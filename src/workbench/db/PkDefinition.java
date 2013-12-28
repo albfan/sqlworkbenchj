@@ -22,10 +22,14 @@
  */
 package workbench.db;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.WbManager;
+
+import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.util.StringUtil;
 
 /**
@@ -33,7 +37,10 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class PkDefinition
+	implements Serializable
 {
+	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
+
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
 	private String pkName;
 	private String pkIndexName;

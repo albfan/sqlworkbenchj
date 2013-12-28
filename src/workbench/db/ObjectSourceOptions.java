@@ -22,16 +22,24 @@
  */
 package workbench.db;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import workbench.WbManager;
+
+import workbench.db.objectcache.DbObjectCacheFactory;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ObjectSourceOptions
+	implements Serializable
 {
+	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
+
 	private final String KEY_TYPE_MODIFIER = "typMod";
 	private final String KEY_INLINE_OPTION = "inlineSql";
 	private final String KEY_TABLE_OPTION = "tbleOpt";

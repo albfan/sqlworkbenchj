@@ -22,7 +22,12 @@
  */
 package workbench.db;
 
+import java.io.Serializable;
 import java.util.Comparator;
+
+import workbench.WbManager;
+
+import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.util.StringUtil;
 
 /**
@@ -30,7 +35,10 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class IndexColumn
+	implements Serializable
 {
+	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
+
 	private String column;
 	private String direction;
 	private int sequence;

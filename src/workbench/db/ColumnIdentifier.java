@@ -22,6 +22,7 @@
  */
 package workbench.db;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -30,6 +31,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import workbench.WbManager;
+
+import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.storage.ResultInfo;
 
 import workbench.util.NumberStringCache;
@@ -42,8 +46,10 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class ColumnIdentifier
-	implements ComparableDbObject, Comparable<ColumnIdentifier>
+	implements ComparableDbObject, Comparable<ColumnIdentifier>, Serializable
 {
+	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
+
 	public static final int NO_TYPE_INFO = Integer.MIN_VALUE;
 
 	private String name;

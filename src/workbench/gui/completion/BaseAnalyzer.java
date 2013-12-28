@@ -158,7 +158,7 @@ public abstract class BaseAnalyzer
 		if (handler == null) return QuoteHandler.STANDARD_HANDLER;
 		return handler;
 	}
-	
+
 	public WbConnection getConnection()
 	{
 		return dbConnection;
@@ -274,6 +274,11 @@ public abstract class BaseAnalyzer
 		{
 			// No schemas supported (e.g. MySQL) pretend a catalog is the same thing
 			return this.dbConnection.getMetadata().getCurrentCatalog();
+		}
+
+		if (dbConnection.getDbSettings().useFullSearchPathForCompletion())
+		{
+			return null;
 		}
 
 		String schema = this.dbConnection.getCurrentSchema();

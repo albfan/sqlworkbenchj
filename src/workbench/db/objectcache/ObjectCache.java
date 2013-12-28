@@ -23,12 +23,29 @@
 package workbench.db.objectcache;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.*;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
+import workbench.db.DbSearchPath;
+import workbench.db.DependencyNode;
+import workbench.db.ObjectNameFilter;
+import workbench.db.ProcedureDefinition;
+import workbench.db.TableDefinition;
+import workbench.db.TableDependency;
+import workbench.db.TableIdentifier;
+import workbench.db.TableNameSorter;
+import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
 
@@ -45,28 +62,21 @@ class ObjectCache
 	private static final String NULL_SCHEMA = "-$$wb-null-schema$$-";
 	private boolean retrieveOraclePublicSynonyms;
 
-	private Set<String> schemasInCache;
-	private Map<TableIdentifier, List<DependencyNode>> referencedTables = new HashMap<TableIdentifier, List<DependencyNode>>();
-	private Map<TableIdentifier, List<DependencyNode>> referencingTables = new HashMap<TableIdentifier, List<DependencyNode>>();
-	private Map<TableIdentifier, List<ColumnIdentifier>> objects;
-	private Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
+	private final Set<String> schemasInCache = CollectionUtil.caseInsensitiveSet();
+	private final Map<TableIdentifier, List<DependencyNode>> referencedTables = new HashMap<TableIdentifier, List<DependencyNode>>();
+	private final Map<TableIdentifier, List<DependencyNode>> referencingTables = new HashMap<TableIdentifier, List<DependencyNode>>();
+	private final Map<TableIdentifier, List<ColumnIdentifier>> objects = new HashMap<TableIdentifier, List<ColumnIdentifier>>();
+	private final Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
 	private boolean supportsSchemas;
 
 	ObjectCache(WbConnection conn)
 	{
-		this.createCache();
 		retrieveOraclePublicSynonyms = conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.editor.autocompletion.oracle.public_synonyms", false);
 		schemaFilter = conn.getProfile().getSchemaFilter();
 		catalogFilter = conn.getProfile().getCatalogFilter();
 		supportsSchemas = conn.getDbSettings().supportsSchemas();
-	}
-
-	private void createCache()
-	{
-		schemasInCache = CollectionUtil.caseInsensitiveSet();
-		objects = new HashMap<TableIdentifier, List<ColumnIdentifier>>();
 	}
 
 	private boolean isFiltered(TableIdentifier table)
@@ -115,10 +125,6 @@ class ObjectCache
 
 	List<String> getSearchPath(WbConnection dbConn, String defaultSchema)
 	{
-		if (dbConn.getDbSettings().useFullSearchPathForCompletion())
-		{
-			defaultSchema = null;
-		}
 		List<String> schemas = DbSearchPath.Factory.getSearchPathHandler(dbConn).getSearchPath(dbConn, defaultSchema);
 		if (schemas.isEmpty())
 		{
@@ -131,6 +137,7 @@ class ObjectCache
 	{
 		return (schemasInCache.contains(schema == null ? NULL_SCHEMA : schema));
 	}
+
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
@@ -498,4 +505,53 @@ class ObjectCache
 		this.schemasInCache.clear();
 	}
 
+	Set<String> getSchemasInCache()
+	{
+		if (schemasInCache == null) return Collections.emptySet();
+		return Collections.unmodifiableSet(schemasInCache);
+	}
+
+	Map<TableIdentifier, List<DependencyNode>> getReferencedTables()
+	{
+		return Collections.unmodifiableMap(referencedTables);
+	}
+
+	Map<TableIdentifier, List<DependencyNode>> getReferencingTables()
+	{
+		return Collections.unmodifiableMap(referencingTables);
+	}
+
+	Map<TableIdentifier, List<ColumnIdentifier>> getObjects()
+	{
+		if (objects == null) return Collections.emptyMap();
+		return Collections.unmodifiableMap(objects);
+	}
+
+	void initExternally(Map<TableIdentifier, List<ColumnIdentifier>> newObjects, Set<String> schemas, Map<TableIdentifier, List<DependencyNode>> referencedTables, Map<TableIdentifier, List<DependencyNode>> referencingTables)
+	{
+		if (newObjects == null || schemas == null) return;
+
+		objects.clear();
+		schemasInCache.clear();
+		this.referencedTables.clear();
+		this.referencingTables.clear();
+		procedureCache.clear();
+
+		objects.putAll(newObjects);
+		schemasInCache.addAll(schemas);
+
+		int refCount = 0;
+		if (referencedTables != null)
+		{
+			this.referencedTables.putAll(referencedTables);
+			refCount += referencedTables.size();
+		}
+
+		if (referencingTables != null)
+		{
+			this.referencingTables.putAll(referencingTables);
+			refCount += referencingTables.size();
+		}
+		LogMgr.logDebug("ObjectCache.initExternally", "Added " + objects.size() + " objects and " + refCount + " foreign key definitions from local storage");
+	}
 }

@@ -226,13 +226,13 @@ public class WbWorkspace
 	private void saveToolProperties()
 		throws IOException
 	{
-		if (this.toolProperties == null && this.toolProperties.isEmpty()) return;
+		if (this.toolProperties == null || this.toolProperties.isEmpty()) return;
 		for (Map.Entry<String, WbProperties> propEntry : toolProperties.entrySet())
 		{
-				ZipEntry entry = new ZipEntry(toolEntryPrefix + propEntry.getKey() + ".properties");
-				this.zout.putNextEntry(entry);
-				propEntry.getValue().save(this.zout);
-				zout.closeEntry();
+			ZipEntry entry = new ZipEntry(toolEntryPrefix + propEntry.getKey() + ".properties");
+			this.zout.putNextEntry(entry);
+			propEntry.getValue().save(this.zout);
+			zout.closeEntry();
 		}
 	}
 

@@ -22,7 +22,12 @@
  */
 package workbench.util;
 
+import java.io.Serializable;
 import java.util.Comparator;
+
+import workbench.WbManager;
+
+import workbench.db.objectcache.DbObjectCacheFactory;
 
 /**
  * A case-insensitive Comparator for String which
@@ -31,10 +36,10 @@ import java.util.Comparator;
  * @author Thomas Kellerer
  */
 public class CaseInsensitiveComparator
-	implements Comparator<String>
+	implements Comparator<String>, Serializable
 {
-
 	public static final CaseInsensitiveComparator INSTANCE = new CaseInsensitiveComparator();
+	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
 
 	private boolean ignoreQuotes;
 

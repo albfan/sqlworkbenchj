@@ -25,9 +25,15 @@ package workbench.db.objectcache;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import workbench.db.WbConnection;
+import java.util.Set;
+
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
 
 /**
  * A factory for DbObjectCache instances.
@@ -39,8 +45,12 @@ import workbench.log.LogMgr;
 public class DbObjectCacheFactory
 	implements PropertyChangeListener
 {
+	public static final long CACHE_VERSION_UID = 1L;
+
 	private final Object lock = new Object();
-	private Map<String, ObjectCache> caches;
+
+	private final Map<String, ObjectCache> caches = new HashMap<String, ObjectCache>();
+	private final Map<String, Set<String>> refCounter = new HashMap<String, Set<String>>();
 
 	/**
 	 * Thread safe singleton-instance
@@ -57,25 +67,95 @@ public class DbObjectCacheFactory
 
 	private DbObjectCacheFactory()
 	{
-		this.caches = new HashMap<String, ObjectCache>();
+	}
+
+	private void loadCache(ObjectCache cache, WbConnection connection)
+	{
+		if (!useLocalCacheStorage(connection)) return;
+		if (cache == null || connection == null) return;
+		synchronized (lock)
+		{
+			ObjectCachePersistence persistence = new ObjectCachePersistence();
+			persistence.loadFromLocalFile(cache, connection);
+		}
+	}
+
+	private void saveCache(ObjectCache cache, WbConnection connection)
+	{
+		if (!useLocalCacheStorage(connection)) return;
+		ObjectCachePersistence persistence = new ObjectCachePersistence();
+		persistence.saveToLocalFile(cache, connection);
+	}
+
+	private boolean useLocalCacheStorage(WbConnection connection)
+	{
+		if (connection == null) return false;
+
+		boolean globalFlag = Settings.getInstance().getBoolProperty("workbench.gui.completioncache.savelocally", false);
+		if (globalFlag) return globalFlag;
+
+		ConnectionProfile profile = connection.getProfile();
+		if (profile != null)
+		{
+			return profile.getStoreCacheLocally();
+		}
+		return false;
 	}
 
 	public DbObjectCache getCache(WbConnection connection)
 	{
+		return getCache(connection, true);
+	}
+
+	public DbObjectCache getCache(WbConnection connection, boolean createNew)
+	{
 		if (connection == null) return null;
+		String key = makeKey(connection);
 
 		synchronized (lock)
 		{
-			String key = makeKey(connection);
 			ObjectCache cache = caches.get(key);
-			if (cache == null)
+			if (cache == null && !createNew) return null;
+
+			if (cache == null && createNew)
 			{
 				LogMgr.logDebug("DbObjectCacheFactory.getCache()", "Creating new cache for: " + key);
 				cache = new ObjectCache(connection);
 				caches.put(key, cache);
 			}
-			return new DbObjectCache(cache, connection);
+			DbObjectCache result = new DbObjectCache(cache, connection);
+			connection.addChangeListener(this);
+			boolean isUsed = isConnectionUsed(key, connection.getId());
+			if (!isUsed)
+			{
+				loadCache(cache, connection);
+			}
+			return result;
 		}
+	}
+
+	private int decreaseRefCount(String key, String connectionId)
+	{
+		Set<String> ids = refCounter.get(key);
+		if (ids == null)
+		{
+			return 0;
+		}
+		ids.remove(connectionId);
+		return ids.size();
+	}
+
+	private boolean isConnectionUsed(String key, String connectionId)
+	{
+		Set<String> ids = refCounter.get(key);
+		if (ids == null)
+		{
+			ids = new HashSet<String>();
+			refCounter.put(key, ids);
+			ids.add(connectionId);
+			return false;
+		}
+		return ids.contains(connectionId);
 	}
 
 	private String makeKey(WbConnection connection)
@@ -97,12 +177,16 @@ public class DbObjectCacheFactory
 			synchronized (lock)
 			{
 				String key = makeKey(conn);
-				LogMgr.logDebug("DbObjectCacheFactory.propertyChange()", "Remove cache for key=" + key);
+
 				ObjectCache cache = caches.get(key);
-				if (cache != null)
+				int refCount = decreaseRefCount(key, conn.getId());
+				LogMgr.logDebug("DbObjectCacheFactory.propertyChange()", "Connection with key=" + key + " was closed. Reference count for this cache is: " + refCount);
+				if (cache != null && refCount == 0)
 				{
+					saveCache(cache, conn);
 					cache.clear();
 					caches.remove(key);
+					LogMgr.logDebug("DbObjectCacheFactory.propertyChange()", "Removed cache for key=" + key);
 				}
 				conn.removeChangeListener(this);
 			}

@@ -53,6 +53,7 @@ public class WbProperties
 	extends Properties
 	implements PropertyStorage
 {
+	private static final long serialVersionUID = 1L;
 	private int distinctSections;
 
 	private final Map<String, List<PropertyChangeListener>> changeListeners = new HashMap<String, List<PropertyChangeListener>>();
@@ -253,7 +254,7 @@ public class WbProperties
 	public void addPropertyChangeListener(PropertyChangeListener aListener, String ... properties)
 	{
 		if (aListener == null) return;
-		
+
 		synchronized (this.changeListeners)
 		{
 			for (String prop : properties)

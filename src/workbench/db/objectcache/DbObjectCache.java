@@ -24,13 +24,16 @@ package workbench.db.objectcache;
 
 import java.util.List;
 import java.util.Set;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
+
 
 /**
  * A wrapper around ObjectCache in order to avoid having to supply the Connection for each call.
@@ -44,6 +47,8 @@ public class DbObjectCache
 
 	DbObjectCache(ObjectCache cache, WbConnection connection)
 	{
+		assert cache != null;
+		assert connection != null;
 		dbConnection = connection;
 		objectCache = cache;
 	}

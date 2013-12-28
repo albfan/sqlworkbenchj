@@ -116,6 +116,10 @@ public class ConnectionProfileTest
 		old.setAlternateDelimiter(null);
 		copy = old.createCopy();
 		assertNull(copy.getAlternateDelimiter());
+
+		old.setStoreCacheLocally(true);
+		copy = old.createCopy();
+		assertTrue(copy.getStoreCacheLocally());
 	}
 
 	@Test

@@ -70,7 +70,7 @@ public class WorkspaceOptions
 		backupCount.setEnabled(createBackup.isSelected());
 		backupCount.setText(Integer.toString(Settings.getInstance().getMaxWorkspaceBackup()));
 		backupDirPicker.setFilename(Settings.getInstance().getWorkspaceBackupDir());
-		backupSettingsFile.setSelected(Settings.getInstance().makeBackups());
+		backupSettingsFile.setSelected(Settings.getInstance().makeVersionedBackups());
 		ExternalFileHandling handling = Settings.getInstance().getFilesInWorkspaceHandling();
 		switch (handling)
 		{

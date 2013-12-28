@@ -3363,7 +3363,7 @@ public class Settings
 		return this.configfile;
 	}
 
-	public boolean makeBackups()
+	public boolean makeVersionedBackups()
 	{
 		return getBoolProperty("workbench.settings.makebackup", false);
 	}
@@ -3392,13 +3392,14 @@ public class Settings
 
 		ShortcutManager.getInstance().saveSettings();
 
-		if (renameExistingFile || (createBackup && !makeBackups()))
+		boolean makeVersionedBackups = makeVersionedBackups();
+		if (renameExistingFile || (createBackup && !makeVersionedBackups))
 		{
 			String bck = this.configfile.makeBackup();
 			LogMgr.logInfo("Settings.saveSettings()", "Created backup of global settings file: " + bck);
 		}
 
-		if (makeBackups())
+		if (makeVersionedBackups)
 		{
 			// versioned backups are something different than renaming the existing file
 			// renameExistingFile will be true if an out of memory error occurred at some point.

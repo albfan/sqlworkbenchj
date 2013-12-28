@@ -59,6 +59,7 @@ public class ConnectionProfile
 	private String group;
 	private String icon;
 	private boolean autocommit;
+	private boolean storeCacheLocally;
 	private boolean rollbackBeforeDisconnect;
 	private boolean changed;
 	private boolean groupChanged;
@@ -123,6 +124,16 @@ public class ConnectionProfile
 		cp.setStoreExplorerSchema(true);
 		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		return cp;
+	}
+
+	public boolean getStoreCacheLocally()
+	{
+		return storeCacheLocally;
+	}
+
+	public void setStoreCacheLocally(boolean flag)
+	{
+		this.storeCacheLocally = flag;
 	}
 
 	public boolean getPromptForUsername()
@@ -852,6 +863,7 @@ public class ConnectionProfile
 		result.setDetectOpenTransaction(this.detectOpenTransaction);
 		result.setPreventDMLWithoutWhere(this.preventNoWhere);
 		result.setPromptForUsername(this.promptForUsername);
+		result.setStoreCacheLocally(this.storeCacheLocally);
 		if (connectionProperties != null)
 		{
 			Enumeration keys = connectionProperties.propertyNames();

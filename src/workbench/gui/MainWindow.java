@@ -993,7 +993,11 @@ public class MainWindow
 		{
 			WbConnection old = panel.getConnection();
 			panel.disconnect();
-			ConnectionMgr.getInstance().disconnect(old);
+
+			// use WbConnection.disconnect() rather than ConnectionMgr.getInstance().disconnect()
+			// to make sure the connection state listeners are notified
+			old.disconnect();
+
 			panel.setConnection(currentConnection);
 			int index = this.getIndexForPanel(panel);
 			sqlTab.setForegroundAt(index, null);
@@ -1879,17 +1883,17 @@ public class MainWindow
 
 			for (int i = 0; i < this.sqlTab.getTabCount(); i++)
 			{
-				final MainPanel sql = (MainPanel) this.sqlTab.getComponentAt(i);
-				if (sql instanceof SqlPanel)
+				final MainPanel panel = (MainPanel) this.sqlTab.getComponentAt(i);
+				if (panel instanceof SqlPanel)
 				{
-					((SqlPanel) sql).abortExecution();
+					((SqlPanel) panel).abortExecution();
 				}
-				conn = sql.getConnection();
-				sql.disconnect();
+				conn = panel.getConnection();
+				panel.disconnect();
 				if (conn != null && !conn.isClosed())
 				{
 					showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
-					mgr.disconnect(conn);
+					conn.disconnect();
 				}
 			}
 			closeExplorerWindows(true);
@@ -2277,7 +2281,7 @@ public class MainWindow
 			WbConnection conn = w.getConnection();
 			if (doDisconnect && conn != this.currentConnection)
 			{
-				ConnectionMgr.getInstance().disconnect(conn);
+				conn.disconnect();
 			}
 			w.closeWindow();
 		}
@@ -3181,7 +3185,7 @@ public class MainWindow
 			if (doDisconnect)
 			{
 				showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
-				ConnectionMgr.getInstance().disconnect(conn);
+				conn.disconnect();
 				showStatusMessage("");
 			}
 			disposeMenu(panelMenus.get(index));

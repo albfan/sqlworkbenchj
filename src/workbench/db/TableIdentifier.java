@@ -22,11 +22,14 @@
  */
 package workbench.db;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
 
+import workbench.WbManager;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -37,8 +40,10 @@ import workbench.util.WbStringTokenizer;
  * @author  Thomas Kellerer
  */
 public class TableIdentifier
-	implements DbObject, Comparable<TableIdentifier>
+	implements DbObject, Comparable<TableIdentifier>, Serializable
 {
+	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
+
 	private String tablename;
 	private String schema;
 	private String catalog;

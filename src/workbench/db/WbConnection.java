@@ -764,10 +764,13 @@ public class WbConnection
 	/**
 	 * Disconnect this connection.
 	 * This is delegated to the Connection Manager because for certain DBMS some cleanup works needs to be done.
+	 *
 	 * The ConnectionMgr is the only one who knows if there are more connections
-	 * around, which might influence what needs to be cleaned up
+	 * around, which might influence what needs to be cleaned up and it also knows if any scripts
+	 * should be run before closing the connection.
+	 *  <br/>
+	 * The ConnectionMgr will in turn call shutdown() once the connection should really be closed.
 	 * <br/>
-	 * (Currently this is only HSQLDB, but who knows...)
 	 * This will also fire a connectionStateChanged event.
 	 */
 	public void disconnect()
@@ -780,6 +783,8 @@ public class WbConnection
 	/**
 	 * This will physically close the connection to the DBMS.
 	 * <br/>
+	 * Calling disconnect() is the preferred method to close a connection.
+	 * <br/>
 	 * It will also free an resources from the DbMetadata object and
 	 * shutdown the keep alive thread.
 	 * <br/>
@@ -790,6 +795,7 @@ public class WbConnection
 	 *
 	 * This will <b>not</b> notify the ConnectionMgr that this connection has been closed.
 	 * a connectionStateChanged event will <b>not</b> be fired.
+	 *
 	 * @see #disconnect()
 	 */
 	public void shutdown()
@@ -814,7 +820,7 @@ public class WbConnection
 		disconnect.start();
 	}
 
-	public void shutdown(boolean withRollback)
+	private void shutdown(boolean withRollback)
 	{
 		if (this.keepAlive != null)
 		{
@@ -1308,11 +1314,14 @@ public class WbConnection
 		int count = this.listeners.size();
 		if (count == 0) return;
 
+		List<PropertyChangeListener> listCopy = new ArrayList<PropertyChangeListener>(listeners);
 		PropertyChangeEvent evt = new PropertyChangeEvent(this, property, oldValue, newValue);
-		for (int i=0; i < count; i++)
+		for (PropertyChangeListener l : listCopy)
 		{
-			PropertyChangeListener l = this.listeners.get(i);
-			l.propertyChange(evt);
+			if (l != null)
+			{
+				l.propertyChange(evt);
+			}
 		}
 	}
 
