@@ -68,7 +68,7 @@ class ObjectCachePersistence
 		long age = System.currentTimeMillis() - cacheFile.lastModified();
 		if (age >= maxAge || age < 0)
 		{
-			LogMgr.logInfo("ObjectCachePersistence.loadFromLocalFile()", "Cache file " + cacheFile.getFullPath() + " was discarded because it is too old.");
+			LogMgr.logInfo("ObjectCachePersistence.loadFromLocalFile()", "Cache file " + cacheFile.getFullPath() + " was discarded because it is too old (max. age=" + maxAgeValue + ").");
 			cacheFile.delete();
 		}
 

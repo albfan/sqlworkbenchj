@@ -71,20 +71,24 @@ public class DbObjectCacheFactory
 
 	private void loadCache(ObjectCache cache, WbConnection connection)
 	{
-		if (!useLocalCacheStorage(connection)) return;
 		if (cache == null || connection == null) return;
-		synchronized (lock)
+		if (useLocalCacheStorage(connection))
 		{
-			ObjectCachePersistence persistence = new ObjectCachePersistence();
-			persistence.loadFromLocalFile(cache, connection);
+			synchronized (lock)
+			{
+				ObjectCachePersistence persistence = new ObjectCachePersistence();
+				persistence.loadFromLocalFile(cache, connection);
+			}
 		}
 	}
 
 	private void saveCache(ObjectCache cache, WbConnection connection)
 	{
-		if (!useLocalCacheStorage(connection)) return;
-		ObjectCachePersistence persistence = new ObjectCachePersistence();
-		persistence.saveToLocalFile(cache, connection);
+		if (useLocalCacheStorage(connection))
+		{
+			ObjectCachePersistence persistence = new ObjectCachePersistence();
+			persistence.saveToLocalFile(cache, connection);
+		}
 	}
 
 	private boolean useLocalCacheStorage(WbConnection connection)
