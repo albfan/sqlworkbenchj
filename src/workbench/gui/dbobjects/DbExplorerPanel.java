@@ -795,17 +795,17 @@ public class DbExplorerPanel
 	public void reset()
 	{
 		this.setLocked(false);
-		if (this.tables != null) this.tables.reset();
-		if (this.procs != null) this.procs.reset();
-		if (this.searchPanel != null) this.searchPanel.reset();
-		if (this.tabPane != null && this.tabPane.getTabCount() > 0) this.tabPane.setSelectedIndex(0);
+		if (tables != null) this.tables.reset();
+		if (procs != null) this.procs.reset();
+		if (searchPanel != null) this.searchPanel.reset();
+		if (tabPane != null && this.tabPane.getTabCount() > 0) this.tabPane.setSelectedIndex(0);
 	}
 
 	@Override
 	public void disconnect()
 	{
-		this.tables.disconnect();
-		this.procs.disconnect();
+		if (tables != null) this.tables.disconnect();
+		if (procs != null) this.procs.disconnect();
 		if (this.triggers != null) this.triggers.disconnect();
 		this.searchPanel.disconnect();
 		this.dbConnection = null;
@@ -814,18 +814,18 @@ public class DbExplorerPanel
 
 	public void saveSettings()
 	{
-		this.tables.saveSettings();
-		this.procs.saveSettings();
-		if (this.triggers != null) this.triggers.saveSettings();
-		if (this.searchPanel != null) this.searchPanel.saveSettings();
+		if (tables != null) this.tables.saveSettings();
+		if (procs != null) this.procs.saveSettings();
+		if (triggers != null) this.triggers.saveSettings();
+		if (searchPanel != null) this.searchPanel.saveSettings();
 	}
 
 	public void restoreSettings()
 	{
 		if (tables != null) tables.restoreSettings();
 		if (procs != null) procs.restoreSettings();
-		if (this.triggers != null) triggers.restoreSettings();
-		if (this.searchPanel != null) searchPanel.restoreSettings();
+		if (triggers != null) triggers.restoreSettings();
+		if (searchPanel != null) searchPanel.restoreSettings();
 	}
 
 	@Override
@@ -1041,9 +1041,22 @@ public class DbExplorerPanel
 	public void dispose()
 	{
 		this.reset();
-		this.tables.dispose();
-		this.procs.dispose();
-		this.triggers.dispose();
+		if (tables != null)
+		{
+			this.tables.dispose();
+			tables = null;
+		}
+		if (procs != null)
+		{
+			this.procs.dispose();
+			this.procs = null;
+		}
+		if (this.triggers != null)
+		{
+			this.triggers.dispose();
+			this.triggers = null;
+		}
+
 		if (mainWindow != null)
 		{
 			mainWindow.removeExecutionListener(this);
