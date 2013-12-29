@@ -219,11 +219,11 @@ class ObjectCache
 		List<DependencyNode> old = referencedTables.put(table, referenced);
 		if (old == null)
 		{
-			LogMgr.logDebug("ObjectCache.addReferencingTables()", "Added referenced tables for " + table + "(" + referenced + ")");
+			LogMgr.logDebug("ObjectCache.addReferencedTables()", "Added referenced tables for " + table + "(" + referenced + ")");
 		}
 		else
 		{
-			LogMgr.logDebug("ObjectCache.addReferencingTables()", "Replaced existing referenced tables for " + table);
+			LogMgr.logDebug("ObjectCache.addReferencedTables()", "Replaced existing referenced tables for " + table);
 		}
 	}
 
