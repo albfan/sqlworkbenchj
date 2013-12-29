@@ -20,6 +20,7 @@
 
 package workbench.db.objectcache;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -191,6 +192,20 @@ class ObjectCachePersistence
 	{
 		String url = dbConnection.getUrl().replaceAll("[^a-zA-Z0-9$]", "_").replaceAll("_+", "_");
 		String user = dbConnection.getDisplayUser().replaceAll("[^a-zA-Z0-9$]", "_");
-		return new WbFile(Settings.getInstance().getConfigDir(), user + "@" + url + ".wbcache");
+		File configDir = Settings.getInstance().getConfigDir();
+		File cacheDir = new File(configDir, "cache");
+		if (!cacheDir.exists())
+		{
+			if (cacheDir.mkdirs())
+			{
+				LogMgr.logInfo("ObjectCachePersistence.getCacheFile()", "Created cache directory for local cache storage: " + cacheDir);
+			}
+			else
+			{
+				LogMgr.logWarning("ObjectCachePersistence.getCacheFile()", "Could not create cache directory in " + configDir.getPath());
+				cacheDir = configDir;
+			}
+		}
+		return new WbFile(cacheDir, user + "@" + url + ".wbcache");
 	}
 }
