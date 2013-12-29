@@ -31,7 +31,7 @@ import workbench.sql.ScriptParser;
 
 import workbench.util.CollectionUtil;
 
-import org.junit.*;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 

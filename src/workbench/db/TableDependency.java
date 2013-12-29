@@ -25,6 +25,8 @@ package workbench.db;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.DatabaseMetaData;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +37,9 @@ import java.util.Set;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.objectcache.DbObjectCache;
+import workbench.db.objectcache.DbObjectCacheFactory;
 
 import workbench.storage.DataStore;
 
@@ -254,6 +259,8 @@ public class TableDependency
 			monitor.setCurrentObject(parent.getTable().toString(), -1, -1);
 		}
 
+		DbSettings dbSettings = metaData.getDbSettings();
+
 		try
 		{
 			DataStore ds;
@@ -307,6 +314,8 @@ public class TableDependency
 				String schema = ds.getValueAsString(i, schemacol);
 				String table = ds.getValueAsString(i, tablecol);
         String fkname = ds.getValueAsString(i, fknamecol);
+				int deferrableCode = ds.getValueAsInt(i, FKHandler.COLUMN_IDX_DEFERRABILITY, DatabaseMetaData.importedKeyNoAction);
+				String deferrable = dbSettings.getRuleDisplay(deferrableCode);
 
 				TableIdentifier tbl = new TableIdentifier(catalog, schema, table);
 
@@ -317,9 +326,13 @@ public class TableDependency
 
 				int update = ds.getValueAsInt(i, 9, -1);
 				int delete = ds.getValueAsInt(i, 10, -1);
+				child.setUpdateActionValue(update);
+				child.setDeleteActionValue(delete);
+				child.setDeferrableValue(deferrableCode);
 				child.setUpdateAction(this.metaData.getDbSettings().getRuleDisplay(update));
 				child.setDeleteAction(this.metaData.getDbSettings().getRuleDisplay(delete));
 				child.addColumnDefinition(tablecolumn, parentcolumn);
+				child.setDeferrableType(deferrable);
 			}
 
 			if (level > 25)
@@ -517,4 +530,49 @@ public class TableDependency
 		return result;
 	}
 
+	public DataStore getDisplayDataStore(boolean showImportedKeys)
+	{
+		setRetrieveDirectChildrenOnly(true);
+		String refColName = null;
+
+		if (showImportedKeys)
+		{
+			readTreeForParents();
+			refColName = "REFERENCES";
+		}
+		else
+		{
+			readTreeForChildren();
+			refColName = "REFERENCED BY";
+		}
+
+		DbObjectCache cache = DbObjectCacheFactory.getInstance().getCache(this.connection);
+		if (showImportedKeys)
+		{
+			cache.addReferencedTables(this.theTable, leafs);
+		}
+		else
+		{
+			cache.addReferencingTables(this.theTable, leafs);
+		}
+
+		String[] cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE"};
+		int[] types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		int[] sizes = new int[] {25, 10, 30, 12, 12, 15};
+		DataStore result = new DataStore(cols, types, sizes);
+
+		for (DependencyNode node : leafs)
+		{
+			int row = result.addRow();
+			result.setValue(row, 0, node.getFkName());
+			result.setValue(row, 1, node.getSourceColumnsList());
+			result.setValue(row, 2, node.getTable().getTableExpression(connection) + "(" + node.getTargetColumnsList() + ")");
+			result.setValue(row, 3, node.getUpdateAction());
+			result.setValue(row, 4, node.getDeleteAction());
+			result.setValue(row, 5, node.getDeferrableType());
+			result.getRow(row).setUserObject(node);
+		}
+		return result;
+
+	}
 }

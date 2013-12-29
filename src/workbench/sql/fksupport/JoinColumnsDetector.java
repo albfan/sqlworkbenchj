@@ -66,13 +66,14 @@ public class JoinColumnsDetector
 		Map<String, String> columns = getJoinColumns();
 		if (columns.isEmpty()) return "";
 
+		String and = Settings.getInstance().getFormatterUpperCaseKeywords() ? " AND " : " and ";
 		StringBuilder result = new StringBuilder(20);
 		boolean first = true;
 		for (Map.Entry<String, String> entry : columns.entrySet())
 		{
 			if (!first)
 			{
-				result.append(" AND ");
+				result.append(and);
 			}
 			result.append(entry.getKey());
 			result.append(" = ");
@@ -94,8 +95,8 @@ public class JoinColumnsDetector
 	private Map<String, String> getJoinColumns()
 		throws SQLException
 	{
-		TableIdentifier realJoinTable = connection.getMetadata().findObject(joinTable.getTable());
-		TableIdentifier realJoinedTable = connection.getMetadata().findObject(joinedTable.getTable());
+		TableIdentifier realJoinTable = connection.getObjectCache().getOrRetrieveTable(joinTable.getTable());
+		TableIdentifier realJoinedTable = connection.getObjectCache().getOrRetrieveTable(joinedTable.getTable());
 
 		if (realJoinTable == null || realJoinedTable == null)
 		{

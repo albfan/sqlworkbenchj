@@ -23,6 +23,7 @@
 package workbench.db;
 
 import java.sql.SQLException;
+
 import workbench.storage.DataStore;
 
 /**
@@ -61,6 +62,8 @@ public interface FKHandler
 	int COLUMN_IDX_FK_DEF_UPDATE_RULE = 3;
 	int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 6;
 
+	int COLUMN_IDX_DEFERRABILITY = 13;
+	
 	/**
 	 * Returns a DataStore with the exported keys with the raw information copied from the result
 	 * of the DatabaseMetaData.getExportedKeys()

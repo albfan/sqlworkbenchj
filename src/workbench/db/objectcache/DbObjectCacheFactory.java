@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
+import workbench.resource.GuiSettings;
 
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -94,16 +94,23 @@ public class DbObjectCacheFactory
 	private boolean useLocalCacheStorage(WbConnection connection)
 	{
 		if (connection == null) return false;
+		ObjectCacheStorage storage = GuiSettings.getLocalStorageForObjectCache();
 
-		boolean globalFlag = Settings.getInstance().getBoolProperty("workbench.gui.completioncache.savelocally", false);
-		if (globalFlag) return globalFlag;
-
-		ConnectionProfile profile = connection.getProfile();
-		if (profile != null)
+		switch (storage)
 		{
-			return profile.getStoreCacheLocally();
+			case always:
+				return true;
+			case never:
+				return false;
+			case profile:
+				ConnectionProfile profile = connection.getProfile();
+				if (profile != null)
+				{
+					return profile.getStoreCacheLocally();
+				}
+			default:
+				return false;
 		}
-		return false;
 	}
 
 	public DbObjectCache getCache(WbConnection connection)

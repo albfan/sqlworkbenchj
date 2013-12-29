@@ -28,6 +28,8 @@ import java.util.Set;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
+import workbench.db.objectcache.ObjectCacheStorage;
+
 import workbench.gui.sql.FileReloadType;
 
 import workbench.util.CollectionUtil;
@@ -81,6 +83,7 @@ public class GuiSettings
 	public static final String PROP_DBEXP_TABLE_HISTORY = "workbench.dbexplorer.tablelist.history";
 
 	public static final String PROP_FILE_RELOAD_TYPE = "workbench.gui.editor.file.reloadtype";
+	public static final String PROP_OBJECT_CACHE_LOCAL_STORAGE = "workbench.gui.completioncache.localstorage";
 
 	public static final String PROP_COPY_TEXT_DISPLAY_DLG = "workbench.gui.copy.text.displayoptions";
 
@@ -936,6 +939,24 @@ public class GuiSettings
 		catch (Exception ex)
 		{
 			return FileReloadType.none;
+		}
+	}
+
+	public void setLocalStorageForObjectCache(ObjectCacheStorage storage)
+	{
+		Settings.getInstance().setProperty(PROP_OBJECT_CACHE_LOCAL_STORAGE, storage.name());
+	}
+
+	public static ObjectCacheStorage getLocalStorageForObjectCache()
+	{
+		String type = Settings.getInstance().getProperty(PROP_OBJECT_CACHE_LOCAL_STORAGE, ObjectCacheStorage.profile.name());
+		try
+		{
+			return ObjectCacheStorage.valueOf(type);
+		}
+		catch (Exception ex)
+		{
+			return ObjectCacheStorage.never;
 		}
 	}
 

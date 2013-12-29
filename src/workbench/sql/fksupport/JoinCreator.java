@@ -23,13 +23,24 @@
 package workbench.sql.fksupport;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import workbench.resource.Settings;
+
 import workbench.db.WbConnection;
+
 import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.StatementContext;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.syntax.SqlKeywordHelper;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -99,7 +110,7 @@ public class JoinCreator
 		TableAlias joinTable = getJoinTable();
 		return getJoinCondition(joinTable);
 	}
-	
+
 	public String getJoinCondition(TableAlias joinTable)
 		throws SQLException
 	{
@@ -107,6 +118,7 @@ public class JoinCreator
 		if (joinTable == null || joinedTable == null) return null;
 		JoinColumnsDetector detector = new JoinColumnsDetector(connection, joinTable, joinedTable);
 		String condition = detector.getJoinCondition();
+		String on = Settings.getInstance().getFormatterUpperCaseKeywords() ? "ON " : "on ";
 		if (!condition.isEmpty())
 		{
 			String currentWord = StringUtil.findWordLeftOfCursor(sql, cursorPos);
@@ -114,7 +126,7 @@ public class JoinCreator
 
 			if (currentWord == null || !currentWord.equalsIgnoreCase("on"))
 			{
-				condition = "ON " + condition;
+				condition = on + condition;
 			}
 			if (!whiteSpaceAtLeft)
 			{

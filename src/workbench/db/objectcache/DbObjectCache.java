@@ -63,6 +63,16 @@ public class DbObjectCache
 		return objectCache.getReferencingTables(dbConnection, table);
 	}
 
+	public void addReferencedTables(TableIdentifier table, List<DependencyNode> referenced)
+	{
+		objectCache.addReferencedTables(table, referenced);
+	}
+
+	public void addReferencingTables(TableIdentifier table, List<DependencyNode> referencing)
+	{
+		objectCache.addReferencingTables(table, referencing);
+	}
+
 	public void addTable(TableDefinition table)
 	{
 		objectCache.addTable(table, dbConnection);
@@ -116,6 +126,20 @@ public class DbObjectCache
 	public TableIdentifier getTable(TableIdentifier table)
 	{
 		return objectCache.findEntry(dbConnection, table);
+	}
+
+	public TableIdentifier getOrRetrieveTable(TableIdentifier table)
+	{
+		TableIdentifier realTable = objectCache.findEntry(dbConnection, table);
+		if (realTable == null)
+		{
+			realTable = dbConnection.getMetadata().findTable(table);
+			if (realTable != null)
+			{
+				objectCache.addTable(realTable);
+			}
+		}
+		return realTable;
 	}
 
 }

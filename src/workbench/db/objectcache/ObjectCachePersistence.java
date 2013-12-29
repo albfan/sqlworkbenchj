@@ -20,7 +20,6 @@
 
 package workbench.db.objectcache;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -29,6 +28,8 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -190,19 +191,40 @@ class ObjectCachePersistence
 
 	private WbFile getCacheFile(WbConnection dbConnection)
 	{
-		String url = dbConnection.getUrl().replaceAll("[^a-zA-Z0-9$]", "_").replaceAll("_+", "_");
-		String user = dbConnection.getDisplayUser().replaceAll("[^a-zA-Z0-9$]", "_");
-		File configDir = Settings.getInstance().getConfigDir();
-		File cacheDir = new File(configDir, "cache");
+		Pattern invalidChars = Pattern.compile("[^a-zA-Z0-9$]+");
+		Matcher urlMatcher = invalidChars.matcher(dbConnection.getUrl());
+		String url = urlMatcher.replaceAll("_");
+
+		// remove the jdbc_ prefix, it is not needed
+		url = url.substring(5);
+
+		Matcher userMatcher = invalidChars.matcher(dbConnection.getDisplayUser());
+		String user = userMatcher.replaceAll("_");
+
+		WbFile configDir = new WbFile(Settings.getInstance().getConfigDir());
+		String cacheDirName = Settings.getInstance().getProperty("workbench.gui.completioncache.cachedir", "cache");
+		WbFile cDir = new WbFile(cacheDirName);
+		WbFile cacheDir = null;
+
+		if (cDir.isAbsolute())
+		{
+			cacheDir = cDir;
+		}
+		else
+		{
+
+			cacheDir = new WbFile(configDir, cacheDirName);
+		}
+
 		if (!cacheDir.exists())
 		{
 			if (cacheDir.mkdirs())
 			{
-				LogMgr.logInfo("ObjectCachePersistence.getCacheFile()", "Created cache directory for local cache storage: " + cacheDir);
+				LogMgr.logInfo("ObjectCachePersistence.getCacheFile()", "Created cache directory for local cache storage: " + cacheDir.getFullPath());
 			}
 			else
 			{
-				LogMgr.logWarning("ObjectCachePersistence.getCacheFile()", "Could not create cache directory in " + configDir.getPath());
+				LogMgr.logWarning("ObjectCachePersistence.getCacheFile()", "Could not create cache directory \"" + cacheDir.getFullPath() + "\". Using config directory: " + configDir.getFullPath());
 				cacheDir = configDir;
 			}
 		}

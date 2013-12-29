@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.JCheckBox;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -35,10 +36,18 @@ import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
-import workbench.db.FKHandler;
-import workbench.db.FKHandlerFactory;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+
+import workbench.db.DependencyNode;
+import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DropForeignKeyAction;
 import workbench.gui.actions.ReloadAction;
@@ -49,12 +58,9 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.renderer.RendererSetup;
-import workbench.interfaces.Interruptable;
-import workbench.interfaces.Reloadable;
-import workbench.interfaces.Resettable;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
+
+import workbench.storage.DataStore;
+
 import workbench.util.WbThread;
 
 /**
@@ -178,12 +184,15 @@ public class FkDisplayPanel
 	{
 		int[] rows = keys.getSelectedRows();
 
-		int colIndex = keys.convertColumnIndexToView(FKHandler.COLUMN_IDX_FK_DEF_FK_NAME);
+		DataStore ds = keys.getDataStore();
+
 		Map<TableIdentifier, String> result = new HashMap<TableIdentifier, String>();
+
 		for (int i=0; i < rows.length; i++)
 		{
 			int row = rows[i];
-			String fkName = keys.getValueAsString(row, colIndex);
+			DependencyNode node = (DependencyNode)ds.getRow(row).getUserObject();
+			String fkName = node.getFkName();
 			TableIdentifier constraintTable = null;
 			if (showImportedKeys)
 			{
@@ -191,7 +200,7 @@ public class FkDisplayPanel
 			}
 			else
 			{
-				constraintTable = getReferencedTable(row);
+				constraintTable = node.getTable();
 			}
 			if (constraintTable != null)
 			{
@@ -238,16 +247,9 @@ public class FkDisplayPanel
 		{
 			currentTable = table;
 			isRetrieving = true;
-			FKHandler handler = FKHandlerFactory.createInstance(dbConnection);
-			final DataStoreTableModel model;
-			if (showImportedKeys)
-			{
-				model = new DataStoreTableModel(handler.getForeignKeys(table, false));
-			}
-			else
-			{
-				model = new DataStoreTableModel(handler.getReferencedBy(table));
-			}
+
+			final DataStoreTableModel model = new DataStoreTableModel(getFKDataStore(table));
+
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				@Override
@@ -268,6 +270,12 @@ public class FkDisplayPanel
 		{
 			isRetrieving = false;
 		}
+	}
+
+	private DataStore getFKDataStore(TableIdentifier table)
+	{
+		TableDependency deps = new TableDependency(dbConnection, table);
+		return deps.getDisplayDataStore(showImportedKeys);
 	}
 
 	protected void retrieveTree(TableIdentifier table)
@@ -331,20 +339,11 @@ public class FkDisplayPanel
 	{
 		if (row < 0) return null;
 
-		int colIndex = keys.convertColumnIndexToView(FKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
-		String col = keys.getValueAsString(row, colIndex);
-
-		// using a '.' here is safe as the FK display always uses the '.'
-		// as the delimiter between column and table even if the DBMS uses a different one
-		int pos = col.lastIndexOf('.');
-		TableIdentifier table = null;
-		if (pos > 0)
-		{
-			String tname = col.substring(0, pos);
-			table = new TableIdentifier(tname);
-		}
-		return table;
+		DataStore ds = keys.getDataStore();
+		DependencyNode node = (DependencyNode)ds.getRow(row).getUserObject();
+		return node.getTable();
 	}
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{

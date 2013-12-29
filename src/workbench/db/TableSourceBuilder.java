@@ -25,7 +25,11 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -35,8 +39,6 @@ import workbench.db.sqltemplates.ConstraintNameTester;
 import workbench.db.sqltemplates.FkTemplate;
 import workbench.db.sqltemplates.PkTemplate;
 import workbench.db.sqltemplates.TemplateHandler;
-
-import workbench.storage.DataStore;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -116,11 +118,10 @@ public class TableSourceBuilder
 		TableDefinition def = meta.getTableDefinition(tbl);
 		List<ColumnIdentifier> cols = def.getColumns();
 		List<IndexDefinition> indexDef = getIndexReader().getTableIndexList(def.getTable());
-		DataStore fkDef = null;
+		List<DependencyNode> fkDef = null;
 		if (includeFk)
 		{
-			FKHandler fk = FKHandlerFactory.createInstance(dbConnection);
-			fkDef = fk.getForeignKeys(def.getTable(), false);
+			fkDef = getForeignKeys(def.getTable());
 		}
 		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, includeDrop, includeFk);
 
@@ -136,12 +137,12 @@ public class TableSourceBuilder
 		return getTableSource(table, columns, indexInfo, null, false, true);
 	}
 
-	private boolean isFKName(String name, DataStore foreignKeys)
+	private boolean isFKName(String name,  List<DependencyNode> foreignKeys)
 	{
 		if (StringUtil.isEmptyString(name)) return false;
-		for (int row=0; row < foreignKeys.getRowCount(); row ++)
+		for (DependencyNode node : foreignKeys)
 		{
-			String fkname = foreignKeys.getValueAsString(row, FKHandler.COLUMN_IDX_FK_DEF_FK_NAME);
+			String fkname = node.getFkName();
 			if (name.equalsIgnoreCase(fkname)) return true;
 		}
 		return false;
@@ -155,11 +156,11 @@ public class TableSourceBuilder
 	 *
 	 * @see DbSettings#supportsAutomaticFkIndexes()
 	 */
-	private List<IndexDefinition> getIndexesToCreate(List<IndexDefinition> indexList, DataStore foreignKeys)
+	private List<IndexDefinition> getIndexesToCreate(List<IndexDefinition> indexList, List<DependencyNode> foreignKeys)
 	{
 		if (!dbConnection.getDbSettings().supportsAutomaticFkIndexes()) return indexList;
 		if (CollectionUtil.isEmpty(indexList)) return indexList;
-		if (foreignKeys == null || foreignKeys.getRowCount() == 0) return indexList;
+		if (CollectionUtil.isEmpty(foreignKeys)) return indexList;
 
 		List<IndexDefinition> result = new ArrayList<IndexDefinition>(indexList.size());
 		for (IndexDefinition idx : indexList)
@@ -176,7 +177,7 @@ public class TableSourceBuilder
 	{
 	}
 
-	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkList, boolean includeDrop, boolean includeFk)
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkList, boolean includeDrop, boolean includeFk)
 	{
 		readTableOptions(table, columns);
 
@@ -281,12 +282,12 @@ public class TableSourceBuilder
 	 *
 	 * @return the CREATE TABLE statement for the table
 	 */
-	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkDefinitions, boolean includeDrop, boolean includeFk)
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, boolean includeDrop, boolean includeFk)
 	{
 		return getCreateTable(table, columns, indexList, fkDefinitions, includeDrop, includeFk, true);
 	}
 
-	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, DataStore fkDefinitions, boolean includeDrop, boolean includeFk, boolean includePK)
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, boolean includeDrop, boolean includeFk, boolean includePK)
 	{
 		if (table == null) return StringUtil.EMPTY_STRING;
 
@@ -781,96 +782,39 @@ public class TableSourceBuilder
 	}
 
 
+	private List<DependencyNode> getForeignKeys(TableIdentifier table)
+	{
+		TableDependency deps = new TableDependency(dbConnection, table);
+		deps.setRetrieveDirectChildrenOnly(true);
+		deps.readTreeForParents();
+		return deps.getLeafs();
+	}
+
 	public StringBuilder getFkSource(TableIdentifier table)
 	{
-		FKHandler fk = FKHandlerFactory.createInstance(dbConnection);
-		DataStore fkDef = fk.getForeignKeys(table, false);
-		return getFkSource(table, fkDef, getCreateInlineFKConstraints());
+		return getFkSource(table, getForeignKeys(table), getCreateInlineFKConstraints());
 	}
 
 	/**
 	 *	Return a SQL script to re-create the Foreign key definition for the given table.
 	 *
 	 *	@param table the tablename for which the foreign keys should be created
-	 *  @param aFkDef a DataStore with the FK definition as returned by #getForeignKeys()
+	 *  @param fkList a DataStore with the FK definition as returned by #getForeignKeys()
 	 *
 	 *	@return a SQL statement to add the foreign key definitions to the given table, never null
 	 */
-	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, boolean forInlineUse)
+	public StringBuilder getFkSource(TableIdentifier table, List<DependencyNode> fkList, boolean forInlineUse)
 	{
-		if (aFkDef == null) return StringUtil.emptyBuilder();
-		int count = aFkDef.getRowCount();
-		if (count == 0) return StringUtil.emptyBuilder();
+		if (CollectionUtil.isEmpty(fkList)) return StringUtil.emptyBuilder();
 
 		FkTemplate tmpl = new FkTemplate(dbConnection.getDbId(), forInlineUse);
 		String template = tmpl.getSQLTemplate();
+		List<String> fkStatements = new ArrayList<String>(fkList.size());
 
-		// fkCols collects all columns from the base table mapped to the
-		// defining foreign key constraint.
-		// The fk name is the key to the hashtable.
-		// The entry will be a LinkedList containing the column names.
-		// This ensures that each column will only be used once per fk definition
-		// (the postgres driver returns some columns twice!)
-		HashMap<String, List<String>> fkCols = new HashMap<String, List<String>>();
-
-		// this hashmap contains the columns of the referenced table
-		HashMap<String, List<String>> fkTarget = new HashMap<String, List<String>>();
-
-		HashMap<String, String> fks = new HashMap<String, String>();
-		HashMap<String, String> updateRules = new HashMap<String, String>();
-		HashMap<String, String> deleteRules = new HashMap<String, String>();
-		HashMap<String, String> deferrable = new HashMap<String, String>();
-
-		String fkname;
-		String col;
-		String fkCol;
-		String updateRule;
-		String deleteRule;
-		String deferRule;
-
-		for (int i=0; i < count; i++)
+		for (DependencyNode node : fkList)
 		{
-			fkname = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_FK_NAME);
-			col = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_COLUMN_NAME);
-			fkCol = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
-			updateRule = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_UPDATE_RULE);
-			deleteRule = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_DELETE_RULE);
-			deferRule = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_DEFERRABLE);
-
-			List<String> colList = fkCols.get(fkname);
-			if (colList == null)
-			{
-				colList = new LinkedList<String>();
-				fkCols.put(fkname, colList);
-			}
-			colList.add(col);
-			updateRules.put(fkname, updateRule);
-			deleteRules.put(fkname, deleteRule);
-			deferrable.put(fkname, deferRule);
-
-			colList = fkTarget.get(fkname);
-			if (colList == null)
-			{
-				colList = new LinkedList<String>();
-				fkTarget.put(fkname, colList);
-			}
-			colList.add(fkCol);
-		}
-
-		// now put the real statements together
-		Iterator<Map.Entry<String, List<String>>> names = fkCols.entrySet().iterator();
-		while (names.hasNext())
-		{
-			Map.Entry<String, List<String>> mapentry = names.next();
-			fkname = mapentry.getKey();
-			List<String> colList = mapentry.getValue();
-
-			String stmt = fks.get(fkname);
-			if (stmt == null)
-			{
-				// first time we hit this FK definition in this loop
-				stmt = template;
-			}
+			String fkname = node.getFkName();
+			String stmt = template;
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
 
 			if (nameTester.isSystemConstraintName(fkname))
@@ -891,10 +835,9 @@ public class TableSourceBuilder
 				}
 			}
 
-			String entry = StringUtil.listToString(colList, ", ", false);
-			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, node.getTargetColumnsList());
 
-			String rule = updateRules.get(fkname);
+			String rule = node.getUpdateAction();
 			if (dbConnection.getDbSettings().supportsFkOption("update", rule))
 			{
 				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, "ON UPDATE " + rule);
@@ -904,7 +847,7 @@ public class TableSourceBuilder
 				stmt = TemplateHandler.removePlaceholder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, true);
 			}
 
-			rule = deleteRules.get(fkname);
+			rule = node.getDeleteAction();
 			if (dbConnection.getDbSettings().supportsFkOption("delete", rule))
 			{
 				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, "ON DELETE " + rule);
@@ -914,7 +857,7 @@ public class TableSourceBuilder
 				stmt = TemplateHandler.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);
 			}
 
-			rule = getDeferrableVerb(deferrable.get(fkname));
+			rule = getDeferrableVerb(node.getDeferrableType());
 			if (StringUtil.isEmptyString(rule))
 			{
 				stmt = TemplateHandler.removePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, true);
@@ -924,47 +867,16 @@ public class TableSourceBuilder
 				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, rule.trim());
 			}
 
-			colList = fkTarget.get(fkname);
-			if (colList == null)
-			{
-				LogMgr.logError("DbMetadata.getFkSource()", "Retrieved a null list for constraing [" + fkname + "] but should contain a list for table [" + table.getTableName() + "]",null);
-				continue;
-			}
-
-			Iterator itr = colList.iterator();
-			StringBuilder colListBuffer = new StringBuilder(30);
-			String targetTable = null;
-			boolean first = true;
-
-			while (itr.hasNext())
-			{
-				col = (String)itr.next();
-				int pos = col.lastIndexOf('.');
-				if (targetTable == null)
-				{
-					String t = col.substring(0, pos);
-					TableIdentifier tbl = new TableIdentifier(t);
-					targetTable = tbl.getTableExpression(this.dbConnection);
-				}
-				if (!first)
-				{
-					colListBuffer.append(',');
-				}
-				else
-				{
-					first = false;
-				}
-				colListBuffer.append(col.substring(pos + 1));
-			}
-			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, targetTable);
-			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
-			fks.put(fkname, stmt.trim());
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, node.getTable().getTableExpression(dbConnection));
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, node.getSourceColumnsList());
+			fkStatements.add(stmt.trim());
 		}
+
 		StringBuilder fk = new StringBuilder();
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 
-		Iterator<String> values = fks.values().iterator();
+		Iterator<String> values = fkStatements.iterator();
 		while (values.hasNext())
 		{
 			if (forInlineUse)

@@ -153,6 +153,38 @@ public class TableSourceBuilderTest
 	}
 
 	@Test
+	public void testFkSource()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+		try
+		{
+			TestUtil.executeScript(con,
+				"create table customers (id integer not null primary key, name varchar(20) not null);\n" +
+				"CREATE TABLE orders (\n" +
+				"  id integer not null, \n" +
+				"  customer_id integer not null references customers, \n" +
+				"  amount decimal(10,2)" +
+				");\n" +
+				"COMMIT;\n"
+			);
+			TableSourceBuilder builder = new TableSourceBuilder(con);
+			TableIdentifier tbl = new TableIdentifier("ORDERS");
+			String sql = builder.getTableSource(tbl, false, true);
+//			System.out.println(sql);
+			assertTrue(sql.contains("FOREIGN KEY (CUSTOMER_ID)"));
+			assertTrue(sql.contains("REFERENCES CUSTOMERS (ID)"));
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+			ConnectionMgr.getInstance().clearProfiles();
+		}
+
+	}
+
+	@Test
 	public void testGeneratePKName()
 		throws Exception
 	{

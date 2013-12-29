@@ -212,6 +212,35 @@ class ObjectCache
 		return referenced;
 	}
 
+
+	public void addReferencedTables(TableIdentifier table, List<DependencyNode> referenced)
+	{
+		if (table == null) return;
+		List<DependencyNode> old = referencedTables.put(table, referenced);
+		if (old == null)
+		{
+			LogMgr.logDebug("ObjectCache.addReferencingTables()", "Added referenced tables for " + table + "(" + referenced + ")");
+		}
+		else
+		{
+			LogMgr.logDebug("ObjectCache.addReferencingTables()", "Replaced existing referenced tables for " + table);
+		}
+	}
+
+	public void addReferencingTables(TableIdentifier table, List<DependencyNode> referencing)
+	{
+		if (table == null) return;
+		List<DependencyNode> old = referencingTables.put(table, referencing);
+		if (old == null)
+		{
+			LogMgr.logDebug("ObjectCache.addReferencingTables()", "Added referencing tables for " + table + "(" + referencing + ")");
+		}
+		else
+		{
+			LogMgr.logDebug("ObjectCache.addReferencingTables()", "Replaced existing referencing tables for " + table);
+		}
+	}
+
 	/**
 	 * Get the procedures the are currently in the cache
 	 */
@@ -430,6 +459,14 @@ class ObjectCache
 		tbl.setNeverAdjustCase(true);
 		tbl.setComment(comment);
 		return tbl;
+	}
+
+	public synchronized void addTable(TableIdentifier table)
+	{
+		if (table == null) return;
+		if (table.getSchema() == null) return;
+		if (objects.containsKey(table)) return;
+		this.objects.put(table, null);
 	}
 
 	public synchronized void addTable(TableDefinition definition, WbConnection conn)

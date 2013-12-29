@@ -35,6 +35,7 @@ import java.util.Map;
 
 import workbench.db.objectcache.DbObjectCacheFactory;
 
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
@@ -57,6 +58,11 @@ public class DependencyNode
 	private String updateAction = "";
 	private String deleteAction = "";
 	private String fkName;
+	private String deferrable;
+
+	private int updateActionValue;
+	private int deleteActionValue;
+	private int deferrableValue;
 
 	/**
 	 * Maps the columns of the base table (this.table) to the matching column
@@ -79,6 +85,16 @@ public class DependencyNode
 		{
 			this.columns.put(aColumn, aParentColumn);
 		}
+	}
+
+	public String getDeferrableType()
+	{
+		return deferrable;
+	}
+
+	public void setDeferrableType(String type)
+	{
+		this.deferrable = type;
 	}
 
 	/**
@@ -155,6 +171,29 @@ public class DependencyNode
 		}
 		result.append(", level:");
 		result.append(getLevel());
+		return result.toString();
+	}
+
+	public String getSourceColumnsList()
+	{
+		if (CollectionUtil.isEmpty(columns)) return "";
+		return StringUtil.listToString(columns.keySet(), ',');
+	}
+
+	public String getTargetColumnsList()
+	{
+		if (CollectionUtil.isEmpty(columns)) return "";
+		StringBuilder result = new StringBuilder(columns.size() * 15);
+		boolean first = true;
+		for (String col : columns.keySet())
+		{
+			if (!first)
+			{
+				result.append(',');
+			}
+			result.append(columns.get(col));
+			first = false;
+		}
 		return result.toString();
 	}
 
@@ -342,6 +381,36 @@ public class DependencyNode
 	public void setUpdateAction(String anAction)
 	{
 		this.updateAction = anAction;
+	}
+
+	public void setUpdateActionValue(int action)
+	{
+		this.updateActionValue = action;
+	}
+
+	public int getUpdateActionValue()
+	{
+		return updateActionValue;
+	}
+
+	public int getDeleteActionValue()
+	{
+		return deleteActionValue;
+	}
+
+	public void setDeleteActionValue(int action)
+	{
+		this.deleteActionValue = action;
+	}
+
+	public int getDeferrableValue()
+	{
+		return deferrableValue;
+	}
+
+	public void setDeferrableValue(int deferrable)
+	{
+		this.deferrableValue = deferrable;
 	}
 
 	public void printAll(File debugFile)

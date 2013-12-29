@@ -23,13 +23,18 @@
 package workbench.db.search;
 
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.DbObject;
 import workbench.db.WbConnection;
+
 import workbench.util.CollectionUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *

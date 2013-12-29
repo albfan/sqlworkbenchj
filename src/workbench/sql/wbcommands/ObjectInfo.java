@@ -30,8 +30,6 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.DbSearchPath;
 import workbench.db.DbSettings;
-import workbench.db.FKHandler;
-import workbench.db.FKHandlerFactory;
 import workbench.db.IndexReader;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -39,6 +37,7 @@ import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
+import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
@@ -329,14 +328,14 @@ public class ObjectInfo
 			{
 				try
 				{
-					FKHandler fk = FKHandlerFactory.createInstance(connection);
-					DataStore references = fk.getForeignKeys(toDescribe, false);
+					TableDependency deps = new TableDependency(connection, toDescribe);
+					DataStore references = deps.getDisplayDataStore(true);
 					if (references.getRowCount() > 0)
 					{
 						references.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
 						result.addDataStore(references);
 					}
-					DataStore referencedBy = fk.getReferencedBy(toDescribe);
+					DataStore referencedBy = deps.getDisplayDataStore(false);
 					if (referencedBy.getRowCount() > 0)
 					{
 						referencedBy.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
