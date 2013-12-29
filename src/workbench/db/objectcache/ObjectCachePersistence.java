@@ -35,6 +35,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
@@ -51,6 +52,9 @@ import workbench.util.WbFile;
  */
 class ObjectCachePersistence
 {
+	private static final String PROP_MAXAGE = GuiSettings.PROP_OBJECT_CACHE_LOCAL_STORAGE + ".maxage";
+	private static final String PROP_CACHEDIR = GuiSettings.PROP_OBJECT_CACHE_LOCAL_STORAGE + ".cachedir";
+
 	private static final String OBJECTS_ENTRY = "objects.dat";
 	private static final String SCHEMAS_ENTRY = "schemas.dat";
 	private static final String REFERENCING_TABLES_ENTRY = "referencing_tables.data";
@@ -63,7 +67,7 @@ class ObjectCachePersistence
 		WbFile cacheFile = getCacheFile(conn);
 		if (cacheFile == null || !cacheFile.exists()) return;
 
-		String maxAgeValue = Settings.getInstance().getProperty("workbench.gui.completioncache.maxage", "5d");
+		String maxAgeValue = Settings.getInstance().getProperty(PROP_MAXAGE, "5d");
 		DurationNumber number = new DurationNumber();
 		long maxAge = number.parseDefinition(maxAgeValue);
 
@@ -202,7 +206,7 @@ class ObjectCachePersistence
 		String user = userMatcher.replaceAll("_");
 
 		WbFile configDir = new WbFile(Settings.getInstance().getConfigDir());
-		String cacheDirName = Settings.getInstance().getProperty("workbench.gui.completioncache.cachedir", "cache");
+		String cacheDirName = Settings.getInstance().getProperty(PROP_CACHEDIR, "cache");
 		WbFile cDir = new WbFile(cacheDirName);
 		WbFile cacheDir = null;
 

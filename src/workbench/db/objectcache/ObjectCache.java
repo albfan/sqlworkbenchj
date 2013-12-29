@@ -87,12 +87,15 @@ class ObjectCache
 			filtered = schemaFilter.isExcluded(table.getSchema());
 		}
 
-		if (!filtered && catalogFilter != null)
+		if (filtered) return true;
+
+		if (catalogFilter != null)
 		{
 			filtered = catalogFilter.isExcluded(table.getCatalog());
 		}
 		return filtered;
 	}
+
 	/**
 	 * Add this list of tables to the current cache.
 	 */

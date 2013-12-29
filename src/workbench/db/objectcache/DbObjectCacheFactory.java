@@ -115,20 +115,13 @@ public class DbObjectCacheFactory
 
 	public DbObjectCache getCache(WbConnection connection)
 	{
-		return getCache(connection, true);
-	}
-
-	public DbObjectCache getCache(WbConnection connection, boolean createNew)
-	{
 		if (connection == null) return null;
 		String key = makeKey(connection);
 
 		synchronized (lock)
 		{
 			ObjectCache cache = caches.get(key);
-			if (cache == null && !createNew) return null;
-
-			if (cache == null && createNew)
+			if (cache == null)
 			{
 				LogMgr.logDebug("DbObjectCacheFactory.getCache()", "Creating new cache for: " + key);
 				cache = new ObjectCache(connection);
