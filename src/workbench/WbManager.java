@@ -70,7 +70,6 @@ import workbench.sql.macros.MacroManager;
 import workbench.util.DeadlockMonitor;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
-import workbench.util.ThreadDumper;
 import workbench.util.UpdateCheck;
 import workbench.util.VersionNumber;
 import workbench.util.WbFile;
@@ -346,9 +345,17 @@ public final class WbManager
 		}
 	}
 
+	/**
+	 * Saves the preferences of all open MainWindows.
+	 *
+	 * @return true if the preferences were saved successfully
+	 *         false if at least on MainWindow "refused" to close
+	 */
 	private boolean saveWindowSettings()
 	{
+		// no settings should be saved, pretend everything was done.
 		if (!this.writeSettings) return true;
+
 		boolean settingsSaved = false;
 
 		if (!this.checkProfiles(getCurrentWindow())) return false;
@@ -416,10 +423,6 @@ public final class WbManager
 		{
 			if (Settings.getInstance().wasExternallyModified())
 			{
-				if (Settings.getInstance().getBoolProperty("workbench.debug.trace.configcheck", true))
-				{
-					ThreadDumper.logThreadDump();
-				}
 				String msg = ResourceMgr.getFormattedString("MsgSettingsChanged", Settings.getInstance().getConfigFile().getFullPath());
 				int choice = WbSwingUtilities.getYesNoCancel(getCurrentWindow(), msg);
 				LogMgr.logDebug("WbManager.canExit()", "Config file overwrite choice: " + WbSwingUtilities.choiceToString(choice));
@@ -443,8 +446,7 @@ public final class WbManager
 
 	public void exitWorkbench(final JFrame window, final boolean forceAbort)
 	{
-		// canExit() will also prompt if any modified
-		// files should be changed
+		// canExit() will also prompt if any modified files should be changed
 		if (!canExit())
 		{
 			return;
@@ -703,7 +705,6 @@ public final class WbManager
 				openNewWindow(false);
 			}
 		});
-
 	}
 
 	private void openNewWindow(boolean checkCmdLine)

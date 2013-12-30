@@ -53,7 +53,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
- * A cache for database objects to support Auto-completion in the editor
+ * A cache for database objects to support auto-completion in the editor
  *
  * @author  Thomas Kellerer
  */
@@ -214,7 +214,6 @@ class ObjectCache
 		}
 		return referenced;
 	}
-
 
 	public void addReferencedTables(TableIdentifier table, List<DependencyNode> referenced)
 	{
@@ -412,17 +411,10 @@ class ObjectCache
 		if (tbl == null) return;
 
 		TableIdentifier toRemove = findEntry(dbConn, tbl);
-		boolean removed = false;
-		if (toRemove != null)
-		{
-			this.objects.remove(toRemove);
-			removed = true;
-		}
+		if (toRemove == null) return;
 
-		if (removed)
-		{
-			LogMgr.logDebug("ObjectCache.removeTable()", "Removed " + tbl.getTableName() + " from the cache");
-		}
+		this.objects.remove(toRemove);
+		LogMgr.logDebug("ObjectCache.removeTable()", "Removed " + tbl.getTableName() + " from the cache");
 	}
 
 	synchronized void addTableList(WbConnection dbConnection, DataStore tables, String schema)
@@ -467,29 +459,23 @@ class ObjectCache
 	public synchronized void addTable(TableIdentifier table)
 	{
 		if (table == null) return;
-		if (table.getSchema() == null) return;
 		if (objects.containsKey(table)) return;
 		this.objects.put(table, null);
 	}
 
 	public synchronized void addTable(TableDefinition definition, WbConnection conn)
 	{
-		if (definition != null)
+		if (definition == null) return;
+		TableIdentifier table = definition.getTable();
+		String tbName = table.getTableExpression(SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn));
+		List<ColumnIdentifier> old = this.objects.put(definition.getTable(), definition.getColumns());
+		if (old == null)
 		{
-			TableIdentifier table = definition.getTable();
-			if (table.getSchema() != null)
-			{
-				String tbName = table.getTableExpression(SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn));
-				List<ColumnIdentifier> old = this.objects.put(definition.getTable(), definition.getColumns());
-				if (old == null)
-				{
-					LogMgr.logDebug("ObjectCache.addTable()", "Added table definition for " + tbName);
-				}
-				else
-				{
-					LogMgr.logDebug("ObjectCache.addTable()", "Replaced existing table definition for " + tbName);
-				}
-			}
+			LogMgr.logDebug("ObjectCache.addTable()", "Added table definition for " + tbName);
+		}
+		else
+		{
+			LogMgr.logDebug("ObjectCache.addTable()", "Replaced existing table definition for " + tbName);
 		}
 	}
 
@@ -503,7 +489,8 @@ class ObjectCache
 	{
 		if (toSearch == null) return null;
 
-		if (toSearch.getSchema() == null)
+		String schemaCat = supportsSchemas ? toSearch.getSchema() : toSearch.getCatalog();
+		if (schemaCat == null)
 		{
 			TableIdentifier key = toSearch.createCopy();
 			key.adjustCase(con);
@@ -512,7 +499,14 @@ class ObjectCache
 			for (String schema : schemas)
 			{
 				TableIdentifier copy = key.createCopy();
-				copy.setSchema(schema);
+				if (supportsSchemas)
+				{
+					copy.setSchema(schema);
+				}
+				else
+				{
+					copy.setCatalog(schema);
+				}
 				TableIdentifier tbl = findInCache(con, copy);
 				if (tbl != null) return tbl;
 			}
@@ -537,12 +531,15 @@ class ObjectCache
 	}
 
 	/**
-	 * Disposes any db objects held in the cache
+	 * Disposes any db objects held in the cache.
 	 */
 	public void clear()
 	{
-		if (this.objects != null) this.objects.clear();
-		this.schemasInCache.clear();
+		objects.clear();
+		schemasInCache.clear();
+		referencedTables.clear();
+		referencingTables.clear();
+		procedureCache.clear();
 	}
 
 	Set<String> getSchemasInCache()
@@ -571,11 +568,7 @@ class ObjectCache
 	{
 		if (newObjects == null || schemas == null) return;
 
-		objects.clear();
-		schemasInCache.clear();
-		this.referencedTables.clear();
-		this.referencingTables.clear();
-		procedureCache.clear();
+		clear();
 
 		objects.putAll(newObjects);
 		schemasInCache.addAll(schemas);

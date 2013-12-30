@@ -41,14 +41,15 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-
 import java.util.Map;
-import workbench.log.LogMgr;
 
 /**
  * Example of using the java.lang.management API to dump stack trace and to perform deadlock detection.
  *
  * @author Mandy Chung
+ *
+ * This class was adapted from "ThreadMonitor.java" which is part of the JDK's demo applications, found
+ * in JDK_HOME/demo/management/FullThreadDump
  */
 public class ThreadDumper
 {
@@ -241,13 +242,6 @@ public class ThreadDumper
 			}
 		}
 		return sw.toString();
-	}
-
-	public static void logThreadDump()
-	{
-		ThreadDumper dumper = new ThreadDumper();
-		String dump = dumper.getThreadDump();
-		LogMgr.logInfo("ThreadDumper", "\n" + dump);
 	}
 
 }
