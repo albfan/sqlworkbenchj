@@ -3,7 +3,7 @@
 
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2013-12-18">
+  <release build="-1" date="2014-01-01">
     <entry dev-build="8" type="enh">The UI of the Save As dialogue was re-designed to make the dialogue more compact</entry>
     <entry dev-build="8" type="enh">Changing the font size with the mouse wheel can now be disabled</entry>
     <entry dev-build="7" type="enh">WbInclude can now do a simple text replacement when running a script.</entry>
@@ -37,7 +37,7 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
-    <entry dev-build="8" type="fix">If the trigger panel was disabled, a DbExplorer tab could not be closed properly.</entry>
+    <entry dev-build="8" type="fix">If the trigger panel was disabled, a DbExplorer tab could not be closed.</entry>
     <entry dev-build="7" type="fix">The completion option "As is" for the case of the object names didn't work any longer</entry>
     <entry dev-build="7" type="fix">For Postgres check constraints were retrieved incorrectly if the same table existed in different schemas</entry>
     <entry dev-build="7" type="fix">When opening a connection that did not have a worskpace assigned the GUI would not initialize.</entry>
