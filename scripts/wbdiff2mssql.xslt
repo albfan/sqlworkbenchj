@@ -152,7 +152,7 @@
       <xsl:text> </xsl:text>
       <xsl:value-of select="dbms-data-type"/>
       <xsl:if test="$nullable = 'false'">
-        <xsl:text>NOT NULL</xsl:text>
+        <xsl:text> NOT NULL</xsl:text>
       </xsl:if>
       <xsl:text>;</xsl:text>
       <xsl:value-of select="$newline"/>
@@ -169,7 +169,8 @@
       <xsl:text> ALTER COLUMN </xsl:text>
       <xsl:value-of select="$column"/>
       <xsl:text> </xsl:text>
-      <xsl:value-of select="dbms-data-type"/>;
+      <xsl:value-of select="dbms-data-type"/>
+      <xsl:text>;</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
 
@@ -339,7 +340,7 @@
       <xsl:value-of select="$unique"/>
       <xsl:text>INDEX </xsl:text>
       <xsl:value-of select="name"/>
-      <xsl:text>ON </xsl:text>
+      <xsl:text> ON </xsl:text>
       <xsl:value-of select="$tablename"/>
       <xsl:text> (</xsl:text>
       <xsl:value-of select="index-expression"/>
