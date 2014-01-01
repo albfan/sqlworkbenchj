@@ -8,6 +8,7 @@ LblMergeType
 TxtEdPrefix
 TxtZoom
 TxtFileFilterSqlInsDel
+TxtCopyright
 LblCancelCopy
 LblCascadeConstraints
 LblCommit
