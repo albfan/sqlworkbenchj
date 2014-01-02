@@ -44,6 +44,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.util.DurationNumber;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
@@ -52,9 +53,6 @@ import workbench.util.WbFile;
  */
 class ObjectCachePersistence
 {
-	private static final String PROP_MAXAGE = GuiSettings.PROP_OBJECT_CACHE_LOCAL_STORAGE + ".maxage";
-	private static final String PROP_CACHEDIR = GuiSettings.PROP_OBJECT_CACHE_LOCAL_STORAGE + ".cachedir";
-
 	private static final String OBJECTS_ENTRY = "objects.dat";
 	private static final String SCHEMAS_ENTRY = "schemas.dat";
 	private static final String REFERENCING_TABLES_ENTRY = "referencing_tables.data";
@@ -67,7 +65,7 @@ class ObjectCachePersistence
 		WbFile cacheFile = getCacheFile(conn);
 		if (cacheFile == null || !cacheFile.exists()) return;
 
-		String maxAgeValue = Settings.getInstance().getProperty(PROP_MAXAGE, "5d");
+		String maxAgeValue = GuiSettings.getLocalStorageMaxAge();
 		DurationNumber number = new DurationNumber();
 		long maxAge = number.parseDefinition(maxAgeValue);
 
@@ -134,6 +132,21 @@ class ObjectCachePersistence
 	}
 
 
+	void deleteCacheFile(String jdbcUrl, String userName)
+	{
+		WbFile cacheFile = getCacheFile(jdbcUrl, userName);
+		try
+		{
+			if (cacheFile.delete())
+			{
+				LogMgr.logDebug("ObjectCachePersistence.deleteCacheFile()", "Deleted local storage file: " + cacheFile.getFullPath());
+			}
+		}
+		catch (Throwable th)
+		{
+		}
+	}
+
 	void saveToLocalFile(ObjectCache objectCache, WbConnection conn)
 	{
 		if (conn == null || objectCache == null) return;
@@ -195,18 +208,27 @@ class ObjectCachePersistence
 
 	private WbFile getCacheFile(WbConnection dbConnection)
 	{
+		return getCacheFile(dbConnection.getUrl(), dbConnection.getDisplayUser());
+	}
+
+	private WbFile getCacheFile(String jdbcUrl, String userName)
+	{
 		Pattern invalidChars = Pattern.compile("[^a-zA-Z0-9$]+");
-		Matcher urlMatcher = invalidChars.matcher(dbConnection.getUrl());
+		Matcher urlMatcher = invalidChars.matcher(jdbcUrl);
 		String url = urlMatcher.replaceAll("_");
 
 		// remove the jdbc_ prefix, it is not needed
 		url = url.substring(5);
 
-		Matcher userMatcher = invalidChars.matcher(dbConnection.getDisplayUser());
-		String user = userMatcher.replaceAll("_");
+		String user = "";
+		if (StringUtil.isNonBlank(userName))
+		{
+			Matcher userMatcher = invalidChars.matcher(userName);
+			user = userMatcher.replaceAll("_") + "@";
+		}
 
 		WbFile configDir = new WbFile(Settings.getInstance().getConfigDir());
-		String cacheDirName = Settings.getInstance().getProperty(PROP_CACHEDIR, "cache");
+		String cacheDirName = Settings.getInstance().getProperty(GuiSettings.PROP_LOCAL_OBJECT_CACHE_DIR, ".cache");
 		WbFile cDir = new WbFile(cacheDirName);
 		WbFile cacheDir = null;
 
@@ -232,6 +254,6 @@ class ObjectCachePersistence
 				cacheDir = configDir;
 			}
 		}
-		return new WbFile(cacheDir, user + "@" + url + ".wbcache");
+		return new WbFile(cacheDir, user + url + ".wbcache");
 	}
 }

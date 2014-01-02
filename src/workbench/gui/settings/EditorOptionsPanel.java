@@ -133,6 +133,7 @@ public class EditorOptionsPanel
 		{
 			wheelScrollLines.setText(Integer.toString(lines));
 		}
+		WbSwingUtilities.makeEqualSize(externalLineEnding, internalLineEnding);
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -349,7 +350,6 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(7, 11, 0, 15);
     add(internalLineEnding, gridBagConstraints);
@@ -369,7 +369,6 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(4, 11, 0, 15);
     add(externalLineEnding, gridBagConstraints);

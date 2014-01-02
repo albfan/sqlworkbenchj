@@ -268,6 +268,7 @@ public class ConnectionEditorPanel
     jPanel4 = new javax.swing.JPanel();
     icon = new StringPropertyEditor();
     selectIconButton = new FlatButton();
+    jCheckBox1 = new BooleanPropertyEditor();
     jSeparator3 = new javax.swing.JSeparator();
     timeoutpanel = new javax.swing.JPanel();
     jPanel6 = new javax.swing.JPanel();
@@ -730,6 +731,7 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
@@ -773,6 +775,7 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
@@ -815,11 +818,22 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
     jPanel3.add(jPanel4, gridBagConstraints);
+
+    jCheckBox1.setText(ResourceMgr.getString("LblLocalStorageType")); // NOI18N
+    jCheckBox1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+    jCheckBox1.setName("storeCacheLocally"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+    jPanel3.add(jCheckBox1, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -1061,6 +1075,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox includeNull;
   protected workbench.gui.components.WbColorPicker infoColor;
   protected javax.swing.JLabel infoColorLabel;
+  protected javax.swing.JCheckBox jCheckBox1;
   protected javax.swing.JLabel jLabel1;
   protected javax.swing.JLabel jLabel3;
   protected javax.swing.JPanel jPanel1;

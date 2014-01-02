@@ -1307,25 +1307,25 @@ public class WbSwingUtilities
 	}
 
 	/**
-	 * Sets the minimum width all buttons to the width of the widest button.
+	 * Sets the minimum width of all components to the width of the widest component.
 	 * <p/>
 	 * @param button the button to change
 	 * @see #makeEqualSize(javax.swing.JButton, int)
 	 */
-	public static void makeEqualSize(JButton... buttons)
+	public static void makeEqualSize(JComponent ... components)
 	{
 		int maxSize = 0;
-		for (JButton button : buttons)
+		for (JComponent comp : components)
 		{
-			Dimension size = button.getPreferredSize();
+			Dimension size = comp.getPreferredSize();
 			if (size.width > maxSize)
 			{
 				maxSize = size.width;
 			}
 		}
-		for (JButton button : buttons)
+		for (JComponent comp : components)
 		{
-			setPreferredWidth(button, maxSize);
+			setPreferredWidth(comp, maxSize);
 		}
 	}
 
@@ -1335,7 +1335,7 @@ public class WbSwingUtilities
 	 * @param button    the button to change
 	 * @param minWidth  the minimum width to apply
 	 */
-	public static void setPreferredWidth(JButton button, int minWidth)
+	public static void setPreferredWidth(JComponent button, int minWidth)
 	{
 		Dimension size = button.getPreferredSize();
 		if (size.width < minWidth)

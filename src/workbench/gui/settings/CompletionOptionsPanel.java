@@ -25,17 +25,27 @@ package workbench.gui.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
 import workbench.interfaces.Restoreable;
+import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ColumnSortType;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.objectcache.ObjectCacheStorage;
+
+import workbench.gui.WbSwingUtilities;
+
+import workbench.util.DurationNumber;
 
 /**
  *
@@ -43,11 +53,16 @@ import workbench.resource.Settings;
  */
 public class CompletionOptionsPanel
 	extends JPanel
-	implements Restoreable
+	implements Restoreable, ValidatingComponent
 {
 	public CompletionOptionsPanel()
 	{
 		initComponents();
+
+		DefaultComboBoxModel model = new DefaultComboBoxModel(ObjectCacheStorage.values());
+		localStorageType.setModel(model);
+
+		WbSwingUtilities.setMinimumSize(maxAgeField, 5);
 	}
 
 	@Override
@@ -84,6 +99,13 @@ public class CompletionOptionsPanel
 		partialMatch.setSelected(GuiSettings.getPartialCompletionSearch());
 		sortColumns.setSelected(GuiSettings.getSortCompletionColumns());
 		cyleEntries.setSelected(GuiSettings.getCycleCompletionPopup());
+
+		ObjectCacheStorage storage = GuiSettings.getLocalStorageForObjectCache();
+		localStorageType.setSelectedItem(storage);
+		localStorageType.doLayout();
+
+		maxAgeField.setText(GuiSettings.getLocalStorageMaxAge());
+		WbSwingUtilities.makeEqualSize(completionColumnSort, completionPasteCase, localStorageType);
 	}
 
 	@Override
@@ -118,6 +140,28 @@ public class CompletionOptionsPanel
 		GuiSettings.setPartialCompletionSearch(partialMatch.isSelected());
 		GuiSettings.setSortCompletionColumns(sortColumns.isSelected());
 		GuiSettings.setCycleCompletionPopup(cyleEntries.isSelected());
+		ObjectCacheStorage storage = (ObjectCacheStorage)localStorageType.getSelectedItem();
+		GuiSettings.setLocalStorageForObjectCache(storage);
+		GuiSettings.setLocalStorageMaxAge(maxAgeField.getText().trim().toLowerCase());
+	}
+
+	@Override
+	public boolean validateInput()
+	{
+		String duration = maxAgeField.getText();
+		DurationNumber n = new DurationNumber();
+
+		if (n.isValid(duration)) return true;
+
+		WbSwingUtilities.showErrorMessageKey(this, "ErrInvalidAge");
+		maxAgeField.selectAll();
+		WbSwingUtilities.requestFocus(maxAgeField);
+		return false;
+	}
+
+	@Override
+	public void componentDisplayed()
+	{
 	}
 
 	/** This method is called from within the constructor to
@@ -140,6 +184,10 @@ public class CompletionOptionsPanel
     partialMatch = new JCheckBox();
     filterSearch = new JCheckBox();
     cyleEntries = new JCheckBox();
+    localStorageLabel = new JLabel();
+    localStorageType = new JComboBox();
+    maxAgeLabel = new JLabel();
+    maxAgeField = new JTextField();
 
     setLayout(new GridBagLayout());
 
@@ -147,7 +195,7 @@ public class CompletionOptionsPanel
     pasteLabel.setToolTipText(ResourceMgr.getString("d_LblPasteCase")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(11, 12, 0, 0);
@@ -157,8 +205,7 @@ public class CompletionOptionsPanel
     completionPasteCase.setToolTipText(ResourceMgr.getDescription("LblPasteCase"));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(8, 11, 0, 15);
     add(completionPasteCase, gridBagConstraints);
@@ -180,8 +227,7 @@ public class CompletionOptionsPanel
     completionColumnSort.setToolTipText(ResourceMgr.getDescription("LblPasteSort"));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(6, 11, 0, 15);
     add(completionColumnSort, gridBagConstraints);
@@ -190,7 +236,7 @@ public class CompletionOptionsPanel
     pasterOrderLabel.setToolTipText(ResourceMgr.getString("d_LblPasteSort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(9, 12, 0, 0);
@@ -240,6 +286,37 @@ public class CompletionOptionsPanel
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(9, 12, 0, 0);
     add(cyleEntries, gridBagConstraints);
+
+    localStorageLabel.setText(ResourceMgr.getString("LblLocalStorageType")); // NOI18N
+    localStorageLabel.setToolTipText(ResourceMgr.getString("d_LblLocalStorageType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    add(localStorageLabel, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(6, 11, 0, 15);
+    add(localStorageType, gridBagConstraints);
+
+    maxAgeLabel.setText(ResourceMgr.getString("LblLocalMaxAge")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    add(maxAgeLabel, gridBagConstraints);
+
+    maxAgeField.setText("jTextField1");
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(6, 11, 0, 15);
+    add(maxAgeField, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox closePopup;
@@ -247,6 +324,10 @@ public class CompletionOptionsPanel
   private JComboBox completionPasteCase;
   private JCheckBox cyleEntries;
   private JCheckBox filterSearch;
+  private JLabel localStorageLabel;
+  private JComboBox localStorageType;
+  private JTextField maxAgeField;
+  private JLabel maxAgeLabel;
   private JCheckBox partialMatch;
   private JLabel pasteLabel;
   private JLabel pasterOrderLabel;

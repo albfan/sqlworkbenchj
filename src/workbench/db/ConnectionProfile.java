@@ -133,6 +133,7 @@ public class ConnectionProfile
 
 	public void setStoreCacheLocally(boolean flag)
 	{
+		this.changed = (flag != storeCacheLocally);
 		this.storeCacheLocally = flag;
 	}
 

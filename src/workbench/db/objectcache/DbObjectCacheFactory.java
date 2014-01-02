@@ -32,6 +32,7 @@ import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 
+import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
@@ -194,6 +195,17 @@ public class DbObjectCacheFactory
 				}
 				conn.removeChangeListener(this);
 			}
+		}
+	}
+
+	public void deleteLocalStorage()
+	{
+		ObjectCachePersistence persistence = new ObjectCachePersistence();
+		for (ConnectionProfile profile : ConnectionMgr.getInstance().getProfiles())
+		{
+			String url = profile.getUrl();
+			String user = profile.getUsername();
+			persistence.deleteCacheFile(url, user);
 		}
 	}
 

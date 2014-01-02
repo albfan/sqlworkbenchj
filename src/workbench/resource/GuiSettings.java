@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
+import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.objectcache.ObjectCacheStorage;
 
 import workbench.gui.sql.FileReloadType;
@@ -83,7 +84,10 @@ public class GuiSettings
 	public static final String PROP_DBEXP_TABLE_HISTORY = "workbench.dbexplorer.tablelist.history";
 
 	public static final String PROP_FILE_RELOAD_TYPE = "workbench.gui.editor.file.reloadtype";
-	public static final String PROP_OBJECT_CACHE_LOCAL_STORAGE = "workbench.gui.completioncache.localstorage";
+	public static final String PROP_LOCAL_OBJECT_CACHE = "workbench.gui.completioncache.localstorage";
+	public static final String PROP_LOCAL_OBJECT_CACHE_MAXAGE = PROP_LOCAL_OBJECT_CACHE + ".maxage";
+	public static final String PROP_LOCAL_OBJECT_CACHE_DIR = PROP_LOCAL_OBJECT_CACHE + ".cachedir";
+
 
 	public static final String PROP_COPY_TEXT_DISPLAY_DLG = "workbench.gui.copy.text.displayoptions";
 
@@ -942,14 +946,28 @@ public class GuiSettings
 		}
 	}
 
-	public void setLocalStorageForObjectCache(ObjectCacheStorage storage)
+	public static void setLocalStorageMaxAge(String duration)
 	{
-		Settings.getInstance().setProperty(PROP_OBJECT_CACHE_LOCAL_STORAGE, storage.name());
+		Settings.getInstance().setProperty(PROP_LOCAL_OBJECT_CACHE_MAXAGE, duration);
+	}
+
+	public static String getLocalStorageMaxAge()
+	{
+		return Settings.getInstance().getProperty(PROP_LOCAL_OBJECT_CACHE_MAXAGE, "5d");
+	}
+
+	public static void setLocalStorageForObjectCache(ObjectCacheStorage storage)
+	{
+		if (ObjectCacheStorage.never == storage)
+		{
+			DbObjectCacheFactory.getInstance().deleteLocalStorage();
+		}
+		Settings.getInstance().setProperty(PROP_LOCAL_OBJECT_CACHE, storage.name());
 	}
 
 	public static ObjectCacheStorage getLocalStorageForObjectCache()
 	{
-		String type = Settings.getInstance().getProperty(PROP_OBJECT_CACHE_LOCAL_STORAGE, ObjectCacheStorage.profile.name());
+		String type = Settings.getInstance().getProperty(PROP_LOCAL_OBJECT_CACHE, ObjectCacheStorage.profile.name());
 		try
 		{
 			return ObjectCacheStorage.valueOf(type);

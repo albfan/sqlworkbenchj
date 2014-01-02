@@ -41,6 +41,16 @@ public class DurationNumber
 	{
 	}
 
+	public boolean isValid(String definition)
+	{
+		if (StringUtil.isBlank(definition))
+		{
+			return false;
+		}
+		String pattern = "^[0-9]+[smhd]{1}$";
+		return definition.trim().toLowerCase().matches(pattern);
+	}
+
 	public long parseDefinition(String definition)
 	{
 		if (StringUtil.isEmptyString(definition)) return 0;
