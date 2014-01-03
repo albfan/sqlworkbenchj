@@ -62,6 +62,8 @@ public class WbInclude
 	public static final String ARG_REPLACE_USE_REGEX = "useRegex";
 	public static final String ARG_REPLACE_IGNORECASE = "ignoreCase";
 	public static final String ARG_CHECK_ESCAPED_QUOTES = "checkEscapedQuotes";
+	public static final String ARG_PRINT_STATEMENTS = "printStatements";
+
 	/*
 	 * I need to store the instance in a variable to be able to cancel the execution.
 	 * If cancelling wasn't necessary, a local variable in the execute() method would have been enough.
@@ -85,6 +87,8 @@ public class WbInclude
 		cmdLine.addArgument(ARG_REPLACE_VALUE);
 		cmdLine.addArgument(ARG_REPLACE_USE_REGEX, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_REPLACE_IGNORECASE, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_PRINT_STATEMENTS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(AppArguments.ARG_SHOW_TIMING, ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
@@ -199,6 +203,8 @@ public class WbInclude
 		boolean verbose = true;
 		boolean defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 		boolean ignoreDrop = defaultIgnore;
+		boolean showStmts = false;
+		boolean showTiming = false;
 		DelimiterDefinition delim = null;
 		String encoding = null;
 
@@ -212,6 +218,8 @@ public class WbInclude
 			encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 			delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue("delimiter"));
 			setUnknownMessage(result, cmdLine, null);
+			showStmts = cmdLine.getBoolean(ARG_PRINT_STATEMENTS, false);
+			showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, false);
 		}
 
 		if (encoding == null)
@@ -239,7 +247,8 @@ public class WbInclude
 			batchRunner.setRowMonitor(this.rowMonitor);
 			batchRunner.setAbortOnError(!continueOnError);
 			batchRunner.setCheckEscapedQuotes(checkEscape);
-			batchRunner.setShowTiming(false);
+			batchRunner.setShowTiming(showTiming);
+			batchRunner.setPrintStatements(showStmts);
 			batchRunner.setEncoding(encoding);
 			batchRunner.setParameterPrompter(this.prompter);
 			batchRunner.setExecutionController(runner.getExecutionController());

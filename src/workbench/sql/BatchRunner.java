@@ -114,6 +114,7 @@ public class BatchRunner
 	private boolean showSummary = verboseLogging;
 	private boolean optimizeCols = true;
 	private boolean showStatementTiming = true;
+	private boolean printStatements;
 	private String connectionId = "BatchRunner";
 	private String command;
 	private boolean storeErrorMessages;
@@ -164,6 +165,11 @@ public class BatchRunner
 	public void setStoreErrors(boolean flag)
 	{
 		this.storeErrorMessages = flag;
+	}
+
+	public void setPrintStatements(boolean flag)
+	{
+		this.printStatements = flag;
 	}
 
 	/**
@@ -726,6 +732,11 @@ public class BatchRunner
 					LogMgr.logDebug("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);
 				}
 
+				if (printStatements)
+				{
+					printMessage(sql.trim());
+				}
+
 				long verbstart = System.currentTimeMillis();
 				this.stmtRunner.runStatement(sql);
 				long verbend = System.currentTimeMillis();
@@ -793,7 +804,7 @@ public class BatchRunner
 					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + time);
 				}
 
-				if (this.rowMonitor != null && ((executedCount + 1) % interval == 0))
+				if (this.rowMonitor != null && ((executedCount + 1) % interval == 0) && !printStatements)
 				{
 					this.rowMonitor.restoreType("batchrunnerMain");
 					this.rowMonitor.setCurrentRow(executedCount + 1, totalStatements);
@@ -882,9 +893,9 @@ public class BatchRunner
 		}
 
 
-		if (showStatementWithResult)
+		if (showStatementWithResult && !printStatements)
 		{
-			console.println(sql);
+			console.println(sql.trim());
 		}
 
 		RowDisplay current = ConsoleSettings.getInstance().getNextRowDisplay();

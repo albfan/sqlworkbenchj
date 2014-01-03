@@ -880,6 +880,25 @@ $$ LANGUAGE plpgsql;
           </row>
 
           <row>
+            <entry>-printStatements</entry>
+            <entry>
+              <para>
+                If true, every SQL statement will be printed before execution. This is mainly intended for console
+                usage, but works in the GUI as well.
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>-showTiming</entry>
+            <entry>
+              <para>
+                If true, display the execution time of every SQL statement and the overall execution time of the script.
+              </para>
+            </entry>
+          </row>
+
+          <row>
             <entry>-useSavepoint</entry>
             <entry>
               Control if each statement from the file should be guarded with a savepoint

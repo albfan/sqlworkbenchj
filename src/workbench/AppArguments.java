@@ -142,9 +142,9 @@ public class AppArguments
 		addArgument(ARG_SHOW_PUMPER, ArgumentType.BoolArgument);
 		addArgument(ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		addArgument(ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
-		addArgument(ARG_SHOW_DBEXP, ArgumentType.BoolArgument);
-		addArgument(ARG_SHOW_SEARCHER, ArgumentType.BoolArgument);
-		addArgument(ARG_SHOW_TIMING, ArgumentType.BoolArgument);
+		addArgument(ARG_SHOW_DBEXP, ArgumentType.BoolSwitch);
+		addArgument(ARG_SHOW_SEARCHER, ArgumentType.BoolSwitch);
+		addArgument(ARG_SHOW_TIMING, ArgumentType.BoolSwitch);
 		addArgument(ARG_SHOWPROGRESS, ArgumentType.BoolArgument);
 		addArgument(ARG_CONSOLE_OPT_COLS, ArgumentType.BoolArgument);
 		addArgument(ARG_CONSOLE_BUFFER_RESULTS, ArgumentType.BoolArgument);

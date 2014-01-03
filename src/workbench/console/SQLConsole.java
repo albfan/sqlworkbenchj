@@ -125,12 +125,9 @@ public class SQLConsole
 		WbFile currentDir = new WbFile(System.getProperty("user.dir"));
 		runner.setBaseDir(currentDir.getFullPath());
 
-		String value = cmdLine.getValue(AppArguments.ARG_SHOW_TIMING);
-		if (StringUtil.isBlank(value))
-		{
-			runner.setShowTiming(true);
-			runner.setShowStatementTiming(false);
-		}
+		boolean showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, false);
+		runner.setShowTiming(showTiming);
+		runner.setShowStatementTiming(!showTiming);
 
 		runner.setHistoryProvider(this.history);
 

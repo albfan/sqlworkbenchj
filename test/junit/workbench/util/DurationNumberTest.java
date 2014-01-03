@@ -49,4 +49,17 @@ public class DurationNumberTest
 		assertEquals(0, num.parseDefinition(null));
 	}
 
+	@Test
+	public void testIsValid()
+	{
+		DurationNumber num = new DurationNumber();
+		assertTrue(num.isValid("5d"));
+		assertTrue(num.isValid("100s"));
+		assertTrue(num.isValid("2h"));
+		assertFalse(num.isValid("42x"));
+		assertFalse(num.isValid("xyz"));
+		assertFalse(num.isValid(" "));
+		assertFalse(num.isValid(""));
+	}
+
 }
