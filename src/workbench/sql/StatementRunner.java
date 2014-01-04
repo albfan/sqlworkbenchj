@@ -453,17 +453,30 @@ public class StatementRunner
 
 		if (logAllStatements)
 		{
-			String msg = "Executed: ";
-			if (Settings.getInstance().getBoolProperty("workbench.sql.log.statements.clean", false))
-			{
-				msg += SqlUtil.makeCleanSql(realSql, false) + " (" + time + "ms)";
-			}
-			else
-			{
-				msg += realSql + "\n(" + time + "ms)";
-			}
-			LogMgr.logInfo("StatementRunner.execute()", msg);
+			logStatement(realSql, time);
 		}
+	}
+
+	public static void logStatement(String sql, long time)
+	{
+		String msg = "";
+		if (time > -1)
+		{
+			msg = "Executed: ";
+		}
+		if (Settings.getInstance().getBoolProperty("workbench.sql.log.statements.clean", false))
+		{
+			msg += SqlUtil.makeCleanSql(sql, false) + " ";
+		}
+		else
+		{
+			msg += sql + "\n";
+		}
+		if (time > -1)
+		{
+			msg +=  "(" + time + "ms)";
+		}
+		LogMgr.logInfo("StatementRunner.execute()", msg);
 	}
 
 	public StatementHook getStatementHook()

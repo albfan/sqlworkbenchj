@@ -715,6 +715,7 @@ public class BatchRunner
 		long totalRows = 0;
 		long errorCount = 0;
 
+		boolean logAllStatements = Settings.getInstance().getLogAllStatements();
 		while (parser.hasNext())
 		{
 			String sql = parser.getNextCommand();
@@ -727,7 +728,7 @@ public class BatchRunner
 					sql = replacer.replace(sql);
 				}
 
-				if (this.resultDisplay == null && !Settings.getInstance().getLogAllStatements())
+				if (this.resultDisplay == null && !logAllStatements)
 				{
 					LogMgr.logDebug("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);
 				}
@@ -735,6 +736,10 @@ public class BatchRunner
 				if (printStatements)
 				{
 					printMessage(sql.trim());
+					if (!logAllStatements)
+					{
+						StatementRunner.logStatement(sql, -1);
+					}
 				}
 
 				long verbstart = System.currentTimeMillis();
