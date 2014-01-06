@@ -103,7 +103,8 @@ public class SqlServerColumnEnhancer
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnRemarks()", "Using query=\n" + sql);
+			LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnRemarks()",
+				"Retrieving column remarks using query:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
 		}
 
 		Map<String, String> remarks = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
@@ -141,11 +142,7 @@ public class SqlServerColumnEnhancer
 
 	private void updateComputedColumns(TableDefinition table, WbConnection conn)
 	{
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-
 		String tablename;
-
 		String sql;
 
 		if (SqlServerUtil.isSqlServer2005(conn))
@@ -158,18 +155,29 @@ public class SqlServerColumnEnhancer
 		}
 		else
 		{
+			// this method is only called when the server version is 2000 or later
+			// so this else part means the server is a SQL Server 2000
 			sql =
 				"select c.name, t.[text], 0 as is_persisted \n" +
-				"from sysobjects o \n" +
-				"  inner join syscolumns c on o.id = c.id \n" +
-				"  inner join syscomments t on  t.number = c.colid and t.id = c.id \n" +
+				"from sysobjects o with (nolock) \n" +
+				"  join syscolumns c with (nolock) on o.id = c.id \n" +
+				"  join syscomments t with (nolock) on  t.number = c.colid and t.id = c.id \n" +
 				"where o.xtype = 'U' \n" +
 				" and c.iscomputed = 1 \n"+
 				" and o.name = ?";
 			tablename = table.getTable().getRawTableName();
 		}
 
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("SqlServerColumnEnhancer.updateComputedColumns()",
+				"Retrieving computed columns using query:\n" + SqlUtil.replaceParameters(sql, tablename));
+		}
+
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		Map<String, String> expressions = new HashMap<String, String>();
+		
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
@@ -179,10 +187,11 @@ public class SqlServerColumnEnhancer
 			{
 				String colname = rs.getString(1);
 				String def = rs.getString(2);
-				if (def == null) continue;
+				if (StringUtil.isEmptyString(def)) continue;
 
 				def = def.trim();
 				boolean isPersisted = rs.getBoolean(3);
+
 				String expr = "AS ";
 				if (def.startsWith("("))
 				{
@@ -223,9 +232,16 @@ public class SqlServerColumnEnhancer
 		String defaultCollation = null;
 		Statement info = null;
 		ResultSet rs = null;
+
 		try
 		{
-			String getDefaultSql = "select cast(databasepropertyex('"+ table.getTable().getCatalog() + "', 'Collation') as varchar(max))";
+			String getDefaultSql = "select cast(databasepropertyex('"+ table.getTable().getRawCatalog() + "', 'Collation') as varchar(max))";
+
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logInfo("SqlServerColumnEnhancer.readCollations()", "Retrieving default collation using: " + getDefaultSql);
+			}
+
 			info = conn.createStatement();
 			rs = info.executeQuery(getDefaultSql);
 			if (rs.next())
@@ -255,17 +271,23 @@ public class SqlServerColumnEnhancer
 			"  AND TABLE_SCHEMA = ? \n " +
 			"  AND TABLE_CATALOG = ?";
 
+		String tableName = table.getTable().getRawTableName();
+		String schema = table.getTable().getRawSchema();
+		String catalog = table.getTable().getRawCatalog();
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("SqlServerColumnEnhancer.readCollations()", "Using collation SQL=\n" + sql);
+			LogMgr.logDebug("SqlServerColumnEnhancer.readCollations()",
+				"Retrieving column collations using query:\n" + SqlUtil.replaceParameters(sql, tableName, schema, catalog));
 		}
 
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, table.getTable().getTableName());
-			stmt.setString(2, table.getTable().getSchema());
-			stmt.setString(3, table.getTable().getCatalog());
+			stmt.setString(1, tableName);
+			stmt.setString(2, schema);
+			stmt.setString(3, catalog);
+
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
@@ -286,6 +308,7 @@ public class SqlServerColumnEnhancer
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			String expression = expressions.get(col.getColumnName());
