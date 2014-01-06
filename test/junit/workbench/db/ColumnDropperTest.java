@@ -25,13 +25,15 @@ package workbench.db;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.sql.ScriptParser;
+
+import org.junit.AfterClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -76,12 +78,10 @@ public class ColumnDropperTest
 		assertNotNull(sql);
 		ScriptParser p = new ScriptParser(sql.trim());
 		p.setReturnStartingWhitespace(false);
-		assertEquals(4, p.getSize());
+		assertEquals(2, p.getSize());
 
 		assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY1", p.getCommand(0).trim());
-		assertEquals("COMMIT", p.getCommand(1).trim());
-		assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY2", p.getCommand(2).trim());
-		assertEquals("COMMIT", p.getCommand(3).trim());
+		assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY2", p.getCommand(1).trim());
 
 		dropper.dropObjects();
 

@@ -176,8 +176,10 @@ public class SqlServerColumnEnhancer
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		Map<String, String> expressions = new HashMap<String, String>();
 		
+		Map<String, String> expressions = new HashMap<String, String>();
+		Map<String, Boolean> persisted = new HashMap<String, Boolean>();
+
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
@@ -191,21 +193,13 @@ public class SqlServerColumnEnhancer
 
 				def = def.trim();
 				boolean isPersisted = rs.getBoolean(3);
-
-				String expr = "AS ";
-				if (def.startsWith("("))
+				persisted.put(colname, Boolean.valueOf(isPersisted));
+				String exp1 = expressions.get(colname);
+				if (exp1 != null)
 				{
-					expr += def;
+					def = exp1 + def;
 				}
-				else
-				{
-					expr += "(" + def + ")";
-				}
-				if (isPersisted)
-				{
-					expr += " PERSISTED";
-				}
-				expressions.put(colname, expr);
+				expressions.put(colname, def);
 			}
 		}
 		catch (Exception e)
@@ -220,10 +214,19 @@ public class SqlServerColumnEnhancer
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			String expr = expressions.get(col.getColumnName());
-			if (StringUtil.isNonBlank(expr))
+			if (StringUtil.isBlank(expr)) continue;
+
+			if (!expr.startsWith("("))
 			{
-				col.setComputedColumnExpression(expr);
+				expr += "(" + expr + ")";
 			}
+			expr = "AS " + expr;
+			Boolean isPersisted = persisted.get(col.getColumnName());
+			if (Boolean.TRUE.equals(isPersisted))
+			{
+				expr = expr + " PERSISTED";
+			}
+			col.setComputedColumnExpression(expr);
 		}
 	}
 

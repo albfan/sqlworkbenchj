@@ -228,7 +228,7 @@ public class WbExportTest
 		FileReader in = new FileReader(exportFile);
 		String script = FileUtil.readCharacters(in);
 		ScriptParser p = new ScriptParser(script);
-		assertEquals(3, p.getSize()); // 3 Statements: CREATE TABLE, ALTER TABLE, COMMIT
+		assertEquals(2, p.getSize()); // 3 Statements: CREATE TABLE, ALTER TABLE
 
 
 		result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -sourceTable=person -append=true");
@@ -248,14 +248,14 @@ public class WbExportTest
 		in = new FileReader(exportFile);
 		script = FileUtil.readCharacters(in);
 		p = new ScriptParser(script);
-		assertEquals(6, p.getSize());
+		assertEquals(4, p.getSize());
 
 		String create1 = p.getCommand(0);
 		assertEquals("CREATE", SqlUtil.getSqlVerb(create1));
 		assertEquals("TABLE", SqlUtil.getCreateType(create1));
 		assertEquals("JUNIT_TEST", TestUtil.getCreateTable(create1));
 
-		String create2 = p.getCommand(3);
+		String create2 = p.getCommand(2);
 		assertEquals("CREATE", SqlUtil.getSqlVerb(create2));
 		assertEquals("TABLE", SqlUtil.getCreateType(create2));
 		assertEquals("PERSON", TestUtil.getCreateTable(create2));
