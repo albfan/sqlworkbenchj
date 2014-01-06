@@ -65,7 +65,7 @@ public class SqlServerColumnEnhancer
 	@Override
 	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
 	{
-		if (SqlServerUtil.isSqlServer2005(conn))
+		if (SqlServerUtil.isSqlServer2000(conn))
 		{
 			updateComputedColumns(table, conn);
 		}
@@ -89,7 +89,7 @@ public class SqlServerColumnEnhancer
 		// I have to cast to a length specified varchar value otherwise
 		// the remarks will be truncated at 31 characters for some strange reason
 		// varchar(8000) character should work on any sensible SQL Server version  (varchar(max) doesn't work on SQL Server 2000)
-		String sql = "SELECT objname, cast(value as varchar(8000)) as value \n FROM ";
+		String sql = "SELECT objname, cast(value as varchar(8000)) as value \nFROM ";
 
 		if (SqlServerUtil.isSqlServer2005(conn))
 		{
@@ -144,17 +144,36 @@ public class SqlServerColumnEnhancer
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		String tablename = table.getTable().getTableExpression(conn);
+		String tablename;
 
-		String sql =
-			"select name, definition, is_persisted \n" +
-      "from sys.computed_columns with (nolock) \n" +
-			"where object_id = object_id('" + tablename + "')";
+		String sql;
+
+		if (SqlServerUtil.isSqlServer2005(conn))
+		{
+			sql =
+				"select name, definition, is_persisted \n" +
+				"from sys.computed_columns with (nolock) \n" +
+				"where object_id = object_id(?)";
+			tablename = table.getTable().getTableExpression(conn);
+		}
+		else
+		{
+			sql =
+				"select c.name, t.[text], 0 as is_persisted \n" +
+				"from sysobjects o \n" +
+				"  inner join syscolumns c on o.id = c.id \n" +
+				"  inner join syscomments t on  t.number = c.colid and t.id = c.id \n" +
+				"where o.xtype = 'U' \n" +
+				" and c.iscomputed = 1 \n"+
+				" and o.name = ?";
+			tablename = table.getTable().getRawTableName();
+		}
 
 		Map<String, String> expressions = new HashMap<String, String>();
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, tablename);
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{

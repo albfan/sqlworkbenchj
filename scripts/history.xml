@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-01-01">
+    <entry dev-build="9" type="enh">For SQL Server 2000 the definition of computed columns are now shown in the generated SQL</entry>
     <entry dev-build="9" type="enh">The cache for the auto-completion can now be saved locally to speed up the auto-completion display.</entry>
     <entry dev-build="9" type="enh">A new option for WbInclude was added to print all SQL statements before running them</entry>
     <entry dev-build="8" type="enh">The UI of the Save As dialogue was re-designed to make the dialogue more compact</entry>

@@ -59,7 +59,7 @@ public class QueryCopySource
 	implements RowDataProducer
 {
 	private DataReceiver receiver;
-	private boolean keepRunning = true;
+	private volatile boolean keepRunning = true;
 	private boolean regularStop = false;
 	private WbConnection sourceConnection;
 	private Statement retrieveStatement;

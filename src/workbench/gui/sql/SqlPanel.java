@@ -235,7 +235,7 @@ public class SqlPanel
 	protected WbTabbedPane resultTab;
 	protected WbSplitPane contentPanel;
 	protected boolean threadBusy;
-	protected boolean cancelExecution;
+	protected volatile boolean cancelExecution;
 
 	private final List actions = new LinkedList();
 	private final List<WbAction> toolbarActions = new LinkedList<WbAction>();

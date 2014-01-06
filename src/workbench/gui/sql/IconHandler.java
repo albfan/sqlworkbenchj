@@ -25,14 +25,17 @@ package workbench.gui.sql;
 import java.awt.Container;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JTabbedPane;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.interfaces.TextChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -224,17 +227,6 @@ public class IconHandler
 						{
 							tab.setIconAt(index, null);
 						}
-//						if (GuiSettings.getUseAnimatedIcon())
-//						{
-							// flushing the animated icons also stops the thread that
-							// is used for the animation. If this is not done it will still
-							// "animate" in the background (at least on older JDKs) and thus
-							// degrade performance
-							// For a static icon this is not necessary, actually not flushing
-							// the static icon improves performance when it's re-displayed
-//							if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
-//							if (this.cancelIcon != null) this.cancelIcon.getImage().flush();
-//						}
 					}
 				}
 				catch (Throwable th)

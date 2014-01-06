@@ -71,7 +71,7 @@ public abstract class AbstractImportFileParser
 	protected boolean trimValues;
 	protected List<ImportFileColumn> importColumns;
 
-	protected boolean cancelImport;
+	protected volatile boolean cancelImport;
 	protected boolean regularStop;
 
 	protected DataReceiver receiver;
@@ -288,7 +288,7 @@ public abstract class AbstractImportFileParser
 		// we can't verify the table without a connection
 		// not having one isn't an error if we are importing the clipboard into a DataStore
 		if (this.connection == null) return null;
-		
+
 		TableIdentifier table = createTargetTableId();
 
 		targetTable = connection.getMetadata().getTableDefinition(table);

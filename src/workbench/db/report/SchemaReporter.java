@@ -76,7 +76,7 @@ public class SchemaReporter
 	private TagWriter tagWriter = new TagWriter();
 	private RowActionMonitor monitor;
 	private String outputfile;
-	protected boolean cancel;
+	protected volatile boolean cancel;
 	private String procedureNames;
 	private boolean includeGrants;
 	private boolean includeTriggers;

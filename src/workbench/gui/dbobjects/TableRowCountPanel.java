@@ -85,7 +85,7 @@ public class TableRowCountPanel
 	private final JLabel statusBar;
 	private final List<TableIdentifier> tables;
 	private Statement currentStatement;
-	private boolean cancel;
+	private volatile boolean cancel;
 	private JFrame window;
 	private WbConnection dbConnection;
 	private final WbConnection sourceConnection;
