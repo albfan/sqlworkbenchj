@@ -317,7 +317,7 @@ public class JdbcTableDefinitionReader
 		{
 			return new InformixColumnEnhancer();
 		}
-		if (meta.isSqlServer() && SqlServerUtil.isSqlServer2005(con))
+		if (meta.isSqlServer() && SqlServerUtil.isSqlServer2000(con))
 		{
 			return new SqlServerColumnEnhancer();
 		}

@@ -69,11 +69,16 @@ public class SqlServerColumnEnhancer
 		{
 			updateComputedColumns(table, conn);
 		}
+
 		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.column.retrieve", true))
 		{
 			updateColumnRemarks(table, conn);
 		}
-		readCollations(table, conn);
+
+		if (SqlServerUtil.isSqlServer2005(conn))
+		{
+			readCollations(table, conn);
+		}
 	}
 
 	private void updateColumnRemarks(TableDefinition table, WbConnection conn)
@@ -176,7 +181,7 @@ public class SqlServerColumnEnhancer
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		
+
 		Map<String, String> expressions = new HashMap<String, String>();
 		Map<String, Boolean> persisted = new HashMap<String, Boolean>();
 
