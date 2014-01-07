@@ -28,7 +28,6 @@ import java.util.Set;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
-import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.objectcache.ObjectCacheStorage;
 
 import workbench.gui.sql.FileReloadType;
@@ -958,10 +957,6 @@ public class GuiSettings
 
 	public static void setLocalStorageForObjectCache(ObjectCacheStorage storage)
 	{
-		if (ObjectCacheStorage.never == storage)
-		{
-			DbObjectCacheFactory.getInstance().deleteLocalStorage();
-		}
 		Settings.getInstance().setProperty(PROP_LOCAL_OBJECT_CACHE, storage.name());
 	}
 

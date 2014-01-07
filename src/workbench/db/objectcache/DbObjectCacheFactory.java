@@ -32,7 +32,6 @@ import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 
-import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
@@ -186,7 +185,7 @@ public class DbObjectCacheFactory
 				ObjectCache cache = caches.get(key);
 				int refCount = decreaseRefCount(key, conn.getId());
 				LogMgr.logDebug("DbObjectCacheFactory.propertyChange()", "Connection with key=" + key + " was closed. Reference count for this cache is: " + refCount);
-				if (cache != null && refCount == 0)
+				if (cache != null && refCount <= 0)
 				{
 					saveCache(cache, conn);
 					cache.clear();
@@ -195,17 +194,6 @@ public class DbObjectCacheFactory
 				}
 				conn.removeChangeListener(this);
 			}
-		}
-	}
-
-	public void deleteLocalStorage()
-	{
-		ObjectCachePersistence persistence = new ObjectCachePersistence();
-		for (ConnectionProfile profile : ConnectionMgr.getInstance().getProfiles())
-		{
-			String url = profile.getUrl();
-			String user = profile.getUsername();
-			persistence.deleteCacheFile(url, user);
 		}
 	}
 
