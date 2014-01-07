@@ -93,7 +93,6 @@ public class WbListTables extends SqlCommand
 
 		if (cmdLine.hasArguments())
 		{
-
 			objects = cmdLine.getValue("objects");
 
 			List<String> typeList = cmdLine.getListValue(CommonArgs.ARG_TYPES);
@@ -114,8 +113,6 @@ public class WbListTables extends SqlCommand
 		{
 			catalog = currentConnection.getMetadata().getCurrentCatalog();
 		}
-
-		DataStore resultList = null;
 
 		if (StringUtil.isBlank(objects))
 		{
@@ -145,17 +142,10 @@ public class WbListTables extends SqlCommand
 			String tname = tbl.getTableName();
 
 			DataStore ds = currentConnection.getMetadata().getObjects(tcatalog, tschema, tname, types);
-			if (resultList == null)
-			{
-				resultList = ds;
-			}
-			else
-			{
-				resultList.copyFrom(ds);
-			}
+			ds.setGeneratingSql(aSql);
+			result.addDataStore(ds);
 		}
 
-		result.addDataStore(resultList);
 		return result;
 	}
 

@@ -146,6 +146,7 @@ public class DataStore
 	{
 		this.data = createData();
 		this.resultInfo = new ResultInfo(colNames, colTypes, colSizes);
+		setLoadTimeToNow();
 	}
 
 	/**
@@ -1260,6 +1261,11 @@ public class DataStore
 		this.initData(aResultSet, -1);
 	}
 
+	public void setLoadTimeToNow()
+	{
+		this.loadedAt = StringUtil.now().getTime();
+	}
+
 	/**
 	 * Read the column definitions from the result set's meta data
 	 * and store the data from the ResultSet in this DataStore (up to maxRows)
@@ -1302,7 +1308,7 @@ public class DataStore
 			}
 		}
 
-		this.loadedAt = StringUtil.now().getTime();
+		setLoadTimeToNow();
 
 		this.cancelRetrieve = false;
 		boolean lowMemory = false;

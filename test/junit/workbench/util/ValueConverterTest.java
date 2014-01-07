@@ -45,12 +45,26 @@ public class ValueConverterTest
 	}
 
 	@Test
-	public void testEmptyStringBool()
+	public void testDefaultBools()
 		throws Exception
 	{
 		ValueConverter converter = new ValueConverter();
 		Object flag = converter.convertValue("", Types.BOOLEAN);
 		assertNull(flag);
+
+		flag = converter.convertValue("False", Types.BOOLEAN);
+		assertEquals(Boolean.FALSE, flag);
+		flag = converter.convertValue("FALSE", Types.BOOLEAN);
+		assertEquals(Boolean.FALSE, flag);
+		flag = converter.convertValue("false", Types.BOOLEAN);
+		assertEquals(Boolean.FALSE, flag);
+
+		flag = converter.convertValue("TruE", Types.BOOLEAN);
+		assertEquals(Boolean.TRUE, flag);
+		flag = converter.convertValue("true", Types.BOOLEAN);
+		assertEquals(Boolean.TRUE, flag);
+		flag = converter.convertValue("1", Types.BOOLEAN);
+		assertEquals(Boolean.TRUE, flag);
 	}
 
 	@Test

@@ -858,11 +858,11 @@ public class DwPanel
 		{
 			if (result.hasDataStores())
 			{
-				showData(result.getDataStores().get(0), result.getSourceCommand(), result.getExecutionTime());
+				showData(result.getDataStores().get(0), result.getSourceCommand(), result.getExecutionDuration());
 			}
 			else if (result.hasResultSets())
 			{
-				showData(result.getResultSets().get(0), result.getSourceCommand(), result.getExecutionTime());
+				showData(result.getResultSets().get(0), result.getSourceCommand(), result.getExecutionDuration());
 			}
 		}
 	}

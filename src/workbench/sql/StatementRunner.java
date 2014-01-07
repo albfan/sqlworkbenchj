@@ -449,7 +449,7 @@ public class StatementRunner
 
 		long time = (System.currentTimeMillis() - sqlExecStart);
 		statementHook.postExec(this, realSql, result);
-		result.setExecutionTime(time);
+		result.setExecutionDuration(time);
 
 		if (logAllStatements)
 		{

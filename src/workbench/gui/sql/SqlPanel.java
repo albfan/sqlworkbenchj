@@ -3143,7 +3143,7 @@ public class SqlPanel
 				}
 
 				resultSets += this.addResult(statementResult);
-				stmtTotal += statementResult.getExecutionTime();
+				stmtTotal += statementResult.getExecutionDuration();
 
 				// the WbFeedback command might change the feedback level
 				// so it needs to be checked each time.
@@ -3609,7 +3609,7 @@ public class SqlPanel
 		if (result == null) return 0;
 		if (!result.isSuccess()) return 0;
 		final String sql = result.getSourceCommand();
-		final long time = result.getExecutionTime();
+		final long time = result.getExecutionDuration();
 
 		int count = 0;
 

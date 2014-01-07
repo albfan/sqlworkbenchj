@@ -99,9 +99,10 @@ public class WbListProcedures
 		{
 			catalog = currentConnection.getCurrentCatalog();
 		}
-		
+
 		DataStore ds = currentConnection.getMetadata().getProcedureReader().getProcedures(catalog, schema, name);
 		ds.setResultName(ResourceMgr.getString("TxtDbExplorerProcs"));
+		ds.setGeneratingSql(aSql);
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;

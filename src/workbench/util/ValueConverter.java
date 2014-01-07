@@ -28,8 +28,9 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -96,8 +97,8 @@ public class ValueConverter
 	private final WbDateFormatter timestampFormatter = new WbDateFormatter();
 	private final WbDateFormatter formatter = new WbDateFormatter();
 	private boolean autoConvertBooleanNumbers = true;
-	private Collection<String> booleanTrueValues = null;
-	private Collection<String> booleanFalseValues = null;
+	private final Map<String, Boolean> booleanValues = new HashMap<String, Boolean>();
+	private boolean booleanUserMap;
 
 	private Integer integerTrue = Integer.valueOf(1);
 	private Integer integerFalse = Integer.valueOf(0);
@@ -118,6 +119,28 @@ public class ValueConverter
 		this.setDefaultDateFormat(sett.getDefaultDateFormat());
 		this.setDefaultTimestampFormat(sett.getDefaultTimestampFormat());
 		cleanupNumbers = Settings.getInstance().getBoolProperty("workbench.converter.cleanupdecimals", false);
+		readConfiguredBooleanValues();
+	}
+
+	private void readConfiguredBooleanValues()
+	{
+		List<String> trueValues = Settings.getInstance().getListProperty("workbench.converter.boolean.true", true, "1,true");
+		List<String> falseValues = Settings.getInstance().getListProperty("workbench.converter.boolean.false", true, "0,false");
+		fillBooleanMap(trueValues, falseValues);
+		booleanUserMap = false;
+	}
+
+	private void fillBooleanMap(Collection<String> trueValues, Collection<String> falseValues)
+	{
+		booleanValues.clear();
+		for (String value : trueValues)
+		{
+			booleanValues.put(value, Boolean.TRUE);
+		}
+		for (String value : falseValues)
+		{
+			booleanValues.put(value, Boolean.FALSE);
+		}
 	}
 
 	public ValueConverter(String aDateFormat, String aTimeStampFormat)
@@ -247,16 +270,15 @@ public class ValueConverter
 	 */
 	public void setBooleanLiterals(Collection<String> trueValues, Collection<String> falseValues)
 	{
-		if (trueValues == null || falseValues == null || trueValues.isEmpty() || falseValues.isEmpty())
+		if (CollectionUtil.isEmpty(trueValues) || CollectionUtil.isEmpty(falseValues))
 		{
-			LogMgr.logWarning("ValueConverter.setBooleanLiterals()", "Ignoring call as at least one collection is empty or null");
-			this.booleanFalseValues = null;
-			this.booleanTrueValues = null;
+			LogMgr.logWarning("ValueConverter.setBooleanLiterals()", "Ignoring attempt to set boolean literals because at least one collection is empty or null");
+			readConfiguredBooleanValues();
 		}
 		else
 		{
-			this.booleanFalseValues = new HashSet<String>(falseValues);
-			this.booleanTrueValues = new HashSet<String>(trueValues);
+			fillBooleanMap(trueValues, falseValues);
+			booleanUserMap = true;
 		}
 	}
 
@@ -550,12 +572,11 @@ public class ValueConverter
 		}
 
 		java.util.Date parsed = null;
-
-		for (int i = 0; i < timeFormats.length; i++)
+		for (String timeFormat : timeFormats)
 		{
 			try
 			{
-				this.formatter.applyPattern(timeFormats[i]);
+				this.formatter.applyPattern(timeFormat);
 				parsed = this.formatter.parse(time);
 				LogMgr.logDebug("ValueConverter.parseTime()", "Succeeded parsing the time string [" + time + "] using the format: " + formatter.toPattern());
 				break;
@@ -852,30 +873,16 @@ public class ValueConverter
 	private Boolean getBoolean(String value, int type)
 		throws ConverterException
 	{
-		if (this.booleanFalseValues != null && this.booleanTrueValues != null)
+		if (!booleanUserMap)
 		{
-			if (booleanFalseValues.contains(value))
-			{
-				return Boolean.FALSE;
-			}
-			if (booleanTrueValues.contains(value))
-			{
-				return Boolean.TRUE;
-			}
+			value = value.toLowerCase().trim();
+		}
+		Boolean bool = booleanValues.get(value);
+		if (booleanUserMap && bool == null)
+		{
 			throw new ConverterException("Input value [" + value + "] not in the list of defined true or false literals", type, null);
 		}
-		else
-		{
-			if ("false".equalsIgnoreCase(value))
-			{
-				return Boolean.FALSE;
-			}
-			if ("true".equalsIgnoreCase(value))
-			{
-				return Boolean.TRUE;
-			}
-		}
-		return null;
+		return bool;
 	}
 
 }

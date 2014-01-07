@@ -114,8 +114,10 @@ public class WbGrepSource
 
 		List<DbObject> found = searcher.searchObjects(values, matchAll, ignoreCase, regEx);
 		DataStore ds = new ObjectResultListDataStore(currentConnection, found, searcher.getSearchSchemaCount() > 1);
+		ds.setGeneratingSql(sql);
 		String msg = ResourceMgr.getFormattedString("MsgGrepSourceFinished", searcher.getNumberOfObjectsSearched(), ds.getRowCount());
 		result.addDataStore(ds);
+		result.setExecutionDuration(0);
 		result.addMessage(msg);
 		result.setSuccess();
 

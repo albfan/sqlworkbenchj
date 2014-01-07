@@ -79,8 +79,9 @@ public class WbListTriggers
 		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA, currentConnection.getCurrentSchema());
 		String catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG, currentConnection.getMetadata().getCurrentCatalog());
 		DataStore ds = reader.getTriggers(catalog, schema);
-		
+
 		ds.setResultName(ResourceMgr.getString("TxtDbExplorerTriggers"));
+		ds.setGeneratingSql(FORMATTED_VERB + " " + options);
 		result.addDataStore(ds);
 		return result;
 	}

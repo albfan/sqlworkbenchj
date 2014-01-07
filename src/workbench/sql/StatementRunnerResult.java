@@ -116,12 +116,15 @@ public class StatementRunnerResult
 		this.wasCancelled = true;
 	}
 
-	public void setExecutionTime(long t)
+	public void setExecutionDuration(long t)
 	{
 		this.executionTime = t;
 	}
 
-	public long getExecutionTime()
+	/**
+	 * Returns the duration of the statement.
+	 */
+	public long getExecutionDuration()
 	{
 		return this.executionTime;
 	}

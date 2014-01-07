@@ -85,6 +85,7 @@ public class WbListSchemas
 			ds.resetStatus();
 		}
 		ds.setResultName(ResourceMgr.getString("TxtSchemaList"));
+		ds.setGeneratingSql(new CommandTester().formatVerb(VERB));
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;

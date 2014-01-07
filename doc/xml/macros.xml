@@ -56,8 +56,7 @@
     </para>
     <para>
       Note that the macro name needs to be unique to be used as a "SQL Statement". If you have
-      two different macros in two different macro groups with the same name, it is not
-      defined which of them will be executed.
+      two different macros in two different macro groups with the same name, it is undefined (i.e. "random") which of them will be executed.
     </para>
 
     <para>
@@ -66,6 +65,10 @@
       After selecting a macro, it can be executed by clicking on the Run <guibutton>Run</guibutton> button. If you check the
       option "Replace current SQL", then the text in the editor will be replaced with the
       text from the macro when you click on the run button.
+    </para>
+    <para>
+      In console mode you can use the command <literal>WbListMacros</literal> to show the complete list of macros (of course
+      this can also be used in GUI mode as well.
     </para>
     <note><para>
       Macros will not be evaluated when running in batch mode.
@@ -149,12 +152,14 @@
       a macro to run an explain plan for the current statement:
     </para>
 
-        <programlisting>EXPLAIN PLAN FOR
+        <programlisting>explain plan 
+for
 ${current_statement}$
 ;
-COMMIT;
 
-SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
+-- @wbResult Execution plan
+select plan_table_output 
+from table(dbms_xplan.display(format => 'ALL'));</programlisting>
 
     <para>
       When you run this macro, it will run an <literal>EXPLAIN PLAN</literal>
@@ -170,7 +175,7 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
     <para>
       For PostgreSQL you can define a similar macro that will automatically run
       the <literal>EXPLAIN</literal> command for a statemet:
-      <programlisting>explain ${current_statement}$</programlisting>
+      <programlisting>explain (analyze true, verbose true, buffers true) ${current_statement}$;</programlisting>
     </para>
 
 
