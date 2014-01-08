@@ -999,9 +999,7 @@ public class DataStore
 		{
 			return value.toString();
 		}
-
 	}
-
 
 	/**
 	 * Return the value of a column as an int value.
@@ -1079,12 +1077,12 @@ public class DataStore
 		throws IndexOutOfBoundsException
 	{
 		// do not allow setting the value for columns
-		// which do not have a name. Those columns cannot
+		// which do not have a name for. Those columns cannot
 		// be saved to the database (because most likely they
 		// are computed columns like count(*) etc)
 		if (this.resultInfo.getColumnName(aColumn) == null) return;
 
-		if (resultInfo.getUpdateTable() != null && !resultInfo.isUpdateable(aColumn))
+		if (resultInfo.getUpdateTable() != null && (!resultInfo.isUpdateable(aColumn) || resultInfo.getColumn(aColumn).isReadonly()))
 		{
 			String tname = resultInfo.getUpdateTable().getTableName();
 			String col = resultInfo.getColumnName(aColumn);
