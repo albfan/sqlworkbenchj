@@ -169,7 +169,6 @@ public class ResultInfo
 				LogMgr.logWarning("ResultInfo.<init>", "Could not obtain column name or alias", th);
 			}
 
-			boolean realColumn = true;
 			if (StringUtil.isNonBlank(name))
 			{
 				this.realColumns ++;
@@ -177,7 +176,6 @@ public class ResultInfo
 			else
 			{
 				name = "Col" + (i+1);
-				realColumn = false;
 			}
 
 			ColumnIdentifier col = new ColumnIdentifier(name);
@@ -189,7 +187,6 @@ public class ResultInfo
 				col.setColumnAlias(alias);
 			}
 
-			col.setUpdateable(realColumn);
 			try
 			{
 				int nullInfo = metaData.isNullable(i + 1);
@@ -198,6 +195,20 @@ public class ResultInfo
 			catch (Throwable th)
 			{
 				LogMgr.logWarning("ResultInfo.<init>", "Error when checking nullable for column : " + name, th);
+			}
+
+			try
+			{
+				boolean isReadonly = metaData.isReadOnly(i + 1);
+				if (isReadonly)
+				{
+					LogMgr.logDebug("ResultInfo.<init>", "Column " + name + " was marked as read-only by the driver!");
+				}
+				col.setReadonly(isReadonly);
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logWarning("ResultInfo.<init>", "Error when checking readonly attribute for column : " + name, th);
 			}
 
 			String typename = null;

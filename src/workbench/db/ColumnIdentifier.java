@@ -31,9 +31,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import workbench.WbManager;
-
 import workbench.db.objectcache.DbObjectCacheFactory;
+
 import workbench.storage.ResultInfo;
 
 import workbench.util.NumberStringCache;
@@ -59,6 +58,7 @@ public class ColumnIdentifier
 	private boolean isExpression;
 	private boolean isNullable = true;
 	private boolean isUpdateable = true;
+	private boolean readOnly;
 	private String dbmsType;
 	private String comment;
 	private String defaultValue;
@@ -439,16 +439,23 @@ public class ColumnIdentifier
 		if (!SqlUtil.isNumberType(this.type)) return false;
 
 		// SQL Server
-		if (this.dbmsType != null && dbmsType.toLowerCase().indexOf("identity") > -1)
+		if (this.dbmsType != null && dbmsType.toLowerCase().contains("identity"))
 		{
 			return true;
 		}
 
 		// certain DB2 versions
-		if (defaultValue != null && defaultValue.toLowerCase().indexOf("identity") > -1)
+		if (defaultValue != null && defaultValue.toLowerCase().contains("identity"))
 		{
 			return true;
 		}
+
+		// HSQLDB and maybe DB2
+		if (expression != null && expression.toLowerCase().contains("identity"))
+		{
+			return true;
+		}
+
 		return false;
 	}
 
@@ -491,6 +498,7 @@ public class ColumnIdentifier
 		result.expression = this.expression;
 		result.alias = this.alias;
 		result.defaultClause = this.defaultClause;
+		result.readOnly = this.readOnly;
 
 		return result;
 	}
@@ -711,7 +719,6 @@ public class ColumnIdentifier
 			default:
 				return Object.class;
 		}
-
 	}
 
 	public String getColumnTypeName()
@@ -728,6 +735,32 @@ public class ColumnIdentifier
 		this.columnTypeName = colTypeName;
 	}
 
+	/**
+	 * Return the readonly flag as returned by the JDBC driver for this column.
+	 * @see #isUpdateable()
+	 */
+	public boolean isReadonly()
+	{
+		return readOnly;
+	}
+
+	/**
+	 * Sets the readonly flag as returned by the JDBC driver.
+	 *
+	 * This might contain different information than the isUpdateable() flag!
+	 */
+	public void setReadonly(boolean flag)
+	{
+		readOnly = flag;
+	}
+
+	/**
+	 * Returns if this column is theoretically updateable.
+	 *
+	 * This flag is managed by ourselves and can contain different information than isReadonly();
+	 *
+	 * @see #isReadonly()
+	 */
 	public boolean isUpdateable()
 	{
 		return isUpdateable;

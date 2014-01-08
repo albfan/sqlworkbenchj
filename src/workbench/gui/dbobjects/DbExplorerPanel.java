@@ -1010,7 +1010,7 @@ public class DbExplorerPanel
 	{
 		if (this.dbConnection != null)
 		{
-			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
+			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab() || Settings.getInstance().getAlwaysUseSeparateConnForDbExpWindow())
 			{
 				try { this.dbConnection.disconnect(); } catch (Throwable th) {}
 			}

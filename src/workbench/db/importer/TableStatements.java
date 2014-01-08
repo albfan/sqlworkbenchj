@@ -25,10 +25,14 @@ package workbench.db.importer;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
+
+import workbench.log.LogMgr;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.sql.wbcommands.CommonArgs;
+
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -46,6 +50,7 @@ public class TableStatements
 	private String postStatement;
 	private boolean ignoreErrors;
 	private boolean success;
+	private boolean runPostStatementAfterError;
 
 	public TableStatements(String pre, String post)
 	{
@@ -73,6 +78,12 @@ public class TableStatements
 		}
 
 		this.ignoreErrors = cmdLine.getBoolean(CommonArgs.ARG_IGNORE_TABLE_STMT_ERRORS, true);
+		this.runPostStatementAfterError = cmdLine.getBoolean(CommonArgs.ARG_RUN_POST_STMT_ON_ERROR, false);
+	}
+
+	public boolean getRunPostStatementAfterError()
+	{
+		return runPostStatementAfterError;
 	}
 
 	public boolean hasStatements()

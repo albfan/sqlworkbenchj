@@ -2419,7 +2419,7 @@ public class MainWindow
 
 		boolean useNewConnection = Settings.getInstance().getAlwaysUseSeparateConnForDbExpWindow()
 			      || currentProfile.getUseSeparateConnectionPerTab()
-						|| this.currentConnection == null;
+						|| currentConnection == null;
 
 		if (useNewConnection)
 		{
@@ -2435,7 +2435,6 @@ public class MainWindow
 
 	public void explorerWindowClosed(DbExplorerWindow w)
 	{
-		if (isConnectInProgress()) return;
 		explorerWindows.remove(w);
 	}
 

@@ -74,6 +74,7 @@ public class CommonArgs
 	public static final String ARG_PRE_TABLE_STMT = "preTableStatement";
 	public static final String ARG_POST_TABLE_STMT = "postTableStatement";
 	public static final String ARG_IGNORE_TABLE_STMT_ERRORS = "ignorePrePostErrors";
+	public static final String ARG_RUN_POST_STMT_ON_ERROR = "runTableStatementOnError";
 	public static final String ARG_TRANS_CONTROL = "transactionControl";
 	public static final String ARG_DATE_LITERAL_TYPE = "sqlDateLiterals";
 	public static final String ARG_DELETE_TARGET = "deleteTarget";
@@ -116,7 +117,8 @@ public class CommonArgs
 	{
 		cmdLine.addArgument(ARG_PRE_TABLE_STMT);
 		cmdLine.addArgument(ARG_POST_TABLE_STMT);
-		cmdLine.addArgument(ARG_IGNORE_TABLE_STMT_ERRORS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_IGNORE_TABLE_STMT_ERRORS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_RUN_POST_STMT_ON_ERROR, ArgumentType.BoolSwitch);
 	}
 
 	public static void addCheckDepsParameter(ArgumentParser cmdLine)

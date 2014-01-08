@@ -2103,6 +2103,12 @@ public class DataImporter
 				try { this.dbConn.rollback(); } catch (Throwable ignore) {}
 			}
 			LogMgr.logError("DataImporter.finishTable()", "Error commiting changes", e);
+
+			if (this.tableStatements != null && this.tableStatements.getRunPostStatementAfterError())
+			{
+				this.tableStatements.runPostTableStatement(dbConn, targetTable);
+			}
+
 			this.hasErrors = true;
 			this.messages.append(ExceptionUtil.getDisplay(e));
 			this.messages.appendNewLine();
