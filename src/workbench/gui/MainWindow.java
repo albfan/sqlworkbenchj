@@ -2279,7 +2279,7 @@ public class MainWindow
 		for (ToolWindow w : explorerWindows)
 		{
 			WbConnection conn = w.getConnection();
-			if (doDisconnect && conn != this.currentConnection)
+			if (conn != null && doDisconnect && conn != this.currentConnection)
 			{
 				conn.disconnect();
 			}
