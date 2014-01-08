@@ -98,7 +98,7 @@ public class SqlServerObjectListEnhancer
 		}
 		else
 		{
-			sql = "SELECT objname, cast(value as varchar(8000)) as value \n" +
+			sql = "SELECT objtype, objname, cast(value as varchar(8000)) as value \n" +
       "FROM ::fn_listextendedproperty ('" + propName + "','user', ?, ?, ";
 		}
 
@@ -116,11 +116,6 @@ public class SqlServerObjectListEnhancer
 			requestedTypes = new String[] { "TABLE", "VIEW", "SYNONYM", "TYPE", "RULE" };
 		}
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("SqlServerObjectListEnhancer.updateObjectRemarks()", "Using query=\n" + sql);
-		}
-
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
@@ -134,6 +129,10 @@ public class SqlServerObjectListEnhancer
 		{
 			for (String type : requestedTypes)
 			{
+				if (Settings.getInstance().getDebugMetadataSql())
+				{
+					LogMgr.logInfo("SqlServerObjectListEnhancer.updateObjectRemarks()", "Retrieving table remarks using:\n" + SqlUtil.replaceParameters(sql, schema, type));
+				}
 				stmt = con.getSqlConnection().prepareStatement(sql);
 				if (schema == null)
 				{
