@@ -153,7 +153,8 @@ public class ResultInfo
 			resolver = dbMeta.getDataTypeResolver();
 		}
 
-		boolean checkReadOnly = sourceConnection.getDbSettings().getCheckResultSetReadOnlyCols();
+		boolean checkReadOnly = (sourceConnection == null ? false : sourceConnection.getDbSettings().getCheckResultSetReadOnlyCols());
+		boolean reportsSizeAsDisplaySize = (sourceConnection == null ? false : sourceConnection.getDbSettings().reportsRealSizeAsDisplaySize()) ;
 
 		for (int i=0; i < this.colCount; i++)
 		{
@@ -282,7 +283,7 @@ public class ResultInfo
 
 			int sizeToUse = prec;
 
-			if (type == Types.VARCHAR && sourceConnection != null && sourceConnection.getDbSettings().reportsRealSizeAsDisplaySize())
+			if (type == Types.VARCHAR && reportsSizeAsDisplaySize)
 			{
 				sizeToUse = displaySize;
 			}
