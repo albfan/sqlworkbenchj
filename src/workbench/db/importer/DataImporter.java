@@ -2100,15 +2100,9 @@ public class DataImporter
 		{
 			if (commitNeeded)
 			{
-				try { this.dbConn.rollback(); } catch (Throwable ignore) {}
+				this.dbConn.rollbackSilently();
 			}
 			LogMgr.logError("DataImporter.finishTable()", "Error commiting changes", e);
-
-			if (this.tableStatements != null && this.tableStatements.getRunPostStatementAfterError())
-			{
-				this.tableStatements.runPostTableStatement(dbConn, targetTable);
-			}
-
 			this.hasErrors = true;
 			this.messages.append(ExceptionUtil.getDisplay(e));
 			this.messages.appendNewLine();
@@ -2204,7 +2198,7 @@ public class DataImporter
 	public void tableImportError()
 	{
 		cleanupRollback();
-		if (this.tableStatements != null && this.tableStatements.getRunPostStatementAfterError())
+		if (this.tableStatements != null && this.tableStatements.getRunPostStatementAfterError() && targetTable != null)
 		{
 			try
 			{

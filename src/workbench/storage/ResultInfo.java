@@ -153,6 +153,8 @@ public class ResultInfo
 			resolver = dbMeta.getDataTypeResolver();
 		}
 
+		boolean checkReadOnly = sourceConnection.getDbSettings().getCheckResultSetReadOnlyCols();
+
 		for (int i=0; i < this.colCount; i++)
 		{
 			String name = null;
@@ -197,18 +199,21 @@ public class ResultInfo
 				LogMgr.logWarning("ResultInfo.<init>", "Error when checking nullable for column : " + name, th);
 			}
 
-			try
+			if (checkReadOnly)
 			{
-				boolean isReadonly = metaData.isReadOnly(i + 1);
-				if (isReadonly)
+				try
 				{
-					LogMgr.logDebug("ResultInfo.<init>", "Column " + name + " was marked as read-only by the driver!");
+					boolean isReadonly = metaData.isReadOnly(i + 1);
+					if (isReadonly)
+					{
+						LogMgr.logTrace("ResultInfo.<init>", "Column " + name + " was marked as read-only by the driver!");
+					}
+					col.setReadonly(isReadonly);
 				}
-				col.setReadonly(isReadonly);
-			}
-			catch (Throwable th)
-			{
-				LogMgr.logWarning("ResultInfo.<init>", "Error when checking readonly attribute for column : " + name, th);
+				catch (Throwable th)
+				{
+					LogMgr.logWarning("ResultInfo.<init>", "Error when checking readonly attribute for column : " + name, th);
+				}
 			}
 
 			String typename = null;

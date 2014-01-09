@@ -216,6 +216,7 @@ public class TableStatements
 	private String getTableStatement(String source, TableIdentifier tbl)
 	{
 		if (source == null) return null;
+		if (tbl == null) return source;
 		String sql = StringUtil.replace(source, "${table.name}", tbl.getTableName());
 		sql = StringUtil.replace(sql, "${table.expression}", tbl.getTableExpression());
 		return sql;

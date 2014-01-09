@@ -1712,4 +1712,9 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "errorinfo.leading.comment.included", false);
 	}
 
+	public boolean getCheckResultSetReadOnlyCols()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "resultset.columns.check.readonly", true);
+	}
+
 }

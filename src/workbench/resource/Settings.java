@@ -977,11 +977,6 @@ public class Settings
 		setProperty("workbench.sql.generate.insert.ignoreidentity",flag);
 	}
 
-	public boolean getUseInsertDefaultForAutoincrement()
-	{
-		return getBoolProperty("workbench.sql.generate.insert.autoincrement.usedefault",false);
-	}
-
 	public int getFormatInsertColumnThreshold()
 	{
 		return getIntProperty("workbench.sql.generate.insert.newlinethreshold", 5);
