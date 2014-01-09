@@ -89,7 +89,7 @@ public class SqlServerColumnEnhancer
 		String tablename = SqlUtil.removeObjectQuotes(table.getTable().getTableName());
 		String schema = SqlUtil.removeObjectQuotes(table.getTable().getSchema());
 
-		String propName = Settings.getInstance().getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
+		String propName = Settings.getInstance().getSqlServerRemarksProperty();
 
 		// I have to cast to a length specified varchar value otherwise
 		// the remarks will be truncated at 31 characters for some strange reason

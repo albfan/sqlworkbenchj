@@ -85,10 +85,9 @@ public class SqlServerObjectListEnhancer
 		}
 	}
 
-
 	public Map<String, String> readRemarks(WbConnection con, String schema, String object, String[] requestedTypes)
 	{
-		String propName = Settings.getInstance().getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
+		String propName = Settings.getInstance().getSqlServerRemarksProperty();
 		String sql = null;
 
 		if (SqlServerUtil.isSqlServer2005(con))
@@ -158,7 +157,7 @@ public class SqlServerObjectListEnhancer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlServerColumnEnhancer.updateObjectRemarks()", "Error retrieving remarks", e);
+			LogMgr.logError("SqlServerObjectListEnhancer.updateObjectRemarks()", "Error retrieving remarks", e);
 		}
 		finally
 		{

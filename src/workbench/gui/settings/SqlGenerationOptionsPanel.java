@@ -74,6 +74,7 @@ public class SqlGenerationOptionsPanel
 		this.exportLiteralTypes.setSelectedItem(Settings.getInstance().getDefaultExportDateLiteralType());
 		this.diffLiteralsType.setSelectedItem(Settings.getInstance().getDefaultDiffDateLiteralType());
 		this.includeEmptyComments.setSelected(Settings.getInstance().getIncludeEmptyComments());
+		ignoreIdentity.setSelected(Settings.getInstance().getGenerateInsertIgnoreIdentity());
 	}
 
 	@Override
@@ -89,7 +90,7 @@ public class SqlGenerationOptionsPanel
 		set.setDefaultExportDateLiteralType((String)exportLiteralTypes.getSelectedItem());
 		set.setDefaultDiffDateLiteralType((String)diffLiteralsType.getSelectedItem());
 		set.setIncludeEmptyComments(includeEmptyComments.isSelected());
-		set.setFormatInsertIgnoreIdentity(ignoreIdentity.isSelected());
+		set.setGenerateInsertIgnoreIdentity(ignoreIdentity.isSelected());
 	}
 
 	/** This method is called from within the constructor to
@@ -170,7 +171,6 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.insets = new Insets(10, 12, 0, 11);
     add(formatDeletes, gridBagConstraints);
 
-    ignoreIdentity.setSelected(Settings.getInstance().getFormatInsertIgnoreIdentity());
     ignoreIdentity.setText(ResourceMgr.getString("LblInsIgnoreId")); // NOI18N
     ignoreIdentity.setToolTipText(ResourceMgr.getString("d_LblInsIgnoreId")); // NOI18N
     ignoreIdentity.setBorder(null);

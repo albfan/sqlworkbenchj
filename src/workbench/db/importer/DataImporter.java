@@ -2204,6 +2204,17 @@ public class DataImporter
 	public void tableImportError()
 	{
 		cleanupRollback();
+		if (this.tableStatements != null && this.tableStatements.getRunPostStatementAfterError())
+		{
+			try
+			{
+				this.tableStatements.runPostTableStatement(dbConn, targetTable);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("DataImporter.tableImportError()", "Error running post-table statement", e);
+			}
+		}
 	}
 
 	@Override

@@ -967,14 +967,19 @@ public class Settings
 		setProperty("workbench.sql.generate.insert.colsperline",1);
 	}
 
-	public boolean getFormatInsertIgnoreIdentity()
+	public boolean getGenerateInsertIgnoreIdentity()
 	{
 		return getBoolProperty("workbench.sql.generate.insert.ignoreidentity",true);
 	}
 
-	public void setFormatInsertIgnoreIdentity(boolean flag)
+	public void setGenerateInsertIgnoreIdentity(boolean flag)
 	{
 		setProperty("workbench.sql.generate.insert.ignoreidentity",flag);
+	}
+
+	public boolean getUseInsertDefaultForAutoincrement()
+	{
+		return getBoolProperty("workbench.sql.generate.insert.autoincrement.usedefault",false);
 	}
 
 	public int getFormatInsertColumnThreshold()
@@ -2599,6 +2604,10 @@ public class Settings
 
 	// </editor-fold>
 
+	public String getSqlServerRemarksProperty()
+	{
+		return getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
+	}
 
 	public int getMaxErrorStatementLength()
 	{
