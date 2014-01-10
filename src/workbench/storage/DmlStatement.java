@@ -31,8 +31,10 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.sql.Array;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,7 +65,7 @@ import workbench.util.WbStringTokenizer;
  */
 public class DmlStatement
 {
-	private CharSequence sql;
+	private String sql;
 	private List<ColumnData> values;
 	private String chrFunc;
 	private String concatString;
@@ -71,6 +73,8 @@ public class DmlStatement
 	private boolean formatInserts;
 	private boolean formatUpdates;
 	private boolean formatDeletes;
+	private Object generatedKey;
+
 
 	/**
 	 *	Create a new DmlStatement with the given SQL template string
@@ -83,9 +87,10 @@ public class DmlStatement
 	 * @param aStatement
 	 * @param aValueList
 	 */
-	public DmlStatement(CharSequence aStatement, List<ColumnData> aValueList)
+	public DmlStatement(String aStatement, List<ColumnData> aValueList)
 	{
 		if (aStatement == null) throw new NullPointerException();
+
 		int count = this.countParameters(aStatement);
 		if (count > 0 && aValueList != null && count != aValueList.size())
 		{
@@ -125,7 +130,7 @@ public class DmlStatement
 	 * @param aConnection the Connection to be used
 	 * @return the number of rows affected
 	 */
-	public int execute(WbConnection aConnection)
+	public int execute(WbConnection aConnection, boolean isInsert)
 		throws SQLException
 	{
 		List<Closeable> streamsToClose = new LinkedList<Closeable>();
@@ -138,11 +143,22 @@ public class DmlStatement
 		boolean useXmlApi = dbs.useXmlAPI();
 		boolean useClobSetString = dbs.useSetStringForClobs();
 		boolean useBlobSetBytes = dbs.useSetBytesForBlobs();
+
+		boolean retrieveKeys = dbs.getGeneratedKeys() && isInsert;
+
 		DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(aConnection);
+		this.generatedKey = null;
 
 		try
 		{
-			stmt = aConnection.getSqlConnection().prepareStatement(this.sql.toString());
+			if (retrieveKeys)
+			{
+				stmt = aConnection.getSqlConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			}
+			else
+			{
+				stmt = aConnection.getSqlConnection().prepareStatement(sql);
+			}
 
 			for (int i=0; i < this.values.size(); i++)
 			{
@@ -214,6 +230,10 @@ public class DmlStatement
 				}
 			}
 			rows = stmt.executeUpdate();
+			if (retrieveKeys)
+			{
+				retrieveKeys(stmt);
+			}
 		}
 		catch (SQLException e)
 		{
@@ -227,6 +247,32 @@ public class DmlStatement
 		}
 
 		return rows;
+	}
+
+	private void retrieveKeys(PreparedStatement stmt)
+	{
+		ResultSet rs = null;
+		try
+		{
+			rs = stmt.getGeneratedKeys();
+			if (rs != null && rs.next())
+			{
+				this.generatedKey = rs.getObject(1);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("DmlStatement.retrieveKeys()", "Could not retrieve generated key", e);
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+	}
+
+	public Object getGeneratedKey()
+	{
+		return this.generatedKey;
 	}
 
 	/**
@@ -451,7 +497,7 @@ public class DmlStatement
 		return result;
 	}
 
-	private int countParameters(CharSequence aSql)
+	private int countParameters(String aSql)
 	{
 		if (aSql == null) return -1;
 		boolean inQuotes = false;
@@ -471,7 +517,7 @@ public class DmlStatement
 
 	public String getSql()
 	{
-		return sql.toString();
+		return sql;
 	}
 
 	@Override

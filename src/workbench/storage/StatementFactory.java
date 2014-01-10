@@ -170,7 +170,7 @@ public class StatementFactory
 			}
 		}
 
-		dml = new DmlStatement(sql, values);
+		dml = new DmlStatement(sql.toString(), values);
 		return dml;
 	}
 
@@ -297,7 +297,7 @@ public class StatementFactory
 		sql.append(") VALUES (");
 		sql.append(valuePart);
 		sql.append(')');
-		dml = new DmlStatement(sql, values);
+		dml = new DmlStatement(sql.toString(), values);
 		return dml;
 	}
 
@@ -357,7 +357,7 @@ public class StatementFactory
 			}
 		}
 
-		dml = new DmlStatement(sql, values);
+		dml = new DmlStatement(sql.toString(), values);
 		return dml;
 	}
 

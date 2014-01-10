@@ -1717,4 +1717,8 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "resultset.columns.check.readonly", true);
 	}
 
+	public boolean getGeneratedKeys()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "insert.retrieve.keys", true);
+	}
 }

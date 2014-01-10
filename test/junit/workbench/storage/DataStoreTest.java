@@ -30,12 +30,15 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.ComplexExpression;
 import workbench.storage.filter.LessThanComparator;
@@ -43,9 +46,12 @@ import workbench.storage.filter.NumberEqualsComparator;
 import workbench.storage.filter.OrExpression;
 import workbench.storage.filter.StartsWithComparator;
 import workbench.storage.filter.StringEqualsComparator;
+
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -62,6 +68,43 @@ public class DataStoreTest
 	{
 		super("DataStoreTest");
 		util = getTestUtil();
+	}
+
+	@Test
+	public void testRetrieveGenerated()
+		throws Exception
+	{
+		util.emptyBaseDirectory();
+		WbConnection con = util.getConnection("pkTestDb");
+		Statement stmt = con.createStatement();
+		TestUtil.executeScript(con,
+			"create table gen_test(id integer identity, some_data varchar(100)); \n" +
+			"insert into gen_test (some_data) values ('foobar'); \n" +
+			"commit;");
+
+		String sql = "select id, some_data from gen_test";
+
+		ResultSet rs = stmt.executeQuery(sql);
+		DataStore ds = new DataStore(rs, con);
+		rs.close();
+		stmt.close();
+		ds.setGeneratingSql(sql);
+		ds.checkUpdateTable(con);
+
+		ds.setValue(0, 1, "bar");
+		int row = ds.addRow();
+		ds.setValue(row, 1, "foo");
+		ds.updateDb(con, null);
+		int id = ds.getValueAsInt(row, 0, Integer.MIN_VALUE);
+		assertEquals(id, 2);
+
+		id = ds.getValueAsInt(0, 0, Integer.MIN_VALUE);
+		assertEquals(id, 1);
+
+		ds.deleteRow(0);
+		ds.updateDb(con, null);
+		id = ds.getValueAsInt(0, 0, Integer.MIN_VALUE);
+		assertEquals(id, 2);
 	}
 
 	@Test
