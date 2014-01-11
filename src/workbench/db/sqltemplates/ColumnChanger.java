@@ -23,6 +23,10 @@
 package workbench.db.sqltemplates;
 
 import java.util.List;
+
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.CommentSqlManager;
 import workbench.db.DbObject;
@@ -32,8 +36,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleUtils;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -216,7 +219,7 @@ public class ColumnChanger
 
 	public boolean canChangeComment()
 	{
-		String sql = commentMgr.getCommentSqlTemplate("column");
+		String sql = commentMgr.getCommentSqlTemplate("column", null);
 		return (sql != null);
 	}
 
@@ -314,13 +317,14 @@ public class ColumnChanger
 
 	private String changeRemarks(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
 	{
-		String sql = commentMgr.getCommentSqlTemplate("column");
-		if (StringUtil.isBlank(sql)) return null;
-
 		String oldRemarks = (oldDefinition == null ? "" : oldDefinition.getComment());
 		String newRemarks = newDefinition.getComment();
 		if (StringUtil.equalStringOrEmpty(oldRemarks, newRemarks)) return null;
 		if (StringUtil.isBlank(newRemarks)) newRemarks = "";
+
+		String action = CommentSqlManager.getAction(oldRemarks, newRemarks);
+		String sql = commentMgr.getCommentSqlTemplate("column", action);
+		if (StringUtil.isBlank(sql)) return null;
 
 		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConn));
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
@@ -344,7 +348,8 @@ public class ColumnChanger
 	{
 		String remarks = column.getComment();
 		if (StringUtil.isBlank(remarks)) remarks = "";
-		String sql = commentMgr.getCommentSqlTemplate("column");
+
+		String sql = commentMgr.getCommentSqlTemplate("column", CommentSqlManager.COMMENT_ACTION_SET);
 
 		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConn));
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectName());

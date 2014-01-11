@@ -27,6 +27,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -56,6 +57,7 @@ public class TableStatements
 	{
 		this.preStatement = pre;
 		this.postStatement = post;
+		runPostStatementAfterError = Settings.getInstance().getBoolProperty("workbench.sql.tablestatements.on.error", true);
 	}
 
 	/**
@@ -76,9 +78,9 @@ public class TableStatements
 		{
 			this.postStatement = sql;
 		}
-
+		boolean defaultRunOnError = Settings.getInstance().getBoolProperty("workbench.sql.tablestatements.on.error", true);
 		this.ignoreErrors = cmdLine.getBoolean(CommonArgs.ARG_IGNORE_TABLE_STMT_ERRORS, true);
-		this.runPostStatementAfterError = cmdLine.getBoolean(CommonArgs.ARG_RUN_POST_STMT_ON_ERROR, false);
+		this.runPostStatementAfterError = cmdLine.getBoolean(CommonArgs.ARG_RUN_POST_STMT_ON_ERROR, defaultRunOnError);
 	}
 
 	public boolean getRunPostStatementAfterError()

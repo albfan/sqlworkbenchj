@@ -22,10 +22,12 @@
  */
 package workbench.gui.dbobjects;
 
-import workbench.db.sqltemplates.ColumnChanger;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.WbConnection;
+import workbench.db.sqltemplates.ColumnChanger;
+
 import workbench.gui.components.DataStoreTableModel;
+
 import workbench.storage.InputValidator;
 import workbench.storage.RowData;
 

@@ -30,10 +30,13 @@ import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.StatementFactory;
+
+import workbench.util.SqlUtil;
 
 import org.junit.After;
 import org.junit.Test;
@@ -60,6 +63,46 @@ public class PostgresDMLTest
 		PostgresTestUtil.cleanUpTestCase();
 	}
 
+	@Test
+	public void testRetrieveGenerated()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+
+		Statement stmt = con.createStatement();
+		TestUtil.executeScript(con,
+			"create table gen_test(id_1 serial primary key, id_2 serial, some_data varchar(100)); \n" +
+			"insert into gen_test (some_data) values ('foobar'); \n" +
+			"select setval('gen_test_id_2_seq', 100, false); \n" +
+			"commit;");
+
+		String sql = "select id_1, id_2, some_data from gen_test";
+
+		ResultSet rs = stmt.executeQuery(sql);
+		DataStore ds = new DataStore(rs, con);
+		SqlUtil.closeAll(rs, stmt);
+		ds.setGeneratingSql(sql);
+		ds.checkUpdateTable(con);
+
+		ds.setValue(0, 2, "bar");
+
+		int row = ds.addRow();
+		ds.setValue(row, 2, "foo");
+		ds.updateDb(con, null);
+		int id = ds.getValueAsInt(row, 0, Integer.MIN_VALUE);
+		assertEquals(2, id);
+
+		id = ds.getValueAsInt(row, 1, Integer.MIN_VALUE);
+		assertEquals(100, id);
+
+		id = ds.getValueAsInt(0, 0, Integer.MIN_VALUE);
+		assertEquals(1, id);
+
+		ds.deleteRow(0);
+		ds.updateDb(con, null);
+		id = ds.getValueAsInt(0, 0, Integer.MIN_VALUE);
+		assertEquals(2, id);
+	}
 
 	@Test
 	public void testUpdateType()
@@ -85,7 +128,7 @@ public class PostgresDMLTest
 			row.setValue(0, Integer.valueOf(42));
 			row.setValue(1, "(1,2)");
 			DmlStatement dml = factory.createInsertStatement(row, true, "\n");
-			int rows = dml.execute(conn);
+			int rows = dml.execute(conn, true);
 			conn.commit();
 			assertEquals(1, rows);
 			int count = ((Number)TestUtil.getSingleQueryValue(conn, "select count(*) from ratings where id = 42")).intValue();
@@ -119,7 +162,7 @@ public class PostgresDMLTest
 			row.setValue(0, Integer.valueOf(42));
 			row.setValue(1, "1,2");
 			DmlStatement dml = factory.createInsertStatement(row, true, "\n");
-			int rows = dml.execute(conn);
+			int rows = dml.execute(conn, true);
 			conn.commit();
 			assertEquals(1, rows);
 			int count = ((Number) TestUtil.getSingleQueryValue(conn, "select count(*) from array_test where id = 42")).intValue();

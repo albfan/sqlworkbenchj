@@ -18,9 +18,10 @@
  * To contact the author please send an email to: support@sql-workbench.net
  */
 
-package workbench.db.postgres;
+package workbench.db.mssql;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.TestUtil;
@@ -29,6 +30,8 @@ import workbench.WbTestCase;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
+
+import workbench.util.SqlUtil;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,65 +43,76 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class DataStorePostgresTest
+public class SqlServerDMLTest
 	extends WbTestCase
 {
 
-	public DataStorePostgresTest()
+	public SqlServerDMLTest()
 	{
-		super("PgDataStoreTest");
+		super("SqlServerDMLTest");
 	}
 
 	@BeforeClass
 	public static void setUpClass()
 		throws Exception
 	{
-		PostgresTestUtil.initTestCase("ds_test_pg");
+		SQLServerTestUtil.initTestcase("SqlServerDropTest");
+		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
+		if (conn == null) return;
+		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
 	@AfterClass
 	public static void tearDownClass()
 		throws Exception
 	{
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
-		PostgresTestUtil.dropAllObjects(con);
+		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
+		if (conn == null) return;
+		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
 	@Test
-	public void testRetrieveGenerated()
-		throws Exception
+	public void testTableDrop()
+		throws SQLException
 	{
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		Statement stmt = con.createStatement();
+		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
+		if (con == null) return;
+
 		TestUtil.executeScript(con,
-			"create table gen_test(id serial primary key, some_data varchar(100)); \n" +
+			"create table gen_test(pk_col integer not null primary key identity, some_data varchar(100)); \n" +
 			"insert into gen_test (some_data) values ('foobar'); \n" +
 			"commit;");
 
-		String sql = "select id, some_data from gen_test";
+		String sql = "select pk_col, some_data from gen_test";
 
+		Statement stmt = con.createStatement();
 		ResultSet rs = stmt.executeQuery(sql);
 		DataStore ds = new DataStore(rs, con);
-		rs.close();
-		stmt.close();
+
+		SqlUtil.closeAll(rs, stmt);
+
 		ds.setGeneratingSql(sql);
 		ds.checkUpdateTable(con);
 
+		// change the existing row
 		ds.setValue(0, 1, "bar");
+
+		// add a new row to retrieve the identity value
 		int row = ds.addRow();
 		ds.setValue(row, 1, "foo");
 		ds.updateDb(con, null);
 		int id = ds.getValueAsInt(row, 0, Integer.MIN_VALUE);
-		assertEquals(id, 2);
+		assertEquals(2, id);
 
+		// make sure the modified row was not changed
 		id = ds.getValueAsInt(0, 0, Integer.MIN_VALUE);
-		assertEquals(id, 1);
+		assertEquals(1, id);
 
+		// make sure no existing row is changed when deleting something
 		ds.deleteRow(0);
 		ds.updateDb(con, null);
 		id = ds.getValueAsInt(0, 0, Integer.MIN_VALUE);
-		assertEquals(id, 2);
+		assertEquals(2, id);
 	}
 
 }

@@ -25,7 +25,9 @@ package workbench.gui.dbobjects;
 import workbench.db.DbMetadata;
 import workbench.db.DbObjectChanger;
 import workbench.db.WbConnection;
+
 import workbench.gui.components.DataStoreTableModel;
+
 import workbench.storage.InputValidator;
 
 /**
@@ -53,7 +55,7 @@ public class TableChangeValidator
 		}
 		else if (col == DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS)
 		{
-			return changer.getCommentSql(type) != null;
+			return changer.getCommentSql(type, null) != null;
 		}
 		else if (col == DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA)
 		{

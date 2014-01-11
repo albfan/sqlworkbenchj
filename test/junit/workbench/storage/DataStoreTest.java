@@ -96,15 +96,15 @@ public class DataStoreTest
 		ds.setValue(row, 1, "foo");
 		ds.updateDb(con, null);
 		int id = ds.getValueAsInt(row, 0, Integer.MIN_VALUE);
-		assertEquals(id, 2);
+		assertEquals(2, id);
 
 		id = ds.getValueAsInt(0, 0, Integer.MIN_VALUE);
-		assertEquals(id, 1);
+		assertEquals(1, id);
 
 		ds.deleteRow(0);
 		ds.updateDb(con, null);
 		id = ds.getValueAsInt(0, 0, Integer.MIN_VALUE);
-		assertEquals(id, 2);
+		assertEquals(2, id);
 	}
 
 	@Test

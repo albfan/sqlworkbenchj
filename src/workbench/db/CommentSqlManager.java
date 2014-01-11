@@ -23,6 +23,7 @@
 package workbench.db;
 
 import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -40,6 +41,10 @@ public class CommentSqlManager
 	public static final String COMMENT_COLUMN_PLACEHOLDER = MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER;
 	public static final String COMMENT_PLACEHOLDER = "%comment%";
 
+	public static final String COMMENT_ACTION_SET = "set";
+	public static final String COMMENT_ACTION_DELETE = "delete";
+	public static final String COMMENT_ACTION_UPDATE = "update";
+
 	private String dbid;
 
 	public CommentSqlManager(String id)
@@ -47,15 +52,27 @@ public class CommentSqlManager
 		this.dbid = id;
 	}
 
-	public String getCommentSqlTemplate(String objectType)
+	public String getCommentSqlTemplate(String objectType, String action)
 	{
 		if (StringUtil.isBlank(objectType)) return null;
 
 		objectType = objectType.toLowerCase().replace(" ", "_");
 
+		String key = key = "workbench.db." + dbid + ".sql.comment." + objectType;
+		String sql = null;
+
+		if (action != null)
+		{
+			sql = Settings.getInstance().getProperty(key + "." + action, null);
+		}
+
 		String defaultValue = Settings.getInstance().getProperty("workbench.db.sql.comment." + objectType, null);
-		String key = "workbench.db." + dbid + ".sql.comment." + objectType;
-		String sql = Settings.getInstance().getProperty(key, defaultValue);
+		if (sql == null)
+		{
+			// no action specific statement found, use a "plain" one
+			sql = Settings.getInstance().getProperty(key, defaultValue);
+		}
+
 		if (StringUtil.isEmptyString(sql))
 		{
 			// If the DB specific property is present, but empty, this means
@@ -75,4 +92,22 @@ public class CommentSqlManager
 		sql = Settings.getInstance().replaceProperties(sql);
 		return SqlUtil.trimSemicolon(sql);
 	}
+
+	public static String getAction(String oldComment, String newComment)
+	{
+		if (StringUtil.equalStringOrEmpty(oldComment, newComment, true)) return null;
+
+		if (StringUtil.isEmptyString(oldComment) && StringUtil.isNonEmpty(newComment))
+		{
+			return COMMENT_ACTION_SET;
+		}
+
+		if (StringUtil.isEmptyString(newComment) && StringUtil.isNonEmpty(oldComment))
+		{
+			return COMMENT_ACTION_DELETE;
+		}
+
+		return COMMENT_ACTION_UPDATE;
+	}
+
 }

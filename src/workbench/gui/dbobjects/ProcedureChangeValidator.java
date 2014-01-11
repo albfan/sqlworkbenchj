@@ -62,7 +62,7 @@ public class ProcedureChangeValidator
 
 		if (col == ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS)
 		{
-			return changer.getCommentSql(type) != null;
+			return changer.getCommentSql(type, null) != null;
 		}
 		else if (col == ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA)
 		{

@@ -23,9 +23,13 @@
 package workbench.db;
 
 import java.util.List;
-import org.junit.Test;
+
 import workbench.WbTestCase;
+
 import workbench.util.CollectionUtil;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -48,7 +52,7 @@ public class CommentSqlManagerTest
 		List<String> types = CollectionUtil.arrayList("alias", "domain", "constant", "table", "view", "column", "index", "sequence");
 		for (String type : types)
 		{
-			String sql = mgr.getCommentSqlTemplate(type);
+			String sql = mgr.getCommentSqlTemplate(type, null);
 			assertNotNull("No template found for type " + type, sql);
 		}
 	}
@@ -60,7 +64,7 @@ public class CommentSqlManagerTest
 		List<String> types = CollectionUtil.arrayList("function", "table", "view", "column", "type", "index", "sequence", "trigger");
 		for (String type : types)
 		{
-			String sql = mgr.getCommentSqlTemplate(type);
+			String sql = mgr.getCommentSqlTemplate(type, null);
 			assertNotNull("No template found for type " + type, sql);
 		}
 	}
@@ -72,7 +76,7 @@ public class CommentSqlManagerTest
 		List<String> types = CollectionUtil.arrayList("table", "column", "materialized view");
 		for (String type : types)
 		{
-			String sql = mgr.getCommentSqlTemplate(type);
+			String sql = mgr.getCommentSqlTemplate(type, null);
 			assertNotNull("No template found for type " + type, sql);
 		}
 	}
@@ -84,7 +88,7 @@ public class CommentSqlManagerTest
 		List<String> types = CollectionUtil.arrayList("table", "column", "view", "synonym", "procedure");
 		for (String type : types)
 		{
-			String sql = mgr.getCommentSqlTemplate(type);
+			String sql = mgr.getCommentSqlTemplate(type, null);
 			assertNotNull("No template found for type " + type, sql);
 		}
 	}

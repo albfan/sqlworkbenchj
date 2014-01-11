@@ -404,7 +404,7 @@ public class JdbcProcedureReader
 		if (StringUtil.isNonBlank(comment))
 		{
 			CommentSqlManager mgr = new CommentSqlManager(connection.getDbSettings().getDbId());
-			String template = mgr.getCommentSqlTemplate(def.getObjectType());
+			String template = mgr.getCommentSqlTemplate(def.getObjectType(), CommentSqlManager.COMMENT_ACTION_SET);
 			if (StringUtil.isNonBlank(template))
 			{
 				template = template.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, def.getProcedureName());

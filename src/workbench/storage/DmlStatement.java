@@ -32,14 +32,17 @@ import java.io.StringReader;
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -51,6 +54,7 @@ import workbench.db.WbConnection;
 
 import workbench.sql.formatter.SqlFormatter;
 
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -73,8 +77,7 @@ public class DmlStatement
 	private boolean formatInserts;
 	private boolean formatUpdates;
 	private boolean formatDeletes;
-	private Object generatedKey;
-
+	private Map<String, Object> generatedKeys;
 
 	/**
 	 *	Create a new DmlStatement with the given SQL template string
@@ -127,10 +130,14 @@ public class DmlStatement
 	/**
 	 * Execute the statement as a prepared statement
 	 *
-	 * @param aConnection the Connection to be used
+	 * @param connection      the Connection to be used
+	 * @param retrieveKeys    a flag indicating if generated keys should be retrieved
+	 *
 	 * @return the number of rows affected
+	 *
+	 * @see DbSettings#getRetrieveGeneratedKeys()
 	 */
-	public int execute(WbConnection aConnection, boolean isInsert)
+	public int execute(WbConnection connection, boolean retrieveKeys)
 		throws SQLException
 	{
 		List<Closeable> streamsToClose = new LinkedList<Closeable>();
@@ -138,26 +145,25 @@ public class DmlStatement
 		PreparedStatement stmt = null;
 		int rows = -1;
 
-		DbSettings dbs = aConnection.getDbSettings();
+		DbSettings dbs = connection.getDbSettings();
 		boolean useSetNull = dbs.useSetNull();
 		boolean useXmlApi = dbs.useXmlAPI();
 		boolean useClobSetString = dbs.useSetStringForClobs();
 		boolean useBlobSetBytes = dbs.useSetBytesForBlobs();
 
-		boolean retrieveKeys = dbs.getGeneratedKeys() && isInsert;
+		DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(connection);
 
-		DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(aConnection);
-		this.generatedKey = null;
+		this.generatedKeys = null;
 
 		try
 		{
 			if (retrieveKeys)
 			{
-				stmt = aConnection.getSqlConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+				stmt = connection.getSqlConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			}
 			else
 			{
-				stmt = aConnection.getSqlConnection().prepareStatement(sql);
+				stmt = connection.getSqlConnection().prepareStatement(sql);
 			}
 
 			for (int i=0; i < this.values.size(); i++)
@@ -193,7 +199,7 @@ public class DmlStatement
 				}
 				else if (useXmlApi && SqlUtil.isXMLType(type) && !builder.isDmlExpressionDefined(dbmsType) && (value instanceof String))
 				{
-					SQLXML xml = JdbcUtils.createXML((String)value, aConnection);
+					SQLXML xml = JdbcUtils.createXML((String)value, connection);
 					stmt.setSQLXML(i+ 1, xml);
 				}
 				else if (value instanceof File)
@@ -222,7 +228,7 @@ public class DmlStatement
 				}
 				else if (type == Types.ARRAY)
 				{
-					handleArray(stmt, i+1, dbmsType, value, aConnection);
+					handleArray(stmt, i+1, dbmsType, value, connection);
 				}
 				else
 				{
@@ -257,12 +263,20 @@ public class DmlStatement
 			rs = stmt.getGeneratedKeys();
 			if (rs != null && rs.next())
 			{
-				this.generatedKey = rs.getObject(1);
+				ResultSetMetaData meta = rs.getMetaData();
+				int colcount = meta.getColumnCount();
+				this.generatedKeys = new HashMap<String, Object>(colcount);
+				for (int col=1; col <= colcount; col++)
+				{
+					generatedKeys.put(meta.getColumnName(col), rs.getObject(col));
+				}
+				LogMgr.logDebug("DmlStatement.retrieveKeys()", "Driver returned generated keys: "  + generatedKeys);
 			}
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logWarning("DmlStatement.retrieveKeys()", "Could not retrieve generated key", e);
+			this.generatedKeys = null;
 		}
 		finally
 		{
@@ -270,9 +284,45 @@ public class DmlStatement
 		}
 	}
 
-	public Object getGeneratedKey()
+	public boolean hasGeneratedKeys()
 	{
-		return this.generatedKey;
+		return generatedKeys != null && generatedKeys.size() > 0;
+	}
+
+	/**
+	 * Return the generated key value for the specified column.
+	 *
+	 * If the column name supplied is not found in the returned keys, the first
+	 * key provided by the driver will be used.
+	 *
+	 * Postgres seems to be the only DBMS that can handle multiple auto-generated keys properly.
+	 * The JDBC driver will return the correct column name for each generated value therefor
+	 * the lookup for the column name will work properly.
+	 *
+	 * For all other DBMS the name returned from getGeneratedKeys() does not match the
+	 * table's column name, but as all the others only support a single auto generated
+	 * column (identity, auto_increment, ...) anyway this shouldn't be a problem
+	 *
+	 * @param colName  the colname for which the generated value should be returned
+	 * @return the generated value, may be null
+	 */
+	public Object getGeneratedKey(String colName)
+	{
+		if (CollectionUtil.isEmpty(generatedKeys)) return null;
+		Object value = this.generatedKeys.get(colName);
+
+		if (value != null) return value;
+
+		// the column name was not found so return the first value returned from the statement
+		// this should only happen for DBMS that only support a single autoincrement/identity column
+		// per table (MySQL, SQL Server, ...)
+		if (generatedKeys.size() > 1)
+		{
+			LogMgr.logWarning("DmlStatement.getGeneratedKey()", "Multiple keys returned, but column name " + colName + " not found in returned key information: " + generatedKeys);
+		}
+
+		// iterator().next() is safe to use because we have at least one value in the map.
+		return generatedKeys.values().iterator().next();
 	}
 
 	/**

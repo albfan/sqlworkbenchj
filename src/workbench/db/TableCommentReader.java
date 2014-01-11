@@ -53,7 +53,7 @@ public class TableCommentReader
 	{
 		CommentSqlManager mgr = new CommentSqlManager(dbConnection.getMetadata().getDbId());
 
-		String commentStatement = mgr.getCommentSqlTemplate(table.getType());
+		String commentStatement = mgr.getCommentSqlTemplate(table.getType(), CommentSqlManager.COMMENT_ACTION_SET);
 
 		if (StringUtil.isBlank(commentStatement))
 		{
@@ -115,7 +115,7 @@ public class TableCommentReader
 	{
 		CommentSqlManager mgr = new CommentSqlManager(dbId);
 
-		String columnStatement = mgr.getCommentSqlTemplate("column");
+		String columnStatement = mgr.getCommentSqlTemplate("column", CommentSqlManager.COMMENT_ACTION_SET);
 		if (StringUtil.isBlank(columnStatement)) return null;
 		StringBuilder result = new StringBuilder(columns.size() * 25);
 		ColumnChanger colChanger = new ColumnChanger(con);

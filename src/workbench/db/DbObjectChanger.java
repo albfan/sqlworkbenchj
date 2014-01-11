@@ -30,8 +30,8 @@ import java.util.Map;
 import workbench.log.LogMgr;
 
 import workbench.db.sqltemplates.ColumnChanger;
-import workbench.util.CollectionUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -195,9 +195,6 @@ public class DbObjectChanger
 
 		String type = oldDefinition.getObjectType();
 
-		String sql = getCommentSql(type);
-		if (sql == null) return null;
-
 		String oldComment = oldDefinition.getComment();
 		String newComment = newDefinition.getComment();
 
@@ -205,6 +202,15 @@ public class DbObjectChanger
 		if (schema == null) schema = "";
 
 		if (StringUtil.equalStringOrEmpty(oldComment, newComment, true)) return null; // no change
+
+		String action = CommentSqlManager.getAction(oldComment, newComment);
+
+		String sql = getCommentSql(type, action);
+		if (sql == null) return null;
+
+		if (oldComment == null) oldComment = "";
+		if (newComment == null) newComment = "";
+
 		String oldname = oldDefinition.getObjectName(dbConnection);
 		if (oldname == null) oldname = "";
 
@@ -238,10 +244,10 @@ public class DbObjectChanger
 		return settings.getChangeCatalogSql(type);
 	}
 
-	public String getCommentSql(String type)
+	public String getCommentSql(String type, String action)
 	{
 		if (commentMgr == null || type == null) return null;
-		return commentMgr.getCommentSqlTemplate(type);
+		return commentMgr.getCommentSqlTemplate(type, action);
 	}
 
 	public String getDropPKScript(TableIdentifier table)

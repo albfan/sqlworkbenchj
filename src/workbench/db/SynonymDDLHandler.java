@@ -72,7 +72,7 @@ public class SynonymDDLHandler
 		if (StringUtil.isNonBlank(synonym.getComment()))
 		{
 			CommentSqlManager mgr = new CommentSqlManager(dbConnection.getMetadata().getDbId());
-			String sql = mgr.getCommentSqlTemplate(synonym.getType());
+			String sql = mgr.getCommentSqlTemplate(synonym.getType(), CommentSqlManager.COMMENT_ACTION_SET);
 			if (StringUtil.isNonBlank(sql))
 			{
 				sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, synonym.getRawTableName());

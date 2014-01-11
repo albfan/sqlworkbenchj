@@ -28,10 +28,14 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.sql.DelimiterDefinition;
+
 import workbench.storage.DataStore;
+
+import workbench.sql.DelimiterDefinition;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -302,7 +306,7 @@ public class DefaultTriggerReader
 				}
 
 				CommentSqlManager mgr = new CommentSqlManager(this.dbConnection.getMetadata().getDbId());
-				String ddl = mgr.getCommentSqlTemplate("trigger");
+				String ddl = mgr.getCommentSqlTemplate("trigger", CommentSqlManager.COMMENT_ACTION_SET);
 				if (result.length() > 0 && StringUtil.isNonBlank(ddl) && StringUtil.isNonBlank(trgComment))
 				{
 					result.append(nl);
