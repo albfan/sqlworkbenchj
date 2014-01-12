@@ -87,24 +87,26 @@ public class UpdateCheck
 	/**
 	 * This is public so that the method is accessible for Unit-Testing
 	 */
-	public boolean needCheck(int interval, Date today, Date lastCheck)
+	boolean needCheck(int interval, Date today, Date lastCheck)
 	{
 		if (interval < 1) return false;
+
 		Calendar next = Calendar.getInstance();
 		long nextCheck = Long.MIN_VALUE;
 		if (lastCheck != null)
 		{
+			next.setLenient(true);
 			next.setTime(lastCheck);
 			next.set(Calendar.HOUR_OF_DAY, 0);
 			next.clear(Calendar.MINUTE);
 			next.clear(Calendar.SECOND);
 			next.clear(Calendar.MILLISECOND);
-			next.add(Calendar.DAY_OF_MONTH, interval);
+			next.add(Calendar.DAY_OF_MONTH, interval);  // this rolls over correctly to the next month because of setLenient(true)
 			nextCheck = next.getTimeInMillis();
 		}
 
 		Calendar now = Calendar.getInstance();
-		now.setTime(today);
+		now.setTimeInMillis(today.getTime());
 		now.set(Calendar.HOUR_OF_DAY, 0);
 		now.clear(Calendar.MINUTE);
 		now.clear(Calendar.SECOND);
