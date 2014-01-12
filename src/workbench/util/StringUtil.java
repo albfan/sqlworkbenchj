@@ -115,6 +115,21 @@ public class StringUtil
 		return null;
 	}
 
+	public static java.util.Date parseISODate(String date)
+	{
+		if (isBlank(date))	return null;
+
+		try
+		{
+			SimpleDateFormat sdf = new SimpleDateFormat(ISO_DATE_FORMAT);
+			return sdf.parse(date);
+		}
+		catch (Exception e)
+		{
+		}
+		return null;
+	}
+
 	public static java.util.Date now()
 	{
 		return new java.util.Date(System.currentTimeMillis());

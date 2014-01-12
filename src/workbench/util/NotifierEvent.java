@@ -30,30 +30,52 @@ import java.awt.event.ActionListener;
 public class NotifierEvent
 {
 	private String iconKey;
-	private String tooltip;
+	private String message;
 	private ActionListener handler;
-	
-	public NotifierEvent(String key, String tip, ActionListener l)
+	private String type;
+	private String tooltip;
+
+	public NotifierEvent(String key, String message, ActionListener l)
 	{
 		this.iconKey = key;
-		this.tooltip = tip;
+		this.message = message;
 		this.handler = l;
 	}
-	
-	public String getIconKey()
+
+	public void setTooltip(String tip)
 	{
-		return iconKey;
+		tooltip = tip;
 	}
-	
+
 	public String getTooltip()
 	{
 		return tooltip;
 	}
 	
+	public void setType(String type)
+	{
+		this.type = type;
+	}
+
+	public String getType()
+	{
+		return type;
+	}
+
+	public String getIconKey()
+	{
+		return iconKey;
+	}
+
+	public String getMessage()
+	{
+		return message;
+	}
+
 	public ActionListener getHandler()
 	{
 		return handler;
 	}
-	
-	
+
+
 }

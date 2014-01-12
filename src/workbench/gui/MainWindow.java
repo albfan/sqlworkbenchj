@@ -2049,13 +2049,13 @@ public class MainWindow
 
 	public void selectConnection()
 	{
-		selectConnection(false, false);
+		selectConnection(false);
 	}
 
-	public void selectConnection(boolean exit, boolean doVersionCheck)
+	public void selectConnection(boolean exit)
 	{
 		exitOnCancel = exit;
-		getSelector().selectConnection(doVersionCheck);
+		getSelector().selectConnection();
 	}
 
 	public JMenu getRecentWorkspaceMenu(int panelIndex)

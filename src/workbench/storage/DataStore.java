@@ -1330,7 +1330,7 @@ public class DataStore
 
 	public void setLoadTimeToNow()
 	{
-		this.loadedAt = StringUtil.now().getTime();
+		this.loadedAt = System.currentTimeMillis();
 	}
 
 	/**

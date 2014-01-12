@@ -26,10 +26,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
 import java.util.Date;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  * @author Thomas Kellerer
@@ -37,6 +39,9 @@ import workbench.resource.Settings;
 public class UpdateCheck
 	implements ActionListener
 {
+	private static final String TYPE_WB_VERSION = "version_check";
+	private static final String TYPE_JAVA_VERSION = "java_check";
+
 	private WbVersionReader versionReader;
 	public static final boolean DEBUG = Boolean.getBoolean("workbench.debug.versioncheck");
 
@@ -49,13 +54,33 @@ public class UpdateCheck
 		}
 
 		int interval = Settings.getInstance().getUpdateCheckInterval();
-		if (interval < 1) return;
-
 		Date lastCheck = Settings.getInstance().getLastUpdateCheck();
 
 		if (needCheck(interval, new java.util.Date(), lastCheck))
 		{
 			startRead();
+		}
+		else
+		{
+			checkJavaVersion();
+		}
+	}
+
+	private void checkJavaVersion()
+	{
+		if (ResourceMgr.getBuildNumber().getMajorVersion() == 999) return; // don't check if started from IDE
+
+		Date threshold = StringUtil.parseISODate("2014-03-01");
+		if (StringUtil.now().before(threshold)) return;
+
+		VersionNumber minVersion = new VersionNumber(1,7);
+		VersionNumber currentVersion = VersionNumber.getJavaVersion();
+		if (!currentVersion.isNewerOrEqual(minVersion))
+		{
+			NotifierEvent event = new NotifierEvent("alert.png", ResourceMgr.getString("MsgOldJava"), this);
+			event.setTooltip(ResourceMgr.getString("MsgOldJavaDetail"));
+			event.setType(TYPE_JAVA_VERSION);
+			EventNotifier.getInstance().displayNotification(event);
 		}
 	}
 
@@ -93,7 +118,7 @@ public class UpdateCheck
 	public void startRead()
 	{
 		LogMgr.logDebug("UpdateCheck.run()", "Checking versions...");
-		this.versionReader = new WbVersionReader("automatic", this);
+		versionReader = new WbVersionReader("automatic", this);
 		versionReader.startCheckThread();
 	}
 
@@ -121,11 +146,6 @@ public class UpdateCheck
 				LogMgr.logInfo("UpdateCheck.run()", "No updates found");
 			}
 
-			if (event != null)
-			{
-				EventNotifier.getInstance().displayNotification(event);
-			}
-
 			if (this.versionReader.success())
 			{
 				try
@@ -136,6 +156,17 @@ public class UpdateCheck
 				{
 					LogMgr.logError("UpdateCheck.run()", "Error when updating last update date", e);
 				}
+			}
+
+			if (event == null)
+			{
+				// no new version so no event to display, we can start the check for the Java version
+				checkJavaVersion();
+			}
+			else
+			{
+				event.setType(TYPE_WB_VERSION);
+				EventNotifier.getInstance().displayNotification(event);
 			}
 		}
 		catch (Exception e)
@@ -152,10 +183,20 @@ public class UpdateCheck
 			showNotification();
 			return;
 		}
+
+		String command = e.getActionCommand();
+
 		try
 		{
 			EventNotifier.getInstance().removeNotification();
-			BrowserLauncher.openURL("http://www.sql-workbench.net");
+			if (TYPE_WB_VERSION.equals(command))
+			{
+				BrowserLauncher.openURL("http://www.sql-workbench.net");
+			}
+			else
+			{
+				BrowserLauncher.openURL("http://www.java.com");
+			}
 		}
 		catch (Exception ex)
 		{

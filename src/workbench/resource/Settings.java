@@ -670,18 +670,7 @@ public class Settings
 	public Date getLastUpdateCheck()
 	{
 		String dt = getProperty("workbench.gui.updatecheck.lastcheck", null);
-		if (dt == null) return null;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date last = null;
-		try
-		{
-			last = sdf.parse(dt);
-			return last;
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
+		return StringUtil.parseISODate(dt);
 	}
 
 	public void setLastUpdateCheck()

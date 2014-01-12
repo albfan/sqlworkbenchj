@@ -81,19 +81,16 @@ public class ProfileSelectionDialog
 	private String escActionCommand;
 	private JLabel versionInfo;
 	private boolean processEscKey;
+	private static boolean firstDisplay = true;
 
 	public ProfileSelectionDialog(Frame parent, boolean modal, String lastProfileKey)
 	{
-		this(parent, modal, lastProfileKey, false);
-	}
-
-	public ProfileSelectionDialog(Frame parent, boolean modal, String lastProfileKey, boolean enableVersionCheck)
-	{
 		super(parent, modal);
 		initComponents(lastProfileKey);
-		if (enableVersionCheck)
+		if (firstDisplay)
 		{
 			EventNotifier.getInstance().addEventDisplay(this);
+			firstDisplay = false;
 		}
 		enableDefaultButtons();
 		EscAction esc = new EscAction(this, this);
@@ -187,7 +184,7 @@ public class ProfileSelectionDialog
 				{
 					if (e.getButton() == MouseEvent.BUTTON1)
 					{
-						ActionEvent evt = new ActionEvent(ProfileSelectionDialog.this, -1, "notifierClicked");
+						ActionEvent evt = new ActionEvent(ProfileSelectionDialog.this, -1, event.getType());
 						event.getHandler().actionPerformed(evt);
 						versionInfo.removeMouseListener(this);
 					}
@@ -201,7 +198,12 @@ public class ProfileSelectionDialog
 			{
 				versionInfo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				versionInfo.setIcon(ResourceMgr.getImageByName(event.getIconKey()));
-				versionInfo.setText(event.getTooltip());
+				versionInfo.setText("<html><b>" + event.getMessage() + "</b></html>");
+				String tip = event.getTooltip();
+				if (StringUtil.isNonEmpty(tip))
+				{
+					versionInfo.setToolTipText(tip);
+				}
 				versionInfo.getParent().doLayout();
 			}
 		});
