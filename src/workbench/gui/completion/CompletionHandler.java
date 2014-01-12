@@ -27,19 +27,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import workbench.db.WbConnection;
-import workbench.gui.editor.JEditTextArea;
+
 import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
+import workbench.gui.editor.JEditTextArea;
+
 import workbench.sql.ScriptParser;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -171,7 +177,16 @@ public class CompletionHandler
 					currentWord = currentWord.substring(1);
 				}
 				window.selectCurrentWordInEditor(selectWord);
+
 				this.elements = ctx.getData();
+
+				LogMgr.logDebug("CompletionHandler.updateSelectionList()",
+					"Auto-completion invoked for " + analyzer.getSqlVerb() +
+						", analyzer: " + analyzer.getClass().getSimpleName() +
+						", context: " + analyzer.contextToString() +
+						", currentSchema: " + analyzer.getSchemaForTableList() +
+						", element count: " + elements.size());
+
 				this.header.setText(ctx.getTitle());
 				this.window.setContext(ctx);
 

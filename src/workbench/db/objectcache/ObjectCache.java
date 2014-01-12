@@ -147,6 +147,7 @@ class ObjectCache
 	synchronized Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, List<String> type)
 	{
 		List<String> searchPath = getSearchPath(dbConnection, schema);
+		LogMgr.logDebug("ObjectCache.getTables()", "Getting tables using schema: " + schema + ", filter: " + type + ", search path: " + searchPath);
 
 		for (String checkSchema  : searchPath)
 		{
@@ -161,6 +162,7 @@ class ObjectCache
 						tbl.checkQuotesNeeded(dbConnection);
 					}
 					this.setTables(tables);
+					LogMgr.logDebug("ObjectCache.getTables()", "Schema: " + checkSchema + " not found in cache. Retrieved " + tables.size() + " objects");
 				}
 				catch (Exception e)
 				{
@@ -540,6 +542,7 @@ class ObjectCache
 		referencedTables.clear();
 		referencingTables.clear();
 		procedureCache.clear();
+		LogMgr.logDebug("ObjectCache.clear()", "Removed all entries from the cache");
 	}
 
 	Set<String> getSchemasInCache()
