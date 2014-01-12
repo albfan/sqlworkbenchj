@@ -205,10 +205,6 @@ public class ResultInfo
 				try
 				{
 					boolean isReadonly = metaData.isReadOnly(i + 1);
-					if (isReadonly)
-					{
-						LogMgr.logTrace("ResultInfo.<init>", "Column " + name + " was marked as read-only by the driver!");
-					}
 					col.setReadonly(isReadonly);
 				}
 				catch (Throwable th)
