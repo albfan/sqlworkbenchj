@@ -780,8 +780,9 @@ public class DataStore
 	 */
 	private void restoreModifiedNotUpdateableColumns()
 	{
-		String tname = resultInfo.getUpdateTable().getTableName();
+		if (!Settings.getInstance().getCheckEditableColumns()) return;
 
+		String tname = resultInfo.getUpdateTable().getTableName();
 
 		for (int row=0; row < getRowCount(); row ++)
 		{
@@ -789,10 +790,15 @@ public class DataStore
 			{
 				String colName = resultInfo.getColumnName(col);
 				boolean canUpdate = resultInfo.isUpdateable(col) && !resultInfo.getColumn(col).isReadonly();
+
 				if (!canUpdate && isColumnModified(row, col))
 				{
-					LogMgr.logDebug("DataStore.restoreModifiedNotUpdateableColumns()",
-						"Restoring original value for column " + tname + "." + colName + " because column is marked as not updateable.");
+					boolean isComputed = resultInfo.getColumn(col).getComputedColumnExpression() != null;
+					LogMgr.logWarning("DataStore.restoreModifiedNotUpdateableColumns()",
+						"Restoring original value for column " + tname + "." + colName + " because column is marked as not updateable. " +
+						"(isUpdateable: " + resultInfo.isUpdateable(col) +
+						", isReadonly: " + resultInfo.getColumn(col).isReadonly() +
+						", isComputed: " + isComputed + ")");
 					getRow(row).restoreOriginalValue(col);
 				}
 			}
@@ -1063,13 +1069,20 @@ public class DataStore
 
 	/**
 	 * Return the value of a column as an long value.
+	 *
 	 * If the object stored in the DataStore is an instance of Number
 	 * the longValue() of that object will be returned, otherwise the String value
 	 * of the column will be converted to a long.
+	 *
 	 * If it cannot be converted to an long, the default value will be returned
+	 *
+	 * If the column contains null, the default value will be returned.
+	 *
 	 * @param aRow The row
 	 * @param aColumn The column to be returned
 	 * @param aDefault The default value that will be returned if the the column's value cannot be converted to a long
+	 *
+	 * @see StringUtil#getLongValue(java.lang.String, long)
 	 */
 	public long getValueAsLong(int aRow, int aColumn, long aDefault)
 	{
@@ -1089,9 +1102,10 @@ public class DataStore
 	}
 
 	/**
-	 *	Set a value received from a user input. This
-	 *  will convert the given value to an object of the
-	 *  correct class
+	 * Set a value received from a user input.
+	 *
+	 * This will convert the given value to an object of the correct class.
+	 * @see #convertCellValue(java.lang.Object, int)
 	 */
 	public void setInputValue(int row, int col, Object value)
 		throws ConverterException
@@ -1101,36 +1115,47 @@ public class DataStore
 	}
 
 	/**
-	 * Set the value for the given column. This will change the internal state of the DataStore to modified.
-	 * @param aRow
-	 * @param aColumn
-	 * @param aValue The value to be set
+	 * Set the value for the given column.
+	 *
+	 * It is expected that the value is an instance of the correct class for the specified column.
+	 *
+	 * This will change the internal state of the DataStore to modified.
+	 *
+	 * @param rowNumber  the row to update
+	 * @param colIndex   the column to update
+	 * @param value      the (new) value to be set
 	 */
-	public void setValue(int aRow, int aColumn, Object aValue)
+	public void setValue(int rowNumber, int colIndex, Object value)
 		throws IndexOutOfBoundsException
 	{
 		// do not allow setting the value for columns
 		// which do not have a name for. Those columns cannot
 		// be saved to the database (because most likely they
 		// are computed columns like count(*) etc)
-		if (this.resultInfo.getColumnName(aColumn) == null) return;
+		if (this.resultInfo.getColumnName(colIndex) == null) return;
 
-		if (resultInfo.getUpdateTable() != null && (!resultInfo.isUpdateable(aColumn) || resultInfo.getColumn(aColumn).isReadonly()))
+		boolean checkEditable = Settings.getInstance().getCheckEditableColumns();
+		if (checkEditable && resultInfo.getUpdateTable() != null && (!resultInfo.isUpdateable(colIndex) || resultInfo.getColumn(colIndex).isReadonly()))
 		{
 			String tname = resultInfo.getUpdateTable().getTableName();
-			String col = resultInfo.getColumnName(aColumn);
-			LogMgr.logWarning("DataStore.setValue()", "Discarding new value for column " + tname + "." + col + " because it was marked as not updateable.");
+			String col = resultInfo.getColumnName(colIndex);
+			boolean isComputed = resultInfo.getColumn(colIndex).getComputedColumnExpression() != null;
+			LogMgr.logWarning("DataStore.setValue()",
+						"Discarding new value for column " + tname + "." + col + " because column is marked as not updateable. " +
+						"(isUpdateable: " + resultInfo.isUpdateable(colIndex) +
+						", isReadonly: " + resultInfo.getColumn(colIndex).isReadonly() +
+						", isComputed: " + isComputed + ")");
 			return;
 		}
 
-		RowData row = this.getRow(aRow);
+		RowData row = this.getRow(rowNumber);
 		if (row == null)
 		{
 			LogMgr.logError("DataStore.setValue()", "Could not find specified row!", null);
 			return;
 		}
 
-		row.setValue(aColumn,aValue);
+		row.setValue(colIndex,value);
 		this.modified = row.isModified();
 	}
 
