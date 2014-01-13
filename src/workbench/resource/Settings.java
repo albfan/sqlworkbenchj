@@ -2197,6 +2197,12 @@ public class Settings
 		return getBoolProperty("workbench.db.edit.verify.updateable", true);
 	}
 
+	public void setCheckEditableColumns(boolean flag)
+	{
+		setProperty("workbench.db.edit.verify.updateable", flag);
+	}
+
+
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Export">
