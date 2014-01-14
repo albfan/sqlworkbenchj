@@ -572,6 +572,7 @@ public class TableDependency
 			result.setValue(row, 5, node.getDeferrableType());
 			result.getRow(row).setUserObject(node);
 		}
+		result.resetStatus();
 		return result;
 
 	}
