@@ -242,7 +242,6 @@ public class CommonArgs
 
 	public static void setCommitAndBatchParams(BatchCommitter committer, ArgumentParser cmdLine)
 	{
-
 		int batchSize = cmdLine.getIntValue(ARG_BATCHSIZE,-1);
 		String commitParam = cmdLine.getValue("commitevery");
 

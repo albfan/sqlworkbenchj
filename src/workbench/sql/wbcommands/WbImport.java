@@ -412,6 +412,38 @@ public class WbImport
 			}
 		}
 
+		String value = cmdLine.getValue(CommonArgs.ARG_PROGRESS);
+		if (value == null && inputFile != null)
+		{
+			int batchSize = imp.getBatchSize();
+			if (batchSize > 0)
+			{
+				imp.setReportInterval(batchSize);
+			}
+			else
+			{
+				int interval = DataImporter.estimateReportIntervalFromFileSize(inputFile);
+				imp.setReportInterval(interval);
+			}
+		}
+		else if ("true".equalsIgnoreCase(value))
+		{
+			this.imp.setReportInterval(1);
+		}
+		else if ("false".equalsIgnoreCase(value))
+		{
+			this.imp.setReportInterval(0);
+		}
+		else if (value != null)
+		{
+			int interval = StringUtil.getIntValue(value, 0);
+			this.imp.setReportInterval(interval);
+		}
+		else
+		{
+			this.imp.setReportInterval(10);
+		}
+
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		ImportFileParser parser = null;
 
@@ -547,6 +579,7 @@ public class WbImport
 				if (pg.isSupported())
 				{
 					textParser.setStreamImporter(pg);
+					imp.setReportInterval(0);
 				}
 				else
 				{
@@ -730,38 +763,6 @@ public class WbImport
 		}
 
 		if (badFile != null) imp.setBadfileName(badFile);
-
-		String value = cmdLine.getValue(CommonArgs.ARG_PROGRESS);
-		if (value == null && inputFile != null)
-		{
-			int batchSize = imp.getBatchSize();
-			if (batchSize > 0)
-			{
-				imp.setReportInterval(batchSize);
-			}
-			else
-			{
-				int interval = DataImporter.estimateReportIntervalFromFileSize(inputFile);
-				imp.setReportInterval(interval);
-			}
-		}
-		else if ("true".equalsIgnoreCase(value))
-		{
-			this.imp.setReportInterval(1);
-		}
-		else if ("false".equalsIgnoreCase(value))
-		{
-			this.imp.setReportInterval(0);
-		}
-		else if (value != null)
-		{
-			int interval = StringUtil.getIntValue(value, 0);
-			this.imp.setReportInterval(interval);
-		}
-		else
-		{
-			this.imp.setReportInterval(10);
-		}
 
 		List<String> constants = cmdLine.getList(ARG_CONSTANTS);
 		if (CollectionUtil.isNonEmpty(constants))
