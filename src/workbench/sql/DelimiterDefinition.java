@@ -51,12 +51,14 @@ public class DelimiterDefinition
 	private String delimiter;
 	private boolean singleLineDelimiter;
 	private boolean changed;
+	private Pattern slePattern;
 
 	public DelimiterDefinition()
 	{
 		this.delimiter = "";
 		this.singleLineDelimiter = false;
 		this.changed = false;
+		slePattern = null;
 	}
 
 	public DelimiterDefinition(String delim, boolean single)
@@ -64,6 +66,7 @@ public class DelimiterDefinition
 		setDelimiter(delim);
 		this.singleLineDelimiter = single;
 		this.changed = false;
+		initPattern();
 	}
 
 	public DelimiterDefinition createCopy()
@@ -142,6 +145,7 @@ public class DelimiterDefinition
 		{
 			this.delimiter = d.trim();
 			this.changed = true;
+			initPattern();
 		}
 	}
 
@@ -161,6 +165,7 @@ public class DelimiterDefinition
 		{
 			this.singleLineDelimiter = flag;
 			this.changed = true;
+			initPattern();
 		}
 	}
 
@@ -176,11 +181,10 @@ public class DelimiterDefinition
 		// cleaning the SQL from all "noise" ensures that the alternate delimiter is still
 		// recognized even if the script is terminated with only comments.
 		sql = SqlUtil.makeCleanSql(sql, true, false, '\'', checkNonStandardComments, false);
-		
+
 		if (this.isSingleLine())
 		{
-			Pattern p = Pattern.compile("(?i)[\\r\\n|\\n]+[ \t]*" + StringUtil.quoteRegexMeta(this.delimiter) + "[ \t]*[\\r\\n|\\n]*$");
-			return p.matcher(sql).find();
+			return slePattern.matcher(sql).find();
 		}
 		else
 		{
@@ -218,6 +222,18 @@ public class DelimiterDefinition
 	public int hashCode()
 	{
 		return (this.delimiter + Boolean.toString(this.singleLineDelimiter)).hashCode();
+	}
+
+	private void initPattern()
+	{
+		if (this.singleLineDelimiter && this.delimiter != null)
+		{
+			slePattern = Pattern.compile("(?i)[\\r\\n|\\n]+[ \t]*" + StringUtil.quoteRegexMeta(this.delimiter) + "[ \t]*[\\r\\n|\\n]*$");
+		}
+		else
+		{
+			slePattern = null;
+		}
 	}
 
 }
