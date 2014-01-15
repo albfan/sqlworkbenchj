@@ -429,7 +429,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
     wbOptionsPanel.add(rollbackBeforeDisconnect, gridBagConstraints);
 
     cbIgnoreDropErrors.setSelected(true);
@@ -462,7 +462,7 @@ public class ConnectionEditorPanel
     emptyStringIsNull.setBorder(null);
     emptyStringIsNull.setName("emptyStringIsNull"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -475,11 +475,9 @@ public class ConnectionEditorPanel
     includeNull.setMargin(new java.awt.Insets(2, 0, 2, 2));
     includeNull.setName("includeNullInInsert"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
     wbOptionsPanel.add(includeNull, gridBagConstraints);
 
@@ -489,13 +487,12 @@ public class ConnectionEditorPanel
     removeComments.setMargin(new java.awt.Insets(2, 0, 2, 2));
     removeComments.setName("removeComments"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
     wbOptionsPanel.add(removeComments, gridBagConstraints);
 
     rememberExplorerSchema.setText(ResourceMgr.getString("LblRememberSchema")); // NOI18N
@@ -506,7 +503,9 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
     wbOptionsPanel.add(rememberExplorerSchema, gridBagConstraints);
 
@@ -515,11 +514,10 @@ public class ConnectionEditorPanel
     trimCharData.setBorder(null);
     trimCharData.setName("trimCharData"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
     wbOptionsPanel.add(trimCharData, gridBagConstraints);
 
     controlUpdates.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
@@ -542,7 +540,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
     wbOptionsPanel.add(controlUpdates, gridBagConstraints);
 
     hideWarnings.setText(ResourceMgr.getString("LblHideWarn")); // NOI18N
@@ -551,7 +549,7 @@ public class ConnectionEditorPanel
     hideWarnings.setName("hideWarnings"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
@@ -564,10 +562,10 @@ public class ConnectionEditorPanel
     checkOpenTrans.setName("detectOpenTransaction"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
     wbOptionsPanel.add(checkOpenTrans, gridBagConstraints);
 
     preventNoWhere.setText(ResourceMgr.getString("LblConnPreventNoWhere")); // NOI18N
@@ -578,7 +576,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 6, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
     wbOptionsPanel.add(preventNoWhere, gridBagConstraints);
 
     cbxPromptUsername.setText(ResourceMgr.getString("LblPrompUsername")); // NOI18N
@@ -588,7 +586,7 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
     wbOptionsPanel.add(cbxPromptUsername, gridBagConstraints);
 
@@ -598,7 +596,9 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
     wbOptionsPanel.add(jCheckBox1, gridBagConstraints);
 
