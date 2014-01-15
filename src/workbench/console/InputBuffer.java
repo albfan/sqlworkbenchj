@@ -34,6 +34,7 @@ public class InputBuffer
 {
 	private StringBuilder script;
 	private DelimiterDefinition delimiter;
+	private boolean checkMySQLComments;
 
 	public InputBuffer()
 	{
@@ -68,8 +69,13 @@ public class InputBuffer
 		return isComplete();
 	}
 
+	public void setCheckMySQLComments(boolean flag)
+	{
+		this.checkMySQLComments = flag;
+	}
+
 	public boolean isComplete()
 	{
-		return delimiter.terminatesScript(script.toString());
+		return delimiter.terminatesScript(script.toString(), checkMySQLComments);
 	}
 }

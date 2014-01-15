@@ -21,8 +21,9 @@
  *
  */
 package workbench.sql;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -37,9 +38,9 @@ public class DelimiterDefinitionTest
 		try
 		{
 			String sql = "delete from thetable\nGO\n";
-			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql));
+			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false));
 			sql = "delete from thetable\nGO";
-			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql));
+			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false));
 
 			sql = "create or replace procedure my_test \n" +
 					"as \n" +
@@ -47,9 +48,9 @@ public class DelimiterDefinitionTest
 					"  null;" +
 					"end; \n" +
 					" / ";
-			assertTrue(DelimiterDefinition.DEFAULT_ORA_DELIMITER.terminatesScript(sql));
+			assertTrue(DelimiterDefinition.DEFAULT_ORA_DELIMITER.terminatesScript(sql, false));
 			DelimiterDefinition del = new DelimiterDefinition("/", false);
-			assertTrue(del.terminatesScript(sql));
+			assertTrue(del.terminatesScript(sql, false));
 		}
 		catch (Exception e)
 		{

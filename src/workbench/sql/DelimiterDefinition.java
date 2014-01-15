@@ -23,6 +23,8 @@
 package workbench.sql;
 
 import java.util.regex.Pattern;
+
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -167,19 +169,23 @@ public class DelimiterDefinition
 	 * with this delimiter
 	 * @param sql
 	 */
-	public boolean terminatesScript(String sql)
+	public boolean terminatesScript(String sql, boolean checkNonStandardComments)
 	{
 		if (StringUtil.isEmptyString(sql)) return false;
+
+		// cleaning the SQL from all "noise" ensures that the alternate delimiter is still
+		// recognized even if the script is terminated with only comments.
+		sql = SqlUtil.makeCleanSql(sql, true, false, '\'', checkNonStandardComments, false);
+		
 		if (this.isSingleLine())
 		{
 			Pattern p = Pattern.compile("(?i)[\\r\\n|\\n]+[ \t]*" + StringUtil.quoteRegexMeta(this.delimiter) + "[ \t]*[\\r\\n|\\n]*$");
-			return p.matcher(sql.trim()).find();
+			return p.matcher(sql).find();
 		}
 		else
 		{
-			return sql.trim().endsWith(this.delimiter);
+			return sql.endsWith(this.delimiter);
 		}
-
 	}
 
 	public boolean equals(String other)

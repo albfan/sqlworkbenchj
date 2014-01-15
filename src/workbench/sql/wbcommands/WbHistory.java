@@ -102,7 +102,8 @@ public class WbHistory
 
 	private String getDisplayString(String sql)
 	{
-		String display = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		boolean isMySQL = (this.currentConnection != null ? currentConnection.getMetadata().isMySql() : false);
+		String display = SqlUtil.makeCleanSql(sql, false, false, '\'', isMySQL, true);
 		if (maxLength > -1)
 		{
 			display = StringUtil.getMaxSubstring(display, maxLength - 10);

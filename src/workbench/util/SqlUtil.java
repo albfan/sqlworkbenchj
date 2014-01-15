@@ -1214,7 +1214,7 @@ public class SqlUtil
 	public static int getKeywordPosition(Set<String> keywords, CharSequence sql, int startPos)
 	{
 		if (StringUtil.isEmptyString(sql)) return -1;
-		
+
 		int pos = -1;
 		try
 		{
@@ -1262,12 +1262,12 @@ public class SqlUtil
 
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
-		return makeCleanSql(aSql, keepNewlines, false, '\'');
+		return makeCleanSql(aSql, keepNewlines, false, '\'', false, true);
 	}
 
 	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments)
 	{
-		return makeCleanSql(aSql, keepNewlines, keepComments, '\'');
+		return makeCleanSql(aSql, keepNewlines, keepComments, '\'', false, true);
 	}
 
 	/**
@@ -1280,7 +1280,7 @@ public class SqlUtil
 	 *	@return String
 	 */
 	@SuppressWarnings("AssignmentToForLoopParameter")
-	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, char quote)
+	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, char quote, boolean checkNonStandardComments, boolean removeSemicolon)
 	{
 		if (aSql == null) return null;
 		aSql = aSql.trim();
@@ -1310,7 +1310,7 @@ public class SqlUtil
 				continue;
 			}
 
-			if ((last == '\n' || last == '\r' || i == 0 ) && (c == '#'))
+			if (checkNonStandardComments && (last == '\n' || last == '\r' || i == 0 ) && (c == '#'))
 			{
 				lineComment = true;
 			}
@@ -1364,7 +1364,7 @@ public class SqlUtil
 			last = c;
 		}
 		String s = newSql.toString().trim();
-		if (s.endsWith(";")) s = s.substring(0, s.length() - 1).trim();
+		if (removeSemicolon && s.endsWith(";")) s = s.substring(0, s.length() - 1).trim();
 		return s;
 	}
 

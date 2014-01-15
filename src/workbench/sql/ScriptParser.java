@@ -280,7 +280,8 @@ public class ScriptParser
 		if (this.alternateDelimiter == null) return;
 		if (this.originalScript == null) return;
 
-		useAlternateDelimiter = alternateDelimiter.terminatesScript(originalScript);
+		boolean isMySQL = "#".equals(this.alternateLineComment);
+		useAlternateDelimiter = alternateDelimiter.terminatesScript(originalScript, isMySQL);
 		this.commands = null;
 	}
 

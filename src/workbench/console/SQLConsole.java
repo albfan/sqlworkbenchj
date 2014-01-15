@@ -34,6 +34,7 @@ import workbench.resource.Settings;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 
 import workbench.gui.profiles.ProfileKey;
@@ -305,6 +306,9 @@ public class SQLConsole
 						startOfStatement = true;
 					}
 
+					// this needs to be tested after each statement as the connection might have changed.
+					buffer.setCheckMySQLComments(isMySQL(runner));
+
 					// Restore the printing consumer in case a WbExport changed it
 					if (printer != null && runner.getResultSetConsumer() == null)
 					{
@@ -345,6 +349,16 @@ public class SQLConsole
 			System.err.println(ExceptionUtil.getDisplay(th));
 			System.exit(1);
 		}
+	}
+
+	private boolean isMySQL(BatchRunner runner)
+	{
+		if (runner == null) return false;
+		WbConnection conn = runner.getConnection();
+		if (conn == null) return false;
+		DbMetadata meta = conn.getMetadata();
+		if (meta == null) return false;
+		return meta.isMySql();
 	}
 
 	private void handleHistory(BatchRunner runner, String stmt)

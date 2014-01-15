@@ -1718,7 +1718,7 @@ public class Settings
 			delim = con.getProfile().getAlternateDelimiter();
 		}
 		return (delim == null ? getAlternateDelimiter() : delim);
-	}
+		}
 
 	public DelimiterDefinition getAlternateDelimiter()
 	{

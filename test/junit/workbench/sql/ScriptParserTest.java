@@ -28,14 +28,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -519,16 +523,18 @@ public class ScriptParserTest
 	{
 		String sql = "SELECT id \n" +
 								 "FROM person \n" +
-								 "# \n" +
+								 "@@ \n" +
 								 " \n" +
 								 " \n" +
 								 "select * \n" +
 								 "from country \n" +
-								 "#";
+								 "@@";
 		try
 		{
 			ScriptParser p = new ScriptParser(sql);
-			p.setAlternateDelimiter(new DelimiterDefinition("#", true));
+			p.setAlternateDelimiter(new DelimiterDefinition("@@", true));
+			p.setCheckForSingleLineCommands(false);
+			p.setSupportOracleInclude(false);
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 
@@ -556,7 +562,7 @@ public class ScriptParserTest
 					"	 END;\n"+
 					"/";
 			p.setScript(sql);
-			p.setAlternateDelimiter(new DelimiterDefinition("/", true));
+			p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 1, size);
 			assertEquals(sql.substring(0, sql.lastIndexOf('/')).trim(), p.getCommand(0));
@@ -827,7 +833,7 @@ public class ScriptParserTest
 		String verb = SqlUtil.getSqlVerb(p.getCommand(1));
 		assertEquals("drop", verb.toLowerCase());
 		String s = p.getCommand(0);
-		String clean = SqlUtil.makeCleanSql(s, false, false, '\'');
+		String clean = SqlUtil.makeCleanSql(s, false, false, '\'', false, true);
 		assertEquals("alter table participants drop constraint r_05", clean);
 		s = p.getCommand(2);
 		assertEquals("@include.sql", s);
@@ -839,7 +845,7 @@ public class ScriptParserTest
 		verb = SqlUtil.getSqlVerb(p.getCommand(1));
 		assertEquals("drop", verb.toLowerCase());
 		s = p.getCommand(0);
-		clean = SqlUtil.makeCleanSql(s, false, false, '\'');
+		clean = SqlUtil.makeCleanSql(s, false, false, '\'', false, true);
 		assertEquals("alter table participants drop constraint r_05", clean);
 		s = p.getCommand(2);
 		assertEquals("@include.sql", s);
