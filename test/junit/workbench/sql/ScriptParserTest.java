@@ -476,6 +476,42 @@ public class ScriptParserTest
 		p.setCheckForSingleLineCommands(false);
 		int size = p.getSize();
 		assertEquals(2, size);
+
+		sql =
+			"use Master \n" +
+			"GO \n" +
+			" \n" +
+			"If  Exists (select * from master.dbo.syslogins where name = 'arthur' and dbname = 'master') \n" +
+			"	drop login arthur \n" +
+			"create login arthur with Password = 'dent' \n" +
+			"GO \n" +
+			" \n" +
+			"If  Exists (select * from master.dbo.syslogins where name = 'ford' and dbname = 'master') \n" +
+			"	drop login ford \n" +
+			"create login ford with Password = 'prefect' \n" +
+			"GO \n" +
+			" \n" +
+			" \n" +
+			"-- CREATE database arthur \n" +
+			"-- GO \n" +
+			" \n" +
+			"-- use arthur \n" +
+			"-- GO \n" +
+			" \n" +
+			"-- Create User foo_admin for login arthur \n" +
+			"-- GO \n" +
+			" \n" +
+			" \n" +
+			"-- use master \n" +
+			"-- GO \n" +
+			"-- drop database arthur \n" +
+			"-- GO";
+
+		p = new ScriptParser(sql);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
+		p.setCheckForSingleLineCommands(true);
+		size = p.getSize();
+		assertEquals(3, size);
 	}
 
 	@Test
