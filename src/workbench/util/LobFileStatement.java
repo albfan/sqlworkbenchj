@@ -34,10 +34,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
-import workbench.db.JdbcUtils;
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.JdbcUtils;
+import workbench.db.WbConnection;
 
 /**
  * A class to analyze the {$blobfile= } and {$clobfile= }
@@ -189,12 +190,11 @@ public class LobFileStatement
 	public void done()
 	{
 		if (this.parameters == null) return;
-
-		for (int i = 0; i < parameters.length; i++)
+		for (LobFileParameter parameter : parameters)
 		{
-			if (parameters[i] != null)
+			if (parameter != null)
 			{
-				parameters[i].close();
+				parameter.close();
 			}
 		}
 	}
