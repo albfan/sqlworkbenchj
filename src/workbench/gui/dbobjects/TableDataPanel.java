@@ -371,24 +371,32 @@ public class TableDataPanel
 		this.reset();
 	}
 
-	@Override
-	public void reset()
+	private void storeSort()
 	{
-		if (!initialized) return;
-
-		if (this.isRetrieving()) return;
 		if (Settings.getInstance().getRememberSortInDbExplorer())
 		{
-			// getCurrentSort() must be called before calling
-			// clearContent() as the sort definition is maintained
-			// in the TableModel and that is deleted when the data is cleared
 			this.lastSort = dataDisplay.getCurrentSort();
 		}
 		else
 		{
 			this.lastSort = null;
 		}
+	}
+
+	@Override
+	public void reset()
+	{
+		if (!initialized) return;
+
+		if (this.isRetrieving()) return;
+
+		// storeSort() must be called before calling
+		// clearContent() as the sort definition is maintained
+		// in the TableModel and that is deleted when the data is cleared
+		storeSort();
+
 		storeColumnOrder();
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
@@ -1121,6 +1129,9 @@ public class TableDataPanel
 		initGui();
 		long rows = -1;
 		boolean ctrlPressed = this.reloadAction.ctrlPressed();
+
+		storeSort();
+		storeColumnOrder();
 
 		if (this.autoloadRowCount)
 		{
