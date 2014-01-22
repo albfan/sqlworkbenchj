@@ -54,6 +54,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.resource.GuiSettings;
 
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
@@ -1503,7 +1504,16 @@ public class DataStore
 		ResultNameParser parser = new ResultNameParser();
 		if (resultName == null)
 		{
-			setResultName(parser.getResultName(sql));
+			String name = parser.getResultName(sql);
+			if (name == null && GuiSettings.getUseTablenameAsResultName())
+			{
+				List<String> tables = SqlUtil.getTables(aSql, false, this.originalConnection);
+				if (tables.size() > 0)
+				{
+					name = tables.get(0);
+				}
+			}
+			setResultName(name);
 		}
 	}
 

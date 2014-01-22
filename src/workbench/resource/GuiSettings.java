@@ -973,6 +973,16 @@ public class GuiSettings
 		}
 	}
 
+	public static boolean getUseTablenameAsResultName()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.data.resultname.firsttable", false);
+	}
+
+	public static void setUseTablenameAsResultName(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.data.resultname.firsttable", flag);
+	}
+
 	public static boolean getDefaultAppendResults()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.data.append.results", false);
