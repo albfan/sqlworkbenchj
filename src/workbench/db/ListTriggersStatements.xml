@@ -344,6 +344,7 @@ from syscat.triggers</string>
 	select tr.name as trigger_name,
 	case 1
 	   when ObjectProperty(tr.object_id, 'ExecIsAfterTrigger') then 'AFTER'
+     when ObjectProperty(tr.object_id, 'ExecIsInsteadOfTrigger') then 'INSTEAD OF'
 	   else 'BEFORE'
 	end  as trigger_type,
 	case 1
@@ -372,6 +373,7 @@ from syscat.triggers</string>
 	select tr.name as trigger_name,
 	case 1
 	   when ObjectProperty( tr.id, 'ExecIsAfterTrigger') then 'AFTER'
+     when ObjectProperty(tr.object_id, 'ExecIsInsteadOfTrigger') then 'INSTEAD OF'
 	   else 'BEFORE'
 	end  as trigger_type,
 	case 1
