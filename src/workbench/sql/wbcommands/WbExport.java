@@ -177,6 +177,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_XML_VERSION, StringUtil.stringToList("1.0", "1.1"));
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
+		cmdLine.addArgument(WbImport.ARG_FILE_EXT);
 		cmdLine.addArgument(ARG_ESCAPE_HTML, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CREATEFULL_HTML_PAGE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_PREDATA_HTML);
@@ -643,6 +644,12 @@ public class WbExport
 			exporter.setNullString(cmdLine.getValue(ARG_NULL_STRING, null));
 		}
 
+		String ext = cmdLine.getValue(WbImport.ARG_FILE_EXT, null);
+		if (ext != null)
+		{
+			defaultExtension = ext;
+		}
+		
 		exporter.setAppendToFile(appendToFile);
 
 		String ending = cmdLine.getValue(ARG_LINEENDING);
