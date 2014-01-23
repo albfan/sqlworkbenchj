@@ -379,7 +379,8 @@ public class OracleTypeReader
 		if (object == null) return null;
 		if (!handlesType(object.getObjectType())) return null;
 		OracleObjectType type = getObjectDefinition(con, object);
-
+		if (type == null) return null;
+		
 		String source = type.getSource();
 
 		if (StringUtil.isBlank(source))
