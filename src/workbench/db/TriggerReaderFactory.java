@@ -22,6 +22,7 @@
  */
 package workbench.db;
 
+import workbench.db.mssql.SqlServerTriggerReader;
 import workbench.db.postgres.PostgresTriggerReader;
 
 /**
@@ -29,7 +30,7 @@ import workbench.db.postgres.PostgresTriggerReader;
  *
  * Currently only one specialized TriggerReader is used for Postgres, for all
  * other DBMS, the DefaultTriggerReader is used.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class TriggerReaderFactory
@@ -42,6 +43,10 @@ public class TriggerReaderFactory
 		if (con.getMetadata().isPostgres())
 		{
 			return new PostgresTriggerReader(con);
+		}
+		if (con.getMetadata().isSqlServer())
+		{
+			return new SqlServerTriggerReader(con);
 		}
 		return new DefaultTriggerReader(con);
 	}

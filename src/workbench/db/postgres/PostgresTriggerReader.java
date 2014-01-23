@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.DefaultTriggerReader;
 import workbench.db.JdbcUtils;
@@ -83,6 +84,12 @@ public class PostgresTriggerReader
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Using query=\n" + sql);
+		}
+
 
 		int triggerCount = 0;
 		try
@@ -160,6 +167,11 @@ public class PostgresTriggerReader
 				" join pg_namespace nsp on nsp.oid = pr.pronamespace \n" +
 				"where trg.evtname = ?";
 
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Using query=\n" + SqlUtil.replaceParameters(sql, triggerName));
+			}
+
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, triggerName);
 			rs = stmt.executeQuery();
@@ -227,6 +239,11 @@ public class PostgresTriggerReader
 			query.append(sql);
 			query.append("WHERE trg.tgname = ? \n");
 			query.append("  AND tblsch.nspname = ? ");
+
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Using query=\n" + SqlUtil.replaceParameters(sql, triggerName, triggerTable.getSchema()));
+			}
 
 			stmt = dbConnection.getSqlConnection().prepareStatement(query.toString());
 			stmt.setString(1, triggerName);

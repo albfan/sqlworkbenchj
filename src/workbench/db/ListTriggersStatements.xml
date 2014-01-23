@@ -341,39 +341,41 @@ from syscat.triggers</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
-      select *
+      select trigger_name,
+             trigger_type,
+             trigger_event,
+             case
+                when table_name is not null and table_schema is not null then table_schema + '.' + table_name
+                else table_name
+             end as table_name,
+             null as remarks,
+             null as status
       from (
         select tr.name as trigger_name,
-        case
-           when ObjectProperty(tr.object_id, 'ExecIsAfterTrigger') = 1 then 'AFTER'
-           when ObjectProperty(tr.object_id, 'ExecIsInsteadOfTrigger') = 1 then 'INSTEAD OF'
-           when te.type_desc is not null then 'ON DATABASE'
-           else 'BEFORE'
-        end  as trigger_type,
-        case
-           when ObjectProperty(tr.object_id, 'ExecIsUpdateTrigger') = 1 then 'UPDATE'
-           when ObjectProperty(tr.object_id, 'ExecIsDeleteTrigger') = 1 then 'DELETE'
-           when ObjectProperty(tr.object_id, 'ExecIsInsertTrigger') = 1then 'INSERT'
-           when te.type_desc is not null then te.type_desc
-        end as trigger_event,
-        tab.name as table_name
+               case
+                  when ObjectProperty(tr.object_id, 'ExecIsAfterTrigger') = 1 then 'AFTER'
+                  when ObjectProperty(tr.object_id, 'ExecIsInsteadOfTrigger') = 1 then 'INSTEAD OF'
+                  else 'BEFORE'
+               end  as trigger_type,
+               case
+                  when ObjectProperty(tr.object_id, 'ExecIsUpdateTrigger') = 1 then 'UPDATE'
+                  when ObjectProperty(tr.object_id, 'ExecIsDeleteTrigger') = 1 then 'DELETE'
+                  when ObjectProperty(tr.object_id, 'ExecIsInsertTrigger') = 1then 'INSERT'
+               end as trigger_event,
+               tab.name as table_name,
+               sh.name as table_schema
         from sys.triggers tr with (nolock)
-          left join sys.objects tab with (nolock) on tab.object_id = tr.parent_id
-          left join sys.trigger_events te with (nolock) on te.object_id = tr.object_id
+          join sys.objects tab with (nolock) on tab.object_id = tr.parent_id
+          join sys.schemas sh with (nolock) on sh.schema_id = tab.schema_id
         where tr.is_ms_shipped = 0
-        union all
-        select tr.name,
-               'ON SERVER' as trigger_type,
-               te.type_desc as trigger_event,
-               null as table_name
-        from sys.server_triggers tr
-          join sys.server_trigger_events te on te.object_id = tr.object_id
-        where is_ms_shipped = 0
       ) trg
      </string>
     </void>
     <void property="objectNameField">
-     <string>trigger_name</string>
+     <string>table_name</string>
+    </void>
+    <void property="schemaField">
+      <string>table_schema</string>
     </void>
     <void property="orderBy">
      <string>ORDER BY trigger_name</string>
@@ -387,16 +389,19 @@ from syscat.triggers</string>
     <void property="baseSql">
      <string>
 	select tr.name as trigger_name,
-	case 1
-	   when ObjectProperty( tr.id, 'ExecIsAfterTrigger') then 'AFTER'
-     when ObjectProperty(tr.object_id, 'ExecIsInsteadOfTrigger') then 'INSTEAD OF'
-	   else 'BEFORE'
-	end  as trigger_type,
-	case 1
-	   when ObjectProperty( tr.id, 'ExecIsUpdateTrigger') then 'UPDATE'
-	   when ObjectProperty( tr.id, 'ExecIsDeleteTrigger') then 'DELETE'
-     when ObjectProperty( tr.id, 'ExecIsInsertTrigger') then 'INSERT'
-  end as trigger_event, tab.name as table_name
+         case
+            when ObjectProperty( tr.id, 'ExecIsAfterTrigger') = 1 then 'AFTER'
+            when ObjectProperty(tr.object_id, 'ExecIsInsteadOfTrigger') = 1 then 'INSTEAD OF'
+            else 'BEFORE'
+         end  as trigger_type,
+         case
+             when ObjectProperty( tr.id, 'ExecIsUpdateTrigger') = 1 then 'UPDATE'
+             when ObjectProperty( tr.id, 'ExecIsDeleteTrigger') = 1 then 'DELETE'
+             when ObjectProperty( tr.id, 'ExecIsInsertTrigger') = 1 then 'INSERT'
+          end as trigger_event,
+       tab.name as table_name,
+       null as remarks,
+       null as status
 	from sysobjects tr with (nolock)
 	  join sysobjects tab with (nolock) on tab.id = tr.parent_obj
 	where  tr.xtype = 'TR'
@@ -413,6 +418,11 @@ from syscat.triggers</string>
 
   <void method="put">
    <string>Microsoft SQL Server-7</string>
+   <object idref="list_sql8"/>
+  </void>
+
+  <void method="put">
+   <string>Microsoft SQL Server-6</string>
    <object idref="list_sql8"/>
   </void>
 
@@ -451,7 +461,7 @@ AND trg.tgname not like 'pg_sync_pg%'
      <string>tbl.relname</string>
     </void>
     <void property="schemaField">
-         <string>ns.nspname</string>
+      <string>ns.nspname</string>
     </void>
     <void property="orderBy">
      <string>order by 1</string>

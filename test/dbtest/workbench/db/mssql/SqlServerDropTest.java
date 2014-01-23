@@ -102,7 +102,8 @@ public class SqlServerDropTest
 		ScriptParser p = new ScriptParser(sql.toString());
 		assertEquals(2, p.getSize());
 		String drop = p.getCommand(0);
-		assertEquals("DROP TABLE dbo.foo IF EXISTS", drop);
+		//System.out.println(drop);
+		assertEquals("IF OBJECT_ID('dbo.foo', 'U') IS NOT NULL DROP TABLE dbo.foo", drop);
 		drop = p.getCommand(1);
 		assertEquals("COMMIT", drop);
 	}
