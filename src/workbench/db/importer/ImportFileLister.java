@@ -198,7 +198,7 @@ public class ImportFileLister
 			String fname = f.getName();
 			for (String contained : containedNames)
 			{
-				if (fname.indexOf(contained) > -1)
+				if (fname.contains(contained))
 				{
 					LogMgr.logDebug("ImportFileLister.<init>", "Ignoring file: " + f.getFullPath());
 					toRemove.add(f);

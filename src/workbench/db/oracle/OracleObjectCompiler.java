@@ -49,7 +49,7 @@ public class OracleObjectCompiler
 	private OracleErrorInformationReader errorReader;
 
 	private static final Set<String> COMPILABLE_TYPES = CollectionUtil.caseInsensitiveSet(
-		"VIEW", "PROCEDURE", "MATERIALIZED VIEW", "FUNCTION", "PACKAGE", "TRIGGER"
+		"VIEW", "PROCEDURE", "MATERIALIZED VIEW", "FUNCTION", "PACKAGE", "TRIGGER", "TYPE"
 	);
 
 	public OracleObjectCompiler(WbConnection conn)
