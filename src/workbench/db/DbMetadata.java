@@ -194,7 +194,7 @@ public class DbMetadata
 
 		String productLower = this.productName.toLowerCase();
 
-		if (productLower.indexOf("postgres") > - 1)
+		if (productLower.contains("postgres"))
 		{
 			this.isPostgres = true;
 			this.dataTypeResolver = new PostgresDataTypeResolver();
@@ -209,7 +209,7 @@ public class DbMetadata
 			extenders.add(typeReader);
 			objectListEnhancer = typeReader;
 		}
-		else if (productLower.indexOf("oracle") > -1 && productLower.indexOf("lite ordbms") == -1)
+		else if (productLower.contains("oracle") && !productLower.contains("lite ordbms"))
 		{
 			isOracle = true;
 			dataTypeResolver = new OracleDataTypeResolver(aConnection);
@@ -217,7 +217,7 @@ public class DbMetadata
 			extenders.add(new OracleTypeReader());
 			objectListEnhancer = new OracleObjectListEnhancer(); // to cleanup MVIEW type information
 		}
-		else if (productLower.indexOf("hsql") > -1)
+		else if (productLower.contains("hsql"))
 		{
 			this.isHsql = true;
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "2.0"))
@@ -232,7 +232,7 @@ public class DbMetadata
 				extenders.add(new HsqlTypeReader());
 			}
 		}
-		else if (productLower.indexOf("firebird") > -1)
+		else if (productLower.contains("firebird"))
 		{
 			this.isFirebird = true;
 			// Jaybird 2.x reports the Firebird version in the
@@ -246,7 +246,7 @@ public class DbMetadata
 			LogMgr.logInfo("DbMetadata.<init>", "Using DBID=" + this.dbId);
 			extenders.add(new FirebirdDomainReader());
 		}
-		else if (productLower.indexOf("sql server") > -1)
+		else if (productLower.contains("sql server"))
 		{
 			isSqlServer = true;
 
@@ -269,7 +269,7 @@ public class DbMetadata
 				schemaInfoReader = new SqlServerSchemaInfoReader(dbConnection);
 			}
 		}
-		else if (productLower.indexOf("db2") > -1)
+		else if (productLower.contains("db2"))
 		{
 			procedureReader = new Db2ProcedureReader(dbConnection, getDbId());
 
@@ -279,16 +279,16 @@ public class DbMetadata
 				extenders.add(new DB2TypeReader());
 			}
 		}
-		else if (productLower.indexOf("mysql") > -1)
+		else if (productLower.contains("mysql"))
 		{
 			this.isMySql = true;
 			objectListEnhancer = new MySQLTableCommentReader();
 		}
-		else if (productLower.indexOf("cloudscape") > -1)
+		else if (productLower.contains("cloudscape"))
 		{
 			this.isApacheDerby = true;
 		}
-		else if (productLower.indexOf("derby") > -1)
+		else if (productLower.contains("derby"))
 		{
 			this.isApacheDerby = true;
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "10.6"))
@@ -300,15 +300,15 @@ public class DbMetadata
 		{
 			extenders.add(new NuoDBDomainReader());
 		}
-		else if (productLower.indexOf("sqlite") > -1)
+		else if (productLower.contains("sqlite"))
 		{
 			dataTypeResolver = new SQLiteDataTypeResolver();
 		}
-		else if (productLower.indexOf("excel") > -1)
+		else if (productLower.contains("excel"))
 		{
 			isExcel = true;
 		}
-		else if (productLower.indexOf("access") > -1)
+		else if (productLower.contains("access"))
 		{
 			isAccess = true;
 		}
@@ -2439,7 +2439,7 @@ public class DbMetadata
 	private boolean isIndexType(String type)
 	{
 		if (type == null) return false;
-		return (type.indexOf("INDEX") > -1);
+		return (type.contains("INDEX"));
 	}
 
 	private synchronized Collection<String> retrieveTableTypes()
@@ -2544,7 +2544,7 @@ public class DbMetadata
 	 *
 	 * @param type the type to check
 	 * @return true if it's a table of some kind.
-	 * @see #isTableType(java.lang.String) 
+	 * @see #isTableType(java.lang.String)
 	 */
 	public boolean isExtendedTableType(String type)
 	{
