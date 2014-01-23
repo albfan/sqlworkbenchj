@@ -11,8 +11,8 @@ set wbdir=%~dp0
 if "%1"=="console" goto console_mode
 
 :gui
-start "SQL Workbench/J" "%JAVA_BINPATH%javaw"^ 
-      -Xmx256m 
+start "SQL Workbench/J" "%JAVA_BINPATH%javaw"^
+      -Xmx256m ^
       -Dvisualvm.display.name=SQLWorkbench ^
       -Dsun.awt.keepWorkingSetOnMinimize=true ^
       -jar %wbdir%sqlworkbench.jar %*
