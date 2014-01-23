@@ -80,7 +80,7 @@ public class SqlServerTriggerReader
 			"from sys.server_triggers tr with (nolock)  \n" +
 			"  join sys.server_trigger_events te with (nolock) on te.object_id = tr.object_id \n" +
 			"where is_ms_shipped = 0" +
-			"  and tr.parent_class_desc = 'DATABASE'";
+			"  and tr.parent_class_desc = 'SERVER'";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

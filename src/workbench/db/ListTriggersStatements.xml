@@ -341,41 +341,31 @@ from syscat.triggers</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
-      select trigger_name,
-             trigger_type,
-             trigger_event,
+      select tr.name as trigger_name,
              case
-                when table_name is not null and table_schema is not null then table_schema + '.' + table_name
-                else table_name
-             end as table_name,
+                when ObjectProperty(tr.object_id, 'ExecIsAfterTrigger') = 1 then 'AFTER'
+                when ObjectProperty(tr.object_id, 'ExecIsInsteadOfTrigger') = 1 then 'INSTEAD OF'
+                else 'BEFORE'
+             end  as trigger_type,
+             case
+                when ObjectProperty(tr.object_id, 'ExecIsUpdateTrigger') = 1 then 'UPDATE'
+                when ObjectProperty(tr.object_id, 'ExecIsDeleteTrigger') = 1 then 'DELETE'
+                when ObjectProperty(tr.object_id, 'ExecIsInsertTrigger') = 1then 'INSERT'
+             end as trigger_event,
+             tab.name + '.' + sh.name as  table_name,
              null as remarks,
              null as status
-      from (
-        select tr.name as trigger_name,
-               case
-                  when ObjectProperty(tr.object_id, 'ExecIsAfterTrigger') = 1 then 'AFTER'
-                  when ObjectProperty(tr.object_id, 'ExecIsInsteadOfTrigger') = 1 then 'INSTEAD OF'
-                  else 'BEFORE'
-               end  as trigger_type,
-               case
-                  when ObjectProperty(tr.object_id, 'ExecIsUpdateTrigger') = 1 then 'UPDATE'
-                  when ObjectProperty(tr.object_id, 'ExecIsDeleteTrigger') = 1 then 'DELETE'
-                  when ObjectProperty(tr.object_id, 'ExecIsInsertTrigger') = 1then 'INSERT'
-               end as trigger_event,
-               tab.name as table_name,
-               sh.name as table_schema
-        from sys.triggers tr with (nolock)
-          join sys.objects tab with (nolock) on tab.object_id = tr.parent_id
-          join sys.schemas sh with (nolock) on sh.schema_id = tab.schema_id
-        where tr.is_ms_shipped = 0
-      ) trg
+      from sys.triggers tr with (nolock)
+        join sys.objects tab with (nolock) on tab.object_id = tr.parent_id
+        join sys.schemas sh with (nolock) on sh.schema_id = tab.schema_id
+      where tr.is_ms_shipped = 0
      </string>
     </void>
     <void property="objectNameField">
-     <string>table_name</string>
+     <string>tab.name</string>
     </void>
     <void property="schemaField">
-      <string>table_schema</string>
+      <string>sh.name</string>
     </void>
     <void property="orderBy">
      <string>ORDER BY trigger_name</string>
