@@ -27,13 +27,17 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.lang.reflect.Method;
 import java.util.Set;
+
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
-import workbench.gui.components.TabbedPaneUIFactory;
+
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+
+import workbench.gui.components.TabbedPaneUIFactory;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -136,7 +140,7 @@ public class LnFHelper
 	private boolean isWindowsLookAndFeel()
 	{
 		String lnf = UIManager.getLookAndFeel().getClass().getName();
-		return lnf.indexOf("plaf.windows") > -1;
+		return lnf.contains("plaf.windows");
 	}
 
 	private void scaleDefaultFonts()
@@ -145,7 +149,7 @@ public class LnFHelper
 
 		UIDefaults def = UIManager.getDefaults();
 		FontScaler scaler = new FontScaler();
-		
+
 		for (String property : fontProperties)
 		{
 			if (!noScale.contains(property))
@@ -258,24 +262,24 @@ public class LnFHelper
 	{
 		try
 		{
-			if (clsname.indexOf("com.sun.java.swing.plaf.windows") > -1)
+			if (clsname.contains("com.sun.java.swing.plaf.windows"))
 			{
 				String osVersion = System.getProperty("os.version", "1.0");
 				Float version = Float.valueOf(osVersion);
-				if (version.floatValue() <= 5.0)
+				if (version <= 5.0)
 				{
 					isWindowsClassic = true;
 				}
 				else
 				{
-					isWindowsClassic = (clsname.indexOf("WindowsClassicLookAndFeel") > -1);
+					isWindowsClassic = clsname.contains("WindowsClassicLookAndFeel");
 					if (!isWindowsClassic)
 					{
 						Toolkit toolkit = Toolkit.getDefaultToolkit();
 						Boolean themeActive = (Boolean) toolkit.getDesktopProperty("win.xpstyle.themeActive");
 						if (themeActive != null)
 						{
-							isWindowsClassic = !themeActive.booleanValue();
+							isWindowsClassic = !themeActive;
 						}
 						else
 						{

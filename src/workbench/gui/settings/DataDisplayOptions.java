@@ -94,6 +94,7 @@ public class DataDisplayOptions
 		showMaxRowsTooltip.setSelected(GuiSettings.getShowMaxRowsTooltip());
 		nullString.setText(GuiSettings.getDisplayNullString());
 		showGeneratingSQL.setSelected(GuiSettings.getShowResultSQL());
+		useTableName.setSelected(GuiSettings.getUseTablenameAsResultName());
 		int align = GuiSettings.getNumberDataAlignment();
 		if (align == SwingConstants.LEFT)
 		{
@@ -132,6 +133,7 @@ public class DataDisplayOptions
 		GuiSettings.setWrapMultilineRenderer(wrapMultineRender.isSelected());
 		GuiSettings.setShowMaxRowsTooltip(showMaxRowsTooltip.isSelected());
 		GuiSettings.setDefaultAppendResults(appendResults.isSelected());
+		GuiSettings.setUseTablenameAsResultName(useTableName.isSelected());
 		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
 		Settings.getInstance().setSortLocale(dl.getLocale());
 		if (alignmentDropDown.getSelectedIndex() == 1)
@@ -233,6 +235,7 @@ public class DataDisplayOptions
     nullStringLabel = new javax.swing.JLabel();
     nullString = new javax.swing.JTextField();
     appendResults = new javax.swing.JCheckBox();
+    useTableName = new javax.swing.JCheckBox();
     colWidthPanel = new javax.swing.JPanel();
     jPanel3 = new javax.swing.JPanel();
     autoColWidth = new javax.swing.JCheckBox();
@@ -295,7 +298,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
     generalPanel.add(retrieveComments, gridBagConstraints);
 
     jLabel5.setLabelFor(defMaxRows);
@@ -303,18 +306,20 @@ public class DataDisplayOptions
     jLabel5.setToolTipText(ResourceMgr.getString("d_LblDefMaxRows")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(3, 16, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(5, 16, 0, 7);
     generalPanel.add(jLabel5, gridBagConstraints);
 
     defMaxRows.setColumns(6);
     defMaxRows.setToolTipText(ResourceMgr.getString("d_LblDefMaxRows")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 19);
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
     generalPanel.add(defMaxRows, gridBagConstraints);
 
     showRowNumbers.setText(ResourceMgr.getString("LblShowRowNumbers")); // NOI18N
@@ -324,7 +329,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
     generalPanel.add(showRowNumbers, gridBagConstraints);
 
     showMaxRowsWarn.setText(ResourceMgr.getString("LblShowMaxRowsWarning")); // NOI18N
@@ -337,7 +342,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 16, 0, 0);
     generalPanel.add(showMaxRowsWarn, gridBagConstraints);
 
     showMaxRowsTooltip.setText(ResourceMgr.getString("LblShowMaxRowsTooltip")); // NOI18N
@@ -348,8 +353,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 16, 0, 0);
     generalPanel.add(showMaxRowsTooltip, gridBagConstraints);
 
     showGeneratingSQL.setText(ResourceMgr.getString("LblShowGenSQL")); // NOI18N
@@ -359,25 +363,28 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
     generalPanel.add(showGeneratingSQL, gridBagConstraints);
 
     alignLabel.setText(ResourceMgr.getString("LblAlignNum")); // NOI18N
     alignLabel.setToolTipText(ResourceMgr.getString("d_LblAlignNum")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 16, 0, 0);
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 0);
     generalPanel.add(alignLabel, gridBagConstraints);
 
     alignmentDropDown.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Left", "Right" }));
     alignmentDropDown.setSelectedItem("Right");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 19);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
     generalPanel.add(alignmentDropDown, gridBagConstraints);
 
     boldHeader.setText(ResourceMgr.getString("LblBoldHeader")); // NOI18N
@@ -387,7 +394,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     generalPanel.add(boldHeader, gridBagConstraints);
 
     nullStringLabel.setText(ResourceMgr.getString("LblNullString")); // NOI18N
@@ -396,15 +403,15 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(6, 16, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 0);
     generalPanel.add(nullStringLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 30);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
     generalPanel.add(nullString, gridBagConstraints);
 
     appendResults.setText(ResourceMgr.getString("LblAppendDefault")); // NOI18N
@@ -414,8 +421,19 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
     generalPanel.add(appendResults, gridBagConstraints);
+
+    useTableName.setText(ResourceMgr.getString("LblUseTblName")); // NOI18N
+    useTableName.setToolTipText(ResourceMgr.getString("d_LblUseTblName")); // NOI18N
+    useTableName.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(3, 16, 0, 7);
+    generalPanel.add(useTableName, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -684,6 +702,7 @@ public class DataDisplayOptions
   private javax.swing.JCheckBox showMaxRowsTooltip;
   private javax.swing.JCheckBox showMaxRowsWarn;
   private javax.swing.JCheckBox showRowNumbers;
+  private javax.swing.JCheckBox useTableName;
   private javax.swing.JCheckBox wrapMultineRender;
   private javax.swing.JCheckBox wrapMultlineEdit;
   // End of variables declaration//GEN-END:variables

@@ -145,6 +145,29 @@
    <string>Microsoft SQL Server</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
+     <string>
+  select *
+  from (
+    select tr.name, sm.definition
+    from sys.sql_modules sm with (nolock)
+      join sys.triggers tr with (nolock) on tr.object_id = sm.object_id
+    union all
+    select tr.name, sm.definition
+    from sys.server_sql_modules sm with (nolock)
+      join sys.server_triggers tr with (nolock) on tr.object_id = sm.object_id
+  ) trg
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Microsoft SQL Server-8</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>exec sp_helptext</string>
     </void>
     <void property="isProcedureCall">
@@ -171,21 +194,6 @@ FROM pg_trigger trg
     </void>
     <void property="objectNameField">
      <string>trg.tgname</string>
-    </void>
-   </object>
-  </void>
-
-  <void method="put">
-   <string>Microsoft SQL Server</string>
-   <object class="workbench.db.GetMetaDataSql">
-    <void property="baseSql">
-     <string>exec sp_helptext</string>
-    </void>
-    <void property="isProcedureCall">
-     <boolean>true</boolean>
-    </void>
-    <void property="objectNameArgumentPos">
-     <int>1</int>
     </void>
    </object>
   </void>
