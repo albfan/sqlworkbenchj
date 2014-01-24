@@ -565,8 +565,8 @@ public class TableDependency
 		{
 			int row = result.addRow();
 			result.setValue(row, 0, node.getFkName());
-			result.setValue(row, 1, node.getSourceColumnsList());
-			result.setValue(row, 2, node.getTable().getTableExpression(connection) + "(" + node.getTargetColumnsList() + ")");
+			result.setValue(row, 1, node.getTargetColumnsList());
+			result.setValue(row, 2, node.getTable().getTableExpression(connection) + "(" + node.getSourceColumnsList() + ")");
 			result.setValue(row, 3, node.getUpdateAction());
 			result.setValue(row, 4, node.getDeleteAction());
 			result.setValue(row, 5, node.getDeferrableType());
