@@ -384,6 +384,9 @@
           <a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a>
         </li>
         <li>
+          <a href="Workbench-Build{$devBuildNumber}-with-office-libs.zip">Download development build including office libraries</a>
+        </li>
+        <li>
           <a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a>
         </li>
         <li>
