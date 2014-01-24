@@ -47,7 +47,7 @@ public class SqlServerUniqueConstraintReader
 	@Override
 	public void processIndexList(List<IndexDefinition> indexList, WbConnection con)
 	{
-		if (!isSupported(con)) return;
+		if (!SqlServerUtil.isSqlServer2005(con)) return;
 
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;
@@ -128,11 +128,5 @@ public class SqlServerUniqueConstraintReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
-
-	private boolean isSupported(WbConnection con)
-	{
-		return SqlServerUtil.isSqlServer2005(con);
-	}
-
 
 }

@@ -24,6 +24,7 @@ package workbench.db.objectcache;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -133,6 +134,9 @@ class ObjectCache
 		{
 			return CollectionUtil.arrayList((String)null);
 		}
+
+		Collection<String> ignore = dbConn.getDbSettings().getIgnoreCompletionSchemas();
+		schemas.removeAll(ignore);
 		return schemas;
 	}
 

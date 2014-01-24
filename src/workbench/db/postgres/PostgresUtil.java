@@ -131,15 +131,23 @@ public class PostgresUtil
 		ResultSet rs = null;
 		Statement stmt = null;
 		Savepoint sp = null;
+
+		String query = Settings.getInstance().getProperty("workbench.db.postgresql.retrieve.search_path", "select array_to_string(current_schemas(true), ',')");
+		
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("PostgresUtil.getSearchPath()", "Query used to retrieve search path:\n" + query);
+		}
+
 		try
 		{
 			sp = con.setSavepoint();
 			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery("select array_to_string(current_schemas(true), ';')");
+			rs = stmt.executeQuery(query);
 			if (rs.next())
 			{
 				String path = rs.getString(1);
-				result = StringUtil.stringToList(path, ";", true, true, false, false);
+				result.addAll(StringUtil.stringToList(path, ",", true, true, false, false));
 			}
 			con.releaseSavepoint(sp);
 		}
@@ -147,18 +155,18 @@ public class PostgresUtil
 		{
 			con.rollback(sp);
 			LogMgr.logError("PostgresUtil.getSearchPath()", "Could not read search path", sql);
-			if (result.isEmpty())
-			{
-				LogMgr.logWarning("PostgresUtil.getSearchPath()", "Using public as the default search path");
-				// Fallback. At least look in the public schema
-				result.add("public");
-			}
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
 
+		if (result.isEmpty())
+		{
+			LogMgr.logWarning("PostgresUtil.getSearchPath()", "Using public as the default search path");
+			// Fallback. At least look in the public schema
+			result.add("public");
+		}
 		return result;
 	}
 

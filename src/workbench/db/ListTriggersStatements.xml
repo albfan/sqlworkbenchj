@@ -375,19 +375,19 @@ from syscat.triggers</string>
 
   <void method="put">
    <string>Microsoft SQL Server-8</string>
-   <object id="list_sql8" class="workbench.db.GetMetaDataSql">
+   <object id="trg_list_mssql8" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
 	select tr.name as trigger_name,
          case
-            when ObjectProperty( tr.id, 'ExecIsAfterTrigger') = 1 then 'AFTER'
-            when ObjectProperty(tr.object_id, 'ExecIsInsteadOfTrigger') = 1 then 'INSTEAD OF'
+            when ObjectProperty(tr.id, 'ExecIsAfterTrigger') = 1 then 'AFTER'
+            when ObjectProperty(tr.id, 'ExecIsInsteadOfTrigger') = 1 then 'INSTEAD OF'
             else 'BEFORE'
          end  as trigger_type,
          case
-             when ObjectProperty( tr.id, 'ExecIsUpdateTrigger') = 1 then 'UPDATE'
-             when ObjectProperty( tr.id, 'ExecIsDeleteTrigger') = 1 then 'DELETE'
-             when ObjectProperty( tr.id, 'ExecIsInsertTrigger') = 1 then 'INSERT'
+             when ObjectProperty(tr.id, 'ExecIsUpdateTrigger') = 1 then 'UPDATE'
+             when ObjectProperty(tr.id, 'ExecIsDeleteTrigger') = 1 then 'DELETE'
+             when ObjectProperty(tr.id, 'ExecIsInsertTrigger') = 1 then 'INSERT'
           end as trigger_event,
        tab.name as table_name,
        null as remarks,
@@ -408,12 +408,12 @@ from syscat.triggers</string>
 
   <void method="put">
    <string>Microsoft SQL Server-7</string>
-   <object idref="list_sql8"/>
+   <object idref="trg_list_mssql8"/>
   </void>
 
   <void method="put">
    <string>Microsoft SQL Server-6</string>
-   <object idref="list_sql8"/>
+   <object idref="trg_list_mssql8"/>
   </void>
 
   <void method="put">

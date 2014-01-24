@@ -166,7 +166,7 @@
 
   <void method="put">
    <string>Microsoft SQL Server-8</string>
-   <object class="workbench.db.GetMetaDataSql">
+   <object id="trg_src_mssql8" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>exec sp_helptext</string>
     </void>
@@ -177,6 +177,16 @@
      <int>1</int>
     </void>
    </object>
+  </void>
+
+  <void method="put">
+   <string>Microsoft SQL Server-7</string>
+   <object idref="trg_src_mssql8"/>
+  </void>
+
+  <void method="put">
+   <string>Microsoft SQL Server-6</string>
+   <object idref="trg_src_mssql8"/>
   </void>
 
   <void method="put">

@@ -84,7 +84,7 @@ public class SqlServerTriggerReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("SqlServerTriggerReader.readDDLTriggers()", "Using query=\n" + sql);
+			LogMgr.logInfo("SqlServerTriggerReader.readDDLTriggers()", "Query to retrieve DDL triggers:\n" + sql);
 		}
 
 		Statement stmt = null;

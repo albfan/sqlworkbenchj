@@ -24,14 +24,20 @@ package workbench.db;
 
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import workbench.db.exporter.RowDataConverter;
+import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.sql.commands.SingleVerbCommand;
+import workbench.storage.BlobLiteralType;
+import workbench.storage.DmlStatement;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -1720,5 +1726,10 @@ public class DbSettings
 	public boolean getRetrieveGeneratedKeys()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "insert.retrieve.keys", true);
+	}
+
+	public Collection<String> getIgnoreCompletionSchemas()
+	{
+		return Settings.getInstance().getListProperty(prefix + "completion.ignore.schema", false, null);
 	}
 }
