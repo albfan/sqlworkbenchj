@@ -41,6 +41,7 @@ import workbench.gui.profiles.ProfileKey;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.StatementHistory;
+import workbench.sql.TraceOutput;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbConnInfo;
@@ -73,6 +74,7 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class SQLConsole
+	implements TraceOutput
 {
 	private static final String HISTORY_FILENAME = "sqlworkbench_history.txt";
 	private ConsolePrompter prompter;
@@ -110,6 +112,7 @@ public class SQLConsole
 		runner.setOptimizeColWidths(optimizeColWidths);
 		runner.setShowDataLoading(false);
 		runner.setConnectionId("Console");
+		runner.setTraceOutput(this);
 
 		// initialize a default max rows.
 		// In console mode it doesn't really make sense to display that many rows
@@ -349,6 +352,12 @@ public class SQLConsole
 			System.err.println(ExceptionUtil.getDisplay(th));
 			System.exit(1);
 		}
+	}
+
+	@Override
+	public void printTrace(String trace)
+	{
+		System.out.println(trace);
 	}
 
 	private boolean isMySQL(BatchRunner runner)

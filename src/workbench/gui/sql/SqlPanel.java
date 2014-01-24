@@ -192,6 +192,7 @@ import workbench.sql.ScrollAnnotation;
 import workbench.sql.StatementHistory;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.TraceOutput;
 import workbench.sql.VariablePool;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.macros.MacroManager;
@@ -223,7 +224,7 @@ public class SqlPanel
 	implements FontChangedListener, PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar, ToolWindowManager
+		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar, ToolWindowManager, TraceOutput
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -1581,6 +1582,7 @@ public class SqlPanel
 		{
 			this.stmtRunner = new StatementRunner();
 			this.stmtRunner.setRowMonitor(this.rowMonitor);
+			this.stmtRunner.setTracer(this);
 		}
 
 		if (this.stmtRunner != null)
@@ -2390,6 +2392,12 @@ public class SqlPanel
 		};
 		importThread.start();
 		this.selectEditor();
+	}
+
+	@Override
+	public void printTrace(String trace)
+	{
+		appendToLog(trace + "\n");
 	}
 
 	@Override

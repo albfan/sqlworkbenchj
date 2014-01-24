@@ -87,6 +87,8 @@ public class StatementRunner
 	protected CommandMapper cmdMapper;
 	private boolean useSavepoint;
 	private boolean logAllStatements;
+	private TraceOutput tracer;
+	private boolean traceStatements;
 	private Savepoint savepoint;
 	private final List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
 	private int maxRows = -1;
@@ -136,6 +138,16 @@ public class StatementRunner
 		{
 			l.propertyChange(evt);
 		}
+	}
+
+	public void setTraceStatements(boolean flag)
+	{
+		this.traceStatements = flag;
+	}
+
+	public void setTracer(TraceOutput output)
+	{
+		this.tracer = output;
 	}
 
 	public void setSessionProperty(String name, String value)
@@ -427,6 +439,10 @@ public class StatementRunner
 		}
 
 		realSql = statementHook.preExec(this, realSql);
+		if (traceStatements && tracer != null)
+		{
+			tracer.printTrace(realSql);
+		}
 
 		long sqlExecStart = System.currentTimeMillis();
 

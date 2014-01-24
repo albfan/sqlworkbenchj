@@ -63,7 +63,7 @@ class ObjectCachePersistence
 		if (conn == null || cache == null) return;
 
 		WbFile cacheFile = getCacheFile(conn);
-		if (cacheFile == null || !cacheFile.exists()) return;
+		if (cacheFile == null || !cacheFile.exists() || cacheFile.length() == 0) return;
 
 		String maxAgeValue = GuiSettings.getLocalStorageMaxAge();
 		DurationNumber number = new DurationNumber();

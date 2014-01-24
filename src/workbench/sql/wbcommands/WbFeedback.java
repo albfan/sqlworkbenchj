@@ -57,6 +57,8 @@ public class WbFeedback
 		this.cmdLine.addArgument("on", ArgumentType.BoolSwitch);
 		this.cmdLine.addArgument("off", ArgumentType.BoolSwitch);
 		this.cmdLine.addArgument("quiet", ArgumentType.BoolSwitch);
+		this.cmdLine.addArgument("traceon", ArgumentType.BoolSwitch);
+		this.cmdLine.addArgument("traceoff", ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -91,7 +93,7 @@ public class WbFeedback
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
+				result.addMessageByKey("MsgFeedbackDisabled");
 			}
 		}
 		else if (cmdLine.getBoolean("on"))
@@ -103,23 +105,33 @@ public class WbFeedback
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
+				result.addMessageByKey("MsgFeedbackEnabled");
 			}
+		}
+		else if (cmdLine.getBoolean("traceon"))
+		{
+			this.runner.setTraceStatements(true);
+			result.addMessageByKey("MsgTraceOn");
+		}
+		else if (cmdLine.getBoolean("traceoff"))
+		{
+			this.runner.setTraceStatements(false);
+			result.addMessageByKey("MsgTraceOff");
 		}
 		else if (cmdLine.hasUnknownArguments())
 		{
 			result.setFailure();
 			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
 		}
-		else 
+		else
 		{
 			if (runner.getVerboseLogging())
 			{
-				result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
+				result.addMessageByKey("MsgFeedbackEnabled");
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
+				result.addMessageByKey("MsgFeedbackDisabled");
 			}
 			result.setSuccess();
 		}
