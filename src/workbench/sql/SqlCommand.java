@@ -426,6 +426,7 @@ public class SqlCommand
 		catch (Exception e)
 		{
 			runner.rollbackSavepoint();
+			appendOutput(result);
 			addErrorInfo(result, sql, e);
 			LogMgr.logUserSqlError("SqlCommand.execute()", sql, e);
 		}
