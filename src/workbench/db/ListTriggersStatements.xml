@@ -352,7 +352,7 @@ from syscat.triggers</string>
                 when ObjectProperty(tr.object_id, 'ExecIsDeleteTrigger') = 1 then 'DELETE'
                 when ObjectProperty(tr.object_id, 'ExecIsInsertTrigger') = 1then 'INSERT'
              end as trigger_event,
-             tab.name + '.' + sh.name as  table_name,
+             sh.name + '.' + tab.name as  table_name,
              null as remarks,
              null as status
       from sys.triggers tr with (nolock)
