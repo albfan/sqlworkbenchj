@@ -1,6 +1,4 @@
 /*
- * SqlPanel.java
- *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2014, Thomas Kellerer
@@ -187,12 +185,12 @@ import workbench.storage.DataStore;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorDescriptor;
+import workbench.sql.OutputPrinter;
 import workbench.sql.ScriptParser;
 import workbench.sql.ScrollAnnotation;
 import workbench.sql.StatementHistory;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.TraceOutput;
 import workbench.sql.VariablePool;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.macros.MacroManager;
@@ -224,7 +222,7 @@ public class SqlPanel
 	implements FontChangedListener, PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar, ToolWindowManager, TraceOutput
+		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar, ToolWindowManager, OutputPrinter
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -505,6 +503,7 @@ public class SqlPanel
 	{
 		if (!SwingUtilities.isEventDispatchThread())
 		{
+
 			Exception e = new Exception("initToolbar() not called on EDT");
 			e.printStackTrace();
 		}
@@ -1582,7 +1581,7 @@ public class SqlPanel
 		{
 			this.stmtRunner = new StatementRunner();
 			this.stmtRunner.setRowMonitor(this.rowMonitor);
-			this.stmtRunner.setTracer(this);
+			this.stmtRunner.setMessagePrinter(this);
 		}
 
 		if (this.stmtRunner != null)
@@ -2395,13 +2394,18 @@ public class SqlPanel
 	}
 
 	@Override
-	public void printTrace(String trace)
+	public void printMessage(String trace)
 	{
-		appendToLog(trace + "\n");
+		appendMessage(trace,"\n");
 	}
 
 	@Override
 	public void appendToLog(final String logMessage)
+	{
+		appendMessage(logMessage);
+	}
+
+	private void appendMessage(final String logMessage, final String ... moreMessages)
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -2409,6 +2413,13 @@ public class SqlPanel
 			public void run()
 			{
 				log.append(logMessage);
+				if (moreMessages != null)
+				{
+					for (String msg : moreMessages)
+					{
+						log.append(msg);
+					}
+				}
 				log.setCaretPosition(log.getDocument().getLength());
 			}
 		});

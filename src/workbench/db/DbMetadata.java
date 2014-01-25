@@ -59,7 +59,6 @@ import workbench.db.mssql.SqlServerRuleReader;
 import workbench.db.mssql.SqlServerSchemaInfoReader;
 import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.mssql.SqlServerUtil;
-import workbench.db.mysql.MySQLTableCommentReader;
 import workbench.db.nuodb.NuoDBDomainReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleDataTypeResolver;
@@ -282,7 +281,6 @@ public class DbMetadata
 		else if (productLower.contains("mysql"))
 		{
 			this.isMySql = true;
-			objectListEnhancer = new MySQLTableCommentReader();
 		}
 		else if (productLower.contains("cloudscape"))
 		{

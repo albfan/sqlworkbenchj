@@ -87,7 +87,7 @@ public class StatementRunner
 	protected CommandMapper cmdMapper;
 	private boolean useSavepoint;
 	private boolean logAllStatements;
-	private TraceOutput tracer;
+	private OutputPrinter messageOutput;
 	private boolean traceStatements;
 	private Savepoint savepoint;
 	private final List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
@@ -145,9 +145,9 @@ public class StatementRunner
 		this.traceStatements = flag;
 	}
 
-	public void setTracer(TraceOutput output)
+	public void setMessagePrinter(OutputPrinter output)
 	{
-		this.tracer = output;
+		this.messageOutput = output;
 	}
 
 	public void setSessionProperty(String name, String value)
@@ -439,9 +439,9 @@ public class StatementRunner
 		}
 
 		realSql = statementHook.preExec(this, realSql);
-		if (traceStatements && tracer != null)
+		if (traceStatements && messageOutput != null)
 		{
-			tracer.printTrace(realSql);
+			messageOutput.printMessage(realSql);
 		}
 
 		long sqlExecStart = System.currentTimeMillis();

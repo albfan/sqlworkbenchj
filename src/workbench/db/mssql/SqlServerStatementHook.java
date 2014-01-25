@@ -25,19 +25,22 @@ package workbench.db.mssql;
 import java.util.List;
 import java.util.Set;
 
-import workbench.db.WbConnection;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
 import workbench.sql.StatementHook;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
  * A statement hook that works around SQL Server's broken handling of semicolons together with the MERGE statement.
  * <br/><br/>
- * For some idiotic reason the new MERGE statement requires to be sent with a semicolon at the end.
- * (all other statements can be sent without a semicolon, as in all other DBMS)
+ * For some idiotic reason the new MERGE statement requires to be sent <b>with</b> a semicolon at the end of the SQL string.
+ * (all other statements can be sent without a semicolon, as with all other JDBC drivers).
  * <br/><br/>
  * This class works around this bug in Micrsoft's SQL parser by simply adding a semicolon
  * to all statements which apparently works fine for the Microsoft JDBC driver and the jTDS driver.
@@ -46,7 +49,7 @@ import workbench.util.SqlUtil;
  * property;<br/>
  * <tt>workbench.db.microsoft_sql_server.semicolon.bug</tt>
  * <br/><br/>
- * If that contains a list of SQL commands, only those will be subject to this fix. <br/>
+ * If that contains a list of SQL commands, only those will be subject to this fix.<br/>
  * The following definition would limit this workaround to the MERGE statement:<br/>
  * <tt>workbench.db.microsoft_sql_server.semicolon.bug=merge</tt>
  *
@@ -61,14 +64,14 @@ public class SqlServerStatementHook
 	public SqlServerStatementHook()
 	{
 		List<String> verbsToFix = Settings.getInstance().getListProperty("workbench.db.microsoft_sql_server.semicolon.bug", false);
-		if (!verbsToFix.isEmpty())
+		if (verbsToFix.isEmpty())
 		{
-			verbsWithSemicolon = CollectionUtil.caseInsensitiveSet();
-			verbsWithSemicolon.addAll(verbsToFix);
+			verbsWithSemicolon = null;
 		}
 		else
 		{
-			verbsWithSemicolon = null;
+			verbsWithSemicolon = CollectionUtil.caseInsensitiveSet();
+			verbsWithSemicolon.addAll(verbsToFix);
 		}
 	}
 
@@ -112,7 +115,6 @@ public class SqlServerStatementHook
 	@Override
 	public void close(WbConnection conn)
 	{
-		// nothing to do
 	}
 
 }

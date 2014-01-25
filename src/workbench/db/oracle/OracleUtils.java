@@ -127,6 +127,26 @@ public class OracleUtils
 		return "true".equals(value);
 	}
 
+	/**
+	 * Checks if the given connection enables the reporting of table comments in MySQL
+	 *
+	 * @param con the connection to test
+	 * @return true if the driver returns comments for tables
+	 */
+	public static boolean remarksEnabledMySQL(WbConnection con)
+	{
+		if (con == null) return false;
+		ConnectionProfile prof = con.getProfile();
+		Properties props = prof.getConnectionProperties();
+		String value = "false";
+		if (props != null)
+		{
+			value = props.getProperty("useInformationSchema", "false");
+		}
+		return "true".equals(value);
+	}
+
+
 	public static String getDefaultTablespace(WbConnection conn)
 	{
 		readDefaultTableSpace(conn);

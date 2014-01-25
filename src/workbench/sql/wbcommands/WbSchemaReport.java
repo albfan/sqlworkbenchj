@@ -256,11 +256,16 @@ public class WbSchemaReport
 
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
 
-		if (currentConnection != null && currentConnection.getMetadata().isOracle())
+		if (currentConnection != null)
 		{
-			if (!OracleUtils.remarksEnabled(currentConnection))
+			if (currentConnection.getMetadata().isOracle() && !OracleUtils.remarksEnabled(currentConnection))
 			{
 				result.addMessage(ResourceMgr.getString("MsgSchemaReporterOracleRemarksWarning"));
+				result.addMessage("");
+			}
+			if (currentConnection.getMetadata().isMySql() && !OracleUtils.remarksEnabledMySQL(currentConnection))
+			{
+				result.addMessage(ResourceMgr.getString("MsgSchemaReporterMySQLRemarksWarning"));
 				result.addMessage("");
 			}
 		}

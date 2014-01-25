@@ -1237,19 +1237,24 @@ WHERE id=42;</programlisting>
       options window. The only difference is, that the setting through <literal>WbFeedback</literal>
       is temporary and does not affect the global setting.
     </para>
+    <para>
+      <literal>WbFeedback traceOn</literal> can be used to enable printing of every executed statement
+      to the screen. The SQL statement printed will be the one after variable substitution and macro expansion.
+      <literal>WbFeedback traceOff</literal> will turn tracing of statements off.
+    </para>
   </section>
 
   <section id="command-set">
     <title>Setting connection properties - SET</title>
     <para>
       The <literal>SET</literal> command is passed on directly to the driver,
-      except for the parameters described in this chapter as they
+      except for the parameters described in this chapter because they
       have an equivalent JDBC call which will be executed instead.
     </para>
     <para>
       Oracle does not have a SQL set command. The SET command that is available
       in SQL*Plus is a specific SQL*Plus command and will not work with other client software.
-      Most of the SQL*Plus SET commands only make sense with SQL*Plus (e.g. formatting of the results).
+      Most of the SQL*Plus SET commands only make sense within SQL*Plus (e.g. formatting of the results).
       To be able to run SQL scripts that are intended for Oracle SQL*PLus, any error reported
       from the SET command when running against an Oracle database will silently be ignored and
       only logged as a warning.
@@ -1371,7 +1376,7 @@ WHERE id=42;</programlisting>
         which will display the execution plan for the statement. If not additional parameter is specified, <literal>EXPLAIN STATISTICS</literal> is used.
       </para>
       <para>
-        If statistics are requested, any query result will be fetched from the database server but it will not be displayed.
+        If statistics are requested, query results will be fetched from the database server but they will not be displayed.
       </para>
       <para>
         Unlike SQL*Plus, the keywords (<literal>AUTOTRACE, STATISTICS, EXPLAIN</literal>) cannot be abbreviated!

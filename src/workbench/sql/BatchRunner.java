@@ -157,9 +157,9 @@ public class BatchRunner
 		queryResults.clear();
 	}
 
-	public void setTraceOutput(TraceOutput tracer)
+	public void setTraceOutput(OutputPrinter tracer)
 	{
-		this.stmtRunner.setTracer(tracer);
+		this.stmtRunner.setMessagePrinter(tracer);
 	}
 	
 	public void setReplacer(Replacer replacer)

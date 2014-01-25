@@ -182,6 +182,8 @@
 <section id="profile-extended-properties">
 	<title>Extended properties for the JDBC driver</title>
   <indexterm><primary>Connection profile</primary><secondary>extended properties</secondary></indexterm>
+  <indexterm><primary>JDBC Connection</primary><secondary>connection properties</secondary></indexterm>
+
 	<para>
 		JDBC drivers support additional connection properties where
 		you can fine tune the behaviour of the driver or enable special features

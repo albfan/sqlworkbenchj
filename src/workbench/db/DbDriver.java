@@ -415,6 +415,15 @@ public class DbDriver
 				}
 			}
 
+			// this replaces the deleted MySQLTableCommentReader
+			if (url.startsWith("jdbc:mysql")
+					&& Settings.getInstance().getBoolProperty("workbench.db.mysql.tablecomments.retrieve", false)
+				  && !props.containsKey("useInformationSchema"))
+			{
+				// see: http://bugs.mysql.com/bug.php?id=65213
+				props.setProperty("useInformationSchema", "true");
+			}
+
 			setAppInfo(props, url.toLowerCase(), id, user);
 
 			conn = this.driverClassInstance.connect(url, props);

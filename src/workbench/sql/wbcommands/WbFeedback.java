@@ -110,13 +110,15 @@ public class WbFeedback
 		}
 		else if (cmdLine.getBoolean("traceon"))
 		{
+			result.setSuccess();
 			this.runner.setTraceStatements(true);
-			result.addMessageByKey("MsgTraceOn");
+			if (!quiet) result.addMessageByKey("MsgTraceOn");
 		}
 		else if (cmdLine.getBoolean("traceoff"))
 		{
+			result.setSuccess();
 			this.runner.setTraceStatements(false);
-			result.addMessageByKey("MsgTraceOff");
+			if (!quiet) result.addMessageByKey("MsgTraceOff");
 		}
 		else if (cmdLine.hasUnknownArguments())
 		{
@@ -125,6 +127,7 @@ public class WbFeedback
 		}
 		else
 		{
+			// no parameter, show the current status
 			if (runner.getVerboseLogging())
 			{
 				result.addMessageByKey("MsgFeedbackEnabled");

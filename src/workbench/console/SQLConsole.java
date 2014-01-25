@@ -40,8 +40,8 @@ import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
 
 import workbench.sql.BatchRunner;
+import workbench.sql.OutputPrinter;
 import workbench.sql.StatementHistory;
-import workbench.sql.TraceOutput;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbConnInfo;
@@ -74,7 +74,7 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class SQLConsole
-	implements TraceOutput
+	implements OutputPrinter
 {
 	private static final String HISTORY_FILENAME = "sqlworkbench_history.txt";
 	private ConsolePrompter prompter;
@@ -355,7 +355,7 @@ public class SQLConsole
 	}
 
 	@Override
-	public void printTrace(String trace)
+	public void printMessage(String trace)
 	{
 		System.out.println(trace);
 	}
