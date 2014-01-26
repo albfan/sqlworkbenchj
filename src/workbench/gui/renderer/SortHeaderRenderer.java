@@ -53,18 +53,18 @@ import workbench.util.StringUtil;
  * A renderer for table headers to be able to display a sort indicator and customized
  * tooltips that show the data type of the column.
  *
- * It adjusts the display of the default renderer to display the sort indicator if
- * the default renderer returns a JLabel.
+ * It relies on the default header renderer and only adds the sort indicator to it.
  *
- * Otherwise a separate JLabel is used to display the header that is made to look
- * like the original component returned from the default renderer.
+ * As a fallback in case the default renderer is not using a JLabel the SortHeaderRenderer is using
+ * it's own JLabel instance which is returned instead in getTableCellRendererComponent().
+ * This should usually not happen though.
  *
  * @author Thomas Kellerer
  */
 public class SortHeaderRenderer
 	implements TableCellRenderer, PropertyChangeListener
 {
-	private JLabel displayLabel = new JLabel();
+	private final JLabel displayLabel = new JLabel();
 	private boolean showFullTypeInfo;
 	private boolean showBoldHeader;
 	private boolean highlightPk;
@@ -111,6 +111,7 @@ public class SortHeaderRenderer
 		}
 		else
 		{
+			// this is a fallback and should not happen
 			displayLabel.setFont(c.getFont());
 			displayLabel.setBorder(c.getBorder());
 			displayLabel.setForeground(c.getForeground());
