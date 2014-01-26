@@ -95,6 +95,9 @@ public class StatementRunner
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
 	private final Map<String, String> sessionAttributes = new TreeMap<String, String>();
+
+	// The history provider is here to give SqlCommands access to the command history.
+	// Currently this is only used in WbHistory to show a list of executed statements.
 	private SqlHistoryProvider history;
 
 	public StatementRunner()

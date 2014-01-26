@@ -24,7 +24,7 @@
   <section id="define-macro">
     <title>Defining Macros</title>
 
-    <para>There are two ways to define a SQL macro.</para>
+    <para>There are three ways to define a SQL macro.</para>
     <para>
       If the current statement in the editor should be defined as a macro, select (highlight) the statement's text
       and select  <menuchoice><guimenu>Macros</guimenu><guimenuitem>Add SQL macro</guimenuitem></menuchoice> from the main
@@ -40,6 +40,10 @@
       will be listed in the menu directly. If you define more than one group, each group will appear
       as a separate sub-menu.
     </para>
+    <para>
+      Macros can also be defined using the command <link linkend="command-definemacro"><literal>WbDefineMacro</literal></link>.
+    </para>
+
     <para>
       The order in which the macros (or groups) appear in the menu can be changed by
       dragging them to the desired position in the manage macro dialog.
@@ -152,13 +156,13 @@
       a macro to run an explain plan for the current statement:
     </para>
 
-        <programlisting>explain plan 
+        <programlisting>explain plan
 for
 ${current_statement}$
 ;
 
 -- @wbResult Execution plan
-select plan_table_output 
+select plan_table_output
 from table(dbms_xplan.display(format => 'ALL'));</programlisting>
 
     <para>
