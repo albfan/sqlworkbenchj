@@ -206,8 +206,15 @@ public class ColumnWidthOptimizer
 			return -1;
 		}
 
-		JTableHeader th = table.getTableHeader();
-		TableCellRenderer rend = th.getDefaultRenderer();
+		// JTableHeader.getDefaultRenderer() does not return our own sort renderer
+		// therefor we use our own instance directly
+		// only if that is not initialized for some reason, the default renderer is used
+		TableCellRenderer rend = table.getHeaderRenderer();
+		if (rend == null)
+		{
+			JTableHeader th = table.getTableHeader();
+			rend = th.getDefaultRenderer();
+		}
 		String colName = table.getColumnName(col);
 
 		JComponent c = (JComponent)rend.getTableCellRendererComponent(table, colName, false, false, -1, col);
