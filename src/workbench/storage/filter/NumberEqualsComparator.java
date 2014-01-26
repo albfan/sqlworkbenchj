@@ -22,6 +22,7 @@
  */
 package workbench.storage.filter;
 
+import workbench.util.NumberUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -76,6 +77,10 @@ public class NumberEqualsComparator
 		}
 		try
 		{
+			if ((reference instanceof Number) && (value instanceof Number))
+			{
+				return NumberUtil.valuesAreEqual((Number)reference, (Number)value);
+			}
 			return reference.equals(value);
 		}
 		catch (Exception e)
