@@ -103,6 +103,7 @@ public class AppArguments
 	public static final String ARG_CONSOLE_OPT_COLS = "optimizeColWidth";
 	public static final String ARG_CONSOLE_BUFFER_RESULTS = "bufferResults";
 	public static final String ARG_PROP = "prop";
+	public static final String ARG_LOG_ALL_STMT = "logAllStatements";
 
 	public AppArguments()
 	{
@@ -162,6 +163,7 @@ public class AppArguments
 		addArgument("help");
 		addArgument("version");
 		addArgument(ARG_PROP, ArgumentType.Repeatable);
+		addArgument(ARG_LOG_ALL_STMT, ArgumentType.BoolSwitch);
 	}
 
 	@Override

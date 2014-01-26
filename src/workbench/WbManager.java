@@ -775,6 +775,12 @@ public final class WbManager
 				System.setProperty("workbench.gui.language", lang);
 			}
 
+			if (cmdLine.isArgPresent(AppArguments.ARG_LOG_ALL_STMT))
+			{
+				boolean logAllStmts = cmdLine.getBoolean(AppArguments.ARG_LOG_ALL_STMT, false);
+				System.setProperty(Settings.PROPERTY_LOG_ALL_SQL, Boolean.toString(logAllStmts));
+			}
+
 			String value = cmdLine.getValue(AppArguments.ARG_CONFIGDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
