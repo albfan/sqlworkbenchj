@@ -25,8 +25,11 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.util.HashMap;
 
 import javax.swing.Icon;
+
+import workbench.gui.renderer.ColorUtils;
 
 /**
  *
@@ -35,30 +38,37 @@ import javax.swing.Icon;
 public class SortArrowIcon
 	implements Icon
 {
-	private enum Direction
+	public enum Direction
 	{
 		UP,
 		DOWN;
 	}
 
-	public static final SortArrowIcon ARROW_UP = new SortArrowIcon(Direction.UP);
-	public static final SortArrowIcon ARROW_DOWN = new SortArrowIcon(Direction.DOWN);
-	public static final SortArrowIcon SMALL_ARROW_UP = new SortArrowIcon(Direction.UP, 6);
-	public static final SortArrowIcon SMALL_ARROW_DOWN = new SortArrowIcon(Direction.DOWN, 6);
-
 	private final Direction direction;
 	private final int width;
 	private final int height;
 
-	private SortArrowIcon(Direction dir)
+	private static final HashMap<Integer, SortArrowIcon> sharedUpArrows = new HashMap<Integer, SortArrowIcon>();
+	private static final HashMap<Integer, SortArrowIcon> sharedDownArrows = new HashMap<Integer, SortArrowIcon>();
+
+	public static synchronized SortArrowIcon getIcon(Direction dir, int size)
 	{
-		this(dir, 8);
+		HashMap<Integer, SortArrowIcon> cache = (dir == Direction.UP ? sharedUpArrows : sharedDownArrows);
+
+		Integer key = Integer.valueOf(size);
+		SortArrowIcon icon = cache.get(key);
+		if (icon == null)
+		{
+			icon = new SortArrowIcon(dir, size);
+			cache.put(key, icon);
+		}
+		return icon;
 	}
 
 	private SortArrowIcon(Direction dir, int size)
 	{
 		this.direction = dir;
-		this.width = size;
+		this.width = size + (int)(size * 0.1);
 		this.height = size;
 	}
 
@@ -79,29 +89,27 @@ public class SortArrowIcon
 	{
 		Color bg = c.getBackground();
 		Color fg = c.getForeground();
-		Color light = bg.brighter();
-		Color shade = bg.darker();
 
+		Color arrowColor = ColorUtils.blend(bg, Color.BLACK, 175);
 		int w = width;
 		int h = height;
-		int m = w / 2;
+		int top = y + h;
+		int bottom = y;
+
+		int[] xPoints = new int[] {x, x + w/2, x + w}; // left, middle, right
+		int[] yPoints;
 
 		if (direction == Direction.UP)
 		{
-			g.setColor(shade);
-			g.drawLine(x, y, x + w, y);
-			g.drawLine(x, y, x + m, y + h);
-			g.setColor(light);
-			g.drawLine(x + w, y, x + m, y + h);
+			yPoints = new int[] {top, bottom, top};
 		}
-		if (direction == Direction.DOWN)
+		else
 		{
-			g.setColor(shade);
-			g.drawLine(x + m, y, x, y + h);
-			g.setColor(light);
-			g.drawLine(x, y + h, x + w, y + h);
-			g.drawLine(x + m, y, x + w, y + h);
+			yPoints = new int[] {bottom, top, bottom};
 		}
+
+		g.setColor(arrowColor);
+		g.fillPolygon(xPoints, yPoints, 3);
 		g.setColor(fg);
 	}
 }

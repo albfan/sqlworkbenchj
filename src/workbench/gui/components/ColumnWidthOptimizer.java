@@ -35,6 +35,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import workbench.gui.renderer.SortHeaderRenderer;
 import workbench.resource.GuiSettings;
 
 import workbench.gui.renderer.WbRenderer;
@@ -229,15 +230,7 @@ public class ColumnWidthOptimizer
 		int headerWidth = hfm.stringWidth(colName) + getAdditionalHeaderSpace() + ins.left + ins.right;
 		if (table.isViewColumnSorted(col))
 		{
-			if (table.isPrimarySortColumn(col))
-			{
-				headerWidth += SortArrowIcon.ARROW_UP.getIconWidth();
-			}
-			else
-			{
-				headerWidth += SortArrowIcon.SMALL_ARROW_UP.getIconWidth();
-			}
-			headerWidth ++;
+			headerWidth += SortHeaderRenderer.getArrowSize(fm, table.isPrimarySortColumn(col)) + 1;
 		}
 
 		return headerWidth;

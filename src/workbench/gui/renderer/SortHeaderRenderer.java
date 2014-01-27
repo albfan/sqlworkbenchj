@@ -24,6 +24,7 @@ package workbench.gui.renderer;
 
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Types;
@@ -173,14 +174,12 @@ public class SortHeaderRenderer
 
 		if (sorted)
 		{
-			if (primary)
-			{
-				display.setIcon(ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP);
-			}
-			else
-			{
-				display.setIcon(ascending ? SortArrowIcon.SMALL_ARROW_DOWN : SortArrowIcon.SMALL_ARROW_UP);
-			}
+			SortArrowIcon icon = null;
+			Font f = display.getFont();
+			FontMetrics fm = display.getFontMetrics(f);
+			int height = getArrowSize(fm, primary);
+			icon = SortArrowIcon.getIcon(ascending ? SortArrowIcon.Direction.UP : SortArrowIcon.Direction.DOWN, height);
+			display.setIcon(icon);
 		}
 		else
 		{
@@ -218,5 +217,18 @@ public class SortHeaderRenderer
 		return display;
 	}
 
+	public static int getArrowSize(FontMetrics fm, boolean primary)
+	{
+		if (fm == null)
+		{
+			return primary ? 16 : 8;
+		}
+		int headerHeight = fm.getHeight();
+		if (primary)
+		{
+			return (int) (headerHeight * 0.7);
+		}
+		return (int) (headerHeight * 0.5);
+	}
 }
 

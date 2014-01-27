@@ -25,9 +25,6 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.Action;
-
-import workbench.gui.components.SortArrowIcon;
 
 /**
  *	@author  Thomas Kellerer
@@ -41,7 +38,6 @@ public class SortAscendingAction extends WbAction
 		super();
 		this.client = aClient;
 		this.setMenuTextByKey("MnuTxtSortAscending");
-		this.putValue(Action.SMALL_ICON, SortArrowIcon.ARROW_DOWN);
 	}
 
 	@Override
