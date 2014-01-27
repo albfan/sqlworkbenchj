@@ -35,9 +35,9 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import workbench.gui.renderer.SortHeaderRenderer;
 import workbench.resource.GuiSettings;
 
+import workbench.gui.renderer.SortHeaderRenderer;
 import workbench.gui.renderer.WbRenderer;
 
 import workbench.util.StringUtil;
@@ -208,8 +208,8 @@ public class ColumnWidthOptimizer
 		}
 
 		// JTableHeader.getDefaultRenderer() does not return our own sort renderer
-		// therefor we use our own instance directly
-		// only if that is not initialized for some reason, the default renderer is used
+		// therefor we use the "cached" instance directly
+		// Only if that is not initialized for some reason, the default renderer is used
 		TableCellRenderer rend = table.getHeaderRenderer();
 		if (rend == null)
 		{
@@ -230,7 +230,8 @@ public class ColumnWidthOptimizer
 		int headerWidth = hfm.stringWidth(colName) + getAdditionalHeaderSpace() + ins.left + ins.right;
 		if (table.isViewColumnSorted(col))
 		{
-			headerWidth += SortHeaderRenderer.getArrowSize(fm, table.isPrimarySortColumn(col)) + 1;
+			int iconWidth = (int)(SortHeaderRenderer.getArrowSize(fm, table.isPrimarySortColumn(col)) * 1.15);
+			headerWidth += iconWidth;
 		}
 
 		return headerWidth;

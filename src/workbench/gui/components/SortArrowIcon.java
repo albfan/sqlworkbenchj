@@ -29,6 +29,8 @@ import java.util.HashMap;
 
 import javax.swing.Icon;
 
+import workbench.resource.Settings;
+
 import workbench.gui.renderer.ColorUtils;
 
 /**
@@ -50,6 +52,7 @@ public class SortArrowIcon
 
 	private static final HashMap<Integer, SortArrowIcon> sharedUpArrows = new HashMap<Integer, SortArrowIcon>();
 	private static final HashMap<Integer, SortArrowIcon> sharedDownArrows = new HashMap<Integer, SortArrowIcon>();
+	private final int blendValue;
 
 	public static synchronized SortArrowIcon getIcon(Direction dir, int size)
 	{
@@ -67,9 +70,10 @@ public class SortArrowIcon
 
 	private SortArrowIcon(Direction dir, int size)
 	{
-		this.direction = dir;
-		this.width = size + (int)(size * 0.1);
-		this.height = size;
+		direction = dir;
+		width = (int)(size * 1.1);
+		height = size;
+		blendValue = Settings.getInstance().getIntProperty("workbench.gui.sorticon.blend", 128);
 	}
 
 	@Override
@@ -90,7 +94,7 @@ public class SortArrowIcon
 		Color bg = c.getBackground();
 		Color fg = c.getForeground();
 
-		Color arrowColor = ColorUtils.blend(bg, Color.BLACK, 175);
+		Color arrowColor = ColorUtils.blend(bg, Color.BLACK, blendValue);
 		int w = width;
 		int h = height;
 		int top = y + h;
@@ -101,7 +105,7 @@ public class SortArrowIcon
 
 		if (direction == Direction.UP)
 		{
-			yPoints = new int[] {top, bottom, top};
+			yPoints = new int[] {top - 1, bottom - 1, top - 1};
 		}
 		else
 		{

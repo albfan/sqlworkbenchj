@@ -226,7 +226,7 @@ public class SortHeaderRenderer
 		int headerHeight = fm.getHeight();
 		if (primary)
 		{
-			return (int) (headerHeight * 0.7);
+			return (int) (headerHeight * 0.6);
 		}
 		return (int) (headerHeight * 0.5);
 	}
