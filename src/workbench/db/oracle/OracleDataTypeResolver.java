@@ -165,7 +165,15 @@ public class OracleDataTypeResolver
 	private String getVarcharType(String type, int size, int semantics)
 	{
 		StringBuilder result = new StringBuilder(25);
+
 		result.append(type);
+
+		if (size <= 0)
+		{
+			// this can happen for procedure columns
+			return result.toString();
+		}
+
 		result.append('(');
 		result.append(size);
 
