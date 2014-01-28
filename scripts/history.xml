@@ -4,13 +4,13 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-01-12">
-    <entry dev-build="10" type="enh">WbImport and WbCopy no support an option to synchronize sequences with the imported values for DBMS that support sequences tied to a column (Postgres, H2, HSQLDB)</entry>
+    <entry dev-build="10" type="enh">WbImport and WbCopy no support an option to synchronize sequences with the imported values for DBMS that support sequences tied to a column (Postgres, DB2, H2, HSQLDB)</entry>
     <entry dev-build="10" type="enh">WbFeedback now supports the options "traceon" and "traceoff". With "traceon" each statement that is executed is printed.</entry>
     <entry dev-build="10" type="enh">The trigger panel in the DbExplorer now shows DDL triggers for SQL Server</entry>
     <entry dev-build="10" type="enh">A new option has been added to use the name of the first table of a query as the name of the result tab</entry>
     <entry dev-build="9" type="enh">When inserting new rows into a result set, the generated values for "auto increment" columns (serial, identiy, ...) are now retrieved.</entry>
     <entry dev-build="9" type="enh">Computed columns (of table) are now treated better when editing data and generating DML for the changes</entry>
-    <entry dev-build="9" type="enh">WbCopy and WbImport now run the post table statement even  when an error occurs. This new behaviour can be disabled using the new parameter runTableStatementOnError</entry>
+    <entry dev-build="9" type="enh">WbCopy and WbImport now run the post table statements even  when an error occurs during the import of the data. This new behaviour can be disabled using the new parameter runTableStatementOnError</entry>
     <entry dev-build="9" type="enh">In the DbExplorer the column definition now includes a flag to show if a column is a computed column or not</entry>
     <entry dev-build="9" type="enh">For SQL Server 2000 the definition of computed columns are now shown in the generated SQL</entry>
     <entry dev-build="9" type="enh">The cache for the auto-completion can now be saved locally to speed up the initial auto-completion display.</entry>
