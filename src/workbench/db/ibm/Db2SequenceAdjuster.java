@@ -17,17 +17,17 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.h2database;
+package workbench.db.ibm;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import workbench.log.LogMgr;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.SequenceAdjuster;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -35,16 +35,16 @@ import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 
 /**
- * A class to sync the sequences related to the columns of a table with the current values of those columns.
+ * A class to sync the sequences related to the columns of a table with the current values.
  *
  * This is intended to be used after doing bulk inserts into the database.
  *
  * @author Thomas Kellerer
  */
-public class H2SequenceAdjuster
+public class Db2SequenceAdjuster
 	implements SequenceAdjuster
 {
-	public H2SequenceAdjuster()
+	public Db2SequenceAdjuster()
 	{
 	}
 
@@ -52,11 +52,11 @@ public class H2SequenceAdjuster
 	public int adjustTableSequences(WbConnection connection, TableIdentifier table, boolean includeCommit)
 		throws SQLException
 	{
-		Map<String, String> columns = getColumnSequences(connection, table);
+		List<String> columns = getIdentityColumns(connection, table);
 
-		for (Map.Entry<String, String> entry : columns.entrySet())
+		for (String column : columns)
 		{
-			syncSingleSequence(connection, table, entry.getKey(), entry.getValue());
+			syncSingleSequence(connection, table, column);
 		}
 
 		if (includeCommit && !connection.getAutoCommit())
@@ -66,7 +66,7 @@ public class H2SequenceAdjuster
 		return columns.size();
 	}
 
-	private void syncSingleSequence(WbConnection dbConnection, TableIdentifier table, String column, String sequence)
+	private void syncSingleSequence(WbConnection dbConnection, TableIdentifier table, String column)
 		throws SQLException
 	{
 		Statement stmt = null;
@@ -87,14 +87,14 @@ public class H2SequenceAdjuster
 
 			if (maxValue > 0)
 			{
-				String ddl = "alter sequence " + sequence + " restart with " + Long.toString(maxValue);
-				LogMgr.logDebug("H2SequenceAdjuster.syncSingleSequence()", "Syncing sequence using: " + ddl);
+				String ddl = "alter table " + table.getTableExpression(dbConnection) + " alter column " + column + " restart with " + Long.toString(maxValue);
+				LogMgr.logDebug("Db2SequenceAdjuster.syncSingleSequence()", "Syncing sequence using: " + ddl);
 				stmt.execute(ddl);
 			}
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("H2SequenceAdjuster.syncSingleSequence()", "Could not read sequences", ex);
+			LogMgr.logError("Db2SequenceAdjuster.getColumnSequences()", "Could not read sequences", ex);
 			throw ex;
 		}
 		finally
@@ -103,45 +103,23 @@ public class H2SequenceAdjuster
 		}
 	}
 
-	private Map<String, String> getColumnSequences(WbConnection dbConnection, TableIdentifier table)
+	private List<String> getIdentityColumns(WbConnection dbConnection, TableIdentifier table)
 	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql =
-			"select column_name,  \n" +
-			"       column_default \n" +
-			"from information_schema.columns \n" +
-			"where table_name = ? \n" +
-			" and table_schema = ? \n" +
-			" and column_default like '(NEXT VALUE FOR%'";
-
-		Map<String, String> result = new HashMap<String, String>();
+		List<String> result = new ArrayList<String>(1);
 		try
 		{
-			pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, table.getRawTableName());
-			pstmt.setString(2, table.getRawSchema());
-
-			rs = pstmt.executeQuery();
-			while (rs.next())
+			List<ColumnIdentifier> columns = dbConnection.getMetadata().getTableColumns(table);
+			for (ColumnIdentifier col : columns)
 			{
-				String column = rs.getString(1);
-				String defValue = rs.getString(2);
-				defValue = defValue.replace("NEXT VALUE FOR", "");
-				if (defValue.startsWith("(") && defValue.endsWith(")"))
+				if (col.isAutoincrement())
 				{
-					defValue = defValue.substring(1, defValue.length() -1 );
+					result.add(col.getColumnName());
 				}
-				result.put(column, defValue);
 			}
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("H2SequenceAdjuster.getColumnSequences()", "Could not read sequences", ex);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
+			LogMgr.logError("Db2SequenceAdjuster.getIdentityColumns()", "Could not read sequence columns", ex);
 		}
 		return result;
 	}

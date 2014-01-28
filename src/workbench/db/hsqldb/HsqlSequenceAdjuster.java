@@ -52,7 +52,7 @@ public class HsqlSequenceAdjuster
 	public int adjustTableSequences(WbConnection connection, TableIdentifier table, boolean includeCommit)
 		throws SQLException
 	{
-		List<String> columns = getColumnSequences(connection, table);
+		List<String> columns = getIdentityColumns(connection, table);
 
 		for (String column : columns)
 		{
@@ -88,13 +88,13 @@ public class HsqlSequenceAdjuster
 			if (maxValue > 0)
 			{
 				String ddl = "alter table " + table.getTableExpression(dbConnection) + " alter column " + column + " restart with " + Long.toString(maxValue);
-				LogMgr.logDebug("H2SequenceAdjuster.syncSingleSequence()", "Syncing sequence using: " + ddl);
+				LogMgr.logDebug("HsqlSequenceAdjuster.syncSingleSequence()", "Syncing sequence using: " + ddl);
 				stmt.execute(ddl);
 			}
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("H2SequenceAdjuster.getColumnSequences()", "Could not read sequences", ex);
+			LogMgr.logError("HsqlSequenceAdjuster.getColumnSequences()", "Could not read sequences", ex);
 			throw ex;
 		}
 		finally
@@ -103,7 +103,7 @@ public class HsqlSequenceAdjuster
 		}
 	}
 
-	private List<String> getColumnSequences(WbConnection dbConnection, TableIdentifier table)
+	private List<String> getIdentityColumns(WbConnection dbConnection, TableIdentifier table)
 	{
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -112,7 +112,7 @@ public class HsqlSequenceAdjuster
 			"from information_schema.columns \n" +
 			"where table_name = ? \n" +
 			" and table_schema = ? \n" +
-			" and is_identity = 'YES'";
+			" and (is_generated = 'ALWAYS' OR (is_identity = 'YES' AND identity_generation IS NOT NULL))";
 
 		List<String> result = new ArrayList<String>(1);
 		try
@@ -130,7 +130,7 @@ public class HsqlSequenceAdjuster
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("H2SequenceAdjuster.getColumnSequences()", "Could not read sequences", ex);
+			LogMgr.logError("HsqlSequenceAdjuster.getIdentityColumns()", "Could not read sequence columns", ex);
 		}
 		finally
 		{

@@ -23,6 +23,7 @@ import java.sql.SQLException;
 
 import workbench.db.h2database.H2SequenceAdjuster;
 import workbench.db.hsqldb.HsqlSequenceAdjuster;
+import workbench.db.ibm.Db2SequenceAdjuster;
 import workbench.db.postgres.PostgresSequenceAdjuster;
 
 /**
@@ -50,6 +51,10 @@ public interface SequenceAdjuster
 			if (conn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(conn, "2.0"))
 			{
 				return new HsqlSequenceAdjuster();
+			}
+			if (conn.getDbId().equals("db2"))
+			{
+				return new Db2SequenceAdjuster();
 			}
 			return null;
 		}
