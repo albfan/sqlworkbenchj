@@ -27,8 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import workbench.WbManager;
-
 import workbench.db.objectcache.DbObjectCacheFactory;
 
 /**

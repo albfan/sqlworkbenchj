@@ -185,8 +185,9 @@ public class OracleTableSourceBuilder
 				}
 
 				String tempTable = rs.getString("temporary");
+				boolean isTempTable = StringUtil.equalString("Y", tempTable);
 				String duration = rs.getString("duration");
-				if (StringUtil.equalString("Y", tempTable))
+				if (isTempTable)
 				{
 					tbl.getSourceOptions().setTypeModifier("GLOBAL TEMPORARY");
 					if (options.length() > 0) options.append('\n');
@@ -200,6 +201,7 @@ public class OracleTableSourceBuilder
 						options.append("ON COMMIT PRESERVE ROWS");
 						tbl.getSourceOptions().addConfigSetting("on_commit", "preserve");
 					}
+					tbl.setTablespace(null); // temporary tables can't have a tablespace
 				}
 
 				int free = rs.getInt("pct_free");
@@ -212,7 +214,7 @@ public class OracleTableSourceBuilder
 				}
 
 				int used = rs.getInt("pct_used");
-				if (!rs.wasNull() && used != 40 && StringUtil.isEmptyString(iot)) // PCTUSED is not valid for IOTs
+				if (!rs.wasNull() && used != 40 && StringUtil.isEmptyString(iot) && !isTempTable) // PCTUSED is not valid for IOTs
 				{
 					tbl.getSourceOptions().addConfigSetting("pct_used", Integer.toString(used));
 					if (options.length() > 0) options.append('\n');
@@ -221,7 +223,7 @@ public class OracleTableSourceBuilder
 				}
 
 				String logging = rs.getString("logging");
-				if (StringUtil.equalStringIgnoreCase("NO", logging))
+				if (StringUtil.equalStringIgnoreCase("NO", logging) && !isTempTable)
 				{
 					tbl.getSourceOptions().addConfigSetting("logging", "nologging");
 					if (options.length() > 0) options.append('\n');
@@ -498,7 +500,7 @@ public class OracleTableSourceBuilder
 		}
 
 		boolean pkIdxReverse = pkIdx != null && REV_IDX_TYPE.equals(pkIdx.getIndexType());
-		
+
 		if (!pkEnabled || pkIdx == null )
 		{
 			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, " DISABLE");

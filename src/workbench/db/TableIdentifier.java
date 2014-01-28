@@ -26,7 +26,6 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
 
-import workbench.WbManager;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.objectcache.DbObjectCacheFactory;

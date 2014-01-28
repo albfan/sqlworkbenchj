@@ -99,7 +99,15 @@ public class WbDefineVar
 		WbFile contentFile = this.evaluateFileArgument(cmdLine.getValue("contentFile"));
 
 		boolean removeUndefined = cmdLine.getBoolean("removeUndefined");
-		String varDef = cmdLine.getNonArguments();
+		String varDef;
+		if (cmdLine.hasArguments())
+		{
+			varDef = cmdLine.getNonArguments();
+		}
+		else
+		{
+			varDef = sql;
+		}
 
 		if (file != null && contentFile != null)
 		{
@@ -180,7 +188,7 @@ public class WbDefineVar
 						valueSql = StringUtil.trimQuotes(valueParameter.trim().substring(1));
 						List<String> values = this.evaluateSql(currentConnection, valueSql, result);
 						int varCount = Math.min(values.size(), varNames.size());
-						
+
 						if (values.size() != varNames.size())
 						{
 							LogMgr.logWarning("WbDefineVar.execute()", "The number of variables does not match the number of columns returned. Using only the first " + varCount + " variables");

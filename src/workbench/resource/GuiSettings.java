@@ -1032,4 +1032,9 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.dpi.threshold", 144);
 	}
+
+	public static boolean showScriptFinishTime()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.sql.script.showtime", false);
+	}
 }

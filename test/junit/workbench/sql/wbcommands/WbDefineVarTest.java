@@ -108,7 +108,7 @@ public class WbDefineVarTest
 			varValue = VariablePool.getInstance().getParameterValue("theanswer");
 			assertEquals("SQL Variable not set", "7", varValue);
 
-			sql = "wbvardef id,value=@\"select nr, some_value from vartest\"";
+			sql = "wbvardef id, value=@\"select nr, some_value from vartest\"";
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			String idValue = VariablePool.getInstance().getParameterValue("id");

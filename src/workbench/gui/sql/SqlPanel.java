@@ -3304,7 +3304,12 @@ public class SqlPanel
 
 			if (count > 1)
 			{
-				this.appendToLog(ResourceMgr.getString("TxtScriptFinished")+ "\n");
+				String finish = ResourceMgr.getString("TxtScriptFinished");
+				if (GuiSettings.showScriptFinishTime())
+				{
+					finish += " (" + StringUtil.getCurrentTimestamp() + ")";
+				}
+				this.appendToLog(finish + "\n");
 				String duration = df.formatDuration(lastScriptExecTime, (lastScriptExecTime < DurationFormatter.ONE_MINUTE));
 				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + duration + "\n";
 				this.appendToLog(s);
