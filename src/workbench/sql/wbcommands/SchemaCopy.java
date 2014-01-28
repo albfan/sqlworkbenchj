@@ -88,6 +88,15 @@ class SchemaCopy
 	}
 
 	@Override
+	public void setAdjustSequences(boolean flag)
+	{
+		if (copier != null)
+		{
+			copier.setAdjustSequences(flag);
+		}
+	}
+
+	@Override
 	public void setTargetSchemaAndCatalog(String schema, String catalog)
 	{
 		this.targetSchema = schema;
@@ -353,7 +362,7 @@ class SchemaCopy
 		this.rowMonitor = monitor;
 
 		this.copier = WbCopy.createDataCopier(cmdLine, target.getDbSettings());
-		
+
 		cmdLineMode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (!this.copier.setMode(cmdLineMode))
 		{

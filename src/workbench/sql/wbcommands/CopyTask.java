@@ -23,9 +23,13 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.db.WbConnection;
-import workbench.sql.StatementRunnerResult;
+
 import workbench.storage.RowActionMonitor;
+
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 
 /**
@@ -35,6 +39,7 @@ import workbench.util.ArgumentParser;
  */
 public interface CopyTask
 {
+	void setAdjustSequences(boolean flag);
 
 	void setTargetSchemaAndCatalog(String schema, String catalog);
 

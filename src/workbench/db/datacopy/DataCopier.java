@@ -36,13 +36,29 @@ import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
-import workbench.db.*;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
+import workbench.db.GenericObjectDropper;
+import workbench.db.TableCreator;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.TableSelectBuilder;
+import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
-import workbench.db.importer.*;
+import workbench.db.importer.DataImporter;
+import workbench.db.importer.DataReceiver;
+import workbench.db.importer.DeleteType;
+import workbench.db.importer.RowDataProducer;
+import workbench.db.importer.TableStatements;
 
 import workbench.storage.RowActionMonitor;
 
-import workbench.util.*;
+import workbench.util.ExceptionUtil;
+import workbench.util.MessageBuffer;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 /**
  * A class to copy data from one database to another.
@@ -99,9 +115,14 @@ public class DataCopier
 		errors = new MessageBuffer();
 	}
 
-	public void setTrimCharData(boolean trimCharData)
+	public void setTrimCharData(boolean flag)
 	{
-		this.trimCharData = trimCharData;
+		this.trimCharData = flag;
+	}
+
+	public void setAdjustSequences(boolean flag)
+	{
+		this.importer.setAdjustSequences(flag);
 	}
 
 	/**

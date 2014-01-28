@@ -137,6 +137,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_DELETE_SYNC, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbExport.ARG_TRIM_CHARDATA, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(WbImport.ARG_ADJUST_SEQ, ArgumentType.BoolSwitch);
 		cmdLine.addArgumentWithValues(PARAM_TABLE_TYPE, DbSettings.getCreateTableTypes());
 	}
 
@@ -271,7 +272,6 @@ public class WbCopy
 			this.copier = new TableCopy();
 		}
 
-
 		try
 		{
 			if (!copier.init(sourceCon, targetCon, result, cmdLine, rowMonitor))
@@ -280,6 +280,8 @@ public class WbCopy
 				result.setFailure();
 				return result;
 			}
+			
+			copier.setAdjustSequences(cmdLine.getBoolean(WbImport.ARG_ADJUST_SEQ, false));
 
 			this.lastCopyCount = copier.copyData();
 			if (copier.isSuccess())

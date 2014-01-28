@@ -65,6 +65,12 @@ class TableCopy
 	}
 
 	@Override
+	public void setAdjustSequences(boolean flag)
+	{
+		copier.setAdjustSequences(flag);
+	}
+
+	@Override
 	public boolean init(WbConnection sourceConnection, WbConnection targetConnection, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
 		throws SQLException
 	{

@@ -54,6 +54,7 @@ import workbench.resource.Settings;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DmlExpressionBuilder;
+import workbench.db.SequenceAdjuster;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -168,6 +169,7 @@ public class DataImporter
 	private int maxErrorCount = 1000;
 
 	private boolean verifyTargetTable = true;
+	private boolean adjustSequences;
 	private String insertSqlStart;
 
 	/**
@@ -226,6 +228,11 @@ public class DataImporter
 			}
 		}
 		LogMgr.logInfo("DataImporter.setUseSavepoint()", "Using savepoints for DML: " + useSavepoint);
+	}
+
+	public void setAdjustSequences(boolean flag)
+	{
+		this.adjustSequences = flag;
 	}
 
 	public void setIgnoreIdentityColumns(boolean flag)
@@ -2067,6 +2074,16 @@ public class DataImporter
 			if (commitNeeded)
 			{
 				 this.dbConn.commit();
+			}
+
+			if (adjustSequences)
+			{
+				SequenceAdjuster adjuster = SequenceAdjuster.Factory.getSequenceAdjuster(dbConn);
+				if (adjuster != null)
+				{
+					int numSequences = adjuster.adjustTableSequences(dbConn, targetTable, transactionControl);
+					LogMgr.logInfo("DataImporter.finishTable()", "Adjusted " + numSequences + " sequence(s) for table " + targetTable.getTableExpression(dbConn));
+				}
 			}
 
 			LogMgr.logInfo("DataImporter.finishTable()", msg);

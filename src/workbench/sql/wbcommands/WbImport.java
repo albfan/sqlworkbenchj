@@ -111,6 +111,7 @@ public class WbImport
 	public static final String ARG_SHEET_NR = "sheetNumber";
 	public static final String ARG_SHEET_NAME = "sheetName";
 	public static final String ARG_IGNORE_MISSING_COLS = "ignoreMissingColumns";
+	public static final String ARG_ADJUST_SEQ = "adjustSequences";
 
 	private DataImporter imp;
 
@@ -190,6 +191,7 @@ public class WbImport
 		cmdLine.addArgument(WbExport.ARG_NULL_STRING);
 		cmdLine.addArgument(ARG_INSERT_START);
 		cmdLine.addArgument(ARG_PG_COPY, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_ADJUST_SEQ, ArgumentType.BoolSwitch);
 		ModifierArguments.addArguments(cmdLine);
 	}
 
@@ -330,7 +332,8 @@ public class WbImport
 
 		imp.setUseSavepoint(cmdLine.getBoolean(ARG_USE_SAVEPOINT, currentConnection.getDbSettings().useSavepointForImport()));
 		imp.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
-
+		imp.setAdjustSequences(cmdLine.getBoolean(ARG_ADJUST_SEQ, false));
+		
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 
