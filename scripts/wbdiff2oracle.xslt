@@ -237,6 +237,8 @@
   <xsl:template match="proc-def">
     <xsl:value-of select="proc-source"/>
     <xsl:value-of select="$newline"/>
+    <xsl:text>/</xsl:text>
+    <xsl:value-of select="$newline"/>
   </xsl:template>
 
   <xsl:template match="add-index">

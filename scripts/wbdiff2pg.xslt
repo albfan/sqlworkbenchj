@@ -77,7 +77,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       </xsl:apply-templates>
       <xsl:for-each select="table-constraints/drop-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
-        <xsl:value-of select="concat($target-schema, $table2)"/>
+        <xsl:value-of select="concat($target-schema, '.', $table2)"/>
         <xsl:text> DROP CONSTRAINT </xsl:text>
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname" select="@name"/>
@@ -88,7 +88,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:value-of select="$newline"/>
       <xsl:for-each select="table-constraints/modify-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
-        <xsl:value-of select="concat($target-schema, $table2)"/>
+        <xsl:value-of select="concat($target-schema, '.', $table2)"/>
         <xsl:text> DROP CONSTRAINT </xsl:text>
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname" select="@name"/>
@@ -96,7 +96,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
         <xsl:text>ALTER TABLE </xsl:text>
-        <xsl:value-of select="concat($target-schema, $table2)"/>
+        <xsl:value-of select="concat($target-schema, '.', $table2)"/>
         <xsl:text> ADD</xsl:text>
         <xsl:if test="@generated-name != 'true'">
           <xsl:text> CONSTRAINT </xsl:text>
@@ -111,7 +111,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       </xsl:for-each>
       <xsl:for-each select="table-constraints/add-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
-        <xsl:value-of select="concat($target-schema, $table2)"/>
+        <xsl:value-of select="concat($target-schema, '.', $table2)"/>
         <xsl:text> ADD</xsl:text>
         <xsl:if test="@generated-name != 'true'">
           <xsl:text> CONSTRAINT </xsl:text>
@@ -171,6 +171,24 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
        <xsl:value-of select="$newline"/>
     </xsl:if>
 
+    <xsl:text>-- Drop tables</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:for-each select="/schema-diff/drop-table">
+      <xsl:text>DROP TABLE </xsl:text>
+      <xsl:call-template name="write-object-name">
+        <xsl:with-param name="objectname" select="table-schema"/>
+      </xsl:call-template>
+      <xsl:text>.</xsl:text>
+      <xsl:call-template name="write-object-name">
+        <xsl:with-param name="objectname" select="table-name"/>
+      </xsl:call-template>
+      <xsl:text> CASCADE;</xsl:text>
+      <xsl:value-of select="$newline"/>
+    </xsl:for-each>
+      <xsl:value-of select="$newline"/>
+
+    <xsl:text>-- Drop views</xsl:text>
+    <xsl:value-of select="$newline"/>
     <xsl:for-each select="/schema-diff/drop-view">
       <xsl:text>DROP VIEW </xsl:text>
       <xsl:call-template name="write-object-name">
@@ -183,12 +201,68 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
     </xsl:for-each>
+
+    <xsl:text>-- Create views</xsl:text>
+    <xsl:value-of select="$newline"/>
     <xsl:for-each select="/schema-diff/create-view">
       <xsl:apply-templates select="view-def"/>
     </xsl:for-each>
+
+    <xsl:text>-- Re-create views</xsl:text>
+    <xsl:value-of select="$newline"/>
     <xsl:for-each select="/schema-diff/update-view">
       <xsl:apply-templates select="view-def"/>
     </xsl:for-each>
+
+    <xsl:text>-- Create functions</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:for-each select="/schema-diff/create-proc">
+       <xsl:copy-of select="proc-def/proc-source"/><xsl:text>;</xsl:text>
+       <xsl:value-of select="$newline"/>
+    </xsl:for-each>
+    <xsl:if test="count(/schema-diff/create-proc) &gt; 0">
+       <xsl:value-of select="$newline"/>
+    </xsl:if>
+
+    <xsl:text>-- Drop functions</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:for-each select="/schema-diff/drop-procedure">
+      <xsl:text>DROP FUNCTION </xsl:text><xsl:value-of select="proc-def/proc-full-name"/><xsl:text>;</xsl:text>
+      <xsl:value-of select="$newline"/>
+    </xsl:for-each>
+    <xsl:if test="count(/schema-diff/drop-procedure) &gt; 0">
+       <xsl:value-of select="$newline"/>
+    </xsl:if>
+
+    <xsl:text>-- Triggers for modified tables</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:for-each select="/schema-diff/modify-table">
+      <xsl:variable name="table">
+        <xsl:value-of select="table-name"/>
+      </xsl:variable>
+      <xsl:variable name="schema">
+        <xsl:value-of select="table-schema"/>
+      </xsl:variable>
+      <xsl:for-each select="create-trigger">
+        <xsl:variable name="trgname">
+          <xsl:value-of select="trigger-def/trigger-name"/>
+        </xsl:variable>
+        <xsl:text>DROP TRIGGER </xsl:text><xsl:value-of select="$trgname"/><xsl:text> ON </xsl:text><xsl:value-of select="concat($table, '.', $schema)"/><xsl:text> CASCADE;</xsl:text>
+        <xsl:value-of select="$newline"/>
+        <xsl:value-of select="trigger-def/trigger-source"/>
+      </xsl:for-each>
+    </xsl:for-each>
+    <xsl:if test="count(/schema-diff/modify-table) &gt; 0">
+       <xsl:value-of select="$newline"/>
+    </xsl:if>
+
+    <xsl:text>-- Triggers for new tables</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:for-each select="/schema-diff/add-table/trigger-def">
+      <xsl:value-of select="trigger-source"/>
+    </xsl:for-each>
+    <xsl:value-of select="$newline"/>
+
     <xsl:value-of select="$newline"/>
     <xsl:text>COMMIT;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -226,7 +300,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
   <xsl:template match="remove-column">
     <xsl:param name="table"/>
     <xsl:text>ALTER TABLE </xsl:text>
-    <xsl:value-of select="concat($target-schema, $table)"/>
+    <xsl:value-of select="concat($target-schema, '.', $table)"/>
     <xsl:text> DROP COLUMN </xsl:text>
     <xsl:call-template name="write-object-name">
       <xsl:with-param name="objectname" select="@name"/>
@@ -245,7 +319,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       </xsl:variable>
       <xsl:variable name="nullable" select="nullable"/>
       <xsl:text>ALTER TABLE </xsl:text>
-      <xsl:value-of select="concat($target-schema, $table)"/>
+      <xsl:value-of select="concat($target-schema, '.', $table)"/>
       <xsl:text> ADD COLUMN </xsl:text>
       <xsl:value-of select="$column"/>
       <xsl:text> </xsl:text>
@@ -272,7 +346,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     </xsl:variable>
     <xsl:if test="string-length(new-column-attributes/dbms-data-type) &gt; 0">
       <xsl:text>ALTER TABLE </xsl:text>
-      <xsl:value-of select="concat($target-schema, $table)"/>
+      <xsl:value-of select="concat($target-schema, '.', $table)"/>
       <xsl:text> ALTER COLUMN </xsl:text>
       <xsl:value-of select="$column"/>
       <xsl:text> TYPE </xsl:text>
@@ -282,7 +356,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     </xsl:if>
     <xsl:if test="new-column-attributes/nullable = 'true'">
       <xsl:text>ALTER TABLE </xsl:text>
-      <xsl:value-of select="concat($target-schema, $table)"/>
+      <xsl:value-of select="concat($target-schema, '.', $table)"/>
       <xsl:text> ALTER COLUMN </xsl:text>
       <xsl:value-of select="$column"/>
       <xsl:text> DROP NOT NULL;</xsl:text>
@@ -290,7 +364,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     </xsl:if>
     <xsl:if test="new-column-attributes/nullable = 'false'">
       <xsl:text>ALTER TABLE </xsl:text>
-      <xsl:value-of select="concat($target-schema, $table)"/>
+      <xsl:value-of select="concat($target-schema, '.', $table)"/>
       <xsl:text> ALTER COLUMN </xsl:text>
       <xsl:value-of select="$column"/>
       <xsl:text> SET NOT NULL;</xsl:text>
@@ -298,7 +372,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     </xsl:if>
     <xsl:if test="string-length(new-column-attributes/default-value) &gt; 0">
       <xsl:text>ALTER TABLE </xsl:text>
-      <xsl:value-of select="concat($target-schema, $table)"/>
+      <xsl:value-of select="concat($target-schema, '.', $table)"/>
       <xsl:text> ALTER COLUMN </xsl:text>
       <xsl:value-of select="$column"/>
       <xsl:text> SET DEFAULT </xsl:text>
@@ -308,7 +382,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     </xsl:if>
     <xsl:if test="new-column-attributes/default-value/@remove = 'true'">
       <xsl:text>ALTER TABLE </xsl:text>
-      <xsl:value-of select="concat($target-schema, $table)"/>
+      <xsl:value-of select="concat($target-schema, '.', $table)"/>
       <xsl:text> ALTER COLUMN </xsl:text>
       <xsl:value-of select="$column"/>
       <xsl:text> DROP DEFAULT;</xsl:text>
@@ -316,7 +390,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     </xsl:if>
     <xsl:if test="string-length(new-column-attributes/comment) &gt; 0">
       <xsl:text>COMMENT ON COLUMN </xsl:text>
-      <xsl:value-of select="concat($target-schema, $table)"/>
+      <xsl:value-of select="concat($target-schema, '.', $table)"/>
       <xsl:text>.</xsl:text>
       <xsl:value-of select="$column"/>
       <xsl:text> IS '</xsl:text>
@@ -330,7 +404,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
   <xsl:template match="add-primary-key">
     <xsl:param name="table"/>
     <xsl:text>ALTER TABLE </xsl:text>
-    <xsl:value-of select="concat($target-schema, $table)"/>
+    <xsl:value-of select="concat($target-schema, '.', $table)"/>
     <xsl:value-of select="$newline"/>
     <xsl:text>  ADD CONSTRAINT </xsl:text>
     <xsl:call-template name="write-object-name">
@@ -355,7 +429,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
   <xsl:template match="remove-primary-key">
     <xsl:param name="table"/>
     <xsl:text>ALTER TABLE </xsl:text>
-    <xsl:value-of select="concat($target-schema, $table)"/>
+    <xsl:value-of select="concat($target-schema, '.', $table)"/>
     <xsl:text> DROP PRIMARY KEY;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:template>
@@ -374,7 +448,6 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     <xsl:text>AS</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:value-of select="view-source"/>
-    <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:if test="string-length(comment) &gt; 0">
       <xsl:text>COMMENT ON VIEW </xsl:text>
@@ -401,7 +474,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       </xsl:call-template>
     </xsl:variable>
     <xsl:text>CREATE TABLE </xsl:text>
-    <xsl:value-of select="concat($target-schema, $tablename)"/>
+    <xsl:value-of select="concat($target-schema, '.', $tablename)"/>
     <xsl:value-of select="$newline"/>
     <xsl:text>(</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -445,7 +518,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
 
     <xsl:if test="$pkcount &gt; 0">
       <xsl:text>ALTER TABLE </xsl:text>
-      <xsl:value-of select="concat($target-schema, $tablename)"/>
+      <xsl:value-of select="concat($target-schema,  '.', $tablename)"/>
       <xsl:value-of select="$newline"/>
       <xsl:text>  ADD CONSTRAINT </xsl:text>
       <xsl:value-of select="concat('pk_', $tablename)"/>
@@ -465,9 +538,9 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
   </xsl:template>
 
   <xsl:template name="drop-fk">
-     <xsl:param name="tablename"/>
+    <xsl:param name="tablename"/>
     <xsl:text>ALTER TABLE </xsl:text>
-    <xsl:value-of select="concat($target-schema, $tablename)"/>
+    <xsl:value-of select="concat($target-schema,  '.', $tablename)"/>
     <xsl:value-of select="$newline"/>
     <xsl:text>  DROP CONSTRAINT </xsl:text>
     <xsl:call-template name="write-object-name">
@@ -480,7 +553,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
   <xsl:template name="add-fk">
     <xsl:param name="tablename"/>
     <xsl:text>ALTER TABLE </xsl:text>
-    <xsl:value-of select="concat($target-schema, $tablename)"/>
+    <xsl:value-of select="concat($target-schema,  '.', $tablename)"/>
     <xsl:value-of select="$newline"/>
     <xsl:text>  ADD CONSTRAINT </xsl:text>
     <xsl:choose>
@@ -580,7 +653,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
         <xsl:with-param name="objectname" select="name"/>
       </xsl:call-template>
       <xsl:text> ON </xsl:text>
-      <xsl:value-of select="concat($target-schema, $tablename)"/>
+      <xsl:value-of select="concat($target-schema, '.', $tablename)"/>
       <xsl:text> (</xsl:text>
       <xsl:value-of select="index-expression"/>
       <xsl:text>);</xsl:text>
