@@ -1173,6 +1173,8 @@ public class SchemaDiff
 		for (ProcedureDefinition def : procsToDelete)
 		{
 			ReportProcedure rp = new ReportProcedure(def, targetDb);
+			String fullName = def.getObjectNameForDrop(targetDb);
+			rp.setFullname(fullName);
 			rp.setIndent(myindent);
 			StringBuilder xml = rp.getXml(false);
 			out.write(xml.toString());

@@ -25,9 +25,13 @@ package workbench.db.report;
 import java.io.IOException;
 import java.io.Writer;
 
+import workbench.resource.Settings;
+
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
+
+import workbench.sql.DelimiterDefinition;
 
 import workbench.util.StringUtil;
 
@@ -39,6 +43,7 @@ public class ReportProcedure
 {
 	public static final String TAG_PROC_DEF = "proc-def";
 	public static final String TAG_PROC_NAME = "proc-name";
+	public static final String TAG_PROC_FULL_NAME = "proc-full-name";
 	public static final String TAG_PROC_CATALOG = "proc-catalog";
 	public static final String TAG_PROC_SCHEMA = "proc-schema";
 	public static final String TAG_PROC_TYPE = "proc-type";
@@ -51,11 +56,19 @@ public class ReportProcedure
 	private StringBuilder indent = new StringBuilder("  ");
 	private StringBuilder indent2 = new StringBuilder("    ");
 	private String schemaToUse;
+	private String fullName;
+	private DelimiterDefinition delim;
 
 	public ReportProcedure(ProcedureDefinition def, WbConnection conn)
 	{
 		this.procDef = def;
 		this.dbConn = conn;
+		delim = Settings.getInstance().getAlternateDelimiter(dbConn);
+	}
+
+	public void setFullname(String name)
+	{
+		this.fullName = name;
 	}
 
 	public void setSchemaToUse(String targetSchema)
@@ -128,6 +141,10 @@ public class ReportProcedure
 		}
 		tagWriter.appendTag(result, indent2, TAG_PROC_SCHEMA, getSchema());
 		tagWriter.appendTag(result, indent2, TAG_PROC_NAME, objectName);
+		if (StringUtil.isNonBlank(fullName))
+		{
+			tagWriter.appendTag(result, indent2, TAG_PROC_FULL_NAME, fullName);
+		}
 
 		if (StringUtil.isNonBlank(procDef.getComment()))
 		{
@@ -135,10 +152,14 @@ public class ReportProcedure
 		}
 
 		tagWriter.appendTag(result, indent2, TAG_PROC_TYPE, procDef.getObjectType(), "jdbcResultType", Integer.toString(procDef.getResultType()));
-
 		if (includeSource)
 		{
-			tagWriter.appendTag(result, indent2, TAG_PROC_SOURCE, getSource(), true);
+			String src = getSource().toString().trim();
+			if (delim != null)
+			{
+				src = delim.removeDelimiter(src);
+			}
+			tagWriter.appendTag(result, indent2, TAG_PROC_SOURCE, src, true);
 			//result.append('\n');
 		}
 		tagWriter.appendCloseTag(result, indent, TAG_PROC_DEF);

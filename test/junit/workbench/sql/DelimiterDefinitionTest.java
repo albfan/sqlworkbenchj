@@ -33,30 +33,35 @@ public class DelimiterDefinitionTest
 {
 
 	@Test
-	public void testTerminatesScript()
+	public void testRemove()
 	{
-		try
-		{
-			String sql = "delete from thetable\nGO\n";
-			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false));
-			sql = "delete from thetable\nGO";
-			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false));
+		String sql =
+			"delete from foo\n" +
+			"/";
+		String clean = DelimiterDefinition.DEFAULT_ORA_DELIMITER.removeDelimiter(sql);
+		String expected = "delete from foo";
+		System.out.println(clean);
+		assertEquals(expected, clean);
+	}
 
-			sql = "create or replace procedure my_test \n" +
-					"as \n" +
-					"begin \n" +
-					"  null;" +
-					"end; \n" +
-					" / ";
-			assertTrue(DelimiterDefinition.DEFAULT_ORA_DELIMITER.terminatesScript(sql, false));
-			DelimiterDefinition del = new DelimiterDefinition("/", false);
-			assertTrue(del.terminatesScript(sql, false));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+	@Test
+	public void testTerminatesScript()
+		throws Exception
+	{
+		String sql = "delete from thetable\nGO\n";
+		assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false));
+		sql = "delete from thetable\nGO";
+		assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false));
+
+		sql = "create or replace procedure my_test \n" +
+				"as \n" +
+				"begin \n" +
+				"  null;" +
+				"end; \n" +
+				" / ";
+		assertTrue(DelimiterDefinition.DEFAULT_ORA_DELIMITER.terminatesScript(sql, false));
+		DelimiterDefinition del = new DelimiterDefinition("/", false);
+		assertTrue(del.terminatesScript(sql, false));
 	}
 
 	@Test

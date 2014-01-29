@@ -22,6 +22,7 @@
  */
 package workbench.sql;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.util.SqlUtil;
@@ -234,6 +235,30 @@ public class DelimiterDefinition
 		{
 			slePattern = null;
 		}
+	}
+
+	public String removeDelimiter(String sql)
+	{
+		if (StringUtil.isEmptyString(sql)) return sql;
+		int startPos = -1;
+		if (this.isSingleLine())
+		{
+			Matcher m = slePattern.matcher(sql);
+			boolean found = m.find();
+			if (found)
+			{
+				startPos = m.start();
+			}
+		}
+		else
+		{
+			startPos = sql.lastIndexOf(this.delimiter);
+		}
+		if (startPos > -1)
+		{
+			return sql.substring(0,startPos).trim();
+		}
+		return sql;
 	}
 
 }
