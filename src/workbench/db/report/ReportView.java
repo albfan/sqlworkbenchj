@@ -266,8 +266,7 @@ public class ReportView
 		target.append(TagWriter.CDATA_START);
 		target.append(source);
 		target.append(TagWriter.CDATA_END);
-		target.append('\n');
-		tagWriter.appendCloseTag(target, indent, TAG_VIEW_SOURCE);
+		tagWriter.appendCloseTag(target, null, TAG_VIEW_SOURCE);
 
 	}
 

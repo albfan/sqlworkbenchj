@@ -32,6 +32,7 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -53,6 +54,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
 
+import static workbench.sql.wbcommands.WbXslt.*;
+
 /**
  * @author  Thomas Kellerer
  */
@@ -73,13 +76,13 @@ public class WbSchemaDiff
 	public static final String ARG_ADD_TYPES = "additionalTypes";
 
 	private SchemaDiff diff;
-	private CommonDiffParameters params;
+	private CommonDiffParameters diffParams;
 
 	public WbSchemaDiff()
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		params = new CommonDiffParameters(cmdLine);
+		diffParams = new CommonDiffParameters(cmdLine);
 		cmdLine.addArgument(ARG_NAMESPACE);
 		cmdLine.addArgument(ARG_INCLUDE_FK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
@@ -95,6 +98,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(ARG_VIEWS_AS_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
+		cmdLine.addArgument(WbXslt.ARG_PARAMETERS, ArgumentType.Repeatable);
 		cmdLine.addArgument(ARG_COMPARE_CHK_CONS_BY_NAME, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ADD_TYPES, ArgumentType.ListArgument);
 	}
@@ -133,12 +137,12 @@ public class WbSchemaDiff
 		}
 
 		if (this.rowMonitor != null) this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-		params.setMonitor(rowMonitor);
+		diffParams.setMonitor(rowMonitor);
 
-		WbConnection targetCon = params.getTargetConnection(currentConnection, result);
+		WbConnection targetCon = diffParams.getTargetConnection(currentConnection, result);
 		if (!result.isSuccess()) return result;
 
-		WbConnection referenceConnection = params.getSourceConnection(currentConnection, result);
+		WbConnection referenceConnection = diffParams.getSourceConnection(currentConnection, result);
 
 		if (referenceConnection == null && targetCon != null && targetCon != currentConnection)
 		{
@@ -309,6 +313,7 @@ public class WbSchemaDiff
 
 				String xslt = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
 				String xsltOutput = cmdLine.getValue(WbXslt.ARG_OUTPUT);
+				Map<String, String> xsltParams = cmdLine.getMapValue(ARG_PARAMETERS);
 
 				if (StringUtil.isNonBlank(xslt) && StringUtil.isNonBlank(xsltOutput))
 				{
@@ -316,7 +321,7 @@ public class WbSchemaDiff
 					try
 					{
 						transformer.setXsltBaseDir(new File(getBaseDir()));
-						transformer.transform(output.getFullPath(), xsltOutput, xslt);
+						transformer.transform(output.getFullPath(), xsltOutput, xslt, xsltParams);
 						String xsltMsg = transformer.getAllOutputs();
 						if (xsltMsg.length() != 0)
 						{

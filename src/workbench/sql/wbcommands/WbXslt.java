@@ -58,7 +58,7 @@ public class WbXslt
 		cmdLine.addArgument(ARG_STYLESHEET, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_OUTPUT);
 		cmdLine.addArgument(ARG_INPUT);
-		cmdLine.addArgument(ARG_PARAMETERS);
+		cmdLine.addArgument(ARG_PARAMETERS, ArgumentType.Repeatable);
 	}
 
 	@Override

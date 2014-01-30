@@ -136,8 +136,6 @@ public class TagWriter
 		if (useCData)
 		{
 			target.append(CDATA_END);
-			target.append('\n');
-			target.append(indent);
 		}
 		appendCloseTag(target, null, tag);
 	}

@@ -32,10 +32,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -43,6 +43,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -149,7 +150,8 @@ public class XsltTransformer
 			{
 				for (Map.Entry<String, String> entry : parameters.entrySet())
 				{
-					transformer.setParameter(entry.getKey(), entry.getValue());
+					String value = StringUtil.decodeUnicode(entry.getValue());
+					transformer.setParameter(entry.getKey(), value);
 				}
 			}
 			in = new BufferedInputStream(new FileInputStream(inputFile),32*1024);
