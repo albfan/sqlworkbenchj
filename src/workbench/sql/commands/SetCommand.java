@@ -40,6 +40,7 @@ import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -142,7 +143,7 @@ public class SetCommand
 				else
 				{
 					result = new StatementRunnerResult();
-					String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", execSql);
+					String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", SqlUtil.getSqlVerb(userSql));
 					result.addMessage(msg);
 					result.setSuccess();
 				}
