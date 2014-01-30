@@ -84,11 +84,17 @@ public class OracleErrorInformationReaderTest
 			ErrorDescriptor errorInfo = reader.getErrorInfo(null, "nocando", "procedure", true);
 			con.setBusy(false);
 			assertNotNull(errorInfo);
-			System.out.println(errorInfo);
+
 			assertTrue(errorInfo.getErrorMessage().startsWith("Errors for PROCEDURE NOCANDO"));
 			assertTrue(errorInfo.getErrorMessage().contains("PLS-00103"));
 			assertEquals(4, errorInfo.getErrorLine());
 			assertEquals(4, errorInfo.getErrorColumn());
+
+			errorInfo = reader.getErrorInfo(null, "nocando", "procedure", false);
+			assertNotNull(errorInfo);
+			String msg = errorInfo.getErrorMessage();
+			assertFalse(msg.contains("Errors for PROCEDURE NOCANDO"));
+			assertTrue(msg.startsWith("L:5"));
 		}
 		finally
 		{

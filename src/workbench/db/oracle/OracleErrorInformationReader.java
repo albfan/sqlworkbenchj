@@ -64,7 +64,7 @@ public class OracleErrorInformationReader
 	 *	@return extended error information if available
 	 */
 	@Override
-	public ErrorDescriptor getErrorInfo(String schema, String objectName, String objectType, boolean formatMessages)
+	public ErrorDescriptor getErrorInfo(String schema, String objectName, String objectType, boolean showObjectHeaders)
 	{
 		if (StringUtil.isEmptyString(objectName))
 		{
@@ -128,7 +128,7 @@ public class OracleErrorInformationReader
 
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleErrorInformationReader.getErrorInfo()", "Using SQL: " + SqlUtil.replaceParameters(query, schema, otype, oname));
+				LogMgr.logDebug("OracleErrorInformationReader.getErrorInfo()", "Using SQL: " + SqlUtil.replaceParameters(query, oschema, otype, oname));
 			}
 
 			rs = stmt.executeQuery();
@@ -141,10 +141,15 @@ public class OracleErrorInformationReader
 			String indent = StringUtil.padRight("", indentLength);
 			while (rs.next())
 			{
-				if (count > 0)
+				if (count == 0)
+				{
+					result = new ErrorDescriptor();
+				}
+				else
 				{
 					msg.append("\n");
 				}
+
 				int line = rs.getInt(1);
 				int pos = rs.getInt(2);
 
@@ -152,21 +157,19 @@ public class OracleErrorInformationReader
 				String name = rs.getString(4);
 				String type = rs.getString(5);
 
-				if (formatMessages && (currentName == null || !currentName.equals(name)))
+				// do not report the line number of the "ignored" error, because the real error occurs after that
+				// (and there is always another error if a "PL/SQL: SQL Statement ignored" is reported)
+				if (firstHeading && !message.contains("PL/SQL: SQL Statement ignored"))
 				{
-					if (firstHeading)
-					{
-						firstHeading = false;
-						// only report the first error position
-						result = new ErrorDescriptor();
+					firstHeading = false;
 
-						// normalize to zero based values
-						result.setErrorPosition(line - 1, pos - 1);
-					}
-					else
-					{
-						msg.append('\n');
-					}
+					// only report the first error position
+					// normalize to zero based values
+					result.setErrorPosition(line - 1, pos - 1);
+				}
+
+				if (showObjectHeaders && (currentName == null || !currentName.equals(name)))
+				{
 					String heading = ResourceMgr.getFormattedString("ErrForObject", type, name);
 					String divide = StringUtil.padRight("", heading.length(), '-');
 					msg.append(heading);
@@ -176,15 +179,12 @@ public class OracleErrorInformationReader
 					currentName = name;
 				}
 
-				if (formatMessages)
-				{
-					String lineInfo = ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos));
-					lineInfo = StringUtil.padRight(lineInfo, indentLength);
-					msg.append(lineInfo);
-					message = message.trim().replace("\n\n", "\n"); // remove duplicate newlines
-					// indent all lines of the message
-					message = message.replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
-				}
+				String lineInfo = ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos));
+				lineInfo = StringUtil.padRight(lineInfo, indentLength);
+				msg.append(lineInfo);
+				message = message.trim().replace("\n\n", "\n"); // remove duplicate newlines
+				// indent all lines of the message
+				message = message.replaceAll(StringUtil.REGEX_CRLF, "\n" + indent);
 				msg.append(message);
 				count++;
 			}
@@ -197,10 +197,12 @@ public class OracleErrorInformationReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+
 		if (result != null)
 		{
 			result.setErrorMessage(msg.toString());
 		}
+		
 		return result;
 	}
 

@@ -48,6 +48,7 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="10" type="fix">When compiling invalid Oracle objects in the DbExplorer no error message was shown.</entry>
     <entry dev-build="10" type="fix">The generated source code for temporary tables in Oracle was not correct.</entry>
     <entry dev-build="8" type="fix">If the trigger panel was disabled, a DbExplorer tab could not be closed.</entry>
     <entry dev-build="7" type="fix">The completion option "As is" for the case of the object names didn't work any longer</entry>

@@ -110,7 +110,7 @@ public class ObjectCompilerUI
 				}
 				else
 				{
-					appendLog(ResourceMgr.getString("TxtError") + "\n  " + error.replaceAll(StringUtil.REGEX_CRLF, "\n    "));
+					appendLog(ResourceMgr.getString("TxtError") + "\n  " + error.replaceAll(StringUtil.REGEX_CRLF, "\n  "));
 				}
 			}
 		}
@@ -118,7 +118,16 @@ public class ObjectCompilerUI
 		{
 			this.dbConnection.setBusy(false);
 		}
-		this.log.setCaretPosition(0);
+		
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				log.setCaretPosition(0);
+			}
+		});
+
 	}
 
 	private void appendLog(final String msg)
