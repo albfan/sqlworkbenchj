@@ -27,7 +27,12 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import workbench.interfaces.ErrorReporter;
 import workbench.interfaces.ProgressReporter;
@@ -49,7 +54,12 @@ import workbench.storage.RowDataReader;
 import workbench.storage.RowDataReaderFactory;
 import workbench.storage.SqlLiteralFormatter;
 
-import workbench.util.*;
+import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
+import workbench.util.MessageBuffer;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * A class to compare the data of two tables and generate approriate INSERT or UPDATE
@@ -334,7 +344,7 @@ public class TableDataDiff
 			return TableDiffStatus.NoPK; //throw new SQLException("No primary key found for table " + referenceTable);
 		}
 
-		tableToSync = this.toSync.getMetadata().findTable(tableToVerify, false);
+		tableToSync = this.toSync.getMetadata().findSelectableObject(tableToVerify);
 		if (tableToSync == null)
 		{
 			LogMgr.logError("TableDataDiff.setTableName()", "Target table " + tableToVerify.getTableName() + " not found!", null);

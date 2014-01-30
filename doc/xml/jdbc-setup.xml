@@ -103,9 +103,9 @@
 
 		<caution>
       <para>
-        The JDBC/ODBC bridge will be removed with Java 8 and will no longer be usable then. The JDBC/ODBC bridge also
-        is quite unreliable and considered a workaround.
-        A real JDBC driver should always be preferred over a using the JDBC/ODBC bridge.
+        The JDBC/ODBC bridge will be removed with Java 8 and will no longer be usable then. The JDBC/ODBC bridge is also
+        quite unreliable, slow and considered a workaround.
+        A real JDBC driver should always be preferred over using the JDBC/ODBC bridge.
       </para>
     </caution>
 

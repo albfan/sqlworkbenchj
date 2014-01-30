@@ -71,7 +71,7 @@ public class SourceTableArgument
 	{
 		if (dbConn == null) return;
 
-		String[] types = dbConn.getMetadata().getTableTypesArray();
+		String[] types = dbConn.getMetadata().getTablesAndViewTypes();
 		schemaAsCatalog = !dbConn.getDbSettings().supportsSchemas();
 		initTableList(includeTables, excludeTables, schema, types, dbConn);
 	}
