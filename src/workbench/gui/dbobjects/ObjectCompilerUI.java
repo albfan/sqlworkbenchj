@@ -118,7 +118,7 @@ public class ObjectCompilerUI
 		{
 			this.dbConnection.setBusy(false);
 		}
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
@@ -138,6 +138,8 @@ public class ObjectCompilerUI
 			public void run()
 			{
 				log.appendLine(msg);
+				log.validate();
+				log.updateScrollBars();
 			}
 		});
 	}
