@@ -141,7 +141,7 @@ public class InformixSequenceReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("InformixSequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
+			LogMgr.logInfo("InformixSequenceReader.getRawSequenceDefinition()", "Query to retrieve sequence:\n" + sql);
 		}
 
 		Statement stmt = null;
@@ -155,7 +155,7 @@ public class InformixSequenceReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("InformixSequenceReader.getRawSequenceDefinition()", "Error when retrieving sequence definition", e);
+			LogMgr.logError("InformixSequenceReader.getRawSequenceDefinition()", "Error when retrieving sequence definition using SQL:\n" + sql, e);
 		}
 		finally
 		{

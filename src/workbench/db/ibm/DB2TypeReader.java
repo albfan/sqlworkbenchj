@@ -30,6 +30,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
@@ -37,9 +41,9 @@ import workbench.db.DbObject;
 import workbench.db.ObjectListEnhancer;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -141,7 +145,7 @@ public class DB2TypeReader
 		select += " ORDER BY typeschema, typename ";
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("DB2TypeReader.getTypes()", "Using SQL: " + select);
+			LogMgr.logInfo("DB2TypeReader.getTypes()", "Query to retrieve TYPE: " + select);
 		}
 
 		Statement stmt = null;

@@ -26,12 +26,15 @@ package workbench.db.nuodb;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -62,6 +65,11 @@ public class NuoDbColumnEnhancer
 			"where tablename = ? \n" +
 			"and schema = ? \n" +
 			"and generator_sequence is not null ";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("NuoDbColumnEnhancer.readIdentityColumns()", "Query to retrieve identity columns:\n" + sql);
+		}
 
 		try
 		{

@@ -28,10 +28,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import workbench.db.DbSearchPath;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DbSearchPath;
+import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -63,7 +66,7 @@ public class Db2SearchPath
 		ResultSet rs = null;
 		Statement stmt = null;
 		String sql = getSQL(con);
-		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using statement: " + sql);
+		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Query to retrieve search path: " + sql);
 
 		try
 		{

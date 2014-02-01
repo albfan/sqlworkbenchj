@@ -22,8 +22,6 @@
  */
 package workbench.db.nuodb;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -95,7 +93,7 @@ public class NuoDBSequenceReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("NuoDBSequenceReader.getRawSequenceDefinition()", "Using query=" + query);
+			LogMgr.logInfo("NuoDBSequenceReader.getRawSequenceDefinition()", "Query to retrieve sequence:" + query);
 		}
 
 		DataStore result = null;

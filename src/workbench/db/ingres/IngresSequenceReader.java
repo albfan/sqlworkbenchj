@@ -27,12 +27,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
-import workbench.util.ExceptionUtil;
-import workbench.log.LogMgr;
+
 import workbench.storage.DataStore;
+
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -104,6 +109,11 @@ public class IngresSequenceReader
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("IngresSequenceReqder.getSquences()", "Query to retrieve sequence:" + sql);
+		}
 
 		try
 		{

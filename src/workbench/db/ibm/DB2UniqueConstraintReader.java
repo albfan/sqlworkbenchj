@@ -26,12 +26,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConstraintDefinition;
 import workbench.db.IndexDefinition;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -123,7 +126,7 @@ public class DB2UniqueConstraintReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("DB2UniqueConstraintReader.processIndexList()", "Using:\n" + sql);
+			LogMgr.logDebug("DB2UniqueConstraintReader.processIndexList()", "Query to retrieve constraints:\n" + sql);
 		}
 
 		Statement stmt = null;

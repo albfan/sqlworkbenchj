@@ -167,13 +167,35 @@ public class DeleteScriptGenerator
 		}
 	}
 
+	private void createDeleteAll(boolean includeRoot)
+	{
+		TableDependencySorter sorter = new TableDependencySorter(connection);
+		sorter.setProgressMonitor(monitor);
+		List<TableIdentifier> sorted = sorter.sortForDelete(Collections.singletonList(rootTable), true);
+
+		for (int i=0; i < sorted.size(); i++)
+		{
+			if (!includeRoot && i==sorted.size() - 1) break;
+			TableIdentifier tbl = sorted.get(i);
+			String delete = "DELETE FROM " + tbl.getTableExpression(connection);
+			this.statements.add(formatSql(delete));
+		}
+	}
+
 	private void createStatements(boolean includeRoot)
 	{
+		if (CollectionUtil.isEmpty(this.columnValues))
+		{
+			createDeleteAll(includeRoot);
+			return;
+		}
+
 		this.dependency.setScriptMonitor(monitor);
 
 		long retrieveStart = System.currentTimeMillis();
 		this.dependency.setExcludedTables(excludeTables);
 		this.dependency.readDependencyTree(true);
+
 
 		long duration = System.currentTimeMillis() - retrieveStart;
 		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Retrieving dependency hierarchy for " +  dependency.getRootNode().getTable() + " took: " + duration + "ms");
@@ -247,7 +269,7 @@ public class DeleteScriptGenerator
 		return sorted;
 	}
 
-	private String formatSql(StringBuilder sql)
+	private String formatSql(CharSequence sql)
 	{
 		if (!formatSql)
 		{
@@ -454,10 +476,15 @@ public class DeleteScriptGenerator
 		}
 		StringBuilder script = new StringBuilder();
 
+		String append = ";\n";
+		if (CollectionUtil.isNonEmpty(columnValues))
+		{
+			append += "\n";
+		}
 		for (String dml : statements)
 		{
 			script.append(dml);
-			script.append(";\n\n");
+			script.append(append);
 		}
 
 		return script.toString();

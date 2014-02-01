@@ -32,13 +32,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.db.sqltemplates.ColumnDefinitionTemplate;
-import workbench.db.sqltemplates.ConstraintNameTester;
-import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.sqltemplates.ColumnDefinitionTemplate;
+import workbench.db.sqltemplates.ConstraintNameTester;
+
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -101,7 +103,7 @@ public abstract class AbstractConstraintReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo(getClass().getName() + ".getColumnConstraints()", "Using SQL: " + sql);
+			LogMgr.logInfo(getClass().getName() + ".getColumnConstraints()", "Query to retrieve column constraints:\n" + sql);
 		}
 
 		HashMap<String, String> result = new HashMap<String, String>();
@@ -188,7 +190,7 @@ public abstract class AbstractConstraintReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo(getClass().getName() + ".getTableConstraints()", "Using SQL: " + sql);
+			LogMgr.logInfo(getClass().getName() + ".getTableConstraints()", "Query to retrieve table constraints:\n" + sql);
 		}
 
 		List<TableConstraint> result = CollectionUtil.arrayList();

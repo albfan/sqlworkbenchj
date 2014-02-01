@@ -29,12 +29,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -165,7 +168,7 @@ public class VerticaSequenceReader
 		catch (SQLException e)
 		{
 			this.dbConnection.rollback(sp);
-			LogMgr.logError("VerticaSequenceReader.getSequences()", "Error retrieving sequences using sql: " + sql, e);
+			LogMgr.logError("VerticaSequenceReader.getSequences()", "Error retrieving sequences using sql:\n" + sql, e);
 			return result;
 		}
 		finally

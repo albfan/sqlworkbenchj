@@ -31,9 +31,9 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.JdbcUtils;
+import workbench.db.ObjectSourceOptions;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
-import workbench.db.ObjectSourceOptions;
 import workbench.db.WbConnection;
 
 import workbench.util.SqlUtil;
@@ -78,7 +78,7 @@ public class Db2TableSourceBuilder
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("Db2TableSourceBuilder.readTableOptions()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+			LogMgr.logInfo("Db2TableSourceBuilder.readTableOptions()", "Query to retrieve table options:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
 		}
 
 		try

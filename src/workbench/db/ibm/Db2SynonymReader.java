@@ -27,11 +27,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -85,7 +88,7 @@ public class Db2SynonymReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("Db2SynonymReader.getSynonymTable()", "Using query=\n" + sql);
+			LogMgr.logInfo("Db2SynonymReader.getSynonymTable()", "Query to retrieve synonyms:\n" + sql);
 		}
 
 		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql.toString());

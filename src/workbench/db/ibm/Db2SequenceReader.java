@@ -27,13 +27,16 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -242,7 +245,7 @@ public class Db2SequenceReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("Db2SequenceReader.getRawSequenceDefinition()", "Using query=\n" +
+			LogMgr.logInfo("Db2SequenceReader.getRawSequenceDefinition()", "Query to retrieve sequence:\n" +
 				SqlUtil.replaceParameters(sql, schema, namePattern));
 		}
 

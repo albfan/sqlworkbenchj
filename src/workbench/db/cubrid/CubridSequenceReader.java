@@ -29,12 +29,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -135,7 +138,7 @@ public class CubridSequenceReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("CubridSequenceReader.getSequences()", "Using query=\n" + sql.toString());
+			LogMgr.logInfo("CubridSequenceReader.getSequences()", "Query to retrieve sequences:\n" + sql.toString());
 		}
 
 		try
@@ -200,7 +203,7 @@ public class CubridSequenceReader
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("CubridSequenceReader.getRawSequenceDefinition()", "Error retrieving sequences", e);
+			LogMgr.logError("CubridSequenceReader.getRawSequenceDefinition()", "Error retrieving sequences using SQL:\n" + sql, e);
 			return null;
 		}
 		finally

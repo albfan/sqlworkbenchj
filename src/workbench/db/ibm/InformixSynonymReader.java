@@ -81,19 +81,21 @@ public class InformixSynonymReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("InformixSynonymReader.getSynonymTable()", "Using query=\n" + SqlUtil.replaceParameters(sql, synonymName, schema));
+			LogMgr.logInfo("InformixSynonymReader.getSynonymTable()", "Query to retrieve synonym:\n" + SqlUtil.replaceParameters(sql, synonymName, schema));
 		}
 
-		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql.toString());
-		stmt.setString(1, synonymName);
-		stmt.setString(2, schema);
-
-		ResultSet rs = stmt.executeQuery();
-		String table = null;
-		String owner = null;
 		TableIdentifier result = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		try
 		{
+			stmt = con.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, synonymName);
+			stmt.setString(2, schema);
+
+			rs = stmt.executeQuery();
+			String table = null;
+			String owner = null;
 			if (rs.next())
 			{
 				owner = rs.getString(1);
@@ -103,6 +105,11 @@ public class InformixSynonymReader
 					result = new TableIdentifier(null, owner, table);
 				}
 			}
+		}
+		catch (SQLException ex)
+		{
+			LogMgr.logError("InformixSynonymReader.getSynonymTable()", "Could not retrieve synonym table using SQL:\n + sql", ex);
+			throw ex;
 		}
 		finally
 		{

@@ -114,7 +114,7 @@ public class InformixColumnEnhancer
 		String tablename = table.getTable().getRawTableName();
 		String schema = table.getTable().getRawSchema();
 
-		LogMgr.logDebug("InformixColumnEnhancer.updateDateColumns()", "Using query=\n" + SqlUtil.replaceParameters(sql, tablename, schema));
+		LogMgr.logDebug("InformixColumnEnhancer.updateDateColumns()", "Query to retrieve column details:\n" + SqlUtil.replaceParameters(sql, tablename, schema));
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;

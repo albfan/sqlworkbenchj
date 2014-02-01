@@ -22,9 +22,6 @@
  */
 package workbench.db.monetdb;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -109,7 +106,7 @@ public class MonetDbSequenceReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("MonetDbSequenceReader.getRawSequenceDefinition()", "Using query=" + query);
+			LogMgr.logInfo("MonetDbSequenceReader.getRawSequenceDefinition()", "Query to retrieve sequences:\n" + query);
 		}
 
 		DataStore result = null;

@@ -29,14 +29,18 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DomainIdentifier;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -91,7 +95,7 @@ public class NuoDBDomainReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("NuoDbDomainReader.getSql()", "Using SQL=\n" + sql);
+			LogMgr.logDebug("NuoDbDomainReader.getSql()", "Query to retrieve domain:\n" + sql);
 		}
 
 		return sql.toString();

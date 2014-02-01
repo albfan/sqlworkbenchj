@@ -84,6 +84,11 @@ public class MonetDbProcedureReader
 
 		sql.append("\norder by 2,3");
 
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("MonetDbProcedureReader.getProcedures()", "Query to retrieve procedures:" + sql);
+		}
+
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;

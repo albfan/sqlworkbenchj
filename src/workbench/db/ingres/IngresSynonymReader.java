@@ -27,10 +27,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -62,6 +66,11 @@ public class IngresSynonymReader
 			sql.append(" WHERE synonym_owner = ?");
 		}
 
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("IngresSynonymReader.getSynonymList()", "Query to retrieve synonyms:\n" + sql);
+		}
+
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql.toString());
@@ -81,7 +90,7 @@ public class IngresSynonymReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("OracleMetaData.getSynonymList()", "Error when retrieving synonyms",e);
+			LogMgr.logError("OracleMetaData.getSynonymList()", "Error when retrieving synonyms using SQL:\n" + sql,e);
 		}
 		finally
 		{
@@ -94,13 +103,20 @@ public class IngresSynonymReader
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String anOwner, String aSynonym)
 		throws SQLException
 	{
-		StringBuilder sql = new StringBuilder(200);
-		sql.append("SELECT synonym_name, table_owner, table_name FROM iisynonyms ");
-		sql.append(" WHERE synonym_name = ? AND synonym_owner = ?");
+		String sql =
+		  "SELECT synonym_name, table_owner, table_name \n" +
+			"FROM iisynonyms \n" +
+			"WHERE synonym_name = ? \n " +
+			"  AND synonym_owner = ? ";
 
-		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql.toString());
+		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
 		stmt.setString(1, aSynonym);
 		stmt.setString(2, anOwner);
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("IngresSynonymReader.getSynonymTable()", "Query to retrieve synonym table:\n" + sql);
+		}
 
 		ResultSet rs = stmt.executeQuery();
 		String table = null;

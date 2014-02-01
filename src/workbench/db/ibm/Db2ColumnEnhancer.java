@@ -94,7 +94,7 @@ public class Db2ColumnEnhancer
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Using query=\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+			LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column details:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
 		}
 
 		Map<String, String> expressions = new HashMap<String, String>();

@@ -98,7 +98,7 @@ public class InformixTableSourceBuilder
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("InformixSynonymReader.readLockMode()", "Using query=\n" + SqlUtil.replaceParameters(sql, table.getTableName(), table.getSchema()));
+			LogMgr.logInfo("InformixTableSourceBuilder.readLockMode()", "Query to retrieve lock mode:\n" + SqlUtil.replaceParameters(sql, table.getTableName(), table.getSchema()));
 		}
 
 		PreparedStatement pstmt = null;
@@ -156,7 +156,7 @@ public class InformixTableSourceBuilder
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("InformixTableSourceBuilder.readLockMode()", "Error when retrieving lock mode", e);
+			LogMgr.logError("InformixTableSourceBuilder.readLockMode()", "Error when retrieving lock mode using SQL:\n" + sql, e);
 		}
 		finally
 		{
