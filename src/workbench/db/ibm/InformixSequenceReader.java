@@ -155,7 +155,7 @@ public class InformixSequenceReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("InformixSequenceReader.getRawSequenceDefinition()", "Error when retrieving sequence definition using SQL:\n" + sql, e);
+			LogMgr.logError("InformixSequenceReader.getRawSequenceDefinition()", "Could not retrievin sequence definition using SQL:\n" + sql, e);
 		}
 		finally
 		{

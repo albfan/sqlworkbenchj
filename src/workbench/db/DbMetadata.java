@@ -360,7 +360,7 @@ public class DbMetadata
 		{
 			this.quoteCharacter = "\"";
 		}
-		LogMgr.logInfo("DbMetadata.<init>", "Using quote escape character: " + quoteCharacter);
+		LogMgr.logInfo("DbMetadata.<init>", "Using identifier quote character: " + quoteCharacter);
 		LogMgr.logInfo("DbMetadata.<init>", "Using search string escape character: " + getSearchStringEscape());
 
 		baseTableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
@@ -435,7 +435,7 @@ public class DbMetadata
 		{
 			catalogSeparator = sep.charAt(0);
 		}
-		LogMgr.logDebug("DbMetadata.<init>", "Using catalog separator: [" + catalogSeparator + "]");
+		LogMgr.logInfo("DbMetadata.<init>", "Using catalog separator: " + catalogSeparator);
 	}
 
 	/**
