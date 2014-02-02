@@ -42,8 +42,8 @@
       <li>Reformatting (Pretty-Print) of SQL Statements (<image-link title="SQL Formatter" name="SqlFormat.png">Screenshot</image-link>)</li>
       <li>Full support for BLOB data in query results, SQL statements, export and import. <a href="blob_example.html">Read more...</a></li>
       <li>Select rows from related tables according to their foreign key definitions (<image-link title="Select child rows" name="child_rows.png">Screenshot 1</image-link> <image-link title="Select parent rows" name="parent_rows.png">Screenshot 2</image-link>).<br/></li>
-      <li>Search text in procedure, view and other sources using a <a href="manual/wb-commands.html#command-search-source">SQL command</a> or a GUI (<image-link title="Search object source" name="objectsearcher.png">Screenshot</image-link>)</li>
-      <li>Search for data across all columns in all tables using a <a href="manual/wb-commands.html#command-search-data">SQL command</a> or a GUI (<image-link title="Search table data" name="SearchTables.png">Screenshot 1</image-link> <image-link title="Search table data" name="wbgrepdata.png">Screenshot 2</image-link>)</li>
+      <li>Search text in procedure, view and other sources using a <a href="manual/wb-commands.html#command-search-source">SQL command</a> or a GUI ( <image-link title="Search object source" name="objectsearcher.png">Screenshot 1</image-link> <image-link title="Using WbGrepSource" name="wbgrepsource.png">Screenshot 2</image-link>)</li>
+      <li>Search for data across all columns in all tables using a <a href="manual/wb-commands.html#command-search-data">SQL command</a> or a GUI (<image-link title="Search table data" name="SearchTables.png">Screenshot 1</image-link> <image-link title="Using WbGrepData" name="wbgrepdata.png">Screenshot 2</image-link>)</li>
       <li>Copy data directly between to database servers using a <a href="manual/command-copy.html">SQL command</a> or a GUI (<image-link title="Data Pumper" name="DataPumper.png">Screenshot</image-link>)</li>
       <li><a href="manual/using.html#macros">Macros</a> (aka aliases) for frequently used SQL statements</li>
       <li>Variable substitution in SQL statements including smart prompting for values (can be combined with macros)</li>
@@ -175,11 +175,11 @@ WHERE id=42;</p>
       <h3 style="padding-top:10px">Installation</h3>
       <p>
         After <a href="downloads.html">downloading</a> SQL Workbench/J, unzip the archive into
-        a directory of your choice. 
+        a directory of your choice.
       </p>
       <p style="margin:10px">
-        <img style="vertical-align:middle;" src="images/warning.png"/>Due to <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4523159">a bug in the Java runtime</a>, you can <b>not</b> use a directory that contains
-        an exclamation mark e.g. <tt>SQL!Workbench</tt>
+        <img style="vertical-align:middle;" src="images/warning.png"/>Due to <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4523159">a bug in the Java runtime</a>,
+        you can <b>not</b> install SQL Workbench/J into a directory that contains an exclamation mark e.g. <tt>SQL!Workbench</tt>
       </p>
       <p>
         The application is now ready to be run, no further installation steps are necessary.
