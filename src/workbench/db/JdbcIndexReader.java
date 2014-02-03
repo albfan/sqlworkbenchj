@@ -46,7 +46,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
-import static workbench.db.IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE;
+import static workbench.db.IndexReader.*;
 
 /**
  * An implementation of the IndexReader interface that uses the standard JDBC API
@@ -921,7 +921,6 @@ public class JdbcIndexReader
 				String idxType = StringUtil.rtrim(rs.getString("index_type"));
 				String isUnique = StringUtil.rtrim(rs.getString("is_unique"));
 				String isPK = StringUtil.rtrim(rs.getString("is_pk"));
-				String columns = rs.getString("column_list");
 
 				TableIdentifier tbl = new TableIdentifier(tableCatalog, tableSchema, tableName);
 				IndexDefinition idx = new IndexDefinition(tbl, idxName.trim());

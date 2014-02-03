@@ -139,12 +139,15 @@ public class XlsRowDataConverter
 			LogMgr.logError("XlsRowDataConverter.loadExcelFile()", "Could not load Excel file", io);
 			workbook = null;
 		}
+		finally
+		{
+			FileUtil.closeQuietely(in);
+		}
 	}
 
 	@Override
 	public StringBuilder getStart()
 	{
-		createFormatters();
 		firstRow = 0;
 
 		boolean loadFile = append || this.targetSheetIndex > 0;
@@ -169,6 +172,7 @@ public class XlsRowDataConverter
 			}
 		}
 
+		createFormatters();
 		excelFormat.setupWithWorkbook(workbook);
 
 		String sheetTitle = getPageTitle("SQLExport");
@@ -188,7 +192,6 @@ public class XlsRowDataConverter
 		{
 			sheet = workbook.createSheet(sheetTitle);
 		}
-
 
 		if (includeColumnComments)
 		{
@@ -252,6 +255,7 @@ public class XlsRowDataConverter
 		}
 		return row;
 	}
+
 	@Override
 	public StringBuilder getEnd(long totalRows)
 	{
@@ -311,6 +315,8 @@ public class XlsRowDataConverter
 		{
 			fileOut = new FileOutputStream(getOutputFile());
 			workbook.write(fileOut);
+			workbook = null;
+			sheet = null;
 		}
 		catch (FileNotFoundException e)
 		{
@@ -470,10 +476,19 @@ public class XlsRowDataConverter
 			cellStyle = excelFormat.headerCellStyle;
 		}
 
+		// do not mess with the formatting if we are writing to an existing sheet
 		if (applyFormatting())
 		{
-			// do not mess with the formatting if we are writing to an existing sheet
-			cell.setCellStyle(cellStyle);
+			try
+			{
+				CellStyle style = workbook.createCellStyle();
+				style.cloneStyleFrom(cellStyle);
+				cell.setCellStyle(style);
+			}
+			catch (IllegalArgumentException iae)
+			{
+				LogMgr.logWarning("XlsRowDataConverter.setCellValueAndStyle()", "Could not set style for column: " + metaData.getColumnName(column) + ", row: " + cell.getRowIndex() + ", column: " + cell.getColumnIndex());
+			}
 		}
 	}
 
