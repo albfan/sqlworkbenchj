@@ -26,6 +26,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Window;
 import java.util.List;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -33,10 +34,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.util.ClassFinder;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -84,6 +89,10 @@ public class ClassFinderGUI
 		}
 		JList list = new JList(model);
 		list.setVisibleRowCount(4);
+		if (StringUtil.isNonBlank(className.getText()))
+		{
+			list.setSelectedValue(className.getText(), true);
+		}
 		JScrollPane scroll = new JScrollPane(list);
 		p.add(scroll, BorderLayout.CENTER);
 		Window parent = SwingUtilities.getWindowAncestor(className);
