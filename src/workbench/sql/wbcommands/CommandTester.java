@@ -126,6 +126,7 @@ public class CommandTester
 		commands.add(WbHistory.VERB);
 		commands.add(WbDefineMacro.VERB);
 		commands.add(WbListMacros.VERB);
+		commands.add(WbListIndexes.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()
@@ -174,6 +175,7 @@ public class CommandTester
 			formattedWords.put(WbGenInsert.VERB, "WbGenerateInsert");
 			formattedWords.put(WbDefineMacro.VERB, "WbDefineMacro");
 			formattedWords.put(WbListMacros.VERB, "WbListMacros");
+			formattedWords.put(WbListIndexes.VERB, "WbListIndexes");
 		}
 		return formattedWords;
 	}

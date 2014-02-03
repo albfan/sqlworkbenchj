@@ -75,6 +75,7 @@ import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbIsolationLevel;
 import workbench.sql.wbcommands.WbListCatalogs;
+import workbench.sql.wbcommands.WbListIndexes;
 import workbench.sql.wbcommands.WbListPkDef;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
@@ -164,6 +165,7 @@ public class CommandMapper
 		addCommand(new WbHideWarnings());
 		addCommand(new WbProcSource());
 		addCommand(new WbListTriggers());
+		addCommand(new WbListIndexes());
 		addCommand(new WbTriggerSource());
 		addCommand(new WbDescribeObject());
 		addCommand(new WbGrepSource());

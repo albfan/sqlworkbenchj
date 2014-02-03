@@ -1,5 +1,4 @@
 /*
- * WbListTables.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -27,6 +26,9 @@ import java.util.List;
 
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
+import workbench.db.DbMetadata;
+import workbench.db.IndexDefinition;
+import workbench.db.IndexReader;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.TableIdentifier;
@@ -41,23 +43,20 @@ import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
 
 /**
- * List all tables available to the current user.
+ * List all indexes available to the current user.
  * <br>
- * This is the same information as displayed in the DbExplorer's "Objects" tab.
  *
  * @see workbench.db.DbMetadata#getObjects(String, String, String, String[])
  * @author Thomas Kellerer
  */
-public class WbListTables
+public class WbListIndexes
 	extends SqlCommand
 {
-	public static final String VERB = "WBLIST";
+	public static final String VERB = "WBLISTINDEXES";
 
-	public WbListTables()
+	public WbListIndexes()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(CommonArgs.ARG_OBJECTS);
-		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 	}
@@ -74,14 +73,22 @@ public class WbListTables
 	{
 		String options = getCommandLine(aSql);
 
-		String[] types = currentConnection.getMetadata().getTableTypesArray();
+		DbMetadata meta = currentConnection.getMetadata();
+
+		IndexReader reader = meta.getIndexReader();
 
 		StatementRunnerResult result = new StatementRunnerResult();
-		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
+
+		if (!reader.supportsIndexList())
+		{
+			result.addMessage("Not supported for " + meta.getProductName());
+			result.setFailure();
+			return result;
+
+		}
 		cmdLine.parse(options);
 
-		String objects = options;
 		String schema = null;
 		String catalog = null;
 
@@ -94,14 +101,6 @@ public class WbListTables
 
 		if (cmdLine.hasArguments())
 		{
-
-			objects = cmdLine.getValue("objects");
-
-			List<String> typeList = cmdLine.getListValue(CommonArgs.ARG_TYPES);
-			if (typeList.size() > 0)
-			{
-				types = StringUtil.toArray(typeList, true, true);
-			}
 			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
 		}
@@ -116,52 +115,10 @@ public class WbListTables
 			catalog = currentConnection.getMetadata().getCurrentCatalog();
 		}
 
-		DataStore resultList = null;
+		List<IndexDefinition> indexes = reader.getIndexes(catalog, schema);
+		DataStore ds = reader.fillDataStore(indexes, true);
+		result.addDataStore(ds);
 
-		if (StringUtil.isBlank(objects))
-		{
-			objects = "%";
-		}
-
-		List<String> objectFilters = StringUtil.stringToList(objects, ",", true, true, false, true);
-
-		for (String filter : objectFilters)
-		{
-			// Create a tableidentifier for parsing e.g. parameters
-			// like -tables=public.*
-			TableIdentifier tbl = new TableIdentifier(currentConnection.getMetadata().adjustObjectnameCase(filter), currentConnection);
-			String tschema = tbl.getSchema();
-			if (StringUtil.isBlank(tschema))
-			{
-				tschema = schema;
-			}
-			tschema = currentConnection.getMetadata().adjustSchemaNameCase(tschema);
-			String tcatalog = tbl.getCatalog();
-			if (StringUtil.isBlank(tcatalog))
-			{
-				tcatalog = catalog;
-			}
-			tcatalog = currentConnection.getMetadata().adjustObjectnameCase(tcatalog);
-
-			String tname = tbl.getTableName();
-
-			DataStore ds = currentConnection.getMetadata().getObjects(tcatalog, tschema, tname, types);
-			if (resultList == null)
-			{
-				// first result retrieved
-				resultList = ds;
-			}
-			else
-			{
-				// additional results retrieved, add them to the current result
-				resultList.copyFrom(ds);
-			}
-		}
-
-		if (resultList != null)
-		{
-			result.addDataStore(resultList);
-		}
 		return result;
 	}
 

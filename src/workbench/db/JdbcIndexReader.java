@@ -513,6 +513,43 @@ public class JdbcIndexReader
 		// Nothing implemented
 	}
 
+	private DataStore createIndexListDataStore(boolean includeTableName)
+	{
+		List<String> columnList = CollectionUtil.arrayList("INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE");
+		List<Integer> typeList = CollectionUtil.arrayList(Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR);
+		List<Integer> sizeList = CollectionUtil.arrayList(30, 7, 6, 40, 10, 15);
+
+		if (this.supportsTableSpaces())
+		{
+			columnList.add("TABLESPACE");
+			typeList.add(Types.VARCHAR);
+			sizeList.add(15);
+		}
+
+		if (includeTableName)
+		{
+			columnList.add(0, "TABLENAME");
+			typeList.add(0, Types.VARCHAR);
+			sizeList.add(0, 30);
+		}
+		String[] cols = new String[columnList.size()];
+		cols = columnList.toArray(cols);
+
+		final int[] types = new int[typeList.size()];
+		for (int i=0; i < typeList.size(); i++)
+		{
+			types[i] = typeList.get(i).intValue();
+		}
+
+		final int[] sizes = new int[sizeList.size()];
+		for (int i=0; i < sizeList.size(); i++)
+		{
+			sizes[i] = sizeList.get(i).intValue();
+		}
+
+		return new DataStore(cols, types, sizes);
+	}
+
 	/**
 	 * Return the index information for a table as a DataStore.
 	 *
@@ -525,37 +562,30 @@ public class JdbcIndexReader
 	@Override
 	public DataStore getTableIndexInformation(TableIdentifier table)
 	{
-		final String[] cols;
-		final int types[];
-		final int sizes[];
-
-		if (this.supportsTableSpaces())
-		{
-			cols = new String[] {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE", "TABLESPACE"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-			sizes = new int[] {30, 7, 6, 40, 10, 15};
-		}
-		else
-		{
-			cols = new String[] {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-			sizes = new int[]  {30, 7, 6, 40, 10};
-		}
-		DataStore idxData = new DataStore(cols, types, sizes);
-		if (table == null) return idxData;
-
 		Collection<IndexDefinition> indexes = getTableIndexList(table);
+		return fillDataStore(indexes, false);
+	}
+
+	@Override
+	public DataStore fillDataStore(Collection<IndexDefinition> indexes, boolean includeTableName)
+	{
+		DataStore idxData = createIndexListDataStore(includeTableName);
+		int offset = includeTableName ? 1 : 0;
 		for (IndexDefinition idx : indexes)
 		{
 			int row = idxData.addRow();
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME, idx.getName());
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG, (idx.isUnique() ? "YES" : "NO"));
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx.getExpression());
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
+			if (includeTableName)
+			{
+				idxData.setValue(row, 0, idx.getBaseTable().getTableExpression(metaData.getWbConnection()));
+			}
+			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME, idx.getName());
+			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG, (idx.isUnique() ? "YES" : "NO"));
+			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
+			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx.getExpression());
+			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
 			if (this.supportsTableSpaces())
 			{
-				idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TBL_SPACE, idx.getTablespace());
+				idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_TBL_SPACE, idx.getTablespace());
 			}
 			idxData.getRow(row).setUserObject(idx);
 		}
@@ -628,6 +658,8 @@ public class JdbcIndexReader
 	 */
 	public List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean uniqueOnly, boolean checkPK)
 	{
+		if (table == null) return new ArrayList<IndexDefinition>();
+
 		ResultSet idxRs = null;
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(metaData.getWbConnection());
@@ -889,6 +921,7 @@ public class JdbcIndexReader
 				String idxType = StringUtil.rtrim(rs.getString("index_type"));
 				String isUnique = StringUtil.rtrim(rs.getString("is_unique"));
 				String isPK = StringUtil.rtrim(rs.getString("is_pk"));
+				String columns = rs.getString("column_list");
 
 				TableIdentifier tbl = new TableIdentifier(tableCatalog, tableSchema, tableName);
 				IndexDefinition idx = new IndexDefinition(tbl, idxName.trim());

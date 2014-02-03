@@ -111,6 +111,8 @@ public interface IndexReader
 	 */
 	DataStore getTableIndexInformation(TableIdentifier table);
 
+	DataStore fillDataStore(Collection<IndexDefinition> indexes, boolean includeTableName);
+
 	/**
 	 * Returns all indexes defined for the given table.
 	 *
@@ -151,7 +153,7 @@ public interface IndexReader
 	 * @param catalog   the catalog for which to retrieve the indexes, may be null
 	 * @param schema    the schema for which to retrieve the indexes, may be null
 	 * @return a list of indexes
-	 * 
+	 *
 	 * @see #supportsIndexList()
 	 */
 	List<IndexDefinition> getIndexes(String catalog, String schema);

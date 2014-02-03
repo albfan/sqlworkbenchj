@@ -481,7 +481,7 @@ public class TableListPanel
 			@Override
 			public void reload()
 			{
-				reload();
+				TableListPanel.this.reload();
 			}
 
 			@Override
