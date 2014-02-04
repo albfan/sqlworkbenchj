@@ -43,9 +43,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -93,7 +91,7 @@ public class OracleIndexReaderTest
 			"create index zzz_foo on foo (id);");
 		try
 		{
-			List<IndexDefinition> indexes = con.getMetadata().getIndexReader().getIndexes(null, OracleTestUtil.SCHEMA_NAME);
+			List<IndexDefinition> indexes = con.getMetadata().getIndexReader().getIndexes(null, OracleTestUtil.SCHEMA_NAME, null, null);
 			assertEquals(3, indexes.size());
 			assertEquals("AAA_UPPER", indexes.get(0).getName());
 			assertEquals("BBB_ID", indexes.get(1).getName());

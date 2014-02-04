@@ -220,13 +220,6 @@ public class DbMetadata
 		else if (productLower.contains("hsql"))
 		{
 			this.isHsql = true;
-			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "2.0"))
-			{
-				// HSQLDB 2.0 has a completely different set of system tables
-				// so the dynamically configured queries in the XML files need
-				// to be different. Therefor the product name is "patched" to include the version number
-				productName += " 2.0";
-			}
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "2.2"))
 			{
 				extenders.add(new HsqlTypeReader());

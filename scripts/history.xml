@@ -3,7 +3,7 @@
 
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-01-12">
+  <release build="-1" date="2014-02-03">
     <entry dev-build="10" type="enh">WbImport and WbCopy no support an option to synchronize sequences with the imported values for DBMS that support sequences tied to a column (Postgres, DB2, H2, HSQLDB)</entry>
     <entry dev-build="10" type="enh">WbFeedback now supports the options "traceon" and "traceoff". With "traceon" each statement that is executed is printed.</entry>
     <entry dev-build="10" type="enh">The trigger panel in the DbExplorer now shows DDL triggers for SQL Server</entry>

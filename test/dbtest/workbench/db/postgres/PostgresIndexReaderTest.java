@@ -103,7 +103,7 @@ public class PostgresIndexReaderTest
 		IndexReader reader = meta.getIndexReader();
 
 		assertTrue(reader.supportsIndexList());
-		List<IndexDefinition> indexList = reader.getIndexes(null, TESTID);
+		List<IndexDefinition> indexList = reader.getIndexes(null, TESTID, null, null);
 		assertNotNull(indexList);
 		assertEquals(3, indexList.size());
 	}

@@ -283,7 +283,7 @@ FROM _SYSTEM.SYS_TABLES
   </void>
 
   <void method="put">
-   <string>HSQL Database Engine</string>
+   <string>HSQL Database Engine-1</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT view_definition FROM INFORMATION_SCHEMA.SYSTEM_VIEWS</string>
@@ -295,7 +295,7 @@ FROM _SYSTEM.SYS_TABLES
   </void>
 
   <void method="put">
-   <string>HSQL Database Engine 2.0</string>
+   <string>HSQL Database Engine-2</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT view_definition FROM INFORMATION_SCHEMA.VIEWS</string>

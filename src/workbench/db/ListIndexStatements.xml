@@ -2,6 +2,101 @@
 <java version="1.5" class="java.beans.XMLDecoder">
  <object class="java.util.HashMap">
 
+<void method="put">
+   <string>H2</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select *
+from (
+  select index_name,
+         null as index_schema,
+         table_catalog,
+         table_schema,
+         table_name,
+         case
+           when non_unique then 'NO'
+           else 'YES'
+         end as is_unique,
+         case
+            when primary_key then 'YES'
+            else 'NO'
+         end as is_pk,
+         group_concat(column_name order by ordinal_position) as index_def,
+         case
+           when index_type = 3 then 'NORMAL'
+         end as index_type,
+         null as index_tablespace
+  from information_schema.indexes
+  group by index_name, table_catalog, table_schema, table_name, is_unique, is_pk
+) idx
+    </string>
+    </void>
+    <void property="schemaField">
+     <string>idx.table_schema</string>
+    </void>
+    <void property="baseObjectNameField">
+      <string>idx.table_name</string>
+    </void>
+    <void property="objectNameField">
+      <string>idx.index_name</string>
+    </void>
+   </object>
+  </void>
+
+
+ <void method="put">
+   <string>HSQL Database Engine-2</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select index_name,
+       index_schema,
+       table_catalog,
+       table_schema,
+       table_name,
+       case
+          when non_unique then 'NO'
+          else 'YES'
+       end as is_unique,
+       case
+          when pk_col_count > 0 then 'YES'
+          else 'NO'
+       end as is_pk,
+       null as index_type,
+       index_def,
+       null as index_tablespace
+from (
+  select idx.index_name,
+         idx.table_schem as index_schema,
+         idx.table_cat as table_catalog,
+         idx.table_schem as table_schema,
+         idx.table_name,
+         idx.non_unique,
+         group_concat(idx.column_name order by ordinal_position) as index_def,
+         count(pk.column_name) as pk_col_count
+  from information_schema.system_indexinfo idx
+    left join information_schema.system_primarykeys pk
+          on pk.table_name = idx.table_name
+          and pk.table_schem = idx.table_schem
+          and pk.table_cat = idx.table_cat
+          and pk.column_name = idx.column_name
+  group by table_cat, table_schem, table_name, index_name, non_unique
+) idx
+    </string>
+    </void>
+    <void property="schemaField">
+     <string>idx.index_schema</string>
+    </void>
+    <void property="baseObjectNameField">
+      <string>idx.table_name</string>
+    </void>
+    <void property="objectNameField">
+      <string>idx.index_name</string>
+    </void>
+   </object>
+  </void>
+
   <void method="put">
    <string>Firebird</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -35,9 +130,6 @@ where idx.rdb$relation_name not like 'RDB$%'
     </void>
     <void property="objectNameField">
       <string>idx.rdb$index_name</string>
-    </void>
-    <void property="orderBy">
-     <string>ORDER BY 1,2,4</string>
     </void>
    </object>
   </void>
@@ -85,9 +177,6 @@ from (
     </void>
     <void property="objectNameField">
       <string>index_name</string>
-    </void>
-    <void property="orderBy">
-     <string>ORDER BY 1,2,4</string>
     </void>
    </object>
   </void>
@@ -139,9 +228,6 @@ WHERE idx.type in (1,2)
     <void property="objectNameField">
      <string>idx.name</string>
     </void>
-    <void property="orderBy">
-     <string>ORDER BY 1,2,4</string>
-    </void>
    </object>
   </void>
 
@@ -183,9 +269,6 @@ from (
    AND ac.owner = idx.table_owner
 WHERE idx.index_name not like 'BIN$%'
      </string>
-    </void>
-    <void property="orderBy">
-     <string>ORDER BY 1,2,4</string>
     </void>
     <void property="schemaField">
      <string>idx.owner</string>
@@ -232,9 +315,6 @@ FROM all_indexes idx
    AND ac.owner = idx.table_owner
 WHERE idx.index_name not like 'BIN$%'
      </string>
-    </void>
-    <void property="orderBy">
-     <string>ORDER BY 1,2,4</string>
     </void>
     <void property="schemaField">
      <string>idx.owner</string>
@@ -285,9 +365,6 @@ where tbl.relkind = 'r'
     </void>
     <void property="schemaField">
       <string>ns.nspname</string>
-    </void>
-    <void property="orderBy">
-     <string>order by 1,2,4</string>
     </void>
     <void property="baseObjectNameField">
       <string>tbl.relname</string>

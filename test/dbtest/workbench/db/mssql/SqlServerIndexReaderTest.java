@@ -93,7 +93,7 @@ public class SqlServerIndexReaderTest
 		String source = reader.getIndexSource(tbl, index).toString();
 		assertTrue(source.contains("INCLUDE (id2)"));
 
-		List<IndexDefinition> indexList = reader.getIndexes(null, "dbo");
+		List<IndexDefinition> indexList = reader.getIndexes(null, "dbo", null, null);
 		assertNotNull(indexList);
 		assertEquals(1, indexList.size());
 		assertEquals("ix_one", indexList.get(0).getName());
