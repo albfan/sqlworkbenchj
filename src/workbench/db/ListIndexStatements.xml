@@ -98,6 +98,61 @@ from (
   </void>
 
   <void method="put">
+   <string>Firebird-2.1</string>
+   <object id="list_fb_full" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select idx.rdb$index_name as index_name,
+       null as index_schema,
+       null as table_catalog,
+       null as table_schema,
+       idx.rdb$relation_name as table_name,
+       case
+          when idx.rdb$unique_flag = 1 then 'YES'
+          else 'NO'
+       end as is_unique,
+       case
+         when pk.rdb$constraint_name is not null then 'YES'
+         else 'NO'
+       end as is_pk,
+       null as index_type,
+       case
+          when rdb$expression_source is null
+             then ( select list(c.col_name, ',') from (select trim(rdb$field_name) as col_name
+                                                       from rdb$index_segments c
+                                                       where c.rdb$index_name = idx.rdb$index_name
+                                                       order by rdb$field_position) c)
+          else rdb$expression_source
+       end as index_def,
+       null as index_tablespace
+from rdb$indices as idx
+  left join rdb$relation_constraints as pk
+         on idx.rdb$index_name = pk.rdb$index_name
+        and pk.rdb$constraint_type = 'PRIMARY KEY'
+where idx.rdb$relation_name not like 'RDB$%'
+      </string>
+    </void>
+    <void property="baseObjectNameField">
+      <string>idx.rdb$relation_name</string>
+    </void>
+    <void property="objectNameField">
+      <string>idx.rdb$index_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Firebird-2.5</string>
+   <object idref="list_fb_full"/>
+  </void>
+
+  <void method="put">
+   <string>Firebird-3.0</string>
+   <object idref="list_fb_full"/>
+  </void>
+
+  <!-- fallback for Firebird befor 2.1 that doesn't have the LIST() function -->
+  <void method="put">
    <string>Firebird</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
