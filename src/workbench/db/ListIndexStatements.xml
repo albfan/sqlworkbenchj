@@ -396,7 +396,7 @@ WHERE idx.index_name not like 'BIN$%'
 select idx.relname as index_name,
        null::text as index_schema,
        ns.nspname as table_schema,
-       current_database() as table_catalog,
+       null as table_catalog,
        tbl.relname as table_name,
        case ind.indisunique
           when true then 'YES'
@@ -407,7 +407,20 @@ select idx.relname as index_name,
           else 'NO'
        end as is_pk,
        null::text as index_type,
-       (regexp_matches(pg_get_indexdef(idx.oid), '\(.+\)'))[1]  as index_def,
+       concat_ws(',',
+           pg_get_indexdef(idx.oid, 1, true),
+           pg_get_indexdef(idx.oid, 2, true),
+           pg_get_indexdef(idx.oid, 3, true),
+           pg_get_indexdef(idx.oid, 4, true),
+           pg_get_indexdef(idx.oid, 5, true),
+           pg_get_indexdef(idx.oid, 6, true),
+           pg_get_indexdef(idx.oid, 7, true),
+           pg_get_indexdef(idx.oid, 8, true),
+           pg_get_indexdef(idx.oid, 9, true),
+           pg_get_indexdef(idx.oid, 10, true),
+           pg_get_indexdef(idx.oid, 11, true),
+           pg_get_indexdef(idx.oid, 12, true)
+       ) as index_def,
        ts.spcname as index_tablespace
 from pg_index ind
   join pg_class idx on idx.oid = ind.indexrelid

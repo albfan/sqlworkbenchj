@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ibm.DB2UniqueConstraintReader;
 import workbench.db.mssql.SqlServerUniqueConstraintReader;
@@ -41,13 +42,13 @@ import workbench.db.postgres.PostgresUniqueConstraintReader;
 import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.storage.DataStore;
+import workbench.storage.SortDefinition;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 import static workbench.db.IndexReader.*;
-import workbench.resource.Settings;
 
 /**
  * An implementation of the IndexReader interface that uses the standard JDBC API
@@ -529,9 +530,12 @@ public class JdbcIndexReader
 
 		if (includeTableName)
 		{
-			columnList.add(0, "TABLENAME");
+			columnList.add(0, "TABLE_SCHEMA");
 			typeList.add(0, Types.VARCHAR);
 			sizeList.add(0, 30);
+			columnList.add(1, "TABLENAME");
+			typeList.add(1, Types.VARCHAR);
+			sizeList.add(1, 30);
 		}
 		String[] cols = new String[columnList.size()];
 		cols = columnList.toArray(cols);
@@ -571,13 +575,14 @@ public class JdbcIndexReader
 	public DataStore fillDataStore(Collection<IndexDefinition> indexes, boolean includeTableName)
 	{
 		DataStore idxData = createIndexListDataStore(includeTableName);
-		int offset = includeTableName ? 1 : 0;
+		int offset = includeTableName ? 2 : 0;
 		for (IndexDefinition idx : indexes)
 		{
 			int row = idxData.addRow();
 			if (includeTableName)
 			{
-				idxData.setValue(row, 0, idx.getBaseTable().getTableExpression(metaData.getWbConnection()));
+				idxData.setValue(row, 0, idx.getBaseTable().getSchema());
+				idxData.setValue(row, 1, idx.getBaseTable().getTableName());
 			}
 			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME, idx.getName());
 			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG, (idx.isUnique() ? "YES" : "NO"));
@@ -590,7 +595,8 @@ public class JdbcIndexReader
 			}
 			idxData.getRow(row).setUserObject(idx);
 		}
-		idxData.sortByColumn(0, true);
+		SortDefinition sort = new SortDefinition(new int[] {0,1}, new boolean[] {true, true});
+		idxData.sort(sort);
 		idxData.resetStatus();
 		return idxData;
 	}
