@@ -22,6 +22,10 @@
  */
 package workbench.gui.lnf;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import workbench.util.StringUtil;
 
 /**
@@ -98,20 +102,22 @@ public class LnFDefinition
 		this.className = className;
 	}
 
-	public String getLibrary()
+	public List<String> getLibraries()
 	{
-		if (this.isBuiltIn) return "rt.jar";
-		return library;
+		if (this.isBuiltIn) return Collections.singletonList("rt.jar");
+		if (StringUtil.isBlank(library)) return new ArrayList<String>(0);
+		List<String> result = StringUtil.stringToList(library, LnFDefinition.LNF_PATH_SEPARATOR, true, true, false, false);
+		return result;
 	}
 
-	public void setLibrary(String library)
+	public void setLibraries(List<String> list)
 	{
-		this.library = library;
+		library = StringUtil.listToString(list, LNF_PATH_SEPARATOR, false);
 	}
 
 	public LnFDefinition createCopy()
 	{
-		return new LnFDefinition(getName(), getClassName(), getLibrary());
+		return new LnFDefinition(getName(), getClassName(), library);
 	}
 
 	@Override

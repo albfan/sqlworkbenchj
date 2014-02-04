@@ -38,14 +38,25 @@ public class LibraryElement
 
 	public LibraryElement(WbFile file)
 	{
-		fullPath = file.getFullPath();
-		if (file.exists())
+		String fname = file.getName();
+		if (fname.equalsIgnoreCase("rt.jar"))
 		{
-			displayString = fullPath;
+			// this is for the Look & Feel dialog
+			// otherwise the "rt.jar" would be shown with a wrong file path
+			displayString = file.getName();
+			fullPath = file.getName();
 		}
 		else
 		{
-			displayString = "<html><span style='color:red'><i>" + fullPath + "</i></span></html>";
+			fullPath = file.getFullPath();
+			if (file.exists())
+			{
+				displayString = fullPath;
+			}
+			else
+			{
+				displayString = "<html><span style='color:red'><i>" + fullPath + "</i></span></html>";
+			}
 		}
 	}
 

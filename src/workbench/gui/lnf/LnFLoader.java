@@ -26,11 +26,13 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.List;
+
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
+
 import workbench.WbManager;
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
 
 /**
  * A class to manage Look and feels that can be loaded at runtime.
@@ -39,7 +41,7 @@ import workbench.util.StringUtil;
 public class LnFLoader
 {
 	private LnFDefinition lnfDef;
-	private String[] liblist;
+	private List<String> liblist;
 
 	public LnFLoader(LnFDefinition definition)
 		throws ClassNotFoundException, MalformedURLException, InstantiationException, IllegalAccessException
@@ -47,31 +49,8 @@ public class LnFLoader
 		this.lnfDef = definition;
 		if (!lnfDef.isBuiltInLnF())
 		{
-			String libs = definition.getLibrary();
-			if (libs != null)
-			{
-				liblist = splitLibraries(libs);
-			}
+			liblist = lnfDef.getLibraries();
 		}
-	}
-
-	public static String[] splitLibraries(String libList)
-	{
-		String[] result = null;
-		if (libList.indexOf(StringUtil.getPathSeparator()) > -1)
-		{
-			result = libList.split(StringUtil.getPathSeparator());
-		}
-		else if (libList.indexOf(LnFDefinition.LNF_PATH_SEPARATOR) > -1)
-		{
-			result = libList.split(StringUtil.getPathSeparator());
-		}
-		else
-		{
-			// Assuming a single library
-			result = new String[] { libList };
-		}
-		return result;
 	}
 
 	public boolean isAvailable()
@@ -95,16 +74,15 @@ public class LnFLoader
 	{
 		if (this.liblist != null)
 		{
-			URL[] url = new URL[this.liblist.length];
-			for (int i=0; i < this.liblist.length; i++)
+			URL[] url = new URL[this.liblist.size()];
+			for (int i=0; i < this.liblist.size(); i++)
 			{
-				String fname = Settings.getInstance().replaceLibDirKey(liblist[i]);
+				String fname = Settings.getInstance().replaceLibDirKey(liblist.get(i));
 				File f = new File(fname);
 				if (!f.isAbsolute())
 				{
-					f = new File(WbManager.getInstance().getJarPath(), this.liblist[i]);
+					f = new File(WbManager.getInstance().getJarPath(), this.liblist.get(i));
 				}
-
 				url[i] = f.toURI().toURL();
 			}
 			ClassLoader loader = new URLClassLoader(url, this.getClass().getClassLoader());

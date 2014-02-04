@@ -1,6 +1,4 @@
 /*
- * LnFManager.java
- *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2014, Thomas Kellerer
@@ -26,14 +24,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+
 import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
- * Retrieve and store LnF definitions in the the Settings object
+ * Retrieve and store LnF definitions in the the Settings object.
+ *
  * @author Thomas Kellerer
  */
 public class LnFManager
@@ -61,11 +63,11 @@ public class LnFManager
 		// The Liquid Look & Feel "installs" itself as a System L&F and if
 		// activated is returned in getInstalledLookAndFeels(). To avoid
 		// a duplicate entry we check this before adding a "system" look and feel
-		LookAndFeelInfo[] info = UIManager.getInstalledLookAndFeels();
+		LookAndFeelInfo[] systemLnf = UIManager.getInstalledLookAndFeels();
 
-		for (int i = 0; i < info.length; i++)
+		for (LookAndFeelInfo lnfInfo : systemLnf)
 		{
-			LnFDefinition lnf = new LnFDefinition(info[i].getName(), info[i].getClassName());
+			LnFDefinition lnf = new LnFDefinition(lnfInfo.getName(), lnfInfo.getClassName());
 			if (!lnfList.contains(lnf))
 			{
 				lnfList.add(lnf);
@@ -113,8 +115,7 @@ public class LnFManager
 		{
 			if (!lnf.isBuiltInLnF())
 			{
-				String libs = lnf.getLibrary();
-				libs = StringUtil.replace(libs, StringUtil.getPathSeparator(), LnFDefinition.LNF_PATH_SEPARATOR);
+				String libs = StringUtil.listToString(lnf.getLibraries(), LnFDefinition.LNF_PATH_SEPARATOR, false);
 				set.setProperty("workbench.lnf." + lnfCount + ".classpath", libs);
 				set.setProperty("workbench.lnf." + lnfCount + ".class", lnf.getClassName());
 				set.setProperty("workbench.lnf." + lnfCount + ".name", lnf.getName());

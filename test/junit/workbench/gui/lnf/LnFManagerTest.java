@@ -27,8 +27,6 @@ import java.util.List;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
 
-import workbench.util.StringUtil;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -49,7 +47,7 @@ public class LnFManagerTest
 	public void testSeparatorConvert()
 	{
 		LnFManager mgr = new LnFManager();
-		LnFDefinition lnf = new LnFDefinition("Test", "someclass", "lib1.jar" + StringUtil.getPathSeparator() + "lib2.jar");
+		LnFDefinition lnf = new LnFDefinition("Test", "someclass", "lib1.jar" + LnFDefinition.LNF_PATH_SEPARATOR + "lib2.jar");
 		mgr.addDefinition(lnf);
 		mgr.saveLookAndFeelDefinitions();
 
@@ -74,8 +72,8 @@ public class LnFManagerTest
 		}
 		assertEquals(1, realCount);
 
-		String deflibs = def.getLibrary();
-		assertEquals("Wrong separator", true, deflibs.indexOf(StringUtil.getPathSeparator()) > -1);
+		List<String> deflibs = def.getLibraries();
+		assertEquals(2, deflibs.size());
 	}
 
 }
