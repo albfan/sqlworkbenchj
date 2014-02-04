@@ -60,12 +60,13 @@ class ExcelDataFormat
 	protected void setupWithWorkbook(Workbook wb)
 	{
 		CreationHelper helper = wb.getCreationHelper();
+		DataFormat dataFormat = helper.createDataFormat();
 		setUpHeader(wb);
 		setUpText(wb);
-		setUpDate(wb, helper);
-		setUpDecimal(wb, helper);
-		setUpInteger(wb, helper);
-		setUpTs(wb, helper);
+		setUpDate(wb, dataFormat);
+		setUpDecimal(wb, dataFormat);
+		setUpInteger(wb, dataFormat);
+		setUpTs(wb, dataFormat);
 		setUpMultiline(wb);
 	}
 
@@ -83,30 +84,27 @@ class ExcelDataFormat
 		textCellStyle.setWrapText(false);
 	}
 
-	protected void setUpDate(Workbook wb, CreationHelper helper)
+	protected void setUpDate(Workbook wb, DataFormat dataFormat)
 	{
 		dateCellStyle = wb.createCellStyle();
 		dateCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
-		DataFormat dataFormat = helper.createDataFormat();
-		gridDateFormat = safeGetFormat(dataFormat, dateFormat);
+		gridDateFormat = getFormat(dataFormat, dateFormat);
 		dateCellStyle.setDataFormat(gridDateFormat);
 	}
 
-	protected void setUpDecimal(Workbook wb, CreationHelper helper)
+	protected void setUpDecimal(Workbook wb, DataFormat dataFormat)
 	{
 		decimalCellStyle = wb.createCellStyle();
 		decimalCellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
-		DataFormat dataFormat = helper.createDataFormat();
-		gridDecimalFormat = safeGetFormat(dataFormat, decimalFormat);
+		gridDecimalFormat = getFormat(dataFormat, decimalFormat);
 		decimalCellStyle.setDataFormat(gridDecimalFormat);
 	}
 
-	protected void setUpInteger(Workbook wb, CreationHelper helper)
+	protected void setUpInteger(Workbook wb, DataFormat dataFormat)
 	{
 		integerCellStyle = wb.createCellStyle();
 		integerCellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
-		DataFormat dataFormat = helper.createDataFormat();
-		gridIntegerFormat = safeGetFormat(dataFormat, integerFormat);
+		gridIntegerFormat = getFormat(dataFormat, integerFormat);
 		integerCellStyle.setDataFormat(gridIntegerFormat);
 	}
 
@@ -119,16 +117,15 @@ class ExcelDataFormat
 		headerCellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 	}
 
-	protected void setUpTs(Workbook wb, CreationHelper helper)
+	protected void setUpTs(Workbook wb, DataFormat dataFormat)
 	{
 		tsCellStyle = wb.createCellStyle();
 		tsCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
-		DataFormat dataFormat = helper.createDataFormat();
-		gridTsFormat = safeGetFormat(dataFormat, timestampFormat);
+		gridTsFormat = getFormat(dataFormat, timestampFormat);
 		tsCellStyle.setDataFormat(gridTsFormat);
 	}
 
-	protected static short safeGetFormat(DataFormat dataFormat, String formatString)
+	private short getFormat(DataFormat dataFormat, String formatString)
 	{
 		return dataFormat.getFormat(formatString);
 	}
