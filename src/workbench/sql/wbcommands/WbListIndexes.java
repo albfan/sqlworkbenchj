@@ -24,14 +24,11 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.List;
 
-import workbench.console.ConsoleSettings;
-import workbench.console.RowDisplay;
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.resource.ResourceMgr;
 
-import workbench.db.TableIdentifier;
 
 import workbench.storage.DataStore;
 
@@ -82,7 +79,7 @@ public class WbListIndexes
 
 		if (!reader.supportsIndexList())
 		{
-			result.addMessage("Not supported for " + meta.getProductName());
+			result.addMessage(ResourceMgr.getFormattedString("ErrIdxListNotSupported", meta.getProductName()));
 			result.setFailure();
 			return result;
 

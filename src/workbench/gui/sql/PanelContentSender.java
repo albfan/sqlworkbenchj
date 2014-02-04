@@ -37,11 +37,13 @@ public class PanelContentSender
 {
 	public static final int NEW_PANEL = -1;
 
-	protected MainWindow target;
+	private MainWindow target;
+	private String newTabName;
 
-	public PanelContentSender(MainWindow window)
+	public PanelContentSender(MainWindow window, String objectName)
 	{
 		this.target = window;
+		newTabName = objectName;
 	}
 
 	public void showResult(final String sql, final String comment, final int panelIndex, final boolean logText)
@@ -134,6 +136,7 @@ public class PanelContentSender
 		if (index == NEW_PANEL)
 		{
 			panel = (SqlPanel)this.target.addTab(true, true);
+			panel.setTabName(newTabName);
 		}
 		else
 		{

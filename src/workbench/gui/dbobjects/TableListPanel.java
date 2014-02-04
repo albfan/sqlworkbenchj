@@ -1526,7 +1526,7 @@ public class TableListPanel
 				@Override
 				public void run()
 				{
-					tableSource.setText(s);
+					tableSource.setText(s, selectedTable.getTableName());
 					tableSource.setCaretPosition(0, false);
 					if (Settings.getInstance().getSelectSourcePanelAfterRetrieve())
 					{
@@ -1546,7 +1546,7 @@ public class TableListPanel
 				@Override
 				public void run()
 				{
-					tableSource.setText(msg);
+					tableSource.setText(msg, null);
 				}
 			});
 		}
@@ -1946,7 +1946,9 @@ public class TableListPanel
 
 	private void showTableData(final int panelIndex, final boolean appendText)
 	{
-		PanelContentSender sender = new PanelContentSender(this.parentWindow);
+		if (this.selectedTable == null) return;
+		
+		PanelContentSender sender = new PanelContentSender(this.parentWindow, selectedTable.getTableName());
 		String sql = buildSqlForTable(true);
 		if (sql == null) return;
 

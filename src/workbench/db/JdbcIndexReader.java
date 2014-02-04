@@ -921,11 +921,14 @@ public class JdbcIndexReader
 				String idxType = StringUtil.rtrim(rs.getString("index_type"));
 				String isUnique = StringUtil.rtrim(rs.getString("is_unique"));
 				String isPK = StringUtil.rtrim(rs.getString("is_pk"));
+				String def = rs.getString("index_def");
+				String tbs = rs.getString("index_tablespace");
 
 				TableIdentifier tbl = new TableIdentifier(tableCatalog, tableSchema, tableName);
 				IndexDefinition idx = new IndexDefinition(tbl, idxName.trim());
 				idx.setSchema(idxSchema);
 				idx.setIndexType(idxType);
+				idx.setTablespace(tbs);
 				if (isUnique != null)
 				{
 					idx.setUnique(StringUtil.stringToBool(isUnique));
@@ -933,6 +936,16 @@ public class JdbcIndexReader
 				if (isPK != null)
 				{
 					idx.setPrimaryKeyIndex(StringUtil.stringToBool(isPK));
+				}
+				if (def != null)
+				{
+					def = StringUtil.removeBrackets(def);
+					List<String> colNames = StringUtil.stringToList(def, ",", true, true, false, true);
+
+					for (String name : colNames)
+					{
+						idx.addColumn(name, null);
+					}
 				}
 				result.add(idx);
 			}

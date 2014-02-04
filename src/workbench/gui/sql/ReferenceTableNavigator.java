@@ -134,7 +134,7 @@ public class ReferenceTableNavigator
 		this.source.removeSubmenu(selectChildTables);
 		this.source.removeSubmenu(selectParentTables);
 	}
-	
+
 	@Override
 	public void valueChanged(ListSelectionEvent evt)
 	{
@@ -526,9 +526,7 @@ public class ReferenceTableNavigator
 
 		if (this.container != null)
 		{
-			PanelContentSender sender = new PanelContentSender(container);
-			// showLog will only be evaluated for existing tabs
-			// if the target tab is the current tab, show
+			PanelContentSender sender = new PanelContentSender(container, null);
 			sender.showResult(sql, comment, containerIndex, logText);
 		}
 	}

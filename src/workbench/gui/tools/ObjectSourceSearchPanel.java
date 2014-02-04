@@ -133,7 +133,7 @@ public class ObjectSourceSearchPanel
 
 	protected void clearSearch()
 	{
-		objectSource.setText("");
+		objectSource.setText("", null);
 		setModel(new ObjectResultListDataStore());
 	}
 
@@ -548,7 +548,7 @@ public class ObjectSourceSearchPanel
 		String result = selectFromList(schemas, selected);
 		if (result != null)
 		{
-			schemaNames.setText(result.toString());
+			schemaNames.setText(result);
 		}
 	}
 
@@ -570,7 +570,7 @@ public class ObjectSourceSearchPanel
 		String result = selectFromList(types, selected);
 		if (result != null)
 		{
-			objectTypes.setText(result.toString());
+			objectTypes.setText(result);
 		}
 	}
 
@@ -634,12 +634,13 @@ public class ObjectSourceSearchPanel
 		// As the source column has been removed from the view, the source
 		// has to be retrieved directly from the underlying table model
 		final CharSequence source = (CharSequence)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_SOURCE);
+		final String name = (String)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_OBJECT_NAME);
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				objectSource.setText(source == null ? "" : source.toString());
+				objectSource.setText(source == null ? "" : source.toString(), name);
 				objectSource.setCaretPosition(0, false);
 				List<String> values = StringUtil.stringToList(searchValues.getText(), ",", true, true, false);
 				if (values.size() == 1)

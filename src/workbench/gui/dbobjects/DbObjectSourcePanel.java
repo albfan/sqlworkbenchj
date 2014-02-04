@@ -65,6 +65,7 @@ public class DbObjectSourcePanel
 	private MainWindow parentWindow;
 	private boolean initialized;
 	private boolean allowReformat;
+	private String objectName;
 
 	public DbObjectSourcePanel(MainWindow window, Reloadable reloader)
 	{
@@ -182,7 +183,7 @@ public class DbObjectSourcePanel
 	{
 		if (this.parentWindow != null)
 		{
-			PanelContentSender sender = new PanelContentSender(this.parentWindow);
+			PanelContentSender sender = new PanelContentSender(this.parentWindow, this.objectName);
 			sender.sendContent(getText(), panelIndex, appendText);
 		}
 	}
@@ -199,10 +200,11 @@ public class DbObjectSourcePanel
 	 * if the SQL Queries have not been configured for e.g. stored procedures)
 	 * syntax highlighting will be disabled.
 	 */
-	public void setText(final String sql)
+	public void setText(final String sql, String name)
 	{
 		initGui();
 		boolean hasText = StringUtil.isNonEmpty(sql);
+		this.objectName = name;
 		if (reloadSource != null) reloadSource.setEnabled(hasText);
 
 		if (editButton != null) editButton.setEnabled(hasText);
@@ -313,7 +315,7 @@ public class DbObjectSourcePanel
 	{
 		if (sourceEditor != null)
 		{
-			this.setText("");
+			this.setText("", null);
 		}
 	}
 

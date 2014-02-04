@@ -191,7 +191,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_LINEENDING, StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument(ARG_SHOW_ENCODINGS);
 		cmdLine.addArgument(ARG_FORMATFILE, StringUtil.stringToList("postgres,oracle,sqlserver,db2,mysql"));
-		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
+		cmdLine.addArgument("compress", ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_EMPTY_RESULTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
 		cmdLine.addArgument("lobIdCols");
@@ -649,7 +649,7 @@ public class WbExport
 		{
 			defaultExtension = ext;
 		}
-		
+
 		exporter.setAppendToFile(appendToFile);
 
 		String ending = cmdLine.getValue(ARG_LINEENDING);

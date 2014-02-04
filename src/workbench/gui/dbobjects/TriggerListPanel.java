@@ -245,7 +245,7 @@ public class TriggerListPanel
 			public void run()
 			{
 				triggerList.reset();
-				source.setText("");
+				source.setText("", null);
 			}
 		});
 	}
@@ -463,12 +463,12 @@ public class TriggerListPanel
 				}
 
 				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName, tbl, comment, true);
-				source.setText(sql == null ? "" : sql);
+				source.setText(sql == null ? "" : sql, triggerName);
 			}
 			catch (Throwable ex)
 			{
 				LogMgr.logError("TriggerListPanel.retrieveTriggerSource() thread", "Could not read trigger source", ex);
-				source.setText(ExceptionUtil.getDisplay(ex));
+				source.setText(ExceptionUtil.getDisplay(ex), null);
 			}
 		}
 		finally

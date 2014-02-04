@@ -25,7 +25,6 @@ package workbench.db;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import workbench.WbManager;
 
 import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.util.StringUtil;

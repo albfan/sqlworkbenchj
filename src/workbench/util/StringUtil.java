@@ -948,6 +948,21 @@ public class StringUtil
 		return input.substring(quote.length(), input.length() - quote.length());
 	}
 
+	public static String removeBrackets(String input)
+	{
+		if (isEmptyString(input)) return input;
+		if (input.length() < 2) return input;
+
+		char first = input.charAt(0);
+		char last = input.charAt(input.length() - 1);
+
+		if ( (first == '(' && last == ')') || (first == '{' && last == '}') || (first == '[' && last == '}') )
+		{
+			return input.substring(1, input.length() - 1);
+		}
+		return input;
+	}
+
 	/**
 	 * Removes single or double quote character from the start and the beginning of a string.
 	 * <br/>

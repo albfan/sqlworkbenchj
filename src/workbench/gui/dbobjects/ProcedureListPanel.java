@@ -93,7 +93,6 @@ import workbench.gui.sql.PanelContentSender;
 
 import workbench.storage.DataStore;
 
-import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
 import workbench.util.StringUtil;
@@ -357,7 +356,7 @@ public class ProcedureListPanel
 			{
 				procList.reset();
 				procColumns.reset();
-				source.setText("");
+				source.setText("", null);
 			}
 		});
 	}
@@ -612,6 +611,13 @@ public class ProcedureListPanel
 		return def;
 	}
 
+	private String getCurrentProcedureName()
+	{
+		ProcedureDefinition def = getCurrentProcedureDefinition();
+		if (def == null) return null;
+		return def.getProcedureName();
+	}
+
 	private ProcedureDefinition getDefinition(int row)
 	{
 		ProcedureDefinition def = null;
@@ -750,19 +756,19 @@ public class ProcedureListPanel
 					sql = def.getSource();
 					putSourceToCache(def, sql);
 				}
-				source.setText(sql == null ? "" : sql.toString());
+				source.setText(sql == null ? "" : sql.toString(), this.getCurrentProcedureName());
 			}
 			catch (NoConfigException nce)
 			{
 				SourceStatementsHelp help = new SourceStatementsHelp(this.dbConnection.getMetadata().getMetaDataSQLMgr());
 				String msg = help.explainMissingProcSourceSql();
-				source.setText(msg);
+				source.setText(msg, null);
 			}
 			catch (Throwable ex)
 			{
 				sql = null;
 				LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure source", ex);
-				source.setText(ex.getMessage());
+				source.setText(ex.getMessage(), null);
 			}
 		}
 		finally
@@ -916,7 +922,7 @@ public class ProcedureListPanel
 
 	private void showProcedureCallData(int panelIndex, boolean appendText)
 	{
-		PanelContentSender sender = new PanelContentSender(this.parentWindow);
+		PanelContentSender sender = new PanelContentSender(this.parentWindow, null);
 		String sql = buildProcedureCallForTable();
 		if (sql != null)
 		{
@@ -926,19 +932,7 @@ public class ProcedureListPanel
 
 	private String buildProcedureCallForTable()
 	{
-		ProcedureDefinition currentDefinition = null;
-
-		try
-		{
-			currentDefinition = this.getCurrentProcedureDefinition();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("TableListPanel.buildProcedureCallForTable()", "Error retrieving procedure definition", e);
-			String msg = ExceptionUtil.getDisplay(e);
-			WbSwingUtilities.showErrorMessage(this, msg);
-			return null;
-		}
+		ProcedureDefinition currentDefinition = this.getCurrentProcedureDefinition();
 
 		if (currentDefinition == null)
 		{
