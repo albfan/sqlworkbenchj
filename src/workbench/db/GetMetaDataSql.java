@@ -101,14 +101,14 @@ public class GetMetaDataSql
 				needsWhere = false;
 			}
 			if (needsAnd) sql.append(" AND ");
-			sql.append(objectNameField + " = '" + getNameValue(objectName) + "'");
+			sql.append(objectNameField +  getOperator(objectName) + "'" + getNameValue(objectName) + "'");
 			needsAnd = true;
 		}
 
 		if (baseObjectName != null && baseObjectNameField != null)
 		{
 			sql.append(" AND ");
-			sql.append(baseObjectNameField + " = '" + getNameValue(baseObjectName ) + "'");
+			sql.append(baseObjectNameField +  getOperator(baseObjectName) + "'" + getNameValue(baseObjectName ) + "'");
 		}
 
 		if (baseObjectCatalog != null && baseObjectCatalogField != null)

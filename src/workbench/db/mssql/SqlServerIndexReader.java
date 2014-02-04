@@ -199,11 +199,11 @@ public class SqlServerIndexReader
 	}
 
 	@Override
-	public List<IndexDefinition> getIndexes(String catalog, String schema)
+	public List<IndexDefinition> getIndexes(String catalogPattern, String schemaPattern, String tablePattern, String indexNamePattern)
 	{
 		if (SqlServerUtil.isSqlServer2005(metaData.getWbConnection()))
 		{
-			return super.getIndexes(catalog, schema);
+			return super.getIndexes(catalogPattern, schemaPattern, tablePattern, indexNamePattern);
 		}
 		return Collections.emptyList();
 	}

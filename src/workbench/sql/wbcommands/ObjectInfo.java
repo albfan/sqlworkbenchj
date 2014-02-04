@@ -275,8 +275,7 @@ public class ObjectInfo
 			ColumnRemover remover = new ColumnRemover(details);
 			DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
 			String fname = showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection);
-			fname += " (" + toDescribe.getObjectType() + ")";
-			cols.setResultName(fname);
+			cols.setResultName(fname + " (" + toDescribe.getObjectType() + ")");
 			cols.setGeneratingSql("DESCRIBE " + fname);
 			result.setSourceCommand("DESCRIBE " + fname);
 			result.addDataStore(cols);

@@ -50,12 +50,16 @@ public class WbListIndexes
 	extends SqlCommand
 {
 	public static final String VERB = "WBLISTINDEXES";
+	public static final String ARG_TABLE_NAME = "tableName";
+	public static final String ARG_INDEX_NAME = "indexName";
 
 	public WbListIndexes()
 	{
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
+		cmdLine.addArgument(ARG_TABLE_NAME);
+		cmdLine.addArgument(ARG_INDEX_NAME);
 	}
 
 	@Override
@@ -112,7 +116,10 @@ public class WbListIndexes
 			catalog = currentConnection.getMetadata().getCurrentCatalog();
 		}
 
-		List<IndexDefinition> indexes = reader.getIndexes(catalog, schema);
+		String tablePattern = cmdLine.getValue(ARG_TABLE_NAME);
+		String indexPattern = cmdLine.getValue(ARG_INDEX_NAME);
+
+		List<IndexDefinition> indexes = reader.getIndexes(catalog, schema, tablePattern, indexPattern);
 		DataStore ds = reader.fillDataStore(indexes, true);
 		result.addDataStore(ds);
 

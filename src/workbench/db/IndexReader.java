@@ -156,7 +156,7 @@ public interface IndexReader
 	 *
 	 * @see #supportsIndexList()
 	 */
-	List<IndexDefinition> getIndexes(String catalog, String schema);
+	List<IndexDefinition> getIndexes(String catalogPattern, String schemaPattern, String tablePattern, String indexNamePattern);
 
 	/**
 	 * Returns true if this IndexReader supports retrieving a list of indexes

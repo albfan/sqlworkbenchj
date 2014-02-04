@@ -47,6 +47,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 import static workbench.db.IndexReader.*;
+import workbench.resource.Settings;
 
 /**
  * An implementation of the IndexReader interface that uses the standard JDBC API
@@ -895,14 +896,21 @@ public class JdbcIndexReader
 	 * @see MetaDataSqlManager#getListIndexesSql()
 	 */
 	@Override
-	public List<IndexDefinition> getIndexes(String catalog, String schema)
+	public List<IndexDefinition> getIndexes(String catalogPattern, String schemaPattern, String tablePattern, String indexNamePattern)
 	{
 		GetMetaDataSql sqlDef = metaData.getMetaDataSQLMgr().getListIndexesSql();
 		if (sqlDef == null) return Collections.emptyList();
 
-		sqlDef.setCatalog(SqlUtil.removeObjectQuotes(catalog));
-		sqlDef.setSchema(SqlUtil.removeObjectQuotes(schema));
+		sqlDef.setCatalog(DbMetadata.cleanupWildcards(SqlUtil.removeObjectQuotes(catalogPattern)));
+		sqlDef.setSchema(DbMetadata.cleanupWildcards(SqlUtil.removeObjectQuotes(schemaPattern)));
+		sqlDef.setBaseObjectName(DbMetadata.cleanupWildcards(SqlUtil.removeObjectQuotes(tablePattern)));
+		sqlDef.setObjectName(DbMetadata.cleanupWildcards(SqlUtil.removeObjectQuotes(indexNamePattern)));
+
 		String sql = sqlDef.getSql();
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("JdbcIndexReader.getIndexes()", "Retrieving index list using:\n" + sql);
+		}
 
 		List<IndexDefinition> result = new ArrayList<IndexDefinition>();
 		Statement stmt = null;

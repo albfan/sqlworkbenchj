@@ -505,7 +505,7 @@ public abstract class BaseAnalyzer
 			catalog = schema;
 			schema = null;
 		}
-		List<IndexDefinition> indexes = reader.getIndexes(catalog, schema);
+		List<IndexDefinition> indexes = reader.getIndexes(catalog, schema, null, null);
 		this.elements = new ArrayList(indexes.size());
 		for (IndexDefinition idx : indexes)
 		{

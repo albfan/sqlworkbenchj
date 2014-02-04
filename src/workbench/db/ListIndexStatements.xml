@@ -30,6 +30,12 @@ from rdb$indices as idx
 where idx.rdb$relation_name not like 'RDB$%'
 </string>
     </void>
+    <void property="baseObjectNameField">
+      <string>idx.rdb$relation_name</string>
+    </void>
+    <void property="objectNameField">
+      <string>idx.rdb$index_name</string>
+    </void>
     <void property="orderBy">
      <string>ORDER BY 1,2,4</string>
     </void>
@@ -73,6 +79,12 @@ from (
     </void>
     <void property="catalogField">
      <string>index_schema</string>
+    </void>
+    <void property="baseObjectNameField">
+      <string>table_name</string>
+    </void>
+    <void property="objectNameField">
+      <string>index_name</string>
     </void>
     <void property="orderBy">
      <string>ORDER BY 1,2,4</string>
@@ -120,6 +132,12 @@ WHERE idx.type in (1,2)
     </void>
     <void property="schemaField">
      <string>sh.name</string>
+    </void>
+    <void property="baseObjectNameField">
+     <string>tbl.name</string>
+    </void>
+    <void property="objectNameField">
+     <string>idx.name</string>
     </void>
     <void property="orderBy">
      <string>ORDER BY 1,2,4</string>
@@ -172,6 +190,12 @@ WHERE idx.index_name not like 'BIN$%'
     <void property="schemaField">
      <string>idx.owner</string>
     </void>
+    <void property="baseObjectNameField">
+     <string>idx.table_name</string>
+    </void>
+    <void property="objectNameField">
+     <string>idx.index_name</string>
+    </void>
    </object>
   </void>
 
@@ -215,6 +239,12 @@ WHERE idx.index_name not like 'BIN$%'
     <void property="schemaField">
      <string>idx.owner</string>
     </void>
+    <void property="baseObjectNameField">
+     <string>idx.table_name</string>
+    </void>
+    <void property="objectNameField">
+     <string>idx.index_name</string>
+    </void>
    </object>
   </void>
 
@@ -254,10 +284,16 @@ where tbl.relkind = 'r'
 </string>
     </void>
     <void property="schemaField">
-         <string>ns.nspname</string>
+      <string>ns.nspname</string>
     </void>
     <void property="orderBy">
      <string>order by 1,2,4</string>
+    </void>
+    <void property="baseObjectNameField">
+      <string>tbl.relname</string>
+    </void>
+    <void property="objectNameField">
+     <string>idx.relname</string>
     </void>
    </object>
   </void>
