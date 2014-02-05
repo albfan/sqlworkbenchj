@@ -8,7 +8,7 @@
     <entry dev-build="10" type="enh">WbFeedback now supports the options "traceon" and "traceoff". With "traceon" each statement that is executed is printed.</entry>
     <entry dev-build="10" type="enh">The trigger panel in the DbExplorer now shows DDL triggers for SQL Server</entry>
     <entry dev-build="10" type="enh">A new option has been added to use the name of the first table of a query as the name of the result tab</entry>
-    <entry dev-build="9" type="enh">When inserting new rows into a result set, the generated values for "auto increment" columns (serial, identiy, ...) are now retrieved.</entry>
+    <entry dev-build="9" type="enh">When inserting new rows into a result set, the generated values for "auto increment" columns (serial, identity, ...) are now retrieved.</entry>
     <entry dev-build="9" type="enh">Computed columns (of table) are now treated better when editing data and generating DML for the changes</entry>
     <entry dev-build="9" type="enh">WbCopy and WbImport now run the post table statements even  when an error occurs during the import of the data. This new behaviour can be disabled using the new parameter runTableStatementOnError</entry>
     <entry dev-build="9" type="enh">In the DbExplorer the column definition now includes a flag to show if a column is a computed column or not</entry>
