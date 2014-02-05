@@ -35,16 +35,27 @@ import workbench.util.StringUtil;
 public class AnnotationReader
 {
 	private final String annotation;
+	private final String keyword;
 
 	public AnnotationReader(String key)
 	{
 		this.annotation = key;
+		keyword = "@" + annotation;
 	}
 
 	public String getAnnotationValue(String sql)
 	{
-		String keyword = "@" + annotation;
+		SQLToken token = getAnnotationToken(sql);
 
+		if (token == null)
+		{
+			return null;
+		}
+		return extractAnnotationValue(token);
+	}
+	
+	protected SQLToken getAnnotationToken(String sql)
+	{
 		if (StringUtil.isBlank(sql)) return null;
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken token = lexer.getNextToken(true, false);
@@ -60,12 +71,31 @@ public class AnnotationReader
 				if (pos >= comment.length()) return null;
 				if (Character.isWhitespace(comment.charAt(pos)))
 				{
-					int nameEnd = StringUtil.findPattern(StringUtil.PATTERN_CRLF, comment, pos + 1);
-					if (nameEnd == -1) nameEnd = comment.length();
-					return comment.substring(pos + 1, nameEnd);
+					return token;
 				}
 			}
 			token = lexer.getNextToken(true, false);
+		}
+		return null;
+	}
+
+	protected String extractAnnotationValue(SQLToken token)
+	{
+		if (token == null) return null;
+
+		String comment = token.getText();
+		comment = stripCommentChars(comment.trim());
+		int pos = comment.toLowerCase().indexOf(keyword);
+		if (pos >= 0)
+		{
+			pos += keyword.length();
+			if (pos >= comment.length()) return null;
+			if (Character.isWhitespace(comment.charAt(pos)))
+			{
+				int nameEnd = StringUtil.findPattern(StringUtil.PATTERN_CRLF, comment, pos + 1);
+				if (nameEnd == -1) nameEnd = comment.length();
+				return comment.substring(pos + 1, nameEnd);
+			}
 		}
 		return null;
 	}

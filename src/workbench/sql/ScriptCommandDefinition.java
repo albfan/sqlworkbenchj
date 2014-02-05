@@ -58,7 +58,10 @@ public class ScriptCommandDefinition
 		}
 	}
 
-	public String getSQL() { return this.command; }
+	public String getSQL()
+	{
+		return this.command;
+	}
 
 	/**
 	 * Returns the start of this command in the source script

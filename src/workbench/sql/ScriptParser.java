@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.resource.Settings;
@@ -50,6 +51,7 @@ public class ScriptParser
 {
 	private String originalScript;
 	private List<ScriptCommandDefinition> commands;
+	private List<NamedScriptLocation> bookmarks;
 	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 	private DelimiterDefinition alternateDelimiter;
 	private int currentIteratorIndex = -42;
@@ -493,6 +495,7 @@ public class ScriptParser
 	private void parseCommands()
 	{
 		this.commands = new ArrayList<ScriptCommandDefinition>();
+		this.bookmarks = new ArrayList<NamedScriptLocation>();
 		ScriptIterator p = getParserInstance();
 		p.setScript(this.originalScript);
 		p.setStoreStatementText(false); // no need to store the statements twice
@@ -500,13 +503,32 @@ public class ScriptParser
 		ScriptCommandDefinition c = null;
 		int index = 0;
 
+		BookmarkAnnotation annotation = new BookmarkAnnotation();
+
 		while ((c = p.getNextCommand()) != null)
 		{
+			String sql = c.getSQL();
+			if (sql == null)
+			{
+				sql = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
+			}
+			String locationName = annotation.getBookmarkName(sql);
+			if (locationName != null)
+			{
+				NamedScriptLocation bookmark = new NamedScriptLocation(locationName, c.getStartPositionInScript());
+				bookmarks.add(bookmark);
+			}
 			c.setIndexInScript(index);
 			index++;
 			this.commands.add(c);
 		}
 		currentIteratorIndex = 0;
+	}
+
+	public List<NamedScriptLocation> getBookmarks()
+	{
+		if (bookmarks == null) parseCommands();
+		return Collections.unmodifiableList(bookmarks);
 	}
 
 	/**

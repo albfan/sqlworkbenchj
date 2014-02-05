@@ -2918,6 +2918,17 @@ public class MainWindow
 		return panel.getTabTitle();
 	}
 
+	public String getTabTitleById(String tabId)
+	{
+		int count = sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			MainPanel p = getSqlPanel(i);
+			if (p.getId().equals(tabId)) return p.getTabTitle();
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the title of the currently selected tab.
 	 *
