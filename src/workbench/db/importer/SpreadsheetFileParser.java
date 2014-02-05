@@ -258,7 +258,9 @@ public class SpreadsheetFileParser
 			this.messages.append(msg);
 			this.messages.appendNewLine();
 			this.importColumns = null;
-			throw new SQLException("No column matched in import file");
+			String logMsg = "No column in table " + target + " matched the columns in the file: " + this.inputFile.getAbsolutePath();
+			LogMgr.logError("SpreadsheetFileParser.setColumns()", logMsg, null);
+			throw new SQLException(logMsg);
 		}
 	}
 
