@@ -64,6 +64,7 @@ import workbench.gui.tools.DataPumper;
 import workbench.gui.tools.ObjectSourceSearchPanel;
 
 import workbench.sql.BatchRunner;
+import workbench.sql.OutputPrinter;
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
 
@@ -1019,6 +1020,18 @@ public final class WbManager
 				// no need to log connect errors, already done by BatchRunner and ConnectionMgr
 				// runner.isSuccess() will also be false for the next step
 			}
+
+			OutputPrinter printer = new OutputPrinter()
+			{
+
+				@Override
+				public void printMessage(String message)
+				{
+					System.out.println(message);
+				}
+			};
+
+			runner.setTraceOutput(printer);
 
 			try
 			{

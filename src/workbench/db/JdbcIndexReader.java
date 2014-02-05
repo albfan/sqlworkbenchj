@@ -888,10 +888,12 @@ public class JdbcIndexReader
 	 * <li>index_name</li>
 	 * <li>index_schema</li>
 	 * <li>table_name</li>
+	 * <li>table_sxhema</li>
 	 * <li>table_catalog</li>
 	 * <li>index_type</li>
 	 * <li>is_unique</li>
 	 * <li>is_pk</li>
+	 * <li>index_def</li>
 	 * </ol>
 	 *
 	 * @param catalog  the catalog to search, may be null. No wildcards allowed
@@ -907,10 +909,15 @@ public class JdbcIndexReader
 		GetMetaDataSql sqlDef = metaData.getMetaDataSQLMgr().getListIndexesSql();
 		if (sqlDef == null) return Collections.emptyList();
 
-		sqlDef.setCatalog(DbMetadata.cleanupWildcards(SqlUtil.removeObjectQuotes(catalogPattern)));
-		sqlDef.setSchema(DbMetadata.cleanupWildcards(SqlUtil.removeObjectQuotes(schemaPattern)));
-		sqlDef.setBaseObjectName(DbMetadata.cleanupWildcards(SqlUtil.removeObjectQuotes(tablePattern)));
-		sqlDef.setObjectName(DbMetadata.cleanupWildcards(SqlUtil.removeObjectQuotes(indexNamePattern)));
+		catalogPattern = DbMetadata.cleanupWildcards(metaData.adjustSchemaNameCase(catalogPattern));
+		schemaPattern = DbMetadata.cleanupWildcards(metaData.adjustSchemaNameCase(schemaPattern));
+		tablePattern = DbMetadata.cleanupWildcards(metaData.adjustObjectnameCase(tablePattern));
+		indexNamePattern = DbMetadata.cleanupWildcards(metaData.adjustObjectnameCase(indexNamePattern));
+
+		sqlDef.setCatalog(catalogPattern);
+		sqlDef.setSchema(schemaPattern);
+		sqlDef.setBaseObjectName(tablePattern);
+		sqlDef.setObjectName(indexNamePattern);
 
 		String sql = sqlDef.getSql();
 		if (Settings.getInstance().getDebugMetadataSql())
