@@ -2023,9 +2023,9 @@ public class WbTable
 	/**
 	 * Scroll the given row into view.
 	 */
-	public void scrollToRow(int aRow)
+	public void scrollToRow(int row)
 	{
-		Rectangle rect = this.getCellRect(aRow, 0, true);
+		Rectangle rect = this.getCellRect(row, 0, true);
 		this.scrollRectToVisible(rect);
 	}
 

@@ -83,6 +83,7 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.RowHighlighter;
+import workbench.gui.components.TableRowHeader;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbLabel;
 import workbench.gui.components.WbScrollPane;
@@ -150,6 +151,7 @@ public class LookupValuePicker
 		lookupData.setColumnSelectionAllowed(false);
 		lookupData.setRowSelectionAllowed(true);
 		lookupData.getHeaderRenderer().setShowPKIcon(true);
+
 		Action nextComponent = new AbstractAction()
 		{
 			@Override
@@ -469,6 +471,7 @@ public class LookupValuePicker
 					DataStoreTableModel model = new DataStoreTableModel(data);
 					model.setAllowEditing(false);
 					lookupData.setModel(model, true);
+					TableRowHeader.showRowHeader(lookupData);
 
 					int row = highlightCurrentValues();
 
@@ -477,6 +480,7 @@ public class LookupValuePicker
 					// the user can immediately use the cursor keys to select one entry.
 					if (!selectCurrent || row < 0) row = 0;
 					lookupData.getSelectionModel().setSelectionInterval(row, row);
+					lookupData.scrollToRow(row);
 
 					int rows = data.getRowCount();
 					int maxRowNum = maxRows.getValue();
