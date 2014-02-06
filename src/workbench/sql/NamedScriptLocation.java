@@ -45,4 +45,9 @@ public class NamedScriptLocation
 		return offset;
 	}
 
+	@Override
+	public String toString()
+	{
+		return "{Bookmark: " + name + ", offset=" + offset + '}';
+	}
 }

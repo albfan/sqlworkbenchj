@@ -20,6 +20,12 @@
  */
 package workbench.sql;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
+
 import workbench.util.StringUtil;
 
 /**
@@ -39,6 +45,34 @@ public class BookmarkAnnotation
 	public String getBookmarkName(String sql)
 	{
 		return StringUtil.trim(getAnnotationValue(sql));
+	}
+
+	/**
+	 * Parses the given SQL script for bookmark annotations.
+	 *
+	 * @param script  the script to parse
+	 * @return the list of bookmarks found
+	 */
+	public List<NamedScriptLocation> getBookmarks(String script)
+	{
+		List<NamedScriptLocation> bookmarks = new ArrayList<NamedScriptLocation>();
+		SQLLexer lexer = new SQLLexer(script);
+		SQLToken token = lexer.getNextToken(true, false);
+
+		while (token != null)
+		{
+			if (token.isComment())
+			{
+				String locationName = StringUtil.trim(extractAnnotationValue(token));
+				if (locationName != null)
+				{
+					NamedScriptLocation bookmark = new NamedScriptLocation(locationName, token.getCharBegin());
+					bookmarks.add(bookmark);
+				}
+			}
+			token = lexer.getNextToken(true, false);
+		}
+		return bookmarks;
 	}
 
 }

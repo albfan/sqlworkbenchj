@@ -507,11 +507,7 @@ public class ScriptParser
 
 		while ((c = p.getNextCommand()) != null)
 		{
-			String sql = c.getSQL();
-			if (sql == null)
-			{
-				sql = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
-			}
+			String sql = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
 			String locationName = annotation.getBookmarkName(sql);
 			if (locationName != null)
 			{
