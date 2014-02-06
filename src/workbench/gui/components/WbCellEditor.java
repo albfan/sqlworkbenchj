@@ -49,6 +49,7 @@ import workbench.resource.GuiSettings;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.MultilineWrapAction;
 import workbench.gui.actions.RestoreDataAction;
+import workbench.gui.actions.SelectFkValueAction;
 import workbench.gui.actions.SetNullAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.TextAreaRenderer;
@@ -74,6 +75,7 @@ public class WbCellEditor
 	private SetNullAction setNull;
 	private MultilineWrapAction multilineWrapAction;
 	private TextComponentMouseListener contextMenu;
+	private SelectFkValueAction selectFk;
 
 	public WbCellEditor(WbTable parent)
 	{
@@ -94,7 +96,12 @@ public class WbCellEditor
 		contextMenu = new TextComponentMouseListener();
 		setNull = new SetNullAction(this);
 		multilineWrapAction = new MultilineWrapAction(this);
+
+		selectFk = new SelectFkValueAction(parent);
+		selectFk.addToInputMap(editor);
+
 		contextMenu.addAction(setNull);
+		contextMenu.addAction(selectFk);
 		contextMenu.addAction(restoreValue);
 		contextMenu.addAction(multilineWrapAction);
 		editor.addMouseListener(contextMenu);
