@@ -27,6 +27,8 @@ import java.beans.PropertyChangeListener;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -124,6 +126,16 @@ public class ConnectionProfile
 		cp.setStoreExplorerSchema(true);
 		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		return cp;
+	}
+
+	public String getSettingsKey()
+	{
+		Pattern p = Pattern.compile("[^0-9A-Za-z]+");
+		Matcher m = p.matcher(group);
+		String key = m.replaceAll("") + ".";
+		m = p.matcher(name);
+		key += m.replaceAll("");
+		return key.toLowerCase();
 	}
 
 	public boolean getStoreCacheLocally()

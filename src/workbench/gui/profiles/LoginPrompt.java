@@ -39,9 +39,10 @@ public class LoginPrompt
 	implements ValidatingComponent
 {
 
-	public LoginPrompt()
+	public LoginPrompt(String historyKey)
 	{
 		initComponents();
+		getUsernameField().setSettingsProperty(historyKey);
 		WbSwingUtilities.setMinimumSize(tfUsername, 25);
 		WbSwingUtilities.setMinimumSize(tfPwd, 25);
 	}

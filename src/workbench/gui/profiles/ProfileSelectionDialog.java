@@ -285,7 +285,7 @@ public class ProfileSelectionDialog
 	{
 		if (this.selectedProfile == null) return false;
 
-		LoginPrompt prompt = new LoginPrompt();
+		LoginPrompt prompt = new LoginPrompt(selectedProfile.getSettingsKey());
 		boolean ok = ValidatingDialog.showConfirmDialog(this, prompt, ResourceMgr.getString("TxtEnterLogin"));
 		if (!ok) return false;
 		this.selectedProfile.setPassword(prompt.getPassword());

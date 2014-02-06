@@ -281,4 +281,14 @@ public class ConnectionProfileTest
 		profiles.add(profile2);
 		assertEquals(1, profiles.size());
 	}
+
+	@Test
+	public void testGetSettingsKey()
+	{
+		ConnectionProfile profile = new ConnectionProfile();
+		profile.setName("Some/Connection");
+		profile.setGroup("Default==Group");
+		String key = profile.getSettingsKey();
+		assertEquals("defaultgroup.someconnection", key);
+	}
 }

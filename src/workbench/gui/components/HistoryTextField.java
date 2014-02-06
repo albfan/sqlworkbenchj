@@ -56,8 +56,6 @@ public class HistoryTextField
 		super();
 		setEditable(true);
 		setSettingsProperty(prop);
-		int maxHistorySize = Settings.getInstance().getIntProperty("workbench.history." + propName + ".size", 25);
-		historyValues = new FixedSizeList<String>(maxHistorySize);
 		contextMenu = new TextComponentMouseListener();
 		getEditor().getEditorComponent().addMouseListener(contextMenu);
 		getEditor().getEditorComponent().setFocusTraversalKeysEnabled(true);
@@ -82,6 +80,8 @@ public class HistoryTextField
 	public void setSettingsProperty(String prop)
 	{
 		propName = prop;
+		int maxHistorySize = Settings.getInstance().getIntProperty("workbench.history." + propName + ".size", 25);
+		historyValues = new FixedSizeList<String>(maxHistorySize);
 	}
 
 	public void selectAll()
