@@ -349,6 +349,7 @@ public class WbCellEditor
 
 	public class TextAreaScrollPane
 		extends JScrollPane
+		implements NullableEditor
 	{
 
 		TextAreaScrollPane(TextAreaEditor content)
@@ -398,5 +399,25 @@ public class WbCellEditor
 		{
 			return editor.processKeyBinding(ks, e, condition, pressed);
 		}
+
+		@Override
+		public void setNull(boolean setToNull)
+		{
+			WbCellEditor.this.setNull(setToNull);
+		}
+
+		@Override
+		public JTextComponent getEditor()
+		{
+			return editor;
+		}
+
+		@Override
+		public void restoreOriginal()
+		{
+			WbCellEditor.this.restoreOriginal();
+		}
+
+
 	}
 }
