@@ -28,6 +28,7 @@ import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.HistoryTextField;
 
 /**
  *
@@ -37,17 +38,17 @@ public class LoginPrompt
 	extends JPanel
 	implements ValidatingComponent
 {
-	/** Creates new form LoginPrompt */
+
 	public LoginPrompt()
 	{
 		initComponents();
-		WbSwingUtilities.setMinimumSize(tfUserName, 25);
+		WbSwingUtilities.setMinimumSize(tfUsername, 25);
 		WbSwingUtilities.setMinimumSize(tfPwd, 25);
 	}
 
 	public String getUserName()
 	{
-		return tfUserName.getText().trim();
+		return getUsernameField().getText().trim();
 	}
 
 	public String getPassword()
@@ -58,13 +59,22 @@ public class LoginPrompt
 	@Override
 	public boolean validateInput()
 	{
+		getUsernameField().addToHistory(getUserName());
+		getUsernameField().saveSettings();
 		return true;
+	}
+
+	private HistoryTextField getUsernameField()
+	{
+		return (HistoryTextField)tfUsername;
 	}
 
 	@Override
 	public void componentDisplayed()
 	{
-		WbSwingUtilities.requestFocus(tfUserName);
+		getUsernameField().restoreSettings();
+		getUsernameField().setText("");
+		WbSwingUtilities.requestFocus(tfUsername);
 	}
 
 
@@ -80,9 +90,9 @@ public class LoginPrompt
     java.awt.GridBagConstraints gridBagConstraints;
 
     lblUsername = new javax.swing.JLabel();
-    tfUserName = new javax.swing.JTextField();
     tfPwd = new javax.swing.JPasswordField();
     lblPwd = new javax.swing.JLabel();
+    tfUsername = new HistoryTextField("usernames");
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -93,16 +103,6 @@ public class LoginPrompt
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 0);
     add(lblUsername, gridBagConstraints);
-
-    tfUserName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    tfUserName.setName("username"); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 6, 2, 2);
-    add(tfUserName, gridBagConstraints);
 
     tfPwd.setName("password"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -122,12 +122,19 @@ public class LoginPrompt
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 0);
     add(lblPwd, gridBagConstraints);
+
+    tfUsername.setEditable(true);
+    tfUsername.setMaximumRowCount(10);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(2, 6, 4, 2);
+    add(tfUsername, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel lblPwd;
   private javax.swing.JLabel lblUsername;
   private javax.swing.JPasswordField tfPwd;
-  private javax.swing.JTextField tfUserName;
+  private javax.swing.JComboBox tfUsername;
   // End of variables declaration//GEN-END:variables
 }
