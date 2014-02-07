@@ -324,6 +324,11 @@ public class TableDependencySorter
 						}
 					}
 				}
+				if (result == 0)
+				{
+					// if all parameters are equal, sort them alphabetically
+					result = o1.getTableExpression().compareTo(o2.getTableExpression());
+				}
 				return result;
 			}
 
