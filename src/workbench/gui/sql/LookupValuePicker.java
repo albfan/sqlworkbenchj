@@ -92,6 +92,7 @@ import workbench.gui.components.WbToolbarButton;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
 import workbench.interfaces.NullableEditor;
+import workbench.resource.GuiSettings;
 
 import workbench.storage.DataStore;
 import workbench.storage.LookupDataLoader;
@@ -471,7 +472,10 @@ public class LookupValuePicker
 					DataStoreTableModel model = new DataStoreTableModel(data);
 					model.setAllowEditing(false);
 					lookupData.setModel(model, true);
-					TableRowHeader.showRowHeader(lookupData);
+					if (GuiSettings.getShowTableRowNumbers())
+					{
+						TableRowHeader.showRowHeader(lookupData);
+					}
 
 					int row = highlightCurrentValues();
 

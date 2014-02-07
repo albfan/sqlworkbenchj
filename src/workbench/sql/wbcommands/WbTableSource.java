@@ -1,5 +1,4 @@
 /*
- *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2014, Thomas Kellerer
@@ -22,29 +21,27 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import workbench.db.DbObject;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
-import workbench.db.TriggerDefinition;
-
-import workbench.db.ViewReader;
-import workbench.db.ViewReaderFactory;
+import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 /**
- * Display the source code of a view.
+ * Display the source code of a table.
  *
  * @author Thomas Kellerer
  */
-public class WbViewSource
+public class WbTableSource
 	extends SqlCommand
 {
 
-	public static final String VERB = "WBVIEWSOURCE";
-	public static final String FORMATTED_VERB = "WbViewSource";
+	public static final String VERB = "WBTABLESOURCE";
+	public static final String FORMATTED_VERB = "WbTableSource";
 
-	public WbViewSource()
+	public WbTableSource()
 	{
 		super();
 	}
@@ -64,19 +61,21 @@ public class WbViewSource
 
 		TableIdentifier object = new TableIdentifier(args, currentConnection);
 
-		ViewReader reader = ViewReaderFactory.createViewReader(currentConnection);
-		CharSequence source = reader.getExtendedViewSource(object, false);
+		TableDefinition tableDef = currentConnection.getMetadata().getTableDefinition(object);
+		if (tableDef == null || tableDef.getColumnCount() == 0)
+		{
+			result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", object.getObjectExpression(currentConnection)));
+			result.setFailure();
+			return result;
+		}
+
+		TableSourceBuilder reader = TableSourceBuilderFactory.getBuilder(currentConnection);
+		String source = reader.getTableSource(tableDef.getTable(), tableDef.getColumns());
 		if (source != null)
 		{
 			result.addMessage(source);
 			result.setSuccess();
 		}
-		else
-		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrViewNotFound", object.getObjectExpression(currentConnection)));
-			result.setFailure();
-		}
-
 		return result;
 	}
 }

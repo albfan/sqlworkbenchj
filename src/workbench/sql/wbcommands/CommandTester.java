@@ -104,6 +104,7 @@ public class CommandTester
 		commands.add(WbRun.VERB);
 		commands.add(WbListTriggers.VERB);
 		commands.add(WbTriggerSource.VERB);
+		commands.add(WbTableSource.VERB);
 		commands.add(WbViewSource.VERB);
 		commands.add(WbGrepSource.VERB);
 		commands.add(WbGrepData.VERB);
@@ -178,6 +179,7 @@ public class CommandTester
 			formattedWords.put(WbListMacros.VERB, "WbListMacros");
 			formattedWords.put(WbListIndexes.VERB, "WbListIndexes");
 			formattedWords.put(WbViewSource.VERB, WbViewSource.FORMATTED_VERB);
+			formattedWords.put(WbTableSource.VERB, WbTableSource.FORMATTED_VERB);
 		}
 		return formattedWords;
 	}

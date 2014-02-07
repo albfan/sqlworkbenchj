@@ -97,6 +97,7 @@ import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbSysExec;
 import workbench.sql.wbcommands.WbSysOpen;
 import workbench.sql.wbcommands.WbSysProps;
+import workbench.sql.wbcommands.WbTableSource;
 import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbViewSource;
 import workbench.sql.wbcommands.WbXslt;
@@ -169,6 +170,7 @@ public class CommandMapper
 		addCommand(new WbListIndexes());
 		addCommand(new WbTriggerSource());
 		addCommand(new WbViewSource());
+		addCommand(new WbTableSource());
 		addCommand(new WbDescribeObject());
 		addCommand(new WbGrepSource());
 		addCommand(new WbGrepData());
