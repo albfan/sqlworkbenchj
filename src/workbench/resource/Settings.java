@@ -41,9 +41,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -3130,6 +3132,24 @@ public class Settings
 		this.setProperty(key, StringUtil.listToString(currentProps,','));
 	}
 
+	public void replacePartialKey(String oldKey, String newKey)
+	{
+		Map<String, String> toChange = new HashMap<String, String>();
+		for (Object keyObj : props.keySet())
+		{
+			String key = keyObj.toString();
+			if (key.contains(oldKey))
+			{
+				toChange.put(key, key.replace(oldKey, newKey));
+			}
+		}
+		for (Map.Entry<String, String> entry : toChange.entrySet())
+		{
+			LogMgr.logDebug("Settings.replacePartialKey", "Renaming: " + entry.getKey() + " to " + entry.getValue());
+			renameProperty(entry.getKey(), entry.getValue());
+		}
+	}
+
 	private void renameOldProps()
 	{
 		renameProperty("workbench.worspace.recent", "workbench.workspace.recent");
@@ -3178,7 +3198,7 @@ public class Settings
 		String value = props.getProperty("workbench.db.postgresql..inlineconstraints", null);
 		if ("true".equals(value))
 		{
-			removeProperty(".inlineconstraints");
+			removeProperty("workbench.db.postgresql..inlineconstraints");
 			props.setProperty("workbench.db.postgresql.pk.inline", "true");
 			props.setProperty("workbench.db.postgresql.fk.inline", "true");
 		}

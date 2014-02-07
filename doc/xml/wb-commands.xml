@@ -1959,17 +1959,6 @@ WHERE id=42;</programlisting>
 		</para>
   </section>
 
-  <section id="command-procsource">
-    <title>Show the source of a stored procedures - WbProcSource</title>
-
-    <para>
-			This command will show the source for a single stored procedure (if the
-			current DBMS is supported by &wb-productname;). The name of the procedure
-			is given as an argument to the command:
-			<programlisting>WbProcSource theAnswer</programlisting>
-		</para>
-  </section>
-
   <section id="command-listcat">
     <title>List catalogs - WbListCat</title>
 
@@ -2017,6 +2006,37 @@ WHERE id=42;</programlisting>
       and always returns all schemas.
     </para>
 
+  </section>
+
+  <section id="command-tablesource">
+    <title>Show the source of a table - WbTableSource</title>
+
+    <para>
+			This command will show the source for a single table. The name of the table
+			is given as an argument to the command:
+			<programlisting>WbTableSource person</programlisting>
+		</para>
+  </section>
+
+  <section id="command-viewsource">
+    <title>Show the source of a view - WbViewSource</title>
+
+    <para>
+			This command will show the source for a single view. The name of the view
+			is given as an argument to the command:
+			<programlisting>WbViewSource v_current_orders</programlisting>
+		</para>
+  </section>
+
+  <section id="command-procsource">
+    <title>Show the source of a stored procedures - WbProcSource</title>
+
+    <para>
+			This command will show the source for a single stored procedure (if the
+			current DBMS is supported by &wb-productname;). The name of the procedure
+			is given as an argument to the command:
+			<programlisting>WbProcSource theAnswer</programlisting>
+		</para>
   </section>
 
 

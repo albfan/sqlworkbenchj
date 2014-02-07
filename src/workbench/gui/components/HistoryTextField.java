@@ -139,12 +139,12 @@ public class HistoryTextField
 
 	public void restoreSettings()
 	{
-		restoreSettings(Settings.getInstance(), "workbench.quickfilter." + propName + ".");
+		restoreSettings(Settings.getInstance(), "workbench.quickfilter.");
 	}
 
 	public void saveSettings()
 	{
-		saveSettings(Settings.getInstance(), "workbench.quickfilter." + propName + ".");
+		saveSettings(Settings.getInstance(), "workbench.quickfilter." );
 	}
 
 	public void storeCurrent()

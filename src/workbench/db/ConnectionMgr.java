@@ -326,12 +326,9 @@ public class ConnectionMgr
 	{
 		if (this.drivers == null)	this.readDrivers();
 
-		DbDriver db = null;
-
-		for (int i=0; i < this.drivers.size(); i ++)
+		for (DbDriver driver : this.drivers)
 		{
-			db = this.drivers.get(i);
-			if (db.getDriverClass().equals(drvClassName)) return db;
+			if (driver.getDriverClass().equals(drvClassName)) return driver;
 		}
 		return null;
 	}
@@ -795,9 +792,8 @@ public class ConnectionMgr
 				WbPersistence reader = new WbPersistence();
 				ArrayList<DbDriver> templates = (ArrayList<DbDriver>)reader.readObject(in);
 
-				for (int i=0; i < templates.size(); i++)
+				for (DbDriver drv : templates)
 				{
-					DbDriver drv = templates.get(i);
 					if (!this.isNameUsed(drv.getName()))
 					{
 						this.drivers.add(drv);
@@ -913,6 +909,7 @@ public class ConnectionMgr
 			for (ConnectionProfile profile : this.profiles)
 			{
 				profile.reset();
+				profile.loadingFinished();
 			}
 			this.profilesChanged = false;
 		}

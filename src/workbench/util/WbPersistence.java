@@ -67,9 +67,8 @@ public class WbPersistence
 		{
 			BeanInfo info = Introspector.getBeanInfo( clazz );
 			PropertyDescriptor[] propertyDescriptors = info.getPropertyDescriptors();
-			for (int i = 0; i < propertyDescriptors.length; i++)
+			for (PropertyDescriptor pd : propertyDescriptors)
 			{
-				PropertyDescriptor pd = propertyDescriptors[i];
 				if ( pd.getName().equals(property) )
 				{
 					pd.setValue( "transient", Boolean.TRUE );

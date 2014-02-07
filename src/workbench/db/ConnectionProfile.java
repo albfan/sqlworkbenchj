@@ -100,6 +100,7 @@ public class ConnectionProfile
 	private DelimiterDefinition alternateDelimiter;
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
+	private String lastSettingsKey;
 
 	public ConnectionProfile()
 	{
@@ -128,14 +129,32 @@ public class ConnectionProfile
 		return cp;
 	}
 
+	public void loadingFinished()
+	{
+		this.lastSettingsKey = getSettingsKey();
+	}
+
+	private void syncSettingsKey()
+	{
+		if (lastSettingsKey == null) return;
+		String newKey = getSettingsKey();
+		if (newKey == null) return;
+
+		Settings.getInstance().replacePartialKey("." + lastSettingsKey + ".", "."  + newKey + ".");
+		this.lastSettingsKey = newKey;
+	}
+
 	public String getSettingsKey()
 	{
+		if (name == null || group == null) return null;
 		Pattern p = Pattern.compile("[^0-9A-Za-z]+");
-		Matcher m = p.matcher(group);
-		String key = m.replaceAll("") + ".";
-		m = p.matcher(name);
-		key += m.replaceAll("");
-		return key.toLowerCase();
+		Matcher gm = p.matcher(group);
+		String cleanGroup = gm.replaceAll("").toLowerCase();
+
+		Matcher nm = p.matcher(name);
+		String cleanName = nm.replaceAll("").toLowerCase();
+		String key = cleanGroup + "." + cleanName;
+		return key;
 	}
 
 	public boolean getStoreCacheLocally()
@@ -374,6 +393,7 @@ public class ConnectionProfile
 		this.group = g;
 		this.changed = true;
 		this.groupChanged = true;
+		syncSettingsKey();
 	}
 
 	public String getIcon()
@@ -793,6 +813,7 @@ public class ConnectionProfile
 	{
 		if (!changed && !StringUtil.equalString(name, aName)) changed = true;
 		this.name = aName;
+		syncSettingsKey();
 	}
 
 	public boolean getStorePassword()
@@ -877,6 +898,7 @@ public class ConnectionProfile
 		result.setPreventDMLWithoutWhere(this.preventNoWhere);
 		result.setPromptForUsername(this.promptForUsername);
 		result.setStoreCacheLocally(this.storeCacheLocally);
+		result.lastSettingsKey = lastSettingsKey;
 		if (connectionProperties != null)
 		{
 			Enumeration keys = connectionProperties.propertyNames();

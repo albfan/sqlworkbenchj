@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.HistoryTextField;
@@ -61,7 +62,7 @@ public class LoginPrompt
 	public boolean validateInput()
 	{
 		getUsernameField().addToHistory(getUserName());
-		getUsernameField().saveSettings();
+		getUsernameField().saveSettings(Settings.getInstance(), "workbench.loginprompt.");
 		return true;
 	}
 
@@ -73,7 +74,7 @@ public class LoginPrompt
 	@Override
 	public void componentDisplayed()
 	{
-		getUsernameField().restoreSettings();
+		getUsernameField().restoreSettings(Settings.getInstance(), "workbench.loginprompt.");
 		getUsernameField().setText("");
 		WbSwingUtilities.requestFocus(tfUsername);
 	}
