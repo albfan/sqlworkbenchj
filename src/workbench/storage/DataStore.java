@@ -871,6 +871,7 @@ public class DataStore
 				LogMgr.logError("DataStore.setUpdateTable()", "Could not find column " + column + " from table definition in ResultInfo!", null);
 			}
 		}
+		checkForGeneratedKeys();
 	}
 
 	private TableIdentifier findTable(WbConnection conn, TableIdentifier table)

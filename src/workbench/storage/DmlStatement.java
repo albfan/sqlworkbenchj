@@ -243,7 +243,7 @@ public class DmlStatement
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("DmlStatement.execute()", "Error executing statement " + sql.toString(), e);
+			LogMgr.logError("DmlStatement.execute()", "Error executing statement " + sql, e);
 			throw e;
 		}
 		finally
