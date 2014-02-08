@@ -1,5 +1,5 @@
 /*
- * ResultNameParser.java
+ * AboutAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -20,27 +20,34 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql;
+package workbench.gui.actions;
+
+import java.awt.event.ActionEvent;
+
+import workbench.WbManager;
+
+import workbench.gui.MainWindow;
+import workbench.gui.bookmarks.BookmarkSelector;
 
 /**
- * A class to extract a "result name" from a statement's comment, similar
- * to Javadoc tags.
- *
+ * Action to display program version information
+ * @see workbench.gui.dialogs.WbAboutDialog
  * @author Thomas Kellerer
  */
-public class ResultNameParser
-	extends AnnotationReader
+public class BookmarksAction
+	extends WbAction
 {
-	public static final String ANNOTATION = "wbresult";
-
-	public ResultNameParser()
+	public BookmarksAction()
 	{
-		super(ANNOTATION);
+		super();
+		initMenuDefinition("MnuTxtBookmarks");
+		removeIcon();
 	}
 
-	public String getResultName(String sql)
+	@Override
+	public void executeAction(ActionEvent e)
 	{
-		return getAnnotationValue(sql);
+		MainWindow window = (MainWindow)WbManager.getInstance().getCurrentWindow();
+		BookmarkSelector.selectBookmark(window);
 	}
-
 }

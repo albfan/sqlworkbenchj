@@ -72,6 +72,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.bookmarks.NamedScriptLocation;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.FlatButton;
@@ -279,6 +280,23 @@ public class DbExplorerPanel
 		{
 			LogMgr.logError(this, "Could not initialize DbExplorerPanel", e);
 		}
+	}
+
+	@Override
+	public boolean isModifiedAfter(long time)
+	{
+		return false;
+	}
+
+	@Override
+	public List<NamedScriptLocation> getBookmarks()
+	{
+		return Collections.emptyList();
+	}
+
+	@Override
+	public void jumpToBookmark(NamedScriptLocation bookmark)
+	{
 	}
 
 	@Override

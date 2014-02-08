@@ -375,6 +375,11 @@ public class JdbcProcedureReader
 
 	}
 
+	public boolean needsHeader(CharSequence procedureBody)
+	{
+		return true;
+	}
+
 	@Override
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
@@ -385,10 +390,13 @@ public class JdbcProcedureReader
 
 		StringBuilder source = new StringBuilder(500);
 
-		StringBuilder header = getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType());
-		source.append(header);
-
 		CharSequence body = retrieveProcedureSource(def);
+		StringBuilder header = getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType());
+
+		if (needsHeader(body))
+		{
+			source.append(header);
+		}
 		source.append(body);
 
 		boolean needsTerminator = this.connection.getDbSettings().proceduresNeedTerminator();

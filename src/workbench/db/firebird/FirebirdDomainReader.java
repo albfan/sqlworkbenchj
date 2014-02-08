@@ -54,32 +54,33 @@ public class FirebirdDomainReader
 	implements ObjectListExtender
 {
 	final String baseSql =
-		         "SELECT trim(rdb$field_name) AS domain_name, \n" +
-             "       rdb$validation_source as constraint_definition, \n" +
-             "       case rdb$field_type  \n" +
-             "         when 261 then 'BLOB' \n" +
-             "         when 14 then 'CHAR' \n" +
-             "         when 40 then 'CSTRING' \n" +
-             "         when 11 then 'D_FLOAT' \n" +
-             "         when 27 then 'DOUBLE' \n" +
-             "         when 10 then 'FLOAT' \n" +
-             "         when 16 then 'BIGINT' \n" +
-             "         when 8 then 'INTEGER' \n" +
-             "         when 9 then 'QUAD' \n" +
-             "         when 7 then 'SMALLINT' \n" +
-             "         when 12 then 'DATE' \n" +
-             "         when 35 then 'TIMESTAMP' \n" +
-             "         when 3 then 'DATE' \n" +
-             "         when 37 then 'VARCHAR' \n" +
-             "         else 'UNKNOWN' \n" +
-             "       end as data_type, \n" +
-             "       rdb$default_source as default_value, \n" +
-             "       case rdb$null_flag \n" +
-             "         when 1 then 1 \n" +
-             "         else 0 \n" +
-             "       end as nullable \n" +
-             "FROM rdb$fields \n" +
-             "WHERE rdb$field_name NOT LIKE 'RDB$%'";
+		"SELECT trim(rdb$field_name) AS domain_name, \n" +
+		"       rdb$validation_source as constraint_definition, \n" +
+		"       case rdb$field_type  \n" +
+		"         when 261 then 'BLOB' \n" +
+		"         when 14 then 'CHAR' \n" +
+		"         when 40 then 'CSTRING' \n" +
+		"         when 11 then 'D_FLOAT' \n" +
+		"         when 27 then 'DOUBLE' \n" +
+		"         when 10 then 'FLOAT' \n" +
+		"         when 16 then 'BIGINT' \n" +
+		"         when 8 then 'INTEGER' \n" +
+		"         when 9 then 'QUAD' \n" +
+		"         when 7 then 'SMALLINT' \n" +
+		"         when 12 then 'DATE' \n" +
+		"         when 35 then 'TIMESTAMP' \n" +
+		"         when 3 then 'DATE' \n" +
+		"         when 37 then 'VARCHAR' \n" +
+		"         else 'UNKNOWN' \n" +
+		"       end as data_type, \n" +
+		"       rdb$default_source as default_value, \n" +
+		"       case rdb$null_flag \n" +
+		"         when 1 then 1 \n" +
+		"         else 0 \n" +
+		"       end as nullable \n" +
+		"FROM rdb$fields \n" +
+		"WHERE rdb$field_name NOT LIKE 'RDB$%' \n" +
+		"  AND rdb$field_name NOT LIKE 'SEC$%' "; // for Firebird 3.0
 
 	private String getSql(WbConnection connection, String name)
 	{
@@ -107,7 +108,7 @@ public class FirebirdDomainReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("FirebirdDomainReader.getSql()", "Using SQL=\n" + sql);
+			LogMgr.logDebug("FirebirdDomainReader.getSql()", "Query to retrieve domains:\n" + sql);
 		}
 
 		return sql.toString();
@@ -119,11 +120,12 @@ public class FirebirdDomainReader
 		ResultSet rs = null;
 		Savepoint sp = null;
 		List<DomainIdentifier> result = new ArrayList<DomainIdentifier>();
+		String sql = null;
 		try
 		{
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(connection, namePattern);
+			sql = getSql(connection, namePattern);
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
@@ -145,7 +147,7 @@ public class FirebirdDomainReader
 		catch (SQLException e)
 		{
 			connection.rollback(sp);
-			LogMgr.logError("FirebirdDomainReader.getDomainList()", "Could not read domains", e);
+			LogMgr.logError("FirebirdDomainReader.getDomainList()", "Could not read domains using query:\n" + sql, e);
 		}
 		finally
 		{

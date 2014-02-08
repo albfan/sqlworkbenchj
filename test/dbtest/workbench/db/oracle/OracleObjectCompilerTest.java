@@ -23,16 +23,22 @@
 package workbench.db.oracle;
 
 import java.util.List;
-import workbench.db.ProcedureDefinition;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import workbench.sql.DelimiterDefinition;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.WbTestCase;
-import workbench.sql.DelimiterDefinition;
+
 import static org.junit.Assert.*;
-import workbench.db.TableIdentifier;
 
 /**
  *
@@ -122,7 +128,8 @@ public class OracleObjectCompilerTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "%");
+		ProcedureReader reader = con.getMetadata().getProcedureReader();
+		List<ProcedureDefinition> procs = reader.getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "%");
 		assertEquals(4, procs.size());
 
 		ProcedureDefinition get = procs.get(0);
@@ -140,6 +147,12 @@ public class OracleObjectCompilerTest
 		sql = compiler.createCompileStatement(pkgFunc);
 		msg = compiler.compileObject(pkgFunc);
 		assertNull(msg);
+
+		TestUtil.executeScript(con, "create procedure nocando as begin null end;");
+		ProcedureDefinition proc = reader.findProcedure(new ProcedureDefinition(null, OracleTestUtil.SCHEMA_NAME, "NOCANDO"));
+		msg = compiler.compileObject(proc);
+		assertNotNull(msg);
+		assertTrue(msg.contains("PLS-00103"));
 	}
 
 	@Test

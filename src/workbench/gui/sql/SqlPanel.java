@@ -159,6 +159,8 @@ import workbench.gui.actions.UndoExpandAction;
 import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.actions.ViewMessageLogAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.bookmarks.BookmarkAnnotation;
+import workbench.gui.bookmarks.NamedScriptLocation;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EtchedBorderTop;
@@ -418,6 +420,43 @@ public class SqlPanel
 		editor.enableMacroExpansion(true);
 		editor.enableBracketCompletion(true);
 		historyStatements = new StatementHistory(Settings.getInstance().getMaxHistorySize());
+	}
+
+	@Override
+	public List<NamedScriptLocation> getBookmarks()
+	{
+		BookmarkAnnotation reader = new BookmarkAnnotation();
+		List<NamedScriptLocation> bookmarks = reader.getBookmarks(editor.getText(), getId());
+		for (NamedScriptLocation loc : bookmarks)
+		{
+			int line = editor.getLineOfOffset(loc.getOffset());
+			loc.setLineNumber(line + 1);
+		}
+		return bookmarks;
+	}
+
+	@Override
+	public boolean isModifiedAfter(long time)
+	{
+		return editor.isModifiedAfter(time);
+	}
+
+	@Override
+	public void jumpToBookmark(NamedScriptLocation bookmark)
+	{
+		if (bookmark == null) return;
+		int position = bookmark.getOffset();
+		final int line = this.editor.getLineOfOffset(position);
+		final int offset = editor.getLineStartOffset(line);
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				editor.setCaretPosition(offset);
+				editor.scrollTo(line, 0);
+			}
+		});
 	}
 
 	public void setDividerLocation(int location)

@@ -18,11 +18,15 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql;
+package workbench.gui.bookmarks;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.resource.GuiSettings;
+
+import workbench.sql.AnnotationReader;
+import workbench.sql.ResultNameParser;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
@@ -35,25 +39,27 @@ import workbench.util.StringUtil;
 public class BookmarkAnnotation
 	extends AnnotationReader
 {
-	public static final String ANNOTATION = "wbmark";
+	public static final String ANNOTATION = "WbTag";
+
+	private boolean useResultNameTag;
 
 	public BookmarkAnnotation()
 	{
 		super(ANNOTATION);
+		useResultNameTag = GuiSettings.getUseResultTagForBookmarks();
 	}
 
-	public String getBookmarkName(String sql)
+	public void setUseResultTag(boolean flag)
 	{
-		return StringUtil.trim(getAnnotationValue(sql));
+		useResultNameTag = flag;
 	}
-
 	/**
 	 * Parses the given SQL script for bookmark annotations.
 	 *
 	 * @param script  the script to parse
 	 * @return the list of bookmarks found
 	 */
-	public List<NamedScriptLocation> getBookmarks(String script)
+	public List<NamedScriptLocation> getBookmarks(String script, String tabId)
 	{
 		List<NamedScriptLocation> bookmarks = new ArrayList<NamedScriptLocation>();
 		SQLLexer lexer = new SQLLexer(script);
@@ -64,9 +70,14 @@ public class BookmarkAnnotation
 			if (token.isComment())
 			{
 				String locationName = StringUtil.trim(extractAnnotationValue(token));
+				if (locationName == null && useResultNameTag)
+				{
+					locationName = StringUtil.trim(extractAnnotationValue(token, ResultNameParser.ANNOTATION));
+				}
+
 				if (locationName != null)
 				{
-					NamedScriptLocation bookmark = new NamedScriptLocation(locationName, token.getCharBegin());
+					NamedScriptLocation bookmark = new NamedScriptLocation(locationName, token.getCharBegin(), tabId);
 					bookmarks.add(bookmark);
 				}
 			}

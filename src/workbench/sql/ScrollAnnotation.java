@@ -34,7 +34,7 @@ import workbench.util.StringUtil;
 public class ScrollAnnotation
 	extends AnnotationReader
 {
-	public static final String ANNOTATION = "wbscrollto";
+	public static final String ANNOTATION = "WbScrollTo";
 	public static final String END_KEYWORD = "end";
 
 	private final Set<String> endKeywords = CollectionUtil.caseInsensitiveSet("bottom", END_KEYWORD);
@@ -48,7 +48,7 @@ public class ScrollAnnotation
 	{
 		return "-- @" + ANNOTATION + " " + END_KEYWORD;
 	}
-	
+
 	public boolean scrollToEnd(String sql)
 	{
 		String value = getAnnotationValue(sql);

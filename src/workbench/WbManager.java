@@ -55,6 +55,7 @@ import workbench.gui.DisconnectInfo;
 import workbench.gui.MainWindow;
 import workbench.gui.WbFocusManager;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.bookmarks.BookmarkManager;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.filter.FilterDefinitionManager;
@@ -668,6 +669,8 @@ public final class WbManager
 			if (!win.saveWorkspace()) return;
 
 			this.mainWindows.remove(win);
+			BookmarkManager.getInstance().clearBookmarksForWindow(win.getWindowId());
+
 			WbThread t = new WbThread(win.getWindowId() + " Disconnect")
 			{
 				@Override

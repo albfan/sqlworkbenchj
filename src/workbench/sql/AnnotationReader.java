@@ -34,13 +34,11 @@ import workbench.util.StringUtil;
  */
 public class AnnotationReader
 {
-	private final String annotation;
 	private final String keyword;
 
 	public AnnotationReader(String key)
 	{
-		this.annotation = key;
-		keyword = "@" + annotation;
+		keyword = "@" + key.toLowerCase();
 	}
 
 	public String getAnnotationValue(String sql)
@@ -53,7 +51,7 @@ public class AnnotationReader
 		}
 		return extractAnnotationValue(token);
 	}
-	
+
 	protected SQLToken getAnnotationToken(String sql)
 	{
 		if (StringUtil.isBlank(sql)) return null;
@@ -81,14 +79,19 @@ public class AnnotationReader
 
 	protected String extractAnnotationValue(SQLToken token)
 	{
+		return extractAnnotationValue(token, keyword);
+	}
+
+	protected String extractAnnotationValue(SQLToken token, String annotation)
+	{
 		if (token == null) return null;
 
 		String comment = token.getText();
 		comment = stripCommentChars(comment.trim());
-		int pos = comment.toLowerCase().indexOf(keyword);
+		int pos = comment.toLowerCase().indexOf(annotation);
 		if (pos >= 0)
 		{
-			pos += keyword.length();
+			pos += annotation.length();
 			if (pos >= comment.length()) return null;
 			if (Character.isWhitespace(comment.charAt(pos)))
 			{

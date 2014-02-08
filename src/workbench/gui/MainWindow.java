@@ -86,6 +86,7 @@ import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
 import workbench.gui.actions.AssignWorkspaceAction;
+import workbench.gui.actions.BookmarksAction;
 import workbench.gui.actions.CloseWorkspaceAction;
 import workbench.gui.actions.ConfigureShortcutsAction;
 import workbench.gui.actions.CreateNewConnection;
@@ -126,6 +127,8 @@ import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.actions.WhatsNewAction;
+import workbench.gui.bookmarks.BookmarkManager;
+import workbench.gui.bookmarks.NamedScriptLocation;
 import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.MenuScroller;
 import workbench.gui.components.RunningJobIndicator;
@@ -1182,6 +1185,12 @@ public class MainWindow
 				updateCurrentTab(index);
 			}
 		});
+
+		int lastIndex = sqlTab.getPreviousTab();
+		if (lastIndex > -1 && lastIndex < sqlTab.getTabCount())
+		{
+			BookmarkManager.getInstance().updateInBackground(this, getSqlPanel(lastIndex));
+		}
 	}
 
 	private void updateCurrentTab(int index)
@@ -1666,6 +1675,8 @@ public class MainWindow
 				}
 			});
 		}
+
+		BookmarkManager.getInstance().updateInBackground(this);
 
 		return resultForWorkspaceClose;
 	}
@@ -2355,6 +2366,9 @@ public class MainWindow
 	{
 		boolean inProgress = connectInProgress;
 		if (!inProgress) this.setConnectIsInProgress();
+
+		BookmarkManager.getInstance().clearBookmarksForWindow(getWindowId());
+
 		try
 		{
 			setIgnoreTabChange(true);
@@ -2496,7 +2510,9 @@ public class MainWindow
 		result.add(new ObjectSearchAction(this));
 
 		result.addSeparator();
+		result.add(new BookmarksAction());
 
+		result.addSeparator();
 		new OptionsDialogAction().addToMenu(result);
 		new ConfigureShortcutsAction().addToMenu(result);
 
@@ -2907,6 +2923,31 @@ public class MainWindow
 		}
 	}
 
+	public void jumpToBookmark(final NamedScriptLocation bookmark)
+	{
+		if (bookmark == null) return;
+		final	int index = getTabIndexById(bookmark.getTabId());
+		if (index < 0)
+		{
+			LogMgr.logWarning("MainWindow.jumpToBookmark()", "Tab with ID=" + bookmark.getTabId() + " not found!");
+			return;
+		}
+		final MainPanel p = getSqlPanel(index);
+		final boolean selectTab = index != sqlTab.getSelectedIndex();
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (selectTab)
+				{
+					selectTab(index);
+				}
+				p.jumpToBookmark(bookmark);
+			}
+		});
+	}
+
 	/**
 	 * Returns the real title of a tab (without the index number or any formatting)
 	 *
@@ -2916,6 +2957,17 @@ public class MainWindow
 	{
 		MainPanel panel = getSqlPanel(index);
 		return panel.getTabTitle();
+	}
+
+	private int getTabIndexById(String tabId)
+	{
+		int count = sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			MainPanel p = getSqlPanel(i);
+			if (p.getId().equals(tabId)) return i;
+		}
+		return -1;
 	}
 
 	public String getTabTitleById(String tabId)
@@ -3180,6 +3232,8 @@ public class MainWindow
 			setIgnoreTabChange(true);
 
 			WbConnection conn = panel.getConnection();
+
+			BookmarkManager.getInstance().clearBookmarksForPanel(getWindowId(), panel.getId());
 
 			// this does not really close the connection
 			// it simply tells the panel that it should

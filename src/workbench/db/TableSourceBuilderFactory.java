@@ -23,6 +23,7 @@
 package workbench.db;
 
 import workbench.db.derby.DerbyTableSourceBuilder;
+import workbench.db.firebird.FirebirdTableSourceBuilder;
 import workbench.db.h2database.H2TableSourceBuilder;
 import workbench.db.hsqldb.HsqlTableSourceBuilder;
 import workbench.db.ibm.Db2TableSourceBuilder;
@@ -77,6 +78,10 @@ public class TableSourceBuilderFactory
 		if (con.getDbId().equals("informix_dynamic_server"))
 		{
 			return new InformixTableSourceBuilder(con);
+		}
+		if (con.getMetadata().isFirebird())
+		{
+			return new FirebirdTableSourceBuilder(con);
 		}
 		return new TableSourceBuilder(con);
 	}

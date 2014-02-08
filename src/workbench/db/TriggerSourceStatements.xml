@@ -356,6 +356,7 @@ and  sysobjects.type = &apos;TR&apos;</string>
              when  114 then 'INSERT OR UPDATE OR DELETE'
              when  60 then 'UPDATE OR DELETE OR INSERT'
              when  78 then 'DELETE OR INSERT OR UPDATE'
+             else ''
           end)||' \n'||rdb$trigger_source
           FROM rdb$triggers</string>
     </void>

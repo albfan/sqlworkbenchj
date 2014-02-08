@@ -33,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -40,11 +41,13 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.border.Border;
+
 import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.EscAction;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.EscAction;
 
 
 /**
@@ -148,17 +151,29 @@ public class ValidatingDialog
 
 		JPanel content = new JPanel();
 		content.setLayout(new BorderLayout());
-		Border b = BorderFactory.createEmptyBorder(10,10,10,10);
+		Border b = BorderFactory.createEmptyBorder(5,5,5,5);
 		content.setBorder(b);
 		content.add(editor, BorderLayout.CENTER);
 		buttonPanel = new JPanel();
-		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		for (int i = 0; i < optionButtons.length; i++)
+		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+		
+		int length = optionButtons.length + (cancelButton == null ? 0 : 1);
+		JComponent[] allButtons = new JComponent[length];
+		for (int i=0; i < optionButtons.length; i++)
 		{
 			buttonPanel.add(optionButtons[i]);
+			allButtons[i] = optionButtons[i];
 		}
-		if (cancelButton != null) buttonPanel.add(cancelButton);
+
+		if (cancelButton != null)
+		{
+			buttonPanel.add(cancelButton);
+			allButtons[allButtons.length - 1] = cancelButton;
+		}
+
 		b = BorderFactory.createEmptyBorder(2, 0, 0, 0);
+
+		WbSwingUtilities.makeEqualSize(allButtons);
 		buttonPanel.setBorder(b);
 		content.add(buttonPanel, BorderLayout.SOUTH);
 		this.getContentPane().add(content);

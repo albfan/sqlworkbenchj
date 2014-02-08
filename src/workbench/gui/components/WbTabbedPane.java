@@ -78,6 +78,8 @@ public class WbTabbedPane
 	private boolean onlyCloseActive;
 	private Point dragStart;
 	private Rectangle tabBounds;
+	private int currentTabIndex;
+	private int previousTabIndex;
 
 	public WbTabbedPane()
 	{
@@ -170,12 +172,10 @@ public class WbTabbedPane
 		{
 			addCloseButtons();
 			updateButtons();
-			addChangeListener(this);
 		}
 		else if (wasRemoved)
 		{
 			removeCloseButtons();
-			removeChangeListener(this);
 		}
 	}
 
@@ -291,6 +291,7 @@ public class WbTabbedPane
 		}
 		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_CLOSE_ACTIVE_TAB);
+		addChangeListener(this);
 	}
 
 	@Override
@@ -500,9 +501,16 @@ public class WbTabbedPane
 		}
 	}
 
+	public int getPreviousTab()
+	{
+		return previousTabIndex;
+	}
+
 	@Override
 	public void stateChanged(ChangeEvent e)
 	{
+		previousTabIndex = currentTabIndex;
+		currentTabIndex = getSelectedIndex();
 		updateButtons();
 	}
 

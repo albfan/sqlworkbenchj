@@ -25,11 +25,15 @@ package workbench.interfaces;
 import java.awt.Font;
 import java.io.IOException;
 import java.util.List;
+
 import javax.swing.JTabbedPane;
 
 import workbench.db.WbConnection;
+
 import workbench.gui.actions.WbAction;
+import workbench.gui.bookmarks.NamedScriptLocation;
 import workbench.gui.components.WbToolbar;
+
 import workbench.util.WbWorkspace;
 
 /**
@@ -65,4 +69,7 @@ public interface MainPanel
 	void reset();
 	boolean isLocked();
 	void setLocked(boolean flag);
+	List<NamedScriptLocation> getBookmarks();
+	boolean isModifiedAfter(long time);
+	void jumpToBookmark(NamedScriptLocation bookmark);
 }

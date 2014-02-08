@@ -28,7 +28,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -53,32 +52,6 @@ public class ScriptParserTest
 	public ScriptParserTest()
 	{
 		super("ScriptParserTest");
-	}
-
-	@Test
-	public void testBookmarks()
-		throws Exception
-	{
-		String script =
-			"-- @" + BookmarkAnnotation.ANNOTATION + " delete all \n" +
-			"delete from person; \n" +
-			"commit;\n " +
-			"\n\n" +
-			"/* \n" +
-			"  @" + BookmarkAnnotation.ANNOTATION + " create table \n" +
-			"*/\n" +
-			"create table foo (id integer);\n" +
-			"commit;\n";
-
-		ScriptParser p = new ScriptParser(script);
-		p.setDelimiter(DelimiterDefinition.STANDARD_DELIMITER);
-		p.setCheckForSingleLineCommands(false);
-		p.setSupportOracleInclude(false);
-		List<NamedScriptLocation> bookmarks = p.getBookmarks();
-		assertNotNull(bookmarks);
-		assertEquals(2, bookmarks.size());
-		assertEquals("delete all", bookmarks.get(0).getName());
-		assertEquals("create table", bookmarks.get(1).getName());
 	}
 
 	@Test

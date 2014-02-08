@@ -909,7 +909,6 @@ public class ConnectionMgr
 			for (ConnectionProfile profile : this.profiles)
 			{
 				profile.reset();
-				profile.loadingFinished();
 			}
 			this.profilesChanged = false;
 		}

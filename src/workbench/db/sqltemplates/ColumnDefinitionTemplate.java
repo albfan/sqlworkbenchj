@@ -113,7 +113,8 @@ public class ColumnDefinitionTemplate
 	{
 		String expr = column.getComputedColumnExpression();
 		boolean isComputed = StringUtil.isNonBlank(expr);
-		String sql = getTemplate(isComputed, column.isAutoincrement());
+		boolean isGenerator = StringUtil.isNonBlank(column.getGeneratorExpression());
+		String sql = getTemplate(isComputed, column.isAutoincrement(), isGenerator);
 
 		String type = StringUtil.padRight(dataTypeOverride == null ? column.getDbmsType() : dataTypeOverride, typeLength);
 
@@ -225,7 +226,7 @@ public class ColumnDefinitionTemplate
 		return template.replace(placeholder, value);
 	}
 
-	private String getTemplate(boolean computedColumn, boolean isAutoincrement)
+	private String getTemplate(boolean computedColumn, boolean isAutoincrement, boolean isGenerator)
 	{
 		if (template != null) return template;
 
@@ -238,9 +239,12 @@ public class ColumnDefinitionTemplate
 				sql = getProperty("coldef.computed.autoinc", ColumnChanger.PARAM_DATATYPE + " " + PARAM_EXPRESSION);
 			}
 		}
+		else if (isGenerator)
+		{
+			sql = getProperty("coldef.generator", ColumnChanger.PARAM_DATATYPE + " " + PARAM_GENERATED);
+		}
 		else
 		{
-
 			sql = getProperty("coldef", ColumnChanger.PARAM_DATATYPE + " " + ColumnChanger.PARAM_DEFAULT_VALUE + " " + PARAM_NOT_NULL + " " + PARAM_COL_CONSTRAINTS);
 		}
 		return sql;

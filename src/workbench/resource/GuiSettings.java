@@ -70,6 +70,8 @@ public class GuiSettings
 	public static final String PROP_FONT_ZOOM_WHEEL = "workbench.gui.fontzoom.mousewheel";
 	public static final String PROP_NUMBER_ALIGN = "workbench.gui.renderer.numberalignment";
 
+	public static final String PROPERTY_UPD_BOOKMARKS_ON_OPEN = "workbench.bookmarks.update.ondisplay";
+	public static final String PROPERTY_BOOKMARKS_INCL_WBRESULT = "workbench.bookmarks.use.wbresult";
 
 	public static final Set<String> WINDOW_TITLE_PROPS = CollectionUtil.treeSet(
 		PROP_TITLE_APP_AT_END, PROP_TITLE_SHOW_WKSP, PROP_TITLE_SHOW_URL, PROP_TITLE_SHOW_PROF_GROUP,
@@ -95,6 +97,16 @@ public class GuiSettings
 		return Settings.getInstance().getIntProperty(PROPERTY_EXPAND_MAXDURATION, 350);
 	}
 
+
+	public static boolean getUseResultTagForBookmarks()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_BOOKMARKS_INCL_WBRESULT, true);
+	}
+
+	public static boolean updateAllBookmarksOnSelect()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_UPD_BOOKMARKS_ON_OPEN, false);
+	}
 
 	public static KeyStroke getExpansionKey()
 	{

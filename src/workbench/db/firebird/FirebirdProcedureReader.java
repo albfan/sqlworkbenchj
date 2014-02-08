@@ -25,12 +25,16 @@ package workbench.db.firebird;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
+
 import workbench.util.StringUtil;
 
 /**
  * An implementation of the ProcedureReader interface for the
- * <a href="http://www.firebirdsql.org">Firebird</a> database server
+ * <a href="http://www.firebirdsql.org">Firebird</a> database server.
+ *
+ * The new packages in Firebird 3.0 are not handled properly yes.
  *
  * @author  Thomas Kellerer
  */
@@ -43,8 +47,23 @@ public class FirebirdProcedureReader
 	}
 
 	@Override
+	public boolean needsHeader(CharSequence procedureBody)
+	{
+		// Our statement to retrieve the procedure source will return
+		// the full package definition for a packaged procedure
+		String packageHeader = "CREATE PACKAGE";
+		if (procedureBody.subSequence(0, packageHeader.length()).equals(packageHeader))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
+		// TODO: handle packages properly (e.g. like in Oracle)
+		
 		StringBuilder source = new StringBuilder();
 		try
 		{

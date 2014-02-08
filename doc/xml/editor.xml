@@ -389,5 +389,28 @@ WHERE p.person_id = a.person_id;</programlisting>
 		</section>
 
 	</section>
+  <section id="editor-bookmarks">
+    <title>Working with bookmarks</title>
+    <para>
+      A bookmark inside the editor is defined by adding the keyword <literal>@WbTag</literal> followed by the name
+      of the bookmark into a SQL comment:
+    </para>
+    <programlisting>-- @WbTag delete everything
+truncate table orders,order_line,customers;
+commit;
+    </programlisting>
+    <para>
+      The keyword is not case sensitive, <literal>@wbtag</literal> will work just as wel as <literal>@WBTAG</literal>,
+      or <literal>@WbTag</literal>. A multiline comment can be used as well as a single line comment.
+    </para>
+    <para>
+      To jump to a bookmark select <menuchoice><guimenu>Tools</guimenu><guimenuitem>Bookmarks</guimenuitem></menuchoice>.
+      A dialog box with all defined bookmarks will be displayed.
+    </para>
+    <para>
+      The list of bookmarks
+    </para>
+
+  </section>
 
 </section>

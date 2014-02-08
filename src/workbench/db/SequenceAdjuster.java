@@ -21,6 +21,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 
+import workbench.db.firebird.FirebirdSequenceAdjuster;
 import workbench.db.h2database.H2SequenceAdjuster;
 import workbench.db.hsqldb.HsqlSequenceAdjuster;
 import workbench.db.ibm.Db2SequenceAdjuster;
@@ -55,6 +56,10 @@ public interface SequenceAdjuster
 			if (conn.getDbId().equals("db2"))
 			{
 				return new Db2SequenceAdjuster();
+			}
+			if (conn.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(conn, "3.0"))
+			{
+				return new FirebirdSequenceAdjuster();
 			}
 			return null;
 		}

@@ -129,11 +129,6 @@ public class ConnectionProfile
 		return cp;
 	}
 
-	public void loadingFinished()
-	{
-		this.lastSettingsKey = getSettingsKey();
-	}
-
 	private void syncSettingsKey()
 	{
 		if (lastSettingsKey == null) return;
@@ -670,6 +665,7 @@ public class ConnectionProfile
 		if (this.alternateDelimiter != null) this.alternateDelimiter.resetChanged();
 		if (this.schemaFilter != null) schemaFilter.resetModified();
 		if (this.catalogFilter != null) catalogFilter.resetModified();
+		this.lastSettingsKey = getSettingsKey();
 	}
 
 	private String encryptPassword(String aPwd)
