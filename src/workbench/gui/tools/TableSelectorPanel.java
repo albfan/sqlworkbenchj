@@ -36,20 +36,24 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.List;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.TableIdentifier;
 import workbench.db.TableNameSorter;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FlatButton;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.util.StringUtil;
 
 /**
@@ -333,7 +337,13 @@ public class TableSelectorPanel
 		Object selected = this.tableSelector.getSelectedItem();
 		if (selected == null) return null;
 
-		return (TableIdentifier)selected;
+		TableIdentifier tbl = (TableIdentifier)selected;
+		if (!"*".equals(currentSchema))
+		{
+			String schema = dbConnection.getMetadata().quoteObjectname(currentSchema);
+			tbl.setSchema(schema);
+		}
+		return tbl;
 	}
 
 	public void findAndSelectTable(String aTable)

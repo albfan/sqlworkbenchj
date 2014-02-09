@@ -303,6 +303,11 @@ SELECT * FROM company;</programlisting>
 				For the second select (with the multi-line comment), the name of the result tab will be
 				<literal>List of companies</literal>, the comment on the second line will not be considered.
 			</para>
+
+      <para>
+        You can automatically use the first table name from a <literal>SELECT</literal> statement to be used
+        for the result name in the <link linkend="option-result-name">Data display options</link>.
+      </para>
 		</section>
 
 </section>

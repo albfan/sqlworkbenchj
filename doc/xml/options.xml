@@ -351,6 +351,15 @@
 			</para></note>
 		</section>
 
+		<section id="options-wbresult-bookmark">
+			<title>Also use @WbResult for bookmarks</title>
+			<para>
+        By default only locations marked with <literal>@WbTag</literal> are included in the list of bookmarks.
+        When this option is enabled, locations that are marked with <link linkend="result-names"><literal>@WbResult</literal></link>
+        are also included in the bookmark list.
+			</para>
+		</section>
+
     <section id="editor-follow-current-dir">
       <title>Current directory follows active file</title>
       <para>
@@ -613,6 +622,19 @@
 				If you have a single numeric column selected (by holding down the <keycap>Alt</keycap> key
 				while selecting with the mouse), the statusbar will display the sum of the selected values.
 			</para>
+    </section>
+
+		<section id="option-result-name">
+      <title>Use table name for result tabs</title>
+      <para>
+				If this option is enabled, the name of a result tab is derived from the <literal>SELECT</literal> that was used to generate the result.
+        The query is analyzed and the first table name mentioned in the <literal>FROM</literal> clause will be used for
+        the name of the result.
+			</para>
+      <para>
+        The table name will not be used when the <link linkend="result-names"><literal>@WbResult</literal></link>
+        annotation is also specified for the query.
+      </para>
     </section>
 
 		<section id="options-multiline">

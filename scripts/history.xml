@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-02-03">
+    <entry dev-build="11" type="enh">Support for bookmarks defined through the annotation @WbTag was added.</entry>
     <entry dev-build="10" type="enh">WbImport and WbCopy no support an option to synchronize sequences with the imported values for DBMS that support sequences tied to a column (Postgres, DB2, H2, HSQLDB)</entry>
     <entry dev-build="10" type="enh">WbFeedback now supports the options "traceon" and "traceoff". With "traceon" each statement that is executed is printed.</entry>
     <entry dev-build="10" type="enh">The trigger panel in the DbExplorer now shows DDL triggers for SQL Server</entry>
@@ -48,6 +49,8 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="11" type="fix">In the DataPumper it was not possible to create the target table in a schema other than the default schema.</entry>
+    <entry dev-build="11" type="fix">WbGenerate delete could sometimes fail with the error "Comparison method violates its general contract"</entry>
     <entry dev-build="10" type="fix">It was not possible to export multiple tables using wildcards for the -sourceTable parameter into a single Excel Workbook using -append=true</entry>
     <entry dev-build="10" type="fix">When compiling invalid Oracle objects in the DbExplorer no error message was shown.</entry>
     <entry dev-build="10" type="fix">The generated source code for temporary tables in Oracle was not correct.</entry>

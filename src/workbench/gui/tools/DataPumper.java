@@ -1802,17 +1802,10 @@ public class DataPumper
 		TableIdentifier id = this.targetTable.getSelectedTable();
 		if (targetProfile == null) return;
 
-		if (id.isNewTable())
-		{
-			s = id.getTableName();
-		}
-		else
-		{
-			s = id.getTableExpression(targetConnection);
-		}
+		String tname = id.getTableExpression(targetConnection);
 		result.append(indent);
 		result.append("-" + WbCopy.PARAM_TARGETTABLE + "=");
-		result.append(s);
+		result.append(tname);
 
 		if (id.isNewTable())
 		{

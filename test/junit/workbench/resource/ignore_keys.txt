@@ -80,3 +80,4 @@ TxtXlsName
 LblSettingsWorkspace
 TxtPSParameterName
 TxtFileFilterJson
+LblBookPanel

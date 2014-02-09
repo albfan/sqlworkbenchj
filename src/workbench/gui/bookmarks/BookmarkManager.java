@@ -19,8 +19,6 @@
  */
 package workbench.gui.bookmarks;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,9 +28,7 @@ import java.util.Map;
 
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 import workbench.gui.MainWindow;
 
@@ -45,18 +41,13 @@ import workbench.util.WbThread;
  * @author Thomas Kellerer
  */
 public class BookmarkManager
-	implements PropertyChangeListener
 {
-
 	// Maps the ID of a MainWindow to bookmarks defined for each tab.
 	// each BookmarkGroup represents the bookmarks from a single editor tab
 	private final Map<String, Map<String, BookmarkGroup>> bookmarks = new HashMap<String, Map<String, BookmarkGroup>>();
 
-	private boolean isDirty;
-
 	private BookmarkManager()
 	{
-		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_BOOKMARKS_USE_WBRESULT);
 	}
 
 	public static BookmarkManager getInstance()
@@ -72,20 +63,6 @@ public class BookmarkManager
 	public synchronized void clearBookmarksForWindow(String windowId)
 	{
 		bookmarks.remove(windowId);
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		if (evt.getPropertyName().equals(GuiSettings.PROPERTY_BOOKMARKS_USE_WBRESULT))
-		{
-			synchronized (this)
-			{
-				LogMgr.logInfo("BookmarkManager.propertyChange()", "Property for using WbResult has been changed, invalidating all bookmarks");
-				bookmarks.clear();
-				isDirty = true;
-			}
-		}
 	}
 
 	public synchronized void clearBookmarksForPanel(String windowId, String panelId)
@@ -128,7 +105,7 @@ public class BookmarkManager
 			modified = group.creationTime();
 		}
 
-		if (isDirty || group == null || panel.isModifiedAfter(modified))
+		if (group == null || panel.isModifiedAfter(modified))
 		{
 			List<NamedScriptLocation> panelBookmarks = panel.getBookmarks();
 			// if getBoomarks() returns null, the panel does not support bookmarks
@@ -141,7 +118,6 @@ public class BookmarkManager
 				windowBookmarks.put(pGroup.getGroupId(), pGroup);
 			}
 		}
-		isDirty = false;
 	}
 
 	public List<String> getTabs(MainWindow window)
@@ -214,12 +190,6 @@ public class BookmarkManager
 	{
 		if (win == null) return;
 		if (panel == null) return;
-
-		if (isDirty)
-		{
-			// if the cache is marked as dirty, we need to update all tabs, not just the requested one
-			updateInBackground(win);
-		}
 
 		WbThread bmThread = new WbThread("Update bookmarks for " + panel.getId())
 		{

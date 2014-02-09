@@ -408,7 +408,8 @@ commit;
       A dialog box with all defined bookmarks will be displayed.
     </para>
     <para>
-      The list of bookmarks
+      The annotations for <link linkend="result-names">naming a result</link> can additionally be
+      included in the bookmark list. This is enabled in the <link linkend="option-result-name">options panel for the editor</link>.
     </para>
 
   </section>

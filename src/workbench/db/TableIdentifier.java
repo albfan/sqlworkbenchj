@@ -29,6 +29,7 @@ import java.util.List;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.objectcache.DbObjectCacheFactory;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -682,8 +683,6 @@ public class TableIdentifier
 
 	public final void setSchema(String aSchema)
 	{
-		if (this.isNewTable) return;
-
 		if (StringUtil.isBlank(aSchema))
 		{
 			this.schema = null;
