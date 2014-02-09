@@ -337,7 +337,14 @@ public class MainWindow
 	@Override
 	public void fileNameChanged(Object sender, String newFilename)
 	{
+		if (ignoreTabChange) return;
+
 		updateWindowTitle();
+		if (sender instanceof SqlPanel)
+		{
+			SqlPanel panel = (SqlPanel)sender;
+			BookmarkManager.getInstance().updateInBackground(this, panel, true);
+		}
 	}
 
 	/**
@@ -1193,10 +1200,10 @@ public class MainWindow
 			}
 		});
 
-		int lastIndex = sqlTab.getPreviousTab();
+		int lastIndex = sqlTab.getPreviousTabIndex();
 		if (lastIndex > -1 && lastIndex < sqlTab.getTabCount())
 		{
-			BookmarkManager.getInstance().updateInBackground(this, getSqlPanel(lastIndex));
+			BookmarkManager.getInstance().updateInBackground(MainWindow.this, getSqlPanel(lastIndex));
 		}
 	}
 
@@ -2874,7 +2881,16 @@ public class MainWindow
 		{
 			index = this.sqlTab.getSelectedIndex() + 1;
 		}
-		return addTabAtIndex(selectNew, checkConnection, renumber, index);
+		
+		try
+		{
+			setIgnoreTabChange(true);
+			return addTabAtIndex(selectNew, checkConnection, renumber, index);
+		}
+		finally
+		{
+			setIgnoreTabChange(false);
+		}
 	}
 
 	private MainPanel addTabAtIndex(boolean selectNew, boolean checkConnection, boolean renumber, int index)
@@ -2888,33 +2904,24 @@ public class MainWindow
 	{
 		if (index == -1) index = sqlTab.getTabCount();
 
-		try
-		{
-			setIgnoreTabChange(true);
+		sql.setConnectionClient(this);
+		sql.addDbExecutionListener(this);
+		sql.addFilenameChangeListener(this);
+		this.sqlTab.add(sql, index);
+		sql.setTabTitle(sqlTab, index);
 
-			sql.setConnectionClient(this);
-			sql.addDbExecutionListener(this);
-			sql.addFilenameChangeListener(this);
-			this.sqlTab.add(sql, index);
-			sql.setTabTitle(sqlTab, index);
+		JMenuBar menuBar = this.createMenuForPanel(sql);
+		this.panelMenus.add(index, menuBar);
 
-			JMenuBar menuBar = this.createMenuForPanel(sql);
-			this.panelMenus.add(index, menuBar);
+		if (checkConnection) this.checkConnectionForPanel(sql);
 
-			if (checkConnection) this.checkConnectionForPanel(sql);
+		// setTabTitle needs to be called after adding the panel!
+		// this will set the correct title with Mnemonics
+		// this.setTabTitle(index, ResourceMgr.getDefaultTabLabel());
 
-			// setTabTitle needs to be called after adding the panel!
-			// this will set the correct title with Mnemonics
-			// this.setTabTitle(index, ResourceMgr.getDefaultTabLabel());
+		this.setMacroMenuEnabled(sql.isConnected());
 
-			this.setMacroMenuEnabled(sql.isConnected());
-
-			if (renumber) this.renumberTabs();
-		}
-		finally
-		{
-			setIgnoreTabChange(false);
-		}
+		if (renumber) this.renumberTabs();
 		sql.initDivider(sqlTab.getHeight() - sqlTab.getTabHeight());
 
 		if (selectNew)

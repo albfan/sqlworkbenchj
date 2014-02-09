@@ -1,6 +1,4 @@
 /*
- * LookupValuePicker.java
- *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2014, Thomas Kellerer
@@ -117,7 +115,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		bookmarks.getHeaderRenderer().setShowPKIcon(true);
 
 		tabSelector = new JComboBox(getTabs());
-
+		tabSelector.addActionListener(this);
+		
 		Action nextComponent = new AbstractAction()
 		{
 			@Override
@@ -186,12 +185,12 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		add(info, gc);
 
 		WbTraversalPolicy pol = new WbTraversalPolicy();
+		pol.addComponent(tabSelector);
 		pol.addComponent(filterValue);
 		pol.addComponent(bookmarks);
 		setFocusCycleRoot(true);
 		bookmarks.setFocusCycleRoot(false);
 		setFocusTraversalPolicy(pol);
-		tabSelector.addActionListener(this);
 	}
 
 	private JPanel createFilterPanel()

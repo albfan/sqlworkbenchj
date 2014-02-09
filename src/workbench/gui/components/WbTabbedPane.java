@@ -78,7 +78,6 @@ public class WbTabbedPane
 	private boolean onlyCloseActive;
 	private Point dragStart;
 	private Rectangle tabBounds;
-	private int currentTabIndex;
 	private int previousTabIndex;
 
 	public WbTabbedPane()
@@ -172,10 +171,12 @@ public class WbTabbedPane
 		{
 			addCloseButtons();
 			updateButtons();
+			addChangeListener(this);
 		}
 		else if (wasRemoved)
 		{
 			removeCloseButtons();
+			removeChangeListener(this);
 		}
 	}
 
@@ -501,7 +502,7 @@ public class WbTabbedPane
 		}
 	}
 
-	public int getPreviousTab()
+	public int getPreviousTabIndex()
 	{
 		return previousTabIndex;
 	}
@@ -509,9 +510,14 @@ public class WbTabbedPane
 	@Override
 	public void stateChanged(ChangeEvent e)
 	{
-		previousTabIndex = currentTabIndex;
-		currentTabIndex = getSelectedIndex();
 		updateButtons();
+	}
+
+	@Override
+	public void setSelectedIndex(int index)
+	{
+		previousTabIndex = getSelectedIndex();
+		super.setSelectedIndex(index);
 	}
 
 	@Override

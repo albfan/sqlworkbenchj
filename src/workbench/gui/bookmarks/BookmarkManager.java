@@ -186,10 +186,43 @@ public class BookmarkManager
 		return ds;
 	}
 
+	/**
+	 * Updates the list of bookmarks for the passed panel.
+	 *
+	 * If the text in the panel hasn't changed since the bookmarks were parsed the last time, no parsing will take place.
+	 *
+	 * @param win    the window to which the panel belongs
+	 * @param panel  the panel
+	 *
+	 * @see #updateInBackground(workbench.gui.MainWindow, workbench.interfaces.MainPanel, boolean)
+	 */
 	public void updateInBackground(final MainWindow win, final MainPanel panel)
+	{
+		updateInBackground(win, panel, false);
+	}
+
+	/**
+	 * Updates the list of bookmarks for the passed panel.
+	 *
+	 * If the text in the panel hasn't changed since the bookmarks were parsed the last time, no parsing will take place.
+	 *
+	 * To force a re-parsing of the panel's bookmarks use the <tt>clearList</tt> parameter.
+	 *
+	 * @param win    the window to which the panel belongs
+	 * @param panel  the panel
+	 * @param clearList  if true any existing bookmarks will be deleted before updating the panel's bookmark
+	 *
+	 * @see #updateInBackground(workbench.gui.MainWindow, workbench.interfaces.MainPanel, boolean)
+	 */
+	public void updateInBackground(final MainWindow win, final MainPanel panel, boolean clearList)
 	{
 		if (win == null) return;
 		if (panel == null) return;
+
+		if (clearList)
+		{
+			clearBookmarksForPanel(win.getWindowId(), panel.getId());
+		}
 
 		WbThread bmThread = new WbThread("Update bookmarks for " + panel.getId())
 		{
@@ -199,7 +232,7 @@ public class BookmarkManager
 				long start = System.currentTimeMillis();
 				BookmarkManager.getInstance().updateBookmarks(win, panel);
 				long duration = System.currentTimeMillis() - start;
-				LogMgr.logDebug("BookmarManager.updateTabBookmarks()", "Parsing bookmark for panel: " + panel.getTabTitle() + " took "  + duration + "ms");
+				LogMgr.logDebug("BookmarManager.updateTabBookmarks()", "Parsing bookmark for panel '" + panel.getTabTitle() + "' took "  + duration + "ms");
 			}
 		};
 		bmThread.setPriority(Thread.MIN_PRIORITY);
