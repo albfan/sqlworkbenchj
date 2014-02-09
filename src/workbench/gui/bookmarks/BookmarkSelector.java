@@ -22,7 +22,6 @@
  */
 package workbench.gui.bookmarks;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.FocusTraversalPolicy;
@@ -35,10 +34,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.InputMap;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -49,6 +52,7 @@ import javax.swing.border.EmptyBorder;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.ValidatingComponent;
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -58,7 +62,6 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.FlatButton;
-import workbench.gui.components.TableRowHeader;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbLabel;
 import workbench.gui.components.WbScrollPane;
@@ -81,6 +84,7 @@ public class BookmarkSelector
 implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent
 {
 	private JTextField filterValue;
+	private JComboBox tabSelector;
 	private JLabel info;
 	private WbTable bookmarks;
 	private WbScrollPane scroll;
@@ -111,6 +115,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		bookmarks.setColumnSelectionAllowed(false);
 		bookmarks.setRowSelectionAllowed(true);
 		bookmarks.getHeaderRenderer().setShowPKIcon(true);
+
+		tabSelector = new JComboBox(getTabs());
 
 		Action nextComponent = new AbstractAction()
 		{
@@ -153,22 +159,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 		scroll = new WbScrollPane(bookmarks);
 
-		JPanel edit = new JPanel(new BorderLayout(0, 0));
-		WbLabel lbl = new WbLabel();
-		lbl.setText(ResourceMgr.getString("LblFkFilterValue"));
-		lbl.setToolTipText(filterValue.getToolTipText());
-		lbl.setLabelFor(filterValue);
-		lbl.setBorder(new EmptyBorder(0, 0, 0, 10));
-		edit.add(lbl, BorderLayout.WEST);
-		edit.add(filterValue, BorderLayout.CENTER);
-
-
-		ReloadAction doReload = new ReloadAction(this);
-		doReload.setTooltip(ResourceMgr.getString("TxtBookmarkReload"));
-		FlatButton reload = new FlatButton(doReload);
-		reload.setText(null);
-		reload.setMargin(WbToolbarButton.MARGIN);
-		edit.add(reload, BorderLayout.LINE_END);
+		JPanel filterPanel = createFilterPanel();
 
 		GridBagConstraints gc = new GridBagConstraints();
 		gc.gridx = 0;
@@ -177,7 +168,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		gc.weightx = 1.0;
 		gc.weighty = 0.0;
-		add(edit, gc);
+		add(filterPanel, gc);
 
 		gc.gridy++;
 		gc.weightx = 1.0;
@@ -200,6 +191,83 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		setFocusCycleRoot(true);
 		bookmarks.setFocusCycleRoot(false);
 		setFocusTraversalPolicy(pol);
+		tabSelector.addActionListener(this);
+	}
+
+	private JPanel createFilterPanel()
+	{
+		JPanel filterPanel = new JPanel(new GridBagLayout());
+		WbLabel lbl = new WbLabel();
+		lbl.setText(ResourceMgr.getString("LblFkFilterValue"));
+		lbl.setToolTipText(filterValue.getToolTipText());
+		lbl.setLabelFor(filterValue);
+		lbl.setBorder(new EmptyBorder(0, 0, 0, 10));
+
+		ReloadAction doReload = new ReloadAction(this);
+		doReload.setTooltip(ResourceMgr.getString("TxtBookmarkReload"));
+		FlatButton reload = new FlatButton(doReload);
+		reload.setText(null);
+		reload.setMargin(WbToolbarButton.MARGIN);
+
+		JLabel tabLbl = new JLabel(ResourceMgr.getString("LblBookPanel"));
+
+		String all = ResourceMgr.getString("LblBookPanelAll");
+		WbSwingUtilities.setMinimumSize(tabSelector, all.length() * 2);
+
+		GridBagConstraints gc = new GridBagConstraints();
+
+		// first line
+		gc.gridx = 0;
+		gc.gridy = 0;
+		gc.anchor = GridBagConstraints.FIRST_LINE_START;
+		gc.fill = GridBagConstraints.HORIZONTAL;
+		gc.weightx = 0.0;
+		gc.weighty = 0.0;
+		filterPanel.add(tabLbl, gc);
+		gc.gridx = 1;
+		gc.gridy = 0;
+		gc.gridwidth = 2;
+		gc.fill = GridBagConstraints.NONE;
+		filterPanel.add(tabSelector, gc);
+
+		// second line
+		gc.gridx = 0;
+		gc.gridy = 1;
+		gc.gridwidth = 1;
+		filterPanel.add(lbl, gc);
+		gc.gridx = 1;
+		gc.gridwidth = 1;
+		gc.weightx = 1.0;
+		gc.weighty = 0.0;
+		gc.fill = GridBagConstraints.HORIZONTAL;
+		filterPanel.add(filterValue, gc);
+
+		gc.gridx = 2;
+		gc.gridwidth = 2;
+		gc.weightx = 0.0;
+		gc.weighty = 1.0;
+		gc.fill = GridBagConstraints.NONE;
+		filterPanel.add(reload, gc);
+
+		return filterPanel;
+	}
+
+	private Object[] getTabs()
+	{
+		List<String> tabIds = BookmarkManager.getInstance().getTabs(window);
+
+		List<TabEntry> entries = new ArrayList<TabEntry>();
+		entries.add(new TabEntry(null, ResourceMgr.getString("LblBookPanelAll"), -1));
+		for (String tabId : tabIds)
+		{
+			int index = window.getIndexForPanel(tabId);
+			if (index > -1)
+			{
+				entries.add(new TabEntry(tabId, window.getTabTitle(index), index));
+			}
+		}
+		Collections.sort(entries, TabEntry.INDEX_SORTER);
+		return entries.toArray();
 	}
 
 	@Override
@@ -208,6 +276,10 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		if (e.getSource() == this.filterValue)
 		{
 			applyFilter();
+		}
+		else if (e.getSource() == this.tabSelector)
+		{
+			loadBookmarks();
 		}
 	}
 
@@ -226,7 +298,18 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 	public void loadBookmarks()
 	{
-		final DataStore data = BookmarkManager.getInstance().getBookmarks(window);
+		TabEntry tab = (TabEntry)(tabSelector.getSelectedItem());
+
+		final long start = System.currentTimeMillis();
+		final DataStore data;
+		if (tab.getId() == null)
+		{
+			data = BookmarkManager.getInstance().getAllBookmarks(window);
+		}
+		else
+		{
+			data = BookmarkManager.getInstance().getBookmarksForTab(window, tab.getId());
+		}
 
 		WbSwingUtilities.showWaitCursorOnWindow(this);
 		EventQueue.invokeLater(new Runnable()
@@ -237,10 +320,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				DataStoreTableModel model = new DataStoreTableModel(data);
 				model.setAllowEditing(false);
 				bookmarks.setModel(model, true);
-				if (GuiSettings.getShowTableRowNumbers())
-				{
-					TableRowHeader.showRowHeader(bookmarks);
-				}
+
 				if (data.getRowCount() > 0)
 				{
 					model.sortByColumn(0, true, false);
@@ -251,6 +331,9 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				// the user can immediately use the cursor keys to select one entry.
 				bookmarks.getSelectionModel().setSelectionInterval(0,0);
 				bookmarks.scrollToRow(0);
+
+				long duration = System.currentTimeMillis() - start;
+				LogMgr.logDebug("BookmarkSelector.loadBookmarks()", "Loading bookmarks took: " + duration + "ms");
 
 				bookmarks.requestFocusInWindow();
 				WbSwingUtilities.showDefaultCursorOnWindow(BookmarkSelector.this);
@@ -292,7 +375,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 						applyFilter();
 					}
 				}
-
 			});
 		}
 		else if (e.getSource() == bookmarks)

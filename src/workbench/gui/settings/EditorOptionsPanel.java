@@ -121,6 +121,7 @@ public class EditorOptionsPanel
 		allowEditDuringExec.setSelected(!GuiSettings.getDisableEditorDuringExecution());
 		emptyLineDelimiter.setSelected(Settings.getInstance().getEmptyLineIsDelimiter());
 		hiliteError.setSelected(GuiSettings.getHighlightErrorStatement());
+		useResultForBookmark.setSelected(GuiSettings.getUseResultTagForBookmarks());
 		autoCloseBrackets.setText(Settings.getInstance().getProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, ""));
 		StoreableKeyStroke key = new StoreableKeyStroke(GuiSettings.getExpansionKey());
 		cbExpansionKey.setSelectedItem(key);
@@ -181,6 +182,7 @@ public class EditorOptionsPanel
 		GuiSettings.setExecuteOnlySelected(!alwaysAllowExecSel.isSelected());
 		GuiSettings.setDisableEditorDuringExecution(!allowEditDuringExec.isSelected());
 		GuiSettings.setHighlightErrorStatement(hiliteError.isSelected());
+		GuiSettings.setUseResultTagForBookmarks(useResultForBookmark.isSelected());
 		set.setProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, autoCloseBrackets.getText());
 
 		StoreableKeyStroke key = (StoreableKeyStroke) cbExpansionKey.getSelectedItem();
@@ -255,6 +257,7 @@ public class EditorOptionsPanel
     autoAdvance = new JCheckBox();
     emptyLineDelimiter = new JCheckBox();
     hiliteError = new JCheckBox();
+    useResultForBookmark = new JCheckBox();
     jPanel1 = new JPanel();
     followCurrentDir = new JCheckBox();
     jLabel1 = new JLabel();
@@ -455,7 +458,6 @@ public class EditorOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     jPanel2.add(allowEditDuringExec, gridBagConstraints);
@@ -519,6 +521,18 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     jPanel2.add(hiliteError, gridBagConstraints);
+
+    useResultForBookmark.setText(ResourceMgr.getString("LblBookmarResultName")); // NOI18N
+    useResultForBookmark.setToolTipText(ResourceMgr.getString("d_LblBookmarResultName")); // NOI18N
+    useResultForBookmark.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    jPanel2.add(useResultForBookmark, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -701,6 +715,7 @@ public class EditorOptionsPanel
   private JComboBox reloadType;
   private JCheckBox rightClickMovesCursor;
   private JTextField tabSize;
+  private JCheckBox useResultForBookmark;
   private JCheckBox useTabs;
   private JLabel wheelScrollLabel;
   private JTextField wheelScrollLines;

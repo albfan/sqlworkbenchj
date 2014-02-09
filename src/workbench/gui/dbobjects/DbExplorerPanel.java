@@ -291,7 +291,7 @@ public class DbExplorerPanel
 	@Override
 	public List<NamedScriptLocation> getBookmarks()
 	{
-		return Collections.emptyList();
+		return null;
 	}
 
 	@Override

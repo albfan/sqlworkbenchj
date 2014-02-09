@@ -1169,7 +1169,6 @@ public class WbSwingUtilities
 			int height = fm.getHeight();
 			Dimension d = new Dimension(width * columns, height * lines);
 			component.setPreferredSize(d);
-			component.setPreferredSize(d);
 		}
 	}
 
@@ -1182,7 +1181,6 @@ public class WbSwingUtilities
 			int width = fm.stringWidth("M");
 			Dimension current = component.getPreferredSize();
 			Dimension d = new Dimension(width * numChars, current.height);
-			component.setPreferredSize(d);
 			component.setPreferredSize(d);
 		}
 	}

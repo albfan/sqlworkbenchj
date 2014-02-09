@@ -832,11 +832,18 @@ public class MainWindow
 
 	public int getIndexForPanel(MainPanel panel)
 	{
+		if (panel == null) return -1;
+		return getIndexForPanel(panel.getId());
+	}
+
+	public int getIndexForPanel(String tabId)
+	{
+		if (tabId == null) return -1;
 		int tabCount = this.sqlTab.getTabCount();
 		for (int i=0; i < tabCount; i++)
 		{
 			MainPanel p = this.getSqlPanel(i);
-			if (p.getId().equals(panel.getId())) return i;
+			if (p.getId().equals(tabId)) return i;
 		}
 		return -1;
 	}
