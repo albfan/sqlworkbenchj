@@ -640,11 +640,9 @@ public class DataPumper
     gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     sourceProfilePanel.add(selectSourceButton, gridBagConstraints);
 
-    openFileButton.setIcon(ResourceMgr.getImage("Open"));
+    openFileButton.setIcon(ResourceMgr.getGifIcon("Open"));
     openFileButton.setToolTipText(ResourceMgr.getString("d_DataPumperOpenFile"));
     openFileButton.setIconTextGap(0);
-    openFileButton.setMaximumSize(new Dimension(22, 22));
-    openFileButton.setMinimumSize(new Dimension(22, 22));
     openFileButton.setPreferredSize(new Dimension(22, 22));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;

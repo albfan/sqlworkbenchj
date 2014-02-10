@@ -125,7 +125,7 @@ public class FilterPickerAction
     JButton result = null;
 		if (this.dropDownButton == null || createNew)
 		{
-      DropDownButton b = new DropDownButton(ResourceMgr.getImage("dropdown"));
+      DropDownButton b = new DropDownButton(ResourceMgr.getGifIcon("dropdown"));
 			b.setAction(this);
 			b.setText(null);
 			b.setMnemonic(0);

@@ -89,15 +89,14 @@ public class BookmarkSelector
 implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent
 {
 	private static final String PROP_PREFIX = "workbench.gui.bookmarks.";
-	private JTextField filterValue;
-	private JComboBox tabSelector;
+	private final JTextField filterValue;
+	private final JComboBox tabSelector;
 	private JLabel info;
 	private WbTable bookmarks;
 	private WbScrollPane scroll;
-	private MainWindow window;
+	private final MainWindow window;
 	private ValidatingDialog dialog;
 	private NamedScriptLocation selectedBookmark;
-	private long lastKeyTyped;
 	private int incrementalSearchDelay;
 	private SortDefinition savedSort;
 	private JLabel searchInfo;
@@ -233,7 +232,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			}
 		}
 		idleTimer = new Timer(incrementalSearchDelay, this);
-		idleTimer.setInitialDelay(0);
 	}
 
 	private void hideSearchPanel()
@@ -374,11 +372,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		}
 		else if (e.getSource() == idleTimer)
 		{
-			long pause = System.currentTimeMillis() - lastKeyTyped;
-			if (pause > incrementalSearchDelay)
-			{
-				hideSearchPanel();
-			}
+			hideSearchPanel();
 		}
 	}
 
@@ -503,8 +497,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		}
 		else if (e.getSource() == bookmarks && !isAltPressed(e)) // Alt+Something might be needed to transfer the focus to a different component
 		{
-			long pause = System.currentTimeMillis() - lastKeyTyped;
-			lastKeyTyped = System.currentTimeMillis();
 			String searchValue;
 			if (searchInfoVisible)
 			{
@@ -514,6 +506,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			{
 				searchValue = String.valueOf(e.getKeyChar());
 			}
+
 			if (idleTimer.isRunning())
 			{
 				idleTimer.restart();
@@ -522,6 +515,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			{
 				idleTimer.start();
 			}
+
 			showSearchPanel(searchValue);
 			jumpBookmark(searchValue.toLowerCase());
 		}
@@ -657,6 +651,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		}
 
 		ValidatingDialog dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWinTitleBookmark"), picker);
+		ResourceMgr.setWindowIcons(dialog, "bookmark");
 		picker.dialog = dialog;
 		String prop = PROP_PREFIX + "select";
 		if (!Settings.getInstance().restoreWindowSize(dialog, prop))

@@ -22,7 +22,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-
 import workbench.gui.MainWindow;
 import workbench.gui.bookmarks.BookmarkSelector;
 
@@ -39,7 +38,7 @@ public class BookmarksAction
 	{
 		super();
 		initMenuDefinition("MnuTxtBookmarks");
-		removeIcon();
+		setPngIcon("bookmark");
 		parent = window;
 	}
 

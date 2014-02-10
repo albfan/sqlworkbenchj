@@ -151,23 +151,23 @@ public class PrintPreview
 
 		tb.addSeparator();
 
-		this.pageDown = new WbToolbarButton(ResourceMgr.getImage("Down"));
+		this.pageDown = new WbToolbarButton(ResourceMgr.getGifIcon("Down"));
 		this.pageDown.addActionListener(this);
 		this.pageDown.setEnabled(false);
 		tb.add(this.pageDown);
 
-		this.pageUp = new WbToolbarButton(ResourceMgr.getImage("Up"));
+		this.pageUp = new WbToolbarButton(ResourceMgr.getGifIcon("Up"));
 		this.pageUp.addActionListener(this);
 		this.pageUp.setEnabled(false);
 		tb.add(this.pageUp);
 
 
-		this.pageLeft = new WbToolbarButton(ResourceMgr.getImage("Back"));
+		this.pageLeft = new WbToolbarButton(ResourceMgr.getGifIcon("Back"));
 		this.pageLeft.addActionListener(this);
 		this.pageLeft.setEnabled(false);
 		tb.add(this.pageLeft);
 
-		this.pageRight = new WbToolbarButton(ResourceMgr.getImage("Forward"));
+		this.pageRight = new WbToolbarButton(ResourceMgr.getGifIcon("Forward"));
 		this.pageRight.addActionListener(this);
 		this.pageRight.setEnabled(false);
 		tb.add(this.pageRight);

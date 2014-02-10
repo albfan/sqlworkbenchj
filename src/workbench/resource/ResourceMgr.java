@@ -19,6 +19,27 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
+ *//*
+ * ResourceMgr.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2014, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
 package workbench.resource;
 
@@ -72,6 +93,7 @@ public class ResourceMgr
 
 	private static ResourceBundle resources;
 	private static final String PROP_CHANGE_LOCALE = "workbench.gui.setdefaultlocale";
+	private static boolean useLargeIcons;
 
 	private ResourceMgr()
 	{
@@ -145,12 +167,12 @@ public class ResourceMgr
 	public static void setWindowIcons(Window window, String baseName)
 	{
 		List<Image> icons = new ArrayList<Image>(2);
-		ImageIcon image16 = getPng(baseName + "16");
+		ImageIcon image16 = retrieveImage(baseName + "16.png");
 		if (image16 != null)
 		{
 			icons.add(image16.getImage());
 		}
-		ImageIcon image32 = getPng(baseName + "32");
+		ImageIcon image32 = retrieveImage(baseName + "32.png");
 		if (image32 != null)
 		{
 			icons.add(image32.getImage());
@@ -270,19 +292,27 @@ public class ResourceMgr
 	 */
 	public static ImageIcon getBlankImage()
 	{
-		return retrieveImage("blank16", ".gif");
+		return retrieveImage("blank16.gif");
+	}
+
+	public static ImageIcon getActionIcon(String baseKey, boolean isPng)
+	{
+		if (isPng)
+		{
+			return retrieveImage(baseKey + (useLargeIcons ? "32.png" : "16.png"));
+		}
+		else
+		{
+			return retrieveImage(baseKey + (useLargeIcons ? "32.gif" : "16.gif"));
+		}
 	}
 
 	/**
-	 * Retrieves a 16x16 GIF image
+	 * Retrieves a GIF Image.
 	 */
-	public static ImageIcon getImage(String aKey)
+	public static ImageIcon getGifIcon(String aKey)
 	{
-		if (aKey.endsWith("png"))
-		{
-			return retrieveImage(aKey);
-		}
-		return retrieveImage(aKey + "16", ".gif");
+		return retrieveImage(aKey + (useLargeIcons ? "32.gif" : "16.gif"));
 	}
 
 	/**
@@ -298,7 +328,12 @@ public class ResourceMgr
 	 */
 	public static ImageIcon getPicture(String aName)
 	{
-		return retrieveImage(aName, ".gif");
+		return retrieveImage(aName + ".gif");
+	}
+
+	public static ImageIcon getPngIcon(String aName)
+	{
+		return retrieveImage(aName + (useLargeIcons ? "32.png" : "16.png"));
 	}
 
 	/**
@@ -308,15 +343,10 @@ public class ResourceMgr
 	 */
 	public static ImageIcon getPng(String aName)
 	{
-		return retrieveImage(aName, ".png");
+		return retrieveImage(aName + ".png");
 	}
 
-	private static ImageIcon retrieveImage(String filename, String extension)
-	{
-		return retrieveImage(filename + extension);
-	}
-
-	private static synchronized ImageIcon retrieveImage(String fname)
+	private static ImageIcon retrieveImage(String fname)
 	{
 		ImageIcon result = null;
 		URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + fname);

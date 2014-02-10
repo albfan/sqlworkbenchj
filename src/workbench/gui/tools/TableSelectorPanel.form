@@ -1,4 +1,4 @@
-<?xml version="1.1" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.2" maxVersion="1.2" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <Properties>
@@ -75,7 +75,7 @@
     <Component class="javax.swing.JButton" name="editNewTableNameButton">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getImage(&quot;Rename&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getGifIcon(&quot;Rename&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getString(&quot;LblEditNewTableName&quot;)" type="code"/>
@@ -103,7 +103,7 @@
     <Component class="javax.swing.JButton" name="refreshButton">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getImage(&quot;Refresh&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getGifIcon(&quot;Refresh&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" value=""/>
         <Property name="enabled" type="boolean" value="false"/>

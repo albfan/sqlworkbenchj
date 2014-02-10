@@ -66,7 +66,7 @@ public class WbColorPicker
 		this.resetButton.setVisible(showReset);
 		if (showReset)
 		{
-			this.resetButton.setIcon(ResourceMgr.getImage("Delete"));
+			this.resetButton.setIcon(ResourceMgr.getGifIcon("Delete"));
 			WbSwingUtilities.adjustButtonWidth(resetButton,22,22);
 		}
 		this.defaultLabel.setVisible(false);

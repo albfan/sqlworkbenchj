@@ -33,6 +33,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -43,6 +44,12 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
+
+import workbench.interfaces.ValidatingComponent;
+import workbench.interfaces.ValueProvider;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
@@ -50,10 +57,7 @@ import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
-import workbench.interfaces.ValidatingComponent;
-import workbench.interfaces.ValueProvider;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
 import workbench.storage.DataStoreValueProvider;
 import workbench.storage.ResultInfo;
@@ -63,6 +67,7 @@ import workbench.storage.filter.ComplexExpression;
 import workbench.storage.filter.ExpressionValue;
 import workbench.storage.filter.FilterExpression;
 import workbench.storage.filter.OrExpression;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -130,11 +135,11 @@ public class DefineFilterExpressionPanel
 		{
 			WbToolbar bar = new WbToolbar();
 			bar.setBorder(BorderFactory.createEtchedBorder());
-			saveButton.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
+			saveButton.setIcon(ResourceMgr.getGifIcon(ResourceMgr.IMG_SAVE));
 			saveButton.setMargin(ins);
 			saveButton.setToolTipText(ResourceMgr.getDescription("SaveFilter"));
 
-			loadButton.setIcon(ResourceMgr.getImage("Open"));
+			loadButton.setIcon(ResourceMgr.getGifIcon("Open"));
 			loadButton.setMargin(new Insets(0,0,0,0));
 			loadButton.setToolTipText(ResourceMgr.getDescription("LoadFilter"));
 
@@ -356,7 +361,7 @@ public class DefineFilterExpressionPanel
 	private Dimension addExpressionPanel(ExpressionValue filter)
 	{
 		final ColumnExpressionPanel exp = new ColumnExpressionPanel(data, filter);
-		JButton b = new FlatButton(ResourceMgr.getImage("Remove"));
+		JButton b = new FlatButton(ResourceMgr.getGifIcon("Remove"));
 		b.setPreferredSize(new Dimension(21,21));
 		b.addActionListener(this);
 		JPanel p = new JPanel(new GridBagLayout());
@@ -386,9 +391,8 @@ public class DefineFilterExpressionPanel
 		c.weightx = 1.0;
 
 		GridBagLayout l = (GridBagLayout)expressions.getLayout();
-		for (int i=0; i < this.panels.size(); i++)
+		for (PanelEntry entry : this.panels)
 		{
-			PanelEntry entry = panels.get(i);
 			GridBagConstraints cons = l.getConstraints(entry.container);
 			cons.weighty = 0;
 			l.setConstraints(entry.container, cons);

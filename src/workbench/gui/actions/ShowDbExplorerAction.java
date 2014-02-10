@@ -24,14 +24,15 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-
 import java.util.List;
+
 import javax.swing.KeyStroke;
 
-import workbench.gui.MainWindow;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.Settings;
+
+import workbench.gui.MainWindow;
 
 /**
  *	@author  Thomas Kellerer
@@ -45,7 +46,7 @@ public class ShowDbExplorerAction
 		super();
 		mainWin = aWindow;
 		this.initMenuDefinition("MnuTxtShowDbExplorer",KeyStroke.getKeyStroke(KeyEvent.VK_D, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("database16.png");
+		this.setPngIcon("database");
 		setEnabled(false);
 	}
 

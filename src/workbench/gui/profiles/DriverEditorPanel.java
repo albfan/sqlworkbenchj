@@ -319,7 +319,7 @@ public class DriverEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(14, 6, 0, 7);
     add(statusLabel, gridBagConstraints);
 
-    detectDriverButton.setIcon(ResourceMgr.getImage("magnifier.png"));
+    detectDriverButton.setIcon(ResourceMgr.getPng("magnifier"));
     detectDriverButton.setToolTipText(ResourceMgr.getString("MsgDetectDriver")); // NOI18N
     detectDriverButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
     detectDriverButton.setMaximumSize(new java.awt.Dimension(22, 22));

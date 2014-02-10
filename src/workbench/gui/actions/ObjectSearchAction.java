@@ -46,7 +46,7 @@ public class ObjectSearchAction
 		super();
 		this.initMenuDefinition("MnuTxtObjectSearch");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_TOOLS);
-		this.setIcon("searchsource16.png");
+		this.setPngIcon("searchsource");
 		this.parent = win;
 	}
 

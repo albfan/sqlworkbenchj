@@ -68,7 +68,7 @@ public class AppendResultsAction
 			this.toggleButton = new JToggleButton(this);
 			this.toggleButton.setText(null);
 			this.toggleButton.setMargin(WbToolbarButton.MARGIN);
-			this.toggleButton.setIcon(ResourceMgr.getImage("AppendResult"));
+			this.toggleButton.setIcon(ResourceMgr.getGifIcon("AppendResult"));
 			this.toggleButton.setSelected(this.isSwitchedOn());
 		}
 		return this.toggleButton;

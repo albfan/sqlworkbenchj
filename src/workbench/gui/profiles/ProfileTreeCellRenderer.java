@@ -49,9 +49,9 @@ public class ProfileTreeCellRenderer
 		super();
 		Color c = getBackgroundSelectionColor();
 		dropBorder = new LineBorder(c, 1);
-		setLeafIcon(ResourceMgr.getImage("profile"));
-		setOpenIcon(ResourceMgr.getImage("Tree"));
-		setClosedIcon(ResourceMgr.getImage("Tree"));
+		setLeafIcon(ResourceMgr.getGifIcon("profile"));
+		setOpenIcon(ResourceMgr.getGifIcon("Tree"));
+		setClosedIcon(ResourceMgr.getGifIcon("Tree"));
 	}
 
 	public void setDropTargetItem(Object target)

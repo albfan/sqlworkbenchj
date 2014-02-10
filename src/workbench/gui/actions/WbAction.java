@@ -44,6 +44,7 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
+import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 import workbench.resource.ShortcutManager;
@@ -76,6 +77,7 @@ public class WbAction
 	private final List<WeakReference<JMenuItem>> createdItems = new LinkedList<WeakReference<JMenuItem>>();
 	protected boolean isConfigurable = true;
 	private String descriptiveName;
+	private boolean isPngIcon;
 
 	public WbAction()
 	{
@@ -531,6 +533,16 @@ public class WbAction
 		return (KeyStroke) getValue(DEFAULT_ACCELERATOR);
 	}
 
+	public void setPngIcon(String key)
+	{
+		this.iconKey = key;
+		this.isPngIcon = true;
+		if (key == null)
+		{
+			removeIcon();
+		}
+	}
+
 	public void setIcon(String key)
 	{
 		// Just store the key for the resource manager
@@ -539,6 +551,7 @@ public class WbAction
 		// this will retrieve the icons "lazily" so not all
 		// of them are actually loaded during startup
 		iconKey = key;
+		isPngIcon = false;
 		if (key == null)
 		{
 			removeIcon();
@@ -560,8 +573,15 @@ public class WbAction
 			if (icon == null)
 			{
 				// now retrieve the icon and store it
-				icon = ResourceMgr.getImage(iconKey);
-				this.putValue(key, icon);
+				icon = ResourceMgr.getActionIcon(iconKey, isPngIcon);
+				if (icon != null)
+				{
+					this.putValue(key, icon);
+				}
+				else
+				{
+					LogMgr.logWarning("WbAction.getValue()", "Could not retrieve icon with key: " + iconKey + " for actio " + this.getClass().getName());
+				}
 			}
 			return icon;
 		}

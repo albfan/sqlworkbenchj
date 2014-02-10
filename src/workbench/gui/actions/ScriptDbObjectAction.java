@@ -24,12 +24,15 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.util.List;
+
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
 import workbench.db.DbObject;
 import workbench.db.ObjectScripter;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectScripterUI;
@@ -51,7 +54,7 @@ public class ScriptDbObjectAction
 		this.source = client;
 		this.selection = list;
 		setEnabled(false);
-		setIcon("script16.png");
+		setPngIcon("script");
 		list.addListSelectionListener(this);
 	}
 
