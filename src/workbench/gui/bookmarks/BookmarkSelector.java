@@ -17,6 +17,25 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
+ *//*
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2014, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
 package workbench.gui.bookmarks;
 
@@ -45,6 +64,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.Timer;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
 import workbench.interfaces.MainPanel;
@@ -73,8 +95,8 @@ import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
-import workbench.util.StringUtil;
 
+import workbench.util.StringUtil;
 
 /**
  *
@@ -97,13 +119,16 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	private String searchValue;
 	private int pauseForIncremental;
 	private NamedSortDefinition savedSort;
+	private JLabel searchInfo;
+	private boolean searchInfoVisible;
+	private Timer idleTimer;
 
 	public BookmarkSelector(MainWindow win)
 	{
 		super(new GridBagLayout());
 		window = win;
 
-		pauseForIncremental = Settings.getInstance().getIntProperty(PROP_PREFIX + "incremental.pause", 350);
+		pauseForIncremental = Settings.getInstance().getIntProperty(PROP_PREFIX + "incremental.pause", 500);
 
 		filterValue = new JTextField();
 		filterValue.addKeyListener(this);
@@ -176,15 +201,22 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		gc.weighty = 0.0;
 		add(filterPanel, gc);
 
-		gc.gridy++;
+		gc.gridy = 1;
 		gc.weightx = 1.0;
 		gc.weighty = 1.0;
 		gc.fill = GridBagConstraints.BOTH;
 		gc.insets = new Insets(5,0,0,0);
 		add(scroll, gc);
 
+		searchInfo = new JLabel("MMMM");
+		searchInfo.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(1,1,1,1)));
+		searchInfo.setBackground(filterValue.getBackground());
+//		Color clr = UIManager.getDefaults().getColor("TextField.inactiveForeground");
+		searchInfo.setForeground(filterValue.getForeground());
+		searchInfo.setOpaque(true);
+
 		info = new JLabel(ResourceMgr.getFormattedString("TxtBookmarkHelp", BookmarkAnnotation.ANNOTATION));
-		gc.gridy++;
+		gc.gridy = 3; // leave one row for the "search indicator" panel
 		gc.weightx = 0.0;
 		gc.weighty = 0.0;
 		gc.fill = GridBagConstraints.BOTH;
@@ -212,6 +244,38 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			{
 				LogMgr.logWarning("BookmarkSelector.<init>", "Invalid sort definition saved: " + sort);
 			}
+		}
+		idleTimer = new Timer(pauseForIncremental, this);
+		idleTimer.setInitialDelay(0);
+	}
+
+	private void hideSearchPanel()
+	{
+		remove(searchInfo);
+		searchInfoVisible = false;
+		invalidate();
+		validate();
+		if (idleTimer.isRunning())
+		{
+			idleTimer.stop();
+		}
+	}
+
+	private void showSearchPanel(String text)
+	{
+		searchInfo.setText(text);
+		if (!searchInfoVisible)
+		{
+			GridBagConstraints gc = new GridBagConstraints();
+			gc.gridx = 0;
+			gc.gridy = 2;
+			gc.insets = new Insets(5,0,0,2);
+			gc.anchor = GridBagConstraints.FIRST_LINE_START;
+			gc.fill = GridBagConstraints.HORIZONTAL;
+			gc.weightx = 0.0;
+			gc.weighty = 0.0;
+			add(searchInfo, gc);
+			searchInfoVisible = true;
 		}
 	}
 
@@ -282,6 +346,16 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		return filterPanel;
 	}
 
+	void done()
+	{
+		saveSettings();
+		if (idleTimer.isRunning())
+		{
+			idleTimer.stop();
+			idleTimer = null;
+		}
+	}
+
 	private Object[] getTabs()
 	{
 		List<String> tabIds = BookmarkManager.getInstance().getTabs(window);
@@ -310,6 +384,14 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		else if (e.getSource() == this.tabSelector)
 		{
 			loadBookmarks();
+		}
+		else if (e.getSource() == idleTimer)
+		{
+			long pause = System.currentTimeMillis() - lastKeyTyped;
+			if (pause > pauseForIncremental)
+			{
+				hideSearchPanel();
+			}
 		}
 	}
 
@@ -435,8 +517,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		{
 			long pause = System.currentTimeMillis() - lastKeyTyped;
 			lastKeyTyped = System.currentTimeMillis();
-
-			System.out.println("pause: " + pause);
 			if (searchValue != null && pause < pauseForIncremental)
 			{
 				searchValue += String.valueOf(e.getKeyChar());
@@ -445,7 +525,16 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			{
 				searchValue = String.valueOf(e.getKeyChar());
 			}
-			jumpBookmark(searchValue);
+			if (idleTimer.isRunning())
+			{
+				idleTimer.restart();
+			}
+			else
+			{
+				idleTimer.start();
+			}
+			showSearchPanel(searchValue);
+			jumpBookmark(searchValue.toLowerCase());
 		}
 	}
 
@@ -555,7 +644,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	{
 	}
 
-	public static void selectBookmark(MainWindow window)
+	public static void selectBookmark(final MainWindow window)
 	{
 		if (window == null)
 		{
@@ -563,7 +652,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			return;
 		}
 
-		BookmarkSelector picker = new BookmarkSelector(window);
+		final BookmarkSelector picker = new BookmarkSelector(window);
 
 		if (GuiSettings.updateAllBookmarksOnSelect())
 		{
@@ -589,10 +678,18 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		dialog.setVisible(true);
 
 		Settings.getInstance().storeWindowSize(dialog, prop);
-		picker.saveSettings();
+		picker.done();
+
 		if (!dialog.isCancelled() && picker.selectedBookmark != null)
 		{
-			window.jumpToBookmark(picker.selectedBookmark);
+			EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					window.jumpToBookmark(picker.selectedBookmark);
+				}
+			});
 		}
 	}
 }
