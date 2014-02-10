@@ -151,6 +151,7 @@ import workbench.storage.NamedSortDefinition;
 import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowDataReader;
+import workbench.storage.SortDefinition;
 import workbench.storage.filter.FilterExpression;
 
 import workbench.util.FileDialogUtil;
@@ -1422,6 +1423,12 @@ public class WbTable
 		dwModel.applyFilter(filter);
 		adjustRowsAndColumns();
 		WbSwingUtilities.repaintLater(getParent());
+	}
+
+	public SortDefinition getCurrentSortColumns()
+	{
+		if (dwModel == null) return null;
+		return dwModel.getSortColumns();
 	}
 
 	public NamedSortDefinition getCurrentSort()

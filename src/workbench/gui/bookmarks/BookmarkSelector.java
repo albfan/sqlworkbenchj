@@ -17,28 +17,10 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
- *//*
- * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- *
- * Copyright 2002-2014, Thomas Kellerer
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at.
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * To contact the author please send an email to: support@sql-workbench.net
- *
  */
 package workbench.gui.bookmarks;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.FocusTraversalPolicy;
@@ -92,7 +74,7 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
 
 import workbench.storage.DataStore;
-import workbench.storage.NamedSortDefinition;
+import workbench.storage.SortDefinition;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
 
@@ -116,10 +98,10 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	private ValidatingDialog dialog;
 	private NamedScriptLocation selectedBookmark;
 	private long lastKeyTyped;
-	private String searchValue;
-	private int pauseForIncremental;
-	private NamedSortDefinition savedSort;
+	private int incrementalSearchDelay;
+	private SortDefinition savedSort;
 	private JLabel searchInfo;
+	private JPanel searchInfoPanel;
 	private boolean searchInfoVisible;
 	private Timer idleTimer;
 
@@ -128,7 +110,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		super(new GridBagLayout());
 		window = win;
 
-		pauseForIncremental = Settings.getInstance().getIntProperty(PROP_PREFIX + "incremental.pause", 500);
+		incrementalSearchDelay = Settings.getInstance().getIntProperty(PROP_PREFIX + "incremental.pause", 1000);
 
 		filterValue = new JTextField();
 		filterValue.addKeyListener(this);
@@ -208,12 +190,17 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		gc.insets = new Insets(5,0,0,0);
 		add(scroll, gc);
 
+		searchInfoPanel = new JPanel(new BorderLayout(0,0));
+		JLabel l = new JLabel(ResourceMgr.getString("LblBookName") + ":");
+		l.setBorder(new EmptyBorder(0,0,0,5));
+		searchInfoPanel.add(l, BorderLayout.LINE_START);
 		searchInfo = new JLabel("MMMM");
 		searchInfo.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(1,1,1,1)));
 		searchInfo.setBackground(filterValue.getBackground());
 //		Color clr = UIManager.getDefaults().getColor("TextField.inactiveForeground");
 		searchInfo.setForeground(filterValue.getForeground());
 		searchInfo.setOpaque(true);
+		searchInfoPanel.add(searchInfo, BorderLayout.CENTER);
 
 		info = new JLabel(ResourceMgr.getFormattedString("TxtBookmarkHelp", BookmarkAnnotation.ANNOTATION));
 		gc.gridy = 3; // leave one row for the "search indicator" panel
@@ -234,7 +221,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		String sort = Settings.getInstance().getProperty(PROP_PREFIX + "sort", null);
 		if (StringUtil.isNonBlank(sort))
 		{
-			savedSort = NamedSortDefinition.parseDefinitionString(sort);
+			savedSort = SortDefinition.parseDefinitionString(sort);
 			if (savedSort != null)
 			{
 				savedSort.setIgnoreCase(true);
@@ -245,15 +232,14 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				LogMgr.logWarning("BookmarkSelector.<init>", "Invalid sort definition saved: " + sort);
 			}
 		}
-		idleTimer = new Timer(pauseForIncremental, this);
+		idleTimer = new Timer(incrementalSearchDelay, this);
 		idleTimer.setInitialDelay(0);
 	}
 
 	private void hideSearchPanel()
 	{
-		remove(searchInfo);
+		remove(searchInfoPanel);
 		searchInfoVisible = false;
-		invalidate();
 		validate();
 		if (idleTimer.isRunning())
 		{
@@ -274,7 +260,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			gc.fill = GridBagConstraints.HORIZONTAL;
 			gc.weightx = 0.0;
 			gc.weighty = 0.0;
-			add(searchInfo, gc);
+			add(searchInfoPanel, gc);
+			validate();
 			searchInfoVisible = true;
 		}
 	}
@@ -388,7 +375,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		else if (e.getSource() == idleTimer)
 		{
 			long pause = System.currentTimeMillis() - lastKeyTyped;
-			if (pause > pauseForIncremental)
+			if (pause > incrementalSearchDelay)
 			{
 				hideSearchPanel();
 			}
@@ -429,7 +416,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			@Override
 			public void run()
 			{
-				NamedSortDefinition oldSort;
+				SortDefinition oldSort;
 				if (savedSort != null)
 				{
 					oldSort = savedSort;
@@ -437,11 +424,12 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				}
 				else
 				{
-					oldSort	= bookmarks.getCurrentSort();
+					oldSort	= bookmarks.getCurrentSortColumns();
 				}
 				DataStoreTableModel model = new DataStoreTableModel(data);
 				model.setAllowEditing(false);
 				bookmarks.setModel(model, true);
+				bookmarks.getTableHeader().setReorderingAllowed(false);
 
 				if (data.getRowCount() > 0)
 				{
@@ -517,9 +505,10 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		{
 			long pause = System.currentTimeMillis() - lastKeyTyped;
 			lastKeyTyped = System.currentTimeMillis();
-			if (searchValue != null && pause < pauseForIncremental)
+			String searchValue;
+			if (searchInfoVisible)
 			{
-				searchValue += String.valueOf(e.getKeyChar());
+				searchValue = searchInfo.getText() + String.valueOf(e.getKeyChar());
 			}
 			else
 			{
@@ -610,7 +599,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 	public void saveSettings()
 	{
-		NamedSortDefinition sort = bookmarks.getCurrentSort();
+		SortDefinition sort = bookmarks.getCurrentSortColumns();
 		String sortDef = sort.getDefinitionString();
 		Settings.getInstance().setProperty(PROP_PREFIX + "sort", sortDef);
 	}

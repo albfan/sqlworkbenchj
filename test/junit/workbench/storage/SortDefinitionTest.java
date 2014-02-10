@@ -22,8 +22,9 @@
  */
 package workbench.storage;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -132,4 +133,21 @@ public class SortDefinitionTest
 		assertTrue(sort.isPrimarySortColumn(3));
 		assertFalse(sort.isPrimarySortColumn(4));
 	}
+
+	@Test
+	public void testGetDefinitionString()
+	{
+		int[] columns = new int[] { 1,3 };
+		boolean[] asc = new boolean[] { true, false };
+
+		SortDefinition def = new SortDefinition(columns, asc);
+
+		String result = def.getDefinitionString();
+		String expected = "1,a;3,d";
+		assertEquals(expected, result);
+
+		SortDefinition newDef = SortDefinition.parseDefinitionString(result);
+		assertEquals(expected, newDef.getDefinitionString());
+	}
+
 }

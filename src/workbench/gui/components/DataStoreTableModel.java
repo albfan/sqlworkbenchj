@@ -602,7 +602,8 @@ public class DataStoreTableModel
 	}
 
 	/**
-	 * Check if the table is sorted by a column
+	 * Check if the table is sorted by a column.
+	 * 
 	 * @return true if the given column is a sort column
 	 * @see #isSortAscending(int)
 	 */
@@ -616,6 +617,7 @@ public class DataStoreTableModel
 	 * by their names instead of their column index (as done by SortDefinition)
 	 *
 	 * @return the current sort definition with named columns or null if no sort is defined
+	 * @see #getSortColumns()
 	 */
 	public NamedSortDefinition getSortDefinition()
 	{
@@ -623,15 +625,32 @@ public class DataStoreTableModel
 		return new NamedSortDefinition(this.dataCache, this.sortDefinition);
 	}
 
-	public void setSortDefinition(NamedSortDefinition definition)
+	/**
+	 * Returns a snapshot of the current sort columns identified by their position.
+	 *
+	 * @return the current sort definition with column indexes or null if no sort is defined
+	 * @see #getSortDefinition()
+	 */
+	public SortDefinition getSortColumns()
 	{
-		if (definition == null) return;
-		SortDefinition newSort = definition.getSortDefinition(dataCache);
+		if (this.sortDefinition == null) return null;
+		return this.sortDefinition.createCopy();
+	}
+
+	public void setSortDefinition(SortDefinition newSort)
+	{
 		if (!newSort.equals(this.sortDefinition))
 		{
 			this.sortDefinition = newSort;
 			applySortColumns();
 		}
+	}
+
+	public void setSortDefinition(NamedSortDefinition definition)
+	{
+		if (definition == null) return;
+		SortDefinition newSort = definition.getSortDefinition(dataCache);
+		setSortDefinition(newSort);
 	}
 
 	/**

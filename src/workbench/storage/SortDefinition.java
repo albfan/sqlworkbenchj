@@ -23,6 +23,10 @@
 package workbench.storage;
 
 import java.util.Arrays;
+import java.util.List;
+
+import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to store the sort definition of a result set (e.g. DataStore,
@@ -282,6 +286,44 @@ public class SortDefinition
 			if (sortColumns[i] == column) return i;
 		}
 		return -1;
+	}
+
+	public String getDefinitionString()
+	{
+		if (sortColumns == null || sortColumns.length == 0) return "";
+		StringBuilder result = new StringBuilder(sortColumns.length * 3);
+		for (int i=0; i < sortColumns.length; i++)
+		{
+			if (i > 0) result.append(';');
+			result.append(Integer.toString(sortColumns[i]));
+			result.append(',');
+			result.append(sortAscending[i] ? 'a' : 'd');
+		}
+		return result.toString();
+	}
+
+	public static SortDefinition parseDefinitionString(String definition)
+	{
+		List<String> elements = StringUtil.stringToList(definition, ";", true, true, false);
+		if (CollectionUtil.isEmpty(elements)) return null;
+
+		int[] columns = new int[elements.size()];
+		boolean[] ascending = new boolean[elements.size()];
+		for (int i=0; i < elements.size(); i++)
+		{
+			String element = StringUtil.trimQuotes(elements.get(i));
+			String[] parts = element.split(",");
+			if (parts != null && parts.length == 2)
+			{
+				int colNr = StringUtil.getIntValue(parts[0], -1);
+
+				if (colNr < 0) return null; // something wrong, assume the whole definition is bogus
+				
+				columns[i] = colNr;
+				ascending[i] = "a".equalsIgnoreCase(parts[1]);
+			}
+		}
+		return new SortDefinition(columns, ascending);
 	}
 
 }
