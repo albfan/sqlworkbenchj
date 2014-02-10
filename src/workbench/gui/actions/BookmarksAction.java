@@ -1,6 +1,4 @@
 /*
- * AboutAction.java
- *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2014, Thomas Kellerer
@@ -24,7 +22,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.WbManager;
 
 import workbench.gui.MainWindow;
 import workbench.gui.bookmarks.BookmarkSelector;
@@ -37,17 +34,18 @@ import workbench.gui.bookmarks.BookmarkSelector;
 public class BookmarksAction
 	extends WbAction
 {
-	public BookmarksAction()
+	private MainWindow parent;
+	public BookmarksAction(MainWindow window)
 	{
 		super();
 		initMenuDefinition("MnuTxtBookmarks");
 		removeIcon();
+		parent = window;
 	}
 
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		MainWindow window = (MainWindow)WbManager.getInstance().getCurrentWindow();
-		BookmarkSelector.selectBookmark(window);
+		BookmarkSelector.selectBookmark(parent);
 	}
 }

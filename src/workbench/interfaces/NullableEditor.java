@@ -33,5 +33,4 @@ public interface NullableEditor
 	void setNull(boolean setToNull);
 	JTextComponent getEditor();
 	void restoreOriginal();
-	
 }

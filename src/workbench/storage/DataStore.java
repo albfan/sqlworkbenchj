@@ -2046,7 +2046,9 @@ public class DataStore
 
 	protected RowDataListSorter createSorter(SortDefinition sort)
 	{
-		return new RowDataListSorter(sort);
+		RowDataListSorter sorter = new RowDataListSorter(sort);
+		sorter.setIgnoreCase(sort.getIgnoreCase());
+		return sorter;
 	}
 
 	public void sort(SortDefinition sortDef)

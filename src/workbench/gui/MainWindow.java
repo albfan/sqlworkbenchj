@@ -922,15 +922,16 @@ public class MainWindow
 		return this.sqlTab.getTabCount();
 	}
 
-	public MainPanel getSqlPanel(int anIndex)
+	public MainPanel getSqlPanel(int index)
 	{
+		if (index < 0 || index >= sqlTab.getTabCount()) return null;
 		try
 		{
-			return (MainPanel)this.sqlTab.getComponentAt(anIndex);
+			return (MainPanel)this.sqlTab.getComponentAt(index);
 		}
 		catch (Exception e)
 		{
-			LogMgr.logDebug("MainWindow.getSqlPanel()", "Invalid index [" + anIndex + "] specified!", e);
+			LogMgr.logDebug("MainWindow.getSqlPanel()", "Invalid index [" + index + "] specified!", e);
 			return null;
 		}
 	}
@@ -2524,7 +2525,7 @@ public class MainWindow
 		result.add(new ObjectSearchAction(this));
 
 		result.addSeparator();
-		result.add(new BookmarksAction());
+		result.add(new BookmarksAction(this));
 
 		result.addSeparator();
 		new OptionsDialogAction().addToMenu(result);
@@ -2881,7 +2882,7 @@ public class MainWindow
 		{
 			index = this.sqlTab.getSelectedIndex() + 1;
 		}
-		
+
 		try
 		{
 			setIgnoreTabChange(true);

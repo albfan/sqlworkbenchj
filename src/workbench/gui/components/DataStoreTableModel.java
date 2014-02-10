@@ -67,7 +67,7 @@ public class DataStoreTableModel
 
 	private List<Integer> noneditableColumns = new ArrayList<Integer>();
 
-	private SortDefinition sortColumns = new SortDefinition();
+	private SortDefinition sortDefinition = new SortDefinition();
 
 	private boolean allowEditing = true;
 
@@ -101,6 +101,11 @@ public class DataStoreTableModel
 	public void setShowConverterError(boolean flag)
 	{
 		this.showConverterError = flag;
+	}
+
+	public void setSortIgnoreCase(boolean flag)
+	{
+		sortDefinition.setIgnoreCase(true);
 	}
 
 	public boolean isColumnModified(int row, int column)
@@ -587,13 +592,13 @@ public class DataStoreTableModel
 	 */
 	public boolean isSortAscending(int col)
 	{
-		return this.sortColumns.isSortAscending(col - columnStartIndex);
+		return this.sortDefinition.isSortAscending(col - columnStartIndex);
 	}
 
 
 	public boolean isPrimarySortColumn(int col)
 	{
-		return this.sortColumns.isPrimarySortColumn(col - columnStartIndex);
+		return this.sortDefinition.isPrimarySortColumn(col - columnStartIndex);
 	}
 
 	/**
@@ -603,7 +608,7 @@ public class DataStoreTableModel
 	 */
 	public boolean isSortColumn(int col)
 	{
-		return this.sortColumns.isSortColumn(col - columnStartIndex);
+		return this.sortDefinition.isSortColumn(col - columnStartIndex);
 	}
 
 	/**
@@ -614,17 +619,17 @@ public class DataStoreTableModel
 	 */
 	public NamedSortDefinition getSortDefinition()
 	{
-		if (this.sortColumns == null) return null;
-		return new NamedSortDefinition(this.dataCache, this.sortColumns);
+		if (this.sortDefinition == null) return null;
+		return new NamedSortDefinition(this.dataCache, this.sortDefinition);
 	}
 
 	public void setSortDefinition(NamedSortDefinition definition)
 	{
 		if (definition == null) return;
 		SortDefinition newSort = definition.getSortDefinition(dataCache);
-		if (!newSort.equals(this.sortColumns))
+		if (!newSort.equals(this.sortDefinition))
 		{
-			this.sortColumns = newSort;
+			this.sortDefinition = newSort;
 			applySortColumns();
 		}
 	}
@@ -635,15 +640,15 @@ public class DataStoreTableModel
 	 */
 	public boolean sort()
 	{
-		if (this.sortColumns == null) return false;
+		if (this.sortDefinition == null) return false;
 		applySortColumns();
 		return true;
 	}
 
 	public void removeSortColumn(int column)
 	{
-		boolean isPrimaryColumn = sortColumns.isPrimarySortColumn(column);
-		sortColumns.removeSortColumn(column);
+		boolean isPrimaryColumn = sortDefinition.isPrimarySortColumn(column);
+		sortDefinition.removeSortColumn(column);
 
 		// if the primary (== first) column was removed
 		// we have to re-apply the sort definition
@@ -660,18 +665,18 @@ public class DataStoreTableModel
 	{
 		if (addSortColumn)
 		{
-			sortColumns.addSortColumn(column - columnStartIndex, ascending);
+			sortDefinition.addSortColumn(column - columnStartIndex, ascending);
 		}
 		else
 		{
-			sortColumns.setSortColumn(column - columnStartIndex, ascending);
+			sortDefinition.setSortColumn(column - columnStartIndex, ascending);
 		}
 		applySortColumns();
 	}
 
 	private void applySortColumns()
 	{
-		if (sortColumns == null) return;
+		if (sortDefinition == null) return;
 		if (dataCache == null) return;
 
 		synchronized (model_change_lock)
@@ -679,7 +684,7 @@ public class DataStoreTableModel
 			try
 			{
 				setSortInProgress(true);
-				dataCache.sort(this.sortColumns);
+				dataCache.sort(this.sortDefinition);
 			}
 			catch (Throwable th)
 			{

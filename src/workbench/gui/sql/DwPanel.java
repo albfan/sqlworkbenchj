@@ -757,13 +757,8 @@ public class DwPanel
 
 	public NamedSortDefinition getCurrentSort()
 	{
-		NamedSortDefinition currentSort = null;
-		DataStoreTableModel model = this.dataTable.getDataStoreTableModel();
-		if (model != null)
-		{
-			currentSort = model.getSortDefinition();
-		}
-		return currentSort;
+		if (dataTable == null) return null;
+		return dataTable.getCurrentSort();
 	}
 
 	public void runCurrentSql(boolean respectMaxRows)
@@ -773,8 +768,14 @@ public class DwPanel
 		if (ds == null) return;
 		String generatingSql = ds.getGeneratingSql();
 		if (generatingSql == null) return;
-		runQuery(generatingSql, respectMaxRows);
 
+		NamedSortDefinition sort = this.dataTable.getCurrentSort();
+		runQuery(generatingSql, respectMaxRows);
+		if (sort != null)
+		{
+			dataTable.getDataStoreTableModel().setSortDefinition(sort);
+			dataTable.adjustColumns();
+		}
 		if (GuiSettings.getShowMaxRowsReached())
 		{
 			checkLimitReachedDisplay();

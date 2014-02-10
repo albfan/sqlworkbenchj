@@ -22,6 +22,8 @@
  */
 package workbench.storage;
 
+import java.util.Arrays;
+
 /**
  * A class to store the sort definition of a result set (e.g. DataStore,
  * DatastoreTableModel)
@@ -32,6 +34,7 @@ public class SortDefinition
 {
 	private boolean[] sortAscending;
 	private int[] sortColumns;
+	private boolean ignoreCase;
 
 	public SortDefinition()
 	{
@@ -51,6 +54,16 @@ public class SortDefinition
 		System.arraycopy(ascending, 0, sortAscending, 0, ascending.length);
 	}
 
+	public void setIgnoreCase(boolean ignoreCase)
+	{
+		this.ignoreCase = ignoreCase;
+	}
+
+	public boolean getIgnoreCase()
+	{
+		return ignoreCase;
+	}
+
 	/**
 	 * Create a copy of this sort definition.
 	 *
@@ -66,6 +79,7 @@ public class SortDefinition
 			copy.sortAscending = new boolean[sortAscending.length];
 			System.arraycopy(this.sortAscending, 0, copy.sortAscending, 0, this.sortAscending.length);
 		}
+		copy.ignoreCase = this.ignoreCase;
 		return copy;
 	}
 
@@ -73,8 +87,8 @@ public class SortDefinition
 	public int hashCode()
 	{
 		int hash = 7;
-		hash = 67 * hash + (this.sortAscending != null ? this.sortAscending.hashCode() : 0);
-		hash = 67 * hash + (this.sortColumns != null ? this.sortColumns.hashCode() : 0);
+		hash = 67 * hash + (this.sortAscending != null ? Arrays.hashCode(this.sortAscending) : 0);
+		hash = 67 * hash + (this.sortColumns != null ? Arrays.hashCode(this.sortColumns) : 0);
 		return hash;
 	}
 

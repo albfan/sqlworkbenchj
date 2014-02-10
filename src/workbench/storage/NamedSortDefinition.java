@@ -22,7 +22,10 @@
  */
 package workbench.storage;
 
+import java.util.List;
 import workbench.db.QuoteHandler;
+import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to save the sort definition for a DataStoreTableModel.
@@ -34,6 +37,13 @@ public class NamedSortDefinition
 {
 	private String[] sortColumns;
 	private boolean[] sortAscending;
+	private boolean ignoreCase;
+
+	public NamedSortDefinition(String[] columnNames, boolean[] ascending)
+	{
+		sortColumns = columnNames;
+		sortAscending = ascending;
+	}
 
 	public NamedSortDefinition(DataStore data, SortDefinition sort)
 	{
@@ -48,6 +58,17 @@ public class NamedSortDefinition
 				sortAscending[i] = sort.isSortAscending(dataColumn);
 			}
 		}
+		ignoreCase = sort.getIgnoreCase();
+	}
+
+	public boolean getIgnoreCase()
+	{
+		return ignoreCase;
+	}
+
+	public void setIgnoreCase(boolean flag)
+	{
+		this.ignoreCase = flag;
 	}
 
 	public SortDefinition getSortDefinition(DataStore data)
@@ -59,7 +80,9 @@ public class NamedSortDefinition
 		{
 			columns[i] = data.getColumnIndex(sortColumns[i]);
 		}
-		return new SortDefinition(columns, sortAscending);
+		SortDefinition sort = new SortDefinition(columns, sortAscending);
+		sort.setIgnoreCase(ignoreCase);
+		return sort;
 	}
 
 	/**
@@ -89,6 +112,44 @@ public class NamedSortDefinition
 			}
 		}
 		return result.toString();
+	}
+
+	public String getDefinitionString()
+	{
+		if (sortColumns == null || sortColumns.length == 0) return "";
+		StringBuilder result = new StringBuilder(sortColumns.length * 10);
+		for (int i=0; i < sortColumns.length; i++)
+		{
+			if (i > 0) result.append(',');
+			result.append('"');
+			result.append(sortColumns[i]);
+			result.append(';');
+			result.append(sortAscending[i] ? 'a' : 'd');
+			result.append('"');
+		}
+		return result.toString();
+	}
+
+	public static NamedSortDefinition parseDefinitionString(String definition)
+	{
+		List<String> elements = StringUtil.stringToList(definition, ",", true, true, false);
+		if (CollectionUtil.isEmpty(elements)) return null;
+
+		String[] columns = new String[elements.size()];
+		boolean[] ascending = new boolean[elements.size()];
+		for (int i=0; i < elements.size(); i++)
+		{
+			String element = StringUtil.trimQuotes(elements.get(i));
+			int pos = element.indexOf(';');
+			if (pos > -1)
+			{
+				String colname = element.substring(0, pos);
+				String asc = element.substring(pos + 1);
+				columns[i] = colname;
+				ascending[i] = "a".equalsIgnoreCase(asc);
+			}
+		}
+		return new NamedSortDefinition(columns, ascending);
 	}
 
 }

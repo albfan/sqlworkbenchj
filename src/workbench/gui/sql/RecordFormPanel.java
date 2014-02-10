@@ -54,10 +54,12 @@ import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.MultilineWrapAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.BlobHandler;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbCellEditor;
 import workbench.gui.components.WbDocument;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
@@ -65,6 +67,7 @@ import workbench.gui.renderer.BlobColumnPanel;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.WbRenderer;
+import workbench.gui.renderer.WrapEnabledEditor;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
@@ -206,9 +209,21 @@ public class RecordFormPanel
 			Component toAdd = null;
 			if (SqlUtil.isMultiLineColumn(col))
 			{
-				JTextArea area = new JTextArea(new WbDocument());
+				final JTextArea area = new JTextArea(new WbDocument());
+				WrapEnabledEditor wrap = new WrapEnabledEditor()
+				{
+					@Override
+					public void setWordwrap(boolean flag)
+					{
+						area.setLineWrap(flag);
+						area.setWrapStyleWord(flag);
+					}
+				};
 				area.setEditable(editable);
-				TextComponentMouseListener.addListener(area);
+				TextComponentMouseListener contextMenu = new TextComponentMouseListener();
+				contextMenu.addAction(new MultilineWrapAction(wrap, area, null));
+
+				area.addMouseListener(contextMenu);
 				area.setLineWrap(false);
 
 				inputControls[i] = area;

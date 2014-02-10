@@ -152,7 +152,7 @@ public class EditorPanel
 
 	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
 	private WbFile currentFile;
-	private boolean fileIsSaved;
+	private boolean saveInProgress;
 	private long fileModifiedTime;
 	private String fileEncoding;
 	private Set<String> dbFunctions;
@@ -328,7 +328,7 @@ public class EditorPanel
 	protected void checkFileChange()
 	{
 		if (this.currentFile == null) return;
-		if (this.fileIsSaved) return;
+		if (this.saveInProgress) return;
 
 		long currentTime = currentFile.lastModified();
 
@@ -356,6 +356,13 @@ public class EditorPanel
 				}
 			}
 		}
+	}
+
+	@Override
+	public boolean isModifiedAfter(long timeInMillis)
+	{
+		boolean isModified = super.isModifiedAfter(timeInMillis);
+		return isModified || (this.hasFileLoaded() && fileModifiedTime > timeInMillis);
 	}
 
 	public void showFindOnPopupMenu()
@@ -901,7 +908,7 @@ public class EditorPanel
 
 		try
 		{
-			fileIsSaved = true;
+			saveInProgress = true;
 			String filename = aFile.getAbsolutePath();
 			int pos = filename.indexOf('.');
 			if (pos < 0)
@@ -942,7 +949,7 @@ public class EditorPanel
 		}
 		finally
 		{
-			fileIsSaved = false;
+			saveInProgress = false;
 		}
 	}
 

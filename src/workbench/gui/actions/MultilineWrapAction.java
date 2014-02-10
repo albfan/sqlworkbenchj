@@ -24,8 +24,8 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.gui.components.WbCellEditor;
-import workbench.resource.GuiSettings;
+import javax.swing.text.JTextComponent;
+import workbench.gui.renderer.WrapEnabledEditor;
 
 /**
  *
@@ -34,15 +34,15 @@ import workbench.resource.GuiSettings;
 public class MultilineWrapAction
 	extends CheckBoxAction
 {
-	private WbCellEditor client;
+	private WrapEnabledEditor client;
 
-	public MultilineWrapAction(WbCellEditor editor)
+	public MultilineWrapAction(WrapEnabledEditor wrappable, JTextComponent editor, String property)
 	{
-		super("LblWordWrap", GuiSettings.PROP_WRAP_MULTILINE_EDITOR);
-		client = editor;
-		if (client != null && client.getEditor() != null)
+		super("LblWordWrap", property);
+		client = wrappable;
+		if (editor != null)
 		{
-			addToInputMap(client.getEditor());
+			addToInputMap(editor);
 		}
 	}
 
@@ -52,7 +52,7 @@ public class MultilineWrapAction
 		super.executeAction(e);
 		if (client != null)
 		{
-			client.setWordwrap(GuiSettings.getWrapMultilineEditor());
+			client.setWordwrap(this.isSwitchedOn());
 		}
 	}
 

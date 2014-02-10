@@ -37,6 +37,7 @@ public class RowDataListSorter
 {
 	private SortDefinition definition;
 	private Collator defaultCollator;
+	private boolean ignoreCase;
 
 	public RowDataListSorter(SortDefinition sortDef)
 	{
@@ -55,6 +56,11 @@ public class RowDataListSorter
 		if (columns.length != order.length) throw new IllegalArgumentException("Size of arrays must match");
 		this.definition = new SortDefinition(columns, order);
 		initCollator();
+	}
+
+	public void setIgnoreCase(boolean flag)
+	{
+		this.ignoreCase = flag;
 	}
 
 	private void initCollator()
@@ -106,6 +112,11 @@ public class RowDataListSorter
 			{
 				return defaultCollator.compare(o1, o2);
 			}
+		}
+
+		if (ignoreCase && (o1 instanceof String && o2 instanceof String))
+		{
+			return ((String)o1).compareToIgnoreCase((String)o2);
 		}
 
 		int result = 0;

@@ -147,6 +147,7 @@ import workbench.gui.sql.DwStatusBar;
 import workbench.storage.DataConverter;
 import workbench.storage.DataStore;
 import workbench.storage.MergeGenerator;
+import workbench.storage.NamedSortDefinition;
 import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowDataReader;
@@ -241,6 +242,7 @@ public class WbTable
 	private FontZoomer zoomer;
 
 	private RendererSetup rendererSetup;
+	private boolean sortIgnoreCase;
 
 	// </editor-fold>
 
@@ -397,6 +399,16 @@ public class WbTable
 	public SortHeaderRenderer getHeaderRenderer()
 	{
 		return sortRenderer;
+	}
+
+	public boolean getSortIgnoreCase()
+	{
+		return sortIgnoreCase;
+	}
+
+	public void setSortIgnoreCase(boolean flag)
+	{
+		this.sortIgnoreCase = flag;
 	}
 
 	public void configureEnterKeyAction(Action enterAction)
@@ -1311,6 +1323,7 @@ public class WbTable
 		{
 			if (this.sortAscending != null) this.sortAscending.setEnabled(allowSort);
 			if (this.sortDescending != null) this.sortDescending.setEnabled(allowSort);
+			this.dwModel.setSortIgnoreCase(this.sortIgnoreCase);
 
 			// it seems that JTable.setModel() resets the default renderers and editors
 			// so we'll have to do it again...
@@ -1409,6 +1422,12 @@ public class WbTable
 		dwModel.applyFilter(filter);
 		adjustRowsAndColumns();
 		WbSwingUtilities.repaintLater(getParent());
+	}
+
+	public NamedSortDefinition getCurrentSort()
+	{
+		if (dwModel == null) return null;
+		return dwModel.getSortDefinition();
 	}
 
 	public DataStoreTableModel getDataStoreTableModel()
@@ -1924,6 +1943,12 @@ public class WbTable
 	 */
 	public void adjustRowsAndColumns()
 	{
+		adjustColumns();
+		adjustRowHeight();
+	}
+
+	public void adjustColumns()
+	{
 		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this);
 		boolean checkHeaders = GuiSettings.getIncludeHeaderInOptimalWidth();
 		if (GuiSettings.getAutomaticOptimalWidth())
@@ -1934,7 +1959,6 @@ public class WbTable
 		{
 			optimizer.adjustColumns(this.adjustToColumnLabel);
 		}
-		adjustRowHeight();
 	}
 
 	public void optimizeRowHeight()

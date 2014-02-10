@@ -53,6 +53,7 @@ import workbench.gui.actions.SelectFkValueAction;
 import workbench.gui.actions.SetNullAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.TextAreaRenderer;
+import workbench.gui.renderer.WrapEnabledEditor;
 
 import workbench.util.WbDateFormatter;
 
@@ -63,7 +64,7 @@ import workbench.util.WbDateFormatter;
  */
 public class WbCellEditor
 	extends AbstractCellEditor
-	implements TableCellEditor, MouseListener, NullableEditor, DocumentListener
+	implements TableCellEditor, MouseListener, NullableEditor, DocumentListener, WrapEnabledEditor
 {
 
 	private TextAreaEditor editor;
@@ -95,7 +96,7 @@ public class WbCellEditor
 		restoreValue = new RestoreDataAction(this);
 		contextMenu = new TextComponentMouseListener();
 		setNull = new SetNullAction(this);
-		multilineWrapAction = new MultilineWrapAction(this);
+		multilineWrapAction = new MultilineWrapAction(this, this.getEditor(), GuiSettings.PROP_WRAP_MULTILINE_EDITOR);
 
 		selectFk = new SelectFkValueAction(parent);
 		selectFk.addToInputMap(editor);
@@ -114,6 +115,7 @@ public class WbCellEditor
 		if (contextMenu != null) contextMenu.dispose();
 	}
 
+	@Override
 	public void setWordwrap(boolean flag)
 	{
 		editor.setLineWrap(flag);

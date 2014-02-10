@@ -60,9 +60,13 @@ public class BookmarkManager
 		private static final BookmarkManager INSTANCE = new BookmarkManager();
 	}
 
-	public synchronized void clearBookmarksForWindow(String windowId)
+	public void clearBookmarksForWindow(String windowId)
 	{
-		bookmarks.remove(windowId);
+		synchronized (bookmarks)
+		{
+			bookmarks.remove(windowId);
+		}
+		LogMgr.logDebug("BookmarkManager.clearBookmarksForWindow()", "Removed all bookmarks for window: " + windowId);
 	}
 
 	public synchronized void clearBookmarksForPanel(String windowId, String panelId)
@@ -74,48 +78,54 @@ public class BookmarkManager
 		}
 	}
 
-	public synchronized void updateBookmarks(MainWindow win)
+	public void updateBookmarks(MainWindow win)
 	{
 		long start = System.currentTimeMillis();
 		int count = win.getTabCount();
-		for (int i=0; i < count; i++)
+		synchronized (bookmarks)
 		{
-			MainPanel panel = win.getSqlPanel(i);
-			updateBookmarks(win, panel);
+			for (int i=0; i < count; i++)
+			{
+				MainPanel panel = win.getSqlPanel(i);
+				updateBookmarks(win, panel);
+			}
 		}
 		long end = System.currentTimeMillis();
 		LogMgr.logDebug("BookmarkManager.updateBookmarks()", "Parsing bookmarks for all tabs took: " + (end - start) + "ms");
 	}
 
-	public synchronized void updateBookmarks(MainWindow win, MainPanel panel)
+	public void updateBookmarks(MainWindow win, MainPanel panel)
 	{
-		Map<String, BookmarkGroup> windowBookmarks = bookmarks.get(win.getWindowId());
-		if (windowBookmarks == null)
+		synchronized (bookmarks)
 		{
-			windowBookmarks = new HashMap<String, BookmarkGroup>();
-			bookmarks.put(win.getWindowId(), windowBookmarks);
-		}
-
-		BookmarkGroup group = windowBookmarks.get(panel.getId());
-
-		long modified = 0;
-
-		if (group != null)
-		{
-			modified = group.creationTime();
-		}
-
-		if (group == null || panel.isModifiedAfter(modified))
-		{
-			List<NamedScriptLocation> panelBookmarks = panel.getBookmarks();
-			// if getBoomarks() returns null, the panel does not support bookmarks
-			// (this is essentially only the DbExplorerPanel)
-			if (panelBookmarks != null)
+			Map<String, BookmarkGroup> windowBookmarks = bookmarks.get(win.getWindowId());
+			if (windowBookmarks == null)
 			{
-				BookmarkGroup pGroup = new BookmarkGroup(panelBookmarks, panel.getId());
-				// int index = win.getIndexForPanel(panel);
-				pGroup.setName(panel.getTabTitle());
-				windowBookmarks.put(pGroup.getGroupId(), pGroup);
+				windowBookmarks = new HashMap<String, BookmarkGroup>();
+				bookmarks.put(win.getWindowId(), windowBookmarks);
+			}
+
+			BookmarkGroup group = windowBookmarks.get(panel.getId());
+
+			long modified = 0;
+
+			if (group != null)
+			{
+				modified = group.creationTime();
+			}
+
+			if (group == null || panel.isModifiedAfter(modified))
+			{
+				List<NamedScriptLocation> panelBookmarks = panel.getBookmarks();
+				// if getBoomarks() returns null, the panel does not support bookmarks
+				// (this is essentially only the DbExplorerPanel)
+				if (panelBookmarks != null)
+				{
+					BookmarkGroup pGroup = new BookmarkGroup(panelBookmarks, panel.getId());
+					// int index = win.getIndexForPanel(panel);
+					pGroup.setName(panel.getTabTitle());
+					windowBookmarks.put(pGroup.getGroupId(), pGroup);
+				}
 			}
 		}
 	}
@@ -123,18 +133,21 @@ public class BookmarkManager
 	public List<String> getTabs(MainWindow window)
 	{
 		String windowId = window == null ? "" : window.getWindowId();
-
-		Map<String, BookmarkGroup> bm = bookmarks.get(windowId);
-		if (bm == null) return Collections.emptyList();
-
-		List<String> result = new ArrayList<String>();
-		for (Map.Entry<String, BookmarkGroup> entry : bm.entrySet())
+		List<String> result = null;
+		synchronized (bookmarks)
 		{
-			String id = entry.getKey();
-			BookmarkGroup group = entry.getValue();
-			if (group.getBookmarks().size() > 0)
+			Map<String, BookmarkGroup> bm = bookmarks.get(windowId);
+			if (bm == null) return Collections.emptyList();
+
+			result = new ArrayList<String>();
+			for (Map.Entry<String, BookmarkGroup> entry : bm.entrySet())
 			{
-				result.add(id);
+				String id = entry.getKey();
+				BookmarkGroup group = entry.getValue();
+				if (group.getBookmarks().size() > 0)
+				{
+					result.add(id);
+				}
 			}
 		}
 		return result;
@@ -179,7 +192,7 @@ public class BookmarkManager
 
 	private DataStore createDataStore()
 	{
-		String[] columns = new String[] { ResourceMgr.getString("LblBookName"), ResourceMgr.getString("LblBookPanel"), ResourceMgr.getString("LblBookLine")};
+		String[] columns = new String[] { ResourceMgr.getPlainString("LblBookName"), ResourceMgr.getPlainString("LblBookPanel"), ResourceMgr.getPlainString("LblBookLine")};
 		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.INTEGER};
 
 		DataStore ds =new DataStore(columns, types);

@@ -74,6 +74,7 @@ class ObjectCachePersistence
 		{
 			LogMgr.logInfo("ObjectCachePersistence.loadFromLocalFile()", "Cache file " + cacheFile.getFullPath() + " was discarded because it is too old (max. age=" + maxAgeValue + ").");
 			cacheFile.delete();
+			return;
 		}
 
 		ZipFile zipFile = null;
@@ -122,7 +123,7 @@ class ObjectCachePersistence
 		{
 			try
 			{
-				zipFile.close();
+				if (zipFile != null) zipFile.close();
 			}
 			catch (Throwable th)
 			{

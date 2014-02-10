@@ -58,6 +58,7 @@ import workbench.resource.Settings;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.ValidatingDialog;
@@ -69,8 +70,10 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
 
 import workbench.storage.DataStore;
+import workbench.storage.NamedSortDefinition;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
+import workbench.util.StringUtil;
 
 
 /**
@@ -81,6 +84,7 @@ public class BookmarkSelector
 	extends JPanel
 implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent
 {
+	private static final String PROP_PREFIX = "workbench.gui.bookmarks.";
 	private JTextField filterValue;
 	private JComboBox tabSelector;
 	private JLabel info;
@@ -92,13 +96,14 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	private long lastKeyTyped;
 	private String searchValue;
 	private int pauseForIncremental;
+	private NamedSortDefinition savedSort;
 
 	public BookmarkSelector(MainWindow win)
 	{
 		super(new GridBagLayout());
 		window = win;
 
-		pauseForIncremental = Settings.getInstance().getIntProperty("workbench.gui.bookmarks.incremental.pause", 300);
+		pauseForIncremental = Settings.getInstance().getIntProperty(PROP_PREFIX + "incremental.pause", 350);
 
 		filterValue = new JTextField();
 		filterValue.addKeyListener(this);
@@ -113,10 +118,11 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		bookmarks.setColumnSelectionAllowed(false);
 		bookmarks.setRowSelectionAllowed(true);
 		bookmarks.getHeaderRenderer().setShowPKIcon(true);
+		bookmarks.setSortIgnoreCase(true);
 
 		tabSelector = new JComboBox(getTabs());
 		tabSelector.addActionListener(this);
-		
+
 		Action nextComponent = new AbstractAction()
 		{
 			@Override
@@ -151,6 +157,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				selectValue();
 			}
 		};
+
 		bookmarks.configureEnterKeyAction(selectValue);
 		bookmarks.getActionMap().put("picker-next-comp", nextComponent);
 		bookmarks.getActionMap().put("picker-prev-comp", prevComponent);
@@ -191,6 +198,21 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		setFocusCycleRoot(true);
 		bookmarks.setFocusCycleRoot(false);
 		setFocusTraversalPolicy(pol);
+
+		String sort = Settings.getInstance().getProperty(PROP_PREFIX + "sort", null);
+		if (StringUtil.isNonBlank(sort))
+		{
+			savedSort = NamedSortDefinition.parseDefinitionString(sort);
+			if (savedSort != null)
+			{
+				savedSort.setIgnoreCase(true);
+				LogMgr.logDebug("BookmarkSelector.<init>", "Using saved sort definition: " + sort);
+			}
+			else
+			{
+				LogMgr.logWarning("BookmarkSelector.<init>", "Invalid sort definition saved: " + sort);
+			}
+		}
 	}
 
 	private JPanel createFilterPanel()
@@ -208,12 +230,16 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		reload.setText(null);
 		reload.setMargin(WbToolbarButton.MARGIN);
 
-		JLabel tabLbl = new JLabel(ResourceMgr.getString("LblBookPanel"));
+		WbLabel tabLbl = new WbLabel();
+		tabLbl.setText(ResourceMgr.getString("LblBookPanel"));
+		tabLbl.setLabelFor(tabSelector);
 
 		String all = ResourceMgr.getString("LblBookPanelAll");
 		WbSwingUtilities.setMinimumSize(tabSelector, all.length() * 2);
 
 		GridBagConstraints gc = new GridBagConstraints();
+		Insets empty = new Insets(0,0,0,0);
+		Insets topTwo = new Insets(2,0,0,0);
 
 		// first line
 		gc.gridx = 0;
@@ -222,22 +248,26 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		gc.weightx = 0.0;
 		gc.weighty = 0.0;
+		gc.insets = topTwo;
 		filterPanel.add(tabLbl, gc);
 		gc.gridx = 1;
 		gc.gridy = 0;
 		gc.gridwidth = 2;
+		gc.insets = empty;
 		gc.fill = GridBagConstraints.NONE;
 		filterPanel.add(tabSelector, gc);
 
 		// second line
 		gc.gridx = 0;
 		gc.gridy = 1;
+		gc.insets = new Insets(8,0,0,0);
 		gc.gridwidth = 1;
 		filterPanel.add(lbl, gc);
 		gc.gridx = 1;
 		gc.gridwidth = 1;
 		gc.weightx = 1.0;
 		gc.weighty = 0.0;
+		gc.insets = new Insets(4,0,0,0);
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		filterPanel.add(filterValue, gc);
 
@@ -245,6 +275,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		gc.gridwidth = 2;
 		gc.weightx = 0.0;
 		gc.weighty = 1.0;
+		gc.insets = topTwo;
 		gc.fill = GridBagConstraints.NONE;
 		filterPanel.add(reload, gc);
 
@@ -297,7 +328,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 	public void loadBookmarks()
 	{
-		TabEntry tab = (TabEntry)(tabSelector.getSelectedItem());
+		TabEntry tab = (TabEntry)tabSelector.getSelectedItem();
 
 		final long start = System.currentTimeMillis();
 		final DataStore data;
@@ -316,13 +347,32 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			@Override
 			public void run()
 			{
+				NamedSortDefinition oldSort;
+				if (savedSort != null)
+				{
+					oldSort = savedSort;
+					savedSort = null;
+				}
+				else
+				{
+					oldSort	= bookmarks.getCurrentSort();
+				}
 				DataStoreTableModel model = new DataStoreTableModel(data);
 				model.setAllowEditing(false);
 				bookmarks.setModel(model, true);
 
 				if (data.getRowCount() > 0)
 				{
-					model.sortByColumn(0, true, false);
+					if (oldSort != null)
+					{
+						model.setSortDefinition(oldSort);
+					}
+					else
+					{
+						model.sortByColumn(0, true, false);
+					}
+					ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(bookmarks);
+					optimizer.optimizeAllColWidth(true);
 				}
 
 				// always select at least one row.
@@ -351,6 +401,11 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		bookmarks.scrollToRow(0);
 	}
 
+	private boolean isAltPressed(KeyEvent e)
+	{
+		return ((e.getModifiers() & ActionEvent.ALT_MASK) == ActionEvent.ALT_MASK);
+	}
+
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
@@ -376,7 +431,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				}
 			});
 		}
-		else if (e.getSource() == bookmarks)
+		else if (e.getSource() == bookmarks && !isAltPressed(e)) // Alt+Something might be needed to transfer the focus to a different component
 		{
 			long pause = System.currentTimeMillis() - lastKeyTyped;
 			lastKeyTyped = System.currentTimeMillis();
@@ -464,6 +519,13 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		dialog.approveAndClose();
 	}
 
+	public void saveSettings()
+	{
+		NamedSortDefinition sort = bookmarks.getCurrentSort();
+		String sortDef = sort.getDefinitionString();
+		Settings.getInstance().setProperty(PROP_PREFIX + "sort", sortDef);
+	}
+
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
@@ -495,6 +557,12 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 	public static void selectBookmark(MainWindow window)
 	{
+		if (window == null)
+		{
+			LogMgr.logError("BookmarkSelector.selectBookmark()", "selectBookmark() called with a NULL window!", new Exception("Invalid window"));
+			return;
+		}
+
 		BookmarkSelector picker = new BookmarkSelector(window);
 
 		if (GuiSettings.updateAllBookmarksOnSelect())
@@ -512,15 +580,16 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 		ValidatingDialog dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWinTitleBookmark"), picker);
 		picker.dialog = dialog;
-		if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.bookmark.select"))
+		String prop = PROP_PREFIX + "select";
+		if (!Settings.getInstance().restoreWindowSize(dialog, prop))
 		{
 			dialog.setSize(450,350);
 		}
 		WbSwingUtilities.center(dialog, window);
 		dialog.setVisible(true);
 
-		Settings.getInstance().storeWindowSize(dialog, "workbench.gui.bookmark.select");
-
+		Settings.getInstance().storeWindowSize(dialog, prop);
+		picker.saveSettings();
 		if (!dialog.isCancelled() && picker.selectedBookmark != null)
 		{
 			window.jumpToBookmark(picker.selectedBookmark);
