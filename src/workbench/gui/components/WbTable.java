@@ -181,10 +181,10 @@ public class WbTable
 	private WbTextCellEditor defaultNumberEditor;
 	private JTextField numberEditorTextField;
 
-	private SortAscendingAction sortAscending;
-	private SortDescendingAction sortDescending;
-	private OptimizeColumnWidthAction optimizeCol;
-	private OptimizeAllColumnsAction optimizeAllCol;
+	protected SortAscendingAction sortAscending;
+	protected SortDescendingAction sortDescending;
+	protected OptimizeColumnWidthAction optimizeCol;
+	protected OptimizeAllColumnsAction optimizeAllCol;
 	private SetColumnWidthAction setColWidth;
 
 	private TableReplacer replacer;
@@ -240,7 +240,7 @@ public class WbTable
 	private FocusIndicator focusIndicator;
 	private ListSelectionControl selectionController;
 	private boolean readOnly;
-	private FontZoomer zoomer;
+	protected FontZoomer zoomer;
 
 	private RendererSetup rendererSetup;
 	private boolean sortIgnoreCase;
@@ -2080,6 +2080,29 @@ public class WbTable
 		this.scrollRectToVisible(rect);
 	}
 
+	protected JPopupMenu createLimitedHeaderPopup()
+	{
+		JPopupMenu menu = new JPopupMenu();
+		menu.add(sortAscending.getMenuItem());
+		menu.add(sortDescending.getMenuItem());
+		menu.addSeparator();
+		menu.add(optimizeCol.getMenuItem());
+		menu.add(optimizeAllCol.getMenuItem());
+		menu.addSeparator();
+		menu.add(createZoomSubmenu());
+		return menu;
+	}
+	
+	protected JMenu createZoomSubmenu()
+	{
+		JMenu zoom = new JMenu(ResourceMgr.getString("TxtZoom"));
+		zoom.add(new JMenuItem(new IncreaseFontSize("TxtFntInc", zoomer)));
+		zoom.add(new JMenuItem(new DecreaseFontSize("TxtFntDecr", zoomer)));
+		zoom.addSeparator();
+		zoom.add(new JMenuItem(new ResetFontSize("TxtFntReset", zoomer)));
+		return zoom;
+	}
+
 	protected JPopupMenu getHeaderPopup()
 	{
 		JPopupMenu headerPopup = new JPopupMenu();
@@ -2101,13 +2124,8 @@ public class WbTable
 			headerPopup.add(new ResetColOrderAction(WbTable.this));
 			headerPopup.add(new SaveColOrderAction(WbTable.this));
 		}
-		JMenu zoom = new JMenu(ResourceMgr.getString("TxtZoom"));
-		zoom.add(new JMenuItem(new IncreaseFontSize("TxtFntInc", zoomer)));
-		zoom.add(new JMenuItem(new DecreaseFontSize("TxtFntDecr", zoomer)));
-		zoom.addSeparator();
-		zoom.add(new JMenuItem(new ResetFontSize("TxtFntReset", zoomer)));
 
-		headerPopup.add(zoom);
+		headerPopup.add(createZoomSubmenu());
 		return headerPopup;
 	}
 	/**

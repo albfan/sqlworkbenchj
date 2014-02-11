@@ -30,6 +30,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -110,7 +111,11 @@ public class EditorOptionsPanel
 		noWordSep.setText(Settings.getInstance().getEditorNoWordSep());
 		useTabs.setSelected(Settings.getInstance().getEditorUseTabCharacter());
 		followCurrentDir.setSelected(GuiSettings.getFollowFileDirectory());
-		defaultDir.setFilename(GuiSettings.getDefaultFileDir().getAbsolutePath());
+		File dir = GuiSettings.getDefaultFileDir();
+		if (dir != null)
+		{
+			defaultDir.setFilename(dir.getAbsolutePath());
+		}
 		defaultDir.setEnabled(followCurrentDir.isSelected());
 		keepHilite.setSelected(GuiSettings.getKeepCurrentSqlHighlight());
 		historySizeField.setText(Integer.toString(Settings.getInstance().getMaxHistorySize()));

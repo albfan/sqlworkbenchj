@@ -1204,7 +1204,7 @@ public class MainWindow
 		int lastIndex = sqlTab.getPreviousTabIndex();
 		if (lastIndex > -1 && lastIndex < sqlTab.getTabCount())
 		{
-			BookmarkManager.getInstance().updateInBackground(MainWindow.this, getSqlPanel(lastIndex));
+			BookmarkManager.getInstance().updateInBackground(MainWindow.this, getSqlPanel(lastIndex), false);
 		}
 	}
 

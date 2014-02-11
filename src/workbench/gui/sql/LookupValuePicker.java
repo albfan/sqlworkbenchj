@@ -53,6 +53,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -63,12 +64,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.text.JTextComponent;
 
+import workbench.interfaces.NullableEditor;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ResultSetter;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -83,6 +86,7 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.RowHighlighter;
+import workbench.gui.components.SelectionHandler;
 import workbench.gui.components.TableRowHeader;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbLabel;
@@ -91,8 +95,6 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
-import workbench.interfaces.NullableEditor;
-import workbench.resource.GuiSettings;
 
 import workbench.storage.DataStore;
 import workbench.storage.LookupDataLoader;
@@ -127,6 +129,7 @@ public class LookupValuePicker
 	private WbConnection dbConnection;
 	private ValidatingDialog dialog;
 	private final Map<String, Object> currentValues = new HashMap<String, Object>();
+	private SelectionHandler keyHandler;
 
 	public LookupValuePicker(WbConnection conn, LookupDataLoader loader, Map<String, Object> values)
 	{
@@ -144,7 +147,15 @@ public class LookupValuePicker
 		filterValue.addActionListener(this);
 		filterValue.setToolTipText(ResourceMgr.getString("d_LblFkFilterValue"));
 
-		lookupData = new WbTable(false, false, false);
+		lookupData = new WbTable(false, false, false)
+		{
+			@Override
+			protected JPopupMenu getHeaderPopup()
+			{
+				return createLimitedHeaderPopup();
+			}
+		};
+
 		lookupData.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		lookupData.setReadOnly(true);
 		lookupData.setRendererSetup(new RendererSetup(false));
@@ -152,6 +163,7 @@ public class LookupValuePicker
 		lookupData.setColumnSelectionAllowed(false);
 		lookupData.setRowSelectionAllowed(true);
 		lookupData.getHeaderRenderer().setShowPKIcon(true);
+		keyHandler = new SelectionHandler(lookupData);
 
 		Action nextComponent = new AbstractAction()
 		{
@@ -483,8 +495,7 @@ public class LookupValuePicker
 					// as the focus is set to the table containing the lookup data,
 					// the user can immediately use the cursor keys to select one entry.
 					if (!selectCurrent || row < 0) row = 0;
-					lookupData.getSelectionModel().setSelectionInterval(row, row);
-					lookupData.scrollToRow(row);
+					keyHandler.selectRow(0);
 
 					int rows = data.getRowCount();
 					int maxRowNum = maxRows.getValue();
@@ -523,10 +534,9 @@ public class LookupValuePicker
 		Map<String, Object> values = new TreeMap<String, Object>();
 		List<String> columns = pk.getColumns();
 		DataStore ds = lookupData.getDataStore();
-		int realRow = lookupData.convertRowIndexToModel(row);
 		for (String column : columns)
 		{
-			Object value = ds.getValue(realRow, column);
+			Object value = ds.getValue(row, column);
 			values.put(column, value);
 		}
 		return values;
@@ -565,6 +575,18 @@ public class LookupValuePicker
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
+		if (e.getSource() == this.filterValue && e.getModifiers() == 0)
+		{
+			if (e.getKeyCode() == KeyEvent.VK_ESCAPE && StringUtil.isNonBlank(filterValue.getText()))
+			{
+				e.consume();
+				resetFilter();
+			}
+			else
+			{
+				keyHandler.handleKeyPressed(e);
+			}
+		}
 	}
 
 	@Override

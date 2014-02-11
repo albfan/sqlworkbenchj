@@ -202,21 +202,6 @@ public class BookmarkManager
 	 *
 	 * If the text in the panel hasn't changed since the bookmarks were parsed the last time, no parsing will take place.
 	 *
-	 * @param win    the window to which the panel belongs
-	 * @param panel  the panel
-	 *
-	 * @see #updateInBackground(workbench.gui.MainWindow, workbench.interfaces.MainPanel, boolean)
-	 */
-	public void updateInBackground(final MainWindow win, final MainPanel panel)
-	{
-		updateInBackground(win, panel, false);
-	}
-
-	/**
-	 * Updates the list of bookmarks for the passed panel.
-	 *
-	 * If the text in the panel hasn't changed since the bookmarks were parsed the last time, no parsing will take place.
-	 *
 	 * To force a re-parsing of the panel's bookmarks use the <tt>clearList</tt> parameter.
 	 *
 	 * @param win    the window to which the panel belongs
@@ -243,8 +228,16 @@ public class BookmarkManager
 				long start = System.currentTimeMillis();
 				BookmarkGroup updated = updateBookmarks(win, panel);
 				long duration = System.currentTimeMillis() - start;
-				String info = "(" + (updated == null ? "no update)" : updated.getBookmarks().size() + " bookmarks)");
-				LogMgr.logDebug("BookmarManager.updateTabBookmarks()", "Panel '" + panel.getTabTitle() + "' was updated in "  + duration + "ms " + info);
+				if (updated == null)
+				{
+					LogMgr.logDebug("BookmarManager.updateInBackground()", "Panel '" + panel.getTabTitle() + "' was up to date");
+				}
+				else
+				{
+					LogMgr.logDebug("BookmarManager.updateInBackground()",
+						"Panel '" + panel.getTabTitle() + "' was updated in "  + duration + "ms (" + updated.getBookmarks().size() + " bookmarks)");
+				}
+
 			}
 		};
 		bmThread.start();

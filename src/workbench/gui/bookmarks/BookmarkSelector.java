@@ -68,6 +68,7 @@ import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.FlatButton;
+import workbench.gui.components.SelectionHandler;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbCheckBox;
 import workbench.gui.components.WbLabel;
@@ -98,7 +99,9 @@ public class BookmarkSelector
 implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent
 {
 	private static final String PROP_PREFIX = "workbench.gui.bookmarks.";
-	private static final String PROP_SAVE_WIDTHS = PROP_PREFIX + "colwidths.save";
+	private static final String PROP_DO_SAVE_WIDTHS = PROP_PREFIX + "colwidths.save";
+	private static final String PROP_DO_SAVE_SORT = PROP_PREFIX + "sort.save";
+	private static final String PROP_SORT_DEF = PROP_PREFIX + "sort";
 	private static final String PROP_USE_CURRENT_TAB = PROP_PREFIX + "current.tab.default";
 	private static final String PROP_SEARCH_NAME = PROP_PREFIX + "search.name";
 
@@ -115,6 +118,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	private WbCheckBox useCurrentEditorCbx;
 	private int[] initialColumnWidths;
 	private CheckBoxAction rememberColumnWidths;
+	private CheckBoxAction rememberSort;
+	private SelectionHandler keyHandler;
 
 	public BookmarkSelector(MainWindow win)
 	{
@@ -126,16 +131,18 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		filterValue.addActionListener(this);
 		filterValue.setToolTipText(ResourceMgr.getString("TxtBookmarkFilterTip"));
 
-		rememberColumnWidths = new CheckBoxAction("MnuTxtBookmarksSaveWidths", PROP_SAVE_WIDTHS);
+		rememberColumnWidths = new CheckBoxAction("MnuTxtBookmarksSaveWidths", PROP_DO_SAVE_WIDTHS);
+		rememberSort = new CheckBoxAction("MnuTxtBookmarksSort", PROP_DO_SAVE_SORT);
 
 		bookmarks = new WbTable(false, false, false)
 		{
 			@Override
 			protected JPopupMenu getHeaderPopup()
 			{
-				JPopupMenu menu = super.getHeaderPopup();
+				JPopupMenu menu = createLimitedHeaderPopup();
 				menu.addSeparator();
 				menu.add(rememberColumnWidths.getMenuItem());
+				menu.add(rememberSort.getMenuItem());
 				return menu;
 			}
 		};
@@ -149,6 +156,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		bookmarks.getHeaderRenderer().setShowPKIcon(true);
 		bookmarks.setSortIgnoreCase(true);
 		bookmarks.setShowPopupMenu(false);
+		keyHandler = new SelectionHandler(bookmarks);
 
 		searchNameCbx = new WbCheckBox();
 		searchNameCbx.setText(ResourceMgr.getString("LblBookFilter"));
@@ -259,19 +267,26 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 		setFocusTraversalPolicy(pol);
 
-		String sort = Settings.getInstance().getProperty(PROP_PREFIX + "sort", null);
-		if (StringUtil.isNonBlank(sort))
+		if (doSaveSortOrder())
 		{
-			savedSort = SortDefinition.parseDefinitionString(sort);
-			if (savedSort != null)
+			String sort = Settings.getInstance().getProperty(PROP_SORT_DEF, null);
+			if (StringUtil.isNonBlank(sort))
 			{
-				savedSort.setIgnoreCase(true);
-				LogMgr.logDebug("BookmarkSelector.<init>", "Using saved sort definition: " + sort);
+				savedSort = SortDefinition.parseDefinitionString(sort);
+				if (savedSort != null)
+				{
+					savedSort.setIgnoreCase(true);
+				}
+				else
+				{
+					LogMgr.logWarning("BookmarkSelector.<init>", "Invalid sort definition saved: " + sort);
+					savedSort = null;
+				}
 			}
-			else
-			{
-				LogMgr.logWarning("BookmarkSelector.<init>", "Invalid sort definition saved: " + sort);
-			}
+		}
+		else
+		{
+			savedSort = null;
 		}
 	}
 
@@ -458,7 +473,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				// always select at least one row.
 				// as the focus is set to the table containing the lookup data,
 				// the user can immediately use the cursor keys to select one entry.
-				selectRow(0);
+				keyHandler.selectRow(0);
 
 				long duration = System.currentTimeMillis() - start;
 				LogMgr.logDebug("BookmarkSelector.loadBookmarks()", "Loading bookmarks took: " + duration + "ms");
@@ -493,7 +508,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			{
 				filterValue.setText("");
 				bookmarks.resetFilter();
-				selectRow(0);
+				keyHandler.selectRow(0);
 			}
 		});
 	}
@@ -522,7 +537,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				((ExpressionValue)filter).setIgnoreCase(true);
 				bookmarks.applyFilter(filter, false);
 				handleColumnWidths();
-				selectRow(0);
+				keyHandler.selectRow(0);
 			}
 		});
 	}
@@ -542,25 +557,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		}
 	}
 
-	private void selectNextRow()
-	{
-		int row = bookmarks.getSelectedRow();
-		selectRow(row + 1);
-	}
-
-	private void selectPreviousRow()
-	{
-		int row = bookmarks.getSelectedRow();
-		selectRow(row - 1);
-	}
-
-	private void selectRow(final int row)
-	{
-		if (row < 0 || row >= bookmarks.getRowCount()) return;
-		bookmarks.getSelectionModel().setSelectionInterval(row, row);
-		bookmarks.scrollToRow(row);
-	}
-
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
@@ -571,13 +567,9 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				e.consume();
 				resetFilter();
 			}
-			if (e.getKeyCode() == KeyEvent.VK_UP)
+			else
 			{
-				selectPreviousRow();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_DOWN)
-			{
-				selectNextRow();
+				keyHandler.handleKeyPressed(e);
 			}
 		}
 	}
@@ -679,7 +671,12 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 	private boolean doSaveColumnWidths()
 	{
-		return Settings.getInstance().getBoolProperty(PROP_PREFIX + "colwidths.save", false);
+		return Settings.getInstance().getBoolProperty(PROP_DO_SAVE_WIDTHS, false);
+	}
+
+	private boolean doSaveSortOrder()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_DO_SAVE_SORT, false);
 	}
 
 	private boolean columnWidthChanged()
@@ -692,9 +689,12 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 	public void saveSettings()
 	{
-		SortDefinition sort = bookmarks.getCurrentSortColumns();
-		String sortDef = sort.getDefinitionString();
-		Settings.getInstance().setProperty(PROP_PREFIX + "sort", sortDef);
+		if (doSaveSortOrder())
+		{
+			SortDefinition sort = bookmarks.getCurrentSortColumns();
+			String sortDef = sort.getDefinitionString();
+			Settings.getInstance().setProperty(PROP_SORT_DEF, sortDef);
+		}
 		Settings.getInstance().setProperty(PROP_SEARCH_NAME, searchNameCbx.isSelected());
 		Settings.getInstance().setProperty(PROP_USE_CURRENT_TAB, useCurrentEditorCbx.isSelected());
 		if (columnWidthChanged() && doSaveColumnWidths())
@@ -706,7 +706,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-		if (e.getClickCount() == 2)
+		if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
 		{
 			selectValueAndClose();
 		}
@@ -750,7 +750,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			// be the one that is stale. The bookmarks for a tab are refreshed when the tab is left
 			// so the bookmarks for all others should be correct
 			MainPanel panel = window.getCurrentPanel();
-			BookmarkManager.getInstance().updateInBackground(window, panel);
+			BookmarkManager.getInstance().updateInBackground(window, panel, false);
 		}
 
 		final BookmarkSelector picker = new BookmarkSelector(window);
