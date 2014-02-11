@@ -149,16 +149,21 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		bookmarks.setSortIgnoreCase(true);
 		bookmarks.setShowPopupMenu(false);
 
-		tabSelector = new JComboBox(getTabs());
-		tabSelector.addActionListener(this);
-
 		searchNameCbx = new WbCheckBox();
 		searchNameCbx.setText(ResourceMgr.getString("LblBookFilter"));
 		searchNameCbx.setSelected(Settings.getInstance().getBoolProperty(PROP_SEARCH_NAME, true));
 
+		boolean useCurrent = Settings.getInstance().getBoolProperty(PROP_USE_CURRENT_TAB, true);
 		useCurrentEditorCbx = new WbCheckBox();
-		useCurrentEditorCbx.setText("&Use current tab");
-		searchNameCbx.setSelected(Settings.getInstance().getBoolProperty(PROP_USE_CURRENT_TAB, true));
+		useCurrentEditorCbx.setText(ResourceMgr.getString("LblBookUseCurrent"));
+		useCurrentEditorCbx.setSelected(useCurrent);
+
+		tabSelector = new JComboBox(getTabs());
+		if (useCurrent)
+		{
+			selectCurrentTab();
+		}
+		tabSelector.addActionListener(this);
 
 		Action nextComponent = new AbstractAction()
 		{
@@ -505,6 +510,21 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		});
 	}
 
+	private void selectCurrentTab()
+	{
+		int count = tabSelector.getItemCount();
+		int currentIndex = window.getCurrentPanelIndex();
+		for (int i=0; i < count; i++)
+		{
+			TabEntry entry = (TabEntry)tabSelector.getItemAt(i);
+			if (entry.getIndex() == currentIndex)
+			{
+				tabSelector.setSelectedItem(entry);
+				return;
+			}
+		}
+	}
+
 	private void selectNextRow()
 	{
 		int row = bookmarks.getSelectedRow();
@@ -692,8 +712,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			return;
 		}
 
-		final BookmarkSelector picker = new BookmarkSelector(window);
-
 		if (GuiSettings.updateAllBookmarksOnSelect())
 		{
 			BookmarkManager.getInstance().updateInBackground(window);
@@ -706,6 +724,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			MainPanel panel = window.getCurrentPanel();
 			BookmarkManager.getInstance().updateInBackground(window, panel);
 		}
+
+		final BookmarkSelector picker = new BookmarkSelector(window);
 
 		ValidatingDialog dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWinTitleBookmark"), picker);
 		ResourceMgr.setWindowIcons(dialog, "bookmark");
