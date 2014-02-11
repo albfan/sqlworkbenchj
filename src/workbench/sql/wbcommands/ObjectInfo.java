@@ -94,7 +94,7 @@ public class ObjectInfo
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-
+		long start = System.currentTimeMillis();
 		TableIdentifier dbObject = new TableIdentifier(objectName, connection);
 
 		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
@@ -347,7 +347,7 @@ public class ObjectInfo
 				}
 			}
 		}
-
+		result.setExecutionDuration(System.currentTimeMillis() - start);
 		return result;
 	}
 

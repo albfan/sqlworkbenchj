@@ -21,6 +21,7 @@
 package workbench.gui.bookmarks;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FocusTraversalPolicy;
 import java.awt.GridBagConstraints;
@@ -33,19 +34,24 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableColumnModel;
 
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.Reloadable;
@@ -57,6 +63,7 @@ import workbench.resource.Settings;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CheckBoxAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
@@ -69,6 +76,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
+import workbench.sql.ResultNameParser;
 
 import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
@@ -89,6 +97,10 @@ public class BookmarkSelector
 implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent
 {
 	private static final String PROP_PREFIX = "workbench.gui.bookmarks.";
+	private static final String PROP_SAVE_WIDTHS = PROP_PREFIX + "colwidths.save";
+	private static final String PROP_USE_CURRENT_TAB = PROP_PREFIX + "current.tab.default";
+	private static final String PROP_SEARCH_NAME = PROP_PREFIX + "search.name";
+
 	private final JTextField filterValue;
 	private final JComboBox tabSelector;
 	private JLabel info;
@@ -99,6 +111,9 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	private NamedScriptLocation selectedBookmark;
 	private SortDefinition savedSort;
 	private WbCheckBox searchNameCbx;
+	private WbCheckBox useCurrentEditorCbx;
+	private int[] initialColumnWidths;
+	private CheckBoxAction rememberColumnWidths;
 
 	public BookmarkSelector(MainWindow win)
 	{
@@ -110,7 +125,20 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		filterValue.addActionListener(this);
 		filterValue.setToolTipText(ResourceMgr.getString("TxtBookmarkFilter"));
 
-		bookmarks = new WbTable(false, false, false);
+		rememberColumnWidths = new CheckBoxAction("MnuTxtBookmarksSaveWidths", PROP_SAVE_WIDTHS);
+
+		bookmarks = new WbTable(false, false, false)
+		{
+			@Override
+			protected JPopupMenu getHeaderPopup()
+			{
+				JPopupMenu menu = super.getHeaderPopup();
+				menu.addSeparator();
+				menu.add(rememberColumnWidths.getMenuItem());
+				return menu;
+			}
+		};
+
 		bookmarks.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		bookmarks.setReadOnly(true);
 		bookmarks.setRendererSetup(new RendererSetup(false));
@@ -119,9 +147,18 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		bookmarks.setRowSelectionAllowed(true);
 		bookmarks.getHeaderRenderer().setShowPKIcon(true);
 		bookmarks.setSortIgnoreCase(true);
+		bookmarks.setShowPopupMenu(false);
 
 		tabSelector = new JComboBox(getTabs());
 		tabSelector.addActionListener(this);
+
+		searchNameCbx = new WbCheckBox();
+		searchNameCbx.setText(ResourceMgr.getString("LblBookFilter"));
+		searchNameCbx.setSelected(Settings.getInstance().getBoolProperty(PROP_SEARCH_NAME, true));
+
+		useCurrentEditorCbx = new WbCheckBox();
+		useCurrentEditorCbx.setText("&Use current tab");
+		searchNameCbx.setSelected(Settings.getInstance().getBoolProperty(PROP_USE_CURRENT_TAB, true));
 
 		Action nextComponent = new AbstractAction()
 		{
@@ -182,7 +219,18 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		gc.insets = new Insets(5,0,0,0);
 		add(scroll, gc);
 
-		info = new JLabel(ResourceMgr.getFormattedString("TxtBookmarkHelp", BookmarkAnnotation.ANNOTATION));
+		String tags = null;
+		String prefix = "<tt><b>@";
+		String close  = "</b></tt>";
+		if (GuiSettings.getUseResultTagForBookmarks())
+		{
+			tags = prefix + BookmarkAnnotation.ANNOTATION + close + " " + ResourceMgr.getString("TxtOr") + " " + prefix + ResultNameParser.ANNOTATION + close;
+		}
+		else
+		{
+			tags = prefix + BookmarkAnnotation.ANNOTATION + close;
+		}
+		info = new JLabel(ResourceMgr.getFormattedString("TxtBookmarkHelp", tags));
 		gc.gridy = 2;
 		gc.weightx = 0.0;
 		gc.weighty = 0.0;
@@ -192,6 +240,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.addComponent(tabSelector);
+		pol.addComponent(useCurrentEditorCbx);
+		pol.addComponent(searchNameCbx);
 		pol.addComponent(filterValue);
 
 		setFocusCycleRoot(true);
@@ -234,59 +284,56 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		tabLbl.setText(ResourceMgr.getString("LblBookPanel"));
 		tabLbl.setLabelFor(tabSelector);
 
-		String all = ResourceMgr.getString("LblBookPanelAll");
-		WbSwingUtilities.setMinimumSize(tabSelector, all.length() * 2);
-
 		GridBagConstraints gc = new GridBagConstraints();
 		Insets empty = new Insets(0,0,0,0);
 		Insets topTwo = new Insets(2,0,0,0);
 
-		// first line
 		gc.gridx = 0;
 		gc.gridy = 0;
 		gc.anchor = GridBagConstraints.FIRST_LINE_START;
-		gc.fill = GridBagConstraints.HORIZONTAL;
+		gc.fill = GridBagConstraints.NONE;
 		gc.weightx = 0.0;
 		gc.weighty = 0.0;
 		gc.insets = topTwo;
 		filterPanel.add(tabLbl, gc);
 
+		Dimension pref = tabSelector.getPreferredSize();
+		Dimension max = new Dimension((int)(pref.width * 1.05), pref.height);
+		tabSelector.setMaximumSize(max);
+		JPanel ddPanel = new JPanel();
+		ddPanel.setLayout(new BoxLayout(ddPanel, BoxLayout.LINE_AXIS));
+		ddPanel.add(tabSelector);
+		ddPanel.add(Box.createHorizontalGlue());
+		ddPanel.add(useCurrentEditorCbx);
+		ddPanel.add(searchNameCbx);
+
 		gc.gridx = 1;
 		gc.gridy = 0;
-		gc.gridwidth = 1;
+		gc.gridwidth = 2;
+		gc.weightx = 1.0;
+		gc.anchor = GridBagConstraints.FIRST_LINE_START;
 		gc.insets = empty;
-		gc.fill = GridBagConstraints.NONE;
-		filterPanel.add(tabSelector, gc);
-
-		searchNameCbx = new WbCheckBox();
-		searchNameCbx.setText(ResourceMgr.getString("LblBookFilter"));
-		searchNameCbx.setSelected(Settings.getInstance().getBoolProperty(PROP_PREFIX + ".search.name", true));
-
-		gc.gridx = 2;
-		gc.gridy = 0;
-		gc.gridwidth = 1;
-		gc.anchor = GridBagConstraints.FIRST_LINE_END;
-		gc.insets = empty;
-		gc.fill = GridBagConstraints.NONE;
-		filterPanel.add(searchNameCbx, gc);
+		gc.fill = GridBagConstraints.HORIZONTAL;
+		filterPanel.add(ddPanel, gc);
 
 		// second line
 		gc.gridx = 0;
 		gc.gridy = 1;
+		gc.weightx = 0.0;
 		gc.anchor = GridBagConstraints.FIRST_LINE_START;
 		gc.insets = new Insets(8,0,0,0);
 		gc.gridwidth = 1;
 		filterPanel.add(lbl, gc);
 
 		gc.gridx = 1;
-		gc.gridwidth = 2;
+		gc.gridwidth = 1;
 		gc.weightx = 1.0;
 		gc.weighty = 0.0;
 		gc.insets = new Insets(4,0,0,0);
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		filterPanel.add(filterValue, gc);
 
-		gc.gridx = 3;
+		gc.gridx = 2;
 		gc.gridwidth = 1;
 		gc.weightx = 0.0;
 		gc.weighty = 1.0;
@@ -327,6 +374,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	@Override
 	public void reload()
 	{
+		saveColumnWidths();
 		BookmarkManager.getInstance().clearBookmarksForWindow(window.getWindowId());
 		BookmarkManager.getInstance().updateBookmarks(window);
 		loadBookmarks();
@@ -353,6 +401,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			@Override
 			public void run()
 			{
+				initialColumnWidths = null;
+
 				SortDefinition oldSort;
 				if (savedSort != null)
 				{
@@ -378,9 +428,10 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 					{
 						model.sortByColumn(0, true, false);
 					}
-					ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(bookmarks);
-					optimizer.optimizeAllColWidth(true);
+					handleColumnWidths();
 				}
+
+				initialColumnWidths = getColumnWidths();
 
 				// always select at least one row.
 				// as the focus is set to the table containing the lookup data,
@@ -394,6 +445,21 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				WbSwingUtilities.showDefaultCursorOnWindow(BookmarkSelector.this);
 			}
 		});
+	}
+
+	private void handleColumnWidths()
+	{
+		int[] savedWidths = getSavedColumnWidths();
+
+		if (savedWidths != null && doSaveColumnWidths())
+		{
+			bookmarks.applyColumnWidths(savedWidths);
+		}
+		else
+		{
+			ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(bookmarks);
+			optimizer.optimizeAllColWidth(true);
+		}
 	}
 
 	protected void resetFilter()
@@ -417,6 +483,10 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			@Override
 			public void run()
 			{
+				if (doSaveColumnWidths())
+				{
+					saveColumnWidths();
+				}
 				ContainsComparator comp = new ContainsComparator();
 				FilterExpression filter;
 				if (searchNameCbx.isSelected())
@@ -428,7 +498,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 					filter = new DataRowExpression(comp, filterValue.getText());
 				}
 				((ExpressionValue)filter).setIgnoreCase(true);
-				bookmarks.applyFilter(filter);
+				bookmarks.applyFilter(filter, false);
+				handleColumnWidths();
 				selectRow(0);
 			}
 		});
@@ -479,6 +550,12 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	{
 	}
 
+	private boolean isAltPressed(KeyEvent e)
+	{
+		// TODO: does this work with MacOS?
+		return ((e.getModifiers() & KeyEvent.ALT_MASK) == KeyEvent.ALT_MASK);
+	}
+
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
@@ -487,6 +564,16 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			if (e.getKeyChar() == KeyEvent.VK_ENTER)
 			{
 				selectValue();
+			}
+			else if (isAltPressed(e) && e.getKeyChar() == searchNameCbx.getMnemonic())
+			{
+				searchNameCbx.setSelected(!searchNameCbx.isSelected());
+				e.consume();
+			}
+			else if (isAltPressed(e) && e.getKeyChar() == useCurrentEditorCbx.getMnemonic())
+			{
+				useCurrentEditorCbx.setSelected(!useCurrentEditorCbx.isSelected());
+				e.consume();
 			}
 			else
 			{
@@ -515,12 +602,57 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		dialog.approveAndClose();
 	}
 
+	private int[] getColumnWidths()
+	{
+		TableColumnModel colMod = bookmarks.getColumnModel();
+		if (colMod == null) return null;
+
+		int count = colMod.getColumnCount();
+		int[] result = new int[count];
+
+		for (int i=0; i<count; i++)
+		{
+			result[i] = colMod.getColumn(i).getWidth();
+		}
+		return result;
+	}
+
+	private void saveColumnWidths()
+	{
+		String widths = StringUtil.arrayToString(getColumnWidths());
+		Settings.getInstance().setProperty(PROP_PREFIX + "colwidths", widths);
+	}
+
+	private int[] getSavedColumnWidths()
+	{
+		String widths = Settings.getInstance().getProperty(PROP_PREFIX + "colwidths", null);
+		return StringUtil.stringToArray(widths);
+	}
+
+	private boolean doSaveColumnWidths()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_PREFIX + "colwidths.save", false);
+	}
+
+	private boolean columnWidthChanged()
+	{
+		if (initialColumnWidths == null) return true;
+		if (getSavedColumnWidths() != null) return true;
+		int[] currentWidths = getColumnWidths();
+		return !Arrays.equals(currentWidths, initialColumnWidths);
+	}
+
 	public void saveSettings()
 	{
 		SortDefinition sort = bookmarks.getCurrentSortColumns();
 		String sortDef = sort.getDefinitionString();
 		Settings.getInstance().setProperty(PROP_PREFIX + "sort", sortDef);
-		Settings.getInstance().setProperty(PROP_PREFIX + ".search.name", searchNameCbx.isSelected());
+		Settings.getInstance().setProperty(PROP_SEARCH_NAME, searchNameCbx.isSelected());
+		Settings.getInstance().setProperty(PROP_USE_CURRENT_TAB, useCurrentEditorCbx.isSelected());
+		if (columnWidthChanged() && doSaveColumnWidths())
+		{
+			saveColumnWidths();
+		}
 	}
 
 	@Override

@@ -3248,8 +3248,6 @@ public class MainWindow
 
 			WbConnection conn = panel.getConnection();
 
-			BookmarkManager.getInstance().clearBookmarksForPanel(getWindowId(), panel.getId());
-
 			// this does not really close the connection
 			// it simply tells the panel that it should
 			// release anything attached to the connection!
@@ -3258,6 +3256,8 @@ public class MainWindow
 			panel.disconnect();
 
 			panel.dispose();
+
+			BookmarkManager.getInstance().clearBookmarksForPanel(getWindowId(), panel.getId());
 
 			boolean doDisconnect = conn != null && this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab();
 
@@ -3269,7 +3269,7 @@ public class MainWindow
 			}
 			disposeMenu(panelMenus.get(index));
 			this.panelMenus.remove(index);
-			this.sqlTab.remove(index);
+			this.sqlTab.removeTabAt(index);
 
 			if (updateGUI)
 			{

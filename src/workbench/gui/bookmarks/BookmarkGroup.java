@@ -76,17 +76,17 @@ class BookmarkGroup
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (obj == null)
+		if (obj instanceof BookmarkGroup)
 		{
-			return false;
+			BookmarkGroup other = (BookmarkGroup) obj;
+			return this.groupId.equals(other.groupId);
 		}
-		if (getClass() != obj.getClass())
-		{
-			return false;
-		}
-		final BookmarkGroup other = (BookmarkGroup) obj;
-		return true;
+		return false;
 	}
 
-
+	@Override
+	public String toString()
+	{
+		return "Group: " + this.groupName + ": " + this.bookmarks.toString();
+	}
 }

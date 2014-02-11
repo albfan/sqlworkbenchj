@@ -425,8 +425,11 @@ public class SqlPanel
 	@Override
 	public List<NamedScriptLocation> getBookmarks()
 	{
+		if (editor == null) return null;
+		String text = editor.getText();
+		if (StringUtil.isEmptyString(text)) return Collections.emptyList();
 		BookmarkAnnotation reader = new BookmarkAnnotation();
-		List<NamedScriptLocation> bookmarks = reader.getBookmarks(editor.getText(), getId());
+		List<NamedScriptLocation> bookmarks = reader.getBookmarks(text, getId());
 		for (NamedScriptLocation loc : bookmarks)
 		{
 			int line = editor.getLineOfOffset(loc.getOffset());

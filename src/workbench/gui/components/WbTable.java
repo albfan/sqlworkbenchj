@@ -1417,11 +1417,18 @@ public class WbTable
 
 	public void applyFilter(FilterExpression filter)
 	{
+		applyFilter(filter, true);
+	}
+	public void applyFilter(FilterExpression filter, boolean adjustColumns)
+	{
 		if (dwModel == null) return;
 		lastFilter = filter;
 		currentFilter = filter;
 		dwModel.applyFilter(filter);
-		adjustRowsAndColumns();
+		if (adjustColumns)
+		{
+			adjustRowsAndColumns();
+		}
 		WbSwingUtilities.repaintLater(getParent());
 	}
 
@@ -1693,6 +1700,19 @@ public class WbTable
 			TableColumn col = colMod.getColumn(i);
 			String name = this.getColumnName(i);
 			savedColumnSizes.put(name, Integer.valueOf(col.getPreferredWidth()));
+		}
+	}
+
+	public void applyColumnWidths(int[] widths)
+	{
+		if (widths == null) return;
+		if (widths.length != this.getColumnCount()) return;
+		TableColumnModel colMod = getColumnModel();
+		for (int i=0; i < widths.length; i++)
+		{
+			TableColumn col = colMod.getColumn(i);
+			col.setWidth(widths[i]);
+			col.setPreferredWidth(widths[i]);
 		}
 	}
 

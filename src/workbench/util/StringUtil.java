@@ -1758,4 +1758,29 @@ public class StringUtil
 		}
 		return end;
 	}
+
+	public static int[] stringToArray(String values)
+	{
+		if (isBlank(values)) return null;
+		String[] elements = values.split(",");
+		int[] result = new int[elements.length];
+		for (int i=0; i < elements.length; i++)
+		{
+			result[i] = getIntValue(elements[i], 0);
+		}
+		return result;
+	}
+	
+	public static String arrayToString(int[] values)
+	{
+		if (values == null) return null;
+
+		StringBuilder sb = new StringBuilder(values.length);
+		for (int i=0; i < values.length; i++)
+		{
+			if (i > 0) sb.append(',');
+			sb.append(Integer.toString(values[i]));
+		}
+		return sb.toString();
+	}
 }

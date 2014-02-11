@@ -53,6 +53,10 @@ public class WbCheckBox
 			this.setMnemonic((int)mnemonic);
 		}
 		super.setText(newText);
+		if (pos > -1 )
+		{
+			this.setDisplayedMnemonicIndex(pos);
+		}
 	}
 
 }

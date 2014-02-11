@@ -41,18 +41,26 @@ public class BookmarkAnnotation
 {
 	public static final String ANNOTATION = "WbTag";
 
-	private boolean useResultNameTag;
+	private String resultNameTag;
 
 	public BookmarkAnnotation()
 	{
 		super(ANNOTATION);
-		useResultNameTag = GuiSettings.getUseResultTagForBookmarks();
+		setUseResultTag(GuiSettings.getUseResultTagForBookmarks());
 	}
 
 	public void setUseResultTag(boolean flag)
 	{
-		useResultNameTag = flag;
+		if (flag)
+		{
+			resultNameTag = "@" + ResultNameParser.ANNOTATION.toLowerCase();
+		}
+		else
+		{
+			resultNameTag = null;
+		}
 	}
+
 	/**
 	 * Parses the given SQL script for bookmark annotations.
 	 *
@@ -65,14 +73,15 @@ public class BookmarkAnnotation
 		SQLLexer lexer = new SQLLexer(script);
 		SQLToken token = lexer.getNextToken(true, false);
 
+
 		while (token != null)
 		{
 			if (token.isComment())
 			{
 				String locationName = StringUtil.trim(extractAnnotationValue(token));
-				if (locationName == null && useResultNameTag)
+				if (locationName == null && resultNameTag != null)
 				{
-					locationName = StringUtil.trim(extractAnnotationValue(token, ResultNameParser.ANNOTATION));
+					locationName = StringUtil.trim(extractAnnotationValue(token, resultNameTag));
 				}
 
 				if (locationName != null)

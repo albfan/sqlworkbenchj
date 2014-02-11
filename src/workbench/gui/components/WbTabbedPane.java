@@ -521,6 +521,13 @@ public class WbTabbedPane
 	}
 
 	@Override
+	public void removeTabAt(int index)
+	{
+		super.removeTabAt(index);
+		previousTabIndex = -1;
+	}
+
+	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
