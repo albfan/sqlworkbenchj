@@ -23,6 +23,7 @@
 package workbench.resource;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.Set;
 
 import javax.swing.KeyStroke;
@@ -371,9 +372,11 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.editor.followfiledir", flag);
 	}
 
-	public static String getDefaultFileDir()
+	public static File getDefaultFileDir()
 	{
-		return Settings.getInstance().getProperty("workbench.gui.editor.defaultdir", null);
+		String dirName = Settings.getInstance().getProperty("workbench.gui.editor.defaultdir", null);
+		if (dirName == null) return null;
+		return new File(dirName);
 	}
 
 	public static void setDefaultFileDir(String path)

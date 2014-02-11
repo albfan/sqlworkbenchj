@@ -582,8 +582,7 @@ public class EditorPanel
 				}
 				else
 				{
-					String dir = GuiSettings.getDefaultFileDir();
-					lastDir = new File(dir);
+					lastDir = GuiSettings.getDefaultFileDir();
 				}
 			}
 			JFileChooser fc = new WbFileChooser(lastDir);

@@ -73,7 +73,6 @@ public class BookmarkAnnotation
 		SQLLexer lexer = new SQLLexer(script);
 		SQLToken token = lexer.getNextToken(true, false);
 
-
 		while (token != null)
 		{
 			if (token.isComment())

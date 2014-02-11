@@ -1869,7 +1869,7 @@ WHERE id=42;</programlisting>
 
   </section>
 
-  <section id="command-listprocs">
+  <section id="command-listindexes">
     <title>List indexes - WbListIndexes</title>
 
     <para>

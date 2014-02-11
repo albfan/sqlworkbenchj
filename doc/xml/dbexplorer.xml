@@ -35,6 +35,7 @@
 		tab.
 	</para>
 
+  <!--
 	<para>
 		The list of tables can be pre-filtered to remove unwanted entries such as tables
 		that have been deleted and now reside in Oracle's "Recycle Bin". The filtering
@@ -42,7 +43,8 @@
 		on a per-database basis. By default this is only defined for Oracle and will filter out
 		any table that starts with <literal>BIN$</literal>.
 	</para>
-
+  -->
+  
 	<para>
 		Synonyms are displayed if the current DBMS supports them.
 		You can filter out unwanted synonyms by <link linkend="db-oracle-filter-syns">specifying a

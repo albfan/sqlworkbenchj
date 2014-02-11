@@ -96,7 +96,7 @@ public class BookmarkManager
 		LogMgr.logDebug("BookmarkManager.updateBookmarks()", "Parsing bookmarks for all tabs took: " + (end - start) + "ms");
 	}
 
-	public synchronized void updateBookmarks(MainWindow win, MainPanel panel)
+	private synchronized BookmarkGroup updateBookmarks(MainWindow win, MainPanel panel)
 	{
 		Map<String, BookmarkGroup> windowBookmarks = bookmarks.get(win.getWindowId());
 		if (windowBookmarks == null)
@@ -105,7 +105,8 @@ public class BookmarkManager
 			bookmarks.put(win.getWindowId(), windowBookmarks);
 		}
 
-		BookmarkGroup group = windowBookmarks.get(panel.getId());
+		final BookmarkGroup group = windowBookmarks.get(panel.getId());
+		BookmarkGroup updated = null;
 
 		long modified = 0;
 
@@ -121,12 +122,13 @@ public class BookmarkManager
 			// (this is essentially only the DbExplorerPanel)
 			if (panelBookmarks != null)
 			{
-				BookmarkGroup pGroup = new BookmarkGroup(panelBookmarks, panel.getId());
+				updated = new BookmarkGroup(panelBookmarks, panel.getId());
 				// int index = win.getIndexForPanel(panel);
-				pGroup.setName(panel.getTabTitle());
-				windowBookmarks.put(pGroup.getGroupId(), pGroup);
+				updated.setName(panel.getTabTitle());
+				windowBookmarks.put(updated.getGroupId(), updated);
 			}
 		}
+		return updated;
 	}
 
 	public synchronized List<String> getTabs(MainWindow window)
@@ -239,14 +241,20 @@ public class BookmarkManager
 			public void run()
 			{
 				long start = System.currentTimeMillis();
-				updateBookmarks(win, panel);
+				BookmarkGroup updated = updateBookmarks(win, panel);
 				long duration = System.currentTimeMillis() - start;
-				LogMgr.logDebug("BookmarManager.updateTabBookmarks()", "Parsing bookmark for panel '" + panel.getTabTitle() + "' took "  + duration + "ms");
+				String info = "(" + (updated == null ? "no update)" : updated.getBookmarks().size() + " bookmarks)");
+				LogMgr.logDebug("BookmarManager.updateTabBookmarks()", "Panel '" + panel.getTabTitle() + "' was updated in "  + duration + "ms " + info);
 			}
 		};
 		bmThread.start();
 	}
 
+	/**
+	 * Updates all bookmarks that are "dirty" in the background.
+	 *
+	 * @param win  the MainWindow for which the bookmarks should be updated.
+	 */
 	public void updateInBackground(final MainWindow win)
 	{
 		WbThread bmThread = new WbThread("Update bookmarks for all tabs")

@@ -110,7 +110,7 @@ public class EditorOptionsPanel
 		noWordSep.setText(Settings.getInstance().getEditorNoWordSep());
 		useTabs.setSelected(Settings.getInstance().getEditorUseTabCharacter());
 		followCurrentDir.setSelected(GuiSettings.getFollowFileDirectory());
-		defaultDir.setFilename(GuiSettings.getDefaultFileDir());
+		defaultDir.setFilename(GuiSettings.getDefaultFileDir().getAbsolutePath());
 		defaultDir.setEnabled(followCurrentDir.isSelected());
 		keepHilite.setSelected(GuiSettings.getKeepCurrentSqlHighlight());
 		historySizeField.setText(Integer.toString(Settings.getInstance().getMaxHistorySize()));
@@ -522,8 +522,8 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     jPanel2.add(hiliteError, gridBagConstraints);
 
-    useResultForBookmark.setText(ResourceMgr.getString("LblBookmarResultName")); // NOI18N
-    useResultForBookmark.setToolTipText(ResourceMgr.getString("d_LblBookmarResultName")); // NOI18N
+    useResultForBookmark.setText(ResourceMgr.getString("LblBookmarkResultName")); // NOI18N
+    useResultForBookmark.setToolTipText(ResourceMgr.getString("d_LblBookmarkResultName")); // NOI18N
     useResultForBookmark.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;

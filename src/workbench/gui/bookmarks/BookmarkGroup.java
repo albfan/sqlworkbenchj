@@ -87,6 +87,6 @@ class BookmarkGroup
 	@Override
 	public String toString()
 	{
-		return "Group: " + this.groupName + ": " + this.bookmarks.toString();
+		return "Group: " + this.groupName + ", " + this.bookmarks.size() + " bookmarks";
 	}
 }

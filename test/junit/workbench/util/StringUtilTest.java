@@ -845,4 +845,15 @@ public class StringUtilTest
 		);
 		assertTrue(found);
 	}
+
+	@Test
+	public void testArray()
+	{
+		int[] data = new int[] {1,2,3,4,5};
+		String list = StringUtil.arrayToString(data);
+		assertEquals("1,2,3,4,5", list);
+		int[] data2 = StringUtil.stringToArray(list);
+		assertArrayEquals(data, data2);
+	}
+
 }

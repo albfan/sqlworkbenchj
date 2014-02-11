@@ -76,7 +76,6 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
-import workbench.sql.ResultNameParser;
 
 import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
@@ -85,6 +84,8 @@ import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
 import workbench.storage.filter.ExpressionValue;
 import workbench.storage.filter.FilterExpression;
+
+import workbench.sql.ResultNameParser;
 
 import workbench.util.StringUtil;
 
@@ -123,7 +124,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		filterValue = new JTextField();
 		filterValue.addKeyListener(this);
 		filterValue.addActionListener(this);
-		filterValue.setToolTipText(ResourceMgr.getString("TxtBookmarkFilter"));
+		filterValue.setToolTipText(ResourceMgr.getString("TxtBookmarkFilterTip"));
 
 		rememberColumnWidths = new CheckBoxAction("MnuTxtBookmarksSaveWidths", PROP_SAVE_WIDTHS);
 
@@ -152,11 +153,15 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		searchNameCbx = new WbCheckBox();
 		searchNameCbx.setText(ResourceMgr.getString("LblBookFilter"));
 		searchNameCbx.setSelected(Settings.getInstance().getBoolProperty(PROP_SEARCH_NAME, true));
+		searchNameCbx.setToolTipText(ResourceMgr.getDescription("LblBookFilter"));
+
 
 		boolean useCurrent = Settings.getInstance().getBoolProperty(PROP_USE_CURRENT_TAB, true);
 		useCurrentEditorCbx = new WbCheckBox();
 		useCurrentEditorCbx.setText(ResourceMgr.getString("LblBookUseCurrent"));
+		useCurrentEditorCbx.setToolTipText(ResourceMgr.getDescription("LblBookUseCurrent"));
 		useCurrentEditorCbx.setSelected(useCurrent);
+		useCurrentEditorCbx.addActionListener(this);
 
 		tabSelector = new JComboBox(getTabs());
 		if (useCurrent)
@@ -196,7 +201,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			@Override
 			public void actionPerformed(ActionEvent evt)
 			{
-				selectValue();
+				selectValueAndClose();
 			}
 		};
 
@@ -277,7 +282,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		lbl.setText(ResourceMgr.getString("LblFkFilterValue"));
 		lbl.setToolTipText(filterValue.getToolTipText());
 		lbl.setLabelFor(filterValue);
-		lbl.setBorder(new EmptyBorder(0, 0, 0, 10));
+		lbl.setBorder(new EmptyBorder(0, 0, 0, 5));
 
 		ReloadAction doReload = new ReloadAction(this);
 		doReload.setTooltip(ResourceMgr.getString("TxtBookmarkReload"));
@@ -288,6 +293,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		WbLabel tabLbl = new WbLabel();
 		tabLbl.setText(ResourceMgr.getString("LblBookPanel"));
 		tabLbl.setLabelFor(tabSelector);
+		tabLbl.setBorder(new EmptyBorder(2, 0, 0, 0));
 
 		GridBagConstraints gc = new GridBagConstraints();
 		Insets empty = new Insets(0,0,0,0);
@@ -334,7 +340,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		gc.gridwidth = 1;
 		gc.weightx = 1.0;
 		gc.weighty = 0.0;
-		gc.insets = new Insets(4,0,0,0);
+		gc.insets = new Insets(4,0,0,5);
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		filterPanel.add(filterValue, gc);
 
@@ -373,6 +379,17 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		if (e.getSource() == this.tabSelector)
 		{
 			loadBookmarks();
+		}
+		if (e.getSource() == this.useCurrentEditorCbx)
+		{
+			if (useCurrentEditorCbx.isSelected())
+			{
+				selectCurrentTab();
+			}
+			else
+			{
+				tabSelector.setSelectedIndex(0);
+			}
 		}
 	}
 
@@ -583,7 +600,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		{
 			if (e.getKeyChar() == KeyEvent.VK_ENTER)
 			{
-				selectValue();
+				selectValueAndClose();
 			}
 			else if (isAltPressed(e) && e.getKeyChar() == searchNameCbx.getMnemonic())
 			{
@@ -605,7 +622,12 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	@Override
 	public boolean validateInput()
 	{
-		return bookmarks.getSelectedRowCount() == 1;
+		if (bookmarks.getSelectedRowCount() == 1)
+		{
+			selectValue();
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -619,8 +641,14 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	{
 		int row = bookmarks.getSelectedRow();
 		selectedBookmark = (NamedScriptLocation)bookmarks.getDataStore().getRow(row).getUserObject();
+	}
+
+	public void selectValueAndClose()
+	{
+		selectValue();
 		dialog.approveAndClose();
 	}
+
 
 	private int[] getColumnWidths()
 	{
@@ -680,7 +708,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	{
 		if (e.getClickCount() == 2)
 		{
-			selectValue();
+			selectValueAndClose();
 		}
 	}
 

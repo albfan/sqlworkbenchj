@@ -27,6 +27,43 @@
 		</para></note>
 	</section>
 
+  <section id="editor-bookmarks">
+    <title>Working with bookmarks</title>
+    <para>
+      A bookmark inside the editor is defined by adding the keyword <literal>@WbTag</literal> followed by the name
+      of the bookmark into a SQL comment:
+    </para>
+    <programlisting>-- @WbTag delete everything
+truncate table orders,order_line,customers;
+commit;
+    </programlisting>
+    <para>
+      The keyword is not case sensitive, <literal>@wbtag</literal> will work just as wel as <literal>@WBTAG</literal>,
+      or <literal>@WbTag</literal>. A multiline comment can be used as well as a single line comment.
+    </para>
+    <para>
+      The annotations for <link linkend="result-names">naming a result</link> can additionally be
+      included in the bookmark list. This is enabled in the <link linkend="option-result-name">options panel for the editor</link>.
+    </para>
+
+    <para>
+      To jump to a bookmark select <menuchoice><guimenu>Tools</guimenu><guimenuitem>Bookmarks</guimenuitem></menuchoice>.
+      A dialog box with all defined bookmarks will be displayed. You can filter the list of displayed bookmarks
+      by entering a value in the input field. Depending on the option <guimenu>Filter on name only</guimenu>
+      the value will either be compared only against the bookmark name. If that option is disabled then
+      the bookmark name and the name of the SQL tab will be checked for the entered value.
+    </para>
+		<note><para>
+      The selection in the bookmark list can be moved with the <keycap>UP/DOWN</keycap> keys even when
+      the cursor is located in the filter input field.
+		</para></note>
+    <para>
+      If the option <guimenu>Only for current tab</guimenu> is enabled, then the dialog will open showing
+      only bookmarks for the current tab.
+    </para>
+
+  </section>
+
 	<section id="command-completion">
 		<title>Command completion</title>
 		<para>
@@ -382,36 +419,12 @@ WHERE p.person_id = a.person_id;</programlisting>
 			<para>
 				Drivers known to <emphasis role="bold">not</emphasis> support this feature:
 				<itemizedlist>
-					<listitem><simpara>Oracle 10g driver (ojdbc14.jar)</simpara></listitem>
-					<listitem><simpara>Microsoft SQL Server 2000/2005 driver (sqljdbc.jar)</simpara></listitem>
+					<listitem><simpara>Oracle 11g driver (<literal>ojdbc6.jar</literal>, <literal>ojdbc7.jar</literal>)</simpara></listitem>
+					<listitem><simpara>Microsoft SQL Server 2000/2005 driver (<literal>sqljdbc4.jar</literal>)</simpara></listitem>
 				</itemizedlist>
 			</para>
 		</section>
 
 	</section>
-  <section id="editor-bookmarks">
-    <title>Working with bookmarks</title>
-    <para>
-      A bookmark inside the editor is defined by adding the keyword <literal>@WbTag</literal> followed by the name
-      of the bookmark into a SQL comment:
-    </para>
-    <programlisting>-- @WbTag delete everything
-truncate table orders,order_line,customers;
-commit;
-    </programlisting>
-    <para>
-      The keyword is not case sensitive, <literal>@wbtag</literal> will work just as wel as <literal>@WBTAG</literal>,
-      or <literal>@WbTag</literal>. A multiline comment can be used as well as a single line comment.
-    </para>
-    <para>
-      To jump to a bookmark select <menuchoice><guimenu>Tools</guimenu><guimenuitem>Bookmarks</guimenuitem></menuchoice>.
-      A dialog box with all defined bookmarks will be displayed.
-    </para>
-    <para>
-      The annotations for <link linkend="result-names">naming a result</link> can additionally be
-      included in the bookmark list. This is enabled in the <link linkend="option-result-name">options panel for the editor</link>.
-    </para>
-
-  </section>
 
 </section>

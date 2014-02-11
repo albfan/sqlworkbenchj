@@ -28,25 +28,28 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-
 import javax.swing.border.EmptyBorder;
-import workbench.gui.MainWindow;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.components.WbFileChooser;
-import workbench.gui.sql.SqlPanel;
+
 import workbench.interfaces.EncodingSelector;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.WbFileChooser;
+import workbench.gui.sql.SqlPanel;
+
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
@@ -76,8 +79,7 @@ public class OpenFileAction
 	{
 		try
 		{
-			String lastDir = null;
-			
+			File lastDir = new File(Settings.getInstance().getLastSqlDir());
 			if (GuiSettings.getFollowFileDirectory())
 			{
 				SqlPanel currentPanel = window.getCurrentSqlPanel();
@@ -86,7 +88,7 @@ public class OpenFileAction
 					WbFile f = new WbFile(currentPanel.getCurrentFileName());
 					if (f.getParent() != null)
 					{
-						lastDir = f.getParent();
+						lastDir = f.getParentFile();
 					}
 				}
 				if (lastDir == null)
@@ -94,11 +96,7 @@ public class OpenFileAction
 					lastDir = GuiSettings.getDefaultFileDir();
 				}
 			}
-			else
-			{
-				lastDir = Settings.getInstance().getLastSqlDir();
-			}
-			
+
 			JFileChooser fc = new WbFileChooser(lastDir);
 			JPanel acc = new JPanel(new GridBagLayout());
 			JComponent p = EncodingUtil.createEncodingPanel();
@@ -113,13 +111,13 @@ public class OpenFileAction
 			JCheckBox newTab = new JCheckBox(ResourceMgr.getString("LblOpenNewTab"));
 			newTab.setToolTipText(ResourceMgr.getDescription("LblOpenNewTab"));
 
-			boolean forceNewTab = false;
+			boolean rememberNewTabSetting = true;
 			if (window.getCurrentSqlPanel() == null)
 			{
 				// DbExplorer is open, force open in new tab!
 				newTab.setSelected(true);
 				newTab.setEnabled(false);
-				forceNewTab = true;
+				rememberNewTabSetting = false;
 			}
 			else
 			{
@@ -141,44 +139,42 @@ public class OpenFileAction
 			if (answer == JFileChooser.APPROVE_OPTION)
 			{
 				final String encoding = selector.getEncoding();
-				boolean openInNewTab = newTab.isSelected();
-
-				final SqlPanel sql;
-				if (openInNewTab)
-				{
-					sql = (SqlPanel) window.addTab();
-				}
-				else
-				{
-					sql = window.getCurrentSqlPanel();
-				}
+				final boolean openInNewTab = newTab.isSelected();
 
 				if (!GuiSettings.getFollowFileDirectory())
 				{
-					lastDir = fc.getCurrentDirectory().getAbsolutePath();
-					Settings.getInstance().setLastSqlDir(lastDir);
+					lastDir = fc.getCurrentDirectory();
+					Settings.getInstance().setLastSqlDir(lastDir.getAbsolutePath());
 				}
 
 				Settings.getInstance().setDefaultFileEncoding(encoding);
-				if (!forceNewTab)
+				if (rememberNewTabSetting)
 				{
 					Settings.getInstance().setProperty("workbench.file.newtab", openInNewTab);
 				}
 
-				if (sql != null)
+				WbFile f = new WbFile(fc.getSelectedFile());
+				final String fname = f.getFullPath();
+				EventQueue.invokeLater(new Runnable()
 				{
-					WbFile f = new WbFile(fc.getSelectedFile());
-					final String fname = f.getFullPath();
-					EventQueue.invokeLater(new Runnable()
+					@Override
+					public void run()
 					{
-
-						@Override
-						public void run()
+						SqlPanel sql;
+						if (openInNewTab)
+						{
+							sql = (SqlPanel) window.addTab();
+						}
+						else
+						{
+							sql = window.getCurrentSqlPanel();
+						}
+						if (sql != null)
 						{
 							sql.readFile(fname, encoding);
 						}
-					});
-				}
+					}
+				});
 			}
 		}
 		catch (Throwable th)

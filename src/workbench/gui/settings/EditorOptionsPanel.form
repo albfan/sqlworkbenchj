@@ -424,10 +424,10 @@
         <Component class="javax.swing.JCheckBox" name="useResultForBookmark">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="language/wbstrings.properties" key="LblBookmarResultName" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="language/wbstrings.properties" key="LblBookmarkResultName" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="language/wbstrings.properties" key="d_LblBookmarResultName" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="language/wbstrings.properties" key="d_LblBookmarkResultName" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
             </Property>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="null"/>
