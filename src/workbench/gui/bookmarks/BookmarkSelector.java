@@ -20,7 +20,6 @@
  */
 package workbench.gui.bookmarks;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.FocusTraversalPolicy;
@@ -46,9 +45,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.Timer;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
 import workbench.interfaces.MainPanel;
@@ -66,6 +62,7 @@ import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.ValidatingDialog;
+import workbench.gui.components.WbCheckBox;
 import workbench.gui.components.WbLabel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
@@ -75,8 +72,11 @@ import workbench.gui.renderer.RendererSetup;
 
 import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
+import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
+import workbench.storage.filter.ExpressionValue;
+import workbench.storage.filter.FilterExpression;
 
 import workbench.util.StringUtil;
 
@@ -97,19 +97,13 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	private final MainWindow window;
 	private ValidatingDialog dialog;
 	private NamedScriptLocation selectedBookmark;
-	private int incrementalSearchDelay;
 	private SortDefinition savedSort;
-	private JLabel searchInfo;
-	private JPanel searchInfoPanel;
-	private boolean searchInfoVisible;
-	private Timer idleTimer;
+	private WbCheckBox searchNameCbx;
 
 	public BookmarkSelector(MainWindow win)
 	{
 		super(new GridBagLayout());
 		window = win;
-
-		incrementalSearchDelay = Settings.getInstance().getIntProperty(PROP_PREFIX + "incremental.pause", 1000);
 
 		filterValue = new JTextField();
 		filterValue.addKeyListener(this);
@@ -167,7 +161,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		bookmarks.configureEnterKeyAction(selectValue);
 		bookmarks.getActionMap().put("picker-next-comp", nextComponent);
 		bookmarks.getActionMap().put("picker-prev-comp", prevComponent);
-		bookmarks.addKeyListener(this);
 
 		scroll = new WbScrollPane(bookmarks);
 
@@ -189,20 +182,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		gc.insets = new Insets(5,0,0,0);
 		add(scroll, gc);
 
-		searchInfoPanel = new JPanel(new BorderLayout(0,0));
-		JLabel l = new JLabel(ResourceMgr.getString("LblBookName") + ":");
-		l.setBorder(new EmptyBorder(0,0,0,5));
-		searchInfoPanel.add(l, BorderLayout.LINE_START);
-		searchInfo = new JLabel("MMMM");
-		searchInfo.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(1,1,1,1)));
-		searchInfo.setBackground(filterValue.getBackground());
-//		Color clr = UIManager.getDefaults().getColor("TextField.inactiveForeground");
-		searchInfo.setForeground(filterValue.getForeground());
-		searchInfo.setOpaque(true);
-		searchInfoPanel.add(searchInfo, BorderLayout.CENTER);
-
 		info = new JLabel(ResourceMgr.getFormattedString("TxtBookmarkHelp", BookmarkAnnotation.ANNOTATION));
-		gc.gridy = 3; // leave one row for the "search indicator" panel
+		gc.gridy = 2;
 		gc.weightx = 0.0;
 		gc.weighty = 0.0;
 		gc.fill = GridBagConstraints.BOTH;
@@ -212,9 +193,10 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.addComponent(tabSelector);
 		pol.addComponent(filterValue);
-		pol.addComponent(bookmarks);
+
 		setFocusCycleRoot(true);
 		bookmarks.setFocusCycleRoot(false);
+
 		setFocusTraversalPolicy(pol);
 
 		String sort = Settings.getInstance().getProperty(PROP_PREFIX + "sort", null);
@@ -230,37 +212,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			{
 				LogMgr.logWarning("BookmarkSelector.<init>", "Invalid sort definition saved: " + sort);
 			}
-		}
-		idleTimer = new Timer(incrementalSearchDelay, this);
-	}
-
-	private void hideSearchPanel()
-	{
-		remove(searchInfoPanel);
-		searchInfoVisible = false;
-		validate();
-		if (idleTimer.isRunning())
-		{
-			idleTimer.stop();
-		}
-	}
-
-	private void showSearchPanel(String text)
-	{
-		searchInfo.setText(text);
-		if (!searchInfoVisible)
-		{
-			GridBagConstraints gc = new GridBagConstraints();
-			gc.gridx = 0;
-			gc.gridy = 2;
-			gc.insets = new Insets(5,0,0,2);
-			gc.anchor = GridBagConstraints.FIRST_LINE_START;
-			gc.fill = GridBagConstraints.HORIZONTAL;
-			gc.weightx = 0.0;
-			gc.weighty = 0.0;
-			add(searchInfoPanel, gc);
-			validate();
-			searchInfoVisible = true;
 		}
 	}
 
@@ -299,29 +250,44 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		gc.weighty = 0.0;
 		gc.insets = topTwo;
 		filterPanel.add(tabLbl, gc);
+
 		gc.gridx = 1;
 		gc.gridy = 0;
-		gc.gridwidth = 2;
+		gc.gridwidth = 1;
 		gc.insets = empty;
 		gc.fill = GridBagConstraints.NONE;
 		filterPanel.add(tabSelector, gc);
 
+		searchNameCbx = new WbCheckBox();
+		searchNameCbx.setText(ResourceMgr.getString("LblBookFilter"));
+		searchNameCbx.setSelected(Settings.getInstance().getBoolProperty(PROP_PREFIX + ".search.name", true));
+
+		gc.gridx = 2;
+		gc.gridy = 0;
+		gc.gridwidth = 1;
+		gc.anchor = GridBagConstraints.FIRST_LINE_END;
+		gc.insets = empty;
+		gc.fill = GridBagConstraints.NONE;
+		filterPanel.add(searchNameCbx, gc);
+
 		// second line
 		gc.gridx = 0;
 		gc.gridy = 1;
+		gc.anchor = GridBagConstraints.FIRST_LINE_START;
 		gc.insets = new Insets(8,0,0,0);
 		gc.gridwidth = 1;
 		filterPanel.add(lbl, gc);
+
 		gc.gridx = 1;
-		gc.gridwidth = 1;
+		gc.gridwidth = 2;
 		gc.weightx = 1.0;
 		gc.weighty = 0.0;
 		gc.insets = new Insets(4,0,0,0);
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		filterPanel.add(filterValue, gc);
 
-		gc.gridx = 2;
-		gc.gridwidth = 2;
+		gc.gridx = 3;
+		gc.gridwidth = 1;
 		gc.weightx = 0.0;
 		gc.weighty = 1.0;
 		gc.insets = topTwo;
@@ -329,16 +295,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		filterPanel.add(reload, gc);
 
 		return filterPanel;
-	}
-
-	void done()
-	{
-		saveSettings();
-		if (idleTimer.isRunning())
-		{
-			idleTimer.stop();
-			idleTimer = null;
-		}
 	}
 
 	private Object[] getTabs()
@@ -362,17 +318,9 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == this.filterValue)
-		{
-			applyFilter();
-		}
-		else if (e.getSource() == this.tabSelector)
+		if (e.getSource() == this.tabSelector)
 		{
 			loadBookmarks();
-		}
-		else if (e.getSource() == idleTimer)
-		{
-			hideSearchPanel();
 		}
 	}
 
@@ -382,11 +330,6 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		BookmarkManager.getInstance().clearBookmarksForWindow(window.getWindowId());
 		BookmarkManager.getInstance().updateBookmarks(window);
 		loadBookmarks();
-	}
-
-	protected void resetFilter()
-	{
-		bookmarks.resetFilter();
 	}
 
 	public void loadBookmarks()
@@ -442,32 +385,98 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 				// always select at least one row.
 				// as the focus is set to the table containing the lookup data,
 				// the user can immediately use the cursor keys to select one entry.
-				bookmarks.getSelectionModel().setSelectionInterval(0,0);
-				bookmarks.scrollToRow(0);
+				selectRow(0);
 
 				long duration = System.currentTimeMillis() - start;
 				LogMgr.logDebug("BookmarkSelector.loadBookmarks()", "Loading bookmarks took: " + duration + "ms");
 
-				bookmarks.requestFocusInWindow();
+				filterValue.requestFocusInWindow();
 				WbSwingUtilities.showDefaultCursorOnWindow(BookmarkSelector.this);
 			}
 		});
+	}
 
+	protected void resetFilter()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				filterValue.setText("");
+				bookmarks.resetFilter();
+				selectRow(0);
+			}
+		});
 	}
 
 	protected void applyFilter()
 	{
-		ContainsComparator comp = new ContainsComparator();
-		DataRowExpression filter = new DataRowExpression(comp, filterValue.getText());
-		filter.setIgnoreCase(true);
-		bookmarks.applyFilter(filter);
-		bookmarks.getSelectionModel().setSelectionInterval(0,0);
-		bookmarks.scrollToRow(0);
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				ContainsComparator comp = new ContainsComparator();
+				FilterExpression filter;
+				if (searchNameCbx.isSelected())
+				{
+					filter = new ColumnExpression(bookmarks.getDataStore().getColumnName(0), comp, filterValue.getText());
+				}
+				else
+				{
+					filter = new DataRowExpression(comp, filterValue.getText());
+				}
+				((ExpressionValue)filter).setIgnoreCase(true);
+				bookmarks.applyFilter(filter);
+				selectRow(0);
+			}
+		});
 	}
 
-	private boolean isAltPressed(KeyEvent e)
+	private void selectNextRow()
 	{
-		return ((e.getModifiers() & ActionEvent.ALT_MASK) == ActionEvent.ALT_MASK);
+		int row = bookmarks.getSelectedRow();
+		selectRow(row + 1);
+	}
+
+	private void selectPreviousRow()
+	{
+		int row = bookmarks.getSelectedRow();
+		selectRow(row - 1);
+	}
+
+	private void selectRow(final int row)
+	{
+		if (row < 0 || row >= bookmarks.getRowCount()) return;
+		bookmarks.getSelectionModel().setSelectionInterval(row, row);
+		bookmarks.scrollToRow(row);
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.getSource() == this.filterValue && e.getModifiers() == 0)
+		{
+			if (e.getKeyCode() == KeyEvent.VK_ESCAPE && StringUtil.isNonBlank(filterValue.getText()))
+			{
+				e.consume();
+				resetFilter();
+			}
+			if (e.getKeyCode() == KeyEvent.VK_UP)
+			{
+				selectPreviousRow();
+			}
+			else if (e.getKeyCode() == KeyEvent.VK_DOWN)
+			{
+				selectNextRow();
+			}
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
 	}
 
 	@Override
@@ -475,100 +484,15 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	{
 		if (e.getSource() == this.filterValue)
 		{
-			EventQueue.invokeLater(new Runnable()
+			if (e.getKeyChar() == KeyEvent.VK_ENTER)
 			{
-				@Override
-				public void run()
-				{
-					if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
-					{
-						resetFilter();
-					}
-					else if (e.getKeyChar() == KeyEvent.VK_ENTER)
-					{
-						selectValue();
-					}
-					else
-					{
-						applyFilter();
-					}
-				}
-			});
-		}
-		else if (e.getSource() == bookmarks && !isAltPressed(e)) // Alt+Something might be needed to transfer the focus to a different component
-		{
-			String searchValue;
-			if (searchInfoVisible)
-			{
-				searchValue = searchInfo.getText() + String.valueOf(e.getKeyChar());
+				selectValue();
 			}
 			else
 			{
-				searchValue = String.valueOf(e.getKeyChar());
-			}
-
-			if (idleTimer.isRunning())
-			{
-				idleTimer.restart();
-			}
-			else
-			{
-				idleTimer.start();
-			}
-
-			showSearchPanel(searchValue);
-			jumpBookmark(searchValue.toLowerCase());
-		}
-	}
-
-	private void jumpBookmark(String startsWith)
-	{
-		final int row = findBookmark(startsWith);
-		if (row > -1)
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					bookmarks.getSelectionModel().setSelectionInterval(row, row);
-					bookmarks.scrollToRow(row);
-				}
-			});
-		}
-	}
-
-	private int findBookmark(String start)
-	{
-		int currentRow = bookmarks.getSelectedRow();
-		int rowCount = bookmarks.getRowCount();
-		for (int row=currentRow + 1; row < rowCount; row++)
-		{
-			String name = bookmarks.getValueAsString(row, 0);
-			if (name.toLowerCase().startsWith(start))
-			{
-				return row;
+				applyFilter();
 			}
 		}
-		for (int row=0; row < currentRow; row++)
-		{
-			String name = bookmarks.getValueAsString(row, 0);
-			if (name.toLowerCase().startsWith(start))
-			{
-				return row;
-			}
-		}
-		return -1;
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e)
-	{
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e)
-	{
 	}
 
 	@Override
@@ -596,6 +520,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		SortDefinition sort = bookmarks.getCurrentSortColumns();
 		String sortDef = sort.getDefinitionString();
 		Settings.getInstance().setProperty(PROP_PREFIX + "sort", sortDef);
+		Settings.getInstance().setProperty(PROP_PREFIX + ".search.name", searchNameCbx.isSelected());
 	}
 
 	@Override
@@ -662,7 +587,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		dialog.setVisible(true);
 
 		Settings.getInstance().storeWindowSize(dialog, prop);
-		picker.done();
+		picker.saveSettings();
 
 		if (!dialog.isCancelled() && picker.selectedBookmark != null)
 		{
