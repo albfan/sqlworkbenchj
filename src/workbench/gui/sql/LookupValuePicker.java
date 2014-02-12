@@ -100,6 +100,7 @@ import workbench.storage.DataStore;
 import workbench.storage.LookupDataLoader;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+import workbench.storage.SortDefinition;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
 
@@ -320,16 +321,9 @@ public class LookupValuePicker
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == this.filterValue)
+		if (e.getSource() == this.filterValue && doSearch.isSelected())
 		{
-			if (doFilter.isSelected())
-			{
-				applyFilter();
-			}
-			else if (doSearch.isSelected())
-			{
-				loadData(false);
-			}
+			loadData(false);
 		}
 	}
 
@@ -467,12 +461,14 @@ public class LookupValuePicker
 			final DataStore data = lookupLoader.getLookupData(dbConnection, maxRows.getValue(), getSqlSearchExpression(), useOrderBy);
 			PkDefinition pk = lookupLoader.getPK();
 			ResultInfo metadata = data.getResultInfo();
+			final SortDefinition sort = new SortDefinition();
 			for (String pkCol : pk.getColumns())
 			{
 				int index = metadata.findColumn(pkCol);
 				if (index > -1)
 				{
 					metadata.getColumn(index).setIsPkColumn(true);
+					sort.addSortColumn(index, true);
 				}
 			}
 
@@ -483,6 +479,7 @@ public class LookupValuePicker
 				{
 					DataStoreTableModel model = new DataStoreTableModel(data);
 					model.setAllowEditing(false);
+					model.setSortDefinition(sort);
 					lookupData.setModel(model, true);
 					if (GuiSettings.getShowTableRowNumbers())
 					{
@@ -495,7 +492,7 @@ public class LookupValuePicker
 					// as the focus is set to the table containing the lookup data,
 					// the user can immediately use the cursor keys to select one entry.
 					if (!selectCurrent || row < 0) row = 0;
-					keyHandler.selectRow(0);
+					keyHandler.selectRow(row);
 
 					int rows = data.getRowCount();
 					int maxRowNum = maxRows.getValue();
@@ -511,7 +508,14 @@ public class LookupValuePicker
 					}
 					statusPanel.doLayout();
 
-					lookupData.requestFocusInWindow();
+					if (doFilter.isSelected())
+					{
+						filterValue.requestFocusInWindow();
+					}
+					else
+					{
+						lookupData.requestFocusInWindow();
+					}
 				}
 			});
 		}
@@ -548,6 +552,9 @@ public class LookupValuePicker
 		DataRowExpression filter = new DataRowExpression(comp, filterValue.getText());
 		filter.setIgnoreCase(true);
 		lookupData.applyFilter(filter);
+		int row = highlightCurrentValues();
+		if (row < 0) row = 0;
+		keyHandler.selectRow(row);
 	}
 
 	@Override
@@ -560,7 +567,11 @@ public class LookupValuePicker
 			@Override
 			public void run()
 			{
-				if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
+				if (e.getKeyChar() == KeyEvent.VK_ENTER)
+				{
+					selectValue();
+				}
+				else if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
 				{
 					resetFilter();
 				}
