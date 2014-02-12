@@ -1071,6 +1071,8 @@ public class TableListPanel
 				{
 					tableList.setModel(model, true);
 					tableList.getExportAction().setEnabled(true);
+					// make the actual model sorted as well so that the sort is remembered when filtering the tables
+					model.setSortDefinition(DbMetadata.getTableListSort());
 					tableList.adjustRowsAndColumns();
 					updateDisplayClients();
 				}
@@ -1947,7 +1949,7 @@ public class TableListPanel
 	private void showTableData(final int panelIndex, final boolean appendText)
 	{
 		if (this.selectedTable == null) return;
-		
+
 		PanelContentSender sender = new PanelContentSender(this.parentWindow, selectedTable.getTableName());
 		String sql = buildSqlForTable(true);
 		if (sql == null) return;

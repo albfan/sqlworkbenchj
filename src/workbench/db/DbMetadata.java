@@ -1331,7 +1331,6 @@ public class DbMetadata
 	public DataStore getObjects(String catalogPattern, String schemaPattern, String namePattern, String[] types)
 		throws SQLException
 	{
-
 		catalogPattern = cleanupWildcards(catalogPattern);
 		schemaPattern = cleanupWildcards(schemaPattern);
 		namePattern = cleanupWildcards(namePattern);
@@ -1513,15 +1512,20 @@ public class DbMetadata
 
 		// the extenders or objectListEnhancer could have changed the list so that the
 		// original sort is no longer "correct".
+		result.sort(getTableListSort());
+		result.resetStatus();
+
+		return result;
+	}
+
+	public static SortDefinition getTableListSort()
+	{
 		SortDefinition def = new SortDefinition();
 		def.addSortColumn(COLUMN_IDX_TABLE_LIST_TYPE, true);
 		def.addSortColumn(COLUMN_IDX_TABLE_LIST_CATALOG, true);
 		def.addSortColumn(COLUMN_IDX_TABLE_LIST_SCHEMA, true);
 		def.addSortColumn(COLUMN_IDX_TABLE_LIST_NAME, true);
-		result.sort(def);
-
-		result.resetStatus();
-		return result;
+		return def;
 	}
 
 	/**
