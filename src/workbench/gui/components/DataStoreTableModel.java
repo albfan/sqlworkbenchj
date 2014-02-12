@@ -76,12 +76,12 @@ public class DataStoreTableModel
 	private Set<Integer> readOnlyColumns;
 	private InputValidator inputValidator;
 
-	public DataStoreTableModel(DataStore aDataStore)
+	public DataStoreTableModel(DataStore sourceData)
 		throws IllegalArgumentException
 	{
 		super();
-		if (aDataStore == null) throw new IllegalArgumentException("DataStore cannot be null");
-		this.setDataStore(aDataStore);
+		if (sourceData == null) throw new IllegalArgumentException("DataStore cannot be null");
+		this.setDataStore(sourceData);
 	}
 
 	public DataStore getDataStore()
@@ -603,7 +603,7 @@ public class DataStoreTableModel
 
 	/**
 	 * Check if the table is sorted by a column.
-	 * 
+	 *
 	 * @return true if the given column is a sort column
 	 * @see #isSortAscending(int)
 	 */

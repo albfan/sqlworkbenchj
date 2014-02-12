@@ -37,6 +37,7 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.storage.SortDefinition;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
@@ -158,6 +159,15 @@ public class JdbcProcedureReader
 		return ds;
 	}
 
+	public static SortDefinition getProcedureListSort()
+	{
+		SortDefinition def = new SortDefinition();
+		def.addSortColumn(COLUMN_IDX_PROC_LIST_CATALOG, true);
+		def.addSortColumn(COLUMN_IDX_PROC_LIST_SCHEMA, true);
+		def.addSortColumn(COLUMN_IDX_PROC_LIST_NAME, true);
+		return def;
+	}
+	
 	public DataStore fillProcedureListDataStore(ResultSet rs)
 		throws SQLException
 	{

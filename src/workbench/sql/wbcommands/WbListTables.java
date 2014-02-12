@@ -27,6 +27,7 @@ import java.util.List;
 
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
+import workbench.db.DbMetadata;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.TableIdentifier;
@@ -160,6 +161,7 @@ public class WbListTables
 
 		if (resultList != null)
 		{
+			resultList.sort(DbMetadata.getTableListSort());
 			result.addDataStore(resultList);
 		}
 		return result;

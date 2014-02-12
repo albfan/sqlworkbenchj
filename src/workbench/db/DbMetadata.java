@@ -1510,9 +1510,6 @@ public class DbMetadata
 			objectListEnhancer.updateObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
 		}
 
-		// the extenders or objectListEnhancer could have changed the list so that the
-		// original sort is no longer "correct".
-		result.sort(getTableListSort());
 		result.resetStatus();
 
 		return result;

@@ -1059,6 +1059,10 @@ public class TableListPanel
 			tableList.setOriginalOrder(ds);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 
+			// by applying the sort definition to the table model we ensure
+			// that the sorting is retained when filtering the objects
+			model.setSortDefinition(DbMetadata.getTableListSort());
+
 			// Make sure some columns are not modified by the user
 			// to avoid the impression that e.g. a table's catalog can be changed
 			// by editing this list
@@ -1071,9 +1075,7 @@ public class TableListPanel
 				{
 					tableList.setModel(model, true);
 					tableList.getExportAction().setEnabled(true);
-					// make the actual model sorted as well so that the sort is remembered when filtering the tables
-					model.setSortDefinition(DbMetadata.getTableListSort());
-					tableList.adjustRowsAndColumns();
+					tableList.adjustColumns();
 					updateDisplayClients();
 				}
 			});

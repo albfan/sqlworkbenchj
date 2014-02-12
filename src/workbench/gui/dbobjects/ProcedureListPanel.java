@@ -59,6 +59,7 @@ import workbench.resource.Settings;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.JdbcProcedureReader;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -429,6 +430,7 @@ public class ProcedureListPanel
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			procList.setOriginalOrder(ds);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
+			model.setSortDefinition(JdbcProcedureReader.getProcedureListSort());
 
 			model.setValidator(validator);
 
