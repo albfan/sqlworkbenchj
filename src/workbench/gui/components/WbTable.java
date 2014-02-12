@@ -1419,6 +1419,7 @@ public class WbTable
 	{
 		applyFilter(filter, true);
 	}
+	
 	public void applyFilter(FilterExpression filter, boolean adjustColumns)
 	{
 		if (dwModel == null) return;
@@ -2092,7 +2093,7 @@ public class WbTable
 		menu.add(createZoomSubmenu());
 		return menu;
 	}
-	
+
 	protected JMenu createZoomSubmenu()
 	{
 		JMenu zoom = new JMenu(ResourceMgr.getString("TxtZoom"));

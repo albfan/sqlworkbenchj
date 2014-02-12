@@ -173,6 +173,8 @@ public class OpenFileAction
 						{
 							sql.readFile(fname, encoding);
 						}
+						window.invalidate();
+						window.validate();
 					}
 				});
 			}

@@ -736,7 +736,13 @@ public class DataStoreTableModel
 			LogMgr.logWarning("DataStoreTableModel", "Wrong column index for sorting specified!");
 			return;
 		}
-		boolean ascending = !this.isSortAscending(aColumn);
+		int sortCols = this.sortDefinition.getColumnCount();
+		boolean ascending = true;
+		if (sortCols <= 1)
+		{
+			// toggle the ascending status only if there is a single sort column
+			ascending = !this.isSortAscending(aColumn);
+		}
 		sortInBackground(table, aColumn, ascending, addSortColumn);
 	}
 

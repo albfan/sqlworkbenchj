@@ -126,6 +126,7 @@ import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
 
 import workbench.storage.DataStore;
+import workbench.storage.NamedSortDefinition;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
@@ -133,6 +134,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
+
+import static workbench.storage.NamedSortDefinition.*;
 
 
 /**
@@ -148,6 +151,8 @@ public class TableListPanel
 						 ShareableDisplay, Exporter, PropertyChangeListener,
 						 TableModelListener, DbObjectList, ListSelectionControl, TableLister
 {
+	private static final String PROP_DO_SAVE_SORT = "workbench.gui.dbexplorer.tablelist.sort";
+
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected WbConnection dbConnection;
 	protected JPanel listPanel;
@@ -207,6 +212,8 @@ public class TableListPanel
 	// need to display the same table list
 	// e.g. the table search panel
 	private List<JTable> tableListClients;
+
+	private NamedSortDefinition savedSort;
 
 	protected JDialog infoWindow;
 	private JLabel infoLabel;
@@ -301,7 +308,7 @@ public class TableListPanel
 		this.triggers = new TriggerDisplayPanel();
 
 		this.listPanel = new JPanel();
-		this.tableList = new DbObjectTable();
+		this.tableList = new DbObjectTable(PROP_DO_SAVE_SORT);
 
 		this.tableList.setName("dbtablelist");
 		this.tableList.setSelectOnRightButtonClick(true);
@@ -1034,6 +1041,8 @@ public class TableListPanel
 			findPanel.setEnabled(false);
 			reloadAction.setEnabled(false);
 			summaryStatusBarLabel.setText(ResourceMgr.getString("MsgRetrieving"));
+			NamedSortDefinition lastSort = tableList.getCurrentSort();
+
 			reset();
 
 			// do not call setBusy() before reset() because
@@ -1061,7 +1070,21 @@ public class TableListPanel
 
 			// by applying the sort definition to the table model we ensure
 			// that the sorting is retained when filtering the objects
-			model.setSortDefinition(DbMetadata.getTableListSort());
+
+			if (savedSort != null)
+			{
+				// sort definition stored in the workspace
+				model.setSortDefinition(savedSort);
+				savedSort = null;
+			}
+			else if (lastSort != null)
+			{
+				model.setSortDefinition(lastSort);
+			}
+			else
+			{
+				model.setSortDefinition(DbMetadata.getTableListSort());
+			}
 
 			// Make sure some columns are not modified by the user
 			// to avoid the impression that e.g. a table's catalog can be changed
@@ -1248,6 +1271,18 @@ public class TableListPanel
 			props.setProperty(prefix + "importedtreedivider", Integer.toString(importedKeys.getDividerLocation()));
 			props.setProperty(prefix + "exportedtree.retrieveall", Boolean.toString(exportedKeys.getRetrieveAll()));
 			props.setProperty(prefix + "importedtree.retrieveall", Boolean.toString(importedKeys.getRetrieveAll()));
+
+			if (Settings.getInstance().getBoolProperty(PROP_DO_SAVE_SORT, false))
+			{
+				NamedSortDefinition sortDef = tableList.getCurrentSort();
+				String sort = null;
+				if (sortDef != null)
+				{
+					sort = sortDef.getDefinitionString();
+				}
+				props.setProperty(prefix + "tablelist.sort", sort);
+			}
+			
 			List<String> objectListColumnOrder = tableList.saveColumnOrder();
 			if (objectListColumnOrder != null)
 			{
@@ -1302,6 +1337,11 @@ public class TableListPanel
 		if (StringUtil.isNonEmpty(colString))
 		{
 			tableList.setNewColumnOrder(StringUtil.stringToList(colString, ","));
+		}
+		String sortString = props.getProperty(prefix + "tablelist.sort", null);
+		if (sortString != null)
+		{
+			savedSort = parseDefinitionString(sortString);
 		}
 	}
 
@@ -1944,7 +1984,6 @@ public class TableListPanel
 	public void reload()
 	{
 		if (!WbSwingUtilities.isConnectionIdle(this, dbConnection)) return;
-		this.reset();
 		this.startRetrieve(false);
 	}
 

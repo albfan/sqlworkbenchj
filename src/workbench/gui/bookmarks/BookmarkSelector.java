@@ -132,7 +132,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		filterValue.setToolTipText(ResourceMgr.getString("TxtBookmarkFilterTip"));
 
 		rememberColumnWidths = new CheckBoxAction("MnuTxtBookmarksSaveWidths", PROP_DO_SAVE_WIDTHS);
-		rememberSort = new CheckBoxAction("MnuTxtBookmarksSort", PROP_DO_SAVE_SORT);
+		rememberSort = new CheckBoxAction("MnuTxtRememberSort", PROP_DO_SAVE_SORT);
 
 		bookmarks = new WbTable(false, false, false)
 		{

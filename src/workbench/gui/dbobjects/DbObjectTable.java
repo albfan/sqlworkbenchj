@@ -26,15 +26,21 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import javax.swing.JPopupMenu;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
+
 import workbench.db.ColumnIdentifier;
+
+import workbench.gui.actions.CheckBoxAction;
 import workbench.gui.actions.ResetColOrderAction;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.WbTable;
 import workbench.gui.renderer.RendererSetup;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 
 /**
@@ -47,8 +53,13 @@ public class DbObjectTable
 	private List<String> columnOrder;
 	private List<String> originalColumnOrder;
 	private List<String> pendingOrder;
+	private String saveSortProperty;
 
 	public DbObjectTable()
+	{
+		this(null);
+	}
+	public DbObjectTable(String propName)
 	{
 		super(true, false, false);
 		setAutoResizeMode(AUTO_RESIZE_OFF);
@@ -57,6 +68,7 @@ public class DbObjectTable
 		setRowSelectionAllowed(true);
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setRendererSetup(RendererSetup.getBaseSetup());
+		this.saveSortProperty = propName;
 	}
 
 	public void setRememberColumnOrder(boolean flag)
@@ -73,6 +85,13 @@ public class DbObjectTable
 	protected JPopupMenu getHeaderPopup()
 	{
 		JPopupMenu menu = super.getHeaderPopup();
+		if (saveSortProperty != null)
+		{
+			int count = menu.getComponentCount();
+			CheckBoxAction rememberSort = new CheckBoxAction("MnuTxtRememberSort", saveSortProperty);
+			menu.insert(rememberSort.getMenuItem(), count - 1);
+		}
+		
 		if (isColumnOrderChanged() && originalColumnOrder != null)
 		{
 			ResetColOrderAction resetColOrder = new ResetColOrderAction(null)
