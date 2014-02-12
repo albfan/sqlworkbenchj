@@ -130,7 +130,7 @@ public class LookupValuePicker
 	private WbConnection dbConnection;
 	private ValidatingDialog dialog;
 	private final Map<String, Object> currentValues = new HashMap<String, Object>();
-	private SelectionHandler keyHandler;
+	private SelectionHandler selectionHandler;
 
 	public LookupValuePicker(WbConnection conn, LookupDataLoader loader, Map<String, Object> values)
 	{
@@ -164,7 +164,7 @@ public class LookupValuePicker
 		lookupData.setColumnSelectionAllowed(false);
 		lookupData.setRowSelectionAllowed(true);
 		lookupData.getHeaderRenderer().setShowPKIcon(true);
-		keyHandler = new SelectionHandler(lookupData);
+		selectionHandler = new SelectionHandler(lookupData);
 
 		Action nextComponent = new AbstractAction()
 		{
@@ -492,7 +492,7 @@ public class LookupValuePicker
 					// as the focus is set to the table containing the lookup data,
 					// the user can immediately use the cursor keys to select one entry.
 					if (!selectCurrent || row < 0) row = 0;
-					keyHandler.selectRow(row);
+					selectionHandler.selectRow(row);
 
 					int rows = data.getRowCount();
 					int maxRowNum = maxRows.getValue();
@@ -552,9 +552,7 @@ public class LookupValuePicker
 		DataRowExpression filter = new DataRowExpression(comp, filterValue.getText());
 		filter.setIgnoreCase(true);
 		lookupData.applyFilter(filter);
-		int row = highlightCurrentValues();
-		if (row < 0) row = 0;
-		keyHandler.selectRow(row);
+		selectionHandler.selectRow(0);
 	}
 
 	@Override
@@ -595,7 +593,7 @@ public class LookupValuePicker
 			}
 			else
 			{
-				keyHandler.handleKeyPressed(e);
+				selectionHandler.handleKeyPressed(e);
 			}
 		}
 	}
