@@ -38,6 +38,7 @@ import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 
 import workbench.interfaces.EncodingSelector;
+import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.PlatformShortcuts;
@@ -55,19 +56,31 @@ import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
 
 /**
- * Open a new file in the main window, with the option to open the
- * file in a new tab
+ * Open a new file in the main window, with the option to open the file in a new tab
+ * 
  * @author  Thomas Kellerer
  */
 public class OpenFileAction
 	extends WbAction
 {
-	private MainWindow window;
+	private MainWindow mainWindow;
+	private TextFileContainer container;
 
 	public OpenFileAction(MainWindow mainWindow)
 	{
+		this(mainWindow, null);
+	}
+
+	public OpenFileAction(TextFileContainer client)
+	{
+		this(null, client);
+	}
+
+	public OpenFileAction(MainWindow window, TextFileContainer client)
+	{
 		super();
-		window = mainWindow;
+		mainWindow = window;
+		container = client;
 		this.initMenuDefinition("MnuTxtFileOpen", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier()));
 		this.setIcon("Open");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
@@ -77,13 +90,20 @@ public class OpenFileAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
+		final MainWindow window = getWindow();
+		final SqlPanel currentPanel = getCurrentPanel();
+
+		if (currentPanel != null)
+		{
+			if (!currentPanel.checkAndSaveFile()) return;
+		}
+
 		try
 		{
 			File lastDir = new File(Settings.getInstance().getLastSqlDir());
 			if (GuiSettings.getFollowFileDirectory())
 			{
-				SqlPanel currentPanel = window.getCurrentSqlPanel();
-				if  (currentPanel != null && currentPanel.hasFileLoaded())
+				if (currentPanel != null && currentPanel.hasFileLoaded())
 				{
 					WbFile f = new WbFile(currentPanel.getCurrentFileName());
 					if (f.getParent() != null)
@@ -101,33 +121,38 @@ public class OpenFileAction
 			JPanel acc = new JPanel(new GridBagLayout());
 			JComponent p = EncodingUtil.createEncodingPanel();
 			p.setBorder(new EmptyBorder(0, 5, 0, 0));
-			GridBagConstraints c = new GridBagConstraints();
-			c.gridx = 0;
-			c.gridy = 0;
-			c.anchor = GridBagConstraints.NORTHEAST;
-			c.fill = GridBagConstraints.HORIZONTAL;
-			acc.add(p, c);
-
-			JCheckBox newTab = new JCheckBox(ResourceMgr.getString("LblOpenNewTab"));
-			newTab.setToolTipText(ResourceMgr.getDescription("LblOpenNewTab"));
 
 			boolean rememberNewTabSetting = true;
-			if (window.getCurrentSqlPanel() == null)
+			JCheckBox newTab = null;
+			if (window != null)
 			{
-				// DbExplorer is open, force open in new tab!
-				newTab.setSelected(true);
-				newTab.setEnabled(false);
-				rememberNewTabSetting = false;
-			}
-			else
-			{
-				newTab.setSelected(Settings.getInstance().getBoolProperty("workbench.file.newtab", false));
-			}
+				GridBagConstraints c = new GridBagConstraints();
+				c.gridx = 0;
+				c.gridy = 0;
+				c.anchor = GridBagConstraints.NORTHEAST;
+				c.fill = GridBagConstraints.HORIZONTAL;
+				acc.add(p, c);
 
-			c.gridy++;
-			c.insets = new Insets(5, 0, 0, 0);
-			c.weighty = 1.0;
-			acc.add(newTab, c);
+				newTab = new JCheckBox(ResourceMgr.getString("LblOpenNewTab"));
+				newTab.setToolTipText(ResourceMgr.getDescription("LblOpenNewTab"));
+
+				if (window.getCurrentSqlPanel() == null)
+				{
+					// DbExplorer is open, force open in new tab!
+					newTab.setSelected(true);
+					newTab.setEnabled(false);
+					rememberNewTabSetting = false;
+				}
+				else
+				{
+					newTab.setSelected(Settings.getInstance().getBoolProperty("workbench.file.newtab", false));
+				}
+
+				c.gridy++;
+				c.insets = new Insets(5, 0, 0, 0);
+				c.weighty = 1.0;
+				acc.add(newTab, c);
+			}
 
 			EncodingSelector selector = (EncodingSelector) p;
 			selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
@@ -139,7 +164,7 @@ public class OpenFileAction
 			if (answer == JFileChooser.APPROVE_OPTION)
 			{
 				final String encoding = selector.getEncoding();
-				final boolean openInNewTab = newTab.isSelected();
+				final boolean openInNewTab = newTab == null ? false : newTab.isSelected();
 
 				if (!GuiSettings.getFollowFileDirectory())
 				{
@@ -164,17 +189,19 @@ public class OpenFileAction
 						if (openInNewTab)
 						{
 							sql = (SqlPanel) window.addTab();
-							window.invalidate();
 						}
 						else
 						{
-							sql = window.getCurrentSqlPanel();
+							sql = currentPanel;
 						}
+
 						if (sql != null)
 						{
 							sql.readFile(fname, encoding);
-							sql.invalidate();
 						}
+						window.invalidate();
+						// this is necessary to update all menus and toolbars
+						// even if the current tab didn't really change
 						window.currentTabChanged();
 					}
 				});
@@ -185,5 +212,24 @@ public class OpenFileAction
 			LogMgr.logError("EditorPanel.openFile()", "Error selecting file", th);
 			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(th));
 		}
+	}
+
+	private MainWindow getWindow()
+	{
+		if (mainWindow != null) return mainWindow;
+		if (container != null)
+		{
+			return container.getMainWindow();
+		}
+		return null;
+	}
+
+	private SqlPanel getCurrentPanel()
+	{
+		if (getWindow() != null)
+		{
+			return getWindow().getCurrentSqlPanel();
+		}
+		return null;
 	}
 }

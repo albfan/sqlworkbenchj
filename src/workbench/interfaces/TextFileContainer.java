@@ -24,6 +24,7 @@ package workbench.interfaces;
 
 import java.io.File;
 
+import workbench.gui.MainWindow;
 
 /**
  *
@@ -33,7 +34,7 @@ public interface TextFileContainer
 {
 	boolean saveFile();
 	boolean saveCurrentFile();
-	boolean openFile();
 	boolean closeFile(boolean clearText);
+	MainWindow getMainWindow();
 	File getCurrentFile();
 }

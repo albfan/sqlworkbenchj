@@ -72,10 +72,10 @@ import workbench.resource.Settings;
 import workbench.db.QuoteHandler;
 import workbench.db.WbConnection;
 
+import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ColumnSelectionAction;
 import workbench.gui.actions.CommentAction;
-import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.FileReloadAction;
 import workbench.gui.actions.FileSaveAction;
 import workbench.gui.actions.FileSaveAsAction;
@@ -85,6 +85,7 @@ import workbench.gui.actions.FindPreviousAction;
 import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.JumpToLineAction;
 import workbench.gui.actions.MatchBracketAction;
+import workbench.gui.actions.OpenFileAction;
 import workbench.gui.actions.RedoAction;
 import workbench.gui.actions.ReplaceAction;
 import workbench.gui.actions.UnCommentAction;
@@ -136,7 +137,7 @@ public class EditorPanel
 
 	protected UndoAction undo;
 	protected RedoAction redo;
-	protected FileOpenAction fileOpen;
+	protected OpenFileAction fileOpen;
 	protected FileSaveAsAction fileSaveAs;
 
 	private boolean allowReformatOnReadonly;
@@ -191,7 +192,7 @@ public class EditorPanel
 		this.fileSave = new FileSaveAction(this);
 		this.fileSaveAs = new FileSaveAsAction(this);
 		this.addPopupMenuItem(fileSaveAs, true);
-		this.fileOpen = new FileOpenAction(this);
+		this.fileOpen = new OpenFileAction(this);
 		this.addPopupMenuItem(this.fileOpen, false);
 		this.jumpToLineAction = new JumpToLineAction(this);
 
@@ -401,7 +402,7 @@ public class EditorPanel
 	public FileSaveAsAction getFileSaveAsAction() { return this.fileSaveAs; }
 	public FormatSqlAction getFormatSqlAction() { return this.formatSql; }
 	public FileReloadAction getReloadAction() { return this.fileReloadAction; }
-	public FileOpenAction getFileOpenAction() { return this.fileOpen; }
+	public OpenFileAction getOpenFileAction() { return this.fileOpen; }
 
 	public void showFormatSql()
 	{
@@ -561,62 +562,14 @@ public class EditorPanel
 	}
 
 	@Override
-	public boolean openFile()
+	public MainWindow getMainWindow()
 	{
-		boolean result = false;
-		YesNoCancelResult choice = this.canCloseFile();
-		if (choice == YesNoCancelResult.cancel)
+		Window w = SwingUtilities.getWindowAncestor(this);
+		if (w instanceof MainWindow)
 		{
-			this.requestFocusInWindow();
-			return false;
+			return (MainWindow)w;
 		}
-
-		try
-		{
-			File lastDir = new File(Settings.getInstance().getLastSqlDir());
-			if (GuiSettings.getFollowFileDirectory())
-			{
-				if (currentFile != null)
-				{
-					lastDir = currentFile.getParentFile();
-				}
-				else
-				{
-					lastDir = GuiSettings.getDefaultFileDir();
-				}
-			}
-			JFileChooser fc = new WbFileChooser(lastDir);
-			JComponent p = EncodingUtil.createEncodingPanel();
-			p.setBorder(new EmptyBorder(0, 5, 0, 0));
-			EncodingSelector selector = (EncodingSelector)p;
-			selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
-			fc.setAccessory(p);
-
-			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
-			int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
-			if (answer == JFileChooser.APPROVE_OPTION)
-			{
-				String encoding = selector.getEncoding();
-
-				result = readFile(fc.getSelectedFile(), encoding);
-
-				WbSwingUtilities.repaintLater(this.getParent());
-
-				if (!GuiSettings.getFollowFileDirectory() && currentFile != null)
-				{
-					String dir = fc.getCurrentDirectory().getAbsolutePath();
-					Settings.getInstance().setLastSqlDir(dir);
-				}
-				Settings.getInstance().setDefaultFileEncoding(encoding);
-			}
-			return result;
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("EditorPanel.openFile()", "Error selecting file", e);
-			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
-			return false;
-		}
+		return null;
 	}
 
 	public boolean reloadFile()

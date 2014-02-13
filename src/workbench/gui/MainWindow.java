@@ -2963,6 +2963,7 @@ public class MainWindow
 				if (selectTab)
 				{
 					selectTab(index);
+					invalidate();
 				}
 				p.jumpToBookmark(bookmark);
 			}

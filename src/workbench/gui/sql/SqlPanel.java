@@ -458,6 +458,7 @@ public class SqlPanel
 			{
 				editor.setCaretPosition(offset);
 				editor.scrollTo(line, 0);
+				editor.validate();
 			}
 		});
 	}
