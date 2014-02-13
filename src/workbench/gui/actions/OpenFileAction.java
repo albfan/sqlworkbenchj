@@ -164,6 +164,7 @@ public class OpenFileAction
 						if (openInNewTab)
 						{
 							sql = (SqlPanel) window.addTab();
+							window.invalidate();
 						}
 						else
 						{
@@ -172,9 +173,9 @@ public class OpenFileAction
 						if (sql != null)
 						{
 							sql.readFile(fname, encoding);
+							sql.invalidate();
 						}
-						window.invalidate();
-						window.validate();
+						window.currentTabChanged();
 					}
 				});
 			}

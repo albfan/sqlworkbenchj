@@ -716,7 +716,7 @@ public class MainWindow
 		content.invalidate();
 	}
 
-	protected void forceRedraw()
+	public void forceRedraw()
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -1186,7 +1186,13 @@ public class MainWindow
 		});
 	}
 
-	private void tabSelected(final int index)
+	public void currentTabChanged()
+	{
+		int index = getCurrentPanelIndex();
+		tabSelected(index);
+	}
+
+	protected void tabSelected(final int index)
 	{
 		if (index < 0) return;
 		if (index >= sqlTab.getTabCount()) return;
