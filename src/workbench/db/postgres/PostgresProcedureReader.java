@@ -34,10 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import workbench.db.ColumnIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
 import workbench.db.NoConfigException;
@@ -266,7 +266,6 @@ public class PostgresProcedureReader
 				int row = ds.addRow();
 
 				PGProcName pname = new PGProcName(name, args, getTypeLookup());
-				List<PGType> pgArgs = pname.getArguments();
 
 				ProcedureDefinition def = new ProcedureDefinition(null, schema, name, java.sql.DatabaseMetaData.procedureReturnsResult);
 
@@ -275,16 +274,6 @@ public class PostgresProcedureReader
 				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
 				List<ColumnIdentifier> cols = convertToColumns(argNames, argTypes, argModes);
 				def.setParameters(cols);
-//				if (pgArgs != null)
-//				{
-//					for (int i=0; i < pgArgs.size(); i++)
-//					{
-//						ColumnIdentifier col = new ColumnIdentifier("$" + i);
-//						col.setDbmsType(pgArgs.get(i).getTypeName());
-//						cols.add(col);
-//					}
-//					def.setParameters(cols);
-//				}
 				def.setDisplayName(pname.getFormattedName());
 				def.setDbmsProcType(type);
 				def.setComment(remark);
@@ -395,7 +384,7 @@ public class PostgresProcedureReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresProcedureReader.readProcedureSource()", "Using SQL=\n" + sql);
+			LogMgr.logDebug("PostgresProcedureReader.readProcedureSource()", "Query to retrieve procedure source:\n" + sql);
 		}
 
 		StringBuilder source = new StringBuilder(500);
@@ -822,6 +811,7 @@ public class PostgresProcedureReader
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, col.getArgumentMode());
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, col.getDataType());
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, col.getDbmsType());
+					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, col.getColumnName());
 				}
 			}
 			else
@@ -876,6 +866,7 @@ public class PostgresProcedureReader
 				}
 			}
 			col.setArgumentMode(md);
+			result.add(col);
 		}
 		return result;
 	}

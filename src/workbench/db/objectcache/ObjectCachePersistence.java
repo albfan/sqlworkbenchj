@@ -21,7 +21,10 @@
 package workbench.db.objectcache;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InvalidClassException;
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -176,34 +179,19 @@ class ObjectCachePersistence
 			zout.setLevel(9);
 
 			Map<TableIdentifier, List<ColumnIdentifier>> objects = objectCache.getObjects();
-			zout.putNextEntry(new ZipEntry(OBJECTS_ENTRY));
-			ObjectOutputStream oos = new ObjectOutputStream(zout);
-			oos.writeObject(objects);
-			zout.closeEntry();
+			writeObject(zout, OBJECTS_ENTRY, objects);
 
 			Set<String> schemas = objectCache.getSchemasInCache();
-			zout.putNextEntry(new ZipEntry(SCHEMAS_ENTRY));
-			oos = new ObjectOutputStream(zout);
-			oos.writeObject(schemas);
-			zout.closeEntry();
+			writeObject(zout, SCHEMAS_ENTRY, schemas);
 
 			Map<TableIdentifier, List<DependencyNode>> referencedTables = objectCache.getReferencedTables();
-			zout.putNextEntry(new ZipEntry(REFERENCED_TABLES_ENTRY));
-			oos = new ObjectOutputStream(zout);
-			oos.writeObject(referencedTables);
-			zout.closeEntry();
+			writeObject(zout, REFERENCED_TABLES_ENTRY, referencedTables);
 
 			Map<TableIdentifier, List<DependencyNode>> referencingTables = objectCache.getReferencingTables();
-			zout.putNextEntry(new ZipEntry(REFERENCING_TABLES_ENTRY));
-			oos = new ObjectOutputStream(zout);
-			oos.writeObject(referencingTables);
-			zout.closeEntry();
+			writeObject(zout, REFERENCING_TABLES_ENTRY, referencingTables);
 
-//			Map<String, List<ProcedureDefinition>> procs = objectCache.getProcedures();
-//			zout.putNextEntry(new ZipEntry(PROCEDURES_ENTRY));
-//			oos = new ObjectOutputStream(zout);
-//			oos.writeObject(procs);
-//			zout.closeEntry();
+			Map<String, List<ProcedureDefinition>> procs = objectCache.getProcedures();
+			writeObject(zout, PROCEDURES_ENTRY, procs);
 		}
 		catch (Exception ex)
 		{
@@ -223,6 +211,26 @@ class ObjectCachePersistence
 			}
 		}
 		LogMgr.logDebug("ObjectCachePersistence.saveCache()", "Current object cache written to: " + cacheFile.getFullPath());
+	}
+
+	private void writeObject(ZipOutputStream zout, String filename, Object toWrite)
+		throws IOException
+	{
+		try
+		{
+			zout.putNextEntry(new ZipEntry(filename));
+			ObjectOutputStream oos = new ObjectOutputStream(zout);
+			oos.writeObject(toWrite);
+			zout.closeEntry();
+		}
+		catch (InvalidClassException ice)
+		{
+			LogMgr.logError("ObjectCachePersistence.writeObject()", "Could not write cache entry: " + filename, ice);
+		}
+		catch (NotSerializableException  nse)
+		{
+			LogMgr.logError("ObjectCachePersistence.writeObject()", "Could not write cache entry: " + filename, nse);
+		}
 	}
 
 	private WbFile getCacheFile(WbConnection dbConnection)

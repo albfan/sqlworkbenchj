@@ -30,8 +30,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.log.LogMgr;
+
+import workbench.db.objectcache.DbObjectCacheFactory;
 
 import workbench.storage.DataStore;
 
@@ -50,7 +51,7 @@ public class ProcedureDefinition
 	implements DbObject, Serializable
 {
 	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
-	
+
 	private String schema;
 	private String catalog;
 	private String procName;
@@ -79,9 +80,6 @@ public class ProcedureDefinition
 	 * Currently used to identify Postgres custom aggregate functions.
 	 */
 	private String dbmsProcType;
-
-	private final Object typeLock = new Object();
-
 	private String specificName;
 
 
@@ -189,7 +187,7 @@ public class ProcedureDefinition
 
 	public void setParameters(List<ColumnIdentifier> procParams)
 	{
-		synchronized (typeLock)
+		synchronized (this)
 		{
 			if (procParams == null)
 			{
@@ -204,7 +202,7 @@ public class ProcedureDefinition
 
 	public List<ColumnIdentifier> getParameters(WbConnection con)
 	{
-		synchronized (typeLock)
+		synchronized (this)
 		{
 			readParameters(con);
 		}
@@ -213,7 +211,7 @@ public class ProcedureDefinition
 
 	public void readParameters(WbConnection con)
 	{
-		synchronized (typeLock)
+		synchronized (this)
 		{
 			if (parameters == null)
 			{
@@ -247,7 +245,7 @@ public class ProcedureDefinition
 
 	public List<String> getParameterNames()
 	{
-		synchronized (typeLock)
+		synchronized (this)
 		{
 			if (parameters == null) return Collections.emptyList();
 			List<String> result = new ArrayList<String>(parameters.size());
@@ -261,7 +259,7 @@ public class ProcedureDefinition
 
 	public List<String> getParameterTypes()
 	{
-		synchronized (typeLock)
+		synchronized (this)
 		{
 			if (parameters == null) return Collections.emptyList();
 			List<String> result = new ArrayList<String>(parameters.size());
@@ -676,6 +674,7 @@ public class ProcedureDefinition
 	}
 
 	private static enum OracleType
+		implements Serializable
 	{
 		packageType,
 		objectType;

@@ -454,6 +454,25 @@ class ObjectCache
 		LogMgr.logDebug("ObjectCache.addTableList()", "Added " + count + " objects");
 	}
 
+	synchronized void addProcedureList(DataStore procs, String schema)
+	{
+		if (schema == null) return;
+		int count = procs.getRowCount();
+		List<ProcedureDefinition> procList = new ArrayList<ProcedureDefinition>();
+		for (int row=0; row < count; row++)
+		{
+			Object uo = procs.getRow(row).getUserObject();
+			if (uo instanceof ProcedureDefinition)
+			{
+				ProcedureDefinition proc = (ProcedureDefinition)uo;
+				procList.add(proc);
+			}
+		}
+		procedureCache.put(schema, procList);
+		LogMgr.logDebug("ObjectCache.addTableList()", "Added " + procList.size() + " procedures");
+	}
+
+
 	private TableIdentifier createIdentifier(DataStore tableList, int row)
 	{
 		String name = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);

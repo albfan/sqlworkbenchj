@@ -35,9 +35,9 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
+import workbench.storage.SortDefinition;
 
 import workbench.sql.DelimiterDefinition;
-import workbench.storage.SortDefinition;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
@@ -167,7 +167,7 @@ public class JdbcProcedureReader
 		def.addSortColumn(COLUMN_IDX_PROC_LIST_NAME, true);
 		return def;
 	}
-	
+
 	public DataStore fillProcedureListDataStore(ResultSet rs)
 		throws SQLException
 	{
@@ -183,7 +183,7 @@ public class JdbcProcedureReader
 			{
 				String cat = rs.getString("PROCEDURE_CAT");
 				String schema = rs.getString("PROCEDURE_SCHEM");
-				String name = rs.getString("PROCEDURE_NAME");
+				String name = stripVersionInfo(rs.getString("PROCEDURE_NAME"));
 				String remark = rs.getString("REMARKS");
 				int type = rs.getInt("PROCEDURE_TYPE");
 				Integer iType;
@@ -197,16 +197,22 @@ public class JdbcProcedureReader
 					iType = Integer.valueOf(type);
 				}
 				int row = ds.addRow();
+
+				ProcedureDefinition def = new ProcedureDefinition(cat, schema, name, iType);
+				def.setComment(remark);
+
 				if (useSpecificName)
 				{
 					String specname = rs.getString("SPECIFIC_NAME");
 					ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SPECIFIC_NAME, specname);
+					def.setSpecificName(specname);
 				}
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, stripVersionInfo(name));
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, name);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, iType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
+				ds.getRow(row).setUserObject(def);
 			}
 			ds.resetStatus();
 		}
@@ -251,6 +257,7 @@ public class JdbcProcedureReader
 
 	protected String stripVersionInfo(String procname)
 	{
+		if (procname == null) return null;
 		DbSettings dbS = this.connection.getMetadata().getDbSettings();
 		String versionDelimiter = dbS.getProcVersionDelimiter();
 		if (StringUtil.isEmptyString(versionDelimiter)) return procname;

@@ -83,6 +83,11 @@ public class DbObjectCache
 		objectCache.addTableList(dbConnection, tables, schema);
 	}
 
+	public void addProcedureList(DataStore procs, String schema)
+	{
+		objectCache.addProcedureList(procs, schema);
+	}
+
 	public void clear()
 	{
 		objectCache.clear();
