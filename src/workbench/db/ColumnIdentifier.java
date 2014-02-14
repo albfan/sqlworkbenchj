@@ -71,6 +71,9 @@ public class ColumnIdentifier
 	private String collationExpression;
 	private String generatorExpression;
 
+	// For procedure columns (=arguments)
+	private String argumentMode;
+
 	// an additional "modifier" to be used instead of the "DEFAULT" keyword
 	// currently only used for Oracle's "DEFAULT ON NULL"
 	private String defaultClause;
@@ -122,6 +125,16 @@ public class ColumnIdentifier
 	{
 		if (defaultClause == null) return "DEFAULT";
 		return defaultClause;
+	}
+
+	public void setArgumentMode(String mode)
+	{
+		this.argumentMode = mode;
+	}
+
+	public String getArgumentMode()
+	{
+		return argumentMode;
 	}
 
 	/**
@@ -499,6 +512,7 @@ public class ColumnIdentifier
 		result.alias = this.alias;
 		result.defaultClause = this.defaultClause;
 		result.readOnly = this.readOnly;
+		result.argumentMode = this.argumentMode;
 
 		return result;
 	}

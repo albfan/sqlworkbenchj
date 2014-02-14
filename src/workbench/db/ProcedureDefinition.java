@@ -22,6 +22,7 @@
  */
 package workbench.db;
 
+import java.io.Serializable;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.log.LogMgr;
 
 import workbench.storage.DataStore;
@@ -45,8 +47,10 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class ProcedureDefinition
-	implements DbObject
+	implements DbObject, Serializable
 {
+	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
+	
 	private String schema;
 	private String catalog;
 	private String procName;
@@ -67,7 +71,7 @@ public class ProcedureDefinition
 	private String oracleOverloadIndex;
 
 	private CharSequence source;
-	private List<String> parameterTypes;
+	private List<ColumnIdentifier> parameters;
 
 	/**
 	 * A DBMS specific name for the type of this procedure/function.
@@ -183,47 +187,89 @@ public class ProcedureDefinition
 		comment = cmt;
 	}
 
-	public void setParameterTypes(List<String> types)
+	public void setParameters(List<ColumnIdentifier> procParams)
 	{
 		synchronized (typeLock)
 		{
-			if (types == null)
+			if (procParams == null)
 			{
-				this.parameterTypes = null;
+				this.parameters = null;
 			}
 			else
 			{
-				this.parameterTypes = new ArrayList<String>(types);
+				this.parameters = new ArrayList<ColumnIdentifier>(procParams);
 			}
 		}
 	}
 
-	public List<String> getParameterTypes(WbConnection con)
+	public List<ColumnIdentifier> getParameters(WbConnection con)
 	{
 		synchronized (typeLock)
 		{
-			if (parameterTypes == null)
+			readParameters(con);
+		}
+		return Collections.unmodifiableList(parameters);
+	}
+
+	public void readParameters(WbConnection con)
+	{
+		synchronized (typeLock)
+		{
+			if (parameters == null)
 			{
-				ProcedureReader reader = con.getMetadata().getProcedureReader();
 				try
 				{
+					ProcedureReader reader = con.getMetadata().getProcedureReader();
 					DataStore ds = reader.getProcedureColumns(this);
-					parameterTypes = new ArrayList<String>(ds.getRowCount());
+					parameters = new ArrayList<ColumnIdentifier>(ds.getRowCount());
 
 					for (int i = 0; i < ds.getRowCount(); i++)
 					{
 						String type = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
 						if ("IN".equalsIgnoreCase(type) || "INOUT".equalsIgnoreCase(type))
 						{
-							parameterTypes.add(ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE));
+							String colName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+							String typeName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
+							int jdbcType = ds.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
+							ColumnIdentifier col = new ColumnIdentifier(colName, jdbcType);
+							col.setDbmsType(typeName);
+							parameters.add(col);
 						}
 					}
 				}
 				catch (SQLException s)
 				{
+					LogMgr.logError("ProcedureDefinition.readParameters()", "Could not read procedure parameters", s);
 				}
 			}
-			return Collections.unmodifiableList(this.parameterTypes);
+		}
+	}
+
+	public List<String> getParameterNames()
+	{
+		synchronized (typeLock)
+		{
+			if (parameters == null) return Collections.emptyList();
+			List<String> result = new ArrayList<String>(parameters.size());
+			for (ColumnIdentifier col : parameters)
+			{
+				result.add(col.getColumnName());
+			}
+			return result;
+		}
+	}
+
+	public List<String> getParameterTypes()
+	{
+		synchronized (typeLock)
+		{
+			if (parameters == null) return Collections.emptyList();
+			List<String> result = new ArrayList<String>(parameters.size());
+			for (ColumnIdentifier col : parameters)
+			{
+				result.add(col.getDbmsType());
+			}
+			return result;
 		}
 	}
 
@@ -263,7 +309,8 @@ public class ProcedureDefinition
 
 		if (this.procName.indexOf('(') > -1) return getObjectExpression(con);
 
-		List<String> params = getParameterTypes(con);
+		readParameters(con);
+		List<String> params = getParameterTypes();
 		if (params.isEmpty()) return getObjectExpression(con) + "()";
 		StringBuilder result = new StringBuilder(procName.length() + params.size() * 5 + 5);
 		result.append(getObjectExpression(con));
@@ -414,9 +461,9 @@ public class ProcedureDefinition
 	public String toString()
 	{
 		String name = oracleType != null ? catalog + "." + procName : procName;
-		if (CollectionUtil.isNonEmpty(parameterTypes))
+		if (CollectionUtil.isNonEmpty(parameters))
 		{
-			return name + "( " + StringUtil.listToString(parameterTypes, ", ", false) + " )";
+			return name + "( " + StringUtil.listToString(getParameterNames(), ", ", false) + " )";
 		}
 		return name;
 	}

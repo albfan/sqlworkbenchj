@@ -249,6 +249,12 @@ class ObjectCache
 		}
 	}
 
+	Map<String, List<ProcedureDefinition>> getProcedures()
+	{
+		if (procedureCache == null) return new HashMap<String, List<ProcedureDefinition>>(0);
+		return procedureCache;
+	}
+
 	/**
 	 * Get the procedures the are currently in the cache
 	 */
@@ -265,7 +271,7 @@ class ObjectCache
 				{
 					for (ProcedureDefinition proc : procs)
 					{
-						proc.getParameterTypes(dbConnection);
+						proc.readParameters(dbConnection);
 					}
 				}
 				procedureCache.put(schemaToUse, procs);
@@ -571,7 +577,7 @@ class ObjectCache
 		return Collections.unmodifiableMap(objects);
 	}
 
-	void initExternally(Map<TableIdentifier, List<ColumnIdentifier>> newObjects, Set<String> schemas, Map<TableIdentifier, List<DependencyNode>> referencedTables, Map<TableIdentifier, List<DependencyNode>> referencingTables)
+	void initExternally(Map<TableIdentifier, List<ColumnIdentifier>> newObjects, Set<String> schemas, Map<TableIdentifier, List<DependencyNode>> referencedTables, Map<TableIdentifier, List<DependencyNode>> referencingTables, Map<String, List<ProcedureDefinition>> procs)
 	{
 		if (newObjects == null || schemas == null) return;
 
@@ -592,6 +598,10 @@ class ObjectCache
 			this.referencingTables.putAll(referencingTables);
 			refCount += referencingTables.size();
 		}
-		LogMgr.logDebug("ObjectCache.initExternally", "Added " + objects.size() + " objects and " + refCount + " foreign key definitions from local storage");
+		if (procs != null)
+		{
+			this.procedureCache.putAll(procs);
+		}
+		LogMgr.logDebug("ObjectCache.initExternally", "Added " + objects.size() + " objects, " + procedureCache.values().size() + " procedures and " + refCount + " foreign key definitions from local storage");
 	}
 }

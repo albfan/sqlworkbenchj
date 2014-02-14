@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import workbench.db.ColumnIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -208,14 +209,15 @@ public class PostgresProcedureReader
 			}
 
 			String sql =
-						"SELECT NULL AS PROCEDURE_CAT, \n" +
-						"       n.nspname AS PROCEDURE_SCHEM, \n" +
-						"       p.proname AS PROCEDURE_NAME, \n" +
-						"	      d.description AS REMARKS, \n" +
-						"       array_to_string(p.proargtypes, ';') as PG_ARGUMENTS, \n" +
+						"SELECT n.nspname AS proc_schema, \n" +
+						"       p.proname AS proc_name, \n" +
+						"       d.description AS remarks, \n" +
+						"       coalesce(array_to_string(proallargtypes, ';'), array_to_string(proargtypes, ';')) as arg_types, \n" +
+						"       array_to_string(p.proargnames, ';') as arg_names, \n" +
+						"       array_to_string(p.proargmodes, ';') as arg_modes, \n"+
 						"       case when p.proisagg then 'aggregate' else 'function' end as proc_type \n" +
 						" FROM pg_catalog.pg_proc p \n " +
-				    "   JOIN pg_catalog.pg_namespace n on p.pronamespace=n.oid \n" +
+						"   JOIN pg_catalog.pg_namespace n on p.pronamespace=n.oid \n" +
 						"   LEFT JOIN pg_catalog.pg_description d ON (p.oid=d.objoid) \n" +
 						"   LEFT JOIN pg_catalog.pg_class c ON (d.classoid=c.oid AND c.relname='pg_proc') \n" +
 						"   LEFT JOIN pg_catalog.pg_namespace pn ON (c.relnamespace=pn.oid AND pn.nspname='pg_catalog')";
@@ -241,8 +243,12 @@ public class PostgresProcedureReader
 				whereNeeded = false;
 			}
 
-			sql += "\nORDER BY procedure_schem, procedure_name ";
+			sql += "\nORDER BY proc_schema, proc_name ";
 
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("PostgresProcedureReader.getProcedures()", "Query to retrieve procedures: \n" + sql);
+			}
 			stmt = connection.createStatementForQuery();
 
 			rs = stmt.executeQuery(sql);
@@ -250,31 +256,39 @@ public class PostgresProcedureReader
 
 			while (rs.next())
 			{
-				String cat = rs.getString("PROCEDURE_CAT");
-				String schema = rs.getString("PROCEDURE_SCHEM");
-				String name = rs.getString("PROCEDURE_NAME");
-				String remark = rs.getString("REMARKS");
-				String args = rs.getString("PG_ARGUMENTS");
+				String schema = rs.getString("proc_schema");
+				String name = rs.getString("proc_name");
+				String remark = rs.getString("remarks");
+				String args = rs.getString("arg_types");
+				String names = rs.getString("arg_names");
+				String modes = rs.getString("arg_modes");
 				String type = rs.getString("proc_type");
 				int row = ds.addRow();
 
 				PGProcName pname = new PGProcName(name, args, getTypeLookup());
 				List<PGType> pgArgs = pname.getArguments();
 
-				ProcedureDefinition def = new ProcedureDefinition(cat, schema, name, java.sql.DatabaseMetaData.procedureReturnsResult);
-				if (pgArgs != null)
-				{
-					List<String> types = new ArrayList<String>(pgArgs.size());
-					for (PGType pgType : pgArgs)
-					{
-						types.add(pgType.getTypeName());
-					}
-					def.setParameterTypes(types);
-				}
+				ProcedureDefinition def = new ProcedureDefinition(null, schema, name, java.sql.DatabaseMetaData.procedureReturnsResult);
+
+				List<String> argNames = StringUtil.stringToList(names, ";", true, true);
+				List<String> argTypes = StringUtil.stringToList(args, ";", true, true);
+				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
+				List<ColumnIdentifier> cols = convertToColumns(argNames, argTypes, argModes);
+				def.setParameters(cols);
+//				if (pgArgs != null)
+//				{
+//					for (int i=0; i < pgArgs.size(); i++)
+//					{
+//						ColumnIdentifier col = new ColumnIdentifier("$" + i);
+//						col.setDbmsType(pgArgs.get(i).getTypeName());
+//						cols.add(col);
+//					}
+//					def.setParameters(cols);
+//				}
 				def.setDisplayName(pname.getFormattedName());
 				def.setDbmsProcType(type);
 				def.setComment(remark);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, null);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, pname.getFormattedName());
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, java.sql.DatabaseMetaData.procedureReturnsResult);
@@ -800,41 +814,19 @@ public class PostgresProcedureReader
 				List<String> argTypes = StringUtil.stringToList(types, ";", true, true);
 				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
 
-				for (int i=0; i < argTypes.size(); i++)
+				List<ColumnIdentifier> columns = convertToColumns(argNames, argTypes, argModes);
+
+				for (ColumnIdentifier col : columns)
 				{
 					int row = result.addRow();
-					int typeOid = StringUtil.getIntValue(argTypes.get(i), -1);
-					String pgt = getTypeNameFromOid(typeOid);
-
-					String nm = "$" + (i + 1);
-					if (argNames != null && i < argNames.size())
-					{
-						nm = argNames.get(i);
-					}
-					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, nm);
-
-					String md = "IN";
-					if (argModes != null && i < argModes.size())
-					{
-						String m = argModes.get(i);
-						if ("o".equals(m))
-						{
-							md = "OUT";
-						}
-						else if ("b".equals(m))
-						{
-							md = "INOUT";
-						}
-					}
-					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, md);
-					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, getJavaType(pgt));
-					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, getTypeNameFromOid(typeOid));
+					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, col.getArgumentMode());
+					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, col.getDataType());
+					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, col.getDbmsType());
 				}
-
 			}
 			else
 			{
-				LogMgr.logWarning("PostgreProcedureReader.getProcedureHeader()", "Could not retrieve columns", null);
+				LogMgr.logWarning("PostgresProcedureReader.getProcedureHeader()", "No columns returned for procedure: " + procname.getName(), null);
 				return super.getProcedureColumns(catalog, schema, procname.getName());
 			}
 
@@ -849,6 +841,41 @@ public class PostgresProcedureReader
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
+	}
+
+	private List<ColumnIdentifier> convertToColumns(List<String> argNames, List<String> argTypes, List<String> argModes)
+	{
+		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(argTypes.size());
+		for (int i=0; i < argTypes.size(); i++)
+		{
+			int typeOid = StringUtil.getIntValue(argTypes.get(i), -1);
+			String pgt = getTypeNameFromOid(typeOid);
+
+			String nm = "$" + (i + 1);
+			if (argNames != null && i < argNames.size())
+			{
+				nm = argNames.get(i);
+			}
+			ColumnIdentifier col = new ColumnIdentifier(nm);
+			col.setDataType(getJavaType(pgt));
+			col.setDbmsType(getTypeNameFromOid(typeOid));
+
+			String md = "IN";
+			if (argModes != null && i < argModes.size())
+			{
+				String m = argModes.get(i);
+				if ("o".equals(m))
+				{
+					md = "OUT";
+				}
+				else if ("b".equals(m))
+				{
+					md = "INOUT";
+				}
+			}
+			col.setArgumentMode(md);
 		}
 		return result;
 	}

@@ -40,6 +40,7 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
+import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -57,6 +58,7 @@ class ObjectCachePersistence
 	private static final String SCHEMAS_ENTRY = "schemas.dat";
 	private static final String REFERENCING_TABLES_ENTRY = "referencing_tables.data";
 	private static final String REFERENCED_TABLES_ENTRY = "referenced_tables.data";
+	private static final String PROCEDURES_ENTRY = "procedures.data";
 
 	void loadFromLocalFile(ObjectCache cache, WbConnection conn)
 	{
@@ -82,6 +84,7 @@ class ObjectCachePersistence
 		Set<String> schemas = null;
 		Map<TableIdentifier, List<DependencyNode>> referencedTables = null;
 		Map<TableIdentifier, List<DependencyNode>> referencingTables = null;
+		Map<String, List<ProcedureDefinition>> procs = null;
 
 		try
 		{
@@ -111,7 +114,16 @@ class ObjectCachePersistence
 				ois = new ObjectInputStream(in);
 				referencingTables = (Map<TableIdentifier, List<DependencyNode>>) ois.readObject();
 			}
-			cache.initExternally(objects, schemas, referencedTables, referencingTables);
+
+			entry = zipFile.getEntry(PROCEDURES_ENTRY);
+			if (entry != null)
+			{
+				in = zipFile.getInputStream(entry);
+				ois = new ObjectInputStream(in);
+				procs = (Map<String, List<ProcedureDefinition>>) ois.readObject();
+			}
+
+			cache.initExternally(objects, schemas, referencedTables, referencingTables, procs);
 		}
 		catch (Throwable th)
 		{
@@ -186,6 +198,12 @@ class ObjectCachePersistence
 			oos = new ObjectOutputStream(zout);
 			oos.writeObject(referencingTables);
 			zout.closeEntry();
+
+//			Map<String, List<ProcedureDefinition>> procs = objectCache.getProcedures();
+//			zout.putNextEntry(new ZipEntry(PROCEDURES_ENTRY));
+//			oos = new ObjectOutputStream(zout);
+//			oos.writeObject(procs);
+//			zout.closeEntry();
 		}
 		catch (Exception ex)
 		{
