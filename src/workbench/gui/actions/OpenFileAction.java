@@ -57,7 +57,7 @@ import workbench.util.WbFile;
 
 /**
  * Open a new file in the main window, with the option to open the file in a new tab
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class OpenFileAction
@@ -90,6 +90,8 @@ public class OpenFileAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
+		EncodingUtil.fetchEncodings();
+		
 		final MainWindow window = getWindow();
 		final SqlPanel currentPanel = getCurrentPanel();
 

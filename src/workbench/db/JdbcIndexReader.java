@@ -973,12 +973,13 @@ public class JdbcIndexReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("JdbcIndexReader.getIndexes()", "Error retrieving index list", e);
+			LogMgr.logError("JdbcIndexReader.getIndexes()", "Error retrieving index list using: " + sql, e);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+		Collections.sort(result, IndexDefinition.getNameSorter());
 		return result;
 	}
 

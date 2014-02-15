@@ -344,8 +344,7 @@ public class PostgresProcedureReader
 			sql += "       null::text as formatted_return_type, \n";
 		}
 		sql +=	"       p.prorettype as return_type_oid, \n" +
-						"       coalesce(array_to_string(p.proallargtypes, ';'), " +
-						"                 array_to_string(p.proargtypes, ';')) as argtypes, \n" +
+						"       coalesce(array_to_string(p.proallargtypes, ';'), array_to_string(p.proargtypes, ';')) as argtypes, \n" +
 						"       array_to_string(p.proargnames, ';') as argnames, \n" +
 						"       array_to_string(p.proargmodes, ';') as argmodes, \n" +
 						"       p.prosecdef, \n" +
@@ -366,7 +365,7 @@ public class PostgresProcedureReader
 			"   JOIN pg_language l ON p.prolang = l.oid \n" +
 			"   JOIN pg_namespace n ON p.pronamespace = n.oid \n";
 
-		sql += "WHERE p.proname = '" + name.getName() + "' ";
+		sql += "WHERE p.proname = '" + name.getName() + "' \n";
 		if (StringUtil.isNonBlank(def.getSchema()))
 		{
 			sql += "  AND n.nspname = '" + def.getSchema() + "' \n";
@@ -375,7 +374,11 @@ public class PostgresProcedureReader
 		String oids = name.getOIDs();
 		if (StringUtil.isNonBlank(oids))
 		{
-			sql += "  AND p.proargtypes = cast('" + oids + "' as oidvector)";
+			String array = "ARRAY[" + oids.replace(' ', ',') + "]::oid[]";
+
+			sql +=
+				"  AND (   (p.proallargtypes is null AND p.proargtypes = cast('" + oids + "' as oidvector)) \n " +
+				"       OR (p.proallargtypes = " + array + "))\n";
 		}
 		else
 		{
@@ -461,7 +464,7 @@ public class PostgresProcedureReader
 					{
 						String mode = argModes.get(i);
 						if ("o".equals(mode)) source.append("OUT ");
-						if ("b".equals(mode)) source.append("INOUT");
+						if ("b".equals(mode)) source.append("INOUT ");
 					}
 
 					if (i < argNames.size())
@@ -655,7 +658,7 @@ public class PostgresProcedureReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresProcedureReader.getAggregateSource()", "Using SQL=" + sql);
+			LogMgr.logDebug("PostgresProcedureReader.getAggregateSource()", "Query to retrieve aggregate source:\n" + sql);
 		}
 		StringBuilder source = new StringBuilder();
 		ResultSet rs = null;
@@ -773,7 +776,7 @@ public class PostgresProcedureReader
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
 				// Postgres JDBC statements implement toString() such that parameters are visible..
-				LogMgr.logDebug("PostgresProcedureReader.getColumns()", "Using SQL:\n" + stmt.toString());
+				LogMgr.logDebug("PostgresProcedureReader.getColumns()", "Query to retrieve procedure columns:\n" + stmt.toString());
 			}
 
 			rs = stmt.executeQuery();

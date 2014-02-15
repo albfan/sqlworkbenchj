@@ -153,6 +153,7 @@ public class EncodingUtil
 	{
 		if (charsets == null)
 		{
+			long start = System.currentTimeMillis();
 			SortedMap<String,Charset> sets = java.nio.charset.Charset.availableCharsets();
 			charsets = new String[sets.size()];
 			int i=0;
@@ -161,6 +162,8 @@ public class EncodingUtil
 				charsets[i] = name;
 				i++;
 			}
+			long duration = System.currentTimeMillis() - start;
+			LogMgr.logDebug("EncodingUtil.getEncodings()", "Retrieving encodings took: " + duration + "ms");
 		}
 		return charsets;
 	}
@@ -228,5 +231,18 @@ public class EncodingUtil
 		{
 			return null;
 		}
+	}
+
+	public static void fetchEncodings()
+	{
+		WbThread encodings = new WbThread("Fetch Encodings")
+		{
+			@Override
+			public void run()
+			{
+				getEncodings();
+			}
+		};
+		encodings.start();
 	}
 }

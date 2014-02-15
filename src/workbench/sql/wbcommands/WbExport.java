@@ -105,7 +105,8 @@ public class WbExport
 	public static final String ARG_AUTOFILTER = "autoFilter";
 	public static final String ARG_OPT_WIDTH = "autoColWidth";
 	public static final String ARG_FIXED_HEADER = "fixedHeader";
-	public static final String ARG_TARGET_SHEET = "targetSheet";
+	public static final String ARG_TARGET_SHEET_IDX = "targetSheet";
+	public static final String ARG_TARGET_SHEET_NAME = "targetSheetName";
 
 	public static final String ARG_PAGE_TITLE = "title";
 
@@ -216,7 +217,8 @@ public class WbExport
 		cmdLine.addArgument(ARG_MERGE_TYPE, MergeGenerator.Factory.getSupportedTypes());
 		cmdLine.addArgument(ARG_NULL_STRING);
 		cmdLine.addArgument(ARG_TRIM_CHARDATA, ArgumentType.BoolSwitch);
-		cmdLine.addArgument(ARG_TARGET_SHEET);
+		cmdLine.addArgument(ARG_TARGET_SHEET_IDX);
+		cmdLine.addArgument(ARG_TARGET_SHEET_NAME);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -463,15 +465,19 @@ public class WbExport
 		format = cmdLine.getValue(ARG_DECIMAL_SYMBOL);
 		if (format != null) exporter.setDecimalSymbol(format);
 
-		// Spreadsheet options (will be ignored silently for non-spreadsheet exports)
-		exporter.setEnableAutoFilter(cmdLine.getBoolean(ARG_AUTOFILTER, true));
-		exporter.setEnableFixedHeader(cmdLine.getBoolean(ARG_FIXED_HEADER, true));
 		exporter.setAppendInfoSheet(cmdLine.getBoolean(ARG_ADD_INFOSHEET, Settings.getInstance().getDefaultExportInfoSheet(type)));
-		exporter.setTargetSheetIndex(cmdLine.getIntValue(ARG_TARGET_SHEET, -1));
-		exporter.setOptimizeSpreadsheetColumns(cmdLine.getBoolean(ARG_OPT_WIDTH, true));
 
-		exporter.setPageTitle(cmdLine.getValue(ARG_PAGE_TITLE));
+		exporter.setTargetSheetIndex(cmdLine.getIntValue(ARG_TARGET_SHEET_IDX, -1));
+		exporter.setTargetSheetName(cmdLine.getValue(ARG_TARGET_SHEET_NAME));
+
+		// the formatting options should only default to true if no target sheet was specified
+		boolean doFormatting = cmdLine.getIntValue(ARG_TARGET_SHEET_IDX, -1) < 0 && cmdLine.getValue(ARG_TARGET_SHEET_NAME) == null;
+		exporter.setEnableAutoFilter(cmdLine.getBoolean(ARG_AUTOFILTER, doFormatting));
+		exporter.setEnableFixedHeader(cmdLine.getBoolean(ARG_FIXED_HEADER, doFormatting));
+		exporter.setOptimizeSpreadsheetColumns(cmdLine.getBoolean(ARG_OPT_WIDTH, doFormatting));
+
 		exporter.setExportHeaders(cmdLine.getBoolean(ARG_HEADER, getHeaderDefault(type)));
+		exporter.setPageTitle(cmdLine.getValue(ARG_PAGE_TITLE));
 		exporter.setIncludeColumnComments(cmdLine.getBoolean(ARG_COL_COMMENTS, false));
 
 		ExportDataModifier modifier = RegexModifierParameter.buildFromCommandline(cmdLine);

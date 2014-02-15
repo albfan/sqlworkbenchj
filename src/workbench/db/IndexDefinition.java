@@ -24,11 +24,13 @@ package workbench.db;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import workbench.log.LogMgr;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to store the defintion of a database index.
@@ -92,7 +94,7 @@ public class IndexDefinition
 	{
 		return this.sourceOptions;
 	}
-	
+
 	public boolean isPartitioned()
 	{
 		return partitioned;
@@ -461,4 +463,22 @@ public class IndexDefinition
 		idx.partitioned = this.partitioned;
 		return idx;
 	}
+
+	public static Comparator<IndexDefinition> getNameSorter()
+	{
+		Comparator<IndexDefinition> comp = new Comparator<IndexDefinition>()
+		{
+			@Override
+			public int compare(IndexDefinition o1, IndexDefinition o2)
+			{
+				if (o1 == null) return 1;
+				if (o2 == null) return -1;
+				String name1 = o1.getName();
+				String name2 = o2.getName();
+				return StringUtil.compareStrings(name1, name2, true);
+			}
+		};
+		return comp;
+	}
+
 }

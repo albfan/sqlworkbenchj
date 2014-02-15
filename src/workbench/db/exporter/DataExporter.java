@@ -142,6 +142,7 @@ public class DataExporter
 	private WbNumberFormatter numberFormatter;
 	private boolean append;
 	private int targetSheetIndex; // for XLS and XLSX only
+	private String targetSheetName; // for XLS and XLSX only
 	private boolean escapeHtml = true;
 	private String htmlHeading;
 	private String htmlTrailer;
@@ -610,6 +611,16 @@ public class DataExporter
 	public void setTargetSheetIndex(int index)
 	{
 		this.targetSheetIndex = index;
+	}
+
+	public String getTargetSheetName()
+	{
+		return targetSheetName;
+	}
+
+	public void setTargetSheetName(String name)
+	{
+		this.targetSheetName = name;
 	}
 
 	public void setContinueOnError(boolean aFlag)

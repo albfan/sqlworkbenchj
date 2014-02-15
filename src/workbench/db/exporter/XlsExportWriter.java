@@ -52,6 +52,7 @@ public class XlsExportWriter
 		xls.setOptimizeColumns(exporter.getOptimizeSpreadsheetColumns());
 		xls.setAppend(exporter.getAppendToFile());
 		xls.setTargetSheetIndex(exporter.getTargetSheetIndex());
+		xls.setTargetSheetName(exporter.getTargetSheetName());
 	}
 
 	@Override

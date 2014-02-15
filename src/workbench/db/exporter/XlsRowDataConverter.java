@@ -73,6 +73,7 @@ public class XlsRowDataConverter
 	private boolean optimizeCols = true;
 	private boolean append;
 	private int targetSheetIndex = -1;
+	private String targetSheetName;
 
 	public XlsRowDataConverter()
 	{
@@ -90,6 +91,11 @@ public class XlsRowDataConverter
 	public void setUseXLSX()
 	{
 		useXLSX = true;
+	}
+
+	public void setTargetSheetName(String name)
+	{
+		this.targetSheetName = name;
 	}
 
 	public void setTargetSheetIndex(int index)
@@ -150,7 +156,7 @@ public class XlsRowDataConverter
 	{
 		firstRow = 0;
 
-		boolean loadFile = append || this.targetSheetIndex > 0;
+		boolean loadFile = append || this.targetSheetIndex > 0 || this.targetSheetName != null;
 
 		if (loadFile && getOutputFile().exists())
 		{
@@ -175,13 +181,34 @@ public class XlsRowDataConverter
 		createFormatters();
 		excelFormat.setupWithWorkbook(workbook);
 
-		String sheetTitle = getPageTitle("SQLExport");
+		String suppliedTitle = getPageTitle(null);
 
 		if (this.targetSheetIndex > 0 && this.targetSheetIndex <= workbook.getNumberOfSheets())
 		{
 			// The user supplies a one based sheet index
 			sheet = workbook.getSheetAt(targetSheetIndex - 1);
-			workbook.setSheetName(targetSheetIndex - 1, sheetTitle);
+			if (suppliedTitle != null)
+			{
+				workbook.setSheetName(targetSheetIndex - 1, suppliedTitle);
+			}
+		}
+		else if (this.targetSheetName != null)
+		{
+			sheet = workbook.getSheet(targetSheetName);
+			if (sheet == null)
+			{
+				LogMgr.logWarning("XlsRowDataConverter.getStart()", "Sheet '" + targetSheetName + "' not found!");
+				targetSheetIndex = -1;
+				targetSheetName = null;
+			}
+			else
+			{
+				targetSheetIndex = workbook.getSheetIndex(sheet);
+			}
+			if (sheet != null && suppliedTitle != null)
+			{
+				workbook.setSheetName(targetSheetIndex, suppliedTitle);
+			}
 		}
 		else
 		{
@@ -190,6 +217,7 @@ public class XlsRowDataConverter
 
 		if (sheet == null)
 		{
+			String sheetTitle = getPageTitle("SQLExport");
 			sheet = workbook.createSheet(sheetTitle);
 		}
 

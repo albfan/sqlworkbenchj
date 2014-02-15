@@ -39,6 +39,7 @@ import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
 import workbench.sql.wbcommands.WbDescribeObject;
+import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbXslt;
@@ -202,13 +203,13 @@ public class WbCommandAnalyzer
 				this.elements = getFiles(args, parameter, true);
 				this.setOverwriteCurrentWord(true);
 			}
-			else if (parameter.equals(WbImport.ARG_SHEET_NR))
+			else if (parameter.equals(WbImport.ARG_SHEET_NR) || parameter.equals(WbExport.ARG_TARGET_SHEET_IDX))
 			{
 				this.useSheetIndex = true;
 				this.elements = getSheetnames(cmd, args);
 				changeCase = false;
 			}
-			else if (parameter.equals(WbImport.ARG_SHEET_NAME))
+			else if (parameter.equals(WbImport.ARG_SHEET_NAME) || parameter.equals(WbExport.ARG_TARGET_SHEET_NAME))
 			{
 				this.useSheetIndex = false;
 				this.elements = getSheetnames(cmd, args);
@@ -313,6 +314,10 @@ public class WbCommandAnalyzer
 			}
 			else
 			{
+				if (entry.sheetName.indexOf(' ') > -1 || entry.sheetName.indexOf('-') > -1)
+				{
+					return "\"" + entry.sheetName + "\"";
+				}
 				return entry.sheetName;
 			}
 		}
@@ -327,6 +332,10 @@ public class WbCommandAnalyzer
 	{
 		cmdLine.parse(this.sql);
 		String fname = cmdLine.getValue(WbImport.ARG_FILE);
+		if (fname == null)
+		{
+			fname = cmdLine.getValue(WbExport.ARG_OUTPUT_FILENAME);
+		}
 		fname = VariablePool.getInstance().replaceAllParameters(fname);
 		WbFile input = wbImport.evaluateFileArgument(fname);
 
@@ -355,7 +364,7 @@ public class WbCommandAnalyzer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("WbCommandAnalyzer.getSheetnames()", "Could not read spreadsheet: " + input.getFullPath(), e);
+			LogMgr.logError("WbCommandAnalyzer.getSheetnames()", "Could not read spreadsheet: " + input.getFullPath(), e);
 		}
 		finally
 		{

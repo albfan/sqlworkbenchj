@@ -236,6 +236,9 @@
                 Additional external libraries are required in order to be able to use this format. Please read the note at the beginning of
                 this section.
 							</para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
 						</entry>
 					</row>
 
@@ -383,7 +386,7 @@
                 for XLS, XLSX and ODS exports.
               </para>
               <para>
-                If auto-completion is invoked for this parameter, it will show a list of encodings
+                This parameter supports auto-completion and if it is invoked for this parameter, it will show a list of encodings
                 defined through the configuration property <literal>workbench.export.defaultencodings</literal>
                 This is a comma-separated list that can be changed using
                 <link linkend="command-setconfig"><literal>WbSetConfig</literal></link>
@@ -417,6 +420,9 @@
 							<para>
 								The default line ending used depends on the platform where &wb-productname; is running.
 							</para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
 						</entry>
 					</row>
 
@@ -491,8 +497,10 @@
 								automatically recognize the external files.
 							</para>
 							<para>
+                <important>
 									Note that SQL exports (<literal>-type=sqlinsert</literal>) generated with
 									<literal>-clobAsFile=true</literal> can only be run with &wb-productname;!
+                </important>
 							</para>
 							<para>
 								All CLOB files that are written using the encoding specified with the
@@ -648,8 +656,10 @@
 								&wb-productname; this is the recommended format.
 							</para>
 							<para>
-								Note that SQL scripts generated with <literal>-blobType=file</literal>
-								can only be run with &wb-productname;
+                <important>
+                  Note that SQL scripts generated with <literal>-blobType=file</literal>
+                  can only be run with &wb-productname;
+                </important>
 							</para>
 							<para>
 								The parameter value <literal>ansi</literal>, will generate
@@ -664,6 +674,9 @@
 								using this option will still create an ansi literal but this
 								might result in an invalid SQL statement.
 							</para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
 						</entry>
 					</row>
           <row>
@@ -777,6 +790,9 @@
 								-quoteChar) that is embedded in the exported (character) data is written as
 								two quotes e.g. <literal>here is a "" quote character</literal>.
 							</para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
 						</entry>
 					</row>
 
@@ -840,6 +856,9 @@
                 To import a text file with escaped values using <link linkend="text-import-decode">WbImport</link>,
                 the <literal>-decode=true</literal> must be used.
               </para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
 						</entry>
 					</row>
 
@@ -875,6 +894,9 @@
 							<note>
                 <para>The generated format file(s) are intended as a starting point for your own adjustments. Don't expect them to be complete.</para>
               </note>
+              <para>
+                This parameter supports auto-completion.
+              </para>
 						</entry>
 					</row>
 
@@ -1080,6 +1102,9 @@
 								You can define the default literal format to be used for the WbExport command
 								in the <link linkend="options-default-copy-literaltype">options dialog</link>.
 							</para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
 						</entry>
 					</row>
 
@@ -1193,7 +1218,7 @@
 						<entry id="export-fixed-header">-fixedHeader</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-              <para>Default value: <literal>true</literal></para>
+              <para>Default value: <literal>true</literal>  unless a target sheet is specified</para>
               <para>
                 If set to true, the header row will be "frozen" in the Worksheet so that
                 it will not scroll out of view.
@@ -1205,10 +1230,10 @@
 						<entry id="export-autofilter">-autoFilter</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>Default value: <literal>true</literal> unless a target sheet is specified</para>
               <para>
                 If set to true, the "auto-filter" fetaure for the column headers will be turned on.
               </para>
-              <para>Default value: <literal>true</literal></para>
             </entry>
 					</row>
 
@@ -1216,7 +1241,7 @@
 						<entry id="export-optimize-colwidth">-autoColWidth</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-              <para>Default value: <literal>true</literal></para>
+              <para>Default value: <literal>true</literal> unless a target sheet is specified</para>
               <para>
                 If set to true, the width of the columns is adjusted to the width of the content.
               </para>
@@ -1224,23 +1249,34 @@
 					</row>
 
           <row>
-            <entry id="export-targetsheet">-targetSheet</entry>
+            <entry id="export-targetsheet">-targetSheet  -targetSheetName</entry>
             <entry>
-              <para>Possible values: any valid index for a worksheet in an existing Excel file</para>
+              <para>Possible values: any valid index or name for a worksheet in an existing Excel file</para>
               <para>This parameter is only available for XLS and XLSX exports</para>
               <para>
                 When using this parameter, the data will be written into an existing file and worksheet without
                 changing the formatting in the spreadsheet. No formatting is applied as it is assumed
-                that the target worksheet is properly set up. <literal>-autoFilter</literal>,
-                <literal>-fixedHeader</literal> and <literal>-autoColWidth</literal> can still be used.
+                that the target worksheet is properly set up.
+              </para>
+              <para>
+                <note>
+                  The parameters <literal>-autoFilter</literal>, <literal>-fixedHeader</literal> and <literal>-autoColWidth</literal> can still be used.
+                  If <literal>-targetSheet</literal> or <literal>-targetSheetName</literal> are specified they default to
+                  <literal>false</literal> unless they are explicitely passed as <literal>true</literal>
+                </note>
               </para>
               <para>
                 If this parameter is used, the target file specified with the <literal>-file</literal> parameter
                 <emphasis role="bold">must</emphasis> already exist
               </para>
+              <para>
+                If <literal>-targetSheet</literal> is supplied, the value for <literal>-targetSheetName</literal> is ignored
+              </para>
+              <para>
+                These parameters supports auto-completion if the <literal>-file</literal> parameter is already supplied.
+              </para>
             </entry>
           </row>
-
 
 				</tbody>
 			</tgroup>

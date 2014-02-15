@@ -1439,12 +1439,12 @@
     <para>
       These parameters are:
 				<itemizedlist>
-          <listitem><simpara>-header</simpara></listitem>
-          <listitem><simpara>-fileColumns</simpara></listitem>
-          <listitem><simpara>-importColumns</simpara></listitem>
-          <listitem><simpara>-nullString</simpara></listitem>
-          <listitem><simpara>-emptyStringIsNull</simpara></listitem>
-          <listitem><simpara>-illegalDateIsNull</simpara></listitem>
+          <listitem><simpara><literal>-header</literal></simpara></listitem>
+          <listitem><simpara><literal>-fileColumns</literal></simpara></listitem>
+          <listitem><simpara><literal>-importColumns</literal></simpara></listitem>
+          <listitem><simpara><literal>-nullString</literal></simpara></listitem>
+          <listitem><simpara><literal>-emptyStringIsNull</literal></simpara></listitem>
+          <listitem><simpara><literal>-illegalDateIsNull</literal></simpara></listitem>
         </itemizedlist>
     </para>
     <para>
