@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-02-03">
+    <entry dev-build="11" type="enh">WbExport now supports -targetSheetName to specify the target sheet by name instead of an index value. The options for autoFilter, autoColWidth and fixedHeader now default to false if a target sheet is specicfied.</entry>
     <entry dev-build="11" type="enh">Support for bookmarks defined through the annotation @WbTag was added.</entry>
     <entry dev-build="10" type="enh">WbImport and WbCopy no support an option to synchronize sequences with the imported values for DBMS that support sequences tied to a column (Postgres, DB2, H2, HSQLDB)</entry>
     <entry dev-build="10" type="enh">WbFeedback now supports the options "traceon" and "traceoff". With "traceon" each statement that is executed is printed.</entry>
