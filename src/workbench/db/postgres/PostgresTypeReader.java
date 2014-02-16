@@ -246,7 +246,6 @@ public class PostgresTypeReader
 				result.setAttributes(tdef.getColumns());
 				return result;
 			}
-			return null;
 		}
 		catch (Exception e)
 		{
