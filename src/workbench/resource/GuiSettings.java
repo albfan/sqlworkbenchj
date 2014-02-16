@@ -90,6 +90,7 @@ public class GuiSettings
 	public static final String PROP_LOCAL_OBJECT_CACHE_MAXAGE = PROP_LOCAL_OBJECT_CACHE + ".maxage";
 	public static final String PROP_LOCAL_OBJECT_CACHE_DIR = PROP_LOCAL_OBJECT_CACHE + ".cachedir";
 
+	public static final String PROP_USE_CURRENT_LINE_FOR_CURRENT_STMT = "workbench.gui.sql.current.line.statement";
 
 	public static final String PROP_COPY_TEXT_DISPLAY_DLG = "workbench.gui.copy.text.displayoptions";
 
@@ -1057,4 +1058,27 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.sql.script.showtime", false);
 	}
+
+	public static boolean getUseStatementInCurrentLine()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_USE_CURRENT_LINE_FOR_CURRENT_STMT, false);
+	}
+
+	public static void setUseStatementInCurrentLine(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_USE_CURRENT_LINE_FOR_CURRENT_STMT, flag);
+	}
+
+	public static boolean getUseLastIfNoCurrentStmt()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.sql.uselast.alternative", getUseStatementInCurrentLine());
+	}
+
+	public static void setUseLastIfNoCurrentStmt(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.sql.uselast.alternative", flag);
+	}
+
+
+
 }

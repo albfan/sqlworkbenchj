@@ -1571,16 +1571,6 @@ public class Settings
 		this.setProperty(PROPERTY_CONSOLIDATE_LOG_MESSAGES, aFlag);
 	}
 
-	public boolean getUseLastIfNoCurrentStmt()
-	{
-		return getBoolProperty("workbench.gui.sql.uselast.alternative", false);
-	}
-
-	public void setUseLastIfNoCurrentStmt(boolean flag)
-	{
-		setProperty("workbench.gui.sql.uselast.alternative", flag);
-	}
-
 	public boolean getPlainEditorWordWrap()
 	{
 		return getBoolProperty("workbench.editor.plain.wordwrap", true);

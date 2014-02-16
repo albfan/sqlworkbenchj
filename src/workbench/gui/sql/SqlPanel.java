@@ -3089,7 +3089,12 @@ public class SqlPanel
 			{
 				// cursorPos > -1 means that the statement at the cursor position should be executed
 				count = 1;
-				startIndex = scriptParser.getCommandIndexAtCursorPos(cursorPos);
+				int realPos = cursorPos;
+				if (GuiSettings.getUseStatementInCurrentLine())
+				{
+					realPos = editor.getLineStartOffset(editor.getCaretLine());
+				}
+				startIndex = scriptParser.getCommandIndexAtCursorPos(realPos);
 				endIndex = startIndex + 1;
 				if (startIndex == -1)
 				{
@@ -3098,11 +3103,11 @@ public class SqlPanel
 					int numStatements = scriptParser.getSize();
 					int endOfLastStatement = scriptParser.getEndPosForCommand(numStatements - 1);
 
-					if (Settings.getInstance().getUseLastIfNoCurrentStmt() && cursorPos >= endOfLastStatement)
+					if (GuiSettings.getUseLastIfNoCurrentStmt() && cursorPos >= endOfLastStatement)
 					{
 						startIndex = numStatements - 1;
 						endIndex = numStatements;
-						LogMgr.logWarning("SqlPanel.displayResult()", "The cursor is not located inside a statement. Using the last statement of the editor instead.");
+						LogMgr.logWarning("SqlPanel.displayResult()", "The cursor is not located inside a statement. Using the last statement of the editor instead!");
 					}
 					else
 					{

@@ -159,7 +159,7 @@ import workbench.util.WbWorkspace;
 
 /**
  * The main window for SQL Workbench.
- * 
+ *
  * It will display several {@link workbench.gui.sql.SqlPanel}s in
  * a tabbed pane. Additionally one or more {@link workbench.gui.dbobjects.DbExplorerPanel}
  * might also be displayed inside the JTabbedPane
@@ -1722,7 +1722,6 @@ public class MainWindow
 		{
 			this.reloadWorkspace.setEnabled(false);
 		}
-
 	}
 
 	public void loadCurrentProfileWorkspace()

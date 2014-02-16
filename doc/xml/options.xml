@@ -297,12 +297,10 @@
 			</para>
 		</section>
 
-		<section id="options-allow-editing">
-			<title>Allow editing while executing</title>
+		<section id="options-hilite-error">
+			<title>Highlight errors</title>
 			<para>
-        When running a statement, the editor is set to read-only in order to allow a consistent statement highlighting.
-        When this option is turned on, the text in the editor may be modified even if a statement is running. If the
-        text in the editor is modified during execution, statement and error highlighting will not be done any more.
+        If "Highlight errors" is enabled then the statement that generated an error is highlighted after execution.
 			</para>
 		</section>
 
@@ -338,23 +336,40 @@
 			</para>
 		</section>
 
+		<section id="options-allow-editing">
+			<title>Allow editing while executing</title>
+			<para>
+        When running a statement, the editor is set to read-only in order to allow a consistent statement highlighting.
+        When this option is turned on, the text in the editor may be modified even if a statement is running. If the
+        text in the editor is modified during execution, statement and error highlighting will not be done any more.
+			</para>
+		</section>
+
 		<section id="options-empty-line-delimiter">
 			<title>Allow empty lines as statement delimiter</title>
 			<para>
 				When analysing statements in the editor, it is assumed that individual statements
 				are separated with a semicolon. This property controls if an empty line delimits a statement as well. This
-        setting will be used to detect the current statement for auto-completion and when using "Execute Current" inside
-        the editor.
+        setting will be used to detect the current statement for auto-completion and when
+        using <guimenuitem>Execute current</guimenuitem> inside the editor.
 			</para>
 			<note><para>
 				This does not influence the behaviour when running scripts in batch mode or when using the <literal>WbInclude</literal> command.
 			</para></note>
 		</section>
 
+		<section id="options-currentline-current-stmt">
+			<title>Use the statement in the current line</title>
+			<para>
+        When this option is enabled, the line of the cursor position determines the "current statement" rather than
+        the cursor position itself when using <link linkend="execute-current"><guimenuitem>Execute current</guimenuitem></link>.
+			</para>
+		</section>
+
 		<section id="options-wbresult-bookmark">
 			<title>Also use @WbResult for bookmarks</title>
 			<para>
-        By default only locations marked with <literal>@WbTag</literal> are included in the list of bookmarks.
+        By default only locations marked with <literal>@WbTag</literal> are included in <link linkend="editor-bookmarks">the list of bookmarks</link>.
         When this option is enabled, locations that are marked with <link linkend="result-names"><literal>@WbResult</literal></link>
         are also included in the bookmark list.
 			</para>

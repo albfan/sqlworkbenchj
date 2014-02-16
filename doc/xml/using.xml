@@ -90,6 +90,28 @@ DELETE FROM person| WHERE lastname = 'Dent';
 COMMIT;</programlisting>
 
 			<para>When pressing Ctrl-Enter the <literal>DELETE</literal> statement will be exectuted</para>
+
+      <para>
+        You can <link linkend="options-currentline-current-stmt">configure the editor</link> to use the statement that is defined by
+        the current <emphasis>line</emphasis> rather than
+        the cursor location when using <guimenuitem>Execute current</guimenuitem>.
+      </para>
+
+      <para>
+        Consider the following editor contents:
+			<programlisting>SELECT firstname, lastname FROM person; |
+DELETE FROM person WHERE lastname = 'Dent';
+COMMIT;</programlisting>
+        If the option to use the current line is <emphasis role="bold">disabled</emphasis> and the cursor is located after the semicolon in the third line,
+        <guimenuitem>Execute current</guimenuitem> will execute the <literal>SELECT</literal> statement because the cursor
+        is logically located in the statement after the <literal>select</literal>.
+      </para>
+      <para>
+        If that option is <emphasis role="bold">enabled</emphasis> and the cursor is located after the semicolon in the third line,
+        <guimenuitem>Execute current</guimenuitem> will execute the <literal>DELETE</literal> statement because the statement in the current line
+        is the <literal>select</literal> statement. If there are multiple SQL statements in the current line, the first statement will be executed.
+      </para>
+
 			<para>
 				You can configure &wb-productname; to automatically jump to the next statement,
 				after executing the current statement. Simply select <menuchoice><guimenu>SQL</guimenu><guimenuitem>Auto advance to next</guimenuitem></menuchoice>

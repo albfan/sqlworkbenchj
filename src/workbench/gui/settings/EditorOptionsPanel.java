@@ -94,6 +94,7 @@ public class EditorOptionsPanel
 
 		internalLineEnding.setModel(new DefaultComboBoxModel(items));
 		externalLineEnding.setModel(new DefaultComboBoxModel(items));
+		useCurrentLineStmt.setSelected(GuiSettings.getUseStatementInCurrentLine());
 
 		reloadType.setModel(new DefaultComboBoxModel(FileReloadType.values()));
 		reloadType.doLayout();
@@ -189,7 +190,7 @@ public class EditorOptionsPanel
 		GuiSettings.setHighlightErrorStatement(hiliteError.isSelected());
 		GuiSettings.setUseResultTagForBookmarks(useResultForBookmark.isSelected());
 		set.setProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, autoCloseBrackets.getText());
-
+		GuiSettings.setUseStatementInCurrentLine(useCurrentLineStmt.isSelected());
 		StoreableKeyStroke key = (StoreableKeyStroke) cbExpansionKey.getSelectedItem();
 		GuiSettings.setExpansionKey(key.getKeyStroke());
 
@@ -263,6 +264,7 @@ public class EditorOptionsPanel
     emptyLineDelimiter = new JCheckBox();
     hiliteError = new JCheckBox();
     useResultForBookmark = new JCheckBox();
+    useCurrentLineStmt = new JCheckBox();
     jPanel1 = new JPanel();
     followCurrentDir = new JCheckBox();
     jLabel1 = new JLabel();
@@ -531,13 +533,22 @@ public class EditorOptionsPanel
     useResultForBookmark.setToolTipText(ResourceMgr.getString("d_LblBookmarkResultName")); // NOI18N
     useResultForBookmark.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    gridBagConstraints.insets = new Insets(7, 15, 0, 0);
     jPanel2.add(useResultForBookmark, gridBagConstraints);
+
+    useCurrentLineStmt.setText(ResourceMgr.getString("LblUseStmtInCurLine")); // NOI18N
+    useCurrentLineStmt.setToolTipText(ResourceMgr.getString("d_LblUseStmtInCurLine")); // NOI18N
+    useCurrentLineStmt.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    jPanel2.add(useCurrentLineStmt, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -720,6 +731,7 @@ public class EditorOptionsPanel
   private JComboBox reloadType;
   private JCheckBox rightClickMovesCursor;
   private JTextField tabSize;
+  private JCheckBox useCurrentLineStmt;
   private JCheckBox useResultForBookmark;
   private JCheckBox useTabs;
   private JLabel wheelScrollLabel;
