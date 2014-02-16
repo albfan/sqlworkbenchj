@@ -23,6 +23,7 @@
 package workbench.console;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,23 +78,22 @@ public class SQLConsole
 	implements OutputPrinter
 {
 	private static final String HISTORY_FILENAME = "sqlworkbench_history.txt";
-	private ConsolePrompter prompter;
+	private final ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
 
 	private Map<String, String> abbreviations = new HashMap<String, String>();
-	private StatementHistory history;
+	private final StatementHistory history;
 
 	public SQLConsole()
 	{
 		prompter = new ConsolePrompter();
+		history = new StatementHistory(Settings.getInstance().getConsoleHistorySize());
+		history.doAppend(true);
 	}
 
 	public void run()
 	{
-		history = new StatementHistory(Settings.getInstance().getConsoleHistorySize());
-		history.doAppend(true);
-
 		AppArguments cmdLine = WbManager.getInstance().getCommandLine();
 
 		if (cmdLine.isArgPresent("help"))
@@ -102,149 +102,26 @@ public class SQLConsole
 			WbManager.getInstance().doShutdown(0);
 		}
 
-		boolean bufferResults = cmdLine.getBoolean(AppArguments.ARG_CONSOLE_BUFFER_RESULTS, true);
 		boolean optimizeColWidths = cmdLine.getBoolean(AppArguments.ARG_CONSOLE_OPT_COLS, true);
 
-		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine, false);
-		runner.showResultSets(true);
-		runner.setShowStatementWithResult(false);
-		runner.setShowStatementSummary(false);
-		runner.setOptimizeColWidths(optimizeColWidths);
-		runner.setShowDataLoading(false);
-		runner.setConnectionId("Console");
-		runner.setTraceOutput(this);
-
-		// initialize a default max rows.
-		// In console mode it doesn't really make sense to display that many rows
-		int maxRows = Settings.getInstance().getIntProperty("workbench.console.default.maxrows", 5000);
-		runner.setMaxRows(maxRows);
-
-		if (!cmdLine.isArgPresent(AppArguments.ARG_SHOWPROGRESS))
-		{
-			runner.setShowProgress(true);
-		}
-
-		// Make the current directory the base directory for the BatchRunner
-		// so that e.g. WbIncludes work properly
-		WbFile currentDir = new WbFile(System.getProperty("user.dir"));
-		runner.setBaseDir(currentDir.getFullPath());
-
-		boolean showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, false);
-		runner.setShowTiming(showTiming);
-		runner.setShowStatementTiming(!showTiming);
-
-		runner.setHistoryProvider(this.history);
-
-		LogMgr.logInfo("SQLConsole.main()", "SQL Workbench/J Console interface started");
+		BatchRunner runner = initBatchRunner(cmdLine, optimizeColWidths);
 
 		String currentPrompt = DEFAULT_PROMPT;
-
 		try
 		{
-			System.out.println(ResourceMgr.getString("MsgConsoleStarted"));
-			WbFile f = new WbFile(Settings.getInstance().getConfigDir());
-			System.out.println(ResourceMgr.getFormattedString("MsgConfigDir", f.getFullPath()));
-			System.out.println("");
+			showStartupMessage(cmdLine);
 
-			// check the presence of the Profile again to put a possible error message after the startup messages.
-			String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
-			String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
-			if (StringUtil.isNonBlank(profilename))
-			{
-				ProfileKey def = new ProfileKey(StringUtil.trimQuotes(profilename), StringUtil.trimQuotes(group));
+			currentPrompt = connectRunner(runner, currentPrompt);
 
-				ConnectionProfile profile = ConnectionMgr.getInstance().getProfile(def);
-				if (profile == null)
-				{
-					String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", def);
-					System.err.println();
-					System.err.println(msg);
-				}
-			}
-
-			if (cmdLine.hasUnknownArguments())
-			{
-				StringBuilder err = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
-				err.append(' ');
-				err.append(cmdLine.getUnknownArguments());
-				System.err.println(err.toString());
-				System.err.println();
-			}
-
-			runner.setPersistentConnect(true);
-
-			if (runner.hasProfile())
-			{
-				ConnectionProfile profile = runner.getProfile();
-				if (!profile.getStorePassword())
-				{
-					String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd"));
-					profile.setInputPassword(pwd);
-				}
-
-				try
-				{
-					runner.connect();
-				}
-				catch (Exception e)
-				{
-					// nothing to log, already done by the runner
-				}
-
-				if (runner.isConnected() && !runner.getVerboseLogging())
-				{
-					WbConnection conn = runner.getConnection();
-					System.out.println(ResourceMgr.getFormattedString("MsgBatchConnectOk", conn.getDisplayString()));
-
-					String warn = conn.getWarnings();
-					if (StringUtil.isNonBlank(warn))
-					{
-						System.out.println(warn);
-					}
-				}
-				currentPrompt = checkConnection(runner);
-			}
-
-			InputBuffer buffer = new InputBuffer();
-			runner.setExecutionController(prompter);
-			runner.setParameterPrompter(prompter);
-
-			ResultSetPrinter printer = null;
-			if (!bufferResults)
-			{
-				printer = new ResultSetPrinter(System.out);
-				printer.setFormatColumns(optimizeColWidths);
-				printer.setPrintRowCount(true);
-				runner.setResultSetConsumer(printer);
-				ConsoleSettings.getInstance().addChangeListener(printer);
-			}
-
-			boolean startOfStatement = true;
+			ResultSetPrinter printer = createPrinter(cmdLine, optimizeColWidths, runner);
 
 			history.readFrom(getHistoryFile());
 
-			CommandTester cmd = new CommandTester();
+			initAbbreviations();
 
-			// Some limited psql compatibility
-			String last = cmd.formatVerb(WbHistory.VERB) + " last";
-			abbreviations.put("\\x", cmd.formatVerb(WbToggleDisplay.VERB));
-			abbreviations.put("\\?", cmd.formatVerb(WbHelp.VERB));
-			abbreviations.put("\\h", cmd.formatVerb(WbHelp.VERB));
-			abbreviations.put("\\i", cmd.formatVerb(WbRun.VERB));
-			abbreviations.put("\\d", cmd.formatVerb(WbListTables.VERB));
-			abbreviations.put("\\g", last);
-			abbreviations.put("\\s", cmd.formatVerb(WbHistory.VERB));
-			abbreviations.put("\\!", cmd.formatVerb(WbSysExec.VERB));
-			abbreviations.put("\\dt", cmd.formatVerb(WbDescribeObject.VERB));
-			abbreviations.put("\\sf", cmd.formatVerb(WbProcSource.VERB));
-			abbreviations.put("\\l", cmd.formatVerb(WbListCatalogs.VERB));
-			abbreviations.put("\\df", cmd.formatVerb(WbListProcedures.VERB));
-			abbreviations.put("\\dn", cmd.formatVerb(WbListSchemas.VERB));
-			abbreviations.put("\\conninfo", cmd.formatVerb(WbConnInfo.VERB));
+			boolean startOfStatement = true;
 
-			// some limited SQL*Plus compatibility
-			abbreviations.put("/", last);
-
+			InputBuffer buffer = new InputBuffer();
 			while (true)
 			{
 				String line = ConsoleReaderFactory.getConsoleReader().readLine(currentPrompt);
@@ -352,6 +229,151 @@ public class SQLConsole
 			System.err.println(ExceptionUtil.getDisplay(th));
 			System.exit(1);
 		}
+	}
+
+	private ResultSetPrinter createPrinter(AppArguments cmdLine, boolean optimizeColWidths, BatchRunner runner)
+		throws SQLException
+	{
+		boolean bufferResults = cmdLine.getBoolean(AppArguments.ARG_CONSOLE_BUFFER_RESULTS, true);
+		ResultSetPrinter printer = null;
+		if (!bufferResults)
+		{
+			printer = new ResultSetPrinter(System.out);
+			printer.setFormatColumns(optimizeColWidths);
+			printer.setPrintRowCount(true);
+			runner.setResultSetConsumer(printer);
+			ConsoleSettings.getInstance().addChangeListener(printer);
+		}
+		return printer;
+	}
+
+	private void showStartupMessage(AppArguments cmdLine)
+	{
+		LogMgr.logInfo("SQLConsole.main()", "SQL Workbench/J Console interface started");
+		System.out.println(ResourceMgr.getString("MsgConsoleStarted"));
+		WbFile f = new WbFile(Settings.getInstance().getConfigDir());
+		System.out.println(ResourceMgr.getFormattedString("MsgConfigDir", f.getFullPath()));
+		System.out.println("");
+
+		// check the presence of the Profile again to put a possible error message after the startup messages.
+		String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
+		String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
+
+		if (StringUtil.isNonBlank(profilename))
+		{
+			ProfileKey def = new ProfileKey(StringUtil.trimQuotes(profilename), StringUtil.trimQuotes(group));
+
+			ConnectionProfile profile = ConnectionMgr.getInstance().getProfile(def);
+			if (profile == null)
+			{
+				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", def);
+				System.err.println();
+				System.err.println(msg);
+			}
+		}
+
+		if (cmdLine.hasUnknownArguments())
+		{
+			StringBuilder err = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
+			err.append(' ');
+			err.append(cmdLine.getUnknownArguments());
+			System.err.println(err.toString());
+			System.err.println();
+		}
+	}
+
+	private String connectRunner(BatchRunner runner, String currentPrompt)
+	{
+		if (runner.hasProfile())
+		{
+			ConnectionProfile profile = runner.getProfile();
+			if (!profile.getStorePassword())
+			{
+				String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd"));
+				profile.setInputPassword(pwd);
+			}
+
+			try
+			{
+				runner.connect();
+			}
+			catch (Exception e)
+			{
+				// nothing to log, already done by the runner
+			}
+
+			if (runner.isConnected() && !runner.getVerboseLogging())
+			{
+				WbConnection conn = runner.getConnection();
+				System.out.println(ResourceMgr.getFormattedString("MsgBatchConnectOk", conn.getDisplayString()));
+
+				String warn = conn.getWarnings();
+				if (StringUtil.isNonBlank(warn))
+				{
+					System.out.println(warn);
+				}
+			}
+			currentPrompt = checkConnection(runner);
+		}
+		return currentPrompt;
+	}
+
+	private BatchRunner initBatchRunner(AppArguments cmdLine, boolean optimizeColWidths)
+	{
+		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine, false);
+		runner.showResultSets(true);
+		runner.setShowStatementWithResult(false);
+		runner.setShowStatementSummary(false);
+		runner.setOptimizeColWidths(optimizeColWidths);
+		runner.setShowDataLoading(false);
+		runner.setConnectionId("Console");
+		runner.setTraceOutput(this);
+		// initialize a default max rows.
+		// In console mode it doesn't really make sense to display that many rows
+		int maxRows = Settings.getInstance().getIntProperty("workbench.console.default.maxrows", 5000);
+		runner.setMaxRows(maxRows);
+		if (cmdLine.isArgNotPresent(AppArguments.ARG_SHOWPROGRESS))
+		{
+			runner.setShowProgress(true);
+		}
+		// Make the current directory the base directory for the BatchRunner
+		// so that e.g. WbIncludes work properly
+		WbFile currentDir = new WbFile(System.getProperty("user.dir"));
+		runner.setBaseDir(currentDir.getFullPath());
+		boolean showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, false);
+		runner.setShowTiming(showTiming);
+		runner.setShowStatementTiming(!showTiming);
+		runner.setHistoryProvider(this.history);
+		runner.setPersistentConnect(true);
+		runner.setExecutionController(prompter);
+		runner.setParameterPrompter(prompter);
+
+		return runner;
+	}
+
+	private void initAbbreviations()
+	{
+		CommandTester cmd = new CommandTester();
+
+		// Some limited psql compatibility
+		String last = cmd.formatVerb(WbHistory.VERB) + " last";
+		abbreviations.put("\\x", cmd.formatVerb(WbToggleDisplay.VERB));
+		abbreviations.put("\\?", cmd.formatVerb(WbHelp.VERB));
+		abbreviations.put("\\h", cmd.formatVerb(WbHelp.VERB));
+		abbreviations.put("\\i", cmd.formatVerb(WbRun.VERB));
+		abbreviations.put("\\d", cmd.formatVerb(WbListTables.VERB));
+		abbreviations.put("\\g", last);
+		abbreviations.put("\\s", cmd.formatVerb(WbHistory.VERB));
+		abbreviations.put("\\!", cmd.formatVerb(WbSysExec.VERB));
+		abbreviations.put("\\dt", cmd.formatVerb(WbDescribeObject.VERB));
+		abbreviations.put("\\sf", cmd.formatVerb(WbProcSource.VERB));
+		abbreviations.put("\\l", cmd.formatVerb(WbListCatalogs.VERB));
+		abbreviations.put("\\df", cmd.formatVerb(WbListProcedures.VERB));
+		abbreviations.put("\\dn", cmd.formatVerb(WbListSchemas.VERB));
+		abbreviations.put("\\conninfo", cmd.formatVerb(WbConnInfo.VERB));
+
+		// some limited SQL*Plus compatibility
+		abbreviations.put("/", last);
 	}
 
 	@Override

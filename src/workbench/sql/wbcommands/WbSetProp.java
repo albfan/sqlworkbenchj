@@ -105,7 +105,7 @@ public class WbSetProp
 				result.setFailure();
 				result.addMessage("Property name required!");
 			}
-			else if (value == null && !cmdLine.isArgPresent(PARAM_VALUE))
+			else if (value == null && cmdLine.isArgNotPresent(PARAM_VALUE))
 			{
 				String currentValue = Settings.getInstance().getProperty(prop, "");
 				result.addMessage(prop + "=" + currentValue);

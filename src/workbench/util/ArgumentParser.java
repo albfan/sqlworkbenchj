@@ -423,6 +423,11 @@ public class ArgumentParser
 		return this.arguments.containsKey(arg);
 	}
 
+	public boolean isArgNotPresent(String arg)
+	{
+		return !isArgPresent(arg);
+	}
+
 	/**
 	 * Check if the given argument was passed on the commandline.
 	 * This does not check if a value has been supplied with the

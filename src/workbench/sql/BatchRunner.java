@@ -161,7 +161,7 @@ public class BatchRunner
 	{
 		this.stmtRunner.setMessagePrinter(tracer);
 	}
-	
+
 	public void setReplacer(Replacer replacer)
 	{
 		this.replacer = replacer;
@@ -992,7 +992,7 @@ public class BatchRunner
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
 	{
 		ConnectionProfile result = null;
-		if (!cmdLine.isArgPresent(AppArguments.ARG_CONN_URL)) return null;
+		if (cmdLine.isArgNotPresent(AppArguments.ARG_CONN_URL)) return null;
 		try
 		{
 			String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
