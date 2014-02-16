@@ -28,19 +28,12 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Point;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -165,7 +158,8 @@ import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
 /**
- * The main window for the Workbench.
+ * The main window for SQL Workbench.
+ * 
  * It will display several {@link workbench.gui.sql.SqlPanel}s in
  * a tabbed pane. Additionally one or more {@link workbench.gui.dbobjects.DbExplorerPanel}
  * might also be displayed inside the JTabbedPane
@@ -174,7 +168,7 @@ import workbench.util.WbWorkspace;
  */
 public class MainWindow
 	extends JFrame
-	implements MouseListener, WindowListener, ChangeListener, DropTargetListener,
+	implements MouseListener, WindowListener, ChangeListener,
 						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener,
 						Moveable, RenameableTab, TabCloser, FilenameChangeListener
 {
@@ -229,6 +223,7 @@ public class MainWindow
 
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
+	private DropHandler dropHandler;
 
 	/**
 	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
@@ -278,7 +273,7 @@ public class MainWindow
 
 		MacroManager.getInstance().getMacros().addChangeListener(this);
 
-		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
+		dropHandler = new DropHandler(this, sqlTab);
 		sqlTab.enableDragDropReordering(this);
 
 		Settings.getInstance().addPropertyChangeListener(this,
@@ -316,8 +311,7 @@ public class MainWindow
 	{
 		this.restoreState();
 		this.setVisible(true);
-		this.addTab(true, false, true, false);
-		this.updateGuiForTab(0);
+		this.addTab();
 		this.updateWindowTitle();
 
 		boolean macroVisible = Settings.getInstance().getBoolProperty(this.getClass().getName() + ".macropopup.visible", false);
@@ -956,7 +950,7 @@ public class MainWindow
 		this.connectInProgress = true;
 	}
 
-	private void checkConnectionForPanel(final MainPanel panel)
+	public void checkConnectionForPanel(final MainPanel panel)
 	{
 		if (this.isConnectInProgress()) return;
 		if (panel == null) return;
@@ -1165,16 +1159,23 @@ public class MainWindow
 		final MainPanel current = this.getSqlPanel(index);
 		if (current == null) return;
 
-		final JMenuBar menu = this.panelMenus.get(index);
-		if (menu == null)	return;
+		JMenuBar menu = null;
+		if (index > -1 && index < panelMenus.size())
+		{
+			menu = this.panelMenus.get(index);
+		}
+
+		// this can happen if a tab selected event occurs during initialization of a new tab
+		if (menu == null)
+		{
+			return;
+		}
 
 		setJMenuBar(menu);
 		updateToolbarVisibility();
 		createNewConnection.checkState();
 		disconnectTab.checkState();
 		checkMacroMenuForPanel(index);
-
-		forceRedraw();
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -1862,6 +1863,10 @@ public class MainWindow
 		this.explorerWindows.clear();
 		JMenuBar bar = getJMenuBar();
 		disposeMenu(bar);
+		if (this.dropHandler != null)
+		{
+			this.dropHandler.dispose();
+		}
 		super.dispose();
 	}
 
@@ -2698,13 +2703,14 @@ public class MainWindow
 		this.updateWindowTitle();
 	}
 
+	/**
+	 *	Save the currently loaded workspace.
+	 */
 	public boolean saveWorkspace()
 	{
 		return saveWorkspace(true);
 	}
-	/**
-	 *	Save the currently loaded workspace
-	 */
+
 	public boolean saveWorkspace(boolean checkUnsaved)
 	{
 		if (this.currentWorkspaceFile != null)
@@ -2817,7 +2823,8 @@ public class MainWindow
 	/**
 	 *	Invoked when the a different SQL panel has been selected.
 	 *
-	 *  This fires the tabSelected() method.
+	 *  This fires the tabSelected() method but only if ignoreTabChange is not set true.
+	 *
 	 *  @param e  a ChangeEvent object
 	 *
 	 */
@@ -2826,10 +2833,7 @@ public class MainWindow
 	{
 		if (e.getSource() == this.sqlTab)
 		{
-			if (this.ignoreTabChange)
-			{
-				return;
-			}
+			if (this.ignoreTabChange)	return;
 			int index = this.sqlTab.getSelectedIndex();
 			this.tabSelected(index);
 		}
@@ -2846,25 +2850,15 @@ public class MainWindow
 	}
 
 	/**
-	 *  @param selectNew if true the new tab is automatically selected
-	 *  @param isConnectionIdle if true, the panel will automatically be connected
-	 *  this is important if a Profile is used where each panel gets its own
-	 *  connection
-	 */
-	public MainPanel addTab(boolean selectNew, boolean checkConnection)
-	{
-		return addTab(selectNew, checkConnection, true, true);
-	}
-
-	/**
-	 * @param selectNew if true the new tab is automatically selected
-	 * @param isConnectionIdle if true, the panel will automatically be connected
-	 * this is important if a Profile is used where each panel gets its own
-	 * connection
-	 * @param append if true, the tab will be appended at the end (after all other tabs), if false will be
-	 * inserted before the current tab.
-	 * @param renumber should the tabs be renumbered after adding the new tab. If several tabs are added
-	 * in a loop renumber is only necessary at the end
+	 * Add a SqlPanel to this window.
+	 *
+	 * @param checkConnection if true, the panel will automatically be connected
+	 *                        this is important if a Profile is used where each panel gets its own
+	 *                        connection
+	 * @param append          if true, the tab will be appended at the end (after all other tabs), if false will be
+	 *                        inserted before the current tab.
+	 * @param renumber        should the tabs be renumbered after adding the new tab. If several tabs are added
+	 *                        in a loop renumber is only necessary at the end
 	 *
 	 * @see #renumberTabs()
 	 * @see #checkConnectionForPanel(workbench.interfaces.MainPanel)
@@ -2875,10 +2869,6 @@ public class MainWindow
 		if (append)
 		{
 			index = findFirstExplorerTab();
-
-			// If the DbExplorer has been moved to somewhere else, then
-			// add the tab really at the end.
-			// Only if the DbExplorer is the last tab, insert the new tab before it
 			if (index < sqlTab.getTabCount() - 1)
 			{
 				index = -1;
@@ -2892,7 +2882,12 @@ public class MainWindow
 		try
 		{
 			setIgnoreTabChange(true);
-			return addTabAtIndex(selectNew, checkConnection, renumber, index);
+			MainPanel p = addTabAtIndex(selectNew, checkConnection, renumber, index);
+			if (selectNew)
+			{
+				currentTabChanged();
+			}
+			return p;
 		}
 		finally
 		{
@@ -3379,65 +3374,4 @@ public class MainWindow
 		}
 		getJobIndicator().jobStarted();
 	}
-
-	@Override
-	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
-	{
-		dropTargetDragEvent.acceptDrag(DnDConstants.ACTION_COPY);
-	}
-
-	@Override
-	public void dragExit(java.awt.dnd.DropTargetEvent dropTargetEvent)
-	{
-	}
-
-	@Override
-	public void dragOver(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
-	{
-	}
-
-	@Override
-	public void drop(java.awt.dnd.DropTargetDropEvent dropTargetDropEvent)
-	{
-		try
-		{
-			Transferable tr = dropTargetDropEvent.getTransferable();
-			if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
-			{
-				dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
-				List fileList = (List)tr.getTransferData(DataFlavor.javaFileListFlavor);
-				if (fileList != null)
-				{
-					int files = fileList.size();
-					for (int i=0; i < files; i++)
-					{
-						File file = (File)fileList.get(i);
-						this.addTab(true, true, true, true);
-						SqlPanel sql = this.getCurrentSqlPanel();
-						sql.readFile(file.getAbsolutePath(), null);
-					}
-				}
-			}
-			else
-			{
-				dropTargetDropEvent.rejectDrop();
-			}
-		}
-		catch (IOException io)
-		{
-			LogMgr.logError("MainWindow.drop()", "Error processing drop event", io);
-			dropTargetDropEvent.rejectDrop();
-		}
-		catch (UnsupportedFlavorException ufe)
-		{
-			LogMgr.logError("MainWindow.drop()", "Error processing drop event", ufe);
-			dropTargetDropEvent.rejectDrop();
-		}
-	}
-
-	@Override
-	public void dropActionChanged(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
-	{
-	}
-
 }

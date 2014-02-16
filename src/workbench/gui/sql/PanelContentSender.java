@@ -23,8 +23,11 @@
 package workbench.gui.sql;
 
 import java.awt.EventQueue;
-import workbench.gui.MainWindow;
+
 import workbench.interfaces.ResultReceiver;
+
+import workbench.gui.MainWindow;
+
 import workbench.util.WbThread;
 
 /**
@@ -51,20 +54,19 @@ public class PanelContentSender
 		if (sql == null) return;
 
 		// This should not be done in the background thread
-		// to make sure it's running on the EDT (otherwise the new panel
-		// will not be initialized correctly
+		// to make sure it's running on the EDT (otherwise the new panel will not be initialized correctly)
 		final SqlPanel panel = selectPanel(panelIndex);
 
 		// When adding a new panel, a new connection
 		// might be initiated automatically. As that is done in a separate
-		// thread, the call to showResult() might occur
-		// before the connection is actually established.
-		// So we need to wait until the new panel is connected
-		// that's what waitForConnection() is for.
+		// thread, the call to showResult() might occur before the connection is actually established.
+		//
+		// So we need to wait until the new panel is connected - that's what waitForConnection() is for.
+
 		// As this code might be execute on the EDT we have to make sure
 		// we are not blocking the current thread, so a new thread
 		// is created that will wait for the connection to succeed.
-		// then the actual showing of the data can be executed (on the EDT)
+		// then the actual showing of the data can be executed on the EDT
 		WbThread t = new WbThread("ShowThread")
 		{
 			@Override
@@ -135,7 +137,7 @@ public class PanelContentSender
 
 		if (index == NEW_PANEL)
 		{
-			panel = (SqlPanel)this.target.addTab(true, true);
+			panel = (SqlPanel)this.target.addTab();
 			panel.setTabName(newTabName);
 		}
 		else
