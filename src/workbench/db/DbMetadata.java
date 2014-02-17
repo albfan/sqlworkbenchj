@@ -2168,15 +2168,21 @@ public class DbMetadata
 	public List<TableIdentifier> getSelectableObjectsList(String namePattern, String schemaOrCatalog)
 		throws SQLException
 	{
+		return getSelectableObjectsList(namePattern, schemaOrCatalog, selectableTypes);
+	}
+	
+	public List<TableIdentifier> getSelectableObjectsList(String namePattern, String schemaOrCatalog, String[] types)
+		throws SQLException
+	{
 		if (getDbSettings().supportsSchemas())
 		{
-			return getObjectList(namePattern, null, schemaOrCatalog, selectableTypes);
+			return getObjectList(namePattern, null, schemaOrCatalog, types);
 		}
 		else if (getDbSettings().supportsCatalogs())
 		{
-			return getObjectList(namePattern, schemaOrCatalog, null, selectableTypes);
+			return getObjectList(namePattern, schemaOrCatalog, null, types);
 		}
-		return getObjectList(namePattern, null, null, selectableTypes);
+		return getObjectList(namePattern, null, null, types);
 	}
 
 	/**

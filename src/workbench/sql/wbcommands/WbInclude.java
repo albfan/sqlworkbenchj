@@ -218,7 +218,7 @@ public class WbInclude
 			encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 			delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue("delimiter"));
 			setUnknownMessage(result, cmdLine, null);
-			showStmts = cmdLine.getBoolean(ARG_PRINT_STATEMENTS, false);
+			showStmts = cmdLine.getBoolean(ARG_PRINT_STATEMENTS, this.runner.getTraceStatements());
 			showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, false);
 		}
 

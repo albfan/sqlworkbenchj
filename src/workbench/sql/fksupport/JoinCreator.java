@@ -118,7 +118,6 @@ public class JoinCreator
 		if (joinTable == null || joinedTable == null) return null;
 		JoinColumnsDetector detector = new JoinColumnsDetector(connection, joinTable, joinedTable);
 		String condition = detector.getJoinCondition();
-		String on = Settings.getInstance().getFormatterUpperCaseKeywords() ? "ON " : "on ";
 		if (!condition.isEmpty())
 		{
 			String currentWord = StringUtil.findWordLeftOfCursor(sql, cursorPos);
@@ -126,6 +125,7 @@ public class JoinCreator
 
 			if (currentWord == null || !currentWord.equalsIgnoreCase("on"))
 			{
+				String on = Settings.getInstance().getFormatterUpperCaseKeywords() ? "ON " : "on ";
 				condition = on + condition;
 			}
 			if (!whiteSpaceAtLeft)

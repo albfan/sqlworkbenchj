@@ -143,6 +143,11 @@ public class StatementRunner
 		}
 	}
 
+	public boolean getTraceStatements()
+	{
+		return traceStatements;
+	}
+	
 	public void setTraceStatements(boolean flag)
 	{
 		this.traceStatements = flag;

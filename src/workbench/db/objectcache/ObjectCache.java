@@ -52,6 +52,7 @@ import workbench.storage.DataStore;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A cache for database objects to support auto-completion in the editor
@@ -78,6 +79,15 @@ class ObjectCache
 		schemaFilter = conn.getProfile().getSchemaFilter();
 		catalogFilter = conn.getProfile().getCatalogFilter();
 		supportsSchemas = conn.getDbSettings().supportsSchemas();
+	}
+
+	private String[] getCompletionTypes(WbConnection conn)
+	{
+		String dbId = conn.getDbId();
+		List<String> typeList = Settings.getInstance().getListProperty("workbench.db." + dbId + ".completion.types", true, null);
+
+		if (CollectionUtil.isEmpty(typeList)) return conn.getMetadata().getTableTypesArray();
+		return StringUtil.toArray(typeList, true);
 	}
 
 	private boolean isFiltered(TableIdentifier table)
@@ -148,10 +158,10 @@ class ObjectCache
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
-	synchronized Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, List<String> type)
+	synchronized Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, List<String> types)
 	{
 		List<String> searchPath = getSearchPath(dbConnection, schema);
-		LogMgr.logDebug("ObjectCache.getTables()", "Getting tables using schema: " + schema + ", filter: " + type + ", search path: " + searchPath);
+		LogMgr.logDebug("ObjectCache.getTables()", "Getting tables using schema: " + schema + ", filter: " + types + ", search path: " + searchPath);
 
 		for (String checkSchema  : searchPath)
 		{
@@ -160,7 +170,7 @@ class ObjectCache
 				try
 				{
 					DbMetadata meta = dbConnection.getMetadata();
-					List<TableIdentifier> tables = meta.getSelectableObjectsList(null, checkSchema);
+					List<TableIdentifier> tables = meta.getSelectableObjectsList(null, checkSchema, getCompletionTypes(dbConnection));
 					for (TableIdentifier tbl : tables)
 					{
 						tbl.checkQuotesNeeded(dbConnection);
@@ -175,9 +185,9 @@ class ObjectCache
 			}
 		}
 
-		if (type != null)
+		if (types != null)
 		{
-			return filterTablesByType(dbConnection, searchPath, type);
+			return filterTablesByType(dbConnection, searchPath, types);
 		}
 		else
 		{
