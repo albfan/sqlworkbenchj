@@ -23,7 +23,6 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
@@ -31,6 +30,7 @@ import javax.swing.KeyStroke;
 import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+import workbench.resource.ShortcutManager;
 
 /**
  *	@author  Thomas Kellerer
@@ -51,41 +51,30 @@ public class SelectTabAction
 
 	private void initName()
 	{
-		switch (this.index)
+		KeyStroke key = getKeyStrokeForIndex(index);
+
+		if (ShortcutManager.getInstance().isKeyStrokeAssigned(key))
 		{
-			case 0:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, PlatformShortcuts.getDefaultModifier()));
-				break;
-			case 1:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, PlatformShortcuts.getDefaultModifier()));
-				break;
-			case 2:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, PlatformShortcuts.getDefaultModifier()));
-				break;
-			case 3:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4, PlatformShortcuts.getDefaultModifier()));
-				break;
-			case 4:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, PlatformShortcuts.getDefaultModifier()));
-				break;
-			case 5:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6, PlatformShortcuts.getDefaultModifier()));
-				break;
-			case 6:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_7, PlatformShortcuts.getDefaultModifier()));
-				break;
-			case 7:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8, PlatformShortcuts.getDefaultModifier()));
-				break;
-			case 8:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9, PlatformShortcuts.getDefaultModifier()));
-				break;
-			default:
-				this.setAccelerator(null);
+			this.setAccelerator(null);
 		}
+		else
+		{
+			this.setAccelerator(key);
+		}
+		
 		this.setActionName("SelectTab" + (this.index+1));
-		this.setMenuText(ResourceMgr.getDefaultTabLabel());// + " &" + Integer.toString(this.index+1));
+		this.setMenuText(ResourceMgr.getDefaultTabLabel());
 		this.setIcon(null);
+	}
+
+	private KeyStroke getKeyStrokeForIndex(int indexValue)
+	{
+		if (indexValue >= 0 && indexValue <= 8)
+		{
+			/** VK_0 thru VK_9 are the same as ASCII '0' thru '9' (0x30 - 0x39) */
+			return KeyStroke.getKeyStroke(0x31 + indexValue, PlatformShortcuts.getDefaultModifier());
+		}
+		return null;
 	}
 
 	public int getIndex()

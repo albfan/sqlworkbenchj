@@ -23,16 +23,28 @@
 package workbench.resource;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import workbench.gui.actions.WbAction;
+
 import workbench.log.LogMgr;
+
+import workbench.gui.actions.WbAction;
+
+import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroManager;
+
 import workbench.util.WbPersistence;
 
 /**
@@ -101,6 +113,14 @@ public class ShortcutManager
 	public void removeChangeListener(ChangeListener l)
 	{
 		this.changeListener.remove(l);
+	}
+
+	public boolean isKeyStrokeAssigned(KeyStroke key)
+	{
+		if (key == null) return false;
+		if (this.getActionClassForKey(key) != null) return true;
+		MacroDefinition def = MacroManager.getInstance().getMacroForKeyStroke(key);
+		return def != null;
 	}
 
 	public void fireShortcutsChanged()
@@ -341,7 +361,7 @@ public class ShortcutManager
 		def.assignKey(aKey);
 		modified = true;
 	}
-	
+
 	private ShortcutDefinition getDefinition(String aClassname)
 	{
 		return this.keyMap.get(aClassname);
