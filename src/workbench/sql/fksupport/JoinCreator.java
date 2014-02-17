@@ -123,6 +123,12 @@ public class JoinCreator
 			String currentWord = StringUtil.findWordLeftOfCursor(sql, cursorPos);
 			boolean whiteSpaceAtLeft = isWhitespaceAtCursor();
 
+			boolean useParens = Settings.getInstance().getBoolProperty("workbench.gui.sql.join.completion.use.parenthesis", false);
+			if (useParens)
+			{
+				condition = "(" + condition + ")";
+			}
+
 			if (currentWord == null || !currentWord.equalsIgnoreCase("on"))
 			{
 				String on = Settings.getInstance().getFormatterUpperCaseKeywords() ? "ON " : "on ";
