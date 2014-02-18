@@ -48,6 +48,22 @@ public class SelectAnalyzerTest
 	}
 
 	@Test
+	public void testJoin()
+	{
+		String sql =
+			"select b. \n" +
+			" from public.t1 a join public.t2 as b using (id)";
+		int pos = sql.indexOf('.') + 1;
+		StatementContext ctx = new StatementContext(null, sql, pos);
+		BaseAnalyzer analyzer = ctx.getAnalyzer();
+		analyzer.checkContext();
+		int context = analyzer.getContext();
+		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, context);
+		TableIdentifier tbl = analyzer.getTableForColumnList();
+		assertEquals("t2", tbl.getTableName());
+	}
+
+	@Test
 	public void testCTE()
 	{
 		String sql =

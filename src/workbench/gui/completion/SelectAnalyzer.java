@@ -310,7 +310,7 @@ public class SelectAnalyzer
 				String t = token.getContents();
 				if (afterFrom)
 				{
-					if ("ON".equals(t))
+					if ("ON".equals(t) || "USING".equals(t))
 					{
 						if (cursorPos >= token.getCharEnd()) result = JOIN_ON_COLUMN_LIST;
 					}

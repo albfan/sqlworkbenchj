@@ -833,8 +833,20 @@ public class SqlUtilTest
 		assertEquals("some_data", l.get(0));
 
 		l = SqlUtil.getTables(sql, true);
-		assertEquals(l.size(), 1);
+		assertEquals(1, l.size());
 		assertEquals("some_data d", l.get(0));
+
+		sql = "select b.* from public.t1 a join public.t2 as b using (id)";
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(2, l.size());
+		assertEquals("public.t1 a", l.get(0));
+		assertEquals("public.t2 AS b", l.get(1));
+
+		l = SqlUtil.getTables(sql, false);
+		assertEquals(2, l.size());
+		assertEquals("public.t1", l.get(0));
+		assertEquals("public.t2", l.get(1));
+
 	}
 
 	@Test

@@ -1084,7 +1084,7 @@ public class SqlUtil
 							result.add(getTableDefinition(currentTable.toString(), includeAlias));
 							currentTable = new StringBuilder();
 					}
-					else if ("ON".equals(s))
+					else if ("ON".equals(s) || "USING".equals(s))
 					{
 						collectTable = false;
 						result.add(getTableDefinition(currentTable.toString(), includeAlias));
