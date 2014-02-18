@@ -27,10 +27,6 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -91,7 +87,7 @@ import workbench.util.StringUtil;
  */
 public class ProfileEditorPanel
 	extends JPanel
-	implements FileActions, ValidatingComponent, PropertyChangeListener, ActionListener, KeyListener, FocusListener
+	implements FileActions, ValidatingComponent, PropertyChangeListener, KeyListener
 {
 	private ProfileListModel model;
 	private JToolBar toolbar;
@@ -159,8 +155,6 @@ public class ProfileEditorPanel
 			p.add(filterPanel, BorderLayout.PAGE_END);
 
 			filterValue.setToolTipText(lbl.getToolTipText());
-			filterValue.addActionListener(this);
-			filterValue.addFocusListener(this);
 			filterValue.addKeyListener(this);
 		}
 
@@ -183,60 +177,109 @@ public class ProfileEditorPanel
 		ConnectionMgr.getInstance().addDriverChangeListener(this);
 	}
 
+	private int getSelectedRow()
+	{
+		if (profileTree.getSelectionCount() != 1) return -1;
+		return profileTree.getSelectionRows()[0];
+	}
+	
+	private void selectPreviousItem()
+	{
+		int row = getSelectedRow();
+		if (row < 0)
+		{
+			row = 0;
+		}
+		else
+		{
+			row --;
+		}
+		profileTree.setSelectionRow(row);
+	}
+
+	private void selectNextItem()
+	{
+		int row = getSelectedRow();
+		if (row < 0)
+		{
+			row = 0;
+		}
+		else
+		{
+			row ++;
+		}
+		profileTree.setSelectionRow(row);
+	}
+
+	private void collapseCurrentGroup()
+	{
+		ProfileTree tree = (ProfileTree)profileTree;
+		TreePath path = tree.getSelectionPath();
+		if (tree.isGroup(path))
+		{
+			tree.collapsePath(path);
+		}
+		else
+		{
+			TreePath parent = path.getParentPath();
+			if (parent != null)
+			{
+				tree.selectPath(parent);
+			}
+		}
+	}
+
+	private void expandCurrentGroup()
+	{
+		ProfileTree tree = (ProfileTree)profileTree;
+		if (tree.isGroup(tree.getSelectionPath()))
+		{
+			tree.expandPath(tree.getSelectionPath());
+		}
+	}
+
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
-				{
-					filterValue.setText("");
-				}
-				applyFilter();
-			}
-		});
+		applyFilter();
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
+		if (e.getSource() != this.filterValue || e.getModifiers() != 0) return;
+
+		if (e.getKeyCode() == KeyEvent.VK_UP)
+		{
+			selectPreviousItem();
+			e.consume();
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_DOWN)
+		{
+			selectNextItem();
+			e.consume();
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_RIGHT)
+		{
+			expandCurrentGroup();
+			e.consume();
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_LEFT)
+		{
+			collapseCurrentGroup();
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_ESCAPE && StringUtil.isNonBlank(filterValue.getText()))
+		{
+			e.consume();
+			filterValue.setText("");
+			applyFilter();
+		}
 	}
+
 
 	@Override
 	public void keyReleased(KeyEvent e)
 	{
-	}
-
-	private ProfileSelectionDialog getDialog()
-	{
-		return (ProfileSelectionDialog)SwingUtilities.getWindowAncestor(this);
-	}
-
-	@Override
-	public void focusGained(FocusEvent e)
-	{
-		if (e.getComponent() == filterValue)
-		{
-			getDialog().disableDefaultButtons();
-		}
-	}
-
-	@Override
-	public void focusLost(FocusEvent e)
-	{
-		if (e.getComponent() == filterValue)
-		{
-			getDialog().enableDefaultButtons();
-		}
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e)
-	{
-		applyFilter();
 	}
 
 	private void applyFilter()

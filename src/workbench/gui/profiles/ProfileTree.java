@@ -69,13 +69,8 @@ import workbench.util.StringUtil;
  */
 public class ProfileTree
 	extends JTree
-	implements TreeModelListener,
-	           MouseListener,
-	           ClipboardSupport,
-	           ActionListener,
-	           TreeSelectionListener,
-						 GroupTree,
-						 ExpandableTree
+	implements TreeModelListener, MouseListener, ClipboardSupport, ActionListener, TreeSelectionListener,
+						 GroupTree, ExpandableTree
 {
 	private ProfileListModel profileModel;
 	private DefaultMutableTreeNode[] clipboardNodes;
