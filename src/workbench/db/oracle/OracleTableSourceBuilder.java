@@ -89,6 +89,7 @@ public class OracleTableSourceBuilder
 		}
 
 		boolean supportsArchives = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.2");
+		boolean supportsCompression = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.1");
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -108,7 +109,11 @@ public class OracleTableSourceBuilder
 			(supportsArchives ?
 			"       fat.flashback_archive_name, \n" :
 			"       null as flashback_archive_name, \n") +
-			"       ai.tablespace_name as index_tablespace \n" +
+			"       ai.tablespace_name as index_tablespace, \n" +
+			(supportsCompression ?
+			"       atb.compression, \n " +
+			"       atb.compress_for \n " :
+			"       null as compression, \n       null as compress_for \n ") +
 			"from all_tables atb \n" +
 			"  left join all_tables iot on atb.owner = iot.owner and atb.table_name = iot.iot_name \n" +
 			"  left join all_constraints ac on ac.owner = atb.owner and ac.table_name = atb.table_name and ac.constraint_type = 'P' \n" +
@@ -228,6 +233,16 @@ public class OracleTableSourceBuilder
 					tbl.getSourceOptions().addConfigSetting("logging", "nologging");
 					if (options.length() > 0) options.append('\n');
 					options.append("NOLOGGING");
+				}
+
+				String compression = rs.getString("compression");
+				if (StringUtil.equalStringIgnoreCase("enabled", compression))
+				{
+					String compressType = rs.getString("compress_for");
+					tbl.getSourceOptions().addConfigSetting("compression", compressType);
+					if (options.length() > 0) options.append('\n');
+					options.append("COMPRESS FOR ");
+					options.append(compressType);
 				}
 
 				archive = rs.getString("flashback_archive_name");
