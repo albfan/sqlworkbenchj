@@ -180,9 +180,12 @@ public class MacroTree
 	public void expandAll()
 	{
 		TreePath[] groups = this.macroModel.getGroupNodes();
-		for (int i = 0; i < groups.length; i++)
+		for (TreePath group : groups)
 		{
-			if (groups[i] != null) expandPath(groups[i]);
+			if (group != null)
+			{
+				expandPath(group);
+			}
 		}
 	}
 
@@ -190,9 +193,12 @@ public class MacroTree
 	public void collapseAll()
 	{
 		TreePath[] groups = this.macroModel.getGroupNodes();
-		for (int i = 0; i < groups.length; i++)
+		for (TreePath group : groups)
 		{
-			if (groups[i] != null) collapsePath(groups[i]);
+			if (group != null)
+			{
+				collapsePath(group);
+			}
 		}
 	}
 
@@ -250,14 +256,17 @@ public class MacroTree
 		if (groupList == null) return;
 		TreePath[] groupNodes = this.macroModel.getGroupNodes();
 		if (groupNodes == null) return;
-		for (int i = 0; i < groupNodes.length; i++)
+		for (TreePath groupNode : groupNodes)
 		{
-			MacroTreeNode node = (MacroTreeNode)groupNodes[i].getLastPathComponent();
+			MacroTreeNode node = (MacroTreeNode) groupNode.getLastPathComponent();
 			if (!node.getAllowsChildren()) continue;
 			MacroGroup g = (MacroGroup)node.getDataObject();
 			if (groupList.contains(g.getName()))
 			{
-				if (!isExpanded(groupNodes[i])) expandPath(groupNodes[i]);
+				if (!isExpanded(groupNode))
+				{
+					expandPath(groupNode);
+				}
 			}
 		}
 	}
@@ -269,11 +278,11 @@ public class MacroTree
 	{
 		LinkedList<String> result = new LinkedList<String>();
 		TreePath[] groupNodes = this.macroModel.getGroupNodes();
-		for (int i = 0; i < groupNodes.length; i++)
+		for (TreePath groupNode : groupNodes)
 		{
-			if (isExpanded(groupNodes[i]))
+			if (isExpanded(groupNode))
 			{
-				MacroTreeNode node = (MacroTreeNode)groupNodes[i].getLastPathComponent();
+				MacroTreeNode node = (MacroTreeNode) groupNode.getLastPathComponent();
 				MacroGroup g = (MacroGroup)node.getDataObject();
 				result.add(g.getName());
 			}
@@ -334,9 +343,9 @@ public class MacroTree
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return false;
-		for (int i = 0; i < selection.length; i++)
+		for (TreePath tp : selection)
 		{
-			TreeNode n = (TreeNode)selection[i].getLastPathComponent();
+			TreeNode n = (TreeNode) tp.getLastPathComponent();
 			if (n.getAllowsChildren()) return false;
 		}
 		return true;
@@ -355,9 +364,9 @@ public class MacroTree
 	public boolean onlyGroupSelected(TreePath[] selection)
 	{
 		if (selection == null) return false;
-		for (int i = 0; i < selection.length; i++)
+		for (TreePath tp : selection)
 		{
-			TreeNode n = (TreeNode)selection[i].getLastPathComponent();
+			TreeNode n = (TreeNode) tp.getLastPathComponent();
 			if (!n.getAllowsChildren()) return false;
 		}
 		return true;

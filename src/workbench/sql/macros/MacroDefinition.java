@@ -49,6 +49,7 @@ public class MacroDefinition
 	private boolean showInMenu = true;
 	private boolean expandWhileTyping;
 	private boolean appendResult;
+	private boolean shortcutChanged;
 
 	public MacroDefinition()
 	{
@@ -182,6 +183,12 @@ public class MacroDefinition
 	public void resetModified()
 	{
 		modified = false;
+		shortcutChanged = true;
+	}
+
+	public boolean isShortcutChanged()
+	{
+		return shortcutChanged;
 	}
 
 	@Override
@@ -197,6 +204,21 @@ public class MacroDefinition
 
 	public void setShortcut(StoreableKeyStroke keystroke)
 	{
+		if (keystroke != null && this.shortcut == null)
+		{
+			modified = true;
+			shortcutChanged = true;
+		}
+		else if (keystroke == null && shortcut != null)
+		{
+			modified = true;
+			shortcutChanged = true;
+		}
+		else if (keystroke != null && shortcut != null)
+		{
+			modified = !keystroke.equals(shortcut);
+			shortcutChanged = true;
+		}
 		this.shortcut = keystroke;
 	}
 }

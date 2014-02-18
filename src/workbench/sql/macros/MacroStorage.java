@@ -34,6 +34,7 @@ import java.util.TreeMap;
 import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.ShortcutManager;
 
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
@@ -177,6 +178,7 @@ public class MacroStorage
 
 	private void updateMap()
 	{
+		boolean shortcutChanged = false;
 		allMacros.clear();
 		for (MacroGroup group : groups)
 		{
@@ -184,7 +186,12 @@ public class MacroStorage
 			for (MacroDefinition macro : macros)
 			{
 				allMacros.put(macro.getName(), macro);
+				shortcutChanged = shortcutChanged || macro.isShortcutChanged();
 			}
+		}
+		if (shortcutChanged)
+		{
+			ShortcutManager.getInstance().fireShortcutsChanged();
 		}
 	}
 
