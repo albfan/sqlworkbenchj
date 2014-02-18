@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import workbench.db.IndexDefinition;
+import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
@@ -104,7 +105,7 @@ public class OracleMViewReader
 			result.append("\nAS\n");
 			result.append(sql);
 			result.append('\n');
-			
+
 			if (includeComments)
 			{
 				TableSourceBuilder.appendComments(result, dbConnection, def);
@@ -153,6 +154,8 @@ public class OracleMViewReader
 	 */
 	private String getMViewOptions(WbConnection dbConnection, TableIdentifier mview)
 	{
+		boolean supportsCompression = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.1");
+
 		String sql =
 			"select mv.rewrite_enabled, \n" +
 			"       mv.refresh_mode, \n" +
@@ -161,8 +164,15 @@ public class OracleMViewReader
 			"       mv.fast_refreshable, \n" +
 			"       cons.constraint_name, \n" +
 			"       cons.index_name, \n" +
-			"       rc.interval \n" +
+			"       rc.interval, \n" +
+			(supportsCompression ?
+			"       tb.compression, \n "  +
+			"       tb.compress_for \n " :
+			"       null as compression, \n   null as compress_for \n") +
 			"from all_mviews mv \n" +
+			(supportsCompression ?
+			"  join all_tables tb on tb.owner = mv.owner and tb.table_name = mv.container_name \n " :
+			"") +
 			"  left join all_constraints cons on cons.owner = mv.owner and cons.table_name = mv.mview_name and cons.constraint_type = 'P' \n " +
 			"  left join all_refresh_children rc on rc.owner = mv.owner and rc.name = mv.mview_name \n" +
 			"where mv.owner = ? \n" +
@@ -184,6 +194,17 @@ public class OracleMViewReader
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{
+				String compress = rs.getString("compression");
+				if (StringUtil.equalStringIgnoreCase("enabled", compress))
+				{
+					String compressType = rs.getString("compress_for");
+					if (StringUtil.isNonBlank(compressType))
+					{
+						result.append("\n  COMPRESS FOR ");
+						result.append(compressType);
+					}
+				}
+
 				String immediate = rs.getString("BUILD_MODE");
 				result.append("\n  BUILD ");
 				result.append(immediate);
