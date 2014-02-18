@@ -46,10 +46,12 @@ public class SelectTabAction
 		super();
 		this.client = aPane;
 		this.index = anIndex;
-		this.initName();
+		this.setIcon(null);
+		this.setMenuText(ResourceMgr.getDefaultTabLabel());
+		this.initAccelerator();
 	}
 
-	private void initName()
+	private void initAccelerator()
 	{
 		KeyStroke key = getKeyStrokeForIndex(index);
 
@@ -61,10 +63,7 @@ public class SelectTabAction
 		{
 			this.setAccelerator(key);
 		}
-		
 		this.setActionName("SelectTab" + (this.index+1));
-		this.setMenuText(ResourceMgr.getDefaultTabLabel());
-		this.setIcon(null);
 	}
 
 	private KeyStroke getKeyStrokeForIndex(int indexValue)
@@ -85,7 +84,7 @@ public class SelectTabAction
 	public void setNewIndex(int anIndex)
 	{
 		this.index = anIndex;
-		this.initName();
+		this.initAccelerator();
 	}
 
 	@Override

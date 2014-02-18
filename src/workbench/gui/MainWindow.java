@@ -70,6 +70,7 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.resource.ShortcutManager;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -290,6 +291,7 @@ public class MainWindow
 			GuiSettings.PROP_TITLE_GROUP_BRACKET,
 			GuiSettings.PROP_TITLE_SHOW_URL_USER
 		);
+		ShortcutManager.getInstance().addChangeListener(this);
 	}
 
 	protected final void updateTabPolicy()
@@ -1866,6 +1868,7 @@ public class MainWindow
 		{
 			this.dropHandler.dispose();
 		}
+		ShortcutManager.getInstance().removeChangeListener(this);
 		super.dispose();
 	}
 
@@ -2248,6 +2251,30 @@ public class MainWindow
 					SelectTabAction a = (SelectTabAction)view.getItem(k).getAction();
 					a.setNewIndex(newIndex);
 					newIndex ++;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Tell all SelectTabAction that the shortcuts have changed, so that they can update accordingly.
+	 * 
+	 * @see SelectTabAction#setNewIndex(int)
+	 */
+	private void updateViewShortcuts()
+	{
+		int panelCount = sqlTab.getTabCount();
+		for (int i=0; i < panelCount; i++)
+		{
+			JMenu view = this.getViewMenu(i);
+			for (int k=0; k < panelCount; k++)
+			{
+				JMenuItem item = view.getItem(k);
+				Action a = item.getAction();
+				if (a instanceof SelectTabAction)
+				{
+					SelectTabAction tab = (SelectTabAction)a;
+					tab.setNewIndex(k);
 				}
 			}
 		}
@@ -2835,6 +2862,10 @@ public class MainWindow
 			if (this.ignoreTabChange)	return;
 			int index = this.sqlTab.getSelectedIndex();
 			this.tabSelected(index);
+		}
+		else if (e.getSource() == ShortcutManager.getInstance())
+		{
+			updateViewShortcuts();
 		}
 	}
 
