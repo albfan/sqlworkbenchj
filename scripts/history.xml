@@ -51,6 +51,8 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="12" type="fix">The keyboard shortcuts Ctrl-1 through Ctrl-9 could not be remapped to something different.</entry>
+    <entry dev-build="12" type="fix">Auto-completion did not work properly if tables where joined with the USING clause rather than the ON clause.</entry>
     <entry dev-build="11" type="fix">In the DataPumper it was not possible to create the target table in a schema other than the default schema.</entry>
     <entry dev-build="11" type="fix">WbGenerate delete could sometimes fail with the error "Comparison method violates its general contract"</entry>
     <entry dev-build="10" type="fix">It was not possible to export multiple tables using wildcards for the -sourceTable parameter into a single Excel Workbook using -append=true</entry>
