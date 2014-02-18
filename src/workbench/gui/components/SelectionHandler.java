@@ -37,25 +37,24 @@ public class SelectionHandler
 
 	public void handleKeyPressed(KeyEvent e)
 	{
-		if (e.getKeyCode() == KeyEvent.VK_UP)
+		switch (e.getKeyCode())
 		{
-			selectPreviousRow();
-			e.consume();
-		}
-		else if (e.getKeyCode() == KeyEvent.VK_DOWN)
-		{
-			selectNextRow();
-			e.consume();
-		}
-		else if (e.getKeyCode() == KeyEvent.VK_PAGE_UP)
-		{
-			pageUp();
-			e.consume();
-		}
-		else if (e.getKeyCode() == KeyEvent.VK_PAGE_DOWN)
-		{
-			pageDown();
-			e.consume();
+			case KeyEvent.VK_UP:
+				selectPreviousRow();
+				e.consume();
+				break;
+			case KeyEvent.VK_DOWN:
+				selectNextRow();
+				e.consume();
+				break;
+			case KeyEvent.VK_PAGE_UP:
+				pageUp();
+				e.consume();
+				break;
+			case KeyEvent.VK_PAGE_DOWN:
+				pageDown();
+				e.consume();
+				break;
 		}
 	}
 

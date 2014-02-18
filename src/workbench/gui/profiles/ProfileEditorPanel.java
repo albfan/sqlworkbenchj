@@ -182,7 +182,7 @@ public class ProfileEditorPanel
 		if (profileTree.getSelectionCount() != 1) return -1;
 		return profileTree.getSelectionRows()[0];
 	}
-	
+
 	private void selectPreviousItem()
 	{
 		int row = getSelectedRow();
@@ -190,7 +190,7 @@ public class ProfileEditorPanel
 		{
 			row = 0;
 		}
-		else
+		else if (row > 0)
 		{
 			row --;
 		}
@@ -200,11 +200,12 @@ public class ProfileEditorPanel
 	private void selectNextItem()
 	{
 		int row = getSelectedRow();
+		int count = profileTree.getRowCount();
 		if (row < 0)
 		{
 			row = 0;
 		}
-		else
+		else if (row < count - 1)
 		{
 			row ++;
 		}
@@ -249,33 +250,33 @@ public class ProfileEditorPanel
 	{
 		if (e.getSource() != this.filterValue || e.getModifiers() != 0) return;
 
-		if (e.getKeyCode() == KeyEvent.VK_UP)
+		switch (e.getKeyCode())
 		{
-			selectPreviousItem();
-			e.consume();
-		}
-		else if (e.getKeyCode() == KeyEvent.VK_DOWN)
-		{
-			selectNextItem();
-			e.consume();
-		}
-		else if (e.getKeyCode() == KeyEvent.VK_RIGHT)
-		{
-			expandCurrentGroup();
-			e.consume();
-		}
-		else if (e.getKeyCode() == KeyEvent.VK_LEFT)
-		{
-			collapseCurrentGroup();
-		}
-		else if (e.getKeyCode() == KeyEvent.VK_ESCAPE && StringUtil.isNonBlank(filterValue.getText()))
-		{
-			e.consume();
-			filterValue.setText("");
-			applyFilter();
+			case KeyEvent.VK_UP:
+				selectPreviousItem();
+				e.consume();
+				break;
+			case KeyEvent.VK_DOWN:
+				selectNextItem();
+				e.consume();
+				break;
+			case KeyEvent.VK_RIGHT:
+				expandCurrentGroup();
+				e.consume();
+				break;
+			case KeyEvent.VK_LEFT:
+				collapseCurrentGroup();
+				e.consume();
+				break;
+			case KeyEvent.VK_ESCAPE:
+				if (StringUtil.isNonBlank(filterValue.getText()))
+				{
+					e.consume();
+					filterValue.setText("");
+					applyFilter();
+				}
 		}
 	}
-
 
 	@Override
 	public void keyReleased(KeyEvent e)
