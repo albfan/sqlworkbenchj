@@ -32,7 +32,6 @@ import workbench.util.VersionNumber;
  */
 public class PoiHelper
 {
-
 	private static boolean tested;
 	private static boolean available;
 	private static boolean xlsxTested;
@@ -60,10 +59,11 @@ public class PoiHelper
 			}
 			VersionNumber version = new VersionNumber(v);
 			VersionNumber needed = new VersionNumber(3, 5);
+			LogMgr.logInfo("PoiHelper.isPoiAvailable()", "POI version: " + poi.getImplementationVersion() + " available.");
 			available = version.isNewerOrEqual(needed);
 			if (!available)
 			{
-				LogMgr.logError("PoiHelper.isPoiAvailable()", "POI on classpath has wrong version: " + poi.getImplementationVersion() + " but " + needed.toString() + " or later is required", null);
+				LogMgr.logError("PoiHelper.isPoiAvailable()", "POI on classpath has wrong version. Version " + needed.toString() + " or later is required", null);
 			}
 		}
 		catch (Throwable th)
