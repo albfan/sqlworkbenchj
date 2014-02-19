@@ -795,11 +795,11 @@ public class SqlUtilTest
 		sql = "SELECT x. FROM \"Dumb Named Schema\".\"Problematically Named Table\" x";
 		l = SqlUtil.getTables(sql, false);
 		assertEquals(l.size(), 1);
-		assertEquals( "\"Dumb Named Schema\".\"Problematically Named Table\"", l.get(0));
+		assertEquals("\"Dumb Named Schema\".\"Problematically Named Table\"", l.get(0));
 
 		l = SqlUtil.getTables(sql, true);
 		assertEquals(l.size(), 1);
-		assertEquals( "\"Dumb Named Schema\".\"Problematically Named Table\" x", l.get(0));
+		assertEquals("\"Dumb Named Schema\".\"Problematically Named Table\" x", l.get(0));
 
 		l = SqlUtil.getTables("select * from some_table limit 100;");
 		assertEquals(l.size(), 1);
@@ -847,6 +847,17 @@ public class SqlUtilTest
 		assertEquals("public.t1", l.get(0));
 		assertEquals("public.t2", l.get(1));
 
+		sql = "select * from \"table one\" as t1 join \"table two\" t2";
+		l = SqlUtil.getTables(sql, false);
+		assertEquals(2, l.size());
+		assertEquals("\"table one\"", l.get(0));
+		assertEquals("\"table two\"", l.get(1));
+
+		sql = "select * from \"table one\" as t1 join \"table two\" t2";
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(2, l.size());
+		assertEquals("\"table one\" AS t1", l.get(0));
+		assertEquals("\"table two\" t2", l.get(1));
 	}
 
 	@Test

@@ -360,9 +360,8 @@ public class SelectAnalyzer
 	{
 		List<String> cols = SqlUtil.getSelectColumns(this.sql, false);
 		List<String> validCols = new LinkedList<String>();
-		for (int i = 0; i < cols.size(); i++)
+		for (String col : cols)
 		{
-			String col = cols.get(i);
 			if (col.indexOf('(') > -1 && col.indexOf(')') > -1)
 			{
 				validCols.add(col);
@@ -385,9 +384,8 @@ public class SelectAnalyzer
 			regex.append("\\s*\\(");
 		}
 		Pattern aggregate = Pattern.compile(regex.toString(), Pattern.CASE_INSENSITIVE);
-		for (int i = 0; i < cols.size(); i++)
+		for (String col : cols)
 		{
-			String col = cols.get(i);
 			if (StringUtil.findPattern(aggregate, col, 0) == -1)
 			{
 				validCols.add(col);

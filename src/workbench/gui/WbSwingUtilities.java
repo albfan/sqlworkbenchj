@@ -1205,8 +1205,21 @@ public class WbSwingUtilities
 	public static void showToolTip(final JComponent component, String tip)
 	{
 		if (component == null) return;
-		Point pos = component.getLocationOnScreen();
+		if (!component.isShowing()) return;
 
+		Point pos = null;
+		try
+		{
+			pos = component.getLocationOnScreen();
+		}
+		catch (Exception ex)
+		{
+			// this can happen if the component is hidden for some reason
+			// but isShowing() could not detect that.
+			pos = null;
+		}
+		if (pos == null) return;
+		
 		JToolTip tooltip = component.createToolTip();
 		PopupFactory popupFactory = PopupFactory.getSharedInstance();
 		tooltip.setTipText(tip);

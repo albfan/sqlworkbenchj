@@ -291,9 +291,8 @@ public class CompletionHandler
 	{
 		if (this.listeners == null) return;
 		ListDataEvent evt = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize() - 1);
-		for (int i=0; i < this.listeners.size(); i++)
+		for (ListDataListener l : this.listeners)
 		{
-			ListDataListener l = this.listeners.get(i);
 			l.contentsChanged(evt);
 		}
 	}

@@ -747,7 +747,7 @@ public class SqlUtil
 	private static String getTableDefinition(String table, boolean keepAlias)
 	{
 		if (keepAlias) return table;
-		int pos = StringUtil.findFirstWhiteSpace(table);
+		int pos = StringUtil.findFirstWhiteSpace(table.trim());
 		if (pos > -1) return table.substring(0, pos);
 		return table;
 	}
@@ -1106,7 +1106,15 @@ public class SqlUtil
 
 			if (currentTable.length() > 0)
 			{
-				result.add(getTableDefinition(currentTable.toString(), includeAlias));
+				String tbl = getTableDefinition(currentTable.toString(), includeAlias);
+				if (StringUtil.isEmptyString(tbl))
+				{
+					LogMgr.logWarning("SqlUtil.getTables()", "Empty table name returned for table definition: " + currentTable);
+				}
+				else
+				{
+					result.add(tbl);
+				}
 			}
 		}
 		catch (Exception e)
