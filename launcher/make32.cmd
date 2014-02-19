@@ -2,11 +2,11 @@
 
 pushd "%~dp0"
 
-call :patch_ini
+rem call :patch_ini
 
 rcedit /C SQLWorkbench.exe
 rcedit /I SQLWorkbench.exe workbench.ico
-rcedit /N SQLWorkbench.exe sqlworkbench32.ini
+rcedit /N SQLWorkbench.exe sqlworkbench.ini
 
 rcedit /C sqlwbconsole.exe
 rcedit /I sqlwbconsole.exe console.ico
