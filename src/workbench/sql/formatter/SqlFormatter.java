@@ -393,6 +393,7 @@ public class SqlFormatter
 	{
 		if (t == null) return;
 		String text = t.getText();
+		String pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
 
 		if (this.lowerCaseFunctions && this.dbFunctions.contains(text))
 		{
@@ -407,6 +408,17 @@ public class SqlFormatter
 			else
 			{
 				text = text.toLowerCase();
+			}
+		}
+		else if (t.isIdentifier() && !isQuotedIdentifier(text))
+		{
+			if ("lower".equalsIgnoreCase(pasteCase))
+			{
+				text = text.toLowerCase();
+			}
+			else if ("lower".equalsIgnoreCase(pasteCase))
+			{
+				text = text.toUpperCase();
 			}
 		}
 
