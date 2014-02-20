@@ -30,6 +30,7 @@ import java.io.Writer;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -43,6 +44,8 @@ import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 
 import workbench.gui.components.BlobHandler;
+import workbench.gui.dialogs.export.ExportOptions;
+import workbench.gui.dialogs.export.TextOptions;
 
 import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.ColumnData;
@@ -115,6 +118,8 @@ public abstract class RowDataConverter
 	private long maxBlobFilesPerDir;
 	private long blobsWritten;
 
+	protected ExportOptions exportOptions;
+	protected TextOptions textOptions;
 	/**
 	 * Spreadsheet option to add an additional sheet with the generating SQL
 	 */
@@ -129,8 +134,6 @@ public abstract class RowDataConverter
 	protected boolean fixedHeader;
 	protected boolean returnNulls;
 
-	private DataExporter exporter;
-
 	public RowDataConverter()
 	{
 		defaultDateFormatter = new WbDateFormatter(Settings.getInstance().getDefaultDateFormat());
@@ -139,9 +142,14 @@ public abstract class RowDataConverter
 		defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
 	}
 
-	public void setDataExporter(DataExporter exporter)
+	public void setExportOptions(ExportOptions options)
 	{
-		this.exporter = exporter;
+		this.exportOptions = options;
+	}
+
+	public void setTextOptions(TextOptions textOptions)
+	{
+		this.textOptions = textOptions;
 	}
 	
 	/**

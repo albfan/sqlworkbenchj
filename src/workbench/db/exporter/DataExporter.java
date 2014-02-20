@@ -94,7 +94,8 @@ import workbench.util.WbThread;
  * @author  Thomas Kellerer
  */
 public class DataExporter
-	implements InterruptableJob, ErrorReporter, ProgressReporter, Committer
+	implements InterruptableJob, ErrorReporter, ProgressReporter, Committer,
+	           ExportOptions, TextOptions
 {
 
 	private WbConnection dbConn;
@@ -251,11 +252,13 @@ public class DataExporter
 		return enableFixedHeader;
 	}
 
+	@Override
 	public String getNullString()
 	{
 		return nullString;
 	}
 
+	@Override
 	public void setNullString(String nullValue)
 	{
 		this.nullString = nullValue;
@@ -420,6 +423,7 @@ public class DataExporter
 	 * Returns the currently selected mode for BLOB literals.
 	 * @return the current type or null, if nothing was selected
 	 */
+	@Override
 	public BlobMode getBlobMode()
 	{
 		return this.blobMode;
@@ -473,6 +477,7 @@ public class DataExporter
 		this.quoteEscape = type;
 	}
 
+	@Override
 	public QuoteEscapeType getQuoteEscaping()
 	{
 		return this.quoteEscape;
@@ -536,11 +541,13 @@ public class DataExporter
 		return "";
 	}
 
+	@Override
 	public void setEncoding(String enc)
 	{
 		this.encoding = enc;
 	}
 
+	@Override
 	public String getEncoding()
 	{
 		return this.encoding;
@@ -711,6 +718,7 @@ public class DataExporter
 	/**
 	 * Set if the (text) export should contain header row.
 	 */
+	@Override
 	public final void setExportHeaders(boolean aFlag)
 	{
 		this.exportHeaders = aFlag;
@@ -720,6 +728,7 @@ public class DataExporter
 	 * Returns if the (text) export contains a header row.
 	 * @return true, if the header row should be written
 	 */
+	@Override
 	public boolean getExportHeaders()
 	{
 		return this.exportHeaders;
@@ -765,6 +774,7 @@ public class DataExporter
 		return this.escapeHtml;
 	}
 
+	@Override
 	public void setTextDelimiter(String aDelimiter)
 	{
 		if (StringUtil.isNonBlank(aDelimiter))
@@ -773,16 +783,19 @@ public class DataExporter
 		}
 	}
 
+	@Override
 	public String getTextDelimiter()
 	{
 		return this.delimiter;
 	}
 
+	@Override
 	public void setTextQuoteChar(String aQuote)
 	{
 		this.quoteChar = aQuote;
 	}
 
+	@Override
 	public String getTextQuoteChar()
 	{
 		return this.quoteChar;
@@ -791,10 +804,10 @@ public class DataExporter
 
 	public void setTimeFormat(String aFormat)
 	{
-		timeFormat = StringUtil.isBlank(aFormat) ? Settings.getInstance().getDefaultTimeFormat() : aFormat;
+		timeFormat = StringUtil.isBlank(aFormat) ? null : aFormat;
 		try
 		{
-			timeFormatter = new SimpleDateFormat(timeFormat);
+			timeFormatter = new SimpleDateFormat(timeFormat == null ? Settings.getInstance().getDefaultTimeFormat() : timeFormat);
 		}
 		catch (IllegalArgumentException i)
 		{
@@ -808,12 +821,13 @@ public class DataExporter
 		return timeFormatter;
 	}
 
+	@Override
 	public void setDateFormat(String aFormat)
 	{
-		dateFormat = StringUtil.isBlank(aFormat) ? Settings.getInstance().getDefaultDateFormat() : aFormat;
+		dateFormat = StringUtil.isBlank(aFormat) ? null : aFormat;
 		try
 		{
-			dateFormatter = new WbDateFormatter(this.dateFormat);
+			dateFormatter = new WbDateFormatter(this.dateFormat == null ? Settings.getInstance().getDefaultDateFormat() : dateFormat);
 		}
 		catch (IllegalArgumentException i)
 		{
@@ -827,17 +841,19 @@ public class DataExporter
 		return dateFormatter;
 	}
 
+	@Override
 	public String getDateFormat()
 	{
 		return this.dateFormat;
 	}
 
+	@Override
 	public void setTimestampFormat(String aFormat)
 	{
-		dateTimeFormat = StringUtil.isBlank(aFormat) ? Settings.getInstance().getDefaultTimestampFormat() : aFormat;
+		dateTimeFormat = StringUtil.isBlank(aFormat) ? null : aFormat;
 		try
 		{
-			dateTimeFormatter = new WbDateFormatter(dateTimeFormat);
+			dateTimeFormatter = new WbDateFormatter(dateTimeFormat == null ? Settings.getInstance().getDefaultTimestampFormat() : dateTimeFormat);
 		}
 		catch (Exception e)
 		{
@@ -846,6 +862,7 @@ public class DataExporter
 		}
 	}
 
+	@Override
 	public String getTimestampFormat()
 	{
 		return dateTimeFormat;
@@ -953,11 +970,12 @@ public class DataExporter
 		return this.chrFunc;
 	}
 
-	public void setDecimalSymbol(String aSymbol)
+	@Override
+	public void setDecimalSymbol(String symbol)
 	{
-		if (StringUtil.isNonBlank(aSymbol))
+		if (StringUtil.isNonBlank(symbol))
 		{
-			numberFormatter = new WbNumberFormatter(aSymbol.charAt(0));
+			numberFormatter = new WbNumberFormatter(symbol.charAt(0));
 		}
 	}
 
@@ -966,13 +984,14 @@ public class DataExporter
 		return this.numberFormatter;
 	}
 
-	public char getDecimalSymbol()
+	@Override
+	public String getDecimalSymbol()
 	{
 		if (numberFormatter == null)
 		{
-			return '.';
+			return null;
 		}
-		return numberFormatter.getDecimalSymbol();
+		return Character.toString(numberFormatter.getDecimalSymbol());
 	}
 
 	public void addQueryJob(String query, WbFile outputFile, String where)
@@ -1532,26 +1551,31 @@ public class DataExporter
 		this.concatString = null;
 	}
 
+	@Override
 	public boolean getQuoteAlways()
 	{
 		return quoteAlways;
 	}
 
+	@Override
 	public void setQuoteAlways(boolean flag)
 	{
 		this.quoteAlways = flag;
 	}
 
+	@Override
 	public void setEscapeRange(CharacterRange range)
 	{
 		this.escapeRange = range;
 	}
 
+	@Override
 	public CharacterRange getEscapeRange()
 	{
 		return this.escapeRange;
 	}
 
+	@Override
 	public void setLineEnding(String ending)
 	{
 		if (ending != null)
@@ -1560,9 +1584,16 @@ public class DataExporter
 		}
 	}
 
+	@Override
 	public String getLineEnding()
 	{
 		return this.lineEnding;
+	}
+
+	@Override
+	public Set<ControlFileFormat> getControlFiles()
+	{
+		return Collections.unmodifiableSet(controlFiles);
 	}
 
 	public void setXMLVersion(String version)

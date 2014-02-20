@@ -108,11 +108,6 @@ public class XlsRowDataConverter
 		this.optimizeCols = flag;
 	}
 
-	private boolean applyFormatting()
-	{
-		return this.targetSheetIndex < 0;
-	}
-
 	// This should not be called in the constructor as
 	// at that point in time the formatters are not initialized
 	private void createFormatters()
@@ -444,9 +439,34 @@ public class XlsRowDataConverter
 		}
 	}
 
+	private boolean applyFormatting()
+	{
+		return this.targetSheetIndex < 0;
+	}
+
+	private boolean applyDateFormat()
+	{
+		if (this.targetSheetIndex < 0) return true;
+		return exportOptions.getDateFormat() != null;
+	}
+
+	private boolean applyTimestampFormat()
+	{
+		if (this.targetSheetIndex < 0) return true;
+		return exportOptions.getTimestampFormat() != null;
+	}
+
+	private boolean applyDecimalFormat()
+	{
+		if (this.targetSheetIndex < 0) return true;
+		return textOptions.getDecimalSymbol() != null;
+	}
+
 	private void setCellValueAndStyle(Cell cell, Object value, boolean isHead, boolean multiline, int column)
 	{
 		CellStyle cellStyle = null;
+
+		boolean useFormat = applyFormatting();
 
 		if (value instanceof BigDecimal)
 		{
@@ -462,6 +482,7 @@ public class XlsRowDataConverter
 			else
 			{
 				cellStyle = excelFormat.decimalCellStyle;
+				useFormat = useFormat || applyDecimalFormat();
 			}
 			cell.setCellValue(bd.doubleValue());
 		}
@@ -469,21 +490,25 @@ public class XlsRowDataConverter
 		{
 			cellStyle = excelFormat.decimalCellStyle;
 			cell.setCellValue(((Double)value).doubleValue());
+			useFormat = useFormat || applyDecimalFormat();
 		}
 		else if (value instanceof Number)
 		{
 			cellStyle = excelFormat.integerCellStyle;
 			cell.setCellValue(((Number)value).doubleValue());
+			useFormat = useFormat || applyDecimalFormat();
 		}
 		else if (value instanceof java.sql.Timestamp)
 		{
 			cellStyle = excelFormat.tsCellStyle;
 			cell.setCellValue((java.util.Date)value);
+			useFormat = useFormat || applyTimestampFormat();
 		}
 		else if (value instanceof java.util.Date)
 		{
 			cellStyle = excelFormat.dateCellStyle;
 			cell.setCellValue((java.util.Date)value);
+			useFormat = useFormat || applyDateFormat();
 		}
 		else
 		{
@@ -505,7 +530,7 @@ public class XlsRowDataConverter
 		}
 
 		// do not mess with the formatting if we are writing to an existing sheet
-		if (applyFormatting())
+		if (useFormat)
 		{
 			try
 			{

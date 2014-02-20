@@ -108,7 +108,8 @@ public class Db2FormatFileWriter
 			{
 				out.println("              chardel" + convertDelimiter(quote));
 			}
-			out.println("              decpt=" + exporter.getDecimalSymbol());
+			String decimal = exporter.getDecimalSymbol();
+			out.println("              decpt=" + (decimal == null ? "." : decimal));
 			String codepage = convertEncodingToCodePage(exporter.getEncoding());
 			if (codepage != null)
 			{
