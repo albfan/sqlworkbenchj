@@ -15,3 +15,5 @@ rcedit64 /I sqlwbconsole64.exe console.ico
 rcedit64 /N sqlwbconsole64.exe sqlwbconsole.ini
 
 del t.ini > nul
+del sqlworkbench.ini > nul
+del sqlwbconsole.ini > nul
