@@ -22,17 +22,22 @@
  */
 package workbench.db.ibm;
 
-import workbench.db.TableConstraint;
 import java.util.List;
+
 import workbench.TestUtil;
+
+import workbench.db.ConstraintReader;
+import workbench.db.ReaderFactory;
+import workbench.db.TableConstraint;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
-import workbench.db.ConstraintReader;
-import workbench.db.ReaderFactory;
 
 /**
  *
@@ -70,17 +75,18 @@ public class Db2ConstraintReaderTest
 
 	@Test
 	public void testGetTableConstraintSql()
+		throws Exception
 	{
 		WbConnection con = Db2TestUtil.getDb2Connection();
 		if (con == null) return;
 
 		String schema = Db2TestUtil.getSchemaName();
-		TableIdentifier person = con.getMetadata().findTable(new TableIdentifier(schema, "PERSON"));
+		TableDefinition person = con.getMetadata().getTableDefinition(new TableIdentifier(schema, "PERSON"));
 		assertNotNull(person);
 
 		ConstraintReader reader = ReaderFactory.getConstraintReader(con.getMetadata());
 		List<TableConstraint> constraints = reader.getTableConstraints(con, person);
-		
+
 		assertNotNull(constraints);
 		assertEquals(1, constraints.size());
 		TableConstraint check = constraints.get(0);

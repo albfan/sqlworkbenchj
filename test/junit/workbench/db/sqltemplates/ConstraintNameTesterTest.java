@@ -22,10 +22,12 @@
  */
 package workbench.db.sqltemplates;
 
+import workbench.WbTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
-import workbench.WbTestCase;
 
 /**
  *
@@ -49,7 +51,7 @@ public class ConstraintNameTesterTest
 	{
 		ConstraintNameTester tester = new ConstraintNameTester("oracle");
 		assertTrue(tester.isSystemConstraintName("SYS_C0013077"));
-		assertFalse(tester.isSystemConstraintName("SYS_C00130779")); // system generated names are exactly 12 characters long
+		assertTrue(tester.isSystemConstraintName("SYS_C00130779"));
 		assertFalse(tester.isSystemConstraintName("PK_SOME_TABLE"));
 		assertFalse(tester.isSystemConstraintName("SYS_MY_PK"));
 	}

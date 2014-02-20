@@ -37,6 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import workbench.interfaces.Restoreable;
+import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -61,15 +62,15 @@ public class SqlGenerationOptionsPanel
 		exportLiteralTypes.setModel(model2);
 		ComboBoxModel model3 = new DefaultComboBoxModel(types.toArray());
 		diffLiteralsType.setModel(model3);
+		tableNameCase.setModel(new DefaultComboBoxModel(GeneratedIdentifierCase.values()));
 	}
 
 	@Override
 	public void restoreSettings()
 	{
-		String genCase = Settings.getInstance().getGeneratedSqlTableCase();
-		if ("lower".equals(genCase)) this.tableNameCase.setSelectedIndex(1);
-		else if ("upper".equals(genCase)) this.tableNameCase.setSelectedIndex(2);
-		else this.tableNameCase.setSelectedIndex(0);
+		GeneratedIdentifierCase genCase = Settings.getInstance().getGeneratedSqlTableCase();
+		this.tableNameCase.setSelectedItem(genCase);
+
 		this.literalTypes.setSelectedItem(Settings.getInstance().getDefaultCopyDateLiteralType());
 		this.exportLiteralTypes.setSelectedItem(Settings.getInstance().getDefaultExportDateLiteralType());
 		this.diffLiteralsType.setSelectedItem(Settings.getInstance().getDefaultDiffDateLiteralType());
@@ -85,7 +86,7 @@ public class SqlGenerationOptionsPanel
 		set.setDoFormatInserts(formatInserts.isSelected());
 		set.setDoFormatDeletes(formatDeletes.isSelected());
 		set.setIncludeOwnerInSqlExport(includeOwner.isSelected());
-		set.setGeneratedSqlTableCase((String)tableNameCase.getSelectedItem());
+		set.setGeneratedSqlTableCase((GeneratedIdentifierCase)tableNameCase.getSelectedItem());
 		set.setDefaultCopyDateLiteralType((String)literalTypes.getSelectedItem());
 		set.setDefaultExportDateLiteralType((String)exportLiteralTypes.getSelectedItem());
 		set.setDefaultDiffDateLiteralType((String)diffLiteralsType.getSelectedItem());

@@ -22,18 +22,23 @@
  */
 package workbench.db.h2database;
 
-import workbench.db.ConnectionMgr;
 import java.util.List;
+
 import workbench.TestUtil;
-import workbench.db.TableConstraint;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import org.junit.AfterClass;
-import org.junit.Test;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
+import workbench.db.ConnectionMgr;
 import workbench.db.ConstraintReader;
 import workbench.db.ReaderFactory;
+import workbench.db.TableConstraint;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -65,10 +70,10 @@ public class H2ConstraintReaderTest
 		String sql = "CREATE TABLE check_test (id integer, constraint positive_id check (id > 42));";
 		TestUtil.executeScript(con, sql);
 
-		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("CHECK_TEST"));
+		TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("CHECK_TEST"));
 		ConstraintReader reader = ReaderFactory.getConstraintReader(con.getMetadata());
 		assertTrue(reader instanceof H2ConstraintReader);
-		
+
 		List<TableConstraint> cons = reader.getTableConstraints(con, tbl);
 		assertNotNull(cons);
 		assertEquals(1, cons.size());

@@ -23,16 +23,21 @@
 package workbench.db.firebird;
 
 import java.util.List;
+
+import workbench.TestUtil;
+
 import workbench.db.ConstraintReader;
+import workbench.db.ReaderFactory;
 import workbench.db.TableConstraint;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
-import workbench.db.ReaderFactory;
 
 /**
  *
@@ -71,9 +76,9 @@ public class FirebirdConstraintReaderTest
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
 		if (con == null) return;
 
-		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("CHECK_TEST"));
+		TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("CHECK_TEST"));
 		ConstraintReader reader = ReaderFactory.getConstraintReader(con.getMetadata());
-		List<TableConstraint> cons = reader.getTableConstraints(con, tbl);
+		List<TableConstraint> cons = reader.getTableConstraints(con, def);
 		assertNotNull(cons);
 		assertEquals(1, cons.size());
 		TableConstraint constraint = cons.get(0);

@@ -55,7 +55,7 @@ public interface ConstraintReader
 	 *
 	 * @return a list of table constraints or an empty list if nothing was found
 	 */
-	List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier table);
+	List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableDefinition table);
 
 	/**
 	 * Rebuild the source of the given constraints.
@@ -77,7 +77,7 @@ public interface ConstraintReader
 		}
 
 		@Override
-		public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier table)
+		public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableDefinition table)
 		{
 			return Collections.emptyList();
 		}

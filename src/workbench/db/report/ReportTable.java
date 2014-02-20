@@ -173,7 +173,7 @@ public class ReportTable
 		if (includeConstraints)
 		{
 			ConstraintReader consReader = ReaderFactory.getConstraintReader(conn.getMetadata());
-			this.tableConstraints = consReader.getTableConstraints(conn, table);
+			this.tableConstraints = consReader.getTableConstraints(conn, def);
 		}
 
 		if (includeGrants)

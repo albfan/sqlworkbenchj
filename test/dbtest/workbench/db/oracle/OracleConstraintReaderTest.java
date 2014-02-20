@@ -22,12 +22,16 @@
  */
 package workbench.db.oracle;
 
+import java.sql.Types;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableConstraint;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -61,7 +65,8 @@ public class OracleConstraintReaderTest
 
 		String sql =
 			"create table person (id integer, constraint positive_id check (id > 0));\n" +
-			"create table foo (id integer constraint foo_nn_id check (id is not null));";
+			"create table foo (id integer constraint foo_nn_id check (id is not null));\n" +
+			"create table foobar (id integer not null);";
 		TestUtil.executeScript(con, sql);
 	}
 
@@ -79,9 +84,9 @@ public class OracleConstraintReaderTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("PERSON"));
+		TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("PERSON"));
 		OracleConstraintReader reader = new OracleConstraintReader(con.getDbId());
-		List<TableConstraint> cons = reader.getTableConstraints(con, tbl);
+		List<TableConstraint> cons = reader.getTableConstraints(con, def);
 		assertNotNull(cons);
 		assertEquals(1, cons.size());
 		TableConstraint constraint = cons.get(0);
@@ -101,6 +106,12 @@ public class OracleConstraintReaderTest
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("FOO"));
 		String source = tbl.getSource(con).toString();
 		assertTrue(source.toLowerCase().contains("constraint foo_nn_id check (id is not null)"));
+
+		tbl = con.getMetadata().findTable(new TableIdentifier("FOOBAR"));
+		source = tbl.getSource(con).toString();
+		System.out.println(source);
+		assertTrue(source.contains("ID  NUMBER   NOT NULL"));
+		assertFalse(source.contains("IS NOT NULL"));
 	}
 
 	@Test
@@ -108,11 +119,16 @@ public class OracleConstraintReaderTest
 	{
 		OracleConstraintReader instance = new OracleConstraintReader("oracle");
 		String definition = "\"MY_COL\" IS NOT NULL";
-		boolean result = instance.isDefaultNNConstraint("SYS_C0013077", definition);
+		ColumnIdentifier myCol = new ColumnIdentifier("MY_COL", Types.VARCHAR);
+		myCol.setIsNullable(false);
+
+		List<ColumnIdentifier> cols =  Collections.singletonList(myCol);
+
+		boolean result = instance.isImplicitConstraint("SYS_C0013077", definition, cols);
 		assertTrue("Default NN not recognized", result);
 
 		definition = "\"MY_COL\" IS NOT NULL OR COL2 IS NOT NULL";
-		result = instance.isDefaultNNConstraint("chk_cols", definition);
+		result = instance.isImplicitConstraint("chk_cols", definition, cols);
 		assertFalse("Default NN not recognized", result);
 	}
 }

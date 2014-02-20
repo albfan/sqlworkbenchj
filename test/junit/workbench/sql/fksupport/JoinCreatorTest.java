@@ -23,16 +23,22 @@
 package workbench.sql.fksupport;
 
 import java.util.List;
-import org.junit.BeforeClass;
-import workbench.resource.Settings;
-import org.junit.AfterClass;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import org.junit.Test;
-import workbench.WbTestCase;
+
 import workbench.util.TableAlias;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
+import static workbench.resource.GeneratedIdentifierCase.*;
 
 /**
  *
@@ -104,7 +110,7 @@ public class JoinCreatorTest
 
 		String sql = "select * from person p join address a join address_type adt on  ";
 		int pos = sql.indexOf("address a") + "address a".length() + 1;
-		Settings.getInstance().setAutoCompletionPasteCase("lower");
+		Settings.getInstance().setAutoCompletionPasteCase(lower);
 		JoinCreator creator = new JoinCreator(sql, pos, conn);
 
 		TableAlias join = creator.getJoinTable();

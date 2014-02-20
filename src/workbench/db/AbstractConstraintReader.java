@@ -183,7 +183,7 @@ public abstract class AbstractConstraintReader
 	 * @return a list of table constraints or an empty list if nothing was found
 	 */
 	@Override
-	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable)
+	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableDefinition table)
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
@@ -198,6 +198,7 @@ public abstract class AbstractConstraintReader
 
 		Savepoint sp = null;
 
+		TableIdentifier baseTable = table.getTable();
 		ResultSet rs = null;
 		try
 		{
@@ -211,7 +212,7 @@ public abstract class AbstractConstraintReader
 			int index = this.getIndexForSchemaParameter();
 			if (index > 0)
 			{
-				String schema = aTable.getRawSchema();
+				String schema = baseTable.getRawSchema();
 				if (StringUtil.isBlank(schema))
 				{
 					schema = dbConnection.getCurrentSchema();
@@ -220,10 +221,10 @@ public abstract class AbstractConstraintReader
 			}
 
 			index = this.getIndexForCatalogParameter();
-			if (index > 0) stmt.setString(index, aTable.getRawCatalog());
+			if (index > 0) stmt.setString(index, baseTable.getRawCatalog());
 
 			index = this.getIndexForTableNameParameter();
-			if (index > 0) stmt.setString(index, aTable.getRawTableName());
+			if (index > 0) stmt.setString(index, baseTable.getRawTableName());
 
 			Pattern p = Pattern.compile("^check\\s+.*", Pattern.CASE_INSENSITIVE);
 			rs = stmt.executeQuery();

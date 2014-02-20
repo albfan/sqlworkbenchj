@@ -23,18 +23,23 @@
 package workbench.db.hsqldb;
 
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ConnectionMgr;
+import workbench.db.ConstraintReader;
+import workbench.db.ReaderFactory;
 import workbench.db.TableConstraint;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.ConnectionMgr;
-import workbench.db.ConstraintReader;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
-import workbench.db.ReaderFactory;
 
 /**
  *
@@ -72,7 +77,7 @@ public class HsqlConstraintReaderTest
 		ConstraintReader reader = ReaderFactory.getConstraintReader(conn.getMetadata());
 		assertTrue(reader instanceof HsqlConstraintReader);
 		HsqlConstraintReader hsqlReader = (HsqlConstraintReader)reader;
-		TableIdentifier tbl = new TableIdentifier("CONS_TEST");
+		TableDefinition tbl = conn.getMetadata().getTableDefinition(new TableIdentifier("CONS_TEST"));
 		List<TableConstraint> constraints = reader.getTableConstraints(conn, tbl);
 		assertEquals(2, constraints.size());
 		TableConstraint minValue = constraints.get(0);

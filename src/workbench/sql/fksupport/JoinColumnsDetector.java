@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
 import workbench.db.DependencyNode;
@@ -66,7 +67,7 @@ public class JoinColumnsDetector
 		Map<String, String> columns = getJoinColumns();
 		if (columns.isEmpty()) return "";
 
-		String and = Settings.getInstance().getFormatterUpperCaseKeywords() ? " AND " : " and ";
+		String and = Settings.getInstance().getFormatterKeywordsCase() == GeneratedIdentifierCase.upper ? " AND " : " and ";
 		StringBuilder result = new StringBuilder(20);
 		boolean first = true;
 		for (Map.Entry<String, String> entry : columns.entrySet())
@@ -136,24 +137,22 @@ public class JoinColumnsDetector
 	private String getColumnName(String colname)
 	{
 		if (colname == null) return colname;
-		String result;
 
-		result = connection.getMetadata().quoteObjectname(colname);
+		String result= connection.getMetadata().quoteObjectname(colname);
 
 		if (connection.getMetadata().isQuoted(result)) return result;
 
-		String pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
-		if ("lower".equalsIgnoreCase(pasteCase))
+		GeneratedIdentifierCase pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
+		switch (pasteCase)
 		{
-			result = colname.toLowerCase();
-		}
-		else if ("upper".equalsIgnoreCase(pasteCase))
-		{
-			result = colname.toUpperCase();
-		}
-		else
-		{
-			result = colname;
+			case lower:
+				result = colname.toLowerCase();
+				break;
+			case upper:
+				result = colname.toUpperCase();
+				break;
+			default:
+				result = colname;
 		}
 		return result;
 	}

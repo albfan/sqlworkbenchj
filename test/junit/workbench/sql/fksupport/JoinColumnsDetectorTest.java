@@ -22,15 +22,20 @@
  */
 package workbench.sql.fksupport;
 
-import org.junit.AfterClass;
-import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
+
 import workbench.util.TableAlias;
+
+import org.junit.AfterClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
+import static workbench.resource.GeneratedIdentifierCase.*;
 
 /**
  *
@@ -86,7 +91,7 @@ public class JoinColumnsDetectorTest
 		TableAlias history = new TableAlias("address_history ah");
 		TableAlias adt = new TableAlias("address_type adt");
 		JoinColumnsDetector detector = new JoinColumnsDetector(conn, person, address);
-		Settings.getInstance().setAutoCompletionPasteCase("lower");
+		Settings.getInstance().setAutoCompletionPasteCase(lower);
 		String join = detector.getJoinCondition();
 		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", join.trim());
 

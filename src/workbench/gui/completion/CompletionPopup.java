@@ -55,6 +55,7 @@ import javax.swing.border.EtchedBorder;
 import workbench.interfaces.ResultSetter;
 import workbench.log.LogMgr;
 import workbench.resource.ColumnSortType;
+import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
@@ -74,6 +75,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 import workbench.util.WbDateFormatter;
+
+import static workbench.resource.GeneratedIdentifierCase.*;
 
 /**
  * @author  Thomas Kellerer
@@ -295,7 +298,7 @@ public class CompletionPopup
 	{
 		if (value == null) return value;
 		String result;
-		String pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
+		GeneratedIdentifierCase pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
 
 		boolean isKeyword = context.getAnalyzer().getContext() == BaseAnalyzer.CONTEXT_KW_LIST;
 		QuoteHandler quoteHandler = context.getAnalyzer().getQuoteHandler();
@@ -306,11 +309,11 @@ public class CompletionPopup
 			{
 				result = value;
 			}
-			else if ("lower".equalsIgnoreCase(pasteCase))
+			else if (pasteCase == lower)
 			{
 				result = value.toLowerCase();
 			}
-			else if ("upper".equalsIgnoreCase(pasteCase))
+			else if (pasteCase == upper)
 			{
 				result = value.toUpperCase();
 			}

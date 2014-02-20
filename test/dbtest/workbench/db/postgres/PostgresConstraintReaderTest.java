@@ -31,6 +31,7 @@ import workbench.WbTestCase;
 import workbench.db.ConstraintReader;
 import workbench.db.ReaderFactory;
 import workbench.db.TableConstraint;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -82,11 +83,12 @@ public class PostgresConstraintReaderTest
 
 	@Test
 	public void testGetConstraints()
+		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null) return;
 
-		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("check_test"));
+		TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("check_test"));
 		ConstraintReader reader = ReaderFactory.getConstraintReader(con.getMetadata());
 		List<TableConstraint> cons = reader.getTableConstraints(con, tbl);
 		assertNotNull(cons);

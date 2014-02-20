@@ -28,12 +28,16 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import workbench.db.AbstractConstraintReader;
-import workbench.db.TableConstraint;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.AbstractConstraintReader;
+import workbench.db.TableConstraint;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -67,7 +71,7 @@ public class FirstSqlConstraintReader
 	}
 
 	@Override
-	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable)
+	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableDefinition def)
 	{
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -78,12 +82,12 @@ public class FirstSqlConstraintReader
 		}
 
 		List<TableConstraint> result = CollectionUtil.arrayList();
-
+		TableIdentifier table = def.getTable();
 		try
 		{
 			pstmt = dbConnection.getSqlConnection().prepareStatement(SQL);
-			pstmt.setString(1, aTable.getSchema());
-			pstmt.setString(2, aTable.getTableName());
+			pstmt.setString(1, table.getSchema());
+			pstmt.setString(2, table.getTableName());
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -94,7 +98,7 @@ public class FirstSqlConstraintReader
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("FirstSqlMetadata.getTableConstraints()", "Could not retrieve table constraints for " + aTable.getTableExpression(), e);
+			LogMgr.logError("FirstSqlMetadata.getTableConstraints()", "Could not retrieve table constraints for " + table.getTableExpression(), e);
 		}
 		finally
 		{

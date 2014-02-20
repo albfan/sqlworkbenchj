@@ -311,7 +311,7 @@ public class TableSourceBuilder
 
 		appendColumnDefinitions(result, columns, meta, columnConstraints, COL_INDENT);
 
-		List<TableConstraint> constraints = consReader.getTableConstraints(dbConnection, table);
+		List<TableConstraint> constraints = consReader.getTableConstraints(dbConnection, new TableDefinition(table, columns));
 		String cons = consReader.getConstraintSource(constraints, COL_INDENT);
 		if (StringUtil.isNonEmpty(cons))
 		{

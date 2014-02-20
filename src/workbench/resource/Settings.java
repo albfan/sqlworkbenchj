@@ -799,14 +799,24 @@ public class Settings
 		setProperty("workbench.sql.formatter.select.columnsperline", value);
 	}
 
-	public boolean getFormatterLowercaseFunctions()
+	public GeneratedIdentifierCase getFormatterFunctionCase()
 	{
-		return getBoolProperty("workbench.sql.formatter.functions.lowercase", false);
+		String value = getProperty("workbench.sql.formatter.functions.lowercase", null);
+		if ("true".equals(value))
+		{
+			return GeneratedIdentifierCase.lower;
+		}
+		if ("false".equals(value))
+		{
+			return GeneratedIdentifierCase.lower;
+		}
+		return getIdentifierCase("workbench.sql.formatter.functions.case", GeneratedIdentifierCase.upper);
 	}
 
-	public void setFormatterLowercaseFunctions(boolean flag)
+	public void setFormatterFunctionCase(GeneratedIdentifierCase funcCase)
 	{
-		setProperty("workbench.sql.formatter.functions.lowercase", flag);
+		removeProperty("workbench.sql.formatter.functions.lowercase");
+		setIdentifierCase("workbench.sql.formatter.functions.case", funcCase);
 	}
 
 	public boolean getFormatterSubselectInNewLine()
@@ -819,14 +829,30 @@ public class Settings
 		setProperty("workbench.sql.formatter.subselect.newline", flag);
 	}
 
-	public boolean getFormatterUpperCaseKeywords()
+	public void setFormatterKeywordsCase(GeneratedIdentifierCase idCase)
 	{
-		return getBoolProperty("workbench.sql.formatter.keywords.uppercase", true);
+		removeProperty("workbench.sql.formatter.keywords.uppercase");
+		setIdentifierCase("workbench.sql.formatter.keywords.case", idCase);
 	}
 
-	public void setFormatterUpperCaseKeywords(boolean flag)
+	public GeneratedIdentifierCase getFormatterKeywordsCase()
 	{
-		setProperty("workbench.sql.formatter.keywords.uppercase", flag);
+		String value = getProperty("workbench.sql.formatter.keywords.uppercase", null);
+		if ("true".equals(value))
+		{
+			return GeneratedIdentifierCase.upper;
+		}
+		return getIdentifierCase("workbench.sql.formatter.keywords.case", GeneratedIdentifierCase.upper);
+	}
+
+	public GeneratedIdentifierCase getFormatterIdentifierCase()
+	{
+		return getIdentifierCase("workbench.sql.formatter.identifier.case", GeneratedIdentifierCase.asIs);
+	}
+
+	public void setFormatterIdentifierCase(GeneratedIdentifierCase identifierCase)
+	{
+		setIdentifierCase("workbench.sql.formatter.identifier.case", identifierCase);
 	}
 
 	public boolean getFormatterAddSpaceAfterComma()
@@ -876,12 +902,12 @@ public class Settings
 
 	public void setFormatterJoinWrapStyle(JoinWrapStyle style)
 	{
-		setProperty("workbench.sql.formatter.join.condition.wrapstyle", style.toString());
+		setProperty("workbench.sql.formatter.join.condition.wrapstyle", style.name());
 	}
 
 	public JoinWrapStyle getFormatterJoinWrapStyle()
 	{
-		String style = getProperty("workbench.sql.formatter.join.condition.wrapstyle", JoinWrapStyle.onlyMultiple.toString());
+		String style = getProperty("workbench.sql.formatter.join.condition.wrapstyle", JoinWrapStyle.onlyMultiple.name());
 		try
 		{
 			return JoinWrapStyle.valueOf(style);
@@ -1995,17 +2021,39 @@ public class Settings
 		setProperty("workbench.editor.nowordsep", noSep);
 	}
 
-	public void setAutoCompletionPasteCase(String value)
+	public void setAutoCompletionPasteCase(GeneratedIdentifierCase value)
 	{
-		if (value != null)
+		setIdentifierCase("workbench.editor.autocompletion.paste.case", value);
+	}
+
+	private void setIdentifierCase(String property, GeneratedIdentifierCase value)
+	{
+		if (value == GeneratedIdentifierCase.lower || value == GeneratedIdentifierCase.upper)
 		{
-			if (value.toLowerCase().startsWith("lower")) setProperty("workbench.editor.autocompletion.paste.case", "lower");
-			else if (value.toLowerCase().startsWith("upper")) setProperty("workbench.editor.autocompletion.paste.case", "upper");
-			else setProperty("workbench.editor.autocompletion.paste.case", null);
+			setProperty(property, value.name());
 		}
 		else
 		{
-			setProperty("workbench.editor.autocompletion.paste.case", null);
+			setProperty(property, null);
+		}
+	}
+
+	public GeneratedIdentifierCase getAutoCompletionPasteCase()
+	{
+		return getIdentifierCase("workbench.editor.autocompletion.paste.case", GeneratedIdentifierCase.asIs);
+	}
+
+	private GeneratedIdentifierCase getIdentifierCase(String property, GeneratedIdentifierCase defaultValue)
+	{
+		String value = getProperty(property, null);
+		if (value == null) return defaultValue;
+		try
+		{
+			return GeneratedIdentifierCase.valueOf(value);
+		}
+		catch (Exception ex)
+		{
+			return GeneratedIdentifierCase.asIs;
 		}
 	}
 
@@ -2022,27 +2070,9 @@ public class Settings
 		}
 	}
 
-	public void setAutoCompletionColumnSort(String sort)
-	{
-
-		try
-		{
-			setAutoCompletionColumnSort(ColumnSortType.valueOf(sort));
-		}
-		catch (Exception e)
-		{
-			setAutoCompletionColumnSort(ColumnSortType.name);
-		}
-	}
-
 	public void setAutoCompletionColumnSort(ColumnSortType sort)
 	{
-		setProperty("workbench.editor.autocompletion.paste.sort", (sort == ColumnSortType.position ? "position" : "name"));
-	}
-
-	public String getAutoCompletionPasteCase()
-	{
-		return getProperty("workbench.editor.autocompletion.paste.case", null);
+		setProperty("workbench.editor.autocompletion.paste.sort", sort.name());
 	}
 
 	public boolean getCloseAutoCompletionWithSearch()
@@ -2726,23 +2756,14 @@ public class Settings
 	}
 	// </editor-fold>
 
-	public void setGeneratedSqlTableCase(String value)
+	public void setGeneratedSqlTableCase(GeneratedIdentifierCase value)
 	{
-		if (value != null)
-		{
-			if (value.toLowerCase().startsWith("lower")) setProperty("workbench.sql.generate.table.case", "lower");
-			else if (value.toLowerCase().startsWith("upper")) setProperty("workbench.sql.generate.table.case", "upper");
-			else setProperty("workbench.sql.generate.table.case", "original");
-		}
-		else
-		{
-			setProperty("workbench.sql.generate.table.case", "original");
-		}
+		setIdentifierCase("workbench.sql.generate.table.case", value);
 	}
 
-	public String getGeneratedSqlTableCase()
+	public GeneratedIdentifierCase getGeneratedSqlTableCase()
 	{
-		return getProperty("workbench.sql.generate.table.case", getAutoCompletionPasteCase());
+		return getIdentifierCase("workbench.sql.generate.table.case", GeneratedIdentifierCase.asIs);
 	}
 
 	public int getInMemoryScriptSizeThreshold()

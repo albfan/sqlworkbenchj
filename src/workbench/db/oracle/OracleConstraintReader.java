@@ -24,15 +24,20 @@ package workbench.db.oracle;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
 import java.util.List;
+
+import workbench.log.LogMgr;
+
 import workbench.db.AbstractConstraintReader;
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableConstraint;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -87,11 +92,13 @@ public class OracleConstraintReader
 	}
 
 	@Override
-	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier table)
+	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableDefinition def)
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
 		List<TableConstraint> result = CollectionUtil.arrayList();
+
+		TableIdentifier table = def.getTable();
 
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
@@ -112,8 +119,7 @@ public class OracleConstraintReader
 
 				if (constraint != null)
 				{
-					// NOT NULL constraints do not need to be taken into account
-					if (isDefaultNNConstraint(name, constraint)) continue;
+					if (isImplicitConstraint(name, constraint, def.getColumns())) continue;
 
 					String expression = "(" + constraint + ")";
 					if ("DISABLED".equalsIgnoreCase(status))
@@ -142,21 +148,14 @@ public class OracleConstraintReader
 	}
 
 	/**
-	 * Checks if the constraint definition is a "default" Not null definition
-	 * as created by Oracle. Those constraints will be included in the column
-	 * definition already and do not need to be returned.
-	 * but a definition like COL_1 IS NOT NULL OR COL_2 IS NOT NULL must
-	 * not be treated as a "default" constraint.
-	 *
-	 * A "default" NN constraint is assumed if an identifier is
-	 * immediately followed by the keyword IS NOT NULL and no further
-	 * definitions exist.
+	 * Checks if the constraint definition is a valid Not null definition that should be displayed.
 	 */
-	protected boolean isDefaultNNConstraint(String name, String definition)
+	protected boolean isImplicitConstraint(String name, String definition, List<ColumnIdentifier> columns)
 	{
-		// Not null constrainst can be defined as check constraints as well
-		// in that case the constraint will have a name that is not system generated
+		// Not null constrainst can also be defined as check constraints.
+		// Tn that case the constraint will have a name that is not system generated
 		// and it needs to be included because those columns are not reported as NOT NULL
+		// e.g. create table foo (id integer constraint id_not_null check (id is not null));
 		if (!isSystemConstraintName(name)) return false;
 
 		try
@@ -166,6 +165,7 @@ public class OracleConstraintReader
 			if (tok == null) return false;
 
 			if (!tok.isIdentifier()) return false;
+			String colName = SqlUtil.removeObjectQuotes(tok.getText());
 
 			// If no further tokens exist, this cannot be a not null constraint
 			tok = lexer.getNextToken(false, false);
@@ -174,7 +174,19 @@ public class OracleConstraintReader
 			SQLToken tok2 = lexer.getNextToken(false, false);
 			if (tok2 == null)
 			{
-				return "IS NOT NULL".equalsIgnoreCase(tok.getContents());
+				if ("IS NOT NULL".equalsIgnoreCase(tok.getContents()))
+				{
+					if (isNullable(columns, colName))
+					{
+						// the colum is marked as nullable but a not null check constraint exists
+						// this constraint should be displayed
+						return false;
+					}
+					// the column is already marked as not null
+					// so the constraint can be ignored
+					return true;
+				}
+				return false;
 			}
 			else
 			{
@@ -187,4 +199,15 @@ public class OracleConstraintReader
 		}
 	}
 
+	private boolean isNullable(List<ColumnIdentifier> columns, String colname)
+	{
+		for (ColumnIdentifier col : columns)
+		{
+			if (col.getColumnName().equalsIgnoreCase(colname))
+			{
+				return col.isNullable();
+			}
+		}
+		return true;
+	}
 }

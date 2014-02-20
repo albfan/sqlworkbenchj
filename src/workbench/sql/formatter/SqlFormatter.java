@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
 import workbench.sql.CommandMapper;
@@ -37,6 +38,8 @@ import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+
+import static workbench.resource.GeneratedIdentifierCase.*;
 
 /**
  * A class to format (pretty-print) SQL statements.
@@ -99,13 +102,13 @@ public class SqlFormatter
 	private static final String NL = "\n";
 	private boolean addColumnCommentForInsert;
 	private boolean newLineForSubSelects;
-	private boolean lowerCaseFunctions;
-	private boolean upperCaseKeywords = true;
+	private GeneratedIdentifierCase keywordCase = GeneratedIdentifierCase.upper;
+	private GeneratedIdentifierCase identifierCase = GeneratedIdentifierCase.asIs;
+	private GeneratedIdentifierCase functionCase = GeneratedIdentifierCase.lower;
 	private boolean addSpaceAfterComma;
 	private boolean commaAfterLineBreak;
 	private boolean addSpaceAfterLineBreakComma;
 	private boolean indentInsert = true;
-	private String identifierCase = "asis";
 	private JoinWrapStyle joinWrapping = JoinWrapStyle.onlyMultiple;
 	private String dbId;
 	private char catalogSeparator = '.';
@@ -148,10 +151,10 @@ public class SqlFormatter
 		}
 		maxSubselectLength = maxLength;
 		dbFunctions = CollectionUtil.caseInsensitiveSet();
-		lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
+		functionCase = Settings.getInstance().getFormatterFunctionCase();
 		newLineForSubSelects = Settings.getInstance().getFormatterSubselectInNewLine();
 		addColumnCommentForInsert = Settings.getInstance().getFormatterAddColumnNameComment();
-		upperCaseKeywords = Settings.getInstance().getFormatterUpperCaseKeywords();
+		keywordCase = Settings.getInstance().getFormatterKeywordsCase();
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
 		commaAfterLineBreak = Settings.getInstance().getFormatterCommaAfterLineBreak();
 		addSpaceAfterLineBreakComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
@@ -161,7 +164,7 @@ public class SqlFormatter
 		setDbId(dbId);
 	}
 
-	public void setIdentifierCase(String idCase)
+	public void setIdentifierCase(GeneratedIdentifierCase idCase)
 	{
 		this.identifierCase = idCase;
 	}
@@ -235,14 +238,14 @@ public class SqlFormatter
 		addColumnCommentForInsert = flag;
 	}
 
-	public void setUseUpperCaseKeywords(boolean flag)
+	public void setKeywordCase(GeneratedIdentifierCase kwCase)
 	{
-		upperCaseKeywords = flag;
+		this.keywordCase = kwCase;
 	}
 
-	public void setUseLowerCaseFunctions(boolean flag)
+	public void setFunctionCase(GeneratedIdentifierCase funcCase)
 	{
-		this.lowerCaseFunctions = flag;
+		this.functionCase = funcCase;
 	}
 
 	public String getLineEnding()
@@ -401,28 +404,35 @@ public class SqlFormatter
 		if (t == null) return;
 		String text = t.getText();
 
-		if (this.lowerCaseFunctions && this.dbFunctions.contains(text))
+		if (this.dbFunctions.contains(text))
 		{
-			text = text.toLowerCase();
-		}
-		else if (this.isKeyword(text))
-		{
-			if (upperCaseKeywords)
+			if (functionCase == GeneratedIdentifierCase.lower)
+			{
+				text = text.toLowerCase();
+			}
+			else if (functionCase == GeneratedIdentifierCase.upper)
 			{
 				text = text.toUpperCase();
 			}
-			else
+		}
+		else if (this.isKeyword(text))
+		{
+			if (keywordCase == GeneratedIdentifierCase.upper)
+			{
+				text = text.toUpperCase();
+			}
+			else if (keywordCase == GeneratedIdentifierCase.lower)
 			{
 				text = text.toLowerCase();
 			}
 		}
 		else if (t.isIdentifier() && !isQuotedIdentifier(text))
 		{
-			if ("lower".equalsIgnoreCase(identifierCase))
+			if (identifierCase == lower)
 			{
 				text = text.toLowerCase();
 			}
-			else if ("lower".equalsIgnoreCase(identifierCase))
+			else if (identifierCase == upper)
 			{
 				text = text.toUpperCase();
 			}
@@ -1045,8 +1055,9 @@ public class SqlFormatter
 	{
 		SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, maxSubLength, this.dbId);
 		f.setNewLineForSubselects(this.newLineForSubSelects);
-		f.setUseLowerCaseFunctions(this.lowerCaseFunctions);
-		f.setUseUpperCaseKeywords(this.upperCaseKeywords);
+		f.setFunctionCase(this.functionCase);
+		f.setIdentifierCase(this.identifierCase);
+		f.setKeywordCase(this.keywordCase);
 		f.setAddColumnNameComment(this.addColumnCommentForInsert);
 		f.setAddSpaceAfterCommInList(this.addSpaceAfterComma);
 		f.setAddSpaceAfterLineBreakComma(this.addSpaceAfterLineBreakComma);

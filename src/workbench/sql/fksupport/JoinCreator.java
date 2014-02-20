@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
@@ -131,7 +132,7 @@ public class JoinCreator
 
 			if (currentWord == null || !currentWord.equalsIgnoreCase("on"))
 			{
-				String on = Settings.getInstance().getFormatterUpperCaseKeywords() ? "ON " : "on ";
+				String on = Settings.getInstance().getFormatterKeywordsCase() == GeneratedIdentifierCase.upper ? "ON " : "on ";
 				condition = on + condition;
 			}
 			if (!whiteSpaceAtLeft)

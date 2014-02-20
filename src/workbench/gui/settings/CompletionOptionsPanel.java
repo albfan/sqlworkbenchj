@@ -37,6 +37,7 @@ import javax.swing.SwingConstants;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ColumnSortType;
+import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -68,32 +69,15 @@ public class CompletionOptionsPanel
 	@Override
 	public void restoreSettings()
 	{
-		String[] pasteCase = new String[] {
-			ResourceMgr.getString("LblLowercase"),
-			ResourceMgr.getString("LblUppercase"),
-			ResourceMgr.getString("LblAsIs")
-		};
-		completionPasteCase.setModel(new DefaultComboBoxModel(pasteCase));
-		String paste = Settings.getInstance().getAutoCompletionPasteCase();
-		if ("lower".equals(paste)) this.completionPasteCase.setSelectedIndex(0);
-		else if ("upper".equals(paste)) this.completionPasteCase.setSelectedIndex(1);
-		else this.completionPasteCase.setSelectedIndex(2);
 
-		String[] sortItems = new String[] {
-			ResourceMgr.getString("LblSortPastColName"),
-			ResourceMgr.getString("LblSortPastColPos")
-		};
-		completionColumnSort.setModel(new DefaultComboBoxModel(sortItems));
+		completionPasteCase.setModel(new DefaultComboBoxModel(GeneratedIdentifierCase.values()));
+		GeneratedIdentifierCase idCase = Settings.getInstance().getAutoCompletionPasteCase();
+		completionPasteCase.setSelectedItem(idCase);
 
+		completionColumnSort.setModel(new DefaultComboBoxModel(ColumnSortType.values()));
 		ColumnSortType sort = Settings.getInstance().getAutoCompletionColumnSortType();
-		if (sort == ColumnSortType.position)
-		{
-			this.completionColumnSort.setSelectedIndex(1);
-		}
-		else
-		{
-			this.completionColumnSort.setSelectedIndex(0);
-		}
+		this.completionColumnSort.setSelectedItem(sort);
+
 		closePopup.setSelected(Settings.getInstance().getCloseAutoCompletionWithSearch());
 		filterSearch.setSelected(GuiSettings.getFilterCompletionSearch());
 		partialMatch.setSelected(GuiSettings.getPartialCompletionSearch());
@@ -112,30 +96,11 @@ public class CompletionOptionsPanel
 	public void saveSettings()
 	{
 		Settings set = Settings.getInstance();
-		int index = this.completionPasteCase.getSelectedIndex();
-		if (index == 0)
-		{
-			set.setAutoCompletionPasteCase("lower");
-		}
-		else if (index == 1)
-		{
-			set.setAutoCompletionPasteCase("upper");
-		}
-		else
-		{
-			set.setAutoCompletionPasteCase(null);
-		}
-
+		GeneratedIdentifierCase genCase = (GeneratedIdentifierCase)this.completionPasteCase.getSelectedItem();
+		set.setAutoCompletionPasteCase(genCase);
 		set.setCloseAutoCompletionWithSearch(closePopup.isSelected());
-		index = completionColumnSort.getSelectedIndex();
-		if (index == 1)
-		{
-			set.setAutoCompletionColumnSort(ColumnSortType.position);
-		}
-		else
-		{
-			set.setAutoCompletionColumnSort(ColumnSortType.name);
-		}
+		ColumnSortType sort = (ColumnSortType)completionColumnSort.getSelectedItem();
+		set.setAutoCompletionColumnSort(sort);
 		GuiSettings.setFilterCompletionSearch(filterSearch.isSelected());
 		GuiSettings.setPartialCompletionSearch(partialMatch.isSelected());
 		GuiSettings.setSortCompletionColumns(sortColumns.isSelected());

@@ -25,6 +25,7 @@ package workbench.sql.formatter;
 import java.util.List;
 
 import workbench.WbTestCase;
+import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
 import workbench.util.CollectionUtil;
@@ -128,7 +129,7 @@ public class SqlFormatterTest
 			"       (foo(a) - foo(b)) as total \n" +
 			"FROM foobar";
 		SqlFormatter f = new SqlFormatter(sql, 150);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT a,\n" +
@@ -153,7 +154,7 @@ public class SqlFormatterTest
 		String sql = "select * from foo join bar on foo.id = bar.id outer apply fn_foo (bar.id) st";
 		SqlFormatter f = new SqlFormatter(sql, 150, "microsoft_sql_server");
 		f.setColumnsPerInsert(1);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT *\n" +
@@ -170,7 +171,7 @@ public class SqlFormatterTest
 		String sql = "select 1, (select foo from bar where bar.id = foobar.id) as foo, col2, col3 from foobar";
 		SqlFormatter f = new SqlFormatter(sql, 150);
 		f.setColumnsPerInsert(1);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT 1,\n" +
@@ -197,7 +198,7 @@ public class SqlFormatterTest
 			"from foobar";
 		SqlFormatter f = new SqlFormatter(sql, 10);
 		f.setColumnsPerInsert(1);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT\n" +
@@ -225,7 +226,7 @@ public class SqlFormatterTest
 			"       col3 from foo";
 		SqlFormatter f = new SqlFormatter(sql, 10);
 		f.setColumnsPerInsert(1);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT\n" +
@@ -250,7 +251,7 @@ public class SqlFormatterTest
 			"from someTable";
 		SqlFormatter f = new SqlFormatter(sql, 10);
 		f.setColumnsPerInsert(1);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"INSERT INTO foobar\n" +
@@ -275,7 +276,7 @@ public class SqlFormatterTest
 	{
 		String sql = "select b.id from bar b group by b.groupid having count(*) = (select count(*) from foo f where f.id = b.groupid);";
 		SqlFormatter f = new SqlFormatter(sql, 10);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT b.id\n" +
@@ -290,7 +291,7 @@ public class SqlFormatterTest
 
 		sql = "select b.id from bar b group by b.groupid having count(*) = 2";
 		f = new SqlFormatter(sql, 10);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		formatted = f.getFormattedSql();
 		expected =
 			"SELECT b.id\n" +
@@ -303,7 +304,7 @@ public class SqlFormatterTest
 
 		sql = "select b.id from bar b group by b.groupid having count(distinct id) = 2 and count(foo) = 42";
 		f = new SqlFormatter(sql, 10);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		formatted = f.getFormattedSql();
 		expected =
 			"SELECT b.id\n" +
@@ -503,7 +504,7 @@ public class SqlFormatterTest
 		try
 		{
 			Settings.getInstance().setFormatterMaxColumnsInInsert(10);
-			String formatted = f.getFormattedSql().toString();
+			String formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
 			assertEquals("SELECT in VALUES not formatted", expected, formatted);
 		}
@@ -1122,7 +1123,7 @@ public class SqlFormatterTest
 	{
 		String sql = "SELECT right(name,5) FROM person";
 		SqlFormatter f = new SqlFormatter(sql);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		f.addDBFunctions(CollectionUtil.treeSet("RIGHT", "LEFT"));
 		String formatted = f.getFormattedSql();
 //		System.out.println("*******\n" + formatted + "\n**********");
@@ -1260,6 +1261,7 @@ public class SqlFormatterTest
 							"       nvl((SELECT 1 FROM td_cdma_ip WHERE tmp.src_ip BETWEEN ip_fromip AND ip_endip),0) isNew\n" +
 							"FROM tmp";
 		f = new SqlFormatter(sql);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("nvl"));
 		formatted = f.getFormattedSql();
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
@@ -1280,7 +1282,7 @@ public class SqlFormatterTest
 							"       name\n" +
 							"FROM foo\n" +
 							"WHERE id BETWEEN 1 AND 10000\nWITH CHECK OPTION";
-		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
+//		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 
 		// Test multiple CTEs in a single statement
@@ -1350,6 +1352,7 @@ public class SqlFormatterTest
 	{
 		String sql = "select row_number() over (order by id) from table";
 		SqlFormatter f = new SqlFormatter(sql);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT row_number() OVER (ORDER BY id)\nFROM TABLE";
 //		System.out.println("**************\n" + formatted + "\n------------------\n" + expected + "\n*************");
@@ -1382,6 +1385,7 @@ public class SqlFormatterTest
 			"         e.empno";
 
 		SqlFormatter f = new SqlFormatter(sql);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("nvl"));
 		String formatted = f.getFormattedSql();
 //		System.out.println("************** result:\n" + formatted + "\n********** expected:\n" + expected);
@@ -1399,16 +1403,16 @@ public class SqlFormatterTest
 			"where x = 1\n" +
 			"and   y = 2";
 		SqlFormatter f = new SqlFormatter(sql);
-		f.setUseLowerCaseFunctions(true);
-		f.setUseUpperCaseKeywords(false);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
+		f.setKeywordCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 //		System.out.println("**************\n" + formatted + "\n--------------- expected: \n" + expected + "\n**********");
 		assertEquals(expected, formatted);
 
 		sql = "SELECT * FROM person WHERE LOWER(firstname) LIKE 'arthur%'";
 		f = new SqlFormatter(sql, 60, "oracle");
-		f.setUseLowerCaseFunctions(true);
-		f.setUseUpperCaseKeywords(false);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
+		f.setKeywordCase(GeneratedIdentifierCase.lower);
 
 		formatted = f.getFormattedSql();
 		expected = "select *\nfrom person\nwhere lower(firstname) like 'arthur%'";
@@ -1745,7 +1749,7 @@ public class SqlFormatterTest
 		String sql = "select col1, MAX(col2) from theTable group by col1;";
 		String expected = "SELECT col1,\n       max(col2)\nFROM theTable\nGROUP BY col1;";
 		SqlFormatter f = new SqlFormatter(sql, 100);
-		f.setUseLowerCaseFunctions(true);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		CharSequence formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
