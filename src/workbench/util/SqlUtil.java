@@ -1098,7 +1098,14 @@ public class SqlUtil
 						{
 							currentTable.append(' ');
 						}
-						currentTable.append(s);
+
+						// if we hit an AS keyword but have not current table name
+						// then this is most probably a derived table: select * from (select x from y) as t
+						// in that case the as must not be added to the table name returned
+						if (! ("AS".equalsIgnoreCase(s) && currentTable.length() == 0) )
+						{
+							currentTable.append(s);
+						}
 					}
 				}
 				t = lex.getNextToken(false, false);

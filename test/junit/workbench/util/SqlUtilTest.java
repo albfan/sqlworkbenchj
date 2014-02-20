@@ -865,8 +865,9 @@ public class SqlUtilTest
 			"  join (select * from foo2 ) as t2 \n" +
 			"    on (t1.id = t2.id)";
 		l = SqlUtil.getTables(sql, false);
-		System.out.println(l);
-
+		assertEquals(2, l.size());
+		assertEquals("t1", l.get(0));
+		assertEquals("t2", l.get(1));
 	}
 
 	@Test

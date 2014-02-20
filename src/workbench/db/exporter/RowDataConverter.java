@@ -129,6 +129,8 @@ public abstract class RowDataConverter
 	protected boolean fixedHeader;
 	protected boolean returnNulls;
 
+	private DataExporter exporter;
+
 	public RowDataConverter()
 	{
 		defaultDateFormatter = new WbDateFormatter(Settings.getInstance().getDefaultDateFormat());
@@ -137,6 +139,11 @@ public abstract class RowDataConverter
 		defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
 	}
 
+	public void setDataExporter(DataExporter exporter)
+	{
+		this.exporter = exporter;
+	}
+	
 	/**
 	 * Returns the display string for <tt>null</tt> values.
 	 *
