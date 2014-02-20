@@ -105,6 +105,7 @@ public class SqlFormatter
 	private boolean commaAfterLineBreak;
 	private boolean addSpaceAfterLineBreakComma;
 	private boolean indentInsert = true;
+	private String identifierCase = "asis";
 	private JoinWrapStyle joinWrapping = JoinWrapStyle.onlyMultiple;
 	private String dbId;
 	private char catalogSeparator = '.';
@@ -156,7 +157,13 @@ public class SqlFormatter
 		addSpaceAfterLineBreakComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
 		joinWrapping = Settings.getInstance().getFormatterJoinWrapStyle();
 		indentInsert = Settings.getInstance().getFormatterIndentInsert();
+		identifierCase = Settings.getInstance().getAutoCompletionPasteCase();
 		setDbId(dbId);
+	}
+
+	public void setIdentifierCase(String idCase)
+	{
+		this.identifierCase = idCase;
 	}
 
 	public void setColumnsPerInsert(int cols)
@@ -393,7 +400,6 @@ public class SqlFormatter
 	{
 		if (t == null) return;
 		String text = t.getText();
-		String pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
 
 		if (this.lowerCaseFunctions && this.dbFunctions.contains(text))
 		{
@@ -412,11 +418,11 @@ public class SqlFormatter
 		}
 		else if (t.isIdentifier() && !isQuotedIdentifier(text))
 		{
-			if ("lower".equalsIgnoreCase(pasteCase))
+			if ("lower".equalsIgnoreCase(identifierCase))
 			{
 				text = text.toLowerCase();
 			}
-			else if ("lower".equalsIgnoreCase(pasteCase))
+			else if ("lower".equalsIgnoreCase(identifierCase))
 			{
 				text = text.toUpperCase();
 			}
@@ -2299,14 +2305,7 @@ public class SqlFormatter
 
 	private boolean isQuotedIdentifier(String name)
 	{
-		boolean isQuoted = SqlUtil.isQuotedIdentifier(name);
-		if (!isQuoted && dbId != null && dbId.contains("microsoft"))
-		{
-			// workaround the stupid Microsoft usage of brackets
-			if (name.startsWith("[") && name.endsWith("]")) return true;
-		}
-		return isQuoted;
-
+		return SqlUtil.isQuotedIdentifier(name);
 	}
 
 	/**
@@ -2389,7 +2388,7 @@ public class SqlFormatter
 				CharSequence select = this.sql.subSequence(t.getCharBegin(), sql.length());
 				SqlFormatter f = new SqlFormatter(select, this.dbId);
 				String formattedSelect = f.getFormattedSql();
-				appendText(formattedSelect.toString());
+				appendText(formattedSelect);
 				return null;
 			}
 		}
