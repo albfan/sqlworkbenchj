@@ -858,6 +858,15 @@ public class SqlUtilTest
 		assertEquals(2, l.size());
 		assertEquals("\"table one\" AS t1", l.get(0));
 		assertEquals("\"table two\" t2", l.get(1));
+
+		sql =
+			"select * " +
+			"from (select * from foo) as t1 \n" +
+			"  join (select * from foo2 ) as t2 \n" +
+			"    on (t1.id = t2.id)";
+		l = SqlUtil.getTables(sql, false);
+		System.out.println(l);
+
 	}
 
 	@Test
