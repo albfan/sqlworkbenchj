@@ -36,7 +36,8 @@ import workbench.util.StringUtil;
 public interface ConstraintReader
 {
 	/**
-	 *	Returns the column constraints for the given table.
+	 *	Retrieve the column constraints for the given table and stores them in the
+	 * list of columns.
 	 *
 	 * The key to the returned Map is	the column name, the value is the full expression which can be appended
 	 * to the column definition inside a CREATE TABLE statement.
@@ -44,7 +45,7 @@ public interface ConstraintReader
 	 * @param dbConnection the connection to use
 	 * @param table        the table to check
 	 */
-	Map<String, String> getColumnConstraints(WbConnection dbConnection, TableIdentifier table);
+	void retrieveColumnConstraints(WbConnection dbConnection, TableDefinition table);
 
 
 	/**
@@ -71,9 +72,8 @@ public interface ConstraintReader
 	ConstraintReader NULL_READER = new ConstraintReader()
 	{
 		@Override
-		public Map<String, String> getColumnConstraints(WbConnection dbConnection, TableIdentifier table)
+		public void retrieveColumnConstraints(WbConnection dbConnection,TableDefinition table)
 		{
-			return Collections.emptyMap();
 		}
 
 		@Override

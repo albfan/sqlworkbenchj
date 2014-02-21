@@ -119,7 +119,7 @@ public class OracleConstraintReader
 
 				if (constraint != null)
 				{
-					if (isImplicitConstraint(name, constraint, def.getColumns())) continue;
+					if (hideTableConstraint(name, constraint, def.getColumns())) continue;
 
 					String expression = "(" + constraint + ")";
 					if ("DISABLED".equalsIgnoreCase(status))
@@ -150,13 +150,14 @@ public class OracleConstraintReader
 	/**
 	 * Checks if the constraint definition is a valid Not null definition that should be displayed.
 	 */
-	protected boolean isImplicitConstraint(String name, String definition, List<ColumnIdentifier> columns)
+	protected boolean hideTableConstraint(String name, String definition, List<ColumnIdentifier> columns)
 	{
 		// Not null constrainst can also be defined as check constraints.
 		// Tn that case the constraint will have a name that is not system generated
 		// and it needs to be included because those columns are not reported as NOT NULL
 		// e.g. create table foo (id integer constraint id_not_null check (id is not null));
-		if (!isSystemConstraintName(name)) return false;
+
+		boolean systemConstraint = isSystemConstraintName(name);
 
 		try
 		{
@@ -167,31 +168,44 @@ public class OracleConstraintReader
 			if (!tok.isIdentifier()) return false;
 			String colName = SqlUtil.removeObjectQuotes(tok.getText());
 
+			ColumnIdentifier colId = ColumnIdentifier.findColumnInList(columns, colName);
+			if (colId == null) return false;
+
 			// If no further tokens exist, this cannot be a not null constraint
 			tok = lexer.getNextToken(false, false);
 			if (tok == null) return false;
 
 			SQLToken tok2 = lexer.getNextToken(false, false);
-			if (tok2 == null)
+			if (tok2 != null) return false; // another token means this can't be a simple NOT NULL constraint
+
+			if ("IS NOT NULL".equalsIgnoreCase(tok.getContents()))
 			{
-				if ("IS NOT NULL".equalsIgnoreCase(tok.getContents()))
+				if (colId.isNullable())
 				{
-					if (isNullable(columns, colName))
+					// column is nullable but has a not null constraint
+					String check = "CHECK (" + definition + ")";
+					if (systemConstraint)
 					{
-						// the colum is marked as nullable but a not null check constraint exists
-						// this constraint should be displayed
-						return false;
+						colId.setConstraint(check);
 					}
-					// the column is already marked as not null
-					// so the constraint can be ignored
-					return true;
+					else
+					{
+						colId.setConstraint("CONSTRAINT " + name + " " + check);
+					}
 				}
-				return false;
+				else
+				{
+					if (!systemConstraint)
+					{
+						// only show the column constraint if it is a named constraint
+						// in that case the column was defined as "col_name type constraint xxxx not null"
+						colId.setConstraint("CONSTRAINT " + name + " NOT NULL");
+					}
+				}
 			}
-			else
-			{
-				return false;
-			}
+			
+			// hide not null constraints at table level, always display them with the column
+			return true;
 		}
 		catch (Exception e)
 		{
@@ -199,15 +213,4 @@ public class OracleConstraintReader
 		}
 	}
 
-	private boolean isNullable(List<ColumnIdentifier> columns, String colname)
-	{
-		for (ColumnIdentifier col : columns)
-		{
-			if (col.getColumnName().equalsIgnoreCase(colname))
-			{
-				return col.isNullable();
-			}
-		}
-		return true;
-	}
 }

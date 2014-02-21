@@ -247,7 +247,7 @@ public class ColumnChanger
 			sql = sql.replace(PARAM_DEFAULT_EXPR, "DEFAULT " + newDefinition.getDefaultValue());
 		}
 
-		sql = ColumnDefinitionTemplate.replaceNullable(sql, dbSettings.getDbId(), newDefinition.isNullable());
+		sql = ColumnDefinitionTemplate.replaceNullable(sql, dbSettings.getDbId(), newDefinition.isNullable(), null);
 		return sql;
 	}
 

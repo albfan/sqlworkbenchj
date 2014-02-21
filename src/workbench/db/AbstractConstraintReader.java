@@ -26,10 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,22 +93,21 @@ public abstract class AbstractConstraintReader
 	 * @see ColumnDefinitionTemplate#getColumnDefinitionSQL(ColumnIdentifier, String, int)
 	 */
 	@Override
-	public Map<String, String> getColumnConstraints(WbConnection dbConnection, TableIdentifier aTable)
+	public void retrieveColumnConstraints(WbConnection dbConnection, TableDefinition def)
 	{
 		String sql = this.getColumnConstraintSql();
-		if (sql == null) return Collections.emptyMap();
+		if (sql == null) return;
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo(getClass().getName() + ".getColumnConstraints()", "Query to retrieve column constraints:\n" + sql);
 		}
 
-		HashMap<String, String> result = new HashMap<String, String>();
-
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		Savepoint sp = null;
 
+		TableIdentifier table = def.getTable();
 		try
 		{
 			if (dbConnection.getDbSettings().useSavePointForDML())
@@ -120,22 +116,24 @@ public abstract class AbstractConstraintReader
 			}
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			int index = this.getIndexForSchemaParameter();
-			if (index > 0) stmt.setString(index, aTable.getSchema());
+			if (index > 0) stmt.setString(index, table.getSchema());
 
 			index = this.getIndexForCatalogParameter();
-			if (index > 0) stmt.setString(index, aTable.getCatalog());
+			if (index > 0) stmt.setString(index, table.getCatalog());
 
 			index = this.getIndexForTableNameParameter();
-			if (index > 0) stmt.setString(index, aTable.getTableName());
+			if (index > 0) stmt.setString(index, table.getTableName());
 
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
 				String column = rs.getString(1);
 				String constraint = rs.getString(2);
-				if (column != null && constraint != null)
+				ColumnIdentifier colId = ColumnIdentifier.findColumnInList(def.getColumns(), column);
+
+				if (colId != null && StringUtil.isNonEmpty(constraint))
 				{
-					result.put(column.trim(), constraint.trim());
+					colId.setConstraint(constraint.trim());
 				}
 			}
 			dbConnection.releaseSavepoint(sp);
@@ -149,7 +147,6 @@ public abstract class AbstractConstraintReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		return result;
 	}
 
 	@Override

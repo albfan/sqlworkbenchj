@@ -138,7 +138,7 @@ public class ColumnDefinitionTemplate
 		{
 			sql = replaceArg(sql, ColumnChanger.PARAM_DEFAULT_VALUE, "");
 		}
-		sql = replaceNullable(sql, dbid, column.isNullable());
+		sql = replaceNullable(sql, dbid, column.isNullable(), colConstraint);
 
 		if (isDefaultConstraint)
 		{
@@ -200,8 +200,18 @@ public class ColumnDefinitionTemplate
 		return value;
 	}
 
-	public static String replaceNullable(String sql, String dbIdentifier, boolean isNullable)
+	public static String replaceNullable(String sql, String dbIdentifier, boolean isNullable, String columnConstraint)
 	{
+		boolean isNotNullConstraint = columnConstraint != null && columnConstraint.toUpperCase().trim().endsWith("NOT NULL");
+		if (isNotNullConstraint)
+		{
+			// the column constraint seems to be a NOT NULL constraint
+			// do not retrieve the not null condition in that case.
+			sql = replaceArg(sql, ColumnChanger.PARAM_NULLABLE, "");
+			sql = replaceArg(sql, PARAM_NOT_NULL, "");
+			return sql;
+		}
+
 		String nullkeyword = Settings.getInstance().getProperty("workbench.db." + dbIdentifier + ".nullkeyword", "NULL");
 		if (isNullable)
 		{

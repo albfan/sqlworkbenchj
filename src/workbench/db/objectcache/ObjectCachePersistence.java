@@ -155,7 +155,7 @@ class ObjectCachePersistence
 		{
 			if (cacheFile.delete())
 			{
-				LogMgr.logDebug("ObjectCachePersistence.deleteCacheFile()", "Deleted local storage file: " + cacheFile.getFullPath());
+				LogMgr.logInfo("ObjectCachePersistence.deleteCacheFile()", "Deleted local storage file: " + cacheFile.getFullPath());
 			}
 		}
 		catch (Throwable th)
@@ -281,6 +281,6 @@ class ObjectCachePersistence
 				cacheDir = configDir;
 			}
 		}
-		return new WbFile(cacheDir, user + url + ".wbcache");
+		return new WbFile(cacheDir, user.toLowerCase() + url.toLowerCase() + ".wbcache");
 	}
 }

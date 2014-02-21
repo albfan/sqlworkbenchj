@@ -57,6 +57,9 @@ public class FormatterOptionsPanel
 		identifierCase.setModel(idModel);
 		ComboBoxModel funcModel = new DefaultComboBoxModel(GeneratedIdentifierCase.values());
 		functionCase.setModel(funcModel);
+		String mnu = ResourceMgr.getPlainString("MnuTxtMakeCharInList");
+		String lbl = ResourceMgr.getFormattedString("LblMaxElements", mnu);
+		jLabel1.setText(lbl);
 	}
 
 	@Override

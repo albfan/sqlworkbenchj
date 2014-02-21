@@ -66,7 +66,8 @@ public class OracleConstraintReaderTest
 		String sql =
 			"create table person (id integer, constraint positive_id check (id > 0));\n" +
 			"create table foo (id integer constraint foo_nn_id check (id is not null));\n" +
-			"create table foobar (id integer not null);";
+			"create table foobar (id integer not null); \n "  +
+			"create table bar (id integer constraint id_not_null not null);";
 		TestUtil.executeScript(con, sql);
 	}
 
@@ -105,13 +106,19 @@ public class OracleConstraintReaderTest
 
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("FOO"));
 		String source = tbl.getSource(con).toString();
+//		System.out.println(source);
 		assertTrue(source.toLowerCase().contains("constraint foo_nn_id check (id is not null)"));
 
 		tbl = con.getMetadata().findTable(new TableIdentifier("FOOBAR"));
 		source = tbl.getSource(con).toString();
-		System.out.println(source);
+//		System.out.println(source);
 		assertTrue(source.contains("ID  NUMBER   NOT NULL"));
 		assertFalse(source.contains("IS NOT NULL"));
+
+		tbl = con.getMetadata().findTable(new TableIdentifier("BAR"));
+		source = tbl.getSource(con).toString();
+//		System.out.println(source);
+		assertTrue(source.contains("ID  NUMBER   CONSTRAINT ID_NOT_NULL NOT NULL"));
 	}
 
 	@Test
@@ -124,11 +131,11 @@ public class OracleConstraintReaderTest
 
 		List<ColumnIdentifier> cols =  Collections.singletonList(myCol);
 
-		boolean result = instance.isImplicitConstraint("SYS_C0013077", definition, cols);
-		assertTrue("Default NN not recognized", result);
+		boolean shouldHide = instance.hideTableConstraint("SYS_C0013077", definition, cols);
+		assertTrue("Default NN not recognized", shouldHide);
 
 		definition = "\"MY_COL\" IS NOT NULL OR COL2 IS NOT NULL";
-		result = instance.isImplicitConstraint("chk_cols", definition, cols);
-		assertFalse("Default NN not recognized", result);
+		shouldHide = instance.hideTableConstraint("chk_cols", definition, cols);
+		assertFalse("Default NN not recognized", shouldHide);
 	}
 }

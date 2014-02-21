@@ -25,9 +25,7 @@ package workbench.db.firstsql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -61,13 +59,6 @@ public class FirstSqlConstraintReader
 	public FirstSqlConstraintReader()
 	{
 		super("firstsqlj");
-	}
-
-
-	@Override
-	public Map<String, String> getColumnConstraints(WbConnection dbConnection, TableIdentifier aTable)
-	{
-		return Collections.emptyMap();
 	}
 
 	@Override

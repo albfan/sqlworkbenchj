@@ -26,10 +26,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -299,8 +297,15 @@ public class TableSourceBuilder
 		StringBuilder result = new StringBuilder(250);
 		DbMetadata meta = dbConnection.getMetadata();
 
+		TableDefinition def = new TableDefinition(table, columns);
 		ConstraintReader consReader = ReaderFactory.getConstraintReader(meta);
-		Map<String, String> columnConstraints = consReader.getColumnConstraints(dbConnection, table);
+
+		consReader.retrieveColumnConstraints(dbConnection, def);
+
+		// getTableConstraints() is allowed to change the column definitions to
+		// move table constraints that are actually column constraints into the column definition
+		// therefor this must be called bevore calling appendColumnDefinition()
+		List<TableConstraint> tableConstraints = consReader.getTableConstraints(dbConnection, def);
 
 		// this should have been populated previously!
 		ObjectSourceOptions sourceOptions = table.getSourceOptions();
@@ -309,10 +314,9 @@ public class TableSourceBuilder
 		result.append(generateCreateObject(includeDrop, table, typeOption));
 		result.append("\n(\n");
 
-		appendColumnDefinitions(result, columns, meta, columnConstraints, COL_INDENT);
+		appendColumnDefinitions(result, columns, meta, COL_INDENT);
 
-		List<TableConstraint> constraints = consReader.getTableConstraints(dbConnection, new TableDefinition(table, columns));
-		String cons = consReader.getConstraintSource(constraints, COL_INDENT);
+		String cons = consReader.getConstraintSource(tableConstraints, COL_INDENT);
 		if (StringUtil.isNonEmpty(cons))
 		{
 			result.append(",\n").append(COL_INDENT);
@@ -526,10 +530,10 @@ public class TableSourceBuilder
 
 	public void appendColumnDefinitions(StringBuilder result, List<ColumnIdentifier> columns, DbMetadata meta)
 	{
-		appendColumnDefinitions(result, columns, meta, new HashMap<String, String>(), COL_INDENT);
+		appendColumnDefinitions(result, columns, meta, COL_INDENT);
 	}
 
-	protected void appendColumnDefinitions(StringBuilder result, List<ColumnIdentifier> columns, DbMetadata meta, Map<String, String> constraints, String indent)
+	public void appendColumnDefinitions(StringBuilder result, List<ColumnIdentifier> columns, DbMetadata meta, String indent)
 	{
 		int maxColLength = 0;
 		int maxTypeLength = 0;
@@ -565,7 +569,7 @@ public class TableSourceBuilder
 			{
 				result.append(' ');
 			}
-			String coldef = getColumnSQL(column, maxTypeLength, constraints.get(column.getColumnName()));
+			String coldef = getColumnSQL(column, maxTypeLength, column.getConstraint());
 
 			result.append(coldef);
 			if (itr.hasNext())

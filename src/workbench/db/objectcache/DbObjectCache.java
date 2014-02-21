@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionProfile;
 import workbench.db.DependencyNode;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableDefinition;
@@ -88,9 +89,26 @@ public class DbObjectCache
 		objectCache.addProcedureList(procs, schema);
 	}
 
+	/**
+	 * Removes all entries from this cache.
+	 */
 	public void clear()
 	{
 		objectCache.clear();
+	}
+
+	/**
+	 * Removes all entries from this cache and deletes any
+	 */
+	public void removeAll()
+	{
+		clear();
+		if (dbConnection != null && dbConnection.getProfile() != null)
+		{
+			ConnectionProfile prof = dbConnection.getProfile();
+			ObjectCachePersistence persistence = new ObjectCachePersistence();
+			persistence.deleteCacheFile(prof.getUrl(), prof.getUsername());
+		}
 	}
 
 	public List<ColumnIdentifier> getColumns(TableIdentifier tbl)

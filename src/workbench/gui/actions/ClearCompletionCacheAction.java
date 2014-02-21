@@ -36,7 +36,7 @@ public class ClearCompletionCacheAction
 	extends WbAction
 {
 	private WbConnection dbConnection;
-	
+
 	public ClearCompletionCacheAction()
 	{
 		super();
@@ -50,10 +50,13 @@ public class ClearCompletionCacheAction
 		this.dbConnection = conn;
 		this.setEnabled(this.dbConnection != null);
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		if (this.dbConnection != null) this.dbConnection.getObjectCache().clear();
+		if (this.dbConnection != null)
+		{
+			this.dbConnection.getObjectCache().removeAll();
+		}
 	}
 }

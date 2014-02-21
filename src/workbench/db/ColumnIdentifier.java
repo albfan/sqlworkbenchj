@@ -70,6 +70,7 @@ public class ColumnIdentifier
 	private String collation;
 	private String collationExpression;
 	private String generatorExpression;
+	private String columnConstraint;
 
 	// For procedure columns (=arguments)
 	private String argumentMode;
@@ -112,6 +113,20 @@ public class ColumnIdentifier
 		this.type = aType;
 		this.isPk = isPkColumn;
 	}
+
+	/**
+	 * Returns the SQL for a constraint defined on this column.
+	 */
+	public String getConstraint()
+	{
+		return columnConstraint;
+	}
+
+	public void setConstraint(String constraint)
+	{
+		this.columnConstraint = constraint;
+	}
+
 
 	/**
 	 * Returns the keyword that should be used to define the default value.
@@ -513,7 +528,7 @@ public class ColumnIdentifier
 		result.defaultClause = this.defaultClause;
 		result.readOnly = this.readOnly;
 		result.argumentMode = this.argumentMode;
-
+		result.columnConstraint = this.columnConstraint;
 		return result;
 	}
 
