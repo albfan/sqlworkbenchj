@@ -60,15 +60,6 @@ public class OracleConstraintReaderTest
 		throws Exception
 	{
 		OracleTestUtil.initTestCase();
-		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
-
-		String sql =
-			"create table person (id integer, constraint positive_id check (id > 0));\n" +
-			"create table foo (id integer constraint foo_nn_id check (id is not null));\n" +
-			"create table foobar (id integer not null); \n "  +
-			"create table bar (id integer constraint id_not_null not null);";
-		TestUtil.executeScript(con, sql);
 	}
 
 	@AfterClass
@@ -84,6 +75,10 @@ public class OracleConstraintReaderTest
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
+
+		String sql =
+			"create table person (id integer, constraint positive_id check (id > 0));\n";
+		TestUtil.executeScript(con, sql);
 
 		TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("PERSON"));
 		OracleConstraintReader reader = new OracleConstraintReader(con.getDbId());
@@ -104,21 +99,32 @@ public class OracleConstraintReaderTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("FOO"));
+		String sql =
+			"create table foo1 (id1 integer not null); \n" +
+			"create table foo2 (id2 integer constraint id2_not_null not null); \n" +
+			"create table foo3 (id3 integer check (id3 is not null)); \n" +
+			"create table foo4 (id4 integer constraint id4_not_null check (id4 is not null));";
+		TestUtil.executeScript(con, sql);
+
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("FOO1"));
 		String source = tbl.getSource(con).toString();
 //		System.out.println(source);
-		assertTrue(source.toLowerCase().contains("constraint foo_nn_id check (id is not null)"));
+		assertTrue(source.contains("ID1  NUMBER   NOT NULL"));
 
-		tbl = con.getMetadata().findTable(new TableIdentifier("FOOBAR"));
+		tbl = con.getMetadata().findTable(new TableIdentifier("FOO2"));
 		source = tbl.getSource(con).toString();
 //		System.out.println(source);
-		assertTrue(source.contains("ID  NUMBER   NOT NULL"));
-		assertFalse(source.contains("IS NOT NULL"));
+		assertTrue(source.contains("ID2  NUMBER   CONSTRAINT ID2_NOT_NULL NOT NULL"));
 
-		tbl = con.getMetadata().findTable(new TableIdentifier("BAR"));
+		tbl = con.getMetadata().findTable(new TableIdentifier("FOO3"));
 		source = tbl.getSource(con).toString();
 //		System.out.println(source);
-		assertTrue(source.contains("ID  NUMBER   CONSTRAINT ID_NOT_NULL NOT NULL"));
+		assertTrue(source.contains("ID3  NUMBER   CHECK (id3 is not null)"));
+
+		tbl = con.getMetadata().findTable(new TableIdentifier("FOO4"));
+		source = tbl.getSource(con).toString();
+//		System.out.println(source);
+		assertTrue(source.contains("ID4  NUMBER   CONSTRAINT ID4_NOT_NULL CHECK (id4 is not null)"));
 	}
 
 	@Test
@@ -138,4 +144,5 @@ public class OracleConstraintReaderTest
 		shouldHide = instance.hideTableConstraint("chk_cols", definition, cols);
 		assertFalse("Default NN not recognized", shouldHide);
 	}
+
 }

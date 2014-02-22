@@ -67,6 +67,10 @@ public class JoinCreator
 	private int cursorPos;
 	private Map<Integer, TableAlias> tablePositions;
 	private Set<String> keywords;
+	private boolean preferUsingOperator;
+	private boolean alwaysUseParenthesis;
+	private GeneratedIdentifierCase keywordCase;
+	private GeneratedIdentifierCase identifierCase;
 
 	public JoinCreator(String statement, int positionInStatement, WbConnection dbConn)
 	{
@@ -76,6 +80,30 @@ public class JoinCreator
 		keywords = helper.getKeywords();
 		int realPos = setSql(statement, positionInStatement);
 		setCursorPosition(realPos);
+		preferUsingOperator = Settings.getInstance().getJoinCompletionPreferUSING();
+		alwaysUseParenthesis = Settings.getInstance().getJoinCompletionUseParens();
+		identifierCase = Settings.getInstance().getFormatterIdentifierCase();
+		keywordCase =  Settings.getInstance().getFormatterKeywordsCase();
+	}
+
+	public void setKeywordCase(GeneratedIdentifierCase kwCase)
+	{
+		this.keywordCase = kwCase;
+	}
+
+	public void setIdentifierCase(GeneratedIdentifierCase idCase)
+	{
+		this.identifierCase = idCase;
+	}
+
+	public void setAlwaysUseParenthesis(boolean flag)
+	{
+		alwaysUseParenthesis = flag;
+	}
+
+	public void setPreferUsingOperator(boolean flag)
+	{
+		this.preferUsingOperator = flag;
 	}
 
 	public final void setCursorPosition(int position)
@@ -117,28 +145,43 @@ public class JoinCreator
 	{
 		TableAlias joinedTable = getJoinedTable();
 		if (joinTable == null || joinedTable == null) return null;
+
 		JoinColumnsDetector detector = new JoinColumnsDetector(connection, joinTable, joinedTable);
+		detector.setPreferUsingOperator(preferUsingOperator);
+		detector.setKeywordCase(keywordCase);
+		detector.setIdentifierCase(identifierCase);
+
 		String condition = detector.getJoinCondition();
-		if (!condition.isEmpty())
+
+		if (condition.isEmpty()) return condition;
+
+		String currentWord = StringUtil.findWordLeftOfCursor(sql, cursorPos);
+		boolean whiteSpaceAtLeft = isWhitespaceAtCursor();
+
+		String operator = null;
+		boolean useUpperCase = keywordCase == GeneratedIdentifierCase.upper;
+		if (condition.indexOf('=') == -1 && preferUsingOperator)
 		{
-			String currentWord = StringUtil.findWordLeftOfCursor(sql, cursorPos);
-			boolean whiteSpaceAtLeft = isWhitespaceAtCursor();
+			operator = useUpperCase ? "USING " : "using ";
+		}
+		else
+		{
+			operator = useUpperCase ? "ON " : "on ";
+		}
 
-			boolean useParens = Settings.getInstance().getBoolProperty("workbench.gui.sql.join.completion.use.parenthesis", false);
-			if (useParens)
-			{
-				condition = "(" + condition + ")";
-			}
+		if (alwaysUseParenthesis && !condition.startsWith("("))
+		{
+			condition = "(" + condition + ")";
+		}
 
-			if (currentWord == null || !currentWord.equalsIgnoreCase("on"))
-			{
-				String on = Settings.getInstance().getFormatterKeywordsCase() == GeneratedIdentifierCase.upper ? "ON " : "on ";
-				condition = on + condition;
-			}
-			if (!whiteSpaceAtLeft)
-			{
-				condition = " " + condition;
-			}
+		if (currentWord == null || !currentWord.equalsIgnoreCase(operator))
+		{
+			condition = operator + condition;
+		}
+
+		if (!whiteSpaceAtLeft)
+		{
+			condition = " " + condition;
 		}
 		return condition;
 	}

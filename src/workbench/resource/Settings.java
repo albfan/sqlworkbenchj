@@ -148,6 +148,9 @@ public class Settings
 	public static final String PROPERTY_VAR_SUFFIX = "workbench.sql.parameter.suffix";
 	public static final String PROPERTY_DECIMAL_DIGITS = "workbench.gui.display.maxfractiondigits";
 	public static final String PROPERTY_DECIMAL_SEP = "workbench.gui.display.decimal.separator";
+
+	public static final String PROP_JOIN_COMPLETION_USE_PARENS = "workbench.gui.sql.join.completion.use.parenthesis";
+	public static final String PROP_JOIN_COMPLETION_PREFER_USING = "workbench.gui.sql.join.completion.prefer.using";
 	// </editor-fold>
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
@@ -2021,6 +2024,25 @@ public class Settings
 		setProperty("workbench.editor.nowordsep", noSep);
 	}
 
+	public boolean getJoinCompletionUseParens()
+	{
+		return getBoolProperty(PROP_JOIN_COMPLETION_USE_PARENS, false);
+	}
+
+	public void setJoinCompletionUseParens(boolean flag)
+	{
+		setProperty(PROP_JOIN_COMPLETION_USE_PARENS, flag);
+	}
+
+	public boolean getJoinCompletionPreferUSING()
+	{
+		return getBoolProperty(PROP_JOIN_COMPLETION_PREFER_USING, false);
+	}
+
+	public void setJoinCompletionPreferUSING(boolean flag)
+	{
+		setProperty(PROP_JOIN_COMPLETION_PREFER_USING, flag);
+	}
 	public void setAutoCompletionPasteCase(GeneratedIdentifierCase value)
 	{
 		setIdentifierCase("workbench.editor.autocompletion.paste.case", value);

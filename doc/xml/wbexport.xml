@@ -1258,13 +1258,18 @@
                 changing the formatting in the spreadsheet. No formatting is applied as it is assumed
                 that the target worksheet is properly set up.
               </para>
-              <para>
-                <note>
+               <note>
+                <para>
                   The parameters <literal>-autoFilter</literal>, <literal>-fixedHeader</literal> and <literal>-autoColWidth</literal> can still be used.
                   If <literal>-targetSheet</literal> or <literal>-targetSheetName</literal> are specified they default to
-                  <literal>false</literal> unless they are explicitely passed as <literal>true</literal>
-                </note>
-              </para>
+                  <literal>false</literal> unless they are explicitely passed as <literal>true</literal>.
+                </para>
+                <para>
+                  If the parameters <literal>-dateFormat</literal> or <literal>-timestampFormat</literal> are specified
+                  together with a target sheet, the format for date/timestamp columns in the Excel sheet will be overwritten.
+                  To overwrite the format in the Excel sheet, those parameters must be specified explicitely.
+                </para>
+               </note>
               <para>
                 If this parameter is used, the target file specified with the <literal>-file</literal> parameter
                 <emphasis role="bold">must</emphasis> already exist
@@ -1273,7 +1278,7 @@
                 If <literal>-targetSheet</literal> is supplied, the value for <literal>-targetSheetName</literal> is ignored
               </para>
               <para>
-                These parameters supports auto-completion if the <literal>-file</literal> parameter is already supplied.
+                These parameters support auto-completion if the <literal>-file</literal> parameter is already supplied.
               </para>
             </entry>
           </row>

@@ -1434,7 +1434,7 @@
 	<section id="import-spreadsheet-parameters">
 		<title>Parameters for spreadsheet import</title>
     <para>
-      Both spreadsheet imports support a subset of the parameters that are used for flat file imports.
+      Both spreadsheet imports (Microsoft Excel, OpenOffice) support a subset of the parameters that are used for flat file imports.
     </para>
     <para>
       These parameters are:

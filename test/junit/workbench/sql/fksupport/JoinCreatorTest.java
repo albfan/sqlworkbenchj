@@ -22,11 +22,12 @@
  */
 package workbench.sql.fksupport;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.resource.Settings;
+import workbench.resource.GeneratedIdentifierCase;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -38,7 +39,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static workbench.resource.GeneratedIdentifierCase.*;
 
 /**
  *
@@ -52,7 +52,6 @@ public class JoinCreatorTest
 	{
 		super("JoinCreatorTest");
 	}
-
 
 	@BeforeClass
 	public static void initClass()
@@ -72,6 +71,7 @@ public class JoinCreatorTest
 			"   foreign key (person_id, person_tenant_id) references person(per_id, tenant_id), \n" +
 			"   foreign key (adr_type_id) references address_type(type_id) \n" +
 			");\n" +
+			"create table person_details (pd_id integer not null primary key, per_id integer not null references person (per_id));\n" +
 			"commit;"
 		);
 	}
@@ -81,6 +81,34 @@ public class JoinCreatorTest
 		throws Exception
 	{
 		ConnectionMgr.getInstance().disconnectAll();
+	}
+
+	@Test
+	public void testUsingOperator() throws SQLException
+	{
+		WbConnection conn = ConnectionMgr.getInstance().findConnection("JoinCreatorTest");
+
+		String sql = "select * from person p join person_details pd ";
+		int pos = sql.indexOf(" pd") + " pd".length() + 1;
+		JoinCreator creator = new JoinCreator(sql, pos, conn);
+
+		creator.setPreferUsingOperator(true);
+		creator.setIdentifierCase(GeneratedIdentifierCase.lower);
+		creator.setKeywordCase(GeneratedIdentifierCase.upper);
+
+		String condition = creator.getJoinCondition();
+		assertEquals("USING (per_id)", condition);
+
+		creator.setPreferUsingOperator(false);
+		condition = creator.getJoinCondition();
+		assertEquals("ON p.per_id = pd.per_id", condition);
+		creator.setAlwaysUseParenthesis(true);
+		condition = creator.getJoinCondition();
+		assertEquals("ON (p.per_id = pd.per_id)", condition);
+
+		creator.setPreferUsingOperator(true);
+		condition = creator.getJoinCondition();
+		assertEquals("USING (per_id)", condition);
 	}
 
 	@Test
@@ -95,6 +123,9 @@ public class JoinCreatorTest
 
 		int pos = sql.indexOf("t4 on") + "t4 on".length() + 1;
 		JoinCreator creator = new JoinCreator(sql, pos, null);
+		creator.setIdentifierCase(GeneratedIdentifierCase.lower);
+		creator.setKeywordCase(GeneratedIdentifierCase.upper);
+
 		List<TableAlias> tables = creator.getPossibleJoinTables();
 		assertEquals(2, tables.size());
 		assertTrue(tables.indexOf(new TableAlias("t2"))  > - 1);
@@ -110,8 +141,11 @@ public class JoinCreatorTest
 
 		String sql = "select * from person p join address a join address_type adt on  ";
 		int pos = sql.indexOf("address a") + "address a".length() + 1;
-		Settings.getInstance().setAutoCompletionPasteCase(lower);
+
 		JoinCreator creator = new JoinCreator(sql, pos, conn);
+		creator.setPreferUsingOperator(true);
+		creator.setIdentifierCase(GeneratedIdentifierCase.lower);
+		creator.setKeywordCase(GeneratedIdentifierCase.upper);
 
 		TableAlias join = creator.getJoinTable();
 		assertEquals("person", join.getObjectName());
@@ -126,16 +160,19 @@ public class JoinCreatorTest
 		creator.setCursorPosition(pos);
 		condition = creator.getJoinCondition();
 		assertNotNull(condition);
-		assertEquals("adt.type_id = a.adr_type_id", condition.trim());
+		assertEquals("ON adt.type_id = a.adr_type_id", condition.trim());
 
 		creator.setCursorPosition(pos + 1);
 		condition = creator.getJoinCondition();
-		assertEquals("adt.type_id = a.adr_type_id", condition.trim());
+		assertEquals("ON adt.type_id = a.adr_type_id", condition.trim());
 
 		// Test for sub-selects
 		sql = "select * from person where id in (select person_id from address ad join address_type adt on )";
 		pos = sql.indexOf("adt on") + "adt on".length() + 1;
 		creator = new JoinCreator(sql, pos, conn);
+		creator.setIdentifierCase(GeneratedIdentifierCase.lower);
+		creator.setKeywordCase(GeneratedIdentifierCase.upper);
+
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
 		assertEquals("ad", join.getAlias());
@@ -143,10 +180,13 @@ public class JoinCreatorTest
 		sql = "select person_id from address ad join address_type adt on ";
 		pos = sql.length() - 1;
 		creator = new JoinCreator(sql, pos, conn);
+		creator.setIdentifierCase(GeneratedIdentifierCase.lower);
+		creator.setKeywordCase(GeneratedIdentifierCase.upper);
+
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
 		assertEquals("ad", join.getAlias());
-		assertEquals("adt.type_id = ad.adr_type_id", creator.getJoinCondition().trim());
+		assertEquals("ON adt.type_id = ad.adr_type_id", creator.getJoinCondition().trim());
 
 		joined = creator.getJoinedTable();
 		assertEquals("address_type", joined.getObjectName());
@@ -155,9 +195,12 @@ public class JoinCreatorTest
 		sql = "select * from address a join person p on ";
 		pos = sql.length() -1;
 		creator = new JoinCreator(sql, pos, conn);
+		creator.setIdentifierCase(GeneratedIdentifierCase.lower);
+		creator.setKeywordCase(GeneratedIdentifierCase.upper);
+
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
-		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", creator.getJoinCondition().trim());
+		assertEquals("ON p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", creator.getJoinCondition().trim());
 	}
 
 	//@Test

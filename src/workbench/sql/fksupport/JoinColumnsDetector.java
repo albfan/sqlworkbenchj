@@ -43,15 +43,37 @@ import workbench.util.TableAlias;
  */
 public class JoinColumnsDetector
 {
-	private TableAlias joinTable;
-	private TableAlias joinedTable;
-	private WbConnection connection;
+	private final TableAlias joinTable;
+	private final TableAlias joinedTable;
+	private final WbConnection connection;
+	private boolean preferUsingOperator;
+	private boolean matchingColumnsAvailable;
+	private GeneratedIdentifierCase keywordCase;
+	private GeneratedIdentifierCase identifierCase;
 
 	public JoinColumnsDetector(WbConnection dbConnection, TableAlias mainTable, TableAlias childTable)
 	{
 		this.joinTable = mainTable;
 		this.joinedTable = childTable;
 		this.connection = dbConnection;
+		this.preferUsingOperator = Settings.getInstance().getJoinCompletionPreferUSING();
+		this.identifierCase = Settings.getInstance().getFormatterIdentifierCase();
+		this.keywordCase =  Settings.getInstance().getFormatterKeywordsCase();
+	}
+
+	public void setPreferUsingOperator(boolean flag)
+	{
+		this.preferUsingOperator = flag;
+	}
+
+	public void setKeywordCase(GeneratedIdentifierCase kwCase)
+	{
+		this.keywordCase = kwCase;
+	}
+
+	public void setIdentifierCase(GeneratedIdentifierCase idCase)
+	{
+		this.identifierCase = idCase;
 	}
 
 	/**
@@ -64,22 +86,43 @@ public class JoinColumnsDetector
 	public String getJoinCondition()
 		throws SQLException
 	{
+		matchingColumnsAvailable = false;
 		Map<String, String> columns = getJoinColumns();
 		if (columns.isEmpty()) return "";
 
-		String and = Settings.getInstance().getFormatterKeywordsCase() == GeneratedIdentifierCase.upper ? " AND " : " and ";
+		String delim = null;
+		boolean useUsingOperator = preferUsingOperator && matchingColumnsAvailable;
+		if (useUsingOperator)
+		{
+			delim = ",";
+		}
+		else
+		{
+			delim = keywordCase == GeneratedIdentifierCase.upper ? " AND " : " and ";
+		}
 		StringBuilder result = new StringBuilder(20);
 		boolean first = true;
+		if (useUsingOperator)
+		{
+			result.append('(');
+		}
 		for (Map.Entry<String, String> entry : columns.entrySet())
 		{
 			if (!first)
 			{
-				result.append(and);
+				result.append(delim);
 			}
 			result.append(entry.getKey());
-			result.append(" = ");
-			result.append(entry.getValue());
+			if (!useUsingOperator)
+			{
+				result.append(" = ");
+				result.append(entry.getValue());
+			}
 			first = false;
+		}
+		if (useUsingOperator)
+		{
+			result.append(')');
 		}
 		return result.toString();
 	}
@@ -123,11 +166,28 @@ public class JoinColumnsDetector
 			if (node.getTable().equals(table1))
 			{
 				Map<String, String> colMap = node.getColumns();
+				int matchingCols = 0;
 				for (Map.Entry<String, String> entry : colMap.entrySet())
 				{
-					String pkColumnExpr = alias1.getNameToUse() + "." +  getColumnName(entry.getKey());
-					String fkColExpr = alias2.getNameToUse() + "." + getColumnName(entry.getValue());
-					columns.put(pkColumnExpr, fkColExpr);
+					if (entry.getKey().equalsIgnoreCase(entry.getValue()))
+					{
+						matchingCols ++;
+					}
+				}
+				this.matchingColumnsAvailable = matchingCols == colMap.size();
+				for (Map.Entry<String, String> entry : colMap.entrySet())
+				{
+					if (matchingColumnsAvailable && preferUsingOperator)
+					{
+						String col = getColumnName(entry.getKey());
+						columns.put(col, col);
+					}
+					else
+					{
+						String pkColumnExpr = alias1.getNameToUse() + "." + getColumnName(entry.getKey());
+						String fkColExpr = alias2.getNameToUse() + "." + getColumnName(entry.getValue());
+						columns.put(pkColumnExpr, fkColExpr);
+					}
 				}
 			}
 		}
@@ -142,8 +202,7 @@ public class JoinColumnsDetector
 
 		if (connection.getMetadata().isQuoted(result)) return result;
 
-		GeneratedIdentifierCase pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
-		switch (pasteCase)
+		switch (identifierCase)
 		{
 			case lower:
 				result = colname.toLowerCase();

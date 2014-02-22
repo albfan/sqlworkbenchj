@@ -26,6 +26,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -63,7 +64,7 @@ public class CompletionOptionsPanel
 		DefaultComboBoxModel model = new DefaultComboBoxModel(ObjectCacheStorage.values());
 		localStorageType.setModel(model);
 
-		WbSwingUtilities.setMinimumSize(maxAgeField, 5);
+		WbSwingUtilities.setMinimumSizeFromCols(maxAgeField);
 	}
 
 	@Override
@@ -83,7 +84,8 @@ public class CompletionOptionsPanel
 		partialMatch.setSelected(GuiSettings.getPartialCompletionSearch());
 		sortColumns.setSelected(GuiSettings.getSortCompletionColumns());
 		cyleEntries.setSelected(GuiSettings.getCycleCompletionPopup());
-
+		addParens.setSelected(Settings.getInstance().getJoinCompletionUseParens());
+		preferUSING.setSelected(Settings.getInstance().getJoinCompletionPreferUSING());
 		ObjectCacheStorage storage = GuiSettings.getLocalStorageForObjectCache();
 		localStorageType.setSelectedItem(storage);
 		localStorageType.doLayout();
@@ -95,12 +97,14 @@ public class CompletionOptionsPanel
 	@Override
 	public void saveSettings()
 	{
-		Settings set = Settings.getInstance();
+		Settings config = Settings.getInstance();
 		GeneratedIdentifierCase genCase = (GeneratedIdentifierCase)this.completionPasteCase.getSelectedItem();
-		set.setAutoCompletionPasteCase(genCase);
-		set.setCloseAutoCompletionWithSearch(closePopup.isSelected());
+		config.setAutoCompletionPasteCase(genCase);
+		config.setCloseAutoCompletionWithSearch(closePopup.isSelected());
 		ColumnSortType sort = (ColumnSortType)completionColumnSort.getSelectedItem();
-		set.setAutoCompletionColumnSort(sort);
+		config.setAutoCompletionColumnSort(sort);
+		config.setJoinCompletionPreferUSING(preferUSING.isSelected());
+		config.setJoinCompletionUseParens(addParens.isSelected());
 		GuiSettings.setFilterCompletionSearch(filterSearch.isSelected());
 		GuiSettings.setPartialCompletionSearch(partialMatch.isSelected());
 		GuiSettings.setSortCompletionColumns(sortColumns.isSelected());
@@ -153,6 +157,9 @@ public class CompletionOptionsPanel
     localStorageType = new JComboBox();
     maxAgeLabel = new JLabel();
     maxAgeField = new JTextField();
+    jPanel1 = new JPanel();
+    addParens = new JCheckBox();
+    preferUSING = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -248,7 +255,6 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(9, 12, 0, 0);
     add(cyleEntries, gridBagConstraints);
 
@@ -275,20 +281,52 @@ public class CompletionOptionsPanel
     gridBagConstraints.insets = new Insets(9, 12, 0, 0);
     add(maxAgeLabel, gridBagConstraints);
 
-    maxAgeField.setText("jTextField1");
+    maxAgeField.setColumns(6);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(6, 11, 0, 15);
     add(maxAgeField, gridBagConstraints);
+
+    jPanel1.setBorder(BorderFactory.createTitledBorder(ResourceMgr.getString("MnuTxtAutoCompleteJoin"))); // NOI18N
+    jPanel1.setLayout(new GridBagLayout());
+
+    addParens.setText(ResourceMgr.getString("LblJoinComplParens")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(2, 0, 0, 0);
+    jPanel1.add(addParens, gridBagConstraints);
+
+    preferUSING.setText(ResourceMgr.getString("LblJoinComplUSING")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 0, 4, 0);
+    jPanel1.add(preferUSING, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(12, 10, 0, 10);
+    add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private JCheckBox addParens;
   private JCheckBox closePopup;
   private JComboBox completionColumnSort;
   private JComboBox completionPasteCase;
   private JCheckBox cyleEntries;
   private JCheckBox filterSearch;
+  private JPanel jPanel1;
   private JLabel localStorageLabel;
   private JComboBox localStorageType;
   private JTextField maxAgeField;
@@ -296,6 +334,7 @@ public class CompletionOptionsPanel
   private JCheckBox partialMatch;
   private JLabel pasteLabel;
   private JLabel pasterOrderLabel;
+  private JCheckBox preferUSING;
   private JCheckBox sortColumns;
   // End of variables declaration//GEN-END:variables
 }

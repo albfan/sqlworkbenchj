@@ -152,10 +152,21 @@ public class OracleConstraintReader
 	 */
 	protected boolean hideTableConstraint(String name, String definition, List<ColumnIdentifier> columns)
 	{
-		// Not null constrainst can also be defined as check constraints.
-		// Tn that case the constraint will have a name that is not system generated
-		// and it needs to be included because those columns are not reported as NOT NULL
-		// e.g. create table foo (id integer constraint id_not_null check (id is not null));
+		/*
+			There are four ways to create a column that is not nullable in Oracle:
+
+			create table foo (id integer not null);
+			--> the column will be marked as NOT NULL and a check constraints with a system name will be created in all_constraints
+
+			create table foo (id integer constraint id_not_null not null);
+			--> the column will be marked as NOT NULL and a check constraint with the specified name will created in all_constraints
+
+			create table foo (id integer check (id is not null));
+			--> the column will be marked as NULLABLE and a check constraint with a system name will be created in all_constraints
+
+			create table foo (id integer constraint id_not_null check (id is not null));
+			--> the column will be marked as NULLABLE and a check constraint with the specified name will be created in all_constraints
+		*/
 
 		boolean systemConstraint = isSystemConstraintName(name);
 
@@ -203,7 +214,7 @@ public class OracleConstraintReader
 					}
 				}
 			}
-			
+
 			// hide not null constraints at table level, always display them with the column
 			return true;
 		}

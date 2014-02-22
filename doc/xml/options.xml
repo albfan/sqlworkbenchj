@@ -518,6 +518,23 @@
 			</para>
 		</section>
 
+    <section id="options-join-completion-using">
+      <title>Prefer USING operator</title>
+      <para>
+        If this option is enabled, the <link linkend="command-join-completion">JOIN completion</link> generates a <literal>USING</literal> clause instead
+        of an <literal>ON</literal> clause to join the tables. If there are no columns with identical names,
+        a join with an <literal>ON</literal> operator is generated.
+      </para>
+    </section>
+
+    <section id="options-join-completion-parentheses">
+      <title>Always use parentheses</title>
+      <para>
+        If this option is enabled, <link linkend="command-join-completion">JOIN completion</link> will generated redundant parentheses around
+        the join condition for the <literal>ON</literal> operator.
+      </para>
+    </section>
+
   </section>
 
 	<section id="options-workspace">
@@ -1253,8 +1270,9 @@
 <programlisting>SELECT p.name,
        p.firstname,
        a.city,
-			 a.zip
-FROM person p JOIN address a ON (p.person_id = a.person_id);</programlisting>
+       a.zip
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;</programlisting>
 				<para>
 					If this is set to 2, this
 					would result in the following formatted SELECT:
@@ -1262,14 +1280,16 @@ FROM person p JOIN address a ON (p.person_id = a.person_id);</programlisting>
 				<programlisting>
 SELECT p.name, p.firstname,
        a.city, a.zip
-FROM person p JOIN address a ON (p.person_id = a.person_id);</programlisting>
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;</programlisting>
 				<para>
 					The above example would list all columns in a single line, if this option
 					is set to 4 (or a higher value):
 				</para>
 				<programlisting>
 SELECT p.name, p.firstname, a.city, a.zip
-FROM person p JOIN address a ON (p.person_id = a.person_id);</programlisting>
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;</programlisting>
 			</section>
 
 			<section id="opt-sql-formatting-insertcols">
@@ -1327,38 +1347,64 @@ WHERE id = 42;</programlisting>
 
 			</section>
 
-			<section id="opt-sql-formatting-quoted-elements">
-				<title>Quoted elements per line</title>
+			<section id="opt-formatter-keywords-case">
+				<title>Keywords</title>
 				<para>
-					This optioin is used when changing the selected text into elements suitable for an <literal>IN</literal> list
-					using <link linkend="editor-make-in-list"><menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice></link>.
-					The number of values that are kept on a single line is controlled with this option.
+          This option defines if standard SQL keywords are generated in upper case, lower case or left unchanged.
 				</para>
 			</section>
 
-			<section id="opt-sql-formatting-other-elements">
-				<title>Other elements per line</title>
+			<section id="opt-formatter-identifier-case">
+				<title>Identifiers</title>
 				<para>
-					This option defines how many values will be put into a single
-					line when creating non-quoted elements (<link linkend="editor-make-in-list">Create non-char SQL List</link>).
+          This option defines if identifiers (table names, column names, ...) are generated in upper case, lower case or left unchanged.
+				</para>
+    	</section>
+
+			<section id="opt-formatter-functions-case">
+				<title>Functions</title>
+				<para>
+          This option defines if the names of SQL functions are generated in upper case, lower case or left unchanged. This
+          does not apply to user-written functions, only standard functions available for the current DBMS.
 				</para>
 			</section>
 
-			<section id="opt-formatter-lowercase-functions">
-				<title>Lowercase functions</title>
-				<para>
-					If this option is selected, standard ANSI functions will converted to lowercase
-					when formatting a SQL statement.
-				</para>
-			</section>
+			<section id="opt-formatter-join-wrapping">
+				<title>JOIN wrapping</title>
+        <para>
+          This option controls how conditions for <literal>JOIN</literal> operators are generated
+        </para>
+        <simplesect id="join-wrapping-never">
+          <title>Never</title>
+          <para>The JOIN condition is always kept on a single line:
+<programlisting language="sql">SELECT *
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;</programlisting>
+          </para>
+        </simplesect>
 
-			<section id="opt-formatter-uppercase-keywords">
-				<title>Uppercase keywords</title>
-				<para>
-					If this option is selected, standard ANSI keywords (<literal>SELECT, UPDATE</literal>)
-					will converted to uppercase when formatting a SQL statement, otherwise they
-					will be converted to lowercase.
-				</para>
+        <simplesect id="join-wrapping-always">
+          <title>Always</title>
+          <para>the JOIN condition is always written on a new line:
+<programlisting>SELECT *
+FROM person p
+  JOIN address a
+    ON p.person_id = a.person_id;</programlisting>
+          </para>
+        </simplesect>
+        <simplesect id="join-wrapping-multiple">
+          <title>Multiple conditions</title>
+          <para>
+            the JOIN condition is generated on multiple lines only if the join involves more than one condition:
+<programlisting>SELECT *
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;
+  JOIN address_details ad
+    ON ad.address_id = a.address_id
+   AND ad.person_id = a.person_id;
+</programlisting>
+          </para>
+        </simplesect>
 			</section>
 
 			<section id="opt-formatter-comma-space-in-list">
@@ -1394,6 +1440,23 @@ FROM person;</programlisting>
 				</para>
 			</section>
 
+			<section id="opt-sql-formatting-quoted-elements">
+				<title>Quoted elements per line</title>
+				<para>
+					This optioin is used when changing the selected text into elements suitable for an <literal>IN</literal> list
+					using <link linkend="editor-make-in-list"><menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice></link>.
+					The number of values that are kept on a single line is controlled with this option.
+				</para>
+			</section>
+
+			<section id="opt-sql-formatting-other-elements">
+				<title>Other elements per line</title>
+				<para>
+					This option defines how many values will be put into a single
+          line when creating non-quoted elements using
+          <link linkend="editor-make-in-list"><menuchoice><guimenu>SQL</guimenu><guimenuitem>Create non-char SQL List</guimenuitem></menuchoice></link>.
+				</para>
+			</section>
 	</section>
 
 	<section id="options-sql-generation">

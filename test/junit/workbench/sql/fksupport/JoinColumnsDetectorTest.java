@@ -24,7 +24,7 @@ package workbench.sql.fksupport;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.resource.Settings;
+import workbench.resource.GeneratedIdentifierCase;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -35,7 +35,6 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static workbench.resource.GeneratedIdentifierCase.*;
 
 /**
  *
@@ -55,6 +54,13 @@ public class JoinColumnsDetectorTest
 	{
 		ConnectionMgr.getInstance().disconnectAll();
 	}
+
+//	@Before
+//	public void setup()
+//	{
+//		Settings.getInstance().setFormatterIdentifierCase(GeneratedIdentifierCase.lower);
+//		Settings.getInstance().setFormatterKeywordsCase(GeneratedIdentifierCase.upper);
+//	}
 
 	@Test
 	public void testGetJoinSQL()
@@ -90,17 +96,73 @@ public class JoinColumnsDetectorTest
 		TableAlias address = new TableAlias("address a");
 		TableAlias history = new TableAlias("address_history ah");
 		TableAlias adt = new TableAlias("address_type adt");
+
 		JoinColumnsDetector detector = new JoinColumnsDetector(conn, person, address);
-		Settings.getInstance().setAutoCompletionPasteCase(lower);
+		detector.setPreferUsingOperator(false);
+		detector.setIdentifierCase(GeneratedIdentifierCase.lower);
+		detector.setKeywordCase(GeneratedIdentifierCase.upper);
+
 		String join = detector.getJoinCondition();
 		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", join.trim());
 
 		detector = new JoinColumnsDetector(conn, address, history);
+		detector.setIdentifierCase(GeneratedIdentifierCase.lower);
+		detector.setKeywordCase(GeneratedIdentifierCase.upper);
+
 		join = detector.getJoinCondition();
 		assertEquals("a.adr_id = ah.address_id", join.trim());
 
 		detector = new JoinColumnsDetector(conn, address, adt);
+		detector.setPreferUsingOperator(false);
+		detector.setIdentifierCase(GeneratedIdentifierCase.lower);
+		detector.setKeywordCase(GeneratedIdentifierCase.upper);
+
 		join = detector.getJoinCondition();
 		assertEquals("adt.type_id = a.adr_type_id", join.trim());
+
+		detector = new JoinColumnsDetector(conn, address, adt);
+		detector.setPreferUsingOperator(true);
+		detector.setIdentifierCase(GeneratedIdentifierCase.lower);
+		detector.setKeywordCase(GeneratedIdentifierCase.upper);
+
+		join = detector.getJoinCondition();
+		assertEquals("adt.type_id = a.adr_type_id", join.trim());
+	}
+
+	@Test
+	public void testUsingOperator()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection conn = util.getConnection();
+		TestUtil.executeScript(conn,
+			"create table foo \n" +
+			"( \n" +
+			"  foo_id integer not null primary key, \n" +
+			"  foo_name varchar(10) \n" +
+			");\n" +
+			"create table bar \n" +
+			"( \n" +
+			"   bar_id integer primary key, \n" +
+			"   bar_data varchar(50), \n " +
+			"   foo_id integer, \n "+
+			"   foreign key (foo_id) references foo(foo_id) \n" +
+			");\n" +
+			"commit;"
+		);
+
+		TableAlias person = new TableAlias("foo f");
+		TableAlias address = new TableAlias("bar b");
+		JoinColumnsDetector detector = new JoinColumnsDetector(conn, person, address);
+		detector.setPreferUsingOperator(true);
+		detector.setIdentifierCase(GeneratedIdentifierCase.lower);
+		detector.setKeywordCase(GeneratedIdentifierCase.upper);
+
+		String join = detector.getJoinCondition();
+		assertEquals("(foo_id)", join.trim());
+
+		detector.setPreferUsingOperator(false);
+		join = detector.getJoinCondition();
+		assertEquals("f.foo_id = b.foo_id", join.trim());
 	}
 }

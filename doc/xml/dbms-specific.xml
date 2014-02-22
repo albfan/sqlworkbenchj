@@ -23,8 +23,9 @@
        <title>Using the COPY API for client side files</title>
        <para>
          <link linkend="command-import">WbImport</link> can make use of PostgreSQL's <literal>COPY</literal> API
-         to send client side files to the server. <literal>COPY from stdin</literal> does not work through
-         the JDBC API, but when using WbImport, the file contents can be <link linkend="import-pg-copy">sent through the COPY API</link>
+         to send client side files to the server. The SQL statement <literal>COPY from stdin</literal> does not work when
+         executed using the JDBC driver. But <literal>WbImport</literal> can make use of the <link linkend="import-pg-copy">COPY API</link>
+         by using the parameter <literal>-usePgCopy</literal>
        </para>
      </section>
   </section>

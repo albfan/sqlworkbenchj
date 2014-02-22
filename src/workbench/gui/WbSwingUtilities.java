@@ -1172,6 +1172,13 @@ public class WbSwingUtilities
 		}
 	}
 
+	public static void setMinimumSizeFromCols(JTextField component)
+	{
+		int columns = component.getColumns();
+		component.setColumns(0);
+		setMinimumSize(component, columns);
+	}
+
 	public static void setMinimumSize(JComponent component, int numChars)
 	{
 		Font font = component.getFont();
@@ -1219,7 +1226,7 @@ public class WbSwingUtilities
 			pos = null;
 		}
 		if (pos == null) return;
-		
+
 		JToolTip tooltip = component.createToolTip();
 		PopupFactory popupFactory = PopupFactory.getSharedInstance();
 		tooltip.setTipText(tip);

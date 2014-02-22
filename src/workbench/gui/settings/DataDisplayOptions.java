@@ -64,12 +64,12 @@ public class DataDisplayOptions
 		ComboBoxModel model = new DefaultComboBoxModel(new String[] {ResourceMgr.getString("TxtTabRight"), ResourceMgr.getString("TxtTabLeft") });
 		alignmentDropDown.setModel(model);
 
-		WbSwingUtilities.setMinimumSize(defMaxRows, 10);
-		WbSwingUtilities.setMinimumSize(nullString, 10);
-		WbSwingUtilities.setMinimumSize(maxRowHeight, 6);
-		WbSwingUtilities.setMinimumSize(multiLineThreshold, 6);
-		WbSwingUtilities.setMinimumSize(minColSizeField, 6);
-		WbSwingUtilities.setMinimumSize(maxColSizeField, 6);
+		WbSwingUtilities.setMinimumSizeFromCols(defMaxRows);
+		WbSwingUtilities.setMinimumSizeFromCols(nullString);
+		WbSwingUtilities.setMinimumSizeFromCols(maxRowHeight);
+		WbSwingUtilities.setMinimumSizeFromCols(multiLineThreshold);
+		WbSwingUtilities.setMinimumSizeFromCols(minColSizeField);
+		WbSwingUtilities.setMinimumSizeFromCols(maxColSizeField);
 		WbSwingUtilities.makeEqualSize(nullString, defMaxRows, alignmentDropDown);
 	}
 
@@ -314,6 +314,7 @@ public class DataDisplayOptions
     gridBagConstraints.insets = new java.awt.Insets(5, 16, 0, 7);
     generalPanel.add(jLabel5, gridBagConstraints);
 
+    defMaxRows.setColumns(8);
     defMaxRows.setToolTipText(ResourceMgr.getString("d_LblDefMaxRows")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -405,6 +406,8 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 16, 0, 0);
     generalPanel.add(nullStringLabel, gridBagConstraints);
+
+    nullString.setColumns(8);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 4;
@@ -479,6 +482,8 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 6);
     jPanel4.add(minColSizeLabel, gridBagConstraints);
+
+    minColSizeField.setColumns(6);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
@@ -501,6 +506,8 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
     jPanel4.add(maxColSizeLabel, gridBagConstraints);
+
+    maxColSizeField.setColumns(6);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;
@@ -565,6 +572,8 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 11, 0, 0);
     rowHeightPanel.add(maxRowHeightLabel, gridBagConstraints);
+
+    maxRowHeight.setColumns(8);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
@@ -628,7 +637,7 @@ public class DataDisplayOptions
     gridBagConstraints.insets = new java.awt.Insets(0, 11, 0, 0);
     multiLinePanel.add(multilineThresholLabel, gridBagConstraints);
 
-    multiLineThreshold.setColumns(5);
+    multiLineThreshold.setColumns(8);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;

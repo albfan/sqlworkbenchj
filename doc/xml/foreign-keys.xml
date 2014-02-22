@@ -91,6 +91,11 @@ FROM orders ord
       a popup window with all tables in the select statement that could be used for completion is displayed. This popup merely
       looks at the tables in the statement, no test for foreign key constraints is done when displaying this list.
     </para>
+    <para>
+      You can <link linkend="options-join-completion-using">configure</link> this feature to generate a <literal>USING</literal>
+      operator if the column names match. The case of the keywords in the generated condition is determined by the settings
+      of the <link linkend="options-sql-formatting">SQL Formatter</link>.
+    </para>
   </section>
 
   <section id="select-fk-values">

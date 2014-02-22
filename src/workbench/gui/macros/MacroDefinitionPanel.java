@@ -98,7 +98,6 @@ public class MacroDefinitionPanel
 		c.insets = new Insets(10, 2, 2, 5);
 		add(macroEditor, c);
 
-		WbSwingUtilities.setMinimumSize(tfName, 40);
 		WbSwingUtilities.setMinimumSize(macroEditor, 25, 70);
 
 		WbTraversalPolicy policy = new WbTraversalPolicy();

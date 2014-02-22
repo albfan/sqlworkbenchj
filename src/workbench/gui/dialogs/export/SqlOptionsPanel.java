@@ -94,8 +94,8 @@ public class SqlOptionsPanel
 		blobTypes.setModel(blobModel);
 		blobTypes.setSelectedItem(BlobMode.SaveToFile.toString());
 
-		WbSwingUtilities.setMinimumSize(commitCount, 4);
-		
+		WbSwingUtilities.setMinimumSizeFromCols(commitCount);
+
 		GridBagLayout layout = (GridBagLayout)getLayout();
 		GridBagConstraints c = layout.getConstraints(extOptionsPanel);
 		remove(extOptionsPanel);
@@ -578,8 +578,8 @@ public class SqlOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     extOptionsPanel.add(commitLabel, gridBagConstraints);
 
+    commitCount.setColumns(4);
     commitCount.setMinimumSize(new Dimension(32, 20));
-    commitCount.setPreferredSize(new Dimension(32, 20));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
