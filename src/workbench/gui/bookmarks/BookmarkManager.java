@@ -90,7 +90,10 @@ public class BookmarkManager
 		for (int i=0; i < count; i++)
 		{
 			MainPanel panel = win.getSqlPanel(i);
-			updateBookmarks(win, panel);
+			if (panel.supportsBookmarks())
+			{
+				updateBookmarks(win, panel);
+			}
 		}
 		long end = System.currentTimeMillis();
 		LogMgr.logDebug("BookmarkManager.updateBookmarks()", "Parsing bookmarks for all tabs took: " + (end - start) + "ms");
@@ -214,6 +217,7 @@ public class BookmarkManager
 	{
 		if (win == null) return;
 		if (panel == null) return;
+		if (!panel.supportsBookmarks()) return;
 
 		if (clearList)
 		{

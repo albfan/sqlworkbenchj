@@ -289,6 +289,12 @@ public class DbExplorerPanel
 	}
 
 	@Override
+	public boolean supportsBookmarks()
+	{
+		return false;
+	}
+
+	@Override
 	public List<NamedScriptLocation> getBookmarks()
 	{
 		return null;

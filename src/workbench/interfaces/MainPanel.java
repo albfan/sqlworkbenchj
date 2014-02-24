@@ -72,4 +72,5 @@ public interface MainPanel
 	List<NamedScriptLocation> getBookmarks();
 	boolean isModifiedAfter(long time);
 	void jumpToBookmark(NamedScriptLocation bookmark);
+	boolean supportsBookmarks();
 }

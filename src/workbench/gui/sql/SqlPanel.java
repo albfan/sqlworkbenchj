@@ -423,6 +423,12 @@ public class SqlPanel
 	}
 
 	@Override
+	public boolean supportsBookmarks()
+	{
+		return true;
+	}
+
+	@Override
 	public List<NamedScriptLocation> getBookmarks()
 	{
 		if (editor == null) return null;
