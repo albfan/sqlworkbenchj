@@ -89,6 +89,7 @@ public class DriverEditorPanel
 
 		tfName.getDocument().addDocumentListener(this);
 		classpathEditor.setLastDirProperty("workbench.drivers.lastlibdir");
+		classpathEditor.addActionListener(this);
 		WbSwingUtilities.setMinimumSize(statusLabel, 1, 20);
 	}
 
