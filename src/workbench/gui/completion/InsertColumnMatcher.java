@@ -212,10 +212,6 @@ public class InsertColumnMatcher
 					next.values.get(v).valueStart = current.values.get(v).valueEnd -1;
 				}
 			}
-//			if (!next.values.isEmpty() && next.values.get(0).valueStart > 0 && next.values.get(0).valueEnd > 0)
-//			{
-//				next.values.get(0).valueStart = current.values.get(0).valueEnd + 1; // plus 1 because of the comma
-//			}
 		}
 	}
 
@@ -384,9 +380,7 @@ public class InsertColumnMatcher
 			}
 			if (values.size() == 1)
 			{
-				String sval = values.get(0).value;
-				if (StringUtil.isEmptyString(sval)) return null;
-				return sval;
+				return values.get(0).value;
 			}
 			StringBuilder result = new StringBuilder(values.size() * 5);
 			result.append('[');

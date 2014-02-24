@@ -258,9 +258,11 @@ public class InsertColumnMatcherTest
 	@Test
 	public void testEmptyValue()
 	{
-		String insert  = "into foo (c1, c2, c3, c4) values (10,20,   )";
+		String insert  = "insert into foo (c1, c2, c3, c4) values (10,20,   )";
 		InsertColumnMatcher matcher = new InsertColumnMatcher(insert);
 		int pos = insert.indexOf(" c2,") + 5;
+		assertFalse(matcher.inValueList(pos));
+		assertTrue(matcher.inColumnList(pos));
 		assertNull(matcher.getTooltipForPosition(pos));
 	}
 

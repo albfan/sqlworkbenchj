@@ -34,7 +34,7 @@ public class ElementInfo
 
 	public ElementInfo(String value, int startPos, int endPos)
 	{
-		this.elementValue = value;
+		this.elementValue = StringUtil.isBlank(value) ? null : value;
 		this.startInStatement = startPos;
 		this.endInStatement = endPos;
 	}
