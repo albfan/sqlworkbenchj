@@ -164,6 +164,12 @@ public class UpdatingCommand
 		catch (Exception e)
 		{
 			runner.rollbackSavepoint();
+			String table = getAffectedTable(sql);
+			if (StringUtil.isNonEmpty(table))
+			{
+				String msg = ResourceMgr.getFormattedString("MsgDMLNoSuccess", getMessageVerb(), table);
+				result.addMessage(msg);
+			}
 			addErrorInfo(result, sql, e);
 			LogMgr.logUserSqlError("UpdatingCommnad.execute()", sql, e);
 		}
