@@ -471,34 +471,17 @@ public class SqlUtil
 	}
 
 	/**
-	 * If the given SQL is an INSERT INTO...
+	 * If the given SQL is an TRUNCATE TABLE INTO...
 	 * returns the target table, otherwise null
 	 */
-	public static String getInsertTable(CharSequence sql)
+	public static String getTruncateTable(CharSequence sql)
 	{
-		return getInsertTable(sql, '.');
+		return getTruncateTable(sql, '.');
 	}
 
-	public static String getInsertTable(CharSequence sql, char catalogSeparator)
+	public static String getTruncateTable(CharSequence sql, char catalogSeparator)
 	{
-		try
-		{
-			StringBuilder tableName = new StringBuilder();
-			SQLLexer lexer = new SQLLexer(sql);
-			SQLToken t = lexer.getNextToken(false, false);
-			if (t == null || !t.getContents().equals("INSERT")) return null;
-			t = lexer.getNextToken(false, false);
-			if (t == null || !t.getContents().equals("INTO")) return null;
-			t = lexer.getNextToken(false, false);
-			if (t == null) return null;
-			tableName.append(t.getContents());
-			appendCurrentTablename(lexer, tableName, catalogSeparator);
-			return tableName.toString();
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
+		return getDmlTable(sql, catalogSeparator, "TRUNCATE", "TABLE");
 	}
 
 	/**
@@ -512,13 +495,37 @@ public class SqlUtil
 
 	public static String getUpdateTable(CharSequence sql, char catalogSeparator)
 	{
+		return getDmlTable(sql, catalogSeparator, "UPDATE", null);
+	}
+
+	/**
+	 * If the given SQL is an INSERT INTO...
+	 * returns the target table, otherwise null
+	 */
+	public static String getInsertTable(CharSequence sql)
+	{
+		return getInsertTable(sql, '.');
+	}
+
+	public static String getInsertTable(CharSequence sql, char catalogSeparator)
+	{
+		return getDmlTable(sql, catalogSeparator, "INSERT", "INTO");
+	}
+
+	private static String getDmlTable(CharSequence sql, char catalogSeparator, String verb, String secondKeyword)
+	{
 		try
 		{
 			StringBuilder tableName = new StringBuilder();
 			SQLLexer lexer = new SQLLexer(sql);
 			SQLToken t = lexer.getNextToken(false, false);
-			if (t == null || !t.getContents().equals("UPDATE")) return null;
+			if (t == null || !t.getContents().equals(verb)) return null;
 			t = lexer.getNextToken(false, false);
+			if (secondKeyword != null)
+			{
+				if (t == null || !t.getContents().equals(secondKeyword)) return null;
+				t = lexer.getNextToken(false, false);
+			}
 			if (t == null) return null;
 			tableName.append(t.getContents());
 			appendCurrentTablename(lexer, tableName, catalogSeparator);

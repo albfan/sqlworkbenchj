@@ -21,7 +21,15 @@ then
   JAVACMD=${JAVA_BIN}/bin/java
 fi
 
+cp=$scriptpath/sqlworkbench.jar
+cp=$cp:$scriptpath/dom4j-1.6.1.jar
+cp=$cp:$scriptpath/poi-ooxml-schemas.jar
+cp=$cp:$scriptpath/poi-ooxml.jar
+cp=$cp:$scriptpath/poi.jar
+cp=$cp:$scriptpath/stax-api-1.0.1.jar
+cp=$cp:$scriptpath/xmlbeans-2.3.0.jar
+
 $JAVACMD -Djava.awt.headless=true \
          -Xmx256m \
          -Dvisualvm.display.name=SQLWorkbench \
-         -cp $scriptpath/sqlworkbench.jar:$scriptpath/poi.jar workbench.console.SQLConsole $@ 
+         -cp $cp workbench.console.SQLConsole $@ 

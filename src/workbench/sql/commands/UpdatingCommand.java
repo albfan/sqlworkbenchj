@@ -143,7 +143,7 @@ public class UpdatingCommand
 			}
 			else
 			{
-				String msg = ResourceMgr.getFormattedString("MsgDMLSuccess", verb, table);
+				String msg = ResourceMgr.getFormattedString("MsgDMLSuccess", getMessageVerb(), table);
 				result.addMessage(msg);
 			}
 			result.setSuccess();
@@ -175,6 +175,24 @@ public class UpdatingCommand
 		return result;
 	}
 
+	private String getMessageVerb()
+	{
+		String result = null;
+		if (this.verb.equals("DELETE"))
+		{
+			result = "DELETE FROM";
+		}
+		else if (this.verb.equals("INSERT"))
+		{
+			result = "INSERT INTO";
+		}
+		else
+		{
+			result = verb;
+		}
+		return result;
+	}
+
 	private String getAffectedTable(String sql)
 	{
 		String tablename = null;
@@ -189,6 +207,10 @@ public class UpdatingCommand
 		else if (this.verb.equals("INSERT"))
 		{
 			tablename = SqlUtil.getInsertTable(sql, SqlUtil.getCatalogSeparator(currentConnection));
+		}
+		else if (this.verb.equals("TRUNCATE"))
+		{
+			tablename = SqlUtil.getTruncateTable(sql, SqlUtil.getCatalogSeparator(currentConnection));
 		}
 		return tablename;
 	}
