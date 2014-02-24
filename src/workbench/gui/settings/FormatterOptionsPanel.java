@@ -66,6 +66,8 @@ public class FormatterOptionsPanel
 		WbSwingUtilities.setMinimumSizeFromCols(insertColumns);
 		WbSwingUtilities.setMinimumSizeFromCols(updateColumns);
 		WbSwingUtilities.setMinimumSizeFromCols(selectColumns);
+		WbSwingUtilities.setMinimumSizeFromCols(maxCharElements);
+		WbSwingUtilities.setMinimumSizeFromCols(maxNumElements);
 	}
 
 	@Override
@@ -351,10 +353,11 @@ public class FormatterOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 16, 0, 0);
     jPanel2.add(maxCharElementsLabel, gridBagConstraints);
+
+    maxCharElements.setColumns(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(7, 4, 0, 7);
@@ -370,10 +373,11 @@ public class FormatterOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 0);
     jPanel2.add(maxNumElementsLabel, gridBagConstraints);
+
+    maxNumElements.setColumns(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
@@ -384,7 +388,6 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 16;
     gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
