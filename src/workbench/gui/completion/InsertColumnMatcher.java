@@ -165,9 +165,8 @@ public class InsertColumnMatcher
 					info.columnEnd = -1;
 					info.columnName = null;
 				}
-				for (int row=0; row < rowValues.size(); row++)
+				for (List<ElementInfo> entries : rowValues)
 				{
-					List<ElementInfo> entries = rowValues.get(row);
 					if (i < entries.size())
 					{
 						info.addValue(entries.get(i).getElementValue(), entries.get(i).getStartPosition(), entries.get(i).getEndPosition());
@@ -385,7 +384,9 @@ public class InsertColumnMatcher
 			}
 			if (values.size() == 1)
 			{
-				return values.get(0).value;
+				String sval = values.get(0).value;
+				if (StringUtil.isEmptyString(sval)) return null;
+				return sval;
 			}
 			StringBuilder result = new StringBuilder(values.size() * 5);
 			result.append('[');
