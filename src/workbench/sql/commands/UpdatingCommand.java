@@ -27,12 +27,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.LobFileStatement;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * Handles DML statements (UPDATE, DELETE, INSERT, TRUNCATE)
@@ -133,7 +136,16 @@ public class UpdatingCommand
 				updateCount = currentStatement.executeUpdate(sql);
 			}
 
-			appendSuccessMessage(result);
+			String table = getAffectedTable(sql);
+			if (StringUtil.isEmptyString(table))
+			{
+				appendSuccessMessage(result);
+			}
+			else
+			{
+				String msg = ResourceMgr.getFormattedString("MsgDMLSuccess", verb, table);
+				result.addMessage(msg);
+			}
 			result.setSuccess();
 
 			// adding the result/update count should be done after adding the success message
@@ -161,6 +173,24 @@ public class UpdatingCommand
 			this.done();
 		}
 		return result;
+	}
+
+	private String getAffectedTable(String sql)
+	{
+		String tablename = null;
+		if (this.verb.equals("UPDATE"))
+		{
+			tablename = SqlUtil.getUpdateTable(sql, SqlUtil.getCatalogSeparator(currentConnection));
+		}
+		else if (this.verb.equals("DELETE"))
+		{
+			tablename = SqlUtil.getDeleteTable(sql, SqlUtil.getCatalogSeparator(currentConnection));
+		}
+		else if (this.verb.equals("INSERT"))
+		{
+			tablename = SqlUtil.getInsertTable(sql, SqlUtil.getCatalogSeparator(currentConnection));
+		}
+		return tablename;
 	}
 
 	@Override

@@ -1670,6 +1670,9 @@ public class MainWindow
 					MainPanel p = getCurrentPanel();
 					checkConnectionForPanel(p);
 					setMacroMenuEnabled(true);
+					JComponent comp = (JComponent)p;
+					comp.validate();
+					comp.repaint();
 				}
 				catch (Throwable e)
 				{
@@ -2258,7 +2261,7 @@ public class MainWindow
 
 	/**
 	 * Tell all SelectTabAction that the shortcuts have changed, so that they can update accordingly.
-	 * 
+	 *
 	 * @see SelectTabAction#setNewIndex(int)
 	 */
 	private void updateViewShortcuts()

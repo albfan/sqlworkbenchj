@@ -236,6 +236,16 @@ public class EditorPanel
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
 
+	@Override
+	public void invalidate()
+	{
+		super.invalidate();
+		if (this.painter != null)
+		{
+			this.painter.invalidate();
+		}
+	}
+
 	public void disableSqlHighlight()
 	{
 		this.setTokenMarker(null);
