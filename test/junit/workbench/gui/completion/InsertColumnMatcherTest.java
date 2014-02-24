@@ -255,4 +255,13 @@ public class InsertColumnMatcherTest
 		assertEquals("c.x2", column);
 	}
 
+	@Test
+	public void testEmptyValue()
+	{
+		String insert  = "into foo (c1, c2, c3, c4) values (10,20,   )";
+		InsertColumnMatcher matcher = new InsertColumnMatcher(insert);
+		int pos = insert.indexOf(" c2,") + 5;
+		assertNull(matcher.getTooltipForPosition(pos));
+	}
+
 }
