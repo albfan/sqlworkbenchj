@@ -28,6 +28,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -74,6 +76,8 @@ public class XlsRowDataConverter
 	private boolean append;
 	private int targetSheetIndex = -1;
 	private String targetSheetName;
+	private Map<Integer, CellStyle> styles;
+	private Map<Integer, CellStyle> headerStyles;
 
 	public XlsRowDataConverter()
 	{
@@ -175,6 +179,8 @@ public class XlsRowDataConverter
 
 		createFormatters();
 		excelFormat.setupWithWorkbook(workbook);
+		styles = new HashMap<Integer, CellStyle>(this.getRealColumnCount());
+		headerStyles = new HashMap<Integer, CellStyle>(this.getRealColumnCount());
 
 		String suppliedTitle = getPageTitle(null);
 
@@ -534,8 +540,7 @@ public class XlsRowDataConverter
 		{
 			try
 			{
-				CellStyle style = workbook.createCellStyle();
-				style.cloneStyleFrom(cellStyle);
+				CellStyle style = geCachedStyle(cellStyle, column, isHead);
 				cell.setCellStyle(style);
 			}
 			catch (IllegalArgumentException iae)
@@ -543,6 +548,22 @@ public class XlsRowDataConverter
 				LogMgr.logWarning("XlsRowDataConverter.setCellValueAndStyle()", "Could not set style for column: " + metaData.getColumnName(column) + ", row: " + cell.getRowIndex() + ", column: " + cell.getColumnIndex());
 			}
 		}
+	}
+
+	private CellStyle geCachedStyle(CellStyle baseStyle, int column, boolean isHeader)
+	{
+		Map<Integer, CellStyle> styleCache = isHeader ? headerStyles : styles;
+		CellStyle style = style = styleCache.get(column);
+		if (style == null)
+		{
+			style = workbook.createCellStyle();
+			style.cloneStyleFrom(baseStyle);
+			if (!useXLSX)
+			{
+				styleCache.put(column, style);
+			}
+		}
+		return style;
 	}
 
 	public boolean isTemplate()
