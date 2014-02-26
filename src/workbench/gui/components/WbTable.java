@@ -1318,13 +1318,13 @@ public class WbTable
 			{
 				header.addMouseListener(this);
 			}
+			this.dwModel.setSortIgnoreCase(this.sortIgnoreCase);
 		}
 
 		if (aModel != EmptyTableModel.EMPTY_MODEL)
 		{
 			if (this.sortAscending != null) this.sortAscending.setEnabled(allowSort);
 			if (this.sortDescending != null) this.sortDescending.setEnabled(allowSort);
-			this.dwModel.setSortIgnoreCase(this.sortIgnoreCase);
 
 			// it seems that JTable.setModel() resets the default renderers and editors
 			// so we'll have to do it again...
@@ -1419,7 +1419,7 @@ public class WbTable
 	{
 		applyFilter(filter, true);
 	}
-	
+
 	public void applyFilter(FilterExpression filter, boolean adjustColumns)
 	{
 		if (dwModel == null) return;
