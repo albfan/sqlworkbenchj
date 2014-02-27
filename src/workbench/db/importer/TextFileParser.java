@@ -49,6 +49,7 @@ import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 
+import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.CsvLineParser;
 import workbench.util.ExceptionUtil;
@@ -498,10 +499,10 @@ public class TextFileParser
 			catch (IOException io)
 			{
 				LogMgr.logError("TextFileParser.processOneFile()", "Could not read line ending from file. Multi-line mode disabled!", io);
-				this.messages.append(ResourceMgr.getString("ErrNoMultiLine") + "\n");
+				this.messages.append(ResourceMgr.getString("ErrNoMultiLine"));
 				enableMultiLineMode = false;
 			}
-			LogMgr.logInfo("TextFileParser.processOneFile()", "Using line ending: " + lineEnding.replace("\\r", "\\\\r").replaceAll("\\n", "\\\\n"));
+			LogMgr.logInfo("TextFileParser.processOneFile()", "Using line ending: " + StringUtil.escapeText(lineEnding, CharacterRange.RANGE_CONTROL));
 			// now that we have already used the Reader supplied by the fileHandler,
 			// we have to close and re-open the ZIP archive in order to make sure we start at the beginning
 			// as we cannot rely on mark() and reset() to be available for the ZIP archives.

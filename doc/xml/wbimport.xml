@@ -865,7 +865,7 @@
 							</para>
 							<para>
 								If <literal>escape</literal> is specified, it is expected that a quote that
-								is part of the data is preceded with a backslas,
+								is part of the data is preceded with a backslash,
 								e.g. the input value <literal>here is a \" quote character</literal> will be imported
 								as <literal>here is a " quote character</literal>
 							</para>
