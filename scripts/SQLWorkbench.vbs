@@ -4,18 +4,26 @@
 ' *******************************************************************************************
 
 set WshShell = WScript.CreateObject("WScript.Shell" )
+set FSO = WScript.CreateObject("Scripting.FileSystemObject")
+
 javaHome = WshShell.ExpandEnvironmentStrings("%JAVA_HOME%")
 wbJava = WshShell.ExpandEnvironmentStrings("%WORKBENCH_JDK%")
+wbpath = Left(WScript.ScriptFullName, Len(WScript.ScriptFullName) - Len(WScript.ScriptName))
 
 set args = WScript.Arguments
 
-if (wbJava <> "%WORKBENCH_JDK%") then
-  javaPath = wbJava & "\bin\javaw.exe"
-else
-  javaPath = javaHome & "\bin\javaw.exe"
+localJRE = wbpath & "jre\bin\javaw.exe"
+
+if (FSO.FileExists(localJRE)) then 
+  javaPath = localJRE
+else 
+  if (wbJava <> "%WORKBENCH_JDK%") then
+    javaPath = wbJava & "\bin\javaw.exe"
+  else
+    javaPath = javaHome & "\bin\javaw.exe"
+  end if
 end if
 
-wbpath = Left(WScript.ScriptFullName, Len(WScript.ScriptFullName) - Len(WScript.ScriptName))
 jarpath = wbpath & "sqlworkbench.jar"
 
 javaCmd = chr(34) & javaPath & chr(34) & " -Xmx256m -jar " & chr(34) & jarpath & chr(34)
