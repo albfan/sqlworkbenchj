@@ -997,9 +997,12 @@ public class DbSettings
 	 */
 	public boolean getGenerateTableIndexSource()
 	{
-		if (!getUseCustomizedCreateTableRetrieval()) return true;
-		boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.index_included", false);
-		return !included;
+		if (isTableSourceRetrievalCustomized())
+		{
+			boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.index_included", false);
+			return !included;
+		}
+		return Settings.getInstance().getBoolProperty(prefix + "generate.tablesource.include.indexes", true);
 	}
 
 	/**
@@ -1011,9 +1014,12 @@ public class DbSettings
 	 */
 	public boolean getGenerateTableFKSource()
 	{
-		if (!getUseCustomizedCreateTableRetrieval()) return true;
-		boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.fk_included", false);
-		return !included;
+		if (isTableSourceRetrievalCustomized())
+		{
+			boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.fk_included", false);
+			return !included;
+		}
+		return Settings.getInstance().getBoolProperty(prefix + "generate.tablesource.include.fk", true);
 	}
 
 	/**
@@ -1032,9 +1038,13 @@ public class DbSettings
 	 */
 	public boolean getGenerateTableComments()
 	{
-		if (!getUseCustomizedCreateTableRetrieval()) return true;
-		boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.comments_included", false);
-		return !included;
+		if (isTableSourceRetrievalCustomized())
+		{
+			boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.comments_included", false);
+			return !included;
+		}
+		boolean defaultFlag = Settings.getInstance().getBoolProperty("workbench.db.generate.tablesource.generate..comments", true);
+		return Settings.getInstance().getBoolProperty(prefix + "generate.tablesource.include.comments", defaultFlag);
 	}
 
 	/**
@@ -1047,11 +1057,19 @@ public class DbSettings
 	 */
 	public boolean getGenerateTableGrants()
 	{
-		if (!getUseCustomizedCreateTableRetrieval()) return true;
-		boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.grants_included", false);
-		return !included;
+		if (isTableSourceRetrievalCustomized())
+		{
+			boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.grants_included", false);
+			return !included;
+		}
+		boolean defaultFlag = Settings.getInstance().getBoolProperty("workbench.db.generate.tablesource.include.grants", true);
+		return Settings.getInstance().getBoolProperty(prefix + "generate.tablesource.include.grants", defaultFlag);
 	}
 
+	private boolean isTableSourceRetrievalCustomized()
+	{
+		return (getUseCustomizedCreateTableRetrieval() && getRetrieveTableSourceSql() != null);
+	}
 	/*
 	 * @see workbench.db.TableSourceBuilder#getTableSource(workbench.db.TableIdentifier, java.util.List, workbench.storage.DataStore, workbench.storage.DataStore, boolean, java.lang.String, boolean)
 	 */

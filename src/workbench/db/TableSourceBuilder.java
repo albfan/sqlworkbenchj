@@ -102,6 +102,12 @@ public class TableSourceBuilder
 	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk)
 		throws SQLException
 	{
+		return getTableSource(table, includeDrop, includeFk, dbConnection.getDbSettings().getGenerateTableGrants());
+	}
+
+	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk, boolean includeGrants)
+		throws SQLException
+	{
 		if (dbConnection.getDbSettings().isViewType(table.getType()))
 		{
 			CharSequence s = getViewReader().getExtendedViewSource(table, includeDrop);
@@ -121,7 +127,7 @@ public class TableSourceBuilder
 		{
 			fkDef = getForeignKeys(def.getTable());
 		}
-		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, includeDrop, includeFk);
+		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, includeDrop, includeFk, includeGrants);
 
 		// copy the source to the original table so that they are available later as well
 		// and don't need to be re-retrieved
@@ -177,6 +183,11 @@ public class TableSourceBuilder
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkList, boolean includeDrop, boolean includeFk)
 	{
+		return getTableSource(table, columns, indexList, fkList, includeDrop, includeFk, dbConnection.getDbSettings().getGenerateTableGrants());
+	}
+
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkList, boolean includeDrop, boolean includeFk, boolean includeGrants)
+	{
 		readTableOptions(table, columns);
 
 		CharSequence createSql = getCreateTable(table, columns, indexList, fkList, includeDrop, includeFk);
@@ -211,7 +222,7 @@ public class TableSourceBuilder
 
 		appendTableComments(result, table, columns, lineEnding);
 
-		if (dbConnection.getDbSettings().getGenerateTableGrants())
+		if (includeGrants)
 		{
 			TableGrantReader grantReader = new TableGrantReader();
 			StringBuilder grants = grantReader.getTableGrantSource(this.dbConnection, table);

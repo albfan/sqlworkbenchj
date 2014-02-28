@@ -857,6 +857,12 @@ public class TableIdentifier
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
+		return getSource(con, retrieveFkSource, con.getDbSettings().getGenerateTableGrants());
+	}
+
+	public CharSequence getSource(WbConnection con, boolean includeFk, boolean includeGrants)
+		throws SQLException
+	{
 		CharSequence source;
 		DbMetadata meta = con.getMetadata();
 		if (meta.isExtendedObject(this))
@@ -884,7 +890,7 @@ public class TableIdentifier
 		else
 		{
 			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-			source = builder.getTableSource(this, false, retrieveFkSource);
+			source = builder.getTableSource(this, false, includeFk, includeGrants);
 		}
 		return source;
 	}

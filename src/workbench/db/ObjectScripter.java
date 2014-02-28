@@ -68,6 +68,7 @@ public class ObjectScripter
 	private boolean appendCommit;
 	private boolean useSeparator = true;
 	private boolean includeDrop;
+	private boolean includeGrants = true;
 	private Collection<String> typesWithoutSeparator;
 	private String sequenceType;
 	private GenericObjectDropper dropper;
@@ -97,6 +98,11 @@ public class ObjectScripter
 	public WbConnection getCurrentConnection()
 	{
 		return dbConnection;
+	}
+
+	public void setIncludeGrants(boolean flag)
+	{
+		this.includeGrants = flag;
 	}
 
 	public void setIncludeDrop(boolean flag)
@@ -244,7 +250,15 @@ public class ObjectScripter
 
 			try
 			{
-				source = dbo.getSource(dbConnection);
+				if (dbo instanceof TableIdentifier)
+				{
+					// do not generate foreign keys now, they should be generated at the end after all tables
+					source = ((TableIdentifier)dbo).getSource(dbConnection, false, includeGrants);
+				}
+				else
+				{
+					source = dbo.getSource(dbConnection);
+				}
 				if (!appendCommit)
 				{
 					appendCommit = commitTypes.contains(type.toLowerCase());

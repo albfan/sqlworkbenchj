@@ -78,6 +78,7 @@ public class WbGenerateScript
 		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("useSeparator", ArgumentType.BoolSwitch);
 		cmdLine.addArgument("file", ArgumentType.StringArgument);
 		cmdLine.addArgument("includeDrop", ArgumentType.BoolSwitch);
@@ -159,6 +160,7 @@ public class WbGenerateScript
 		scripter = new ObjectScripter(objects, currentConnection);
 		scripter.setUseSeparator(cmdLine.getBoolean("useSeparator", false));
 		scripter.setIncludeDrop(cmdLine.getBoolean("includeDrop", false));
+		scripter.setIncludeGrants(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_GRANTS, true));
 
 		if (this.rowMonitor != null)
 		{

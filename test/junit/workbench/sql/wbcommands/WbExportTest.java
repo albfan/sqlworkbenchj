@@ -1218,9 +1218,12 @@ public class WbExportTest
 
 			File[] files = dir.listFiles();
 			int xmlFiles = 0;
-			for (int i = 0; i < files.length; i++)
+			for (File file : files)
 			{
-				if (files[i].getAbsolutePath().endsWith(".xml")) xmlFiles ++;
+				if (file.getAbsolutePath().endsWith(".xml"))
+				{
+					xmlFiles ++;
+				}
 			}
 			assertEquals("Not all tables exported", 4, xmlFiles);
 

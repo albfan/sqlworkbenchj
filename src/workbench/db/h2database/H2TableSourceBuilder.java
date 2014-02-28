@@ -51,7 +51,7 @@ public class H2TableSourceBuilder
 	}
 
 	@Override
-	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk)
+	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk, boolean includeGrants)
 		throws SQLException
 	{
 		if ("TABLE LINK".equals(table.getType()))
@@ -59,7 +59,7 @@ public class H2TableSourceBuilder
 			String sql = getLinkedTableSource(table, includeDrop);
 			if (sql != null) return sql;
 		}
-		return super.getTableSource(table, includeDrop, includeFk);
+		return super.getTableSource(table, includeDrop, includeFk, includeGrants);
 	}
 
 	private String getLinkedTableSource(TableIdentifier table, boolean includeDrop)
@@ -154,7 +154,7 @@ public class H2TableSourceBuilder
 				{
 					defaultType = "MEMORY";
 				}
-				
+
 				if (alwaysShowType || !defaultType.equals(type))
 				{
 					tbl.getSourceOptions().setTypeModifier(type);
