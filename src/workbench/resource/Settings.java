@@ -1050,6 +1050,26 @@ public class Settings
 
 	// <editor-fold defaultstate="collapsed" desc="DbExplorer">
 
+	public boolean getGenerateTableGrants()
+	{
+		return getBoolProperty("workbench.db.generate.tablesource.include.grants", true);
+	}
+
+	public void setGenerateTableGrants(boolean flag)
+	{
+		setProperty("workbench.db.generate.tablesource.include.grants", flag);
+	}
+
+	public boolean getDbExpGenerateDrop()
+	{
+		return getBoolProperty("workbench.dbexplorer.generate.drop", true);
+	}
+
+	public void setDbExpGenerateDrop(boolean flag)
+	{
+		setProperty("workbench.dbexplorer.generate.drop", flag);
+	}
+
 	public boolean getDbExpUsePartialMatch()
 	{
 		return getBoolProperty(PROPERTY_DBEXP_ASSUME_WILDCARDS, true);

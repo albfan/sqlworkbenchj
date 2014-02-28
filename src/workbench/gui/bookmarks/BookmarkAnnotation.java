@@ -27,6 +27,7 @@ import workbench.resource.GuiSettings;
 
 import workbench.sql.AnnotationReader;
 import workbench.sql.ResultNameParser;
+import workbench.sql.UseTabAnnotation;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
@@ -41,7 +42,7 @@ public class BookmarkAnnotation
 {
 	public static final String ANNOTATION = "WbTag";
 
-	private String resultNameTag;
+	private List<String> validTags = new ArrayList<String>(3);
 
 	public BookmarkAnnotation()
 	{
@@ -51,13 +52,12 @@ public class BookmarkAnnotation
 
 	public void setUseResultTag(boolean flag)
 	{
+		validTags.clear();
+		validTags.add(ANNOTATION.toLowerCase());
 		if (flag)
 		{
-			resultNameTag = "@" + ResultNameParser.ANNOTATION.toLowerCase();
-		}
-		else
-		{
-			resultNameTag = null;
+			validTags.add("@" + ResultNameParser.ANNOTATION.toLowerCase());
+			validTags.add("@" + UseTabAnnotation.ANNOTATION.toLowerCase());
 		}
 	}
 
@@ -77,12 +77,7 @@ public class BookmarkAnnotation
 		{
 			if (token.isComment())
 			{
-				String locationName = StringUtil.trim(extractAnnotationValue(token));
-				if (locationName == null && resultNameTag != null)
-				{
-					locationName = StringUtil.trim(extractAnnotationValue(token, resultNameTag));
-				}
-
+				String locationName = findTagValue(token);
 				if (locationName != null)
 				{
 					NamedScriptLocation bookmark = new NamedScriptLocation(locationName, token.getCharBegin(), tabId);
@@ -94,4 +89,13 @@ public class BookmarkAnnotation
 		return bookmarks;
 	}
 
+	private String findTagValue(SQLToken token)
+	{
+		for (String tag : validTags)
+		{
+			String value = StringUtil.trim(extractAnnotationValue(token, tag));
+			if (value != null) return value;
+		}
+		return null;
+	}
 }

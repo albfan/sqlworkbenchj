@@ -1780,6 +1780,12 @@ WHERE id=42;</programlisting>
 								</para>
 							</entry>
 						</row>
+            <row>
+              <entry>-includeTableGrants</entry>
+              <entry>
+                This parameter controls the generation of table grants. The default value is <literal>true</literal>.
+              </entry>
+            </row>
 						<row>
 							<entry>-useSeparator</entry>
 							<entry>

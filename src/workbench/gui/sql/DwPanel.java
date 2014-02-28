@@ -157,6 +157,7 @@ public class DwPanel
 	private JLabel sqlInfo;
 	private boolean enableSqlInfo;
 	private boolean disconnected;
+	private boolean wasReUsed;
 
 	public DwPanel()
 	{
@@ -194,6 +195,16 @@ public class DwPanel
 		initColors();
 	}
 
+	public void setReUsed(boolean flag)
+	{
+		this.wasReUsed = flag;
+	}
+
+	public boolean wasReUsed()
+	{
+		return wasReUsed;
+	}
+	
 	public void dispose()
 	{
 		clearContent();

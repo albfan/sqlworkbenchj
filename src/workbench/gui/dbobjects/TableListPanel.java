@@ -1282,7 +1282,7 @@ public class TableListPanel
 				}
 				props.setProperty(prefix + "tablelist.sort", sort);
 			}
-			
+
 			List<String> objectListColumnOrder = tableList.saveColumnOrder();
 			if (objectListColumnOrder != null)
 			{
@@ -1556,7 +1556,7 @@ public class TableListPanel
 			// isExtendedTableType() checks for regular tables and "extended tables"
 			else if (meta.isExtendedTableType(type))
 			{
-				sql = builder.getTableSource(selectedTable, true, true);
+				sql = builder.getTableSource(selectedTable, Settings.getInstance().getDbExpGenerateDrop(), true, Settings.getInstance().getGenerateTableGrants());
 			}
 
 			if (sql != null && dbConnection.getDbSettings().ddlNeedsCommit())

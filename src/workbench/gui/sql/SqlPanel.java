@@ -193,6 +193,7 @@ import workbench.sql.ScrollAnnotation;
 import workbench.sql.StatementHistory;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.UseTabAnnotation;
 import workbench.sql.VariablePool;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.macros.MacroManager;
@@ -2775,6 +2776,33 @@ public class SqlPanel
 		clearResultTabs();
 	}
 
+	private int findFirstReused()
+	{
+		for (int i=0; i < resultTab.getTabCount() - 1; i ++)
+		{
+			Component c = resultTab.getComponentAt(i);
+			if (c instanceof DwPanel)
+			{
+				DwPanel panel = (DwPanel)c;
+				if (panel.wasReUsed()) return i;
+			}
+		}
+		return -1;
+	}
+
+	private void resetReuse()
+	{
+		for (int i=0; i < resultTab.getTabCount() - 1; i ++)
+		{
+			Component c = resultTab.getComponentAt(i);
+			if (c instanceof DwPanel)
+			{
+				DwPanel panel = (DwPanel)c;
+				panel.setReUsed(false);
+			}
+		}
+	}
+
 	/**
 	 * Close all result tabs without asking
 	 */
@@ -3041,11 +3069,13 @@ public class SqlPanel
 		StatementRunnerResult statementResult = null;
 
 		int currentCursor = this.editor.getCaretPosition();
+		int currentResultCount = this.resultTab.getTabCount() - 1;
 
 		try
 		{
 			if (appendResult)
 			{
+				resetReuse();
 				firstResultIndex = this.resultTab.getTabCount() - 1;
 				appendToLog("\n");
 			}
@@ -3141,9 +3171,7 @@ public class SqlPanel
 
 			boolean onErrorAsk = !Settings.getInstance().getIgnoreErrors();
 
-			// Displays the first "result" tab. As no result is available
-			// at this point, it merely shows the message log
-			showResultPanel();
+			showLogPanel();
 
 			highlightCurrent = ((count > 1 || cursorPos > -1) && (!macroRun) && Settings.getInstance().getHighlightCurrentStatement());
 
@@ -3349,7 +3377,16 @@ public class SqlPanel
 			ignoreStateChange = false;
 			if (resultSets > 0)
 			{
-				if (firstResultIndex > 0) this.showResultPanel(firstResultIndex);
+				if (resultTab.getTabCount() - 1 == currentResultCount)
+				{
+					// this means at least one result was re-used
+					int index = findFirstReused();
+					if (index > -1) this.showResultPanel(index);
+				}
+				else if (firstResultIndex > 0)
+				{
+					this.showResultPanel(firstResultIndex);
+				}
 			}
 			else
 			{
@@ -3673,6 +3710,22 @@ public class SqlPanel
 		return resultTab.getTabCount();
 	}
 
+	private DwPanel findResultPanelByName(String toFind)
+	{
+		int tabCount = this.resultTab.getTabCount();
+		for (int i = 0; i < tabCount; i++)
+		{
+
+			String name  = resultTab.getTitleAt(i);
+			if (StringUtil.equalStringIgnoreCase(name, toFind))
+			{
+				DwPanel p = (DwPanel)resultTab.getComponentAt(i);
+				return p;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Display the data contained in the StatementRunnerResult.
 	 * For each DataStore or ResultSet in the result, an additional
@@ -3695,7 +3748,7 @@ public class SqlPanel
 		{
 			final List<DataStore> results = result.getDataStores();
 			count += results.size();
-			final List<DwPanel> newPanels = new ArrayList<DwPanel>(results.size());
+			final List<DwPanel> panels = new ArrayList<DwPanel>(results.size());
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				@Override
@@ -3703,13 +3756,32 @@ public class SqlPanel
 				{
 					try
 					{
+						UseTabAnnotation useTab = new UseTabAnnotation();
 						for (DataStore ds : results)
 						{
 							String gen = StringUtil.isNonBlank(sql) ? sql : ds.getGeneratingSql();
-							DwPanel p = createDwPanel(true);
-							p.showData(ds, gen, time);
-							addResultTab(p);
-							newPanels.add(p);
+							String tabName = useTab.getResultName(sql);
+
+							DwPanel p = null;
+							if (StringUtil.isNonEmpty(tabName))
+							{
+								ds.setResultName(tabName);
+								p = findResultPanelByName(tabName);
+							}
+
+							if (p != null)
+							{
+								p.showData(ds, gen, time);
+								panels.add(p);
+								p.setReUsed(true);
+							}
+							else
+							{
+								p = createDwPanel(true);
+								p.showData(ds, gen, time);
+								addResultTab(p);
+								panels.add(p);
+							}
 						}
 					}
 					catch (Exception e)
@@ -3722,7 +3794,7 @@ public class SqlPanel
 			// The retrieval of column comments should not be done on the AWT Thread
 			if (GuiSettings.getRetrieveQueryComments())
 			{
-				for (DwPanel p : newPanels)
+				for (DwPanel p : panels)
 				{
 					p.readColumnComments();
 				}

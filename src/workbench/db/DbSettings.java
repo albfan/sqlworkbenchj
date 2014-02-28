@@ -31,13 +31,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import workbench.db.exporter.RowDataConverter;
-import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.sql.commands.SingleVerbCommand;
+
+import workbench.db.exporter.RowDataConverter;
+
+import workbench.gui.dbobjects.TableSearchPanel;
+
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
+
+import workbench.sql.commands.SingleVerbCommand;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -1062,7 +1066,7 @@ public class DbSettings
 			boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.grants_included", false);
 			return !included;
 		}
-		boolean defaultFlag = Settings.getInstance().getBoolProperty("workbench.db.generate.tablesource.include.grants", true);
+		boolean defaultFlag = Settings.getInstance().getGenerateTableGrants();
 		return Settings.getInstance().getBoolProperty(prefix + "generate.tablesource.include.grants", defaultFlag);
 	}
 
