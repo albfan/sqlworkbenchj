@@ -1017,8 +1017,9 @@ public class DbSettings
 	}
 
 	/**
-	 * If customized SQL is configured to retrieve the source of a table, this setting controls if table and column
-	 * comments should be gnerated by SQL Workbench.
+	 * If customized SQL is configured to retrieve the source of a table, this setting identifies if table and column
+	 * comments are included in the generated SQL.
+	 *
 	 * <br/>
 	 * If no SQL is configured, this method always returns true. Otherwise the value of the config property <br/>
 	 * <tt>workbench.db.[dbid].retrieve.create.table.comments_included</tt> is checked. If that is true to indicate that
@@ -1026,6 +1027,7 @@ public class DbSettings
 	 * <br/>
 	 *
 	 * @see #getUseCustomizedCreateTableRetrieval()
+	 *
 	 * @return true if table comments (including columns) should be generated
 	 */
 	public boolean getGenerateTableComments()
@@ -1036,9 +1038,11 @@ public class DbSettings
 	}
 
 	/**
+	 * Returns if the table grants are already included in the generated table source.
 	 *
 	 * @see #getUseCustomizedCreateTableRetrieval()
 	 * @see workbench.db.TableSourceBuilder#getTableSource(workbench.db.TableIdentifier, java.util.List, workbench.storage.DataStore, workbench.storage.DataStore, boolean, java.lang.String, boolean)
+	 *
 	 * @return true if table grants should be generated even if the table source is retrieved by a customized statement
 	 */
 	public boolean getGenerateTableGrants()
