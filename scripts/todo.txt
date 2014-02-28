@@ -1,5 +1,12 @@
 Features:
 ---------
+- replaced result tab for a named result 
+  e.g. @WbResultTab foobar
+  when the query is executed, the result will replace an existing result with that name
+  if none exists a new tab is created
+- support for named parameters from e.g. JPA Queries
+  select * from foo where x = :id;
+  
 - WbVarDef
   - use all rows of a result (e.g. concatenated using \n)
 - Profiles
