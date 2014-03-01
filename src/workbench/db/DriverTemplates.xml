@@ -243,23 +243,6 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
-     <string>sun.jdbc.odbc.JdbcOdbcDriver</string>
-    </void>
-    <void property="library">
-     <string></string>
-    </void>
-    <void property="name">
-     <string>ODBC Bridge</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:odbc:datasource_name_from_control_panel</string>
-    </void>
-   </object>
-  </void>
-
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
      <string>de.sag.jdbc.adabasd.ADriver</string>
     </void>
     <void property="library">
@@ -309,57 +292,6 @@
   </void>
 
   <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>sun.jdbc.odbc.JdbcOdbcDriver</string>
-    </void>
-    <void property="library">
-     <string></string>
-    </void>
-    <void property="name">
-     <string>Excel</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:odbc:DRIVER={Microsoft Excel Driver (*.xls)};DBQ=full_pathname_to_xls_file</string>
-    </void>
-   </object>
-  </void>
-
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>sun.jdbc.odbc.JdbcOdbcDriver</string>
-    </void>
-    <void property="library">
-     <string></string>
-    </void>
-    <void property="name">
-     <string>Access</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)};DBQ=full_pathname_to_mdb_file</string>
-    </void>
-   </object>
-  </void>
-
-  <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>sun.jdbc.odbc.JdbcOdbcDriver</string>
-    </void>
-    <void property="library">
-     <string></string>
-    </void>
-    <void property="name">
-     <string>dBase</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:odbc:DRIVER={Microsoft dBase Driver (*.dbf)};DefaultDir=full_path_to_dir_with_dbf</string>
-    </void>
-   </object>
-  </void>
-
-  <void method="add">
     <object class="workbench.db.DbDriver">
      <void property="driverClass">
       <string>com.ibm.as400.access.AS400JDBCDriver</string>
@@ -375,7 +307,6 @@
      </void>
     </object>
    </void>
-
 
   <void method="add">
    <object class="workbench.db.DbDriver">

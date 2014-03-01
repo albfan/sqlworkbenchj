@@ -309,6 +309,7 @@
 						</entry>
 					</row>
 
+          <!--
 					<row>
 						<entry>ODBC Bridge (not recommended!)</entry>
 						<entry><literal>sun.jdbc.odbc.JdbcOdbcDriver</literal></entry>
@@ -317,7 +318,7 @@
 						</simplelist>
 						</entry>
 					</row>
-
+          -->
 				</tbody>
 			</tgroup>
 		</informaltable>

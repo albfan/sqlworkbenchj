@@ -653,13 +653,11 @@
         instead of the default application icon.
       </para>
       <para>
-        The icon file can be a <literal>png</literal> or <literal>gif</literal> file.
+        The icon file can <emphasis role="bold">only</emphasis> be a <literal>png</literal> or <literal>gif</literal> file.
       </para>
-      <caution>
-        <para>
-          Do <emphasis role="bold">not</emphasis> use an animated GIF file because that will hang the application!
-        </para>
-      </caution>
+      <para>
+        Do <emphasis role="bold">not</emphasis> use an animated GIF file because that will hang the application!
+      </para>
       <para>
         At least one file with an icon of 16x16 pixel should be selected. You can select multiple files with different
         icon sizes (e.g. a 16x16 and a 32x32 icon). Whether or not the additional sizes (i.e. bigger than 16x16)
@@ -678,13 +676,21 @@
 
   <section id="odbc">
 		<title>ODBC connections without a data source</title>
+    <para>
+      <important>
+        The ODBC bridge has been removed from the Java with the release of Java 8.
+      </important>
+    </para>
 		<para>
 			On Microsoft Windows&reg; you can use the ODBC bridge to connect to
 			ODBC datasources. For some drivers you don&#39;t need to create an ODBC
 			datasource in order to be able to use the ODBC driver. The following
 			URLs can be used to connect to data files directly.
 		</para>
-		<para>The class name of the driver is <literal>sun.jdbc.odbc.JdbcOdbcDriver</literal></para>
+    <para>
+      The class name of the driver (in Java7 and earlier) is
+        <emphasis role="bold"><literal>sun.jdbc.odbc.JdbcOdbcDriver</literal></emphasis>
+    </para>
 
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
