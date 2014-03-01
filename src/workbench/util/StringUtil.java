@@ -370,14 +370,43 @@ public class StringUtil
 		return true;
 	}
 
-	public static boolean hasOpenQuotes(String data, char quoteChar)
+	public static boolean hasOpenQuotes(String data, char quoteChar, QuoteEscapeType escapeType)
 	{
 		if (isEmptyString(data)) return false;
 		int chars = data.length();
 		boolean inQuotes = false;
 		for (int i = 0; i < chars; i++)
 		{
-			if (data.charAt(i) == quoteChar) inQuotes = !inQuotes;
+			char current = data.charAt(i);
+			if (current == quoteChar)
+			{
+				if (escapeType == QuoteEscapeType.escape)
+				{
+					char last = 0;
+					if (i > 1) last = data.charAt(i - 1);
+					if (last != '\\')
+					{
+						inQuotes = !inQuotes;
+					}
+				}
+				else if (escapeType == QuoteEscapeType.duplicate)
+				{
+					char next = 0;
+					if (i < data.length() - 1) next = data.charAt(i + 1);
+					if (next == quoteChar)
+					{
+						i++;
+					}
+					else
+					{
+						inQuotes = !inQuotes;
+					}
+				}
+				else
+				{
+					inQuotes = !inQuotes;
+				}
+			}
 		}
 		return inQuotes;
 	}
@@ -1770,7 +1799,7 @@ public class StringUtil
 		}
 		return result;
 	}
-	
+
 	public static String arrayToString(int[] values)
 	{
 		if (values == null) return null;

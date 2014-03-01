@@ -617,7 +617,7 @@ public class TextFileParser
 					continue;
 				}
 
-				if (enableMultiLineMode && StringUtil.hasOpenQuotes(currentLine, quoteCharToUse))
+				if (enableMultiLineMode && StringUtil.hasOpenQuotes(currentLine, quoteCharToUse, quoteEscape))
 				{
 					try
 					{

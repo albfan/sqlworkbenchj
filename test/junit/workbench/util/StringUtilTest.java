@@ -712,13 +712,28 @@ public class StringUtilTest
 	public void testHasOpenQuotes()
 	{
 		String value = "this line does not have quotes";
-		assertEquals("Wrong check for non-quotes", false, StringUtil.hasOpenQuotes(value, '\''));
+		assertFalse(StringUtil.hasOpenQuotes(value, '\'', QuoteEscapeType.none));
 
 		value = "this line 'does' have quotes";
-		assertEquals("Wrong check for quotes", false, StringUtil.hasOpenQuotes(value, '\''));
+		assertFalse(StringUtil.hasOpenQuotes(value, '\'', QuoteEscapeType.none));
 
 		value = "this line leaves a 'quote open";
-		assertEquals("Wrong check for open quotes", true, StringUtil.hasOpenQuotes(value, '\''));
+		assertTrue(StringUtil.hasOpenQuotes(value, '\'', QuoteEscapeType.none));
+
+		value = "this 12\\\"monitor ";
+		assertFalse(StringUtil.hasOpenQuotes(value, '"', QuoteEscapeType.escape));
+
+		value = "this \"monitor ";
+		assertTrue(StringUtil.hasOpenQuotes(value, '"', QuoteEscapeType.escape));
+
+		value = "'foo';'Peter\\'s house';'some data'";
+		assertFalse(StringUtil.hasOpenQuotes(value, '\'', QuoteEscapeType.escape));
+
+		value = "'foo';'Peter''s house';'some data'";
+		assertFalse(StringUtil.hasOpenQuotes(value, '\'', QuoteEscapeType.duplicate));
+
+		value = "'foo';'Peter's house';'some data'";
+		assertTrue(StringUtil.hasOpenQuotes(value, '\'', QuoteEscapeType.duplicate));
 	}
 
 	@Test
