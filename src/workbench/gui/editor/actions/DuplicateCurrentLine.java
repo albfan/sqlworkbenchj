@@ -23,10 +23,13 @@
 package workbench.gui.editor.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.text.BadLocationException;
+
+import workbench.resource.Settings;
+
 import workbench.gui.editor.InputHandler;
 import workbench.gui.editor.JEditTextArea;
-import workbench.resource.Settings;
 
 /**
  *
@@ -46,18 +49,44 @@ public class DuplicateCurrentLine
 		JEditTextArea textArea = InputHandler.getTextArea(evt);
 		if (textArea == null) return;
 
-		int line = textArea.getCaretLine();
-		String lineText = textArea.getLineText(line) + Settings.getInstance().getInternalEditorLineEnding();
 
-		int lineEnd = textArea.getLineEndOffset(line);
+		int insertPoint = -1;
+		int currentLine = textArea.getCaretLine();
+		int currentColumn = textArea.getCaretPositionInLine(currentLine);
+
+		boolean wasSelected = false;
+
+		String dupeText = textArea.getSelectedText();
+		
+		if (dupeText != null)
+		{
+			insertPoint = textArea.getSelectionEnd();
+			textArea.select(insertPoint, insertPoint);
+			wasSelected = true;
+		}
+		else
+		{
+			dupeText = textArea.getLineText(currentLine) + Settings.getInstance().getInternalEditorLineEnding();
+			insertPoint = textArea.getLineEndOffset(currentLine);
+		}
 
 		try
 		{
-			textArea.getDocument().insertString(lineEnd, lineText, null);
+			textArea.getDocument().insertString(insertPoint, dupeText, null);
 		}
 		catch (BadLocationException bl)
 		{
 			bl.printStackTrace();
+		}
+
+		if (wasSelected)
+		{
+			textArea.select(insertPoint, insertPoint + dupeText.length());
+		}
+		else
+		{
+			int newPos = textArea.getLineStartOffset(currentLine + 1) + currentColumn;
+			textArea.setCaretPosition(newPos);
 		}
 	}
 }
