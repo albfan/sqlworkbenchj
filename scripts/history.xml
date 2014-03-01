@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-02-22">
+    <entry dev-build="12" type="enh">Duplicate current line in the editor is now selection aware. If text is selected, the selection is duplicated, rather than the whole line</entry>
     <entry dev-build="12" type="enh">WbGenerateScript has a new option to include the table's GRANTs.</entry>
     <entry dev-build="12" type="enh">The generation of table grants and DROP statements in the DbExplorer can now be disabled through the options panel</entry>
     <entry dev-build="12" type="enh">A new result annotation (@WbUseTab) is available that will re-use an existing result tab with the same name if already present</entry>
