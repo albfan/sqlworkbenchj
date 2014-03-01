@@ -1275,6 +1275,10 @@ public class TableListPanel
 			if (Settings.getInstance().getBoolProperty(PROP_DO_SAVE_SORT, false))
 			{
 				NamedSortDefinition sortDef = tableList.getCurrentSort();
+				if (sortDef == null)
+				{
+					sortDef = savedSort;
+				}
 				String sort = null;
 				if (sortDef != null)
 				{
