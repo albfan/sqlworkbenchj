@@ -23,8 +23,10 @@
 package workbench.db.ibm;
 
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 
 import workbench.log.LogMgr;
@@ -32,11 +34,14 @@ import workbench.resource.Settings;
 
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
+import workbench.db.JdbcUtils;
+import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * DB2's JDBC driver only returns procedures, not functions.
@@ -49,11 +54,13 @@ public class Db2ProcedureReader
 	extends JdbcProcedureReader
 {
 	private boolean useJDBC;
+	private boolean retrieveFunctionParameters;
 
 	public Db2ProcedureReader(WbConnection conn, String dbID)
 	{
 		super(conn);
 		useJDBC = dbID.equals("db2i");
+		retrieveFunctionParameters = Settings.getInstance().getBoolProperty("workbench.db." + dbID + ".functionparams.fixretrieval", true);
 	}
 
 	@Override
@@ -154,6 +161,68 @@ public class Db2ProcedureReader
 			SqlUtil.appendAndCondition(sql, "routinename", namePattern, this.connection);
 		}
 		return sql.toString();
+	}
+
+	@Override
+	public DataStore getProcedureColumns(ProcedureDefinition def)
+		throws SQLException
+	{
+		if (def.isFunction() && retrieveFunctionParameters)
+		{
+			return getFunctionParameters(def);
+		}
+		return super.getProcedureColumns(def);
+	}
+
+	public DataStore getFunctionParameters(ProcedureDefinition def)
+		throws SQLException
+	{
+		DataStore ds = createProcColsDataStore();
+
+		PreparedStatement stmt = null;
+		Savepoint sp = null;
+		ResultSet rs = null;
+		String sql = "call SYSIBM.SQLFUNCTIONCOLS(?, ?, ?, '%', null)";
+		try
+		{
+			if (useSavepoint)
+			{
+				sp = this.connection.setSavepoint();
+			}
+
+			stmt = connection.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, def.getCatalog());
+			stmt.setString(2, def.getSchema());
+			stmt.setString(3, def.getProcedureName());
+			rs = stmt.executeQuery();
+
+			int specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFIC_NAME");
+			if (specIndex < 0)
+			{
+				specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFICNAME");
+			}
+			String specificName = def.getSpecificName();
+
+			while (rs.next())
+			{
+				String procSpecName = specIndex  > -1 ? rs.getString(specIndex) : null;
+				if (!StringUtil.equalString(procSpecName, specificName)) continue;
+				processProcedureColumnResultRow(ds, rs, true);
+			}
+			this.connection.releaseSavepoint(sp);
+		}
+		catch (SQLException ex)
+		{
+			this.connection.rollback(sp);
+			throw ex;
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+
+		return ds;
+
 	}
 
 }

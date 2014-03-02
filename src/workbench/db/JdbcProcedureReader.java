@@ -325,12 +325,18 @@ public class JdbcProcedureReader
 	protected void processProcedureColumnResultRow(DataStore ds, ResultSet rs)
 		throws SQLException
 	{
+		processProcedureColumnResultRow(ds, rs, false);
+	}
+
+	protected void processProcedureColumnResultRow(DataStore ds, ResultSet rs, boolean useColIndex)
+		throws SQLException
+	{
 
 		int row = ds.addRow();
 
-		String colName = rs.getString("COLUMN_NAME");
+		String colName = useColIndex ? rs.getString(4) : rs.getString("COLUMN_NAME");
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, colName);
-		int colType = rs.getInt("COLUMN_TYPE");
+		int colType = useColIndex ? rs.getInt(5) : rs.getInt("COLUMN_TYPE");
 		String stype;
 
 		switch (colType)
@@ -358,11 +364,11 @@ public class JdbcProcedureReader
 		}
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, stype);
 
-		int sqlType = rs.getInt("DATA_TYPE");
-		String typeName = rs.getString("TYPE_NAME");
-		int precision = rs.getInt("PRECISION");
-		int length = rs.getInt("LENGTH");
-		int scale = rs.getInt("SCALE");
+		int sqlType = useColIndex ? rs.getInt(6) : rs.getInt("DATA_TYPE");
+		String typeName = useColIndex ? rs.getString(7) : rs.getString("TYPE_NAME");
+		int precision = useColIndex ? rs.getInt(8) : rs.getInt("PRECISION");
+		int length = useColIndex ? rs.getInt(9) : rs.getInt("LENGTH");
+		int scale = useColIndex ? rs.getInt(10) : rs.getInt("SCALE");
 		if (rs.wasNull())
 		{
 			scale = -1;
@@ -388,12 +394,12 @@ public class JdbcProcedureReader
 			digits = 0;
 		}
 
-		String rem = rs.getString("REMARKS");
+		String rem = useColIndex ? rs.getString(13) : rs.getString("REMARKS");
 		int ordinal = -1;
 
 		try
 		{
-			ordinal = rs.getInt("ORDINAL_POSITION");
+			ordinal = useColIndex ? rs.getInt(18) : rs.getInt("ORDINAL_POSITION");
 		}
 		catch (Exception e)
 		{
