@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 
@@ -53,6 +54,8 @@ public class TableGrantReader
 	{
 		Collection<TableGrant> result = new HashSet<TableGrant>();
 		ResultSet rs = null;
+		Set<String> ignoreGrantors = dbConnection.getDbSettings().getGrantorsToIgnore();
+
 		try
 		{
 			TableIdentifier tbl = table.createCopy();
@@ -61,6 +64,9 @@ public class TableGrantReader
 			boolean useColumnNames = dbConnection.getDbSettings().useColumnNameForMetadata();
 			while (rs.next())
 			{
+				String from = useColumnNames ? rs.getString("GRANTOR") : rs.getString(4);
+				if (ignoreGrantors.contains(from)) continue;
+				
 				String to = useColumnNames ? rs.getString("GRANTEE") : rs.getString(5);
 				String what = useColumnNames ? rs.getString("PRIVILEGE") : rs.getString(6);
 				boolean grantable = StringUtil.stringToBool(useColumnNames ? rs.getString("IS_GRANTABLE") : rs.getString(7));

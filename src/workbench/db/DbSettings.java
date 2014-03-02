@@ -1758,4 +1758,13 @@ public class DbSettings
 	{
 		return Settings.getInstance().getListProperty(prefix + "completion.ignore.schema", false, null);
 	}
+
+	public Set<String> getGrantorsToIgnore()
+	{
+		List<String> names = Settings.getInstance().getListProperty(prefix + "ignore.grantor", false);
+		Set<String> result = CollectionUtil.caseInsensitiveSet();
+		result.addAll(names);
+		return result;
+	}
+
 }
