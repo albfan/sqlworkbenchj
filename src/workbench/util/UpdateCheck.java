@@ -70,9 +70,6 @@ public class UpdateCheck
 	{
 		if (ResourceMgr.getBuildNumber().getMajorVersion() == 999) return; // don't check if started from IDE
 
-		Date threshold = StringUtil.parseISODate("2014-03-01");
-		if (StringUtil.now().before(threshold)) return;
-
 		VersionNumber minVersion = new VersionNumber(1,7);
 		VersionNumber currentVersion = VersionNumber.getJavaVersion();
 		if (!currentVersion.isNewerOrEqual(minVersion))

@@ -185,8 +185,8 @@ public class ProfileSelectionDialog
 					if (e.getButton() == MouseEvent.BUTTON1)
 					{
 						ActionEvent evt = new ActionEvent(ProfileSelectionDialog.this, -1, event.getType());
-						event.getHandler().actionPerformed(evt);
 						versionInfo.removeMouseListener(this);
+						event.getHandler().actionPerformed(evt);
 					}
 				}
 			});
@@ -219,6 +219,7 @@ public class ProfileSelectionDialog
 			@Override
 			public void run()
 			{
+				versionInfo.setCursor(null);
 				versionInfo.setIcon(null);
 				versionInfo.setText("");
 				versionInfo.getParent().doLayout();
