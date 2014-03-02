@@ -174,6 +174,17 @@ public class Db2ProcedureReader
 		return super.getProcedureColumns(def);
 	}
 
+	/**
+	 * Retrieve parameters for a stored function.
+	 *
+	 * The DB2 JDBC driver does not return parameters for functions, only for stored procedures.
+	 * This method uses SYSIBM.SQLFUNCTIONCOLS() to retrieve the parameters for the given stored function
+	 *
+	 * @param def  the stored function
+	 * @return the parameters defined
+	 * 
+	 * @throws SQLException
+	 */
 	public DataStore getFunctionParameters(ProcedureDefinition def)
 		throws SQLException
 	{
@@ -182,14 +193,19 @@ public class Db2ProcedureReader
 		PreparedStatement stmt = null;
 		Savepoint sp = null;
 		ResultSet rs = null;
-		String sql = "call SYSIBM.SQLFUNCTIONCOLS(?, ?, ?, '%', null)";
+
+		String procSchema = Settings.getInstance().getProperty("workbench.db." + connection.getDbId() + ".functionparams.procschema", "SYSIBM");
+		String options = Settings.getInstance().getProperty("workbench.db." + connection.getDbId() + ".functionparams.options", "UNDERSCORE=0");
+
+		String sql = "call " + procSchema + ".SQLFUNCTIONCOLS(?, ?, ?, '%', '" +  options + "')";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("Db2ProcedureReader.getFunctionParameters()", "Query to retrieve function parameters: " + sql);
+		}
+
 		try
 		{
-			if (useSavepoint)
-			{
-				sp = this.connection.setSavepoint();
-			}
-
 			stmt = connection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, def.getCatalog());
 			stmt.setString(2, def.getSchema());
@@ -209,11 +225,10 @@ public class Db2ProcedureReader
 				if (!StringUtil.equalString(procSpecName, specificName)) continue;
 				processProcedureColumnResultRow(ds, rs, true);
 			}
-			this.connection.releaseSavepoint(sp);
 		}
 		catch (SQLException ex)
 		{
-			this.connection.rollback(sp);
+			LogMgr.logWarning("Db2ProcedureReader.getFunctionParams()", "Could not retrieve function parameters using: " + sql, ex);
 			throw ex;
 		}
 		finally

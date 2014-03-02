@@ -394,7 +394,7 @@ public class JdbcProcedureReader
 			digits = 0;
 		}
 
-		String rem = useColIndex ? rs.getString(13) : rs.getString("REMARKS");
+		String comments = useColIndex ? rs.getString(13) : rs.getString("REMARKS");
 		int ordinal = -1;
 
 		try
@@ -412,8 +412,7 @@ public class JdbcProcedureReader
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NR, ordinal);
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, display);
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, sqlType);
-		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, rem);
-
+		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, comments);
 	}
 
 	public boolean needsHeader(CharSequence procedureBody)
