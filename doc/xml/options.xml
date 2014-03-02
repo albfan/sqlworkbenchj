@@ -1207,7 +1207,7 @@
 
     </section>
 
-    <section id="dbexp-options-objectlist">
+    <section id="dbexp-options-data-display">
       <title>Data display options</title>
       <simplesect id="dbexp-options-remember-sort">
         <title>Remember sort column</title>
@@ -1231,7 +1231,7 @@
         </blockquote>
       </simplesect>
 
-      <simplesect id="dbexp-options-remember-col-order">
+      <simplesect id="dbexp-options-use-order-by">
         <title>Apply sort order as ORDER BY</title>
         <blockquote>
         <para>
@@ -1265,7 +1265,7 @@
         </blockquote>
       </simplesect>
 
-      <simplesect id="dbexp-options-gen-pk">
+      <simplesect id="dbexp-options-gen-grants">
         <title>Generate table grants</title>
         <blockquote>
         <para>
@@ -1275,7 +1275,7 @@
         </blockquote>
       </simplesect>
 
-      <simplesect id="dbexp-options-gen-pk">
+      <simplesect id="dbexp-options-gen-drop">
         <title>Generate DROP statement</title>
         <blockquote>
         <para>
