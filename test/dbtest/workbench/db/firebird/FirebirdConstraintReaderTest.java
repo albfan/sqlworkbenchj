@@ -74,7 +74,7 @@ public class FirebirdConstraintReaderTest
 		throws Exception
 	{
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("CHECK_TEST"));
 		ConstraintReader reader = ReaderFactory.getConstraintReader(con.getMetadata());

@@ -22,18 +22,23 @@
  */
 package workbench.db.mssql;
 
-import org.junit.AfterClass;
-import workbench.db.TableDefinition;
-import static org.junit.Assert.*;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.resource.Settings;
+
 import workbench.db.TableCommentReader;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
+
 import workbench.sql.ScriptParser;
+
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -53,7 +58,7 @@ public class SqlServerCommentReaderTest
 	{
 		SQLServerTestUtil.initTestcase("SqlServerProcedureReaderTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 		String sql =
 				"create table foo \n" +
@@ -73,16 +78,16 @@ public class SqlServerCommentReaderTest
 		throws Exception
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		Assume.assumeNotNull("No connection available", con);
 		SQLServerTestUtil.dropAllObjects(con);
 	}
-	
+
 	@Test
 	public void testComments()
 		throws Exception
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		try
 		{

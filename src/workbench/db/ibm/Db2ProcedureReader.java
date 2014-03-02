@@ -71,12 +71,12 @@ public class Db2ProcedureReader
 
 		Statement stmt = null;
 		ResultSet rs = null;
+		String sql = getSQL(schemaPattern, namePattern);
 		try
 		{
-			String sql = getSQL(schemaPattern, namePattern);
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("Db2ProcedureReader.getProcedures()", "Using SQL:\n" + sql);
+				LogMgr.logDebug("Db2ProcedureReader.getProcedures()", "Query to retrieve procedurelist:\n" + sql);
 			}
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
@@ -85,7 +85,7 @@ public class Db2ProcedureReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("Db2ProcedureReader.getProcedures()", "Error retrieving procedures. Using JDBC...", e);
+			LogMgr.logError("Db2ProcedureReader.getProcedures()", "Error retrieving procedures using query:\n" + sql, e);
 			useJDBC = true;
 			return super.getProcedures(catalog, schemaPattern, namePattern);
 		}
@@ -125,7 +125,8 @@ public class Db2ProcedureReader
              "       CASE  \n" +
              "         WHEN routinetype = 'F' THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
              "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
-             "       END as PROCEDURE_TYPE \n" +
+             "       END as PROCEDURE_TYPE, \n" +
+						 "       NULL as SPECIFIC_NAME \n" +
              "FROM SYSIBM.SYSROUTINES \n" +
              "WHERE routinetype in ('F', 'P') \n" +
              "AND origin in ('Q', 'U') \n");
@@ -143,7 +144,8 @@ public class Db2ProcedureReader
 					 "       CASE  \n" +
 					 "         WHEN routinetype = 'F' THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
 					 "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
-					 "       END as PROCEDURE_TYPE \n" +
+					 "       END as PROCEDURE_TYPE, \n" +
+					 "       SPECIFICNAME as SPECIFIC_NAME \n" +
 					 "FROM syscat.routines \n" +
 					 "WHERE routinetype in ('F', 'P') \n" +
 					 "AND origin in ('Q', 'U') \n");

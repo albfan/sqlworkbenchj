@@ -33,6 +33,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -56,7 +57,7 @@ public class SqlServerIndexReaderTest
 	{
 		SQLServerTestUtil.initTestcase("SqlServerProcedureReaderTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
@@ -64,9 +65,9 @@ public class SqlServerIndexReaderTest
 	public static void tearDownClass()
 		throws Exception
 	{
-		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
-		SQLServerTestUtil.dropAllObjects(con);
+		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
+		Assume.assumeNotNull("No connection available", conn);
+		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
 	@Test
@@ -74,7 +75,7 @@ public class SqlServerIndexReaderTest
 		throws Exception
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 		String sql =
 				"create table foo \n" +
 				"( \n" +

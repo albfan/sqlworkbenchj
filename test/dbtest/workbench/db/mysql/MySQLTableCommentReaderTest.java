@@ -23,14 +23,19 @@
 package workbench.db.mysql;
 
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.resource.Settings;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
+
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -52,10 +57,8 @@ public class MySQLTableCommentReaderTest
 	{
 		MySQLTestUtil.initTestcase("MySQLTableCommentReaderTest");
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null)
-		{
-			return;
-		}
+		Assume.assumeNotNull(con);
+		
 		String sql =
 			"CREATE TABLE aaa_one (id integer) COMMENT 'first table';\n" +
 			"CREATE TABLE bbb_two (id2 integer) COMMENT 'other table';";
@@ -67,10 +70,8 @@ public class MySQLTableCommentReaderTest
 		throws Exception
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null)
-		{
-			return;
-		}
+		Assume.assumeNotNull(con);
+
 		String sql =
 			"DROP TABLE aaa_one;\n" +
 			"DROP TABLE bbb_two;";
@@ -83,10 +84,7 @@ public class MySQLTableCommentReaderTest
 		throws Exception
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null)
-		{
-			return;
-		}
+		assertNotNull("No connection available", con);
 
 		Settings.getInstance().setProperty("workbench.db.mysql.tablecomments.retrieve", true);
 

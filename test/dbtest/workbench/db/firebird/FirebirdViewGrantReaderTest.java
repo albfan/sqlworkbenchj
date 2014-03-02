@@ -23,22 +23,26 @@
 package workbench.db.firebird;
 
 import java.util.Collection;
+import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.TableGrant;
 import workbench.db.TableIdentifier;
-import java.util.List;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class FirebirdViewGrantReaderTest 
+public class FirebirdViewGrantReaderTest
 	extends WbTestCase
 {
 
@@ -55,7 +59,7 @@ public class FirebirdViewGrantReaderTest
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
 		if (con == null) return;
 
-		TestUtil.executeScript(con, 
+		TestUtil.executeScript(con,
 			"create table foo (id integer);\n" +
 			"create view v_foo as select * from foo;\n" +
 			"grant select on v_foo to public;");
@@ -74,7 +78,8 @@ public class FirebirdViewGrantReaderTest
 		throws Exception
 	{
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
+		
 		List<TableIdentifier> tables = con.getMetadata().getTableList();
 		assertNotNull(tables);
 		assertEquals(1, tables.size());

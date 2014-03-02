@@ -312,7 +312,7 @@ public class PostgresProcedureReader
 		}
 		else
 		{
-			return super.getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName());
+			return super.getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName(), null);
 		}
 	}
 
@@ -820,7 +820,7 @@ public class PostgresProcedureReader
 			else
 			{
 				LogMgr.logWarning("PostgresProcedureReader.getProcedureHeader()", "No columns returned for procedure: " + procname.getName(), null);
-				return super.getProcedureColumns(catalog, schema, procname.getName());
+				return super.getProcedureColumns(catalog, schema, procname.getName(), null);
 			}
 
 			connection.releaseSavepoint(sp);
@@ -829,7 +829,7 @@ public class PostgresProcedureReader
 		{
 			connection.rollback(sp);
 			LogMgr.logError("PostgresProcedureReader.getProcedureHeader()", "Error retrieving header", e);
-			return super.getProcedureColumns(catalog, schema, procname.getName());
+			return super.getProcedureColumns(catalog, schema, procname.getName(), null);
 		}
 		finally
 		{

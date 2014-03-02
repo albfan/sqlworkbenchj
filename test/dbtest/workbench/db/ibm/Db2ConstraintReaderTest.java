@@ -78,7 +78,7 @@ public class Db2ConstraintReaderTest
 		throws Exception
 	{
 		WbConnection con = Db2TestUtil.getDb2Connection();
-		if (con == null) return;
+		if (con == null) fail("No connection available");
 
 		String schema = Db2TestUtil.getSchemaName();
 		TableDefinition person = con.getMetadata().getTableDefinition(new TableIdentifier(schema, "PERSON"));

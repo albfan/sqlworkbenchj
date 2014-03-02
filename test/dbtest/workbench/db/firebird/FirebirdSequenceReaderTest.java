@@ -23,12 +23,16 @@
 package workbench.db.firebird;
 
 import java.util.List;
+
 import workbench.TestUtil;
+
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -49,7 +53,7 @@ public class FirebirdSequenceReaderTest
 		FirebirdTestUtil.initTestCase();
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
 		if (con == null) return;
-		
+
 		TestUtil.executeScript(con, "CREATE SEQUENCE seq_one;");
 	}
 
@@ -65,7 +69,8 @@ public class FirebirdSequenceReaderTest
 		throws Exception
 	{
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
+		
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] { "SEQUENCE" });
 		assertEquals(1, objects.size());
 		TableIdentifier seq = objects.get(0);

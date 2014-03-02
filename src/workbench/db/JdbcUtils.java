@@ -137,7 +137,9 @@ public class JdbcUtils
 			for (int i=1; i <= colcount; i++)
 			{
 				String name = meta.getColumnName(i);
-				if (name.equalsIgnoreCase(colname)) return i;
+				if (colname.equalsIgnoreCase(name)) return i;
+				String alias = meta.getColumnLabel(i);
+				if (colname.equalsIgnoreCase(alias)) return i;
 			}
 		}
 		catch (Exception e)

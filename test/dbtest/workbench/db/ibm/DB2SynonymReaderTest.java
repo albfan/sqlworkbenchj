@@ -24,20 +24,21 @@ package workbench.db.ibm;
 
 
 import java.sql.SQLException;
-
 import java.util.Collection;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.SynonymReader;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.SynonymReader;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -97,7 +98,7 @@ public class DB2SynonymReaderTest
 		throws Exception
 	{
 		WbConnection con = Db2TestUtil.getDb2Connection();
-		if (con == null) return;
+		if (con == null) fail("No connection available");
 
 		SynonymReader reader = con.getMetadata().getSynonymReader();
 		assertNotNull(reader);

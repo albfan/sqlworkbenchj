@@ -23,14 +23,19 @@
 package workbench.db.mssql;
 
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -52,7 +57,7 @@ public class SqlServerSynonymReaderTest
 	{
 		SQLServerTestUtil.initTestcase("SqlServerProcedureReaderTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 
 		String sql =
@@ -67,7 +72,7 @@ public class SqlServerSynonymReaderTest
 		throws Exception
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
@@ -77,7 +82,7 @@ public class SqlServerSynonymReaderTest
 		throws Exception
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 		SynonymReader reader = conn.getMetadata().getSynonymReader();
 		assertNotNull(reader);
 		List<TableIdentifier> syns = reader.getSynonymList(conn, null, "dbo", null);

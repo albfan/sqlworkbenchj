@@ -30,6 +30,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -52,7 +53,7 @@ public class SqlServerTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		Assume.assumeNotNull("No connection available", con);
 		SQLServerTestUtil.dropAllObjects(con);
 		ConnectionMgr.getInstance().disconnect(con);
 	}

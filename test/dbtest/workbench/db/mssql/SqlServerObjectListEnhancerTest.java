@@ -37,6 +37,7 @@ import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -61,7 +62,7 @@ public class SqlServerObjectListEnhancerTest
 	{
 		SQLServerTestUtil.initTestcase("SqlServerProcedureReaderTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 		String sql =
 				"create table person \n" +
@@ -78,7 +79,7 @@ public class SqlServerObjectListEnhancerTest
 		throws Exception
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
@@ -87,7 +88,7 @@ public class SqlServerObjectListEnhancerTest
 		throws SQLException
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 		Settings.getInstance().setProperty("workbench.db.microsoft_sql_server.remarks.object.retrieve", true);
 		TableIdentifier sales = conn.getMetadata().findTable(new TableIdentifier("person"));
 

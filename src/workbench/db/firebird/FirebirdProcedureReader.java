@@ -63,11 +63,11 @@ public class FirebirdProcedureReader
 	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
 		// TODO: handle packages properly (e.g. like in Oracle)
-		
+
 		StringBuilder source = new StringBuilder();
 		try
 		{
-			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
+			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname, null);
 			source.append("CREATE PROCEDURE ");
 			source.append(aProcname);
 			String retType = null;

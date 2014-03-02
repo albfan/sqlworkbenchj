@@ -34,6 +34,7 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -58,7 +59,7 @@ public class SqlServerDMLTest
 	{
 		SQLServerTestUtil.initTestcase("SqlServerDropTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull(conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
@@ -67,7 +68,7 @@ public class SqlServerDMLTest
 		throws Exception
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull(conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
@@ -76,7 +77,7 @@ public class SqlServerDMLTest
 		throws SQLException
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		TestUtil.executeScript(con,
 			"create table gen_test(pk_col integer not null primary key identity, some_data varchar(100)); \n" +

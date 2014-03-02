@@ -23,15 +23,20 @@
 package workbench.db.mssql;
 
 import java.sql.SQLException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
+import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
-import workbench.db.ReaderFactory;
 
 /**
  *
@@ -52,7 +57,7 @@ public class SqlServerConstraintReaderTest
 	{
 		SQLServerTestUtil.initTestcase("SqlServerProcedureReaderTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 		String sql =
 			"create table sales \n" +
@@ -72,7 +77,7 @@ public class SqlServerConstraintReaderTest
 		throws Exception
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
@@ -81,7 +86,7 @@ public class SqlServerConstraintReaderTest
 		throws SQLException
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 
 		TableIdentifier tbl = conn.getMetadata().findTable(new TableIdentifier("sales"));
 		assertNotNull(tbl);
@@ -103,7 +108,7 @@ public class SqlServerConstraintReaderTest
 		throws SQLException
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 
 		TableIdentifier tbl = conn.getMetadata().findTable(new TableIdentifier("def_test"));
 		assertNotNull(tbl);

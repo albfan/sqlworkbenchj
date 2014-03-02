@@ -23,12 +23,16 @@
 package workbench.db.ibm;
 
 import java.util.List;
+
+import workbench.TestUtil;
+
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -81,7 +85,8 @@ public class DB2TypeReaderTest
 		throws Exception
 	{
 		WbConnection con = Db2TestUtil.getDb2Connection();
-		if (con == null) return;
+		if (con == null) fail("No connection available");
+		
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(Db2TestUtil.getSchemaName(), new String[] {"TYPE"} );
 		assertNotNull(objects);
 		assertEquals(1, objects.size());

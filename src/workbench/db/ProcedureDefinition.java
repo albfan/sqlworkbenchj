@@ -300,14 +300,22 @@ public class ProcedureDefinition
 			return catalog;
 		}
 		boolean needParameters = con.getDbSettings().needParametersToDropFunction();
-		if (!needParameters)
+		boolean useSpecificName = con.getDbSettings().useSpecificNameForDropProcedure();
+
+		boolean nameContainsParameters = this.procName.indexOf('(') > -1;
+		if (useSpecificName && specificName != null)
 		{
-			return getObjectExpression(con);
+			nameContainsParameters = specificName.indexOf('(') > -1;
 		}
 
-		if (this.procName.indexOf('(') > -1) return getObjectExpression(con);
+		if (!needParameters || nameContainsParameters)
+		{
+			return buildObjectExpression(con, useSpecificName);
+		}
 
+		// we need the parameters, so retrieve them now
 		readParameters(con);
+
 		List<String> params = getParameterTypes();
 		if (params.isEmpty()) return getObjectExpression(con) + "()";
 		StringBuilder result = new StringBuilder(procName.length() + params.size() * 5 + 5);
@@ -361,18 +369,40 @@ public class ProcedureDefinition
 	@Override
 	public String getObjectExpression(WbConnection conn)
 	{
-		String name = procName;
-		if (procName.indexOf('(') > -1)
+		return buildObjectExpression(conn, false);
+	}
+
+	private String buildObjectExpression(WbConnection conn, boolean useSpecificName)
+	{
+		String nameToUse = null;
+		if (useSpecificName && specificName != null)
 		{
-			name = procName.substring(0, name.indexOf('('));
+			nameToUse = specificName;
 		}
-		String expr = SqlUtil.buildExpression(conn, catalog, schema, name);
-		if (procName.indexOf('(') > -1)
+		else
 		{
-			expr = expr + procName.substring(procName.indexOf('('));
+			nameToUse = procName;
+		}
+
+		String name = nameToUse;
+		int pos = nameToUse.indexOf('(');
+
+		if (pos > -1)
+		{
+			// remove the parameters for building the fully qualified name
+			// otherwise buildExpression will quote the name due to the parantheses
+			name = name.substring(0, pos);
+		}
+
+		String expr = SqlUtil.buildExpression(conn, catalog, schema, name);
+		if (pos > -1)
+		{
+			// add the parameters back to the complete name
+			expr = expr + nameToUse.substring(pos);
 		}
 		return expr;
 	}
+
 
 	@Override
 	public String getObjectName()

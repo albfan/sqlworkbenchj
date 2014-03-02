@@ -22,21 +22,27 @@
  */
 package workbench.db.mssql;
 
-import java.sql.Statement;
-import workbench.db.sqltemplates.ColumnChanger;
-import workbench.resource.Settings;
-import workbench.util.SqlUtil;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.sqltemplates.ColumnChanger;
+
+import workbench.util.SqlUtil;
+
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -58,7 +64,7 @@ public class SqlServerColumnEnhancerTest
 	{
 		SQLServerTestUtil.initTestcase("SqlServerProcedureReaderTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 		String sql =
 				"create table sales \n" +
@@ -76,7 +82,7 @@ public class SqlServerColumnEnhancerTest
 		throws Exception
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
@@ -85,7 +91,7 @@ public class SqlServerColumnEnhancerTest
 		throws SQLException
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 
 		TableDefinition def = conn.getMetadata().getTableDefinition(new TableIdentifier("sales"));
 		assertNotNull(def);
@@ -105,7 +111,7 @@ public class SqlServerColumnEnhancerTest
 		throws SQLException
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 		Settings.getInstance().setProperty("workbench.db.microsoft_sql_server.remarks.column.retrieve", true);
 
 		ColumnChanger changer = new ColumnChanger(conn);

@@ -24,15 +24,17 @@ package workbench.db.firebird;
 
 import java.util.List;
 
-import org.junit.*;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -52,7 +54,7 @@ public class FirebirdIndexReaderTest
 		throws Exception
 	{
 		WbConnection conn = FirebirdTestUtil.getFirebirdConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 
 		try
 		{

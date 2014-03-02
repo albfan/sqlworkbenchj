@@ -38,6 +38,7 @@ import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -62,7 +63,7 @@ public class SqlServerDropTest
 	{
 		SQLServerTestUtil.initTestcase("SqlServerDropTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 		String sql =
 			"create table foo \n" +
@@ -81,7 +82,7 @@ public class SqlServerDropTest
 		throws Exception
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
@@ -90,7 +91,7 @@ public class SqlServerDropTest
 		throws SQLException
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 
 		TableIdentifier tbl = conn.getMetadata().findTable(new TableIdentifier("foo"));
 		assertNotNull(tbl);
@@ -113,7 +114,7 @@ public class SqlServerDropTest
 		throws SQLException
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 
 		TableIdentifier tbl = conn.getMetadata().findTable(new TableIdentifier("foo"));
 		assertNotNull(tbl);

@@ -22,17 +22,22 @@
  */
 package workbench.db.mysql;
 
-import workbench.resource.Settings;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.resource.Settings;
+
+import workbench.db.ProcedureDefinition;
+import workbench.db.WbConnection;
+
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.ScriptParser;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.ProcedureDefinition;
-import workbench.db.WbConnection;
-import workbench.sql.DelimiterDefinition;
-import workbench.sql.ScriptParser;
+
 import static org.junit.Assert.*;
 
 /**
@@ -81,7 +86,7 @@ public class MySqlProcedureReaderTest
 		throws Exception
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(MySQLTestUtil.DB_NAME, null, null);
 		assertNotNull(procs);

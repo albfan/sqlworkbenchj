@@ -24,19 +24,21 @@ package workbench.db.mssql;
 
 
 import java.sql.SQLException;
-
 import java.util.List;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -57,7 +59,7 @@ public class SqlServerRuleReaderTest
 		SQLServerTestUtil.initTestcase("SqlServerRuleReaderTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
 
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 
 		TestUtil.executeScript(conn,
@@ -71,7 +73,8 @@ public class SqlServerRuleReaderTest
 		throws Exception
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		Assume.assumeNotNull("No connection available", con);
+
 		SQLServerTestUtil.dropAllObjects(con);
 		ConnectionMgr.getInstance().disconnect(con);
 	}
@@ -81,7 +84,7 @@ public class SqlServerRuleReaderTest
 		throws SQLException
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 		try
 		{
 			List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] { "RULE" } );

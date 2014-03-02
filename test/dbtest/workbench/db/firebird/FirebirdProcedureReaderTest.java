@@ -93,7 +93,7 @@ public class FirebirdProcedureReaderTest
 		throws Exception
 	{
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		ProcedureReader reader = con.getMetadata().getProcedureReader();
 		assertTrue(reader instanceof FirebirdProcedureReader);

@@ -23,15 +23,19 @@
 package workbench.db.ibm;
 
 import java.util.List;
-import workbench.db.ColumnIdentifier;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -52,7 +56,7 @@ public class Db2ColumnEnhancerTest
 		throws Exception
 	{
 		Db2TestUtil.initTestCase();
-		
+
 		WbConnection con = Db2TestUtil.getDb2Connection();
 		if (con == null) return;
 
@@ -86,7 +90,7 @@ public class Db2ColumnEnhancerTest
 		throws Exception
 	{
 		WbConnection con = Db2TestUtil.getDb2Connection();
-		if (con == null) return;
+		if (con == null) fail("No connection available");
 
 		TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier(Db2TestUtil.getSchemaName(), "COMPUTED_COLS"));
 

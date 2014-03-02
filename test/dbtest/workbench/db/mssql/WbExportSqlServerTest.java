@@ -34,6 +34,7 @@ import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -58,7 +59,7 @@ public class WbExportSqlServerTest
 	{
 		SQLServerTestUtil.initTestcase("export_test");
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		Assume.assumeNotNull("No connection available", con);
 
 		TestUtil.executeScript(con,
 			"create table data (some_data binary(4), data_id integer not null);\n" +
@@ -73,7 +74,7 @@ public class WbExportSqlServerTest
 		throws Exception
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
 	}
 
@@ -82,7 +83,7 @@ public class WbExportSqlServerTest
 		throws Exception
 	{
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
-		if (conn == null) return;
+		assertNotNull("No connection available", conn);
 
 		TestUtil util = getTestUtil();
 

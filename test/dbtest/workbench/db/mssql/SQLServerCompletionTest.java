@@ -25,18 +25,22 @@ package workbench.db.mssql;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.SelectAnalyzer;
 import workbench.gui.completion.StatementContext;
+
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -58,7 +62,7 @@ public class SQLServerCompletionTest
 		SQLServerTestUtil.initTestcase("SQLServerCompletionTest");
 
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		Assume.assumeNotNull(con);
 
 		String sql =
 			"CREATE TABLE data ( id integer primary key, info varchar(100));\n"  +
@@ -72,7 +76,7 @@ public class SQLServerCompletionTest
 		throws Exception
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		Assume.assumeNotNull(con);
 		SQLServerTestUtil.dropAllObjects(con);
 	}
 
@@ -81,7 +85,7 @@ public class SQLServerCompletionTest
 		throws SQLException
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		String sql = "select  from  ";
 		StatementContext context = new StatementContext(con, sql, sql.indexOf("from") + "from".length() + 1);
@@ -104,7 +108,7 @@ public class SQLServerCompletionTest
 		throws SQLException
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		String sql = "delete from ";
 		StatementContext context = new StatementContext(con, sql, sql.indexOf("from") + "from".length() + 1);

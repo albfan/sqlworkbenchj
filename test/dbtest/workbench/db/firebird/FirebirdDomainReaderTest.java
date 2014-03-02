@@ -22,19 +22,24 @@
  */
 package workbench.db.firebird;
 
-import workbench.storage.DataStore;
-import workbench.db.DbObject;
-import workbench.db.TableIdentifier;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.DbObject;
+import workbench.db.DomainIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.DomainIdentifier;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -84,7 +89,7 @@ public class FirebirdDomainReaderTest
 		throws Exception
 	{
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		List<TableIdentifier> domains = con.getMetadata().getObjectList(null, new String[] { "DOMAIN" });
 		assertNotNull(domains);

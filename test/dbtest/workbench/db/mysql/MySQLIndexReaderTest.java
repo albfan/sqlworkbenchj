@@ -25,16 +25,18 @@ package workbench.db.mysql;
 
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
+
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -77,7 +79,7 @@ public class MySQLIndexReaderTest
 		throws Exception
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		IndexReader reader = con.getMetadata().getIndexReader();
 		assertTrue(reader instanceof MySQLIndexReader);

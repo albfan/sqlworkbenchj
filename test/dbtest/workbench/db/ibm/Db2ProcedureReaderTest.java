@@ -22,17 +22,22 @@
  */
 package workbench.db.ibm;
 
-import java.util.List;
-import workbench.db.ProcedureDefinition;
 import java.sql.SQLException;
+import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
+import workbench.db.WbConnection;
+
+import workbench.sql.DelimiterDefinition;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.ProcedureReader;
-import workbench.db.WbConnection;
-import workbench.sql.DelimiterDefinition;
+
 import static org.junit.Assert.*;
 
 /**
@@ -84,11 +89,7 @@ public class Db2ProcedureReaderTest
 		throws SQLException
 	{
 		WbConnection con = Db2TestUtil.getDb2Connection();
-		if (con == null) 
-		{
-			System.out.println("DB2 Not available, skipping test");
-			return;
-		}
+		if (con == null) fail("No connection available");
 
 		ProcedureReader reader = con.getMetadata().getProcedureReader();
 		assertTrue(reader instanceof Db2ProcedureReader);

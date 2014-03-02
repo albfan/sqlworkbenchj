@@ -171,7 +171,6 @@ public class JdbcProcedureReader
 	public DataStore fillProcedureListDataStore(ResultSet rs)
 		throws SQLException
 	{
-
 		int specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFIC_NAME");
 		boolean useSpecificName = specIndex > -1;
 
@@ -270,10 +269,10 @@ public class JdbcProcedureReader
 	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
-		return getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName());
+		return getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName(), def.getSpecificName());
 	}
 
-	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname, String specificName)
 		throws SQLException
 	{
 		DataStore ds = createProcColsDataStore();
@@ -285,9 +284,27 @@ public class JdbcProcedureReader
 			{
 				sp = this.connection.setSavepoint();
 			}
+
 			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(aCatalog, aSchema, aProcname, "%");
+
+			int specIndex = -1;
+			boolean useSpecificName = false;
+			if (connection.getDbSettings().useSpecificNameForProcedureColumns())
+			{
+				String colname = connection.getDbSettings().getSpecificNameColumn();
+				specIndex = JdbcUtils.getColumnIndex(rs, colname);
+				useSpecificName = specIndex > -1 && StringUtil.isNonEmpty(specificName);
+			}
+
 			while (rs.next())
 			{
+				if (useSpecificName)
+				{
+					String procSpecName = rs.getString(specIndex);
+
+					// if the specific name is relevant, only process columns for the matching specific name
+					if (!StringUtil.equalString(procSpecName, specificName)) continue;
+				}
 				processProcedureColumnResultRow(ds, rs);
 			}
 			this.connection.releaseSavepoint(sp);
@@ -308,6 +325,7 @@ public class JdbcProcedureReader
 	protected void processProcedureColumnResultRow(DataStore ds, ResultSet rs)
 		throws SQLException
 	{
+
 		int row = ds.addRow();
 
 		String colName = rs.getString("COLUMN_NAME");
@@ -433,6 +451,7 @@ public class JdbcProcedureReader
 			if (StringUtil.isNonBlank(template))
 			{
 				template = template.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, def.getProcedureName());
+				template = template.replace("%specific_name%", def.getSpecificName());
 				template = template.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, def.getSchema());
 				template = template.replace(CommentSqlManager.COMMENT_PLACEHOLDER, comment.replace("'", "''"));
 				source.append('\n');
@@ -486,13 +505,17 @@ public class JdbcProcedureReader
 			sql.setSchema(def.getSchema());
 			sql.setObjectName(procName);
 			sql.setCatalog(def.getCatalog());
+			sql.setSpecificName(def.getSpecificName());
+
+			String query = sql.getSql();
+
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logInfo("JdbcProcedureReader.getProcedureSource()", "Using query=\n" + sql.getSql());
+				LogMgr.logInfo("JdbcProcedureReader.getProcedureSource()", "Retrieving procedure source using query:\n" + query);
 			}
 
 			stmt = this.connection.createStatementForQuery();
-			rs = stmt.executeQuery(sql.getSql());
+			rs = stmt.executeQuery(query);
 			while (rs.next())
 			{
 				String line = rs.getString(1);

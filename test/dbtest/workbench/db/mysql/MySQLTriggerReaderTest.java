@@ -23,16 +23,21 @@
 package workbench.db.mysql;
 
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+
 import workbench.sql.DelimiterDefinition;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -85,7 +90,7 @@ public class MySQLTriggerReaderTest
 		throws Exception
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		TriggerReader reader = TriggerReaderFactory.createReader(con);
 		List<TriggerDefinition> list = reader.getTriggerList(null, null, "one");

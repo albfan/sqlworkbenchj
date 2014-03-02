@@ -23,14 +23,18 @@
 package workbench.db.ibm;
 
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -77,11 +81,7 @@ public class Db2SequenceReaderTest
 		throws Exception
 	{
 		WbConnection con = Db2TestUtil.getDb2Connection();
-		if (con == null)
-		{
-			System.out.println("DB2 not available. Skipping test");
-			return;
-		}
+		if (con == null) fail("No connection available");
 
 		SequenceReader reader = con.getMetadata().getSequenceReader();
 		assertTrue(reader instanceof Db2SequenceReader);

@@ -101,7 +101,7 @@ public class FirebirdColumnEnhancerTest
 		throws Exception
 	{
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
-		Assume.assumeNotNull(con);
+		assertNotNull("No connection available", con);
 		if (!JdbcUtils.hasMinimumServerVersion(con, "3.0")) return;
 
 		try

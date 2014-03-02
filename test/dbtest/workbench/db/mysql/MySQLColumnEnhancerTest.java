@@ -22,17 +22,22 @@
  */
 package workbench.db.mysql;
 
-import java.util.List;
-import workbench.db.ColumnIdentifier;
 import java.sql.SQLException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -55,7 +60,7 @@ public class MySQLColumnEnhancerTest
 		MySQLTestUtil.initTestcase("MySqlEnumReaderTest");
 
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) return;
+		Assume.assumeNotNull("No connection available", con);
 
 		String sql = "CREATE TABLE enum_test \n" +
 								 "( \n" +
@@ -70,7 +75,7 @@ public class MySQLColumnEnhancerTest
 		throws Exception
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) return;
+		Assume.assumeNotNull("No connection available", con);
 		String sql = "DROP TABLE enum_test;";
 		TestUtil.executeScript(con, sql);
 		MySQLTestUtil.cleanUpTestCase();
@@ -81,10 +86,7 @@ public class MySQLColumnEnhancerTest
 		throws SQLException
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null)
-		{
-			return;
-		}
+		assertNotNull("No connection available", con);
 
 		TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("enum_test"));
 		assertNotNull(def);

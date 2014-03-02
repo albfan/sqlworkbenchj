@@ -96,6 +96,9 @@ from sys.functions fct
     <void property="schemaField">
      <string>ROUTINESCHEMA</string>
     </void>
+    <void property="specificNameColumn">
+     <string>SPECIFICNAME</string>
+    </void>
    </object>
   </void>
 

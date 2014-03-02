@@ -100,7 +100,7 @@ public class MySqlProcedureReader
 			source.append(aProcname);
 			source.append(" (");
 
-			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
+			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname, null);
 			int count = ds.getRowCount();
 			int added = 0;
 			for (int i=0; i < count; i++)

@@ -34,7 +34,9 @@ import workbench.db.WbConnection;
 
 import workbench.util.StringUtil;
 
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -80,7 +82,7 @@ public class MySQLTableSourceBuilderTest
 		throws SQLException
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		String sql =
 			"create table tbl_isam (id integer primary key) engine = myisam\n comment = 'myisam table';\n" +
@@ -113,7 +115,7 @@ public class MySQLTableSourceBuilderTest
 		throws SQLException
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		String sql =
 			"create table foo (id integer primary key, foo varchar(10) default 'bar');\n" +

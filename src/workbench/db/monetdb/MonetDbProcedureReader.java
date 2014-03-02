@@ -122,12 +122,12 @@ public class MonetDbProcedureReader
 		{
 			name = def.getProcedureName();
 		}
-		return getProcedureColumns(def.getCatalog(), def.getSchema(), name);
+		return getProcedureColumns(def.getCatalog(), def.getSchema(), name, null);
 	}
 
 
 	@Override
-	public DataStore getProcedureColumns(String catalog, String schema, String procName)
+	public DataStore getProcedureColumns(String catalog, String schema, String procName, String specificName)
 		throws SQLException
 	{
 		DataStore ds = createProcColsDataStore();

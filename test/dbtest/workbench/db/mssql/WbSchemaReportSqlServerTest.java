@@ -34,11 +34,11 @@ import workbench.util.FileUtil;
 import workbench.util.WbFile;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 /**
@@ -59,7 +59,7 @@ extends WbTestCase
 	{
 		SQLServerTestUtil.initTestcase("report_test");
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		Assume.assumeNotNull(con);
 
 		TestUtil.executeScript(con,
 			"create table foo (id integer);\n" +
@@ -77,7 +77,7 @@ extends WbTestCase
 		throws Exception
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		Assume.assumeNotNull(con);
 		SQLServerTestUtil.dropAllObjects(con);
 		TestUtil.executeScript(con,
 			"drop table s2.fx;\n" +
@@ -90,7 +90,7 @@ extends WbTestCase
 		throws Exception
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		WbSchemaReport reporter = new WbSchemaReport();
 		reporter.setConnection(con);

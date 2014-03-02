@@ -25,18 +25,21 @@ package workbench.db.mysql;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.SelectAnalyzer;
 import workbench.gui.completion.StatementContext;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -83,7 +86,7 @@ public class MySQLCompletionTest
 		throws SQLException
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		String sql = "select  from  ";
 		StatementContext context = new StatementContext(con, sql, sql.indexOf("from") + "from".length() + 1);
@@ -106,7 +109,7 @@ public class MySQLCompletionTest
 		throws SQLException
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null) return;
+		assertNotNull("No connection available", con);
 
 		String sql = "delete from ";
 		StatementContext context = new StatementContext(con, sql, sql.indexOf("from") + "from".length() + 1);

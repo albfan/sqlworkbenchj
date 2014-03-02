@@ -26,17 +26,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+
+import workbench.util.SqlUtil;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -83,10 +87,7 @@ public class MySQLDataStoreTest
 		throws SQLException
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		if (con == null)
-		{
-			return;
-		}
+		assertNotNull("No connection available", con);
 
 		Statement stmt = null;
 		ResultSet rs = null;

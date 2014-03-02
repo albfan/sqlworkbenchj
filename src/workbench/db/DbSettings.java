@@ -457,6 +457,21 @@ public class DbSettings
 		return ddl;
 	}
 
+	public boolean useSpecificNameForDropProcedure()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "drop.function.use.specificname", false);
+	}
+
+	public boolean useSpecificNameForProcedureColumns()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "procedures.use.specificname", true);
+	}
+
+	public String getSpecificNameColumn()
+	{
+		return Settings.getInstance().getProperty(prefix + "procedures.specificname.colname", "SPECIFIC_NAME");
+	}
+	
 	public boolean needParametersToDropFunction()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "drop.function.includeparameters", false);

@@ -55,6 +55,10 @@ public class GetMetaDataSql
 	private String baseObjectCatalogField;
 	private String baseObjectSchemaField;
 
+	// for stored procedure retrieval
+	private String specificNameColumn;
+	private String specificName;
+
 	public String getSql()
 	{
 		if (this.isProcedureCall) return this.getProcedureCallSql();
@@ -102,6 +106,18 @@ public class GetMetaDataSql
 			}
 			if (needsAnd) sql.append(" AND ");
 			sql.append(objectNameField +  getOperator(objectName) + "'" + getNameValue(objectName) + "'");
+			needsAnd = true;
+		}
+
+		if (specificName != null && specificNameColumn != null)
+		{
+			if (needsWhere)
+			{
+				sql.append(" WHERE ");
+				needsWhere = false;
+			}
+			if (needsAnd) sql.append(" AND ");
+			sql.append(specificNameColumn +  getOperator(specificName) + "'" + getNameValue(specificName) + "'");
 			needsAnd = true;
 		}
 
@@ -379,6 +395,27 @@ public class GetMetaDataSql
 	{
 		this.baseObjectSchemaField = baseObjectSchemaField;
 	}
+
+	public String getSpecificNameColumn()
+	{
+		return specificNameColumn;
+	}
+
+	public void setSpecificNameColumn(String column)
+	{
+		this.specificNameColumn = column;
+	}
+
+	public String getSpecificName()
+	{
+		return specificName;
+	}
+
+	public void setSpecificName(String name)
+	{
+		this.specificName = name;
+	}
+
 
 	boolean containsWhere(String sql)
 	{

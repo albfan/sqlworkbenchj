@@ -22,16 +22,20 @@
  */
 package workbench.db.ibm;
 
-import workbench.TestUtil;
 import java.util.Collection;
-import workbench.db.TableGrant;
 import java.util.List;
+
+import workbench.TestUtil;
+
+import workbench.db.TableGrant;
 import workbench.db.TableIdentifier;
+import workbench.db.ViewGrantReader;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.db.ViewGrantReader;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -76,7 +80,8 @@ public class Db2ViewGrantReaderTest
 		throws Exception
 	{
 		WbConnection conn = Db2TestUtil.getDb2Connection();
-		if (conn == null) return;
+		if (conn == null) fail("No connection available");
+
 		String schema = Db2TestUtil.getSchemaName();
 
 		List<TableIdentifier> views = conn.getMetadata().getObjectList(schema, new String[] { "VIEW" });
