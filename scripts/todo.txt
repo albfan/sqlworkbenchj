@@ -42,7 +42,7 @@ Features:
 - Option panel to modify DB specific stuff (ddlneedscommit etc)
 - Scripting (Groovy, JavaScript, awk, ..)
 - Import macros from other WbMacros.xml
-- Bookmarks in the editor (e.g. through a @WbBoomark annotation)
+
 
 Bugs:
 -----
