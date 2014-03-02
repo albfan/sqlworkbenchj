@@ -46,7 +46,6 @@ Features:
 
 Bugs:
 -----
-- Overloaded procedures in DB2 not treated correctly (should work as in Postgres)
 - excludeFiles is case-sensitiv
 - Export Query Results does not replace macros
 - short include @ und nested includes without ; does not owrk
