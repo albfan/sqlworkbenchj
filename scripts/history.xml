@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
+<?xml-stylesheet type="text/xsl" href="history2html.xslt"?>
+
+<history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-02-22">
+  <release build="-1" date="2014-03-02">
     <entry dev-build="12" type="enh">Parameters for function parameters are now shown for DB2 (a workaround for a deficiency in the JDBC driver)</entry>
     <entry dev-build="12" type="enh">Duplicate current line in the editor is now selection aware. If text is selected, the selection is duplicated, rather than the whole line</entry>
     <entry dev-build="12" type="enh">WbGenerateScript has a new option to include the table's GRANTs.</entry>

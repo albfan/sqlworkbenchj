@@ -115,7 +115,7 @@ WHERE id=42;</p>
       <li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;amp;sub=jdbc">(Download JDBC driver)</a></li>
       <li><a target="_blank" href="http://db.apache.org/derby/">Apache Derby</a></li>
       <li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
-      <li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a> <a target="_blank" href="http://www-01.ibm.com/software/data/db2/express/additional-downloads.html">(Download JDBC driver)</a></li>
+      <li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a></li>
       <li><a target="_blank" href="http://www-01.ibm.com/software/data/informix">Informix</a></li>
       <li><a target="_blank" href="http://www.ingres.com/">Ingres</a></li>
       <li><a target="_blank" href="http://www.sqlite.org/">SQLite</a> (with <a href="https://bitbucket.org/xerial/sqlite-jdbc">SQLiteJDBC</a>)</li>
@@ -126,10 +126,6 @@ WHERE id=42;</p>
       <li><a target="_blank" href="http://www.cubrid.org/">Cubrid</a></li>
     </ul>
     <p>If you find that not all features (especially in the DbExplorer) work for your DBMS, please feel free to contact me.</p>
-    <p>
-      SQL Workbench/J also works with ODBC drivers through the JDBC/ODBC bridge, but this is not recommended.
-      Basic queries on e.g. Excel&reg; worksheets or Microsoft Access databases do work.
-    </p>
     </content>
   </page>
 
