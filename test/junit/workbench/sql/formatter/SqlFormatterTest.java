@@ -48,6 +48,22 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testAllCols()
+	{
+		String sql = "select t.* from some_table t";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+
+		String expected =
+			"SELECT t.*\n" +
+			"FROM some_table t";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testMerge()
 	{
 		String sql =
@@ -1257,7 +1273,7 @@ public class SqlFormatterTest
 							"(\n" +
 							"  SELECT * FROM users\n" +
 							")\n" +
-							"SELECT tmp. *,\n" +
+							"SELECT tmp.*,\n" +
 							"       nvl((SELECT 1 FROM td_cdma_ip WHERE tmp.src_ip BETWEEN ip_fromip AND ip_endip),0) isNew\n" +
 							"FROM tmp";
 		f = new SqlFormatter(sql);

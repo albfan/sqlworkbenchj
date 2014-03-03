@@ -935,7 +935,7 @@ public class SqlFormatter
 					this.appendText(' ');
 				}
 			}
-			else if (text.equals("*") && !lastToken.isSeparator())
+			else if (text.equals("*") && !lastToken.isSeparator() && !lastToken.isIdentifier())
 			{
 				this.appendText(" *");
 			}
