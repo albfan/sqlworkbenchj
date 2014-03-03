@@ -1230,7 +1230,7 @@ public class DataExporter
 			ResultInfo rsInfo = new ResultInfo(meta, this.dbConn);
 			if (info != null)
 			{
-				// Some JDBC drivers to not report the column's data types
+				// Some JDBC drivers do not report the column's data types
 				// correctly through ResultSet.getMetaData(), so we are
 				// using the table information returned by DatabaseMetaData
 				// instead (if this is a table export)
@@ -1272,7 +1272,13 @@ public class DataExporter
 			}
 		}
 		long numRows = this.exportWriter.getNumberOfRecords();
-		LogMgr.logInfo("DataExporter.startExport()", "Exported " + numRows + " rows to " + this.outputfile);
+		String msg = "Exported " + numRows + " rows to " + this.outputfile;
+		String details = exportWriter.getConverter().getTargetFileDetails();
+		if (details != null)
+		{
+			msg += " (" + details + ")";
+		}
+		LogMgr.logInfo("DataExporter.startExport()", msg);
 		return numRows;
 	}
 

@@ -32,7 +32,9 @@ import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import workbench.interfaces.DataFileWriter;
 import workbench.interfaces.ErrorReporter;
@@ -59,6 +61,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.OutputFactory;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbDateFormatter;
 import workbench.util.WbFile;
@@ -120,6 +123,8 @@ public abstract class RowDataConverter
 
 	protected ExportOptions exportOptions;
 	protected TextOptions textOptions;
+	private Map<Integer, Boolean> multilineInfo;
+
 	/**
 	 * Spreadsheet option to add an additional sheet with the generating SQL
 	 */
@@ -151,7 +156,7 @@ public abstract class RowDataConverter
 	{
 		this.textOptions = textOptions;
 	}
-	
+
 	/**
 	 * Returns the display string for <tt>null</tt> values.
 	 *
@@ -267,6 +272,18 @@ public abstract class RowDataConverter
 		}
 	}
 
+	public String getTargetFileDetails()
+	{
+		return null;
+	}
+	
+	protected boolean isMultiline(int column)
+	{
+		Boolean result = multilineInfo.get(Integer.valueOf(column));
+		if (result == null) return false;
+		return result.booleanValue();
+	}
+
 	/**
 	 * Define the structure of the result to be exported.
 	 */
@@ -297,6 +314,14 @@ public abstract class RowDataConverter
 			{
 				this.useRowNumForBlobFile = false;
 			}
+		}
+
+		int colCount = metaData.getColumnCount();
+		this.multilineInfo = new HashMap<Integer, Boolean>(colCount);
+		for (int c = 0; c < colCount; c++)
+		{
+			boolean multiline = SqlUtil.isMultiLineColumn(metaData.getColumn(c));
+			multilineInfo.put(Integer.valueOf(c), Boolean.valueOf(multiline));
 		}
 
 		if (this.filenameColumn != null)

@@ -262,7 +262,7 @@ public class NativeOdsRowDataConverter
 				else
 				{
 					cell.setDisplayText(formatted);
-					boolean multiline = SqlUtil.isMultiLineColumn(metaData.getColumn(i));
+					boolean multiline = isMultiline(i);
 					if (multiline)
 					{
 						cell.setTextWrapped(true);

@@ -76,8 +76,10 @@ public class XlsRowDataConverter
 	private boolean append;
 	private int targetSheetIndex = -1;
 	private String targetSheetName;
-	private Map<Integer, CellStyle> styles;
-	private Map<Integer, CellStyle> headerStyles;
+	private String outputSheetName;
+	final private Map<Integer, CellStyle> styles = new HashMap<Integer, CellStyle>(10);
+	final private Map<Integer, CellStyle> headerStyles = new HashMap<Integer, CellStyle>(10);
+	private final	StringBuilder dummyResult = new StringBuilder();
 
 	public XlsRowDataConverter()
 	{
@@ -154,6 +156,7 @@ public class XlsRowDataConverter
 	public StringBuilder getStart()
 	{
 		firstRow = 0;
+		outputSheetName = null;
 
 		boolean loadFile = append || this.targetSheetIndex > 0 || this.targetSheetName != null;
 
@@ -179,8 +182,8 @@ public class XlsRowDataConverter
 
 		createFormatters();
 		excelFormat.setupWithWorkbook(workbook);
-		styles = new HashMap<Integer, CellStyle>(this.getRealColumnCount());
-		headerStyles = new HashMap<Integer, CellStyle>(this.getRealColumnCount());
+		styles.clear();
+		headerStyles.clear();
 
 		String suppliedTitle = getPageTitle(null);
 
@@ -255,6 +258,12 @@ public class XlsRowDataConverter
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public String getTargetFileDetails()
+	{
+		return outputSheetName;
 	}
 
 	private Cell createSheetCell(Row row, int cellIndex)
@@ -344,8 +353,11 @@ public class XlsRowDataConverter
 		{
 			fileOut = new FileOutputStream(getOutputFile());
 			workbook.write(fileOut);
+			outputSheetName = sheet.getSheetName();
 			workbook = null;
 			sheet = null;
+			styles.clear();
+			headerStyles.clear();
 		}
 		catch (FileNotFoundException e)
 		{
@@ -410,9 +422,8 @@ public class XlsRowDataConverter
 	@Override
 	public StringBuilder convertRowData(RowData row, long rowIndex)
 	{
-		StringBuilder ret = new StringBuilder();
-		int count = this.metaData.getColumnCount();
-		int rowNum = (int)rowIndex + firstRow;
+		final int count = this.metaData.getColumnCount();
+		final int rowNum = (int)rowIndex + firstRow;
 		Row myRow = createSheetRow(rowNum);
 		int column = 0;
 		for (int c = 0; c < count; c++)
@@ -422,12 +433,12 @@ public class XlsRowDataConverter
 				Cell cell = createSheetCell(myRow, column);
 
 				Object value = row.getValue(c);
-				boolean multiline = SqlUtil.isMultiLineColumn(metaData.getColumn(c));
+				boolean multiline = isMultiline(c);
 				setCellValueAndStyle(cell, value, false, multiline, c);
 				column ++;
 			}
 		}
-		return ret;
+		return dummyResult;
 	}
 
 	private boolean isIntegerColumn(int column)
@@ -558,10 +569,7 @@ public class XlsRowDataConverter
 		{
 			style = workbook.createCellStyle();
 			style.cloneStyleFrom(baseStyle);
-			if (!useXLSX)
-			{
-				styleCache.put(column, style);
-			}
+			styleCache.put(column, style);
 		}
 		return style;
 	}
