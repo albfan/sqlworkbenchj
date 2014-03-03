@@ -124,6 +124,10 @@ public class JdbcProcedureReader
 				sp = this.connection.setSavepoint();
 			}
 			ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(catalog, schema, name);
+			if (Settings.getInstance().getBoolProperty("workbench.db.procreader.debug", false))
+			{
+				SqlUtil.dumpResultSetInfo("getProcedures()", rs.getMetaData());
+			}
 			DataStore ds = fillProcedureListDataStore(rs);
 			this.connection.releaseSavepoint(sp);
 			ds.resetStatus();
@@ -286,6 +290,11 @@ public class JdbcProcedureReader
 			}
 
 			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(aCatalog, aSchema, aProcname, "%");
+
+			if (Settings.getInstance().getBoolProperty("workbench.db.procreader.debug", false))
+			{
+				SqlUtil.dumpResultSetInfo("getProcedureColumns()", rs.getMetaData());
+			}
 
 			int specIndex = -1;
 			boolean useSpecificName = false;
