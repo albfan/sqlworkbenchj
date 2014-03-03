@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -485,7 +486,24 @@ public class XlsRowDataConverter
 
 		boolean useFormat = applyFormatting();
 
-		if (value instanceof BigDecimal)
+		if (value == null)
+		{
+			// this somewhat duplicates the following code, but the detection based
+			// on the actual value class is a bit more accurate than just based
+			// on the JDBC datatype, but if a NULL value is passed, then the detection
+			// must be done based on the JDBC type
+			cellStyle = getBaseStyleForColumn(column, isHead, multiline);
+			int type = metaData.getColumnType(column);
+			if (type == Types.TIMESTAMP)
+			{
+				useFormat = useFormat || applyTimestampFormat();
+			}
+			else if (type == Types.DATE)
+			{
+				useFormat = useFormat || applyDateFormat();
+			}
+		}
+		else if (value instanceof BigDecimal)
 		{
 			BigDecimal bd = (BigDecimal)value;
 
@@ -559,6 +577,49 @@ public class XlsRowDataConverter
 				LogMgr.logWarning("XlsRowDataConverter.setCellValueAndStyle()", "Could not set style for column: " + metaData.getColumnName(column) + ", row: " + cell.getRowIndex() + ", column: " + cell.getColumnIndex());
 			}
 		}
+	}
+
+	private CellStyle getBaseStyleForColumn(int column, boolean isHead, boolean multiline)
+	{
+		if (isHead)
+		{
+			return excelFormat.headerCellStyle;
+		}
+
+		CellStyle cellStyle = null;
+		int type = metaData.getColumnType(column);
+
+		if (SqlUtil.isNumberType(type))
+		{
+			if (isIntegerColumn(column))
+			{
+				cellStyle = excelFormat.integerCellStyle;
+			}
+			else
+			{
+				cellStyle = excelFormat.decimalCellStyle;
+			}
+		}
+		else if (type == Types.TIMESTAMP)
+		{
+			cellStyle = excelFormat.tsCellStyle;
+		}
+		else if (type == Types.DATE)
+		{
+			cellStyle = excelFormat.dateCellStyle;
+		}
+		else
+		{
+			if (multiline)
+			{
+				cellStyle = excelFormat.multilineCellStyle;
+			}
+			else
+			{
+				cellStyle = excelFormat.textCellStyle;
+			}
+		}
+		return cellStyle;
 	}
 
 	private CellStyle geCachedStyle(CellStyle baseStyle, int column, boolean isHeader)
