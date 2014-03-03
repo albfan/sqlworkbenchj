@@ -636,11 +636,11 @@ public class SqlCommand
 						SqlUtil.closeResult(rs);
 					}
 
-					if (runner.getStatementHook().displayResults())
+					if (this.currentRetrievalData != null)
 					{
 						result.addDataStore(this.currentRetrievalData);
+						result.addRowsProcessed(currentRetrievalData.getRowCount());
 					}
-					result.addRowsProcessed(currentRetrievalData.getRowCount());
 				}
 			}
 
