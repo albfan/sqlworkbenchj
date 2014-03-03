@@ -53,6 +53,7 @@ import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -147,7 +148,7 @@ public class StatementRunner
 	{
 		return traceStatements;
 	}
-	
+
 	public void setTraceStatements(boolean flag)
 	{
 		this.traceStatements = flag;
@@ -171,6 +172,12 @@ public class StatementRunner
 	public String getSessionAttribute(String name)
 	{
 		return sessionAttributes.get(name);
+	}
+
+	public boolean getBoolSessionAttribute(String name)
+	{
+		String value = sessionAttributes.get(name);
+		return StringUtil.stringToBool(value);
 	}
 
 	@Override
@@ -454,8 +461,15 @@ public class StatementRunner
 
 		long sqlExecStart = System.currentTimeMillis();
 
-		// now run the statement ...
-		this.result = this.currentCommand.execute(realSql);
+		if (realSql == null)
+		{
+			// this can happen when the statement hook signalled to no execute the statement
+			this.result = new StatementRunnerResult();
+		}
+		else
+		{
+			this.result = this.currentCommand.execute(realSql);
+		}
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())
 		{

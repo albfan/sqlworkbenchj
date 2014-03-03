@@ -32,6 +32,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
+import workbench.db.firebird.FirebirdStatementHook;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -117,37 +118,6 @@ public class SetCommand
 				result = this.setAutocommit(currentConnection, param);
 				execSql = false;
 			}
-			else if (currentConnection.getMetadata().isOracle())
-			{
-				Set<String> allowed = CollectionUtil.caseInsensitiveSet("constraints","constraint","transaction","role");
-				List<String> options = Settings.getInstance().getListProperty("workbench.db.oracle.set.options", true, "");
-				allowed.addAll(options);
-
-				execSql = false;
-				if (command.equalsIgnoreCase("serveroutput"))
-				{
-					result = this.setServeroutput(currentConnection, param);
-				}
-				else if (command.equalsIgnoreCase("feedback"))
-				{
-					result = this.setFeedback(param);
-				}
-				else if (command.equalsIgnoreCase("autotrace"))
-				{
-					result = handleAutotrace(userSql.substring(commandEnd).trim());
-				}
-				else if (allowed.contains(command))
-				{
-					execSql = true;
-				}
-				else
-				{
-					result = new StatementRunnerResult();
-					String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", SqlUtil.getSqlVerb(userSql));
-					result.addMessage(msg);
-					result.setSuccess();
-				}
-			}
 			else if (command.equalsIgnoreCase("maxrows"))
 			{
 				result = new StatementRunnerResult();
@@ -185,6 +155,43 @@ public class SetCommand
 			else if (command.equalsIgnoreCase("schema") && currentConnection.getMetadata().isPostgres())
 			{
 				pgSchemaChange = true;
+			}
+			else if (currentConnection.getMetadata().isOracle())
+			{
+				Set<String> allowed = CollectionUtil.caseInsensitiveSet("constraints","constraint","transaction","role");
+				List<String> options = Settings.getInstance().getListProperty("workbench.db.oracle.set.options", true, "");
+				allowed.addAll(options);
+
+				execSql = false;
+				if (command.equalsIgnoreCase("serveroutput"))
+				{
+					result = this.setServeroutput(currentConnection, param);
+				}
+				else if (command.equalsIgnoreCase("feedback"))
+				{
+					result = this.setFeedback(param);
+				}
+				else if (command.equalsIgnoreCase("autotrace"))
+				{
+					result = handleAutotrace(userSql.substring(commandEnd).trim());
+				}
+				else if (allowed.contains(command))
+				{
+					execSql = true;
+				}
+				else
+				{
+					result = new StatementRunnerResult();
+					String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", SqlUtil.getSqlVerb(userSql));
+					result.addMessage(msg);
+					result.setSuccess();
+				}
+			}
+			else if (currentConnection.getMetadata().isFirebird())
+			{
+				result = new StatementRunnerResult(userSql);
+				boolean handled = handleFirebird(result, userSql);
+				execSql = !handled;
 			}
 		}
 
@@ -253,6 +260,62 @@ public class SetCommand
 		}
 
 		return result;
+	}
+
+	private boolean handleFirebird(StatementRunnerResult result, String sql)
+	{
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken token = lexer.getNextToken(false, false);
+
+		// ignore the first verb, that will be the SET
+		token = lexer.getNextToken(false, false);
+		if (token == null) return false;
+		
+		if (token.getText().equalsIgnoreCase("plan"))
+		{
+			token = lexer.getNextToken(false, false);
+			boolean on = false;
+			if (token == null)
+			{
+				on = !runner.getBoolSessionAttribute(FirebirdStatementHook.SESS_ATTR_SHOWPLAN);
+			}
+			else
+			{
+				on = token.getText().equalsIgnoreCase("ON");
+			}
+			runner.setSessionProperty(FirebirdStatementHook.SESS_ATTR_SHOWPLAN, Boolean.toString(on));
+			String flagKey = on ? "TxtOn" : "TxtOff";
+			String msg = ResourceMgr.getFormattedString("MsgFbExecPlan", ResourceMgr.getString(flagKey));
+			result.addMessage(msg);
+			return true;
+		}
+		else if (token.getText().equalsIgnoreCase("planonly"))
+		{
+			token = lexer.getNextToken(false, false);
+			token = lexer.getNextToken(false, false);
+			boolean on = false;
+			if (token == null)
+			{
+				on = !runner.getBoolSessionAttribute(FirebirdStatementHook.SESS_ATTR_PLAN_ONLY);
+			}
+			else
+			{
+				on = token.getText().equalsIgnoreCase("ON");
+			}
+
+			runner.setSessionProperty(FirebirdStatementHook.SESS_ATTR_PLAN_ONLY, Boolean.toString(on));
+
+			if (on)
+			{
+				result.addMessageByKey("MsgFbExecPlanNoResult");
+			}
+			else
+			{
+				result.addMessageByKey("MsgFbExecPlanResult");
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private String handlePgSchemaChange(String oldSchema)

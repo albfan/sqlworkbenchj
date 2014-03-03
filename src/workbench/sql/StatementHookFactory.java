@@ -23,6 +23,7 @@
 package workbench.sql;
 
 import workbench.db.WbConnection;
+import workbench.db.firebird.FirebirdStatementHook;
 import workbench.db.mssql.SqlServerStatementHook;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleStatementHook;
@@ -49,6 +50,10 @@ public class StatementHookFactory
 		{
 			// The hack for the MERGE statement is only necessary for SQL Server 2008 and above
 			return new SqlServerStatementHook();
+		}
+		if (conn.getMetadata().isFirebird())
+		{
+			return new FirebirdStatementHook(conn);
 		}
 		return DEFAULT_HOOK;
 	}
