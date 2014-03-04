@@ -118,7 +118,7 @@ public class AutotraceTest
 
 			assertEquals("Statistics", data.get(1).getResultName());
 			DataStore stat = data.get(1);
-			
+
 //			DataStorePrinter printer = new DataStorePrinter(stat);
 //			printer.printTo(System.out);
 
