@@ -58,6 +58,9 @@ public class ProcedureDefinition
 	private String comment;
 	private String displayName;
 
+	private String internalIdentifier;
+
+
 	/**
 	 * The result type as returned by the JDBC driver.
 	 * Corresponds to:
@@ -132,6 +135,16 @@ public class ProcedureDefinition
 		return def;
 	}
 
+	public String getInternalIdentifier()
+	{
+		return internalIdentifier;
+	}
+
+	public void setInternalIdentifier(String internalName)
+	{
+		this.internalIdentifier = internalName;
+	}
+
 	public String getSpecificName()
 	{
 		return specificName;
@@ -202,10 +215,18 @@ public class ProcedureDefinition
 
 	public List<ColumnIdentifier> getParameters(WbConnection con)
 	{
-		synchronized (this)
+		if (con == null)
 		{
-			readParameters(con);
+			synchronized (this)
+			{
+				if (parameters == null)
+				{
+					return Collections.emptyList();
+				}
+				return Collections.unmodifiableList(parameters);
+			}
 		}
+		readParameters(con);
 		return Collections.unmodifiableList(parameters);
 	}
 

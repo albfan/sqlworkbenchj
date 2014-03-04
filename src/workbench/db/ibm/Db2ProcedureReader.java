@@ -26,7 +26,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.sql.Statement;
 
 import workbench.log.LogMgr;
@@ -182,7 +181,7 @@ public class Db2ProcedureReader
 	 *
 	 * @param def  the stored function
 	 * @return the parameters defined
-	 * 
+	 *
 	 * @throws SQLException
 	 */
 	public DataStore getFunctionParameters(ProcedureDefinition def)
@@ -191,7 +190,6 @@ public class Db2ProcedureReader
 		DataStore ds = createProcColsDataStore();
 
 		PreparedStatement stmt = null;
-		Savepoint sp = null;
 		ResultSet rs = null;
 
 		String procSchema = Settings.getInstance().getProperty("workbench.db." + connection.getDbId() + ".functionparams.procschema", "SYSIBM");

@@ -39,6 +39,7 @@ import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.ibm.Db2SequenceReader;
+import workbench.db.ibm.InformixProcedureReader;
 import workbench.db.ibm.InformixSequenceReader;
 import workbench.db.ingres.IngresSequenceReader;
 import workbench.db.monetdb.MonetDbIndexReader;
@@ -99,6 +100,10 @@ public class ReaderFactory
 		if (meta.getDbId().equals("monetdb") && !Settings.getInstance().getBoolProperty("workbench.db.monetdb.procedurelist.usedriver"))
 		{
 			return new MonetDbProcedureReader(meta.getWbConnection());
+		}
+		if (meta.getDbId().equals("informix_dynamic_server") && Settings.getInstance().getBoolProperty("workbench.db.informix_dynamic_server.procedurelist.usecustom", true))
+		{
+			return new InformixProcedureReader(meta.getWbConnection());
 		}
 		return new JdbcProcedureReader(meta.getWbConnection());
 	}
