@@ -24,17 +24,18 @@ package workbench.db.oracle;
 
 import java.sql.SQLException;
 
-import org.junit.AfterClass;
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.console.DataStorePrinter;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
+
+import org.junit.AfterClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -57,7 +58,7 @@ public class OracleFKHandlerTest
 	}
 
 	@Test
-	public void testHandler()
+	public void testDeferrable()
 		throws SQLException
 	{
 		WbConnection conn = OracleTestUtil.getOracleConnection();
@@ -80,10 +81,18 @@ public class OracleFKHandlerTest
 		assertNotNull(fklist);
 		assertEquals(3, fklist.getRowCount());
 
-		DataStorePrinter printer = new DataStorePrinter(fklist);
-		printer.printTo(System.out);
+		fklist.sortByColumn(0, true);
+//		DataStorePrinter printer = new DataStorePrinter(fklist);
+//		printer.printTo(System.out);
 
-		// fail("The test case is a prototype.");
+		String deferrable = fklist.getValueAsString(0, "DEFERRABLE");
+		assertEquals("INITIALLY DEFERRED", deferrable);
+
+		deferrable = fklist.getValueAsString(1, "DEFERRABLE");
+		assertEquals("INITIALLY IMMEDIATE", deferrable);
+
+		deferrable = fklist.getValueAsString(2, "DEFERRABLE");
+		assertEquals("NOT DEFERRABLE", deferrable);
 	}
 
 }
