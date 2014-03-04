@@ -58,6 +58,7 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="13" type="fix">For Oracle the initial state of a deferred foreign key constraint was displayed incorrectly</entry>
     <entry dev-build="12" type="fix">Importing text files with multiline enabled did not work, if the file contained escaped quotes</entry>
     <entry dev-build="12" type="fix">Fixed some problems with exporting to Excel spreadsheets regarding the use of cell styles</entry>
     <entry dev-build="12" type="fix">For Oracle, named not null constraints are now displayed correctly in the generated SQL source of a table.</entry>

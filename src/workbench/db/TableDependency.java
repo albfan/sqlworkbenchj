@@ -314,7 +314,7 @@ public class TableDependency
 				String schema = ds.getValueAsString(i, schemacol);
 				String table = ds.getValueAsString(i, tablecol);
         String fkname = ds.getValueAsString(i, fknamecol);
-				int deferrableCode = ds.getValueAsInt(i, FKHandler.COLUMN_IDX_DEFERRABILITY, DatabaseMetaData.importedKeyNoAction);
+				int deferrableCode = ds.getValueAsInt(i, FKHandler.COLUMN_IDX_DEFERRABILITY, DatabaseMetaData.importedKeyNotDeferrable);
 				String deferrable = dbSettings.getRuleDisplay(deferrableCode);
 
 				TableIdentifier tbl = new TableIdentifier(catalog, schema, table);

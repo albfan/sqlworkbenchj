@@ -23,6 +23,8 @@
 package workbench.db;
 
 import java.sql.DatabaseMetaData;
+import static java.sql.DatabaseMetaData.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -170,11 +172,17 @@ public class DefaultFKHandler
 				ds.setValue(row, 6, useColumnNames ? rs.getString("FKTABLE_NAME") : rs.getString(7)); // FKTABLE_NAME
 				ds.setValue(row, 7, useColumnNames ? rs.getString("FKCOLUMN_NAME") : rs.getString(8)); // FKCOLUMN_NAME
 				ds.setValue(row, 8, Integer.valueOf(useColumnNames ? rs.getInt("KEY_SEQ") : rs.getInt(9))); // KEY_SEQ
-				ds.setValue(row, 9, Integer.valueOf(useColumnNames ? rs.getInt("UPDATE_RULE") : rs.getInt(10))); // UPDATE_RULE
-				ds.setValue(row, 10, Integer.valueOf(useColumnNames ? rs.getInt("DELETE_RULE") : rs.getInt(11))); // DELETE_RULE
+
+				int updRule = fixRule(useColumnNames ? rs.getInt("UPDATE_RULE") : rs.getInt(10));
+				ds.setValue(row, 9, Integer.valueOf(updRule)); // UPDATE_RULE
+
+				int delRule = fixRule(useColumnNames ? rs.getInt("DELETE_RULE") : rs.getInt(11));
+				ds.setValue(row, 10, Integer.valueOf(delRule)); // DELETE_RULE
 				ds.setValue(row, 11, useColumnNames ? rs.getString("FK_NAME") : rs.getString(12)); // FK_NAME
 				ds.setValue(row, 12, useColumnNames ? rs.getString("PK_NAME") : rs.getString(13)); // PK_NAME
-				ds.setValue(row, 13, Integer.valueOf(useColumnNames ? rs.getInt("DEFERRABILITY") : rs.getInt(14))); // DEFERRABILITY
+
+				int defer = fixDeferrableRule(useColumnNames ? rs.getInt("DEFERRABILITY") : rs.getInt(14));
+				ds.setValue(row, 13, Integer.valueOf(defer)); // DEFERRABILITY
 			}
 			ds.resetStatus();
 		}
@@ -183,6 +191,25 @@ public class DefaultFKHandler
 			SqlUtil.closeResult(rs);
 		}
 		return ds;
+	}
+
+	private int fixDeferrableRule(int defer)
+	{
+		// Some drivers return wrong values here, so we need to sanitize this
+		if (defer != importedKeyInitiallyDeferred && defer != importedKeyInitiallyImmediate)
+		{
+			return importedKeyNotDeferrable;
+		}
+		return defer;
+	}
+
+	private int fixRule(int rule)
+	{
+		if (rule != importedKeyCascade && rule != importedKeyRestrict && rule != importedKeySetDefault && rule != importedKeySetNull)
+		{
+			return importedKeyNoAction;
+		}
+		return rule;
 	}
 
 	private DataStore getKeyList(TableIdentifier tbl, boolean getOwnFk, boolean includeNumericRuleValue)
@@ -257,7 +284,7 @@ public class DefaultFKHandler
 				this.cancel = true;
 				return null;
 			}
-			
+
 			for (int rawRow = 0; rawRow < rawList.getRowCount(); rawRow ++)
 			{
 				String tname = rawList.getValueAsString(rawRow, tableCol);

@@ -82,9 +82,9 @@ public class OracleFKHandler
 			"       f.constraint_name AS fk_name, \n" +
 			"       p.constraint_name AS pk_name, \n" +
 			"       decode(f.deferrable, \n" +
-			"             'DEFERRABLE',    5, \n" +
+			"             'DEFERRABLE',    6, \n" +
 			"             'NOT DEFERRABLE',7, \n" +
-			"             'DEFERRED',      6       \n" +
+			"             'DEFERRED',      5       \n" +
 			"       ) deferrability \n" +
 			"FROM all_cons_columns pc, \n" +
 			"     all_constraints p, \n" +
