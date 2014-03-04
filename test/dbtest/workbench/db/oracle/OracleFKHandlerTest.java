@@ -66,11 +66,11 @@ public class OracleFKHandlerTest
 		String create =
 			"create table parent (id integer not null primary key);\n" +
 			"create table child_deferred (id integer not null primary key, pid integer not null,\n" +
-			" constraint fk_cd_parent foreign key (pid) references parent (id) deferrable initially deferred);\n" +
+			" constraint fk_aaa foreign key (pid) references parent (id) deferrable initially deferred);\n" +
 			"create table child_immediate (id integer not null primary key, pid integer not null,\n" +
-			" constraint fk_ci_parent foreign key (pid) references parent (id) deferrable initially immediate);\n" +
+			" constraint fk_bbb foreign key (pid) references parent (id) deferrable initially immediate);\n" +
 			"create table child_not_deferred (id integer not null primary key, pid integer not null,\n" +
-			" constraint fk_nd_parent foreign key (pid) references parent (id));\n";
+			" constraint fk_ccc foreign key (pid) references parent (id));\n";
 
 		TestUtil.executeScript(conn, create);
 
