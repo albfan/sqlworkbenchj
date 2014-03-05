@@ -55,6 +55,7 @@ public class TableGrantReader
 		Collection<TableGrant> result = new HashSet<TableGrant>();
 		ResultSet rs = null;
 		Set<String> ignoreGrantors = dbConnection.getDbSettings().getGrantorsToIgnore();
+		Set<String> ignoreGrantees = dbConnection.getDbSettings().getGranteesToIgnore();
 
 		try
 		{
@@ -66,8 +67,10 @@ public class TableGrantReader
 			{
 				String from = useColumnNames ? rs.getString("GRANTOR") : rs.getString(4);
 				if (ignoreGrantors.contains(from)) continue;
-				
+
 				String to = useColumnNames ? rs.getString("GRANTEE") : rs.getString(5);
+				if (ignoreGrantees.contains(to)) continue;
+
 				String what = useColumnNames ? rs.getString("PRIVILEGE") : rs.getString(6);
 				boolean grantable = StringUtil.stringToBool(useColumnNames ? rs.getString("IS_GRANTABLE") : rs.getString(7));
 				TableGrant grant = new TableGrant(to, what, grantable);

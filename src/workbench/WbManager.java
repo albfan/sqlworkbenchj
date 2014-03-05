@@ -880,6 +880,9 @@ public final class WbManager
 			value = cmdLine.getValue(AppArguments.ARG_PROFILE_STORAGE);
 			Settings.getInstance().setProfileStorage(value);
 
+			value = cmdLine.getValue(AppArguments.ARG_MACRO_STORAGE);
+			Settings.getInstance().setMacroStorage(value);
+
 			if (cmdLine.hasUnknownArguments())
 			{
 				String unknown = cmdLine.getUnknownArguments();

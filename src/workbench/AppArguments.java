@@ -92,6 +92,7 @@ public class AppArguments
 
 	// Other parameters
 	public static final String ARG_PROFILE_STORAGE = "profileStorage";
+	public static final String ARG_MACRO_STORAGE = "macroStorage";
 	public static final String ARG_CONFIGDIR = "configDir";
 	public static final String ARG_LIBDIR = "libdir";
 	public static final String ARG_LOGLEVEL = "logLevel";
@@ -114,6 +115,7 @@ public class AppArguments
 		addArgument(ARG_FEEDBACK, ArgumentType.BoolArgument);
 		addArgument(ARG_PROFILE_GROUP);
 		addArgument(ARG_PROFILE_STORAGE);
+		addArgument(ARG_MACRO_STORAGE);
 		addArgument(ARG_CONFIGDIR);
 		addArgument(ARG_LIBDIR);
 		addArgument(ARG_SCRIPT);

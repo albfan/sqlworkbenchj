@@ -471,7 +471,7 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + "procedures.specificname.colname", "SPECIFIC_NAME");
 	}
-	
+
 	public boolean needParametersToDropFunction()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "drop.function.includeparameters", false);
@@ -1777,6 +1777,14 @@ public class DbSettings
 	public Set<String> getGrantorsToIgnore()
 	{
 		List<String> names = Settings.getInstance().getListProperty(prefix + "ignore.grantor", false);
+		Set<String> result = CollectionUtil.caseInsensitiveSet();
+		result.addAll(names);
+		return result;
+	}
+
+	public Set<String> getGranteesToIgnore()
+	{
+		List<String> names = Settings.getInstance().getListProperty(prefix + "ignore.grantee", false);
 		Set<String> result = CollectionUtil.caseInsensitiveSet();
 		result.addAll(names);
 		return result;

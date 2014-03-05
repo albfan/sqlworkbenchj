@@ -117,6 +117,12 @@ public class Settings
 	 * The property that identifies the name of the file containing the connection profiles.
 	 */
 	public static final String PROPERTY_PROFILE_STORAGE = "workbench.settings.profilestorage";
+
+	/**
+	 * The property that identifies the name of the file containing the connection profiles.
+	 */
+	public static final String PROPERTY_DEFAULT_MACRO_STORAGE = "workbench.settings.macrostorage";
+
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 
 	public static final String PROPERTY_EDITOR_CURRENT_LINE_COLOR = "workbench.editor.currentline.color";
@@ -155,6 +161,7 @@ public class Settings
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
 
+	public static final String DEFAULT_MACRO_FILENAME = "WbMacros.xml";
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
 	public static final String UNIX_LINE_TERMINATOR_PROP_VALUE = "lf";
 	public static final String DOS_LINE_TERMINATOR_PROP_VALUE = "crlf";
@@ -165,6 +172,7 @@ public class Settings
 	private static final String TOOLS_NAME = ".name";
 	private static final String TOOLS_PARAM = ".parameter";
 	private static final String TOOLS_PREFIX = "workbench.tools.";
+
 
 	private WbProperties props;
 	private WbFile configfile;
@@ -578,6 +586,55 @@ public class Settings
 	public String getShortcutFilename()
 	{
 		return new WbFile(getConfigDir(), "WbShortcuts.xml").getFullPath();
+	}
+
+
+	public String getMacroStorage()
+	{
+		String macros = this.props.getProperty(PROPERTY_DEFAULT_MACRO_STORAGE);
+		if (macros == null)
+		{
+			return new File(getConfigDir(), DEFAULT_MACRO_FILENAME).getAbsolutePath();
+		}
+		String realFilename = FileDialogUtil.replaceConfigDir(macros);
+
+		WbFile f = new WbFile(realFilename);
+		if (!f.isAbsolute())
+		{
+			// no directory in filename -> use config directory
+			f = new WbFile(getConfigDir(), realFilename);
+		}
+		return f.getFullPath();
+	}
+
+	public void setMacroStorage(String file)
+	{
+		if (StringUtil.isEmptyString(file))
+		{
+			this.props.remove(PROPERTY_DEFAULT_MACRO_STORAGE);
+		}
+		else
+		{
+			this.props.setProperty(PROPERTY_DEFAULT_MACRO_STORAGE, file);
+		}
+	}
+
+	public String getProfileStorage()
+	{
+		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
+		if (profiles == null)
+		{
+			return new File(getConfigDir(), "WbProfiles.xml").getAbsolutePath();
+		}
+		String realFilename = FileDialogUtil.replaceConfigDir(profiles);
+
+		WbFile f = new WbFile(realFilename);
+		if (!f.isAbsolute())
+		{
+			// no directory in filename -> use config directory
+			f = new WbFile(getConfigDir(), realFilename);
+		}
+		return f.getFullPath();
 	}
 
 	public void setProfileStorage(String file)
@@ -2563,24 +2620,6 @@ public class Settings
 	public void setLastFilterDir(String dir)
 	{
 		this.props.setProperty("workbench.filter.lastdir",dir);
-	}
-
-	public String getProfileStorage()
-	{
-		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
-		if (profiles == null)
-		{
-			return new File(getConfigDir(), "WbProfiles.xml").getAbsolutePath();
-		}
-		String realFilename = FileDialogUtil.replaceConfigDir(profiles);
-
-		WbFile f = new WbFile(realFilename);
-		if (!f.isAbsolute())
-		{
-			// no directory in filename -> use config directory
-			f = new WbFile(getConfigDir(), realFilename);
-		}
-		return f.getFullPath();
 	}
 
 	// </editor-fold>

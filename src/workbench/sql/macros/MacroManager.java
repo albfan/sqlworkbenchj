@@ -26,11 +26,13 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.swing.KeyStroke;
-import workbench.log.LogMgr;
 
+import javax.swing.KeyStroke;
+
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.resource.StoreableKeyStroke;
+
 import workbench.util.CaseInsensitiveComparator;
 
 /**
@@ -54,14 +56,14 @@ public class MacroManager
 	{
 		long start = System.currentTimeMillis();
 		storage = new MacroStorage();
-		storage.loadMacros(getMacroFile());
+		storage.loadMacros(getDefaultMacroFile());
 		long duration = System.currentTimeMillis() - start;
 		LogMgr.logTrace("MacroManager.init<>", "Loading macros took " + duration + "ms");
 	}
 
-	public final File getMacroFile()
+	private File getDefaultMacroFile()
 	{
-		File f = new File(Settings.getInstance().getConfigDir(), "WbMacros.xml");
+		File f = new File(Settings.getInstance().getMacroStorage());
 		return f;
 	}
 
@@ -119,7 +121,7 @@ public class MacroManager
 
 	public void save()
 	{
-		storage.saveMacros(getMacroFile());
+		storage.saveMacros();
 	}
 
 }

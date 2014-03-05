@@ -56,6 +56,7 @@ public class MacroStorage
 
 	private boolean modified = false;
 	private List<MacroChangeListener> changeListeners = null;
+	private File sourceFile;
 
 	public MacroStorage()
 	{
@@ -124,6 +125,11 @@ public class MacroStorage
 		return copy;
 	}
 
+	public void saveMacros()
+	{
+		this.saveMacros(this.sourceFile);
+	}
+	
 	public void saveMacros(File file)
 	{
 		synchronized (lock)
@@ -258,6 +264,7 @@ public class MacroStorage
 			LogMgr.logError("MacroManager.loadMacros()", "Error loading macro file", e);
 		}
 		this.modified = false;
+		this.sourceFile = source;
 	}
 
 	public synchronized void moveMacro(MacroDefinition macro, MacroGroup newGroup)
