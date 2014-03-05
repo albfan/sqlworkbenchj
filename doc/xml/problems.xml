@@ -166,7 +166,7 @@
       <para>
         The driver calls used to display the list of tables and views in a specific schema expects a wildcard expression.
         To avoid listing the objects for <literal>USERX1</literal> when displaying the objects for <literal>USER_1</literal>
-        the underscore must be escaped. The driver will create an expression similar to <literal>AND onwer LIKE 'USER_1' ESCAPE '\'</literal>
+        the underscore must be escaped. The driver will create an expression similar to <literal>AND owner LIKE 'USER_1' ESCAPE '\'</literal>
         (which would return tables for <literal>USERA1</literal>, <literal>USERB1</literal> and so on, including of course
         <literal>USER_1</literal>).
       </para>
@@ -176,7 +176,7 @@
       </para>
       <para>
         However some older Oracle drivers report the wrong escape character, so the value sent to the database results in
-        <literal>AND onwer LIKE 'USER\_1' ESCAPE '/'</literal>. The backslash in the expression is the character
+        <literal>AND owner LIKE 'USER\_1' ESCAPE '/'</literal>. The backslash in the expression is the character
         <emphasis>reported</emphasis> by the driver, whereas the forward slash in the expression is the character
         actually <emphasis>used</emphasis> by the driver.
       </para>

@@ -1613,7 +1613,7 @@ FROM person;</programlisting>
 		<simplesect id="opt-sql-export-include-owner">
 			<title>Include owner in export</title><blockquote>
 			<para>
-				This setting controls whether &wb-productname; uses the onwer (schema)
+				This setting controls whether &wb-productname; uses the owner (schema)
 				when creating SQL scripts during exporting data (through WbExport
 				or "Save as"). When this option is selected, the usage of the schema
 				depends on the <link linkend="settings-db-ignoreschema">ignore schema</link> setting
