@@ -59,6 +59,10 @@ public class GetMetaDataSql
 	private String specificNameColumn;
 	private String specificName;
 
+	// for stored procedure retrieval
+	private String internalIdColumn;
+	private String internalId;
+
 	public String getSql()
 	{
 		if (this.isProcedureCall) return this.getProcedureCallSql();
@@ -118,6 +122,18 @@ public class GetMetaDataSql
 			}
 			if (needsAnd) sql.append(" AND ");
 			sql.append(specificNameColumn +  getOperator(specificName) + "'" + getNameValue(specificName) + "'");
+			needsAnd = true;
+		}
+
+		if (internalId != null && internalIdColumn != null)
+		{
+			if (needsWhere)
+			{
+				sql.append(" WHERE ");
+				needsWhere = false;
+			}
+			if (needsAnd) sql.append(" AND ");
+			sql.append(internalIdColumn +  " = " + internalId);
 			needsAnd = true;
 		}
 
@@ -189,6 +205,27 @@ public class GetMetaDataSql
 		}
 		return sql.toString();
 	}
+
+	public String getInternalIdColumn()
+	{
+		return internalIdColumn;
+	}
+
+	public void setInternalIdColumn(String columnName)
+	{
+		this.internalIdColumn = columnName;
+	}
+
+	public String getInternalId()
+	{
+		return internalId;
+	}
+
+	public void setInternalId(String id)
+	{
+		this.internalId = id;
+	}
+
 
 	public String getBaseSql()
 	{
