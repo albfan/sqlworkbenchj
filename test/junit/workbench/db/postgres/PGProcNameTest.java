@@ -46,7 +46,7 @@ public class PGProcNameTest
 		assertEquals(2, proc.getArguments().size());
 		assertEquals(23, proc.getArguments().get(0).getOid());
 
-		PGProcName proc2 = new PGProcName("func_2", "23;23;1043", types);
+		PGProcName proc2 = new PGProcName("func_2", "23;23;1043", "i;i;i", types);
 		assertEquals("func_2", proc2.getName());
 		assertEquals(3, proc2.getArguments().size());
 		assertEquals(23, proc2.getArguments().get(0).getOid());

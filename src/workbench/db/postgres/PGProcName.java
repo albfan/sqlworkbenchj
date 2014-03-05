@@ -72,22 +72,29 @@ public class PGProcName
 		}
 	}
 
-	public PGProcName(String name, String oidArgs, PGTypeLookup typeMap)
+	public PGProcName(String name, String oidArgs, String modes, PGTypeLookup typeMap)
 	{
 		procName = name;
 		if (StringUtil.isNonBlank(oidArgs))
 		{
-			arguments = getTypesFromOid(oidArgs, typeMap);
+			arguments = getTypesFromOid(oidArgs, modes, typeMap);
 		}
 	}
 
-	private List<PGType> getTypesFromOid(String oidList, PGTypeLookup typeMap)
+	private List<PGType> getTypesFromOid(String oidList, String modes, PGTypeLookup typeMap)
 	{
 		String[] items = oidList.split(";");
+		String[] paramModes = modes.split(";");
+
 		List<PGType> result = new ArrayList<PGType>(items.length);
-		for (String s : items)
+		for (int i=0; i < items.length; i++)
 		{
-			Long oid = Long.valueOf(s.trim());
+			String arg = items[i];
+			String mode = (i < paramModes.length ? paramModes[i] : null);
+
+			if ("t".equals(mode)) continue;
+			
+			Long oid = Long.valueOf(arg.trim());
 			PGType typ = typeMap.getTypeFromOID(oid);
 			if (typ != null)
 			{

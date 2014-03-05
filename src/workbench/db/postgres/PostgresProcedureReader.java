@@ -265,7 +265,12 @@ public class PostgresProcedureReader
 				String type = rs.getString("proc_type");
 				int row = ds.addRow();
 
-				PGProcName pname = new PGProcName(name, args, getTypeLookup());
+				if (modes == null)
+				{
+					// modes will be null if all arguments are IN arguments
+					modes = args.replaceAll("[0-9]+", "i");
+				}
+				PGProcName pname = new PGProcName(name, args, modes, getTypeLookup());
 
 				ProcedureDefinition def = new ProcedureDefinition(null, schema, name, java.sql.DatabaseMetaData.procedureReturnsResult);
 
@@ -460,14 +465,22 @@ public class PostgresProcedureReader
 				{
 					if (paramCount > 0) source.append(", ");
 
+					String mode = null;
 					if (i < argModes.size())
 					{
-						String mode = argModes.get(i);
-						if ("o".equals(mode)) source.append("OUT ");
-						if ("b".equals(mode)) source.append("INOUT ");
+						String pgMode = argModes.get(i);
+						if (!"t".equals(pgMode))
+						{
+							mode = pgArgModeToJdbc(pgMode);
+							if (mode != null)
+							{
+								source.append(mode);
+								source.append(' ');
+							}
+						}
 					}
 
-					if (i < argNames.size())
+					if (i < argNames.size() && mode != null)
 					{
 						source.append(argNames.get(i));
 						source.append(' ');
@@ -804,6 +817,10 @@ public class PostgresProcedureReader
 
 				List<String> argNames = StringUtil.stringToList(names, ";", true, true);
 				List<String> argTypes = StringUtil.stringToList(types, ";", true, true);
+				if (modes == null)
+				{
+					modes = types.replaceAll("[0-9]+", "i");
+				}
 				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
 
 				List<ColumnIdentifier> columns = convertToColumns(argNames, argTypes, argModes);
@@ -851,26 +868,47 @@ public class PostgresProcedureReader
 			{
 				nm = argNames.get(i);
 			}
+
+			String md = null;
+			if (argModes != null && i < argModes.size())
+			{
+				md = pgArgModeToJdbc(argModes.get(i));
+			}
+
 			ColumnIdentifier col = new ColumnIdentifier(nm);
 			col.setDataType(getJavaType(pgt));
 			col.setDbmsType(getTypeNameFromOid(typeOid));
-
-			String md = "IN";
-			if (argModes != null && i < argModes.size())
-			{
-				String m = argModes.get(i);
-				if ("o".equals(m))
-				{
-					md = "OUT";
-				}
-				else if ("b".equals(m))
-				{
-					md = "INOUT";
-				}
-			}
 			col.setArgumentMode(md);
 			result.add(col);
 		}
 		return result;
+	}
+
+	static String pgArgModeToJdbc(String pgMode)
+	{
+		if (pgMode == null) return null;
+
+		if ("i".equals(pgMode))
+		{
+			return "IN";
+		}
+		if ("o".equals(pgMode))
+		{
+			return "OUT";
+		}
+		else if ("b".equals(pgMode))
+		{
+			return "INOUT";
+		}
+		else if ("v".equals(pgMode))
+		{
+			// treat VARIADIC as input parameter
+			return "IN";
+		}
+		else if ("t".equals(pgMode))
+		{
+			return "RETURN";
+		}
+		return null;
 	}
 }
