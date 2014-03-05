@@ -215,11 +215,12 @@ public class PostgresProcedureReader
 						"       coalesce(array_to_string(proallargtypes, ';'), array_to_string(proargtypes, ';')) as arg_types, \n" +
 						"       array_to_string(p.proargnames, ';') as arg_names, \n" +
 						"       array_to_string(p.proargmodes, ';') as arg_modes, \n"+
-						"       case when p.proisagg then 'aggregate' else 'function' end as proc_type \n" +
+						"       case when p.proisagg then 'aggregate' else 'function' end as proc_type, \n" +
+						"       p.oid::text as procid \n" +
 						" FROM pg_catalog.pg_proc p \n " +
-						"   JOIN pg_catalog.pg_namespace n on p.pronamespace=n.oid \n" +
-						"   LEFT JOIN pg_catalog.pg_description d ON (p.oid=d.objoid) \n" +
-						"   LEFT JOIN pg_catalog.pg_class c ON (d.classoid=c.oid AND c.relname='pg_proc') \n" +
+						"   JOIN pg_catalog.pg_namespace n on p.pronamespace = n.oid \n" +
+						"   LEFT JOIN pg_catalog.pg_description d ON p.oid = d.objoid \n" +
+						"   LEFT JOIN pg_catalog.pg_class c ON d.classoid=c.oid AND c.relname='pg_proc' \n" +
 						"   LEFT JOIN pg_catalog.pg_namespace pn ON (c.relnamespace=pn.oid AND pn.nspname='pg_catalog')";
 
 			boolean whereNeeded = true;
@@ -263,6 +264,7 @@ public class PostgresProcedureReader
 				String names = rs.getString("arg_names");
 				String modes = rs.getString("arg_modes");
 				String type = rs.getString("proc_type");
+				String procId = rs.getString("procid");
 				int row = ds.addRow();
 
 				if (modes == null)
@@ -282,6 +284,7 @@ public class PostgresProcedureReader
 				def.setDisplayName(pname.getFormattedName());
 				def.setDbmsProcType(type);
 				def.setComment(remark);
+				def.setInternalIdentifier(procId);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, null);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, pname.getFormattedName());
@@ -379,11 +382,7 @@ public class PostgresProcedureReader
 		String oids = name.getOIDs();
 		if (StringUtil.isNonBlank(oids))
 		{
-			String array = "ARRAY[" + oids.replace(' ', ',') + "]::oid[]";
-
-			sql +=
-				"  AND (   (p.proallargtypes is null AND p.proargtypes = cast('" + oids + "' as oidvector)) \n " +
-				"       OR (p.proallargtypes = " + array + "))\n";
+			sql += " AND p.proargtypes = cast('" + oids + "' as oidvector) \n ";
 		}
 		else
 		{
@@ -458,36 +457,22 @@ public class PostgresProcedureReader
 				List<String> argTypes = StringUtil.stringToList(types, ";", true, true);
 				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
 
+				List<ColumnIdentifier> args = convertToColumns(argNames, argTypes, argModes);
+
 				source.append('(');
 				int paramCount = 0;
-
-				for (int i=0; i < argTypes.size(); i++)
+				for (ColumnIdentifier col : args)
 				{
+					String mode = col.getArgumentMode();
+					if ("RETURN".equals(mode)) continue;
+
 					if (paramCount > 0) source.append(", ");
 
-					String mode = null;
-					if (i < argModes.size())
-					{
-						String pgMode = argModes.get(i);
-						if (!"t".equals(pgMode))
-						{
-							mode = pgArgModeToJdbc(pgMode);
-							if (mode != null)
-							{
-								source.append(mode);
-								source.append(' ');
-							}
-						}
-					}
-
-					if (i < argNames.size() && mode != null)
-					{
-						source.append(argNames.get(i));
-						source.append(' ');
-					}
-
-					long typeOid = StringUtil.getLongValue(argTypes.get(i), voidType.getOid());
-					source.append(getTypeNameFromOid(typeOid));
+					String argName = col.getColumnName();
+					String type = col.getDbmsType();
+					source.append(argName);
+					source.append(' ');
+					source.append(type);
 					paramCount ++;
 				}
 

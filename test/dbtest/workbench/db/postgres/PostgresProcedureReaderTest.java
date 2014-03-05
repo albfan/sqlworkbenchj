@@ -124,7 +124,24 @@ public class PostgresProcedureReaderTest
 			"/\n" +
 			"commit\n" +
 			"/\n";
+
 		TestUtil.executeScript(con, fullNames, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		String tableFunc =
+			"CREATE OR REPLACE FUNCTION table_func(arg1 integer)\n" +
+			"  RETURNS TABLE(col1 integer, col2 integer)\n" +
+			"  LANGUAGE plpgsql\n" +
+			"AS\n" +
+			"$body$\n" +
+			"BEGIN\n" +
+			"  return query select arg1, arg1 * 2;\n" +
+			"END;\n" +
+			"$body$\n" +
+			" VOLATILE\n" +
+			" COST 100\n" +
+			" ROWS 1000;\n" +
+			"/\n";
+		TestUtil.executeScript(con, tableFunc, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 	}
 
 	@AfterClass
@@ -132,6 +149,36 @@ public class PostgresProcedureReaderTest
 		throws Exception
 	{
 		PostgresTestUtil.cleanUpTestCase();
+	}
+
+	@Test
+	public void testTableFunc()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		PostgresProcedureReader reader = new PostgresProcedureReader(con);
+		List<ProcedureDefinition> procs = reader.getProcedureList(null, TEST_ID, "table_func");
+		assertEquals(1, procs.size());
+		ProcedureDefinition def = procs.get(0);
+		assertEquals("table_func", def.getProcedureName());
+		assertEquals("table_func(integer)", def.getDisplayName());
+		String source = def.getSource(con).toString();
+		String expected =
+			"CREATE OR REPLACE FUNCTION " + TEST_ID + ".table_func(arg1 integer)\n" +
+			"  RETURNS TABLE(col1 integer, col2 integer)\n" +
+			"  LANGUAGE plpgsql\n" +
+			"AS\n" +
+			"$body$\n" +
+			"BEGIN\n" +
+			"  return query select arg1, arg1 * 2;\n" +
+			"END;\n" +
+			"$body$\n" +
+			" VOLATILE\n" +
+			" COST 100\n" +
+			" ROWS 1000\n" +
+			"/";
+//		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
+		assertEquals(expected, source.trim());
 	}
 
 	@Test
