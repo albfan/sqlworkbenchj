@@ -51,7 +51,7 @@ public class LoadMacrosAction
 	public void executeAction(ActionEvent e)
 	{
 		MacroFileSelector selector = new MacroFileSelector();
-		WbFile f = selector.selectStorageFile();
+		WbFile f = selector.selectStorageForLoad();
 		if (f == null) return;
 		RecentFileManager.getInstance().macrosLoaded(f);
 		MacroManager.getInstance().loadMacros(f);

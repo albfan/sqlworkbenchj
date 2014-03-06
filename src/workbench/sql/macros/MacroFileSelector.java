@@ -24,11 +24,14 @@ import java.awt.Window;
 import java.io.File;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import workbench.WbManager;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
 
@@ -42,12 +45,34 @@ public class MacroFileSelector
 {
 	public static final String LAST_DIR_PROPERTY = "workbench.macros.lastdir";
 
-	public WbFile selectStorageFile()
+	public boolean canLoadMacros()
 	{
+		if (!MacroManager.getInstance().getMacros().isModified()) return true;
+		
+		int result = WbSwingUtilities.getYesNoCancel(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("MsgConfirmUnsavedMacros"));
+		if (result == JOptionPane.CANCEL_OPTION)
+		{
+			return false;
+		}
+		if (result == JOptionPane.YES_OPTION)
+		{
+			MacroManager.getInstance().save();
+		}
+		return true;
+	}
+
+	public WbFile selectStorageForLoad()
+	{
+		if (!canLoadMacros()) return null;
 		return selectStorageFile(false, null);
 	}
 
-	public WbFile selectStorageFile(boolean forSave, File currentFile)
+	public WbFile selectStorageForSave()
+	{
+		return selectStorageFile(true, MacroManager.getInstance().getMacros().getCurrentFile());
+	}
+
+	private WbFile selectStorageFile(boolean forSave, File currentFile)
 	{
 		String lastDir = Settings.getInstance().getProperty(LAST_DIR_PROPERTY, Settings.getInstance().getConfigDir().getAbsolutePath());
 

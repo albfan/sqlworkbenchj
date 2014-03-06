@@ -75,7 +75,7 @@ public class MacroStorage
 	{
 		return sourceFile;
 	}
-	
+
 	public String getCurrentMacroFilename()
 	{
 		if (sourceFile == null) return null;
@@ -172,7 +172,7 @@ public class MacroStorage
 					LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
 				}
 			}
-			this.modified = false;
+			resetModified();
 		}
 	}
 
@@ -282,7 +282,7 @@ public class MacroStorage
 		{
 			LogMgr.logError("MacroManager.loadMacros()", "Error loading macro file", e);
 		}
-		this.modified = false;
+		resetModified();
 		this.sourceFile = source;
 		if (fireChangeEvent)
 		{

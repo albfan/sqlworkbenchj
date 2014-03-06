@@ -24,6 +24,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
+import workbench.sql.macros.MacroFileSelector;
 import workbench.sql.macros.MacroManager;
 
 import workbench.util.WbFile;
@@ -47,6 +48,10 @@ public class LoadMacroFileAction extends WbAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		MacroManager.getInstance().loadMacros(macroFile);
+		MacroFileSelector selector = new MacroFileSelector();
+		if (selector.canLoadMacros())
+		{
+			MacroManager.getInstance().loadMacros(macroFile);
+		}
 	}
 }

@@ -54,7 +54,7 @@ public class SaveMacrosAction
 	public void executeAction(ActionEvent e)
 	{
 		MacroFileSelector selector = new MacroFileSelector();
-		WbFile f = selector.selectStorageFile(true, MacroManager.getInstance().getMacros().getCurrentFile());
+		WbFile f = selector.selectStorageForSave();
 		if (f == null) return;
 		MacroManager.getInstance().save(f);
 		setTooltip(f.getFullPath());
