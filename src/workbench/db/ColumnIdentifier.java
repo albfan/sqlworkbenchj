@@ -529,6 +529,9 @@ public class ColumnIdentifier
 		result.readOnly = this.readOnly;
 		result.argumentMode = this.argumentMode;
 		result.columnConstraint = this.columnConstraint;
+		result.collation = this.collation;
+		result.collationExpression = this.collationExpression;
+		result.generatorExpression = this.generatorExpression;
 		return result;
 	}
 
