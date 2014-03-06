@@ -28,14 +28,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-
 import javax.swing.SwingUtilities;
+
 import workbench.WbManager;
+import workbench.resource.PlatformShortcuts;
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.MainWindow;
 import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
-import workbench.resource.PlatformShortcuts;
-import workbench.resource.ResourceMgr;
 
 /**
  *	@author  Thomas Kellerer

@@ -1,5 +1,5 @@
 /*
- * LoadWorkspaceAction.java
+ * LoadWorkspaceFileAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -23,37 +23,30 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
+import workbench.sql.macros.MacroManager;
 
-import workbench.resource.PlatformShortcuts;
-import workbench.resource.ResourceMgr;
-
-import workbench.gui.MainWindow;
+import workbench.util.WbFile;
 
 /**
  *	@author  Thomas Kellerer
  */
-public class LoadWorkspaceAction
-	extends WbAction
+public class LoadMacroFileAction extends WbAction
 {
-	private MainWindow client;
+	private WbFile macroFile;
 
-	public LoadWorkspaceAction(MainWindow aClient)
+	public LoadMacroFileAction(WbFile file)
 	{
 		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtLoadWorkspace", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_WORKSPACE);
+		macroFile = file;
+		this.setMenuText(macroFile.getFileName());
+		this.setTooltip(macroFile.getFullPath());
 		this.setIcon(null);
 	}
 
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		this.client.loadWorkspace();
+		MacroManager.getInstance().loadMacros(macroFile);
 	}
-
 }

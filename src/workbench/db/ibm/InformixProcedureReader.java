@@ -39,11 +39,12 @@ import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
-import workbench.util.CollectionUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -81,7 +82,7 @@ public class InformixProcedureReader
 
 		Statement stmt = null;
 		ResultSet rs = null;
-		String sql = getSQL(schemaPattern, namePattern);
+		String sql = getSQL(catalog, schemaPattern, namePattern);
 		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
 		try
 		{
@@ -170,9 +171,13 @@ public class InformixProcedureReader
 		return result;
 	}
 
-	private String getSQL(String schemaPattern, String namePattern)
+	private String getSQL(String catalog, String schemaPattern, String namePattern)
 	{
 		StringBuilder sql = new StringBuilder(100);
+
+		String systemSchema = getSystemSchema();
+		TableIdentifier procs = new TableIdentifier(catalog, systemSchema, "sysprocedures");
+		String sysProcs = procs.getFullyQualifiedName(connection);
 
 		sql.append(
 			"SELECT '' as PROCEDURE_CAT,  \n" +
@@ -186,7 +191,7 @@ public class InformixProcedureReader
 			"       specificname as specific_name, \n" +
 			"       procid, \n" +
 			"       paramtypes::LVARCHAR as parameter_types \n" +
-			"FROM sysprocedures \n" +
+			"FROM " + sysProcs + " \n" +
 			"WHERE internal = 'f' \n " +
 			"  AND mode IN ('D', 'd', 'O', 'o') ");
 
@@ -235,6 +240,12 @@ public class InformixProcedureReader
 
 	private DataStore retrieveColumns(ProcedureDefinition def)
 	{
+		String systemSchema = getSystemSchema();
+		TableIdentifier procs = new TableIdentifier(def.getCatalog(), systemSchema, "sysprocedures");
+		TableIdentifier cols = new TableIdentifier(def.getCatalog(), systemSchema, "sysproccolumns");
+		String sysProcs = procs.getFullyQualifiedName(connection);
+		String sysCols = cols.getFullyQualifiedName(connection);
+
 		String sql =
 			"select col.paramid,  \n" +
 			"       col.paramname,  \n" +
@@ -247,8 +258,8 @@ public class InformixProcedureReader
 			"         when col.paramattr = 4 then 'OUT' \n" +
 			"         else '' \n" +
 			"       end as param_mode \n" +
-			"from sysproccolumns col \n" +
-			"  join sysprocedures p on p.procid = col.procid \n";
+			"from " + sysCols + " col \n" +
+			"  join " + sysProcs + " p on p.procid = col.procid \n";
 
 		if (def.getInternalIdentifier() != null)
 		{
@@ -372,6 +383,12 @@ public class InformixProcedureReader
     }
 		return typeMap;
 	}
+	
+	private String getSystemSchema()
+	{
+		return connection.getDbSettings().getProperty("systemschema", "informix");
+	}
+
 
 	private static class ParamDef
 	{

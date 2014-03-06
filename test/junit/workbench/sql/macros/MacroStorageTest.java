@@ -27,14 +27,19 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.KeyStroke;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.resource.StoreableKeyStroke;
+
 import workbench.util.WbFile;
 import workbench.util.WbPersistence;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
-import workbench.WbTestCase;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -67,7 +72,7 @@ public class MacroStorageTest
 		File f = new File(util.getBaseDir(), "macros.xml");
 		macros.saveMacros(f);
 		MacroStorage newStorage = new MacroStorage();
-		newStorage.loadMacros(f);
+		newStorage.loadMacros(f, false);
 		MacroDefinition m2 = newStorage.getMacro("sessions");
 		StoreableKeyStroke key2 = m2.getShortcut();
 		assertEquals(key, key2);
@@ -169,7 +174,7 @@ public class MacroStorageTest
 		writer.writeObject(old);
 
 		MacroStorage newStorage = new MacroStorage();
-		newStorage.loadMacros(oldfile);
+		newStorage.loadMacros(oldfile, false);
 
 		MacroDefinition m1 = newStorage.getMacro("macro1");
 		assertEquals(old.get("macro1"), m1.getText());
@@ -178,7 +183,7 @@ public class MacroStorageTest
 		newStorage.saveMacros(newfile);
 
 		MacroStorage new2 = new MacroStorage();
-		new2.loadMacros(newfile);
+		new2.loadMacros(newfile, false);
 		assertEquals(m1, new2.getMacro("macro1"));
 	}
 }

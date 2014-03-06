@@ -94,6 +94,7 @@ import workbench.gui.actions.FileNewWindowAction;
 import workbench.gui.actions.FileSaveProfiles;
 import workbench.gui.actions.HelpContactAction;
 import workbench.gui.actions.InsertTabAction;
+import workbench.gui.actions.LoadMacrosAction;
 import workbench.gui.actions.LoadWorkspaceAction;
 import workbench.gui.actions.ManageDriversAction;
 import workbench.gui.actions.ManageMacroAction;
@@ -108,6 +109,7 @@ import workbench.gui.actions.ReloadProfileWkspAction;
 import workbench.gui.actions.RemoveTabAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.SaveAsNewWorkspaceAction;
+import workbench.gui.actions.SaveMacrosAction;
 import workbench.gui.actions.SaveWorkspaceAction;
 import workbench.gui.actions.SelectTabAction;
 import workbench.gui.actions.ShowDbExplorerAction;
@@ -138,7 +140,7 @@ import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.fontzoom.IncreaseFontSize;
 import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.macros.MacroMenuBuilder;
-import workbench.gui.menu.RecentWorkspaceManager;
+import workbench.gui.menu.RecentFileManager;
 import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelType;
@@ -174,6 +176,8 @@ public class MainWindow
 						Moveable, RenameableTab, TabCloser, FilenameChangeListener
 {
 	private static final String DEFAULT_WORKSPACE = "Default.wksp";
+	private static final String RECENTMACROS_NAME = "recent-macros";
+
 	private static int instanceCount;
 	private final int windowId;
 
@@ -218,6 +222,8 @@ public class MainWindow
 
 	private AddMacroAction createMacro;
 	private ManageMacroAction manageMacros;
+	private LoadMacrosAction loadMacros;
+	private SaveMacrosAction saveMacros;
 	private ShowMacroPopupAction showMacroPopup;
 
 	private final List<ToolWindow> explorerWindows = new ArrayList<ToolWindow>();
@@ -446,6 +452,8 @@ public class MainWindow
 
 		this.createMacro = new AddMacroAction();
 		this.manageMacros = new ManageMacroAction(this);
+		this.loadMacros = new LoadMacrosAction();
+		this.saveMacros = new SaveMacrosAction();
 		showMacroPopup = new ShowMacroPopupAction(this);
 
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
@@ -578,7 +586,7 @@ public class MainWindow
 		menu.addSeparator();
 		JMenu recentWorkspace = new JMenu(ResourceMgr.getString("MnuTxtRecentWorkspace"));
 		recentWorkspace.setName("recent-workspace");
-		RecentWorkspaceManager.getInstance().populateMenu(recentWorkspace, this);
+		RecentFileManager.getInstance().populateRecentWorkspaceMenu(recentWorkspace, this);
 		menu.add(recentWorkspace);
 
 
@@ -791,9 +799,25 @@ public class MainWindow
 		{
 			int itemCount = menu.getItemCount();
 
-			// The actual macro entries start at index 3
-			// 0,1,2 are menu items,
-			for (int in=3; in < itemCount; in++)
+			int startIndex = -1;
+			for (int i=0; i < itemCount; i++)
+			{
+				JMenuItem item = menu.getItem(i);
+				if (item == null) continue;
+				if (item.getName() == null) continue;
+				if (item.getName().equals(RECENTMACROS_NAME))
+				{
+					startIndex = i + 1;
+				}
+			}
+
+			if (startIndex == -1)
+			{
+				LogMgr.logWarning("MainWindow.setMacroMenuItemStates()", "Start of macro menu items not found!");
+				return;
+			}
+
+			for (int in=startIndex; in < itemCount; in++)
 			{
 				JMenuItem item = menu.getItem(in);
 				if (item != null) item.setEnabled(enabled);
@@ -823,6 +847,15 @@ public class MainWindow
 		createMacro.addToMenu(macroMenu);
 		manageMacros.addToMenu(macroMenu);
 		showMacroPopup.addToMenu(macroMenu);
+
+		macroMenu.addSeparator();
+		loadMacros.addToMenu(macroMenu);
+		saveMacros.addToMenu(macroMenu);
+
+		JMenu recentWorkspace = new JMenu(ResourceMgr.getString("MnuTxtRecentMacros"));
+		recentWorkspace.setName(RECENTMACROS_NAME);
+		RecentFileManager.getInstance().populateRecentMacrosMenu(recentWorkspace);
+		macroMenu.add(recentWorkspace);
 
 		MacroMenuBuilder builder = new MacroMenuBuilder();
 		builder.buildMacroMenu(this, macroMenu);
@@ -1692,7 +1725,7 @@ public class MainWindow
 
 		if (updateRecent)
 		{
-			RecentWorkspaceManager.getInstance().workspaceLoaded(f);
+			RecentFileManager.getInstance().workspaceLoaded(f);
 			EventQueue.invokeLater(new Runnable()
 			{
 				@Override
@@ -1857,7 +1890,7 @@ public class MainWindow
 			this.assignWorkspaceAction,this.closeWorkspaceAction,this.createMacro,this.createNewConnection,
 			this.dbExplorerAction,this.disconnectAction,this.disconnectTab,this.loadWorkspaceAction,this.manageMacros,
 			this.newDbExplorerPanel,this.newDbExplorerWindow,this.nextTab,this.prevTab,this.saveAsWorkspaceAction,
-			this.saveWorkspaceAction,this.showDbmsManual,this.showMacroPopup, this.reloadWorkspace
+			this.saveWorkspaceAction,this.showDbmsManual,this.showMacroPopup, this.reloadWorkspace, this.loadMacros, this.saveMacros
 		);
 		for (JMenuBar bar : panelMenus)
 		{
@@ -2148,7 +2181,7 @@ public class MainWindow
 		for (int i=0; i < getTabCount(); i++)
 		{
 			JMenu menu = getRecentWorkspaceMenu(i);
-			RecentWorkspaceManager.getInstance().populateMenu(menu, this);
+			RecentFileManager.getInstance().populateRecentWorkspaceMenu(menu, this);
 		}
 	}
 

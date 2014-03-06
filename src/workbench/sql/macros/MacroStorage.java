@@ -23,6 +23,7 @@
 package workbench.sql.macros;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,6 +71,24 @@ public class MacroStorage
 	}
 
 
+	public File getCurrentFile()
+	{
+		return sourceFile;
+	}
+	
+	public String getCurrentMacroFilename()
+	{
+		if (sourceFile == null) return null;
+		try
+		{
+			return sourceFile.getCanonicalPath();
+		}
+		catch (IOException io)
+		{
+			return sourceFile.getAbsolutePath();
+		}
+	}
+
 	public void removeGroup(MacroGroup group)
 	{
 		groups.remove(group);
@@ -110,7 +129,7 @@ public class MacroStorage
 			modified = true;
 			updateMap();
 		}
-		fireMacroListChange();
+		fireMacroListChanged();
 	}
 
 	public MacroStorage createCopy()
@@ -129,7 +148,7 @@ public class MacroStorage
 	{
 		this.saveMacros(this.sourceFile);
 	}
-	
+
 	public void saveMacros(File file)
 	{
 		synchronized (lock)
@@ -157,7 +176,7 @@ public class MacroStorage
 		}
 	}
 
-	private void fireMacroListChange()
+	private void fireMacroListChanged()
 	{
 		if (this.changeListeners == null) return;
 		for (MacroChangeListener listener : this.changeListeners)
@@ -215,7 +234,7 @@ public class MacroStorage
 	 * @see workbench.util.WbPersistence#readObject()
 	 */
 	@SuppressWarnings("unchecked")
-	public void loadMacros(File source)
+	public void loadMacros(File source, boolean fireChangeEvent)
 	{
 		if (!source.exists())
 		{
@@ -265,6 +284,10 @@ public class MacroStorage
 		}
 		this.modified = false;
 		this.sourceFile = source;
+		if (fireChangeEvent)
+		{
+			fireMacroListChanged();
+		}
 	}
 
 	public synchronized void moveMacro(MacroDefinition macro, MacroGroup newGroup)
@@ -278,7 +301,7 @@ public class MacroStorage
 		}
 		newGroup.addMacro(macro);
 		this.modified = true;
-		this.fireMacroListChange();
+		this.fireMacroListChanged();
 	}
 
 	public MacroGroup findMacroGroup(String macroName)
@@ -313,7 +336,7 @@ public class MacroStorage
 			macro.setSortOrder(group.getSize() + 1);
 			this.modified = true;
 		}
-		this.fireMacroListChange();
+		this.fireMacroListChanged();
 	}
 
 	public void removeMacro(MacroDefinition toDelete)
@@ -327,7 +350,7 @@ public class MacroStorage
 			}
 			this.modified = true;
 		}
-		this.fireMacroListChange();
+		this.fireMacroListChanged();
 	}
 
 	public void addMacro(String groupName, String key, String text)
@@ -360,7 +383,7 @@ public class MacroStorage
 			updateMap();
 			this.modified = true;
 		}
-		this.fireMacroListChange();
+		this.fireMacroListChanged();
 	}
 
 	public boolean containsGroup(String groupName)
@@ -456,7 +479,7 @@ public class MacroStorage
 			this.groups.clear();
 			this.modified = true;
 		}
-		this.fireMacroListChange();
+		this.fireMacroListChanged();
 	}
 
 }

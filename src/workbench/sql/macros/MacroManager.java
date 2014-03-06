@@ -56,7 +56,7 @@ public class MacroManager
 	{
 		long start = System.currentTimeMillis();
 		storage = new MacroStorage();
-		storage.loadMacros(getDefaultMacroFile());
+		storage.loadMacros(getDefaultMacroFile(), false);
 		long duration = System.currentTimeMillis() - start;
 		LogMgr.logTrace("MacroManager.init<>", "Loading macros took " + duration + "ms");
 	}
@@ -65,6 +65,21 @@ public class MacroManager
 	{
 		File f = new File(Settings.getInstance().getMacroStorage());
 		return f;
+	}
+
+	public void save()
+	{
+		storage.saveMacros();
+	}
+
+	public void save(File macroFile)
+	{
+		storage.saveMacros(macroFile);
+	}
+
+	public void loadMacros(File macroFile)
+	{
+		storage.loadMacros(macroFile, true);
 	}
 
 	public static MacroManager getInstance()
@@ -117,11 +132,6 @@ public class MacroManager
 			}
 		}
 		return result;
-	}
-
-	public void save()
-	{
-		storage.saveMacros();
 	}
 
 }

@@ -54,10 +54,12 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBox;
+import workbench.gui.components.WbLabelField;
 import workbench.gui.editor.MacroExpander;
 import workbench.gui.sql.SqlPanel;
 
 import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroManager;
 
 import workbench.util.StringUtil;
 
@@ -71,7 +73,6 @@ public class MacroManagerDialog
 	extends JDialog
 	implements ActionListener, TreeSelectionListener, MouseListener, WindowListener
 {
-	private JPanel buttonPanel;
 	private JList macroList;
 	private JButton okButton;
 	private JButton runButton;
@@ -138,7 +139,7 @@ public class MacroManagerDialog
 	private void initComponents()
 	{
 		macroPanel = new MacroManagerGui();
-		buttonPanel = new JPanel();
+		JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		runButton = new WbButton(ResourceMgr.getString("LblRunMacro"));
 		runButton.setToolTipText(ResourceMgr.getDescription("LblManageMacrosRun"));
 
@@ -169,20 +170,25 @@ public class MacroManagerDialog
 		JPanel p = new JPanel();
 		p.setLayout(new FlowLayout(FlowLayout.LEFT));
 		p.add(this.replaceEditorText);
-		p.add(new JPanel());
 
-		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		buttonPanel.add(p);
+		buttons.add(p);
 
 		runButton.addActionListener(this);
 		runButton.setEnabled(false);
-		buttonPanel.add(runButton);
+		buttons.add(runButton);
 
 		okButton.addActionListener(this);
-		buttonPanel.add(okButton);
+		buttons.add(okButton);
 
 		cancelButton.addActionListener(this);
-		buttonPanel.add(cancelButton);
+		buttons.add(cancelButton);
+
+		JPanel buttonPanel = new JPanel(new BorderLayout());
+		String txt = ResourceMgr.getFormattedString("LblCurrMacros", MacroManager.getInstance().getMacros().getCurrentMacroFilename());
+		WbLabelField lbl = new WbLabelField(txt);
+		lbl.setBorder(new EmptyBorder(0, 5, 0, 0));
+		buttonPanel.add(lbl, BorderLayout.LINE_START);
+		buttonPanel.add(buttons, BorderLayout.LINE_END);
 
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
