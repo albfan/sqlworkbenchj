@@ -58,7 +58,7 @@ public class ProcedureDefinition
 	private String comment;
 	private String displayName;
 
-	private String internalIdentifier;
+	private Object internalIdentifier;
 
 
 	/**
@@ -135,12 +135,12 @@ public class ProcedureDefinition
 		return def;
 	}
 
-	public String getInternalIdentifier()
+	public Object getInternalIdentifier()
 	{
 		return internalIdentifier;
 	}
 
-	public void setInternalIdentifier(String internalName)
+	public void setInternalIdentifier(Object internalName)
 	{
 		this.internalIdentifier = internalName;
 	}

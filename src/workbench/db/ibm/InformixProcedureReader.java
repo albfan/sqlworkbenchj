@@ -42,6 +42,7 @@ import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -54,20 +55,22 @@ import workbench.util.StringUtil;
 public class InformixProcedureReader
 	extends JdbcProcedureReader
 {
-	private boolean fixRetrieval;
+	private boolean fixProcRetrieval;
+	private boolean fixParamsRetrieval;
 	private Map<String, Integer> typeMap;
 
 	public InformixProcedureReader(WbConnection conn)
 	{
 		super(conn);
-		fixRetrieval = JdbcUtils.hasMinimumServerVersion(conn, "11.0");
+		fixProcRetrieval = JdbcUtils.hasMinimumServerVersion(conn, "10.0"); // Not sure about that
+		fixParamsRetrieval = JdbcUtils.hasMinimumServerVersion(conn, "11.0");
 	}
 
 	@Override
 	public DataStore getProcedures(String catalog, String schemaPattern, String namePattern)
 		throws SQLException
 	{
-		if (!fixRetrieval)
+		if (!fixProcRetrieval)
 		{
 			return super.getProcedures(catalog, schemaPattern, namePattern);
 		}
@@ -94,28 +97,34 @@ public class InformixProcedureReader
 				String name = rs.getString("PROCEDURE_NAME");
 				String specificName = rs.getString("SPECIFIC_NAME");
 				String args = rs.getString("parameter_types");
-				String procid = rs.getString("procid");
+				long procid = rs.getLong("procid");
 
 				int type = rs.getInt("PROCEDURE_TYPE");
 				int row = ds.addRow();
 
 				ProcedureDefinition def = new ProcedureDefinition(null, schema, name, type);
 
-				List<String> argTypes = StringUtil.stringToList(args, ",", true, true);
+				List<ParamDef> argTypes = convertTypeList(args);
 				List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+
+				String typeList = "";
 
 				for (int i=0; i < argTypes.size(); i++)
 				{
-					String argName = "input" + Integer.toString(i + 1);
+					if (i > 0) typeList += ",";
+					String argName = "parameter_" + Integer.toString(i + 1);
 					ColumnIdentifier col = new ColumnIdentifier(argName);
-					col.setDbmsType(argTypes.get(i));
-					col.setDataType(getJdbcType(argTypes.get(i)));
+					String ifxType = argTypes.get(i).ifxTypeName;
+					typeList += ifxType;
+					col.setDbmsType(ifxType);
+					col.setDataType(getJdbcType(ifxType));
+					col.setArgumentMode(argTypes.get(i).mode);
 					cols.add(col);
 				}
 				def.setParameters(cols);
 				def.setSpecificName(specificName);
-				def.setInternalIdentifier(procid);
-				def.setDisplayName(name + "(" + args + ")");
+				def.setInternalIdentifier(Long.valueOf(procid));
+				def.setDisplayName(name + "(" + typeList + ")");
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, null);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, def.getDisplayName());
@@ -129,14 +138,36 @@ public class InformixProcedureReader
 		catch (Exception e)
 		{
 			LogMgr.logError("InformixProcedureReader.getProcedures()", "Error retrieving procedures using query:\n" + sql, e);
-			fixRetrieval = false;
+			fixProcRetrieval = false;
 			return super.getProcedures(catalog, schemaPattern, namePattern);
 		}
 		finally
 		{
-			// The resultSet is already closed by fillProcedureListDataStore
-			SqlUtil.closeStatement(stmt);
+			SqlUtil.closeAll(rs, stmt);
 		}
+	}
+
+	private List<ParamDef> convertTypeList(String ifxTypeList)
+	{
+		List<String> plain = StringUtil.stringToList(ifxTypeList, ",", true, true);
+		List<ParamDef> result = new ArrayList<ParamDef>(plain.size());
+		for (String ifx : plain)
+		{
+			String[] elements = ifx.split(" ");
+			ParamDef def = new ParamDef();
+			if (elements.length == 1)
+			{
+				def.ifxTypeName = elements[0];
+				def.mode = "INPUT";
+			}
+			else if (elements.length == 2)
+			{
+				def.mode = elements[0].toUpperCase();
+				def.ifxTypeName = elements[1];
+			}
+			result.add(def);
+		}
+		return result;
 	}
 
 	private String getSQL(String schemaPattern, String namePattern)
@@ -153,7 +184,7 @@ public class InformixProcedureReader
 			"         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
 			"       END as PROCEDURE_TYPE, \n" +
 			"       specificname as specific_name, \n" +
-			"       procid::LVARCHAR as procid, \n" +
+			"       procid, \n" +
 			"       paramtypes::LVARCHAR as parameter_types \n" +
 			"FROM sysprocedures \n" +
 			"WHERE internal = 'f' \n " +
@@ -168,23 +199,131 @@ public class InformixProcedureReader
 	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
-		if (def.getParameterNames().isEmpty())
-		{
-			return super.getProcedureColumns(def);
-		}
-		DataStore ds = createProcColsDataStore();
-		List<ColumnIdentifier> parameters = def.getParameters(null);
-		for (ColumnIdentifier col : parameters)
-		{
-			int row = ds.addRow();
-			ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, col.getColumnName());
+		DataStore ds = null;
 
+		if (fixParamsRetrieval)
+		{
+			// most of the column information is already present (because it's retrieved together with the procedure definition)
+			// but that is lacking the parameter names. Therefor I'm doing another query to the database.
+			ds = retrieveColumns(def);
+		}
+
+		if (ds == null && def != null && !def.getParameterTypes().isEmpty())
+		{
+			// the exception is already logged
+			ds = createProcColsDataStore();
+			List<ColumnIdentifier> parameters = def.getParameters(null);
+			int pos = 1;
+			for (ColumnIdentifier col : parameters)
+			{
+				int row = ds.addRow();
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, col.getColumnName());
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, col.getDbmsType());
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NR, Integer.valueOf(pos));
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, col.getArgumentMode());
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Integer.valueOf(getJdbcType(col.getDbmsType())));
+				pos ++;
+			}
+		}
+		else if (ds == null)
+		{
+			// fall back to JDBC driver, better than nothing
+			ds = super.getProcedureColumns(def);
 		}
 		return ds;
 	}
 
+	private DataStore retrieveColumns(ProcedureDefinition def)
+	{
+		String sql =
+			"select col.paramid,  \n" +
+			"       col.paramname,  \n" +
+			"       ifx_param_types(col.procid) as param_types, \n" +
+			"       ifx_ret_types(col.procid) as ret_types, \n" +
+			"       case  \n" +
+			"         when col.paramattr = 1 then 'INPUT' \n" +
+			"         when col.paramattr = 2 then 'INOUT' \n" +
+			"         when col.paramattr in (3,5) then 'RETURN' \n" +
+			"         when col.paramattr = 4 then 'OUT' \n" +
+			"         else '' \n" +
+			"       end as param_mode \n" +
+			"from sysproccolumns col \n" +
+			"  join sysprocedures p on p.procid = col.procid \n";
+
+		if (def.getInternalIdentifier() != null)
+		{
+			sql += "where p.procid = " + def.getInternalIdentifier() + " \n";
+		}
+		else if (CollectionUtil.isNonEmpty(def.getParameterTypes()))
+		{
+			String types = StringUtil.listToString(def.getParameterTypes(), ",", false);
+			sql +=
+				"where p.procname = '" + def.getProcedureName() + "' \n " +
+				"  and ifx_param_types(p.procid) = '" + types + "' \n";
+		}
+		sql += "order by col.paramid";
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("InformixProcedureReader.getProcedures()", "Query to retrieve procedure parameters:\n" + sql);
+		}
+
+		DataStore ds = createProcColsDataStore();
+
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+
+			stmt = connection.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+			boolean isFirst = true;
+			List<ParamDef> types = null;
+			while (rs.next())
+			{
+				int paramid = rs.getInt("paramid");
+				String name = rs.getString("paramname");
+				String argTypes = rs.getString("param_types");
+				String mode = rs.getString("param_mode");
+				String returnType = rs.getString("ret_types");
+
+				if (isFirst)
+				{
+					types = convertTypeList(argTypes);
+					isFirst = false;
+				}
+				String dataType = null;
+				if (paramid == 0)
+				{
+					dataType = returnType;
+				}
+				else if (paramid - 1 < types.size())
+				{
+					dataType = types.get(paramid - 1).ifxTypeName;
+				}
+				int row = ds.addRow();
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, name);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, dataType);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NR, Integer.valueOf(paramid));
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, mode);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Integer.valueOf(getJdbcType(dataType)));
+			}
+			return ds;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("InformixProcedureReader.getProcedures()", "Error retrieving procedure columns using query:\n" + sql, e);
+			fixParamsRetrieval = false; // don't try again
+			return null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
 	private int getJdbcType(String typeName)
 	{
+		if (typeName == null) return Types.OTHER;
 		String baseType = SqlUtil.getBaseTypeName(typeName);
 		Integer jdbc = getJavaTypeMapping().get(baseType.toLowerCase());
 		if (jdbc == null) return Types.OTHER;
@@ -232,5 +371,11 @@ public class InformixProcedureReader
 			typeMap.put("timestamptz", Integer.valueOf(Types.TIMESTAMP));
     }
 		return typeMap;
+	}
+
+	private static class ParamDef
+	{
+		String ifxTypeName = "";
+		String mode = "INPUT";
 	}
 }

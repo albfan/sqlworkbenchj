@@ -520,6 +520,7 @@ public class JdbcProcedureReader
 			sql.setObjectName(procName);
 			sql.setCatalog(def.getCatalog());
 			sql.setSpecificName(def.getSpecificName());
+			sql.setInternalId(def.getInternalIdentifier());
 
 			String query = sql.getSql();
 

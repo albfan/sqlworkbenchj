@@ -61,7 +61,7 @@ public class GetMetaDataSql
 
 	// for stored procedure retrieval
 	private String internalIdColumn;
-	private String internalId;
+	private Object internalId;
 
 	public String getSql()
 	{
@@ -133,7 +133,16 @@ public class GetMetaDataSql
 				needsWhere = false;
 			}
 			if (needsAnd) sql.append(" AND ");
-			sql.append(internalIdColumn +  " = " + internalId);
+			String expr = null;
+			if (internalId instanceof String)
+			{
+				expr = "'" + internalId + "'";
+			}
+			else
+			{
+				expr = internalId.toString();
+			}
+			sql.append(internalIdColumn +  " = " + expr);
 			needsAnd = true;
 		}
 
@@ -216,12 +225,12 @@ public class GetMetaDataSql
 		this.internalIdColumn = columnName;
 	}
 
-	public String getInternalId()
+	public Object getInternalId()
 	{
 		return internalId;
 	}
 
-	public void setInternalId(String id)
+	public void setInternalId(Object id)
 	{
 		this.internalId = id;
 	}
