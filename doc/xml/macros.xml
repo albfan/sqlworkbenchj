@@ -21,6 +21,30 @@
     the editor if the name is typed or the macro is selected from the menu.
   </para>
 
+  <section id="macro-load-save">
+    <title>Loading and saving macro sets</title>
+    <para>
+      By default &wb-productname; will use a file with the name <literal>WbMacros.xml</literal>
+      stored in the <link linkend="config-dir">confguration directory</link> to save and load the macros.
+    </para>
+    <para>
+      To create a copy of the currently loaded macros, use
+      <menuchoice><guimenu>Macros</guimenu><guimenuitem>Save Macros as...</guimenuitem></menuchoice>.
+      To load previously saved macros, use <menuchoice><guimenu>Macros</guimenu><guimenuitem>Load Macros...</guimenuitem></menuchoice>.
+    </para>
+    <para>
+      The currently loaded file is displayed as a tooltip of the <guimenuitem>Save Macros as...</guimenuitem> menu item and
+      and the bottom of the <guimenuitem>Manage Macros</guimenuitem> dialog.
+    </para>
+
+    <para>
+      <note>
+        A set of macros is always loaded globally, not just for the current window. If you
+        have more than one window open, the newly loaded macros will also be active in all the other windows.
+      </note>
+    </para>
+  </section>
+
   <section id="define-macro">
     <title>Defining Macros</title>
 
@@ -42,6 +66,10 @@
     </para>
     <para>
       Macros can also be defined using the command <link linkend="command-definemacro"><literal>WbDefineMacro</literal></link>.
+    </para>
+    <para>
+      When the dialog is closed using the <guibutton>OK</guibutton> button the macros are automatically
+      saved to the current file.
     </para>
 
     <para>

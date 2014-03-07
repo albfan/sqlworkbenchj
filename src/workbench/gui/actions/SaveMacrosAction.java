@@ -25,6 +25,8 @@ import java.awt.event.ActionEvent;
 import workbench.interfaces.MacroChangeListener;
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.menu.RecentFileManager;
+
 import workbench.sql.macros.MacroFileSelector;
 import workbench.sql.macros.MacroManager;
 
@@ -57,6 +59,7 @@ public class SaveMacrosAction
 		WbFile f = selector.selectStorageForSave();
 		if (f == null) return;
 		MacroManager.getInstance().save(f);
+		RecentFileManager.getInstance().macrosLoaded(f);
 		setTooltip(f.getFullPath());
 	}
 

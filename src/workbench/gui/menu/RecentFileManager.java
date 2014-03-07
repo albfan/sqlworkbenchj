@@ -162,8 +162,8 @@ public class RecentFileManager
 		getRecentWorkspaces().addEntry(workspace);
 	}
 
-	public void macrosLoaded(WbFile workspace)
+	public void macrosLoaded(WbFile macroFile)
 	{
-		getRecentMacroFiles().addEntry(workspace);
+		getRecentMacroFiles().addEntry(macroFile);
 	}
 }

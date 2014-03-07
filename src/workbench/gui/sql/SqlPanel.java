@@ -464,8 +464,9 @@ public class SqlPanel
 			public void run()
 			{
 				editor.setCaretPosition(offset);
-				editor.scrollTo(line, 0);
+				editor.setFirstLine(line);
 				editor.validate();
+				editor.requestFocusInWindow();
 			}
 		});
 	}
@@ -3170,8 +3171,6 @@ public class SqlPanel
 			final int finishedSize = finishedMsg1.length() + finishedMsg2.length() + 5;
 
 			boolean onErrorAsk = !Settings.getInstance().getIgnoreErrors();
-
-			showLogPanel();
 
 			highlightCurrent = ((count > 1 || cursorPos > -1) && (!macroRun) && Settings.getInstance().getHighlightCurrentStatement());
 

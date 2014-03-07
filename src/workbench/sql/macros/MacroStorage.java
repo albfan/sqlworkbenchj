@@ -172,6 +172,7 @@ public class MacroStorage
 					LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
 				}
 			}
+			this.sourceFile = file;
 			resetModified();
 		}
 	}

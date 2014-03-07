@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -73,6 +72,7 @@ public class InformixProcedureReader
 	{
 		if (!fixProcRetrieval)
 		{
+			LogMgr.logDebug("InformixProcedureReader.getProcedures()", "Using JDBC driver to retrieve procedures.");
 			return super.getProcedures(catalog, schemaPattern, namePattern);
 		}
 
@@ -86,10 +86,10 @@ public class InformixProcedureReader
 		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
 		try
 		{
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
+//			if (Settings.getInstance().getDebugMetadataSql())
+//			{
 				LogMgr.logDebug("InformixProcedureReader.getProcedures()", "Query to retrieve procedurelist:\n" + sql);
-			}
+//			}
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
@@ -175,9 +175,7 @@ public class InformixProcedureReader
 	{
 		StringBuilder sql = new StringBuilder(100);
 
-		String systemSchema = getSystemSchema();
-		TableIdentifier procs = new TableIdentifier(catalog, systemSchema, "sysprocedures");
-		String sysProcs = procs.getFullyQualifiedName(connection);
+		String sysProcs = getSysProceduresTable(catalog);
 
 		sql.append(
 			"SELECT '' as PROCEDURE_CAT,  \n" +
@@ -240,11 +238,8 @@ public class InformixProcedureReader
 
 	private DataStore retrieveColumns(ProcedureDefinition def)
 	{
-		String systemSchema = getSystemSchema();
-		TableIdentifier procs = new TableIdentifier(def.getCatalog(), systemSchema, "sysprocedures");
-		TableIdentifier cols = new TableIdentifier(def.getCatalog(), systemSchema, "sysproccolumns");
-		String sysProcs = procs.getFullyQualifiedName(connection);
-		String sysCols = cols.getFullyQualifiedName(connection);
+		String sysProcs = getSysProceduresTable(def.getCatalog());
+		String sysCols = getSysProcColumnsTable(def.getCatalog());
 
 		String sql =
 			"select col.paramid,  \n" +
@@ -273,10 +268,10 @@ public class InformixProcedureReader
 				"  and ifx_param_types(p.procid) = '" + types + "' \n";
 		}
 		sql += "order by col.paramid";
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
+//		if (Settings.getInstance().getDebugMetadataSql())
+//		{
 			LogMgr.logDebug("InformixProcedureReader.getProcedures()", "Query to retrieve procedure parameters:\n" + sql);
-		}
+//		}
 
 		DataStore ds = createProcColsDataStore();
 
@@ -383,12 +378,25 @@ public class InformixProcedureReader
     }
 		return typeMap;
 	}
-	
+
+	private String getSysProceduresTable(String catalog)
+	{
+		String systemSchema = getSystemSchema();
+		TableIdentifier procs = new TableIdentifier(catalog, systemSchema, "sysprocedures");
+		return procs.getFullyQualifiedName(connection);
+	}
+
+	private String getSysProcColumnsTable(String catalog)
+	{
+		String systemSchema = getSystemSchema();
+		TableIdentifier cols = new TableIdentifier(catalog, systemSchema, "sysproccolumns");
+		return cols.getFullyQualifiedName(connection);
+	}
+
 	private String getSystemSchema()
 	{
 		return connection.getDbSettings().getProperty("systemschema", "informix");
 	}
-
 
 	private static class ParamDef
 	{

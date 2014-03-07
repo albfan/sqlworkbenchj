@@ -290,7 +290,7 @@ public class JEditTextArea
 			this.removeMouseWheelListener(fontZoomer);
 		}
 	}
-	
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
@@ -790,8 +790,7 @@ public class JEditTextArea
 	}
 
 	/**
-	 * Sets the line displayed at the text area's origin without
-	 * updating the scroll bars.
+	 * Sets the line displayed at the text area's origin.
 	 */
 	public void setFirstLine(int firstLine)
 	{
