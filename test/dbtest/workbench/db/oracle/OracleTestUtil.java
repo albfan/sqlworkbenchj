@@ -25,13 +25,17 @@ package workbench.db.oracle;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import workbench.AppArguments;
 import workbench.TestUtil;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
+
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 
@@ -161,6 +165,7 @@ public class OracleTestUtil
 				}
 			}
 			stmt.executeUpdate("purge recyclebin");
+			con.getObjectCache().clear();
 		}
 		catch (Exception e)
 		{

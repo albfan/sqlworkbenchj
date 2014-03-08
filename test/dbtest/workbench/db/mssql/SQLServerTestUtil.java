@@ -23,12 +23,16 @@
 package workbench.db.mssql;
 
 import java.sql.SQLException;
+
 import workbench.AppArguments;
 import workbench.TestUtil;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.sql.BatchRunner;
+
 import workbench.util.ArgumentParser;
 
 /**
@@ -134,6 +138,7 @@ public class SQLServerTestUtil
 		{
 			TestUtil.executeScript(con, sql);
 			con.commit();
+			con.getObjectCache().clear();
 		}
 		catch (SQLException ex)
 		{

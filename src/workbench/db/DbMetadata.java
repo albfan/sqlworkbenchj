@@ -1372,7 +1372,15 @@ public class DbMetadata
 		if (getDbSettings().supportsMetaDataWildcards())
 		{
 			escapedNamePattern = SqlUtil.escapeUnderscore(namePattern, escape);
+		}
+
+		if (getDbSettings().supportsMetaDataSchemaWildcards())
+		{
 			escapedSchema = SqlUtil.escapeUnderscore(schemaPattern, escape);
+		}
+
+		if (getDbSettings().supportsMetaDataCatalogWildcards())
+		{
 			escapedCatalog = SqlUtil.escapeUnderscore(catalogPattern, escape);
 		}
 
@@ -2170,7 +2178,7 @@ public class DbMetadata
 	{
 		return getSelectableObjectsList(namePattern, schemaOrCatalog, selectableTypes);
 	}
-	
+
 	public List<TableIdentifier> getSelectableObjectsList(String namePattern, String schemaOrCatalog, String[] types)
 		throws SQLException
 	{

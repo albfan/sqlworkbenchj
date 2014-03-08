@@ -330,15 +330,6 @@ public class SqlPanel
 	private long lastScriptExecTime;
 	protected final List<ToolWindow> resultWindows = new ArrayList<ToolWindow>(1);
 
-	private final Runnable selector = new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_selectEditor();
-			}
-		};
-
 //</editor-fold>
 
 	public SqlPanel()
@@ -1074,6 +1065,15 @@ public class SqlPanel
 		editor.getInputMap().setParent(im);
 		editor.getActionMap().setParent(am);
 	}
+
+	private final Runnable selector = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_selectEditor();
+			}
+		};
 
 	public void selectEditorLater()
 	{

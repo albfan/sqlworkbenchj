@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -50,6 +51,8 @@ import workbench.util.StringUtil;
 /**
  * IBM's JDBC driver for Informix does not handle overloaded procedures correctly.
  *
+ * The SQL statements are only tested against an Informix 11.5
+ * 
  * @author Thomas Kellerer
  */
 public class InformixProcedureReader
@@ -62,8 +65,18 @@ public class InformixProcedureReader
 	public InformixProcedureReader(WbConnection conn)
 	{
 		super(conn);
-		fixProcRetrieval = JdbcUtils.hasMinimumServerVersion(conn, "10.0"); // Not sure about that
-		fixParamsRetrieval = JdbcUtils.hasMinimumServerVersion(conn, "11.0");
+		boolean useDriver = connection.getDbSettings().getBoolProperty("procedurelist.usedriver", false);
+		if (useDriver)
+		{
+			fixProcRetrieval = false;
+			fixParamsRetrieval = false;
+		}
+		else
+		{
+			// TODO: verify if our statement for sysprocedures really works with Informix 10.x
+			fixProcRetrieval = JdbcUtils.hasMinimumServerVersion(conn, "10.0");
+			fixParamsRetrieval = JdbcUtils.hasMinimumServerVersion(conn, "11.0");
+		}
 	}
 
 	@Override
@@ -86,10 +99,10 @@ public class InformixProcedureReader
 		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
 		try
 		{
-//			if (Settings.getInstance().getDebugMetadataSql())
-//			{
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
 				LogMgr.logDebug("InformixProcedureReader.getProcedures()", "Query to retrieve procedurelist:\n" + sql);
-//			}
+			}
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
@@ -268,10 +281,10 @@ public class InformixProcedureReader
 				"  and ifx_param_types(p.procid) = '" + types + "' \n";
 		}
 		sql += "order by col.paramid";
-//		if (Settings.getInstance().getDebugMetadataSql())
-//		{
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
 			LogMgr.logDebug("InformixProcedureReader.getProcedures()", "Query to retrieve procedure parameters:\n" + sql);
-//		}
+		}
 
 		DataStore ds = createProcColsDataStore();
 

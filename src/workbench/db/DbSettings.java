@@ -1584,6 +1584,21 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "metadata.retrieval.wildcards", true);
 	}
 
+	public boolean supportsMetaDataSchemaWildcards()
+	{
+		return supportsMetaDataWildcards("schema");
+	}
+
+	public boolean supportsMetaDataCatalogWildcards()
+	{
+		return supportsMetaDataWildcards("catalog");
+	}
+
+	private boolean supportsMetaDataWildcards(String type)
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "metadata.retrieval.wildcards." + type, supportsMetaDataWildcards());
+	}
+
 	public int getLockTimoutForSqlServer()
 	{
 		return Settings.getInstance().getIntProperty(prefix + "dbexplorer.locktimeout", 2500);
@@ -1726,6 +1741,11 @@ public class DbSettings
 	public String getProperty(String prop, String defaultValue)
 	{
 		return Settings.getInstance().getProperty(prefix + prop, defaultValue);
+	}
+
+	public boolean getBoolProperty(String prop, boolean defaultValue)
+	{
+		return Settings.getInstance().getBoolProperty(prefix + prop, defaultValue);
 	}
 
 	public boolean generateColumnListInViews()

@@ -70,7 +70,7 @@ public class FirebirdSequenceReaderTest
 	{
 		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
 		assertNotNull("No connection available", con);
-		
+
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] { "SEQUENCE" });
 		assertEquals(1, objects.size());
 		TableIdentifier seq = objects.get(0);

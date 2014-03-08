@@ -24,14 +24,18 @@ package workbench.db.ibm;
 
 import java.sql.Statement;
 import java.util.List;
+
 import workbench.AppArguments;
 import workbench.TestUtil;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.GenericObjectDropper;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.sql.BatchRunner;
+
 import workbench.util.ArgumentParser;
 
 /**
@@ -57,7 +61,7 @@ public class Db2TestUtil
 		}
 		return value;
 	}
-	
+
 	/**
 	 * Return a connection to a locally running DB2 database.
 	 *
@@ -154,6 +158,7 @@ public class Db2TestUtil
 			dropper.setCascade(true);
 			dropper.dropObjects();
 			con.commit();
+			con.getObjectCache().clear();
 		}
 		catch (Exception e)
 		{

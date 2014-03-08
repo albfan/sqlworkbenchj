@@ -23,14 +23,18 @@
 package workbench.db.firebird;
 
 import java.util.List;
+
 import workbench.AppArguments;
 import workbench.TestUtil;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.GenericObjectDropper;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.sql.BatchRunner;
+
 import workbench.util.ArgumentParser;
 
 /**
@@ -89,13 +93,15 @@ public class FirebirdTestUtil
 
 		try
 		{
-			List<TableIdentifier> tables = con.getMetadata().getObjectList(null, null);
+			String[] types = { "TABLE", "VIEW", "SEQUENCE", "DOMAIN" };
+			List<TableIdentifier> tables = con.getMetadata().getObjectList(null, types);
 			GenericObjectDropper dropper = new GenericObjectDropper();
 			dropper.setConnection(con);
 			dropper.setObjects(tables);
 			dropper.setCascade(true);
 			dropper.dropObjects();
 			con.commit();
+			con.getObjectCache().clear();
 		}
 		catch (Exception e)
 		{

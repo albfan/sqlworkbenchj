@@ -133,6 +133,7 @@ public class PostgresTestUtil
 			stmt = con.createStatement();
 			stmt.execute("drop owned by wbjunit cascade");
 			con.commit();
+			con.getObjectCache().clear();
 		}
 		catch (Exception e)
 		{

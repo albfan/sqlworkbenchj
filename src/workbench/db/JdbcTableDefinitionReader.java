@@ -96,7 +96,15 @@ public class JdbcTableDefinitionReader
 		if (dbConnection.getDbSettings().supportsMetaDataWildcards())
 		{
 			tablename = SqlUtil.escapeUnderscore(tablename, dbConnection);
+		}
+
+		if (dbConnection.getDbSettings().supportsMetaDataSchemaWildcards())
+		{
 			schema = SqlUtil.escapeUnderscore(schema, dbConnection);
+		}
+
+		if (dbConnection.getDbSettings().supportsMetaDataCatalogWildcards())
+		{
 			catalog = SqlUtil.escapeUnderscore(catalog, dbConnection);
 		}
 
