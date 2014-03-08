@@ -151,6 +151,8 @@ public class MacroStorage
 
 	public void saveMacros(File file)
 	{
+		if (file == null) return;
+
 		synchronized (lock)
 		{
 			if (this.getSize() == 0)
@@ -240,6 +242,7 @@ public class MacroStorage
 		if (!source.exists())
 		{
 			LogMgr.logDebug("MacroManager.loadMacros()", "Macro file " + source.getAbsolutePath() + " not found. No Macros loaded");
+			this.sourceFile = source;
 			return;
 		}
 

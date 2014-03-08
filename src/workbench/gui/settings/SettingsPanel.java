@@ -217,7 +217,24 @@ public class SettingsPanel
 		}
 		else
 		{
-			this.dialog.setSize(640, 540);
+			// if no page is displayed, pack() will not work properly
+			// so we need to instantiate and display the two largest pages
+
+			// the editor page is the highest page
+			pageList.setSelectedIndex(1);
+			this.dialog.pack();
+			int h = dialog.getSize().height;
+
+			// the editor colors page is the widest page
+			pageList.setSelectedIndex(2);
+			this.dialog.pack();
+			int w = dialog.getSize().width;
+
+			dialog.setSize(w,h);
+
+			// the "Editor Colors" page is substantially wider than the general options page
+			// so increase the size after the pack()
+			WbSwingUtilities.scale(dialog, 1.02, 1.02);
 		}
 
 		this.dialog.getRootPane().setDefaultButton(this.okButton);
@@ -232,9 +249,10 @@ public class SettingsPanel
 			{
 				pageList.setSelectedIndex(0);
 				pageList.requestFocusInWindow();
+				dialog.setVisible(true);
 			}
 		});
-		this.dialog.setVisible(true);
+
 	}
 
 	private void closeWindow()

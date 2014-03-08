@@ -306,7 +306,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(0, 6, 2, 6);
+    gridBagConstraints.insets = new java.awt.Insets(0, 6, 2, 5);
     add(cbDrivers, gridBagConstraints);
 
     tfURL.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -318,7 +318,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(1, 6, 2, 6);
+    gridBagConstraints.insets = new java.awt.Insets(1, 6, 2, 5);
     add(tfURL, gridBagConstraints);
 
     tfUserName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -402,9 +402,10 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 4, 6);
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 4, 5);
     add(showPassword, gridBagConstraints);
 
+    wbOptionsPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
     wbOptionsPanel.setLayout(new java.awt.GridBagLayout());
 
     cbStorePassword.setSelected(true);
@@ -415,7 +416,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
     wbOptionsPanel.add(cbStorePassword, gridBagConstraints);
@@ -440,7 +440,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
     wbOptionsPanel.add(cbIgnoreDropErrors, gridBagConstraints);
@@ -452,7 +451,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
     wbOptionsPanel.add(cbSeparateConnections, gridBagConstraints);
@@ -464,7 +462,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
     wbOptionsPanel.add(emptyStringIsNull, gridBagConstraints);
@@ -489,7 +486,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
@@ -503,10 +499,8 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 9);
     wbOptionsPanel.add(rememberExplorerSchema, gridBagConstraints);
 
     trimCharData.setText(ResourceMgr.getString("LblTrimCharData")); // NOI18N
@@ -550,7 +544,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
     wbOptionsPanel.add(hideWarnings, gridBagConstraints);
@@ -563,7 +556,6 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
     wbOptionsPanel.add(checkOpenTrans, gridBagConstraints);
@@ -596,10 +588,9 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 9);
     wbOptionsPanel.add(jCheckBox1, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -610,7 +601,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 6);
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
     add(wbOptionsPanel, gridBagConstraints);
 
     jPanel2.setLayout(new java.awt.GridBagLayout());
@@ -842,7 +833,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 6);
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 6, 5);
     add(jPanel3, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -859,7 +850,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 6, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(3, 6, 0, 5);
     add(timeoutpanel, gridBagConstraints);
 
     jPanel6.setLayout(new java.awt.GridBagLayout());
@@ -911,7 +902,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 6, 14, 0);
     add(jPanel6, gridBagConstraints);
   }
 
@@ -1447,7 +1438,7 @@ public class ConnectionEditorPanel
 			asSysDBA.setEnabled(false);
 			asSysDBA.setSelected(false);
 			cons.gridwidth = 2;
-			cons.insets = new Insets(0, 6, 2, 6);
+			cons.insets = new Insets(0, 6, 2, 5);
 			layout.setConstraints(tfUserName, cons);
 		}
 	}

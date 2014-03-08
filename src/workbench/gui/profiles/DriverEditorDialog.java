@@ -78,6 +78,7 @@ public class DriverEditorDialog
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
 			this.pack();
+			WbSwingUtilities.scale(this, 1.05, 1.10);
 		}
 
 		// when invoked from the connection dialog, it seems that under

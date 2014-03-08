@@ -91,6 +91,8 @@ public class DriverEditorPanel
 		classpathEditor.setLastDirProperty("workbench.drivers.lastlibdir");
 		classpathEditor.addActionListener(this);
 		WbSwingUtilities.setMinimumSize(statusLabel, 1, 20);
+		WbSwingUtilities.setMinimumSize(tfName, 40);
+		WbSwingUtilities.setMinimumSize(tfClassName, 50);
 	}
 
 	public void setValidator(Validator nameValidator)

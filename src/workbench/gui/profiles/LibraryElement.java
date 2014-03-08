@@ -55,7 +55,7 @@ public class LibraryElement
 			}
 			else
 			{
-				displayString = "<html><span style='color:red'><i>" + fullPath + "</i></span></html>";
+				displayString = "<html><span style='color:red'><i>" + file.getName() + "</i></span></html>";
 			}
 		}
 	}

@@ -263,7 +263,7 @@
      <string>org.postgresql.Driver</string>
     </void>
     <void property="library">
-     <string>postgresql-9.1-901.jdbc4.jar</string>
+     <string>postgresql-9.3-1101.jdbc4.jar</string>
     </void>
     <void property="name">
      <string>PostgreSQL</string>

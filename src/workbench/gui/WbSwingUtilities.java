@@ -1408,4 +1408,12 @@ public class WbSwingUtilities
 			}
 		}
 	}
+
+	public static void scale(Window toScale, double factorWidth, double factorHeight)
+	{
+		Dimension size = toScale.getSize();
+		size.width = (int)(size.width * factorWidth);
+		size.height = (int)(size.height * factorHeight);
+		toScale.setSize(size);
+	}
 }

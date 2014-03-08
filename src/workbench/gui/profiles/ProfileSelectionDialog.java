@@ -245,6 +245,7 @@ public class ProfileSelectionDialog
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
 			this.pack();
+			WbSwingUtilities.scale(this, 1.02, 1.025);
 		}
 	}
 
