@@ -25,7 +25,6 @@ package workbench.db;
 import java.util.regex.Matcher;
 
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -73,8 +72,9 @@ public interface QuoteHandler
 		@Override
 		public boolean isQuoted(String name)
 		{
-			if (StringUtil.isEmptyString(name)) return false;
+			if (name == null) return false;
 			name = name.trim();
+			if (name.isEmpty()) return false;
 			return name.charAt(0) == '"' && name.charAt(name.length() - 1) == '"';
 		}
 
