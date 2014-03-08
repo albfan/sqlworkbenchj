@@ -1009,8 +1009,10 @@ public class DbMetadata
 	@Override
 	public boolean isQuoted(String name)
 	{
-		if (StringUtil.isBlank(name)) return false;
+		if (name == null) return false;
 		name = name.trim();
+		if (name.isEmpty()) return false;
+
 		if (name.startsWith(quoteCharacter)) return true;
 
 		// SQL Server driver claims that a " is the quote character but still
@@ -1053,8 +1055,7 @@ public class DbMetadata
 	 */
 	public String quoteObjectname(String name, boolean quoteAlways)
 	{
-		if (name == null) return null;
-		if (name.length() == 0) return name;
+		if (StringUtil.isEmptyString(name)) return null;
 
 		// already quoted?
 		if (isQuoted(name)) return name;

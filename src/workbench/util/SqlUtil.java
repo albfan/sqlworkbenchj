@@ -277,7 +277,7 @@ public class SqlUtil
 
 		if ( (firstChar == '"' && lastChar == '"') ||
 				 (firstChar == '`' && lastChar == '`') || /* workaround the idiotic MySQL quoting */
- 			   (firstChar == '[' && lastChar == ']') /* workaround the idiotic SQL Server quoting */
+ 			   (firstChar == '[' && lastChar == ']')    /* workaround the idiotic SQL Server quoting */
 				 )
 		{
 			return input.substring(1, len - 1);
