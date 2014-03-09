@@ -1329,13 +1329,8 @@ public class DbMetadata
 		return cleanTypes;
 	}
 
-	public DataStore getObjects(String catalogPattern, String schemaPattern, String namePattern, String[] types)
-		throws SQLException
+	public DataStore createTableListDataStore()
 	{
-		catalogPattern = cleanupWildcards(catalogPattern);
-		schemaPattern = cleanupWildcards(schemaPattern);
-		namePattern = cleanupWildcards(namePattern);
-
 		String[] cols = getTableListColumns();
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {30, 12, 10, 10, 20};
@@ -1352,6 +1347,17 @@ public class DbMetadata
 				return sorter;
 			}
 		};
+		return result;
+	}
+
+	public DataStore getObjects(String catalogPattern, String schemaPattern, String namePattern, String[] types)
+		throws SQLException
+	{
+		catalogPattern = cleanupWildcards(catalogPattern);
+		schemaPattern = cleanupWildcards(schemaPattern);
+		namePattern = cleanupWildcards(namePattern);
+
+		DataStore result = createTableListDataStore();
 
 		boolean sequencesReturned = false;
 		boolean synRetrieved = false;
@@ -1386,6 +1392,13 @@ public class DbMetadata
 		}
 
 		String sequenceType = getSequenceReader() != null ? getSequenceReader().getSequenceTypeName() : null;
+		final SynonymReader synReader = this.getSynonymReader();
+		String synTypeName = SynonymReader.SYN_TYPE_NAME;
+
+		if (synReader != null)
+		{
+			synTypeName = synReader.getSynonymTypeName();
+		}
 
 		ResultSet tableRs = null;
 		try
@@ -1432,13 +1445,13 @@ public class DbMetadata
 
 				String remarks = useColumnNames ? tableRs.getString("REMARKS") : tableRs.getString(5);
 
-				boolean isSynoym = "SYNONYM".equals(ttype);
+				boolean isSynoym = synRetrieved || synTypeName.equals(ttype);
 
 				// prevent duplicate retrieval of SYNONYMs if the driver
 				// returns them already, but the Settings have enabled
 				// Synonym retrieval as well
 				// (e.g. because an upgraded Driver now returns the synonyms)
-				if (!synRetrieved && isSynoym)
+				if (isSynoym)
 				{
 					synRetrieved = true;
 				}
@@ -1470,7 +1483,7 @@ public class DbMetadata
 
 		// Synonym and Sequence retrieval is handled differently to "regular" ObjectListExtenders
 		// because some JDBC driver versions do retrieve this information automatically some don't
-		SequenceReader seqReader = this.getSequenceReader();
+		SequenceReader seqReader = getSequenceReader();
 		if (seqReader != null && typeIncluded(seqReader.getSequenceTypeName(), types) &&
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
@@ -1489,7 +1502,6 @@ public class DbMetadata
 			}
 		}
 
-		SynonymReader synReader = this.getSynonymReader();
 		boolean retrieveSyns = (synReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
 		if (retrieveSyns && !synRetrieved && synonymsRequested)
 		{
@@ -2240,7 +2252,7 @@ public class DbMetadata
 		return tables;
 	}
 
-	private TableIdentifier buildTableIdentifierFromDs(DataStore ds, int row)
+	public TableIdentifier buildTableIdentifierFromDs(DataStore ds, int row)
 	{
 		String t = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_NAME);
 		String s = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_SCHEMA);

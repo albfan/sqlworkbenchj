@@ -60,6 +60,12 @@ public class Db2SynonymReader
 	}
 
 	@Override
+	public String getSynonymTypeName()
+	{
+		return "ALIAS";
+	}
+
+	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schemaPattern, String namePattern)
 		throws SQLException
 	{

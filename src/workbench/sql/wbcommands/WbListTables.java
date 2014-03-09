@@ -23,14 +23,12 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.List;
 
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
-import workbench.db.DbMetadata;
 import workbench.resource.ResourceMgr;
 
-import workbench.db.TableIdentifier;
+import workbench.db.DbMetadata;
 
 import workbench.storage.DataStore;
 
@@ -39,7 +37,6 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
-import workbench.util.StringUtil;
 
 /**
  * List all tables available to the current user.
@@ -70,22 +67,15 @@ public class WbListTables
 	}
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
-		String options = getCommandLine(aSql);
-
-		String[] types = currentConnection.getMetadata().getTableTypesArray();
+		String options = getCommandLine(sql);
 
 		StatementRunnerResult result = new StatementRunnerResult();
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
 		cmdLine.parse(options);
-
-		String objects = options;
-		String schema = null;
-		String catalog = null;
-
 		if (cmdLine.hasUnknownArguments())
 		{
 			result.addMessage(ResourceMgr.getString("ErrListWrongArgs"));
@@ -93,71 +83,8 @@ public class WbListTables
 			return result;
 		}
 
-		if (cmdLine.hasArguments())
-		{
-
-			objects = cmdLine.getValue("objects");
-
-			List<String> typeList = cmdLine.getListValue(CommonArgs.ARG_TYPES);
-			if (typeList.size() > 0)
-			{
-				types = StringUtil.toArray(typeList, true, true);
-			}
-			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
-			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
-		}
-
-		if (StringUtil.isBlank(schema))
-		{
-			schema = currentConnection.getMetadata().getCurrentSchema();
-		}
-
-		if (StringUtil.isBlank(catalog))
-		{
-			catalog = currentConnection.getMetadata().getCurrentCatalog();
-		}
-
-		DataStore resultList = null;
-
-		if (StringUtil.isBlank(objects))
-		{
-			objects = "%";
-		}
-
-		List<String> objectFilters = StringUtil.stringToList(objects, ",", true, true, false, true);
-
-		for (String filter : objectFilters)
-		{
-			// Create a tableidentifier for parsing e.g. parameters
-			// like -tables=public.*
-			TableIdentifier tbl = new TableIdentifier(currentConnection.getMetadata().adjustObjectnameCase(filter), currentConnection);
-			String tschema = tbl.getSchema();
-			if (StringUtil.isBlank(tschema))
-			{
-				tschema = schema;
-			}
-			tschema = currentConnection.getMetadata().adjustSchemaNameCase(tschema);
-			String tcatalog = tbl.getCatalog();
-			if (StringUtil.isBlank(tcatalog))
-			{
-				tcatalog = catalog;
-			}
-			tcatalog = currentConnection.getMetadata().adjustObjectnameCase(tcatalog);
-
-			String tname = tbl.getTableName();
-
-			DataStore ds = currentConnection.getMetadata().getObjects(tcatalog, tschema, tname, types);
-			if (resultList == null)
-			{
-				// first result retrieved
-				resultList = ds;
-			}
-			else
-			{
-				// additional results retrieved, add them to the current result
-				resultList.copyFrom(ds);
-			}
-		}
+		ObjectLister lister = new ObjectLister();
+		DataStore resultList = lister.getObjects(cmdLine, options, currentConnection);
 
 		if (resultList != null)
 		{

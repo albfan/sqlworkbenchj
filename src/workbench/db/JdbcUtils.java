@@ -29,6 +29,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Savepoint;
+import java.sql.Statement;
+
+import workbench.log.LogMgr;
 
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -220,4 +224,37 @@ public class JdbcUtils
 		}
 	}
 
+	public static ResultSet runStatement(WbConnection dbConnection, Statement statement, String sql, boolean useSeparateConnection, boolean useSavepoint)
+	{
+		ResultSet rs = null;
+		Savepoint sp = null;
+
+		try
+		{
+			if (useSavepoint)
+			{
+				sp = dbConnection.setSavepoint();
+			}
+
+			rs = statement.executeQuery(sql);
+			if (useSeparateConnection)
+			{
+				if (dbConnection.selectStartsTransaction())
+				{
+					dbConnection.rollback();
+				}
+			}
+			else
+			{
+				dbConnection.rollback(sp);
+			}
+		}
+		catch (SQLException ex)
+		{
+			dbConnection.rollback(sp);
+			LogMgr.logError("JdbcUtils.runStatement()", "Error running statement", ex);
+			rs = null;
+		}
+		return rs;
+	}
 }

@@ -27,12 +27,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -54,6 +57,12 @@ public class SqlServerSynonymReader
 	public SqlServerSynonymReader(DbMetadata dbMeta)
 	{
 		this.meta = dbMeta;
+	}
+
+	@Override
+	public String getSynonymTypeName()
+	{
+		return SYN_TYPE_NAME;
 	}
 
 	public static boolean supportsSynonyms(WbConnection con)

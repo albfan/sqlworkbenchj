@@ -51,6 +51,12 @@ public class DerbySynonymReader
 	}
 
 	@Override
+	public String getSynonymTypeName()
+	{
+		return SYN_TYPE_NAME;
+	}
+
+	@Override
 	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
 		throws SQLException
 	{

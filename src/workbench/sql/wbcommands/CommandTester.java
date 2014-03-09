@@ -129,6 +129,7 @@ public class CommandTester
 		commands.add(WbDefineMacro.VERB);
 		commands.add(WbListMacros.VERB);
 		commands.add(WbListIndexes.VERB);
+		commands.add(WbRowCount.VERB.toUpperCase());
 	}
 
 	private Map<String, String> getFormattedVerbs()
@@ -180,6 +181,7 @@ public class CommandTester
 			formattedWords.put(WbListIndexes.VERB, "WbListIndexes");
 			formattedWords.put(WbViewSource.VERB, WbViewSource.FORMATTED_VERB);
 			formattedWords.put(WbTableSource.VERB, WbTableSource.FORMATTED_VERB);
+			formattedWords.put(WbRowCount.VERB.toUpperCase(), WbRowCount.VERB);
 		}
 		return formattedWords;
 	}

@@ -87,6 +87,7 @@ import workbench.sql.wbcommands.WbMode;
 import workbench.sql.wbcommands.WbOraShow;
 import workbench.sql.wbcommands.WbProcSource;
 import workbench.sql.wbcommands.WbRemoveVar;
+import workbench.sql.wbcommands.WbRowCount;
 import workbench.sql.wbcommands.WbRunLB;
 import workbench.sql.wbcommands.WbSavePkMapping;
 import workbench.sql.wbcommands.WbSchemaDiff;
@@ -191,6 +192,7 @@ public class CommandMapper
 		addCommand(new WbGenDelete());
 		addCommand(new WbGenInsert());
 		addCommand(new WbEcho());
+		addCommand(new WbRowCount());
 
 		addCommand(new WbDisconnect());
 		addCommand(new WbDisplay());
@@ -244,11 +246,11 @@ public class CommandMapper
 	 */
 	public final void addCommand(SqlCommand command)
 	{
-		cmdDispatch.put(command.getVerb(), command);
+		cmdDispatch.put(command.getVerb().toUpperCase(), command);
 		String alternate = command.getAlternateVerb();
 		if (alternate != null)
 		{
-			cmdDispatch.put(alternate, command);
+			cmdDispatch.put(alternate.toUpperCase(), command);
 		}
 	}
 

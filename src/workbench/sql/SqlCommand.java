@@ -344,7 +344,7 @@ public class SqlCommand
 		{
 			if (currentStatement != null)
 			{
-				String info = getVerb() + " (" + getClass().getSimpleName();
+				String info = getVerb() + " (" + getClass().getSimpleName() + ")";
 				LogMgr.logTrace("SqlCommand.done()", "Cleaning up SqlCommand " + info + ")");
 
 				try { currentStatement.clearBatch(); } catch (Throwable th) {}

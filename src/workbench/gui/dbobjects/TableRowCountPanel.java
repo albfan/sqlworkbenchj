@@ -29,9 +29,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -52,6 +50,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ConnectionMgr;
+import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
@@ -65,6 +64,8 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 
 import workbench.storage.DataStore;
+
+import workbench.sql.wbcommands.WbRowCount;
 
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
@@ -234,16 +235,7 @@ public class TableRowCountPanel
 		cancelAction.setEnabled(true);
 		cancel = false;
 
-		String[] tableListColumns = dbConnection.getMetadata().getTableListColumns();
-		String[] columns = new String[tableListColumns.length];
-
-		columns[0] = ResourceMgr.getString("TxtRowCnt").toUpperCase();
-		columns[1] = tableListColumns[0];
-		columns[2] = tableListColumns[1];
-		columns[3] = tableListColumns[2];
-		columns[4] = tableListColumns[3];
-
-		DataStore ds = new DataStore(columns, new int[] { Types.BIGINT, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR} );
+		DataStore ds = WbRowCount.buildResultDataStore(dbConnection);
 		DataStoreTableModel model = new DataStoreTableModel(ds);
 		model.setAllowEditing(false);
 		setModel(model);
@@ -269,7 +261,8 @@ public class TableRowCountPanel
 				showTable(table, tableNum+1, tblCount);
 				String sql = builder.getSelectForCount(table);
 
-				rs = runStatement(sql, useSavepoint);
+				rs = JdbcUtils.runStatement(dbConnection, currentStatement, sql, useSeparateConnection, useSavepoint);
+				
 				if (cancel) break;
 
 				long rowCount = 0;
@@ -309,40 +302,6 @@ public class TableRowCountPanel
 				data.requestFocusInWindow();
 			}
 		});
-	}
-
-	private ResultSet runStatement(String sql, boolean useSavepoint)
-	{
-		ResultSet rs = null;
-		Savepoint sp = null;
-
-		try
-		{
-			if (useSavepoint)
-			{
-				sp = dbConnection.setSavepoint();
-			}
-
-			rs = currentStatement.executeQuery(sql);
-			if (useSeparateConnection)
-			{
-				if (this.dbConnection.selectStartsTransaction())
-				{
-					dbConnection.rollback();
-				}
-			}
-			else
-			{
-				dbConnection.rollback(sp);
-			}
-		}
-		catch (SQLException ex)
-		{
-			dbConnection.rollback(sp);
-			LogMgr.logError("TableRowCountPanel.retrieveRowCounts()", "Error retrieving table count", ex);
-			rs = null;
-		}
-		return rs;
 	}
 
 	private void showTable(final TableIdentifier table, int current, int total)

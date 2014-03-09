@@ -60,6 +60,12 @@ public class InformixSynonymReader
 	}
 
 	@Override
+	public String getSynonymTypeName()
+	{
+		return SYN_TYPE_NAME;
+	}
+
+	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
 		throws SQLException
 	{

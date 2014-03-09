@@ -49,6 +49,12 @@ public class IngresSynonymReader
 	{
 	}
 
+	@Override
+	public String getSynonymTypeName()
+	{
+		return SYN_TYPE_NAME;
+	}
+
 	/**
 	 * 	Get a list of synonyms for the given owner
 	 */
