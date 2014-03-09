@@ -107,7 +107,7 @@ public class WbRowCount
 		if (this.rowMonitor != null)
 		{
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-			rowMonitor.setCurrentObject("Retrieving tables", -1, -1);
+			rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
 		}
 
 		DataStore resultList = lister.getObjects(cmdLine, options, currentConnection);
@@ -115,7 +115,7 @@ public class WbRowCount
 		if (resultList == null)
 		{
 			result.setFailure();
-			result.addMessage("Not tables found!");
+			result.addMessageByKey("ErrNoTablesFound");
 		}
 
 		DbMetadata meta = currentConnection.getMetadata();
@@ -139,6 +139,8 @@ public class WbRowCount
 				rowMonitor.setCurrentObject(msg, row + 1, tableCount);
 				rs = JdbcUtils.runStatement(currentConnection, currentStatement, countQuery, false, useSavepoint);
 
+				if (isCancelled) break;
+				
 				long rowCount = -1;
 				if (rs != null && rs.next())
 				{
