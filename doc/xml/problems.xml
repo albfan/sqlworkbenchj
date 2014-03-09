@@ -60,9 +60,24 @@
       When using the <link linkend="launcher-using">Windows launcher</link> you have to prefix the paramter with -J to identify it as a parameter
       for the Java runtime not for the application.
     </para>
-
   </section>
 
+  <section id="window-sizes">
+    <title>Some of the dialogs are too small</title>
+    <indexterm><primary>Problems</primary><secondary>dialog too small</secondary></indexterm>
+    <indexterm><primary>Options dialog</primary><secondary>dialog too small</secondary></indexterm>
+    <indexterm><primary>Profile dialog</primary><secondary>dialog too small</secondary></indexterm>
+    <para>
+      When using non-default font sizes in the operating system, it can happen that the windows
+      shown in &wb-productname; are sometimes too small and some GUI elements are cut off
+      or not visible at all.
+    </para>
+    <para>
+      All windows and dialogs can be resized and will remember their size. If GUI controls are not visible or are cut-off
+      simply resize the window until everything is visible. The next time the dialog is opened, the chose
+      size will be restored.
+    </para>
+  </section>
 
   <section id="excel-export">
     <title>Excel export not available</title>
