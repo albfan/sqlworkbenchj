@@ -1,24 +1,35 @@
-#!/bin/sh 
+#!/bin/sh
 # Start SQL Workbench/J in console mode
-scriptpath=`dirname $0`
 
-JAVA_BIN=""
+# resolve links - $0 may be a softlink
+PRG="$0"
 
-if [ -n "$WORKBENCH_JDK" ]
-then
-  JAVA_BIN=$WORKBENCH_JDK
-fi
+while [ -h "$PRG" ] ; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
 
-if [ -z "$JAVA_BIN" ]
-then
-  JAVA_BIN=$JAVA_HOME
-fi
+scriptpath=`dirname "$PRG"`
 
 JAVACMD="java"
 
-if [ -n "$JAVA_BIN" ]
+if [ -x "$scriptpath/jre/bin/java" ]
 then
-  JAVACMD=${JAVA_BIN}/bin/java
+  JAVACMD="$scriptpath/jre/java"
+elif [ -x "$WORKBENCH_JDK/bin/java" ]
+then
+  JAVACMD="$WORKBENCH_JDK/bin/java"
+elif [ -x "$JAVA_HOME/jre/bin/java" ]
+then
+  JAVACMD="$JAVA_HOME/jre/java"
+elif [ -x "$JAVA_HOME/bin/java" ]
+then
+  JAVACMD="$JAVA_HOME/bin/java"
 fi
 
 cp=$scriptpath/sqlworkbench.jar
@@ -30,6 +41,6 @@ cp=$cp:$scriptpath/stax-api-1.0.1.jar
 cp=$cp:$scriptpath/xmlbeans-2.3.0.jar
 
 $JAVACMD -Djava.awt.headless=true \
-         -Xmx256m \
+         -Xmx512m \
          -Dvisualvm.display.name=SQLWorkbench \
-         -cp $cp workbench.console.SQLConsole $@ 
+         -cp $cp workbench.console.SQLConsole $@

@@ -10,7 +10,11 @@ if exist "%~dp0jre\bin\java.exe" (
    if exist "%WORKBENCH_JDK%\bin\java.exe" (
      set JAVA_BINPATH=%WORKBENCH_JDK%\bin\
    ) else (
-     if exist "%JAVA_HOME%\bin\java.exe" set JAVA_BINPATH=%JAVA_HOME%\bin\
+     if exist "%JAVA_HOME%\jre\bin\java.exe" (
+        set JAVA_BINPATH=%JAVA_HOME%\jre\bin\
+     ) else (
+       if exist "%JAVA_HOME%\bin\java.exe" set JAVA_BINPATH=%JAVA_HOME%\bin\
+     )
    )
 )
 
