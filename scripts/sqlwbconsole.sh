@@ -20,13 +20,13 @@ JAVACMD="java"
 
 if [ -x "$scriptpath/jre/bin/java" ]
 then
-  JAVACMD="$scriptpath/jre/java"
+  JAVACMD="$scriptpath/jre/bin/java"
 elif [ -x "$WORKBENCH_JDK/bin/java" ]
 then
   JAVACMD="$WORKBENCH_JDK/bin/java"
 elif [ -x "$JAVA_HOME/jre/bin/java" ]
 then
-  JAVACMD="$JAVA_HOME/jre/java"
+  JAVACMD="$JAVA_HOME/jre/bin/java"
 elif [ -x "$JAVA_HOME/bin/java" ]
 then
   JAVACMD="$JAVA_HOME/bin/java"
