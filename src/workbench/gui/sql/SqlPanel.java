@@ -1508,16 +1508,20 @@ public class SqlPanel
 		String fname = null;
 		String tooltip = null;
 
-		fname = this.getCurrentFileName();
-		if (fname != null)
+		// don't mess with the icon if a statement is running
+		if (!isBusy())
 		{
-			File f = new File(fname);
-			tooltip = f.getAbsolutePath();
-			iconHandler.showIconForTab(iconHandler.getFileIcon());
-		}
-		else
-		{
-			iconHandler.removeIcon();
+			fname = this.getCurrentFileName();
+			if (fname != null)
+			{
+				File f = new File(fname);
+				tooltip = f.getAbsolutePath();
+				iconHandler.showIconForTab(iconHandler.getFileIcon());
+			}
+			else
+			{
+				iconHandler.removeIcon();
+			}
 		}
 		PanelTitleSetter.setTabTitle(tab, this, index, getTabTitle());
 		tab.setToolTipTextAt(index, tooltip);
