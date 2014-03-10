@@ -1424,6 +1424,7 @@ public class DataExporter
 	public void setSqlOptions(SqlOptions sqlOptions)
 	{
 		this.setOutputType(sqlOptions.getExportType());
+		this.setMergeType(sqlOptions.getMergeType());
 		this.setIncludeCreateTable(sqlOptions.getCreateTable());
 		this.setCommitEvery(sqlOptions.getCommitEvery());
 		this.setTableName(sqlOptions.getAlternateUpdateTable());

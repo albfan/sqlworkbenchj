@@ -226,30 +226,44 @@ public class DataExporterTest
 
 			@Override
 			public boolean getCreateTable() { return false; }
+			
 			@Override
 			public void setCreateTable(boolean flag) { }
+
 			@Override
 			public void setCommitEvery(int value)	{	}
+
 			@Override
 			public int getCommitEvery() { return 0; }
+
 			@Override
 			public ExportType getExportType() { return ExportType.SQL_INSERT; }
+
 			@Override
 			public void setExportType(ExportType type) { }
-			public void setCreateDeleteInsert() { }
+
 			@Override
 			public String getAlternateUpdateTable() { return null; }
+
 			@Override
 			public void setAlternateUpdateTable(String table) { }
+
 			@Override
 			public List<String> getKeyColumns()
 			{
 				return CollectionUtil.arrayList("ID");
 			}
+
 			@Override
 			public String getDateLiteralType()
 			{
 				return "jdbc";
+			}
+
+			@Override
+			public String getMergeType()
+			{
+				return "ansi";
 			}
 
 			@Override

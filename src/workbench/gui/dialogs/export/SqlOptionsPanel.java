@@ -153,6 +153,12 @@ public class SqlOptionsPanel
 	}
 
 	@Override
+	public String getMergeType()
+	{
+		return (String)mergeTypes.getSelectedItem();
+	}
+
+	@Override
 	public BlobMode getBlobMode()
 	{
 		String type = (String)blobTypes.getSelectedItem();
