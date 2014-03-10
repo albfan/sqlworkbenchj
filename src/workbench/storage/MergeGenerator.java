@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import workbench.resource.Settings;
+
 import workbench.db.AnsiSQLMergeGenerator;
 import workbench.db.WbConnection;
-import workbench.db.firebird.FirebirdMergeGenerator;
+import workbench.db.firebird.Firebird20MergeGenerator;
+import workbench.db.firebird.Firebird21MergeGenerator;
 import workbench.db.h2database.H2MergeGenerator;
 import workbench.db.hsqldb.HsqlMergeGenerator;
 import workbench.db.ibm.Db2MergeGenerator;
@@ -167,7 +170,11 @@ public interface MergeGenerator
 
 			if ("firebird".equals(type))
 			{
-				return new FirebirdMergeGenerator();
+				if (Settings.getInstance().getBoolProperty("workbench.db.firebird.mergegenerator.use.ansi", true))
+				{
+					return new Firebird21MergeGenerator();
+				}
+				return new Firebird20MergeGenerator();
 			}
 
 			return new AnsiSQLMergeGenerator();

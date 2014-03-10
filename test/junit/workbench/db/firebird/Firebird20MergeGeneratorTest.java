@@ -1,5 +1,5 @@
 /*
- * FirebirdMergeGeneratorTest.java
+ * Firebird20MergeGeneratorTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -41,16 +41,16 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class FirebirdMergeGeneratorTest
+public class Firebird20MergeGeneratorTest
 	extends WbTestCase
 {
-	public FirebirdMergeGeneratorTest()
+	public Firebird20MergeGeneratorTest()
 	{
 		super("FirebirdMergeGeneratorTest");
 	}
 
 	/**
-	 * Test of generateMerge method, of class FirebirdMergeGenerator.
+	 * Test of generateMerge method, of class FirebirdMerge20Generator.
 	 */
 	@Test
 	public void testGenerateMerge()
@@ -79,7 +79,7 @@ public class FirebirdMergeGeneratorTest
 		Settings.getInstance().setDoFormatInserts(false);
 		try
 		{
-			FirebirdMergeGenerator generator = new FirebirdMergeGenerator();
+			Firebird20MergeGenerator generator = new Firebird20MergeGenerator();
 			String sql = generator.generateMerge(ds);
 			String expected =
 				"UPDATE OR INSERT INTO person (id,fname,lname) VALUES (42,'Arthur','Dent')\n" +

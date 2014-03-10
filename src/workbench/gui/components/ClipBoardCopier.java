@@ -53,8 +53,8 @@ import workbench.gui.WbSwingUtilities;
 import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
-import workbench.util.CharacterRange;
 
+import workbench.util.CharacterRange;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -166,7 +166,7 @@ public class ClipBoardCopier
 				String name = Settings.getInstance().getProperty("workbench.copy.text.escaperange", CharacterRange.RANGE_NONE.getName());
 				CharacterRange range = CharacterRange.getRangeByName(name);
 				printer.setEscapeRange(range);
-				
+
 				printer.setNullString(GuiSettings.getDisplayNullString());
 				printer.setColumnMapping(getColumnOrder());
 
@@ -383,6 +383,7 @@ public class ClipBoardCopier
 			StringBuilder result = new StringBuilder(count * 100);
 			RowData rowdata = null;
 
+			result.append(converter.getStart());
 			for (int row = 0; row < count; row ++)
 			{
 				if (rows == null)
@@ -395,11 +396,12 @@ public class ClipBoardCopier
 				}
 				StringBuilder sql = converter.convertRowData(rowdata, row);
 				result.append(sql);
-				if (!StringUtil.endsWith(sql, '\n'))
+				if (type != ExportType.SQL_MERGE && !StringUtil.endsWith(sql, '\n'))
 				{
 					result.append('\n');
 				}
 			}
+			result.append(converter.getEnd(count));
 
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			StringSelection sel = new StringSelection(result.toString());

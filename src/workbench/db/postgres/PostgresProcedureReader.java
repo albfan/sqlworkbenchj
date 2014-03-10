@@ -201,6 +201,9 @@ public class PostgresProcedureReader
 		Statement stmt = null;
 		Savepoint sp = null;
 		ResultSet rs = null;
+
+		boolean showParametersInName = connection.getDbSettings().getBoolProperty("procedurelist.showparameters", true);
+
 		try
 		{
 			if (useSavepoint)
@@ -287,7 +290,7 @@ public class PostgresProcedureReader
 				def.setInternalIdentifier(procId);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, null);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, pname.getFormattedName());
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, showParametersInName ? pname.getFormattedName() : name);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, java.sql.DatabaseMetaData.procedureReturnsResult);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
 				ds.getRow(row).setUserObject(def);

@@ -47,7 +47,7 @@ import workbench.storage.StatementFactory;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
-import static workbench.db.exporter.ExportType.SQL_DELETE_INSERT;
+import static workbench.db.exporter.ExportType.*;
 
 /**
  * Export data as SQL INSERT statements.
@@ -82,6 +82,7 @@ public class SqlRowDataConverter
 	private SqlLiteralFormatter literalFormatter;
 	private boolean ignoreRowStatus = true;
 	private String mergeType;
+	private MergeGenerator mergeGenerator;
 
 	public SqlRowDataConverter(WbConnection con)
 	{
@@ -159,16 +160,23 @@ public class SqlRowDataConverter
 	@Override
 	public StringBuilder getEnd(long totalRows)
 	{
+		StringBuilder end = null;
+		if (sqlTypeToUse == ExportType.SQL_MERGE)
+		{
+			end = new StringBuilder(100);
+			end.append(getMergeEnd());
+			end.append(lineTerminator);
+		}
+
 		boolean writeCommit = true;
 		if ( (commitEvery == Committer.NO_COMMIT_FLAG) || (commitEvery > 0 && (totalRows % commitEvery == 0)))
 		{
 			writeCommit = false;
 		}
 
-		StringBuilder end = null;
 		if (writeCommit && totalRows > 0 || this.createTable && this.originalConnection.getDbSettings().ddlNeedsCommit())
 		{
-			end = new StringBuilder(12);
+			if (end == null) end = new StringBuilder(12);
 			end.append(lineTerminator);
 			end.append("COMMIT;");
 			end.append(lineTerminator);
@@ -210,7 +218,7 @@ public class SqlRowDataConverter
 	{
 		if (sqlTypeToUse == ExportType.SQL_MERGE)
 		{
-			return generateMerge(row);
+			return appendMergeRow(row, rowIndex);
 		}
 
 		StringBuilder result = new StringBuilder();
@@ -270,32 +278,60 @@ public class SqlRowDataConverter
 		return result;
 	}
 
-	private StringBuilder generateMerge(RowData row)
+	private MergeGenerator getMergeGenerator()
 	{
-		MergeGenerator generator;
-		if (mergeType != null)
+		if (this.mergeGenerator == null)
 		{
-			generator = MergeGenerator.Factory.createGenerator(mergeType);
+			if (mergeType != null)
+			{
+				mergeGenerator = MergeGenerator.Factory.createGenerator(mergeType);
+			}
+			else
+			{
+				mergeGenerator = MergeGenerator.Factory.createGenerator(originalConnection);
+			}
 		}
-		else
-		{
-			generator = MergeGenerator.Factory.createGenerator(originalConnection);
-		}
+		return mergeGenerator;
+	}
 
+	private StringBuilder appendMergeRow(RowData row, long rowIndex)
+	{
+		MergeGenerator generator = getMergeGenerator();
 		if (generator != null)
 		{
-			RowDataContainer container = RowDataContainer.Factory.createContainer(originalConnection, row, metaData);
-			String merge = generator.generateMerge(container);
+			String merge = generator.addRow(metaData, row, rowIndex);
 			StringBuilder result = new StringBuilder(merge);
 			return result;
 		}
 		return null;
 	}
 
+	private String getMergeEnd()
+	{
+		MergeGenerator generator = getMergeGenerator();
+		if (generator == null) return null;
+		RowDataContainer data = RowDataContainer.Factory.createContainer(originalConnection, currentRowData, metaData);
+		return generator.generateMergeEnd(data);
+	}
+
+	private StringBuilder getMergeStart()
+	{
+		MergeGenerator generator = getMergeGenerator();
+		if (generator == null) return null;
+		RowDataContainer data = RowDataContainer.Factory.createContainer(originalConnection, currentRowData, metaData);
+		return new StringBuilder(generator.generateMergeStart(data));
+	}
+
 	@Override
 	public StringBuilder getStart()
 	{
+		if (sqlTypeToUse == ExportType.SQL_MERGE)
+		{
+			return getMergeStart();
+		}
+
 		if (!this.createTable) return null;
+
 		TableIdentifier updateTable = this.metaData.getUpdateTable();
 		if (updateTable == null && alternateUpdateTable == null)
 		{

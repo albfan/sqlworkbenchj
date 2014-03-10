@@ -1,5 +1,5 @@
 /*
- * FirebirdMergeGenerator.java
+ * FirebirdMerge20Generator.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -34,13 +34,13 @@ import workbench.storage.StatementFactory;
  *
  * @author Thomas Kellerer
  */
-public class FirebirdMergeGenerator
+public class Firebird20MergeGenerator
 	implements MergeGenerator
 {
 	private SqlLiteralFormatter formatter;
 	private StatementFactory stmtFactory;
 
-	public FirebirdMergeGenerator()
+	public Firebird20MergeGenerator()
 	{
 		formatter = new SqlLiteralFormatter("firebird");
 	}

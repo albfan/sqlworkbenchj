@@ -97,6 +97,9 @@ public class InformixProcedureReader
 		ResultSet rs = null;
 		String sql = getSQL(catalog, schemaPattern, namePattern);
 		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
+
+		boolean showParametersInName = connection.getDbSettings().getBoolProperty("procedurelist.showparameters", true);
+
 		try
 		{
 			if (Settings.getInstance().getDebugMetadataSql())
@@ -141,7 +144,7 @@ public class InformixProcedureReader
 				def.setDisplayName(name + "(" + typeList + ")");
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, null);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, def.getDisplayName());
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, showParametersInName ? def.getDisplayName() : name);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, type);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, null);
 				ds.getRow(row).setUserObject(def);
