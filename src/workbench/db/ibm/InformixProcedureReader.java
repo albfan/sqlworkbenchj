@@ -52,7 +52,7 @@ import workbench.util.StringUtil;
  * IBM's JDBC driver for Informix does not handle overloaded procedures correctly.
  *
  * The SQL statements are only tested against an Informix 11.5
- * 
+ *
  * @author Thomas Kellerer
  */
 public class InformixProcedureReader
@@ -203,8 +203,8 @@ public class InformixProcedureReader
 			"       procid, \n" +
 			"       paramtypes::LVARCHAR as parameter_types \n" +
 			"FROM " + sysProcs + " \n" +
-			"WHERE internal = 'f' \n " +
-			"  AND mode IN ('D', 'd', 'O', 'o') ");
+			"WHERE internal = 'f' \n" +
+			"  AND mode IN ('D', 'd', 'O', 'o', 'R', 'r') \n");
 
 		SqlUtil.appendAndCondition(sql, "owner", schemaPattern, this.connection);
 		SqlUtil.appendAndCondition(sql, "procname", namePattern, this.connection);
