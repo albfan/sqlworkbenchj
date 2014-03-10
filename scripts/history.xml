@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
+<?xml-stylesheet type="text/xsl" href="history2html.xslt"?>
+
+<history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-03-09">
     <entry dev-build="13" type="enh">Macros can now be saved and loaded from different files.</entry>
