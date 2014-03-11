@@ -24,8 +24,8 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-
 import workbench.gui.MainWindow;
+
 import workbench.util.WbFile;
 
 /**
@@ -49,6 +49,10 @@ public class LoadWorkspaceFileAction extends WbAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		this.client.loadWorkspace(workspace.getFullPath(), true);
+		boolean canLoad = client.saveWorkspace(true);
+		if (canLoad)
+		{
+			this.client.loadWorkspace(workspace.getFullPath(), true);
+		}
 	}
 }
