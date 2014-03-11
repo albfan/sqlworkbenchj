@@ -187,6 +187,10 @@ from sys.functions fct
     <void property="objectNameField">
      <string>routine_name</string>
     </void>
+    <void property="specificNameColumn">
+     <string>specific_name</string>
+    </void>
+
     <void property="schemaField">
      <string>routine_schema</string>
     </void>
