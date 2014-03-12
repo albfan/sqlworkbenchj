@@ -36,6 +36,8 @@ import workbench.util.StringUtil;
  */
 public class SortDefinition
 {
+	public static final SortDefinition EMPTY_SORT = new SortDefinition();
+
 	private boolean[] sortAscending;
 	private int[] sortColumns;
 	private boolean ignoreCase;
@@ -302,16 +304,11 @@ public class SortDefinition
 		return result.toString();
 	}
 
-	public boolean isValid()
+	public boolean isEmpty()
 	{
-		if (sortColumns == null) return false;
-		for (int i=0; i < sortColumns.length; i++)
-		{
-			if (sortColumns[i] < 0) return false;
-		}
-		return true;
+		return sortColumns == null || sortColumns.length == 0;
 	}
-	
+
 	public static SortDefinition parseDefinitionString(String definition)
 	{
 		List<String> elements = StringUtil.stringToList(definition, ";", true, true, false);

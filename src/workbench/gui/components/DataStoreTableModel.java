@@ -67,7 +67,7 @@ public class DataStoreTableModel
 
 	private List<Integer> noneditableColumns = new ArrayList<Integer>();
 
-	private SortDefinition sortDefinition = new SortDefinition();
+	private SortDefinition sortDefinition = SortDefinition.EMPTY_SORT;
 
 	private boolean allowEditing = true;
 
@@ -622,7 +622,8 @@ public class DataStoreTableModel
 	public NamedSortDefinition getSortDefinition()
 	{
 		if (this.sortDefinition == null) return null;
-		if (!this.sortDefinition.isValid()) return null;
+		if (this.sortDefinition.isEmpty()) return null;
+
 		return new NamedSortDefinition(this.dataCache, this.sortDefinition);
 	}
 
@@ -642,7 +643,7 @@ public class DataStoreTableModel
 	{
 		if (!newSort.equals(this.sortDefinition))
 		{
-			this.sortDefinition = newSort;
+			sortDefinition = newSort;
 			applySortColumns();
 		}
 	}
@@ -651,10 +652,7 @@ public class DataStoreTableModel
 	{
 		if (definition == null) return;
 		SortDefinition newSort = definition.getSortDefinition(dataCache);
-		if (newSort.isValid())
-		{
-			setSortDefinition(newSort);
-		}
+		setSortDefinition(newSort);
 	}
 
 	/**
@@ -670,6 +668,7 @@ public class DataStoreTableModel
 
 	public void removeSortColumn(int column)
 	{
+		if (sortDefinition == null) return;
 		boolean isPrimaryColumn = sortDefinition.isPrimarySortColumn(column);
 		sortDefinition.removeSortColumn(column);
 

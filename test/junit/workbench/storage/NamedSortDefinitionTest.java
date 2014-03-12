@@ -22,7 +22,10 @@
  */
 package workbench.storage;
 
+import java.sql.Types;
+
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 
@@ -51,6 +54,18 @@ public class NamedSortDefinitionTest
 
 		NamedSortDefinition newDef = NamedSortDefinition.parseDefinitionString(result);
 		assertEquals(expected, newDef.getDefinitionString());
+	}
+
+	@Test
+	public void testInvalidSort()
+	{
+		String[] columns = new String[] { "lastname", "firstname" };
+		boolean[] asc = new boolean[] { true, false };
+
+		NamedSortDefinition def = new NamedSortDefinition(columns, asc);
+		DataStore ds = new DataStore(new String[] {"first_name", "lastname"}, new int[] { Types.VARCHAR, Types.VARCHAR } );
+		SortDefinition sort = def.getSortDefinition(ds);
+		assertTrue(sort.isEmpty());
 	}
 
 }

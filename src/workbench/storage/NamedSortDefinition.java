@@ -73,26 +73,28 @@ public class NamedSortDefinition
 		this.ignoreCase = flag;
 	}
 
+	/**
+	 * Return a column-index based SortDefinition for the given DataStore.
+	 *
+	 * If not all column names are found in the datastore an "empty" sort is returned.
+	 *
+	 * @param data  the DataStore for which the named sort should be applied
+	 * @return the real sort definition to be used. Never null
+	 * 
+	 * @see SortDefinition#EMPTY_SORT
+	 */
 	public SortDefinition getSortDefinition(DataStore data)
 	{
-		if (sortColumns == null) return new SortDefinition();
+		if (sortColumns == null) return SortDefinition.EMPTY_SORT;
 
 		int[] columns = new int[sortColumns.length];
-		int realCount = 0;
 		for (int i=0; i < sortColumns.length; i++)
 		{
 			int index = data.getColumnIndex(sortColumns[i]);
-			if (index > -1)
-			{
-				columns[i] = index;
-				realCount ++;
-			}
+			if (index < 0) return SortDefinition.EMPTY_SORT;
+			columns[i] = index;
 		}
-		if (realCount == 0)
-		{
-			return new SortDefinition();
-		}
-		
+
 		SortDefinition sort = new SortDefinition(columns, sortAscending);
 		sort.setIgnoreCase(ignoreCase);
 		return sort;
