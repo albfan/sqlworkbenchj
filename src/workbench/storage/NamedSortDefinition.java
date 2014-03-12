@@ -78,10 +78,21 @@ public class NamedSortDefinition
 		if (sortColumns == null) return new SortDefinition();
 
 		int[] columns = new int[sortColumns.length];
+		int realCount = 0;
 		for (int i=0; i < sortColumns.length; i++)
 		{
-			columns[i] = data.getColumnIndex(sortColumns[i]);
+			int index = data.getColumnIndex(sortColumns[i]);
+			if (index > -1)
+			{
+				columns[i] = index;
+				realCount ++;
+			}
 		}
+		if (realCount == 0)
+		{
+			return new SortDefinition();
+		}
+		
 		SortDefinition sort = new SortDefinition(columns, sortAscending);
 		sort.setIgnoreCase(ignoreCase);
 		return sort;

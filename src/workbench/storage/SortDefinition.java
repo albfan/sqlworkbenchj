@@ -302,6 +302,16 @@ public class SortDefinition
 		return result.toString();
 	}
 
+	public boolean isValid()
+	{
+		if (sortColumns == null) return false;
+		for (int i=0; i < sortColumns.length; i++)
+		{
+			if (sortColumns[i] < 0) return false;
+		}
+		return true;
+	}
+	
 	public static SortDefinition parseDefinitionString(String definition)
 	{
 		List<String> elements = StringUtil.stringToList(definition, ";", true, true, false);
@@ -318,7 +328,7 @@ public class SortDefinition
 				int colNr = StringUtil.getIntValue(parts[0], -1);
 
 				if (colNr < 0) return null; // something wrong, assume the whole definition is bogus
-				
+
 				columns[i] = colNr;
 				ascending[i] = "a".equalsIgnoreCase(parts[1]);
 			}

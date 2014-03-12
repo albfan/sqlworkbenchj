@@ -622,6 +622,7 @@ public class DataStoreTableModel
 	public NamedSortDefinition getSortDefinition()
 	{
 		if (this.sortDefinition == null) return null;
+		if (!this.sortDefinition.isValid()) return null;
 		return new NamedSortDefinition(this.dataCache, this.sortDefinition);
 	}
 
@@ -650,7 +651,10 @@ public class DataStoreTableModel
 	{
 		if (definition == null) return;
 		SortDefinition newSort = definition.getSortDefinition(dataCache);
-		setSortDefinition(newSort);
+		if (newSort.isValid())
+		{
+			setSortDefinition(newSort);
+		}
 	}
 
 	/**
