@@ -140,7 +140,7 @@ public class WbRowCount
 				rs = JdbcUtils.runStatement(currentConnection, currentStatement, countQuery, false, useSavepoint);
 
 				if (isCancelled) break;
-				
+
 				long rowCount = -1;
 				if (rs != null && rs.next())
 				{
@@ -159,6 +159,8 @@ public class WbRowCount
 				SqlUtil.closeResult(rs);
 			}
 		}
+		rowCounts.setResultName(VERB);
+		rowCounts.setGeneratingSql(sql);
 		rowCounts.resetStatus();
 		result.addDataStore(rowCounts);
 

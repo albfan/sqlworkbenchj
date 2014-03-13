@@ -1029,6 +1029,7 @@ public class WbExport
 		// i.e. no sourcetable given in the initial wbexport command
 		try
 		{
+			long rowCount = 0;
 			if (toConsume.hasResultSets())
 			{
 				String sql = toConsume.getSourceCommand();
@@ -1039,28 +1040,28 @@ public class WbExport
 				// object.
 				// Thus the later call to clearResultSets() will only free any not used ResultSet
 				toConsume.getResultSets().remove(0);
-				long rowCount = this.exporter.exportResultSet(pendingOutput, toExport, sql);
-
-				if (exporter.isSuccess())
-				{
-					toConsume.addMessage(""); // force new line in output
-					toConsume.addMessage(ResourceMgr.getFormattedString("MsgSpoolOk", Long.toString(rowCount)));
-					toConsume.addMessage(ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename());
-				}
-				addMessages(toConsume);
-
-				if (exporter.isSuccess())
-				{
-					toConsume.setSuccess();
-				}
-				else
-				{
-					toConsume.setFailure();
-				}
+				rowCount = this.exporter.exportResultSet(pendingOutput, toExport, sql);
 			}
 			else if (toConsume.hasDataStores() && pendingOutput != null)
 			{
-				exportDataStores(toConsume.getDataStores());
+				rowCount = exportDataStores(toConsume.getDataStores());
+			}
+
+			if (exporter.isSuccess())
+			{
+				toConsume.addMessage(""); // force new line in output
+				toConsume.addMessage(ResourceMgr.getFormattedString("MsgSpoolOk", Long.toString(rowCount)));
+				toConsume.addMessage(ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename());
+			}
+			addMessages(toConsume);
+
+			if (exporter.isSuccess())
+			{
+				toConsume.setSuccess();
+			}
+			else
+			{
+				toConsume.setFailure();
 			}
 		}
 		catch (Exception e)
@@ -1072,17 +1073,18 @@ public class WbExport
 		}
 		finally
 		{
-			toConsume.clearResultSets();
+			toConsume.clearResultData();
 			// Tell the statement runner we're done
 			runner.setConsumer(null);
 		}
 	}
 
-	private void exportDataStores(List<DataStore> data)
+	private long exportDataStores(List<DataStore> data)
 		throws Exception
 	{
-		if (this.pendingOutput == null) return;
-		if (data == null || data.isEmpty()) return;
+		if (this.pendingOutput == null) return 0;
+		if (data == null || data.isEmpty()) return 0;
+		long rowCount = 0;
 
 		boolean isContainer = this.exporter.isContainerExport();
 		boolean isFile = !pendingOutput.isDirectory(); // I cannot use isFile() as that returns false if the file does not exist
@@ -1098,20 +1100,25 @@ public class WbExport
 			baseDir = pendingOutput.getParentFile();
 		}
 
-		for (DataStore ds : data)
+		for (int resultNr=0; resultNr < data.size(); resultNr ++)
 		{
+			DataStore ds = data.get(resultNr);
 			exporter.setPageTitle(ds.getResultName());
 			WbFile output = null;
-			if (isFile && isContainer)
+			if (isFile || isContainer)
 			{
 				output = pendingOutput;
 			}
 			else
 			{
-				output = new WbFile(baseDir, StringUtil.makeFilename(ds.getResultName()) + defaultExtension);
+				// export to multiple files, so create the filename based on the result's name
+				String name = ds.getResultName();
+				if (name == null) name = "export_result_" + Integer.toString(resultNr + 1);
+				output = new WbFile(baseDir, StringUtil.makeFilename(name) + defaultExtension);
 			}
-			exporter.startExport(output, ds, null);
+			rowCount += exporter.startExport(output, ds, null);
 		}
+		return rowCount;
 	}
 
 	@Override
