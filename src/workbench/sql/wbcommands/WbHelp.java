@@ -39,7 +39,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbHelp
 	extends SqlCommand
 {
-	public static final String VERB = "WBHELP";
+	public static final String VERB = "WbHelp";
 
 	public WbHelp()
 	{

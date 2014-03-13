@@ -55,7 +55,7 @@ public class WbConnect
 	private static int connectionId;
 	private boolean persistentChange = false;
 
-	public static final String VERB = "WBCONNECT";
+	public static final String VERB = "WbConnect";
 
 	public WbConnect()
 	{

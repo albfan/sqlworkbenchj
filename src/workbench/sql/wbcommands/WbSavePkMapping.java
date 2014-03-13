@@ -41,8 +41,7 @@ import workbench.util.WbFile;
 public class WbSavePkMapping
 	extends SqlCommand
 {
-	public static final String VERB = "WBSAVEPKMAP";
-	public static final String FORMATTED_VERB = "WbSavePKMap";
+	public static final String VERB = "WbSavePKMap";
 
 	public WbSavePkMapping()
 	{

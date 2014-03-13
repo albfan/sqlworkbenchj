@@ -59,7 +59,7 @@ public class WbGrepData
 	extends SqlCommand
 	implements TableSearchConsumer
 {
-	public static final String VERB = "WBGREPDATA";
+	public static final String VERB = "WbGrepData";
 	public static final String PARAM_TABLES = "tables";
 	public static final String PARAM_EXPRESSION = "searchValue";
 	public static final String PARAM_EXCLUDE_LOBS = "excludeLobs";

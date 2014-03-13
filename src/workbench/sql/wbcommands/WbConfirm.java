@@ -44,7 +44,7 @@ import workbench.util.StringUtil;
 public class WbConfirm
 	extends SqlCommand
 {
-	public static final String VERB = "WBCONFIRM";
+	public static final String VERB = "WbConfirm";
 	public static final String PARAM_MSG = "message";
 	public static final String PARAM_YES = "yesText";
 	public static final String PARAM_NO = "noText";
@@ -77,7 +77,7 @@ public class WbConfirm
 	{
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);
-		
+
 		String msg = null;
 		String yes = null;
 		String no = null;

@@ -42,7 +42,7 @@ import workbench.util.StringUtil;
 public class WbListSchemas
 	extends SqlCommand
 {
-	public static final String VERB = "WBLISTSCHEMAS";
+	public static final String VERB = "WbListSchemas";
 
 	public WbListSchemas()
 	{
@@ -85,7 +85,7 @@ public class WbListSchemas
 			ds.resetStatus();
 		}
 		ds.setResultName(ResourceMgr.getString("TxtSchemaList"));
-		ds.setGeneratingSql(new CommandTester().formatVerb(VERB));
+		ds.setGeneratingSql(VERB);
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;

@@ -39,7 +39,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbFetchSize
 	extends SqlCommand
 {
-	public static final String VERB = "WBFETCHSIZE";
+	public static final String VERB = "WbFetchsize";
 
 	public WbFetchSize()
 	{

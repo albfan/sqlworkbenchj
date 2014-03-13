@@ -46,8 +46,7 @@ import workbench.util.ArgumentType;
 public class WbListTriggers
 	extends SqlCommand
 {
-	public static final String VERB = "WBLISTTRIGGERS";
-	public static final String FORMATTED_VERB = "WbListTriggers";
+	public static final String VERB = "WbListTriggers";
 
 	public WbListTriggers()
 	{
@@ -81,7 +80,7 @@ public class WbListTriggers
 		DataStore ds = reader.getTriggers(catalog, schema);
 
 		ds.setResultName(ResourceMgr.getString("TxtDbExplorerTriggers"));
-		ds.setGeneratingSql(FORMATTED_VERB + " " + options);
+		ds.setGeneratingSql(VERB + " " + options);
 		result.addDataStore(ds);
 		return result;
 	}

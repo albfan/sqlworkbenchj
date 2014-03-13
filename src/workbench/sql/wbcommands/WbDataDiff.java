@@ -75,7 +75,7 @@ import workbench.util.WbFile;
 public class WbDataDiff
 	extends SqlCommand
 {
-	public static final String VERB = "WBDATADIFF";
+	public static final String VERB = "WbDataDiff";
 
 	public static final String PARAM_INCLUDE_DELETE = "includeDelete";
 	public static final String PARAM_IGNORE_COLS = "ignoreColumns";

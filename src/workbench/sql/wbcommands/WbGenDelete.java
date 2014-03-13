@@ -56,7 +56,7 @@ public class WbGenDelete
 	extends SqlCommand
 	implements ScriptGenerationMonitor
 {
-	public static final String VERB = "WBGENERATEDELETE";
+	public static final String VERB = "WbGenerateDelete";
 
 	public static final String PARAM_TABLE = "table";
 	public static final String PARAM_FILE = "outputFile";

@@ -49,7 +49,7 @@ import workbench.util.StringUtil;
 public class WbListIndexes
 	extends SqlCommand
 {
-	public static final String VERB = "WBLISTINDEXES";
+	public static final String VERB = "WbListIndexes";
 	public static final String ARG_TABLE_NAME = "tableName";
 	public static final String ARG_INDEX_NAME = "indexName";
 
@@ -121,6 +121,7 @@ public class WbListIndexes
 
 		List<IndexDefinition> indexes = reader.getIndexes(catalog, schema, tablePattern, indexPattern);
 		DataStore ds = reader.fillDataStore(indexes, true);
+		ds.setResultName(ResourceMgr.getString("TxtDbExplorerIndexes"));
 		result.addDataStore(ds);
 
 		return result;

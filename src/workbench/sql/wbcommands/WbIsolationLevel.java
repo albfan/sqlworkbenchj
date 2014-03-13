@@ -44,7 +44,7 @@ import workbench.util.StringUtil;
 public class WbIsolationLevel
 	extends SqlCommand
 {
-	public static final String VERB = "WBISOLATIONLEVEL";
+	public static final String VERB = "WbIsolationLevel";
 	private final Map<String, Integer> levelMap = new TreeMap<String, Integer>(CaseInsensitiveComparator.INSTANCE);
 
 	public WbIsolationLevel()

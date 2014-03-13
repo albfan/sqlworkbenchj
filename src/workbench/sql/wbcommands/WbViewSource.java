@@ -41,8 +41,7 @@ public class WbViewSource
 	extends SqlCommand
 {
 
-	public static final String VERB = "WBVIEWSOURCE";
-	public static final String FORMATTED_VERB = "WbViewSource";
+	public static final String VERB = "WbViewSource";
 
 	public WbViewSource()
 	{

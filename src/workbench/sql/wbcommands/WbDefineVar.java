@@ -60,7 +60,7 @@ import workbench.util.WbStringTokenizer;
 public class WbDefineVar
 	extends SqlCommand
 {
-	public static final String VERB = "WBVARDEF";
+	public static final String VERB = "WbVarDef";
 
 	public WbDefineVar()
 	{

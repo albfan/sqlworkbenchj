@@ -47,8 +47,8 @@ import workbench.util.SqlUtil;
 public class WbSetProp
 	extends SqlCommand
 {
-	public static final String VERB = "WBSETPROP";
-	public static final String ALTERNATE_VERB = "WBSETCONFIG";
+	public static final String VERB = "WbSetProp";
+	public static final String ALTERNATE_VERB = "WbSetConfig";
 	public static final String PARAM_TYPE = "type";
 	public static final String PARAM_PROP = "property";
 	public static final String PARAM_VALUE = "value";

@@ -39,7 +39,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbConnInfo
 	extends SqlCommand
 {
-	public static final String VERB = "WBCONNINFO";
+	public static final String VERB = "WbConnInfo";
 
 	public WbConnInfo()
 	{

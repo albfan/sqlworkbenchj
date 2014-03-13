@@ -33,7 +33,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbEndBatch
 	extends SqlCommand
 {
-	public static final String VERB = "WBENDBATCH";
+	public static final String VERB = "WbEndBatch";
 
 	@Override
 	public String getVerb()

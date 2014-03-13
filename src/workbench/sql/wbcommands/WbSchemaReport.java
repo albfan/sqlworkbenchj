@@ -72,8 +72,8 @@ public class WbSchemaReport
 	public static final String PARAM_OBJECT_NAMES = "objects";
 	public static final String PARAM_OBJECT_TYPE_NAMES = "objectTypeNames";
 
-	public static final String ALTERNATE_VERB = "WBREPORT";
-	public static final String VERB = "WBSCHEMAREPORT";
+	public static final String ALTERNATE_VERB = "WbReport";
+	public static final String VERB = "WbSchemaReport";
 
 	private SchemaReporter reporter;
 	private int currentTable = 0;

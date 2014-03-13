@@ -43,8 +43,8 @@ public class WbListCatalogs
 	extends SqlCommand
 {
 
-	public static final String VERB = "WBLISTDB";
-	public static final String VERB_ALTERNATE = "WBLISTCAT";
+	public static final String VERB = "WbListDB";
+	public static final String VERB_ALTERNATE = "WbListCat";
 
 	public WbListCatalogs()
 	{

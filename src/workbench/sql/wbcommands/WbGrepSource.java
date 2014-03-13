@@ -45,7 +45,7 @@ import workbench.util.CollectionUtil;
 public class WbGrepSource
 	extends SqlCommand
 {
-	public static final String VERB = "WBGREPSOURCE";
+	public static final String VERB = "WbGrepSource";
 
 	public static final String PARAM_SEARCH_EXP = "searchValues";
 	public static final String PARAM_MATCHALL = "matchAll";

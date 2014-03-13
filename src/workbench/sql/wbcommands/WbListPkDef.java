@@ -37,8 +37,7 @@ public class WbListPkDef
 	extends SqlCommand
 {
 
-	public static final String VERB = "WBLISTPKDEF";
-	public static final String FORMATTED_VERB = "WbListPkDef";
+	public static final String VERB = "WbListPkDef";
 
 	@Override
 	public String getVerb()

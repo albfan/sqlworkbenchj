@@ -58,7 +58,7 @@ import workbench.util.StringUtil;
 public class WbCopy
 	extends SqlCommand
 {
-	public static final String VERB = "WBCOPY";
+	public static final String VERB = "WbCopy";
 
 	public static final String PARAM_SOURCETABLE = "sourceTable";
 	public static final String PARAM_SOURCESCHEMA = "sourceSchema";
@@ -280,7 +280,7 @@ public class WbCopy
 				result.setFailure();
 				return result;
 			}
-			
+
 			copier.setAdjustSequences(cmdLine.getBoolean(WbImport.ARG_ADJUST_SEQ, false));
 
 			this.lastCopyCount = copier.copyData();

@@ -47,7 +47,7 @@ import workbench.util.StringUtil;
 public class WbListProcedures
 	extends SqlCommand
 {
-	public static final String VERB = "WBLISTPROCS";
+	public static final String VERB = "WbListProcs";
 
 	public WbListProcedures()
 	{

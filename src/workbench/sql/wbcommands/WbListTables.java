@@ -88,6 +88,8 @@ public class WbListTables
 
 		if (resultList != null)
 		{
+			resultList.setResultName(ResourceMgr.getString("TxtObjList"));
+			resultList.setGeneratingSql(sql);
 			resultList.sort(DbMetadata.getTableListSort());
 			result.addDataStore(resultList);
 		}

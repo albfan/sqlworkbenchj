@@ -73,7 +73,7 @@ public class WbLoadPkMappingTest
 			w.println("junitpk=id,name");
 			w.close();
 
-			String sql = "-- load mapping from a file \n     " + WbLoadPkMapping.FORMATTED_VERB + "\n -file='" + f.getAbsolutePath() + "'";
+			String sql = "-- load mapping from a file \n     " + WbLoadPkMapping.VERB + "\n -file='" + f.getAbsolutePath() + "'";
 			SqlCommand command = runner.getCommandToUse(sql);
 			assertTrue(command instanceof WbLoadPkMapping);
 			runner.runStatement(sql);

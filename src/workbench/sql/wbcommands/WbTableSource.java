@@ -37,9 +37,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbTableSource
 	extends SqlCommand
 {
-
-	public static final String VERB = "WBTABLESOURCE";
-	public static final String FORMATTED_VERB = "WbTableSource";
+	public static final String VERB = "WbTableSource";
 
 	public WbTableSource()
 	{

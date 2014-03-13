@@ -62,7 +62,7 @@ import static workbench.sql.wbcommands.WbXslt.*;
 public class WbSchemaDiff
 	extends SqlCommand
 {
-	public static final String VERB = "WBSCHEMADIFF";
+	public static final String VERB = "WbSchemaDiff";
 
 	public static final String ARG_NAMESPACE = "namespace";
 	public static final String ARG_INCLUDE_INDEX = "includeIndex";

@@ -73,7 +73,7 @@ public class WbCall
 {
 	public static final String EXEC_VERB_SHORT = "EXEC";
 	public static final String EXEC_VERB_LONG = "EXECUTE";
-	public static final String VERB = "WBCALL";
+	public static final String VERB = "WbCall";
 	private Map<Integer, ParameterDefinition> refCursor = null;
 
 	// Stores all parameters that need an input

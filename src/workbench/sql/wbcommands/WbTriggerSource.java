@@ -42,9 +42,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbTriggerSource
 	extends SqlCommand
 {
-
-	public static final String VERB = "WBTRIGGERSOURCE";
-	public static final String FORMATTED_VERB = "WbTriggerSource";
+	public static final String VERB = "WbTriggerSource";
 
 	public WbTriggerSource()
 	{

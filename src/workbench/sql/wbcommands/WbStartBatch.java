@@ -34,7 +34,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbStartBatch
 	extends SqlCommand
 {
-	public static final String VERB = "WBSTARTBATCH";
+	public static final String VERB = "WbStartBatch";
 	private Statement batch;
 
 	@Override

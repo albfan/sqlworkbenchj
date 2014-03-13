@@ -129,7 +129,7 @@ public class CommandTester
 		commands.add(WbDefineMacro.VERB);
 		commands.add(WbListMacros.VERB);
 		commands.add(WbListIndexes.VERB);
-		commands.add(WbRowCount.VERB.toUpperCase());
+		commands.add(WbRowCount.VERB);
 	}
 
 	private Map<String, String> getFormattedVerbs()
@@ -137,15 +137,15 @@ public class CommandTester
 		if (formattedWords == null)
 		{
 			formattedWords = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
-			formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
-			formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.FORMATTED_VERB);
-			formattedWords.put(WbDefineVar.VERB, "WbVarDef");
-			formattedWords.put(WbListPkDef.VERB, WbListPkDef.FORMATTED_VERB);
-			formattedWords.put(WbEndBatch.VERB, "WbEndBatch");
-			formattedWords.put(WbStartBatch.VERB, "WbStartBatch");
-			formattedWords.put(WbSchemaDiff.VERB, "WbSchemaDiff");
-			formattedWords.put(WbSchemaReport.VERB, "WbSchemaReport");
-			formattedWords.put(WbDataDiff.VERB, "WbDataDiff");
+			formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.VERB);
+			formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.VERB);
+			formattedWords.put(WbDefineVar.VERB, WbDefineVar.VERB);
+			formattedWords.put(WbListPkDef.VERB, WbListPkDef.VERB);
+			formattedWords.put(WbEndBatch.VERB, WbEndBatch.VERB);
+			formattedWords.put(WbStartBatch.VERB, WbStartBatch.VERB);
+			formattedWords.put(WbSchemaDiff.VERB, WbSchemaDiff.VERB);
+			formattedWords.put(WbSchemaReport.VERB, WbSchemaReport.VERB);
+			formattedWords.put(WbDataDiff.VERB, WbDataDiff.VERB);
 			formattedWords.put(WbDescribeObject.VERB, WbDescribeObject.VERB.toUpperCase());
 			formattedWords.put(WbDescribeObject.VERB_LONG, WbDescribeObject.VERB_LONG.toUpperCase());
 			formattedWords.put(WbHideWarnings.VERB, "WbEnableWarnings");
@@ -157,16 +157,16 @@ public class CommandTester
 			formattedWords.put(WbRemoveVar.VERB, "WbVarDelete");
 			formattedWords.put(WbProcSource.VERB, "WbProcSource");
 			formattedWords.put(WbListProcedures.VERB, "WbListProcs");
-			formattedWords.put(WbListTriggers.VERB, WbListTriggers.FORMATTED_VERB);
-			formattedWords.put(WbTriggerSource.VERB, WbTriggerSource.FORMATTED_VERB);
-			formattedWords.put(WbListCatalogs.VERB, "WbListDB");
-			formattedWords.put(WbListCatalogs.VERB_ALTERNATE, "WbListCat");
-			formattedWords.put(WbListSchemas.VERB, "WbListSchemas");
-			formattedWords.put(WbGrepData.VERB, "WbGrepData");
-			formattedWords.put(WbGrepSource.VERB, "WbGrepSource");
-			formattedWords.put(WbFetchSize.VERB, "WbFetchSize");
-			formattedWords.put(WbRunLB.VERB, "WbRunLB");
-			formattedWords.put(WbIsolationLevel.VERB, "WbIsolationLevel");
+			formattedWords.put(WbListTriggers.VERB, WbListTriggers.VERB);
+			formattedWords.put(WbTriggerSource.VERB, WbTriggerSource.VERB);
+			formattedWords.put(WbListCatalogs.VERB, WbListCatalogs.VERB);
+			formattedWords.put(WbListCatalogs.VERB_ALTERNATE, WbListCatalogs.VERB_ALTERNATE);
+			formattedWords.put(WbListSchemas.VERB, WbListSchemas.VERB);
+			formattedWords.put(WbGrepData.VERB, WbGrepData.VERB);
+			formattedWords.put(WbGrepSource.VERB, WbGrepSource.VERB);
+			formattedWords.put(WbFetchSize.VERB, WbFetchSize.VERB);
+			formattedWords.put(WbRunLB.VERB, WbRunLB.VERB);
+			formattedWords.put(WbIsolationLevel.VERB, WbIsolationLevel.VERB);
 			formattedWords.put(WbConnInfo.VERB, "WbConnInfo");
 			formattedWords.put(WbSysExec.VERB, "WbSysExec");
 			formattedWords.put(WbGenDrop.VERB, "WbGenerateDrop");
@@ -174,14 +174,14 @@ public class CommandTester
 			formattedWords.put(WbSetProp.ALTERNATE_VERB, "WbSetConfig");
 			formattedWords.put(WbGenerateScript.VERB, "WbGenerateScript");
 			formattedWords.put(WbSysOpen.VERB, "WbSysOpen");
-			formattedWords.put(WbGenDelete.VERB, "WbGenerateDelete");
+			formattedWords.put(WbGenDelete.VERB, WbGenDelete.VERB);
 			formattedWords.put(WbGenInsert.VERB, "WbGenerateInsert");
 			formattedWords.put(WbDefineMacro.VERB, "WbDefineMacro");
 			formattedWords.put(WbListMacros.VERB, "WbListMacros");
-			formattedWords.put(WbListIndexes.VERB, "WbListIndexes");
-			formattedWords.put(WbViewSource.VERB, WbViewSource.FORMATTED_VERB);
-			formattedWords.put(WbTableSource.VERB, WbTableSource.FORMATTED_VERB);
-			formattedWords.put(WbRowCount.VERB.toUpperCase(), WbRowCount.VERB);
+			formattedWords.put(WbListIndexes.VERB, WbListIndexes.VERB);
+			formattedWords.put(WbViewSource.VERB, WbViewSource.VERB);
+			formattedWords.put(WbTableSource.VERB, WbTableSource.VERB);
+			formattedWords.put(WbRowCount.VERB, WbRowCount.VERB);
 		}
 		return formattedWords;
 	}
