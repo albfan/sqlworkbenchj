@@ -72,7 +72,7 @@ import workbench.util.WbFile;
 public class WbImport
 	extends SqlCommand
 {
-	public static final String VERB = "WBIMPORT";
+	public static final String VERB = "WbImport";
 
 	public static final String ARG_TYPE = "type";
 	public static final String ARG_FILE = "file";
@@ -333,7 +333,7 @@ public class WbImport
 		imp.setUseSavepoint(cmdLine.getBoolean(ARG_USE_SAVEPOINT, currentConnection.getDbSettings().useSavepointForImport()));
 		imp.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
 		imp.setAdjustSequences(cmdLine.getBoolean(ARG_ADJUST_SEQ, false));
-		
+
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 

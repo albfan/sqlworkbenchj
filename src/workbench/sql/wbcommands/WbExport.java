@@ -73,7 +73,7 @@ public class WbExport
 	extends SqlCommand
 	implements RowActionMonitor, ProgressReporter, ResultSetConsumer
 {
-	public static final String VERB = "WBEXPORT";
+	public static final String VERB = "WbExport";
 
 	// <editor-fold defaultstate="collapsed" desc=" Arguments ">
 	public static final String ARG_SOURCETABLE = "sourceTable";

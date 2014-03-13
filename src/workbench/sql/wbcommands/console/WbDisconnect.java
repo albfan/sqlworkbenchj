@@ -37,7 +37,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbDisconnect
 	extends SqlCommand
 {
-	public static final String VERB = "WBDISCONNECT";
+	public static final String VERB = "WbDisconnect";
 
 	public WbDisconnect()
 	{

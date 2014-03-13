@@ -45,7 +45,7 @@ import workbench.util.XsltTransformer;
 public class WbXslt
 	extends SqlCommand
 {
-	public static final String VERB = "WBXSLT";
+	public static final String VERB = "WbXslt";
 	public static final String ARG_STYLESHEET = "stylesheet";
 	public static final String ARG_OUTPUT = "xsltOutput";
 	public static final String ARG_INPUT = "inputFile";

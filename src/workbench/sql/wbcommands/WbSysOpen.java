@@ -27,9 +27,12 @@ import java.io.File;
 import java.sql.SQLException;
 
 import workbench.log.LogMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.*;
+
+import workbench.util.ArgumentParser;
+import workbench.util.StringUtil;
 
 /**
  * A workbench command to call an operating system program (or command)
@@ -39,7 +42,7 @@ import workbench.util.*;
 public class WbSysOpen
 	extends SqlCommand
 {
-	public static final String VERB = "WBSYSOPEN";
+	public static final String VERB = "WbSysOpen";
 
 	public WbSysOpen()
 	{

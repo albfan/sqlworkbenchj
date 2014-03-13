@@ -37,7 +37,7 @@ import workbench.sql.VariablePool;
  */
 public class WbRemoveVar extends SqlCommand
 {
-	public static final String VERB = "WBVARDELETE";
+	public static final String VERB = "WbVarDelete";
 
 	@Override
 	public String getVerb()

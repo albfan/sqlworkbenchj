@@ -48,7 +48,7 @@ import workbench.sql.macros.MacroStorage;
 public class WbListMacros
 	extends SqlCommand
 {
-	public static final String VERB = "WBLISTMACROS";
+	public static final String VERB = "WbListMacros";
 
 	public WbListMacros()
 	{

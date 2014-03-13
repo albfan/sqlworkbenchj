@@ -54,7 +54,7 @@ import workbench.util.WbFile;
 public class WbInclude
 	extends SqlCommand
 {
-	public static final String VERB = "WBINCLUDE";
+	public static final String VERB = "WbInclude";
 	public static final String ORA_INCLUDE = "@";
 
 	public static final String ARG_SEARCH_VALUE = "searchFor";

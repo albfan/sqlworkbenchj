@@ -42,7 +42,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbProcSource
 	extends SqlCommand
 {
-	public static final String VERB = "WBPROCSOURCE";
+	public static final String VERB = "WbProcSource";
 
 	public WbProcSource()
 	{

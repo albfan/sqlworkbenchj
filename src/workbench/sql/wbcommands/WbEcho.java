@@ -34,7 +34,7 @@ import workbench.util.StringUtil;
 public class WbEcho
 	extends SqlCommand
 {
-	public static final String VERB = "WBECHO";
+	public static final String VERB = "WbEcho";
 
 	public WbEcho()
 	{

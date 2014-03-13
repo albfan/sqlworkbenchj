@@ -29,15 +29,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import workbench.db.WbConnection;
+
 import workbench.interfaces.JobErrorHandler;
 import workbench.resource.Settings;
 
-import workbench.sql.SqlCommand;
-import workbench.sql.StatementRunnerResult;
+import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.RowData;
+
+import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 
@@ -49,7 +53,7 @@ import workbench.util.StringUtil;
 public class WbSysProps
 	extends SqlCommand
 {
-	public static final String VERB = "WBPROPS";
+	public static final String VERB = "WbProps";
 
 	public WbSysProps()
 	{

@@ -23,12 +23,16 @@
 package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
-import workbench.db.ConnectionInfoBuilder;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ConnectionInfoBuilder;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -40,7 +44,7 @@ import workbench.util.WbFile;
 public class WbAbout
 	extends SqlCommand
 {
-	public static final String VERB = "WBABOUT";
+	public static final String VERB = "WbAbout";
 
 	public WbAbout()
 	{

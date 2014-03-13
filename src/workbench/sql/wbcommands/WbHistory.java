@@ -43,8 +43,8 @@ import workbench.util.StringUtil;
 public class WbHistory
 	extends SqlCommand
 {
-	public static final String VERB = "WBHISTORY";
-	public static final String SHORT_VERB = "WBHIST";
+	public static final String VERB = "WbHistory";
+	public static final String SHORT_VERB = "WbHist";
 
 	private int maxLength = -1;
 

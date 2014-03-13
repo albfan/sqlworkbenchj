@@ -42,7 +42,7 @@ import workbench.util.StringUtil;
 public class WbDisplay
 	extends SqlCommand
 {
-	public static final String VERB = "WBDISPLAY";
+	public static final String VERB = "WbDisplay";
 
 	@Override
 	public StatementRunnerResult execute(String aSql)

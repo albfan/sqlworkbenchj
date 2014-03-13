@@ -53,7 +53,7 @@ import workbench.util.WbFile;
 public class WbSysExec
 	extends SqlCommand
 {
-	public static final String VERB = "WBSYSEXEC";
+	public static final String VERB = "WbSysExec";
 	public static final String ARG_PROGRAM = "program";
 	public static final String ARG_PRG_ARG = "argument";
 	public static final String ARG_WORKING_DIR = "dir";

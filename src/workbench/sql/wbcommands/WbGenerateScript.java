@@ -62,8 +62,8 @@ public class WbGenerateScript
 	implements ScriptGenerationMonitor
 {
 
-	public static final String VERB = "WBGENERATESCRIPT";
-	public static final String SHORT_VERB = "WBGENSCRIPT";
+	public static final String VERB = "WbGenerateScript";
+	public static final String SHORT_VERB = "WbGenScript";
 
 	private ObjectScripter scripter;
 

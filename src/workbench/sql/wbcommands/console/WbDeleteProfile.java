@@ -44,7 +44,7 @@ import workbench.util.StringUtil;
 public class WbDeleteProfile
 	extends SqlCommand
 {
-	public static final String VERB = "WBDELETEPROFILE";
+	public static final String VERB = "WbDeleteProfile";
 
 	public WbDeleteProfile()
 	{

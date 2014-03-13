@@ -24,12 +24,16 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.ProfileGroupMap;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
@@ -42,7 +46,7 @@ import workbench.util.CollectionUtil;
 public class WbListProfiles
 	extends SqlCommand
 {
-	public static final String VERB = "WBLISTPROFILES";
+	public static final String VERB = "WbListProfiles";
 	public static final String ARG_GROUP = "group";
 	public static final String ARG_GROUPS_ONLY = "groupsOnly";
 

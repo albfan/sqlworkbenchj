@@ -23,13 +23,18 @@
 package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
+
 import workbench.gui.profiles.ProfileKey;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
@@ -41,7 +46,7 @@ import workbench.util.StringUtil;
 public class WbStoreProfile
 	extends SqlCommand
 {
-	public static final String VERB = "WBSTOREPROFILE";
+	public static final String VERB = "WbStoreProfile";
 	public static final String ARG_PROFILE_NAME = "name";
 	public static final String ARG_SAVE_PASSWORD = "savePassword";
 	public WbStoreProfile()

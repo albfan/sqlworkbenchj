@@ -50,7 +50,7 @@ import workbench.util.WbFile;
 public class WbDefineMacro
 	extends SqlCommand
 {
-	public static final String VERB = "WBDEFINEMACRO";
+	public static final String VERB = "WbDefineMacro";
 
 	public static final String ARG_NAME = "name";
 	public static final String ARG_TEXT = "text";

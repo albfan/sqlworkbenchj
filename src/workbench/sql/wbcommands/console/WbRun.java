@@ -47,7 +47,7 @@ import workbench.util.WbFile;
 public class WbRun
 	extends SqlCommand
 {
-	public static final String VERB = "WBRUN";
+	public static final String VERB = "WbRun";
 
 	public WbRun()
 	{

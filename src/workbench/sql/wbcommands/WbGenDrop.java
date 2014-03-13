@@ -38,10 +38,10 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
 import workbench.util.WbFile;
 
-import static workbench.sql.wbcommands.WbGenDrop.PARAM_INCLUDE_CREATE;
-import workbench.util.FileUtil;
+import static workbench.sql.wbcommands.WbGenDrop.*;
 
 /**
  * A SqlCommand to create a DROP script for one or more tables that will drop referencing foreign keys
@@ -54,7 +54,7 @@ import workbench.util.FileUtil;
 public class WbGenDrop
 	extends SqlCommand
 {
-	public static final String VERB = "WBGENERATEDROP";
+	public static final String VERB = "WbGenerateDrop";
 
 	public static final String PARAM_TABLES = "tables";
 	public static final String PARAM_FILE = "outputFile";

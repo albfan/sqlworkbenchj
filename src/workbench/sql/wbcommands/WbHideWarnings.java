@@ -23,11 +23,14 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 
@@ -38,7 +41,7 @@ import workbench.util.StringUtil;
 public class WbHideWarnings
 	extends SqlCommand
 {
-	public static final String VERB = "WBHIDEWARNINGS";
+	public static final String VERB = "WbHideWarnings";
 
 	public WbHideWarnings()
 	{

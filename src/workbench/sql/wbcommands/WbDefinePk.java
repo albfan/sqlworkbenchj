@@ -44,7 +44,7 @@ import workbench.util.WbStringTokenizer;
 public class WbDefinePk
 	extends SqlCommand
 {
-	public static final String VERB = "WBDEFINEPK";
+	public static final String VERB = "WbDefinePK";
 
 	@Override
 	public String getVerb()

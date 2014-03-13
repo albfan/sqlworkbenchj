@@ -52,7 +52,7 @@ public class WbGenInsert
 	extends SqlCommand
 	implements ScriptGenerationMonitor
 {
-	public static final String VERB = "WBGENERATEINSERT";
+	public static final String VERB = "WbGenerateInsert";
 
 	public static final String PARAM_TABLES = "tables";
 	public static final String PARAM_FULL_INSERT = "fullInsert";

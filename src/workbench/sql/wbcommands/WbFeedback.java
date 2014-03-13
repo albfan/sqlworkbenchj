@@ -41,7 +41,7 @@ import workbench.util.ArgumentType;
 public class WbFeedback
 	extends SqlCommand
 {
-	public static final String VERB = "WBFEEDBACK";
+	public static final String VERB = "WbFeedback";
 	private final String command;
 
 	public WbFeedback()

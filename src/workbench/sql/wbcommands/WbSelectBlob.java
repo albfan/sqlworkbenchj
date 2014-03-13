@@ -30,12 +30,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -62,7 +65,7 @@ import workbench.util.WbFile;
 public class WbSelectBlob
 	extends SqlCommand
 {
-	public static final String VERB = "WBSELECTBLOB";
+	public static final String VERB = "WbSelectBlob";
 
 	public WbSelectBlob()
 	{

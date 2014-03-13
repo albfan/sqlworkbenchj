@@ -25,7 +25,6 @@ package workbench.sql.wbcommands;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import workbench.sql.wbcommands.console.WbAbout;
@@ -39,12 +38,12 @@ import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
 
 import workbench.util.CaseInsensitiveComparator;
-import workbench.util.CollectionUtil;
 
 /**
  * A class to test whether a given SQL Verb is an internal
- * Workbench command. This is used by the SqlFormatter, because
- * the verbs for WbXXXX commands are not formatted in uppercase.
+ * Workbench command.
+ *
+ * This is used by the SqlFormatter, because the verbs for WbXXXX commands should be be not formatted in uppercase.
  *
  * This is also used by the code completion to check for WB specific commands.
  *
@@ -56,139 +55,89 @@ import workbench.util.CollectionUtil;
 public class CommandTester
 {
 
-	private final Set<String> commands;
-	private Map<String, String> formattedWords;
+	private Map<String, String> commands;
 
 	public CommandTester()
 	{
-		commands = CollectionUtil.caseInsensitiveSet();
-		commands.add(WbCall.VERB);
-		commands.add(WbConfirm.VERB);
-		commands.add(WbCopy.VERB);
-		commands.add(WbDataDiff.VERB);
-		commands.add(WbDefinePk.VERB);
-		commands.add(WbDefineVar.VERB);
-		commands.add(WbDeleteProfile.VERB);
-		commands.add(WbDescribeObject.VERB);
-		commands.add(WbDescribeObject.VERB_LONG);
-		commands.add(WbDisableOraOutput.VERB);
-		commands.add(WbDisplay.VERB);
-		commands.add(WbEnableOraOutput.VERB);
-		commands.add(WbEndBatch.VERB);
-		commands.add(WbExport.VERB);
-		commands.add(WbFeedback.VERB);
-		commands.add(WbImport.VERB);
-		commands.add(WbInclude.VERB);
-		commands.add(WbListPkDef.VERB);
-		commands.add(WbListVars.VERB);
-		commands.add(WbListTables.VERB);
-		commands.add(WbListProcedures.VERB);
-		commands.add(WbListCatalogs.VERB);
-		commands.add(WbListCatalogs.VERB_ALTERNATE);
-		commands.add(WbListSchemas.VERB);
-		commands.add(WbLoadPkMapping.VERB);
-		commands.add(WbRemoveVar.VERB);
-		commands.add(WbSavePkMapping.VERB);
-		commands.add(WbSchemaDiff.VERB);
-		commands.add(WbSchemaReport.VERB);
-		commands.add(WbSelectBlob.VERB);
-		commands.add(WbStartBatch.VERB);
-		commands.add(WbXslt.VERB);
-		commands.add(WbConnect.VERB);
-		commands.add(WbDisconnect.VERB);
-		commands.add(WbHideWarnings.VERB);
-		commands.add(WbListProfiles.VERB);
-		commands.add(WbStoreProfile.VERB);
-		commands.add(WbHelp.VERB);
-		commands.add(WbProcSource.VERB);
-		commands.add(WbRun.VERB);
-		commands.add(WbListTriggers.VERB);
-		commands.add(WbTriggerSource.VERB);
-		commands.add(WbTableSource.VERB);
-		commands.add(WbViewSource.VERB);
-		commands.add(WbGrepSource.VERB);
-		commands.add(WbGrepData.VERB);
-		commands.add(WbMode.VERB);
-		commands.add(WbFetchSize.VERB);
-		commands.add(WbAbout.VERB);
-		commands.add(WbRunLB.VERB);
-		commands.add(WbIsolationLevel.VERB);
-		commands.add(WbConnInfo.VERB);
-		commands.add(WbSysExec.VERB);
-		commands.add(WbSysProps.VERB);
-		commands.add(WbOraShow.VERB);
-		commands.add(WbGenDrop.VERB);
-		commands.add(WbSetProp.VERB);
-		commands.add(WbSetProp.ALTERNATE_VERB);
-		commands.add(WbGenerateScript.VERB);
-		commands.add(WbSysOpen.VERB);
-		commands.add(WbGenDelete.VERB);
-		commands.add(WbGenInsert.VERB);
-		commands.add(WbEcho.VERB);
-		commands.add(WbHistory.VERB);
-		commands.add(WbDefineMacro.VERB);
-		commands.add(WbListMacros.VERB);
-		commands.add(WbListIndexes.VERB);
-		commands.add(WbRowCount.VERB);
+		commands = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+		putVerb(WbCall.VERB);
+		putVerb(WbConfirm.VERB);
+		putVerb(WbCopy.VERB);
+		putVerb(WbDataDiff.VERB);
+		putVerb(WbDefinePk.VERB);
+		putVerb(WbDefineVar.VERB);
+		putVerb(WbDeleteProfile.VERB);
+		putVerb(WbDescribeObject.VERB);
+		putVerb(WbDescribeObject.VERB_LONG);
+		putVerb(WbDisableOraOutput.VERB);
+		putVerb(WbDisplay.VERB);
+		putVerb(WbEnableOraOutput.VERB);
+		putVerb(WbEndBatch.VERB);
+		putVerb(WbExport.VERB);
+		putVerb(WbFeedback.VERB);
+		putVerb(WbImport.VERB);
+		putVerb(WbInclude.VERB);
+		putVerb(WbListPkDef.VERB);
+		putVerb(WbListVars.VERB);
+		putVerb(WbListTables.VERB);
+		putVerb(WbListProcedures.VERB);
+		putVerb(WbListCatalogs.VERB);
+		putVerb(WbListCatalogs.VERB_ALTERNATE);
+		putVerb(WbListSchemas.VERB);
+		putVerb(WbLoadPkMapping.VERB);
+		putVerb(WbRemoveVar.VERB);
+		putVerb(WbSavePkMapping.VERB);
+		putVerb(WbSchemaDiff.VERB);
+		putVerb(WbSchemaReport.VERB);
+		putVerb(WbSelectBlob.VERB);
+		putVerb(WbStartBatch.VERB);
+		putVerb(WbXslt.VERB);
+		putVerb(WbConnect.VERB);
+		putVerb(WbDisconnect.VERB);
+		putVerb(WbHideWarnings.VERB);
+		putVerb(WbListProfiles.VERB);
+		putVerb(WbStoreProfile.VERB);
+		putVerb(WbHelp.VERB);
+		putVerb(WbProcSource.VERB);
+		putVerb(WbRun.VERB);
+		putVerb(WbListTriggers.VERB);
+		putVerb(WbTriggerSource.VERB);
+		putVerb(WbTableSource.VERB);
+		putVerb(WbViewSource.VERB);
+		putVerb(WbGrepSource.VERB);
+		putVerb(WbGrepData.VERB);
+		putVerb(WbMode.VERB);
+		putVerb(WbFetchSize.VERB);
+		putVerb(WbAbout.VERB);
+		putVerb(WbRunLB.VERB);
+		putVerb(WbIsolationLevel.VERB);
+		putVerb(WbConnInfo.VERB);
+		putVerb(WbSysExec.VERB);
+		putVerb(WbSysProps.VERB);
+		putVerb(WbOraShow.VERB);
+		putVerb(WbGenDrop.VERB);
+		putVerb(WbSetProp.VERB);
+		putVerb(WbSetProp.ALTERNATE_VERB);
+		putVerb(WbGenerateScript.VERB);
+		putVerb(WbSysOpen.VERB);
+		putVerb(WbGenDelete.VERB);
+		putVerb(WbGenInsert.VERB);
+		putVerb(WbEcho.VERB);
+		putVerb(WbHistory.VERB);
+		putVerb(WbDefineMacro.VERB);
+		putVerb(WbListMacros.VERB);
+		putVerb(WbListIndexes.VERB);
+		putVerb(WbRowCount.VERB);
 	}
 
-	private Map<String, String> getFormattedVerbs()
+	private void putVerb(String verb)
 	{
-		if (formattedWords == null)
-		{
-			formattedWords = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
-			formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.VERB);
-			formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.VERB);
-			formattedWords.put(WbDefineVar.VERB, WbDefineVar.VERB);
-			formattedWords.put(WbListPkDef.VERB, WbListPkDef.VERB);
-			formattedWords.put(WbEndBatch.VERB, WbEndBatch.VERB);
-			formattedWords.put(WbStartBatch.VERB, WbStartBatch.VERB);
-			formattedWords.put(WbSchemaDiff.VERB, WbSchemaDiff.VERB);
-			formattedWords.put(WbSchemaReport.VERB, WbSchemaReport.VERB);
-			formattedWords.put(WbDataDiff.VERB, WbDataDiff.VERB);
-			formattedWords.put(WbDescribeObject.VERB, WbDescribeObject.VERB.toUpperCase());
-			formattedWords.put(WbDescribeObject.VERB_LONG, WbDescribeObject.VERB_LONG.toUpperCase());
-			formattedWords.put(WbHideWarnings.VERB, "WbEnableWarnings");
-			formattedWords.put(WbStoreProfile.VERB, "WbStoreProfile");
-			formattedWords.put(WbDeleteProfile.VERB, "WbDeleteProfile");
-			formattedWords.put(WbListProfiles.VERB, "WbListProfiles");
-			formattedWords.put(WbDefinePk.VERB, "WbDefinePK");
-			formattedWords.put(WbSelectBlob.VERB, "WbSelectBlob");
-			formattedWords.put(WbRemoveVar.VERB, "WbVarDelete");
-			formattedWords.put(WbProcSource.VERB, "WbProcSource");
-			formattedWords.put(WbListProcedures.VERB, "WbListProcs");
-			formattedWords.put(WbListTriggers.VERB, WbListTriggers.VERB);
-			formattedWords.put(WbTriggerSource.VERB, WbTriggerSource.VERB);
-			formattedWords.put(WbListCatalogs.VERB, WbListCatalogs.VERB);
-			formattedWords.put(WbListCatalogs.VERB_ALTERNATE, WbListCatalogs.VERB_ALTERNATE);
-			formattedWords.put(WbListSchemas.VERB, WbListSchemas.VERB);
-			formattedWords.put(WbGrepData.VERB, WbGrepData.VERB);
-			formattedWords.put(WbGrepSource.VERB, WbGrepSource.VERB);
-			formattedWords.put(WbFetchSize.VERB, WbFetchSize.VERB);
-			formattedWords.put(WbRunLB.VERB, WbRunLB.VERB);
-			formattedWords.put(WbIsolationLevel.VERB, WbIsolationLevel.VERB);
-			formattedWords.put(WbConnInfo.VERB, "WbConnInfo");
-			formattedWords.put(WbSysExec.VERB, "WbSysExec");
-			formattedWords.put(WbGenDrop.VERB, "WbGenerateDrop");
-			formattedWords.put(WbSetProp.VERB, "WbSetProp");
-			formattedWords.put(WbSetProp.ALTERNATE_VERB, "WbSetConfig");
-			formattedWords.put(WbGenerateScript.VERB, "WbGenerateScript");
-			formattedWords.put(WbSysOpen.VERB, "WbSysOpen");
-			formattedWords.put(WbGenDelete.VERB, WbGenDelete.VERB);
-			formattedWords.put(WbGenInsert.VERB, "WbGenerateInsert");
-			formattedWords.put(WbDefineMacro.VERB, "WbDefineMacro");
-			formattedWords.put(WbListMacros.VERB, "WbListMacros");
-			formattedWords.put(WbListIndexes.VERB, WbListIndexes.VERB);
-			formattedWords.put(WbViewSource.VERB, WbViewSource.VERB);
-			formattedWords.put(WbTableSource.VERB, WbTableSource.VERB);
-			formattedWords.put(WbRowCount.VERB, WbRowCount.VERB);
-		}
-		return formattedWords;
+		commands.put(verb, verb);
 	}
 
 	public Collection<String> getCommands()
 	{
-		return Collections.unmodifiableSet(commands);
+		return Collections.unmodifiableSet(commands.keySet());
 	}
 
 	public boolean isWbCommand(String verb)
@@ -197,33 +146,11 @@ public class CommandTester
 		{
 			return false;
 		}
-		return commands.contains(verb.trim());
+		return commands.containsKey(verb.trim());
 	}
 
 	public String formatVerb(String verb)
 	{
-		if (verb == null)
-		{
-			return null;
-		}
-		String f = getFormattedVerbs().get(verb.trim());
-		if (f != null)
-		{
-			return f;
-		}
-		else
-		{
-			return fixCase(verb);
-		}
-	}
-
-	private String fixCase(String verb)
-	{
-		if (!verb.toLowerCase().startsWith("wb"))
-		{
-			return verb;
-		}
-		String s = "Wb" + Character.toUpperCase(verb.charAt(2)) + verb.substring(3).toLowerCase();
-		return s;
+		return commands.get(verb);
 	}
 }

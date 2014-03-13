@@ -49,7 +49,7 @@ import workbench.util.ArgumentType;
 public class WbListTables
 	extends SqlCommand
 {
-	public static final String VERB = "WBLIST";
+	public static final String VERB = "WbList";
 
 	public WbListTables()
 	{
