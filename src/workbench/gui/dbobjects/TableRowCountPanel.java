@@ -64,6 +64,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 
 import workbench.storage.DataStore;
+import workbench.storage.SortDefinition;
 
 import workbench.sql.wbcommands.WbRowCount;
 
@@ -262,7 +263,7 @@ public class TableRowCountPanel
 				String sql = builder.getSelectForCount(table);
 
 				rs = JdbcUtils.runStatement(dbConnection, currentStatement, sql, useSeparateConnection, useSavepoint);
-				
+
 				if (cancel) break;
 
 				long rowCount = 0;
@@ -299,6 +300,8 @@ public class TableRowCountPanel
 			@Override
 			public void run()
 			{
+				SortDefinition sortDef = WbRowCount.getDefaultRowCountSort(data.getDataStore(), dbConnection);
+				data.getDataStoreTableModel().setSortDefinition(sortDef);
 				data.requestFocusInWindow();
 			}
 		});

@@ -44,7 +44,7 @@
 		any table that starts with <literal>BIN$</literal>.
 	</para>
   -->
-  
+
 	<para>
 		Synonyms are displayed if the current DBMS supports them.
 		You can filter out unwanted synonyms by <link linkend="db-oracle-filter-syns">specifying a
@@ -95,6 +95,17 @@
 					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for datatypes</link>
 					is <emphasis role="bold">not</emphasis> applied to the generated <literal>SELECT</literal> statement.
 				</para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbexplorer-rowcount">
+			<title>Count rows</title>
+			<blockquote>
+				<para>
+					This will count the rows for each selected table object. The rowcounts will be opened in a new window.
+          This is the same functionality as the <link linkend="command-rowcount"><literal>WbRowCount</literal></link>
+          command.
+        </para>
 			</blockquote>
 		</simplesect>
 

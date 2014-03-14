@@ -2046,6 +2046,81 @@ WHERE id=42;</programlisting>
   </section>
 
 
+  <section id="command-rowcount">
+    <title>Count rows for all tables - WbRowcCount</title>
+    <para>
+      This command retrieves the row counts for several tables at once. If called without parameters
+      the row counts for all tables accessible to the current user are counted.
+    </para>
+    <para>
+			The command supports the following parameters to specify the tables (or views) to be counted.
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"  colwidth="2.5cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-schema</entry>
+							<entry>
+								<para>
+									Count the rows for tables from the given schemas, e.g. <literal>-schema=public,local</literal>
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-catalog</entry>
+							<entry>
+								<para>
+									Show only indexes for the specified catalog e.g. <literal>-catalog=other_db</literal>
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-objects</entry>
+							<entry>
+								<para>
+                  Show only indexes for the tables (or views) specified by the parameter. The parameter value
+                  can contain wildcards, e.g. <literal>-objects=PR%,ORD%</literal> will count the rows
+                  for all tables with names that either start with <literal>PR</literal> or <literal>ORD</literal>
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-types</entry>
+							<entry>
+								<para>
+                  Define the types of objects which should be selected. By default only tables are considered.
+                  If you also want to count the rows for views, use <literal>-types=table,view</literal>
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-sortBy</entry>
+							<entry>
+								<para>
+                  Defines how the resulting table should be sorted. By default it will be sorted
+                  alphabetically by table name. To sort by rowcount descending, the following can be used:
+                  <literal>-sortBy="rowcount,desc"</literal>. If you want to sort by multiple columns, separate
+                  the definitions with a comma: <literal>-sortBy="rowcount;desc,name;asc"</literal>.
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+		</para>
+    <para>
+      Unlike the <link linkend="dbexplorer-rowcount">Count rows</link> item in the DbExplorer, <literal>WbRowCount</literal>
+      displays the result for all tables at the end, it does not incrementally update the output.
+    </para>
+  </section>
+
   <section id="command-connect">
     <title>Change the connection for a script - WbConnect</title>
 

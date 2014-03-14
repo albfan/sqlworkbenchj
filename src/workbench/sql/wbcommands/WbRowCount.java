@@ -185,7 +185,7 @@ public class WbRowCount
 		return Settings.getInstance().getProperty("workbench.sql.wbrowcount.sortdef", "name;a").toLowerCase();
 	}
 	
-	public static SortDefinition getRowCountSort(DataStore rowCounts, WbConnection connection)
+	public static SortDefinition getDefaultRowCountSort(DataStore rowCounts, WbConnection connection)
 	{
 		return getRowCountSort(getDefaultSortConfig(), rowCounts, connection);
 	}
