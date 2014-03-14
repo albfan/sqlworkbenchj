@@ -24,15 +24,24 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.KeyStroke;
-import workbench.db.WbConnection;
-import workbench.gui.sql.SqlPanel;
+
 import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
+import workbench.gui.sql.SqlPanel;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ObjectInfo;
-import workbench.storage.DataStore;
+
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -93,7 +102,15 @@ public class ShowObjectInfoAction
 			String text = display.getSelectedText();
 			if (StringUtil.isEmptyString(text))
 			{
-				text = display.getEditor().getWordAtCursor();
+				char schemaSeparator = SqlUtil.getSchemaSeparator(conn);
+				String wordChars = Settings.getInstance().getEditorNoWordSep();
+				wordChars += schemaSeparator;
+				char catSeparator = SqlUtil.getCatalogSeparator(conn);
+				if (catSeparator != schemaSeparator)
+				{
+					wordChars += catSeparator;
+				}
+				text = display.getEditor().getWordAtCursor(wordChars);
 			}
 
 			if (conn != null && StringUtil.isNonBlank(text))

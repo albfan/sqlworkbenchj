@@ -1551,11 +1551,16 @@ public class JEditTextArea
 
 	public String getWordAtCursor()
 	{
+		return getWordAtCursor(Settings.getInstance().getEditorNoWordSep());
+	}
+	
+	public String getWordAtCursor(String wordCharacters)
+	{
 		int currentLine = getCaretLine();
 		String line = this.getLineText(currentLine);
 		int pos = this.getCaretPositionInLine(currentLine);
-		int start = TextUtilities.findWordStart(line, pos);
-		int end = TextUtilities.findWordEnd(line, pos);
+		int start = TextUtilities.findWordStart(line, pos, wordCharacters);
+		int end = TextUtilities.findWordEnd(line, pos, wordCharacters);
 		if (start < end && start >= 0)
 		{
 			return line.substring(start, end);

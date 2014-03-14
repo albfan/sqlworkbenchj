@@ -158,6 +158,11 @@ public class TextUtilities
 	 */
 	public static int findWordStart(String line, int pos)
 	{
+		return findWordStart(line, pos, Settings.getInstance().getEditorNoWordSep());
+	}
+
+	public static int findWordStart(String line, int pos, String wordCharacters)
+	{
 		if (pos >= line.length())
 		{
 			pos = line.length();
@@ -167,19 +172,19 @@ public class TextUtilities
 
 		char ch = line.charAt(pos - 1);
 
-		String noWordSep = Settings.getInstance().getEditorNoWordSep();
+
 		if (Character.isWhitespace(ch))
 		{
 			return findWhitespaceBackwards(line, pos - 1);
 		}
 
-		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) 	&& noWordSep.indexOf(ch) == -1);
+		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) 	&& wordCharacters.indexOf(ch) == -1);
 
 		int wordStart = 0;
 		for (int i = pos - 1; i >= 0; i--)
 		{
 			ch = line.charAt(i);
-			if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1))
+			if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) && wordCharacters.indexOf(ch) == -1))
 			{
 				wordStart = i + 1;
 				break;
@@ -207,12 +212,18 @@ public class TextUtilities
 		}
 		return -1;
 	}
+
 	/**
 	 * Locates the end of the word at the specified position.
 	 * @param line The text
 	 * @param pos The position
 	 */
 	public static int findWordEnd(String line, int pos)
+	{
+		return findWordEnd(line, pos, Settings.getInstance().getEditorNoWordSep());
+	}
+
+	public static int findWordEnd(String line, int pos, String wordCharacters)
 	{
 		if(pos >= line.length()) return line.length();
 		char ch = line.charAt(pos);
@@ -221,8 +232,6 @@ public class TextUtilities
 		{
 			return StringUtil.findFirstNonWhitespace(line, pos);
 		}
-
-		String wordCharacters = Settings.getInstance().getEditorNoWordSep();
 
 		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) && wordCharacters.indexOf(ch) == -1);
 

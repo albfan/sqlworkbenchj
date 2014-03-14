@@ -610,7 +610,7 @@ public abstract class BaseAnalyzer
 			start = len - 1;
 		}
 
-		char separator = SqlUtil.getCatalogSeparator(this.dbConnection);
+		char separator = SqlUtil.getSchemaSeparator(this.dbConnection);
 		char c = this.sql.charAt(start);
 		//if (Character.isWhitespace(c)) return null;
 
