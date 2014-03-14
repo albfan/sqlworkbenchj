@@ -33,12 +33,15 @@ import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.storage.NamedSortDefinition;
+import workbench.storage.SortDefinition;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -63,6 +66,7 @@ public class WbRowCount
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
+		cmdLine.addArgument("sortBy");
 	}
 
 	@Override
@@ -96,6 +100,9 @@ public class WbRowCount
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
 		cmdLine.parse(options);
+		String defaultSort = getDefaultSortConfig();
+		String sort = cmdLine.getValue("sortBy", defaultSort);
+
 		if (cmdLine.hasUnknownArguments())
 		{
 			result.addMessage(ResourceMgr.getString("ErrListWrongArgs"));
@@ -159,6 +166,12 @@ public class WbRowCount
 				SqlUtil.closeResult(rs);
 			}
 		}
+
+		SortDefinition sortDef = getRowCountSort(sort, rowCounts, currentConnection);
+		if (sortDef.hasColumns())
+		{
+			rowCounts.sort(sortDef);
+		}
 		rowCounts.setResultName(VERB);
 		rowCounts.setGeneratingSql(sql);
 		rowCounts.resetStatus();
@@ -166,4 +179,35 @@ public class WbRowCount
 
 		return result;
 	}
+
+	public static String getDefaultSortConfig()
+	{
+		return Settings.getInstance().getProperty("workbench.sql.wbrowcount.sortdef", "name;a").toLowerCase();
+	}
+	
+	public static SortDefinition getRowCountSort(DataStore rowCounts, WbConnection connection)
+	{
+		return getRowCountSort(getDefaultSortConfig(), rowCounts, connection);
+	}
+
+	public static SortDefinition getRowCountSort(String namedSort, DataStore rowCounts, WbConnection connection)
+	{
+		if (namedSort == null) return SortDefinition.EMPTY_SORT;
+
+		DbMetadata meta = connection.getMetadata();
+		// the column name for rowcount used in the DataStore is localized (see buildResultDataStore(), so we need to
+		// replace the name with the real one before creating the SortDefinition
+		String sort = namedSort.replace("rowcount", rowCounts.getColumnName(0).toLowerCase());
+
+		// The schema and catalog columns might not be called that depending on the JDBC driver
+		String schema = meta.getSchemaTerm().toLowerCase();
+		sort = sort.replace("schema", schema);
+
+		String catalog = meta.getCatalogTerm().toLowerCase();
+		sort = sort.replace("catalog", catalog);
+
+		NamedSortDefinition namedSortDef = NamedSortDefinition.parseDefinitionString(sort);
+		return namedSortDef.getSortDefinition(rowCounts);
+	}
+
 }

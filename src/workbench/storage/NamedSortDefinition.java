@@ -80,7 +80,7 @@ public class NamedSortDefinition
 	 *
 	 * @param data  the DataStore for which the named sort should be applied
 	 * @return the real sort definition to be used. Never null
-	 * 
+	 *
 	 * @see SortDefinition#EMPTY_SORT
 	 */
 	public SortDefinition getSortDefinition(DataStore data)
@@ -161,7 +161,12 @@ public class NamedSortDefinition
 				String colname = element.substring(0, pos);
 				String asc = element.substring(pos + 1);
 				columns[i] = colname;
-				ascending[i] = "a".equalsIgnoreCase(asc);
+				ascending[i] = asc.toLowerCase().startsWith("a"); // allows for asc/desc as well
+			}
+			else
+			{
+				columns[i] = element;
+				ascending[i] = true;
 			}
 		}
 		return new NamedSortDefinition(columns, ascending);

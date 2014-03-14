@@ -116,6 +116,12 @@ public class SortDefinition
 		return false;
 	}
 
+
+	public boolean isEmpty()
+	{
+		return getColumnCount() == 0;
+	}
+
 	public boolean hasColumns()
 	{
 		return getColumnCount() != 0;
@@ -302,11 +308,6 @@ public class SortDefinition
 			result.append(sortAscending[i] ? 'a' : 'd');
 		}
 		return result.toString();
-	}
-
-	public boolean isEmpty()
-	{
-		return sortColumns == null || sortColumns.length == 0;
 	}
 
 	public static SortDefinition parseDefinitionString(String definition)

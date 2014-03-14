@@ -95,6 +95,10 @@ public class DataStoreTableModel
 		this.dataCache = newData;
 		this.showStatusColumn = false;
 		this.columnStartIndex = 0;
+		if (newData.getLastSort() != null)
+		{
+			this.sortDefinition = newData.getLastSort();
+		}
 		this.fireTableStructureChanged();
 	}
 

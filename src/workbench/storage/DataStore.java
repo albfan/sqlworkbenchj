@@ -121,6 +121,8 @@ public class DataStore
 	private boolean hasGeneratedKeys;
 	private long loadedAt;
 
+	private SortDefinition lastSort;
+
 	/**
 	 *	Create a DataStore which is not based on a result set
 	 *	and contains the columns defined in the given array
@@ -2053,6 +2055,7 @@ public class DataStore
 
 	public void sort(SortDefinition sortDef)
 	{
+		lastSort = sortDef;
 		synchronized (this)
 		{
 			RowDataListSorter sorter = createSorter(sortDef);
@@ -2064,10 +2067,15 @@ public class DataStore
 	{
 		synchronized (this)
 		{
-			SortDefinition sort = new SortDefinition(col, ascending);
-			RowDataListSorter sorter = createSorter(sort);
+			lastSort = new SortDefinition(col, ascending);
+			RowDataListSorter sorter = createSorter(lastSort);
 			sorter.sort(this.data);
 		}
+	}
+
+	public SortDefinition getLastSort()
+	{
+		return lastSort;
 	}
 
 	/**
