@@ -30,7 +30,6 @@ import javax.swing.KeyStroke;
 import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
 
@@ -90,6 +89,9 @@ public class ShowObjectInfoAction
 	protected void showInfo(boolean includeDependencies)
 	{
 		if (display.isBusy()) return;
+		WbConnection conn = display.getConnection();
+		if (conn == null)	return;
+
 		try
 		{
 			display.setBusy(true);
@@ -97,28 +99,42 @@ public class ShowObjectInfoAction
 			setEnabled(false);
 
 			ObjectInfo info = new ObjectInfo();
-			WbConnection conn = display.getConnection();
+
 			boolean deps = conn.getDbSettings().objectInfoWithDependencies();
 			String text = display.getSelectedText();
 			if (StringUtil.isEmptyString(text))
 			{
-				// by adding the schema and catalog separator and to the list of "word characters"
-				// a schema prefixed object name (public.foo) will be recognized properly
+				// Use valid SQL characters including schema/catalog separator and the quote character
+				// for the list of allowed (additional) word characters so that fully qualified names (public.foo)
+				// and quoted names ("public"."Foo") are identified correctly
+
+				// this will not cover more complex situations where non-standard names are used inside quotes (e.g. "Stupid Name")
+				// but will cover most of the usual situations
+
+				String wordChars = "_$";
+
 				char schemaSeparator = SqlUtil.getSchemaSeparator(conn);
-				String wordChars = Settings.getInstance().getEditorNoWordSep();
 				wordChars += schemaSeparator;
 				char catSeparator = SqlUtil.getCatalogSeparator(conn);
+
 				if (catSeparator != schemaSeparator)
 				{
 					wordChars += catSeparator;
 				}
 
-				// by adding the quote character quoted names ("public"."Foo") will also be recognized correctly
+				// now add the quote character used by the DBMS
 				wordChars += conn.getMetadata().getQuoteCharacter();
+
+				if (conn.getMetadata().isSqlServer())
+				{
+					// add the stupid Microsoft quoting stuff
+					wordChars += "[]";
+				}
+
 				text = display.getEditor().getWordAtCursor(wordChars);
 			}
 
-			if (conn != null && StringUtil.isNonBlank(text))
+			if (StringUtil.isNonBlank(text))
 			{
 				display.setStatusMessage(ResourceMgr.getString("TxtRetrieveTableDef") + " " + text);
 				StatementRunnerResult result = info.getObjectInfo(conn, text, includeDependencies || deps, true);
@@ -158,14 +174,19 @@ public class ShowObjectInfoAction
 		}
 		catch (Exception ex)
 		{
-			LogMgr.logError("ShowObjectInfoAction.executeAcion()", "Error retrieving objec tinfo", ex);
+			LogMgr.logError("ShowObjectInfoAction.executeAcion()", "Error retrieving object info", ex);
 		}
 		finally
 		{
 			display.fireDbExecEnd();
-			// just in case...
-			if (display.isBusy()) display.setBusy(false);
 			display.clearStatusMessage();
+
+			// just in case...
+			if (display.isBusy())
+			{
+				display.setBusy(false);
+			}
+
 			checkEnabled();
 		}
 	}

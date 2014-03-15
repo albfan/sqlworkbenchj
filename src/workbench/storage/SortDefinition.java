@@ -116,7 +116,16 @@ public class SortDefinition
 		return false;
 	}
 
-
+	public boolean isValid()
+	{
+		if (isEmpty()) return true;
+		for (int colIndex : sortColumns)
+		{
+			if (colIndex < 0) return false;
+		}
+		return true;
+	}
+	
 	public boolean isEmpty()
 	{
 		return getColumnCount() == 0;
