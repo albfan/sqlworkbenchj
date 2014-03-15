@@ -22,15 +22,24 @@
  */
 package workbench.storage;
 
-import static org.junit.Assert.*;
+import workbench.WbTestCase;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class RowDataListSorterTest
+	extends WbTestCase
 {
+
+	public RowDataListSorterTest()
+	{
+		super("RowDataListSorterTest");
+	}
 
 	@Test
 	public void testSort()
@@ -121,5 +130,28 @@ public class RowDataListSorterTest
 
 		i1 = (Integer) data.get(1).getValue(1);
 		assertEquals(i1.intValue(), 2);
+	}
+
+	@Test
+	public void testSortLastColumn()
+		throws Exception
+	{
+		int count = 10;
+		RowDataList data = new RowDataList(count);
+		for (int i=0; i < count; i++)
+		{
+			RowData row = new RowData(3);
+			row.setValue(0, "foo");
+			row.setValue(1, "bar");
+			row.setValue(2, Integer.valueOf(count - i));
+			data.add(row);
+		}
+		RowDataListSorter sorter = new RowDataListSorter(2, true);
+		sorter.sort(data);
+		for (int i=0; i < count; i++)
+		{
+			int value = (Integer) data.get(i).getValue(2);
+			assertEquals(i + 1, value);
+		}
 	}
 }

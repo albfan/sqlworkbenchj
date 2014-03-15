@@ -141,17 +141,17 @@ public class RowDataListSorter
 	public int compare(RowData row1, RowData row2)
 	{
 		if (this.definition == null) return 0;
-		if (!this.definition.isValid()) return 0;
 
 		try
 		{
 			int colIndex = 0;
 			int result = 0;
 			int numCols = this.definition.getColumnCount();
+
 			while (result == 0 && colIndex < numCols)
 			{
 				int column = definition.getSortColumnByIndex(colIndex);
-				if (column > 0 && column >= numCols) break; // invalid sort definition, should not happen
+				if (column < 0) break;
 
 				result = compareColumn(column, row1, row2);
 				boolean ascending = definition.isSortAscending(column) ;
