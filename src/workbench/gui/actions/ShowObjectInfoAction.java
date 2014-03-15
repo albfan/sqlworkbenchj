@@ -102,6 +102,8 @@ public class ShowObjectInfoAction
 			String text = display.getSelectedText();
 			if (StringUtil.isEmptyString(text))
 			{
+				// by adding the schema and catalog separator and to the list of "word characters"
+				// a schema prefixed object name (public.foo) will be recognized properly
 				char schemaSeparator = SqlUtil.getSchemaSeparator(conn);
 				String wordChars = Settings.getInstance().getEditorNoWordSep();
 				wordChars += schemaSeparator;
@@ -110,6 +112,9 @@ public class ShowObjectInfoAction
 				{
 					wordChars += catSeparator;
 				}
+
+				// by adding the quote character quoted names ("public"."Foo") will also be recognized correctly
+				wordChars += conn.getMetadata().getQuoteCharacter();
 				text = display.getEditor().getWordAtCursor(wordChars);
 			}
 
