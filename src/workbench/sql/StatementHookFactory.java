@@ -22,11 +22,14 @@
  */
 package workbench.sql;
 
+import workbench.resource.Settings;
+
 import workbench.db.WbConnection;
 import workbench.db.firebird.FirebirdStatementHook;
 import workbench.db.mssql.SqlServerStatementHook;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleStatementHook;
+import workbench.db.postgres.PostgresStatementHook;
 
 /**
  *
@@ -54,6 +57,10 @@ public class StatementHookFactory
 		if (conn.getMetadata().isFirebird())
 		{
 			return new FirebirdStatementHook(conn);
+		}
+		if (conn.getMetadata().isPostgres() && Settings.getInstance().getBoolProperty("workbench.db.postgresql.enable.listen", true))
+		{
+			return new PostgresStatementHook(conn);
 		}
 		return DEFAULT_HOOK;
 	}
