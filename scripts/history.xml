@@ -4,6 +4,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-03-09">
+    <entry dev-build="14" type="enh">For Postgres messages received through LISTEN/NOTIFY are now shown in the message panel after running a statement</entry>
     <entry dev-build="14" type="enh">Showing the execution plan for Firebird is now supported (using the same syntax as isql)</entry>
     <entry dev-build="13" type="enh">Macros can now be saved and loaded from different files.</entry>
     <entry dev-build="12" type="enh">Duplicate current line in the editor is now selection aware. If text is selected, the selection is duplicated, rather than the whole line</entry>
@@ -59,6 +60,7 @@
     <entry dev-build="2" type="enh">The behaviour when a file has been modified by a different application can now be configured</entry>
     <entry dev-build="1" type="enh">It is now possible to display a drop down with the recently selected tables in the DbExplorer.</entry>
     <entry dev-build="1" type="enh">WbGenerateScript now supports -includeDrop to generate a DROP statement before the object (similar to the source in the DbExplorer</entry>
+    <entry dev-build="14" type="fix">Exporting the result of a Workbench command (e.g. WbList, WbListProcedures etc) using WbExport did not work properly.</entry>
     <entry dev-build="14" type="fix">When adding a new SQL tab while a statement was running in a tab that had a file loaded, the "busy" icon was removed from that tab</entry>
     <entry dev-build="13" type="fix">Fixed some problems with exporting to Excel spreadsheets regarding the use of cell styles</entry>
     <entry dev-build="13" type="fix">For Informix (11.x) overloaded procedures and functions are now handled correctly in the DbExplorer</entry>

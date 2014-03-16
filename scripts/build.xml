@@ -221,7 +221,6 @@
           <fileset dir="../libs/odf" includes="*.jar"/>
           <fileset dir="../libs/poi" includes="*.jar"/>
           <fileset dir="../libs/log4j" includes="*.jar"/>
-          <fileset dir="../libs/junit" includes="ojdbc*.jar"/>
       </classpath>
     </javac>
 
