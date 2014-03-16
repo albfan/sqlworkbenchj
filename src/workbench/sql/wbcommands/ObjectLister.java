@@ -60,6 +60,10 @@ public class ObjectLister
 			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
 		}
+		else
+		{
+			objects = userInput;
+		}
 
 		if (StringUtil.isBlank(schema))
 		{

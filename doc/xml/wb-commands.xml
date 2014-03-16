@@ -2116,6 +2116,11 @@ WHERE id=42;</programlisting>
 			</informaltable>
 		</para>
     <para>
+      If none of the above parameters are used, <literal>WbRowCount</literal> assumes that a list ot table names was specified.
+      <literal>WbRowCount person,address,orders</literal>is equivalent to <literal>WbRowCount -objects=person,address,orders</literal>. When
+      called without any parameters the row counts for all tables accessible to the current user will be displayed.
+    </para>
+    <para>
       Unlike the <link linkend="dbexplorer-rowcount">Count rows</link> item in the DbExplorer, <literal>WbRowCount</literal>
       displays the result for all tables at the end, it does not incrementally update the output.
     </para>

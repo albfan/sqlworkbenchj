@@ -27,21 +27,21 @@ import java.sql.Types;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.db.DbMetadata;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
+import workbench.storage.NamedSortDefinition;
 import workbench.storage.RowActionMonitor;
+import workbench.storage.SortDefinition;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.NamedSortDefinition;
-import workbench.storage.SortDefinition;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -102,13 +102,6 @@ public class WbRowCount
 		cmdLine.parse(options);
 		String defaultSort = getDefaultSortConfig();
 		String sort = cmdLine.getValue("sortBy", defaultSort);
-
-		if (cmdLine.hasUnknownArguments())
-		{
-			result.addMessage(ResourceMgr.getString("ErrListWrongArgs"));
-			result.setFailure();
-			return result;
-		}
 
 		ObjectLister lister = new ObjectLister();
 		if (this.rowMonitor != null)
@@ -184,7 +177,7 @@ public class WbRowCount
 	{
 		return Settings.getInstance().getProperty("workbench.sql.wbrowcount.sortdef", "name;a").toLowerCase();
 	}
-	
+
 	public static SortDefinition getDefaultRowCountSort(DataStore rowCounts, WbConnection connection)
 	{
 		return getRowCountSort(getDefaultSortConfig(), rowCounts, connection);
