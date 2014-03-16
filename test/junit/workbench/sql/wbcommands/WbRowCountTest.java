@@ -140,6 +140,14 @@ public class WbRowCountTest
 //		printer.printTo(System.out);
 		assertEquals(2, counts.getRowCount());
 
+		result = instance.execute("WbRowCount foobar,data.foo,orders.t1");
+		assertFalse(result.getDataStores().isEmpty());
+		counts = result.getDataStores().get(0);
+
+//		DataStorePrinter printer = new DataStorePrinter(counts);
+//		printer.printTo(System.out);
+		assertEquals(3, counts.getRowCount());
+
 	}
 
 
