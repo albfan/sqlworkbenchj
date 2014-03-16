@@ -66,7 +66,7 @@ public class WbRowCount
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
-		cmdLine.addArgument("sortBy");
+		cmdLine.addArgument("orderBy");
 	}
 
 	@Override
@@ -101,15 +101,15 @@ public class WbRowCount
 
 		cmdLine.parse(options);
 		String defaultSort = getDefaultSortConfig();
-		String sort = cmdLine.getValue("sortBy", defaultSort);
+		String sort = cmdLine.getValue("orderBy", defaultSort);
 
-		ObjectLister lister = new ObjectLister();
 		if (this.rowMonitor != null)
 		{
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 			rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
 		}
 
+		ObjectLister lister = new ObjectLister();
 		DataStore resultList = lister.getObjects(cmdLine, options, currentConnection);
 
 		if (resultList == null)
@@ -136,7 +136,10 @@ public class WbRowCount
 				String countQuery = builder.getSelectForCount(table);
 				String msg = ResourceMgr.getFormattedString("MsgCalculatingRowCount", table.getTableExpression(), row + 1, tableCount);
 
-				rowMonitor.setCurrentObject(msg, row + 1, tableCount);
+				if (rowMonitor != null)
+				{
+					rowMonitor.setCurrentObject(msg, row + 1, tableCount);
+				}
 				rs = JdbcUtils.runStatement(currentConnection, currentStatement, countQuery, false, useSavepoint);
 
 				if (isCancelled) break;
