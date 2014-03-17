@@ -1175,7 +1175,6 @@ public class MainWindow
 		this.closeConnectingInfo();
 		panel.setConnection(conn);
 
-		WbSwingUtilities.waitForEmptyQueue();
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
