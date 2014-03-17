@@ -25,7 +25,6 @@ package workbench.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -302,6 +301,7 @@ public class MainWindow
 
 	protected final void updateTabPolicy()
 	{
+		final JComponent content = (JComponent)this.getContentPane();
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
@@ -309,7 +309,8 @@ public class MainWindow
 			{
 				int tabPolicy = Settings.getInstance().getIntProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.WRAP_TAB_LAYOUT);
 				sqlTab.setTabLayoutPolicy(tabPolicy);
-				sqlTab.validate();
+				sqlTab.invalidate();
+				content.revalidate();
 			}
 		});
 		WbSwingUtilities.repaintLater(this);
@@ -700,7 +701,7 @@ public class MainWindow
 	 */
 	private void updateToolbarVisibility()
 	{
-		final Container content = this.getContentPane();
+		final JComponent content = (JComponent)this.getContentPane();
 
 		if (this.currentToolbar != null)
 		{
@@ -717,7 +718,7 @@ public class MainWindow
 				content.add(currentToolbar, BorderLayout.NORTH);
 			}
 		}
-		content.invalidate();
+		content.revalidate();
 	}
 
 	public void forceRedraw()
@@ -729,7 +730,6 @@ public class MainWindow
 			{
 				JComponent content = (JComponent)getContentPane();
 				sqlTab.invalidate();
-				content.invalidate();
 				content.revalidate();
 			}
 		});
@@ -742,7 +742,6 @@ public class MainWindow
 		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
 		{
 			updateToolbarVisibility();
-			forceRedraw();
 		}
 		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
 		{
@@ -1210,6 +1209,7 @@ public class MainWindow
 		createNewConnection.checkState();
 		disconnectTab.checkState();
 		checkMacroMenuForPanel(index);
+		forceRedraw();
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
