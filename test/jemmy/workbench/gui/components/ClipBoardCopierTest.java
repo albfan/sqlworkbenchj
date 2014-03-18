@@ -28,28 +28,31 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-
 import java.sql.Types;
-
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.WbTestCase;
+import workbench.resource.GuiSettings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.IndexColumn;
 import workbench.db.PkDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.ExportType;
-import workbench.resource.GuiSettings;
-import workbench.sql.ScriptParser;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
+
+import workbench.sql.ScriptParser;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -133,7 +136,6 @@ public class ClipBoardCopierTest
 
 			ClipBoardCopier copier = new ClipBoardCopier(ds);
 			String sql = copier.createSqlString(ExportType.SQL_INSERT, false, false);
-			System.out.println(sql);
 			ScriptParser p = new ScriptParser(sql);
 			assertEquals(3, p.getSize());
 

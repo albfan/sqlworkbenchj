@@ -367,6 +367,7 @@ public class ClipBoardCopier
 			converter.setResultInfo(data.getResultInfo());
 			converter.setDateLiteralType(Settings.getInstance().getDefaultCopyDateLiteralType());
 			converter.setType(type);
+			converter.setTransactionControl(false);
 
 			if (type == ExportType.SQL_INSERT || type == ExportType.SQL_DELETE_INSERT)
 			{

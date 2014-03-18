@@ -83,6 +83,7 @@ public class SqlRowDataConverter
 	private boolean ignoreRowStatus = true;
 	private String mergeType;
 	private MergeGenerator mergeGenerator;
+	private boolean transactionControl = true;
 
 	public SqlRowDataConverter(WbConnection con)
 	{
@@ -103,6 +104,12 @@ public class SqlRowDataConverter
 		super.setInfinityLiterals(literals);
 		this.literalFormatter.setInfinityLiterals(literals);
 	}
+
+	public void setTransactionControl(boolean flag)
+	{
+		this.transactionControl = flag;
+	}
+
 
 	private boolean needPrimaryKey()
 	{
@@ -168,6 +175,8 @@ public class SqlRowDataConverter
 			end.append(lineTerminator);
 		}
 
+		if (!transactionControl) return end;
+		
 		boolean writeCommit = true;
 		if ( (commitEvery == Committer.NO_COMMIT_FLAG) || (commitEvery > 0 && (totalRows % commitEvery == 0)))
 		{
