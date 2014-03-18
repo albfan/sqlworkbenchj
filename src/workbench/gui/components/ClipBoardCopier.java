@@ -276,7 +276,18 @@ public class ClipBoardCopier
 
 	public void doCopyAsSql(final ExportType type, boolean selectedOnly, final boolean showSelectColumns)
 	{
-		if (this.data.getRowCount() <= 0) return;
+		String sql = createSqlString(type, selectedOnly, showSelectColumns);
+		if (sql != null)
+		{
+			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+			StringSelection sel = new StringSelection(sql);
+			clp.setContents(sel, sel);
+		}
+	}
+
+	public String createSqlString(final ExportType type, boolean selectedOnly, final boolean showSelectColumns)
+	{
+		if (this.data.getRowCount() <= 0) return null;
 
 		if (needsPK(type))
 		{
@@ -294,7 +305,7 @@ public class ClipBoardCopier
 			{
 				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE or DELETE statements without a primary key!", null);
 				if (!WbManager.isTest()) WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNotAvailable");
-				return;
+				return null;
 			}
 		}
 
@@ -318,7 +329,7 @@ public class ClipBoardCopier
 		if (showSelectColumns && !WbManager.isTest())
 		{
       ColumnSelectionResult result = this.selectColumns(false, selectedOnly, false, client.getSelectedRowCount() > 0, false);
-			if (result == null) return;
+			if (result == null) return null;
 			columnsToInclude = result.columns;
       selectedOnly = result.selectedOnly;
 		}
@@ -340,7 +351,7 @@ public class ClipBoardCopier
 			{
 				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE statement with only key columns!", null);
 				if (!WbManager.isTest()) WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNoNonKeyCols");
-				return;
+				return null;
 			}
 		}
 
@@ -410,10 +421,7 @@ public class ClipBoardCopier
 			{
 				result.append(end);
 			}
-
-			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-			StringSelection sel = new StringSelection(result.toString());
-			clp.setContents(sel, sel);
+			return result.toString();
 		}
 		catch (Throwable e)
 		{
@@ -433,7 +441,7 @@ public class ClipBoardCopier
 		{
 			if (!WbManager.isTest()) WbSwingUtilities.showDefaultCursorOnWindow(this.client);
 		}
-
+		return null;
 	}
 
 
