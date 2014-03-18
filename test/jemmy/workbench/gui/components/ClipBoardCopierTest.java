@@ -131,19 +131,9 @@ public class ClipBoardCopierTest
 			ds.setValue(row, 1, "Marvin");
 			ds.setValue(row, 2, null);
 
-			assertTrue(ds.hasPkColumns());
-
 			ClipBoardCopier copier = new ClipBoardCopier(ds);
-			copier.doCopyAsSql(ExportType.SQL_INSERT, false, false);
-
-			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-			Transferable contents = clp.getContents(copier);
-			Object data = contents.getTransferData(DataFlavor.stringFlavor);
-
-			assertNotNull(data);
-			assertTrue(data instanceof String);
-			String sql = (String)data;
-
+			String sql = copier.createSqlString(ExportType.SQL_INSERT, false, false);
+			System.out.println(sql);
 			ScriptParser p = new ScriptParser(sql);
 			assertEquals(3, p.getSize());
 
