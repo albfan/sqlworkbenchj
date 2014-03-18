@@ -383,7 +383,11 @@ public class ClipBoardCopier
 			StringBuilder result = new StringBuilder(count * 100);
 			RowData rowdata = null;
 
-			result.append(converter.getStart());
+			StringBuilder start = converter.getStart();
+			if (start != null)
+			{
+				result.append(start);
+			}
 			for (int row = 0; row < count; row ++)
 			{
 				if (rows == null)
@@ -401,7 +405,11 @@ public class ClipBoardCopier
 					result.append('\n');
 				}
 			}
-			result.append(converter.getEnd(count));
+			StringBuilder end = converter.getEnd(count);
+			if (end != null)
+			{
+				result.append(end);
+			}
 
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			StringSelection sel = new StringSelection(result.toString());
