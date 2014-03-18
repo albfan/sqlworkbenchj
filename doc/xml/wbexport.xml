@@ -75,17 +75,16 @@
 
     <para>
       WbExport is designed to directly write the rows that are retrieved from the database
-      to the export file without buffering them in memory.
+      to the export file without buffering them in memory (except for the XLS and XLSX formats)
    </para>
 
-   <note>
     <para>
-       Some JDBC drivers (e.g. PostgreSQL, jTDS and the Microsoft Driver) read the full result obtained
+       Some JDBC drivers (e.g. PostgreSQL, jTDS and the Microsoft driver) read the full result obtained
        from the database into memory. In that case, exporting large results might still require a lot
        of memory. Please refer to the chapter <link linkend="troubleshooting">Common problems</link>
        for details on how to configure the individual drivers if this happens to you.
-     </para>
-    </note>
+    </para>
+
   </section>
 
   <section id="poi-installation">
@@ -156,12 +155,19 @@
       <ulink url="http://www.sql-workbench.net/poi-add-on2.zip"/>. After downloading the archive, unzip it
       into the directory where <literal>sqlworkbench.jar</literal> is located.
     </para>
+
+
     <important>
       <para>
-        If you have downloaded the add-on ZIP before build 112, you have to delete the file
-        <emphasis role="bold"><literal>ooxml-schemas-1.0.jar</literal></emphasis> as it has been replaced with <literal>poi-ooxml-schemas.jar</literal>.
+        To write the file formats XLS and XLSX the entire file needs to be built in memory. When exporting
+        results with a large number of rows this will require a substiantal amount of memory.
       </para>
     </important>
+
+    <para>
+      If you have downloaded the add-on ZIP before build 112, you have to delete the file
+      <emphasis role="bold"><literal>ooxml-schemas-1.0.jar</literal></emphasis> as it has been replaced with <literal>poi-ooxml-schemas.jar</literal>.
+    </para>
 
   </section>
 
