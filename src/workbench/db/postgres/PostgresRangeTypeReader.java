@@ -57,6 +57,7 @@ public class PostgresRangeTypeReader
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db.postgresql.rangetypes.retrieve", true);
 	}
+
 	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schemaPattern, String objectPattern, String[] requestedTypes)
 	{
@@ -138,6 +139,13 @@ public class PostgresRangeTypeReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
+	}
+
+
+	@Override
+	public boolean isDerivedType()
+	{
+		return true;
 	}
 
 	@Override

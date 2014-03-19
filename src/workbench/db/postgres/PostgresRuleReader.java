@@ -236,6 +236,12 @@ public class PostgresRuleReader
 	}
 
 	@Override
+	public boolean isDerivedType()
+	{
+		return false;
+	}
+
+	@Override
 	public boolean handlesType(String type)
 	{
 		return StringUtil.equalStringIgnoreCase("RULE", type);

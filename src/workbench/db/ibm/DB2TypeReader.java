@@ -82,6 +82,11 @@ public class DB2TypeReader
 		typeNameMap.put("BINARY", Types.BINARY);
 	}
 
+	@Override
+	public boolean isDerivedType()
+	{
+		return false;
+	}
 
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)

@@ -23,6 +23,7 @@
 package workbench.db;
 
 import java.util.List;
+
 import workbench.storage.DataStore;
 
 /**
@@ -33,7 +34,7 @@ public interface ObjectListExtender
 {
 	/**
 	 * Adds the objects managed by this extender to the existing result.
-	 * 
+	 *
 	 * The DataStore's structure is the one created by DbMetadata.getObjects()
 	 *
 	 * @param con the database connection to be used
@@ -49,6 +50,16 @@ public interface ObjectListExtender
 	 * Return a list of object types that this extender handles
 	 */
 	List<String> supportedTypes();
+
+	/**
+	 * Returns if the type is a type derived from some other type.
+	 *
+	 * This is currently only used in the DbExplorer to hide some types from the "Type dropdown"
+	 *
+	 * @return true if this type is derived from an existing one.
+	 * @see DbMetadata#getObjectTypes() 
+	 */
+	boolean isDerivedType();
 
 	/**
 	 * Checks if the extender handles the given type

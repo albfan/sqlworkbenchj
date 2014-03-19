@@ -251,4 +251,9 @@ public class NuoDBDomainReader
 		return getDomainSource(getObjectDefinition(con, object));
 	}
 
+	@Override
+	public boolean isDerivedType()
+	{
+		return false;
+	}
 }

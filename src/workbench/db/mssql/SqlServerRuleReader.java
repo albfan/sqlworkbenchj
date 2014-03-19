@@ -28,13 +28,17 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -114,6 +118,13 @@ public class SqlServerRuleReader
 			result.getRow(row).setUserObject(rule);
 		}
 		return true;
+	}
+
+
+	@Override
+	public boolean isDerivedType()
+	{
+		return false;
 	}
 
 	@Override

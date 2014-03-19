@@ -66,7 +66,6 @@ import workbench.db.oracle.OracleDataTypeResolver;
 import workbench.db.oracle.OracleObjectListEnhancer;
 import workbench.db.oracle.OracleTableDefinitionReader;
 import workbench.db.oracle.OracleTypeReader;
-import workbench.db.postgres.PgRangeType;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -2507,18 +2506,6 @@ public class DbMetadata
 			SqlUtil.closeResult(rs);
 		}
 
-		if (this.isPostgres())
-		{
-			if (JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.3"))
-			{
-				types.add("MATERIALIZED VIEW");
-			}
-			if (JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.2") && PostgresRangeTypeReader.retrieveRangeTypes())
-			{
-				types.add(PgRangeType.RANGE_TYPE_NAME);
-			}
-		}
-
 		tableTypesFromDriver = Collections.unmodifiableSet(types);
 
 		return tableTypesFromDriver;
@@ -2550,7 +2537,10 @@ public class DbMetadata
 
 		for (ObjectListExtender extender : extenders)
 		{
-			result.addAll(extender.supportedTypes());
+			if (!extender.isDerivedType())
+			{
+				result.addAll(extender.supportedTypes());
+			}
 		}
 		return result;
 	}

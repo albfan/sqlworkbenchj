@@ -82,6 +82,12 @@ public class FirebirdDomainReader
 		"WHERE rdb$field_name NOT LIKE 'RDB$%' \n" +
 		"  AND rdb$field_name NOT LIKE 'SEC$%' "; // for Firebird 3.0
 
+	@Override
+	public boolean isDerivedType()
+	{
+		return false;
+	}
+	
 	private String getSql(WbConnection connection, String name)
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 40);

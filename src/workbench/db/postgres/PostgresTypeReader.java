@@ -203,6 +203,13 @@ public class PostgresTypeReader
 		return result;
 	}
 
+
+	@Override
+	public boolean isDerivedType()
+	{
+		return false;
+	}
+
 	@Override
 	public List<String> supportedTypes()
 	{

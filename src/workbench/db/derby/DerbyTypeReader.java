@@ -26,13 +26,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -43,6 +47,11 @@ import workbench.util.SqlUtil;
 public class DerbyTypeReader
 	implements ObjectListExtender
 {
+	@Override
+	public boolean isDerivedType()
+	{
+		return false;
+	}
 
 	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schemaPattern, String objectPattern, String[] requestedTypes)
@@ -59,7 +68,7 @@ public class DerbyTypeReader
 		{
 			LogMgr.logDebug("DerbyTypeReader.extendObjectList()", "Using sql=\n" + select);
 		}
-		
+
 		try
 		{
 			stmt = con.createStatementForQuery();
@@ -93,7 +102,7 @@ public class DerbyTypeReader
 
 	private String getSelect(String schemaPattern, String objectPattern)
 	{
-		String select = 
+		String select =
 			       "select s.schemaname, \n" +
 			       "       a.alias as type_name,  \n" +
              "       a.javaclassname, \n" +
@@ -115,7 +124,7 @@ public class DerbyTypeReader
 
 		return select;
 	}
-	
+
 	@Override
 	public List<String> supportedTypes()
 	{

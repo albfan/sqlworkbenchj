@@ -29,10 +29,21 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import workbench.db.*;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
+import workbench.db.DbObject;
+import workbench.db.DomainIdentifier;
+import workbench.db.ObjectListExtender;
+import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
+import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -110,6 +121,13 @@ public class SqlServerTypeReader
 		{
 			if (handlesType(typ)) return true;
 		}
+		return false;
+	}
+
+
+	@Override
+	public boolean isDerivedType()
+	{
 		return false;
 	}
 

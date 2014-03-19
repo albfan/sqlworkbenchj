@@ -209,6 +209,12 @@ public class OracleTypeReader
 	}
 
 	@Override
+	public boolean isDerivedType()
+	{
+		return false;
+	}
+	
+	@Override
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
 		if (object == null) return null;
@@ -380,7 +386,7 @@ public class OracleTypeReader
 		if (!handlesType(object.getObjectType())) return null;
 		OracleObjectType type = getObjectDefinition(con, object);
 		if (type == null) return null;
-		
+
 		String source = type.getSource();
 
 		if (StringUtil.isBlank(source))

@@ -32,14 +32,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.EnumIdentifier;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -249,6 +253,12 @@ public class PostgresEnumReader
 		return false;
 	}
 
+	@Override
+	public boolean isDerivedType()
+	{
+		return false;
+	}
+	
 	@Override
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{

@@ -136,6 +136,9 @@ public class JdbcIndexReader
 		// Views don't have primary keys...
 		if (metaData.getDbSettings().isViewType(tbl.getType())) return null;
 
+		// extended objects don't have primary keys either...
+		if (metaData.isExtendedObject(tbl)) return null;
+
 		// Retrieve the name of the PK index
 		String pkName = null;
 		String pkIndexName = null;
