@@ -60,6 +60,7 @@ import workbench.util.StringUtil;
 public class PostgresTypeReader
 	implements ObjectListExtender, ObjectListEnhancer
 {
+	private final PostgresRangeTypeReader rangeReader = new PostgresRangeTypeReader();
 
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)
@@ -94,24 +95,34 @@ public class PostgresTypeReader
 	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schemaPattern, String objectPattern, String[] requestedTypes)
 	{
-		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
+		boolean retrieveTypes = DbMetadata.typeIncluded("TYPE", requestedTypes);
+		boolean retrieveRangeTypes = JdbcUtils.hasMinimumServerVersion(con, "9.2") && PostgresRangeTypeReader.retrieveRangeTypes();
 
 		if (JdbcUtils.hasMiniumDriverVersion(con, "9.0"))
 		{
 			// nothing to do, the 9.0 driver will correctly return the TYPE entries
-			return false;
+			retrieveTypes = false;
 		}
 
 		if (requestedTypes == null)
 		{
 			// if all objects were selected, even the old driver will already return the types
-			return true;
+			retrieveTypes = false;
 		}
 
-		// this is only needed for pre 9.0 drivers as they did not return
-		// any object types, if that was specifically requested
-		List<BaseObjectType> types = getTypes(con, schemaPattern, objectPattern);
-		if (types.isEmpty()) return false;
+		List<BaseObjectType> types = new ArrayList<BaseObjectType>();
+		if (retrieveTypes)
+		{
+			// this is only needed for pre 9.0 drivers as they did not return
+			// any object types, if that was specifically requested
+			types.addAll(getTypes(con, schemaPattern, objectPattern));
+		}
+
+		if (retrieveRangeTypes)
+		{
+			List<PgRangeType> rangeTypes = rangeReader.getRangeTypes(con, schemaPattern, objectPattern);
+			types.addAll(rangeTypes);
+		}
 
 		for (BaseObjectType type : types)
 		{

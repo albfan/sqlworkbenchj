@@ -342,7 +342,7 @@ public class DbSettings
 	public String getCascadeConstraintsVerb(String aType)
 	{
 		if (aType == null) return null;
-		String verb = Settings.getInstance().getProperty("workbench.db.drop." + aType.toLowerCase() + ".cascade." + getDbId(), null);
+		String verb = Settings.getInstance().getProperty("workbench.db.drop." + getKeyValue(aType) + ".cascade." + getDbId(), null);
 		return verb;
 	}
 

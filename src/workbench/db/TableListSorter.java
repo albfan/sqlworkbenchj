@@ -22,6 +22,8 @@
  */
 package workbench.db;
 
+import workbench.db.postgres.PgRangeType;
+
 import workbench.storage.RowData;
 import workbench.storage.RowDataListSorter;
 import workbench.storage.SortDefinition;
@@ -61,7 +63,7 @@ public class TableListSorter
 	@Override
 	protected int compareColumn(int column, RowData row1, RowData row2)
 	{
-		if (mviewAsTable && column == DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE)
+		if (column == DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE)
 		{
 			String value1 = getType(row1);
 			String value2 = getType(row2);
@@ -74,7 +76,14 @@ public class TableListSorter
 	{
 		String value = (String)row.getValue(DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 		if (value == null) return StringUtil.EMPTY_STRING;
-		if (DbMetadata.MVIEW_NAME.equals(value)) return TABLE_TYPE;
+		if (mviewAsTable)
+		{
+			if (DbMetadata.MVIEW_NAME.equals(value)) return TABLE_TYPE;
+		}
+
+		// Always sort "RANGE TYPE" as "TYPE"
+		if (PgRangeType.RANGE_TYPE_NAME.equals(value)) return "TYPE";
+
 		return value;
 	}
 

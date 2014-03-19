@@ -126,7 +126,7 @@ public class CountTableRowsAction
 		for (DbObject dbo : selected)
 		{
 			String type = dbo.getObjectType();
-			if (typesWithData.contains(type))
+			if (typesWithData.contains(type) && dbo instanceof TableIdentifier)
 			{
 				objects.add((TableIdentifier)dbo);
 			}

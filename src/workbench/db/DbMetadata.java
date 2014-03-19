@@ -66,9 +66,11 @@ import workbench.db.oracle.OracleDataTypeResolver;
 import workbench.db.oracle.OracleObjectListEnhancer;
 import workbench.db.oracle.OracleTableDefinitionReader;
 import workbench.db.oracle.OracleTypeReader;
+import workbench.db.postgres.PgRangeType;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
+import workbench.db.postgres.PostgresRangeTypeReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
 import workbench.db.sqlite.SQLiteDataTypeResolver;
@@ -206,8 +208,12 @@ public class DbMetadata
 			}
 			extenders.add(new PostgresRuleReader());
 			PostgresTypeReader typeReader = new PostgresTypeReader();
-			extenders.add(typeReader);
 			objectListEnhancer = typeReader;
+			extenders.add(typeReader);
+			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "9.2") && PostgresRangeTypeReader.retrieveRangeTypes())
+			{
+				extenders.add(new PostgresRangeTypeReader());
+			}
 		}
 		else if (productLower.contains("oracle") && !productLower.contains("lite ordbms"))
 		{
@@ -633,6 +639,9 @@ public class DbMetadata
 			objectsWithData.add("system view");
 			objectsWithData.add("system table");
 		}
+
+		List<String> notSelectable = Settings.getInstance().getListProperty("workbench.db.objecttype.not.selectable." + getDbId(), false);
+		objectsWithData.removeAll(notSelectable);
 
 		return objectsWithData;
 	}
@@ -1347,6 +1356,7 @@ public class DbMetadata
 				return sorter;
 			}
 		};
+
 		return result;
 	}
 
@@ -2497,10 +2507,18 @@ public class DbMetadata
 			SqlUtil.closeResult(rs);
 		}
 
-		if (this.isPostgres() && JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.3"))
+		if (this.isPostgres())
 		{
-			types.add("MATERIALIZED VIEW");
+			if (JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.3"))
+			{
+				types.add("MATERIALIZED VIEW");
+			}
+			if (JdbcUtils.hasMinimumServerVersion(this.dbConnection, "9.2") && PostgresRangeTypeReader.retrieveRangeTypes())
+			{
+				types.add(PgRangeType.RANGE_TYPE_NAME);
+			}
 		}
+
 		tableTypesFromDriver = Collections.unmodifiableSet(types);
 
 		return tableTypesFromDriver;
