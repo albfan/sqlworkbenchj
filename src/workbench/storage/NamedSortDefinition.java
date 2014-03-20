@@ -53,14 +53,32 @@ public class NamedSortDefinition
 		{
 			sortColumns = new String[sort.getColumnCount()];
 			sortAscending = new boolean[sort.getColumnCount()];
+			
+			int totalColumns = data.getColumnCount();
 			for (int i=0; i < sort.getColumnCount(); i++)
 			{
 				int dataColumn = sort.getSortColumnByIndex(i);
-				sortColumns[i] = data.getColumnName(dataColumn);
-				sortAscending[i] = sort.isSortAscending(dataColumn);
+				if (dataColumn > -1 && dataColumn < totalColumns)
+				{
+					sortColumns[i] = data.getColumnName(dataColumn);
+					sortAscending[i] = sort.isSortAscending(dataColumn);
+				}
+				else
+				{
+					// invalid definition
+					sortColumns = null;
+					sortAscending = null;
+					break;
+				}
 			}
+			ignoreCase = sort.getIgnoreCase();
 		}
-		ignoreCase = sort.getIgnoreCase();
+	}
+
+	public int getColumnCount()
+	{
+		if (sortColumns == null) return 0;
+		return sortColumns.length;
 	}
 
 	public boolean getIgnoreCase()
@@ -85,13 +103,13 @@ public class NamedSortDefinition
 	 */
 	public SortDefinition getSortDefinition(DataStore data)
 	{
-		if (sortColumns == null) return SortDefinition.EMPTY_SORT;
+		if (sortColumns == null) return new SortDefinition();
 
 		int[] columns = new int[sortColumns.length];
 		for (int i=0; i < sortColumns.length; i++)
 		{
 			int index = data.getColumnIndex(sortColumns[i]);
-			if (index < 0) return SortDefinition.EMPTY_SORT;
+			if (index < 0) return new SortDefinition();
 			columns[i] = index;
 		}
 

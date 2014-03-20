@@ -67,7 +67,7 @@ public class DataStoreTableModel
 
 	private List<Integer> noneditableColumns = new ArrayList<Integer>();
 
-	private SortDefinition sortDefinition = SortDefinition.EMPTY_SORT;
+	private SortDefinition sortDefinition = new SortDefinition();
 
 	private boolean allowEditing = true;
 
@@ -627,8 +627,14 @@ public class DataStoreTableModel
 	{
 		if (this.sortDefinition == null) return null;
 		if (this.sortDefinition.isEmpty()) return null;
+		if (!this.sortDefinition.isValid()) return null;
 
-		return new NamedSortDefinition(this.dataCache, this.sortDefinition);
+		NamedSortDefinition newSort = new NamedSortDefinition(this.dataCache, this.sortDefinition);
+		if (newSort.getColumnCount() > 0)
+		{
+			return newSort;
+		}
+		return null;
 	}
 
 	/**

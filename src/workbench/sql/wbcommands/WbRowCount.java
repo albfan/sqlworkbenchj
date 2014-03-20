@@ -188,7 +188,7 @@ public class WbRowCount
 
 	public static SortDefinition getRowCountSort(String namedSort, DataStore rowCounts, WbConnection connection)
 	{
-		if (namedSort == null) return SortDefinition.EMPTY_SORT;
+		if (namedSort == null) return new SortDefinition();
 
 		DbMetadata meta = connection.getMetadata();
 		// the column name for rowcount used in the DataStore is localized (see buildResultDataStore(), so we need to

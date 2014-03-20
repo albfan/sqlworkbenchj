@@ -36,8 +36,6 @@ import workbench.util.StringUtil;
  */
 public class SortDefinition
 {
-	public static final SortDefinition EMPTY_SORT = new SortDefinition();
-
 	private boolean[] sortAscending;
 	private int[] sortColumns;
 	private boolean ignoreCase;
@@ -125,7 +123,7 @@ public class SortDefinition
 		}
 		return true;
 	}
-	
+
 	public boolean isEmpty()
 	{
 		return getColumnCount() == 0;
