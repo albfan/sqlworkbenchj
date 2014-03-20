@@ -114,7 +114,7 @@ COMMIT;</programlisting>
 
 			<para>
 				You can configure &wb-productname; to automatically jump to the next statement,
-				after executing the current statement. Simply select <menuchoice><guimenu>SQL</guimenu><guimenuitem>Auto advance to next</guimenuitem></menuchoice>
+				after executing the current statement. Simply select <menuchoice><guimenu>SQL</guimenu><guimenuitem>Settings</guimenuitem><guimenuitem>Auto advance to next</guimenuitem></menuchoice>
 				The check mark next to the menu item indicates if this option is enabled.
 				This option can also be changed through the <link linkend="options-autojump-statement">Options dialog</link>
 			</para>

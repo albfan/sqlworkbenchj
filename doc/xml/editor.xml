@@ -96,7 +96,7 @@
   </section>
 
 	<section id="command-completion">
-		<title>Command completion</title>
+		<title>Code completion</title>
 		<para>
 			The editor can show a popup window with a list of available tables (and views) or
 			a list of available columns for a table. Which list is displayed depends on the position
@@ -264,7 +264,7 @@ AND   NOT EXISTS (SELECT 1
 			as a condition for a SQL <literal>IN</literal> expression. Suppose you a have a list of ID's in your
 			spreadsheet each in one row of the same column. If you copy and paste this into the editor, each ID
 			will be put on a separate line.
-			If you select the text, and then choose <menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice>
+			If you select the text, and then choose <menuchoice><guimenu>SQL</guimenu><guimenuitem>Code tools</guimenuitem><guimenuitem>Create SQL List</guimenuitem></menuchoice>
 			the selected text will be converted into a format that can be used as an expression for an <literal>IN</literal> condition:
 		</para>
 		<programlisting>Dent
@@ -281,7 +281,7 @@ Marvin
  'Prefect',
  'Marvin')</programlisting>
 		<para>
-			The function <menuchoice><guimenu>SQL</guimenu><guimenuitem>Create non-char SQL List</guimenuitem></menuchoice>
+			The function <menuchoice><guimenu>SQL</guimenu><guimenuitem>Code tools</guimenuitem><guimenuitem>Create non-char SQL List</guimenuitem></menuchoice>
 			is basically the same. The only difference is, that it assumes that each item in the list is a numeric value, and no
 			single quotes are placed around the values.
 		</para>
@@ -309,7 +309,7 @@ Marvin
 			<title>Copy Code Snippet</title>
 			<para>
 				Suppose you have created the SQL statement that you wish to use inside
-				your application to access your DBMS. The menu item <menuchoice><guimenu>SQL</guimenu><guimenuitem>Copy Code Snippet</guimenuitem></menuchoice>
+				your application to access your DBMS. The menu item <menuchoice><guimenu>SQL</guimenu><guimenuitem>Code tools</guimenuitem><guimenuitem>Copy Code Snippet</guimenuitem></menuchoice>
 				will create a piece of code that defines a String variable which contains the current SQL statement (or
 				the currently selected statement if any text is selected).
 			</para>
@@ -351,7 +351,7 @@ String sql="SELECT p.name, \n" +
 				When using the <xref linkend="editor-copy-java-code-snippet"/> feature during
 				development, the SQL statement usually needs refinement after testing the Java class.
 				You can Copy &amp; Paste the generated Java code into &wb-productname;, then when you select
-				the pasted text, and call <menuchoice><guimenu>SQL</guimenu><guimenuitem>Clean Java Code</guimenuitem></menuchoice>
+				the pasted text, and call <menuchoice><guimenu>SQL</guimenu><guimenuitem>Code tools</guimenuitem><guimenuitem>Clean Java Code</guimenuitem></menuchoice>
 				the selected text will be "cleaned" from the Java stuff around it. The algorithm behind that is as
 				follows: remove everything up to the first &quot; at the beginning of the line. Delete everything
 				up to the first &quot; searching backwards from the end of the line. Any trailing white-space including
@@ -406,7 +406,7 @@ WHERE p.person_id = a.person_id;</programlisting>
 				You can copy and <link linkend="editor-clean-java-code">clean</link> the SQL statement
 				but you will not be able to execute it, because there is no value available for the parameter
 				denoted by the question mark. To run this kind of statements, you need to enable the prepared statement
-				detection using <menuchoice><guimenu>SQL</guimenu><guimenuitem>Detect prepared statements</guimenuitem></menuchoice>
+				detection using <menuchoice><guimenu>SQL</guimenu><guimenuitem>Settings</guimenuitem><guimenuitem>Detect prepared statements</guimenuitem></menuchoice>
 			</para>
 			<para>
 				Once the prepared statement detection is enabled, &wb-productname; will examine
