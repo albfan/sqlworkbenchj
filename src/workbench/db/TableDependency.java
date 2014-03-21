@@ -317,6 +317,19 @@ public class TableDependency
 				int deferrableCode = ds.getValueAsInt(i, FKHandler.COLUMN_IDX_DEFERRABILITY, DatabaseMetaData.importedKeyNotDeferrable);
 				String deferrable = dbSettings.getRuleDisplay(deferrableCode);
 
+				if (fkname == null)
+				{
+					if (exportedKeys)
+					{
+						fkname = "WbGenerated_fk_" + parent.getTable().getTableName() + "_referenced_by_" + table;
+					}
+					else
+					{
+						fkname = "WbGenerated_fk_" + parent.getTable().getTableName() + "_references_" + table;
+					}
+					LogMgr.logError("TableDependency.readTree()", "JDBC Driver returned a NULL value for the FK name for table " + parent.getTable().getTableExpression() + "  Using: " + fkname + " instead", null);
+				}
+
 				TableIdentifier tbl = new TableIdentifier(catalog, schema, table);
 
 				tbl.setNeverAdjustCase(true);
