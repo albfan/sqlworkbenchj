@@ -28,10 +28,6 @@ import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
-import static workbench.util.SqlUtil.getKnownTypes;
-import static workbench.util.SqlUtil.getTypesWithoutNames;
-import static workbench.util.SqlUtil.removeObjectQuotes;
-
 /**
  *
  * @author Thomas Kellerer
@@ -59,7 +55,7 @@ public class DdlObjectInfo
 
 	public boolean isValid()
 	{
-		return objectType != null && objectName != null;
+		return objectType != null;
 	}
 
 	public String getObjectType()
@@ -90,7 +86,7 @@ public class DdlObjectInfo
 			while (token != null)
 			{
 				String c = token.getContents();
-				if (getKnownTypes().contains(c))
+				if (SqlUtil.getKnownTypes().contains(c))
 				{
 					typeFound = true;
 					this.objectType = c.toUpperCase();
@@ -102,7 +98,7 @@ public class DdlObjectInfo
 			if (!typeFound) return;
 
 			// if a type was found we assume the next keyword is the name
-			if (!getTypesWithoutNames().contains(this.objectType))
+			if (!SqlUtil.getTypesWithoutNames().contains(this.objectType))
 			{
 				SQLToken name = lexer.getNextToken(false, false);
 				if (name == null) return;
@@ -137,7 +133,7 @@ public class DdlObjectInfo
 
 				if (this.objectName != null)
 				{
-					this.objectName = removeObjectQuotes(this.objectName);
+					this.objectName = SqlUtil.removeObjectQuotes(this.objectName);
 				}
 			}
 		}

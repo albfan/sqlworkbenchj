@@ -2115,7 +2115,12 @@ public class DataStore
 		throws IndexOutOfBoundsException
 	{
 		RowData row = this.getRow(aRow);
-		if (row.isNew())
+
+		if (row == null)
+		{
+			return RowData.NOT_MODIFIED;
+		}
+		else if (row.isNew())
 		{
 			return RowData.NEW;
 		}

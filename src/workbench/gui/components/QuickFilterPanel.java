@@ -421,7 +421,7 @@ public class QuickFilterPanel
 	{
 		try
 		{
-			this.filterValue.removeActionListener(this);
+			filterValue.removeActionListener(this);
 			if (StringUtil.isEmptyString(filterExpression) || filterExpression.trim().equals("*") || filterExpression.trim().equals("%"))
 			{
 				this.searchTable.resetFilter();
@@ -628,6 +628,8 @@ public class QuickFilterPanel
 				{
 					filterByEditorValue(false);
 				}
+				// make sure the input field keeps the focus
+				filterValue.requestFocusInWindow();
 			}
 		});
 	}

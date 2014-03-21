@@ -1423,6 +1423,7 @@ public class WbTable
 	public void applyFilter(FilterExpression filter, boolean adjustColumns)
 	{
 		if (dwModel == null) return;
+		cancelEditing();
 		lastFilter = filter;
 		currentFilter = filter;
 		dwModel.applyFilter(filter);

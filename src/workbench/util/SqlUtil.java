@@ -94,13 +94,13 @@ public class SqlUtil
 			"SYNONYM", "SEQUENCE", "ALIAS", "TRIGGER", "DOMAIN", "ROLE", "CAST", "AGGREGATE",
 			"TABLESPACE", "TYPE", "USER", "MATERIALIZED VIEW LOG", "MATERIALIZED VIEW", "SNAPSHOT",
 			"FLASHBACK ARCHIVE", "TYPE BODY", "CAST", "FOREIGN DATA WRAPPER", "OPERATOR", "SCHEMA", "EXTENSION",
-			"DATABASE", "DATABASE LINK"));
+			"DATABASE", "DATABASE LINK", "PFILE", "SPFILE"));
 	}
 
 	private static class TypesWithoutNamesHolder
 	{
 		protected final static Set<String> TYPES =
-			Collections.unmodifiableSet(CollectionUtil.treeSet("MATERIALIZED VIEW LOG", "SNAPSHOT LOG"));
+			Collections.unmodifiableSet(CollectionUtil.treeSet("MATERIALIZED VIEW LOG", "SNAPSHOT LOG", "PFILE", "SPFILE"));
 	}
 
 	public static Set<String> getTypesWithoutNames()
