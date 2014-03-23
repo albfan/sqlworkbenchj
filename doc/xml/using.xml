@@ -612,6 +612,23 @@ WHERE id=42;</programlisting>
 
 	</section>
 
+	<section id="display-object-info">
+		<title>Displaying the structure of tables</title>
+    <para>
+      The command <link linkend="command-desc"><literal>describe</literal></link> can be used to display the structure of a view or table.
+      You can also display information about the database object at the cursor by using
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>Object info</guimenuitem></menuchoice>. This function is also available
+      in the context menu of the editor.
+    </para>
+    <para>
+      When the menu item is invoked using the mouse, holding down the <keycap>CTRL</keycap> key
+      will return dependent object information as well (e.g. indexes, foreign keys).
+    </para>
+    <para>
+      You can configure this function to always include dependent objects by
+      <link linkend="manual-setting-objectinfo-dependent">adding a configuration property</link>.
+    </para>
+  </section>
 	<section id="server-messages">
 		<title>Viewing server messages</title>
 

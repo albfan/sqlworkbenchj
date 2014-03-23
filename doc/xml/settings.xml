@@ -377,6 +377,59 @@
   <section id="settings-db">
     <title>Database related settings</title>
 
+    <simplesect id="manual-setting-objectinfo-dependent">
+      <title>Include dependency information for "Object info"</title>
+      <informaltable frame="none">
+        <tgroup cols="2" align="left" colsep="0" rowsep="0" cellpadding="0" cellspacing="0">
+        <colspec colname="c1" colwidth="2cm"/>
+        <colspec colname="c2"/>
+        <tbody>
+          <row>
+            <entry morerows="1" valign="top">Property:</entry>
+            <entry><literal>workbench.db.objectinfo.includedeps</literal></entry>
+          </row>
+          <row>
+            <entry><literal>workbench.db.<link linkend="dbid">[dbid]</link>.objectinfo.includedeps</literal></entry>
+          </row>
+        </tbody>
+        </tgroup>
+      </informaltable>
+      <para>
+        If <link linkend="display-object-info">Object info</link> is invoked, this setting controls if
+        dependent objects (indexes, triggers) are also displayed for tables. This setting serves as a default
+        for all DBMS. Displaying dependent objects can also be controlled on per DBMS by adding the
+        <link linkend="dbid">DBID</link> to the property key. The value without the DBID serves as a default setting
+        for all DBMS.
+      </para>
+      <para>Default: <literal>false</literal></para>
+    </simplesect>
+
+    <simplesect id="manual-setting-objectinfo-fk">
+      <title>Include foreign key constraint information for "Object info"</title>
+      <informaltable frame="none">
+        <tgroup cols="2" align="left" colsep="0" rowsep="0" cellpadding="0" cellspacing="0">
+        <colspec colname="c1" colwidth="2cm"/>
+        <colspec colname="c2"/>
+        <tbody>
+          <row>
+            <entry morerows="1" valign="top">Property:</entry>
+            <entry><literal>workbench.db.objectinfo.includefk</literal></entry>
+          </row>
+          <row>
+            <entry><literal>workbench.db.<link linkend="dbid">[dbid]</link>.objectinfo.includefk</literal></entry>
+          </row>
+        </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>
+        If <link linkend="display-object-info">Object info</link> is invoked, this setting controls if
+        foreign key constraints are also displayed when dependent objects are displayed for tables. This setting serves as a default
+        for all DBMS. When adding the <link linkend="dbid">DBID</link> to the property key this is controlled on a per DBMS level.
+      </para>
+      <para>Default: <literal>false</literal></para>
+    </simplesect>
+
     <simplesect id="manual-setting-datapumper-autoconnect">
       <title>Automatically connect the DataPumper</title>
       <para>Property: <literal>workbench.datapumper.autoconnect</literal></para>
