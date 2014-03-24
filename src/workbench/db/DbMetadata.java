@@ -244,8 +244,10 @@ public class DbMetadata
 			LogMgr.logInfo("DbMetadata.<init>", "Using DBID=" + this.dbId);
 			extenders.add(new FirebirdDomainReader());
 		}
-		else if (productLower.contains("sql server"))
+		else if (productLower.contains("microsoft") && productLower.contains("sql server"))
 		{
+			// checking for "microsoft" is important, because apparently the jTDS driver
+			// confusingly identifies a Sybase server as "SQL Server"
 			isSqlServer = true;
 
 			if (SqlServerTypeReader.versionSupportsTypes(dbConnection))
