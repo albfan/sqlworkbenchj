@@ -131,7 +131,7 @@ public class SqlServerColumnEnhancer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlServerColumnEnhancer.updateColumnRemarks()", "Error retrieving remarks", e);
+			LogMgr.logError("SqlServerColumnEnhancer.updateColumnRemarks()", "Error retrieving remarks using:\n" + SqlUtil.replaceParameters(sql, schema, tablename), e);
 		}
 		finally
 		{
@@ -164,9 +164,9 @@ public class SqlServerColumnEnhancer
 			// so this else part means the server is a SQL Server 2000
 			sql =
 				"select c.name, t.[text], 0 as is_persisted \n" +
-				"from sysobjects o with (nolock) \n" +
-				"  join syscolumns c with (nolock) on o.id = c.id \n" +
-				"  join syscomments t with (nolock) on  t.number = c.colid and t.id = c.id \n" +
+				"from sys.sysobjects o with (nolock) \n" +
+				"  join sys.syscolumns c with (nolock) on o.id = c.id \n" +
+				"  join sys.syscomments t with (nolock) on  t.number = c.colid and t.id = c.id \n" +
 				"where o.xtype = 'U' \n" +
 				" and c.iscomputed = 1 \n"+
 				" and o.name = ?";
@@ -209,7 +209,7 @@ public class SqlServerColumnEnhancer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlServerColumnEnhancer.updateComputedColumns()", "Error retrieving computed columns", e);
+			LogMgr.logError("SqlServerColumnEnhancer.updateComputedColumns()", "Error retrieving computed columns using:\n" + SqlUtil.replaceParameters(sql, tablename), e);
 		}
 		finally
 		{
@@ -241,17 +241,17 @@ public class SqlServerColumnEnhancer
 		Statement info = null;
 		ResultSet rs = null;
 
+		String defSql = "select cast(databasepropertyex('" + table.getTable().getRawCatalog() + "', 'Collation') as varchar(128))";
 		try
 		{
-			String getDefaultSql = "select cast(databasepropertyex('"+ table.getTable().getRawCatalog() + "', 'Collation') as varchar(max))";
 
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logInfo("SqlServerColumnEnhancer.readCollations()", "Retrieving default collation using: " + getDefaultSql);
+				LogMgr.logInfo("SqlServerColumnEnhancer.readCollations()", "Retrieving default collation using: " + defSql);
 			}
 
 			info = conn.createStatement();
-			rs = info.executeQuery(getDefaultSql);
+			rs = info.executeQuery(defSql);
 			if (rs.next())
 			{
 				defaultCollation = rs.getString(1);
@@ -259,7 +259,7 @@ public class SqlServerColumnEnhancer
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("SqlServerColumnEnhancer.readCollations()", "Could not read default collation", e);
+			LogMgr.logError("SqlServerColumnEnhancer.readCollations()", "Could not read default collation using: " + defSql, e);
 		}
 		finally
 		{
@@ -310,7 +310,7 @@ public class SqlServerColumnEnhancer
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("SqlServerColumnEnhancer.readCollations()", "Could not read column collations", ex);
+			LogMgr.logError("SqlServerColumnEnhancer.readCollations()", "Could not read column collations using:\n" + SqlUtil.replaceParameters(sql, tableName, schema, catalog), ex);
 		}
 		finally
 		{

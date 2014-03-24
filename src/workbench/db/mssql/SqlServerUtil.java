@@ -78,15 +78,16 @@ public class SqlServerUtil
 	public static void setLockTimeout(WbConnection conn, int millis)
 	{
 		Statement stmt = null;
+		String sql = "SET LOCK_TIMEOUT " + Integer.toString(millis <= 0 ? -1 : millis );
 		try
 		{
 			stmt = conn.createStatement();
 			LogMgr.logInfo("SqlServerUtil.setLockTimeout()", "Setting lock timeout: " + millis + "ms");
-			stmt.execute("SET LOCK_TIMEOUT " + Integer.toString(millis <= 0 ? -1 : millis ));
+			stmt.execute(sql);
 		}
-		catch (SQLException sql)
+		catch (SQLException ex)
 		{
-			LogMgr.logError("SqlServerUtil.setLockTimeout()", "Could not set lock timeout", sql);
+			LogMgr.logError("SqlServerUtil.setLockTimeout()", "Could not set lock timeout using: " + sql, ex);
 		}
 		finally
 		{

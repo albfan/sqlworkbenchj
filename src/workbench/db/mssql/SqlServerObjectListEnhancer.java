@@ -124,10 +124,12 @@ public class SqlServerObjectListEnhancer
 		}
 
 		Map<String, String> remarks = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+		String type = null;
 		try
 		{
-			for (String type : requestedTypes)
+			for (int i=0; i < requestedTypes.length; i++)
 			{
+				type = requestedTypes[i];
 				if (Settings.getInstance().getDebugMetadataSql())
 				{
 					LogMgr.logInfo("SqlServerObjectListEnhancer.updateObjectRemarks()", "Retrieving table remarks using:\n" + SqlUtil.replaceParameters(sql, schema, type));
@@ -157,7 +159,7 @@ public class SqlServerObjectListEnhancer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlServerObjectListEnhancer.updateObjectRemarks()", "Error retrieving remarks", e);
+			LogMgr.logError("SqlServerObjectListEnhancer.updateObjectRemarks()", "Error retrieving remarks using:\n " + SqlUtil.replaceParameters(sql, schema, type), e);
 		}
 		finally
 		{
