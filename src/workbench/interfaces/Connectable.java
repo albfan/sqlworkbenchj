@@ -32,7 +32,7 @@ import workbench.db.WbConnection;
 public interface Connectable
 {
 	void connectCancelled();
-	boolean connectBegin(ConnectionProfile profile, StatusBar info);
+	boolean connectBegin(ConnectionProfile profile, StatusBar info, boolean loadWorkspace);
 	String getConnectionId(ConnectionProfile profile);
 	void connectFailed(String error);
 	void connected(WbConnection conn);

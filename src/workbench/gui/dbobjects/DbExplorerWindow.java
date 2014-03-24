@@ -252,7 +252,7 @@ public class DbExplorerWindow
 	}
 
 	@Override
-	public boolean connectBegin(ConnectionProfile profile, StatusBar info)
+	public boolean connectBegin(ConnectionProfile profile, StatusBar info, final boolean loadWorkspace)
 	{
 		return true;
 	}

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<?xml-stylesheet type="text/xsl" href="history2html.xslt"?>
-
-<history>
+<?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-03-09">
+  <release build="-1" date="2014-03-24">
     <entry dev-build="14" type="enh">The DbExplorer now supports range types for Postgres</entry>
     <entry dev-build="14" type="enh">A new command WbRowCount is available which counts the rows of several tables (it's the commandline version of the corresponding feature in the DbExplorer)</entry>
     <entry dev-build="14" type="enh">For Postgres messages received through LISTEN/NOTIFY are now shown in the message panel after running a statement</entry>

@@ -88,6 +88,7 @@ import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.FileCloseAction;
 import workbench.gui.actions.FileConnectAction;
 import workbench.gui.actions.FileDisconnectAction;
+import workbench.gui.actions.FileReconnectAction;
 import workbench.gui.actions.FileExitAction;
 import workbench.gui.actions.FileNewWindowAction;
 import workbench.gui.actions.FileSaveProfiles;
@@ -188,6 +189,7 @@ public class MainWindow
 
 	private ShowDbmsManualAction showDbmsManual;
 	private FileDisconnectAction disconnectAction;
+	private FileReconnectAction reconnectAction;
 	private CreateNewConnection createNewConnection;
 	private DisconnectTabAction disconnectTab;
 	private ShowDbExplorerAction dbExplorerAction;
@@ -440,6 +442,7 @@ public class MainWindow
 	private void initMenu()
 	{
 		this.disconnectAction = new FileDisconnectAction(this);
+		this.reconnectAction = new FileReconnectAction(this);
 		this.assignWorkspaceAction = new AssignWorkspaceAction(this);
 		this.reloadWorkspace = new ReloadProfileWkspAction(this);
 		this.closeWorkspaceAction = new CloseWorkspaceAction(this);
@@ -505,6 +508,7 @@ public class MainWindow
 		action = new FileConnectAction(this);
 		action.addToMenu(menu);
 		this.disconnectAction.addToMenu(menu);
+		this.reconnectAction.addToMenu(menu);
 		FileCloseAction close = new FileCloseAction(this);
 		close.addToMenu(menu);
 		menu.addSeparator();
@@ -1380,7 +1384,7 @@ public class MainWindow
 	}
 
 	@Override
-	public boolean connectBegin(final ConnectionProfile aProfile, final StatusBar info)
+	public boolean connectBegin(final ConnectionProfile aProfile, final StatusBar info, final boolean loadWorkspace)
 	{
 		if (this.isBusy() || this.isCancelling())
 		{
@@ -1414,8 +1418,15 @@ public class MainWindow
 		this.currentProfile = aProfile;
 
 		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
-		if (info != null) info.setStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
-		loadCurrentProfileWorkspace();
+		if (info != null)
+		{
+			info.setStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
+		}
+		
+		if (loadWorkspace)
+		{
+			loadCurrentProfileWorkspace();
+		}
 		Settings.getInstance().setLastConnection(currentProfile);
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
 		return true;
@@ -1470,9 +1481,9 @@ public class MainWindow
 		return connectionSelector;
 	}
 
-	public void connectTo(ConnectionProfile profile, boolean showDialog)
+	public void connectTo(ConnectionProfile profile, boolean showDialog, boolean loadWorkspace)
 	{
-		getSelector().connectTo(profile, showDialog);
+		getSelector().connectTo(profile, showDialog, loadWorkspace);
 	}
 
 
@@ -1500,6 +1511,7 @@ public class MainWindow
 		this.newDbExplorerWindow.setEnabled(true);
 
 		this.disconnectAction.setEnabled(true);
+		this.reconnectAction.setEnabled(true);
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();
 		this.showMacroPopup.workspaceChanged();
@@ -1887,7 +1899,7 @@ public class MainWindow
 		sqlTab.removeAll();
 		WbAction.dispose(
 			this.assignWorkspaceAction,this.closeWorkspaceAction,this.createMacro,this.createNewConnection,
-			this.dbExplorerAction,this.disconnectAction,this.disconnectTab,this.loadWorkspaceAction,this.manageMacros,
+			this.dbExplorerAction,this.disconnectAction,this.reconnectAction,this.disconnectTab,this.loadWorkspaceAction,this.manageMacros,
 			this.newDbExplorerPanel,this.newDbExplorerWindow,this.nextTab,this.prevTab,this.saveAsWorkspaceAction,
 			this.saveWorkspaceAction,this.showDbmsManual,this.showMacroPopup, this.reloadWorkspace, this.loadMacros, this.saveMacros
 		);
@@ -1999,6 +2011,7 @@ public class MainWindow
 		getJobIndicator().allJobsEnded();
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
+		this.reconnectAction.setEnabled(false);
 		showDbmsManual.setDbms(null, -1, -1);
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();

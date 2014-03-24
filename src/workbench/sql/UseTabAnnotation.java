@@ -21,7 +21,7 @@
 package workbench.sql;
 
 /**
- * A class to extract define the name of a result tab that will be re-used if it is present.
+ * A class to define the name of a result tab that will be re-used if it is present.
  *
  * @author Thomas Kellerer
  */

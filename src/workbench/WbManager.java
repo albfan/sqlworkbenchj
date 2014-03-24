@@ -740,7 +740,7 @@ public final class WbManager
 				// try to connect to the profile passed on the
 				// command line. If this fails the connection
 				// dialog will be show to the user
-				main.connectTo(prof, true);
+				main.connectTo(prof, true, true);
 
 				// the main window will take care of displaying the connection dialog
 				// if the connection to the requested profile fails.

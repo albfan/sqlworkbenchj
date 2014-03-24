@@ -108,7 +108,7 @@ public class ConnectionSelector
 			}
 			else
 			{
-				this.connectTo(prof, false);
+				this.connectTo(prof, false, true);
 			}
 		}
 		catch (Throwable th)
@@ -121,7 +121,7 @@ public class ConnectionSelector
 		}
 	}
 
-	public void connectTo(final ConnectionProfile aProfile, final boolean showDialogOnError)
+	public void connectTo(final ConnectionProfile aProfile, final boolean showDialogOnError, final boolean loadWorkspace)
 	{
 		if (this.isConnectInProgress()) return;
 
@@ -130,7 +130,7 @@ public class ConnectionSelector
 			@Override
 			public void run()
 			{
-				doConnect(aProfile, showDialogOnError);
+				doConnect(aProfile, showDialogOnError, loadWorkspace);
 			}
 		};
 		t.start();
@@ -190,7 +190,7 @@ public class ConnectionSelector
 	}
 
 
-	protected void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError)
+	protected void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError, final boolean loadWorkspace)
 	{
 		if (isConnectInProgress()) return;
 
@@ -216,7 +216,7 @@ public class ConnectionSelector
 		WbConnection conn = null;
 		String error = null;
 
-		if (!client.connectBegin(aProfile, this))
+		if (!client.connectBegin(aProfile, this, loadWorkspace))
 		{
 			closeConnectingInfo();
 			return;
