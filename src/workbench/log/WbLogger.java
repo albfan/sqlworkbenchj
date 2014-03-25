@@ -35,7 +35,7 @@ public interface WbLogger
 
 	LogLevel getRootLevel();
 
-	void logMessage(LogLevel level, Object caller, String msg, Throwable th);
+	void logMessage(LogLevel level, Object caller, CharSequence msg, Throwable th);
 
 	void setMessageFormat(String newFormat);
 

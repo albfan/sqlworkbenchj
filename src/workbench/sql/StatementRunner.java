@@ -497,22 +497,26 @@ public class StatementRunner
 
 	public static void logStatement(String sql, long time)
 	{
-		String msg = "";
-		if (time > -1)
-		{
-			msg = "Executed: ";
-		}
+		StringBuilder msg = new StringBuilder(sql.length() + 25);
+		msg.append("Executed: ");
+
 		if (Settings.getInstance().getBoolProperty("workbench.sql.log.statements.clean", false))
 		{
-			msg += SqlUtil.makeCleanSql(sql, false, true) + " ";
+			msg.append(SqlUtil.makeCleanSql(sql, false, true));
+			msg.append(' ');
 		}
 		else
 		{
-			msg += sql + "\n";
+			msg.append('\n');
+			msg.append(sql);
+			msg.append('\n');
 		}
+
 		if (time > -1)
 		{
-			msg +=  "(" + time + "ms)";
+			msg.append('(');
+			msg.append(Long.toString(time));
+			msg.append("ms)");
 		}
 		LogMgr.logInfo("StatementRunner.execute()", msg);
 	}

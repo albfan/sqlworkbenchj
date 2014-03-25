@@ -242,7 +242,7 @@ public class Log4JLogger
 	}
 
 	@Override
-	public void logMessage(LogLevel level, Object caller, String msg, Throwable th)
+	public void logMessage(LogLevel level, Object caller, CharSequence msg, Throwable th)
 	{
 		switch (level)
 		{
