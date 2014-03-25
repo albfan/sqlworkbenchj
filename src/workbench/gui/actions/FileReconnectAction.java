@@ -49,6 +49,7 @@ public class FileReconnectAction
 	{
 		ConnectionProfile profile = window.getCurrentProfile();
 		boolean reloadWorkspace = false;
+		window.disconnect(false, false, true);
 		if (invokedByMouse(e) && isCtrlPressed(e))
 		{
 			reloadWorkspace = true;
