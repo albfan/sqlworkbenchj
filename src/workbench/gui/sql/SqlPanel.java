@@ -3777,6 +3777,7 @@ public class SqlPanel
 								p.showData(ds, gen, time);
 								panels.add(p);
 								p.setReUsed(true);
+								p.showGeneratingSQLAsTooltip();
 							}
 							else
 							{
