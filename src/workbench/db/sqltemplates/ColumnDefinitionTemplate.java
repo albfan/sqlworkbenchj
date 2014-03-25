@@ -178,10 +178,12 @@ public class ColumnDefinitionTemplate
 
 		if (value == null) return null;
 
+		boolean isMySQL = dbid != null && dbid.equals("mysql");
+
 		// If the ColumnDefinition was retrieved from a different DBMS (e.g. SQL Server) it might be that
 		// the default value is defined as ((42)).
 		// MySQL's SQL parser is not smart enough to accept that as a valid default expression, so we need to fix it here.
-		if (dbid != null && dbid.equals("mysql") && SqlUtil.isNumberType(column.getDataType()))
+		if (isMySQL && SqlUtil.isNumberType(column.getDataType()))
 		{
 			value = value.replaceAll("^\\(+", "");
 			value = value.replaceAll("\\)+$", "");
@@ -189,14 +191,26 @@ public class ColumnDefinitionTemplate
 
 		if (!fixDefaultExpression) return value;
 
+		boolean addQuotes = false;
 		if (SqlUtil.isCharacterType(column.getDataType()))
 		{
-			value = value.trim();
 			if (!value.startsWith("'") && !value.startsWith("N'") && !value.startsWith("E'") && !value.startsWith("U&'"))
 			{
-				return "'" + value + "'";
+				addQuotes = true;
 			}
 		}
+
+		value = value.trim();
+		if (isMySQL && SqlUtil.isDateType(column.getDataType()) && !value.startsWith("'"))
+		{
+			addQuotes = true;
+		}
+
+		if (addQuotes)
+		{
+			return "'" + value + "'";
+		}
+
 		return value;
 	}
 

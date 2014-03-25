@@ -904,6 +904,16 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROP_DBEXP_TABLE_HISTORY, flag);
 	}
 
+	public static boolean getDbExplorerIncludeTrgInTableSource()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tablesource.include.trigger", false);
+	}
+
+	public static void setDbExplorerIncludeTrgInTableSource(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.dbexplorer.tablesource.include.trigger", flag);
+	}
+
 	public static int getNumberDataAlignment()
 	{
 		String align = Settings.getInstance().getProperty(PROP_NUMBER_ALIGN, "right");

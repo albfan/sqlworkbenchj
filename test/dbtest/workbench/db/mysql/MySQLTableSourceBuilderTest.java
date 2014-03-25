@@ -118,18 +118,24 @@ public class MySQLTableSourceBuilderTest
 		assertNotNull("No connection available", con);
 
 		String sql =
-			"create table foo (id integer primary key, foo varchar(10) default 'bar');\n" +
+			"create table foo (" +
+			"  id integer primary key, " +
+			"  foo varchar(10) default 'bar', \n" +
+			"  bar date default '2014-01-01', " +
+			"  dts datetime default '2014-01-01 01:02:03');\n" +
 			"commit;\n";
 		TestUtil.executeScript(con, sql);
 
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("foo"));
 
 		String create = tbl.getSource(con).toString();
-//		System.out.println(create);
+		System.out.println(create);
 		String[] lines = create.trim().split("\n");
-		assertEquals(10, lines.length);
+		assertEquals(12, lines.length);
 		assertEquals("CREATE TABLE foo", lines[0]);
-		assertEquals("   foo  VARCHAR(10)   DEFAULT 'bar'", lines[3]);
+		assertEquals("   foo  VARCHAR(10)   DEFAULT 'bar',", lines[3]);
+		assertEquals("   bar  DATE          DEFAULT '2014-01-01',", lines[4]);
+		assertEquals("   dts  DATETIME      DEFAULT '2014-01-01 01:02:03'", lines[5]);
 	}
 
 }
