@@ -504,7 +504,7 @@ public class StatementRunner
 		}
 		if (Settings.getInstance().getBoolProperty("workbench.sql.log.statements.clean", false))
 		{
-			msg += SqlUtil.makeCleanSql(sql, false) + " ";
+			msg += SqlUtil.makeCleanSql(sql, false, true) + " ";
 		}
 		else
 		{
