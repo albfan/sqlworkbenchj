@@ -11,7 +11,7 @@
      <string>pvjdbc2.jar</string>
     </void>
     <void property="name">
-     <string>Actian Pervasive</string>
+     <string>Pervasive PSQL</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:pervasive://(hostname):(port)/(database)</string>
