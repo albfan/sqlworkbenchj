@@ -5,6 +5,23 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>com.pervasive.jdbc.v2.Driver </string>
+    </void>
+    <void property="library">
+     <string>pvjdbc2.jar</string>
+    </void>
+    <void property="name">
+     <string>Actian Pervasive</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:pervasive://(hostname):(port)/(database)</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>nl.cwi.monetdb.jdbc.MonetDriver</string>
     </void>
     <void property="library">
@@ -65,7 +82,7 @@
 		 <string>Apache Derby Network Client</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:derby://server:1527/databasename</string>
+     <string>jdbc:derby://(hostname):1527/(database)</string>
     </void>
    </object>
   </void>
