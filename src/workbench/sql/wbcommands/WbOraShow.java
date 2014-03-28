@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -48,6 +49,7 @@ import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * An implementation of various SQL*Plus "show" commands.
@@ -111,7 +113,7 @@ public class WbOraShow
 			String parm = null;
 			if (name != null)
 			{
-				parm = name.getContents();
+				parm = clean.substring(name.getCharBegin());
 			}
 			return getParameterValues(parm);
 		}
@@ -315,19 +317,27 @@ public class WbOraShow
 			"       value, \n" +
 			"       description, \n"  +
 			"       update_comment \n" +
-			"from v$parameter\n ";
+			"from v$parameter \n ";
 		ResultSet rs = null;
 
-		if (parameter != null)
+		List<String> names = StringUtil.stringToList(parameter, ",", true, true, false, false);
+
+		if (names.size() > 0)
 		{
-			query += "where name like lower('%" + parameter + "%')\n ";
+			query +="where";
+
+			for (int i=0; i < names.size(); i++)
+			{
+				if (i > 0) query += "  or";
+				query += " name like lower('%" + names.get(i) + "%') \n";
+			}
 		}
 		query += "order by name";
 		StatementRunnerResult result = new StatementRunnerResult(query);
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("WbOraShow.getParameterValues()", "Using SQL: " + query);
+			LogMgr.logDebug("WbOraShow.getParameterValues()", "Retrieving system parameters using:\n" + query);
 		}
 
 		try
