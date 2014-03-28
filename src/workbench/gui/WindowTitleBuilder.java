@@ -44,7 +44,7 @@ public class WindowTitleBuilder
 		boolean showProfileGroup = GuiSettings.getShowProfileGroupInWindowTitle();
 		boolean showWorkspace = GuiSettings.getShowWorkspaceInWindowTitle();
 		boolean showURL = GuiSettings.getShowURLinWindowTitle();
-		boolean includeUser = GuiSettings.getIncludeUserInTitleURL();
+		boolean includeUser = GuiSettings.getIncludeUserInTitleURL() || profile.getPromptForUsername();
 
 		String enclose = GuiSettings.getTitleGroupBracket();
 		String sep = GuiSettings.getTitleGroupSeparator();
@@ -72,6 +72,11 @@ public class WindowTitleBuilder
 			}
 			else
 			{
+				if (profile.getPromptForUsername())
+				{
+					title.append(profile.getUsername());
+					title.append(" - ");
+				}
 				if (showProfileGroup)
 				{
 					char open = getOpeningBracket(enclose);
