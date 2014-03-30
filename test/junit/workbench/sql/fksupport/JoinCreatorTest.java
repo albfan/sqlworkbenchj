@@ -200,7 +200,13 @@ public class JoinCreatorTest
 
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
-		assertEquals("ON p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", creator.getJoinCondition().trim());
+		condition = creator.getJoinCondition().trim();
+		assertEquals("ON p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", condition);
+
+		creator.setPreferUsingOperator(true);
+
+		String cond2 = creator.getJoinCondition().trim();
+		assertEquals(condition, cond2);
 	}
 
 	//@Test
