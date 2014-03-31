@@ -151,6 +151,7 @@ public class LnFDefinitionPanel
 	{
 		ClassFinder finder = new ClassFinder(LookAndFeel.class);
 		List<String> libs = classpathEditor.getLibraries();
+		currentLnF.setLibraries(libs);
 		ClassFinderGUI gui = new ClassFinderGUI(finder, tfClassName, statusLabel);
 		gui.setStatusBarKey("TxtSearchingLnF");
 		gui.setWindowTitleKey("TxtSelectLnF");
