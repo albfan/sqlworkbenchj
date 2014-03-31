@@ -151,6 +151,9 @@ public class LnFDefinitionPanel
 	{
 		ClassFinder finder = new ClassFinder(LookAndFeel.class);
 		List<String> libs = classpathEditor.getLibraries();
+
+		// this method is called when the library definition changes
+		// so we need to update the current LnF definition
 		currentLnF.setLibraries(libs);
 		ClassFinderGUI gui = new ClassFinderGUI(finder, tfClassName, statusLabel);
 		gui.setStatusBarKey("TxtSearchingLnF");
