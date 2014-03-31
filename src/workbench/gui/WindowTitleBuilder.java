@@ -24,9 +24,11 @@ package workbench.gui;
 
 import java.io.File;
 
-import workbench.db.ConnectionProfile;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ConnectionProfile;
+
 import workbench.util.StringUtil;
 
 /**
@@ -41,10 +43,7 @@ public class WindowTitleBuilder
 		final StringBuilder title = new StringBuilder(50);
 
 		boolean showProductNameAtEnd = GuiSettings.getShowProductNameAtEnd();
-		boolean showProfileGroup = GuiSettings.getShowProfileGroupInWindowTitle();
 		boolean showWorkspace = GuiSettings.getShowWorkspaceInWindowTitle();
-		boolean showURL = GuiSettings.getShowURLinWindowTitle();
-		boolean includeUser = GuiSettings.getIncludeUserInTitleURL() || profile.getPromptForUsername();
 
 		String enclose = GuiSettings.getTitleGroupBracket();
 		String sep = GuiSettings.getTitleGroupSeparator();
@@ -61,6 +60,10 @@ public class WindowTitleBuilder
 		}
 		else
 		{
+			boolean showProfileGroup = GuiSettings.getShowProfileGroupInWindowTitle();
+			boolean showURL = GuiSettings.getShowURLinWindowTitle();
+			boolean includeUser = GuiSettings.getIncludeUserInTitleURL() || profile.getPromptForUsername();
+
 			if (showURL)
 			{
 				if (includeUser)
@@ -74,6 +77,7 @@ public class WindowTitleBuilder
 			{
 				if (profile.getPromptForUsername())
 				{
+					// always display the username if prompted
 					title.append(profile.getUsername());
 					title.append(" - ");
 				}
