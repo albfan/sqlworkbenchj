@@ -727,8 +727,7 @@ public class JEditTextArea
 	/**
 	 * Updates the state of the scroll bars.
 	 *
-	 * This should be called
-	 * if the number of lines in the document changes, or when the size of the text area changes.
+	 * This should be called when the number of lines in the document changes, or when the size of the text area changes.
 	 */
 	public void updateScrollBars()
 	{
@@ -794,10 +793,15 @@ public class JEditTextArea
 	 */
 	public void setFirstLine(int firstLine)
 	{
+		setFirstLine(firstLine, true);
+	}
+
+	protected void setFirstLine(int firstLine, boolean updateScrollbar)
+	{
 		if (firstLine == this.firstLine) return;
 		this.firstLine = firstLine;
 
-		if (firstLine != vertical.getValue())
+		if (updateScrollbar && firstLine != vertical.getValue())
 		{
 			updateScrollBars();
 		}
@@ -845,9 +849,17 @@ public class JEditTextArea
 	 */
 	public void setHorizontalOffset(int horizontalOffset)
 	{
+		setHorizontalOffset(horizontalOffset, true);
+	}
+
+	protected void setHorizontalOffset(int horizontalOffset, boolean updateScrollbar)
+	{
 		if (horizontalOffset == this.horizontalOffset) return;
 		this.horizontalOffset = horizontalOffset;
-		if (horizontal != null && horizontalOffset != horizontal.getValue())	updateScrollBars();
+		if (updateScrollbar && horizontal != null && horizontalOffset != horizontal.getValue())
+		{
+			updateScrollBars();
+		}
 		painter.repaint();
 	}
 
@@ -1553,7 +1565,7 @@ public class JEditTextArea
 	{
 		return getWordAtCursor(Settings.getInstance().getEditorNoWordSep());
 	}
-	
+
 	public String getWordAtCursor(String wordCharacters)
 	{
 		int currentLine = getCaretLine();
@@ -3028,24 +3040,14 @@ public class JEditTextArea
 				return;
 			}
 
-			// If this is not done, mousePressed events accumilate
-			// and the result is that scrolling doesn't stop after
-			// the mouse is released
-			EventQueue.invokeLater(new Runnable()
+			if (evt.getAdjustable() == vertical)
 			{
-				@Override
-				public void run()
-				{
-					if (evt.getAdjustable() == vertical)
-					{
-						setFirstLine(vertical.getValue());
-					}
-					else
-					{
-						setHorizontalOffset(horizontal != null ? -horizontal.getValue() : 0);
-					}
-				}
-			});
+				setFirstLine(vertical.getValue(), false);
+			}
+			else if (evt.getAdjustable() == horizontal)
+			{
+				setHorizontalOffset(-horizontal.getValue(), false);
+			}
 		}
 	}
 
