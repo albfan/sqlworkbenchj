@@ -743,7 +743,7 @@ public class BatchRunner
 					printMessage(sql.trim());
 					if (!logAllStatements)
 					{
-						StatementRunner.logStatement(sql, -1);
+						StatementRunner.logStatement(sql, -1, connection);
 					}
 				}
 

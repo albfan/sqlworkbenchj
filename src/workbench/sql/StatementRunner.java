@@ -491,14 +491,20 @@ public class StatementRunner
 
 		if (logAllStatements)
 		{
-			logStatement(realSql, time);
+			logStatement(realSql, time, currentConnection);
 		}
 	}
 
-	public static void logStatement(String sql, long time)
+	public static void logStatement(String sql, long time, WbConnection conn)
 	{
 		StringBuilder msg = new StringBuilder(sql.length() + 25);
 		msg.append("Executed: ");
+		msg.append('(');
+		msg.append(conn.getCurrentUser());
+		msg.append('@');
+		msg.append(conn.getUrl());
+		msg.append(')');
+
 
 		if (Settings.getInstance().getBoolProperty("workbench.sql.log.statements.clean", false))
 		{
