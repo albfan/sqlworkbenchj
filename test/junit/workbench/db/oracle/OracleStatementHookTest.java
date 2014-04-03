@@ -70,6 +70,12 @@ public class OracleStatementHookTest
 		result = hook.injectHint(sql);
 		assertEquals(expResult, result);
 
+		sql = "with foobar as (\n" +
+			"select * \n" +
+			"from foo)\n" +
+			"select * from foobar";
+		result = hook.injectHint(sql);
+		assertTrue(result.startsWith("with /*+ gather_plan_statistics */ foobar as"));
 	}
 
 }
