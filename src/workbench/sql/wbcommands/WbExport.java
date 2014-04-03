@@ -132,6 +132,9 @@ public class WbExport
 	public static final String ARG_NULL_STRING = "nullString";
 	public static final String ARG_TRIM_CHARDATA = "trimCharData";
 
+	public static final String ARG_INCLUDE_IDENTITY = "includeAutoIncColumns";
+	public static final String ARG_INCLUDE_READONLY = "includeReadOnlyColumns";
+
 	// </editor-fold>
 
 	private DataExporter exporter;
@@ -219,6 +222,8 @@ public class WbExport
 		cmdLine.addArgument(ARG_TRIM_CHARDATA, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_TARGET_SHEET_IDX);
 		cmdLine.addArgument(ARG_TARGET_SHEET_NAME);
+		cmdLine.addArgument(ARG_INCLUDE_IDENTITY, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_READONLY, ArgumentType.BoolArgument);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -450,6 +455,9 @@ public class WbExport
 
 		exporter.setWriteEmptyResults(cmdLine.getBoolean(ARG_EMPTY_RESULTS, true));
 		exporter.setWriteClobAsFile(cmdLine.getBoolean(ARG_CLOB_AS_FILE, false));
+		boolean includeIdentityDefault = !Settings.getInstance().getGenerateInsertIgnoreIdentity();
+		exporter.setIncludeIdentityCols(cmdLine.getBoolean(ARG_INCLUDE_IDENTITY, includeIdentityDefault));
+		exporter.setIncludeReadOnlyCols(cmdLine.getBoolean(ARG_INCLUDE_READONLY, false));
 
 		this.continueOnError = cmdLine.getBoolean(ARG_CONTINUE_ON_ERROR, false);
 

@@ -131,6 +131,9 @@ public class DataExporter
 	private int commitEvery = 0;
 	private boolean useSchemaInSql;
 
+	private boolean includeIdentityCols;
+	private boolean includeReadOnlyCols;
+
 	private InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
 
 	private String dateFormat;
@@ -225,6 +228,28 @@ public class DataExporter
 			}
 		}
 	}
+
+	public boolean getIncludeIdentityCols()
+	{
+		return includeIdentityCols;
+	}
+
+	public void setIncludeIdentityCols(boolean flag)
+	{
+		this.includeIdentityCols = flag;
+	}
+
+	public boolean getIncludeReadOnlyCols()
+	{
+		return includeReadOnlyCols;
+	}
+
+	public void setIncludeReadOnlyCols(boolean flag)
+	{
+		this.includeReadOnlyCols = flag;
+	}
+
+
 
 	public boolean getTrimCharData()
 	{

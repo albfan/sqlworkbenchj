@@ -22,9 +22,10 @@
  */
 package workbench.db.exporter;
 
-import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.TableIdentifier;
 
 /**
  * Export data as SQL INSERT statements.

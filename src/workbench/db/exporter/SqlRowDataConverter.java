@@ -84,6 +84,8 @@ public class SqlRowDataConverter
 	private String mergeType;
 	private MergeGenerator mergeGenerator;
 	private boolean transactionControl = true;
+	private boolean includeIdentityCols;
+	private boolean includeReadOnlyCols;
 
 	public SqlRowDataConverter(WbConnection con)
 	{
@@ -128,6 +130,8 @@ public class SqlRowDataConverter
 		this.needsUpdateTable = meta.getUpdateTable() == null;
 		this.statementFactory.setIncludeTableOwner(this.includeOwner);
 		this.statementFactory.setTableToUse(this.alternateUpdateTable);
+		this.statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
+		this.statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols);
 
 		boolean keysPresent = this.checkKeyColumns();
 		this.sqlTypeToUse = this.sqlType;
@@ -147,6 +151,17 @@ public class SqlRowDataConverter
 
 			LogMgr.logWarning("SqlRowDataConverter.setResultInfo()", "No key columns found" + tbl + " reverting back to INSERT generation");
 			this.sqlTypeToUse = ExportType.SQL_INSERT;
+		}
+	}
+
+	@Override
+	public void setExporter(DataExporter exporter)
+	{
+		super.setExporter(exporter);
+		if (exporter != null)
+		{
+			this.includeReadOnlyCols = exporter.getIncludeReadOnlyCols();
+			this.includeIdentityCols = exporter.getIncludeIdentityCols();
 		}
 	}
 
@@ -176,7 +191,7 @@ public class SqlRowDataConverter
 		}
 
 		if (!transactionControl) return end;
-		
+
 		boolean writeCommit = true;
 		if ( (commitEvery == Committer.NO_COMMIT_FLAG) || (commitEvery > 0 && (totalRows % commitEvery == 0)))
 		{

@@ -465,19 +465,19 @@ public class XlsRowDataConverter
 	private boolean applyDateFormat()
 	{
 		if (this.targetSheetIndex < 0) return true;
-		return exportOptions.getDateFormat() != null;
+		return exporter.getDateFormat() != null;
 	}
 
 	private boolean applyTimestampFormat()
 	{
 		if (this.targetSheetIndex < 0) return true;
-		return exportOptions.getTimestampFormat() != null;
+		return exporter.getTimestampFormat() != null;
 	}
 
 	private boolean applyDecimalFormat()
 	{
 		if (this.targetSheetIndex < 0) return true;
-		return textOptions.getDecimalSymbol() != null;
+		return exporter.getDecimalSymbol() != null;
 	}
 
 	private void setCellValueAndStyle(Cell cell, Object value, boolean isHead, boolean multiline, int column)

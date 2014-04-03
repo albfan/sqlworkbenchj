@@ -46,8 +46,6 @@ import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 
 import workbench.gui.components.BlobHandler;
-import workbench.gui.dialogs.export.ExportOptions;
-import workbench.gui.dialogs.export.TextOptions;
 
 import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.ColumnData;
@@ -121,8 +119,7 @@ public abstract class RowDataConverter
 	private long maxBlobFilesPerDir;
 	private long blobsWritten;
 
-	protected ExportOptions exportOptions;
-	protected TextOptions textOptions;
+	protected DataExporter exporter;
 	private Map<Integer, Boolean> multilineInfo;
 
 	/**
@@ -135,7 +132,6 @@ public abstract class RowDataConverter
 	 */
 	protected boolean enableAutoFilter;
 
-
 	protected boolean fixedHeader;
 	protected boolean returnNulls;
 
@@ -147,14 +143,9 @@ public abstract class RowDataConverter
 		defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
 	}
 
-	public void setExportOptions(ExportOptions options)
+	public void setExporter(DataExporter exporter)
 	{
-		this.exportOptions = options;
-	}
-
-	public void setTextOptions(TextOptions textOptions)
-	{
-		this.textOptions = textOptions;
+		this.exporter = exporter;
 	}
 
 	/**
@@ -276,7 +267,7 @@ public abstract class RowDataConverter
 	{
 		return null;
 	}
-	
+
 	protected boolean isMultiline(int column)
 	{
 		Boolean result = multilineInfo.get(Integer.valueOf(column));

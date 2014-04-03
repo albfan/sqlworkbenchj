@@ -94,9 +94,8 @@ public abstract class ExportWriter
 	public void configureConverter()
 	{
 		converter.setErrorReporter(exporter);
-		converter.setExportOptions(exporter);
-		converter.setTextOptions(exporter);
-		
+		converter.setExporter(exporter);
+
 		converter.setEncoding(exporter.getEncoding());
 		converter.setDefaultDateFormatter(exporter.getDateFormatter());
 		converter.setDefaultTimestampFormatter(exporter.getTimestampFormatter());
