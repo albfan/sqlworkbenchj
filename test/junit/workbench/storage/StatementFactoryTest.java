@@ -182,7 +182,7 @@ public class StatementFactoryTest
 		data.setValue(1, "Zaphod");
 		data.setValue(2, "Beeblebrox");
 
-		factory.setSkipIdentityColumnsForInsert(true);
+		factory.setIncludeIdentiyColumns(false);
 		DmlStatement stmt = factory.createInsertStatement(data, false, "\n");
 		String sql = stmt.toString();
 		assertEquals("Not an INSERT statement", true, sql.startsWith("INSERT"));
@@ -191,7 +191,7 @@ public class StatementFactoryTest
 		sql = stmt.getExecutableStatement(formatter).toString();
 		assertEquals("Wrong values inserted", true, sql.indexOf("VALUES ('Zaphod','Beeblebrox')") > -1);
 
-		factory.setSkipIdentityColumnsForInsert(false);
+		factory.setIncludeIdentiyColumns(true);
 		stmt = factory.createInsertStatement(data, false, "\n");
 		sql = stmt.getExecutableStatement(formatter).toString();
 		assertEquals("Wrong values inserted", true, sql.indexOf("VALUES (42,'Zaphod','Beeblebrox')") > -1);
