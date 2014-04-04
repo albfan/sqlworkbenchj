@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import workbench.db.JdbcUtils;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -88,6 +89,10 @@ public class WbOraShow
 		propertyUnits.put("memory_target", "mb");
 		propertyUnits.put("db_recovery_file_dest_size", "mb");
 		propertyUnits.put("db_recycle_cache_size", "mb");
+		propertyUnits.put("db_cache_size", "mb");
+		propertyUnits.put("result_cache_max_size", "mb");
+		propertyUnits.put("java_pool_size", "mb");
+		propertyUnits.put("pga_aggregate_target", "mb");
 	}
 
 
@@ -303,6 +308,9 @@ public class WbOraShow
 
 	private StatementRunnerResult getParameterValues(String parameter)
 	{
+		boolean hasDisplayValue = JdbcUtils.hasMinimumServerVersion(currentConnection, "10.0");
+		boolean useDisplayValue = Settings.getInstance().getBoolProperty("workbench.db.oracle.showparameter.display_value", hasDisplayValue);
+
 		String query =
 			"select name,  \n" +
 			"       case type \n" +
@@ -314,7 +322,7 @@ public class WbOraShow
 			"         when 6 then 'big integer' \n" +
 			"         else to_char(type) \n" +
 			"       end as type,  \n" +
-			"       value, \n" +
+			"       " + (useDisplayValue ? "display_value" : "value") + ", \n" +
 			"       description, \n"  +
 			"       update_comment \n" +
 			"from v$parameter \n ";
@@ -353,10 +361,13 @@ public class WbOraShow
 				{
 					String property = ds.getValueAsString(row, 0);
 					String value = ds.getValueAsString(row, 2);
-					String formatted = formatMemorySize(property, value);
-					if (formatted != null)
+					if (!useDisplayValue)
 					{
-						ds.setValue(row, 2, formatted);
+						String formatted = formatMemorySize(property, value);
+						if (formatted != null)
+						{
+							ds.setValue(row, 2, formatted);
+						}
 					}
 				}
 				ds.resetStatus();
