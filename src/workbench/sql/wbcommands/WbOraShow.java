@@ -322,7 +322,7 @@ public class WbOraShow
 			"         when 6 then 'big integer' \n" +
 			"         else to_char(type) \n" +
 			"       end as type,  \n" +
-			"       " + (useDisplayValue ? "display_value" : "value") + ", \n" +
+			"       " + (useDisplayValue ? "display_value" : "value") + " as value, \n" +
 			"       description, \n"  +
 			"       update_comment \n" +
 			"from v$parameter \n ";
