@@ -1180,6 +1180,32 @@
 						</entry>
 					</row>
 
+					<row>
+						<entry id="sql-export-identity-cols">-includeAutoIncColumns</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>Default value: defined by <link linkend="opt-sql-include-identity">global option</link></para>
+              <para>
+                With this parameter you can override the <link linkend="opt-sql-include-identity">global option</link>
+                to include identity and auto-increment columnfor <literal>INSERT</literal> statements.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="sql-export-readonly-cols">-includeReadOnlyColumns</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>Default value: <literal>false</literal></para>
+              <para>
+                By default, columns that are marked as read-only by the JDBC driver
+                or are defined as a computed column are not part of generated SQL statements. By
+                setting this parameter to <literal>true</literal>, those columns will be included
+                in <literal>INSERT</literal> statements.
+              </para>
+						</entry>
+					</row>
+
 				</tbody>
 			</tgroup>
 		</informaltable>

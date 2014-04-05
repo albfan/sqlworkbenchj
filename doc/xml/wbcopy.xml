@@ -498,7 +498,13 @@ Please check <link linkend="command-copy-query">Copying data based on a SQL quer
 				<tbody>
 					<row>
 						<entry>-sourceQuery</entry>
-						<entry>The SQL query to be used as the source data (instead of a table).</entry>
+						<entry>
+              <para>The SQL query to be used as the source data (instead of a table).</para>
+              <para>
+                This parameter is ignored if <literal>-sourceSchema</literal> or <literal>-sourceTable</literal>
+                is specified.
+              </para>
+            </entry>
 					</row>
 					<row>
 						<entry>-columns</entry>

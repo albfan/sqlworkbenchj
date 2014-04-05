@@ -661,6 +661,19 @@
 			<para>Default value: <literal>false</literal></para>
 		</simplesect>
 
+		<simplesect id="db-check-read-only-columns">
+			<title>Check read only columns</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>resultset.columns.check.readonly</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+			<para>
+				If this property is enabled, columns in result sets will be checked whether they are marked
+        as read only by the JDBC driver. Read-only columns will not be included in generated DML
+        statements when editing data. If the driver incorrectly reports columns that can be changed
+        as read-only, setting this property to <literal>false</literal> will enable editing those columns.
+			</para>
+			<para>Default value: <literal>true</literal></para>
+		</simplesect>
+
 		<simplesect id="db-custom-type-map">
 			<title>Customizing data type mapping</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.typemap</literal></para>
@@ -682,7 +695,7 @@
 				maps the JDBC value -1 (LONGVARCHAR) to the DBMS type <literal>VARCHAR</literal>
 				using only the <literal>$size</literal> parameter
 			</para>
-			<programlisting>workbench.db.[some_db].typemap=3:DOUBLE;2:NUMBER($size,$digits);-1:VARCHAR($size)</programlisting>
+			<programlisting>workbench.db.some_dbid.typemap=3:DOUBLE;2:NUMBER($size,$digits);-1:VARCHAR($size)</programlisting>
 			<para>
 				JDBC 4.0 defines the following constants:
 				<itemizedlist spacing="compact">

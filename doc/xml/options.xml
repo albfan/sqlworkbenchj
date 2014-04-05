@@ -1610,19 +1610,7 @@ FROM person;</programlisting>
 			</para>
 		</blockquote></simplesect>
 
-		<simplesect id="opt-sql-export-include-owner">
-			<title>Include owner in export</title><blockquote>
-			<para>
-				This setting controls whether &wb-productname; uses the owner (schema)
-				when creating SQL scripts during exporting data (through WbExport
-				or "Save as"). When this option is selected, the usage of the schema
-				depends on the <link linkend="settings-db-ignoreschema">ignore schema</link> setting
-				that controls ignoring certain schemas for specific DBMS.
-				When this is option is not selected, the schema/owner will never be used for SQL scripts.
-			</para>
-		</blockquote></simplesect>
-
-		<simplesect id="options-default-copy-literaltype">
+    <simplesect id="options-default-copy-literaltype">
 			<title>Date literals for clipboard</title><blockquote>
 			<para>
 				Defines the date literal format to be used when copying data
@@ -1657,6 +1645,37 @@ FROM person;</programlisting>
 				switch is not supplied when running <literal>WbDataDiff</literal>.
 				This default value is reported when <literal>WbDataDiff</literal> is executed
 				without parameters.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="opt-sql-export-include-owner">
+			<title>Include owner in export</title><blockquote>
+			<para>
+				This setting controls whether &wb-productname; uses the owner (schema)
+				when creating SQL scripts during exporting data (through WbExport
+				or "Save as"). When this option is selected, the usage of the schema
+				depends on the <link linkend="settings-db-ignoreschema">ignore schema</link> setting
+				that controls ignoring certain schemas for specific DBMS.
+				When this is option is not selected, the schema/owner will never be used for SQL scripts.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="opt-sql-include-empty-comments">
+			<title>Include empty comments</title><blockquote>
+			<para>
+        By default the DbExplorer will not generate the SQL to create empty comments (tables, views, columns,...).
+        If this option is enabled then a corresponding SQL statement to define a comment with an empty
+        string will be generated. If a comment is <literal>NULL</literal> comments will never be generated.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="opt-sql-include-identity">
+			<title>Ignore identity and autoincrement columns for INSERTs</title><blockquote>
+			<para>
+        If this option is enabled, generated INSERT statements (e.g. when editing data) will not contain
+        identity or autoincrement columns. When using <literal>WbExport</literal> to create a
+        SQL script, this can be <link linkend="sql-export-identity-cols">controlled independently</link>
+        from the global option.
 			</para>
 		</blockquote></simplesect>
 
