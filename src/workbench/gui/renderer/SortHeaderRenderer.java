@@ -126,6 +126,7 @@ public class SortHeaderRenderer
 		{
 			display.setFont(display.getFont().deriveFont(Font.BOLD));
 		}
+		display.setIconTextGap(5);
 		display.setHorizontalTextPosition(SwingConstants.LEFT);
 		display.setHorizontalAlignment(SwingConstants.LEFT);
 
