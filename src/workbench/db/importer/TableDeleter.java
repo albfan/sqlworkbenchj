@@ -25,31 +25,35 @@ package workbench.db.importer;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 
 /**
  * @author Thomas Kellerer
  */
-public class TableDeleter 
+public class TableDeleter
 {
 	private RowActionMonitor rowMonitor;
 	private boolean checkDependencies = false;
 	private WbConnection dbConn;
 	private boolean cancel = false;
 	private MessageBuffer messages = new MessageBuffer();
-	
+
 	public TableDeleter(WbConnection conn, boolean checkOrder)
 	{
 		dbConn = conn;
 		checkDependencies = checkOrder;
 	}
-	
+
 	private List<TableIdentifier> sortTables(List<TableIdentifier> tables)
 	{
 		if (this.rowMonitor != null)
@@ -60,7 +64,7 @@ public class TableDeleter
 
 		TableDependencySorter sorter = new TableDependencySorter(dbConn);
 		List<TableIdentifier> sorted = sorter.sortForDelete(tables, false);
-		
+
 		if (this.rowMonitor != null)
 		{
 			this.rowMonitor.jobFinished();
@@ -72,25 +76,25 @@ public class TableDeleter
 	{
 		return messages;
 	}
-	
+
 	public void cancel()
 	{
 		this.cancel = true;
 	}
-	
+
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
 	}
-	
+
 	/**
-	 * Delete all rows from the passed tables. 
+	 * Delete all rows from the passed tables.
 	 * For each table a DELETE FROM table; will be sent to the database.
-	 * If commitEach is true, a commit() will be sent after each DELETE statement, 
-	 * otherwise only one commit at the end. 
-	 * 
+	 * If commitEach is true, a commit() will be sent after each DELETE statement,
+	 * otherwise only one commit at the end.
+	 *
 	 * @param tables the list of tables to be deleted
-	 * @param commitEach 
+	 * @param commitEach
 	 * @throws java.sql.SQLException
 	 */
 	public void deleteRows(List<TableIdentifier> tables, boolean commitEach)
@@ -100,7 +104,7 @@ public class TableDeleter
 		{
 			tables = sortTables(tables);
 		}
-		
+
 		boolean needsCommit = !this.dbConn.getAutoCommit();
 		Statement statement = null;
 		try
@@ -114,12 +118,15 @@ public class TableDeleter
 			int table = 1;
 			for (TableIdentifier sourceTable : tables)
 			{
-				if (this.cancel) 
+				if (this.cancel)
 				{
-					dbConn.rollback();
+					if (needsCommit)
+					{
+						dbConn.rollbackSilently();
+					}
 					break;
 				}
-				
+
 				TableIdentifier targetTable = dbConn.getMetadata().findTable(new TableIdentifier(sourceTable.getTableName()), false);
 				if (this.rowMonitor != null)
 				{
@@ -128,7 +135,7 @@ public class TableDeleter
 				String sql = "DELETE FROM " + targetTable.getTableExpression(dbConn);
 				LogMgr.logInfo("TableDeleter.deleteRows()", "Running: " + sql);
 				long rows = statement.executeUpdate(sql);
-				this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + targetTable.getTableExpression(this.dbConn) + "\n");				
+				this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + targetTable.getTableExpression(this.dbConn) + "\n");
 				if (needsCommit && commitEach)
 				{
 					dbConn.commit();
@@ -142,7 +149,10 @@ public class TableDeleter
 		}
 		catch (SQLException e)
 		{
-			dbConn.rollback();
+			if (needsCommit)
+			{
+				dbConn.rollbackSilently();
+			}
 			throw e;
 		}
 		finally
@@ -155,5 +165,5 @@ public class TableDeleter
 			}
 		}
 	}
-	
+
 }
