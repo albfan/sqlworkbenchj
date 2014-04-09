@@ -25,7 +25,6 @@ package workbench.db;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Set;
 
 import workbench.interfaces.ObjectDropper;
 import workbench.log.LogMgr;
@@ -203,7 +202,6 @@ public class GenericObjectDropper
 			int count = this.objects.size();
 
     	currentStatement = this.connection.createStatement();
-			Set<String> types = connection.getMetadata().getObjectsWithData();
 
 			for (int i=0; i < count; i++)
 			{
@@ -218,17 +216,13 @@ public class GenericObjectDropper
 				}
 				currentStatement.execute(sql);
 
-				if (types.contains(object.getObjectType()))
+				try
 				{
-					try
-					{
-						TableIdentifier tbl = (TableIdentifier)object;
-						connection.getObjectCache().removeTable(tbl);
-					}
-					catch (ClassCastException cce)
-					{
-						LogMgr.logWarning("GenericObjectDropper.dropObjects()", "Could not cast a table type to a TableIdentifier!", cce);
-					}
+					connection.getObjectCache().removeEntry(object);
+				}
+				catch (ClassCastException cce)
+				{
+					LogMgr.logWarning("GenericObjectDropper.dropObjects()", "Could not cast a table type to a TableIdentifier!", cce);
 				}
 				if (this.cancel) break;
 			}

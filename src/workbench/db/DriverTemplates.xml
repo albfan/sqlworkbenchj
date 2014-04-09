@@ -393,5 +393,40 @@
    </object>
   </void>
 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>net.ucanaccess.jdbc.UcanaccessDriver</string>
+    </void>
+    <void property="libraryList">
+      <object class="java.util.Collections" method="unmodifiableList">
+      <object class="java.util.ArrayList">
+       <void method="add">
+        <string>ucanaccess-2.0.3.jar</string>
+       </void>
+       <void method="add">
+        <string>jackcess-2.0.3.jar</string>
+       </void>
+       <void method="add">
+        <string>hsqldb.jar</string>
+       </void>
+       <void method="add">
+        <string>commons-logging-1.0.4.jar</string>
+       </void>
+       <void method="add">
+        <string>commons-lang-2.6.jar</string>
+       </void>
+      </object>
+     </object>
+    </void>
+    <void property="name">
+     <string>Microsoft Access JDBC Driver</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:ucanaccess://c:/path/to/database.mdb</string>
+    </void>
+   </object>
+  </void>
+
  </object>
 </java>

@@ -134,6 +134,7 @@ public class DdlCommand
 				try
 				{
 					this.currentStatement.executeUpdate(sql);
+					removeFromCache(info);
 					result.addMessage(getSuccessMessage(info, getVerb()));
 				}
 				catch (Exception th)
@@ -171,11 +172,7 @@ public class DdlCommand
 
 			if (isDrop && result.isSuccess() && info != null)
 			{
-				Set<String> types = currentConnection.getMetadata().getObjectsWithData();
-				if (types.contains(info.getObjectType()))
-				{
-					currentConnection.getObjectCache().removeTable(new TableIdentifier(info.getObjectName(), currentConnection));
-				}
+				removeFromCache(info);
 			}
 		}
 		catch (Exception e)
@@ -197,6 +194,12 @@ public class DdlCommand
 		}
 
 		return result;
+	}
+
+	private void removeFromCache(DdlObjectInfo info)
+	{
+		if (info == null) return;
+		currentConnection.getObjectCache().removeTable(new TableIdentifier(info.getObjectName(), currentConnection));
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -426,6 +427,27 @@ class ObjectCache
 
 		}
 		return Collections.unmodifiableList(cols);
+	}
+
+	synchronized void removeProcedure(WbConnection dbConn, ProcedureDefinition toRemove)
+	{
+		if (toRemove == null) return;
+		String schema = toRemove.getSchema();
+		String fullName = toRemove.getObjectNameForDrop(dbConn);
+
+		List<ProcedureDefinition> procedures = getProcedures(dbConn, schema);
+		Iterator<ProcedureDefinition> itr = procedures.iterator();
+		while (itr.hasNext())
+		{
+			ProcedureDefinition proc = itr.next();
+			String procName = proc.getObjectNameForDrop(dbConn);
+			if (procName.equals(fullName))
+			{
+				LogMgr.logDebug("ObjectCache.removeProcedure()", "Procedure " + fullName + " removed from the cache");
+				itr.remove();
+				break;
+			}
+		}
 	}
 
 	synchronized void removeTable(WbConnection dbConn, TableIdentifier tbl)

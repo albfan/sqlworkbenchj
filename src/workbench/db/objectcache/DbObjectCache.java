@@ -131,6 +131,18 @@ public class DbObjectCache
 		return objectCache.getTables(dbConnection, schema, type);
 	}
 
+	public void removeEntry(Object obj)
+	{
+		if (obj instanceof TableIdentifier)
+		{
+			removeTable((TableIdentifier)obj);
+		}
+		else if (obj instanceof ProcedureDefinition)
+		{
+			objectCache.removeProcedure(dbConnection, (ProcedureDefinition)obj);
+		}
+	}
+
 	public void removeTable(TableIdentifier tbl)
 	{
 		objectCache.removeTable(dbConnection, tbl);
