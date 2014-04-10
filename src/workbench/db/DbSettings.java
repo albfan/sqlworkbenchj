@@ -81,6 +81,13 @@ public class DbSettings
 
 	private final String prefix;
 
+	public static enum GenerateOwnerType
+	{
+		always,
+		whenNeeded,
+		never;
+	}
+
 	public DbSettings(String id)
 	{
 		this.dbId = id;
@@ -1039,6 +1046,19 @@ public class DbSettings
 			return !included;
 		}
 		return Settings.getInstance().getBoolProperty(prefix + "generate.tablesource.include.fk", true);
+	}
+
+	public GenerateOwnerType getGenerateTableOwner()
+	{
+		String value = Settings.getInstance().getProperty(prefix + "generate.tablesource.include.owner", GenerateOwnerType.whenNeeded.name());
+		try
+		{
+			return GenerateOwnerType.valueOf(value);
+		}
+		catch (Exception ex)
+		{
+			return GenerateOwnerType.whenNeeded;
+		}
 	}
 
 	/**

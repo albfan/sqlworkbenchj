@@ -35,7 +35,16 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-import workbench.db.*;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbSettings;
+import workbench.db.DomainIdentifier;
+import workbench.db.EnumIdentifier;
+import workbench.db.IndexDefinition;
+import workbench.db.JdbcUtils;
+import workbench.db.ObjectSourceOptions;
+import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
+import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -122,10 +131,11 @@ public class PostgresTableSourceBuilder
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
-			"select " + tempCol + ", ct.relkind, " + optionsCol + ", spc.spcname \n" +
-			"from pg_class ct \n" +
-			"    join pg_namespace cns on ct.relnamespace = cns.oid \n " +
-			"    left join pg_tablespace spc on spc.oid = ct.reltablespace \n" +
+			"select " + tempCol + ", ct.relkind, " + optionsCol + ", spc.spcname, own.rolname as owner \n" +
+			"from pg_catalog.pg_class ct \n" +
+			"    join pg_catalog.pg_namespace cns on ct.relnamespace = cns.oid \n " +
+			"    join pg_catalog.pg_roles own on ct.relowner = own.oid \n " +
+			"    left join pg_catalog.pg_tablespace spc on spc.oid = ct.reltablespace \n" +
 			" where cns.nspname = ? \n" +
 			"   and ct.relname = ?";
 
@@ -147,6 +157,9 @@ public class PostgresTableSourceBuilder
 				String type = rs.getString(2);
 				String tblSettings = rs.getString(3);
 				String tableSpace = rs.getString(4);
+				String owner = rs.getString("owner");
+				option.addConfigSetting("owner", owner);
+
 				if (StringUtil.isNonEmpty(persistence))
 				{
 					switch (persistence.charAt(0))
@@ -344,20 +357,42 @@ public class PostgresTableSourceBuilder
 		CharSequence domains = getDomainInformation(columns, schema);
 		CharSequence sequences = getColumnSequenceInformation(table, columns);
 		CharSequence children = getChildTables(table);
+		String owner = getOwnerSql(table);
 
-		if (enums == null && domains == null && sequences == null && children == null) return null;
-
+		if (enums == null && domains == null && sequences == null && children == null && owner == null) return null;
 		int enumLen = (enums != null ? enums.length() : 0);
 		int domainLen = (domains != null ? domains.length() : 0);
 		int childLen = (children != null ? children.length() : 0);
+		int ownerLen = (owner != null ? owner.length() : 0);
 
-		StringBuilder result = new StringBuilder(enumLen + domainLen + childLen);
+		StringBuilder result = new StringBuilder(enumLen + domainLen + childLen + ownerLen);
 		if (enums != null) result.append(enums);
 		if (domains != null) result.append(domains);
 		if (sequences != null) result.append(sequences);
 		if (children != null) result.append(children);
+		if (owner != null) result.append(owner);
 
 		return result.toString();
+	}
+
+	private String getOwnerSql(TableIdentifier table)
+	{
+		DbSettings.GenerateOwnerType genType = dbConnection.getDbSettings().getGenerateTableOwner();
+		if (genType == DbSettings.GenerateOwnerType.never) return null;
+
+		String user = dbConnection.getCurrentUser();
+
+		ObjectSourceOptions options = table.getSourceOptions();
+		if (options == null) return null;
+		String owner = options.getConfigSettings().get("owner");
+		if (StringUtil.isBlank(owner)) return null;
+
+		if (genType == DbSettings.GenerateOwnerType.whenNeeded)
+		{
+			if (user.equalsIgnoreCase(owner)) return null;
+		}
+		
+		return "\nALTER TABLE " + table.getFullyQualifiedName(dbConnection) + " SET OWNER TO " + SqlUtil.quoteObjectname(owner) + ";";
 	}
 
 	private CharSequence getColumnSequenceInformation(TableIdentifier table, List<ColumnIdentifier> columns)

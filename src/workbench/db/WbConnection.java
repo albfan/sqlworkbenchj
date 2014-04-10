@@ -353,7 +353,7 @@ public class WbConnection
 	 */
 	public String getCurrentUser()
 	{
-		if (this.profile != null)
+		if (this.profile != null && !profile.getPromptForUsername())
 		{
 			return this.profile.getUsername();
 		}
