@@ -48,6 +48,7 @@ public class TableIdentifier
 	private String schema;
 	private String catalog;
 	private String server; // for SQL Server syntax
+	private String owner;
 	private boolean isNewTable;
 	private boolean tableWasQuoted;
 	private boolean serverWasQuoted;
@@ -137,6 +138,16 @@ public class TableIdentifier
 		}
 		this.setCatalog(aCatalog);
 		this.setSchema(aSchema);
+	}
+
+	public String getOwner()
+	{
+		return owner;
+	}
+
+	public void setOwner(String owner)
+	{
+		this.owner = owner;
 	}
 
 	/**
@@ -309,6 +320,7 @@ public class TableIdentifier
 		copy.tableComment = this.tableComment;
 		copy.sourceOptions = this.sourceOptions == null ? null : sourceOptions.createCopy();
 		copy.useInlinePK = this.useInlinePK;
+		copy.owner = this.owner;
 		return copy;
 	}
 

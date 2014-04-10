@@ -78,6 +78,7 @@ public class ReportTable
 {
 	public static final String TAG_TABLE_DEF = "table-def";
 	public static final String TAG_TABLE_NAME = "table-name";
+	public static final String TAG_TABLE_OWNER = "table-owner";
 	public static final String TAG_TABLE_CATALOG = "table-catalog";
 	public static final String TAG_TABLE_SCHEMA = "table-schema";
 	public static final String TAG_TABLE_COMMENT = "table-comment";
@@ -466,6 +467,11 @@ public class ReportTable
 		tagWriter.appendTag(toAppend, indent, TAG_TABLE_CATALOG, SqlUtil.removeObjectQuotes(this.table.getCatalog()));
 		tagWriter.appendTag(toAppend, indent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? SqlUtil.removeObjectQuotes(this.table.getSchema()) : this.schemaNameToUse));
 		tagWriter.appendTag(toAppend, indent, TAG_TABLE_NAME, SqlUtil.removeObjectQuotes(this.table.getTableName()));
+		String owner = table.getOwner();
+		if (owner != null)
+		{
+			tagWriter.appendTag(toAppend, indent, TAG_TABLE_OWNER, SqlUtil.removeObjectQuotes(owner));
+		}
 	}
 
 	/**

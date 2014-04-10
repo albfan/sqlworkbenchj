@@ -158,7 +158,7 @@ public class PostgresTableSourceBuilder
 				String tblSettings = rs.getString(3);
 				String tableSpace = rs.getString(4);
 				String owner = rs.getString("owner");
-				option.addConfigSetting("owner", owner);
+				tbl.setOwner(owner);
 
 				if (StringUtil.isNonEmpty(persistence))
 				{
@@ -380,18 +380,15 @@ public class PostgresTableSourceBuilder
 		DbSettings.GenerateOwnerType genType = dbConnection.getDbSettings().getGenerateTableOwner();
 		if (genType == DbSettings.GenerateOwnerType.never) return null;
 
-		String user = dbConnection.getCurrentUser();
-
-		ObjectSourceOptions options = table.getSourceOptions();
-		if (options == null) return null;
-		String owner = options.getConfigSettings().get("owner");
+		String owner = table.getOwner();
 		if (StringUtil.isBlank(owner)) return null;
 
 		if (genType == DbSettings.GenerateOwnerType.whenNeeded)
 		{
+			String user = dbConnection.getCurrentUser();
 			if (user.equalsIgnoreCase(owner)) return null;
 		}
-		
+
 		return "\nALTER TABLE " + table.getFullyQualifiedName(dbConnection) + " SET OWNER TO " + SqlUtil.quoteObjectname(owner) + ";";
 	}
 
