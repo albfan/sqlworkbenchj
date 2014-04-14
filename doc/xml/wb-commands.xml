@@ -942,7 +942,7 @@ $$ LANGUAGE plpgsql;
     <para>Execute <literal>my_script.sql</literal> but abort on the first error</para>
     <programlisting>WbInclude -file="my_script.sql" -continueOnError=false;</programlisting>
     <para>Execute the script <literal>create_tables.sql</literal> and change all occurances of <literal>oldschema</literal>
-    to <litereral>new_schema</litereral>
+    to <literal>new_schema</literal>
     </para>
     <programlisting>WbInclude -file=create_tables.sql -searchFor="oldschema." -replaceWith="new_schema."</programlisting>
   </section>
