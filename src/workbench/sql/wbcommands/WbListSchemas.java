@@ -23,15 +23,18 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-
 import java.sql.Types;
 import java.util.List;
+
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.resource.ResourceMgr;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -82,10 +85,10 @@ public class WbListSchemas
 				int row = ds.addRow();
 				ds.setValue(row, 0, cat);
 			}
-			ds.resetStatus();
 		}
 		ds.setResultName(ResourceMgr.getString("TxtSchemaList"));
 		ds.setGeneratingSql(VERB);
+		ds.resetStatus();
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;
@@ -96,7 +99,7 @@ public class WbListSchemas
 		String name = StringUtil.capitalize(currentConnection.getMetadata().getSchemaTerm());
 		String sql =
 			"SELECT n.nspname AS \"" + name + "\",\n" +
-			"  pg_catalog.pg_get_userbyid(n.nspowner) AS \"Owner\"\n" +
+			"       pg_catalog.pg_get_userbyid(n.nspowner) AS \"Owner\"\n" +
 			"FROM pg_catalog.pg_namespace n\n" +
 			"WHERE n.nspname !~ '^pg_' AND n.nspname <> 'information_schema'\n" +
 			"ORDER BY 1";

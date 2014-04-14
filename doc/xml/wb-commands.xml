@@ -907,7 +907,6 @@ $$ LANGUAGE plpgsql;
               of the SQL statements.
             </entry>
           </row>
-
           <row>
             <entry>-ignoreDropErrors</entry>
             <entry>
@@ -936,6 +935,9 @@ $$ LANGUAGE plpgsql;
         </tbody>
       </tgroup>
     </informaltable>
+    <para>
+      <literal>WbInclude</literal> also supports <link linkend="conditional-exec">conditional execution</link>
+    </para>
 
     <para>Execute <literal>my_script.sql</literal></para>
     <programlisting>@my_script.sql;</programlisting>
@@ -2319,6 +2321,10 @@ WHERE id=42;</programlisting>
     </informaltable>
 
     <para>
+      <literal>WbSysExec</literal> also supports <link linkend="conditional-exec">conditional execution</link>
+    </para>
+
+    <para>
       To run an internal Windows command using the second format, use the following syntax:
     </para>
     <programlisting>WbSysExec -program='cmd.exe' -argument='/c' -argument='dir /n' -dir='c:\temp\'</programlisting>
@@ -2445,8 +2451,6 @@ WbSysOpen c:/temp/person.txt;</programlisting>
     </para>
   </section>
 
-
-
   <section id="command-setconfig">
     <title>Change an internal configuration paramter - WbSetConfig</title>
     <indexterm><primary>Configuration</primary><secondary>change advanced configuration properties</secondary></indexterm>
@@ -2471,4 +2475,18 @@ WbSysOpen c:/temp/person.txt;</programlisting>
     </para>
   </section>
 
+  <section id="conditional-exec">
+    <title>Conditional execution</title>
+    <para>
+      The following &wb-productname; commands support conditional execution based on variables:
+			<itemizedlist>
+        <listitem><literal><link linkend="command-wbinclude">WbInclude</link></literal></listitem>
+        <listitem><literal><link linkend="command-wbexec">WbSysExec</link></literal></listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      Conditional execution is controlled using the following parameters:
+    </para>
+    &conditionals;
+  </section>
 </section>
