@@ -948,6 +948,9 @@ public class JdbcIndexReader
 		List<IndexDefinition> result = new ArrayList<IndexDefinition>();
 		Statement stmt = null;
 		ResultSet rs = null;
+
+		boolean hasStatus = supportsIndexStatus();
+
 		try
 		{
 			stmt = this.metaData.getWbConnection().createStatementForQuery();
@@ -964,12 +967,15 @@ public class JdbcIndexReader
 				String isPK = StringUtil.rtrim(rs.getString("is_pk"));
 				String def = rs.getString("index_def");
 				String tbs = rs.getString("index_tablespace");
+				String status = (hasStatus ? rs.getString("index_status") : null);
 
 				TableIdentifier tbl = new TableIdentifier(tableCatalog, tableSchema, tableName);
 				IndexDefinition idx = new IndexDefinition(tbl, idxName.trim());
 				idx.setSchema(idxSchema);
 				idx.setIndexType(idxType);
 				idx.setTablespace(tbs);
+				idx.setStatus(status);
+				
 				if (isUnique != null)
 				{
 					idx.setUnique(StringUtil.stringToBool(isUnique));

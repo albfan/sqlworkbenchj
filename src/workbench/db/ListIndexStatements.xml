@@ -306,7 +306,8 @@ select /* SQLWorkbench */ ic.index_name,
          else 'YES'
        end as is_pk,
        index_def,
-       idx.tablespace_name as index_tablespace
+       idx.tablespace_name as index_tablespace,
+       idx.status as index_status
 from (
   select index_name,
          index_owner as index_schema,

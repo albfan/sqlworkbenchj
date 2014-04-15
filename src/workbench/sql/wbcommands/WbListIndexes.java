@@ -95,7 +95,7 @@ public class WbListIndexes
 
 		if (cmdLine.hasUnknownArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrListWrongArgs"));
+			result.addMessage(ResourceMgr.getString("ErrListIdxWrongArgs"));
 			result.setFailure();
 			return result;
 		}
