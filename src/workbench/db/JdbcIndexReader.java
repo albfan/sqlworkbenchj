@@ -84,6 +84,11 @@ public class JdbcIndexReader
 		return false;
 	}
 
+	public boolean supportsIndexStatus()
+	{
+		return false;
+	}
+
 	/**
 	 * This method is called after the ResultSet obtained from getIndexInfo() has been processed.
 	 *
@@ -531,6 +536,13 @@ public class JdbcIndexReader
 			sizeList.add(15);
 		}
 
+		if (this.supportsIndexStatus())
+		{
+			columnList.add("STATUS");
+			typeList.add(Types.VARCHAR);
+			sizeList.add(15);
+		}
+
 		if (includeTableName)
 		{
 			columnList.add(0, "TABLE_SCHEMA");
@@ -540,6 +552,7 @@ public class JdbcIndexReader
 			typeList.add(1, Types.VARCHAR);
 			sizeList.add(1, 30);
 		}
+
 		String[] cols = new String[columnList.size()];
 		cols = columnList.toArray(cols);
 
@@ -595,6 +608,10 @@ public class JdbcIndexReader
 			if (this.supportsTableSpaces())
 			{
 				idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_TBL_SPACE, idx.getTablespace());
+			}
+			if (this.supportsIndexStatus())
+			{
+				idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_IDX_STATUS, idx.getStatus());
 			}
 			idxData.getRow(row).setUserObject(idx);
 		}

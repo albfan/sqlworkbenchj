@@ -111,6 +111,12 @@ public class OracleIndexReader
 	}
 
 	@Override
+	public boolean supportsIndexStatus()
+	{
+		return true;
+	}
+
+	@Override
 	public boolean supportsTableSpaces()
 	{
 		// We can only return tablespace information when using our own SQL statement for the index retrieval.
@@ -148,6 +154,7 @@ public class OracleIndexReader
 			"       i.leaf_blocks as pages, \n" +
 			"       null as filter_condition, \n" +
 			"       i.tablespace_name, \n" +
+			"       i.status as index_status, \n" +
 			"       i.partitioned, \n" +
 			(hasCompression ?
 			"       i.compression, \n" +
@@ -223,6 +230,8 @@ public class OracleIndexReader
 			}
 		}
 		index.setTablespace(tblSpace);
+		String status = rs.getString("INDEX_STATUS");
+		index.setStatus(status);
 	}
 
 	public IndexDefinition getIndexDefinition(TableIdentifier table, String indexName, String indexSchema)

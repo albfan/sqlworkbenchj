@@ -46,6 +46,7 @@ public interface IndexReader
 	int COLUMN_IDX_TABLE_INDEXLIST_COL_DEF = 3;
 	int COLUMN_IDX_TABLE_INDEXLIST_TYPE = 4;
 	int COLUMN_IDX_TABLE_INDEXLIST_TBL_SPACE = 5;
+	int COLUMN_IDX_TABLE_INDEXLIST_IDX_STATUS = 6;
 
 	/**
 	 * Replacement for the JDBC's getIndexInfo method.
