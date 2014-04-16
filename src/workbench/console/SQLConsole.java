@@ -398,13 +398,23 @@ public class SQLConsole
 		adjustHistoryDisplay(runner);
 		String arg = SqlUtil.stripVerb(SqlUtil.makeCleanSql(stmt, false, false));
 		int index = -1;
+
 		if (StringUtil.isBlank(arg))
 		{
-			runner.executeScript(stmt);
-			// WbHistory without parameters was executed prompt for an index to be executed
-			System.out.println("");
-			String input = ConsoleReaderFactory.getConsoleReader().readLineWithoutHistory(">>> " + ResourceMgr.getString("TxtEnterStmtIndex") + " >>> ");
-			index = StringUtil.getIntValue(input, -1);
+			RowDisplay display = ConsoleSettings.getInstance().getRowDisplay();
+			try
+			{
+				ConsoleSettings.getInstance().setRowDisplay(RowDisplay.SingleLine);
+				runner.executeScript(stmt);
+				// WbHistory without parameters was executed prompt for an index to be executed
+				System.out.println("");
+				String input = ConsoleReaderFactory.getConsoleReader().readLineWithoutHistory(">>> " + ResourceMgr.getString("TxtEnterStmtIndex") + " >>> ");
+				index = StringUtil.getIntValue(input, -1);
+			}
+			finally
+			{
+				ConsoleSettings.getInstance().setRowDisplay(display);
+			}
 		}
 		else
 		{
