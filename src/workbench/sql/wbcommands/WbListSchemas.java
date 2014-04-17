@@ -96,10 +96,11 @@ public class WbListSchemas
 
 	private DataStore listPgSchemas()
 	{
-		String name = StringUtil.capitalize(currentConnection.getMetadata().getSchemaTerm());
 		String sql =
-			"SELECT n.nspname AS \"" + name + "\",\n" +
-			"       pg_catalog.pg_get_userbyid(n.nspowner) AS \"Owner\"\n" +
+			"SELECT n.nspname AS \"Schema\",\n" +
+			"       pg_catalog.pg_get_userbyid(n.nspowner) AS \"Owner\", \n" +
+			"				pg_catalog.array_to_string(n.nspacl, ', ') as \"Access privileges\", " +
+			"       pg_catalog.obj_description(n.oid, 'pg_namespace') AS \"Description\" " +
 			"FROM pg_catalog.pg_namespace n\n" +
 			"WHERE n.nspname !~ '^pg_' AND n.nspname <> 'information_schema'\n" +
 			"ORDER BY 1";
