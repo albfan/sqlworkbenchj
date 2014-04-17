@@ -323,7 +323,7 @@ SELECT 42 FROM dual;</programlisting>
 			<para>
 				It seems that the necessary API calls to list the tables of the <literal>INFORMATION_SCHEMA</literal>
 				database (which is a database, not a schema - contrary to its name) are not implemented correctly
-				in earlier JDBC drivers of MySQL. Only the driver with the version 5.1.7 returns the list of tables
+				in some versions of the MySQL driver. Currently only the version 5.1.30 is known to return the list of tables
 				of the <literal>INFORMATION_SCHEMA</literal> database.
 			</para>
 		</section>

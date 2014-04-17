@@ -79,7 +79,7 @@ public class OracleDataConverter
 	@Override
 	public boolean convertsType(int jdbcType, String dbmsType)
 	{
-		return (jdbcType == Types.VARBINARY && dbmsType.equals("RAW") ||
+		return (jdbcType == Types.VARBINARY && dbmsType.startsWith("RAW") ||
 			      jdbcType == Types.ROWID);
 	}
 
