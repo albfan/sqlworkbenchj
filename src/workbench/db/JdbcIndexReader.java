@@ -362,10 +362,66 @@ public class JdbcIndexReader
 		return sql;
 	}
 
+	private String getNativeIndexSource(TableIdentifier table, IndexDefinition index)
+	{
+		String sql = metaData.getDbSettings().getRetrieveIndexSourceSql();
+		if (sql == null) return null;
+
+		StringBuilder result = new StringBuilder(250);
+
+		int colIndex = metaData.getDbSettings().getRetrieveIndexSourceCol();
+		boolean needQuotes = metaData.getDbSettings().getRetrieveTableSourceNeedsQuotes();
+
+		WbConnection conn = metaData.getWbConnection();
+
+		sql = TableSourceBuilder.replacePlaceHolder(sql, TableSourceBuilder.SCHEMA_PLACEHOLDER, index.getSchema(), needQuotes, metaData);
+		sql = TableSourceBuilder.replacePlaceHolder(sql, TableSourceBuilder.CATALOG_PLACEHOLDER, index.getCatalog(), needQuotes, metaData);
+		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, index.getName(), needQuotes, metaData);
+		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.FQ_INDEX_NAME_PLACEHOLDER, index.getFullyQualifiedName(conn), needQuotes, metaData);
+		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn), needQuotes, metaData);
+		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.TABLE_NAME_ONLY_PLACEHOLDER, table.getTableName(), needQuotes, metaData);
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("JdbcIndexReader.getNativeIndexSource()", "Using query to retrieve index definition=" + sql);
+		}
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = conn.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+			while (rs.next())
+			{
+				result.append(rs.getString(colIndex));
+			}
+			result.append('\n');
+		}
+		catch (Exception se)
+		{
+			LogMgr.logError("JdbcIndexReader.getNativeIndexSource()", "Error retrieving table source using query: " + sql + "\n", se);
+			return null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		StringUtil.trimTrailingWhitespace(result);
+		if (result.charAt(result.length() -1 ) != ';')
+		{
+			result.append(";\n");
+		}
+
+		return result.toString();
+	}
+
 	@Override
 	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition)
 	{
 		if (indexDefinition == null) return null;
+		String nativeSource = getNativeIndexSource(table, indexDefinition);
+		if (nativeSource != null) return nativeSource;
+
 		StringBuilder idx = new StringBuilder(100);
 
 		String uniqueConstraint = null;
@@ -975,7 +1031,7 @@ public class JdbcIndexReader
 				idx.setIndexType(idxType);
 				idx.setTablespace(tbs);
 				idx.setStatus(status);
-				
+
 				if (isUnique != null)
 				{
 					idx.setUnique(StringUtil.stringToBool(isUnique));

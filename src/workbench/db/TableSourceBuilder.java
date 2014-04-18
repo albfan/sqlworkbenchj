@@ -646,6 +646,12 @@ public class TableSourceBuilder
 		return null;
 	}
 
+	public static String replacePlaceHolder(String sql, String placeHolder, String value, boolean needQuotes, QuoteHandler quoter)
+	{
+		value = (needQuotes ? quoter.quoteObjectname(value) : value);
+		return TemplateHandler.replacePlaceholder(sql, placeHolder, value);
+	}
+
 	public String getNativeTableSource(TableIdentifier table, boolean includeDrop)
 	{
 		String sql = dbConnection.getDbSettings().getRetrieveTableSourceSql();
@@ -663,31 +669,12 @@ public class TableSourceBuilder
 		}
 
 		boolean needQuotes = dbConnection.getDbSettings().getRetrieveTableSourceNeedsQuotes();
+		DbMetadata metaData = dbConnection.getMetadata();
 
-		if (StringUtil.isBlank(table.getCatalog()))
-		{
-			sql = sql.replace(CATALOG_PLACEHOLDER + ".", ""); // in case the sql contains %catalog%.%tablename%
-			sql = sql.replace(CATALOG_PLACEHOLDER, ""); // in case no trailing dot is present (e.g. for a procedure call)
-		}
-		else
-		{
-			String cat = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getCatalog()) : table.getCatalog());
-			sql = sql.replace(CATALOG_PLACEHOLDER, cat);
-		}
-
-		if (StringUtil.isBlank(table.getSchema()))
-		{
-			sql = sql.replace(SCHEMA_PLACEHOLDER + ".", "");
-			sql = sql.replace(SCHEMA_PLACEHOLDER, "");
-		}
-		else
-		{
-			String schema = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getSchema()) : table.getSchema());
-			sql = sql.replace(SCHEMA_PLACEHOLDER, schema);
-		}
-
-		String tname = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getTableName()) : table.getTableName());
-		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tname);
+		sql = replacePlaceHolder(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableName(), needQuotes, metaData);
+		sql = replacePlaceHolder(sql, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConnection), needQuotes, metaData);
+		sql = replacePlaceHolder(sql, SCHEMA_PLACEHOLDER, table.getSchema(), needQuotes, metaData);
+		sql = replacePlaceHolder(sql, CATALOG_PLACEHOLDER, table.getCatalog(), needQuotes, metaData);
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

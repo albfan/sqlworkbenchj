@@ -1273,26 +1273,24 @@
 			<title>Defining the result column</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.sourcecol</literal></para>
 			<para>
-        The source of the table might not be returned in the first column of the result set. If this
-        is the case this property can be used to define the column index in which the table's source
-        is available. The first column has the index 1.
+        By default the source code is assumed to be in the first column of the result. If that is not the case
+        this property can be used to define the column index in which the table's source is available.
+        The first column has the index 1.
 			</para>
     </simplesect>
 
     <para>
-      The following example configures a SQL statement to retrieve the table's source using MySQL's
-      "SHOW CREATE TABLE":
+      The following example configures a SQL statement to retrieve the table source using MySQL's
+      <literal>SHOW CREATE TABLE</literal>:
     </para>
     <programlisting>workbench.db.mysql.retrieve.create.table.query=show create table %catalog%.%table_name%
 workbench.db.mysql.retrieve.create.table.sourcecol=2</programlisting>
 
     <para>
-      The following example configures a SQL statement to retrieve the table's source using Oracle's
+      The following example configures a SQL statement to retrieve the table source using Oracle's
       <ulink url="http://docs.oracle.com/cd/E11882_01/appdev.112/e25788/d_metada.htm">DBMS_METADATA</ulink> package:
-      "SHOW CREATE TABLE":
     </para>
-    <programlisting>workbench.db.oracle.retrieve.create.table.query=select dbms_metadata.get_ddl('TABLE', '%schema%', '%table_name%') from dual;</programlisting>
-
+    <programlisting>workbench.db.oracle.retrieve.create.table.query=select dbms_metadata.get_ddl('TABLE', '%table_name%' ,'%schema%') from dual</programlisting>
     <para>
       If an error occurs during retrieval, &wb-productname; will revert to the built-in table
       source generation.

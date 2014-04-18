@@ -1150,6 +1150,43 @@ public class DbSettings
 		return Settings.getInstance().getIntProperty(prefix + "retrieve.create.table.sourcecol", 1);
 	}
 
+
+	/**
+	 * Returns the result set column in which the index source from getRetrieveIndexSourceSql()
+	 * is returned (if configured)
+	 *
+	 * @return the approriate result set column index if configured, 1 otherwise
+	 * @see #getRetrieveIndexSourceSql()
+	 */
+	public int getRetrieveIndexSourceCol()
+	{
+		return Settings.getInstance().getIntProperty(prefix + "retrieve.create.index.sourcecol", 1);
+	}
+
+	protected boolean getUseCustomizedCreateIndexRetrieval()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "retrieve.create.index.enabled", true);
+	}
+
+	public String getRetrieveIndexSourceSql()
+	{
+		if (!getUseCustomizedCreateIndexRetrieval()) return null;
+		return Settings.getInstance().getProperty(prefix + "retrieve.create.index.query", null);
+	}
+
+	/**
+	 * Returns true if the placeholders for retrieving the index source need to be checked
+	 * for quoting. This is necessary if the SQL is a SELECT statement, but might not
+	 * be necessary if the SQL (defined by getRetrieveIndexSourceSql()) is a procedure call
+	 *
+	 * @return true if quotes might be needed.
+	 * @see #getRetrieveIndexSourceSql()
+	 */
+	public boolean getRetrieveIndexSourceNeedsQuotes()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "retrieve.create.index.checkquotes", true);
+	}
+
 	/**
 	 * Return all configured "CREATE TABLE" types.
 	 *
