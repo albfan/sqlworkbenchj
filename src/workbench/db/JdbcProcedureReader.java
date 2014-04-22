@@ -92,9 +92,9 @@ public class JdbcProcedureReader
 
 			if (ds.getRowCount() > 0)
 			{
-				int type = ds.getValueAsInt(0, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureNoResult);
+				int type = ds.getValueAsInt(0, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
 
-				if (type == procType)
+				if (procType == DatabaseMetaData.procedureResultUnknown || type == procType)
 				{
 					exists = true;
 				}

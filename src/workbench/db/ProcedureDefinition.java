@@ -105,7 +105,7 @@ public class ProcedureDefinition
 		schema = schem;
 		catalog = cat;
 		procName = name;
-		resultType = DatabaseMetaData.procedureNoResult;
+		resultType = DatabaseMetaData.procedureResultUnknown;
 	}
 
 	/**

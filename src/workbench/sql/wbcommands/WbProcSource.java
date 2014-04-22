@@ -67,6 +67,7 @@ public class WbProcSource
 
 		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
 		ProcedureDefinition def = new ProcedureDefinition(object.getCatalog(), object.getSchema(), object.getObjectName());
+
 		if (reader.procedureExists(def))
 		{
 			CharSequence source = def.getSource(currentConnection);
