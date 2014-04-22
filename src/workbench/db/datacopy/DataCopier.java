@@ -650,7 +650,7 @@ public class DataCopier
 
 		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(count);
 		List<ColumnIdentifier> sourceCols = new ArrayList<ColumnIdentifier>(count);
-		TableSelectBuilder builder = new TableSelectBuilder(sourceConnection, "export");
+		TableSelectBuilder builder = new TableSelectBuilder(sourceConnection, "export", TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
 
 		StringBuilder sql = new StringBuilder(count * 25 + 30);
 

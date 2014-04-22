@@ -626,7 +626,7 @@ public class TableDataPanel
 	private String buildSqlForRowCount()
 	{
 		if (this.table == null) return null;
-		TableSelectBuilder builder = new TableSelectBuilder(dbConnection, "tabledata");
+		TableSelectBuilder builder = new TableSelectBuilder(dbConnection, TableSelectBuilder.ROWCOUNT_TEMPLATE_NAME, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
 		String sql = builder.getSelectForCount(table);
 		return sql;
 	}
@@ -645,7 +645,7 @@ public class TableDataPanel
 			tbl = this.table;
 			columns = Collections.emptyList();
 		}
-		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection, "tabledata");
+		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
 		String sql = builder.getSelectForColumns(tbl, columns);
 		if (GuiSettings.getApplySQLSortInDbExplorer() && lastSort != null)
 		{

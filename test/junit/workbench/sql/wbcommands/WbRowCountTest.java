@@ -24,6 +24,7 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 
 import workbench.db.ConnectionMgr;
+import workbench.db.MetaDataSqlManager;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
@@ -150,5 +151,33 @@ public class WbRowCountTest
 
 	}
 
+	@Test
+	public void testRowCountTemplate()
+		throws Exception
+	{
+		WbConnection conn = getTestUtil().getConnection();
+		String dbId = conn.getDbId();
+
+		try
+		{
+			System.setProperty("workbench.db." + dbId + ".tablerowcount.select", "select 42 from " + MetaDataSqlManager.TABLE_NAME_PLACEHOLDER);
+
+			TestUtil.executeScript(conn,
+				"create table foobar (id integer);\n" +
+				"insert into foobar values (1),(1),(1),(1),(1);\n" +
+				"commit;");
+			WbRowCount counter = new WbRowCount();
+			counter.setConnection(conn);
+			StatementRunnerResult result = counter.execute("WbRowCount");
+			assertFalse(result.getDataStores().isEmpty());
+			DataStore counts = result.getDataStores().get(0);
+			assertEquals(1, counts.getRowCount());
+			assertEquals(42, counts.getValueAsInt(0, 0, -1));
+		}
+		finally
+		{
+			System.clearProperty("workbench.db." + dbId + ".tablerowcount.select");
+		}
+	}
 
 }

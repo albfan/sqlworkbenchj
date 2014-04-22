@@ -122,7 +122,7 @@ public class WbRowCount
 		boolean useSavepoint = currentConnection.getDbSettings().useSavePointForDML();
 
 		DataStore rowCounts = buildResultDataStore(currentConnection);
-		TableSelectBuilder builder = new TableSelectBuilder(currentConnection, "tabledata");
+		TableSelectBuilder builder = new TableSelectBuilder(currentConnection, TableSelectBuilder.ROWCOUNT_TEMPLATE_NAME, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
 		currentStatement = currentConnection.createStatementForQuery();
 
 		int tableCount = resultList.getRowCount();

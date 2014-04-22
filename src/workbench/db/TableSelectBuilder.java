@@ -39,6 +39,8 @@ import workbench.util.StringUtil;
 public class TableSelectBuilder
 {
 	public static final String COLUMN_PLACEHOLDER = "${column}";
+	public static final String TABLEDATA_TEMPLATE_NAME = "tabledata";
+	public static final String ROWCOUNT_TEMPLATE_NAME = "tablerowcount";
 
 	private WbConnection dbConnection;
 	private boolean includLobColumns = true;
@@ -48,15 +50,15 @@ public class TableSelectBuilder
 
 	public TableSelectBuilder(WbConnection source)
 	{
-		this(source, null);
-	}
-
-	public void setSortPksFirst(boolean flag)
-	{
-		this.sortPksFirst = flag;
+		this(source, null, null);
 	}
 
 	public TableSelectBuilder(WbConnection source, String templateKey)
+	{
+		this(source, templateKey, null);
+	}
+
+	public TableSelectBuilder(WbConnection source, String templateKey, String fallbackTemplate)
 	{
 		this.dbConnection = source;
 		if (StringUtil.isNonBlank(templateKey))
@@ -64,10 +66,20 @@ public class TableSelectBuilder
 			sqlTemplate = source.getDbSettings().getTableSelectTemplate(templateKey.toLowerCase());
 		}
 
+		if (StringUtil.isBlank(sqlTemplate) && StringUtil.isNonBlank(fallbackTemplate))
+		{
+			sqlTemplate = source.getDbSettings().getTableSelectTemplate(fallbackTemplate.toLowerCase());
+		}
+
 		if (StringUtil.isBlank(sqlTemplate))
 		{
 			sqlTemplate = "SELECT " + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + "\nFROM " + MetaDataSqlManager.TABLE_NAME_PLACEHOLDER;
 		}
+	}
+
+	public void setSortPksFirst(boolean flag)
+	{
+		this.sortPksFirst = flag;
 	}
 
 	/**

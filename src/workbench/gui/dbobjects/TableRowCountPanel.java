@@ -245,7 +245,7 @@ public class TableRowCountPanel
 		try
 		{
 			dbConnection.setBusy(true);
-			TableSelectBuilder builder = new TableSelectBuilder(dbConnection, "tabledata");
+			TableSelectBuilder builder = new TableSelectBuilder(dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
 			currentStatement = dbConnection.createStatementForQuery();
 
 			WbSwingUtilities.showWaitCursor(scrollPane);
