@@ -158,10 +158,23 @@ public class ColumnDropper
 		throws SQLException
 	{
 		if (this.conn == null) return;
-		if (this.table == null) return;
-		if (this.columns == null || this.columns.isEmpty()) return;
+		if (this.table == null)
+		{
+			return;
+		}
+
+		if (this.columns == null || this.columns.isEmpty())
+		{
+			LogMgr.logWarning("ColumnDropper.dropObjects()", "No columns to drop!");
+			return;
+		}
 
 		List<String> statements = getSql(table, columns, conn);
+		if (statements.isEmpty())
+		{
+			LogMgr.logWarning("ColumnDropper.dropObjects()", "No statements generated!");
+			return;
+		}
 
 		try
 		{
@@ -170,7 +183,7 @@ public class ColumnDropper
 			for (String sql : statements)
 			{
 				if (cancelDrop) break;
-				LogMgr.logDebug("ColumnDropper.dropObjects()", "Using sql: " + sql);
+				LogMgr.logDebug("ColumnDropper.dropObjects()", "Statement to drop column(s): " + sql);
 				this.currentStatement.executeUpdate(sql);
 			}
 
