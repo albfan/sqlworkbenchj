@@ -227,10 +227,14 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
   <xsl:text>-- Create/Update functions</xsl:text>
   <xsl:value-of select="$newline"/>
   <xsl:for-each select="/schema-diff/create-proc | /schema-diff/update-proc">
-     <xsl:value-of select="proc-def/proc-source"/>
-     <xsl:value-of select="$proc-terminator"/>
-     <xsl:value-of select="$newline"/>
+    <xsl:value-of select="proc-def/proc-source"/>
+    <xsl:value-of select="$newline"/>
+    <xsl:if test="$proc-terminator != ';'">
+      <xsl:value-of select="$proc-terminator"/>
+    </xsl:if>
+    <xsl:value-of select="$newline"/>
   </xsl:for-each>
+  <xsl:value-of select="$newline"/>
 
   <xsl:text>-- Triggers for modified tables</xsl:text>
   <xsl:value-of select="$newline"/>
@@ -254,6 +258,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:if test="$proc-terminator != ';'">
         <xsl:value-of select="$proc-terminator"/>
       </xsl:if>
+      <xsl:value-of select="$newline"/>
     </xsl:for-each>
   </xsl:for-each>
   <xsl:if test="count(/schema-diff/modify-table) &gt; 0">
@@ -262,13 +267,18 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
 
   <xsl:text>-- Triggers for new tables</xsl:text>
   <xsl:value-of select="$newline"/>
-  <xsl:for-each select="/schema-diff/add-table/trigger-def">
+  <xsl:for-each select="/schema-diff/add-table/table-def/trigger-def">
     <xsl:value-of select="trigger-source"/>
+    <xsl:value-of select="$newline"/>
+    <xsl:if test="$proc-terminator != ';'">
+      <xsl:value-of select="$proc-terminator"/>
+    </xsl:if>
+    <xsl:value-of select="$newline"/>
   </xsl:for-each>
   <xsl:value-of select="$newline"/>
 
-  <xsl:value-of select="$newline"/>
   <xsl:text>COMMIT</xsl:text><xsl:value-of select="$stmt-terminator"/>
+  <xsl:value-of select="$newline"/>
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
@@ -585,10 +595,12 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
   <xsl:text>)</xsl:text>
   <xsl:value-of select="$newline"/>
   <xsl:text>  REFERENCES </xsl:text>
-  <xsl:call-template name="write-object-name">
-    <xsl:with-param name="objectname" select="references/table-schema"/>
-  </xsl:call-template>
-  <xsl:text>.</xsl:text>
+  <xsl:if test="string-length(references/table-schema) &gt; 0">
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="references/table-schema"/>
+    </xsl:call-template>
+    <xsl:text>.</xsl:text>
+  </xsl:if>
   <xsl:call-template name="write-object-name">
     <xsl:with-param name="objectname" select="references/table-name"/>
   </xsl:call-template>
@@ -669,6 +681,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
   <xsl:param name="tablename"/>
   <xsl:variable name="source" select="trigger-source"/>
   <xsl:value-of select="$source"/>
+  <xsl:value-of select="$newline"/>
   <xsl:value-of select="$newline"/>
 </xsl:template>
 

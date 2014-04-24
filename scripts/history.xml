@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="116" date="2014-04-06">
+  <release build="-1" date="2014-04-14">
+    <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
+    <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
+    <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="1" type="fix">WbXslt was no longer working</entry>
+  </release>
+  
+  <release build="116" date="2014-04-14">
     <entry dev-build="14" type="enh">When exporting data as SQL INSERT using WbExport the inclusion of identity columns can now be controlled with a parameter</entry>
     <entry dev-build="14" type="enh">The DbExplorer now supports range types for Postgres</entry>
     <entry dev-build="14" type="enh">A new command WbRowCount is available which counts the rows of several tables (it's the commandline version of the corresponding feature in the DbExplorer)</entry>
