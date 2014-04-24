@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import workbench.sql.wbcommands.console.WbAbout;
+import workbench.sql.wbcommands.console.WbDefineDriver;
 import workbench.sql.wbcommands.console.WbDefineMacro;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisconnect;
@@ -128,6 +129,7 @@ public class CommandTester
 		putVerb(WbListMacros.VERB);
 		putVerb(WbListIndexes.VERB);
 		putVerb(WbRowCount.VERB);
+		putVerb(WbDefineDriver.VERB);
 	}
 
 	private void putVerb(String verb)

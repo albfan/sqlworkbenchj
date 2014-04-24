@@ -52,6 +52,9 @@ public class WbStoreProfile
 	public WbStoreProfile()
 	{
 		super();
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument(ARG_PROFILE_NAME);
+		cmdLine.addArgument(ARG_SAVE_PASSWORD, ArgumentType.BoolArgument);
 	}
 
 	@Override
@@ -65,10 +68,6 @@ public class WbStoreProfile
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_PROFILE_NAME);
-		cmdLine.addArgument(ARG_SAVE_PASSWORD, ArgumentType.BoolArgument);
-
 		String arguments = getCommandLine(sql);
 		cmdLine.parse(arguments);
 
