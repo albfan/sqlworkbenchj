@@ -116,6 +116,7 @@ public class ObjectDropperUI
 		{
 			final String msg = ex.getMessage();
 			WbSwingUtilities.showErrorMessage(dialog, msg);
+			LogMgr.logError("ObjectDropperUI.doDrop()", "Error when dropping objects", ex);
 		}
 		finally
 		{
@@ -229,9 +230,12 @@ public class ObjectDropperUI
 	public void windowClosing(WindowEvent e)
 	{
 		cancel();
-		dialog.setVisible(false);
-		dialog.dispose();
-		dialog = null;
+		if (dialog != null)
+		{
+			dialog.setVisible(false);
+			dialog.dispose();
+			dialog = null;
+		}
 	}
 
 	@Override
@@ -290,7 +294,6 @@ public class ObjectDropperUI
 				// ignore
 			}
 		}
-		dropButton.setEnabled(true);
 	}
 
 	/** This method is called from within the constructor to
