@@ -78,13 +78,6 @@ public class WbXslt
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		if (!aSql.trim().toUpperCase().startsWith(this.getVerb()))
-		{
-			result.addMessage("Wrong command! " + this.getVerb() + " expected.");
-			result.setFailure();
-			return result;
-		}
-
 		String parm = SqlUtil.stripVerb(aSql);
 
 		cmdLine.parse(parm);
