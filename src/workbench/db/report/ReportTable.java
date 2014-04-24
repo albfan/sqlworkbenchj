@@ -102,7 +102,6 @@ public class ReportTable
 	private List<TriggerDefinition> triggers;
 	private ReportTableGrants grants;
 	private final List<ObjectOption> dbmsOptions = new ArrayList<ObjectOption>();
-	private char catalogSeparator;
 
 	/**
 	 * Initialize this ReportTable.
@@ -127,7 +126,6 @@ public class ReportTable
 	{
 		this.includePrimaryKey = includePk;
 		this.includePartitions = includePartitioning;
-		catalogSeparator = conn.getMetadata().getCatalogSeparator();
 
 		// By using getTableDefinition() the TableIdentifier is completely initialized
 		// (mainly it will contain the primary key name, which it doesn't when the TableIdentifier
@@ -210,10 +208,9 @@ public class ReportTable
 		return grants != null;
 	}
 
-	private ReportTable(TableIdentifier tbl, char catSep)
+	private ReportTable(TableIdentifier tbl)
 	{
 		this.table = tbl;
-		this.catalogSeparator = catSep;
 	}
 
 	public List<ObjectOption> getDbmsOptions()
@@ -356,7 +353,16 @@ public class ReportTable
 				}
 				if (def.getForeignTable() == null)
 				{
-					def.setForeignTable(new ReportTable(new TableIdentifier(reftable, conn), catalogSeparator));
+					TableIdentifier tbl = new TableIdentifier(reftable, conn);
+					if (tbl.getSchema() == null)
+					{
+						tbl.setSchema(this.table.getSchema());
+					}
+					if (tbl.getCatalog() == null)
+					{
+						tbl.setCatalog(this.table.getCatalog());
+					}
+					def.setForeignTable(new ReportTable(tbl));
 				}
 				def.addReferenceColumn(col, refcolumn);
 				rcol.setForeignKeyReference(def.getColumnReference(col));
@@ -465,7 +471,7 @@ public class ReportTable
 	public void appendTableNameXml(StringBuilder toAppend, StringBuilder indent)
 	{
 		tagWriter.appendTag(toAppend, indent, TAG_TABLE_CATALOG, SqlUtil.removeObjectQuotes(this.table.getCatalog()));
-		tagWriter.appendTag(toAppend, indent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? SqlUtil.removeObjectQuotes(this.table.getSchema()) : this.schemaNameToUse));
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_SCHEMA, (StringUtil.isBlank(this.schemaNameToUse) ? SqlUtil.removeObjectQuotes(this.table.getSchema()) : this.schemaNameToUse));
 		tagWriter.appendTag(toAppend, indent, TAG_TABLE_NAME, SqlUtil.removeObjectQuotes(this.table.getTableName()));
 		String owner = table.getOwner();
 		if (owner != null)
