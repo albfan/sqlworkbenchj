@@ -163,6 +163,11 @@ public class WbRowCount
 			}
 		}
 
+		if (rowMonitor != null)
+		{
+			rowMonitor.jobFinished();;
+		}
+
 		SortDefinition sortDef = getRowCountSort(sort, rowCounts, currentConnection);
 		if (sortDef.hasColumns())
 		{

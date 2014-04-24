@@ -499,12 +499,14 @@ public class StatementRunner
 	{
 		StringBuilder msg = new StringBuilder(sql.length() + 25);
 		msg.append("Executed: ");
-		msg.append('(');
-		msg.append(conn.getCurrentUser());
-		msg.append('@');
-		msg.append(conn.getUrl());
-		msg.append(')');
-
+		if (conn != null)
+		{
+			msg.append('(');
+			msg.append(conn.getCurrentUser());
+			msg.append('@');
+			msg.append(conn.getUrl());
+			msg.append(')');
+		}
 
 		if (Settings.getInstance().getBoolProperty("workbench.sql.log.statements.clean", false))
 		{
