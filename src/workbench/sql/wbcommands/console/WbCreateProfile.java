@@ -24,11 +24,15 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 
+import workbench.AppArguments;
+import workbench.db.ConnectionProfile;
+import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -45,6 +49,21 @@ public class WbCreateProfile
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(WbStoreProfile.ARG_PROFILE_NAME);
 		cmdLine.addArgument(WbStoreProfile.ARG_SAVE_PASSWORD, ArgumentType.BoolArgument);
+		cmdLine.addArgument(AppArguments.ARG_CONN_AUTOCOMMIT);
+		cmdLine.addArgument(AppArguments.ARG_CONN_DRIVER_CLASS);
+		cmdLine.addArgument(AppArguments.ARG_CONN_PWD);
+		cmdLine.addArgument(AppArguments.ARG_CONN_URL);
+		cmdLine.addArgument(AppArguments.ARG_CONN_USER);
+		cmdLine.addArgument(AppArguments.ARG_CONN_FETCHSIZE);
+		cmdLine.addArgument(AppArguments.ARG_CONN_EMPTYNULL);
+		cmdLine.addArgument(AppArguments.ARG_WORKSPACE);
+		cmdLine.addArgument(AppArguments.ARG_ALT_DELIMITER);
+		cmdLine.addArgument(AppArguments.ARG_CONN_SEPARATE);
+		cmdLine.addArgument(AppArguments.ARG_CONN_TRIM_CHAR);
+		cmdLine.addArgument(AppArguments.ARG_CONN_REMOVE_COMMENTS);
+		cmdLine.addArgument(AppArguments.ARG_READ_ONLY);
+		cmdLine.addArgument(AppArguments.ARG_CONN_PROPS);
+		cmdLine.addArgument("driverName");
 	}
 
 	@Override
@@ -58,6 +77,29 @@ public class WbCreateProfile
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
+
+		cmdLine.parse(getCommandLine(sql));
+		String name = cmdLine.getValue(WbStoreProfile.ARG_PROFILE_NAME);
+		if (StringUtil.isBlank(name))
+		{
+			result.addMessage("Profile name required");
+			result.setFailure();
+			return result;
+		}
+
+		ConnectionProfile profile = BatchRunner.createCmdLineProfile(cmdLine);
+		if (profile == null)
+		{
+			result.addMessage("Invalid arguments");
+			result.setFailure();
+			return result;
+		}
+
+		profile.setTemporaryProfile(false);
+		profile.setName(name);
+		boolean savePwd = cmdLine.getBoolean(WbStoreProfile.ARG_SAVE_PASSWORD, true);
+		profile.setStorePassword(savePwd);
+
 		result.addMessage("Not yet implemented");
 		result.setFailure();
 		return result;
