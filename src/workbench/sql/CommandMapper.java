@@ -109,6 +109,7 @@ import workbench.sql.wbcommands.console.WbDefineMacro;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbDisplay;
+import workbench.sql.wbcommands.console.WbListDrivers;
 import workbench.sql.wbcommands.console.WbListMacros;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbRun;
@@ -197,7 +198,6 @@ public class CommandMapper
 		addCommand(new WbDisconnect());
 		addCommand(new WbDisplay());
 		addCommand(new WbToggleDisplay());
-		addCommand(new WbListProfiles());
 		addCommand(new WbRun());
 		addCommand(new WbHistory());
 		addCommand(new WbListMacros());
@@ -207,6 +207,8 @@ public class CommandMapper
 		addCommand(new WbDeleteProfile());
 		addCommand(new WbCreateProfile());
 		addCommand(new WbDefineDriver());
+		addCommand(new WbListProfiles());
+		addCommand(new WbListDrivers());
 
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.getCommit());

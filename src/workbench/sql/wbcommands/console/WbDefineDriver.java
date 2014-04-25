@@ -26,11 +26,14 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.AppArguments;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.DbDriver;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -58,6 +61,12 @@ public class WbDefineDriver
 	public String getVerb()
 	{
 		return VERB;
+	}
+
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
 	}
 
 	@Override
@@ -125,7 +134,7 @@ public class WbDefineDriver
 		{
 			return result;
 		}
-		
+
 		ConnectionMgr.getInstance().getDrivers().add(drv);
 		ConnectionMgr.getInstance().saveDrivers();
 		result.addMessage(ResourceMgr.getFormattedString("MsgDriverAdded", name));
