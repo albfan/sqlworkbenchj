@@ -517,7 +517,8 @@ public class JdbcIndexReader
 
 	public String getSQLKeywordForType(String type)
 	{
-		if (type == null || type.startsWith("NORMAL")) return "";
+		// fix some Oracle types that are informational only
+		if (type == null || type.startsWith("NORMAL") || "IOT - TOP".equals(type)) return "";
 		return type;
 	}
 
