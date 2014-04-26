@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.AppArguments;
+import workbench.resource.ResourceMgr;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -74,7 +75,7 @@ public class WbCreateProfile
 		cmdLine.addArgument(ARG_DRV_NAME);
 		cmdLine.addArgument(AppArguments.ARG_PROFILE_GROUP);
 	}
-	
+
 	@Override
 	protected boolean isConnectionRequired()
 	{
@@ -175,7 +176,7 @@ public class WbCreateProfile
 
 		ConnectionMgr.getInstance().addProfile(profile);
 		ConnectionMgr.getInstance().saveProfiles();
-		result.addMessage("Profile " + name + " created");
+		result.addMessage(ResourceMgr.getFormattedString("MsgProfileAdded", profile.getKey().toString()));
 		return result;
 	}
 
