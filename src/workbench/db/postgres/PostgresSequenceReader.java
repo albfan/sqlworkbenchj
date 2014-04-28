@@ -188,6 +188,7 @@ public class PostgresSequenceReader
 	public CharSequence getSequenceSource(String catalog, String schema, String aSequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(catalog, schema, aSequence);
+		if (def == null) return "";
 		return def.getSource();
 	}
 
@@ -246,6 +247,7 @@ public class PostgresSequenceReader
 	private SequenceDefinition retrieveSequenceDetails(String schema, String sequence, String comment)
 	{
 		DataStore ds = getRawSequenceDefinition(null, schema, sequence);
+		if (ds == null) return null;
 		SequenceDefinition result = createDefinition(sequence, schema, comment, ds);
 		readRelatedTable(result);
 		readSequenceSource(result); // should be called after readRelatedTable() !!
