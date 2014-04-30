@@ -1578,7 +1578,7 @@ public class SqlPanel
 	@Override
 	public void disconnect()
 	{
-		synchronized (this)
+		synchronized (this.connectionLock)
 		{
 			if (this.dbConnection != null)
 			{
@@ -2013,27 +2013,30 @@ public class SqlPanel
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}
 
-		if (!this.isConnected())
+		synchronized (this.connectionLock)
 		{
-			LogMgr.logError("SqlPanel.startExecution()", "startExecution() was called but no connection available!", null);
-			return;
-		}
-
-		if (this.dbConnection.isBusy())
-		{
-			showLogMessage(ResourceMgr.getString("ErrConnectionBusy"));
-			return;
-		}
-
-		this.executionThread = new WbThread("SQL Execution Thread " + getThreadId())
-		{
-			@Override
-			public void run()
+			if (!this.isConnected())
 			{
-				runStatement(sql, offset, commandAtIndex, highlightError, appendResult);
+				LogMgr.logError("SqlPanel.startExecution()", "startExecution() was called but no connection available!", null);
+				return;
 			}
-		};
-		this.executionThread.start();
+
+			if (this.dbConnection.isBusy())
+			{
+				showLogMessage(ResourceMgr.getString("ErrConnectionBusy"));
+				return;
+			}
+
+			this.executionThread = new WbThread("SQL Execution Thread " + getThreadId())
+			{
+				@Override
+				public void run()
+				{
+					runStatement(sql, offset, commandAtIndex, highlightError, appendResult);
+				}
+			};
+			this.executionThread.start();
+		}
 	}
 
 	private String getThreadId()
@@ -4007,7 +4010,7 @@ public class SqlPanel
 
 	public void setBusy(final boolean busy)
 	{
-		synchronized (this)
+		synchronized (this.connectionLock)
 		{
 			threadBusy = busy;
 			iconHandler.showBusyIcon(busy);
@@ -4051,7 +4054,7 @@ public class SqlPanel
 
 	public void fireDbExecStart()
 	{
-		synchronized (this)
+		synchronized (this.connectionLock)
 		{
 			if (this.execListener != null)
 			{
@@ -4070,7 +4073,7 @@ public class SqlPanel
 
 	public void fireDbExecEnd()
 	{
-		synchronized (this)
+		synchronized (this.connectionLock)
 		{
 			// It is important to first tell the connection that we are finished
 			// otherwise the connection still thinks it's "busy" although it is not

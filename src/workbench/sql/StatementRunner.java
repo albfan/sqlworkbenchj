@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -51,6 +52,7 @@ import workbench.storage.RowActionMonitor;
 
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
+import workbench.storage.DataStore;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -96,6 +98,7 @@ public class StatementRunner
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
 	private final Map<String, String> sessionAttributes = new TreeMap<String, String>();
+	private final	RemoveEmptyResultsAnnotation removeAnnotation = new RemoveEmptyResultsAnnotation();
 
 	// The history provider is here to give SqlCommands access to the command history.
 	// Currently this is only used in WbHistory to show a list of executed statements.
@@ -463,7 +466,7 @@ public class StatementRunner
 
 		if (realSql == null)
 		{
-			// this can happen when the statement hook signalled to no execute the statement
+			// this can happen when the statement hook signalled to not execute the statement
 			this.result = new StatementRunnerResult();
 		}
 		else
@@ -478,6 +481,7 @@ public class StatementRunner
 		else if (this.batchCommand != null && this.currentCommand instanceof WbEndBatch)
 		{
 			this.result = this.batchCommand.executeBatch();
+			removeEmptyResults(result, realSql);
 		}
 
 		if (this.currentConsumer != null && currentCommand != currentConsumer)
@@ -492,6 +496,22 @@ public class StatementRunner
 		if (logAllStatements)
 		{
 			logStatement(realSql, time, currentConnection);
+		}
+	}
+
+	private void removeEmptyResults(StatementRunnerResult result, String sql)
+	{
+		if (removeAnnotation.containsAnnotation(sql))
+		{
+			Iterator<DataStore> itr = result.getDataStores().iterator();
+			while (itr.hasNext())
+			{
+				DataStore ds = itr.next();
+				if (ds.getRowCount() == 0)
+				{
+					itr.remove();
+				}
+			}
 		}
 	}
 

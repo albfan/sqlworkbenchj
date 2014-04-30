@@ -83,52 +83,60 @@ public class BookmarkManager
 		}
 	}
 
-	public synchronized void updateBookmarks(MainWindow win)
+	public void updateBookmarks(MainWindow win)
 	{
 		long start = System.currentTimeMillis();
-		int count = win.getTabCount();
-		for (int i=0; i < count; i++)
+		int count = -1;
+		synchronized (this)
 		{
-			MainPanel panel = win.getSqlPanel(i);
-			if (panel.supportsBookmarks())
+			count = win.getTabCount();
+			for (int i=0; i < count; i++)
 			{
-				updateBookmarks(win, panel);
+				MainPanel panel = win.getSqlPanel(i);
+				if (panel.supportsBookmarks())
+				{
+					updateBookmarks(win, panel);
+				}
 			}
 		}
 		long end = System.currentTimeMillis();
-		LogMgr.logDebug("BookmarkManager.updateBookmarks()", "Parsing bookmarks for all tabs took: " + (end - start) + "ms");
+		LogMgr.logDebug("BookmarkManager.updateBookmarks()", "Parsing bookmarks for " + count + " tabs took: " + (end - start) + "ms");
 	}
 
-	private synchronized BookmarkGroup updateBookmarks(MainWindow win, MainPanel panel)
+	private BookmarkGroup updateBookmarks(MainWindow win, MainPanel panel)
 	{
-		Map<String, BookmarkGroup> windowBookmarks = bookmarks.get(win.getWindowId());
-		if (windowBookmarks == null)
-		{
-			windowBookmarks = new HashMap<String, BookmarkGroup>();
-			bookmarks.put(win.getWindowId(), windowBookmarks);
-		}
-
-		final BookmarkGroup group = windowBookmarks.get(panel.getId());
 		BookmarkGroup updated = null;
 
-		long modified = 0;
-
-		if (group != null)
+		synchronized (this)
 		{
-			modified = group.creationTime();
-		}
-
-		if (group == null || panel.isModifiedAfter(modified))
-		{
-			List<NamedScriptLocation> panelBookmarks = panel.getBookmarks();
-			// if getBoomarks() returns null, the panel does not support bookmarks
-			// (this is essentially only the DbExplorerPanel)
-			if (panelBookmarks != null)
+			Map<String, BookmarkGroup> windowBookmarks = bookmarks.get(win.getWindowId());
+			if (windowBookmarks == null)
 			{
-				updated = new BookmarkGroup(panelBookmarks, panel.getId());
-				// int index = win.getIndexForPanel(panel);
-				updated.setName(panel.getTabTitle());
-				windowBookmarks.put(updated.getGroupId(), updated);
+				windowBookmarks = new HashMap<String, BookmarkGroup>();
+				bookmarks.put(win.getWindowId(), windowBookmarks);
+			}
+
+			final BookmarkGroup group = windowBookmarks.get(panel.getId());
+
+			long modified = 0;
+
+			if (group != null)
+			{
+				modified = group.creationTime();
+			}
+
+			if (group == null || panel.isModifiedAfter(modified))
+			{
+				List<NamedScriptLocation> panelBookmarks = panel.getBookmarks();
+				// if getBoomarks() returns null, the panel does not support bookmarks
+				// (this is essentially only the DbExplorerPanel)
+				if (panelBookmarks != null)
+				{
+					updated = new BookmarkGroup(panelBookmarks, panel.getId());
+					// int index = win.getIndexForPanel(panel);
+					updated.setName(panel.getTabTitle());
+					windowBookmarks.put(updated.getGroupId(), updated);
+				}
 			}
 		}
 		return updated;

@@ -52,6 +52,26 @@ public class AnnotationReader
 		return extractAnnotationValue(token);
 	}
 
+	public boolean containsAnnotation(String sql)
+	{
+		if (StringUtil.isBlank(sql)) return false;
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken token = lexer.getNextToken(true, false);
+
+		while (token != null && token.isComment())
+		{
+			String comment = token.getText();
+			comment = stripCommentChars(comment.trim());
+			int pos = comment.toLowerCase().indexOf(keyword);
+			if (pos >= 0)
+			{
+				return true;
+			}
+			token = lexer.getNextToken(true, false);
+		}
+		return false;
+	}
+
 	protected SQLToken getAnnotationToken(String sql)
 	{
 		if (StringUtil.isBlank(sql)) return null;
