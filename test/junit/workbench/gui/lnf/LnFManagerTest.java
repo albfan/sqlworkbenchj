@@ -27,6 +27,8 @@ import java.util.List;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
 
+import workbench.util.CollectionUtil;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -47,7 +49,8 @@ public class LnFManagerTest
 	public void testSeparatorConvert()
 	{
 		LnFManager mgr = new LnFManager();
-		LnFDefinition lnf = new LnFDefinition("Test", "someclass", "lib1.jar" + LnFDefinition.LNF_PATH_SEPARATOR + "lib2.jar");
+
+		LnFDefinition lnf = new LnFDefinition("Test", "someclass", CollectionUtil.arrayList("lib1.jar", "lib2.jar"));
 		mgr.addDefinition(lnf);
 		mgr.saveLookAndFeelDefinitions();
 
