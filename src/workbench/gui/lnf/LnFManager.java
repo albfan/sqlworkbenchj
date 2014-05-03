@@ -31,6 +31,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import workbench.resource.Settings;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -52,10 +53,18 @@ public class LnFManager
 			String clz = set.getProperty("workbench.lnf." + i + ".class", "");
 			String name = set.getProperty("workbench.lnf." + i + ".name", clz);
 			String libs = set.getProperty("workbench.lnf." + i + ".classpath", "");
-			libs = libs.replace(LnFDefinition.LNF_PATH_SEPARATOR, StringUtil.getPathSeparator());
-			if (clz != null && libs != null)
+			List<String> liblist = null;
+			if (libs.contains(LnFDefinition.LNF_PATH_SEPARATOR))
 			{
-				LnFDefinition lnf = new LnFDefinition(name, clz, libs);
+				liblist = StringUtil.stringToList(libs, LnFDefinition.LNF_PATH_SEPARATOR);
+			}
+			else
+			{
+				liblist = StringUtil.stringToList(libs, StringUtil.getPathSeparator());
+			}
+			if (clz != null && CollectionUtil.isNonEmpty(liblist))
+			{
+				LnFDefinition lnf = new LnFDefinition(name, clz, liblist);
 				lnfList.add(lnf);
 			}
 		}

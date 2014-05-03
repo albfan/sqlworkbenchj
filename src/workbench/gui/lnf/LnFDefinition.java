@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -40,7 +41,7 @@ public class LnFDefinition
 {
 	private String name;
 	private String className;
-	private String library;
+	private List<String> liblist;
 	private boolean isBuiltIn;
 	public static final String LNF_PATH_SEPARATOR = "$|$";
 
@@ -56,12 +57,12 @@ public class LnFDefinition
 		this.isBuiltIn = true;
  	}
 
-	public LnFDefinition(String desc, String clazz, String libs)
+	public LnFDefinition(String desc, String clazz, List<String> libs)
 	{
 		this.name = desc;
 		this.className = (clazz == null ? clazz : clazz.trim());
-		this.library = libs;
 		this.isBuiltIn = (libs == null);
+		this.setLibraries(libs);
 	}
 
 	public boolean isBuiltInLnF()
@@ -73,7 +74,7 @@ public class LnFDefinition
 	{
 		if (this.isBuiltIn) return true;
 		return !StringUtil.isEmptyString(this.name) && !StringUtil.isEmptyString(this.className)
-		       && !StringUtil.isEmptyString(this.library);
+			&& CollectionUtil.isNonEmpty(liblist);
 	}
 
 	@Override
@@ -105,19 +106,25 @@ public class LnFDefinition
 	public List<String> getLibraries()
 	{
 		if (this.isBuiltIn) return Collections.singletonList("rt.jar");
-		if (StringUtil.isBlank(library)) return new ArrayList<String>(0);
-		List<String> result = StringUtil.stringToList(library, LnFDefinition.LNF_PATH_SEPARATOR, true, true, false, false);
-		return result;
+		if (CollectionUtil.isEmpty(liblist)) return new ArrayList<String>(0);
+		return Collections.unmodifiableList(liblist);
 	}
 
 	public void setLibraries(List<String> list)
 	{
-		library = StringUtil.listToString(list, LNF_PATH_SEPARATOR, false);
+		if (list != null)
+		{
+			liblist = new ArrayList<String>(list);
+		}
+		else
+		{
+			liblist = null;
+		}
 	}
 
 	public LnFDefinition createCopy()
 	{
-		return new LnFDefinition(getName(), getClassName(), library);
+		return new LnFDefinition(getName(), getClassName(), liblist);
 	}
 
 	@Override

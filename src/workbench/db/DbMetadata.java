@@ -2400,7 +2400,10 @@ public class DbMetadata
 
 		// If only a single catalog is returned and that is the current one,
 		// is is assumed, that the system does not have catalogs.
-		if (result.size() == 1 && result.get(0).equals(this.getCurrentCatalog()))
+		// this is mainly for Postgres and DB2 which do return the current database as a catalog
+		// but don't actually allow switching databases or cross-database queries.
+		String currentCatalog = this.getCurrentCatalog();
+		if (result.size() == 1 && (currentCatalog == null || result.get(0).equals(currentCatalog)))
 		{
 			result.clear();
 		}
