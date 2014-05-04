@@ -1647,6 +1647,20 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testCreateTableIfNotExists()
+		throws Exception
+	{
+		String sql = "create table if not exists person (id integer not null primary key, firstname varchar(50), lastname varchar(50));";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		String formatted = f.getFormattedSql();
+//		System.out.println("***\n" + formatted + "\n***");
+		assertNotNull(formatted);
+		List<String> lines = StringUtil.getLines(formatted);
+		assertFalse(lines.isEmpty());
+		assertEquals("CREATE TABLE IF NOT EXISTS person", lines.get(0).trim());
+	}
+
+	@Test
 	public void testCreateTable()
 		throws Exception
 	{

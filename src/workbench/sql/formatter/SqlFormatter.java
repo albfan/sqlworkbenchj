@@ -2333,6 +2333,16 @@ public class SqlFormatter
 
 		String name = t.getContents();
 
+		// Postgres, MySQL
+		if (name.equals("IF NOT EXISTS"))
+		{
+			this.appendText(name);
+			this.appendText(" ");
+			t = lexer.getNextToken(false, false);
+			if (t == null) return null;
+			name = t.getContents();
+		}
+
 		// handle those weird non-standard SQL Server temp-table names
 		if (name.equals("#"))
 		{

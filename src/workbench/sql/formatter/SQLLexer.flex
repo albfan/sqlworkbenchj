@@ -164,6 +164,8 @@ keyword=(
 (PRIMARY{wsp}KEY)|
 (SNAPSHOT{wsp}LOG)|
 (FOREIGN{wsp}DATA{wsp}WRAPPER)|
+(IF{wsp}EXISTS)|
+(IF{wsp}NOT{wsp}EXISTS)|
 "AFTER"|
 "AGGREGATE"|
 "ALL"|
