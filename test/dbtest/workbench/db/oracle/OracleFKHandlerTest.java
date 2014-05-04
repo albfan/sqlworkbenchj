@@ -93,6 +93,7 @@ public class OracleFKHandlerTest
 
 		deferrable = fklist.getValueAsString(2, "DEFERRABLE");
 		assertEquals("NOT DEFERRABLE", deferrable);
+		OracleTestUtil.cleanUpTestCase();
 	}
 
 }

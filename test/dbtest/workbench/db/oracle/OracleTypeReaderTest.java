@@ -23,14 +23,19 @@
 package workbench.db.oracle;
 
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.WbConnection;
+
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.ScriptParser;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.WbConnection;
-import workbench.sql.DelimiterDefinition;
-import workbench.sql.ScriptParser;
+
 import static org.junit.Assert.*;
 
 /**
@@ -52,10 +57,7 @@ public class OracleTypeReaderTest
 	{
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null)
-		{
-			return;
-		}
+		assertNotNull("Oracle not available", con);
 
 		String sql =
 			"CREATE TYPE address_type AS OBJECT (street varchar(100), city varchar(50), zipcode varchar(10));\n" +
@@ -89,11 +91,8 @@ public class OracleTypeReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null)
-		{
-			System.out.println("No Oracle connection available. Skipping test");
-			return;
-		}
+		assertNotNull("Oracle not available", con);
+
 		OracleTypeReader reader = new OracleTypeReader();
 
 		List<OracleObjectType> types = reader.getTypes(con, "WBJUNIT", null);
@@ -113,6 +112,7 @@ public class OracleTypeReaderTest
 		String source = typ1.getSource(con).toString();
 		ScriptParser p = new ScriptParser(source);
 		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		System.out.println(source);
 		assertEquals(2, p.getSize());
 
 		types = reader.getTypes(con, "WBJUNIT", "ADDRESS_TYPE");

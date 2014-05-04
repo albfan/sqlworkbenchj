@@ -22,20 +22,25 @@
  */
 package workbench.db.oracle;
 
-import workbench.db.ColumnIdentifier;
-import workbench.gui.completion.SelectAllMarker;
-import workbench.db.TableIdentifier;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
+import workbench.gui.completion.BaseAnalyzer;
+import workbench.gui.completion.OracleExplainAnalyzer;
+import workbench.gui.completion.SelectAllMarker;
+import workbench.gui.completion.SelectAnalyzer;
+import workbench.gui.completion.StatementContext;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.WbConnection;
-import workbench.gui.completion.BaseAnalyzer;
-import workbench.gui.completion.OracleExplainAnalyzer;
-import workbench.gui.completion.SelectAnalyzer;
-import workbench.gui.completion.StatementContext;
+
 import static org.junit.Assert.*;
 
 /**

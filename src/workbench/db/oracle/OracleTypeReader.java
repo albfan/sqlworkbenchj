@@ -29,6 +29,8 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -213,7 +215,7 @@ public class OracleTypeReader
 	{
 		return false;
 	}
-	
+
 	@Override
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
@@ -351,9 +353,19 @@ public class OracleTypeReader
 
 			boolean needsAlternateDelimiter = false;
 
+			int pos = -1;
+			if (source != null)
+			{
+				Pattern p = Pattern.compile("CREATE OR REPLACE\\s+(EDITIONABLE){0,1}\\s*TYPE BODY");
+				Matcher m = p.matcher(source);
+				if (m.find())
+				{
+					pos = m.start();
+				}
+			}
+
 			// the first closing bracket with a semicolon marks the end of the type declaration
 			// so we need to insert an alternate delimiter there.
-			int pos = source == null ? -1 : source.indexOf("CREATE OR REPLACE TYPE BODY");
 			if (pos > 1)
 			{
 				StringBuilder fullSource = new StringBuilder(source);

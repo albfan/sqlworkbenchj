@@ -45,7 +45,6 @@ import workbench.util.SqlUtil;
  */
 public class OracleTestUtil
 {
-	private static boolean isAvailable = true;
 	public static final String SCHEMA_NAME = "WBJUNIT";
 	public static final String SCHEMA2_NAME = "WBJUNIT2";
 
@@ -113,12 +112,9 @@ public class OracleTestUtil
 		TestUtil util = new TestUtil("OracleJUnit");
 		util.prepareEnvironment();
 
-		if (!isAvailable) return;
-
 		WbConnection con = getOracleConnection(username);
 		if (con == null)
 		{
-			isAvailable = false;
 			return;
 		}
 		dropAllObjects(con);
@@ -131,7 +127,6 @@ public class OracleTestUtil
 
 	public static void cleanUpTestCase(String username)
 	{
-		if (!isAvailable) return;
 		WbConnection con = getOracleConnection(username);
 		dropAllObjects(con);
 		ConnectionMgr.getInstance().disconnectAll();
@@ -170,6 +165,7 @@ public class OracleTestUtil
 		catch (Exception e)
 		{
 			con.rollbackSilently();
+			e.printStackTrace();
 		}
 		finally
 		{
