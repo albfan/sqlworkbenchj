@@ -310,7 +310,15 @@ public class WbCall
 
 		if (result.isSuccess())
 		{
-			result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + sqlUsed);
+			LogMgr.logInfo("WbCall.execute()", "Converted procedure call to JDBC syntax: " + sqlUsed);
+			String procname = null;
+			SQLLexer l = new SQLLexer(cleanSql);
+			SQLToken t = l.getNextToken(false, false);
+			if (t != null)
+			{
+				procname = t.getText();
+			}
+			result.addMessage(ResourceMgr.getFormattedString("MsgKnownStatementOK", procname));
 		}
 
 		return result;
