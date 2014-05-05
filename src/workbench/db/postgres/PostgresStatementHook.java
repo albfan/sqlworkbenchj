@@ -154,7 +154,13 @@ public class PostgresStatementHook
 	private synchronized void initialize(WbConnection conn)
 	{
 		if (!isAvailable()) return;
-		
+		if (conn.getUrl().startsWith("jdbc:pgsql"))
+		{
+			// the PG/NG driver does not support the notification classes
+			setUnavailable();
+			return;
+		}
+
 		try
 		{
 			getNotifications = conn.getSqlConnection().getClass().getMethod("getNotifications", (Class[])null);
