@@ -55,8 +55,17 @@ public class ProfileKey
 	 */
 	public ProfileKey(String pname, String pgroup)
 	{
-		if (pgroup != null) group = pgroup.trim();
-		setName(pname);
+		if (pname == null) throw new NullPointerException("Name cannot be null!");
+
+		if (pgroup != null)
+		{
+			this.group = pgroup.trim();
+			this.name = pname.trim();
+		}
+		else
+		{
+			setName(pname);
+		}
 	}
 
 	private void setName(String pname)
@@ -85,8 +94,15 @@ public class ProfileKey
 		}
 	}
 
-	public String getName() { return name; }
-	public String getGroup() { return group; }
+	public String getName()
+	{
+		return name;
+	}
+
+	public String getGroup()
+	{
+		return group;
+	}
 
 	@Override
 	public String toString()
