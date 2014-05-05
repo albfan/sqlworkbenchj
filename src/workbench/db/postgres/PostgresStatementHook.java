@@ -52,7 +52,7 @@ public class PostgresStatementHook
 	private Method getPID;
 	private Method getParameter;
 
-	private boolean available = true;
+	private static boolean available = true;
 
 	public PostgresStatementHook(WbConnection connection)
 	{
@@ -68,7 +68,7 @@ public class PostgresStatementHook
 	@Override
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
 	{
-		if (!available) return;
+		if (!isAvailable()) return;
 
 		List<String> messages = getMessages(runner.getConnection());
 		for (String msg : messages)
@@ -97,7 +97,7 @@ public class PostgresStatementHook
 
 	private List<String> getMessages(WbConnection conn)
 	{
-		if (!available || conn == null) return Collections.emptyList();
+		if (!isAvailable()|| conn == null) return Collections.emptyList();
 
 		List<String> result = new ArrayList<String>(1);
 		try
@@ -121,7 +121,7 @@ public class PostgresStatementHook
 		catch (Throwable th)
 		{
 			LogMgr.logError("PostgresStatementHook.getMessages()","Could not retrieve messages", th);
-			available = false;
+			setUnavailable();
 		}
 
 		return result;
@@ -131,14 +131,14 @@ public class PostgresStatementHook
 		throws Exception
 	{
 		if (notification == null) return null;
-		if (!available) return null;
+		if (!isAvailable()) return null;
 
 		if (getName == null)
 		{
 			initGetters(notification);
 		}
 
-		if (!available) return null;
+		if (!isAvailable()) return null;
 
 		String name = (String)getName.invoke(notification, (Object[])null);
 		Object pid = getPID.invoke(notification, (Object[])null);
@@ -153,6 +153,8 @@ public class PostgresStatementHook
 
 	private synchronized void initialize(WbConnection conn)
 	{
+		if (!isAvailable()) return;
+		
 		try
 		{
 			getNotifications = conn.getSqlConnection().getClass().getMethod("getNotifications", (Class[])null);
@@ -161,7 +163,7 @@ public class PostgresStatementHook
 		{
 			LogMgr.logError("PostgresStatementHook.initialize()", "Could not obtain getNotifications() method", t);
 			getNotifications = null;
-			available = false;
+			setUnavailable();
 		}
 	}
 
@@ -176,8 +178,17 @@ public class PostgresStatementHook
 		catch (Throwable th)
 		{
 			LogMgr.logError("PostgresStatementHook.initGetters()", "Could not obtain methods from PGNotification interface", th);
-			available = false;
+			setUnavailable();
 		}
 	}
 
+	private static synchronized boolean isAvailable()
+	{
+		return available;
+	}
+
+	private static synchronized void setUnavailable()
+	{
+		available = false;
+	}
 }
