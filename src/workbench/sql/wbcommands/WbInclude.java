@@ -63,6 +63,7 @@ public class WbInclude
 	public static final String ARG_REPLACE_IGNORECASE = "ignoreCase";
 	public static final String ARG_CHECK_ESCAPED_QUOTES = "checkEscapedQuotes";
 	public static final String ARG_PRINT_STATEMENTS = "printStatements";
+	public static final String ARG_FILE = "file";
 
 	/*
 	 * I need to store the instance in a variable to be able to cancel the execution.
@@ -74,7 +75,7 @@ public class WbInclude
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("file");
+		cmdLine.addArgument(ARG_FILE);
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CHECK_ESCAPED_QUOTES, ArgumentType.BoolArgument);
@@ -138,7 +139,7 @@ public class WbInclude
 		{
 			clean = getCommandLine(aSql);
 			cmdLine.parse(clean);
-			file = evaluateFileArgument(cmdLine.getValue("file"));
+			file = evaluateFileArgument(cmdLine.getValue(ARG_FILE));
 			if (file == null)
 			{
 				// support a short version of WbInclude that simply specifies the filename
@@ -166,9 +167,9 @@ public class WbInclude
 		}
 
 		List<File> allFiles = null;
-		if (FileUtil.hasWildcard(cmdLine.getValue("file")))
+		if (FileUtil.hasWildcard(cmdLine.getValue(ARG_FILE)))
 		{
-			String search = StringUtil.trimQuotes(cmdLine.getValue("file"));
+			String search = StringUtil.trimQuotes(cmdLine.getValue(ARG_FILE));
 			File f = new File(search);
 			if (f.getParentFile() == null && this.runner != null)
 			{
