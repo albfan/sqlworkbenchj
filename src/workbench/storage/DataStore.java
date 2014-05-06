@@ -856,9 +856,19 @@ public class DataStore
 
 	public void setUpdateTable(TableDefinition tableDef)
 	{
-		this.updateTable = tableDef.getTable();
-		this.resultInfo.setUpdateTable(updateTable);
 		this.missingPkcolumns = new ArrayList<ColumnIdentifier>(0);
+		
+		if (tableDef == null)
+		{
+			this.updateTable = null;
+			this.resultInfo.setUpdateTable(null);
+			return;
+		}
+		else
+		{
+			this.updateTable = tableDef.getTable();
+			this.resultInfo.setUpdateTable(updateTable);
+		}
 
 		List<ColumnIdentifier> columns = tableDef.getColumns();
 		for (ColumnIdentifier column : columns)

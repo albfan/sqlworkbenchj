@@ -204,7 +204,7 @@ public class DwPanel
 	{
 		return wasReUsed;
 	}
-	
+
 	public void dispose()
 	{
 		clearContent();
@@ -554,11 +554,14 @@ public class DwPanel
 	public void defineUpdateTable(TableDefinition table)
 	{
 		DataStore ds = this.dataTable.getDataStore();
-		if (ds != null)
+		if (ds != null && table != null)
 		{
 			ds.setUpdateTable(table);
 		}
-		if (referenceNavigator != null) referenceNavigator.reset();
+		if (referenceNavigator != null)
+		{
+			referenceNavigator.reset();
+		}
 	}
 
 	/**
@@ -572,11 +575,14 @@ public class DwPanel
 	public void setUpdateTableToBeUsed(TableIdentifier table)
 	{
 		DataStore ds = this.dataTable.getDataStore();
-		if (ds != null)
+		if (ds != null && table != null)
 		{
 			ds.setUpdateTableToBeUsed(table);
 		}
-		if (referenceNavigator != null) referenceNavigator.reset();
+		if (referenceNavigator != null)
+		{
+			referenceNavigator.reset();
+		}
 	}
 
 	/**
@@ -589,7 +595,7 @@ public class DwPanel
 		try
 		{
 			DataStore ds = this.dataTable.getDataStore();
-			if (ds != null)
+			if (ds != null && table != null)
 			{
 				ds.setUpdateTable(table);
 			}

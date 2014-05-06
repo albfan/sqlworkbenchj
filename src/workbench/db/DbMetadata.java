@@ -1657,7 +1657,7 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DbMetadata.tableExists()", "Error checking table existence", e);
+			LogMgr.logError("DbMetadata.findObject()", "Error checking table existence", e);
 		}
 		return result;
 	}
@@ -1793,7 +1793,7 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DbMetadata.tableExists()", "Error checking table existence", e);
+			LogMgr.logError("DbMetadata.findTable()", "Error checking table existence", e);
 		}
 		return result;
 	}
