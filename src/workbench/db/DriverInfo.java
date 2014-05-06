@@ -27,13 +27,16 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 import workbench.log.LogMgr;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -43,7 +46,7 @@ import workbench.util.SqlUtil;
 public class DriverInfo
 {
 	private Map<String, String> infoMap = new HashMap<String, String>(30);
-	private List<String> methods = new ArrayList<String>(30);
+	private final Set<String> methods = new TreeSet<String>();
 
 	public DriverInfo(Connection con)
 	{
@@ -53,6 +56,7 @@ public class DriverInfo
 		methods.add("getIdentifierQuoteString");
 		methods.add("getProcedureTerm");
 		methods.add("getSchemaTerm");
+		methods.add("getCatalogTerm");
 		methods.add("allProceduresAreCallable");
 		methods.add("allTablesAreSelectable");
 		methods.add("dataDefinitionCausesTransactionCommit");
@@ -66,6 +70,7 @@ public class DriverInfo
 		methods.add("getMaxColumnsInIndex");
 		methods.add("getMaxTableNameLength");
 		methods.add("getMaxTablesInSelect");
+		methods.add("getMaxStatementLength");
 		methods.add("storesLowerCaseIdentifiers");
 		methods.add("storesUpperCaseIdentifiers");
 		methods.add("storesMixedCaseIdentifiers");
@@ -90,6 +95,14 @@ public class DriverInfo
 		methods.add("supportsMixedCaseIdentifiers");
 		methods.add("supportsMixedCaseQuotedIdentifiers");
 		methods.add("supportsSavepoints");
+		methods.add("supportsSchemasInTableDefinitions");
+		methods.add("supportsSchemasInDataManipulation");
+		methods.add("supportsSchemasInIndexDefinitions");
+		methods.add("supportsSchemasInProcedureCalls");
+		methods.add("supportsCatalogsInTableDefinitions");
+		methods.add("supportsCatalogsInDataManipulation");
+		methods.add("supportsCatalogsInIndexDefinitions");
+		methods.add("supportsCatalogsInProcedureCalls");
 		methods.add("supportsStoredProcedures");
 		methods.add("supportsSubqueriesInComparisons");
 		methods.add("supportsSubqueriesInExists");
@@ -114,6 +127,7 @@ public class DriverInfo
 		{
 			LogMgr.logError("DriverInfo.fillMap()", "Could not obtain MetaData", sql);
 		}
+
 		for (String method : methods)
 		{
 			String value = getValue(metaData, method);
