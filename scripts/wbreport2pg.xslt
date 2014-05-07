@@ -444,7 +444,7 @@
         <xsl:text>smallint</xsl:text>
       </xsl:when>
       <xsl:when test="$type-id = 8">
-        <xsl:text>double</xsl:text>
+        <xsl:text>double precision</xsl:text>
       </xsl:when>
       <xsl:when test="$type-id = 7">
         <xsl:text>real</xsl:text>
