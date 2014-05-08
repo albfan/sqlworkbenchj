@@ -44,14 +44,14 @@ public class PGProcNameTest
 		PGProcName proc = new PGProcName(procname, types);
 		assertEquals("my_func", proc.getName());
 		assertEquals(2, proc.getArguments().size());
-		assertEquals(23, proc.getArguments().get(0).getOid());
+		assertEquals(23, proc.getArguments().get(0).argType.getOid());
 
 		PGProcName proc2 = new PGProcName("func_2", "23;23;1043", "i;i;i", types);
 		assertEquals("func_2", proc2.getName());
 		assertEquals(3, proc2.getArguments().size());
-		assertEquals(23, proc2.getArguments().get(0).getOid());
-		assertEquals(23, proc2.getArguments().get(1).getOid());
-		assertEquals(1043, proc2.getArguments().get(2).getOid());
+		assertEquals(23, proc2.getArguments().get(0).argType.getOid());
+		assertEquals(23, proc2.getArguments().get(1).argType.getOid());
+		assertEquals(1043, proc2.getArguments().get(2).argType.getOid());
 	}
 
 	private Map<Long, PGType> getTypes()

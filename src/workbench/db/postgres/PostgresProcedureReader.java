@@ -382,7 +382,7 @@ public class PostgresProcedureReader
 			sql += "  AND n.nspname = '" + def.getSchema() + "' \n";
 		}
 
-		String oids = name.getOIDs();
+		String oids = name.getInputOIDs();
 		if (StringUtil.isNonBlank(oids))
 		{
 			sql += " AND p.proargtypes = cast('" + oids + "' as oidvector) \n ";
@@ -764,7 +764,7 @@ public class PostgresProcedureReader
 		{
 			sp = connection.setSavepoint();
 
-			String oids = procname.getOIDs();
+			String oids = procname.getInputOIDs();
 			if (StringUtil.isNonBlank(oids))
 			{
 				sql += "  AND p.proargtypes = cast('" + oids + "' as oidvector)";

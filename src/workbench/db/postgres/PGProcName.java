@@ -35,7 +35,7 @@ import workbench.util.StringUtil;
 public class PGProcName
 	implements Comparable<PGProcName>
 {
-	private List<PGType> arguments;
+	private List<PGArg> arguments;
 	private String procName;
 
 	/**
@@ -55,13 +55,14 @@ public class PGProcName
 			procName = fullname.substring(0, pos);
 			String args = fullname.substring(pos + 1, fullname.indexOf(')'));
 			String[] elements = args.split(",");
-			arguments = new ArrayList<PGType>();
+			arguments = new ArrayList<PGArg>();
 			for (String s : elements)
 			{
 				PGType typ = typeMap.getEntryByType(s.trim());
 				if (typ != null)
 				{
-					arguments.add(typ);
+					PGArg arg = new PGArg(typ, "in");
+					arguments.add(arg);
 				}
 			}
 		}
@@ -81,27 +82,45 @@ public class PGProcName
 		}
 	}
 
-	private List<PGType> getTypesFromOid(String oidList, String modes, PGTypeLookup typeMap)
+	private List<PGArg> getTypesFromOid(String oidList, String modes, PGTypeLookup typeMap)
 	{
 		String[] items = oidList.split(";");
 		String[] paramModes = modes.split(";");
 
-		List<PGType> result = new ArrayList<PGType>(items.length);
+		List<PGArg> result = new ArrayList<PGArg>(items.length);
 		for (int i=0; i < items.length; i++)
 		{
 			String arg = items[i];
 			String mode = (i < paramModes.length ? paramModes[i] : null);
 
 			if ("t".equals(mode)) continue;
-			
+
 			Long oid = Long.valueOf(arg.trim());
 			PGType typ = typeMap.getTypeFromOID(oid);
 			if (typ != null)
 			{
-				result.add(typ);
+				PGArg parg = new PGArg(typ, mode);
+				result.add(parg);
 			}
 		}
 		return result;
+	}
+
+	public String getInputOIDs()
+	{
+		if (arguments == null || arguments.isEmpty()) return null;
+		StringBuilder argTypes = new StringBuilder(arguments.size() * 4);
+		int argCount = 0;
+		for (PGArg arg : arguments)
+		{
+			if (arg.argMode != PGArg.ArgMode.out)
+			{
+				if (argCount > 0) argTypes.append(' ');
+				argTypes.append(Long.toString(arg.argType.getOid()));
+				argCount ++;
+			}
+		}
+		return argTypes.toString();
 	}
 
 	public String getOIDs()
@@ -112,12 +131,12 @@ public class PGProcName
 		for (int i=0; i < arguments.size(); i++)
 		{
 			if (i > 0) argTypes.append(' ');
-			argTypes.append(Long.toString(arguments.get(i).getOid()));
+			argTypes.append(Long.toString(arguments.get(i).argType.getOid()));
 		}
 		return argTypes.toString();
 	}
 
-	public List<PGType> getArguments()
+	List<PGArg> getArguments()
 	{
 		return arguments;
 	}
@@ -142,7 +161,7 @@ public class PGProcName
 		for (int i=0; i < arguments.size(); i++)
 		{
 			if (i > 0) b.append(", ");
-			b.append(arguments.get(i).getTypeName());
+			b.append(arguments.get(i).argType.getTypeName());
 		}
 		b.append(')');
 		return b.toString();
