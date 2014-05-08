@@ -177,7 +177,7 @@ public class PostgresProcedureReaderTest
 			" COST 100\n" +
 			" ROWS 1000\n" +
 			"/";
-//		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
+		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
 		assertEquals(expected, source.trim());
 	}
 

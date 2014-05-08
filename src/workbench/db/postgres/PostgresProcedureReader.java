@@ -318,7 +318,7 @@ public class PostgresProcedureReader
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true)
 			  && JdbcUtils.hasMinimumServerVersion(connection, "8.1"))
 		{
-			PGProcName pgName = new PGProcName(def.getDisplayName(), getTypeLookup());
+			PGProcName pgName = new PGProcName(def, getTypeLookup());
 			return getColumns(def.getCatalog(), def.getSchema(), pgName);
 		}
 		else
@@ -339,7 +339,7 @@ public class PostgresProcedureReader
 			return;
 		}
 
-		PGProcName name = new PGProcName(def.getDisplayName(), getTypeLookup());
+		PGProcName name = new PGProcName(def, getTypeLookup());
 
 		String sql =
 			"SELECT p.prosrc, \n" +

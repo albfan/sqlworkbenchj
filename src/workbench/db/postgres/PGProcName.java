@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.db.ColumnIdentifier;
+import workbench.db.ProcedureDefinition;
 import workbench.util.StringUtil;
 
 /**
@@ -38,6 +40,27 @@ public class PGProcName
 	private List<PGArg> arguments;
 	private String procName;
 
+	public PGProcName(ProcedureDefinition def, PGTypeLookup typeMap)
+	{
+		procName = def.getProcedureName();
+		List<ColumnIdentifier> parameters = def.getParameters(null);
+		if (parameters != null)
+		{
+			arguments = new ArrayList<PGArg>(parameters.size());
+			for (ColumnIdentifier col : parameters)
+			{
+				String mode = col.getArgumentMode();
+				PGType typ = typeMap.getEntryByType(col.getDbmsType());
+				PGArg arg = new PGArg(typ, mode);
+				arguments.add(arg);
+			}
+		}
+		else
+		{
+			initFromDisplayName(def.getDisplayName(), typeMap);
+		}
+	}
+	
 	/**
 	 * Initialize a PGProcName from a "full" name that includes the
 	 * procedure's name and all parameter types in brackets.
@@ -49,11 +72,16 @@ public class PGProcName
 	 */
 	public PGProcName(String fullname, PGTypeLookup typeMap)
 	{
-		int pos = fullname.indexOf('(');
+		initFromDisplayName(fullname, typeMap);
+	}
+
+	private void initFromDisplayName(String displayName, PGTypeLookup typeMap)
+	{
+		int pos = displayName.indexOf('(');
 		if (pos > -1)
 		{
-			procName = fullname.substring(0, pos);
-			String args = fullname.substring(pos + 1, fullname.indexOf(')'));
+			procName = displayName.substring(0, pos);
+			String args = displayName.substring(pos + 1, displayName.indexOf(')'));
 			String[] elements = args.split(",");
 			arguments = new ArrayList<PGArg>();
 			for (String s : elements)
@@ -68,7 +96,7 @@ public class PGProcName
 		}
 		else
 		{
-			procName = fullname;
+			procName = displayName;
 			arguments = Collections.emptyList();
 		}
 	}

@@ -32,7 +32,8 @@ class PGArg
 	{
 		in,
 		out,
-		inout;
+		inout,
+		returnValue;
 	};
 
 	public final PGType argType;
