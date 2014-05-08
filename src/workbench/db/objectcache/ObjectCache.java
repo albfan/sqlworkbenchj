@@ -200,8 +200,7 @@ class ObjectCache
 	{
 		if (table == null) return Collections.emptyList();
 
-		TableIdentifier tbl = table.createCopy();
-		tbl.adjustCase(dbConn);
+		TableIdentifier tbl = dbConn.getMetadata().findTable(table, false);
 		List<DependencyNode> referencing = referencingTables.get(tbl);
 		if (referencing == null)
 		{
@@ -218,8 +217,7 @@ class ObjectCache
 	{
 		if (table == null) return Collections.emptyList();
 
-		TableIdentifier tbl = table.createCopy();
-		tbl.adjustCase(dbConn);
+		TableIdentifier tbl = dbConn.getMetadata().findTable(table, false);
 		List<DependencyNode> referenced = referencedTables.get(tbl);
 		if (referenced == null)
 		{

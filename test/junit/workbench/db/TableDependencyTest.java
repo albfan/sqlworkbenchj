@@ -117,7 +117,7 @@ public class TableDependencyTest
 		TestUtil.executeScript(dbConn, script);
 		try
 		{
-			TableIdentifier base = new TableIdentifier("ONE.T1");
+			TableIdentifier base = dbConn.getMetadata().findTable(new TableIdentifier("ONE.T1"));
 			TableDependency dep = new TableDependency(dbConn, base);
 			dep.setRetrieveDirectChildrenOnly(false);
 			dep.readTreeForChildren();
@@ -151,9 +151,10 @@ public class TableDependencyTest
 	{
 		try
 		{
-			TableIdentifier base = new TableIdentifier("BASE");
+			WbConnection dbConn = createRegularDB();
+			TableIdentifier base = dbConn.getMetadata().findTable(new TableIdentifier("BASE"));
 
-			TableDependency dep = new TableDependency(createRegularDB(), base);
+			TableDependency dep = new TableDependency(dbConn, base);
 			dep.readTreeForChildren();
 			DependencyNode root = dep.getRootNode();
 			assertNotNull("No root returned", root);

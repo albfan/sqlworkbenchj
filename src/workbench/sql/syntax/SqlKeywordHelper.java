@@ -43,6 +43,7 @@ import workbench.util.StringUtil;
  *
  * By default the files
  * <ul>
+ *   <li>reserved_words.wb (general SQL reserved words)</li>
  *   <li>keywords.wb (general SQL keywords)</li>
  *   <li>datatypes.wb (SQL datatypes)</li>
  *   <li>functions.wb (SQL functions)</li>
@@ -63,6 +64,16 @@ import workbench.util.StringUtil;
 public class SqlKeywordHelper
 {
 	private String dbId;
+
+	private static class LazyHolder
+	{
+		private static Set<String> keywords = new SqlKeywordHelper().getReservedWords();
+	}
+
+	public static Set<String> getDefaultReservedWords()
+	{
+		return LazyHolder.keywords;
+	}
 
 	/**
 	 * Read dbms-independent keywords.

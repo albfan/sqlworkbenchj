@@ -22,10 +22,12 @@
  */
 package workbench.db;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
+
 import org.junit.*;
 import static org.junit.Assert.*;
+
 import workbench.WbTestCase;
 
 /**
@@ -47,12 +49,13 @@ public class DriverInfoTest
 	{
 		WbConnection con = getTestUtil().getConnection();
 		DriverInfo info = new DriverInfo(con.getSqlConnection());
-		Map<String, String> infoMap = info.getInfoMap();
-		Map<String, String> expected = new HashMap<String, String>();
+		Map<String, String> infoMap = new TreeMap<String, String>(info.getInfoMap());
+		Map<String, String> expected = new TreeMap<String, String>();
 		expected.put("defaultIsolationLevel", "READ COMMITTED");
 		expected.put("maxTableNameLength","0");
 		expected.put("maxTableNameLength","0");
 		expected.put("maxTablesInSelect", "0");
+		expected.put("maxStatementLength", "0");
 		expected.put("supportsUnion", "true");
 		expected.put("supportsSavepoints", "true");
 		expected.put("maxCharLiteralLength", "0");
@@ -86,6 +89,7 @@ public class DriverInfoTest
 		expected.put("supportsUnionAll", "true");
 		expected.put("supportsMixedCaseQuotedIdentifiers", "true");
 		expected.put("schemaTerm", "schema");
+		expected.put("catalogTerm", "catalog");
 		expected.put("extraNameCharacters", "");
 		expected.put("supportsStoredProcedures", "false");
 		expected.put("maxColumnsInIndex", "0");
@@ -101,6 +105,14 @@ public class DriverInfoTest
 		expected.put("supportsFullOuterJoins", "false");
 		expected.put("supportsSubqueriesInIns", "true");
 		expected.put("supportsBatchUpdates", "true");
+		expected.put("supportsCatalogsInDataManipulation", "true");
+		expected.put("supportsCatalogsInIndexDefinitions", "true");
+		expected.put("supportsCatalogsInProcedureCalls", "false");
+		expected.put("supportsCatalogsInTableDefinitions", "true");
+		expected.put("supportsSchemasInDataManipulation", "true");
+		expected.put("supportsSchemasInIndexDefinitions", "true");
+		expected.put("supportsSchemasInProcedureCalls", "true");
+		expected.put("supportsSchemasInTableDefinitions", "true");
 //		System.out.println(infoMap + "\n-----------\n" + expected);
 		assertEquals(expected, infoMap);
 	}

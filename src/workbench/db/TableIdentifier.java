@@ -364,15 +364,15 @@ public class TableIdentifier
 		{
 			if (this.catalog != null)
 			{
-				result.append(SqlUtil.quoteObjectname(this.catalog, preserveQuotes && catalogWasQuoted));
+				result.append(SqlUtil.quoteObjectname(this.catalog, preserveQuotes && catalogWasQuoted, true, '"'));
 				result.append(catalogSeparator);
 			}
 			if (this.schema != null)
 			{
-				result.append(SqlUtil.quoteObjectname(this.schema, preserveQuotes && schemaWasQuoted));
+				result.append(SqlUtil.quoteObjectname(this.schema, preserveQuotes && schemaWasQuoted, true, '"'));
 				result.append(schemaSeparator);
 			}
-			result.append(SqlUtil.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted));
+			result.append(SqlUtil.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted, true, '"'));
 		}
 		else
 		{

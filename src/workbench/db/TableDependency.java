@@ -79,12 +79,24 @@ public class TableDependency
 	public TableDependency(WbConnection con, TableIdentifier tbl)
 	{
 		this(con);
-		setMainTable(tbl);
+		setMainTable(tbl, false);
 	}
 
 	public final void setMainTable(TableIdentifier tbl)
 	{
-		theTable = metaData.findTable(tbl, false);
+		setMainTable(tbl, true);
+	}
+	
+	public final void setMainTable(TableIdentifier tbl, boolean verifyTable)
+	{
+		if (verifyTable)
+		{
+			theTable = metaData.findTable(tbl, false);
+		}
+		else
+		{
+			theTable = tbl.createCopy();
+		}
 		visitedParents.clear();
 		visitedRelations.clear();
 		leafs.clear();

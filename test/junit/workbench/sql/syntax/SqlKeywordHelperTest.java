@@ -26,10 +26,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
+
 
 /**
  *
@@ -46,12 +49,19 @@ public class SqlKeywordHelperTest
 		util = getTestUtil();
 	}
 
+
+	@Test
+	public void testStandardKeywords()
+	{
+		assertTrue(SqlKeywordHelper.getDefaultReservedWords().contains("default"));
+		assertTrue(SqlKeywordHelper.getDefaultReservedWords().contains("by"));
+	}
+
 	@Test
 	public void testGetKeywords()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
 		Collection<String> result = helper.getKeywords();
-		assertTrue(result.size() > 0);
 		assertTrue(result.contains("SELECT"));
 		assertTrue(result.contains("DELETE"));
 		assertTrue(result.contains("UPDATE"));

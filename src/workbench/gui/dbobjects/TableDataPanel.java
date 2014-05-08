@@ -520,7 +520,7 @@ public class TableDataPanel
 			rowCount = -1;
 			error = true;
 			final String msg = ExceptionUtil.getDisplay(e);
-			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression(), e);
+			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression(dbConnection) + " using\n " + sql, e);
 			if (rowCountCancel)
 			{
 				WbSwingUtilities.setLabel(rowCountLabel, ResourceMgr.getString("LblNotAvailable"), null);
