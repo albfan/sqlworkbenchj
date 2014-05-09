@@ -30,6 +30,7 @@ import java.sql.Types;
 import workbench.log.LogMgr;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to control the dbms_output package in Oracle through JDBC
@@ -126,10 +127,11 @@ public class DbmsOutput
 			{
 				stmt.execute();
 				String line = stmt.getString(1);
+				if (line == null) line = "";
 				status = stmt.getInt(2);
-				if (line != null && status == 0)
+				if (status == 0)
 				{
-					result.append(line.trim());
+					result.append(StringUtil.rtrim(line));
 					result.append('\n');
 				}
 			}
