@@ -50,6 +50,10 @@ class PGArg
 		{
 			argMode = ArgMode.out;
 		}
+		else if ("return".equalsIgnoreCase(mode))
+		{
+			argMode = ArgMode.returnValue;
+		}
 		else
 		{
 			argMode = ArgMode.in;

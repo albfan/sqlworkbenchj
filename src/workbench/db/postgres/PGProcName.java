@@ -60,7 +60,7 @@ public class PGProcName
 			initFromDisplayName(def.getDisplayName(), typeMap);
 		}
 	}
-	
+
 	/**
 	 * Initialize a PGProcName from a "full" name that includes the
 	 * procedure's name and all parameter types in brackets.
@@ -141,7 +141,7 @@ public class PGProcName
 		int argCount = 0;
 		for (PGArg arg : arguments)
 		{
-			if (arg.argMode != PGArg.ArgMode.out)
+			if (arg.argMode == PGArg.ArgMode.in || arg.argMode == PGArg.ArgMode.inout)
 			{
 				if (argCount > 0) argTypes.append(' ');
 				argTypes.append(Long.toString(arg.argType.getOid()));

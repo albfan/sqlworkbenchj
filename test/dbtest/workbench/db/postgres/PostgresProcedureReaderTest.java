@@ -142,6 +142,20 @@ public class PostgresProcedureReaderTest
 			" ROWS 1000;\n" +
 			"/\n";
 		TestUtil.executeScript(con, tableFunc, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		String setof =
+			"CREATE OR REPLACE FUNCTION fn_get_data(pid integer, title varchar, some_output text)\n" +
+			"  RETURNS SETOF record\n" +
+			"  LANGUAGE sql\n" +
+			"AS\n" +
+			"$body$\n" +
+			"select 'Arthur', 'Dent';\n" +
+			"$body$\n" +
+			" VOLATILE\n" +
+			" COST 100\n" +
+			" ROWS 1000\n" +
+			"/";
+		TestUtil.executeScript(con, setof, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 	}
 
 	@AfterClass
@@ -149,6 +163,33 @@ public class PostgresProcedureReaderTest
 		throws Exception
 	{
 		PostgresTestUtil.cleanUpTestCase();
+	}
+
+	@Test
+	public void testSetof()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		PostgresProcedureReader reader = new PostgresProcedureReader(con);
+		List<ProcedureDefinition> procs = reader.getProcedureList(null, TEST_ID, "fn_get_data");
+		assertEquals(1, procs.size());
+		ProcedureDefinition def = procs.get(0);
+		assertEquals("fn_get_data", def.getProcedureName());
+		String source = def.getSource(con).toString();
+		String expected =
+			"CREATE OR REPLACE FUNCTION " + TEST_ID + ".fn_get_data(pid integer, title varchar, some_output text)\n" +
+			"  RETURNS SETOF record\n" +
+			"  LANGUAGE sql\n" +
+			"AS\n" +
+			"$body$\n" +
+			"select 'Arthur', 'Dent';\n" +
+			"$body$\n" +
+			" VOLATILE\n" +
+			" COST 100\n" +
+			" ROWS 1000\n" +
+			"/";
+//		System.out.println(source);
+		assertEquals(expected, source.trim());
 	}
 
 	@Test
@@ -177,7 +218,7 @@ public class PostgresProcedureReaderTest
 			" COST 100\n" +
 			" ROWS 1000\n" +
 			"/";
-		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
+//		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
 		assertEquals(expected, source.trim());
 	}
 
