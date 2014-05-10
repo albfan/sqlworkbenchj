@@ -23,6 +23,21 @@
   </void>
 
   <void method="put">
+   <string>SQLBase</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select text FROM SYSADM.SYSTRIGGERS</string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="schemaField">
+     <string>creator</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>NuoDB</string>
    <object id="db2_host_trg_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

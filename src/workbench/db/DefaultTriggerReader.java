@@ -331,7 +331,7 @@ public class DefaultTriggerReader
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("DefaultTriggerReader.getTriggerSource()", "Error reading trigger source", e);
+			LogMgr.logError("DefaultTriggerReader.getTriggerSource()", "Error reading trigger source using query:\n" + query, e);
 			if (this.dbMeta.isPostgres()) try { this.dbConnection.rollback(); } catch (Throwable th) {}
 			result.append(ExceptionUtil.getDisplay(e));
 			SqlUtil.closeAll(rs, stmt);

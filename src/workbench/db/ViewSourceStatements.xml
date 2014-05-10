@@ -18,6 +18,24 @@
   </void>
 
   <void method="put">
+   <string>SQLBase</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select text FROM SYSADM.SYSVIEWS</string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="schemaField">
+     <string>creator</string>
+    </void>
+		 <void property="orderBy">
+			 <string>order by seqno</string>
+		 </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>SAP DB</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

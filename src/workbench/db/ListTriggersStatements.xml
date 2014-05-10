@@ -3,6 +3,28 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>SQLBase</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select trg.name as trigger_name,
+       @decode(actiontime, 'A', 'AFTER', 'BEFORE') as trigger_type,
+       @decode(triggerevent, 'I', 'INSERT', 'U', 'UPDATE', 'D', 'DELETE') as trigger_event,
+       tbl.name as trigger_table
+from sysadm.systriggers trg
+  join sysadm.systables tbl on tbl.snum = trg.tbsnum
+</string>
+    </void>
+    <void property="objectNameField">
+     <string>tbl.name</string>
+    </void>
+    <void property="schemaField">
+     <string>tbl.creator</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>MonetDB</string>
    <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
