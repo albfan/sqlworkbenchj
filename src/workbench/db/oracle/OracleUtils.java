@@ -25,6 +25,7 @@ package workbench.db.oracle;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -210,4 +211,34 @@ public class OracleUtils
 		return (!tablespace.equals(defaultTablespace));
 	}
 
+	public static String trimSQLPlusLineContinuation(String input)
+	{
+		if (StringUtil.isEmptyString(input)) return input;
+		List<String> lines = StringUtil.getLines(input);
+		StringBuilder result = new StringBuilder(input.length());
+		for (String line : lines)
+		{
+			String clean = StringUtil.rtrim(line);
+			if (clean.endsWith("-"))
+			{
+				result.append(clean.substring(0, clean.length() - 1));
+			}
+			else
+			{
+				result.append(line);
+			}
+			result.append('\n');
+		}
+		return result.toString();
+	}
+
+	public static boolean shouldTrimContinuationCharacter(WbConnection conn)
+	{
+		if (conn == null) return false;
+		if (conn.getMetadata().isOracle())
+		{
+			return Settings.getInstance().getBoolProperty("workbench.db.oracle.trim.sqlplus.continuation", false);
+		}
+		return false;
+	}
 }

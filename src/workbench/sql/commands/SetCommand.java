@@ -27,6 +27,7 @@ import java.sql.Savepoint;
 import java.util.List;
 import java.util.Set;
 
+import workbench.db.DbSettings;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -105,7 +106,7 @@ public class SetCommand
 		}
 
 		boolean execSql = true;
-		boolean pgSchemaChange = false;
+		boolean schemaChange = false;
 
 		if (command != null)
 		{
@@ -152,9 +153,9 @@ public class SetCommand
 					result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
 				}
 			}
-			else if (command.equalsIgnoreCase("schema") && currentConnection.getMetadata().isPostgres())
+			else if (command.equalsIgnoreCase("schema") && canChangeSchema())
 			{
-				pgSchemaChange = true;
+				schemaChange = true;
 			}
 			else if (currentConnection.getMetadata().isOracle())
 			{
@@ -209,7 +210,7 @@ public class SetCommand
 			}
 
 			String oldSchema = null;
-			if (pgSchemaChange)
+			if (schemaChange)
 			{
 				oldSchema = currentConnection.getCurrentSchema();
 			}
@@ -223,9 +224,9 @@ public class SetCommand
 			processMoreResults(toExecute, result, hasResult);
 			result.setSuccess();
 
-			if (pgSchemaChange)
+			if (schemaChange)
 			{
-				String newSchema = handlePgSchemaChange(oldSchema);
+				String newSchema = handleSchemaChange(oldSchema);
 				result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", newSchema));
 			}
 			else
@@ -262,6 +263,14 @@ public class SetCommand
 		return result;
 	}
 
+	private boolean canChangeSchema()
+	{
+		if (currentConnection == null) return false;
+		DbSettings set = currentConnection.getDbSettings();
+		if (set == null) return false;
+		return set.supportsSetSchema();
+	}
+
 	private boolean handleFirebird(StatementRunnerResult result, String sql)
 	{
 		SQLLexer lexer = new SQLLexer(sql);
@@ -270,7 +279,7 @@ public class SetCommand
 		// ignore the first verb, that will be the SET
 		token = lexer.getNextToken(false, false);
 		if (token == null) return false;
-		
+
 		if (token.getText().equalsIgnoreCase("plan"))
 		{
 			token = lexer.getNextToken(false, false);
@@ -318,7 +327,7 @@ public class SetCommand
 		return false;
 	}
 
-	private String handlePgSchemaChange(String oldSchema)
+	private String handleSchemaChange(String oldSchema)
 	{
 		boolean busy = currentConnection.isBusy();
 		String newSchema = null;

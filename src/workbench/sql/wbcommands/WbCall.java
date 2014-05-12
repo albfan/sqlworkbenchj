@@ -43,6 +43,7 @@ import workbench.db.DbMetadata;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.oracle.OracleProcedureReader;
+import workbench.db.oracle.OracleUtils;
 
 import workbench.gui.preparedstatement.ParameterEditor;
 
@@ -118,6 +119,10 @@ public class WbCall
 
 		String verbUsed = SqlUtil.getSqlVerb(sql).toUpperCase();
 		String cleanSql = SqlUtil.stripVerb(sql);
+		if (OracleUtils.shouldTrimContinuationCharacter(currentConnection))
+		{
+			cleanSql = OracleUtils.trimSQLPlusLineContinuation(cleanSql);
+		}
 		sqlUsed = getSqlToPrepare(cleanSql, false);
 
 		this.inputParameters.clear();

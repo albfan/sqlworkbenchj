@@ -1867,4 +1867,8 @@ public class DbSettings
 		return result;
 	}
 
+	public boolean supportsSetSchema()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "supports.schema_change", false);
+	}
 }
