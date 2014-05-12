@@ -91,6 +91,7 @@ public class SqlRowDataConverter
 	{
 		super();
 		setOriginalConnection(con);
+		includeIdentityCols = !Settings.getInstance().getGenerateInsertIgnoreIdentity();
 	}
 
 	@Override
@@ -247,7 +248,11 @@ public class SqlRowDataConverter
 
 		StringBuilder result = new StringBuilder();
 		DmlStatement dml = null;
-		this.statementFactory.setIncludeTableOwner(this.includeOwner);
+		
+		this.statementFactory.setIncludeTableOwner(includeOwner);
+		this.statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
+		this.statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols);
+		this.statementFactory.setTableToUse(alternateUpdateTable);
 
 		if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT)
 		{
@@ -458,7 +463,6 @@ public class SqlRowDataConverter
 		{
 			this.alternateUpdateTable = table;
 			this.needsUpdateTable = false;
-			if (this.statementFactory != null) this.statementFactory.setTableToUse(this.alternateUpdateTable);
 		}
 		else
 		{
@@ -479,7 +483,6 @@ public class SqlRowDataConverter
 	public void setIncludeTableOwner(boolean flag)
 	{
 		this.includeOwner = flag;
-		if (this.statementFactory != null) this.statementFactory.setIncludeTableOwner(flag);
 	}
 
 	public void setBlobMode(BlobMode type)
