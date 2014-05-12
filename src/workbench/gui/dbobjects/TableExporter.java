@@ -25,19 +25,24 @@ package workbench.gui.dbobjects;
 import java.awt.Frame;
 import java.sql.SQLException;
 import java.util.List;
+
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.ExportType;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dialogs.export.ExportFileDialog;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.ProgressReporter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -129,6 +134,11 @@ public class TableExporter
 		{
 			progress.finished();
 			progress.dispose();
+		}
+		if (exporter != null && !exporter.isSuccess())
+		{
+			CharSequence msg = exporter.getErrors();
+			WbSwingUtilities.showErrorMessage(msg.toString());
 		}
 	}
 

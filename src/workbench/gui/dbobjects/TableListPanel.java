@@ -2278,7 +2278,10 @@ public class TableListPanel
 
 		TableExporter exporter = new TableExporter(this.dbConnection);
 		Frame f = parentWindow;
-		if (f == null) f = (Frame)SwingUtilities.getWindowAncestor(this);
+		if (f == null)
+		{
+			f = (Frame)SwingUtilities.getWindowAncestor(this);
+		}
 		exporter.exportTables(getSelectedObjects(), f);
 		exporter.startExport(f);
 	}

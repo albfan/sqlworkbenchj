@@ -31,11 +31,13 @@ import java.io.File;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileSystemView;
 
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -57,12 +59,6 @@ public class WbFileChooser
 	public WbFileChooser(File currentDirectoryPath)
 	{
 		super(currentDirectoryPath);
-		init();
-	}
-
-	public WbFileChooser(File currentDirectoryPath, FileSystemView fsv)
-	{
-		super(currentDirectoryPath, fsv);
 		init();
 	}
 
@@ -93,6 +89,7 @@ public class WbFileChooser
 		throws HeadlessException
 	{
 		this.dialog = super.createDialog(parent);
+		ResourceMgr.setWindowIcons(dialog, "workbench");
 		if (windowSettingsId != null)
 		{
 			Settings.getInstance().restoreWindowSize(dialog, windowSettingsId);
@@ -124,6 +121,28 @@ public class WbFileChooser
 		{
 			ValidatingComponent vc = (ValidatingComponent)accessory;
 			return vc.validateInput();
+		}
+		
+		if (!this.isFileSelectionEnabled())
+		{
+			File f = getSelectedFile();
+			String errKey = null;
+			if (!f.isDirectory())
+			{
+				errKey = "ErrExportOutputDirNotDir";
+			}
+
+			if (!f.exists())
+			{
+				errKey = "ErrOutputDirNotFound";
+			}
+
+			if (errKey != null)
+			{
+				String msg = ResourceMgr.getFormattedString(errKey, f.getAbsolutePath());
+				WbSwingUtilities.showErrorMessage(this.dialog, msg);
+				return false;
+			}
 		}
 		return true;
 	}

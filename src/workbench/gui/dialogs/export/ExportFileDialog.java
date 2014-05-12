@@ -27,7 +27,6 @@ import java.awt.EventQueue;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -54,6 +53,7 @@ import workbench.storage.ResultInfo;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 import static workbench.db.exporter.ExportType.*;
 
@@ -294,11 +294,11 @@ public class ExportFileDialog
 		{
 			String filename = null;
 			this.isCancelled = false;
-			File fl = chooser.getSelectedFile();
 
+			WbFile fl = new WbFile(chooser.getSelectedFile());
 			if (this.selectDirectory)
 			{
-				filename = fl.getAbsolutePath();
+				filename = fl.getFullPath();
 				this.exportType = this.exportOptions.getExportType();
 				lastDir = filename;
 			}
@@ -308,7 +308,7 @@ public class ExportFileDialog
 				if (ff instanceof ExtensionFileFilter)
 				{
 					ExtensionFileFilter eff = (ExtensionFileFilter)ff;
-					filename = fl.getAbsolutePath();
+					filename = fl.getFullPath();
 
 					String ext = ExtensionFileFilter.getExtension(fl);
 					if (StringUtil.isEmptyString(ext))
@@ -320,7 +320,7 @@ public class ExportFileDialog
 				}
 				else
 				{
-					filename = fl.getAbsolutePath();
+					filename = fl.getFullPath();
 					this.exportType = this.exportOptions.getExportType();
 				}
 				lastDir = chooser.getCurrentDirectory().getAbsolutePath();
