@@ -8,6 +8,7 @@
     <entry dev-build="1" type="fix">If a profile name contained a forward slash (/) the profile was not selected as the last used profile in the connection dialog</entry>
     <entry dev-build="1" type="fix">WbXslt was no longer working</entry>
     <entry dev-build="1" type="fix">Look and Feel definitions with more than one library were not loaded any more</entry>
+    <entry dev-build="1" type="fix">"Copy as SQL INSERT" would not include auto-generated ("identity") columns</entry>
   </release>
 
   <release build="116" date="2014-04-14">
