@@ -1932,7 +1932,7 @@ WHERE id=42;</programlisting>
 								<para>
                   Show only indexes with the specified name. The parameter value
                   can contain a wildcard, e.g. <literal>-indexName=PK%</literal> lists only indexes
-                  that starting with PK
+                  that start with <literal>PK</literal>
 								</para>
 							</entry>
 						</row>
@@ -2124,7 +2124,7 @@ WHERE id=42;</programlisting>
     </para>
     <para>
       Unlike the <link linkend="dbexplorer-rowcount">Count rows</link> item in the DbExplorer, <literal>WbRowCount</literal>
-      displays the result for all tables at the end, it does not incrementally update the output.
+      displays the result for all tables once it is finished. It does not incrementally update the output.
     </para>
   </section>
 
