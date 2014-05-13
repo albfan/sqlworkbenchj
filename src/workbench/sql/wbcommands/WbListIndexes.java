@@ -58,7 +58,7 @@ public class WbListIndexes
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
-		cmdLine.addArgument(ARG_TABLE_NAME);
+		cmdLine.addArgument(ARG_TABLE_NAME, ArgumentType.TableArgument);
 		cmdLine.addArgument(ARG_INDEX_NAME);
 	}
 
