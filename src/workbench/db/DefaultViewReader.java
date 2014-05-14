@@ -184,11 +184,11 @@ public class DefaultViewReader
 		}
 
 		TableCommentReader commentReader = new TableCommentReader();
-		String tableComment = commentReader.getTableCommentSql(this.connection, view.getTable());
-		if (StringUtil.isNonBlank(tableComment))
+		String viewComment = commentReader.getTableCommentSql(this.connection, view.getTable());
+		if (StringUtil.isNonBlank(viewComment))
 		{
-			result.append(tableComment);
-			if (!tableComment.endsWith(";")) result.append(';');
+			result.append(viewComment);
+			if (!viewComment.endsWith(";")) result.append(';');
 		}
 
 		StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.connection, view.getTable(), view.getColumns());
