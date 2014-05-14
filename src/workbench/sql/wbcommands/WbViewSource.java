@@ -61,10 +61,10 @@ public class WbViewSource
 		String args = getCommandLine(sql);
 
 		TableIdentifier object = new TableIdentifier(args, currentConnection);
-		TableIdentifier view = currentConnection.getMetadata().findTable(object, new String[] { currentConnection.getMetadata().getViewTypeName() });
+		object.setType(currentConnection.getMetadata().getViewTypeName());
 
 		ViewReader reader = ViewReaderFactory.createViewReader(currentConnection);
-		CharSequence source = reader.getExtendedViewSource(view == null ? object : view, false);
+		CharSequence source = reader.getExtendedViewSource(object, false);
 		if (source != null)
 		{
 			result.addMessage(source);
