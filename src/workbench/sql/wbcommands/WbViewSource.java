@@ -22,9 +22,8 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import workbench.db.DbObject;
+
 import workbench.db.TableIdentifier;
-import workbench.db.TriggerDefinition;
 
 import workbench.db.ViewReader;
 import workbench.db.ViewReaderFactory;
@@ -62,9 +61,10 @@ public class WbViewSource
 		String args = getCommandLine(sql);
 
 		TableIdentifier object = new TableIdentifier(args, currentConnection);
+		TableIdentifier view = currentConnection.getMetadata().findTable(object, new String[] { currentConnection.getMetadata().getViewTypeName() });
 
 		ViewReader reader = ViewReaderFactory.createViewReader(currentConnection);
-		CharSequence source = reader.getExtendedViewSource(object, false);
+		CharSequence source = reader.getExtendedViewSource(view == null ? object : view, false);
 		if (source != null)
 		{
 			result.addMessage(source);
