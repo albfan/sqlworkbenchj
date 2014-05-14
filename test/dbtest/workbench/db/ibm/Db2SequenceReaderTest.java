@@ -22,6 +22,8 @@
  */
 package workbench.db.ibm;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import workbench.TestUtil;
@@ -89,6 +91,14 @@ public class Db2SequenceReaderTest
 		String schema = Db2TestUtil.getSchemaName();
 
 		List<SequenceDefinition> seqs = reader.getSequences(null, schema, null);
+		Collections.sort(seqs, new Comparator<SequenceDefinition>()
+		{
+			@Override
+			public int compare(SequenceDefinition o1, SequenceDefinition o2)
+			{
+				return o1.getSequenceName().compareToIgnoreCase(o2.getSequenceName());
+			}
+		});
 		assertNotNull(seqs);
 		assertEquals(2, seqs.size());
 		assertEquals("WB_SEQUENCE_A", seqs.get(0).getSequenceName());

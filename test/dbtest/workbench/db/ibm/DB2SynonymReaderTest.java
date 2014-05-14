@@ -98,7 +98,7 @@ public class DB2SynonymReaderTest
 		throws Exception
 	{
 		WbConnection con = Db2TestUtil.getDb2Connection();
-		if (con == null) fail("No connection available");
+		assertNotNull("No connection available", con);
 
 		SynonymReader reader = con.getMetadata().getSynonymReader();
 		assertNotNull(reader);

@@ -89,9 +89,11 @@ public class Db2TestUtil
 			String dbname = getProperty("wbjunit.db2.testdb", "tkdb");
 			String username = getProperty("wbjunit.db2.user", "thomas");
 			String pwd = getProperty("wbjunit.db2.password", "welcome");
+			String port = getProperty("wbjunit.db2.port", "50001");
+			String host = getProperty("wbjunit.db2.host", "db2wbtest");
 
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:db2://localhost:50000/" + dbname + "' -username=" + username + " -password=" + pwd + " -driver=com.ibm.db2.jcc.DB2Driver");
+			parser.parse("-url='jdbc:db2://" + host + ":" + port + "/" + dbname + "' -username=" + username + " -password=" + pwd + " -driver=com.ibm.db2.jcc.DB2Driver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName("WBJUnitDB2");
 			prof.addConnectionProperty("retrieveMessagesFromServerOnGetMessage", "true");
@@ -101,6 +103,7 @@ public class Db2TestUtil
 		}
 		catch (Throwable th)
 		{
+			th.printStackTrace();
 			isAvailable = false;
 			return null;
 		}
