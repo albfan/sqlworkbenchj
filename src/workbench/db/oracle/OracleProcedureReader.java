@@ -219,7 +219,7 @@ public class OracleProcedureReader
 	{
 		if (useCustomSql())
 		{
-			String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", "PACKAGE", meta.getSchemaTerm().toUpperCase(), "REMARKS", "STATUS"};
+			String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", "PACKAGE", "SCHEMA", "REMARKS", "STATUS"};
 			int[] types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 			int[] sizes = new int[] {30,12,10,10,20,20};
 			DataStore ds = new DataStore(cols, types, sizes);
@@ -320,13 +320,33 @@ public class OracleProcedureReader
 		return JdbcUtils.hasMinimumServerVersion(connection, "10.0") && Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", true);
 	}
 
+	private DataStore getProceduresFromJdbc(String catalog, String schema, String name)
+		throws SQLException
+	{
+		DataStore result = super.getProcedures(catalog, schema, name);
+		int count = result.getRowCount();
+
+		// in order to display package source correctly, each row must have a proper ProcedureDefinition as the user object
+		for (int row = 0; row < count; row ++)
+		{
+			String procName = result.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+			String procSchema = result.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+			String packageName = result.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+			String remark = result.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
+			int type = result.getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureNoResult);
+			ProcedureDefinition def = ProcedureDefinition.createOracleDefinition(procSchema, procName, packageName, type, remark);
+			result.getRow(row).setUserObject(def);
+		}
+		return result;
+	}
+
 	@Override
 	public DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException
 	{
 		if (!useCustomSql())
 		{
-			return super.getProcedures(catalog, schema, name);
+			return getProceduresFromJdbc(catalog, schema, name);
 		}
 
 		schema = DbMetadata.cleanupWildcards(schema);
