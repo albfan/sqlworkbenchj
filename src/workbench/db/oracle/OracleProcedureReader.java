@@ -317,7 +317,7 @@ public class OracleProcedureReader
 	private boolean useCustomSql()
 	{
 		if (connection == null) return false;
-		return JdbcUtils.hasMinimumServerVersion(connection, "10.0") && Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", true);
+		return JdbcUtils.hasMinimumServerVersion(connection, "9.0") && Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", true);
 	}
 
 	private DataStore getProceduresFromJdbc(String catalog, String schema, String name)
@@ -467,7 +467,9 @@ public class OracleProcedureReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("JdbcProcedureReader.getProcedures()", "Error while retrieving procedures", e);
+			LogMgr.logError("JdbcProcedureReader.getProcedures()", "Error while retrieving procedures using SQL:\n" + sql, e);
+			// assume the SQL statement does not work with the Oracle version in use and disable the custom SQL for now
+			System.setProperty("workbench.db.oracle.procedures.custom_sql", "false");
 		}
 		finally
 		{
