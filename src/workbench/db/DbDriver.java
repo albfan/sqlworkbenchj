@@ -388,6 +388,16 @@ public class DbDriver
 		return copy;
 	}
 
+	private boolean useEmptyStringForEmptyPassword()
+	{
+		return Settings.getInstance().getBoolProperty(this.driverClass + ".use.emptypassword", false);
+	}
+
+	private boolean useEmptyStringForEmptyUser()
+	{
+		return Settings.getInstance().getBoolProperty(this.driverClass + ".use.emptyuser", false);
+	}
+
 	public Connection connect(String url, String user, String password, String id, Properties connProps)
 		throws ClassNotFoundException, SQLException
 	{
@@ -397,8 +407,23 @@ public class DbDriver
 			loadDriverClass();
 
 			Properties props = new Properties();
-			if (StringUtil.isNonBlank(user)) props.put("user", user);
-			if (StringUtil.isNonBlank(password)) props.put("password", password);
+			if (StringUtil.isNonBlank(user))
+			{
+				props.put("user", user);
+			}
+			else if (useEmptyStringForEmptyUser())
+			{
+				props.put("user", "");
+			}
+
+			if (StringUtil.isNonBlank(password))
+			{
+				props.put("password", password);
+			}
+			else if (useEmptyStringForEmptyPassword())
+			{
+				props.put("password", "");
+			}
 
 			// copy the user defined connection properties into the actually used ones!
 			if (connProps != null)

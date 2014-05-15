@@ -184,7 +184,7 @@ public class ResultInfo
 			ColumnIdentifier col = new ColumnIdentifier(name);
 			col.setPosition(i+1);
 
-			if (!name.equals(alias))
+			if (StringUtil.isNonEmpty(alias) && !name.equals(alias))
 			{
 				// only set the alias if it's different than the name
 				col.setColumnAlias(alias);

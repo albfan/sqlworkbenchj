@@ -52,6 +52,8 @@ public class ClasspathEditor
 	private String lastDirProperty;
 	private String lastDir = null;
 	private List<ActionListener> listener = new ArrayList<ActionListener>();
+	private String replacmentKey;
+	private String replacementDirName;
 
 	public ClasspathEditor()
 	{
@@ -61,6 +63,12 @@ public class ClasspathEditor
 		btnDown.addActionListener(this);
 		btnRemove.addActionListener(this);
 		btnAdd.addActionListener(this);
+	}
+
+	public void setReplacementDir(String key, String dir)
+	{
+		this.replacmentKey = key;
+		this.replacementDirName = dir;
 	}
 
 	public void restoreSettings()

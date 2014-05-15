@@ -52,7 +52,7 @@ public class SqlFormatter
 		"SELECT", "SET", "FROM", "WHERE", "ORDER BY", "GROUP BY", "HAVING", "VALUES",
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "REFRESH", "AS", "FOR", "JOIN",
 		"INNER JOIN", "RIGHT OUTER JOIN", "LEFT OUTER JOIN", "CROSS JOIN", "LEFT JOIN",
-		"RIGHT JOIN", "START WITH", "CONNECT BY", "OUTER APPLY", "CROSS APPLY", "WITH");
+		"RIGHT JOIN", "START WITH", "CONNECT BY", "OUTER APPLY", "CROSS APPLY");
 
 	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.unmodifiableSet(
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "AS", "FOR");
@@ -1531,6 +1531,7 @@ public class SqlFormatter
 		CommandTester wbTester = new CommandTester();
 
 		List<String> insertColumns = new ArrayList<String>();
+		boolean firstToken = true;
 
 		while (t != null)
 		{
@@ -1574,11 +1575,12 @@ public class SqlFormatter
 					this.appendNewline();
 				}
 
-				if (word.equals("WITH"))
+				if (word.equals("WITH") && firstToken)
 				{
 					lastToken = t;
 					t = this.processCTE(t);
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1587,6 +1589,7 @@ public class SqlFormatter
 					lastToken = t;
 					t = this.processMerge(t);
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1595,6 +1598,7 @@ public class SqlFormatter
 					lastToken = t;
 					t = this.processList(t,"SELECT".length() + 1, SELECT_TERMINAL);
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1603,6 +1607,7 @@ public class SqlFormatter
 					lastToken = t;
 					t = this.processList(t,"SET".length() + 4, SET_TERMINAL);
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1611,6 +1616,7 @@ public class SqlFormatter
 					lastToken = t;
 					t = this.processCreate();
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1619,6 +1625,7 @@ public class SqlFormatter
 					lastToken = t;
 					t = this.processGrantRevoke(t);
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1627,6 +1634,7 @@ public class SqlFormatter
 					lastToken = t;
 					t = this.processFrom(t);
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1635,6 +1643,7 @@ public class SqlFormatter
 					lastToken = t;
 					t = this.processList(lastToken, (word + " ").length(), GROUP_BY_TERMINAL);
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1643,6 +1652,7 @@ public class SqlFormatter
 					lastToken = t;
 					t = this.processHaving(lastToken);
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1658,6 +1668,7 @@ public class SqlFormatter
 					lastToken = t;
 					t = this.processWhere(t);
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1665,6 +1676,7 @@ public class SqlFormatter
 				{
 					lastToken = t;
 					t = this.processIntoKeyword(insertColumns);
+					firstToken = false;
 					continue;
 				}
 
@@ -1677,6 +1689,7 @@ public class SqlFormatter
 						t = this.processBracketList(indentInsert ? 2 : 0, getColumnsPerInsert(), insertColumns, false);
 					}
 					if (t == null) return;
+					firstToken = false;
 					continue;
 				}
 
@@ -1684,7 +1697,6 @@ public class SqlFormatter
 				{
 					t = this.processWbCommand(word);
 				}
-
 			}
 			else
 			{
@@ -1716,6 +1728,7 @@ public class SqlFormatter
 			}
 			lastToken = t;
 			t = this.lexer.getNextToken(true, false);
+			firstToken = false;
 		}
 	}
 
@@ -1909,6 +1922,11 @@ public class SqlFormatter
 
 			if (WHERE_TERMINAL.contains(verb))
 			{
+				if ("WITH".equals(verb))
+				{
+					// for e.g. view definitions using "WITH CHECK OPTION"
+					this.appendNewline();
+				}
 				return t;
 			}
 

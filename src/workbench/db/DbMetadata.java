@@ -839,7 +839,7 @@ public class DbMetadata
 
 			// If the current schema is not the one of the table, the schema is needed in DML statements
 			// to avoid wrong implicit schema resolution
-			if (!currentSchema.equalsIgnoreCase(tblSchema)) return true;
+			if (currentSchema != null && !currentSchema.equalsIgnoreCase(tblSchema)) return true;
 
 			// otherwise check if the schema should be ignored
 		  return (!ignoreSchema(tblSchema, currentSchema));

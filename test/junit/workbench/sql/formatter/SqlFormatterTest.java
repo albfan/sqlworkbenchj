@@ -2105,4 +2105,22 @@ public class SqlFormatterTest
 		}
 	}
 
+	@Test
+	public void testNolock()
+		throws Exception
+	{
+		String sql =
+		  "select * \n" +
+			"from foobar with (nolock) \n" +
+			"where (id is null or id in (select y from bar))";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"SELECT *\n" +
+			"FROM foobar WITH (nolock)\n" +
+			"WHERE (id IS NULL OR id IN (SELECT y FROM bar))";
+//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+			assertEquals(expected, formatted);
+	}
+
 }

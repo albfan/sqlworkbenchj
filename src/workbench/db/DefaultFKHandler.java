@@ -23,8 +23,6 @@
 package workbench.db;
 
 import java.sql.DatabaseMetaData;
-import static java.sql.DatabaseMetaData.*;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -34,6 +32,8 @@ import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 
 import workbench.util.SqlUtil;
+
+import static java.sql.DatabaseMetaData.*;
 
 /**
  * Retrieve FK information from the database.
