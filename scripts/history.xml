@@ -10,6 +10,7 @@
     <entry dev-build="1" type="fix">Look and Feel definitions with more than one library were not loaded any more</entry>
     <entry dev-build="1" type="fix">"Copy as SQL INSERT" would not include auto-generated ("identity") columns</entry>
     <entry dev-build="1" type="fix">For DB2 comments and grants on views where not displayed in the generated source code</entry>
+    <entry dev-build="1" type="fix">For Oracle 9.x the source code for pacakges was not displayed</entry>
   </release>
 
   <release build="116" date="2014-04-14">
