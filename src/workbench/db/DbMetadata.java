@@ -868,10 +868,11 @@ public class DbMetadata
 		String cat = table.getCatalog();
 		if (this.isExcel)
 		{
+			if (StringUtil.isEmptyString(cat)) return false;
+
 			String currentCat = getCurrentCatalog();
-			if (StringUtil.isEmptyString(cat) && StringUtil.isEmptyString(currentCat)) return true;
-			if (StringUtil.isEmptyString(cat) || StringUtil.isEmptyString(currentCat)) return false;
-			
+			if (StringUtil.isEmptyString(currentCat)) return true;
+
 			// Excel puts the directory into the catalog
 			// so we need to normalize the directory name
 			File c1 = new File(cat);
@@ -2322,7 +2323,7 @@ public class DbMetadata
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("DbMetadata.getCurrentCatalog()", "Error retrieving current catalog using query=[" + query + "]", e);
+				LogMgr.logWarning("DbMetadata.getCurrentCatalog()", "Error retrieving current catalog using query:\n" + query, e);
 				catalog = null;
 			}
 			finally
