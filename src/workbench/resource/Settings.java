@@ -157,6 +157,8 @@ public class Settings
 
 	public static final String PROP_JOIN_COMPLETION_USE_PARENS = "workbench.gui.sql.join.completion.use.parenthesis";
 	public static final String PROP_JOIN_COMPLETION_PREFER_USING = "workbench.gui.sql.join.completion.prefer.using";
+
+	public static final String PROP_LIBDIR = "workbench.libdir";
 	// </editor-fold>
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
@@ -167,7 +169,7 @@ public class Settings
 	public static final String DOS_LINE_TERMINATOR_PROP_VALUE = "crlf";
 	public static final String DEFAULT_LINE_TERMINATOR_PROP_VALUE = "default";
 
-	private static final String LIB_DIR_KEY = "%LibDir%";
+	public static final String LIB_DIR_KEY = "%LibDir%";
 	private static final String TOOLS_EXE = ".executable";
 	private static final String TOOLS_NAME = ".name";
 	private static final String TOOLS_PARAM = ".parameter";
@@ -577,7 +579,7 @@ public class Settings
 
 	public WbFile getLibDir()
 	{
-		String dir = System.getProperty("workbench.libdir", getProperty("workbench.libdir", null));
+		String dir = getProperty(PROP_LIBDIR, null);
 		dir = FileDialogUtil.replaceConfigDir(dir);
 		if (dir == null) return new WbFile(getConfigDir());
 		return new WbFile(dir);

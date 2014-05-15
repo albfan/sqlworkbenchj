@@ -20,6 +20,7 @@
 
 package workbench.gui.profiles;
 
+import workbench.resource.Settings;
 import workbench.util.WbFile;
 
 /**
@@ -43,19 +44,34 @@ public class LibraryElement
 		{
 			// this is for the Look & Feel dialog
 			// otherwise the "rt.jar" would be shown with a wrong file path
-			displayString = file.getName();
-			fullPath = file.getName();
+			displayString = fname;
+			fullPath = fname;
 		}
 		else
 		{
-			fullPath = file.getFullPath();
-			if (file.exists())
+			String libdir = Settings.getInstance().getProperty(Settings.PROP_LIBDIR, null);
+			String dir = file.getParent();
+			if (libdir != null && dir != null && dir.toLowerCase().contains(Settings.LIB_DIR_KEY.toLowerCase()))
 			{
-				displayString = fullPath;
+				displayString = Settings.LIB_DIR_KEY + "/" + fname;
+				fullPath = Settings.LIB_DIR_KEY + "/" + fname;
+				WbFile f = new WbFile(Settings.getInstance().getLibDir(), fname);
+				if (!f.exists())
+				{
+					displayString = "<html><span style='color:red'><i>" + displayString + "</i></span></html>";
+				}
 			}
 			else
 			{
-				displayString = "<html><span style='color:red'><i>" + file.getName() + "</i></span></html>";
+				fullPath = file.getFullPath();
+				if (file.exists())
+				{
+					displayString = fullPath;
+				}
+				else
+				{
+					displayString = "<html><span style='color:red'><i>" + fullPath + "</i></span></html>";
+				}
 			}
 		}
 	}
