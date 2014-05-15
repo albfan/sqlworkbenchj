@@ -869,6 +869,9 @@ public class DbMetadata
 		if (this.isExcel)
 		{
 			String currentCat = getCurrentCatalog();
+			if (StringUtil.isEmptyString(cat) && StringUtil.isEmptyString(currentCat)) return true;
+			if (StringUtil.isEmptyString(cat) || StringUtil.isEmptyString(currentCat)) return false;
+			
 			// Excel puts the directory into the catalog
 			// so we need to normalize the directory name
 			File c1 = new File(cat);
