@@ -1011,6 +1011,7 @@ public class WbImport
 		if (name.endsWith(".csv")) return "text";
 		if (name.endsWith(".xls")) return "xls";
 		if (name.endsWith(".xlsx")) return "xlsx";
+		if (name.endsWith(".ods")) return "ods";
 		return null;
 	}
 }

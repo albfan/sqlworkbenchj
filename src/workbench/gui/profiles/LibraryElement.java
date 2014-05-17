@@ -20,7 +20,9 @@
 
 package workbench.gui.profiles;
 
-import workbench.resource.Settings;
+
+import workbench.gui.components.LibListUtil;
+
 import workbench.util.WbFile;
 
 /**
@@ -42,28 +44,31 @@ public class LibraryElement
 		String fname = file.getName();
 		if (fname.equalsIgnoreCase("rt.jar"))
 		{
-			// this is for the Look & Feel dialog
+			// this is for the Look & Feel dialog and the JDBC/ODBC bridge driver
 			// otherwise the "rt.jar" would be shown with a wrong file path
 			displayString = fname;
 			fullPath = fname;
 		}
 		else
 		{
-			String libdir = Settings.getInstance().getProperty(Settings.PROP_LIBDIR, null);
-			String dir = file.getParent();
-			if (libdir != null && dir != null && dir.toLowerCase().contains(Settings.LIB_DIR_KEY.toLowerCase()))
+			LibListUtil util = new LibListUtil();
+			WbFile realFile = util.replacePlaceHolder(file);
+
+			// if replacePlaceHolder() returned the same file, no placeholder is present
+			if (realFile == file)
 			{
-				displayString = Settings.LIB_DIR_KEY + "/" + fname;
-				fullPath = Settings.LIB_DIR_KEY + "/" + fname;
-				WbFile f = new WbFile(Settings.getInstance().getLibDir(), fname);
-				if (!f.exists())
+				if (file.isAbsolute())
 				{
-					displayString = "<html><span style='color:red'><i>" + displayString + "</i></span></html>";
+					fullPath = file.getFullPath();
 				}
-			}
-			else
-			{
-				fullPath = file.getFullPath();
+				else
+				{
+					// don't use getFullPath() on files that are not absolute filenames
+					// otherwise driver templates that don't contain a path to the driver jar
+					// would show up as defined in the current directory which is quite confusing.
+					fullPath = file.getName();
+				}
+
 				if (file.exists())
 				{
 					displayString = fullPath;
@@ -71,6 +76,16 @@ public class LibraryElement
 				else
 				{
 					displayString = "<html><span style='color:red'><i>" + fullPath + "</i></span></html>";
+				}
+			}
+			else
+			{
+				// we can't use WbFile.getFullPath() or File.getAbsolutePath() due to the placeholder
+				fullPath = file.getParent() + System.getProperty("file.separator") + file.getName();
+				displayString = fullPath;
+				if (!realFile.exists())
+				{
+					displayString = "<html><span style='color:red'><i>" + displayString + "</i></span></html>";
 				}
 			}
 		}

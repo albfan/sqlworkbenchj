@@ -206,11 +206,12 @@ public class ClasspathEditor
 		int answer = jf.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
+			LibListUtil util = new LibListUtil();
 			File[] selectedFiles = jf.getSelectedFiles();
 			removeSelected();
 			for (File f : selectedFiles)
 			{
-				WbFile wbf = new WbFile(f);
+				WbFile wbf = util.replaceLibDir(new WbFile(f));
 				model.addElement(new LibraryElement(wbf));
 			}
 			lastDir = selectedFiles[0].getParent();
