@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-04-14">
+  <release build="-1" date="2014-05-20">
     <entry dev-build="1" type="enh">For Postgres 9.4 the new WITH CHECK OPTION is now shown in the view's source</entry>
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
