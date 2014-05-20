@@ -3094,17 +3094,8 @@ public class SqlPanel
 				firstResultIndex = 0;
 			}
 
-			String cleanSql = SqlUtil.makeCleanSql(script, false);
-			String macro = MacroManager.getInstance().getMacroText(cleanSql);
-			if (macro != null)
-			{
-				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + cleanSql + "\n");
-				script = macro;
-				macroRun = true;
-			}
-
 			// executeMacro() will set this variable so that we can
-			// log the macro statement here. Otherwise we wouldn know at this point
+			// log the macro statement here. Otherwise we wouldn't know at this point
 			// that a macro is beeing executed
 			if (this.macroExecution)
 			{
@@ -3214,6 +3205,14 @@ public class SqlPanel
 					currentSql = fixNLPattern.matcher(currentSql).replaceAll(nl);
 				}
 				if (currentSql.length() == 0) continue;
+
+				String macro = MacroManager.getInstance().getMacroText(currentSql);
+				if (macro != null)
+				{
+					appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + currentSql + "\n");
+					macroRun = true;
+					currentSql = macro;
+				}
 
 				// By calling yield() we make sure that
 				// this thread can actually be interrupted!
