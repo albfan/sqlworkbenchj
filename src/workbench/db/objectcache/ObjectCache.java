@@ -586,7 +586,7 @@ class ObjectCache
 		key.adjustCase(con);
 		for (TableIdentifier tbl : objects.keySet())
 		{
-			if (tbl.equals(key)) return tbl;
+			if (tbl.compareNames(key)) return key;
 		}
 		return null;
 	}
