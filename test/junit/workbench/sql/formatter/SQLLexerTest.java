@@ -60,12 +60,34 @@ public class SQLLexerTest
 	}
 
 	@Test
-	public void testSqlServer()
+	public void testNonStandardIdentifiers()
 	{
 		String sql = "select * from bar outer apply fn(x) st";
 		List<SQLToken> l = getTokenList(sql);
 		assertNotNull(l.get(4));
 		assertTrue(l.get(4).isReservedWord());
+
+		// Table variables
+		sql = "select * from @@table_var";
+		l = getTokenList(sql);
+		assertEquals(4, l.size());
+		assertEquals("@@table_var", l.get(3).getText());
+
+		sql = "select * from @table_var";
+		l = getTokenList(sql);
+		assertEquals(4, l.size());
+		assertEquals("@table_var", l.get(3).getText());
+
+		// temp tables
+		sql = "select * from #temp";
+		l = getTokenList(sql);
+		assertEquals(4, l.size());
+		assertEquals("#temp", l.get(3).getText());
+
+		sql = "select * from ##temp";
+		l = getTokenList(sql);
+		assertEquals(4, l.size());
+		assertEquals("##temp", l.get(3).getText());
 	}
 
 	@Test

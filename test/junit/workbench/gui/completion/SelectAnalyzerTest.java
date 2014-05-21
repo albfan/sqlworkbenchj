@@ -165,10 +165,20 @@ public class SelectAnalyzerTest
 	}
 
 	@Test
-	public void testAlternateSeparator()
+	public void testNonStandardNames()
 	{
-		String select = "select * from mylib/sometable";
+		String select = "select  from #some_table";
+		SelectAnalyzer analyzer = new SelectAnalyzer(null, select, 7);
+		analyzer.checkContext();
+		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
+		assertEquals("#some_table", analyzer.getTableForColumnList().getTableName());
 
+		select = "select * from #some_schema.";
+		int pos = select.indexOf('.') + 1;
+		analyzer = new SelectAnalyzer(null, select, pos);
+		analyzer.checkContext();
+		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, analyzer.getContext());
+		assertEquals("#some_schema", analyzer.getSchemaForTableList());
 	}
 
 }

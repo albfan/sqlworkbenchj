@@ -103,18 +103,10 @@ public class DdlObjectInfo
 				SQLToken name = lexer.getNextToken(false, false);
 				if (name == null) return;
 				String content = name.getContents();
-				if (content.equals("IF NOT EXISTS") || content.equals("IF EXISTS") || content.equals("#"))
+				if (content.equals("IF NOT EXISTS") || content.equals("IF EXISTS"))
 				{
 					name = lexer.getNextToken(false, false);
 					if (name == null) return;
-
-					if (name.getContents().equals("#"))
-					{
-						// SQL Server temporary tables using ##
-						content = "##";
-						name = lexer.getNextToken(false, false);
-						if (name == null) return;
-					}
 				}
 
 				SQLToken next = lexer.getNextToken(false, false);
@@ -125,11 +117,6 @@ public class DdlObjectInfo
 				}
 
 				this.objectName = name.getContents();
-
-				if (content.startsWith("#"))
-				{
-					this.objectName = content + this.objectName;
-				}
 
 				if (this.objectName != null)
 				{

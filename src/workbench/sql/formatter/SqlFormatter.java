@@ -2361,23 +2361,6 @@ public class SqlFormatter
 			name = t.getContents();
 		}
 
-		// handle those weird non-standard SQL Server temp-table names
-		if (name.equals("#"))
-		{
-			t = this.lexer.getNextToken(false, false);
-			if (t == null) return t;
-			if (t.getContents().equals("#"))
-			{
-				t = this.lexer.getNextToken(false, false);
-				if (t == null) return t;
-				name = "##" + t.getContents();
-			}
-			else
-			{
-				name = "#" + t.getContents();
-			}
-		}
-
 		this.appendText(name);
 
 		// the SQLLexer does not handle quoted multi-part identifiers correctly...

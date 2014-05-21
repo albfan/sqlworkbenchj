@@ -58,7 +58,7 @@ import workbench.util.TableAlias;
  */
 public abstract class BaseAnalyzer
 {
-	public static final String QUALIFIER_DELIM = "\\?*=<>!/{}\\#%'(),:;";
+	public static final String QUALIFIER_DELIM = "\\?*=<>!/{}\\%'(),:;";
 	public static final String WORD_DELIM = QUALIFIER_DELIM + "@";
 	public static final String SELECT_WORD_DELIM = WORD_DELIM + ".";
 

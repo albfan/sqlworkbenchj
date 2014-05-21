@@ -69,7 +69,7 @@ import workbench.sql.syntax.SqlKeywordHelper;
  */
 public class SqlUtil
 {
-	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
+	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_#@][\\w\\$#@]*");
 
 	private static final SQLLexer LEXER_INSTANCE = new SQLLexer("");
 
