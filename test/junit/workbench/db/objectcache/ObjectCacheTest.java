@@ -22,7 +22,6 @@
  */
 package workbench.db.objectcache;
 
-import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -30,10 +29,6 @@ import static org.junit.Assert.*;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.db.ColumnIdentifier;
-import workbench.db.DependencyNode;
-import workbench.db.ProcedureDefinition;
-import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
