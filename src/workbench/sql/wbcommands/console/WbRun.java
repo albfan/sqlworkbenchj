@@ -120,6 +120,8 @@ public class WbRun
 			batchRunner.setOptimizeColWidths(true);
 			batchRunner.showResultSets(true);
 			batchRunner.setShowProgress(false);
+			batchRunner.setShowStatementWithResult(runner.getTraceStatements());
+			batchRunner.setShowStatementSummary(runner.getVerboseLogging());
 
 			if (WbManager.getInstance().isGUIMode())
 			{
