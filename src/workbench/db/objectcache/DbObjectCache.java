@@ -171,7 +171,7 @@ public class DbObjectCache
 			realTable = dbConnection.getMetadata().findTable(table);
 			if (realTable != null)
 			{
-				objectCache.addTable(realTable);
+				objectCache.addTable(realTable, dbConnection);
 			}
 		}
 		return realTable;

@@ -517,11 +517,13 @@ class ObjectCache
 		return tbl;
 	}
 
-	public synchronized void addTable(TableIdentifier table)
+	public synchronized void addTable(TableIdentifier table, WbConnection con)
 	{
 		if (table == null) return;
-		if (objects.containsKey(table)) return;
-		this.objects.put(table, null);
+		if (findInCache(con, table) == null)
+		{
+			this.objects.put(table, null);
+		}
 	}
 
 	public synchronized void addTable(TableDefinition definition, WbConnection conn)
@@ -582,9 +584,9 @@ class ObjectCache
 
 	private TableIdentifier findInCache(WbConnection con, TableIdentifier toSearch)
 	{
-		TableIdentifier key = toSearch.createCopy();
-		key.adjustCase(con);
-		for (TableIdentifier tbl : objects.keySet())
+		TableIdentifier tbl = toSearch.createCopy();
+		tbl.adjustCase(con);
+		for (TableIdentifier key : objects.keySet())
 		{
 			if (tbl.compareNames(key)) return key;
 		}
