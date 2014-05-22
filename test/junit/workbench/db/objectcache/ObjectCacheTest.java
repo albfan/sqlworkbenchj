@@ -67,6 +67,19 @@ public class ObjectCacheTest
 		assertNotNull(one.getCatalog());
 		assertEquals("PUBLIC", one.getSchema());
 		assertEquals("ONE", one.getTableName());
+
+		TableIdentifier two = cache.findEntry(dbConn, new TableIdentifier("PUBLIC", "TWO"));
+		assertNotNull(two);
+		assertNotNull(two.getCatalog());
+		assertEquals("PUBLIC", two.getSchema());
+		assertEquals("TWO", two.getTableName());
+
+		// make sure that tables that do carry a schema/catalog are not mistakenly returned from the cache
+		TableIdentifier foo = cache.findEntry(dbConn, new TableIdentifier("FOO", "BAR", "ONE"));
+		assertNull(foo);
+
+		TableIdentifier bar = cache.findEntry(dbConn, new TableIdentifier("BAR", "ONE"));
+		assertNull(bar);
 	}
 
 }
