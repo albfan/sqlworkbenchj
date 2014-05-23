@@ -6,6 +6,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="2" type="fix">The cache for auto-completion was not working for DBMS' that return also catalog information for a table</entry>
     <entry dev-build="1" type="fix">If a profile name contained a forward slash (/) the profile was not selected as the last used profile in the connection dialog</entry>
     <entry dev-build="1" type="fix">WbXslt was no longer working</entry>
     <entry dev-build="1" type="fix">Look and Feel definitions with more than one library were not loaded any more</entry>
