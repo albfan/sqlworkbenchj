@@ -91,7 +91,7 @@ public class OpenFileAction
 	public void executeAction(ActionEvent e)
 	{
 		EncodingUtil.fetchEncodings();
-		
+
 		final MainWindow window = getWindow();
 		final SqlPanel currentPanel = getCurrentPanel();
 
@@ -120,6 +120,8 @@ public class OpenFileAction
 			}
 
 			JFileChooser fc = new WbFileChooser(lastDir);
+			fc.setMultiSelectionEnabled(true);
+			
 			JPanel acc = new JPanel(new GridBagLayout());
 			JComponent p = EncodingUtil.createEncodingPanel();
 			p.setBorder(new EmptyBorder(0, 5, 0, 0));
@@ -160,13 +162,12 @@ public class OpenFileAction
 			selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
 
 			fc.setAccessory(acc);
-
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
+
 			int answer = fc.showOpenDialog(window);
 			if (answer == JFileChooser.APPROVE_OPTION)
 			{
 				final String encoding = selector.getEncoding();
-				final boolean openInNewTab = newTab == null ? false : newTab.isSelected();
 
 				if (!GuiSettings.getFollowFileDirectory())
 				{
@@ -175,38 +176,52 @@ public class OpenFileAction
 				}
 
 				Settings.getInstance().setDefaultFileEncoding(encoding);
+
+				File[] files = fc.getSelectedFiles();
+				final boolean openInNewTab;
+				if (files.length == 1)
+				{
+					openInNewTab = newTab == null ? false : newTab.isSelected();
+				}
+				else
+				{
+					openInNewTab = true;
+				}
 				if (rememberNewTabSetting)
 				{
 					Settings.getInstance().setProperty("workbench.file.newtab", openInNewTab);
 				}
 
-				WbFile f = new WbFile(fc.getSelectedFile());
-				final String fname = f.getFullPath();
-				EventQueue.invokeLater(new Runnable()
+				for (File sf : files)
 				{
-					@Override
-					public void run()
+					WbFile f = new WbFile(sf);
+					final String fname = f.getFullPath();
+					EventQueue.invokeLater(new Runnable()
 					{
-						SqlPanel sql;
-						if (openInNewTab)
+						@Override
+						public void run()
 						{
-							sql = (SqlPanel) window.addTab();
-						}
-						else
-						{
-							sql = currentPanel;
-						}
+							SqlPanel sql;
+							if (openInNewTab)
+							{
+								sql = (SqlPanel) window.addTab();
+							}
+							else
+							{
+								sql = currentPanel;
+							}
 
-						if (sql != null)
-						{
-							sql.readFile(fname, encoding);
+							if (sql != null)
+							{
+								sql.readFile(fname, encoding);
+							}
+							window.invalidate();
+							// this is necessary to update all menus and toolbars
+							// even if the current tab didn't really change
+							window.currentTabChanged();
 						}
-						window.invalidate();
-						// this is necessary to update all menus and toolbars
-						// even if the current tab didn't really change
-						window.currentTabChanged();
-					}
-				});
+					});
+				}
 			}
 		}
 		catch (Throwable th)
@@ -234,4 +249,6 @@ public class OpenFileAction
 		}
 		return null;
 	}
+
+
 }
