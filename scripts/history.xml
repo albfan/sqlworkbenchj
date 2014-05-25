@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-05-18">
+    <entry dev-build="2" type="enh">It's now possible to open multiple files through "File -> Open file". If multiple files are selected they all opended automatically in a editor tab eac.</entry>
     <entry dev-build="1" type="enh">For Postgres 9.4 the new WITH CHECK OPTION is now shown in the view's source</entry>
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
