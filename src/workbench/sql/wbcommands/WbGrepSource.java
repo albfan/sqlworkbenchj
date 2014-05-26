@@ -112,15 +112,24 @@ public class WbGrepSource
 		searcher.setTypesToSearch(types);
 		searcher.setNamesToSearch(names);
 
-		List<DbObject> found = searcher.searchObjects(values, matchAll, ignoreCase, regEx);
-		DataStore ds = new ObjectResultListDataStore(currentConnection, found, searcher.getSearchSchemaCount() > 1);
-		ds.setGeneratingSql(sql);
-		String msg = ResourceMgr.getFormattedString("MsgGrepSourceFinished", searcher.getNumberOfObjectsSearched(), ds.getRowCount());
-		result.addDataStore(ds);
-		result.setExecutionDuration(0);
-		result.addMessage(msg);
-		result.setSuccess();
-
+		try
+		{
+			List<DbObject> found = searcher.searchObjects(values, matchAll, ignoreCase, regEx);
+			DataStore ds = new ObjectResultListDataStore(currentConnection, found, searcher.getSearchSchemaCount() > 1);
+			ds.setGeneratingSql(sql);
+			String msg = ResourceMgr.getFormattedString("MsgGrepSourceFinished", searcher.getNumberOfObjectsSearched(), ds.getRowCount());
+			result.addDataStore(ds);
+			result.setExecutionDuration(0);
+			result.addMessage(msg);
+			result.setSuccess();
+		}
+		finally
+		{
+			if (rowMonitor != null)
+			{
+				rowMonitor.jobFinished();
+			}
+		}
 		return result;
 	}
 
