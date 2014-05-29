@@ -72,12 +72,14 @@ public class DbExplorerTester
 		JComponentOperator listComp = new JComponentOperator(tableComp, chooser);
 		WbTable tableList = (WbTable)listComp.getSource();
 		assertTrue(tableList.getRowCount() > 0);
+//		DataStorePrinter printer = new DataStorePrinter(tableList.getDataStore());
+//		printer.printTo(System.out);
 
 		int personRow = -1;
 		for (int row=0; row < tableList.getRowCount(); row++)
 		{
-			String tableName = tableList.getValueAsString(0, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			if (tableName.equals("PERSON"))
+			String tableName = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			if (tableName.equalsIgnoreCase("PERSON"))
 			{
 				personRow = row;
 				break;
@@ -133,7 +135,8 @@ public class DbExplorerTester
 			Thread.sleep(150);
 		} while (tPanel.isBusy());
 		String sql = source.getText();
-		assertTrue(sql.indexOf("CREATE TABLE PERSON") > -1);
+		System.out.println(sql);
+		assertTrue(sql.indexOf("CREATE TABLE PERSON") > -1 || sql.indexOf("CREATE CACHED TABLE PERSON") > -1 );
 
 		// data panel
 		tabbedPane.setSelectedIndex(2);

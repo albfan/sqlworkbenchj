@@ -345,7 +345,7 @@ public class MainWindowTest
 
 		msg = runSql(sqlPanel, "insert into person (nr, firstname, lastname) values (42, 'Ford', 'Prefect');\ncommit;");
 		assertNotNull(msg);
-		assertTrue(msg.indexOf("1 row(s) affected") > -1);
+		assertTrue(msg.indexOf("1 row affected") > -1);
 
 		runSql(sqlPanel, "select nr, firstname, lastname from person");
 
@@ -406,7 +406,7 @@ public class MainWindowTest
 
 		msg = runSql(sqlPanel, "update person set firstname = null where nr = 42;\ncommit;");
 		System.out.println("update message: " + msg);
-		assertTrue(msg.indexOf("1 row(s) affected") > -1);
+		assertTrue(msg.indexOf("1 row affected") > -1);
 
 		msg = runSql(sqlPanel, "select nr, firstname, lastname from person where lastname = 'Dent';");
 		System.out.println("Message: " + msg);
@@ -419,6 +419,7 @@ public class MainWindowTest
 		tool.waitEmpty();
 		msg = saveChanges(sqlPanel);
 		tool.waitEmpty();
+		System.out.println("*** runSql() finished");
 	}
 
 	private void showLogFile()
@@ -444,7 +445,8 @@ public class MainWindowTest
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 		JMenuOperator sqlMenu = new JMenuOperator(mainMenu.getMenu(4));
 
-		JMenuItem appendItem = sqlMenu.getItem(19);
+		JMenu settings = (JMenu)sqlMenu.getItem(26);
+		JMenuItem appendItem = settings.getItem(1);
 
 		AppendResultsAction action = (AppendResultsAction)appendItem.getAction();
 		assertFalse(appendItem.isSelected());
@@ -458,7 +460,7 @@ public class MainWindowTest
 		assertEquals(2, resultTab.getTabCount());
 
 		QueueTool tool = new QueueTool();
-		mainMenu.pushMenu("SQL|Append new results", "|");
+		mainMenu.pushMenu("SQL|Settings|Append new results", "|");
 		tool.waitEmpty();
 		assertTrue(sqlPanel.getAppendResults());
 		assertTrue(appendItem.isSelected());
@@ -467,7 +469,7 @@ public class MainWindowTest
 		runSql(sqlPanel, "select * from person");
 		assertEquals(3, resultTab.getTabCount());
 
-		mainMenu.pushMenu("SQL|Append new results", "|");
+		mainMenu.pushMenu("SQL|Settings|Append new results", "|");
 		tool.waitEmpty();
 		assertFalse(sqlPanel.getAppendResults());
 		assertFalse(appendItem.isSelected());
