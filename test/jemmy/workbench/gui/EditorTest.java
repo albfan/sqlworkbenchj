@@ -147,7 +147,7 @@ public class EditorTest
 
 		try
 		{
-			mainMenu.pushMenu("SQL|Copy Code Snippet", "|");
+			mainMenu.pushMenu("SQL|Code tools|Copy Code Snippet", "|");
 			tool.waitEmpty();
 
 			final String text = (String)clp.getData(DataFlavor.stringFlavor);
@@ -156,7 +156,7 @@ public class EditorTest
 
 			editor.setText(text);
 			editor.selectAll();
-			mainMenu.pushMenu("SQL|Clean Java Code", "|");
+			mainMenu.pushMenu("SQL|Code tools|Clean Java Code", "|");
 			tool.waitEmpty();
 			String newText = editor.getText();
 //			System.out.println("new text: " + newText);
