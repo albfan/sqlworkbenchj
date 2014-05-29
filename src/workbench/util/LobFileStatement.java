@@ -139,7 +139,7 @@ public class LobFileStatement
 		}
 		catch (SQLException sql)
 		{
-			LogMgr.logDebug("LobFileStatement.prepareStatement()", "Cannot determine parameter meta data", sql);
+			LogMgr.logWarning("LobFileStatement.prepareStatement()", "Cannot obtain parameter meta data", sql);
 		}
 
 		final int buffSize = 64*1024;
@@ -175,7 +175,7 @@ public class LobFileStatement
 					length = (int) FileUtil.getCharacterLength(f, parameters[i].getEncoding());
 				}
 
-				if (supportsMeta && meta != null && SqlUtil.isXMLType(meta.getParameterType(i+1)))
+				if (meta != null && SqlUtil.isXMLType(meta.getParameterType(i+1)))
 				{
 					// createXML closes the stream, so there is no need to keep the reference in the LobFileParameter instance
 					SQLXML xml = JdbcUtils.createXML(in, conn);
