@@ -96,6 +96,7 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CopyAllColumnNamesAction;
+import workbench.gui.actions.CopyAsDbUnitXMLAction;
 import workbench.gui.actions.CopyAsSqlDeleteAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
@@ -103,6 +104,7 @@ import workbench.gui.actions.CopyAsSqlMergeAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
 import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.CopyColumnNameAction;
+import workbench.gui.actions.CopySelectedAsDbUnitXMLAction;
 import workbench.gui.actions.CopySelectedAsSqlDeleteAction;
 import workbench.gui.actions.CopySelectedAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlInsertAction;
@@ -193,6 +195,7 @@ public class WbTable
 
 	private CopyAsTextAction copyAsTextAction;
 	private CopyAsSqlInsertAction copyInsertAction;
+	private CopyAsDbUnitXMLAction copyDbUnitXMLAction;
 	private CopyAsSqlMergeAction copyMergeAction;
 	private CopyAsSqlDeleteInsertAction copyDeleteInsertAction;
 	private CopyAsSqlDeleteAction copyDeleteAction;
@@ -200,6 +203,8 @@ public class WbTable
 
 	private CopySelectedAsTextAction copySelectedAsTextAction;
 	private CopySelectedAsSqlMergeAction copySelectedAsMergeAction;
+	private CopySelectedAsDbUnitXMLAction copySelectedAsDBUnitXMLAction;
+
 	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
 	private CopySelectedAsSqlDeleteInsertAction copySelectedAsDeleteInsertAction;
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
@@ -323,6 +328,12 @@ public class WbTable
 			sqlCopyMenu.add(this.copyMergeAction);
 			sqlCopyMenu.add(this.copyDeleteInsertAction);
 			sqlCopyMenu.add(this.copyDeleteAction);
+
+			if (DbUnitHelper.isDbUnitAvailable())
+			{
+				this.copyDbUnitXMLAction = new CopyAsDbUnitXMLAction(this);
+				sqlCopyMenu.add(this.copyDbUnitXMLAction);
+			}
 
 			this.addPopupSubMenu(sqlCopyMenu, false);
 
@@ -690,6 +701,11 @@ public class WbTable
 			copySelectedAsTextAction = new CopySelectedAsTextAction(this);
 		}
 
+		if (copySelectedAsDBUnitXMLAction == null && DbUnitHelper.isDbUnitAvailable())
+		{
+			copySelectedAsDBUnitXMLAction = new CopySelectedAsDbUnitXMLAction(this);
+		}
+
 		if (copySelectedAsInsertAction == null && this.copyInsertAction != null)
 		{
 			copySelectedAsInsertAction = new CopySelectedAsSqlInsertAction(this);
@@ -722,6 +738,7 @@ public class WbTable
 		if (copySelectedAsMergeAction != null) copyMenu.add(copySelectedAsMergeAction);
 		if (copySelectedAsDeleteInsertAction != null) copyMenu.add(copySelectedAsDeleteInsertAction);
 		if (copySelectedDeleteAction != null) copyMenu.add(copySelectedDeleteAction);
+		if (copySelectedAsDBUnitXMLAction != null) copyMenu.add(copySelectedAsDBUnitXMLAction);
 	}
 
 	public final WbMenu getCopySelectedMenu()
@@ -817,9 +834,10 @@ public class WbTable
 		}
 
 		WbAction.dispose(copySelectedAsTextAction, copySelectedAsInsertAction, copySelectedAsMergeAction, copySelectedAsUpdateAction,
-			copySelectedAsDeleteInsertAction, copySelectedDeleteAction, copyInsertAction, copyDeleteInsertAction, copyDeleteAction,
-			copyMergeAction, copyUpdateAction, saveDataAsAction, copyAsTextAction, filterAction, resetFilterAction, resetHighlightAction,
-			optimizeAllCol, optimizeCol, printDataAction,	printPreviewAction,	setColWidth, sortAscending, sortDescending, transposeRow);
+			copySelectedAsDeleteInsertAction, copySelectedDeleteAction, copySelectedAsDBUnitXMLAction, copyDbUnitXMLAction, copyInsertAction,
+			copyDeleteInsertAction, copyDeleteAction, copyMergeAction, copyUpdateAction, saveDataAsAction, copyAsTextAction, filterAction,
+			resetFilterAction, resetHighlightAction, optimizeAllCol, optimizeCol, printDataAction,	printPreviewAction,	setColWidth,
+			sortAscending, sortDescending, transposeRow);
 
 		Settings.getInstance().removePropertyChangeListener(sortRenderer);
 		WbSwingUtilities.removeAllListeners(this);
@@ -960,6 +978,11 @@ public class WbTable
 		if (this.copySelectedAsTextAction != null)
 		{
 			this.copySelectedAsTextAction.setEnabled(selected);
+		}
+
+		if (this.copySelectedAsDBUnitXMLAction != null)
+		{
+			this.copySelectedAsDBUnitXMLAction.setEnabled(selected);
 		}
 
 		if (this.copySelectedAsInsertAction != null)

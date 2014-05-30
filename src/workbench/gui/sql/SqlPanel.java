@@ -81,6 +81,9 @@ import workbench.db.DbSettings;
 import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
+
+import workbench.gui.components.DbUnitHelper;
+
 import workbench.db.importer.DataStoreImporter;
 import workbench.db.importer.DefaultImportOptions;
 import workbench.db.importer.DefaultTextImportOptions;
@@ -99,6 +102,7 @@ import workbench.gui.actions.ClearMessagesAction;
 import workbench.gui.actions.CloseAllResultsAction;
 import workbench.gui.actions.CloseResultTabAction;
 import workbench.gui.actions.CommitAction;
+import workbench.gui.actions.CopyAsDbUnitXMLAction;
 import workbench.gui.actions.CopyAsSqlDeleteAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
@@ -255,6 +259,7 @@ public class SqlPanel
 	// Actions from DwPanel
 	protected CopyAsTextAction dataToClipboard;
 	protected SaveDataAsAction exportDataAction;
+	protected CopyAsDbUnitXMLAction copyAsDBUnitXML;
 	protected CopyAsSqlInsertAction copyAsSqlInsert;
 	protected CopyAsSqlUpdateAction copyAsSqlUpdate;
 	protected CopyAsSqlDeleteInsertAction copyAsSqlDeleteInsert;
@@ -828,6 +833,12 @@ public class SqlPanel
 
 		copyAsSQLMenu = WbTable.createCopyAsSQLMenu();
 		copyAsSQLMenu.setEnabled(false);
+
+		if (DbUnitHelper.isDbUnitAvailable())
+		{
+			copyAsDBUnitXML = new CopyAsDbUnitXMLAction(null);
+			copyAsSQLMenu.add(this.copyAsDBUnitXML);
+		}
 
 		copyAsSqlInsert = new CopyAsSqlInsertAction(null);
 		copyAsSQLMenu.add(this.copyAsSqlInsert);

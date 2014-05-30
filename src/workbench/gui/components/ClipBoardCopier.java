@@ -59,6 +59,10 @@ import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
+import org.dbunit.dataset.DefaultDataSet;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSet;
+
 /**
  * A class to copy the data of a {@link workbench.gui.components.WbTable} to
  * the clipboard. Either as tab-separated text or SQL Statements.
@@ -215,6 +219,90 @@ public class ClipBoardCopier
 	public void copyAsSqlInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
 		this.copyAsSql(ExportType.SQL_INSERT, selectedOnly, showSelectColumns);
+	}
+
+
+	public void copyAsDbUnit(final boolean selectedOnly, final boolean showSelectColumns)
+	{
+		if (this.data == null)
+		{
+			// Should not happen.
+			WbSwingUtilities.showErrorMessage(client, "No DataStore available!");
+			LogMgr.logError("ClipBoardCopier.copyAsSql()", "Cannot copy without a DataStore!", null);
+			return;
+		}
+
+		// For some reason the statusbar will not be updated if
+		// this is run in the AWT thread, so we have to
+		// create a new thread to run the actual copy
+		WbThread t = new WbThread("CopyThread")
+		{
+			@Override
+			public void run()
+			{
+				doCopyAsDBUnitXML(selectedOnly, showSelectColumns);
+			}
+		};
+		t.start();
+	}
+
+	public void doCopyAsDBUnitXML(boolean selectedOnly, final boolean showSelectColumns)
+	{
+		try
+		{
+			WbSwingUtilities.showWaitCursorOnWindow(this.client);
+			String sql = createDBUnitXMLDataString(selectedOnly, showSelectColumns);
+			if (sql != null)
+			{
+				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+				StringSelection sel = new StringSelection(sql);
+				clp.setContents(sel, sel);
+			}
+		}
+		catch (Throwable e)
+		{
+			if (e instanceof OutOfMemoryError)
+			{
+				WbManager.getInstance().showOutOfMemoryError();
+			}
+			else
+			{
+				String msg = ResourceMgr.getString("ErrClipCopy");
+				msg = StringUtil.replace(msg, "%errmsg%", ExceptionUtil.getDisplay(e));
+				if (!WbManager.isTest())
+				{
+					WbSwingUtilities.showErrorMessage(client, msg);
+				}
+			}
+			LogMgr.logError("ClipboardCopier.doCopyAsSql()", "Error when copying as SQL", e);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursorOnWindow(this.client);
+		}
+	}
+
+	public String createDBUnitXMLDataString(boolean selectedOnly, final boolean showSelectColumns)
+		throws Exception
+	{
+		if (this.data.getRowCount() <= 0) return null;
+
+		// full database export
+		TableIdentifier updateTable = data.getUpdateTable();
+		if (updateTable == null && client != null)
+		{
+			UpdateTableSelector selector = new UpdateTableSelector(client);
+			updateTable = selector.selectUpdateTable();
+			if (updateTable != null)
+			{
+				client.getDataStore().setUpdateTable(updateTable);
+			}
+		}
+
+		IDataSet fullDataSet = new DefaultDataSet(new DBUnitITableAdapter(data));
+		StringWriter s = new StringWriter();
+		FlatXmlDataSet.write(fullDataSet, s);
+		return s.toString();
 	}
 
 	public void copyAsSqlDeleteInsert(boolean selectedOnly, boolean showSelectColumns)
