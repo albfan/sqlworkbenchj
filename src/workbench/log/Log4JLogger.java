@@ -201,6 +201,7 @@ public class Log4JLogger
 		{
 			System.out.println("callerClass in getLogger(): " + callerClass);
 		}
+
 		if (callerClass != null)
 		{
 			Logger logger = getLogger(callerClass);
@@ -225,7 +226,7 @@ public class Log4JLogger
 		{
 			try
 			{
-				return sun.reflect.Reflection.getCallerClass(5).getName();
+				return getCallerClass(5).getName();
 			}
 			catch (Throwable th)
 			{
@@ -239,6 +240,54 @@ public class Log4JLogger
 			return trace[5].getClassName();
 		}
 		return Log4JLogger.class.getName();
+	}
+
+	public static Class getCallerClass(int i)
+	{
+		Class[] classContext = null;
+		try
+		{
+			classContext = new SecurityManager()
+			{
+				@Override
+				public Class[] getClassContext()
+				{
+					return super.getClassContext();
+				}
+			}.getClassContext();
+		}
+		catch (NoSuchMethodError e)
+		{
+		}
+
+		if (classContext != null)
+		{
+			for (int j = 0; j < classContext.length; j++)
+			{
+				if (classContext[j] == Log4JLogger.class)
+				{
+					return classContext[i + j];
+				}
+			}
+		}
+		else
+		{
+			try
+			{
+				StackTraceElement[] classNames = Thread.currentThread().getStackTrace();
+				for (int j = 0; j < classNames.length; j++)
+				{
+					if (Class.forName(classNames[j].getClassName()) == Log4JLogger.class)
+					{
+						return Class.forName(classNames[i + j].getClassName());
+					}
+				}
+			}
+			catch (ClassNotFoundException e)
+			{
+			}
+		}
+		return null;
 	}
 
 	@Override
