@@ -1086,6 +1086,28 @@ public class ScriptParserTest
 		assertEquals(2, count);
 		int index = p.getCommandIndexAtCursorPos(pos + 5);
 		assertEquals(1, index);
+	}
 
+	@Test
+	public void testTrailingWhitespace()
+		throws Exception
+	{
+		String sql =
+			"statement_1\n" +
+			"/ \n" +
+			"\n" +
+			"-- some comment \n" +
+			"statement_2\n" +
+			"/\n";
+		ScriptParser p = new ScriptParser(sql);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		int count = p.getSize();
+		for (int i=0; i < count; i++)
+		{
+			System.out.println(p.getCommand(i) + "\n####################\n");
+		}
+		assertEquals(2, count);
+		assertEquals("statement_1", p.getCommand(0));
+		assertEquals("statement_2", p.getCommand(1));
 	}
 }

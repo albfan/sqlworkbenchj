@@ -502,7 +502,7 @@ public class ScriptParser
 
 		while ((c = p.getNextCommand()) != null)
 		{
-			String sql = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
+//			String sql = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
 			c.setIndexInScript(index);
 			index++;
 			this.commands.add(c);
