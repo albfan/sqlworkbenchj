@@ -365,6 +365,7 @@ public class OracleIndexReader
 
 	/**
 	 * 	Read the definition for function based indexes into the Map provided.
+	 *
 	 * 	The map should contain the names of the indexes as keys, and an List
 	 * 	as elements. Each Element of the list is one part (=function call to a column)
 	 * 	of the index definition.
@@ -375,12 +376,14 @@ public class OracleIndexReader
 		if (CollectionUtil.isEmpty(indexDefs)) return;
 
 		String base="SELECT i.index_name, e.column_expression, e.column_position \n" +
-			"FROM all_indexes i, all_ind_expressions e  \n" +
-			" WHERE i.index_name = e.index_name   \n" +
-			"    and i.owner = e.index_owner   \n" +
-			"    and i.table_name = e.table_name   \n" +
-			"    and e.index_owner = i.owner \n " +
-			"    and i.index_type like 'FUNCTION-BASED%' ";
+			"FROM all_indexes i \n" +
+			"  JOIN all_ind_expressions e \n" +
+			"    ON i.index_name = e.index_name \n" +
+			"   AND i.owner = e.index_owner \n" +
+			"   AND i.table_name = e.table_name \n" +
+			"   AND e.index_owner = i.owner \n " +
+			"WHERE i.index_type like 'FUNCTION-BASED%' ";
+
 		StringBuilder sql = new StringBuilder(300);
 		sql.append(base);
 		String schema = tbl.getSchema();
