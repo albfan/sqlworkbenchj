@@ -248,34 +248,4 @@ public class ClipBoardCopierTest
 		assertTrue(p.getCommand(1).contains("id = 2"));
 	}
 
-	@Test
-	public void testCopyAsDBUnitXML()
-		throws Exception
-	{
-		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
-		try
-		{
-			GuiSettings.setDisplayNullString("<[NULL]>");
-			DataStore ds = createDataStore();
-			int row = ds.addRow();
-			ds.setValue(row, 0, new Integer(1));
-			ds.setValue(row, 1, "Marvin");
-			ds.setValue(row, 2, null);
-			ds.setUpdateTableToBeUsed(new TableIdentifier("PERSON"));
-			ClipBoardCopier copier = new ClipBoardCopier(ds);
-			String xml = copier.createDBUnitXMLDataString(false, false).trim();
-			String expected =
-				"<dataset>\n" +
-				"  <person id=\"1\" firstname=\"Arthur\" lastname=\"Dent\"/>\n" +
-				"  <person id=\"2\" firstname=\"Ford\" lastname=\"Prefect\"/>\n" +
-				"  <person id=\"1\" firstname=\"Marvin\"/>\n" +
-				"</dataset>";
-//			System.out.println(expected + "\n*****************\n" + xml);
-			assertEquals(expected, xml);
-		}
-		finally
-		{
-			GuiSettings.setDisplayNullString(null);
-		}
-	}
 }

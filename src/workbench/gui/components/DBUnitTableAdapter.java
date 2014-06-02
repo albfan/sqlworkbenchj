@@ -21,6 +21,7 @@
  */
 package workbench.gui.components;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,22 +29,25 @@ import workbench.storage.DataStore;
 
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.DefaultDataSet;
+import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.RowOutOfBoundsException;
 import org.dbunit.dataset.datatype.DataType;
+import org.dbunit.dataset.xml.FlatXmlDataSet;
 
 /**
  *
  * @author Brian Bonner
  */
-public class DBUnitITableAdapter
+public class DBUnitTableAdapter
 	implements ITable
 {
 
 	private DataStore dataStore;
 
-	public DBUnitITableAdapter(DataStore dataStore)
+	public DBUnitTableAdapter(DataStore dataStore)
 	{
 		this.dataStore = dataStore;
 	}

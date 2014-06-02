@@ -59,10 +59,6 @@ import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
-import org.dbunit.dataset.DefaultDataSet;
-import org.dbunit.dataset.IDataSet;
-import org.dbunit.dataset.xml.FlatXmlDataSet;
-
 /**
  * A class to copy the data of a {@link workbench.gui.components.WbTable} to
  * the clipboard. Either as tab-separated text or SQL Statements.
@@ -248,10 +244,20 @@ public class ClipBoardCopier
 
 	public void doCopyAsDBUnitXML(boolean selectedOnly, final boolean showSelectColumns)
 	{
+		if (data == null) return;
+
+		checkUpdateTable();
+
 		try
 		{
 			WbSwingUtilities.showWaitCursorOnWindow(this.client);
-			String sql = createDBUnitXMLDataString(selectedOnly, showSelectColumns);
+
+			// The actual usage of the DbUnit classes must be in a different class than this class
+			// Otherwise not having the DbUnit jar in the classpath will prevent this class from being instantiated
+			// (and thus all other copy methods won't work either)
+			DbUnitCopier copier = new DbUnitCopier();
+			String sql = copier.createDBUnitXMLDataString(data);
+
 			if (sql != null)
 			{
 				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -280,29 +286,6 @@ public class ClipBoardCopier
 		{
 			WbSwingUtilities.showDefaultCursorOnWindow(this.client);
 		}
-	}
-
-	public String createDBUnitXMLDataString(boolean selectedOnly, final boolean showSelectColumns)
-		throws Exception
-	{
-		if (this.data.getRowCount() <= 0) return null;
-
-		// full database export
-		TableIdentifier updateTable = data.getUpdateTable();
-		if (updateTable == null && client != null)
-		{
-			UpdateTableSelector selector = new UpdateTableSelector(client);
-			updateTable = selector.selectUpdateTable();
-			if (updateTable != null)
-			{
-				client.getDataStore().setUpdateTable(updateTable);
-			}
-		}
-
-		IDataSet fullDataSet = new DefaultDataSet(new DBUnitITableAdapter(data));
-		StringWriter s = new StringWriter();
-		FlatXmlDataSet.write(fullDataSet, s);
-		return s.toString();
 	}
 
 	public void copyAsSqlDeleteInsert(boolean selectedOnly, boolean showSelectColumns)
@@ -397,16 +380,7 @@ public class ClipBoardCopier
 			}
 		}
 
-		TableIdentifier updateTable = data.getUpdateTable();
-		if (updateTable == null && client != null)
-		{
-			UpdateTableSelector selector = new UpdateTableSelector(client);
-			updateTable = selector.selectUpdateTable();
-			if (updateTable != null)
-			{
-				client.getDataStore().setUpdateTable(updateTable);
-			}
-		}
+		checkUpdateTable();
 
 		List<ColumnIdentifier> columnsToInclude = null;
 		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
@@ -564,6 +538,21 @@ public class ClipBoardCopier
 			result = null;
 		}
 		return result;
+	}
+
+	private void checkUpdateTable()
+	{
+		if (data == null) return;
+		TableIdentifier updateTable = data.getUpdateTable();
+		if (updateTable == null && client != null)
+		{
+			UpdateTableSelector selector = new UpdateTableSelector(client);
+			updateTable = selector.selectUpdateTable();
+			if (updateTable != null)
+			{
+				client.getDataStore().setUpdateTable(updateTable);
+			}
+		}
 	}
 
 	private List<ColumnIdentifier> getColumnsFromSelection()
