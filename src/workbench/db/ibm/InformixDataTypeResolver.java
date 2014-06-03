@@ -31,6 +31,7 @@ import workbench.db.DefaultDataTypeResolver;
 public class InformixDataTypeResolver
 	extends DefaultDataTypeResolver
 {
+
 	@Override
 	public int fixColumnType(int type, String dbmsType)
 	{
@@ -42,4 +43,31 @@ public class InformixDataTypeResolver
 		}
 		return type;
 	}
+
+	/**
+	 * Handles Informix varchar(m,r) correctly.
+	 *
+	 * @see workbench.util.SqlUtil#getSqlTypeDisplay(java.lang.String, int, int, int)
+	 */
+	@Override
+	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
+	{
+		if (sqlType == Types.VARCHAR)
+		{
+			String display = dbmsName;
+
+			int charLength = size % 256;
+			display += "(" + Integer.toString(charLength);
+
+			int reserved = (int)(2810 / 256);
+			if (reserved > 0)
+			{
+				display += "," + Integer.toString(reserved);
+			}
+			display += ")";
+			return display;
+		}
+		return super.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
+	}
+
 }
