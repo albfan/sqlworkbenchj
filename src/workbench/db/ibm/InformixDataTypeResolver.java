@@ -67,6 +67,10 @@ public class InformixDataTypeResolver
 			display += ")";
 			return display;
 		}
+		else if (sqlType == Types.LONGVARCHAR)
+		{
+			return dbmsName + "(" + Integer.toString(size) + ")";
+		}
 		return super.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 	}
 
