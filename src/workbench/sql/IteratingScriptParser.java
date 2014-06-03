@@ -310,22 +310,22 @@ public class IteratingScriptParser
 
 		for (pos = this.lastPos; pos < this.scriptLength; pos++)
 		{
-			char firstChar = this.script.charAt(pos);
+			char currChar = this.script.charAt(pos);
 
 			// skip CR characters
-			if (firstChar == '\r') continue;
+			if (currChar == '\r') continue;
 
 			char nextChar = (pos < scriptLength - 1 ? this.script.charAt(pos + 1) : 0);
 
 			// ignore quotes in comments
-			if (!commentOn && isQuoteChar(quoteOn, firstChar))
+			if (!commentOn && isQuoteChar(quoteOn, currChar))
 			{
 				if (!quoteOn)
 				{
-					lastQuote = firstChar;
+					lastQuote = currChar;
 					quoteOn = true;
 				}
-				else if (firstChar == lastQuote || (lastQuote == '[' && firstChar == ']'))
+				else if (currChar == lastQuote || (lastQuote == '[' && currChar == ']'))
 				{
 					if (pos > 1)
 					{
@@ -351,13 +351,13 @@ public class IteratingScriptParser
 			{
 				if (!commentOn)
 				{
-					if (firstChar == '/' && nextChar == '*')
+					if (currChar == '/' && nextChar == '*')
 					{
 						blockComment = true;
 						singleLineComment = false;
 						commentOn = true;
 					}
-					else if (firstChar != '\n' && isLineComment(pos))
+					else if (currChar != '\n' && isLineComment(pos))
 					{
 						singleLineComment = true;
 						blockComment = false;
@@ -368,7 +368,7 @@ public class IteratingScriptParser
 				{
 					if (singleLineComment)
 					{
-						if (firstChar == '\n')
+						if (currChar == '\n')
 						{
 							singleLineComment = false;
 							blockComment = false;
@@ -380,7 +380,7 @@ public class IteratingScriptParser
 					else if (blockComment)
 					{
 						char last = this.script.charAt(pos - 1);
-						if (firstChar == '/' && last == '*')
+						if (currChar == '/' && last == '*')
 						{
 							blockComment = false;
 							singleLineComment = false;
@@ -400,7 +400,7 @@ public class IteratingScriptParser
 				}
 				else
 				{
-					currWord = String.valueOf(firstChar);
+					currWord = String.valueOf(currChar);
 				}
 
 				if (!delimiterOnOwnLine && (currWord.equals(delim) || (pos == scriptLength)))
@@ -420,7 +420,7 @@ public class IteratingScriptParser
 				}
 				else
 				{
-					if (firstChar == '\n')
+					if (currChar == '\n')
 					{
 						String line = this.script.subSequence(lastNewLineStart, pos).toString().trim();
 						String clean = SqlUtil.makeCleanSql(line, false, false);

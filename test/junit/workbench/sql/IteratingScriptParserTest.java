@@ -61,5 +61,28 @@ public class IteratingScriptParserTest
 		assertEquals("commit", commands.get(2).getSQL());
 	}
 
+	@Test
+	public void testTrailingWhitespace()
+		throws Exception
+	{
+		String sql =
+			"1\n" +
+			"/ \n" +
+			"\n" +
+			"-- some comment \n" +
+			"2\n" +
+			"/\n";
+		IteratingScriptParser p = new IteratingScriptParser();
+		p.setDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		p.setScript(sql);
+		p.setStoreStatementText(true);
 
+		ScriptCommandDefinition c = p.getNextCommand();
+		assertNotNull(c);
+		System.out.println("first: " + c.getSQL());
+		assertEquals("1", c.getSQL());
+		c = p.getNextCommand();
+		assertNotNull(c);
+		assertEquals("-- some comment \n2", c.getSQL());
+	}
 }

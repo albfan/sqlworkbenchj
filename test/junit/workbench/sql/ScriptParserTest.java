@@ -515,7 +515,11 @@ public class ScriptParserTest
 		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
 		p.setCheckForSingleLineCommands(true);
 		size = p.getSize();
-		assertEquals(3, size);
+//		for (int i=0; i < size; i++)
+//		{
+//			System.out.println(p.getCommand(i) + "\n####################\n");
+//		}
+		assertEquals(4, size);
 	}
 
 	@Test
@@ -882,6 +886,11 @@ public class ScriptParserTest
 				"\n" +
 				"select 43 from dual;";
 			ScriptParser p = new ScriptParser(sql);
+//			int count = p.getSize();
+//			for (int i=0; i < count; i++)
+//			{
+//				System.out.println(p.getCommand(i) + "\n####################\n");
+//			}
 			assertEquals(3, p.getSize());
 			assertEquals("select 42 from dummy", p.getCommand(0));
 			assertEquals("select 43 from dual", p.getCommand(2));
@@ -1093,21 +1102,21 @@ public class ScriptParserTest
 		throws Exception
 	{
 		String sql =
-			"statement_1\n" +
+			"1\n" +
 			"/ \n" +
 			"\n" +
 			"-- some comment \n" +
-			"statement_2\n" +
+			"2\n" +
 			"/\n";
 		ScriptParser p = new ScriptParser(sql);
 		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		int count = p.getSize();
-		for (int i=0; i < count; i++)
-		{
-			System.out.println(p.getCommand(i) + "\n####################\n");
-		}
+//		for (int i=0; i < count; i++)
+//		{
+//			System.out.println(p.getCommand(i) + "\n####################\n");
+//		}
 		assertEquals(2, count);
-		assertEquals("statement_1", p.getCommand(0));
-		assertEquals("statement_2", p.getCommand(1));
+		assertEquals("1", p.getCommand(0));
+		assertEquals("-- some comment \n2", p.getCommand(1));
 	}
 }

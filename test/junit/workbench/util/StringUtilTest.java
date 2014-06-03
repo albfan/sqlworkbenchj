@@ -222,6 +222,13 @@ public class StringUtilTest
 
 		isComment = StringUtil.lineStartsWith("update foo set bar = 24     \t # non-standard comment\n", 25, "#");
 		assertTrue(isComment);
+
+		isComment = StringUtil.lineStartsWith("x \n-- comment", 0, "--");
+		assertFalse(isComment);
+
+		isComment = StringUtil.lineStartsWith("1 \n-- comment", 2, "--");
+		assertFalse(isComment);
+
 	}
 
 	@Test
@@ -232,10 +239,10 @@ public class StringUtilTest
 		assertEquals(3, pos);
 
 		s = "some stuff     -- this is a comment";
-		pos = StringUtil.findFirstNonWhitespace(s, 10);
+		pos = StringUtil.findFirstNonWhitespace(s, 10, true);
 		assertEquals(15, pos);
 
-		pos = StringUtil.findFirstNonWhitespace(s, 12);
+		pos = StringUtil.findFirstNonWhitespace(s, 12, true);
 		assertEquals(15, pos);
 
 		String empty = "   ";

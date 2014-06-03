@@ -230,7 +230,7 @@ public class TextUtilities
 
 		if (Character.isWhitespace(ch))
 		{
-			return StringUtil.findFirstNonWhitespace(line, pos);
+			return StringUtil.findFirstNonWhitespace(line, pos, false);
 		}
 
 		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) && wordCharacters.indexOf(ch) == -1);
