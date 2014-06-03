@@ -69,7 +69,14 @@ public class InformixDataTypeResolver
 		}
 		else if (sqlType == Types.LONGVARCHAR)
 		{
-			return dbmsName + "(" + Integer.toString(size) + ")";
+			if ("longvarchar".equalsIgnoreCase(dbmsName))
+			{
+				return dbmsName + "(" + Integer.toString(size) + ")";
+			}
+			else
+			{
+				return dbmsName;
+			}
 		}
 		return super.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 	}
