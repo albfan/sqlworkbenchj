@@ -52,7 +52,7 @@ public class InformixDataTypeResolver
 	@Override
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
-		if (sqlType == Types.VARCHAR)
+		if (sqlType == Types.VARCHAR && size > 255)
 		{
 			String display = dbmsName;
 
