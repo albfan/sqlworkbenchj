@@ -53,6 +53,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 import static workbench.gui.completion.BaseAnalyzer.*;
+import workbench.sql.wbcommands.WbTableSource;
 
 
 /**
@@ -139,7 +140,14 @@ public class WbCommandAnalyzer
 		ArgumentParser args = cmd.getArgumentParser();
 		if (args == null)
 		{
-			this.context = NO_CONTEXT;
+			if (showTableList(cmd, args))
+			{
+				this.context = CONTEXT_TABLE_LIST;
+			}
+			else
+			{
+				this.context = NO_CONTEXT;
+			}
 			this.elements = null;
 			return;
 		}
@@ -221,7 +229,7 @@ public class WbCommandAnalyzer
 				this.elements = null;
 			}
 		}
-		else if (cmd instanceof WbDescribeObject && args.getArgumentCount() == 0)
+		else if (showTableList(cmd, args))
 		{
 			this.context = CONTEXT_TABLE_LIST;
 			this.elements = null;
@@ -238,6 +246,19 @@ public class WbCommandAnalyzer
 			Collections.sort(this.elements, CaseInsensitiveComparator.INSTANCE);
 			isParameter = args.needsSwitch();
 		}
+	}
+
+	private boolean showTableList(SqlCommand cmd, ArgumentParser args)
+	{
+		if (cmd == null) return false;
+		
+		int numArgs = args == null ? 0 : args.getArgumentCount();
+		if (numArgs > 0) return false;
+
+		if (cmd instanceof WbDescribeObject) return true;
+		if (cmd instanceof WbTableSource) return true;
+
+		return false;
 	}
 
 	@Override
