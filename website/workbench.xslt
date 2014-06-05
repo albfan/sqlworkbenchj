@@ -435,9 +435,10 @@
   </xsl:template>
 
   <xsl:template match="not-mysql">
-    <p style="margin:15px;padding:5px;border-style:solid;border-color:red;border-width:1px">
+    <p class="mysql-hint">
       Please note that SQL Workbench/J has no relation to the product <a title="Visit Oracle's product page" href="http://www.mysql.com/products/workbench/"><b>My</b>SQL Workbench</a>
-      <img src="images/outlink.gif" alt="Link Arrow" border="0"/>&nbsp;which is maintained and owned by Oracle. If you are looking for <b>My</b>SQL Workbench support please contact Oracle.
+      <img src="images/outlink.gif" alt="Link Arrow" border="0"/>&nbsp;which is maintained and owned by Oracle. <br/>
+      If you are looking for <b>My</b>SQL Workbench support please contact Oracle.
     </p>
   </xsl:template>
 

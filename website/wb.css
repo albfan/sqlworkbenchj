@@ -241,9 +241,10 @@ li.toclist#current
   background-color:#666633;
 }
 
-.content { width: 100%;
+.content { 
+  width: 100%;
   background-color:#FFFFFF;
-  padding:4px 10px 10px 10px;
+  padding: 1em 10px 10px 10px;
   vertical-align:top;
   text-align:left;
   border-style:solid;
@@ -336,4 +337,16 @@ h3.note_h
   padding: 2px;
   font-size: 10pt;
   white-space: pre;
+}
+
+.mysql-hint 
+{
+  margin-top:0.5em;
+  margin-left:1em;
+  margin-right:1em;
+  margin-bottom:2em;
+  padding:5px;
+  border-style:solid;
+  border-color:red;
+  border-width:1px
 }
