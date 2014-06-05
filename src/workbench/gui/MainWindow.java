@@ -431,24 +431,6 @@ public class MainWindow
 		}
 	}
 
-	public String getLastSqlFileDir()
-	{
-		WbProperties props = toolProperties.get("mainwindow");
-		if (props == null) return null;
-		return props.getProperty("sql.lastscriptdir", null);
-	}
-
-	public void setLastSqlFileDir(String lastDir)
-	{
-		WbProperties props = toolProperties.get("mainwindow");
-		if (props == null)
-		{
-			props = new WbProperties(null);
-			toolProperties.put("mainwindow", props);
-		}
-		props.setProperty("sql.lastscriptdir", lastDir);
-	}
-
 	protected void checkWorkspaceActions()
 	{
 		this.saveWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);

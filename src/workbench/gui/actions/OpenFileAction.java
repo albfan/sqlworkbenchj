@@ -101,12 +101,15 @@ public class OpenFileAction
 			if (!currentPanel.checkAndSaveFile()) return;
 		}
 
+		final String toolname = "directories";
+		final String lastDirKey = "last.script.dir";
+
 		try
 		{
 			File lastDir = new File(Settings.getInstance().getLastSqlDir());
 			if (Settings.getInstance().getStoreScriptDirInWksp())
 			{
-				String dirname = window.getLastSqlFileDir();
+				String dirname = window.getToolProperties(toolname).getProperty(lastDirKey, null);
 				if (StringUtil.isNonBlank(dirname))
 				{
 					lastDir = new File(dirname);
@@ -184,7 +187,7 @@ public class OpenFileAction
 					lastDir = fc.getCurrentDirectory();
 					if (Settings.getInstance().getStoreScriptDirInWksp())
 					{
-						window.setLastSqlFileDir(lastDir.getAbsolutePath());
+						window.getToolProperties(toolname).setProperty(lastDirKey, lastDir.getAbsolutePath());
 					}
 					else
 					{

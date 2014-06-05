@@ -67,6 +67,11 @@ public class WbProperties
 		this(null, 2);
 	}
 
+	public WbProperties(int num)
+	{
+		this(null, num);
+	}
+	
 	public WbProperties(Object notificationSource)
 	{
 		this(notificationSource, 2);
