@@ -88,9 +88,9 @@ import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.FileCloseAction;
 import workbench.gui.actions.FileConnectAction;
 import workbench.gui.actions.FileDisconnectAction;
-import workbench.gui.actions.FileReconnectAction;
 import workbench.gui.actions.FileExitAction;
 import workbench.gui.actions.FileNewWindowAction;
+import workbench.gui.actions.FileReconnectAction;
 import workbench.gui.actions.FileSaveProfiles;
 import workbench.gui.actions.HelpContactAction;
 import workbench.gui.actions.InsertTabAction;
@@ -429,6 +429,24 @@ public class MainWindow
 				((SqlPanel)p).removeDbExecutionListener(l);
 			}
 		}
+	}
+
+	public String getLastSqlFileDir()
+	{
+		WbProperties props = toolProperties.get("mainwindow");
+		if (props == null) return null;
+		return props.getProperty("sql.lastscriptdir", null);
+	}
+
+	public void setLastSqlFileDir(String lastDir)
+	{
+		WbProperties props = toolProperties.get("mainwindow");
+		if (props == null)
+		{
+			props = new WbProperties(null);
+			toolProperties.put("mainwindow", props);
+		}
+		props.setProperty("sql.lastscriptdir", lastDir);
 	}
 
 	protected void checkWorkspaceActions()
@@ -1422,7 +1440,7 @@ public class MainWindow
 		{
 			info.setStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 		}
-		
+
 		if (loadWorkspace)
 		{
 			loadCurrentProfileWorkspace();

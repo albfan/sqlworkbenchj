@@ -2594,6 +2594,16 @@ public class Settings
 		this.props.setProperty("workbench.export.lastdir", aDir);
 	}
 
+	public boolean getStoreScriptDirInWksp()
+	{
+		return getBoolProperty("workbench.scriptdir.store.in.workspace", false);
+	}
+
+	public void setStoreScriptDirInWksp(boolean flag)
+	{
+		setProperty("workbench.scriptdir.store.in.workspace", flag);
+	}
+
 	public String getLastSqlDir()
 	{
 		return getProperty("workbench.sql.lastscriptdir","");

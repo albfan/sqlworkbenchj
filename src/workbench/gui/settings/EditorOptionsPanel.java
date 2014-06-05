@@ -112,6 +112,7 @@ public class EditorOptionsPanel
 		noWordSep.setText(Settings.getInstance().getEditorNoWordSep());
 		useTabs.setSelected(Settings.getInstance().getEditorUseTabCharacter());
 		followCurrentDir.setSelected(GuiSettings.getFollowFileDirectory());
+		storeDirInWksp.setSelected(Settings.getInstance().getStoreScriptDirInWksp());
 		File dir = GuiSettings.getDefaultFileDir();
 		if (dir != null)
 		{
@@ -182,6 +183,7 @@ public class EditorOptionsPanel
 		set.setEditorUseTabCharacter(useTabs.isSelected());
 		set.setProperty(Settings.PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, hiliteCurrent.isSelected());
 		set.setEmptyLineIsDelimiter(emptyLineDelimiter.isSelected());
+		set.setStoreScriptDirInWksp(storeDirInWksp.isSelected());
 		GuiSettings.setDefaultFileDir(defaultDir.getFilename());
 		GuiSettings.setFollowFileDirectory(followCurrentDir.isSelected());
 		GuiSettings.setKeepCurrentSqlHighlight(keepHilite.isSelected());
@@ -269,6 +271,7 @@ public class EditorOptionsPanel
     followCurrentDir = new JCheckBox();
     jLabel1 = new JLabel();
     defaultDir = new WbFilePicker();
+    storeDirInWksp = new JCheckBox();
     jLabel2 = new JLabel();
     autoCloseBrackets = new JTextField();
     jLabel3 = new JLabel();
@@ -567,28 +570,39 @@ public class EditorOptionsPanel
     followCurrentDir.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 0, 0, 0);
     jPanel1.add(followCurrentDir, gridBagConstraints);
 
     jLabel1.setText(ResourceMgr.getString("LblEditorDefaultDir")); // NOI18N
     jLabel1.setToolTipText(ResourceMgr.getString("d_LblEditorDefaultDir")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 0, 0, 11);
     jPanel1.add(jLabel1, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(3, 0, 0, 0);
     jPanel1.add(defaultDir, gridBagConstraints);
+
+    storeDirInWksp.setText(ResourceMgr.getString("LblStoreScriptDirInWksp")); // NOI18N
+    storeDirInWksp.setToolTipText(ResourceMgr.getString("d_LblStoreScriptDirInWksp")); // NOI18N
+    storeDirInWksp.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    jPanel1.add(storeDirInWksp, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -730,6 +744,7 @@ public class EditorOptionsPanel
   private JLabel reloadLabel;
   private JComboBox reloadType;
   private JCheckBox rightClickMovesCursor;
+  private JCheckBox storeDirInWksp;
   private JTextField tabSize;
   private JCheckBox useCurrentLineStmt;
   private JCheckBox useResultForBookmark;

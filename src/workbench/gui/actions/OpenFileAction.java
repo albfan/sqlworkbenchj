@@ -53,6 +53,7 @@ import workbench.gui.sql.SqlPanel;
 
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
@@ -103,6 +104,15 @@ public class OpenFileAction
 		try
 		{
 			File lastDir = new File(Settings.getInstance().getLastSqlDir());
+			if (Settings.getInstance().getStoreScriptDirInWksp())
+			{
+				String dirname = window.getLastSqlFileDir();
+				if (StringUtil.isNonBlank(dirname))
+				{
+					lastDir = new File(dirname);
+				}
+			}
+
 			if (GuiSettings.getFollowFileDirectory())
 			{
 				if (currentPanel != null && currentPanel.hasFileLoaded())
@@ -121,7 +131,7 @@ public class OpenFileAction
 
 			JFileChooser fc = new WbFileChooser(lastDir);
 			fc.setMultiSelectionEnabled(true);
-			
+
 			JPanel acc = new JPanel(new GridBagLayout());
 			JComponent p = EncodingUtil.createEncodingPanel();
 			p.setBorder(new EmptyBorder(0, 5, 0, 0));
@@ -172,7 +182,14 @@ public class OpenFileAction
 				if (!GuiSettings.getFollowFileDirectory())
 				{
 					lastDir = fc.getCurrentDirectory();
-					Settings.getInstance().setLastSqlDir(lastDir.getAbsolutePath());
+					if (Settings.getInstance().getStoreScriptDirInWksp())
+					{
+						window.setLastSqlFileDir(lastDir.getAbsolutePath());
+					}
+					else
+					{
+						Settings.getInstance().setLastSqlDir(lastDir.getAbsolutePath());
+					}
 				}
 
 				Settings.getInstance().setDefaultFileEncoding(encoding);

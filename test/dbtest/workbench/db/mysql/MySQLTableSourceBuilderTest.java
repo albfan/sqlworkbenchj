@@ -68,9 +68,9 @@ public class MySQLTableSourceBuilderTest
 		if (con == null) return;
 
 		String sql =
-			"drop table tbl_isam;\n" +
-			"drop table tbl_inno;\n" +
-			"drop table foo;\n" +
+			"drop table if exists tbl_isam;\n" +
+			"drop table if exists tbl_inno;\n" +
+			"drop table if exists foo;\n" +
 			"commit;\n";
 		TestUtil.executeScript(con, sql);
 
@@ -122,20 +122,22 @@ public class MySQLTableSourceBuilderTest
 			"  id integer primary key, " +
 			"  foo varchar(10) default 'bar', \n" +
 			"  bar date default '2014-01-01', " +
-			"  dts datetime default '2014-01-01 01:02:03');\n" +
+			"  dts datetime default '2014-01-01 01:02:03', \n" +
+			"  ts timestamp default current_timestamp);\n" +
 			"commit;\n";
 		TestUtil.executeScript(con, sql);
 
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("foo"));
 
 		String create = tbl.getSource(con).toString();
-		System.out.println(create);
+//		System.out.println(create);
 		String[] lines = create.trim().split("\n");
-		assertEquals(12, lines.length);
+		assertEquals(13, lines.length);
 		assertEquals("CREATE TABLE foo", lines[0]);
 		assertEquals("   foo  VARCHAR(10)   DEFAULT 'bar',", lines[3]);
 		assertEquals("   bar  DATE          DEFAULT '2014-01-01',", lines[4]);
-		assertEquals("   dts  DATETIME      DEFAULT '2014-01-01 01:02:03'", lines[5]);
+		assertEquals("   dts  DATETIME      DEFAULT '2014-01-01 01:02:03',", lines[5]);
+		assertEquals("   ts   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL", lines[6]);
 	}
 
 }
