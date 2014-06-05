@@ -201,7 +201,7 @@ public class ColumnDefinitionTemplate
 		}
 
 		value = value.trim();
-		if (isMySQL && SqlUtil.isDateType(column.getDataType()) && !value.startsWith("'"))
+		if (isMySQL && SqlUtil.isDateType(column.getDataType()) && !value.startsWith("'") && !value.equalsIgnoreCase("CURRENT_TIMESTAMP"))
 		{
 			addQuotes = true;
 		}
