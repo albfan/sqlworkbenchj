@@ -166,7 +166,10 @@ WHERE id=42;</p>
         SQL Workbench/J needs a <a target="_blank" href="http://www.java.com/en/">Java runtime</a>.<br/>
         You have to install <b>Java 7</b> or higher before you can run SQL Workbench/J.
       </p>
-      <p>Java 6 will work as well, but it is not recommended as it is no longer supported</p>
+      <p>
+	     Java 6 will work as well, but it is not recommended as it is no longer supported<br/>
+		 Build 116 will be the last release to support Java 6.
+	  </p>
 
       <h3 style="padding-top:10px">Installation</h3>
       <p>
