@@ -22,7 +22,6 @@
  */
 package workbench.gui.components;
 
-import java.awt.EventQueue;
 import java.awt.Frame;
 import java.io.File;
 import java.sql.SQLException;
@@ -78,7 +77,7 @@ public class ConnectionSelector
 
 	public void selectConnection()
 	{
-		EventQueue.invokeLater(new Runnable()
+		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
 			public void run()

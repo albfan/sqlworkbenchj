@@ -1053,7 +1053,15 @@ public class WbSwingUtilities
 		});
 	}
 
-	public static void requestFocus(final Window win, final JComponent comp)
+	/**
+	 * Registers a (temporary) WindowListener with the window that will activate the passed component
+	 * as soon as the windowActivated() event is received.
+	 *
+	 * @param win     the parent window
+	 * @param comp    the component to focus in the window
+	 *
+	 */
+	public static void requestComponentFocus(final Window win, final JComponent comp)
 	{
 		win.addWindowListener(new WindowAdapter()
 		{
@@ -1069,27 +1077,6 @@ public class WbSwingUtilities
 					}
 				});
 				win.removeWindowListener(this);
-			}
-		});
-	}
-
-	/**
-	 * Schedules a requestFocus() for the window and the component on the AWT event queue.
-	 *
-	 * @param parent  the parent window
-	 * @param comp    the component to focus in the window
-	 *
-	 * @see EventQueue#invokeLater()
-	 */
-	public static void requestWindowFocus(final Window parent, final JComponent comp)
-	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (parent != null) parent.requestFocus();
-				if (comp != null) comp.requestFocus();
 			}
 		});
 	}

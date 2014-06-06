@@ -166,11 +166,8 @@ public class ProfileSelectionDialog
 
 		setTitle(ResourceMgr.getString("LblSelectProfile"));
 		this.restoreSize();
-		// This should be done "later", otherwise the focus will not be set
-		// correctly when running on Linux with the GTk+ look and feel
-		// with Java8 it also seems to be necessary to explicitely set the focus
-		// to this dialog before setting the focus to the component
-		WbSwingUtilities.requestWindowFocus(this, profiles.getInitialFocusComponent());
+		
+		WbSwingUtilities.requestComponentFocus(this, profiles.getInitialFocusComponent());
 	}
 
 	@Override

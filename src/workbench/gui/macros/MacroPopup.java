@@ -321,7 +321,7 @@ public class MacroPopup
 						MacroRunner runner = new MacroRunner();
 						runner.runMacro(macro, panel, WbAction.isShiftPressed(e.getModifiers()));
 					}
-					WbSwingUtilities.requestFocus(mainWindow, panel);
+					WbSwingUtilities.requestComponentFocus(mainWindow, panel);
 				}
 			}
 		}
