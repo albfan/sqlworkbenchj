@@ -144,7 +144,7 @@ public class ConnectionMgr
 	 * @throws UnsupportedClassVersionError  if the driver is for a different Java version
 	 */
 	public WbConnection getConnection(ConnectionProfile profile, String connId)
-		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
+		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError, NoConnectionException
 	{
 		if (this.activeConnections.containsKey(connId))
 		{
@@ -205,7 +205,7 @@ public class ConnectionMgr
 	}
 
 	WbConnection connect(ConnectionProfile profile, String anId)
-		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
+		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError, NoConnectionException
 	{
 		String drvClass = profile.getDriverclass();
 		String drvName = profile.getDriverName();

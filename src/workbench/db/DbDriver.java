@@ -399,7 +399,7 @@ public class DbDriver
 	}
 
 	public Connection connect(String url, String user, String password, String id, Properties connProps)
-		throws ClassNotFoundException, SQLException
+		throws ClassNotFoundException, NoConnectionException, SQLException
 	{
 		Connection conn = null;
 		try
@@ -452,11 +452,6 @@ public class DbDriver
 			setAppInfo(props, url.toLowerCase(), id, user);
 
 			conn = this.driverClassInstance.connect(url, props);
-			if (conn == null)
-			{
-				LogMgr.logError("DbDriver.connect()", "No connection returned by driver " + this.driverClass + " for URL=" + url, null);
-				throw new SQLException("Driver did not return a connection for url=" + url);
-			}
 
 			// The system property for the Firebird driver is only needed when the connection is created
 			// so after the connect was successful, we can clean up the system properties
@@ -483,6 +478,12 @@ public class DbDriver
 		{
 			LogMgr.logError("DbDriver.connect()", "Error connecting to the database using URL=" + url + ", username=" + user, th);
 			throw new SQLException(th.getMessage(), th);
+		}
+
+		if (conn == null)
+		{
+			LogMgr.logError("DbDriver.connect()", "No connection returned by driver " + this.driverClass + " for URL=" + url, null);
+			throw new NoConnectionException("Driver did not return a connection for url=" + url);
 		}
 
 		return conn;

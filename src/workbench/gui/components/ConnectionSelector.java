@@ -35,6 +35,7 @@ import workbench.resource.Settings;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.NoConnectionException;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
@@ -234,6 +235,12 @@ public class ConnectionSelector
 			{
 				Settings.getInstance().setProperty(this.propertyKey, aProfile.getName());
 			}
+		}
+		catch (NoConnectionException noConn)
+		{
+			conn = null;
+			LogMgr.logError("ConnectionSelector.doConnect()", "No connection returned for profile "+ aProfile.getKey(), noConn);
+			error = ResourceMgr.getString("ErrNoConnReturned");
 		}
 		catch (UnsupportedClassVersionError ucv)
 		{
