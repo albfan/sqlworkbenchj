@@ -1073,6 +1073,34 @@ public class WbSwingUtilities
 		});
 	}
 
+	/**
+	 * Schedules a requestFocus() for the window and the component on the AWT event queue.
+	 *
+	 * @param parent  the parent window
+	 * @param comp    the component to focus in the window
+	 *
+	 * @see EventQueue#invokeLater()
+	 */
+	public static void requestWindowFocus(final Window parent, final JComponent comp)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (parent != null) parent.requestFocus();
+				if (comp != null) comp.requestFocus();
+			}
+		});
+	}
+
+	/**
+	 * Schedules a requestFocus() call in the AWT event queue.
+	 *
+	 * @param comp  the component to focus
+	 *
+	 * @see EventQueue#invokeLater()
+	 */
 	public static void requestFocus(final JComponent comp)
 	{
 		if (comp == null) return;
