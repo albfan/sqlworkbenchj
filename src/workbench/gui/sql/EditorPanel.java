@@ -47,6 +47,7 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -473,12 +474,45 @@ public class EditorPanel
 
 	public final void addPopupMenuItem(WbAction anAction, boolean withSeparator)
 	{
-		if (withSeparator)
-		{
-			this.popup.addSeparator();
-		}
-		this.popup.add(anAction.getMenuItem());
+		if (popup == null) return;
+		popup.addAction(anAction, withSeparator);
 		this.addKeyBinding(anAction);
+	}
+
+	private void addFileSaveAction()
+	{
+		int index = findItemOnPopup(fileSaveAs);
+		if (index > -1)
+		{
+			popup.add(fileSave.getMenuItem(), index);
+		}
+	}
+
+	private void removeFileSaveAction()
+	{
+		int index = findItemOnPopup(fileSave);
+		if (index > -1)
+		{
+			popup.remove(index);
+		}
+	}
+
+	private int findItemOnPopup(WbAction action)
+	{
+		if (this.popup == null) return -1;
+		for (int i=0; i < popup.getComponentCount(); i++)
+		{
+			Component component = popup.getComponent(i);
+			if (component instanceof JMenuItem)
+			{
+				JMenuItem menu = (JMenuItem)component;
+				if (menu.getAction() == action)
+				{
+					return i;
+				}
+			}
+		}
+		return -1;
 	}
 
 	@Override
@@ -540,6 +574,8 @@ public class EditorPanel
 			this.reset();
 		}
 		fireFilenameChanged(null);
+		removeFileSaveAction();
+
 		return true;
 	}
 
@@ -747,6 +783,7 @@ public class EditorPanel
 				result = true;
 				fireFilenameChanged(toLoad.getAbsolutePath());
 			}
+			addFileSaveAction();
 		}
 		catch (BadLocationException bl)
 		{
