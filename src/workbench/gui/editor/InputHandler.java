@@ -403,13 +403,6 @@ public class InputHandler
 	@Override
 	public void keyReleased(KeyEvent evt)
 	{
-		if (evt.getKeyCode() == KeyEvent.VK_ALT)
-		{
-			// we consume this to work around the bug
-			// where Alt+TAB window switching activates
-			// the menu bar on Windows.
-			evt.consume();
-		}
 	}
 
 	public List<KeyStroke> getKeys(JMenu menu)
