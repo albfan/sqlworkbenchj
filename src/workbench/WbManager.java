@@ -71,6 +71,7 @@ import workbench.sql.macros.MacroManager;
 
 import workbench.util.DeadlockMonitor;
 import workbench.util.MacOSHelper;
+import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
 import workbench.util.UpdateCheck;
 import workbench.util.VersionNumber;
@@ -896,6 +897,10 @@ public final class WbManager
 			LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 			LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") + ", name=" + System.getProperty("java.vm.name"));
 			LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
+
+			long maxMem = MemoryWatcher.MAX_MEMORY / (1024*1024);
+			LogMgr.logInfo("WbManager.init()", "Available memory: " + maxMem + "MB");
+
 			if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
 			{
 				LogMgr.logInfo("WbManager.init()", "The '" + AppArguments.ARG_NOSETTNGS + "' option was specified on the commandline. Global settings will not be saved!");
