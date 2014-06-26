@@ -86,6 +86,10 @@ public class ConnectionMgr
 	private ConnectionMgr()
 	{
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_PROFILE_STORAGE);
+
+		// make sure the inputPassword is not stored, only the password property should be stored
+		// because that might be encrypted
+		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
 	}
 
 	public static ConnectionMgr getInstance()
