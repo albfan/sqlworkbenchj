@@ -52,8 +52,11 @@ public class OracleRowDataReader
 {
 	private Method getTsValue;
 	private Method getBytes;
+	private Method getSessionOffset;
 
 	private Connection sqlConnection;
+
+	private boolean adjustTs;
 
 	public OracleRowDataReader(ResultInfo info, WbConnection conn)
 		throws ClassNotFoundException
@@ -61,20 +64,26 @@ public class OracleRowDataReader
 		super(info, conn);
 		sqlConnection = conn.getSqlConnection();
 
+		adjustTs = false;
+
 		// we cannot have any "hardcoded" references to the Oracle classes
 		// because that will throw a ClassNotFoundException as those classes
 		// were loaded through a different class loader.
 		// Therefor I need to use reflection to access the methods
-		try
+		if (adjustTs)
 		{
-			Class tzClass = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.TIMESTAMPTZ");
-			getBytes = tzClass.getMethod("getBytes", (Class[]) null);
-			getTsValue = tzClass.getMethod("timestampValue", java.sql.Connection.class);
-		}
-		catch (Throwable t)
-		{
-			LogMgr.logError("OracleRowDataReader.initialize()", "Could not access TIMESTAMPTZ class", t);
-			throw new ClassNotFoundException("TIMESTAMPTZ");
+			try
+			{
+				Class tzClass = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.TIMESTAMPTZ");
+				getBytes = tzClass.getMethod("getBytes", (Class[]) null);
+				getTsValue = tzClass.getMethod("timestampValue", java.sql.Connection.class);
+				getSessionOffset = conn.getSqlConnection().getClass().getMethod("getSessionTimeZoneOffset", (Class[]) null);
+			}
+			catch (Throwable t)
+			{
+				LogMgr.logError("OracleRowDataReader.initialize()", "Could not access TIMESTAMPTZ class", t);
+				throw new ClassNotFoundException("TIMESTAMPTZ");
+			}
 		}
 	}
 
@@ -82,8 +91,8 @@ public class OracleRowDataReader
 	protected Object readTimestampValue(ResultSet rs, int column)
 		throws SQLException
 	{
-		String type = this.resultInfo.getDbmsTypeName(column-1);
-		if (!type.equalsIgnoreCase("TIMESTAMP WITH TIME ZONE"))
+//		String type = this.resultInfo.getDbmsTypeName(column-1);
+		if (!adjustTs)
 		{
 			return rs.getTimestamp(column);
 		}
@@ -103,7 +112,28 @@ public class OracleRowDataReader
 				LogMgr.logDebug("OracleRowDataReader.readTimestampValue()", "Could not read timestamp", ex);
 			}
 		}
+
+		if (value.getClass().getName().equals("oracle.sql.TIMESTAMPLTZ") && getSessionOffset != null)
+		{
+			try
+			{
+				return getLocalTimestamp(value);
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logDebug("OracleRowDataReader.readTimestampValue()", "Could not read timestamp with local time", ex);
+			}
+
+		}
 		return rs.getTimestamp(column);
+	}
+
+	private Object getLocalTimestamp(Object tz)
+		throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	{
+		String offset = (String)getSessionOffset.invoke(sqlConnection, (Object[]) null);
+		System.out.println("Session offset: " + offset);
+		return tz;
 	}
 
 	private Object adjustTimezone(Object tz)
@@ -136,6 +166,11 @@ public class OracleRowDataReader
 			String region = StringUtil.formatInt(hourOffset, 2) + ":" + StringUtil.formatInt(minuteOffset, 2);
 			zone = TimeZone.getTimeZone(region);
 		}
+		return createTimestamp(tzValue, zone);
+	}
+
+	private Object createTimestamp(long tzValue, TimeZone zone)
+	{
 		Calendar cal = Calendar.getInstance(zone);
 		cal.setTimeInMillis(tzValue);
 
