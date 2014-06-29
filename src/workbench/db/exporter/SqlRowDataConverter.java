@@ -113,6 +113,23 @@ public class SqlRowDataConverter
 		this.transactionControl = flag;
 	}
 
+	public void setIncludeIdentityColumns(boolean flag)
+	{
+		includeIdentityCols = flag;
+		if (statementFactory != null)
+		{
+			statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
+		}
+	}
+
+	public void setIncludeReadOnlyColumns(boolean flag)
+	{
+		includeReadOnlyCols = flag;
+		if (statementFactory != null)
+		{
+			statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols );
+		}
+	}
 
 	private boolean needPrimaryKey()
 	{
@@ -248,7 +265,7 @@ public class SqlRowDataConverter
 
 		StringBuilder result = new StringBuilder();
 		DmlStatement dml = null;
-		
+
 		this.statementFactory.setIncludeTableOwner(includeOwner);
 		this.statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
 		this.statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols);

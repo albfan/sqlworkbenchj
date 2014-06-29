@@ -426,10 +426,19 @@ public class ClipBoardCopier
 
 			SqlRowDataConverter converter = new SqlRowDataConverter(data.getOriginalConnection());
 			converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-			converter.setResultInfo(data.getResultInfo());
 			converter.setDateLiteralType(Settings.getInstance().getDefaultCopyDateLiteralType());
 			converter.setType(type);
 			converter.setTransactionControl(false);
+			converter.setIgnoreColumnStatus(true);
+
+			if (columnsToInclude != null)
+			{
+				// if columns were manually selected always include all columns regardless of their "type".
+				converter.setIncludeIdentityColumns(true);
+				converter.setIncludeReadOnlyColumns(true);
+			}
+			
+			converter.setResultInfo(data.getResultInfo());
 
 			if (type == ExportType.SQL_INSERT || type == ExportType.SQL_DELETE_INSERT)
 			{
