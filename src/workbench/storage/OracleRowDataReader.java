@@ -21,28 +21,25 @@
  */
 package workbench.storage;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.TimeZone;
+import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.db.oracle.OracleTimeZoneInfo;
-
-import workbench.util.StringUtil;
 
 
 /**
  * A class to properly read the value of a TIMESTAMP WITH TIME ZONE column.
  *
- * This code should actually be inside Oracle's JDBC trigger's getTimestamp() method to properly adjust
+ * This code should actually be inside Oracle's JDBC driver's getTimestamp() method to properly adjust
  * the timestamp value.
  *
  * @author Thomas Kellerer
@@ -50,13 +47,11 @@ import workbench.util.StringUtil;
 public class OracleRowDataReader
 	extends RowDataReader
 {
-	private Method getTsValue;
-	private Method getBytes;
-	private Method getSessionOffset;
+	private Method stringValue;
 
 	private Connection sqlConnection;
-
-	private boolean adjustTs;
+	private SimpleDateFormat tsParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	private final Set<String> tsClasses = new HashSet<String>(3);
 
 	public OracleRowDataReader(ResultInfo info, WbConnection conn)
 		throws ClassNotFoundException
@@ -64,123 +59,62 @@ public class OracleRowDataReader
 		super(info, conn);
 		sqlConnection = conn.getSqlConnection();
 
-		adjustTs = false;
+		// TODO: do I also need to convert TIMESTAMP WITH LOCAL TIME ZONE (oracle.sql.TIMESTAMPTLZ)?
+		tsClasses.add("oracle.sql.TIMESTAMPTZ");
 
 		// we cannot have any "hardcoded" references to the Oracle classes
-		// because that will throw a ClassNotFoundException as those classes
-		// were loaded through a different class loader.
-		// Therefor I need to use reflection to access the methods
-		if (adjustTs)
+		// because that will throw a ClassNotFoundException as those classes were loaded through a different class loader.
+		// Therefor I need to use reflection to access the stringValue() method
+		try
 		{
-			try
-			{
-				Class tzClass = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.TIMESTAMPTZ");
-				getBytes = tzClass.getMethod("getBytes", (Class[]) null);
-				getTsValue = tzClass.getMethod("timestampValue", java.sql.Connection.class);
-				getSessionOffset = conn.getSqlConnection().getClass().getMethod("getSessionTimeZoneOffset", (Class[]) null);
-			}
-			catch (Throwable t)
-			{
-				LogMgr.logError("OracleRowDataReader.initialize()", "Could not access TIMESTAMPTZ class", t);
-				throw new ClassNotFoundException("TIMESTAMPTZ");
-			}
+			Class oraDatum = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.Datum");
+			stringValue= oraDatum.getMethod("stringValue", java.sql.Connection.class);
 		}
+		catch (Throwable t)
+		{
+			LogMgr.logError("OracleRowDataReader.initialize()", "Could not access TIMESTAMPTZ class", t);
+			throw new ClassNotFoundException("TIMESTAMPTZ");
+		}
+
 	}
 
 	@Override
 	protected Object readTimestampValue(ResultSet rs, int column)
 		throws SQLException
 	{
-//		String type = this.resultInfo.getDbmsTypeName(column-1);
-		if (!adjustTs)
-		{
-			return rs.getTimestamp(column);
-		}
-
 		Object value = rs.getObject(column);
+
 		if (value == null) return null;
 		if (rs.wasNull()) return null;
 
-		if (value.getClass().getName().equals("oracle.sql.TIMESTAMPTZ"))
+		if (tsClasses.contains(value.getClass().getName()))
 		{
-			try
-			{
-				return adjustTimezone(value);
-			}
-			catch (Exception ex)
-			{
-				LogMgr.logDebug("OracleRowDataReader.readTimestampValue()", "Could not read timestamp", ex);
-			}
+			return adjustTIMESTAMP(value);
 		}
 
-		if (value.getClass().getName().equals("oracle.sql.TIMESTAMPLTZ") && getSessionOffset != null)
+		if (value instanceof java.sql.Timestamp)
 		{
-			try
-			{
-				return getLocalTimestamp(value);
-			}
-			catch (Exception ex)
-			{
-				LogMgr.logDebug("OracleRowDataReader.readTimestampValue()", "Could not read timestamp with local time", ex);
-			}
-
+			return value;
 		}
 		return rs.getTimestamp(column);
 	}
 
-	private Object getLocalTimestamp(Object tz)
-		throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	private Object adjustTIMESTAMP(Object tz)
 	{
-		String offset = (String)getSessionOffset.invoke(sqlConnection, (Object[]) null);
-		System.out.println("Session offset: " + offset);
+		try
+		{
+			String tsValue = (String) stringValue.invoke(tz, sqlConnection);
+			java.util.Date date = tsParser.parse(tsValue);
+			// this loses the time zone information stored in Oracle's TIMESTAMPTZ or TIMESTAMPLTZ values
+			// but otherwise the displayed time would be totally wrong.
+			Timestamp ts = new java.sql.Timestamp(date.getTime());
+			return ts;
+		}
+		catch (Throwable ex)
+		{
+			LogMgr.logDebug("OracleRowDataReader.adjustTIMESTAMP()", "Could not read timestamp", ex);
+		}
 		return tz;
-	}
-
-	private Object adjustTimezone(Object tz)
-		throws SQLException, IllegalAccessException, InvocationTargetException
-	{
-		Timestamp oraTs = (Timestamp)getTsValue.invoke(tz, sqlConnection);
-		long tzValue = oraTs.getTime();
-
-		byte[] bytes = (byte[])getBytes.invoke(tz, (Object[]) null);
-		TimeZone zone;
-		if ((bytes[11] & -128) != 0)
-		{
-			int regionCode = (bytes[11] & 127) << 6;
-			regionCode += ((bytes[12] & 252) >> 2);
-			String regionName = OracleTimeZoneInfo.ORA_TIMEZONES.get(regionCode);
-			if (regionName != null)
-			{
-				zone = TimeZone.getTimeZone(regionName);
-			}
-			else
-			{
-				LogMgr.logWarning("OracleRowDataReader.adjustTimezone", "No timezone for ID=" + regionCode + " found. Using default timezone!");
-				zone = TimeZone.getDefault();
-			}
-		}
-		else
-		{
-			int hourOffset = bytes[11] - 20;
-			int minuteOffset = bytes[12] - 60;
-			String region = StringUtil.formatInt(hourOffset, 2) + ":" + StringUtil.formatInt(minuteOffset, 2);
-			zone = TimeZone.getTimeZone(region);
-		}
-		return createTimestamp(tzValue, zone);
-	}
-
-	private Object createTimestamp(long tzValue, TimeZone zone)
-	{
-		Calendar cal = Calendar.getInstance(zone);
-		cal.setTimeInMillis(tzValue);
-
-		// I have to use the deprecated consctructor, because Calendar.get() correctly deals with DST and timezone information
-		// which is not done when using getTimeMillis()
-		Timestamp ts = new java.sql.Timestamp(
-			cal.get(Calendar.YEAR) - 1900, cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH),
-			cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND), cal.get(Calendar.MILLISECOND) * 1000000
-		);
-		return ts;
 	}
 
 }
