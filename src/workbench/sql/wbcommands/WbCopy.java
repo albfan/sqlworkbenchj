@@ -37,6 +37,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
+import workbench.db.importer.TableStatementError;
 import workbench.db.importer.TableStatements;
 
 import workbench.gui.profiles.ProfileKey;
@@ -297,6 +298,12 @@ public class WbCopy
 		catch (TableNotFoundException tnf)
 		{
 			String err = ResourceMgr.getFormattedString("ErrTableNotFound", tnf.getTableName());
+			result.addMessage(err);
+			result.setFailure();
+		}
+		catch (TableStatementError tse)
+		{
+			String err = ResourceMgr.getFormattedString("ErrTableStmt", tse.getTable(), tse.getMessage());
 			result.addMessage(err);
 			result.setFailure();
 		}

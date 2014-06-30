@@ -157,14 +157,15 @@ public class TableStatements
 		catch (SQLException e)
 		{
 			con.rollback(sp);
+			String errMsg = "Error running statement: [" + sql + "] for table: " + tbl.getFullyQualifiedName(con);
 			if (ignoreErrors)
 			{
-				LogMgr.logWarning("TableStatements.runStatement", "Error running statement: [" + sql + "]: " + e.getMessage());
+				LogMgr.logWarning("TableStatements.runStatement", errMsg + ": " + e.getMessage());
 			}
 			else
 			{
-				LogMgr.logError("TableStatements.runStatement", "Error running statement: " + sql, e);
-				throw e;
+				LogMgr.logError("TableStatements.runStatement", errMsg + sql, e);
+				throw new TableStatementError(e, tbl);
 			}
 		}
 		catch (Throwable th)
