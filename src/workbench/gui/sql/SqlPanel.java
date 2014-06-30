@@ -186,6 +186,7 @@ import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
+import workbench.sql.AppendResultAnnotation;
 
 import workbench.storage.DataStore;
 
@@ -3092,19 +3093,6 @@ public class SqlPanel
 
 		try
 		{
-			if (appendResult)
-			{
-				resetReuse();
-				firstResultIndex = this.resultTab.getTabCount() - 1;
-				appendToLog("\n");
-			}
-			else
-			{
-				setLogText("");
-				clearResultTabs();
-				firstResultIndex = 0;
-			}
-
 			// executeMacro() will set this variable so that we can
 			// log the macro statement here. Otherwise we wouldn't know at this point
 			// that a macro is beeing executed
@@ -3163,6 +3151,31 @@ public class SqlPanel
 					}
 				}
 			}
+
+			if (endIndex == startIndex + 1)
+			{
+				AppendResultAnnotation append = new AppendResultAnnotation();
+				String sql = scriptParser.getCommand(startIndex);
+				if (append.containsAnnotation(sql))
+				{
+					appendResult = true;
+				}
+			}
+
+			if (appendResult)
+			{
+				resetReuse();
+				firstResultIndex = this.resultTab.getTabCount() - 1;
+				appendToLog("\n");
+			}
+			else
+			{
+				setLogText("");
+				clearResultTabs();
+				firstResultIndex = 0;
+			}
+
+
 
 			if (count > 1)
 			{
