@@ -92,6 +92,7 @@ public class SqlRowDataConverter
 		super();
 		setOriginalConnection(con);
 		includeIdentityCols = !Settings.getInstance().getGenerateInsertIgnoreIdentity();
+		includeReadOnlyCols = !Settings.getInstance().getCheckEditableColumns();
 	}
 
 	@Override
