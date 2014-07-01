@@ -1881,4 +1881,11 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "supports.schema_change", false);
 	}
+
+	public boolean getAutoCloseReadOnlyTransactions()
+	{
+		boolean defaultAutoCommit = Settings.getInstance().getBoolProperty("workbench.sql.transaction.readonly.autocommit.enabled", false);
+		return Settings.getInstance().getBoolProperty(prefix + "transaction.readonly.autocommit.enabled", defaultAutoCommit);
+	}
+
 }

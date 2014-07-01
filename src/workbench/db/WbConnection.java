@@ -159,7 +159,11 @@ public class WbConnection
 
 	public TransactionChecker getTransactionChecker()
 	{
-		return TransactionChecker.Factory.createChecker(this);
+		if (getProfile().getDetectOpenTransaction())
+		{
+			return TransactionChecker.Factory.createChecker(this);
+		}
+		return TransactionChecker.NO_CHECK;
 	}
 
 	public ObjectNameFilter getCatalogFilter()

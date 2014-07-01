@@ -79,7 +79,7 @@ public interface TransactionChecker
 
 			String sql = db.checkOpenTransactionsQuery();
 
-			if (sql != null && con.getProfile().getDetectOpenTransaction())
+			if (sql != null)
 			{
 				return new DefaultTransactionChecker(sql);
 			}

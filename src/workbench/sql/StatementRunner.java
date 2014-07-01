@@ -46,7 +46,11 @@ import workbench.resource.Settings;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
+import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
+import workbench.sql.commands.AlterSessionCommand;
+import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.wbcommands.CommandTester;
 
 import workbench.storage.RowActionMonitor;
 
@@ -97,6 +101,9 @@ public class StatementRunner
 	private int maxRows = -1;
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
+	private boolean autoCloseReadOnlyTransactions;
+	private TransactionChecker transactionChecker;
+	private CommandTester cmdTester;
 	private final Map<String, String> sessionAttributes = new TreeMap<String, String>();
 	private final	RemoveEmptyResultsAnnotation removeAnnotation = new RemoveEmptyResultsAnnotation();
 
@@ -342,6 +349,48 @@ public class StatementRunner
 		setUseSavepoint(db == null ? false : db.useSavePointForDML());
 		statementHook = StatementHookFactory.getStatementHook(this);
 		sessionAttributes.clear();
+		checkAutoCommitQueries();
+	}
+
+	private boolean shouldEndTransactionForCommand(SqlCommand command)
+	{
+		if (command == null) return false;
+		if (command.isUpdatingCommand()) return false;
+		if (command instanceof SingleVerbCommand) return false;
+		if (command instanceof AlterSessionCommand) return false;
+		if (cmdTester != null && cmdTester.isWbCommand(command.getVerb())) return false;
+		return true;
+	}
+
+	private void endReadOnlyTransaction()
+	{
+		if (currentConnection == null) return;
+		if (currentConnection.getAutoCommit()) return;
+		if (!shouldEndTransactionForCommand(currentCommand)) return;
+
+		if (autoCloseReadOnlyTransactions)
+		{
+			if (!transactionChecker.hasUncommittedChanges(currentConnection))
+			{
+				LogMgr.logInfo("StatementRunner", "Sending a rollback to end the current transaction");
+				currentConnection.rollbackSilently();
+			}
+		}
+	}
+
+	private void checkAutoCommitQueries()
+	{
+		if (this.currentConnection == null)
+		{
+			autoCloseReadOnlyTransactions = false;
+			transactionChecker = TransactionChecker.NO_CHECK;
+			cmdTester = null;
+			return;
+		}
+
+		transactionChecker = TransactionChecker.Factory.createChecker(currentConnection);
+		autoCloseReadOnlyTransactions = currentConnection.getDbSettings().getAutoCloseReadOnlyTransactions();
+		cmdTester = new CommandTester();
 	}
 
 	public StatementRunnerResult getResult()
@@ -607,11 +656,14 @@ public class StatementRunner
 
 	public void abort()
 	{
+		endReadOnlyTransaction();
+
 		if (this.result != null) this.result.clear();
 		this.result = null;
 		this.savepoint = null;
 		this.currentCommand = null;
 		this.currentConsumer = null;
+
 		if (mainConnection != null)
 		{
 			this.currentConnection = mainConnection;
@@ -623,6 +675,8 @@ public class StatementRunner
 	{
 		synchronized (this)
 		{
+			endReadOnlyTransaction();
+
 			if (this.result != null) this.result.clear();
 			this.result = null;
 			this.releaseSavepoint();

@@ -31,7 +31,6 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
-import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbImport;
 
@@ -321,9 +320,7 @@ public class ProducerFactory
 			indent.append(' ');
 		}
 		indent.append(' ');
-		CommandTester ct = new CommandTester();
-		String verb = ct.formatVerb(WbImport.VERB);
-		result.append(verb + " -" + WbImport.ARG_FILE + "=");
+		result.append(WbImport.VERB + " -" + WbImport.ARG_FILE + "=");
 		String filename = inputFile.getAbsolutePath();
 		if (filename.indexOf('-') > -1) result.append('"');
 		result.append(StringUtil.replace(filename, "\\", "/"));
