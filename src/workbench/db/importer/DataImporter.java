@@ -1641,7 +1641,7 @@ public class DataImporter
 				}
 				catch (SQLException e)
 				{
-					this.messages.append(ResourceMgr.getFormattedString("ErrTableNotFound", this.targetTable.getTableExpression()));
+					this.messages.append(ResourceMgr.getFormattedString("ErrTargetTableNotFound", this.targetTable.getTableExpression()));
 					if (parser != null)
 					{
 						this.messages.appendNewLine();
@@ -1721,11 +1721,7 @@ public class DataImporter
 			{
 				this.badWriter = null;
 			}
-
-			if (this.tableStatements != null)
-			{
-				this.tableStatements.runPreTableStatement(dbConn, targetTable);
-			}
+			runPreTableStatement();
 		}
 		catch (RuntimeException th)
 		{
@@ -1735,6 +1731,45 @@ public class DataImporter
 			throw th;
 		}
 	}
+
+	private void runPreTableStatement()
+		throws SQLException
+	{
+		try
+		{
+			if (this.tableStatements != null)
+			{
+				this.tableStatements.runPreTableStatement(dbConn, targetTable);
+			}
+		}
+		catch (TableStatementError tse)
+		{
+			String err = ResourceMgr.getFormattedString("ErrTableStmt", tse.getTable(), tse.getMessage());
+			messages.append(err);
+			messages.appendNewLine();
+			throw tse;
+		}
+	}
+
+	private void runPostTableStatement()
+		throws SQLException
+	{
+		try
+		{
+			if (this.tableStatements != null && this.tableStatements.wasSuccess())
+			{
+				this.tableStatements.runPostTableStatement(dbConn, targetTable);
+			}
+		}
+		catch (TableStatementError tse)
+		{
+			String err = ResourceMgr.getFormattedString("ErrTableStmt", tse.getTable(), tse.getMessage());
+			messages.append(err);
+			messages.appendNewLine();
+			throw tse;
+		}
+	}
+
 
 	private String getModeString()
 	{
@@ -2056,10 +2091,7 @@ public class DataImporter
 
 			closeStatements();
 
-			if (this.tableStatements != null && this.tableStatements.wasSuccess())
-			{
-				this.tableStatements.runPostTableStatement(dbConn, targetTable);
-			}
+			runPostTableStatement();
 
 			String msg = this.targetTable.getTableName() + ": " + this.getInsertedRows() + " row(s) inserted. " + this.getUpdatedRows() + " row(s) updated.";
 			if (!transactionControl)
@@ -2207,7 +2239,6 @@ public class DataImporter
 			this.hasErrors = true;
 		}
 		this.isRunning = false;
-		//this.messages.append(this.source.getMessages());
 		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 
@@ -2220,6 +2251,13 @@ public class DataImporter
 			try
 			{
 				this.tableStatements.runPostTableStatement(dbConn, targetTable);
+			}
+			catch (TableStatementError tse)
+			{
+				LogMgr.logWarning("DataImporter.tableImportError()", "Error running post-table statement", tse);
+				String err = ResourceMgr.getFormattedString("ErrTableStmt", tse.getTable(), tse.getMessage());
+				messages.append(err);
+				messages.appendNewLine();
 			}
 			catch (Exception e)
 			{

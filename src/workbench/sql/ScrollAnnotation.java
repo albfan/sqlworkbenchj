@@ -37,7 +37,7 @@ public class ScrollAnnotation
 	public static final String ANNOTATION = "WbScrollTo";
 	public static final String END_KEYWORD = "end";
 
-	private final Set<String> endKeywords = CollectionUtil.caseInsensitiveSet("bottom", END_KEYWORD);
+	private final Set<String> endKeywords = CollectionUtil.caseInsensitiveSet("bottom", "last", END_KEYWORD);
 
 	public ScrollAnnotation()
 	{

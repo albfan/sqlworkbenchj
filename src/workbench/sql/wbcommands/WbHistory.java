@@ -95,7 +95,8 @@ public class WbHistory
 			index ++;
 		}
 		ds.resetStatus();
-		ds.setGeneratingSql(ScrollAnnotation.getScrollToEndAnnotation() + "\nWbHistory");
+		ds.setResultName(VERB);
+		ds.setGeneratingSql(ScrollAnnotation.getScrollToEndAnnotation() + "\n" + VERB);
 		result.addDataStore(ds);
 		return result;
 	}

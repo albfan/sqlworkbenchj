@@ -1142,7 +1142,11 @@ public class WbConnection
 				buff.append(schema);
 			}
 
-			buff.append(", URL=");
+			if (buff.length() > 0)
+			{
+				buff.append(", ");
+			}
+			buff.append("URL=");
 			buff.append(getUrl());
 			displayString = buff.toString();
 		}

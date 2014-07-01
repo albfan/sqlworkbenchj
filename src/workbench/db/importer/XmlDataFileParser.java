@@ -243,7 +243,7 @@ public class XmlDataFileParser
 			}
 			else
 			{
-				String msg = ResourceMgr.getFormattedString("ErrTableNotFound", tbl.getTableName());
+				String msg = ResourceMgr.getFormattedString("ErrTargetTableNotFound", tbl.getTableName());
 				this.messages.append(msg);
 				this.messages.appendNewLine();
 				throw new SQLException("Table '" + tbl.getTableName() + "' not found!");

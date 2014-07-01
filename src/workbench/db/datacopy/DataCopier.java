@@ -678,16 +678,7 @@ public class DataCopier
 		}
 		initQuerySource(sql.toString());
 
-		try
-		{
-			this.importer.setTargetTable(this.targetTable, cols);
-		}
-		catch (SQLException e)
-		{
-			String msg = ResourceMgr.getFormattedString("ErrCopyTargetTableNotFound", this.targetTable.getTableExpression());
-			this.addMessage(msg);
-			throw e;
-		}
+		this.importer.setTargetTable(this.targetTable, cols);
 	}
 
 	private void initQuerySource(String sql)

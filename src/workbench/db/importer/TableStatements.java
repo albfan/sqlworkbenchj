@@ -142,12 +142,12 @@ public class TableStatements
 
 		Savepoint sp = null;
 		Statement stmt = null;
-		boolean useSavepoint = con.getDbSettings().useSavepointForImport();
+		boolean useSavepoint = con.getDbSettings().useSavepointForTableStatements() && con.supportsSavepoints();
 
 		success = false;
 		try
 		{
-			if (useSavepoint && !con.getAutoCommit()) sp = con.setSavepoint();
+			if (useSavepoint) sp = con.setSavepoint();
 			stmt = con.createStatement();
 			LogMgr.logDebug("TableStatements.runStatement", "Executing statement: " + sql);
 			stmt.execute(sql);

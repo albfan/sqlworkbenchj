@@ -495,6 +495,16 @@ public class DbSettings
 	}
 
 	/**
+	 * Returns if the DataImporter should use savepoints for the pre and post tables statements.
+	 * <br/>
+	 * The related property is: <tt>workbench.db.[dbid].import.tablestmt.usesavepoint</tt>
+	 */
+	public boolean useSavepointForTableStatements()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "import.tablestmt.usesavepoint", false);
+	}
+
+	/**
 	 * Returns if DML statements should be guarded by savepoints.
 	 * <br/>
 	 * This affects SQL statements entered by the user and generated when
