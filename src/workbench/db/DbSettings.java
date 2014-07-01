@@ -41,6 +41,7 @@ import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
 
+import workbench.sql.EndReadOnlyTrans;
 import workbench.sql.commands.SingleVerbCommand;
 
 import workbench.util.CollectionUtil;
@@ -1882,10 +1883,22 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "supports.schema_change", false);
 	}
 
-	public boolean getAutoCloseReadOnlyTransactions()
+	public EndReadOnlyTrans getAutoCloseReadOnlyTransactions()
 	{
-		boolean defaultAutoCommit = Settings.getInstance().getBoolProperty("workbench.sql.transaction.readonly.autocommit.enabled", false);
-		return Settings.getInstance().getBoolProperty(prefix + "transaction.readonly.autocommit.enabled", defaultAutoCommit);
+		String defaultSetting = Settings.getInstance().getProperty("workbench.sql.transaction.readonly.end", EndReadOnlyTrans.never.name());
+		String value = Settings.getInstance().getProperty(prefix + "transaction.readonly.end", defaultSetting);
+		if (value != null)
+		{
+			try
+			{
+				return EndReadOnlyTrans.valueOf(value);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("DbSettings.getAutoCloseReadOnlyTransactions()", "Invalid end type '" + value + "' specified");
+			}
+		}
+		return EndReadOnlyTrans.never;
 	}
 
 }

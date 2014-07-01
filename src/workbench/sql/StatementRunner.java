@@ -48,15 +48,16 @@ import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
-import workbench.sql.commands.AlterSessionCommand;
-import workbench.sql.commands.SingleVerbCommand;
-import workbench.sql.wbcommands.CommandTester;
 
+import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 
+import workbench.sql.commands.AlterSessionCommand;
+import workbench.sql.commands.SetCommand;
+import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
-import workbench.storage.DataStore;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -101,7 +102,7 @@ public class StatementRunner
 	private int maxRows = -1;
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
-	private boolean autoCloseReadOnlyTransactions;
+	private EndReadOnlyTrans endTransType;
 	private TransactionChecker transactionChecker;
 	private CommandTester cmdTester;
 	private final Map<String, String> sessionAttributes = new TreeMap<String, String>();
@@ -349,7 +350,7 @@ public class StatementRunner
 		setUseSavepoint(db == null ? false : db.useSavePointForDML());
 		statementHook = StatementHookFactory.getStatementHook(this);
 		sessionAttributes.clear();
-		checkAutoCommitQueries();
+		initEndReadOnlyTransaction();
 	}
 
 	private boolean shouldEndTransactionForCommand(SqlCommand command)
@@ -358,6 +359,7 @@ public class StatementRunner
 		if (command.isUpdatingCommand()) return false;
 		if (command instanceof SingleVerbCommand) return false;
 		if (command instanceof AlterSessionCommand) return false;
+		if (command instanceof SetCommand) return false;
 		if (cmdTester != null && cmdTester.isWbCommand(command.getVerb())) return false;
 		return true;
 	}
@@ -366,31 +368,53 @@ public class StatementRunner
 	{
 		if (currentConnection == null) return;
 		if (currentConnection.getAutoCommit()) return;
+		if (endTransType == EndReadOnlyTrans.never) return;
+
 		if (!shouldEndTransactionForCommand(currentCommand)) return;
 
-		if (autoCloseReadOnlyTransactions)
+		if (!transactionChecker.hasUncommittedChanges(currentConnection))
 		{
-			if (!transactionChecker.hasUncommittedChanges(currentConnection))
+			LogMgr.logInfo("StatementRunner.endReadOnlyTransaction()", "Sending a " + endTransType.name() + " to end the current transaction started by: " + currentCommand);
+			try
 			{
-				LogMgr.logInfo("StatementRunner", "Sending a rollback to end the current transaction");
-				currentConnection.rollbackSilently();
+				switch (endTransType)
+				{
+					case commit:
+						currentConnection.commit();
+						break;
+					case rollback:
+						currentConnection.rollback();
+						break;
+				}
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logWarning("StatementRnner.endReadOnlyTransaction()", "Could not " + endTransType.name(), ex);
 			}
 		}
 	}
 
-	private void checkAutoCommitQueries()
+	private void initEndReadOnlyTransaction()
 	{
 		if (this.currentConnection == null)
 		{
-			autoCloseReadOnlyTransactions = false;
-			transactionChecker = TransactionChecker.NO_CHECK;
-			cmdTester = null;
-			return;
+			endTransType = EndReadOnlyTrans.never;
+		}
+		else
+		{
+			endTransType = currentConnection.getDbSettings().getAutoCloseReadOnlyTransactions();
 		}
 
-		transactionChecker = TransactionChecker.Factory.createChecker(currentConnection);
-		autoCloseReadOnlyTransactions = currentConnection.getDbSettings().getAutoCloseReadOnlyTransactions();
-		cmdTester = new CommandTester();
+		switch (endTransType)
+		{
+			case never:
+				cmdTester = null;
+				transactionChecker = TransactionChecker.NO_CHECK;
+			default:
+				cmdTester = new CommandTester();
+				transactionChecker = TransactionChecker.Factory.createChecker(currentConnection);
+		}
+
 	}
 
 	public StatementRunnerResult getResult()
@@ -625,6 +649,7 @@ public class StatementRunner
 
 	public void statementDone()
 	{
+		endReadOnlyTransaction();
 		if (this.currentCommand != null && currentCommand != currentConsumer)
 		{
 			this.currentCommand.done();
@@ -656,8 +681,6 @@ public class StatementRunner
 
 	public void abort()
 	{
-		endReadOnlyTransaction();
-
 		if (this.result != null) this.result.clear();
 		this.result = null;
 		this.savepoint = null;
@@ -675,8 +698,6 @@ public class StatementRunner
 	{
 		synchronized (this)
 		{
-			endReadOnlyTransaction();
-
 			if (this.result != null) this.result.clear();
 			this.result = null;
 			this.releaseSavepoint();

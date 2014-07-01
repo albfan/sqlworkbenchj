@@ -1016,4 +1016,10 @@ public class SqlCommand
 		return false;
 	}
 
+	@Override
+	public String toString()
+	{
+		return getVerb();
+	}
+
 }
