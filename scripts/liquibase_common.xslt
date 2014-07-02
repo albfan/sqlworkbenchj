@@ -6,6 +6,9 @@
   <xsl:variable name="dsquote"><xsl:text>&#39;&#39;</xsl:text></xsl:variable>
 
   <xsl:variable name="table-name" select="table-name"/>
+  <xsl:variable name="pk-col-count">
+    <xsl:value-of select="count(column-def[primary-key='true'])"/>
+  </xsl:variable>
 
   <createTable tableName="{$table-name}">
     <xsl:if test="string-length($schema.owner) &gt; 0">
@@ -32,10 +35,6 @@
     <!-- find PK name -->
     <xsl:variable name="pk-name">
       <xsl:value-of select="index-def[primary-key='true']/name"/>
-    </xsl:variable>
-
-    <xsl:variable name="pk-col-count">
-      <xsl:value-of select="count(column-def[primary-key='true'])"/>
     </xsl:variable>
 
     <xsl:for-each select="column-def">
@@ -146,6 +145,7 @@
   <xsl:for-each select="index-def">
     <xsl:call-template name="create-index">
        <xsl:with-param name="table-name" select="$table-name"/>
+       <xsl:with-param name="pk-col-count" select="$pk-col-count"/>
     </xsl:call-template>
   </xsl:for-each> <!-- index-def -->
 
@@ -160,6 +160,7 @@
 
 <xsl:template name="create-index">
   <xsl:param name="table-name"/>
+  <xsl:param name="pk-col-count"/>
 
   <xsl:variable name="index-name">
     <xsl:value-of select="name"/>
@@ -171,9 +172,18 @@
 
   <!--
      Primary keys with a single column are already defined in the table itself
-     so we only need to take care of those with more than one column
+     so we only need to take care of those with more than one column.
+
+     Oracle supports (non-unique) index definitions that have more columns than the PK
+     to be used for enforcing the PK. No addPrimaryKey should be generated for those indexes.
+
+     Only indexes that are marked as PK and have the same number of columns as the PK itself should be considered
+     as the index for the PK.
+
+     Checking for PK indexes ensures that a unique constraint is not added twice:
+     once for the PK columns and once for the unique index that is present
   -->
-  <xsl:if test="primary-key='true' and count(column-list/column) &gt; 1">
+  <xsl:if test="primary-key='true' and count(column-list/column) &gt; 1 and count(column-list/column) = $pk-col-count">
     <xsl:variable name="pk-columns">
       <xsl:for-each select="column-list/column">
         <xsl:value-of select="@name"/>
@@ -184,7 +194,7 @@
     <addPrimaryKey tableName="{$table-name}" columnNames="{$pk-columns}" constraintName="{$index-name}"/>
   </xsl:if>
 
-  <xsl:if test="primary-key='false'">
+  <xsl:if test="primary-key='false' or count(column-list/column) != $pk-col-count">
     <createIndex indexName="{$index-name}" tableName="{$table-name}" unique="{$unique-flag}">
     <xsl:if test="string-length($schema.owner) &gt; 0">
       <xsl:attribute name="schemaName">
