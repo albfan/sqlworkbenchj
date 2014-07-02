@@ -251,7 +251,7 @@ public class WbCommandAnalyzer
 	private boolean showTableList(SqlCommand cmd, ArgumentParser args)
 	{
 		if (cmd == null) return false;
-		
+
 		int numArgs = args == null ? 0 : args.getArgumentCount();
 		if (numArgs > 0) return false;
 
@@ -364,6 +364,8 @@ public class WbCommandAnalyzer
 		if (input == null) return result;
 
 		SpreadsheetReader reader = SpreadsheetReader.Factory.createReader(input, -1, null);
+		if (reader == null) return result;
+		
 		try
 		{
 			List<String> sheets = reader.getSheets();

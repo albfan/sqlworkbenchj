@@ -58,6 +58,10 @@ public interface SpreadsheetReader
 		{
 			WbFile f = new WbFile(inputFile);
 			String ext = f.getExtension();
+			if (ext == null) return null;
+			
+			ext = ext.toLowerCase();
+
 			SpreadsheetReader reader = null;
 
 			if (ext.startsWith("xls"))
