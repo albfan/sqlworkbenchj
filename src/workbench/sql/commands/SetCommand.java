@@ -23,7 +23,6 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.util.List;
 import java.util.Set;
 
@@ -201,14 +200,8 @@ public class SetCommand
 			return result;
 		}
 
-		Savepoint sp = null;
 		try
 		{
-			if (currentConnection.getDbSettings().useSavePointForDML())
-			{
-				sp = currentConnection.setSavepoint();
-			}
-
 			String oldSchema = null;
 			if (schemaChange)
 			{
@@ -234,11 +227,9 @@ public class SetCommand
 				appendSuccessMessage(result);
 			}
 
-			currentConnection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
-			currentConnection.rollback(sp);
 			result = new StatementRunnerResult();
 			result.clear();
 			if (currentConnection.getMetadata().isOracle())
