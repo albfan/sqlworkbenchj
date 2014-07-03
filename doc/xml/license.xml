@@ -81,6 +81,13 @@
     </para>
   </section>
 
+  <section id="license-restrictions">
+    <title>Restrictions</title>
+    <para>
+      This software may <emphasis role="bold">NOT</emphasis> be used by members of the government of the United States of America or any
+      organization associated directly with the government of the USA.
+    </para>
+  </section>
 
   <section id="license-grant-patent">
     <title>Grant of Patent License</title>
@@ -190,14 +197,6 @@
       behalf of any other Contributor, and only if You agree to indemnify, defend, and hold each Contributor harmless for
       any liability incurred by, or claims asserted against, such Contributor by reason of your accepting any such warranty
       or additional liability.
-    </para>
-  </section>
-
-  <section id="license-restriction">
-    <title>Restrictions</title>
-    <para>
-      THIS SOFTWARE MAY NOT BE USED BY MEMBERS OF THE GOVERNMENT OF THE UNITED STATES OF AMERICA OR ANY
-      ORGANIZATION ASSOCIATED DIRECTLY WITH THE GOVERNMENT OF THE USA.
     </para>
   </section>
 
