@@ -521,10 +521,10 @@ public class XlsRowDataConverter
 			}
 			cell.setCellValue(bd.doubleValue());
 		}
-		else if (value instanceof Double)
+		else if (value instanceof Double || value instanceof Float)
 		{
 			cellStyle = excelFormat.decimalCellStyle;
-			cell.setCellValue(((Double)value).doubleValue());
+			cell.setCellValue(((Number)value).doubleValue());
 			useFormat = useFormat || applyDecimalFormat();
 		}
 		else if (value instanceof Number)
