@@ -36,7 +36,6 @@ import workbench.util.NumberStringCache;
  * <br/>
  * This is only used if enabled.
  *
- *
  * @see workbench.resource.Settings#getConvertOracleTypes()
  *
  * @author Thomas Kellerer
