@@ -133,24 +133,24 @@ WHERE id=42;</p>
     <content>
       <h3>Screenshots</h3>
       <ul style="margin-top:10px">
-      <li><image-link title="Main window" name="MainWindow.png">Main Window</image-link><br/></li>
-      <li><image-link title="Connection Profile" name="Profiles.png">Connection Profile</image-link><br/></li>
-      <li><image-link title="SQL Formatter" name="SqlFormat.png">SQL Formatter</image-link></li>
-      <li><image-link title="Select related child rows" name="child_rows.png">Select related child rows</image-link></li>
-      <li><image-link title="Select parent rows" name="parent_rows.png">Select related parent rows</image-link></li>
-      <li><image-link title="Select foreign key values from referenced table" name="fk_lookup.png">Select foreign key values from referenced table</image-link></li>
-      <li><image-link title="Search object source" name="objectsearcher.png">Search in the source of all objects</image-link></li>
-      <li><image-link title="Using WbGrepSource" name="wbgrepsource.png">Search in the source code using</image-link>&nbsp;<b><a href="manual/wb-commands.html#command-search-source">WbGrepSource</a></b></li>
-      <li><image-link title="Search table data" name="SearchTables.png">Search data in all tables in the DbExplorer</image-link></li>
-      <li><image-link title="Using WbGrepData" name="wbgrepdata.png">Search data in all tables using</image-link>&nbsp;<b><a href="manual/wb-commands.html#command-search-data">WbGrepData</a></b></li>
-      <li><image-link title="Data Pumper" name="DataPumper.png">Copy data between databases</image-link></li>
-      <li><image-link title="Auto-completion" name="completion.png">Auto-completion for SQL statements</image-link></li>
-      <li><image-link title="INSERT Hint" name="insert_hint.png">Hints for columns and values in INSERT statements</image-link></li>
-      <li><image-link title="Console mode" name="console.png">Console mode</image-link></li>
-      <li><image-link title="Table definition" name="table_definition.png">DbExplorer displaying table definition</image-link></li>
-      <li><image-link title="SQL source for table definition" name="TableSource.png">DbExplorer displaying table source</image-link></li>
-      <li><image-link title="SQL Source Display" name="ViewSource.png">DbExplorer displaying the source of a VIEW</image-link></li>
-      <li><image-link title="Foreign key display" name="FkDisplay.png">DbExplorer displaying foreign key relationships</image-link></li>
+      <li><image-link title="Main window" name="MainWindow.png" back="screenshots.html" next="Profiles_png.html">Main Window</image-link><br/></li>
+      <li><image-link title="Connection Profile" name="Profiles.png" back="screenshots.html">Connection Profile</image-link><br/></li>
+      <li><image-link title="SQL Formatter" name="SqlFormat.png" back="screenshots.html">SQL Formatter</image-link></li>
+      <li><image-link title="Select related child rows" name="child_rows.png" back="screenshots.html">Select related child rows</image-link></li>
+      <li><image-link title="Select parent rows" name="parent_rows.png" back="screenshots.html">Select related parent rows</image-link></li>
+      <li><image-link title="Select foreign key values from referenced table" name="fk_lookup.png" back="screenshots.html">Select foreign key values from referenced table</image-link></li>
+      <li><image-link title="Search object source" name="objectsearcher.png" back="screenshots.html">Search in the source of all objects</image-link></li>
+      <li><image-link title="Using WbGrepSource" name="wbgrepsource.png" back="screenshots.html">Search in the source code using</image-link>&nbsp;<b><a href="manual/wb-commands.html#command-search-source">WbGrepSource</a></b></li>
+      <li><image-link title="Search table data" name="SearchTables.png" back="screenshots.html">Search data in all tables in the DbExplorer</image-link></li>
+      <li><image-link title="Using WbGrepData" name="wbgrepdata.png" back="screenshots.html">Search data in all tables using</image-link>&nbsp;<b><a href="manual/wb-commands.html#command-search-data">WbGrepData</a></b></li>
+      <li><image-link title="Data Pumper" name="DataPumper.png" back="screenshots.html">Copy data between databases</image-link></li>
+      <li><image-link title="Auto-completion" name="completion.png" back="screenshots.html">Auto-completion for SQL statements</image-link></li>
+      <li><image-link title="INSERT Hint" name="insert_hint.png" back="screenshots.html">Hints for columns and values in INSERT statements</image-link></li>
+      <li><image-link title="Console mode" name="console.png" back="screenshots.html">Console mode</image-link></li>
+      <li><image-link title="Table definition" name="table_definition.png" back="screenshots.html">DbExplorer displaying table definition</image-link></li>
+      <li><image-link title="SQL source for table definition" name="TableSource.png" back="screenshots.html">DbExplorer displaying table source</image-link></li>
+      <li><image-link title="SQL Source Display" name="ViewSource.png" back="screenshots.html">DbExplorer displaying the source of a VIEW</image-link></li>
+      <li><image-link title="Foreign key display" name="FkDisplay.png" back="screenshots.html">DbExplorer displaying foreign key relationships</image-link></li>
      </ul>
     </content>
   </page>

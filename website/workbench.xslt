@@ -180,6 +180,8 @@
     <xsl:param name="imageTitle"/>
     <xsl:param name="subTitle"/>
     <xsl:param name="description"/>
+    <xsl:param name="back"/>
+    <xsl:param name="next"/>
 
     <html>
       <head>
@@ -230,7 +232,17 @@
 
         <div id="main">
           <xsl:if test="$imageName">
-            <img src="{$imageName}"/>
+            <xsl:if test="$back or $next">
+               <div style="padding-top:1em;padding-bottom:2em;" width="100%">
+                 <xsl:if test="$back">
+                    <span style="float:left"><a href="{$back}">Back</a></span>
+                 </xsl:if>
+                 <xsl:if test="$next">
+                    <span style="float:right"><a href="{$next}">Next</a></span>
+                 </xsl:if>
+               </div>
+            </xsl:if>
+            <div style="clear:both"><img src="{$imageName}"/></div>
           </xsl:if>
           <xsl:if test="not($imageName)">
             <div class="content">
@@ -419,6 +431,8 @@
   <xsl:template match="image-link">
     <xsl:variable name="imageName" select="@name"/>
     <xsl:variable name="imageTitle" select="@title"/>
+    <xsl:variable name="backLink" select="@back"/>
+    <xsl:variable name="nxtLink" select="@next"/>
     <xsl:variable name="fname" select="concat(translate(@name,'.','_'),'.html')"/>
     <xsl:variable name="imgFile" select="concat($fdir, $fname)"/>
     <a href="{$fname}">
@@ -430,6 +444,8 @@
         <xsl:with-param name="pageTitle" select="'SQL Workbench/J'"/>
         <xsl:with-param name="subTitle" select="$imageTitle"/>
         <xsl:with-param name="imageTitle" select="$imageTitle"/>
+        <xsl:with-param name="back" select="$backLink"/>
+        <xsl:with-param name="next" select="$nxtLink"/>
       </xsl:call-template>
     </redirect:write>
   </xsl:template>
