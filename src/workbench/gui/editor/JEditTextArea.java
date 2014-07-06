@@ -205,7 +205,6 @@ public class JEditTextArea
 	public JEditTextArea()
 	{
 		super();
-		// Enable the necessary events
 		enableEvents(AWTEvent.KEY_EVENT_MASK);
 
 		painter = new TextAreaPainter(this);

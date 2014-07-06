@@ -905,6 +905,8 @@ public class EditorPanel
 			encoding = Settings.getInstance().getDefaultFileEncoding();
 		}
 
+		boolean trimTrailing = Settings.getInstance().getTrimTrailingSpaces();
+
 		try
 		{
 			saveInProgress = true;
@@ -923,7 +925,16 @@ public class EditorPanel
 			for (int i=0; i < count; i++)
 			{
 				String line = this.getLineText(i);
-				int len = StringUtil.getRealLineLength(line);
+				int len = 0;
+				if (trimTrailing)
+				{
+					line = StringUtil.rtrim(line);
+					len = line.length();
+				}
+				else
+				{
+					len = StringUtil.getRealLineLength(line);
+				}
 				if (len > 0)
 				{
 					writer.write(line, 0, len);

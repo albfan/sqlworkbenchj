@@ -157,6 +157,7 @@ public class Settings
 
 	public static final String PROP_JOIN_COMPLETION_USE_PARENS = "workbench.gui.sql.join.completion.use.parenthesis";
 	public static final String PROP_JOIN_COMPLETION_PREFER_USING = "workbench.gui.sql.join.completion.prefer.using";
+	public static final String PROP_EDITOR_TRIM = "workbench.file.save.trim.trailing";
 
 	public static final String PROP_LIBDIR = "workbench.libdir";
 	// </editor-fold>
@@ -2399,6 +2400,16 @@ public class Settings
 	public void setDefaultFileEncoding(String enc)
 	{
 		this.props.setProperty("workbench.file.encoding", enc);
+	}
+
+	public boolean getTrimTrailingSpaces()
+	{
+		return getBoolProperty(PROP_EDITOR_TRIM, false);
+	}
+
+	public void setTrimTrailingSpaces(boolean flag)
+	{
+		this.props.setProperty(PROP_EDITOR_TRIM, flag);
 	}
 
 	public String getDefaultTextDelimiter(boolean readable)
