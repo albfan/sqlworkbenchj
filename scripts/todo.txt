@@ -1,12 +1,14 @@
 Features:
 ---------
+- Use procedure/function declarations as bookmarks
+- search text in all editor tabs
 - support for named parameters from e.g. JPA Queries
   select * from foo where x = :id;
 - WbVarDef
   - use all rows of a result (e.g. concatenated using \n)
 - Profiles
   - Import profiles from other WbProfiles.xml
-  - Load different WbProfiles.xml from within the connection dialog
+  - Load different WbProfiles.xml from within the connection dialog (one WbProfiles per MainWindow?)
     Dropdown with the last used files
 - extend auto completion for update/delete statements that use joins (PostgreSQL, SQL Server, Oracle, ...)
 - save table sort of DbExplorer in Workspace
