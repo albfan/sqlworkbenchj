@@ -232,17 +232,20 @@
 
         <div id="main">
           <xsl:if test="$imageName">
-            <xsl:if test="$back or $next">
-               <div style="padding-top:1em;padding-bottom:2em;" width="100%">
-                 <xsl:if test="$back">
-                    <span style="float:left"><a href="{$back}">Back</a></span>
-                 </xsl:if>
-                 <xsl:if test="$next">
-                    <span style="float:right"><a href="{$next}">Next</a></span>
-                 </xsl:if>
-               </div>
+          
+            <h3 style="padding-top:1.5em"><xsl:value-of select="@title"/></h3>
+             <xsl:if test="$next">
+                <a href="{$next}"><img src="{$imageName}"/></a>
+             </xsl:if>
+             <xsl:if test="$next = ''">
+                <img src="{$imageName}"/>
+             </xsl:if>
+            <xsl:if test="$back and $back != 'screenshots.html'">
+              <div style="padding-top:2em"><a href="{$back}">Previous</a></div>
             </xsl:if>
-            <div style="clear:both"><img src="{$imageName}"/></div>
+            <xsl:if test="$back = 'screenshots.html'">
+              <div style="padding-top:2em"><a href="{$back}">Screenshots</a></div>
+            </xsl:if>
           </xsl:if>
           <xsl:if test="not($imageName)">
             <div class="content">
@@ -431,10 +434,22 @@
   <xsl:template match="image-link">
     <xsl:variable name="imageName" select="@name"/>
     <xsl:variable name="imageTitle" select="@title"/>
-    <xsl:variable name="backLink" select="@back"/>
-    <xsl:variable name="nxtLink" select="@next"/>
+    <xsl:variable name="back" select="@back"/>
+    <xsl:variable name="next" select="@next"/>
     <xsl:variable name="fname" select="concat(translate(@name,'.','_'),'.html')"/>
     <xsl:variable name="imgFile" select="concat($fdir, $fname)"/>
+    <xsl:variable name="backLink">
+      <xsl:if test="$back">
+        <xsl:value-of select="concat(translate($back,'.','_'),'.html')"/>
+      </xsl:if>
+    </xsl:variable>
+    
+    <xsl:variable name="nextLink">
+      <xsl:if test="$next">
+        <xsl:value-of select="concat(translate($next,'.','_'),'.html')"/>
+      </xsl:if>
+    </xsl:variable>
+    
     <a href="{$fname}">
       <xsl:value-of select="."/>
     </a>
@@ -445,7 +460,7 @@
         <xsl:with-param name="subTitle" select="$imageTitle"/>
         <xsl:with-param name="imageTitle" select="$imageTitle"/>
         <xsl:with-param name="back" select="$backLink"/>
-        <xsl:with-param name="next" select="$nxtLink"/>
+        <xsl:with-param name="next" select="$nextLink"/>
       </xsl:call-template>
     </redirect:write>
   </xsl:template>

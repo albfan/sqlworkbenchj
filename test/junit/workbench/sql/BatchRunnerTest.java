@@ -23,28 +23,34 @@
 package workbench.sql;
 
 import java.io.BufferedReader;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
+
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.db.WbConnection;
+
 import workbench.gui.profiles.ProfileKey;
+
 import workbench.util.ArgumentParser;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
@@ -157,6 +163,7 @@ public class BatchRunnerTest
 				" -username=sa -driver=org.h2.Driver "  +
 				" -logfile='" + logfile.getFullPath() + "' " +
 				" -script='" + scriptFile.getFullPath() + "' " +
+				" -password='' " +
 				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
 				" -autocommit=false " +
 				" -cleanupSuccess='" + successFile.getFullPath() + "' "
@@ -224,6 +231,7 @@ public class BatchRunnerTest
 			WbFile dbFile = new WbFile(util.getBaseDir(), "successtest");
 			parser.parse("-url=jdbc:h2:" + dbFile.getFullPath() +
 				" -username=sa -driver=org.h2.Driver "  +
+				" -password='' " +
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
 				" -cleanupSuccess='" + successFile.getFullPath() + "' " +
@@ -300,7 +308,7 @@ public class BatchRunnerTest
 
 		ArgumentParser parser = new AppArguments();
 		String script = "-script='" + scriptFile.getAbsolutePath() + "'";
-		parser.parse("-url='jdbc:h2:mem:testEmptyStmt' -username=sa -driver=org.h2.Driver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
+		parser.parse("-url='jdbc:h2:mem:testEmptyStmt' -username=sa -password='' -driver=org.h2.Driver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
 		BatchRunner runner = BatchRunner.createBatchRunner(parser);
 		initRunner4Test(runner);
 
@@ -324,7 +332,7 @@ public class BatchRunnerTest
 		runner.setVerboseLogging(false);
 		runner.setShowProgress(false);
 	}
-	
+
 	@Test
 	public void testBatchRunner()
 		throws Exception
@@ -351,6 +359,7 @@ public class BatchRunnerTest
 			ArgumentParser parser = new AppArguments();
 			parser.parse("-url='jdbc:h2:mem:testBatchRunner' " +
 				" -username=sa " +
+				" -password='' " +
 				" -driver=org.h2.Driver "  +
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -rollbackOnDisconnect=true " +
@@ -467,10 +476,10 @@ public class BatchRunnerTest
 			writer2.println("commit;");
 			writer2.close();
 
-			parser.parse("-url='jdbc:h2:mem:testAltDelimiter' -altdelimiter='/;nl' -username=sa -driver=org.h2.Driver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
+			parser.parse("-url='jdbc:h2:mem:testAltDelimiter' -altdelimiter='/;nl' -username=sa -password='' -driver=org.h2.Driver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 			initRunner4Test(runner);
-			
+
 			assertNotNull(runner);
 
 			runner.connect();

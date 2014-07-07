@@ -28,13 +28,17 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
-import junit.framework.TestCase;
+
+import workbench.log.LogMgr;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
+
+import junit.framework.TestCase;
 
 /**
  *
@@ -76,6 +80,7 @@ public class WbManagerTest
 												"-url='jdbc:h2:" + db.getAbsolutePath() + "'",
 												"-" + AppArguments.ARG_CONN_USER + "=sa",
 												"-logfile='" + logfile.getFullPath() + "'",
+												"-password= ",
 												"-feedback=false",
 												"-driver=org.h2.Driver ",
 												"-script='" + scriptFile.getFullPath() + "'",
@@ -129,6 +134,7 @@ public class WbManagerTest
 												"-url='jdbc:h2:" + db.getAbsolutePath() + "' ",
 												"-" + AppArguments.ARG_CONN_USER + "='sa' ",
 												"-logfile='" + logfile.getFullPath() + "'",
+												"-password= ",
 												"-feedback=false -abortOnError=true ",
 												"-command='WbExport -type=\"text\" -file=\"" + export.getFullPath() + "\" "+
 												"-delimiter=\";\" -decimal=\",\"; select TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE from information_schema.tables;' "
@@ -178,6 +184,7 @@ public class WbManagerTest
 			writer.println("url=jdbc:h2:" + db.getAbsolutePath());
 			writer.println(AppArguments.ARG_CONN_USER + "=sa");
 			writer.println("logfile=" + logfile.getFullPath());
+			writer.println("password= ");
 			writer.println("feedback=false");
 			writer.println("abortOnError=true");
 			writer.println("script=" + script.getFullPath());

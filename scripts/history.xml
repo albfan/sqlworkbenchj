@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-05-18">
+  <release build="-1" date="2014-07-07">
+    <entry dev-build="2" type="enh">When running in batch mode and not supplying the -password parameter, a prompt for the password is now displayed</entry>
     <entry dev-build="2" type="enh">The last directory for opening files can now optionally be stored in the current workspace</entry>
-    <entry dev-build="2" type="enh">It's now possible to open multiple files through "File -> Open file". If multiple files are selected, each one is opended in a seperate editor tab</entry>
+    <entry dev-build="2" type="enh">It's now possible to open multiple files through "File -&gt; Open file". If multiple files are selected, each one is opended in a seperate editor tab</entry>
     <entry dev-build="1" type="enh">For Postgres 9.4 the new WITH CHECK OPTION is now shown in the view's source</entry>
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
