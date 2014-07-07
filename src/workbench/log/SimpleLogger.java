@@ -36,7 +36,7 @@ import workbench.util.*;
 public class SimpleLogger
 	implements WbLogger
 {
-	private LogLevel level = LogLevel.warning;
+	private LogLevel level = LogLevel.info;
 	private PrintStream logOut = null;
 	private boolean logSystemErr = false;
 	private String messageFormat;
@@ -87,6 +87,7 @@ public class SimpleLogger
 	{
 		if (logfile == null)
 		{
+			System.err.println("setOutputFile() called with a NULL file!");
 			return;
 		}
 

@@ -38,6 +38,7 @@ import java.util.Properties;
 import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.console.ConsolePrompter;
+import workbench.console.ConsoleReaderFactory;
 import workbench.console.ConsoleSettings;
 import workbench.console.ConsoleStatusBar;
 import workbench.console.DataStorePrinter;
@@ -350,6 +351,12 @@ public class BatchRunner
 			LogMgr.logWarning("BatchRunner.connect()", "No profile defined, proceeding without a connection.");
 			success = true;
 			return;
+		}
+
+		if (!profile.getStorePassword())
+		{
+			String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd"));
+			profile.setInputPassword(pwd);
 		}
 
 		try
@@ -1038,10 +1045,19 @@ public class BatchRunner
 			result.setDriverclass(driverclass);
 			result.setDriverName(null);
 			result.setStoreExplorerSchema(false);
-			result.setStorePassword(cmdLine.isArgPresent(AppArguments.ARG_CONN_PWD));
 			result.setUrl(url);
+
+			if (cmdLine.isArgPresent(AppArguments.ARG_CONN_PWD))
+			{
+				result.setPassword(pwd);
+				result.setStorePassword(true);
+			}
+			else
+			{
+				result.setStorePassword(false);
+			}
+			
 			result.setUsername(user);
-			result.setPassword(pwd);
 			result.setRollbackBeforeDisconnect(rollback);
 			result.setAlternateDelimiter(delim);
 			result.setTrimCharData(trimCharData);
@@ -1139,7 +1155,7 @@ public class BatchRunner
 		if (cmdLine.hasUnknownArguments())
 		{
 			StringBuilder err = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
-			if (!WbManager.getInstance().isConsoleMode())
+			if (!WbManager.getInstance().isGUIMode())
 			{
 				err.append(' ');
 				err.append(cmdLine.getUnknownArguments());

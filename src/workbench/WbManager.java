@@ -884,16 +884,6 @@ public final class WbManager
 			value = cmdLine.getValue(AppArguments.ARG_MACRO_STORAGE);
 			Settings.getInstance().setMacroStorage(value);
 
-			if (cmdLine.hasUnknownArguments())
-			{
-				String unknown = cmdLine.getUnknownArguments();
-				LogMgr.logError("WbManager.readParameters()", "The following parameters are invalid: " + unknown, null);
-				if (!isGUIMode())
-				{
-					System.err.println("Invalid parameter(s): " + unknown);
-				}
-			}
-
 			LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 			LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") + ", name=" + System.getProperty("java.vm.name"));
 			LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
