@@ -51,6 +51,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.TableColumnModel;
 
 import workbench.interfaces.MainPanel;
@@ -96,7 +98,7 @@ import workbench.util.StringUtil;
  */
 public class BookmarkSelector
 	extends JPanel
-implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent
+implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent, ChangeListener
 {
 	private static final String PROP_PREFIX = "workbench.gui.bookmarks.";
 	private static final String PROP_DO_SAVE_WIDTHS = PROP_PREFIX + "colwidths.save";
@@ -169,7 +171,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		useCurrentEditorCbx.setText(ResourceMgr.getString("LblBookUseCurrent"));
 		useCurrentEditorCbx.setToolTipText(ResourceMgr.getDescription("LblBookUseCurrent"));
 		useCurrentEditorCbx.setSelected(useCurrent);
-		useCurrentEditorCbx.addActionListener(this);
+		useCurrentEditorCbx.addChangeListener(this);
 
 		tabSelector = new JComboBox(getTabs());
 		if (useCurrent)
@@ -389,22 +391,25 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	}
 
 	@Override
+	public void stateChanged(ChangeEvent e)
+	{
+		// the checkbox for "Current tab only" was changed
+		if (useCurrentEditorCbx.isSelected())
+		{
+			selectCurrentTab();
+		}
+		else
+		{
+			tabSelector.setSelectedIndex(0);
+		}
+	}
+
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.tabSelector)
 		{
 			loadBookmarks();
-		}
-		if (e.getSource() == this.useCurrentEditorCbx)
-		{
-			if (useCurrentEditorCbx.isSelected())
-			{
-				selectCurrentTab();
-			}
-			else
-			{
-				tabSelector.setSelectedIndex(0);
-			}
 		}
 	}
 
