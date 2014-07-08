@@ -108,6 +108,8 @@ public class OracleTableSourceBuilder
 			"       iot.tablespace_name as iot_overflow, \n" +
 			"       iot.table_name as overflow_table, \n" +
 			"       ac.index_name as pk_index_name, \n" +
+			"       ai.compression as index_compression, \n" +
+			"       ai.prefix_length, \n" +
 			"       ai.tablespace_name as index_tablespace, \n" +
 			(supportsArchives ?
 			"       fat.flashback_archive_name, \n" :
@@ -152,28 +154,35 @@ public class OracleTableSourceBuilder
 					tbl.getSourceOptions().addConfigSetting("organization", "index");
 					options.append("ORGANIZATION INDEX");
 
-					if (StringUtil.isNonBlank(overflow))
+					String compression = rs.getString("index_compression");
+					if ("ENABLED".equalsIgnoreCase(compression))
 					{
-						String included = getIOTIncludedColumn(tbl.getSchema(), tbl.getTableName(), pkIndex);
-						if (included != null)
+						String cols = rs.getString("prefix_length");
+						if (StringUtil.isNonBlank(cols))
 						{
-							options.append("\nINCLUDING ");
-							options.append(included);
-							tbl.getSourceOptions().addConfigSetting("iot_included_cols", included);
+							options.append("\n  COMPRESS ");
+							options.append(cols);
 						}
+					}
+					String included = getIOTIncludedColumn(tbl.getSchema(), tbl.getTableName(), pkIndex);
+					if (included != null)
+					{
+						options.append("\n  INCLUDING ");
+						options.append(included);
+						tbl.getSourceOptions().addConfigSetting("iot_included_cols", included);
 					}
 
 					String idxTbs = rs.getString("INDEX_TABLESPACE");
 					if (StringUtil.isNonEmpty(idxTbs))
 					{
-						options.append("\nTABLESPACE ").append(idxTbs);
+						options.append("\n  TABLESPACE ").append(idxTbs);
 						tbl.getSourceOptions().addConfigSetting("index_tablespace", idxTbs);
 						tbl.setTablespace(null);
 					}
 
 					if (StringUtil.isNonBlank(overflow))
 					{
-						options.append("\nOVERFLOW TABLESPACE ");
+						options.append("\n  OVERFLOW TABLESPACE ");
 						options.append(overflow);
 						tbl.getSourceOptions().addConfigSetting("overflow_tablespace", overflow);
 					}
