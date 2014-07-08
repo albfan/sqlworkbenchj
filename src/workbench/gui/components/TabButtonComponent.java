@@ -60,7 +60,6 @@ public class TabButtonComponent
 		pane = tabPane;
 
 		boolean opaque = Settings.getInstance().getBoolProperty("workbench.gui.closebutton.opaque", false);
-		boolean buttonOnRight = GuiSettings.getShowCloseButtonOnRightSide();
 
 		boolean jGoodies = LnFHelper.isJGoodies();
 		if (jGoodies)
@@ -83,20 +82,7 @@ public class TabButtonComponent
 		closeButton.setFocusable(false);
 		closeButton.addActionListener(this);
 
-		GridBagConstraints c = new GridBagConstraints();
-		c.gridx = (buttonOnRight ? 0 : 1);
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.SOUTHWEST;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = (buttonOnRight ? new Insets(0,0,1,4) : new Insets(0,0,1,0));
-		add(label, c);
-
-		c.gridx = (buttonOnRight ? 1 : 0);
-		c.anchor = GridBagConstraints.SOUTHWEST;
-		c.fill = GridBagConstraints.NONE;
-		c.insets = (buttonOnRight ? WbSwingUtilities.EMPTY_INSETS : new Insets(0,0,0,4));
-		add(closeButton, c);
-
+		setupComponents();
 		if (!showButton) closeButton.setVisible(showButton);
 		setOpaque(opaque);
 
@@ -177,32 +163,59 @@ public class TabButtonComponent
 		}
 	}
 
-	private void setComponenentOrder()
+	private void setupComponents()
 	{
 		boolean buttonOnRight = GuiSettings.getShowCloseButtonOnRightSide();
 		remove(label);
 		remove(closeButton);
 
 		GridBagConstraints c = new GridBagConstraints();
-		c.gridx = (buttonOnRight ? 0 : 1);
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.SOUTHWEST;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = (buttonOnRight ? new Insets(0,0,1,4) : new Insets(0,0,1,0));
-		add(label, c);
+		c.gridwidth = 1;
+		c.gridheight = 1;
 
-		c.gridx = (buttonOnRight ? 1 : 0);
-		c.anchor = GridBagConstraints.SOUTHWEST;
-		c.fill = GridBagConstraints.NONE;
-		c.insets = (buttonOnRight ? WbSwingUtilities.EMPTY_INSETS : new Insets(0,0,0,4));
-		add(closeButton, c);
+		if (buttonOnRight)
+		{
+			c.gridx = 0;
+			c.gridy = 0;
+			c.anchor = GridBagConstraints.WEST;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.weightx = 1.0;
+			c.insets = new Insets(0, 0, 1, 4);
+			add(label, c);
+
+			c.gridx ++;
+			c.anchor = GridBagConstraints.EAST;
+			c.fill = GridBagConstraints.NONE;
+			c.weightx = 0.0;
+			c.insets = WbSwingUtilities.EMPTY_INSETS;
+			c.weightx = 1;
+			add(closeButton, c);
+		}
+		else
+		{
+			c.gridx = 0;
+			c.gridy = 0;
+			c.anchor = GridBagConstraints.EAST;
+			c.fill = GridBagConstraints.NONE;
+			c.weightx = 0.0;
+			c.insets = new Insets(0, 0, 1, 4);
+			add(closeButton, c);
+
+			c.gridx ++;
+			c.anchor = GridBagConstraints.EAST;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.weightx = 1.0;
+			c.insets = WbSwingUtilities.EMPTY_INSETS;
+			c.weightx = 1;
+			add(label, c);
+		}
 		validate();
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		setComponenentOrder();
+		setupComponents();
 	}
 
 }
