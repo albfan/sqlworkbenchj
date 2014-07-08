@@ -106,10 +106,12 @@ public class OracleTableSourceBuilder
 			"       atb.logging, \n" +
 			"       atb.iot_type, \n" +
 			"       iot.tablespace_name as iot_overflow, \n" +
+			"       iot.table_name as overflow_table, \n" +
+			"       ac.index_name as pk_index_name, \n" +
+			"       ai.tablespace_name as index_tablespace, \n" +
 			(supportsArchives ?
 			"       fat.flashback_archive_name, \n" :
 			"       null as flashback_archive_name, \n") +
-			"       ai.tablespace_name as index_tablespace, \n" +
 			(supportsCompression ?
 			"       atb.compression, \n " +
 			"       atb.compress_for \n " :
@@ -145,8 +147,22 @@ public class OracleTableSourceBuilder
 				String iot = rs.getString("IOT_TYPE");
 				if (StringUtil.isNonBlank(iot))
 				{
+					String pkIndex = rs.getString("pk_index_name");
+					String overflow = rs.getString("IOT_OVERFLOW");
 					tbl.getSourceOptions().addConfigSetting("organization", "index");
 					options.append("ORGANIZATION INDEX");
+
+					if (StringUtil.isNonBlank(overflow))
+					{
+						String included = getIOTIncludedColumn(tbl.getSchema(), tbl.getTableName(), pkIndex);
+						if (included != null)
+						{
+							options.append("\nINCLUDING ");
+							options.append(included);
+							tbl.getSourceOptions().addConfigSetting("iot_included_cols", included);
+						}
+					}
+
 					String idxTbs = rs.getString("INDEX_TABLESPACE");
 					if (StringUtil.isNonEmpty(idxTbs))
 					{
@@ -154,7 +170,7 @@ public class OracleTableSourceBuilder
 						tbl.getSourceOptions().addConfigSetting("index_tablespace", idxTbs);
 						tbl.setTablespace(null);
 					}
-					String overflow = rs.getString("IOT_OVERFLOW");
+
 					if (StringUtil.isNonBlank(overflow))
 					{
 						options.append("\nOVERFLOW TABLESPACE ");
@@ -210,7 +226,7 @@ public class OracleTableSourceBuilder
 				}
 
 				int free = rs.getInt("pct_free");
-				if (!rs.wasNull() && free != 10)
+				if (!rs.wasNull() && free != 10 && StringUtil.isEmptyString(iot))
 				{
 					tbl.getSourceOptions().addConfigSetting("pct_free", Integer.toString(free));
 					if (options.length() > 0) options.append('\n');
@@ -254,7 +270,7 @@ public class OracleTableSourceBuilder
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("OracleTableSourceBuilder.readTableOptions()", "Error retrieving table options", e);
+			LogMgr.logError("OracleTableSourceBuilder.readTableOptions()", "Error retrieving table options using SQL: \n" + sql, e);
 		}
 		finally
 		{
@@ -568,4 +584,49 @@ public class OracleTableSourceBuilder
 		return index;
 	}
 
+	private String getIOTIncludedColumn(String owner, String tableName, String pkIndexName)
+	{
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql =
+			"select column_name \n" +
+			"from all_tab_columns \n" +
+			"where column_name not in (select column_name \n" +
+			"                          from all_ind_columns  \n" +
+			"                          where index_name = ? " +
+			"                            and index_owner = ?) \n" +
+			"  and table_name = ? \n" +
+			"  and owner = ? \n" +
+			"order by column_id \n";
+
+		String column = null;
+		try
+		{
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, pkIndexName);
+			pstmt.setString(2, owner);
+			pstmt.setString(3, tableName);
+			pstmt.setString(4, owner);
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("OracleTableSourceBuilder.getIOTIncludedColumn()", "Using sql:\n" +
+					SqlUtil.replaceParameters(sql, pkIndexName, owner, tableName, owner));
+			}
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				column = rs.getString(1);
+			}
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("OracleTableSourceBuilder.getIOTIncludedColumn()", "Could not retrieve included columns", ex);
+			column = null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+		return column;
+	}
 }
