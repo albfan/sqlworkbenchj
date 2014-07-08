@@ -26,19 +26,21 @@ package workbench.db.oracle;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.JdbcUtils;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
 
 import workbench.sql.ScriptParser;
 
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.db.JdbcUtils;
-import workbench.db.TableDefinition;
-import workbench.db.TableSourceBuilder;
-import workbench.db.TableSourceBuilderFactory;
 
 /**
  *
@@ -77,12 +79,48 @@ public class OracleTableSourceBuilderTest
 	}
 
 	@Test
+	public void testIOT()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		Assume.assumeNotNull(con);
+		try
+		{
+			String sql =
+				"create table iot1  \n" +
+				"( \n" +
+				"  id1 integer not null, \n" +
+				"  id2 integer not null, \n" +
+				"  some_column integer, \n" +
+				"  constraint pk_iot1 primary key (id1, id2) \n" +
+				") \n" +
+				"organization index \n" +
+				"compress 1 \n" +
+				"overflow tablespace users";
+			TestUtil.executeScript(con, sql);
+			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+			TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("IOT1"));
+			String tableSource = builder.getTableSource(tbl.getTable(), tbl.getColumns());
+//			System.out.println(tableSource);
+			assertTrue(tableSource.contains("CONSTRAINT PK_IOT1 PRIMARY KEY (ID1, ID2)"));
+			assertFalse(tableSource.contains("ALTER TABLE"));
+			assertTrue(tableSource.contains("COMPRESS 1"));
+			assertTrue(tableSource.contains("ORGANIZATION INDEX"));
+			assertTrue(tableSource.contains("INCLUDING SOME_COLUMN"));
+		}
+		finally
+		{
+			TestUtil.executeScript(con, "drop table iot1 cascade constraints purge");
+		}
+	}
+
+	@Test
 	public void test12c()
 		throws Exception
 	{
-//		WbConnection con = OracleTestUtil.getOracleConnection("thomas", "welcome", "10.0.26.20", "orcl");
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		Assume.assumeNotNull(con);
+
 		if (!JdbcUtils.hasMinimumServerVersion(con, "12.1"))
 		{
 			System.out.println("No Oracle 12c available, skipping test");

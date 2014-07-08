@@ -30,14 +30,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.lnf.LnFHelper;
+
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.lnf.LnFHelper;
 
 /**
  * Component to be used as tabComponent.
@@ -53,7 +56,8 @@ public class TabButtonComponent
 	private final WbTabbedPane pane;
 	private final JLabel label;
 	private final WbButton closeButton;
-
+	private static final Insets INSETS = new Insets(0, 0, 1, 4);
+	
 	public TabButtonComponent(String title, final WbTabbedPane tabPane, boolean showButton)
 	{
 		super(new GridBagLayout());
@@ -166,47 +170,40 @@ public class TabButtonComponent
 	private void setupComponents()
 	{
 		boolean buttonOnRight = GuiSettings.getShowCloseButtonOnRightSide();
+
 		remove(label);
 		remove(closeButton);
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridwidth = 1;
 		c.gridheight = 1;
+		c.gridy = 0;
+		c.gridx = 0;
 
+		c.anchor = GridBagConstraints.LINE_START;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1.0;
+		c.insets = INSETS;
 		if (buttonOnRight)
 		{
-			c.gridx = 0;
-			c.gridy = 0;
-			c.anchor = GridBagConstraints.WEST;
-			c.fill = GridBagConstraints.HORIZONTAL;
-			c.weightx = 1.0;
-			c.insets = new Insets(0, 0, 1, 4);
 			add(label, c);
+		}
+		else
+		{
+			add(closeButton, c);
+		}
 
-			c.gridx ++;
-			c.anchor = GridBagConstraints.EAST;
-			c.fill = GridBagConstraints.NONE;
-			c.weightx = 0.0;
-			c.insets = WbSwingUtilities.EMPTY_INSETS;
-			c.weightx = 1;
+		c.gridx ++;
+		c.anchor = GridBagConstraints.LINE_END;
+		c.fill = GridBagConstraints.NONE;
+		c.weightx = 0;
+		c.insets = WbSwingUtilities.EMPTY_INSETS;
+		if (buttonOnRight)
+		{
 			add(closeButton, c);
 		}
 		else
 		{
-			c.gridx = 0;
-			c.gridy = 0;
-			c.anchor = GridBagConstraints.EAST;
-			c.fill = GridBagConstraints.NONE;
-			c.weightx = 0.0;
-			c.insets = new Insets(0, 0, 1, 4);
-			add(closeButton, c);
-
-			c.gridx ++;
-			c.anchor = GridBagConstraints.EAST;
-			c.fill = GridBagConstraints.HORIZONTAL;
-			c.weightx = 1.0;
-			c.insets = WbSwingUtilities.EMPTY_INSETS;
-			c.weightx = 1;
 			add(label, c);
 		}
 		validate();
