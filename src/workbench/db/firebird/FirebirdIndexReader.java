@@ -36,7 +36,10 @@ import workbench.util.SqlUtil;
 /**
  * A class to retrieve the index information for Firebird 2.5.
  *
+ * The Firebird driver does not return information about function based indexes correctly.
+ *
  * This class will not work with earlier Firebird releases and should not be instantiated for them.
+ *
  * @author Thomas Kellerer
  * @see ReaderFactory#getIndexReader(workbench.db.DbMetadata)
  */
