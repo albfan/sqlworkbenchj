@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-07-07">
+    <entry dev-build="3" type="enh">The code completion now also caches synonym translation to improve performance</entry>
     <entry dev-build="2" type="enh">When running in batch mode and not supplying the -password parameter, a prompt for the password is now displayed</entry>
     <entry dev-build="2" type="enh">The last directory for opening files can now optionally be stored in the current workspace</entry>
     <entry dev-build="2" type="enh">It's now possible to open multiple files through "File -&gt; Open file". If multiple files are selected, each one is opended in a seperate editor tab</entry>
