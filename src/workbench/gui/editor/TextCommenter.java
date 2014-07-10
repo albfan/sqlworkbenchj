@@ -23,7 +23,9 @@
 package workbench.gui.editor;
 
 import javax.swing.text.BadLocationException;
+
 import workbench.log.LogMgr;
+
 import workbench.util.StringUtil;
 
 /**
@@ -57,7 +59,7 @@ public class TextCommenter
 	private void doComment(String commentChar, boolean addComment)
 	{
 		int startline = editor.getSelectionStartLine();
-		int endline = editor.getSelectionEndLine();
+		int endline = getLastRelevantSelectionLine();
 
 		if (commentChar == null) commentChar = "--";
 
@@ -123,7 +125,7 @@ public class TextCommenter
 	protected boolean isSelectionCommented(String commentChar)
 	{
 		int startline = editor.getSelectionStartLine();
-		int endline = editor.getSelectionEndLine();
+		int endline = getLastRelevantSelectionLine();
 		if (commentChar == null) commentChar = "--";
 
 		for (int line = startline; line <= endline; line ++)
@@ -135,4 +137,15 @@ public class TextCommenter
 		return true;
 	}
 
+	private int getLastRelevantSelectionLine()
+	{
+		int endline = editor.getSelectionEndLine();
+		int lastLineStart = editor.getLineStartOffset(endline);
+		if (lastLineStart == editor.getSelectionEnd())
+		{
+			// ignore the last selection line if there isn't something selected
+			endline--;
+		}
+		return endline;
+	}
 }
