@@ -69,10 +69,13 @@ class ObjectCache
 	private final Map<TableIdentifier, List<DependencyNode>> referencedTables = new HashMap<TableIdentifier, List<DependencyNode>>();
 	private final Map<TableIdentifier, List<DependencyNode>> referencingTables = new HashMap<TableIdentifier, List<DependencyNode>>();
 	private final Map<TableIdentifier, List<ColumnIdentifier>> objects = new HashMap<TableIdentifier, List<ColumnIdentifier>>();
+	private final Map<TableIdentifier, TableIdentifier> synonymMap = new HashMap<TableIdentifier, TableIdentifier>();
 	private final Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
 	private boolean supportsSchemas;
+
+	private final TableIdentifier dummyTable = new TableIdentifier("-$WB DUMMY$-", "-$WB DUMMY$-");
 
 	ObjectCache(WbConnection conn)
 	{
@@ -365,6 +368,40 @@ class ObjectCache
 		return result;
 	}
 
+	public synchronized void addSynonym(TableIdentifier synonym, TableIdentifier baseTable)
+	{
+		this.synonymMap.put(synonym, baseTable);
+	}
+	
+	public synchronized TableIdentifier getSynonymTable(WbConnection dbConn, TableIdentifier synonym)
+	{
+		TableIdentifier baseTable = this.synonymMap.get(synonym);
+		if (baseTable == dummyTable)
+		{
+			// we already tested for a synonym but did not found any
+			return null;
+		}
+		if (baseTable != null)
+		{
+			return baseTable;
+		}
+
+		if (baseTable == null)
+		{
+			baseTable = dbConn.getMetadata().resolveSynonym(synonym);
+		}
+		if (baseTable == null)
+		{
+			// "negative caching. Avoid repeated lookup for non-synonyms
+			synonymMap.put(synonym, dummyTable);
+		}
+		else
+		{
+			synonymMap.put(synonym, baseTable);
+		}
+		return baseTable;
+	}
+
 	/**
 	 * Return the columns for the given table.
 	 *
@@ -603,6 +640,7 @@ class ObjectCache
 		referencedTables.clear();
 		referencingTables.clear();
 		procedureCache.clear();
+		synonymMap.clear();
 		LogMgr.logDebug("ObjectCache.clear()", "Removed all entries from the cache");
 	}
 
@@ -628,7 +666,12 @@ class ObjectCache
 		return Collections.unmodifiableMap(objects);
 	}
 
-	void initExternally(Map<TableIdentifier, List<ColumnIdentifier>> newObjects, Set<String> schemas, Map<TableIdentifier, List<DependencyNode>> referencedTables, Map<TableIdentifier, List<DependencyNode>> referencingTables, Map<String, List<ProcedureDefinition>> procs)
+	void initExternally(
+		Map<TableIdentifier, List<ColumnIdentifier>> newObjects, Set<String> schemas,
+		Map<TableIdentifier, List<DependencyNode>> referencedTables,
+		Map<TableIdentifier, List<DependencyNode>> referencingTables,
+		Map<String, List<ProcedureDefinition>> procs,
+		Map<TableIdentifier, TableIdentifier> synonyms)
 	{
 		if (newObjects == null || schemas == null) return;
 
@@ -653,6 +696,14 @@ class ObjectCache
 		{
 			this.procedureCache.putAll(procs);
 		}
-		LogMgr.logDebug("ObjectCache.initExternally", "Added " + objects.size() + " objects, " + procedureCache.values().size() + " procedures and " + refCount + " foreign key definitions from local storage");
+		if (synonyms != null)
+		{
+			synonymMap.putAll(synonyms);
+		}
+		LogMgr.logDebug("ObjectCache.initExternally",
+			"Added " + objects.size() + " objects, " +
+			procedureCache.values().size() + " procedures, " +
+			synonymMap.size() + " synonyms and "
+			+ refCount + " foreign key definitions from local storage");
 	}
 }

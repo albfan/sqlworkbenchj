@@ -559,7 +559,7 @@ public abstract class BaseAnalyzer
 		if (tableForColumnList == null) return false;
 		if (this.dbConnection == null) return false;
 		DbObjectCache cache = this.dbConnection.getObjectCache();
-		TableIdentifier toCheck = this.dbConnection.getMetadata().resolveSynonym(tableForColumnList);
+		TableIdentifier toCheck = cache.getSynonymTable(tableForColumnList);
 		List<ColumnIdentifier> cols = cache.getColumns(toCheck);
 		if (cols != null && cols.size() > 0)
 		{

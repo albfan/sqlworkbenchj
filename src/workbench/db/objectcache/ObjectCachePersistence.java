@@ -62,6 +62,7 @@ class ObjectCachePersistence
 	private static final String REFERENCING_TABLES_ENTRY = "referencing_tables.data";
 	private static final String REFERENCED_TABLES_ENTRY = "referenced_tables.data";
 	private static final String PROCEDURES_ENTRY = "procedures.data";
+	private static final String SYNONYMS_ENTRY = "synonyms.data";
 
 	void loadFromLocalFile(ObjectCache cache, WbConnection conn)
 	{
@@ -88,7 +89,7 @@ class ObjectCachePersistence
 		Map<TableIdentifier, List<DependencyNode>> referencedTables = null;
 		Map<TableIdentifier, List<DependencyNode>> referencingTables = null;
 		Map<String, List<ProcedureDefinition>> procs = null;
-
+		Map<TableIdentifier, TableIdentifier> syns = null;
 		try
 		{
 			zipFile = new ZipFile(cacheFile);
@@ -126,7 +127,15 @@ class ObjectCachePersistence
 				procs = (Map<String, List<ProcedureDefinition>>) ois.readObject();
 			}
 
-			cache.initExternally(objects, schemas, referencedTables, referencingTables, procs);
+			entry = zipFile.getEntry(SYNONYMS_ENTRY);
+			if (entry != null)
+			{
+				in = zipFile.getInputStream(entry);
+				ois = new ObjectInputStream(in);
+				syns = (Map<TableIdentifier, TableIdentifier>)ois.readObject();
+			}
+
+			cache.initExternally(objects, schemas, referencedTables, referencingTables, procs, syns);
 		}
 		catch (Throwable th)
 		{

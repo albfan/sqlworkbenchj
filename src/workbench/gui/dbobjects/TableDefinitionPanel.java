@@ -387,6 +387,7 @@ public class TableDefinitionPanel
 			ds.setValue(row, 0, "BASE_TABLE");
 			ds.setValue(row, 1, baseTable.getTableExpression(dbConnection));
 		}
+		dbConnection.getObjectCache().addSynonym(syn, baseTable);
 		return ds;
 	}
 

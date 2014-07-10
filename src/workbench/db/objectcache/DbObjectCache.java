@@ -111,6 +111,16 @@ public class DbObjectCache
 		}
 	}
 
+	public synchronized void addSynonym(TableIdentifier synonym, TableIdentifier baseTable)
+	{
+		objectCache.addSynonym(synonym, baseTable);
+	}
+
+	public TableIdentifier getSynonymTable(TableIdentifier synonym)
+	{
+		return objectCache.getSynonymTable(dbConnection, synonym);
+	}
+
 	public List<ColumnIdentifier> getColumns(TableIdentifier tbl)
 	{
 		return objectCache.getColumns(dbConnection, tbl);
