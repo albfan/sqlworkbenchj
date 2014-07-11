@@ -201,6 +201,9 @@ class ObjectCachePersistence
 
 			Map<String, List<ProcedureDefinition>> procs = objectCache.getProcedures();
 			writeObject(zout, PROCEDURES_ENTRY, procs);
+
+			Map<TableIdentifier, TableIdentifier> syns = objectCache.getSynonyms();
+			writeObject(zout, SYNONYMS_ENTRY, syns);
 		}
 		catch (Exception ex)
 		{

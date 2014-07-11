@@ -372,7 +372,7 @@ class ObjectCache
 	{
 		this.synonymMap.put(synonym, baseTable);
 	}
-	
+
 	public synchronized TableIdentifier getSynonymTable(WbConnection dbConn, TableIdentifier synonym)
 	{
 		TableIdentifier baseTable = this.synonymMap.get(synonym);
@@ -662,8 +662,12 @@ class ObjectCache
 
 	Map<TableIdentifier, List<ColumnIdentifier>> getObjects()
 	{
-		if (objects == null) return Collections.emptyMap();
 		return Collections.unmodifiableMap(objects);
+	}
+
+	public Map<TableIdentifier, TableIdentifier> getSynonyms()
+	{
+		return Collections.unmodifiableMap(synonymMap);
 	}
 
 	void initExternally(
