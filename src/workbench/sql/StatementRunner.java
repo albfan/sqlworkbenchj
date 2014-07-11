@@ -667,10 +667,17 @@ public class StatementRunner
 				{
 					this.currentConsumer.cancel();
 				}
+
+				if (currentConnection != null && Settings.getInstance().useOracleNativeCancel())
+				{
+					currentConnection.oracleCancel();
+				}
+
 				if (this.currentCommand != null)
 				{
 					this.currentCommand.cancel();
 				}
+
 			}
 			catch (Exception th)
 			{

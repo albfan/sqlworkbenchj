@@ -776,6 +776,11 @@ public class Settings
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", false);
 	}
 
+	public boolean useOracleNativeCancel()
+	{
+		return getBoolProperty("workbench.db.oracle.cancel.native", true);
+	}
+	
 	public boolean fixOracleDateType()
 	{
 		return getBoolProperty("workbench.db.oracle.fixdatetype", false);

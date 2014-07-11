@@ -24,6 +24,7 @@ package workbench.db;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -1437,4 +1438,24 @@ public class WbConnection
 		}
 	}
 
+	public void oracleCancel()
+	{
+		if (this.metaData == null) return;
+		if (!metaData.isOracle()) return;
+		
+		try
+		{
+			Method cancel = sqlConnection.getClass().getMethod("cancel", (Class[])null);
+			cancel.setAccessible(true);
+
+			LogMgr.logDebug("WbConnection.oracleCancel()", "Using OracleConnection.cancel() to cancel the current statement");
+			cancel.invoke(sqlConnection, (Object[])null);
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logWarning("WbConnection.oracleCancel()", "Could not call OracleConnection.cancel()", th);
+		}
+
+
+	}
 }
