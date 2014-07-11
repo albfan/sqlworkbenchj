@@ -133,6 +133,7 @@ public class ObjectInfo
 							synonymTarget.getTableExpression() + " (" +
 							synonymTarget.getObjectType() + ")";
 
+					connection.getObjectCache().addSynonym(toDescribe, synonymTarget);
 					result.addMessage(msg + "\n");
 					result.setSourceCommand(msg);
 				}
