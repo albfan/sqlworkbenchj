@@ -25,6 +25,7 @@ package workbench.db.search;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.List;
 
 import workbench.interfaces.TableSearchConsumer;
@@ -246,6 +247,11 @@ public class ClientSideTableSearcher
 	@Override
 	public void setCriteria(String search, boolean ignoreCase)
 	{
+		setCriteria(search, ignoreCase, null);
+	}
+
+	public void setCriteria(String search, boolean ignoreCase, Collection<String> columns)
+	{
 		if (StringUtil.isNonBlank(search))
 		{
 			searchString = search.trim();
@@ -263,6 +269,7 @@ public class ClientSideTableSearcher
 			searchString = null;
 		}
 		searcher = new RowDataSearcher(searchString, comparator, ignoreCase);
+		searcher.setColumnsToSearch(columns);
 	}
 
 	@Override

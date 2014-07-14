@@ -22,6 +22,9 @@
  */
 package workbench.db.search;
 
+import java.util.Collection;
+import java.util.Set;
+
 import workbench.db.exporter.TextRowDataConverter;
 
 import workbench.storage.ResultInfo;
@@ -30,6 +33,7 @@ import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -46,6 +50,7 @@ public class RowDataSearcher
 {
 	private ColumnExpression filterExpression;
 	private TextRowDataConverter converter;
+	private final Set<String> columns = CollectionUtil.caseInsensitiveSet();
 
 	public RowDataSearcher(String searchValue, ColumnComparator comp, boolean ignoreCase)
 	{
@@ -71,9 +76,31 @@ public class RowDataSearcher
 		for (int c = 0; c < row.getColumnCount(); c++)
 		{
 			if (SqlUtil.isBlobType(metaData.getColumnType(c))) continue;
-			String value = converter.getValueAsFormattedString(row, c);
-			if (filterExpression.evaluate(value)) return true;
+			if (searchColumn(metaData.getColumnName(c)))
+			{
+				String value = converter.getValueAsFormattedString(row, c);
+				if (filterExpression.evaluate(value)) return true;
+			}
 		}
 		return false;
+	}
+
+	public void setColumnsToSearch(Collection<String> toSearch)
+	{
+		if (CollectionUtil.isEmpty(toSearch))
+		{
+			columns.clear();
+		}
+		else
+		{
+
+			columns.addAll(toSearch);
+		}
+	}
+
+	private boolean searchColumn(String columnName)
+	{
+		if (columns.isEmpty()) return true;
+		return columns.contains(columnName);
 	}
 }

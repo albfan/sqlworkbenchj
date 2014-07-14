@@ -142,6 +142,21 @@ public class WbGrepDataTest
 		assertEquals(1, data.get(0).getRowCount());
 		assertEquals(10, data.get(0).getValueAsInt(0, 0, -1));
 
+		sql = "WbGrepData -searchValue=arthur -tables=person -columns=lastname";
+		result = instance.execute(sql);
+		String msg = result.getMessageBuffer().toString();
+		System.out.println(msg);
+		assertTrue(msg, result.isSuccess());
+		data = result.getDataStores();
+		assertNull(data);
+
+		sql = "WbGrepData -searchValue=arthur -tables=person -columns=firstname";
+		result = instance.execute(sql);
+		msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+		data = result.getDataStores();
+		assertNotNull(data);
+		assertEquals(1, data.size());
 	}
 
 }

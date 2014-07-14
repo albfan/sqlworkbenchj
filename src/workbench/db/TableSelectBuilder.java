@@ -140,7 +140,7 @@ public class TableSelectBuilder
 	}
 
 	/**
-	 * Create a SELECT statement that contains all columns of the table.
+	 * Create a SELECT statement for the columns of the the table.
 	 *
 	 * If replacements for certain datatypes are configured, an expression to convert the column
 	 * will be used instead of the column directly. The expression will be given the column name as an alias.

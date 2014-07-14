@@ -98,7 +98,10 @@ public class DbObjectCache
 	}
 
 	/**
-	 * Removes all entries from this cache and deletes any
+	 * Removes all entries from this cache and deletes any saved cache file.
+	 *
+	 * @see #clear() 
+	 * @see ObjectCachePersistence#deleteCacheFile(java.lang.String, java.lang.String)
 	 */
 	public void removeAll()
 	{

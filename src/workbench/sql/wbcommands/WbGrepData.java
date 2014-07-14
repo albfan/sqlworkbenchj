@@ -25,15 +25,16 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.db.JdbcUtils;
-import workbench.db.TableIdentifier;
-import workbench.db.search.ClientSideTableSearcher;
+
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.TableSearchConsumer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.SqlCommand;
-import workbench.sql.StatementRunnerResult;
+
+import workbench.db.JdbcUtils;
+import workbench.db.TableIdentifier;
+import workbench.db.search.ClientSideTableSearcher;
+
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.filter.ColumnComparator;
@@ -42,6 +43,10 @@ import workbench.storage.filter.IsNullComparator;
 import workbench.storage.filter.RegExComparator;
 import workbench.storage.filter.StartsWithComparator;
 import workbench.storage.filter.StringEqualsComparator;
+
+import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
@@ -66,6 +71,7 @@ public class WbGrepData
 	public static final String PARAM_IGNORE_CASE = "ignoreCase";
 
 	public static final String PARAM_COMPARATOR = "compareType";
+	public static final String PARAM_COLUMNS = "columns";
 
 	private ClientSideTableSearcher searcher;
 	private StatementRunnerResult searchResult;
@@ -84,6 +90,7 @@ public class WbGrepData
 		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_EXPRESSION);
+		cmdLine.addArgument(PARAM_COLUMNS);
 		cmdLine.addArgument(PARAM_COMPARATOR, CollectionUtil.arrayList("equals", "startsWith", "contains", "matches", "isNull"));
 	}
 
@@ -168,9 +175,10 @@ public class WbGrepData
 			return searchResult;
 		}
 
+		List<String> columns = cmdLine.getListValue(PARAM_COLUMNS);
 		searcher.setComparator(comp);
 		searcher.setConsumer(this);
-		searcher.setCriteria(searchValue, ignoreCase);
+		searcher.setCriteria(searchValue, ignoreCase, columns);
 
 		if (Settings.getInstance().getBoolProperty("workbench.searchdata.warn.buffer", true) &&
 				JdbcUtils.driverMightBufferResults(currentConnection))
