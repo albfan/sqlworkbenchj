@@ -139,7 +139,10 @@
               <row>
                 <entry>PARAMETERS</entry>
                 <entry>
-                  <para>Displays configuration parameters.</para>
+                  <para>Displays configuration parameters.
+                    Unlike SQL*Plus you can supply multiple parameters separated with a comma: <literal>show parameter memory,sga</literal> will show
+                    the values for all parameters that contain the string <literal>memory</literal> or <literal>sga</literal>.
+                  </para>
                   <para>As with SQL*Plus, you need the <literal>SELECT</literal> privilege on <literal>V_$PARAMETER</literal>
                   to use the <literal>PARAMETERS</literal> option.</para>
                 </entry>
