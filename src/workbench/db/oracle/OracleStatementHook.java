@@ -44,11 +44,6 @@ import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.*;
-import workbench.sql.wbcommands.console.WbAbout;
-import workbench.sql.wbcommands.console.WbDeleteProfile;
-import workbench.sql.wbcommands.console.WbDisconnect;
-import workbench.sql.wbcommands.console.WbDisplay;
-import workbench.sql.wbcommands.console.WbStoreProfile;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -66,7 +61,7 @@ public class OracleStatementHook
 	private static final String wbSelectMarker = "select /* sqlwb_statistics */";
 
 	private static final String retrieveStats =
-			wbSelectMarker + " a.name, s.value, s.statistic# \n" +
+			wbSelectMarker + " a.name, coalesce(s.value,0) as value, s.statistic# \n" +
 			"from v$sesstat s \n" +
 			"  join v$statname a on a.statistic# = s.statistic# \n" +
 			"where sid = userenv('SID') \n" +
@@ -101,13 +96,8 @@ public class OracleStatementHook
 	/**
 	 * A list of SQL commands where no statistics should be shown.
 	 */
-	private final Set<String> noStatistics = CollectionUtil.caseInsensitiveSet(
-		WbFetchSize.VERB, WbAbout.VERB, WbConfirm.VERB, WbConnInfo.VERB, WbDefinePk.VERB, WbDefineVar.VERB,
-		WbDeleteProfile.VERB, WbStoreProfile.VERB, WbDisconnect.VERB, WbDisplay.VERB,
-		WbDisableOraOutput.VERB, WbEnableOraOutput.VERB, WbStartBatch.VERB, WbEndBatch.VERB, WbHelp.VERB,
-		WbIsolationLevel.VERB, WbLoadPkMapping.VERB, WbListPkDef.VERB, WbMode.VERB, WbListVars.VERB, WbSetProp.VERB,
-		WbSetProp.ALTERNATE_VERB, WbSysProps.VERB, WbXslt.VERB, SetCommand.VERB, SingleVerbCommand.COMMIT_VERB,
-		SingleVerbCommand.ROLLBACK_VERB);
+	private final Set<String> noStatistics = CollectionUtil.caseInsensitiveSet(SetCommand.VERB,
+		SingleVerbCommand.COMMIT_VERB, SingleVerbCommand.ROLLBACK_VERB);
 
 	/**
 	 * Stores the statistic values before the execution of the statement.
@@ -131,6 +121,7 @@ public class OracleStatementHook
 
 	private PreparedStatement statisticsStmt;
 	private final Object lock = new Object();
+	private CommandTester wbTester = new CommandTester();
 
 	public OracleStatementHook()
 	{
@@ -145,6 +136,11 @@ public class OracleStatementHook
 		}
 
 		lastExplainID = null;
+
+		if (showStatistics)
+		{
+			storeSessionStats(runner);
+		}
 
 		if (showRealPlan)
 		{
@@ -161,10 +157,6 @@ public class OracleStatementHook
 			}
 		}
 
-		if (showStatistics)
-		{
-			storeSessionStats(runner);
-		}
 		return sql;
 	}
 
@@ -570,10 +562,16 @@ public class OracleStatementHook
 		}
 	}
 
+	private boolean skipStatistics(String verb)
+	{
+		if (wbTester.isWbCommand(verb)) return true;
+		return noStatistics.contains(verb);
+	}
+
 	private DataStore retrieveStatistics(StatementRunner runner, String sql)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
-		if (noStatistics.contains(verb))
+		if (skipStatistics(verb))
 		{
 			return null;
 		}
@@ -596,16 +594,10 @@ public class OracleStatementHook
 				{
 					String statName = rs.getString(1);
 					Long value = Long.valueOf(rs.getLong(2));
-					if (statName != null && value != null)
-					{
-						Long startValue = values.get(statName);
-						if (startValue != null)
-						{
-							int row = statValues.addRow();
-							statValues.setValue(row, nameCol, statName);
-							statValues.setValue(row, valueCol, (value - startValue));
-						}
-					}
+					Long startValue = nvl(values.get(statName));
+					int row = statValues.addRow();
+					statValues.setValue(row, nameCol, statName);
+					statValues.setValue(row, valueCol, (value - startValue));
 				}
 			}
 			statValues.setResultName("Statistics");
@@ -619,6 +611,12 @@ public class OracleStatementHook
 			SqlUtil.closeResult(rs);
 		}
 		return statValues;
+	}
+
+	private Long nvl(Long value)
+	{
+		if (value != null) return value;
+		return Long.valueOf(0);
 	}
 
 	/**
