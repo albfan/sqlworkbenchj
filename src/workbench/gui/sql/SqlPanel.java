@@ -81,9 +81,6 @@ import workbench.db.DbSettings;
 import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
-
-import workbench.gui.components.DbUnitHelper;
-
 import workbench.db.importer.DataStoreImporter;
 import workbench.db.importer.DefaultImportOptions;
 import workbench.db.importer.DefaultTextImportOptions;
@@ -167,6 +164,7 @@ import workbench.gui.bookmarks.BookmarkAnnotation;
 import workbench.gui.bookmarks.NamedScriptLocation;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.DbUnitHelper;
 import workbench.gui.components.EtchedBorderTop;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.TabCloser;
@@ -186,10 +184,10 @@ import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
-import workbench.sql.AppendResultAnnotation;
 
 import workbench.storage.DataStore;
 
+import workbench.sql.AppendResultAnnotation;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.OutputPrinter;
@@ -3091,18 +3089,28 @@ public class SqlPanel
 		int currentCursor = this.editor.getCaretPosition();
 		int currentResultCount = this.resultTab.getTabCount() - 1;
 
-		try
+		if (this.macroExecution)
 		{
-			// executeMacro() will set this variable so that we can
+			// executeMacro() will set "macroExecution" so that we can
 			// log the macro statement here. Otherwise we wouldn't know at this point
 			// that a macro is beeing executed
-			if (this.macroExecution)
+			macroRun = true;
+			appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + script + "\n");
+		}
+		else
+		{
+			String cleanSql = SqlUtil.trimSemicolon(script.trim());
+			String macro = MacroManager.getInstance().getMacroText(cleanSql);
+			if (macro != null)
 			{
-				macroExecution = false;
-
+				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + cleanSql + "\n");
+				script = macro;
 				macroRun = true;
-				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + script + "\n");
 			}
+		}
+
+		try
+		{
 
 			scriptParser.setScript(script);
 

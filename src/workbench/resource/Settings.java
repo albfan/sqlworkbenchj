@@ -780,7 +780,7 @@ public class Settings
 	{
 		return getBoolProperty("workbench.db.oracle.cancel.native", true);
 	}
-	
+
 	public boolean fixOracleDateType()
 	{
 		return getBoolProperty("workbench.db.oracle.fixdatetype", false);
@@ -2259,7 +2259,7 @@ public class Settings
 
 	public boolean getCreateDriverBackup()
 	{
-		return getBoolProperty("workbench.drivers.createbackup", false);
+		return getBoolProperty("workbench.drivers.createbackup", getCreateProfileBackup());
 	}
 
 	public void setFilesInWorkspaceHandling(ExternalFileHandling handling)
