@@ -32,9 +32,32 @@ import workbench.db.WbConnection;
 public class DB2ObjectType
 	extends BaseObjectType
 {
+	private boolean isDistinctType;
+	private String baseType;
+
 	public DB2ObjectType(String schema, String objectName)
 	{
 		super(schema, objectName);
+	}
+
+	public boolean isDistinctType()
+	{
+		return isDistinctType;
+	}
+
+	public void setIsDistinctType(boolean isDistinctType)
+	{
+		this.isDistinctType = isDistinctType;
+	}
+
+	public String getBaseType()
+	{
+		return baseType;
+	}
+
+	public void setBaseType(String baseType)
+	{
+		this.baseType = baseType;
 	}
 
 	@Override

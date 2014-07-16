@@ -117,11 +117,16 @@ public class DB2TypeReader
 	public List<DB2ObjectType> getTypes(WbConnection con, String schemaPattern, String namePattern)
 	{
 		List<DB2ObjectType> result = new ArrayList<DB2ObjectType>();
-		String select = "select typeschema,  \n" +
-             "       typename,   \n" +
-             "       remarks   \n" +
-             "from syscat.datatypes  \n" +
-             "where ownertype = 'U' ";
+		String select =
+			"select typeschema,  \n" +
+			"       typename,   \n" +
+			"       remarks,   \n" +
+			"       sourcename, \n" +
+			"       metatype, \n" +
+			"       length,  \n" +
+			"       scale   \n" +
+			"from syscat.datatypes  \n" +
+			"where ownertype = 'U' ";
 
 		if (StringUtil.isNonBlank(schemaPattern))
 		{
@@ -155,6 +160,8 @@ public class DB2TypeReader
 
 		Statement stmt = null;
 		ResultSet rs = null;
+		DataTypeResolver resolver = con.getMetadata().getDataTypeResolver();
+
 		try
 		{
 			stmt = con.createStatementForQuery();
@@ -164,8 +171,19 @@ public class DB2TypeReader
 				String schema = rs.getString("typeschema");
 				String name = rs.getString("typename");
 				String remarks = rs.getString("REMARKS");
+				String meta = rs.getString("METATYPE");
+				String baseType = rs.getString("SOURCENAME");
+				int len = rs.getInt("length");
+				int scale = rs.getInt("scale");
 				DB2ObjectType object = new DB2ObjectType(schema, name);
 				object.setComment(remarks);
+
+				if ("T".equalsIgnoreCase(meta))
+				{
+					object.setIsDistinctType(true);
+					int jdbcType = db2TypeToJDBC(baseType);
+					object.setBaseType(resolver.getSqlTypeDisplay(baseType, jdbcType, len, scale));
+				}
 				result.add(object);
 			}
 		}
@@ -248,17 +266,29 @@ public class DB2TypeReader
 		StringBuilder sql = new StringBuilder(50 + type.getNumberOfAttributes() * 50);
 		sql.append("CREATE TYPE ");
 		sql.append(type.getObjectName());
-		sql.append(" AS\n(\n");
-		List<ColumnIdentifier> columns = type.getAttributes();
-		int maxLen = ColumnIdentifier.getMaxNameLength(columns);
-		for (int i=0; i < columns.size(); i++)
+		if (type.isDistinctType())
 		{
-			sql.append("  ");
-			sql.append(StringUtil.padRight(columns.get(i).getColumnName(), maxLen + 2));
-			sql.append(columns.get(i).getDbmsType());
-			if (i < columns.size() - 1) sql.append(",\n");
+			sql.append(" AS ");
+			sql.append(type.getBaseType());
+			if (!type.getBaseType().endsWith("LOB"))
+			{
+				sql.append(" WITH COMPARISONS;");
+			}
 		}
-		sql.append("\n);\n");
+		else
+		{
+			sql.append(" AS\n(\n");
+			List<ColumnIdentifier> columns = type.getAttributes();
+			int maxLen = ColumnIdentifier.getMaxNameLength(columns);
+			for (int i=0; i < columns.size(); i++)
+			{
+				sql.append("  ");
+				sql.append(StringUtil.padRight(columns.get(i).getColumnName(), maxLen + 2));
+				sql.append(columns.get(i).getDbmsType());
+				if (i < columns.size() - 1) sql.append(",\n");
+			}
+			sql.append("\n);\n");
+		}
 		return sql.toString();
 	}
 
@@ -266,11 +296,12 @@ public class DB2TypeReader
 	{
 		if (type == null) return null;
 
-		String sql = "select attr_name,  \n" +
-             "       attr_typename, \n" +
-             "       length, \n" +
-             "       scale  \n" +
-             "from syscat.attributes  \n";
+		String sql =
+			"select attr_name,  \n" +
+			"       attr_typename, \n" +
+			"       length, \n" +
+			"       scale  \n" +
+			"from syscat.attributes  \n";
 
 		sql += " WHERE typename = '" + type.getObjectName() + "' \n";
 		sql += " AND typeschema = '" + type.getSchema() + "' \n";
