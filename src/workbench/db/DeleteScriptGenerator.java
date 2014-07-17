@@ -155,7 +155,8 @@ public class DeleteScriptGenerator
 	public boolean isCancelled()
 	{
 		// not implemented yet
-		return false;
+		if (dependency == null) return false;
+		return dependency.isCancelled();
 	}
 
 	@Override
@@ -543,6 +544,10 @@ public class DeleteScriptGenerator
 				this.setValues(pkvalues);
 				if (monitor != null) this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow"), i+1, numRows);
 				this.createStatements(true);
+				if (dependency != null && dependency.isCancelled())
+				{
+					break;
+				}
 			}
 		}
 		catch (Exception e)

@@ -4044,13 +4044,13 @@ public class SqlPanel
 		synchronized (this.connectionLock)
 		{
 			threadBusy = busy;
-			iconHandler.showBusyIcon(busy);
+			if (iconHandler != null) iconHandler.showBusyIcon(busy);
 			setExecuteActionStates(!busy);
 			if (disableEditor())
 			{
-				editor.setEditable(!busy);
+				if (editor != null) editor.setEditable(!busy);
 			}
-			sqlHistory.setEnabled(!busy);
+			if (sqlHistory != null) sqlHistory.setEnabled(!busy);
 		}
 	}
 

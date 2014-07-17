@@ -86,7 +86,7 @@ public class TableDependency
 	{
 		setMainTable(tbl, true);
 	}
-	
+
 	public final void setMainTable(TableIdentifier tbl, boolean verifyTable)
 	{
 		if (verifyTable)
@@ -160,6 +160,11 @@ public class TableDependency
 		return null;
 	}
 
+	public boolean isCancelled()
+	{
+		return cancelled;
+	}
+	
 	@SuppressWarnings("SleepWhileInLoop")
 	public void cancel()
 	{

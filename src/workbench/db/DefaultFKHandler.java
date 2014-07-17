@@ -129,7 +129,7 @@ public class DefaultFKHandler
 		throws SQLException
 	{
 		if (this.dbConnection == null) return null;
-		
+
 		TableIdentifier table = tbl.createCopy();
 		table.adjustCase(this.dbConnection);
 
@@ -216,6 +216,8 @@ public class DefaultFKHandler
 
 	private DataStore getKeyList(TableIdentifier tbl, boolean getOwnFk, boolean includeNumericRuleValue)
 	{
+		if (cancel) return null;
+		
 		String cols[] = null;
 		String refColName = null;
 		DbSettings dbSettings = dbConnection.getDbSettings();
