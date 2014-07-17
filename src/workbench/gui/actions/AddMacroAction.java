@@ -64,8 +64,15 @@ public class AddMacroAction
 			this.client.removeSelectionListener(this);
 		}
 		this.client = panel;
-		this.client.addSelectionListener(this);
-		this.setEnabled(client.isTextSelected());
+		if (this.client == null)
+		{
+			this.setEnabled(false);
+		}
+		else
+		{
+			this.client.addSelectionListener(this);
+			this.setEnabled(client.isTextSelected());
+		}
 	}
 
 	@Override
