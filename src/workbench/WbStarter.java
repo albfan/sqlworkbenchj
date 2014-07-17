@@ -62,7 +62,7 @@ public class WbStarter
 		}
 
 		boolean versionIsOk = false;
-		final int minMinorVersion = 6;
+		final int minMinorVersion = 7;
 
 		int minorversion = -1;
 
@@ -79,10 +79,9 @@ public class WbStarter
 
 		if (!versionIsOk)
 		{
-			String error = "SQL Workbench/J requires Java 6, but only " + version + " was found\n\n" +
-				"If you do have Java 6 installed, please point JAVA_HOME to the location of your Java 6 installation.\n" +
-				"When using Windows you can also use the -jdk switch.\n" +
-				"Please refer to the manual for details on how to specify the Java runtime to be used.";
+			String error = "SQL Workbench/J requires Java 7, but only " + version + " was found\n\n" +
+				"If you do have Java 7 installed, please point JAVA_HOME to the location of your Java 7 installation.\n" +
+				"or refer to the manual for details on how to specify the Java runtime to be used.";
 
 			System.err.println("*** Cannot run this application ***");
 			System.err.println(error);
@@ -98,7 +97,7 @@ public class WbStarter
 
 				try
 				{
-					URL iconUrl = WbStarter.class.getClassLoader().getResource("workbench/resource/images/workbench16.gif");
+					URL iconUrl = WbStarter.class.getClassLoader().getResource("workbench/resource/images/workbench16.png");
 					ImageIcon icon = new ImageIcon(iconUrl);
 					dummy.setIconImage(icon.getImage());
 				}
