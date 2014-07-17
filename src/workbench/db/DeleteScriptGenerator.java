@@ -73,6 +73,7 @@ public class DeleteScriptGenerator
 	private final WbConnection connection;
 	private List<ColumnData> columnValues;
 	private TableDependency dependency;
+	private TableDependencySorter sorter;
 	private final DbMetadata meta;
 	private TableIdentifier rootTable;
 	private WbTable sourceTable;
@@ -156,7 +157,10 @@ public class DeleteScriptGenerator
 	{
 		// not implemented yet
 		if (dependency == null) return false;
-		return dependency.isCancelled();
+		if (dependency.isCancelled()) return true;
+
+		if (sorter == null) return false;
+		return sorter.isCancelled();
 	}
 
 	@Override
@@ -166,20 +170,33 @@ public class DeleteScriptGenerator
 		{
 			dependency.cancel();
 		}
+		if (sorter != null)
+		{
+			sorter.cancel();
+		}
 	}
 
 	private void createDeleteAll(boolean includeRoot)
 	{
-		TableDependencySorter sorter = new TableDependencySorter(connection);
-		sorter.setProgressMonitor(monitor);
-		List<TableIdentifier> sorted = sorter.sortForDelete(Collections.singletonList(rootTable), true);
+		if (isCancelled()) return;
 
-		for (int i=0; i < sorted.size(); i++)
+		try
 		{
-			if (!includeRoot && i==sorted.size() - 1) break;
-			TableIdentifier tbl = sorted.get(i);
-			String delete = "DELETE FROM " + tbl.getTableExpression(connection);
-			this.statements.add(formatSql(delete));
+			this.sorter = new TableDependencySorter(connection);
+			this.sorter.setProgressMonitor(monitor);
+			List<TableIdentifier> sorted = sorter.sortForDelete(Collections.singletonList(rootTable), true);
+
+			for (int i=0; i < sorted.size(); i++)
+			{
+				if (!includeRoot && i==sorted.size() - 1) break;
+				TableIdentifier tbl = sorted.get(i);
+				String delete = "DELETE FROM " + tbl.getTableExpression(connection);
+				this.statements.add(formatSql(delete));
+			}
+		}
+		finally
+		{
+			this.sorter = null;
 		}
 	}
 
@@ -197,6 +214,10 @@ public class DeleteScriptGenerator
 		this.dependency.setExcludedTables(excludeTables);
 		this.dependency.readDependencyTree(true);
 
+		if (isCancelled())
+		{
+			return;
+		}
 
 		long duration = System.currentTimeMillis() - retrieveStart;
 		LogMgr.logDebug("DeleteScriptGenerator.createStatements()", "Retrieving dependency hierarchy for " +  dependency.getRootNode().getTable() + " took: " + duration + "ms");
@@ -242,6 +263,7 @@ public class DeleteScriptGenerator
 				for (TableIdentifier tbl : sorted)
 				{
 					if (this.excludeTables.contains(tbl)) continue;
+					if (isCancelled()) break;
 					statements.add(createDeleteStatement(tbl, tableNodes.get(tbl)));
 				}
 			}

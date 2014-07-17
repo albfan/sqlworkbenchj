@@ -179,6 +179,11 @@ public class TableDependencySorter
 		return lastNode;
 	}
 
+	public boolean isCancelled()
+	{
+		return cancel;
+	}
+	
 	public void cancel()
 	{
 		cancel = true;
