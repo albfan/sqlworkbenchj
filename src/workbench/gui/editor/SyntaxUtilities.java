@@ -39,8 +39,8 @@ public class SyntaxUtilities
 		int textLength = line.offset + line.count;
 		if (textLength > haystack.length)
 		{
-			// for some reason it happends that the textLength is calculated too big
-			LogMgr.logWarning("SyntaxUtilities.findMatch()", "textLength=" + textLength + ", line.offset=" + line.offset + ", line.count=" + line.count + ", haystack.length=" + haystack.length + ", needle=" + needle + " (length=" + needle.length() + ")");
+			// for some reason it happens that the textLength is calculated too big
+			LogMgr.logDebug("SyntaxUtilities.findMatch()", "textLength=" + textLength + ", line.offset=" + line.offset + ", line.count=" + line.count + ", haystack.length=" + haystack.length + ", needle=" + needle + " (length=" + needle.length() + ")");
 			textLength = haystack.length;
 		}
 

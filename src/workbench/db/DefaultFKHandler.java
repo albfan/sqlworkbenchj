@@ -128,6 +128,8 @@ public class DefaultFKHandler
 	protected DataStore getRawKeyList(TableIdentifier tbl, boolean exported)
 		throws SQLException
 	{
+		if (this.dbConnection == null) return null;
+		
 		TableIdentifier table = tbl.createCopy();
 		table.adjustCase(this.dbConnection);
 
