@@ -247,6 +247,8 @@ public class DeleteScriptGenerator
 		{
 			if (entry.getValue().size() > 0)
 			{
+				if (isCancelled()) return;
+				
 				// collect all nodes for one table (on the current level) so that we can generate a single delete statement
 				// that covers all foreign keys at once
 				AggregatingMap<TableIdentifier, DependencyNode> tableNodes = new AggregatingMap<TableIdentifier, DependencyNode>(false);
