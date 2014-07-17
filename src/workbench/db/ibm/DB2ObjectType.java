@@ -32,23 +32,65 @@ import workbench.db.WbConnection;
 public class DB2ObjectType
 	extends BaseObjectType
 {
-	private boolean isDistinctType;
 	private String baseType;
+	private MetaType metaType;
+	private int arrayLength;
 
 	public DB2ObjectType(String schema, String objectName)
 	{
 		super(schema, objectName);
 	}
 
-	public boolean isDistinctType()
+	public MetaType getMetaType()
 	{
-		return isDistinctType;
+		return metaType;
 	}
 
-	public void setIsDistinctType(boolean isDistinctType)
+	public int getArrayLength()
 	{
-		this.isDistinctType = isDistinctType;
+		return arrayLength;
 	}
+
+	public void setArrayLength(int length)
+	{
+		this.arrayLength = length;
+	}
+
+	public void setMetaType(String meta)
+	{
+		// http://www-01.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.sql.ref.doc/doc/r0001040.html?cp=SSEPGG_9.7.0%2F5-5-7-26&lang=en
+		//    A = User-defined array type
+		//    C = User-defined cursor type
+		//    F = User-defined row type
+		//    L = User-defined associative array type
+		//    R = User-defined structured type
+		//    S = System predefined type
+		//    T = User-defined distinct type
+
+		if (meta == null) return;
+		if ("A".equals(meta))
+		{
+			this.metaType = MetaType.array;
+		}
+		else if ("T".equals(meta))
+		{
+			this.metaType = MetaType.distinct;
+		}
+		else if ("F".equals(meta))
+		{
+			this.metaType = MetaType.row;
+		}
+		else
+		{
+			this.metaType = MetaType.structured;
+		}
+	}
+
+	public void setMetaType(MetaType type)
+	{
+		this.metaType = metaType;
+	}
+
 
 	public String getBaseType()
 	{
@@ -66,4 +108,12 @@ public class DB2ObjectType
 		return "DROP TYPE " + getSchema() + "." + getObjectName();
 	}
 
+	public static enum MetaType
+	{
+		distinct,
+		array,
+		cursor,
+		row,
+		structured;
+	}
 }
