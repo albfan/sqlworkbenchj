@@ -112,7 +112,8 @@ public class WbListCatalogs
 			"       pg_catalog.pg_encoding_to_char(d.encoding) as \"Encoding\",\n" +
 			"       d.datcollate as \"Collate\",\n" +
 			"       d.datctype as \"Ctype\",\n" +
-			"       pg_catalog.array_to_string(d.datacl, E'\\n') AS \"Access privileges\"\n" +
+			"       pg_catalog.array_to_string(d.datacl, E'\\n') AS \"Access privileges\", \n" +
+			"       pg_catalog.shobj_description(d.oid, 'pg_database') as \"Description\"" +
 			"FROM pg_catalog.pg_database d\n" +
 			"ORDER BY 1";
 		DataStore ds = SqlUtil.getResult(currentConnection, sql, true);

@@ -164,7 +164,7 @@ public class TableDependency
 	{
 		return cancelled;
 	}
-	
+
 	@SuppressWarnings("SleepWhileInLoop")
 	public void cancel()
 	{
@@ -448,14 +448,14 @@ public class TableDependency
 		return this.tableRoot;
 	}
 
-	public static void dumpTree(String fname, DependencyNode root)
+	public static void dumpTree(String fname, DependencyNode root, boolean append)
 	{
 		if (!Settings.getInstance().getBoolProperty("workbench.debug.dependency", false)) return;
 
 		FileWriter writer = null;
 		try
 		{
-			writer = new FileWriter(new File("c:/temp", fname));
+			writer = new FileWriter(new File(fname), append);
 			boolean showParents = true;
 			if (root.getChildren().isEmpty())
 			{

@@ -58,6 +58,7 @@ import workbench.sql.formatter.SqlFormatter;
 
 import workbench.util.AggregatingMap;
 import workbench.util.CollectionUtil;
+import workbench.util.SilentFileWriter;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -224,6 +225,8 @@ public class DeleteScriptGenerator
 
 		Map<Integer, Set<DependencyNode>> levels = buildLevelsTopDown(dependency.getRootNode(), 1);
 
+//		TableDependency.dumpTree("c:/temp/wfm_tree.txt", dependency.getRootNode(), false);
+
 		if (this.monitor != null)
 		{
 			this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgCalcDelDeps"), -1, -1);
@@ -248,7 +251,7 @@ public class DeleteScriptGenerator
 			if (entry.getValue().size() > 0)
 			{
 				if (isCancelled()) return;
-				
+
 				// collect all nodes for one table (on the current level) so that we can generate a single delete statement
 				// that covers all foreign keys at once
 				AggregatingMap<TableIdentifier, DependencyNode> tableNodes = new AggregatingMap<TableIdentifier, DependencyNode>(false);
