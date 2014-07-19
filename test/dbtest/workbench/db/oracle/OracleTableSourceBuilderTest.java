@@ -25,6 +25,7 @@ package workbench.db.oracle;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.resource.Settings;
 
 import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
@@ -63,7 +64,10 @@ public class OracleTableSourceBuilderTest
 			"CREATE TABLE index_test (test_id integer not null, tenant_id integer);\n" +
 			"ALTER TABLE index_test \n" +
 			"   ADD CONSTRAINT pk_indexes PRIMARY KEY (test_id)  \n" +
-			"   USING INDEX (CREATE INDEX idx_pk_index_test ON index_test (test_id, tenant_id) REVERSE);";
+			"   USING INDEX (CREATE INDEX idx_pk_index_test ON index_test (test_id, tenant_id) REVERSE);" +
+			"CREATE TABLE uc_test (test_id integer not null, tenant_id integer); \n" +
+			"create unique index ux_test on uc_test(test_id); \n" +
+			"alter table uc_test add constraint unique_test_id unique (test_id) using index ux_test;";
 
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
@@ -183,7 +187,8 @@ public class OracleTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		Assume.assumeNotNull(con);
+
 		TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("INDEX_TEST"));
 		assertNotNull(table);
 		String sql = table.getSource(con).toString();
@@ -197,6 +202,43 @@ public class OracleTableSourceBuilderTest
 //		System.out.println(indexSql);
 		String expected = "ALTER TABLE INDEX_TEST ADD CONSTRAINT PK_INDEXES PRIMARY KEY (TEST_ID) USING INDEX ( CREATE INDEX IDX_PK_INDEX_TEST ON INDEX_TEST (TEST_ID ASC, TENANT_ID ASC) TABLESPACE USERS REVERSE )";
 		assertEquals(expected, indexSql);
+	}
+
+	@Test
+	public void testUniqueConstraintWithIndex()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		Assume.assumeNotNull(con);
+		boolean showTablespace = Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_tablespace", true);
+		TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("UC_TEST"));
+		assertNotNull(table);
+		try
+		{
+			Settings.getInstance().setProperty("workbench.db.oracle.retrieve_tablespace", false);
+			String sql = table.getSource(con).toString();
+
+//			System.out.println(sql);
+			ScriptParser parser = new ScriptParser(sql);
+			int size = parser.getSize();
+			assertEquals(3, size);
+
+			String createIdx =
+				"CREATE UNIQUE INDEX UX_TEST\n" +
+				"   ON UC_TEST (TEST_ID ASC)";
+			assertEquals(createIdx, parser.getCommand(1).trim());
+
+			String alter =
+				"ALTER TABLE UC_TEST\n" +
+				"   ADD CONSTRAINT UNIQUE_TEST_ID UNIQUE (TEST_ID)\n" +
+				"   USING INDEX UX_TEST";
+			assertEquals(alter, parser.getCommand(2).trim());
+		}
+		finally
+		{
+			Settings.getInstance().setProperty("workbench.db.oracle.retrieve_tablespace", showTablespace);
+		}
 
 	}
+
 }

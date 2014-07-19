@@ -32,7 +32,16 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.*;
+import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
+import workbench.db.IndexColumn;
+import workbench.db.IndexDefinition;
+import workbench.db.JdbcIndexReader;
+import workbench.db.JdbcUtils;
+import workbench.db.ObjectSourceOptions;
+import workbench.db.PkDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;

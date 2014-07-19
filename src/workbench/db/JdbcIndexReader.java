@@ -352,6 +352,16 @@ public class JdbcIndexReader
 
 			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.CONS_ENABLED, constraint.isEnabled() ? "" : disabled);
 			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.CONS_VALIDATED, constraint.isValid() ? "" : novalidate);
+
+			if (metaData.isOracle())
+			{
+				// deal with the "using index" part of a unique constraint
+				if (!constraint.getConstraintName().equals(indexDefinition.getName()))
+				{
+					sql += "\n   USING INDEX ";
+					sql +=indexDefinition.getObjectExpression(this.metaData.getWbConnection());
+				}
+			}
 		}
 
 		if (!sql.endsWith(";"))
@@ -422,8 +432,6 @@ public class JdbcIndexReader
 		String nativeSource = getNativeIndexSource(table, indexDefinition);
 		if (nativeSource != null) return nativeSource;
 
-		StringBuilder idx = new StringBuilder(100);
-
 		String uniqueConstraint = null;
 		if (indexDefinition.isUniqueConstraint())
 		{
@@ -433,7 +441,18 @@ public class JdbcIndexReader
 				return uniqueConstraint;
 			}
 		}
+		StringBuilder idx = processCreateIndexTemplate(table, indexDefinition);
+		if (uniqueConstraint != null)
+		{
+			idx.append('\n');
+			idx.append(uniqueConstraint);
+		}
+		return idx;
+	}
 
+	protected StringBuilder processCreateIndexTemplate(TableIdentifier table, IndexDefinition indexDefinition)
+	{
+		StringBuilder idx = new StringBuilder(100);
 		String template = this.metaData.getDbSettings().getCreateIndexSQL();
 		String type = indexDefinition.getIndexType();
 		type = getSQLKeywordForType(type);
@@ -492,11 +511,6 @@ public class JdbcIndexReader
 		}
 		idx.append(";\n");
 
-		if (uniqueConstraint != null)
-		{
-			idx.insert(0, '\n');
-			idx.append(uniqueConstraint);
-		}
 		return idx;
 	}
 
