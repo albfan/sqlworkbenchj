@@ -282,6 +282,7 @@ keyword=(
 "JOIN"|
 "KEY"|
 "LANGUAGE"|
+"LATERAL"|
 "LAST"|
 "LEFT"|
 "LENGTH"|
