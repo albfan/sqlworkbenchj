@@ -73,6 +73,8 @@ public class BookmarkAnnotation
 		SQLLexer lexer = new SQLLexer(script);
 		SQLToken token = lexer.getNextToken(true, false);
 
+		ProcedureBookmarks parser = new ProcedureBookmarks(tabId);
+
 		while (token != null)
 		{
 			if (token.isComment())
@@ -84,8 +86,10 @@ public class BookmarkAnnotation
 					bookmarks.add(bookmark);
 				}
 			}
+			parser.processToken(token);
 			token = lexer.getNextToken(true, false);
 		}
+		bookmarks.addAll(parser.getBookmarks());
 		return bookmarks;
 	}
 
