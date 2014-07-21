@@ -276,10 +276,11 @@ public class OracleIndexReader
 		return index;
 	}
 
-	public CharSequence getExtendedIndexSource(TableIdentifier table, IndexDefinition definition, String indent)
+	@Override
+	protected StringBuilder processCreateIndexTemplate(TableIdentifier table, IndexDefinition indexDefinition)
 	{
-		CharSequence baseSource = super.getIndexSource(table, definition);
-		CharSequence partitionSource = getPartitionDefinition(definition, indent);
+		StringBuilder baseSource = super.processCreateIndexTemplate(table, indexDefinition);
+		CharSequence partitionSource = getPartitionDefinition(indexDefinition, "   ");
 		if (partitionSource == null) return baseSource;
 		StringBuilder sql = new StringBuilder(baseSource.length() + partitionSource.length() + 5);
 		sql.append(SqlUtil.trimSemicolon(baseSource.toString()));
@@ -305,10 +306,10 @@ public class OracleIndexReader
 			catch (SQLException e)
 			{
 				LogMgr.logWarning("OracleIndexReader.getIndexSource()", "Could not retrieve source using dbms_meta", e);
-				return getExtendedIndexSource(table, definition, "");
+				return super.getIndexSource(table, definition);
 			}
 		}
-		return getExtendedIndexSource(table, definition, "");
+		return super.getIndexSource(table, definition);
 	}
 
 	private String getSourceFromDBMSMeta(IndexDefinition definition)

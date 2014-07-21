@@ -205,7 +205,9 @@ public abstract class AbstractOraclePartition
 		}
 		if (OracleUtils.shouldAppendTablespace(tableSpace, defaultUserTablespace, objectOwner, currentUser))
 		{
-			result.append("\nTABLESPACE ");
+			result.append('\n');
+			result.append(indent);
+			result.append("TABLESPACE ");
 			result.append(tableSpace);
 		}
 		return result.toString();
