@@ -75,6 +75,7 @@ public class GuiSettings
 	public static final String PROPERTY_BOOKMARKS_USE_WBRESULT = "workbench.bookmarks.use.wbresult";
 	public static final String PROPERTY_BOOKMARKS_PARSE_PROCS = "workbench.bookmarks.parse.procs";
 	public static final String PROPERTY_BOOKMARKS_MAX_COL_WIDTH = "workbench.bookmarks.list.max_col_width";
+	public static final String PROPERTY_BOOKMARKS_PKG_DEF_CHAR = "workbench.bookmarks.package_spec.character";
 
 	public static final Set<String> WINDOW_TITLE_PROPS = CollectionUtil.treeSet(
 		PROP_TITLE_APP_AT_END, PROP_TITLE_SHOW_WKSP, PROP_TITLE_SHOW_URL, PROP_TITLE_SHOW_PROF_GROUP,
@@ -114,6 +115,14 @@ public class GuiSettings
 	public static void setParseProceduresForBookmarks(boolean flag)
 	{
 		Settings.getInstance().setProperty(PROPERTY_BOOKMARKS_PARSE_PROCS, flag);
+	}
+
+	/**
+	 * Return the prefix that should be shown for bookmarks inside Oracle's package specification.
+	 */
+	public static String getBookmarksPkgSpecPrefix()
+	{
+		return Settings.getInstance().getProperty(PROPERTY_BOOKMARKS_PKG_DEF_CHAR, "$ ");
 	}
 
 	public static boolean updateAllBookmarksOnOpen()

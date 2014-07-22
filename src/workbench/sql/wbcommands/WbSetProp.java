@@ -38,6 +38,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -144,7 +145,7 @@ public class WbSetProp
 				}
 				else
 				{
-					Settings.getInstance().setTemporaryProperty(prop, value);
+					Settings.getInstance().setTemporaryProperty(prop, StringUtil.trimQuotes(value));
 					result.addMessage(prop  + " set to "  + value);
 				}
 			}

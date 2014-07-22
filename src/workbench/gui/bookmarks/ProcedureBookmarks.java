@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import workbench.resource.GuiSettings;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
@@ -206,7 +207,7 @@ public class ProcedureBookmarks
 			}
 			if (globalState == GlobalState.packageSpec)
 			{
-				name = "(S) " + name;
+				name = GuiSettings.getBookmarksPkgSpecPrefix() + name;
 			}
 			NamedScriptLocation bookmark = new NamedScriptLocation(name, currentStartToken.getCharBegin(), id);
 			this.procedures.add(bookmark);
