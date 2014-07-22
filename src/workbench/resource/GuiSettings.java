@@ -74,6 +74,7 @@ public class GuiSettings
 	public static final String PROPERTY_BOOKMARKS_UPDATE_ON_OPEN = "workbench.bookmarks.update.ondisplay";
 	public static final String PROPERTY_BOOKMARKS_USE_WBRESULT = "workbench.bookmarks.use.wbresult";
 	public static final String PROPERTY_BOOKMARKS_PARSE_PROCS = "workbench.bookmarks.parse.procs";
+	public static final String PROPERTY_BOOKMARKS_PROCS_INCL_PNAME = "workbench.bookmarks.procs.parm_name";
 	public static final String PROPERTY_BOOKMARKS_MAX_COL_WIDTH = "workbench.bookmarks.list.max_col_width";
 	public static final String PROPERTY_BOOKMARKS_PKG_DEF_CHAR = "workbench.bookmarks.package_spec.character";
 
@@ -107,6 +108,11 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROPERTY_BOOKMARKS_USE_WBRESULT, flag);
 	}
 
+	public static boolean getProcBookmarksIncludeParmName()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_BOOKMARKS_PROCS_INCL_PNAME, false);
+	}
+
 	public static boolean getParseProceduresForBookmarks()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_BOOKMARKS_PARSE_PROCS, true);
@@ -122,7 +128,7 @@ public class GuiSettings
 	 */
 	public static String getBookmarksPkgSpecPrefix()
 	{
-		return Settings.getInstance().getProperty(PROPERTY_BOOKMARKS_PKG_DEF_CHAR, "$ ");
+		return Settings.getInstance().getProperty(PROPERTY_BOOKMARKS_PKG_DEF_CHAR, "$");
 	}
 
 	public static boolean updateAllBookmarksOnOpen()

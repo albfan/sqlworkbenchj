@@ -131,22 +131,19 @@ public class WbSetProp
 			if (pair.length == 2)
 			{
 				String prop	= getPropertyName(pair[0]);
-				String value = pair[1];
-				if ("\"\"".equals(value.trim()) || "''".equals(value.trim()))
-				{
-					value = "";
-				}
+				String value = StringUtil.trimQuotes(pair[1]);
+
 				if (isConfig && prop.startsWith("workbench"))
 				{
 					Settings.getInstance().setProperty(prop, value);
-					result.addMessage(prop  + " permanently set to "  + value);
+					result.addMessage(prop  + " permanently set to \""  + value + "\"");
 					LogMgr.logInfo("WbSetConfig.execute()", "Changed configuration property: " + prop + "=" + value);
 					Settings.getInstance().setCreatBackupOnSave(true);
 				}
 				else
 				{
-					Settings.getInstance().setTemporaryProperty(prop, StringUtil.trimQuotes(value));
-					result.addMessage(prop  + " set to "  + value);
+					Settings.getInstance().setTemporaryProperty(prop, value);
+					result.addMessage(prop  + " set to \""  + value + "\"");
 				}
 			}
 			else if (pair.length == 1)

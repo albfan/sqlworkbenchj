@@ -179,13 +179,21 @@ public class ProcedureBookmarks
 					}
 					else if (parmState == ParameterState.none || parmState == ParameterState.dataType)
 					{
-						if (parameterList.length() > 0) parameterList += ",";
+						if (parameterList.length() > 0)
+						{
+							parameterList += GuiSettings.getProcBookmarksIncludeParmName() ? " " : ",";
+						}
 						parameterList += token.getText();
 						parmState = ParameterState.none;
 					}
 					else if (parmState == ParameterState.name)
 					{
 						parmState = ParameterState.dataType;
+						if (GuiSettings.getProcBookmarksIncludeParmName())
+						{
+							if (parameterList.length() > 0) parameterList += ", ";
+							parameterList += token.getText();
+						}
 					}
 				}
 				break;
@@ -207,7 +215,7 @@ public class ProcedureBookmarks
 			}
 			if (globalState == GlobalState.packageSpec)
 			{
-				name = GuiSettings.getBookmarksPkgSpecPrefix() + name;
+				name = GuiSettings.getBookmarksPkgSpecPrefix() + " " + name;
 			}
 			NamedScriptLocation bookmark = new NamedScriptLocation(name, currentStartToken.getCharBegin(), id);
 			this.procedures.add(bookmark);
