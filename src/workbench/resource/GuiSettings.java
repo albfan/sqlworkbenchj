@@ -74,6 +74,7 @@ public class GuiSettings
 	public static final String PROPERTY_BOOKMARKS_UPDATE_ON_OPEN = "workbench.bookmarks.update.ondisplay";
 	public static final String PROPERTY_BOOKMARKS_USE_WBRESULT = "workbench.bookmarks.use.wbresult";
 	public static final String PROPERTY_BOOKMARKS_PARSE_PROCS = "workbench.bookmarks.parse.procs";
+	public static final String PROPERTY_BOOKMARKS_MAX_COL_WIDTH = "workbench.bookmarks.list.max_col_width";
 
 	public static final Set<String> WINDOW_TITLE_PROPS = CollectionUtil.treeSet(
 		PROP_TITLE_APP_AT_END, PROP_TITLE_SHOW_WKSP, PROP_TITLE_SHOW_URL, PROP_TITLE_SHOW_PROF_GROUP,
@@ -95,11 +96,6 @@ public class GuiSettings
 
 	public static final String PROP_COPY_TEXT_DISPLAY_DLG = "workbench.gui.copy.text.displayoptions";
 
-	public static int getMaxExpansionPause()
-	{
-		return Settings.getInstance().getIntProperty(PROPERTY_EXPAND_MAXDURATION, 350);
-	}
-
 	public static boolean getUseResultTagForBookmarks()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_BOOKMARKS_USE_WBRESULT, false);
@@ -120,11 +116,50 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROPERTY_BOOKMARKS_PARSE_PROCS, flag);
 	}
 
-	public static boolean updateAllBookmarksOnSelect()
+	public static boolean updateAllBookmarksOnOpen()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_BOOKMARKS_UPDATE_ON_OPEN, false);
 	}
 
+	/**
+	 * Return the maximum width in characters for the columns in the bookmark selector window.
+	 *
+	 * @return the max. number of characters, 0 (or lower) means unlimited.
+	 * @see #setBookmarksMaxColumnWidth(int)
+	 */
+	public static int getBookmarksMaxColumnWidth()
+	{
+		return Settings.getInstance().getIntProperty(PROPERTY_BOOKMARKS_MAX_COL_WIDTH, 60);
+	}
+
+	/**
+	 * Define the maximum width in characters for the columns in the bookmark selector window.
+	 *
+	 * @param numChars the maximum width in characters
+	 * @see #getBookmarksMaxColumnWidth()
+	 */
+	public static void setBookmarksMaxColumnWidth(int numChars)
+	{
+		Settings.getInstance().setProperty(PROPERTY_BOOKMARKS_MAX_COL_WIDTH, numChars);
+	}
+
+	/**
+	 * Return the number of milliseconds before the expansion key is no longer "hot".
+	 *
+	 * @return the max. delay (in ms) between typing a macro name and typing the expansing key
+	 * @see #getExpansionKey()
+	 */
+	public static int getMaxExpansionPause()
+	{
+		return Settings.getInstance().getIntProperty(PROPERTY_EXPAND_MAXDURATION, 350);
+	}
+
+	/**
+	 * Return the keystroke that should trigger expanding a macro.
+	 *
+	 * The default is the space key.
+	 * @see #getMaxExpansionPause()
+	 */
 	public static KeyStroke getExpansionKey()
 	{
 		String value = Settings.getInstance().getProperty(PROPERTY_EXPAND_KEYSTROKE, "32,0");

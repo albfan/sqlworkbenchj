@@ -500,7 +500,9 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		else
 		{
 			ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(bookmarks);
-			optimizer.optimizeAllColWidth(true);
+			int maxChars = GuiSettings.getBookmarksMaxColumnWidth();
+			int maxWidth = WbSwingUtilities.calculateCharWidth(bookmarks, maxChars);
+			optimizer.optimizeAllColWidth(10, maxWidth, true);
 		}
 	}
 
@@ -745,7 +747,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			return;
 		}
 
-		if (GuiSettings.updateAllBookmarksOnSelect())
+		if (GuiSettings.updateAllBookmarksOnOpen())
 		{
 			BookmarkManager.getInstance().updateInBackground(window);
 		}

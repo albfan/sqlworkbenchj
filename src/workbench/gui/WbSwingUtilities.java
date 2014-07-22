@@ -1196,15 +1196,29 @@ public class WbSwingUtilities
 
 	public static void setMinimumSize(JComponent component, int numChars)
 	{
+		int width = calculateCharWidth(component, numChars);
+		if (width > 0)
+		{
+			Dimension current = component.getPreferredSize();
+			Dimension d = new Dimension(width, current.height);
+			component.setPreferredSize(d);
+		}
+	}
+
+	public static int calculateCharWidth(JComponent component, int numChars)
+	{
+		if (numChars < 0) return -1;
+		if (component == null) return -1;
+		
+		int width = -1;
 		Font font = component.getFont();
 		if (font != null)
 		{
 			FontMetrics fm = component.getFontMetrics(font);
-			int width = fm.stringWidth("M");
-			Dimension current = component.getPreferredSize();
-			Dimension d = new Dimension(width * numChars, current.height);
-			component.setPreferredSize(d);
+			int charWidth = fm.stringWidth("M");
+			width = charWidth * numChars;
 		}
+		return width;
 	}
 
 	public static String choiceToString(int choice)
