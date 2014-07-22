@@ -22,8 +22,8 @@ package workbench.gui.bookmarks;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
+import workbench.WbTestCase;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -33,20 +33,12 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class ProcedureBookmarksTest
+	extends WbTestCase
 {
 
 	public ProcedureBookmarksTest()
 	{
-	}
-
-	@Before
-	public void setUp()
-	{
-	}
-
-	@After
-	public void tearDown()
-	{
+		super("ProcedureBookmarksTest");
 	}
 
 	@Test
@@ -54,7 +46,7 @@ public class ProcedureBookmarksTest
 	{
 		String script =
 			"-- this is a test proc\n" +
-			"create or replace function foo(p_foo integer) return boolean as begin return 42; end;\n" +
+			"create or replace function foo(p_foo integer, p_bar varchar(20)) return boolean as begin return 42; end;\n" +
 			"\n" +
 			"-- another proc\n" +
 			"drop procedure bar;\n" +
@@ -65,5 +57,4 @@ public class ProcedureBookmarksTest
 		System.out.println(bookmarks);
 		assertEquals(2, bookmarks.size());
 	}
-
 }

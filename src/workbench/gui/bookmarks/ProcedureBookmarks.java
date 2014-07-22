@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.resource.GuiSettings;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
@@ -47,6 +48,7 @@ public class ProcedureBookmarks
 	private enum ParseState
 	{
 		none,
+		skip,
 		createKeyword,
 		procType,
 		procName,
@@ -63,6 +65,7 @@ public class ProcedureBookmarks
 	private Set<String> modeKeywords = CollectionUtil.caseInsensitiveSet("OUT", "IN", "INOUT");
 	private Set<String> typeKeywords = CollectionUtil.caseInsensitiveSet("PROCEDURE", "FUNCTION");
 	private Set<String> createKeywords = CollectionUtil.caseInsensitiveSet("CREATE", "ALTER", "CREATE OR REPLACE");
+	private Set<String> noParse = CollectionUtil.caseInsensitiveSet("DROP");
 	private Set<String> parameterStart = CollectionUtil.caseInsensitiveSet("(");
 	private Set<String> parameterEnd = CollectionUtil.caseInsensitiveSet(")", "DEFAULT", "COLLATE", "NOT NULL");
 	private Set<String> createTerminal = CollectionUtil.caseInsensitiveSet("AS", "RETURN", "IS", "BEGIN", ";", "DECLARE", "RETURNS");
@@ -76,8 +79,8 @@ public class ProcedureBookmarks
 
 	private SQLToken currentStartToken;
 	private String currentIdentifier;
-	private String type;
 	private String parameterList;
+	private int bracketCount;
 
 	public ProcedureBookmarks()
 	{
@@ -109,15 +112,27 @@ public class ProcedureBookmarks
 				else if (typeKeywords.contains(content))
 				{
 					parseState = ParseState.procName;
-					type = token.getText();
 					currentStartToken = token;
 				}
+				else if (noParse.contains(content))
+				{
+					parseState = ParseState.skip;
+					currentStartToken = null;
+					currentIdentifier = "";
+				}
 				break;
+
+			case skip:
+				if (";".equals(content))
+				{
+					parseState = ParseState.none;
+				}
+				break;
+
 			case createKeyword:
 				if (typeKeywords.contains(content))
 				{
 					parseState = ParseState.procType;
-					type = token.getText();
 					currentStartToken = token;
 				}
 				else if (content.equals("PACKAGE BODY"))
@@ -136,6 +151,7 @@ public class ProcedureBookmarks
 					currentStartToken = null;
 				}
 				break;
+
 			case procType:
 				if (token.isIdentifier())
 				{
@@ -143,6 +159,7 @@ public class ProcedureBookmarks
 					currentIdentifier = content;
 				}
 				break;
+
 			case procName:
 				if (parameterStart.contains(content))
 				{
@@ -160,8 +177,15 @@ public class ProcedureBookmarks
 					currentIdentifier += content;
 				}
 				break;
+
 			case parameterList:
-				if (parameterEnd.contains(content) || createTerminal.contains(content))
+
+				if ("(".equals(content))
+				{
+					bracketCount++;
+				}
+
+				if ((parameterEnd.contains(content) && bracketCount == 0) || createTerminal.contains(content))
 				{
 					parseState = ParseState.none;
 					parmState = ParameterState.none;
@@ -169,7 +193,7 @@ public class ProcedureBookmarks
 				}
 				else
 				{
-					if (",".equals(content))
+					if (",".equals(content) && bracketCount == 0)
 					{
 						parmState = ParameterState.name;
 					}
@@ -179,12 +203,11 @@ public class ProcedureBookmarks
 					}
 					else if (parmState == ParameterState.none || parmState == ParameterState.dataType)
 					{
-						if (parameterList.length() > 0)
+						if (parameterList.length() > 0 && bracketCount == 0)
 						{
 							parameterList += GuiSettings.getProcBookmarksIncludeParmName() ? " " : ",";
 						}
 						parameterList += token.getText();
-						parmState = ParameterState.none;
 					}
 					else if (parmState == ParameterState.name)
 					{
@@ -194,6 +217,11 @@ public class ProcedureBookmarks
 							if (parameterList.length() > 0) parameterList += ", ";
 							parameterList += token.getText();
 						}
+					}
+					if (")".equals(content) && bracketCount > 0)
+					{
+						bracketCount--;
+						parmState = ParameterState.none;
 					}
 				}
 				break;
@@ -220,8 +248,8 @@ public class ProcedureBookmarks
 			NamedScriptLocation bookmark = new NamedScriptLocation(name, currentStartToken.getCharBegin(), id);
 			this.procedures.add(bookmark);
 			parameterList = null;
-			type = null;
 			currentIdentifier = "";
+			bracketCount = 0;
 		}
 	}
 
@@ -231,9 +259,9 @@ public class ProcedureBookmarks
 		parseState = ParseState.none;
 		globalState = GlobalState.none;
 		parmState = ParameterState.none;
-		type = null;
 		procedures.clear();
 		currentIdentifier = "";
+		bracketCount = 0;
 	}
 
 	public List<NamedScriptLocation> getBookmarks()
