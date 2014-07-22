@@ -52,18 +52,28 @@ public class ProcedureBookmarks
 		parameterList;
 	}
 
+	private enum ParameterState
+	{
+		none,
+		name,
+		dataType;
+	}
+
+	private Set<String> modeKeywords = CollectionUtil.caseInsensitiveSet("OUT", "IN", "INOUT");
 	private Set<String> typeKeywords = CollectionUtil.caseInsensitiveSet("PROCEDURE", "FUNCTION");
 	private Set<String> createKeywords = CollectionUtil.caseInsensitiveSet("CREATE", "ALTER", "CREATE OR REPLACE");
 	private Set<String> parameterStart = CollectionUtil.caseInsensitiveSet("(");
-	private Set<String> parameterEnd = CollectionUtil.caseInsensitiveSet(")");
-	private Set<String> createTerminal = CollectionUtil.caseInsensitiveSet("AS", "RETURN", "IS", "BEGIN", ";");
+	private Set<String> parameterEnd = CollectionUtil.caseInsensitiveSet(")", "DEFAULT", "COLLATE", "NOT NULL");
+	private Set<String> createTerminal = CollectionUtil.caseInsensitiveSet("AS", "RETURN", "IS", "BEGIN", ";", "DECLARE", "RETURNS");
 	private List<NamedScriptLocation> procedures = new ArrayList<NamedScriptLocation>();
 
 	private final String id;
 
 	private GlobalState globalState;
 	private ParseState parseState;
-	private SQLToken createToken;
+	private ParameterState parmState;
+
+	private SQLToken currentStartToken;
 	private String currentIdentifier;
 	private String type;
 	private String parameterList;
@@ -93,22 +103,36 @@ public class ProcedureBookmarks
 				if (createKeywords.contains(content))
 				{
 					parseState = ParseState.createKeyword;
-					createToken = token;
+					currentStartToken = token;
+				}
+				else if (typeKeywords.contains(content))
+				{
+					parseState = ParseState.procName;
+					type = token.getText();
+					currentStartToken = token;
 				}
 				break;
 			case createKeyword:
 				if (typeKeywords.contains(content))
 				{
 					parseState = ParseState.procType;
-					type = content;
+					type = token.getText();
+					currentStartToken = token;
 				}
 				else if (content.equals("PACKAGE BODY"))
 				{
-					globalState = GlobalState.packageSpec;
+					globalState = GlobalState.packageBody;
+					currentStartToken = null;
 				}
 				else if (content.equals("PACKAGE"))
 				{
-					globalState = GlobalState.packageBody;
+					globalState = GlobalState.packageSpec;
+					currentStartToken = null;
+				}
+				else if (createTerminal.contains(content))
+				{
+					parseState = ParseState.none;
+					currentStartToken = null;
 				}
 				break;
 			case procType:
@@ -122,6 +146,7 @@ public class ProcedureBookmarks
 				if (parameterStart.contains(content))
 				{
 					parseState = ParseState.parameterList;
+					parmState = ParameterState.name;
 					parameterList = "";
 				}
 				else if (createTerminal.contains(content))
@@ -138,12 +163,29 @@ public class ProcedureBookmarks
 				if (parameterEnd.contains(content) || createTerminal.contains(content))
 				{
 					parseState = ParseState.none;
+					parmState = ParameterState.none;
 					addCurrentProc();
 				}
 				else
 				{
-					if (parameterList.length() > 0) parameterList += " ";
-					parameterList += token.getText();
+					if (",".equals(content))
+					{
+						parmState = ParameterState.name;
+					}
+					else if (modeKeywords.contains(content))
+					{
+						parmState = ParameterState.dataType;
+					}
+					else if (parmState == ParameterState.none || parmState == ParameterState.dataType)
+					{
+						if (parameterList.length() > 0) parameterList += ",";
+						parameterList += token.getText();
+						parmState = ParameterState.none;
+					}
+					else if (parmState == ParameterState.name)
+					{
+						parmState = ParameterState.dataType;
+					}
 				}
 				break;
 		}
@@ -151,26 +193,26 @@ public class ProcedureBookmarks
 
 	private void addCurrentProc()
 	{
-		if (createToken != null && this.currentIdentifier != null)
+		if (currentStartToken != null && this.currentIdentifier != null)
 		{
 			String name = currentIdentifier;
-			if (StringUtil.isNonEmpty(type))
-			{
-				name = type + " " + name;
-			}
+//			if (StringUtil.isNonEmpty(type))
+//			{
+//				name = type + " " + name;
+//			}
 			if (StringUtil.isNonEmpty(parameterList))
 			{
-				name += " (" + parameterList + ")";
+				name += "(" + parameterList + ")";
 			}
 			if (globalState == GlobalState.packageSpec)
 			{
-				name = "Spec: " + name;
+				name = "(S) " + name;
 			}
-			NamedScriptLocation bookmark = new NamedScriptLocation(name, createToken.getCharBegin(), id);
+			NamedScriptLocation bookmark = new NamedScriptLocation(name, currentStartToken.getCharBegin(), id);
 			this.procedures.add(bookmark);
 			parameterList = null;
 			type = null;
-			currentIdentifier = null;
+			currentIdentifier = "";
 		}
 	}
 
@@ -179,9 +221,10 @@ public class ProcedureBookmarks
 	{
 		parseState = ParseState.none;
 		globalState = GlobalState.none;
+		parmState = ParameterState.none;
 		type = null;
 		procedures.clear();
-		currentIdentifier = null;
+		currentIdentifier = "";
 	}
 
 	public List<NamedScriptLocation> getBookmarks()

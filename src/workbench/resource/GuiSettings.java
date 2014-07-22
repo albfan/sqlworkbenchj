@@ -73,6 +73,7 @@ public class GuiSettings
 
 	public static final String PROPERTY_BOOKMARKS_UPDATE_ON_OPEN = "workbench.bookmarks.update.ondisplay";
 	public static final String PROPERTY_BOOKMARKS_USE_WBRESULT = "workbench.bookmarks.use.wbresult";
+	public static final String PROPERTY_BOOKMARKS_PARSE_PROCS = "workbench.bookmarks.parse.procs";
 
 	public static final Set<String> WINDOW_TITLE_PROPS = CollectionUtil.treeSet(
 		PROP_TITLE_APP_AT_END, PROP_TITLE_SHOW_WKSP, PROP_TITLE_SHOW_URL, PROP_TITLE_SHOW_PROF_GROUP,
@@ -99,7 +100,6 @@ public class GuiSettings
 		return Settings.getInstance().getIntProperty(PROPERTY_EXPAND_MAXDURATION, 350);
 	}
 
-
 	public static boolean getUseResultTagForBookmarks()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_BOOKMARKS_USE_WBRESULT, false);
@@ -108,6 +108,16 @@ public class GuiSettings
 	public static void setUseResultTagForBookmarks(boolean flag)
 	{
 		Settings.getInstance().setProperty(PROPERTY_BOOKMARKS_USE_WBRESULT, flag);
+	}
+
+	public static boolean getParseProceduresForBookmarks()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_BOOKMARKS_PARSE_PROCS, true);
+	}
+
+	public static void setParseProceduresForBookmarks(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROPERTY_BOOKMARKS_PARSE_PROCS, flag);
 	}
 
 	public static boolean updateAllBookmarksOnSelect()

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
 
 import workbench.sql.AnnotationReader;
 import workbench.sql.ResultNameParser;
@@ -50,11 +51,11 @@ public class BookmarkAnnotation
 		setUseResultTag(GuiSettings.getUseResultTagForBookmarks());
 	}
 
-	public void setUseResultTag(boolean flag)
+	public void setUseResultTag(boolean useResultTag)
 	{
 		validTags.clear();
 		validTags.add(ANNOTATION.toLowerCase());
-		if (flag)
+		if (useResultTag)
 		{
 			validTags.add("@" + ResultNameParser.ANNOTATION.toLowerCase());
 			validTags.add("@" + UseTabAnnotation.ANNOTATION.toLowerCase());
@@ -73,7 +74,11 @@ public class BookmarkAnnotation
 		SQLLexer lexer = new SQLLexer(script);
 		SQLToken token = lexer.getNextToken(true, false);
 
-		ProcedureBookmarks parser = new ProcedureBookmarks(tabId);
+		ProcedureBookmarks parser = null;
+		if (GuiSettings.getParseProceduresForBookmarks())
+		{
+			parser = new ProcedureBookmarks(tabId);
+		}
 
 		while (token != null)
 		{
@@ -86,7 +91,10 @@ public class BookmarkAnnotation
 					bookmarks.add(bookmark);
 				}
 			}
-			parser.processToken(token);
+			if (parser != null)
+			{
+				parser.processToken(token);
+			}
 			token = lexer.getNextToken(true, false);
 		}
 		bookmarks.addAll(parser.getBookmarks());
