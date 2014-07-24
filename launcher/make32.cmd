@@ -3,6 +3,7 @@
 pushd "%~dp0"
 
 echo main.class=workbench.WbStarter>t.ini
+echo vm.heapsize.preferred=1024>>t.ini
 copy /b t.ini+workbench.ini sqlworkbench.ini
 
 rcedit /C SQLWorkbench.exe
