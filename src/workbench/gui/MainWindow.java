@@ -2821,7 +2821,7 @@ public class MainWindow
 		if (Settings.getInstance().getCreateWorkspaceBackup())
 		{
 			int maxVersions = Settings.getInstance().getMaxWorkspaceBackup();
-			String dir = Settings.getInstance().getWorkspaceBackupDir();
+			String dir = Settings.getInstance().getBackupDir();
 			String sep = Settings.getInstance().getFileVersionDelimiter();
 			FileVersioner version = new FileVersioner(maxVersions, dir, sep);
 			try

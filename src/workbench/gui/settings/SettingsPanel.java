@@ -87,6 +87,7 @@ public class SettingsPanel
 		pages.add(new OptionPanelPage("FontOptionsPanel", "LblSettingsFonts"));
 		pages.add(new OptionPanelPage("CompletionOptionsPanel", "LblCompletionOptions"));
 		pages.add(new OptionPanelPage("WorkspaceOptions", "LblSettingsWorkspace"));
+		pages.add(new OptionPanelPage("BackupOptions", "LblBackups"));
 		pages.add(new OptionPanelPage("DataDisplayOptions", "LblSettingsDataDisplay"));
 		pages.add(new OptionPanelPage("DataFormattingOptionsPanel", "LblSettingsDataFormat"));
 		pages.add(new OptionPanelPage("DataColorOptions", "LblDataColors"));

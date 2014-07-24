@@ -2242,12 +2242,12 @@ public class Settings
 		return getBoolProperty("workbench.workspace.createbackup", true);
 	}
 
-	public void setWorkspaceBackupDir(String dir)
+	public void setBackupDir(String dir)
 	{
 		setProperty("workbench.workspace.backup.dir", dir);
 	}
 
-	public String getWorkspaceBackupDir()
+	public String getBackupDir()
 	{
 		return getProperty("workbench.workspace.backup.dir", null);
 	}
@@ -2257,9 +2257,29 @@ public class Settings
 		return getBoolProperty("workbench.profiles.createbackup", false);
 	}
 
+	public void setCreateProfileBackup(boolean flag)
+	{
+		setProperty("workbench.profiles.createbackup", flag);
+	}
+
 	public boolean getCreateDriverBackup()
 	{
 		return getBoolProperty("workbench.drivers.createbackup", getCreateProfileBackup());
+	}
+
+	public void setCreateDriverBackup(boolean flag)
+	{
+		setProperty("workbench.drivers.createbackup", flag);
+	}
+
+	public boolean getCreateSettingsBackup()
+	{
+		return getBoolProperty("workbench.settings.createbackup", getCreateProfileBackup());
+	}
+
+	public void setCreateSettingsBackup(boolean flag)
+	{
+		setProperty("workbench.settings.createbackup", flag);
 	}
 
 	public void setFilesInWorkspaceHandling(ExternalFileHandling handling)
@@ -3507,16 +3527,6 @@ public class Settings
 		return this.configfile;
 	}
 
-	public boolean makeVersionedBackups()
-	{
-		return getBoolProperty("workbench.settings.makebackup", false);
-	}
-
-	public void setMakeBackups(boolean flag)
-	{
-		setProperty("workbench.settings.makebackup", flag);
-	}
-
 	/**
 	 * Save all properties to the configuration file.
 	 *
@@ -3536,7 +3546,7 @@ public class Settings
 
 		ShortcutManager.getInstance().saveSettings();
 
-		boolean makeVersionedBackups = makeVersionedBackups();
+		boolean makeVersionedBackups = getCreateSettingsBackup();
 		if (renameExistingFile || (createBackup && !makeVersionedBackups))
 		{
 			String bck = this.configfile.makeBackup();
@@ -3550,7 +3560,7 @@ public class Settings
 			// If that happened FileVersioning might not work properly (because the JVM acts strange once an OOME occurred)
 			// So both things are done.
 			int maxVersions = getMaxWorkspaceBackup();
-			String dir = getWorkspaceBackupDir();
+			String dir = getBackupDir();
 			String sep = getFileVersionDelimiter();
 			FileVersioner version = new FileVersioner(maxVersions, dir, sep);
 			try
