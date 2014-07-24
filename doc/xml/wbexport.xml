@@ -1483,8 +1483,14 @@
 
       <para>
         This will export each specified table into a text file in the specified directory. The files are named <literal>"table_1.txt"</literal>,
-        <literal>"table_2.txt"</literal> and so on.
+        <literal>"table_2.txt"</literal> and so on. To export all tables of a schema, the <literal>-sourceTable</literal> parameter supports wildcards:
       </para>
+
+<programlisting>WbExport -type=text
+         -outputDir='c:/data'
+         -delimiter=';'
+         -header=true
+         -sourcetable=my_schema.*;</programlisting>
 
       <para>
         Limiting the export data when using a table based export, can be done using the <literal>-tableWhere</literal> argument.
