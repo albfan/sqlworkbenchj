@@ -25,6 +25,7 @@ package workbench.db.oracle;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -36,6 +37,7 @@ import workbench.db.WbConnection;
 
 import workbench.sql.ErrorDescriptor;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -50,6 +52,9 @@ public class OracleErrorInformationReader
 	implements ErrorInformationReader
 {
 	private WbConnection connection;
+	private Set<String> validTypes = CollectionUtil.caseInsensitiveSet(
+		"VIEW", "PROCEDURE", "FUNCTION", "PACKAGE", "PACKAGE BODY", "TRIGGER", "TYPE",
+		"TYPE BODY", "LIBRARY", "JAVA SOURCE", "JAVA CLASS", "DIMENSION");
 
 	public OracleErrorInformationReader(WbConnection conn)
 	{
@@ -67,6 +72,11 @@ public class OracleErrorInformationReader
 	public ErrorDescriptor getErrorInfo(String schema, String objectName, String objectType, boolean showObjectHeaders)
 	{
 		if (StringUtil.isEmptyString(objectName))
+		{
+			return null;
+		}
+
+		if (!validTypes.contains(objectType))
 		{
 			return null;
 		}
@@ -202,7 +212,7 @@ public class OracleErrorInformationReader
 		{
 			result.setErrorMessage(msg.toString());
 		}
-		
+
 		return result;
 	}
 

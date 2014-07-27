@@ -42,7 +42,7 @@ import workbench.util.StringUtil;
 public class OracleErrorPositionReader
 	extends RegexErrorPositionReader
 {
-	private final Set<String> verbs = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "WITH");
+	private final Set<String> verbs = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "WITH", "CREATE", "DROP");
 
 	public OracleErrorPositionReader()
 	{

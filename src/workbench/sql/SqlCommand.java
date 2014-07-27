@@ -976,7 +976,7 @@ public class SqlCommand
 			}
 			else
 			{
-				result.addMessage(ExceptionUtil.getAllExceptions(e));
+				result.addMessage(ExceptionUtil.getDisplay(e));
 				result.setFailure();
 			}
 		}

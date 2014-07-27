@@ -62,6 +62,29 @@ public class OracleErrorPositionReaderTest
 	}
 
 	@Test
+	public void testCreate()
+		throws Exception
+	{
+		WbConnection conn = OracleTestUtil.getOracleConnection();
+		OracleErrorPositionReader reader = new OracleErrorPositionReader();
+		ErrorDescriptor error = reader.getErrorPosition(conn, "create table foo (id integr);", null);
+		assertNotNull(error);
+		assertEquals(28, error.getErrorPosition());
+
+		error = reader.getErrorPosition(conn, "drop tablex foo;", null);
+		assertNotNull(error);
+		assertTrue(error.getErrorPosition() > 0);
+
+		error = reader.getErrorPosition(conn, "drop table foo cascade;", null);
+		assertNotNull(error);
+		assertTrue(error.getErrorPosition() > 0);
+
+		error = reader.getErrorPosition(conn, "drop function foo();", null);
+		assertNotNull(error);
+		assertTrue(error.getErrorPosition() > 0);
+	}
+
+	@Test
 	public void testPLSqlBlock()
 		throws Exception
 	{
@@ -89,7 +112,7 @@ public class OracleErrorPositionReaderTest
 			}
 			catch (SQLException ex)
 			{
-				System.out.println("*** " + ex.getMessage());
+//				System.out.println("*** " + ex.getMessage());
 				error = ex;
 			}
 			ErrorDescriptor errorInfo = reader.getErrorPosition(conn, sql, error);

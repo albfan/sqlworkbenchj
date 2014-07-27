@@ -44,7 +44,6 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
-import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -110,6 +109,7 @@ public class DdlCommand
 			currentConnection.setLastDDLObject(info);
 		}
 
+		boolean isDrop = false;
 		try
 		{
 			this.currentStatement = currentConnection.createStatement();
@@ -128,7 +128,7 @@ public class DdlCommand
 				this.ddlSavepoint = currentConnection.setSavepoint();
 			}
 
-			boolean isDrop = isDropCommand(sql);
+			isDrop = isDropCommand(sql);
 			if (isDrop && this.runner.getIgnoreDropErrors())
 			{
 				try
@@ -142,7 +142,7 @@ public class DdlCommand
 					this.currentConnection.rollback(ddlSavepoint);
 					this.ddlSavepoint = null;
 					result.addMessage(ResourceMgr.getString("MsgDropWarning"));
-					result.addMessage(ExceptionUtil.getDisplay(th));
+					addErrorPosition(result, sql, th);
 					result.setSuccess();
 				}
 			}
@@ -180,7 +180,7 @@ public class DdlCommand
 			this.currentConnection.rollback(ddlSavepoint);
 			result.setFailure();
 			addErrorStatementInfo(result, sql);
-			if (!addExtendErrorInfo(currentConnection, sql, info, result))
+			if (isDrop || !addExtendErrorInfo(currentConnection, sql, info, result))
 			{
 				addErrorPosition(result, sql, e);
 			}
