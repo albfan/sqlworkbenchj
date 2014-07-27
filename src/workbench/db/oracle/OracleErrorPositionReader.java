@@ -25,6 +25,7 @@ import java.sql.Types;
 import java.util.Set;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.RegexErrorPositionReader;
 import workbench.db.WbConnection;
@@ -42,11 +43,27 @@ import workbench.util.StringUtil;
 public class OracleErrorPositionReader
 	extends RegexErrorPositionReader
 {
-	private final Set<String> verbs = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "WITH", "CREATE", "DROP");
+	private final Set<String> verbs = CollectionUtil.caseInsensitiveSet("SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "WITH");
 
 	public OracleErrorPositionReader()
 	{
+		this(Settings.getInstance().getBoolProperty("workbench.db.oracle.errorposition.check_create", true), Settings.getInstance().getBoolProperty("workbench.db.oracle.errorposition.check_drop", false));
+	}
+	
+	public OracleErrorPositionReader(boolean checkCreate, boolean checkDrop)
+	{
 		super("(?i)\\s(line|zeile)\\s[0-9]+", "(?i)\\s(column|spalte)\\s[0-9]+");
+
+		if (checkCreate)
+		{
+			verbs.add("CREATE");
+		}
+
+		// don't run dbms_sql.parse() for drop statements, just in case...
+		if (checkDrop)
+		{
+			verbs.add("DROP");
+		}
 	}
 
 
@@ -59,7 +76,10 @@ public class OracleErrorPositionReader
 	 * See: http://docs.oracle.com/cd/E11882_01/appdev.112/e25788/d_sql.htm#i997676
 	 *
 	 * For anonymous PL/SQL blocks Oracle already returns a proper error message including line and column
-	 * in this case, this information is extraced using regular expresions
+	 * in this case, this information is extraced using regular expresions.
+	 *
+	 * CREATE and DROP statements will also be handled. Because as dbms_sql.parse() runs a DDL statement immediately
+	 * <b>this method should never be called with a valid CREATE or DROP statement</b>
 	 *
 	 * @param con  the connection to use
 	 * @param sql  the SQL statement which produced the error (without the ; at the end)

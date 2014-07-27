@@ -66,22 +66,22 @@ public class OracleErrorPositionReaderTest
 		throws Exception
 	{
 		WbConnection conn = OracleTestUtil.getOracleConnection();
-		OracleErrorPositionReader reader = new OracleErrorPositionReader();
-		ErrorDescriptor error = reader.getErrorPosition(conn, "create table foo (id integr);", null);
+		OracleErrorPositionReader reader = new OracleErrorPositionReader(true, true);
+		ErrorDescriptor error = reader.getErrorPosition(conn, "create table foo (id integr)", null);
 		assertNotNull(error);
-		assertEquals(28, error.getErrorPosition());
+		assertEquals(21, error.getErrorPosition());
 
-		error = reader.getErrorPosition(conn, "drop tablex foo;", null);
+		error = reader.getErrorPosition(conn, "drop tablex foo", null);
 		assertNotNull(error);
-		assertTrue(error.getErrorPosition() > 0);
+		assertEquals(5, error.getErrorPosition());
 
-		error = reader.getErrorPosition(conn, "drop table foo cascade;", null);
+		error = reader.getErrorPosition(conn, "drop table foo cascade", null);
 		assertNotNull(error);
-		assertTrue(error.getErrorPosition() > 0);
+		assertEquals(22, error.getErrorPosition());
 
-		error = reader.getErrorPosition(conn, "drop function foo();", null);
+		error = reader.getErrorPosition(conn, "drop function foo()", null);
 		assertNotNull(error);
-		assertTrue(error.getErrorPosition() > 0);
+		assertEquals(17, error.getErrorPosition());
 	}
 
 	@Test
