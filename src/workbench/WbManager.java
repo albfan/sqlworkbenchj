@@ -583,6 +583,10 @@ public final class WbManager
 				LogMgr.logError("WbManager.saveSettings()", "Could not write column order storage", e);
 			}
 		}
+		else
+		{
+			LogMgr.logDebug("WbManager.saveConfigSettings()", "Settings not saved. writeSettings=" + writeSettings + ", runMode=" + runMode);
+		}
 	}
 
 	public void removeShutdownHook()

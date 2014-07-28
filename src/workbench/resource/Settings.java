@@ -3534,10 +3534,18 @@ public class Settings
 	 */
 	public void saveSettings(boolean renameExistingFile)
 	{
-		if (this.props == null) return;
+		if (this.props == null)
+		{
+			LogMgr.logWarning("Settings.saveSettings()", "saveSettings() called but properties are null!");
+			return;
+		}
 
 		// Never save settings in test mode
-		if (isTestMode()) return;
+		if (isTestMode())
+		{
+			LogMgr.logTrace("Settings.saveSettings()", "Test mode active. Settings are not saved.");
+			return;
+		}
 
 		for (SettingsListener l : saveListener)
 		{
@@ -3587,7 +3595,6 @@ public class Settings
 			WbProperties defaults = getDefaultProperties();
 			LogMgr.logDebug("Settings.saveSettings()", "Saving global settings to: " + configfile.getFullPath());
 			this.props.saveToFile(this.configfile, defaults);
-			LogMgr.logDebug("Settings.saveSettings()", "Global settings saved to: " + configfile.getFullPath());
 			fileTime = configfile.lastModified();
 		}
 		catch (Throwable th)
