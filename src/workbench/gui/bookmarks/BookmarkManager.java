@@ -31,8 +31,10 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.MainWindow;
+import workbench.resource.GuiSettings;
 
 import workbench.storage.DataStore;
+import workbench.util.NumberStringCache;
 
 import workbench.util.WbThread;
 
@@ -133,8 +135,13 @@ public class BookmarkManager
 				if (panelBookmarks != null)
 				{
 					updated = new BookmarkGroup(panelBookmarks, panel.getId());
-					// int index = win.getIndexForPanel(panel);
-					updated.setName(panel.getTabTitle());
+					String title = panel.getTabTitle();
+					if (GuiSettings.getShowTabIndex() && title.equals(ResourceMgr.getDefaultTabLabel()))
+					{
+						int index = win.getIndexForPanel(panel);
+						title += " " + NumberStringCache.getNumberString(index + 1);
+					}
+					updated.setName(title);
 					windowBookmarks.put(updated.getGroupId(), updated);
 				}
 			}
