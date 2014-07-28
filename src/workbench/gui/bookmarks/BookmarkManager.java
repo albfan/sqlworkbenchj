@@ -28,14 +28,14 @@ import java.util.Map;
 
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.MainWindow;
-import workbench.resource.GuiSettings;
 
 import workbench.storage.DataStore;
-import workbench.util.NumberStringCache;
 
+import workbench.util.NumberStringCache;
 import workbench.util.WbThread;
 
 /**
@@ -136,7 +136,7 @@ public class BookmarkManager
 				{
 					updated = new BookmarkGroup(panelBookmarks, panel.getId());
 					String title = panel.getTabTitle();
-					if (GuiSettings.getShowTabIndex() && title.equals(ResourceMgr.getDefaultTabLabel()))
+					if (GuiSettings.getShowTabIndex())
 					{
 						int index = win.getIndexForPanel(panel);
 						title += " " + NumberStringCache.getNumberString(index + 1);

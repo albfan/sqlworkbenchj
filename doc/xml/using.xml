@@ -254,7 +254,7 @@ COMMIT;
       </para>
     </caution>
 
-		<para>
+		<para id="append-results">
 			When you run a SQL statement, the current results will be cleared and
 			replaced by the new results. You can turn this off by selecting
 			<menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice>.
@@ -296,62 +296,25 @@ COMMIT;
 			</para>
 		</section>
 
-		<section id="result-names">
+		<section id="using-result-names">
 			<title>Naming result tabs</title>
-			<para>
-				You can change the name of the result tab associated with a statement. To give a result
-				set a name you have to provide a comment before the SQL statement that contains the
-				keyword <literal>@WbResult</literal> followed by a whitespace and then the name that should
-				appear as the result's name. The keywords must be specified in lowercase!
-			</para>
-			<para>
-				The following examples executes two statements. The result for the first will be labelled
-				"List of contacts" and the second will be labelled "List of companies":
-			</para>
-			<programlisting>-- @WbResult List of contacts
-SELECT * FROM person;
-
-/*
- @WbResult List of companies
- this will retrieve all companies from the database
-*/
-SELECT * FROM company;</programlisting>
-			<para>
-				As you can see, you can put the <literal>@wbresult</literal> keyword into a single-line
-				or multi-line comment. The name that is used, will be everything after the keyword
-				until the end of the line.
-			</para>
-			<para>
-				For the second select (with the multi-line comment), the name of the result tab will be
-				<literal>List of companies</literal>, the comment on the second line will not be considered.
-			</para>
-
       <para>
-        You can automatically use the first table name from a <literal>SELECT</literal> statement to be used
-        for the result name in the <link linkend="option-result-name">Data display options</link>.
+        There are two ways to assign a name to the result tab of a query:
+        <itemizedlist>
+          <listitem>
+            <simpara>
+              By specifying the annotation <literal>@WbResult</literal>.
+              For details please see the chapter about <link linkend="annotations">annotations</link>
+            </simpara>
+          </listitem>
+					<listitem>
+            <simpara>
+              You can automatically use the first table name from a <literal>SELECT</literal> statement to be used
+              for the result name in the <link linkend="option-result-name">Data display options</link>.
+            </simpara>
+          </listitem>
+        </itemizedlist>
       </para>
-
-      <simplesect id="result-tab-reuse">
-        <title>Re-using an existing named result tab</title>
-        <para>
-          If the result of a query should be displayed in an existing result tab, the annotation <literal>@WbUseTab</literal>
-          together with a tab name can be used. If this annotation is present and a result tab with that name already
-          exists, the existing result will be replaced with the new result. If no result tab with that name exists,
-          a new tab (with the supplied name) will be created.
-        </para>
-        <para>
-          <note>
-            Re-using a result tab only works if <menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice> is enabled.
-          </note>
-        </para>
-        <para>
-          If the following query is run for the second time, the existing data will be replaced with the
-          newly retrieved data:
-        </para>
-			<programlisting>-- @WbUseTab List of contacts
-SELECT * FROM person;
-</programlisting>
-      </simplesect>
 		</section>
 
 </section>

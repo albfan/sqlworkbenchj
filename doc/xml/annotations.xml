@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<section id="annotations">
+	<title>Using &wb-productname; specific annotations in SQL comments</title>
+  <para>
+    By adding special comments to a SQL (select) statement, you can influence the way the result is displayed in &wb-productname;.
+    This comments are called "annotations" and must be included in a comment preceding the statement that is executed.
+    The comment can be a single line or multi-line SQL comment
+  </para>
+
+		<section id="result-names">
+			<title>Naming result tabs</title>
+			<para>
+				You can change the name of the result tab associated with a statement. To give a result
+				set a name, use the annotation <literal>@WbResult</literal> followed by the name that should
+				appear as the result's name.
+			</para>
+			<para>
+				The following examples executes two statements. The result for the first will be labelled
+				"List of contacts" and the second will be labelled "List of companies":
+			</para>
+			<programlisting>-- @WbResult List of contacts
+SELECT * FROM person;
+
+/*
+ @WbResult List of companies
+ this will retrieve all companies from the database
+*/
+SELECT * FROM company;</programlisting>
+			<para>
+				The result name that is used, will be everything after the annotation's keyword until the end of the line.
+			</para>
+			<para>
+				For the second select (with the multi-line comment), the name of the result tab will be
+				<literal>List of companies</literal>, the comment on the second line will not be considered.
+			</para>
+		</section>
+
+    <section id="result-tab-reuse">
+      <title>Re-using an existing named result tab</title>
+      <para>
+        If the result of a query should be displayed in an existing result tab, the annotation <literal>@WbUseTab</literal>
+        together with a tab name can be used. If this annotation is present and a result tab with that name already
+        exists, the existing result will be replaced with the new result. If no result tab with that name exists,
+        a new tab (with the supplied name) will be created.
+      </para>
+      <para>
+        <note>
+          Re-using a result tab only works if <menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice> is enabled.
+          You can combine <literal>@WbUseTab</literal> with the <literal>@WbAppendResult</literal> annotation to
+          force re-using an existing result even though the option is turned off.
+        </note>
+      </para>
+      <para>
+        If the following query is run for the second time, the existing data will be replaced with the
+        newly retrieved data:
+      </para>
+    <programlisting>-- @WbUseTab List of contacts
+SELECT * FROM person;
+</programlisting>
+    </section>
+
+    <section id="scroll-annotation">
+      <title>Scrolling the result</title>
+      <para>
+        The annotation <literal>@WbScrollTo</literal> can be used to automatically scroll a result set after it has been retrieved
+        to a specific row number. The row number has to be supplied using a <literal>#</literal> sign:
+      </para>
+    <programlisting>-- @WbScrollTo #100
+SELECT *
+FROM person;
+</programlisting>
+
+      <para>
+        In addition to a row number, the special values <literal>end</literal> or <literal>last</literal> (without a <literal>#</literal>)
+        are also recognized. When they are supplied, the result is automatically scrolled to the last row.
+        This is useful when displaying the contents of log tables.
+      </para>
+
+    <programlisting>-- @WbScrollTo end
+SELECT *
+FROM activity_log;
+</programlisting>
+
+    </section>
+
+    <section id="append-annotation">
+      <title>Appending a results</title>
+      <para>
+        The annotation <literal>@WbAppendResult</literal> can be used to always append the result of the associated query regardless of
+        the current setting of <menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice>.
+      </para>
+    </section>
+
+    <section id="remove-empty-annotation">
+      <title>Suppressing empty results</title>
+      <para>
+        To suppress an empty result, the annotation <literal>@WbRemoveEmpty</literal> can be used. If a query
+        returns no rows and contains this annotation, no result tab will be created. No warning or message will
+        be shown if this happens!
+      </para>
+    </section>
+
+</section>

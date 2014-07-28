@@ -12,6 +12,7 @@
 	<!ENTITY editor SYSTEM "editor.xml">
 	<!ENTITY delimiter SYSTEM "delimiter.xml">
 	<!ENTITY using SYSTEM "using.xml">
+  <!ENTITY annotations SYSTEM "annotations.xml">
 	<!ENTITY macros SYSTEM "macros.xml">
 	<!ENTITY using-fk SYSTEM "foreign-keys.xml">
 	<!ENTITY scripting SYSTEM "scripting.xml">
@@ -49,6 +50,7 @@
 &editor;
 &delimiter;
 &using;
+&annotations;
 &macros;
 &using-fk;
 &dbms-specific;

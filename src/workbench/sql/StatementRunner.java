@@ -554,9 +554,10 @@ public class StatementRunner
 		else if (this.batchCommand != null && this.currentCommand instanceof WbEndBatch)
 		{
 			this.result = this.batchCommand.executeBatch();
-			removeEmptyResults(result, realSql);
 		}
 
+		removeEmptyResults(result, realSql);
+		
 		if (this.currentConsumer != null && currentCommand != currentConsumer)
 		{
 			this.currentConsumer.consumeResult(result);
