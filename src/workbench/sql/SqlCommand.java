@@ -192,7 +192,13 @@ public class SqlCommand
 			}
 			else
 			{
-				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", info.getObjectType());
+				String typeName = info.getObjectType();
+				if ("INDEX".equals(typeName))
+				{
+					// this is essentially for Postgres which allows to create an index without a name (a name will be generated)
+					typeName = info.getDisplayType();
+				}
+				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", typeName);
 			}
 		}
 		else if ("ANALYZE".equals(verb))

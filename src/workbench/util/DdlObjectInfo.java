@@ -116,7 +116,10 @@ public class DdlObjectInfo
 					if (next != null) name = next;
 				}
 
-				this.objectName = name.getContents();
+				if (!name.isReservedWord())
+				{
+					this.objectName = name.getContents();
+				}
 
 				if (this.objectName != null)
 				{
