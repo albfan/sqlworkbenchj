@@ -22,17 +22,21 @@
  */
 package workbench.db.oracle;
 
-import workbench.sql.wbcommands.*;
 import java.util.List;
 
-import org.junit.AfterClass;
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import static org.junit.Assert.*;
+
+import workbench.sql.wbcommands.SourceTableArgument;
+
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.WbTestCase;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -66,6 +70,8 @@ public class OracleSourceTableArgumentTest
 		throws Exception
   {
     WbConnection con = OracleTestUtil.getOracleConnection();
+		assertNotNull("Oracle not available", con);
+
 		String script =
 			"create table first_table (id integer);\n" +
 			"create table second_table (id integer);\n" +

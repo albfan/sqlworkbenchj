@@ -70,7 +70,7 @@ public class OracleTransactionCheckerTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		try
 		{

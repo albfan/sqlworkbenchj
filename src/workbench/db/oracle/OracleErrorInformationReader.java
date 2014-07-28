@@ -76,7 +76,7 @@ public class OracleErrorInformationReader
 			return null;
 		}
 
-		if (!validTypes.contains(objectType))
+		if (objectType != null && !validTypes.contains(objectType))
 		{
 			return null;
 		}

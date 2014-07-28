@@ -81,7 +81,8 @@ public class OracleExplainTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
+
 		String sql = "explain plan into " + OracleTestUtil.SCHEMA_NAME + ". for select * from person";
 
 		StatementContext context = new StatementContext(con, sql, sql.indexOf('.') + 1);

@@ -22,13 +22,18 @@
  */
 package workbench.db.oracle;
 
+import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
 
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
-import workbench.WbTestCase;
 
 /**
  *
@@ -42,12 +47,28 @@ extends WbTestCase
 		super("WbOraShowTest");
 	}
 
+	@BeforeClass
+	public static void setUpClass()
+		throws Exception
+	{
+		OracleTestUtil.initTestCase();
+	}
+
+	@AfterClass
+	public static void tearDown()
+		throws Exception
+	{
+		OracleTestUtil.cleanUpTestCase();
+	}
+
+
 	@Test
 	public void testExecute()
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
+
 		StatementRunner runner = getTestUtil().createConnectedStatementRunner(con);
 
 		runner.runStatement("create procedure nocando as begin null end;");

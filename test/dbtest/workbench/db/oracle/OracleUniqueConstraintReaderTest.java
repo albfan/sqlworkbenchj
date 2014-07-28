@@ -24,16 +24,18 @@ package workbench.db.oracle;
 
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -82,7 +84,8 @@ public class OracleUniqueConstraintReaderTest
 	public void testProcessIndexList()
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
+		
 		TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("PARENT"));
 		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent);
 		boolean foundConstraint = false;

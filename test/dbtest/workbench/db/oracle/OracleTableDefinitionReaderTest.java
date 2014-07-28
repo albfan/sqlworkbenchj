@@ -32,7 +32,15 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
 
-import workbench.db.*;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbObjectComparator;
+import workbench.db.IndexColumn;
+import workbench.db.IndexDefinition;
+import workbench.db.IndexReader;
+import workbench.db.JdbcUtils;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
 
@@ -91,7 +99,7 @@ public class OracleTableDefinitionReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		List<TableIdentifier> views = con.getMetadata().getObjectList("WBJUNIT", new String[] { "VIEW" });
 		assertEquals(1, views.size());

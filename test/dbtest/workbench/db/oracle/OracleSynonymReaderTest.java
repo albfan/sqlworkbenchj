@@ -78,7 +78,7 @@ public class OracleSynonymReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		SynonymReader reader = con.getMetadata().getSynonymReader();
 		assertNotNull(reader);

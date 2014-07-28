@@ -52,6 +52,8 @@ public class OracleErrorPositionReaderTest
 		throws Exception
 	{
 		WbConnection conn = OracleTestUtil.getOracleConnection();
+		assertNotNull(conn);
+
 		OracleErrorPositionReader reader = new OracleErrorPositionReader();
 		ErrorDescriptor error = reader.getErrorPosition(conn, "select 42 from dualx", null);
 		assertNotNull(error);
@@ -66,6 +68,8 @@ public class OracleErrorPositionReaderTest
 		throws Exception
 	{
 		WbConnection conn = OracleTestUtil.getOracleConnection();
+		assertNotNull("Oracle not available", conn);
+
 		OracleErrorPositionReader reader = new OracleErrorPositionReader(true, true);
 		ErrorDescriptor error = reader.getErrorPosition(conn, "create table foo (id integr)", null);
 		assertNotNull(error);
@@ -94,6 +98,7 @@ public class OracleErrorPositionReaderTest
 			// make sure we use english error messages
 			Locale.setDefault(Locale.ENGLISH);
 			WbConnection conn = OracleTestUtil.getOracleConnection();
+			assertNotNull("Oracle not available", conn);
 
 			OracleErrorPositionReader reader = new OracleErrorPositionReader();
 			String sql =

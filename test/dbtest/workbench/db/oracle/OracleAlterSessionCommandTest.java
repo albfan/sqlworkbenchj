@@ -23,15 +23,18 @@
 package workbench.db.oracle;
 
 
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.WbConnection;
+
+import workbench.sql.StatementRunner;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.WbConnection;
-import workbench.sql.StatementRunner;
+import static org.junit.Assert.*;
 /**
  *
  * @author Thomas Kellerer
@@ -64,7 +67,7 @@ public class OracleAlterSessionCommandTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		//String oldZone = TestUtil.getSingleQueryValue(con, "select SESSIONTIMEZONE from dual").toString();
 		StatementRunner runner = new StatementRunner();

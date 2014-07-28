@@ -137,10 +137,8 @@ public class OracleDataDiffTest
 	{
 		WbConnection reference = OracleTestUtil.getOracleConnection();
 		WbConnection target = OracleTestUtil.getOracleConnection2();
-		if (reference == null || target == null)
-		{
-			return;
-		}
+		assertNotNull(reference);
+		assertNotNull(target);
 
 		try
 		{

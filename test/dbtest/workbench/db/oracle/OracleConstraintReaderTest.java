@@ -74,7 +74,7 @@ public class OracleConstraintReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		String sql =
 			"create table person (id integer, constraint positive_id check (id > 0));\n";
@@ -97,7 +97,7 @@ public class OracleConstraintReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		String sql =
 			"create table foo1 (id1 integer not null); \n" +

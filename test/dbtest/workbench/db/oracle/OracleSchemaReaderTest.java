@@ -23,12 +23,14 @@
 package workbench.db.oracle;
 
 
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -47,7 +49,7 @@ public class OracleSchemaReaderTest
 		throws Exception
 	{
 		WbConnection conn = OracleTestUtil.getOracleConnection();
-		if (conn == null) return;
+		assertNotNull("Oracle not available", conn);
 
 		try
 		{

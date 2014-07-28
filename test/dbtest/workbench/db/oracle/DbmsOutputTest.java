@@ -22,13 +22,18 @@
  */
 package workbench.db.oracle;
 
-import workbench.util.StringUtil;
 import java.sql.Statement;
+
+import workbench.WbTestCase;
+
+import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+
 import org.junit.AfterClass;
 import org.junit.Test;
-import workbench.WbTestCase;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -55,7 +60,7 @@ public class DbmsOutputTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		Statement stmt = null;
 		try

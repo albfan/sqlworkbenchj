@@ -22,13 +22,17 @@
  */
 package workbench.db.oracle;
 
+import workbench.WbTestCase;
+
+import workbench.db.WbConnection;
+
+import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.WbTestCase;
-import workbench.db.WbConnection;
-import workbench.sql.StatementRunner;
-import workbench.sql.StatementRunnerResult;
+
 import static org.junit.Assert.*;
 /**
  *
@@ -62,7 +66,7 @@ public class OracleSetCommandTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(con);

@@ -24,14 +24,18 @@ package workbench.db.oracle;
 
 import java.sql.SQLException;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
+import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.db.IndexDefinition;
+
 import static org.junit.Assert.*;
 
 /**
@@ -92,7 +96,8 @@ public class OracleIndexPartitionTest
 
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
+
 		try
 		{
 			TestUtil.executeScript(con, sql, false);

@@ -22,17 +22,21 @@
  */
 package workbench.db.oracle;
 
-import workbench.WbTestCase;
-import java.util.List;
-import workbench.db.TableIdentifier;
 import java.util.Collection;
+import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.SequenceDefinition;
+import workbench.db.SequenceReader;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.db.SequenceDefinition;
-import workbench.db.SequenceReader;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -73,7 +77,7 @@ public class OracleSequenceReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		SequenceReader reader = con.getMetadata().getSequenceReader();
 		assertNotNull(reader);

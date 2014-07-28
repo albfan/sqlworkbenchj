@@ -22,18 +22,24 @@
  */
 package workbench.db.oracle;
 
-import workbench.db.ProcedureReader;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.resource.Settings;
+
+import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
+import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+
+import workbench.sql.DelimiterDefinition;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.ProcedureDefinition;
-import workbench.db.WbConnection;
-import workbench.resource.Settings;
-import workbench.sql.DelimiterDefinition;
-import workbench.storage.DataStore;
+
 import static org.junit.Assert.*;
 
 /**
@@ -56,7 +62,7 @@ public class OracleProcedureReaderTest
 	{
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		String sql = "create table some_info (id integer primary key, some_number number(14,3))\n" +
 			"/\n" +

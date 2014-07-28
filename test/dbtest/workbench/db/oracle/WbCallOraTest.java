@@ -25,22 +25,26 @@ package workbench.db.oracle;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.interfaces.StatementParameterPrompter;
+
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
-import workbench.interfaces.StatementParameterPrompter;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.preparedstatement.StatementParameters;
 import workbench.sql.wbcommands.WbCall;
-import workbench.storage.DataStore;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -231,7 +235,7 @@ public class WbCallOraTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		WbCall call = new WbCall();
 		StatementRunner runner = new StatementRunner();
@@ -270,7 +274,7 @@ public class WbCallOraTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "REF_CURSOR_EXAMPLE");
 		assertEquals(1, procs.size());
@@ -341,7 +345,7 @@ public class WbCallOraTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_MAGIC");
 		assertEquals(1, procs.size());
@@ -367,7 +371,7 @@ public class WbCallOraTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_STATUS");
 		assertEquals(1, procs.size());
@@ -413,7 +417,7 @@ public class WbCallOraTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "PROCESS_PKG_DATA");
 		assertEquals(1, procs.size());
@@ -459,7 +463,7 @@ public class WbCallOraTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "PROCESS_DATA");
 		assertEquals(1, procs.size());
@@ -505,7 +509,7 @@ public class WbCallOraTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_ANSWER");
 		assertEquals(1, procs.size());
@@ -554,7 +558,7 @@ public class WbCallOraTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_ANSWER");
 		assertEquals(1, procs.size());

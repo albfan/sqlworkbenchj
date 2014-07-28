@@ -85,7 +85,7 @@ public class OracleIndexReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 		TestUtil.executeScript(con,
 			"create table foo (id integer);\n" +
 			"create index zzz_foo on foo (id);");
@@ -108,7 +108,7 @@ public class OracleIndexReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		try
 		{

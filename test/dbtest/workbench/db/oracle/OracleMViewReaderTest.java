@@ -22,18 +22,20 @@
  */
 package workbench.db.oracle;
 
-import org.junit.After;
-import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.db.TableIdentifier;
-import workbench.db.TableSourceBuilder;
-import workbench.db.WbConnection;
-import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 
 import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
+import workbench.db.WbConnection;
+
+import org.junit.After;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -67,7 +69,8 @@ public class OracleMViewReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
+
 		String sql =
 			"CREATE table person (id integer primary key, name varchar(100));" +
 			"create materialized view v_person  \n" +

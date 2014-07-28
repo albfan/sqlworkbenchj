@@ -23,14 +23,18 @@
 package workbench.db.oracle;
 
 import java.util.Collection;
-import workbench.db.TableGrant;
 import java.util.List;
+
 import workbench.TestUtil;
+
+import workbench.db.TableGrant;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -70,7 +74,7 @@ public class OracleViewGrantReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		List<TableIdentifier> views = con.getMetadata().getObjectList(null, "WBJUNIT", new String[] { "VIEW" });
 		assertEquals(1, views.size());

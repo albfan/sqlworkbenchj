@@ -67,7 +67,7 @@ public class OracleErrorInformationReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		String sql =
 			"create procedure nocando\n" +

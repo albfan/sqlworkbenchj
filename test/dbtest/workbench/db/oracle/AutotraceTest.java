@@ -89,7 +89,7 @@ public class AutotraceTest
 		{
 
 			WbConnection con = OracleTestUtil.getOracleConnection();
-			if (con == null) return;
+			assertNotNull(con);
 
 			Settings.getInstance().setProperty("workbench.db.oracle.autotrace.statistics.valuefirst", true);
 

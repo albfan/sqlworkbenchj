@@ -26,18 +26,22 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.SelectAnalyzer;
 import workbench.gui.completion.StatementContext;
+
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -59,7 +63,7 @@ public class OracleCompletionTest
 		OracleTestUtil.initTestCase();
 
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		Assume.assumeNotNull(con);
 
 		String sql =
 			"CREATE TABLE data ( id integer primary key, info varchar(100));\n"  +
@@ -80,7 +84,7 @@ public class OracleCompletionTest
 		throws SQLException
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		String sql = "select  from  ";
 		StatementContext context = new StatementContext(con, sql, sql.indexOf("from") + "from".length() + 1);
@@ -126,7 +130,7 @@ public class OracleCompletionTest
 		throws SQLException
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		String sql = "delete from  ";
 		StatementContext context = new StatementContext(con, sql, sql.indexOf("from") + "from".length() + 1);
@@ -143,7 +147,7 @@ public class OracleCompletionTest
 		throws SQLException
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		String sql = "insert into ";
 		StatementContext context = new StatementContext(con, sql, sql.indexOf("into") + "into".length() + 1);

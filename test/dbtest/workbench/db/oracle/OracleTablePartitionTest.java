@@ -24,13 +24,17 @@ package workbench.db.oracle;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -86,6 +90,7 @@ public class OracleTablePartitionTest
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
+
 		try
 		{
 			TestUtil.executeScript(con, sql, false);
@@ -166,7 +171,8 @@ public class OracleTablePartitionTest
 		if (!partitioningAvailable) return;
 
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
+
 
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("WB_LIST_PARTITION_TEST"));
 		assertNotNull(tbl);
@@ -204,7 +210,7 @@ public class OracleTablePartitionTest
 	{
 		if (!partitioningAvailable) return;
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("WB_HASH_PARTITION_TEST"));
 		assertNotNull(tbl);
@@ -240,7 +246,7 @@ public class OracleTablePartitionTest
 	{
 		if (!partitioningAvailable) return;
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("RANGE_SUB_PART_HASH"));
 		assertNotNull(tbl);

@@ -37,7 +37,6 @@ import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
 
 import org.junit.AfterClass;
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -87,7 +86,8 @@ public class OracleTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		Assume.assumeNotNull(con);
+		assertNotNull("Oracle not available", con);
+
 		try
 		{
 			String sql =
@@ -123,7 +123,7 @@ public class OracleTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		Assume.assumeNotNull(con);
+		assertNotNull("Oracle not available", con);
 
 		if (!JdbcUtils.hasMinimumServerVersion(con, "12.1"))
 		{
@@ -187,7 +187,7 @@ public class OracleTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		Assume.assumeNotNull(con);
+		assertNotNull("Oracle not available", con);
 
 		TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("INDEX_TEST"));
 		assertNotNull(table);
@@ -209,7 +209,8 @@ public class OracleTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		Assume.assumeNotNull(con);
+		assertNotNull("Oracle not available", con);
+
 		boolean showTablespace = Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_tablespace", true);
 		TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("UC_TEST"));
 		assertNotNull(table);

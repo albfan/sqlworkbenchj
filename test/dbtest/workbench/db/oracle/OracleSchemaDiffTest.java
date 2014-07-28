@@ -253,10 +253,8 @@ public class OracleSchemaDiffTest
 	{
 		WbConnection reference = OracleTestUtil.getOracleConnection();
 		WbConnection target = OracleTestUtil.getOracleConnection2();
-		if (reference == null || target == null)
-		{
-			return;
-		}
+		assertNotNull("Oracle not available", reference);
+		assertNotNull("Oracle not available", target);
 
 		try
 		{

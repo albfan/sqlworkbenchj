@@ -60,7 +60,7 @@ public class OracleObjectCompilerTest
 	{
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		String sql = "CREATE OR REPLACE FUNCTION aaa_get_answer \n " +
 			"RETURN INTEGER \n" +

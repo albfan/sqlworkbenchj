@@ -22,15 +22,19 @@
  */
 package workbench.db.oracle;
 
-import java.sql.Types;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Types;
+
+import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
+
 import static org.junit.Assert.*;
 
 /**
@@ -54,7 +58,7 @@ public class OracleDataConverterTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		String sql = 
+		String sql =
 			"create table some_table (id integer, some_data raw(200));\n" +
 			"insert into some_table (id, some_data) values (42, utl_raw.cast_to_raw('0123'));\n" +
 		  "commit;\n";
@@ -73,7 +77,8 @@ public class OracleDataConverterTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
+		
 		String select = "SELECT rowid, some_data FROM some_table";
 		Statement stmt = con.createStatement();
 		ResultSet rs = stmt.executeQuery(select);
