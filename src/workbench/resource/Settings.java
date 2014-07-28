@@ -3585,13 +3585,14 @@ public class Settings
 		try
 		{
 			WbProperties defaults = getDefaultProperties();
+			LogMgr.logDebug("Settings.saveSettings()", "Saving global settings to: " + configfile.getFullPath());
 			this.props.saveToFile(this.configfile, defaults);
 			LogMgr.logDebug("Settings.saveSettings()", "Global settings saved to: " + configfile.getFullPath());
 			fileTime = configfile.lastModified();
 		}
-		catch (IOException e)
+		catch (Throwable th)
 		{
-			LogMgr.logError(this, "Error saving Settings file '" + configfile.getFullPath() + "'", e);
+			LogMgr.logError(this, "Error saving Settings file '" + configfile.getFullPath() + "'", th);
 		}
 
 		if (this.getPKMappingFilename() != null && PkMapping.isInitialized())
