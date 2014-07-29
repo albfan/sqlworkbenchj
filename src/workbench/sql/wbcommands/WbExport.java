@@ -741,6 +741,15 @@ public class WbExport
 			return result;
 		}
 
+		// if the user cancelled the statement while the tables were retrieved,
+		// The exported isn't actually running until now, so the cancel request was essentially ignored
+		if (this.isCancelled)
+		{
+			result.setWarning(true);
+			result.addMessageByKey("MsgExportCancelled");
+			return result;
+		}
+
 		this.consumeQuery = tablesToExport.isEmpty();
 
 		CommonArgs.setProgressInterval(this, cmdLine);

@@ -45,6 +45,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * Run a DDL (CREATE, DROP, ALTER, GRANT, REVOKE) command.
@@ -170,7 +171,7 @@ public class DdlCommand
 			}
 			this.currentConnection.releaseSavepoint(ddlSavepoint);
 
-			if (isDrop && result.isSuccess() && info != null)
+			if (isDrop && result.isSuccess())
 			{
 				removeFromCache(info);
 			}
@@ -199,6 +200,8 @@ public class DdlCommand
 	private void removeFromCache(DdlObjectInfo info)
 	{
 		if (info == null) return;
+		if (StringUtil.isEmptyString(info.getObjectName())) return;
+		
 		currentConnection.getObjectCache().removeTable(new TableIdentifier(info.getObjectName(), currentConnection));
 	}
 
