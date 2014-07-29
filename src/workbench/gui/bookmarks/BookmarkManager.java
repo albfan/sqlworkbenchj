@@ -136,7 +136,7 @@ public class BookmarkManager
 				{
 					updated = new BookmarkGroup(panelBookmarks, panel.getId());
 					String title = panel.getTabTitle();
-					if (GuiSettings.getShowTabIndex())
+					if (GuiSettings.getShowTabIndex() && title.equals(ResourceMgr.getDefaultTabLabel()))
 					{
 						int index = win.getIndexForPanel(panel);
 						title += " " + NumberStringCache.getNumberString(index + 1);
