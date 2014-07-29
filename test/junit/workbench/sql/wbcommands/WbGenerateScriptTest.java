@@ -118,6 +118,14 @@ public class WbGenerateScriptTest
 		assertFalse(script.contains("CREATE TABLE CUSTOMER"));
 		assertFalse(script.contains("CREATE TABLE INVOICE"));
 		assertFalse(script.contains("CREATE TABLE CURRENCY"));
+
+		result = genScript.execute("WbGenerateScript -types=table -objects=* -exclude=*ord*");
+		script = result.getMessageBuffer().toString();
+		assertTrue(script.contains("CREATE TABLE CUSTOMER"));
+		assertTrue(script.contains("CREATE TABLE INVOICE"));
+		assertTrue(script.contains("CREATE TABLE CURRENCY"));
+		assertFalse(script.contains("CREATE TABLE ORDERS"));
+		assertFalse(script.contains("CREATE TABLE ORDER_ITEM"));
 	}
 
 }

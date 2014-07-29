@@ -61,9 +61,9 @@ public class WbGenerateScript
 	extends SqlCommand
 	implements ScriptGenerationMonitor
 {
-
 	public static final String VERB = "WbGenerateScript";
 	public static final String SHORT_VERB = "WbGenScript";
+	public static final String ARG_EXCLUDE = "exclude";
 
 	private ObjectScripter scripter;
 
@@ -76,6 +76,7 @@ public class WbGenerateScript
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
+		cmdLine.addArgument(ARG_EXCLUDE);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
@@ -119,11 +120,12 @@ public class WbGenerateScript
 			schemas = CollectionUtil.arrayList(currentConnection.getCurrentSchema());
 		}
 
+		String excluded = cmdLine.getValue(ARG_EXCLUDE);
 		String[] typesArray = CollectionUtil.isEmpty(types) ? null : StringUtil.toArray(types, true, true);
 
 		for (String schema : schemas)
 		{
-			SourceTableArgument selector = new SourceTableArgument(names, null, schema, typesArray, currentConnection);
+			SourceTableArgument selector = new SourceTableArgument(names, excluded, schema, typesArray, currentConnection);
 			objects.addAll(selector.getTables());
 		}
 
