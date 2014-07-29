@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-07-07">
+    <entry dev-build="3" type="enh">For Firebird 3.0 the source code of procedures and packages are now displayed</entry>
     <entry dev-build="3" type="enh">The bookmarks dialog now also includes procedure and function names if available</entry>
     <entry dev-build="3" type="enh">The code completion now also caches synonym translation to improve performance</entry>
     <entry dev-build="2" type="enh">When running in batch mode and not supplying the -password parameter, a prompt for the password is now displayed</entry>
@@ -11,6 +12,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="3" type="fix">When using the "JOIN completion" the ON (or USING) keyword was added even if it was already present</entry>
     <entry dev-build="3" type="fix">For Oracle the position of an error was not shown for CREATE statements</entry>
     <entry dev-build="3" type="fix">For Oracle "included" (non-PK) columns for index organized tables were not shown in the generated DDL statement</entry>
     <entry dev-build="2" type="fix">Column values for FLOAT columns where not formatted correctly in an Excel export</entry>

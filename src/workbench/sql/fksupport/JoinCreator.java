@@ -174,7 +174,7 @@ public class JoinCreator
 			condition = "(" + condition + ")";
 		}
 
-		if (currentWord == null || !currentWord.equalsIgnoreCase(operator))
+		if (currentWord == null || !currentWord.equalsIgnoreCase(operator.trim()))
 		{
 			condition = operator + condition;
 		}

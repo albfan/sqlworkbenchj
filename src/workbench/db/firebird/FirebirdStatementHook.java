@@ -80,7 +80,7 @@ public class FirebirdStatementHook
 	@Override
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
 	{
-		if (showPlan)
+		if (showPlan || planOnly)
 		{
 			String plan = getExecutionPlan(runner.getConnection(), sql == null ? toExplain : sql);
 			if (plan != null)

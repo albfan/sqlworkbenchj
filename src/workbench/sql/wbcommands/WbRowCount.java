@@ -45,6 +45,7 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -58,6 +59,7 @@ public class WbRowCount
 	extends SqlCommand
 {
 	public static final String VERB = "WbRowCount";
+	public static final String ARG_ORDER_BY = "orderBy";
 
 	public WbRowCount()
 	{
@@ -66,7 +68,7 @@ public class WbRowCount
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
-		cmdLine.addArgument("orderBy");
+		cmdLine.addArgument(ARG_ORDER_BY, CollectionUtil.arrayList("rowcount", "type", "schema", "catalog", "name"));
 	}
 
 	@Override
@@ -101,7 +103,7 @@ public class WbRowCount
 
 		cmdLine.parse(options);
 		String defaultSort = getDefaultSortConfig();
-		String sort = cmdLine.getValue("orderBy", defaultSort);
+		String sort = cmdLine.getValue(ARG_ORDER_BY, defaultSort);
 
 		if (this.rowMonitor != null)
 		{
@@ -165,7 +167,7 @@ public class WbRowCount
 
 		if (rowMonitor != null)
 		{
-			rowMonitor.jobFinished();;
+			rowMonitor.jobFinished();
 		}
 
 		SortDefinition sortDef = getRowCountSort(sort, rowCounts, currentConnection);

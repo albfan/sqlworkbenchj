@@ -53,7 +53,7 @@ public class NamedSortDefinition
 		{
 			sortColumns = new String[sort.getColumnCount()];
 			sortAscending = new boolean[sort.getColumnCount()];
-			
+
 			int totalColumns = data.getColumnCount();
 			for (int i=0; i < sort.getColumnCount(); i++)
 			{
@@ -174,12 +174,16 @@ public class NamedSortDefinition
 		{
 			String element = StringUtil.trimQuotes(elements.get(i));
 			int pos = element.indexOf(';');
+			if (pos == -1)
+			{
+				pos = element.indexOf(':');
+			}
 			if (pos > -1)
 			{
 				String colname = element.substring(0, pos);
 				String asc = element.substring(pos + 1);
 				columns[i] = colname;
-				ascending[i] = asc.toLowerCase().startsWith("a"); // allows for asc/desc as well
+				ascending[i] = asc.toLowerCase().startsWith("a"); 
 			}
 			else
 			{
