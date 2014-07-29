@@ -159,12 +159,11 @@ public class JoinCreatorTest
 		pos = sql.indexOf("address_type adt on") + "address_type adt on".length();
 		creator.setCursorPosition(pos);
 		condition = creator.getJoinCondition();
-		assertNotNull(condition);
-		assertEquals("ON adt.type_id = a.adr_type_id", condition.trim());
+		assertEquals("adt.type_id = a.adr_type_id", condition.trim());
 
 		creator.setCursorPosition(pos + 1);
 		condition = creator.getJoinCondition();
-		assertEquals("ON adt.type_id = a.adr_type_id", condition.trim());
+		assertEquals("adt.type_id = a.adr_type_id", condition.trim());
 
 		// Test for sub-selects
 		sql = "select * from person where id in (select person_id from address ad join address_type adt on )";
@@ -186,7 +185,7 @@ public class JoinCreatorTest
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
 		assertEquals("ad", join.getAlias());
-		assertEquals("ON adt.type_id = ad.adr_type_id", creator.getJoinCondition().trim());
+		assertEquals("adt.type_id = ad.adr_type_id", creator.getJoinCondition().trim());
 
 		joined = creator.getJoinedTable();
 		assertEquals("address_type", joined.getObjectName());
@@ -201,7 +200,7 @@ public class JoinCreatorTest
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
 		condition = creator.getJoinCondition().trim();
-		assertEquals("ON p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", condition);
+		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", condition);
 
 		creator.setPreferUsingOperator(true);
 
