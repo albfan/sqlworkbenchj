@@ -1713,8 +1713,16 @@ WHERE id=42;</programlisting>
 							<entry>
 								<para>
 									A comma separated list of table (views or other objects), e.g. <literal>-objects=customer,invoice,v_turnover,seq_cust_id</literal>.
-                  The parameter supports specifying tables using wildcards <literal>-objects=cust%,inv%</literal>. This will retrieve
-                  everything that is also displayed in then "Objects" tab of the DbExplorer
+                  The parameter supports specifying tables using wildcards <literal>-objects=cust%,inv%</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-exclude</entry>
+							<entry>
+								<para>
+									A comma separated list of object names to be excluded from the generated script.
+                  The parameter supports wildcards <literal>-exclude=foo*,bar*</literal>.
 								</para>
 							</entry>
 						</row>
