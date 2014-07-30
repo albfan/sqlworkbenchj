@@ -1192,7 +1192,7 @@ public class Settings
 
 	public boolean getAutoGeneratePKName()
 	{
-		return getBoolProperty("workbench.db.createpkname", true);
+		return getBoolProperty("workbench.db.createpkname", false);
 	}
 
 	public void setAutoGeneratePKName(boolean flag)
