@@ -150,6 +150,7 @@ public class DbMetadata
 	private final char catalogSeparator;
 	private SelectIntoVerifier selectIntoVerifier;
 	private Set<String> tableTypesFromDriver;
+	private int maxTableNameLength;
 
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -437,9 +438,25 @@ public class DbMetadata
 		{
 			catalogSeparator = sep.charAt(0);
 		}
+
+		try
+		{
+			this.maxTableNameLength = metaData.getMaxTableNameLength();
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logWarning("DbMetadata.<init>", "Driver does not support getMaxTableNameLength()", sql);
+			this.maxTableNameLength = 0;
+		}
+
 		LogMgr.logInfo("DbMetadata.<init>", "Using catalog separator: " + catalogSeparator);
 	}
 
+	public int getMaxTableNameLength()
+	{
+		return maxTableNameLength;
+	}
+	
 	/**
 	 * Wrapper around DatabaseMetadata.getSearchStringEscape() that does not throw an exception.
 	 *

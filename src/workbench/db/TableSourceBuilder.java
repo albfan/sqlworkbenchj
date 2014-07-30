@@ -746,6 +746,11 @@ public class TableSourceBuilder
 		if (pkName == null && Settings.getInstance().getAutoGeneratePKName())
 		{
 			pkName = "pk_" + SqlUtil.cleanupIdentifier(table.getTableName().toLowerCase());
+			int maxLen = this.dbConnection.getMetadata().getMaxTableNameLength();
+			if (pkName.length() > maxLen)
+			{
+				pkName = pkName.substring(0, maxLen - 1);
+			}
 		}
 
 		if (StringUtil.isEmptyString(pkName))
