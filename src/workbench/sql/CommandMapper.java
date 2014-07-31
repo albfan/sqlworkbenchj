@@ -94,6 +94,7 @@ import workbench.sql.wbcommands.WbSchemaDiff;
 import workbench.sql.wbcommands.WbSchemaReport;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbSetProp;
+import workbench.sql.wbcommands.WbShowEncoding;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbSysExec;
 import workbench.sql.wbcommands.WbSysOpen;
@@ -193,6 +194,7 @@ public class CommandMapper
 		addCommand(new WbGenDelete());
 		addCommand(new WbGenInsert());
 		addCommand(new WbEcho());
+		addCommand(new WbShowEncoding());
 		addCommand(new WbRowCount());
 
 		addCommand(new WbDisconnect());

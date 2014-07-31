@@ -138,7 +138,7 @@ public class IteratingScriptParser
 	{
 		this.cleanup();
 		// Make sure we have an encoding (otherwise FileMappedSequence will not work!
-		if (enc == null) enc = Settings.getInstance().getDefaultEncoding();
+		if (enc == null) enc = Settings.getInstance().getDefaultFileEncoding();
 		this.script = new FileMappedSequence(f, enc);
 		this.scriptLength = script.length();
 		this.checkEscapedQuotes = false;

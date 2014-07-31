@@ -134,6 +134,7 @@ public class CommandTester
 		putVerb(WbDefineDriver.VERB);
 		putVerb(WbListDrivers.VERB);
 		putVerb(WbCreateProfile.VERB);
+		putVerb(WbShowEncoding.VERB);
 	}
 
 	private void putVerb(String verb)
