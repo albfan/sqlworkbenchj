@@ -65,16 +65,17 @@ public class OracleSynonymReader
 	{
 		boolean readComments = OracleUtils.getRemarksReporting(con);
 
-		StringBuilder sql = new StringBuilder(100);
+		StringBuilder sql = new StringBuilder(500);
 		sql.append("SELECT s.synonym_name, s.table_owner, s.table_name, s.db_link, o.object_type, s.owner ");
 		if (readComments)
 		{
 			sql.append(", tc.comments ");
 		}
 
+		// the outer join to all_objects is necessary to also see synonyms that point to no longer existing tables
 		sql.append(
 			"\nFROM all_synonyms s \n" +
-			"  JOIN all_objects o ON s.table_name = o.object_name AND s.table_owner = o.owner  \n");
+			"  LEFT JOIN all_objects o ON s.table_name = o.object_name AND s.table_owner = o.owner  \n");
 
 		if (readComments)
 		{
