@@ -33,8 +33,8 @@ import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -52,8 +52,8 @@ public class OracleSynonymReaderTest
 		super("OracleSynonymReaderTest");
 	}
 
-	@BeforeClass
-	public static void setUpClass()
+	@Before
+	public void setUp()
 		throws Exception
 	{
 		OracleTestUtil.initTestCase();
@@ -65,13 +65,12 @@ public class OracleSynonymReaderTest
 			"CREATE SYNONYM s_person FOR person;");
 	}
 
-	@AfterClass
-	public static void tearDownClass()
+	@After
+	public void cleanup()
 		throws Exception
 	{
 		OracleTestUtil.cleanUpTestCase();
 	}
-
 
 	@Test
 	public void testGetSynonymList()
@@ -96,6 +95,18 @@ public class OracleSynonymReaderTest
 //		System.out.println(sql);
 		String expected = "CREATE SYNONYM S_PERSON\n   FOR WBJUNIT.PERSON;";
 		assertEquals(expected, sql.trim());
+
+		TestUtil.executeScript(con, "drop table person purge;");
+		objects = con.getMetadata().getObjectList(null, new String[] { "SYNONYM"});
+
+		assertNotNull(objects);
+		assertEquals(1, objects.size());
+		syn = objects.get(0);
+		assertEquals("SYNONYM", syn.getObjectType());
+
+		sql = reader.getSynonymSource(con, null, syn.getSchema(), syn.getTableName());
+//		System.out.println(sql);
+		assertEquals(expected, sql.trim());
 	}
 
 	@Test
@@ -103,7 +114,7 @@ public class OracleSynonymReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull("Oracle not available", con);
 
 		SynonymDDLHandler handler = new SynonymDDLHandler();
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] {"SYNONYM"});
