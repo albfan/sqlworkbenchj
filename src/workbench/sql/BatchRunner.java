@@ -740,11 +740,6 @@ public class BatchRunner
 					sql = replacer.replace(sql);
 				}
 
-				if (this.resultDisplay == null && !logAllStatements)
-				{
-					LogMgr.logDebug("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);
-				}
-
 				if (printStatements)
 				{
 					printMessage(sql.trim());
@@ -752,6 +747,10 @@ public class BatchRunner
 					{
 						StatementRunner.logStatement(sql, -1, connection);
 					}
+				}
+				else if (!logAllStatements)
+				{
+					LogMgr.logDebug("BatchRunner.executeScript()", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);
 				}
 
 				long verbstart = System.currentTimeMillis();
@@ -1056,7 +1055,7 @@ public class BatchRunner
 			{
 				result.setStorePassword(false);
 			}
-			
+
 			result.setUsername(user);
 			result.setRollbackBeforeDisconnect(rollback);
 			result.setAlternateDelimiter(delim);

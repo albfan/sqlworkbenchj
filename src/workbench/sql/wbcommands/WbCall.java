@@ -315,7 +315,7 @@ public class WbCall
 
 		if (result.isSuccess())
 		{
-			LogMgr.logInfo("WbCall.execute()", "Converted procedure call to JDBC syntax: " + sqlUsed);
+			LogMgr.logDebug("WbCall.execute()", "Converted procedure call to JDBC syntax: " + sqlUsed);
 			String procname = null;
 			SQLLexer l = new SQLLexer(cleanSql);
 			SQLToken t = l.getNextToken(false, false);
