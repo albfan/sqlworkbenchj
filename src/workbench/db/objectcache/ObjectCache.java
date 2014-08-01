@@ -173,14 +173,17 @@ class ObjectCache
 			{
 				try
 				{
-					DbMetadata meta = dbConnection.getMetadata();
-					List<TableIdentifier> tables = meta.getSelectableObjectsList(null, checkSchema, getCompletionTypes(dbConnection));
-					for (TableIdentifier tbl : tables)
+					if (!dbConnection.isBusy())
 					{
-						tbl.checkQuotesNeeded(dbConnection);
+						DbMetadata meta = dbConnection.getMetadata();
+						List<TableIdentifier> tables = meta.getSelectableObjectsList(null, checkSchema, getCompletionTypes(dbConnection));
+						for (TableIdentifier tbl : tables)
+						{
+							tbl.checkQuotesNeeded(dbConnection);
+						}
+						this.setTables(tables);
+						LogMgr.logDebug("ObjectCache.getTables()", "Schema: " + checkSchema + " not found in cache. Retrieved " + tables.size() + " objects");
 					}
-					this.setTables(tables);
-					LogMgr.logDebug("ObjectCache.getTables()", "Schema: " + checkSchema + " not found in cache. Retrieved " + tables.size() + " objects");
 				}
 				catch (Exception e)
 				{
@@ -201,7 +204,7 @@ class ObjectCache
 
 	public List<DependencyNode> getReferencingTables(WbConnection dbConn, TableIdentifier table)
 	{
-		if (table == null) return Collections.emptyList();
+		if (table == null || dbConn.isBusy()) return Collections.emptyList();
 
 		TableIdentifier tbl = dbConn.getMetadata().findTable(table, false);
 		List<DependencyNode> referencing = referencingTables.get(tbl);
@@ -218,7 +221,7 @@ class ObjectCache
 
 	public List<DependencyNode> getReferencedTables(WbConnection dbConn, TableIdentifier table)
 	{
-		if (table == null) return Collections.emptyList();
+		if (table == null || dbConn.isBusy()) return Collections.emptyList();
 
 		TableIdentifier tbl = dbConn.getMetadata().findTable(table, false);
 		List<DependencyNode> referenced = referencedTables.get(tbl);
@@ -276,6 +279,12 @@ class ObjectCache
 		List<ProcedureDefinition> procs = procedureCache.get(schemaToUse);
 		if (procs == null)
 		{
+			// nothing in the cache. We can only retrieve this from the database if the connection isn't busy
+			if (dbConnection.isBusy())
+			{
+				return Collections.emptyList();
+			}
+
 			try
 			{
 				procs = dbConnection.getMetadata().getProcedureReader().getProcedureList(null, schemaToUse, "%");
@@ -420,6 +429,12 @@ class ObjectCache
 		if (toSearch != null)
 		{
 			cols = this.objects.get(toSearch);
+		}
+
+		// nothing in the cache. We can only retrieve this from the database if the connection isn't busy
+		if (dbConnection.isBusy())
+		{
+			return Collections.emptyList();
 		}
 
 		if (cols == null)
