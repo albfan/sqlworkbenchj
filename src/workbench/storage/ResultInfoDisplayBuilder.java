@@ -22,6 +22,8 @@
 package workbench.storage;
 
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 import workbench.db.ColumnIdentifier;
 
@@ -34,18 +36,36 @@ public class ResultInfoDisplayBuilder
 
 	public static DataStore getDataStore(ResultInfo info, boolean showComments)
 	{
-		String[] cols;
-		int[] types;
-
+		List<String> columns = new ArrayList<String>(12);
+		columns.add("INDEX");
+		columns.add("COLUMN_NAME");
+		columns.add("ALIAS");
+		columns.add("DATA_TYPE");
+		columns.add("JDBC Type");
 		if (showComments)
 		{
-			cols = new String[] {	"INDEX", "COLUMN_NAME", "ALIAS", "DATA_TYPE", "JDBC Type", "REMARKS", "BASE TABLE", "CLASS_NAME" };
-			types = new int[]	{ Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			columns.add("REMARKS");
+			columns.add("BASE TABLE");
 		}
-		else
+		columns.add("CLASS_NAME");
+		columns.add("AUTO_GENERATED");
+		columns.add("IDENTITY_COLUMN");
+		columns.add("READONLY");
+		columns.add("UPDATEABLE");
+
+		String[] cols = columns.toArray(new String[0]);
+		int[] types = new int[cols.length];
+
+		for (int i=0; i < cols.length; i++)
 		{
-			cols = new String[] { "INDEX", "COLUMN_NAME", "ALIAS", "DATA_TYPE", "JDBC Type", "CLASS_NAME" };
-			types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR };
+			if (cols[i].equals("JDBC TYPE"))
+			{
+				types[i] = Types.INTEGER;
+			}
+			else
+			{
+				types[i] = Types.VARCHAR;
+			}
 		}
 
 		DataStore infoDs = new DataStore(cols, types);
@@ -67,6 +87,10 @@ public class ResultInfoDisplayBuilder
 				infoDs.setValue(row, colIndex++, col.getSourceTableName());
 			}
 			infoDs.setValue(row, colIndex++, col.getColumnClassName());
+			infoDs.setValue(row, colIndex++, col.isAutoincrement());
+			infoDs.setValue(row, colIndex++, col.isIdentityColumn());
+			infoDs.setValue(row, colIndex++, col.isReadonly());
+			infoDs.setValue(row, colIndex++, col.isUpdateable());
 		}
 		return infoDs;
 	}
