@@ -123,6 +123,17 @@ public class JdbcIndexReader
 		{
 			return null;
 		}
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("JdbcIndexReader.getIndexInfo()",
+				"Calling getIndexInfo() using: catalog="+ table.getCatalog() +
+				", schema=" + table.getSchema() +
+				", name=" + table.getTableName() +
+				", unique=" + unique +
+				", approximate=true");
+		}
+		
 		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, true);
 	}
 

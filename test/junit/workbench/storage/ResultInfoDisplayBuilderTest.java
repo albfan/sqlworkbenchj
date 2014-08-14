@@ -79,7 +79,7 @@ extends WbTestCase
 
 			assertNotNull(infoDs);
 			assertEquals(3, infoDs.getRowCount());
-			assertEquals(6, infoDs.getColumnCount());
+			assertEquals(10, infoDs.getColumnCount());
 			assertEquals("ID", infoDs.getValueAsString(0, "COLUMN_NAME"));
 			assertEquals("PID", infoDs.getValueAsString(0, "ALIAS")); // this only works properly with H2
 			assertEquals("INTEGER", infoDs.getValueAsString(0, "DATA_TYPE"));
@@ -91,7 +91,7 @@ extends WbTestCase
 			infoDs = ResultInfoDisplayBuilder.getDataStore(info, true);
 
 			assertEquals(3, infoDs.getRowCount());
-			assertEquals(8, infoDs.getColumnCount());
+			assertEquals(12, infoDs.getColumnCount());
 			assertEquals("ID", infoDs.getValueAsString(0, "COLUMN_NAME"));
 			assertEquals("PID", infoDs.getValueAsString(0, "ALIAS"));
 			assertEquals("INTEGER", infoDs.getValueAsString(0, "DATA_TYPE"));

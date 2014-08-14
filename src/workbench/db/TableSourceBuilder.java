@@ -747,7 +747,7 @@ public class TableSourceBuilder
 		{
 			pkName = "pk_" + SqlUtil.cleanupIdentifier(table.getTableName().toLowerCase());
 			int maxLen = this.dbConnection.getMetadata().getMaxTableNameLength();
-			if (pkName.length() > maxLen)
+			if (maxLen > 0 && pkName.length() > maxLen)
 			{
 				pkName = pkName.substring(0, maxLen - 1);
 			}

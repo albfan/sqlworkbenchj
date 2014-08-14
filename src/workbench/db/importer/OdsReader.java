@@ -31,12 +31,14 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 import org.odftoolkit.simple.SpreadsheetDocument;
 import org.odftoolkit.simple.table.Cell;
+import org.odftoolkit.simple.table.Column;
 import org.odftoolkit.simple.table.Row;
 import org.odftoolkit.simple.table.Table;
 
@@ -76,29 +78,59 @@ public class OdsReader
 	}
 
 	@Override
-	public List<String> getHeaderColumns()
+	public synchronized List<String> getHeaderColumns()
 	{
 		if (headerColumns == null)
 		{
-			Row rowData = worksheet.getRowByIndex(0);
-			int colCount = rowData.getCellCount();
-			headerColumns = new ArrayList<String>(colCount);
-			for (int i=0; i < colCount; i++)
+			if (Settings.getInstance().getBoolProperty("workbench.ods.use.get_cell_count", true))
 			{
-				Cell cell = rowData.getCellByIndex(i);
-				String title = cell.getDisplayText();
-
-				if (title != null)
-				{
-					headerColumns.add(title.toString());
-				}
-				else
-				{
-					headerColumns.add("Col" + Integer.toString(i));
-				}
+				readHeaderColsDefault();
+			}
+			else
+			{
+				readHeaderColsAlternate();
 			}
 		}
 		return headerColumns;
+	}
+
+	private void readHeaderColsDefault()
+	{
+		Row rowData = worksheet.getRowByIndex(0);
+		int colCount = rowData.getCellCount();
+		headerColumns = new ArrayList<String>(colCount);
+		for (int i=0; i < colCount; i++)
+		{
+			Cell cell = rowData.getCellByIndex(i);
+			String title = cell.getDisplayText();
+
+			if (title != null)
+			{
+				headerColumns.add(title);
+			}
+			else
+			{
+				headerColumns.add("Col" + Integer.toString(i));
+			}
+		}
+	}
+
+	private void readHeaderColsAlternate()
+	{
+		headerColumns = new ArrayList<String>();
+		List<Column> columnList = worksheet.getColumnList();
+		for (Column col : columnList)
+		{
+			Cell cell = col.getCellByIndex(0);
+			if (cell != null && cell.getColumnSpannedNumber() == 1)
+			{
+				String title = cell.getDisplayText();
+				if (StringUtil.isNonBlank(title))
+				{
+					headerColumns.add(title);
+				}
+			}
+		}
 	}
 
 	@Override

@@ -456,7 +456,7 @@ public class DbMetadata
 	{
 		return maxTableNameLength;
 	}
-	
+
 	/**
 	 * Wrapper around DatabaseMetadata.getSearchStringEscape() that does not throw an exception.
 	 *
@@ -1432,21 +1432,26 @@ public class DbMetadata
 			synTypeName = synReader.getSynonymTypeName();
 		}
 
+		if (!getDbSettings().supportsMetaDataNullPattern() && escapedNamePattern == null)
+		{
+			escapedNamePattern = "%";
+		}
+
 		ResultSet tableRs = null;
 		try
 		{
+			String[] typesToUse = types;
+			if (getDbSettings().cleanupTypeList())
+			{
+				typesToUse = cleanupTypes(types);
+			}
+
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
 				LogMgr.logDebug("DbMetadata.getObjects()", "Calling getTables() using: catalog="+ escapedCatalog +
 					", schema=" + escapedSchema +
 					", name=" + escapedNamePattern +
-					", types=" + (types == null ? "null" : Arrays.asList(types).toString()));
-			}
-
-			String[] typesToUse = types;
-			if (getDbSettings().cleanupTypeList())
-			{
-				typesToUse = cleanupTypes(types);
+					", types=" + (typesToUse == null ? "null" : Arrays.asList(typesToUse).toString()));
 			}
 
 			// if the types are cleaned up, an empty array can be returned
@@ -1461,6 +1466,11 @@ public class DbMetadata
 					LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
 					return result;
 				}
+			}
+
+			if (tableRs != null && Settings.getInstance().getDebugMetadataSql())
+			{
+				SqlUtil.dumpResultSetInfo("DatabaseMetaData.getTables() returned:", tableRs.getMetaData());
 			}
 
 			boolean useColumnNames = dbSettings.useColumnNameForMetadata();

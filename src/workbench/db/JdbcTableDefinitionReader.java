@@ -162,8 +162,9 @@ public class JdbcTableDefinitionReader
 				}
 				if (rs.wasNull()) digits = -1;
 
-				String remarks = useColumnNames ? rs.getString("REMARKS") : rs.getString(12);
-				String defaultValue = useColumnNames ? rs.getString("COLUMN_DEF") : rs.getString(13);
+				String remarks = getString(rs, "REMARKS", 12, useColumnNames);
+				String defaultValue = getString(rs, "COLUMN_DEF", 13, useColumnNames);
+
 				if (defaultValue != null && dbSettings.trimDefaults())
 				{
 					defaultValue = defaultValue.trim();
@@ -180,7 +181,7 @@ public class JdbcTableDefinitionReader
 					position = -1;
 				}
 
-				String nullable = useColumnNames ? rs.getString("IS_NULLABLE") : rs.getString(18);
+				String nullable = getString(rs, "IS_NULLABLE", 18, useColumnNames);
 
 				String increment = "NO";
 				if (jdbc4)
@@ -221,6 +222,19 @@ public class JdbcTableDefinitionReader
 		ColumnIdentifier.sortByPosition(columns);
 
 		return columns;
+	}
+
+	private String getString(ResultSet rs, String colName, int colIndex, boolean useColumnNames)
+	{
+		try
+		{
+			return useColumnNames ? rs.getString(colName) : rs.getString(colIndex);
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("JdbcTableDefinitionReader.getString()", "Could not read column " + colName, ex);
+		}
+		return null;
 	}
 
 	/**

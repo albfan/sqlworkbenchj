@@ -868,7 +868,7 @@ public class DataImporter
 			this.tableDeleter.cancel();
 		}
 
-		this.source.cancel();
+		if (this.source != null) this.source.cancel();
 		this.messages.append(ResourceMgr.getString("MsgImportCancelled") + "\n");
 	}
 

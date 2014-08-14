@@ -23,13 +23,12 @@ package workbench.sql.wbcommands;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
 
 import workbench.sql.StatementRunnerResult;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -41,19 +40,11 @@ import static org.junit.Assert.*;
 public class WbGenerateScriptTest
 	extends WbTestCase
 {
+	private boolean oldGenProp;
+
 	public WbGenerateScriptTest()
 	{
 		super("WbGenerateScriptTest");
-	}
-
-	@Before
-	public void setUp()
-	{
-	}
-
-	@After
-	public void tearDown()
-	{
 	}
 
 	@Test
@@ -83,49 +74,59 @@ public class WbGenerateScriptTest
 			"commit;\n";
 		TestUtil.executeScript(conn, sql);
 
-		WbGenerateScript genScript = new WbGenerateScript();
-		genScript.setConnection(conn);
+		boolean oldGenProp = Settings.getInstance().getAutoGeneratePKName();
+		Settings.getInstance().setAutoGeneratePKName(true);
 
-		StatementRunnerResult result = null;
-		String script = null;
+		try
+		{
+			WbGenerateScript genScript = new WbGenerateScript();
+			genScript.setConnection(conn);
 
-		result = genScript.execute("WbGenerateScript -types=view");
-		script = result.getMessageBuffer().toString();
-		assertNotNull(script);
-		assertTrue(script.toLowerCase().startsWith("create view v_order_items"));
+			StatementRunnerResult result = null;
+			String script = null;
 
-		result = genScript.execute("WbGenerateScript -objects=customer,orders");
-		script = result.getMessageBuffer().toString();
-		assertTrue(script.contains("CREATE TABLE CUSTOMER"));
-		assertTrue(script.contains("ADD CONSTRAINT pk_customer"));
+			result = genScript.execute("WbGenerateScript -types=view");
+			script = result.getMessageBuffer().toString();
+			assertNotNull(script);
+			assertTrue(script.toLowerCase().startsWith("create view v_order_items"));
 
-		assertTrue(script.contains("CREATE TABLE ORDERS"));
-		assertTrue(script.contains("ADD CONSTRAINT pk_orders"));
-		assertTrue(script.contains("ADD CONSTRAINT FK_ORDERS_CUST"));
+			result = genScript.execute("WbGenerateScript -objects=customer,orders");
+			script = result.getMessageBuffer().toString();
+			assertTrue(script.contains("CREATE TABLE CUSTOMER"));
+			assertTrue(script.contains("ADD CONSTRAINT pk_customer"));
 
-		result = genScript.execute("WbGenerateScript invoice");
-		script = result.getMessageBuffer().toString();
+			assertTrue(script.contains("CREATE TABLE ORDERS"));
+			assertTrue(script.contains("ADD CONSTRAINT pk_orders"));
+			assertTrue(script.contains("ADD CONSTRAINT FK_ORDERS_CUST"));
 
-		assertTrue(script.contains("CREATE TABLE INVOICE"));
-		assertTrue(script.contains("ADD CONSTRAINT pk_invoice"));
-		assertTrue(script.contains("ADD CONSTRAINT FK_INV_ORDER"));
+			result = genScript.execute("WbGenerateScript invoice");
+			script = result.getMessageBuffer().toString();
 
-		result = genScript.execute("WbGenerateScript -objects=o%");
-		script = result.getMessageBuffer().toString();
+			assertTrue(script.contains("CREATE TABLE INVOICE"));
+			assertTrue(script.contains("ADD CONSTRAINT pk_invoice"));
+			assertTrue(script.contains("ADD CONSTRAINT FK_INV_ORDER"));
 
-		assertTrue(script.contains("CREATE TABLE ORDERS"));
-		assertTrue(script.contains("CREATE TABLE ORDER_ITEM"));
-		assertFalse(script.contains("CREATE TABLE CUSTOMER"));
-		assertFalse(script.contains("CREATE TABLE INVOICE"));
-		assertFalse(script.contains("CREATE TABLE CURRENCY"));
+			result = genScript.execute("WbGenerateScript -objects=o%");
+			script = result.getMessageBuffer().toString();
 
-		result = genScript.execute("WbGenerateScript -types=table -objects=* -exclude=*ord*");
-		script = result.getMessageBuffer().toString();
-		assertTrue(script.contains("CREATE TABLE CUSTOMER"));
-		assertTrue(script.contains("CREATE TABLE INVOICE"));
-		assertTrue(script.contains("CREATE TABLE CURRENCY"));
-		assertFalse(script.contains("CREATE TABLE ORDERS"));
-		assertFalse(script.contains("CREATE TABLE ORDER_ITEM"));
+			assertTrue(script.contains("CREATE TABLE ORDERS"));
+			assertTrue(script.contains("CREATE TABLE ORDER_ITEM"));
+			assertFalse(script.contains("CREATE TABLE CUSTOMER"));
+			assertFalse(script.contains("CREATE TABLE INVOICE"));
+			assertFalse(script.contains("CREATE TABLE CURRENCY"));
+
+			result = genScript.execute("WbGenerateScript -types=table -objects=* -exclude=*ord*");
+			script = result.getMessageBuffer().toString();
+			assertTrue(script.contains("CREATE TABLE CUSTOMER"));
+			assertTrue(script.contains("CREATE TABLE INVOICE"));
+			assertTrue(script.contains("CREATE TABLE CURRENCY"));
+			assertFalse(script.contains("CREATE TABLE ORDERS"));
+			assertFalse(script.contains("CREATE TABLE ORDER_ITEM"));
+		}
+		finally
+		{
+			Settings.getInstance().setAutoGeneratePKName(oldGenProp);
+		}
 	}
 
 }

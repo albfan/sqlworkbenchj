@@ -173,7 +173,6 @@ public class LookupDataLoader
 	{
 		try
 		{
-			conn.setBusy(true);
 			lookupTable = null;
 			TableIdentifier table = null;
 			List<DependencyNode> nodes = conn.getObjectCache().getReferencedTables(baseTable);
@@ -191,6 +190,7 @@ public class LookupDataLoader
 				}
 			}
 			// can't use the objectCache here because I also need the PK of the table
+			conn.setBusy(true);
 			lookupTable = conn.getMetadata().getTableDefinition(table);
 		}
 		finally

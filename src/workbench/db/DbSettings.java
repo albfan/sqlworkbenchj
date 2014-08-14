@@ -1662,6 +1662,11 @@ public class DbSettings
 		return supportsMetaDataWildcards("catalog");
 	}
 
+	public boolean supportsMetaDataNullPattern()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "metadata.pattern.tablename.null.supported", true);
+	}
+
 	private boolean supportsMetaDataWildcards(String type)
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "metadata.retrieval.wildcards." + type, supportsMetaDataWildcards());

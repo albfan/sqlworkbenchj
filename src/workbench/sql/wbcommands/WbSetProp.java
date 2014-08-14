@@ -168,9 +168,13 @@ public class WbSetProp
 
 	private String getPropertyName(String shortName)
 	{
-		String longName = configMap.get(shortName);
-		if (longName == null) return shortName;
-		return longName;
+		String propName = configMap.get(shortName);
+		if (propName == null) propName = shortName;
+		if (currentConnection != null)
+		{
+			return propName.replace("[dbid]", this.currentConnection.getDbId());
+		}
+		return propName;
 	}
 
 	@Override

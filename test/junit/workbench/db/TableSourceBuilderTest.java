@@ -190,18 +190,22 @@ public class TableSourceBuilderTest
 	{
 		TestUtil util = getTestUtil();
 		WbConnection con = util.getConnection();
+		boolean oldProp = Settings.getInstance().getAutoGeneratePKName();
+		Settings.getInstance().setAutoGeneratePKName(true);
 		try
 		{
 			TableIdentifier tbl = new TableIdentifier("OTHER.PERSON");
 			TableSourceBuilder builder = new TableSourceBuilder(con);
 			PkDefinition pk = new PkDefinition(CollectionUtil.arrayList("ID"));
 			String sql = builder.getPkSource(tbl, pk, false).toString();
+			System.out.println(sql);
 			assertTrue(sql.indexOf("ADD CONSTRAINT pk_person") > -1);
 		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 			ConnectionMgr.getInstance().clearProfiles();
+			Settings.getInstance().setAutoGeneratePKName(oldProp);
 		}
 	}
 
