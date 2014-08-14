@@ -485,6 +485,7 @@ public class DbExplorerPanel
 				this.schemaLabel.setVisible(false);
 				currentSchema = null;
 			}
+
 			try
 			{
 				if (this.dbConnection.getDbSettings().supportsCatalogs())
