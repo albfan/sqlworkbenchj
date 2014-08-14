@@ -40,8 +40,6 @@ import static org.junit.Assert.*;
 public class WbGenerateScriptTest
 	extends WbTestCase
 {
-	private boolean oldGenProp;
-
 	public WbGenerateScriptTest()
 	{
 		super("WbGenerateScriptTest");

@@ -177,7 +177,7 @@ public class PostgresProcedureReaderTest
 		assertEquals("fn_get_data", def.getProcedureName());
 		String source = def.getSource(con).toString();
 		String expected =
-			"CREATE OR REPLACE FUNCTION " + TEST_ID + ".fn_get_data(pid integer, title varchar, some_output text)\n" +
+			"CREATE OR REPLACE FUNCTION " + TEST_ID + ".fn_get_data(pid integer, title character varying, some_output text)\n" +
 			"  RETURNS SETOF record\n" +
 			"  LANGUAGE sql\n" +
 			"AS\n" +

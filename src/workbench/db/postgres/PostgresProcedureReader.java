@@ -62,7 +62,6 @@ public class PostgresProcedureReader
 	// Maps PG type names to Java types.
 	private Map<String, Integer> pgType2Java;
 	private PGTypeLookup pgTypes;
-	private PGType voidType;
 
 	public PostgresProcedureReader(WbConnection conn)
 	{
@@ -150,10 +149,6 @@ public class PostgresProcedureReader
 					}
 					PGType typ = new PGType(StringUtil.trimQuotes(typeName), oid);
 					typeMap.put(Long.valueOf(oid), typ);
-					if (typ.isVoid())
-					{
-						voidType = typ;
-					}
 				}
 				connection.releaseSavepoint(sp);
 			}
@@ -316,7 +311,7 @@ public class PostgresProcedureReader
 		throws SQLException
 	{
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true)
-			  && JdbcUtils.hasMinimumServerVersion(connection, "8.1"))
+			  && JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
 		{
 			PGProcName pgName = new PGProcName(def, getTypeLookup());
 			return getColumns(def.getCatalog(), def.getSchema(), pgName);
@@ -348,11 +343,13 @@ public class PostgresProcedureReader
 
 		if (JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
 		{
-			sql += "       pg_get_function_result(p.oid) as formatted_return_type, \n";
+			sql += "       pg_get_function_result(p.oid) as formatted_return_type, \n" +
+						 "       pg_get_function_arguments(p.oid) as formatted_parameters, \n ";
 		}
 		else
 		{
-			sql += "       null::text as formatted_return_type, \n";
+			sql += "       null::text as formatted_return_type, \n" +
+						 "       null::text as formatted_parameters, \n";
 		}
 		sql +=	"       p.prorettype as return_type_oid, \n" +
 						"       coalesce(array_to_string(p.proallargtypes, ';'), array_to_string(p.proargtypes, ';')) as argtypes, \n" +
@@ -406,6 +403,7 @@ public class PostgresProcedureReader
 		boolean isAggregate = false;
 		String comment = null;
 		String schema = null;
+
 		try
 		{
 			if (useSavepoint)
@@ -456,28 +454,14 @@ public class PostgresProcedureReader
 					cost = rs.getDouble("procost");
 					rows = rs.getDouble("prorows");
 				}
-				List<String> argNames = StringUtil.stringToList(names, ";", true, true);
-				List<String> argTypes = StringUtil.stringToList(types, ";", true, true);
-				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
-
-				List<ColumnIdentifier> args = convertToColumns(argNames, argTypes, argModes);
+				CharSequence parameters = rs.getString("formatted_parameters");
+				if (parameters == null)
+				{
+					parameters = buildParameterList(names, types, modes);
+				}
 
 				source.append('(');
-				int paramCount = 0;
-				for (ColumnIdentifier col : args)
-				{
-					String mode = col.getArgumentMode();
-					if ("RETURN".equals(mode)) continue;
-
-					if (paramCount > 0) source.append(", ");
-
-					String argName = col.getColumnName();
-					String type = col.getDbmsType();
-					source.append(argName);
-					source.append(' ');
-					source.append(type);
-					paramCount ++;
-				}
+				source.append(parameters);
 
 				source.append(")\n  RETURNS ");
 				if (readableReturnType == null)
@@ -571,6 +555,34 @@ public class PostgresProcedureReader
 		def.setSource(source);
 	}
 
+	private CharSequence buildParameterList(String names, String types, String modes)
+	{
+		List<String> argNames = StringUtil.stringToList(names, ";", true, true);
+		List<String> argTypes = StringUtil.stringToList(types, ";", true, true);
+		List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
+
+		List<ColumnIdentifier> args = convertToColumns(argNames, argTypes, argModes);
+		StringBuilder result = new StringBuilder(args.size() * 10);
+
+		result.append('(');
+		int paramCount = 0;
+		for (ColumnIdentifier col : args)
+		{
+			String mode = col.getArgumentMode();
+			if ("RETURN".equals(mode)) continue;
+
+			if (paramCount > 0) result.append(", ");
+
+			String argName = col.getColumnName();
+			String type = col.getDbmsType();
+			result.append(argName);
+			result.append(' ');
+			result.append(type);
+			paramCount ++;
+		}
+		return result;
+	}
+
 	/**
 	 * Read the definition of a function using pg_get_functiondef()
 	 *
@@ -578,8 +590,8 @@ public class PostgresProcedureReader
 	 */
 	protected void readFunctionDef(ProcedureDefinition def)
 	{
-		PGProcName name = new PGProcName(def.getDisplayName(), getTypeLookup());
-		String funcname = def.getSchema() + "." + name.getFormattedName();
+		PGProcName name = new PGProcName(def, getTypeLookup());
+		String funcname = def.getSchema() + "." + name.getSignature();
 		String sql = "select pg_get_functiondef('" + funcname + "'::regprocedure)";
 
 		if (Settings.getInstance().getDebugMetadataSql())

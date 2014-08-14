@@ -28,6 +28,7 @@ import java.util.List;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ProcedureDefinition;
+
 import workbench.util.StringUtil;
 
 /**
@@ -178,6 +179,26 @@ public class PGProcName
 	public String getName()
 	{
 		return procName;
+	}
+
+	public String getSignature()
+	{
+		if (arguments == null || arguments.isEmpty()) return procName +"()";
+		StringBuilder b = new StringBuilder(procName.length() + arguments.size() * 10);
+		b.append(procName);
+		b.append('(');
+		int argCount = 0;
+		for (PGArg arg : arguments)
+		{
+			if (arg.argMode == PGArg.ArgMode.in)
+			{
+				if (argCount > 0) b.append(", ");
+				b.append(arg.argType.getTypeName());
+				argCount ++;
+			}
+		}
+		b.append(')');
+		return b.toString();
 	}
 
 	public String getFormattedName()
