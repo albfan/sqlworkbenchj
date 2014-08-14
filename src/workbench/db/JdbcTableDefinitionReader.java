@@ -141,7 +141,7 @@ public class JdbcTableDefinitionReader
 				jdbc4 = name.equals("IS_AUTOINCREMENT");
 			}
 
-			while (rs != null && rs.next())
+			while (rs.next())
 			{
 				String colName = StringUtil.trim(useColumnNames ? rs.getString("COLUMN_NAME") : rs.getString(4));
 				int sqlType = useColumnNames ? rs.getInt("DATA_TYPE") : rs.getInt(5);

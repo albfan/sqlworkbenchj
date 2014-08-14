@@ -2405,13 +2405,14 @@ public class DbMetadata
 	{
 		List<String> result = CollectionUtil.arrayList();
 
+		boolean useColumnNames = dbSettings.useColumnNameForMetadata();
 		ResultSet rs = null;
 		try
 		{
 			rs = this.metaData.getCatalogs();
 			while (rs.next())
 			{
-				String cat = rs.getString(1);
+				String cat = useColumnNames ? rs.getString("TABLE_CAT") : rs.getString(1);
 				if (cat == null) continue;
 
 				if (filter == null || !filter.isExcluded(cat))
@@ -2468,12 +2469,13 @@ public class DbMetadata
 		ArrayList<String> result = new ArrayList<String>();
 		ResultSet rs = null;
 
+		boolean useColumnNames = dbSettings.useColumnNameForMetadata();
 		try
 		{
 			rs = this.metaData.getSchemas();
 			while (rs.next())
 			{
-				String schema = rs.getString(1);
+				String schema = useColumnNames ? rs.getString("TABLE_SCHEM") : rs.getString(1);
 				if (schema == null)	continue;
 				if (filter == null || !filter.isExcluded(schema))
 				{
