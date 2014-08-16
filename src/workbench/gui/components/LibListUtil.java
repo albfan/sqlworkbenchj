@@ -81,6 +81,7 @@ public class LibListUtil
 			fileDir = fileDir.getParentFile();
 			if (fileDir == null) break;
 		}
+		if (fileDir == null) return file;
 		String fpath = file.getAbsolutePath().replace(fileDir.getAbsolutePath(), Settings.LIB_DIR_KEY);
 		return new WbFile(fpath);
 	}
