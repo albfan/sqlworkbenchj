@@ -688,10 +688,13 @@ public class EditorPanel
 
 	public boolean readFile(File aFile)
 	{
+		if (aFile == null) return false;
+		
 		String encoding = null;
 		if (Settings.getInstance().getEditorDetectEncoding())
 		{
 			encoding = FileUtil.detectFileEncoding(aFile);
+			LogMgr.logDebug("EditorPanel.readFile()", "Detected encoding: " + encoding + " for file " + aFile.getAbsolutePath());
 		}
 		return this.readFile(aFile, encoding);
 	}
