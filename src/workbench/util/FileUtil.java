@@ -526,7 +526,7 @@ public class FileUtil
 			int nread;
 			while ((nread = fis.read(buf)) > 0 && !detector.isDone())
 			{
-					detector.handleData(buf, 0, nread);
+				detector.handleData(buf, 0, nread);
 			}
 			detector.dataEnd();
 			encoding = detector.getDetectedCharset();
