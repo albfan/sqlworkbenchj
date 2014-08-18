@@ -42,7 +42,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
 import workbench.log.LogMgr;
+
+import org.mozilla.universalchardet.UniversalDetector;
 
 /**
  * @author  Thomas Kellerer
@@ -506,5 +509,36 @@ public class FileUtil
 		{
 			FileUtil.closeQuietely(writer);
 		}
+	}
+
+	public static String detectFileEncoding(File file)
+	{
+		if (file == null) return null;
+		if (!file.exists()) return null;
+		
+		byte[] buf = new byte[4096];
+
+		UniversalDetector detector = new UniversalDetector(null);
+		String encoding = null;
+		try
+		{
+			FileInputStream fis = new FileInputStream(file);
+			int nread;
+			while ((nread = fis.read(buf)) > 0 && !detector.isDone())
+			{
+					detector.handleData(buf, 0, nread);
+			}
+			detector.dataEnd();
+			encoding = detector.getDetectedCharset();
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("FileUtil.detectFileEncoding()", "Could not detect file encoding", th);
+		}
+		finally
+		{
+			detector.reset();
+		}
+		return encoding;
 	}
 }

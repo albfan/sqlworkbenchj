@@ -688,7 +688,12 @@ public class EditorPanel
 
 	public boolean readFile(File aFile)
 	{
-		return this.readFile(aFile, null);
+		String encoding = null;
+		if (Settings.getInstance().getEditorDetectEncoding())
+		{
+			encoding = FileUtil.detectFileEncoding(aFile);
+		}
+		return this.readFile(aFile, encoding);
 	}
 
 	public boolean readFile(File toLoad, String encoding)

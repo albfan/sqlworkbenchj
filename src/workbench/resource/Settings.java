@@ -1380,6 +1380,11 @@ public class Settings
 		this.setFont(PROPERTY_PRINTER_FONT, aFont);
 	}
 
+	public boolean getEditorDetectEncoding()
+	{
+		return props.getBoolProperty("workbench.editor.drop.detect.encoding", true);
+	}
+
 	public void setEditorFont(Font f)
 	{
 		this.setFont(PROPERTY_EDITOR_FONT, f);
