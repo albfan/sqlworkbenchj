@@ -515,7 +515,7 @@ public class FileUtil
 	{
 		if (file == null) return null;
 		if (!file.exists()) return null;
-		
+
 		byte[] buf = new byte[4096];
 
 		UniversalDetector detector = new UniversalDetector(null);
@@ -530,6 +530,7 @@ public class FileUtil
 			}
 			detector.dataEnd();
 			encoding = detector.getDetectedCharset();
+			LogMgr.logInfo("FileUtil.detectFileEncoding()", "Detected encoding: " + encoding + " for file " + file.getAbsolutePath());
 		}
 		catch (Throwable th)
 		{
