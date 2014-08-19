@@ -1526,6 +1526,10 @@ public class SqlPanel
 			{
 				File f = new File(fname);
 				tooltip = f.getAbsolutePath();
+				if (editor != null)
+				{
+					tooltip += " (" + editor.getCurrentFileEncoding() + ")";
+				}
 				iconHandler.showIconForTab(iconHandler.getFileIcon());
 			}
 			else

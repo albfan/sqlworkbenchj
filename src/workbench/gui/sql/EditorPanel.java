@@ -692,6 +692,10 @@ public class EditorPanel
 		if (Settings.getInstance().getEditorDetectEncoding())
 		{
 			encoding = FileUtil.detectFileEncoding(aFile);
+			if (encoding == null)
+			{
+				encoding = Settings.getInstance().getSystemFileEncoding();
+			}
 		}
 		return this.readFile(aFile, encoding);
 	}

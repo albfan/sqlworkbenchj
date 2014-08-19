@@ -2404,7 +2404,7 @@ public class Settings
 		setProperty("workbench.export.general.nullstring", value);
 	}
 
-	private String getSystemFileEncoding()
+	public String getSystemFileEncoding()
 	{
 		String def = System.getProperty("file.encoding");
 		// Replace the strange Windows encoding with something more standard
