@@ -39,19 +39,19 @@ import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 
 /**
- * List all tables available to the current user.
+ * List tables and other database objects available to the current user.
  * <br>
  * This is the same information as displayed in the DbExplorer's "Objects" tab.
  *
  * @see workbench.db.DbMetadata#getObjects(String, String, String, String[])
  * @author Thomas Kellerer
  */
-public class WbListTables
+public class WbList
 	extends SqlCommand
 {
 	public static final String VERB = "WbList";
 
-	public WbListTables()
+	public WbList()
 	{
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_OBJECTS);

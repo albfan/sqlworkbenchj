@@ -41,11 +41,11 @@ import static org.junit.Assert.*;
 /**
  * @author Thomas Kellerer
  */
-public class WbListTablesTest
+public class WbListTest
 	extends WbTestCase
 {
 
-	public WbListTablesTest()
+	public WbListTest()
 	{
 		super("WbListTablesTest");
 	}
@@ -68,7 +68,7 @@ public class WbListTablesTest
 		{
 			con = util.getConnection();
 			TestUtil.executeScript(con, sql);
-			WbListTables list = new WbListTables();
+			WbList list = new WbList();
 			list.setConnection(con);
 			StatementRunnerResult result = list.execute("wblist");
 			assertTrue(result.isSuccess());
@@ -125,7 +125,7 @@ public class WbListTablesTest
 		{
 			con = util.getConnection();
 			TestUtil.executeScript(con, sql);
-			WbListTables list = new WbListTables();
+			WbList list = new WbList();
 			list.setConnection(con);
 			StatementRunnerResult result = list.execute("wblist -schema=test_2");
 			assertTrue(result.isSuccess());

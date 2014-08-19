@@ -79,7 +79,7 @@ import workbench.sql.wbcommands.WbListIndexes;
 import workbench.sql.wbcommands.WbListPkDef;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
-import workbench.sql.wbcommands.WbListTables;
+import workbench.sql.wbcommands.WbList;
 import workbench.sql.wbcommands.WbListTriggers;
 import workbench.sql.wbcommands.WbListVars;
 import workbench.sql.wbcommands.WbLoadPkMapping;
@@ -140,7 +140,7 @@ public class CommandMapper
 		cmdDispatch.put("*", new SqlCommand());
 
 		// Workbench specific commands
-		addCommand(new WbListTables());
+		addCommand(new WbList());
 		addCommand(new WbListProcedures());
 		addCommand(new WbDefineVar());
 		addCommand(new WbEnableOraOutput());

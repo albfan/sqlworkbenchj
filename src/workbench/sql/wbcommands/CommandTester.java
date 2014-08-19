@@ -82,7 +82,7 @@ public class CommandTester
 		putVerb(WbInclude.VERB);
 		putVerb(WbListPkDef.VERB);
 		putVerb(WbListVars.VERB);
-		putVerb(WbListTables.VERB);
+		putVerb(WbList.VERB);
 		putVerb(WbListProcedures.VERB);
 		putVerb(WbListCatalogs.VERB);
 		putVerb(WbListCatalogs.VERB_ALTERNATE);
