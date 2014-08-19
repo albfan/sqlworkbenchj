@@ -157,17 +157,18 @@
   </void>
 
   <void method="put">
+   <!-- this is valid for SQL Server 2005 and later -->
    <string>Microsoft SQL Server</string>
-   <object class="workbench.db.GetMetaDataSql">
+   <object id="trg_src_mssql9" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
-  select definition
+  select /* SQLWorkbench */ definition
   from (
     select tr.name, sm.definition
     from sys.sql_modules sm with (nolock)
       join sys.triggers tr with (nolock) on tr.object_id = sm.object_id
     union all
-    select tr.name, sm.definition
+    select tr.name collate database_default as name, sm.definition collate database_default as definition
     from sys.server_sql_modules sm with (nolock)
       join sys.server_triggers tr with (nolock) on tr.object_id = sm.object_id
   ) trg
