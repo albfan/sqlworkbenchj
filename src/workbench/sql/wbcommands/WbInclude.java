@@ -160,7 +160,9 @@ public class WbInclude
 
 		if (file == null)
 		{
-			String msg = ResourceMgr.getString("ErrIncludeWrongParameter").replace("%default_encoding%", Settings.getInstance().getDefaultEncoding());
+			String msg = ResourceMgr.getString("ErrIncludeWrongParameter").
+				replace("%default_encoding%", Settings.getInstance().getDefaultEncoding()).
+				replace("%default_continue%", Boolean.toString(Settings.getInstance().getIncludeDefaultContinue()));
 			result.addMessage(msg);
 			result.setFailure();
 			return result;
@@ -211,7 +213,7 @@ public class WbInclude
 
 		if (checkParms)
 		{
-			continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false);
+			continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, Settings.getInstance().getIncludeDefaultContinue());
 			checkEscape = cmdLine.getBoolean(ARG_CHECK_ESCAPED_QUOTES, Settings.getInstance().getCheckEscapedQuotes());
 			verbose = cmdLine.getBoolean("verbose", false);
 			defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());

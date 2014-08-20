@@ -2831,6 +2831,11 @@ public class Settings
 		return getBoolProperty("workbench.sql.checkescapedquotes", false);
 	}
 
+	public boolean getIncludeDefaultContinue()
+	{
+		return getBoolProperty("workbench.include.continue.default", false);
+	}
+
 	public void setCheckEscapedQuotes(boolean flag)
 	{
 		this.setProperty("workbench.sql.checkescapedquotes", flag);
