@@ -104,6 +104,17 @@ public class ResourceMgr
 		return getString("TxtBuild") + " " + getBuildNumber().toString() + " (" + getString("TxtBuildDate") + ")";
 	}
 
+	public static String getJavaInfo()
+	{
+		String jdk = getString("TxtJavaVersion") + " " + System.getProperty("java.runtime.version");
+		String bits = System.getProperty("sun.arch.data.model", null);
+		if (bits != null)
+		{
+			jdk += " (" + bits + "bit)";
+		}
+		return jdk;
+	}
+
 	public static String replaceModifierText(String msg)
 	{
 		msg = StringUtil.replace(msg, "%shift%", KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK));

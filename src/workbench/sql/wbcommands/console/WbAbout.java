@@ -69,7 +69,7 @@ public class WbAbout
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.addMessage(ResourceMgr.getBuildInfo());
-		result.addMessage(ResourceMgr.getString("TxtJavaVersion") + ": " + System.getProperty("java.runtime.version"));
+		result.addMessage(ResourceMgr.getJavaInfo());
 
 		WbFile f = Settings.getInstance().getConfigFile();
 		String s = ResourceMgr.getFormattedString("LblSettingsLocation", f.getFullPath());

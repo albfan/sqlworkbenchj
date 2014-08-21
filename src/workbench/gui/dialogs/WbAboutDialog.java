@@ -147,7 +147,6 @@ public class WbAboutDialog
         closeButtonActionPerformed(evt);
       }
     });
-
     buttonPanel.add(closeButton);
 
     getContentPane().add(buttonPanel, BorderLayout.SOUTH);
@@ -241,7 +240,7 @@ public class WbAboutDialog
     gridBagConstraints.insets = new Insets(0, 5, 4, 5);
     contentPanel.add(jeditLabel, gridBagConstraints);
 
-    jdkVersion.setText(ResourceMgr.getString("TxtJavaVersion") + " " + System.getProperty("java.runtime.version"));
+    jdkVersion.setText(ResourceMgr.getJavaInfo());
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
