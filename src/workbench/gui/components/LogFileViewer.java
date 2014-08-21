@@ -49,6 +49,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.FixedSizeList;
+import workbench.util.MemoryWatcher;
 import workbench.util.WbFile;
 
 /**
@@ -126,10 +127,9 @@ public class LogFileViewer
 					load();
 				}
 			}
-
 		};
 		int refreshTime = Settings.getInstance().getIntProperty("workbench.logviewer.refresh", 1000);
-		watcher.schedule(task, refreshTime, refreshTime);
+		watcher.schedule(task, (long)(refreshTime * 1.5), refreshTime);
 	}
 
 	public void append(String msg)
@@ -194,6 +194,15 @@ public class LogFileViewer
 		sourceFile = new WbFile(f);
 		setTitle(sourceFile.getFullPath());
 		initWatcher();
+		EventQueue.invokeLater(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				load();
+			}
+		});
 	}
 
 	protected void saveSettings()
@@ -205,8 +214,13 @@ public class LogFileViewer
 	public String readLastLines(File src, int maxLines)
 		throws IOException
 	{
+		final int maxBuff = (int)(MemoryWatcher.getFreeMemory() * 0.1); // never use more than 10 percent of the free memory for the buffer
 		int logfileSize = Settings.getInstance().getMaxLogfileSize();
-		int buffSize = Settings.getInstance().getIntProperty("workbench.logviewer.readbuff", (int)(logfileSize / 15));
+		int buffSize = Settings.getInstance().getIntProperty("workbench.logviewer.readbuff", (int)(logfileSize * 0.15));
+		if (buffSize > maxBuff)
+		{
+			buffSize = maxBuff;
+		}
 		BufferedReader reader = EncodingUtil.createBufferedReader(src, LogMgr.DEFAULT_ENCODING, buffSize);
 		try
 		{
