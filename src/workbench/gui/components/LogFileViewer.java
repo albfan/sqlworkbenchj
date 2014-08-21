@@ -205,7 +205,8 @@ public class LogFileViewer
 	public String readLastLines(File src, int maxLines)
 		throws IOException
 	{
-		BufferedReader reader = EncodingUtil.createBufferedReader(src, LogMgr.DEFAULT_ENCODING);
+		int buffSize = Settings.getInstance().getIntProperty("workbench.logviewer.readbuff", 1024 * 1024);
+		BufferedReader reader = EncodingUtil.createBufferedReader(src, LogMgr.DEFAULT_ENCODING, buffSize);
 		try
 		{
 			FixedSizeList<String> lines = new FixedSizeList<String>(maxLines);
