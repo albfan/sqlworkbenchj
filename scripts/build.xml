@@ -1214,6 +1214,17 @@
     <javadoc destdir="${javadocdir}" notree="true" sourcepath="${src}" packagenames="workbench.*"/>
   </target>
 
+<!--  -->
+
+  <target name="pdf-javadoc">
+    <javadoc doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet"
+             docletpath="../libs/doclet/pdfdoclet-1.0.3-all.jar"
+             sourcepath="${src}" 
+             additionalparam="-pdf ${javadocdir}/workbench-api.pdf -config pdf_javadoc.properties"
+             packagenames="workbench.*"
+    />
+  </target>
+
   <target name="fixshellscripts">
 
     <fixcrlf srcdir="${scriptsrc}"
