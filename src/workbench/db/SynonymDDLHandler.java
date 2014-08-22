@@ -42,7 +42,7 @@ public class SynonymDDLHandler
 	 * Return the SQL statement to recreate the given synonym.
 	 *
 	 * @return the SQL to create the synonym.
-	 * @see SynonymReader#getSynonymSource(workbench.db.WbConnection, java.lang.String, java.lang.String)
+	 * @see SynonymReader#getSynonymSource(workbench.db.WbConnection, String, String, String)
 	 */
 	public String getSynonymSource(WbConnection dbConnection, TableIdentifier synonym, boolean includeTable, boolean includeDrop)
 	{

@@ -454,7 +454,7 @@ public class SqlCommand
 	 * warnings are stored in the result object
 	 *
 	 * @see #processResults(StatementRunnerResult, boolean, ResultSet)
-	 * @see #appendWarnings(StatementRunnerResult)
+	 * @see #appendWarnings(workbench.sql.StatementRunnerResult, boolean)
 	 */
 	protected void processMoreResults(String sql, StatementRunnerResult result, boolean hasResult)
 		throws SQLException
@@ -901,7 +901,7 @@ public class SqlCommand
 	 *
 	 * @param sql the sql to "clean"
 	 * @return the sql with the verb, comments and newlines removed
-	 * @see workbench.util.SqlUtil#makeCleanSql(String, boolean, boolean, char)
+	 * @see workbench.util.SqlUtil#makeCleanSql(java.lang.String, boolean) 
 	 * @see workbench.util.SqlUtil#getSqlVerb(String)
 	 */
 	protected String getCommandLine(String sql)

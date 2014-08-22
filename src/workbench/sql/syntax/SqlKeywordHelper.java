@@ -143,7 +143,6 @@ public class SqlKeywordHelper
 	 * for in the config directory.
 	 *
 	 * @param filename
-	 * @return
 	 */
 	public Set<String> loadKeywordsFromFile(String filename)
 	{

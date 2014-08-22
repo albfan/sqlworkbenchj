@@ -31,7 +31,7 @@ import workbench.resource.ResourceMgr;
 /**
  * Exit and close the application.
  *
- * @see workbench.WbManager#exitWorkbench()
+ * @see workbench.WbManager#exitWorkbench(boolean) 
  *
  * @author  Thomas Kellerer
  */

@@ -149,7 +149,6 @@ public class HsqlColumnEnhancer
 	 * Returns information about sequences mapped to table columns.
 	 * @param conn the connection to use
 	 * @param tbl the table to check
-	 * @return
 	 */
 	private Map<String, SequenceDefinition> getColumnSequences(WbConnection conn, TableIdentifier tbl)
 	{

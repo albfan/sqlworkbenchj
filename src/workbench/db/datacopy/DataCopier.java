@@ -220,8 +220,8 @@ public class DataCopier
 	 *
 	 * @param source the source connection
 	 * @param target the target connection
-	 * @param sourceTbl the table to copy (in the database defined by source)
-	 * @param targetTable the table write to (in the database defined by target)
+	 * @param sourceTbl  the table to copy (in the database defined by source)
+	 * @param targetTbl  the table write to (in the database defined by target)
 	 * @param columnMapping define a mapping from source columns to target columns (may be null)
 	 * @param additionalWhere a WHERE condition to be appended to the SELECT that retrieves the data from the source table
 	 * @param createTableType if not null, the target table will be created with the template defined by this type
@@ -427,17 +427,19 @@ public class DataCopier
 	/**
 	 *	Copy data from a SQL SELECT result to the given target table.
 	 *
-	 * @param source the source connection
-	 * @param target the target connection
-	 * @param the query to be executed on the source connection
-	 * @param targetTable the table write to (in the database defined by target)
-	 * @param the columns from the query
+	 * @param source         the source connection
+	 * @param target         the target connection
+	 * @param query          the query to be executed on the source connection
+	 * @param aTargetTable   the table write to (in the database defined by target)
+	 * @param queryColumsn   the columns from the query
 	 * @param createTableType if not null, the target table will be created with the template defined by this type
-	 * @param dropTable if true, the target table will be dropped
+	 * @param dropTarget      if true, the target table will be dropped
 	 * @param ignoreDropError if true, an error during drop will not terminate the copy
+	 * @param skipTargetCheck if true the existence of the target table will not be checked.
 	 *
 	 * @see DbSettings#getCreateTableTemplate(java.lang.String)
-	 */	public void copyFromQuery(WbConnection source,
+	 */
+	public void copyFromQuery(WbConnection source,
 														WbConnection target,
 														String query,
 														TableIdentifier aTargetTable,

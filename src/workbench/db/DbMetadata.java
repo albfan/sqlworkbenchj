@@ -839,7 +839,7 @@ public class DbMetadata
 	 * the result of ignoreSchema() is checked to leave out e.g. the PUBLIC schema in Postgres or H2
 	 *
 	 * @see #ignoreSchema(java.lang.String)
-	 * @see #supportsSchemas()
+	 * @see DbSettings#supportsSchemas()
 	 */
 	public boolean needSchemaInDML(TableIdentifier table)
 	{
@@ -1255,7 +1255,7 @@ public class DbMetadata
 	/**
 	 * Returns the current schema.
 	 *
-	 * @see SchemaInformationReader#getCurrentSchema(workbench.db.WbConnection)
+	 * @see SchemaInformationReader#getCurrentSchema()
 	 */
 	public String getCurrentSchema()
 	{
@@ -2024,7 +2024,6 @@ public class DbMetadata
 	 *
 	 * After a call to close(), this instance should not be used any longer.
 	 * @see DbmsOutput#close()
-	 * @see OracleUtils#done()
 	 * @see SchemaInformationReader#dispose()
 	 */
 	public void close()
@@ -2641,7 +2640,7 @@ public class DbMetadata
 	 *
 	 * @return the table to which the synonym points or null if the passed
 	 *         name does not reference a synonym or if the DBMS does not support synonyms
-	 * @see #getSynonymTable(String, String)
+	 * @see #getSynonymTable(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public TableIdentifier getSynonymTable(TableIdentifier synonym)
 	{
@@ -2658,7 +2657,7 @@ public class DbMetadata
 	 *
 	 * @return the table to which the synonym points or null if the passed
 	 *         name does not reference a synonym or if the DBMS does not support synonyms
-	 * @see #getSynonymTable(String, String)
+	 * @see #getSynonymTable(workbench.db.TableIdentifier)
 	 */
 	public TableIdentifier getSynonymTable(String catalog, String schema, String synonym)
 	{

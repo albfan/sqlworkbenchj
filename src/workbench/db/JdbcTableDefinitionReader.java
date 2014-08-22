@@ -69,8 +69,6 @@ public class JdbcTableDefinitionReader
 	 * instance of {@link TableColumnsDatastore}.
 	 *
 	 * @param table The table for which the definition should be retrieved
-	 * @param primaryKeyColumns the primary keys of <tt>table</tt>, may not be null
-	 * @param dbConnection the connection to be used
 	 * @param typeResolver the DataTypeResolver to be used. If null, it will be taken from the connection
 	 *
 	 * @throws SQLException

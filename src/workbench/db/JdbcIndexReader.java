@@ -73,7 +73,6 @@ public class JdbcIndexReader
 	 * Returns false.
 	 *
 	 * Needs to be overriden by a specialized IndexReader for each DBMS
-	 * @return
 	 */
 	@Override
 	public boolean supportsTableSpaces()
@@ -133,7 +132,7 @@ public class JdbcIndexReader
 				", unique=" + unique +
 				", approximate=true");
 		}
-		
+
 		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, true);
 	}
 
@@ -284,8 +283,8 @@ public class JdbcIndexReader
 	 * Return the SQL to re-create the indexes defined for the table.
 	 *
 	 * @param table
-	 * @param indexDefinition
-	 * @param tableNameToUse
+	 * @param indexList
+
 	 * @return SQL Script to create indexes
 	 */
 	@Override
@@ -998,8 +997,10 @@ public class JdbcIndexReader
 	 * <li>index_def</li>
 	 * </ol>
 	 *
-	 * @param catalog  the catalog to search, may be null. No wildcards allowed
-	 * @param schema   the schema to search, may be null. No wildcards allowed
+	 * @param catalogPattern    the catalog to search, may be null.
+	 * @param schemaPattern     the schema to search, may be null.
+	 * @param tablePattern      the table for which indexes should be returned, may be null
+	 * @param indexNamePattern  the index name pattern to look for, may be null
 	 *
 	 * @return a list of indexes in the catalog/schema
 	 *

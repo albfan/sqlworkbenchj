@@ -35,7 +35,7 @@ package workbench.storage;
  * is recommended to avoid too many instances of the implementing class.
  *
  * @author Thomas Kellerer
- * @see RowDataReader#setConverter(workbench.storage.DataConverter)
+ * @see RowDataReader#setConverter(workbench.storage.DataConverter) 
  */
 public interface DataConverter
 {

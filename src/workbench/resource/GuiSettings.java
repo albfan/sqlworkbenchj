@@ -734,7 +734,6 @@ public class GuiSettings
 
 	/**
 	 * Return true if the JDBC URL should be shown in the Window title instead of the profilename
-	 * @return
 	 */
 	public static boolean getShowURLinWindowTitle()
 	{

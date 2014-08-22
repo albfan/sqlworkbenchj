@@ -35,7 +35,7 @@ import workbench.sql.StatementRunnerResult;
 
 /**
  * Display the source code of a trigger.
- * @see workbench.db.TriggerReader#getTriggerSource(workbench.db.TriggerDefinition)
+ * @see workbench.db.TriggerReader#getTriggerSource(workbench.db.TriggerDefinition, boolean) 
  *
  * @author Thomas Kellerer
  */

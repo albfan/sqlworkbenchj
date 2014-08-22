@@ -61,7 +61,7 @@ public class SourceTableArgument
 	 *
 	 * @param includeTables the parameter value to include tables
 	 * @param excludeTables the parameter value to exclude tables
-	 * @param types         the parameter value for the table types
+	 * @param schema        the schema to look in
 	 * @param dbConn        the connection to use
 	 * <p/>
 	 * @throws SQLException

@@ -175,7 +175,7 @@ public abstract class AbstractConstraintReader
 	 * Returns the table level constraints for the table
 	 *
 	 * @param dbConnection  the connection to use
-	 * @param aTable        the table to check
+	 * @param table         the table to check
 	 *
 	 * @return a list of table constraints or an empty list if nothing was found
 	 */

@@ -79,7 +79,9 @@ public interface MergeGenerator
 	 * <br/>
 	 * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
 	 *
-	 * @param data the data source
+	 * @param info      the metadata of the result
+	 * @param row       the data
+	 * @param rowIndex  the rowIndex in the result
 	 * @return  the SQL for a single row inside a MERGE statement.
 	 */
 	String addRow(ResultInfo info, RowData row, long rowIndex);

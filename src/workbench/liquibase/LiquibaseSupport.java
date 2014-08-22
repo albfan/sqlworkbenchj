@@ -32,7 +32,7 @@ import workbench.util.WbFile;
 
 /**
  * A class to extract SQL from a Liquibase changeset.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class LiquibaseSupport
@@ -66,7 +66,7 @@ public class LiquibaseSupport
 	 * Return the statements stored in a <sql> or <createProcedure> tag
 	 * of a Liquibase Changeset
 	 *
-	 * @param changeSetId
+	 * @param ids the list of changeSet IDs to extract
 	 * @return null if no supported tag was found, all stored SQL scripts otherwise
 	 */
 	public List<String> getSQLFromChangeSet(List<ChangeSetIdentifier> ids)

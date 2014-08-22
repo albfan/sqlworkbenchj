@@ -286,7 +286,6 @@ public class TableSourceBuilder
 	 * @param indexList defined indexes for the table (may be null)
 	 * @param fkDefinitions defined foreign keys for the table (may be null)
 	 * @param includeDrop if true, a DROP TABLE will be added before the CREATE TABLE
-	 * @param tableNameToUse an alternate name to use (instead of the one in the table parameter)
 	 * @param includeFk if true, foreign key definitions (if present) will be included
 	 *
 	 * @return the CREATE TABLE statement for the table
@@ -466,11 +465,10 @@ public class TableSourceBuilder
 
 	/**
 	 * Generate a CREATE statement for the given object type
-	 * @param includeDrop if true, a DROP ... will be included in the SQL
-	 * @param objectType the object type (TABLE, VIEW, ...)
-	 * @param name the name of the object to create
-	 * @param typeOption an option for the CREATE statement. This is only
-	 * @return
+	 * @param includeDrop  if true, a DROP ... will be included in the SQL
+	 * @param toCreate     the definition of the object to create
+	 * @param typeOption   an option for the CREATE statement. This is only
+	 * @return an approriate CREATE xxxx statement
 	 */
 	public StringBuilder generateCreateObject(boolean includeDrop, DbObject toCreate, String typeOption)
 	{

@@ -91,7 +91,6 @@ public class ErrorDescriptor
 	 * Sets the position of the error as an offset to the start of the SQL statement.
 	 *
 	 * @param position  the position inside the statement
-	 * @see
 	 */
 	public void setErrorOffset(int position)
 	{

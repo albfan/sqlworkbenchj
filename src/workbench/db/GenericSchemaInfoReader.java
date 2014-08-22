@@ -142,7 +142,6 @@ public class GenericSchemaInfoReader
 	 *
 	 * If a configured query throws an error, the query will be ignored for all subsequent calls.
 	 *
-	 * @see #GenericSchemaInfoReader(String)
 	 * @see workbench.db.DbMetadata#getDbId()
 	 */
 	@Override

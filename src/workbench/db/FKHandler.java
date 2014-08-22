@@ -63,7 +63,7 @@ public interface FKHandler
 	int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 6;
 
 	int COLUMN_IDX_DEFERRABILITY = 13;
-	
+
 	/**
 	 * Returns a DataStore with the exported keys with the raw information copied from the result
 	 * of the DatabaseMetaData.getExportedKeys()
@@ -110,7 +110,6 @@ public interface FKHandler
 	 * The column indexes of this datastore are defined by the COLUMN_IDX_xxx constants in this class
 	 *
 	 * @param table the table to check
-	 * @param includeNumericRuleValue
 	 * @return all "incoming" foreign keys
 	 */
 	DataStore getReferencedBy(TableIdentifier table);

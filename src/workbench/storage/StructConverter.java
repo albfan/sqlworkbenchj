@@ -46,7 +46,7 @@ import workbench.util.SqlUtil;
  * and will thus return a String object as well.
  *
  * @author Thomas Kellerer
- * @see RowData#read(java.sql.ResultSet, workbench.storage.ResultInfo)
+ * @see RowDataReader#read(java.sql.ResultSet, boolean) 
  */
 public class StructConverter
 {

@@ -344,10 +344,6 @@ public class PostgresTableSourceBuilder
 	/**
 	 * Return domain information for columns in the specified table.
 	 *
-	 * @param table
-	 * @param columns
-	 * @param indexList
-	 * @return
 	 */
 	@Override
 	public String getAdditionalTableInfo(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)

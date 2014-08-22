@@ -99,7 +99,6 @@ public abstract class AbstractWbCallHandler
 	 * Returns all OUT our IN/OUT parameters from the passed List.
 	 *
 	 * @param parameters
-	 * @return
 	 * @see ParameterDefinition#isOutParameter() 
 	 */
 	protected List<ParameterDefinition> getOutParameters(List<ParameterDefinition> parameters)
@@ -114,5 +113,5 @@ public abstract class AbstractWbCallHandler
 		}
 		return result;
 	}
-	
+
 }

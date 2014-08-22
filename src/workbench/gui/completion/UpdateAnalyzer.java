@@ -125,8 +125,6 @@ public class UpdateAnalyzer
 
 	/**
 	 * Package visible for testing purposes.
-	 *
-	 * @return
 	 */
 	String getCurrentColumn()
 	{

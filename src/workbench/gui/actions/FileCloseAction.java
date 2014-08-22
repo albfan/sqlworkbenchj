@@ -30,7 +30,7 @@ import workbench.gui.MainWindow;
 
 /**
  * Exit and close the application
- * @see workbench.WbManager#exitWorkbench()
+ * @see workbench.WbManager#closeMainWindow(workbench.gui.MainWindow) 
  *
  * @author  Thomas Kellerer
  */

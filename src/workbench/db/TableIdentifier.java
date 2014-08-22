@@ -165,7 +165,6 @@ public class TableIdentifier
 
 	/**
 	 * Return DBMS specific configuration options for this table.
-	 * @return
 	 */
 	public String getAdditionalSql()
 	{

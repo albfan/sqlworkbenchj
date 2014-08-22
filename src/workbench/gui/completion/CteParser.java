@@ -60,7 +60,6 @@ public class CteParser
 	/**
 	 * Split the passed SQL into individual CTE definitions.
 	 *
-	 * @param sql  the sql to parse
 	 * @return a list that contains one string for each CTE
 	 */
 	public List<CteDefinition> getCteDefinitions()

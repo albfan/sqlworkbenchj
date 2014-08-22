@@ -48,7 +48,6 @@ public class ToolDefinition
 
 	/**
 	 * Return any parameter that should be passed to the application when starting it.
-	 * @return
 	 */
 	public String getParameters()
 	{

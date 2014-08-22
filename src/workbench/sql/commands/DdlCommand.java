@@ -201,7 +201,7 @@ public class DdlCommand
 	{
 		if (info == null) return;
 		if (StringUtil.isEmptyString(info.getObjectName())) return;
-		
+
 		currentConnection.getObjectCache().removeTable(new TableIdentifier(info.getObjectName(), currentConnection));
 	}
 
@@ -245,8 +245,8 @@ public class DdlCommand
 	 *
 	 * @return true if an error was added, false otherwise
 	 *
-	 * @see ErrorInformationReader#getErrorInfo(String, String, String)
-	 * @see ReaderFactory#getErrorInformationReader(workbench.db.WbConnection)
+	 * @see ErrorInformationReader#getErrorInfo(java.lang.String, java.lang.String, java.lang.String, boolean)
+	 * @see ReaderFactory#getErrorInformationReader(workbench.db.WbConnection) 
 	 */
 	private boolean addExtendErrorInfo(WbConnection aConnection, String sql, DdlObjectInfo info , StatementRunnerResult result)
 	{

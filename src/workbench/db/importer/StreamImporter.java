@@ -44,10 +44,7 @@ public interface StreamImporter
 	 *
 	 * @param table     the table to import
 	 * @param columns   the columns to be used
-	 * @param data      the source data
 	 * @param options   the import options
-	 * @param encoding  the encoding of the source file
-	 * @return the number of rows imported
 	 *
 	 * @throws SQLException
 	 * @throws IOException

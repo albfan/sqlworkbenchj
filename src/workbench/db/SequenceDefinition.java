@@ -231,7 +231,7 @@ public class SequenceDefinition
 	 * Converts the internally stored sequence properties into a
 	 * DataStore with a single row and one column per property, similar
 	 * to the display of a Sequence in the DbExplorer (obtained through
-	 * {@link SequenceReader#getRawSequenceDefinition(java.lang.String, java.lang.String) }
+	 * {@link SequenceReader#getRawSequenceDefinition(String, String, String)  }
 	 * <br/>
 	 * Note that some sequence readers might not put all retrieved attributes
 	 * into the properties, so this is not necessarily the same as retrieving

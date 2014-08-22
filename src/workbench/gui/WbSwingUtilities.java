@@ -1086,7 +1086,7 @@ public class WbSwingUtilities
 	 *
 	 * @param comp  the component to focus
 	 *
-	 * @see EventQueue#invokeLater()
+	 * @see java.awt.EventQueue#invokeLater()
 	 */
 	public static void requestFocus(final JComponent comp)
 	{
@@ -1209,7 +1209,7 @@ public class WbSwingUtilities
 	{
 		if (numChars < 0) return -1;
 		if (component == null) return -1;
-		
+
 		int width = -1;
 		Font font = component.getFont();
 		if (font != null)
@@ -1356,7 +1356,7 @@ public class WbSwingUtilities
 	/**
 	 * Sets the minimum width of all components to the width of the widest component.
 	 * <p/>
-	 * @param button the button to change
+	 * @param component the components to change
 	 * @see #makeEqualSize(javax.swing.JButton, int)
 	 */
 	public static void makeEqualSize(JComponent ... components)

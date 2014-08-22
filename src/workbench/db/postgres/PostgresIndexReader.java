@@ -69,7 +69,6 @@ public class PostgresIndexReader
 	 *
 	 * @param table the table for which to retrieve the indexes
 	 * @param indexList the indexes to retrieve
-	 * @return
 	 */
 	@Override
 	public StringBuilder getIndexSource(TableIdentifier table, List<IndexDefinition> indexList)

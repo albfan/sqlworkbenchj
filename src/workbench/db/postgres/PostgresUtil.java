@@ -92,9 +92,9 @@ public class PostgresUtil
 	 *
 	 * Setting the application name for pg_stat_activity is only supported by drivers >= 9.1
 	 *
-	 * @param pgDriver
+	 * @param pgDriver the Postgres JDBC driver class
 	 * @return true if the driver supports the ApplicationName property
-	 * @see #APP_INFO_PROPERTY
+	 * @see #APP_NAME_PROPERTY
 	 */
 	public static boolean supportsAppInfoProperty(Class pgDriver)
 	{
@@ -133,7 +133,7 @@ public class PostgresUtil
 		Savepoint sp = null;
 
 		String query = Settings.getInstance().getProperty("workbench.db.postgresql.retrieve.search_path", "select array_to_string(current_schemas(true), ',')");
-		
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("PostgresUtil.getSearchPath()", "Query used to retrieve search path:\n" + query);

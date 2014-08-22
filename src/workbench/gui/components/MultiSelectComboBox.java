@@ -200,7 +200,6 @@ public class MultiSelectComboBox<T>
 	 * @return the first selected item, or the defaul item if nothing was selected
 	 *
 	 * @see #getSelectedItems()
-	 * @see #setDefaultItem(java.lang.Object)
 	 */
 	@Override
 	public T getSelectedItem()

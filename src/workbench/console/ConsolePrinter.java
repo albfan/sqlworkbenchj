@@ -90,7 +90,7 @@ public abstract class ConsolePrinter
 	 *
 	 * @see DataStorePrinter
 	 * @see ResultSetPrinter
-	 * @see workbench.util.StringUtil#escapeUnicode(java.lang.String, workbench.util.CharacterRange)
+	 * @see workbench.util.StringUtil#escapeText(java.lang.String, workbench.util.CharacterRange, java.lang.String) 
 	 *
 	 * @param flag
 	 */

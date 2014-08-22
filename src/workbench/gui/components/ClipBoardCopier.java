@@ -305,7 +305,7 @@ public class ClipBoardCopier
 	 *
 	 * @see workbench.storage.DataStore#hasPkColumns()
 	 * @see workbench.gui.components.WbTable#detectDefinedPkColumns()
-	 * @see #copyAsSql(boolean, boolean, boolean, boolean)
+	 * @see #copyAsSql(workbench.db.exporter.ExportType, boolean, boolean) 
 	 */
 	public void copyAsSqlUpdate(boolean selectedOnly, boolean showSelectColumns)
 	{
@@ -437,7 +437,7 @@ public class ClipBoardCopier
 				converter.setIncludeIdentityColumns(true);
 				converter.setIncludeReadOnlyColumns(true);
 			}
-			
+
 			converter.setResultInfo(data.getResultInfo());
 
 			if (type == ExportType.SQL_INSERT || type == ExportType.SQL_DELETE_INSERT)

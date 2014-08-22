@@ -297,7 +297,6 @@ public class WbConnection
 
 	/**
 	 * Returns the current isolation level as a readable string
-	 * @return
 	 */
 	public String getIsolationLevelName()
 	{
@@ -903,7 +902,7 @@ public class WbConnection
 	/**
 	 * Return the fetch size to be used.
 	 * <br/>
-	 * If a fetch size has been defined using {@link #setFetchSize(int)) that size
+	 * If a fetch size has been defined using {@link #setFetchSize(int)} that size
 	 * is used, otherwise the fetch size defined on the connection profile is used.
 	 *
 	 * @return the defined fetch size, or -1 if no fetch size was defined
@@ -1442,7 +1441,7 @@ public class WbConnection
 	{
 		if (this.metaData == null) return;
 		if (!metaData.isOracle()) return;
-		
+
 		try
 		{
 			Method cancel = sqlConnection.getClass().getMethod("cancel", (Class[])null);

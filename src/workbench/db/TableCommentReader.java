@@ -100,8 +100,10 @@ public class TableCommentReader
 
 	/**
 	 * Return the SQL that is needed to re-create the comment on the given columns.
+	 *
 	 * The syntax to be used, can be configured in the workbench.settings file.
-	 * @see CommentSqlManager#getCommentSqlTemplate(java.lang.String)
+	 * 
+	 * @see CommentSqlManager#getCommentSqlTemplate(java.lang.String, java.lang.String)
 	 */
 	public StringBuilder getTableColumnCommentsSql(WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
 	{

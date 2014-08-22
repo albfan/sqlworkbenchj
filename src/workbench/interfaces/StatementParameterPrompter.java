@@ -31,7 +31,6 @@ public interface StatementParameterPrompter
 	 *
 	 * @param parms the parameters identified by the caller
 	 * @param showNames true if then parameter names should be displayed to the user
-	 * @return
 	 */
 	boolean showParameterDialog(final StatementParameters parms, final boolean showNames);
 }

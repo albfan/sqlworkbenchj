@@ -33,7 +33,7 @@ import workbench.util.ArgumentValue;
  * to create such a table.
  *
  * @see TableCreator
- * @see DbSettings#getCreateTableTemplate(String);
+ * @see DbSettings#getCreateTableTemplate(String)
  *
  * @author Thomas Kellerer
  */

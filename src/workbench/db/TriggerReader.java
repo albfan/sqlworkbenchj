@@ -101,10 +101,12 @@ public interface TriggerReader {
 	/**
 	 * Retrieve the SQL Source of the given trigger.
 	 *
-	 * @param triggerCatalog The catalog in which the trigger is defined. This should be null if the DBMS does not support catalogs
-	 * @param triggerSchema The schema in which the trigger is defined. This should be null if the DBMS does not support schemas
-	 * @param triggerName the name of the trigger
-	 * @param triggerTable the table for which the trigger is defined
+	 * @param aCatalog      The catalog in which the trigger is defined. This should be null if the DBMS does not support catalogs
+	 * @param aSchema       The schema in which the trigger is defined. This should be null if the DBMS does not support schemas
+	 * @param aTriggername  the name of the trigger
+	 * @param triggerTable  the table for which the trigger is defined
+	 * @param trgComment    the comment for the trigger
+	 * @param includeDependencies  if true dependent objects should be included in the source (e.g. the trigger function in Postgres)
 	 * @throws SQLException
 	 * @return the trigger source
 	 */

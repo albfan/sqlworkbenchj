@@ -249,7 +249,6 @@ public class StringUtil
 	 * Null safe trim().
 	 *
 	 * @param toTrim
-	 * @return
 	 */
 	public static String trim(String toTrim)
 	{
@@ -587,7 +586,6 @@ public class StringUtil
 	 * This is done by parsing the String using Double.parseDouble() and catching all possible exceptions.
 	 *
 	 * @param value
-	 * @return
 	 */
 	public static boolean isNumber(String value)
 	{
@@ -630,7 +628,7 @@ public class StringUtil
 	 * Whitespaces are considered "not empty".
 	 *
 	 * @param value
-	 * @see #isEmpty(CharSequence)
+	 * @see #isEmptyString(java.lang.CharSequence)
 	 */
 	public static boolean isNonEmpty(CharSequence value)
 	{
@@ -1457,7 +1455,6 @@ public class StringUtil
 	 * Convert an int value to a String with leading zeros
 	 * @param value
 	 * @param length
-	 * @return
 	 */
 	public static CharSequence formatInt(int value, int length)
 	{

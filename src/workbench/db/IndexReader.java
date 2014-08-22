@@ -61,7 +61,7 @@ public interface IndexReader
 		throws SQLException;
 
 	/**
-	 * This closes any resources opened by {@link #getIndexSource(workbench.db.TableIdentifier, workbench.storage.DataStore, String)}
+	 * This closes any resources opened by {@link #getIndexInfo(workbench.db.TableIdentifier, boolean) }
 	 * and should be called after the ResultSet obtained from {@link #getIndexInfo(TableIdentifier, boolean)} has
 	 * been processed and closed
 	 *
@@ -81,7 +81,6 @@ public interface IndexReader
 	 * Return the CREATE INDEX for a single index
 	 * @param table
 	 * @param indexDefinition
-	 * @param tableNameToUse
 	 */
 	CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition);
 
@@ -151,8 +150,8 @@ public interface IndexReader
 	/**
 	 * Return a list of indexes defined in the system.
 	 *
-	 * @param catalog   the catalog for which to retrieve the indexes, may be null
-	 * @param schema    the schema for which to retrieve the indexes, may be null
+	 * @param catalogPattern   the catalog for which to retrieve the indexes, may be null
+	 * @param schemaPattern    the schema for which to retrieve the indexes, may be null
 	 * @return a list of indexes
 	 *
 	 * @see #supportsIndexList()
@@ -164,7 +163,7 @@ public interface IndexReader
 	 * without any table parameter.
 	 *
 	 * @return  true if getInd
-	 * @see #getIndexes(String, String)
+	 * @see #getIndexes(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	boolean supportsIndexList();
 }

@@ -310,7 +310,7 @@ public class DbSettings
 	 * <br/>
 	 * The related property is workbench.db.[dbid].import.use.setnull
 	 *
-	 * @see DmlStatement#execute(workbench.db.WbConnection)
+	 * @see DmlStatement#execute(workbench.db.WbConnection, boolean)
 	 */
 	public boolean useSetNull()
 	{
@@ -1101,7 +1101,7 @@ public class DbSettings
 	 * Returns if the table grants are already included in the generated table source.
 	 *
 	 * @see #getUseCustomizedCreateTableRetrieval()
-	 * @see workbench.db.TableSourceBuilder#getTableSource(workbench.db.TableIdentifier, java.util.List, workbench.storage.DataStore, workbench.storage.DataStore, boolean, java.lang.String, boolean)
+	 * @see workbench.db.TableSourceBuilder#getTableSource(workbench.db.TableIdentifier, java.util.List)
 	 *
 	 * @return true if table grants should be generated even if the table source is retrieved by a customized statement
 	 */
@@ -1331,7 +1331,6 @@ public class DbSettings
 
 	/**
 	 * The SQL to set a column's default.
-	 * @return
 	 */
 	public String getSetColumnDefaultSql()
 	{
@@ -1482,8 +1481,6 @@ public class DbSettings
 
 	/**
 	 * Returns a flag if the driver returns "ready-made" expressions for the DEFAULT value of a column.
-	 *
-	 * @return
 	 */
 	public boolean returnsValidDefaultExpressions()
 	{
@@ -1572,7 +1569,6 @@ public class DbSettings
 
 	/**
 	 * Return true if the driver for this DBMS is known to support CallableStatement.getParameterMetaData()
-	 * @return
 	 */
 	public boolean supportsParameterMetaData()
 	{

@@ -163,7 +163,7 @@ public class SqlUtil
 	/**
 	 * Quote the given objectName if needed according to the SQL standard.
 	 *
-	 * @param objectName the name to quote
+	 * @param object the name to quote
 	 * @return the quoted version of the name.
 	 */
 	public static String quoteObjectname(String object)
@@ -748,7 +748,6 @@ public class SqlUtil
 
 	 * @param table
 	 * @param keepAlias
-	 * @return
 	 */
 	private static String getTableDefinition(String table, boolean keepAlias)
 	{
@@ -1943,7 +1942,6 @@ public class SqlUtil
 	 * This is used to detect which renderer to use in the result set display.
 	 *
 	 * @param column the column to test
-	 * @return
 	 */
 	public static boolean isMultiLineColumn(ColumnIdentifier column)
 	{

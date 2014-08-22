@@ -61,9 +61,10 @@ public class TableCreator
 	 *
 	 * @param target the connection where to create the table
 	 * @param type a keyword identifying the type of the table. This will be used to retrieve the corresponding
-	 *             SQL template from {@link DbSettings#getCreateTableTemplate(workbench.db.TableCreator.CreationType)}
+	 *             SQL template from {@link DbSettings#getCreateTableTemplate(java.lang.String) }
 	 * @param newTable the name of the new table
 	 * @param columns the columns of the new table
+	 *
 	 * @throws SQLException if something goes wrong
 	 */
 	public TableCreator(WbConnection target, String type, TableIdentifier newTable, Collection<ColumnIdentifier> columns)

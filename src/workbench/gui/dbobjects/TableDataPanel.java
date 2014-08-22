@@ -300,7 +300,6 @@ public class TableDataPanel
 	/**
 	 * Return the displayed table data.
 	 * Intended for testing purposes
-	 * @return
 	 */
 	public WbTable getData()
 	{
