@@ -23,13 +23,16 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.db.WbConnection;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.db.WbConnection;
+import workbench.db.objectcache.DbObjectCache;
 
 /**
  * Action to clear the cache for code completion
  *
- * @see workbench.db.DbObjectCache
+ * @see DbObjectCache
  * @author  Thomas Kellerer
  */
 public class ClearCompletionCacheAction

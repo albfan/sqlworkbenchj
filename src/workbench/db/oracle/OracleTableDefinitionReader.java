@@ -64,8 +64,8 @@ import workbench.util.StringUtil;
  *
  * Additionally if the config property <tt>workbench.db.oracle.fixdatetype</tt> is
  * set to true, DATE columns will always be mapped to Timestamp objects when
- * retrieving data (see {@link #getMapDateToTimestamp()} and
- * {@link #fixColumnType(int)}
+ * retrieving data (see {@link OracleUtils#getMapDateToTimestamp(workbench.db.WbConnection) }
+ * and {@link OracleDataTypeResolver#fixColumnType(int, java.lang.String)}
  *
  * @author Thomas Kellerer
  */

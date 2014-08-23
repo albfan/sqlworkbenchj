@@ -584,7 +584,7 @@ public class TableDataDiff
 	 *
 	 * @param rows the data from the reference table
 	 * @param info the result set definition of the reference table
-	 * @return
+	 * @return the statement to select the rows
 	 */
 	private String buildCheckSql(List<RowData> rows, ResultInfo info)
 	{

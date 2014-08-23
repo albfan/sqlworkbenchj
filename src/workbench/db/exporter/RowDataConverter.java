@@ -30,7 +30,6 @@ import java.io.Writer;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -243,7 +242,6 @@ public abstract class RowDataConverter
 	 * A running number will be appended to the <tt>baseDir</tt> parameter, for each
 	 * directory that gets created.
 	 *
-	 * @param baseDir
 	 * @param maxFiles
 	 */
 	public void setMaxLobFilesPerDirectory(int maxFiles)
@@ -828,12 +826,11 @@ public abstract class RowDataConverter
 	 * @param col The column in aRow for which the value should be formatted
 	 * @return The formatted value as a String
 	 *
-	 * @see #setDefaultDateFormatter(SimpleDateFormat)
-	 * @see #setDefaultTimestampFormatter(SimpleDateFormat)
-	 * @see #setDefaultNumberFormatter(DecimalFormat)
+	 * @see #setDefaultDateFormatter(workbench.util.WbDateFormatter)
+	 * @see #setDefaultTimeFormatter(java.text.SimpleDateFormat)
+	 * @see #setDefaultNumberFormatter(workbench.util.WbNumberFormatter)
 	 * @see #setDefaultDateFormat(String)
 	 * @see #setDefaultTimestampFormat(String)
-	 * @see #setDefaultNumberFormat(String)
 	 * @see #getNullDisplay()
 	 * @see #setReturnNulls(boolean)
 	 */

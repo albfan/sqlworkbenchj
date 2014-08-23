@@ -222,7 +222,7 @@ public class LookupDataLoader
 	 *
 	 * @return the PK of the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
 	 * @see #getLookupTable()
-	 * @see #getReferencedColumn()
+	 * @see #getReferencingColumns() 
 	 */
 	public PkDefinition getPK()
 	{

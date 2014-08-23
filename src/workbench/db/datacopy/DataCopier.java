@@ -427,11 +427,11 @@ public class DataCopier
 	/**
 	 *	Copy data from a SQL SELECT result to the given target table.
 	 *
-	 * @param source         the source connection
-	 * @param target         the target connection
-	 * @param query          the query to be executed on the source connection
-	 * @param aTargetTable   the table write to (in the database defined by target)
-	 * @param queryColumsn   the columns from the query
+	 * @param source          the source connection
+	 * @param target          the target connection
+	 * @param query           the query to be executed on the source connection
+	 * @param aTargetTable    the table write to (in the database defined by target)
+	 * @param queryColumns    the columns from the query
 	 * @param createTableType if not null, the target table will be created with the template defined by this type
 	 * @param dropTarget      if true, the target table will be dropped
 	 * @param ignoreDropError if true, an error during drop will not terminate the copy

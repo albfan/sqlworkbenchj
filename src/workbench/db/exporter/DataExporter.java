@@ -89,7 +89,7 @@ import workbench.util.WbThread;
  * Data can be exported in two ways: either a complete export of a table using
  * {@link #addTableExportJob(java.io.File, workbench.db.TableIdentifier) } or by
  * specifying a SQL query where the generated ResultSet should be exported
- * using {@link #addQueryJob(java.lang.String, workbench.util.WbFile) }
+ * using {@link #addQueryJob(java.lang.String, workbench.util.WbFile, java.lang.String)  }
  *
  * @author  Thomas Kellerer
  */
@@ -1079,7 +1079,7 @@ public class DataExporter
 	 * @throws java.io.IOException if the output file could not be written
 	 * @throws java.sql.SQLException if an error occurred during DB access
 	 *
-	 * @see #addQueryJob(java.lang.String, workbench.util.WbFile)
+	 * @see #addQueryJob(java.lang.String, workbench.util.WbFile, java.lang.String)
 	 * @see #addTableExportJob(java.io.File, workbench.db.TableIdentifier)
 	 */
 	public long startExport()

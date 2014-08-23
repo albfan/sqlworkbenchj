@@ -60,7 +60,7 @@ public class InformixTableSourceBuilder
 	 * @param table    the table to process
 	 * @param columns  the columns (not used)
 	 *
-	 * @see TableSourceOptions#getAdditionalSql()
+	 * @see ObjectSourceOptions#getAdditionalSql() 
 	 */
 	@Override
 	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)

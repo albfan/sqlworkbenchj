@@ -27,7 +27,7 @@ package workbench.storage;
  * An interface for the RowData class to "convert" data that is read from the database
  * on the fly.
  * <br/>
- * Any new implementation should be created in {@link RowDataFactory#getConverterInstance(workbench.db.WbConnection) (workbench.db.WbConnection) }
+ * Any new implementation should be created through {@link RowDataReader#getConverterInstance(workbench.db.WbConnection)   }
  * to ensure that the RowData class actually uses the converter.
  * <br/><br/>
  * An implementation of this interface should be done as a singleton, because a reference to the
@@ -35,7 +35,7 @@ package workbench.storage;
  * is recommended to avoid too many instances of the implementing class.
  *
  * @author Thomas Kellerer
- * @see RowDataReader#setConverter(workbench.storage.DataConverter) 
+ * @see RowDataReader#setConverter(workbench.storage.DataConverter)
  */
 public interface DataConverter
 {

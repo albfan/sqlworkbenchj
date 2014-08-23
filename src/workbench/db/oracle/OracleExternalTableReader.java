@@ -115,7 +115,6 @@ public class OracleExternalTableReader
 	 *
 	 * @param parameter
 	 * @param baseIndent
-	 * @return
 	 */
 	private StringBuilder fixIndention(String parameter, String baseIndent)
 	{

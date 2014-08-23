@@ -69,6 +69,8 @@ public class PostgresIndexReader
 	 *
 	 * @param table the table for which to retrieve the indexes
 	 * @param indexList the indexes to retrieve
+	 *
+	 * @return The SQL statement for all indexes
 	 */
 	@Override
 	public StringBuilder getIndexSource(TableIdentifier table, List<IndexDefinition> indexList)
@@ -214,7 +216,7 @@ public class PostgresIndexReader
 	 * @param indexDefs  the list of retrieved indexes
 	 *
 	 * @see IndexDefinition#setTablespace(java.lang.String)
-	 * @see #PROP_RETRIEVE_TABLESPACE
+	 * @see PostgresIndexReader#PROP_RETRIEVE_TABLESPACE
 	 */
 	@Override
 	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
