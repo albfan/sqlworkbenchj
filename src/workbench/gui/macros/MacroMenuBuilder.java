@@ -23,13 +23,17 @@
 package workbench.gui.macros;
 
 import java.util.List;
+
 import javax.swing.JMenu;
+
 import workbench.gui.MainWindow;
 import workbench.gui.actions.RunMacroAction;
 import workbench.gui.components.WbMenu;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.StringUtil;
 
 /**
@@ -41,7 +45,7 @@ public class MacroMenuBuilder
 
 	public void buildMacroMenu(MainWindow main, JMenu macroMenu)
 	{
-		List<MacroGroup> groups = MacroManager.getInstance().getMacros().getVisibleGroups();
+		List<MacroGroup> groups = MacroManager.getInstance().getMacros(main.getMacroClientId()).getVisibleGroups();
 
 		if (groups == null || groups.isEmpty()) return;
 

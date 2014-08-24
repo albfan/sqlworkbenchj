@@ -333,13 +333,15 @@ public class SqlPanel
 	private boolean ignoreStateChange;
 	private long lastScriptExecTime;
 	protected final List<ToolWindow> resultWindows = new ArrayList<ToolWindow>(1);
+	private final int macroClientId;
 
 //</editor-fold>
 
-	public SqlPanel()
+	public SqlPanel(int clientId)
 	{
 		super(new BorderLayout());
 		this.internalId = ++instanceCount;
+		this.macroClientId = clientId;
 		this.setName("sqlpanel-" + internalId);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
@@ -413,8 +415,8 @@ public class SqlPanel
 
 		tabName = ResourceMgr.getDefaultTabLabel();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON);
-		editor.enableMacroExpansion(true);
-		editor.enableBracketCompletion(true);
+		editor.setMacroExpansionEnabled(true, macroClientId);
+		editor.setBracketCompletionEnabled(true);
 		historyStatements = new StatementHistory(Settings.getInstance().getMaxHistorySize());
 	}
 
@@ -3104,7 +3106,7 @@ public class SqlPanel
 		else
 		{
 			String cleanSql = SqlUtil.trimSemicolon(script.trim());
-			String macro = MacroManager.getInstance().getMacroText(cleanSql);
+			String macro = MacroManager.getInstance().getMacroText(macroClientId, cleanSql);
 			if (macro != null)
 			{
 				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + cleanSql + "\n");
@@ -3242,7 +3244,7 @@ public class SqlPanel
 				}
 				if (currentSql.length() == 0) continue;
 
-				String macro = MacroManager.getInstance().getMacroText(currentSql);
+				String macro = MacroManager.getInstance().getMacroText(macroClientId, currentSql);
 				if (macro != null)
 				{
 					appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + currentSql + "\n");

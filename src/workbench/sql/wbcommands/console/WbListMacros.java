@@ -27,7 +27,6 @@ import java.sql.Types;
 import java.util.List;
 
 import workbench.WbManager;
-import workbench.console.ConsoleReaderFactory;
 import workbench.resource.ResourceMgr;
 
 import workbench.storage.DataStore;
@@ -49,6 +48,7 @@ public class WbListMacros
 	extends SqlCommand
 {
 	public static final String VERB = "WbListMacros";
+	private int macroClientId = MacroManager.DEFAULT_STORAGE;
 
 	public WbListMacros()
 	{
@@ -67,13 +67,18 @@ public class WbListMacros
 		return false;
 	}
 
+	public void setMacroClientId(int clientId)
+	{
+		this.macroClientId = clientId;
+	}
+
 	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		MacroStorage storage = MacroManager.getInstance().getMacros();
+		MacroStorage storage = MacroManager.getInstance().getMacros(macroClientId);
 		List<MacroGroup> groups = storage.getGroups();
 
 		String lblName = ResourceMgr.getString("LblMacroName");
@@ -122,16 +127,4 @@ public class WbListMacros
 		return result;
 	}
 
-	private int getMaxLength()
-	{
-		if (WbManager.getInstance().isConsoleMode())
-		{
-			int columns = ConsoleReaderFactory.getConsoleReader().getColumns();
-			if (columns > 0)
-			{
-				return columns;
-			}
-		}
-		return Integer.MAX_VALUE;
-	}
 }

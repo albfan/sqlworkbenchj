@@ -74,11 +74,10 @@ public class MacroManagerGui
 	private MacroDefinitionPanel macroPanel;
 	private MacroGroupPanel groupPanel;
 	private MacroTree macroTree;
-
-	public MacroManagerGui()
+	public MacroManagerGui(int macroId)
 	{
 		super();
-		this.macroTree = new MacroTree();
+		this.macroTree = new MacroTree(macroId);
 		this.setLayout(new BorderLayout());
 
 		this.toolbar = new WbToolbar();

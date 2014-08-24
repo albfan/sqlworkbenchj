@@ -23,6 +23,7 @@
 package workbench.sql.macros;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -34,15 +35,19 @@ import workbench.resource.Settings;
 import workbench.resource.StoreableKeyStroke;
 
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.WbFile;
 
 /**
- * A singleton class to load and save SQL macros (aliases)
+ * A singleton class to load and saveAs SQL macros (aliases)
  *
  * @author Thomas Kellerer
  */
 public class MacroManager
 {
-	private final MacroStorage storage;
+	public static final int DEFAULT_STORAGE = Integer.MIN_VALUE;
+
+	private final Map<String, MacroStorage> allMacros = new HashMap<String, MacroStorage>();
+	private final Map<Integer, String> macroClients = new HashMap<Integer, String>();
 
 	/**
 	 * Thread safe singleton instance.
@@ -54,32 +59,13 @@ public class MacroManager
 
 	private MacroManager()
 	{
+		String defaultPath = getDefaultMacroFile().getFullPath();
 		long start = System.currentTimeMillis();
-		storage = new MacroStorage();
+		MacroStorage storage = new MacroStorage(defaultPath);
 		storage.loadMacros(getDefaultMacroFile(), false);
 		long duration = System.currentTimeMillis() - start;
-		LogMgr.logTrace("MacroManager.init<>", "Loading macros took " + duration + "ms");
-	}
-
-	private File getDefaultMacroFile()
-	{
-		File f = new File(Settings.getInstance().getMacroStorage());
-		return f;
-	}
-
-	public void save()
-	{
-		storage.saveMacros();
-	}
-
-	public void save(File macroFile)
-	{
-		storage.saveMacros(macroFile);
-	}
-
-	public void loadMacros(File macroFile)
-	{
-		storage.loadMacros(macroFile, true);
+		allMacros.put(defaultPath, storage);
+		LogMgr.logDebug("MacroManager.init<>", "Loading default macros took " + duration + "ms");
 	}
 
 	public static MacroManager getInstance()
@@ -87,40 +73,121 @@ public class MacroManager
 		return InstanceHolder.instance;
 	}
 
-	public synchronized String getMacroText(String key)
+	public static WbFile getDefaultMacroFile()
+	{
+		WbFile f = new WbFile(Settings.getInstance().getMacroStorage());
+		return f;
+	}
+
+	public synchronized void save()
+	{
+		for (MacroStorage storage : allMacros.values())
+		{
+			storage.saveMacros();
+		}
+	}
+
+	public void saveAs(int clientId, WbFile macroFile)
+	{
+		MacroStorage storage = allMacros.get(getClientfilename(clientId));
+		if (storage != null)
+		{
+			storage.saveMacros(macroFile);
+			macroClients.put(clientId, macroFile.getFullPath());
+		}
+	}
+
+	/**
+	 * Save the macro definitions currently used by the given client.
+	 *
+	 * @param clientId the client ID
+	 */
+	public void save(int clientId)
+	{
+		String fname = getClientfilename(clientId);
+		MacroStorage storage = allMacros.get(fname);
+		if (storage != null)
+		{
+			storage.saveMacros(new File(fname));
+		}
+	}
+
+	private String getClientfilename(int clientId)
+	{
+		String clientFilename = macroClients.get(clientId);
+		if (clientFilename == null)
+		{
+			return getDefaultMacroFile().getFullPath();
+		}
+		return clientFilename;
+	}
+
+	public synchronized void loadMacros(int clientId, WbFile macroFile)
+	{
+		String fname = macroFile.getFullPath();
+		MacroStorage storage = allMacros.get(fname);
+		if (storage == null)
+		{
+			storage = new MacroStorage(fname);
+			storage.loadMacros(macroFile, true);
+			allMacros.put(fname, storage);
+		}
+		macroClients.put(clientId, fname);
+		LogMgr.logDebug("MacroManager.loadMacros()", "Loaded macros from file " + macroFile.getFullPath() + " for clientId:  " + clientId);
+	}
+
+	private MacroStorage getStorage(int macroClientId)
+	{
+		return allMacros.get(getClientfilename(macroClientId));
+	}
+
+	public synchronized String getMacroText(int macroClientId, String key)
 	{
 		if (key == null) return null;
-		MacroDefinition macro = storage.getMacro(key);
+
+		MacroDefinition macro = getStorage(macroClientId).getMacro(key);
 		if (macro == null) return null;
 		return macro.getText();
 	}
 
-	public MacroStorage getMacros()
+	public synchronized MacroStorage getMacros(int clientId)
 	{
-		return this.storage;
+		return getStorage(clientId);
 	}
 
-	public MacroDefinition getMacroForKeyStroke(KeyStroke key)
+	/**
+	 * Checks if the given KeyStroke is assigned to any of the currently loaded macro files.
+	 * @param key the key to test
+	 *
+	 * @return true if the keystroke is currently used
+	 */
+	public synchronized MacroDefinition getMacroForKeyStroke(KeyStroke key)
 	{
 		if (key == null) return null;
-
-		StoreableKeyStroke sk = new StoreableKeyStroke(key);
-		List<MacroGroup> groups = this.storage.getGroups();
-		for (MacroGroup group : groups)
+		for (MacroStorage storage : allMacros.values())
 		{
-			for (MacroDefinition def : group.getMacros())
+			StoreableKeyStroke sk = new StoreableKeyStroke(key);
+			List<MacroGroup> groups = storage.getGroups();
+			for (MacroGroup group : groups)
 			{
-				StoreableKeyStroke macroKey = def.getShortcut();
-				if (macroKey != null && macroKey.equals(sk)) return def;
+				for (MacroDefinition def : group.getMacros())
+				{
+					StoreableKeyStroke macroKey = def.getShortcut();
+					if (macroKey != null && macroKey.equals(sk))
+					{
+						return def;
+					}
+				}
 			}
 		}
 		return null;
 	}
 
-	public Map<String, MacroDefinition> getExpandableMacros()
+	public Map<String, MacroDefinition> getExpandableMacros(int clientId)
 	{
+		MacroStorage storage = getStorage(clientId);
 		Map<String, MacroDefinition> result = new TreeMap<String, MacroDefinition>(CaseInsensitiveComparator.INSTANCE);
-		List<MacroGroup> groups = this.storage.getGroups();
+		List<MacroGroup> groups = storage.getGroups();
 		for (MacroGroup group : groups)
 		{
 			for (MacroDefinition def : group.getMacros())

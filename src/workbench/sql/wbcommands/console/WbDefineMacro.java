@@ -58,6 +58,8 @@ public class WbDefineMacro
 	public static final String ARG_GROUP = "group";
 	public static final String ARG_EXPAND = "autoExpand";
 
+	private int macroClientId = MacroManager.DEFAULT_STORAGE;
+
 	public WbDefineMacro()
 	{
 		super();
@@ -82,6 +84,11 @@ public class WbDefineMacro
 		return false;
 	}
 
+	public void setMacroClientId(int clientId)
+	{
+		this.macroClientId = clientId;
+	}
+	
 	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
@@ -109,7 +116,7 @@ public class WbDefineMacro
 			return result;
 		}
 
-		MacroStorage storage = MacroManager.getInstance().getMacros();
+		MacroStorage storage = MacroManager.getInstance().getMacros(macroClientId);
 		List<MacroGroup> groups = storage.getGroups();
 
 		MacroGroup groupToUse = null;

@@ -80,6 +80,7 @@ import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbTraversalPolicy;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.macros.MacroFileSelector;
 
 import workbench.util.CollectionUtil;
 import workbench.util.FileDialogUtil;
@@ -136,7 +137,11 @@ public class ConnectionEditorPanel
 		policy.addComponent(altDelimiter.getCheckBox());
 		policy.addComponent(editConnectionScriptsButton);
 		policy.addComponent(tfWorkspaceFile);
+		policy.addComponent(selectWkspButton);
 		policy.addComponent(icon);
+		policy.addComponent(selectIconButton);
+		policy.addComponent(macroFile);
+		policy.addComponent(selectMacroFileButton);
 		policy.addComponent(editConnectionScriptsButton);
 		policy.addComponent(editFilterButton);
 
@@ -149,6 +154,7 @@ public class ConnectionEditorPanel
 
 		this.selectWkspButton.addActionListener(this);
 		this.selectIconButton.addActionListener(this);
+		this.selectMacroFileButton.addActionListener(this);
 		this.showPassword.addActionListener(this);
 
 		this.infoColor.setActionListener(this);
@@ -269,6 +275,10 @@ public class ConnectionEditorPanel
     jPanel4 = new javax.swing.JPanel();
     icon = new StringPropertyEditor();
     selectIconButton = new FlatButton();
+    jLabel4 = new javax.swing.JLabel();
+    jPanel5 = new javax.swing.JPanel();
+    macroFile = new StringPropertyEditor();
+    selectMacroFileButton = new FlatButton();
     jSeparator3 = new javax.swing.JSeparator();
     timeoutpanel = new javax.swing.JPanel();
     jPanel6 = new javax.swing.JPanel();
@@ -828,6 +838,50 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
     jPanel3.add(jPanel4, gridBagConstraints);
 
+    jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    jLabel4.setText(ResourceMgr.getString("LblMacroFile")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    jPanel3.add(jLabel4, gridBagConstraints);
+
+    jPanel5.setLayout(new java.awt.GridBagLayout());
+
+    macroFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    macroFile.setToolTipText(ResourceMgr.getString("d_LblIcon")); // NOI18N
+    macroFile.setName("macroFilename"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    jPanel5.add(macroFile, gridBagConstraints);
+
+    selectMacroFileButton.setText("...");
+    selectMacroFileButton.setMaximumSize(null);
+    selectMacroFileButton.setMinimumSize(null);
+    selectMacroFileButton.setPreferredSize(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    jPanel5.add(selectMacroFileButton, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
+    jPanel3.add(jPanel5, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 13;
@@ -1071,10 +1125,12 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox jCheckBox1;
   protected javax.swing.JLabel jLabel1;
   protected javax.swing.JLabel jLabel3;
+  protected javax.swing.JLabel jLabel4;
   protected javax.swing.JPanel jPanel1;
   protected javax.swing.JPanel jPanel2;
   protected javax.swing.JPanel jPanel3;
   protected javax.swing.JPanel jPanel4;
+  protected javax.swing.JPanel jPanel5;
   protected javax.swing.JPanel jPanel6;
   protected javax.swing.JSeparator jSeparator2;
   protected javax.swing.JSeparator jSeparator3;
@@ -1082,6 +1138,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JLabel lblPwd;
   protected javax.swing.JLabel lblUrl;
   protected javax.swing.JLabel lblUsername;
+  protected javax.swing.JTextField macroFile;
   protected javax.swing.JCheckBox preventNoWhere;
   protected javax.swing.JLabel propLabel;
   protected javax.swing.JCheckBox readOnly;
@@ -1090,6 +1147,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox rollbackBeforeDisconnect;
   protected javax.swing.JLabel scriptLabel;
   protected javax.swing.JButton selectIconButton;
+  protected javax.swing.JButton selectMacroFileButton;
   protected javax.swing.JButton selectWkspButton;
   protected javax.swing.JButton showPassword;
   protected javax.swing.JTextField tfFetchSize;
@@ -1151,6 +1209,18 @@ public class ConnectionEditorPanel
 				checkExtendedProps();
 			}
 		});
+	}
+
+	public void selectMacroFile()
+	{
+		MacroFileSelector selector = new MacroFileSelector();
+		WbFile file = selector.selectMacroFile();
+		if (file != null)
+		{
+			String path = FileDialogUtil.getPathWithPlaceholder(file);
+			macroFile.setText(path);
+			macroFile.setCaretPosition(0);
+		}
 	}
 
 	public void selectIcon()
@@ -1489,6 +1559,10 @@ public class ConnectionEditorPanel
 		else if (e.getSource() == this.selectIconButton)
 		{
 			this.selectIcon();
+		}
+		else if (e.getSource() == this.selectMacroFileButton)
+		{
+			this.selectMacroFile();
 		}
 		else if (e.getSource() == this.showPassword)
 		{

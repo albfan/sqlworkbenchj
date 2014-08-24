@@ -43,7 +43,7 @@ public class ClipCompletor
 	public int complete(String buffer, int cursor, List candidates)
 	{
 		LogMgr.logDebug("ClipCompletor.complete()", "Checking completion for: " + buffer);
-		Map<String, MacroDefinition> macros = MacroManager.getInstance().getExpandableMacros();
+		Map<String, MacroDefinition> macros = MacroManager.getInstance().getExpandableMacros(MacroManager.DEFAULT_STORAGE);
 		MacroDefinition def = macros.get(buffer);
 		if (def != null)
 		{

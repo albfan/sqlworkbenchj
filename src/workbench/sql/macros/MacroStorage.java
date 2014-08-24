@@ -51,6 +51,7 @@ import workbench.util.WbPersistence;
  */
 public class MacroStorage
 {
+	private final String storageId;
 	private final Object lock = new Object();
 	private final Map<String, MacroDefinition> allMacros;
 	private final List<MacroGroup> groups;
@@ -59,8 +60,9 @@ public class MacroStorage
 	private List<MacroChangeListener> changeListeners = null;
 	private File sourceFile;
 
-	public MacroStorage()
+	public MacroStorage(String id)
 	{
+		storageId = id;
 		allMacros = new TreeMap<String, MacroDefinition>(CaseInsensitiveComparator.INSTANCE);
 		groups = new ArrayList<MacroGroup>();
 	}
@@ -70,6 +72,10 @@ public class MacroStorage
 		return allMacros.get(key);
 	}
 
+	public String getStorageId()
+	{
+		return storageId;
+	}
 
 	public File getCurrentFile()
 	{
@@ -134,7 +140,7 @@ public class MacroStorage
 
 	public MacroStorage createCopy()
 	{
-		MacroStorage copy = new MacroStorage();
+		MacroStorage copy = new MacroStorage(storageId);
 		for (MacroGroup group : groups)
 		{
 			copy.groups.add(group.createCopy());

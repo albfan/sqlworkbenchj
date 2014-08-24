@@ -26,14 +26,18 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
 import javax.swing.SwingUtilities;
+
+import workbench.interfaces.TextSelectionListener;
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.macros.AddMacroPanel;
 import workbench.gui.sql.EditorPanel;
-import workbench.interfaces.TextSelectionListener;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.StringUtil;
 
 /**
@@ -47,10 +51,12 @@ public class AddMacroAction
 	implements TextSelectionListener
 {
 	private EditorPanel client;
-
-	public AddMacroAction()
+	private final int macroClientId;
+	
+	public AddMacroAction(int macroId)
 	{
 		super();
+		this.macroClientId = macroId;
 		this.setIcon(null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
 		this.initMenuDefinition("MnuTxtAddMacro");
@@ -85,7 +91,7 @@ public class AddMacroAction
 			return;
 		}
 
-		AddMacroPanel panel = new AddMacroPanel();
+		AddMacroPanel panel = new AddMacroPanel(this.macroClientId);
 
 		ValidatingDialog dialog = ValidatingDialog.createDialog(
 			SwingUtilities.getWindowAncestor(client),
@@ -101,7 +107,7 @@ public class AddMacroAction
 			String name = panel.getMacroName();
 			if (StringUtil.isNonBlank(name) && group != null)
 			{
-				MacroManager.getInstance().getMacros().addMacro(group, new MacroDefinition(name, text));
+				MacroManager.getInstance().getMacros(macroClientId).addMacro(group, new MacroDefinition(name, text));
 			}
 		}
 	}

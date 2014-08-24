@@ -82,11 +82,13 @@ public class MacroManagerDialog
 	private EscAction escAction;
 	private SqlPanel client;
 	private JCheckBox replaceEditorText;
+	private final int macroClient;
 
-	public MacroManagerDialog(Frame parent, SqlPanel aTarget)
+	public MacroManagerDialog(Frame parent, SqlPanel aTarget, int clientId)
 	{
 		super(parent, true);
 		this.client = aTarget;
+		this.macroClient = clientId;
 		this.initComponents();
 		this.initWindow(parent);
 
@@ -138,7 +140,7 @@ public class MacroManagerDialog
 
 	private void initComponents()
 	{
-		macroPanel = new MacroManagerGui();
+		macroPanel = new MacroManagerGui(macroClient);
 		JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		runButton = new WbButton(ResourceMgr.getString("LblRunMacro"));
 		runButton.setToolTipText(ResourceMgr.getDescription("LblManageMacrosRun"));
@@ -184,7 +186,7 @@ public class MacroManagerDialog
 		buttons.add(cancelButton);
 
 		JPanel buttonPanel = new JPanel(new BorderLayout());
-		String txt = ResourceMgr.getFormattedString("LblCurrMacros", MacroManager.getInstance().getMacros().getCurrentMacroFilename());
+		String txt = ResourceMgr.getFormattedString("LblCurrMacros", MacroManager.getInstance().getMacros(macroClient).getCurrentMacroFilename());
 		WbLabelField lbl = new WbLabelField(txt);
 		lbl.setBorder(new EmptyBorder(0, 5, 0, 0));
 		buttonPanel.add(lbl, BorderLayout.LINE_START);

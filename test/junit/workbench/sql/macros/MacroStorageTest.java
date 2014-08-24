@@ -57,7 +57,7 @@ public class MacroStorageTest
 	@Test
 	public void testSave()
 	{
-		MacroStorage macros = new MacroStorage();
+		MacroStorage macros = new MacroStorage("test");
 		assertFalse(macros.isModified());
 
 		macros.addMacro("Default", "sessions", "select * from v$session");
@@ -71,7 +71,7 @@ public class MacroStorageTest
 		TestUtil util = new TestUtil("SaveMacros");
 		File f = new File(util.getBaseDir(), "macros.xml");
 		macros.saveMacros(f);
-		MacroStorage newStorage = new MacroStorage();
+		MacroStorage newStorage = new MacroStorage("test");
 		newStorage.loadMacros(f, false);
 		MacroDefinition m2 = newStorage.getMacro("sessions");
 		StoreableKeyStroke key2 = m2.getShortcut();
@@ -81,7 +81,7 @@ public class MacroStorageTest
 	@Test
 	public void testCopy()
 	{
-		MacroStorage macros = new MacroStorage();
+		MacroStorage macros = new MacroStorage("test");
 		assertFalse(macros.isModified());
 
 		macros.addMacro("Default", "sessions", "select * from v$session");
@@ -127,7 +127,7 @@ public class MacroStorageTest
 	@Test
 	public void testEmpty()
 	{
-		MacroStorage macros = new MacroStorage();
+		MacroStorage macros = new MacroStorage("test");
 		MacroGroup group1 = new MacroGroup("FirstGroup");
 		group1.setVisibleInMenu(true);
 		macros.addGroup(group1);
@@ -173,7 +173,7 @@ public class MacroStorageTest
 		WbPersistence writer = new WbPersistence(oldfile.getFullPath());
 		writer.writeObject(old);
 
-		MacroStorage newStorage = new MacroStorage();
+		MacroStorage newStorage = new MacroStorage("test");
 		newStorage.loadMacros(oldfile, false);
 
 		MacroDefinition m1 = newStorage.getMacro("macro1");
@@ -182,7 +182,7 @@ public class MacroStorageTest
 		WbFile newfile = new WbFile(util.getBaseDir(), "WbMacros.xml");
 		newStorage.saveMacros(newfile);
 
-		MacroStorage new2 = new MacroStorage();
+		MacroStorage new2 = new MacroStorage("test");
 		new2.loadMacros(newfile, false);
 		assertEquals(m1, new2.getMacro("macro1"));
 	}

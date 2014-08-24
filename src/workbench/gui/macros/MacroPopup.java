@@ -65,7 +65,7 @@ import workbench.sql.macros.MacroManager;
 
 import workbench.util.StringUtil;
 
-import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import static javax.swing.WindowConstants.*;
 
 /**
  * Display a floating window with the MacroTree.
@@ -95,7 +95,7 @@ public class MacroPopup
 		setTitle(ResourceMgr.getString("TxtMacroManagerWindowTitle"));
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-		tree = new MacroTree();
+		tree = new MacroTree(parent.getMacroClientId());
 		JScrollPane p = new JScrollPane(tree);
 		add(p, BorderLayout.CENTER);
 		if (!Settings.getInstance().restoreWindowSize(this))
@@ -149,7 +149,7 @@ public class MacroPopup
 		SaveListFileAction save = new SaveListFileAction(actions, "LblSaveMacros");
 		tree.addPopupAction(save, false);
 
-		MacroManager.getInstance().getMacros().addChangeListener(this);
+		MacroManager.getInstance().getMacros(parent.getMacroClientId()).addChangeListener(this);
 		ToolTipManager.sharedInstance().registerComponent(tree);
 	}
 
@@ -212,7 +212,7 @@ public class MacroPopup
 	{
 		ToolTipManager.sharedInstance().unregisterComponent(tree);
 		setVisible(false);
-		MacroManager.getInstance().getMacros().removeChangeListener(this);
+		MacroManager.getInstance().getMacros(mainWindow.getMacroClientId()).removeChangeListener(this);
 		dispose();
 	}
 
@@ -228,14 +228,14 @@ public class MacroPopup
 
 	protected void saveMacros(boolean restoreListener)
 	{
-		MacroManager.getInstance().getMacros().removeChangeListener(this);
+		MacroManager.getInstance().getMacros(mainWindow.getMacroClientId()).removeChangeListener(this);
 		if (tree.isModified())
 		{
 			tree.saveChanges();
 		}
 		if (restoreListener)
 		{
-			MacroManager.getInstance().getMacros().addChangeListener(this);
+			MacroManager.getInstance().getMacros(mainWindow.getMacroClientId()).addChangeListener(this);
 		}
 	}
 

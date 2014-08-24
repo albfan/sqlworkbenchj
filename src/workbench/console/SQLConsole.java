@@ -49,10 +49,10 @@ import workbench.sql.wbcommands.WbConnInfo;
 import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbHistory;
+import workbench.sql.wbcommands.WbList;
 import workbench.sql.wbcommands.WbListCatalogs;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
-import workbench.sql.wbcommands.WbList;
 import workbench.sql.wbcommands.WbProcSource;
 import workbench.sql.wbcommands.WbSysExec;
 import workbench.sql.wbcommands.console.WbRun;
@@ -437,7 +437,7 @@ public class SQLConsole
 
 	private String getMacroText(String sql)
 	{
-		return MacroManager.getInstance().getMacroText(SqlUtil.trimSemicolon(sql));
+		return MacroManager.getInstance().getMacroText(MacroManager.DEFAULT_STORAGE, SqlUtil.trimSemicolon(sql));
 	}
 
 	private WbFile getHistoryFile()

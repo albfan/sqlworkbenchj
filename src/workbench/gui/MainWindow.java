@@ -279,7 +279,7 @@ public class MainWindow
 
 		addWindowListener(this);
 
-		MacroManager.getInstance().getMacros().addChangeListener(this);
+		MacroManager.getInstance().getMacros(getMacroClientId()).addChangeListener(this);
 
 		dropHandler = new DropHandler(this, sqlTab);
 		sqlTab.enableDragDropReordering(this);
@@ -454,10 +454,10 @@ public class MainWindow
 		this.loadWorkspaceAction = new LoadWorkspaceAction(this);
 		this.saveWorkspaceAction = new SaveWorkspaceAction(this);
 
-		this.createMacro = new AddMacroAction();
+		this.createMacro = new AddMacroAction(getMacroClientId());
 		this.manageMacros = new ManageMacroAction(this);
-		this.loadMacros = new LoadMacrosAction();
-		this.saveMacros = new SaveMacrosAction();
+		this.loadMacros = new LoadMacrosAction(getMacroClientId());
+		this.saveMacros = new SaveMacrosAction(getMacroClientId());
 		showMacroPopup = new ShowMacroPopupAction(this);
 
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
@@ -857,7 +857,7 @@ public class MainWindow
 
 		JMenu recentWorkspace = new JMenu(ResourceMgr.getString("MnuTxtRecentMacros"));
 		recentWorkspace.setName(RECENTMACROS_NAME);
-		RecentFileManager.getInstance().populateRecentMacrosMenu(recentWorkspace);
+		RecentFileManager.getInstance().populateRecentMacrosMenu(getMacroClientId(), recentWorkspace);
 		macroMenu.add(recentWorkspace);
 
 		MacroMenuBuilder builder = new MacroMenuBuilder();
@@ -1432,6 +1432,11 @@ public class MainWindow
 		return true;
 	}
 
+	public int getMacroClientId()
+	{
+		return windowId;
+	}
+
 	public String getWindowId()
 	{
 		return NumberStringCache.getNumberString(windowId);
@@ -1486,6 +1491,20 @@ public class MainWindow
 		getSelector().connectTo(profile, showDialog, loadWorkspace);
 	}
 
+
+	private void loadMacrosForProfile()
+	{
+		if (currentProfile == null) return;
+		WbFile macroFile = currentProfile.getMacroFile();
+
+		MacroManager.getInstance().getMacros(getMacroClientId()).removeChangeListener(this);
+		if (macroFile != null && macroFile.exists())
+		{
+			MacroManager.getInstance().loadMacros(getMacroClientId(), macroFile);
+		}
+		macroListChanged();
+		MacroManager.getInstance().getMacros(getMacroClientId()).addChangeListener(this);
+	}
 
 	/**
 	 *	Call-back function which gets executed on the AWT thread after
@@ -1780,6 +1799,8 @@ public class MainWindow
 			LogMgr.logError("MainWindow.loadCurrentProfileWorkspace()", "No current profile defined!", new IllegalStateException("No current profile"));
 			return;
 		}
+
+		loadMacrosForProfile();
 
 		String realFilename = null;
 		try
@@ -2975,7 +2996,7 @@ public class MainWindow
 
 	private MainPanel addTabAtIndex(boolean selectNew, boolean checkConnection, boolean renumber, int index)
 	{
-		final SqlPanel sql = new SqlPanel();
+		final SqlPanel sql = new SqlPanel(getMacroClientId());
 		addTabAtIndex(sql, selectNew, checkConnection, renumber, index);
 		return sql;
 	}

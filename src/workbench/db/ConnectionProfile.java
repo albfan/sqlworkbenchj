@@ -37,9 +37,11 @@ import workbench.gui.profiles.ProfileKey;
 
 import workbench.sql.DelimiterDefinition;
 
+import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbDesCipher;
+import workbench.util.WbFile;
 
 /**
  *	A class to store a connection definition including non-JDBC properties
@@ -101,6 +103,7 @@ public class ConnectionProfile
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
 	private String lastSettingsKey;
+	private String macroFileName;
 
 	public ConnectionProfile()
 	{
@@ -150,6 +153,33 @@ public class ConnectionProfile
 		String cleanName = nm.replaceAll("").toLowerCase();
 		String key = cleanGroup + "." + cleanName;
 		return key;
+	}
+
+	public String getMacroFilename()
+	{
+		return macroFileName;
+	}
+
+	public WbFile getMacroFile()
+	{
+		if (macroFileName == null) return null;
+		WbFile f = new WbFile(FileDialogUtil.replaceConfigDir(macroFileName));
+		if (f.isAbsolute() && f.exists())
+		{
+			return f;
+		}
+		WbFile realFile = new WbFile(Settings.getInstance().getConfigDir(), macroFileName);
+		if (realFile.exists()) return realFile;
+		return null;
+	}
+
+	public void setMacroFilename(String fname)
+	{
+		if (!StringUtil.equalString(fname, macroFileName))
+		{
+			this.macroFileName = fname;
+			this.changed = true;
+		}
 	}
 
 	public boolean getStoreCacheLocally()

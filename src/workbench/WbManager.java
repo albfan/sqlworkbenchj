@@ -382,7 +382,7 @@ public final class WbManager
 			if (!result) return false;
 		}
 
-		// No window with focus found, save the size and position of the last opened window
+		// No window with focus found, saveAs the size and position of the last opened window
 		if (!settingsSaved && mainWindows.size() > 0)
 		{
 			mainWindows.get(mainWindows.size() - 1).saveSettings();
@@ -684,7 +684,7 @@ public final class WbManager
 					// First parameter tells the window to disconnect in the
 					// current thread as we are already in a background thread
 					// second parameter tells the window not to close the workspace
-					// third parameter tells the window not to save the workspace
+					// third parameter tells the window not to saveAs the workspace
 					// this does not need to happen on the EDT
 					win.disconnect(false, false, false);
 					win.setVisible(false);
@@ -959,7 +959,7 @@ public final class WbManager
 			@Override
 			public void run()
 			{
-				MacroManager.getInstance().getMacros();
+				MacroManager.getInstance(); // get instance will trigger loading the default macros
 			}
 		};
 		t2.start();

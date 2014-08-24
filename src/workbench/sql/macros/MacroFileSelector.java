@@ -45,10 +45,10 @@ public class MacroFileSelector
 {
 	public static final String LAST_DIR_PROPERTY = "workbench.macros.lastdir";
 
-	public boolean canLoadMacros()
+	public boolean canLoadMacros(int clientId)
 	{
-		if (!MacroManager.getInstance().getMacros().isModified()) return true;
-		
+		if (!MacroManager.getInstance().getMacros(clientId).isModified()) return true;
+
 		int result = WbSwingUtilities.getYesNoCancel(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("MsgConfirmUnsavedMacros"));
 		if (result == JOptionPane.CANCEL_OPTION)
 		{
@@ -61,15 +61,20 @@ public class MacroFileSelector
 		return true;
 	}
 
-	public WbFile selectStorageForLoad()
+	public WbFile selectMacroFile()
 	{
-		if (!canLoadMacros()) return null;
 		return selectStorageFile(false, null);
 	}
 
-	public WbFile selectStorageForSave()
+	public WbFile selectStorageForLoad(int clientId)
 	{
-		return selectStorageFile(true, MacroManager.getInstance().getMacros().getCurrentFile());
+		if (!canLoadMacros(clientId)) return null;
+		return selectStorageFile(false, null);
+	}
+
+	public WbFile selectStorageForSave(int clientId)
+	{
+		return selectStorageFile(true, MacroManager.getInstance().getMacros(clientId).getCurrentFile());
 	}
 
 	private WbFile selectStorageFile(boolean forSave, File currentFile)

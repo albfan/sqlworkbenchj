@@ -29,6 +29,7 @@ import workbench.gui.menu.RecentFileManager;
 
 import workbench.sql.macros.MacroFileSelector;
 import workbench.sql.macros.MacroManager;
+import workbench.sql.macros.MacroStorage;
 
 import workbench.util.WbFile;
 
@@ -40,15 +41,18 @@ public class SaveMacrosAction
 	extends WbAction
 	implements MacroChangeListener
 {
+	private final int macroClientId;
 
-	public SaveMacrosAction()
+	public SaveMacrosAction(int clientId)
 	{
 		super();
+		this.macroClientId = clientId;
 		this.initMenuDefinition("MnuTxtSaveMacros");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
 		this.setIcon(null);
-		MacroManager.getInstance().getMacros().addChangeListener(this);
-		String fname = MacroManager.getInstance().getMacros().getCurrentMacroFilename();
+		MacroStorage macros = MacroManager.getInstance().getMacros(macroClientId);
+		macros.addChangeListener(this);
+		String fname = macros.getCurrentMacroFilename();
 		setTooltip(fname);
 	}
 
@@ -56,9 +60,9 @@ public class SaveMacrosAction
 	public void executeAction(ActionEvent e)
 	{
 		MacroFileSelector selector = new MacroFileSelector();
-		WbFile f = selector.selectStorageForSave();
+		WbFile f = selector.selectStorageForSave(macroClientId);
 		if (f == null) return;
-		MacroManager.getInstance().save(f);
+		MacroManager.getInstance().saveAs(macroClientId, f);
 		RecentFileManager.getInstance().macrosLoaded(f);
 		setTooltip(f.getFullPath());
 	}
@@ -66,7 +70,7 @@ public class SaveMacrosAction
 	@Override
 	public void macroListChanged()
 	{
-		String fname = MacroManager.getInstance().getMacros().getCurrentMacroFilename();
+		String fname = MacroManager.getInstance().getMacros(macroClientId).getCurrentMacroFilename();
 		setTooltip(fname);
 	}
 
@@ -74,7 +78,7 @@ public class SaveMacrosAction
 	public void dispose()
 	{
 		super.dispose();
-		MacroManager.getInstance().getMacros().removeChangeListener(this);
+		MacroManager.getInstance().getMacros(macroClientId).removeChangeListener(this);
 	}
 
 }

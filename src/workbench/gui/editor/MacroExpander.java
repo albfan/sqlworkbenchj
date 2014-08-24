@@ -26,10 +26,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
 
-import workbench.gui.editor.actions.NextWord;
 import workbench.interfaces.MacroChangeListener;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+
+import workbench.gui.editor.actions.NextWord;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
 
@@ -50,11 +52,13 @@ public class MacroExpander
 	private int maxTypingPause = 350;
 
 	private JEditTextArea editor;
+	private final int macroClientId;
 
-	public MacroExpander(JEditTextArea textArea)
+	public MacroExpander(int clientId, JEditTextArea textArea)
 	{
-		MacroManager.getInstance().getMacros().addChangeListener(this);
-		macros = MacroManager.getInstance().getExpandableMacros();
+		macroClientId = clientId;
+		MacroManager.getInstance().getMacros(macroClientId).addChangeListener(this);
+		macros = MacroManager.getInstance().getExpandableMacros(macroClientId);
 		maxTypingPause = GuiSettings.getMaxExpansionPause();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_EXPAND_MAXDURATION);
 		this.editor = textArea;
@@ -62,7 +66,7 @@ public class MacroExpander
 
 	public void dispose()
 	{
-		MacroManager.getInstance().getMacros().removeChangeListener(this);
+		MacroManager.getInstance().getMacros(macroClientId).removeChangeListener(this);
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
@@ -72,11 +76,16 @@ public class MacroExpander
 		maxTypingPause = GuiSettings.getMaxExpansionPause();
 	}
 
+	public int getMacroClientId()
+	{
+		return macroClientId;
+	}
+
 	private void readMap()
 	{
 		synchronized (lockMonitor)
 		{
-			macros = MacroManager.getInstance().getExpandableMacros();
+			macros = MacroManager.getInstance().getExpandableMacros(macroClientId);
 		}
 	}
 

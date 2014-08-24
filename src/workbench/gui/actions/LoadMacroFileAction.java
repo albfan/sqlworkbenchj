@@ -35,11 +35,13 @@ import workbench.util.WbFile;
 public class LoadMacroFileAction extends WbAction
 {
 	private WbFile macroFile;
+	private final int macroClientId;
 
-	public LoadMacroFileAction(WbFile file)
+	public LoadMacroFileAction(int clientId, WbFile file)
 	{
 		super();
 		macroFile = file;
+		macroClientId = clientId;
 		this.setMenuText(macroFile.getFileName());
 		this.setTooltip(macroFile.getFullPath());
 		this.setIcon(null);
@@ -49,9 +51,9 @@ public class LoadMacroFileAction extends WbAction
 	public void executeAction(ActionEvent e)
 	{
 		MacroFileSelector selector = new MacroFileSelector();
-		if (selector.canLoadMacros())
+		if (selector.canLoadMacros(macroClientId))
 		{
-			MacroManager.getInstance().loadMacros(macroFile);
+			MacroManager.getInstance().loadMacros(macroClientId, macroFile);
 		}
 	}
 }

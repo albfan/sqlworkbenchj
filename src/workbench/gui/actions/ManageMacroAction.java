@@ -22,15 +22,11 @@
  */
 package workbench.gui.actions;
 
-import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 
-import workbench.WbManager;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
@@ -59,22 +55,8 @@ public class ManageMacroAction
 	public void executeAction(ActionEvent e)
 	{
 		SqlPanel sql = this.client.getCurrentSqlPanel();
-		if (sql != null)
-		{
-			Window w = SwingUtilities.getWindowAncestor(sql);
-			Frame parent = null;
-			if (w instanceof Frame)
-			{
-				parent = (Frame)w;
-			}
-			MacroManagerDialog d = new MacroManagerDialog(parent, sql);
-			d.setVisible(true);
-		}
-		else
-		{
-			MacroManagerDialog d = new MacroManagerDialog(WbManager.getInstance().getCurrentWindow(), null);
-			d.setVisible(true);
-		}
+		MacroManagerDialog d = new MacroManagerDialog(client, sql, client.getMacroClientId());
+		d.setVisible(true);
 	}
 
 }

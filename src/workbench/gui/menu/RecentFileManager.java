@@ -96,7 +96,7 @@ public class RecentFileManager
 		recentMenu.setEnabled(true);
 	}
 
-	public void populateRecentMacrosMenu(JMenu recentMenu)
+	public void populateRecentMacrosMenu(int clientId, JMenu recentMenu)
 	{
 		recentMenu.removeAll();
 
@@ -110,7 +110,7 @@ public class RecentFileManager
 
 		for (WbFile f : files)
 		{
-			LoadMacroFileAction load = new LoadMacroFileAction(f);
+			LoadMacroFileAction load = new LoadMacroFileAction(clientId, f);
 			recentMenu.add(load);
 		}
 		recentMenu.setEnabled(true);

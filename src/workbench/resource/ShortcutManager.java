@@ -306,7 +306,7 @@ public class ShortcutManager
 			return;
 		}
 
-		// we only want to save those definitions where a different mapping is defined
+		// we only want to saveAs those definitions where a different mapping is defined
 		// so we first create a copy of the current keymap, and then remove any
 		// definition that is not customized.
 		HashMap<String, ShortcutDefinition> toSave = new HashMap<String, ShortcutDefinition>(this.keyMap);
@@ -318,7 +318,7 @@ public class ShortcutManager
 				toSave.remove(entry.getKey());
 			}
 		}
-		// if no mapping at all is defined, then don't save it
+		// if no mapping at all is defined, then don't saveAs it
 		if (toSave.size() > 0)
 		{
 			WbPersistence writer = new WbPersistence(this.filename);

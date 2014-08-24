@@ -31,13 +31,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.EncodingPanel;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  *
@@ -257,6 +258,22 @@ public class FileDialogUtil
 		{
 			return aPathname;
 		}
+	}
+
+	public static String getPathWithPlaceholder(WbFile file)
+	{
+		File configDir = Settings.getInstance().getConfigDir();
+
+		File fileDir = file.getParentFile();
+		while (!fileDir.equals(configDir))
+		{
+			fileDir = fileDir.getParentFile();
+			if (fileDir == null) break;
+		}
+		if (fileDir == null) return file.getFullPath();
+
+		String fpath = file.getAbsolutePath().replace(fileDir.getAbsolutePath(), CONFIG_DIR_KEY);
+		return fpath;
 	}
 
 	public static String replaceConfigDir(String aPathname)

@@ -89,10 +89,12 @@ public class MacroTree
 	private WbAction pasteToFolderAction;
 
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
+	private final int macroClientId;
 
-	public MacroTree()
+	public MacroTree(int clientId)
 	{
 		super();
+		macroClientId = clientId;
 		loadMacros();
 		setRootVisible(false);
 		putClientProperty("JTree.lineStyle", "Angled");
@@ -135,7 +137,7 @@ public class MacroTree
 		{
 			macroModel.removeTreeModelListener(this);
 		}
-		macroModel = new MacroListModel(MacroManager.getInstance().getMacros());
+		macroModel = new MacroListModel(MacroManager.getInstance().getMacros(macroClientId));
 		setModel(macroModel);
 		macroModel.addTreeModelListener(this);
 	}
@@ -241,8 +243,8 @@ public class MacroTree
 	public void saveChanges()
 	{
 		MacroStorage current = this.macroModel.getMacros();
-		MacroManager.getInstance().getMacros().copyFrom(current);
-		MacroManager.getInstance().save();
+		MacroManager.getInstance().getMacros(macroClientId).copyFrom(current);
+		MacroManager.getInstance().save(macroClientId);
 		current.resetModified();
 	}
 

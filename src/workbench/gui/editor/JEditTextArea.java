@@ -523,11 +523,11 @@ public class JEditTextArea
 		return expander;
 	}
 
-	public void enableMacroExpansion(boolean flag)
+	public void setMacroExpansionEnabled(boolean flag, int clientId)
 	{
 		if (flag && expander == null)
 		{
-			expander = new MacroExpander(this);
+			expander = new MacroExpander(clientId, this);
 		}
 		else if (!flag)
 		{
@@ -631,7 +631,7 @@ public class JEditTextArea
 		return count != 0;
 	}
 
-	public void enableBracketCompletion(boolean flag)
+	public void setBracketCompletionEnabled(boolean flag)
 	{
 		if (bracketCompleter == null && flag)
 		{

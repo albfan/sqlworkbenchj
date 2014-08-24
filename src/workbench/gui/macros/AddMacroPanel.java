@@ -29,12 +29,22 @@ import java.awt.Insets;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.List;
-import javax.swing.*;
-import workbench.gui.WbSwingUtilities;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.StringUtil;
 
 /**
@@ -45,10 +55,13 @@ public class AddMacroPanel
 	extends JPanel
 	implements WindowListener, ValidatingComponent
 {
-	public AddMacroPanel()
+	private int macroClientId;
+
+	public AddMacroPanel(int clientId)
 	{
 		initComponents();
-		List<MacroGroup> groups = MacroManager.getInstance().getMacros().getGroups();
+		this.macroClientId = clientId;
+		List<MacroGroup> groups = MacroManager.getInstance().getMacros(macroClientId).getGroups();
 		DefaultComboBoxModel model = new DefaultComboBoxModel();
 		for (MacroGroup group : groups)
 		{

@@ -38,10 +38,12 @@ import workbench.util.WbFile;
 public class LoadMacrosAction
 	extends WbAction
 {
+	private final int macroClientId;
 
-	public LoadMacrosAction()
+	public LoadMacrosAction(int clientId)
 	{
 		super();
+		this.macroClientId = clientId;
 		this.initMenuDefinition("MnuTxtLoadMacros");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
 		this.setIcon(null);
@@ -51,9 +53,9 @@ public class LoadMacrosAction
 	public void executeAction(ActionEvent e)
 	{
 		MacroFileSelector selector = new MacroFileSelector();
-		WbFile f = selector.selectStorageForLoad();
+		WbFile f = selector.selectStorageForLoad(macroClientId);
 		if (f == null) return;
 		RecentFileManager.getInstance().macrosLoaded(f);
-		MacroManager.getInstance().loadMacros(f);
+		MacroManager.getInstance().loadMacros(macroClientId, f);
 	}
 }
