@@ -840,6 +840,7 @@ public class ConnectionEditorPanel
 
     jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     jLabel4.setText(ResourceMgr.getString("LblMacroFile")); // NOI18N
+    jLabel4.setToolTipText(ResourceMgr.getString("d_LblMacroFile")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -850,7 +851,7 @@ public class ConnectionEditorPanel
     jPanel5.setLayout(new java.awt.GridBagLayout());
 
     macroFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    macroFile.setToolTipText(ResourceMgr.getString("d_LblIcon")); // NOI18N
+    macroFile.setToolTipText(ResourceMgr.getString("d_LblMacroFile")); // NOI18N
     macroFile.setName("macroFilename"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
