@@ -924,7 +924,8 @@ public class ConnectionProfile
 		result.setPreventDMLWithoutWhere(this.preventNoWhere);
 		result.setPromptForUsername(this.promptForUsername);
 		result.setStoreCacheLocally(this.storeCacheLocally);
-		result.lastSettingsKey = lastSettingsKey;
+		result.setMacroFilename(this.macroFileName);
+		result.lastSettingsKey = this.lastSettingsKey;
 		if (connectionProperties != null)
 		{
 			Enumeration keys = connectionProperties.propertyNames();

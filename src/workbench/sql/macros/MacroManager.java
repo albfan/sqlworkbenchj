@@ -122,6 +122,11 @@ public class MacroManager
 		return clientFilename;
 	}
 
+	public void loadDefaultMacros(int clientId)
+	{
+		loadMacros(clientId, getDefaultMacroFile());
+	}
+
 	public synchronized void loadMacros(int clientId, WbFile macroFile)
 	{
 		String fname = macroFile.getFullPath();
@@ -138,7 +143,14 @@ public class MacroManager
 
 	private MacroStorage getStorage(int macroClientId)
 	{
-		return allMacros.get(getClientfilename(macroClientId));
+		String fname = getClientfilename(macroClientId);
+		MacroStorage storage = allMacros.get(fname);
+		if (storage == null)
+		{
+			storage = allMacros.get(getDefaultMacroFile().getFullPath());
+			LogMgr.logError("MacroManager.getStorage()", "No macros registered for clientId=" + macroClientId + ". Using default macros!", new Exception("Client not initialized"));
+		}
+		return storage;
 	}
 
 	public synchronized String getMacroText(int macroClientId, String key)

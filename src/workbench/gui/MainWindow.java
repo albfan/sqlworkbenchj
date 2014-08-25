@@ -1502,6 +1502,10 @@ public class MainWindow
 		{
 			MacroManager.getInstance().loadMacros(getMacroClientId(), macroFile);
 		}
+		else
+		{
+			MacroManager.getInstance().loadDefaultMacros(getMacroClientId());
+		}
 		macroListChanged();
 		MacroManager.getInstance().getMacros(getMacroClientId()).addChangeListener(this);
 	}

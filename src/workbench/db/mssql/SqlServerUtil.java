@@ -36,6 +36,14 @@ import workbench.util.SqlUtil;
 public class SqlServerUtil
 {
 	/**
+	 * Returns true if the connection is to a SQL Server 2014 or later.
+	 */
+	public static boolean isSqlServer2014(WbConnection conn)
+	{
+		return JdbcUtils.hasMinimumServerVersion(conn, "12.0");
+	}
+
+	/**
 	 * Returns true if the connection is to a SQL Server 2012 or later.
 	 */
 	public static boolean isSqlServer2012(WbConnection conn)

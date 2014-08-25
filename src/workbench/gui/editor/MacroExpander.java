@@ -34,6 +34,7 @@ import workbench.gui.editor.actions.NextWord;
 
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
+import workbench.sql.macros.MacroStorage;
 
 /**
  *
@@ -66,7 +67,11 @@ public class MacroExpander
 
 	public void dispose()
 	{
-		MacroManager.getInstance().getMacros(macroClientId).removeChangeListener(this);
+		MacroStorage storage = MacroManager.getInstance().getMacros(macroClientId);
+		if (storage != null)
+		{
+			storage.removeChangeListener(this);
+		}
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
