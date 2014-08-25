@@ -23,9 +23,13 @@
 package workbench.gui.components;
 
 import java.awt.Insets;
+
 import javax.swing.Action;
 import javax.swing.Icon;
+
 import workbench.WbManager;
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.WbSwingUtilities;
 
 /**
@@ -40,6 +44,7 @@ public class FlatButton
 	public static final Insets LARGER_MARGIN = new Insets(5,7,5,7);
 	private boolean useDefaultMargin;
 	private Insets customInsets;
+	private String enableMsgKey;
 
 	public FlatButton()
 	{
@@ -63,6 +68,11 @@ public class FlatButton
 	{
 		super(label);
 		init();
+	}
+
+	public void showMessageOnEnable(String resourceKey)
+	{
+		this.enableMsgKey = resourceKey;
 	}
 
 	private void init()
@@ -109,5 +119,16 @@ public class FlatButton
 			return super.getMargin();
 		}
 		return customInsets == null ? SMALL_MARGIN : customInsets;
+	}
+
+	@Override
+	public void setEnabled(boolean flag)
+	{
+		boolean wasEnabled = this.isEnabled();
+		super.setEnabled(flag);
+		if (flag && !wasEnabled && this.enableMsgKey != null)
+		{
+			WbSwingUtilities.showToolTip(this, "<html><p style=\"margin:4px\">" + ResourceMgr.getString(enableMsgKey) + "</p></html>");
+		}
 	}
 }

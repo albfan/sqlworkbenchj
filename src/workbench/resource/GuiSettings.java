@@ -98,6 +98,11 @@ public class GuiSettings
 
 	public static final String PROP_COPY_TEXT_DISPLAY_DLG = "workbench.gui.copy.text.displayoptions";
 
+	public static boolean showApplyDDLHint()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.apply.ddl.hint", true);
+	}
+	
 	public static boolean getUseResultTagForBookmarks()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_BOOKMARKS_USE_WBRESULT, false);

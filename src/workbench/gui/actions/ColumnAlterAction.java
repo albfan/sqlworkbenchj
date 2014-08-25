@@ -40,6 +40,7 @@ import workbench.db.WbConnection;
 import workbench.db.sqltemplates.ColumnChanger;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.RunScriptPanel;
 
@@ -72,6 +73,16 @@ public class ColumnAlterAction
 		definition.addTableModelListener(this);
 	}
 
+	@Override
+	public void dispose()
+	{
+		if (definition != null)
+		{
+			definition.removeTableModelListener(this);
+		}
+		super.dispose();
+	}
+
 	public void setReloader(Reloadable reload)
 	{
 		client = reload;
@@ -88,7 +99,8 @@ public class ColumnAlterAction
 			return;
 		}
 
-		if (e.getType() == TableModelEvent.UPDATE || e.getType() == TableModelEvent.DELETE)
+		DataStoreTableModel model = (DataStoreTableModel)e.getSource();
+		if (model.getDataStore().isModified())
 		{
 			setEnabled(sourceTable != null);
 		}

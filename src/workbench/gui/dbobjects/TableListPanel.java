@@ -369,6 +369,7 @@ public class TableListPanel
 
 		this.statusPanel = new JPanel(new BorderLayout());
 		this.alterButton = new FlatButton(this.renameAction);
+		alterButton.showMessageOnEnable("MsgApplyDDLHint");
 		this.alterButton.setResourceKey("MnuTxtRunAlter");
 
 		this.summaryStatusBarLabel = new SummaryLabel("");
