@@ -212,15 +212,22 @@ public class WbCopy
 		boolean doSyncDelete = cmdLine.getBoolean(PARAM_DELETE_SYNC, false);
 		if (doSyncDelete && StringUtil.isNonBlank(sourcequery))
 		{
-			result.addMessage(ResourceMgr.getString("ErrCopySyncNoQuery"));
+			result.addMessageByKey("ErrCopySyncNoQuery");
 			result.setFailure();
 			return result;
 		}
 
 		if (StringUtil.isBlank(sourcetable) && StringUtil.isBlank(sourcequery) && StringUtil.isBlank(sourceSchema))
 		{
-			result.addMessage(ResourceMgr.getString("ErrCopyNoSourceSpecified"));
+			result.addMessageByKey("ErrCopyNoSourceSpecified");
 			addWrongParams(result);
+			return result;
+		}
+
+		if (StringUtil.isNonBlank(sourcetable) && StringUtil.isNonBlank(sourcequery))
+		{
+			result.addMessageByKey("ErrCopyTargetAndQuery");
+			result.setFailure();
 			return result;
 		}
 
