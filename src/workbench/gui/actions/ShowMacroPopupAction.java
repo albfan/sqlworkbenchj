@@ -87,7 +87,6 @@ public class ShowMacroPopupAction
 			macroWindow = new MacroPopup(client);
 			EventQueue.invokeLater(new Runnable()
 			{
-
 				@Override
 				public void run()
 				{
@@ -107,7 +106,7 @@ public class ShowMacroPopupAction
 	@Override
 	public void windowGainedFocus(WindowEvent e)
 	{
-		if (macroWindow != null && e.getWindow() == client && !macroWindow.isShowing())
+		if (macroWindow != null && e.getWindow() == client && !macroWindow.isShowing() && !macroWindow.isClosing())
 		{
 			macroWindow.setVisible(true);
 			client.requestFocus();

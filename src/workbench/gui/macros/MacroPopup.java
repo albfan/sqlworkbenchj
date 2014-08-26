@@ -54,6 +54,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.EditMacroAction;
+import workbench.gui.actions.EscAction;
 import workbench.gui.actions.RunMacroAction;
 import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.actions.WbAction;
@@ -83,6 +84,7 @@ public class MacroPopup
 	private RunMacroAction runAction;
 	private EditMacroAction editAction;
 	private WbAction copyTextAction;
+	private EscAction closeAction;
 	private boolean isClosing;
 	private final String propkey = getClass().getName() + ".expandedgroups";
 	private final String toolkey = "macropopup";
@@ -110,6 +112,11 @@ public class MacroPopup
 
 		restoreExpandedGroups();
 		tree.addMouseListener(this);
+
+		if (GuiSettings.getCloseMacroPopupWithEsc())
+		{
+			closeAction = new EscAction(this, this);
+		}
 
 		runAction = new RunMacroAction(mainWindow, null, -1);
 		editAction = new EditMacroAction();
@@ -239,8 +246,7 @@ public class MacroPopup
 		}
 	}
 
-	@Override
-	public void windowClosing(WindowEvent e)
+	private void doClose()
 	{
 		isClosing = true;
 		if (tree.isModified())
@@ -270,6 +276,15 @@ public class MacroPopup
 				closeWindow();
 			}
 		});
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e)
+	{
+		if (!isClosing)
+		{
+			doClose();
+		}
 	}
 
 	@Override
@@ -382,6 +397,10 @@ public class MacroPopup
 		if (e.getSource() == this.copyTextAction)
 		{
 			copyMacroText();
+		}
+		else if (e.getSource() == this.closeAction && !isClosing)
+		{
+			doClose();
 		}
 	}
 
