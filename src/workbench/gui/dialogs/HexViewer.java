@@ -28,22 +28,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
+
 import workbench.WbManager;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.HexPanel;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  * A panel to display a BLOB as a hex dump.
  *
  * It uses a HexPanel to display the data.
- * 
+ *
  * @author Thomas Kellerer
  * @see workbench.gui.components.HexPanel
  */
@@ -83,37 +86,45 @@ public class HexViewer
 		panel.setData(data);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		this.setVisible(false);
 		this.dispose();
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 		Settings.getInstance().storeWindowSize(this, settingsId);
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
