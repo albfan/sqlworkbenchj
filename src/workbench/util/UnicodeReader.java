@@ -1,6 +1,10 @@
 package workbench.util;
 
+import java.io.*;
+
 /**
+ * Generic unicode textreader, which will use BOM mark to identify the encoding to be used.
+ *
  * Original pseudocode   : Thomas Weidenfeller
  * Implementation tweaked: Aki Nieminen
  *
@@ -15,12 +19,6 @@ package workbench.util;
  * Win2k Notepad:
  * Unicode format = UTF-16LE
  **/
-import java.io.*;
-
-/**
- * Generic unicode textreader, which will use BOM mark
- * to identify the encoding to be used.
- */
 public class UnicodeReader
 	extends Reader
 {
