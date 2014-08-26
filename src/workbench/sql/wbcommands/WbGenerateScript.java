@@ -83,6 +83,7 @@ public class WbGenerateScript
 		cmdLine.addArgument("useSeparator", ArgumentType.BoolSwitch);
 		cmdLine.addArgument("file", ArgumentType.StringArgument);
 		cmdLine.addArgument("includeDrop", ArgumentType.BoolSwitch);
+		cmdLine.addArgument("encoding", ArgumentType.StringArgument);
 	}
 
 	@Override
@@ -191,12 +192,13 @@ public class WbGenerateScript
 
 		result.setSuccess();
 
+		String encoding = cmdLine.getValue("encoding", EncodingUtil.getDefaultEncoding());
 		if (output != null)
 		{
 			Writer writer = null;
 			try
 			{
-				writer = EncodingUtil.createWriter(output, EncodingUtil.getDefaultEncoding(), false);
+				writer = EncodingUtil.createWriter(output, encoding, false);
 				writer.write(scripter.getScript());
 				result.addMessage(ResourceMgr.getFormattedString("MsgScriptWritten", output.getAbsolutePath()));
 			}
