@@ -94,6 +94,12 @@ public class TableReplacer
 	}
 
 	@Override
+	public void setWrapSearch(boolean flag)
+	{
+
+	}
+
+	@Override
 	public int findPrevious()
 	{
 		return -1;

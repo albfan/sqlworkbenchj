@@ -29,13 +29,16 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  * A search dialog panel.
@@ -54,10 +57,12 @@ public class SearchCriteriaPanel
 	private String regexProperty;
 	private String highlightProperty;
 	private String baseProperty;
+	private String wrapProperty;
 	private JCheckBox ignoreCase;
 	private JCheckBox wholeWord;
 	private JCheckBox useRegEx;
 	private JCheckBox highlightAll;
+	private JCheckBox wrapSearch;
 	protected HistoryTextField criteria;
 	protected JLabel label;
 
@@ -78,6 +83,7 @@ public class SearchCriteriaPanel
 		caseProperty = settingsKey + ".search.ignoreCase";
 		wordProperty = settingsKey + ".search.wholeWord";
 		regexProperty = settingsKey + ".search.useRegEx";
+		wrapProperty = settingsKey  + ".search.wrapSearch";
 
 		if (showHighlight)
 		{
@@ -98,6 +104,11 @@ public class SearchCriteriaPanel
 		this.useRegEx.setToolTipText(ResourceMgr.getDescription("LblSearchRegEx"));
 		this.useRegEx.setSelected(Settings.getInstance().getBoolProperty(regexProperty, false));
 		this.useRegEx.setName("regex");
+
+		this.wrapSearch = new JCheckBox(ResourceMgr.getString("LblSearchWrap"));
+		this.wrapSearch.setToolTipText(ResourceMgr.getDescription("LblSearchWrap"));
+		this.wrapSearch.setSelected(Settings.getInstance().getBoolProperty(wrapProperty, false));
+		this.wrapSearch.setName("wrap");
 
 		if (showHighlight)
 		{
@@ -145,6 +156,13 @@ public class SearchCriteriaPanel
 		c.gridwidth = 2;
 		add(this.ignoreCase, c);
 
+		c.fill = GridBagConstraints.NONE;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.gridx = 0;
+		c.gridy++;
+		c.gridwidth = 2;
+		add(this.wrapSearch, c);
+
 		if (showHighlight)
 		{
 			c.gridy++;
@@ -177,6 +195,11 @@ public class SearchCriteriaPanel
 	public boolean getUseRegex()
 	{
 		return this.useRegEx.isSelected();
+	}
+
+	public boolean getWrapSearch()
+	{
+		return wrapSearch.isSelected();
 	}
 
 	public boolean getHighlightAll()
@@ -240,6 +263,8 @@ public class SearchCriteriaPanel
 		Settings.getInstance().setProperty(caseProperty, this.getIgnoreCase());
 		Settings.getInstance().setProperty(wordProperty, this.getWholeWordOnly());
 		Settings.getInstance().setProperty(regexProperty, this.getUseRegex());
+		Settings.getInstance().setProperty(wrapProperty, this.getWrapSearch());
+
 		if (this.highlightProperty != null)
 		{
 			Settings.getInstance().setProperty(highlightProperty, getHighlightAll());

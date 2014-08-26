@@ -67,6 +67,8 @@ public class SearchAndReplace
 	private FindNextAction findNextAction;
 	private ReplaceAction replaceAction;
 
+	private boolean wrapSearch;
+
 	/**
 	 * Create a new SearchAndReplace support.
 	 *
@@ -85,6 +87,17 @@ public class SearchAndReplace
 		this.findNextAction.setEnabled(false);
 		this.replaceAction = new ReplaceAction(this);
 		this.replaceAction.setEnabled(true);
+	}
+
+	public boolean getWrapSearch()
+	{
+		return wrapSearch;
+	}
+
+	@Override
+	public void setWrapSearch(boolean flag)
+	{
+		this.wrapSearch = flag;
 	}
 
 	public ReplaceAction getReplaceAction()
@@ -144,10 +157,12 @@ public class SearchAndReplace
 		{
 			boolean doFind = p.showFindDialog(this.parent);
 			if (!doFind) return -1;
+
 			String criteria = p.getCriteria();
 			boolean ignoreCase = p.getIgnoreCase();
 			boolean wholeWord = p.getWholeWordOnly();
 			boolean useRegex = p.getUseRegex();
+			setWrapSearch(p.getWrapSearch());
 			try
 			{
 				this.lastSearchCriteria = criteria;
@@ -155,7 +170,7 @@ public class SearchAndReplace
 				this.findPreviousAction.setEnabled(false);
 				pos = this.findText(criteria, ignoreCase, wholeWord, useRegex);
 				showDialog = false;
-				this.findNextAction.setEnabled(pos > -1);
+				this.findNextAction.setEnabled(pos > -1 || wrapSearch);
 				this.findPreviousAction.setEnabled(pos > -1);
 			}
 			catch (Exception e)
@@ -204,11 +219,17 @@ public class SearchAndReplace
 	public int findNext()
 	{
 		if (this.lastSearchPattern == null) return -1;
-		if (this.lastSearchPos == -1) return -1;
+		if (this.lastSearchPos == -1 && !wrapSearch) return -1;
 
 		Matcher m = this.lastSearchPattern.matcher(this.getText());
 
-		if (m.find(this.getCaretPosition() + 1))
+		int startPos = this.getCaretPosition() + 1;
+		if (wrapSearch && lastSearchPos == -1)
+		{
+			startPos = 0;
+		}
+
+		if (m.find(startPos))
 		{
 			this.lastSearchPos = m.start();
 			int end = m.end();
@@ -455,10 +476,18 @@ public class SearchAndReplace
 		else
 		{
 			this.lastSearchPos = -1;
-			Toolkit.getDefaultToolkit().beep();
-			String msg = ResourceMgr.getString("MsgEditorCriteriaNotFound");
-			msg = StringUtil.replace(msg, "%value%", anExpression);
-			WbSwingUtilities.showMessage(this.parent, msg);
+			int pos = -1;
+			if (wrapSearch)
+			{
+				pos = findNext();
+			}
+			if (pos < 0)
+			{
+				Toolkit.getDefaultToolkit().beep();
+				String msg = ResourceMgr.getString("MsgEditorCriteriaNotFound");
+				msg = StringUtil.replace(msg, "%value%", anExpression);
+				WbSwingUtilities.showMessage(this.parent, msg);
+			}
 		}
 		return this.lastSearchPos;
 	}

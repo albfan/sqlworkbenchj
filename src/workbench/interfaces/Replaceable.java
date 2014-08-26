@@ -76,5 +76,7 @@ public interface Replaceable
 	 */
 	int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord, boolean useRegex);
 
+	void setWrapSearch(boolean flag);
+	
 	boolean isTextSelected();
 }
