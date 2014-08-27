@@ -1211,7 +1211,12 @@
   </target>
 
   <target name="javadoc">
-    <javadoc destdir="${javadocdir}" notree="true" sourcepath="${src}" packagenames="workbench.*"/>
+    <javadoc destdir="${javadocdir}"
+             noqualifier="java.*:javax.*"
+             notree="true"
+             sourcepath="${src}"
+             link="http://docs.oracle.com/javase/6/docs/api/"
+             packagenames="workbench.*"/>
   </target>
 
 <!--  -->
@@ -1219,7 +1224,7 @@
   <target name="pdf-javadoc">
     <javadoc doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet"
              docletpath="../libs/doclet/pdfdoclet-1.0.3-all.jar"
-             sourcepath="${src}" 
+             sourcepath="${src}"
              additionalparam="-pdf ${javadocdir}/workbench-api.pdf -config pdf_javadoc.properties"
              packagenames="workbench.*"
     />

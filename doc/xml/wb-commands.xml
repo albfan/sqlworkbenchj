@@ -965,7 +965,7 @@ $$ LANGUAGE plpgsql;
        </para>
        <para>
          <literal>WbRunLB</literal> will only extract SQL statements stored in <literal>&lt;sql&gt;</literal> or
-         <literal>&lt;createProcedure&gt;</literal> tags.
+         <literal>&lt;createProcedure&gt;</literal> tags or scripts referenced through the <literal>&lt;sqlFile&gt;</literal> tag.
        </para>
        <para>
          It will not convert any of the Liquibase tags to "real" SQL.

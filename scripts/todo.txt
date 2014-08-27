@@ -1,7 +1,10 @@
 Features:
 ---------
+- close macro popup with ESC
 - Use procedure/function declarations as bookmarks
-- search text in all editor tabs
+- search in editor
+  - search text in all editor tabs
+  - wrap search at the end
 - support for named parameters from e.g. JPA Queries
   select * from foo where x = :id;
 - WbVarDef

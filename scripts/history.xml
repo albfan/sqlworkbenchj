@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-08-21">
+    <entry dev-build="4" type="enh">WbRunLB will now also read scripts included with the &lt;sqlFile&gt; tag</entry>
     <entry dev-build="3" type="enh">WbGenerateScript now supports the -exclude parameter</entry>
     <entry dev-build="3" type="enh">For Firebird 3.0 the source code of procedures and packages is now displayed</entry>
     <entry dev-build="3" type="enh">The bookmarks dialog now also includes procedure and function names if available</entry>
