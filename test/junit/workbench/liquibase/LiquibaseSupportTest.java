@@ -52,67 +52,68 @@ public class LiquibaseSupportTest
 	public void testGetCustomSQL()
 		throws Exception
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
-             "  \n" +
-             "<databaseChangeLog \n" +
-             "  xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog/1.9\" \n" +
-             "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
-             "  xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog/1.9 \n" +
-             "         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd\"> \n" +
-             "  \n" +
-             "    <changeSet id=\"1\" author=\"Arthur\"> \n" +
-						 "         <sql splitStatements=\"false\"> \n" +
-						 "            SELECT 42 FROM DUAL; \n" +
-						 "            COMMIT;" +
-						 "        </sql>\n" +
-             "    </changeSet> \n" +
-						 "\n" +
-						 "    <changeSet id=\"2\" author=\"Tricia\"> \n" +
-						 "       <createTable tableName=\"person\"> \n" +
-						 "         <column name=\"id\" type=\"integer\"> \n" +
-						 "           <constraint primaryKey=\"true\" nullable=\"false\"/> \n" +
-						 "         </column> \n" +
-						 "       </createTable> \n" +
-						 "       <sql splitStatements=\"true\"> \n" +
-						 "            INSERT INTO person (id) VALUES (1); \n" +
-						 "            INSERT INTO person (id) VALUES (2); \n" +
-						 "            COMMIT;" +
-						 "        </sql>\n" +
-             "    </changeSet> \n" +
-						 "\n" +
-             "    <changeSet id=\"5\" author=\"Zaphod\"> \n" +
-						 "         <createProcedure> \n" +
-						 "            SELECT 'zaphod-5' FROM DUAL; \n" +
-						 "        </createProcedure>\n" +
-             "    </changeSet> \n" +
-						 "\n" +
-             "    <changeSet id=\"5\" author=\"Arthur\"> \n" +
-						 "         <createProcedure> \n" +
-						 "            SELECT 'arthur-5' FROM DUAL; \n" +
-						 "        </createProcedure>\n" +
-             "    </changeSet> \n" +
-						 "\n" +
-             "    <changeSet id=\"3\" author=\"Zaphod\"> \n" +
-						 "         <createProcedure> \n" +
-						 "            SELECT 3 FROM DUAL; \n" +
-						 "        </createProcedure>\n" +
-             "    </changeSet> \n" +
-             "  \n" +
-						 "    <changeSet id=\"4\" author=\"Ford\"> \n" +
-						 "       <sql splitStatements=\"true\"> \n" +
-						 "            INSERT INTO person (id) VALUES (1)\n" +
-						 "            GO\n" +
-						 "\n" +
-						 "            INSERT INTO person (id) VALUES (2)\n" +
-						 "            GO\n" +
-						 "\n" +
-						 "            COMMIT\n" +
-						 "            GO\n" +
-						 "\n" +
-						 "        </sql>\n" +
-             "    </changeSet> \n" +
-						 "\n" +
-             "</databaseChangeLog>";
+		String xml =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+			"  \n" +
+			"<databaseChangeLog \n" +
+			"  xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog/1.9\" \n" +
+			"  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
+			"  xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog/1.9 \n" +
+			"         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd\"> \n" +
+			"  \n" +
+			"    <changeSet id=\"1\" author=\"Arthur\"> \n" +
+			"         <sql splitStatements=\"false\"> \n" +
+			"            SELECT 42 FROM DUAL; \n" +
+			"            COMMIT;" +
+			"        </sql>\n" +
+			"    </changeSet> \n" +
+			"\n" +
+			"    <changeSet id=\"2\" author=\"Tricia\"> \n" +
+			"       <createTable tableName=\"person\"> \n" +
+			"         <column name=\"id\" type=\"integer\"> \n" +
+			"           <constraint primaryKey=\"true\" nullable=\"false\"/> \n" +
+			"         </column> \n" +
+			"       </createTable> \n" +
+			"       <sql splitStatements=\"true\"> \n" +
+			"            INSERT INTO person (id) VALUES (1); \n" +
+			"            INSERT INTO person (id) VALUES (2); \n" +
+			"            COMMIT;" +
+			"        </sql>\n" +
+			"    </changeSet> \n" +
+			"\n" +
+			"    <changeSet id=\"5\" author=\"Zaphod\"> \n" +
+			"         <createProcedure> \n" +
+			"            SELECT 'zaphod-5' FROM DUAL; \n" +
+			"        </createProcedure>\n" +
+			"    </changeSet> \n" +
+			"\n" +
+			"    <changeSet id=\"5\" author=\"Arthur\"> \n" +
+			"         <createProcedure> \n" +
+			"            SELECT 'arthur-5' FROM DUAL; \n" +
+			"        </createProcedure>\n" +
+			"    </changeSet> \n" +
+			"\n" +
+			"    <changeSet id=\"3\" author=\"Zaphod\"> \n" +
+			"         <createProcedure> \n" +
+			"            SELECT 3 FROM DUAL; \n" +
+			"        </createProcedure>\n" +
+			"    </changeSet> \n" +
+			"  \n" +
+			"    <changeSet id=\"4\" author=\"Ford\"> \n" +
+			"       <sql splitStatements=\"true\"> \n" +
+			"            INSERT INTO person (id) VALUES (1)\n" +
+			"            GO\n" +
+			"\n" +
+			"            INSERT INTO person (id) VALUES (2)\n" +
+			"            GO\n" +
+			"\n" +
+			"            COMMIT\n" +
+			"            GO\n" +
+			"\n" +
+			"        </sql>\n" +
+			"    </changeSet> \n" +
+			"\n" +
+			"</databaseChangeLog>";
 
 		TestUtil util = getTestUtil();
 		WbFile xmlFile = new WbFile(util.getBaseDir(), "changelog.xml");
@@ -155,6 +156,83 @@ public class LiquibaseSupportTest
 
 		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("Arthur", "*"));
 		assertEquals(2, sql.size());
+	}
+
+	@Test
+	public void testSqlFile()
+		throws Exception
+	{
+		String sql = "create table foo (id integer not null primary key);";
+
+		String xml =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+			"  \n" +
+			"<databaseChangeLog \n" +
+			"  xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog/1.9\" \n" +
+			"  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
+			"  xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog/1.9 \n" +
+			"         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd\"> \n" +
+			"  \n" +
+			"    <changeSet id=\"1\" author=\"Arthur\"> \n" +
+			"         <sqlFile path=\"create_table.sql\" relativeToChangelogFile=\"true\" splitStatements=\"false\"/> \n" +
+			"    </changeSet> \n" +
+			"\n" +
+			"</databaseChangeLog>";
+
+		TestUtil util = getTestUtil();
+		WbFile xmlFile = new WbFile(util.getBaseDir(), "changelog.xml");
+
+		TestUtil.writeFile(xmlFile, xml, "UTF-8");
+		WbFile sqlFile = new WbFile(util.getBaseDir(), "create_table.sql");
+		TestUtil.writeFile(sqlFile, sql, "UTF-8");
+
+		LiquibaseSupport lb = new LiquibaseSupport(xmlFile);
+		List<String> statements = lb.getSQLFromChangeSet(new ChangeSetIdentifier("1"));
+		assertNotNull(statements);
+		assertEquals(1, statements.size());
+		assertEquals(sql, statements.get(0));
+	}
+
+	@Test
+	public void testSqlFileWithDelim()
+		throws Exception
+	{
+		String sql =
+			"create table foo (id integer)\n" +
+			"/\n" +
+			"create index idx_foo on foo (id)\n" +
+			"/\n";
+
+		String xml =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+			"  \n" +
+			"<databaseChangeLog \n" +
+			"  xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog/1.9\" \n" +
+			"  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
+			"  xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog/1.9 \n" +
+			"         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd\"> \n" +
+			"  \n" +
+			"    <changeSet id=\"1\" author=\"Arthur\"> \n" +
+			"         <sqlFile path=\"scripts/create_table.sql\" endDelimiter=\"/\" relativeToChangelogFile=\"true\" splitStatements=\"true\"/> \n" +
+			"    </changeSet> \n" +
+			"\n" +
+			"</databaseChangeLog>";
+
+		TestUtil util = getTestUtil();
+		WbFile xmlFile = new WbFile(util.getBaseDir(), "changelog.xml");
+		WbFile scriptDir = new WbFile(util.getBaseDir(), "scripts");
+		scriptDir.mkdirs();
+
+		TestUtil.writeFile(xmlFile, xml, "UTF-8");
+		WbFile sqlFile = new WbFile(scriptDir, "create_table.sql");
+		TestUtil.writeFile(sqlFile, sql, "UTF-8");
+
+		LiquibaseSupport lb = new LiquibaseSupport(xmlFile);
+		List<String> statements = lb.getSQLFromChangeSet(new ChangeSetIdentifier("1"));
+		assertNotNull(statements);
+		assertEquals(2, statements.size());
+		assertEquals("create table foo (id integer)", statements.get(0));
+		assertEquals("create index idx_foo on foo (id)", statements.get(1));
 	}
 
 }

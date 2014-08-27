@@ -22,23 +22,31 @@
  */
 package workbench.liquibase;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+
 import workbench.log.LogMgr;
+
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.ScriptParser;
+
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
@@ -50,12 +58,13 @@ public class LiquibaseParser
 	private WbFile changeLog;
 	private String xmlEncoding;
 	private SAXParser saxParser;
-	private Set<String> tagsToRead = CollectionUtil.treeSet("sql", "createProcedure", "sqlFile");
+	private Set<String> tagsToRead = CollectionUtil.treeSet("sql", "createProcedure");
 	private List<LiquibaseTagContent> resultTags = new ArrayList<LiquibaseTagContent>();
 	private List<ChangeSetIdentifier> idsToRead;
 
 	private boolean captureContent;
 	private final String CHANGESET_TAG = "changeSet";
+	private final String SQL_FILE_TAG = "sqlFile";
 	private StringBuilder currentContent;
 	private boolean currentSplitValue;
 
@@ -66,7 +75,7 @@ public class LiquibaseParser
 
 	public LiquibaseParser(WbFile xmlFile, String encoding)
 	{
-		this.changeLog = xmlFile;
+		changeLog = xmlFile;
 		xmlEncoding = encoding;
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setValidating(false);
@@ -83,7 +92,7 @@ public class LiquibaseParser
 
 	/**
 	 * Return the text stored in all <sql> or <createProcedure> tags
-	 * for the given changeset id. Each tag will be
+	 * for the given changeset id.
 	 *
 	 * @param changeSetIds a list of changeSetIds to use. If this is null, all changesets are used
 	 * @return null if no supported tag was found, all stored SQL scripts otherwise
@@ -135,6 +144,29 @@ public class LiquibaseParser
 				captureContent = true;
 			}
 		}
+		else if (tagName.equals(SQL_FILE_TAG))
+		{
+			String path = attrs.getValue("path");
+			String delim = attrs.getValue("endDelimiter");
+			boolean split = Boolean.parseBoolean(attrs.getValue("splitStatements"));
+			boolean relative = Boolean.parseBoolean(attrs.getValue("relativeToChangelogFile"));
+			WbFile file = null;
+			File parent = changeLog.getParentFile();
+			if (relative && parent != null)
+			{
+				file = new WbFile(parent, path);
+			}
+			else
+			{
+				file = new WbFile(path);
+			}
+			List<String> statements = readSqlFile(file, delim, split);
+			for (String sql : statements)
+			{
+				LiquibaseTagContent tag = new LiquibaseTagContent(sql, false);
+				resultTags.add(tag);
+			}
+		}
 		else if (captureContent && tagsToRead.contains(tagName))
 		{
 			currentContent = new StringBuilder(500);
@@ -175,6 +207,39 @@ public class LiquibaseParser
 		{
 			this.currentContent.append(buf, offset, len);
 		}
+	}
+
+	private List<String> readSqlFile(WbFile include, String delimiter, boolean splitStatements)
+		throws SAXException
+	{
+		List<String> result = new ArrayList<String>();
+		try
+		{
+			if (splitStatements)
+			{
+				ScriptParser parser = new ScriptParser(include, xmlEncoding);
+				if (StringUtil.isNonBlank(delimiter))
+				{
+					DelimiterDefinition delim = new DelimiterDefinition(delimiter, true);
+					parser.setAlternateDelimiter(delim);
+				}
+				int count = parser.getSize();
+				for (int i=0; i < count; i++)
+				{
+					result.add(parser.getCommand(i));
+				}
+			}
+			else
+			{
+				String script = FileUtil.readFile(include, xmlEncoding);
+				result.add(script);
+			}
+		}
+		catch (IOException io)
+		{
+			throw new SAXException(io);
+		}
+		return result;
 	}
 
 }
