@@ -25,9 +25,11 @@ package workbench.liquibase;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import workbench.log.LogMgr;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
+import workbench.util.MessageBuffer;
 import workbench.util.WbFile;
 
 /**
@@ -40,7 +42,9 @@ public class LiquibaseSupport
 	private WbFile changeLog;
 	private String fileEncoding;
 	private DelimiterDefinition alternateDelimiter;
-
+	private MessageBuffer messages = new MessageBuffer();
+	private boolean hasWarnings;
+	
 	public LiquibaseSupport(WbFile xmlFile)
 	{
 		this(xmlFile, null);
@@ -71,7 +75,7 @@ public class LiquibaseSupport
 	 */
 	public List<String> getSQLFromChangeSet(List<ChangeSetIdentifier> ids)
 	{
-		LiquibaseParser parser = new LiquibaseParser(changeLog, fileEncoding);
+		LiquibaseParser parser = new LiquibaseParser(changeLog, fileEncoding, messages);
 		List<String> result = null;
 		try
 		{
@@ -101,8 +105,12 @@ public class LiquibaseSupport
 		{
 			LogMgr.logError("LiquibaseSupport.getSQLFromChangeSet()", "Error parsing XML", e);
 		}
-		return result;
 
+		return result;
 	}
 
+	public MessageBuffer getWarnings()
+	{
+		return messages;
+	}
 }

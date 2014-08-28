@@ -91,8 +91,7 @@ public class WbRun
 		if (StringUtil.isEmptyString(clean) || !file.exists())
 		{
 			result.setFailure();
-			String msg = ResourceMgr.getString("ErrIncludeFileNotFound");
-			msg = StringUtil.replace(msg, "%filename%", file.getFullPath());
+			String msg = ResourceMgr.getFormattedString("ErrIncludeFileNotFound", file.getFullPath());
 			result.addMessage(msg);
 			return result;
 		}

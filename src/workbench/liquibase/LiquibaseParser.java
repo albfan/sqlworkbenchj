@@ -48,6 +48,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import workbench.resource.ResourceMgr;
+import workbench.util.MessageBuffer;
+
 /**
  *
  * @author Thomas Kellerer
@@ -67,16 +70,18 @@ public class LiquibaseParser
 	private final String SQL_FILE_TAG = "sqlFile";
 	private StringBuilder currentContent;
 	private boolean currentSplitValue;
+	private final MessageBuffer warnings;
 
-	public LiquibaseParser(WbFile xmlFile)
+	public LiquibaseParser(WbFile xmlFile, MessageBuffer buffer)
 	{
-		this(xmlFile, "UTF-8");
+		this(xmlFile, "UTF-8", buffer);
 	}
 
-	public LiquibaseParser(WbFile xmlFile, String encoding)
+	public LiquibaseParser(WbFile xmlFile, String encoding, MessageBuffer buffer)
 	{
 		changeLog = xmlFile;
 		xmlEncoding = encoding;
+		warnings = buffer;
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setValidating(false);
     try
@@ -144,27 +149,34 @@ public class LiquibaseParser
 				captureContent = true;
 			}
 		}
-		else if (tagName.equals(SQL_FILE_TAG))
+		else if (tagName.equals(SQL_FILE_TAG) && attrs.getValue("path") != null)
 		{
 			String path = attrs.getValue("path");
 			String delim = attrs.getValue("endDelimiter");
 			boolean split = Boolean.parseBoolean(attrs.getValue("splitStatements"));
-			boolean relative = Boolean.parseBoolean(attrs.getValue("relativeToChangelogFile"));
-			WbFile file = null;
+
+			WbFile file = new WbFile(path);
 			File parent = changeLog.getParentFile();
-			if (relative && parent != null)
+
+			if (!file.exists() && !file.isAbsolute())
 			{
 				file = new WbFile(parent, path);
 			}
+
+			if (file.exists())
+			{
+				List<String> statements = readSqlFile(file, delim, split);
+				for (String sql : statements)
+				{
+					LiquibaseTagContent tag = new LiquibaseTagContent(sql, false);
+					resultTags.add(tag);
+				}
+			}
 			else
 			{
-				file = new WbFile(path);
-			}
-			List<String> statements = readSqlFile(file, delim, split);
-			for (String sql : statements)
-			{
-				LiquibaseTagContent tag = new LiquibaseTagContent(sql, false);
-				resultTags.add(tag);
+				String msg = ResourceMgr.getFormattedString("ErrIncludeFileNotFound", path);
+				warnings.append(msg);
+				LogMgr.logError("LiquibaseParser.startElement()", "sqlFile=\"" + path + "\" not found!", null);
 			}
 		}
 		else if (captureContent && tagsToRead.contains(tagName))

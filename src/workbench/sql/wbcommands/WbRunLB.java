@@ -25,6 +25,7 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.liquibase.ChangeSetIdentifier;
 import workbench.liquibase.LiquibaseSupport;
 import workbench.util.ArgumentType;
@@ -33,9 +34,9 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
-import workbench.util.StringUtil;
 import workbench.storage.RowActionMonitor;
 import workbench.util.CollectionUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.WbFile;
 
 /**
@@ -56,7 +57,7 @@ public class WbRunLB
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument("changeSet", ArgumentType.Repeatable);
 		cmdLine.addArgument("author", ArgumentType.Repeatable);
-		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
+		cmdLine.addArgument("verbose", ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
 		isUpdatingCommand = true;
 	}
@@ -105,16 +106,17 @@ public class WbRunLB
 		if (!file.exists())
 		{
 			result.setFailure();
-			String msg = ResourceMgr.getString("ErrIncludeFileNotFound");
-			msg = StringUtil.replace(msg, "%filename%", file.getFullPath());
+			String msg = ResourceMgr.getFormattedString("ErrIncludeFileNotFound", file.getFullPath());
 			result.addMessage(msg);
 			return result;
 		}
 
 		boolean continueOnError = checkParameters ? cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false) : false;
+		boolean verbose = checkParameters ? cmdLine.getBoolean("verbose", false) : false;
 		List<String> idStrings = checkParameters ? cmdLine.getListValue("changeSet") : null;
 		List<String> authors = checkParameters ? cmdLine.getListValue("author") : null;
 		List<ChangeSetIdentifier> ids = null;
+
 
 		if (CollectionUtil.isNonEmpty(authors))
 		{
@@ -142,8 +144,11 @@ public class WbRunLB
 			setUnknownMessage(result, cmdLine, null);
 		}
 
+
+		boolean oldVerbose = runner.getVerboseLogging();
 		try
 		{
+			runner.setVerboseLogging(verbose);
 			LiquibaseSupport lb = new LiquibaseSupport(file, encoding);
 
 			List<String> statements = lb.getSQLFromChangeSet(ids);
@@ -169,11 +174,21 @@ public class WbRunLB
 			{
 				this.rowMonitor.jobFinished();
 			}
+			MessageBuffer warnings = lb.getWarnings();
+			if (warnings.getLength() > 0)
+			{
+				result.addMessage(warnings);
+				result.setWarning(true);
+			}
 		}
 		catch (Exception th)
 		{
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(th));
+		}
+		finally
+		{
+			runner.setVerboseLogging(oldVerbose);
 		}
 		return result;
 	}

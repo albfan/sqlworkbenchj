@@ -186,8 +186,7 @@ public class WbInclude
 			if (allFiles.isEmpty())
 			{
 				result.setFailure();
-				String msg = ResourceMgr.getString("ErrIncludeFileNotFound");
-				msg = StringUtil.replace(msg, "%filename%", search);
+				String msg = ResourceMgr.getFormattedString("ErrIncludeFileNotFound", search);
 				result.addMessage(msg);
 				return result;
 			}
@@ -195,8 +194,7 @@ public class WbInclude
 		else if (!file.exists())
 		{
 			result.setFailure();
-			String msg = ResourceMgr.getString("ErrIncludeFileNotFound");
-			msg = StringUtil.replace(msg, "%filename%", file.getFullPath());
+			String msg = ResourceMgr.getFormattedString("ErrIncludeFileNotFound", file.getFullPath());
 			result.addMessage(msg);
 			return result;
 		}
