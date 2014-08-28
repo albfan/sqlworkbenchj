@@ -453,30 +453,53 @@ public class CompletionPopup
 				}
 
 				@Override
-				public void setResult(Map<String, Object> values, Map<String, String> fkColumnMap)
+				public void setResult(List<Map<String, Object>> valueList, Map<String, String> fkColumnMap)
 				{
 					String editColumn = marker.getColumnName();
-					for (Map.Entry<String, Object> entry : values.entrySet())
+					int row = 0;
+					StringBuilder text = new StringBuilder(valueList.size() * 20);
+
+					for (Map<String, Object> values : valueList)
 					{
-						String fkColumn = fkColumnMap.get(entry.getKey());
-						if (SqlUtil.objectNamesAreEqual(fkColumn, editColumn))
+						for (Map.Entry<String, Object> entry : values.entrySet())
 						{
-							Object value = entry.getValue();
-							if (value != null)
+							String fkColumn = fkColumnMap.get(entry.getKey());
+							if (SqlUtil.objectNamesAreEqual(fkColumn, editColumn))
 							{
-								editor.setSelectedText(WbDateFormatter.getDisplayValue(value));
+								Object value = entry.getValue();
+								if (value != null)
+								{
+									if (row > 0) text.append(',');
+									text.append(getValueString(value));
+								}
+								break;
 							}
-							break;
 						}
+						row ++;
 					}
+					editor.setSelectedText(text.toString());
 				}
 			};
 			// this is done in a background thread!
-			LookupValuePicker.pickValue(editor, result, connection, marker.getColumnName(), marker.getTable());
+			LookupValuePicker.pickValue(editor, result, connection, marker.getColumnName(), marker.getTable(), marker.getAllowMultiSelect());
 
 			return true;
 		}
 		return false;
+	}
+
+	private String getValueString(Object value)
+	{
+		if (value instanceof String)
+		{
+			return "'" + value + "'";
+		}
+
+		if (value instanceof Number)
+		{
+			return value.toString();
+		}
+		return WbDateFormatter.getDisplayValue(value);
 	}
 
 	protected void doPaste()

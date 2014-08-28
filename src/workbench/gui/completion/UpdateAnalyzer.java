@@ -117,8 +117,8 @@ public class UpdateAnalyzer
 			if (table != null)
 			{
 				context = CONTEXT_COLUMN_LIST;
-				columnForFKSelect = getCurrentColumn();
 				tableForColumnList = new TableIdentifier(table, dbConnection);
+				fkMarker = checkFkLookup(); 
 			}
 		}
 	}

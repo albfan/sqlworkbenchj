@@ -2126,7 +2126,7 @@ public class SqlUtil
 		}
 	}
 
-	public static SQLToken getTokenBeforeCursor(String sql, int cursor)
+	public static SQLToken getOperatorBeforeCursor(String sql, int cursor)
 	{
 		if (StringUtil.isBlank(sql)) return null;
 		SQLLexer lexer = new SQLLexer(sql);
@@ -2136,10 +2136,16 @@ public class SqlUtil
 		{
 			tokens.add(token);
 			token = lexer.getNextToken(false, false);
+			if (token != null && token.getCharEnd() > cursor) break;
 		}
+		Set<String> comparisonOperators  = CollectionUtil.caseInsensitiveSet("IN", "ANY", "ALL");
 		for (int i = tokens.size() - 1; i >= 0; i--)
 		{
-			if (tokens.get(i).getCharEnd() <= cursor) return tokens.get(i);
+			SQLToken tk = tokens.get(i);
+			if (tk.getCharEnd() <= cursor && (tk.isOperator() || comparisonOperators.contains(tk.getContents())))
+			{
+				return tokens.get(i);
+			}
 		}
 		return null;
 	}

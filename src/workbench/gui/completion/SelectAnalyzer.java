@@ -37,7 +37,6 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 
-import workbench.util.SelectColumn;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -86,6 +85,8 @@ public class SelectAnalyzer
 
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
 		boolean afterGroup = (groupPos > 0 && cursorPos > groupPos);
+		boolean beforeOrder = (orderPos > -1 && cursorPos < orderPos) || orderPos == -1;
+
 		if (havingPos > -1 && afterGroup)
 		{
 			afterGroup = (cursorPos < havingPos);
@@ -106,7 +107,7 @@ public class SelectAnalyzer
 			   (wherePos < 0 && cursorPos > fromPos) ||
 			   (wherePos > -1 && cursorPos > fromPos && cursorPos <= wherePos));
 
-		boolean inWhere = afterWhere && !afterGroup && !afterHaving && cursorPos > orderPos;
+		boolean inWhere = afterWhere && !afterGroup && !afterHaving && beforeOrder;
 
 		if (inTableList && afterGroup) inTableList = false;
 		if (inTableList && orderPos > -1 && cursorPos > orderPos) inTableList = false;
@@ -246,39 +247,8 @@ public class SelectAnalyzer
 
 		if (inWhere)
 		{
-			checkFkLookup();
+			fkMarker = checkFkLookup();
 		}
-	}
-
-	private void checkFkLookup()
-	{
-		String col = getColumnNameForCondition();
-		if (col != null)
-		{
-			SelectColumn scol = new SelectColumn(col);
-			columnForFKSelect = scol.getObjectName();
-			String tbl = scol.getColumnTable();
-			if (tbl != null)
-			{
-				List<TableAlias> tblList = getTables();
-				for (TableAlias alias : tblList)
-				{
-					if (tbl.equalsIgnoreCase(alias.getNameToUse()))
-					{
-						tableForFkSelect = alias.getTable();
-					}
-				}
-			}
-		}
-	}
-
-	private String getColumnNameForCondition()
-	{
-		SQLToken prev = SqlUtil.getTokenBeforeCursor(sql, cursorPos);
-		if (prev == null || !prev.isOperator()) return null;
-		int pos = prev.getCharBegin() - 1;
-		String col = StringUtil.getWordLeftOfCursor(sql, pos, " ");
-		return col;
 	}
 
 	private TableAlias findAlias(String toSearch, List<String> possibleTables, char catalogSeparator, char schemaSeparator)

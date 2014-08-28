@@ -44,8 +44,10 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.DbObjectCache;
 
+import workbench.sql.formatter.SQLToken;
 import workbench.sql.syntax.SqlKeywordHelper;
 
+import workbench.util.SelectColumn;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -127,8 +129,7 @@ public abstract class BaseAnalyzer
 	protected BaseAnalyzer parentAnalyzer;
 	protected char catalogSeparator;
 
-	protected String columnForFKSelect;
-	protected TableIdentifier tableForFkSelect;
+	protected SelectFKValueMarker fkMarker;
 
 	public BaseAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
@@ -321,8 +322,7 @@ public abstract class BaseAnalyzer
 		this.context = NO_CONTEXT;
 		this.typeFilter = null;
 		this.keywordFile = null;
-		this.columnForFKSelect = null;
-		this.tableForFkSelect = null;
+		this.fkMarker =  null;
 
 		checkOverwrite();
 		this.addAllMarker = false;
@@ -578,17 +578,17 @@ public abstract class BaseAnalyzer
 			{
 				Collections.sort(elements);
 			}
-			if (columnForFKSelect != null)
+			if (fkMarker != null)
 			{
-				TableIdentifier tbl = (tableForFkSelect != null ? tableForFkSelect : tableForColumnList);
-				SelectFKValueMarker fk = new SelectFKValueMarker(columnForFKSelect, tbl);
+//				TableIdentifier tbl = (tableForFkSelect != null ? tableForFkSelect : tableForColumnList);
+//				SelectFKValueMarker fk = new SelectFKValueMarker(columnForFKSelect, tbl, multiValueFkSelect);
 				if (GuiSettings.showSelectFkValueAtTop())
 				{
-					elements.add(0, fk);
+					elements.add(0, fkMarker);
 				}
 				else
 				{
-					elements.add(fk);
+					elements.add(fkMarker);
 				}
 			}
 		}
@@ -653,9 +653,44 @@ public abstract class BaseAnalyzer
 		}
 	}
 
+	protected SelectFKValueMarker checkFkLookup()
+	{
+		SQLToken prev = SqlUtil.getOperatorBeforeCursor(sql, cursorPos);
+		if (prev == null) return null;
+		int pos = prev.getCharBegin() - 1;
+		String col = StringUtil.getWordLeftOfCursor(sql, pos, " ");
+
+		if (col != null)
+		{
+			SelectColumn scol = new SelectColumn(col);
+			String column = scol.getObjectName();
+
+			// getOperatorBeforeCursor() only returns operators and IN, ANY, ALL
+			// if the token is not an operator it's an IN, ANY, ALL condition
+			// which would allow multiple values to be selected.
+			boolean multiValueFkSelect = !prev.isOperator();
+			TableIdentifier fkTable = this.tableForColumnList;
+			String tbl =  scol.getColumnTable();
+			if (tbl != null)
+			{
+				List<TableAlias> tblList = getTables();
+				for (TableAlias alias : tblList)
+				{
+					if (tbl.equalsIgnoreCase(alias.getNameToUse()))
+					{
+						fkTable = alias.getTable();
+					}
+				}
+			}
+			return new SelectFKValueMarker(column, fkTable, multiValueFkSelect);
+		}
+		return null;
+	}
 	// Used by JUnit tests
 	TableIdentifier getTableForColumnList()
 	{
 		return tableForColumnList;
 	}
+
+
 }

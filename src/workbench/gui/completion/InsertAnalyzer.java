@@ -23,11 +23,15 @@
 package workbench.gui.completion;
 
 import java.util.ArrayList;
+
+import workbench.log.LogMgr;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -160,9 +164,8 @@ public class InsertAnalyzer
 			String column = matcher.getInsertColumnName(cursorPos);
 			if (column != null)
 			{
-				columnForFKSelect = column;
 				elements = new ArrayList();
-				elements .add(new SelectFKValueMarker(column, table));
+				elements.add(new SelectFKValueMarker(column, table, false));
 			}
 		}
 	}

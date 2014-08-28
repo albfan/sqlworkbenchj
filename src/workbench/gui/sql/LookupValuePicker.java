@@ -39,11 +39,11 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -131,13 +131,16 @@ public class LookupValuePicker
 	private ValidatingDialog dialog;
 	private final Map<String, Object> currentValues = new HashMap<String, Object>();
 	private SelectionHandler selectionHandler;
+	private boolean multiSelect;
 
-	public LookupValuePicker(WbConnection conn, LookupDataLoader loader, Map<String, Object> values)
+	public LookupValuePicker(WbConnection conn, LookupDataLoader loader, Map<String, Object> values, boolean allowMultiSelect)
 	{
 		super(new GridBagLayout());
 
 		lookupLoader = loader;
 		dbConnection = conn;
+		multiSelect = allowMultiSelect;
+		
 		if (values != null)
 		{
 			currentValues.putAll(values);
@@ -157,7 +160,14 @@ public class LookupValuePicker
 			}
 		};
 
-		lookupData.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		if (allowMultiSelect)
+		{
+			lookupData.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		}
+		else
+		{
+			lookupData.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		}
 		lookupData.setReadOnly(true);
 		lookupData.setRendererSetup(new RendererSetup(false));
 		lookupData.addMouseListener(this);
@@ -530,20 +540,27 @@ public class LookupValuePicker
 		}
 	}
 
-	public Map<String, Object> getSelectedPKValues()
+	public List<Map<String, Object>> getSelectedPKValues()
 	{
-		int row = lookupData.getSelectedRow();
-		if (row < 0) return Collections.emptyMap();
+		int[] rows = lookupData.getSelectedRows();
+		if (rows == null || rows.length == 0) return Collections.emptyList();
 		PkDefinition pk = lookupLoader.getPK();
-		Map<String, Object> values = new TreeMap<String, Object>();
+		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(1);
 		List<String> columns = pk.getColumns();
 		DataStore ds = lookupData.getDataStore();
-		for (String column : columns)
+
+		for (int i=0; i < rows.length; i++)
 		{
-			Object value = ds.getValue(row, column);
-			values.put(column, value);
+			int row = rows[i];
+			Map<String, Object> values = new HashMap<String, Object>();
+			for (String column : columns)
+			{
+				Object value = ds.getValue(row, column);
+				values.put(column, value);
+			}
+			result.add(values);
 		}
-		return values;
+		return result;
 	}
 
 	protected void applyFilter()
@@ -606,7 +623,14 @@ public class LookupValuePicker
 	@Override
 	public boolean validateInput()
 	{
-		return lookupData.getSelectedRowCount() == 1;
+		if (multiSelect)
+		{
+			return lookupData.getSelectedRowCount() > 0;
+		}
+		else
+		{
+			return lookupData.getSelectedRowCount() == 1;
+		}
 	}
 
 	@Override
@@ -651,7 +675,7 @@ public class LookupValuePicker
 	{
 	}
 
-	public static void pickValue(final JComponent parent, final ResultSetter result, final WbConnection conn, final String column, final TableIdentifier baseTable)
+	public static void pickValue(final JComponent parent, final ResultSetter result, final WbConnection conn, final String column, final TableIdentifier baseTable, final boolean allowMultiSelect)
 	{
 		// The retrieval of the FK references must be done in a background thread to avoid blocking the UI
 		// especially with Oracle retrieving FK information is deadly slow and can take minutes!
@@ -690,7 +714,7 @@ public class LookupValuePicker
 						@Override
 						public void run()
 						{
-							showDialog(parent, result, conn, baseTable, loader);
+							showDialog(parent, result, conn, baseTable, loader, allowMultiSelect);
 						}
 					});
 				}
@@ -703,7 +727,7 @@ public class LookupValuePicker
 		retrieve.start();
 	}
 
-	private static void showDialog(final JComponent parent, final ResultSetter result, WbConnection conn, TableIdentifier baseTable, final LookupDataLoader loader)
+	private static void showDialog(final JComponent parent, final ResultSetter result, WbConnection conn, TableIdentifier baseTable, final LookupDataLoader loader, final boolean multiSelect)
 	{
 		try
 		{
@@ -715,7 +739,7 @@ public class LookupValuePicker
 
 			String cols  = "(" + StringUtil.listToString(refColumns, ',') + ")";
 
-			LookupValuePicker picker = new LookupValuePicker(conn, loader, result.getFKValues(refColumns));
+			LookupValuePicker picker = new LookupValuePicker(conn, loader, result.getFKValues(refColumns), multiSelect);
 			JFrame window = (JFrame)SwingUtilities.getWindowAncestor(parent);
 
 			String title = ResourceMgr.getFormattedString("MsgFkPickVal", baseTable.getRawTableName() + cols, lookupTable.getTableExpression());
@@ -734,7 +758,7 @@ public class LookupValuePicker
 
 			if (!dialog.isCancelled())
 			{
-				Map<String, Object> values = picker.getSelectedPKValues();
+				List<Map<String, Object>> values = picker.getSelectedPKValues();
 				result.setResult(values, loader.getForeignkeyMap());
 			}
 		}
@@ -779,7 +803,7 @@ public class LookupValuePicker
 			}
 
 			@Override
-			public void setResult(final Map<String, Object> values, Map<String, String> fkColumnMap)
+			public void setResult(final List<Map<String, Object>> valueList, Map<String, String> fkColumnMap)
 			{
 				JComponent comp = (JComponent)table.getEditorComponent();
 				final JTextComponent editor;
@@ -795,6 +819,9 @@ public class LookupValuePicker
 				{
 					editor = null;
 				}
+
+				// we only allow single selection when the lookup picker is invoked for a WbTable
+				Map<String, Object> values = valueList.get(0);
 
 				for (Map.Entry<String, Object> entry : values.entrySet())
 				{
@@ -814,7 +841,7 @@ public class LookupValuePicker
 				}
 			}
 		};
-		pickValue(table, result, conn, editColumn, baseTable);
+		pickValue(table, result, conn, editColumn, baseTable, false);
 	}
 
 	private static void showNotFound(JComponent current)

@@ -974,10 +974,16 @@ public class SqlUtilTest
 	{
 		String sql = "select * from foo where x < 1";
 		int pos = sql.indexOf('<')+ 1;
-		SQLToken prev = SqlUtil.getTokenBeforeCursor(sql, pos);
+		SQLToken prev = SqlUtil.getOperatorBeforeCursor(sql, pos);
 		assertNotNull(prev);
 		assertTrue(prev.isOperator());
 		assertEquals("<", prev.getContents());
+
+		sql = "where a in ( )";
+		pos = sql.indexOf('(') + 1;
+		prev = SqlUtil.getOperatorBeforeCursor(sql, pos);
+		assertNotNull(prev);
+		assertEquals("IN", prev.getContents());
 	}
 
 	@Test

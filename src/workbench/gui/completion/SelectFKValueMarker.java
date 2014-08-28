@@ -23,6 +23,7 @@
 package workbench.gui.completion;
 
 import workbench.resource.ResourceMgr;
+
 import workbench.db.TableIdentifier;
 
 /**
@@ -33,11 +34,18 @@ public class SelectFKValueMarker
 {
 	private final String columnName;
 	private final TableIdentifier table;
-
-	public SelectFKValueMarker(String column, TableIdentifier baseTable)
+	private final boolean allowMultiSelect;
+	
+	public SelectFKValueMarker(String column, TableIdentifier baseTable, boolean multiSelectAllowed)
 	{
 		this.columnName = column;
 		this.table = baseTable;
+		this.allowMultiSelect = multiSelectAllowed;
+	}
+
+	public boolean getAllowMultiSelect()
+	{
+		return allowMultiSelect;
 	}
 
 	public String getColumnName()
