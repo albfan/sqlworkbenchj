@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1902,4 +1903,22 @@ public class DbSettings
 		return EndReadOnlyTrans.never;
 	}
 
+	public Set<Integer> getInformationalWarningCodes()
+	{
+		List<String> ids = Settings.getInstance().getListProperty(prefix + "warning.ignore.codes", false);
+		if (ids.isEmpty()) return Collections.emptySet();
+		Set<Integer> result = new HashSet<Integer>(ids.size());
+		for (String id :ids)
+		{
+			result.add(StringUtil.getIntValue(id, Integer.MIN_VALUE));
+		}
+		return result;
+	}
+
+	public Set<String> getInformationalWarningStates()
+	{
+		List<String> ids = Settings.getInstance().getListProperty(prefix + "warning.ignore.sqlstate", false);
+		if (ids.isEmpty()) return Collections.emptySet();
+		return new HashSet<String>(ids);
+	}
 }

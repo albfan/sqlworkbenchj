@@ -51,6 +51,7 @@ import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WarningContent;
 import workbench.util.WbFile;
 
 /**
@@ -256,7 +257,12 @@ public class SqlCommand
 	{
 		if (this.runner.getHideWarnings()) return false;
 
-		CharSequence warn = SqlUtil.getWarnings(this.currentConnection, this.currentStatement);
+		WarningContent warnings = SqlUtil.getWarnings(this.currentConnection, this.currentStatement);
+		CharSequence warn = warnings.allWarnings;
+		if (!warnings.isRealWarning)
+		{
+			addLabel = false;
+		}
 		boolean hasWarning = false;
 		if (warn != null && warn.length() > 0)
 		{
@@ -433,6 +439,7 @@ public class SqlCommand
 		{
 			runner.rollbackSavepoint();
 			appendOutput(result);
+			appendWarnings(result, true);
 			addErrorInfo(result, sql, e);
 			LogMgr.logUserSqlError("SqlCommand.execute()", sql, e);
 		}
@@ -901,7 +908,7 @@ public class SqlCommand
 	 *
 	 * @param sql the sql to "clean"
 	 * @return the sql with the verb, comments and newlines removed
-	 * @see workbench.util.SqlUtil#makeCleanSql(java.lang.String, boolean) 
+	 * @see workbench.util.SqlUtil#makeCleanSql(java.lang.String, boolean)
 	 * @see workbench.util.SqlUtil#getSqlVerb(String)
 	 */
 	protected String getCommandLine(String sql)
