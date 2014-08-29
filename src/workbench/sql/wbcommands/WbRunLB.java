@@ -120,7 +120,7 @@ public class WbRunLB
 
 		if (CollectionUtil.isNonEmpty(authors))
 		{
-			ids = new ArrayList<ChangeSetIdentifier>(authors.size());
+			ids = new ArrayList<>(authors.size());
 			for (String author : authors)
 			{
 				ChangeSetIdentifier id = new ChangeSetIdentifier(author, "*");
@@ -129,7 +129,7 @@ public class WbRunLB
 		}
 		else if (CollectionUtil.isNonEmpty(idStrings))
 		{
-			ids = new ArrayList<ChangeSetIdentifier>(idStrings.size());
+			ids = new ArrayList<>(idStrings.size());
 			for (String param : idStrings)
 			{
 				ChangeSetIdentifier id = new ChangeSetIdentifier(param);

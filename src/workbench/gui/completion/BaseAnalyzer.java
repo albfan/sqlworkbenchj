@@ -473,7 +473,7 @@ public abstract class BaseAnalyzer
 		if (this.keywordFile == null) return null;
 		SqlKeywordHelper helper = new SqlKeywordHelper(dbConnection.getDbId());
 		Set<String> kwlist = helper.loadKeywordsFromFile(keywordFile);
-		return new ArrayList<String>(kwlist);
+		return new ArrayList<>(kwlist);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -597,7 +597,7 @@ public abstract class BaseAnalyzer
 
 	protected void setTableTypeFilter(List<String> filter)
 	{
-		this.typeFilter = new ArrayList<String>(filter);
+		this.typeFilter = new ArrayList<>(filter);
 	}
 
 	public String getQualifierLeftOfCursor()

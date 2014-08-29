@@ -647,7 +647,7 @@ public class SqlUtil
 		if (info == null) return null;
 
 		int count = info.getColumnCount();
-		ArrayList<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
+		ArrayList<ColumnIdentifier> result = new ArrayList<>(count);
 		for (int i = 0; i < count; i++)
 		{
 			result.add(info.getColumn(i));
@@ -771,7 +771,7 @@ public class SqlUtil
 	public static List<String> getSelectColumns(String select, boolean includeAlias)
 	{
 		List<ElementInfo> entries = getColumnEntries(select, includeAlias);
-		List<String> result = new ArrayList<String>(entries.size());
+		List<String> result = new ArrayList<>(entries.size());
 		for (ElementInfo entry : entries)
 		{
 			result.add(entry.getElementValue());
@@ -795,7 +795,7 @@ public class SqlUtil
 	 */
 	public static List<ElementInfo> getColumnEntries(String select, boolean includeAlias)
 	{
-		List<ElementInfo> result = new LinkedList<ElementInfo>();
+		List<ElementInfo> result = new LinkedList<>();
 		try
 		{
 			SQLLexer lex = new SQLLexer(select);
@@ -1035,7 +1035,7 @@ public class SqlUtil
 	{
 		String from = getFromPart(sql);
 		if (StringUtil.isBlank(from)) return Collections.emptyList();
-		List<String> result = new LinkedList<String>();
+		List<String> result = new LinkedList<>();
 		try
 		{
 			SQLLexer lex = new SQLLexer(from);
@@ -1779,7 +1779,7 @@ public class SqlUtil
 			// For this we keep a list of warnings which have been added
 			// from the statement. They will not be added when the Warnings from
 			// the connection are retrieved
-			Set<String> added = new HashSet<String>();
+			Set<String> added = new HashSet<>();
 			StringBuilder msg = null;
 			String s = null;
 			SQLWarning warn = (stmt == null ? null : stmt.getWarnings());
@@ -2130,7 +2130,7 @@ public class SqlUtil
 	{
 		if (StringUtil.isBlank(sql)) return null;
 		SQLLexer lexer = new SQLLexer(sql);
-		List<SQLToken> tokens = new ArrayList<SQLToken>();
+		List<SQLToken> tokens = new ArrayList<>();
 		SQLToken token = lexer.getNextToken(false, false);
 		while (token != null)
 		{

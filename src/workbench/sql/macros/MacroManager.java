@@ -46,8 +46,8 @@ public class MacroManager
 {
 	public static final int DEFAULT_STORAGE = Integer.MIN_VALUE;
 
-	private final Map<String, MacroStorage> allMacros = new HashMap<String, MacroStorage>();
-	private final Map<Integer, String> macroClients = new HashMap<Integer, String>();
+	private final Map<String, MacroStorage> allMacros = new HashMap<>();
+	private final Map<Integer, String> macroClients = new HashMap<>();
 
 	/**
 	 * Thread safe singleton instance.
@@ -198,7 +198,7 @@ public class MacroManager
 	public Map<String, MacroDefinition> getExpandableMacros(int clientId)
 	{
 		MacroStorage storage = getStorage(clientId);
-		Map<String, MacroDefinition> result = new TreeMap<String, MacroDefinition>(CaseInsensitiveComparator.INSTANCE);
+		Map<String, MacroDefinition> result = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 		List<MacroGroup> groups = storage.getGroups();
 		for (MacroGroup group : groups)
 		{

@@ -334,7 +334,7 @@ WHERE id=42;</p>
                 SQL Workbench/J requires Java 7 or later.
             </p>
             <p style="margin-top:0px;text-align:center">
-                Java 6 will work as well, but it is not recommended as it is no longer supported
+               Java 6 will work as well, but it is not recommended as it is no longer supported. <i>Build 116 is the last release to support Java 6.</i>
             </p>
         <h3 style="margin-top:25px">Stable release</h3>
         <p>
@@ -399,6 +399,9 @@ WHERE id=42;</p>
         <br/>
         Bugfixes will show up in these builds first.
         <br/>
+      </p>
+      <p>
+        <b>The development builds now require Java 7</b>
       </p>
       <dev-build/>
     </content>

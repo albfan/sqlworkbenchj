@@ -80,7 +80,7 @@ public class AlterTableAnalyzer
 			LogMgr.logError("AlterTableAnalyzer", "Error parsing SQL", e);
 		}
 
-		schemaForTableList = getSchemaFromCurrentWord();;
+		schemaForTableList = getSchemaFromCurrentWord();
 
 		if (between(cursorPos, tablePos, modifyPos) || between(cursorPos, tablePos, addPos) ||
 			 (modifyPos == -1 && addPos == -1))

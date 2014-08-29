@@ -373,7 +373,7 @@ public class CompletionPopup
 	private List<ColumnIdentifier> getColumnsFromData()
 	{
 		int count = data.getSize();
-		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
+		List<ColumnIdentifier> result = new ArrayList<>(count);
 
 		// The first element is the SelectAllMarker, so we do not
 		// need to include it
@@ -469,7 +469,7 @@ public class CompletionPopup
 								Object value = entry.getValue();
 								if (value != null)
 								{
-									if (row > 0) text.append(',');
+									if (row > 0) text.append(", ");
 									text.append(getValueString(value));
 								}
 								break;

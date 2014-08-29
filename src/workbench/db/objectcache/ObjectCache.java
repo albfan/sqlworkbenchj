@@ -66,11 +66,11 @@ class ObjectCache
 	private boolean retrieveOraclePublicSynonyms;
 
 	private final Set<String> schemasInCache = CollectionUtil.caseInsensitiveSet();
-	private final Map<TableIdentifier, List<DependencyNode>> referencedTables = new HashMap<TableIdentifier, List<DependencyNode>>();
-	private final Map<TableIdentifier, List<DependencyNode>> referencingTables = new HashMap<TableIdentifier, List<DependencyNode>>();
-	private final Map<TableIdentifier, List<ColumnIdentifier>> objects = new HashMap<TableIdentifier, List<ColumnIdentifier>>();
-	private final Map<TableIdentifier, TableIdentifier> synonymMap = new HashMap<TableIdentifier, TableIdentifier>();
-	private final Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
+	private final Map<TableIdentifier, List<DependencyNode>> referencedTables = new HashMap<>();
+	private final Map<TableIdentifier, List<DependencyNode>> referencingTables = new HashMap<>();
+	private final Map<TableIdentifier, List<ColumnIdentifier>> objects = new HashMap<>();
+	private final Map<TableIdentifier, TableIdentifier> synonymMap = new HashMap<>();
+	private final Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<>();
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
 	private boolean supportsSchemas;
@@ -266,7 +266,7 @@ class ObjectCache
 
 	Map<String, List<ProcedureDefinition>> getProcedures()
 	{
-		if (procedureCache == null) return new HashMap<String, List<ProcedureDefinition>>(0);
+		if (procedureCache == null) return new HashMap<>(0);
 		return procedureCache;
 	}
 
@@ -307,12 +307,15 @@ class ObjectCache
 
 	private Set<TableIdentifier> filterTablesByType(WbConnection conn, List<String> schemas, List<String> requestedTypes)
 	{
-		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameSorter());
+		SortedSet<TableIdentifier> result = new TreeSet<>(new TableNameSorter());
 		String currentSchema = null;
 		if (schemas.size() == 1)
 		{
 			currentSchema = schemas.get(0);
 		}
+
+		boolean alwaysUseSchema = conn.getDbSettings().alwaysUseSchemaForCompletion() || schemas.size() > 1;
+
 		for (TableIdentifier tbl : objects.keySet())
 		{
 			String ttype = tbl.getType();
@@ -320,29 +323,43 @@ class ObjectCache
 			if ( (requestedTypes.contains(ttype) && schemas.contains(tSchema)) || tSchema == null || "public".equalsIgnoreCase(tSchema) )
 			{
 				TableIdentifier copy = tbl.createCopy();
-				if (tSchema != null && currentSchema != null && conn.getMetadata().ignoreSchema(tSchema, currentSchema))
-				{
-					copy.setSchema(null);
-				}
+				adjustSchemaAndCatalog(conn, copy, currentSchema, alwaysUseSchema);
 				result.add(copy);
 			}
 		}
 		return result;
 	}
 
+	private void adjustSchemaAndCatalog(WbConnection conn, TableIdentifier table, String currentSchema, boolean alwaysUseSchema)
+	{
+		DbMetadata meta = conn.getMetadata();
+		boolean alwaysUseCatalog = conn.getDbSettings().alwaysUseCatalogForCompletion();
+		String tSchema = table.getSchema();
+		boolean ignoreSchema = (alwaysUseSchema ? false : meta.ignoreSchema(tSchema, currentSchema));
+		if (ignoreSchema)
+		{
+			table.setSchema(null);
+		}
+
+		boolean ignoreCatalog = (alwaysUseCatalog ? false : meta.ignoreCatalog(table.getCatalog()));
+		if (ignoreCatalog)
+		{
+			table.setCatalog(null);
+		}
+	}
+
 	private Set<TableIdentifier> filterTablesBySchema(WbConnection dbConnection, List<String> schemas)
 	{
-		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameSorter(true));
+		SortedSet<TableIdentifier> result = new TreeSet<>(new TableNameSorter(true));
 		DbMetadata meta = dbConnection.getMetadata();
 
-		List<String> schemasToCheck = new ArrayList<String>(schemas.size());
+		List<String> schemasToCheck = new ArrayList<>(schemas.size());
 		for (String s : schemas)
 		{
 			if (s != null) schemasToCheck.add(s);
 		}
 
 		boolean alwaysUseSchema = dbConnection.getDbSettings().alwaysUseSchemaForCompletion() || schemasToCheck.size() > 1;
-		boolean alwaysUseCatalog = dbConnection.getDbSettings().alwaysUseCatalogForCompletion();
 
 		String currentSchema = null;
 		if (schemasToCheck.size() == 1)
@@ -357,19 +374,7 @@ class ObjectCache
 			if (schemasToCheck.contains(tSchema) || schemasToCheck.isEmpty())
 			{
 				TableIdentifier copy = tbl.createCopy();
-
-				boolean ignoreSchema = (alwaysUseSchema ? false : meta.ignoreSchema(tSchema, currentSchema));
-				if (ignoreSchema)
-				{
-					copy.setSchema(null);
-				}
-
-				boolean ignoreCatalog = (alwaysUseCatalog ? false : meta.ignoreCatalog(copy.getCatalog()));
-				if (ignoreCatalog)
-				{
-					copy.setCatalog(null);
-				}
-
+				adjustSchemaAndCatalog(dbConnection, copy, currentSchema, alwaysUseSchema);
 				result.add(copy);
 			}
 		}
@@ -540,7 +545,7 @@ class ObjectCache
 	{
 		if (schema == null) return;
 		int count = procs.getRowCount();
-		List<ProcedureDefinition> procList = new ArrayList<ProcedureDefinition>();
+		List<ProcedureDefinition> procList = new ArrayList<>();
 		for (int row=0; row < count; row++)
 		{
 			Object uo = procs.getRow(row).getUserObject();

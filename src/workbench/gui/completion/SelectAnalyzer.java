@@ -248,6 +248,10 @@ public class SelectAnalyzer
 		if (inWhere)
 		{
 			fkMarker = checkFkLookup();
+			if (fkMarker != null && elements != null)
+			{
+				elements.add(fkMarker);
+			}
 		}
 	}
 
@@ -329,7 +333,7 @@ public class SelectAnalyzer
 	private List getColumnsForHaving()
 	{
 		List<String> cols = SqlUtil.getSelectColumns(this.sql, false);
-		List<String> validCols = new LinkedList<String>();
+		List<String> validCols = new LinkedList<>();
 		for (String col : cols)
 		{
 			if (col.indexOf('(') > -1 && col.indexOf(')') > -1)
@@ -343,7 +347,7 @@ public class SelectAnalyzer
 	private List getColumnsForGroupBy()
 	{
 		List<String> cols = SqlUtil.getSelectColumns(this.sql, false);
-		List<String> validCols = new LinkedList<String>();
+		List<String> validCols = new LinkedList<>();
 		String[] funcs = new String[]{"sum", "count", "avg", "min", "max" };
 		StringBuilder regex = new StringBuilder(50);
 		for (int i = 0; i < funcs.length; i++)
@@ -372,7 +376,7 @@ public class SelectAnalyzer
 	public List<TableAlias> getTables()
 	{
 		List<String> tables = SqlUtil.getTables(sql, true, dbConnection);
-		List<TableAlias> result = new ArrayList<TableAlias>(tables.size());
+		List<TableAlias> result = new ArrayList<>(tables.size());
 		for (String s : tables)
 		{
 			result.add(new TableAlias(s));

@@ -43,8 +43,7 @@ public class LiquibaseSupport
 	private String fileEncoding;
 	private DelimiterDefinition alternateDelimiter;
 	private MessageBuffer messages = new MessageBuffer();
-	private boolean hasWarnings;
-	
+
 	public LiquibaseSupport(WbFile xmlFile)
 	{
 		this(xmlFile, null);
@@ -80,7 +79,7 @@ public class LiquibaseSupport
 		try
 		{
 			List<LiquibaseTagContent> content = parser.getContentFromChangeSet(ids);
-			result = new ArrayList<String>(content.size());
+			result = new ArrayList<>(content.size());
 			for (LiquibaseTagContent tag : content)
 			{
 				if (tag.getSplitStatements())

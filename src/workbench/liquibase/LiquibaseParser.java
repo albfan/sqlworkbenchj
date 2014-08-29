@@ -224,7 +224,7 @@ public class LiquibaseParser
 	private List<String> readSqlFile(WbFile include, String delimiter, boolean splitStatements)
 		throws SAXException
 	{
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		try
 		{
 			if (splitStatements)
