@@ -82,6 +82,7 @@ public class SettingsPanel
 		pages = new ArrayList<OptionPanelPage>();
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
+		pages.add(new OptionPanelPage("MacroOptionsPanel", "LblMacroSettings"));
 		pages.add(new OptionPanelPage("EditorColorsPanel", "LblEditorColors"));
 		pages.add(new OptionPanelPage("HighlightSettingsPanel", "LblHighlightOptions"));
 		pages.add(new OptionPanelPage("FontOptionsPanel", "LblSettingsFonts"));

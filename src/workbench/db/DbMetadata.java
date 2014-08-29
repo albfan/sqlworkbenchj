@@ -152,6 +152,8 @@ public class DbMetadata
 	private Set<String> tableTypesFromDriver;
 	private int maxTableNameLength;
 
+	private boolean supportsGetSchema;
+
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
 	{
@@ -1263,7 +1265,20 @@ public class DbMetadata
 		{
 			return this.schemaInfoReader.getCurrentSchema();
 		}
-		return null;
+
+		String schema = null;
+		if (supportsGetSchema)
+		{
+			try
+			{
+					schema = this.dbConnection.getSqlConnection().getSchema();
+			}
+			catch (Exception ex)
+			{
+				supportsGetSchema = false;
+			}
+		}
+		return schema;
 	}
 
 	public void clearCachedSchemaInformation()

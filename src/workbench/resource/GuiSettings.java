@@ -202,6 +202,11 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty(PROPERTY_MACRO_POPUP_CLOSE_ESC, false);
 	}
 
+	public static void setCloseMacroPopupWithEsc(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROPERTY_MACRO_POPUP_CLOSE_ESC, flag);
+	}
+
 	public static boolean getStoreMacroPopupInWorkspace()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_MACRO_POPUP_WKSP, false);
@@ -670,11 +675,6 @@ public class GuiSettings
 	public static void setUseBrushedMetal(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.macos.brushedmetal", flag);
-	}
-
-	public static int getMaxMacrosInMenu()
-	{
-		return Settings.getInstance().getIntProperty("workbench.gui.macro.maxmenuitems", 9);
 	}
 
 	public static final int SHOW_NO_FILENAME = 0;

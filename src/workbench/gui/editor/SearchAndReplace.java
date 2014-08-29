@@ -229,7 +229,13 @@ public class SearchAndReplace
 			startPos = 0;
 		}
 
-		if (m.find(startPos))
+		boolean found = m.find(startPos);
+		if (!found && wrapSearch)
+		{
+			found = m.find(0);
+		}
+		
+		if (found)
 		{
 			this.lastSearchPos = m.start();
 			int end = m.end();

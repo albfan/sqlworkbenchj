@@ -29,17 +29,14 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.io.File;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import workbench.interfaces.Restoreable;
@@ -47,7 +44,6 @@ import workbench.interfaces.ValidatingComponent;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.resource.StoreableKeyStroke;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DelimiterDefinitionPanel;
@@ -75,11 +71,6 @@ public class EditorOptionsPanel
 		TextFieldWidthAdjuster adjuster = new TextFieldWidthAdjuster();
 		adjuster.adjustAllFields(this);
 		defaultDir.setSelectDirectoryOnly(true);
-		StoreableKeyStroke space = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
-		StoreableKeyStroke shiftSpace = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, KeyEvent.SHIFT_MASK));
-		StoreableKeyStroke tab = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
-		ComboBoxModel model = new DefaultComboBoxModel(new Object[] { space, shiftSpace, tab});
-		cbExpansionKey.setModel(model);
 	}
 
 	@Override
@@ -130,8 +121,6 @@ public class EditorOptionsPanel
 		hiliteError.setSelected(GuiSettings.getHighlightErrorStatement());
 		useResultForBookmark.setSelected(GuiSettings.getUseResultTagForBookmarks());
 		autoCloseBrackets.setText(Settings.getInstance().getProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, ""));
-		StoreableKeyStroke key = new StoreableKeyStroke(GuiSettings.getExpansionKey());
-		cbExpansionKey.setSelectedItem(key);
 		int lines = GuiSettings.getWheelScrollLines();
 		if (lines <= 0)
 		{
@@ -193,8 +182,6 @@ public class EditorOptionsPanel
 		GuiSettings.setUseResultTagForBookmarks(useResultForBookmark.isSelected());
 		set.setProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, autoCloseBrackets.getText());
 		GuiSettings.setUseStatementInCurrentLine(useCurrentLineStmt.isSelected());
-		StoreableKeyStroke key = (StoreableKeyStroke) cbExpansionKey.getSelectedItem();
-		GuiSettings.setExpansionKey(key.getKeyStroke());
 
 		if (StringUtil.isNumber(wheelScrollLines.getText()))
 		{
@@ -274,8 +261,6 @@ public class EditorOptionsPanel
     storeDirInWksp = new JCheckBox();
     jLabel2 = new JLabel();
     autoCloseBrackets = new JTextField();
-    jLabel3 = new JLabel();
-    cbExpansionKey = new JComboBox();
     wheelScrollLabel = new JLabel();
     wheelScrollLines = new JTextField();
     reloadLabel = new JLabel();
@@ -635,25 +620,6 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(autoCloseBrackets, gridBagConstraints);
 
-    jLabel3.setLabelFor(cbExpansionKey);
-    jLabel3.setText(ResourceMgr.getString("LblExpandKey")); // NOI18N
-    jLabel3.setToolTipText(ResourceMgr.getString("d_LblExpandKey")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
-    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(3, 12, 0, 0);
-    add(jLabel3, gridBagConstraints);
-
-    cbExpansionKey.setModel(new DefaultComboBoxModel(new String[] { "Space", "Shift-Space", "Tab" }));
-    cbExpansionKey.setToolTipText(ResourceMgr.getString("d_LblExpandKey")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 10;
-    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(4, 11, 0, 15);
-    add(cbExpansionKey, gridBagConstraints);
-
     wheelScrollLabel.setText(ResourceMgr.getString("LblWheelScrLines")); // NOI18N
     wheelScrollLabel.setToolTipText(ResourceMgr.getString("d_LblWheelScrLines")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
@@ -677,20 +643,20 @@ public class EditorOptionsPanel
     reloadLabel.setText(ResourceMgr.getString("LblRldBehaviour")); // NOI18N
     reloadLabel.setToolTipText(ResourceMgr.getString("d_LblRldBehaviour")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
+    gridBagConstraints.insets = new Insets(3, 12, 0, 0);
     add(reloadLabel, gridBagConstraints);
 
     reloadType.setModel(new DefaultComboBoxModel(new String[] { "Never", "Prompt", "Automatic" }));
     reloadType.setToolTipText(ResourceMgr.getString("d_LblRldBehaviour")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(4, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(reloadType, gridBagConstraints);
   }
 
@@ -717,7 +683,6 @@ public class EditorOptionsPanel
   private JCheckBox alwaysAllowExecSel;
   private JCheckBox autoAdvance;
   private JTextField autoCloseBrackets;
-  private JComboBox cbExpansionKey;
   private WbFilePicker defaultDir;
   private JLabel editorTabSizeLabel;
   private JTextField electricScroll;
@@ -735,7 +700,6 @@ public class EditorOptionsPanel
   private JLabel internalLineEndingLabel;
   private JLabel jLabel1;
   private JLabel jLabel2;
-  private JLabel jLabel3;
   private JPanel jPanel1;
   private JPanel jPanel2;
   private JCheckBox keepHilite;
