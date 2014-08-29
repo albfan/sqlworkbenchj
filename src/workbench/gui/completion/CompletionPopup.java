@@ -431,12 +431,12 @@ public class CompletionPopup
 
 	private boolean handleFKSelection()
 	{
-		Object[] selected = this.elementList.getSelectedValues();
+		List selected = this.elementList.getSelectedValuesList();
 		if (selected == null) return false;
-		if (selected.length != 1) return false;
-		if (selected[0] instanceof SelectFKValueMarker)
+		if (selected.size() != 1) return false;
+		if (selected.get(0) instanceof SelectFKValueMarker)
 		{
-			final SelectFKValueMarker marker = (SelectFKValueMarker)selected[0];
+			final SelectFKValueMarker marker = (SelectFKValueMarker)selected.get(0);
 			final WbConnection connection = this.context.getAnalyzer().getConnection();
 			if (!WbSwingUtilities.isConnectionIdle(editor, connection))
 			{

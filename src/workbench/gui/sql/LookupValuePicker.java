@@ -129,7 +129,7 @@ public class LookupValuePicker
 	private JLabel rowCount;
 	private WbConnection dbConnection;
 	private ValidatingDialog dialog;
-	private final Map<String, Object> currentValues = new HashMap<String, Object>();
+	private final Map<String, Object> currentValues = new HashMap<>();
 	private SelectionHandler selectionHandler;
 	private boolean multiSelect;
 
@@ -140,7 +140,7 @@ public class LookupValuePicker
 		lookupLoader = loader;
 		dbConnection = conn;
 		multiSelect = allowMultiSelect;
-		
+
 		if (values != null)
 		{
 			currentValues.putAll(values);
@@ -545,14 +545,14 @@ public class LookupValuePicker
 		int[] rows = lookupData.getSelectedRows();
 		if (rows == null || rows.length == 0) return Collections.emptyList();
 		PkDefinition pk = lookupLoader.getPK();
-		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(1);
+		List<Map<String, Object>> result = new ArrayList<>(1);
 		List<String> columns = pk.getColumns();
 		DataStore ds = lookupData.getDataStore();
 
 		for (int i=0; i < rows.length; i++)
 		{
 			int row = rows[i];
-			Map<String, Object> values = new HashMap<String, Object>();
+			Map<String, Object> values = new HashMap<>();
 			for (String column : columns)
 			{
 				Object value = ds.getValue(row, column);
@@ -790,7 +790,7 @@ public class LookupValuePicker
 			@Override
 			public Map<String, Object> getFKValues(List<String> columns)
 			{
-				Map<String, Object> result = new HashMap<String, Object>(columns.size());
+				Map<String, Object> result = new HashMap<>(columns.size());
 				for (String name : columns)
 				{
 					int colIndex = table.getColumnIndex(name);
