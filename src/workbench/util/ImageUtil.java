@@ -161,7 +161,7 @@ public class ImageUtil
 	 */
 	public static List<File> getIcons(String iconList)
 	{
-		List<File> iconFiles = new ArrayList<File>(2);
+		List<File> iconFiles = new ArrayList<>(2);
 		if (StringUtil.isBlank(iconList)) return iconFiles;
 
 		try

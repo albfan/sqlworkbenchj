@@ -97,7 +97,7 @@ public class ValueConverter
 	private final WbDateFormatter timestampFormatter = new WbDateFormatter();
 	private final WbDateFormatter formatter = new WbDateFormatter();
 	private boolean autoConvertBooleanNumbers = true;
-	private final Map<String, Boolean> booleanValues = new HashMap<String, Boolean>();
+	private final Map<String, Boolean> booleanValues = new HashMap<>();
 	private boolean booleanUserMap;
 
 	private Integer integerTrue = Integer.valueOf(1);
@@ -124,8 +124,8 @@ public class ValueConverter
 
 	private void readConfiguredBooleanValues()
 	{
-		List<String> trueValues = Settings.getInstance().getListProperty("workbench.converter.boolean.true", true, "1,true");
-		List<String> falseValues = Settings.getInstance().getListProperty("workbench.converter.boolean.false", true, "0,false");
+		List<String> trueValues = Settings.getInstance().getListProperty("workbench.converter.boolean.true", true, "1,t,true");
+		List<String> falseValues = Settings.getInstance().getListProperty("workbench.converter.boolean.false", true, "0,f,false");
 		fillBooleanMap(trueValues, falseValues);
 		booleanUserMap = false;
 	}

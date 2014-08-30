@@ -66,7 +66,7 @@ import workbench.util.StringUtil;
  */
 public class RowDataReader
 {
-	private List<Closeable> streams = new LinkedList<Closeable>();
+	private List<Closeable> streams = new LinkedList<>();
 	private DataConverter converter;
 	private boolean ignoreReadErrors;
 	private boolean useStreamsForBlobs;

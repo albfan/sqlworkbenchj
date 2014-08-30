@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.transform.Source;
@@ -279,46 +278,6 @@ public class XsltTransformer
 		File totest = new File(configdir, file);
 		if (totest.exists()) return totest;
 		return new File(file);
-	}
-
-	@SuppressWarnings("CallToThreadDumpStack")
-	public static void main(String[] args)
-	{
-		try
-		{
-			if (args.length < 3)
-			{
-				System.out.println("Call with: XsltTransformer inputfile outputfile stylesheet [param=value ...]");
-			}
-			else
-			{
-				XsltTransformer transformer = new XsltTransformer();
-
-				Map<String, String> parameters = new HashMap<String, String>();
-				if (args.length > 3)
-				{
-					for (int i=3; i < args.length; i++)
-					{
-						String[] pardef = args[i].split("=");
-						if (pardef.length == 2)
-						{
-							parameters.put(pardef[0], pardef[1]);
-						}
-						else
-						{
-							System.out.println("Ignoring incorrect parameter definition: " + args[i]);
-						}
-					}
-				}
-				transformer.transform(args[0], args[1], args[2], parameters);
-				System.out.println(args[0] + " has been successfully transformed into " + args[1]);
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			System.exit(1);
-		}
 	}
 
 }

@@ -140,7 +140,7 @@ public class DmlStatement
 	public int execute(WbConnection connection, boolean retrieveKeys)
 		throws SQLException
 	{
-		List<Closeable> streamsToClose = new LinkedList<Closeable>();
+		List<Closeable> streamsToClose = new LinkedList<>();
 
 		PreparedStatement stmt = null;
 		int rows = -1;
@@ -265,7 +265,7 @@ public class DmlStatement
 			{
 				ResultSetMetaData meta = rs.getMetaData();
 				int colcount = meta.getColumnCount();
-				this.generatedKeys = new HashMap<String, Object>(colcount);
+				this.generatedKeys = new HashMap<>(colcount);
 				for (int col=1; col <= colcount; col++)
 				{
 					generatedKeys.put(meta.getColumnName(col), rs.getObject(col));
@@ -363,7 +363,7 @@ public class DmlStatement
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setSourceString(valueString);
 
-		List<Object> arrayValues = new ArrayList<Object>();
+		List<Object> arrayValues = new ArrayList<>();
 		while (tok.hasMoreTokens())
 		{
 			String s = tok.nextToken().trim();

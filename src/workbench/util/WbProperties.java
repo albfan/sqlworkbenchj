@@ -56,8 +56,8 @@ public class WbProperties
 	private static final long serialVersionUID = 1L;
 	private int distinctSections;
 
-	private final Map<String, List<PropertyChangeListener>> changeListeners = new HashMap<String, List<PropertyChangeListener>>();
-	private final Map<String, String> comments = new HashMap<String, String>();
+	private final Map<String, List<PropertyChangeListener>> changeListeners = new HashMap<>();
+	private final Map<String, String> comments = new HashMap<>();
 
 	private Object changeNotificationSource = null;
 	private boolean changed = false;
@@ -267,7 +267,7 @@ public class WbProperties
 				List<PropertyChangeListener> listeners = this.changeListeners.get(prop);
 				if (listeners == null)
 				{
-					listeners = new ArrayList<PropertyChangeListener>();
+					listeners = new ArrayList<>();
 					this.changeListeners.put(prop, listeners);
 				}
 				listeners.add(aListener);
@@ -296,7 +296,7 @@ public class WbProperties
 		if (listeners == null || listeners.isEmpty()) return;
 
 		// Making a shallow copy of the list prevents a ConcurrentModificationException
-		List<PropertyChangeListener> l2 = new ArrayList<PropertyChangeListener>(listeners);
+		List<PropertyChangeListener> l2 = new ArrayList<>(listeners);
 		PropertyChangeEvent evt = new PropertyChangeEvent(this.changeNotificationSource, name, oldValue, newValue);
 
 		for (PropertyChangeListener l : l2)
@@ -318,11 +318,11 @@ public class WbProperties
 	{
 		if (prefix == null)
 		{
-			return new ArrayList<String>(getKeys());
+			return new ArrayList<>(getKeys());
 		}
 
 		Set<String> keys = getKeys();
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 
 		for (String key : keys)
 		{

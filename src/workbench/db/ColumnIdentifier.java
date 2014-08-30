@@ -219,7 +219,14 @@ public class ColumnIdentifier
 	 */
 	public void setSourceTableName(String name)
 	{
-		sourceTable = name;
+		if (StringUtil.isNonEmpty(name))
+		{
+			sourceTable = name;
+		}
+		else
+		{
+			sourceTable = null;
+		}
 	}
 
 	/**

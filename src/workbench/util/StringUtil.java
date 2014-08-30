@@ -868,12 +868,12 @@ public class StringUtil
 	 */
 	public static List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets, boolean keepQuotes)
 	{
-		if (isEmptyString(aString)) return new ArrayList<String>(0);
+		if (isEmptyString(aString)) return new ArrayList<>(0);
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setKeepQuotes(keepQuotes);
 		tok.setCheckBrackets(checkBrackets);
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		while (tok.hasMoreTokens())
 		{
 			String element = tok.nextToken();
@@ -1640,7 +1640,7 @@ public class StringUtil
 	public static List<String> readLines(Reader source)
 		throws IOException
 	{
-		ArrayList<String> result = new ArrayList<String>();
+		ArrayList<String> result = new ArrayList<>();
 		BufferedReader in = null;
 		try
 		{

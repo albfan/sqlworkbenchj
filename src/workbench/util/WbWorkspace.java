@@ -55,7 +55,7 @@ public class WbWorkspace
 	private boolean isReadOnly;
 	private WbProperties tabInfo = new WbProperties(null, 0);
 	private int tabCount = -1;
-	private Map<String, WbProperties> toolProperties = new HashMap<String, WbProperties>();
+	private Map<String, WbProperties> toolProperties = new HashMap<>();
 	private final String toolEntryPrefix = "toolprop_";
 
 	public WbWorkspace(String archiveName, boolean createNew)
@@ -163,7 +163,7 @@ public class WbWorkspace
 
 	public void setToolProperties(Map<String, WbProperties> toolProps)
 	{
-		this.toolProperties = new HashMap<String, WbProperties>(toolProps);
+		this.toolProperties = new HashMap<>(toolProps);
 	}
 
 	public void setEntryCount(int count)

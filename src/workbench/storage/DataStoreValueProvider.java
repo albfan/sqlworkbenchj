@@ -52,7 +52,7 @@ public class DataStoreValueProvider
 	public Collection<String> getColumnValues(String columnName)
 	{
 		int rowCount = data.getRowCount();
-		Set<String> result = new TreeSet<String>();
+		Set<String> result = new TreeSet<>();
 		int col = data.getColumnIndex(columnName);
 		if (col < 0) return result;
 

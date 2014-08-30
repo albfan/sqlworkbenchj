@@ -180,8 +180,8 @@ public class Settings
 	private WbProperties props;
 	private WbFile configfile;
 
-	private final List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
-	private final List<SettingsListener> saveListener = new ArrayList<SettingsListener>(5);
+	private final List<FontChangedListener> fontChangeListeners = new ArrayList<>(5);
+	private final List<SettingsListener> saveListener = new ArrayList<>(5);
 
 	private long fileTime;
 	private boolean createBackup;
@@ -523,7 +523,7 @@ public class Settings
 	public List<WbLocale> getLanguages()
 	{
 		List<String> codes = getListProperty("workbench.gui.languages.available", false, "en,de");
-		List<WbLocale> result = new ArrayList<WbLocale>(codes.size());
+		List<WbLocale> result = new ArrayList<>(codes.size());
 		for (String c : codes)
 		{
 			try
@@ -681,7 +681,7 @@ public class Settings
 	public List<ToolDefinition> getExternalTools(boolean checkExists, boolean addPdfReader)
 	{
 		int numTools = getIntProperty("workbench.tools.count", 0);
-		List<ToolDefinition> result = new ArrayList<ToolDefinition>(numTools);
+		List<ToolDefinition> result = new ArrayList<>(numTools);
 
 		for (int i = 0; i < numTools; i++)
 		{
@@ -3273,7 +3273,7 @@ public class Settings
 		List<String> currentList = StringUtil.stringToList(currentValue, ",", true, true, false);
 
 		// Use a HashSet to ensure that no duplicates are contained in the list
-		Set<String> currentProps = new HashSet<String>();
+		Set<String> currentProps = new HashSet<>();
 		currentProps.addAll(currentList);
 
 		String defValue = defProps.getProperty(key, "");
@@ -3284,7 +3284,7 @@ public class Settings
 
 	public void replacePartialKey(String oldKey, String newKey)
 	{
-		Map<String, String> toChange = new HashMap<String, String>();
+		Map<String, String> toChange = new HashMap<>();
 		for (Object keyObj : props.keySet())
 		{
 			String key = keyObj.toString();

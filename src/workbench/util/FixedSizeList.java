@@ -48,7 +48,7 @@ public class FixedSizeList<T>
 	public FixedSizeList(int max)
 	{
 		this.maxSize = max;
-		this.entries = new LinkedList<T>();
+		this.entries = new LinkedList<>();
 	}
 
 	public void doAppend(boolean flag)

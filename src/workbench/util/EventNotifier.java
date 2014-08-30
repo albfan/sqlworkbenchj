@@ -32,7 +32,7 @@ import workbench.interfaces.EventDisplay;
  */
 public class EventNotifier 
 {
-	private List<EventDisplay> displayClients = new LinkedList<EventDisplay>();
+	private List<EventDisplay> displayClients = new LinkedList<>();
 	private NotifierEvent lastEvent = null;
 	private static EventNotifier instance = new EventNotifier();
 	

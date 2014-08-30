@@ -87,7 +87,7 @@ public class ZipUtil
 		throws IOException
 	{
 		ZipFile zip = new ZipFile(archive);
-		List<String> result = new ArrayList<String>(zip.size());
+		List<String> result = new ArrayList<>(zip.size());
 		
 		try
 		{

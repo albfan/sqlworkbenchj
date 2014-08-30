@@ -51,7 +51,7 @@ public class OracleRowDataReader
 
 	private Connection sqlConnection;
 	private SimpleDateFormat tsParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-	private final Set<String> tsClasses = new HashSet<String>(3);
+	private final Set<String> tsClasses = new HashSet<>(3);
 
 	public OracleRowDataReader(ResultInfo info, WbConnection conn)
 		throws ClassNotFoundException

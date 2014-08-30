@@ -44,11 +44,11 @@ public class AggregatingMap<K extends Object, V extends Object>
 		this.sorted = sorted;
 		if (sorted)
 		{
-			content = new TreeMap<K, Set<V>>();
+			content = new TreeMap<>();
 		}
 		else
 		{
-			content = new HashMap<K, Set<V>>();
+			content = new HashMap<>();
 		}
 	}
 
@@ -75,9 +75,9 @@ public class AggregatingMap<K extends Object, V extends Object>
 	{
 		if (sorted)
 		{
-			return new TreeSet<V>();
+			return new TreeSet<>();
 		}
-		return new HashSet<V>();
+		return new HashSet<>();
 	}
 	public Set<V> addValue(K key, V value)
 	{

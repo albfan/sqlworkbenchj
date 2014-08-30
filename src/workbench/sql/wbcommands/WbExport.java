@@ -1226,6 +1226,7 @@ public class WbExport
 		if (fname.endsWith(".xlsm")) return "xlsm";
 		if (fname.endsWith(".xlsx")) return "xlsx";
 		if (fname.endsWith(".ods")) return "ods";
+		if (fname.endsWith(".json")) return "json";
 		return null;
 	}
 

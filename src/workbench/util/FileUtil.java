@@ -104,7 +104,7 @@ public class FileUtil
 	 */
 	public static List<String> getLines(BufferedReader input, boolean trim, boolean checkComments)
 	{
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 
 		try
 		{

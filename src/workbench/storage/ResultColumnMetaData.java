@@ -84,7 +84,7 @@ public class ResultColumnMetaData
 
 		DbMetadata meta = connection.getMetadata();
 
-		Map<String, TableDefinition> tableDefs = new HashMap<String, TableDefinition>(tables.size());
+		Map<String, TableDefinition> tableDefs = new HashMap<>(tables.size());
 		for (String table : tables)
 		{
 			if (StringUtil.isBlank(table)) continue;

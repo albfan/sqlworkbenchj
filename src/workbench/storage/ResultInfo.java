@@ -155,12 +155,12 @@ public class ResultInfo
 
 		boolean checkReadOnly = (sourceConnection == null ? false : sourceConnection.getDbSettings().getCheckResultSetReadOnlyCols());
 		boolean reportsSizeAsDisplaySize = (sourceConnection == null ? false : sourceConnection.getDbSettings().reportsRealSizeAsDisplaySize()) ;
+		boolean supportsGetTable = (sourceConnection == null ? false : sourceConnection.getDbSettings().supportsResultMetaGetTable());
 
 		for (int i=0; i < this.colCount; i++)
 		{
 			String name = null;
 			String alias = null;
-
 			try
 			{
 				// Not all drivers will really return the column label if an alias is used
@@ -210,6 +210,25 @@ public class ResultInfo
 				catch (Throwable th)
 				{
 					LogMgr.logWarning("ResultInfo.<init>", "Error when checking readonly attribute for column : " + name, th);
+				}
+			}
+
+			if (supportsGetTable)
+			{
+				try
+				{
+					String tname = metaData.getTableName(i + 1);
+					col.setSourceTableName(tname);
+					if (StringUtil.isEmptyString(tname))
+					{
+						LogMgr.logInfo("ResultInfo.<init>", "Marking column " + name + " as not updateable because no base table was returned for it by the driver");
+						col.setReadonly(true);
+						col.setUpdateable(false);
+					}
+				}
+				catch (Throwable th)
+				{
+					// ignore
 				}
 			}
 
@@ -324,6 +343,16 @@ public class ResultInfo
 			catch (Throwable e)
 			{
 				col.setColumnClassName("java.lang.Object");
+			}
+
+			try
+			{
+				boolean autoIncrement = metaData.isAutoIncrement(i + 1);
+				col.setIsAutoincrement(autoIncrement);
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logDebug("ResultInfo.<init>", "Error when checking autoincrement attribute for column : " + name, th);
 			}
 			this.columns[i] = col;
 		}

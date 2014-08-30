@@ -43,7 +43,7 @@ import workbench.resource.Settings;
  */
 public class MessageBuffer
 {
-	private LinkedList<CharSequence> messages = new LinkedList<CharSequence>();
+	private LinkedList<CharSequence> messages = new LinkedList<>();
 	private int length = 0;
 	private final String newLine = "\n";
 	private final int maxSize;

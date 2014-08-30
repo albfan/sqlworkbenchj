@@ -56,14 +56,14 @@ public class CollectionUtil
 
 	public static <E> Set<E> treeSet(E... add)
 	{
-		Set<E> result = new TreeSet<E>();
+		Set<E> result = new TreeSet<>();
 		result.addAll(Arrays.asList(add));
 		return result;
 	}
 
 	public static <E> Set<E> treeSet(Set<E> base, E... add)
 	{
-		Set<E> result = new TreeSet<E>();
+		Set<E> result = new TreeSet<>();
 		result.addAll(base);
 		result.addAll(Arrays.asList(add));
 		return result;
@@ -71,7 +71,7 @@ public class CollectionUtil
 
 	public static Set<String> caseInsensitiveSet()
 	{
-		return new TreeSet<String>(CaseInsensitiveComparator.INSTANCE);
+		return new TreeSet<>(CaseInsensitiveComparator.INSTANCE);
 	}
 
 	public static Set<String> unmodifiableSet(Set<String> base, String... add)
@@ -101,17 +101,17 @@ public class CollectionUtil
 
 	public static <E> List<E> arrayList(List<E> source)
 	{
-		return new ArrayList<E>(source);
+		return new ArrayList<>(source);
 	}
 
 	public static <E> List<E> sizedArrayList(int capacity)
 	{
-		return new ArrayList<E>(capacity);
+		return new ArrayList<>(capacity);
 	}
 
 	public static <E> List<E> arrayList()
 	{
-		return new ArrayList<E>();
+		return new ArrayList<>();
 	}
 
 	/**
@@ -121,7 +121,7 @@ public class CollectionUtil
 	 */
 	public static <E> List<E> arrayList(E... a)
 	{
-		ArrayList<E> result = new ArrayList<E>(a.length);
+		ArrayList<E> result = new ArrayList<>(a.length);
 		result.addAll(Arrays.asList(a));
 		return result;
 	}

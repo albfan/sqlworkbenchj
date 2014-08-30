@@ -165,7 +165,7 @@ public class LookupDataLoader
 
 	public List<String> getReferencingColumns()
 	{
-		return new ArrayList<String>(columnMap.values());
+		return new ArrayList<>(columnMap.values());
 	}
 
 	public void retrieveReferencedTable(WbConnection conn)

@@ -51,7 +51,7 @@ import workbench.util.StringUtil;
  */
 public class PkMapping
 {
-	private final Map<String, String> columnMapping = new HashMap<String, String>();
+	private final Map<String, String> columnMapping = new HashMap<>();
 
 	private static PkMapping instance;
 

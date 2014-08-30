@@ -102,7 +102,7 @@ public interface MergeGenerator
 	 */
 	class Factory
 	{
-		private static final Map<String, String> DBID_TO_TYPE_MAP = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+		private static final Map<String, String> DBID_TO_TYPE_MAP = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 		static
 		{
 			DBID_TO_TYPE_MAP.put("postgresql", "postgres");

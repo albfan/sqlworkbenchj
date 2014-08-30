@@ -1546,6 +1546,11 @@ public class DbSettings
 		return Settings.getInstance().getIntProperty(prefix + "errorcode.unique", -1);
 	}
 
+	public boolean supportsResultMetaGetTable()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "resultmetadata.gettablename.supported", false);
+	}
+
 	/**
 	 * Checks if this DBMS supports triggers on views.
 	 * It is better to call TriggerReader#supportsTriggersOnViews() instead as that also

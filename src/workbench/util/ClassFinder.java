@@ -65,7 +65,7 @@ public class ClassFinder
 	{
 		if (classNames != null)
 		{
-			excludedClasses = new TreeSet<String>(classNames);
+			excludedClasses = new TreeSet<>(classNames);
 		}
 	}
 
@@ -81,7 +81,7 @@ public class ClassFinder
 	public List<String> findImplementations(List<String> jarFiles)
 		throws IOException
 	{
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		ClassLoader loader = buildClassLoader(jarFiles);
 
 		for (String file : jarFiles)
@@ -99,7 +99,7 @@ public class ClassFinder
 	private List<String> processJarFile(String archive, ClassLoader loader)
 		throws IOException
 	{
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 
 		JarFile jarFile = new JarFile(archive);
 		try
@@ -182,7 +182,7 @@ public class ClassFinder
 		assert classLoader != null;
 		String path = packageName.replace('.', '/');
 		Enumeration<URL> resources = classLoader.getResources(path);
-		List<File> dirs = new ArrayList<File>();
+		List<File> dirs = new ArrayList<>();
 		while (resources.hasMoreElements())
 		{
 			URL resource = resources.nextElement();
@@ -190,7 +190,7 @@ public class ClassFinder
 			String fileNameDecoded = URLDecoder.decode(fileName, "UTF-8");
 			dirs.add(new File(fileNameDecoded));
 		}
-		ArrayList<Class> classes = new ArrayList<Class>();
+		ArrayList<Class> classes = new ArrayList<>();
 		for (File directory : dirs)
 		{
 			classes.addAll(findClasses(directory, packageName));
@@ -210,7 +210,7 @@ public class ClassFinder
 	private static List<Class> findClasses(File directory, String packageName)
 		throws ClassNotFoundException
 	{
-		List<Class> classes = new ArrayList<Class>();
+		List<Class> classes = new ArrayList<>();
 		if (!directory.exists())
 		{
 			return classes;

@@ -147,7 +147,7 @@ public class ToolDefinition
 
 	private List<String> getComandElements()
 	{
-		List<String> result = new ArrayList<String>(2);
+		List<String> result = new ArrayList<>(2);
 		result.add(this.exePath);
 		if (StringUtil.isNonBlank(parameters))
 		{
