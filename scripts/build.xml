@@ -595,7 +595,7 @@
   </target>
 
   <!-- build a full release -->
-  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, set-history-release-number, set-history-build-date, make-jar, pdf, publish, publish-single, release-src-zip, release-package, mac-package, mac-package7">
+  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, set-history-release-number, set-history-build-date, make-jar, pdf, publish, publish-single, release-src-zip, release-package, mac-package7">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -738,93 +738,6 @@
       </tarfileset>
     </tar>
 
-  </target>
-
-  <target name="mac-package" depends="init">
-    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../libs/jarbundler/jarbundler-2.1.0.jar"/>
-
-    <property name="bundledir" value="${distdir}/mac"/>
-    <delete dir="${bundledir}" failonerror="false"/>
-    <mkdir dir="${bundledir}"/>
-
-    <jarbundler dir="${bundledir}"
-      name="SQLWorkbenchJ"
-      mainclass="workbench.WbStarter"
-      jar="${distdir}/${jarfile}"
-      jvmversion="1.6+"
-      version="${build.number}"
-      shortname="SQL Workbench"
-      infostring="SQL Workbench/J"
-      signature="sqwb"
-      icon="Workbench.icns"
-      vmoptions="-Xmx512m"
-      stubfile="../libs/jarbundler/SQLWorkbench">
-
-      <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
-      <javaproperty name="com.apple.mrj.application.growbox.intrudes" value="false"/>
-      <javaproperty name="apple.awt.showGrowBox" value="true"/>
-      <javaproperty name="apple.awt.rendering" value="speed"/>
-      <javaproperty name="apple.awt.antialiasing" value="true"/>
-      <javaproperty name="apple.awt.textantialiasing" value="true"/>
-    </jarbundler>
-
-    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac.tgz">
-      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
-        <include name="SQLWorkbench-Manual.pdf"/>
-      </tarfileset>
-      <tarfileset dir="${bundledir}">
-        <include name="**/*"/>
-        <exclude name="**/SQLWorkbench"/>
-      </tarfileset>
-      <tarfileset mode="555" dir="${bundledir}">
-        <include name="**/SQLWorkbench"/>
-      </tarfileset>
-      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Resources/Java/manual">
-        <include name="**/*.*"/>
-      </tarfileset>
-      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
-        <include name="history.html"/>
-        <include name="LICENSE"/>
-      </tarfileset>
-      <zipfileset dir="${scriptsrc}" prefix="xslt">
-        <include name="**/*.xslt"/>
-        <exclude name="get_builds_from_history.xslt"/>
-        <exclude name="history2html.xslt"/>
-        <exclude name="history2docbook.xslt"/>
-      </zipfileset>
-    </tar>
-
-    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac-with-office-libs.tgz">
-      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
-        <include name="SQLWorkbench-Manual.pdf"/>
-      </tarfileset>
-      <tarfileset dir="${bundledir}">
-        <include name="**/*"/>
-        <exclude name="**/SQLWorkbench"/>
-      </tarfileset>
-      <tarfileset dir="../libs/poi" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
-        <include name="*.jar"/>
-      </tarfileset>
-      <tarfileset dir="../libs/odf" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
-        <include name="*.jar"/>
-      </tarfileset>
-      <tarfileset mode="555" dir="${bundledir}">
-        <include name="**/SQLWorkbench"/>
-      </tarfileset>
-      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Resources/Java/manual">
-        <include name="**/*.*"/>
-      </tarfileset>
-      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
-        <include name="history.html"/>
-        <include name="LICENSE"/>
-      </tarfileset>
-      <zipfileset dir="${scriptsrc}" prefix="xslt">
-        <include name="**/*.xslt"/>
-        <exclude name="get_builds_from_history.xslt"/>
-        <exclude name="history2html.xslt"/>
-        <exclude name="history2docbook.xslt"/>
-      </zipfileset>
-    </tar>
   </target>
 
   <target name="release-package" depends="fixshellscripts,html-history">
@@ -1218,8 +1131,6 @@
              link="http://docs.oracle.com/javase/6/docs/api/"
              packagenames="workbench.*"/>
   </target>
-
-<!--  -->
 
   <target name="pdf-javadoc">
     <javadoc doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet"
