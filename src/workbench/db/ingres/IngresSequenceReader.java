@@ -80,8 +80,8 @@ public class IngresSequenceReader
 			whereAdded = true;
 			ownerIndex = 1;
 			sql.append(" WHERE seq_owner = ?");
-
 		}
+		
 		if (StringUtil.isNonBlank(namePattern))
 		{
 			if (whereAdded)
@@ -108,7 +108,7 @@ public class IngresSequenceReader
 
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		List<SequenceDefinition> result = new ArrayList<>();
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -257,7 +257,9 @@ public class IngresSequenceReader
 
 		try
 		{
-			stmt = this.dbConn.getSqlConnection().prepareStatement(SELECT_SEQUENCE_DEF);
+			String sql = SELECT_SEQUENCE_DEF + " WHERE seq_owner = ? AND seq_name = ?";
+
+			stmt = this.dbConn.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, owner.trim());
 			stmt.setString(2, sequence.trim());
 
@@ -267,12 +269,12 @@ public class IngresSequenceReader
 				result.append("CREATE SEQUENCE ");
 				result.append(rs.getString(1));
 
-				BigInteger minvalue = rs.getBigDecimal(2).toBigInteger();
-				BigInteger maxvalue = rs.getBigDecimal(3).toBigInteger();
-				long increment = rs.getLong(4);
-				String cycle = rs.getString(5);
-				String order = rs.getString(6);
-				long cache = rs.getLong(7);
+				BigInteger minvalue = rs.getBigDecimal(3).toBigInteger();
+				BigInteger maxvalue = rs.getBigDecimal(4).toBigInteger();
+				long increment = rs.getLong(5);
+				String cycle = rs.getString(6);
+				String order = rs.getString(7);
+				long cache = rs.getLong(8);
 
 				result.append("\n      INCREMENT BY ");
 				result.append(increment);
