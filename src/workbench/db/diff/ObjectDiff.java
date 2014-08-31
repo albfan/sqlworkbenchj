@@ -208,7 +208,7 @@ public class ObjectDiff
 		ReportObjectType rep = new ReportObjectType(target);
 		rep.appendDefinitionXml(result, myIndent);
 
-		ArrayList<ReportColumn> colsToBeAdded = new ArrayList<ReportColumn>();
+		ArrayList<ReportColumn> colsToBeAdded = new ArrayList<>();
 		List<ReportColumn> refCols = getColumns(ref);
 		List<ReportColumn> tCols = getColumns(target);
 
@@ -237,7 +237,7 @@ public class ObjectDiff
 				}
 			}
 		}
-		ArrayList<ReportColumn> colsToBeRemoved = new ArrayList<ReportColumn>();
+		ArrayList<ReportColumn> colsToBeRemoved = new ArrayList<>();
 
 		for (ReportColumn tcol : tCols)
 		{
@@ -263,8 +263,8 @@ public class ObjectDiff
 
 	private List<ReportColumn> getColumns(BaseObjectType type)
 	{
-		List<ReportColumn> result = new ArrayList<ReportColumn>();
-		List<ColumnIdentifier> atts = new ArrayList<ColumnIdentifier>(type.getAttributes());
+		List<ReportColumn> result = new ArrayList<>();
+		List<ColumnIdentifier> atts = new ArrayList<>(type.getAttributes());
 		Collections.sort(atts);
 		for (ColumnIdentifier col : atts)
 		{

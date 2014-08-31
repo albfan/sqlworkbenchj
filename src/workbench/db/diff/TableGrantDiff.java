@@ -58,7 +58,7 @@ public class TableGrantDiff
 
 	public StringBuilder getMigrateTargetXml(TagWriter writer, StringBuilder indent)
 	{
-		Collection<TableGrant> grantsToAdd = new LinkedList<TableGrant>();
+		Collection<TableGrant> grantsToAdd = new LinkedList<>();
 		if (this.referenceGrants != null)
 		{
 			grantsToAdd.addAll(this.referenceGrants);
@@ -68,7 +68,7 @@ public class TableGrantDiff
 			grantsToAdd.removeAll(targetGrants);
 		}
 
-		Collection<TableGrant> grantsToRemove = new LinkedList<TableGrant>();
+		Collection<TableGrant> grantsToRemove = new LinkedList<>();
 		if (this.targetGrants != null)
 		{
 			grantsToRemove.addAll(targetGrants);

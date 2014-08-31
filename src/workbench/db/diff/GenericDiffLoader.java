@@ -100,7 +100,7 @@ public class GenericDiffLoader
 	public void loadObjects()
 	{
 		cancelProcessing = false;
-		objects = new ArrayList<ObjectDiff>();
+		objects = new ArrayList<>();
 		String msg = ResourceMgr.getString("MsgProcessObject") + ": ";
 
 		try
@@ -190,7 +190,7 @@ public class GenericDiffLoader
 		List<TableIdentifier> objList = meta.getObjectList(schema, types);
 		int count = objList.size();
 
-		List<DbObject> dbos = new ArrayList<DbObject>(count);
+		List<DbObject> dbos = new ArrayList<>(count);
 		for (TableIdentifier tbl : objList)
 		{
 			DbObject dbo = meta.getObjectDefinition(tbl);

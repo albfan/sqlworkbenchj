@@ -96,7 +96,7 @@ public class ViewDiff
 
 		if (!sourceDifferent && !createView && !indexDifferent && !grantDifferent) return result;
 
-		List<TagAttribute> att = new ArrayList<TagAttribute>();
+		List<TagAttribute> att = new ArrayList<>();
 
 		String type = reference.getView().getType();
 		if (!"VIEW".equals(type))

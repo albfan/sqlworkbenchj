@@ -171,7 +171,7 @@ public class XmlDataFileParser
 		if (StringUtil.isNonBlank(columnList))
 		{
 			WbStringTokenizer tok = new WbStringTokenizer(columnList, ",");
-			this.columnsToImport = new ArrayList<ColumnIdentifier>();
+			this.columnsToImport = new ArrayList<>();
 			while (tok.hasMoreTokens())
 			{
 				String col = tok.nextToken();
@@ -198,7 +198,7 @@ public class XmlDataFileParser
 	{
 		if (cols != null && cols.size() > 0)
 		{
-			this.columnsToImport = new ArrayList<ColumnIdentifier>(cols.size());
+			this.columnsToImport = new ArrayList<>(cols.size());
 			Iterator<ColumnIdentifier> itr = cols.iterator();
 			while (itr.hasNext())
 			{
@@ -250,7 +250,7 @@ public class XmlDataFileParser
 			}
 		}
 		List<ColumnIdentifier> tableCols = this.connection.getMetadata().getTableColumns(tbl);
-		List<ColumnIdentifier> validCols = new LinkedList<ColumnIdentifier>();
+		List<ColumnIdentifier> validCols = new LinkedList<>();
 
 		for (int colIndex=0; colIndex < this.columns.length; colIndex++)
 		{
@@ -356,9 +356,12 @@ public class XmlDataFileParser
 	private boolean containsColumn(ColumnIdentifier col)
 	{
 		if (this.columns == null) return false;
-		for (int i=0; i<this.columns.length; i++)
+		for (ColumnIdentifier column : this.columns)
 		{
-			if (this.columns[i].equals(col)) return true;
+			if (column.equals(col))
+			{
+				return true;
+			}
 		}
 		return false;
 	}
@@ -374,7 +377,7 @@ public class XmlDataFileParser
 		{
 			return Collections.emptyList();
 		}
-		ArrayList<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(this.columns.length);
+		ArrayList<ColumnIdentifier> result = new ArrayList<>(this.columns.length);
 		result.addAll(Arrays.asList(this.columns));
 		return result;
 	}
@@ -702,7 +705,7 @@ public class XmlDataFileParser
 			}
 			else
 			{
-				List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(this.realColCount);
+				List<ColumnIdentifier> cols = new ArrayList<>(this.realColCount);
 				for (int i=0; i < this.colCount; i++)
 				{
 					if (this.columnsToImport.contains(this.columns[i]))
