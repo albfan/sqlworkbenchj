@@ -827,24 +827,14 @@ public class WbImport
 			}
 			result.setWarning(imp.hasWarnings());
 		}
-		catch (CycleErrorException e)
+		catch (CycleErrorException | ParsingInterruptedException e)
 		{
 			// Logging already done.
 			result.setFailure();
 		}
-		catch (SQLException e)
+		catch (SQLException | ConverterException e)
 		{
 			LogMgr.logError("WbImport.execute()", "Error importing " + (inputFile == null ? dir : inputFile), e);
-			result.setFailure();
-		}
-		catch (ConverterException e)
-		{
-			LogMgr.logError("WbImport.execute()", "Error importing " + (inputFile == null ? dir : inputFile), e);
-			result.setFailure();
-		}
-		catch (ParsingInterruptedException e)
-		{
-			// Logging already done by DataImporter
 			result.setFailure();
 		}
 		catch (Exception e)

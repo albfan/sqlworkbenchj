@@ -94,7 +94,7 @@ public class ObjectNameFilter
 	{
 		if (CollectionUtil.isEmpty(expressions)) return;
 
-		filterExpressions = new HashSet<Pattern>(expressions.size());
+		filterExpressions = new HashSet<>(expressions.size());
 		for (String exp : expressions)
 		{
 			if (StringUtil.isNonBlank(exp))
@@ -158,7 +158,7 @@ public class ObjectNameFilter
 
 		if (filterExpressions == null)
 		{
-			filterExpressions = new HashSet<Pattern>();
+			filterExpressions = new HashSet<>();
 		}
 
 		try
@@ -202,7 +202,7 @@ public class ObjectNameFilter
 		copy.inclusionFilter = this.inclusionFilter;
 		if (this.filterExpressions != null)
 		{
-			copy.filterExpressions = new HashSet<Pattern>(this.filterExpressions);
+			copy.filterExpressions = new HashSet<>(this.filterExpressions);
 		}
 		return copy;
 	}

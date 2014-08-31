@@ -119,7 +119,7 @@ public class TableDeleter
 
 		boolean hasError = false;
 
-		List<TableIdentifier> deletedTables = new ArrayList<TableIdentifier>();
+		List<TableIdentifier> deletedTables = new ArrayList<>();
 
 		try
 		{

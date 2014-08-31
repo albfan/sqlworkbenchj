@@ -99,7 +99,7 @@ public interface TransactionChecker
 		public static boolean supportsTransactionCheck(String driverClass)
 		{
 			if (StringUtil.isBlank(driverClass)) return false;
-			Set<String> drivers = new TreeSet<String>();
+			Set<String> drivers = new TreeSet<>();
 			drivers.addAll(Settings.getInstance().getListProperty("workbench.db.drivers.opentransaction.check.builtin", false));
 			drivers.addAll(Settings.getInstance().getListProperty("workbench.db.drivers.opentransaction.check", false));
 			return drivers.contains(driverClass);

@@ -47,7 +47,7 @@ public class PGProcName
 		List<ColumnIdentifier> parameters = def.getParameters(null);
 		if (parameters != null)
 		{
-			arguments = new ArrayList<PGArg>(parameters.size());
+			arguments = new ArrayList<>(parameters.size());
 			for (ColumnIdentifier col : parameters)
 			{
 				String mode = col.getArgumentMode();
@@ -84,7 +84,7 @@ public class PGProcName
 			procName = displayName.substring(0, pos);
 			String args = displayName.substring(pos + 1, displayName.indexOf(')'));
 			String[] elements = args.split(",");
-			arguments = new ArrayList<PGArg>();
+			arguments = new ArrayList<>();
 			for (String s : elements)
 			{
 				PGType typ = typeMap.getEntryByType(s.trim());
@@ -116,7 +116,7 @@ public class PGProcName
 		String[] items = oidList.split(";");
 		String[] paramModes = modes.split(";");
 
-		List<PGArg> result = new ArrayList<PGArg>(items.length);
+		List<PGArg> result = new ArrayList<>(items.length);
 		for (int i=0; i < items.length; i++)
 		{
 			String arg = items[i];

@@ -105,7 +105,7 @@ public class WbConnection
 
 	private Boolean sessionReadOnly;
 	private Boolean sessionConfirmUpdates;
-	private final Map<String, String> sessionProps = new HashMap<String, String>();
+	private final Map<String, String> sessionProps = new HashMap<>();
 	private DdlObjectInfo lastDdlObject;
 
 	/**
@@ -1322,7 +1322,7 @@ public class WbConnection
 		int count = this.listeners.size();
 		if (count == 0) return;
 
-		List<PropertyChangeListener> listCopy = new ArrayList<PropertyChangeListener>(listeners);
+		List<PropertyChangeListener> listCopy = new ArrayList<>(listeners);
 		PropertyChangeEvent evt = new PropertyChangeEvent(this, property, oldValue, newValue);
 		for (PropertyChangeListener l : listCopy)
 		{

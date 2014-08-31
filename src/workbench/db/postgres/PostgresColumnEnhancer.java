@@ -128,7 +128,7 @@ public class PostgresColumnEnhancer
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		HashMap<String, ArrayDef> dims = new HashMap<String, ArrayDef>(table.getColumnCount());
+		HashMap<String, ArrayDef> dims = new HashMap<>(table.getColumnCount());
 
 		try
 		{
@@ -170,7 +170,7 @@ public class PostgresColumnEnhancer
 	{
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		HashMap<String, String> collations = new HashMap<String, String>(table.getColumnCount());
+		HashMap<String, String> collations = new HashMap<>(table.getColumnCount());
 		String sql =
 			"select att.attname, col.collcollate \n" +
 			"from pg_attribute att \n" +

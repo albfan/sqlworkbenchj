@@ -33,7 +33,7 @@ import workbench.util.StringUtil;
  */
 public class ObjectListFilter
 {
-	private Map<String, ObjectNameFilter> filterMap = new HashMap<String, ObjectNameFilter>();
+	private Map<String, ObjectNameFilter> filterMap = new HashMap<>();
 
 	public ObjectListFilter(String dbid)
 	{

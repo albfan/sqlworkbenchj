@@ -469,7 +469,7 @@ public class ConnectionMgr
 
 	public void addDriverChangeListener(PropertyChangeListener l)
 	{
-		if (this.driverChangeListener == null) this.driverChangeListener = new ArrayList<PropertyChangeListener>();
+		if (this.driverChangeListener == null) this.driverChangeListener = new ArrayList<>();
 		this.driverChangeListener.add(l);
 	}
 
@@ -713,7 +713,7 @@ public class ConnectionMgr
 		// As drivers and profiles can be saved in console mode, we need to make
 		// sure, that the "internal" drivers that are created "on-the-fly" when connecting
 		// from the commandline are not stored in the configuration file.
-		List<DbDriver> allDrivers = new ArrayList<DbDriver>(this.drivers);
+		List<DbDriver> allDrivers = new ArrayList<>(this.drivers);
 		Iterator<DbDriver> itr = allDrivers.iterator();
 		while (itr.hasNext())
 		{
@@ -877,7 +877,7 @@ public class ConnectionMgr
 			result = null;
 		}
 
-		this.profiles = new ArrayList<ConnectionProfile>();
+		this.profiles = new ArrayList<>();
 
 		if (result instanceof Collection)
 		{

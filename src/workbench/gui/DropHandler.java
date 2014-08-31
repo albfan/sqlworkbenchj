@@ -96,14 +96,9 @@ class DropHandler
 				dropTargetDropEvent.rejectDrop();
 			}
 		}
-		catch (IOException io)
+		catch (IOException | UnsupportedFlavorException io)
 		{
 			LogMgr.logError("MainWindow.drop()", "Error processing drop event", io);
-			dropTargetDropEvent.rejectDrop();
-		}
-		catch (UnsupportedFlavorException ufe)
-		{
-			LogMgr.logError("MainWindow.drop()", "Error processing drop event", ufe);
 			dropTargetDropEvent.rejectDrop();
 		}
 	}

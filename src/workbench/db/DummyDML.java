@@ -58,7 +58,7 @@ public class DummyDML
 	public DummyDML(TableIdentifier tbl, List<ColumnIdentifier> cols, boolean buildUpdate)
 	{
 		this.table = tbl;
-		this.columns = new ArrayList<ColumnIdentifier>(cols);
+		this.columns = new ArrayList<>(cols);
 		this.createUpdateStatement = buildUpdate;
 	}
 

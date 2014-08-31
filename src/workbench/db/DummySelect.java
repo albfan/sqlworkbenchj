@@ -50,7 +50,7 @@ public class DummySelect
 	public DummySelect(TableIdentifier tbl, List<ColumnIdentifier> cols)
 	{
 		this.table = tbl;
-		this.columns = new ArrayList<ColumnIdentifier>(cols);
+		this.columns = new ArrayList<>(cols);
 	}
 
 	@Override

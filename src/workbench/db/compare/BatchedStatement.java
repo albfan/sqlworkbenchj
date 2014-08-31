@@ -57,7 +57,7 @@ public class BatchedStatement
 	private int batchSize;
 	private int currentSize;
 	private boolean commitBatch;
-	private final List<Closeable> streams = new LinkedList<Closeable>();
+	private final List<Closeable> streams = new LinkedList<>();
 
 	/**
 	 * Creates a BatchedStatement with a batch size of 10.

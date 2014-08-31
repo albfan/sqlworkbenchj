@@ -99,7 +99,7 @@ public class PostgresStatementHook
 	{
 		if (!isAvailable()|| conn == null) return Collections.emptyList();
 
-		List<String> result = new ArrayList<String>(1);
+		List<String> result = new ArrayList<>(1);
 		try
 		{
 			Object notifications = getNotifications.invoke(conn.getSqlConnection(), (Object[])null);

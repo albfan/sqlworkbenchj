@@ -168,7 +168,7 @@ public class JdbcIndexReader
 		{
 			String catalog = tbl.getCatalog();
 			String schema = tbl.getSchema();
-			List<IndexColumn> cols = new ArrayList<IndexColumn>();
+			List<IndexColumn> cols = new ArrayList<>();
 
 			ResultSet keysRs = null;
 			String pkStatus = null;
@@ -766,7 +766,7 @@ public class JdbcIndexReader
 	 */
 	public List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean uniqueOnly, boolean checkPK)
 	{
-		if (table == null) return new ArrayList<IndexDefinition>();
+		if (table == null) return new ArrayList<>();
 
 		ResultSet idxRs = null;
 		TableIdentifier tbl = table.createCopy();
@@ -785,7 +785,7 @@ public class JdbcIndexReader
 		catch (Exception e)
 		{
 			LogMgr.logWarning("JdbcIndexReader.getTableIndexInformation()", "Could not retrieve indexes", e);
-			result = new ArrayList<IndexDefinition>(0);
+			result = new ArrayList<>(0);
 		}
 		finally
 		{
@@ -806,7 +806,7 @@ public class JdbcIndexReader
 		// This will map an indexname to an IndexDefinition object
 		// getIndexInfo() returns one row for each column
 		// so the columns of the index are collected in the IndexDefinition
-		HashMap<String, IndexDefinition> defs = new HashMap<String, IndexDefinition>();
+		HashMap<String, IndexDefinition> defs = new HashMap<>();
 
 		boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
 		boolean isPartitioned = false;
@@ -910,7 +910,7 @@ public class JdbcIndexReader
 		}
 
 		processIndexList(tbl, indexes);
-		return new ArrayList<IndexDefinition>(indexes);
+		return new ArrayList<>(indexes);
 	}
 
 	/**
@@ -1028,7 +1028,7 @@ public class JdbcIndexReader
 			LogMgr.logInfo("JdbcIndexReader.getIndexes()", "Retrieving index list using:\n" + sql);
 		}
 
-		List<IndexDefinition> result = new ArrayList<IndexDefinition>();
+		List<IndexDefinition> result = new ArrayList<>();
 		Statement stmt = null;
 		ResultSet rs = null;
 

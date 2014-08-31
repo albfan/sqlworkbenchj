@@ -136,7 +136,7 @@ public class BaseObjectType
 
 	public void setAttributes(List<ColumnIdentifier> attr)
 	{
-		columns = new ArrayList<ColumnIdentifier>(attr);
+		columns = new ArrayList<>(attr);
 	}
 
 	@Override

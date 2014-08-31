@@ -125,7 +125,7 @@ public class ColumnDropper
 	@Override
 	public void setObjects(List<? extends DbObject> toDrop)
 	{
-		this.columns = new ArrayList<ColumnIdentifier>();
+		this.columns = new ArrayList<>();
 		if (toDrop == null) return;
 		for (DbObject dbo : toDrop)
 		{
@@ -230,7 +230,7 @@ public class ColumnDropper
 	{
 		String multiSql = conn.getDbSettings().getDropMultipleColumnSql();
 		String singleSql = conn.getDbSettings().getDropSingleColumnSql();
-		List<String> result = new ArrayList<String>(columns.size());
+		List<String> result = new ArrayList<>(columns.size());
 
 		if (columns.size() == 1 || StringUtil.isEmptyString(multiSql))
 		{

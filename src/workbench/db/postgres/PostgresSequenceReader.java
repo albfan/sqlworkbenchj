@@ -198,7 +198,7 @@ public class PostgresSequenceReader
 	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String schema, String namePattern)
 	{
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		List<SequenceDefinition> result = new ArrayList<>();
 
 		ResultSet rs = null;
 		Savepoint sp = null;

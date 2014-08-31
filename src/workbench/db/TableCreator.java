@@ -75,7 +75,7 @@ public class TableCreator
 
 		// As we are sorting the columns we have to create a copy of the array
 		// to ensure that the caller does not see a different ordering
-		this.columnDefinition = new ArrayList<ColumnIdentifier>(columns);
+		this.columnDefinition = new ArrayList<>(columns);
 
 		// Now sort the columns according to their DBMS position
 		ColumnIdentifier.sortByPosition(columnDefinition);
@@ -143,7 +143,7 @@ public class TableCreator
 		String name = this.tablename.getTableExpression(this.connection);
 
 		int numCols = 0;
-		List<String> pkCols = new ArrayList<String>();
+		List<String> pkCols = new ArrayList<>();
 
 		columns.append("  ");
 		for (ColumnIdentifier col : columnDefinition)
@@ -187,7 +187,7 @@ public class TableCreator
 
 		if (storeSQL)
 		{
-			generatedSQL = new ArrayList<String>(2);
+			generatedSQL = new ArrayList<>(2);
 			generatedSQL.add(sql);
 		}
 

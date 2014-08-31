@@ -48,7 +48,7 @@ public class ProfileGroupMap
 			List<ConnectionProfile> l = get(group);
 			if (l == null)
 			{
-				l = new ArrayList<ConnectionProfile>();
+				l = new ArrayList<>();
 				put(group, l);
 			}
 			l.add(profile);

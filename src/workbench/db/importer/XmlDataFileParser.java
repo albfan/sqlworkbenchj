@@ -370,11 +370,7 @@ public class XmlDataFileParser
 		{
 			if (this.columns == null) this.readXmlTableDefinition();
 		}
-		catch (IOException e)
-		{
-			return Collections.emptyList();
-		}
-		catch (SAXException e)
+		catch (IOException | SAXException e)
 		{
 			return Collections.emptyList();
 		}

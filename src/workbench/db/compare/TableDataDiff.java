@@ -101,7 +101,7 @@ public class TableDataDiff
 	private boolean firstInsert;
 
 	private SqlLiteralFormatter formatter;
-	private List<ColumnIdentifier> pkColumns = new ArrayList<ColumnIdentifier>();
+	private List<ColumnIdentifier> pkColumns = new ArrayList<>();
 	private String lineEnding = "\n";
 	private String encoding = "UTF-8";
 
@@ -204,7 +204,7 @@ public class TableDataDiff
 		{
 			CaseInsensitiveComparator comp = new CaseInsensitiveComparator();
 			comp.setIgnoreQuotes(true);
-			this.alternateKeys = new TreeMap<String, Set<String>>(comp);
+			this.alternateKeys = new TreeMap<>(comp);
 			this.alternateKeys.putAll(mapping);
 		}
 	}
@@ -409,7 +409,7 @@ public class TableDataDiff
 				this.monitor.setCurrentObject(msg, -1, -1);
 			}
 
-			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
+			List<RowData> packetRows = new ArrayList<>(chunkSize);
 
 			reader = RowDataReaderFactory.createReader(info, this.reference);
 			while (rs.next())
@@ -456,7 +456,7 @@ public class TableDataDiff
 		try
 		{
 			rs = checkStatement.executeQuery(sql);
-			List<RowData> checkRows = new ArrayList<RowData>(referenceRows.size());
+			List<RowData> checkRows = new ArrayList<>(referenceRows.size());
 			ResultInfo ri = new ResultInfo(rs.getMetaData(), toSync);
 			ri.setPKColumns(this.pkColumns);
 			ri.setUpdateTable(this.tableToSync);

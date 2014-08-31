@@ -59,15 +59,15 @@ public class TableDependency
 	private DependencyNode tableRoot;
 	private final DbMetadata metaData;
 	private final FKHandler fkHandler;
-	private final List<DependencyNode> leafs = new ArrayList<DependencyNode>();
+	private final List<DependencyNode> leafs = new ArrayList<>();
 	private boolean directChildrenOnly;
 	private boolean readAborted;
 	private boolean cancelRetrieve;
 	private boolean cancelled;
-	private final Map<DependencyNode, DependencyNode> visitedRelations = new HashMap<DependencyNode, DependencyNode>();
-	private final Set<DependencyNode> visitedParents = new HashSet<DependencyNode>();
+	private final Map<DependencyNode, DependencyNode> visitedRelations = new HashMap<>();
+	private final Set<DependencyNode> visitedParents = new HashSet<>();
 	private ScriptGenerationMonitor monitor;
-	private final List<TableIdentifier> excludeTables = new ArrayList<TableIdentifier>();
+	private final List<TableIdentifier> excludeTables = new ArrayList<>();
 
 	public TableDependency(WbConnection con)
 	{
@@ -524,7 +524,7 @@ public class TableDependency
 
 	private Set<TableIdentifier> getAllTables(DependencyNode root)
 	{
-		Set<TableIdentifier> result = new HashSet<TableIdentifier>();
+		Set<TableIdentifier> result = new HashSet<>();
 		if (root == null) return result;
 
 		List<DependencyNode> children = root.getChildren();
@@ -545,7 +545,7 @@ public class TableDependency
 
 	private List<DependencyNode> getAllNodes(DependencyNode root)
 	{
-		List<DependencyNode> result = new ArrayList<DependencyNode>();
+		List<DependencyNode> result = new ArrayList<>();
 		if (root == null)
 		{
 			return result;

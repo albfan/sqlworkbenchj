@@ -794,13 +794,9 @@ public class EditorPanel
 			}
 			addFileSaveAction();
 		}
-		catch (BadLocationException bl)
+		catch (BadLocationException | IOException bl)
 		{
 			LogMgr.logError("EditorPanel.readFile()", "Error reading file " + toLoad.getAbsolutePath(), bl);
-		}
-		catch (IOException e)
-		{
-			LogMgr.logError("EditorPanel.readFile()", "Error reading file " + toLoad.getAbsolutePath(), e);
 		}
 		catch (OutOfMemoryError mem)
 		{
@@ -1092,14 +1088,9 @@ public class EditorPanel
 				dropTargetDropEvent.rejectDrop();
 			}
 		}
-		catch (IOException io)
+		catch (IOException | UnsupportedFlavorException io)
 		{
 			io.printStackTrace();
-			dropTargetDropEvent.rejectDrop();
-		}
-		catch (UnsupportedFlavorException ufe)
-		{
-			ufe.printStackTrace();
 			dropTargetDropEvent.rejectDrop();
 		}
 	}

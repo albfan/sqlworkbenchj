@@ -92,13 +92,9 @@ public class XmlTableDefinitionParser
 			InputSource source = new InputSource(in);
 			saxParser.parse(source, this);
 		}
-		catch (ParserConfigurationException ce)
+		catch (ParserConfigurationException | ParsingEndedException ce)
 		{
 			// should not happen
-		}
-		catch (ParsingEndedException e)
-		{
-			// expected exception to stop parsing
 		}
 		catch (IOException e)
 		{

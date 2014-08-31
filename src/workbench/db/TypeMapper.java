@@ -70,7 +70,7 @@ public class TypeMapper
 
 	private String findAlternateBlobType(int type)
 	{
-		List<Integer> allBlobTypes = new ArrayList<Integer>(4);
+		List<Integer> allBlobTypes = new ArrayList<>(4);
 
 		// BLOBs are reported as BLOB, VARBINARY (Postgres), LONGVARBNARY (HSQL) and
 		// possibly as BINARY. So we need to test each of them. The order here
@@ -94,7 +94,7 @@ public class TypeMapper
 
 	private String findAlternateClobType(int type)
 	{
-		List<Integer> allClobTypes = new ArrayList<Integer>(4);
+		List<Integer> allClobTypes = new ArrayList<>(4);
 
 		// CLOBs are reported as CLOB, LONGVARCHAR
 		// The order here is a personal feeling which type should be preferred over others ;)
@@ -197,7 +197,7 @@ public class TypeMapper
 	 */
 	public void parseUserTypeMap(String mapping)
 	{
-		userMapping = new HashMap<Integer, String>();
+		userMapping = new HashMap<>();
 
 		if (StringUtil.isBlank(mapping)) return;
 		List<String> types = StringUtil.stringToList(mapping, ";", true, true, false, false);
@@ -234,7 +234,7 @@ public class TypeMapper
 	private void createTypeMap()
 	{
 		ResultSet rs = null;
-		this.typeInfo = new HashMap<Integer, String>(27);
+		this.typeInfo = new HashMap<>(27);
 		boolean cleanup = targetDb.getDbSettings().cleanupTypeMappingNames();
 
 		Pattern p = Pattern.compile("[\\(\\)\\[\\]{}'\"`]");
@@ -277,7 +277,7 @@ public class TypeMapper
 		catch (SQLException e)
 		{
 			LogMgr.logError("TypeMapper.createTypeMap()", "Error reading type info for target connection", e);
-			this.typeInfo = new HashMap<Integer, String>();
+			this.typeInfo = new HashMap<>();
 		}
 		finally
 		{

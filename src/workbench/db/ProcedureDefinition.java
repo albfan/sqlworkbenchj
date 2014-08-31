@@ -208,7 +208,7 @@ public class ProcedureDefinition
 			}
 			else
 			{
-				this.parameters = new ArrayList<ColumnIdentifier>(procParams);
+				this.parameters = new ArrayList<>(procParams);
 			}
 		}
 	}
@@ -240,7 +240,7 @@ public class ProcedureDefinition
 				{
 					ProcedureReader reader = con.getMetadata().getProcedureReader();
 					DataStore ds = reader.getProcedureColumns(this);
-					parameters = new ArrayList<ColumnIdentifier>(ds.getRowCount());
+					parameters = new ArrayList<>(ds.getRowCount());
 
 					for (int i = 0; i < ds.getRowCount(); i++)
 					{
@@ -269,7 +269,7 @@ public class ProcedureDefinition
 		synchronized (this)
 		{
 			if (parameters == null) return Collections.emptyList();
-			List<String> result = new ArrayList<String>(parameters.size());
+			List<String> result = new ArrayList<>(parameters.size());
 			for (ColumnIdentifier col : parameters)
 			{
 				result.add(col.getColumnName());
@@ -283,7 +283,7 @@ public class ProcedureDefinition
 		synchronized (this)
 		{
 			if (parameters == null) return Collections.emptyList();
-			List<String> result = new ArrayList<String>(parameters.size());
+			List<String> result = new ArrayList<>(parameters.size());
 			for (ColumnIdentifier col : parameters)
 			{
 				result.add(col.getDbmsType());

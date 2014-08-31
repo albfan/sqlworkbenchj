@@ -44,7 +44,7 @@ import workbench.util.StringUtil;
 class DependencyDuplicateFinder
 {
 	private final DependencyNode root;
-	private final Map<TableIdentifier, Integer> tableLevels = new HashMap<TableIdentifier, Integer>();
+	private final Map<TableIdentifier, Integer> tableLevels = new HashMap<>();
 
 	DependencyDuplicateFinder(DependencyNode rootNode)
 	{
@@ -53,7 +53,7 @@ class DependencyDuplicateFinder
 
 	Set<String> getDuplicates()
 	{
-		Set<String> result = new HashSet<String>();
+		Set<String> result = new HashSet<>();
 		List<NodeInformation> tree = buildTree(root, 0);
 		for (NodeInformation info : tree)
 		{
@@ -120,7 +120,7 @@ class DependencyDuplicateFinder
 
 	List<NodeInformation> buildTree(DependencyNode root, int level)
 	{
-		List<NodeInformation> result = new ArrayList<NodeInformation>();
+		List<NodeInformation> result = new ArrayList<>();
 		List<DependencyNode> children = root.getChildren();
 		if (children.isEmpty()) return result;
 

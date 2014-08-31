@@ -562,7 +562,7 @@ public class JdbcProcedureReader
 	public List<ProcedureDefinition> getProcedureList(String catalogPattern, String schemaPattern, String namePattern)
 		throws SQLException
 	{
-		List<ProcedureDefinition> result = new LinkedList<ProcedureDefinition>();
+		List<ProcedureDefinition> result = new LinkedList<>();
 
 		catalogPattern = DbMetadata.cleanupWildcards(catalogPattern);
 		schemaPattern = DbMetadata.cleanupWildcards(schemaPattern);

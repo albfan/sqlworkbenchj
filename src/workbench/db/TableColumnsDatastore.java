@@ -160,7 +160,7 @@ public class TableColumnsDatastore
 	public static List<ColumnIdentifier> createColumnIdentifiers(DbMetadata meta, DataStore ds)
 	{
 		int count = ds.getRowCount();
-		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
+		List<ColumnIdentifier> result = new ArrayList<>(count);
 		for (int i=0; i < count; i++)
 		{
 			ColumnIdentifier ci = (ColumnIdentifier)ds.getRow(i).getUserObject();

@@ -143,7 +143,7 @@ public class PostgresRuleReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
-		List<PostgresRule> result = new ArrayList<PostgresRule>();
+		List<PostgresRule> result = new ArrayList<>();
 		try
 		{
 			sp = connection.setSavepoint();

@@ -920,7 +920,7 @@ public class ColumnIdentifier
 	 */
 	public static List<ColumnIdentifier> sortPksFirst(List<ColumnIdentifier> columns)
 	{
-		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(columns.size());
+		List<ColumnIdentifier> result = new ArrayList<>(columns.size());
 		for (ColumnIdentifier col : columns)
 		{
 			if (col.isPkColumn())

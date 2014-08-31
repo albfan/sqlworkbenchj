@@ -53,7 +53,7 @@ public class EnumIdentifier
 
 	public void addEnumValue(String value)
 	{
-		if (this.values == null) values = new ArrayList<String>();
+		if (this.values == null) values = new ArrayList<>();
 		values.add(value);
 	}
 

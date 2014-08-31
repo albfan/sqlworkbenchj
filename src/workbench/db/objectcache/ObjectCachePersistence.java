@@ -235,13 +235,9 @@ class ObjectCachePersistence
 			oos.writeObject(toWrite);
 			zout.closeEntry();
 		}
-		catch (InvalidClassException ice)
+		catch (InvalidClassException | NotSerializableException ice)
 		{
 			LogMgr.logError("ObjectCachePersistence.writeObject()", "Could not write cache entry: " + filename, ice);
-		}
-		catch (NotSerializableException  nse)
-		{
-			LogMgr.logError("ObjectCachePersistence.writeObject()", "Could not write cache entry: " + filename, nse);
 		}
 	}
 

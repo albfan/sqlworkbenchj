@@ -52,7 +52,7 @@ public class TableGrantReader
 	 */
 	public Collection<TableGrant> getTableGrants(WbConnection dbConnection, TableIdentifier table)
 	{
-		Collection<TableGrant> result = new HashSet<TableGrant>();
+		Collection<TableGrant> result = new HashSet<>();
 		ResultSet rs = null;
 		Set<String> ignoreGrantors = dbConnection.getDbSettings().getGrantorsToIgnore();
 		Set<String> ignoreGrantees = dbConnection.getDbSettings().getGranteesToIgnore();
@@ -102,7 +102,7 @@ public class TableGrantReader
 
 		// as several grants to several users can be made, we need to collect them
 		// first, in order to be able to build the complete statements
-		Map<String, List<String>> grants = new HashMap<String, List<String>>(count);
+		Map<String, List<String>> grants = new HashMap<>(count);
 
 		for (TableGrant grant : grantList)
 		{
@@ -112,7 +112,7 @@ public class TableGrantReader
 			List<String> privs = grants.get(grantee);
 			if (privs == null)
 			{
-				privs = new LinkedList<String>();
+				privs = new LinkedList<>();
 				grants.put(grantee, privs);
 			}
 			privs.add(priv.trim());

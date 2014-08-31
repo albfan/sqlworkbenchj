@@ -43,8 +43,8 @@ public class ObjectSourceOptions
 	private final String KEY_TABLE_OPTION = "tbleOpt";
 	private final String KEY_ADDITIONAL_SQL = "addSql";
 
-	private final Map<String, String> options = new HashMap<String, String>();
-	private final Map<String, String> configSettings = new HashMap<String, String>();
+	private final Map<String, String> options = new HashMap<>();
+	private final Map<String, String> configSettings = new HashMap<>();
 
 	private boolean initialized;
 

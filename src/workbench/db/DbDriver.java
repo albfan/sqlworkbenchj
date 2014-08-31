@@ -151,7 +151,7 @@ public class DbDriver
 	private void addToLibraryPath()
 	{
 		if (this.libraryList == null) return;
-		Set<String> paths = new TreeSet<String>();
+		Set<String> paths = new TreeSet<>();
 		for (String file : libraryList)
 		{
 			WbFile f = buildFile(file);
@@ -208,7 +208,7 @@ public class DbDriver
 		}
 		else
 		{
-			this.libraryList = new ArrayList<String>(files);
+			this.libraryList = new ArrayList<>(files);
 		}
 	}
 
@@ -379,7 +379,7 @@ public class DbDriver
 	{
 		DbDriver copy = new DbDriver();
 		copy.driverClass = this.driverClass;
-		copy.libraryList = new ArrayList<String>(libraryList);
+		copy.libraryList = new ArrayList<>(libraryList);
 		copy.sampleUrl = this.sampleUrl;
 		copy.name = this.name;
 
@@ -466,11 +466,7 @@ public class DbDriver
 				PostgresUtil.setApplicationName(conn, getProgramName() + " (" + id + ")");
 			}
 		}
-		catch (ClassNotFoundException e)
-		{
-			throw e;
-		}
-		catch (UnsupportedClassVersionError e)
+		catch (ClassNotFoundException | UnsupportedClassVersionError e)
 		{
 			throw e;
 		}

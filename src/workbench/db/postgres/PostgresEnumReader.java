@@ -171,7 +171,7 @@ public class PostgresEnumReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
-		Map<String, EnumIdentifier> enums = new HashMap<String, EnumIdentifier>();
+		Map<String, EnumIdentifier> enums = new HashMap<>();
 
 		try
 		{

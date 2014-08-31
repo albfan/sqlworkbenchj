@@ -79,11 +79,11 @@ public class DeleteScriptGenerator
 	private TableIdentifier rootTable;
 	private WbTable sourceTable;
 	private ScriptGenerationMonitor monitor;
-	private final List<String> statements = new LinkedList<String>();
+	private final List<String> statements = new LinkedList<>();
 	private final SqlLiteralFormatter formatter;
 	private boolean formatSql = true;
 	private boolean showFkNames;
-	private List<TableIdentifier> excludeTables = new ArrayList<TableIdentifier>();
+	private List<TableIdentifier> excludeTables = new ArrayList<>();
 
 	private final Comparator<Integer> descComparator = new Comparator<Integer>()
 		{
@@ -118,7 +118,7 @@ public class DeleteScriptGenerator
 		}
 		else
 		{
-			this.excludeTables = new ArrayList<TableIdentifier>(toExclude);
+			this.excludeTables = new ArrayList<>(toExclude);
 		}
 	}
 
@@ -254,7 +254,7 @@ public class DeleteScriptGenerator
 
 				// collect all nodes for one table (on the current level) so that we can generate a single delete statement
 				// that covers all foreign keys at once
-				AggregatingMap<TableIdentifier, DependencyNode> tableNodes = new AggregatingMap<TableIdentifier, DependencyNode>(false);
+				AggregatingMap<TableIdentifier, DependencyNode> tableNodes = new AggregatingMap<>(false);
 
 				for (DependencyNode node : entry.getValue())
 				{
@@ -288,7 +288,7 @@ public class DeleteScriptGenerator
 
 	private List<TableIdentifier> sortTables(final Map<TableIdentifier, Set<DependencyNode>>  tables)
 	{
-		final Set<DependencyNode> allNodes = new HashSet<DependencyNode>();
+		final Set<DependencyNode> allNodes = new HashSet<>();
 		for (Set<DependencyNode> values : tables.values())
 		{
 			allNodes.addAll(values);
@@ -321,7 +321,7 @@ public class DeleteScriptGenerator
 		if (table == null) return StringUtil.EMPTY_STRING;
 		if (CollectionUtil.isEmpty(nodes)) return StringUtil.EMPTY_STRING;
 
-		Set<DependencyNode> processed = new HashSet<DependencyNode>(nodes.size());
+		Set<DependencyNode> processed = new HashSet<>(nodes.size());
 		StringBuilder sql = new StringBuilder(nodes.size() * 200);
 
 		if (showFkNames)
@@ -589,7 +589,7 @@ public class DeleteScriptGenerator
 
 	private int adjustLevels(Map<Integer, Set<DependencyNode>> levels)
 	{
-		Map<DependencyNode, Integer> newLevels = new HashMap<DependencyNode, Integer>();
+		Map<DependencyNode, Integer> newLevels = new HashMap<>();
 
 		for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
 		{
@@ -650,7 +650,7 @@ public class DeleteScriptGenerator
 
 	private Map<Integer, Set<DependencyNode>> buildLevelsTopDown(DependencyNode root, int level)
 	{
-		AggregatingMap<Integer, DependencyNode> map = new AggregatingMap<Integer, DependencyNode>(new TreeMap<Integer, Set<DependencyNode>>(descComparator));
+		AggregatingMap<Integer, DependencyNode> map = new AggregatingMap<>(new TreeMap<Integer, Set<DependencyNode>>(descComparator));
 
 		List<DependencyNode> children = root.getChildren();
 

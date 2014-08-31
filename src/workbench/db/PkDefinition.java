@@ -41,7 +41,7 @@ public class PkDefinition
 {
 	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
 
-	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
+	private List<IndexColumn> columns = new ArrayList<>();
 	private String pkName;
 	private String pkIndexName;
 
@@ -66,7 +66,7 @@ public class PkDefinition
 		this.pkName = StringUtil.trim(name);
 		if (columns != null)
 		{
-			this.columns = new ArrayList<IndexColumn>(columns);
+			this.columns = new ArrayList<>(columns);
 		}
 	}
 
@@ -129,7 +129,7 @@ public class PkDefinition
 		{
 			Collections.sort(this.columns, IndexColumn.getSequenceSorter());
 		}
-		List<String> result = new ArrayList<String>(columns.size());
+		List<String> result = new ArrayList<>(columns.size());
 		for (IndexColumn col : columns)
 		{
 			result.add(col.getColumn());

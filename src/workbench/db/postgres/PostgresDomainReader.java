@@ -76,7 +76,7 @@ public class PostgresDomainReader
 	public Map<String, DomainIdentifier> getDomainInfo(WbConnection connection, String schema)
 	{
 		List<DomainIdentifier> domains = getDomainList(connection, schema, null);
-		Map<String, DomainIdentifier> result = new HashMap<String, DomainIdentifier>(domains.size());
+		Map<String, DomainIdentifier> result = new HashMap<>(domains.size());
 		for (DomainIdentifier d : domains)
 		{
 			result.put(d.getObjectName(), d);
@@ -121,7 +121,7 @@ public class PostgresDomainReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
-		List<DomainIdentifier> result = new ArrayList<DomainIdentifier>();
+		List<DomainIdentifier> result = new ArrayList<>();
 		try
 		{
 			sp = connection.setSavepoint();

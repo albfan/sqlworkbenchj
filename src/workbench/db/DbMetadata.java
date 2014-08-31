@@ -118,7 +118,7 @@ public class DbMetadata
 	private ProcedureReader procedureReader;
 	private SchemaInformationReader schemaInfoReader;
 	private IndexReader indexReader;
-	private List<ObjectListExtender> extenders = new ArrayList<ObjectListExtender>();
+	private List<ObjectListExtender> extenders = new ArrayList<>();
 
 	private DbmsOutput oraOutput;
 
@@ -551,14 +551,14 @@ public class DbMetadata
 
 	public String[] getTablesAndViewTypes()
 	{
-		List<String> types = new ArrayList<String>(tableTypesList);
+		List<String> types = new ArrayList<>(tableTypesList);
 		types.add(getViewTypeName());
 		return types.toArray(EMPTY_STRING_ARRAY);
 	}
 
 	public List<String> getTableTypes()
 	{
-		return new ArrayList<String>(tableTypesList);
+		return new ArrayList<>(tableTypesList);
 	}
 
 	public String getMViewTypeName()
@@ -811,7 +811,7 @@ public class DbMetadata
 		String ids = Settings.getInstance().getProperty("workbench.sql.ignore" + type + "." + this.getDbId(), defaultList);
 		if (ids != null)
 		{
-			result = new TreeSet<String>(StringUtil.stringToList(ids, ","));
+			result = new TreeSet<>(StringUtil.stringToList(ids, ","));
 		}
 		else
 		{
@@ -1359,7 +1359,7 @@ public class DbMetadata
 	{
 		if (types == null || types.length == 0) return types;
 
-		List<String> typesToUse = new ArrayList<String>(types.length);
+		List<String> typesToUse = new ArrayList<>(types.length);
 
 		Collection<String> nativeTypes = retrieveTableTypes();
 		for (String type : types)
@@ -1415,7 +1415,7 @@ public class DbMetadata
 		// When TABLE and MATERIALIZED VIEW is specified for getTables() the Oracle driver returns
 		// materialized views twice, so we need to get rid of them.
 		boolean detectDuplicates = isOracle && typeIncluded("TABLE", types) && typeIncluded(MVIEW_NAME, types);
-		Set<String> processed = new TreeSet<String>();
+		Set<String> processed = new TreeSet<>();
 
 		String escape = dbConnection.getSearchStringEscape();
 
@@ -2299,7 +2299,7 @@ public class DbMetadata
 	{
 		DataStore ds = getObjects(catalogPattern, schemaPattern, namePattern, types);
 		int count = ds.getRowCount();
-		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(count);
+		List<TableIdentifier> tables = new ArrayList<>(count);
 		for (int i=0; i < count; i++)
 		{
 			TableIdentifier tbl = buildTableIdentifierFromDs(ds, i);
@@ -2480,7 +2480,7 @@ public class DbMetadata
 	 */
 	public List<String> getSchemas(ObjectNameFilter filter)
 	{
-		ArrayList<String> result = new ArrayList<String>();
+		ArrayList<String> result = new ArrayList<>();
 		ResultSet rs = null;
 
 		boolean useColumnNames = dbSettings.useColumnNameForMetadata();
