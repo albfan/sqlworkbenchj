@@ -83,7 +83,7 @@ public class DataStorePrinter
 	protected Map<Integer, Integer> getColumnSizes()
 	{
 		if (!doFormat) return null;
-		Map<Integer, Integer> widths = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> widths = new HashMap<>();
 		for (int i=0; i < data.getColumnCount(); i++)
 		{
 			int dataWidth = getMaxDataWidth(i);

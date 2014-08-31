@@ -33,6 +33,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
@@ -40,6 +41,7 @@ import workbench.sql.ScriptParser;
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -47,9 +49,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-
-import workbench.resource.ResourceMgr;
-import workbench.util.MessageBuffer;
 
 /**
  *
@@ -62,7 +61,7 @@ public class LiquibaseParser
 	private String xmlEncoding;
 	private SAXParser saxParser;
 	private Set<String> tagsToRead = CollectionUtil.treeSet("sql", "createProcedure");
-	private List<LiquibaseTagContent> resultTags = new ArrayList<LiquibaseTagContent>();
+	private List<LiquibaseTagContent> resultTags = new ArrayList<>();
 	private List<ChangeSetIdentifier> idsToRead;
 
 	private boolean captureContent;
@@ -105,7 +104,7 @@ public class LiquibaseParser
 	public List<LiquibaseTagContent> getContentFromChangeSet(List<ChangeSetIdentifier> changeSetIds)
 		throws IOException, SAXException
 	{
-		idsToRead = changeSetIds == null ? null : new ArrayList<ChangeSetIdentifier>(changeSetIds);
+		idsToRead = changeSetIds == null ? null : new ArrayList<>(changeSetIds);
 		Reader in = EncodingUtil.createReader(changeLog, xmlEncoding);
 		try
 		{
@@ -174,7 +173,7 @@ public class LiquibaseParser
 			}
 			else
 			{
-				String msg = ResourceMgr.getFormattedString("ErrIncludeFileNotFound", path);
+				String msg = ResourceMgr.getFormattedString("ErrFileNotFound", path);
 				warnings.append(msg);
 				LogMgr.logError("LiquibaseParser.startElement()", "sqlFile=\"" + path + "\" not found!", null);
 			}

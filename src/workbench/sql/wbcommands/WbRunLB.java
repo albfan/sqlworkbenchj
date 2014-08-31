@@ -28,14 +28,17 @@ import java.util.List;
 
 import workbench.liquibase.ChangeSetIdentifier;
 import workbench.liquibase.LiquibaseSupport;
-import workbench.util.ArgumentType;
-import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
+
+import workbench.storage.RowActionMonitor;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
-import workbench.storage.RowActionMonitor;
+import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.WbFile;
 
@@ -106,7 +109,7 @@ public class WbRunLB
 		if (!file.exists())
 		{
 			result.setFailure();
-			String msg = ResourceMgr.getFormattedString("ErrIncludeFileNotFound", file.getFullPath());
+			String msg = ResourceMgr.getFormattedString("ErrFileNotFound", file.getFullPath());
 			result.addMessage(msg);
 			return result;
 		}

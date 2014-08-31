@@ -82,7 +82,7 @@ public class SQLConsole
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
 
-	private Map<String, String> abbreviations = new HashMap<String, String>();
+	private Map<String, String> abbreviations = new HashMap<>();
 	private final StatementHistory history;
 
 	public SQLConsole()

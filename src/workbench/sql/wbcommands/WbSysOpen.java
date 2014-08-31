@@ -23,7 +23,6 @@
 package workbench.sql.wbcommands;
 
 import java.awt.Desktop;
-import java.io.File;
 import java.sql.SQLException;
 
 import workbench.log.LogMgr;
@@ -32,7 +31,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
-import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * A workbench command to call an operating system program (or command)
@@ -55,8 +54,8 @@ public class WbSysOpen
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
-		String doc = getCommandLine(sql);
-		if (StringUtil.isBlank(doc))
+		WbFile doc = evaluateFileArgument(getCommandLine(sql));
+		if (doc == null)
 		{
 			result.setFailure();
 			result.addMessageByKey("ErrSysOpenNoParm");
@@ -65,12 +64,12 @@ public class WbSysOpen
 
 		try
 		{
-			Desktop.getDesktop().open(new File(doc));
+			Desktop.getDesktop().open(doc);
 			result.setSuccess();
 		}
 		catch (Exception ex)
 		{
-			LogMgr.logError("WbSysOpen.execute()", "Could not open file " + doc, ex);
+			LogMgr.logError("WbSysOpen.execute()", "Could not open file " + getCommandLine(sql), ex);
 			result.setFailure();
 			result.addMessage(ex.getLocalizedMessage());
 		}

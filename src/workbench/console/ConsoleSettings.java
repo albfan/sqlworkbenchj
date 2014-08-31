@@ -44,7 +44,7 @@ public class ConsoleSettings
 {
 	private RowDisplay rowDisplay = RowDisplay.SingleLine;
 	private RowDisplay nextRowDisplay;
-	private List<PropertyChangeListener> listener = new ArrayList<PropertyChangeListener>();
+	private List<PropertyChangeListener> listener = new ArrayList<>();
 
 	protected static class LazyInstanceHolder
 	{

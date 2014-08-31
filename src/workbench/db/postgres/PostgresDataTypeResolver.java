@@ -25,6 +25,7 @@ package workbench.db.postgres;
 import java.sql.Types;
 
 import workbench.db.DataTypeResolver;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -50,7 +51,10 @@ public class PostgresDataTypeResolver
 
 		if (sqlType == Types.VARCHAR && size == Integer.MAX_VALUE)
 		{
-			return "varchar";
+			// enums are returned as Types.VARCHAR and size == Integer.MAX_VALUE
+			// in order to not change the underlying data type, we just use
+			// the type name that the driver returned
+			return dbmsName;
 		}
 
 		if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)

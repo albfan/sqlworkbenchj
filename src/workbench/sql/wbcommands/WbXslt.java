@@ -82,9 +82,9 @@ public class WbXslt
 
 		cmdLine.parse(parm);
 
-		String inputFile = cmdLine.getValue(ARG_INPUT);
-		String outputFile = cmdLine.getValue(ARG_OUTPUT);
-		String xsltFile = cmdLine.getValue(ARG_STYLESHEET);
+		WbFile inputFile = evaluateFileArgument(cmdLine.getValue(ARG_INPUT));
+		WbFile outputFile = evaluateFileArgument(cmdLine.getValue(ARG_OUTPUT));
+		WbFile xsltFile = evaluateFileArgument(cmdLine.getValue(ARG_STYLESHEET));
 
 		if (!cmdLine.hasArguments())
 		{
@@ -100,6 +100,13 @@ public class WbXslt
 			return result;
 		}
 
+		if (!inputFile.exists())
+		{
+			result.addMessage(ResourceMgr.getFormattedString("ErrFileNotFound", cmdLine.getValue(ARG_INPUT)));
+			result.setFailure();
+			return result;
+		}
+
 		if (outputFile == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrXsltMissingOutputFile"));
@@ -110,6 +117,13 @@ public class WbXslt
 		if (xsltFile == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrXsltMissingStylesheet"));
+			result.setFailure();
+			return result;
+		}
+
+		if (!xsltFile.exists())
+		{
+			result.addMessage(ResourceMgr.getFormattedString("ErrFileNotFound", cmdLine.getValue(ARG_STYLESHEET)));
 			result.setFailure();
 			return result;
 		}

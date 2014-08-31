@@ -75,7 +75,7 @@ extends WbTestCase
 
 			ResultInfo info = ds.getResultInfo();
 
-			DataStore infoDs = ResultInfoDisplayBuilder.getDataStore(info, false);
+			DataStore infoDs = ResultInfoDisplayBuilder.getDataStore(info, false, false);
 
 			assertNotNull(infoDs);
 			assertEquals(3, infoDs.getRowCount());
@@ -88,7 +88,7 @@ extends WbTestCase
 			ResultColumnMetaData meta = new ResultColumnMetaData(ds);
 			meta.retrieveColumnRemarks(ds.getResultInfo(), null);
 
-			infoDs = ResultInfoDisplayBuilder.getDataStore(info, true);
+			infoDs = ResultInfoDisplayBuilder.getDataStore(info, true, false);
 
 			assertEquals(3, infoDs.getRowCount());
 			assertEquals(12, infoDs.getColumnCount());

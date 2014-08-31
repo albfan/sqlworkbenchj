@@ -81,7 +81,7 @@ public class WbRun
 			return result;
 		}
 
-		WbFile file = new WbFile(clean);
+		WbFile file = evaluateFileArgument(clean);
 
 		if (StringUtil.isEmptyString(file.getExtension()))
 		{
@@ -91,7 +91,7 @@ public class WbRun
 		if (StringUtil.isEmptyString(clean) || !file.exists())
 		{
 			result.setFailure();
-			String msg = ResourceMgr.getFormattedString("ErrIncludeFileNotFound", file.getFullPath());
+			String msg = ResourceMgr.getFormattedString("ErrFileNotFound", file.getFullPath());
 			result.addMessage(msg);
 			return result;
 		}
@@ -155,11 +155,5 @@ public class WbRun
 		}
 		return result;
 	}
-
-//	@Override
-//	public boolean isModeSupported(RunMode mode)
-//	{
-//		return mode != RunMode.GUI;
-//	}
 
 }

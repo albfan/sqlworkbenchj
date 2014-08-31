@@ -270,7 +270,7 @@ public abstract class ConsolePrinter
 		int colcount = row.getColumnCount();
 		try
 		{
-			Map<Integer, String[]> continuationLines = new HashMap<Integer, String[]>(colcount);
+			Map<Integer, String[]> continuationLines = new HashMap<>(colcount);
 
 			int realColCount = 0;
 			for (int col = 0; col < colcount; col ++)

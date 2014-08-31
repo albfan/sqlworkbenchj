@@ -156,7 +156,7 @@ public class DbSettings
 
 	public static Map<String, String> getDBMSNames()
 	{
-		Map<String, String> dbmsNames = new HashMap<String, String>();
+		Map<String, String> dbmsNames = new HashMap<>();
 		dbmsNames.put("h2", "H2");
 		dbmsNames.put("oracle", "Oracle");
 		dbmsNames.put("hsql_database_engine", "HSQLDB");
@@ -1217,7 +1217,7 @@ public class DbSettings
 	public static List<CreateTableTypeDefinition> getCreateTableTypes(String dbid)
 	{
 		List<String> types = Settings.getInstance().getKeysLike(".create.table.");
-		List<CreateTableTypeDefinition> result = new ArrayList<CreateTableTypeDefinition>(types.size());
+		List<CreateTableTypeDefinition> result = new ArrayList<>(types.size());
 		for (String type : types)
 		{
 			CreateTableTypeDefinition createType = new CreateTableTypeDefinition(type);
@@ -1912,7 +1912,7 @@ public class DbSettings
 	{
 		List<String> ids = Settings.getInstance().getListProperty(prefix + "warning.ignore.codes", false);
 		if (ids.isEmpty()) return Collections.emptySet();
-		Set<Integer> result = new HashSet<Integer>(ids.size());
+		Set<Integer> result = new HashSet<>(ids.size());
 		for (String id :ids)
 		{
 			result.add(StringUtil.getIntValue(id, Integer.MIN_VALUE));
@@ -1924,6 +1924,6 @@ public class DbSettings
 	{
 		List<String> ids = Settings.getInstance().getListProperty(prefix + "warning.ignore.sqlstate", false);
 		if (ids.isEmpty()) return Collections.emptySet();
-		return new HashSet<String>(ids);
+		return new HashSet<>(ids);
 	}
 }

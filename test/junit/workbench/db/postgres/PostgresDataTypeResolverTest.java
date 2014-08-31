@@ -23,8 +23,10 @@
 package workbench.db.postgres;
 
 import java.sql.Types;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
@@ -36,17 +38,17 @@ public class PostgresDataTypeResolverTest
 	public void testGetSqlTypeDisplay()
 	{
 		PostgresDataTypeResolver resolver = new PostgresDataTypeResolver();
-		
+
 		String display = resolver.getSqlTypeDisplay("NUMERIC", Types.NUMERIC, 65535, 0);
 		assertEquals("NUMERIC", display);
-		
+
 		display = resolver.getSqlTypeDisplay("NUMERIC", Types.NUMERIC, 131089, 0);
 		assertEquals("NUMERIC", display);
 
 		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 300, 0);
 		assertEquals("VARCHAR(300)", display);
 
-		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, Integer.MAX_VALUE, 0);
+		display = resolver.getSqlTypeDisplay("varchar", Types.VARCHAR, Integer.MAX_VALUE, 0);
 		assertEquals("varchar", display);
 
 		display = resolver.getSqlTypeDisplay("text", Types.VARCHAR, 300, 0);
@@ -61,5 +63,5 @@ public class PostgresDataTypeResolverTest
 		display = resolver.getSqlTypeDisplay("int2", Types.SMALLINT, 0, 0);
 		assertEquals("smallint", display);
 	}
-	
+
 }

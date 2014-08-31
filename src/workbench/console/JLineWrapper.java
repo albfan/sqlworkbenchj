@@ -51,7 +51,7 @@ public class JLineWrapper
 		reader.setUseHistory(true);
 		reader.setUsePagination(false);
 		reader.setBellEnabled(false);
-		List<Completor> completors = new ArrayList<Completor>(2);
+		List<Completor> completors = new ArrayList<>(2);
 //		completors.add(new WbFilenameCompletor());
 		completors.add(new ClipCompletor());
 		completors.add(new NullCompletor());

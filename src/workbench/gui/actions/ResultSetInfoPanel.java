@@ -31,6 +31,8 @@ import javax.swing.table.TableColumnModel;
 
 import workbench.resource.GuiSettings;
 
+import workbench.db.WbConnection;
+
 import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbTable;
@@ -66,7 +68,14 @@ public class ResultSetInfoPanel
 		{
 			ResultInfo info = ds.getResultInfo();
 			boolean showComments = GuiSettings.getRetrieveQueryComments();
-			DataStore infoDs = ResultInfoDisplayBuilder.getDataStore(info, showComments);
+			WbConnection conn = ds.getOriginalConnection();
+			boolean showTablename = false;
+			if (conn != null)
+			{
+				showTablename = conn.getDbSettings().supportsResultMetaGetTable();
+			}
+
+			DataStore infoDs = ResultInfoDisplayBuilder.getDataStore(info, showComments, showTablename);
 			DataStoreTableModel model = new DataStoreTableModel(infoDs);
 			display.setAutoCreateColumnsFromModel(true);
 			display.setModel(model);

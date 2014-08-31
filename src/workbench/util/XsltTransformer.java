@@ -103,7 +103,6 @@ public class XsltTransformer
 		File inputFile = new File(inputFileName);
 		File outputFile = new File(outputFileName);
 		File xslFile = findStylesheet(xslFileName);
-		xsltUsed = xslFile;
 		transform(inputFile, outputFile, xslFile, parameters);
 	}
 
@@ -115,6 +114,8 @@ public class XsltTransformer
 			throw new FileNotFoundException("File " + xslfile.getAbsolutePath() + " doesn't exist");
 		}
 
+		xsltUsed = xslfile;
+		
 		InputStream in = null;
 		OutputStream out = null;
 		InputStream xlsInput = null;
