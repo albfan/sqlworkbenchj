@@ -139,11 +139,12 @@ public class TextCommenter
 
 	private int getLastRelevantSelectionLine()
 	{
+		int startline = editor.getSelectionStartLine();
 		int endline = editor.getSelectionEndLine();
 		int lastLineStart = editor.getLineStartOffset(endline);
-		if (lastLineStart == editor.getSelectionEnd())
+		if (lastLineStart == editor.getSelectionEnd() && endline > startline)
 		{
-			// ignore the last selection line if there isn't something selected
+			// ignore the last selection line (of a multiline selection) if there isn't something selected
 			endline--;
 		}
 		return endline;
