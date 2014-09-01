@@ -227,7 +227,7 @@ public class MainWindow
 	private SaveMacrosAction saveMacros;
 	private ShowMacroPopupAction showMacroPopup;
 
-	private final List<ToolWindow> explorerWindows = new ArrayList<ToolWindow>();
+	private final List<ToolWindow> explorerWindows = new ArrayList<>();
 
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
@@ -237,7 +237,7 @@ public class MainWindow
 	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
 	 * e.g. the Macro Popup window
 	 */
-	private final Map<String, WbProperties> toolProperties = new HashMap<String, WbProperties>();
+	private final Map<String, WbProperties> toolProperties = new HashMap<>();
 
 	public MainWindow()
 	{
@@ -491,7 +491,7 @@ public class MainWindow
 
 	private JMenuBar createMenuForPanel(MainPanel panel)
 	{
-		HashMap<String, JMenu> menus = new HashMap<String, JMenu>(10);
+		HashMap<String, JMenu> menus = new HashMap<>(10);
 
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBorderPainted(false);
@@ -916,7 +916,7 @@ public class MainWindow
 	{
 		int tabCount = this.sqlTab.getTabCount();
 
-		List<String> result = new ArrayList<String>(tabCount);
+		List<String> result = new ArrayList<>(tabCount);
 		for (int i=0; i < tabCount; i++)
 		{
 			MainPanel p = this.getSqlPanel(i);
@@ -1867,7 +1867,7 @@ public class MainWindow
 		showDisconnectInfo();
 		try
 		{
-			final List<WbConnection> toAbort = new ArrayList<WbConnection>();
+			final List<WbConnection> toAbort = new ArrayList<>();
 
 			for (int i=0; i < this.sqlTab.getTabCount(); i++)
 			{
