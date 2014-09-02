@@ -86,10 +86,12 @@ public class ProgressDialog
 	{
 		WbThread t = new WbThread("ShowProgress")
 		{
+			@Override
 			public void run()
 			{
 				WbSwingUtilities.invoke(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						WbSwingUtilities.center(ProgressDialog.this, parentWindow);
@@ -101,31 +103,38 @@ public class ProgressDialog
 		t.start();
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		worker.cancelExecution();
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}

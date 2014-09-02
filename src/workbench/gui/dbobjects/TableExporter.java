@@ -24,6 +24,7 @@ package workbench.gui.dbobjects;
 
 import java.awt.Frame;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import workbench.interfaces.DbExecutionListener;
@@ -46,6 +47,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.WbThread;
 
 /**
  *
@@ -56,6 +58,9 @@ public class TableExporter
 {
 	private DataExporter exporter;
 	private ProgressDialog progress;
+	private List<TableIdentifier> toExport;
+	private String outputDirectory;
+	private String extension;
 
 	public TableExporter(WbConnection conn)
 	{
@@ -68,7 +73,7 @@ public class TableExporter
 		return exporter;
 	}
 
-	public void exportTables(List<DbObject> tables, Frame caller)
+	public void selectTables(List<DbObject> tables, Frame caller)
 	{
 		if (CollectionUtil.isEmpty(tables)) return;
 
@@ -83,12 +88,14 @@ public class TableExporter
 		boolean answer = dialog.selectOutput(title);
 		if (answer)
 		{
-			String fdir = dialog.getSelectedFilename();
+			this.outputDirectory = dialog.getSelectedFilename();
 
 			dialog.setExporterOptions(exporter);
 
 			ExportType type = dialog.getExportType();
-			String ext = type.getDefaultFileExtension();
+			this.extension = type.getDefaultFileExtension();
+
+			this.toExport = new ArrayList<>(tables.size());
 
 			for (DbObject dbo : tables)
 			{
@@ -96,30 +103,49 @@ public class TableExporter
 				if (ttype == null) continue;
 				if (!meta.objectTypeCanContainData(ttype)) continue;
 				if (!(dbo instanceof TableIdentifier)) continue;
-				TableIdentifier tbl = (TableIdentifier)dbo;
-				String fname = StringUtil.makeFilename(dbo.getObjectName());
-				WbFile f = new WbFile(fdir, fname + ext);
-				try
-				{
-					exporter.addTableExportJob(f, tbl);
-				}
-				catch (SQLException e)
-				{
-					LogMgr.logError("TableListPanel.exportTables()", "Error adding ExportJob", e);
-					WbSwingUtilities.showMessage(caller, e.getMessage());
-				}
+				this.toExport.add((TableIdentifier)dbo);
 			}
 		}
 	}
 
-	public void startExport(Frame parent)
+	public void startExport(final Frame parent)
 	{
 		progress = new ProgressDialog(ResourceMgr.getString("MsgSpoolWindowTitle"), parent, exporter);
-		progress.getInfoPanel().setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		exporter.setRowMonitor(progress.getMonitor());
 		progress.showProgress();
-		exporter.addExecutionListener(this);
-		exporter.startBackgroundExport();
+
+		progress.getInfoPanel().setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+		progress.getInfoPanel().setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
+
+		// Creating the tableExportJobs should be done in a background thread
+		// as this can potentially take some time (especially with Oracle) as for
+		// each table that should be exported, the definition needs to be retrieved.
+
+		WbThread th = new WbThread("Init export")
+		{
+			@Override
+			public void run()
+			{
+				for (TableIdentifier tbl : toExport)
+				{
+					String fname = StringUtil.makeFilename(tbl.getObjectName());
+					WbFile f = new WbFile(outputDirectory, fname + extension);
+					try
+					{
+						exporter.addTableExportJob(f, tbl);
+					}
+					catch (SQLException e)
+					{
+						LogMgr.logError("TableListPanel.exportTables()", "Error adding ExportJob", e);
+						WbSwingUtilities.showMessage(parent, e.getMessage());
+					}
+				}
+				progress.getInfoPanel().setMonitorType(RowActionMonitor.MONITOR_EXPORT);
+				exporter.addExecutionListener(TableExporter.this);
+				exporter.startBackgroundExport();
+			}
+		};
+		th.start();
 	}
 
 	@Override

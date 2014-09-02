@@ -2277,14 +2277,25 @@ public class TableListPanel
 		int rowCount = this.tableList.getSelectedRowCount();
 		if (rowCount <= 0) return;
 
-		TableExporter exporter = new TableExporter(this.dbConnection);
-		Frame f = parentWindow;
-		if (f == null)
+		final TableExporter exporter = new TableExporter(this.dbConnection);
+		final Frame f;
+		if (parentWindow == null)
 		{
 			f = (Frame)SwingUtilities.getWindowAncestor(this);
 		}
-		exporter.exportTables(getSelectedObjects(), f);
-		exporter.startExport(f);
+		else
+		{
+			f  = parentWindow;
+		}
+		exporter.selectTables(getSelectedObjects(), f);
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				exporter.startExport(f);
+			}
+		});
 	}
 
 	/** Invoked when the displayed tab has changed.

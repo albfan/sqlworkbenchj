@@ -136,27 +136,36 @@ public class ProgressPanel
 		this.updateLayout();
 	}
 
+	@Override
 	public void jobFinished()
 	{
 	}
 
-	public void setCurrentObject(String object, long number, long totalObjects)
+	@Override
+	public void setCurrentObject(final String object, final long number, final long totalObjects)
 	{
-		String info = NumberStringCache.getNumberString(number) + "/"+  NumberStringCache.getNumberString(totalObjects);
-		if (monitorType == RowActionMonitor.MONITOR_EXPORT)
+		final String info = NumberStringCache.getNumberString(number) + "/"+  NumberStringCache.getNumberString(totalObjects);
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			setRowInfo(0);
-			setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
-			setObject(object + " [" + info + "]");
-		}
-		else
-		{
-			setInfoText(object);
-			rowInfo.setText(info);
-		}
-		updateLayout();
+			@Override
+			public void run()
+			{
+				if (monitorType == RowActionMonitor.MONITOR_EXPORT)
+				{
+					setRowInfo(0);
+					setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
+					setObject(object + " [" + info + "]");
+				}
+				else
+				{
+					setInfoText(object);
+					rowInfo.setText(info);
+				}
+			}
+		});
 	}
 
+	@Override
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
 		if (currentRow > -1 && totalRows > -1)
