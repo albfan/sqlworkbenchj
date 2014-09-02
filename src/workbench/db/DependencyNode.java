@@ -64,6 +64,9 @@ public class DependencyNode
 	private int deleteActionValue;
 	private int deferrableValue;
 
+	private boolean enabled;
+	private boolean validated;
+
 	/**
 	 * Maps the columns of the base table (this.table) to the matching column
 	 * of the parent table (parentNode.getTable())
@@ -85,6 +88,26 @@ public class DependencyNode
 		{
 			this.columns.put(aColumn, aParentColumn);
 		}
+	}
+
+	public boolean isEnabled()
+	{
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled)
+	{
+		this.enabled = enabled;
+	}
+
+	public boolean isValidated()
+	{
+		return validated;
+	}
+
+	public void setValidated(boolean validated)
+	{
+		this.validated = validated;
 	}
 
 	public String getDeferrableType()

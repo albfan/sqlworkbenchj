@@ -1846,6 +1846,7 @@ public class SqlUtil
 		}
 		catch (Exception e)
 		{
+			LogMgr.logWarning("SqlUtil.getWarnings()", "Error retrieving warnings", e);
 			return null;
 		}
 	}

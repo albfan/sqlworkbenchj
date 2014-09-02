@@ -121,9 +121,11 @@ public class DropScriptGeneratorTest
 		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST;", drop.get(0));
 
 		List<String> restore = generator.getRestoreStatements(cust);
-		assertEquals(1, restore.size());
-		assertTrue(restore.get(0).startsWith("ALTER TABLE ORDERS"));
-		assertTrue(restore.get(0).contains("ADD CONSTRAINT FK_ORDERS_CUST FOREIGN KEY (CUST_ID)"));
+		assertEquals(2, restore.size());
+		assertTrue(restore.get(0).startsWith("ALTER TABLE CUSTOMER"));
+		assertTrue(restore.get(0).contains("ADD PRIMARY KEY (CUST_ID)"));
+		assertTrue(restore.get(1).startsWith("ALTER TABLE ORDERS"));
+		assertTrue(restore.get(1).contains("ADD CONSTRAINT FK_ORDERS_CUST FOREIGN KEY (CUST_ID)"));
 
 		TableIdentifier orders = conn.getMetadata().findTable(new TableIdentifier("ORDERS"));
 		generator.setTable(orders);
@@ -136,11 +138,11 @@ public class DropScriptGeneratorTest
 		assertEquals("ALTER TABLE ORDER_ITEM DROP CONSTRAINT FK_OI_ORDERS;", drop.get(1));
 
 		restore = generator.getRestoreStatements(orders);
-		assertEquals(3, restore.size());
-		assertTrue(restore.get(0).contains("ADD CONSTRAINT FK_INV_ORDER FOREIGN KEY (ORDER_ID)"));
-		assertTrue(restore.get(1).contains("ADD CONSTRAINT FK_OI_ORDERS FOREIGN KEY (ORDER_ID)"));
-		assertTrue(restore.get(2).startsWith("ALTER TABLE ORDERS"));
-		assertTrue(restore.get(2).contains("ADD CONSTRAINT FK_ORDERS_CUST FOREIGN KEY (CUST_ID)"));
+		assertEquals(4, restore.size());
+		assertTrue(restore.get(1).contains("ADD CONSTRAINT FK_INV_ORDER FOREIGN KEY (ORDER_ID)"));
+		assertTrue(restore.get(2).contains("ADD CONSTRAINT FK_OI_ORDERS FOREIGN KEY (ORDER_ID)"));
+		assertTrue(restore.get(3).startsWith("ALTER TABLE ORDERS"));
+		assertTrue(restore.get(3).contains("ADD CONSTRAINT FK_ORDERS_CUST FOREIGN KEY (CUST_ID)"));
 
 		TableIdentifier orderItem = conn.getMetadata().findTable(new TableIdentifier("ORDER_ITEM"));
 		generator.setTable(orderItem);
@@ -152,28 +154,28 @@ public class DropScriptGeneratorTest
 		assertEquals("ALTER TABLE DELIVERY DROP CONSTRAINT FK_DEL_OI;", drop.get(0));
 
 		restore = generator.getRestoreStatements(orderItem);
-		assertEquals(3, restore.size());
-		assertTrue(restore.get(0).startsWith("ALTER TABLE DELIVERY"));
-		assertTrue(restore.get(0).contains("ADD CONSTRAINT FK_DEL_OI FOREIGN KEY (ITEM_ID)"));
-
-		assertTrue(restore.get(1).startsWith("ALTER TABLE ORDER_ITEM"));
-		assertTrue(restore.get(1).contains("ADD CONSTRAINT FK_OI_CURRENCY FOREIGN KEY (CURRENCY_ID)"));
+		assertEquals(4, restore.size());
+		assertTrue(restore.get(1).startsWith("ALTER TABLE DELIVERY"));
+		assertTrue(restore.get(1).contains("ADD CONSTRAINT FK_DEL_OI FOREIGN KEY (ITEM_ID)"));
 
 		assertTrue(restore.get(2).startsWith("ALTER TABLE ORDER_ITEM"));
-		assertTrue(restore.get(2).contains("ADD CONSTRAINT FK_OI_ORDERS FOREIGN KEY (ORDER_ID)"));
+		assertTrue(restore.get(2).contains("ADD CONSTRAINT FK_OI_CURRENCY FOREIGN KEY (CURRENCY_ID)"));
+
+		assertTrue(restore.get(3).startsWith("ALTER TABLE ORDER_ITEM"));
+		assertTrue(restore.get(3).contains("ADD CONSTRAINT FK_OI_ORDERS FOREIGN KEY (ORDER_ID)"));
 
 		generator.setTables(CollectionUtil.arrayList(cust,orders,orderItem));
 		String custScript = generator.getScriptFor(cust);
-//		System.out.println(custScript);
+		System.out.println(custScript);
 
 		ScriptParser p = new ScriptParser(custScript);
 		p.setScript(custScript);
 		int count = p.getSize();
-		assertEquals(3, count);
+		assertEquals(4, count);
 		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST", p.getCommand(0));
 		assertEquals("DROP TABLE CUSTOMER", p.getCommand(1));
-		assertTrue(p.getCommand(2).startsWith("ALTER TABLE ORDERS"));
-		assertTrue(p.getCommand(2).contains("ADD CONSTRAINT FK_ORDERS_CUST FOREIGN KEY (CUST_ID)"));
+		assertTrue(p.getCommand(3).startsWith("ALTER TABLE ORDERS"));
+		assertTrue(p.getCommand(3).contains("ADD CONSTRAINT FK_ORDERS_CUST FOREIGN KEY (CUST_ID)"));
 	}
 
 }

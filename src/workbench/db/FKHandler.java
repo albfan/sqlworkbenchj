@@ -32,24 +32,12 @@ import workbench.storage.DataStore;
  */
 public interface FKHandler
 {
+	int COLUMN_IDX_FK_DEF_FK_NAME = 0;
 	/**
 	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
 	 * indicating the source column name
 	 */
 	int COLUMN_IDX_FK_DEF_COLUMN_NAME = 1;
-	/**
-	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
-	 * indicating the column where the deferrable option is stored
-	 */
-	int COLUMN_IDX_FK_DEF_DEFERRABLE = 5;
-	int COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE = 8;
-	/**
-	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
-	 * indicating the column where the update rule is stored
-	 */
-	int COLUMN_IDX_FK_DEF_DELETE_RULE = 4;
-	int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 7;
-	int COLUMN_IDX_FK_DEF_FK_NAME = 0;
 	/**
 	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
 	 * indicating the column name of the target table (as tablename.columnname)
@@ -60,9 +48,27 @@ public interface FKHandler
 	 * indicating the column where the delete rule is stored
 	 */
 	int COLUMN_IDX_FK_DEF_UPDATE_RULE = 3;
-	int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 6;
+	/**
+	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
+	 * indicating the column where the update rule is stored
+	 */
+	int COLUMN_IDX_FK_DEF_DELETE_RULE = 4;
+	/**
+	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
+	 * indicating the column where the deferrable option is stored
+	 */
+	int COLUMN_IDX_FK_DEF_DEFERRABLE = 5;
+
+	int COLUMN_IDX_FK_DEF_STATUS = 6;
+//	int COLUMN_IDX_FK_DEF_VALIDATED = 7;
+
+	int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 7;
+	int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 8;
+	int COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE = 9;
 
 	int COLUMN_IDX_DEFERRABILITY = 13;
+
+	boolean supportsStatus();
 
 	/**
 	 * Returns a DataStore with the exported keys with the raw information copied from the result

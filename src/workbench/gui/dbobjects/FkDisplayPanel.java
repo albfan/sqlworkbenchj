@@ -186,7 +186,7 @@ public class FkDisplayPanel
 
 		DataStore ds = keys.getDataStore();
 
-		Map<TableIdentifier, String> result = new HashMap<TableIdentifier, String>();
+		Map<TableIdentifier, String> result = new HashMap<>();
 
 		for (int i=0; i < rows.length; i++)
 		{

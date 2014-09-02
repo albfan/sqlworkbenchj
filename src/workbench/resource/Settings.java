@@ -2106,7 +2106,7 @@ public class Settings
 
 	public String getEditorNoWordSep()
 	{
-		return getProperty("workbench.editor.nowordsep", "");
+		return getProperty("workbench.editor.nowordsep", "_$");
 	}
 
 	public void setEditorNoWordSep(String noSep)

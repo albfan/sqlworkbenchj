@@ -258,6 +258,8 @@ public class SqlCommand
 		if (this.runner.getHideWarnings()) return false;
 
 		WarningContent warnings = SqlUtil.getWarnings(this.currentConnection, this.currentStatement);
+		if (warnings == null) return false;
+
 		CharSequence warn = warnings.allWarnings;
 		if (!warnings.isRealWarning)
 		{

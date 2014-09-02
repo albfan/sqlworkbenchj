@@ -46,7 +46,7 @@ public class ForeignKeyDefinition
 
 	// Stores which column in the source table
 	// references which column in the foreignTabl
-	private Map<String, String> columnMap = new TreeMap<String, String>(new CaseInsensitiveComparator());
+	private Map<String, String> columnMap = new TreeMap<>(new CaseInsensitiveComparator());
 	private ReportTable foreignTable;
 	private String updateRule;
 	private String deleteRule;
@@ -56,11 +56,32 @@ public class ForeignKeyDefinition
 	private int deleteRuleValue;
 	private int deferrableRuleValue;
 	private boolean compareFKRules;
-
+	private String status;
+	private boolean validated;
 
 	public ForeignKeyDefinition(String name)
 	{
 		fkName = name;
+	}
+
+	public String getStatus()
+	{
+		return status;
+	}
+
+	public void setStatus(String status)
+	{
+		this.status = status;
+	}
+
+	public boolean isValidated()
+	{
+		return validated;
+	}
+
+	public void setValidated(boolean flag)
+	{
+		this.validated = flag;
 	}
 
 	public void setCompareFKRules(boolean flag)

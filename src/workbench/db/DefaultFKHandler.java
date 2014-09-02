@@ -45,10 +45,18 @@ public class DefaultFKHandler
 {
 	private final WbConnection dbConnection;
 	private boolean cancel;
+	protected boolean supportsStatus;
 
 	protected DefaultFKHandler(WbConnection conn)
 	{
 		dbConnection = conn;
+		supportsStatus = false;
+	}
+
+	@Override
+	public boolean supportsStatus()
+	{
+		return supportsStatus;
 	}
 
 	/**
@@ -155,6 +163,14 @@ public class DefaultFKHandler
 		if (rs == null) return null;
 		DataStore ds = new DataStore(rs, false);
 		boolean useColumnNames = dbConnection.getDbSettings().useColumnNameForMetadata();
+
+		int statusCol = -1;
+
+		if (supportsStatus)
+		{
+			statusCol = JdbcUtils.getColumnIndex(rs, "ENABLED");
+		}
+
 		try
 		{
 			while (rs.next())
@@ -185,6 +201,10 @@ public class DefaultFKHandler
 
 				int defer = fixDeferrableRule(useColumnNames ? rs.getInt("DEFERRABILITY") : rs.getInt(14));
 				ds.setValue(row, 13, Integer.valueOf(defer)); // DEFERRABILITY
+				if (statusCol > 0)
+				{
+					ds.setValue(row, statusCol - 1, rs.getString(statusCol));
+				}
 			}
 			ds.resetStatus();
 		}
@@ -217,7 +237,7 @@ public class DefaultFKHandler
 	private DataStore getKeyList(TableIdentifier tbl, boolean getOwnFk, boolean includeNumericRuleValue)
 	{
 		if (cancel) return null;
-		
+
 		String cols[] = null;
 		String refColName = null;
 		DbSettings dbSettings = dbConnection.getDbSettings();
@@ -235,15 +255,15 @@ public class DefaultFKHandler
 
 		if (includeNumericRuleValue)
 		{
-			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE", "UPDATE_RULE_VALUE", "DELETE_RULE_VALUE", "DEFER_RULE_VALUE"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER};
-			sizes = new int[] {25, 10, 30, 12, 12, 15, 1, 1, 1};
+			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE", "ENABLED", "UPDATE_RULE_VALUE", "DELETE_RULE_VALUE", "DEFER_RULE_VALUE"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER};
+			sizes = new int[] {25, 10, 30, 12, 12, 15, 5, 1, 1, 1};
 		}
 		else
 		{
-			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-			sizes = new int[] {25, 10, 30, 12, 12, 15};
+			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE", "ENABLED"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[] {25, 10, 30, 12, 12, 15, 5};
 		}
 		DataStore ds = new DataStore(cols, types, sizes);
 		if (tbl == null) return ds;
@@ -322,6 +342,11 @@ public class DefaultFKHandler
 					ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, Integer.valueOf(deleteAction));
 					ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, Integer.valueOf(updateAction));
 					ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, Integer.valueOf(deferrableCode));
+				}
+				if (supportsStatus)
+				{
+					ds.setValue(row, COLUMN_IDX_FK_DEF_STATUS, rawList.getValue(rawRow, "ENABLED"));
+//					ds.setValue(row, COLUMN_IDX_FK_DEF_VALIDATED, rawList.getValue(rawRow, "VALIDATED"));
 				}
 				if (cancel)
 				{

@@ -318,7 +318,14 @@ public class StringUtil
 		int len = value.length();
 		int pos = len - 1;
 		char c = value.charAt(pos);
+		
 		if (!Character.isWhitespace(c)) return;
+
+		if (len == 1 && Character.isWhitespace(c))
+		{
+			value.deleteCharAt(0);
+			return;
+		}
 
 		while (Character.isWhitespace(c))
 		{

@@ -22,11 +22,17 @@
  */
 package workbench.db.mssql;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import workbench.db.DependencyNode;
 import workbench.db.PkDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.db.sqltemplates.TemplateHandler;
+import workbench.log.LogMgr;
+import workbench.util.SqlUtil;
 
 import workbench.util.StringUtil;
 
@@ -71,5 +77,60 @@ public class SqlServerTableSourceBuilder
 		}
 		return sql;
 	}
+
+	@Override
+	protected String getAdditionalFkSql(TableIdentifier table, DependencyNode fk, String template)
+	{
+		String sql =
+			"select is_disabled, is_not_trusted \n" +
+			"from sys.foreign_keys \n" +
+			"where parent_object_id = object_id(?) \n" +
+			"  and name = ? \n" +
+			"  and (is_disabled = 'true' or is_not_trusted = 'true')";
+
+		if (table == null || fk == null) return null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, table.getFullyQualifiedName(dbConnection));
+			stmt.setString(2, fk.getFkName());
+
+			rs = stmt.executeQuery();
+			boolean isDisabled = false;
+			boolean isNotTrusted = false;
+
+			if (rs.next())
+			{
+				isDisabled = rs.getBoolean(1);
+				isNotTrusted = rs.getBoolean(2);
+			}
+
+			if (isNotTrusted)
+			{
+				template = template.replace("%nocheck%", "WITH NOCHECK ");
+			}
+			else
+			{
+				template = template.replace("%nocheck%", "");
+			}
+			if (isDisabled)
+			{
+				template += "\nALTER TABLE " + table.getObjectExpression(dbConnection) + " NOCHECK CONSTRAINT " + dbConnection.getMetadata().quoteObjectname(fk.getFkName());
+			}
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("SqlServerTableSourceBuilder.getAdditionalFkSql()", "Could not retrieve FK information", ex);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return template;
+	}
+
+
 
 }

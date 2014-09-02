@@ -874,6 +874,12 @@ public class TableSourceBuilder
 
 			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, node.getTable().getTableExpression(dbConnection));
 			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, node.getSourceColumnsList());
+
+			String add = getAdditionalFkSql(table, node, stmt);
+			if (add != null)
+			{
+				stmt = add;
+			}
 			fkStatements.add(stmt.trim());
 		}
 
@@ -903,6 +909,11 @@ public class TableSourceBuilder
 		}
 
 		return fk;
+	}
+
+	protected String getAdditionalFkSql(TableIdentifier table, DependencyNode fk, String template)
+	{
+		return null;
 	}
 
 	private String getDeferrableVerb(String type)

@@ -64,6 +64,8 @@ public class OracleFKHandler
 	{
 		super(conn);
 		currentUser = conn.getCurrentSchema();
+		supportsStatus = true;
+		
 		baseSql =
 			"SELECT /* SQLWorkbench */ NULL AS pktable_cat, \n" +
 			"       p.owner AS pktable_schem, \n" +
@@ -85,7 +87,9 @@ public class OracleFKHandler
 			"       decode(f.deferrable, \n" +
 			"             'DEFERRABLE', decode(f.deferred, 'IMMEDIATE', " + DatabaseMetaData.importedKeyInitiallyImmediate + ", " + DatabaseMetaData.importedKeyInitiallyDeferred + ") , \n" +
 			"             'NOT DEFERRABLE'," + DatabaseMetaData.importedKeyNotDeferrable + " \n" +
-						"       ) deferrability \n" +
+			"       ) deferrability, \n" +
+			"       case when f.status = 'ENABLED' then 'YES' else 'NO' end as enabled, \n" +
+			"       case when f.validated = 'VALIDATED' then 'YES' else 'NO' end as validated \n " +
 			"FROM all_cons_columns pc, \n" +
 			"     all_constraints p, \n" +
 			"     all_cons_columns fc, \n" +

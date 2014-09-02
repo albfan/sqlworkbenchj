@@ -363,6 +363,18 @@ public class TableDependency
 				child.setDeleteAction(this.metaData.getDbSettings().getRuleDisplay(delete));
 				child.addColumnDefinition(tablecolumn, parentcolumn);
 				child.setDeferrableType(deferrable);
+				if (fkHandler.supportsStatus())
+				{
+					String enabled = ds.getValueAsString(i, "ENABLED");
+					String validated = ds.getValueAsString(i, "VALIDATED");
+					child.setEnabled(StringUtil.stringToBool(enabled));
+					child.setValidated(StringUtil.stringToBool(validated));
+				}
+				else
+				{
+					child.setEnabled(true);
+					child.setValidated(true);
+				}
 			}
 
 			if (level > 25)
@@ -586,20 +598,39 @@ public class TableDependency
 			cache.addReferencingTables(this.theTable, leafs);
 		}
 
-		String[] cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE"};
-		int[] types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		int[] sizes = new int[] {25, 10, 30, 12, 12, 15};
+		String[] cols;
+		int[] types;
+		int[] sizes;
+
+		if (fkHandler.supportsStatus())
+		{
+			cols = new String[] { "FK_NAME", "COLUMN", refColName , "ENABLED", "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[] {25, 10, 30, 10, 12, 12, 15};
+		}
+		else
+		{
+			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE"};
+			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+			sizes = new int[] {25, 10, 30, 10, 12, 12, 15};
+
+		}
 		DataStore result = new DataStore(cols, types, sizes);
 
 		for (DependencyNode node : leafs)
 		{
 			int row = result.addRow();
-			result.setValue(row, 0, node.getFkName());
-			result.setValue(row, 1, node.getTargetColumnsList());
-			result.setValue(row, 2, node.getTable().getTableExpression(connection) + "(" + node.getSourceColumnsList() + ")");
-			result.setValue(row, 3, node.getUpdateAction());
-			result.setValue(row, 4, node.getDeleteAction());
-			result.setValue(row, 5, node.getDeferrableType());
+			int col = 0;
+			result.setValue(row, col++, node.getFkName());
+			result.setValue(row, col++, node.getTargetColumnsList());
+			result.setValue(row, col++, node.getTable().getTableExpression(connection) + "(" + node.getSourceColumnsList() + ")");
+			if (fkHandler.supportsStatus())
+			{
+				result.setValue(row, col++, node.isEnabled() ? "YES" : "NO");
+			}
+			result.setValue(row, col++, node.getUpdateAction());
+			result.setValue(row, col++, node.getDeleteAction());
+			result.setValue(row, col++, node.getDeferrableType());
 			result.getRow(row).setUserObject(node);
 		}
 		result.resetStatus();

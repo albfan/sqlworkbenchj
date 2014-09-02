@@ -141,6 +141,17 @@ public class DropScriptGenerator
 		List<String> drop = new ArrayList<>();
 		List<String> restore = new ArrayList<>();
 
+		if (includeDropTable)
+		{
+			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
+			PkDefinition pk = connection.getMetadata().getIndexReader().getPrimaryKey(table);
+			CharSequence pkSource = builder.getPkSource(table, pk, false);
+			if (pkSource != null)
+			{
+				restore.add(pkSource.toString().trim());
+			}
+		}
+
 		for (DependencyNode node : leafs)
 		{
 			if (visitedTables.contains(node)) continue;
@@ -235,6 +246,8 @@ public class DropScriptGenerator
 			{
 				appendCreateFks(script);
 			}
+
+
 		}
 		else
 		{
