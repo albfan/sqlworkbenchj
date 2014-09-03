@@ -135,7 +135,7 @@ public class SqlServerTypeReader
 	{
 		Statement stmt = null;
 		ResultSet rs = null;
-		List<DomainIdentifier> result = new ArrayList<DomainIdentifier>();
+		List<DomainIdentifier> result = new ArrayList<>();
 		try
 		{
 			stmt = connection.createStatementForQuery();
@@ -295,7 +295,7 @@ public class SqlServerTypeReader
 			sql += " AND s.name = '" + type.getSchema() + "' \n";
 		}
 		sql += "order by col.column_id";
-		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> columns = new ArrayList<>();
 
 		try
 		{

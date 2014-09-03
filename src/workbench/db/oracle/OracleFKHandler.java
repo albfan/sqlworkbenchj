@@ -64,8 +64,8 @@ public class OracleFKHandler
 	{
 		super(conn);
 		currentUser = conn.getCurrentSchema();
-		supportsStatus = true;
-		
+		containsStatusCol = true;
+
 		baseSql =
 			"SELECT /* SQLWorkbench */ NULL AS pktable_cat, \n" +
 			"       p.owner AS pktable_schem, \n" +

@@ -31,12 +31,14 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DependencyNode;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcUtils;
 import workbench.db.PkDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
+import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -638,4 +640,28 @@ public class OracleTableSourceBuilder
 		}
 		return column;
 	}
+
+	@Override
+	protected String getAdditionalFkSql(TableIdentifier table, DependencyNode fk, String template)
+	{
+		if (fk.isValidated())
+		{
+			template = TemplateHandler.removePlaceholder(template, "%validate%", false);
+		}
+		else
+		{
+			template = TemplateHandler.replacePlaceholder(template, "%validate%", "NOVALIDATE");
+		}
+
+		if (fk.isEnabled())
+		{
+			template = TemplateHandler.removePlaceholder(template, "%enabled%", false);
+		}
+		else
+		{
+			template = TemplateHandler.replacePlaceholder(template, "%enabled%", "DISABLE");
+		}
+		return template;
+	}
+
 }

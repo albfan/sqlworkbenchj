@@ -74,7 +74,7 @@ public class SqlServerSynonymReader
 	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String schemaPattern, String namePattern)
 		throws SQLException
 	{
-		List<TableIdentifier> result = new ArrayList<TableIdentifier>();
+		List<TableIdentifier> result = new ArrayList<>();
 		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
 		sql.append(baseSql);
 		int schemaIndex = -1;

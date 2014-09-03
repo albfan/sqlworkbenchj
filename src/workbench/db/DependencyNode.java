@@ -29,7 +29,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,14 +64,16 @@ public class DependencyNode
 	private int deleteActionValue;
 	private int deferrableValue;
 
-	private boolean enabled;
-	private boolean validated;
+	private boolean enabled = true;
+	private boolean validated = true;
 
 	/**
 	 * Maps the columns of the base table (this.table) to the matching column
-	 * of the parent table (parentNode.getTable())
+	 * of the parent table (parentNode.getTable()).
+	 *
+	 * The LinkedHashMap is used to preserve the order of the columns in the FK definition.
 	 */
-	private final Map<String, String> columns = new HashMap<>();
+	private final Map<String, String> columns = new LinkedHashMap<>();
 
 	private final List<DependencyNode> childTables = new ArrayList<>();
 

@@ -23,9 +23,8 @@
 package workbench.db.report;
 
 import java.util.Map;
-import java.util.TreeMap;
 
-import workbench.util.CaseInsensitiveComparator;
+import workbench.db.DependencyNode;
 import workbench.util.NumberStringCache;
 
 /**
@@ -42,46 +41,21 @@ public class ForeignKeyDefinition
 	public static final String TAG_DELETE_RULE = "delete-rule";
 	public static final String TAG_DEFER_RULE = "deferrable";
 
-	private String fkName;
+	private DependencyNode fkDefinition;
 
-	// Stores which column in the source table
-	// references which column in the foreignTabl
-	private Map<String, String> columnMap = new TreeMap<>(new CaseInsensitiveComparator());
 	private ReportTable foreignTable;
-	private String updateRule;
-	private String deleteRule;
-	private String deferRule;
 	private TagWriter tagWriter = new TagWriter();
-	private int updateRuleValue;
-	private int deleteRuleValue;
-	private int deferrableRuleValue;
 	private boolean compareFKRules;
-	private String status;
-	private boolean validated;
 
-	public ForeignKeyDefinition(String name)
+	public ForeignKeyDefinition(DependencyNode node)
 	{
-		fkName = name;
+		this.fkDefinition = node;
+		foreignTable = new ReportTable(node.getTable());
 	}
 
-	public String getStatus()
+	public boolean isEnabled()
 	{
-		return status;
-	}
-
-	public void setStatus(String status)
-	{
-		this.status = status;
-	}
-
-	public boolean isValidated()
-	{
-		return validated;
-	}
-
-	public void setValidated(boolean flag)
-	{
-		this.validated = flag;
+		return fkDefinition.isEnabled();
 	}
 
 	public void setCompareFKRules(boolean flag)
@@ -89,52 +63,24 @@ public class ForeignKeyDefinition
 		compareFKRules = flag;
 	}
 
-	public void addReferenceColumn(String myColumn, String foreignColumn)
-	{
-		this.columnMap.put(myColumn, foreignColumn);
-	}
-
-	public void setUpdateRuleValue(int value)
-	{
-		this.updateRuleValue = value;
-	}
-
 	public int getUpdateRuleValue()
 	{
-		return this.updateRuleValue;
-	}
-
-	public void setDeleteRuleValue(int value)
-	{
-		this.deleteRuleValue = value;
+		return fkDefinition.getUpdateActionValue();
 	}
 
 	public int getDeleteRuleValue()
 	{
-		return this.deleteRuleValue;
-	}
-
-	public void setDeferrableRuleValue(int value)
-	{
-		this.deferrableRuleValue = value;
+		return fkDefinition.getDeleteActionValue();
 	}
 
 	public int getDeferrableRuleValue()
 	{
-		return this.deferrableRuleValue;
-	}
-
-	public void setForeignTable(ReportTable tbl)
-	{
-		if (this.foreignTable == null)
-		{
-			this.foreignTable = tbl;
-		}
+		return fkDefinition.getDeferrableValue();
 	}
 
 	public ColumnReference getColumnReference(String sourceCol)
 	{
-		String targetCol = this.columnMap.get(sourceCol);
+		String targetCol = fkDefinition.getColumns().get(sourceCol);
 		ColumnReference ref = null;
 		if (targetCol != null)
 		{
@@ -144,45 +90,29 @@ public class ForeignKeyDefinition
 		return ref;
 	}
 
-	public void setUpdateRule(String rule)
-	{
-		this.updateRule = rule;
-	}
-
 	public String getUpdateRule()
 	{
-		return this.updateRule;
-	}
-
-	public void setDeleteRule(String rule)
-	{
-		this.deleteRule = rule;
+		return fkDefinition.getUpdateAction();
 	}
 
 	public String getDeleteRule()
 	{
-		return deleteRule;
-	}
-
-	public void setDeferRule(String rule)
-	{
-		this.deferRule = rule;
+		return fkDefinition.getDeleteAction();
 	}
 
 	public String getDeferRule()
 	{
-		return this.deferRule;
+		return fkDefinition.getDeferrableType();
 	}
-
 
 	public ReportTable getForeignTable()
 	{
-		return this.foreignTable;
+		return foreignTable;
 	}
 
 	public String getFkName()
 	{
-		return fkName;
+		return fkDefinition.getFkName();
 	}
 
 	@Override
@@ -211,7 +141,14 @@ public class ForeignKeyDefinition
 		StringBuilder result = new StringBuilder(250);
 		StringBuilder colIndent = new StringBuilder(indent);
 		colIndent.append("  ");
-		tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.fkName);
+		if (isEnabled())
+		{
+			tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.getFkName());
+		}
+		else
+		{
+			tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.getFkName(), "enabled", Boolean.toString(isEnabled()));
+		}
 		tagWriter.appendOpenTag(result, indent, "references");
 		result.append('\n');
 		this.foreignTable.appendTableNameXml(result, colIndent);
@@ -220,6 +157,7 @@ public class ForeignKeyDefinition
 		tagWriter.appendOpenTag(result, indent, TAG_SOURCE_COLS);
 		result.append('\n');
 
+		Map<String, String> columnMap = fkDefinition.getColumns();
 		for (String col : columnMap.keySet())
 		{
 			tagWriter.appendTag(result, colIndent, "column", col);
@@ -235,9 +173,9 @@ public class ForeignKeyDefinition
 		}
 		tagWriter.appendCloseTag(result, indent, TAG_TARGET_COLS);
 
-		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.deleteRule, "jdbcValue", NumberStringCache.getNumberString(this.deleteRuleValue));
-		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.updateRule, "jdbcValue", NumberStringCache.getNumberString(this.updateRuleValue));
-		tagWriter.appendTag(result, indent, TAG_DEFER_RULE, this.deferRule, "jdbcValue", NumberStringCache.getNumberString(this.deferrableRuleValue));
+		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.getDeleteRule(), "jdbcValue", NumberStringCache.getNumberString(this.getDeleteRuleValue()));
+		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.getUpdateRule(), "jdbcValue", NumberStringCache.getNumberString(this.getUpdateRuleValue()));
+		tagWriter.appendTag(result, indent, TAG_DEFER_RULE, this.getDeferRule(), "jdbcValue", NumberStringCache.getNumberString(this.getDeferrableRuleValue()));
 
 		return result;
 	}
@@ -245,13 +183,13 @@ public class ForeignKeyDefinition
 	@Override
 	public int hashCode() {
 		int hash = 7;
-		hash = 53 * hash + (this.fkName != null ? this.fkName.hashCode() : 0);
+		hash = 53 * hash + (this.getFkName() != null ? this.getFkName().hashCode() : 0);
 		hash = 53 * hash + (this.foreignTable != null ? this.foreignTable.hashCode() : 0);
 		if (compareFKRules)
 		{
-			hash = 53 * hash + this.updateRuleValue;
-			hash = 53 * hash + this.deleteRuleValue;
-			hash = 53 * hash + this.deferrableRuleValue;
+			hash = 53 * hash + this.getUpdateRuleValue();
+			hash = 53 * hash + this.getDeleteRuleValue();
+			hash = 53 * hash + this.getDeferrableRuleValue();
 		}
 		return hash;
 	}
@@ -267,9 +205,9 @@ public class ForeignKeyDefinition
 	private boolean compareColumns(ForeignKeyDefinition other)
 	{
 		if (other == null) return false;
-		for (Map.Entry<String, String> entry : columnMap.entrySet())
+		for (Map.Entry<String, String> entry : fkDefinition.getColumns().entrySet())
 		{
-			String mappedTo = other.columnMap.get(entry.getKey().toLowerCase());
+			String mappedTo = other.fkDefinition.getColumns().get(entry.getKey().toLowerCase());
 			if (!mappedTo.equalsIgnoreCase(entry.getValue())) return false;
 		}
 		return true;
@@ -279,7 +217,7 @@ public class ForeignKeyDefinition
 	{
 		try
 		{
-			return this.fkName.equalsIgnoreCase(ref.fkName);
+			return this.getFkName().equalsIgnoreCase(ref.getFkName());
 		}
 		catch (Exception e)
 		{
@@ -299,9 +237,9 @@ public class ForeignKeyDefinition
 			if (baseEquals && compareFKRules)
 			{
 				baseEquals = baseEquals &&
-							(this.updateRuleValue == ref.updateRuleValue) &&
-							(this.deleteRuleValue == ref.deleteRuleValue) &&
-							(this.deferrableRuleValue == ref.deferrableRuleValue);
+							(this.getUpdateRuleValue() == ref.getUpdateRuleValue()) &&
+							(this.getDeleteRuleValue() == ref.getDeleteRuleValue()) &&
+							(this.getDeferrableRuleValue() == ref.getDeferrableRuleValue());
 			}
 			return baseEquals;
 		}

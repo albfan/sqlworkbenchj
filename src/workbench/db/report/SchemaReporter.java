@@ -67,9 +67,9 @@ public class SchemaReporter
 	implements Interruptable
 {
 	private WbConnection dbConn;
-	private List<DbObject> objects = new ArrayList<DbObject>();
-	private List<ReportProcedure> procedures = new ArrayList<ReportProcedure>();
-	private List<ReportSequence> sequences = new ArrayList<ReportSequence>();
+	private List<DbObject> objects = new ArrayList<>();
+	private List<ReportProcedure> procedures = new ArrayList<>();
+	private List<ReportSequence> sequences = new ArrayList<>();
 	private Set<String> types;
 	private List<String> schemas;
 
@@ -437,7 +437,7 @@ public class SchemaReporter
 				}
 			}
 
-			Set<String> oraPackages = new HashSet<String>();
+			Set<String> oraPackages = new HashSet<>();
 
 			for (ProcedureDefinition def : procs)
 			{

@@ -464,4 +464,25 @@ public class TableDependencyTest
 		}
 	}
 
+	@Test
+	public void testGetOutgoingFks()
+		throws Exception
+	{
+		WbConnection con = createRegularDB();
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("child2"));
+
+		TableDependency dep = new TableDependency(con);
+		dep.setMainTable(tbl);
+		List<DependencyNode> fklist = dep.getOutgoingForeignKeys();
+		assertNotNull(fklist);
+		assertEquals(1, fklist.size());
+		assertEquals("BASE", fklist.get(0).getTable().getTableName());
+
+		tbl = con.getMetadata().findTable(new TableIdentifier("child2_detail"));
+		dep.setMainTable(tbl);
+		fklist = dep.getOutgoingForeignKeys();
+		assertNotNull(fklist);
+		assertEquals(1, fklist.size());
+		assertEquals("CHILD2", fklist.get(0).getTable().getTableName());
+	}
 }

@@ -220,15 +220,24 @@ public class WbSchemaReportTest
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='Address']/grant)");
 			assertEquals("Incorrect grant count", "4", count);
 
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='Address']/foreign-keys/foreign-key)");
+			assertEquals("Incorrect source column count", "0", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key)");
+			assertEquals("Incorrect source column count", "3", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[2]/source-columns/column)");
+			assertEquals("Incorrect source column count", "2", count);
+
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS']/column-def/references)");
 			assertEquals("Incorrect references count", "2", count);
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='Person']/table-constraints/constraint-definition[@name='POSITIVE_ID'])");
 			assertEquals("Incorrect references count", "1", count);
-			if (!output.delete())
-			{
-				fail("could not delete output file");
-			}
+//			if (!output.delete())
+//			{
+//				fail("could not delete output file");
+//			}
 		}
 		finally
 		{

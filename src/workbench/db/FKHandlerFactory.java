@@ -22,6 +22,8 @@
  */
 package workbench.db;
 
+import workbench.db.mssql.SqlServerFKHandler;
+import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleFKHandler;
 
 /**
@@ -35,6 +37,10 @@ public class FKHandlerFactory
 		if (conn.getMetadata().isOracle() && conn.getDbSettings().fixFKRetrieval())
 		{
 			return new OracleFKHandler(conn);
+		}
+		if (conn.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2005(conn))
+		{
+			return new SqlServerFKHandler(conn);
 		}
 		return new DefaultFKHandler(conn);
 	}

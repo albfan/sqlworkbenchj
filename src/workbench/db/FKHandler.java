@@ -59,16 +59,19 @@ public interface FKHandler
 	 */
 	int COLUMN_IDX_FK_DEF_DEFERRABLE = 5;
 
-	int COLUMN_IDX_FK_DEF_STATUS = 6;
-//	int COLUMN_IDX_FK_DEF_VALIDATED = 7;
+	int COLUMN_IDX_FK_DEF_ENABLED = 6;
+	int COLUMN_IDX_FK_DEF_VALIDATED = 7;
 
-	int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 7;
-	int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 8;
-	int COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE = 9;
+	int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 8;
+	int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 9;
+	int COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE = 10;
 
 	int COLUMN_IDX_DEFERRABILITY = 13;
 
 	boolean supportsStatus();
+	boolean containsStatusColumn();
+
+	FkStatusInfo getFkEnabledFlag(TableIdentifier table, String fkname);
 
 	/**
 	 * Returns a DataStore with the exported keys with the raw information copied from the result
@@ -121,5 +124,17 @@ public interface FKHandler
 	DataStore getReferencedBy(TableIdentifier table);
 
 	void cancel();
+
+	public static class FkStatusInfo
+	{
+		public final boolean validated;
+		public final boolean enabled;
+
+		public FkStatusInfo(boolean enabled, boolean validated)
+		{
+			this.validated = validated;
+			this.enabled = enabled;
+		}
+	}
 
 }

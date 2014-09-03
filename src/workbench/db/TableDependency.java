@@ -174,7 +174,7 @@ public class TableDependency
 	}
 
 	/**
-	 * Read the hierarchy of tables referencing this one.
+	 * Read the hierarchy of tables referencing this one (the "incoming" foreign keys).
 	 * This is equivalent to calling <tt>readDependencyTree(true)</tt>
 	 *
 	 * @see #readDependencyTree(boolean)
@@ -185,7 +185,7 @@ public class TableDependency
 	}
 
 	/**
-	 * Read the hierarchy of tables that this table references.
+	 * Read the hierarchy of tables that this table references (the "outgoing" foreign keys).
 	 * This is equivalent to calling <tt>readDependencyTree(false)</tt>
 	 *
 	 * @see #readDependencyTree(boolean)
@@ -193,6 +193,21 @@ public class TableDependency
 	public void readTreeForParents()
 	{
 		readDependencyTree(false);
+	}
+
+	public List<DependencyNode> getOutgoingForeignKeys()
+	{
+		boolean direct = this.directChildrenOnly;
+		try
+		{
+			setRetrieveDirectChildrenOnly(true);
+			readTreeForParents();
+		}
+		finally
+		{
+			setRetrieveDirectChildrenOnly(direct);
+		}
+		return getLeafs();
 	}
 
 	public void readDependencyTree(boolean exportedKeys)
@@ -363,17 +378,32 @@ public class TableDependency
 				child.setDeleteAction(this.metaData.getDbSettings().getRuleDisplay(delete));
 				child.addColumnDefinition(tablecolumn, parentcolumn);
 				child.setDeferrableType(deferrable);
+				child.setEnabled(true);
 				if (fkHandler.supportsStatus())
 				{
-					String enabled = ds.getValueAsString(i, "ENABLED");
-					String validated = ds.getValueAsString(i, "VALIDATED");
-					child.setEnabled(StringUtil.stringToBool(enabled));
-					child.setValidated(StringUtil.stringToBool(validated));
-				}
-				else
-				{
-					child.setEnabled(true);
-					child.setValidated(true);
+					String flag = null;
+					if (fkHandler.containsStatusColumn())
+					{
+						flag = ds.getValueAsString(i, "ENABLED");
+						if (flag != null)
+						{
+							child.setEnabled(StringUtil.stringToBool(flag));
+						}
+						flag = ds.getValueAsString(i, "VALIDATED");
+						if (flag != null)
+						{
+							child.setValidated(StringUtil.stringToBool(flag));
+						}
+					}
+					else
+					{
+						FKHandler.FkStatusInfo status = fkHandler.getFkEnabledFlag(ptbl, fkname);
+						if (status != null)
+						{
+							child.setEnabled(status.enabled);
+							child.setValidated(status.validated);
+						}
+					}
 				}
 			}
 

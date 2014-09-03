@@ -123,13 +123,13 @@ public class SqlServerObjectListEnhancer
 			schema = con.getMetadata().getCurrentSchema();
 		}
 
-		Map<String, String> remarks = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+		Map<String, String> remarks = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 		String type = null;
 		try
 		{
-			for (int i=0; i < requestedTypes.length; i++)
+			for (String requestedType : requestedTypes)
 			{
-				type = requestedTypes[i];
+				type = requestedType;
 				if (Settings.getInstance().getDebugMetadataSql())
 				{
 					LogMgr.logInfo("SqlServerObjectListEnhancer.updateObjectRemarks()", "Retrieving table remarks using:\n" + SqlUtil.replaceParameters(sql, schema, type));

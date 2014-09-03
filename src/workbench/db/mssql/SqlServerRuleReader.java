@@ -54,7 +54,7 @@ public class SqlServerRuleReader
 
 	public List<SqlServerRule> getRuleList(WbConnection connection, String schemaPattern, String namePattern, String ruleTable)
 	{
-		List<SqlServerRule> result = new ArrayList<SqlServerRule>();
+		List<SqlServerRule> result = new ArrayList<>();
 
 		Statement stmt = null;
 		ResultSet rs = null;

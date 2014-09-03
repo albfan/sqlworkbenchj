@@ -38,6 +38,7 @@ import workbench.log.LogMgr;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConstraintReader;
+import workbench.db.DependencyNode;
 import workbench.db.FKHandler;
 import workbench.db.FKHandlerFactory;
 import workbench.db.IndexDefinition;
@@ -45,6 +46,7 @@ import workbench.db.ReaderFactory;
 import workbench.db.TableCommentReader;
 import workbench.db.TableConstraint;
 import workbench.db.TableDefinition;
+import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
@@ -90,7 +92,7 @@ public class ReportTable
 	public static final String TAG_TABLE_TYPE = "table-type";
 
 	private TableIdentifier table;
-	private Map<String, ForeignKeyDefinition> foreignKeys = new HashMap<String, ForeignKeyDefinition>();
+	private Map<String, ForeignKeyDefinition> foreignKeys = new HashMap<>();
 	private List<ReportColumn> columns;
 	private IndexReporter reporter;
 	private String tableComment;
@@ -101,7 +103,7 @@ public class ReportTable
 	private List<TableConstraint> tableConstraints;
 	private List<TriggerDefinition> triggers;
 	private ReportTableGrants grants;
-	private final List<ObjectOption> dbmsOptions = new ArrayList<ObjectOption>();
+	private final List<ObjectOption> dbmsOptions = new ArrayList<>();
 
 	/**
 	 * Initialize this ReportTable.
@@ -208,7 +210,7 @@ public class ReportTable
 		return grants != null;
 	}
 
-	private ReportTable(TableIdentifier tbl)
+	ReportTable(TableIdentifier tbl)
 	{
 		this.table = tbl;
 	}
@@ -220,7 +222,7 @@ public class ReportTable
 
 	private List<ColumnIdentifier> getColumnList()
 	{
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(columns.size());
+		List<ColumnIdentifier> cols = new ArrayList<>(columns.size());
 		for (ReportColumn col : columns)
 		{
 			cols.add(col.getColumn());
@@ -308,7 +310,7 @@ public class ReportTable
 	{
 		if (cols == null) return;
 		int numCols = cols.size();
-		this.columns = new ArrayList<ReportColumn>(numCols);
+		this.columns = new ArrayList<>(numCols);
 		for (ColumnIdentifier col : cols)
 		{
 			columns.add(new ReportColumn(col));
@@ -317,56 +319,22 @@ public class ReportTable
 
 	private void readForeignKeys(WbConnection conn)
 	{
-		FKHandler	fk = FKHandlerFactory.createInstance(conn);
-		DataStore ds = fk.getForeignKeys(this.table, true);
-		int keys = ds.getRowCount();
-		if (keys == 0) return;
-
-		for (int i=0; i < keys; i++)
+		TableDependency dep = new TableDependency(conn, this.table);
+		List<DependencyNode> keys = dep.getOutgoingForeignKeys();
+		for (DependencyNode node : keys)
 		{
-			String col = ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_COLUMN_NAME);
-			ReportColumn rcol = this.findColumn(col);
-			if (rcol != null)
+			ForeignKeyDefinition def = new ForeignKeyDefinition(node);
+			def.setCompareFKRules(true);
+			Map<String, String> colMap = node.getColumns();
+			for (String col : colMap.keySet())
 			{
-				String fkname = ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_FK_NAME);
-				ForeignKeyDefinition def = this.foreignKeys.get(fkname);
-				if (def == null)
+				ReportColumn rcol = this.findColumn(col);
+				if (rcol != null)
 				{
-					def = new ForeignKeyDefinition(fkname);
-					def.setCompareFKRules(true);
-					def.setDeleteRuleValue(ds.getValueAsInt(i, FKHandler.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
-					def.setUpdateRuleValue(ds.getValueAsInt(i, FKHandler.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
-					def.setDeleteRule(ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_DELETE_RULE));
-					def.setUpdateRule(ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_UPDATE_RULE));
-					def.setDeferrableRuleValue(ds.getValueAsInt(i, FKHandler.COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, DatabaseMetaData.importedKeyNotDeferrable));
-					def.setDeferRule(ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_DEFERRABLE));
-					foreignKeys.put(fkname, def);
+					rcol.setForeignKeyReference(def.getColumnReference(col));
 				}
-				String colExpr = ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
-				String reftable = null;
-				String refcolumn = null;
-				int pos = colExpr.lastIndexOf('.');
-				if (pos  > -1)
-				{
-					reftable = colExpr.substring(0, pos);
-					refcolumn = colExpr.substring(pos + 1);
-				}
-				if (def.getForeignTable() == null)
-				{
-					TableIdentifier tbl = new TableIdentifier(reftable, conn);
-					if (tbl.getSchema() == null)
-					{
-						tbl.setSchema(this.table.getSchema());
-					}
-					if (tbl.getCatalog() == null)
-					{
-						tbl.setCatalog(this.table.getCatalog());
-					}
-					def.setForeignTable(new ReportTable(tbl));
-				}
-				def.addReferenceColumn(col, refcolumn);
-				rcol.setForeignKeyReference(def.getColumnReference(col));
 			}
+			foreignKeys.put(node.getFkName(), def);
 		}
 	}
 
@@ -419,7 +387,7 @@ public class ReportTable
 				return pos1 - pos2;
 			}
 		};
-		List<ReportColumn> result = new ArrayList<ReportColumn>(columns.size());
+		List<ReportColumn> result = new ArrayList<>(columns.size());
 		result.addAll(columns);
 		Collections.sort(result, comp);
 		return result;
@@ -427,7 +395,7 @@ public class ReportTable
 
 	public List<ReportColumn> getColumns()
 	{
-		return new ArrayList<ReportColumn>(this.columns);
+		return new ArrayList<>(this.columns);
 	}
 
 	public TableIdentifier getTable()
