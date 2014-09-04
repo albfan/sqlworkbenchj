@@ -43,7 +43,7 @@ public class BookmarkAnnotation
 {
 	public static final String ANNOTATION = "WbTag";
 
-	private List<String> validTags = new ArrayList<String>(3);
+	private List<String> validTags = new ArrayList<>(3);
 
 	public BookmarkAnnotation()
 	{
@@ -70,7 +70,7 @@ public class BookmarkAnnotation
 	 */
 	public List<NamedScriptLocation> getBookmarks(String script, String tabId)
 	{
-		List<NamedScriptLocation> bookmarks = new ArrayList<NamedScriptLocation>();
+		List<NamedScriptLocation> bookmarks = new ArrayList<>();
 		SQLLexer lexer = new SQLLexer(script);
 		SQLToken token = lexer.getNextToken(true, false);
 

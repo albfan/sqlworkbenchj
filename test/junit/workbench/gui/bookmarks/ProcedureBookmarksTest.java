@@ -42,7 +42,7 @@ public class ProcedureBookmarksTest
 	}
 
 	@Test
-	public void testParseScript()
+	public void testOracle()
 	{
 		String script =
 			"-- this is a test proc\n" +
@@ -52,9 +52,36 @@ public class ProcedureBookmarksTest
 			"drop procedure bar;\n" +
 			"create procedure bar as begin null; end;\n";
 		ProcedureBookmarks parser = new ProcedureBookmarks();
+		parser.setIncludeParameterNames(false);
 		parser.parseScript(script);
 		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
-		System.out.println(bookmarks);
+//		System.out.println(bookmarks);
 		assertEquals(2, bookmarks.size());
 	}
+
+	@Test
+	public void testMicrosoft()
+	{
+		String script =
+			"create procedure foo(@p_foo int, @p_bar varchar(20) = 'bar') \n" +
+			"as\n" +
+			"begin" +
+			"   do_something;\n" +
+			"end;\n";
+		ProcedureBookmarks parser = new ProcedureBookmarks();
+		parser.setIncludeParameterNames(false);
+		parser.parseScript(script);
+
+		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
+		//System.out.println(bookmarks);
+		assertEquals(1, bookmarks.size());
+		assertEquals("foo(int,varchar(20))", bookmarks.get(0).getName());
+		parser.setIncludeParameterNames(true);
+		parser.parseScript(script);
+		bookmarks = parser.getBookmarks();
+		assertEquals(1, bookmarks.size());
+		assertEquals("foo(@p_foo int, @p_bar varchar(20))", bookmarks.get(0).getName());
+//		System.out.println(bookmarks);
+	}
+
 }

@@ -46,7 +46,7 @@ public class BookmarkManager
 {
 	// Maps the ID of a MainWindow to bookmarks defined for each tab.
 	// each BookmarkGroup represents the bookmarks from a single editor tab
-	private final Map<String, Map<String, BookmarkGroup>> bookmarks = new HashMap<String, Map<String, BookmarkGroup>>();
+	private final Map<String, Map<String, BookmarkGroup>> bookmarks = new HashMap<>();
 
 	private BookmarkManager()
 	{
@@ -114,7 +114,7 @@ public class BookmarkManager
 			Map<String, BookmarkGroup> windowBookmarks = bookmarks.get(win.getWindowId());
 			if (windowBookmarks == null)
 			{
-				windowBookmarks = new HashMap<String, BookmarkGroup>();
+				windowBookmarks = new HashMap<>();
 				bookmarks.put(win.getWindowId(), windowBookmarks);
 			}
 
@@ -156,7 +156,7 @@ public class BookmarkManager
 		Map<String, BookmarkGroup> bm = bookmarks.get(windowId);
 		if (bm == null) return Collections.emptyList();
 
-		result = new ArrayList<String>();
+		result = new ArrayList<>();
 		for (Map.Entry<String, BookmarkGroup> entry : bm.entrySet())
 		{
 			String id = entry.getKey();

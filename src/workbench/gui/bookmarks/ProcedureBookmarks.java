@@ -59,7 +59,8 @@ public class ProcedureBookmarks
 	{
 		none,
 		name,
-		dataType;
+		dataType,
+		defaultValue;
 	}
 
 	private Set<String> modeKeywords = CollectionUtil.caseInsensitiveSet("OUT", "IN", "INOUT");
@@ -69,7 +70,7 @@ public class ProcedureBookmarks
 	private Set<String> parameterStart = CollectionUtil.caseInsensitiveSet("(");
 	private Set<String> parameterEnd = CollectionUtil.caseInsensitiveSet(")", "DEFAULT", "COLLATE", "NOT NULL");
 	private Set<String> createTerminal = CollectionUtil.caseInsensitiveSet("AS", "RETURN", "IS", "BEGIN", ";", "DECLARE", "RETURNS");
-	private List<NamedScriptLocation> procedures = new ArrayList<NamedScriptLocation>();
+	private List<NamedScriptLocation> procedures = new ArrayList<>();
 
 	private final String id;
 
@@ -81,6 +82,7 @@ public class ProcedureBookmarks
 	private String currentIdentifier;
 	private String parameterList;
 	private int bracketCount;
+	private boolean includeParameterNames;
 
 	public ProcedureBookmarks()
 	{
@@ -91,6 +93,12 @@ public class ProcedureBookmarks
 	{
 		this.id = panelId;
 		reset();
+		this.includeParameterNames = GuiSettings.getProcBookmarksIncludeParmName();
+	}
+
+	public void setIncludeParameterNames(boolean flag)
+	{
+		this.includeParameterNames = flag;
 	}
 
 	public void processToken(SQLToken token)
@@ -203,16 +211,24 @@ public class ProcedureBookmarks
 					}
 					else if (parmState == ParameterState.none || parmState == ParameterState.dataType)
 					{
-						if (parameterList.length() > 0 && bracketCount == 0)
+						// This is for SQL Server
+						if (content.equals("="))
 						{
-							parameterList += GuiSettings.getProcBookmarksIncludeParmName() ? " " : ",";
+							parmState = ParameterState.defaultValue;
 						}
-						parameterList += token.getText();
+						else
+						{
+							if (parameterList.length() > 0 && bracketCount == 0)
+							{
+								parameterList += includeParameterNames ? " " : ",";
+							}
+							parameterList += token.getText();
+						}
 					}
 					else if (parmState == ParameterState.name)
 					{
 						parmState = ParameterState.dataType;
-						if (GuiSettings.getProcBookmarksIncludeParmName())
+						if (includeParameterNames)
 						{
 							if (parameterList.length() > 0) parameterList += ", ";
 							parameterList += token.getText();
@@ -233,10 +249,6 @@ public class ProcedureBookmarks
 		if (currentStartToken != null && this.currentIdentifier != null)
 		{
 			String name = currentIdentifier;
-//			if (StringUtil.isNonEmpty(type))
-//			{
-//				name = type + " " + name;
-//			}
 			if (StringUtil.isNonEmpty(parameterList))
 			{
 				name += "(" + parameterList + ")";
@@ -250,6 +262,7 @@ public class ProcedureBookmarks
 			parameterList = null;
 			currentIdentifier = "";
 			bracketCount = 0;
+			currentStartToken = null;
 		}
 	}
 
@@ -262,6 +275,7 @@ public class ProcedureBookmarks
 		procedures.clear();
 		currentIdentifier = "";
 		bracketCount = 0;
+		currentStartToken = null;
 	}
 
 	public List<NamedScriptLocation> getBookmarks()
