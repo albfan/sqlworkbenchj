@@ -22,7 +22,6 @@
  */
 package workbench.db.diff;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -77,9 +76,9 @@ public class SchemaDiffTest
 		diff.setSchemas("REF", "OLD");
 
 		String xml = diff.getMigrateTargetXml();
-		TestUtil util = getTestUtil();
-		TestUtil.writeFile(new File(util.getBaseDir(), "basediff.xml"), xml);
-		System.out.println("---------------\n" + xml + "\n---------------");
+//		TestUtil util = getTestUtil();
+//		TestUtil.writeFile(new File(util.getBaseDir(), "basediff.xml"), xml);
+//		System.out.println("---------------\n" + xml + "\n---------------");
 
 		String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
 		assertEquals("Incorrect number of tables listed", "4", count);

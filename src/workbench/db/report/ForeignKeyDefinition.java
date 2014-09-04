@@ -25,8 +25,8 @@ package workbench.db.report;
 import java.util.Iterator;
 import java.util.Map;
 
-import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
+
 import workbench.util.NumberStringCache;
 
 /**
@@ -226,7 +226,7 @@ public class ForeignKeyDefinition
 			{
 				String myFk = myCols.get(myCol);
 				String otherFk = otherCols.get(otherCol);
-				if (myFk.equalsIgnoreCase(otherFk)) return false;
+				if (!myFk.equalsIgnoreCase(otherFk)) return false;
 			}
 			else
 			{
