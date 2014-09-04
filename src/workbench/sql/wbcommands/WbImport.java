@@ -789,7 +789,7 @@ public class WbImport
 		{
 			if (!imp.setMode(mode))
 			{
-				result.addMessage(ResourceMgr.getString("ErrInvalidModeIgnored").replace("%mode%", mode));
+				result.addMessage(ResourceMgr.getFormattedString("ErrInvalidModeIgnored", mode));
 			}
 		}
 

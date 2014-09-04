@@ -224,10 +224,17 @@ public class WbSchemaReportTest
 			assertEquals("Incorrect source column count", "0", count);
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key)");
-			assertEquals("Incorrect source column count", "3", count);
+			assertEquals("Incorrect source column count", "1", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[2]/source-columns/column)");
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/source-columns/column)");
 			assertEquals("Incorrect source column count", "2", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/referenced-columns/column)");
+			assertEquals("Incorrect source column count", "2", count);
+
+			String col1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/source-columns/column[1]/text()");
+			String col2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/referenced-columns/column[1]/text()");
+			assertEquals("Incorrect source column matching", col1, col2);
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS']/column-def/references)");
 			assertEquals("Incorrect references count", "2", count);
