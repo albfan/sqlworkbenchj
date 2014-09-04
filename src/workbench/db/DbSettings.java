@@ -1825,7 +1825,7 @@ public class DbSettings
 
 	public boolean generateColumnListInViews()
 	{
-		boolean all = Settings.getInstance().getBoolProperty("workbench.sql.create.view.columnlist", true);
+		boolean all = Settings.getInstance().getGenerateColumnListInViews();
 		return Settings.getInstance().getBoolProperty(prefix + "create.view.columnlist", all);
 	}
 

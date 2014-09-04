@@ -70,6 +70,7 @@ public class DbExplorerOptionsPanel
 		GuiSettings.setApplySQLSortInDbExplorer(applySQLSort.isSelected());
 		GuiSettings.setShowSynonymTargetInDbExplorer(showSynDetails.isSelected());
 		GuiSettings.setDbExplorerShowTableHistory(showTableHistory.isSelected());
+		config.setGenerateColumnListInViews(generateViewColumns.isSelected());
 		((PlacementChooser)tabPlacement).saveSelection();
 	}
 
@@ -94,6 +95,7 @@ public class DbExplorerOptionsPanel
 		applySQLSort.setSelected(GuiSettings.getApplySQLSortInDbExplorer());
 		showSynDetails.setSelected(GuiSettings.showSynonymTargetInDbExplorer());
 		showTableHistory.setSelected(GuiSettings.getDbExplorerShowTableHistory());
+		generateViewColumns.setSelected(set.getGenerateColumnListInViews());
 	}
 
 	/** This method is called from within the constructor to
@@ -133,6 +135,7 @@ public class DbExplorerOptionsPanel
     autogeneratePK = new javax.swing.JCheckBox();
     generateTableGrants = new javax.swing.JCheckBox();
     generateDrop = new javax.swing.JCheckBox();
+    generateViewColumns = new javax.swing.JCheckBox();
     jPanel4 = new javax.swing.JPanel();
     rememberColOrder = new javax.swing.JCheckBox();
     rememberSort = new javax.swing.JCheckBox();
@@ -391,7 +394,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(9, 4, 0, 8);
     add(jPanel5, gridBagConstraints);
 
-    jPanel6.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+    jPanel6.setLayout(new java.awt.GridBagLayout());
 
     jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblDbExpGenOpts"))); // NOI18N
     jPanel3.setLayout(new java.awt.GridBagLayout());
@@ -429,7 +432,20 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 8, 3, 10);
     jPanel3.add(generateDrop, gridBagConstraints);
 
-    jPanel6.add(jPanel3);
+    generateViewColumns.setText(ResourceMgr.getString("LblGenerateViewCols")); // NOI18N
+    generateViewColumns.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    generateViewColumns.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 8, 3, 10);
+    jPanel3.add(generateViewColumns, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+    jPanel6.add(jPanel3, gridBagConstraints);
 
     jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblDbExpDataOpts"))); // NOI18N
     jPanel4.setLayout(new java.awt.GridBagLayout());
@@ -469,7 +485,12 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 3, 10);
     jPanel4.add(applySQLSort, gridBagConstraints);
 
-    jPanel6.add(jPanel4);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    jPanel6.add(jPanel4, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -478,7 +499,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 4, 0, 0);
     add(jPanel6, gridBagConstraints);
   }
 
@@ -508,6 +529,7 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox filterWhileTyping;
   private javax.swing.JCheckBox generateDrop;
   private javax.swing.JCheckBox generateTableGrants;
+  private javax.swing.JCheckBox generateViewColumns;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;

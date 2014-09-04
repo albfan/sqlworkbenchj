@@ -1195,6 +1195,16 @@ public class Settings
 		return getBoolProperty("workbench.db.createpkname", false);
 	}
 
+	public void setGenerateColumnListInViews(boolean flag)
+	{
+		setProperty("workbench.sql.create.view.columnlist", flag);
+	}
+
+	public boolean getGenerateColumnListInViews()
+	{
+		return getBoolProperty("workbench.sql.create.view.columnlist");
+	}
+
 	public void setAutoGeneratePKName(boolean flag)
 	{
 		setProperty("workbench.db.createpkname", flag);

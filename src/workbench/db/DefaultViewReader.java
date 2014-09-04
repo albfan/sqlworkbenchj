@@ -113,7 +113,7 @@ public class DefaultViewReader
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 		String verb = SqlUtil.getSqlVerb(source.toString());
 
-		// ThinkSQL and DB2 return the full CREATE VIEW statement
+		// SQL Server and DB2 return the full CREATE VIEW statement
 		// DB2 even returns the CREATE OR REPLACE if the view was created that way.
 		// therefor the verb is compared with startsWith() rather than equals()
 		if (verb.startsWith("CREATE"))
