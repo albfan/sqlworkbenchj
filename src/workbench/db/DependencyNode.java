@@ -256,7 +256,7 @@ public class DependencyNode
 		}
 		else
 		{
-			return this.columns;
+			return Collections.unmodifiableMap(this.columns);
 		}
 	}
 

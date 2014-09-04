@@ -57,6 +57,20 @@ public class ProcedureBookmarksTest
 		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
 		assertEquals(2, bookmarks.size());
+		assertEquals("foo(integer,varchar(20))", bookmarks.get(0).getName());
+		assertEquals("bar", bookmarks.get(1).getName());
+
+
+		script =
+			"-- this is a test proc\n" +
+			"create or replace function foo(p_one integer, p_two varchar(20) default 'foo') return boolean as begin return 42; end;\n";
+		parser = new ProcedureBookmarks();
+		parser.setIncludeParameterNames(true);
+		parser.parseScript(script);
+		bookmarks = parser.getBookmarks();
+//		System.out.println(bookmarks);
+		assertEquals(1, bookmarks.size());
+		assertEquals("foo(p_one integer, p_two varchar(20))", bookmarks.get(0).getName());
 	}
 
 	@Test
@@ -73,7 +87,7 @@ public class ProcedureBookmarksTest
 		parser.parseScript(script);
 
 		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
-		//System.out.println(bookmarks);
+//		System.out.println(bookmarks);
 		assertEquals(1, bookmarks.size());
 		assertEquals("foo(int,varchar(20))", bookmarks.get(0).getName());
 		parser.setIncludeParameterNames(true);
@@ -83,5 +97,44 @@ public class ProcedureBookmarksTest
 		assertEquals("foo(@p_foo int, @p_bar varchar(20))", bookmarks.get(0).getName());
 //		System.out.println(bookmarks);
 	}
+
+	@Test
+	public void testPostgres()
+	{
+		String script =
+			"create function get_answer(p_foo integer) returns boolean \n" +
+			"as $$\n" +
+			"begin" +
+			"   select 42;\n" +
+			"end;\n" +
+			"$$" +
+			"language sql;";
+
+		ProcedureBookmarks parser = new ProcedureBookmarks();
+		parser.setIncludeParameterNames(false);
+		parser.parseScript(script);
+
+		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
+//		System.out.println(bookmarks);
+		assertEquals(1, bookmarks.size());
+		assertEquals("get_answer(integer)", bookmarks.get(0).getName());
+
+		script =
+			"create function get_answer(p_foo integer, p_bar integer default = 0) returns boolean \n" +
+			"as $$\n" +
+			"begin" +
+			"   select 42;\n" +
+			"end;\n" +
+			"$$" +
+			"language sql;";
+
+		parser.setIncludeParameterNames(true);
+		parser.parseScript(script);
+		bookmarks = parser.getBookmarks();
+//		System.out.println(bookmarks);
+		assertEquals(1, bookmarks.size());
+		assertEquals("get_answer(p_foo integer, p_bar integer)", bookmarks.get(0).getName());
+	}
+
 
 }

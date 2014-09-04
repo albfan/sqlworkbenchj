@@ -24,7 +24,6 @@ package workbench.db.report;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,8 +38,6 @@ import workbench.log.LogMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConstraintReader;
 import workbench.db.DependencyNode;
-import workbench.db.FKHandler;
-import workbench.db.FKHandlerFactory;
 import workbench.db.IndexDefinition;
 import workbench.db.ReaderFactory;
 import workbench.db.TableCommentReader;
@@ -56,7 +53,6 @@ import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleTablePartition;
 
-import workbench.storage.DataStore;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -325,6 +321,18 @@ public class ReportTable
 		{
 			ForeignKeyDefinition def = new ForeignKeyDefinition(node);
 			def.setCompareFKRules(true);
+
+			TableIdentifier tbl = node.getTable().createCopy();
+			if (tbl.getSchema() == null)
+			{
+				tbl.setSchema(this.table.getSchema());
+			}
+			if (tbl.getCatalog() == null)
+			{
+				tbl.setCatalog(this.table.getCatalog());
+			}
+			def.setForeignTable(new ReportTable(tbl));
+			
 			Map<String, String> colMap = node.getColumns();
 			for (String col : colMap.keySet())
 			{

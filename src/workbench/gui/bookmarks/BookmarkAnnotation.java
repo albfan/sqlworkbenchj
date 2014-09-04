@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.resource.GuiSettings;
-import workbench.resource.Settings;
 
 import workbench.sql.AnnotationReader;
 import workbench.sql.ResultNameParser;
@@ -65,20 +64,28 @@ public class BookmarkAnnotation
 	/**
 	 * Parses the given SQL script for bookmark annotations.
 	 *
+	 * If procedures and functions should be show as bookmarks they are added as well.
+	 * For that {@link ProcedureBookmarks} is used passing the tokens from the
+	 * SQLLexer while parsing the current script so only a single parse of the script is necessary.
+	 *
 	 * @param script  the script to parse
 	 * @return the list of bookmarks found
+	 *
+	 * @see GuiSettings#getParseProceduresForBookmarks()
+	 * @see ProcedureBookmarks
 	 */
 	public List<NamedScriptLocation> getBookmarks(String script, String tabId)
 	{
 		List<NamedScriptLocation> bookmarks = new ArrayList<>();
-		SQLLexer lexer = new SQLLexer(script);
-		SQLToken token = lexer.getNextToken(true, false);
 
 		ProcedureBookmarks parser = null;
 		if (GuiSettings.getParseProceduresForBookmarks())
 		{
 			parser = new ProcedureBookmarks(tabId);
 		}
+
+		SQLLexer lexer = new SQLLexer(script);
+		SQLToken token = lexer.getNextToken(true, false);
 
 		while (token != null)
 		{
@@ -97,7 +104,11 @@ public class BookmarkAnnotation
 			}
 			token = lexer.getNextToken(true, false);
 		}
-		bookmarks.addAll(parser.getBookmarks());
+
+		if (parser != null)
+		{
+			bookmarks.addAll(parser.getBookmarks());
+		}
 		return bookmarks;
 	}
 

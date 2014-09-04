@@ -70,6 +70,7 @@ public class ProcedureBookmarks
 	private Set<String> parameterStart = CollectionUtil.caseInsensitiveSet("(");
 	private Set<String> parameterEnd = CollectionUtil.caseInsensitiveSet(")", "DEFAULT", "COLLATE", "NOT NULL");
 	private Set<String> createTerminal = CollectionUtil.caseInsensitiveSet("AS", "RETURN", "IS", "BEGIN", ";", "DECLARE", "RETURNS");
+
 	private List<NamedScriptLocation> procedures = new ArrayList<>();
 
 	private final String id;

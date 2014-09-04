@@ -22,8 +22,10 @@
  */
 package workbench.db.report;
 
+import java.util.Iterator;
 import java.util.Map;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.util.NumberStringCache;
 
@@ -50,7 +52,11 @@ public class ForeignKeyDefinition
 	public ForeignKeyDefinition(DependencyNode node)
 	{
 		this.fkDefinition = node;
-		foreignTable = new ReportTable(node.getTable());
+	}
+
+	public void setForeignTable(ReportTable table)
+	{
+		foreignTable = table;
 	}
 
 	public boolean isEnabled()
@@ -205,10 +211,27 @@ public class ForeignKeyDefinition
 	private boolean compareColumns(ForeignKeyDefinition other)
 	{
 		if (other == null) return false;
-		for (Map.Entry<String, String> entry : fkDefinition.getColumns().entrySet())
+		Map<String, String> myCols = fkDefinition.getColumns();
+		Map<String, String> otherCols = other.fkDefinition.getColumns();
+		if (myCols.size() != otherCols.size()) return false;
+
+		Iterator<String> myItr = myCols.keySet().iterator();
+		Iterator<String> otherItr = otherCols.keySet().iterator();
+
+		while (myItr.hasNext())
 		{
-			String mappedTo = other.fkDefinition.getColumns().get(entry.getKey().toLowerCase());
-			if (!mappedTo.equalsIgnoreCase(entry.getValue())) return false;
+			String myCol = myItr.next();
+			String otherCol = otherItr.next();  // this is safe because both iterators have the same number of elements
+			if (myCol.equalsIgnoreCase(otherCol))
+			{
+				String myFk = myCols.get(myCol);
+				String otherFk = otherCols.get(otherCol);
+				if (myFk.equalsIgnoreCase(otherFk)) return false;
+			}
+			else
+			{
+				return false;
+			}
 		}
 		return true;
 	}
