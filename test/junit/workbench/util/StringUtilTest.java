@@ -642,7 +642,7 @@ public class StringUtilTest
 	@Test
 	public void testToArray()
 	{
-		List<String> elements = new LinkedList<String>();
+		List<String> elements = new LinkedList<>();
 		elements.add("one");
 		elements.add("two");
 		elements.add("three");
