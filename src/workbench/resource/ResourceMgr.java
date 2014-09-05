@@ -48,6 +48,8 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -60,6 +62,7 @@ import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 
 import workbench.log.LogMgr;
+import workbench.util.FileUtil;
 
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
@@ -94,6 +97,11 @@ public class ResourceMgr
 	private static ResourceBundle resources;
 	private static final String PROP_CHANGE_LOCALE = "workbench.gui.setdefaultlocale";
 	private static boolean useLargeIcons;
+
+	private static void getLoader(Class callerClass)
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
 	private ResourceMgr()
 	{
@@ -159,7 +167,7 @@ public class ResourceMgr
 		if (iconFiles == null) return;
 		try
 		{
-			List<Image> icons = new ArrayList<Image>(iconFiles.size());
+			List<Image> icons = new ArrayList<>(iconFiles.size());
 			for (File f : iconFiles)
 			{
 				URL url = f.toURI().toURL();
@@ -177,7 +185,7 @@ public class ResourceMgr
 
 	public static void setWindowIcons(Window window, String baseName)
 	{
-		List<Image> icons = new ArrayList<Image>(2);
+		List<Image> icons = new ArrayList<>(2);
 		ImageIcon image16 = retrieveImage(baseName + "16.png");
 		if (image16 != null)
 		{
@@ -381,6 +389,33 @@ public class ResourceMgr
 	 */
 	static ResourceBundle getResourceBundle(Locale l)
 	{
+		if (Settings.getInstance().isUTF8Language(l))
+		{
+			ResourceBundle.Control control = ResourceBundle.Control.getControl(ResourceBundle.Control.FORMAT_PROPERTIES);
+			String bundleName = "/" + control.toBundleName("language/wbstrings", l) + ".properties";
+			InputStream in = null;
+			Reader r = null;
+
+			try
+			{
+				in = ResourceMgr.class.getResourceAsStream(bundleName);
+				r = new InputStreamReader(in, "UTF-8");
+				WbResourceBundle bundle = new WbResourceBundle(r);
+
+				ResourceBundle parent = ResourceBundle.getBundle("language/wbstrings", Locale.ENGLISH);
+				bundle.setParent(parent);
+
+				return bundle;
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logError("ResourceMgr.getResourceBundle()", "Could not read resource bundle "+ bundleName + " using UTF-8", ex);
+			}
+			finally
+			{
+				FileUtil.closeQuietely(in);
+			}
+		}
 		return ResourceBundle.getBundle("language/wbstrings", l);
 	}
 

@@ -2967,6 +2967,11 @@ public class Settings
 		}
 	}
 
+	public boolean isUTF8Language(Locale l)
+	{
+		return getBoolProperty("workbench.locale.use.utf8."+ l.getLanguage(), false);
+	}
+
 	private String getSortLanguage()
 	{
 		return getProperty("workbench.sort.language", System.getProperty("user.language"));
