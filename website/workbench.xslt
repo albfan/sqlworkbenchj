@@ -233,19 +233,30 @@
         <div id="main">
           <xsl:if test="$imageName">
           
-            <h3 style="padding-top:1.5em"><xsl:value-of select="@title"/></h3>
-             <xsl:if test="$next">
-                <a href="{$next}"><img src="{$imageName}"/></a>
-             </xsl:if>
-             <xsl:if test="$next = ''">
-                <img src="{$imageName}"/>
-             </xsl:if>
-            <xsl:if test="$back and $back != 'screenshots.html'">
-              <div style="padding-top:2em"><a href="{$back}">Previous</a></div>
-            </xsl:if>
-            <xsl:if test="$back = 'screenshots.html'">
-              <div style="padding-top:2em"><a href="{$back}">Screenshots</a></div>
-            </xsl:if>
+            <h3 style="padding-top:1em"><xsl:value-of select="@title"/></h3>
+             <div style="float:left">
+                 <xsl:if test="$next">
+                    <a href="{$next}"><img src="{$imageName}"/></a>
+                 </xsl:if>
+                 <xsl:if test="$next = ''">
+                    <img src="{$imageName}"/>
+                 </xsl:if>
+                 <br/>
+                 <div style="padding-top:1.5em">
+                   <xsl:if test="$back and $back != 'screenshots.html'">
+                     <div style="float:left"><a href="{$back}">Previous</a></div>
+                   </xsl:if>
+                   <xsl:if test="$back = 'screenshots.html'">
+                     <span><a href="{$back}">Screenshots</a></span>
+                   </xsl:if>
+                   <xsl:if test="$next and $next != 'screenshots.html'">
+                     <div style="float:right"><a href="{$next}">Next</a></div>
+                   </xsl:if>
+                   <xsl:if test="$next = 'screenshots.html'">
+                     <div style="float:right"><a href="screenshots.html">Screenshots</a></div>
+                   </xsl:if>
+                 </div>
+             </div>
           </xsl:if>
           <xsl:if test="not($imageName)">
             <div class="content">
