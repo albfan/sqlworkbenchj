@@ -803,7 +803,7 @@ public class ProcedureListPanel
 	private List<String> getParameterNames()
 	{
 		int rows = procColumns.getRowCount();
-		List<String> names = new ArrayList<String>(rows);
+		List<String> names = new ArrayList<>(rows);
 		for (int row = 0; row < rows; row ++)
 		{
 			String name = procColumns.getValueAsString(row, 0);
@@ -853,7 +853,7 @@ public class ProcedureListPanel
 		if (this.procList.getSelectedRowCount() == 0) return null;
 		int[] rows = this.procList.getSelectedRows();
 		int count = rows.length;
-		List<ProcedureDefinition> result = new ArrayList<ProcedureDefinition>(count);
+		List<ProcedureDefinition> result = new ArrayList<>(count);
 		if (count == 0) return result;
 
 		for (int i=0; i < count; i ++)

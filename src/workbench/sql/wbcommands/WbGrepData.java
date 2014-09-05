@@ -280,7 +280,7 @@ public class WbGrepData
 			// clear the status display
 			rowMonitor.jobFinished();
 		}
-		searchedTables = new ArrayList<String>(50);
+		searchedTables = new ArrayList<>(50);
 		foundTables = 0;
 	}
 

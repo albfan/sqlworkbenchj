@@ -933,7 +933,7 @@ public class WbImport
 	private List<ColumnIdentifier> stringToCols(String columns)
 	{
 		List<String> names = StringUtil.stringToList(columns, ",", true, true);
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(names.size());
+		List<ColumnIdentifier> cols = new ArrayList<>(names.size());
 		for (String name : names)
 		{
 			cols.add(new ColumnIdentifier(name));

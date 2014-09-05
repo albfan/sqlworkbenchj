@@ -72,7 +72,7 @@ public class VariablePool
 	implements PropertyChangeListener
 {
 	public static final String PROP_PREFIX = "wbp.";
-	private final Map<String, String> data = new HashMap<String, String>();
+	private final Map<String, String> data = new HashMap<>();
 
 	private final Object lock = new Object();
 	private String prefix;
@@ -252,7 +252,7 @@ public class VariablePool
 		if (sql == null) return Collections.emptySet();
 		Matcher m = this.promptPattern.matcher(sql);
 		if (m == null) return Collections.emptySet();
-		Set<String> variables = new TreeSet<String>();
+		Set<String> variables = new TreeSet<>();
 		synchronized (this.data)
 		{
 			while (m.find())

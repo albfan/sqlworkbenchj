@@ -444,7 +444,7 @@ public class TableSearchPanel
 
 		int[] selectedTables = this.tableNames.getSelectedRows();
 
-		List<TableIdentifier> searchTables = new ArrayList<TableIdentifier>(this.tableNames.getSelectedRowCount());
+		List<TableIdentifier> searchTables = new ArrayList<>(this.tableNames.getSelectedRowCount());
 		DataStore tables = ((WbTable)(this.tableNames)).getDataStore();
 		for (int i=0; i < selectedTables.length; i++)
 		{

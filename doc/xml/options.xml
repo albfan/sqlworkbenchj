@@ -298,14 +298,6 @@
       </para>
 		</blockquote></simplesect>
 
-    <simplesect id="macro-expansion-keystroke">
-      <title>Macro expansion key</title><blockquote>
-      <para>
-        This defines the key combination that triggers the detection of
-        <link linkend="expandable-macro">expandable macros</link>.
-      </para>
-    </blockquote></simplesect>
-
 		<simplesect id="options-hilite-current">
 			<title>Highlight current statement</title><blockquote>
 			<para>
@@ -391,15 +383,6 @@
 			</para>
 		</blockquote></simplesect>
 
-		<simplesect id="options-wbresult-bookmark">
-			<title>Also use @WbResult for bookmarks</title><blockquote>
-			<para>
-        By default only locations marked with <literal>@WbTag</literal> are included in <link linkend="editor-bookmarks">the list of bookmarks</link>.
-        When this option is enabled, locations that are marked with <link linkend="result-names"><literal>@WbResult</literal></link>
-        are also included in the bookmark list.
-			</para>
-		</blockquote></simplesect>
-
     <simplesect id="editor-follow-current-dir">
       <title>Current directory follows active file</title><blockquote>
       <para>
@@ -410,6 +393,84 @@
       </para>
     </blockquote></simplesect>
 	</section>
+
+  <section id="macro-options">
+    <title>Macro options</title>
+    <simplesect id="macro-expansion-keystroke">
+      <title>Macro expansion key</title><blockquote>
+      <para>
+        This defines the key combination that triggers the detection of
+        <link linkend="expandable-macro">expandable macros</link>.
+      </para>
+    </blockquote></simplesect>
+
+    <simplesect id="macro-popup-save-wksp">
+      <title>Save window settings in workspace</title><blockquote>
+      <para>
+        If this option is enabled, the current position and the expaned macro groups of the macro popup window are stored in the current
+        workspace. It this option is disabled, these settings are saved globally.
+      </para>
+    </blockquote></simplesect>
+
+    <simplesect id="macro-popup-close-esc">
+      <title>Close window with ESC</title><blockquote>
+      <para>
+        If this option is enabled the macro popup window can be closed using the <keycap>ESC</keycap> key.
+      </para>
+    </blockquote></simplesect>
+
+    <simplesect id="macro-popup-exec-enter">
+      <title>Execute macro with Enter</title><blockquote>
+      <para>
+        If this option is enabled the currently selected macro can be run by hitting the <keycap>Enter</keycap> key.
+      </para>
+    </blockquote></simplesect>
+
+  </section>
+
+  <section id="bookmark-options">
+    <title>Bookmark options</title>
+		<simplesect id="options-wbresult-bookmark">
+			<title>Also use @WbResult for bookmarks</title><blockquote>
+			<para>
+        By default only locations marked with <literal>@WbTag</literal> are included in <link linkend="editor-bookmarks">the list of bookmarks</link>.
+        When this option is enabled, locations that are marked with <link linkend="result-names"><literal>@WbResult</literal></link>
+        are also included in the bookmark list.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bookmark-proc">
+			<title>Use procedure/function names as bookmarks</title><blockquote>
+			<para>
+        If this is enabled &wb-productname; will also the names of procedures or functions for which a
+        <literal>CREATE</literal> statement is present in the editor as a bookmark.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bookmark-proc-params">
+			<title>Include parameter names for procedures and functions</title><blockquote>
+			<para>
+        When including procudure and function names in the bookmarks, only the datatype of the parameters
+        are shown in the bookmark list. If this option is enabled the parameter names (if available) are also shown.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bookmark-save-col-widths">
+			<title>Remember column widths</title><blockquote>
+			<para>
+        If this is enabled, the width of the columns in the bookmark window is not resized to match the displayed
+        value, but rather the last with is remembered.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bookmark-save-sort">
+			<title>Remember sort order</title><blockquote>
+			<para>
+        If this is enabled, the sort order of the bookmark list is restored the next time the bookmark window is displayed.
+			</para>
+		</blockquote></simplesect>
+
+  </section>
 
 	<section id="options-editor-colors">
 		<title>Editor colors</title>

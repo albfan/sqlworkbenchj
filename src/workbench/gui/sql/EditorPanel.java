@@ -152,7 +152,7 @@ public class EditorPanel
 	private final UnCommentAction unCommentAction;
 	private final JumpToLineAction jumpToLineAction;
 
-	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
+	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<>();
 	private WbFile currentFile;
 	private boolean saveInProgress;
 	private long fileModifiedTime;
@@ -859,7 +859,7 @@ public class EditorPanel
 		JComponent p = EncodingUtil.createEncodingPanel();
 		p.setBorder(new EmptyBorder(0,5,0,0));
 		EncodingSelector selector = (EncodingSelector)p;
-		selector.setEncoding(this.fileEncoding);
+		selector.setEncoding(fileEncoding != null ? fileEncoding : Settings.getInstance().getDefaultFileEncoding());
 		fc.setAccessory(p);
 
 		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
@@ -912,6 +912,7 @@ public class EditorPanel
 
 		boolean trimTrailing = Settings.getInstance().getTrimTrailingSpaces();
 
+		Writer writer = null;
 		try
 		{
 			saveInProgress = true;
@@ -923,7 +924,7 @@ public class EditorPanel
 				aFile = new File(filename);
 			}
 
-			Writer writer = EncodingUtil.createWriter(aFile, encoding, false);
+			writer = EncodingUtil.createWriter(aFile, encoding, false);
 
 			int count = this.getLineCount();
 
@@ -951,7 +952,6 @@ public class EditorPanel
 					writer.write(lineEnding);
 				}
 			}
-			writer.close();
 			this.currentFile = new WbFile(aFile);
 			this.fileEncoding = encoding;
 			this.fileModifiedTime = currentFile.lastModified();
@@ -964,6 +964,7 @@ public class EditorPanel
 		}
 		finally
 		{
+			FileUtil.closeQuietely(writer);
 			saveInProgress = false;
 		}
 	}

@@ -252,19 +252,17 @@ public class ForeignKeyDefinition
 	{
 		try
 		{
-			boolean columnsAreEqual = compareColumns(ref);
-			boolean tablesAreEqual = this.foreignTable.equals(ref.foreignTable);
+			boolean baseEqual = compareColumns(ref);
+			baseEqual = baseEqual && this.foreignTable.equals(ref.foreignTable);
 
-			boolean baseEquals = columnsAreEqual && tablesAreEqual;
-
-			if (baseEquals && compareFKRules)
+			if (baseEqual && compareFKRules)
 			{
-				baseEquals = baseEquals &&
+				baseEqual = baseEqual &&
 							(this.getUpdateRuleValue() == ref.getUpdateRuleValue()) &&
 							(this.getDeleteRuleValue() == ref.getDeleteRuleValue()) &&
 							(this.getDeferrableRuleValue() == ref.getDeferrableRuleValue());
 			}
-			return baseEquals;
+			return baseEqual;
 		}
 		catch (Exception e)
 		{

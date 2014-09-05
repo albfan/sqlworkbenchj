@@ -243,9 +243,9 @@ public class SqlPanel
 	protected volatile boolean cancelExecution;
 
 	private final List actions = new LinkedList();
-	private final List<WbAction> toolbarActions = new LinkedList<WbAction>();
+	private final List<WbAction> toolbarActions = new LinkedList<>();
 
-	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<FilenameChangeListener>();
+	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<>();
 
 	protected StopAction stopAction;
 	protected ExecuteAllAction executeAll;
@@ -332,7 +332,7 @@ public class SqlPanel
 	private boolean locked;
 	private boolean ignoreStateChange;
 	private long lastScriptExecTime;
-	protected final List<ToolWindow> resultWindows = new ArrayList<ToolWindow>(1);
+	protected final List<ToolWindow> resultWindows = new ArrayList<>(1);
 	private final int macroClientId;
 
 //</editor-fold>
@@ -3791,7 +3791,7 @@ public class SqlPanel
 		{
 			final List<DataStore> results = result.getDataStores();
 			count += results.size();
-			final List<DwPanel> panels = new ArrayList<DwPanel>(results.size());
+			final List<DwPanel> panels = new ArrayList<>(results.size());
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				@Override

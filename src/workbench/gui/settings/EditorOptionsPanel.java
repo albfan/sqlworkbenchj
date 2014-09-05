@@ -119,7 +119,6 @@ public class EditorOptionsPanel
 		allowEditDuringExec.setSelected(!GuiSettings.getDisableEditorDuringExecution());
 		emptyLineDelimiter.setSelected(Settings.getInstance().getEmptyLineIsDelimiter());
 		hiliteError.setSelected(GuiSettings.getHighlightErrorStatement());
-		useResultForBookmark.setSelected(GuiSettings.getUseResultTagForBookmarks());
 		autoCloseBrackets.setText(Settings.getInstance().getProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, ""));
 		int lines = GuiSettings.getWheelScrollLines();
 		if (lines <= 0)
@@ -179,7 +178,6 @@ public class EditorOptionsPanel
 		GuiSettings.setExecuteOnlySelected(!alwaysAllowExecSel.isSelected());
 		GuiSettings.setDisableEditorDuringExecution(!allowEditDuringExec.isSelected());
 		GuiSettings.setHighlightErrorStatement(hiliteError.isSelected());
-		GuiSettings.setUseResultTagForBookmarks(useResultForBookmark.isSelected());
 		set.setProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, autoCloseBrackets.getText());
 		GuiSettings.setUseStatementInCurrentLine(useCurrentLineStmt.isSelected());
 
@@ -252,7 +250,6 @@ public class EditorOptionsPanel
     autoAdvance = new JCheckBox();
     emptyLineDelimiter = new JCheckBox();
     hiliteError = new JCheckBox();
-    useResultForBookmark = new JCheckBox();
     useCurrentLineStmt = new JCheckBox();
     jPanel1 = new JPanel();
     followCurrentDir = new JCheckBox();
@@ -517,17 +514,6 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     jPanel2.add(hiliteError, gridBagConstraints);
 
-    useResultForBookmark.setText(ResourceMgr.getString("LblBookmarkResultName")); // NOI18N
-    useResultForBookmark.setToolTipText(ResourceMgr.getString("d_LblBookmarkResultName")); // NOI18N
-    useResultForBookmark.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(7, 15, 0, 0);
-    jPanel2.add(useResultForBookmark, gridBagConstraints);
-
     useCurrentLineStmt.setText(ResourceMgr.getString("LblUseStmtInCurLine")); // NOI18N
     useCurrentLineStmt.setToolTipText(ResourceMgr.getString("d_LblUseStmtInCurLine")); // NOI18N
     useCurrentLineStmt.setBorder(null);
@@ -711,7 +697,6 @@ public class EditorOptionsPanel
   private JCheckBox storeDirInWksp;
   private JTextField tabSize;
   private JCheckBox useCurrentLineStmt;
-  private JCheckBox useResultForBookmark;
   private JCheckBox useTabs;
   private JLabel wheelScrollLabel;
   private JTextField wheelScrollLines;

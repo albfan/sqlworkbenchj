@@ -65,7 +65,6 @@ public class SettingsPanel
 	extends JPanel
 	implements ActionListener, ListSelectionListener, WindowListener, ValidatingComponent
 {
-	private static final long serialVersionUID = -1922805582361974003L;
 	private JButton cancelButton;
 	private JButton helpButton;
 	private JPanel content;
@@ -74,15 +73,15 @@ public class SettingsPanel
 	private JButton okButton;
 	private JDialog dialog;
 	private EscAction escAction;
-	private List<OptionPanelPage> pages;
+	private List<OptionPanelPage> pages = new ArrayList<>();
 
 	public SettingsPanel()
 	{
 		super();
-		pages = new ArrayList<OptionPanelPage>();
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
 		pages.add(new OptionPanelPage("MacroOptionsPanel", "LblMacroSettings"));
+		pages.add(new OptionPanelPage("BookmarkOptionsPanel", "LblBookmarkOptions"));
 		pages.add(new OptionPanelPage("EditorColorsPanel", "LblEditorColors"));
 		pages.add(new OptionPanelPage("HighlightSettingsPanel", "LblHighlightOptions"));
 		pages.add(new OptionPanelPage("FontOptionsPanel", "LblSettingsFonts"));

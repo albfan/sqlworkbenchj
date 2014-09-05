@@ -34,7 +34,7 @@ public class ResettableSplitPane
 	extends WbSplitPane
 	implements Resettable
 {
-	private Set<Resettable> clients = new HashSet<Resettable>();
+	private Set<Resettable> clients = new HashSet<>();
 	
 	public ResettableSplitPane(int type)
 	{

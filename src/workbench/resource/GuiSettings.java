@@ -59,6 +59,7 @@ public class GuiSettings
 	public static final String PROPERTY_SHOW_RESULT_SQL = "workbench.gui.display.result.sql";
 	public static final String PROPERTY_MACRO_POPUP_WKSP = "workbench.gui.macropopup.useworkspace";
 	public static final String PROPERTY_MACRO_POPUP_CLOSE_ESC = "workbench.gui.macropopup.esc.closes";
+	public static final String PROPERTY_MACRO_POPUP_RUN_ON_ENTER = "workbench.gui.macropopup.enter.run";
 
 	public static final String PROP_TITLE_SHOW_WKSP = "workbench.gui.display.showpworkspace";
 	public static final String PROP_TITLE_SHOW_URL = "workbench.gui.display.showurl";
@@ -99,9 +100,33 @@ public class GuiSettings
 
 	public static final String PROP_COPY_TEXT_DISPLAY_DLG = "workbench.gui.copy.text.displayoptions";
 
+	public static final String PROP_BOOKMARK_PREFIX = "workbench.gui.bookmarks.";
+	public static final String PROP_BOOKMARKS_SAVE_WIDTHS = PROP_BOOKMARK_PREFIX + "colwidths.save";
+	public static final String PROP_BOOKMARKS_SAVE_SORT = PROP_BOOKMARK_PREFIX + "sort.save";
+
 	public static boolean showApplyDDLHint()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.apply.ddl.hint", true);
+	}
+
+	public static boolean getSaveBookmarkColWidths()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_BOOKMARKS_SAVE_WIDTHS, false);
+	}
+
+	public static void setSaveBookmarksColWidths(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_BOOKMARKS_SAVE_WIDTHS, flag);
+	}
+
+	public static boolean getSaveBookmarkSort()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_BOOKMARKS_SAVE_SORT, false);
+	}
+
+	public static void setSaveBookmarksSort(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_BOOKMARKS_SAVE_SORT, flag);
 	}
 
 	public static boolean getUseResultTagForBookmarks()
@@ -117,6 +142,11 @@ public class GuiSettings
 	public static boolean getProcBookmarksIncludeParmName()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_BOOKMARKS_PROCS_INCL_PNAME, false);
+	}
+
+	public static void setProcBookmarksIncludeParmName(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROPERTY_BOOKMARKS_PROCS_INCL_PNAME, flag);
 	}
 
 	public static boolean getParseProceduresForBookmarks()
@@ -195,6 +225,16 @@ public class GuiSettings
 		int code = key.getKeyCode();
 		int modifier = key.getModifiers();
 		Settings.getInstance().setProperty(PROPERTY_EXPAND_KEYSTROKE, Integer.toString(code) + "," + Integer.toString(modifier));
+	}
+
+	public static void setRunMacroWithEnter(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROPERTY_MACRO_POPUP_RUN_ON_ENTER, flag);
+	}
+
+	public static boolean getRunMacroWithEnter()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_MACRO_POPUP_RUN_ON_ENTER, true);
 	}
 
 	public static boolean getCloseMacroPopupWithEsc()

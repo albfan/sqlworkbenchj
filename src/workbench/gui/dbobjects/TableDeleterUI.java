@@ -597,7 +597,7 @@ public class TableDeleterUI
 	{
 		if (this.deleteListener == null)
 		{
-			this.deleteListener = new ArrayList<TableDeleteListener>();
+			this.deleteListener = new ArrayList<>();
 		}
 		this.deleteListener.add(listener);
 	}

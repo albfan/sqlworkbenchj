@@ -103,7 +103,7 @@ public abstract class AbstractWbCallHandler
 	 */
 	protected List<ParameterDefinition> getOutParameters(List<ParameterDefinition> parameters)
 	{
-		List<ParameterDefinition> result = new ArrayList<ParameterDefinition>();
+		List<ParameterDefinition> result = new ArrayList<>();
 		for (ParameterDefinition def : parameters)
 		{
 			if (def.isOutParameter())

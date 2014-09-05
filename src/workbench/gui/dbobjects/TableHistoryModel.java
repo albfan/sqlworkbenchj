@@ -43,7 +43,7 @@ public class TableHistoryModel
 
 	public TableHistoryModel()
 	{
-		history = new FixedSizeList<TableIdentifier>(GuiSettings.getDbExplorerTableHistorySize());
+		history = new FixedSizeList<>(GuiSettings.getDbExplorerTableHistorySize());
 	}
 
 	public TableIdentifier getSelectedTable()

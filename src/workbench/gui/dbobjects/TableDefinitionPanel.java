@@ -645,7 +645,7 @@ public class TableDefinitionPanel
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return null;
 		int[] rows = this.tableDefinition.getSelectedRows();
 
-		List<DbObject> columns = new ArrayList<DbObject>(rows.length);
+		List<DbObject> columns = new ArrayList<>(rows.length);
 
 		for (int i=0; i < rows.length; i++)
 		{
@@ -678,7 +678,7 @@ public class TableDefinitionPanel
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return;
 		int[] rows = this.tableDefinition.getSelectedRows();
 		int count = rows.length;
-		List<IndexColumn> columns = new ArrayList<IndexColumn>(count);
+		List<IndexColumn> columns = new ArrayList<>(count);
 		String indexName = ResourceMgr.getString("TxtNewIndexName");
 		//String indexName = WbSwingUtilities.getUserInput(this, msg, defaultName);
 		if (StringUtil.isBlank(indexName)) return;

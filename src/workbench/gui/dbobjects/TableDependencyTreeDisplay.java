@@ -206,7 +206,7 @@ public class TableDependencyTreeDisplay
 	{
 		String parenttable = parent.getTable().getTableName();
 
-		this.nodesToExpand = new ArrayList<TreeNode[]>();
+		this.nodesToExpand = new ArrayList<>();
 
 		DependencyNode child = null;
 		DefaultMutableTreeNode treeNode = null;

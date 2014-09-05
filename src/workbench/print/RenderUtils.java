@@ -38,7 +38,7 @@ public class RenderUtils
 			return lines;
 		}
 
-		List<String> strings = new ArrayList<String>(lines.size());
+		List<String> strings = new ArrayList<>(lines.size());
 		for (String line : lines)
 		{
 			wrapLineInto(line, strings, fm, maxWidth);

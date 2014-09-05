@@ -45,7 +45,7 @@ public class WbIsolationLevel
 	extends SqlCommand
 {
 	public static final String VERB = "WbIsolationLevel";
-	private final Map<String, Integer> levelMap = new TreeMap<String, Integer>(CaseInsensitiveComparator.INSTANCE);
+	private final Map<String, Integer> levelMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
 	public WbIsolationLevel()
 	{

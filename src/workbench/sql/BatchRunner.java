@@ -120,7 +120,7 @@ public class BatchRunner
 	private String command;
 	private boolean storeErrorMessages;
 	private MessageBuffer errors;
-	private final List<DataStore> queryResults = new ArrayList<DataStore>();
+	private final List<DataStore> queryResults = new ArrayList<>();
 	private Replacer replacer;
 
 	public BatchRunner()
@@ -135,7 +135,7 @@ public class BatchRunner
 		this();
 		WbStringTokenizer tok = new WbStringTokenizer(aFilelist, ",", false, "\"'", false);
 		List<String> names = tok.getAllTokens();
-		filenames = new ArrayList<String>(names.size());
+		filenames = new ArrayList<>(names.size());
 		for (String name : names)
 		{
 			filenames.add(name.trim());
@@ -145,7 +145,7 @@ public class BatchRunner
 	public BatchRunner(List<File> files)
 	{
 		this();
-		filenames = new ArrayList<String>(files.size());
+		filenames = new ArrayList<>(files.size());
 		for (File f : files)
 		{
 			filenames.add(f.getAbsolutePath());

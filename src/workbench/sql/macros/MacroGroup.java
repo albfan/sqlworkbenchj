@@ -41,7 +41,7 @@ public class MacroGroup
 	implements Sortable
 {
 	private String name;
-	private List<MacroDefinition> macros = new ArrayList<MacroDefinition>();
+	private List<MacroDefinition> macros = new ArrayList<>();
 	private int sortOrder;
 	private boolean modified = false;
 	private boolean showInMenu = true;
@@ -126,7 +126,7 @@ public class MacroGroup
 	 */
 	public synchronized List<MacroDefinition> getVisibleMacros()
 	{
-		List<MacroDefinition> result = new ArrayList<MacroDefinition>(macros.size());
+		List<MacroDefinition> result = new ArrayList<>(macros.size());
 		for (MacroDefinition macro : macros)
 		{
 			if (macro.isVisibleInMenu())

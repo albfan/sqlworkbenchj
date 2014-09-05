@@ -98,14 +98,14 @@ public class StatementRunner
 	private OutputPrinter messageOutput;
 	private boolean traceStatements;
 	private Savepoint savepoint;
-	private final List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
+	private final List<PropertyChangeListener> changeListeners = new ArrayList<>();
 	private int maxRows = -1;
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
 	private EndReadOnlyTrans endTransType;
 	private TransactionChecker transactionChecker;
 	private CommandTester cmdTester;
-	private final Map<String, String> sessionAttributes = new TreeMap<String, String>();
+	private final Map<String, String> sessionAttributes = new TreeMap<>();
 	private final	RemoveEmptyResultsAnnotation removeAnnotation = new RemoveEmptyResultsAnnotation();
 
 	// The history provider is here to give SqlCommands access to the command history.

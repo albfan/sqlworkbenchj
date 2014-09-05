@@ -324,7 +324,7 @@ public class TablePrinter
 
 		// the key to the map is the horizontal page number
 		// the value will be the column were that page starts
-		Map<Integer, Integer> horizontalBrakeColumns = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> horizontalBrakeColumns = new HashMap<>();
 
 		// First page always starts at column 0
 		horizontalBrakeColumns.put(Integer.valueOf(0), Integer.valueOf(0));

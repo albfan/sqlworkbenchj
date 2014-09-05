@@ -10,6 +10,7 @@
 	<!ENTITY jdbc-setup SYSTEM "jdbc-setup.xml">
 	<!ENTITY profiles SYSTEM "profiles.xml">
 	<!ENTITY editor SYSTEM "editor.xml">
+	<!ENTITY bookmarks SYSTEM "bookmarks.xml">
 	<!ENTITY delimiter SYSTEM "delimiter.xml">
 	<!ENTITY using SYSTEM "using.xml">
   <!ENTITY annotations SYSTEM "annotations.xml">
@@ -48,6 +49,7 @@
 &jdbc-setup;
 &profiles;
 &editor;
+&bookmarks;
 &delimiter;
 &using;
 &annotations;

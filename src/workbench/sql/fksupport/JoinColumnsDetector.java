@@ -158,7 +158,7 @@ public class JoinColumnsDetector
 	private Map<String, String> getJoinColumns(TableIdentifier table1, TableAlias alias1, TableIdentifier table2, TableAlias alias2)
 		throws SQLException
 	{
-		Map<String, String> columns = new HashMap<String, String>(2);
+		Map<String, String> columns = new HashMap<>(2);
 		List<DependencyNode> refTables = connection.getObjectCache().getReferencedTables(table2);
 
 		for (DependencyNode node : refTables)

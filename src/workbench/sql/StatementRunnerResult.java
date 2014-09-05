@@ -211,7 +211,7 @@ public class StatementRunnerResult
 
 	public int addDataStore(DataStore ds)
 	{
-		if (this.datastores == null) this.datastores = new ArrayList<DataStore>(5);
+		if (this.datastores == null) this.datastores = new ArrayList<>(5);
 		ds.resetCancelStatus();
 		this.datastores.add(ds);
 		return this.datastores.size();
@@ -219,7 +219,7 @@ public class StatementRunnerResult
 
 	public int addResultSet(ResultSet rs)
 	{
-		if (this.results == null) this.results = new LinkedList<ResultSet>();
+		if (this.results == null) this.results = new LinkedList<>();
 		this.results.add(rs);
 		return this.results.size();
 	}

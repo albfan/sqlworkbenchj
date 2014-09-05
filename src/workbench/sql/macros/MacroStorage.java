@@ -63,8 +63,8 @@ public class MacroStorage
 	public MacroStorage(String id)
 	{
 		storageId = id;
-		allMacros = new TreeMap<String, MacroDefinition>(CaseInsensitiveComparator.INSTANCE);
-		groups = new ArrayList<MacroGroup>();
+		allMacros = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+		groups = new ArrayList<>();
 	}
 
 	public synchronized MacroDefinition getMacro(String key)
@@ -114,7 +114,7 @@ public class MacroStorage
 	{
 		if (this.changeListeners == null)
 		{
-			this.changeListeners = new ArrayList<MacroChangeListener>();
+			this.changeListeners = new ArrayList<>();
 		}
 		this.changeListeners.add(aListener);
 	}
@@ -434,7 +434,7 @@ public class MacroStorage
 	 */
 	public List<MacroGroup> getVisibleGroups()
 	{
-		List<MacroGroup> result = new ArrayList<MacroGroup>(groups.size());
+		List<MacroGroup> result = new ArrayList<>(groups.size());
 		synchronized (lock)
 		{
 			for (MacroGroup group : groups)

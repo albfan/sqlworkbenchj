@@ -25,8 +25,6 @@ package workbench.gui.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
@@ -51,13 +49,14 @@ import workbench.gui.components.TextFieldWidthAdjuster;
  */
 public class MacroOptionsPanel
 	extends JPanel
-	implements Restoreable, ActionListener
+	implements Restoreable
 {
 
 	public MacroOptionsPanel()
 	{
 		super();
 		initComponents();
+		enterRuns.setText(ResourceMgr.getFormattedString("LblMacroPopEnterRun", KeyEvent.getKeyText(KeyEvent.VK_ENTER)));
 		TextFieldWidthAdjuster adjuster = new TextFieldWidthAdjuster();
 		adjuster.adjustAllFields(this);
 		StoreableKeyStroke space = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
@@ -75,6 +74,7 @@ public class MacroOptionsPanel
 		cbExpansionKey.setSelectedItem(key);
 		closeEsc.setSelected(GuiSettings.getCloseMacroPopupWithEsc());
 		saveWksp.setSelected(GuiSettings.getStoreMacroPopupInWorkspace());
+		enterRuns.setSelected(GuiSettings.getRunMacroWithEnter());
 	}
 
 	@Override
@@ -84,6 +84,7 @@ public class MacroOptionsPanel
 		GuiSettings.setExpansionKey(key.getKeyStroke());
 		GuiSettings.setCloseMacroPopupWithEsc(closeEsc.isSelected());
 		GuiSettings.setStoreMacroPopupInWorkspace(saveWksp.isSelected());
+		GuiSettings.setRunMacroWithEnter(enterRuns.isSelected());
 	}
 
 
@@ -102,6 +103,7 @@ public class MacroOptionsPanel
     jPanel1 = new JPanel();
     closeEsc = new JCheckBox();
     saveWksp = new JCheckBox();
+    enterRuns = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -128,7 +130,6 @@ public class MacroOptionsPanel
     jPanel1.setLayout(new GridBagLayout());
 
     closeEsc.setText(ResourceMgr.getString("LblMacroPopCloseEsc")); // NOI18N
-    closeEsc.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -146,6 +147,15 @@ public class MacroOptionsPanel
     gridBagConstraints.weightx = 1.0;
     jPanel1.add(saveWksp, gridBagConstraints);
 
+    enterRuns.setText(ResourceMgr.getString("LblMacroPopEnterRun")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    jPanel1.add(enterRuns, gridBagConstraints);
+
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -156,27 +166,13 @@ public class MacroOptionsPanel
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(10, 7, 0, 8);
     add(jPanel1, gridBagConstraints);
-  }
-
-  // Code for dispatching events from components to event handlers.
-
-  public void actionPerformed(ActionEvent evt)
-  {
-    if (evt.getSource() == closeEsc)
-    {
-      MacroOptionsPanel.this.closeEscActionPerformed(evt);
-    }
   }// </editor-fold>//GEN-END:initComponents
-
-  private void closeEscActionPerformed(ActionEvent evt)//GEN-FIRST:event_closeEscActionPerformed
-  {//GEN-HEADEREND:event_closeEscActionPerformed
-    // TODO add your handling code here:
-  }//GEN-LAST:event_closeEscActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JComboBox cbExpansionKey;
   private JCheckBox closeEsc;
+  private JCheckBox enterRuns;
   private JLabel jLabel3;
   private JPanel jPanel1;
   private JCheckBox saveWksp;

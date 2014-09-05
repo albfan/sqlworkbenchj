@@ -53,7 +53,7 @@ public class WbSetProp
 	public static final String PARAM_TYPE = "type";
 	public static final String PARAM_PROP = "property";
 	public static final String PARAM_VALUE = "value";
-	private final Map<String, String> configMap = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+	private final Map<String, String> configMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
 	public WbSetProp()
 	{

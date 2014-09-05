@@ -122,8 +122,11 @@ public class MacroPopup
 		}
 
 		runAction = new RunMacroAction(mainWindow, null, -1);
-		runAction.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
-		runAction.addToInputMap(tree, JComponent.WHEN_FOCUSED);
+		if (GuiSettings.getRunMacroWithEnter())
+		{
+			runAction.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
+			runAction.addToInputMap(tree, JComponent.WHEN_FOCUSED);
+		}
 		editAction = new EditMacroAction();
 		copyTextAction = new WbAction(this, "copy-query-text");
 		copyTextAction.setMenuTextByKey("MnuTxtCopyMacroTxt");

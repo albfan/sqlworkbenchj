@@ -78,7 +78,7 @@ public class WbCall
 	private Map<Integer, ParameterDefinition> refCursor = null;
 
 	// Stores all parameters that need an input
-	private List<ParameterDefinition> inputParameters = new ArrayList<ParameterDefinition>(5);
+	private List<ParameterDefinition> inputParameters = new ArrayList<>(5);
 	private String sqlUsed = null;
 
 	private StatementParameterPrompter parameterPrompter;
@@ -351,7 +351,7 @@ public class WbCall
 		ParameterMetaData parmData = cstmt.getParameterMetaData();
 		if (parmData != null)
 		{
-			parameterNames = new ArrayList<ParameterDefinition>();
+			parameterNames = new ArrayList<>();
 
 			for (int i = 0; i < parmData.getParameterCount(); i++)
 			{
@@ -464,7 +464,7 @@ public class WbCall
 		}
 		else if (procs.size() > 1)
 		{
-			List<DataStore> procParams = new ArrayList<DataStore>(procs.size());
+			List<DataStore> procParams = new ArrayList<>(procs.size());
 
 			// if more than one procedure was found this could be an overloaded one
 			// so loop through all definitions and compare the number of parameters
@@ -562,7 +562,7 @@ public class WbCall
 			int realParamIndex = 1 + parameterIndexOffset;
 			int inputIndex = 0;
 
-			parameterNames = new ArrayList<ParameterDefinition>(definedParamCount);
+			parameterNames = new ArrayList<>(definedParamCount);
 			for (int i = 0; i < definedParamCount; i++)
 			{
 				int dataType = params.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, -1);
@@ -629,7 +629,7 @@ public class WbCall
 						if (dbmsTypeOverride != Integer.MIN_VALUE) dataType = dbmsTypeOverride;
 						if (refCursor == null)
 						{
-							refCursor = new HashMap<Integer, ParameterDefinition>();
+							refCursor = new HashMap<>();
 						}
 						refCursor.put(Integer.valueOf(realParamIndex), def);
 					}

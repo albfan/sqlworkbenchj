@@ -62,7 +62,7 @@ public class CommandTester
 
 	public CommandTester()
 	{
-		commands = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+		commands = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 		putVerb(WbCall.VERB);
 		putVerb(WbConfirm.VERB);
 		putVerb(WbCopy.VERB);

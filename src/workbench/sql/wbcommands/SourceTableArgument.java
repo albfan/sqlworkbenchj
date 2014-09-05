@@ -44,8 +44,8 @@ import workbench.util.WbStringTokenizer;
  */
 public class SourceTableArgument
 {
-	private List<String> missingTables = new ArrayList<String>();
-	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+	private List<String> missingTables = new ArrayList<>();
+	private List<TableIdentifier> tables = new ArrayList<>();
 	private boolean wildcardsPresent;
 	private boolean schemaAsCatalog;
 
@@ -242,7 +242,7 @@ public class SourceTableArgument
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setCheckBrackets(false);
 		tok.setKeepQuotes(true);
-		List<String> result = new LinkedList<String>();
+		List<String> result = new LinkedList<>();
 		while (tok.hasMoreTokens())
 		{
 			String element = tok.nextToken();

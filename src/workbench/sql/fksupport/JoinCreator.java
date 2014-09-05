@@ -205,7 +205,7 @@ public class JoinCreator
 
 		TableAlias firstTable = getJoinTable();
 
-		List<TableAlias> tables = new ArrayList<TableAlias>(tablePositions.size());
+		List<TableAlias> tables = new ArrayList<>(tablePositions.size());
 
 		for (Map.Entry<Integer, TableAlias> entry : tablePositions.entrySet())
 		{
@@ -221,7 +221,7 @@ public class JoinCreator
 	public TableAlias getJoinTable()
 	{
 		Integer pos = getTableIndexBeforeCursor();
-		List<Integer> tableIndex = new ArrayList<Integer>(tablePositions.keySet());
+		List<Integer> tableIndex = new ArrayList<>(tablePositions.keySet());
 		int index = tableIndex.indexOf(pos);
 		if (index > 0)
 		{
@@ -239,7 +239,7 @@ public class JoinCreator
 
 	private Integer getTableIndexBeforeCursor()
 	{
-		List<Integer> tableIndex = new ArrayList<Integer>(tablePositions.keySet());
+		List<Integer> tableIndex = new ArrayList<>(tablePositions.keySet());
 		for (int i=0; i < tableIndex.size(); i++)
 		{
 			if (tableIndex.get(i) > cursorPos && i > 0)
@@ -252,7 +252,7 @@ public class JoinCreator
 
 	private void retrieveTablePositions()
 	{
-		tablePositions = new TreeMap<Integer, TableAlias>();
+		tablePositions = new TreeMap<>();
 		SQLLexer lexer = new SQLLexer(sql);
 		int bracketCount = 0;
 

@@ -26,6 +26,7 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -49,7 +50,7 @@ public class EncodingPanel
 
 	public EncodingPanel()
 	{
-		this(Settings.getInstance().getDefaultEncoding(), true);
+		this(Settings.getInstance().getDefaultFileEncoding(), true);
 	}
 
 	public EncodingPanel(String encoding)
@@ -57,20 +58,21 @@ public class EncodingPanel
 		this(encoding, true);
 	}
 
-	public EncodingPanel(String encoding, boolean showLabel)
+	public EncodingPanel(final String encoding, boolean showLabel)
 	{
 		super();
 		String[] charsets = EncodingUtil.getEncodings();
-		int count = charsets.length;
-		for (int i=0; i < count; i++)
-		{
-			encodings.addItem(charsets[i]);
-		}
 
+		DefaultComboBoxModel model = new DefaultComboBoxModel(charsets);
 		if (encoding != null)
 		{
-			encodings.setSelectedItem(encoding);
+			int index = model.getIndexOf(encoding);
+			if (index < 0)
+			{
+				model.addElement(encoding);
+			}
 		}
+		encodings.setModel(model);
 
 		this.setLayout(new GridBagLayout());
 
@@ -125,6 +127,12 @@ public class EncodingPanel
 			@Override
 			public void run()
 			{
+				DefaultComboBoxModel model = (DefaultComboBoxModel)encodings.getModel();
+				int index = model.getIndexOf(enc);
+				if (index < 0)
+				{
+					encodings.addItem(enc);
+				}
 				encodings.setSelectedItem(enc);
 			}
 		});

@@ -117,7 +117,7 @@ public class WbGenDelete
 		}
 
 		List<String> cols = cmdLine.getList(PARAM_COLUMN_VAL);
-		List<ColumnData> values = new ArrayList<ColumnData>();
+		List<ColumnData> values = new ArrayList<>();
 		for (String def : cols)
 		{
 			String[] pair = def.split(":");

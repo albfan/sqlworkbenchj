@@ -492,7 +492,7 @@ public class ScriptParser
 	 */
 	private void parseCommands()
 	{
-		this.commands = new ArrayList<ScriptCommandDefinition>();
+		this.commands = new ArrayList<>();
 		ScriptIterator p = getParserInstance();
 		p.setScript(this.originalScript);
 		p.setStoreStatementText(false); // no need to store the statements twice

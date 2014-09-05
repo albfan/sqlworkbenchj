@@ -521,7 +521,7 @@ public class TriggerListPanel
 		if (this.triggerList.getSelectedRowCount() == 0) return null;
 		int[] rows = this.triggerList.getSelectedRows();
 		int count = rows.length;
-		List<DbObject> objects = new ArrayList<DbObject>(count);
+		List<DbObject> objects = new ArrayList<>(count);
 		if (count == 0) return objects;
 
 		for (int i=0; i < count; i ++)

@@ -536,7 +536,7 @@ private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN
 				// not DbObjects, so I need to create a new list.
 				// The list should not contain only TableIdentifiers anyway, otherwise
 				// the ObjectDropper wouldn't (or shouldn't) support FK checking
-				List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+				List<TableIdentifier> tables = new ArrayList<>();
 				for (DbObject dbo : dropper.getObjects())
 				{
 					if (dbo instanceof TableIdentifier)

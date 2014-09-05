@@ -46,7 +46,7 @@ public class ColumnWidthDefinition
 		{
 			return;
 		}
-		this.columnWidths = new HashMap<ColumnIdentifier, Integer>();
+		this.columnWidths = new HashMap<>();
 
 		for (String def : entries)
 		{

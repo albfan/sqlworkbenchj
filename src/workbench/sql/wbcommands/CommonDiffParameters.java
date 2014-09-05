@@ -70,8 +70,8 @@ public class CommonDiffParameters
 
 	private RowActionMonitor monitor;
 	private ArgumentParser cmdLine;
-	private List<String> missingRefTables = new ArrayList<String>();
-	private List<String> missingTargetTables = new ArrayList<String>();
+	private List<String> missingRefTables = new ArrayList<>();
+	private List<String> missingTargetTables = new ArrayList<>();
 
 	public CommonDiffParameters(ArgumentParser args)
 	{
@@ -289,8 +289,8 @@ public class CommonDiffParameters
 
 	public static class TableMapping
 	{
-		public List<TableIdentifier> referenceTables = new ArrayList<TableIdentifier>();
-		public List<TableIdentifier> targetTables = new ArrayList<TableIdentifier>();
+		public List<TableIdentifier> referenceTables = new ArrayList<>();
+		public List<TableIdentifier> targetTables = new ArrayList<>();
 
 		@Override
 		public String toString()

@@ -145,7 +145,7 @@ public class WbDataDiff
 
 	protected Map<String, Set<String>> getAlternateKeys(ArgumentParser command, StatementRunnerResult result)
 	{
-		Map<String, Set<String>> map = new TreeMap<String, Set<String>>(CaseInsensitiveComparator.INSTANCE);
+		Map<String, Set<String>> map = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
 		List<String> list = command.getList(PARAM_ALTERNATE_KEYS);
 		if (CollectionUtil.isEmpty(list))
@@ -162,7 +162,7 @@ public class WbDataDiff
 			if (elements != null && elements.length == 2)
 			{
 				List<String> l = StringUtil.stringToList(elements[1], ",", true, true, false, true);
-				Set<String> cols = new TreeSet<String>(comp);
+				Set<String> cols = new TreeSet<>(comp);
 				cols.addAll(l);
 				map.put(elements[0], cols);
 			}

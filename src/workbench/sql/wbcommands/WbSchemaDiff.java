@@ -221,7 +221,7 @@ public class WbSchemaDiff
 		else if (tarTables == null)
 		{
 			SourceTableArgument parms = new SourceTableArgument(refTables, referenceConnection);
-			List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+			List<TableIdentifier> tables = new ArrayList<>();
 			for (TableIdentifier tbl : parms.getTables())
 			{
 				TableIdentifier realTable = referenceConnection.getMetadata().findTable(tbl, false);

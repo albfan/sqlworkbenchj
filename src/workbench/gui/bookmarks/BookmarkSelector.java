@@ -100,12 +100,9 @@ public class BookmarkSelector
 	extends JPanel
 implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent, ChangeListener
 {
-	private static final String PROP_PREFIX = "workbench.gui.bookmarks.";
-	private static final String PROP_DO_SAVE_WIDTHS = PROP_PREFIX + "colwidths.save";
-	private static final String PROP_DO_SAVE_SORT = PROP_PREFIX + "sort.save";
-	private static final String PROP_SORT_DEF = PROP_PREFIX + "sort";
-	private static final String PROP_USE_CURRENT_TAB = PROP_PREFIX + "current.tab.default";
-	private static final String PROP_SEARCH_NAME = PROP_PREFIX + "search.name";
+	private static final String PROP_SORT_DEF = GuiSettings.PROP_BOOKMARK_PREFIX + "sort";
+	private static final String PROP_USE_CURRENT_TAB = GuiSettings.PROP_BOOKMARK_PREFIX + "current.tab.default";
+	private static final String PROP_SEARCH_NAME = GuiSettings.PROP_BOOKMARK_PREFIX + "search.name";
 
 	private final JTextField filterValue;
 	private final JComboBox tabSelector;
@@ -133,8 +130,8 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		filterValue.addActionListener(this);
 		filterValue.setToolTipText(ResourceMgr.getString("TxtBookmarkFilterTip"));
 
-		rememberColumnWidths = new CheckBoxAction("MnuTxtBookmarksSaveWidths", PROP_DO_SAVE_WIDTHS);
-		rememberSort = new CheckBoxAction("MnuTxtRememberSort", PROP_DO_SAVE_SORT);
+		rememberColumnWidths = new CheckBoxAction("MnuTxtBookmarksSaveWidths", GuiSettings.PROP_BOOKMARKS_SAVE_WIDTHS);
+		rememberSort = new CheckBoxAction("MnuTxtRememberSort", GuiSettings.PROP_BOOKMARKS_SAVE_SORT);
 
 		bookmarks = new WbTable(false, false, false)
 		{
@@ -269,7 +266,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 		setFocusTraversalPolicy(pol);
 
-		if (doSaveSortOrder())
+		if (GuiSettings.getSaveBookmarkSort())
 		{
 			String sort = Settings.getInstance().getProperty(PROP_SORT_DEF, null);
 			if (StringUtil.isNonBlank(sort))
@@ -376,7 +373,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	{
 		List<String> tabIds = BookmarkManager.getInstance().getTabs(window);
 
-		List<TabEntry> entries = new ArrayList<TabEntry>();
+		List<TabEntry> entries = new ArrayList<>();
 		entries.add(new TabEntry(null, ResourceMgr.getString("LblBookPanelAll"), -1));
 		for (String tabId : tabIds)
 		{
@@ -493,7 +490,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	{
 		int[] savedWidths = getSavedColumnWidths();
 
-		if (savedWidths != null && doSaveColumnWidths())
+		if (savedWidths != null && GuiSettings.getSaveBookmarkColWidths())
 		{
 			bookmarks.applyColumnWidths(savedWidths);
 		}
@@ -527,7 +524,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 			@Override
 			public void run()
 			{
-				if (doSaveColumnWidths())
+				if (GuiSettings.getSaveBookmarkColWidths())
 				{
 					saveColumnWidths();
 				}
@@ -667,23 +664,13 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	private void saveColumnWidths()
 	{
 		String widths = StringUtil.arrayToString(getColumnWidths());
-		Settings.getInstance().setProperty(PROP_PREFIX + "colwidths", widths);
+		Settings.getInstance().setProperty(GuiSettings.PROP_BOOKMARK_PREFIX + "colwidths", widths);
 	}
 
 	private int[] getSavedColumnWidths()
 	{
-		String widths = Settings.getInstance().getProperty(PROP_PREFIX + "colwidths", null);
+		String widths = Settings.getInstance().getProperty(GuiSettings.PROP_BOOKMARK_PREFIX + "colwidths", null);
 		return StringUtil.stringToArray(widths);
-	}
-
-	private boolean doSaveColumnWidths()
-	{
-		return Settings.getInstance().getBoolProperty(PROP_DO_SAVE_WIDTHS, false);
-	}
-
-	private boolean doSaveSortOrder()
-	{
-		return Settings.getInstance().getBoolProperty(PROP_DO_SAVE_SORT, false);
 	}
 
 	private boolean columnWidthChanged()
@@ -696,7 +683,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 
 	public void saveSettings()
 	{
-		if (doSaveSortOrder())
+		if (GuiSettings.getSaveBookmarkSort())
 		{
 			SortDefinition sort = bookmarks.getCurrentSortColumns();
 			String sortDef = sort.getDefinitionString();
@@ -704,7 +691,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		}
 		Settings.getInstance().setProperty(PROP_SEARCH_NAME, searchNameCbx.isSelected());
 		Settings.getInstance().setProperty(PROP_USE_CURRENT_TAB, useCurrentEditorCbx.isSelected());
-		if (columnWidthChanged() && doSaveColumnWidths())
+		if (columnWidthChanged() && GuiSettings.getSaveBookmarkColWidths())
 		{
 			saveColumnWidths();
 		}
@@ -765,7 +752,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		ValidatingDialog dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWinTitleBookmark"), picker);
 		ResourceMgr.setWindowIcons(dialog, "bookmark");
 		picker.dialog = dialog;
-		String prop = PROP_PREFIX + "select";
+		String prop = GuiSettings.PROP_BOOKMARK_PREFIX + "select";
 		if (!Settings.getInstance().restoreWindowSize(dialog, prop))
 		{
 			dialog.setSize(450,350);

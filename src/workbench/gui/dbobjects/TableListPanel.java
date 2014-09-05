@@ -516,7 +516,7 @@ public class TableListPanel
 				int[] rows = indexes.getSelectedRows();
 				if (rows == null) return null;
 
-				ArrayList<DbObject> objects = new ArrayList<DbObject>(rows.length);
+				ArrayList<DbObject> objects = new ArrayList<>(rows.length);
 
 				TableIdentifier tbl = getObjectTable();
 
@@ -2148,7 +2148,7 @@ public class TableListPanel
 	@Override
 	public void addTableListDisplayClient(JTable aClient)
 	{
-		if (this.tableListClients == null) this.tableListClients = new ArrayList<JTable>();
+		if (this.tableListClients == null) this.tableListClients = new ArrayList<>();
 		if (!this.tableListClients.contains(aClient)) this.tableListClients.add(aClient);
 		if (tableList != null && tableList.getRowCount() > 0)
 		{
@@ -2203,7 +2203,7 @@ public class TableListPanel
 		int count = rows.length;
 		if (count == 0) return null;
 
-		List<DbObject> result = new ArrayList<DbObject>(count);
+		List<DbObject> result = new ArrayList<>(count);
 		for (int i=0; i < count; i++)
 		{
 			DbObject db = (DbObject)tableList.getDataStore().getRow(rows[i]).getUserObject();

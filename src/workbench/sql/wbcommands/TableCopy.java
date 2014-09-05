@@ -226,7 +226,7 @@ class TableCopy
 
 		// Use a LinkedHashMap to make sure the order of the columns
 		// is preserved (in case -createTable) was also specified
-		Map<String, String> mapping = new LinkedHashMap<String, String>();
+		Map<String, String> mapping = new LinkedHashMap<>();
 		for (int i=0; i < count; i++)
 		{
 			String s = l.get(i);
