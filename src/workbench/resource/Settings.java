@@ -811,6 +811,11 @@ public class Settings
 		return getProperty("workbench.export.defaultencodings", "UTF-8,ISO-8859-1,ISO-8859-15");
 	}
 
+	public List<String> getEncodingsToUse()
+	{
+		return getListProperty("workbench.encodings", false, null);
+	}
+
 	/**
 	 * Return true if the application should be terminated if the first connect
 	 * dialog is cancelled.

@@ -36,6 +36,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,6 +44,7 @@ import java.util.regex.Pattern;
 import javax.swing.JComponent;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 /**
  * Utility class to handle encoding related stuff
@@ -153,19 +155,39 @@ public class EncodingUtil
 	{
 		if (charsets == null)
 		{
-			long start = System.currentTimeMillis();
-			SortedMap<String,Charset> sets = java.nio.charset.Charset.availableCharsets();
-			charsets = new String[sets.size()];
-			int i=0;
-			for (String name : sets.keySet())
+			List<String> toUse = Settings.getInstance().getEncodingsToUse();
+			if (CollectionUtil.isEmpty(toUse))
 			{
-				charsets[i] = name;
-				i++;
+				charsets = getSystemCharsets();
 			}
-			long duration = System.currentTimeMillis() - start;
-			LogMgr.logDebug("EncodingUtil.getEncodings()", "Retrieving encodings took: " + duration + "ms");
+			else
+			{
+				charsets = new String[toUse.size()];
+				int i=0;
+				for (String encoding : toUse)
+				{
+					charsets[i] = encoding;
+					i++;
+				}
+			}
 		}
 		return charsets;
+	}
+
+	private static String[] getSystemCharsets()
+	{
+		long start = System.currentTimeMillis();
+		SortedMap<String, Charset> sets = java.nio.charset.Charset.availableCharsets();
+		String[] result = new String[sets.size()];
+		int i = 0;
+		for (String name : sets.keySet())
+		{
+			result[i] = name;
+			i++;
+		}
+		long duration = System.currentTimeMillis() - start;
+		LogMgr.logDebug("EncodingUtil.getEncodings()", "Retrieving encodings took: " + duration + "ms");
+		return result;
 	}
 
 	/**
