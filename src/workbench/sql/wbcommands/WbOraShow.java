@@ -31,11 +31,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import workbench.db.JdbcUtils;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.db.JdbcUtils;
 import workbench.db.oracle.OracleErrorInformationReader;
 
 import workbench.storage.DataStore;
@@ -193,7 +193,7 @@ public class WbOraShow
 			if (result.hasDataStores() && result.getDataStores().get(0).getRowCount() == 0)
 			{
 				result.clear();
-				result.addMessage("Recyclebin is empty.");
+				result.addMessageByKey("MsgRecyclebinEmpty");
 			}
 			result.setSuccess();
 		}
