@@ -62,8 +62,8 @@
   <para>
     <important>
       Oracles's <literal>BFILE</literal>, PostgreSQL's <literal>large object</literal> and SQL Server's <literal>filestream</literal>
-      types are not real <literal>BLOB</literal> datatypes and are currently not exported by WbExport. Essentially only BLOB columns
-      that are reported as <literal>BLOB</literal>, <literal>BINARY</literal>, <literal>VARBINARY</literal> or <literal>LONGVARBINARY</literal>
+      types are not real <literal>BLOB</literal> datatypes (from a JDBC point of view) and are currently not exported by WbExport.
+      Only columns that are reported as <literal>BLOB</literal>, <literal>BINARY</literal>, <literal>VARBINARY</literal> or <literal>LONGVARBINARY</literal>
       in the column "JDBC type" in the DbExplorer will be exported correctly into a separate file.
     </important>
   </para>
@@ -101,7 +101,7 @@
       &wb-productname; supports three different Excel file formats:
     </para>
 
-		<informaltable frame="all">
+		<informaltable frame="all" id="export-xls-formats">
 			<tgroup cols="2" align="left">
 				<colspec colname="c1" />
 				<colspec colname="c2" />
@@ -116,30 +116,41 @@
 					<row>
 						<entry>xlsm</entry>
 						<entry>
-              <para>This is the plain XML ("SpreadsheetML") format introduced with Office 2003. This format is always
-              available and does not need any additional libraries.</para>
-              <para>Files with this format should be saved with
-              the extension <emphasis role="bold">xml</emphasis> (otherwise Office is not able to open them properly)</para>
+              <para>
+                This is the plain XML ("SpreadsheetML") format introduced with Office 2003. This format is always
+                available and does not need any additional libraries.
+              </para>
+              <para>
+                Files with this format should be saved with the extension <emphasis role="bold">xml</emphasis> (otherwise Office is not able to open them properly)
+              </para>
             </entry>
           </row>
+
 					<row>
 						<entry>xls</entry>
 						<entry>
-              <para>This is the "old" binary format using by Excel 97 up to 2003.
-              To export this format, only <literal>poi.jar</literal> is needed. If the library is not available,
-              this format will not be listed in the export dialog ("Save data as...")</para>
-              <para>Files with this format should be saved with
-              the extension <emphasis role="bold">xls</emphasis></para>
+              <para>
+                This is the old binary format using by Excel 97 up to 2003. To export this format, only <literal>poi.jar</literal> is needed.
+                If the library is not available, this format will not be listed in the export dialog ("Save data as...")
+              </para>
+              <para>
+                Files with this format should be saved with the extension <emphasis role="bold">xls</emphasis>
+              </para>
             </entry>
           </row>
+
 					<row>
 						<entry>xlsx</entry>
 						<entry>
-              <para>This is the "new" XML format (OfficeOpen XML) introduced with Office 2007. To create this file format,
-              additionaly libraries are required. If those libraries are not available,
-              this format will not be listed in the export dialog ("Save data as...")</para>
-              <para>Files with this format should be saved with
-              the extension <emphasis role="bold">xlsx</emphasis></para>
+              <para>
+                This is the "new" XML format (OfficeOpen XML) introduced with Office 2007. To create this file format,
+                additionaly libraries are required. If those libraries are not available,
+                this format will not be listed in the export dialog ("Save data as...")
+              </para>
+              <para>
+                Files with this format should be saved with
+                the extension <emphasis role="bold">xlsx</emphasis>
+              </para>
             </entry>
           </row>
         </tbody>
@@ -155,7 +166,6 @@
       <ulink url="http://www.sql-workbench.net/poi-add-on2.zip"/>. After downloading the archive, unzip it
       into the directory where <literal>sqlworkbench.jar</literal> is located.
     </para>
-
 
     <important>
       <para>
@@ -251,21 +261,23 @@
 					<row>
 						<entry>-file</entry>
 						<entry>
-              The output file to which the exported data is written. This parameter is ignored if
-              <literal>-outputDir</literal> is also specified.
+              <para>The output file to which the exported data is written.</para>
+              <para>
+                 This parameter is ignored if <literal>-outputDir</literal> is also specified.
+              </para>
 						</entry>
 					</row>
 
 					<row>
 						<entry>-createDir</entry>
 						<entry>
-							If this parameter is set to true, &wb-productname; will create any
+              If this parameter is set to <literal>true</literal>, &wb-productname; will create any
 							needed directories when creating the output file.
 						</entry>
 					</row>
 
 					<row>
-						<entry>-sourceTable</entry>
+						<entry id="export-source-table">-sourceTable</entry>
 						<entry>
 							<para>Defines a list of tables to be exported. If this
 								switch is used, <literal>-outputdir</literal> is also required
@@ -311,7 +323,7 @@
             </entry>
           </row>
 					<row>
-						<entry>-types</entry>
+						<entry id="export-object-types">-types</entry>
 						<entry>
               <para>
                 Selects the object types to be exported. By default only TABLEs are exported. If you want to export
@@ -324,7 +336,7 @@
             </entry>
           </row>
 					<row>
-						<entry>-excludeTables</entry>
+						<entry id="export-exclude-tables">-excludeTables</entry>
 						<entry>
               <para>
                 The tables listed in this parameter will not be exported. This can be used when all but a few tables
@@ -366,7 +378,7 @@
 					</row>
 
 					<row>
-						<entry>-outputDir</entry>
+						<entry id="export-outputdir">-outputDir</entry>
 						<entry>
               When using the <literal>-sourceTable</literal> switch
 							with multiple tables, this parameter is mandatory and defines
@@ -382,7 +394,7 @@
 						</entry>
 					</row>
 					<row>
-						<entry>-encoding</entry>
+						<entry id="export-encoding">-encoding</entry>
 						<entry>
               <para>
                 Defines the encoding in which the file should be
@@ -399,6 +411,7 @@
               </para>
 						</entry>
 					</row>
+
 					<row>
 						<entry>-showEncodings</entry>
 						<entry>
@@ -408,7 +421,7 @@
 					</row>
 
 					<row>
-						<entry>-lineEnding</entry>
+						<entry id="export-line-ending">-lineEnding</entry>
 						<entry>
 							<para>Possible values are: <literal>crlf</literal>, <literal>lf</literal></para>
 							<para>
@@ -433,7 +446,7 @@
 					</row>
 
 					<row>
-						<entry>-header</entry>
+						<entry id="export-header">-header</entry>
 
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
@@ -447,7 +460,7 @@
 					</row>
 
 					<row>
-						<entry>-compress</entry>
+						<entry id="export-compress">-compress</entry>
             <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 						<entry>
 							<para>
@@ -504,8 +517,8 @@
 							</para>
 							<para>
                 <important>
-									Note that SQL exports (<literal>-type=sqlinsert</literal>) generated with
-									<literal>-clobAsFile=true</literal> can only be run with &wb-productname;!
+									SQL exports (<literal>-type=sqlinsert</literal>) generated with
+									<literal>-clobAsFile=true</literal> can only be used with &wb-productname;.
                 </important>
 							</para>
 							<para>
@@ -603,8 +616,7 @@
 					</row>
 
 					<row>
-						<entry>-dateFormat</entry>
-
+						<entry id="export-dateformat">-dateFormat</entry>
 						<entry>
 							The date <link linkend="options-date-format">format</link> to be used when
 							writing date columns into the output file. This parameter is ignored for
@@ -622,7 +634,7 @@
 					</row>
 
 					<row>
-						<entry>-blobType</entry>
+						<entry id="export-blob-type">-blobType</entry>
 						<entry>
 							<para>Possible values: <literal>file</literal>, <literal>dbms</literal>, <literal>ansi</literal>, <literal>base64</literal>
 							</para>
@@ -685,8 +697,9 @@
               </para>
 						</entry>
 					</row>
+
           <row>
-            <entry>-replaceExpression -replaceWith</entry>
+            <entry id="export-replace">-replaceExpression -replaceWith</entry>
             <entry>
               <para>
                 Using these parameters, arbitrary text can be replaced during the export. <literal>-replaceExpression</literal>
@@ -700,8 +713,10 @@
               </para>
               <para>
                 Because the search and replace is done before the data is converted to the output format, it
-                can be used for all export types. Only character columns (<literal>CHAR</literal>, <literal>VARCHAR</literal>,
-                <literal>CLOB</literal>, <literal>LONGVARCHAR</literal>) are taken into account.
+                can be used for all export types (text, xml, Excel, ...).
+              </para>
+              <para>
+                Only character columns (<literal>CHAR</literal>, <literal>VARCHAR</literal>, <literal>CLOB</literal>, <literal>LONGVARCHAR</literal>) are taken into account.
               </para>
             </entry>
           </row>
@@ -743,7 +758,7 @@
 
 				<tbody valign="top">
 					<row>
-						<entry>-delimiter</entry>
+						<entry id="export-text-delimiter">-delimiter</entry>
 
 						<entry>The given string sequence will be
 						placed between two columns. The default is a tab character
@@ -847,10 +862,11 @@
 								range [32-126] and [161-255]
 							</para>
 							<para>
-								This will write a unicode representation of the character into the
-								text file e.g. \n for a newline, \u00F6 for &ouml;. This file
+                This will write a "short-hand" representation of control characters (e.g. <literal>\n</literal>
+                for a newline) and a unicode representation for characters above ASCII 126
+                (e.g. <literal>\u00F6</literal> for <literal>&ouml;</literal>). This file
 								can only be imported using &wb-productname; (at least I don't know
-								of any DBMS specific loader that will decode this properly)
+								of any DBMS specific loader that will decode this properly).
 							</para>
 							<para>
 								If character escaping is enabled, then the quote character will be escaped
@@ -869,7 +885,7 @@
 					</row>
 
 					<row>
-						<entry>-nullString</entry>
+						<entry id="text-nullstring">-nullString</entry>
 						<entry>
 							<para>
                 Defines the string value that should be written into the output file for a <literal>NULL</literal> value.
@@ -929,8 +945,7 @@
 					<row>
 						<entry>-table</entry>
 						<entry>
-							The given tablename will be put
-							into the &#60;table&#62; tag as an attribute.
+              The given tablename will be put into the <literal>&#60;table&#62;</literal> tag as an attribute.
 						</entry>
 					</row>
 
@@ -938,8 +953,9 @@
 						<entry>-decimal</entry>
 						<entry>The decimal symbol to be used for numbers. The default is a dot (e.g. 3.14152)</entry>
 					</row>
+
 					<row>
-						<entry>-useCDATA</entry>
+						<entry id="export-xml-cdata">-useCDATA</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -969,6 +985,7 @@
 						different format. If -stylesheet is specified, -xsltoutput has
 						to be specified as well.</entry>
 					</row>
+
 					<row>
 						<entry>-xsltOutput</entry>
 						<entry>The resulting output file (specified
@@ -980,15 +997,12 @@
 						<entry>-verboseXML</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>This parameter controls the tags that
-								are used in the XML file and minor formatting features.
-								The default is -verboseXML=true and this will generate
-								more readable tags and formatting. However the overhead
-								imposed by this is quite high. Using -verboseXML=false
-								uses shorter tag names (not longer then two characters) and
-								does put more information in one line. This output is
-								harder to read for a human but is smaller in size which
-								could be important for exports with large result sets.
+							<para>
+                This parameter controls the tags that are used in the XML file and minor formatting features.
+								The default is -verboseXML=true and this will generate more readable tags and formatting. However the overhead
+								imposed by this is quite high. Using -verboseXML=false uses shorter tag names
+                (not longer then two characters) and does put more information in one line. This output is
+								harder to read for a human but is smaller in size which could be important for exports with large result sets.
 							</para>
 						</entry>
 					</row>
@@ -1639,7 +1653,7 @@ FROM blob_table;</programlisting>
          -replaceExpression='(\n|\r\n)' -replaceWith='*'
          -sourceTable=export_table;</programlisting>
        <para>
-         This will replace each newline (either DOS CR/LF or Unix LF) with the character *.
+         This will replace each newline (either Windows' CR/LF or Unix LF) with the character *.
        </para>
        <para>
          The value for <literal>-replaceExpression</literal> defines a regular expression. In the example
