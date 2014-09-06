@@ -74,12 +74,12 @@ import workbench.sql.wbcommands.WbHistory;
 import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbIsolationLevel;
+import workbench.sql.wbcommands.WbList;
 import workbench.sql.wbcommands.WbListCatalogs;
 import workbench.sql.wbcommands.WbListIndexes;
 import workbench.sql.wbcommands.WbListPkDef;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
-import workbench.sql.wbcommands.WbList;
 import workbench.sql.wbcommands.WbListTriggers;
 import workbench.sql.wbcommands.WbListVars;
 import workbench.sql.wbcommands.WbLoadPkMapping;
@@ -299,6 +299,14 @@ public class CommandMapper
 			WbFeedback echo = new WbFeedback("ECHO");
 			this.cmdDispatch.put(echo.getVerb(), echo);
 
+			SqlCommand wbEcho = this.cmdDispatch.get(WbEcho.VERB);
+			this.cmdDispatch.put("prompt", wbEcho);
+
+			SqlCommand confirm = this.cmdDispatch.get(WbConfirm.VERB);
+			this.cmdDispatch.put("pause", confirm);
+
+			this.dbSpecificCommands.add("pause");
+			this.dbSpecificCommands.add("prompt");
 			this.dbSpecificCommands.add(alter.getVerb());
 			this.dbSpecificCommands.add(WbCall.EXEC_VERB_LONG);
 			this.dbSpecificCommands.add(WbCall.EXEC_VERB_SHORT);
