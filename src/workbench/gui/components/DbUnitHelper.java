@@ -45,7 +45,7 @@ public class DbUnitHelper
 		try
 		{
 			tested = true;
-			Class c = Class.forName("org.dbunit.dataset.ITable");
+			Class.forName("org.dbunit.dataset.ITable");
 			LogMgr.logInfo("DbUnitHelper.isDbUnitAvailable()", "DbUnit available");
 			available = true;
 		}

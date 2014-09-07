@@ -21,21 +21,19 @@
  */
 package workbench.gui.components;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.db.ColumnIdentifier;
 
 import workbench.storage.DataStore;
 
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.DefaultDataSet;
-import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.RowOutOfBoundsException;
 import org.dbunit.dataset.datatype.DataType;
-import org.dbunit.dataset.xml.FlatXmlDataSet;
 
 /**
  *
@@ -80,6 +78,10 @@ public class DBUnitTableAdapter
 				{
 					return dataStore.getResultInfo().getUpdateTable().getTableName();
 				}
+				else if (dataStore.getInsertTable() != null)
+				{
+					return dataStore.getInsertTable();
+				}
 				else
 				{
 					return "UNKNOWN";
@@ -90,14 +92,30 @@ public class DBUnitTableAdapter
 			public Column[] getPrimaryKeys()
 				throws DataSetException
 			{
-				return null;
+				if (!dataStore.hasPkColumns()) return null;
+
+				ColumnIdentifier[] columns = dataStore.getColumns();
+				if (columns == null) return null;
+				int pkCount = 0;
+				for (ColumnIdentifier col : columns)
+				{
+					if (col.isPkColumn()) pkCount++;
+				}
+				if (pkCount == 0) return null;
+				Column[] result = new Column[pkCount];
+				for (ColumnIdentifier col : columns)
+				{
+					DataType type = DataType.forSqlType(col.getDataType());
+					Column pk = new Column(col.getColumnName(), type);
+				}
+				return result;
 			}
 
 			@Override
 			public Column[] getColumns()
 				throws DataSetException
 			{
-				List<Column> columns = new ArrayList<Column>();
+				List<Column> columns = new ArrayList<>();
 				for (int i = 0; i < dataStore.getColumns().length; i++)
 				{
 					String columnName = dataStore.getColumnName(i);
@@ -112,7 +130,7 @@ public class DBUnitTableAdapter
 			public int getColumnIndex(String columnName)
 				throws DataSetException
 			{
-				return 0;
+				return dataStore.getColumnIndex(columnName);
 			}
 
 		};

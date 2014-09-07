@@ -91,6 +91,24 @@
 					generate valid SQL)
 				</para>
 			</listitem>
+			<listitem>
+				<para>DbUnit XML</para>
+				<para>
+          For this option to be available <literal>DbUnit</literal>, <literal>Log4j</literal> and
+          <literal>slf4j</literal> libraries must be copied into the same directory
+          where <literal>sqlworkbench.jar</literal> is located.
+        </para>
+        <para>
+          The following libraries are needed:
+          <itemizedlist>
+            <listitem><literal>dbunit-2.3.0.jar</literal> (or later)</listitem>
+            <listitem><literal>slf4j-api-1.7.7.jar</literal> (or later)</listitem>
+            <listitem><literal>slf4j-log4j12-1.7.7.jar</literal> (or later)</listitem>
+            <listitem><literal>log4j-1.2.15.jar</literal> (or later)</listitem>
+          </itemizedlist>
+				</para>
+			</listitem>
+
 		</itemizedlist>
 	</para>
 	<para>
@@ -136,8 +154,8 @@
 		</para>
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
-				<colspec colname="c1" colwidth="5cm" />
-				<colspec colname="c2" colwidth="10cm" />
+				<colspec colname="c1" />
+				<colspec colname="c2" />
 				<thead valign="top">
 					<row>
 						<entry>Option</entry>
