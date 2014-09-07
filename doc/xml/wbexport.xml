@@ -460,7 +460,7 @@
 					</row>
 
 					<row>
-						<entry id="export-compress">-compress</entry>
+						<entry id="export-param-compress">-compress</entry>
             <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 						<entry>
 							<para>
