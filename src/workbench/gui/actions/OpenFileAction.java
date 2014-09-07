@@ -53,6 +53,7 @@ import workbench.gui.sql.SqlPanel;
 
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -198,6 +199,7 @@ public class OpenFileAction
 				Settings.getInstance().setDefaultFileEncoding(encoding);
 
 				File[] files = fc.getSelectedFiles();
+
 				final boolean openInNewTab;
 				if (files.length == 1)
 				{
@@ -214,7 +216,8 @@ public class OpenFileAction
 
 				for (File sf : files)
 				{
-					WbFile f = new WbFile(sf);
+					final WbFile f = new WbFile(sf);
+
 					final String fname = f.getFullPath();
 					EventQueue.invokeLater(new Runnable()
 					{
@@ -222,6 +225,12 @@ public class OpenFileAction
 						public void run()
 						{
 							SqlPanel sql;
+							String encodingToUse = encoding;
+							if (StringUtil.isEmptyString(encodingToUse))
+							{
+								encodingToUse = FileUtil.detectFileEncoding(f);
+							}
+
 							if (openInNewTab)
 							{
 								sql = (SqlPanel) window.addTab();
@@ -233,7 +242,7 @@ public class OpenFileAction
 
 							if (sql != null)
 							{
-								sql.readFile(fname, encoding);
+								sql.readFile(fname, encodingToUse);
 							}
 							window.invalidate();
 							// this is necessary to update all menus and toolbars

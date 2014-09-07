@@ -507,7 +507,7 @@ public class FileUtil
 		}
 		finally
 		{
-			FileUtil.closeQuietely(writer);
+			closeQuietely(writer);
 		}
 	}
 
@@ -520,9 +520,10 @@ public class FileUtil
 
 		UniversalDetector detector = new UniversalDetector(null);
 		String encoding = null;
+		FileInputStream fis = null;
 		try
 		{
-			FileInputStream fis = new FileInputStream(file);
+			fis = new FileInputStream(file);
 			int nread;
 			while ((nread = fis.read(buf)) > 0 && !detector.isDone())
 			{
@@ -538,6 +539,7 @@ public class FileUtil
 		}
 		finally
 		{
+			closeQuietely(fis);
 			detector.reset();
 		}
 		return encoding;

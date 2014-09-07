@@ -93,6 +93,10 @@ public class FileDialogUtil
 			this.encoding = encodingPanel.getEncoding();
 
 			File fl = fc.getSelectedFile();
+			if (StringUtil.isEmptyString(encoding))
+			{
+				encoding = FileUtil.detectFileEncoding(fl);
+			}
 			FileFilter ff = fc.getFileFilter();
 			if (ff instanceof ExtensionFileFilter)
 			{

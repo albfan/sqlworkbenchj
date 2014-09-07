@@ -868,6 +868,10 @@ public class EditorPanel
 			try
 			{
 				String encoding = selector.getEncoding();
+				if (StringUtil.isEmptyString(encoding))
+				{
+					encoding = FileUtil.detectFileEncoding(fc.getSelectedFile());
+				}
 				this.saveFile(fc.getSelectedFile(), encoding, Settings.getInstance().getExternalEditorLineEnding());
 	      this.fireFilenameChanged(this.getCurrentFileName());
 				lastDir = fc.getCurrentDirectory().getAbsolutePath();
