@@ -110,6 +110,13 @@
       </para>
     </section>
 
+    <section id="charset-detector-license">
+      <title>Charset detector </title>
+      <para>
+        &wb-productname; uses the Java port of Mozilla's universal charset detector from <ulink url="https://code.google.com/p/juniversalchardet/"/>
+      </para>
+    </section>
+
     <section id="iharder-license">
       <title>iHarder - Base64 implementation</title>
       <para>

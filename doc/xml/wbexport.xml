@@ -979,7 +979,7 @@
 					</row>
 
 					<row>
-						<entry>-stylesheet</entry>
+						<entry id="export-stylesheet">-stylesheet</entry>
 						<entry>The name of the XSLT stylesheet that should be used
 						to transform the &wb-productname; specific XML file into a
 						different format. If -stylesheet is specified, -xsltoutput has
