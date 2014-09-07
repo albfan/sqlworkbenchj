@@ -1,6 +1,7 @@
 @echo off
 
 echo main.class=workbench.WbStarter>t.ini
+echo vm.heapsize.max.percent=50>>t.ini
 copy /b t.ini+workbench.ini sqlworkbench.ini > nul
 
 rcedit64 /C SQLWorkbench64.exe
