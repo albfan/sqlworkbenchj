@@ -403,6 +403,7 @@
       <param name="admon.graphics.extension" expression=".png"/>
       <param name="admon.graphics" expression="1"/>
       <param name="admon.textlabel" expression="0"/>
+      <param name="ulink.target" expression="_blank"/>
 
       <param name="generate.index" expression="1"/>
       <param name="index.prefer.titleabbrev" expression="1"/>
@@ -467,6 +468,7 @@
       <param name="generate.id.attributes" expression="1"/>
       <param name="use.id.as.filename" expression="1"/>
       <param name="section.autolabel" expression="1"/>
+      <param name="ulink.target" expression="_blank"/>
 
       <param name="generate.section.toc.level" expression="1"/>
       <param name="toc.max.depth" expression="3"/>

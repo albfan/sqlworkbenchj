@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-08-21">
+  <release build="-1" date="2014-09-07">
+    <entry dev-build="4" type="enh">The macro popup window can now be configure to be closed using the ESC key</entry>
     <entry dev-build="4" type="enh">For Oracle and SQL Server the DbExplorer now shows if a foreign key is enabled</entry>
     <entry dev-build="4" type="enh">WbRunLB will now also read scripts included with the &lt;sqlFile&gt; tag</entry>
+    <entry dev-build="4" type="enh">It is now possible to copy the current result as DbUnit XML to the clipboard. Thanks to Brian for the contribution</entry>
     <entry dev-build="3" type="enh">WbGenerateScript now supports the -exclude parameter</entry>
     <entry dev-build="3" type="enh">For Firebird 3.0 the source code of procedures and packages is now displayed</entry>
     <entry dev-build="3" type="enh">The bookmarks dialog now also includes procedure and function names if available</entry>
