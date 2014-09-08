@@ -2841,14 +2841,19 @@ public class Settings
 		return this.getIntProperty("workbench.log.maxfilesize", 10 * 1024 * 1024);
 	}
 
-	public boolean getCheckEscapedQuotes()
+	public boolean getDelimiterDefaultSingleLine()
 	{
-		return getBoolProperty("workbench.sql.checkescapedquotes", false);
+		return getBoolProperty("workbench.delimiter.newline.default", true);
 	}
-
+	
 	public boolean getIncludeDefaultContinue()
 	{
 		return getBoolProperty("workbench.include.continue.default", false);
+	}
+
+	public boolean getCheckEscapedQuotes()
+	{
+		return getBoolProperty("workbench.sql.checkescapedquotes", false);
 	}
 
 	public void setCheckEscapedQuotes(boolean flag)

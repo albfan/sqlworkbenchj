@@ -805,11 +805,11 @@ $$ LANGUAGE plpgsql;
     </para>
     <para>
       Only files up to a <link linkend="options-max-script-size">certain size</link> will be read into memory. Files exceeding
-      this size will be processes statement by statement. In this case the automatic
+      that size will be processed statement by statement. In this case the automatic
       detection of the <link linkend="alternate-delimiter-usage">alternate delimiter</link> will
-      not work. If your scripts exceed the maximum size and do use the alternate delimiter
-      you will have to use the "long" version so that you can specify the actual
-      delimiter used in your script.
+      <emphasis role="bold">not work</emphasis>. If your scripts exceed the maximum size and you do use the alternate delimiter
+      you will have to use the long version of the command using the <literal>-file</literal> and <literal>-delimiter</literal>
+      parameters.
     </para>
     <para>The command supports the following parameters:</para>
 
@@ -826,7 +826,7 @@ $$ LANGUAGE plpgsql;
 
         <tbody valign="top">
           <row>
-            <entry>-file</entry>
+            <entry id="include-param-file">-file</entry>
             <entry>The filename of the file to be included.</entry>
           </row>
 
@@ -841,7 +841,7 @@ $$ LANGUAGE plpgsql;
           </row>
 
           <row>
-            <entry>-delimiter</entry>
+            <entry id="include-param-delimiter">-delimiter</entry>
             <entry>
               Specify the delimiter that is used in the script. This defaults
               to <literal>;</literal>. If you want to define a delimiter that
@@ -851,7 +851,7 @@ $$ LANGUAGE plpgsql;
           </row>
 
           <row>
-            <entry>-encoding</entry>
+            <entry id="include-param-encoding">-encoding</entry>
             <entry>
               Specify the encoding of the input file. If no encoding is specified,
               the default encoding for the current platform (operating system) is used.
@@ -939,14 +939,22 @@ $$ LANGUAGE plpgsql;
       <literal>WbInclude</literal> also supports <link linkend="conditional-exec">conditional execution</link>
     </para>
 
-    <para>Execute <literal>my_script.sql</literal></para>
-    <programlisting>@my_script.sql;</programlisting>
-    <para>Execute <literal>my_script.sql</literal> but abort on the first error</para>
-    <programlisting>WbInclude -file="my_script.sql" -continueOnError=false;</programlisting>
-    <para>Execute the script <literal>create_tables.sql</literal> and change all occurances of <literal>oldschema</literal>
-    to <literal>new_schema</literal>
-    </para>
-    <programlisting>WbInclude -file=create_tables.sql -searchFor="oldschema." -replaceWith="new_schema."</programlisting>
+    <section id="command-include-examples">
+      <title>Examples</title>
+      <para>Execute <literal>my_script.sql</literal></para>
+      <programlisting>@my_script.sql;</programlisting>
+      <para>Execute <literal>my_script.sql</literal> but abort on the first error</para>
+      <programlisting>WbInclude -file="my_script.sql" -continueOnError=false;</programlisting>
+      <para>
+        Execute the script <literal>create_tables.sql</literal> and change all occurances of <literal>oldschema</literal>
+        to <literal>new_schema</literal>
+      </para>
+      <programlisting>WbInclude -file=create_tables.sql -searchFor="oldschema." -replaceWith="new_schema."</programlisting>
+      <para>
+        Execute a large script that uses a non-standard statement delimiter:
+      </para>
+      <programlisting>WbInclude -file=insert_10million_rows.sql -delimiter='/:nl';</programlisting>
+    </section>
   </section>
 
   <section id="command-wbrunlb">

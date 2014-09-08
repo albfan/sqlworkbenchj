@@ -25,6 +25,7 @@ package workbench.sql;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -57,9 +58,9 @@ public class DelimiterDefinition
 	public DelimiterDefinition()
 	{
 		this.delimiter = "";
-		this.singleLineDelimiter = false;
+		this.singleLineDelimiter = Settings.getInstance().getDelimiterDefaultSingleLine();
 		this.changed = false;
-		slePattern = null;
+		this.slePattern = null;
 	}
 
 	public DelimiterDefinition(String delim, boolean single)
@@ -108,22 +109,30 @@ public class DelimiterDefinition
 
 		String delim = null;
 		final boolean single;
+
 		int pos = arg.indexOf(':');
 		if (pos == -1)
 		{
 			pos = arg.indexOf(';', 1);
 		}
 
-		if (pos > -1)
+		if (pos == -1)
 		{
-			String type = arg.substring(pos + 1);
-			single = "nl".equalsIgnoreCase(type);
-			delim = arg.substring(0, pos);
+			delim = arg;
+			single = Settings.getInstance().getDelimiterDefaultSingleLine();
 		}
 		else
 		{
-			delim = arg;
-			single = false;
+			delim = arg.substring(0, pos);
+			String type = arg.substring(pos + 1);
+			if (!Settings.getInstance().getDelimiterDefaultSingleLine())
+			{
+				single = "nl".equalsIgnoreCase(type);
+			}
+			else
+			{
+				single = "sl".equalsIgnoreCase(type);
+			}
 		}
 		return new DelimiterDefinition(delim, single);
 	}

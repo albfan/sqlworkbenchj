@@ -885,7 +885,7 @@ public class SqlFormatterTest
 	@Test
 	public void testColumnComments()
 	{
-		String sql = "insert into foobar (id, foo, bar) values (42, 'arthur', 'dent');";
+		String sql = "insert into foobar (id, foo, bar) values (42, 'arthur''s house', 'dent');";
 		SqlFormatter f = new SqlFormatter(sql);
 		f.setAddColumnNameComment(true);
 		f.setColumnsPerInsert(1);
@@ -900,10 +900,10 @@ public class SqlFormatterTest
 			"VALUES\n" +
 			"(\n" +
 			"  /* id */ 42,\n" +
-			"  /* foo */ 'arthur',\n" +
+			"  /* foo */ 'arthur''s house',\n" +
 			"  /* bar */ 'dent'\n" +
 			");";
-//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 
 		f = new SqlFormatter(sql);
