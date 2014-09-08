@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -327,6 +328,22 @@ public class ConnectionProfile
 		this.infoColor = c;
 	}
 
+	public void setAlternateDelimiterString(String delim)
+	{
+		DelimiterDefinition def = new DelimiterDefinition(delim);
+		if (!def.isStandard())
+		{
+			setAlternateDelimiter(def);
+		}
+	}
+
+	public String getAlternateDelimiterString()
+	{
+		if (this.alternateDelimiter == null) return null;
+		if (this.alternateDelimiter.isEmpty()) return null;
+		return alternateDelimiter.getDelimiter();
+	}
+
 	public DelimiterDefinition getAlternateDelimiter()
 	{
 		if (this.alternateDelimiter == null) return null;
@@ -341,10 +358,7 @@ public class ConnectionProfile
 		// Do not accept a semicolon as the alternate delimiter
 		if (def != null && def.isStandard()) return;
 
-		if ((def == null && this.alternateDelimiter != null) ||
-			  (def != null && this.alternateDelimiter == null) ||
-				(def != null && !def.equals(this.alternateDelimiter)) ||
-				(def != null && def.isChanged()))
+		if (!Objects.equals(def, this.alternateDelimiter) || (def != null && def.isChanged()))
 		{
 			this.alternateDelimiter = def;
 			this.changed = true;

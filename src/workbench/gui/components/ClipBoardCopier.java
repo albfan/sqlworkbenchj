@@ -147,7 +147,7 @@ public class ClipBoardCopier
 				printer.setPrintRowCount(false);
 				if (columnsToCopy != null)
 				{
-					List<String> colNames =new ArrayList<String>(columnsToCopy.size());
+					List<String> colNames =new ArrayList<>(columnsToCopy.size());
 					for (ColumnIdentifier id : columnsToCopy)
 					{
 						colNames.add(id.getColumnName());
@@ -305,7 +305,7 @@ public class ClipBoardCopier
 	 *
 	 * @see workbench.storage.DataStore#hasPkColumns()
 	 * @see workbench.gui.components.WbTable#detectDefinedPkColumns()
-	 * @see #copyAsSql(workbench.db.exporter.ExportType, boolean, boolean) 
+	 * @see #copyAsSql(workbench.db.exporter.ExportType, boolean, boolean)
 	 */
 	public void copyAsSqlUpdate(boolean selectedOnly, boolean showSelectColumns)
 	{
@@ -400,7 +400,7 @@ public class ClipBoardCopier
 		// If only key columns are selected then creating an UPDATE statement does not make sense.
 		if (type == ExportType.SQL_UPDATE)
 		{
-			List<ColumnIdentifier> keyColumns = new ArrayList<ColumnIdentifier>();
+			List<ColumnIdentifier> keyColumns = new ArrayList<>();
 			for (ColumnIdentifier col : data.getResultInfo().getColumns())
 			{
 				if (col.isPkColumn())
@@ -569,7 +569,7 @@ public class ClipBoardCopier
 		int[] cols = this.client.getSelectedColumns();
 		DataStore ds = this.client.getDataStore();
 		if (ds == null) return Collections.emptyList();
-		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(cols.length);
+		List<ColumnIdentifier> result = new ArrayList<>(cols.length);
 		TableColumnModel model = client.getColumnModel();
 		for (int i=0; i < cols.length; i++)
 		{

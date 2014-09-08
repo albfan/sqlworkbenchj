@@ -46,7 +46,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.DelimiterDefinitionPanel;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.TextFieldWidthAdjuster;
 import workbench.gui.components.WbFilePicker;
@@ -98,7 +97,7 @@ public class EditorOptionsPanel
 
 		value = Settings.getInstance().getExternalLineEndingValue();
 		externalLineEnding.setSelectedIndex(lineEndingValueToIndex(value));
-		alternateDelim.setDelimiter(Settings.getInstance().getAlternateDelimiter());
+		alternateDelimiter.setText(Settings.getInstance().getAlternateDelimiter().getDelimiter());
 
 		noWordSep.setText(Settings.getInstance().getEditorNoWordSep());
 		useTabs.setSelected(Settings.getInstance().getEditorUseTabCharacter());
@@ -158,7 +157,7 @@ public class EditorOptionsPanel
 		Settings set = Settings.getInstance();
 		set.setMaxHistorySize(((NumberField)this.historySizeField).getValue());
 
-		set.setAlternateDelimiter(alternateDelim.getDelimiter());
+		set.setAlternateDelimiter(alternateDelimiter.getText());
 		set.setRightClickMovesCursor(rightClickMovesCursor.isSelected());
 		set.setAutoJumpNextStatement(this.autoAdvance.isSelected());
 		set.setEditorTabWidth(StringUtil.getIntValue(this.tabSize.getText(), 2));
@@ -237,7 +236,6 @@ public class EditorOptionsPanel
     externalLineEndingLabel = new JLabel();
     externalLineEnding = new JComboBox();
     includeFilesInHistory = new JCheckBox();
-    alternateDelim = new DelimiterDefinitionPanel();
     noWordSepLabel = new JLabel();
     useTabs = new JCheckBox();
     noWordSep = new JTextField();
@@ -262,6 +260,7 @@ public class EditorOptionsPanel
     wheelScrollLines = new JTextField();
     reloadLabel = new JLabel();
     reloadType = new JComboBox();
+    alternateDelimiter = new NumberField();
 
     setLayout(new GridBagLayout());
 
@@ -381,14 +380,6 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 0, 0, 11);
     add(includeFilesInHistory, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 10, 0, 15);
-    add(alternateDelim, gridBagConstraints);
 
     noWordSepLabel.setLabelFor(noWordSep);
     noWordSepLabel.setText(ResourceMgr.getString("LblNoWordSep")); // NOI18N
@@ -644,6 +635,15 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(reloadType, gridBagConstraints);
+
+    alternateDelimiter.setColumns(4);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 11, 0, 15);
+    add(alternateDelimiter, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -665,7 +665,7 @@ public class EditorOptionsPanel
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox allowEditDuringExec;
   private JLabel altDelimLabel;
-  private DelimiterDefinitionPanel alternateDelim;
+  private JTextField alternateDelimiter;
   private JCheckBox alwaysAllowExecSel;
   private JCheckBox autoAdvance;
   private JTextField autoCloseBrackets;

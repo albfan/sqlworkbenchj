@@ -90,6 +90,7 @@ public class ConnectionMgr
 		// make sure the inputPassword is not stored, only the password property should be stored
 		// because that might be encrypted
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
+		WbPersistence.makeTransient(ConnectionProfile.class, "alternateDelimiterString");
 	}
 
 	public static ConnectionMgr getInstance()

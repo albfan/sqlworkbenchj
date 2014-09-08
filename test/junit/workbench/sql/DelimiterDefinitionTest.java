@@ -38,7 +38,7 @@ public class DelimiterDefinitionTest
 		String sql =
 			"delete from foo\n" +
 			"/";
-		String clean = DelimiterDefinition.DEFAULT_ORA_DELIMITER.removeDelimiter(sql);
+		String clean = DelimiterDefinition.DEFAULT_ORA_DELIMITER.removeFromEnd(sql);
 		String expected = "delete from foo";
 		System.out.println(clean);
 		assertEquals(expected, clean);
@@ -60,7 +60,7 @@ public class DelimiterDefinitionTest
 				"end; \n" +
 				" / ";
 		assertTrue(DelimiterDefinition.DEFAULT_ORA_DELIMITER.terminatesScript(sql, false));
-		DelimiterDefinition del = new DelimiterDefinition("/", false);
+		DelimiterDefinition del = new DelimiterDefinition("/");
 		assertTrue(del.terminatesScript(sql, false));
 	}
 
@@ -79,11 +79,11 @@ public class DelimiterDefinitionTest
 			d.setDelimiter(" ; ");
 			assertEquals(true, d.isStandard());
 
-			d = new DelimiterDefinition("/", true);
+			d = new DelimiterDefinition("/");
 			assertEquals(false, d.isStandard());
 			assertEquals(true, d.isSingleLine());
 
-			d = new DelimiterDefinition("   / \n", true);
+			d = new DelimiterDefinition("   / \n");
 			assertEquals("/", d.getDelimiter());
 			assertEquals(true, d.isSingleLine());
 		}
@@ -104,17 +104,17 @@ public class DelimiterDefinitionTest
 			assertEquals(true, d.isSingleLine());
 			assertEquals("/", d.getDelimiter());
 
-			d = DelimiterDefinition.parseCmdLineArgument("/;bla");
-			assertEquals(false, d.isEmpty());
-			assertEquals(false, d.isSingleLine());
-			assertEquals("/", d.getDelimiter());
-
 			d = DelimiterDefinition.parseCmdLineArgument("/   ");
 			assertEquals(false, d.isEmpty());
-			assertEquals(false, d.isSingleLine());
+			assertEquals(true, d.isSingleLine());
 			assertEquals("/", d.getDelimiter());
 
 			d = DelimiterDefinition.parseCmdLineArgument("GO:nl");
+			assertEquals(false, d.isEmpty());
+			assertEquals(true, d.isSingleLine());
+			assertEquals("GO", d.getDelimiter());
+
+			d = DelimiterDefinition.parseCmdLineArgument("GO");
 			assertEquals(false, d.isEmpty());
 			assertEquals(true, d.isSingleLine());
 			assertEquals("GO", d.getDelimiter());

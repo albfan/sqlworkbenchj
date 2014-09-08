@@ -51,7 +51,7 @@ public class ConnectionProfileTest
 		throws Exception
 	{
 		ConnectionProfile old = new ConnectionProfile();
-		old.setAlternateDelimiter(new DelimiterDefinition("/", true));
+		old.setAlternateDelimiter(new DelimiterDefinition("/"));
 		old.setAutocommit(false);
 		old.setConfirmUpdates(true);
 		old.setDriverName("Postgres");
@@ -128,7 +128,7 @@ public class ConnectionProfileTest
 	{
 		ConnectionProfile profile = new ConnectionProfile();
 		profile.setName("ProfileTest");
-		profile.setAlternateDelimiter(new DelimiterDefinition("/", true));
+		profile.setAlternateDelimiter(new DelimiterDefinition("/"));
 		profile.setAutocommit(false);
 		profile.setConfirmUpdates(true);
 		profile.setDriverName("Postgres");
@@ -230,7 +230,7 @@ public class ConnectionProfileTest
 		assertTrue(profile.isChanged());
 
 		profile.reset();
-		DelimiterDefinition def = new DelimiterDefinition("GO", true);
+		DelimiterDefinition def = new DelimiterDefinition("GO");
 		profile.setAlternateDelimiter(def);
 		assertTrue(profile.isChanged());
 
@@ -256,7 +256,7 @@ public class ConnectionProfileTest
 	public void testFindInList()
 	{
 		ConnectionProfile profile = new ConnectionProfile();
-		profile.setAlternateDelimiter(new DelimiterDefinition("/", true));
+		profile.setAlternateDelimiter(new DelimiterDefinition("/"));
 		profile.setAutocommit(false);
 		profile.setDriverName("Postgres");
 		profile.setEmptyStringIsNull(true);
@@ -265,7 +265,7 @@ public class ConnectionProfileTest
 		profile.setGroup("Primary");
 		profile.setStorePassword(true);
 
-		List<ConnectionProfile> profiles = new ArrayList<ConnectionProfile>();
+		List<ConnectionProfile> profiles = new ArrayList<>();
 		profiles.add(profile);
 
 		ConnectionProfile profile2 = new ConnectionProfile();

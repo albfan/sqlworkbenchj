@@ -157,7 +157,7 @@ public class ReportProcedure
 			String src = getSource().toString().trim();
 			if (delim != null)
 			{
-				src = delim.removeDelimiter(src);
+				src = delim.removeFromEnd(src);
 			}
 			tagWriter.appendTag(result, indent2, TAG_PROC_SOURCE, src, true);
 			//result.append('\n');

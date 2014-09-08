@@ -843,10 +843,24 @@ $$ LANGUAGE plpgsql;
           <row>
             <entry id="include-param-delimiter">-delimiter</entry>
             <entry>
-              Specify the delimiter that is used in the script. This defaults
-              to <literal>;</literal>. If you want to define a delimiter that
-              will only be recognized when it's the only text in a line, append
-              <literal>:nl</literal> to the value, e.g.: <literal>-delimiter=/:nl</literal>
+              <para>
+              Specify a delimiter to be used that is different from the standard <literal>;</literal> delimiter.
+              </para>
+              <para>
+              A non-standard delimiter will be required to be on a line of its own.
+              If you specify <literal>-delimiter=/</literal> the following will work:
+<programlisting>select *
+from person
+/
+</programlisting>
+              but putting the delimiter at the end of a line will <emphasis role="bold">not</emphasis> work:
+<programlisting>select *
+from person/
+</programlisting>
+              </para>
+              <para>
+                If this parameter is not specified, the SQL standard <literal>;</literal> delimiter will be used.
+              </para>
             </entry>
           </row>
 
@@ -953,7 +967,7 @@ $$ LANGUAGE plpgsql;
       <para>
         Execute a large script that uses a non-standard statement delimiter:
       </para>
-      <programlisting>WbInclude -file=insert_10million_rows.sql -delimiter='/:nl';</programlisting>
+      <programlisting>WbInclude -file=insert_10million_rows.sql -delimiter='/';</programlisting>
     </section>
   </section>
 

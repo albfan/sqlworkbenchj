@@ -1844,22 +1844,20 @@ public class Settings
 			delim = con.getProfile().getAlternateDelimiter();
 		}
 		return (delim == null ? getAlternateDelimiter() : delim);
-		}
+	}
 
 	public DelimiterDefinition getAlternateDelimiter()
 	{
 		String delim = getProperty("workbench.sql.alternatedelimiter", "/");
-		boolean sld = getBoolProperty("workbench.sql.alternatedelimiter.singleline", true);
 		if (StringUtil.isEmptyString(delim)) return null;
-		DelimiterDefinition def = new DelimiterDefinition(delim, sld);
+		DelimiterDefinition def = new DelimiterDefinition(delim);
 		if (def.isStandard()) return null;
 		return def;
 	}
 
-	public void setAlternateDelimiter(DelimiterDefinition aDelimit)
+	public void setAlternateDelimiter(String delimiter)
 	{
-		this.setProperty("workbench.sql.alternatedelimiter", aDelimit.getDelimiter());
-		this.setProperty("workbench.sql.alternatedelimiter.singleline", aDelimit.isSingleLine());
+		this.setProperty("workbench.sql.alternatedelimiter", delimiter);
 	}
 
 	public boolean getRightClickMovesCursor()
@@ -2845,7 +2843,7 @@ public class Settings
 	{
 		return getBoolProperty("workbench.delimiter.newline.default", true);
 	}
-	
+
 	public boolean getIncludeDefaultContinue()
 	{
 		return getBoolProperty("workbench.include.continue.default", false);

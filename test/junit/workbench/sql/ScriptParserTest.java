@@ -298,7 +298,7 @@ public class ScriptParserTest
 		try
 		{
 			ScriptParser p = new ScriptParser();
-			p.setAlternateDelimiter(new DelimiterDefinition("/", true));
+			p.setAlternateDelimiter(new DelimiterDefinition("/"));
 			p.setCheckForSingleLineCommands(false);
 			p.setScript(sql);
 			int size = p.getSize();
@@ -350,7 +350,7 @@ public class ScriptParserTest
 		// a very low max file size
 		ScriptParser p = new ScriptParser(10);
 
-		p.setDelimiter(new DelimiterDefinition("/", true));
+		p.setDelimiter(new DelimiterDefinition("/"));
 		p.setSupportOracleInclude(false);
 		p.setCheckForSingleLineCommands(false);
 		p.setCheckEscapedQuotes(false);
@@ -445,7 +445,7 @@ public class ScriptParserTest
 
 			sql = "SET QUOTED_IDENTIFIER ON\nRUN\nSET ANSI_NULLS ON\nRUN";
 			p.setScript(sql);
-			p.setAlternateDelimiter(new DelimiterDefinition("RUN", true));
+			p.setAlternateDelimiter(new DelimiterDefinition("RUN"));
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 			assertEquals("SET QUOTED_IDENTIFIER ON", p.getCommand(0));
@@ -536,13 +536,13 @@ public class ScriptParserTest
 		try
 		{
 			ScriptParser p = new ScriptParser(sql);
-			p.setAlternateDelimiter(new DelimiterDefinition("@@", true));
+			p.setAlternateDelimiter(new DelimiterDefinition("@@"));
 			p.setCheckForSingleLineCommands(false);
 			p.setSupportOracleInclude(false);
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 
-			p.setAlternateDelimiter(new DelimiterDefinition("./", false));
+			p.setAlternateDelimiter(new DelimiterDefinition("./"));
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 1, size);
 
@@ -598,17 +598,12 @@ public class ScriptParserTest
              "END;\n" +
              "/ ";
 			p.setScript(sql);
-			p.setAlternateDelimiter(new DelimiterDefinition("/", false));
-			size = p.getSize();
 			String expected = sql.substring(0, sql.lastIndexOf('/') - 1).trim();
-			String cmd = p.getCommand(0);
-//			System.out.println("--- sql ---\n" + cmd + "\n----- expected -----\n" + expected + "\n-----------");
-			assertEquals(expected, cmd);
 
 			p.setScript(sql);
-			p.setAlternateDelimiter(new DelimiterDefinition("/", true));
+			p.setAlternateDelimiter(new DelimiterDefinition("/"));
 			size = p.getSize();
-			cmd = p.getCommand(0);
+			String cmd = p.getCommand(0);
 //			System.out.println("--- sql ---\n" + cmd + "\n----- expected -----\n" + expected + "\n-----------");
 			assertEquals(expected, cmd);
 		}

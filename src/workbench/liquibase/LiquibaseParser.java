@@ -231,8 +231,11 @@ public class LiquibaseParser
 				ScriptParser parser = new ScriptParser(include, xmlEncoding);
 				if (StringUtil.isNonBlank(delimiter))
 				{
-					DelimiterDefinition delim = new DelimiterDefinition(delimiter, true);
-					parser.setAlternateDelimiter(delim);
+					DelimiterDefinition delim = new DelimiterDefinition(delimiter);
+					if (!delim.isStandard())
+					{
+						parser.setAlternateDelimiter(delim);
+					}
 				}
 				int count = parser.getSize();
 				for (int i=0; i < count; i++)

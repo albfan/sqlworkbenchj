@@ -23,8 +23,10 @@
 package workbench.sql;
 
 import java.io.IOException;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -242,7 +244,7 @@ public class LexerBasedParserTest
 	{
 		String sql = "select * from test\n GO \n" + "select * from person\nGO";
 		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser.setDelimiter(new DelimiterDefinition("GO", true));
+		parser.setDelimiter(new DelimiterDefinition("GO"));
 		ScriptCommandDefinition cmd = null;
 		while ((cmd = parser.getNextCommand()) != null)
 		{
@@ -310,30 +312,11 @@ public class LexerBasedParserTest
 	public void testAlternateDelimiter()
 		throws Exception
 	{
-		String sql = "select * from test\n./\n" + "select * from person\n./\n";
+		String sql =  "select * from test./\n./\n" + "select * from person\n./\n";
 		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser.setDelimiter(new DelimiterDefinition("./", false));
-		ScriptCommandDefinition cmd = null;
-		while ((cmd = parser.getNextCommand()) != null)
-		{
-			int index = cmd.getIndexInScript();
-			if (index == 0)
-			{
-				assertEquals("select * from test", cmd.getSQL().trim());
-			}
-			else if (index == 1)
-			{
-				assertEquals("select * from person", cmd.getSQL().trim());
-			}
-			else
-			{
-				fail("Wrong command index: " + index);
-			}
-		}
-
-		sql = "select * from test./\n./\n" + "select * from person\n./\n";
 		parser = new LexerBasedParser(sql);
-		parser.setDelimiter(new DelimiterDefinition("./", true));
+		parser.setDelimiter(new DelimiterDefinition("./"));
+		ScriptCommandDefinition cmd = null;
 		while ((cmd = parser.getNextCommand()) != null)
 		{
 			int index = cmd.getIndexInScript();

@@ -47,7 +47,7 @@ END;</programlisting>
   </para>
 
   <para>
-    If a SQL statement is terminated with the alternate delimiter,
+    If a SQL statement is terminated with the alternate delimiter on a single line,
     that delimiter is used instead of a semicolon. This way the semicolons embedded in
     <literal>CREATE PROCEDURE</literal> statements will be sent correctly to the backend
     DBMS.
@@ -81,15 +81,15 @@ END;
   <note>
     <para>
     You cannot mix the standard semicolon and the alternate delimiter inside
-    one script.
+    a single script.
     </para>
   </note>
 
   <para>
     If you use the alternate delimiter (by terminating the whole script with it), then
     <emphasis role="bold">all</emphasis> statements have to be delimited with it.
-    You cannot mix the use	of the normal semicolon and the alternate delimiter for one execution.
-    The following statement (when executed completely) would produce an error message:
+    You cannot mix the the standard semicolon and the alternate delimiter for one execution.
+    The following statement (when executed as a complete scrip) would produce an error message:
   </para>
   <programlisting>SELECT sysdate FROM DUAL;
 
@@ -103,10 +103,10 @@ END;
 /</programlisting>
 
   <para>
-    &wb-productname; will use the alternate delimiter present, the <literal>SELECT</literal> statement
-    at the beginning will also be sent to the database together with the <literal>CREATE</literal>
-    statement. This of course is an invalid statement. You will need to either select and run each statement
-    individually or change the delimiter after the <literal>SELECT</literal> to the alternate delimiter.
+    &wb-productname; will use the alternate delimiter which terminates the script. Thus the whole script
+    will be seen as a <emphasis role="bold">single</</emphasis> statement - which of course is invalid.
+    You will need to either select and run each statement individually or change the delimiter
+    after the <literal>SELECT</literal> to the alternate delimiter.
   </para>
 
 </section>

@@ -68,7 +68,6 @@ import workbench.db.TransactionChecker;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
-import workbench.gui.components.DelimiterDefinitionPanel;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.IntegerPropertyEditor;
@@ -99,7 +98,7 @@ public class ConnectionEditorPanel
 	private ConnectionProfile currentProfile;
 	private ProfileListModel sourceModel;
 	private boolean init;
-	private List<SimplePropertyEditor> editors;
+	private List<SimplePropertyEditor> editors = new LinkedList<>();;
 
 	public ConnectionEditorPanel()
 	{
@@ -133,8 +132,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(removeComments);
 		policy.addComponent(hideWarnings);
 		policy.addComponent(checkOpenTrans);
-		policy.addComponent(altDelimiter.getTextField());
-		policy.addComponent(altDelimiter.getCheckBox());
+		policy.addComponent(altDelimiter);
 		policy.addComponent(editConnectionScriptsButton);
 		policy.addComponent(tfWorkspaceFile);
 		policy.addComponent(selectWkspButton);
@@ -165,6 +163,7 @@ public class ConnectionEditorPanel
 		((FlatButton)editFilterButton).setCustomInsets(FlatButton.LARGER_MARGIN);
 		WbSwingUtilities.setMinimumSize(tfFetchSize, 5);
 		WbSwingUtilities.setMinimumSize(tfTimeout, 5);
+		WbSwingUtilities.setMinimumSize(altDelimiter, 5);
 	}
 
 	public JComponent getInitialFocusComponent()
@@ -187,10 +186,8 @@ public class ConnectionEditorPanel
 
 	private void initEditorList()
 	{
-		this.editors = new LinkedList<SimplePropertyEditor>();
+		this.editors.clear();
 		initEditorList(this);
-		altDelimiter.addPropertyChangeListener(DelimiterDefinitionPanel.PROP_SLD, this);
-		altDelimiter.addPropertyChangeListener(DelimiterDefinitionPanel.PROP_DELIM, this);
 	}
 
 	private void initEditorList(Container parent)
@@ -205,10 +202,6 @@ public class ConnectionEditorPanel
 				String name = c.getName();
 				c.addPropertyChangeListener(name, this);
 				ed.setImmediateUpdate(true);
-			}
-			else if (c instanceof JPanel && !(c instanceof DelimiterDefinitionPanel))
-			{
-				initEditorList((JPanel)c);
 			}
 		}
 	}
@@ -266,7 +259,6 @@ public class ConnectionEditorPanel
     workspaceFileLabel = new javax.swing.JLabel();
     infoColor = new WbColorPicker(true);
     infoColorLabel = new javax.swing.JLabel();
-    altDelimiter = new workbench.gui.components.DelimiterDefinitionPanel();
     altDelimLabel = new javax.swing.JLabel();
     jPanel1 = new javax.swing.JPanel();
     tfWorkspaceFile = new StringPropertyEditor();
@@ -279,6 +271,7 @@ public class ConnectionEditorPanel
     jPanel5 = new javax.swing.JPanel();
     macroFile = new StringPropertyEditor();
     selectMacroFileButton = new FlatButton();
+    altDelimiter = new StringPropertyEditor();
     jSeparator3 = new javax.swing.JSeparator();
     timeoutpanel = new javax.swing.JPanel();
     jPanel6 = new javax.swing.JPanel();
@@ -740,15 +733,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 0);
     jPanel3.add(infoColorLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 1, 0);
-    jPanel3.add(altDelimiter, gridBagConstraints);
 
     altDelimLabel.setText(ResourceMgr.getString("LblAltDelimit")); // NOI18N
     altDelimLabel.setToolTipText(ResourceMgr.getString("d_LblAltDelimit")); // NOI18N
@@ -882,6 +866,13 @@ public class ConnectionEditorPanel
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
     jPanel3.add(jPanel5, gridBagConstraints);
+
+    altDelimiter.setName("alternateDelimiterString"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    jPanel3.add(altDelimiter, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -1100,7 +1091,7 @@ public class ConnectionEditorPanel
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JLabel altDelimLabel;
-  protected workbench.gui.components.DelimiterDefinitionPanel altDelimiter;
+  protected javax.swing.JTextField altDelimiter;
   protected javax.swing.JCheckBox asSysDBA;
   protected javax.swing.JCheckBox cbAutocommit;
   protected javax.swing.JComboBox cbDrivers;
@@ -1313,12 +1304,6 @@ public class ConnectionEditorPanel
 			editor.applyChanges();
 		}
 
-		if (altDelimiter.getDelimiter().isChanged())
-		{
-			changed = true;
-			currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
-		}
-
 		DbDriver current = getCurrentDriver();
 		String driverName = currentProfile.getDriverName();
 		String drvClass = currentProfile.getDriverclass();
@@ -1442,7 +1427,6 @@ public class ConnectionEditorPanel
 				drv = ConnectionMgr.getInstance().findDriverByName(drvClass, name);
 			}
 
-			this.altDelimiter.setDelimiter(this.currentProfile.getAlternateDelimiter());
 			cbDrivers.setSelectedItem(drv);
 
 			Color c = this.currentProfile.getInfoDisplayColor();
@@ -1526,12 +1510,6 @@ public class ConnectionEditorPanel
 	{
 		if (!this.init)
 		{
-			if (evt.getSource() == this.altDelimiter)
-			{
-				// As the alternateDelimiter is a not attached to the profile itself,
-				// we have to propagate any updated delimiter object to the profile
-				this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
-			}
 			this.sourceModel.profileChanged(this.currentProfile);
 		}
 	}

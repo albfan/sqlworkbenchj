@@ -25,7 +25,6 @@ package workbench.sql;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -38,17 +37,17 @@ public class DelimiterDefinition
 	/**
 	 * The default delimiter for ANSI SQL: a semicolon
 	 */
-	public static final DelimiterDefinition STANDARD_DELIMITER = new DelimiterDefinition(";", false);
+	public static final DelimiterDefinition STANDARD_DELIMITER = new DelimiterDefinition(";");
 
 	/**
 	 * A default alternate delimiter. This is Oracle's slash on a single line
 	 */
-	public static final DelimiterDefinition DEFAULT_ORA_DELIMITER = new DelimiterDefinition("/", true);
+	public static final DelimiterDefinition DEFAULT_ORA_DELIMITER = new DelimiterDefinition("/");
 
 	/**
 	 * A default alternate delimiter that matches SQL Server's GO command
 	 */
-	public static final DelimiterDefinition DEFAULT_MS_DELIMITER = new DelimiterDefinition("GO", true);
+	public static final DelimiterDefinition DEFAULT_MS_DELIMITER = new DelimiterDefinition("GO");
 
 	private String delimiter;
 	private boolean singleLineDelimiter;
@@ -58,22 +57,20 @@ public class DelimiterDefinition
 	public DelimiterDefinition()
 	{
 		this.delimiter = "";
-		this.singleLineDelimiter = Settings.getInstance().getDelimiterDefaultSingleLine();
 		this.changed = false;
 		this.slePattern = null;
 	}
 
-	public DelimiterDefinition(String delim, boolean single)
+	public DelimiterDefinition(String delim)
 	{
 		setDelimiter(delim);
-		this.singleLineDelimiter = single;
 		this.changed = false;
 		initPattern();
 	}
 
 	public DelimiterDefinition createCopy()
 	{
-		DelimiterDefinition copy = new DelimiterDefinition(this.delimiter, singleLineDelimiter);
+		DelimiterDefinition copy = new DelimiterDefinition(this.delimiter);
 		copy.changed = false;
 		return copy;
 	}
@@ -107,8 +104,7 @@ public class DelimiterDefinition
 			return DEFAULT_MS_DELIMITER;
 		}
 
-		String delim = null;
-		final boolean single;
+		String delim = arg;
 
 		int pos = arg.indexOf(':');
 		if (pos == -1)
@@ -116,25 +112,11 @@ public class DelimiterDefinition
 			pos = arg.indexOf(';', 1);
 		}
 
-		if (pos == -1)
+		if (pos > -1)
 		{
-			delim = arg;
-			single = Settings.getInstance().getDelimiterDefaultSingleLine();
+			delim  = delim.substring(0, pos);
 		}
-		else
-		{
-			delim = arg.substring(0, pos);
-			String type = arg.substring(pos + 1);
-			if (!Settings.getInstance().getDelimiterDefaultSingleLine())
-			{
-				single = "nl".equalsIgnoreCase(type);
-			}
-			else
-			{
-				single = "sl".equalsIgnoreCase(type);
-			}
-		}
-		return new DelimiterDefinition(delim, single);
+		return new DelimiterDefinition(delim);
 	}
 
 	@Override
@@ -154,6 +136,7 @@ public class DelimiterDefinition
 		if (!StringUtil.equalString(this.delimiter, d))
 		{
 			this.delimiter = d.trim();
+			this.singleLineDelimiter = !delimiter.equals(";");
 			this.changed = true;
 			initPattern();
 		}
@@ -246,7 +229,7 @@ public class DelimiterDefinition
 		}
 	}
 
-	public String removeDelimiter(String sql)
+	public String removeFromEnd(String sql)
 	{
 		if (StringUtil.isEmptyString(sql)) return sql;
 		int startPos = -1;
