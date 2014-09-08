@@ -47,7 +47,7 @@ public class SQLLexerTest
 
 	private List<SQLToken> getTokenList(String sql)
 	{
-		ArrayList<SQLToken> result = new ArrayList<SQLToken>();
+		ArrayList<SQLToken> result = new ArrayList<>();
 
 		SQLLexer l = new SQLLexer(sql);
 		SQLToken t = l.getNextToken(false, false);
@@ -201,7 +201,7 @@ public class SQLLexerTest
 		throws IOException
 	{
 		String sql = "values (\n   'line 1 \n x \n   line2;\n');";
-		ArrayList<SQLToken> tokens = new ArrayList<SQLToken>();
+		ArrayList<SQLToken> tokens = new ArrayList<>();
 
 		SQLLexer l = new SQLLexer(sql);
 		SQLToken t = null;
@@ -353,6 +353,22 @@ public class SQLLexerTest
 		assertNotNull(tokens);
 		assertEquals(2, tokens.size());
 		assertEquals("schema.proc", tokens.get(1).getText());
+	}
+
+	@Test
+	public void testStringLiterals()
+		throws Exception
+	{
+		String sql = "select 'arthur''s house' from some_table";
+		List<SQLToken> tokens = getTokenList(sql);
+		System.out.println(tokens);
+		assertNotNull(tokens);
+		assertEquals(4, tokens.size());
+		assertTrue(tokens.get(0).isReservedWord());
+		assertTrue(tokens.get(1).isLiteral());
+		assertTrue(tokens.get(2).isReservedWord());
+		assertTrue(tokens.get(3).isIdentifier());
+		assertEquals("'arthur''s house'", tokens.get(1).getContents());
 	}
 
 }

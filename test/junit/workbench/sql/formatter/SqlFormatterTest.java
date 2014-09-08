@@ -914,7 +914,7 @@ public class SqlFormatterTest
 			"INSERT INTO foobar\n" +
 			"  (id, foo, bar)\n" +
 			"VALUES\n" +
-			"  (/* id */ 42, /* foo */ 'arthur', /* bar */ 'dent');";
+			"  (/* id */ 42, /* foo */ 'arthur''s house', /* bar */ 'dent');";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 
@@ -934,7 +934,7 @@ public class SqlFormatterTest
 			"VALUES\n" +
 			"(\n" +
 			"   /* id */ 42\n" +
-			"  ,/* foo */ 'arthur'\n" +
+			"  ,/* foo */ 'arthur''s house'\n" +
 			"  ,/* bar */ 'dent'\n" +
 			");";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
@@ -956,7 +956,7 @@ public class SqlFormatterTest
 			"VALUES\n" +
 			"(\n" +
 			"    /* id */ 42\n" +
-			"  , /* foo */ 'arthur'\n" +
+			"  , /* foo */ 'arthur''s house'\n" +
 			"  , /* bar */ 'dent'\n" +
 			");";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
