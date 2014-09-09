@@ -169,7 +169,7 @@ public class DataExporter
 	private long totalRows;
 	private Set<ControlFileFormat> controlFiles = EnumSet.noneOf(ControlFileFormat.class);
 	private boolean compressOutput;
-	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
+	private List<DbExecutionListener> listener = new ArrayList<>();
 	private ExportDataModifier modifier;
 	private boolean includeColumnComments;
 	private String nullString;
@@ -216,7 +216,7 @@ public class DataExporter
 	public DataExporter(WbConnection con)
 	{
 		this.dbConn = con;
-		this.jobQueue = new LinkedList<ExportJobEntry>();
+		this.jobQueue = new LinkedList<>();
 		this.useSchemaInSql = Settings.getInstance().getIncludeOwnerInSqlExport();
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
 		if (con != null)
@@ -1142,6 +1142,10 @@ public class DataExporter
 				{
 					break;
 				}
+			}
+			if (this.rowMonitor != null)
+			{
+				this.rowMonitor.jobFinished();
 			}
 		}
 		finally

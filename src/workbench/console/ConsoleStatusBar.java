@@ -83,7 +83,7 @@ public class ConsoleStatusBar
 		}
 		else
 		{
-			output.print("\r");
+			output.print('\r');
 		}
 	}
 

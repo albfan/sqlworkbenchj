@@ -42,7 +42,7 @@ public class GenericRowMonitor
 	private String currentMonitorObject;
 	private int monitorType;
 	private String objectMsg = ResourceMgr.getString("MsgProcessObject") + " ";
-	private Map<String, TypeEntry> typeStack = new HashMap<String, TypeEntry>();
+	private Map<String, TypeEntry> typeStack = new HashMap<>();
 
 	public GenericRowMonitor(StatusBar status)
 	{
@@ -167,6 +167,7 @@ public class GenericRowMonitor
 	@Override
 	public void restoreType(String type)
 	{
+		statusBar.clearStatusMessage();
 		TypeEntry entry = typeStack.get(type);
 		if (entry == null) return;
 		this.updateMsg = entry.msg;

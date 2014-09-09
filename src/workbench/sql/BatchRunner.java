@@ -820,10 +820,10 @@ public class BatchRunner
 					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + time);
 				}
 
-				if (this.rowMonitor != null && ((executedCount + 1) % interval == 0) && !printStatements)
+				if (this.rowMonitor != null && (executedCount % interval == 0) && !printStatements)
 				{
 					this.rowMonitor.restoreType("batchrunnerMain");
-					this.rowMonitor.setCurrentRow(executedCount + 1, totalStatements);
+					this.rowMonitor.setCurrentRow(executedCount, totalStatements);
 				}
 
 				if (result != null && result.stopScript())
