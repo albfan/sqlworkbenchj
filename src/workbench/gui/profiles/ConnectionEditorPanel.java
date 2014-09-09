@@ -148,8 +148,6 @@ public class ConnectionEditorPanel
 		this.setFocusCycleRoot(false);
 		this.setFocusTraversalPolicy(policy);
 
-		this.initEditorList();
-
 		this.selectWkspButton.addActionListener(this);
 		this.selectIconButton.addActionListener(this);
 		this.selectMacroFileButton.addActionListener(this);
@@ -164,6 +162,7 @@ public class ConnectionEditorPanel
 		WbSwingUtilities.setMinimumSize(tfFetchSize, 5);
 		WbSwingUtilities.setMinimumSize(tfTimeout, 5);
 		WbSwingUtilities.setMinimumSize(altDelimiter, 5);
+		this.initEditorList();
 	}
 
 	public JComponent getInitialFocusComponent()
@@ -202,6 +201,10 @@ public class ConnectionEditorPanel
 				String name = c.getName();
 				c.addPropertyChangeListener(name, this);
 				ed.setImmediateUpdate(true);
+			}
+			else if (c instanceof JPanel)
+			{
+				initEditorList((JPanel) c);
 			}
 		}
 	}

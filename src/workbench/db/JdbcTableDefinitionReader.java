@@ -277,7 +277,9 @@ public class JdbcTableDefinitionReader
 
 		if (dbConnection.getDbSettings().isSynonymType(table.getType()))
 		{
-			TableIdentifier id = meta.getSynonymTable(catalog, schema, tablename);
+			TableIdentifier id = table.getRealTable();
+			if (id == null) id = meta.getSynonymTable(catalog, schema, tablename);
+			
 			if (id != null)
 			{
 				schema = id.getSchema();

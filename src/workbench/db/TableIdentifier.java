@@ -64,6 +64,9 @@ public class TableIdentifier
 	private boolean retrieveFkSource;
 	private boolean useInlinePK;
 
+	// for Synonyms
+	private TableIdentifier realTable;
+
 	private ObjectSourceOptions sourceOptions = new ObjectSourceOptions();
 
 	/**
@@ -138,6 +141,16 @@ public class TableIdentifier
 		}
 		this.setCatalog(aCatalog);
 		this.setSchema(aSchema);
+	}
+
+	public TableIdentifier getRealTable()
+	{
+		return realTable;
+	}
+
+	public void setRealTable(TableIdentifier targetTable)
+	{
+		this.realTable = targetTable != null ? targetTable.createCopy() : null;
 	}
 
 	public String getOwner()
@@ -320,6 +333,7 @@ public class TableIdentifier
 		copy.sourceOptions = this.sourceOptions == null ? null : sourceOptions.createCopy();
 		copy.useInlinePK = this.useInlinePK;
 		copy.owner = this.owner;
+		copy.realTable = this.realTable == null ? null : realTable.createCopy();
 		return copy;
 	}
 

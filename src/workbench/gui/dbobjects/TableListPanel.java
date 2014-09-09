@@ -185,9 +185,6 @@ public class TableListPanel
 
 	private TableIdentifier selectedTable;
 
-	// For synonym resolution
-	private TableIdentifier realTable;
-
 	private JComboBox tableHistory;
 
 	private boolean shiftDown;
@@ -787,7 +784,6 @@ public class TableListPanel
 	public void reset()
 	{
 		this.selectedTable = null;
-		this.realTable = null;
 		this.invalidateData();
 
 		if (this.isBusy())
@@ -1365,7 +1361,15 @@ public class TableListPanel
 			{
 				this.showDataMenu.setEnabled(this.tableList.getSelectedRowCount() == 1);
 			}
-			this.updateDisplay();
+			try
+			{
+				WbSwingUtilities.showWaitCursor(this);
+				this.updateDisplay();
+			}
+			finally
+			{
+				WbSwingUtilities.showDefaultCursor(this);
+			}
 		}
 	}
 
@@ -1403,7 +1407,6 @@ public class TableListPanel
 		if (row < 0) return;
 
 		this.selectedTable = createTableIdentifier(row);
-		this.realTable = null;
 
 		this.invalidateData();
 
@@ -1887,11 +1890,12 @@ public class TableListPanel
 		if (this.selectedTable == null) return null;
 		if (!isSynonym(selectedTable)) return selectedTable;
 
-		if (realTable == null)
+		if (selectedTable.getRealTable() == null)
 		{
-			realTable = dbConnection.getMetadata().resolveSynonym(selectedTable);
+			TableIdentifier realTable = dbConnection.getMetadata().resolveSynonym(selectedTable);
+			selectedTable.setRealTable(realTable);
 		}
-		return realTable;
+		return selectedTable.getRealTable();
 	}
 
 	protected void retrieveTriggers()
