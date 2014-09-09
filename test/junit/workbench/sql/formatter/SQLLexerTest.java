@@ -125,6 +125,20 @@ public class SQLLexerTest
 	}
 
 	@Test
+	public void testStupidQuotedIdentifier()
+	{
+		String sql = "Select [one AND two] from thetable;";
+		SQLLexer l = new SQLLexer(sql);
+		SQLToken select = l.getNextToken(false, false);
+		assertEquals(select.getContents(), "SELECT");
+
+		SQLToken col = l.getNextToken(false, false);
+		assertEquals("[one AND two]", col.getContents());
+		assertTrue(col.isIdentifier());
+	}
+
+
+	@Test
 	public void testQuotedIdentifier()
 	{
 		String sql = "Select \"one AND two\" from thetable;";
