@@ -23,14 +23,19 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
-import workbench.resource.ResourceMgr;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
@@ -106,5 +111,11 @@ public class WbListProcedures
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 }

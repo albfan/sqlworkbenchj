@@ -24,7 +24,9 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -112,6 +114,12 @@ public class WbStartBatch
 			result.addMessage(msg);
 		}
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 
 }

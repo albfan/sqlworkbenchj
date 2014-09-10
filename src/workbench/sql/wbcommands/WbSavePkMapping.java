@@ -24,11 +24,15 @@ package workbench.sql.wbcommands;
 
 import java.io.File;
 import java.sql.SQLException;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.storage.PkMapping;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.PkMapping;
+
 import workbench.util.ArgumentParser;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
@@ -95,4 +99,9 @@ public class WbSavePkMapping
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

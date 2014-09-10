@@ -1004,4 +1004,10 @@ public class WbImport
 		if (name.endsWith(".ods")) return "ods";
 		return null;
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

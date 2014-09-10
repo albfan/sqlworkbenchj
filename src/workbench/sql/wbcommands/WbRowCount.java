@@ -213,4 +213,10 @@ public class WbRowCount
 		return namedSortDef.getSortDefinition(rowCounts);
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

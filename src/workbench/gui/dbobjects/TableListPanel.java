@@ -115,6 +115,7 @@ import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.FlatButton;
+import workbench.gui.components.MultiSelectComboBox;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
@@ -172,7 +173,7 @@ public class TableListPanel
 	private JTabbedPane displayTab;
 	private final WbSplitPane splitPane;
 
-	private JComboBox tableTypes = new JComboBox();
+	private JComboBox tableTypes;
 	private String currentSchema;
 	private String currentCatalog;
 	private final SpoolDataAction spoolData;
@@ -238,6 +239,15 @@ public class TableListPanel
 		displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		displayTab.setName("displaytab");
 
+		if (GuiSettings.getDbExplorerMultiSelectTypes())
+		{
+			tableTypes = new MultiSelectComboBox();
+			((MultiSelectComboBox)tableTypes).setCloseOnSelect(GuiSettings.getDbExplorerMultiSelectTypesAutoClose());
+		}
+		else
+		{
+			 tableTypes = new JComboBox<>();
+		}
 		this.tableDefinition = new TableDefinitionPanel();
 		this.tableDefinition.setName("tabledefinition");
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
@@ -346,18 +356,16 @@ public class TableListPanel
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constr = new GridBagConstraints();
-		constr.anchor = GridBagConstraints.WEST;
 		constr.gridx = 0;
+		constr.gridy = 0;
+		constr.gridwidth = 1;
 		constr.fill = GridBagConstraints.HORIZONTAL;
+		constr.anchor = GridBagConstraints.FIRST_LINE_START;
+		constr.weightx = 0.6;
 
-		Dimension d = new Dimension(150, 50);
-		tableTypes.setMaximumSize(d);
 		topPanel.add(this.tableTypes, constr);
 
-		constr = new GridBagConstraints();
-		constr.anchor = GridBagConstraints.WEST;
-		constr.gridwidth = GridBagConstraints.REMAINDER;
-		constr.fill = GridBagConstraints.HORIZONTAL;
+		constr.gridx++;
 		constr.weightx = 1.0;
 		topPanel.add((JPanel)this.findPanel, constr);
 
@@ -862,31 +870,14 @@ public class TableListPanel
 		shouldRetrieveImportedKeys = true;
 	}
 
-	public void setConnection(WbConnection connection)
+	private void setupSingleSelectTypes()
 	{
-		dbConnection = connection;
-
-		tableTypes.removeActionListener(this);
-		displayTab.removeChangeListener(this);
-
-		importedKeys.setConnection(connection);
-		exportedKeys.setConnection(connection);
-		tableData.setConnection(connection);
-		tableDefinition.setConnection(connection);
-		triggers.setConnection(connection);
-		tableSource.setDatabaseConnection(connection);
-
-		renameAction.setConnection(dbConnection);
-		validator.setConnection(dbConnection);
-
-		reset();
+		Collection<String> types = this.dbConnection.getMetadata().getObjectTypes();
+		this.tableTypes.removeAllItems();
+		this.tableTypes.addItem("*");
 
 		try
 		{
-			Collection<String> types = this.dbConnection.getMetadata().getObjectTypes();
-			this.tableTypes.removeAllItems();
-			this.tableTypes.addItem("*");
-
 			for (String type : types)
 			{
 				this.tableTypes.addItem(type);
@@ -914,15 +905,67 @@ public class TableListPanel
 				}
 			}
 
-			this.tableTypes.setSelectedIndex(0);
 			if (tableTypeToSelect != null)
 			{
 				this.tableTypes.setSelectedItem(this.tableTypeToSelect);
 			}
+			else
+			{
+				this.tableTypes.setSelectedIndex(0);
+			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("TableListPanel.setConnection()", "Error when setting up connection", e);
+			LogMgr.logError("TableListPanel.setConnection()", "Error when setting table types", e);
+		}
+	}
+
+	private void setupMultiSelectTypes()
+	{
+		MultiSelectComboBox<String> typeCb = (MultiSelectComboBox)tableTypes;
+
+		List<String> types = new ArrayList<>(this.dbConnection.getMetadata().getObjectTypes());
+		List<String> toSelect = new ArrayList<>();
+
+		if (tableTypeToSelect != null)
+		{
+			toSelect = StringUtil.stringToList(tableTypeToSelect, ",", true, true, false, false);
+		}
+		// setItems() will clear all previous items
+		typeCb.setItems(types, toSelect);
+
+		if (toSelect.isEmpty())
+		{
+			typeCb.selectAll();
+		}
+	}
+
+	public void setConnection(WbConnection connection)
+	{
+		dbConnection = connection;
+
+		tableTypes.removeActionListener(this);
+		displayTab.removeChangeListener(this);
+
+		importedKeys.setConnection(connection);
+		exportedKeys.setConnection(connection);
+		tableData.setConnection(connection);
+		tableDefinition.setConnection(connection);
+		triggers.setConnection(connection);
+		tableSource.setDatabaseConnection(connection);
+
+		renameAction.setConnection(dbConnection);
+		validator.setConnection(dbConnection);
+
+		reset();
+
+		if (tableTypes instanceof MultiSelectComboBox)
+		{
+			setupMultiSelectTypes();
+		}
+		else
+		{
+			setupSingleSelectTypes();
 		}
 
 		this.tableTypes.addActionListener(this);
@@ -1009,6 +1052,35 @@ public class TableListPanel
 		});
 	}
 
+	private String[] getSelectedTypes()
+	{
+		if (tableTypes == null) return null;
+
+		String[] types = null;
+
+		if (tableTypes instanceof MultiSelectComboBox)
+		{
+			MultiSelectComboBox<String> cb = (MultiSelectComboBox<String>)tableTypes;
+			List<String> items = cb.getSelectedItems();
+			types = items.toArray(new String[]{});
+		}
+		else
+		{
+			String type = (String)tableTypes.getSelectedItem();
+
+			if (!"*".equals(type))
+			{
+				List<String> typeList = StringUtil.stringToList(type);
+				types = new String[typeList.size()];
+				for (int i=0; i < typeList.size(); i++)
+				{
+					types[i] = typeList.get(i);
+				}
+			}
+		}
+		return types;
+	}
+
 	public void retrieve()
 	{
 		if (this.isBusy())
@@ -1046,18 +1118,7 @@ public class TableListPanel
 			// reset will do nothing if the panel is busy
 			setBusy(true);
 
-			String[] types = null;
-			String type = (String)tableTypes.getSelectedItem();
-
-			if (!"*".equals(type))
-			{
-				List<String> typeList = StringUtil.stringToList(type);
-				types = new String[typeList.size()];
-				for (int i=0; i < typeList.size(); i++)
-				{
-					types[i] = typeList.get(i);
-				}
-			}
+			String[] types = getSelectedTypes();
 
 			levelChanger.changeIsolationLevel(dbConnection);
 			DataStore ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, types);
@@ -1251,7 +1312,7 @@ public class TableListPanel
 			String type;
 			if (tableTypes != null && tableTypes.getModel().getSize() > 0)
 			{
-				type = (String)tableTypes.getSelectedItem();
+				type = StringUtil.arrayToString(getSelectedTypes());
 			}
 			else
 			{

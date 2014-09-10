@@ -353,4 +353,10 @@ public class WbInclude
 		result.setSuccess();
 		return false;
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

@@ -23,11 +23,12 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
-import workbench.db.TableIdentifier;
+import workbench.resource.ResourceMgr;
 
+import workbench.db.TableIdentifier;
 import workbench.db.ViewReader;
 import workbench.db.ViewReaderFactory;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -77,5 +78,11 @@ public class WbViewSource
 		}
 
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 }

@@ -207,6 +207,10 @@ public class WbGenDrop
 		return VERB;
 	}
 
-
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 
 }

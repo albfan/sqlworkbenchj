@@ -274,4 +274,10 @@ public class WbGenerateScript
 		}
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

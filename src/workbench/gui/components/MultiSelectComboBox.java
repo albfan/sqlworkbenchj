@@ -23,20 +23,27 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
-
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import javax.swing.ComboBoxEditor;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JList;
-import javax.swing.ListCellRenderer;
+import javax.swing.UIManager;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import workbench.resource.ResourceMgr;
+
+import workbench.util.CollectionUtil;
 
 /**
  * A JComboBox containing checkboxes to allow multiple items to be selected.
@@ -52,8 +59,9 @@ import workbench.resource.ResourceMgr;
  *
  * @author Thomas Kellerer
  */
-public class MultiSelectComboBox<T>
-	extends JComboBox
+public class MultiSelectComboBox<T extends Object>
+	extends WbComboBox
+	implements PopupMenuListener
 {
 	private static final String PROP_KEY = "userObject";
 	private static final String ALL_ITEMS_SELECTED_DISPLAY = "*";
@@ -77,16 +85,27 @@ public class MultiSelectComboBox<T>
 	 * The checkboxes that are displayed.
 	 * the actual item value is stored as a client properpty of the checkbox
 	 */
-	private List<JCheckBox> values;
+	private final List<JCheckBox> values = Collections.synchronizedList(new ArrayList<JCheckBox>());
 
-	private String pleaseSelectLabel;
+	private String nothingSelectedText;
 	private String selectAllLabel;
 	private String selectNoneLabel;
 
+	private ActionListener listener;
 	private boolean selectionRequired;
+	private boolean closing;
+	private boolean closePopupOnSelect;
+	private List<T> lastSelected;
 
+	private int maxElementWidth;
+
+	private final MultiSelectRenderer myRenderer = new MultiSelectRenderer();
 	private final DividerBorder topDivider = new DividerBorder(DividerBorder.TOP);
 
+	public MultiSelectComboBox()
+	{
+		this(null, null);
+	}
 
 	/**
 	 * Initialize a new MultiSelectComboBox.
@@ -95,8 +114,7 @@ public class MultiSelectComboBox<T>
 	 */
 	public MultiSelectComboBox(List<T> items)
 	{
-		super();
-		initialize(items, null);
+		this(items, null);
 	}
 
 	/**
@@ -108,45 +126,101 @@ public class MultiSelectComboBox<T>
 	public MultiSelectComboBox(List<T> items, Collection<T> selectedItems)
 	{
 		super();
-		initialize(items, selectedItems);
-	}
-
-	private void initialize(List<T> items, Collection<T> selectedItems)
-	{
-		pleaseSelectLabel = ResourceMgr.getString("LblNone");
+		addPopupMenuListener(this);
+		setRenderer(myRenderer);
+		nothingSelectedText = ResourceMgr.getString("LblNone");
 		selectAllLabel = ResourceMgr.getString("LblSelectAll");
 		selectNoneLabel = ResourceMgr.getString("LblSelectNone");
+		if (items != null)
+		{
+			setupItemList(items, selectedItems);
+		}
+	}
 
-		values = new ArrayList<>(items.size());
+	public void setItems(List<T> items, Collection<T> selected)
+	{
+		if (items != null)
+		{
+			setupItemList(items, selected);
+		}
+	}
 
-		this.addItem(pleaseSelectLabel);
+	private void setupItemList(List<T> items, Collection<T> selectedItems)
+	{
+		super.removeActionListener(this);
+
+		removeAllItems();
+
+		this.addItem(nothingSelectedText);
 		this.addItem(selectAllLabel);
 		this.addItem(selectNoneLabel);
 
 		setupItemIndexes();
 
+		maxElementWidth = Integer.MIN_VALUE;
+
 		for (T item : items)
 		{
 			boolean selected = selectedItems == null ? false : selectedItems.contains(item);
 			JCheckBox cb = new JCheckBox(item.toString());
+			int cwidth = cb.getPreferredSize().width;
+			if (cwidth > maxElementWidth)
+			{
+				maxElementWidth = cwidth;
+			}
 			cb.putClientProperty(PROP_KEY, item);
 			cb.setSelected(selected);
 			values.add(cb);
-			this.addItem(cb);
+			addItem(cb);
 		}
+		int scrollWidth = UIManager.getInt("ScrollBar.width");
+		setPopupWidth(maxElementWidth + scrollWidth + 5);
+		super.addActionListener(this);
+	}
 
-		addActionListener(this);
-		setRenderer(createRenderer());
+	public void setCloseOnSelect(boolean flag)
+	{
+		this.closePopupOnSelect = flag;
+	}
+
+	@Override
+	public void removeAllItems()
+	{
+		super.removeAllItems();
+		values.clear();
+	}
+
+	@Override
+	public void removeActionListener(ActionListener l)
+	{
+		if (l == this.listener)
+		{
+			this.listener = null;
+		}
+	}
+
+	@Override
+	public void addActionListener(ActionListener l)
+	{
+		this.listener = l;
+	}
+
+	public int getValueCount()
+	{
+		if (values == null) return 0;
+		return values.size();
 	}
 
 	private void setupItemIndexes()
 	{
-		lastCustomIndex = getItemCount() - 1;
-		valueIndexOffset = getItemCount();
-		for (int i=0; i < getItemCount(); i++)
+		int count = getItemCount();
+		lastCustomIndex = count - 1;
+		valueIndexOffset = count;
+		
+		for (int i=0; i < count; i++)
 		{
 			Object o = getItemAt(i);
-			if (o == pleaseSelectLabel)
+			if (o == nothingSelectedText)
 			{
 				summaryIndex = i;
 			}
@@ -192,12 +266,12 @@ public class MultiSelectComboBox<T>
 	/**
 	 * Returns the first selected item.
 	 *
-	 * If nothing is selected, the default item is returned.
+	 * If nothing is selected, null is returned.
 	 *
 	 * As this combobox can select multiple items,
 	 * {@link #getSelectedItems()} should be used instead.
 	 *
-	 * @return the first selected item, or the defaul item if nothing was selected
+	 * @return the first selected item, or null item if nothing was selected
 	 *
 	 * @see #getSelectedItems()
 	 */
@@ -205,7 +279,7 @@ public class MultiSelectComboBox<T>
 	public T getSelectedItem()
 	{
 		List<T> items = getSelectedItems();
-		if (items.isEmpty())
+		if (CollectionUtil.isEmpty(items))
 		{
 			return null;
 		}
@@ -224,7 +298,6 @@ public class MultiSelectComboBox<T>
 	public int getSelectedCount()
 	{
 		int count = 0;
-
 		for (JCheckBox cbx : values)
 		{
 			if (cbx.isSelected())
@@ -285,17 +358,45 @@ public class MultiSelectComboBox<T>
 		}
 	}
 
+	private void fireActionPerformed(ActionEvent e)
+	{
+		if (this.listener != null)
+		{
+			listener.actionPerformed(e);
+		}
+	}
+
+	private void closeAndFire()
+	{
+		List<T> selected = getSelectedItems();
+		boolean changed = !Objects.equals(selected, lastSelected);
+
+		boolean allowClose = !selectionRequired || getSelectedCount() > 0;
+		if (!allowClose) return;
+
+		try
+		{
+			closing = true;
+			ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, getActionCommand(), 0);
+			super.setPopupVisible(false);
+			if (changed)
+			{
+				fireActionPerformed(e);
+			}
+		}
+		finally
+		{
+			closing = false;
+		}
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		int index = getSelectedIndex();
 		if (index == summaryIndex)
 		{
-			boolean allowClose = !selectionRequired || getSelectedCount() > 0;
-			if (allowClose)
-			{
-				super.setPopupVisible(false);
-			}
+			closeAndFire();
 		}
 		else if (index == selectAllIndex)
 		{
@@ -305,7 +406,7 @@ public class MultiSelectComboBox<T>
 		{
 			selectNone();
 		}
-		else
+		else if (index >= valueIndexOffset)
 		{
 			JCheckBox cb = values.get(index - valueIndexOffset);
 			cb.setSelected(!cb.isSelected());
@@ -313,11 +414,24 @@ public class MultiSelectComboBox<T>
 		// clear the selection of the underlying listbox so that all items are "unselected"
 		// as the selection itself is represented by the checkbox
 		this.setSelectedIndex(-1);
+		if (closePopupOnSelect && listener != null)
+		{
+			closeAndFire();
+		}
 	}
 
 	public CharSequence getSelectedItemsDisplay()
 	{
 		List<T> items = getSelectedItems();
+		if (items.size() == getValueCount())
+		{
+			return ALL_ITEMS_SELECTED_DISPLAY;
+		}
+		else if (items.isEmpty())
+		{
+			return nothingSelectedText;
+		}
+
 		StringBuilder display = new StringBuilder(items.size() * 10);
 		for (int i = 0; i < items.size(); i++)
 		{
@@ -358,55 +472,91 @@ public class MultiSelectComboBox<T>
 		}
 	}
 
-	private ListCellRenderer createRenderer()
+	@Override
+	public Object getPrototypeDisplayValue()
 	{
-		return new DefaultListCellRenderer()
+		return getSelectedItemsDisplay();
+	}
+
+	@Override
+	public void popupMenuWillBecomeVisible(PopupMenuEvent e)
+	{
+		lastSelected = getSelectedItems();
+	}
+
+	@Override
+	public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
+	{
+		if (closing) return;
+
+		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
-			public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
+			public void run()
 			{
-				if (index > lastCustomIndex)
-				{
-					// this is a CheckBox in our DropDown, so we need to return the CheckBox as the item renderer
-					JCheckBox cb = values.get(index - valueIndexOffset);
-
-					// A checkbox does not have the same UI preferences for background foreground colors as the JList does.
-					cb.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
-					cb.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
-					return cb;
-				}
-				else if (index == selectAllIndex)
-				{
-					JComponent renderer = (JComponent) super.getListCellRendererComponent(list, selectAllLabel, index, isSelected, cellHasFocus);
-					renderer.setBorder(topDivider);
-					return renderer;
-				}
-				else if (index == selectNoneIndex)
-				{
-					JComponent renderer = (JComponent) super.getListCellRendererComponent(list, selectNoneLabel, index, isSelected, cellHasFocus);
-					renderer.setBorder(DividerBorder.BOTTOM_DIVIDER);
-					return renderer;
-				}
-
-				// the only index left is the index for the "summary display"
-				int selectedCount = getSelectedCount();
-
-				if (selectedCount == 0)
-				{
-					// nothing selected --> return the default label
-					return super.getListCellRendererComponent(list, pleaseSelectLabel, index, isSelected, cellHasFocus);
-				}
-
-				if (selectedCount == values.size())
-				{
-					// all items selected --> show a * to indicate "everything"
-					return super.getListCellRendererComponent(list, ALL_ITEMS_SELECTED_DISPLAY, index, isSelected, cellHasFocus);
-				}
-
-				// only some items are selected --> display a comma separated list of those items
-				return super.getListCellRendererComponent(list, getSelectedItemsDisplay(), index, isSelected, cellHasFocus);
+				closeAndFire();
 			}
-		};
+		});
+	}
+
+	@Override
+	public void popupMenuCanceled(PopupMenuEvent e)
+	{
+	}
+
+	private class MultiSelectRenderer
+		extends DefaultListCellRenderer
+	{
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
+		{
+			if (index > lastCustomIndex)
+			{
+				// this is a CheckBox in our DropDown, so we need to return the CheckBox as the item renderer
+				JCheckBox cb = values.get(index - valueIndexOffset);
+
+				// A checkbox does not have the same UI preferences for background foreground colors as the JList does.
+				cb.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
+				cb.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
+				return cb;
+			}
+			else if (index == selectAllIndex)
+			{
+				JComponent renderer = (JComponent) super.getListCellRendererComponent(list, selectAllLabel, index, isSelected, cellHasFocus);
+				renderer.setBorder(topDivider);
+				return renderer;
+			}
+			else if (index == selectNoneIndex)
+			{
+				JComponent renderer = (JComponent) super.getListCellRendererComponent(list, selectNoneLabel, index, isSelected, cellHasFocus);
+				renderer.setBorder(DividerBorder.BOTTOM_DIVIDER);
+				return renderer;
+			}
+
+			// index == -1 means the currently selected item should be displayed
+			// which is only requested when the ComboBox is closed, so we need
+			// to adjust the ComboBox editor
+
+			int selectedCount = getSelectedCount();
+			ComboBoxEditor editor = MultiSelectComboBox.this.getEditor();
+			if (selectedCount == 0)
+			{
+				// nothing selected --> return the default label
+				editor.setItem(nothingSelectedText);
+			}
+			else if (selectedCount == getValueCount())
+			{
+				// all items selected --> show a * to indicate "everything"
+				editor.setItem(ALL_ITEMS_SELECTED_DISPLAY);
+			}
+			else
+			{
+				// only some items are selected --> display a comma separated list of those items
+				editor.setItem(getSelectedItemsDisplay());
+			}
+			return editor.getEditorComponent();
+		}
 	}
 
 }

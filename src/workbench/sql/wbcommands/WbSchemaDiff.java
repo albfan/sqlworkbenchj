@@ -356,4 +356,10 @@ public class WbSchemaDiff
 		super.cancel();
 		if (this.diff != null) this.diff.cancel();
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

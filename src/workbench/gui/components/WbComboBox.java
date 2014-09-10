@@ -23,11 +23,13 @@
 package workbench.gui.components;
 
 import java.awt.Dimension;
+
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 
 /**
  * A JComboBox allowing a popup that is wider than the combobox itself.
+ *
  * As this is not natively supported by Java, this is done using an ugly hack
  * that is floating around on the internet, and which I have found in various places.
  *
@@ -77,7 +79,7 @@ public class WbComboBox
 	public Dimension getSize()
 	{
 		Dimension dim = super.getSize();
-		if (!layingOut && popupWidth != 0)
+		if (!layingOut && popupWidth != 0 && dim.width < popupWidth)
 		{
 			dim.width = popupWidth;
 		}

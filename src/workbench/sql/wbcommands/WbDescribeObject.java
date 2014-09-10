@@ -121,4 +121,10 @@ public class WbDescribeObject
 		}
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

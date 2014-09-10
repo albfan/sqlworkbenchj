@@ -63,4 +63,9 @@ public class WbEcho
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

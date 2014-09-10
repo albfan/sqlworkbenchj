@@ -104,4 +104,10 @@ public class WbHideWarnings
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

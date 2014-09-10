@@ -82,5 +82,11 @@ public class WbProcSource
 
 		return result;
 	}
+	
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 
 }

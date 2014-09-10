@@ -195,5 +195,10 @@ public class WbSetProp
 		return false;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 
 }

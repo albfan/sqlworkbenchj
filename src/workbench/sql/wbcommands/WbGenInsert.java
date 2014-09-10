@@ -223,4 +223,10 @@ public class WbGenInsert
 		}
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

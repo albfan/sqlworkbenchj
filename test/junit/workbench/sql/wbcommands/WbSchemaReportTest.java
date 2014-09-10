@@ -232,9 +232,15 @@ public class WbSchemaReportTest
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/referenced-columns/column)");
 			assertEquals("Incorrect source column count", "2", count);
 
-			String col1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/source-columns/column[1]/text()");
-			String col2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/referenced-columns/column[1]/text()");
-			assertEquals("Incorrect source column matching", col1, col2);
+			String col1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/foreign-keys/foreign-key[1]/source-columns/column[1]/text()");
+			String col2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/foreign-keys/foreign-key[1]/referenced-columns/column[1]/text()");
+			assertEquals("PER_ID", col1);
+			assertEquals("PERSON_ID", col2);
+
+			col1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/source-columns/column[1]/text()");
+			col2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/referenced-columns/column[1]/text()");
+			assertEquals("PERSON_ID", col1);
+			assertEquals("PER_ID", col2);
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS']/column-def/references)");
 			assertEquals("Incorrect references count", "2", count);
@@ -399,12 +405,12 @@ public class WbSchemaReportTest
 		String script =
 			"create table \"Person\" (person_id integer primary key, firstname varchar(100), lastname varchar(100), constraint positive_id check (person_id > 0));\n" +
 			"create table \"Address\" (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
-			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n" +
+			"create table person_address (per_id integer, adr_id integer, primary key (per_id, adr_id));\n" +
 			"create table person_address_status (person_id integer, address_id integer, status_name varchar(10), primary key (person_id, address_id));\n" +
 
-			"alter table person_address add constraint fk_pa_person foreign key (person_id) references \"Person\"(person_id);\n" +
-			"alter table person_address add constraint fk_pa_address foreign key (address_id) references \"Address\"(address_id);\n" +
-			"alter table person_address_status add constraint fk_pas_pa foreign key (person_id, address_id) references person_address(person_id, address_id);\n" +
+			"alter table person_address add constraint fk_pa_person foreign key (per_id) references \"Person\"(person_id);\n" +
+			"alter table person_address add constraint fk_pa_address foreign key (adr_id) references \"Address\"(address_id);\n" +
+			"alter table person_address_status add constraint fk_pas_pa foreign key (person_id, address_id) references person_address(per_id, adr_id);\n" +
 
 			"CREATE VIEW v_person AS SELECT * FROM \"Person\";\n" +
 			"CREATE sequence seq_one;\n" +

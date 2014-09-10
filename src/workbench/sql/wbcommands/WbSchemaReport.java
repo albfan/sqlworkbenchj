@@ -411,4 +411,9 @@ public class WbSchemaReport
 	{
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

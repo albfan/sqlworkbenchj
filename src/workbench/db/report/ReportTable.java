@@ -53,7 +53,6 @@ import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleTablePartition;
 
-
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -332,14 +331,16 @@ public class ReportTable
 				tbl.setCatalog(this.table.getCatalog());
 			}
 			def.setForeignTable(new ReportTable(tbl));
-			
+
 			Map<String, String> colMap = node.getColumns();
-			for (String col : colMap.keySet())
+			for (Map.Entry<String, String> entry : colMap.entrySet())
 			{
-				ReportColumn rcol = this.findColumn(col);
+				ReportColumn rcol = this.findColumn(entry.getValue());
 				if (rcol != null)
 				{
-					rcol.setForeignKeyReference(def.getColumnReference(col));
+					ColumnReference ref = new ColumnReference(def);
+					ref.setForeignColumn(entry.getKey());
+					rcol.setForeignKeyReference(ref);
 				}
 			}
 			foreignKeys.put(node.getFkName(), def);

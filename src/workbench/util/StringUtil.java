@@ -318,7 +318,7 @@ public class StringUtil
 		int len = value.length();
 		int pos = len - 1;
 		char c = value.charAt(pos);
-		
+
 		if (!Character.isWhitespace(c)) return;
 
 		if (len == 1 && Character.isWhitespace(c))
@@ -1794,6 +1794,19 @@ public class StringUtil
 			}
 		}
 		return end;
+	}
+
+	public static String arrayToString(String[] values)
+	{
+		if (values == null || values.length == 0) return "";
+
+		StringBuilder sb = new StringBuilder(values.length);
+		for (int i=0; i < values.length; i++)
+		{
+			if (i > 0) sb.append(',');
+			sb.append(values[i]);
+		}
+		return sb.toString();
 	}
 
 	public static int[] stringToArray(String values)

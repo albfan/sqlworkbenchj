@@ -684,4 +684,11 @@ public class WbCall
 	{
 		return sqlUsed;
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

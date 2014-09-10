@@ -97,4 +97,10 @@ public class WbDefinePk
 		result.addMessage(msg);
 		return result;
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

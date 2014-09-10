@@ -23,18 +23,23 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.AppArguments;
 import workbench.WbManager;
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
-import workbench.db.WbConnection;
-import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.ExecutionController;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+
+import workbench.gui.profiles.ProfileKey;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
@@ -203,6 +208,12 @@ public class WbConnect
 		}
 
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 
 }

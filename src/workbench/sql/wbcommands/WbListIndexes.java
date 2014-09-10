@@ -24,11 +24,11 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.List;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
-import workbench.resource.ResourceMgr;
-
 
 import workbench.storage.DataStore;
 
@@ -127,4 +127,9 @@ public class WbListIndexes
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

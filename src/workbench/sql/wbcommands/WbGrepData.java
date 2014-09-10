@@ -293,4 +293,10 @@ public class WbGrepData
 		}
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

@@ -86,4 +86,10 @@ public class WbRemoveVar extends SqlCommand
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

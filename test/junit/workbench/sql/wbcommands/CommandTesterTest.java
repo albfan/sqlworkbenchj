@@ -23,11 +23,16 @@
 package workbench.sql.wbcommands;
 
 import java.util.List;
-import org.junit.Test;
+
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import workbench.sql.SqlCommand;
+
 import workbench.util.ClassFinder;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *

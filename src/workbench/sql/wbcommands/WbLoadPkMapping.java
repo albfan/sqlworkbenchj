@@ -109,4 +109,10 @@ public class WbLoadPkMapping
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

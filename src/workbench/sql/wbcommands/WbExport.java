@@ -1230,4 +1230,10 @@ public class WbExport
 		return null;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

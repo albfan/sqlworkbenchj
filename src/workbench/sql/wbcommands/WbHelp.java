@@ -97,4 +97,10 @@ public class WbHelp
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

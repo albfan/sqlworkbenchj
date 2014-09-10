@@ -71,4 +71,10 @@ public class WbListVars extends SqlCommand
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

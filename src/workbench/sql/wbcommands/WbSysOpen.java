@@ -87,4 +87,10 @@ public class WbSysOpen
 	{
 		return VERB;
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

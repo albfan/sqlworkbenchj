@@ -23,7 +23,9 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -49,6 +51,12 @@ public class WbEndBatch
 		result.setSuccess();
 		result.addMessage(ResourceMgr.getString("MsgJdbcBatchProcessingEnded"));
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 
 }

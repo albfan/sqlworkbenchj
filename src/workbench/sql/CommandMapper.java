@@ -44,7 +44,6 @@ import workbench.sql.commands.SetCommand;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.commands.UseCommand;
-import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.MySQLShow;
 import workbench.sql.wbcommands.WbCall;
 import workbench.sql.wbcommands.WbConfirm;
@@ -238,13 +237,12 @@ public class CommandMapper
 	{
 		Collection<SqlCommand> commands = cmdDispatch.values();
 		TreeSet<String> result = new TreeSet<>();
-		CommandTester tester = new CommandTester();
 		for (SqlCommand cmd : commands)
 		{
 			String verb = cmd.getVerb();
-			if (tester.isWbCommand(verb))
+			if (cmd.isWbCommand())
 			{
-				result.add(tester.formatVerb(verb));
+				result.add(verb);
 			}
 		}
 		return result;
@@ -255,7 +253,7 @@ public class CommandMapper
 	 */
 	public final void addCommand(SqlCommand command)
 	{
-		cmdDispatch.put(command.getVerb().toUpperCase(), command);
+		cmdDispatch.put(command.getVerb(), command);
 		String alternate = command.getAlternateVerb();
 		if (alternate != null)
 		{
@@ -373,7 +371,7 @@ public class CommandMapper
 	 * Check for a SELECT ... INTO syntax for Informix which actually
 	 * creates a table. In that case we will simply pretend it's a
 	 * CREATE statement.
-	 * In all other casese, the approriate SqlCommand from commanDispatch will be used
+	 * In all other casese, the approriate SqlCommand from commandDispatch will be used
 	 * This is made public in order to be accessible from a JUnit test
 	 *
 	 * @param sql the statement to be executed
@@ -408,14 +406,13 @@ public class CommandMapper
 
 		if (cmd == null && allowAbbreviated)
 		{
-			CommandTester tester = new CommandTester();
 			Set<String> verbs = cmdDispatch.keySet();
 			int found = 0;
 			String lastVerb = null;
 			String lverb = verb.toLowerCase();
 			for (String toTest : verbs)
 			{
-				if (tester.isWbCommand(toTest))
+				if (cmdDispatch.get(toTest).isWbCommand())
 				{
 					if (toTest.toLowerCase().startsWith(lverb))
 					{

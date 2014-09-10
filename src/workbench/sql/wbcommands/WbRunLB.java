@@ -211,4 +211,10 @@ public class WbRunLB
 			runner.cancel();
 		}
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

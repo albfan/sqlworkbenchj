@@ -23,7 +23,9 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -39,7 +41,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbFetchSize
 	extends SqlCommand
 {
-	public static final String VERB = "WbFetchsize";
+	public static final String VERB = "WbFetchSize";
 
 	public WbFetchSize()
 	{
@@ -78,5 +80,11 @@ public class WbFetchSize
 		result.setSuccess();
 
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 }

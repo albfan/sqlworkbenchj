@@ -111,4 +111,10 @@ public class WbHistory
 		}
 		return display;
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

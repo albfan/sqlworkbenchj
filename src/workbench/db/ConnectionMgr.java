@@ -369,8 +369,8 @@ public class ConnectionMgr
 	}
 
 	/**
-	 * Add a new, dynamically defined driver to the list of available
-	 * drivers.
+	 * Add a new, dynamically defined driver to the list of available drivers.
+	 *
 	 * This is used if a driver definition is passed on the commandline
 	 *
 	 * @param drvClassName  the classname of the driver
@@ -383,7 +383,7 @@ public class ConnectionMgr
 	{
 		if (this.drivers == null) this.readDrivers();
 
-		DbDriver drv = new DbDriver("JdbcDriver", drvClassName, jarFile);
+		DbDriver drv = new DbDriver("JdbcDriver-" + Integer.toString(drivers.size() + 1), drvClassName, jarFile);
 		drv.setInternal(true);
 
 		// this method is called from BatchRunner.createCmdLineProfile() when

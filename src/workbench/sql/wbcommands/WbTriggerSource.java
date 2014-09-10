@@ -23,19 +23,21 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
-
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 /**
  * Display the source code of a trigger.
- * @see workbench.db.TriggerReader#getTriggerSource(workbench.db.TriggerDefinition, boolean) 
+ * @see workbench.db.TriggerReader#getTriggerSource(workbench.db.TriggerDefinition, boolean)
  *
  * @author Thomas Kellerer
  */
@@ -84,5 +86,11 @@ public class WbTriggerSource
 		}
 
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 }

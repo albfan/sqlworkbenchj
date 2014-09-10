@@ -29,9 +29,12 @@ import java.util.List;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.resource.ResourceMgr;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -120,5 +123,11 @@ public class WbListCatalogs
 		ds.setGeneratingSql(sql);
 		ds.setResultName(ResourceMgr.getString("TxtDbList"));
 		return ds;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 }

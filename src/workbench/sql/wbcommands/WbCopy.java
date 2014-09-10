@@ -453,4 +453,11 @@ public class WbCopy
 
 		return copier;
 	}
+	
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

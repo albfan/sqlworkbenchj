@@ -241,4 +241,10 @@ public class WbGenDelete
 		}
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

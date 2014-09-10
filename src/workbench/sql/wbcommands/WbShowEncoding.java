@@ -24,11 +24,12 @@ import java.sql.SQLException;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
-
 import workbench.util.EncodingUtil;
 
 /**
@@ -78,11 +79,16 @@ public class WbShowEncoding
 			}
 			result.addMessage("");
 		}
-		
+
 		String msg = ResourceMgr.getFormattedString("MsgDefaultEncoding", Settings.getInstance().getDefaultEncoding());
 		result.addMessage(msg);
 		result.setSuccess();
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

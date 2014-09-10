@@ -303,4 +303,10 @@ public class WbSysExec
 		return VERB;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

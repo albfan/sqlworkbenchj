@@ -26,8 +26,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -122,5 +124,11 @@ public class WbIsolationLevel
 		Integer level = levelMap.get(arg);
 		if (level == null) return -1;
 		return level.intValue();
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 }

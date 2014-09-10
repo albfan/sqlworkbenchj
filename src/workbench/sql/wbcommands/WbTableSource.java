@@ -21,11 +21,14 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -75,5 +78,11 @@ public class WbTableSource
 			result.setSuccess();
 		}
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 }

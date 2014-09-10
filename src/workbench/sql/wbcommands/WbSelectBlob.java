@@ -207,4 +207,9 @@ public class WbSelectBlob
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

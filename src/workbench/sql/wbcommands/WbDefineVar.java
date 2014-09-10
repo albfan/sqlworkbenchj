@@ -374,4 +374,9 @@ public class WbDefineVar
 		}
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

@@ -110,4 +110,9 @@ public class WbListSchemas
 		return ds;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

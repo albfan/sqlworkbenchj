@@ -1014,6 +1014,16 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROP_DBEXP_TABLE_HISTORY, flag);
 	}
 
+	public static boolean getDbExplorerMultiSelectTypes()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tablelist.types.multiselect", false);
+	}
+
+	public static boolean getDbExplorerMultiSelectTypesAutoClose()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tablelist.types.multiselect.autoclose", false);
+	}
+
 	public static boolean getDbExplorerIncludeTrgInTableSource()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tablesource.include.trigger", false);

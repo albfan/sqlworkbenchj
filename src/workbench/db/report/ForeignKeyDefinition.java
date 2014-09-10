@@ -84,18 +84,6 @@ public class ForeignKeyDefinition
 		return fkDefinition.getDeferrableValue();
 	}
 
-	public ColumnReference getColumnReference(String sourceCol)
-	{
-		String targetCol = fkDefinition.getColumns().get(sourceCol);
-		ColumnReference ref = null;
-		if (targetCol != null)
-		{
-			ref = new ColumnReference(this);
-			ref.setForeignColumn(targetCol);
-		}
-		return ref;
-	}
-
 	public String getUpdateRule()
 	{
 		return fkDefinition.getUpdateAction();

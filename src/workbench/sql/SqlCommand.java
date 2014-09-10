@@ -108,6 +108,11 @@ public class SqlCommand
 		return this.errorLevel;
 	}
 
+	public boolean isWbCommand()
+	{
+		return false;
+	}
+
 	protected String getBaseDir()
 	{
 		String dir = runner == null ? null : runner.getBaseDir();

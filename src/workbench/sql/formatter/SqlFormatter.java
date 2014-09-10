@@ -1424,7 +1424,7 @@ public class SqlFormatter
 	private SQLToken processInList(SQLToken current)
 	{
 		if (current == null) return null;
-		List<StringBuilder> list = new ArrayList<StringBuilder>(25);
+		List<StringBuilder> list = new ArrayList<>(25);
 		list.add(new StringBuilder(""));
 		SQLToken t = current;
 
@@ -1530,7 +1530,7 @@ public class SqlFormatter
 		SQLToken lastToken = t;
 		CommandTester wbTester = new CommandTester();
 
-		List<String> insertColumns = new ArrayList<String>();
+		List<String> insertColumns = new ArrayList<>();
 		boolean firstToken = true;
 
 		while (t != null)
@@ -1748,7 +1748,7 @@ public class SqlFormatter
 		boolean nextIsSelect = true;
 		boolean afterThen = false;
 		t = skipComments();
-		List<String> insertColumns = new ArrayList<String>();
+		List<String> insertColumns = new ArrayList<>();
 		while (t != null)
 		{
 			String text = t.getContents();
@@ -2181,7 +2181,7 @@ public class SqlFormatter
 
 	private SQLToken processTableDefinition()
 	{
-		List<StringBuilder> cols = new ArrayList<StringBuilder>();
+		List<StringBuilder> cols = new ArrayList<>();
 		SQLToken t = lexer.getNextToken(true, false);
 		StringBuilder line = new StringBuilder(50);
 		int maxColLength = 0;

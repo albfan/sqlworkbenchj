@@ -25,9 +25,11 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import workbench.resource.ResourceMgr;
+
+import workbench.storage.PkMapping;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.PkMapping;
 
 /**
  *
@@ -72,5 +74,11 @@ public class WbListPkDef
 			result.addMessage(ResourceMgr.getString("MsgPkDefinitionsEmpty"));
 		}
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 }

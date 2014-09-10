@@ -773,4 +773,12 @@ public class WbDataDiff
 		}
 		return new WbFile(outputDir, StringUtil.makeFilename(table.getTableName() + "_$" + type + ".sql"));
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }
+

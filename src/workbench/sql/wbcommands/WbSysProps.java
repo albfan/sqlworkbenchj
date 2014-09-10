@@ -249,6 +249,12 @@ public class WbSysProps
 		}
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }
 
 

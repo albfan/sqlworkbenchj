@@ -26,12 +26,16 @@ import java.sql.SQLException;
 
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
-import workbench.resource.ResourceMgr;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 
@@ -83,5 +87,11 @@ public class WbListTriggers
 		ds.setGeneratingSql(VERB + " " + options);
 		result.addDataStore(ds);
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 }

@@ -96,4 +96,9 @@ public class WbList
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 }

@@ -74,4 +74,10 @@ public class WbDisableOraOutput extends SqlCommand
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

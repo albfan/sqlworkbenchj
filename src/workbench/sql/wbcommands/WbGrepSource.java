@@ -24,12 +24,17 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbObject;
 import workbench.db.search.ObjectSourceSearcher;
-import workbench.resource.ResourceMgr;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
@@ -149,6 +154,12 @@ public class WbGrepSource
 	{
 		super.done();
 		searcher = null;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 
 }
