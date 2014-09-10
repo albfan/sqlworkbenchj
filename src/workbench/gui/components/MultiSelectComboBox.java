@@ -38,6 +38,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -65,7 +66,7 @@ public class MultiSelectComboBox<T extends Object>
 {
 	private static final String PROP_KEY = "userObject";
 	private static final String ALL_ITEMS_SELECTED_DISPLAY = "*";
-
+	private static final EmptyBorder emptyBorder = new EmptyBorder(1,0,1,0);
 	/** holds the index inside this combobox's items which represents the summary display. */
 	private int summaryIndex;
 
@@ -163,6 +164,8 @@ public class MultiSelectComboBox<T extends Object>
 		{
 			boolean selected = selectedItems == null ? false : selectedItems.contains(item);
 			JCheckBox cb = new JCheckBox(item.toString());
+			cb.setBorder(emptyBorder);
+
 			int cwidth = cb.getPreferredSize().width;
 			if (cwidth > maxElementWidth)
 			{
@@ -216,7 +219,7 @@ public class MultiSelectComboBox<T extends Object>
 		int count = getItemCount();
 		lastCustomIndex = count - 1;
 		valueIndexOffset = count;
-		
+
 		for (int i=0; i < count; i++)
 		{
 			Object o = getItemAt(i);
