@@ -65,12 +65,17 @@ public class PgCopyImporterTest
 		if (conn == null) return;
 
 		TestUtil.executeScript(conn,
-			"create table foo (id integer, firstname text, lastname text);\n" +
+			"create table foo (id integer, firstname varchar(6), lastname text);\n" +
 			"commit;\n");
 
 		TestUtil util = getTestUtil();
 		File data = new File(util.getBaseDir(), "foo.txt");
-		String content = "id|firstname|lastname\n1|Arthur|Dent\n2|Ford|Prefect\n";
+		String content =
+			"id|firstname|lastname\n" +
+			"1|Arthur|Dent\n" +
+			"2|Ford|Prefect\n" +
+			"3|ÖÄÜöäü|Something\n";
+
 		TestUtil.writeFile(data, content, "UTF-8");
 		PgCopyImporter copy = new PgCopyImporter(conn);
 		copy.setUseDefaultClassloader(true);
@@ -80,10 +85,10 @@ public class PgCopyImporterTest
 		TextImportOptions options = createOptions();
 		options.setTextDelimiter("|");
 		options.setContainsHeader(true);
-		copy.setup(def.getTable(), def.getColumns(), in, options);
+		copy.setup(def.getTable(), def.getColumns(), in, options, "UTF-8");
 		long rows = copy.processStreamData();
 		conn.commit();
-		assertEquals(2, rows);
+		assertEquals(3, rows);
 		Statement stmt = null;
 		ResultSet rs = null;
 		try
@@ -93,7 +98,7 @@ public class PgCopyImporterTest
 			if (rs.next())
 			{
 				rows = rs.getInt(1);
-				assertEquals(2, rows);
+				assertEquals(3, rows);
 			}
 		}
 		finally
@@ -113,13 +118,13 @@ public class PgCopyImporterTest
 		List<ColumnIdentifier> cols = CollectionUtil.arrayList(id, name);
 		TextImportOptions options = createOptions();
 
-		String sql = copy.createCopyStatement(tbl, cols, options);
-		assertEquals("COPY foo (id,name) FROM stdin WITH (format csv, delimiter '|', header true)", sql);
+		String sql = copy.createCopyStatement(tbl, cols, options, "UTF-8");
+		assertEquals("COPY foo (id,name) FROM stdin WITH (format csv, delimiter '|', header true, encoding 'UTF-8')", sql);
 		options.setContainsHeader(false);
 		options.setTextDelimiter("\t");
 		cols = CollectionUtil.arrayList(name, id);
-		sql = copy.createCopyStatement(tbl, cols, options);
-		assertEquals("COPY foo (name,id) FROM stdin WITH (format csv, delimiter '\t', header false)", sql);
+		sql = copy.createCopyStatement(tbl, cols, options, "ISO-8859-1");
+		assertEquals("COPY foo (name,id) FROM stdin WITH (format csv, delimiter '\t', header false, encoding 'ISO-8859-1')", sql);
 	}
 
 	private TextImportOptions createOptions()

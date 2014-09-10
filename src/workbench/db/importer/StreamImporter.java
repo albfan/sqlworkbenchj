@@ -49,7 +49,7 @@ public interface StreamImporter
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	void setup(TableIdentifier table, List<ColumnIdentifier> columns, Reader in, TextImportOptions options);
+	void setup(TableIdentifier table, List<ColumnIdentifier> columns, Reader in, TextImportOptions options, String encoding);
 
 	long processStreamData()
 		throws SQLException, IOException;

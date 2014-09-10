@@ -73,7 +73,7 @@ public class WbModeTest
 			BatchRunner runner = new BatchRunner();
 			runner.setConnection(con);
 			runner.setVerboseLogging(false);
-			runner.executeScript(
+			runner.runScript(
 				"WbMode readonly;\n" +
 				"delete from mode_test;\n" +
 				"commit;\n"
@@ -89,7 +89,7 @@ public class WbModeTest
 			Controller controll = new Controller();
 			runner.setExecutionController(controll);
 
-			runner.executeScript(
+			runner.runScript(
 				"WbMode confirm;\n" +
 				"delete from mode_test;\n" +
 				"commit;\n"
@@ -107,19 +107,19 @@ public class WbModeTest
 			con.getProfile().setReadOnly(true);
 			con.getProfile().setConfirmUpdates(false);
 
-			runner.executeScript(
+			runner.runScript(
 				"WbMode confirm;\n"
 			);
 			assertTrue(con.confirmUpdatesInSession());
 			assertFalse(con.isSessionReadOnly());
 
-			runner.executeScript(
+			runner.runScript(
 				"WbMode normal;\n"
 			);
 			assertFalse(con.confirmUpdatesInSession());
 			assertFalse(con.isSessionReadOnly());
 
-			runner.executeScript(
+			runner.runScript(
 				"WbMode reset;\n"
 			);
 			assertFalse(con.confirmUpdatesInSession());

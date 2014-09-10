@@ -191,18 +191,20 @@ public class EncodingUtil
 	}
 
 	/**
-	 * Test if the given encoding is supported. Before this is
-	 * tested, cleanupEncoding() is called to allow for some
-	 * common "abbreviations"
+	 * Test if the given encoding is supported.
+	 *
+	 * Before this is tested, cleanupEncoding() is called to allow for some common "abbreviations"
+	 *
 	 * @see #cleanupEncoding(String)
 	 */
 	public static boolean isEncodingSupported(String encoding)
 	{
+		if (StringUtil.isBlank(encoding)) return false;
+
 		String enc = cleanupEncoding(encoding);
 		try
 		{
-			Charset.forName(enc);
-			return true;
+			return Charset.isSupported(enc);
 		}
 		catch (Throwable e)
 		{
@@ -220,7 +222,7 @@ public class EncodingUtil
 		throws IOException
 	{
 		Writer pw = null;
-		final int buffSize = 64*1024;
+		final int buffSize = Settings.getInstance().getIntProperty("workbench.export.default.filebuffer", 4*1024*1024);
 		if (encoding != null)
 		{
 			try
@@ -267,4 +269,5 @@ public class EncodingUtil
 		};
 		encodings.start();
 	}
+
 }

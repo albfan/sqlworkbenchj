@@ -166,7 +166,7 @@ public class ForeignKeyDefinition
 		Map<String, String> columnMap = fkDefinition.getColumns();
 		for (String col : columnMap.keySet())
 		{
-			tagWriter.appendTag(result, colIndent, "column", col);
+			tagWriter.appendTag(result, colIndent, "column", columnMap.get(col));
 		}
 		tagWriter.appendCloseTag(result, indent, TAG_SOURCE_COLS);
 
@@ -174,8 +174,7 @@ public class ForeignKeyDefinition
 		result.append('\n');
 		for (String col : columnMap.keySet())
 		{
-			String target = columnMap.get(col);
-			tagWriter.appendTag(result, colIndent, "column", target);
+			tagWriter.appendTag(result, colIndent, "column", col);
 		}
 		tagWriter.appendCloseTag(result, indent, TAG_TARGET_COLS);
 

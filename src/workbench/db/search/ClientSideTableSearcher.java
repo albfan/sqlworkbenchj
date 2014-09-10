@@ -45,6 +45,7 @@ import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 
 import workbench.util.CollectionUtil;
+import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -72,6 +73,8 @@ public class ClientSideTableSearcher
 	private TableSearchConsumer consumer;
 	private RowDataSearcher searcher;
 	private ColumnComparator comparator;
+	private boolean treatBlobAsText;
+	private String blobEncoding;
 
 	public ClientSideTableSearcher()
 	{
@@ -136,6 +139,20 @@ public class ClientSideTableSearcher
 		}
 	}
 
+	public void setTreatBlobAsText(boolean flag, String encoding)
+	{
+		this.treatBlobAsText = flag;
+		if (treatBlobAsText && EncodingUtil.isEncodingSupported(encoding))
+		{
+			this.blobEncoding = encoding;
+			this.excludeLobs = false;
+		}
+		else
+		{
+			this.blobEncoding = null;
+		}
+	}
+
 	@Override
 	public void search()
 	{
@@ -195,6 +212,10 @@ public class ClientSideTableSearcher
 			result.setUpdateTableToBeUsed(table);
 
 			boolean trimCharData = this.connection.trimCharData();
+
+			// by specifying a blob encoding the search will automatically convert
+			// blob data to a string using the specified encoding
+			searcher.setBlobTextEncoding(blobEncoding);
 
 			RowDataReader reader = RowDataReaderFactory.createReader(info, connection);
 			while (rs.next())

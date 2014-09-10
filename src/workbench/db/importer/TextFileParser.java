@@ -237,7 +237,7 @@ public class TextFileParser
 			// When using the TextFileParser to import into a DataStore
 			// no target table is defined, so this is an expected situation and we simply
 			// pretend the file columns are the target columns
-			tableCols = new ArrayList<ColumnIdentifier>(fileColumns);
+			tableCols = new ArrayList<>(fileColumns);
 		}
 		else
 		{
@@ -365,7 +365,7 @@ public class TextFileParser
 		if (currentRowValues == null) return null;
 		if (inputFileIndexes == null) return null;
 
-		Map<Integer, Object> result = new HashMap<Integer, Object>(inputFileIndexes.size());
+		Map<Integer, Object> result = new HashMap<>(inputFileIndexes.size());
 		for (Integer index : inputFileIndexes)
 		{
 			if (index > 0 && index <= currentRowValues.size())
@@ -381,7 +381,7 @@ public class TextFileParser
 		if (this.importColumns == null) return null;
 
 		if (!fixedWidthImport) return null;
-		List<Integer> result = new ArrayList<Integer>();
+		List<Integer> result = new ArrayList<>();
 		for (ImportFileColumn col : importColumns)
 		{
 			if (col.getDataWidth() > -1)
@@ -453,10 +453,10 @@ public class TextFileParser
 		this.streamImporter = importer;
 	}
 
-	protected void sendCompleteFile(List<ColumnIdentifier> columns, Reader in)
+	protected void sendCompleteFile(List<ColumnIdentifier> columns, Reader in, String encoding)
 		throws Exception
 	{
-		streamImporter.setup(targetTable.getTable(), columns, in, this);
+		streamImporter.setup(targetTable.getTable(), columns, in, this, encoding);
 		receiver.processFile(streamImporter);
 	}
 
@@ -564,7 +564,7 @@ public class TextFileParser
 			// need to reset the stream to the beginning
 			FileUtil.closeQuietely(in);
 			in = this.fileHandler.getMainFileReader();
-			sendCompleteFile(columnsToImport, in);
+			sendCompleteFile(columnsToImport, in, fileHandler.getEncoding());
 			return;
 		}
 
@@ -841,7 +841,7 @@ public class TextFileParser
 
 	protected List<String> getLineValues(LineParser parser, String line)
 	{
-		List<String> result = new ArrayList<String>(getColumnCount());
+		List<String> result = new ArrayList<>(getColumnCount());
 		parser.setLine(line);
 		while (parser.hasNext())
 		{
@@ -861,7 +861,7 @@ public class TextFileParser
 	private void readColumns(String headerLine)
 		throws Exception
 	{
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> cols = new ArrayList<>();
 		WbStringTokenizer tok = new WbStringTokenizer(delimiter, this.quoteChar, false);
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setSourceString(headerLine);
@@ -886,7 +886,7 @@ public class TextFileParser
 	public List<ColumnIdentifier> getColumnsFromFile()
 	{
 		BufferedReader in = null;
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> cols = new ArrayList<>();
 		try
 		{
 			// Make sure the file handler is initialized as this can be called from

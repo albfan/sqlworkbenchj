@@ -117,7 +117,7 @@ public class MultiSelectComboBox<T>
 		selectAllLabel = ResourceMgr.getString("LblSelectAll");
 		selectNoneLabel = ResourceMgr.getString("LblSelectNone");
 
-		values = new ArrayList<JCheckBox>(items.size());
+		values = new ArrayList<>(items.size());
 
 		this.addItem(pleaseSelectLabel);
 		this.addItem(selectAllLabel);
@@ -243,7 +243,7 @@ public class MultiSelectComboBox<T>
 	 */
 	public List<T> getSelectedItems()
 	{
-		List<T> ret = new ArrayList<T>(values.size());
+		List<T> ret = new ArrayList<>(values.size());
 		for (JCheckBox cbx : values)
 		{
 			if (cbx.isSelected())

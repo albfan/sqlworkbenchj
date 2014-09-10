@@ -75,7 +75,7 @@ public class PgCopyImporter
 	{
 		useDefaultClassloader = flag;
 	}
-	
+
 	public boolean isSupported()
 	{
 		try
@@ -123,9 +123,9 @@ public class PgCopyImporter
 	}
 
 	@Override
-	public void setup(TableIdentifier table, List<ColumnIdentifier> columns, Reader in, TextImportOptions options)
+	public void setup(TableIdentifier table, List<ColumnIdentifier> columns, Reader in, TextImportOptions options, String encoding)
 	{
-		sql = createCopyStatement(table, columns, options);
+		sql = createCopyStatement(table, columns, options, encoding);
 		data = in;
 	}
 
@@ -188,7 +188,7 @@ public class PgCopyImporter
 		}
 	}
 
-	public final String createCopyStatement(TableIdentifier table, List<ColumnIdentifier> columns, TextImportOptions options)
+	public final String createCopyStatement(TableIdentifier table, List<ColumnIdentifier> columns, TextImportOptions options, String encoding)
 	{
 		StringBuilder copySql = new StringBuilder(100);
 		copySql.append("COPY ");
@@ -205,7 +205,9 @@ public class PgCopyImporter
 		copySql.append("'");
 		copySql.append(", header ");
 		copySql.append(Boolean.toString(options.getContainsHeader()));
-		copySql.append(")");
+		copySql.append(", encoding '");
+		copySql.append(encoding);
+		copySql.append("')");
 		return copySql.toString();
 	}
 }

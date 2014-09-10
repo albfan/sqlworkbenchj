@@ -22,6 +22,7 @@
  */
 package workbench.db.search;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Set;
 
@@ -51,6 +52,7 @@ public class RowDataSearcher
 	private ColumnExpression filterExpression;
 	private TextRowDataConverter converter;
 	private final Set<String> columns = CollectionUtil.caseInsensitiveSet();
+	private String blobEncoding;
 
 	public RowDataSearcher(String searchValue, ColumnComparator comp, boolean ignoreCase)
 	{
@@ -62,6 +64,11 @@ public class RowDataSearcher
 		filterExpression.setIgnoreCase(ignoreCase);
 		converter = new TextRowDataConverter();
 		converter.setReturnNulls(true);
+	}
+
+	public void setBlobTextEncoding(String encoding)
+	{
+		this.blobEncoding = encoding;
 	}
 
 	public ColumnExpression getExpression()
@@ -78,7 +85,27 @@ public class RowDataSearcher
 			if (SqlUtil.isBlobType(metaData.getColumnType(c))) continue;
 			if (searchColumn(metaData.getColumnName(c)))
 			{
-				String value = converter.getValueAsFormattedString(row, c);
+				String value = null;
+				if (blobEncoding != null && SqlUtil.isBlobType(metaData.getColumnType(c)))
+				{
+					Object data = row.getValue(c);
+					if (data instanceof byte[])
+					{
+						byte[] blob = (byte[])data;
+						try
+						{
+							value = new String(blob, blobEncoding);
+						}
+						catch (UnsupportedEncodingException ex)
+						{
+							value = null;
+						}
+					}
+				}
+				else
+				{
+					value = converter.getValueAsFormattedString(row, c);
+				}
 				if (filterExpression.evaluate(value)) return true;
 			}
 		}

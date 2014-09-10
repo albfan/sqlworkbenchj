@@ -251,7 +251,7 @@ public class RunScriptPanel
 			cancelButton.setEnabled(true);
 			closeButton.setEnabled(false);
 
-			success = !runner.executeScript(editor.getText());
+			success = !runner.runScript(editor.getText());
 
 			final String statusMsg;
 			if (success)

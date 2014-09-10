@@ -471,7 +471,7 @@ public class BatchRunner
 	{
 		try
 		{
-			executeScript(command);
+			runScript(command);
 			this.success = true;
 		}
 		catch (Exception e)
@@ -493,7 +493,7 @@ public class BatchRunner
 		}
 		else
 		{
-			runScript();
+			BatchRunner.this.runScript();
 		}
 	}
 
@@ -502,9 +502,12 @@ public class BatchRunner
 		boolean error = false;
 		int count = this.filenames.size();
 
+		String typeKey = "batchRunnerFileLoop";
+
 		if (this.rowMonitor  != null)
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
+			this.rowMonitor.saveCurrentType(typeKey);
 		}
 
 		int currentFileIndex = 0;
@@ -517,8 +520,8 @@ public class BatchRunner
 
 			if (this.rowMonitor != null)
 			{
+				this.rowMonitor.restoreType(typeKey);
 				this.rowMonitor.setCurrentObject(file, currentFileIndex, count);
-				this.rowMonitor.saveCurrentType("batchrunnerMain");
 			}
 
 			try
@@ -556,6 +559,11 @@ public class BatchRunner
 			{
 				break;
 			}
+		}
+
+		if (this.rowMonitor  != null)
+		{
+			this.rowMonitor.jobFinished();
 		}
 
 		if (abortOnError && error)
@@ -671,12 +679,17 @@ public class BatchRunner
 	 * @return true if an error occurred
 	 * @throws IOException
 	 */
-	public boolean executeScript(String script)
+	public boolean runScript(String script)
 		throws IOException
 	{
 		ScriptParser parser = createParser();
 		parser.setScript(script);
-		return executeScript(parser);
+		boolean result = executeScript(parser);
+		if (this.rowMonitor  != null)
+		{
+			this.rowMonitor.jobFinished();
+		}
+		return result;
 	}
 
 	private boolean executeScript(ScriptParser parser)
@@ -822,7 +835,6 @@ public class BatchRunner
 
 				if (this.rowMonitor != null && (executedCount % interval == 0) && !printStatements)
 				{
-					this.rowMonitor.restoreType("batchrunnerMain");
 					this.rowMonitor.setCurrentRow(executedCount, totalStatements);
 				}
 

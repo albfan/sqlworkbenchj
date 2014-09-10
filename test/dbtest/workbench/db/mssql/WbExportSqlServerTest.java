@@ -102,7 +102,7 @@ public class WbExportSqlServerTest
 
 		BatchRunner runner = new BatchRunner();
 		runner.setConnection(conn);
-		runner.executeScript(sql);
+		runner.runScript(sql);
 
 		String msg = runner.getMessages();
 		assertTrue(msg, runner.isSuccess());

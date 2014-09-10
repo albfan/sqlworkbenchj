@@ -166,11 +166,11 @@ public class SQLConsole
 							history.add(stmt);
 							if (StringUtil.isBlank(macro))
 							{
-								runner.executeScript(stmt);
+								runner.runScript(stmt);
 							}
 							else
 							{
-								runner.executeScript(macro);
+								runner.runScript(macro);
 							}
 						}
 					}
@@ -406,7 +406,7 @@ public class SQLConsole
 			try
 			{
 				ConsoleSettings.getInstance().setRowDisplay(RowDisplay.SingleLine);
-				runner.executeScript(stmt);
+				runner.runScript(stmt);
 				// WbHistory without parameters was executed prompt for an index to be executed
 				System.out.println("");
 				String input = ConsoleReaderFactory.getConsoleReader().readLineWithoutHistory(">>> " + ResourceMgr.getString("TxtEnterStmtIndex") + " >>> ");
@@ -431,7 +431,7 @@ public class SQLConsole
 
 		if (index > 0 && index <= history.size())
 		{
-			runner.executeScript(history.get(index - 1));
+			runner.runScript(history.get(index - 1));
 		}
 	}
 
