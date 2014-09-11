@@ -225,6 +225,7 @@ public class TableListPanel
 
 	private TableChangeValidator validator = new TableChangeValidator();
 	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
+	private final int maxTypeItems = 25;
 	// </editor-fold>
 
 	public TableListPanel(MainWindow aParent)
@@ -913,7 +914,6 @@ public class TableListPanel
 			{
 				this.tableTypes.setSelectedIndex(0);
 			}
-			tableTypes.setMaximumRowCount(types.size() + 1);
 		}
 		catch (Exception e)
 		{
@@ -968,6 +968,7 @@ public class TableListPanel
 		{
 			setupSingleSelectTypes();
 		}
+		tableTypes.setMaximumRowCount(Math.min(tableTypes.getItemCount() + 1, maxTypeItems));
 
 		this.tableTypes.addActionListener(this);
 		this.displayTab.addChangeListener(this);

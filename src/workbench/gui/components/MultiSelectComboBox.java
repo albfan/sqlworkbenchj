@@ -145,7 +145,6 @@ public class MultiSelectComboBox<T extends Object>
 		}
 		int scrollWidth = UIManager.getInt("ScrollBar.width");
 		setPopupWidth(maxElementWidth + scrollWidth + 5);
-		setMaximumRowCount(items.size() + 3);
 		super.addActionListener(this);
 	}
 
