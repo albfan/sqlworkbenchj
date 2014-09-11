@@ -55,10 +55,12 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CharacterEscapeType;
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.QuoteEscapeType;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
@@ -190,7 +192,7 @@ public class WbExport
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(ARG_OUTPUTDIR, ArgumentType.DirName);
 		cmdLine.addArgument(ARG_USE_CDATA, ArgumentType.BoolArgument);
-		cmdLine.addArgument(ARG_ESCAPETEXT, StringUtil.stringToList("control,7bit,8bit,extended,none"));
+		cmdLine.addArgument(ARG_ESCAPETEXT, StringUtil.stringToList("control,7bit,8bit,extended,none,pgcopy"));
 		cmdLine.addArgument(ARG_QUOTE_ALWAYS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_LINEENDING, StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument(ARG_SHOW_ENCODINGS);
@@ -562,6 +564,11 @@ public class WbExport
 				{
 					exporter.setEscapeRange(null);
 				}
+				else if ("pgcopy".equalsIgnoreCase(escape))
+				{
+					exporter.setEscapeRange(CharacterRange.RANGE_CONTROL);
+					exporter.setEscapeType(CharacterEscapeType.pgHex);
+				}
 				else
 				{
 					exporter.setEscapeRange(null);
@@ -570,7 +577,14 @@ public class WbExport
 				}
 			}
 			exporter.setQuoteAlways(cmdLine.getBoolean(ARG_QUOTE_ALWAYS));
-			exporter.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
+			QuoteEscapeType quoteEscaping = CommonArgs.getQuoteEscaping(cmdLine);
+			if (quoteEscaping != QuoteEscapeType.none && StringUtil.isBlank(quote))
+			{
+				result.addMessageByKey("ErrExpQuoteRequired");
+				result.setFailure();
+				return result;
+			}
+			exporter.setQuoteEscaping(quoteEscaping);
 			exporter.setRowIndexColumnName(cmdLine.getValue(ARG_ROWNUM));
 			this.defaultExtension = ".txt";
 		}

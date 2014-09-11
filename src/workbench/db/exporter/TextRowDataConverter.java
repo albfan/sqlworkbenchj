@@ -32,6 +32,7 @@ import workbench.db.WbConnection;
 import workbench.storage.DataConverter;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+import workbench.util.CharacterEscapeType;
 
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
@@ -233,11 +234,11 @@ public class TextRowDataConverter
 				{
 					if (addQuote)
 					{
-						value = StringUtil.escapeText(value, this.escapeRange, this.quoteCharacter);
+						value = StringUtil.escapeText(value, this.escapeRange, this.quoteCharacter, exporter.getEscapeType());
 					}
 					else
 					{
-						value = StringUtil.escapeText(value, this.escapeRange, this.delimiterAndQuote);
+						value = StringUtil.escapeText(value, this.escapeRange, this.delimiterAndQuote, exporter.getEscapeType());
 					}
 				}
 				if (this.quoteEscape != QuoteEscapeType.none && value.indexOf(this.quoteCharacter) > -1)

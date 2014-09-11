@@ -104,7 +104,13 @@ public class TextFileParser
 		this.inputFile = aFile;
 	}
 
+	@Override
+	public String getNullString()
+	{
+		return nullString;
+	}
 
+	@Override
 	public void setNullString(String value)
 	{
 		nullString = value;

@@ -119,12 +119,12 @@ public class PgCopyImporterTest
 		TextImportOptions options = createOptions();
 
 		String sql = copy.createCopyStatement(tbl, cols, options, "UTF-8");
-		assertEquals("COPY foo (id,name) FROM stdin WITH (format csv, delimiter '|', header true, encoding 'UTF-8')", sql);
+		assertEquals("COPY foo (id,name) FROM stdin WITH (format csv, header true, quote '\"', delimiter '|', encoding 'UTF-8', NULL '')", sql);
 		options.setContainsHeader(false);
 		options.setTextDelimiter("\t");
 		cols = CollectionUtil.arrayList(name, id);
 		sql = copy.createCopyStatement(tbl, cols, options, "ISO-8859-1");
-		assertEquals("COPY foo (name,id) FROM stdin WITH (format csv, delimiter '\t', header false, encoding 'ISO-8859-1')", sql);
+		assertEquals("COPY foo (name,id) FROM stdin WITH (format csv, header false, quote '\"', delimiter '	', encoding 'ISO-8859-1', NULL '')", sql);
 	}
 
 	private TextImportOptions createOptions()
@@ -190,6 +190,17 @@ public class PgCopyImporterTest
 
 			@Override
 			public void setDecimalChar(String s)
+			{
+			}
+
+			@Override
+			public String getNullString()
+			{
+				return null;
+			}
+
+			@Override
+			public void setNullString(String nullString)
 			{
 			}
 

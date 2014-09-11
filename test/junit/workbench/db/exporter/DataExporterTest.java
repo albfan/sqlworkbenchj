@@ -55,6 +55,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.util.CharacterEscapeType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -201,6 +203,17 @@ public class DataExporterTest
 			public void setDecimalSymbol(String decimal) { }
 
 			@Override
+			public void setEscapeType(CharacterEscapeType type)
+			{
+			}
+
+			@Override
+			public CharacterEscapeType getEscapeType()
+			{
+				return CharacterEscapeType.unicode;
+			}
+			
+			@Override
 			public QuoteEscapeType getQuoteEscaping()
 			{
 				return QuoteEscapeType.none;
@@ -226,7 +239,7 @@ public class DataExporterTest
 
 			@Override
 			public boolean getCreateTable() { return false; }
-			
+
 			@Override
 			public void setCreateTable(boolean flag) { }
 

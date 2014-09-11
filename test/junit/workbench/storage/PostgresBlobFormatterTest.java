@@ -23,8 +23,10 @@
 package workbench.storage;
 
 import java.io.ByteArrayOutputStream;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
+
 
 /**
  * @author Thomas Kellerer
@@ -36,7 +38,7 @@ public class PostgresBlobFormatterTest
 	public void testGetBlobLiteral()
 		throws Exception
 	{
-		PostgresBlobFormatter formatter = new PostgresBlobFormatter(true);
+		PostgresBlobFormatter formatter = new PostgresBlobFormatter(BlobLiteralType.pgEscape);
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		b.write(255);
 		b.write(0);
@@ -46,7 +48,7 @@ public class PostgresBlobFormatterTest
 		String literal = formatter.getBlobLiteral(blob).toString();
 		assertEquals("Wrong literal created", "E'\\\\377\\\\000\\\\020\\\\017'::bytea", literal);
 
-		formatter = new PostgresBlobFormatter(false);
+		formatter = new PostgresBlobFormatter(BlobLiteralType.pgDecode);
 		String decodeLiteral = formatter.getBlobLiteral(blob).toString();
 		assertEquals("Wrong literal created", "decode('ff00100f', 'hex')", decodeLiteral);
 	}

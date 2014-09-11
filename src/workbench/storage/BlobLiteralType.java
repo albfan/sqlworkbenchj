@@ -32,5 +32,6 @@ public enum BlobLiteralType
 	unicode,
 	base64,
 	pgEscape,
-	pgDecode;
+	pgDecode,
+	pgHex;
 }

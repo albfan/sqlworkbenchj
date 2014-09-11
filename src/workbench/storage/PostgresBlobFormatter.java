@@ -25,6 +25,8 @@ package workbench.storage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+
+import workbench.db.exporter.BlobMode;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.FileUtil;
@@ -47,31 +49,56 @@ import workbench.util.StringUtil;
 public class PostgresBlobFormatter
 	implements BlobLiteralFormatter
 {
-
-	private boolean useEscape;
+	private BlobLiteralType blobLiteral;
 
 	public PostgresBlobFormatter()
 	{
 		String type = Settings.getInstance().getProperty("workbench.db.postgresql.blobformat", "decode");
-		useEscape = "escape".equalsIgnoreCase(type);
+		if ("escape".equalsIgnoreCase(type))
+		{
+			blobLiteral = BlobLiteralType.pgEscape;
+		}
+		else
+		{
+			blobLiteral = BlobLiteralType.pgDecode;
+		}
 	}
 
-	public PostgresBlobFormatter(boolean useEscapedOctal)
+	public PostgresBlobFormatter(BlobMode mode)
 	{
-		useEscape = useEscapedOctal;
+		switch (mode)
+		{
+			case pgEscape:
+				blobLiteral = BlobLiteralType.pgEscape;
+				break;
+			case pgHex:
+				blobLiteral = BlobLiteralType.pgHex;
+				break;
+			default:
+				blobLiteral = BlobLiteralType.pgDecode;
+		}
 	}
 
 	public PostgresBlobFormatter(BlobLiteralType mode)
 	{
-		useEscape = (mode == BlobLiteralType.pgEscape);
+		this.blobLiteral = mode;
 	}
+
 
 	@Override
 	public CharSequence getBlobLiteral(Object value)
 		throws SQLException
 	{
-		if (useEscape) return getEscapeString(value);
-		return getDecodeString(value);
+		switch (blobLiteral)
+		{
+			case pgEscape:
+				return getEscapeString(value);
+			case pgHex:
+				return getHexString(value);
+			default:
+				return getDecodeString(value);
+
+		}
 	}
 
 	private CharSequence getDecodeString(Object value)
@@ -88,6 +115,22 @@ public class PostgresBlobFormatter
 			result.append(StringUtil.hexString(c, 2));
 		}
 		result.append("', 'hex')");
+		return result;
+	}
+
+	private CharSequence getHexString(Object value)
+	{
+		if (value == null) return null;
+		byte[] buffer = getBytes(value);
+		if (buffer == null) return value.toString();
+
+		StringBuilder result = new StringBuilder(buffer.length * 2 + 5);
+		result.append("\\\\x");
+		for (int i = 0; i < buffer.length; i++)
+		{
+			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
+			result.append(StringUtil.hexString(c, 2));
+		}
 		return result;
 	}
 
@@ -125,7 +168,7 @@ public class PostgresBlobFormatter
 		{
 			return (byte[])value;
 		}
-		
+
 		if (value instanceof InputStream)
 		{
 			// When doing an export the Blobs might be returned as InputStreams
@@ -141,10 +184,11 @@ public class PostgresBlobFormatter
 		}
 		return null;
 	}
+
 	@Override
 	public BlobLiteralType getType()
 	{
-		return BlobLiteralType.octal;
+		return blobLiteral;
 	}
 
 }

@@ -25,6 +25,7 @@ package workbench.db.postgres;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
+import workbench.db.exporter.BlobMode;
 import workbench.log.LogMgr;
 
 import workbench.db.exporter.DataExporter;
@@ -32,6 +33,7 @@ import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
 
 import workbench.storage.ResultInfo;
+import workbench.util.CharacterRange;
 
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
@@ -56,7 +58,7 @@ public class PostgresCopyStatementWriter
 		WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
 		String dir = baseFile.getParent();
 		String baseName = baseFile.getFileName();
-		WbFile ctl = new WbFile(dir, "copy_" + baseName + ".sql");
+		WbFile ctl = new WbFile(dir, "import_" + baseName + ".sql");
 		PrintWriter out = null;
 		try
 		{
@@ -73,27 +75,54 @@ public class PostgresCopyStatementWriter
 			out.print(")");
 
 
+			CharacterRange range = exporter.getEscapeRange();
+			boolean canDecode = range == null || range == CharacterRange.RANGE_CONTROL || range == CharacterRange.RANGE_NONE;
+			boolean canDecodeBlobs = exporter.getBlobMode() == BlobMode.None || exporter.getBlobMode() == BlobMode.pgHex;
+			boolean useText = exporter.getTextQuoteChar() == null && exporter.getExportHeaders()== false && canDecode && canDecodeBlobs;
+
 			out.print("\n     from ");
 			out.print("'" + baseFile.getFullPath() + "'");
 
 			String delim = exporter.getTextDelimiter();
-			out.print("\n     with (format csv");
+			out.print("\n     with (format ");
+			if (useText)
+			{
+				out.print("text");
+			}
+			else
+			{
+				out.print("csv");
+				if (exporter.getExportHeaders())
+				{
+					out.print(", header true");
+				}
 
+				String quote = exporter.getTextQuoteChar();
+				if (quote != null)
+				{
+					out.print(", quote '" + quote + "'");
+				}
+			}
+
+			if ("\\t".equals(delim))
+			{
+				delim = "\t";
+			}
 			out.print(", delimiter '" + delim + "'");  // a tab should be written as a tab!
 
-			if (exporter.getExportHeaders())
-			{
-				out.print(", header true");
-			}
-			String quote = exporter.getTextQuoteChar();
-			if (quote != null)
-			{
-				out.print(", quote '" + quote + "'");
-			}
 			String encoding = exporter.getEncoding();
 			if (encoding != null)
 			{
-				out.print(", encoding '" + encoding + "'");   // only available from 9.1 onwards but I'm writing it anyways
+				out.print(", encoding '" + encoding + "'");
+			}
+
+			if (exporter.getNullString() == null)
+			{
+				out.print(", null ''");
+			}
+			else
+			{
+				out.print(", null '" + exporter.getNullString() + "'");
 			}
 			out.println(");");
 		}

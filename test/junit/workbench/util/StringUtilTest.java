@@ -454,6 +454,10 @@ public class StringUtilTest
 		value = "\n";
 		enc = StringUtil.escapeText(value, CharacterRange.RANGE_7BIT, "");
 		assertEquals("NL not replaced" , "\\n", enc);
+
+		value = "\u0016";
+		enc = StringUtil.escapeText(value, CharacterRange.RANGE_CONTROL, "", CharacterEscapeType.pgHex);
+		assertEquals("\\x16", enc);
 	}
 
 	@Test

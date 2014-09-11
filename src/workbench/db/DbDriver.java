@@ -221,7 +221,7 @@ public class DbDriver
 	public static List<String> splitLibraryList(String libList)
 	{
 		if (libList == null) return null;
-		
+
 		if (libList.indexOf('|') > -1)
 		{
 			return StringUtil.stringToList(libList, "|", true, true, false);

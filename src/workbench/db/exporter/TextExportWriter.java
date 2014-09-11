@@ -26,6 +26,7 @@ import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.storage.BlobFormatterFactory;
 import workbench.storage.BlobLiteralType;
+import workbench.storage.PostgresBlobFormatter;
 
 /**
  * An ExportWriter to generate flat files.
@@ -77,6 +78,12 @@ public class TextExportWriter
 			WbConnection con = exporter.getConnection();
 			if (con != null) meta = con.getMetadata();
 			conv.setBlobFormatter(BlobFormatterFactory.createInstance(meta));
+			conv.setWriteBlobToFile(false);
+		}
+		else if (mode == BlobMode.pgHex || mode == BlobMode.pgEscape)
+		{
+			PostgresBlobFormatter formatter = new PostgresBlobFormatter(mode);
+			conv.setBlobFormatter(formatter);
 			conv.setWriteBlobToFile(false);
 		}
 		else if (mode == BlobMode.SaveToFile)

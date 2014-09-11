@@ -141,7 +141,7 @@ public class PostgresCopyStatementWriterTest
 		{
 			PostgresCopyStatementWriter writer = new PostgresCopyStatementWriter();
 			writer.writeFormatFile(exporter, converter);
-			WbFile formatFile = new WbFile(util.getBaseDir(), "copy_export.sql");
+			WbFile formatFile = new WbFile(util.getBaseDir(), "import_export.sql");
 			assertTrue(formatFile.exists());
 
 			List<String> contents = StringUtil.readLines(formatFile);

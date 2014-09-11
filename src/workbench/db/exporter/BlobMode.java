@@ -70,6 +70,8 @@ public enum BlobMode
 	 */
 	pgEscape,
 
+	pgHex,
+
 	None;
 
 	/**
@@ -94,6 +96,7 @@ public enum BlobMode
 		if ("file".equalsIgnoreCase(type.trim())) return BlobMode.SaveToFile;
 		if ("base64".equalsIgnoreCase(type.trim())) return BlobMode.Base64;
 		if ("pgescape".equalsIgnoreCase(type.trim())) return BlobMode.pgEscape;
+		if ("pghex".equalsIgnoreCase(type.trim())) return BlobMode.pgHex;
 		if ("pgdecode".equalsIgnoreCase(type.trim())) return BlobMode.pgDecode;
 		try
 		{
@@ -123,14 +126,16 @@ public enum BlobMode
 				return "pgdecode";
 			case pgEscape:
 				return "pgescape";
+			case pgHex:
+				return "pghex";
 			default:
 				return "";
 		}
-		
+
 	}
 	public static List<String> getTypes()
 	{
-		return CollectionUtil.arrayList("file", "ansi", "dbms", "base64", "pgescape", "pgdecode");
+		return CollectionUtil.arrayList("file", "ansi", "dbms", "base64", "pgescape", "pgdecode", "pghex");
 	}
 
 }

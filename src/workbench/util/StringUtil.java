@@ -1346,6 +1346,7 @@ public class StringUtil
 		return escapeText(value, range, EMPTY_STRING);
 	}
 
+
 	/**
 	 * Encodes characters to Unicode &#92;uxxxx (or simple escape like \r)
 	 *
@@ -1360,6 +1361,11 @@ public class StringUtil
 	 * @param additionalCharsToEncode additional characters not covered by the range may be null
 	 */
 	public static String escapeText(String value, CharacterRange range, String additionalCharsToEncode)
+	{
+		return escapeText(value, range, additionalCharsToEncode, CharacterEscapeType.unicode);
+	}
+
+	public static String escapeText(String value, CharacterRange range, String additionalCharsToEncode, CharacterEscapeType type)
 	{
 		if (value == null) return null;
 
@@ -1402,8 +1408,19 @@ public class StringUtil
 					if (range.isOutsideRange(aChar) || additionalCharsToEncode.indexOf(aChar) > -1)
 					{
 						if (outBuffer == null) outBuffer = createStringBuilder(value, x);
-						outBuffer.append("\\u");
-						appendUnicode(outBuffer, aChar);
+						switch (type)
+						{
+							case pgHex:
+								outBuffer.append("\\x");
+								outBuffer.append(hexString(aChar, 2));
+								break;
+							case hex:
+								outBuffer.append(hexString(aChar, 4));
+								break;
+							default:
+								outBuffer.append("\\u");
+								appendUnicode(outBuffer, aChar);
+						}
 					}
 					else if (outBuffer != null)
 					{

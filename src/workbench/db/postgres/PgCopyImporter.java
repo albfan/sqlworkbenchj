@@ -199,15 +199,41 @@ public class PgCopyImporter
 			if (i > 0) copySql.append(',');
 			copySql.append(columns.get(i).getColumnName());
 		}
-		copySql.append(") FROM stdin WITH (format csv");
+		copySql.append(") FROM stdin WITH (format ");
+
+		boolean useText = options.getTextQuoteChar() == null && options.getContainsHeader() == false && options.getDecode();
+		String nullString = options.getNullString();
+
+		if (useText)
+		{
+			copySql.append("text");
+		}
+		else
+		{
+			copySql.append("csv");
+			copySql.append(", header ");
+			copySql.append(Boolean.toString(options.getContainsHeader()));
+			copySql.append(", quote '");
+			copySql.append(options.getTextQuoteChar());
+			copySql.append('\'');
+		}
+
 		copySql.append(", delimiter '");
 		copySql.append(options.getTextDelimiter());
-		copySql.append("'");
-		copySql.append(", header ");
-		copySql.append(Boolean.toString(options.getContainsHeader()));
-		copySql.append(", encoding '");
+		copySql.append("', encoding '");
 		copySql.append(encoding);
-		copySql.append("')");
+		if (nullString == null)
+		{
+			copySql.append("', NULL ''");
+		}
+		else
+		{
+			copySql.append("', NULL '");
+			copySql.append(nullString);
+			copySql.append('\'');
+		}
+		copySql.append(")");
+
 		return copySql.toString();
 	}
 }

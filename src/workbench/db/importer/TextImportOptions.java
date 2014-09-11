@@ -42,4 +42,6 @@ public interface TextImportOptions
 	void setDecimalChar(String s);
 	QuoteEscapeType getQuoteEscaping();
 	boolean getQuoteAlways();
+	String getNullString();
+	void setNullString(String nullString);
 }

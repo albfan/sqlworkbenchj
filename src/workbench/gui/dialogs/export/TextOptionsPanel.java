@@ -52,6 +52,7 @@ import workbench.gui.components.FoldingPanel;
 import workbench.gui.components.WbComboBox;
 import workbench.gui.dialogs.QuoteEscapeSelector;
 import workbench.gui.dialogs.QuoteSettingVerifier;
+import workbench.util.CharacterEscapeType;
 
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
@@ -278,6 +279,17 @@ public class TextOptionsPanel
 	public void setQuoteAlways(boolean flag)
 	{
 		this.quoteAlways.setSelected(flag);
+	}
+
+	@Override
+	public void setEscapeType(CharacterEscapeType type)
+	{
+	}
+
+	@Override
+	public CharacterEscapeType getEscapeType()
+	{
+		return CharacterEscapeType.unicode;
 	}
 
 	@Override

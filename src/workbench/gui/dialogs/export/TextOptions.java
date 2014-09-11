@@ -26,6 +26,7 @@ import java.util.Set;
 
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ControlFileFormat;
+import workbench.util.CharacterEscapeType;
 
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
@@ -46,6 +47,8 @@ public interface TextOptions
 	boolean getQuoteAlways();
 	void setEscapeRange(CharacterRange range);
 	CharacterRange getEscapeRange();
+	void setEscapeType(CharacterEscapeType type);
+	CharacterEscapeType getEscapeType();
 	void setLineEnding(String ending);
 	String getLineEnding();
 	void setDecimalSymbol(String decimal);

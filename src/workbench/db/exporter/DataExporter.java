@@ -66,6 +66,7 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
+import workbench.util.CharacterEscapeType;
 
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
@@ -207,6 +208,7 @@ public class DataExporter
 	private ZipEntry zipEntry;
 	private BlobMode blobMode;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
+	private CharacterEscapeType escapeType = CharacterEscapeType.unicode;
 
 	/**
 	 * Create a DataExporter for the specified connection.
@@ -227,6 +229,18 @@ public class DataExporter
 				this.trimCharData = profile.getTrimCharData();
 			}
 		}
+	}
+
+	@Override
+	public void setEscapeType(CharacterEscapeType type)
+	{
+		this.escapeType = type;
+	}
+
+	@Override
+	public CharacterEscapeType getEscapeType()
+	{
+		return escapeType;
 	}
 
 	public boolean getIncludeIdentityCols()

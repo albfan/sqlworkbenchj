@@ -109,4 +109,16 @@ public class DefaultTextImportOptions
 	public void setDecimalChar(String s)
 	{
 	}
+
+	@Override
+	public String getNullString()
+	{
+		return null;
+	}
+
+	@Override
+	public void setNullString(String nullString)
+	{
+	}
+
 }

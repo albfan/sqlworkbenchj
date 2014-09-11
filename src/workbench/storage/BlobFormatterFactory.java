@@ -38,13 +38,13 @@ public class BlobFormatterFactory
 		// which is e.g. used by SQL Server
 		DefaultBlobFormatter f = new DefaultBlobFormatter();
 		f.setPrefix("0x");
-		
+
 		return f;
 	}
 
 	public static BlobLiteralFormatter createInstance(BlobLiteralType type)
 	{
-		if (type == BlobLiteralType.pgDecode || type == BlobLiteralType.pgEscape)
+		if (type == BlobLiteralType.pgDecode || type == BlobLiteralType.pgEscape || type == BlobLiteralType.pgHex)
 		{
 			return new PostgresBlobFormatter(type);
 		}
@@ -52,7 +52,7 @@ public class BlobFormatterFactory
 		f.setLiteralType(type);
 		return f;
 	}
-	
+
 	public static BlobLiteralFormatter createInstance(DbMetadata meta)
 	{
 		// Check for a user-defined formatter definition
@@ -64,7 +64,7 @@ public class BlobFormatterFactory
 		{
 			DefaultBlobFormatter f = new DefaultBlobFormatter();
 			String type = s.getBlobLiteralType();
-			
+
 			BlobLiteralType literalType = null;
 			try
 			{
@@ -74,15 +74,15 @@ public class BlobFormatterFactory
 			{
 				literalType = BlobLiteralType.hex;
 			}
-			
+
 			BlobLiteralType.valueOf(type);
 			f.setUseUpperCase(s.getBlobLiteralUpperCase());
 			f.setLiteralType(literalType);
 			f.setPrefix(prefix);
 			f.setSuffix(suffix);
 			return f;
-		}		
-		
+		}
+
 		// No user-defined formatter definition found, use the built-in settings
 		if (meta.isPostgres())
 		{
@@ -102,7 +102,7 @@ public class BlobFormatterFactory
 		{
 			// Although the DB2 Manuals says it supports
 			// binary string constants, it is very likely
-			// that this will be rejected by DB2 due to the 
+			// that this will be rejected by DB2 due to the
 			// max.length of 32K for binary strings.
 			DefaultBlobFormatter f = new DefaultBlobFormatter();
 			f.setUseUpperCase(true);
@@ -122,5 +122,5 @@ public class BlobFormatterFactory
 		// Still no luck, use the ANSI format.
 		return createAnsiFormatter();
 	}
-	
+
 }

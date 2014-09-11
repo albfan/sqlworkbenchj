@@ -301,12 +301,19 @@ public class ConnectionMgr
 
 		for (DbDriver db : drivers)
 		{
+			if (db == null) continue;
+
+			if (db.getDriverClass() == null)
+			{
+				LogMgr.logWarning("ConnectionMgr.findDriverByName()", "Got driver without a driver class: " + db.getName() + ", classpath=" + db.getLibraryList());
+				continue;
+			}
+
 			if (db.getDriverClass().equals(drvClassName))
 			{
-				// if the classname and the driver name are the same return the driver immediately
-				// If we don't find a match for the name, we'll use
-				// the first match for the classname
-				if (db.getName().equals(driverName)) return db;
+				// if the classname and the driver name are the same, return the driver immediately
+				// If we don't find a match for the name, we'll use the first match for the classname
+				if (driverName.equals(db.getName())) return db;
 				if (firstMatch == null)
 				{
 					firstMatch = db;
@@ -333,7 +340,12 @@ public class ConnectionMgr
 
 		for (DbDriver driver : this.drivers)
 		{
-			if (driver.getDriverClass().equals(drvClassName)) return driver;
+			if (driver.getDriverClass() == null)
+			{
+				LogMgr.logWarning("ConnectionMgr.findRegisteredDriver()", "Got driver without a driver class: " + driver.getName() + ", classpath=" + driver.getLibraryList());
+				continue;
+			}
+			if (drvClassName.equals(driver.getDriverClass())) return driver;
 		}
 		return null;
 	}

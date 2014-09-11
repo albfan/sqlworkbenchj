@@ -192,6 +192,18 @@ public class TextOptionsPanel
 		this.decimalCharTextField.setText(s);
 	}
 
+	@Override
+	public String getNullString()
+	{
+		return null;
+	}
+
+	@Override
+	public void setNullString(String nullString)
+	{
+	}
+
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
