@@ -49,37 +49,14 @@
 
     <!-- put all foreign keys in a single changeset -->
     <changeSet author="{$authorName}" id="initial-fk">
-    <!-- now process all foreign keys -->
-    <xsl:for-each select="table-def/foreign-keys/foreign-key">
-
-      <xsl:variable name="initial-table" select="../../table-name"/>
-      <xsl:variable name="target-table" select="references/table-name"/>
-
-      <xsl:variable name="pk-columns">
-        <xsl:for-each select="source-columns">
-          <xsl:value-of select="column"/>
-          <xsl:if test="position() &lt; last()"><xsl:text>,</xsl:text></xsl:if>
-        </xsl:for-each>
-      </xsl:variable>
-
-      <xsl:variable name="fk-columns">
-        <xsl:for-each select="referenced-columns">
-          <xsl:value-of select="column"/>
-          <xsl:if test="position() &lt; last()"><xsl:text>,</xsl:text></xsl:if>
-        </xsl:for-each>
-      </xsl:variable>
-
-      <xsl:variable name="fk-name" select="constraint-name"/>
-      <addForeignKeyConstraint constraintName="{$fk-name}"
-                               baseTableName="{$initial-table}"
-                               baseColumnNames="{$pk-columns}"
-                               referencedTableName="{$target-table}"
-                               referencedColumnNames="{$fk-columns}"/>
-
-    </xsl:for-each>  <!-- foreign keys -->
+    
+      <xsl:for-each select="table-def/foreign-keys/foreign-key">
+        <xsl:call-template name="add-fk">
+          <xsl:with-param name="tablename" select="../../table-name"/>
+        </xsl:call-template>
+      </xsl:for-each> 
+      
     </changeSet>
-
-
 
     <xsl:for-each select="proc-def">
       <xsl:variable name="id" select="position()"/>
