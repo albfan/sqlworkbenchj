@@ -260,8 +260,8 @@ FROM pg_trigger trg
   </void>
 
   <void method="put">
-   <string>HSQL Database Engine 2.0</string>
-   <object class="workbench.db.GetMetaDataSql">
+   <string>HSQL Database Engine-2</string>
+   <object id="hsqldb20" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT 'CREATE TRIGGER '||trigger_name||'\n'||
        action_timing||' '||event_manipulation||' ON '||event_object_table||'\n'||
@@ -293,7 +293,7 @@ FROM pg_trigger trg
        end||'\n'||
        trim(action_statement)
        FROM information_schema.triggers
-</string>
+      </string>
     </void>
     <void property="objectNameField">
      <string>trigger_name</string>
@@ -302,7 +302,7 @@ FROM pg_trigger trg
   </void>
 
   <void method="put">
-   <string>HSQL Database Engine</string>
+   <string>HSQL Database Engine-1.8</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT description FROM information_schema.system_triggers</string>
