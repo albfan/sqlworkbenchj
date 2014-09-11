@@ -59,6 +59,7 @@ public class LexerBasedParser
 	protected boolean hasMoreCommands;
 	protected boolean checkOracleInclude;
 	protected boolean calledOnce;
+	protected boolean checkPgQuoting;
 
 	protected Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
 	protected Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
@@ -91,6 +92,10 @@ public class LexerBasedParser
 		emptyLineIsDelimiter = flag;
 	}
 
+	public void setCheckPgQuoting(boolean flag)
+	{
+		this.checkPgQuoting = true;
+	}
 	/**
 	 * Controls if the actual SQL for each command returned by
 	 * #getNextCommand() is stored in the ScriptCommandDefinition
@@ -118,7 +123,11 @@ public class LexerBasedParser
 		String delimiterString = delimiter.getDelimiter();
 		try
 		{
-			StringBuilder sql = new StringBuilder(250);
+			StringBuilder sql = null;
+			if (storeStatementText || !returnLeadingWhitespace)
+			{
+				sql = new StringBuilder(250);
+			}
 
 			int previousEnd = -1;
 
@@ -126,6 +135,8 @@ public class LexerBasedParser
 			boolean startOfLine = false;
 			boolean singleLineCommand = false;
 			boolean danglingQuote = false;
+			boolean inPgQuote = false;
+			String pgQuoteString = null;
 
 			while (token != null)
 			{
@@ -134,7 +145,19 @@ public class LexerBasedParser
 
 				boolean checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
 
-				if (token.isUnclosedString())
+				if (checkPgQuoting && isDollarQuote(text))
+				{
+					if (inPgQuote && text.equals(pgQuoteString))
+					{
+						inPgQuote = false;
+					}
+					else
+					{
+						inPgQuote = true;
+						pgQuoteString = text;
+					}
+				}
+				else if (token.isUnclosedString())
 				{
 					danglingQuote = true;
 				}
@@ -145,7 +168,7 @@ public class LexerBasedParser
 						danglingQuote = false;
 					}
 				}
-				else
+				else if (!inPgQuote)
 				{
 					if (checkOracleInclude && startOfLine && !singleLineCommand && text.charAt(0) == '@')
 					{
@@ -195,7 +218,10 @@ public class LexerBasedParser
 				}
 				previousEnd = token.getCharEnd();
 				token = lexer.getNextToken();
-				sql.append(text);
+				if (sql != null)
+				{
+					sql.append(text);
+				}
 			}
 			if (previousEnd > 0)
 			{
@@ -204,7 +230,7 @@ public class LexerBasedParser
 				cmd.setIndexInScript(currentStatementIndex);
 				currentStatementIndex ++;
 				lastStart = -1;
-				hasMoreCommands = (token != null);
+				hasMoreCommands = token != null && token.getCharEnd() < scriptLength;
 				return cmd;
 			}
 			hasMoreCommands = false;
@@ -335,4 +361,12 @@ public class LexerBasedParser
 			LogMgr.logError("LexerBasedParser.reset()", "Cannot re-open input stream", io2);
 		}
 	}
+
+	protected boolean isDollarQuote(String text)
+	{
+		if (text == null || text.isEmpty()) return false;
+		if (text.charAt(0) != '$') return false;
+		return text.endsWith("$");
+	}
+
 }

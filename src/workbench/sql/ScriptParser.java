@@ -464,14 +464,15 @@ public class ScriptParser
 	private ScriptIterator getParserInstance()
 	{
 		ScriptIterator p = null;
-		if (usePgParser)
-		{
-			return new PgSqlParser();
-		}
-		
 		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", true);
 
-		if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands || supportIdioticQuotes)
+		if (usePgParser)
+		{
+			LexerBasedParser l = new LexerBasedParser();
+			l.setCheckPgQuoting(true);
+			p = l;
+		}
+		else if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands || supportIdioticQuotes)
 		{
 			p = new IteratingScriptParser();
 			((IteratingScriptParser)p).setSupportIdioticQuotes(this.supportIdioticQuotes);

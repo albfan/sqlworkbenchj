@@ -23,6 +23,8 @@
 package workbench.sql;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -236,6 +238,71 @@ public class LexerBasedParserTest
 			}
 
 		}
+	}
+
+	@Test
+	public void testPgParser()
+		throws Exception
+	{
+		String sql =
+			"select * from foo;\n" +
+			"commit;\n" +
+			"delete from bar;";
+
+		LexerBasedParser parser = new LexerBasedParser(sql);
+		parser.setCheckPgQuoting(true);
+		List<String> script = getStatements(parser);
+		assertEquals(3, script.size());
+		assertEquals("commit", script.get(1));
+
+		sql =
+			"create or replace function foo()\n" +
+			"  returns integer \n" +
+			"as \n" +
+			"$body$\n" +
+			"  declare l_value integer;\n" +
+			"begin \n" +
+			"   l_value := 42; \n" +
+			"   return l_value; \n" +
+			"end;\n" +
+			"$body$\n"+
+			"language plpgsql;";
+
+		parser.setScript(sql);
+		script = getStatements(parser);
+		assertEquals(1, script.size());
+
+		sql =
+			"drop function foo()\n" +
+			"/\n" +
+			"create or replace function foo()\n" +
+			"  returns integer \n" +
+			"as \n" +
+			"$body$\n" +
+			"  declare l_value integer;\n" +
+			"begin \n" +
+			"   l_value := 42; \n" +
+			"   return l_value; \n" +
+			"end;\n" +
+			"$body$\n"+
+			"language plpgsql" +
+			"/\n";
+
+		parser.setScript(sql);
+		parser.setDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		script = getStatements(parser);
+		assertEquals(2, script.size());
+	}
+
+	private List<String> getStatements(LexerBasedParser parser)
+	{
+		List<String> result = new ArrayList<>();
+		while (parser.hasMoreCommands())
+		{
+			ScriptCommandDefinition cmd = parser.getNextCommand();
+			result.add(cmd.getSQL());
+		}
+		return result;
 	}
 
 	@Test
