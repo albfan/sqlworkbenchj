@@ -913,6 +913,7 @@ public class TableListPanel
 			{
 				this.tableTypes.setSelectedIndex(0);
 			}
+			tableTypes.setMaximumRowCount(types.size() + 1);
 		}
 		catch (Exception e)
 		{

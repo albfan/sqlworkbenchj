@@ -105,48 +105,15 @@ public class MultiSelectComboBox<T extends Object>
 
 	public MultiSelectComboBox()
 	{
-		this(null, null);
-	}
-
-	/**
-	 * Initialize a new MultiSelectComboBox.
-	 *
-	 * @param items  the items to display. May not contain null values
-	 */
-	public MultiSelectComboBox(List<T> items)
-	{
-		this(items, null);
-	}
-
-	/**
-	 * Initialize a new MultiSelectComboBox.
-	 *
-	 * @param items          the items to display. May not contain null values
-	 * @param selectedItems  the items that should be pre-selected
-	 */
-	public MultiSelectComboBox(List<T> items, Collection<T> selectedItems)
-	{
 		super();
 		addPopupMenuListener(this);
 		setRenderer(myRenderer);
 		nothingSelectedText = ResourceMgr.getString("LblNone");
 		selectAllLabel = ResourceMgr.getString("LblSelectAll");
 		selectNoneLabel = ResourceMgr.getString("LblSelectNone");
-		if (items != null)
-		{
-			setupItemList(items, selectedItems);
-		}
 	}
 
-	public void setItems(List<T> items, Collection<T> selected)
-	{
-		if (items != null)
-		{
-			setupItemList(items, selected);
-		}
-	}
-
-	private void setupItemList(List<T> items, Collection<T> selectedItems)
+	public void setItems(List<T> items, Collection<T> selectedItems)
 	{
 		super.removeActionListener(this);
 
@@ -178,6 +145,7 @@ public class MultiSelectComboBox<T extends Object>
 		}
 		int scrollWidth = UIManager.getInt("ScrollBar.width");
 		setPopupWidth(maxElementWidth + scrollWidth + 5);
+		setMaximumRowCount(items.size() + 3);
 		super.addActionListener(this);
 	}
 
