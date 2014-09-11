@@ -23,7 +23,9 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -34,9 +36,11 @@ import java.util.Objects;
 
 import javax.swing.ComboBoxEditor;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JList;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.PopupMenuEvent;
@@ -145,6 +149,7 @@ public class MultiSelectComboBox<T extends Object>
 		}
 		int scrollWidth = UIManager.getInt("ScrollBar.width");
 		setPopupWidth(maxElementWidth + scrollWidth + 5);
+		this.setToolTipText(getSelectedItemsDisplay().toString());
 		super.addActionListener(this);
 	}
 
@@ -336,10 +341,25 @@ public class MultiSelectComboBox<T extends Object>
 		}
 	}
 
-	private void closeAndFire()
+	@Override
+	public void removeNotify()
+	{
+		super.removeNotify();
+		if (myRenderer != null)
+		{
+			myRenderer.dispose();
+		}
+	}
+
+	private boolean isChanged()
 	{
 		List<T> selected = getSelectedItems();
-		boolean changed = !Objects.equals(selected, lastSelected);
+		return !Objects.equals(selected, lastSelected);
+	}
+
+	private void closeAndFire()
+	{
+		boolean changed = isChanged();
 
 		boolean allowClose = !selectionRequired || getSelectedCount() > 0;
 		if (!allowClose) return;
@@ -349,6 +369,7 @@ public class MultiSelectComboBox<T extends Object>
 			closing = true;
 			ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, getActionCommand(), 0);
 			super.setPopupVisible(false);
+			this.setToolTipText(getSelectedItemsDisplay().toString());
 			if (changed)
 			{
 				fireActionPerformed(e);
@@ -477,6 +498,29 @@ public class MultiSelectComboBox<T extends Object>
 	private class MultiSelectRenderer
 		extends DefaultListCellRenderer
 	{
+		private FlatButton button;
+		private ImageIcon icon;
+
+		MultiSelectRenderer()
+		{
+			button = new FlatButton();
+			button.setRolloverEnabled(true);
+			button.setHorizontalTextPosition(SwingConstants.RIGHT);
+			button.setHorizontalAlignment(SwingConstants.LEADING);
+			button.setMargin(new Insets(2, 5, 2, 2));
+			button.setIconTextGap(2);
+			icon = ResourceMgr.getImageByName("tick.gif");
+			Dimension d = new Dimension(maxElementWidth - 10, icon.getIconHeight() + 4);
+			button.setPreferredSize(d);
+		}
+
+		void dispose()
+		{
+			if (icon != null && icon.getImage() != null)
+			{
+				icon.getImage().flush();
+			}
+		}
 
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
@@ -502,6 +546,19 @@ public class MultiSelectComboBox<T extends Object>
 				JComponent renderer = (JComponent) super.getListCellRendererComponent(list, selectNoneLabel, index, isSelected, cellHasFocus);
 				renderer.setBorder(DividerBorder.BOTTOM_DIVIDER);
 				return renderer;
+			}
+			else if (index == summaryIndex)
+			{
+				button.setText(getSelectedItemsDisplay().toString());
+				if (isChanged())
+				{
+					button.setIcon(icon);
+				}
+				else
+				{
+					button.setIcon(null);
+				}
+				return button;
 			}
 
 			// index == -1 means the currently selected item should be displayed
