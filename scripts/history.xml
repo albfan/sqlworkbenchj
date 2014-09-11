@@ -21,6 +21,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="5" type="fix">For HSQLDB 2.x triggers were no longer displayed.</entry>
     <entry dev-build="5" type="fix">The formatter did not handle non-standard quoted identifiers for T-SQL properly</entry>
     <entry dev-build="5" type="fix">WbSchemaReport was writing the columns for foreign keys in the wrong order</entry>
     <entry dev-build="3" type="fix">For PostgreSQL the default value of function parameters was not shown in the generated SQL</entry>
