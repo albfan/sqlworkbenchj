@@ -104,7 +104,7 @@ END;
 
   <para>
     &wb-productname; will use the alternate delimiter which terminates the script. Thus the whole script
-    will be seen as a <emphasis role="bold">single</</emphasis> statement - which of course is invalid.
+    will be seen as a <emphasis role="bold">single</emphasis> statement - which of course is invalid.
     You will need to either select and run each statement individually or change the delimiter
     after the <literal>SELECT</literal> to the alternate delimiter.
   </para>
