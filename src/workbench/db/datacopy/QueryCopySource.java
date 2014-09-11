@@ -128,6 +128,9 @@ public class QueryCopySource
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
 			reader = RowDataReaderFactory.createReader(info, sourceConnection);
 
+			// make sure the data is retrieved "as is" from the source. Do not convert it to something readable.
+			reader.setConverter(null);
+
 			while (this.keepRunning && rs.next())
 			{
 				// RowDataReader will make some transformation
