@@ -146,6 +146,10 @@ public class CompletionHandler
 		highlightNotNulls = false;
 		String script = this.editor.getText();
 		ScriptParser parser = new ScriptParser(script);
+		if (dbConnection != null)
+		{
+			parser.usePgParser(dbConnection.getMetadata().isPostgres());
+		}
 		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		parser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 		parser.setAlternateLineComment(dbConnection == null ? null : dbConnection.getDbSettings().getLineComment());

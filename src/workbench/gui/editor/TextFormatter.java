@@ -22,13 +22,16 @@
  */
 package workbench.gui.editor;
 
-import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.SqlTextContainer;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
+
 import workbench.util.StringUtil;
 
 /**
@@ -49,11 +52,11 @@ public class TextFormatter
 	{
 		String sql = editor.getSelectedStatement();
 		ScriptParser parser = new ScriptParser();
+		parser.usePgParser("postgresql".equals(dbId));
 		parser.setAlternateDelimiter(alternateDelimiter);
 		parser.setReturnStartingWhitespace(true);
 		parser.setAlternateLineComment(lineComment);
 		parser.setScript(sql);
-
 
 		DelimiterDefinition delimiter = parser.getDelimiter();
 
@@ -65,7 +68,7 @@ public class TextFormatter
 
 		StringBuilder newSql = new StringBuilder(sql.length() + 100);
 		boolean needDelimiter = (count > 1) || (count == 1 && isSelected && selectionWithDelimiter);
-
+		boolean addNewLine = false;
 		for (int i=0; i < count; i++)
 		{
 			String command = parser.getCommand(i);
@@ -76,6 +79,8 @@ public class TextFormatter
 				newSql.append(command);
 				continue;
 			}
+
+			addNewLine = (i < count);
 
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength(), dbId);
 
@@ -94,7 +99,7 @@ public class TextFormatter
 				newSql.append('\n');
 
 				// add a blank line between the statements, but not for the last one
-				if (count > 1 && i < count - 2)
+				if (addNewLine)
 				{
 					newSql.append('\n');
 				}

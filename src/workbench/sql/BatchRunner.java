@@ -659,8 +659,11 @@ public class BatchRunner
 			parser.setSupportOracleInclude(this.connection.getDbSettings().supportShortInclude());
 			parser.setCheckForSingleLineCommands(this.connection.getDbSettings().supportSingleLineCommands());
 			parser.setAlternateLineComment(this.connection.getDbSettings().getLineComment());
+			if (this.connection.getMetadata().isPostgres())
+			{
+				parser.usePgParser(true);
+			}
 		}
-
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		return parser;
 	}

@@ -2,7 +2,10 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-09-07">
-    <entry dev-build="5" type="enh">The default when specifying an alternate delimiter using the -delimiter parameter has changed to "single line"</entry>
+    <entry dev-build="5" type="enh">WbExport now has additional options to escape control characters and BLOB data such that the output file can be imported using Postgres' COPY statement</entry>
+    <entry dev-build="5" type="enh">The parser now understand Postgres' "dollar quoting" (removing the need to use the alternate delimiter for Postgres)</entry>
+    <entry dev-build="5" type="enh">The ability to specify an alternate delimiter as "single line" has been removed. The alternate delimiter is now always assumed to be on a single line</entry>
+    <entry dev-build="5" type="enh">It's now possible to load a different macro file for each connection</entry>
     <entry dev-build="4" type="enh">The macro popup window can now be configure to be closed using the ESC key</entry>
     <entry dev-build="4" type="enh">For Oracle and SQL Server the DbExplorer now shows if a foreign key is enabled</entry>
     <entry dev-build="4" type="enh">WbRunLB will now also read scripts included with the &lt;sqlFile&gt; tag</entry>
@@ -18,6 +21,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="5" type="fix">The formatter did not handle non-standard quoted identifiers for T-SQL properly</entry>
     <entry dev-build="5" type="fix">WbSchemaReport was writing the columns for foreign keys in the wrong order</entry>
     <entry dev-build="3" type="fix">For PostgreSQL the default value of function parameters was not shown in the generated SQL</entry>
     <entry dev-build="3" type="fix">For Oracle, synonyms pointing to no longer existing tables where not shown in the DbExplorer</entry>

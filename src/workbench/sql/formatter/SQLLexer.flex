@@ -64,6 +64,17 @@ import workbench.util.CharSequenceReader;
 	private StringBuilder commentBuffer = new StringBuilder();
 	private int commentNestCount = 0;
 	private int commentStartChar = 0;
+  private boolean checkStupidQuoting = false;
+
+  public void setCheckStupidQuoting(boolean flag)
+  {
+    checkStupidQuoting = flag;
+  }
+
+  public boolean getCheckStupidQuoting()
+  {
+    return checkStupidQuoting;
+  }
 
 	/**
 	 * next Token method that allows you to control if whitespace and comments are
@@ -74,11 +85,19 @@ import workbench.util.CharSequenceReader;
 		try
 		{
 			SQLToken t = getNextToken();
+      if (t != null && checkStupidQuoting && "[".equals(t.getText()))
+      {
+         return findStupidQuoteEnd(t);
+      }
       if (returnComments && returnWhiteSpace) return t;
 
 			while (t != null && ((!returnWhiteSpace && t.isWhiteSpace()) || (!returnComments && t.isComment())))
 			{
 				t = getNextToken();
+				if (t != null && checkStupidQuoting && "[".equals(t.getText()))
+				{
+					 return findStupidQuoteEnd(t);
+				}
 			}
 			return (t);
 		}
@@ -88,6 +107,26 @@ import workbench.util.CharSequenceReader;
 			return null;
 		}
 	}
+
+  public SQLToken findStupidQuoteEnd(SQLToken current)
+  {
+		StringBuilder realText = new StringBuilder(30);
+		realText.append(current.getText());
+		SQLToken next = getNextToken(true, true);
+		int lastEnd = 0;
+		while (next != null)
+		{
+			realText.append(next.getText());
+			lastEnd = next.getCharEnd();
+			if (next.getText().equals("]"))
+			{
+				SQLToken realToken = new SQLToken(SQLToken.IDENTIFIER, realText.toString(), current.getCharBegin(), next.getCharEnd());
+				return realToken;
+			}
+			next = getNextToken(true, true);
+		}
+		return new SQLToken(SQLToken.ERROR, realText.toString(), current.getCharBegin(), lastEnd);
+  }
 
 	/**
 	 * Closes the current input stream, and resets the scanner to read from a new input stream.
@@ -457,7 +496,7 @@ keyword=(
 
 whitespace=([ \r\n\t\f])
 wbvar=(\$\[)(\&|\?)?[a-zA-Z_0-9]+(\])|(\$\{)(\&|\?)?[a-zA-Z_0-9]+(\})
-identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\[\,\;\:\*]*)|(\"[^\r\n\t\f\*\<\>\'\"\*]*\")
+identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\*\<\>\'\"\*]*\")|(`[^\r\n\t\f\*\<\>\'\"\*]*`)
 digit=([0-9])
 digits=({digit}+)
 separator=([\(\)\[\]\,\;\:\*])

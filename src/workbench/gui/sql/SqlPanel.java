@@ -2970,10 +2970,17 @@ public class SqlPanel
 				LogMgr.logError("SqlPanel.createScriptParser()", "No db settings available!", null);
 				return scriptParser;
 			}
-			scriptParser.setSupportOracleInclude(db.supportShortInclude());
-			scriptParser.setCheckForSingleLineCommands(db.supportSingleLineCommands());
-			scriptParser.setAlternateLineComment(db.getLineComment());
-			scriptParser.setSupportIdioticQuotes(db.getUseIdioticQuotes());
+			if (this.dbConnection.getMetadata().isPostgres())
+			{
+				scriptParser.usePgParser(true);
+			}
+			else
+			{
+				scriptParser.setSupportOracleInclude(db.supportShortInclude());
+				scriptParser.setCheckForSingleLineCommands(db.supportSingleLineCommands());
+				scriptParser.setAlternateLineComment(db.getLineComment());
+				scriptParser.setSupportIdioticQuotes(db.getUseIdioticQuotes());
+			}
 		}
 		else
 		{

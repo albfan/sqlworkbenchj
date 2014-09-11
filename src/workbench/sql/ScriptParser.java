@@ -62,6 +62,7 @@ public class ScriptParser
 	private boolean returnTrailingWhitesapce;
 	private String alternateLineComment;
 	private boolean useAlternateDelimiter;
+	private boolean usePgParser;
 	private File source;
 
 	private int maxFileSize;
@@ -117,6 +118,11 @@ public class ScriptParser
 		throws IOException
 	{
 		setFile(f, null);
+	}
+
+	public void usePgParser(boolean flag)
+	{
+		this.usePgParser = flag;
 	}
 
 	/**
@@ -458,6 +464,11 @@ public class ScriptParser
 	private ScriptIterator getParserInstance()
 	{
 		ScriptIterator p = null;
+		if (usePgParser)
+		{
+			return new PgSqlParser();
+		}
+		
 		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", true);
 
 		if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands || supportIdioticQuotes)
@@ -502,7 +513,6 @@ public class ScriptParser
 
 		while ((c = p.getNextCommand()) != null)
 		{
-//			String sql = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
 			c.setIndexInScript(index);
 			index++;
 			this.commands.add(c);

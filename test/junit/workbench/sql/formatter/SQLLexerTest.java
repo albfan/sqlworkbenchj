@@ -126,15 +126,47 @@ public class SQLLexerTest
 
 	@Test
 	public void testStupidQuotedIdentifier()
+			throws Exception
 	{
 		String sql = "Select [one AND two] from thetable;";
 		SQLLexer l = new SQLLexer(sql);
+		l.setCheckStupidQuoting(true);
 		SQLToken select = l.getNextToken(false, false);
 		assertEquals(select.getContents(), "SELECT");
 
 		SQLToken col = l.getNextToken(false, false);
 		assertEquals("[one AND two]", col.getContents());
 		assertTrue(col.isIdentifier());
+
+		sql = "Select '[one AND two]' from thetable;";
+		l = new SQLLexer(sql);
+		l.setCheckStupidQuoting(true);
+		select = l.getNextToken(false, false);
+		assertEquals(select.getContents(), "SELECT");
+
+		col = l.getNextToken(false, false);
+		assertEquals("'[one AND two]'", col.getContents());
+		assertTrue(col.isLiteral());
+
+		sql = "CREATE TABLE [dumb]([Id]        [int] NOT NULL);";
+		l = new SQLLexer(sql);
+		l.setCheckStupidQuoting(true);
+		SQLToken t = l.getNextToken(true, true); // create
+		t = l.getNextToken(true, true); // whitespace
+		t = l.getNextToken(true, true); // table
+		t = l.getNextToken(true, true); // whitespace
+		t = l.getNextToken(true, true); // the table name
+		assertEquals("[dumb]", t.getText());
+		assertTrue(t.isIdentifier());
+
+		t = l.getNextToken(true, true); // whitespace
+		t = l.getNextToken(true, true); // [Id]
+		assertEquals("[Id]", t.getText());
+		assertTrue(t.isIdentifier());
+
+		t = l.getNextToken(true, true); // whitespace
+		t = l.getNextToken(true, true); // [int]
+		assertEquals("[int]", t.getText());
 	}
 
 
@@ -346,7 +378,6 @@ public class SQLLexerTest
 		assertEquals("+0.123", tokens.get(0).getText());
 		assertTrue(tokens.get(0).isNumberLiteral());
 		assertFalse(tokens.get(0).isIntegerLiteral());
-
 	}
 
 
@@ -375,7 +406,6 @@ public class SQLLexerTest
 	{
 		String sql = "select 'arthur''s house' from some_table";
 		List<SQLToken> tokens = getTokenList(sql);
-		System.out.println(tokens);
 		assertNotNull(tokens);
 		assertEquals(4, tokens.size());
 		assertTrue(tokens.get(0).isReservedWord());

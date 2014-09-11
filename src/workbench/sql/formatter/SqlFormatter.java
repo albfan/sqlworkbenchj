@@ -344,6 +344,7 @@ public class SqlFormatter
 		if (this.sql.length() == 0) return "";
 
 		this.lexer = new SQLLexer(this.sql);
+		this.lexer.setCheckStupidQuoting("microsoft_sql_server".equals(this.dbId));
 		this.result = new StringBuilder(this.sql.length() + 100);
 
 		this.formatSql();
@@ -2254,6 +2255,7 @@ public class SqlFormatter
 		for (StringBuilder col : cols)
 		{
 			SQLLexer lex = new SQLLexer(col.toString());
+			lex.setCheckStupidQuoting(this.lexer.getCheckStupidQuoting());
 			SQLToken column = lex.getNextToken(false, false);
 			if (column == null) continue;
 			String colname = column.getContents();
@@ -2363,16 +2365,7 @@ public class SqlFormatter
 
 		this.appendText(name);
 
-		// the SQLLexer does not handle quoted multi-part identifiers correctly...
-		// and it does not detect the stupid Microsoft quoted multi-part identifiers either
-		if (name.startsWith("[") && name.endsWith("]."))
-		{
-			t = this.skipComments(); // this must be the real table name
-			appendText(t.getContents());
-			appendText(' ');
-			t = this.skipComments();
-		}
-		else if (isQuotedIdentifier(name))
+		if (isQuotedIdentifier(name))
 		{
 			t = this.skipComments();
 			if (t.getContents().equals("."))

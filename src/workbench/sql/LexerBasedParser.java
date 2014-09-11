@@ -27,9 +27,12 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.regex.Pattern;
+
 import workbench.log.LogMgr;
+
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -42,23 +45,23 @@ public class LexerBasedParser
 	implements ScriptIterator
 {
 	private File originalFile;
-	private String fileEncoding;
-	private SQLLexer lexer;
-	private Reader input;
-	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
-	private int lastStart = -1;
-	private int currentStatementIndex;
-	private boolean storeStatementText = true;
-	private boolean returnLeadingWhitespace;
-	private boolean emptyLineIsDelimiter;
-	private int scriptLength;
-	private int realScriptLength;
-	private boolean hasMoreCommands;
-	private boolean checkOracleInclude;
-	private boolean calledOnce;
+	protected String fileEncoding;
+	protected SQLLexer lexer;
+	protected Reader input;
+	protected DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
+	protected int lastStart = -1;
+	protected int currentStatementIndex;
+	protected boolean storeStatementText = true;
+	protected boolean returnLeadingWhitespace;
+	protected boolean emptyLineIsDelimiter;
+	protected int scriptLength;
+	protected int realScriptLength;
+	protected boolean hasMoreCommands;
+	protected boolean checkOracleInclude;
+	protected boolean calledOnce;
 
-	private Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
-	private Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
+	protected Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
+	protected Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
 
 	public LexerBasedParser()
 	{
@@ -225,7 +228,7 @@ public class LexerBasedParser
 		return MULTI_LINE_PATTERN.matcher(text).matches();
 	}
 
-	private ScriptCommandDefinition createCommandDef(StringBuilder sql, int start, int end)
+	protected ScriptCommandDefinition createCommandDef(StringBuilder sql, int start, int end)
 	{
 		if (returnLeadingWhitespace || sql == null || !Character.isWhitespace(sql.charAt(0)) || sql.length() == 0)
 		{

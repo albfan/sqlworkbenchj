@@ -447,6 +447,7 @@ public class WbConnection
 		runner.setErrorReportLevel(ErrorReportLevel.none);
 
 		ScriptParser p = new ScriptParser(sql);
+		p.usePgParser(this.metaData.isPostgres());
 		p.setAlternateLineComment(this.getDbSettings().getLineComment());
 
 		// The statemenRunner will call clearMessages() when statementDone()

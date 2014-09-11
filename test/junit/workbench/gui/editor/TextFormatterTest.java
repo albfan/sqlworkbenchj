@@ -22,14 +22,16 @@
  */
 package workbench.gui.editor;
 
-import org.junit.AfterClass;
-
-import org.junit.Test;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 import workbench.interfaces.SqlTextContainer;
+
 import workbench.sql.DelimiterDefinition;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -162,7 +164,9 @@ public class TextFormatterTest
 			"UPDATE bar\n" +
 			"   SET foo = 2;";
 
-		assertEquals(expected, editorText.trim());
+		String formatted = editorText.trim();
+//		System.out.println("expected: \n" + expected + "\n------------- formatted: --------- \n" + formatted);
+		assertEquals(expected, formatted);
 
 		editorText = "update foo set bar = 1;\nupdate bar set foo = 2; ";
 		selectionStart = 0;
@@ -195,6 +199,8 @@ public class TextFormatterTest
 //		System.out.println("formatted:\n" + editorText);
 		assertEquals(expected, editorText.trim());
 
+		instance = new TextFormatter("oracle");
+
 		editorText = "update foo set bar = 1 where id = 1\n/\nupdate foo set bar = 2 where id = 2\n/\n";
 		selectionStart = 0;
 		selectionEnd = 0;
@@ -205,12 +211,14 @@ public class TextFormatterTest
 			"   SET bar = 1\n" +
 			"WHERE id = 1\n" +
 			"/\n" +
+			"\n" +
 			"UPDATE foo\n" +
 			"   SET bar = 2\n" +
 			"WHERE id = 2\n" +
 			"/";
 
-//		System.out.println("formatted:\n" + editorText);
+		formatted = editorText.trim();
+//		System.out.println("expected: \n" + expected + "\n------------- formatted: --------- \n" + formatted);
 		assertEquals(expected, editorText.trim());
 
 	}
