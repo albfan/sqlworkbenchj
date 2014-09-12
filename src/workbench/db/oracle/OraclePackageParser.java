@@ -240,7 +240,7 @@ public class OraclePackageParser
 
 	private static List<String> getParameters(SQLLexer lexer)
 	{
-		List<String> params = new ArrayList<String>();
+		List<String> params = new ArrayList<>();
 		SQLToken t = lexer.getNextToken(false, false);
 		boolean nextIsName = true;
 		while (t != null)

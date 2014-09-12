@@ -312,8 +312,14 @@ public class SqlUtil
 	 */
 	public static DdlObjectInfo getDDLObjectInfo(CharSequence sql)
 	{
+		return getDDLObjectInfo(sql, null);
+	}
+
+	public static DdlObjectInfo getDDLObjectInfo(CharSequence sql, WbConnection conn)
+	{
 		if (StringUtil.isEmptyString(sql)) return null;
-		DdlObjectInfo info = new DdlObjectInfo(sql);
+
+		DdlObjectInfo info = new DdlObjectInfo(sql, conn);
 		if (info.isValid())
 		{
 			return info;
@@ -394,19 +400,21 @@ public class SqlUtil
 
 	public static String getDeleteTable(CharSequence sql)
 	{
-		return getDeleteTable(sql, '.');
+		return getDeleteTable(sql, '.', null);
 	}
 
 	/**
 	 * If the given SQL is a DELETE [FROM] returns
 	 * the table from which rows will be deleted
 	 */
-	public static String getDeleteTable(CharSequence sql, char catalogSeparator)
+	public static String getDeleteTable(CharSequence sql, char catalogSeparator, WbConnection conn)
 	{
 		try
 		{
 			StringBuilder tableName = new StringBuilder();
 			SQLLexer lexer = new SQLLexer(sql);
+			lexer.setCheckStupidQuoting(conn == null ? false : conn.isSqlServer());
+
 			SQLToken t = lexer.getNextToken(false, false);
 			if (!t.getContents().equals("DELETE")) return null;
 			t = lexer.getNextToken(false, false);
@@ -473,50 +481,51 @@ public class SqlUtil
 	 * If the given SQL is an TRUNCATE TABLE INTO...
 	 * returns the target table, otherwise null
 	 */
-	public static String getTruncateTable(CharSequence sql)
+	public static String getTruncateTable(CharSequence sql, WbConnection conn)
 	{
-		return getTruncateTable(sql, '.');
+		return getTruncateTable(sql, '.', conn);
 	}
 
-	public static String getTruncateTable(CharSequence sql, char catalogSeparator)
+	public static String getTruncateTable(CharSequence sql, char catalogSeparator, WbConnection conn)
 	{
-		return getDmlTable(sql, catalogSeparator, "TRUNCATE", "TABLE");
+		return getDmlTable(sql, catalogSeparator, "TRUNCATE", "TABLE", conn);
 	}
 
 	/**
 	 * If the given SQL command is an UPDATE command, return
 	 * the table that is updated, otherwise return null;
 	 */
-	public static String getUpdateTable(CharSequence sql)
+	public static String getUpdateTable(CharSequence sql, WbConnection conn)
 	{
-		return getUpdateTable(sql, '.');
+		return getUpdateTable(sql, '.', null);
 	}
 
-	public static String getUpdateTable(CharSequence sql, char catalogSeparator)
+	public static String getUpdateTable(CharSequence sql, char catalogSeparator, WbConnection conn)
 	{
-		return getDmlTable(sql, catalogSeparator, "UPDATE", null);
+		return getDmlTable(sql, catalogSeparator, "UPDATE", null, conn);
 	}
 
 	/**
 	 * If the given SQL is an INSERT INTO...
 	 * returns the target table, otherwise null
 	 */
-	public static String getInsertTable(CharSequence sql)
+	public static String getInsertTable(CharSequence sql, WbConnection conn)
 	{
-		return getInsertTable(sql, '.');
+		return getInsertTable(sql, '.', conn);
 	}
 
-	public static String getInsertTable(CharSequence sql, char catalogSeparator)
+	public static String getInsertTable(CharSequence sql, char catalogSeparator, WbConnection conn)
 	{
-		return getDmlTable(sql, catalogSeparator, "INSERT", "INTO");
+		return getDmlTable(sql, catalogSeparator, "INSERT", "INTO", conn);
 	}
 
-	private static String getDmlTable(CharSequence sql, char catalogSeparator, String verb, String secondKeyword)
+	private static String getDmlTable(CharSequence sql, char catalogSeparator, String verb, String secondKeyword, WbConnection conn)
 	{
 		try
 		{
 			StringBuilder tableName = new StringBuilder();
 			SQLLexer lexer = new SQLLexer(sql);
+			lexer.setCheckStupidQuoting(conn == null ? false : conn.isSqlServer());
 			SQLToken t = lexer.getNextToken(false, false);
 			if (t == null || !t.getContents().equals(verb)) return null;
 			t = lexer.getNextToken(false, false);

@@ -1084,7 +1084,7 @@ public class WbExportTest
 		String sql = p.getCommand(0);
 		String verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("Not an insert file", "UPDATE", verb);
-		String table = SqlUtil.getUpdateTable(sql);
+		String table = SqlUtil.getUpdateTable(sql, null);
 		assertNotNull("No insert table found", table);
 		assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
 	}
@@ -1114,7 +1114,7 @@ public class WbExportTest
 		sql = p.getCommand(1);
 		verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("No INSERT as the second statement", "INSERT", verb);
-		table = SqlUtil.getInsertTable(sql);
+		table = SqlUtil.getInsertTable(sql, null);
 		assertNotNull("No INSERT table found", table);
 		assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
 	}
@@ -1136,7 +1136,7 @@ public class WbExportTest
 		String sql = p.getCommand(0);
 		String verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("Not an insert file", "INSERT", verb);
-		String table = SqlUtil.getInsertTable(sql);
+		String table = SqlUtil.getInsertTable(sql, null);
 		assertNotNull("No insert table found", table);
 		assertEquals("Wrong target table", "OTHER_TABLE", table.toUpperCase());
 	}
@@ -1175,7 +1175,7 @@ public class WbExportTest
 		verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("Not an insert file", "INSERT", verb);
 
-		String table = SqlUtil.getInsertTable(sql);
+		String table = SqlUtil.getInsertTable(sql, null);
 		assertNotNull("No insert table found", table);
 		assertEquals("Wrong target table", "OTHER_TABLE", table.toUpperCase());
 	}

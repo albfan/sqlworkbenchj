@@ -364,11 +364,11 @@ public class SqlUtilTest
 		assertEquals("Wrong table returned", "\"FROM\"", table);
 
 		sql = "delete from mylib/sometable";
-		table = SqlUtil.getDeleteTable(sql, '/');
+		table = SqlUtil.getDeleteTable(sql, '/', null);
 		assertEquals("mylib/sometable", table);
 
 		sql = "delete mylib/sometable where x = 1";
-		table = SqlUtil.getDeleteTable(sql, '/');
+		table = SqlUtil.getDeleteTable(sql, '/', null);
 		assertEquals("mylib/sometable", table);
 
 	}
@@ -377,19 +377,19 @@ public class SqlUtilTest
 	public void testGetInsertTable()
 	{
 		String sql = "insert into mytable";
-		String table = SqlUtil.getInsertTable(sql);
+		String table = SqlUtil.getInsertTable(sql, null);
 		assertEquals("mytable", table);
 
 		sql = "insert into theschema.mytable";
-		table = SqlUtil.getInsertTable(sql);
+		table = SqlUtil.getInsertTable(sql, null);
 		assertEquals("theschema.mytable", table);
 
 		sql = "insert into \"into\"";
-		table = SqlUtil.getInsertTable(sql);
+		table = SqlUtil.getInsertTable(sql, null);
 		assertEquals("\"into\"", table);
 
 		sql = "insert into mylib/sometable (";
-		table = SqlUtil.getInsertTable(sql, '/');
+		table = SqlUtil.getInsertTable(sql, '/', null);
 		assertEquals("mylib/sometable", table);
 	}
 
@@ -397,15 +397,15 @@ public class SqlUtilTest
 	public void testGetUpdateTable()
 	{
 		String sql = "update mytable set foo=42";
-		String table = SqlUtil.getUpdateTable(sql);
+		String table = SqlUtil.getUpdateTable(sql, null);
 		assertEquals("mytable", table);
 
 		sql = "update \"mytable\" set foo=42";
-		table = SqlUtil.getUpdateTable(sql);
+		table = SqlUtil.getUpdateTable(sql, null);
 		assertEquals("\"mytable\"", table);
 
 		sql = "update somelib/mytable set foo=42 where ";
-		table = SqlUtil.getUpdateTable(sql, '/');
+		table = SqlUtil.getUpdateTable(sql, '/', null);
 		assertEquals("somelib/mytable", table);
 	}
 

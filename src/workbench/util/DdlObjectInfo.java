@@ -23,6 +23,7 @@ package workbench.util;
 
 import java.util.Set;
 
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 
 import workbench.sql.formatter.SQLLexer;
@@ -39,7 +40,12 @@ public class DdlObjectInfo
 
 	public DdlObjectInfo(CharSequence sql)
 	{
-		parseSQL(sql);
+		parseSQL(sql, null);
+	}
+
+	public DdlObjectInfo(CharSequence sql, WbConnection conn)
+	{
+		parseSQL(sql, conn);
 	}
 
 	@Override
@@ -68,9 +74,11 @@ public class DdlObjectInfo
 		return objectName;
 	}
 
-	private void parseSQL(CharSequence sql)
+	private void parseSQL(CharSequence sql, WbConnection conn)
 	{
 		SQLLexer lexer = new SQLLexer(sql);
+		lexer.setCheckStupidQuoting(conn == null ? false : conn.isSqlServer());
+		
 		SQLToken t = lexer.getNextToken(false, false);
 
 		if (t == null) return;

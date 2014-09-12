@@ -101,7 +101,7 @@ public class DdlCommand
 			LogMgr.logWarning("DdlCommand.execute()", "A savepoint should be used for this DDL command, but the driver does not support savepoints!");
 		}
 
-		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql, currentConnection);
 		if (info != null && typesToRemember.contains(info.getObjectType()))
 		{
 			// this is only here to mimic SQL*Plus' behaviour for a "SHOW ERROR" without a parameter
@@ -246,7 +246,7 @@ public class DdlCommand
 	 * @return true if an error was added, false otherwise
 	 *
 	 * @see ErrorInformationReader#getErrorInfo(java.lang.String, java.lang.String, java.lang.String, boolean)
-	 * @see ReaderFactory#getErrorInformationReader(workbench.db.WbConnection) 
+	 * @see ReaderFactory#getErrorInformationReader(workbench.db.WbConnection)
 	 */
 	private boolean addExtendErrorInfo(WbConnection aConnection, String sql, DdlObjectInfo info , StatementRunnerResult result)
 	{

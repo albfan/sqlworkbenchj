@@ -204,19 +204,19 @@ public class UpdatingCommand
 		String tablename = null;
 		if (this.verb.equals("UPDATE"))
 		{
-			tablename = SqlUtil.getUpdateTable(sql, SqlUtil.getCatalogSeparator(currentConnection));
+			tablename = SqlUtil.getUpdateTable(sql, SqlUtil.getCatalogSeparator(currentConnection), currentConnection);
 		}
 		else if (this.verb.equals("DELETE"))
 		{
-			tablename = SqlUtil.getDeleteTable(sql, SqlUtil.getCatalogSeparator(currentConnection));
+			tablename = SqlUtil.getDeleteTable(sql, SqlUtil.getCatalogSeparator(currentConnection), currentConnection);
 		}
 		else if (this.verb.equals("INSERT"))
 		{
-			tablename = SqlUtil.getInsertTable(sql, SqlUtil.getCatalogSeparator(currentConnection));
+			tablename = SqlUtil.getInsertTable(sql, SqlUtil.getCatalogSeparator(currentConnection), currentConnection);
 		}
 		else if (this.verb.equals("TRUNCATE"))
 		{
-			tablename = SqlUtil.getTruncateTable(sql, SqlUtil.getCatalogSeparator(currentConnection));
+			tablename = SqlUtil.getTruncateTable(sql, SqlUtil.getCatalogSeparator(currentConnection), currentConnection);
 		}
 		return tablename;
 	}

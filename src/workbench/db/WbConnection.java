@@ -138,6 +138,25 @@ public class WbConnection
 		}
 	}
 
+	public boolean isSqlServer()
+	{
+		if (this.metaData != null)
+		{
+			return metaData.isSqlServer();
+		}
+		return false;
+	}
+
+	public boolean isPostgres()
+	{
+		if (this.metaData != null)
+		{
+			return metaData.isPostgres();
+		}
+		return false;
+	}
+
+
 	public void setLastDDLObject(DdlObjectInfo object)
 	{
 		this.lastDdlObject = object;

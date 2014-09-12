@@ -118,7 +118,7 @@ public class UpdateAnalyzer
 			{
 				context = CONTEXT_COLUMN_LIST;
 				tableForColumnList = new TableIdentifier(table, dbConnection);
-				fkMarker = checkFkLookup(); 
+				fkMarker = checkFkLookup();
 			}
 		}
 	}
@@ -144,7 +144,7 @@ public class UpdateAnalyzer
 	 */
 	List<ColumnInfo> getColumns()
 	{
-		List<ColumnInfo> result = new ArrayList<ColumnInfo>();
+		List<ColumnInfo> result = new ArrayList<>();
 
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken t = lexer.getNextToken(false, false);
@@ -230,9 +230,9 @@ public class UpdateAnalyzer
 	public List<TableAlias> getTables()
 	{
 		char schemaSep = SqlUtil.getSchemaSeparator(dbConnection);
-		String table = SqlUtil.getUpdateTable(this.sql, catalogSeparator);
+		String table = SqlUtil.getUpdateTable(this.sql, catalogSeparator, dbConnection);
 		TableAlias a = new TableAlias(table, catalogSeparator, schemaSep);
-		List<TableAlias> result = new ArrayList<TableAlias>(1);
+		List<TableAlias> result = new ArrayList<>(1);
 		result.add(a);
 		return result;
 	}
