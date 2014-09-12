@@ -157,7 +157,7 @@ public class SqlCommand
 		{
 			verb = SqlUtil.getSqlVerb(sql);
 		}
-		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql, currentConnection);
 		if (info != null)
 		{
 			String msg = getSuccessMessage(info, verb);
