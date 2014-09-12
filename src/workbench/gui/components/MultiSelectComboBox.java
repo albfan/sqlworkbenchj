@@ -23,8 +23,8 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -38,8 +38,8 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.PopupMenuEvent;
@@ -148,7 +148,7 @@ public class MultiSelectComboBox<T extends Object>
 		}
 		int scrollWidth = UIManager.getInt("ScrollBar.width");
 		setPopupWidth(maxElementWidth + scrollWidth + 5);
-		this.setToolTipText(getSelectedItemsDisplay().toString());
+		this.setToolTipText(getSelectedItemsDisplay());
 		super.addActionListener(this);
 	}
 
@@ -379,7 +379,7 @@ public class MultiSelectComboBox<T extends Object>
 			closing = true;
 			ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, getActionCommand(), 0);
 			super.setPopupVisible(false);
-			this.setToolTipText(getSelectedItemsDisplay().toString());
+			this.setToolTipText(getSelectedItemsDisplay());
 			if (changed)
 			{
 				fireActionPerformed(e);
@@ -421,7 +421,7 @@ public class MultiSelectComboBox<T extends Object>
 		}
 	}
 
-	public CharSequence getSelectedItemsDisplay()
+	public String getSelectedItemsDisplay()
 	{
 		List<T> items = getSelectedItems();
 		if (items.size() == getValueCount())
@@ -442,7 +442,7 @@ public class MultiSelectComboBox<T extends Object>
 			}
 			display.append(items.get(i).toString());
 		}
-		return display;
+		return display.toString();
 	}
 
 	/**
@@ -508,18 +508,14 @@ public class MultiSelectComboBox<T extends Object>
 	private class MultiSelectRenderer
 		extends DefaultListCellRenderer
 	{
-		private FlatButton button;
 		private ImageIcon icon;
-
+		private Dimension iconSize;
 		MultiSelectRenderer()
 		{
-			button = new FlatButton();
-			button.setRolloverEnabled(true);
-			button.setHorizontalTextPosition(SwingConstants.RIGHT);
-			button.setHorizontalAlignment(SwingConstants.LEADING);
-			button.setMargin(new Insets(2, 5, 2, 2));
-			button.setIconTextGap(2);
 			icon = ResourceMgr.getImageByName("filter_go16.gif");
+			int width = icon.getIconWidth();
+			int height = icon.getIconHeight();
+			iconSize = new Dimension((int)(width * 1.5), (int)(height * 1.5));
 		}
 
 		void dispose()
@@ -557,16 +553,11 @@ public class MultiSelectComboBox<T extends Object>
 			}
 			else if (index == summaryIndex)
 			{
-				button.setText(getSelectedItemsDisplay().toString());
-				if (isChanged())
-				{
-					button.setIcon(icon);
-				}
-				else
-				{
-					button.setIcon(null);
-				}
-				return button;
+				JComponent renderer = (JComponent) super.getListCellRendererComponent(list, getSelectedItemsDisplay(), index, isSelected, cellHasFocus);
+				JLabel label = (JLabel)renderer;
+				label.setPreferredSize(iconSize);
+				label.setIcon(icon);
+				return renderer;
 			}
 
 			// index == -1 means the currently selected item should be displayed

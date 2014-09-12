@@ -3,18 +3,17 @@
   <title>Other &wb-productname; specific commands</title>
 
 	<para>
-		In addtion to the <link linkend="command-export">WbExport</link>,
-		<link linkend="command-import">WbImport</link> and <link linkend="command-copy">WbCopy</link>
-		commands, &wb-productname; implements a set of additional SQL commands that are not part
-		of the SQL standard. These commands can be used like any other SQL command
-		(such as <literal>UPDATE</literal> inside &wb-productname;, i.e. inside the editor
-		or as part of a SQL script that is run through &wb-productname; in <link linkend="using-scripting">batch mode</link>.
+		&wb-productname; implements a set of additional SQL commands that are executed directly by &wb-productname; (i.e. not by database server).
+    These commands can be used like any other SQL command (such as <literal>UPDATE</literal> or <literal>SELECT</literal>)
+    inside &wb-productname;, i.e. inside the editor or as part of a SQL script that is run through &wb-productname;
+    in <link linkend="using-scripting">batch mode</link>.
 	</para>
 
 	<para>
 		As those commands are implemented by &wb-productname; you will not be able to
-		use them when running your SQL scripts using a different client program
-		(e.g. <literal>psql</literal>, SQL*Plus or <literal>phpmyadmin</literal>.
+		use them when running your SQL scripts using a different client program e.g.
+    <ulink url="http://www.postgresql.org/docs/current/static/app-psql.html"><literal>psql</literal></ulink>,
+    SQuirrel or <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/toc.htm">SQL*Plus</ulink>.
 	</para>
 
   <section id="command-schema-report">

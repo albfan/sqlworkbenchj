@@ -205,6 +205,13 @@ public class CommonDiffParameters
 			targetSchema = targetCon.getMetadata().adjustSchemaNameCase(targetSchema);
 		}
 
+		if (StringUtil.isEmptyString(targetSchema) && StringUtil.isEmptyString(targetTableNames))
+		{
+			// assume the reference tables are the targettables
+			// if neither target tables were specified nor a schema could be detected
+			targetTableNames = refTableNames;
+		}
+
 		SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, targetCon);
 		targetTables = targetArg.getTables();
 		missingTargetTables.addAll(targetArg.getMissingTables());

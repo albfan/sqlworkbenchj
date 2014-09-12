@@ -27,6 +27,9 @@ import workbench.db.WbConnection;
  */
 public class SQLLexerFactory
 {
+	public static final String DBID_ORA = "oracle";
+	public static final String DBID_PG = "postgresql";
+	public static final String DBID_MS = "microsoft_sql_server";
 
 	public static SQLLexer createLexer()
 	{
@@ -47,10 +50,10 @@ public class SQLLexerFactory
 		return lexer;
 	}
 
-	public static SQLLexer createLexerForDbId(String dbId, CharSequence sql)
+	public static SQLLexer createLexer(WbConnection conn, String sql)
 	{
 		SQLLexer lexer = new SQLLexer(sql);
-		configureLexer(lexer, dbId);
+		configureLexer(lexer, conn);
 		return lexer;
 	}
 
@@ -61,23 +64,23 @@ public class SQLLexerFactory
 		return lexer;
 	}
 
-	public static SQLLexer createLexer(WbConnection conn, String sql)
+	public static SQLLexer createLexerForDbId(String dbId, CharSequence sql)
 	{
 		SQLLexer lexer = new SQLLexer(sql);
-		configureLexer(lexer, conn);
+		configureLexer(lexer, dbId);
 		return lexer;
 	}
 
 	private static void configureLexer(SQLLexer lexer, WbConnection conn)
 	{
 		if (conn == null) return;
-		lexer.setCheckStupidQuoting(conn.isSqlServer());
+		configureLexer(lexer, conn.getDbId());
 	}
 
 	private static void configureLexer(SQLLexer lexer, String dbId)
 	{
 		if (dbId == null) return;
-		lexer.setCheckStupidQuoting(dbId.equalsIgnoreCase("microsoft_sql_server"));
+		lexer.setCheckStupidQuoting(dbId.equalsIgnoreCase(DBID_MS));
 	}
 
 }

@@ -4,10 +4,11 @@
 	<para>
 		The <literal>WbCopy</literal> is essentially the command line version of the
 		the <link linkend="data-pumper">DataPumper</link>. For a more detailed explanation
-		of the copy process, please refer to that section. It bascially chains a WbExport and a
-		<literal>WbImport</literal> statement without the need of an intermediate data file.
-		The <literal>WbCopy</literal> command requires that a connection to the source and target
-		database can be made at the same time.
+    of the copy process, please refer to that section. It bascially chains a
+    <link linkend="command-export"><literal>WbExport</literal></link> and a <link linkend="command-import"><literal>WbImport</literal></link>
+    statement without the need of an intermediate data file. The <literal>WbCopy</literal> command requires
+    that a connection to the source and target database can be made at the same time from the computer
+    running &wb-productname;
 	</para>
 
    <note>

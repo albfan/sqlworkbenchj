@@ -24,6 +24,9 @@ package workbench.storage;
 
 import java.sql.Types;
 import java.util.List;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -61,32 +64,42 @@ public class DatastoreTransposer
 		}
 	}
 
-	public DataStore transposeRow(int row)
+	public DataStore transposeRows(int[] rows)
 	{
-		if (row < 0 || row >= source.getRowCount()) return null;
-		DataStore ds = createDatastore();
-		int colCount = source.getColumnCount();
-		for (int col=0; col < colCount; col ++)
+		if (rows == null || rows.length == 0) return null;
+
+		String[] columns = new String[rows.length + 1];
+		int[] types = new int[rows.length + 1];
+
+		columns[0] = ResourceMgr.getString("TxtColumnName");
+		types[0] = Types.VARCHAR;
+
+		for (int i=0; i < rows.length; i++)
 		{
-			int newRow = ds.addRow();
-			ds.setValue(newRow, 0, source.getColumnDisplayName(col));
-			ds.setValue(newRow, 1, source.getValueAsString(row, col));
+			columns[i+1] = ResourceMgr.getString("TxtRow") + " #" + Integer.toString(rows[i] + 1);
+			types[i+1] = Types.VARCHAR;
 		}
 
-		String name = "Row " + Integer.toString(row + 1);
-		if (resultName != null)
+		DataStore ds = new DataStore(columns, types);
+
+		int colCount = source.getColumnCount();
+		for (int i=0; i < colCount; i++)
 		{
-			name = resultName + " (" + name + ")";
+			ds.addRow();
 		}
-		ds.setResultName(name);
+
+		for (int ix=0; ix < rows.length; ix++)
+		{
+			int row = rows[ix];
+			for (int col=0; col < colCount; col ++)
+			{
+				ds.setValue(col, 0, source.getColumnDisplayName(col));
+				ds.setValue(col, 1 + ix, source.getValueAsString(row, col));
+			}
+		}
+		ds.setResultName("<[ " + resultName + " ]>");
 		ds.resetStatus();
 		return ds;
 	}
 
-	private DataStore createDatastore()
-	{
-		String[] columns = new String[] { "Column", "Value" };
-		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR };
-		return new DataStore(columns, types);
-	}
 }

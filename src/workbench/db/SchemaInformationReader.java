@@ -32,4 +32,5 @@ public interface SchemaInformationReader
 	String getCachedSchema();
 	void dispose();
 	void clearCache();
+	boolean isSupported();
 }

@@ -25,11 +25,14 @@ package workbench.gui.actions;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
+
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import workbench.log.LogMgr;
+
 import workbench.gui.components.WbTable;
 import workbench.gui.sql.SqlPanel;
-import workbench.log.LogMgr;
 
 import workbench.storage.DataStore;
 import workbench.storage.DatastoreTransposer;
@@ -62,12 +65,8 @@ public class TransposeRowAction
 	{
 		DatastoreTransposer transpose = new DatastoreTransposer(client.getDataStore());
 		int[] rows = client.getSelectedRows();
-		for (int i=0; i < rows.length; i++)
-		{
-			int row = rows[i];
-			DataStore ds = transpose.transposeRow(row);
-			showDatastore(ds);
-		}
+		DataStore ds = transpose.transposeRows(rows);
+		showDatastore(ds);
 	}
 
 	private void showDatastore(DataStore ds)

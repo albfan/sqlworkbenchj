@@ -34,8 +34,6 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -155,6 +153,7 @@ import workbench.util.FileUtil;
 import workbench.util.FileVersioner;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
+import workbench.util.VersionNumber;
 import workbench.util.WbFile;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
@@ -1541,17 +1540,8 @@ public class MainWindow
 
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
-		DatabaseMetaData meta = conn.getMetadata().getJdbcMetaData();
-		try
-		{
-			int major = meta.getDatabaseMajorVersion();
-			int minor = meta.getDatabaseMinorVersion();
-			showDbmsManual.setDbms(conn.getMetadata().getDbId(), major, minor);
-		}
-		catch (SQLException sql)
-		{
-			showDbmsManual.setDbms(conn.getMetadata().getDbId(), -1, -1);
-		}
+		VersionNumber version = conn.getDatabaseVersion();
+		showDbmsManual.setDbms(conn.getDbId(), version);
 		showConnectionWarnings(conn, this.getCurrentPanel());
 		selectCurrentEditor();
 	}

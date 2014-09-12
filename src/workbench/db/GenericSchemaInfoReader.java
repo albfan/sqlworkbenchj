@@ -29,8 +29,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -70,6 +72,12 @@ public class GenericSchemaInfoReader
 
 		connection.addChangeListener(this);
 		logSettings();
+	}
+
+	@Override
+	public boolean isSupported()
+	{
+		return StringUtil.isNonEmpty(schemaQuery);
 	}
 
 	private void logSettings()

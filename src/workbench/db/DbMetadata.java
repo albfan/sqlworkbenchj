@@ -163,6 +163,7 @@ public class DbMetadata
 		try
 		{
 			this.schemaTerm = this.metaData.getSchemaTerm();
+			LogMgr.logDebug("DbMetadata.<init>", "Schema term: " + schemaTerm);
 		}
 		catch (SQLException e)
 		{
@@ -173,6 +174,7 @@ public class DbMetadata
 		try
 		{
 			this.catalogTerm = this.metaData.getCatalogTerm();
+			LogMgr.logDebug("DbMetadata.<init>", "Catalog term: " + catalogTerm);
 		}
 		catch (SQLException e)
 		{
@@ -450,6 +452,8 @@ public class DbMetadata
 			LogMgr.logWarning("DbMetadata.<init>", "Driver does not support getMaxTableNameLength()", sql);
 			this.maxTableNameLength = 0;
 		}
+
+		supportsGetSchema = dbSettings.supportsGetSchemaCall();
 
 		LogMgr.logInfo("DbMetadata.<init>", "Using catalog separator: " + catalogSeparator);
 	}
@@ -1261,7 +1265,7 @@ public class DbMetadata
 	 */
 	public String getCurrentSchema()
 	{
-		if (dbSettings.supportsSchemas() && this.schemaInfoReader != null)
+		if (dbSettings.supportsSchemas() && this.schemaInfoReader != null && schemaInfoReader.isSupported())
 		{
 			return this.schemaInfoReader.getCurrentSchema();
 		}
@@ -1271,9 +1275,9 @@ public class DbMetadata
 		{
 			try
 			{
-					schema = this.dbConnection.getSqlConnection().getSchema();
+				schema = this.dbConnection.getSqlConnection().getSchema();
 			}
-			catch (Exception ex)
+			catch (Throwable ex)
 			{
 				supportsGetSchema = false;
 			}
@@ -2151,7 +2155,7 @@ public class DbMetadata
 			if (GuiSettings.getTransformSequenceDisplay() && seqDef != null && seqDef.getRowCount() == 1)
 			{
 				DatastoreTransposer transpose = new DatastoreTransposer(seqDef);
-				def = transpose.transposeRow(0);
+				def = transpose.transposeRows(new int[]{0});
 				def.getColumns()[0].setColumnName(ResourceMgr.getString("TxtAttribute"));
 				def.getColumns()[1].setColumnName(ResourceMgr.getString("TxtValue"));
 			}

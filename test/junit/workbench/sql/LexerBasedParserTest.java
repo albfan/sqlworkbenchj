@@ -292,6 +292,24 @@ public class LexerBasedParserTest
 		parser.setDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		script = getStatements(parser);
 		assertEquals(2, script.size());
+
+		sql =
+			"delete from foo where descr = 'arthur''s house';\n" +
+			"commit;";
+
+		parser.setScript(sql);
+		parser.setDelimiter(DelimiterDefinition.STANDARD_DELIMITER);
+		script = getStatements(parser);
+		assertEquals(2, script.size());
+		assertEquals("delete from foo where descr = 'arthur''s house'", script.get(0));
+		assertEquals("commit", script.get(1));
+
+		parser.setScript(sql);
+		parser.setCheckPgQuoting(false);
+		script = getStatements(parser);
+		assertEquals(2, script.size());
+		assertEquals("delete from foo where descr = 'arthur''s house'", script.get(0));
+		assertEquals("commit", script.get(1));
 	}
 
 	private List<String> getStatements(LexerBasedParser parser)

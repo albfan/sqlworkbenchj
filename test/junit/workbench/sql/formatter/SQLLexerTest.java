@@ -413,6 +413,29 @@ public class SQLLexerTest
 		assertTrue(tokens.get(2).isReservedWord());
 		assertTrue(tokens.get(3).isIdentifier());
 		assertEquals("'arthur''s house'", tokens.get(1).getContents());
+		sql =
+			"CREATE OR REPLACE FUNCTION foobar(p1 integer)\n" +
+			"  RETURNS text\n" +
+			"  LANGUAGE plpgsql\n" +
+			"AS\n" +
+			"'\n" +
+			"begin\n" +
+			"  return ''foobar'';\n" +
+			"end;\n" +
+			"'\n" +
+			" VOLATILE\n" +
+			" COST 100;";
+		tokens = getTokenList(sql);
+		assertTrue(tokens.get(10).isIdentifier());
+		assertTrue(tokens.get(11).isReservedWord());
+		assertTrue(tokens.get(12).isLiteral());
+		String literal =
+			"'\n" +
+			"begin\n" +
+			"  return ''foobar'';\n" +
+			"end;\n" +
+			"'";
+		assertEquals(literal, tokens.get(12).getText());
 	}
 
 }

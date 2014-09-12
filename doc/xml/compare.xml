@@ -7,6 +7,11 @@
     the data contained in them.
   </para>
 
+	<para>
+		These commands (<literal>WbSchemaDiff</literal> and <literal>WbDataDiff</literal>) can be used like
+    any other SQL command as long as they are run using &wb-productname; This includes the usage in scripts
+    that are run in <link linkend="using-scripting">batch mode</link>.
+	</para>
 
   <section id="command-schema-diff">
     <title>Compare two database schemas - WbSchemaDiff</title>

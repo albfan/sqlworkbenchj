@@ -24,9 +24,12 @@ package workbench.db.mssql;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+
+import workbench.log.LogMgr;
+
 import workbench.db.SchemaInformationReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -68,6 +71,12 @@ public class SqlServerSchemaInfoReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+	}
+
+	@Override
+	public boolean isSupported()
+	{
+		return true;
 	}
 
 	@Override
