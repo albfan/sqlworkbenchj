@@ -15,7 +15,7 @@
 />
 
   <xsl:param name="useJdbcTypes">true</xsl:param>
-  <xsl:param name="makeLowerCase">false</xsl:param>
+  <xsl:param name="makeLowerCase">true</xsl:param>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -148,7 +148,9 @@
       <xsl:text> ADD PRIMARY KEY </xsl:text>
       <xsl:text>(</xsl:text>
       <xsl:for-each select="column-def[primary-key='true']">
-        <xsl:value-of select="column-name"/>
+        <xsl:call-template name="write-object-name">
+          <xsl:with-param name="objectname" select="column-name"/>
+        </xsl:call-template>
         <xsl:if test="position() &lt; last()">
           <xsl:text>, </xsl:text>
         </xsl:if>
