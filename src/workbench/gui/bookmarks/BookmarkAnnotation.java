@@ -29,6 +29,7 @@ import workbench.sql.AnnotationReader;
 import workbench.sql.ResultNameParser;
 import workbench.sql.UseTabAnnotation;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.StringUtil;
@@ -84,7 +85,7 @@ public class BookmarkAnnotation
 			parser = new ProcedureBookmarks(tabId);
 		}
 
-		SQLLexer lexer = new SQLLexer(script);
+		SQLLexer lexer = SQLLexerFactory.createLexer(script);
 		SQLToken token = lexer.getNextToken(true, false);
 
 		while (token != null)

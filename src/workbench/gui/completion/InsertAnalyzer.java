@@ -30,6 +30,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.SqlUtil;
@@ -50,7 +51,7 @@ public class InsertAnalyzer
 	@Override
 	public void checkContext()
 	{
-		SQLLexer lexer = new SQLLexer(this.sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, this.sql);
 
 		int intoEnd = Integer.MAX_VALUE;
 		int intoStart = Integer.MAX_VALUE;
@@ -160,7 +161,7 @@ public class InsertAnalyzer
 		{
 			context = CONTEXT_STATEMENT_PARAMETER;
 			tableForColumnList = table;
-			InsertColumnMatcher matcher = new InsertColumnMatcher(sql);
+			InsertColumnMatcher matcher = new InsertColumnMatcher(dbConnection, sql);
 			String column = matcher.getInsertColumnName(cursorPos);
 			if (column != null)
 			{

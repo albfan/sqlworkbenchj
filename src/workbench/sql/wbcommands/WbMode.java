@@ -31,6 +31,7 @@ import workbench.db.ConnectionProfile;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.ArgumentParser;
@@ -88,7 +89,7 @@ public class WbMode
 		String command = null;
 		try
 		{
-			SQLLexer l = new SQLLexer(sql);
+			SQLLexer l = SQLLexerFactory.createLexer(currentConnection, sql);
 			SQLToken t = l.getNextToken(false, false); // ignore the verb
 			t = l.getNextToken(false, false);
 			if (t != null)

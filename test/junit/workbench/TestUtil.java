@@ -63,6 +63,7 @@ import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.ArgumentParser;
@@ -666,7 +667,7 @@ public class TestUtil
 	{
 		try
 		{
-			SQLLexer lexer = new SQLLexer(sql);
+			SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 			SQLToken t = lexer.getNextToken(false, false);
 			if (t == null || !t.getContents().equals("CREATE")) return null;
 			t = lexer.getNextToken(false, false);
@@ -708,7 +709,7 @@ public class TestUtil
 	public static String cleanupSql(CharSequence sql)
 	{
 		if (StringUtil.isBlank(sql)) return "";
-		SQLLexer lexer = new SQLLexer(sql);
+			SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		StringBuilder result = new StringBuilder(sql.length());
 		SQLToken last = null;
 		SQLToken t = lexer.getNextToken(false, true);

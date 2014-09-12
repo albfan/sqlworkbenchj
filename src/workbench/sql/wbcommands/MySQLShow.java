@@ -30,6 +30,7 @@ import workbench.storage.DataStore;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 
@@ -83,7 +84,7 @@ public class MySQLShow
 	boolean isInnoDBStatus(String sql)
 	{
 		String[] words = new String[] { "show", "engine", "innodb", "status"};
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexerForDbId("mysql", sql);
 		SQLToken token = lexer.getNextToken(false, false);
 		int index = 0;
 		while (token != null)

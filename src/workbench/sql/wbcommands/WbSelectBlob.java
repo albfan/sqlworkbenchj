@@ -37,6 +37,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.ExceptionUtil;
@@ -84,7 +85,7 @@ public class WbSelectBlob
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sqlCommand);
-		SQLLexer lexer = new SQLLexer(sqlCommand);
+		SQLLexer lexer = SQLLexerFactory.createLexer(currentConnection, sqlCommand);
 
 		StringBuilder sql = new StringBuilder(sqlCommand.length());
 

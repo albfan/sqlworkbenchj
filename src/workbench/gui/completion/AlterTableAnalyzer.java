@@ -28,6 +28,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 /**
@@ -50,7 +51,7 @@ public class AlterTableAnalyzer
 		int modifyPos = -1;
 		int tablePos = -1;
 		int tableEnd = -1;
-		SQLLexer lexer = new SQLLexer(this.sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, this.sql);
 
 		try
 		{

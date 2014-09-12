@@ -30,7 +30,10 @@ import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
@@ -48,9 +51,15 @@ public class InsertColumnMatcher
 	private boolean isInsert;
 	private String noValue = "<" + ResourceMgr.getString("TxtNoValue") + ">";
 
-	public InsertColumnMatcher(String sql)
+
+	public InsertColumnMatcher(WbConnection conn, String sql)
 	{
-		analyzeStatement(sql);
+		analyzeStatement(conn, sql);
+	}
+
+	InsertColumnMatcher(String sql)
+	{
+		analyzeStatement(null, sql);
 	}
 
 	public boolean isInsertStatement()
@@ -58,13 +67,13 @@ public class InsertColumnMatcher
 		return isInsert;
 	}
 
-	private void analyzeStatement(String sql)
+	private void analyzeStatement(WbConnection conn, String sql)
 	{
 		try
 		{
 			Set<String> verbs = CollectionUtil.caseInsensitiveSet("INSERT", "MERGE");
 
-			SQLLexer lexer = new SQLLexer(sql);
+			SQLLexer lexer = SQLLexerFactory.createLexer(conn, sql);
 			SQLToken token = lexer.getNextToken(false, false);
 
 			if (token == null || !verbs.contains(token.getContents()))
@@ -88,7 +97,7 @@ public class InsertColumnMatcher
 			}
 
 			List<ElementInfo> columnEntries = null;
-			List<List<ElementInfo>> rowValues = new ArrayList<List<ElementInfo>>(1);
+			List<List<ElementInfo>> rowValues = new ArrayList<>(1);
 
 			int bracketCount = 0;
 			boolean isSubSelect = false;
@@ -127,7 +136,7 @@ public class InsertColumnMatcher
 				else if (text.equals("SELECT") || text.equals("WITH"))
 				{
 					String subSelect = sql.substring(token.getCharBegin());
-					List<ElementInfo> entries = SqlUtil.getColumnEntries(subSelect, true);
+					List<ElementInfo> entries = SqlUtil.getColumnEntries(subSelect, true, conn);
 					for (ElementInfo element : entries)
 					{
 						element.setOffset(token.getCharBegin());
@@ -149,7 +158,7 @@ public class InsertColumnMatcher
 			}
 
 			int maxElements = columnEntries.size() > maxValues ? columnEntries.size() : maxValues;
-			columns = new ArrayList<InsertColumnInfo>(maxElements);
+			columns = new ArrayList<>(maxElements);
 			for (int i=0; i < maxElements; i++)
 			{
 				InsertColumnInfo info = new InsertColumnInfo();
@@ -217,7 +226,7 @@ public class InsertColumnMatcher
 
 	private List<ElementInfo> getListValues(SQLLexer lexer, int lastStart, String sql)
 	{
-		List<ElementInfo> result = new ArrayList<ElementInfo>();
+		List<ElementInfo> result = new ArrayList<>();
 
 		int bracketCount = 1;
 		int lastComma = lastStart;
@@ -282,7 +291,7 @@ public class InsertColumnMatcher
 	{
 		if (columns == null) return Collections.emptyList();
 
-		List<String> result = new ArrayList<String>(columns.size());
+		List<String> result = new ArrayList<>(columns.size());
 		for (InsertColumnInfo column : columns)
 		{
 			result.add(column.columnName);
@@ -365,7 +374,7 @@ public class InsertColumnMatcher
 		int columnStart;
 		int columnEnd;
 		String columnName;
-		List<ColumnValueInfo> values = new ArrayList<ColumnValueInfo>(1);
+		List<ColumnValueInfo> values = new ArrayList<>(1);
 
 		void addValue(String value, int valueStart, int valueEnd)
 		{

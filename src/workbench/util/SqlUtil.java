@@ -58,6 +58,7 @@ import workbench.storage.ResultInfo;
 
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.sql.syntax.SqlKeywordHelper;
@@ -71,7 +72,7 @@ public class SqlUtil
 {
 	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_#@][\\w\\$#@]*");
 
-	private static final SQLLexer LEXER_INSTANCE = new SQLLexer("");
+	private static final SQLLexer LEXER_INSTANCE = SQLLexerFactory.createLexer();
 
 	private static class JoinKeywordsHolder
 	{
@@ -412,8 +413,7 @@ public class SqlUtil
 		try
 		{
 			StringBuilder tableName = new StringBuilder();
-			SQLLexer lexer = new SQLLexer(sql);
-			lexer.setCheckStupidQuoting(conn == null ? false : conn.isSqlServer());
+			SQLLexer lexer = SQLLexerFactory.createLexer(conn, sql);
 
 			SQLToken t = lexer.getNextToken(false, false);
 			if (!t.getContents().equals("DELETE")) return null;
@@ -524,8 +524,8 @@ public class SqlUtil
 		try
 		{
 			StringBuilder tableName = new StringBuilder();
-			SQLLexer lexer = new SQLLexer(sql);
-			lexer.setCheckStupidQuoting(conn == null ? false : conn.isSqlServer());
+			SQLLexer lexer = SQLLexerFactory.createLexer(conn, sql);
+
 			SQLToken t = lexer.getNextToken(false, false);
 			if (t == null || !t.getContents().equals(verb)) return null;
 			t = lexer.getNextToken(false, false);
@@ -777,9 +777,9 @@ public class SqlUtil
 	 * @return a List of column names
 	 * @see #getColumnEntries(java.lang.String, boolean)
 	 */
-	public static List<String> getSelectColumns(String select, boolean includeAlias)
+	public static List<String> getSelectColumns(String select, boolean includeAlias, WbConnection conn)
 	{
-		List<ElementInfo> entries = getColumnEntries(select, includeAlias);
+		List<ElementInfo> entries = getColumnEntries(select, includeAlias, conn);
 		List<String> result = new ArrayList<>(entries.size());
 		for (ElementInfo entry : entries)
 		{
@@ -802,13 +802,13 @@ public class SqlUtil
 	 * @see #getSelectColumns(java.lang.String, boolean)
 	 *
 	 */
-	public static List<ElementInfo> getColumnEntries(String select, boolean includeAlias)
+	public static List<ElementInfo> getColumnEntries(String select, boolean includeAlias, WbConnection conn)
 	{
 		List<ElementInfo> result = new LinkedList<>();
 		try
 		{
-			SQLLexer lex = new SQLLexer(select);
-			SQLToken t = lex.getNextToken(false, false);
+			SQLLexer lexer = SQLLexerFactory.createLexer(conn, select);
+			SQLToken t = lexer.getNextToken(false, false);
 
 
 			if (t == null) return Collections.emptyList();
@@ -822,11 +822,11 @@ public class SqlUtil
 
 			if ("WITH".equals(word))
 			{
-				t = skipCTE(lex);
+				t = skipCTE(lexer);
 			}
 			else
 			{
-				t = lex.getNextToken(false, false);
+				t = lexer.getNextToken(false, false);
 			}
 
 			if (t == null) return Collections.emptyList();
@@ -838,7 +838,7 @@ public class SqlUtil
 			{
 				// Postgres DISTINCT ON extension...
 				ignoreFirstBracket = t.getContents().equals("DISTINCT ON");
-				t = lex.getNextToken(false, false);
+				t = lexer.getNextToken(false, false);
 				if (t == null) return Collections.emptyList();
 			}
 
@@ -892,7 +892,7 @@ public class SqlUtil
 					lastColStart = t.getCharBegin();
 					nextIsCol = false;
 				}
-				t = lex.getNextToken(false, false);
+				t = lexer.getNextToken(false, false);
 			}
 			if (lastColStart > -1)
 			{
@@ -955,7 +955,7 @@ public class SqlUtil
 
 		try
 		{
-			SQLLexer lexer = new SQLLexer(sql);
+			SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 			// skip until the first opening bracket
 			SQLToken t = lexer.getNextToken(false, false);
 			while (t != null && !t.getContents().equals("("))
@@ -1032,22 +1032,23 @@ public class SqlUtil
 	 */
 	public static List<String> getTables(String sql, boolean includeAlias)
 	{
-		return getTables(sql, includeAlias, '.', '.');
+		return getTables(sql, includeAlias, '.', '.', null);
 	}
 
 	public static List<String> getTables(String sql, boolean includeAlias, WbConnection conn)
 	{
-		return getTables(sql, includeAlias, SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn));
+		return getTables(sql, includeAlias, SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn), conn);
 	}
 
-	public static List<String> getTables(String sql, boolean includeAlias, char catalogSeparator, char schemaSeparator)
+	public static List<String> getTables(String sql, boolean includeAlias, char catalogSeparator, char schemaSeparator, WbConnection conn)
 	{
 		String from = getFromPart(sql);
 		if (StringUtil.isBlank(from)) return Collections.emptyList();
 		List<String> result = new LinkedList<>();
+
 		try
 		{
-			SQLLexer lex = new SQLLexer(from);
+			SQLLexer lex = SQLLexerFactory.createLexer(conn, from);
 			SQLToken t = lex.getNextToken(false, false);
 
 			boolean collectTable = true;
@@ -2074,7 +2075,7 @@ public class SqlUtil
 		if (values.length == 0) return sql.toString();
 
 		int valuePos = 0;
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		SQLToken t = lexer.getNextToken(true, true);
 		StringBuilder result = new StringBuilder(sql.length() + values.length * 5);
 
@@ -2139,7 +2140,7 @@ public class SqlUtil
 	public static SQLToken getOperatorBeforeCursor(String sql, int cursor)
 	{
 		if (StringUtil.isBlank(sql)) return null;
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		List<SQLToken> tokens = new ArrayList<>();
 		SQLToken token = lexer.getNextToken(false, false);
 		while (token != null)
@@ -2233,7 +2234,7 @@ public class SqlUtil
 	public static int getRealStart(String sql)
 	{
 		if (StringUtil.isEmptyString(sql)) return 0;
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		SQLToken token = lexer.getNextToken(false, false);
 		if (token == null)
 		{

@@ -26,17 +26,18 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-import workbench.db.DbSettings;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.db.firebird.FirebirdStatementHook;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
@@ -75,7 +76,7 @@ public class SetCommand
 		String param = null;
 		try
 		{
-			SQLLexer l = new SQLLexer(userSql);
+			SQLLexer l = SQLLexerFactory.createLexer(currentConnection, userSql);
 			SQLToken t = l.getNextToken(false, false); // ignore the verb
 			t = l.getNextToken(false, false);
 			if (t != null)
@@ -264,7 +265,7 @@ public class SetCommand
 
 	private boolean handleFirebird(StatementRunnerResult result, String sql)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(currentConnection, sql);
 		SQLToken token = lexer.getNextToken(false, false);
 
 		// ignore the first verb, that will be the SET

@@ -31,6 +31,7 @@ import workbench.log.LogMgr;
 import workbench.db.ProcedureDefinition;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
@@ -75,7 +76,7 @@ public class OraclePackageParser
 	private void parse(String sql)
 		throws IOException
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		SQLToken t = lexer.getNextToken(false, false);
 
 		int defBegin = -1;
@@ -172,7 +173,7 @@ public class OraclePackageParser
 	{
 		int procPos = -1;
 
-		SQLLexer lexer = new SQLLexer(source);
+		SQLLexer lexer = SQLLexerFactory.createLexer(source);
 		SQLToken t = lexer.getNextToken(false, false);
 
 		boolean packageHeaderFound = false;
@@ -193,7 +194,7 @@ public class OraclePackageParser
 		{
 			// apparently only the defintion but not the body is available
 			// so try to find the procedure in the header
-			lexer = new SQLLexer(source);
+			lexer = SQLLexerFactory.createLexer(source);
 			t = lexer.getNextToken(false, false);
 		}
 

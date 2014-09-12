@@ -34,6 +34,7 @@ import workbench.db.DbMetadata;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.ExceptionUtil;
@@ -63,7 +64,7 @@ public class AlterSessionCommand
 		result.setSuccess();
 
 		String oldSchema = null;
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(currentConnection, sql);
 
 		DbMetadata meta = currentConnection.getMetadata();
 

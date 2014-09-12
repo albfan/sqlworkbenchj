@@ -27,9 +27,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
 import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 
@@ -61,7 +65,7 @@ public class PostgresExplainAnalyzer
 
 		int bracketOpen = explain.indexOf('(');
 		boolean use90Options = bracketOpen > -1;
-		SQLLexer lexer = new SQLLexer(explain);
+		SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, explain);
 		SQLToken t = lexer.getNextToken(false, false);
 		SQLToken last = null;
 		String currentWord = null;
@@ -101,7 +105,7 @@ public class PostgresExplainAnalyzer
 		{
 			if (usedOptions.isEmpty())
 			{
-				elements = new ArrayList<String>(options90.keySet());
+				elements = new ArrayList<>(options90.keySet());
 				context = CONTEXT_SYNTAX_COMPLETION;
 			}
 			else
@@ -150,7 +154,7 @@ public class PostgresExplainAnalyzer
 
 	private Map<String, List<String>> get90Options()
 	{
-		Map<String, List<String>> options	= new TreeMap<String, List<String>>(CaseInsensitiveComparator.INSTANCE);
+		Map<String, List<String>> options	= new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 		List<String> booleanValues = CollectionUtil.arrayList("true", "false");
 		options.put("analyze", booleanValues);
 		options.put("verbose", booleanValues);
@@ -168,7 +172,7 @@ public class PostgresExplainAnalyzer
 
 		try
 		{
-			SQLLexer lexer = new SQLLexer(sql);
+			SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, sql);
 			SQLToken t = lexer.getNextToken(false, false);
 			while (t != null)
 			{

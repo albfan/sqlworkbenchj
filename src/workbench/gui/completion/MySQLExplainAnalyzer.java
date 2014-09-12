@@ -25,10 +25,15 @@ package workbench.gui.completion;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
+
+import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.CollectionUtil;
 
 /**
@@ -49,7 +54,7 @@ public class MySQLExplainAnalyzer
 	{
 		try
 		{
-			SQLLexer lexer = new SQLLexer(sql);
+			SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, sql);
 			SQLToken t = lexer.getNextToken(false, false);
 			while (t != null)
 			{
@@ -77,7 +82,7 @@ public class MySQLExplainAnalyzer
 		String sqlToParse = getExplainSql();
 		try
 		{
-			SQLLexer lexer = new SQLLexer(sqlToParse);
+			SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, sqlToParse);
 			SQLToken t = lexer.getNextToken(false, false);
 			while (t != null)
 			{
@@ -90,7 +95,7 @@ public class MySQLExplainAnalyzer
 			}
 			if (usedOptions.isEmpty())
 			{
-				this.elements = new ArrayList<String>(allOptions);
+				this.elements = new ArrayList<>(allOptions);
 			}
 			else
 			{
@@ -102,7 +107,7 @@ public class MySQLExplainAnalyzer
 		catch (Exception e)
 		{
 			LogMgr.logError("MySQLExplainAnalyzer.checkContext()", "Error getting optiosn", e);
-			this.elements = new ArrayList<String>();
+			this.elements = new ArrayList<>();
 			this.context = NO_CONTEXT;
 		}
 	}

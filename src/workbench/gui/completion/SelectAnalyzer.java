@@ -34,6 +34,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 
@@ -276,7 +277,7 @@ public class SelectAnalyzer
 		{
 			boolean afterFrom = false;
 
-			SQLLexer lexer = new SQLLexer(this.sql);
+			SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, this.sql);
 			SQLToken token = lexer.getNextToken(false, false);
 			SQLToken lastToken = null;
 			while (token != null)
@@ -332,7 +333,7 @@ public class SelectAnalyzer
 
 	private List getColumnsForHaving()
 	{
-		List<String> cols = SqlUtil.getSelectColumns(this.sql, false);
+		List<String> cols = SqlUtil.getSelectColumns(this.sql, false, dbConnection);
 		List<String> validCols = new LinkedList<>();
 		for (String col : cols)
 		{
@@ -346,7 +347,7 @@ public class SelectAnalyzer
 
 	private List getColumnsForGroupBy()
 	{
-		List<String> cols = SqlUtil.getSelectColumns(this.sql, false);
+		List<String> cols = SqlUtil.getSelectColumns(this.sql, false, dbConnection);
 		List<String> validCols = new LinkedList<>();
 		String[] funcs = new String[]{"sum", "count", "avg", "min", "max" };
 		StringBuilder regex = new StringBuilder(50);

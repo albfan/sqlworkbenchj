@@ -53,12 +53,12 @@ import workbench.storage.DataStore;
 import workbench.storage.SqlLiteralFormatter;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 
 import workbench.util.AggregatingMap;
 import workbench.util.CollectionUtil;
-import workbench.util.SilentFileWriter;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -453,7 +453,7 @@ public class DeleteScriptGenerator
 		if (value instanceof String)
 		{
 			String s = (String)value;
-			SQLLexer lexer = new SQLLexer(s);
+			SQLLexer lexer = SQLLexerFactory.createLexer(connection, s);
 			SQLToken first = lexer.getNextToken(false, false);
 			if (first.isNumberLiteral() || first.isLiteral())
 			{

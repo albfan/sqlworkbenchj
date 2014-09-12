@@ -24,9 +24,14 @@ package workbench.gui.completion;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.db.ColumnIdentifier;
+import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.SelectColumn;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -40,11 +45,16 @@ public class CteParser
 
 	private String baseSql;
 	private int baseSqlStart;
-	private List<CteDefinition> cteList = new ArrayList<CteDefinition>();
+	private List<CteDefinition> cteList = new ArrayList<>();
 
-	public CteParser(String sql)
+	CteParser(String sql)
 	{
-		parseCte(sql);
+		parseCte(null, sql);
+	}
+
+	public CteParser(WbConnection con, String sql)
+	{
+		parseCte(con, sql);
 	}
 
 	public String getBaseSql()
@@ -67,9 +77,9 @@ public class CteParser
 		return cteList;
 	}
 
-	private void parseCte(String sql)
+	private void parseCte(WbConnection con, String sql)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(con, sql);
 
 		int lastStart = 0;
 		int bracketCount = 0;
@@ -136,7 +146,7 @@ public class CteParser
 					}
 					else
 					{
-						cols = getColumnsFromSelect(cte);
+						cols = getColumnsFromSelect(cte, con);
 					}
 					CteDefinition def = new CteDefinition(currentName, cols);
 					def.setStartInStatement(lastStart);
@@ -161,7 +171,7 @@ public class CteParser
 	private List<ColumnIdentifier> getColumnsFromDefinition(String columnList)
 	{
 		List<String> cl = StringUtil.stringToList(columnList, ",", true, true, false, true);
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(cl.size());
+		List<ColumnIdentifier> cols = new ArrayList<>(cl.size());
 		int colIndex = 1;
 		for (String col : cl)
 		{
@@ -174,10 +184,10 @@ public class CteParser
 		return cols;
 	}
 
-	private List<ColumnIdentifier> getColumnsFromSelect(String select)
+	private List<ColumnIdentifier> getColumnsFromSelect(String select, WbConnection conn)
 	{
-		List<String> cl = SqlUtil.getSelectColumns(select, true);
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(cl.size());
+		List<String> cl = SqlUtil.getSelectColumns(select, true, conn);
+		List<ColumnIdentifier> cols = new ArrayList<>(cl.size());
 
 		int colIndex = 1;
 		for (String col : cl)

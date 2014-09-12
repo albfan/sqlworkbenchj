@@ -23,6 +23,7 @@
 package workbench.db.oracle;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 /**
@@ -41,7 +42,7 @@ public class OracleDDLCleaner
 	public static String cleanupQuotedIdentifiers(String input)
 	{
 		StringBuilder result = new StringBuilder(input.length());
-		SQLLexer lexer = new SQLLexer(input);
+		SQLLexer lexer = SQLLexerFactory.createLexer(input);
 		SQLToken token = lexer.getNextToken(true, true);
 		while (token != null)
 		{

@@ -44,6 +44,7 @@ import workbench.sql.ErrorDescriptor;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CaseInsensitiveComparator;
@@ -103,7 +104,7 @@ public class WbOraShow
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
 		String clean = getCommandLine(sql);
-		SQLLexer lexer = new SQLLexer(clean);
+		SQLLexer lexer = SQLLexerFactory.createLexer(currentConnection, clean);
 		SQLToken token = lexer.getNextToken(false, false);
 		if (token == null)
 		{

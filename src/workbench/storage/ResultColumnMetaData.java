@@ -68,7 +68,7 @@ public class ResultColumnMetaData
 		tables = SqlUtil.getTables(sql, true, conn);
 		if (CollectionUtil.isEmpty(tables)) return;
 
-		columns = SqlUtil.getSelectColumns(sql, true);
+		columns = SqlUtil.getSelectColumns(sql, true, conn);
 	}
 
 	public void retrieveColumnRemarks(ResultInfo info)
@@ -88,7 +88,7 @@ public class ResultColumnMetaData
 		for (String table : tables)
 		{
 			if (StringUtil.isBlank(table)) continue;
-			
+
 			if (tableDef != null && tableDef.getTable().getTableName().equals(table))
 			{
 				tableDefs.put(tableDef.getTable().getTableName().toLowerCase(), tableDef);

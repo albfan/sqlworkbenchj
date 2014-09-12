@@ -22,7 +22,12 @@
  */
 package workbench.db.oracle;
 
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +47,9 @@ import workbench.sql.StatementRunnerResult;
 import workbench.sql.commands.SetCommand;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
-import workbench.sql.wbcommands.*;
+import workbench.sql.wbcommands.CommandTester;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -271,7 +277,7 @@ public class OracleStatementHook
 		boolean addComment = false;
 		int pos = -1;
 
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		SQLToken verb = lexer.getNextToken(false, false);
 
 		if (verb == null) return getIDPrefix() + "  " + sql;
@@ -325,7 +331,7 @@ public class OracleStatementHook
 	private void storeSessionStats(StatementRunner runner)
 	{
 		WbConnection con = runner.getConnection();
-		values = new HashMap<String, Long>(10);
+		values = new HashMap<>(10);
 
 		ResultSet rs = null;
 		try
@@ -371,7 +377,7 @@ public class OracleStatementHook
 
 	private boolean shouldTraceStatement(String sql)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		SQLToken verb = lexer.getNextToken(false, false);
 		if (verb == null) return false;
 		String sqlVerb = verb.getContents();
@@ -629,7 +635,7 @@ public class OracleStatementHook
 	 */
 	private boolean canExplain(String sql)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		SQLToken verb = lexer.getNextToken(false, false);
 		if (verb == null) return false;
 

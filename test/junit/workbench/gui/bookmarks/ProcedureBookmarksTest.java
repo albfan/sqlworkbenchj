@@ -24,6 +24,10 @@ import java.util.List;
 
 import workbench.WbTestCase;
 
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
+import workbench.sql.formatter.SQLToken;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -41,6 +45,18 @@ public class ProcedureBookmarksTest
 		super("ProcedureBookmarksTest");
 	}
 
+	public void parseScript(String script, ProcedureBookmarks parser)
+	{
+		parser.reset();
+		SQLLexer lexer = SQLLexerFactory.createLexer(script);
+		SQLToken token = lexer.getNextToken(false, false);
+		while (token != null)
+		{
+			parser.processToken(token);
+			token = lexer.getNextToken(false, false);
+		}
+	}
+
 	@Test
 	public void testOracle()
 	{
@@ -53,7 +69,7 @@ public class ProcedureBookmarksTest
 			"create procedure bar as begin null; end;\n";
 		ProcedureBookmarks parser = new ProcedureBookmarks();
 		parser.setIncludeParameterNames(false);
-		parser.parseScript(script);
+		parseScript(script, parser);
 		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
 		assertEquals(2, bookmarks.size());
@@ -66,7 +82,7 @@ public class ProcedureBookmarksTest
 			"create or replace function foo(p_one integer, p_two varchar(20) default 'foo') return boolean as begin return 42; end;\n";
 		parser = new ProcedureBookmarks();
 		parser.setIncludeParameterNames(true);
-		parser.parseScript(script);
+		parseScript(script, parser);
 		bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
 		assertEquals(1, bookmarks.size());
@@ -84,14 +100,14 @@ public class ProcedureBookmarksTest
 			"end;\n";
 		ProcedureBookmarks parser = new ProcedureBookmarks();
 		parser.setIncludeParameterNames(false);
-		parser.parseScript(script);
+		parseScript(script, parser);
 
 		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
 		assertEquals(1, bookmarks.size());
 		assertEquals("foo(int,varchar(20))", bookmarks.get(0).getName());
 		parser.setIncludeParameterNames(true);
-		parser.parseScript(script);
+		parseScript(script, parser);
 		bookmarks = parser.getBookmarks();
 		assertEquals(1, bookmarks.size());
 		assertEquals("foo(@p_foo int, @p_bar varchar(20))", bookmarks.get(0).getName());
@@ -112,7 +128,7 @@ public class ProcedureBookmarksTest
 
 		ProcedureBookmarks parser = new ProcedureBookmarks();
 		parser.setIncludeParameterNames(false);
-		parser.parseScript(script);
+		parseScript(script, parser);
 
 		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
@@ -129,7 +145,7 @@ public class ProcedureBookmarksTest
 			"language sql;";
 
 		parser.setIncludeParameterNames(true);
-		parser.parseScript(script);
+		parseScript(script, parser);
 		bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
 		assertEquals(1, bookmarks.size());

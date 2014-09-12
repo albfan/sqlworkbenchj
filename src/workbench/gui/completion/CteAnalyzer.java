@@ -24,6 +24,7 @@ package workbench.gui.completion;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -38,7 +39,7 @@ public class CteAnalyzer
 
 	public CteAnalyzer(WbConnection conn, String baseSql, int realCursorPos)
 	{
-		this(conn, new CteParser(baseSql), realCursorPos);
+		this(conn, new CteParser(conn, baseSql), realCursorPos);
 	}
 
 	private CteAnalyzer(WbConnection conn, CteParser cte, int realCursorPos)

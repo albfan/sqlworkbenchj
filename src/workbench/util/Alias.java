@@ -23,6 +23,7 @@
 package workbench.util;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 /**
@@ -42,7 +43,7 @@ public class Alias
 	{
 		if (StringUtil.isEmptyString(value)) throw new IllegalArgumentException("Identifier must not be empty");
 
-		SQLLexer lexer = new SQLLexer(value);
+		SQLLexer lexer = SQLLexerFactory.createLexer(value);
 		StringBuilder name = new StringBuilder(value.length());
 		SQLToken t = lexer.getNextToken(false, true);
 		boolean objectNamePart = true;

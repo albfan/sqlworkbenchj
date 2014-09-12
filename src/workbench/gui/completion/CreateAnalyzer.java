@@ -27,6 +27,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 /**
@@ -48,7 +49,7 @@ public class CreateAnalyzer
 	@Override
 	protected void checkContext()
 	{
-		SQLLexer lexer = new SQLLexer(this.sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, this.sql);
 
 		boolean isCreateIndex = false;
 		boolean showColumns = false;

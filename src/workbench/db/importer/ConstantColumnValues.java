@@ -79,8 +79,8 @@ public class ConstantColumnValues
 		throws SQLException, ConverterException
 	{
 
-		columnValues = new ArrayList<ColumnData>(entries.size());
-		selectStatements = new HashMap<Integer, ValueStatement>();
+		columnValues = new ArrayList<>(entries.size());
+		selectStatements = new HashMap<>();
 
 		for (String entry : entries)
 		{

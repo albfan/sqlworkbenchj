@@ -66,7 +66,7 @@ import workbench.util.CharSequenceReader;
 	private int commentStartChar = 0;
   private boolean checkStupidQuoting = false;
 
-  public void setCheckStupidQuoting(boolean flag)
+  void setCheckStupidQuoting(boolean flag)
   {
     checkStupidQuoting = flag;
   }
@@ -151,12 +151,12 @@ import workbench.util.CharSequenceReader;
 		this.yycolumn = yycolumn;
 	}
 
-	public SQLLexer(String source)
+	SQLLexer(String source)
 	{
 	  this(new StringReader(source));
 	}
 
-	public SQLLexer(CharSequence source)
+	SQLLexer(CharSequence source)
 	{
 	  this(new CharSequenceReader(source));
 	}

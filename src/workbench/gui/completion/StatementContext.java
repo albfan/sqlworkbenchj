@@ -32,6 +32,7 @@ import workbench.log.LogMgr;
 import workbench.db.WbConnection;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbSelectBlob;
@@ -154,7 +155,7 @@ public class StatementContext
 		String verb = SqlUtil.getSqlVerb(sql);
 		if (!"WITH".equalsIgnoreCase(verb)) return null;
 
-		CteParser cteParser = new CteParser(sql);
+		CteParser cteParser = new CteParser(conn, sql);
 		List<CteDefinition> definitions = cteParser.getCteDefinitions();
 		if (definitions.isEmpty()) return null;
 		for (CteDefinition cte : definitions)
@@ -174,7 +175,7 @@ public class StatementContext
 
 		try
 		{
-			SQLLexer lexer = new SQLLexer(sql);
+			SQLLexer lexer = SQLLexerFactory.createLexer(conn, sql);
 
 			SQLToken t = lexer.getNextToken(false, false);
 			if (t == null) return null;
@@ -187,7 +188,7 @@ public class StatementContext
 
 			// Will contain the position of each SELECT verb
 			// if a UNION is encountered.
-			List<Integer> unionStarts = new ArrayList<Integer>();
+			List<Integer> unionStarts = new ArrayList<>();
 			int bracketCount = 0;
 			boolean inSubselect = false;
 			boolean checkForInsertSelect = verb.equals("INSERT") || verb.equals("CREATE") || verb.equals("CREATE OR REPLACE");

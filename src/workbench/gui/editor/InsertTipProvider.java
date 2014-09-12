@@ -22,11 +22,13 @@
  */
 package workbench.gui.editor;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.completion.InsertColumnMatcher;
 import workbench.gui.completion.ParameterTipProvider;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.ScriptParser;
 
 /**
@@ -80,7 +82,7 @@ public class InsertTipProvider
 		}
 
 		int positionInStatement = currentPosition - lastCommandStart;
-		InsertColumnMatcher matcher = new InsertColumnMatcher(lastCommand);
+		InsertColumnMatcher matcher = new InsertColumnMatcher(sqlPanel.getConnection(), lastCommand);
 		String tip = matcher.getTooltipForPosition(positionInStatement);
 		if (tip == null)
 		{

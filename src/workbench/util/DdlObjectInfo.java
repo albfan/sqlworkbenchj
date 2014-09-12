@@ -23,10 +23,12 @@ package workbench.util;
 
 import java.util.Set;
 
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 
+import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 /**
@@ -76,9 +78,7 @@ public class DdlObjectInfo
 
 	private void parseSQL(CharSequence sql, WbConnection conn)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
-		lexer.setCheckStupidQuoting(conn == null ? false : conn.isSqlServer());
-		
+		SQLLexer lexer = SQLLexerFactory.createLexer(conn, sql);
 		SQLToken t = lexer.getNextToken(false, false);
 
 		if (t == null) return;

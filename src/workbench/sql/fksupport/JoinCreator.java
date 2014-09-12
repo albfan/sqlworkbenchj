@@ -39,6 +39,7 @@ import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.StatementContext;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.syntax.SqlKeywordHelper;
 
@@ -253,7 +254,7 @@ public class JoinCreator
 	private void retrieveTablePositions()
 	{
 		tablePositions = new TreeMap<>();
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(connection, sql);
 		int bracketCount = 0;
 
 		boolean nextIsTable = false;

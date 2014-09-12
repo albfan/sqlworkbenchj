@@ -29,6 +29,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.ArgumentParser;
@@ -70,7 +71,7 @@ public class WbHideWarnings
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(currentConnection, sql);
 		// Skip the SQL Verb
 		SQLToken token = lexer.getNextToken(false, false);
 

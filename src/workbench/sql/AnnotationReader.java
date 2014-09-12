@@ -23,6 +23,7 @@
 package workbench.sql;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.StringUtil;
@@ -55,7 +56,8 @@ public class AnnotationReader
 	public boolean containsAnnotation(String sql)
 	{
 		if (StringUtil.isBlank(sql)) return false;
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
+
 		SQLToken token = lexer.getNextToken(true, false);
 
 		while (token != null && token.isComment())
@@ -75,7 +77,7 @@ public class AnnotationReader
 	protected SQLToken getAnnotationToken(String sql)
 	{
 		if (StringUtil.isBlank(sql)) return null;
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		SQLToken token = lexer.getNextToken(true, false);
 
 		while (token != null && token.isComment())

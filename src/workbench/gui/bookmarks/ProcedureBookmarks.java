@@ -26,7 +26,6 @@ import java.util.Set;
 
 import workbench.resource.GuiSettings;
 
-import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
@@ -268,7 +267,7 @@ public class ProcedureBookmarks
 	}
 
 
-	private void reset()
+	void reset()
 	{
 		parseState = ParseState.none;
 		globalState = GlobalState.none;
@@ -283,17 +282,4 @@ public class ProcedureBookmarks
 	{
 		return procedures;
 	}
-
-	public void parseScript(String script)
-	{
-		reset();
-		SQLLexer lexer = new SQLLexer(script);
-		SQLToken token = lexer.getNextToken(false, false);
-		while (token != null)
-		{
-			processToken(token);
-			token = lexer.getNextToken(false, false);
-		}
-	}
-
 }

@@ -52,6 +52,7 @@ import workbench.storage.DataStore;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.preparedstatement.ParameterDefinition;
 import workbench.sql.preparedstatement.StatementParameters;
@@ -317,7 +318,7 @@ public class WbCall
 		{
 			LogMgr.logDebug("WbCall.execute()", "Converted procedure call to JDBC syntax: " + sqlUsed);
 			String procname = null;
-			SQLLexer l = new SQLLexer(cleanSql);
+			SQLLexer l = SQLLexerFactory.createLexer(currentConnection, cleanSql);
 			SQLToken t = l.getNextToken(false, false);
 			if (t != null)
 			{
@@ -385,7 +386,7 @@ public class WbCall
 		DbMetadata meta = this.currentConnection.getMetadata();
 
 		// Detect the name/schema of the called procedure
-		SQLLexer l = new SQLLexer(sql);
+		SQLLexer l = SQLLexerFactory.createLexer(currentConnection, sql);
 
 		// The WbCall verb has already been removed from the sql string
 		// so the first token is the actual procedure name (but could contain a package and/or schema name)

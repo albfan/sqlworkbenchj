@@ -28,6 +28,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
@@ -58,7 +59,7 @@ public class DdlAnalyzer
 	@Override
 	protected void checkContext()
 	{
-		SQLLexer lexer = new SQLLexer(this.sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, this.sql);
 		SQLToken verbToken = lexer.getNextToken(false, false);
 		if (verbToken == null)
 		{

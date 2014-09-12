@@ -23,8 +23,11 @@
 package workbench.gui.completion;
 
 import workbench.db.WbConnection;
+
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
+
 import workbench.util.CollectionUtil;
 
 /**
@@ -46,7 +49,7 @@ public class OracleExplainAnalyzer
 	@Override
 	protected void checkContext()
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, sql);
 		SQLToken t = lexer.getNextToken(false, false);
 		int setPosition = Integer.MAX_VALUE;
 		int intoPosition = Integer.MAX_VALUE;
@@ -95,7 +98,7 @@ public class OracleExplainAnalyzer
 	@Override
 	protected int getStatementStart(String sql)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, sql);
 		SQLToken t = lexer.getNextToken(false, false);
 		boolean nextIsStatement = false;
 		while (t != null)

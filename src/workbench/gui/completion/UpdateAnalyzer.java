@@ -29,6 +29,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 
@@ -60,7 +61,7 @@ public class UpdateAnalyzer
 		boolean nextIsTable = false;
 		String table = null;
 
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, sql);
 		SQLToken t = lexer.getNextToken(false, false);
 
 		while (t != null)
@@ -146,7 +147,7 @@ public class UpdateAnalyzer
 	{
 		List<ColumnInfo> result = new ArrayList<>();
 
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(dbConnection, sql);
 		SQLToken t = lexer.getNextToken(false, false);
 		SQLToken lastToken = null;
 		boolean inColumns = false;
