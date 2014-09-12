@@ -1016,7 +1016,7 @@ public class GuiSettings
 
 	public static boolean getDbExplorerMultiSelectTypes()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tablelist.types.multiselect", false);
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tablelist.types.multiselect", true);
 	}
 
 	public static boolean getDbExplorerMultiSelectTypesAutoClose()
