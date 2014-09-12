@@ -932,6 +932,7 @@ public class TableListPanel
 		{
 			toSelect = StringUtil.stringToList(tableTypeToSelect, ",", true, true, false, false);
 		}
+		
 		// setItems() will clear all previous items
 		typeCb.setItems(types, toSelect);
 

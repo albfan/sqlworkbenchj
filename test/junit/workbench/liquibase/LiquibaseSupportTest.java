@@ -145,11 +145,11 @@ public class LiquibaseSupportTest
 		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("5"));
 		assertEquals(2, sql.size());
 
-		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("Arthur;5"));
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("Arthur::5"));
 		assertEquals(1, sql.size());
 		assertEquals("SELECT 'arthur-5' FROM DUAL;", sql.get(0).trim());
 
-		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("3"), new ChangeSetIdentifier("Arthur;5"));
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("3"), new ChangeSetIdentifier("Arthur::5"));
 		assertEquals(2, sql.size());
 		assertEquals("SELECT 'arthur-5' FROM DUAL;", sql.get(0).trim());
 		assertEquals("SELECT 3 FROM DUAL;", sql.get(1).trim());
@@ -162,7 +162,8 @@ public class LiquibaseSupportTest
 	public void testSqlFile()
 		throws Exception
 	{
-		String sql = "create table foo (id integer not null primary key);";
+		String sqlFoo = "create table foo (id integer not null primary key);";
+		String sqlBar = "create table bar (id integer not null primary key);";
 
 		String xml =
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -174,23 +175,32 @@ public class LiquibaseSupportTest
 			"         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd\"> \n" +
 			"  \n" +
 			"    <changeSet id=\"1\" author=\"Arthur\"> \n" +
-			"         <sqlFile path=\"create_table.sql\" relativeToChangelogFile=\"true\" splitStatements=\"false\"/> \n" +
+			"         <sql>drop table foo;</sql>\n" +
+			"         <sqlFile path=\"create_table_foo.sql\" relativeToChangelogFile=\"true\" splitStatements=\"false\"/> \n" +
 			"    </changeSet> \n" +
 			"\n" +
+			"    <changeSet id=\"2\" author=\"Arthur\"> \n" +
+			"         <sql>drop table bar;</sql>\n" +
+			"         <sqlFile path=\"create_table_bar.sql\" relativeToChangelogFile=\"true\" splitStatements=\"false\"/> \n" +
+			"    </changeSet> \n" +
 			"</databaseChangeLog>";
 
 		TestUtil util = getTestUtil();
 		WbFile xmlFile = new WbFile(util.getBaseDir(), "changelog.xml");
 
 		TestUtil.writeFile(xmlFile, xml, "UTF-8");
-		WbFile sqlFile = new WbFile(util.getBaseDir(), "create_table.sql");
-		TestUtil.writeFile(sqlFile, sql, "UTF-8");
+		WbFile sqlFile1 = new WbFile(util.getBaseDir(), "create_table_foo.sql");
+		TestUtil.writeFile(sqlFile1, sqlFoo, "UTF-8");
+
+		WbFile sqlFile2 = new WbFile(util.getBaseDir(), "create_table_bar.sql");
+		TestUtil.writeFile(sqlFile2, sqlBar, "UTF-8");
 
 		LiquibaseSupport lb = new LiquibaseSupport(xmlFile);
-		List<String> statements = lb.getSQLFromChangeSet(new ChangeSetIdentifier("1"));
+		List<String> statements = lb.getSQLFromChangeSet(new ChangeSetIdentifier("Arthur", "1"));
 		assertNotNull(statements);
-		assertEquals(1, statements.size());
-		assertEquals(sql, statements.get(0));
+		assertEquals(2, statements.size());
+		assertEquals("drop table foo", statements.get(0));
+		assertEquals(sqlFoo, statements.get(1));
 	}
 
 	@Test

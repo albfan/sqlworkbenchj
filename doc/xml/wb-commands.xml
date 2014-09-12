@@ -1033,18 +1033,23 @@ from person/
           <row>
             <entry>-changeSet</entry>
             <entry>
-              A list of changeSet ids to be run. If this is omitted, then the SQL from all changesets (containing ) are executed. The value
-              specified can include the value for the author attribute as well, <literal>-changeSet="Arthur;42"</literal> selects the changeSet
-              where <literal>author="Arthur"</literal> and <literal>id="42"</literal>. This parameter can be repeated in order to select
-              multiple changesets: <literal>-changeSet="Arthur;42" -changeSet="Arthur;43"</literal>.
-            </entry>
-          </row>
-
-          <row>
-            <entry>-author</entry>
-            <entry>
-              Select all changeSets with a given author, e.g. <literal>-author=Arthur</literal>. If this parameter is specified, <literal>-changeSet</literal>
-              is ignored. This parameter can be repeated in order to select changesets from multiple authors: <literal>-author=Arthur -author=Zaphod</literal>.
+              <para>
+                A list of changeSet ids to be run. If this is omitted, then the SQL from all changesets (containing supported tags) are executed. The value
+                specified can include the value for the author and the id, <literal>-changeSet="Arthur::42"</literal> selects the changeSet
+                where <literal>author="Arthur"</literal> and <literal>id="42"</literal>. This parameter can be repeated in order to select
+                multiple changesets: <literal>-changeSet="Arthur::42" -changeSet="Arthur::43"</literal>.
+              </para>
+              <para>
+                You can specify wildcards before or after the double colon: <literal>-changeSet="*::42"</literal> will select all
+                changesets with the id=42. <literal>-changeSet="Author::*"</literal> will select all changesets from "Arthur"
+              </para>
+              <para>
+                If the parameter value does not contain the double colon it is assumed to be an ID only: <literal>-changeSet="42"</literal> is the same
+                as <literal>-changeSet="*::42"</literal>
+              </para>
+              <para>
+                If this parameter is omitted, all changesets are executed.
+              </para>
             </entry>
           </row>
 

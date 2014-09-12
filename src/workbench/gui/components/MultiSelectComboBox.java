@@ -23,7 +23,6 @@
 package workbench.gui.components;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -272,15 +271,20 @@ public class MultiSelectComboBox<T extends Object>
 	 */
 	public int getSelectedCount()
 	{
-		int count = 0;
-		for (JCheckBox cbx : values)
+		if (values.isEmpty()) return 0;
+
+		synchronized (values)
 		{
-			if (cbx.isSelected())
+			int count = 0;
+			for (JCheckBox cbx : values)
 			{
-				count ++;
+				if (cbx.isSelected())
+				{
+					count ++;
+				}
 			}
+			return count;
 		}
-		return count;
 	}
 
 	/**
@@ -291,15 +295,21 @@ public class MultiSelectComboBox<T extends Object>
 	 */
 	public List<T> getSelectedItems()
 	{
-		List<T> ret = new ArrayList<>(values.size());
-		for (JCheckBox cbx : values)
+		List<T> ret = new ArrayList<>();
+		if (values.isEmpty()) return ret;
+
+		synchronized (values)
 		{
-			if (cbx.isSelected())
+			// Avoid the iterator to prevent a ConcurrentModificationException
+			for (JCheckBox cbx : values)
 			{
-				ret.add(getUserObject(cbx));
+				if (cbx.isSelected())
+				{
+					ret.add(getUserObject(cbx));
+				}
 			}
+			return ret;
 		}
-		return ret;
 	}
 
 	private T getUserObject(JCheckBox cbx)
@@ -509,9 +519,7 @@ public class MultiSelectComboBox<T extends Object>
 			button.setHorizontalAlignment(SwingConstants.LEADING);
 			button.setMargin(new Insets(2, 5, 2, 2));
 			button.setIconTextGap(2);
-			icon = ResourceMgr.getImageByName("tick.gif");
-			Dimension d = new Dimension(maxElementWidth - 10, icon.getIconHeight() + 4);
-			button.setPreferredSize(d);
+			icon = ResourceMgr.getImageByName("filter_go16.gif");
 		}
 
 		void dispose()

@@ -59,7 +59,6 @@ public class WbRunLB
 		cmdLine.addArgument("file");
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument("changeSet", ArgumentType.Repeatable);
-		cmdLine.addArgument("author", ArgumentType.Repeatable);
 		cmdLine.addArgument("verbose", ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
 		isUpdatingCommand = true;
@@ -116,21 +115,11 @@ public class WbRunLB
 
 		boolean continueOnError = checkParameters ? cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false) : false;
 		boolean verbose = checkParameters ? cmdLine.getBoolean("verbose", false) : false;
+
 		List<String> idStrings = checkParameters ? cmdLine.getListValue("changeSet") : null;
-		List<String> authors = checkParameters ? cmdLine.getListValue("author") : null;
 		List<ChangeSetIdentifier> ids = null;
 
-
-		if (CollectionUtil.isNonEmpty(authors))
-		{
-			ids = new ArrayList<>(authors.size());
-			for (String author : authors)
-			{
-				ChangeSetIdentifier id = new ChangeSetIdentifier(author, "*");
-				ids.add(id);
-			}
-		}
-		else if (CollectionUtil.isNonEmpty(idStrings))
+		if (CollectionUtil.isNonEmpty(idStrings))
 		{
 			ids = new ArrayList<>(idStrings.size());
 			for (String param : idStrings)
@@ -153,6 +142,7 @@ public class WbRunLB
 		{
 			runner.setVerboseLogging(verbose);
 			LiquibaseSupport lb = new LiquibaseSupport(file, encoding);
+			lb.usePgParser(currentConnection.getMetadata().isPostgres());
 
 			List<String> statements = lb.getSQLFromChangeSet(ids);
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);

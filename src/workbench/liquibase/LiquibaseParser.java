@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -63,12 +64,13 @@ public class LiquibaseParser
 	private Set<String> tagsToRead = CollectionUtil.treeSet("sql", "createProcedure");
 	private List<LiquibaseTagContent> resultTags = new ArrayList<>();
 	private List<ChangeSetIdentifier> idsToRead;
-
+	private List<ChangeSetIdentifier> idsFromChangeLog;
 	private boolean captureContent;
 	private final String CHANGESET_TAG = "changeSet";
 	private final String SQL_FILE_TAG = "sqlFile";
 	private StringBuilder currentContent;
 	private boolean currentSplitValue;
+	private boolean collectChangeSets;
 	private final MessageBuffer warnings;
 
 	public LiquibaseParser(WbFile xmlFile, MessageBuffer buffer)
@@ -104,6 +106,7 @@ public class LiquibaseParser
 	public List<LiquibaseTagContent> getContentFromChangeSet(List<ChangeSetIdentifier> changeSetIds)
 		throws IOException, SAXException
 	{
+		collectChangeSets = false;
 		idsToRead = changeSetIds == null ? null : new ArrayList<>(changeSetIds);
 		Reader in = EncodingUtil.createReader(changeLog, xmlEncoding);
 		try
@@ -118,21 +121,38 @@ public class LiquibaseParser
 		return resultTags;
 	}
 
+	public List<ChangeSetIdentifier> getChangeSets()
+	{
+		collectChangeSets = true;
+		idsFromChangeLog = new ArrayList<>();
+		Reader in = null;
+		try
+		{
+			in = EncodingUtil.createReader(changeLog, xmlEncoding);
+			InputSource source = new InputSource(in);
+			saxParser.parse(source, this);
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("LiquibaseParser.getChangeSets()", "Could not retrieve list of change sets", th);
+		}
+		finally
+		{
+			FileUtil.closeQuietely(in);
+		}
+		return idsFromChangeLog;
+	}
+
 	private boolean isChangeSetIncluded(ChangeSetIdentifier toCheck)
 	{
+		if (toCheck == null) return false;
 		if (CollectionUtil.isEmpty(idsToRead)) return true;
+
 		for (ChangeSetIdentifier id : idsToRead)
 		{
-			if (id == null) continue;
-
-			boolean idsEqual = StringUtil.equalString(toCheck.getId(), id.getId());
-			if (id.getAuthor() == null && idsEqual) return true;
-
-			boolean authorsEqual = StringUtil.equalString(toCheck.getAuthor(), id.getAuthor());
-			if (idsEqual && authorsEqual) return true;
-
-			if (authorsEqual && id.getId().equals("*")) return true;
+			if (toCheck.isEqualTo(id)) return true;
 		}
+
 		return false;
 	}
 
@@ -143,53 +163,60 @@ public class LiquibaseParser
 		if (tagName.equals(CHANGESET_TAG))
 		{
 			ChangeSetIdentifier id = new ChangeSetIdentifier(attrs.getValue("author"), attrs.getValue("id"));
-			if (isChangeSetIncluded(id))
+			if (collectChangeSets)
+			{
+				idsFromChangeLog.add(id);
+			}
+			else if (isChangeSetIncluded(id))
 			{
 				captureContent = true;
 			}
 		}
-		else if (tagName.equals(SQL_FILE_TAG) && attrs.getValue("path") != null)
+		else if (captureContent)
 		{
-			String path = attrs.getValue("path");
-			String delim = attrs.getValue("endDelimiter");
-			boolean split = Boolean.parseBoolean(attrs.getValue("splitStatements"));
-
-			WbFile file = new WbFile(path);
-			File parent = changeLog.getParentFile();
-
-			if (!file.exists() && !file.isAbsolute())
+			if (tagName.equals(SQL_FILE_TAG) && attrs.getValue("path") != null)
 			{
-				file = new WbFile(parent, path);
-			}
+				String path = attrs.getValue("path");
+				String delim = attrs.getValue("endDelimiter");
+				boolean split = Boolean.parseBoolean(attrs.getValue("splitStatements"));
 
-			if (file.exists())
-			{
-				List<String> statements = readSqlFile(file, delim, split);
-				for (String sql : statements)
+				WbFile file = new WbFile(path);
+				File parent = changeLog.getParentFile();
+
+				if (!file.exists() && !file.isAbsolute())
 				{
-					LiquibaseTagContent tag = new LiquibaseTagContent(sql, false);
-					resultTags.add(tag);
+					file = new WbFile(parent, path);
+				}
+
+				if (file.exists())
+				{
+					List<String> statements = readSqlFile(file, delim, split);
+					for (String sql : statements)
+					{
+						LiquibaseTagContent tag = new LiquibaseTagContent(sql, false);
+						resultTags.add(tag);
+					}
+				}
+				else
+				{
+					String msg = ResourceMgr.getFormattedString("ErrFileNotFound", path);
+					warnings.append(msg);
+					LogMgr.logError("LiquibaseParser.startElement()", "sqlFile=\"" + path + "\" not found!", null);
 				}
 			}
-			else
+			else if (tagsToRead.contains(tagName))
 			{
-				String msg = ResourceMgr.getFormattedString("ErrFileNotFound", path);
-				warnings.append(msg);
-				LogMgr.logError("LiquibaseParser.startElement()", "sqlFile=\"" + path + "\" not found!", null);
-			}
-		}
-		else if (captureContent && tagsToRead.contains(tagName))
-		{
-			currentContent = new StringBuilder(500);
-			if (tagName.equals("sql"))
-			{
-				String split = attrs.getValue("splitStatements");
-				if (StringUtil.isBlank(split)) split = "true";
-				currentSplitValue = StringUtil.stringToBool(split);
-			}
-			else
-			{
-				currentSplitValue = false;
+				currentContent = new StringBuilder(500);
+				if (tagName.equals("sql"))
+				{
+					String split = attrs.getValue("splitStatements");
+					if (StringUtil.isBlank(split)) split = "true";
+					currentSplitValue = StringUtil.stringToBool(split);
+				}
+				else
+				{
+					currentSplitValue = false;
+				}
 			}
 		}
 	}

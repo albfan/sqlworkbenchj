@@ -153,16 +153,17 @@ public class TestUtil
 		dir.mkdir();
 		basedir = dir.getAbsolutePath();
 
-		PrintWriter pw = new PrintWriter(new FileWriter(new File(dir, "workbench.settings")));
-		pw.println("workbench.log.console=false");
-		pw.println("workbench.log.format={timestamp} {type} {source} {message} {error}");
-		pw.println("workbench.log.level=DEBUG");
-		pw.println("workbench.log.maxfilesize=150000");
-		pw.println("workbench.gui.language=en");
-		pw.println("workbench.gui.autoconnect=false");
-		pw.println("workbench.gui.updatecheck.interval=0");
-		pw.println("workbench.db.previewsql=false");
-		pw.close();
+		try (PrintWriter pw = new PrintWriter(new FileWriter(new File(dir, "workbench.settings"))))
+		{
+			pw.println("workbench.log.console=false");
+			pw.println("workbench.log.format={timestamp} {type} {source} {message} {error}");
+			pw.println("workbench.log.level=DEBUG");
+			pw.println("workbench.log.maxfilesize=150000");
+			pw.println("workbench.gui.language=en");
+			pw.println("workbench.gui.autoconnect=false");
+			pw.println("workbench.gui.updatecheck.interval=0");
+			pw.println("workbench.db.previewsql=false");
+		}
 		emptyBaseDirectory();
 	}
 
@@ -441,17 +442,19 @@ public class TestUtil
 	public static void writeFile(File f, String content)
 		throws IOException
 	{
-		FileWriter w = new FileWriter(f);
-		w.write(content);
-		w.close();
+		try (FileWriter w = new FileWriter(f))
+		{
+			w.write(content);
+		}
 	}
 
 	public static void writeFile(File f, String content, String encoding)
 		throws IOException
 	{
-		Writer w = EncodingUtil.createWriter(f, encoding, false);
-		w.write(content);
-		w.close();
+		try (Writer w = EncodingUtil.createWriter(f, encoding, false))
+		{
+			w.write(content);
+		}
 	}
 
 	public static void executeScript(WbConnection con, InputStream in)
@@ -647,9 +650,10 @@ public class TestUtil
              "	 \n" +
              " </object>  \n" +
              "</java> ";
-		PrintWriter writer = new PrintWriter(new FileOutputStream(new File(getBaseDir(), "WbProfiles.xml")));
-		writer.println(xml);
-		writer.close();
+		try (PrintWriter writer = new PrintWriter(new FileOutputStream(new File(getBaseDir(), "WbProfiles.xml"))))
+		{
+			writer.println(xml);
+		}
 		// Make sure the new profiles are read
 		ConnectionMgr.getInstance().reloadProfiles();
 	}
@@ -679,7 +683,7 @@ public class TestUtil
 
 	public static Map<String, String> getNameSpaces(String xml, String rootTag)
 	{
-		Map<String, String> result = new HashMap<String, String>();
+		Map<String, String> result = new HashMap<>();
 		// find first tag
 		int start = xml.indexOf("<" + rootTag);
 		int end = xml.indexOf('>', start);
