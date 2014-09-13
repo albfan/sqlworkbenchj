@@ -29,12 +29,8 @@ import java.util.Set;
 
 import workbench.resource.ResourceMgr;
 
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-
-import workbench.gui.profiles.ProfileKey;
 
 import workbench.storage.RowActionMonitor;
 
@@ -54,8 +50,11 @@ public class CommonDiffParameters
 {
 	public static final String PARAM_SOURCEPROFILE = "referenceProfile";
 	public static final String PARAM_SOURCEPROFILE_GROUP = "referenceGroup";
+	public static final String PARAM_SOURCE_CONN = "referenceConnection";
+
 	public static final String PARAM_TARGETPROFILE = "targetProfile";
 	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
+	public static final String PARAM_TARGET_CONN = "targetConnection";
 
 	public static final String PARAM_FILENAME = "file";
 
@@ -72,14 +71,24 @@ public class CommonDiffParameters
 	private ArgumentParser cmdLine;
 	private List<String> missingRefTables = new ArrayList<>();
 	private List<String> missingTargetTables = new ArrayList<>();
+	private String baseDir;
 
 	public CommonDiffParameters(ArgumentParser args)
 	{
+		this(args, null);
+	}
+	
+	public CommonDiffParameters(ArgumentParser args, String directory)
+	{
 		cmdLine = args;
+		baseDir = directory;
 		cmdLine.addArgument(PARAM_SOURCEPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE_GROUP);
+		cmdLine.addArgument(PARAM_SOURCE_CONN);
 		cmdLine.addArgument(PARAM_TARGETPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
+		cmdLine.addArgument(PARAM_TARGET_CONN);
+
 		cmdLine.addArgument(PARAM_FILENAME);
 		CommonArgs.addEncodingParameter(cmdLine);
 		cmdLine.addArgument(PARAM_REFERENCETABLES, ArgumentType.TableArgument);
@@ -97,45 +106,26 @@ public class CommonDiffParameters
 
 	public WbConnection getTargetConnection(WbConnection current, StatementRunnerResult result)
 	{
-		return getConnection(PARAM_TARGETPROFILE, PARAM_TARGETPROFILE_GROUP, current, "Target", result);
+		return getConnection(PARAM_TARGETPROFILE, PARAM_TARGETPROFILE_GROUP, PARAM_TARGET_CONN, current, "Target", result);
 	}
 
 	public WbConnection getSourceConnection(WbConnection current, StatementRunnerResult result)
 	{
-		return getConnection(PARAM_SOURCEPROFILE, PARAM_SOURCEPROFILE_GROUP, current, "Source", result);
+		return getConnection(PARAM_SOURCEPROFILE, PARAM_SOURCEPROFILE_GROUP, PARAM_SOURCE_CONN, current, "Source", result);
 	}
 
-	protected WbConnection getConnection(String nameArg, String groupArg, WbConnection current, String connType, StatementRunnerResult result)
+	protected WbConnection getConnection(String nameArg, String groupArg, String connArg, WbConnection current, String connType, StatementRunnerResult result)
 	{
-		String profileName = cmdLine.getValue(nameArg);
-		String profileGroup = cmdLine.getValue(groupArg);
-		ProfileKey profileKey = null;
-		if (profileName != null) profileKey = new ProfileKey(profileName, profileGroup);
-
-		if (profileKey == null || (current != null && current.getProfile().isProfileForKey(profileKey)))
-		{
-			return current;
-		}
+		CommandLineConnectionHandler handler = new CommandLineConnectionHandler(cmdLine, nameArg, groupArg, connArg);
 
 		WbConnection connection = null;
-
-		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(profileKey);
-
-		if (prof == null)
-		{
-			String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", profileKey.toString());
-			result.addMessage(msg);
-			result.setFailure();
-			return null;
-		}
-
 		try
 		{
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnecting" + connType),-1,-1);
 			}
-			connection = ConnectionMgr.getInstance().getConnection(profileKey, "Wb-Diff-" + connType);
+			connection = handler.getConnection(result, current, baseDir, "Wb-Diff-" + connType);
 		}
 		catch (Exception e)
 		{

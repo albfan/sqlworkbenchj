@@ -59,6 +59,7 @@ public class AppArguments
 	public static final String ARG_CONN_USER = "username";
 	public static final String ARG_CONN_PWD = "password";
 	public static final String ARG_CONN_PROPS = "connectionProperties";
+	public static final String ARG_CONN_DESCRIPTOR = "connection";
 	public static final String ARG_CONN_AUTOCOMMIT = "autocommit";
 	public static final String ARG_CONN_SEPARATE = "separateConnection";
 	public static final String ARG_CONN_EMPTYNULL = "emptyStringIsNull";
@@ -166,6 +167,7 @@ public class AppArguments
 		addArgument("version");
 		addArgument(ARG_PROP, ArgumentType.Repeatable);
 		addArgument(ARG_LOG_ALL_STMT, ArgumentType.BoolSwitch);
+		addArgument(ARG_CONN_DESCRIPTOR);
 	}
 
 	@Override

@@ -62,6 +62,7 @@ import workbench.gui.profiles.ProfileKey;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 
+import workbench.sql.wbcommands.ConnectionDescriptor;
 import workbench.sql.wbcommands.WbConnect;
 
 import workbench.util.ArgumentParser;
@@ -1013,19 +1014,22 @@ public class BatchRunner
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
 	{
 		ConnectionProfile result = null;
-		if (cmdLine.isArgNotPresent(AppArguments.ARG_CONN_URL)) return null;
-		try
+
+		String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
+		String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
+		if (driverclass == null)
 		{
-			String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
+			driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER_CLASS);
+		}
+
+		String descriptor = cmdLine.getValue(AppArguments.ARG_CONN_DESCRIPTOR);
+
+		if (descriptor == null)
+		{
 			if (url == null)
 			{
 				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a connection URL!", null);
 				return null;
-			}
-			String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
-			if (driverclass == null)
-			{
-				driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER_CLASS);
 			}
 
 			if (driverclass == null)
@@ -1036,29 +1040,13 @@ public class BatchRunner
 			String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
 			String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
 			String jar = cmdLine.getValue(AppArguments.ARG_CONN_JAR);
-			String commit =  cmdLine.getValue(AppArguments.ARG_CONN_AUTOCOMMIT);
-			String wksp = cmdLine.getValue(AppArguments.ARG_WORKSPACE);
-			String delimDef = cmdLine.getValue(AppArguments.ARG_ALT_DELIMITER);
-			String title = cmdLine.getValue(AppArguments.ARG_CONN_NAME, CMD_LINE_PROFILE_NAME);
-			DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
-			boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_CONN_TRIM_CHAR, false);
-			boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
-			boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
-
-			Map<String, String> props = cmdLine.getMapValue(AppArguments.ARG_CONN_PROPS);
-
 			if (jar != null)
 			{
 				WbFile jarFile = new WbFile(jar);
 				ConnectionMgr.getInstance().registerDriver(driverclass, jarFile.getFullPath());
 			}
-
 			result = ConnectionProfile.createEmptyProfile();
-			result.setTemporaryProfile(true);
-			result.setName(title);
 			result.setDriverclass(driverclass);
-			result.setDriverName(null);
-			result.setStoreExplorerSchema(false);
 			result.setUrl(url);
 
 			if (cmdLine.isArgPresent(AppArguments.ARG_CONN_PWD))
@@ -1070,8 +1058,36 @@ public class BatchRunner
 			{
 				result.setStorePassword(false);
 			}
-
 			result.setUsername(user);
+		}
+		else
+		{
+			ConnectionDescriptor parser = new ConnectionDescriptor();
+			result = parser.parseDefinition(descriptor);
+			if (result == null)
+			{
+				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Invalid connection descriptor: " + descriptor, null);
+				return null;
+			}
+		}
+
+		try
+		{
+			String commit =  cmdLine.getValue(AppArguments.ARG_CONN_AUTOCOMMIT);
+			String wksp = cmdLine.getValue(AppArguments.ARG_WORKSPACE);
+			String delimDef = cmdLine.getValue(AppArguments.ARG_ALT_DELIMITER);
+			String title = cmdLine.getValue(AppArguments.ARG_CONN_NAME, CMD_LINE_PROFILE_NAME);
+			DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
+			boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_CONN_TRIM_CHAR, false);
+			boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
+			boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
+
+			Map<String, String> props = cmdLine.getMapValue(AppArguments.ARG_CONN_PROPS);
+
+			result.setTemporaryProfile(true);
+			result.setName(title);
+			result.setDriverName(null);
+			result.setStoreExplorerSchema(false);
 			result.setRollbackBeforeDisconnect(rollback);
 			result.setAlternateDelimiter(delim);
 			result.setTrimCharData(trimCharData);

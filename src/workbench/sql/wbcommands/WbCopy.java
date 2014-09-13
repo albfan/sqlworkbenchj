@@ -75,6 +75,11 @@ public class WbCopy
 	public static final String PARAM_DROPTARGET = "dropTarget";
 	public static final String PARAM_CREATETARGET = "createTarget";
 	public static final String PARAM_REMOVE_DEFAULTS = "removeDefaults";
+	public static final String PARAM_SOURCE_CONN = "sourceConnection";
+	public static final String PARAM_TARGET_CONN = "targetConnection";
+
+	private static final int TYPE_SOURCE = 1;
+	private static final int TYPE_TARGET = 2;
 
 
 	/**
@@ -119,6 +124,8 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_SOURCESCHEMA);
 		cmdLine.addArgument(PARAM_TARGETTABLE);
 		cmdLine.addArgument(PARAM_TARGETSCHEMA);
+		cmdLine.addArgument(PARAM_SOURCE_CONN);
+		cmdLine.addArgument(PARAM_TARGET_CONN);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_TARGETPROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE_GROUP);
@@ -165,24 +172,6 @@ public class WbCopy
 		}
 	}
 
-	private ProfileKey getTargetProfile()
-	{
-		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
-		String targetGroup = cmdLine.getValue(PARAM_TARGETPROFILE_GROUP);
-		ProfileKey targetKey = null;
-		if (targetProfile != null) targetKey = new ProfileKey(targetProfile, targetGroup);
-		return targetKey;
-	}
-
-	private ProfileKey getSourceProfile()
-	{
-		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
-		String sourceGroup = cmdLine.getValue(PARAM_SOURCEPROFILE_GROUP);
-		ProfileKey sourceKey = null;
-		if (sourceProfile != null) sourceKey = new ProfileKey(sourceProfile, sourceGroup);
-		return sourceKey;
-	}
-
 	@Override
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
@@ -201,9 +190,6 @@ public class WbCopy
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrCopyWrongParameters"));
 			return result;
 		}
-
-		ProfileKey sourceKey = getSourceProfile();
-		ProfileKey targetKey = getTargetProfile();
 
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
 		String sourceSchema = cmdLine.getValue(PARAM_SOURCESCHEMA);
@@ -231,13 +217,15 @@ public class WbCopy
 			return result;
 		}
 
-		WbConnection targetCon = getConnection(result, targetKey, ID_PREFIX + "-Target-"+ runId + "$");
+		CommandLineConnectionHandler targetHandler = new CommandLineConnectionHandler(cmdLine, PARAM_TARGETPROFILE, PARAM_TARGETPROFILE_GROUP, PARAM_TARGET_CONN);
+		WbConnection targetCon = targetHandler.getConnection(result, currentConnection, getBaseDir(), ID_PREFIX + "-Target-"+ runId + "$");
 		if (targetCon == null || !result.isSuccess())
 		{
 			return result;
 		}
 
-		WbConnection sourceCon = getConnection(result, sourceKey, ID_PREFIX + "-Source-" + runId + "$");
+		CommandLineConnectionHandler sourceHandler = new CommandLineConnectionHandler(cmdLine, PARAM_SOURCEPROFILE, PARAM_SOURCEPROFILE_GROUP, PARAM_SOURCE_CONN);
+		WbConnection sourceCon = sourceHandler.getConnection(result, currentConnection, getBaseDir(), ID_PREFIX + "-Source-" + runId + "$");
 		if (sourceCon == null || !result.isSuccess())
 		{
 			return result;
@@ -381,38 +369,6 @@ public class WbCopy
 		}
 	}
 
-	private WbConnection getConnection(StatementRunnerResult result, ProfileKey profileKey, String id)
-	{
-		if (profileKey == null || (currentConnection != null && currentConnection.getProfile().isProfileForKey(profileKey)))
-		{
-			return currentConnection;
-		}
-		else
-		{
-			ConnectionProfile tprof = ConnectionMgr.getInstance().getProfile(profileKey);
-			if (tprof == null)
-			{
-				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", profileKey.toString());
-				result.addMessage(msg);
-				result.setFailure();
-				return null;
-			}
-
-			try
-			{
-				return ConnectionMgr.getInstance().getConnection(profileKey, id);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("Wbcopy.getConnection()", "Error connecting to database", e);
-				result.addMessage(ResourceMgr.getFormattedString("ErrCopyCouldNotConnect", profileKey.toString()));
-				result.addMessage(ExceptionUtil.getDisplay(e));
-				result.setFailure();
-				return null;
-			}
-		}
-	}
-
 	/**
 	 * Extracts the target profile from the passed SQL statement.
 	 */
@@ -420,8 +376,10 @@ public class WbCopy
 	public ConnectionProfile getModificationTarget(WbConnection con, String sql)
 	{
 		cmdLine.parse(getCommandLine(sql));
-		ProfileKey target = getTargetProfile();
-		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(target);
+		CommandLineConnectionHandler handler = new CommandLineConnectionHandler(cmdLine, PARAM_TARGETPROFILE, PARAM_TARGETPROFILE_GROUP, PARAM_TARGET_CONN);
+		ProfileKey key = handler.getProfileKey();
+		if (key == null) return null;
+		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(key);
 		return prof;
 	}
 
@@ -453,7 +411,7 @@ public class WbCopy
 
 		return copier;
 	}
-	
+
 	@Override
 	public boolean isWbCommand()
 	{

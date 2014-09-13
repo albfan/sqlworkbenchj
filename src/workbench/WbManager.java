@@ -849,7 +849,8 @@ public final class WbManager
 			{
 				String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
 				String jar = cmdLine.getValue(AppArguments.ARG_CONN_JAR);
-				if (!StringUtil.isEmptyString(url) && !StringUtil.isEmptyString(jar))
+				String lbFile = cmdLine.getValue(AppArguments.ARG_LB_CONN);
+				if ( (!StringUtil.isEmptyString(url) && !StringUtil.isEmptyString(jar)) || !StringUtil.isNonEmpty(lbFile))
 				{
 					// Do not read the driver templates if a connection is specified directly
 					readDriverTemplates = false;

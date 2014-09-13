@@ -800,36 +800,41 @@ public class ConnectionMgr
 		{
 			if (this.drivers == null) this.readDrivers();
 
-			// now read the templates and append them to the driver list
-			InputStream in = null;
-			try
+			List<DbDriver> templates = getDriverTemplates();
+			for (DbDriver drv : templates)
 			{
-				in = getDriverTemplates();
-
-				WbPersistence reader = new WbPersistence();
-				ArrayList<DbDriver> templates = (ArrayList<DbDriver>)reader.readObject(in);
-
-				for (DbDriver drv : templates)
+				if (!this.isNameUsed(drv.getName()))
 				{
-					if (!this.isNameUsed(drv.getName()))
-					{
-						this.drivers.add(drv);
-					}
+					this.drivers.add(drv);
 				}
-			}
-			catch (Throwable io)
-			{
-				LogMgr.logWarning("ConectionMgr.readDrivers()", "Could not read driver templates!", io);
-			}
-			finally
-			{
-				FileUtil.closeQuietely(in);
 			}
 		}
 		this.templatesImported = true;
 	}
 
-	private InputStream getDriverTemplates()
+	public List<DbDriver> getDriverTemplates()
+	{
+		List<DbDriver> templates = null;
+		InputStream in = null;
+		try
+		{
+			in = openDriverTemplatesFile();
+			WbPersistence reader = new WbPersistence();
+			templates = (List<DbDriver>) reader.readObject(in);
+		}
+		catch (Throwable io)
+		{
+			LogMgr.logWarning("ConectionMgr.getDriverTemplates()", "Could not read driver templates!", io);
+			templates = new ArrayList<>();
+		}
+		finally
+		{
+			FileUtil.closeQuietely(in);
+		}
+		return templates;
+	}
+
+	private InputStream openDriverTemplatesFile()
 		throws IOException
 	{
 		WbFile f = new WbFile(WbManager.getInstance().getJarPath(), "DriverTemplates.xml");
