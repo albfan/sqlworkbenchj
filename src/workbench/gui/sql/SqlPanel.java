@@ -188,7 +188,6 @@ import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.storage.DataStore;
 
 import workbench.sql.AppendResultAnnotation;
-import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.OutputPrinter;
 import workbench.sql.ScriptParser;
@@ -2956,9 +2955,7 @@ public class SqlPanel
 	public ScriptParser createScriptParser()
 	{
 		ScriptParser scriptParser = new ScriptParser();
-		DelimiterDefinition altDelim = Settings.getInstance().getAlternateDelimiter(this.dbConnection);
-
-		scriptParser.setAlternateDelimiter(altDelim);
+		scriptParser.setAlternateDelimiter(dbConnection.getAlternateDelimiter());
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		scriptParser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 

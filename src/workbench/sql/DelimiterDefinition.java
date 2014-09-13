@@ -37,28 +37,47 @@ public class DelimiterDefinition
 	/**
 	 * The default delimiter for ANSI SQL: a semicolon
 	 */
-	public static final DelimiterDefinition STANDARD_DELIMITER = new DelimiterDefinition(";");
+	public static final DelimiterDefinition STANDARD_DELIMITER = new DelimiterDefinition(";", true);
 
 	/**
 	 * A default alternate delimiter. This is Oracle's slash on a single line
 	 */
-	public static final DelimiterDefinition DEFAULT_ORA_DELIMITER = new DelimiterDefinition("/");
+	public static final DelimiterDefinition DEFAULT_ORA_DELIMITER = new DelimiterDefinition("/", true);
 
 	/**
 	 * A default alternate delimiter that matches SQL Server's GO command
 	 */
-	public static final DelimiterDefinition DEFAULT_MS_DELIMITER = new DelimiterDefinition("GO");
+	public static final DelimiterDefinition DEFAULT_MS_DELIMITER = new DelimiterDefinition("GO", true);
+
+	public static final DelimiterDefinition EMPTY_DELIMITER = new DelimiterDefinition(true);
 
 	private String delimiter;
 	private boolean singleLineDelimiter;
 	private boolean changed;
 	private Pattern slePattern;
+	private boolean isImmutable;
 
 	public DelimiterDefinition()
 	{
 		this.delimiter = "";
 		this.changed = false;
 		this.slePattern = null;
+	}
+
+	private DelimiterDefinition(boolean immutable)
+	{
+		this.delimiter = "";
+		this.changed = false;
+		this.slePattern = null;
+		this.isImmutable = immutable;
+	}
+
+	private DelimiterDefinition(String delim, boolean immutable)
+	{
+		setDelimiter(delim);
+		this.changed = false;
+		initPattern();
+		isImmutable = immutable;
 	}
 
 	public DelimiterDefinition(String delim)
@@ -132,6 +151,8 @@ public class DelimiterDefinition
 
 	public final void setDelimiter(String d)
 	{
+		if (isImmutable) return;
+
 		if (d == null) return;
 		if (!StringUtil.equalString(this.delimiter, d))
 		{
@@ -154,6 +175,8 @@ public class DelimiterDefinition
 
 	public void setSingleLine(boolean flag)
 	{
+		if (isImmutable) return;
+		
 		if (flag != this.singleLineDelimiter)
 		{
 			this.singleLineDelimiter = flag;

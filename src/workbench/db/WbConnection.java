@@ -47,6 +47,7 @@ import workbench.db.objectcache.DbObjectCache;
 import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.oracle.OracleWarningsClearer;
 
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorReportLevel;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
@@ -177,6 +178,11 @@ public class WbConnection
 		return sessionProps.get(key);
 	}
 
+	public DelimiterDefinition getAlternateDelimiter()
+	{
+		return Settings.getInstance().getAlternateDelimiter(this, null);
+	}
+	
 	public TransactionChecker getTransactionChecker()
 	{
 		if (getProfile().getDetectOpenTransaction())

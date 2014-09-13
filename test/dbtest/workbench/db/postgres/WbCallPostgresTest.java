@@ -23,20 +23,23 @@
 package workbench.db.postgres;
 
 import java.util.List;
-import workbench.db.ProcedureDefinition;
-import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
-import java.sql.Statement;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
+import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
-import workbench.sql.DelimiterDefinition;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.WbCall;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -65,12 +68,7 @@ public class WbCallPostgresTest
 			"create table person (id integer, first_name varchar(50), last_name varchar(50));\n" +
 			"insert into person (id, first_name, last_name) values (1, 'Arthur', 'Dent');\n" +
 			"insert into person (id, first_name, last_name) values (2, 'Ford', 'Prefect');\n" +
-			"commit;\n");
-
-		Statement stmt = null;
-		try
-		{
-			String sql =
+			"commit;\n"  +
 			"CREATE OR REPLACE FUNCTION refcursorfunc() \n" +
 			 "  RETURNS refcursor \n" +
 			 "  LANGUAGE plpgsql \n" +
@@ -82,15 +80,7 @@ public class WbCallPostgresTest
 			 "    OPEN mycurs FOR SELECT * FROM person ORDER BY id;  \n" +
 			 "    RETURN mycurs;  \n" +
 			 " END \n" +
-			 "$body$\n";
-			stmt = con.createStatement();
-			stmt.execute(sql);
-		}
-		finally
-		{
-			SqlUtil.closeStatement(stmt);
-		}
-		TestUtil.executeScript(con,
+			 "$body$;\n" +
 			"create or replace function get_answer() \n" +
 			" returns integer \n" +
 			 "  LANGUAGE plpgsql \n" +
@@ -100,9 +90,7 @@ public class WbCallPostgresTest
 			 "    RETURN 42;  \n" +
 			 " END \n" +
 			 "$body$\n" +
-			 "/",
-			 DelimiterDefinition.DEFAULT_ORA_DELIMITER
-			);
+			 ";");
 	}
 
 	@AfterClass

@@ -93,9 +93,11 @@ public class MySqlProcedureReaderTest
 		assertEquals(1, procs.size());
 		ProcedureDefinition proc = procs.get(0);
 		assertEquals("simpleproc", proc.getProcedureName());
+		con.getProfile().setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		String source = proc.getSource(con).toString();
+//		System.out.println(source);
 		ScriptParser p = new ScriptParser(source);
-		p.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(con));
+		p.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(con, DelimiterDefinition.DEFAULT_ORA_DELIMITER));
 		assertEquals(2, p.getSize());
 		String create = p.getCommand(1);
 		String expected =

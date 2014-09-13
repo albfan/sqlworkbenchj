@@ -25,8 +25,6 @@ package workbench.db.report;
 import java.io.IOException;
 import java.io.Writer;
 
-import workbench.resource.Settings;
-
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
@@ -57,13 +55,11 @@ public class ReportProcedure
 	private StringBuilder indent2 = new StringBuilder("    ");
 	private String schemaToUse;
 	private String fullName;
-	private DelimiterDefinition delim;
 
 	public ReportProcedure(ProcedureDefinition def, WbConnection conn)
 	{
 		this.procDef = def;
 		this.dbConn = conn;
-		delim = Settings.getInstance().getAlternateDelimiter(dbConn);
 	}
 
 	public void setFullname(String name)
@@ -155,6 +151,7 @@ public class ReportProcedure
 		if (includeSource)
 		{
 			String src = getSource().toString().trim();
+			DelimiterDefinition delim = this.dbConn.getAlternateDelimiter();
 			if (delim != null)
 			{
 				src = delim.removeFromEnd(src);

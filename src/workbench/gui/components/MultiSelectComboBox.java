@@ -543,20 +543,30 @@ public class MultiSelectComboBox<T extends Object>
 			{
 				JComponent renderer = (JComponent) super.getListCellRendererComponent(list, selectAllLabel, index, isSelected, cellHasFocus);
 				renderer.setBorder(topDivider);
+				renderer.setToolTipText(null);
 				return renderer;
 			}
 			else if (index == selectNoneIndex)
 			{
 				JComponent renderer = (JComponent) super.getListCellRendererComponent(list, selectNoneLabel, index, isSelected, cellHasFocus);
 				renderer.setBorder(DividerBorder.BOTTOM_DIVIDER);
+				renderer.setToolTipText(null);
 				return renderer;
 			}
 			else if (index == summaryIndex)
 			{
 				JComponent renderer = (JComponent) super.getListCellRendererComponent(list, getSelectedItemsDisplay(), index, isSelected, cellHasFocus);
-				JLabel label = (JLabel)renderer;
-				label.setPreferredSize(iconSize);
-				label.setIcon(icon);
+				renderer.setPreferredSize(iconSize);
+				renderer.setToolTipText(ResourceMgr.getDescription("LblMultiClose"));
+				try
+				{
+					JLabel label = (JLabel)renderer;
+					label.setIcon(icon);
+				}
+				catch (Throwable th)
+				{
+					// ignore, should not happen
+				}
 				return renderer;
 			}
 

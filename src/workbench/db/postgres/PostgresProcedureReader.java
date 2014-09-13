@@ -47,6 +47,8 @@ import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
 
+import workbench.sql.DelimiterDefinition;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -396,6 +398,7 @@ public class PostgresProcedureReader
 
 		StringBuilder source = new StringBuilder(500);
 
+		DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(connection, DelimiterDefinition.STANDARD_DELIMITER);
 		ResultSet rs = null;
 		Savepoint sp = null;
 		Statement stmt = null;
@@ -515,8 +518,8 @@ public class PostgresProcedureReader
 					source.append("\n ROWS ");
 					source.append(rows.longValue());
 				}
-				source.append('\n');
-				source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
+				if (delim.isSingleLine()) source.append('\n');
+				source.append(delim.getDelimiter());
 				source.append('\n');
 				if (StringUtil.isNonBlank(comment))
 				{
@@ -525,7 +528,7 @@ public class PostgresProcedureReader
 					source.append(" IS '");
 					source.append(SqlUtil.escapeQuotes(def.getComment()));
 					source.append("'\n" );
-					source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
+					source.append(delim.getDelimiter());
 					source.append('\n');
 				}
 			}
@@ -619,7 +622,12 @@ public class PostgresProcedureReader
 					source = new StringBuilder(s.length() + 50);
 					source.append(s);
 					if (!s.endsWith("\n"))	source.append('\n');
-					source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
+
+					DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(connection, DelimiterDefinition.STANDARD_DELIMITER);
+					if (delim != null)
+					{
+						source.append(delim.getDelimiter());
+					}
 					source.append('\n');
 					if (StringUtil.isNonBlank(def.getComment()))
 					{
@@ -628,8 +636,12 @@ public class PostgresProcedureReader
 						source.append(" IS '");
 						source.append(SqlUtil.escapeQuotes(def.getComment()));
 						source.append("'\n" );
-						source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
-						source.append('\n');
+						if (delim != null)
+						{
+							source.append(delim.getDelimiter());
+							source.append('\n');
+						}
+
 					}
 				}
 			}

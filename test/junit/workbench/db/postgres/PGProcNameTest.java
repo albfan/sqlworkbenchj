@@ -56,7 +56,7 @@ public class PGProcNameTest
 
 	private Map<Long, PGType> getTypes()
 	{
-		Map<Long, PGType> result = new HashMap<Long, PGType>();
+		Map<Long, PGType> result = new HashMap<>();
 		result.put(16L, new PGType("boolean", 16));
 		result.put(18L, new PGType("char", 18));
 		result.put(20L, new PGType("bigint", 20));

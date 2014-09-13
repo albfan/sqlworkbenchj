@@ -68,7 +68,7 @@ public class ColumnDropperTest
 		con.commit();
 
 		TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("PERSON"));
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> cols = new ArrayList<>();
 		cols.add(new ColumnIdentifier("DUMMY1"));
 		cols.add(new ColumnIdentifier("DUMMY2"));
 

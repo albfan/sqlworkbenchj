@@ -266,7 +266,7 @@ public class EditorPanel
 		dbFunctions = CollectionUtil.caseInsensitiveSet();
 		dbDatatypes = CollectionUtil.caseInsensitiveSet();
 
-		this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter(aConnection);
+		this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter(aConnection, null);
 
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
 

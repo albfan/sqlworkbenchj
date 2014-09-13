@@ -23,9 +23,11 @@
 package workbench.db.postgres;
 
 import java.sql.SQLException;
+
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 
 /**

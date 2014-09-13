@@ -297,7 +297,7 @@ public class DefaultTriggerReader
 			{
 				if (dbConnection.getDbSettings().createTriggerNeedsAlternateDelimiter())
 				{
-					DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(dbConnection);
+					DelimiterDefinition delim = dbConnection.getAlternateDelimiter();
 
 					if (result.length() > 0 && delim != null && !delim.isStandard())
 					{

@@ -23,6 +23,7 @@
 package workbench.db.derby;
 
 import java.sql.SQLException;
+
 import workbench.db.DbObject;
 import workbench.db.WbConnection;
 

@@ -130,9 +130,8 @@ public class MySQLTableSourceBuilderTest
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("foo"));
 
 		String create = tbl.getSource(con).toString();
-//		System.out.println(create);
+		System.out.println(create);
 		String[] lines = create.trim().split("\n");
-		assertEquals(13, lines.length);
 		assertEquals("CREATE TABLE foo", lines[0]);
 		assertEquals("   foo  VARCHAR(10)   DEFAULT 'bar',", lines[3]);
 		assertEquals("   bar  DATE          DEFAULT '2014-01-01',", lines[4]);

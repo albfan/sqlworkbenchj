@@ -148,12 +148,12 @@ public class CompletionHandler
 		ScriptParser parser = new ScriptParser(script);
 		if (dbConnection != null)
 		{
-			parser.usePgParser(dbConnection.getMetadata().isPostgres());
+			parser.usePgParser(dbConnection.isPostgres());
 		}
 		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		parser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 		parser.setAlternateLineComment(dbConnection == null ? null : dbConnection.getDbSettings().getLineComment());
-		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(dbConnection));
+		parser.setAlternateDelimiter(dbConnection.getAlternateDelimiter());
 		int cursorPos = this.editor.getCaretPosition();
 
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);
@@ -325,7 +325,7 @@ public class CompletionHandler
 	@Override
 	public void addListDataListener(ListDataListener listDataListener)
 	{
-		if (this.listeners == null) this.listeners = new ArrayList<ListDataListener>();
+		if (this.listeners == null) this.listeners = new ArrayList<>();
 		this.listeners.add(listDataListener);
 	}
 

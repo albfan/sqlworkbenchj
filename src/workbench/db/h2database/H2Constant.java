@@ -22,8 +22,11 @@
  */
 package workbench.db.h2database;
 
-import workbench.db.*;
 import java.sql.SQLException;
+
+import workbench.db.DbObject;
+import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 
 /**

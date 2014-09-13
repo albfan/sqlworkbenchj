@@ -89,9 +89,12 @@ public class MySqlProcedureReader
 			source.append(proctype);
 			source.append(' ');
 			source.append(aProcname);
-			DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(connection);
-			source.append(nl);
-			source.append(delim.toString());
+			DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(connection, DelimiterDefinition.STANDARD_DELIMITER);
+			if (delim != null)
+			{
+				if (delim.isSingleLine()) source.append(nl);
+				source.append(delim.toString());
+			}
 			source.append(nl);
 			source.append(nl);
 			source.append("CREATE ");

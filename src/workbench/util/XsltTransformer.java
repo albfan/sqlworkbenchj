@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.Source;
@@ -61,6 +63,8 @@ public class XsltTransformer
 	private boolean saveSystemOut;
 	private File xsltUsed;
 
+	private List<String> ignoredMessages = new ArrayList<>();
+
 	/**
 	 * The directory where the initially defined XSLT is stored.
 	 * Will be set by transform() in order to be able to
@@ -70,6 +74,9 @@ public class XsltTransformer
 
 	public XsltTransformer()
 	{
+		ignoredMessages.add("'http://javax.xml.XMLConstants/property/accessExternalDTD'");
+		ignoredMessages.add("'http://javax.xml.XMLConstants/feature/secure-processing'");
+		ignoredMessages.add("'http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit'");
 	}
 
 	/**
@@ -115,7 +122,7 @@ public class XsltTransformer
 		}
 
 		xsltUsed = xslfile;
-		
+
 		InputStream in = null;
 		OutputStream out = null;
 		InputStream xlsInput = null;
@@ -123,7 +130,7 @@ public class XsltTransformer
 
 		ByteArrayOutputStream systemOut = null;
 		ByteArrayOutputStream systemErr = null;
-		PrintStream oldOut = System.out;
+		final PrintStream oldOut = System.out;
 		PrintStream oldErr = System.err;
 		try
 		{
@@ -135,7 +142,19 @@ public class XsltTransformer
 				systemOut = new ByteArrayOutputStream();
 				System.setOut(new PrintStream(systemOut));
 				systemErr = new ByteArrayOutputStream();
-				System.setErr(new PrintStream(systemErr));
+				System.setErr(new PrintStream(systemErr)
+				{
+					@Override
+					public void println(String x)
+					{
+						// if the Xerces parser is in the class path it emits some useless warnings
+						// that are filtered out here
+						if (!ignoreXsltMessage(x))
+						{
+							super.println(x);
+						}
+					}
+				});
 			}
 
 			Source sxslt = new StreamSource(xlsInput);
@@ -175,6 +194,15 @@ public class XsltTransformer
 		}
 	}
 
+	private boolean ignoreXsltMessage(String message)
+	{
+		for (String msg : ignoredMessages)
+		{
+			if (message.contains(msg)) return true;
+		}
+		return false;
+	}
+
 	public Exception getNestedError()
 	{
 		return nestedError;
@@ -185,13 +213,22 @@ public class XsltTransformer
 		return getAllOutputs(null);
 	}
 
+	private String getSystemErr()
+	{
+		if (StringUtil.isBlank(sysErr)) return "";
+		int index = sysErr.indexOf("Compiler warnings:");
+		if (index > 0)
+		{
+			return sysErr.substring(0, index - 1).trim();
+		}
+		return sysErr.trim();
+	}
+
 	public String getAllOutputs(Exception e)
 	{
 		StringBuilder result = new StringBuilder();
-		if (StringUtil.isNonBlank(sysErr))
-		{
-			result.append(sysErr.trim());
-		}
+		result.append(getSystemErr());
+
 		if (StringUtil.isNonBlank(sysOut))
 		{
 			if (result.length() > 0) result.append('\n');

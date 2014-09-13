@@ -81,7 +81,7 @@ public class ColumnDropperPostgresTest
 			"commit;");
 
 		TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("person"));
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> cols = new ArrayList<>();
 		cols.add(new ColumnIdentifier("dummy1"));
 		cols.add(new ColumnIdentifier("dummy2"));
 

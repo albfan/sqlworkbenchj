@@ -27,18 +27,20 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -89,7 +91,7 @@ public class TableCreatorPostgresTest
 
 			// Make sure the table is created with the same column
 			// ordering as the original table.
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			List<ColumnIdentifier> cols = new ArrayList<>();
 
 			for (ColumnIdentifier col : clist)
 			{
@@ -141,7 +143,7 @@ public class TableCreatorPostgresTest
 			assertEquals(0, tables.size());
 
 			TableIdentifier tbl = new TableIdentifier("other.foo");
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			List<ColumnIdentifier> cols = new ArrayList<>();
 
 			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
 			id.setDbmsType("integer");

@@ -490,6 +490,7 @@ public class TestUtil
 		if (con == null) return;
 
 		ScriptParser parser = new ScriptParser(script);
+		parser.usePgParser(con.isPostgres());
 		if (alternateDelimiter != null)
 		{
 			parser.setAlternateDelimiter(alternateDelimiter);

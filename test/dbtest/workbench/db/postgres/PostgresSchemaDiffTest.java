@@ -34,8 +34,6 @@ import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
 
-import workbench.sql.DelimiterDefinition;
-
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 
@@ -200,18 +198,16 @@ public class PostgresSchemaDiffTest
 		}
 
 		TestUtil.executeScript(conn,
-			"create schema " + TARGET_SCHEMA  + "\n/\n" +
+			"create schema " + TARGET_SCHEMA  + "\n;\n" +
 			"create function " + REFERENCE_SCHEMA + ".to_create() returns integer as $$ begin return 42; end; $$ language plpgsql;\n" +
-			"/\n" +
+			"\n" +
 			"create function " + REFERENCE_SCHEMA + ".to_modify() returns integer as $$ begin return 42; end; $$ language plpgsql; \n" +
-			"/\n" +
+			"\n" +
 			"create function " + TARGET_SCHEMA + ".to_modify() returns integer as $$ begin return 1; end; $$ language plpgsql; \n" +
-			"/\n" +
+			"\n" +
 			"create function " + TARGET_SCHEMA + ".to_delete() returns integer as $$ begin return 1; end; $$ language plpgsql; \n" +
-			"/\n"  +
-			"commit\n" +
-			"/\n",
-			DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+			"\n"  +
+			"commit;\n");
 
 		SchemaDiff diff = new SchemaDiff(conn, conn);
 		diff.setIncludeViews(false);
@@ -233,7 +229,7 @@ public class PostgresSchemaDiffTest
 		Reader in = new FileReader(outfile);
 		String xml = FileUtil.readCharacters(in);
 		assertNotNull(xml);
-		System.out.println(xml);
+//		System.out.println(xml);
 
 		String value = TestUtil.getXPathValue(xml, "/schema-diff/create-proc/proc-def/proc-name");
 		assertEquals("to_create", value);

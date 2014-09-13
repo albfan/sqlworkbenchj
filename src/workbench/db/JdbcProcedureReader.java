@@ -448,9 +448,9 @@ public class JdbcProcedureReader
 		}
 		source.append(body);
 
-		boolean needsTerminator = this.connection.getDbSettings().proceduresNeedTerminator();
-		DelimiterDefinition delimiter = Settings.getInstance().getAlternateDelimiter(connection);
-		if (!StringUtil.endsWith(source, delimiter.getDelimiter()) && needsTerminator)
+		DelimiterDefinition delimiter = connection.getAlternateDelimiter();
+
+		if (delimiter != null && !StringUtil.endsWith(source, delimiter.getDelimiter()))
 		{
 			if (delimiter.isSingleLine()) source.append('\n');
 			source.append(delimiter.getDelimiter());

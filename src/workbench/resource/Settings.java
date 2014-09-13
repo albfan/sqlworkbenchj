@@ -1836,20 +1836,24 @@ public class Settings
 		this.setProperty("workbench.sql.historysize", aValue);
 	}
 
-	public DelimiterDefinition getAlternateDelimiter(WbConnection con)
+	public DelimiterDefinition getAlternateDelimiter(WbConnection con, DelimiterDefinition defaultDelim)
 	{
 		DelimiterDefinition delim = null;
 		if (con != null && con.getProfile() != null)
 		{
 			delim = con.getProfile().getAlternateDelimiter();
 		}
-		return (delim == null ? getAlternateDelimiter() : delim);
+		if (delim == null)
+		{
+			delim = getAlternateDelimiter(defaultDelim);
+		}
+		return delim;
 	}
 
-	public DelimiterDefinition getAlternateDelimiter()
+	public DelimiterDefinition getAlternateDelimiter(DelimiterDefinition defaultDelim)
 	{
-		String delim = getProperty("workbench.sql.alternatedelimiter", "/");
-		if (StringUtil.isEmptyString(delim)) return null;
+		String delim = getProperty("workbench.sql.alternatedelimiter", null);
+		if (StringUtil.isEmptyString(delim)) return defaultDelim;
 		DelimiterDefinition def = new DelimiterDefinition(delim);
 		if (def.isStandard()) return null;
 		return def;

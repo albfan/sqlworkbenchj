@@ -34,8 +34,6 @@ import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
 
-import workbench.sql.DelimiterDefinition;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -81,19 +79,18 @@ public class PostgresProcedureReaderTest
 			"BEGIN \n" +
 			"    RETURN 42; \n" +
 			"END; \n" +
-			"$$ LANGUAGE plpgsql \n" +
-			"/\n"  +
+			"$$ LANGUAGE plpgsql; \n" +
+			"\n"  +
 			"CREATE FUNCTION fn_answer(boost integer)  \n" +
 			"  RETURNS integer  \n" +
 			"AS $$ \n" +
 			"BEGIN \n" +
 			"    RETURN 42 * boost;\n" +
 			"END; \n" +
-			"$$ LANGUAGE plpgsql \n" +
-			"/\n "  +
-			"commit \n" +
-			"/";
-		TestUtil.executeScript(con, fnCreate, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+			"$$ LANGUAGE plpgsql; \n" +
+			"\n "  +
+			"commit;";
+		TestUtil.executeScript(con, fnCreate);
 
 		String tables =
 			"create schema s1; \n" +
@@ -112,7 +109,6 @@ public class PostgresProcedureReaderTest
 			"  select 'Name_1: '||cust.customer_name; \n" +
 			"$body$ \n" +
 			"language sql; \n" +
-			"/ \n" +
 			" \n" +
 			"create or replace function public.fullname(cust s2.customer) \n" +
 			"  returns varchar \n" +
@@ -121,11 +117,9 @@ public class PostgresProcedureReaderTest
 			"  select 'Name_2: '||cust.customer_name; \n" +
 			"$body$ \n" +
 			"language sql; \n" +
-			"/\n" +
-			"commit\n" +
-			"/\n";
+			"commit;\n";
 
-		TestUtil.executeScript(con, fullNames, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		TestUtil.executeScript(con, fullNames);
 
 		String tableFunc =
 			"CREATE OR REPLACE FUNCTION table_func(arg1 integer)\n" +
@@ -139,9 +133,8 @@ public class PostgresProcedureReaderTest
 			"$body$\n" +
 			" VOLATILE\n" +
 			" COST 100\n" +
-			" ROWS 1000;\n" +
-			"/\n";
-		TestUtil.executeScript(con, tableFunc, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+			" ROWS 1000;\n";
+		TestUtil.executeScript(con, tableFunc);
 
 		String setof =
 			"CREATE OR REPLACE FUNCTION fn_get_data(pid integer, title varchar, some_output text)\n" +
@@ -153,9 +146,8 @@ public class PostgresProcedureReaderTest
 			"$body$\n" +
 			" VOLATILE\n" +
 			" COST 100\n" +
-			" ROWS 1000\n" +
-			"/";
-		TestUtil.executeScript(con, setof, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+			" ROWS 1000\n";
+		TestUtil.executeScript(con, setof);
 	}
 
 	@AfterClass
@@ -186,8 +178,7 @@ public class PostgresProcedureReaderTest
 			"$body$\n" +
 			" VOLATILE\n" +
 			" COST 100\n" +
-			" ROWS 1000\n" +
-			"/";
+			" ROWS 1000;";
 //		System.out.println(source);
 		assertEquals(expected, source.trim());
 	}
@@ -216,8 +207,7 @@ public class PostgresProcedureReaderTest
 			"$body$\n" +
 			" VOLATILE\n" +
 			" COST 100\n" +
-			" ROWS 1000\n" +
-			"/";
+			" ROWS 1000;";
 //		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
 		assertEquals(expected, source.trim());
 	}

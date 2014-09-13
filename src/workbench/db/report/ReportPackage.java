@@ -67,7 +67,7 @@ public class ReportPackage
 	{
 		return schemaToUse == null ? owner : schemaToUse;
 	}
-	
+
 	public ReportPackage(String owner, String name)
 	{
 		this.owner = owner;

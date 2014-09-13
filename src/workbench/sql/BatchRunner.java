@@ -640,7 +640,7 @@ public class BatchRunner
 		// If no delimiter has been defined, than use the default fallback
 		if (this.delimiter == null)
 		{
-			DelimiterDefinition altDelim = Settings.getInstance().getAlternateDelimiter(this.connection);
+			DelimiterDefinition altDelim = Settings.getInstance().getAlternateDelimiter(this.connection, null);
 			parser.setDelimiters(DelimiterDefinition.STANDARD_DELIMITER, altDelim);
 		}
 		else

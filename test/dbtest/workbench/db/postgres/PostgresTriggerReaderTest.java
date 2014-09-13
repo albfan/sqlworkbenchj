@@ -32,8 +32,6 @@ import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 
-import workbench.sql.DelimiterDefinition;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -77,13 +75,12 @@ public class PostgresTriggerReaderTest
 			"END; \n" +
 			"$body$  \n" +
 			"LANGUAGE plpgsql; \n" +
-			"/" +
+			"" +
 			"\n" +
 			"CREATE TRIGGER some_trg BEFORE UPDATE ON some_table \n" +
-			"    FOR EACH ROW EXECUTE PROCEDURE my_trigger_func()\n" +
-			"/";
+			"    FOR EACH ROW EXECUTE PROCEDURE my_trigger_func();\n";
 
-		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		TestUtil.executeScript(con, sql);
 	}
 
 	@AfterClass

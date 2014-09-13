@@ -30,6 +30,7 @@ import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;

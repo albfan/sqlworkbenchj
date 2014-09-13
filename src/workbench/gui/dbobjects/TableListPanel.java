@@ -908,7 +908,7 @@ public class TableListPanel
 
 			if (tableTypeToSelect != null)
 			{
-				this.tableTypes.setSelectedItem(this.tableTypeToSelect);
+				this.tableTypes.setSelectedItem(this.tableTypeToSelect.toUpperCase());
 			}
 			else
 			{
@@ -930,9 +930,16 @@ public class TableListPanel
 
 		if (tableTypeToSelect != null)
 		{
-			toSelect = StringUtil.stringToList(tableTypeToSelect, ",", true, true, false, false);
+			if (tableTypeToSelect.equals("*"))
+			{
+				toSelect.addAll(types);
+			}
+			else
+			{
+				toSelect = StringUtil.stringToList(tableTypeToSelect.toUpperCase(), ",", true, true, false, false);
+			}
 		}
-		
+
 		// setItems() will clear all previous items
 		typeCb.setItems(types, toSelect);
 

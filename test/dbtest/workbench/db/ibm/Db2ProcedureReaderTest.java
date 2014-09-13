@@ -96,7 +96,16 @@ public class Db2ProcedureReaderTest
 
 		List<ProcedureDefinition> procs = reader.getProcedureList(null, Db2TestUtil.getSchemaName(), null);
 
+		con.getProfile().setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		assertNotNull(procs);
 		assertEquals(1, procs.size());
+		CharSequence source = procs.get(0).getSource(con);
+		String expected =
+			"create or replace procedure wb_test () \n" +
+			"language SQL \n" +
+			"begin \n" +
+			"end\n" +
+			"/";
+		assertEquals(expected, source.toString().trim());
 	}
 }

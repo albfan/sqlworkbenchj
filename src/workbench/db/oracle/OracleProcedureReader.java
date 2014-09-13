@@ -136,8 +136,12 @@ public class OracleProcedureReader
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		DelimiterDefinition delimiter = Settings.getInstance().getAlternateDelimiter(connection);
+		DelimiterDefinition alternateDelimiter = this.connection.getAlternateDelimiter();
+
+		if (alternateDelimiter == null)
+		{
+			alternateDelimiter = DelimiterDefinition.DEFAULT_ORA_DELIMITER;
+		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -170,10 +174,10 @@ public class OracleProcedureReader
 				}
 				if (lineCount > 0)
 				{
-					result.append(nl);
-					result.append(delimiter.getDelimiter());
-					result.append(nl);
-					result.append(nl);
+					result.append('\n');
+					result.append(alternateDelimiter.getDelimiter());
+					result.append('\n');
+					result.append('\n');
 				}
 				lineCount = 0;
 
@@ -196,11 +200,11 @@ public class OracleProcedureReader
 					}
 				}
 			}
-			result.append(nl);
+			result.append('\n');
 			if (lineCount > 0)
 			{
-				result.append(delimiter.getDelimiter());
-				result.append(nl);
+				result.append(alternateDelimiter.getDelimiter());
+				result.append('\n');
 			}
 		}
 		catch (Exception e)

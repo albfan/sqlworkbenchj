@@ -23,6 +23,7 @@
 package workbench.db;
 
 import java.sql.SQLException;
+
 import workbench.util.SqlUtil;
 
 /**

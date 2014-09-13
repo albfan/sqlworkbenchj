@@ -33,7 +33,6 @@ import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 
-
 import workbench.util.SqlUtil;
 
 /**

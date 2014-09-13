@@ -678,14 +678,6 @@ public class DbSettings
 		return IDX_TYPE_NORMAL;
 	}
 
-	public boolean proceduresNeedTerminator()
-	{
-		String value = Settings.getInstance().getProperty("workbench.db.noprocterminator", null);
-		if (value == null) return true;
-		List l = StringUtil.stringToList(value, ",");
-		return !l.contains(this.dbId);
-	}
-
 	public IdentifierCase getSchemaNameCase()
 	{
 		// This allows overriding the default value returned by the JDBC driver
@@ -1572,7 +1564,7 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "jdbc.getschame.supported", true);
 	}
-	
+
 	public boolean supportsSchemas()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "schemas.supported", true);

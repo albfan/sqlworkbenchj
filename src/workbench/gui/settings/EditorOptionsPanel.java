@@ -52,6 +52,8 @@ import workbench.gui.components.WbFilePicker;
 import workbench.gui.editor.BracketCompleter;
 import workbench.gui.sql.FileReloadType;
 
+import workbench.sql.DelimiterDefinition;
+
 import workbench.util.StringUtil;
 
 /**
@@ -97,7 +99,16 @@ public class EditorOptionsPanel
 
 		value = Settings.getInstance().getExternalLineEndingValue();
 		externalLineEnding.setSelectedIndex(lineEndingValueToIndex(value));
-		alternateDelimiter.setText(Settings.getInstance().getAlternateDelimiter().getDelimiter());
+
+		DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(null);
+		if (delim == null)
+		{
+			alternateDelimiter.setText("");
+		}
+		else
+		{
+			alternateDelimiter.setText(delim.getDelimiter());
+		}
 
 		noWordSep.setText(Settings.getInstance().getEditorNoWordSep());
 		useTabs.setSelected(Settings.getInstance().getEditorUseTabCharacter());

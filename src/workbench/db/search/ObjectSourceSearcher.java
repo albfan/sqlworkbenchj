@@ -26,6 +26,10 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.ProcedureDefinition;
@@ -35,9 +39,9 @@ import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 

@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import workbench.interfaces.ScriptGenerationMonitor;
@@ -49,7 +50,6 @@ import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
-
 
 /**
  *
@@ -101,6 +101,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
+		cmdLine.addArgument(WbXslt.ARG_PARAMETERS, ArgumentType.Repeatable);
 	}
 
 	@Override
@@ -308,10 +309,12 @@ public class WbSchemaReport
 		if (!StringUtil.isEmptyString(xslt) && !StringUtil.isEmptyString(xsltOutput))
 		{
 			XsltTransformer transformer = new XsltTransformer();
+			Map<String, String> params = cmdLine.getMapValue(WbXslt.ARG_PARAMETERS);
+
 			try
 			{
 				transformer.setXsltBaseDir(new File(getBaseDir()));
-				transformer.transform(output.getFullPath(), xsltOutput, xslt);
+				transformer.transform(output.getFullPath(), xsltOutput, xslt, params);
 				String msg = transformer.getAllOutputs();
 				if (msg.length() != 0)
 				{
