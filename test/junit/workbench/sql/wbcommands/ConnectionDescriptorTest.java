@@ -54,6 +54,7 @@ public class ConnectionDescriptorTest
 
 	@Test
 	public void testParseDefinition()
+		throws Exception
 	{
 		ConnectionDescriptor def = new ConnectionDescriptor();
 		ConnectionProfile profile = def.parseDefinition("username=\"thomas\", url=jdbc:postgresql://localhost/thomas, password='secret'");
