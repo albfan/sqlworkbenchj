@@ -2,6 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-09-07">
+    <entry dev-build="5" type="enh">WbCopy, WbSchemaDiff and WbDataDiff can now be used without pre-defined connection profiles</entry>
+    <entry dev-build="5" type="enh">"Columns to Rows" now creates only a single result with as many columns as rows were selected</entry>
     <entry dev-build="5" type="enh">It's now possible to select multiple types individually in the dropdown of the DbExplorer</entry>
     <entry dev-build="5" type="enh">WbExport now has additional options to escape control characters and BLOB data such that the output file can be imported using Postgres' COPY statement</entry>
     <entry dev-build="5" type="enh">The parser now understand Postgres' "dollar quoting" and thus removes the need to use the alternate delimiter for Postgres</entry>
