@@ -58,22 +58,29 @@ public class CommandLineConnectionHandler
 		String desc = cmdLine.getValue(connectionArgument, null);
 		if (StringUtil.isNonBlank(desc))
 		{
-			ConnectionDescriptor parser = new ConnectionDescriptor(baseDir);
-			ConnectionProfile profile = parser.parseDefinition(desc);
-			if (profile != null)
+			try
 			{
-				try
+				ConnectionDescriptor parser = new ConnectionDescriptor(baseDir);
+				ConnectionProfile profile = parser.parseDefinition(desc);
+				if (profile != null)
 				{
 					return ConnectionMgr.getInstance().getConnection(profile, id);
 				}
-				catch (Exception e)
-				{
-					LogMgr.logError("CommandLineConnectionHandler.getConnection()", "Error connecting to database", e);
-					result.addMessage(ResourceMgr.getFormattedString("ErrCopyCouldNotConnect", desc));
-					result.addMessage(ExceptionUtil.getDisplay(e));
-					result.setFailure();
-					return null;
-				}
+			}
+			catch (InvalidConnectionDescriptor icd)
+			{
+				LogMgr.logError("CommandLineConnectionHandler.getConnection()", "Error connecting to database", icd);
+				result.addMessage(icd.getLocalizedMessage());
+				result.setFailure();
+				return null;
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("CommandLineConnectionHandler.getConnection()", "Error connecting to database", e);
+				result.addMessage(ResourceMgr.getFormattedString("ErrConnectDescriptor", desc));
+				result.addMessage(ExceptionUtil.getDisplay(e));
+				result.setFailure();
+				return null;
 			}
 		}
 
@@ -107,15 +114,15 @@ public class CommandLineConnectionHandler
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("Wbcopy.getConnectionFromKey()", "Error connecting to database", e);
-				result.addMessage(ResourceMgr.getFormattedString("ErrCopyCouldNotConnect", profileKey.toString()));
+				LogMgr.logError("CommandLineConnectionHandler.getConnectionFromKey()", "Error connecting to database", e);
+				result.addMessage(ResourceMgr.getFormattedString("ErrConnectProfile", profileKey.toString()));
 				result.addMessage(ExceptionUtil.getDisplay(e));
 				result.setFailure();
 				return null;
 			}
 		}
 	}
-	
+
 	public ProfileKey getProfileKey()
 	{
 		String sourceProfile = cmdLine.getValue(profileNameArgument);

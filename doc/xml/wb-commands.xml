@@ -1049,6 +1049,9 @@ from person/
               <para>
                 If this parameter is omitted, all changesets are executed.
               </para>
+              <para>
+                This parameter supports auto-completion if the <literal>-file</literal> argument is specified.
+              </para>
             </entry>
           </row>
 
@@ -2190,51 +2193,104 @@ WHERE id=42;</programlisting>
 		</para>
 
 	  <para>
-			The command supports the following parameters:
+			There are three different ways to specify a connection:
 		</para>
 
-		<informaltable frame="all">
-			<tgroup cols="2">
-				<colspec colname="c1" colwidth="3.6cm" />
-				<colspec colname="c2" />
-				<thead>
-					<row>
-						<entry>Parameter</entry>
-						<entry>Description</entry>
-					</row>
-				</thead>
+    <section id="command-connect-profile-arg">
+      <title>By specifying a profile</title>
+      <informaltable frame="all">
+        <tgroup cols="2">
+          <colspec colname="c1" colwidth="3.6cm" />
+          <colspec colname="c2" />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
 
-				<tbody valign="top">
+          <tbody valign="top">
+          <row>
+            <entry>-profile</entry>
+            <entry>
+              <para>Specifies the profile name to connect to.</para>
+              <para>
+                This parameter is ignored if either <literal>-connection</literal> or the detailed connection informations
+                are supplied individually.
+              </para>
+            </entry>
+          </row>
+          <row>
+            <entry>-profileGroup</entry>
+            <entry>Specifies the group in which the profile is stored. This is only required if the profile name is not unique</entry>
+          </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </section>
 
-				<row>
-					<entry>-profile</entry>
-					<entry>
-						Defines the profile to connect to. If this parameter is specified
-						all other parameters are ignored.
-					</entry>
-				</row>
+    <section id="command-connect-descriptor-arg">
+      <title>By specifying a simple connection string</title>
+      <informaltable frame="all">
+        <tgroup cols="2">
+          <colspec colname="c1" colwidth="3.6cm" />
+          <colspec colname="c2" />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
 
-				<!-- Create an empty line to distinguish between the -profile
-				     parameter and the others -->
-				<row>
-					<entry rowsep="0" colsep="0"></entry>
-					<entry rowsep="0" colsep="0"></entry>
-				</row>
+          <tbody valign="top">
+            <row id="id">
+              <entry>-connection</entry>
+              <entry>
+                &connect-descriptor;
+                <para>
+                  If an approriate driver is already configured the driver's classname or the JAR file don't have to be specified.
+                </para>
+                <para>
+                  If an approriate driver is not configured, the driver's jar file must be specified:
+                  <simpara>
+                  <literal>"username=foo,password=bar,url=jdbc:postgresql://localhost/mydb,driverjar=/etc/drivers/postgresql.jar"</literal>
+                  </simpara>
+                  &wb-productname; will try to detect the driver's classname automatically (based on the JDBC URL).
+                </para>
+                <para>
+                  If this parameter is specified, <literal>-profile</literal> is ignored.
+                </para>
+                <para>
+                  The individual parameters controlling the connection <emphasis>behaviour</emphasis>
+                  can be used together with <literal>-connection</literal>, e.g. <literal>-autocommit</literal> or <literal>-fetchSize</literal>
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
 
-				<row>
-					<entry rowsep="0" colsep="0">or</entry>
-					<entry rowsep="0" colsep="0"></entry>
-				</row>
+    </section>
+    <section id="command-connect-args">
+      <title>By specifying all connection attributes</title>
+      <informaltable frame="all">
+        <tgroup cols="2">
+          <colspec colname="c1" colwidth="3.6cm" />
+          <colspec colname="c2" />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
 
-				<row>
-					<entry colsep="0"></entry>
-					<entry colsep="0"></entry>
-				</row>
+          <tbody valign="top">
+            &common-connect-args;
+          </tbody>
+        </tgroup>
+      </informaltable>
 
-					&common-connect-args;
-				</tbody>
-			</tgroup>
-		</informaltable>
+    </section>
 
 		<para>
 			If none of the parameters is supplied when running the command, it is assumed that any value

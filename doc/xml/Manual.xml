@@ -37,6 +37,7 @@
 	<!ENTITY conditionals SYSTEM "conditionals.xml">
   <!ENTITY table-statements SYSTEM "table-statements.xml">
 	<!ENTITY release-history SYSTEM "docbook-history.xml">
+	<!ENTITY connect-descriptor SYSTEM "connect-descriptor.xml">
 ]>
 
 <?xml-stylesheet href="html.css" type="text/css"?>

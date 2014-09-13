@@ -63,6 +63,7 @@ import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 
 import workbench.sql.wbcommands.ConnectionDescriptor;
+import workbench.sql.wbcommands.InvalidConnectionDescriptor;
 import workbench.sql.wbcommands.WbConnect;
 
 import workbench.util.ArgumentParser;
@@ -1028,18 +1029,25 @@ public class BatchRunner
 		{
 			if (url == null)
 			{
-				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a connection URL!", null);
+				LogMgr.logWarning("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a connection URL!", null);
 				return null;
 			}
 
 			if (driverclass == null)
 			{
-				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a driver class!", null);
+				driverclass = ConnectionDescriptor.findDriverClassFromUrl(url);
+			}
+
+			if (driverclass == null)
+			{
+				LogMgr.logWarning("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a driver class!", null);
 				return null;
 			}
+
 			String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
 			String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
 			String jar = cmdLine.getValue(AppArguments.ARG_CONN_JAR);
+
 			if (jar != null)
 			{
 				WbFile jarFile = new WbFile(jar);
@@ -1062,11 +1070,14 @@ public class BatchRunner
 		}
 		else
 		{
-			ConnectionDescriptor parser = new ConnectionDescriptor();
-			result = parser.parseDefinition(descriptor);
-			if (result == null)
+			try
 			{
-				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Invalid connection descriptor: " + descriptor, null);
+				ConnectionDescriptor parser = new ConnectionDescriptor();
+				result = parser.parseDefinition(descriptor);
+			}
+			catch (InvalidConnectionDescriptor icd)
+			{
+				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Invalid connection descriptor: " + descriptor, icd);
 				return null;
 			}
 		}

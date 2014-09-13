@@ -158,7 +158,7 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
-     <string>org.hsqldb.jdbcDriver</string>
+     <string>org.hsqldb.jdbc.JDBCDriver</string>
     </void>
     <void property="library">
      <string>hsqldb.jar</string>

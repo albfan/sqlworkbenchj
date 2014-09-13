@@ -70,6 +70,18 @@
           </entry>
         </row>
         <row>
+          <entry>-referenceConnection</entry>
+          <entry>
+            &connect-descriptor;
+            <para>
+              For a sample connection string please see the <link linkend="copy-source-con-descriptor">documentation for WbCopy</link>.
+            </para>
+            <para>
+              If this parameter is specified <literal>-referenceProfile</literal> will be ignored.
+            </para>
+          </entry>
+        </row>
+        <row>
           <entry id="schema-diff-targetprof">-targetProfile</entry>
           <entry>
             <para>
@@ -92,6 +104,18 @@
             If the name of your target profile is not unique across
             all profiles, you will need to specify the group in which the profile
             is located with this parameter.
+          </entry>
+        </row>
+        <row>
+          <entry>-targetConnection</entry>
+          <entry>
+            &connect-descriptor;
+            <para>
+              For a sample connection string please see the <link linkend="command-connect-descriptor-arg">documentation for WbConnect</link>.
+            </para>
+            <para>
+              If this parameter is specified <literal>-targetProfile</literal> will be ignored.
+            </para>
           </entry>
         </row>
 

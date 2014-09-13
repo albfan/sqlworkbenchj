@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.liquibase.ChangeSetIdentifier;
+import workbench.liquibase.LiquibaseParser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -38,22 +40,25 @@ import workbench.db.importer.SpreadsheetReader;
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
+import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbImport;
+import workbench.sql.wbcommands.WbRunLB;
+import workbench.sql.wbcommands.WbTableSource;
 import workbench.sql.wbcommands.WbXslt;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.MessageBuffer;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 import static workbench.gui.completion.BaseAnalyzer.*;
-import workbench.sql.wbcommands.WbTableSource;
 
 
 /**
@@ -180,7 +185,7 @@ public class WbCommandAnalyzer
 			}
 			else if (type == ArgumentType.ObjectTypeArgument)
 			{
-				this.elements  = new ArrayList<String>(dbConnection.getMetadata().getObjectTypes());
+				this.elements  = new ArrayList<>(dbConnection.getMetadata().getObjectTypes());
 				if (verb.equalsIgnoreCase(WbGrepSource.VERB))
 				{
 					elements.add("FUNCTION");
@@ -190,11 +195,11 @@ public class WbCommandAnalyzer
 			}
 			else if (type == ArgumentType.SchemaArgument)
 			{
-				this.elements  = new ArrayList<String>(dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter()));
+				this.elements  = new ArrayList<>(dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter()));
 			}
 			else if (type == ArgumentType.CatalogArgument)
 			{
-				this.elements  = new ArrayList<String>(dbConnection.getMetadata().getCatalogInformation(dbConnection.getCatalogFilter()));
+				this.elements  = new ArrayList<>(dbConnection.getMetadata().getCatalogInformation(dbConnection.getCatalogFilter()));
 			}
 			else if (type == ArgumentType.ProfileArgument)
 			{
@@ -211,13 +216,18 @@ public class WbCommandAnalyzer
 				this.elements = getFiles(args, parameter, true);
 				this.setOverwriteCurrentWord(true);
 			}
-			else if (parameter.equals(WbImport.ARG_SHEET_NR) || parameter.equals(WbExport.ARG_TARGET_SHEET_IDX))
+			else if (parameter.equalsIgnoreCase(WbImport.ARG_SHEET_NR) || parameter.equalsIgnoreCase(WbExport.ARG_TARGET_SHEET_IDX))
 			{
 				this.useSheetIndex = true;
 				this.elements = getSheetnames(cmd, args);
 				changeCase = false;
 			}
-			else if (parameter.equals(WbImport.ARG_SHEET_NAME) || parameter.equals(WbExport.ARG_TARGET_SHEET_NAME))
+			else if (parameter.equalsIgnoreCase(WbRunLB.ARG_CHANGESET))
+			{
+				this.elements = getChangeSets(cmd, args);
+				changeCase = false;
+			}
+			else if (parameter.equalsIgnoreCase(WbImport.ARG_SHEET_NAME) || parameter.equalsIgnoreCase(WbExport.ARG_TARGET_SHEET_NAME))
 			{
 				this.useSheetIndex = false;
 				this.elements = getSheetnames(cmd, args);
@@ -310,7 +320,7 @@ public class WbCommandAnalyzer
 			return null;
 		}
 
-		List<WbFile> result = new ArrayList<WbFile>(files.length);
+		List<WbFile> result = new ArrayList<>(files.length);
 		for (File f : files)
 		{
 			if (!dirsOnly || f.isDirectory())
@@ -349,6 +359,29 @@ public class WbCommandAnalyzer
 		return null;
 	}
 
+	private List getChangeSets(SqlCommand wbRunLb, ArgumentParser cmdLine)
+	{
+		cmdLine.parse(this.sql);
+		WbFile file = wbRunLb.evaluateFileArgument(cmdLine.getValue(WbRunLB.ARG_FILE));
+		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, "UTF-8");
+		try
+		{
+			MessageBuffer messages = new MessageBuffer(1);
+			LiquibaseParser parser = new LiquibaseParser(file, encoding, messages);
+			List<ChangeSetIdentifier> changeSets = parser.getChangeSets();
+			List result = new ArrayList();
+			for (ChangeSetIdentifier set : changeSets)
+			{
+				result.add(set.toString());
+			}
+			return result;
+		}
+		catch (Throwable th)
+		{
+			return null;
+		}
+	}
+
 	private List getSheetnames(SqlCommand wbImport, ArgumentParser cmdLine)
 	{
 		cmdLine.parse(this.sql);
@@ -365,7 +398,7 @@ public class WbCommandAnalyzer
 
 		SpreadsheetReader reader = SpreadsheetReader.Factory.createReader(input, -1, null);
 		if (reader == null) return result;
-		
+
 		try
 		{
 			List<String> sheets = reader.getSheets();

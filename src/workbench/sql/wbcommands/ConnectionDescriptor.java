@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.List;
 
 import workbench.AppArguments;
+import workbench.resource.ResourceMgr;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -60,6 +61,7 @@ public class ConnectionDescriptor
 	 * @return a connection profile to be used
 	 */
 	public ConnectionProfile parseDefinition(String connectionString)
+		throws InvalidConnectionDescriptor
 	{
 		if (StringUtil.isBlank(connectionString)) return null;
 
@@ -72,7 +74,7 @@ public class ConnectionDescriptor
 		for (String element : elements)
 		{
 			String lower = element.toLowerCase();
-			if (lower.startsWith(AppArguments.ARG_CONN_USER + "="))
+			if (lower.startsWith(AppArguments.ARG_CONN_USER + "=") || lower.startsWith("user="))
 			{
 				user = getValue(element);
 			}
@@ -93,14 +95,22 @@ public class ConnectionDescriptor
 				jarfile = getValue(element);
 			}
 		}
-		if (StringUtil.isBlank(user)) return null;
-		if (StringUtil.isBlank(url)) return null;
+
+		if (StringUtil.isBlank(url))
+		{
+			throw new InvalidConnectionDescriptor("No JDBC URL specified in connection specification", ResourceMgr.getString("ErrConnectURLMissing"));
+		}
 
 		if (StringUtil.isEmptyString(driverClass))
 		{
-			driverClass = findDriverFromUrl(url);
+			driverClass = findDriverClassFromUrl(url);
 		}
 
+		if (StringUtil.isEmptyString(driverClass))
+		{
+			throw new InvalidConnectionDescriptor("No JDBC URL specified in connection specification", ResourceMgr.getFormattedString("ErrConnectDrvNotFound", url));
+		}
+		
 		DbDriver driver = getDriver(driverClass, jarfile);
 
 		ConnectionProfile result = new ConnectionProfile();
@@ -128,7 +138,7 @@ public class ConnectionDescriptor
 		return StringUtil.trimQuotes(parameter.substring(pos + 1).trim());
 	}
 
-	protected String getUrlPrefix(String url)
+	protected static String getUrlPrefix(String url)
 	{
 		if (StringUtil.isEmptyString(url)) return null;
 		int pos = url.indexOf(':');
@@ -138,7 +148,7 @@ public class ConnectionDescriptor
 		return url.substring(0, pos2 + 1);
 	}
 
-	private String findDriverFromUrl(String url)
+	public static String findDriverClassFromUrl(String url)
 	{
 		String prefix = getUrlPrefix(url);
 		if (prefix == null) return null;
@@ -165,7 +175,7 @@ public class ConnectionDescriptor
 		}
 		else
 		{
-		String jarPath = null;
+			String jarPath = null;
 			WbFile df = new WbFile(jarFile);
 			if (df.isAbsolute() || baseDir == null)
 			{

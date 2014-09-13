@@ -78,10 +78,6 @@ public class WbCopy
 	public static final String PARAM_SOURCE_CONN = "sourceConnection";
 	public static final String PARAM_TARGET_CONN = "targetConnection";
 
-	private static final int TYPE_SOURCE = 1;
-	private static final int TYPE_TARGET = 2;
-
-
 	/**
 	 * If PARAM_CREATETARGET is set to true, this parameter defines
 	 * the table type (template) to be used when creating the table.
@@ -221,6 +217,7 @@ public class WbCopy
 		WbConnection targetCon = targetHandler.getConnection(result, currentConnection, getBaseDir(), ID_PREFIX + "-Target-"+ runId + "$");
 		if (targetCon == null || !result.isSuccess())
 		{
+			LogMgr.logError("WbCopy.execute()", "Could not create target connection!", null);
 			return result;
 		}
 
@@ -228,6 +225,7 @@ public class WbCopy
 		WbConnection sourceCon = sourceHandler.getConnection(result, currentConnection, getBaseDir(), ID_PREFIX + "-Source-" + runId + "$");
 		if (sourceCon == null || !result.isSuccess())
 		{
+			LogMgr.logError("WbCopy.execute()", "Could not create source connection!", null);
 			return result;
 		}
 

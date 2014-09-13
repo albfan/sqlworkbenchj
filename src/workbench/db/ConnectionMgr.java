@@ -345,7 +345,10 @@ public class ConnectionMgr
 				LogMgr.logWarning("ConnectionMgr.findRegisteredDriver()", "Got driver without a driver class: " + driver.getName() + ", classpath=" + driver.getLibraryList());
 				continue;
 			}
-			if (drvClassName.equals(driver.getDriverClass())) return driver;
+			if (drvClassName.equals(driver.getDriverClass()) && driver.canReadLibrary())
+			{
+				return driver;
+			}
 		}
 		return null;
 	}

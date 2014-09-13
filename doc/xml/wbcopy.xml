@@ -66,6 +66,19 @@
 					</row>
 
 					<row>
+						<entry id="copy-source-con-descriptor">-sourceConnection</entry>
+						<entry>
+              &connect-descriptor;
+              <para>
+                For a sample connection string please see the <link linkend="command-connect-descriptor-arg">documentation for WbConnect</link>.
+              </para>
+              <para>
+                If this parmeter is specified, <literal>-sourceProfile</literal> is ignored
+              </para>
+						</entry>
+					</row>
+
+					<row>
 						<entry>-targetProfile</entry>
 						<entry>
 							<para>
@@ -92,6 +105,16 @@
 							<para>
 								If the group name contains spaces or dashes, it has to be quoted.
 							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-targetConnection</entry>
+						<entry>
+              &connect-descriptor;
+              <para>
+                If this parmeter is specified, <literal>-sourceProfile</literal> is ignored
+              </para>
 						</entry>
 					</row>
 
