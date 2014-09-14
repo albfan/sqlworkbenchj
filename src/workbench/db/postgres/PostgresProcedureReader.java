@@ -527,7 +527,8 @@ public class PostgresProcedureReader
 					source.append(name.getFormattedName());
 					source.append(" IS '");
 					source.append(SqlUtil.escapeQuotes(def.getComment()));
-					source.append("'\n" );
+					source.append('\'');
+					if (delim.isSingleLine()) source.append("\n" );
 					source.append(delim.getDelimiter());
 					source.append('\n');
 				}

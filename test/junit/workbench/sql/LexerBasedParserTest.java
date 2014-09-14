@@ -310,6 +310,29 @@ public class LexerBasedParserTest
 		assertEquals(2, script.size());
 		assertEquals("delete from foo where descr = 'arthur''s house'", script.get(0));
 		assertEquals("commit", script.get(1));
+
+		sql =
+			"drop function foo();\n" +
+			"\n" +
+			"create or replace function foo()\n" +
+			"  returns integer \n" +
+			"as \n" +
+			"$body$\n" +
+			"  declare l_value varchar;\n" +
+			"begin \n" +
+			"   select \"$body$\" into l_value where some_column <> '$body$'; \n" +
+			"   return l_value; \n" +
+			"end;\n" +
+			"$body$\n"+
+			"language plpgsql;";
+
+		parser.setScript(sql);
+		parser.setCheckPgQuoting(true);
+		script = getStatements(parser);
+		assertEquals(2, script.size());
+		assertEquals("drop function foo()", script.get(0));
+		assertTrue(script.get(1).startsWith("create or replace"));
+		assertTrue(script.get(1).endsWith("language plpgsql"));
 	}
 
 	private List<String> getStatements(LexerBasedParser parser)

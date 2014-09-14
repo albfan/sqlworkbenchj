@@ -51,7 +51,7 @@ public class IteratingScriptParserTest
 		ScriptCommandDefinition c = null;
 		int index = 0;
 
-		List<ScriptCommandDefinition> commands = new ArrayList<ScriptCommandDefinition>();
+		List<ScriptCommandDefinition> commands = new ArrayList<>();
 		while ((c = parser.getNextCommand()) != null)
 		{
 			c.setIndexInScript(index);
