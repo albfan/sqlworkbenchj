@@ -73,15 +73,7 @@ public class BookmarkManager
 		Map<String, BookmarkGroup> windowBookmarks = bookmarks.get(windowId);
 		if (windowBookmarks != null)
 		{
-			BookmarkGroup removed = windowBookmarks.remove(panelId);
-			if (removed != null)
-			{
-				LogMgr.logDebug("BookmarkManager.clearBookmarksForPanel()", "Removed all bookmarks for panel: " + panelId + ", window: " + windowId + "\n" + removed.toString());
-			}
-			else
-			{
-				LogMgr.logDebug("BookmarkManager.clearBookmarksForPanel()", "Nothing to remove for panel: " + panelId + ", window: " + windowId);
-			}
+			windowBookmarks.remove(panelId);
 		}
 	}
 

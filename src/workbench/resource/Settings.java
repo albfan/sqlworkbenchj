@@ -1853,7 +1853,7 @@ public class Settings
 	public DelimiterDefinition getAlternateDelimiter(DelimiterDefinition defaultDelim)
 	{
 		String delim = getProperty("workbench.sql.alternatedelimiter", null);
-		if (StringUtil.isEmptyString(delim)) return defaultDelim;
+		if (StringUtil.isBlank(delim)) return defaultDelim;
 		DelimiterDefinition def = new DelimiterDefinition(delim);
 		if (def.isStandard()) return null;
 		return def;
