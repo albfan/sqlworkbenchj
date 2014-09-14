@@ -24,6 +24,7 @@ package workbench.gui.editor;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
@@ -35,17 +36,24 @@ import javax.swing.undo.UndoableEdit;
 public class WbCompoundEdit
 	implements UndoableEdit
 {
-	private List<UndoableEdit> edits = new ArrayList<UndoableEdit>();
+	private List<UndoableEdit> edits = new ArrayList<>();
 	private boolean acceptNew = true;
+	private long lastEditTime;
+
+	public WbCompoundEdit()
+	{
+	}
 
 	public int getSize()
 	{
 		return edits.size();
 	}
 
-	public void clear()
+	public void reset()
 	{
-		this.edits.clear();
+		edits.clear();
+		acceptNew = true;
+		lastEditTime = 0;
 	}
 
 	public void finished()
@@ -75,9 +83,8 @@ public class WbCompoundEdit
 	public boolean canUndo()
 	{
 		if (edits.size() == 0) return false;
-		for (int i=0; i < edits.size(); i++)
+		for (UndoableEdit edit : edits)
 		{
-			UndoableEdit edit = edits.get(i);
 			if (!edit.canUndo()) return false;
 		}
 		return true;
@@ -89,9 +96,8 @@ public class WbCompoundEdit
 	{
 		if (edits.size() == 0) return;
 
-		for (int i=0; i < edits.size(); i++)
+		for (UndoableEdit edit : edits)
 		{
-			UndoableEdit edit = edits.get(i);
 			edit.redo();
 		}
 	}
@@ -116,10 +122,17 @@ public class WbCompoundEdit
 		}
 	}
 
+	public long getDurationSinceLastEdit()
+	{
+		if (getSize() == 0) return 0;
+		return System.currentTimeMillis() - lastEditTime;
+	}
+
 	@Override
 	public boolean addEdit(UndoableEdit anEdit)
 	{
 		if (!acceptNew) return false;
+		lastEditTime = System.currentTimeMillis();
 		return edits.add(anEdit);
 	}
 

@@ -172,7 +172,7 @@ public class InputHandler
 	 */
 	public final void initKeyBindings()
 	{
-		bindings = new HashMap<KeyStroke, ActionListener>();
+		bindings = new HashMap<>();
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), BACKSPACE);
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), DELETE);
@@ -408,7 +408,7 @@ public class InputHandler
 	public List<KeyStroke> getKeys(JMenu menu)
 	{
 		if (menu == null) return Collections.emptyList();
-		List<KeyStroke> allKeys = new ArrayList<KeyStroke>();
+		List<KeyStroke> allKeys = new ArrayList<>();
 
 		for (int i=0; i < menu.getItemCount(); i++)
 		{
@@ -431,7 +431,7 @@ public class InputHandler
 			JComponent.WHEN_IN_FOCUSED_WINDOW
 		};
 
-		List<KeyStroke> allKeys = new ArrayList<KeyStroke>();
+		List<KeyStroke> allKeys = new ArrayList<>();
 		for (int when : types)
 		{
 			InputMap map = c.getInputMap(when);
@@ -464,7 +464,7 @@ public class InputHandler
 
 		JEditTextArea area = getTextArea(evt);
 
-		List<KeyStroke> allKeys = new ArrayList<KeyStroke>();
+		List<KeyStroke> allKeys = new ArrayList<>();
 		allKeys.addAll(getKeys(area));
 
 		Window w = SwingUtilities.getWindowAncestor(area);

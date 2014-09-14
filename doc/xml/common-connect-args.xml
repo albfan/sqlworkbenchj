@@ -94,3 +94,11 @@
 	setting of the connection profile.
   </entry>
 </row>
+
+<row>
+  <entry>-altDelimiter</entry>
+  <entry>
+      This parameter corresponds to the <link linkend="profile-alternate-delimiter">Alternate delimiter</link> setting of the connection profile.
+  </entry>
+</row>
+

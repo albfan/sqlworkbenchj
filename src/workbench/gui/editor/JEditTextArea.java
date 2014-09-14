@@ -59,10 +59,6 @@ import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 import javax.swing.text.Utilities;
-import javax.swing.undo.AbstractUndoableEdit;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.UndoableEdit;
 
 import workbench.WbManager;
 import workbench.interfaces.ClipboardSupport;
@@ -1940,8 +1936,6 @@ public class JEditTextArea
 			painter.invalidateLineRange(selectionStartLine, selectionEndLine);
 			painter.invalidateLineRange(newStartLine, newEndLine);
 
-			document.addUndoableEdit(new CaretUndo(selectionStart,selectionEnd));
-
 			selectionStart = newStart;
 			selectionEnd = newEnd;
 			selectionStartLine = newStartLine;
@@ -2883,7 +2877,7 @@ public class JEditTextArea
 		private Component center;
 		private Component right;
 		private Component bottom;
-		private final List<Component> leftOfScrollBar = new ArrayList<Component>();
+		private final List<Component> leftOfScrollBar = new ArrayList<>();
 
 		@Override
 		public void addLayoutComponent(String name, Component comp)
@@ -3293,66 +3287,6 @@ public class JEditTextArea
 		protected void doTripleClick(MouseEvent evt, int line,int offset, int dot)
 		{
 			select(getLineStartOffset(line),getLineEndOffset(line)-1);
-		}
-	}
-
-	class CaretUndo
-		extends AbstractUndoableEdit
-	{
-		private int start;
-		private int end;
-
-		CaretUndo(int start, int end)
-		{
-			super();
-			this.start = start;
-			this.end = end;
-		}
-
-		@Override
-		public boolean isSignificant()
-		{
-			return false;
-		}
-
-		@Override
-		public String getPresentationName()
-		{
-			return "caret move";
-		}
-
-		@Override
-		public void undo()
-			throws CannotUndoException
-		{
-			super.undo();
-
-			select(start,end);
-		}
-
-		@Override
-		public void redo()
-			throws CannotRedoException
-		{
-			super.redo();
-
-			select(start,end);
-		}
-
-		@Override
-		public boolean addEdit(UndoableEdit edit)
-		{
-			if(edit instanceof CaretUndo)
-			{
-				CaretUndo cedit = (CaretUndo)edit;
-				start = cedit.start;
-				end = cedit.end;
-				cedit.die();
-
-				return true;
-			}
-			else
-				return false;
 		}
 	}
 

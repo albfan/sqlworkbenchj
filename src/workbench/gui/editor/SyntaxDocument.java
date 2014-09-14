@@ -12,8 +12,7 @@ import javax.swing.text.Segment;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import javax.swing.undo.UndoableEdit;
-import workbench.log.LogMgr;
+
 import workbench.resource.Settings;
 
 /**
@@ -28,10 +27,10 @@ public class SyntaxDocument
 {
 	private UndoManager undoManager = new UndoManager();
 	protected TokenMarker tokenMarker;
-	private int compoundLevelCounter = 0;
-	private WbCompoundEdit compoundEditItem = null;
-	private boolean undoSuspended = false;
-	private int maxLineLength = 0;
+	private WbCompoundEdit undoItem = new WbCompoundEdit();
+	private boolean undoSuspended;
+	private int maxLineLength;
+	private int maxCompoundEditDelay = Settings.getInstance().getIntProperty("workbench.gui.editor.compoundedit.delay", 100);
 
 	public SyntaxDocument()
 	{
@@ -87,11 +86,8 @@ public class SyntaxDocument
 	{
 		clearUndoBuffer();
 
-		if (this.compoundEditItem != null)
-		{
-			this.compoundEditItem.clear();
-			this.compoundEditItem = null;
-		}
+		lastChangePosition = 0;
+
 		try
 		{
 			suspendUndo();
@@ -104,7 +100,11 @@ public class SyntaxDocument
 		{
 			resumeUndo();
 		}
-		if (tokenMarker != null) tokenMarker.reset();
+
+		if (tokenMarker != null)
+		{
+			tokenMarker.reset();
+		}
 	}
 
 	public void suspendUndo()
@@ -119,12 +119,17 @@ public class SyntaxDocument
 
 	public void clearUndoBuffer()
 	{
-		this.undoManager.discardAllEdits();
+		undoManager.discardAllEdits();
+		undoItem.reset();
 	}
 
 	public void redo()
 	{
+		// make sure any pending edits are added to the UndoManager
+		endCompoundEdit();
+
 		if (!undoManager.canRedo()) return;
+
 		try
 		{
 			undoManager.redo();
@@ -137,6 +142,9 @@ public class SyntaxDocument
 
 	public void undo()
 	{
+		// make sure any pending edits are added to the UndoManager
+		endCompoundEdit();
+
 		if (!undoManager.canUndo()) return;
 		try
 		{
@@ -225,15 +233,7 @@ public class SyntaxDocument
 	public synchronized void undoableEditHappened(UndoableEditEvent e)
 	{
 		if (undoSuspended) return;
-
-		if (this.compoundEditItem != null)
-		{
-			this.compoundEditItem.addEdit(e.getEdit());
-		}
-		else
-		{
-			undoManager.addEdit(e.getEdit());
-		}
+		undoItem.addEdit(e.getEdit());
 	}
 
 	/**
@@ -242,11 +242,13 @@ public class SyntaxDocument
 	public synchronized void beginCompoundEdit()
 	{
 		if (undoSuspended) return;
-		if (compoundLevelCounter == 0)
+
+		long duration = undoItem.getDurationSinceLastEdit();
+		if (duration > maxCompoundEditDelay && undoItem.getSize() > 0)
 		{
-			this.compoundEditItem = new WbCompoundEdit();
+			// store the collected edits
+			endCompoundEdit();
 		}
-		this.compoundLevelCounter ++;
 	}
 
 	/**
@@ -256,44 +258,21 @@ public class SyntaxDocument
 	{
 		this.calcMaxLineLength();
 		if (undoSuspended) return;
-		if (compoundLevelCounter == 1)
-		{
-			// it's important to finish the current compound undo
-			// because the UndoManager asks the last UndoableEdit whether
-			// it accepts more elements. If the compound wasn't finished
-			// the single item added would be added to the compound rather
-			// than to the UndoManager's item list
-			compoundEditItem.finished();
 
-			if (compoundEditItem.getSize() == 1)
-			{
-				UndoableEdit single = compoundEditItem.getLast();
-				undoManager.addEdit(single);
-				compoundEditItem.clear();
-			}
-			else if (compoundEditItem.getSize() > 1)
-			{
-				undoManager.addEdit(compoundEditItem);
-			}
-			compoundEditItem = null;
-			compoundLevelCounter = 0;
-		}
-		else if (compoundLevelCounter == 0)
+		long duration = undoItem.getDurationSinceLastEdit();
+
+		if (duration > maxCompoundEditDelay && undoItem.getSize() > 0)
 		{
-			Exception e = new IllegalStateException();
-			LogMgr.logError("SyntaxDocument.endCompoundEdit", "Unbalanced endCompoundEdit()", e);
-		}
-		else
-		{
-			this.compoundLevelCounter --;
+			undoItem.finished();
+			undoManager.addEdit(undoItem);
+			undoItem = new WbCompoundEdit();
 		}
 	}
 
-	public void addUndoableEdit(UndoableEdit edit)
+	public int getPositionOfLastChange()
 	{
+		return lastChangePosition;
 	}
-
-	public int getPositionOfLastChange() { return lastChangePosition; }
 
 	private int lastChangePosition = -1;
 

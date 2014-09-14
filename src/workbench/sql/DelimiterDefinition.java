@@ -123,6 +123,11 @@ public class DelimiterDefinition
 			return DEFAULT_MS_DELIMITER;
 		}
 
+		if (arg.equals(";"))
+		{
+			return STANDARD_DELIMITER;
+		}
+		
 		String delim = arg;
 
 		int pos = arg.indexOf(':');
@@ -176,7 +181,7 @@ public class DelimiterDefinition
 	public void setSingleLine(boolean flag)
 	{
 		if (isImmutable) return;
-		
+
 		if (flag != this.singleLineDelimiter)
 		{
 			this.singleLineDelimiter = flag;
