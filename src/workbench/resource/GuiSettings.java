@@ -999,6 +999,11 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROP_DBEXP_USE_SQLSORT, flag);
 	}
 
+	public static boolean getDbExplorerTableDetailFullyQualified()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tabledetails.fullname", true);
+	}
+
 	public static int getDbExplorerTableHistorySize()
 	{
 		return Settings.getInstance().getIntProperty("workbench.dbexplorer.tablelist.history.size", 25);

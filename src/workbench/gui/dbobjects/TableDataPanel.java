@@ -617,7 +617,14 @@ public class TableDataPanel
 			{
 				dataDisplay.getTable().clearLastFilter(true);
 				dataDisplay.getTable().resetFilter();
-				tableNameLabel.setText(table.getTableName());
+				if (GuiSettings.getDbExplorerTableDetailFullyQualified())
+				{
+					tableNameLabel.setText(table.getFullyQualifiedName(dbConnection));
+				}
+				else
+				{
+					tableNameLabel.setText(table.getTableExpression(dbConnection));
+				}
 			}
 		});
 	}

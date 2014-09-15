@@ -498,7 +498,15 @@ public class TableDefinitionPanel
 			}
 		}
 
-		String displayName = displayTable.getTableExpression(dbConnection);
+		String displayName;
+		if (GuiSettings.getDbExplorerTableDetailFullyQualified())
+		{
+			displayName = displayTable.getFullyQualifiedName(dbConnection);
+		}
+		else
+		{
+			displayName = displayTable.getTableExpression(dbConnection);
+		}
 
 		if (model instanceof EmptyTableModel)
 		{
