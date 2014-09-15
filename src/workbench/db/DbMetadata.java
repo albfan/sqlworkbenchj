@@ -2155,6 +2155,10 @@ public class DbMetadata
 			if (GuiSettings.getTransformSequenceDisplay() && seqDef != null && seqDef.getRowCount() == 1)
 			{
 				DatastoreTransposer transpose = new DatastoreTransposer(seqDef);
+
+				// No need to show the remarks as a row in the sequence details
+				transpose.setColumnsToExclude(CollectionUtil.caseInsensitiveSet("remarks"));
+
 				def = transpose.transposeRows(new int[]{0});
 				def.getColumns()[0].setColumnName(ResourceMgr.getString("TxtAttribute"));
 				def.getColumns()[1].setColumnName(ResourceMgr.getString("TxtValue"));

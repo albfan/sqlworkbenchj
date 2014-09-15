@@ -23,9 +23,12 @@
 package workbench.storage;
 
 import java.sql.Types;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import workbench.resource.ResourceMgr;
+import workbench.util.CollectionUtil;
 
 import workbench.util.SqlUtil;
 
@@ -38,11 +41,25 @@ public class DatastoreTransposer
 {
 	private DataStore source;
 	private String resultName;
+	private final Set<String> excludeColumns = CollectionUtil.caseInsensitiveSet();
 
 	public DatastoreTransposer(DataStore sourceData)
 	{
 		this.source = sourceData;
 		retrieveResultName();
+	}
+
+	public void setColumnsToExclude(Collection<String> toExclude)
+	{
+		if (CollectionUtil.isEmpty(toExclude))
+		{
+			excludeColumns.clear();
+		}
+		else
+		{
+			excludeColumns.clear();
+			excludeColumns.addAll(toExclude);
+		}
 	}
 
 	private void retrieveResultName()
@@ -93,8 +110,12 @@ public class DatastoreTransposer
 			int row = rows[ix];
 			for (int col=0; col < colCount; col ++)
 			{
-				ds.setValue(col, 0, source.getColumnDisplayName(col));
-				ds.setValue(col, 1 + ix, source.getValueAsString(row, col));
+				String colname = source.getColumnDisplayName(col);
+				if (!excludeColumns.contains(colname))
+				{
+					ds.setValue(col, 0, colname);
+					ds.setValue(col, 1 + ix, source.getValueAsString(row, col));
+				}
 			}
 		}
 		ds.setResultName("<[ " + resultName + " ]>");

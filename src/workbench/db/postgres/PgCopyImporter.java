@@ -213,13 +213,19 @@ public class PgCopyImporter
 			copySql.append("csv");
 			copySql.append(", header ");
 			copySql.append(Boolean.toString(options.getContainsHeader()));
-			copySql.append(", quote '");
-			copySql.append(options.getTextQuoteChar());
-			copySql.append('\'');
+			String quote = options.getTextQuoteChar();
+			if (quote != null)
+			{
+				copySql.append(", quote '");
+				copySql.append(quote);
+				copySql.append('\'');
+			}
 		}
 
 		copySql.append(", delimiter '");
-		copySql.append(options.getTextDelimiter());
+		String delim = options.getTextDelimiter();
+		if (delim.equals("\\t")) delim = "\t";
+		copySql.append(delim);
 		copySql.append("', encoding '");
 		copySql.append(encoding);
 		if (nullString == null)
