@@ -153,7 +153,7 @@ public class SetCommand
 					result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
 				}
 			}
-			else if (command.equalsIgnoreCase("schema") && canChangeSchema())
+			else if ((command.equalsIgnoreCase("schema") || command.equalsIgnoreCase("search_path")) && canChangeSchema())
 			{
 				schemaChange = true;
 			}
