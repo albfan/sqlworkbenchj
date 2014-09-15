@@ -226,18 +226,17 @@ public class PgCopyImporter
 		String delim = options.getTextDelimiter();
 		if (delim.equals("\\t")) delim = "\t";
 		copySql.append(delim);
-		copySql.append("', encoding '");
+		copySql.append('\'');
+
+		copySql.append(", encoding '");
 		copySql.append(encoding);
-		if (nullString == null)
-		{
-			copySql.append("', NULL ''");
-		}
-		else
-		{
-			copySql.append("', NULL '");
-			copySql.append(nullString);
-			copySql.append('\'');
-		}
+		copySql.append('\'');
+
+		if (nullString == null) nullString = "";
+		copySql.append(", NULL '");
+		copySql.append(nullString);
+		copySql.append('\'');
+
 		copySql.append(")");
 
 		return copySql.toString();
