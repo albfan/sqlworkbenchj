@@ -62,7 +62,7 @@
   <para>
     <important>
       Oracles's <literal>BFILE</literal>, PostgreSQL's <literal>large object</literal> and SQL Server's <literal>filestream</literal>
-      types are not real <literal>BLOB</literal> datatypes (from a JDBC point of view) and are currently not exported by WbExport.
+      types are not real <literal>BLOB</literal> datatypes (from a JDBC point of view) and are currently not exported by <literal>WbExport</literal>.
       Only columns that are reported as <literal>BLOB</literal>, <literal>BINARY</literal>, <literal>VARBINARY</literal> or <literal>LONGVARBINARY</literal>
       in the column "JDBC type" in the DbExplorer will be exported correctly into a separate file.
     </important>
@@ -636,7 +636,7 @@
 					<row>
 						<entry id="export-blob-type">-blobType</entry>
 						<entry>
-							<para>Possible values: <literal>file</literal>, <literal>dbms</literal>, <literal>ansi</literal>, <literal>base64</literal>
+              <para>Possible values: <literal>file</literal>, <literal>dbms</literal>, <literal>ansi</literal>, <literal>base64</literal>, <literal>pghex</literal>
 							</para>
 							<para>
 								This parameter controls how BLOB data will be put into the generated SQL statements.
@@ -646,7 +646,10 @@
                 all parameter values make sense for all export types.
 							</para>
               <para>
-                The type <literal>base64</literal> is primarily intended for Text exports (e.g. to be used with PostgreSQL's <literal>COPY</literal> command)
+                The type <literal>base64</literal> is primarily intended for Text exports.
+              </para>
+              <para>
+                The type <literal>pghex</literal> is intended to be used for export files that should be imported using PostgreSQL's <literal>COPY</literal> command.
               </para>
               <para>
                 The types <literal>dbms</literal> and <literal>ansi</literal> are intended for SQL exports and generate
@@ -844,7 +847,8 @@
 					<row>
 						<entry>-decimal</entry>
 						<entry>
-							The decimal symbol to be used for numbers. The default is a dot (e.g. 3.14152)
+              The decimal symbol to be used for numbers. The default is a dot e.g. the number Pi would be written as <literal>3.14152</literal>
+              When using <literal>-decimal=','</literal> the number Pi would be written as: <literal>3,14152</literal>
 						</entry>
 					</row>
 
@@ -855,11 +859,17 @@
 							<para>
 								This parameter controls the escaping of non-printable
 								or non-ASCII characters. Valid options are
-								<literal>ctrl</literal> which will escape everything below ASCII 32 (newline, tab, etc),
-								<literal>7bit</literal> which will escape everything below ASCII 32 and above 126,
-								<literal>8bit</literal> which will escape everything below ASCII 32 and above 255
-								and <literal>extended</literal> which will escape everything outside the
-								range [32-126] and [161-255]
+                <itemizedlist>
+                  <listitem>
+                    <literal>control</literal> which will escape everything below ASCII 32 (newline, tab, etc)</listitem>
+                    <listitem><literal>7bit</literal> which will escape everything below ASCII 32 and above 126</listitem>
+                    <listitem><literal>8bit</literal> which will escape everything below ASCII 32 and above 255</listitem>
+                    <listitem><literal>extended</literal> which will escape everything outside the range [32-126] and [161-255]</listitem>
+                    <listitem>
+                      <literal>pgcopy</literal> which is the same as <literal>control</literal> but will write the characters as two byte hex
+                      values which are compatible with the input format for PostgreSQL's <literal>COPY</literal>.
+                    </listitem>
+                </itemizedlist>
 							</para>
 							<para>
                 This will write a "short-hand" representation of control characters (e.g. <literal>\n</literal>
@@ -876,7 +886,8 @@
 							</para>
               <para>
                 To import a text file with escaped values using <link linkend="text-import-decode">WbImport</link>,
-                the <literal>-decode=true</literal> must be used.
+                the <literal>-decode=true</literal> must be used. Note that <literal>WbImport</literal> can not handle
+                the <literal>pgcopy</literal> encoding.
               </para>
               <para>
                 This parameter supports auto-completion.

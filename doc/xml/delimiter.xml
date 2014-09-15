@@ -42,8 +42,7 @@ END;</programlisting>
     The value of this sequence can be configured in the <link linkend="options">options dialog</link>
     as a global default, or per <link linkend="profile-alternate-delimiter">connection profile</link>
     (so you can use different alternate delimiters for different database systems).
-    The default is the forward slash <emphasis role="bold">/</emphasis> defined as a single
-    line delimiter.
+    The default is the forward slash <emphasis role="bold">/</emphasis> which has to appear on a line of its own.
   </para>
 
   <para>
@@ -53,7 +52,7 @@ END;</programlisting>
     DBMS.
   </para>
 
-  <para>So the solution to the above problem is the following script:</para>
+  <para>The script needs to be written like this:</para>
   <programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
 result INTEGER;
@@ -67,6 +66,11 @@ END;
     Note the trailing forward slash (<literal>/</literal>) at the end in order to "turn on" the
     use of the alternate delimiter. If you run scripts with embedded semicolons and you get
     an error, please verify the setting for your alternate delimiter.
+  </para>
+  <para>
+    The alternate delimiter is not needed when using PostgreSQL because the function's body is
+    essentially a string literal and delimiter inside string literals are not relevant for splitting
+    a script into several statements.
   </para>
 
   <para id="alternate-delimiter-usage"><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
