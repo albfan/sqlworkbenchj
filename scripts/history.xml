@@ -24,6 +24,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="5" type="fix">WbExport did not use the default setting for the decimal separator</entry>
     <entry dev-build="5" type="fix">It was not possible to unset/clear the global alternate delimiter</entry>
     <entry dev-build="5" type="fix">Selecting a single changesets with WbRunLB did not work properly.</entry>
     <entry dev-build="5" type="fix">For HSQLDB 2.x triggers were no longer displayed.</entry>

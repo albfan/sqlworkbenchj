@@ -66,8 +66,8 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
-import workbench.util.CharacterEscapeType;
 
+import workbench.util.CharacterEscapeType;
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
@@ -220,6 +220,7 @@ public class DataExporter
 		this.dbConn = con;
 		this.jobQueue = new LinkedList<>();
 		this.useSchemaInSql = Settings.getInstance().getIncludeOwnerInSqlExport();
+		this.numberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
 		if (con != null)
 		{

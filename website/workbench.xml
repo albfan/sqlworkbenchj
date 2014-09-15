@@ -605,6 +605,7 @@ WHERE id=42;</p>
   </page>
 
   <page link="manual/information.html#license" title="License" toc="small"/>
+  <page link="dbms_comparison.html" title="DBMS feature comparison" toc="small"/>
 
   <!-- ======================== About the author ========================== -->
   <page name="author" title="About the author" toc="small">

@@ -34,7 +34,7 @@ import workbench.util.HtmlUtil;
 public class OdsDateStyleBuilder
 {
 	private String formatString;
-	private List<String> elements = new ArrayList<String>(5);
+	private List<String> elements = new ArrayList<>(5);
 
 	public OdsDateStyleBuilder(String format)
 	{

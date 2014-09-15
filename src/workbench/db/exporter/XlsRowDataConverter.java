@@ -78,8 +78,8 @@ public class XlsRowDataConverter
 	private int targetSheetIndex = -1;
 	private String targetSheetName;
 	private String outputSheetName;
-	final private Map<Integer, CellStyle> styles = new HashMap<Integer, CellStyle>(10);
-	final private Map<Integer, CellStyle> headerStyles = new HashMap<Integer, CellStyle>(10);
+	final private Map<Integer, CellStyle> styles = new HashMap<>(10);
+	final private Map<Integer, CellStyle> headerStyles = new HashMap<>(10);
 	private final	StringBuilder dummyResult = new StringBuilder();
 
 	public XlsRowDataConverter()

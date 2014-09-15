@@ -138,7 +138,6 @@ public abstract class RowDataConverter
 	{
 		defaultDateFormatter = new WbDateFormatter(Settings.getInstance().getDefaultDateFormat());
 		defaultTimestampFormatter = new WbDateFormatter(Settings.getInstance().getDefaultTimestampFormat());
-		defaultNumberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
 		defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
 	}
 
@@ -306,7 +305,7 @@ public abstract class RowDataConverter
 		}
 
 		int colCount = metaData.getColumnCount();
-		this.multilineInfo = new HashMap<Integer, Boolean>(colCount);
+		this.multilineInfo = new HashMap<>(colCount);
 		for (int c = 0; c < colCount; c++)
 		{
 			boolean multiline = SqlUtil.isMultiLineColumn(metaData.getColumn(c));
