@@ -37,7 +37,8 @@ public interface SequenceReader
 	 * The property name for the sequence increment.
 	 */
 	public static final String PROP_INCREMENT = "increment";
-	public static final String PROP_CACHE = "cache";
+	public static final String PROP_CACHE_SIZE = "cache";
+	public static final String PROP_IS_CACHED = "is_cached";
 	public static final String PROP_CYCLE = "cycle";
 	public static final String PROP_MIN_VALUE = "min_value";
 	public static final String PROP_MAX_VALUE = "max_value";
@@ -45,6 +46,9 @@ public interface SequenceReader
 	public static final String PROP_ORDERED = "ordered";
 	public static final String PROP_START_VALUE = "start_value";
 	public static final String PROP_DATA_TYPE = "data_type";
+	public static final String PROP_USER_DATA_TYPE = "user_data_type";
+	public static final String PROP_CURRENT_VALUE = "current_value";
+	public static final String PROP_PRECISION = "current_value";
 
 	String DEFAULT_TYPE_NAME = "SEQUENCE";
 

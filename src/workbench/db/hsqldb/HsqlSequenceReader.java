@@ -29,14 +29,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.JdbcUtils;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -149,7 +152,7 @@ public class HsqlSequenceReader
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		List<SequenceDefinition> result = new ArrayList<>();
 
 		for (int row = 0; row < ds.getRowCount(); row++)
 		{
@@ -170,12 +173,12 @@ public class HsqlSequenceReader
 		result = new SequenceDefinition(schema, name);
 		result.setCatalog(catalog);
 
-		result.setSequenceProperty("START_WITH", ds.getValue(row, "START_WITH"));
-		result.setSequenceProperty("MAXIMUM_VALUE", ds.getValue(row, "MAXIMUM_VALUE"));
-		result.setSequenceProperty("MINIMUM_VALUE", ds.getValue(row, "MINIMUM_VALUE"));
-		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
-		result.setSequenceProperty("CYCLE_OPTION", ds.getValue(row, "CYCLE_OPTION"));
-		result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
+		result.setSequenceProperty(PROP_START_VALUE, ds.getValue(row, "START_WITH"));
+		result.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "MAXIMUM_VALUE"));
+		result.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(row, "MINIMUM_VALUE"));
+		result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "INCREMENT"));
+		result.setSequenceProperty(PROP_CYCLE, ds.getValue(row, "CYCLE_OPTION"));
+		result.setSequenceProperty(PROP_DATA_TYPE, ds.getValue(row, "DATA_TYPE"));
 		readRelatedTable(result); // must be called before buildSource is called!
 
 		result.setSource(buildSource(result));
@@ -205,7 +208,7 @@ public class HsqlSequenceReader
 		result.append("CREATE SEQUENCE ");
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append(def.getSequenceName());
-		String type = (String)def.getSequenceProperty("DATA_TYPE");
+		String type = (String)def.getSequenceProperty(PROP_DATA_TYPE);
 
 		if (!"INTEGER".equals(type))
 		{
@@ -214,12 +217,12 @@ public class HsqlSequenceReader
 		}
 
 		// For some reason HSQLDB returns all properties as String objects, even the numeric ones!
-		String start = (String)def.getSequenceProperty("START_WITH");
+		String start = (String)def.getSequenceProperty(PROP_START_VALUE);
 		result.append(nl);
 		result.append("       START WITH ");
 		result.append(start);
 
-		String inc = (String)def.getSequenceProperty("INCREMENT");
+		String inc = (String)def.getSequenceProperty(PROP_INCREMENT);
 		result.append(nl);
 		result.append("       INCREMENT BY ");
 		result.append(inc);

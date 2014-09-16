@@ -1564,9 +1564,10 @@ WHERE id=42;</programlisting>
 							<entry>
                 <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
-                  Usually the generated SQL script will be "sorted" by tables. When specifying
-                  <literal>-sortByType=true</literal>, then the script will first list all statements
-                  to drop the foreign keys, then the tables. Then the re-create statements will be listed.
+                  Usually the generated SQL script will be ordered by the type of statemens. So first all statements
+                  to drop constraints will be listed, then the drop table statements, then the statements to re-create all foreign keys.
+                  When specifying <literal>-sortByType=false</literal>, then the script will be ordered by table: first
+                  all statements for the first table, then all statements for the second table and so on.
 								</para>
 							</entry>
 						</row>

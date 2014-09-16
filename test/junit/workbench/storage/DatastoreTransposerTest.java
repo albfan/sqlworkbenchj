@@ -23,6 +23,8 @@ import java.sql.Types;
 
 import workbench.WbTestCase;
 
+import workbench.util.CollectionUtil;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -43,25 +45,7 @@ public class DatastoreTransposerTest
 	@Test
 	public void testTransposeRows()
 	{
-		String[] cols = new String[] {"id", "firstname", "lastname" };
-		int[] types = new int[] { Types.INTEGER, Types.VARCHAR, Types.VARCHAR };
-
-		DataStore data = new DataStore(cols, types);
-		int row = data.addRow();
-		data.setValue(row, 0, Integer.valueOf(1));
-		data.setValue(row, 1, "Arthur");
-		data.setValue(row, 2, "Dent");
-
-		row = data.addRow();
-		data.setValue(row, 0, Integer.valueOf(2));
-		data.setValue(row, 1, "Ford");
-		data.setValue(row, 2, "Prefect");
-
-		row = data.addRow();
-		data.setValue(row, 0, Integer.valueOf(3));
-		data.setValue(row, 1, "Tricia");
-		data.setValue(row, 2, "McMillan");
-		data.setResultName("Person");
+		DataStore data = createDataStore();
 
 		int[] rows = new int[] {0,2};
 		DatastoreTransposer transposer = new DatastoreTransposer(data);
@@ -84,5 +68,43 @@ public class DatastoreTransposerTest
 		result = transposer.transposeRows(rows);
 		assertEquals(3, result.getRowCount());
 		assertEquals(4, result.getColumnCount());
+	}
+
+	@Test
+	public void testExcludeColumns()
+	{
+		DataStore data = createDataStore();
+		int[] rows = new int[] {0,1,2};
+		DatastoreTransposer transposer = new DatastoreTransposer(data);
+		transposer.setColumnsToExclude(CollectionUtil.caseInsensitiveSet("firstname"));
+		DataStore result = transposer.transposeRows(rows);
+//		DataStorePrinter printer = new DataStorePrinter(result);
+//		printer.printTo(System.out);
+		assertEquals(2, result.getRowCount());
+		assertEquals(4, result.getColumnCount());
+	}
+
+	private DataStore createDataStore()
+	{
+		String[] cols = new String[] {"id", "firstname", "lastname" };
+		int[] types = new int[] { Types.INTEGER, Types.VARCHAR, Types.VARCHAR };
+
+		DataStore data = new DataStore(cols, types);
+		int row = data.addRow();
+		data.setValue(row, 0, Integer.valueOf(1));
+		data.setValue(row, 1, "Arthur");
+		data.setValue(row, 2, "Dent");
+
+		row = data.addRow();
+		data.setValue(row, 0, Integer.valueOf(2));
+		data.setValue(row, 1, "Ford");
+		data.setValue(row, 2, "Prefect");
+
+		row = data.addRow();
+		data.setValue(row, 0, Integer.valueOf(3));
+		data.setValue(row, 1, "Tricia");
+		data.setValue(row, 2, "McMillan");
+		data.setResultName("Person");
+		return data;
 	}
 }

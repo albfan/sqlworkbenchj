@@ -81,7 +81,7 @@ public class PostgresSequenceReader
 			Long max = (Long) def.getSequenceProperty(PROP_MAX_VALUE);
 			Long min = (Long) def.getSequenceProperty(PROP_MIN_VALUE);
 			Long inc = (Long) def.getSequenceProperty(PROP_INCREMENT);
-			Long cache = (Long) def.getSequenceProperty(PROP_CACHE);
+			Long cache = (Long) def.getSequenceProperty(PROP_CACHE_SIZE);
 			Boolean cycle = (Boolean) def.getSequenceProperty(PROP_CYCLE);
 			if (cycle == null) cycle = Boolean.FALSE;
 
@@ -187,7 +187,7 @@ public class PostgresSequenceReader
 		def.setSequenceProperty(PROP_INCREMENT, ds.getValue(0, "increment_by"));
 		def.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(0, "max_value"));
 		def.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(0, "min_value"));
-		def.setSequenceProperty(PROP_CACHE, ds.getValue(0, "cache_value"));
+		def.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(0, "cache_value"));
 		def.setSequenceProperty(PROP_CYCLE, ds.getValue(0, "is_cycled"));
 		String ownedBy = ds.getValueAsString(0, "owned_by");
 		if (StringUtil.isNonEmpty(ownedBy))

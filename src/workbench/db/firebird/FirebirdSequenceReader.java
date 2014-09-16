@@ -27,12 +27,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -69,7 +73,7 @@ public class FirebirdSequenceReader
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		List<SequenceDefinition> result = new ArrayList<>();
 
 		for (int row=0; row < ds.getRowCount(); row++)
 		{

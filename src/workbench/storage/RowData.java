@@ -23,9 +23,10 @@
 package workbench.storage;
 
 import java.util.Arrays;
-
 import java.util.List;
+
 import workbench.db.importer.ValueDisplay;
+
 import workbench.util.NumberUtil;
 
 /**
@@ -370,7 +371,7 @@ public class RowData
 	public int hashCode()
 	{
 		int hash = 7;
-		hash = 59 * hash + (this.colData != null ? this.colData.hashCode() : 0);
+		hash = 59 * hash + (this.colData != null ? Arrays.hashCode(this.colData) : 0);
 		return hash;
 	}
 

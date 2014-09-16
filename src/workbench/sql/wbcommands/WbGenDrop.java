@@ -111,8 +111,8 @@ public class WbGenDrop
 
 		boolean includeCreate = cmdLine.getBoolean(PARAM_INCLUDE_CREATE, true);
 		boolean onlyFk = cmdLine.getBoolean(PARAM_DROP_FK_ONLY, false);
-		boolean sortByType = cmdLine.getBoolean(PARAM_SORT_BY_TYPE, false);
-		boolean includeComments = cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, true);
+		boolean sortByType = cmdLine.getBoolean(PARAM_SORT_BY_TYPE, true);
+		boolean includeComments = cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false);
 
 		DropScriptGenerator gen = new DropScriptGenerator(currentConnection);
 		gen.setIncludeRecreateStatements(includeCreate);

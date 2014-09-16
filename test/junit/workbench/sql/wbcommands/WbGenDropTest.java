@@ -35,7 +35,8 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -85,10 +86,15 @@ public class WbGenDropTest
 		StatementRunnerResult result = cmd.execute("WbGenerateDrop -tables=customer, orders");
 		assertTrue(result.isSuccess());
 		String script = result.getMessageBuffer().toString();
+		System.out.println(script);
 		ScriptParser p = new ScriptParser(script);
 
-		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST", SqlUtil.makeCleanSql(p.getCommand(0), false, false));
-		assertEquals("DROP TABLE CUSTOMER", SqlUtil.makeCleanSql(p.getCommand(1), false, false));
+		assertEquals("ALTER TABLE INVOICE DROP CONSTRAINT FK_INV_ORDER", SqlUtil.makeCleanSql(p.getCommand(0), false, false));
+		assertEquals("ALTER TABLE ORDER_ITEM DROP CONSTRAINT FK_OI_ORDERS", SqlUtil.makeCleanSql(p.getCommand(1), false, false));
+		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST", SqlUtil.makeCleanSql(p.getCommand(2), false, false));
+
+		assertEquals("DROP TABLE ORDERS", SqlUtil.makeCleanSql(p.getCommand(3), false, false));
+		assertEquals("DROP TABLE CUSTOMER", SqlUtil.makeCleanSql(p.getCommand(4), false, false));
 
 		WbFile dir = new WbFile(util.getBaseDir());
 

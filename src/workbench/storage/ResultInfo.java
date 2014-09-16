@@ -617,7 +617,7 @@ public class ResultInfo
 			{
 				return i;
 			}
-		}
+			}
 		return -1;
 	}
 

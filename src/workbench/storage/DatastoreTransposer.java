@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.resource.ResourceMgr;
-import workbench.util.CollectionUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -51,14 +51,13 @@ public class DatastoreTransposer
 
 	public void setColumnsToExclude(Collection<String> toExclude)
 	{
-		if (CollectionUtil.isEmpty(toExclude))
+		excludeColumns.clear();
+		for (String colname : toExclude)
 		{
-			excludeColumns.clear();
-		}
-		else
-		{
-			excludeColumns.clear();
-			excludeColumns.addAll(toExclude);
+			if (source.getColumnIndex(colname) > -1)
+			{
+				excludeColumns.add(colname);
+			}
 		}
 	}
 
@@ -112,11 +111,11 @@ public class DatastoreTransposer
 
 			for (int col=0; col < colCount; col ++)
 			{
-				String colname = source.getColumnDisplayName(col);
-				if (!excludeColumns.contains(colname))
+				String colDisplay = source.getColumnDisplayName(col);
+				if (!excludeColumns.contains(colDisplay))
 				{
-					ds.setValue(colRow, 0, colname);
-					ds.setValue(colRow, 1 + ix, source.getValueAsString(sourceRow, colname));
+					ds.setValue(colRow, 0, colDisplay);
+					ds.setValue(colRow, 1 + ix, source.getValueAsString(sourceRow, col));
 					colRow ++;
 				}
 			}

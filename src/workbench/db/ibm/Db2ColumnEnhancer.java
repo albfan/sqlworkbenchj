@@ -97,7 +97,7 @@ public class Db2ColumnEnhancer
 			LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column details:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
 		}
 
-		Map<String, String> expressions = new HashMap<String, String>();
+		Map<String, String> expressions = new HashMap<>();
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
@@ -113,9 +113,9 @@ public class Db2ColumnEnhancer
 				BigDecimal inc = rs.getBigDecimal(5);
 				BigDecimal min = rs.getBigDecimal(6);
 				BigDecimal max = rs.getBigDecimal(7);
-				String cycle = rs.getString(8);
+				boolean cycle = StringUtil.stringToBool(rs.getString(8));
 				Integer cache = rs.getInt(9);
-				String order = rs.getString(10);
+				boolean order = StringUtil.stringToBool(rs.getString(10));
 
 				String rowbegin = "N";
 				String rowend = "N";

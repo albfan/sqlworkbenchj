@@ -151,7 +151,7 @@ public class OracleSequenceReader
 		result.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "MAX_VALUE"));
 		result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "INCREMENT_BY"));
 		result.setSequenceProperty(PROP_CYCLE, Boolean.toString("CYCLE".equalsIgnoreCase(ds.getValueAsString(row, "CYCLE_FLAG"))));
-		result.setSequenceProperty(PROP_CACHE, ds.getValue(row, "CACHE_SIZE"));
+		result.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(row, "CACHE_SIZE"));
 		result.setSequenceProperty(PROP_ORDERED, Boolean.toString("ORDER".equalsIgnoreCase(ds.getValueAsString(row, "ORDER_FLAG"))));
 		readSequenceSource(result);
 		return result;
@@ -177,7 +177,7 @@ public class OracleSequenceReader
 
 		String cycle = (String) def.getSequenceProperty(PROP_CYCLE);
 		String order = (String) def.getSequenceProperty(PROP_ORDERED);
-		Number cache = (Number) def.getSequenceProperty(PROP_CACHE);
+		Number cache = (Number) def.getSequenceProperty(PROP_CACHE_SIZE);
 
 		result.append(nl).append("       INCREMENT BY ");
 		result.append(increment);

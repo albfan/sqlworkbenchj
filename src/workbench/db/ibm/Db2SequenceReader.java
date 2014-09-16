@@ -65,7 +65,7 @@ public class Db2SequenceReader
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>(ds.getRowCount());
+		List<SequenceDefinition> result = new ArrayList<>(ds.getRowCount());
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
 			result.add(createSequenceDefinition(ds, row));
@@ -108,19 +108,19 @@ public class Db2SequenceReader
 
 		SequenceDefinition result = new SequenceDefinition(schema != null ? schema.trim() : null, name.trim());
 
-		result.setSequenceProperty("START", ds.getValue(row, "START"));
-		result.setSequenceProperty("MINVALUE", getDSValue(ds, row, "MINVALUE", "MINIMUM_VALUE"));
-		result.setSequenceProperty("MAXVALUE", getDSValue(ds, row, "MAXVALUE", "MAXIMUM_VALUE"));
-		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
-		result.setSequenceProperty("CYCLE", ds.getValue(row, "CYCLE"));
-		result.setSequenceProperty("ORDER", ds.getValue(row, "ORDER"));
-		result.setSequenceProperty("CACHE", ds.getValue(row, "CACHE"));
+		result.setSequenceProperty(PROP_START_VALUE, ds.getValue(row, "START"));
+		result.setSequenceProperty(PROP_MIN_VALUE, getDSValue(ds, row, "MINVALUE", "MINIMUM_VALUE"));
+		result.setSequenceProperty(PROP_MAX_VALUE, getDSValue(ds, row, "MAXVALUE", "MAXIMUM_VALUE"));
+		result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "INCREMENT"));
+		result.setSequenceProperty(PROP_CYCLE, Boolean.toString(StringUtil.stringToBool(ds.getValueAsString(row, "CYCLE"))));
+		result.setSequenceProperty(PROP_ORDERED, Boolean.toString(StringUtil.stringToBool(ds.getValueAsString(row, "ORDER"))));
+		result.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(row, "CACHE"));
 		if (ds.getColumnIndex("DATATYPEID") > -1)
 		{
 			result.setSequenceProperty("DATATYPEID", ds.getValue(row, "DATATYPEID"));
 		}
 
-		if (ds.getColumnIndex("DATA_TYPE") > -1)
+		if (ds.getColumnIndex(PROP_DATA_TYPE) > -1)
 		{
 			result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
 		}
@@ -290,13 +290,13 @@ public class Db2SequenceReader
 		result.append("CREATE SEQUENCE ");
 		result.append(def.getObjectExpression(connection));
 
-		Number start = (Number) def.getSequenceProperty("START");
-		Number minvalue = (Number) def.getSequenceProperty("MINVALUE");
-		Number maxvalue = (Number) def.getSequenceProperty("MAXVALUE");
-		Number increment = (Number) def.getSequenceProperty("INCREMENT");
-		String cycle = (String) def.getSequenceProperty("CYCLE");
-		String order = (String) def.getSequenceProperty("ORDER");
-		Number cache = (Number) def.getSequenceProperty("CACHE");
+		Number start = (Number) def.getSequenceProperty(PROP_START_VALUE);
+		Number minvalue = (Number) def.getSequenceProperty(PROP_MIN_VALUE);
+		Number maxvalue = (Number) def.getSequenceProperty(PROP_MAX_VALUE);
+		Number increment = (Number) def.getSequenceProperty(PROP_INCREMENT);
+		boolean cycle = Boolean.parseBoolean((String) def.getSequenceProperty(PROP_CYCLE));
+		boolean order = Boolean.parseBoolean((String) def.getSequenceProperty(PROP_ORDERED));
+		Number cache = (Number) def.getSequenceProperty(PROP_CACHE_SIZE);
 		Number typeid = (Number) def.getSequenceProperty("TYPEID");
 
 		if (typeid != null)
@@ -328,7 +328,7 @@ public class Db2SequenceReader
 		def.setSource(result);
 	}
 
-	public static CharSequence buildSequenceDetails(boolean doFormat, Number start, Number minvalue, Number maxvalue, Number increment, String cycle, String order, Number cache)
+	public static CharSequence buildSequenceDetails(boolean doFormat, Number start, Number minvalue, Number maxvalue, Number increment, boolean cycle, boolean order, Number cache)
 	{
 		StringBuilder result = new StringBuilder(30);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
@@ -384,7 +384,7 @@ public class Db2SequenceReader
 		}
 
 		if (doFormat) result.append(nl + "      ");
-		if (cycle != null && cycle.equals("Y"))
+		if (cycle)
 		{
 			result.append(" CYCLE");
 		}
@@ -394,7 +394,7 @@ public class Db2SequenceReader
 		}
 
 		if (doFormat) result.append(nl + "      ");
-		if (order != null && order.equals("Y"))
+		if (order)
 		{
 			result.append(" ORDER");
 		}

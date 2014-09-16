@@ -159,17 +159,17 @@ public class SqlServerSequenceReader
 		String db = ds.getValueAsString(row, "SEQUENCE_CATALOG");
 		SequenceDefinition result = new SequenceDefinition(schema, name);
 		result.setCatalog(db);
-		result.setSequenceProperty("minimum_value", ds.getValue(row, "minimum_value"));
-		result.setSequenceProperty("maximum_value", ds.getValue(row, "maximum_value"));
-		result.setSequenceProperty("start_value", ds.getValue(row, "start_value"));
-		result.setSequenceProperty("increment", ds.getValue(row, "increment"));
-		result.setSequenceProperty("cycle_flag", ds.getValue(row, "cycle_flag"));
-		result.setSequenceProperty("is_cached", ds.getValue(row, "is_cached"));
-		result.setSequenceProperty("cache_size", ds.getValue(row, "cache_size"));
-		result.setSequenceProperty("current_value", ds.getValue(row, "current_value"));
-		result.setSequenceProperty("data_type", ds.getValue(row, "data_type"));
-		result.setSequenceProperty("user_type", ds.getValue(row, "user_type"));
-		result.setSequenceProperty("precision", ds.getValue(row, "precision"));
+		result.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(row, "minimum_value"));
+		result.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "maximum_value"));
+		result.setSequenceProperty(PROP_START_VALUE, ds.getValue(row, "start_value"));
+		result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "increment"));
+		result.setSequenceProperty(PROP_CYCLE, "CYCLE".equals(ds.getValueAsString(row, "cycle_flag")));
+		result.setSequenceProperty(PROP_IS_CACHED, ds.getValue(row, "is_cached"));
+		result.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(row, "cache_size"));
+		result.setSequenceProperty(PROP_CURRENT_VALUE, ds.getValue(row, "current_value"));
+		result.setSequenceProperty(PROP_DATA_TYPE, ds.getValue(row, "data_type"));
+		result.setSequenceProperty(PROP_USER_DATA_TYPE, ds.getValue(row, "user_type"));
+		result.setSequenceProperty(PROP_PRECISION, ds.getValue(row, "precision"));
 		return result;
 	}
 
@@ -202,19 +202,19 @@ public class SqlServerSequenceReader
 		result.append("CREATE SEQUENCE ");
 		result.append(def.getSequenceName());
 
-		Number minValue = getNumberValue(def, "minimum_value");
-		Number maxValue = getNumberValue(def, "maximum_value");
-		Number startValue = getNumberValue(def, "start_value");
+		Number minValue = getNumberValue(def, PROP_MIN_VALUE);
+		Number maxValue = getNumberValue(def, PROP_MAX_VALUE);
+		Number startValue = getNumberValue(def, PROP_START_VALUE);
 
-		Number increment = getNumberValue(def, "increment");
+		Number increment = getNumberValue(def, PROP_INCREMENT);
 
-		String cycle = (String) def.getSequenceProperty("cycle_flag");
-		Boolean isCached = (Boolean)def.getSequenceProperty("is_cached");
-		Number cache = (Number) def.getSequenceProperty("cache_size");
-		Number precision = (Number)def.getSequenceProperty("precision");
+		boolean cycle = Boolean.getBoolean((String)def.getSequenceProperty(PROP_CYCLE));
+		Boolean isCached = (Boolean)def.getSequenceProperty(PROP_IS_CACHED);
+		Number cache = (Number) def.getSequenceProperty(PROP_CACHE_SIZE);
+		Number precision = (Number)def.getSequenceProperty(PROP_PRECISION);
 
-		String type = (String)def.getSequenceProperty("data_type");
-		String userType = (String)def.getSequenceProperty("data_type");
+		String type = (String)def.getSequenceProperty(PROP_DATA_TYPE);
+		String userType = (String)def.getSequenceProperty(PROP_USER_DATA_TYPE);
 		String typeToUse = type;
 		if (!type.equals(userType))
 		{

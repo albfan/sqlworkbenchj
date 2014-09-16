@@ -153,8 +153,8 @@ public class GenericObjectDropper
 		{
 			CharSequence sql = getDropStatement(i);
 			result.append(sql);
-			result.append(";\n");
-			result.append('\n');
+			if (!StringUtil.endsWith(sql, ';')) result.append(';');
+			result.append("\n\n");
 		}
 		if (needCommit) result.append("COMMIT;\n");
 		return result;
