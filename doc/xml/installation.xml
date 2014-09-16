@@ -288,7 +288,7 @@
     </para>
 
     <para>
-      When using 32bit Java runtime the default maximum memory is set to 1GB. When using a 64bit Java runtime
+      When using a 32bit Java runtime the default maximum memory is set to 1GB. When using a 64bit Java runtime
       the default is set to 50% of the available physical memory.
     </para>
 
