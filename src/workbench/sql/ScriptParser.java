@@ -62,7 +62,7 @@ public class ScriptParser
 	private boolean returnTrailingWhitesapce;
 	private String alternateLineComment;
 	private boolean useAlternateDelimiter;
-	private boolean usePgParser;
+	private ParserType parserType;
 	private File source;
 
 	private int maxFileSize;
@@ -72,10 +72,20 @@ public class ScriptParser
 		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
 	}
 
-	/**
-	 *	Create a ScriptParser for the given Script.
-	 *	The delimiter to be used will be evaluated dynamically
-	 */
+	public ScriptParser(ParserType type)
+	{
+		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
+		parserType = type;
+	}
+
+
+	public ScriptParser(String aScript, ParserType type)
+	{
+		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
+		parserType = type;
+		this.setScript(aScript);
+	}
+
 	public ScriptParser(String aScript)
 	{
 		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
@@ -120,9 +130,9 @@ public class ScriptParser
 		setFile(f, null);
 	}
 
-	public void usePgParser(boolean flag)
+	public void setParserType(ParserType type)
 	{
-		this.usePgParser = flag;
+		this.parserType = type;
 	}
 
 	/**
@@ -466,10 +476,9 @@ public class ScriptParser
 		ScriptIterator p = null;
 		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", true);
 
-		if (usePgParser)
+		if (parserType == ParserType.Postgres || parserType == ParserType.SqlServer)
 		{
-			LexerBasedParser l = new LexerBasedParser();
-			l.setCheckPgQuoting(true);
+			LexerBasedParser l = new LexerBasedParser(parserType);
 			p = l;
 		}
 		else if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands || supportIdioticQuotes)

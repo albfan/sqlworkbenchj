@@ -30,7 +30,7 @@ public class SyntaxDocument
 	private WbCompoundEdit undoItem = new WbCompoundEdit();
 	private boolean undoSuspended;
 	private int maxLineLength;
-	private int maxCompoundEditDelay = Settings.getInstance().getIntProperty("workbench.gui.editor.compoundedit.delay", 100);
+	private int maxCompoundEditDelay = Settings.getInstance().getIntProperty("workbench.gui.editor.compoundedit.delay", 150);
 
 	public SyntaxDocument()
 	{

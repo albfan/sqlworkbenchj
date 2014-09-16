@@ -49,6 +49,7 @@ import workbench.db.oracle.OracleWarningsClearer;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorReportLevel;
+import workbench.sql.ParserType;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
@@ -182,7 +183,7 @@ public class WbConnection
 	{
 		return Settings.getInstance().getAlternateDelimiter(this, null);
 	}
-	
+
 	public TransactionChecker getTransactionChecker()
 	{
 		if (getProfile().getDetectOpenTransaction())
@@ -472,7 +473,7 @@ public class WbConnection
 		runner.setErrorReportLevel(ErrorReportLevel.none);
 
 		ScriptParser p = new ScriptParser(sql);
-		p.usePgParser(this.metaData.isPostgres());
+		p.setParserType(ParserType.getTypeFromConnection(this));
 		p.setAlternateLineComment(this.getDbSettings().getLineComment());
 
 		// The statemenRunner will call clearMessages() when statementDone()

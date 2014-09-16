@@ -29,6 +29,7 @@ import workbench.resource.Settings;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.ParserType;
 import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
 
@@ -51,8 +52,7 @@ public class TextFormatter
 	public void formatSql(final SqlTextContainer editor, DelimiterDefinition alternateDelimiter, String lineComment)
 	{
 		String sql = editor.getSelectedStatement();
-		ScriptParser parser = new ScriptParser();
-		parser.usePgParser("postgresql".equals(dbId));
+		ScriptParser parser = new ScriptParser(ParserType.getTypeFromDBID(dbId));
 		parser.setAlternateDelimiter(alternateDelimiter);
 		parser.setReturnStartingWhitespace(true);
 		parser.setAlternateLineComment(lineComment);

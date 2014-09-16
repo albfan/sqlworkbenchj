@@ -179,7 +179,7 @@
 					</row>
 
 					<row>
-						<entry>-keyColumns</entry>
+						<entry id="copy-key-columns">-keyColumns</entry>
 						<entry>
 							<para>
 								Defines the key columns for the target table. This parameter
@@ -207,7 +207,7 @@
 					</row>
 
 					<row>
-						<entry>-batchSize</entry>
+						<entry id="copy-batch-size">-batchSize</entry>
 						<entry>
 							<para>
 								Enable the use of the JDBC batch update feature, by setting the size
@@ -324,6 +324,24 @@
               </para>
 						</entry>
 					</row>
+
+					<row>
+						<entry id="copy-exclude-tables">-excludeTables</entry>
+						<entry>
+              <para>
+                The tables listed in this parameter will not be copied. This can be used when all but a few tables
+                should be copied from one database to another. First all tables specified through <literal>-sourceTable</literal> will
+                be evaluated. The tables specified by <literal>-excludeTables</literal> can include wildcards in the same way,
+                <literal>-sourceTable</literal> allows wildcards.
+              </para>
+              <para>
+                <literal>-sourceTable=* -excludeTables=TEMP*</literal> will copy all tables, but not those starting with <literal>TEMP</literal>.
+              </para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
+            </entry>
+          </row>
 
 					<row>
 						<entry>-checkDependencies</entry>

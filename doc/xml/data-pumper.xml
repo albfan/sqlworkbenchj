@@ -54,7 +54,7 @@
 		connect to the database. Connecting to the target database works similar. Simply
 		click on the ellipsis next to the target profile box.</para>
 		<para>Instead of a database connection as the source, you can also select
-			a text or XML file as the source for the DataPumper. Thus it can also 
+			a text or XML file as the source for the DataPumper. Thus it can also
 			be used as a replacement of the <link linkend="command-import">WbImport</link> command.
 		</para>
 
@@ -161,7 +161,7 @@
 				For maximum performance, choose the update strategy that will result in a succssful
 				first statement more often. As a rule of thumb:
 				<itemizedlist>
-					<listitem><simpara>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</simpara></listitem>
+					<listitem><simpara>Use <literal>-mode=insert,update</literal>, if you expect more rows to be inserted then updated.</simpara></listitem>
 					<listitem><simpara>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</simpara></listitem>
 				</itemizedlist>
 			</para>

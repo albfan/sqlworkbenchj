@@ -43,6 +43,7 @@ import workbench.resource.Settings;
 import workbench.db.WbConnection;
 
 import workbench.gui.editor.JEditTextArea;
+import workbench.sql.ParserType;
 
 import workbench.sql.ScriptParser;
 
@@ -145,11 +146,7 @@ public class CompletionHandler
 		boolean result = false;
 		highlightNotNulls = false;
 		String script = this.editor.getText();
-		ScriptParser parser = new ScriptParser(script);
-		if (dbConnection != null)
-		{
-			parser.usePgParser(dbConnection.isPostgres());
-		}
+		ScriptParser parser = new ScriptParser(script, ParserType.getTypeFromConnection(dbConnection));
 		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		parser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 		parser.setAlternateLineComment(dbConnection == null ? null : dbConnection.getDbSettings().getLineComment());

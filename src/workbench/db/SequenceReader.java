@@ -33,6 +33,19 @@ import workbench.storage.DataStore;
  */
 public interface SequenceReader
 {
+	/**
+	 * The property name for the sequence increment.
+	 */
+	public static final String PROP_INCREMENT = "increment";
+	public static final String PROP_CACHE = "cache";
+	public static final String PROP_CYCLE = "cycle";
+	public static final String PROP_MIN_VALUE = "min_value";
+	public static final String PROP_MAX_VALUE = "max_value";
+	public static final String PROP_OWNED_BY = "owned_by";
+	public static final String PROP_ORDERED = "ordered";
+	public static final String PROP_START_VALUE = "start_value";
+	public static final String PROP_DATA_TYPE = "data_type";
+
 	String DEFAULT_TYPE_NAME = "SEQUENCE";
 
 	/**

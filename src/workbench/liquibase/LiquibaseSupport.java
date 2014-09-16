@@ -29,6 +29,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.ParserType;
 import workbench.sql.ScriptParser;
 
 import workbench.util.MessageBuffer;
@@ -45,7 +46,7 @@ public class LiquibaseSupport
 	private String fileEncoding;
 	private DelimiterDefinition alternateDelimiter;
 	private MessageBuffer messages = new MessageBuffer();
-	private boolean usePgParser;
+	private ParserType parserType;
 
 	public LiquibaseSupport(WbFile xmlFile)
 	{
@@ -58,9 +59,9 @@ public class LiquibaseSupport
 		this.fileEncoding = encoding;
 	}
 
-	public void usePgParser(boolean flag)
+	public void setParserType(ParserType type)
 	{
-		this.usePgParser = flag;
+		this.parserType = type;
 	}
 
 	public void setAlternateDelimiter(DelimiterDefinition delimiter)
@@ -92,8 +93,7 @@ public class LiquibaseSupport
 			{
 				if (tag.getSplitStatements())
 				{
-					ScriptParser p = new ScriptParser();
-					p.usePgParser(usePgParser);
+					ScriptParser p = new ScriptParser(parserType);
 					p.setAlternateDelimiter(alternateDelimiter);
 					p.setScript(tag.getContent());
 					p.startIterator();

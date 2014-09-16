@@ -100,21 +100,24 @@ public class DatastoreTransposer
 		DataStore ds = new DataStore(columns, types);
 
 		int colCount = source.getColumnCount();
-		for (int i=0; i < colCount; i++)
+		for (int i=0; i < colCount  - excludeColumns.size(); i++)
 		{
 			ds.addRow();
 		}
 
 		for (int ix=0; ix < rows.length; ix++)
 		{
-			int row = rows[ix];
+			int sourceRow = rows[ix];
+			int colRow = 0;
+
 			for (int col=0; col < colCount; col ++)
 			{
 				String colname = source.getColumnDisplayName(col);
 				if (!excludeColumns.contains(colname))
 				{
-					ds.setValue(col, 0, colname);
-					ds.setValue(col, 1 + ix, source.getValueAsString(row, col));
+					ds.setValue(colRow, 0, colname);
+					ds.setValue(colRow, 1 + ix, source.getValueAsString(sourceRow, colname));
+					colRow ++;
 				}
 			}
 		}

@@ -77,6 +77,8 @@ import workbench.util.WbFile;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import workbench.sql.ParserType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -489,8 +491,7 @@ public class TestUtil
 	{
 		if (con == null) return;
 
-		ScriptParser parser = new ScriptParser(script);
-		parser.usePgParser(con.isPostgres());
+		ScriptParser parser = new ScriptParser(script, ParserType.getTypeFromConnection(con));
 		if (alternateDelimiter != null)
 		{
 			parser.setAlternateDelimiter(alternateDelimiter);

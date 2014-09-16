@@ -26,7 +26,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 
 import workbench.TestUtil;
@@ -332,19 +331,19 @@ public class ScriptParserTest
 		util.prepareEnvironment();
 
 		File scriptFile = new File(util.getBaseDir(), "testscript.sql");
-		PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
-		writer.println("-- test script");
-		writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100))");
-		writer.println("/");
-		writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')");
-		writer.println("/");
-		writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect')");
-		writer.println("/");
-		writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox')");
-		writer.println("/");
-		writer.println("commit");
-		writer.println("/");
-		writer.close();
+		String script =
+			"-- test script \n" +
+			"CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100)) \n" +
+			"/ \n" +
+			"insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent') \n" +
+			"/ \n" +
+			"insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect') \n" +
+			"/ \n" +
+			"insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox') \n" +
+			"/ \n" +
+			"commit \n" +
+			"/";
+		TestUtil.writeFile(scriptFile, script);
 
 		// Make sure the iterating parser is used, by setting
 		// a very low max file size
@@ -723,22 +722,23 @@ public class ScriptParserTest
 	{
 		File tempdir = new File(System.getProperty("java.io.tmpdir"));
 		File script = new File(tempdir, "largefile.sql");
-		BufferedWriter out = new BufferedWriter(new FileWriter(script));
-		for (int i = 0; i < counter; i++)
+		try (BufferedWriter out = new BufferedWriter(new FileWriter(script)))
 		{
-			out.write("--- test command");
-			out.write(lineEnd);
-			out.write("insert into test_table");
-			out.write(lineEnd);
-			out.write("col1, col2, col3, col4)");
-			out.write(lineEnd);
-			out.write("values ('1','2''',3,' a two line ");
-			out.write(lineEnd);
-			out.write("; quoted text');");
-			out.write(lineEnd);
-			out.write(lineEnd);
+			for (int i = 0; i < counter; i++)
+			{
+				out.write("--- test command");
+				out.write(lineEnd);
+				out.write("insert into test_table");
+				out.write(lineEnd);
+				out.write("col1, col2, col3, col4)");
+				out.write(lineEnd);
+				out.write("values ('1','2''',3,' a two line ");
+				out.write(lineEnd);
+				out.write("; quoted text');");
+				out.write(lineEnd);
+				out.write(lineEnd);
+			}
 		}
-		out.close();
 		return script;
 	}
 
@@ -940,6 +940,11 @@ public class ScriptParserTest
 		assertEquals(2, count);
 		assertEquals("SELECT * FROM [Some;Table]", parser.getCommand(0).trim());
 
+    parser = new ScriptParser(sql, ParserType.SqlServer);
+		count = parser.getSize();
+		assertEquals(2, count);
+		assertEquals("SELECT * FROM [Some;Table]", parser.getCommand(0).trim());
+
 		sql = "SELECT '[SomeTable];' FROM dual;DELETE FROM \"[Other];Table\";";
     parser = new ScriptParser(sql);
 		parser.setSupportIdioticQuotes(true);
@@ -957,7 +962,6 @@ public class ScriptParserTest
 		assertEquals("Table]", parser.getCommand(1).trim());
 		assertEquals("DELETE FROM [Other", parser.getCommand(2).trim());
 		assertEquals("Table]", parser.getCommand(3).trim());
-
 	}
 
 	@Test

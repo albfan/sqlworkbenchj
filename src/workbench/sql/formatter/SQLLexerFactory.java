@@ -19,7 +19,11 @@
  */
 package workbench.sql.formatter;
 
+import java.io.Reader;
+
+import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.sql.ParserType;
 
 /**
  *
@@ -27,10 +31,6 @@ import workbench.db.WbConnection;
  */
 public class SQLLexerFactory
 {
-	public static final String DBID_ORA = "oracle";
-	public static final String DBID_PG = "postgresql";
-	public static final String DBID_MS = "microsoft_sql_server";
-
 	public static SQLLexer createLexer()
 	{
 		SQLLexer lexer = new SQLLexer("");
@@ -71,6 +71,16 @@ public class SQLLexerFactory
 		return lexer;
 	}
 
+	public static SQLLexer createLexer(Reader input, ParserType type)
+	{
+		SQLLexer lexer = new SQLLexer(input);
+		if (type == ParserType.SqlServer)
+		{
+			lexer.setCheckStupidQuoting(true);
+		}
+		return lexer;
+	}
+
 	private static void configureLexer(SQLLexer lexer, WbConnection conn)
 	{
 		if (conn == null) return;
@@ -80,7 +90,7 @@ public class SQLLexerFactory
 	private static void configureLexer(SQLLexer lexer, String dbId)
 	{
 		if (dbId == null) return;
-		lexer.setCheckStupidQuoting(dbId.equalsIgnoreCase(DBID_MS));
+		lexer.setCheckStupidQuoting(dbId.equalsIgnoreCase(DbMetadata.DBID_MS));
 	}
 
 }

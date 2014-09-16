@@ -638,7 +638,7 @@ public class BatchRunner
 
 	private ScriptParser createParser()
 	{
-		ScriptParser parser = new ScriptParser();
+		ScriptParser parser = new ScriptParser(ParserType.getTypeFromConnection(connection));
 		// If no delimiter has been defined, than use the default fallback
 		if (this.delimiter == null)
 		{
@@ -661,10 +661,6 @@ public class BatchRunner
 			parser.setSupportOracleInclude(this.connection.getDbSettings().supportShortInclude());
 			parser.setCheckForSingleLineCommands(this.connection.getDbSettings().supportSingleLineCommands());
 			parser.setAlternateLineComment(this.connection.getDbSettings().getLineComment());
-			if (this.connection.getMetadata().isPostgres())
-			{
-				parser.usePgParser(true);
-			}
 		}
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		return parser;

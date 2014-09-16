@@ -59,7 +59,7 @@ public class OracleSequenceReader
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null || ds.getRowCount() == 0) return Collections.emptyList();
-		ArrayList<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		ArrayList<SequenceDefinition> result = new ArrayList<>();
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
 			result.add(createDefinition(ds, row));
@@ -147,12 +147,12 @@ public class OracleSequenceReader
 		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
 		String owner = ds.getValueAsString(row, "SEQUENCE_OWNER");
 		SequenceDefinition result = new SequenceDefinition(owner, name);
-		result.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
-		result.setSequenceProperty("MAX_VALUE", ds.getValue(row, "MAX_VALUE"));
-		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT_BY"));
-		result.setSequenceProperty("CYCLE_FLAG", ds.getValue(row, "CYCLE_FLAG"));
-		result.setSequenceProperty("CACHE_SIZE", ds.getValue(row, "CACHE_SIZE"));
-		result.setSequenceProperty("ORDER_FLAG", ds.getValue(row, "ORDER_FLAG"));
+		result.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(row, "MIN_VALUE"));
+		result.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "MAX_VALUE"));
+		result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "INCREMENT_BY"));
+		result.setSequenceProperty(PROP_CYCLE, Boolean.toString("CYCLE".equalsIgnoreCase(ds.getValueAsString(row, "CYCLE_FLAG"))));
+		result.setSequenceProperty(PROP_CACHE, ds.getValue(row, "CACHE_SIZE"));
+		result.setSequenceProperty(PROP_ORDERED, Boolean.toString("ORDER".equalsIgnoreCase(ds.getValueAsString(row, "ORDER_FLAG"))));
 		readSequenceSource(result);
 		return result;
 	}
@@ -170,14 +170,14 @@ public class OracleSequenceReader
 		result.append("CREATE SEQUENCE ");
 		result.append(def.getSequenceName());
 
-		Number minValue = (Number) def.getSequenceProperty("MIN_VALUE");
-		Number maxValue = (Number) def.getSequenceProperty("MAX_VALUE");
+		Number minValue = (Number) def.getSequenceProperty(PROP_MIN_VALUE);
+		Number maxValue = (Number) def.getSequenceProperty(PROP_MAX_VALUE);
 
-		Number increment = (Number) def.getSequenceProperty("INCREMENT");
+		Number increment = (Number) def.getSequenceProperty(PROP_INCREMENT);
 
-		String cycle = (String) def.getSequenceProperty("CYCLE_FLAG");
-		String order = (String) def.getSequenceProperty("ORDER_FLAG");
-		Number cache = (Number) def.getSequenceProperty("CACHE_SIZE");
+		String cycle = (String) def.getSequenceProperty(PROP_CYCLE);
+		String order = (String) def.getSequenceProperty(PROP_ORDERED);
+		Number cache = (Number) def.getSequenceProperty(PROP_CACHE);
 
 		result.append(nl).append("       INCREMENT BY ");
 		result.append(increment);
@@ -212,10 +212,10 @@ public class OracleSequenceReader
 			result.append(nl).append("       NOCACHE");
 		}
 		result.append(nl).append("       ");
-		result.append(cycle);
+		result.append(Boolean.getBoolean(cycle) ? "CYCLE" : "NOCYCLE");
 
 		result.append(nl).append("       ");
-		result.append(order);
+		result.append(Boolean.getBoolean(order) ? "ORDER" : "NOORDER");
 
 		result.append(';');
 		result.append(nl);

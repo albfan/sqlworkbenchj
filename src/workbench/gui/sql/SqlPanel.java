@@ -190,6 +190,7 @@ import workbench.storage.DataStore;
 import workbench.sql.AppendResultAnnotation;
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.OutputPrinter;
+import workbench.sql.ParserType;
 import workbench.sql.ScriptParser;
 import workbench.sql.ScrollAnnotation;
 import workbench.sql.StatementHistory;
@@ -2954,7 +2955,7 @@ public class SqlPanel
 
 	public ScriptParser createScriptParser()
 	{
-		ScriptParser scriptParser = new ScriptParser();
+		ScriptParser scriptParser = new ScriptParser(ParserType.getTypeFromConnection(this.dbConnection));
 		scriptParser.setAlternateDelimiter(dbConnection.getAlternateDelimiter());
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		scriptParser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
@@ -2967,17 +2968,10 @@ public class SqlPanel
 				LogMgr.logError("SqlPanel.createScriptParser()", "No db settings available!", null);
 				return scriptParser;
 			}
-			if (this.dbConnection.getMetadata().isPostgres())
-			{
-				scriptParser.usePgParser(true);
-			}
-			else
-			{
-				scriptParser.setSupportOracleInclude(db.supportShortInclude());
-				scriptParser.setCheckForSingleLineCommands(db.supportSingleLineCommands());
-				scriptParser.setAlternateLineComment(db.getLineComment());
-				scriptParser.setSupportIdioticQuotes(db.getUseIdioticQuotes());
-			}
+			scriptParser.setSupportOracleInclude(db.supportShortInclude());
+			scriptParser.setCheckForSingleLineCommands(db.supportSingleLineCommands());
+			scriptParser.setAlternateLineComment(db.getLineComment());
+			scriptParser.setSupportIdioticQuotes(db.getUseIdioticQuotes());
 		}
 		else
 		{

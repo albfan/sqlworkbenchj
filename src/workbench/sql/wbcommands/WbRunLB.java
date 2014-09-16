@@ -29,6 +29,7 @@ import java.util.List;
 import workbench.liquibase.ChangeSetIdentifier;
 import workbench.liquibase.LiquibaseSupport;
 import workbench.resource.ResourceMgr;
+import workbench.sql.ParserType;
 
 import workbench.storage.RowActionMonitor;
 
@@ -146,7 +147,7 @@ public class WbRunLB
 		{
 			runner.setVerboseLogging(verbose);
 			LiquibaseSupport lb = new LiquibaseSupport(file, encoding);
-			lb.usePgParser(currentConnection.getMetadata().isPostgres());
+			lb.setParserType(ParserType.getTypeFromConnection(currentConnection));
 
 			List<String> statements = lb.getSQLFromChangeSet(ids);
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);

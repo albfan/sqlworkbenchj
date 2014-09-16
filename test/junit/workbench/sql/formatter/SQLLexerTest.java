@@ -167,6 +167,17 @@ public class SQLLexerTest
 		t = l.getNextToken(true, true); // whitespace
 		t = l.getNextToken(true, true); // [int]
 		assertEquals("[int]", t.getText());
+
+		sql = "SELECT * FROM [Some;Table];";
+		l = new SQLLexer(sql);
+		l.setCheckStupidQuoting(true);
+		t = l.getNextToken(false, false); // select
+		t = l.getNextToken(false, false); // *
+		t = l.getNextToken(false, false); // from
+		t = l.getNextToken(false, false); // [Some;Tabe]
+		assertEquals("[Some;Table]", t.getText());
+		t = l.getNextToken(false, false); // ;
+		assertEquals(";", t.getText());
 	}
 
 

@@ -33,6 +33,7 @@
     <xsl:apply-templates select="/schema-report/table-def"/>
     <xsl:apply-templates select="/schema-report/view-def"/>
     <xsl:call-template name="process-fk"/>
+    <xsl:apply-templates select="/schema-report/sequence-def"/>
     <xsl:value-of select="$newline"/>
     <xsl:text>commit;</xsl:text>
   </xsl:template>
@@ -244,6 +245,36 @@
     </xsl:if>
   </xsl:template>
 
+  <xsl:template match="sequence-def">
+    <xsl:text>CREATE SEQUENCE </xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="sequence-name"/>
+    </xsl:call-template>
+    <xsl:value-of select="$newline"/>
+    <xsl:for-each select="sequence-properties/property">
+    </xsl:for-each>
+    <xsl:text>   INCREMENT BY </xsl:text><xsl:value-of select="sequence-properties/property[@name='INCREMENT']/@value"/>
+    <xsl:if test="sequence-properties/property[@name='CACHE']/@value != '1'">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>   CACHE </xsl:text><xsl:value-of select="sequence-properties/property[@name='CACHE']/@value"/>
+    </xsl:if>
+    <xsl:if test="sequence-properties/property[@name='CYCLE']/@value = 'true'">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>   CYCLE</xsl:text>
+    </xsl:if>
+    <xsl:if test="sequence-properties/property[@name='MINVALUE']/@value != '1'">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>   MINVALUE </xsl:text><xsl:value-of select="sequence-properties/property[@name='MINVALUE']/@value"/>
+    </xsl:if>
+    
+    <!-- now deal with attributes retrieved from an Oracle Database (e.g. when migrating) -->
+    <xsl:if test="sequence-properties/property[@name='CACHE_SIZE']/@value != '1'">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>   CACHE </xsl:text><xsl:value-of select="sequence-properties/property[@name='CACHE_SIZE']/@value"/>
+    </xsl:if>
+    <xsl:value-of select="$newline"/>
+  </xsl:template>
+  
   <xsl:template name="process-fk">
     <xsl:for-each select="/schema-report/table-def">
       <xsl:variable name="table">

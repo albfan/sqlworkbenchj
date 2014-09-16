@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import workbench.db.SequenceDefinition;
+import workbench.db.SequenceReader;
 
 import workbench.util.StringUtil;
 import workbench.util.WbDateFormatter;
@@ -129,12 +130,23 @@ public class ReportSequence
 		toAppend.append('\n');
 		for (String propName : sequence.getProperties())
 		{
+			if ("remarks".equalsIgnoreCase("propName")) continue;
+
 			Object value = this.sequence.getSequenceProperty(propName);
 			TagAttribute name = new TagAttribute("name", propName);
 			TagAttribute val = new TagAttribute("value", (value == null ? "" : WbDateFormatter.getDisplayValue(value)));
 			tagWriter.appendOpenTag(toAppend, myindent, TAG_SEQ_PROPERTY, false, name, val);
 			toAppend.append("/>\n");
 		}
+		if (sequence.getRelatedTable() != null && sequence.getRelatedColumn() != null)
+		{
+			String colref = sequence.getRelatedTable().getTableName() + "." + sequence.getRelatedColumn();
+			TagAttribute name = new TagAttribute("name", SequenceReader.PROP_OWNED_BY.toUpperCase());
+			TagAttribute val = new TagAttribute("value", colref);
+			tagWriter.appendOpenTag(toAppend, myindent, TAG_SEQ_PROPERTY, false, name, val);
+			toAppend.append("/>\n");
+		}
+
 		tagWriter.appendCloseTag(toAppend, indent, TAG_SEQ_PROPS);
 	}
 

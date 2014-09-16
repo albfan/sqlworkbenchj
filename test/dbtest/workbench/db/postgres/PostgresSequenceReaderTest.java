@@ -77,22 +77,19 @@ public class PostgresSequenceReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null)
-		{
-			System.out.println("No PostgreSQL connection available. Skipping test...");
-			return;
-		}
+		assertNotNull("No PostgreSQL connection available", con);
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(TEST_ID, new String[] { "SEQUENCE" });
 		assertEquals(2, objects.size());
 		TableIdentifier seq = objects.get(0);
 		assertEquals("SEQUENCE", seq.getObjectType());
 		String sql = seq.getSource(con).toString();
-		String expected = "CREATE SEQUENCE seq_one\n" +
-             "       INCREMENT BY 1\n" +
-             "       MINVALUE 1\n" +
-             "       CACHE 1\n" +
-             "       NO CYCLE;\n\n" +
-						 "ALTER SEQUENCE seq_one OWNER TO seq_table.id;";
+		String expected =
+			"CREATE SEQUENCE seq_one\n" +
+			"       INCREMENT BY 1\n" +
+			"       MINVALUE 1\n" +
+			"       CACHE 1\n" +
+			"       NO CYCLE\n" +
+			"       OWNED BY seq_table.id;";
 //		System.out.println(sql + "\n-------------\n" + expected);
 
 		assertEquals(expected, sql.trim());

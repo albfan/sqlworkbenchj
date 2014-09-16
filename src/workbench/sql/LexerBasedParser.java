@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import workbench.log.LogMgr;
 
 import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.EncodingUtil;
@@ -60,12 +61,19 @@ public class LexerBasedParser
 	protected boolean checkOracleInclude;
 	protected boolean calledOnce;
 	protected boolean checkPgQuoting;
-
+	protected ParserType parserType;
 	protected Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
 	protected Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
 
 	public LexerBasedParser()
 	{
+		this.parserType = ParserType.Standard;
+	}
+
+	public LexerBasedParser(ParserType type)
+	{
+		this.parserType = type;
+		setCheckPgQuoting(parserType == ParserType.Postgres);
 	}
 
 	public LexerBasedParser(String script)
@@ -121,127 +129,118 @@ public class LexerBasedParser
 		calledOnce = true;
 
 		String delimiterString = delimiter.getDelimiter();
-		try
+		StringBuilder sql = null;
+		if (storeStatementText || !returnLeadingWhitespace)
 		{
-			StringBuilder sql = null;
-			if (storeStatementText || !returnLeadingWhitespace)
+			sql = new StringBuilder(250);
+		}
+
+		int previousEnd = -1;
+
+		SQLToken token = lexer.getNextToken(true, true);
+		boolean startOfLine = false;
+		boolean singleLineCommand = false;
+		boolean danglingQuote = false;
+		boolean inPgQuote = false;
+		String pgQuoteString = null;
+
+		while (token != null)
+		{
+			if (lastStart == -1) lastStart = token.getCharBegin();
+			String text = token.getText();
+
+			boolean checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
+
+			if (checkPgQuoting && isDollarQuote(text))
 			{
-				sql = new StringBuilder(250);
+				if (inPgQuote && text.equals(pgQuoteString))
+				{
+					inPgQuote = false;
+				}
+				else
+				{
+					inPgQuote = true;
+					pgQuoteString = text;
+				}
 			}
-
-			int previousEnd = -1;
-
-			SQLToken token = lexer.getNextToken();
-			boolean startOfLine = false;
-			boolean singleLineCommand = false;
-			boolean danglingQuote = false;
-			boolean inPgQuote = false;
-			String pgQuoteString = null;
-
-			while (token != null)
+			else if (token.isUnclosedString())
 			{
-				if (lastStart == -1) lastStart = token.getCharBegin();
-				String text = token.getText();
-
-				boolean checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
-
-				if (checkPgQuoting && isDollarQuote(text))
+				danglingQuote = true;
+			}
+			else if (danglingQuote)
+			{
+				if (text.charAt(0) == '\'')
 				{
-					if (inPgQuote && text.equals(pgQuoteString))
-					{
-						inPgQuote = false;
-					}
-					else
-					{
-						inPgQuote = true;
-						pgQuoteString = text;
-					}
+					danglingQuote = false;
 				}
-				else if (token.isUnclosedString())
+			}
+			else if (!inPgQuote)
+			{
+				if (checkOracleInclude && startOfLine && !singleLineCommand && text.charAt(0) == '@')
 				{
-					danglingQuote = true;
+					singleLineCommand = true;
 				}
-				else if (danglingQuote)
+
+				if (startOfLine && !token.isWhiteSpace())
 				{
-					if (text.charAt(0) == '\'')
-					{
-						danglingQuote = false;
-					}
+					startOfLine = false;
 				}
-				else if (!inPgQuote)
+
+				if (checkForDelimiter && delimiterString.equals(text))
 				{
-					if (checkOracleInclude && startOfLine && !singleLineCommand && text.charAt(0) == '@')
-					{
-						singleLineCommand = true;
-					}
+					break;
+				}
+				else if (checkForDelimiter && delimiterString.startsWith(text))
+				{
+					StringBuilder delim = new StringBuilder(delimiter.getDelimiter().length());
+					delim.append(text);
+					StringBuilder skippedText = new StringBuilder(text.length() + 5);
+					skippedText.append(text);
 
-					if (startOfLine && !token.isWhiteSpace())
+					while ((token = lexer.getNextToken(true, true)) != null)
 					{
-						startOfLine = false;
+						if (storeStatementText) skippedText.append(token.getText());
+						if (token.isComment() || token.isWhiteSpace() || token.isLiteral()) break;
+						delim.append(token.getText());
+						if (delim.length() > delimiterString.length()) break;
+						if (!delimiterString.startsWith(delim.toString())) break;
 					}
-
-					if (checkForDelimiter && delimiterString.equals(text))
+					boolean delimiterMatched = delimiterString.equals(delim.toString());
+					if (delimiterMatched)
 					{
 						break;
 					}
-					else if (checkForDelimiter && delimiterString.startsWith(text))
-					{
-						StringBuilder delim = new StringBuilder(delimiter.getDelimiter().length());
-						delim.append(text);
-						StringBuilder skippedText = new StringBuilder(text.length() + 5);
-						skippedText.append(text);
-
-						while ((token = lexer.getNextToken()) != null)
-						{
-							if (storeStatementText) skippedText.append(token.getText());
-							if (token.isComment() || token.isWhiteSpace() || token.isLiteral()) break;
-							delim.append(token.getText());
-							if (delim.length() > delimiterString.length()) break;
-							if (!delimiterString.startsWith(delim.toString())) break;
-						}
-						boolean delimiterMatched = delimiterString.equals(delim.toString());
-						if (delimiterMatched)
-						{
-							break;
-						}
-						text += skippedText.toString();
-					}
-					else if (isLineBreak(text))
-					{
-						if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text)))
-						{
-							break;
-						}
-						startOfLine = true;
-						singleLineCommand = false;
-					}
+					text += skippedText.toString();
 				}
-				previousEnd = token.getCharEnd();
-				token = lexer.getNextToken();
-				if (sql != null)
+				else if (isLineBreak(text))
 				{
-					sql.append(text);
+					if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text)))
+					{
+						break;
+					}
+					startOfLine = true;
+					singleLineCommand = false;
 				}
 			}
-			if (previousEnd > 0)
+			previousEnd = token.getCharEnd();
+			token = lexer.getNextToken(true, true);
+			if (sql != null)
 			{
-				if (token == null) previousEnd = realScriptLength;
-				ScriptCommandDefinition cmd = createCommandDef(sql, lastStart, previousEnd);
-				cmd.setIndexInScript(currentStatementIndex);
-				currentStatementIndex ++;
-				lastStart = -1;
-				hasMoreCommands = token != null && token.getCharEnd() < scriptLength;
-				return cmd;
+				sql.append(text);
 			}
-			hasMoreCommands = false;
-			return null;
 		}
-		catch (IOException e)
+		if (previousEnd > 0)
 		{
-			LogMgr.logError("LexerBasedParser.getNextCommand()", "Error parsing script", e);
-			hasMoreCommands = false;
-			return null;
+			if (token == null) previousEnd = realScriptLength;
+			ScriptCommandDefinition cmd = createCommandDef(sql, lastStart, previousEnd);
+			cmd.setIndexInScript(currentStatementIndex);
+			currentStatementIndex ++;
+			lastStart = -1;
+			hasMoreCommands = token != null && token.getCharEnd() < scriptLength;
+			return cmd;
 		}
+		hasMoreCommands = false;
+		return null;
 	}
 
 	boolean isLineBreak(String text)
@@ -314,7 +313,7 @@ public class LexerBasedParser
 	{
 		scriptLength = (int)FileUtil.getCharacterLength(f, encoding);
 		input = EncodingUtil.createBufferedReader(f, encoding);
-		lexer = new SQLLexer(input);
+		lexer = SQLLexerFactory.createLexer(input, parserType);
 		calledOnce = false;
 		hasMoreCommands = (scriptLength > 0);
 		fileEncoding = encoding;
@@ -332,7 +331,7 @@ public class LexerBasedParser
 	{
 		String toUse = StringUtil.rtrim(script);
 		input = new StringReader(toUse);
-		lexer = new SQLLexer(input);
+		lexer = SQLLexerFactory.createLexer(input, parserType);
 		scriptLength = toUse.length();
 		realScriptLength = script.length();
 		calledOnce = false;

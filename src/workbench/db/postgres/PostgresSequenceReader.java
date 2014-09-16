@@ -78,11 +78,11 @@ public class PostgresSequenceReader
 		try
 		{
 			String name = def.getSequenceName();
-			Long max = (Long) def.getSequenceProperty("MAXVALUE");
-			Long min = (Long) def.getSequenceProperty("MINVALUE");
-			Long inc = (Long) def.getSequenceProperty("INCREMENT");
-			Long cache = (Long) def.getSequenceProperty("CACHE");
-			Boolean cycle = (Boolean) def.getSequenceProperty("CYCLE");
+			Long max = (Long) def.getSequenceProperty(PROP_MAX_VALUE);
+			Long min = (Long) def.getSequenceProperty(PROP_MIN_VALUE);
+			Long inc = (Long) def.getSequenceProperty(PROP_INCREMENT);
+			Long cache = (Long) def.getSequenceProperty(PROP_CACHE);
+			Boolean cycle = (Boolean) def.getSequenceProperty(PROP_CYCLE);
 			if (cycle == null) cycle = Boolean.FALSE;
 
 			buf.append("CREATE SEQUENCE ");
@@ -105,26 +105,21 @@ public class PostgresSequenceReader
 				buf.append("NO");
 			}
 			buf.append(" CYCLE");
+			String col = def.getRelatedColumn();
+			TableIdentifier tbl = def.getRelatedTable();
+			if (tbl != null && StringUtil.isNonBlank(col))
+			{
+				buf.append("\n       OWNED BY ");
+				buf.append(tbl.getTableName());
+				buf.append('.');
+				buf.append(col);
+			}
 			buf.append(";\n");
 
 			if (StringUtil.isNonBlank(def.getComment()))
 			{
 				buf.append('\n');
 				buf.append("COMMENT ON SEQUENCE ").append(def.getSequenceName()).append(" IS '").append(def.getComment().replace("'", "''")).append("';");
-			}
-
-			String col = def.getRelatedColumn();
-			TableIdentifier tbl = def.getRelatedTable();
-			if (tbl != null && StringUtil.isNonBlank(col))
-			{
-				buf.append('\n');
-				buf.append("ALTER SEQUENCE ");
-				buf.append(def.getSequenceName());
-				buf.append(" OWNER TO ");
-				buf.append(tbl.getTableName());
-				buf.append('.');
-				buf.append(col);
-				buf.append(";\n");
 			}
 		}
 		catch (Exception e)
@@ -189,11 +184,11 @@ public class PostgresSequenceReader
 	private SequenceDefinition createDefinition(String name, String schema, DataStore ds)
 	{
 		SequenceDefinition def = new SequenceDefinition(schema, name);
-		def.setSequenceProperty("INCREMENT", ds.getValue(0, "increment_by"));
-		def.setSequenceProperty("MAXVALUE", ds.getValue(0, "max_value"));
-		def.setSequenceProperty("MINVALUE", ds.getValue(0, "min_value"));
-		def.setSequenceProperty("CACHE", ds.getValue(0, "cache_value"));
-		def.setSequenceProperty("CYCLE", ds.getValue(0, "is_cycled"));
+		def.setSequenceProperty(PROP_INCREMENT, ds.getValue(0, "increment_by"));
+		def.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(0, "max_value"));
+		def.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(0, "min_value"));
+		def.setSequenceProperty(PROP_CACHE, ds.getValue(0, "cache_value"));
+		def.setSequenceProperty(PROP_CYCLE, ds.getValue(0, "is_cycled"));
 		String ownedBy = ds.getValueAsString(0, "owned_by");
 		if (StringUtil.isNonEmpty(ownedBy))
 		{
@@ -202,7 +197,6 @@ public class PostgresSequenceReader
 			def.setRelatedTable(tbl, elements.get(1));
 		}
 		String comment = ds.getValueAsString(0, "remarks");
-		def.setSequenceProperty("REMARKS", comment);
 		def.setComment(comment);
 		return def;
 	}

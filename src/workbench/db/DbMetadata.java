@@ -96,6 +96,10 @@ import workbench.util.StringUtil;
 public class DbMetadata
 	implements QuoteHandler
 {
+	public static final String DBID_ORA = "oracle";
+	public static final String DBID_PG = "postgresql";
+	public static final String DBID_MS = "microsoft_sql_server";
+
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};
 
