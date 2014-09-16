@@ -56,7 +56,7 @@ public class FileUtil
 	/**
 	 * The size of the buffer used by copy()
 	 */
-	private static final int BUFF_SIZE = 64*1024;
+	private static final int BUFF_SIZE = 2048*1024;
 
 	/*
 	 * Closes all streams in the list.
@@ -235,7 +235,7 @@ public class FileUtil
 		BufferedReader in = null;
 		try
 		{
-			in = new BufferedReader(new FileReader(f), 8192);
+			in = new BufferedReader(new FileReader(f), 256 * 1024);
 			in.readLine(); // skip the first line
 			int lfSize = StringUtil.LINE_TERMINATOR.length();
 			for (int i=0; i < sampleLines; i++)
@@ -389,7 +389,7 @@ public class FileUtil
 		long result = 0;
 		try
 		{
-			r = EncodingUtil.createBufferedReader(source, encoding, 32*1024);
+			r = EncodingUtil.createBufferedReader(source, encoding, 512*1024);
 			// Not very efficient, but I can't think of a different solution
 			// to retrieve the number of characters
 			result = r.skip(Long.MAX_VALUE);

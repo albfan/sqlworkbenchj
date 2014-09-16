@@ -106,7 +106,7 @@ public class EncodingUtil
 	public static BufferedReader createBufferedReader(File f, String encoding)
 		throws IOException
 	{
-		return createBufferedReader(f, encoding, 16*1024);
+		return createBufferedReader(f, encoding, 1024*1024);
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class EncodingUtil
 		throws IOException
 	{
 		Writer pw = null;
-		final int buffSize = Settings.getInstance().getIntProperty("workbench.export.default.filebuffer", 4*1024*1024);
+		final int buffSize = 4*1024*1024;
 		if (encoding != null)
 		{
 			try
