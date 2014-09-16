@@ -97,7 +97,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(ARG_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_VIEWS_AS_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
-		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
+		cmdLine.addArgument(WbXslt.ARG_OUTPUT, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_PARAMETERS, ArgumentType.Repeatable);
 		cmdLine.addArgument(ARG_COMPARE_CHK_CONS_BY_NAME, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ADD_TYPES, ArgumentType.ListArgument);

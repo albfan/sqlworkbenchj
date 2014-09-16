@@ -29,10 +29,10 @@ import java.util.List;
 import workbench.liquibase.ChangeSetIdentifier;
 import workbench.liquibase.LiquibaseSupport;
 import workbench.resource.ResourceMgr;
-import workbench.sql.ParserType;
 
 import workbench.storage.RowActionMonitor;
 
+import workbench.sql.ParserType;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -61,7 +61,7 @@ public class WbRunLB
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_FILE);
+		cmdLine.addArgument(ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CHANGESET, ArgumentType.Repeatable);
 		cmdLine.addArgument(ARG_VERBOSE, ArgumentType.BoolSwitch);

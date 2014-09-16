@@ -81,9 +81,9 @@ public class WbGenerateScript
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("useSeparator", ArgumentType.BoolSwitch);
-		cmdLine.addArgument("file", ArgumentType.StringArgument);
+		cmdLine.addArgument("file", ArgumentType.Filename);
 		cmdLine.addArgument("includeDrop", ArgumentType.BoolSwitch);
-		cmdLine.addArgument("encoding", ArgumentType.StringArgument);
+		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
 	@Override
@@ -192,7 +192,7 @@ public class WbGenerateScript
 
 		result.setSuccess();
 
-		String encoding = cmdLine.getValue("encoding", EncodingUtil.getDefaultEncoding());
+		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, EncodingUtil.getDefaultEncoding());
 		if (output != null)
 		{
 			Writer writer = null;

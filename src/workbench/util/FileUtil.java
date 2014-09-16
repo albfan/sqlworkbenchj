@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -543,5 +544,26 @@ public class FileUtil
 			detector.reset();
 		}
 		return encoding;
+	}
+
+	public static void sortFiles(List<? extends File> files)
+	{
+		Comparator<File> comp = new Comparator<File>()
+		{
+			@Override
+			public int compare(File o1, File o2)
+			{
+				if (Objects.equals(o1, o2)) return 0;
+				if (o1 == null && o2 != null) return -1;
+				if (o1 != null && o2 == null) return 1;
+
+				if (o1.isDirectory() && o2.isFile()) return -1;
+				if (o1.isFile() && o2.isDirectory()) return 1;
+
+				// both objects are either files or directories;
+				return o1.compareTo(o2);
+			}
+		};
+		Collections.sort(files, comp);
 	}
 }

@@ -154,7 +154,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_SHEET_NAME);
 		cmdLine.addArgument(ARG_EMPTY_FILE, EmptyImportFileHandling.class);
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
-		cmdLine.addArgument(ARG_FILE);
+		cmdLine.addArgument(ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_TARGETTABLE, ArgumentType.TableArgument);
 		cmdLine.addArgument(ARG_QUOTE);
 		cmdLine.addArgument(ARG_CONTAINSHEADER, ArgumentType.BoolArgument);
@@ -167,7 +167,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_IMPORTCOLUMNS);
 		cmdLine.addArgument(ARG_COL_FILTER);
 		cmdLine.addArgument(ARG_LINE_FILTER);
-		cmdLine.addArgument(ARG_DIRECTORY);
+		cmdLine.addArgument(ARG_DIRECTORY, ArgumentType.DirName);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(ARG_USE_TRUNCATE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ILLEGAL_DATE_NULL, ArgumentType.BoolArgument);

@@ -43,8 +43,8 @@ import workbench.resource.Settings;
 import workbench.db.WbConnection;
 
 import workbench.gui.editor.JEditTextArea;
-import workbench.sql.ParserType;
 
+import workbench.sql.ParserType;
 import workbench.sql.ScriptParser;
 
 import workbench.util.CollectionUtil;
@@ -164,13 +164,13 @@ public class CompletionHandler
 			return false;
 		}
 
-		this.currentWord = editor.getWordLeftOfCursor(BaseAnalyzer.SELECT_WORD_DELIM);
-
 		try
 		{
 			StatementContext ctx = new StatementContext(this.dbConnection, sql, commandCursorPos);
+
 			if (ctx.isStatementSupported())
 			{
+				currentWord = editor.getWordLeftOfCursor(ctx.getAnalyzer().getWordDelimiters());
 				boolean selectWord = (ctx.getAnalyzer().getOverwriteCurrentWord() && StringUtil.isNonBlank(currentWord));
 				BaseAnalyzer analyzer = ctx.getAnalyzer();
 				if (analyzer != null && StringUtil.isNonBlank(currentWord) && analyzer.isWbParam() && currentWord.charAt(0) == '-')

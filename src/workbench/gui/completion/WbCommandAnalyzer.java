@@ -26,6 +26,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import workbench.liquibase.ChangeSetIdentifier;
 import workbench.liquibase.LiquibaseParser;
@@ -52,6 +54,7 @@ import workbench.sql.wbcommands.WbXslt;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.FileUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -75,6 +78,9 @@ public class WbCommandAnalyzer
 	private boolean changeCase;
 	private final String wordDelimiters = " \t";
 	private boolean useSheetIndex = true;
+
+	// Maps a Wb command to a map of recently used directories for each parameter
+	private static final Map<String, Map<String, String>> LRU_DIR_MAP = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
 	public WbCommandAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
@@ -282,6 +288,16 @@ public class WbCommandAnalyzer
 
 	private WbFile getCurrentDir(String parameter)
 	{
+		String lastDir = getLastDirectory(parameter);
+		if (StringUtil.isNonBlank(lastDir))
+		{
+			WbFile dir = new WbFile(lastDir);
+			if (dir.exists())
+			{
+				return dir;
+			}
+		}
+
 		if (parameter.equalsIgnoreCase(WbXslt.ARG_STYLESHEET))
 		{
 			File dir = Settings.getInstance().getDefaultXsltDirectory();
@@ -291,6 +307,36 @@ public class WbCommandAnalyzer
 			}
 		}
 		return new WbFile(".");
+	}
+
+	private String getLastDirectory(String parameter)
+	{
+		if (parameter == null) return null;
+		Map<String, String> parameterMap = LRU_DIR_MAP.get(getSqlVerb());
+		if (parameterMap == null) return null;
+		return parameterMap.get(parameter);
+	}
+
+	private void saveLastDirectory(WbFile file)
+	{
+		if (file == null) return;
+
+		Map<String, String> parameterMap = LRU_DIR_MAP.get(getSqlVerb());
+		if (parameterMap == null)
+		{
+			parameterMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+			LRU_DIR_MAP.put(getSqlVerb(), parameterMap);
+		}
+		String parameter = getCurrentParameter();
+		if (file.isDirectory())
+		{
+			parameterMap.put(parameter, file.getFullPath());
+		}
+		else
+		{
+			WbFile dir = new WbFile(file.getParentFile());
+			parameterMap.put(parameter, dir.getFullPath());
+		}
 	}
 
 	private List<WbFile> getFiles(ArgumentParser cmdLine, String parameter, boolean dirsOnly)
@@ -327,9 +373,11 @@ public class WbCommandAnalyzer
 			{
 				WbFile wb = new WbFile(f);
 				wb.setShowOnlyFilename(true);
+				wb.setShowDirsInBrackets(true);
 				result.add(wb);
 			}
 		}
+		FileUtil.sortFiles(result);
 		return result;
 	}
 
@@ -354,7 +402,9 @@ public class WbCommandAnalyzer
 		}
 		if (selectedObject instanceof WbFile)
 		{
-			return ((WbFile)selectedObject).getFullPath();
+			WbFile file = (WbFile)selectedObject;
+			saveLastDirectory(file);
+			return file.getFullPath();
 		}
 		return null;
 	}

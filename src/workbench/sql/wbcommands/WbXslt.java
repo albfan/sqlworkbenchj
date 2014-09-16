@@ -56,8 +56,8 @@ public class WbXslt
 		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_STYLESHEET, ArgumentType.Filename);
-		cmdLine.addArgument(ARG_OUTPUT);
-		cmdLine.addArgument(ARG_INPUT);
+		cmdLine.addArgument(ARG_OUTPUT, ArgumentType.Filename);
+		cmdLine.addArgument(ARG_INPUT, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_PARAMETERS, ArgumentType.Repeatable);
 	}
 

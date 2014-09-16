@@ -39,6 +39,7 @@ public class WbFile
 {
 
 	private boolean showOnlyFilename;
+	private boolean showDirsInBrackets;
 
 	/**
 	 * Create a new file object.
@@ -95,6 +96,11 @@ public class WbFile
 	public void setShowOnlyFilename(boolean flag)
 	{
 		this.showOnlyFilename = flag;
+	}
+
+	public void setShowDirsInBrackets(boolean flag)
+	{
+		this.showDirsInBrackets = flag;
 	}
 
 	/**
@@ -214,8 +220,13 @@ public class WbFile
 	{
 		if (showOnlyFilename)
 		{
+			if (showDirsInBrackets && this.isDirectory())
+			{
+				return "[" + getName() + "]";
+			}
 			return getName();
 		}
 		return getFullPath();
 	}
+
 }

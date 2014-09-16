@@ -69,8 +69,8 @@ public class WbGenDrop
 		super();
 		this.isUpdatingCommand = true;
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_DIR, ArgumentType.StringArgument);
-		cmdLine.addArgument(PARAM_FILE, ArgumentType.StringArgument);
+		cmdLine.addArgument(PARAM_DIR, ArgumentType.DirName);
+		cmdLine.addArgument(PARAM_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_CREATE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DROP_FK_ONLY, ArgumentType.BoolArgument);

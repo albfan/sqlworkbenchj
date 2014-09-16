@@ -74,7 +74,7 @@ public class WbGenDelete
 		super();
 		this.isUpdatingCommand = true;
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_FILE, ArgumentType.StringArgument);
+		cmdLine.addArgument(PARAM_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(PARAM_DO_FORMAT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_TABLE, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_COLUMN_VAL, ArgumentType.Repeatable);

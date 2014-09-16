@@ -83,7 +83,7 @@ public class WbSchemaReport
 		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
-		cmdLine.addArgument("file");
+		cmdLine.addArgument("file", ArgumentType.Filename);
 		cmdLine.addArgument(PARAM_TABLE_NAMES, ArgumentType.Deprecated);
 		cmdLine.addArgument(PARAM_OBJECT_NAMES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_EXCLUDE_OBJECTS, ArgumentType.TableArgument);
@@ -100,7 +100,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
-		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
+		cmdLine.addArgument(WbXslt.ARG_OUTPUT, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_PARAMETERS, ArgumentType.Repeatable);
 	}
 

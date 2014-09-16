@@ -164,7 +164,7 @@ public class WbExport
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
 
 		cmdLine.addArgument(ARG_EXPORT_TYPE, StringUtil.stringToList(exportTypes));
-		cmdLine.addArgument(ARG_OUTPUT_FILENAME);
+		cmdLine.addArgument(ARG_OUTPUT_FILENAME, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_TABLE_PREFIX);
 		cmdLine.addArgument(ARG_PAGE_TITLE);
 		cmdLine.addArgument(ARG_TABLE);
@@ -182,7 +182,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_APPEND, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_XML_VERSION, StringUtil.stringToList("1.0", "1.1"));
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
-		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
+		cmdLine.addArgument(WbXslt.ARG_OUTPUT, ArgumentType.Filename);
 		cmdLine.addArgument(WbImport.ARG_FILE_EXT);
 		cmdLine.addArgument(ARG_ESCAPE_HTML, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CREATEFULL_HTML_PAGE, ArgumentType.BoolArgument);
