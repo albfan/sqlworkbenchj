@@ -278,35 +278,41 @@
       The virtual machine limits the memory of the application independently from the installed
       memory that is available to the operating system.
     </para>
+
     <para>
-      &wb-productname; reads the data that is returned by a <literal>SELECT</literal>
-      statement into the main memory. When retrieving large result sets, you might
+      &wb-productname; reads <emphasis role="bold">all</emphasis> the data that is
+      returned by a SQL statement into memory. When retrieving large result sets, you might
       get an error message, indicating that not enough memory is available. In this
       case you need to increase the memory that the JVM requests from the operating
       system (or change your statement to return fewer rows).
     </para>
 
     <para>
+      When using 32bit Java runtime the default maximum memory is set to 1GB. When using a 64bit Java runtime
+      the default is set to 50% of the available physical memory.
+    </para>
+
+    <para>
       To increase the memory that is available to the application, you can pass the parameter <literal>-Xmx</literal>
-      to the Windows&reg; launcher, specifying the maximum memory the application should use. To increase the memory
-      to 1GB, you can use: <literal>-Xmx1024m</literal>. This can e.g. be added to the shortcut you use to
+      to the Windows&reg; launcher, specifying the maximum memory the application is allowed to use. To increase the memory
+      to 1.4GB, you can use: <literal>-Xmx1400m</literal>. This can e.g. be added to the shortcut you use to
       start &wb-productname;
     </para>
 
     <para>
-      As an alternative you can create a configuration file named <literal>SQLWorkbench.ini</literal> (or <literal>SQLWorkbench64.ini</literal>
-      when using the 64bit launcher) with the following content:
-      <programlisting>vm.heapsize.preferred=1024</programlisting>
-      This will increase the memory for the application to 512MB. For more options to configure the JVM, please refer to the
-      documentation of <ulink url="http://winrun4j.sourceforge.net/">WinRun4J</ulink>.
-      The configuration file has to be located in the same directory where the <literal>.exe</literal> is located.
+      <note>
+        With a 32bit Java runtime, you can't assign more than approx. 1.5GB for the application. If you really need
+        to process results that require that much memory you will have to use a 64bit Java runtime.
+      </note>
     </para>
 
-    <para>
+   <para>
       If you are running &wb-productname; on a non-Windows&reg; operating system or do not
-      want to use the launcher, then you need to pass this parameter directly to the JVM
+      want to use the launcher, then you need to pass this parameter directly to the JVM.
+      If you are running a 64bit Java runtime you can increase the memory to 2GB using
+      the following command line:
     </para>
-    <para><programlisting>java -Xmx512m -jar sqlworkbench.jar</programlisting></para>
+    <para><programlisting>java -Xmx2048m -jar sqlworkbench.jar</programlisting></para>
 
     <para>
       If you are using the supplied shell scripts to start &wb-productname;, you can
