@@ -12,14 +12,11 @@
 
 <xsl:output encoding="UTF-8" method="xml" indent="yes" cdata-section-elements="createView"/>
 
-<xsl:preserve-space elements="*"/>
-<xsl:strip-space elements="createView"/>
-
 <xsl:param name="schema.owner"/>
 <xsl:param name="tablespace.table"/>
 <xsl:param name="tablespace.index"/>
 <xsl:param name="authorName">sql-workbench</xsl:param>
-<xsl:param name="useJdbcTypes">false</xsl:param>
+<xsl:param name="useJdbcTypes">true</xsl:param>
 
 <xsl:import href="liquibase_common.xslt"/>
 
@@ -47,7 +44,7 @@
       <xsl:call-template name="add-fk">
         <xsl:with-param name="tablename" select="../../table-name"/>
       </xsl:call-template>
-      
+
     </xsl:for-each>  <!-- foreign keys -->
 
     <xsl:for-each select="proc-def">
@@ -73,39 +70,8 @@
     </xsl:for-each>
 
     <xsl:for-each select="sequence-def">
-      <xsl:variable name="seq-name" select="@name"/>
-      <createSequence sequenceName="{$seq-name}">
-        <xsl:if test="string-length($schema.owner) &gt; 0">
-          <xsl:attribute name="schemaName">
-            <xsl:value-of select="$schema.owner"/>
-          </xsl:attribute>
-        </xsl:if>
-        <xsl:if test="string-length(sequence-properties/property[@name='INCREMENT']/@value) &gt; 0">
-          <xsl:attribute name="incrementBy">
-            <xsl:value-of select="sequence-properties/property[@name='INCREMENT']/@value"/>
-          </xsl:attribute>
-        </xsl:if>
-        <xsl:if test="string-length(sequence-properties/property[@name='CYCLE']/@value) &gt; 0">
-          <xsl:attribute name="cycle">
-            <xsl:value-of select="sequence-properties/property[@name='CYCLE']/@value"/>
-          </xsl:attribute>
-        </xsl:if>
-        <xsl:if test="string-length(sequence-properties/property[@name='MIN_VALUE']/@value) &gt; 0">
-          <xsl:attribute name="minValue">
-            <xsl:value-of select="sequence-properties/property[@name='MIN_VALUE']/@value"/>
-          </xsl:attribute>
-        </xsl:if>
-        <xsl:if test="string-length(sequence-properties/property[@name='ORDERED']/@value) &gt; 0">
-          <xsl:attribute name="ordered">
-            <xsl:value-of select="sequence-properties/property[@name='ORDERED']/@value"/>
-          </xsl:attribute>
-        </xsl:if>
-      </createSequence>
-      <xsl:if test="string-length(sequence-properties/property[@name='OWNED_BY']/@value) &gt; 0">
-        <sql dbms="postgresql">
-          <xsl:text>ALTER SEQUENCE </xsl:text><xsl:value-of select="$seq-name"/><xsl:text> OWNED BY </xsl:text><xsl:value-of select="sequence-properties/property[@name='OWNED_BY']/@value"/><xsl:text>;</xsl:text>
-        </sql>
-      </xsl:if>
+       <!-- create sequence is handled in liquibase_common.xslt -->
+       <xsl:apply-templates select="."/>
     </xsl:for-each>
 
   </changeSet>

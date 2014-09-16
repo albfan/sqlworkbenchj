@@ -245,6 +245,49 @@
                            referencedColumnNames="{$referenced-columns}"/>
 </xsl:template>
 
+<xsl:template match="sequence-def">
+  <xsl:variable name="seq-name" select="@name"/>
+  <xsl:variable name="max-value" select="sequence-properties/property[@name='MAX_VALUE']/@value"/>
+
+  <createSequence sequenceName="{$seq-name}">
+    <xsl:if test="string-length($schema.owner) &gt; 0">
+      <xsl:attribute name="schemaName">
+        <xsl:value-of select="$schema.owner"/>
+      </xsl:attribute>
+    </xsl:if>
+    <xsl:if test="string-length(sequence-properties/property[@name='INCREMENT']/@value) &gt; 0">
+      <xsl:attribute name="incrementBy">
+        <xsl:value-of select="sequence-properties/property[@name='INCREMENT']/@value"/>
+      </xsl:attribute>
+    </xsl:if>
+    <xsl:if test="string-length(sequence-properties/property[@name='CYCLE']/@value) &gt; 0">
+      <xsl:attribute name="cycle">
+        <xsl:value-of select="sequence-properties/property[@name='CYCLE']/@value"/>
+      </xsl:attribute>
+    </xsl:if>
+    <xsl:if test="string-length(sequence-properties/property[@name='MIN_VALUE']/@value) &gt; 0">
+      <xsl:attribute name="minValue">
+        <xsl:value-of select="sequence-properties/property[@name='MIN_VALUE']/@value"/>
+      </xsl:attribute>
+    </xsl:if>
+    <xsl:if test="string-length($max-value) &gt; 0 and $max-value != '9223372036854775807' and substr($max-value, 1, 27) != '999999999999999999999999999'">
+      <xsl:attribute name="maxValue">
+        <xsl:value-of select="sequence-properties/property[@name='MAX_VALUE']/@value"/>
+      </xsl:attribute>
+    </xsl:if>
+    <xsl:if test="string-length(sequence-properties/property[@name='ORDERED']/@value) &gt; 0">
+      <xsl:attribute name="ordered">
+        <xsl:value-of select="sequence-properties/property[@name='ORDERED']/@value"/>
+      </xsl:attribute>
+    </xsl:if>
+  </createSequence>
+  <xsl:if test="string-length(sequence-properties/property[@name='OWNED_BY']/@value) &gt; 0">
+    <sql dbms="postgresql">
+      <xsl:text>ALTER SEQUENCE </xsl:text><xsl:value-of select="$seq-name"/><xsl:text> OWNED BY </xsl:text><xsl:value-of select="sequence-properties/property[@name='OWNED_BY']/@value"/><xsl:text>;</xsl:text>
+    </sql>
+  </xsl:if>
+</xsl:template>
+
 <!--
   Map jdbc data types (from java.sql.Types) to a proper data type
   using scale and precision where approriate.

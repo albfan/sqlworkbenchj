@@ -49,13 +49,13 @@
 
     <!-- put all foreign keys in a single changeset -->
     <changeSet author="{$authorName}" id="initial-fk">
-    
+
       <xsl:for-each select="table-def/foreign-keys/foreign-key">
         <xsl:call-template name="add-fk">
           <xsl:with-param name="tablename" select="../../table-name"/>
         </xsl:call-template>
-      </xsl:for-each> 
-      
+      </xsl:for-each>
+
     </changeSet>
 
     <xsl:for-each select="proc-def">
@@ -87,17 +87,10 @@
     </xsl:for-each>
 
     <xsl:for-each select="sequence-def">
-      <xsl:variable name="seq-name" select="@name"/>
       <xsl:variable name="id" select="position()"/>
       <!-- one changeset for each table -->
       <changeSet author="{$authorName}" id="initial-seq-{$id}">
-        <createSequence sequenceName="{$seq-name}">
-          <xsl:if test="string-length($schema.owner) &gt; 0">
-            <xsl:attribute name="schemaName">
-              <xsl:value-of select="$schema.owner"/>
-            </xsl:attribute>
-          </xsl:if>
-        </createSequence>
+        <xsl:apply-templates select="."/>
       </changeSet>
     </xsl:for-each>
 
