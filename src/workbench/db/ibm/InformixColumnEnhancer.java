@@ -47,7 +47,7 @@ import workbench.util.StringUtil;
 public class InformixColumnEnhancer
 	implements ColumnDefinitionEnhancer
 {
-	private final Map<Integer, String> limits = new HashMap<Integer, String>(11);
+	private final Map<Integer, String> limits = new HashMap<>(11);
 
 	public InformixColumnEnhancer()
 	{
@@ -119,7 +119,7 @@ public class InformixColumnEnhancer
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		Map<String, ColumnIdentifier> cols = new TreeMap<String, ColumnIdentifier>(CaseInsensitiveComparator.INSTANCE);
+		Map<String, ColumnIdentifier> cols = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			cols.put(col.getColumnName(), col);

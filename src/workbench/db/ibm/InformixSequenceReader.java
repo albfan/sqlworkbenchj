@@ -61,7 +61,7 @@ public class InformixSequenceReader
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>(ds.getRowCount());
+		List<SequenceDefinition> result = new ArrayList<>(ds.getRowCount());
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
 			result.add(createSequenceDefinition(ds, row));
@@ -82,12 +82,13 @@ public class InformixSequenceReader
 		String name = ds.getValueAsString(row, "sequence_name");
 		String schema = ds.getValueAsString(row, "sequence_schema");
 		SequenceDefinition result = new SequenceDefinition(schema, name);
-		result.setSequenceProperty("START", ds.getValue(row, "start_val"));
-		result.setSequenceProperty("MINVALUE", ds.getValue(row, "min_val"));
-		result.setSequenceProperty("MAXVALUE", ds.getValue(row, "max_val"));
-		result.setSequenceProperty("INCREMENT", ds.getValue(row, "inc_val"));
-		result.setSequenceProperty("CYCLE", ds.getValue(row, "cycle"));
-		result.setSequenceProperty("ORDER", ds.getValue(row, "order"));
+		result.setSequenceProperty(PROP_START_VALUE, ds.getValue(row, "start_val"));
+		result.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(row, "min_val"));
+		result.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "max_val"));
+		result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "inc_val"));
+		result.setSequenceProperty(PROP_CYCLE, Boolean.valueOf(StringUtil.stringToBool(ds.getValueAsString(row, "cycle"))));
+		result.setSequenceProperty(PROP_ORDERED, Boolean.valueOf(StringUtil.stringToBool(ds.getValueAsString(row, "order"))));
+		result.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(row, "cache"));
 		readSequenceSource(result);
 		return result;
 	}
@@ -183,38 +184,38 @@ public class InformixSequenceReader
 		result.append("CREATE SEQUENCE ");
 		result.append(def.getSequenceName());
 
-		Number start = (Number) def.getSequenceProperty("START");
-		Number minvalue = (Number) def.getSequenceProperty("MINVALUE");
-		Number maxvalue = (Number) def.getSequenceProperty("MAXVALUE");
-		Number increment = (Number) def.getSequenceProperty("INCREMENT");
-		String cycle = (String) def.getSequenceProperty("CYCLE");
-		String order = (String) def.getSequenceProperty("ORDER");
-		Number cache = (Number) def.getSequenceProperty("CACHE");
+		Number start = (Number) def.getSequenceProperty(PROP_START_VALUE);
+		Number minvalue = (Number) def.getSequenceProperty(PROP_MIN_VALUE);
+		Number maxvalue = (Number) def.getSequenceProperty(PROP_MAX_VALUE);
+		Number increment = (Number) def.getSequenceProperty(PROP_INCREMENT);
+		boolean cycle = (Boolean) def.getSequenceProperty(PROP_CYCLE);
+		boolean order = (Boolean) def.getSequenceProperty(PROP_ORDERED);
+		Number cache = (Number) def.getSequenceProperty(PROP_CACHE_SIZE);
 
-		result.append(buildSequenceDetails(true, start, minvalue, maxvalue, increment, cycle, order, cache));
+		result.append(buildSequenceDetails(start, minvalue, maxvalue, increment, cycle, order, cache));
 
 		result.append(';');
 		result.append(nl);
 		def.setSource(result);
 	}
 
-	public static CharSequence buildSequenceDetails(boolean doFormat, Number start, Number minvalue, Number maxvalue, Number increment, String cycle, String order, Number cache)
+	private CharSequence buildSequenceDetails(Number start, Number minvalue, Number maxvalue, Number increment, boolean cycle, boolean order, Number cache)
 	{
 		StringBuilder result = new StringBuilder(30);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 
 		if (start != null && start.longValue() > 0)
 		{
-			if (doFormat) result.append(nl + "       ");
+			result.append(nl + "       ");
 			result.append("START WITH ");
 			result.append(start);
 		}
 
-		if (doFormat) result.append(nl + "      ");
+		result.append(nl + "      ");
 		result.append(" INCREMENT BY ");
 		result.append(increment);
 
-		if (doFormat) result.append(nl + "      ");
+		result.append(nl + "      ");
 
 		boolean hasMinValue = minvalue != null && minvalue.longValue() != 1;
 
@@ -225,30 +226,52 @@ public class InformixSequenceReader
 		}
 		else
 		{
-			if (doFormat) result.append(" NOMINVALUE");
+			result.append(" NOMINVALUE");
 		}
 
-		if (doFormat) result.append(nl + "      ");
+		result.append(nl + "      ");
 		boolean hasMaxValue = maxvalue != null && maxvalue.longValue() != Long.MAX_VALUE;
 		if (hasMaxValue)
 		{
 			result.append(" MAXVALUE ");
 			result.append(maxvalue);
 		}
-		else if (doFormat)
+		else
 		{
-			result.append(" NO MAXVALUE");
+			result.append(" NOMAXVALUE");
 		}
 
-		if (doFormat) result.append(nl + "      ");
-		if (cycle != null && cycle.equals("1"))
+		result.append(nl + "      ");
+		if (cycle)
 		{
 			result.append(" CYCLE");
 		}
-		else if (doFormat)
+		else
 		{
-			result.append(" NO CYCLE");
+			result.append(" NOCYCLE");
 		}
+
+		result.append(nl + "      ");
+		if (order)
+		{
+			result.append(" ORDER");
+		}
+		else
+		{
+			result.append(" NOORDER");
+		}
+
+		result.append(nl + "      ");
+		if (cache != null && cache.longValue() > 0)
+		{
+			result.append(" CACHE ");
+			result.append(cache.toString());
+		}
+		else
+		{
+			result.append(" NOCACHE");
+		}
+
 
 		return result;
 	}

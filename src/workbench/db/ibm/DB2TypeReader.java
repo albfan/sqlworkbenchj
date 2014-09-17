@@ -57,7 +57,7 @@ import workbench.util.StringUtil;
 public class DB2TypeReader
 	implements ObjectListExtender, ObjectListEnhancer
 {
-	private final Map<String, Integer> typeNameMap = new HashMap<String, Integer>(10);
+	private final Map<String, Integer> typeNameMap = new HashMap<>(10);
 
 	public DB2TypeReader()
 	{
@@ -116,7 +116,7 @@ public class DB2TypeReader
 
 	public List<DB2ObjectType> getTypes(WbConnection con, String schemaPattern, String namePattern)
 	{
-		List<DB2ObjectType> result = new ArrayList<DB2ObjectType>();
+		List<DB2ObjectType> result = new ArrayList<>();
 		String select =
 			"select typeschema,  \n" +
 			"       typename,   \n" +
@@ -359,7 +359,7 @@ public class DB2TypeReader
 
 		Statement stmt = null;
 		ResultSet rs = null;
-		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(type.getNumberOfAttributes());
+		List<ColumnIdentifier> result = new ArrayList<>(type.getNumberOfAttributes());
 		try
 		{
 			stmt = con.createStatementForQuery();

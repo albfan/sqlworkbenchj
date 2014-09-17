@@ -61,7 +61,7 @@ public class Db2SearchPath
 			return Collections.singletonList(con.getMetadata().adjustSchemaNameCase(defaultSchema));
 		}
 
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 
 		ResultSet rs = null;
 		Statement stmt = null;
@@ -113,7 +113,7 @@ public class Db2SearchPath
 
 	List<String> parseResult(List<String> entries)
 	{
-		List<String> searchPath = new ArrayList<String>(entries.size());
+		List<String> searchPath = new ArrayList<>(entries.size());
 		for (String line : entries)
 		{
 			if (line.charAt(0) != '*')
