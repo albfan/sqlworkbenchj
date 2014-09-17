@@ -105,7 +105,7 @@ public class H2DomainReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
-		List<DomainIdentifier> result = new ArrayList<DomainIdentifier>();
+		List<DomainIdentifier> result = new ArrayList<>();
 		try
 		{
 			sp = connection.setSavepoint();

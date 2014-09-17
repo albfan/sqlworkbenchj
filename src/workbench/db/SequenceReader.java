@@ -39,6 +39,7 @@ public interface SequenceReader
 	public static final String PROP_INCREMENT = "increment";
 	public static final String PROP_CACHE_SIZE = "cache";
 	public static final String PROP_IS_CACHED = "is_cached";
+	public static final String PROP_IS_GENERATED = "is_generated";
 	public static final String PROP_CYCLE = "cycle";
 	public static final String PROP_MIN_VALUE = "min_value";
 	public static final String PROP_MAX_VALUE = "max_value";

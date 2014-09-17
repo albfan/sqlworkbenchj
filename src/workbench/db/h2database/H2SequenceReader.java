@@ -27,12 +27,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -69,7 +73,7 @@ public class H2SequenceReader
 	{
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		List<SequenceDefinition> result = new ArrayList<>();
 
 		for (int row=0; row < ds.getRowCount(); row++)
 		{
@@ -97,12 +101,13 @@ public class H2SequenceReader
 		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
 		result = new SequenceDefinition(schema, name);
 
-		result.setSequenceProperty("CURRENT_VALUE", ds.getValue(row, "CURRENT_VALUE"));
-		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
-		result.setSequenceProperty("IS_GENERATED", ds.getValue(row, "IS_GENERATED"));
+		result.setSequenceProperty(PROP_CURRENT_VALUE, ds.getValue(row, "CURRENT_VALUE"));
+		result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "INCREMENT"));
+		result.setSequenceProperty(PROP_IS_GENERATED, ds.getValue(row, "IS_GENERATED"));
+		result.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(row, "CACHE"));
+
 		String comment = ds.getValueAsString(row, "REMARKS");
 		result.setComment(comment);
-		result.setSequenceProperty("CACHE", ds.getValue(row, "CACHE"));
 		readSequenceSource(result);
 
 		return result;
@@ -119,7 +124,7 @@ public class H2SequenceReader
     result.append("CREATE SEQUENCE ");
     result.append(def.getSequenceName());
 
-		Long inc = (Long)def.getSequenceProperty("INCREMENT");
+		Long inc = (Long)def.getSequenceProperty(PROP_INCREMENT);
     if (inc != null && inc != 1)
     {
       result.append("\n       INCREMENT BY ");
@@ -127,7 +132,7 @@ public class H2SequenceReader
     }
 
     result.append("\n       CACHE ");
-		result.append(def.getSequenceProperty("CACHE").toString());
+		result.append(def.getSequenceProperty(PROP_CACHE_SIZE).toString());
 
 		result.append(';');
 		result.append(nl);
