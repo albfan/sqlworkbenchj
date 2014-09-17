@@ -73,12 +73,12 @@ public class PostgresColumnEnhancer
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			String dbmsType = col.getDbmsType();
-			String defaultValue = col.getDefaultValue();
 			if (dbmsType.endsWith("serial"))
 			{
+				String defaultValue = col.getDefaultValue();
 				if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.serial.show", true))
 				{
-					if (dbmsType.endsWith("serial") && defaultValue != null && defaultValue.startsWith("nextval"))
+					if (defaultValue != null && defaultValue.startsWith("nextval"))
 					{
 						col.setDefaultValue(null);
 					}
