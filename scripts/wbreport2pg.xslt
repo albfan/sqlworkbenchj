@@ -246,6 +246,8 @@
   </xsl:template>
 
   <xsl:template match="sequence-def">
+    <xsl:variable name="max-value" select="sequence-properties/property[@name='MAX_VALUE']/@value"/>
+
     <xsl:text>CREATE SEQUENCE </xsl:text>
     <xsl:call-template name="write-object-name">
       <xsl:with-param name="objectname" select="sequence-name"/>
@@ -266,15 +268,19 @@
       <xsl:value-of select="$newline"/>
       <xsl:text>   MINVALUE </xsl:text><xsl:value-of select="sequence-properties/property[@name='MINVALUE']/@value"/>
     </xsl:if>
-    
-    <!-- now deal with attributes retrieved from an Oracle Database (e.g. when migrating) -->
-    <xsl:if test="sequence-properties/property[@name='CACHE_SIZE']/@value != '1'">
+    <xsl:if test="string-length($max-value) &gt; 0 and $max-value != '9223372036854775807'">
       <xsl:value-of select="$newline"/>
-      <xsl:text>   CACHE </xsl:text><xsl:value-of select="sequence-properties/property[@name='CACHE_SIZE']/@value"/>
+      <xsl:text>   MAXVALUE </xsl:text><xsl:value-of select="$max-value"/>
     </xsl:if>
+    <xsl:if test="string-length(sequence-properties/property[@name='OWNED_BY']/@value) &gt; 0">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>   OWNED BY </xsl:text><xsl:value-of select="sequence-properties/property[@name='OWNED_BY']/@value"/>
+    </xsl:if>
+    <xsl:text>;</xsl:text>
+    <xsl:value-of select="$newline"/>
     <xsl:value-of select="$newline"/>
   </xsl:template>
-  
+
   <xsl:template name="process-fk">
     <xsl:for-each select="/schema-report/table-def">
       <xsl:variable name="table">
