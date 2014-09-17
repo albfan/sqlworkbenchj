@@ -44,6 +44,8 @@ public class ReportSequence
 	public static final String TAG_SEQ_COMMENT = "sequence-comment";
 	public static final String TAG_SEQ_SOURCE = "sequence-source";
 	public static final String TAG_SEQ_PROPS = "sequence-properties";
+	public static final String TAG_SEQ_OWNING_TABLE = "owned-by-table";
+	public static final String TAG_SEQ_OWNING_COLUMN = "owned-by-column";
 	public static final String TAG_SEQ_PROPERTY = "property";
 
 	private SequenceDefinition sequence;
@@ -93,6 +95,11 @@ public class ReportSequence
 		{
 			tagWriter.appendTag(line, colindent, TAG_SEQ_CATALOG, this.sequence.getCatalog());
 		}
+		if (sequence.getRelatedTable() != null && sequence.getRelatedColumn() != null)
+		{
+			tagWriter.appendTag(line, colindent, TAG_SEQ_OWNING_TABLE, sequence.getRelatedTable().getTableName());
+			tagWriter.appendTag(line, colindent, TAG_SEQ_OWNING_COLUMN, sequence.getRelatedColumn());
+		}
 		tagWriter.appendTag(line, colindent, TAG_SEQ_SCHEMA, (this.schemaNameToUse == null ? this.sequence.getSequenceOwner() : this.schemaNameToUse));
 		tagWriter.appendTag(line, colindent, TAG_SEQ_NAME, this.sequence.getSequenceName());
 		tagWriter.appendTagConditionally(line, colindent, TAG_SEQ_COMMENT, sequence.getComment());
@@ -128,6 +135,7 @@ public class ReportSequence
 
 		tagWriter.appendOpenTag(toAppend, indent, TAG_SEQ_PROPS);
 		toAppend.append('\n');
+
 		for (String propName : sequence.getProperties())
 		{
 			if ("remarks".equalsIgnoreCase("propName")) continue;
@@ -138,6 +146,7 @@ public class ReportSequence
 			tagWriter.appendOpenTag(toAppend, myindent, TAG_SEQ_PROPERTY, false, name, val);
 			toAppend.append("/>\n");
 		}
+
 		if (sequence.getRelatedTable() != null && sequence.getRelatedColumn() != null)
 		{
 			String colref = sequence.getRelatedTable().getTableName() + "." + sequence.getRelatedColumn();

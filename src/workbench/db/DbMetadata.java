@@ -2557,7 +2557,7 @@ public class DbMetadata
 				type = type.trim();
 
 				if (isIndexType(type)) continue;
-				types.add(type);
+				types.add(type.toUpperCase());
 			}
 		}
 		catch (Exception e)
@@ -2585,8 +2585,12 @@ public class DbMetadata
 		Set<String> result = CollectionUtil.caseInsensitiveSet();
 		result.addAll(retrieveTableTypes());
 
-		List<String> addTypes = Settings.getInstance().getListProperty("workbench.db." + this.getDbId() + ".additional.objecttypes",false);
-		result.addAll(addTypes);
+		String types = System.getProperty("workbench.db." + this.getDbId() + ".additional.objecttypes", "");
+		if (StringUtil.isNonBlank(types))
+		{
+			List<String> addTypes = StringUtil.stringToList(types.toUpperCase(), ",", true, true, false, false);
+			result.addAll(addTypes);
+		}
 
 		if (supportsSynonyms())
 		{

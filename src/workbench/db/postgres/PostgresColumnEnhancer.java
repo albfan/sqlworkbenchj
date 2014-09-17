@@ -27,13 +27,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
 import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -51,6 +54,7 @@ import workbench.util.StringUtil;
 public class PostgresColumnEnhancer
 	implements ColumnDefinitionEnhancer
 {
+	public static final String PROP_SHOW_REAL_SERIAL_DEF = "workbench.db.postgresql.serial.show";
 
 	@Override
 	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
@@ -73,15 +77,23 @@ public class PostgresColumnEnhancer
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			String dbmsType = col.getDbmsType();
-			if (dbmsType.endsWith("serial"))
+			String defaultValue = col.getDefaultValue();
+			if (dbmsType.endsWith("serial") && defaultValue != null)
 			{
-				String defaultValue = col.getDefaultValue();
-				if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.serial.show", true))
+				// The nextval() call is returned with a full qualified name if the
+				// sequence is not in the current schema.
+				// to avoid calling WbConnection.getCurrentSchema() for each default value
+				// I'm just checking for a . in the default value which would indicate a fully qualified sequence
+				String expectedDefault = "nextval('" ;
+				if (defaultValue.indexOf('.') > -1)
 				{
-					if (defaultValue != null && defaultValue.startsWith("nextval"))
-					{
-						col.setDefaultValue(null);
-					}
+					expectedDefault += table.getTable().getRawSchema()+ ".";
+				}
+				expectedDefault += table.getTable().getRawTableName() + "_" + col.getColumnName() + "_seq'::regclass)";
+
+				if (Settings.getInstance().getBoolProperty(PROP_SHOW_REAL_SERIAL_DEF, true) && (defaultValue.equals(expectedDefault)))
+				{
+					col.setDefaultValue(null);
 				}
 				else
 				{

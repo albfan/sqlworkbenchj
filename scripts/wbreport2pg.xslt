@@ -14,7 +14,7 @@
   omit-xml-declaration="yes"
 />
 
-  <xsl:param name="useJdbcTypes">true</xsl:param>
+  <xsl:param name="useJdbcTypes">false</xsl:param>
   <xsl:param name="makeLowerCase">true</xsl:param>
 
   <xsl:strip-space elements="*"/>
@@ -30,12 +30,17 @@
 
 
   <xsl:template match="/">
+    <xsl:apply-templates select="/schema-report/sequence-def">
+      <xsl:with-param name="definition-part" select="'create'"/>
+    </xsl:apply-templates>
     <xsl:apply-templates select="/schema-report/table-def"/>
+    <xsl:apply-templates select="/schema-report/sequence-def">
+      <xsl:with-param name="definition-part" select="'owner'"/>
+    </xsl:apply-templates>
     <xsl:apply-templates select="/schema-report/view-def"/>
     <xsl:call-template name="process-fk"/>
-    <xsl:apply-templates select="/schema-report/sequence-def"/>
     <xsl:value-of select="$newline"/>
-    <xsl:text>commit;</xsl:text>
+    <xsl:text>COMMIT;</xsl:text>
   </xsl:template>
 
   <xsl:template match="table-def">
@@ -246,39 +251,54 @@
   </xsl:template>
 
   <xsl:template match="sequence-def">
+    <xsl:param name="definition-part" select="'create'"/>
     <xsl:variable name="max-value" select="sequence-properties/property[@name='MAX_VALUE']/@value"/>
+    <xsl:variable name="owned-by" select="sequence-properties/property[@name='OWNED_BY']/@value"/>
+    <xsl:variable name="owner-table" select="owned-by-table"/>
+    <xsl:variable name="owner-column" select="owned-by-column"/>
 
-    <xsl:text>CREATE SEQUENCE </xsl:text>
-    <xsl:call-template name="write-object-name">
-      <xsl:with-param name="objectname" select="sequence-name"/>
-    </xsl:call-template>
-    <xsl:value-of select="$newline"/>
-    <xsl:for-each select="sequence-properties/property">
-    </xsl:for-each>
-    <xsl:text>   INCREMENT BY </xsl:text><xsl:value-of select="sequence-properties/property[@name='INCREMENT']/@value"/>
-    <xsl:if test="sequence-properties/property[@name='CACHE']/@value != '1'">
+    <xsl:variable name="col-type" select="/schema-report/table-def[@name=$owner-table]/column-def[@name=$owner-column]/dbms-data-type"/>
+
+    <xsl:if test="$col-type != 'serial' and $col-type != 'bigserial' and $definition-part = 'create'">
+      <xsl:text>CREATE SEQUENCE </xsl:text>
+      <xsl:call-template name="write-object-name">
+        <xsl:with-param name="objectname" select="sequence-name"/>
+      </xsl:call-template>
       <xsl:value-of select="$newline"/>
-      <xsl:text>   CACHE </xsl:text><xsl:value-of select="sequence-properties/property[@name='CACHE']/@value"/>
-    </xsl:if>
-    <xsl:if test="sequence-properties/property[@name='CYCLE']/@value = 'true'">
+      <xsl:for-each select="sequence-properties/property">
+      </xsl:for-each>
+      <xsl:text>   INCREMENT BY </xsl:text><xsl:value-of select="sequence-properties/property[@name='INCREMENT']/@value"/>
+      <xsl:if test="sequence-properties/property[@name='CACHE']/@value != '1'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>   CACHE </xsl:text><xsl:value-of select="sequence-properties/property[@name='CACHE']/@value"/>
+      </xsl:if>
+      <xsl:if test="sequence-properties/property[@name='CYCLE']/@value = 'true'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>   CYCLE</xsl:text>
+      </xsl:if>
+      <xsl:if test="sequence-properties/property[@name='MINVALUE']/@value != '1'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>   MINVALUE </xsl:text><xsl:value-of select="sequence-properties/property[@name='MINVALUE']/@value"/>
+      </xsl:if>
+      <xsl:if test="string-length($max-value) &gt; 0 and $max-value != '9223372036854775807'">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>   MAXVALUE </xsl:text><xsl:value-of select="$max-value"/>
+      </xsl:if>
+      <xsl:text>;</xsl:text>
       <xsl:value-of select="$newline"/>
-      <xsl:text>   CYCLE</xsl:text>
-    </xsl:if>
-    <xsl:if test="sequence-properties/property[@name='MINVALUE']/@value != '1'">
       <xsl:value-of select="$newline"/>
-      <xsl:text>   MINVALUE </xsl:text><xsl:value-of select="sequence-properties/property[@name='MINVALUE']/@value"/>
     </xsl:if>
-    <xsl:if test="string-length($max-value) &gt; 0 and $max-value != '9223372036854775807'">
+    <xsl:if test="$col-type != 'serial' and $col-type != 'bigserial' and string-length($owned-by) &gt; 0 and $definition-part = 'owner'">
+      <xsl:text>ALTER SEQUENCE </xsl:text>
+      <xsl:call-template name="write-object-name">
+        <xsl:with-param name="objectname" select="sequence-name"/>
+      </xsl:call-template>
       <xsl:value-of select="$newline"/>
-      <xsl:text>   MAXVALUE </xsl:text><xsl:value-of select="$max-value"/>
-    </xsl:if>
-    <xsl:if test="string-length(sequence-properties/property[@name='OWNED_BY']/@value) &gt; 0">
+      <xsl:text>   OWNED BY </xsl:text><xsl:value-of select="$owned-by"/>
+      <xsl:text>;</xsl:text>
       <xsl:value-of select="$newline"/>
-      <xsl:text>   OWNED BY </xsl:text><xsl:value-of select="sequence-properties/property[@name='OWNED_BY']/@value"/>
     </xsl:if>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
-    <xsl:value-of select="$newline"/>
+
   </xsl:template>
 
   <xsl:template name="process-fk">
