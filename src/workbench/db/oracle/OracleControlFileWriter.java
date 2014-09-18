@@ -60,7 +60,7 @@ public class OracleControlFileWriter
 	implements FormatFileWriter
 {
 
-	private final Map<String, String> encodingMap = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
+	private final Map<String, String> encodingMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
 	public OracleControlFileWriter()
 	{
@@ -141,7 +141,7 @@ public class OracleControlFileWriter
 				format = Settings.getInstance().getDefaultTimestampFormat();
 			}
 			String oraFormat = convertJavaDateFormatToOracle(format);
-			List<String> blobColumns = new LinkedList<String>();
+			List<String> blobColumns = new LinkedList<>();
 			boolean clobAsFile = exporter.getWriteClobAsFile();
 			for (int i = 0; i < count; i++)
 			{
