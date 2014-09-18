@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.liquibase.ChangeSetIdentifier;
-import workbench.liquibase.LiquibaseSupport;
+import workbench.liquibase.LiquibaseParser;
 import workbench.resource.ResourceMgr;
 
 import workbench.storage.RowActionMonitor;
@@ -146,10 +146,11 @@ public class WbRunLB
 		try
 		{
 			runner.setVerboseLogging(verbose);
-			LiquibaseSupport lb = new LiquibaseSupport(file, encoding);
-			lb.setParserType(ParserType.getTypeFromConnection(currentConnection));
+			MessageBuffer messages = new MessageBuffer();
+			ParserType parserType = ParserType.getTypeFromConnection(currentConnection);
+			LiquibaseParser lb = new LiquibaseParser(file, encoding, messages, parserType);
 
-			List<String> statements = lb.getSQLFromChangeSet(ids);
+			List<String> statements = lb.getContentFromChangeSet(ids);
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 
 			for (int i=0; i < statements.size(); i++)
@@ -172,10 +173,10 @@ public class WbRunLB
 			{
 				this.rowMonitor.jobFinished();
 			}
-			MessageBuffer warnings = lb.getWarnings();
-			if (warnings.getLength() > 0)
+
+			if (messages.getLength() > 0)
 			{
-				result.addMessage(warnings);
+				result.addMessage(messages);
 				result.setWarning(true);
 			}
 		}

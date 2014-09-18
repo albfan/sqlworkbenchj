@@ -24,6 +24,7 @@ package workbench.liquibase;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,6 +34,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.ParserType;
 import workbench.sql.ScriptParser;
 
 import workbench.util.CollectionUtil;
@@ -56,21 +58,33 @@ import org.xml.sax.SAXException;
  */
 public class LiquibaseParser
 {
-	private WbFile changeLog;
+	private final WbFile changeLog;
 	private String fileEncoding;
 	private MessageBuffer messages;
 	private final String TAG_CHANGESET = "changeSet";
 	private final String TAG_SQLFILE = "sqlFile";
 	private final String TAG_SQL = "sql";
 	private final String TAG_CREATEPROC = "createProcedure";
+	private final ParserType sqlParserType;
 
-	public LiquibaseParser(WbFile xmlFile, String encoding, MessageBuffer buffer)
+	public LiquibaseParser(WbFile xmlFile)
+	{
+		this(xmlFile, "UTF-8", new MessageBuffer(), ParserType.Standard);
+	}
+	
+	public LiquibaseParser(WbFile xmlFile, String encoding, MessageBuffer buffer, ParserType parserType)
 	{
 		changeLog = xmlFile;
 		fileEncoding = encoding;
 		messages = buffer;
+		sqlParserType = parserType;
 	}
 
+	public List<String> getContentFromChangeSet(ChangeSetIdentifier ... ids)
+		throws IOException, SAXException
+	{
+		return getContentFromChangeSet(ids == null ? null : Arrays.asList(ids));
+	}
 
 	/**
 	 * Return the text stored in all <sql> or <createProcedure> tags
@@ -79,10 +93,10 @@ public class LiquibaseParser
 	 * @param changeSetIds a list of changeSetIds to use. If this is null, all changesets are used
 	 * @return null if no supported tag was found, all stored SQL scripts otherwise
 	 */
-	public List<LiquibaseTagContent> getContentFromChangeSet(List<ChangeSetIdentifier> changeSetIds)
+	public List<String> getContentFromChangeSet(List<ChangeSetIdentifier> changeSetIds)
 		throws IOException, SAXException
 	{
-		List<LiquibaseTagContent> result = new ArrayList<>();
+		List<String> result = new ArrayList<>();
 		try
 		{
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -98,7 +112,7 @@ public class LiquibaseParser
 				ChangeSetIdentifier cs = getChangeSetId(item);
 				if (isChangeSetIncluded(changeSetIds, cs) && item instanceof Element)
 				{
-					List<LiquibaseTagContent> content = getContent((Element)item);
+					List<String> content = getContent((Element)item);
 					if (content != null)
 					{
 						result.addAll(content);
@@ -113,9 +127,9 @@ public class LiquibaseParser
 		return result;
 	}
 
-	private List<LiquibaseTagContent> getContent(Element item)
+	private List<String> getContent(Element item)
 	{
-		List<LiquibaseTagContent> result = new ArrayList<>();
+		List<String> result = new ArrayList<>();
 
 		NodeList nodes = item.getChildNodes();
 		int size = nodes.getLength();
@@ -134,7 +148,15 @@ public class LiquibaseParser
 				{
 					splitStatements = getSplitAttribute(element);
 				}
-				result.add(new LiquibaseTagContent(element.getTextContent(), splitStatements));
+				DelimiterDefinition delim = getDelimiter(element);
+				if (splitStatements)
+				{
+					result.addAll(splitStatements(element.getTextContent(), delim));
+				}
+				else
+				{
+					result.add(element.getTextContent());
+				}
 			}
 
 			if (TAG_SQLFILE.equals(tagName))
@@ -146,17 +168,41 @@ public class LiquibaseParser
 		return result;
 	}
 
-	private List<LiquibaseTagContent> getContentFromSqlFile(Element element)
+	private List<String> splitStatements(String content, DelimiterDefinition delimiter)
+	{
+		List<String> result = new ArrayList<>();
+		ScriptParser parser = new ScriptParser(content);
+		parser.setParserType(sqlParserType);
+		parser.setAlternateDelimiter(delimiter);
+		int count = parser.getSize();
+
+		for (int c = 0; c < count; c++)
+		{
+			result.add(parser.getCommand(c));
+		}
+		return result;
+	}
+
+	private DelimiterDefinition getDelimiter(Element node)
+	{
+		String delimiter = node.getAttribute("endDelimiter");
+		if (StringUtil.isBlank(delimiter)) return null;
+		DelimiterDefinition delim = new DelimiterDefinition(delimiter);
+		if (delim.isStandard()) return null;
+		return delim;
+	}
+
+	private List<String> getContentFromSqlFile(Element element)
 	{
 		String path = element.getAttribute("path");
-		List<LiquibaseTagContent> result = new ArrayList<>();
+		List<String> result = new ArrayList<>();
 
 		if (StringUtil.isEmptyString(path)) return result;
 
 		String encoding = element.getAttribute("encoding");
 		if (StringUtil.isEmptyString(encoding)) encoding = fileEncoding;
 		if (StringUtil.isEmptyString(encoding))	encoding = EncodingUtil.getDefaultEncoding();
-		String delimiter = element.getAttribute("endDelimiter");
+		DelimiterDefinition delimiter = getDelimiter(element);
 		boolean relative = StringUtil.stringToBool(element.getAttribute("relativeToChangelogFile"));
 		boolean split = getSplitAttribute(element);
 		WbFile include;
@@ -173,10 +219,7 @@ public class LiquibaseParser
 		if (include.exists())
 		{
 			List<String> statements = readSqlFile(include, delimiter, encoding, split);
-			for (String sql : statements)
-			{
-				result.add(new LiquibaseTagContent(sql, false));
-			}
+			result.addAll(statements);
 		}
 		else
 		{
@@ -252,7 +295,7 @@ public class LiquibaseParser
 		return false;
 	}
 
-	private List<String> readSqlFile(WbFile include, String delimiter, String encoding, boolean splitStatements)
+	private List<String> readSqlFile(WbFile include, DelimiterDefinition delimiter, String encoding, boolean splitStatements)
 	{
 		List<String> result = new ArrayList<>();
 		try
@@ -260,14 +303,8 @@ public class LiquibaseParser
 			if (splitStatements)
 			{
 				ScriptParser parser = new ScriptParser(include, encoding);
-				if (StringUtil.isNonBlank(delimiter))
-				{
-					DelimiterDefinition delim = new DelimiterDefinition(delimiter);
-					if (!delim.isStandard())
-					{
-						parser.setAlternateDelimiter(delim);
-					}
-				}
+				parser.setAlternateDelimiter(delimiter);
+				parser.setParserType(sqlParserType);
 				int count = parser.getSize();
 				for (int i=0; i < count; i++)
 				{

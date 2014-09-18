@@ -40,6 +40,7 @@ import workbench.db.WbConnection;
 import workbench.db.importer.SpreadsheetReader;
 
 import workbench.sql.CommandMapper;
+import workbench.sql.ParserType;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
 import workbench.sql.wbcommands.CommonArgs;
@@ -416,7 +417,7 @@ public class WbCommandAnalyzer
 		try
 		{
 			MessageBuffer messages = new MessageBuffer(1);
-			LiquibaseParser parser = new LiquibaseParser(file, encoding, messages);
+			LiquibaseParser parser = new LiquibaseParser(file, encoding, messages, ParserType.Standard);
 			List<ChangeSetIdentifier> changeSets = parser.getChangeSets();
 			List result = new ArrayList();
 			for (final ChangeSetIdentifier set : changeSets)
