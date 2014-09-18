@@ -22,9 +22,9 @@
   <xsl:variable name="dsquote"><xsl:text>&#39;&#39;</xsl:text></xsl:variable>
 
 <xsl:template match="/">
+  <xsl:apply-templates select="/schema-report/sequence-def"/>
   <xsl:apply-templates select="/schema-report/table-def"/>
   <xsl:apply-templates select="/schema-report/view-def"/>
-  <xsl:apply-templates select="/schema-report/sequence-def"/>
   <xsl:call-template name="process-fk"/>
 </xsl:template>
 
