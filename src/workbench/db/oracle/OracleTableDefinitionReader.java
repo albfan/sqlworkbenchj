@@ -29,14 +29,12 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
-import workbench.db.ConnectionProfile;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
@@ -126,7 +124,7 @@ public class OracleTableDefinitionReader
 		String schema = StringUtil.trimQuotes(table.getSchema());
 		String tablename = StringUtil.trimQuotes(table.getTableName());
 
-		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> columns = new ArrayList<>();
 
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
@@ -456,25 +454,6 @@ public class OracleTableDefinitionReader
 		}
 
 		return linkOwner;
-	}
-
-	/**
-	 * Checks if the property "remarksReporting" is enabled for the given connection.
-	 *
-	 * @param con the connection to test
-	 * @return true if the driver returns comments for tables and columns
-	 */
-	public static boolean remarksEnabled(WbConnection con)
-	{
-		if (con == null) return false;
-		ConnectionProfile prof = con.getProfile();
-		Properties props = prof.getConnectionProperties();
-		String value = "false";
-		if (props != null)
-		{
-			value = props.getProperty("remarksReporting", "false");
-		}
-		return "true".equals(value);
 	}
 
 }
