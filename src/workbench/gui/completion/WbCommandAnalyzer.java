@@ -339,7 +339,7 @@ public class WbCommandAnalyzer
 		}
 	}
 
-	private List<TooltipElement> getFiles(ArgumentParser cmdLine, String parameter, boolean dirsOnly)
+	private List<WbFile> getFiles(ArgumentParser cmdLine, String parameter, boolean dirsOnly)
 	{
 		String name = cmdLine.getValue(parameter);
 		File[] files;
@@ -366,36 +366,17 @@ public class WbCommandAnalyzer
 			return null;
 		}
 
-		FileUtil.sortFiles(files);
-
-		List<TooltipElement> result = new ArrayList<>(files.length);
+		List<WbFile> result = new ArrayList<>(files.length);
 		for (File f : files)
 		{
 			if (!dirsOnly || f.isDirectory())
 			{
-				final WbFile wb = new WbFile(f);
-				TooltipElement element = new TooltipElement()
-				{
-
-					@Override
-					public String getTooltip()
-					{
-						return wb.getFullPath();
-					}
-
-					@Override
-					public String toString()
-					{
-						if (wb.isDirectory())
-						{
-							return "[" + wb.getFileName() + "]";
-						}
-						return wb.getFileName();
-					}
-				};
-				result.add(element);
+				WbFile wb = new TooltipFile(f);
+				result.add(wb);
 			}
 		}
+		FileUtil.sortFiles(result);
+
 		return result;
 	}
 

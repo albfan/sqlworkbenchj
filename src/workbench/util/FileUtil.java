@@ -551,7 +551,7 @@ public class FileUtil
 	 *
 	 * @param files
 	 */
-	public static void sortFiles(File[] files)
+	public static void sortFiles(List<? extends File> files)
 	{
 		Comparator<File> comp = new Comparator<File>()
 		{
@@ -569,6 +569,6 @@ public class FileUtil
 				return o1.compareTo(o2);
 			}
 		};
-		Arrays.sort(files, comp);
+		Collections.sort(files, comp);
 	}
 }
