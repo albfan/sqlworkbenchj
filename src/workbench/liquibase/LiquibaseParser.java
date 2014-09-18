@@ -22,15 +22,12 @@
  */
 package workbench.liquibase;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -40,60 +37,40 @@ import workbench.sql.ScriptParser;
 
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class LiquibaseParser
-	extends DefaultHandler
 {
 	private WbFile changeLog;
-	private String xmlEncoding;
-	private SAXParser saxParser;
-	private Set<String> tagsToRead = CollectionUtil.treeSet("sql", "createProcedure");
-	private List<LiquibaseTagContent> resultTags = new ArrayList<>();
-	private List<ChangeSetIdentifier> idsToRead;
-	private List<ChangeSetIdentifier> idsFromChangeLog;
-	private boolean captureContent;
-	private final String CHANGESET_TAG = "changeSet";
-	private final String SQL_FILE_TAG = "sqlFile";
-	private StringBuilder currentContent;
-	private boolean currentSplitValue;
-	private boolean collectChangeSets;
-	private final MessageBuffer warnings;
-
-	public LiquibaseParser(WbFile xmlFile, MessageBuffer buffer)
-	{
-		this(xmlFile, "UTF-8", buffer);
-	}
+	private String fileEncoding;
+	private MessageBuffer messages;
+	private final String TAG_CHANGESET = "changeSet";
+	private final String TAG_SQLFILE = "sqlFile";
+	private final String TAG_SQL = "sql";
+	private final String TAG_CREATEPROC = "createProcedure";
 
 	public LiquibaseParser(WbFile xmlFile, String encoding, MessageBuffer buffer)
 	{
 		changeLog = xmlFile;
-		xmlEncoding = encoding;
-		warnings = buffer;
-    SAXParserFactory factory = SAXParserFactory.newInstance();
-    factory.setValidating(false);
-    try
-    {
-      saxParser = factory.newSAXParser();
-    }
-    catch (Exception e)
-    {
-      // should not happen!
-      LogMgr.logError("XmlDataFileParser.<init>", "Error creating XML parser", e);
-    }
+		fileEncoding = encoding;
+		messages = buffer;
 	}
+
 
 	/**
 	 * Return the text stored in all <sql> or <createProcedure> tags
@@ -105,49 +82,169 @@ public class LiquibaseParser
 	public List<LiquibaseTagContent> getContentFromChangeSet(List<ChangeSetIdentifier> changeSetIds)
 		throws IOException, SAXException
 	{
-		collectChangeSets = false;
-		idsToRead = changeSetIds == null ? null : new ArrayList<>(changeSetIds);
-		Reader in = EncodingUtil.createReader(changeLog, xmlEncoding);
+		List<LiquibaseTagContent> result = new ArrayList<>();
 		try
 		{
-			InputSource source = new InputSource(in);
-			saxParser.parse(source, this);
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(changeLog);
+
+			doc.getDocumentElement().normalize();
+			NodeList elements = doc.getElementsByTagName(TAG_CHANGESET);
+			int size = elements.getLength();
+			for (int i=0; i < size; i++)
+			{
+				Node item = elements.item(i);
+				ChangeSetIdentifier cs = getChangeSetId(item);
+				if (isChangeSetIncluded(changeSetIds, cs) && item instanceof Element)
+				{
+					List<LiquibaseTagContent> content = getContent((Element)item);
+					if (content != null)
+					{
+						result.addAll(content);
+					}
+				}
+			}
 		}
-		finally
+		catch (Exception ex)
 		{
-			FileUtil.closeQuietely(in);
+			LogMgr.logError("LiquibaseParser.getContentFromChangeSet()", "Could not parse file: " + changeLog.getFullPath(), ex);
 		}
-		return resultTags;
+		return result;
+	}
+
+	private List<LiquibaseTagContent> getContent(Element item)
+	{
+		List<LiquibaseTagContent> result = new ArrayList<>();
+
+		NodeList nodes = item.getChildNodes();
+		int size = nodes.getLength();
+		for (int i=0; i<size; i++)
+		{
+			Node node = nodes.item(i);
+			if (node.getNodeType() != Node.ELEMENT_NODE) continue;
+
+			Element element = (Element)node;
+			String tagName = element.getTagName();
+
+			if (TAG_SQL.equals(tagName) || TAG_CREATEPROC.equals(tagName))
+			{
+				boolean splitStatements = false;
+				if (TAG_SQL.equals(tagName))
+				{
+					splitStatements = getSplitAttribute(element);
+				}
+				result.add(new LiquibaseTagContent(element.getTextContent(), splitStatements));
+			}
+
+			if (TAG_SQLFILE.equals(tagName))
+			{
+				result.addAll(getContentFromSqlFile(element));
+			}
+
+		}
+		return result;
+	}
+
+	private List<LiquibaseTagContent> getContentFromSqlFile(Element element)
+	{
+		String path = element.getAttribute("path");
+		List<LiquibaseTagContent> result = new ArrayList<>();
+
+		if (StringUtil.isEmptyString(path)) return result;
+
+		String encoding = element.getAttribute("encoding");
+		if (StringUtil.isEmptyString(encoding)) encoding = fileEncoding;
+		if (StringUtil.isEmptyString(encoding))	encoding = EncodingUtil.getDefaultEncoding();
+		String delimiter = element.getAttribute("endDelimiter");
+		boolean relative = StringUtil.stringToBool(element.getAttribute("relativeToChangelogFile"));
+		boolean split = getSplitAttribute(element);
+		WbFile include;
+
+		if (relative)
+		{
+			include = new WbFile(changeLog.getParentFile(), path);
+		}
+		else
+		{
+			include = new WbFile(path);
+		}
+
+		if (include.exists())
+		{
+			List<String> statements = readSqlFile(include, delimiter, encoding, split);
+			for (String sql : statements)
+			{
+				result.add(new LiquibaseTagContent(sql, false));
+			}
+		}
+		else
+		{
+			String msg = ResourceMgr.getFormattedString("ErrFileNotFound", path);
+			messages.append(msg);
+			LogMgr.logError("LiquibaseParser.getContent()", "sqlFile=\"" + path + "\" not found!", null);
+		}
+
+		return result;
+	}
+
+	private boolean getSplitAttribute(Element element)
+	{
+		String split = element.getAttribute("splitStatements");
+		if (StringUtil.isBlank(split)) return true;
+		return Boolean.parseBoolean(split);
+	}
+
+	private ChangeSetIdentifier getChangeSetId(Node item)
+	{
+		NamedNodeMap attributes = item.getAttributes();
+		String author = attributes.getNamedItem("author").getTextContent();
+		String id = attributes.getNamedItem("id").getTextContent();
+		ChangeSetIdentifier cs = new ChangeSetIdentifier(author, id);
+		if (item instanceof Element)
+		{
+			NodeList comments = ((Element)item).getElementsByTagName("comment");
+			if (comments != null && comments.getLength() == 1)
+			{
+				String comment = comments.item(0).getTextContent();
+				cs.setComment(comment);
+			}
+		}
+		return cs;
 	}
 
 	public List<ChangeSetIdentifier> getChangeSets()
 	{
-		collectChangeSets = true;
-		idsFromChangeLog = new ArrayList<>();
-		Reader in = null;
+		List<ChangeSetIdentifier> result = new ArrayList<>();
 		try
 		{
-			in = EncodingUtil.createReader(changeLog, xmlEncoding);
-			InputSource source = new InputSource(in);
-			saxParser.parse(source, this);
+			DocumentBuilderFactory factor = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factor.newDocumentBuilder();
+			Document doc = builder.parse(changeLog);
+
+			doc.getDocumentElement().normalize();
+			NodeList elements = doc.getElementsByTagName(TAG_CHANGESET);
+			int size = elements.getLength();
+			for (int i=0; i < size; i++)
+			{
+				Node item = elements.item(i);
+				ChangeSetIdentifier id = getChangeSetId(item);
+				result.add(id);
+			}
 		}
-		catch (Throwable th)
+		catch (Exception ex)
 		{
-			LogMgr.logError("LiquibaseParser.getChangeSets()", "Could not retrieve list of change sets", th);
+			LogMgr.logError("LiquibaseParser.getChangeSets()", "Could not parse file: " + changeLog.getFullPath(), ex);
 		}
-		finally
-		{
-			FileUtil.closeQuietely(in);
-		}
-		return idsFromChangeLog;
+		return result;
 	}
 
-	private boolean isChangeSetIncluded(ChangeSetIdentifier toCheck)
+	private boolean isChangeSetIncluded(List<ChangeSetIdentifier> toRead, ChangeSetIdentifier toCheck)
 	{
 		if (toCheck == null) return false;
-		if (CollectionUtil.isEmpty(idsToRead)) return true;
+		if (CollectionUtil.isEmpty(toRead)) return true;
 
-		for (ChangeSetIdentifier id : idsToRead)
+		for (ChangeSetIdentifier id : toRead)
 		{
 			if (toCheck.isEqualTo(id)) return true;
 		}
@@ -155,106 +252,14 @@ public class LiquibaseParser
 		return false;
 	}
 
-	@Override
-	public void startElement(String namespaceURI, String sName, String tagName, Attributes attrs)
-		throws SAXException
-	{
-		if (tagName.equals(CHANGESET_TAG))
-		{
-			ChangeSetIdentifier id = new ChangeSetIdentifier(attrs.getValue("author"), attrs.getValue("id"));
-			if (collectChangeSets)
-			{
-				idsFromChangeLog.add(id);
-			}
-			else if (isChangeSetIncluded(id))
-			{
-				captureContent = true;
-			}
-		}
-		else if (captureContent)
-		{
-			if (tagName.equals(SQL_FILE_TAG) && attrs.getValue("path") != null)
-			{
-				String path = attrs.getValue("path");
-				String delim = attrs.getValue("endDelimiter");
-				boolean split = Boolean.parseBoolean(attrs.getValue("splitStatements"));
-
-				WbFile file = new WbFile(path);
-				File parent = changeLog.getParentFile();
-
-				if (!file.exists() && !file.isAbsolute())
-				{
-					file = new WbFile(parent, path);
-				}
-
-				if (file.exists())
-				{
-					List<String> statements = readSqlFile(file, delim, split);
-					for (String sql : statements)
-					{
-						LiquibaseTagContent tag = new LiquibaseTagContent(sql, false);
-						resultTags.add(tag);
-					}
-				}
-				else
-				{
-					String msg = ResourceMgr.getFormattedString("ErrFileNotFound", path);
-					warnings.append(msg);
-					LogMgr.logError("LiquibaseParser.startElement()", "sqlFile=\"" + path + "\" not found!", null);
-				}
-			}
-			else if (tagsToRead.contains(tagName))
-			{
-				currentContent = new StringBuilder(500);
-				if (tagName.equals("sql"))
-				{
-					String split = attrs.getValue("splitStatements");
-					if (StringUtil.isBlank(split)) split = "true";
-					currentSplitValue = StringUtil.stringToBool(split);
-				}
-				else
-				{
-					currentSplitValue = false;
-				}
-			}
-		}
-	}
-
-	@Override
-	public void endElement(String namespaceURI, String sName, String tagName)
-		throws SAXException
-	{
-		if (tagName.equals(CHANGESET_TAG))
-		{
-			captureContent = false;
-		}
-		if (currentContent != null && tagsToRead.contains(tagName))
-		{
-			LiquibaseTagContent tag = new LiquibaseTagContent(currentContent.toString(), currentSplitValue);
-			resultTags.add(tag);
-			currentContent = null;
-		}
-	}
-
-	@Override
-	public void characters(char[] buf, int offset, int len)
-		throws SAXException
-	{
-		if (currentContent != null)
-		{
-			this.currentContent.append(buf, offset, len);
-		}
-	}
-
-	private List<String> readSqlFile(WbFile include, String delimiter, boolean splitStatements)
-		throws SAXException
+	private List<String> readSqlFile(WbFile include, String delimiter, String encoding, boolean splitStatements)
 	{
 		List<String> result = new ArrayList<>();
 		try
 		{
 			if (splitStatements)
 			{
-				ScriptParser parser = new ScriptParser(include, xmlEncoding);
+				ScriptParser parser = new ScriptParser(include, encoding);
 				if (StringUtil.isNonBlank(delimiter))
 				{
 					DelimiterDefinition delim = new DelimiterDefinition(delimiter);
@@ -271,13 +276,14 @@ public class LiquibaseParser
 			}
 			else
 			{
-				String script = FileUtil.readFile(include, xmlEncoding);
+				String script = FileUtil.readFile(include, encoding);
 				result.add(script);
 			}
 		}
-		catch (IOException io)
+		catch (Exception ex)
 		{
-			throw new SAXException(io);
+			messages.append(ExceptionUtil.getDisplay(ex));
+			LogMgr.logError("LiquibaseParser.getContent()", "Could not read sqlFile=\"" + include.getFullPath() + "\"", ex);
 		}
 		return result;
 	}

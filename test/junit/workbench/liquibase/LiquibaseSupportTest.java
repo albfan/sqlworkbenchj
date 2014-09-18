@@ -116,6 +116,7 @@ public class LiquibaseSupportTest
 			"</databaseChangeLog>";
 
 		TestUtil util = getTestUtil();
+		util.emptyBaseDirectory();
 		WbFile xmlFile = new WbFile(util.getBaseDir(), "changelog.xml");
 
 		TestUtil.writeFile(xmlFile, xml, "UTF-8");
@@ -186,6 +187,7 @@ public class LiquibaseSupportTest
 			"</databaseChangeLog>";
 
 		TestUtil util = getTestUtil();
+		util.emptyBaseDirectory();
 		WbFile xmlFile = new WbFile(util.getBaseDir(), "changelog.xml");
 
 		TestUtil.writeFile(xmlFile, xml, "UTF-8");
@@ -229,6 +231,7 @@ public class LiquibaseSupportTest
 			"</databaseChangeLog>";
 
 		TestUtil util = getTestUtil();
+		util.emptyBaseDirectory();
 		WbFile xmlFile = new WbFile(util.getBaseDir(), "changelog.xml");
 		WbFile scriptDir = new WbFile(util.getBaseDir(), "scripts");
 		scriptDir.mkdirs();
