@@ -95,7 +95,6 @@ public class CompletionPopup
 	private StatementContext context;
 	private boolean selectCurrentWordInEditor;
 	protected CompletionSearchField searchField;
-	private boolean dbStoresMixedCase;
 	private boolean ignoreSearchChange;
 	private CompletionListRenderer listRenderer;
 
@@ -281,11 +280,6 @@ public class CompletionPopup
 		}
 	}
 
-	public void setDbStoresMixedCase(boolean flag)
-	{
-		this.dbStoresMixedCase = flag;
-	}
-
 	/**
 	 * Callback from the SearchField when enter has been pressed in the search field
 	 */
@@ -300,12 +294,11 @@ public class CompletionPopup
 		String result;
 		GeneratedIdentifierCase pasteCase = Settings.getInstance().getAutoCompletionPasteCase();
 
-		boolean isKeyword = context.getAnalyzer().getContext() == BaseAnalyzer.CONTEXT_KW_LIST;
 		QuoteHandler quoteHandler = context.getAnalyzer().getQuoteHandler();
 
 		if (this.context.getAnalyzer().convertCase())
 		{
-			if (!isKeyword && (quoteHandler.isQuoted(value.trim()) || StringUtil.isMixedCase(value) || dbStoresMixedCase ))
+			if (pasteCase == asIs || quoteHandler.isQuoted(value.trim()))
 			{
 				result = value;
 			}

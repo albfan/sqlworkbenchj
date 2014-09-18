@@ -91,10 +91,6 @@ public class CompletionHandler
 	public void setConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
-		if (this.window != null)
-		{
-			this.window.setDbStoresMixedCase(dbConnection != null ? dbConnection.getMetadata().storesMixedCaseIdentifiers() : false);
-		}
 	}
 
 	protected void showPopup()
@@ -125,7 +121,6 @@ public class CompletionHandler
 		if (this.window == null)
 		{
 			this.window = new CompletionPopup(editor, header, this);
-			this.window.setDbStoresMixedCase(dbConnection != null ? dbConnection.getMetadata().storesMixedCaseIdentifiers() : false);
 		}
 
 		// if this is not done in a separate thread
