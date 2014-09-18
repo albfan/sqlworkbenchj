@@ -38,9 +38,6 @@ public class WbFile
 	extends File
 {
 
-	private boolean showOnlyFilename;
-	private boolean showDirsInBrackets;
-
 	/**
 	 * Create a new file object.
 	 *
@@ -91,16 +88,6 @@ public class WbFile
 	public WbFile(String filename)
 	{
 		super(StringUtil.replaceProperties(filename));
-	}
-
-	public void setShowOnlyFilename(boolean flag)
-	{
-		this.showOnlyFilename = flag;
-	}
-
-	public void setShowDirsInBrackets(boolean flag)
-	{
-		this.showDirsInBrackets = flag;
 	}
 
 	/**
@@ -218,14 +205,6 @@ public class WbFile
 	@Override
 	public String toString()
 	{
-		if (showOnlyFilename)
-		{
-			if (showDirsInBrackets && this.isDirectory())
-			{
-				return "[" + getName() + "]";
-			}
-			return getName();
-		}
 		return getFullPath();
 	}
 

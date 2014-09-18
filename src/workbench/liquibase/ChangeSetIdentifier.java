@@ -32,6 +32,7 @@ public class ChangeSetIdentifier
 {
 	private final String author;
 	private final String id;
+	private String comment;
 
 	/**
 	 * Initialize the identifier using a combined string in the format <tt>author::id</tt>.
@@ -68,6 +69,16 @@ public class ChangeSetIdentifier
 	{
 		this.author = author == null ? "*" : author.trim();
 		this.id = id == null ? "*" : id.trim();
+	}
+
+	public String getComment()
+	{
+		return comment;
+	}
+	
+	public void setComment(String comment)
+	{
+		this.comment = comment;
 	}
 
 	public String getAuthor()

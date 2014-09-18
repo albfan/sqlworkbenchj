@@ -546,7 +546,12 @@ public class FileUtil
 		return encoding;
 	}
 
-	public static void sortFiles(List<? extends File> files)
+	/**
+	 * Sorts the file such that directories come first, and regular files afterwards.
+	 *
+	 * @param files
+	 */
+	public static void sortFiles(File[] files)
 	{
 		Comparator<File> comp = new Comparator<File>()
 		{
@@ -564,6 +569,6 @@ public class FileUtil
 				return o1.compareTo(o2);
 			}
 		};
-		Collections.sort(files, comp);
+		Arrays.sort(files, comp);
 	}
 }

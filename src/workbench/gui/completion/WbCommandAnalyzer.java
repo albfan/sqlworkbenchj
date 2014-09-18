@@ -339,7 +339,7 @@ public class WbCommandAnalyzer
 		}
 	}
 
-	private List<WbFile> getFiles(ArgumentParser cmdLine, String parameter, boolean dirsOnly)
+	private List<TooltipElement> getFiles(ArgumentParser cmdLine, String parameter, boolean dirsOnly)
 	{
 		String name = cmdLine.getValue(parameter);
 		File[] files;
@@ -366,18 +366,36 @@ public class WbCommandAnalyzer
 			return null;
 		}
 
-		List<WbFile> result = new ArrayList<>(files.length);
+		FileUtil.sortFiles(files);
+
+		List<TooltipElement> result = new ArrayList<>(files.length);
 		for (File f : files)
 		{
 			if (!dirsOnly || f.isDirectory())
 			{
-				WbFile wb = new WbFile(f);
-				wb.setShowOnlyFilename(true);
-				wb.setShowDirsInBrackets(true);
-				result.add(wb);
+				final WbFile wb = new WbFile(f);
+				TooltipElement element = new TooltipElement()
+				{
+
+					@Override
+					public String getTooltip()
+					{
+						return wb.getFullPath();
+					}
+
+					@Override
+					public String toString()
+					{
+						if (wb.isDirectory())
+						{
+							return "[" + wb.getFileName() + "]";
+						}
+						return wb.getFileName();
+					}
+				};
+				result.add(element);
 			}
 		}
-		FileUtil.sortFiles(result);
 		return result;
 	}
 
@@ -420,9 +438,22 @@ public class WbCommandAnalyzer
 			LiquibaseParser parser = new LiquibaseParser(file, encoding, messages);
 			List<ChangeSetIdentifier> changeSets = parser.getChangeSets();
 			List result = new ArrayList();
-			for (ChangeSetIdentifier set : changeSets)
+			for (final ChangeSetIdentifier set : changeSets)
 			{
-				result.add(set.toString());
+				TooltipElement element = new TooltipElement()
+				{
+					@Override
+					public String getTooltip()
+					{
+						return set.getComment();
+					}
+					@Override
+					public String toString()
+					{
+						return set.toString();
+					}
+				};
+				result.add(element);
 			}
 			return result;
 		}
@@ -518,6 +549,7 @@ public class WbCommandAnalyzer
 	}
 
 	private static class SheetEntry
+		implements TooltipElement
 	{
 		private final int sheetIndex;
 		private final String sheetName;
@@ -528,6 +560,12 @@ public class WbCommandAnalyzer
 			this.sheetIndex = index;
 			this.sheetName = name;
 			this.displayString = display;
+		}
+
+		@Override
+		public String getTooltip()
+		{
+			return sheetName + " - " + NumberStringCache.getNumberString(sheetIndex);
 		}
 
 		@Override

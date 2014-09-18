@@ -105,6 +105,10 @@ public class CompletionListRenderer
 			}
 			setToolTipText(tooltip);
 		}
+		else if (value instanceof TooltipElement)
+		{
+			setToolTipText(((TooltipElement)value).getTooltip());
+		}
 		else
 		{
 			setToolTipText(null);
