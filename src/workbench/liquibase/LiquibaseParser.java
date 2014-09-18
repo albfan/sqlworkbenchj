@@ -53,6 +53,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
+ * A class to read information from a Liquibase ChangeLog.
  *
  * @author Thomas Kellerer
  */
@@ -71,7 +72,7 @@ public class LiquibaseParser
 	{
 		this(xmlFile, "UTF-8", new MessageBuffer(), ParserType.Standard);
 	}
-	
+
 	public LiquibaseParser(WbFile xmlFile, String encoding, MessageBuffer buffer, ParserType parserType)
 	{
 		changeLog = xmlFile;
@@ -90,7 +91,11 @@ public class LiquibaseParser
 	 * Return the text stored in all <sql> or <createProcedure> tags
 	 * for the given changeset id.
 	 *
-	 * @param changeSetIds a list of changeSetIds to use. If this is null, all changesets are used
+	 * The SQL statements are already split according to the <tt>splitStatements</tt> attribute
+	 * of the <tt>sql</tt> or <tt>sqlFile</tt> tags respecting the <tt>endDelimiter</tt> attribute as well.
+	 *
+	 * @param changeSetIds a list of changeSetIds to use. If this is null, all changesets are returned
+	 *
 	 * @return null if no supported tag was found, all stored SQL scripts otherwise
 	 */
 	public List<String> getContentFromChangeSet(List<ChangeSetIdentifier> changeSetIds)
@@ -123,6 +128,39 @@ public class LiquibaseParser
 		catch (Exception ex)
 		{
 			LogMgr.logError("LiquibaseParser.getContentFromChangeSet()", "Could not parse file: " + changeLog.getFullPath(), ex);
+		}
+		return result;
+	}
+
+	/**
+	 * Return a list of all ChangeSet ids defined in the ChangeLog file.
+	 *
+	 * Files included using the <tt>include</tt> will not be evaluated.
+	 *
+	 * @return  all changesets from the changelog file.
+	 */
+	public List<ChangeSetIdentifier> getChangeSets()
+	{
+		List<ChangeSetIdentifier> result = new ArrayList<>();
+		try
+		{
+			DocumentBuilderFactory factor = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factor.newDocumentBuilder();
+			Document doc = builder.parse(changeLog);
+
+			doc.getDocumentElement().normalize();
+			NodeList elements = doc.getElementsByTagName(TAG_CHANGESET);
+			int size = elements.getLength();
+			for (int i=0; i < size; i++)
+			{
+				Node item = elements.item(i);
+				ChangeSetIdentifier id = getChangeSetId(item);
+				result.add(id);
+			}
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("LiquibaseParser.getChangeSets()", "Could not parse file: " + changeLog.getFullPath(), ex);
 		}
 		return result;
 	}
@@ -183,15 +221,6 @@ public class LiquibaseParser
 		return result;
 	}
 
-	private DelimiterDefinition getDelimiter(Element node)
-	{
-		String delimiter = node.getAttribute("endDelimiter");
-		if (StringUtil.isBlank(delimiter)) return null;
-		DelimiterDefinition delim = new DelimiterDefinition(delimiter);
-		if (delim.isStandard()) return null;
-		return delim;
-	}
-
 	private List<String> getContentFromSqlFile(Element element)
 	{
 		String path = element.getAttribute("path");
@@ -238,6 +267,27 @@ public class LiquibaseParser
 		return Boolean.parseBoolean(split);
 	}
 
+	/**
+	 * Return the delimiter defined through the attribute <tt>endDelimiter</tt> from the DOM node.
+	 *
+	 * @param node the tag to use
+	 * @return null if no endDelimiter was defined or if it was defined as ;
+	 */
+	private DelimiterDefinition getDelimiter(Element node)
+	{
+		String delimiter = node.getAttribute("endDelimiter");
+		if (StringUtil.isBlank(delimiter)) return null;
+		DelimiterDefinition delim = new DelimiterDefinition(delimiter);
+		if (delim.isStandard()) return null;
+		return delim;
+	}
+
+	/**
+	 * Extract the complete changeSet ID from a changeSet tag.
+	 *
+	 * @param item  the DOM node
+	 * @return the id of the tag
+	 */
 	private ChangeSetIdentifier getChangeSetId(Node item)
 	{
 		NamedNodeMap attributes = item.getAttributes();
@@ -254,32 +304,6 @@ public class LiquibaseParser
 			}
 		}
 		return cs;
-	}
-
-	public List<ChangeSetIdentifier> getChangeSets()
-	{
-		List<ChangeSetIdentifier> result = new ArrayList<>();
-		try
-		{
-			DocumentBuilderFactory factor = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder = factor.newDocumentBuilder();
-			Document doc = builder.parse(changeLog);
-
-			doc.getDocumentElement().normalize();
-			NodeList elements = doc.getElementsByTagName(TAG_CHANGESET);
-			int size = elements.getLength();
-			for (int i=0; i < size; i++)
-			{
-				Node item = elements.item(i);
-				ChangeSetIdentifier id = getChangeSetId(item);
-				result.add(id);
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("LiquibaseParser.getChangeSets()", "Could not parse file: " + changeLog.getFullPath(), ex);
-		}
-		return result;
 	}
 
 	private boolean isChangeSetIncluded(List<ChangeSetIdentifier> toRead, ChangeSetIdentifier toCheck)
