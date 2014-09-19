@@ -29,6 +29,9 @@ import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.sql.ParserType;
+import workbench.sql.ScriptParser;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -79,7 +82,7 @@ public class PostgresTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		TableIdentifier tbl = new TableIdentifier(TEST_SCHEMA, "child_table");
 		String sql = tbl.getSource(con).toString();
@@ -96,7 +99,7 @@ public class PostgresTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		TableIdentifier tbl = new TableIdentifier(TEST_SCHEMA, "more_data");
 		String sql = tbl.getSource(con).toString();
@@ -110,7 +113,7 @@ public class PostgresTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		TableIdentifier tbl = new TableIdentifier(TEST_SCHEMA, "base_table");
 		String sql = tbl.getSource(con).toString();
@@ -122,7 +125,7 @@ public class PostgresTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 		if (!JdbcUtils.hasMinimumServerVersion(con, "9.1")) return;
 		TestUtil.executeScript(con, "create unlogged table no_crash_safe (id integer, some_data varchar(100));");
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("no_crash_safe"));
@@ -135,11 +138,36 @@ public class PostgresTableSourceBuilderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 		TestUtil.executeScript(con, "create table foo_fill (id integer, some_data varchar(100)) with (fillfactor=40);");
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("foo_fill"));
 		String source = tbl.getSource(con).toString();
 		assertTrue(source.contains("fillfactor=40"));
+	}
+
+	@Test
+	public void testStorage()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		assertNotNull(con);
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("base_table"));
+		String source = tbl.getSource(con).toString();
+//		System.out.println(source);
+		assertFalse(source.contains("SET STORAGE"));
+
+		TestUtil.executeScript(con,
+			"create table foo_storage (id integer, some_data varchar(100));\n" +
+			"alter table foo_storage alter some_data set storage plain;\n" +
+			"commit;");
+
+		tbl = con.getMetadata().findTable(new TableIdentifier("foo_storage"));
+		source = tbl.getSource(con).toString();
+//		System.out.println(source);
+		ScriptParser p = new ScriptParser(source, ParserType.Postgres);
+		int size = p.getSize();
+		assertEquals(2, size);
+		assertEquals("ALTER TABLE foo_storage ALTER some_data SET STORAGE PLAIN", p.getCommand(1));
 	}
 
 }

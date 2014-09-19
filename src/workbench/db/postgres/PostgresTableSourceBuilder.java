@@ -386,7 +386,8 @@ public class PostgresTableSourceBuilder
 		for (ColumnIdentifier col : columns)
 		{
 			int storage = col.getPgStorage();
-			if (storage != PostgresColumnEnhancer.STORAGE_EXTENDED)
+			String option = PostgresColumnEnhancer.getStorageOption(storage);
+			if (option != null && storage != PostgresColumnEnhancer.STORAGE_EXTENDED)
 			{
 				if (result == null)
 				{
@@ -398,7 +399,7 @@ public class PostgresTableSourceBuilder
 				result.append(" ALTER ");
 				result.append(dbConnection.getMetadata().quoteObjectname(col.getColumnName()));
 				result.append(" SET STORAGE ");
-				result.append(PostgresColumnEnhancer.getStorageOption(storage));
+				result.append(option);
 				result.append(";\n");
 			}
 		}
