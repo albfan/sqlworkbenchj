@@ -403,7 +403,7 @@ public class TableSourceBuilder
 		if (StringUtil.isNonBlank(info))
 		{
 			result.append(info);
-			result.append("\n\n");
+			result.append('\n');
 		}
 
 		if (includePK && !inlinePK && pk != null)

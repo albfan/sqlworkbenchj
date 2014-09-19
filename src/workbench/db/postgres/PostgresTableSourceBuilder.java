@@ -353,15 +353,22 @@ public class PostgresTableSourceBuilder
 		CharSequence domains = getDomainInformation(columns, schema);
 		CharSequence sequences = getColumnSequenceInformation(table, columns);
 		CharSequence children = getChildTables(table);
+		StringBuilder storage = getColumnStorage(table, columns);
 		String owner = getOwnerSql(table);
 
-		if (enums == null && domains == null && sequences == null && children == null && owner == null) return null;
+		if (StringUtil.isEmptyString(enums) && StringUtil.isEmptyString(domains) &&
+			StringUtil.isEmptyString(sequences) && StringUtil.isEmptyString(children) &&
+			StringUtil.isEmptyString(owner) && StringUtil.isEmptyString(storage)) return null;
+
 		int enumLen = (enums != null ? enums.length() : 0);
 		int domainLen = (domains != null ? domains.length() : 0);
 		int childLen = (children != null ? children.length() : 0);
 		int ownerLen = (owner != null ? owner.length() : 0);
+		int storageLen = (storage != null ? storage.length() : 0);
 
-		StringBuilder result = new StringBuilder(enumLen + domainLen + childLen + ownerLen);
+		StringBuilder result = new StringBuilder(enumLen + domainLen + childLen + ownerLen + storageLen);
+
+		if (storage != null) result.append(storage);
 		if (enums != null) result.append(enums);
 		if (domains != null) result.append(domains);
 		if (sequences != null) result.append(sequences);
@@ -369,6 +376,33 @@ public class PostgresTableSourceBuilder
 		if (owner != null) result.append(owner);
 
 		return result.toString();
+	}
+
+	private StringBuilder getColumnStorage(TableIdentifier table, List<ColumnIdentifier> columns)
+	{
+		StringBuilder result = null;
+		String tname = table.getTableExpression(dbConnection);
+
+		for (ColumnIdentifier col : columns)
+		{
+			int storage = col.getPgStorage();
+			if (storage != PostgresColumnEnhancer.STORAGE_EXTENDED)
+			{
+				if (result == null)
+				{
+					result = new StringBuilder(50);
+					result.append('\n');
+				}
+				result.append("ALTER TABLE ");
+				result.append(tname);
+				result.append(" ALTER ");
+				result.append(dbConnection.getMetadata().quoteObjectname(col.getColumnName()));
+				result.append(" SET STORAGE ");
+				result.append(PostgresColumnEnhancer.getStorageOption(storage));
+				result.append(";\n");
+			}
+		}
+		return result;
 	}
 
 	private String getOwnerSql(TableIdentifier table)
@@ -442,7 +476,7 @@ public class PostgresTableSourceBuilder
 		PostgresEnumReader reader = new PostgresEnumReader();
 		Map<String, EnumIdentifier> enums = reader.getEnumInfo(dbConnection, schema, null);
 		if (enums == null || enums.isEmpty()) return null;
-		StringBuilder result = new StringBuilder(50);
+		StringBuilder result = null;
 
 		for (ColumnIdentifier col : columns)
 		{
@@ -450,6 +484,7 @@ public class PostgresTableSourceBuilder
 			EnumIdentifier enumDef = enums.get(dbType);
 			if (enumDef != null)
 			{
+				if (result == null) result = new StringBuilder(50);
 				result.append("\n-- enum '");
 				result.append(dbType);
 				result.append("': ");
@@ -465,7 +500,7 @@ public class PostgresTableSourceBuilder
 		PostgresDomainReader reader = new PostgresDomainReader();
 		Map<String, DomainIdentifier> domains = reader.getDomainInfo(dbConnection, schema);
 		if (domains == null || domains.isEmpty()) return null;
-		StringBuilder result = new StringBuilder(50);
+		StringBuilder result = null;
 
 		for (ColumnIdentifier col : columns)
 		{
@@ -473,6 +508,7 @@ public class PostgresTableSourceBuilder
 			DomainIdentifier domain = domains.get(dbType);
 			if (domain != null)
 			{
+				if (result == null) result = new StringBuilder(50);
 				result.append("\n-- domain '");
 				result.append(dbType);
 				result.append("': ");

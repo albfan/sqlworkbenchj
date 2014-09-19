@@ -54,6 +54,11 @@ import workbench.util.StringUtil;
 public class PostgresColumnEnhancer
 	implements ColumnDefinitionEnhancer
 {
+	public static final int STORAGE_PLAIN = 1;
+	public static final int STORAGE_MAIN = 2;
+	public static final int STORAGE_EXTERNAL = 3;
+	public static final int STORAGE_EXTENDED = 4;
+
 	public static final String PROP_SHOW_REAL_SERIAL_DEF = "workbench.db.postgresql.serial.show";
 
 	@Override
@@ -61,7 +66,7 @@ public class PostgresColumnEnhancer
 	{
 		if (JdbcUtils.hasMinimumServerVersion(conn, "9.1"))
 		{
-			readCollations(table, conn);
+			readColumnInfo(table, conn);
 		}
 
 		if (JdbcUtils.hasMinimumServerVersion(conn, "8.0"))
@@ -70,6 +75,22 @@ public class PostgresColumnEnhancer
 		}
 
 		updateSerials(table);
+	}
+
+	public static String getStorageOption(int storage)
+	{
+		switch (storage)
+		{
+			case STORAGE_EXTENDED:
+				return "EXTENDED";
+			case STORAGE_EXTERNAL:
+				return "EXTERNAL";
+			case STORAGE_MAIN:
+				return "MAIN";
+			case STORAGE_PLAIN:
+				return "PLAIN";
+		}
+		return null;
 	}
 
 	private void updateSerials(TableDefinition table)
@@ -120,8 +141,8 @@ public class PostgresColumnEnhancer
 				arrayCols ++;
 			}
 		}
-		if (arrayCols == 0) return;
 
+		if (arrayCols == 0) return;
 
 		String sql =
 			"select att.attname, att.attndims, pg_catalog.format_type(atttypid, NULL) as display_type \n" +
@@ -178,23 +199,28 @@ public class PostgresColumnEnhancer
 		}
 	}
 
-	private void readCollations(TableDefinition table, WbConnection conn)
+	private void readColumnInfo(TableDefinition table, WbConnection conn)
 	{
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		HashMap<String, String> collations = new HashMap<>(table.getColumnCount());
+
 		String sql =
-			"select att.attname, col.collcollate \n" +
-			"from pg_attribute att \n" +
-			"  join pg_class tbl on tbl.oid = att.attrelid  \n" +
-			"  join pg_namespace ns on tbl.relnamespace = ns.oid  \n" +
-			"  join pg_collation col on att.attcollation = col.oid \n" +
-			"where tbl.relname = ?   \n" +
-			"  and ns.nspname = ?";
+			"select att.attname, col.collcollate,  \n" +
+			"       case  \n" +
+			"          when att.attlen = -1 then att.attstorage \n" +
+			"          else null \n" +
+			"       end as attstorage \n" +
+			"from pg_attribute att  \n" +
+			"  join pg_class tbl on tbl.oid = att.attrelid   \n" +
+			"  join pg_namespace ns on tbl.relnamespace = ns.oid   \n" +
+			"  left join pg_collation col on att.attcollation = col.oid \n" +
+			"where tbl.relname = ? \n" +
+			"  and ns.nspname = ? \n" +
+			"  and not att.attisdropped";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresColumnEnhancer.readCollations()", "PostgresColumnEnhancer using SQL=\n" + sql);
+			LogMgr.logDebug("PostgresColumnEnhancer.readCollations()", "Retrieving column information using SQL=\n" + sql);
 		}
 
 		try
@@ -207,28 +233,43 @@ public class PostgresColumnEnhancer
 			{
 				String colname = rs.getString(1);
 				String collation = rs.getString(2);
+				String storage = rs.getString(3);
+				ColumnIdentifier col = table.findColumn(colname);
+				if (col == null) continue;
+
 				if (StringUtil.isNonEmpty(collation))
 				{
-					collations.put(colname, collation);
+					col.setCollation(collation);
+					col.setCollationExpression(" COLLATE \"" + collation + "\"");
+				}
+
+				if (storage != null && !storage.isEmpty())
+				{
+					switch (storage.charAt(0))
+					{
+						case 'p':
+							col.setPgStorage(STORAGE_PLAIN);
+							break;
+						case 'm':
+							col.setPgStorage(STORAGE_MAIN);
+							break;
+						case 'e':
+							col.setPgStorage(STORAGE_EXTERNAL);
+							break;
+						case 'x':
+							col.setPgStorage(STORAGE_EXTENDED);
+							break;
+					}
 				}
 			}
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("PostgresColumnEnhancer.readCollations()", "Could not read column collations", ex);
+			LogMgr.logError("PostgresColumnEnhancer.readColumnInfo()", "Could not read column collations", ex);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
-		}
-		for (ColumnIdentifier col : table.getColumns())
-		{
-			String collation = collations.get(col.getColumnName());
-			if (StringUtil.isNonEmpty(collation))
-			{
-				col.setCollation(collation);
-				col.setCollationExpression(" COLLATE \"" + collation + "\"");
-			}
 		}
 	}
 	class ArrayDef

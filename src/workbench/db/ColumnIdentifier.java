@@ -83,6 +83,11 @@ public class ColumnIdentifier
 	 */
 	private String expression;
 
+	/**
+	 * Used to identify the storage type for a column in Postgres
+	 */
+	private int pgStorage;
+
 	private int displaySize = -1;
 
 	/** The position of the column in the table or result set */
@@ -114,6 +119,16 @@ public class ColumnIdentifier
 		this.isPk = isPkColumn;
 	}
 
+	public void setPgStorage(int type)
+	{
+		this.pgStorage = type;
+	}
+
+	public int getPgStorage()
+	{
+		return pgStorage;
+	}
+	
 	/**
 	 * Returns the SQL for a constraint defined on this column.
 	 */
