@@ -1007,7 +1007,7 @@ public class WbExportTest
 			TestUtil.executeScript(connection,
 				"CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB);\n" +
 				"INSERT INTO clob_test (nr, clob_data) values (1, 'First clob');\n" +
-				"INSERT INTO clob_test (nr, clob_data) values (2, 'Second clob')\n"+
+				"INSERT INTO clob_test (nr, clob_data) values (2, 'Second clob');\n"+
 				"commit;"
 			);
 
