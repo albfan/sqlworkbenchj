@@ -1056,6 +1056,8 @@ public class WbExport
 	@Override
 	public void consumeResult(StatementRunnerResult toConsume)
 	{
+		if (!toConsume.isSuccess()) return;
+		
 		// Run an export that is defined by a SQL Statement
 		// i.e. no sourcetable given in the initial wbexport command
 		try
