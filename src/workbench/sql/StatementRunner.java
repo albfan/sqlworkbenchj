@@ -557,8 +557,8 @@ public class StatementRunner
 		}
 
 		removeEmptyResults(result, realSql);
-		
-		if (this.currentConsumer != null && currentCommand != currentConsumer)
+
+		if (this.currentConsumer != null && currentCommand != currentConsumer && result.isSuccess())
 		{
 			this.currentConsumer.consumeResult(result);
 		}
