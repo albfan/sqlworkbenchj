@@ -28,6 +28,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.regex.Pattern;
 
+import workbench.db.importer.RowDataProducer;
 import workbench.log.LogMgr;
 
 import workbench.sql.formatter.SQLLexer;
@@ -102,7 +103,7 @@ public class LexerBasedParser
 
 	public void setCheckPgQuoting(boolean flag)
 	{
-		this.checkPgQuoting = flag;
+		this.checkPgQuoting = false;
 	}
 	/**
 	 * Controls if the actual SQL for each command returned by
@@ -365,6 +366,7 @@ public class LexerBasedParser
 	{
 		if (text == null || text.isEmpty()) return false;
 		if (text.charAt(0) != '$') return false;
+		if (text.equals(RowDataProducer.SKIP_INDICATOR)) return false;
 		return text.endsWith("$");
 	}
 

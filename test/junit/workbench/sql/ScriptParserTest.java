@@ -115,7 +115,7 @@ public class ScriptParserTest
 			"          -truncateTable=true \n" +
 			";\n" +
 			"select count(*) from foo;";
-		p = new ScriptParser(sql);
+		p = new ScriptParser(sql, ParserType.Standard);
 		assertEquals(2, p.getSize());
 
 		sql =
@@ -138,8 +138,15 @@ public class ScriptParserTest
 			"; \n" +
 			" \n" +
 			"";
-		p = new ScriptParser(sql);
-		p.setSupportIdioticQuotes(true);
+		p = new ScriptParser(sql, ParserType.SqlServer);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
+		assertEquals(3, p.getSize());
+
+		p = new ScriptParser(sql, ParserType.Standard);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
+		assertEquals(3, p.getSize());
+
+		p = new ScriptParser(sql, ParserType.Postgres);
 		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
 		assertEquals(3, p.getSize());
 	}
