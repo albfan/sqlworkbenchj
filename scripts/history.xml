@@ -24,6 +24,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="6" type="fix">The names for primary and foreign keys were not quoted properly in the generated SQL source (if they needed quoting)</entry>
     <entry dev-build="5" type="fix">A WbExport based on a following SELECT would always be treated as successful even if the SELECT had an error</entry>
     <entry dev-build="5" type="fix">For Postgres sequences linked to columns the generated source code used OWNER TO instead of the correct OWNED BY</entry>
     <entry dev-build="5" type="fix">WbExport did not use the default setting for the decimal separator</entry>

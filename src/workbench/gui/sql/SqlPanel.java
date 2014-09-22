@@ -2088,7 +2088,7 @@ public class SqlPanel
 		// receives the execStart event
 		fireDbExecStart();
 
-		if (Settings.getInstance().getAutoSaveExternalFiles() && editor.hasFileLoaded())
+		if (Settings.getInstance().getAutoSaveExternalFiles() && editor.hasFileLoaded() && editor.isModified())
 		{
 			editor.saveCurrentFile();
 		}

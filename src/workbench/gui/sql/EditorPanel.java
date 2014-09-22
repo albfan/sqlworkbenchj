@@ -342,13 +342,16 @@ public class EditorPanel
 		if (this.currentFile == null) return;
 		if (this.saveInProgress) return;
 
-		long currentTime = currentFile.lastModified();
+		long currentFileTime = currentFile.lastModified();
 
-		if (currentTime > fileModifiedTime)
+		if (currentFileTime > fileModifiedTime)
 		{
 			String fname = getCurrentFileName();
-			LogMgr.logDebug("EditorPanel", "File " + fname + " has been modified externally!");
 			FileReloadType reloadType = GuiSettings.getReloadType();
+			if (reloadType != FileReloadType.none)
+			{
+				LogMgr.logDebug("EditorPanel", "File " + fname + " has been modified externally. currentFileTime=" + currentFileTime + ", saved lastModifiedTime=" + fileModifiedTime);
+			}
 			if (reloadType == FileReloadType.automatic)
 			{
 				this.reloadFile();
@@ -364,7 +367,7 @@ public class EditorPanel
 				else
 				{
 					// don't check again until the file changes another time
-					this.fileModifiedTime = currentTime;
+					this.fileModifiedTime = currentFileTime;
 				}
 			}
 		}
@@ -726,8 +729,6 @@ public class EditorPanel
 			// be in memory at the same time.
 			clearCurrentDocument();
 
-			this.fileModifiedTime = toLoad.lastModified();
-
 			try
 			{
 				if (StringUtil.isEmptyString(encoding))
@@ -809,6 +810,7 @@ public class EditorPanel
 		{
 			resetModified();
 			FileUtil.closeQuietely(reader);
+			fileModifiedTime = System.currentTimeMillis();
 		}
 
 		return result;
@@ -958,7 +960,7 @@ public class EditorPanel
 			}
 			this.currentFile = new WbFile(aFile);
 			this.fileEncoding = encoding;
-			this.fileModifiedTime = currentFile.lastModified();
+			this.fileModifiedTime = System.currentTimeMillis();
 			this.resetModified();
 		}
 		catch (IOException e)

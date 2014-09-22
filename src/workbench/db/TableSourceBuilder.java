@@ -759,9 +759,9 @@ public class TableSourceBuilder
 		}
 		else
 		{
-			pkName = SqlUtil.quoteObjectname(pkName, false, true, meta.getQuoteCharacter().charAt(0));
-			template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);  // old templates
-			template = TemplateHandler.replacePlaceholder(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName);  // new templates through DbSettings.getAddPk()
+			String name = meta.quoteObjectname(pkName);
+			template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, name);  // old templates
+			template = TemplateHandler.replacePlaceholder(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, name);  // new templates through DbSettings.getAddPk()
 		}
 
 		template = template.replaceAll("ADD\\s+PRIMARY", "ADD PRIMARY"); // removing the constraint name leaves two spaces which I find ugly :)
@@ -836,7 +836,7 @@ public class TableSourceBuilder
 				}
 				else
 				{
-					stmt = StringUtil.replace(stmt, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, fkname);
+					stmt = StringUtil.replace(stmt, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(fkname));
 				}
 			}
 
