@@ -3385,7 +3385,7 @@ public class SqlPanel
 				this.stmtRunner.statementDone();
 				if (this.cancelExecution) break;
 
-				if (cursorPos > -1 && endIndex == startIndex + 1 && shouldRunNextStatement(scriptParser, startIndex))
+				if (cursorPos > -1 && shouldRunNextStatement(scriptParser, startIndex))
 				{
 					endIndex ++;
 				}
