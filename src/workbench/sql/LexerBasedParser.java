@@ -102,7 +102,7 @@ public class LexerBasedParser
 
 	public void setCheckPgQuoting(boolean flag)
 	{
-		this.checkPgQuoting = true;
+		this.checkPgQuoting = flag;
 	}
 	/**
 	 * Controls if the actual SQL for each command returned by

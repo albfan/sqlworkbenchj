@@ -311,6 +311,15 @@ public class LexerBasedParserTest
 		assertEquals("delete from foo where descr = 'arthur''s house'", script.get(0));
 		assertEquals("commit", script.get(1));
 
+		parser.setScript(
+			"wbImport -fileColumns=one,two,$wb_skip$,three -table=x -file=x.txt;\n" +
+			"select count(*) from x;\n");
+		script = getStatements(parser);
+		assertEquals(2, script.size());
+		assertEquals("wbImport -fileColumns=one,two,$wb_skip$,three -table=x -file=x.txt", script.get(0));
+		assertEquals("select count(*) from x", script.get(1));
+
+
 		sql =
 			"drop function foo();\n" +
 			"\n" +

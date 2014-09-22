@@ -94,6 +94,7 @@ public class ScriptParserTest
 		assertEquals(2, p.getSize());
 	}
 
+
 	@Test
 	public void testEmbeddedQuotes()
 		throws Exception
@@ -103,12 +104,44 @@ public class ScriptParserTest
       "wbimport  -type=text;";
 
 		ScriptParser p = new ScriptParser(sql);
-		int count = 0;
-		while (p.getNextCommand() != null)
-		{
-			count ++;
-		}
-		assertEquals(2, count);
+		assertEquals(2, p.getSize());
+
+		sql =
+      "wbimport  -type=text \n" +
+			"          -fileColumns=one,two,three,$wb_skip$ \n" +
+			"          -delimiter=';' \n" +
+			"          -endRow=5 \n" +
+			"          -table=foo \n" +
+			"          -truncateTable=true \n" +
+			";\n" +
+			"select count(*) from foo;";
+		p = new ScriptParser(sql);
+		assertEquals(2, p.getSize());
+
+		sql =
+			"wbimport -file=\"\\\\someserver\\somedir\\somefile.csv\" \n" +
+			"         -fileColumns=one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,$wb_skip$ \n" +
+			"         -table=foo \n" +
+			"         -endRow=5 \n" +
+			"         -truncateTable=true \n" +
+			"         -delimiter=';' \n" +
+			"; \n" +
+			" \n" +
+			"select count(*) \n" +
+			"from foobar \n" +
+			"where one is null \n" +
+			"; \n" +
+			" \n" +
+			"select two \n" +
+			"from foobar \n" +
+			"where some_col = '12345' \n" +
+			"; \n" +
+			" \n" +
+			"";
+		p = new ScriptParser(sql);
+		p.setSupportIdioticQuotes(true);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
+		assertEquals(3, p.getSize());
 	}
 
 	@Test
