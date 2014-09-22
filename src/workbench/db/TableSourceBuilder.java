@@ -750,7 +750,11 @@ public class TableSourceBuilder
 				pkName = pkName.substring(0, maxLen - 1);
 			}
 		}
-
+		else
+		{
+			pkName = meta.quoteObjectname(pkName);
+		}
+		
 		if (StringUtil.isEmptyString(pkName))
 		{
 			template = TemplateHandler.removePlaceholder(template, "CONSTRAINT " + MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, true);
@@ -759,9 +763,8 @@ public class TableSourceBuilder
 		}
 		else
 		{
-			String name = meta.quoteObjectname(pkName);
-			template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, name);  // old templates
-			template = TemplateHandler.replacePlaceholder(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, name);  // new templates through DbSettings.getAddPk()
+			template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);  // old templates
+			template = TemplateHandler.replacePlaceholder(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName);  // new templates through DbSettings.getAddPk()
 		}
 
 		template = template.replaceAll("ADD\\s+PRIMARY", "ADD PRIMARY"); // removing the constraint name leaves two spaces which I find ugly :)

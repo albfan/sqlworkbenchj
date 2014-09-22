@@ -198,7 +198,7 @@ public class TableSourceBuilderTest
 			TableSourceBuilder builder = new TableSourceBuilder(con);
 			PkDefinition pk = new PkDefinition(CollectionUtil.arrayList("ID"));
 			String sql = builder.getPkSource(tbl, pk, false).toString();
-			System.out.println(sql);
+//			System.out.println(sql);
 			assertTrue(sql.indexOf("ADD CONSTRAINT pk_person") > -1);
 		}
 		finally

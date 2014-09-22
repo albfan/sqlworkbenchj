@@ -24,10 +24,13 @@ package workbench.db;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
@@ -60,7 +63,7 @@ public class ObjectScripterTest
 		TestUtil util = getTestUtil();
 		WbConnection con = util.getConnection();
 		setupDatabase(con);
-		List<DbObject> objects = new ArrayList<DbObject>();
+		List<DbObject> objects = new ArrayList<>();
 
 		objects.add(new SequenceDefinition(null, "TEST_SEQUENCE"));
 		TableIdentifier tbl = new TableIdentifier("PERSON");
@@ -74,7 +77,7 @@ public class ObjectScripterTest
 		objects.add(new ViewDefinition("V_PERSON"));
 		ObjectScripter scripter = new ObjectScripter(objects, con);
 		String script = scripter.getScript();
-		System.out.println(script);
+//		System.out.println(script);
 
 		int personPos = script.indexOf("CREATE TABLE PERSON");
 		assertTrue(personPos > -1);

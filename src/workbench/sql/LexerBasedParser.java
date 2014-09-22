@@ -28,8 +28,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.regex.Pattern;
 
-import workbench.db.importer.RowDataProducer;
 import workbench.log.LogMgr;
+
+import workbench.db.importer.RowDataProducer;
 
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLLexerFactory;
@@ -103,8 +104,9 @@ public class LexerBasedParser
 
 	public void setCheckPgQuoting(boolean flag)
 	{
-		this.checkPgQuoting = false;
+		this.checkPgQuoting = flag;
 	}
+	
 	/**
 	 * Controls if the actual SQL for each command returned by
 	 * #getNextCommand() is stored in the ScriptCommandDefinition
