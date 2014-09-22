@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -3384,6 +3385,10 @@ public class SqlPanel
 				this.stmtRunner.statementDone();
 				if (this.cancelExecution) break;
 
+				if (cursorPos > -1 && endIndex == startIndex + 1 && shouldRunNextStatement(scriptParser, startIndex))
+				{
+					endIndex ++;
+				}
 			} // end for loop over all statements
 
 			lastScriptExecTime = stmtTotal;
@@ -3481,6 +3486,24 @@ public class SqlPanel
 			stmtRunner.done();
 			ignoreStateChange = false;
 		}
+	}
+
+	private boolean shouldRunNextStatement(ScriptParser parser, int statementIndex)
+	{
+		if (!Settings.getInstance().getAutoRunExportStatement()) return false;
+		if (this.stmtRunner == null) return false;
+		if (this.stmtRunner.getConsumer() == null) return false;
+
+		if (statementIndex + 1 < parser.getSize())
+		{
+			String verb = SqlUtil.getSqlVerb(parser.getCommand(statementIndex + 1));
+			Collection<String> autoRunVerbs = Settings.getInstance().getAutoRunVerbs();
+			if (autoRunVerbs.contains(verb))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void restoreSelection(final boolean highlightCurrent, final boolean jumpToNext, final boolean restoreSelection, final int currentCursor, final int oldSelectionStart, final int oldSelectionEnd, final int commandWithError, final int startIndex, final int endIndex, final ScriptParser scriptParser)

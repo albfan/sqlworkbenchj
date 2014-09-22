@@ -70,6 +70,7 @@ import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorReportLevel;
 import workbench.sql.formatter.JoinWrapStyle;
 
+import workbench.util.CollectionUtil;
 import workbench.util.FileAttributeChanger;
 import workbench.util.FileDialogUtil;
 import workbench.util.FileUtil;
@@ -1609,6 +1610,24 @@ public class Settings
 		setProperty("workbench.diff.sql.default.dateliterals", type);
 	}
 
+	public boolean getAutoRunExportStatement()
+	{
+		return getBoolProperty("workbench.export.sql.autorun.executecurrent", false);
+	}
+
+	public void setAutoRunExportStatement(boolean flag)
+	{
+		setProperty("workbench.export.sql.autorun.executecurrent", flag);
+	}
+
+	public Collection<String> getAutoRunVerbs()
+	{
+		List<String> list = getListProperty("workbench.export.sql.autorun.verbs", true, "select,wbcall,wblist,wbrowcount");
+		Set<String> verbs = CollectionUtil.caseInsensitiveSet();
+		verbs.addAll(list);
+		return verbs;
+	}
+	
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Color Handling">
