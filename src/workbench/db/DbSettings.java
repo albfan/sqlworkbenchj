@@ -1923,4 +1923,9 @@ public class DbSettings
 		if (ids.isEmpty()) return Collections.emptySet();
 		return new HashSet<>(ids);
 	}
+
+	public List<String> getSchemasToAdd()
+	{
+		return Settings.getInstance().getListProperty(prefix + "schemas.additional", false, null);
+	}
 }

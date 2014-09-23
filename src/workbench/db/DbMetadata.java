@@ -2518,13 +2518,13 @@ public class DbMetadata
 			SqlUtil.closeResult(rs);
 		}
 
-		// The Oracle driver does not return the "PUBLIC"
-		// schema (which is - strictly speaking - correct as
-		// there is no user PUBLIC in the database), but to view
-		// public synonyms we need the entry for the DbExplorer
-		if (isOracle)
+		// This is mainly for Oracle because the Oracle driver does not return the "PUBLIC" schema
+		// which is - strictly speaking - correct as there is no user PUBLIC in the database.
+		// but to view public synonyms we need the entry for the DbExplorer
+		List<String> additionalSchemas = dbSettings.getSchemasToAdd();
+		if (additionalSchemas != null)
 		{
-			result.add("PUBLIC");
+			result.addAll(additionalSchemas);
 			Collections.sort(result);
 		}
 		return result;
