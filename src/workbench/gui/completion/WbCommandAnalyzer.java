@@ -262,6 +262,7 @@ public class WbCommandAnalyzer
 			this.elements.removeAll(argsPresent);
 			Collections.sort(this.elements, CaseInsensitiveComparator.INSTANCE);
 			isParameter = args.needsSwitch();
+			changeCase = false;
 		}
 	}
 
