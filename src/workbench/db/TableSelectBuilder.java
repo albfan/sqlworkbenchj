@@ -214,7 +214,7 @@ public class TableSelectBuilder
 		String fqTableName = SqlUtil.fullyQualifiedName(dbConnection, table);
 
 		String select = sqlTemplate.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, selectCols);
-		select = TemplateHandler.replacePlaceholder(select, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqTableName);
+		select = TemplateHandler.replacePlaceholder(select, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqTableName, true);
 
 		select = select.replace(MetaDataSqlManager.TABLE_NAME_ONLY_PLACEHOLDER, table.getTableName());
 
@@ -241,7 +241,7 @@ public class TableSelectBuilder
 			// do not call getTableExpression() if not necessary.
 			// this might trigger a SELECT to the database to get the current schema and/or catalog
 			// to avoid unnecessary calls, this is only done if really needed
-			select = TemplateHandler.replacePlaceholder(select, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.dbConnection));
+			select = TemplateHandler.replacePlaceholder(select, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.dbConnection), true);
 		}
 		return select;
 	}

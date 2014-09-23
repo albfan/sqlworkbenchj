@@ -124,7 +124,7 @@ public abstract class TemplateHandler
 	 * @return the template with the placeholder replaced
 	 * @see #removePlaceholder(String, String, boolean)
 	 */
-	public static String replacePlaceholder(String sql, String placeholder, String replacement)
+	public static String replacePlaceholder(String sql, String placeholder, String replacement, boolean addWhitespace)
 	{
 		if (StringUtil.isEmptyString(replacement)) return removePlaceholder(sql, placeholder, false);
 		int pos = sql.indexOf(placeholder);
@@ -136,7 +136,7 @@ public abstract class TemplateHandler
 		{
 			String opening = "([\"'`";
 			char prev = sql.charAt(pos - 1);
-			if (!Character.isWhitespace(prev) && opening.indexOf(prev) == -1)
+			if (addWhitespace && !Character.isWhitespace(prev) && opening.indexOf(prev) == -1)
 			{
 				realReplacement = " " + realReplacement;
 			}
@@ -146,7 +146,7 @@ public abstract class TemplateHandler
 		{
 			String closing = ")]\"'`";
 			char next = sql.charAt(pos + placeholder.length());
-			if (!Character.isWhitespace(next) && closing.indexOf(next) == -1)
+			if (addWhitespace && !Character.isWhitespace(next) && closing.indexOf(next) == -1)
 			{
 				realReplacement = realReplacement + " ";
 			}

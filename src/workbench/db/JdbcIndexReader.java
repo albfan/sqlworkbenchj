@@ -360,8 +360,8 @@ public class JdbcIndexReader
 			String disabled = metaData.getDbSettings().getDisabledConstraintKeyword();
 			String novalidate = metaData.getDbSettings().getNoValidateConstraintKeyword();
 
-			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.CONS_ENABLED, constraint.isEnabled() ? "" : disabled);
-			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.CONS_VALIDATED, constraint.isValid() ? "" : novalidate);
+			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.CONS_ENABLED, constraint.isEnabled() ? "" : disabled, true);
+			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.CONS_VALIDATED, constraint.isValid() ? "" : novalidate, true);
 
 			if (metaData.isOracle())
 			{
@@ -489,7 +489,7 @@ public class JdbcIndexReader
 		}
 		else
 		{
-			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type);
+			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type, true);
 		}
 
 		String expr = indexDefinition.getExpression();
@@ -499,7 +499,7 @@ public class JdbcIndexReader
 		}
 		else
 		{
-			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, expr);
+			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, expr, true);
 		}
 
 		if (!StringUtil.equalStringIgnoreCase("ASC", indexDefinition.getDirection()))
@@ -580,7 +580,7 @@ public class JdbcIndexReader
 		sql = TemplateHandler.removePlaceholder(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, true);
 		if (unique)
 		{
-			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE");
+			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE", true);
 		}
 		else
 		{

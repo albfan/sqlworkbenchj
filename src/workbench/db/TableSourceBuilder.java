@@ -647,7 +647,7 @@ public class TableSourceBuilder
 	public static String replacePlaceHolder(String sql, String placeHolder, String value, boolean needQuotes, QuoteHandler quoter)
 	{
 		value = (needQuotes ? quoter.quoteObjectname(value) : value);
-		return TemplateHandler.replacePlaceholder(sql, placeHolder, value);
+		return TemplateHandler.replacePlaceholder(sql, placeHolder, value, false);
 	}
 
 	public String getNativeTableSource(TableIdentifier table, boolean includeDrop)
@@ -676,7 +676,7 @@ public class TableSourceBuilder
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("TableSourceBuilder.getNativeTableSource()", "Using SQL=" + sql);
+			LogMgr.logDebug("TableSourceBuilder.getNativeTableSource()", "Retrieving table source using SQL:\n" + sql);
 		}
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -754,7 +754,7 @@ public class TableSourceBuilder
 		{
 			pkName = meta.quoteObjectname(pkName);
 		}
-		
+
 		if (StringUtil.isEmptyString(pkName))
 		{
 			template = TemplateHandler.removePlaceholder(template, "CONSTRAINT " + MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, true);
@@ -764,7 +764,7 @@ public class TableSourceBuilder
 		else
 		{
 			template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);  // old templates
-			template = TemplateHandler.replacePlaceholder(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName);  // new templates through DbSettings.getAddPk()
+			template = TemplateHandler.replacePlaceholder(template, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName, true);  // new templates through DbSettings.getAddPk()
 		}
 
 		template = template.replaceAll("ADD\\s+PRIMARY", "ADD PRIMARY"); // removing the constraint name leaves two spaces which I find ugly :)
@@ -843,12 +843,12 @@ public class TableSourceBuilder
 				}
 			}
 
-			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, node.getTargetColumnsList());
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, node.getTargetColumnsList(), true);
 
 			String rule = node.getUpdateAction();
 			if (dbConnection.getDbSettings().supportsFkOption("update", rule))
 			{
-				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, "ON UPDATE " + rule);
+				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_UPDATE_RULE, "ON UPDATE " + rule, true);
 			}
 			else
 			{
@@ -858,7 +858,7 @@ public class TableSourceBuilder
 			rule = node.getDeleteAction();
 			if (dbConnection.getDbSettings().supportsFkOption("delete", rule))
 			{
-				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, "ON DELETE " + rule);
+				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, "ON DELETE " + rule, true);
 			}
 			else
 			{
@@ -872,11 +872,11 @@ public class TableSourceBuilder
 			}
 			else
 			{
-				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, rule.trim());
+				stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, rule.trim(), true);
 			}
 
-			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, node.getTable().getTableExpression(dbConnection));
-			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, node.getSourceColumnsList());
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, node.getTable().getTableExpression(dbConnection), true);
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, node.getSourceColumnsList(), true);
 
 			String add = getAdditionalFkSql(table, node, stmt);
 			if (add != null)

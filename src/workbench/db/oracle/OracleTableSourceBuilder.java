@@ -650,7 +650,7 @@ public class OracleTableSourceBuilder
 		}
 		else
 		{
-			template = TemplateHandler.replacePlaceholder(template, "%validate%", "NOVALIDATE");
+			template = TemplateHandler.replacePlaceholder(template, "%validate%", "NOVALIDATE", true);
 		}
 
 		if (fk.isEnabled())
@@ -659,7 +659,7 @@ public class OracleTableSourceBuilder
 		}
 		else
 		{
-			template = TemplateHandler.replacePlaceholder(template, "%enabled%", "DISABLE");
+			template = TemplateHandler.replacePlaceholder(template, "%enabled%", "DISABLE", true);
 		}
 		return template;
 	}

@@ -69,7 +69,7 @@ public class SqlServerTableSourceBuilder
 		}
 		else
 		{
-			sql = TemplateHandler.replacePlaceholder(sql, CLUSTERED_PLACEHOLDER, clustered);
+			sql = TemplateHandler.replacePlaceholder(sql, CLUSTERED_PLACEHOLDER, clustered, true);
 		}
 		return sql;
 	}
