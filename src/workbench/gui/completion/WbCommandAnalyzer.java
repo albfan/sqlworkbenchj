@@ -226,7 +226,7 @@ public class WbCommandAnalyzer
 			else if (parameter.equalsIgnoreCase(WbImport.ARG_SHEET_NR) || parameter.equalsIgnoreCase(WbExport.ARG_TARGET_SHEET_IDX))
 			{
 				this.useSheetIndex = true;
-				this.elements = getSheetnames(cmd, args);
+				this.elements = getSheetnames(cmd, args, true);
 				changeCase = false;
 			}
 			else if (parameter.equalsIgnoreCase(WbRunLB.ARG_CHANGESET))
@@ -237,7 +237,7 @@ public class WbCommandAnalyzer
 			else if (parameter.equalsIgnoreCase(WbImport.ARG_SHEET_NAME) || parameter.equalsIgnoreCase(WbExport.ARG_TARGET_SHEET_NAME))
 			{
 				this.useSheetIndex = false;
-				this.elements = getSheetnames(cmd, args);
+				this.elements = getSheetnames(cmd, args, false);
 				changeCase = false;
 			}
 			else
@@ -446,7 +446,7 @@ public class WbCommandAnalyzer
 		}
 	}
 
-	private List getSheetnames(SqlCommand wbImport, ArgumentParser cmdLine)
+	private List getSheetnames(SqlCommand wbImport, ArgumentParser cmdLine, boolean displayIndex)
 	{
 		cmdLine.parse(this.sql);
 		String fname = cmdLine.getValue(WbImport.ARG_FILE);
@@ -470,7 +470,7 @@ public class WbCommandAnalyzer
 			{
 				String display = null;
 				String name = sheets.get(index);
-				if (useSheetIndex)
+				if (displayIndex)
 				{
 					display = NumberStringCache.getNumberString(index + 1) + " - " + name;
 				}
