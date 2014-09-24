@@ -25,10 +25,15 @@ package workbench.storage;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.TextRowDataConverter;
+
 import workbench.util.CharacterRange;
 import workbench.util.StringUtil;
+import workbench.util.WbNumberFormatter;
 
 /**
  * A class to print the contents of a {@link DataStore} to a PrintStream
@@ -77,6 +82,8 @@ public class DataPrinter
 		converter.setDelimiter(delimiter);
 		converter.setColumnsToExport(columns);
 		converter.setEscapeRange(CharacterRange.RANGE_NONE);
+		WbNumberFormatter formatter = Settings.getInstance().createDefaultDecimalFormatter();
+		converter.setDefaultNumberFormatter(formatter);
 	}
 
 	public void setNullString(String value)

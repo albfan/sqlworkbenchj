@@ -426,30 +426,6 @@ public class LexerBasedParserTest
 			}
 		}
 		assertEquals(1, count);
-
-//		sql = "wbfeedback off; \n" +
-//             " \n" +
-//             "create procedure dbo.CopyTable \n" +
-//             "      @SrcTableName varchar(max), \n" +
-//             "      @DestTableName varchar(max) \n" +
-//             "      as \n" +
-//             "   set nocount on \n" +
-//             "   set xact_abort on \n" +
-//             "   declare @cols varchar(max) \n" +
-//             "   select @cols = case when @cols is null then '' else @cols + ',' end + name from sys.columns where object_id=object_id(@DestTableName) order by column_id \n" +
-//             "   declare @sql varchar(max) \n" +
-//             "   set @sql = 'insert into ' + @DestTableName + ' (' + @cols + ') ' + \n" +
-//             "      'select ' + @cols + ' from + @SrcTableName \n" +
-//             "   exec (@sql); \n" +
-//             " \n" +
-//             "commit;";
-//		parser = new LexerBasedParser(sql);
-//		System.out.println("**************************");
-//		while ((cmd = parser.getNextCommand()) != null)
-//		{
-//			System.out.println("** " + cmd.getSQL());
-//		}
-
 	}
 
 	@Test

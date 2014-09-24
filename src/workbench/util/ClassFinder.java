@@ -24,6 +24,7 @@ package workbench.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -101,8 +102,7 @@ public class ClassFinder
 	{
 		List<String> result = new ArrayList<>();
 
-		JarFile jarFile = new JarFile(archive);
-		try
+		try (JarFile jarFile = new JarFile(archive))
 		{
 			Enumeration<JarEntry> entries = jarFile.entries();
 
@@ -128,7 +128,7 @@ public class ClassFinder
 				try
 				{
 					Class clz = loader.loadClass(clsName);
-					if (toFind.isAssignableFrom(clz))
+					if (toFind.isAssignableFrom(clz) && !Modifier.isAbstract(clz.getModifiers()))
 					{
 						result.add(clsName);
 					}
@@ -138,10 +138,6 @@ public class ClassFinder
 					// ignore
 				}
 			}
-		}
-		finally
-		{
-			jarFile.close();
 		}
 
 		return result;

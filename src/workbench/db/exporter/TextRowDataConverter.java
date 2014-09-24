@@ -32,7 +32,6 @@ import workbench.db.WbConnection;
 import workbench.storage.DataConverter;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
-import workbench.util.CharacterEscapeType;
 
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;

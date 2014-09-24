@@ -23,10 +23,15 @@
 package workbench.storage;
 
 import java.io.StringWriter;
-import java.sql.Types;
 import java.io.Writer;
-import org.junit.Test;
+import java.math.BigDecimal;
+import java.sql.Types;
+
 import workbench.WbTestCase;
+import workbench.resource.Settings;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -58,7 +63,7 @@ public class DataPrinterTest
 		ds.setValue(row, 0, Integer.valueOf(2));
 		ds.setValue(row, 1, "Zaphod");
 		ds.setValue(row, 2, "Beeblebrox");
-		
+
 		Writer out = new StringWriter(50);
 
 		DataPrinter printer = new DataPrinter(ds, ";", "\n", null, true);
@@ -75,5 +80,46 @@ public class DataPrinterTest
 		out = new StringWriter(50);
 		printer.writeDataString(out, new int[] {0} );
 		assertEquals("LASTNAME;FIRSTNAME;ID\nDent;Arthur;1\n", out.toString());
+	}
+
+	@Test
+	public void testDecimal()
+		throws Exception
+	{
+		int[] types = new int[] {Types.DECIMAL, Types.VARCHAR };
+		String[] names = new String[] {"PRICE", "PRODUCT" };
+		DataStore ds = new DataStore(names, types);
+		int row = ds.addRow();
+		ds.setValue(row, 0, new BigDecimal("1.234"));
+		ds.setValue(row, 1, "Foo");
+
+		row = ds.addRow();
+		ds.setValue(row, 0, new BigDecimal("3.14"));
+		ds.setValue(row, 1, "Bar");
+
+		Writer out = new StringWriter(50);
+
+		String decimal = Settings.getInstance().getDecimalSymbol();
+		int digits = Settings.getInstance().getMaxFractionDigits();
+
+		try
+		{
+			Settings.getInstance().setMaxFractionDigits(0);
+			Settings.getInstance().setDecimalSymbol(".");
+			DataPrinter printer = new DataPrinter(ds, ";", "\n", null, true);
+			printer.writeDataString(out, null);
+			assertEquals("PRICE;PRODUCT\n1.234;Foo\n3.14;Bar\n", out.toString());
+
+			Settings.getInstance().setDecimalSymbol(",");
+			printer = new DataPrinter(ds, ";", "\n", null, true);
+			out = new StringWriter(50);
+			printer.writeDataString(out, null);
+			assertEquals("PRICE;PRODUCT\n1,234;Foo\n3,14;Bar\n", out.toString());
+		}
+		finally
+		{
+			Settings.getInstance().setDecimalSymbol(decimal);
+			Settings.getInstance().setMaxFractionDigits(digits);
+		}
 	}
 }
