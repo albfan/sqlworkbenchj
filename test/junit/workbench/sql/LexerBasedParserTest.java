@@ -456,21 +456,13 @@ public class LexerBasedParserTest
 	public void testAlternateDelimiter()
 		throws Exception
 	{
-		String sql =  "select * from test./\n./\n" + "select * from person\n./\n";
-		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser.setDelimiter(new DelimiterDefinition("./"));
-		List<String> statements = getStatements(parser);
-		assertEquals(2, statements.size());
-		assertEquals("select * from test./", statements.get(0).trim());
-		assertEquals("select * from person", statements.get(1).trim());
-
-		sql =
+		String sql =
 			"create table one (id integer)\n" +
 			"/?\n" +
 			"create table two (id integer)\n" +
 			"/?\n";
 
-		parser = new LexerBasedParser(sql);
+		LexerBasedParser parser = new LexerBasedParser(sql);
 		parser.setDelimiter(new DelimiterDefinition("/?"));
 		parser.setStoreStatementText(false);
 

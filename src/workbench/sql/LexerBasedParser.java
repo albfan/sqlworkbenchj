@@ -145,6 +145,8 @@ public class LexerBasedParser
 		boolean singleLineCommand = false;
 		boolean danglingQuote = false;
 		boolean inPgQuote = false;
+		boolean scriptEnd = false;
+
 		String pgQuoteString = null;
 
 		while (token != null)
@@ -212,6 +214,7 @@ public class LexerBasedParser
 					boolean delimiterMatched = delimiterString.equals(delim.toString());
 					if (delimiterMatched)
 					{
+						scriptEnd = token == null;
 						break;
 					}
 					text += skippedText.toString();
@@ -235,7 +238,7 @@ public class LexerBasedParser
 		}
 		if (previousEnd > 0)
 		{
-			if (token == null) previousEnd = realScriptLength;
+			if (token == null && !scriptEnd) previousEnd = realScriptLength;
 			ScriptCommandDefinition cmd = createCommandDef(sql, lastStart, previousEnd);
 			cmd.setIndexInScript(currentStatementIndex);
 			currentStatementIndex ++;
