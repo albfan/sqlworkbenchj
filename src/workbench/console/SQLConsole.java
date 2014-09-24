@@ -250,7 +250,7 @@ public class SQLConsole
 	private void showStartupMessage(AppArguments cmdLine)
 	{
 		LogMgr.logInfo("SQLConsole.main()", "SQL Workbench/J Console interface started");
-		System.out.println(ResourceMgr.getString("MsgConsoleStarted"));
+		System.out.println(ResourceMgr.getFormattedString("MsgConsoleStarted", ResourceMgr.getBuildNumber().toString()));
 		WbFile f = new WbFile(Settings.getInstance().getConfigDir());
 		System.out.println(ResourceMgr.getFormattedString("MsgConfigDir", f.getFullPath()));
 		System.out.println("");
