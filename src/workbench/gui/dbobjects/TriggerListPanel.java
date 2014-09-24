@@ -205,6 +205,7 @@ public class TriggerListPanel
 		{
 			setConnection(dbConnection);
 		}
+		this.splitPane.setDividerLocation(0.5d);
 
 		initialized = true;
 
@@ -328,7 +329,6 @@ public class TriggerListPanel
 			this.dbConnection.setBusy(false);
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
-
 	}
 
 	@Override
@@ -342,7 +342,9 @@ public class TriggerListPanel
 	{
 		super.setVisible(aFlag);
 		if (aFlag && this.shouldRetrieve)
+		{
 			this.retrieve();
+		}
 	}
 
 	private String getWorkspacePrefix(int index)

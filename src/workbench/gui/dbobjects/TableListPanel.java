@@ -161,6 +161,7 @@ public class TableListPanel
 	protected DbObjectTable tableList;
 	protected TableDefinitionPanel tableDefinition;
 	protected WbTable indexes;
+	protected VerticaProjectionPanel projections;
 	protected FkDisplayPanel importedKeys;
 	protected FkDisplayPanel exportedKeys;
 	protected ReloadAction reloadAction;
@@ -195,6 +196,7 @@ public class TableListPanel
 	protected boolean shouldRetrieveTableSource;
 	protected boolean shouldRetrieveTriggers;
 	protected boolean shouldRetrieveIndexes;
+	protected boolean shouldRetrieveProjections;
 	protected boolean shouldRetrieveExportedKeys;
 	protected boolean shouldRetrieveImportedKeys;
 	protected boolean shouldRetrieveTableData;
@@ -432,6 +434,7 @@ public class TableListPanel
 			});
 		}
 
+		projections = new VerticaProjectionPanel();
 		tableList.setRememberColumnOrder(Settings.getInstance().getRememberMetaColumnOrder("tablelist"));
 		tableList.setListSelectionControl(this);
 		tableList.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
@@ -557,6 +560,7 @@ public class TableListPanel
 		findPanel.dispose();
 		if (indexes != null) indexes.dispose();
 		if (indexPanel != null) indexPanel.dispose();
+		if (projections != null) projections.dispose();
 		WbAction.dispose(compileAction,countAction,reloadAction,renameAction,spoolData,toggleTableSource);
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
@@ -639,7 +643,14 @@ public class TableListPanel
 					displayTab.removeAll();
 					addBaseObjectPanels();
 					addDataPanel();
-					displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), indexPanel);
+					if (dbConnection.getDbId().equals(DbMetadata.DBID_VERTICA))
+					{
+						displayTab.add(ResourceMgr.getString("TxtDbExplorerProjections"), projections);
+					}
+					else
+					{
+						displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), indexPanel);
+					}
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedKeys);
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedKeys);
 					addTriggerPanel();
@@ -697,6 +708,7 @@ public class TableListPanel
 					indexes.reset();
 					triggers.reset();
 					importedKeys.reset();
+					projections.reset();
 
 					if (!includeDataPanel) tableData.reset();
 					restoreIndex(index);
@@ -823,6 +835,7 @@ public class TableListPanel
 				tableDefinition.reset();
 				importedKeys.reset();
 				exportedKeys.reset();
+				if (projections != null) projections.reset();
 				indexes.reset();
 				triggers.reset();
 				tableSource.reset();
@@ -869,6 +882,7 @@ public class TableListPanel
 		shouldRetrieveIndexes = true;
 		shouldRetrieveExportedKeys = true;
 		shouldRetrieveImportedKeys = true;
+		shouldRetrieveProjections = true;
 	}
 
 	private void setupSingleSelectTypes()
@@ -949,6 +963,24 @@ public class TableListPanel
 		}
 	}
 
+	private void initVertica()
+	{
+		if (dbConnection == null) return;
+
+		if (dbConnection.getDbId().equals(DbMetadata.DBID_VERTICA))
+		{
+			projections.setConnection(dbConnection);
+		}
+		else
+		{
+			if (projections != null)
+			{
+				projections.reset();
+				displayTab.remove(projections);
+			}
+		}
+	}
+
 	public void setConnection(WbConnection connection)
 	{
 		dbConnection = connection;
@@ -982,6 +1014,7 @@ public class TableListPanel
 		this.displayTab.addChangeListener(this);
 		this.compileAction.setConnection(connection);
 		this.countAction.setConnection(connection);
+		initVertica();
 	}
 
 	public boolean isReallyVisible()
@@ -1279,6 +1312,7 @@ public class TableListPanel
 		this.triggers.restoreSettings();
 		this.tableData.restoreSettings();
 		this.tableDefinition.restoreSettings();
+		this.projections.restoreSettings();
 	}
 
 
@@ -1291,6 +1325,7 @@ public class TableListPanel
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
 		tableData.saveToWorkspace(w, index);
+		projections.saveToWorkspace(w, index);
 		WbProperties props = w.getSettings();
 		String prefix = getWorkspacePrefix(index);
 		storeSettings(props, prefix);
@@ -1309,6 +1344,7 @@ public class TableListPanel
 		// the settings in the workspace override the global ones
 		restoreSettings();
 		tableData.readFromWorkspace(w, index);
+		projections.readFromWorkspace(w, index);
 		WbProperties props = w.getSettings();
 		String prefix = getWorkspacePrefix(index);
 		readSettings(props, prefix);
@@ -1911,6 +1947,10 @@ public class TableListPanel
 		{
 			retrieveIndexes();
 		}
+		else if (panel == projections && shouldRetrieveProjections)
+		{
+			retrieveProjections();
+		}
 		else if (panel == importedKeys && shouldRetrieveImportedKeys)
 		{
 			retrieveImportedTables();
@@ -2059,6 +2099,27 @@ public class TableListPanel
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
+
+	protected void retrieveProjections()
+			throws SQLException
+		{
+			try
+			{
+				WbSwingUtilities.showWaitCursor(this);
+				projections.retrieve(getObjectTable());
+				this.shouldRetrieveProjections = false;
+			}
+			catch (Throwable th)
+			{
+				this.shouldRetrieveProjections = true;
+				LogMgr.logError("TableListPanel.retrieveProjections()", "Error retrieving projections", th);
+				WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
+			}
+			finally
+			{
+				WbSwingUtilities.showDefaultCursor(this);
+			}
+		}
 
 	@Override
 	public void reload()
