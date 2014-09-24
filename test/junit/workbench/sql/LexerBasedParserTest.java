@@ -342,6 +342,33 @@ public class LexerBasedParserTest
 		assertEquals("drop function foo()", script.get(0));
 		assertTrue(script.get(1).startsWith("create or replace"));
 		assertTrue(script.get(1).endsWith("language plpgsql"));
+
+
+		sql =
+			"drop function foo()\n" +
+			"/?\n" +
+			"create or replace function foo()\n" +
+			"  returns integer \n" +
+			"as \n" +
+			"$body$\n" +
+			"  declare l_value varchar;\n" +
+			"begin \n" +
+			"   select \"$body$\" into l_value where some_column <> '$body$'; \n" +
+			"   return l_value; \n" +
+			"end;\n" +
+			"$body$\n"+
+			"language plpgsql\n" +
+			"/?\n";
+
+		parser = new LexerBasedParser(sql);
+		parser.setDelimiter(new DelimiterDefinition("/?"));
+		parser.setCheckPgQuoting(true);
+		script = getStatements(parser);
+		assertEquals(2, script.size());
+		assertEquals("drop function foo()", script.get(0));
+//		System.out.println(script.get(1));
+		assertTrue(script.get(1).startsWith("create or replace"));
+		assertTrue(script.get(1).endsWith("language plpgsql"));
 	}
 
 	private List<String> getStatements(LexerBasedParser parser)
@@ -431,25 +458,32 @@ public class LexerBasedParserTest
 	{
 		String sql =  "select * from test./\n./\n" + "select * from person\n./\n";
 		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser = new LexerBasedParser(sql);
 		parser.setDelimiter(new DelimiterDefinition("./"));
-		ScriptCommandDefinition cmd = null;
-		while ((cmd = parser.getNextCommand()) != null)
-		{
-			int index = cmd.getIndexInScript();
-			if (index == 0)
-			{
-				assertEquals("select * from test./", cmd.getSQL().trim());
-			}
-			else if (index == 1)
-			{
-				assertEquals("select * from person", cmd.getSQL().trim());
-			}
-			else
-			{
-				fail("Wrong command index: " + index);
-			}
-		}
+		List<String> statements = getStatements(parser);
+		assertEquals(2, statements.size());
+		assertEquals("select * from test./", statements.get(0).trim());
+		assertEquals("select * from person", statements.get(1).trim());
+
+		sql =
+			"create table one (id integer)\n" +
+			"/?\n" +
+			"create table two (id integer)\n" +
+			"/?\n";
+
+		parser = new LexerBasedParser(sql);
+		parser.setDelimiter(new DelimiterDefinition("/?"));
+		parser.setStoreStatementText(false);
+
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		String stmt = sql.substring(cmd.getStartPositionInScript(), cmd.getEndPositionInScript());
+		assertEquals("create table one (id integer)", stmt.trim());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		stmt = sql.substring(cmd.getStartPositionInScript(), cmd.getEndPositionInScript());
+		System.out.println(stmt);
+		assertEquals("create table two (id integer)", stmt.trim());
 	}
 
 	@Test

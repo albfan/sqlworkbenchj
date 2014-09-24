@@ -106,7 +106,7 @@ public class LexerBasedParser
 	{
 		this.checkPgQuoting = flag;
 	}
-	
+
 	/**
 	 * Controls if the actual SQL for each command returned by
 	 * #getNextCommand() is stored in the ScriptCommandDefinition
@@ -195,6 +195,7 @@ public class LexerBasedParser
 				}
 				else if (checkForDelimiter && delimiterString.startsWith(text))
 				{
+					// handle delimiters that are not parsed as a single token
 					StringBuilder delim = new StringBuilder(delimiter.getDelimiter().length());
 					delim.append(text);
 					StringBuilder skippedText = new StringBuilder(text.length() + 5);

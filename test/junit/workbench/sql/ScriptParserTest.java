@@ -1158,4 +1158,71 @@ public class ScriptParserTest
 		assertEquals("1", p.getCommand(0));
 		assertEquals("-- some comment \n2", p.getCommand(1));
 	}
+
+	@Test
+	public void testPgScript()
+	{
+		String script =
+			"create table one (id integer)\n" +
+			"/?\n" +
+			"\n" +
+			"create table two (id integer)\n" +
+			"/?\n" +
+			"\n" +
+			"do $$ \n" +
+			"declare \n" +
+			"    selectrow record; \n" +
+			"begin \n" +
+			"  for selectrow in \n" +
+			"      select 'ALTER TABLE '|| t.table_name || ' ADD COLUMN foo integer NULL' as script\n" +
+			"      from information_schema.tables t \n" +
+			"      where t.table_schema = 'stuff' \n" +
+			"  loop \n" +
+			"    execute selectrow.script;\n" +
+			"  end loop\n" +
+			"end;\n" +
+			"$$\n" +
+			"/?\n";
+
+		ScriptParser parser = new ScriptParser(script, ParserType.Postgres);
+		parser.setAlternateDelimiter(new DelimiterDefinition("/?"));
+		int count = parser.getStatementCount();
+		assertEquals(3, count);
+		assertEquals("create table one (id integer)", parser.getCommand(0));
+		assertEquals("create table two (id integer)", parser.getCommand(1));
+		System.out.println(parser.getCommand(2));
+		assertFalse(parser.getCommand(2).contains("/?"));
+		assertTrue(parser.getCommand(2).trim().endsWith("$$"));
+
+		script =
+			"create table one (id integer)\n" +
+			"GO\n" +
+			"\n" +
+			"create table two (id integer)\n" +
+			"GO\n" +
+			"\n" +
+			"do $$ \n" +
+			"declare \n" +
+			"    selectrow record; \n" +
+			"begin \n" +
+			"  for selectrow in \n" +
+			"      select 'ALTER TABLE '|| t.table_name || ' ADD COLUMN foo integer NULL' as script\n" +
+			"      from information_schema.tables t \n" +
+			"      where t.table_schema = 'stuff' \n" +
+			"  loop \n" +
+			"    execute selectrow.script;\n" +
+			"  end loop\n" +
+			"end;\n" +
+			"$$\n" +
+			"GO\n";
+
+		parser = new ScriptParser(script, ParserType.Postgres);
+		parser.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
+		count = parser.getStatementCount();
+		assertEquals(3, count);
+		assertEquals("create table one (id integer)", parser.getCommand(0));
+		assertEquals("create table two (id integer)", parser.getCommand(1));
+		assertFalse(parser.getCommand(2).contains("GO"));
+		assertTrue(parser.getCommand(2).trim().endsWith("$$"));
+	}
 }
