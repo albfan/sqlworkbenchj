@@ -234,9 +234,10 @@ public class LiquibaseParser
 		DelimiterDefinition delimiter = getDelimiter(element);
 		boolean relative = StringUtil.stringToBool(element.getAttribute("relativeToChangelogFile"));
 		boolean split = getSplitAttribute(element);
+		WbFile pathFile = new WbFile(path);
 		WbFile include;
 
-		if (relative)
+		if (relative || !pathFile.isAbsolute())
 		{
 			include = new WbFile(changeLog.getParentFile(), path);
 		}
