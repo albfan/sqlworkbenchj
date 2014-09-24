@@ -270,7 +270,7 @@
         <xsl:value-of select="sequence-properties/property[@name='MIN_VALUE']/@value"/>
       </xsl:attribute>
     </xsl:if>
-    <xsl:if test="string-length($max-value) &gt; 0 and $max-value != '9223372036854775807' and substr($max-value, 1, 27) != '999999999999999999999999999'">
+    <xsl:if test="string-length($max-value) &gt; 0 and $max-value != '9223372036854775807' and substring($max-value, 1, 27) != '999999999999999999999999999'">
       <xsl:attribute name="maxValue">
         <xsl:value-of select="sequence-properties/property[@name='MAX_VALUE']/@value"/>
       </xsl:attribute>
