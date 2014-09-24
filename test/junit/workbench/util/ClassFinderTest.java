@@ -24,7 +24,9 @@ package workbench.util;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -44,7 +46,7 @@ public class ClassFinderTest
 	{
 		String path = System.getProperty("java.class.path");
 		List<String> elements = StringUtil.stringToList(path, System.getProperty("path.separator"));
-		List<String> toSearch = new ArrayList<String>();
+		List<String> toSearch = new ArrayList<>();
 		for (String entry : elements)
 		{
 			if (entry.endsWith(".jar") &&
