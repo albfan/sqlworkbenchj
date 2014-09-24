@@ -28,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
@@ -387,7 +388,7 @@ public class PostgresTableSourceBuilder
 		{
 			int storage = col.getPgStorage();
 			String option = PostgresColumnEnhancer.getStorageOption(storage);
-			if (option != null && storage != PostgresColumnEnhancer.STORAGE_EXTENDED)
+			if (option != null && !isDefaultStorage(col.getDataType(), storage))
 			{
 				if (result == null)
 				{
@@ -406,6 +407,12 @@ public class PostgresTableSourceBuilder
 		return result;
 	}
 
+	private boolean isDefaultStorage(int columnType, int storage)
+	{
+		if (columnType == Types.NUMERIC && storage == PostgresColumnEnhancer.STORAGE_MAIN) return true;
+		return storage == PostgresColumnEnhancer.STORAGE_EXTENDED;
+	}
+	
 	private String getOwnerSql(TableIdentifier table)
 	{
 		DbSettings.GenerateOwnerType genType = dbConnection.getDbSettings().getGenerateTableOwner();
