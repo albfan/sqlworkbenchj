@@ -228,10 +228,6 @@ public class PgCopyImporter
 		copySql.append(delim);
 		copySql.append('\'');
 
-		copySql.append(", encoding '");
-		copySql.append(encoding);
-		copySql.append('\'');
-
 		if (nullString == null) nullString = "";
 		copySql.append(", NULL '");
 		copySql.append(nullString);
