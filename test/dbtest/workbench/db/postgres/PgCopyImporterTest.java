@@ -29,20 +29,23 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
 import workbench.TestUtil;
-
 import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.TextImportOptions;
+
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -119,12 +122,12 @@ public class PgCopyImporterTest
 		TextImportOptions options = createOptions();
 
 		String sql = copy.createCopyStatement(tbl, cols, options, "UTF-8");
-		assertEquals("COPY foo (id,name) FROM stdin WITH (format csv, header true, quote '\"', delimiter '|', encoding 'UTF-8', NULL '')", sql);
+		assertEquals("COPY foo (id,name) FROM stdin WITH (format csv, header true, quote '\"', delimiter '|', NULL '')", sql);
 		options.setContainsHeader(false);
 		options.setTextDelimiter("\t");
 		cols = CollectionUtil.arrayList(name, id);
 		sql = copy.createCopyStatement(tbl, cols, options, "ISO-8859-1");
-		assertEquals("COPY foo (name,id) FROM stdin WITH (format csv, header false, quote '\"', delimiter '	', encoding 'ISO-8859-1', NULL '')", sql);
+		assertEquals("COPY foo (name,id) FROM stdin WITH (format csv, header false, quote '\"', delimiter '	', NULL '')", sql);
 	}
 
 	private TextImportOptions createOptions()
