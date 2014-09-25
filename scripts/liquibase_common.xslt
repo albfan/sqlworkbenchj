@@ -88,7 +88,7 @@
           </xsl:variable>
           <xsl:if test="contains($boolean-types, concat($type-id,';'))">
             <xsl:attribute name="defaultValueBoolean">
-              <xsl:value-of select="translate(default-value, ' *?[]()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', '')"/>
+              <xsl:value-of select="default-value"/>
             </xsl:attribute>
           </xsl:if>
         </xsl:if>
