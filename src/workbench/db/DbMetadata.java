@@ -100,7 +100,7 @@ public class DbMetadata
 	public static final String DBID_PG = "postgresql";
 	public static final String DBID_MS = "microsoft_sql_server";
 	public static final String DBID_VERTICA = "vertica_database";
-	
+
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};
 
@@ -361,11 +361,18 @@ public class DbMetadata
 
 		this.dbSettings = new DbSettings(this.getDbId());
 
-		String quote = dbSettings.getQuoteEscapeCharacter();
+		String quote = dbSettings.getIdentifierQuoteString();
 		if (quote != null)
 		{
-			this.quoteCharacter = quote;
-			LogMgr.logDebug("DbMetadata.<init>", "Using configured quote escape character: " + quoteCharacter);
+			if ("<none>".equals(quote))
+			{
+				this.quoteCharacter = "";
+			}
+			else
+			{
+				this.quoteCharacter = quote;
+			}
+			LogMgr.logDebug("DbMetadata.<init>", "Using configured identifier quote character: >" + quoteCharacter + "<");
 		}
 
 		if (StringUtil.isBlank(quoteCharacter))

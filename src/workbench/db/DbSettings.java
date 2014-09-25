@@ -68,7 +68,6 @@ public class DbSettings
 	private boolean useJdbcCommit;
 	private boolean ddlNeedsCommit;
 
-	private boolean neverQuoteObjects;
 	private boolean reportsRealSizeAsDisplaySize;
 
 	private boolean allowsMultipleGetUpdateCounts = true;
@@ -102,7 +101,15 @@ public class DbSettings
 		this.supportsCommentInSql = settings.getBoolProperty(prefix + "sql.embeddedcomments", true);
 
 		List<String> quote = StringUtil.stringToList(settings.getProperty("workbench.db.neverquote",""));
-		this.neverQuoteObjects = quote.contains(dbId);
+		if (CollectionUtil.isNonEmpty(quote))
+		{
+			LogMgr.logInfo("DbSettings.<init>", "Migration old property \"workbench.db.neverquote\" to dbid based properties");
+			for (String nid : quote)
+			{
+				settings.setProperty("workbench.db." + nid + ".neverquote", "true");
+			}
+			settings.removeProperty("workbench.db.neverquote");
+		}
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty(prefix + "multipleupdatecounts", true);
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty(prefix + "charsize.usedisplaysize", false);
 		this.supportsBatchedStatements = settings.getBoolProperty(prefix + "batchedstatements", false);
@@ -287,9 +294,8 @@ public class DbSettings
 	 */
 	public boolean neverQuoteObjects()
 	{
-		return neverQuoteObjects;
+		return Settings.getInstance().getBoolProperty(prefix + "neverquote", false);
 	}
-
 
 	/**
 	 * Returns true if default values in the table definition should be trimmed
@@ -1593,9 +1599,21 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "fixfkretrieval", true);
 	}
 
-	public String getQuoteEscapeCharacter()
+	public String getIdentifierQuoteString()
 	{
-		return Settings.getInstance().getProperty(prefix + "quote.escape", null);
+		String propName = prefix + "identifier.quote";
+		String quote = Settings.getInstance().getProperty(prefix + "quote.escape", null);
+		if (quote != null)
+		{
+			LogMgr.logWarning("DbSettings.getIdentifierQuoteString()", "Deprecated property \"" + prefix + ".quote.escape\" used. Renaming to: " + propName);
+			Settings.getInstance().removeProperty(prefix + "quote.escape");
+			Settings.getInstance().setProperty(propName, quote);
+		}
+		else
+		{
+			quote = Settings.getInstance().getProperty(propName, null);
+		}
+		return quote;
 	}
 
 	public boolean objectInfoWithFK()
