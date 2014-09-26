@@ -42,6 +42,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import workbench.interfaces.PropertyStorage;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
@@ -71,7 +72,7 @@ public class WbProperties
 	{
 		this(null, num);
 	}
-	
+
 	public WbProperties(Object notificationSource)
 	{
 		this(notificationSource, 2);
@@ -98,15 +99,9 @@ public class WbProperties
 	public synchronized void saveToFile(File filename, WbProperties reference)
 		throws IOException
 	{
-		FileOutputStream out = null;
-		try
+		try (FileOutputStream out = new FileOutputStream(filename))
 		{
-			out = new FileOutputStream(filename);
 			this.save(out, reference);
-		}
-		finally
-		{
-			out.close();
 		}
 	}
 
@@ -129,11 +124,15 @@ public class WbProperties
 		for (Object key1 : keys)
 		{
 			key = (String) key1;
-			if (reference != null)
+			if (reference != null && reference.size() > 0)
 			{
 				String currentValue = getProperty(key);
 				String referenceValue = reference.getProperty(key);
-				if (StringUtil.equalStringOrEmpty(currentValue, referenceValue)) continue;
+				if (StringUtil.equalStringOrEmpty(currentValue, referenceValue))
+				{
+					LogMgr.logTrace("WbProperties.save()", "Property: [" + key1 + "] has its default value. Property will not be saved");
+					continue;
+				}
 			}
 			String comment = comments.get(key);
 			if (StringUtil.isNonBlank(comment))

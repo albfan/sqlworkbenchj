@@ -98,7 +98,7 @@ public class FileVersioner
 	 * @return the complete filename of the backup
 	 * @throws java.io.IOException
 	 */
-	public String createBackup(File target)
+	public File createBackup(File target)
 		throws IOException
 	{
 		if (target == null) return null;
@@ -122,7 +122,7 @@ public class FileVersioner
 		}
 		File backup = new File(dir, target.getName() + versionSeparator + nextVersion);
 		FileUtil.copy(target, backup);
-		return backup.getAbsolutePath();
+		return backup;
 	}
 
 	private File getTargetDir(File target)

@@ -1627,7 +1627,7 @@ public class Settings
 		verbs.addAll(list);
 		return verbs;
 	}
-	
+
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Color Handling">
@@ -3629,8 +3629,8 @@ public class Settings
 			FileVersioner version = new FileVersioner(maxVersions, dir, sep);
 			try
 			{
-				String bck = version.createBackup(configfile);
-				LogMgr.logInfo("Settings.saveSettings()", "Created new version of global settings file: " + bck);
+				File bck = version.createBackup(configfile);
+				LogMgr.logInfo("Settings.saveSettings()", "Created new version of global settings file: " + bck.getAbsolutePath()+ "(" + bck.length() + " bytes)");
 			}
 			catch (IOException e)
 			{
