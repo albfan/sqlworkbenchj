@@ -1612,7 +1612,7 @@ public class Settings
 
 	public boolean getAutoRunExportStatement()
 	{
-		return getBoolProperty("workbench.export.sql.autorun.executecurrent", false);
+		return getBoolProperty("workbench.export.sql.autorun.executecurrent", true);
 	}
 
 	public void setAutoRunExportStatement(boolean flag)
@@ -1622,7 +1622,7 @@ public class Settings
 
 	public Collection<String> getAutoRunVerbs()
 	{
-		List<String> list = getListProperty("workbench.export.sql.autorun.verbs", true, "select,wbcall,wblist,wbrowcount");
+		List<String> list = getListProperty("workbench.export.sql.autorun.verbs", false, null);
 		Set<String> verbs = CollectionUtil.caseInsensitiveSet();
 		verbs.addAll(list);
 		return verbs;
