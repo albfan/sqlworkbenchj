@@ -499,22 +499,60 @@
             </entry>
           </row>
           <row>
-            <entry>-excludeLobs</entry>
+            <entry>-retrieveCLOB</entry>
             <entry>
               <para>
-                If this parameter is set to true, CLOB and BLOB columns will
-                not be retrieved at all, which is useful if you retrieve a lot
-                of rows from tables with columns of those type to reduce the memory
-                that is needed.
+                By default <literal>CLOB</literal> columns will be retrieved and searched.
+                If this parameter is set to <literal>false</literal>, CLOB columns will not be retrieved.
               </para>
               <para>
-                If this switch is set to <literal>true</literal> the content of CLOB columns will not be searched.
+                If the search value is not expected in columns of that type, exluding them from the search
+                will speed up data retrieval (and thus the searching).
+              </para>
+              <para>
+                Only columns reported as <literal>CLOB</literal> by the JDBC driver will be excluded.
+                If the driver reports a column as <literal>VARCHAR</literal> this parameter will
+                not exclude that column.
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>-retrieveBLOB</entry>
+            <entry>
+              <para>
+                By default <literal>BLOB</literal> columns will not be retrieved for those rows
+                that match the criteria to avoid excessive memory usage.
+              </para>
+              <para>
+                If <literal>BLOB</literal> columns should be retrieved, this parameter needs to be
+                set to <literal>true</literal>. Enabling this will not search inside the binary
+                data. If <literal>BLOB</literal> columns should be searched (and treated as character
+                data), use the <literal>-treatBlobAs</literal> parameter
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <entry>-treatBlobAs</entry>
+            <entry>
+              <para>
+                If this parameter specifies a valid encoding, binary (aka "BLOB") columns will
+                be retrieved and converted to a character value using the specified encoding.
+                That character value is then searched.
+              </para>
+              <para>
+                <literal>-treatBlobAs="UTF-8"</literal> would convert <emphasis role="bold">all</emphasis>
+                <literal>BLOB</literal> columns in <emphasis role="bold">all</emphasis> tables that are
+                searched to a character value using UTF-8 as the encoding. Therefore using this option usually
+                only makes sense if a single table is searched.
               </para>
             </entry>
           </row>
         </tbody>
       </tgroup>
     </informaltable>
+
     <section id="grep-data-examples">
       <title>Examples</title>
       <section id="grep-data-example-simple">

@@ -93,7 +93,8 @@ public class LookupDataLoader
 		{
 			TableSelectBuilder builder = new TableSelectBuilder (conn, "lookupretrieval");
 			builder.setSortPksFirst(true);
-			builder.setExcludeLobColumns(true);
+			builder.setIncludeBLOBColumns(false);
+			builder.setIncludeCLOBColumns(false);
 			sql = builder.getSelectForColumns(lookupTable.getTable(), lookupTable.getColumns());
 		}
 		else
@@ -222,7 +223,7 @@ public class LookupDataLoader
 	 *
 	 * @return the PK of the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
 	 * @see #getLookupTable()
-	 * @see #getReferencingColumns() 
+	 * @see #getReferencingColumns()
 	 */
 	public PkDefinition getPK()
 	{

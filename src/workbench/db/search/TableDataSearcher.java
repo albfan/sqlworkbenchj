@@ -23,9 +23,12 @@
 package workbench.db.search;
 
 import java.util.List;
+
+import workbench.interfaces.TableSearchConsumer;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.TableSearchConsumer;
+
 import workbench.storage.filter.ColumnExpression;
 
 /**
@@ -51,7 +54,7 @@ public interface TableDataSearcher
 
 	void setConsumer(TableSearchConsumer consumer);
 
-	void setExcludeLobColumns(boolean flag);
+	void setRetrieveLobColumns(boolean flag);
 
 	void setMaxRows(int max);
 

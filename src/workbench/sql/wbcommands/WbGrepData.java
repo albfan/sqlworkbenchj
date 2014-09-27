@@ -65,13 +65,16 @@ public class WbGrepData
 	implements TableSearchConsumer
 {
 	public static final String VERB = "WbGrepData";
-	public static final String PARAM_TABLES = "tables";
-	public static final String PARAM_EXPRESSION = "searchValue";
-	public static final String PARAM_EXCLUDE_LOBS = "excludeLobs";
-	public static final String PARAM_IGNORE_CASE = "ignoreCase";
+	public static final String ARG_TABLES = "tables";
+	public static final String ARG_EXPRESSION = "searchValue";
+	public static final String ARG_EXCLUDE_LOBS = "excludeLobs";
+	public static final String ARG_RETRIEVE_CLOBS = "retrieveCLOB";
+	public static final String ARG_RETRIEVE_BLOBS = "retrieveBLOB";
+	public static final String ARG_IGNORE_CASE = "ignoreCase";
 
-	public static final String PARAM_COMPARATOR = "compareType";
-	public static final String PARAM_COLUMNS = "columns";
+	public static final String ARG_COMPARATOR = "compareType";
+	public static final String ARG_COLUMNS = "columns";
+	public static final String ARG_BLOB_ENCODING = "treatBlobAs";
 
 	private ClientSideTableSearcher searcher;
 	private StatementRunnerResult searchResult;
@@ -84,14 +87,17 @@ public class WbGrepData
 		this.isUpdatingCommand = false;
 
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(ARG_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
-		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_EXPRESSION);
-		cmdLine.addArgument(PARAM_COLUMNS);
-		cmdLine.addArgument(PARAM_COMPARATOR, CollectionUtil.arrayList("equals", "startsWith", "contains", "matches", "isNull"));
+		cmdLine.addArgument(ARG_EXCLUDE_LOBS, ArgumentType.Deprecated);
+		cmdLine.addArgument(ARG_IGNORE_CASE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_RETRIEVE_CLOBS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_RETRIEVE_BLOBS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_EXPRESSION);
+		cmdLine.addArgument(ARG_COLUMNS);
+		cmdLine.addArgument(ARG_BLOB_ENCODING, StringUtil.stringToList(Settings.getInstance().getPopularEncodings(), ",", true, true));
+		cmdLine.addArgument(ARG_COMPARATOR, CollectionUtil.arrayList("equals", "startsWith", "contains", "matches", "isNull"));
 	}
 
 	@Override
@@ -115,10 +121,10 @@ public class WbGrepData
 			return searchResult;
 		}
 
-		String searchValue = cmdLine.getValue(PARAM_EXPRESSION);
+		String searchValue = cmdLine.getValue(ARG_EXPRESSION);
 		boolean needSearchValue = true;
 
-		String tableNames = cmdLine.getValue(PARAM_TABLES);
+		String tableNames = cmdLine.getValue(ARG_TABLES);
 		String excludeTables = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
 		List<TableIdentifier> tables = null;
 
@@ -133,12 +139,31 @@ public class WbGrepData
 		tables = parser.getTables();
 
 		searcher = new ClientSideTableSearcher();
-		searcher.setExcludeLobColumns(cmdLine.getBoolean(PARAM_EXCLUDE_LOBS, false));
+		if (cmdLine.isArgPresent(ARG_EXCLUDE_LOBS))
+		{
+			searcher.setRetrieveLobColumns(!cmdLine.getBoolean(ARG_EXCLUDE_LOBS, false));
+			String msg = ResourceMgr.getFormattedString("ErrDataSearchExclDeprecated", "-" + ARG_EXCLUDE_LOBS, "-" + ARG_RETRIEVE_CLOBS, "-" + ARG_RETRIEVE_BLOBS);
+			searchResult.addMessage(msg);
+			searchResult.setWarning(true);
+		}
+		else
+		{
+			if (cmdLine.isArgPresent(ARG_BLOB_ENCODING))
+			{
+				String encoding = cmdLine.getValue(ARG_BLOB_ENCODING);
+				searcher.setTreatBlobAsText(StringUtil.isNonBlank(encoding), encoding);
+			}
+			else
+			{
+				searcher.setRetrieveBLOBs(cmdLine.getBoolean(ARG_RETRIEVE_BLOBS, false));
+			}
+			searcher.setIncludeCLOBs(cmdLine.getBoolean(ARG_RETRIEVE_CLOBS, true));
+		}
 		searcher.setConnection(currentConnection);
 		searcher.setTableNames(tables);
 
-		boolean ignoreCase = cmdLine.getBoolean(PARAM_IGNORE_CASE, true);
-		String comparatorType = cmdLine.getValue(PARAM_COMPARATOR);
+		boolean ignoreCase = cmdLine.getBoolean(ARG_IGNORE_CASE, true);
+		String comparatorType = cmdLine.getValue(ARG_COMPARATOR);
 		if (StringUtil.isBlank(comparatorType))
 		{
 			comparatorType = "contains";
@@ -175,7 +200,7 @@ public class WbGrepData
 			return searchResult;
 		}
 
-		List<String> columns = cmdLine.getListValue(PARAM_COLUMNS);
+		List<String> columns = cmdLine.getListValue(ARG_COLUMNS);
 		searcher.setComparator(comp);
 		searcher.setConsumer(this);
 		searcher.setCriteria(searchValue, ignoreCase, columns);

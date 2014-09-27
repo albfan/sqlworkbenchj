@@ -43,7 +43,8 @@ public class TableSelectBuilder
 	public static final String ROWCOUNT_TEMPLATE_NAME = "tablerowcount";
 
 	private WbConnection dbConnection;
-	private boolean includLobColumns = true;
+	private boolean includeBLOBColumns = true;
+	private boolean includeCLOBColumns = true;
 	private boolean useColumnAlias;
 	private boolean sortPksFirst;
 	private String sqlTemplate;
@@ -91,9 +92,14 @@ public class TableSelectBuilder
 		this.sqlTemplate = template;
 	}
 
-	public void setExcludeLobColumns(boolean flag)
+	public void setIncludeBLOBColumns(boolean flag)
 	{
-		this.includLobColumns = !flag;
+		includeBLOBColumns = flag;
+	}
+
+	public void setIncludeCLOBColumns(boolean flag)
+	{
+		includeCLOBColumns = flag;
 	}
 
 	public void setUseColumnAlias(boolean flag)
@@ -185,11 +191,18 @@ public class TableSelectBuilder
 					dbmsType = SqlUtil.getTypeName(type);
 				}
 
-				if (includLobColumns || dbConnection.getDbSettings().isSearchable(dbmsType))
+				boolean isBlob = SqlUtil.isBlobType(type);
+				boolean isClob = SqlUtil.isClobType(type);
+
+				if (isClob)
 				{
-					expr = getColumnExpression(column);
+					if (includeCLOBColumns) expr = getColumnExpression(column);
 				}
-				else if (!SqlUtil.isBlobType(type) && !SqlUtil.isClobType(type))
+				else if (isBlob)
+				{
+					if (includeBLOBColumns) expr = getColumnExpression(column);
+				}
+				else
 				{
 					expr = getColumnExpression(column);
 				}

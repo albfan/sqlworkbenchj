@@ -519,13 +519,14 @@ public class WbCopyTest
 			StatementRunnerResult result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
-			ResultSet rs = stmt.executeQuery("select count(*) from target_data");
-			if (rs.next())
+			try (ResultSet rs = stmt.executeQuery("select count(*) from target_data"))
 			{
-				int count = rs.getInt(1);
-				assertEquals("Incorrect number of rows copied", 4, count);
+				if (rs.next())
+				{
+					int count = rs.getInt(1);
+					assertEquals("Incorrect number of rows copied", 4, count);
+				}
 			}
-			rs.close();
 
 			// Make sure the order in the column mapping is preserved when creating the table
 			List<ColumnIdentifier> columns = con.getMetadata().getTableColumns(new TableIdentifier("TARGET_DATA"));
@@ -1453,13 +1454,13 @@ public class WbCopyTest
 
 		StatementRunnerResult result = copyCmd.execute(sql);
 		assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
-		Statement stmt = con.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT count(*) from target_table");
-		assertTrue(rs.next());
-		int count = rs.getInt(1);
-		assertEquals(1, count);
-		rs.close();
-		stmt.close();
+		try (Statement stmt = con.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT count(*) from target_table"))
+		{
+			assertTrue(rs.next());
+			int count = rs.getInt(1);
+			assertEquals(1, count);
+		}
 
 	}
 

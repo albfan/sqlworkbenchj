@@ -22,7 +22,6 @@
  */
 package workbench.db.search;
 
-import workbench.db.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -32,12 +31,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.WbManager;
 import workbench.interfaces.TableSearchConsumer;
 import workbench.log.LogMgr;
+
+import workbench.db.DbMetadata;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.TableSelectBuilder;
+import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -62,7 +70,7 @@ public class ServerSideTableSearcher
 	private Statement query = null;
 	private Thread searchThread;
 	private int maxRows = 0;
-	private boolean excludeLobColumns = true;
+	private boolean retrieveLobColumns = true;
 	private DataStore result = null;
 
 	@Override
@@ -149,9 +157,9 @@ public class ServerSideTableSearcher
 	}
 
 	@Override
-	public void setExcludeLobColumns(boolean flag)
+	public void setRetrieveLobColumns(boolean flag)
 	{
-		this.excludeLobColumns = flag;
+		this.retrieveLobColumns = flag;
 	}
 
 	private void searchTable(TableIdentifier table, long current, long total)
@@ -248,7 +256,8 @@ public class ServerSideTableSearcher
 
 		StringBuilder sql = new StringBuilder(colCount * 120);
 		TableSelectBuilder builder = new TableSelectBuilder(this.connection, sqlTemplateKey);
-		builder.setExcludeLobColumns(this.excludeLobColumns);
+		builder.setIncludeBLOBColumns(this.retrieveLobColumns);
+		builder.setIncludeCLOBColumns(this.retrieveLobColumns);
 		sql.append(builder.getSelectForColumns(def.getTable(), def.getColumns()));
 		sql.append("\n WHERE ");
 		boolean first = true;
@@ -368,7 +377,14 @@ public class ServerSideTableSearcher
 	@Override
 	public void setTableNames(List<TableIdentifier> tables)
 	{
-		this.tablesToSearch = new ArrayList<TableIdentifier>(tables);
+		if (tables == null)
+		{
+			this.tablesToSearch = new ArrayList<>(0);
+		}
+		else
+		{
+			this.tablesToSearch = new ArrayList<>(tables);
+		}
 	}
 
 	public TableSearchConsumer getDisplay()

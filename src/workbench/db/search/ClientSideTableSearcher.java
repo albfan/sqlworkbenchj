@@ -63,7 +63,9 @@ public class ClientSideTableSearcher
 {
 	private String searchString;
 	private boolean isRunning;
-	private boolean excludeLobs;
+	private boolean includeBLOBs;
+	private boolean includeCLOBs;
+
 	private int maxRows = Integer.MAX_VALUE;
 	private List<TableIdentifier> tablesToSearch;
 	private WbConnection connection;
@@ -145,12 +147,23 @@ public class ClientSideTableSearcher
 		if (treatBlobAsText && EncodingUtil.isEncodingSupported(encoding))
 		{
 			this.blobEncoding = encoding;
-			this.excludeLobs = false;
+			this.includeBLOBs = true;
 		}
 		else
 		{
 			this.blobEncoding = null;
 		}
+	}
+
+	public void setRetrieveBLOBs(boolean flag)
+	{
+		this.includeBLOBs = flag;
+		this.blobEncoding = null; // only retrieve the BLOBs don't retrieve them
+	}
+
+	public void setIncludeCLOBs(boolean flag)
+	{
+		this.includeCLOBs = flag;
 	}
 
 	@Override
@@ -188,7 +201,9 @@ public class ClientSideTableSearcher
 			}
 
 			TableSelectBuilder builder = new TableSelectBuilder(connection, "tablesearch");
-			builder.setExcludeLobColumns(excludeLobs);
+			builder.setIncludeBLOBColumns(includeBLOBs);
+			builder.setIncludeCLOBColumns(includeCLOBs);
+
 			String sql = builder.getSelectForTable(table);
 			if (StringUtil.isEmptyString(sql))
 			{
@@ -300,9 +315,11 @@ public class ClientSideTableSearcher
 	}
 
 	@Override
-	public void setExcludeLobColumns(boolean flag)
+	public void setRetrieveLobColumns(boolean flag)
 	{
-		excludeLobs = flag;
+		includeBLOBs = flag;
+		includeCLOBs = flag;
+		blobEncoding = null; // only retrieve blobs, don't search them
 	}
 
 	@Override

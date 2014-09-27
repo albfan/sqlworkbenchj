@@ -258,7 +258,7 @@
             </Constraint>
           </Constraints>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="excludeLobs">
+        <Component class="javax.swing.JCheckBox" name="excludeClobs">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
               <ResourceString bundle="language/wbstrings.properties" key="LblExclLobs" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>

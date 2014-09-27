@@ -22,18 +22,24 @@
  */
 package workbench.db.search;
 
-import org.junit.After;
-import org.junit.Test;
-import org.junit.Before;
-import workbench.WbTestCase;
 import java.util.List;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.interfaces.TableSearchConsumer;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.TableSearchConsumer;
+
 import workbench.storage.DataStore;
+
 import workbench.util.CollectionUtil;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -112,7 +118,7 @@ public class ServerSideTableSearcherTest
 		// Check exclusion of CLOB column
 		tables = CollectionUtil.arrayList(new TableIdentifier("DOCUMENT"));
 		searcher.setTableNames(tables);
-		searcher.setExcludeLobColumns(true);
+		searcher.setRetrieveLobColumns(false);
 		searcher.setCriteria("stuff", true);
 		searcher.search();
 

@@ -82,11 +82,11 @@ public class RowDataSearcher
 	{
 		for (int c = 0; c < row.getColumnCount(); c++)
 		{
-			if (SqlUtil.isBlobType(metaData.getColumnType(c))) continue;
 			if (searchColumn(metaData.getColumnName(c)))
 			{
+				boolean isBlob = SqlUtil.isBlobType(metaData.getColumnType(c));
 				String value = null;
-				if (blobEncoding != null && SqlUtil.isBlobType(metaData.getColumnType(c)))
+				if (blobEncoding != null && isBlob)
 				{
 					Object data = row.getValue(c);
 					if (data instanceof byte[])
@@ -102,7 +102,7 @@ public class RowDataSearcher
 						}
 					}
 				}
-				else
+				else if (!isBlob)
 				{
 					value = converter.getValueAsFormattedString(row, c);
 				}

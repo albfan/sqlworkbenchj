@@ -465,7 +465,7 @@ public class TableSearchPanel
 		searcher.setConnection(this.connection);
 		searcher.setConsumer(this);
 		searcher.setMaxRows(maxRows);
-		searcher.setExcludeLobColumns(excludeLobs.isSelected());
+		searcher.setRetrieveLobColumns(!excludeClobs.isSelected());
 		searcher.setTableNames(searchTables);
 		fireDbExecStart();
 		searcher.startBackgroundSearch();
@@ -506,7 +506,7 @@ public class TableSearchPanel
 				serverSearcherCriteria.saveSettings(prefix, props);
 			}
 			props.setProperty(prefix + ".maxrows", this.rowCount.getText());
-			props.setProperty(prefix + ".excludelobs", excludeLobs.isSelected());
+			props.setProperty(prefix + ".excludelobs", excludeClobs.isSelected());
 		}
 		else if (workspaceSettings != null)
 		{
@@ -536,7 +536,7 @@ public class TableSearchPanel
 			}
 
 			this.rowCount.setText(props.getProperty(prefix + ".maxrows", "0"));
-			this.excludeLobs.setSelected(props.getBoolProperty(prefix + ".excludelobs", true));
+			this.excludeClobs.setSelected(props.getBoolProperty(prefix + ".excludelobs", true));
 			showTableSearcherCriteria();
 		}
 		else
@@ -693,7 +693,7 @@ public class TableSearchPanel
     buttonPanel = new javax.swing.JPanel();
     criteriaContainer = new javax.swing.JPanel();
     serverSideSearch = new javax.swing.JCheckBox();
-    excludeLobs = new javax.swing.JCheckBox();
+    excludeClobs = new javax.swing.JCheckBox();
     labelRowCount = new javax.swing.JLabel();
     rowCount = new javax.swing.JTextField();
     jSeparator1 = new javax.swing.JSeparator();
@@ -798,13 +798,13 @@ public class TableSearchPanel
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
     entryPanel.add(serverSideSearch, gridBagConstraints);
 
-    excludeLobs.setText(ResourceMgr.getString("LblExclLobs")); // NOI18N
-    excludeLobs.setToolTipText(ResourceMgr.getString("d_LblExclLobs")); // NOI18N
+    excludeClobs.setText(ResourceMgr.getString("LblExclLobs")); // NOI18N
+    excludeClobs.setToolTipText(ResourceMgr.getString("d_LblExclLobs")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 7;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-    entryPanel.add(excludeLobs, gridBagConstraints);
+    entryPanel.add(excludeClobs, gridBagConstraints);
 
     labelRowCount.setLabelFor(rowCount);
     labelRowCount.setText(ResourceMgr.getString("LblMaxRows")); // NOI18N
@@ -881,7 +881,7 @@ public class TableSearchPanel
   protected javax.swing.JPanel buttonPanel;
   protected javax.swing.JPanel criteriaContainer;
   protected javax.swing.JPanel entryPanel;
-  protected javax.swing.JCheckBox excludeLobs;
+  protected javax.swing.JCheckBox excludeClobs;
   protected javax.swing.JPanel jPanel2;
   protected javax.swing.JPanel jPanel3;
   protected javax.swing.JSeparator jSeparator1;
