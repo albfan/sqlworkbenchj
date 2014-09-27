@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-09-21">
+    <entry dev-build="6" type="enh">WbGrepData can now search in BLOB columns if an encoding is specified how the binary data should be converted to character data. The old parameter -excludeLobs has been deprecated.</entry>
     <entry dev-build="6" type="enh">When using "Execute current" to run WbExport that has not -sourceTable argument and the next statement in the editor is a SELECT, the export is now started automatically</entry>
     <entry dev-build="6" type="enh">When configuring a JDBC driver, the dialog to select the approriate class no longer displays non-usable (=abstract) classes</entry>
     <entry dev-build="6" type="enh">For Vertica, the DbExplorer now displays the projections instead of indexes (thanks to Tatiana for the contribution)</entry>

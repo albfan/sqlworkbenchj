@@ -16,7 +16,7 @@ Features:
 - open file after "Save Data As"
 - WbClipCopy: Copy result set data to the clipboard
 - Generate multi-row inserts (PostgreSQL, MySQL, SQL Server) in BatchedStatement instead of using JDBC batch and preparedstatement
-- Alternate quoting characters (Oracle's q'[ ]', PostgreSQL $foo$, or E'...')
+- Alternate quoting characters (Oracle's q'[ ]', or E'...')
 - DbExplorer panel showing all indexes
 - Treat Oracle's BFILE, Postgres' LargeObjects and SQL Server's FileStream as BLOBs
 - Support external SQL formatter
@@ -39,7 +39,6 @@ Features:
 - DbExplorer: dependencies between tables and views (tables used in views, views in which the table is used)
 - WbCopy with multiple tables and -deleteTarget (do a delete with dependencies first, then run Copy)
 - Show table data from the result of "Search table data" (or make the result editable)
-- search BLOB columns as Text in "Search table data"
 - Multi-Threaded WbImport
 - Workspace "Explorer"
 - Option panel to modify DB specific stuff (ddlneedscommit etc)
