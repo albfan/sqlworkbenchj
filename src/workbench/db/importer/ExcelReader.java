@@ -53,6 +53,9 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import workbench.resource.ResourceMgr;
+import workbench.util.MessageBuffer;
+
 /**
  *
  * @author Thomas Kellerer
@@ -77,6 +80,7 @@ public class ExcelReader
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
 
 	private final boolean useXLSX;
+	private MessageBuffer messages = new MessageBuffer();
 
 	public ExcelReader(File excelFile, int sheetNumber, String name)
 	{
@@ -91,6 +95,12 @@ public class ExcelReader
 			sheetName = null;
 		}
 		useXLSX = inputFile.getExtension().equalsIgnoreCase("xlsx");
+	}
+
+	@Override
+	public MessageBuffer getMessages()
+	{
+		return messages;
 	}
 
 	@Override
@@ -211,6 +221,8 @@ public class ExcelReader
 			if (row == null)
 			{
 				LogMgr.logError("ExcelReader.getHeaderColumns()", "Cannot retrieve column names because no data is available in the first row of the sheet: " + dataSheet.getSheetName(), null);
+				String msg = ResourceMgr.getFormattedString("ErrExportNoCols", dataSheet.getSheetName());
+				messages.append(msg);
 				return headerColumns;
 			}
 

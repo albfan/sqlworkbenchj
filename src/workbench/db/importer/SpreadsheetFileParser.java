@@ -174,7 +174,7 @@ public class SpreadsheetFileParser
 		{
 			// this is acceptable if no real target table has been defined
 			// in this case assume the file columns and table columns are identical
-			tableCols = new ArrayList<ColumnIdentifier>(fileColumns);
+			tableCols = new ArrayList<>(fileColumns);
 		}
 		else
 		{
@@ -276,7 +276,7 @@ public class SpreadsheetFileParser
 		if (dataRowValues == null) return null;
 		if (inputFileIndexes == null) return null;
 
-		Map<Integer, Object> result = new HashMap<Integer, Object>(inputFileIndexes.size());
+		Map<Integer, Object> result = new HashMap<>(inputFileIndexes.size());
 		for (Integer index : inputFileIndexes)
 		{
 			if (index > 0 && index <= dataRowValues.size())
@@ -377,7 +377,7 @@ public class SpreadsheetFileParser
 	private List<Integer> getSheets()
 	{
 		List<String> allSheets = reader.getSheets();
-		List<Integer> result = new  ArrayList<Integer>(allSheets.size());
+		List<Integer> result = new  ArrayList<>(allSheets.size());
 
 		if (this.checkDependencies)
 		{
@@ -391,7 +391,7 @@ public class SpreadsheetFileParser
 			tableSorter = new TableDependencySorter(this.connection);
 			tableSorter.setProgressMonitor(this);
 
-			List<TableIdentifier> tables = new ArrayList<TableIdentifier>(allSheets.size());
+			List<TableIdentifier> tables = new ArrayList<>(allSheets.size());
 			for (String sheet : allSheets)
 			{
 				TableIdentifier ts = new TableIdentifier(sheet);
@@ -491,9 +491,9 @@ public class SpreadsheetFileParser
 				this.receiver.beginMultiTable();
 				List<Integer> sheets = getSheets();
 				List<String> allSheets = reader.getSheets();
-				for (int i=0; i < sheets.size(); i++)
+				for (Integer sheet : sheets)
 				{
-					sheetIndex = sheets.get(i);
+					sheetIndex = sheet;
 					sheetName = allSheets.get(sheetIndex);
 					importColumns = null;
 
@@ -501,7 +501,6 @@ public class SpreadsheetFileParser
 					targetTable = null;
 
 					TableIdentifier tbl = createTargetTableId();
-
 					if (connection.getMetadata().tableExists(tbl))
 					{
 						reader.setActiveWorksheet(sheetIndex);
@@ -739,7 +738,7 @@ public class SpreadsheetFileParser
 	@Override
 	public List<ColumnIdentifier> getColumnsFromFile()
 	{
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> cols = new ArrayList<>();
 		try
 		{
 			createReader();
@@ -748,6 +747,7 @@ public class SpreadsheetFileParser
 			{
 				cols.add(new ColumnIdentifier(col));
 			}
+			messages.append(reader.getMessages());
 		}
 		catch (Exception e)
 		{

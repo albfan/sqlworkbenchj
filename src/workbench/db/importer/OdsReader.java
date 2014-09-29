@@ -42,6 +42,9 @@ import org.odftoolkit.simple.table.Column;
 import org.odftoolkit.simple.table.Row;
 import org.odftoolkit.simple.table.Table;
 
+import workbench.resource.ResourceMgr;
+import workbench.util.MessageBuffer;
+
 
 /**
  *
@@ -58,6 +61,7 @@ public class OdsReader
 	private String worksheetName;
 	private List<String> headerColumns;
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
+	private MessageBuffer messages = new MessageBuffer();
 
 	public OdsReader(File odsFile, int sheetIndex, String name)
 	{
@@ -75,6 +79,12 @@ public class OdsReader
 		{
 			worksheetIndex = 0;
 		}
+	}
+
+	@Override
+	public MessageBuffer getMessages()
+	{
+		return messages;
 	}
 
 	@Override
@@ -97,8 +107,16 @@ public class OdsReader
 	private void readHeaderColsDefault()
 	{
 		Row rowData = worksheet.getRowByIndex(0);
+		if (rowData == null)
+		{
+			LogMgr.logError("OdsReader.readHeaderColsDefault()", "Cannot retrieve column names because no data is available in the first row of the sheet: " + worksheet.getTableName(), null);
+			String msg = ResourceMgr.getFormattedString("ErrExportNoCols", worksheet.getTableName());
+			messages.append(msg);
+			return;
+		}
+
 		int colCount = rowData.getCellCount();
-		headerColumns = new ArrayList<String>(colCount);
+		headerColumns = new ArrayList<>(colCount);
 		for (int i=0; i < colCount; i++)
 		{
 			Cell cell = rowData.getCellByIndex(i);
@@ -117,7 +135,7 @@ public class OdsReader
 
 	private void readHeaderColsAlternate()
 	{
-		headerColumns = new ArrayList<String>();
+		headerColumns = new ArrayList<>();
 		List<Column> columnList = worksheet.getColumnList();
 		for (Column col : columnList)
 		{
@@ -182,7 +200,7 @@ public class OdsReader
 	{
 		Row rowData = worksheet.getRowByIndex(row);
 		int colCount = rowData.getCellCount();
-		List<Object> result = new ArrayList<Object>(colCount);
+		List<Object> result = new ArrayList<>(colCount);
 		int nullCount = 0;
 
 		for (int col=0; col < colCount; col++)
@@ -301,7 +319,7 @@ public class OdsReader
 	@Override
 	public List<String> getSheets()
 	{
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		if (dataFile == null)
 		{
 			try

@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import workbench.util.MessageBuffer;
 import workbench.util.WbFile;
 
 /**
@@ -34,6 +35,7 @@ import workbench.util.WbFile;
  */
 public interface SpreadsheetReader
 {
+	MessageBuffer getMessages();
 	List<String> getHeaderColumns();
 	void setActiveWorksheet(int index);
 	void setActiveWorksheet(String name);
@@ -59,7 +61,7 @@ public interface SpreadsheetReader
 			WbFile f = new WbFile(inputFile);
 			String ext = f.getExtension();
 			if (ext == null) return null;
-			
+
 			ext = ext.toLowerCase();
 
 			SpreadsheetReader reader = null;
