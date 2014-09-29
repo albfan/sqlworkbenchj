@@ -225,6 +225,7 @@ public class ExcelReader
 				LogMgr.logError("ExcelReader.getHeaderColumns()", "Cannot retrieve column names because no data is available in the first row of the sheet: " + dataSheet.getSheetName(), null);
 				String msg = ResourceMgr.getFormattedString("ErrExportNoCols", dataSheet.getSheetName());
 				messages.append(msg);
+				messages.appendNewLine();
 				return headerColumns;
 			}
 
