@@ -96,7 +96,7 @@ public class ExcelReader
 	@Override
 	public List<String> getSheets()
 	{
-		List<String> names = new ArrayList<String>();
+		List<String> names = new ArrayList<>();
 
 		if (dataFile == null)
 		{
@@ -194,7 +194,7 @@ public class ExcelReader
 		}
 		headerColumns = null;
 		int numMergedRegions = dataSheet.getNumMergedRegions();
-		mergedRegions = new ArrayList<CellRangeAddress>(numMergedRegions);
+		mergedRegions = new ArrayList<>(numMergedRegions);
 		for (int i = 0; i < numMergedRegions; i++)
 		{
 			mergedRegions.add(dataSheet.getMergedRegion(i));
@@ -206,9 +206,14 @@ public class ExcelReader
 	{
 		if (headerColumns == null)
 		{
+			headerColumns = new ArrayList<>();
 			Row row = dataSheet.getRow(0);
+			if (row == null)
+			{
+				LogMgr.logError("ExcelReader.getHeaderColumns()", "Cannot retrieve column names because no data is available in the first row of the sheet: " + dataSheet.getSheetName(), null);
+				return headerColumns;
+			}
 
-			headerColumns = new ArrayList<String>();
 			int colCount = row.getLastCellNum();
 
 			for (int i=0; i < colCount; i++)
@@ -309,7 +314,7 @@ public class ExcelReader
 	public List<Object> getRowValues(int rowIndex)
 	{
 		Row row = dataSheet.getRow(rowIndex);
-		ArrayList<Object> values = new ArrayList<Object>();
+		ArrayList<Object> values = new ArrayList<>();
 
 		if (row == null) return values;
 
