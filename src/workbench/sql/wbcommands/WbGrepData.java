@@ -75,6 +75,7 @@ public class WbGrepData
 	public static final String ARG_COMPARATOR = "compareType";
 	public static final String ARG_COLUMNS = "columns";
 	public static final String ARG_BLOB_ENCODING = "treatBlobAs";
+	public static final String ARG_SUMMARY_ONLY = "summaryOnly";
 
 	private ClientSideTableSearcher searcher;
 	private StatementRunnerResult searchResult;
@@ -94,6 +95,7 @@ public class WbGrepData
 		cmdLine.addArgument(ARG_IGNORE_CASE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_RETRIEVE_CLOBS, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_RETRIEVE_BLOBS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_SUMMARY_ONLY, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_EXPRESSION);
 		cmdLine.addArgument(ARG_COLUMNS);
 		cmdLine.addArgument(ARG_BLOB_ENCODING, StringUtil.stringToList(Settings.getInstance().getPopularEncodings(), ",", true, true));
