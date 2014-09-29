@@ -297,13 +297,13 @@
   <xsl:param name="precision"/>
   <xsl:param name="scale"/>
   <xsl:choose>
-    <xsl:when test="$type-id = 2005">
+    <xsl:when test="$type-id = 2005 or ($type-id = 12 and $precision = 2147483647)">
       <xsl:text>CLOB</xsl:text>
     </xsl:when>
     <xsl:when test="$type-id = 2011">
       <xsl:text>NCLOB</xsl:text>
     </xsl:when>
-    <xsl:when test="$type-id = 2004">
+    <xsl:when test="$type-id = 2004 or $type-id = -2">
       <xsl:text>BLOB</xsl:text>
     </xsl:when>
     <xsl:when test="$type-id = -3">
