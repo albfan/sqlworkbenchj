@@ -35,10 +35,12 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 import workbench.util.CollectionUtil;
 import workbench.util.DurationFormatter;
 import workbench.util.FileUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -52,9 +54,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import workbench.resource.ResourceMgr;
-import workbench.util.MessageBuffer;
 
 /**
  *
@@ -218,15 +217,16 @@ public class ExcelReader
 		{
 			headerColumns = new ArrayList<>();
 			Row row = dataSheet.getRow(0);
-			if (row == null)
+
+			int colCount = row != null ? row.getLastCellNum() : 0;
+
+			if (row == null || colCount == 0)
 			{
 				LogMgr.logError("ExcelReader.getHeaderColumns()", "Cannot retrieve column names because no data is available in the first row of the sheet: " + dataSheet.getSheetName(), null);
 				String msg = ResourceMgr.getFormattedString("ErrExportNoCols", dataSheet.getSheetName());
 				messages.append(msg);
 				return headerColumns;
 			}
-
-			int colCount = row.getLastCellNum();
 
 			for (int i=0; i < colCount; i++)
 			{

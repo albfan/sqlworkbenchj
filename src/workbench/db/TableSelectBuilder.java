@@ -164,7 +164,7 @@ public class TableSelectBuilder
 			return null;
 		}
 
-		StringBuilder selectCols = new StringBuilder(columns.size() * 30);
+		StringBuilder selectCols = new StringBuilder(columns.size() * 15);
 
 		if (columns.isEmpty())
 		{

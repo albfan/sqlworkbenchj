@@ -31,9 +31,11 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.util.CollectionUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.StringUtil;
 
 import org.odftoolkit.simple.SpreadsheetDocument;
@@ -41,9 +43,6 @@ import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Column;
 import org.odftoolkit.simple.table.Row;
 import org.odftoolkit.simple.table.Table;
-
-import workbench.resource.ResourceMgr;
-import workbench.util.MessageBuffer;
 
 
 /**
@@ -92,6 +91,7 @@ public class OdsReader
 	{
 		if (headerColumns == null)
 		{
+			headerColumns = new ArrayList<>();
 			if (Settings.getInstance().getBoolProperty("workbench.ods.use.get_cell_count", true))
 			{
 				readHeaderColsDefault();
@@ -107,16 +107,27 @@ public class OdsReader
 	private void readHeaderColsDefault()
 	{
 		Row rowData = worksheet.getRowByIndex(0);
-		if (rowData == null)
+
+		int colCount = 0;
+
+		try
 		{
-			LogMgr.logError("OdsReader.readHeaderColsDefault()", "Cannot retrieve column names because no data is available in the first row of the sheet: " + worksheet.getTableName(), null);
+			if (rowData != null) colCount = rowData.getCellCount();
+		}
+		catch (Exception ex)
+		{
+			colCount = -1;
+		}
+
+		if (colCount <= 0)
+		{
+			LogMgr.logError("OdsReader.readHeaderColsDefault()", "Cannot retrieve column names because no columns are available in the first row of the sheet: " + worksheet.getTableName(), null);
 			String msg = ResourceMgr.getFormattedString("ErrExportNoCols", worksheet.getTableName());
 			messages.append(msg);
+			messages.appendNewLine();
 			return;
 		}
 
-		int colCount = rowData.getCellCount();
-		headerColumns = new ArrayList<>(colCount);
 		for (int i=0; i < colCount; i++)
 		{
 			Cell cell = rowData.getCellByIndex(i);
@@ -135,8 +146,16 @@ public class OdsReader
 
 	private void readHeaderColsAlternate()
 	{
-		headerColumns = new ArrayList<>();
 		List<Column> columnList = worksheet.getColumnList();
+		if (CollectionUtil.isEmpty(columnList))
+		{
+			LogMgr.logError("OdsReader.readHeaderColsAlternate()", "Cannot retrieve column names because no columns are available in the first row of the sheet: " + worksheet.getTableName(), null);
+			String msg = ResourceMgr.getFormattedString("ErrExportNoCols", worksheet.getTableName());
+			messages.append(msg);
+			messages.appendNewLine();
+			return;
+		}
+
 		for (Column col : columnList)
 		{
 			Cell cell = col.getCellByIndex(0);
