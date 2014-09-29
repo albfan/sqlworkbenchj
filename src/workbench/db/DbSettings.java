@@ -1696,7 +1696,8 @@ public class DbSettings
 
 	public boolean checkUniqueIndexesForPK()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "pk.retrieval.checkunique", false);
+		boolean global = Settings.getInstance().getBoolProperty("workbench.db.pk.retrieval.checkunique", true);
+		return Settings.getInstance().getBoolProperty(prefix + "pk.retrieval.checkunique", global);
 	}
 
 	public boolean endTransactionAfterConnect()
