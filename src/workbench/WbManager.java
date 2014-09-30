@@ -842,15 +842,17 @@ public final class WbManager
 
 			boolean readDriverTemplates = true;
 			boolean showHelp = cmdLine.isArgPresent("help");
+			boolean hasScript = StringUtil.isNonBlank(scriptname) || StringUtil.isNonBlank(cmd) ;
 
 			this.runMode = RunMode.GUI;
 
-			if (BatchRunner.hasConnectionArgument(cmdLine) || showHelp)
+			if (BatchRunner.hasConnectionArgument(cmdLine) || showHelp || hasScript)
 			{
+				// Do not read the driver templates in batchmode
 				readDriverTemplates = false;
 			}
 
-			if (StringUtil.isNonBlank(scriptname) || StringUtil.isNonBlank(cmd) || showHelp)
+			if (hasScript || showHelp)
 			{
 				this.runMode = RunMode.Batch;
 			}
@@ -872,7 +874,7 @@ public final class WbManager
 			{
 				readDriverTemplates = false;
 			}
-			
+
 			ConnectionMgr.getInstance().setReadTemplates(readDriverTemplates);
 
 			// Setting the profile storage should be done after initializing
