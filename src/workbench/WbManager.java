@@ -845,21 +845,14 @@ public final class WbManager
 
 			this.runMode = RunMode.GUI;
 
-			if (StringUtil.isBlank(scriptname) && StringUtil.isBlank(cmd) && !showHelp)
+			if (BatchRunner.hasConnectionArgument(cmdLine) || showHelp)
 			{
-				String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
-				String jar = cmdLine.getValue(AppArguments.ARG_CONN_JAR);
-				String lbFile = cmdLine.getValue(AppArguments.ARG_LB_CONN);
-				if ( (!StringUtil.isEmptyString(url) && !StringUtil.isEmptyString(jar)) || !StringUtil.isNonEmpty(lbFile))
-				{
-					// Do not read the driver templates if a connection is specified directly
-					readDriverTemplates = false;
-				}
+				readDriverTemplates = false;
 			}
-			else
+
+			if (StringUtil.isNonBlank(scriptname) || StringUtil.isNonBlank(cmd) || showHelp)
 			{
 				this.runMode = RunMode.Batch;
-				readDriverTemplates = false;
 			}
 
 			List<String> vars = cmdLine.getList(AppArguments.ARG_VARDEF);
@@ -879,6 +872,7 @@ public final class WbManager
 			{
 				readDriverTemplates = false;
 			}
+			
 			ConnectionMgr.getInstance().setReadTemplates(readDriverTemplates);
 
 			// Setting the profile storage should be done after initializing

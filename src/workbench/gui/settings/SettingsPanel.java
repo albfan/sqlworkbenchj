@@ -78,6 +78,8 @@ public class SettingsPanel
 	public SettingsPanel()
 	{
 		super();
+		// Remember to adjust the calculation of the width and height for the dialog
+		// when changing the order of pages
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
 		pages.add(new OptionPanelPage("MacroOptionsPanel", "LblMacroSettings"));
@@ -220,14 +222,14 @@ public class SettingsPanel
 		{
 			// if no page is displayed, pack() will not work properly
 			// so we need to instantiate and display the two largest pages
-
+			
 			// the editor page is the highest page
 			pageList.setSelectedIndex(1);
 			this.dialog.pack();
 			int h = dialog.getSize().height;
 
 			// the editor colors page is the widest page
-			pageList.setSelectedIndex(2);
+			pageList.setSelectedIndex(4);
 			this.dialog.pack();
 			int w = dialog.getSize().width;
 

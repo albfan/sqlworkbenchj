@@ -1008,8 +1008,22 @@ public class BatchRunner
 		}
 	}
 
+	public static boolean hasConnectionArgument(ArgumentParser cmdLine)
+	{
+		if (!cmdLine.hasArguments()) return false;
+		if (cmdLine.isArgPresent(AppArguments.ARG_CONN_DESCRIPTOR)) return true;
+		if (cmdLine.isArgPresent(AppArguments.ARG_CONN_URL)) return true;
+		if (cmdLine.isArgPresent(AppArguments.ARG_CONN_USER)) return true;
+		if (cmdLine.isArgPresent(AppArguments.ARG_CONN_JAR)) return true;
+		if (cmdLine.isArgPresent(AppArguments.ARG_CONN_DRIVER)) return true;
+		if (cmdLine.isArgPresent(AppArguments.ARG_CONN_PWD)) return true;
+		return false;
+	}
+
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
 	{
+		if (hasConnectionArgument(cmdLine)) return null;
+
 		ConnectionProfile result = null;
 
 		String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
