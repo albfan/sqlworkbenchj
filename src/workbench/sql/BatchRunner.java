@@ -1022,7 +1022,7 @@ public class BatchRunner
 
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
 	{
-		if (hasConnectionArgument(cmdLine)) return null;
+		if (!hasConnectionArgument(cmdLine)) return null;
 
 		ConnectionProfile result = null;
 
