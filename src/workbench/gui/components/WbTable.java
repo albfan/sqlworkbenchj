@@ -484,6 +484,8 @@ public class WbTable
 	public void setReadOnly(boolean flag)
 	{
 		readOnly = flag;
+		DataStoreTableModel model = getDataStoreTableModel();
+		if (model != null) model.setAllowEditing(!readOnly);
 	}
 
 	public boolean isReadOnly()

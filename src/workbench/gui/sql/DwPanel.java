@@ -1112,14 +1112,13 @@ public class DwPanel
 			if (this.selectKeys != null) this.selectKeys.setEnabled(false);
 			return;
 		}
+		
 		boolean hasResult = this.hasResultSet();
 		int rows = this.getTable().getSelectedRowCount();
 
-		if (this.readOnly)
+		if (readOnly)
 		{
 			this.disableUpdateActions();
-			DataStoreTableModel model = dataTable.getDataStoreTableModel();
-			if (model != null) model.setAllowEditing(false);
 		}
 		else
 		{
@@ -1129,6 +1128,9 @@ public class DwPanel
 			if (this.insertRow != null) this.insertRow.setEnabled(hasResult);
 			if (this.deleteDependentRow != null) this.deleteDependentRow.setEnabled(rows > 0);
 		}
+
+		dataTable.setReadOnly(this.readOnly);
+
 		if (this.selectKeys != null) this.selectKeys.setEnabled(hasResult);
 		this.dataTable.checkCopyActions();
 	}
