@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import workbench.db.DbSettings;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -156,7 +157,7 @@ public class WbSetProp
 		}
 		else
 		{
-			DataStore ds = WbSysProps.getWbProperties(args);
+			DataStore ds = WbShowProps.getWbProperties(args);
 			if (ds.getRowCount() > 0)
 			{
 				result.addDataStore(ds);
@@ -172,7 +173,7 @@ public class WbSetProp
 		if (propName == null) propName = shortName;
 		if (currentConnection != null)
 		{
-			return propName.replace("[dbid]", this.currentConnection.getDbId());
+			return propName.replace(DbSettings.DBID_PLACEHOLDER, this.currentConnection.getDbId());
 		}
 		return propName;
 	}

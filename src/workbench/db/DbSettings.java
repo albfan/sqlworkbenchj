@@ -63,6 +63,10 @@ import workbench.util.StringUtil;
  */
 public class DbSettings
 {
+	public static final String IDX_TYPE_NORMAL = "NORMAL";
+	public static final String DEFAULT_CREATE_TABLE_TYPE = "default";
+	public static final String DBID_PLACEHOLDER = "[dbid]";
+
 	private final String dbId;
 	private boolean caseSensitive;
 	private boolean useJdbcCommit;
@@ -73,9 +77,6 @@ public class DbSettings
 	private boolean allowsMultipleGetUpdateCounts = true;
 	private boolean supportsBatchedStatements;
 	private boolean supportsCommentInSql = true;
-
-	public static final String IDX_TYPE_NORMAL = "NORMAL";
-	public static final String DEFAULT_CREATE_TABLE_TYPE = "default";
 
 	private Set<String> updatingCommands;
 	private Set<String> noUpdateCountVerbs = CollectionUtil.caseInsensitiveSet();

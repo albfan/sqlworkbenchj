@@ -97,7 +97,7 @@ import workbench.sql.wbcommands.WbShowEncoding;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbSysExec;
 import workbench.sql.wbcommands.WbSysOpen;
-import workbench.sql.wbcommands.WbSysProps;
+import workbench.sql.wbcommands.WbShowProps;
 import workbench.sql.wbcommands.WbTableSource;
 import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbViewSource;
@@ -186,7 +186,7 @@ public class CommandMapper
 		addCommand(new WbConnInfo());
 		addCommand(new WbSysExec());
 		addCommand(new WbSysOpen());
-		addCommand(new WbSysProps());
+		addCommand(new WbShowProps());
 		addCommand(new WbSetProp());
 		addCommand(new WbGenDrop());
 		addCommand(new WbGenerateScript());

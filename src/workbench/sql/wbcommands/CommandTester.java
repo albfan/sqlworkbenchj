@@ -116,7 +116,8 @@ public class CommandTester
 		putVerb(WbIsolationLevel.VERB);
 		putVerb(WbConnInfo.VERB);
 		putVerb(WbSysExec.VERB);
-		putVerb(WbSysProps.VERB);
+		putVerb(WbShowProps.VERB);
+		putVerb(WbShowProps.ALTERNATE_VERB);
 		putVerb(WbOraShow.VERB);
 		putVerb(WbGenDrop.VERB);
 		putVerb(WbSetProp.VERB);

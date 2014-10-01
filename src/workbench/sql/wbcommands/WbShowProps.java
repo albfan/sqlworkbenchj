@@ -1,6 +1,4 @@
 /*
- * WbSysProps.java
- *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2014, Thomas Kellerer
@@ -30,6 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import workbench.db.DbSettings;
 import workbench.interfaces.JobErrorHandler;
 import workbench.resource.Settings;
 
@@ -45,21 +44,21 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 
-
 /**
  *
  * @author Thomas Kellerer
  */
-public class WbSysProps
+public class WbShowProps
 	extends SqlCommand
 {
 	public static final String VERB = "WbProps";
+	public static final String ALTERNATE_VERB = "WbShowProps";
 
-	public WbSysProps()
+	public WbShowProps()
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("type", StringUtil.stringToList("wb,system"));
+		cmdLine.addArgument("type", StringUtil.stringToList("wb,system,db"));
 	}
 
 	@Override
@@ -68,18 +67,41 @@ public class WbSysProps
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-		cmdLine.parse(getCommandLine(sql).toLowerCase());
+		String args = getCommandLine(sql);
+		cmdLine.parse(args);
 
-		List<String> types = cmdLine.getListValue("type");
+		if (cmdLine.hasArguments() || StringUtil.isBlank(args))
+		{
+			List<String> types = cmdLine.getListValue("type");
 
-		if (types.contains("wb"))
-		{
-			result.addDataStore(getWbProperties(null));
+			if (types.contains("wb"))
+			{
+				result.addDataStore(getWbProperties(null));
+			}
+
+			if (types.isEmpty() || types.contains("system"))
+			{
+				result.addDataStore(getSystemProperties());
+			}
+
+			if (types.contains("db") && currentConnection != null)
+			{
+				result.addDataStore(getWbProperties("workbench.db." + currentConnection.getDbId()));
+			}
 		}
-		if (types.isEmpty() || types.contains("system"))
+		else if (StringUtil.isNonBlank(args))
 		{
-			result.addDataStore(getSystemProperties());
+			if (currentConnection != null)
+			{
+				args = args.toLowerCase().replace(DbSettings.DBID_PLACEHOLDER, currentConnection.getDbId());
+			}
+			DataStore ds = getWbProperties(args);
+			if (ds.getRowCount() > 0)
+			{
+				result.addDataStore(ds);
+			}
 		}
+
 		result.setSuccess();
 		return result;
 	}
@@ -133,6 +155,12 @@ public class WbSysProps
 	public String getVerb()
 	{
 		return VERB;
+	}
+
+	@Override
+	public String getAlternateVerb()
+	{
+		return ALTERNATE_VERB;
 	}
 
 	@Override
