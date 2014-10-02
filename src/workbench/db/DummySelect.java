@@ -124,10 +124,9 @@ public class DummySelect
 	{
 		DbMetadata meta = con.getMetadata();
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		TableDefinition tableDef = meta.getTableDefinition(table);
 
 		List<ColumnIdentifier> cols = columns;
-		if (cols == null) cols = tableDef.getColumns();
+		if (cols == null) cols = meta.getTableColumns(table, false);
 
 		if (cols.isEmpty())
 		{

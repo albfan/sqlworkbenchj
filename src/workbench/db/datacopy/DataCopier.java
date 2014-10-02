@@ -699,7 +699,7 @@ public class DataCopier
 		{
 			DbMetadata sourceMeta = this.sourceConnection.getMetadata();
 			TableIdentifier tbl = sourceMeta.resolveSynonym(this.sourceTable);
-			sourceCols = sourceMeta.getTableColumns(tbl);
+			sourceCols = sourceMeta.getTableColumns(tbl, false);
 		}
 		else if (this.targetColumnsForQuery != null)
 		{

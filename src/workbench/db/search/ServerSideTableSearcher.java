@@ -244,7 +244,7 @@ public class ServerSideTableSearcher
 		throws SQLException
 	{
 		DbMetadata meta = this.connection.getMetadata();
-		TableDefinition def = meta.getTableDefinition(tbl);
+		TableDefinition def = meta.getTableDefinition(tbl, false);
 		return buildSqlForTable(def, "tablesearch");
 	}
 

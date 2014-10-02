@@ -141,7 +141,7 @@ public class TableSelectBuilder
 			// This is not done by default because resolving the synonym is quite costly especially on Oracle!
 			tbl = dbConnection.getMetadata().getSynonymTable(table);
 		}
-		TableDefinition def = dbConnection.getMetadata().getTableDefinition(tbl == null ? table : tbl);
+		TableDefinition def = dbConnection.getMetadata().getTableDefinition(tbl == null ? table : tbl, false);
 		return getSelectForColumns(def.getTable(), def.getColumns());
 	}
 

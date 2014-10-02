@@ -61,7 +61,7 @@ public class ConstantColumnValues
 	public ConstantColumnValues(List<String> entries, WbConnection con, String tablename, ValueConverter converter)
 		throws SQLException, ConverterException
 	{
-		List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(new TableIdentifier(tablename, con));
+		List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(new TableIdentifier(tablename, con), false);
 		if (tableColumns.isEmpty()) throw new SQLException("Table '" + tablename + "' not found!");
 		init(entries, tableColumns, converter);
 	}

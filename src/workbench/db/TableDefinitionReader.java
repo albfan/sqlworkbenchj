@@ -49,7 +49,7 @@ public interface TableDefinitionReader
 	List<ColumnIdentifier> getTableColumns(TableIdentifier toRead, DataTypeResolver typeResolver)
 		throws SQLException;
 
-	TableDefinition getTableDefinition(TableIdentifier toRead)
+	TableDefinition getTableDefinition(TableIdentifier toRead, boolean includePkInformation)
 		throws SQLException;
 
 }

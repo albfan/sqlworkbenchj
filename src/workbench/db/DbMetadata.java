@@ -1500,7 +1500,7 @@ public class DbMetadata
 					return result;
 				}
 			}
-			
+
 			long duration = System.currentTimeMillis() - start;
 			LogMgr.logDebug("DbMetadata.getObjects()", "Retrieving table list took: " + duration + "ms");
 
@@ -2102,15 +2102,24 @@ public class DbMetadata
 		return null;
 	}
 
-	/**
-	 * Return the column list for the given table.
-	 * @param table the table for which to retrieve the column definition
-	 * @see #getTableDefinition(workbench.db.TableIdentifier)
-	 */
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table)
 		throws SQLException
 	{
-		TableDefinition def = definitionReader.getTableDefinition(table);
+		return getTableColumns(table, true);
+	}
+
+	/**
+	 * Return the column list for the given table.
+	 *
+	 * @param table             the table for which to retrieve the column definition
+	 * @param readPkDefinition  if true, the PK definition of the table will also be retrieved
+	 *
+	 * @see #getTableDefinition(workbench.db.TableIdentifier)
+	 */
+	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, boolean readPkDefinition)
+		throws SQLException
+	{
+		TableDefinition def = definitionReader.getTableDefinition(table, readPkDefinition);
 		if (def == null) return Collections.emptyList();
 		return def.getColumns();
 	}
@@ -2188,7 +2197,7 @@ public class DbMetadata
 		}
 		else if (def == null)
 		{
-			TableDefinition tdef = definitionReader.getTableDefinition(table);
+			TableDefinition tdef = definitionReader.getTableDefinition(table, true);
 			def = new TableColumnsDatastore(tdef);
 		}
 		if (def != null) def.resetStatus();
@@ -2211,8 +2220,14 @@ public class DbMetadata
 	public TableDefinition getTableDefinition(TableIdentifier toRead)
 		throws SQLException
 	{
+		return getTableDefinition(toRead, true);
+	}
+	
+	public TableDefinition getTableDefinition(TableIdentifier toRead, boolean includePkInformation)
+		throws SQLException
+	{
 		if (toRead == null) return null;
-		return definitionReader.getTableDefinition(toRead);
+		return definitionReader.getTableDefinition(toRead, includePkInformation);
 	}
 
 	/**

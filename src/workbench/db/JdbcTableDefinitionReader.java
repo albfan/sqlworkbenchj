@@ -241,14 +241,15 @@ public class JdbcTableDefinitionReader
 	 * To display the columns for a table in a DataStore create an
 	 * instance of {@link TableColumnsDatastore}.
 	 *
-	 * @param toRead The table for which the definition should be retrieved
+	 * @param toRead         The table for which the definition should be retrieved
+	 * @param readPrimaryKey If true the PK information for the table will also be retrieved
 	 *
 	 * @throws SQLException
 	 * @return the definition of the table.
 	 * @see TableColumnsDatastore
 	 */
 	@Override
-	public TableDefinition getTableDefinition(TableIdentifier toRead)
+	public TableDefinition getTableDefinition(TableIdentifier toRead, boolean readPrimaryKey)
 		throws SQLException
 	{
 		if (toRead == null) return null;
@@ -279,7 +280,7 @@ public class JdbcTableDefinitionReader
 		{
 			TableIdentifier id = table.getRealTable();
 			if (id == null) id = meta.getSynonymTable(catalog, schema, tablename);
-			
+
 			if (id != null)
 			{
 				schema = id.getSchema();
@@ -292,8 +293,11 @@ public class JdbcTableDefinitionReader
 			}
 		}
 
-		PkDefinition pk = meta.getIndexReader().getPrimaryKey(retrieve);
-		retrieve.setPrimaryKey(pk);
+		if (readPrimaryKey)
+		{
+			PkDefinition pk = meta.getIndexReader().getPrimaryKey(retrieve);
+			retrieve.setPrimaryKey(pk);
+		}
 
 		List<ColumnIdentifier> columns = getTableColumns(retrieve, meta.getDataTypeResolver());
 

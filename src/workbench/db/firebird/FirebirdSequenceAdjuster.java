@@ -108,7 +108,7 @@ public class FirebirdSequenceAdjuster
 		List<String> result = new ArrayList<String>(1);
 		try
 		{
-			List<ColumnIdentifier> columns = dbConnection.getMetadata().getTableColumns(table);
+			List<ColumnIdentifier> columns = dbConnection.getMetadata().getTableColumns(table, false);
 			for (ColumnIdentifier col : columns)
 			{
 				if (col.isAutoincrement())
