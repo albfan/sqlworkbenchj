@@ -237,12 +237,47 @@
       <xsl:if test="position() &lt; last()"><xsl:text>,</xsl:text></xsl:if>
     </xsl:for-each>
   </xsl:variable>
+  
+  <xsl:variable name="update-rule" select="update-rule/text()"/>
+  <xsl:variable name="delete-rule" select="delete-rule/text()"/>
+  <xsl:variable name="deferrable-value" select="deferrable/@jdbcValue"/>
 
   <addForeignKeyConstraint constraintName="{$fk-name}"
                            baseTableName="{$tablename}"
                            baseColumnNames="{$base-columns}"
                            referencedTableName="{$referenced-table}"
-                           referencedColumnNames="{$referenced-columns}"/>
+                           referencedColumnNames="{$referenced-columns}">
+    <xsl:if test="$delete-rule != 'NO ACTION' and $delete-rule != 'RESTRICT'">
+      <xsl:attribute name="onDelete">
+        <xsl:value-of select="$delete-rule"/>
+      </xsl:attribute>
+    </xsl:if>
+    <xsl:if test="$update-rule != 'NO ACTION' and $update-rule != 'RESTRICT'">
+      <xsl:attribute name="onUpdate">
+        <xsl:value-of select="$update-rule"/>
+      </xsl:attribute>
+    </xsl:if>
+    <!-- constant values for the deferrability: 
+         7 = not deferrable
+         6 = initially immediate
+         5 = initially deferred
+    -->
+    <xsl:if test="$deferrable-value = 5 or $deferrable-value = 6"> 
+      <xsl:attribute name="deferrable">
+        <xsl:value-of select="'true'"/>
+      </xsl:attribute>
+      <xsl:if test="$deferrable-value = 5">
+        <xsl:attribute name="initiallyDeferred">
+          <xsl:value-of select="'true'"/>
+        </xsl:attribute>
+      </xsl:if>
+      <xsl:if test="$deferrable-value = 6">
+        <xsl:attribute name="initiallyDeferred">
+          <xsl:value-of select="'false'"/>
+        </xsl:attribute>
+      </xsl:if>
+    </xsl:if>
+  </addForeignKeyConstraint>
 </xsl:template>
 
 <xsl:template match="sequence-def">
