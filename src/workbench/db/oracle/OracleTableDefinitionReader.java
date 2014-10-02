@@ -221,6 +221,10 @@ public class OracleTableDefinitionReader
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
+		if (columns.size() > 0 && table.getType() == null)
+		{
+			table.setType("TABLE");
+		}
 		return columns;
 	}
 

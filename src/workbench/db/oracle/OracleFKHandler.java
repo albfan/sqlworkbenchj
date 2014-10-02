@@ -51,10 +51,6 @@ import workbench.util.StringUtil;
 public class OracleFKHandler
 	extends DefaultFKHandler
 {
-	// This is essentially a copy of the Statement used by the Oracle driver
-	// the driver does not take unique constraints into account, and this statement does
-	// otherwise foreign keys referencing unique constraints (rather than primary keys) would
-	// not be displayed (DbExplorer, WbSchemaReport) or correctly processed (TableDependency)
 	final String baseSql;
 
 	private PreparedStatement retrievalStatement;
@@ -63,9 +59,13 @@ public class OracleFKHandler
 	public OracleFKHandler(WbConnection conn)
 	{
 		super(conn);
-		currentUser = conn.getCurrentSchema();
+		currentUser = conn.getCurrentUser();
 		containsStatusCol = true;
 
+		// This is essentially a copy of the Statement used by the Oracle driver
+		// the driver does not take unique constraints into account, and this statement does.
+		// Otherwise foreign keys referencing unique constraints (rather than primary keys) would
+		// not be displayed (DbExplorer, WbSchemaReport) or correctly processed (TableDependency)
 		baseSql =
 			"SELECT /* SQLWorkbench */ NULL AS pktable_cat, \n" +
 			"       p.owner AS pktable_schem, \n" +
@@ -150,13 +150,12 @@ public class OracleFKHandler
 	 */
 	private String getQuery(TableIdentifier tbl)
 	{
-		boolean optimize = Settings.getInstance().getBoolProperty("workbench.db.oracle.optimize_fk_query", true);
-		if (optimize)
+		if (OracleUtils.optimizeCatalogQueries())
 		{
 			String schema = tbl.getRawSchema();
-			if (StringUtil.isEmptyString(schema) || schema.equals(currentUser))
+			if (StringUtil.isEmptyString(schema) || schema.equalsIgnoreCase(currentUser))
 			{
-				return baseSql.replace("all_", "user_");
+				return baseSql.replace(" all_c", " user_c");
 			}
 		}
 		return baseSql;
@@ -174,7 +173,7 @@ public class OracleFKHandler
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logTrace("OracleFKHandler.getExportedKeyList()", "Using:\n " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
+			LogMgr.logDebug("OracleFKHandler.getExportedKeyList()", "Using:\n " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
 		}
 
 		ResultSet rs;
@@ -217,7 +216,7 @@ public class OracleFKHandler
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logTrace("OracleFKHandler.getImportedKeyList()", "Using:\n" + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
+			LogMgr.logDebug("OracleFKHandler.getImportedKeyList()", "Using:\n" + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
 		}
 
 		ResultSet rs;

@@ -2392,7 +2392,6 @@ public class Settings
 		setProperty("workbench.db.edit.verify.updateable", flag);
 	}
 
-
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Export">

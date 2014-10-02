@@ -241,4 +241,9 @@ public class OracleUtils
 		}
 		return false;
 	}
+
+	public static boolean optimizeCatalogQueries()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.prefer_user_catalog_tables", true);
+	}
 }

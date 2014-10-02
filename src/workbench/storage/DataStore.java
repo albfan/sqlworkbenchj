@@ -47,6 +47,7 @@ import workbench.db.DeleteScriptGenerator;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
+import workbench.db.PkDefinition;
 import workbench.db.QuoteHandler;
 import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
@@ -668,6 +669,40 @@ public class DataStore
 		this.updateTable = (tbl == null ? null : tbl.createCopy());
 	}
 
+	private void checkPkOnlyForUpdateTable(TableIdentifier tbl, WbConnection conn)
+	{
+		DbMetadata meta = conn.getMetadata();
+		if (meta == null) return;
+		if (resultInfo == null) return;
+		
+		PkDefinition pk = meta.getIndexReader().getPrimaryKey(tbl);
+
+		TableIdentifier table = tbl.createCopy();
+		table.adjustCase(conn);
+
+		if (pk == null || CollectionUtil.isEmpty(pk.getColumns()))
+		{
+			checkUniqueIndexesForPK(conn, tbl, resultInfo);
+		}
+		else
+		{
+			for (String colName : pk.getColumns())
+			{
+				int index = findColumn(colName);
+				if (index > -1)
+				{
+					this.resultInfo.setIsPkColumn(index, true);
+					this.resultInfo.setIsNullable(index, false);
+				}
+			}
+		}
+		if (hasPkColumns())
+		{
+			this.updateTable = table;
+			this.resultInfo.setUpdateTable(updateTable);
+		}
+	}
+
 	/**
 	 * Sets the table to be updated for this DataStore.
 	 * Upon setting the table, the column definition for the table
@@ -700,6 +735,16 @@ public class DataStore
 			return;
 		}
 
+
+		if (conn.getDbSettings().getOnlyRetrievePkForUpdateCheck())
+		{
+			LogMgr.logDebug("DataStore.setUpdateTable()", "Only checking the PK definition for " + tbl.getTableExpression());
+			checkPkOnlyForUpdateTable(tbl, conn);
+			if (updateTable != null) return;
+		}
+
+		List<ColumnIdentifier> columns = null;
+
 		// check the columns which are in the new table so that we can refuse any changes to columns
 		// which do not derive from that table.
 
@@ -709,9 +754,25 @@ public class DataStore
 			DbMetadata meta = conn.getMetadata();
 			if (meta == null) return;
 
-			// Look up the table in the database to make sure
-			// we get the name correct (upper/lowercase etc)
-			this.updateTable = findTable(conn, tbl);
+			if (conn.getDbSettings().getRetrieveTableDefinitionDirectly())
+			{
+				// try to use the table name as-is and retrieve the table definition directly
+				// as this should cover the majority of all cases it should usually be a bit faster
+				// than first searching for the table - especially for Oracle with its dead slow catalog views
+				TableDefinition def = meta.getTableDefinition(tbl);
+				if (def != null && def.getColumnCount() > 0 && def.getTable() != null)
+				{
+					columns = def.getColumns();
+					updateTable = def.getTable();
+				}
+			}
+
+			if (updateTable == null)
+			{
+				// Look up the table in the database to make sure
+				// we get the name correct (upper/lowercase etc)
+				this.updateTable = findTable(conn, tbl);
+			}
 
 			// No table found --> nothing to do.
 			if (updateTable == null) return;
@@ -730,7 +791,11 @@ public class DataStore
 			// will return the passed table
 			TableIdentifier toCheck = meta.resolveSynonym(synCheck);
 
-			List<ColumnIdentifier> columns = meta.getTableColumns(toCheck);
+			if (columns == null)
+			{
+				columns = meta.getTableColumns(toCheck);
+			}
+
 			int realColumns = 0;
 
 			if (columns != null)
@@ -758,7 +823,7 @@ public class DataStore
 
 			if (!hasPkColumns() && meta.getDbSettings().checkUniqueIndexesForPK())
 			{
-				checkUniqueIndexesForPK(conn);
+				checkUniqueIndexesForPK(conn, updateTable, resultInfo);
 			}
 
 			this.resultInfo.setUpdateTable(updateTable);
@@ -830,14 +895,13 @@ public class DataStore
 		resultCol.setComputedColumnExpression(column.getComputedColumnExpression());
 	}
 
-	private void checkUniqueIndexesForPK(WbConnection con)
+	private void checkUniqueIndexesForPK(WbConnection con, TableIdentifier tableToUse, ResultInfo result)
 	{
-		if (this.updateTable == null) return;
-
-		LogMgr.logInfo("DataStore.checkUniqueIndexesForPK()", "No PK found for table " + updateTable.getTableName()+ " Trying to find an unique index.");
+		if (tableToUse == null || result == null) return;
+		LogMgr.logInfo("DataStore.checkUniqueIndexesForPK()", "No PK found for table " + tableToUse.getTableName()+ " Trying to find an unique index.");
 		IndexReader reader = ReaderFactory.getIndexReader(con.getMetadata());
 
-		List<IndexDefinition> indexes = reader.getUniqueIndexes(updateTable);
+		List<IndexDefinition> indexes = reader.getUniqueIndexes(tableToUse);
 		if (CollectionUtil.isEmpty(indexes)) return;
 
 		IndexDefinition idx = indexes.get(0);
@@ -848,8 +912,8 @@ public class DataStore
 			int index = this.findColumn(col.getColumn());
 			if (index > -1)
 			{
-				this.resultInfo.setIsPkColumn(index, true);
-				this.resultInfo.setIsNullable(index, false);
+				result.setIsPkColumn(index, true);
+				result.setIsNullable(index, false);
 			}
 		}
 	}
@@ -857,7 +921,7 @@ public class DataStore
 	public void setUpdateTable(TableDefinition tableDef)
 	{
 		this.missingPkcolumns = new ArrayList<>(0);
-		
+
 		if (tableDef == null)
 		{
 			this.updateTable = null;

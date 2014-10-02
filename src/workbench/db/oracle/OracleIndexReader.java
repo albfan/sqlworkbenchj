@@ -71,6 +71,7 @@ public class OracleIndexReader
 	private PreparedStatement pkStament;
 	private String defaultTablespace;
 	private final boolean hasCompression;
+	private String currentUser;
 
 	public OracleIndexReader(DbMetadata meta)
 	{
@@ -87,6 +88,7 @@ public class OracleIndexReader
 			defaultTablespace = OracleUtils.getDefaultTablespace(meta.getWbConnection());
 		}
 		hasCompression = JdbcUtils.hasMinimumServerVersion(meta.getWbConnection(), "9.0");
+		currentUser = meta.getWbConnection().getCurrentUser();
 	}
 
 	@Override
@@ -385,7 +387,8 @@ public class OracleIndexReader
 	{
 		if (CollectionUtil.isEmpty(indexDefs)) return;
 
-		String base="SELECT i.index_name, e.column_expression, e.column_position \n" +
+		String base=
+			"SELECT i.index_name, e.column_expression, e.column_position \n" +
 			"FROM all_indexes i \n" +
 			"  JOIN all_ind_expressions e \n" +
 			"    ON i.index_name = e.index_name \n" +
@@ -511,7 +514,7 @@ public class OracleIndexReader
 	 * As there is no such function in JDBC api JdbcIndexReader uses getPrimaryKeys() to retrieve the name
 	 * of the index as in most cases the PK name is the same as the supporting index.
 	 *
-	 * But in Oracle one can create a PK that is supported by an existing index and thus those two names
+	 * But in Oracle its possible to create a PK that is supported by an existing index and thus those two names
 	 * do not need to be identical.
 	 *
 	 * Therefor the usage of getPrimaryKey() is disabled by default and replaced with our own statement.
@@ -548,9 +551,17 @@ public class OracleIndexReader
 			" and cons.owner = ? \n" +
 			" and cons.table_name = ? ";
 
+		if (OracleUtils.optimizeCatalogQueries())
+		{
+			if (StringUtil.isEmptyString(schema) || schema.equalsIgnoreCase(currentUser))
+			{
+				sql = sql.replace(" all_co", " user_co");
+			}
+		}
+
 		if (pkStament != null)
 		{
-			LogMgr.logWarning("OracleIndexReader.getPrimeryKeys()", "getPrimeryKeys() called with pending statement!");
+			LogMgr.logDebug("OracleIndexReader.getPrimaryKeyInfo()", "getPrimeryKeys() called with pending statement!");
 			primaryKeysResultDone();
 		}
 
@@ -561,7 +572,7 @@ public class OracleIndexReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleIndexReader.getPrimaryKeys()", "Using SQL=" + SqlUtil.replaceParameters(sql, schema, table));
+			LogMgr.logDebug("OracleIndexReader.getPrimaryKeyInfo()", "Retrieving PK information using:\n" + SqlUtil.replaceParameters(sql, schema, table));
 		}
 
 		pkStament = metaData.getSqlConnection().prepareStatement(sql);

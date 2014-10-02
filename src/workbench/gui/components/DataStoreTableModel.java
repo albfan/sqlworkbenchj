@@ -65,7 +65,7 @@ public class DataStoreTableModel
 	private boolean showStatusColumn;
 	private int columnStartIndex;
 
-	private List<Integer> noneditableColumns = new ArrayList<Integer>();
+	private List<Integer> noneditableColumns = new ArrayList<>();
 
 	private SortDefinition sortDefinition = new SortDefinition();
 

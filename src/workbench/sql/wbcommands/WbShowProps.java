@@ -128,11 +128,11 @@ public class WbShowProps
 
 	private static boolean isWorkbenchProperty(String key)
 	{
-		return key.startsWith("workbench.db.")
+		return key.startsWith("workbench.db")
 			    || key.startsWith("workbench.settings.")
-			    || (key.startsWith("workbench.sql.") && !key.startsWith("workbench.sql.replace.")
-				                                       && !key.startsWith("workbench.sql.formatter.")
-				                                       && !key.startsWith("workbench.sql.search."));
+			    || (key.startsWith("workbench.sql") && !key.startsWith("workbench.sql.replace.")
+				                                      && !key.startsWith("workbench.sql.formatter.")
+				                                      && !key.startsWith("workbench.sql.search."));
 	}
 
 	private DataStore getSystemProperties()

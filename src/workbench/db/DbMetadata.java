@@ -1485,6 +1485,8 @@ public class DbMetadata
 					", types=" + (typesToUse == null ? "null" : Arrays.asList(typesToUse).toString()));
 			}
 
+			long start = System.currentTimeMillis();
+
 			// if the types are cleaned up, an empty array can be returned
 			// in that case this means that only non-native types are requested
 			// which are handled by one of the extenders. In that case there is no
@@ -1498,6 +1500,10 @@ public class DbMetadata
 					return result;
 				}
 			}
+			
+			long duration = System.currentTimeMillis() - start;
+			LogMgr.logDebug("DbMetadata.getObjects()", "Retrieving table list took: " + duration + "ms");
+
 
 			if (tableRs != null && Settings.getInstance().getDebugMetadataSql())
 			{
