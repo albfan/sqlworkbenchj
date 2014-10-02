@@ -28,6 +28,7 @@ import java.util.Set;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DependencyNode;
+import workbench.db.IndexDefinition;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -100,7 +101,7 @@ public class DbObjectCache
 	/**
 	 * Removes all entries from this cache and deletes any saved cache file.
 	 *
-	 * @see #clear() 
+	 * @see #clear()
 	 * @see ObjectCachePersistence#deleteCacheFile(java.lang.String, java.lang.String)
 	 */
 	public void removeAll()
@@ -176,6 +177,11 @@ public class DbObjectCache
 		return objectCache.findEntry(dbConnection, table);
 	}
 
+	public List<IndexDefinition> getUniqueIndexes(TableIdentifier table)
+	{
+		return objectCache.getUniqueIndexes(dbConnection, table);
+	}
+	
 	public TableIdentifier getOrRetrieveTable(TableIdentifier table)
 	{
 		TableIdentifier realTable = objectCache.findEntry(dbConnection, table);

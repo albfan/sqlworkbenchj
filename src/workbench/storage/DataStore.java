@@ -37,25 +37,19 @@ import java.util.Map;
 
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
-import workbench.db.DbMetadata;
 import workbench.db.DeleteScriptGenerator;
-import workbench.db.IndexColumn;
-import workbench.db.IndexDefinition;
-import workbench.db.IndexReader;
-import workbench.db.PkDefinition;
 import workbench.db.QuoteHandler;
-import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.resource.GuiSettings;
 
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
@@ -669,40 +663,6 @@ public class DataStore
 		this.updateTable = (tbl == null ? null : tbl.createCopy());
 	}
 
-	private void checkPkOnlyForUpdateTable(TableIdentifier tbl, WbConnection conn)
-	{
-		DbMetadata meta = conn.getMetadata();
-		if (meta == null) return;
-		if (resultInfo == null) return;
-		
-		PkDefinition pk = meta.getIndexReader().getPrimaryKey(tbl);
-
-		TableIdentifier table = tbl.createCopy();
-		table.adjustCase(conn);
-
-		if (pk == null || CollectionUtil.isEmpty(pk.getColumns()))
-		{
-			checkUniqueIndexesForPK(conn, tbl, resultInfo);
-		}
-		else
-		{
-			for (String colName : pk.getColumns())
-			{
-				int index = findColumn(colName);
-				if (index > -1)
-				{
-					this.resultInfo.setIsPkColumn(index, true);
-					this.resultInfo.setIsNullable(index, false);
-				}
-			}
-		}
-		if (hasPkColumns())
-		{
-			this.updateTable = table;
-			this.resultInfo.setUpdateTable(updateTable);
-		}
-	}
-
 	/**
 	 * Sets the table to be updated for this DataStore.
 	 * Upon setting the table, the column definition for the table
@@ -723,119 +683,56 @@ public class DataStore
 	 */
 	public void setUpdateTable(TableIdentifier tbl, WbConnection conn)
 	{
-		if ( conn == null || (tbl != null && TableIdentifier.tablesAreEqual(tbl, this.updateTable, conn)) ) return;
+		if (conn == null || (tbl != null && TableIdentifier.tablesAreEqual(tbl, this.updateTable, conn)) ) return;
 
 		// Reset everything
 		this.updateTable = null;
 		this.resultInfo.setUpdateTable(null);
 		this.missingPkcolumns = null;
 
-		if (tbl == null)
-		{
-			return;
-		}
+		if (tbl == null) return;
 
+		UpdateTableDetector detector = new UpdateTableDetector(conn);
+		detector.checkUpdateTable(tbl, resultInfo);
+		updateTable = detector.getUpdateTable();
+		missingPkcolumns = detector.getMissingPkColumns();
 
-		if (conn.getDbSettings().getOnlyRetrievePkForUpdateCheck())
-		{
-			LogMgr.logDebug("DataStore.setUpdateTable()", "Only checking the PK definition for " + tbl.getTableExpression());
-			checkPkOnlyForUpdateTable(tbl, conn);
-			if (updateTable != null) return;
-		}
+		checkForGeneratedKeys();
+		restoreModifiedNotUpdateableColumns();
+	}
 
-		List<ColumnIdentifier> columns = null;
+	public void setUpdateTable(TableDefinition tableDef)
+	{
+		this.missingPkcolumns = new ArrayList<>(0);
 
-		// check the columns which are in the new table so that we can refuse any changes to columns
-		// which do not derive from that table.
-
-		// Note that this does not work, if the columns were renamed via an alias in the select statement
-		try
-		{
-			DbMetadata meta = conn.getMetadata();
-			if (meta == null) return;
-
-			if (conn.getDbSettings().getRetrieveTableDefinitionDirectly())
-			{
-				// try to use the table name as-is and retrieve the table definition directly
-				// as this should cover the majority of all cases it should usually be a bit faster
-				// than first searching for the table - especially for Oracle with its dead slow catalog views
-				TableDefinition def = meta.getTableDefinition(tbl);
-				if (def != null && def.getColumnCount() > 0 && def.getTable() != null)
-				{
-					columns = def.getColumns();
-					updateTable = def.getTable();
-				}
-			}
-
-			if (updateTable == null)
-			{
-				// Look up the table in the database to make sure
-				// we get the name correct (upper/lowercase etc)
-				this.updateTable = findTable(conn, tbl);
-			}
-
-			// No table found --> nothing to do.
-			if (updateTable == null) return;
-
-			// If the object that was used in the original SELECT is
-			// a synonym we have to get the definition of the underlying
-			// table in order to find the primary key columns
-			TableIdentifier synCheck = updateTable.createCopy();
-
-			if (synCheck != null && synCheck.getSchema() == null)
-			{
-				synCheck.setSchema(meta.getSchemaToUse());
-			}
-
-			// if the passed table is not a synonym resolveSynonym
-			// will return the passed table
-			TableIdentifier toCheck = meta.resolveSynonym(synCheck);
-
-			if (columns == null)
-			{
-				columns = meta.getTableColumns(toCheck);
-			}
-
-			int realColumns = 0;
-
-			if (columns != null)
-			{
-				this.missingPkcolumns = new ArrayList<>(columns.size());
-
-				for (ColumnIdentifier column : columns)
-				{
-					int index = this.findColumn(column.getColumnName());
-					if (index > -1)
-					{
-						syncResultColumn(index, column);
-						realColumns++;
-					}
-					else if (column.isPkColumn())
-					{
-						this.missingPkcolumns.add(column);
-					}
-				}
-			}
-			if (realColumns == 0 && updateTable != null)
-			{
-				LogMgr.logWarning("DataStore.setUpdateTable()", "No columns from the table " + this.updateTable.getTableExpression() + " could be found in the current result set!");
-			}
-
-			if (!hasPkColumns() && meta.getDbSettings().checkUniqueIndexesForPK())
-			{
-				checkUniqueIndexesForPK(conn, updateTable, resultInfo);
-			}
-
-			this.resultInfo.setUpdateTable(updateTable);
-
-			checkForGeneratedKeys();
-			restoreModifiedNotUpdateableColumns();
-		}
-		catch (Exception e)
+		if (tableDef == null)
 		{
 			this.updateTable = null;
-			LogMgr.logError("DataStore.setUpdateTable()", "Could not read table definition", e);
+			this.resultInfo.setUpdateTable(null);
+			return;
 		}
+		else
+		{
+			this.updateTable = tableDef.getTable();
+			this.resultInfo.setUpdateTable(updateTable);
+		}
+
+		UpdateTableDetector detector = new UpdateTableDetector(originalConnection);
+
+		List<ColumnIdentifier> columns = tableDef.getColumns();
+		for (ColumnIdentifier column : columns)
+		{
+			int index = this.findColumn(column.getColumnName());
+			if (index > -1)
+			{
+				detector.syncResultColumn(index, column, resultInfo);
+			}
+			else
+			{
+				LogMgr.logError("DataStore.setUpdateTable()", "Could not find column " + column + " from table definition in ResultInfo!", null);
+			}
+		}
+		checkForGeneratedKeys();
 	}
 
 	/**
@@ -873,101 +770,8 @@ public class DataStore
 		}
 	}
 
-	private void syncResultColumn(int index, ColumnIdentifier column)
-	{
-		boolean canUpdate = true;
-		if (!column.isAutoGenerated() && column.getComputedColumnExpression() != null)
-		{
-			canUpdate = false;
-			LogMgr.logDebug("DataStore.syncResultColumn()", "Column " + column.getColumnName() + " can not be updated because it is a computed column");
-		}
-
-		if (resultInfo.getColumn(index).isReadonly())
-		{
-			LogMgr.logDebug("DataStore.syncResultColumn()", "Column " + column.getColumnName() + " was marked as read-only by the driver!");
-		}
-
-		this.resultInfo.setUpdateable(index, canUpdate);
-		this.resultInfo.setIsPkColumn(index, column.isPkColumn());
-		this.resultInfo.setIsNullable(index, column.isNullable());
-		ColumnIdentifier resultCol = this.resultInfo.getColumn(index);
-		resultCol.setIsAutoincrement(column.isAutoincrement());
-		resultCol.setComputedColumnExpression(column.getComputedColumnExpression());
-	}
-
-	private void checkUniqueIndexesForPK(WbConnection con, TableIdentifier tableToUse, ResultInfo result)
-	{
-		if (tableToUse == null || result == null) return;
-		LogMgr.logInfo("DataStore.checkUniqueIndexesForPK()", "No PK found for table " + tableToUse.getTableName()+ " Trying to find an unique index.");
-		IndexReader reader = ReaderFactory.getIndexReader(con.getMetadata());
-
-		List<IndexDefinition> indexes = reader.getUniqueIndexes(tableToUse);
-		if (CollectionUtil.isEmpty(indexes)) return;
-
-		IndexDefinition idx = indexes.get(0);
-		List<IndexColumn> columns = idx.getColumns();
-		LogMgr.logInfo("DataStore.checkUniqueIndexesForPK()", "Using unique index " + idx.getObjectName() + " as a surrogate PK");
-		for (IndexColumn col : columns)
-		{
-			int index = this.findColumn(col.getColumn());
-			if (index > -1)
-			{
-				result.setIsPkColumn(index, true);
-				result.setIsNullable(index, false);
-			}
-		}
-	}
-
-	public void setUpdateTable(TableDefinition tableDef)
-	{
-		this.missingPkcolumns = new ArrayList<>(0);
-
-		if (tableDef == null)
-		{
-			this.updateTable = null;
-			this.resultInfo.setUpdateTable(null);
-			return;
-		}
-		else
-		{
-			this.updateTable = tableDef.getTable();
-			this.resultInfo.setUpdateTable(updateTable);
-		}
-
-		List<ColumnIdentifier> columns = tableDef.getColumns();
-		for (ColumnIdentifier column : columns)
-		{
-			int index = this.findColumn(column.getColumnName());
-			if (index > -1)
-			{
-				syncResultColumn(index, column);
-			}
-			else
-			{
-				LogMgr.logError("DataStore.setUpdateTable()", "Could not find column " + column + " from table definition in ResultInfo!", null);
-			}
-		}
-		checkForGeneratedKeys();
-	}
-
-	private TableIdentifier findTable(WbConnection conn, TableIdentifier table)
-	{
-		DbMetadata meta = conn.getMetadata();
-		TableIdentifier tbl = meta.searchSelectableObjectOnPath(table);
-		if (tbl == null && table.getSchema() == null)
-		{
-			tbl = meta.getSynonymTable(table);
-			if (tbl != null)
-			{
-				LogMgr.logDebug("DataStore.findTable()", "Using synonym table: " + tbl.getObjectExpression(null));
-			}
-		}
-		return tbl;
-	}
-
 	/**
-	 * Returns the current table to be updated if this DataStore is
-	 * based on a SELECT query
+	 * Returns the current table to be updated if this DataStore is based on a SELECT query
 	 *
 	 * @return The current update table
 	 *

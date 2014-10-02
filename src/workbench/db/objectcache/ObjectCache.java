@@ -41,8 +41,11 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSearchPath;
 import workbench.db.DependencyNode;
+import workbench.db.IndexDefinition;
+import workbench.db.IndexReader;
 import workbench.db.ObjectNameFilter;
 import workbench.db.ProcedureDefinition;
+import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
@@ -70,6 +73,7 @@ class ObjectCache
 	private final Map<TableIdentifier, List<DependencyNode>> referencingTables = new HashMap<>();
 	private final Map<TableIdentifier, List<ColumnIdentifier>> objects = new HashMap<>();
 	private final Map<TableIdentifier, TableIdentifier> synonymMap = new HashMap<>();
+	private final Map<TableIdentifier, List<IndexDefinition>> indexMap= new HashMap<>();
 	private final Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<>();
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
@@ -639,6 +643,22 @@ class ObjectCache
 		return null;
 	}
 
+	List<IndexDefinition> getUniqueIndexes(WbConnection con, TableIdentifier table)
+	{
+		synchronized (indexMap)
+		{
+			List<IndexDefinition> indexes  = indexMap.get(table);
+			if (indexes  == null)
+			{
+				IndexReader reader = ReaderFactory.getIndexReader(con.getMetadata());
+				indexes = reader.getUniqueIndexes(table);
+				if (indexes == null) indexes = new ArrayList<>(0);
+				indexMap.put(table, indexes);
+			}
+			return indexes;
+		}
+	}
+
 	private TableIdentifier findInCache(WbConnection con, TableIdentifier toSearch)
 	{
 		TableIdentifier tbl = toSearch.createCopy();
@@ -695,7 +715,8 @@ class ObjectCache
 		Map<TableIdentifier, List<DependencyNode>> referencedTables,
 		Map<TableIdentifier, List<DependencyNode>> referencingTables,
 		Map<String, List<ProcedureDefinition>> procs,
-		Map<TableIdentifier, TableIdentifier> synonyms)
+		Map<TableIdentifier, TableIdentifier> synonyms,
+		Map<TableIdentifier, List<IndexDefinition>> indexes)
 	{
 		if (newObjects == null || schemas == null) return;
 
@@ -724,6 +745,11 @@ class ObjectCache
 		{
 			synonymMap.putAll(synonyms);
 		}
+		if (indexes != null)
+		{
+			indexMap.putAll(indexes);
+		}
+
 		LogMgr.logDebug("ObjectCache.initExternally",
 			"Added " + objects.size() + " objects, " +
 			procedureCache.values().size() + " procedures, " +

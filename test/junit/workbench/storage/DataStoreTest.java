@@ -76,7 +76,7 @@ public class DataStoreTest
 	{
 		util.emptyBaseDirectory();
 		WbConnection con = util.getConnection("pkTestDb");
-		Statement stmt = con.createStatement();
+
 		TestUtil.executeScript(con,
 			"create table gen_test(id integer identity, some_data varchar(100)); \n" +
 			"insert into gen_test (some_data) values ('foobar'); \n" +
@@ -84,10 +84,12 @@ public class DataStoreTest
 
 		String sql = "select id, some_data from gen_test";
 
-		ResultSet rs = stmt.executeQuery(sql);
-		DataStore ds = new DataStore(rs, con);
-		rs.close();
-		stmt.close();
+		DataStore ds;
+		try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(sql))
+		{
+			ds = new DataStore(rs, con);
+		}
+
 		ds.setGeneratingSql(sql);
 		ds.checkUpdateTable(con);
 
@@ -113,18 +115,17 @@ public class DataStoreTest
 	{
 		util.emptyBaseDirectory();
 		WbConnection con = util.getConnection("pkTestDb");
-		Statement stmt = con.createStatement();
 		TestUtil.executeScript(con,
 			"CREATE TABLE junit_test (id1 integer, id2 integer, id3 integer, some_data varchar(100), primary key (id1, id2, id3));\n" +
 			"insert into junit_test (id1,id2,id3, some_data) values (1,2,3,'bla');\n" +
 			"commit;");
 
 		String sql = "select id1, id2, some_data from JUnit_Test";
-
-		ResultSet rs = stmt.executeQuery(sql);
-		DataStore ds = new DataStore(rs, con);
-		rs.close();
-		stmt.close();
+		DataStore ds;
+		try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(sql))
+		{
+			ds = new DataStore(rs, con);
+		}
 		ds.setGeneratingSql(sql);
 		ds.checkUpdateTable(con);
 		assertEquals("Missing PK columns not detected", false, ds.pkColumnsComplete());
@@ -146,7 +147,6 @@ public class DataStoreTest
 			"commit;");
 
 		String sql = "select id, somedata from \"FOO.BAR\"";
-
 		Statement stmt = con.createStatement();
 		ResultSet rs = stmt.executeQuery(sql);
 		DataStore ds = new DataStore(rs, con);
@@ -325,16 +325,11 @@ public class DataStoreTest
 		util.emptyBaseDirectory();
 		WbConnection wb = util.getConnection();
 		Connection con = wb.getSqlConnection();
-		Statement stmt = con.createStatement();
-		try
-		{
-			stmt.executeUpdate("DROP TABLE junit_test");
-		}
-		catch (Throwable th)
-		{
-		}
-		stmt.executeUpdate("CREATE TABLE junit_test (key integer primary key, firstname varchar(100), lastname varchar(100))");
-		stmt.close();
+		TestUtil.executeScript(wb,
+			"drop table if exists junit_test;\n" +
+			"CREATE TABLE junit_test (key integer primary key, firstname varchar(100), lastname varchar(100));"
+		);
+
 		PreparedStatement pstmt = con.prepareStatement("insert into junit_test (key, firstname, lastname) values (?,?,?)");
 		for (int i = 0; i < rowcount; i++)
 		{

@@ -1963,4 +1963,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + propName, global);
 	}
 
+	public boolean useCompletionCacheForUpdateTableCheck()
+	{
+		String propName = "updatetable.check.use.cache";
+		boolean global = Settings.getInstance().getBoolProperty("workbench.db." + propName, false);
+		return Settings.getInstance().getBoolProperty(prefix + propName, global);
+	}
+
 }
