@@ -47,10 +47,17 @@ public class UpdateTableDetector
 	private TableIdentifier updateTable;
 	private List<ColumnIdentifier> missingPkcolumns;
 	private WbConnection conn;
+	private boolean checkPkOnly;
 
 	public UpdateTableDetector(WbConnection db)
 	{
 		conn = db;
+		checkPkOnly = conn.getDbSettings().getUpdateTableCheckPkOnly();
+	}
+
+	public void setCheckPKOnly(boolean flag)
+	{
+		this.checkPkOnly = true;
 	}
 
 	public TableIdentifier getUpdateTable()
@@ -75,23 +82,20 @@ public class UpdateTableDetector
 		}
 
 		DbMetadata meta = conn.getMetadata();
+		if (meta == null) return;
+
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(conn);
-		if (tbl.getSchema() == null)
-		{
-			tbl.setSchema(meta.getSchemaToUse());
-		}
-		if (tbl.getCatalog() == null)
-		{
-			tbl.setCatalog(meta.getCurrentCatalog());
-		}
 
-		UpdateTableCheckType type = conn.getDbSettings().getUpdateTableCheckType();
-		if (type == UpdateTableCheckType.pk)
+		if (checkPkOnly)
 		{
 			LogMgr.logDebug("UpdateTableDetector.setUpdateTable()", "Only checking the PK definition for " + tbl.getTableExpression());
 			checkPkOnlyForUpdateTable(tbl, resultInfo);
 			if (updateTable != null) return;
+
+			// the table either has no PK or unique index at all or does not exist
+			// if it does not exist, this might be a synonym
+			tbl = findTable(tbl);
 		}
 
 		List<ColumnIdentifier> columns = null;
@@ -102,33 +106,28 @@ public class UpdateTableDetector
 
 		try
 		{
-			if (meta == null) return;
 
-			if (type == UpdateTableCheckType.definition)
+			// try to use the table name as-is and retrieve the table definition directly
+			// as this should cover the majority of all cases it should usually be a bit faster
+			// than first searching for the table - especially for Oracle with its dead slow catalog views
+			TableDefinition def = getDefinition(tbl);
+			if (def != null && def.getColumnCount() > 0 && def.getTable() != null)
 			{
-				// try to use the table name as-is and retrieve the table definition directly
-				// as this should cover the majority of all cases it should usually be a bit faster
-				// than first searching for the table - especially for Oracle with its dead slow catalog views
-				TableDefinition def = getDefinition(tbl);
-				if (def != null && def.getColumnCount() > 0 && def.getTable() != null)
+				columns = def.getColumns();
+				if (meta.isSynonym(tbl))
 				{
-					columns = def.getColumns();
+					updateTable = tbl;
+				}
+				else
+				{
+					// using the table identifier returned ensures
+					// that the table name is fully qualified with schema and catalog
 					updateTable = def.getTable();
 				}
 			}
-
-			if (updateTable == null)
+			else
 			{
-				// Look up the table in the database to make sure
-				// we get the name correct (upper/lowercase etc)
-				this.updateTable = findTable(tbl);
-			}
-
-			// No table found --> nothing to do.
-			if (updateTable == null) return;
-
-			if (columns == null)
-			{
+				updateTable = findTable(tbl);
 				columns = getColumns(tbl);
 			}
 
@@ -177,14 +176,7 @@ public class UpdateTableDetector
 		// If the object that was used in the original SELECT is
 		// a synonym we have to get the definition of the underlying
 		// table in order to find the primary key columns
-		TableIdentifier synCheck = table.createCopy();
-
-		if (synCheck.getSchema() == null)
-		{
-			// no need to check for catalogs, because the DBMS that support
-			// synonyms (Oracle, DB2) don't support catalogs
-			synCheck.setSchema(conn.getMetadata().getSchemaToUse());
-		}
+		TableIdentifier synCheck = getFullyQualifiedTable(table);
 
 		// if the passed table is not a synonym resolveSynonym
 		// will return the passed table
@@ -207,7 +199,8 @@ public class UpdateTableDetector
 	{
 		if (conn.getDbSettings().useCompletionCacheForUpdateTableCheck())
 		{
-			return conn.getObjectCache().getSynonymTable(toCheck);
+			TableIdentifier syn = conn.getObjectCache().getSynonymTable(toCheck);
+			return (syn == null ? toCheck : syn);
 		}
 		return conn.getMetadata().resolveSynonym(toCheck);
 	}
@@ -272,7 +265,7 @@ public class UpdateTableDetector
 			IndexReader reader = ReaderFactory.getIndexReader(con.getMetadata());
 			indexes = reader.getUniqueIndexes(tableToUse);
 		}
-		
+
 		if (CollectionUtil.isEmpty(indexes)) return;
 
 		IndexDefinition idx = indexes.get(0);
@@ -328,11 +321,27 @@ public class UpdateTableDetector
 				def = new TableDefinition(tbl, columns);
 			}
 		}
+
 		if (def == null)
 		{
-			def = conn.getMetadata().getTableDefinition(toFind);
+			TableIdentifier tbl = getFullyQualifiedTable(toFind);
+			def = conn.getMetadata().getTableDefinition(tbl);
 		}
 		return def;
+	}
+
+	private TableIdentifier getFullyQualifiedTable(TableIdentifier table)
+	{
+		TableIdentifier tbl = table.createCopy();
+		if (tbl.getSchema() == null)
+		{
+			tbl.setSchema(conn.getMetadata().getCurrentSchema());
+		}
+		if (tbl.getCatalog() == null)
+		{
+			tbl.setCatalog(conn.getMetadata().getCurrentCatalog());
+		}
+		return tbl;
 	}
 
 	private TableIdentifier findTable(TableIdentifier table)
@@ -341,24 +350,11 @@ public class UpdateTableDetector
 		if (conn.getDbSettings().useCompletionCacheForUpdateTableCheck())
 		{
 			tbl = conn.getObjectCache().getTable(table);
-			if (tbl == null)
-			{
-				tbl = conn.getObjectCache().getSynonymTable(table);
-			}
 		}
 
 		if (tbl == null)
 		{
-			DbMetadata meta = conn.getMetadata();
-			tbl = meta.searchSelectableObjectOnPath(table);
-			if (tbl == null && table.getSchema() == null)
-			{
-				tbl = meta.getSynonymTable(table);
-				if (tbl != null)
-				{
-					LogMgr.logDebug("UpdateTableDetector.findTable()", "Using synonym table: " + tbl.getObjectExpression(null));
-				}
-			}
+			tbl = conn.getMetadata().searchSelectableObjectOnPath(table);
 		}
 		return tbl;
 	}

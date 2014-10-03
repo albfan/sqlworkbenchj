@@ -42,7 +42,6 @@ import workbench.gui.dbobjects.TableSearchPanel;
 
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
-import workbench.storage.UpdateTableCheckType;
 
 import workbench.sql.EndReadOnlyTrans;
 import workbench.sql.commands.SingleVerbCommand;
@@ -1951,25 +1950,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "pk.retrieval.checkunique", global);
 	}
 
-	public UpdateTableCheckType getUpdateTableCheckType()
+	public boolean getUpdateTableCheckPkOnly()
 	{
-		String propName = "updatetable.check.type";
-		String global = Settings.getInstance().getProperty("workbench.db." + propName, UpdateTableCheckType.full.name());
-		String type = Settings.getInstance().getProperty(prefix + propName, global);
-		UpdateTableCheckType result = UpdateTableCheckType.full;
-
-		if (StringUtil.isBlank(type)) return result;
-		if ("default".equalsIgnoreCase(type)) return result;
-		try
-		{
-			result = UpdateTableCheckType.valueOf(type);
-			return result;
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("DbSettings.getUpdateTableCheckType()", "Invalid type for update table check specified: "  + type, null);
-			return UpdateTableCheckType.full;
-		}
+		String propName = "updatetable.check.pkonly";
+		boolean global = Settings.getInstance().getBoolProperty("workbench.db." + propName, false);
+		return Settings.getInstance().getBoolProperty(prefix + propName, global);
 	}
 
 	public boolean useCompletionCacheForUpdateTableCheck()

@@ -226,6 +226,12 @@ class ObjectCachePersistence
 
 			Map<TableIdentifier, TableIdentifier> syns = objectCache.getSynonyms();
 			writeObject(zout, SYNONYMS_ENTRY, syns);
+
+			Map<TableIdentifier, List<IndexDefinition>> indexes = objectCache.getIndexes();
+			writeObject(zout, INDEX_ENTRY, indexes);
+
+			Map<TableIdentifier, PkDefinition> pkMap = objectCache.getPKMap();
+			writeObject(zout, PK_ENTRY, pkMap);
 		}
 		catch (Exception ex)
 		{

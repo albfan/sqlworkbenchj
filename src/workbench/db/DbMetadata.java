@@ -2151,6 +2151,14 @@ public class DbMetadata
 		return def;
 	}
 
+	public boolean isSynonym(TableIdentifier table)
+	{
+		if (table == null) return false;
+		SynonymReader reader = getSynonymReader();
+		if (reader == null) return false;
+		return reader.getSynonymTypeName().equalsIgnoreCase(table.getType());
+	}
+
 	public boolean isSequenceType(String type)
 	{
 		if (type == null) return false;
@@ -2222,7 +2230,7 @@ public class DbMetadata
 	{
 		return getTableDefinition(toRead, true);
 	}
-	
+
 	public TableDefinition getTableDefinition(TableIdentifier toRead, boolean includePkInformation)
 		throws SQLException
 	{

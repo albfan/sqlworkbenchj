@@ -677,29 +677,24 @@
 
     <simplesect id="db-updatetable-check">
       <title>Configuring the check process</title>
-			<para>Property: <literal>workbench.db.updatetable.check.type</literal> (for all DBMS)</para>
-			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.updatetable.check.type</literal> (will overwrite the DBMS independent configuration)</para>
-      <para>Possible values: <literal>full</literal>, <literal>definition</literal>, <literal>pk</literal></para>
+			<para>Property: <literal>workbench.db.updatetable.check.pkonly</literal> (for all DBMS)</para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.updatetable.check.pkonly</literal> (will overwrite the DBMS independent configuration)</para>
+      <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
       <para>
         When changing values directly in the result set, &wb-productname; needs to find out which table is being edited.
         As this process requires multiple requests to the database server in order to support different features
         during editing this can be time consuming depending on the DBMS being used and the size of the database.
       </para>
       <para>
-        This property controls which steps are carried out by &wb-productname; when this happens. The default setting
-        is <literal>full</literal> and will try to resolve synonyms, retrieve all columns of the table (to ensure that
-        only real columns are included in the generated DML statements) and will retrieve the primary key information.
+        If this property is set to <literal>true</literal>, only the PK definition will be retrieved, otherwise the full
+        definition of all columns of the table.
       </para>
       <para>
-        The step to resolve synonyms can be disabled by specifying <literal>definition</literal>. If this is used,
-        editing a result that is based on a SELECT statement from a synonym will not work properly as neither the
-        table's columns nor the primary key can be detected.
-      </para>
-      <para>
-        The update table check can be reduced to only retrieve the primary key of the table by specifying <literal>pk</literal>
-        for this property. This will also skip the test for a synonym. When this type is configured results from
-        multiple tables cannot be edited correctly. The option <link linkend="options-highlight-required">Highlight required fields</link>
-        will have no effect either as no column information will be retrieved for the table.
+        When this is enabled, editing results based on statements with multiple tables might not work properly.
+        The option <link linkend="options-highlight-required">Highlight required fields</link> will also have no effect as no
+        column information will be retrieved for the table. It is also recommended to enable the option
+        <link linkend="options-highlight-required">Highlight required fields</link> to make sure the correct SQL statements are
+        generated when only the PK information is checked.
       </para>
     </simplesect>
 
@@ -815,7 +810,7 @@
 
     <section id="mssql-config-settings">
       <title>Microsoft SQL Server specific settings</title>
-      
+
       <simplesect id="mssql-dbexplorer-locktimeout">
         <indexterm><primary>Microsoft SQL Server</primary><secondary>lock timeout for DbExplorer</secondary></indexterm>
         <title>Define a lock timeout for the DbExplorer</title>

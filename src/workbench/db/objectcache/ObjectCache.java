@@ -763,6 +763,16 @@ class ObjectCache
 		return Collections.unmodifiableMap(synonymMap);
 	}
 
+	public Map<TableIdentifier, PkDefinition> getPKMap()
+	{
+		return Collections.unmodifiableMap(pkMap);
+	}
+
+	public Map<TableIdentifier, List<IndexDefinition>> getIndexes()
+	{
+		return Collections.unmodifiableMap(indexMap);
+	}
+
 	void initExternally(
 		Map<TableIdentifier, List<ColumnIdentifier>> newObjects, Set<String> schemas,
 		Map<TableIdentifier, List<DependencyNode>> referencedTables,

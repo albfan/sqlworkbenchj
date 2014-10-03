@@ -136,29 +136,6 @@ public class DataStoreTest
 	}
 
 	@Test
-	public void testSpecialName()
-		throws Exception
-	{
-		util.emptyBaseDirectory();
-		WbConnection con = util.getConnection("pkTestDb");
-		TestUtil.executeScript(con,
-			"create table \"FOO.BAR\" (id integer primary key, somedata varchar(50));\n" +
-			"insert into \"FOO.BAR\" values (1, 'foobar');\n" +
-			"commit;");
-
-		String sql = "select id, somedata from \"FOO.BAR\"";
-		Statement stmt = con.createStatement();
-		ResultSet rs = stmt.executeQuery(sql);
-		DataStore ds = new DataStore(rs, con);
-		SqlUtil.closeAll(rs, stmt);
-		ds.setGeneratingSql(sql);
-		ds.updatePkInformation();
-		assertTrue(ds.hasPkColumns());
-		TableIdentifier tbl = ds.getUpdateTable();
-		assertEquals("FOO.BAR", tbl.getTableName());
-	}
-
-	@Test
 	public void testDefinePK()
 		throws Exception
 	{

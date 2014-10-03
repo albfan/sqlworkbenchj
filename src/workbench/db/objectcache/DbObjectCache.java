@@ -187,13 +187,13 @@ public class DbObjectCache
 	{
 		return objectCache.getPrimaryKey(dbConnection, table);
 	}
-	
+
 	public TableIdentifier getOrRetrieveTable(TableIdentifier table)
 	{
 		TableIdentifier realTable = objectCache.findEntry(dbConnection, table);
 		if (realTable == null)
 		{
-			realTable = dbConnection.getMetadata().findTable(table);
+			realTable = dbConnection.getMetadata().searchSelectableObjectOnPath(table);
 			if (realTable != null)
 			{
 				objectCache.addTable(realTable, dbConnection);

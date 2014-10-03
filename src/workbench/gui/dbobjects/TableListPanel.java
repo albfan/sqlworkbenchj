@@ -341,7 +341,6 @@ public class TableListPanel
 		this.extendPopupMenu();
 
 		findPanel =  new QuickFilterPanel(this.tableList, false, "tablelist");
-		configureFindPanel();
 
 		Settings.getInstance().addPropertyChangeListener(this,
 			DbExplorerSettings.PROP_INSTANT_FILTER,
@@ -355,6 +354,7 @@ public class TableListPanel
 		reloadAction.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
 		reloadAction.addToInputMap(tableList);
 
+		configureFindPanel();
 		this.findPanel.addToToolbar(reloadAction, true, false);
 
 		JPanel selectPanel = new JPanel();
@@ -1176,7 +1176,9 @@ public class TableListPanel
 			DataStore ds = null;
 			if (DbExplorerSettings.getUseFilterForRetrieve())
 			{
-				String filter = StringUtil.trimQuotes(findPanel.getText());
+				String filter = findPanel.getText();
+				filter = dbConnection.getMetadata().adjustObjectnameCase(filter);
+				filter = dbConnection.getMetadata().removeQuotes(filter);
 				ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, filter, types);
 			}
 			else
@@ -2551,9 +2553,11 @@ public class TableListPanel
 		{
 			findPanel.setActionsEnabled(false);
 			findPanel.setToolTipText(ResourceMgr.getString("TxtQuickFilterLikeHint"));
+			findPanel.setReloadAction(reloadAction);
 		}
 		else
 		{
+			findPanel.setReloadAction(null);
 			findPanel.setActionsEnabled(true);
 			findPanel.setFilterTooltip();
 		}

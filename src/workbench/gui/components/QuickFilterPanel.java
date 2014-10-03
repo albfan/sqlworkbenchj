@@ -64,6 +64,7 @@ import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.QuickFilterAction;
+import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.WbAction;
 
@@ -102,6 +103,7 @@ public class QuickFilterPanel
 	private boolean assumeWildcards;
 	private boolean autoFilterEnabled;
 	private boolean enableMultiValue = true;
+	private ReloadAction reload;
 
 	public QuickFilterPanel(WbTable table, boolean showDropDown, String historyProperty)
 	{
@@ -112,9 +114,15 @@ public class QuickFilterPanel
 		this.initGui(historyProperty);
 	}
 
+	public void setReloadAction(ReloadAction action)
+	{
+		this.reload = action;
+	}
+
 	public void dispose()
 	{
 		WbAction.dispose(filterAction);
+		reload = null;
 		if (filterValue != null) filterValue.dispose();
 		if (textListener != null) textListener.dispose();
 		if (toolbar != null) toolbar.removeAll();
@@ -219,7 +227,7 @@ public class QuickFilterPanel
 	{
 		this.filterValue.setToolTipText(tip);
 	}
-	
+
 	private void initGui(String historyProperty)
 	{
 		GridBagConstraints gridBagConstraints;
@@ -516,10 +524,17 @@ public class QuickFilterPanel
 	{
 		if (e.getSource() == filterValue  && !autoFilterEnabled)
 		{
-			String cmd = e.getActionCommand();
-			if (cmd.equals("comboBoxChanged") || cmd.equals("comboBoxEdited"))
+			if (reload != null)
 			{
-				applyQuickFilter();
+				reload.executeAction(e);
+			}
+			else
+			{
+				String cmd = e.getActionCommand();
+				if (cmd.equals("comboBoxChanged") || cmd.equals("comboBoxEdited"))
+				{
+					applyQuickFilter();
+				}
 			}
 		}
 		else if (e.getSource() instanceof JMenuItem)
