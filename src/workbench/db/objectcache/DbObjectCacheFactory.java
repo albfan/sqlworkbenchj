@@ -49,8 +49,8 @@ public class DbObjectCacheFactory
 
 	private final Object lock = new Object();
 
-	private final Map<String, ObjectCache> caches = new HashMap<String, ObjectCache>();
-	private final Map<String, Set<String>> refCounter = new HashMap<String, Set<String>>();
+	private final Map<String, ObjectCache> caches = new HashMap<>();
+	private final Map<String, Set<String>> refCounter = new HashMap<>();
 
 	/**
 	 * Thread safe singleton-instance
@@ -154,7 +154,7 @@ public class DbObjectCacheFactory
 		Set<String> ids = refCounter.get(key);
 		if (ids == null)
 		{
-			ids = new HashSet<String>();
+			ids = new HashSet<>();
 			refCounter.put(key, ids);
 			ids.add(connectionId);
 			return false;

@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.Settings;
 
 import workbench.db.sqltemplates.ColumnDefinitionTemplate;
@@ -741,7 +742,7 @@ public class TableSourceBuilder
 			pkName = null;
 		}
 
-		if (pkName == null && Settings.getInstance().getAutoGeneratePKName())
+		if (pkName == null && DbExplorerSettings.getAutoGeneratePKName())
 		{
 			pkName = "pk_" + SqlUtil.cleanupIdentifier(table.getTableName().toLowerCase());
 			int maxLen = this.dbConnection.getMetadata().getMaxTableNameLength();

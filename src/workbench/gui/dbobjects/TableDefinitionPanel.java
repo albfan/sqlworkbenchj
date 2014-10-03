@@ -47,6 +47,7 @@ import javax.swing.table.TableModel;
 import workbench.interfaces.DbData;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -157,8 +158,8 @@ public class TableDefinitionPanel
 		this.tableDefinition.getExportAction().setEnabled(true);
 		this.tableDefinition.setRendererSetup(RendererSetup.getBaseSetup());
 
-		tableDefinition.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
-		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_ALLOW_ALTER_TABLE);
+		tableDefinition.setReadOnly(!DbExplorerSettings.allowAlterInDbExplorer());
+		Settings.getInstance().addPropertyChangeListener(this, DbExplorerSettings.PROP_ALLOW_ALTER_TABLE);
 
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setEnabled(false);
@@ -175,8 +176,8 @@ public class TableDefinitionPanel
 		// as the column list will be updated automatically when the model of the table changes
 		columnFilter.setColumnList(TableColumnsDatastore.TABLE_DEFINITION_COLS);
 
-		columnFilter.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
-		columnFilter.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
+		columnFilter.setFilterOnType(DbExplorerSettings.getDbExpFilterDuringTyping());
+		columnFilter.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
 
 
 		DbData db = new DbData()
@@ -291,7 +292,7 @@ public class TableDefinitionPanel
 		setFocusCycleRoot(false);
 		setFocusTraversalPolicy(policy);
 
-		if (Settings.getInstance().showFocusInDbExplorer())
+		if (DbExplorerSettings.showFocusInDbExplorer())
 		{
 			tableDefinition.showFocusBorder();
 		}
@@ -462,7 +463,7 @@ public class TableDefinitionPanel
 				});
 				alterColumnsAction.setSourceTable(dbConnection, currentTable);
 				alterColumnsAction.setEnabled(false);
-				boolean canAddColumn = dbConnection.getDbSettings().getAddColumnSql() != null && GuiSettings.allowAlterInDbExplorer();
+				boolean canAddColumn = dbConnection.getDbSettings().getAddColumnSql() != null && DbExplorerSettings.allowAlterInDbExplorer();
 				addColumn.setEnabled(canAddColumn && isTable());
 			}
 			catch (SQLException e)
@@ -499,7 +500,7 @@ public class TableDefinitionPanel
 		}
 
 		String displayName;
-		if (GuiSettings.getDbExplorerTableDetailFullyQualified())
+		if (DbExplorerSettings.getDbExplorerTableDetailFullyQualified())
 		{
 			displayName = displayTable.getFullyQualifiedName(dbConnection);
 		}
@@ -755,7 +756,7 @@ public class TableDefinitionPanel
 			createPKAction.setEnabled(rowsSelected && isTable && !hasPk);
 			dropPKAction.setEnabled(isTable && hasPk);
 			createIndexAction.setEnabled(rowsSelected && isTable);
-			deleteColumn.setEnabled(rowsSelected && isTable && GuiSettings.allowAlterInDbExplorer());
+			deleteColumn.setEnabled(rowsSelected && isTable && DbExplorerSettings.allowAlterInDbExplorer());
 		}
 	}
 
@@ -812,9 +813,9 @@ public class TableDefinitionPanel
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getPropertyName().equals(GuiSettings.PROPERTY_ALLOW_ALTER_TABLE))
+		if (evt.getPropertyName().equals(DbExplorerSettings.PROP_ALLOW_ALTER_TABLE))
 		{
-			tableDefinition.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
+			tableDefinition.setReadOnly(!DbExplorerSettings.allowAlterInDbExplorer());
 		}
 	}
 }

@@ -16,9 +16,6 @@
   <SubComponents>
     <Component class="javax.swing.JCheckBox" name="showDbExplorer">
       <Properties>
-        <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Settings.getInstance().getShowDbExplorerInMainWindow()" type="code"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="language/wbstrings.properties" key="LblDbExplorerCheckBox" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
@@ -40,9 +37,6 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="showTriggerPanel">
       <Properties>
-        <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Settings.getInstance().getShowTriggerPanel()" type="code"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="language/wbstrings.properties" key="LblShowTriggerPanel" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
@@ -66,9 +60,6 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="autoselectDataPanel">
       <Properties>
-        <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Settings.getInstance().getSelectDataPanelAfterRetrieve()" type="code"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="language/wbstrings.properties" key="LblSelectDataPanel" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
@@ -92,9 +83,6 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="showFocus">
       <Properties>
-        <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Settings.getInstance().showFocusInDbExplorer()" type="code"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="language/wbstrings.properties" key="LblShowFocus" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
@@ -176,9 +164,6 @@
     </Container>
     <Component class="javax.swing.JCheckBox" name="retrieveFKTree">
       <Properties>
-        <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Settings.getInstance().getRetrieveDbExplorer()" type="code"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="language/wbstrings.properties" key="LblRetrieveFkTree" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
@@ -284,9 +269,6 @@
       <SubComponents>
         <Component class="javax.swing.JCheckBox" name="rememberObject">
           <Properties>
-            <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Settings.getInstance().getStoreExplorerObjectType()" type="code"/>
-            </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
               <ResourceString bundle="language/wbstrings.properties" key="LblRememberObjectType" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
             </Property>
@@ -304,7 +286,7 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-              <GridBagConstraints gridX="0" gridY="2" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="8" insetsLeft="8" insetsBottom="4" insetsRight="10" anchor="17" weightX="0.0" weightY="0.0"/>
+              <GridBagConstraints gridX="0" gridY="3" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="5" insetsLeft="8" insetsBottom="1" insetsRight="10" anchor="17" weightX="0.0" weightY="0.0"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -358,7 +340,7 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-              <GridBagConstraints gridX="0" gridY="1" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="8" insetsLeft="8" insetsBottom="0" insetsRight="10" anchor="17" weightX="0.0" weightY="0.0"/>
+              <GridBagConstraints gridX="0" gridY="2" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="8" insetsLeft="8" insetsBottom="0" insetsRight="10" anchor="17" weightX="0.0" weightY="0.0"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -376,15 +358,12 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-              <GridBagConstraints gridX="1" gridY="2" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="8" insetsLeft="8" insetsBottom="4" insetsRight="10" anchor="17" weightX="1.0" weightY="1.0"/>
+              <GridBagConstraints gridX="1" gridY="2" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="8" insetsLeft="8" insetsBottom="0" insetsRight="10" anchor="17" weightX="1.0" weightY="1.0"/>
             </Constraint>
           </Constraints>
         </Component>
         <Component class="javax.swing.JCheckBox" name="retrieveDbExplorer">
           <Properties>
-            <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Settings.getInstance().getRetrieveDbExplorer()" type="code"/>
-            </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
               <ResourceString bundle="language/wbstrings.properties" key="LblRetrieveDbExplorer" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
             </Property>
@@ -407,7 +386,7 @@
         <Container class="javax.swing.JPanel" name="jPanel7">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-              <GridBagConstraints gridX="0" gridY="3" gridWidth="2" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="3" insetsLeft="8" insetsBottom="5" insetsRight="6" anchor="10" weightX="0.0" weightY="0.0"/>
+              <GridBagConstraints gridX="1" gridY="3" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="5" insetsLeft="8" insetsBottom="0" insetsRight="6" anchor="17" weightX="0.0" weightY="0.0"/>
             </Constraint>
           </Constraints>
 
@@ -440,6 +419,24 @@
             </Component>
           </SubComponents>
         </Container>
+        <Component class="javax.swing.JCheckBox" name="filterRetrieval">
+          <Properties>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="language/wbstrings.properties" key="LblDbExpUseRetrievalFilter" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
+            </Property>
+            <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="language/wbstrings.properties" key="d_LblDbExpUseRetrievalFilter" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
+            </Property>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="null"/>
+            </Property>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
+              <GridBagConstraints gridX="0" gridY="1" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="8" insetsLeft="8" insetsBottom="0" insetsRight="10" anchor="17" weightX="0.0" weightY="0.0"/>
+            </Constraint>
+          </Constraints>
+        </Component>
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="jPanel6">
@@ -615,9 +612,6 @@
             </Component>
             <Component class="javax.swing.JCheckBox" name="applySQLSort">
               <Properties>
-                <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="Settings.getInstance().getRememberSortInDbExplorer()" type="code"/>
-                </Property>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                   <ResourceString bundle="language/wbstrings.properties" key="LblApplySQLSort" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
                 </Property>

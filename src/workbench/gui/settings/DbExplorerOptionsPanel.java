@@ -27,9 +27,9 @@ import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 
 import workbench.interfaces.Restoreable;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  *
@@ -48,54 +48,60 @@ public class DbExplorerOptionsPanel
 	@Override
 	public void saveSettings()
 	{
-		Settings config = Settings.getInstance();
-		config.setRetrieveDbExplorer(retrieveDbExplorer.isSelected());
-		config.setShowDbExplorerInMainWindow(this.showDbExplorer.isSelected());
-		config.setStoreExplorerObjectType(this.rememberObject.isSelected());
-		config.setAutoGeneratePKName(autogeneratePK.isSelected());
-		config.setShowTriggerPanel(showTriggerPanel.isSelected());
-		config.setSelectDataPanelAfterRetrieve(autoselectDataPanel.isSelected());
-		config.setSelectSourcePanelAfterRetrieve(selectSrcPanel.isSelected());
-		config.setRememberSortInDbExplorer(rememberSort.isSelected());
-		config.setRememberColumnOrder(rememberColOrder.isSelected());
-		config.setShowFocusInDbExplorer(showFocus.isSelected());
-		config.setDefaultExplorerObjectType(this.defTableType.getText());
-		config.setDbExpFilterDuringTyping(filterWhileTyping.isSelected());
-		config.setDbExpUsePartialMatch(partialMatchSearch.isSelected());
-		config.setGenerateTableGrants(generateTableGrants.isSelected());
-		config.setDbExpGenerateDrop(generateDrop.isSelected());
+		DbExplorerSettings.setRetrieveDbExplorer(retrieveDbExplorer.isSelected());
+		DbExplorerSettings.setShowDbExplorerInMainWindow(this.showDbExplorer.isSelected());
+		DbExplorerSettings.setStoreExplorerObjectType(this.rememberObject.isSelected());
+		DbExplorerSettings.setAutoGeneratePKName(autogeneratePK.isSelected());
+		DbExplorerSettings.setShowTriggerPanel(showTriggerPanel.isSelected());
+		DbExplorerSettings.setSelectDataPanelAfterRetrieve(autoselectDataPanel.isSelected());
+		DbExplorerSettings.setSelectSourcePanelAfterRetrieve(selectSrcPanel.isSelected());
+		DbExplorerSettings.setRememberSortInDbExplorer(rememberSort.isSelected());
+		DbExplorerSettings.setRememberColumnOrder(rememberColOrder.isSelected());
+		DbExplorerSettings.setShowFocusInDbExplorer(showFocus.isSelected());
+		DbExplorerSettings.setDefaultExplorerObjectType(this.defTableType.getText());
+		DbExplorerSettings.setDbExpFilterDuringTyping(filterWhileTyping.isSelected());
+		DbExplorerSettings.setDbExpUsePartialMatch(partialMatchSearch.isSelected());
+		DbExplorerSettings.setGenerateTableGrants(generateTableGrants.isSelected());
+		DbExplorerSettings.setDbExpGenerateDrop(generateDrop.isSelected());
 		GuiSettings.setUseRegexInQuickFilter(useQuickFilterRegex.isSelected());
-		GuiSettings.setAllowAlterInDbExplorer(allowTableAlter.isSelected());
-		GuiSettings.setAutorRetrieveFKTree(retrieveFKTree.isSelected());
-		GuiSettings.setApplySQLSortInDbExplorer(applySQLSort.isSelected());
-		GuiSettings.setShowSynonymTargetInDbExplorer(showSynDetails.isSelected());
-		GuiSettings.setDbExplorerShowTableHistory(showTableHistory.isSelected());
-		config.setGenerateColumnListInViews(generateViewColumns.isSelected());
+		DbExplorerSettings.setAllowAlterInDbExplorer(allowTableAlter.isSelected());
+		DbExplorerSettings.setAutorRetrieveFKTree(retrieveFKTree.isSelected());
+		DbExplorerSettings.setApplySQLSortInDbExplorer(applySQLSort.isSelected());
+		DbExplorerSettings.setShowSynonymTargetInDbExplorer(showSynDetails.isSelected());
+		DbExplorerSettings.setDbExplorerShowTableHistory(showTableHistory.isSelected());
+		DbExplorerSettings.setGenerateColumnListInViews(generateViewColumns.isSelected());
+		DbExplorerSettings.setUseFilterForRetrieve(filterRetrieval.isSelected());
 		((PlacementChooser)tabPlacement).saveSelection();
 	}
 
 	@Override
 	public void restoreSettings()
 	{
-		Settings set = Settings.getInstance();
-		autogeneratePK.setSelected(set.getAutoGeneratePKName());
-		partialMatchSearch.setSelected(set.getDbExpUsePartialMatch());
-		retrieveFKTree.setSelected(GuiSettings.getAutoRetrieveFKTree());
-		allowTableAlter.setSelected(GuiSettings.allowAlterInDbExplorer());
-		defTableType.setText(set.getDefaultExplorerObjectType());
-		rememberColOrder.setSelected(set.getRememberColumnOrder());
-		rememberSort.setSelected(Settings.getInstance().getRememberSortInDbExplorer());
-		generateTableGrants.setSelected(Settings.getInstance().getGenerateTableGrants());
-		generateDrop.setSelected(Settings.getInstance().getDbExpGenerateDrop());
+		filterRetrieval.setSelected(DbExplorerSettings.getUseFilterForRetrieve());
+		autogeneratePK.setSelected(DbExplorerSettings.getAutoGeneratePKName());
+		partialMatchSearch.setSelected(DbExplorerSettings.getDbExpUsePartialMatch());
+		retrieveFKTree.setSelected(DbExplorerSettings.getAutoRetrieveFKTree());
+		allowTableAlter.setSelected(DbExplorerSettings.allowAlterInDbExplorer());
+		defTableType.setText(DbExplorerSettings.getDefaultExplorerObjectType());
+		rememberColOrder.setSelected(DbExplorerSettings.getRememberColumnOrder());
+		rememberSort.setSelected(DbExplorerSettings.getRememberSortInDbExplorer());
+		generateTableGrants.setSelected(DbExplorerSettings.getGenerateTableGrants());
+		generateDrop.setSelected(DbExplorerSettings.getDbExpGenerateDrop());
 		useQuickFilterRegex.setSelected(GuiSettings.getUseRegexInQuickFilter());
-		filterWhileTyping.setSelected(Settings.getInstance().getDbExpFilterDuringTyping());
-		selectSrcPanel.setSelected(set.getSelectSourcePanelAfterRetrieve());
+		filterWhileTyping.setSelected(DbExplorerSettings.getDbExpFilterDuringTyping());
+		selectSrcPanel.setSelected(DbExplorerSettings.getSelectSourcePanelAfterRetrieve());
 		((PlacementChooser)tabPlacement).showPlacement();
 		partialMatchSearch.setEnabled(!useQuickFilterRegex.isSelected());
-		applySQLSort.setSelected(GuiSettings.getApplySQLSortInDbExplorer());
+		applySQLSort.setSelected(DbExplorerSettings.getApplySQLSortInDbExplorer());
 		showSynDetails.setSelected(GuiSettings.showSynonymTargetInDbExplorer());
-		showTableHistory.setSelected(GuiSettings.getDbExplorerShowTableHistory());
-		generateViewColumns.setSelected(set.getGenerateColumnListInViews());
+		showTableHistory.setSelected(DbExplorerSettings.getDbExplorerShowTableHistory());
+		generateViewColumns.setSelected(DbExplorerSettings.getGenerateColumnListInViews());
+		showDbExplorer.setSelected(DbExplorerSettings.getShowDbExplorerInMainWindow());
+		showTriggerPanel.setSelected(DbExplorerSettings.getShowTriggerPanel());
+		showFocus.setSelected(DbExplorerSettings.showFocusInDbExplorer());
+    retrieveDbExplorer.setSelected(DbExplorerSettings.getRetrieveDbExplorer());
+    rememberObject.setSelected(DbExplorerSettings.getStoreExplorerObjectType());
+    applySQLSort.setSelected(DbExplorerSettings.getRememberSortInDbExplorer());
 	}
 
 	/** This method is called from within the constructor to
@@ -130,6 +136,7 @@ public class DbExplorerOptionsPanel
     jPanel7 = new javax.swing.JPanel();
     defTableTypeLabel = new javax.swing.JLabel();
     defTableType = new javax.swing.JTextField();
+    filterRetrieval = new javax.swing.JCheckBox();
     jPanel6 = new javax.swing.JPanel();
     jPanel3 = new javax.swing.JPanel();
     autogeneratePK = new javax.swing.JCheckBox();
@@ -143,7 +150,6 @@ public class DbExplorerOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    showDbExplorer.setSelected(Settings.getInstance().getShowDbExplorerInMainWindow());
     showDbExplorer.setText(ResourceMgr.getString("LblDbExplorerCheckBox")); // NOI18N
     showDbExplorer.setToolTipText(ResourceMgr.getString("d_LblDbExplorerCheckBox")); // NOI18N
     showDbExplorer.setBorder(null);
@@ -158,7 +164,6 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 0);
     add(showDbExplorer, gridBagConstraints);
 
-    showTriggerPanel.setSelected(Settings.getInstance().getShowTriggerPanel());
     showTriggerPanel.setText(ResourceMgr.getString("LblShowTriggerPanel")); // NOI18N
     showTriggerPanel.setToolTipText(ResourceMgr.getString("d_LblShowTriggerPanel")); // NOI18N
     showTriggerPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -171,7 +176,6 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 0);
     add(showTriggerPanel, gridBagConstraints);
 
-    autoselectDataPanel.setSelected(Settings.getInstance().getSelectDataPanelAfterRetrieve());
     autoselectDataPanel.setText(ResourceMgr.getString("LblSelectDataPanel")); // NOI18N
     autoselectDataPanel.setToolTipText(ResourceMgr.getString("d_LblSelectDataPanel")); // NOI18N
     autoselectDataPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -184,7 +188,6 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
     add(autoselectDataPanel, gridBagConstraints);
 
-    showFocus.setSelected(Settings.getInstance().showFocusInDbExplorer());
     showFocus.setText(ResourceMgr.getString("LblShowFocus")); // NOI18N
     showFocus.setToolTipText(ResourceMgr.getString("d_LblShowFocus")); // NOI18N
     showFocus.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -231,7 +234,6 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 20);
     add(jPanel2, gridBagConstraints);
 
-    retrieveFKTree.setSelected(Settings.getInstance().getRetrieveDbExplorer());
     retrieveFKTree.setText(ResourceMgr.getString("LblRetrieveFkTree")); // NOI18N
     retrieveFKTree.setToolTipText(ResourceMgr.getString("d_LblRetrieveFkTree")); // NOI18N
     retrieveFKTree.setBorder(null);
@@ -283,17 +285,16 @@ public class DbExplorerOptionsPanel
     jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblDbExpObjListOpts"))); // NOI18N
     jPanel5.setLayout(new java.awt.GridBagLayout());
 
-    rememberObject.setSelected(Settings.getInstance().getStoreExplorerObjectType());
     rememberObject.setText(ResourceMgr.getString("LblRememberObjectType")); // NOI18N
     rememberObject.setToolTipText(ResourceMgr.getString("d_LblRememberObjectType")); // NOI18N
     rememberObject.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
     rememberObject.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 8, 4, 10);
+    gridBagConstraints.insets = new java.awt.Insets(5, 8, 1, 10);
     jPanel5.add(rememberObject, gridBagConstraints);
 
     partialMatchSearch.setText(ResourceMgr.getString("LblPartialMatch")); // NOI18N
@@ -323,7 +324,7 @@ public class DbExplorerOptionsPanel
     allowTableAlter.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 10);
@@ -339,10 +340,9 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 8, 4, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 10);
     jPanel5.add(filterWhileTyping, gridBagConstraints);
 
-    retrieveDbExplorer.setSelected(Settings.getInstance().getRetrieveDbExplorer());
     retrieveDbExplorer.setText(ResourceMgr.getString("LblRetrieveDbExplorer")); // NOI18N
     retrieveDbExplorer.setToolTipText(ResourceMgr.getString("d_LblRetrieveDbExplorer")); // NOI18N
     retrieveDbExplorer.setBorder(null);
@@ -378,12 +378,22 @@ public class DbExplorerOptionsPanel
     jPanel7.add(defTableType, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(3, 8, 5, 6);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 8, 0, 6);
     jPanel5.add(jPanel7, gridBagConstraints);
+
+    filterRetrieval.setText(ResourceMgr.getString("LblDbExpUseRetrievalFilter")); // NOI18N
+    filterRetrieval.setToolTipText(ResourceMgr.getString("d_LblDbExpUseRetrievalFilter")); // NOI18N
+    filterRetrieval.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 10);
+    jPanel5.add(filterRetrieval, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -471,7 +481,6 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
     jPanel4.add(rememberSort, gridBagConstraints);
 
-    applySQLSort.setSelected(Settings.getInstance().getRememberSortInDbExplorer());
     applySQLSort.setText(ResourceMgr.getString("LblApplySQLSort")); // NOI18N
     applySQLSort.setToolTipText(ResourceMgr.getString("d_LblApplySQLSort")); // NOI18N
     applySQLSort.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -526,6 +535,7 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox autoselectDataPanel;
   private javax.swing.JTextField defTableType;
   private javax.swing.JLabel defTableTypeLabel;
+  private javax.swing.JCheckBox filterRetrieval;
   private javax.swing.JCheckBox filterWhileTyping;
   private javax.swing.JCheckBox generateDrop;
   private javax.swing.JCheckBox generateTableGrants;

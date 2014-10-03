@@ -22,13 +22,16 @@
  */
 package workbench.db.postgres;
 
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -71,10 +74,29 @@ public class PostgresViewReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		TableIdentifier view = con.getMetadata().findObject(new TableIdentifier(TEST_SCHEMA, "v_view"));
 		String sql = con.getMetadata().getViewReader().getExtendedViewSource(view).toString();
 		assertTrue(sql.contains("CREATE RULE insert_view AS\n    ON INSERT TO v_view DO"));
+	}
+
+	@Test
+	public void testQuotedIdentifer()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		assertNotNull(con);
+
+		TestUtil.executeScript(con,
+			"create view \"View_Test\" as select * from some_table;\n" +
+			"commit;\n");
+
+		TableIdentifier tbl = new TableIdentifier(TEST_SCHEMA, "View_Test");
+		tbl.setNeverAdjustCase(true);
+
+		String sql = con.getMetadata().getViewReader().getViewSource(tbl).toString();
+		assertTrue(sql.contains("SELECT some_table.id"));
+		assertTrue(sql.contains("FROM some_table"));
 	}
 }

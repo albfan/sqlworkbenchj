@@ -58,6 +58,7 @@ import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.interfaces.TableDeleteListener;
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -271,7 +272,7 @@ public class TableDataPanel
 		setFocusTraversalPolicy(policy);
 		dataDisplay.getTable().setColumnOrderSavingEnabled(true);
 
-		if (Settings.getInstance().showFocusInDbExplorer())
+		if (DbExplorerSettings.showFocusInDbExplorer())
 		{
 			dataDisplay.getTable().showFocusBorder();
 		}
@@ -372,7 +373,7 @@ public class TableDataPanel
 
 	private void storeSort()
 	{
-		if (Settings.getInstance().getRememberSortInDbExplorer())
+		if (DbExplorerSettings.getRememberSortInDbExplorer())
 		{
 			this.lastSort = dataDisplay.getCurrentSort();
 		}
@@ -581,7 +582,7 @@ public class TableDataPanel
 
 	public void storeColumnOrder()
 	{
-		if (!Settings.getInstance().getRememberColumnOrder()) return;
+		if (!DbExplorerSettings.getRememberColumnOrder()) return;
 		saveColumnOrder();
 	}
 
@@ -617,7 +618,7 @@ public class TableDataPanel
 			{
 				dataDisplay.getTable().clearLastFilter(true);
 				dataDisplay.getTable().resetFilter();
-				if (GuiSettings.getDbExplorerTableDetailFullyQualified())
+				if (DbExplorerSettings.getDbExplorerTableDetailFullyQualified())
 				{
 					tableNameLabel.setText(table.getFullyQualifiedName(dbConnection));
 				}
@@ -653,7 +654,7 @@ public class TableDataPanel
 		}
 		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
 		String sql = builder.getSelectForColumns(tbl, columns);
-		if (GuiSettings.getApplySQLSortInDbExplorer() && lastSort != null)
+		if (DbExplorerSettings.getApplySQLSortInDbExplorer() && lastSort != null)
 		{
 			String sort = lastSort.getSqlExpression(dbConnection.getMetadata());
 			if (StringUtil.isNonBlank(sort))
@@ -935,7 +936,7 @@ public class TableDataPanel
 			}
 		}
 
-		if (!error && Settings.getInstance().getSelectDataPanelAfterRetrieve())
+		if (!error && DbExplorerSettings.getSelectDataPanelAfterRetrieve())
 		{
 			WbSwingUtilities.requestFocus(dataDisplay.getTable());
 		}

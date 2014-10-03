@@ -29,8 +29,8 @@ import java.util.List;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.ToolWindow;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.PlatformShortcuts;
-import workbench.resource.Settings;
 
 import workbench.gui.MainWindow;
 
@@ -53,7 +53,7 @@ public class ShowDbExplorerAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		boolean useTab = Settings.getInstance().getShowDbExplorerInMainWindow();
+		boolean useTab = DbExplorerSettings.getShowDbExplorerInMainWindow();
 		if (useTab)
 		{
 			int index = mainWin.findFirstExplorerTab();

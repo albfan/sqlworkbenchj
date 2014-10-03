@@ -44,6 +44,7 @@ import workbench.db.DependencyNode;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.ObjectNameFilter;
+import workbench.db.PkDefinition;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
@@ -74,6 +75,7 @@ class ObjectCache
 	private final Map<TableIdentifier, List<ColumnIdentifier>> objects = new HashMap<>();
 	private final Map<TableIdentifier, TableIdentifier> synonymMap = new HashMap<>();
 	private final Map<TableIdentifier, List<IndexDefinition>> indexMap= new HashMap<>();
+	private final Map<TableIdentifier, PkDefinition> pkMap = new HashMap<>();
 	private final Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<>();
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
@@ -643,11 +645,56 @@ class ObjectCache
 		return null;
 	}
 
+	PkDefinition getPrimaryKey(WbConnection con, TableIdentifier table)
+	{
+		synchronized (pkMap)
+		{
+			PkDefinition pk = getPkFromTableCache(con, table);
+
+			if (pk == null)
+			{
+				TableIdentifier tbl = findInCache(con, table, pkMap.keySet());
+				if (tbl != null)
+				{
+					pk = pkMap.get(table);
+				}
+			}
+			if (pk == null)
+			{
+				pk = con.getMetadata().getIndexReader().getPrimaryKey(table);
+				pkMap.put(table, pk);
+			}
+			return pk;
+		}
+	}
+
+	private PkDefinition getPkFromTableCache(WbConnection con, TableIdentifier table)
+	{
+		List<ColumnIdentifier> columns = getColumns(con, table);
+		if (CollectionUtil.isEmpty(columns)) return null;
+
+		List<String> pkCols = new ArrayList<>(1);
+		for (ColumnIdentifier col : columns)
+		{
+			if (col.isPkColumn())
+			{
+				pkCols.add(col.getColumnName());
+			}
+		}
+		return new PkDefinition(pkCols);
+	}
+
 	List<IndexDefinition> getUniqueIndexes(WbConnection con, TableIdentifier table)
 	{
 		synchronized (indexMap)
 		{
-			List<IndexDefinition> indexes  = indexMap.get(table);
+			TableIdentifier tbl = findInCache(con, table, indexMap.keySet());
+			List<IndexDefinition> indexes = null;
+			if (tbl != null)
+			{
+				indexes = indexMap.get(tbl);
+			}
+
 			if (indexes  == null)
 			{
 				IndexReader reader = ReaderFactory.getIndexReader(con.getMetadata());
@@ -659,11 +706,17 @@ class ObjectCache
 		}
 	}
 
+
 	private TableIdentifier findInCache(WbConnection con, TableIdentifier toSearch)
+	{
+		return findInCache(con, toSearch, objects.keySet());
+	}
+
+	private TableIdentifier findInCache(WbConnection con, TableIdentifier toSearch, Set<TableIdentifier> keys)
 	{
 		TableIdentifier tbl = toSearch.createCopy();
 		tbl.adjustCase(con);
-		for (TableIdentifier key : objects.keySet())
+		for (TableIdentifier key : keys)
 		{
 			if (tbl.compareNames(key)) return key;
 		}
@@ -716,7 +769,8 @@ class ObjectCache
 		Map<TableIdentifier, List<DependencyNode>> referencingTables,
 		Map<String, List<ProcedureDefinition>> procs,
 		Map<TableIdentifier, TableIdentifier> synonyms,
-		Map<TableIdentifier, List<IndexDefinition>> indexes)
+		Map<TableIdentifier, List<IndexDefinition>> indexes,
+		Map<TableIdentifier, PkDefinition> pk)
 	{
 		if (newObjects == null || schemas == null) return;
 
@@ -748,6 +802,10 @@ class ObjectCache
 		if (indexes != null)
 		{
 			indexMap.putAll(indexes);
+		}
+		if (pk != null)
+		{
+			pkMap.putAll(pk);
 		}
 
 		LogMgr.logDebug("ObjectCache.initExternally",

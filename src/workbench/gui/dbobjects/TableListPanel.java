@@ -45,6 +45,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
@@ -77,6 +78,7 @@ import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.interfaces.ShareableDisplay;
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -129,6 +131,7 @@ import workbench.gui.sql.PanelContentSender;
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
 
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
 import workbench.util.StringUtil;
@@ -227,6 +230,7 @@ public class TableListPanel
 
 	private TableChangeValidator validator = new TableChangeValidator();
 	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
+
 	private final int maxTypeItems = 25;
 	// </editor-fold>
 
@@ -242,10 +246,10 @@ public class TableListPanel
 		displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		displayTab.setName("displaytab");
 
-		if (GuiSettings.getDbExplorerMultiSelectTypes())
+		if (DbExplorerSettings.getDbExplorerMultiSelectTypes())
 		{
 			tableTypes = new MultiSelectComboBox();
-			((MultiSelectComboBox)tableTypes).setCloseOnSelect(GuiSettings.getDbExplorerMultiSelectTypesAutoClose());
+			((MultiSelectComboBox)tableTypes).setCloseOnSelect(DbExplorerSettings.getDbExplorerMultiSelectTypesAutoClose());
 		}
 		else
 		{
@@ -337,14 +341,14 @@ public class TableListPanel
 		this.extendPopupMenu();
 
 		findPanel =  new QuickFilterPanel(this.tableList, false, "tablelist");
-		findPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
-		findPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
+		configureFindPanel();
 
 		Settings.getInstance().addPropertyChangeListener(this,
-			Settings.PROPERTY_DBEXP_INSTANT_FILTER,
-			Settings.PROPERTY_DBEXP_ASSUME_WILDCARDS,
+			DbExplorerSettings.PROP_INSTANT_FILTER,
+			DbExplorerSettings.PROP_ASSUME_WILDCARDS,
 			PlacementChooser.PLACEMENT_PROPERTY,
-			GuiSettings.PROP_DBEXP_TABLE_HISTORY
+			DbExplorerSettings.PROP_TABLE_HISTORY,
+			DbExplorerSettings.PROP_USE_FILTER_RETRIEVE
 		);
 
 		reloadAction = new ReloadAction(this);
@@ -383,7 +387,7 @@ public class TableListPanel
 		this.summaryStatusBarLabel = new SummaryLabel("");
 		this.statusPanel.add(summaryStatusBarLabel, BorderLayout.CENTER);
 
-		if (GuiSettings.getDbExplorerShowTableHistory())
+		if (DbExplorerSettings.getDbExplorerShowTableHistory())
 		{
 			showTableHistory();
 		}
@@ -421,7 +425,7 @@ public class TableListPanel
 		this.splitPane.setOneTouchTooltip(toggleTableSource.getTooltipTextWithKeys());
 		setupActionMap();
 
-		if (Settings.getInstance().showFocusInDbExplorer())
+		if (DbExplorerSettings.showFocusInDbExplorer())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -435,10 +439,15 @@ public class TableListPanel
 		}
 
 		projections = new VerticaProjectionPanel();
-		tableList.setRememberColumnOrder(Settings.getInstance().getRememberMetaColumnOrder("tablelist"));
+		tableList.setRememberColumnOrder(DbExplorerSettings.getRememberMetaColumnOrder("tablelist"));
 		tableList.setListSelectionControl(this);
-		tableList.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
+		tableList.setReadOnly(!DbExplorerSettings.allowAlterInDbExplorer());
 		showObjectDefinitionPanels(false);
+	}
+
+	private boolean getApplyFilterWhileTyping()
+	{
+		return DbExplorerSettings.getDbExpFilterDuringTyping() && !DbExplorerSettings.getUseFilterForRetrieve();
 	}
 
 	private void hideTableHistory()
@@ -1150,7 +1159,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			tableTypes.setEnabled(false);
-			findPanel.setEnabled(false);
+			setFindPanelEnabled(false);
 			reloadAction.setEnabled(false);
 			summaryStatusBarLabel.setText(ResourceMgr.getString("MsgRetrieving"));
 			NamedSortDefinition lastSort = tableList.getCurrentSort();
@@ -1164,7 +1173,16 @@ public class TableListPanel
 			String[] types = getSelectedTypes();
 
 			levelChanger.changeIsolationLevel(dbConnection);
-			DataStore ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, types);
+			DataStore ds = null;
+			if (DbExplorerSettings.getUseFilterForRetrieve())
+			{
+				String filter = StringUtil.trimQuotes(findPanel.getText());
+				ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, filter, types);
+			}
+			else
+			{
+				ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, types);
+			}
 			dbConnection.getObjectCache().addTableList(ds, currentSchema);
 			tableList.setOriginalOrder(ds);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
@@ -1241,9 +1259,18 @@ public class TableListPanel
 			setBusy(false);
 			tableTypes.setEnabled(true);
 			levelChanger.restoreIsolationLevel(dbConnection);
-			findPanel.setEnabled(true);
+			setFindPanelEnabled(true);
 			reloadAction.setEnabled(true);
 			endTransaction();
+		}
+	}
+
+	private void setFindPanelEnabled(boolean flag)
+	{
+		findPanel.setEnabled(flag);
+		if (flag && DbExplorerSettings.getUseFilterForRetrieve())
+		{
+			findPanel.setActionsEnabled(false);
 		}
 	}
 
@@ -1432,8 +1459,8 @@ public class TableListPanel
 		importedKeys.setRetrieveAll(props.getBoolProperty(prefix + "importedtree.retrieveall", true));
 		exportedKeys.setRetrieveAll(props.getBoolProperty(prefix + "exportedtree.retrieveall", true));
 
-		String defType = Settings.getInstance().getDefaultExplorerObjectType();
-		if (Settings.getInstance().getStoreExplorerObjectType())
+		String defType = DbExplorerSettings.getDefaultExplorerObjectType();
+		if (DbExplorerSettings.getStoreExplorerObjectType())
 		{
 			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", defType);
 		}
@@ -1671,7 +1698,7 @@ public class TableListPanel
 			// isExtendedTableType() checks for regular tables and "extended tables"
 			else if (meta.isExtendedTableType(type))
 			{
-				sql = builder.getTableSource(selectedTable, Settings.getInstance().getDbExpGenerateDrop(), true, Settings.getInstance().getGenerateTableGrants());
+				sql = builder.getTableSource(selectedTable, DbExplorerSettings.getDbExpGenerateDrop(), true, DbExplorerSettings.getGenerateTableGrants());
 			}
 
 			if (sql != null && dbConnection.getDbSettings().ddlNeedsCommit())
@@ -1687,7 +1714,7 @@ public class TableListPanel
 				{
 					tableSource.setText(s, selectedTable.getTableName());
 					tableSource.setCaretPosition(0, false);
-					if (Settings.getInstance().getSelectSourcePanelAfterRetrieve())
+					if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
 					{
 						tableSource.requestFocusInWindow();
 					}
@@ -2463,18 +2490,21 @@ public class TableListPanel
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
+		Set<String> filterProps = CollectionUtil.caseInsensitiveSet(DbExplorerSettings.PROP_INSTANT_FILTER,
+			DbExplorerSettings.PROP_USE_FILTER_RETRIEVE, DbExplorerSettings.PROP_ASSUME_WILDCARDS);
+
 		if (evt.getSource() == renameAction)
 		{
 			checkAlterButton();
 		}
-		else if (GuiSettings.PROP_DBEXP_TABLE_HISTORY.equals(evt.getPropertyName()))
+		else if (DbExplorerSettings.PROP_TABLE_HISTORY.equals(evt.getPropertyName()))
 		{
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					if (GuiSettings.getDbExplorerShowTableHistory())
+					if (DbExplorerSettings.getDbExplorerShowTableHistory())
 					{
 						showTableHistory();
 					}
@@ -2494,13 +2524,9 @@ public class TableListPanel
 			invalidateData();
 			this.shouldRetrieveTable = false;
 		}
-		else if (Settings.PROPERTY_DBEXP_INSTANT_FILTER.equals(evt.getPropertyName()))
+		else if (filterProps.contains(evt.getPropertyName()))
 		{
-			findPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
-		}
-		else if (Settings.PROPERTY_DBEXP_ASSUME_WILDCARDS.equals(evt.getPropertyName()))
-		{
-			findPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
+			configureFindPanel();
 		}
 		else if (PlacementChooser.PLACEMENT_PROPERTY.equals(evt.getPropertyName()))
 		{
@@ -2514,6 +2540,22 @@ public class TableListPanel
 					displayTab.validate();
 				}
 			});
+		}
+	}
+
+	private void configureFindPanel()
+	{
+		findPanel.setFilterOnType(getApplyFilterWhileTyping());
+		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
+		if (DbExplorerSettings.getUseFilterForRetrieve())
+		{
+			findPanel.setActionsEnabled(false);
+			findPanel.setToolTipText(ResourceMgr.getString("TxtQuickFilterLikeHint"));
+		}
+		else
+		{
+			findPanel.setActionsEnabled(true);
+			findPanel.setFilterTooltip();
 		}
 	}
 

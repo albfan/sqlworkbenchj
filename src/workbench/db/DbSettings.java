@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.Settings;
 
 import workbench.db.exporter.RowDataConverter;
@@ -41,6 +42,7 @@ import workbench.gui.dbobjects.TableSearchPanel;
 
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
+import workbench.storage.UpdateTableCheckType;
 
 import workbench.sql.EndReadOnlyTrans;
 import workbench.sql.commands.SingleVerbCommand;
@@ -104,7 +106,7 @@ public class DbSettings
 		List<String> quote = StringUtil.stringToList(settings.getProperty("workbench.db.neverquote",""));
 		if (CollectionUtil.isNonEmpty(quote))
 		{
-			LogMgr.logInfo("DbSettings.<init>", "Migration old property \"workbench.db.neverquote\" to dbid based properties");
+			LogMgr.logInfo("DbSettings.<init>", "Migrating deprecated property \"workbench.db.neverquote\" to dbid based properties");
 			for (String nid : quote)
 			{
 				settings.setProperty("workbench.db." + nid + ".neverquote", "true");
@@ -1112,7 +1114,7 @@ public class DbSettings
 			boolean included = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.grants_included", false);
 			return !included;
 		}
-		boolean defaultFlag = Settings.getInstance().getGenerateTableGrants();
+		boolean defaultFlag = DbExplorerSettings.getGenerateTableGrants();
 		return Settings.getInstance().getBoolProperty(prefix + "generate.tablesource.include.grants", defaultFlag);
 	}
 
@@ -1695,12 +1697,6 @@ public class DbSettings
 		return Settings.getInstance().getIntProperty(prefix + "dbexplorer.locktimeout", 2500);
 	}
 
-	public boolean checkUniqueIndexesForPK()
-	{
-		boolean global = Settings.getInstance().getBoolProperty("workbench.db.pk.retrieval.checkunique", true);
-		return Settings.getInstance().getBoolProperty(prefix + "pk.retrieval.checkunique", global);
-	}
-
 	public boolean endTransactionAfterConnect()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "afterconnect.finishtrans", false);
@@ -1714,7 +1710,7 @@ public class DbSettings
 
 	public boolean getSwitchCatalogInExplorer()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "dbexplorer.switchcatalog", Settings.getInstance().getSwitchCatalogInExplorer());
+		return Settings.getInstance().getBoolProperty(prefix + "dbexplorer.switchcatalog", DbExplorerSettings.getSwitchCatalogInExplorer());
 	}
 
 	public boolean fixSqlServerAutoincrement()
@@ -1842,7 +1838,7 @@ public class DbSettings
 
 	public boolean generateColumnListInViews()
 	{
-		boolean all = Settings.getInstance().getGenerateColumnListInViews();
+		boolean all = DbExplorerSettings.getGenerateColumnListInViews();
 		return Settings.getInstance().getBoolProperty(prefix + "create.view.columnlist", all);
 	}
 
@@ -1949,18 +1945,31 @@ public class DbSettings
 		return Settings.getInstance().getListProperty(prefix + "schemas.additional", false, null);
 	}
 
-	public boolean getRetrieveTableDefinitionDirectly()
+	public boolean checkUniqueIndexesForPK()
 	{
-		String propName = "updatetable.check.retrieve.definition";
-		boolean global = Settings.getInstance().getBoolProperty("workbench.db." + propName, false);
-		return Settings.getInstance().getBoolProperty(prefix + propName, global);
+		boolean global = Settings.getInstance().getBoolProperty("workbench.db.pk.retrieval.checkunique", true);
+		return Settings.getInstance().getBoolProperty(prefix + "pk.retrieval.checkunique", global);
 	}
 
-	public boolean getOnlyRetrievePkForUpdateCheck()
+	public UpdateTableCheckType getUpdateTableCheckType()
 	{
-		String propName = "updatetable.check.retrieve.pkonly";
-		boolean global = Settings.getInstance().getBoolProperty("workbench.db." + propName, false);
-		return Settings.getInstance().getBoolProperty(prefix + propName, global);
+		String propName = "updatetable.check.type";
+		String global = Settings.getInstance().getProperty("workbench.db." + propName, UpdateTableCheckType.full.name());
+		String type = Settings.getInstance().getProperty(prefix + propName, global);
+		UpdateTableCheckType result = UpdateTableCheckType.full;
+
+		if (StringUtil.isBlank(type)) return result;
+		if ("default".equalsIgnoreCase(type)) return result;
+		try
+		{
+			result = UpdateTableCheckType.valueOf(type);
+			return result;
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("DbSettings.getUpdateTableCheckType()", "Invalid type for update table check specified: "  + type, null);
+			return UpdateTableCheckType.full;
+		}
 	}
 
 	public boolean useCompletionCacheForUpdateTableCheck()

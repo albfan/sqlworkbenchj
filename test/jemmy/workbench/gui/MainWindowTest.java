@@ -29,7 +29,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
 
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
+import workbench.resource.DbExplorerSettings;
 
 import workbench.db.ConnectionMgr;
 
@@ -130,7 +130,7 @@ public class MainWindowTest
 	private void dbExplorerTest()
 		throws InterruptedException
 	{
-		Settings.getInstance().setRetrieveDbExplorer(true);
+		DbExplorerSettings.setRetrieveDbExplorer(true);
 		JFrameOperator mainWindowOp = new JFrameOperator("SQL Workbench");
 
 		QueueTool tool = new QueueTool();

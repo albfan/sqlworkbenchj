@@ -64,6 +64,7 @@ import workbench.interfaces.Moveable;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -2546,7 +2547,7 @@ public class MainWindow
 		explorer.restoreSettings();
 		DbExplorerWindow w = explorer.openWindow(this.currentProfile.getName());
 
-		boolean useNewConnection = Settings.getInstance().getAlwaysUseSeparateConnForDbExpWindow()
+		boolean useNewConnection = DbExplorerSettings.getAlwaysUseSeparateConnForDbExpWindow()
 			      || currentProfile.getUseSeparateConnectionPerTab()
 						|| currentConnection == null;
 

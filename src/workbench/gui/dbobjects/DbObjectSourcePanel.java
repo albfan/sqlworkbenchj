@@ -34,8 +34,8 @@ import workbench.interfaces.Reloadable;
 import workbench.interfaces.Replaceable;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 import workbench.db.SourceStatementsHelp;
 import workbench.db.WbConnection;
@@ -136,7 +136,7 @@ public class DbObjectSourcePanel
 			editButton.setDropDownMenu(selectTabMenu.getPopupMenu());
 			toolbar.add(editButton);
 		}
-		if (Settings.getInstance().showFocusInDbExplorer())
+		if (DbExplorerSettings.showFocusInDbExplorer())
 		{
 			new FocusIndicator(sourceEditor, sourceEditor);
 		}

@@ -247,6 +247,8 @@ public class DefaultViewReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
+		String query = null;
+		
 		try
 		{
 			if (connection.getDbSettings().useSavePointForDML())
@@ -255,14 +257,14 @@ public class DefaultViewReader
 			}
 			TableIdentifier tbl = viewId.createCopy();
 			tbl.adjustCase(connection);
-			sql.setSchema(connection.getMetadata().quoteObjectname(tbl.getSchema()));
-			sql.setObjectName(connection.getMetadata().quoteObjectname(tbl.getTableName()));
-			sql.setCatalog(connection.getMetadata().quoteObjectname(tbl.getCatalog()));
+			sql.setSchema(tbl.getRawSchema());
+			sql.setObjectName(tbl.getRawTableName());
+			sql.setCatalog(tbl.getRawCatalog());
 			stmt = connection.createStatementForQuery();
-			String query = sql.getSql();
+			query = sql.getSql();
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logInfo("DbMetadata.getViewSource()", "Using query=\n" + query);
+				LogMgr.logInfo("DbMetadata.getViewSource()", "Retrieving view source using query=\n" + query);
 			}
 			rs = stmt.executeQuery(query);
 			while (rs.next())
@@ -293,7 +295,7 @@ public class DefaultViewReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DefaultViewReader.getViewSource()", "Could not retrieve view definition for " + viewId.getTableExpression(), e);
+			LogMgr.logError("DefaultViewReader.getViewSource()", "Could not retrieve view definition for " + viewId.getTableExpression() + " using SQL:\n" + query, e);
 			source = new StringBuilder(ExceptionUtil.getDisplay(e));
 			connection.rollback(sp);
 		}

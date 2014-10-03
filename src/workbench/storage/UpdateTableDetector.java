@@ -63,18 +63,31 @@ public class UpdateTableDetector
 		return missingPkcolumns;
 	}
 
-	public void checkUpdateTable(TableIdentifier tbl, ResultInfo resultInfo)
+	public void checkUpdateTable(TableIdentifier table, ResultInfo resultInfo)
 	{
 		updateTable = null;
 		resultInfo.setUpdateTable(null);
 		missingPkcolumns = null;
 
-		if (tbl == null)
+		if (table == null)
 		{
 			return;
 		}
 
-		if (conn.getDbSettings().getOnlyRetrievePkForUpdateCheck())
+		DbMetadata meta = conn.getMetadata();
+		TableIdentifier tbl = table.createCopy();
+		tbl.adjustCase(conn);
+		if (tbl.getSchema() == null)
+		{
+			tbl.setSchema(meta.getSchemaToUse());
+		}
+		if (tbl.getCatalog() == null)
+		{
+			tbl.setCatalog(meta.getCurrentCatalog());
+		}
+
+		UpdateTableCheckType type = conn.getDbSettings().getUpdateTableCheckType();
+		if (type == UpdateTableCheckType.pk)
 		{
 			LogMgr.logDebug("UpdateTableDetector.setUpdateTable()", "Only checking the PK definition for " + tbl.getTableExpression());
 			checkPkOnlyForUpdateTable(tbl, resultInfo);
@@ -89,10 +102,9 @@ public class UpdateTableDetector
 
 		try
 		{
-			DbMetadata meta = conn.getMetadata();
 			if (meta == null) return;
 
-			if (conn.getDbSettings().getRetrieveTableDefinitionDirectly())
+			if (type == UpdateTableCheckType.definition)
 			{
 				// try to use the table name as-is and retrieve the table definition directly
 				// as this should cover the majority of all cases it should usually be a bit faster
@@ -206,10 +218,17 @@ public class UpdateTableDetector
 		if (meta == null) return;
 		if (resultInfo == null) return;
 
-		PkDefinition pk = meta.getIndexReader().getPrimaryKey(tbl);
+		PkDefinition pk = null;
+		if (conn.getDbSettings().useCompletionCacheForUpdateTableCheck())
+		{
+			pk = conn.getObjectCache().getPrimaryKey(tbl);
+		}
+		else
+		{
+			pk = meta.getIndexReader().getPrimaryKey(tbl);
+		}
 
-		TableIdentifier table = tbl.createCopy();
-		table.adjustCase(conn);
+		this.missingPkcolumns = new ArrayList<>(1);
 
 		if (pk == null || CollectionUtil.isEmpty(pk.getColumns()))
 		{
@@ -225,11 +244,15 @@ public class UpdateTableDetector
 					resultInfo.setIsPkColumn(index, true);
 					resultInfo.setIsNullable(index, false);
 				}
+				else
+				{
+					missingPkcolumns.add(new ColumnIdentifier(colName));
+				}
 			}
 		}
 		if (resultInfo.hasPkColumns())
 		{
-			this.updateTable = table;
+			this.updateTable = tbl;
 			resultInfo.setUpdateTable(updateTable);
 		}
 	}
@@ -239,6 +262,7 @@ public class UpdateTableDetector
 		if (tableToUse == null || result == null) return;
 		LogMgr.logInfo("UpdateTableDetector.checkUniqueIndexesForPK()", "No PK found for table " + tableToUse.getTableName()+ " Trying to find an unique index.");
 		List<IndexDefinition> indexes = null;
+
 		if (con.getDbSettings().useCompletionCacheForUpdateTableCheck())
 		{
 			indexes = con.getObjectCache().getUniqueIndexes(tableToUse);
@@ -248,6 +272,7 @@ public class UpdateTableDetector
 			IndexReader reader = ReaderFactory.getIndexReader(con.getMetadata());
 			indexes = reader.getUniqueIndexes(tableToUse);
 		}
+		
 		if (CollectionUtil.isEmpty(indexes)) return;
 
 		IndexDefinition idx = indexes.get(0);
@@ -256,11 +281,14 @@ public class UpdateTableDetector
 		for (IndexColumn col : columns)
 		{
 			int index = result.findColumn(col.getColumn(), conn.getMetadata());
-
 			if (index > -1)
 			{
 				result.setIsPkColumn(index, true);
 				result.setIsNullable(index, false);
+			}
+			else
+			{
+				missingPkcolumns.add(new ColumnIdentifier(col.getColumn()));
 			}
 		}
 	}

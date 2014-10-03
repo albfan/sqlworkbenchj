@@ -25,6 +25,7 @@ package workbench.db;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.Settings;
 
 import workbench.db.sqltemplates.ColumnChanger;
@@ -190,8 +191,8 @@ public class TableSourceBuilderTest
 	{
 		TestUtil util = getTestUtil();
 		WbConnection con = util.getConnection();
-		boolean oldProp = Settings.getInstance().getAutoGeneratePKName();
-		Settings.getInstance().setAutoGeneratePKName(true);
+		boolean oldProp = DbExplorerSettings.getAutoGeneratePKName();
+		DbExplorerSettings.setAutoGeneratePKName(true);
 		try
 		{
 			TableIdentifier tbl = new TableIdentifier("OTHER.PERSON");
@@ -205,7 +206,7 @@ public class TableSourceBuilderTest
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 			ConnectionMgr.getInstance().clearProfiles();
-			Settings.getInstance().setAutoGeneratePKName(oldProp);
+			DbExplorerSettings.setAutoGeneratePKName(oldProp);
 		}
 	}
 

@@ -38,50 +38,35 @@
     or at least re-connect to the database.
   </para>
 
-  <section id="dbms-identifier">
-    <title>Database Identifier</title>
-
-		<para>
-			Some parameters are used such that a list of "Database Identifiers" is expected.
-			The identifier that needs to be put there can be obtained by right clicking on the JDBC URL in the main
-      window and then selecting "Connection Info" to show details about the current connection
-    </para>
-
-    <para>
-      The "Database Identifier is also reported in the logfile. After a successful connect to a database,
-      there will be an entry in the log file similar to this:
-		</para>
-
-    <programlisting>INFO  15.08.2004 10:24:42 Connected to: [HSQL Database Engine]</programlisting>
-
-    <para>
-			If the description for a property in this chapter refers to a "Database Identifier",
-      the text between (but not including) the square brackets has to be used.
-    </para>
-
-  </section>
-
   <section id="dbid">
     <title>DBID</title>
 
 		<para>
-			For some settings, where the ID is part of the property's key, a "clean" version of
-			the Database Identifer, called the DBID, is used. This DBID is displayed in the connection
-			info dialog (right click on the connection URL in the main window, then choose "Connection Info").
+			DBMS specific settings are controlled through properties that contain a DBMS specific value, called the
+			the DBID. This DBID is displayed in the connection info dialog (right click on the connection URL in the main window, then choose "Connection Info").
 		</para>
 
 		<para>
 			The DBID is also reported in the log file:
 		</para>
 
-		<programlisting>INFO  15.08.2004 10:24:42 Using DBID=hsql_database_engine</programlisting>
+		<programlisting>INFO  15.08.2014 10:24:42 Using DBID=postgresql</programlisting>
 
 		<para>
 			If the description for a property in this chapter refers to the "DBID", then this value has to be used.
 		</para>
+
 		<para>
 			If the DBID is part of a property key this will be referred to as <literal>[dbid]</literal> in this chapter.
 		</para>
+
+    <para>
+      When using <link linkend="command-setconfig"> <literal>WbSetConfig</literal></link> you can use the value <literal>[dbid]</literal>
+      inside the property name and it will get replaced with the <emphasis>current</emphasis> DBID automatically. The following
+      command changes the property named <literal>workbench.db.postgresql.ddlneedscommit</literal>
+      if the current connection is against a PostgreSQL database:
+      <programlisting>WbSetConfig workbench.db.[dbid].ddlneedscommit=true</programlisting>
+    </para>
 
 	</section>
 
@@ -253,11 +238,11 @@
       </para>
       <para>Default values:
         <simplelist columns="1">
-          <member><literal>.defaultt=view,table,system view,system table</literal></member>
+          <member><literal>.default=view,table,system view,system table</literal></member>
           <member><literal>.postgresql=view,table,system view,system table,sequence</literal></member>
           <member><literal>.rdb=view,table,system,system view</literal></member>
         </simplelist>
-				The values in this property are not case-sensitiv (TABLE is the same as table)
+        The values in this property are not case-sensitiv (<literal>TABLE</literal> is the same as <literal>table</literal>)
       </para>
     </simplesect>
 
@@ -289,46 +274,6 @@
           <member>For MySQL: <literal>longtext,tinytext,mediumtext</literal></member>
         </simplelist>
       </para>
-    </simplesect>
-
-		<simplesect id="dbexplorer-ms-remarks-prop">
-			<title>Microsoft SQL Server extended property for remarks</title>
-			<para>Property: <literal>workbench.db.microsoft_sql_server.remarks.propertyname</literal></para>
-      <para>
-        Defines the name of the extended property that is queried in order to retrieve table or column remarks
-        for SQL Server.
-      </para>
-      <para>
-        &wb-productname; will use the table function <ulink url="http://msdn.microsoft.com/en-us/library/ms179853%28SQL.90%29.aspx">fn_listextendedproperty </ulink>
-        to retrieve the extended property defined by this configuration setting to retrieve remarks.
-      </para>
-      <para>Default value: <literal>MS_DESCRIPTION</literal></para>
-    </simplesect>
-
-		<simplesect id="dbexplorer-ms-remarks">
-			<title>Retrieving remarks for Microsoft SQL Server</title>
-			<para>Property:
-        <simplelist columns="1">
-          <member><literal>workbench.db.microsoft_sql_server.remarks.object.retrieve</literal></member>
-          <member><literal>workbench.db.microsoft_sql_server.remarks.column.retrieve</literal></member>
-        </simplelist>
-      </para>
-      <para>
-        Enables/disables the retrieval of extended properties as a replacement for the standard SQL <literal>COMMENT ON ...</literal> capability.
-      </para>
-      <para>
-        &wb-productname; will use SQL Server's <ulink url="http://msdn.microsoft.com/en-us/library/ms179853%28SQL.90%29.aspx">fn_listextendedproperty </ulink>
-        table function to retrieve table or column remarks. As this can have a performance impact on the retrieval of tables or columns,
-        this retrieval can be disabled using this configuration setting.
-      </para>
-      <para>
-        The name of the extended property can be configured using
-        <link linkend="dbexplorer-ms-remarks-prop"><literal>workbench.db.microsoft_sql_server.remarks.propertyname</literal></link>
-      </para>
-      <para>
-        Enabling these options is also necessary in order to get comments in a <link linkend="command-schema-report">WbSchemaReport</link> output
-      </para>
-      <para>Default value: <literal>true</literal> for both properties</para>
     </simplesect>
 
 		<simplesect id="dbexplorer-read-uncommmitted">
@@ -466,18 +411,14 @@
 
     <simplesect id="db-settings-constraint-gen">
       <title>Generating constraints for SQL source</title>
-      <para>Property: <literal>workbench.db.inlineconstraints</literal></para>
+      <para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.inlineconstraints</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
       <para>
 				This setting controls the generation of the <literal>CREATE TABLE</literal>
-				source in the <link linkend="dbexplorer">DbExplorer</link>. This is a comma separated
-				list of <link linkend="dbms-identifier">Database Identifiers</link> that only support defining
-				primary and foreign keys inside the <literal>CREATE TABLE</literal> statement.
+				source in the <link linkend="dbexplorer">DbExplorer</link>. If a DBMS only supports defining
+				primary and foreign keys inside the <literal>CREATE TABLE</literal> statement, then this property
+        should be set to <literal>true</literal>.
       </para>
-			<para>
-				If a DBMS is not listed here, the table constraints will be re-created using
-				 <literal>ALTER TABLE</literal>.
-			</para>
-      <para>Default: <literal>FirstSQL/J</literal></para>
     </simplesect>
 
     <simplesect id="db-settings-case-sensitiv">
@@ -731,6 +672,67 @@
 			</para>
 		</simplesect>
   </section>
+  <section id="settings-updatetable-check">
+    <title>Configuring the check for the update table</title>
+
+    <simplesect id="db-updatetable-check">
+      <title>Configuring the check process</title>
+			<para>Property: <literal>workbench.db.updatetable.check.type</literal> (for all DBMS)</para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.updatetable.check.type</literal> (will overwrite the DBMS independent configuration)</para>
+      <para>Possible values: <literal>full</literal>, <literal>definition</literal>, <literal>pk</literal></para>
+      <para>
+        When changing values directly in the result set, &wb-productname; needs to find out which table is being edited.
+        As this process requires multiple requests to the database server in order to support different features
+        during editing this can be time consuming depending on the DBMS being used and the size of the database.
+      </para>
+      <para>
+        This property controls which steps are carried out by &wb-productname; when this happens. The default setting
+        is <literal>full</literal> and will try to resolve synonyms, retrieve all columns of the table (to ensure that
+        only real columns are included in the generated DML statements) and will retrieve the primary key information.
+      </para>
+      <para>
+        The step to resolve synonyms can be disabled by specifying <literal>definition</literal>. If this is used,
+        editing a result that is based on a SELECT statement from a synonym will not work properly as neither the
+        table's columns nor the primary key can be detected.
+      </para>
+      <para>
+        The update table check can be reduced to only retrieve the primary key of the table by specifying <literal>pk</literal>
+        for this property. This will also skip the test for a synonym. When this type is configured results from
+        multiple tables cannot be edited correctly. The option <link linkend="options-highlight-required">Highlight required fields</link>
+        will have no effect either as no column information will be retrieved for the table.
+      </para>
+    </simplesect>
+
+    <simplesect id="db-updatetable-use-unique-index">
+      <title>Using unique indexes when no primary key is available</title>
+			<para>Property: <literal>workbench.db.pk.retrieval.checkunique</literal> (for all DBMS)</para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.pk.retrieval.checkunique</literal> (will overwrite the DBMS independent configuration)</para>
+      <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+      <para>
+        This property controls the behaviour when no primary key is found when checking the update table. If this is
+        set to true, &wb-productname; will use a unique index instead if available. Note that the check for the PK
+        is still done during hte detection of the update table. Using a unique key is only a fallback.
+      </para>
+    </simplesect>
+
+    <simplesect id="db-updatetable-use-cache">
+      <title>Using the completion cache when checking the update table</title>
+			<para>Property: <literal>workbench.db.updatetable.check.use.cache</literal> (for all DBMS)</para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.updatetable.check.use.cache</literal> (will overwrite the DBMS independent configuration)</para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+      <para>
+        If this is set to <literal>true</literal>, retrieval of the table's columns, primary key (or unique index)
+        information will be done using the completion cache. This can speed up repeated lookups for the same table(s).
+      </para>
+
+      <para>
+        The disadvantage is that when the table definitions are changed this would not be reflected in the cache and
+        thus the PK information used or the generated SQL statements to save the changes might be wrong. It is
+        recommend to enable <link linkend="options-confirm-update">Confirm result set updates</link> to make
+        sure the generated SQL statements are correct.
+      </para>
+    </simplesect>
+  </section>
 
   <section id="dbms-specific-settings">
     <title>DBMS specific settings</title>
@@ -813,6 +815,7 @@
 
     <section id="mssql-config-settings">
       <title>Microsoft SQL Server specific settings</title>
+      
       <simplesect id="mssql-dbexplorer-locktimeout">
         <indexterm><primary>Microsoft SQL Server</primary><secondary>lock timeout for DbExplorer</secondary></indexterm>
         <title>Define a lock timeout for the DbExplorer</title>
@@ -835,7 +838,47 @@
         <para>Default value: 2500</para>
       </simplesect>
 
+      <simplesect id="dbexplorer-ms-remarks-prop">
+        <title>Microsoft SQL Server extended property for remarks</title>
+        <para>Property: <literal>workbench.db.microsoft_sql_server.remarks.propertyname</literal></para>
+        <para>
+          Defines the name of the extended property that is queried in order to retrieve table or column remarks
+          for SQL Server.
+        </para>
+        <para>
+          &wb-productname; will use the table function <ulink url="http://msdn.microsoft.com/en-us/library/ms179853%28SQL.90%29.aspx">fn_listextendedproperty </ulink>
+          to retrieve the extended property defined by this configuration setting to retrieve remarks.
+        </para>
+        <para>Default value: <literal>MS_DESCRIPTION</literal></para>
+      </simplesect>
+
+      <simplesect id="dbexplorer-ms-remarks">
+        <title>Retrieving remarks for Microsoft SQL Server</title>
+        <para>Property:
+          <simplelist columns="1">
+            <member><literal>workbench.db.microsoft_sql_server.remarks.object.retrieve</literal></member>
+            <member><literal>workbench.db.microsoft_sql_server.remarks.column.retrieve</literal></member>
+          </simplelist>
+        </para>
+        <para>
+          Enables/disables the retrieval of extended properties as a replacement for the standard SQL <literal>COMMENT ON ...</literal> capability.
+        </para>
+        <para>
+          &wb-productname; will use SQL Server's <ulink url="http://msdn.microsoft.com/en-us/library/ms179853%28SQL.90%29.aspx">fn_listextendedproperty </ulink>
+          table function to retrieve table or column remarks. As this can have a performance impact on the retrieval of tables or columns,
+          this retrieval can be disabled using this configuration setting.
+        </para>
+        <para>
+          The name of the extended property can be configured using
+          <link linkend="dbexplorer-ms-remarks-prop"><literal>workbench.db.microsoft_sql_server.remarks.propertyname</literal></link>
+        </para>
+        <para>
+          Enabling these options is also necessary in order to get comments in a <link linkend="command-schema-report">WbSchemaReport</link> output
+        </para>
+        <para>Default value: <literal>true</literal> for both properties</para>
+      </simplesect>
     </section>
+
   </section>
 
   <section id="sql-execution-settings">

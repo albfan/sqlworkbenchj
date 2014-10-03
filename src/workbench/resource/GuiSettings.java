@@ -49,7 +49,6 @@ public class GuiSettings
 	public static final String PROPERTY_SQLTAB_CLOSE_BUTTON = "workbench.gui.display.sqltab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
-	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 	public static final String PROPERTY_EXEC_SEL_ONLY = "workbench.gui.editor.execute.onlyselected";
 	public static final String PROPERTY_QUICK_FILTER_REGEX = "workbench.gui.quickfilter.useregex";
 	public static final String PROPERTY_COMPLETE_CHARS = "workbench.editor.completechars";
@@ -84,12 +83,10 @@ public class GuiSettings
 		PROP_TITLE_APP_AT_END, PROP_TITLE_SHOW_WKSP, PROP_TITLE_SHOW_URL, PROP_TITLE_SHOW_PROF_GROUP,
 		PROP_TITLE_SHOW_EDITOR_FILE, PROP_TITLE_GROUP_SEP, PROP_TITLE_GROUP_BRACKET);
 
-	public static final String PROP_DBEXP_USE_SQLSORT = "workbench.dbexplorer.datapanel.applysqlorder";
 	public static final String PROP_TABLE_HEADER_BOLD = "workbench.gui.table.header.bold";
 	public static final String PROP_TABLE_HEADER_FULL_TYPE_INFO = "workbench.gui.table.header.typeinfo.full";
 	public static final String PROP_WRAP_MULTILINE_RENDERER = "workbench.gui.display.multiline.renderer.wrap";
 	public static final String PROP_WRAP_MULTILINE_EDITOR = "workbench.gui.display.multiline.editor.wrap";
-	public static final String PROP_DBEXP_TABLE_HISTORY = "workbench.dbexplorer.tablelist.history";
 
 	public static final String PROP_FILE_RELOAD_TYPE = "workbench.gui.editor.file.reloadtype";
 	public static final String PROP_LOCAL_OBJECT_CACHE = "workbench.gui.completioncache.localstorage";
@@ -277,16 +274,6 @@ public class GuiSettings
 		Settings.getInstance().setProperty(PROPERTY_HILITE_ERROR_LINE, flag);
 	}
 
-	public static boolean getAutoRetrieveFKTree()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.fktree.autoload", true);
-	}
-
-	public static void setAutorRetrieveFKTree(boolean flag)
-	{
-		Settings.getInstance().setProperty("workbench.dbexplorer.fktree.autoload", flag);
-	}
-
 	public static boolean getDisableEditorDuringExecution()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.editor.exec.disable", true);
@@ -427,16 +414,6 @@ public class GuiSettings
 	public static void setShowSynonymTargetInDbExplorer(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.dbexplorer.synonyms.showtarget", flag);
-	}
-
-	public static boolean allowAlterInDbExplorer()
-	{
-		return Settings.getInstance().getBoolProperty(PROPERTY_ALLOW_ALTER_TABLE, false);
-	}
-
-	public static void setAllowAlterInDbExplorer(boolean flag)
-	{
-		Settings.getInstance().setProperty(PROPERTY_ALLOW_ALTER_TABLE, flag);
 	}
 
 	public static boolean getKeepCurrentSqlHighlight()
@@ -989,56 +966,6 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.editor.wheelscroll.units", lines);
 	}
 
-	public static boolean getApplySQLSortInDbExplorer()
-	{
-		return Settings.getInstance().getBoolProperty(PROP_DBEXP_USE_SQLSORT, false);
-	}
-
-	public static void setApplySQLSortInDbExplorer(boolean flag)
-	{
-		Settings.getInstance().setProperty(PROP_DBEXP_USE_SQLSORT, flag);
-	}
-
-	public static boolean getDbExplorerTableDetailFullyQualified()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tabledetails.fullname", true);
-	}
-
-	public static int getDbExplorerTableHistorySize()
-	{
-		return Settings.getInstance().getIntProperty("workbench.dbexplorer.tablelist.history.size", 25);
-	}
-
-	public static boolean getDbExplorerShowTableHistory()
-	{
-		return Settings.getInstance().getBoolProperty(PROP_DBEXP_TABLE_HISTORY, true);
-	}
-
-	public static void setDbExplorerShowTableHistory(boolean flag)
-	{
-		Settings.getInstance().setProperty(PROP_DBEXP_TABLE_HISTORY, flag);
-	}
-
-	public static boolean getDbExplorerMultiSelectTypes()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tablelist.types.multiselect", true);
-	}
-
-	public static boolean getDbExplorerMultiSelectTypesAutoClose()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tablelist.types.multiselect.autoclose", false);
-	}
-
-	public static boolean getDbExplorerIncludeTrgInTableSource()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.tablesource.include.trigger", false);
-	}
-
-	public static void setDbExplorerIncludeTrgInTableSource(boolean flag)
-	{
-		Settings.getInstance().setProperty("workbench.dbexplorer.tablesource.include.trigger", flag);
-	}
-
 	public static int getNumberDataAlignment()
 	{
 		String align = Settings.getInstance().getProperty(PROP_NUMBER_ALIGN, "right");
@@ -1213,7 +1140,5 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.sql.uselast.alternative", flag);
 	}
-
-
 
 }

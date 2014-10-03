@@ -44,6 +44,7 @@ import workbench.resource.Settings;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.db.IndexDefinition;
+import workbench.db.PkDefinition;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -65,6 +66,7 @@ class ObjectCachePersistence
 	private static final String PROCEDURES_ENTRY = "procedures.data";
 	private static final String SYNONYMS_ENTRY = "synonyms.data";
 	private static final String INDEX_ENTRY = "index.data";
+	private static final String PK_ENTRY = "pk.data";
 
 	void loadFromLocalFile(ObjectCache cache, WbConnection conn)
 	{
@@ -93,6 +95,7 @@ class ObjectCachePersistence
 		Map<String, List<ProcedureDefinition>> procs = null;
 		Map<TableIdentifier, TableIdentifier> syns = null;
 		Map<TableIdentifier, List<IndexDefinition>> indexes = null;
+		Map<TableIdentifier, PkDefinition> pk = null;
 		try
 		{
 			zipFile = new ZipFile(cacheFile);
@@ -146,7 +149,15 @@ class ObjectCachePersistence
 				indexes = (Map<TableIdentifier, List<IndexDefinition>>)ois.readObject();
 			}
 
-			cache.initExternally(objects, schemas, referencedTables, referencingTables, procs, syns, indexes);
+			entry = zipFile.getEntry(PK_ENTRY);
+			if (entry != null)
+			{
+				in = zipFile.getInputStream(entry);
+				ois = new ObjectInputStream(in);
+				pk = (Map<TableIdentifier, PkDefinition>)ois.readObject();
+			}
+
+			cache.initExternally(objects, schemas, referencedTables, referencingTables, procs, syns, indexes, pk);
 		}
 		catch (Throwable th)
 		{

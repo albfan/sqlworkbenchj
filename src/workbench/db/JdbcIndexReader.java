@@ -777,7 +777,10 @@ public class JdbcIndexReader
 		try
 		{
 			PkDefinition pk = tbl.getPrimaryKey();
-			if (pk == null && checkPK) pk = getPrimaryKey(tbl);
+			if (pk == null && checkPK)
+			{
+				pk = getPrimaryKey(tbl);
+			}
 
 			idxRs = getIndexInfo(tbl, uniqueOnly);
 			result = processIndexResult(idxRs, pk, tbl);

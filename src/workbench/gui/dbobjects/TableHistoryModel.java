@@ -27,8 +27,9 @@ import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.event.ListDataListener;
 
+import workbench.resource.DbExplorerSettings;
+
 import workbench.db.TableIdentifier;
-import workbench.resource.GuiSettings;
 
 import workbench.util.FixedSizeList;
 
@@ -43,7 +44,7 @@ public class TableHistoryModel
 
 	public TableHistoryModel()
 	{
-		history = new FixedSizeList<>(GuiSettings.getDbExplorerTableHistorySize());
+		history = new FixedSizeList<>(DbExplorerSettings.getDbExplorerTableHistorySize());
 	}
 
 	public TableIdentifier getSelectedTable()

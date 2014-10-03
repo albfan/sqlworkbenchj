@@ -29,6 +29,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DependencyNode;
 import workbench.db.IndexDefinition;
+import workbench.db.PkDefinition;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -180,6 +181,11 @@ public class DbObjectCache
 	public List<IndexDefinition> getUniqueIndexes(TableIdentifier table)
 	{
 		return objectCache.getUniqueIndexes(dbConnection, table);
+	}
+
+	public PkDefinition getPrimaryKey(TableIdentifier table)
+	{
+		return objectCache.getPrimaryKey(dbConnection, table);
 	}
 	
 	public TableIdentifier getOrRetrieveTable(TableIdentifier table)

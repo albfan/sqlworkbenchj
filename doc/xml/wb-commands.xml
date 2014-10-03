@@ -2580,30 +2580,6 @@ WbSysOpen c:/temp/person.txt;</programlisting>
     </para>
   </section>
 
-  <section id="command-setconfig">
-    <title>Change an internal configuration paramter - WbSetConfig</title>
-    <indexterm><primary>Configuration</primary><secondary>change advanced configuration properties</secondary></indexterm>
-    <para>
-      Not all configuration parameters are available through the <link linkend="options">Options Dialog</link> and have
-      to be changed manually in the file <link linkend="config-dir">workbench.settings</link>. Editing the file requires
-      to close the application. Using <literal>WbSetConfig</literal> configuration properties can be changed permanently
-      without restarting &wb-productname;
-    </para>
-    <para>
-      If you want to e.g. disable the use of Savepoints in the SQL statements entered interactively, the following
-      command will turn this off for PostgreSQL:
-    </para>
-    <programlisting>WbSetConfig workbench.db.postgresql.sql.usesavepoint=false</programlisting>
-    <para>
-      For a list of configuration properties that can be changed, please refer to <link linkend="settings">Advanced configuration options</link>
-    </para>
-    <para>
-      If you supply only the property key, the current value will be displayed. If no argument is supplied for <literal>WbSetConfig</literal> all
-      properties are displayed. You can also supply a partial property key. <literal>WbSetConfig workbench.db.postgresql</literal> will list
-      all PostgreSQL related properties. You can directly edit the properties in the result set.
-    </para>
-  </section>
-
   <section id="conditional-exec">
     <title>Conditional execution</title>
     <para>
@@ -2618,4 +2594,44 @@ WbSysOpen c:/temp/person.txt;</programlisting>
     </para>
     &conditionals;
   </section>
+
+  <section id="command-setconfig">
+    <title>Change an internal configuration paramter - WbSetConfig</title>
+    <indexterm><primary>Configuration</primary><secondary>change advanced configuration properties</secondary></indexterm>
+    <para>
+      Not all configuration parameters are available through the <link linkend="options">Options Dialog</link> and have
+      to be changed manually in the file <link linkend="config-dir">workbench.settings</link>. Editing the file requires
+      to close the application.
+    </para>
+    <para>
+      When using <literal>WbSetConfig</literal> configuration properties can be changed permanently without restarting &wb-productname;.
+    </para>
+    <para>
+      Any value that is changed through this command will be saved automatically in <literal>workbench.settings</literal>
+      when the application is closed.
+    </para>
+    <para>
+      If you want to e.g. disable the use of Savepoints in the SQL statements entered interactively, the following
+      command will turn this off for PostgreSQL:
+    </para>
+    <programlisting>WbSetConfig workbench.db.postgresql.sql.usesavepoint=false</programlisting>
+    <para>
+      For a list of configuration properties that can be changed, please refer to <link linkend="settings">Advanced configuration options</link>
+    </para>
+    <para>
+      If you supply only the property key, the current value will be displayed. If no argument is supplied for <literal>WbSetConfig</literal> all
+      properties are displayed. You can also supply a partial property key. <literal>WbSetConfig workbench.db.postgresql</literal> will list
+      all PostgreSQL related properties. You can directly edit the properties in the result set.
+    </para>
+    <para>
+      The value <literal>[dbid]</literal> inside the property name will get replaced with the current
+      <link linkend="dbid">DBID</link>.
+    </para>
+    <para>
+      The following command changes the property named <literal>workbench.db.postgresql.ddlneedscommit</literal>
+      if the current connection is against a PostgreSQL database:
+      <programlisting>WbSetConfig workbench.db.[dbid].ddlneedscommit=true</programlisting>
+    </para>
+  </section>
+
 </section>

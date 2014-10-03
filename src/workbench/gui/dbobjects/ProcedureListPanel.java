@@ -53,7 +53,7 @@ import workbench.WbManager;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -207,14 +207,14 @@ public class ProcedureListPanel
 				return super.getCellRenderer(row, column);
 			}
 		};
-		procList.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
+		procList.setReadOnly(!DbExplorerSettings.allowAlterInDbExplorer());
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		this.procList.setRememberColumnOrder(Settings.getInstance().getRememberMetaColumnOrder("procedurelist"));
+		this.procList.setRememberColumnOrder(DbExplorerSettings.getRememberMetaColumnOrder("procedurelist"));
 		this.procList.addTableModelListener(this);
 		this.findPanel = new QuickFilterPanel(this.procList, false, "procedurelist");
-		findPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
-		findPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
+		findPanel.setFilterOnType(DbExplorerSettings.getDbExpFilterDuringTyping());
+		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
 
 		ReloadAction a = new ReloadAction(this);
 
@@ -791,7 +791,7 @@ public class ProcedureListPanel
 				public void run()
 				{
 					source.setCaretPosition(pos,(pos > 0));
-					if (Settings.getInstance().getSelectSourcePanelAfterRetrieve())
+					if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
 					{
 						source.requestFocusInWindow();
 					}

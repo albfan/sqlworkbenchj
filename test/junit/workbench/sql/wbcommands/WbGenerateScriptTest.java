@@ -23,7 +23,7 @@ package workbench.sql.wbcommands;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.resource.Settings;
+import workbench.resource.DbExplorerSettings;
 
 import workbench.db.WbConnection;
 
@@ -72,8 +72,8 @@ public class WbGenerateScriptTest
 			"commit;\n";
 		TestUtil.executeScript(conn, sql);
 
-		boolean oldGenProp = Settings.getInstance().getAutoGeneratePKName();
-		Settings.getInstance().setAutoGeneratePKName(true);
+		boolean oldGenProp = DbExplorerSettings.getAutoGeneratePKName();
+		DbExplorerSettings.setAutoGeneratePKName(true);
 
 		try
 		{
@@ -123,7 +123,7 @@ public class WbGenerateScriptTest
 		}
 		finally
 		{
-			Settings.getInstance().setAutoGeneratePKName(oldGenProp);
+			DbExplorerSettings.setAutoGeneratePKName(oldGenProp);
 		}
 	}
 

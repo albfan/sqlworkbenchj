@@ -43,6 +43,7 @@ import workbench.WbManager;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -163,8 +164,8 @@ public class TriggerListPanel
 		triggerList.setReadOnly(true);
 
 		findPanel = new QuickFilterPanel(this.triggerList, false, "triggerlist");
-		findPanel.setFilterOnType(Settings.getInstance().getDbExpFilterDuringTyping());
-		findPanel.setAlwaysUseContainsFilter(Settings.getInstance().getDbExpUsePartialMatch());
+		findPanel.setFilterOnType(DbExplorerSettings.getDbExpFilterDuringTyping());
+		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
 
 		ReloadAction a = new ReloadAction(this);
 
@@ -488,7 +489,7 @@ public class TriggerListPanel
 				public void run()
 				{
 					source.setCaretPosition(0, false);
-					if (Settings.getInstance().getSelectSourcePanelAfterRetrieve())
+					if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
 					{
 						source.requestFocusInWindow();
 					}

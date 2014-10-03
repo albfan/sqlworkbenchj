@@ -131,6 +131,12 @@ public class QuickFilterPanel
 		filterValue.setEnabled(flag);
 	}
 
+	public void setActionsEnabled(boolean flag)
+	{
+		filterAction.setEnabled(flag);
+		searchTable.getResetFilterAction().setEnabled(flag);
+	}
+
 	public void setEnableMultipleValues(boolean flag)
 	{
 		this.enableMultiValue = flag;
@@ -189,7 +195,7 @@ public class QuickFilterPanel
 		this.add(columnDropDown, gridBagConstraints);
 	}
 
-	private void setFilterTooltip()
+	public void setFilterTooltip()
 	{
 		String col = "";
 		if (searchColumn != null)
@@ -208,6 +214,12 @@ public class QuickFilterPanel
 		this.filterValue.setToolTipText(msg);
 	}
 
+	@Override
+	public void setToolTipText(String tip)
+	{
+		this.filterValue.setToolTipText(tip);
+	}
+	
 	private void initGui(String historyProperty)
 	{
 		GridBagConstraints gridBagConstraints;

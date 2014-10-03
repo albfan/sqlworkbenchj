@@ -40,7 +40,7 @@ import workbench.interfaces.Interruptable;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DependencyNode;
@@ -261,7 +261,7 @@ public class FkDisplayPanel
 				}
 			});
 
-			if (GuiSettings.getAutoRetrieveFKTree())
+			if (DbExplorerSettings.getAutoRetrieveFKTree())
 			{
 				reload();
 			}

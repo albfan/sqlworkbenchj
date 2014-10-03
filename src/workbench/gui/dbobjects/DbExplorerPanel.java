@@ -58,6 +58,7 @@ import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -184,7 +185,7 @@ public class DbExplorerPanel
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
 			tabPane.setToolTipTextAt(1, ResourceMgr.getDescription("TxtDbExplorerProcs"));
 
-			if (Settings.getInstance().getShowTriggerPanel())
+			if (DbExplorerSettings.getShowTriggerPanel())
 			{
 				triggers = new TriggerListPanel(aParent);
 				tabPane.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
@@ -364,7 +365,7 @@ public class DbExplorerPanel
 	{
 		if (this.dbConnection == null)
 		{
-			return Settings.getInstance().getSwitchCatalogInExplorer();
+			return DbExplorerSettings.getSwitchCatalogInExplorer();
 		}
 		return dbConnection.getDbSettings().getSwitchCatalogInExplorer();
 	}
@@ -654,7 +655,7 @@ public class DbExplorerPanel
 
 			this.connectionInitPending = true;
 			this.schemaRetrievePending = true;
-			this.retrievePending = Settings.getInstance().getRetrieveDbExplorer();
+			this.retrievePending = DbExplorerSettings.getRetrieveDbExplorer();
 
 			if (this.window != null)
 			{
@@ -1035,7 +1036,7 @@ public class DbExplorerPanel
 	{
 		if (this.dbConnection != null)
 		{
-			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab() || Settings.getInstance().getAlwaysUseSeparateConnForDbExpWindow())
+			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab() || DbExplorerSettings.getAlwaysUseSeparateConnForDbExpWindow())
 			{
 				try { this.dbConnection.disconnect(); } catch (Throwable th) {}
 			}
