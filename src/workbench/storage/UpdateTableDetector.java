@@ -52,7 +52,6 @@ public class UpdateTableDetector
 	public UpdateTableDetector(WbConnection db)
 	{
 		conn = db;
-		checkPkOnly = conn.getDbSettings().getUpdateTableCheckPkOnly();
 	}
 
 	public void setCheckPKOnly(boolean flag)
