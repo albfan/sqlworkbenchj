@@ -2,6 +2,9 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-09-21">
+    <entry dev-build="6" type="enh">The amount of details retrieved from the database when editing a result set can now be reduced through a configuration property. Refer to the Chapter "Advanced configuration options" in the manual for details.</entry>
+    <entry dev-build="6" type="enh">The meta information retrieved to enable editing a result set can now optionally taken from the completion cache.</entry>
+    <entry dev-build="6" type="enh">The filter value of the DbExplorer's table list can now optionally be used to limit the number of tables retrieved.</entry>
     <entry dev-build="6" type="enh">WbGrepData can now search in BLOB columns if an encoding is specified how the binary data should be converted to character data. The old parameter -excludeLobs has been deprecated.</entry>
     <entry dev-build="6" type="enh">When using "Execute current" to run WbExport that has not -sourceTable argument and the next statement in the editor is a SELECT, the export is now started automatically</entry>
     <entry dev-build="6" type="enh">When configuring a JDBC driver, the dialog to select the approriate class no longer displays non-usable (=abstract) classes</entry>
@@ -28,6 +31,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="6" type="fix">The source code for views with case-sensitive names was not displayed</entry>
     <entry dev-build="6" type="fix">The pre-defined JDBC driver definitions were no longer loaded (e.g. when starting SQL Workbench for the first time)</entry>
     <entry dev-build="6" type="fix">For SQL Server and Postgres alternate delimiters with more than two characters using some special characters were no longer working</entry>
     <entry dev-build="6" type="fix">The names for primary and foreign keys were not quoted properly in the generated SQL source (if they needed quoting)</entry>
