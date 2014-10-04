@@ -100,10 +100,6 @@ public class UpdateTableDetector
 
 		List<ColumnIdentifier> columns = null;
 
-		// check the columns which are in the new table so that we can refuse any changes to columns
-		// which do not derive from that table.
-		// Note that this does not work, if the columns were renamed via an alias in the select statement
-
 		try
 		{
 
@@ -132,6 +128,10 @@ public class UpdateTableDetector
 			}
 
 			int realColumns = 0;
+
+			// check the columns which are in the new table so that we can refuse any changes to columns
+			// which do not derive from that table.
+			// Note that this does not work, if the columns were renamed via an alias in the select statement
 
 			if (columns != null)
 			{
