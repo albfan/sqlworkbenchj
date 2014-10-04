@@ -395,7 +395,7 @@ class ObjectCache
 
 	public synchronized TableIdentifier getSynonymTable(WbConnection dbConn, TableIdentifier synonym)
 	{
-		if (!dbConn.getMetadata().supportsSynonyms()) return null;
+		if (!dbConn.getMetadata().supportsSynonyms()) return synonym;
 
 		TableIdentifier baseTable = this.synonymMap.get(synonym);
 		if (baseTable == dummyTable)

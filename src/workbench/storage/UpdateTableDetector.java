@@ -197,6 +197,8 @@ public class UpdateTableDetector
 
 	private TableIdentifier getSynonymTable(TableIdentifier toCheck)
 	{
+		if (!conn.getMetadata().supportsSynonyms()) return toCheck;
+
 		if (conn.getDbSettings().useCompletionCacheForUpdateTableCheck())
 		{
 			TableIdentifier syn = conn.getObjectCache().getSynonymTable(toCheck);
@@ -349,7 +351,7 @@ public class UpdateTableDetector
 		TableIdentifier tbl = null;
 		if (conn.getDbSettings().useCompletionCacheForUpdateTableCheck())
 		{
-			tbl = conn.getObjectCache().getTable(table);
+			tbl = conn.getObjectCache().getOrRetrieveTable(table);
 		}
 
 		if (tbl == null)
