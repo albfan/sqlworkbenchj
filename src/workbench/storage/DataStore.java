@@ -693,6 +693,8 @@ public class DataStore
 		if (tbl == null) return;
 
 		UpdateTableDetector detector = new UpdateTableDetector(conn);
+		detector.setCheckPKOnly(conn.getDbSettings().getUpdateTableCheckPkOnly());
+
 		detector.checkUpdateTable(tbl, resultInfo);
 		updateTable = detector.getUpdateTable();
 		missingPkcolumns = detector.getMissingPkColumns();
