@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-09-21">
+  <release build="-1" date="2014-10-05">
     <entry dev-build="6" type="enh">The amount of details retrieved from the database when editing a result set can now be reduced through a configuration property. Refer to the Chapter "Advanced configuration options" in the manual for details.</entry>
     <entry dev-build="6" type="enh">The meta information retrieved to enable editing a result set can now optionally taken from the completion cache.</entry>
     <entry dev-build="6" type="enh">The filter value of the DbExplorer's table list can now optionally be used to limit the number of tables retrieved.</entry>
