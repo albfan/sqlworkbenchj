@@ -26,12 +26,17 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Random;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -176,11 +181,11 @@ public class RowDataTest
 	public void testResetStatus()
 	{
 		RowData row = new RowData(2);
-		row.setValue(0, new Integer(42));
+		row.setValue(0, Integer.valueOf(42));
 		row.setValue(1, "Test");
 		row.resetStatus();
 
-		row.setValue(0, new Integer(43));
+		row.setValue(0, Integer.valueOf(43));
 		row.setValue(1, "Test2");
 		assertTrue(row.isModified());
 
@@ -193,7 +198,23 @@ public class RowDataTest
 		assertFalse(row.isColumnModified(0));
 		assertFalse(row.isColumnModified(1));
 		assertFalse(row.isModified());
+
+		row = new RowData(2);
+		row.setValue(0, new Integer(42));
+		row.setValue(1, "Test");
+		row.resetStatus();
+
+		row.resetStatusForColumn(0);
+		row.resetStatusForColumn(1);
+		assertEquals(Integer.valueOf(42), row.getValue(0));
+		assertEquals("Test", row.getValue(1));
+
+		row.setValue(0, Integer.valueOf(43));
+		assertEquals(Integer.valueOf(43), row.getValue(0));
+		row.resetStatusForColumn(0);
+		assertEquals("Test", row.getValue(1));
 	}
+
 
 	@Test
 	public void testChangeValues()

@@ -707,23 +707,26 @@ Done.</programlisting>
     </important>
 
     <para>
-			If the update is successful (no database errors) a <literal>COMMIT</literal> will be
-			sent to the database automatically.
+			If the update is successful (no database errors) a <literal>COMMIT</literal> will automatically be
+			sent to the database (if <link linkend="profile-autocommit">autocommit</link> is turned off).
     </para>
 
 		<para>
 			If your <literal>SELECT</literal> was based
-			on more than one table, you will be prompted to specify which table should be
-			updated. Only columns for the chosen table will be included in the <literal>UPDATE</literal> or
-			<literal>INSERT</literal> statements.
-			If no primary key can be found for the update table, you will be prompted to select the
+			on more than one table, you will be prompted to specify which table should be	updated.
+      It cannot be detected reliably which column belongs to which of the tables from the select statement.
+      When updating a result from multiple tables, only columns from the chose update table should be changed, otherwise
+      incorrect SQL statements will be generated.
+    </para>
+    <para>
+      If no primary key can be found for the update table, you will be prompted to select the
 			columns that should be used to uniquely identify a row in the update table.
 		</para>
 
 		<para>
-			If an error is reported during the
-			update, a <literal>ROLLBACK</literal> will be sent to the database. The <literal>COMMIT</literal>
-			or <literal>ROLLBACK</literal> will only be sent if <link linkend="profile-autocommit">autocommit</link> is turned off.
+			If an error is reported during the update, a <literal>ROLLBACK</literal> will automatically be sent to the database.
+      The <literal>COMMIT</literal> or <literal>ROLLBACK</literal> will only be sent if <link linkend="profile-autocommit">autocommit</link>
+      is turned off.
 		</para>
 
 		<para>

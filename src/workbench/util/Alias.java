@@ -68,6 +68,7 @@ public class Alias
 			t = lexer.getNextToken(false, true);
 		}
 		objectName = name.toString();
+		display = value;
 	}
 
 	/**

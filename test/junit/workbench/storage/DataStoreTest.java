@@ -182,14 +182,8 @@ public class DataStoreTest
 		{
 			WbConnection con = prepareDatabase();
 
-			String[] cols = new String[]
-			{
-				"\"KEY\"", "LASTNAME", "FIRSTNAME", "LASTNAME"
-			};
-			int[] types = new int[]
-			{
-				java.sql.Types.VARCHAR, java.sql.Types.VARCHAR, java.sql.Types.VARCHAR, java.sql.Types.VARCHAR
-			};
+			String[] cols = new String[] { "\"KEY\"", "LASTNAME", "FIRSTNAME", "LASTNAME" };
+			int[] types = new int[] { java.sql.Types.VARCHAR, java.sql.Types.VARCHAR, java.sql.Types.VARCHAR, java.sql.Types.VARCHAR };
 
 			int[] sizes = new int[]
 			{
@@ -429,19 +423,19 @@ public class DataStoreTest
 		try
 		{
 			con = util.getConnection();
+			TestUtil.executeScript(con,
+				"CREATE TABLE person (id integer primary key, firstname varchar(20), lastname varchar(20));\n" +
+				"insert into person (id, firstname, lastname) values (42, 'Zaphod', 'Beeblebrox');\n" +
+				"insert into person (id, firstname, lastname) values (1, 'Mary', 'Moviestar');\n" +
+				"create table detail (did integer primary key, person_id integer, detail_info varchar(100));\n" +
+				"alter table detail ADD CONSTRAINT fk_pers FOREIGN KEY (person_id) REFERENCES person (id);\n" +
+				"insert into detail (did, person_id, detail_info) values (1, 42, 'some stuff');\n" +
+				"insert into detail (did, person_id, detail_info) values (2, 42, 'more stuff');\n" +
+				"insert into detail (did, person_id, detail_info) values (3, 1, 'mary1');\n" +
+				"insert into detail (did, person_id, detail_info) values (4, 1, 'mary2');\n" +
+				"commit;");
+
 			Statement stmt = con.createStatement();
-			stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(20), lastname varchar(20))");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (42, 'Zaphod', 'Beeblebrox')");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (1, 'Mary', 'Moviestar')");
-
-			stmt.executeUpdate("create table detail (did integer primary key, person_id integer, detail_info varchar(100))");
-			stmt.executeUpdate("alter table detail ADD CONSTRAINT fk_pers FOREIGN KEY (person_id) REFERENCES person (id)");
-			stmt.executeUpdate("insert into detail (did, person_id, detail_info) values (1, 42, 'some stuff')");
-			stmt.executeUpdate("insert into detail (did, person_id, detail_info) values (2, 42, 'more stuff')");
-			stmt.executeUpdate("insert into detail (did, person_id, detail_info) values (3, 1, 'mary1')");
-			stmt.executeUpdate("insert into detail (did, person_id, detail_info) values (4, 1, 'mary2')");
-			con.commit();
-
 			ResultSet rs = stmt.executeQuery("select id, firstname, lastname from person order by id");
 			DataStore ds = new DataStore(rs, true);
 			rs.close();
@@ -564,14 +558,8 @@ public class DataStoreTest
 	{
 		try
 		{
-			String[] cols = new String[]
-			{
-				"CHAR", "INT", "DOUBLE"
-			};
-			int[] types = new int[]
-			{
-				Types.VARCHAR, Types.INTEGER, Types.DOUBLE
-			};
+			String[] cols = new String[] {"CHAR", "INT", "DOUBLE"};
+			int[] types = new int[] {Types.VARCHAR, Types.INTEGER, Types.DOUBLE};
 			DataStore ds = new DataStore(cols, types);
 			ds.addRow();
 			assertEquals(1, ds.getRowCount());
@@ -606,14 +594,8 @@ public class DataStoreTest
 	public void testSort()
 		throws Exception
 	{
-		int[] types = new int[]
-		{
-			Types.VARCHAR
-		};
-		String[] cols = new String[]
-		{
-			"NAME"
-		};
+		int[] types = new int[] {Types.VARCHAR};
+		String[] cols = new String[] { "NAME" };
 		DataStore ds = new DataStore(cols, types);
 
 		ds.addRow();

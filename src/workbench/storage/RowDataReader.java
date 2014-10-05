@@ -62,7 +62,7 @@ import workbench.util.StringUtil;
  * @see ResultInfo#useGetStringForClobs()
  * @see ResultInfo#useGetStringForBit()
  * @see ResultInfo#useGetXML()
- * @see ResultInfo#convertArrays()
+ * @see ResultInfo#getConvertArrays()
  */
 public class RowDataReader
 {
@@ -89,7 +89,7 @@ public class RowDataReader
 		useGetStringForClobs = info.useGetStringForClobs();
 		useGetStringForBit = info.useGetStringForBit();
 		useGetXML = info.useGetXML();
-		adjustArrayDisplay = info.convertArrays();
+		adjustArrayDisplay = info.getConvertArrays();
 	}
 
 	/**

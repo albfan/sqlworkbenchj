@@ -60,6 +60,7 @@ public class ResultInfo
 	private boolean useGetStringForBit;
 	private boolean useGetXML;
 	private boolean convertArrays;
+	private boolean columnTablesDetected;
 
 	public ResultInfo(ColumnIdentifier[] cols)
 	{
@@ -122,6 +123,11 @@ public class ResultInfo
 		}
 		this.colCount = this.columns.length;
 		initDbConfig(conn);
+	}
+
+	ResultInfo(String[] names)
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 	private void initDbConfig(WbConnection sourceConnection)
@@ -358,7 +364,23 @@ public class ResultInfo
 		}
 	}
 
-	public boolean convertArrays()
+
+	/**
+	 * Returns true if the information returned from ColumnIdentifier.getSourceTableName() can be trusted
+	 *
+	 * @return true if the source table for each column is properly initialized
+	 */
+	public boolean isColumnTableDetected()
+	{
+		return columnTablesDetected;
+	}
+
+	public void setColumnTableDetected(boolean flag)
+	{
+		columnTablesDetected = flag;
+	}
+
+	public boolean getConvertArrays()
 	{
 		return convertArrays;
 	}

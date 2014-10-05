@@ -500,7 +500,9 @@ public class SqlUtilTest
 		sql = "SELECT a.att1\n      ,a.att2\nFROM   adam   a";
 		l = SqlUtil.getSelectColumns(sql,true,null);
 		assertEquals("Not enough columns", 2, l.size());
-
+		assertEquals("a.att1", l.get(0));
+		assertEquals("a.att2", l.get(1));
+		
 		sql = "SELECT to_char(date_col, 'YYYY-MM-DD'), col2 as \"Comma, column\", func('bla,blub')\nFROM   adam   a";
 		l = SqlUtil.getSelectColumns(sql,false,null);
 		assertEquals("Not enough columns", 3, l.size());

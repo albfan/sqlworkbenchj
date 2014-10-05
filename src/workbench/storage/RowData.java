@@ -167,7 +167,7 @@ public class RowData
 	}
 
 	/**
-	 *	Returns the value for the given column
+	 *	Returns the value for the given column.
 	 *
 	 *	@throws IndexOutOfBoundsException
 	 */
@@ -178,9 +178,8 @@ public class RowData
 	}
 
 	/**
-	 * Returns the value from the specified column as it was retrieved from
-	 * the database.
-	 * <br/>
+	 * Returns the value from the specified column as it was retrieved from the database.
+	 *
 	 * If the column was not modified or this row is new
 	 * then the current value is returned.
 	 */
@@ -205,8 +204,11 @@ public class RowData
 	public Object restoreOriginalValue(int column)
 	{
 		if (this.originalData == null) return null;
-		this.colData[column] = this.originalData[column];
-		resetStatusForColumn(column);
+		if (isColumnModified(column))
+		{
+			this.colData[column] = this.originalData[column];
+			resetStatusForColumn(column);
+		}
 		return this.colData[column];
 	}
 

@@ -1955,7 +1955,7 @@ public class DbSettings
 		String propName = "updatetable.check.pkonly";
 		boolean global = Settings.getInstance().getBoolProperty("workbench.db." + propName, false);
 		return Settings.getInstance().getBoolProperty(prefix + propName, global);
-	}
+		}
 
 	public boolean useCompletionCacheForUpdateTableCheck()
 	{

@@ -22,6 +22,7 @@
  */
 package workbench.db;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,7 +38,7 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class IndexDefinition
-	implements DbObject
+	implements DbObject, Serializable
 {
 	private boolean isPK;
 	private boolean isUnique;

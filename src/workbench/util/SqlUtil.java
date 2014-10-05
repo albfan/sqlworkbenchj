@@ -810,7 +810,6 @@ public class SqlUtil
 			SQLLexer lexer = SQLLexerFactory.createLexer(conn, select);
 			SQLToken t = lexer.getNextToken(false, false);
 
-
 			if (t == null) return Collections.emptyList();
 
 			String word = t.getContents();

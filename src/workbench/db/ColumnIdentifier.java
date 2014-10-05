@@ -128,7 +128,7 @@ public class ColumnIdentifier
 	{
 		return pgStorage;
 	}
-	
+
 	/**
 	 * Returns the SQL for a constraint defined on this column.
 	 */
@@ -228,8 +228,8 @@ public class ColumnIdentifier
 	}
 
 	/**
-	 * Set the name of the source table if this column was used
-	 * in a query.
+	 * Set the name of the source table if this column was used in a query.
+	 * 
 	 * @param name
 	 */
 	public void setSourceTableName(String name)

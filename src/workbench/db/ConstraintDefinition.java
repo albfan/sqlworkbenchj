@@ -22,11 +22,14 @@
  */
 package workbench.db;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Thomas Kellerer
  */
 public class ConstraintDefinition
+	implements Serializable
 {
 	private String constraintName;
 	private Boolean deferrable;

@@ -699,6 +699,9 @@ public class DataStore
 		updateTable = detector.getUpdateTable();
 		missingPkcolumns = detector.getMissingPkColumns();
 
+		SourceTableDetector checkTable = new SourceTableDetector();
+		checkTable.checkColumnTables(this.sql, resultInfo, conn);
+
 		checkForGeneratedKeys();
 		restoreModifiedNotUpdateableColumns();
 	}
@@ -737,6 +740,21 @@ public class DataStore
 		checkForGeneratedKeys();
 	}
 
+	private boolean columnBelongsToUpdateTable(int col)
+	{
+		// conservative approach: if no table was detected assume the column belongs to the update table
+		if (this.updateTable == null) return true;
+		if (!this.resultInfo.isColumnTableDetected()) return true;
+
+		String sourceTable = resultInfo.getColumn(col).getSourceTableName();
+
+		// conservative approach: if no table was detected assume the column belongs to the update table
+		if (StringUtil.isEmptyString(sourceTable)) return true;
+
+		TableIdentifier tbl = new TableIdentifier(sourceTable);
+		return (TableIdentifier.tablesAreEqual(tbl, updateTable, originalConnection));
+	}
+
 	/**
 	 * Restore the original column values for all columns that are marked as not modifieable and have been modified.
 	 *
@@ -749,10 +767,14 @@ public class DataStore
 	{
 		if (!Settings.getInstance().getCheckEditableColumns()) return;
 
-		String tname = resultInfo.getUpdateTable().getTableName();
+		if (resultInfo.getUpdateTable() == null) return;
+
+		String tname = resultInfo.getUpdateTable().getTableExpression();
 
 		for (int row=0; row < getRowCount(); row ++)
 		{
+			if (!isRowModified(row)) continue;
+
 			for (int col=0; col < getColumnCount(); col++)
 			{
 				String colName = resultInfo.getColumnName(col);
@@ -766,6 +788,13 @@ public class DataStore
 						"(isUpdateable: " + resultInfo.isUpdateable(col) +
 						", isReadonly: " + resultInfo.getColumn(col).isReadonly() +
 						", isComputed: " + isComputed + ")");
+					getRow(row).restoreOriginalValue(col);
+				}
+				else if (!columnBelongsToUpdateTable(col))
+				{
+					String colTable = resultInfo.getColumn(col).getSourceTableName();
+					LogMgr.logWarning("DataStore.restoreModifiedNotUpdateableColumns()",
+						"Restoring original value for column " + colTable + "." + colName + " because column does not belong to the detected update table: " + tname);
 					getRow(row).restoreOriginalValue(col);
 				}
 			}
@@ -1018,24 +1047,33 @@ public class DataStore
 		// are computed columns like count(*) etc)
 		if (this.resultInfo.getColumnName(colIndex) == null) return;
 
-		boolean checkEditable = Settings.getInstance().getCheckEditableColumns();
-		if (checkEditable && resultInfo.getUpdateTable() != null && (!resultInfo.isUpdateable(colIndex) || resultInfo.getColumn(colIndex).isReadonly()))
+		boolean checkEditable = Settings.getInstance().getCheckEditableColumns() && resultInfo.getUpdateTable() != null;
+		if (checkEditable)
 		{
 			String tname = resultInfo.getUpdateTable().getTableName();
 			String col = resultInfo.getColumnName(colIndex);
-			boolean isComputed = resultInfo.getColumn(colIndex).getComputedColumnExpression() != null;
-			LogMgr.logWarning("DataStore.setValue()",
-						"Discarding new value for column " + tname + "." + col + " because column is marked as not updateable. " +
-						"(isUpdateable: " + resultInfo.isUpdateable(colIndex) +
-						", isReadonly: " + resultInfo.getColumn(colIndex).isReadonly() +
-						", isComputed: " + isComputed + ")");
-			return;
+			if (!resultInfo.isUpdateable(colIndex) || resultInfo.getColumn(colIndex).isReadonly())
+			{
+				boolean isComputed = resultInfo.getColumn(colIndex).getComputedColumnExpression() != null;
+				LogMgr.logWarning("DataStore.setValue()",
+							"Discarding new value for column " + tname + "." + col + " because column is marked as not updateable. " +
+							"(isUpdateable: " + resultInfo.isUpdateable(colIndex) +
+							", isReadonly: " + resultInfo.getColumn(colIndex).isReadonly() +
+							", isComputed: " + isComputed + ")");
+				return;
+			}
+			else if (!columnBelongsToUpdateTable(colIndex))
+			{
+				LogMgr.logWarning("DataStore.restoreModifiedNotUpdateableColumns()",
+					"Restoring original value for column " + tname + "." + col + " because column does not belong to the detected update table: " + updateTable.getTableExpression());
+				return;
+			}
 		}
 
 		RowData row = this.getRow(rowNumber);
 		if (row == null)
 		{
-			LogMgr.logError("DataStore.setValue()", "Could not find specified row!", null);
+			LogMgr.logError("DataStore.setValue()", "Could not find specified row!", new Exception("Invalid row specified"));
 			return;
 		}
 
