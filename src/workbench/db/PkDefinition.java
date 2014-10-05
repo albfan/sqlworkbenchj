@@ -27,9 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import workbench.WbManager;
-
 import workbench.db.objectcache.DbObjectCacheFactory;
+
 import workbench.util.StringUtil;
 
 /**

@@ -57,12 +57,6 @@ public class SourceTableDetector
 			columns.add(new SelectColumn(name));
 		}
 
-		if (columns.size() != result.getColumnCount())
-		{
-			LogMgr.logWarning("SourceTableDetector.checkColumnTables()", "The SQL statement contains a different number of columns than the ResultInfo");
-			return;
-		}
-
 		if (tables.size() == 1)
 		{
 			for (ColumnIdentifier col : result.getColumns())
@@ -70,6 +64,12 @@ public class SourceTableDetector
 				col.setSourceTableName(tables.get(0).getObjectName());
 			}
 			result.setColumnTableDetected(true);
+			return;
+		}
+
+		if (columns.size() != result.getColumnCount())
+		{
+			LogMgr.logWarning("SourceTableDetector.checkColumnTables()", "The SQL statement contains a different number of columns than the ResultInfo");
 			return;
 		}
 

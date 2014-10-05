@@ -651,10 +651,13 @@ class ObjectCache
 	{
 		synchronized (pkMap)
 		{
+			// Prefer the column definitions in the regular cache
+			// over the plain PK
 			PkDefinition pk = getPkFromTableCache(con, table);
 
 			if (pk == null)
 			{
+				// No column definitions in the cache, check the PK cache
 				TableIdentifier tbl = findInCache(con, table, pkMap.keySet());
 				if (tbl != null)
 				{
@@ -672,7 +675,11 @@ class ObjectCache
 
 	private PkDefinition getPkFromTableCache(WbConnection con, TableIdentifier table)
 	{
-		List<ColumnIdentifier> columns = getColumns(con, table);
+		TableIdentifier toSearch = findEntry(con, table);
+
+		if (toSearch == null) return null;
+
+		List<ColumnIdentifier> columns = this.objects.get(toSearch);
 		if (CollectionUtil.isEmpty(columns)) return null;
 
 		List<String> pkCols = new ArrayList<>(1);
