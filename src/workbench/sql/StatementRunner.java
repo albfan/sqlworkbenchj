@@ -55,7 +55,6 @@ import workbench.storage.RowActionMonitor;
 import workbench.sql.commands.AlterSessionCommand;
 import workbench.sql.commands.SetCommand;
 import workbench.sql.commands.SingleVerbCommand;
-import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
 
@@ -104,7 +103,6 @@ public class StatementRunner
 	private boolean showDataLoadingProgress = true;
 	private EndReadOnlyTrans endTransType;
 	private TransactionChecker transactionChecker;
-	private CommandTester cmdTester;
 	private final Map<String, String> sessionAttributes = new TreeMap<>();
 	private final	RemoveEmptyResultsAnnotation removeAnnotation = new RemoveEmptyResultsAnnotation();
 
@@ -357,10 +355,10 @@ public class StatementRunner
 	{
 		if (command == null) return false;
 		if (command.isUpdatingCommand()) return false;
-		if (command instanceof SingleVerbCommand) return false;
-		if (command instanceof AlterSessionCommand) return false;
+		if (command instanceof SingleVerbCommand) return false; // commit or rollback
+		if (command instanceof AlterSessionCommand) return false; 
 		if (command instanceof SetCommand) return false;
-		if (cmdTester != null && cmdTester.isWbCommand(command.getVerb())) return false;
+		if (command.isWbCommand()) return false;
 		return true;
 	}
 
@@ -377,19 +375,18 @@ public class StatementRunner
 			LogMgr.logInfo("StatementRunner.endReadOnlyTransaction()", "Sending a " + endTransType.name() + " to end the current transaction started by: " + currentCommand);
 			try
 			{
-				switch (endTransType)
+				if (endTransType == EndReadOnlyTrans.commit)
 				{
-					case commit:
-						currentConnection.commit();
-						break;
-					case rollback:
-						currentConnection.rollback();
-						break;
+					currentConnection.commit();
+				}
+				else
+				{
+					currentConnection.rollback();
 				}
 			}
 			catch (Exception ex)
 			{
-				LogMgr.logWarning("StatementRnner.endReadOnlyTransaction()", "Could not " + endTransType.name(), ex);
+				LogMgr.logWarning("StatementRunner.endReadOnlyTransaction()", "Could not " + endTransType.name(), ex);
 			}
 		}
 	}
@@ -405,16 +402,14 @@ public class StatementRunner
 			endTransType = currentConnection.getDbSettings().getAutoCloseReadOnlyTransactions();
 		}
 
-		switch (endTransType)
+		if (endTransType ==  EndReadOnlyTrans.never)
 		{
-			case never:
-				cmdTester = null;
-				transactionChecker = TransactionChecker.NO_CHECK;
-			default:
-				cmdTester = new CommandTester();
-				transactionChecker = TransactionChecker.Factory.createChecker(currentConnection);
+			transactionChecker = TransactionChecker.NO_CHECK;
 		}
-
+		else
+		{
+			transactionChecker = TransactionChecker.Factory.createChecker(currentConnection);
+		}
 	}
 
 	public StatementRunnerResult getResult()
