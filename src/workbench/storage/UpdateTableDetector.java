@@ -35,6 +35,7 @@ import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 
 import workbench.util.CollectionUtil;
 
@@ -48,10 +49,12 @@ public class UpdateTableDetector
 	private List<ColumnIdentifier> missingPkcolumns;
 	private WbConnection conn;
 	private boolean checkPkOnly;
-
+	private boolean logDuration;
+	
 	public UpdateTableDetector(WbConnection db)
 	{
 		conn = db;
+		logDuration = Settings.getInstance().getBoolProperty("workbench.db.updatetable.check.logduration", false);
 	}
 
 	public void setCheckPKOnly(boolean flag)
@@ -213,6 +216,8 @@ public class UpdateTableDetector
 		if (resultInfo == null) return;
 
 		PkDefinition pk = null;
+		long start = System.currentTimeMillis();
+
 		if (conn.getDbSettings().useCompletionCacheForUpdateTableCheck())
 		{
 			pk = conn.getObjectCache().getPrimaryKey(tbl);
@@ -220,6 +225,12 @@ public class UpdateTableDetector
 		else
 		{
 			pk = meta.getIndexReader().getPrimaryKey(tbl);
+		}
+
+		long duration = System.currentTimeMillis() - start;
+		if (logDuration)
+		{
+			LogMgr.logDebug("UpdateTableDetector.checkPkOnlyForUpdateTable()", "Retrieving primary key for table " + tbl.getTableExpression() + " took: " + duration + "ms");
 		}
 
 		this.missingPkcolumns = new ArrayList<>(1);
@@ -257,6 +268,7 @@ public class UpdateTableDetector
 		LogMgr.logInfo("UpdateTableDetector.checkUniqueIndexesForPK()", "No PK found for table " + tableToUse.getTableName()+ " Trying to find an unique index.");
 		List<IndexDefinition> indexes = null;
 
+		long start = System.currentTimeMillis();
 		if (con.getDbSettings().useCompletionCacheForUpdateTableCheck())
 		{
 			indexes = con.getObjectCache().getUniqueIndexes(tableToUse);
@@ -266,12 +278,19 @@ public class UpdateTableDetector
 			IndexReader reader = ReaderFactory.getIndexReader(con.getMetadata());
 			indexes = reader.getUniqueIndexes(tableToUse);
 		}
+		long duration = System.currentTimeMillis() - start;
+
+		if (logDuration)
+		{
+			LogMgr.logDebug("UpdateTableDetector.checkPkOnlyForUpdateTable()", "Retrieving unique indexes for table " + tableToUse.getTableExpression() + " took: " + duration + "ms");
+		}
 
 		if (CollectionUtil.isEmpty(indexes)) return;
 
 		IndexDefinition idx = indexes.get(0);
 		List<IndexColumn> columns = idx.getColumns();
-		LogMgr.logInfo("UpdateTableDetector.checkUniqueIndexesForPK()", "Using unique index " + idx.getObjectName() + " as a surrogate PK");
+		LogMgr.logInfo("UpdateTableDetector.checkUniqueIndexesForPK()", "Using unique index " + idx.getObjectName() + " as a surrogate PK for table: " + tableToUse.getTableExpression());
+
 		for (IndexColumn col : columns)
 		{
 			int index = result.findColumn(col.getColumn(), conn.getMetadata());
