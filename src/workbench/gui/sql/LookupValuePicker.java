@@ -484,6 +484,7 @@ public class LookupValuePicker
 
 			EventQueue.invokeLater(new Runnable()
 			{
+				// <editor-fold defaultstate="collapsed" desc="Implementation">
 				@Override
 				public void run()
 				{
@@ -527,6 +528,7 @@ public class LookupValuePicker
 						lookupData.requestFocusInWindow();
 					}
 				}
+				// </editor-fold>
 			});
 		}
 		catch (SQLException ex)
@@ -681,6 +683,7 @@ public class LookupValuePicker
 		// especially with Oracle retrieving FK information is deadly slow and can take minutes!
 		WbThread retrieve = new WbThread("RetrieveLookupFk")
 		{
+			// <editor-fold defaultstate="collapsed" desc="Implementation">
 			@Override
 			public void run()
 			{
@@ -723,6 +726,7 @@ public class LookupValuePicker
 					showNotFound(parent);
 				}
 			}
+			// </editor-fold>
 		};
 		retrieve.start();
 	}
@@ -784,9 +788,15 @@ public class LookupValuePicker
 		ds.checkUpdateTable();
 		TableIdentifier baseTable = ds.getUpdateTable();
 
+		if (baseTable == null)
+		{
+			LogMgr.logWarning("LookupValuePicker.openPicker()", "No update table available for the current table. Cannot open FK dialog");
+			return;
+		}
+
 		ResultSetter result = new ResultSetter()
 		{
-
+			// <editor-fold defaultstate="collapsed" desc="Implementation">
 			@Override
 			public Map<String, Object> getFKValues(List<String> columns)
 			{
@@ -840,6 +850,7 @@ public class LookupValuePicker
 					}
 				}
 			}
+			// </editor-fold>
 		};
 		pickValue(table, result, conn, editColumn, baseTable, false);
 	}

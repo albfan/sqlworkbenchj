@@ -248,26 +248,32 @@
       The different shortcuts can still use the same main configuration file.
     </para>
 
-    <section id="move-installation">
-      <title>Copying an installation</title>
+  </section>
 
-      <para>
-        To copy an installation to a different computer, simply copy all the above
-        files to the other computer (the log file does not need to be copied).
-        When a profile is connected to a workspace, the workspace file should be specified
-        without a directory name (or using the <literal>%ConfigDir%</literal> placeholder).
-        In that case it is always loaded from the configuration directory.
-        If the workspace file location is given with an absolute directory, this needs to be adjusted
-        after the copying the files.
-      </para>
+  <section id="move-installation">
+    <title>Copying an installation</title>
 
-      <para>
-        You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
-        as the full path to the driver's jar file(s) is stored in the file (unless you
-        define the location of the drivers using the <link linkend="settings-libdir">libdir variable</link>.
-      </para>
+    <para>
+      To copy an installation to a different computer, simply copy all the files from the configuration directory
+      to the other computer (the log file does not need to be copied).
+      When a profile is connected to a workspace, the workspace file should be specified
+      without a directory name (or using the <literal>%ConfigDir%</literal> placeholder).
+      In that case it is always loaded from the configuration directory.
+      If the workspace file is given with an absolute directory, this needs to be adjusted
+      after the copying the files.
+    </para>
 
-    </section>
+    <para>
+      You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
+      because the <emphasis>full path</emphasis> to the driver's jar file(s) is stored in the file.
+    </para>
+    <para>
+      If you store all JDBC drivers in a common directory (or below a common root directory)
+      you can define the <link linkend="settings-libdir">libdir variable</link>. In that case the paths to the
+      driver's jar file are stored relative to the <literal>%LibDir%</literal> directory.
+      After copying the installation you only need to adjust the <literal>%LibDir%</literal> variable
+      on the other computer.
+    </para>
 
   </section>
 

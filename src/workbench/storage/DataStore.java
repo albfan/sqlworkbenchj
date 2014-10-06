@@ -1478,7 +1478,11 @@ public class DataStore
 		{
 			if (this.sql == null) return false;
 			List<String> tables = SqlUtil.getTables(this.sql, false, aConn);
-			if (tables.size() != 1) return false;
+			if (tables.size() != 1)
+			{
+				LogMgr.logWarning("DataStore.checkUpdateTable()", "More than one table found in the original query. No update table will be set.");
+				return false;
+			}
 			String table = tables.get(0);
 			LogMgr.logDebug("DataStore.checkUpdateTable()", "Using table name: " + table);
 			this.setUpdateTable(table, aConn);
