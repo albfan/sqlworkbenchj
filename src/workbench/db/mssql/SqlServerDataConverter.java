@@ -23,7 +23,9 @@
 package workbench.db.mssql;
 
 import java.sql.Types;
+
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataConverter;
 import workbench.util.NumberStringCache;
 
@@ -35,6 +37,7 @@ import workbench.util.NumberStringCache;
 public class SqlServerDataConverter
 	implements DataConverter
 {
+	private boolean convertVarbinary;
 
 	protected static class LazyInstanceHolder
 	{
@@ -48,6 +51,7 @@ public class SqlServerDataConverter
 
 	private SqlServerDataConverter()
 	{
+		convertVarbinary = Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.converter.varbinary", false);
 	}
 
 	@Override
@@ -67,7 +71,15 @@ public class SqlServerDataConverter
 	@Override
 	public boolean convertsType(int jdbcType, String dbmsType)
 	{
-		return (jdbcType == Types.BINARY && dbmsType.equals("timestamp"));
+		if (jdbcType == Types.BINARY)
+		{
+			return dbmsType.equals("timestamp");
+		}
+		if (jdbcType == Types.VARBINARY)
+		{
+			return convertVarbinary;
+		}
+		return false;
 	}
 
 	/**
