@@ -77,7 +77,9 @@ public class SqlServerDataConverter
 		}
 		if (jdbcType == Types.VARBINARY)
 		{
-			return convertVarbinary;
+			// don't convert really large blobs
+			// only convert varbinary(x) - assuming that they are sufficiently small
+			return convertVarbinary && !dbmsType.equalsIgnoreCase("varbinary(max)");
 		}
 		return false;
 	}
