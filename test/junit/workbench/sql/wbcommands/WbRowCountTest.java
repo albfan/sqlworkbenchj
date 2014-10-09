@@ -61,11 +61,10 @@ public class WbRowCountTest
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 
-	@Test
-	public void testExecute()
+
+	private void initTables(WbConnection conn)
 		throws Exception
 	{
-		WbConnection conn = getTestUtil().getConnection();
 		TestUtil.executeScript(conn,
 			"create schema orders;\n" +
 			"create schema data; \n" +
@@ -82,6 +81,60 @@ public class WbRowCountTest
 			"insert into data.foo values (1),(1),(1),(1);\n" +
 			"insert into foobar values (1),(1),(1),(1),(1);\n" +
 			"commit;");
+	}
+
+	@Test
+	public void testExcludeColumns()
+		throws Exception
+	{
+		WbConnection conn = getTestUtil().getConnection();
+		initTables(conn);
+		WbRowCount instance = new WbRowCount();
+		instance.setConnection(conn);
+
+		StatementRunnerResult result = instance.execute("WbRowCount -schema=orders -excludeColumns=type,catalog");
+		assertFalse(result.getDataStores().isEmpty());
+		DataStore counts = result.getDataStores().get(0);
+		assertEquals(3, counts.getRowCount());
+		assertEquals(3, counts.getColumnCount());
+		assertTrue("ROWCOUNT".equalsIgnoreCase(counts.getColumnName(0)));
+		assertTrue("NAME".equalsIgnoreCase(counts.getColumnName(1)));
+		assertTrue("SCHEMA".equalsIgnoreCase(counts.getColumnName(2)));
+
+		result = instance.execute("WbRowCount -schema=orders -excludeColumns=type,catalog,schema");
+		assertFalse(result.getDataStores().isEmpty());
+		counts = result.getDataStores().get(0);
+		assertEquals(3, counts.getRowCount());
+		assertEquals(2, counts.getColumnCount());
+		assertTrue("ROWCOUNT".equalsIgnoreCase(counts.getColumnName(0)));
+		assertTrue("NAME".equalsIgnoreCase(counts.getColumnName(1)));
+
+		result = instance.execute("WbRowCount -schema=orders -excludeColumns=type,schema");
+		assertFalse(result.getDataStores().isEmpty());
+		counts = result.getDataStores().get(0);
+		assertEquals(3, counts.getRowCount());
+		assertEquals(3, counts.getColumnCount());
+		assertTrue("ROWCOUNT".equalsIgnoreCase(counts.getColumnName(0)));
+		assertTrue("NAME".equalsIgnoreCase(counts.getColumnName(1)));
+		assertTrue("CATALOG".equalsIgnoreCase(counts.getColumnName(2)));
+
+		result = instance.execute("WbRowCount -schema=orders -excludeColumns=type");
+		assertFalse(result.getDataStores().isEmpty());
+		counts = result.getDataStores().get(0);
+		assertEquals(3, counts.getRowCount());
+		assertEquals(4, counts.getColumnCount());
+		assertTrue("ROWCOUNT".equalsIgnoreCase(counts.getColumnName(0)));
+		assertTrue("NAME".equalsIgnoreCase(counts.getColumnName(1)));
+		assertTrue("CATALOG".equalsIgnoreCase(counts.getColumnName(2)));
+		assertTrue("SCHEMA".equalsIgnoreCase(counts.getColumnName(3)));
+	}
+
+	@Test
+	public void testExecute()
+		throws Exception
+	{
+		WbConnection conn = getTestUtil().getConnection();
+		initTables(conn);
 		WbRowCount instance = new WbRowCount();
 		instance.setConnection(conn);
 

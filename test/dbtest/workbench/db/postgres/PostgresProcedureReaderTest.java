@@ -30,6 +30,7 @@ import workbench.WbTestCase;
 import workbench.db.GenericObjectDropper;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
@@ -286,4 +287,24 @@ public class PostgresProcedureReaderTest
 		assertTrue(source2.contains("'Name_2: '"));
 	}
 
+	@Test
+	public void testProcSource()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		TestUtil.executeScript(con,
+			"create schema foo;\n" +
+			"create function foo.bar(p_in integer) returns integer as $$ select 42; $$ language sql;\n" +
+			"commit;");
+
+		TableIdentifier object = new TableIdentifier("foo.bar(integer)", con);
+		object.adjustCase(con);
+
+		ProcedureReader reader = con.getMetadata().getProcedureReader();
+		ProcedureDefinition def = new ProcedureDefinition(object.getCatalog(), object.getSchema(), object.getObjectName());
+		assertTrue(reader.procedureExists(def));
+		CharSequence sql = def.getSource(con);
+		assertNotNull(sql);
+		assertTrue(sql.toString().contains("FUNCTION foo.bar(p_in integer)"));
+	}
 }
