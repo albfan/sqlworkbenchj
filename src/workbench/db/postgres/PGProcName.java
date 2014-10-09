@@ -28,6 +28,7 @@ import java.util.List;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ProcedureDefinition;
+import workbench.util.CollectionUtil;
 
 import workbench.util.StringUtil;
 
@@ -45,7 +46,7 @@ public class PGProcName
 	{
 		procName = def.getProcedureName();
 		List<ColumnIdentifier> parameters = def.getParameters(null);
-		if (parameters != null)
+		if (CollectionUtil.isNonEmpty(parameters))
 		{
 			arguments = new ArrayList<>(parameters.size());
 			for (ColumnIdentifier col : parameters)
