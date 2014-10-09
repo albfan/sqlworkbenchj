@@ -23,6 +23,9 @@ package workbench.sql.wbcommands;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
@@ -60,6 +63,7 @@ public class WbRowCount
 {
 	public static final String VERB = "WbRowCount";
 	public static final String ARG_ORDER_BY = "orderBy";
+	public static final String ARG_EXCL_COLS = "excludeColumns";
 
 	public WbRowCount()
 	{
@@ -69,6 +73,7 @@ public class WbRowCount
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 		cmdLine.addArgument(ARG_ORDER_BY, CollectionUtil.arrayList("rowcount", "type", "schema", "catalog", "name"));
+		cmdLine.addArgument(ARG_EXCL_COLS, CollectionUtil.arrayList("schema","catalog","type"));
 	}
 
 	@Override
@@ -79,16 +84,39 @@ public class WbRowCount
 
 	public static DataStore buildResultDataStore(WbConnection connection)
 	{
-		String[] tableListColumns = connection.getMetadata().getTableListColumns();
-		String[] columns = new String[tableListColumns.length];
+		return buildResultDataStore(connection, true, true, true);
+	}
 
-		columns[0] = ResourceMgr.getString("TxtRowCnt").toUpperCase();
-		columns[1] = tableListColumns[0];
-		columns[2] = tableListColumns[1];
-		columns[3] = tableListColumns[2];
-		columns[4] = tableListColumns[3];
+	public static DataStore buildResultDataStore(WbConnection connection, boolean includeCatalog, boolean includeSchema, boolean includeType)
+	{
+		List<String> colNames = new ArrayList<>(5);
 
-		DataStore ds = new DataStore(columns, new int[]	{ Types.BIGINT, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR});
+		colNames.add(ResourceMgr.getString("TxtRowCnt").toUpperCase());
+		colNames.add("NAME");
+		if (includeType)
+		{
+			colNames.add("TYPE");
+		}
+		if (includeCatalog)
+		{
+			colNames.add(connection.getMetadata().getCatalogTerm());
+		}
+		if (includeSchema)
+		{
+			colNames.add(connection.getMetadata().getSchemaTerm());
+		}
+
+		int[] types = new int[colNames.size()];
+		types[0] = Types.BIGINT;
+
+		String[]  columns = new String[colNames.size()];
+
+		for (int i=0; i< colNames.size(); i++)
+		{
+			if (i > 0) types[i] = Types.VARCHAR;
+			columns[i] = colNames.get(i);
+		}
+		DataStore ds = new DataStore(columns, types);
 		return ds;
 	}
 
@@ -123,9 +151,22 @@ public class WbRowCount
 		DbMetadata meta = currentConnection.getMetadata();
 		boolean useSavepoint = currentConnection.getDbSettings().useSavePointForDML();
 
-		DataStore rowCounts = buildResultDataStore(currentConnection);
+
+		Set<String> excludeCols = CollectionUtil.caseInsensitiveSet();
+		excludeCols.addAll(cmdLine.getListValue(ARG_EXCL_COLS));
+
+		boolean includeType = !excludeCols.contains("type");
+		boolean includeSchema = !excludeCols.contains("schema");
+		boolean includeCatalog = !excludeCols.contains("catalog");
+
+		DataStore rowCounts = buildResultDataStore(currentConnection, includeCatalog, includeSchema, includeType);
+
 		TableSelectBuilder builder = new TableSelectBuilder(currentConnection, TableSelectBuilder.ROWCOUNT_TEMPLATE_NAME, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
 		currentStatement = currentConnection.createStatementForQuery();
+
+		int typeIndex = rowCounts.getColumnIndex("TYPE");
+		int catalogIndex = rowCounts.getColumnIndex(currentConnection.getMetadata().getCatalogTerm());
+		int schemaIndex = rowCounts.getColumnIndex(currentConnection.getMetadata().getSchemaTerm());
 
 		int tableCount = resultList.getRowCount();
 		for (int row=0; row < tableCount; row++)
@@ -155,9 +196,9 @@ public class WbRowCount
 				int dsRow = rowCounts.addRow();
 				rowCounts.setValue(dsRow, 0, Long.valueOf(rowCount));
 				rowCounts.setValue(dsRow, 1, table.getTableName());
-				rowCounts.setValue(dsRow, 2, table.getObjectType());
-				rowCounts.setValue(dsRow, 3, table.getCatalog());
-				rowCounts.setValue(dsRow, 4, table.getSchema());
+				if (includeType) rowCounts.setValue(dsRow, typeIndex, table.getObjectType());
+				if (includeCatalog) rowCounts.setValue(dsRow, catalogIndex, table.getCatalog());
+				if (includeSchema) rowCounts.setValue(dsRow, schemaIndex, table.getSchema());
 			}
 			finally
 			{
