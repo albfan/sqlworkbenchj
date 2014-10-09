@@ -712,12 +712,6 @@ public class ConnectionMgr
 	 */
 	public void saveDrivers()
 	{
-		if (WbManager.getInstance().isRestrictedMode())
-		{
-			LogMgr.logInfo("ConnectionMgr.saveProfiles()", "Application is running in restricted mode. Connection profiles are not saved");
-			return;
-		}
-
 		if (Settings.getInstance().getCreateDriverBackup())
 		{
 			WbFile f = new WbFile(Settings.getInstance().getDriverConfigFilename());
@@ -960,12 +954,6 @@ public class ConnectionMgr
 	 */
 	public void saveProfiles()
 	{
-		if (WbManager.getInstance().isRestrictedMode())
-		{
-			LogMgr.logInfo("ConnectionMgr.saveProfiles()", "Application is running in restricted mode. Connection profiles are not saved");
-			return;
-		}
-
 		synchronized (profileLock)
 		{
 			if (this.profiles != null)
@@ -998,11 +986,6 @@ public class ConnectionMgr
 	 */
 	public boolean profilesAreModified()
 	{
-		if (WbManager.getInstance().isRestrictedMode())
-		{
-			return false;
-		}
-
 		if (this.profilesChanged) return true;
 		synchronized (profileLock)
 		{

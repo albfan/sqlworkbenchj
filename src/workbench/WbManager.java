@@ -91,7 +91,6 @@ public final class WbManager
 	private final List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<MainWindow>(5));
 	private final List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
 
-	private boolean restrictedMode;
 	private RunMode runMode;
 	private boolean writeSettings = true;
 	private boolean overWriteGlobalSettingsFile = true;
@@ -389,11 +388,6 @@ public final class WbManager
 		}
 
 		return true;
-	}
-
-	public boolean isRestrictedMode()
-	{
-		return this.restrictedMode;
 	}
 
 	public RunMode getRunMode()
