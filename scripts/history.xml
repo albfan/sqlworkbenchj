@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-10-05">
+    <entry dev-build="7" type="enh">WbRowCount now has an option to exclude some columns from the result</entry>
     <entry dev-build="6" type="enh">The amount of details retrieved from the database when editing a result set can now be reduced through a configuration property. Refer to the Chapter "Advanced configuration options" in the manual for details.</entry>
     <entry dev-build="6" type="enh">The meta information retrieved to enable editing a result set can now optionally taken from the completion cache.</entry>
     <entry dev-build="6" type="enh">The filter value of the DbExplorer's table list can now optionally be used to limit the number of tables retrieved.</entry>
@@ -31,6 +32,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="7" type="fix">For Postgres WbProcSource did not display the source code for functions with arguments</entry>
     <entry dev-build="6" type="fix">The source code for views with case-sensitive names was not displayed</entry>
     <entry dev-build="6" type="fix">The pre-defined JDBC driver definitions were no longer loaded (e.g. when starting SQL Workbench for the first time)</entry>
     <entry dev-build="6" type="fix">For SQL Server and Postgres alternate delimiters with more than two characters using some special characters were no longer working</entry>
