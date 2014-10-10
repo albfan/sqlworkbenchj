@@ -147,6 +147,8 @@ public class ArgumentParserTest
 	{
 		ArgumentParser arg = new ArgumentParser();
 		arg.addArgument("type", StringUtil.stringToList("text,xml,sql"));
+		arg.parse("-type=xml");
+		
 		Collection<ArgumentValue> c = arg.getAllowedValues("type");
 		assertEquals(3, c.size());
 

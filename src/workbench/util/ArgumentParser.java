@@ -87,6 +87,10 @@ public class ArgumentParser
 	{
 		StringArgumentValue argValue = new StringArgumentValue(value);
 		Collection<ArgumentValue> allowed = getAllowedValues(key);
+		if (allowed == null)
+		{
+			return false;
+		}
 		return allowed.contains(argValue);
 	}
 
@@ -468,7 +472,6 @@ public class ArgumentParser
 		}
 		this.argCount = 0;
 		this.unknownParameters.clear();
-		this.allowedValues.clear();
 	}
 
 	/**
