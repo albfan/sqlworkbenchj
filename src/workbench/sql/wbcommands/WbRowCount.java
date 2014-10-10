@@ -73,7 +73,7 @@ public class WbRowCount
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 		cmdLine.addArgument(ARG_ORDER_BY, CollectionUtil.arrayList("rowcount", "type", "schema", "catalog", "name"));
-		cmdLine.addArgument(ARG_EXCL_COLS, CollectionUtil.arrayList("schema","catalog","type"));
+		cmdLine.addArgument(ARG_EXCL_COLS, CollectionUtil.arrayList("schema","catalog","database","type"));
 	}
 
 	@Override
@@ -99,11 +99,11 @@ public class WbRowCount
 		}
 		if (includeCatalog)
 		{
-			colNames.add(connection.getMetadata().getCatalogTerm());
+			colNames.add(connection.getMetadata().getCatalogTerm().toUpperCase());
 		}
 		if (includeSchema)
 		{
-			colNames.add(connection.getMetadata().getSchemaTerm());
+			colNames.add(connection.getMetadata().getSchemaTerm().toUpperCase());
 		}
 
 		int[] types = new int[colNames.size()];
@@ -155,9 +155,27 @@ public class WbRowCount
 		Set<String> excludeCols = CollectionUtil.caseInsensitiveSet();
 		excludeCols.addAll(cmdLine.getListValue(ARG_EXCL_COLS));
 
-		boolean includeType = !excludeCols.contains("type");
-		boolean includeSchema = !excludeCols.contains("schema");
-		boolean includeCatalog = !excludeCols.contains("catalog");
+		String schemaTerm = currentConnection.getMetadata().getSchemaTerm().toLowerCase();
+		String catalogTerm =  currentConnection.getMetadata().getCatalogTerm().toLowerCase();
+
+		boolean includeType = true;
+		boolean includeSchema = true;
+		boolean includeCatalog = true;
+
+		if (excludeCols.contains("type"))
+		{
+			includeType = false;
+		}
+
+		if (excludeCols.contains("schema") || excludeCols.contains(schemaTerm))
+		{
+			includeSchema = false;
+		}
+
+		if (excludeCols.contains("catalog") || excludeCols.contains("database") || excludeCols.contains(catalogTerm))
+		{
+			includeCatalog = false;
+		}
 
 		DataStore rowCounts = buildResultDataStore(currentConnection, includeCatalog, includeSchema, includeType);
 

@@ -37,6 +37,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+
 /**
  *
  * @author Thomas Kellerer
@@ -95,6 +96,8 @@ public class WbRowCountTest
 		StatementRunnerResult result = instance.execute("WbRowCount -schema=orders -excludeColumns=type,catalog");
 		assertFalse(result.getDataStores().isEmpty());
 		DataStore counts = result.getDataStores().get(0);
+//		DataStorePrinter printer = new DataStorePrinter(counts);
+//		printer.printTo(System.out);
 		assertEquals(3, counts.getRowCount());
 		assertEquals(3, counts.getColumnCount());
 		assertTrue("ROWCOUNT".equalsIgnoreCase(counts.getColumnName(0)));

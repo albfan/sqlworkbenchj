@@ -455,6 +455,7 @@ public class ArgumentParser
 		}
 		this.arguments.remove(arg);
 		this.argTypes.remove(arg);
+		this.allowedValues.remove(arg);
 	}
 
 	private void reset()
@@ -467,6 +468,7 @@ public class ArgumentParser
 		}
 		this.argCount = 0;
 		this.unknownParameters.clear();
+		this.allowedValues.clear();
 	}
 
 	/**
