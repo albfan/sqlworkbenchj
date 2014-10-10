@@ -278,7 +278,7 @@ public class MacroTree
 	 */
 	public List<String> getExpandedGroupNames()
 	{
-		LinkedList<String> result = new LinkedList<String>();
+		LinkedList<String> result = new LinkedList<>();
 		TreePath[] groupNodes = this.macroModel.getGroupNodes();
 		for (TreePath groupNode : groupNodes)
 		{

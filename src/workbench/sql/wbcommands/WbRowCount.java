@@ -68,7 +68,7 @@ public class WbRowCount
 	public WbRowCount()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(CommonArgs.ARG_OBJECTS);
+		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);

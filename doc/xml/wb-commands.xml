@@ -2149,6 +2149,9 @@ WHERE id=42;</programlisting>
 								<para>
 									Count the rows for tables from the given schemas, e.g. <literal>-schema=public,local</literal>
 								</para>
+                <para>
+                  The parameter supports auto-completion and will show a list of available schemas.
+                </para>
 							</entry>
 						</row>
 						<row>
@@ -2163,10 +2166,13 @@ WHERE id=42;</programlisting>
 							<entry>-objects</entry>
 							<entry>
 								<para>
-                  Show only indexes for the tables (or views) specified by the parameter. The parameter value
+                  Show only the row counts for the tables (or views) specified by the parameter. The parameter value
                   can contain wildcards, e.g. <literal>-objects=PR%,ORD%</literal> will count the rows
                   for all tables with names that either start with <literal>PR</literal> or <literal>ORD</literal>
 								</para>
+                <para>
+                  The parameter supports auto-completion and will show a list of available tables.
+                </para>
 							</entry>
 						</row>
 						<row>
@@ -2176,6 +2182,9 @@ WHERE id=42;</programlisting>
                   Define the types of objects which should be selected. By default only tables are considered.
                   If you also want to count the rows for views, use <literal>-types=table,view</literal>
 								</para>
+                <para>
+                  The parameter supports auto-completion and will show a list of available object types.
+                </para>
 							</entry>
 						</row>
 						<row>
@@ -2187,6 +2196,24 @@ WHERE id=42;</programlisting>
                   <literal>-orderBy="rowcount,desc"</literal>. If you want to sort by multiple columns, separate
                   the definitions with a comma: <literal>-orderBy="rowcount;desc,name;asc"</literal>.
 								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-excludeCols</entry>
+							<entry>
+                <para>Possible values: <literal>catalog</literal><literal>schema</literal>, <literal>type</literal></para>
+                <para>
+                  By default <literal>WbRowCount</literal> will display the same columns as the table list in the
+                  DbExplorer. If not all columns are needed or wanted, this parameter can be used to exclude
+                  certain columns.
+                </para>
+								<para>
+                  The is a comma separated list of columns to be excluded. The columns <literal>ROWCOUNT</literal>
+                  and <literal>NAME</literal> can not be excluded.
+								</para>
+                <para>
+                  The column name <literal>database</literal> can be used instead of <literal>catalog</literal>.
+                </para>
 							</entry>
 						</row>
 					</tbody>
