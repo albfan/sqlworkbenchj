@@ -149,13 +149,16 @@ public class SelectionDisplay
 		}
 
 		int cols[] = table.getSelectedColumns();
-
-		StringBuilder display = new StringBuilder(30);
-
 		double sum = 0;
 		boolean numbers = false;
 
-		if (cols != null && cols.length > 0 && table.getColumnSelectionAllowed())
+		boolean showSum = cols != null && cols.length > 0 && table.getColumnSelectionAllowed();
+		if (table.getSelectedRowCount() == 1 && cols.length == 1)
+		{
+			showSum = false;
+		}
+
+		if (showSum)
 		{
 			int rows[] = table.getSelectedRows();
 			for (int i=0; i < rows.length; i++)
@@ -172,26 +175,28 @@ public class SelectionDisplay
 			}
 		}
 
+		String display = null;
+
 		if (numbers)
 		{
-			String v = formatter.format(sum);
-			display.append(ResourceMgr.getFormattedString("MsgSelectSum", v));
+			display = ResourceMgr.getFormattedString("MsgSelectSum", formatter.format(sum));
 		}
 		else
 		{
 			int rows = table.getSelectedRowCount();
 			if (rows > 0)
 			{
-				display.append(ResourceMgr.getFormattedString("MsgRowsSelected", rows));
+				display = ResourceMgr.getFormattedString("MsgRowsSelected", rows);
 			}
 		}
-		if (display.length() == 0)
+
+		if (display == null)
 		{
 			setText(StringUtil.EMPTY_STRING);
 		}
 		else
 		{
-			setText(display.toString());
+			setText(display);
 		}
 	}
 }
