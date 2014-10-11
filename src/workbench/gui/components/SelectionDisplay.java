@@ -31,9 +31,12 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumnModel;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.util.StringUtil;
 import workbench.util.WbNumberFormatter;
 
@@ -87,7 +90,7 @@ public class SelectionDisplay
 			{
 				colModel.removeListSelectionListener(columnListener);
 			}
-			setText("");
+			setText(StringUtil.EMPTY_STRING);
 		}
 	}
 
@@ -141,7 +144,7 @@ public class SelectionDisplay
 	{
 		if (table == null)
 		{
-			setText("");
+			setText(StringUtil.EMPTY_STRING);
 			return;
 		}
 
@@ -152,16 +155,19 @@ public class SelectionDisplay
 		double sum = 0;
 		boolean numbers = false;
 
-		if (cols.length == 1 && table.getColumnSelectionAllowed())
+		if (cols != null && cols.length > 0 && table.getColumnSelectionAllowed())
 		{
 			int rows[] = table.getSelectedRows();
 			for (int i=0; i < rows.length; i++)
 			{
-				Object o = table.getValueAt(rows[i], cols[0]);
-				if (o instanceof Number)
+				for (int c=0; c < cols.length; c++)
 				{
-					sum += ((Number)o).doubleValue();
-					numbers = true;
+					Object o = table.getValueAt(rows[i], cols[c]);
+					if (o instanceof Number)
+					{
+						sum += ((Number)o).doubleValue();
+						numbers = true;
+					}
 				}
 			}
 		}
@@ -181,7 +187,7 @@ public class SelectionDisplay
 		}
 		if (display.length() == 0)
 		{
-			setText("");
+			setText(StringUtil.EMPTY_STRING);
 		}
 		else
 		{
