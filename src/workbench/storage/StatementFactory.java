@@ -35,6 +35,7 @@ import workbench.db.DefaultExpressionBuilder;
 import workbench.db.DmlExpressionBuilder;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.resource.GeneratedIdentifierCase;
 
 import workbench.util.SqlUtil;
 
@@ -56,6 +57,8 @@ public class StatementFactory
 	private boolean includeReadOnlyColumns;
 	private boolean includeIdentityColumns;
 	private DmlExpressionBuilder expressionBuilder;
+	private GeneratedIdentifierCase keywordStyle;
+	private GeneratedIdentifierCase identifierStyle;
 
 	/**
 	 * @param metaData the description of the resultSet for which the statements are generated
@@ -67,7 +70,20 @@ public class StatementFactory
 		this.setCurrentConnection(conn);
 		expressionBuilder = DmlExpressionBuilder.Factory.getBuilder(conn);
 		includeIdentityColumns = !Settings.getInstance().getGenerateInsertIgnoreIdentity();
+		keywordStyle = Settings.getInstance().getFormatterKeywordsCase();
+		identifierStyle = Settings.getInstance().getFormatterIdentifierCase();
 	}
+
+	public void setKeywordStyle(GeneratedIdentifierCase style)
+	{
+		this.keywordStyle = style;
+	}
+
+	public void setIdentifierStyle(GeneratedIdentifierCase style)
+	{
+		this.identifierStyle = style;
+	}
+
 
 	public void setIncludeIdentiyColumns(boolean flag)
 	{
@@ -113,9 +129,10 @@ public class StatementFactory
 
 		if (!ignoreStatus && !aRow.isModified()) return null;
 		ArrayList<ColumnData> values = new ArrayList<>(cols);
-		StringBuilder sql = new StringBuilder("UPDATE ");
+		StringBuilder sql = new StringBuilder(50);
+		appendKeyword(sql, "UPDATE ");
 		sql.append(getTableNameToUse());
-		sql.append(" SET ");
+		appendKeyword(sql, " SET ");
 		first = true;
 
 		for (int col=0; col < cols; col ++)
@@ -142,7 +159,7 @@ public class StatementFactory
 				Object value = aRow.getValue(col);
 				if (isNull(value))
 				{
-					sql.append(" = NULL");
+					appendKeyword(sql, " = NULL");
 				}
 				else
 				{
@@ -152,7 +169,7 @@ public class StatementFactory
 				}
 			}
 		}
-		sql.append(" WHERE ");
+		appendKeyword(sql, " WHERE ");
 		first = true;
 		int count = this.resultInfo.getColumnCount();
 		for (int j=0; j < count; j++)
@@ -164,7 +181,7 @@ public class StatementFactory
 			}
 			else
 			{
-				sql.append(" AND ");
+				appendKeyword(sql, " AND ");
 			}
 			String colName = getColumnName(j);
 			sql.append(colName);
@@ -172,7 +189,7 @@ public class StatementFactory
 			Object value = aRow.getOriginalValue(j);
 			if (value == null)
 			{
-				sql.append(" IS NULL");
+				appendKeyword(sql, " IS NULL");
 			}
 			else
 			{
@@ -266,7 +283,7 @@ public class StatementFactory
 		ArrayList<ColumnData> values = new ArrayList<>(cols);
 
 		StringBuilder sql = new StringBuilder(250);
-    sql.append("INSERT INTO ");
+    appendKeyword(sql, "INSERT INTO ");
 		sql.append(getTableNameToUse());
 		sql.append(" (");
 
@@ -323,7 +340,7 @@ public class StatementFactory
 				values.add(new ColumnData(value,colId));
 			}
 		}
-		sql.append(") VALUES (");
+		appendKeyword(sql, ") VALUES (");
 		sql.append(valuePart);
 		sql.append(')');
 		dml = new DmlStatement(sql.toString(), values);
@@ -354,9 +371,9 @@ public class StatementFactory
 
 		ArrayList<ColumnData> values = new ArrayList<>(count);
 		StringBuilder sql = new StringBuilder(250);
-    sql.append("DELETE FROM ");
+    appendKeyword(sql, "DELETE FROM ");
 		sql.append(getTableNameToUse());
-		sql.append(" WHERE ");
+		appendKeyword(sql, " WHERE ");
 		first = true;
 
 		for (int j=0; j < count; j++)
@@ -368,7 +385,7 @@ public class StatementFactory
 			}
 			else
 			{
-				sql.append(" AND ");
+				appendKeyword(sql, " AND ");
 			}
 			sql.append(getColumnName(j));
 
@@ -376,7 +393,7 @@ public class StatementFactory
 			if (isNull(value)) value = null;
 			if (value == null)
 			{
-				sql.append(" IS NULL");
+				appendKeyword(sql, " IS NULL");
 			}
 			else
 			{
@@ -441,11 +458,17 @@ public class StatementFactory
 	private String adjustColumnName(String colName)
 	{
 		if (colName == null) return null;
-		if (dbConnection != null)
+		String name = null;
+
+		if (dbConnection == null)
 		{
-			return dbConnection.getMetadata().quoteObjectname(colName);
+			name = SqlUtil.quoteObjectname(colName, false, true, '"');
 		}
-		return SqlUtil.quoteObjectname(colName, false, true, '"');
+		else
+		{
+			name = dbConnection.getMetadata().quoteObjectname(colName);
+		}
+		return formatIdentifier(name);
 	}
 
 	private TableIdentifier getUpdateTable()
@@ -455,6 +478,8 @@ public class StatementFactory
 
 	private String getTableNameToUse()
 	{
+		String tname = null;
+
 		TableIdentifier updateTable = getUpdateTable();
 		if (updateTable == null) throw new IllegalArgumentException("Cannot proceed without update table defined");
 
@@ -463,20 +488,64 @@ public class StatementFactory
 
 		if (includeTableOwner)
 		{
-			return toUse.getTableExpression(this.dbConnection);
+			tname = toUse.getTableExpression(this.dbConnection);
 		}
+		else
+		{
+			if (dbConnection == null)
+			{
+				tname = SqlUtil.quoteObjectname(toUse.getTableName(), false, true, '"');
+			}
+			else
+			{
+				tname = dbConnection.getMetadata().quoteObjectname(toUse.getTableName());
+			}
+		}
+		return formatIdentifier(tname);
+	}
+
+	private boolean isQuoted(String name)
+	{
 		if (dbConnection == null)
 		{
-			return SqlUtil.quoteObjectname(toUse.getTableName(), false, true, '"');
+			return SqlUtil.isQuotedIdentifier(name);
 		}
-		return dbConnection.getMetadata().quoteObjectname(toUse.getTableName());
+		return dbConnection.getMetadata().isQuoted(name);
+	}
+
+	private String formatIdentifier(String name)
+	{
+		if (name == null) return name;
+
+		if (isQuoted(name)) return name;
+
+		switch (identifierStyle)
+		{
+			case lower:
+				return name.toLowerCase();
+			case upper:
+				return name.toUpperCase();
+		}
+		return name;
+	}
+	private void appendKeyword(StringBuilder text, String toAppend)
+	{
+		GeneratedIdentifierCase style = Settings.getInstance().getFormatterKeywordsCase();
+		if (style == GeneratedIdentifierCase.lower)
+		{
+			text.append(toAppend.toLowerCase());
+		}
+		else
+		{
+			text.append(toAppend);
+		}
 	}
 
 	private boolean isNull(Object value)
 	{
 		if (value == null) return true;
 		String s = value.toString();
-		if (emptyStringIsNull && s.length() == 0) return true;
+		if (emptyStringIsNull && s.isEmpty()) return true;
 		return false;
 	}
 
