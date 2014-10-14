@@ -21,7 +21,7 @@
     <style type="text/css">
      
       body {
-        font-size:14px;
+        font-size:12px;
       }
       
       h1 {
