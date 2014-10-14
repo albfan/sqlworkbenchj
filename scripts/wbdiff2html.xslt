@@ -12,8 +12,8 @@
   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
 />
 
-<xsl:variable name="ref-schema" select="/schema-diff/reference-connection/connection"/>
-<xsl:variable name="target-schema" select="/schema-diff/target-connection/connection"/>
+<xsl:variable name="ref-schema" select="concat('User=', /schema-diff/reference-connection/database-user, ' url=', /schema-diff/reference-connection/jdbc-url)"/>
+<xsl:variable name="target-schema" select="concat('User=', /schema-diff/target-connection/database-user, ' url=', /schema-diff/target-connection/jdbc-url)"/>
 
 <xsl:template match="/">
   <html>
