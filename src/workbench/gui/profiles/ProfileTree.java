@@ -232,7 +232,7 @@ public class ProfileTree
 	 */
 	public List<String> getExpandedGroupNames()
 	{
-		LinkedList<String> result = new LinkedList<String>();
+		LinkedList<String> result = new LinkedList<>();
 		TreePath[] groupNodes = this.profileModel.getGroupNodes();
 		for (TreePath groupNode : groupNodes)
 		{
