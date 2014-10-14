@@ -63,6 +63,7 @@ public class WbCreateProfile
 		cmdLine.addArgument(AppArguments.ARG_CONN_PWD);
 		cmdLine.addArgument(AppArguments.ARG_CONN_URL);
 		cmdLine.addArgument(AppArguments.ARG_CONN_USER);
+		cmdLine.addArgument("user");
 		cmdLine.addArgument(AppArguments.ARG_CONN_FETCHSIZE);
 		cmdLine.addArgument(AppArguments.ARG_CONN_EMPTYNULL);
 		cmdLine.addArgument(AppArguments.ARG_ALT_DELIMITER);
@@ -121,10 +122,23 @@ public class WbCreateProfile
 
 			profile = ConnectionProfile.createEmptyProfile();
 			String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
+			if (StringUtil.isBlank(user))
+			{
+				user = cmdLine.getValue("user");
+			}
 			String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
 			profile.setUrl(url);
 			profile.setUsername(user);
-			profile.setPassword(pwd);
+			
+			if (StringUtil.isNonBlank(pwd))
+			{
+				profile.setPassword(pwd);
+				profile.setStorePassword(true);
+			}
+			else
+			{
+				profile.setStorePassword(false);
+			}
 
 			String drvName = cmdLine.getValue(ARG_DRV_NAME);
 			if (drvName != null)
