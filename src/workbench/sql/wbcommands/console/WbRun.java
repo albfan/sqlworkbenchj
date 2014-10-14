@@ -156,4 +156,10 @@ public class WbRun
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

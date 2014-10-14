@@ -77,4 +77,10 @@ public class WbDisconnect
 		return mode == RunMode.Console;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

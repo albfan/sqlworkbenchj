@@ -110,7 +110,7 @@ public class ConnectionDescriptor
 		{
 			throw new InvalidConnectionDescriptor("No JDBC URL specified in connection specification", ResourceMgr.getFormattedString("ErrConnectDrvNotFound", url));
 		}
-		
+
 		DbDriver driver = getDriver(driverClass, jarfile);
 
 		ConnectionProfile result = new ConnectionProfile();

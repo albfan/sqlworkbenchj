@@ -110,4 +110,10 @@ public class WbListProfiles
 		return result;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

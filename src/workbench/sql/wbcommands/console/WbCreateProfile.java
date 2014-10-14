@@ -35,6 +35,7 @@ import workbench.db.DbDriver;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.wbcommands.ConnectionDescriptor;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -74,6 +75,7 @@ public class WbCreateProfile
 		cmdLine.addArgument(AppArguments.ARG_CONN_EMPTYNULL);
 		cmdLine.addArgument(ARG_DRV_NAME);
 		cmdLine.addArgument(AppArguments.ARG_PROFILE_GROUP);
+		cmdLine.addArgument(AppArguments.ARG_CONN_DESCRIPTOR);
 	}
 
 	@Override
@@ -103,12 +105,69 @@ public class WbCreateProfile
 			return result;
 		}
 
-		String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
-		String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
+		ConnectionProfile profile = null;
+		String descriptor = cmdLine.getValue(AppArguments.ARG_CONN_DESCRIPTOR);
 
-		ConnectionProfile profile = ConnectionProfile.createEmptyProfile();
-		String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
-		String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
+		if (StringUtil.isNonBlank(descriptor))
+		{
+			ConnectionDescriptor parser = new ConnectionDescriptor();
+			profile = parser.parseDefinition(descriptor);
+		}
+
+		if (profile == null)
+		{
+			String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
+			String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
+
+			profile = ConnectionProfile.createEmptyProfile();
+			String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
+			String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
+			profile.setUrl(url);
+			profile.setUsername(user);
+			profile.setPassword(pwd);
+
+			String drvName = cmdLine.getValue(ARG_DRV_NAME);
+			if (drvName != null)
+			{
+				List<DbDriver> drivers = ConnectionMgr.getInstance().getDrivers();
+				DbDriver drv = null;
+				for (DbDriver dbDriver : drivers)
+				{
+					if (dbDriver.getName().equalsIgnoreCase(drvName))
+					{
+						drv = dbDriver;
+						break;
+					}
+				}
+				if (drv != null)
+				{
+					profile.setDriver(drv);
+				}
+			}
+			else if (driverclass != null)
+			{
+				DbDriver drv = ConnectionMgr.getInstance().findDriver(driverclass);
+				if (drv != null)
+				{
+					profile.setDriver(drv);
+					profile.setDriverName(null);
+				}
+			}
+			else
+			{
+				driverclass = ConnectionDescriptor.findDriverClassFromUrl(url);
+				DbDriver drv = ConnectionMgr.getInstance().findDriver(driverclass);
+				if (drv != null)
+				{
+					profile.setDriver(drv);
+					profile.setDriverName(null);
+				}
+			}
+
+		}
+
+		profile.setTemporaryProfile(false);
+
 		boolean commit =  cmdLine.getBoolean(AppArguments.ARG_CONN_AUTOCOMMIT, false);
 		String delimDef = cmdLine.getValue(AppArguments.ARG_ALT_DELIMITER);
 		DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
@@ -116,53 +175,10 @@ public class WbCreateProfile
 		boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
 		boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
 
-		profile.setTemporaryProfile(false);
-		profile.setName(name);
-
-		String drvName = cmdLine.getValue(ARG_DRV_NAME);
-		if (drvName != null)
-		{
-			List<DbDriver> drivers = ConnectionMgr.getInstance().getDrivers();
-			DbDriver drv = null;
-			for (DbDriver dbDriver : drivers)
-			{
-				if (dbDriver.getName().equalsIgnoreCase(drvName))
-				{
-					drv = dbDriver;
-					break;
-				}
-			}
-			if (drv != null)
-			{
-				profile.setDriver(drv);
-			}
-		}
-		else if (driverclass != null)
-		{
-			DbDriver drv = ConnectionMgr.getInstance().findDriver(driverclass);
-			if (drv != null)
-			{
-				profile.setDriver(drv);
-				profile.setDriverName(null);
-			}
-		}
-		else
-		{
-			profile.setDriverName(drvName);
-		}
-
-		String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
-		if (group != null)
-		{
-			profile.setGroup(group);
-		}
 		boolean savePwd = cmdLine.getBoolean(WbStoreProfile.ARG_SAVE_PASSWORD, true);
 		profile.setStorePassword(savePwd);
 		profile.setAutocommit(commit);
 		profile.setStoreExplorerSchema(false);
-		profile.setUrl(url);
-		profile.setUsername(user);
-		profile.setPassword(pwd);
 		profile.setRollbackBeforeDisconnect(rollback);
 		profile.setAlternateDelimiter(delim);
 		profile.setTrimCharData(trimCharData);
@@ -174,10 +190,23 @@ public class WbCreateProfile
 		int fetchSize = cmdLine.getIntValue(AppArguments.ARG_CONN_FETCHSIZE, -1);
 		profile.setDefaultFetchSize(fetchSize);
 
+		profile.setName(name);
+		String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
+		if (group != null)
+		{
+			profile.setGroup(group);
+		}
+
 		ConnectionMgr.getInstance().addProfile(profile);
 		ConnectionMgr.getInstance().saveProfiles();
 		result.addMessage(ResourceMgr.getFormattedString("MsgProfileAdded", profile.getKey().toString()));
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 
 }

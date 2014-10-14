@@ -126,5 +126,11 @@ public class WbListMacros
 		result.setSuccess();
 		return result;
 	}
+	
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
 
 }

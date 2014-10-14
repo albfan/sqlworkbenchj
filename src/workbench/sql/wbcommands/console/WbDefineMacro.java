@@ -88,7 +88,7 @@ public class WbDefineMacro
 	{
 		this.macroClientId = clientId;
 	}
-	
+
 	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
@@ -181,6 +181,12 @@ public class WbDefineMacro
 		result.setSuccess();
 
 		return result;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 
 }

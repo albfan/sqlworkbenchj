@@ -38,7 +38,7 @@ import workbench.sql.StatementRunnerResult;
  */
 public class WbToggleDisplay extends SqlCommand
 {
-	public static final String VERB = "WBTOGGLEDISPLAY";
+	public static final String VERB = "WbToggleDisplay";
 
 	@Override
 	public StatementRunnerResult execute(String aSql)
@@ -79,6 +79,12 @@ public class WbToggleDisplay extends SqlCommand
 	public boolean isModeSupported(RunMode mode)
 	{
 		return mode != RunMode.GUI;
+	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
 	}
 
 }

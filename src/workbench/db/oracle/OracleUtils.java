@@ -88,6 +88,10 @@ public class OracleUtils
 		// return DATE columns as Types.TIMESTAMP. We have to mimic that
 		// when using our own statement to retrieve column definitions
 		String value = getDriverProperty(conn, "oracle.jdbc.mapDateToTimestamp", true);
+
+		// this is what the driver does: it assumes true if nothing was specified
+		if (value == null) return true;
+
 		return "true".equalsIgnoreCase(value);
 	}
 

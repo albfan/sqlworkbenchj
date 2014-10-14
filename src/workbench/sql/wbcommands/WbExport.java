@@ -746,6 +746,16 @@ public class WbExport
 			{
 				LogMgr.logDebug("WbExport.execute()", "Exporting tables: " + StringUtil.listToString(tablesToExport, ','));
 			}
+			List<String> notFound = argParser.getMissingTables();
+			if (CollectionUtil.isNonEmpty(notFound))
+			{
+				String tableList = StringUtil.listToString(notFound, ',');
+				String msg = ResourceMgr.getString("MsgTablesNotFound") + " " + tableList;
+				result.addMessage(msg);
+				result.addMessageNewLine();
+				result.setWarning(true);
+				LogMgr.logWarning("WbExport.execute()", "The following tables were not found: " + tableList);
+			}
 		}
 		catch (SQLException e)
 		{
@@ -1057,7 +1067,7 @@ public class WbExport
 	public void consumeResult(StatementRunnerResult toConsume)
 	{
 		if (!toConsume.isSuccess()) return;
-		
+
 		// Run an export that is defined by a SQL Statement
 		// i.e. no sourcetable given in the initial wbexport command
 		try

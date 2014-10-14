@@ -154,4 +154,11 @@ public class WbDefineDriver
 		}
 		return true;
 	}
+
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }

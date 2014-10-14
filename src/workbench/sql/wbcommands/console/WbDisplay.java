@@ -100,4 +100,10 @@ public class WbDisplay
 		return mode != RunMode.GUI;
 	}
 
+	@Override
+	public boolean isWbCommand()
+	{
+		return true;
+	}
+
 }
