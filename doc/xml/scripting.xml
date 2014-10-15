@@ -101,6 +101,27 @@
 			parameter is ignored.
 		</para>
 
+    <para>
+      When using Linux (or Unix-Based operating systems) the command can also be passed using a "Here Document". In this
+      case you must not provide a value for the <literal>-command</literal> parameter:
+    </para>
+    <programlisting>
+java -jar sqlworkbench.jar -profile=PostgresProduction -command &lt;&lt;SQLCMD
+insert into some_table values (42);
+delete from other_table where id = 42;
+commit;
+SQLCMD</programlisting>
+    <para>
+      The position of the <literal>-command</literal> parameter does not matter. The following will also work:
+    </para><programlisting>
+java -jar sqlworkbench.jar \
+     -profile=PostgresProduction \
+     -command \
+     -displayResult=true \
+     -showTiming=true &lt;&lt;SQLCMD
+select *
+from person;
+SQLCMD</programlisting>
 	</section>
 
 	<section id="scripting-delimiter">
