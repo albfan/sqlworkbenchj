@@ -495,6 +495,7 @@ public class TableSourceBuilder
 		{
 			result.append(generateDrop(toCreate, true));
 			result.append('\n');
+			result.append('\n');
 		}
 
 		if (!replaceAvailable)
