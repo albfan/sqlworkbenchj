@@ -32,6 +32,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="7" type="fix">For Oracle the position of a function or procedure inside a package was not always detected correctly when displaying the source in the DbExplorer</entry>
     <entry dev-build="7" type="fix">For Postgres WbProcSource did not display the source code for functions with arguments</entry>
     <entry dev-build="6" type="fix">The source code for views with case-sensitive names was not displayed</entry>
     <entry dev-build="6" type="fix">The pre-defined JDBC driver definitions were no longer loaded (e.g. when starting SQL Workbench for the first time)</entry>
