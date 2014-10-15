@@ -64,21 +64,34 @@ public class OraclePackageParserTest
              "      INSERT INTO emp VALUES (empno_seq.NEXTVAL, ename, job, \n" +
              "         mgr, SYSDATE, sal, comm, deptno) \n" +
              "   END hire_employee; \n" +
+             "---------------------------------------------------- \n" +
              " \n" +
+             " \n" +
+             "---------------------------------------------------- \n" +
              "   PROCEDURE fire_employee(emp_id NUMBER) IS \n" +
              "   BEGIN \n" +
              "      DELETE FROM emp WHERE empno = emp_id; \n" +
              "   END fire_employee; \n" +
+             "---------------------------------------------------- \n" +
              " \n" +
+             " \n" +
+             " \n" +
+             "---------------------------------------------------- \n" +
              "   PROCEDURE fire_employee IS \n" +
              "   BEGIN \n" +
              "      DELETE FROM emp WHERE empno = emp_id; \n" +
              "   END fire_employee; \n" +
+             "---------------------------------------------------- \n" +
              " \n" +
+             " \n" +
+             " \n" +
+             " \n" +
+             "---------------------------------------------------- \n" +
              "   PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE) IS \n" +
              "   BEGIN \n" +
              "      DELETE FROM emp WHERE empno = emp_id; \n" +
              "   END fire_employee; \n" +
+             "---------------------------------------------------- \n" +
              "END emp_actions;";
 
 
@@ -96,7 +109,7 @@ public class OraclePackageParserTest
 	@Test
 	public void testFindProc()
 	{
-		String script = decl + "\n/\n/" + body;
+		String script = decl + "\n/\n/" + body + "\n/\n";
 		int pos = script.indexOf("   PROCEDURE hire_employee(") + 3;
 		ProcedureDefinition proc = new ProcedureDefinition("HIRE_EMPLOYEE", DatabaseMetaData.procedureNoResult);
 		int procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id"));

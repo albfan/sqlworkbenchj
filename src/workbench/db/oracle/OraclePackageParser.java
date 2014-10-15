@@ -177,8 +177,10 @@ public class OraclePackageParser
 		SQLToken t = lexer.getNextToken(false, false);
 
 		boolean packageHeaderFound = false;
+		String procType = def.isFunction() ? "FUNCTION" : "PROCEDURE";
+
 		// Find the start of the package body
-		while (t != null)
+ 		while (t != null)
 		{
 			if (t.getContents().equals("PACKAGE") || t.getContents().equals("TYPE"))
 			{
@@ -226,7 +228,8 @@ public class OraclePackageParser
 					continue;
 				}
 			}
-			if (text.equals("PROCEDURE") || text.equals("FUNCTION"))
+
+			if (text.equals(procType))
 			{
 				lastKeywordPos = t.getCharBegin();
 			}

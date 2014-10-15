@@ -169,7 +169,7 @@ public class OracleProcedureReader
 						{
 							result.append("CREATE OR REPLACE ");
 						}
-						result.append(line);
+						result.append(StringUtil.makePlainLinefeed(line));
 					}
 				}
 				if (lineCount > 0)
@@ -196,7 +196,7 @@ public class OracleProcedureReader
 						{
 							result.append("CREATE OR REPLACE ");
 						}
-						result.append(line);
+						result.append(StringUtil.makePlainLinefeed(line));
 					}
 				}
 			}
