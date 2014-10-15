@@ -113,6 +113,8 @@ public class DefaultViewReader
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 		String verb = SqlUtil.getSqlVerb(source.toString());
 
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
+
 		// SQL Server and DB2 return the full CREATE VIEW statement
 		// DB2 even returns the CREATE OR REPLACE if the view was created that way.
 		// therefor the verb is compared with startsWith() rather than equals()
@@ -120,12 +122,7 @@ public class DefaultViewReader
 		{
 			if (includeDrop && !verb.equals("CREATE OR REPLACE"))
 			{
-				String type = SqlUtil.getCreateType(source);
-				result.append("DROP ");
-				result.append(type);
-				result.append(' ');
-				result.append(viewTable.getTableExpression(connection));
-				result.append(';');
+				result.append(builder.generateDrop(viewTable, false));
 				result.append(lineEnding);
 				result.append(lineEnding);
 			}
@@ -139,7 +136,6 @@ public class DefaultViewReader
 		}
 		else
 		{
-			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
 			result.append(builder.generateCreateObject(includeDrop, viewTable, null));
 
 			if (connection.getDbSettings().generateColumnListInViews())
@@ -248,7 +244,7 @@ public class DefaultViewReader
 		ResultSet rs = null;
 		Savepoint sp = null;
 		String query = null;
-		
+
 		try
 		{
 			if (connection.getDbSettings().useSavePointForDML())
