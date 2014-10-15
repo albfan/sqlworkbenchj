@@ -572,6 +572,11 @@ public class DbMetadata
 		return types.toArray(EMPTY_STRING_ARRAY);
 	}
 
+	public String[] getSelectableTypes()
+	{
+		return Arrays.copyOf(selectableTypes, selectableTypes.length);
+	}
+
 	public List<String> getTableTypes()
 	{
 		return new ArrayList<>(tableTypesList);

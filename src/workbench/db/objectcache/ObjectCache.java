@@ -96,7 +96,7 @@ class ObjectCache
 		String dbId = conn.getDbId();
 		List<String> typeList = Settings.getInstance().getListProperty("workbench.db." + dbId + ".completion.types", true, null);
 
-		if (CollectionUtil.isEmpty(typeList)) return conn.getMetadata().getTableTypesArray();
+		if (CollectionUtil.isEmpty(typeList)) return conn.getMetadata().getSelectableTypes();
 		return StringUtil.toArray(typeList, true);
 	}
 
