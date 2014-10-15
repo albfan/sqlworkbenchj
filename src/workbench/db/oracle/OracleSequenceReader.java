@@ -28,13 +28,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.JdbcUtils;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
-import workbench.log.LogMgr;
+
+import workbench.storage.ColumnRemover;
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -47,11 +52,13 @@ public class OracleSequenceReader
 {
   private WbConnection connection;
 	private boolean is12c;
+	private boolean hasIdentitySeqName;
 
   public OracleSequenceReader(WbConnection conn)
   {
     this.connection = conn;
 		this.is12c = JdbcUtils.hasMinimumServerVersion(connection, "12.1");
+		hasIdentitySeqName = OracleUtils.is12_1_0_2(conn);
   }
 
 	@Override
@@ -81,29 +88,32 @@ public class OracleSequenceReader
   {
 		StringBuilder sql = new StringBuilder(100);
 		sql.append(
-			"SELECT SEQUENCE_OWNER, \n" +
-			"       SEQUENCE_NAME, \n" +
-			"       MIN_VALUE, \n" +
-			"       MAX_VALUE, \n" +
-			"       INCREMENT_BY, \n" +
-			"       CASE WHEN CYCLE_FLAG = 'Y' then 'CYCLE' ELSE 'NOCYCLE' END AS CYCLE_FLAG, \n" +
-			"       CASE WHEN ORDER_FLAG = 'Y' then 'ORDER' ELSE 'NOORDER' END AS ORDER_FLAG, \n" +
-			"       CACHE_SIZE, \n" +
-			"       LAST_NUMBER \n" +
-			"FROM ALL_SEQUENCES \n" +
-			"WHERE sequence_owner = '");
+			"select /* SQLWorkbench */ s.sequence_owner, \n" +
+			"       s.sequence_name, \n" +
+			"       s.min_value, \n" +
+			"       s.max_value, \n" +
+			"       s.increment_by, \n" +
+			"       case when cycle_flag = 'Y' then 'CYCLE' else 'NOCYCLE' end as cycle_flag, \n" +
+			"       case when order_flag = 'Y' then 'ORDER' else 'NOORDER' end as order_flag, \n" +
+			"       s.cache_size, \n" +
+			"       s.last_number, \n" +
+			(hasIdentitySeqName ? "       ic.table_name, \n" : "       null as table_name, \n") +
+			(hasIdentitySeqName ? "       ic.column_name \n" : "       null as column_name \n") +
+			"from all_sequences s \n");
+
+		if (hasIdentitySeqName)
+		{
+			sql.append("  left join all_tab_identity_cols ic on ic.owner = s.sequence_owner and ic.sequence_name = s.sequence_name \n");
+		}
+
+		sql.append("WHERE s.sequence_owner = '");
 
 		sql.append(StringUtil.trimQuotes(owner));
 		sql.append("'\n ");
 
-		if (is12c && connection.getDbSettings().hideOracleIdentitySequences())
-		{
-			sql.append("  AND sequence_name NOT LIKE 'ISEQ$$%'"); // remove Oracle 12c sequences used for identity columns
-		}
-
 		if (StringUtil.isNonEmpty(sequence))
 		{
-			SqlUtil.appendAndCondition(sql, "sequence_name", sequence, connection);
+			SqlUtil.appendAndCondition(sql, "s.sequence_name", sequence, connection);
 		}
 		sql.append("\nORDER BY 1,2");
 
@@ -130,6 +140,11 @@ public class OracleSequenceReader
       SqlUtil.closeAll(rs, stmt);
     }
 
+		if (!hasIdentitySeqName)
+		{
+			ColumnRemover remover = new ColumnRemover(result);
+			result = remover.removeColumnsByName("TABLE_NAME", "COLUMN_NAME");
+		}
     return result;
   }
 
@@ -153,6 +168,18 @@ public class OracleSequenceReader
 		result.setSequenceProperty(PROP_CYCLE, Boolean.toString("CYCLE".equalsIgnoreCase(ds.getValueAsString(row, "CYCLE_FLAG"))));
 		result.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(row, "CACHE_SIZE"));
 		result.setSequenceProperty(PROP_ORDERED, Boolean.toString("ORDER".equalsIgnoreCase(ds.getValueAsString(row, "ORDER_FLAG"))));
+
+		int tblIndex = ds.getColumnIndex("TABLE_NAME");
+		if (tblIndex > -1)
+		{
+			String table = ds.getValueAsString(row, "TABLE_NAME");
+			String col = ds.getValueAsString(row, "COLUMN_NAME");
+			if (table != null && col != null)
+			{
+				TableIdentifier seqTable = new TableIdentifier(owner, table);
+				result.setRelatedTable(seqTable, col);
+			}
+		}
 		readSequenceSource(result);
 		return result;
 	}
@@ -166,6 +193,14 @@ public class OracleSequenceReader
 
 		StringBuilder result = new StringBuilder(100);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
+
+		TableIdentifier tbl = def.getRelatedTable();
+		String col = def.getRelatedColumn();
+		if (tbl != null && col != null)
+		{
+			result.append("-- identity sequence for " + tbl.getTableName() + "." + col);
+			result.append(nl);
+		}
 
 		result.append("CREATE SEQUENCE ");
 		result.append(def.getSequenceName());

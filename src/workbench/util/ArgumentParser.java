@@ -51,7 +51,7 @@ public class ArgumentParser
 	private static final String ARG_PRESENT = "$WB$__ARG_PRESENT__$WB$";
 
 	// Maps the argument to the supplied value
-	private Map<String, Object> arguments;
+	protected Map<String, Object> arguments;
 
 	// Maps a registered argument to the argument type
 	private Map<String, ArgumentType> argTypes;

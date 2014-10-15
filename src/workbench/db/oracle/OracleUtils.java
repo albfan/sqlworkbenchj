@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ConnectionProfile;
+import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
@@ -248,5 +249,48 @@ public class OracleUtils
 	public static boolean optimizeCatalogQueries()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.prefer_user_catalog_tables", true);
+	}
+
+	public static boolean is12_1_0_2(WbConnection conn)
+	{
+		if (conn == null) return false;
+		if (!JdbcUtils.hasMinimumServerVersion(conn, "12.1")) return false;
+
+		try
+		{
+			String release = conn.getSqlConnection().getMetaData().getDatabaseProductVersion();
+			return is12_1_0_2(release);
+		}
+		catch (Throwable th)
+		{
+			return false;
+		}
+	}
+
+	public static boolean is12_1_0_2(String release)
+	{
+		int pos = release.indexOf("Release ");
+		if (pos < 0) return false;
+		int pos2 = release.indexOf(" - ", pos);
+		String version = release.substring(pos + "Release".length() + 1, pos2);
+		if (!version.startsWith("12")) return false;
+		// "12.1.0.2.0"
+		String[] elements = version.split("\\.");
+		if (elements == null || elements.length < 5) return false;
+		try
+		{
+			int major = Integer.parseInt(elements[0]);
+			int minor = Integer.parseInt(elements[1]);
+			int first = Integer.parseInt(elements[2]);
+			int second = Integer.parseInt(elements[3]);
+			if (major < 12) return false;
+			if (minor > 1) return true;
+
+			return (first >= 0 && second >= 2);
+		}
+		catch (Throwable th)
+		{
+			return false;
+		}
 	}
 }

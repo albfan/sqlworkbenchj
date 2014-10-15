@@ -834,6 +834,12 @@ public final class WbManager
 			String scriptname = cmdLine.getValue(AppArguments.ARG_SCRIPT);
 			String cmd = cmdLine.getValue(AppArguments.ARG_COMMAND);
 
+			if (StringUtil.isEmptyString(cmd) && cmdLine.isArgPresent(AppArguments.ARG_COMMAND))
+			{
+				cmd = cmdLine.getSystemIn();
+				cmdLine.setCommandString(cmd);
+			}
+
 			boolean readDriverTemplates = true;
 			boolean showHelp = cmdLine.isArgPresent("help");
 			boolean hasScript = StringUtil.isNonBlank(scriptname) || StringUtil.isNonBlank(cmd) ;

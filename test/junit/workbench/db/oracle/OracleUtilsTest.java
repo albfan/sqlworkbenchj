@@ -23,9 +23,9 @@
 package workbench.db.oracle;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
-import workbench.db.WbConnection;
 
 /**
  *
@@ -51,4 +51,27 @@ public class OracleUtilsTest
 		assertEquals(expResult, result);
 	}
 
+	@Test
+	public void testIs12102()
+	{
+		String version =
+			"Oracle Database 12c Enterprise Edition Release 12.1.0.1.0 - 64bit Production\n" +
+			"With the Partitioning, OLAP, Advanced Analytics and Real Application Testing options";
+
+		boolean is12102 = OracleUtils.is12_1_0_2(version);
+		assertFalse(is12102);
+
+		version =
+			"Oracle Database 12c Enterprise Edition Release 12.1.0.2.0 - 64bit Production\n" +
+			"With the Partitioning, OLAP, Advanced Analytics and Real Application Testing options";
+		is12102 = OracleUtils.is12_1_0_2(version);
+		assertTrue(is12102);
+
+		version =
+			"Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production\n" +
+			"With the Partitioning, OLAP, Advanced Analytics and Real Application Testing options";
+		is12102 = OracleUtils.is12_1_0_2(version);
+		assertTrue(is12102);
+
+	}
 }
