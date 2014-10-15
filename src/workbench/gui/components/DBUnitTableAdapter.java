@@ -95,19 +95,22 @@ public class DBUnitTableAdapter
 				if (!dataStore.hasPkColumns()) return null;
 
 				ColumnIdentifier[] columns = dataStore.getColumns();
+
 				if (columns == null) return null;
-				int pkCount = 0;
+
+				List<Column> pkCols = new ArrayList<>(1);
 				for (ColumnIdentifier col : columns)
 				{
-					if (col.isPkColumn()) pkCount++;
+					if (col.isPkColumn())
+					{
+						DataType type = DataType.forSqlType(col.getDataType());
+						Column pk = new Column(col.getColumnName(), type);
+						pkCols.add(pk);
+					}
 				}
-				if (pkCount == 0) return null;
-				Column[] result = new Column[pkCount];
-				for (ColumnIdentifier col : columns)
-				{
-					DataType type = DataType.forSqlType(col.getDataType());
-					Column pk = new Column(col.getColumnName(), type);
-				}
+				if (pkCols.isEmpty()) return null;
+
+				Column[] result = pkCols.toArray(new Column[]{});
 				return result;
 			}
 

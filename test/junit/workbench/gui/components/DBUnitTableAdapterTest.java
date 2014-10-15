@@ -80,6 +80,7 @@ public class DBUnitTableAdapterTest
 		Column[] pk = meta.getPrimaryKeys();
 		assertNotNull(pk);
 		assertEquals(1, pk.length);
+		assertEquals("ID", pk[0].getColumnName());
 		Object name = adapter.getValue(0, "FIRSTNAME");
 		assertEquals("Arthur", name);
 	}
