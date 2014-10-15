@@ -3009,6 +3009,8 @@ public class Settings
 
 	public boolean restoreWindowSize(final Component target, final String id)
 	{
+		if (StringUtil.isEmptyString(id)) return false;
+
 		boolean result = false;
 		final int w = this.getWindowWidth(id);
 		final int h = this.getWindowHeight(id);

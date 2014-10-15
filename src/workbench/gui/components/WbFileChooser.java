@@ -90,9 +90,9 @@ public class WbFileChooser
 	{
 		this.dialog = super.createDialog(parent);
 		ResourceMgr.setWindowIcons(dialog, "workbench");
-		if (windowSettingsId != null)
+		if (Settings.getInstance().restoreWindowSize(dialog, windowSettingsId))
 		{
-			Settings.getInstance().restoreWindowSize(dialog, windowSettingsId);
+			dialog.setLocationRelativeTo(parent);
 		}
 		return dialog;
 	}
@@ -122,7 +122,7 @@ public class WbFileChooser
 			ValidatingComponent vc = (ValidatingComponent)accessory;
 			return vc.validateInput();
 		}
-		
+
 		if (!this.isFileSelectionEnabled())
 		{
 			File f = getSelectedFile();

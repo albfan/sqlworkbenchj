@@ -133,9 +133,10 @@ public class OpenFileAction
 				}
 			}
 
-			JFileChooser fc = new WbFileChooser(lastDir);
+			WbFileChooser fc = new WbFileChooser(lastDir);
+			fc.setSettingsID("workbench.editor.file.opendialog");
 			fc.setMultiSelectionEnabled(true);
-
+			
 			JPanel acc = new JPanel(new GridBagLayout());
 			JComponent p = EncodingUtil.createEncodingPanel();
 			p.setBorder(new EmptyBorder(0, 5, 0, 0));
