@@ -70,6 +70,7 @@ import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
 
 import workbench.util.DeadlockMonitor;
+import workbench.util.FileUtil;
 import workbench.util.MacOSHelper;
 import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
@@ -836,7 +837,7 @@ public final class WbManager
 
 			if (StringUtil.isEmptyString(cmd) && cmdLine.isArgPresent(AppArguments.ARG_COMMAND))
 			{
-				cmd = cmdLine.getSystemIn();
+				cmd = FileUtil.getSystemIn();
 				cmdLine.setCommandString(cmd);
 			}
 

@@ -23,6 +23,7 @@
 package workbench.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -571,4 +572,33 @@ public class FileUtil
 		};
 		Collections.sort(files, comp);
 	}
+
+	/**
+	 * Reads input from System.in if data is avaiable.
+	 *
+	 * @return  the current (pending) input from System.in or null if nothing is there to read.
+	 */
+	public static String getSystemIn()
+	{
+		try
+		{
+			ByteArrayOutputStream out = new ByteArrayOutputStream(50);
+			if (System.in.available() != 0)
+			{
+				int ch = System.in.read();
+				while (ch > -1)
+				{
+					out.write(ch);
+					ch = System.in.read();
+				}
+				String data = out.toString();
+				return data;
+			}
+		}
+		catch (Throwable th)
+		{
+		}
+		return null;
+	}
+
 }

@@ -23,7 +23,6 @@
 package workbench;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -242,29 +241,6 @@ public class AppArguments
 	public void setCommandString(String cmd)
 	{
 		arguments.put(ARG_COMMAND, cmd);
-	}
-
-	public String getSystemIn()
-	{
-		try
-		{
-			ByteArrayOutputStream out = new ByteArrayOutputStream(50);
-			if (System.in.available() != 0)
-			{
-				int ch = System.in.read();
-				while (ch > -1)
-				{
-					out.write(ch);
-					ch = System.in.read();
-				}
-				String data = out.toString();
-				return data;
-			}
-		}
-		catch (Throwable th)
-		{
-		}
-		return null;
 	}
 
 	public String getHelp()
