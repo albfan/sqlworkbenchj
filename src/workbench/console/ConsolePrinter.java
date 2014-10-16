@@ -36,6 +36,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.exporter.TextRowDataConverter;
+import workbench.resource.Settings;
 
 import workbench.storage.RowData;
 
@@ -68,6 +69,7 @@ public abstract class ConsolePrinter
 	public ConsolePrinter()
 	{
 		converter.setNullString(ConsoleSettings.getNullString());
+		converter.setDefaultNumberFormatter(Settings.getInstance().createDefaultDecimalFormatter());
 	}
 
 	/**
@@ -90,7 +92,7 @@ public abstract class ConsolePrinter
 	 *
 	 * @see DataStorePrinter
 	 * @see ResultSetPrinter
-	 * @see workbench.util.StringUtil#escapeText(java.lang.String, workbench.util.CharacterRange, java.lang.String) 
+	 * @see workbench.util.StringUtil#escapeText(java.lang.String, workbench.util.CharacterRange, java.lang.String)
 	 *
 	 * @param flag
 	 */
