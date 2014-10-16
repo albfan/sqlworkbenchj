@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-10-05">
+    <entry dev-build="7" type="enh">When enabling empty lines as a statement delimiter it's now possible to mix empty lines and the standard delimiter in the editor</entry>
     <entry dev-build="7" type="enh">It's now possible to pass a SQL statement through the -command parameter using Linux "Here Documents"</entry>
     <entry dev-build="7" type="enh">WbRowCount now has an option to exclude some columns from the result</entry>
     <entry dev-build="6" type="enh">The amount of details retrieved from the database when editing a result set can now be reduced through a configuration property. Refer to the Chapter "Advanced configuration options" in the manual for details.</entry>
