@@ -3,6 +3,8 @@
   <indexterm><primary>DDL</primary><secondary>Execute DDL statements</secondary></indexterm>
   <indexterm><primary>Stored procedures</primary><secondary>create stored procedure</secondary></indexterm>
   <indexterm><primary>Triggers</primary><secondary>create trigger</secondary></indexterm>
+  <indexterm><primary>SQL</primary><secondary>change the statement delimiter</secondary></indexterm>
+  <indexterm><primary>Statement delimiter</primary><secondary>change the statement delimiter</secondary></indexterm>
 
   <para>
     &wb-productname; will send the contents of the editor unaltered to the DBMS, so
@@ -37,12 +39,8 @@ END;</programlisting>
   </para>
 
   <para>
-    The solution is to terminate the script with a character
-    sequence called the "<link linkend="options-alternate-delimiter">alternate delimiter</link>".
-    The value of this sequence can be configured in the <link linkend="options">options dialog</link>
-    as a global default, or per <link linkend="profile-alternate-delimiter">connection profile</link>
-    (so you can use different alternate delimiters for different database systems).
-    The default is the forward slash <emphasis role="bold">/</emphasis> which has to appear on a line of its own.
+    The solution is to terminate the script with a character sequence that is called the "<link linkend="profile-alternate-delimiter">alternate delimiter</link>"
+    which can be defined in the connection profile.
   </para>
 
   <para>
@@ -113,4 +111,7 @@ END;
     after the <literal>SELECT</literal> to the alternate delimiter.
   </para>
 
+  <para>
+    Currently there is no possibility to change the alternate delimiter dynamically (e.g. through a SQL command).
+  </para>
 </section>
