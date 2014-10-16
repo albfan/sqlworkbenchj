@@ -78,14 +78,14 @@ public class WbGenInsert
 
 		if (cmdLine.hasUnknownArguments())
 		{
-			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrGenDeleteWrongParam"));
+			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrGenInsertWrongParam"));
 			result.setFailure();
 			return result;
 		}
 
 		if (!cmdLine.hasArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrGenDropWrongParam"));
+			result.addMessage(ResourceMgr.getString("ErrGenInsertWrongParam"));
 			result.setFailure();
 			return result;
 		}
