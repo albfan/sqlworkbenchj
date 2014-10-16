@@ -236,12 +236,12 @@ public class EditorOptionsPanel
     GridBagConstraints gridBagConstraints;
 
     editorTabSizeLabel = new JLabel();
-    tabSize = new JTextField();
+    tabSize = new NumberField();
     altDelimLabel = new JLabel();
     historySizeLabel = new JLabel();
     historySizeField = new NumberField();
     electricScrollLabel = new JLabel();
-    electricScroll = new JTextField();
+    electricScroll = new NumberField();
     internalLineEndingLabel = new JLabel();
     internalLineEnding = new JComboBox();
     externalLineEndingLabel = new JLabel();
@@ -268,10 +268,10 @@ public class EditorOptionsPanel
     jLabel2 = new JLabel();
     autoCloseBrackets = new JTextField();
     wheelScrollLabel = new JLabel();
-    wheelScrollLines = new JTextField();
+    wheelScrollLines = new NumberField();
     reloadLabel = new JLabel();
     reloadType = new JComboBox();
-    alternateDelimiter = new NumberField();
+    alternateDelimiter = new JTextField();
 
     setLayout(new GridBagLayout());
 
