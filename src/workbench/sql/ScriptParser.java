@@ -479,6 +479,7 @@ public class ScriptParser
 		if (parserType == ParserType.Postgres || parserType == ParserType.SqlServer)
 		{
 			LexerBasedParser l = new LexerBasedParser(parserType);
+			l.setAllowMixedTerminator(Settings.getInstance().getAllowMixingEmptyLinesAndTerminator());
 			p = l;
 		}
 		else if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands || supportIdioticQuotes)

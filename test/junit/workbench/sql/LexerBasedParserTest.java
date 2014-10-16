@@ -197,33 +197,77 @@ public class LexerBasedParserTest
 	}
 
 	@Test
-	public void testPostgresEmptyLineDelim()
+	public void testMixedEmptyLinesWithTerminator()
 		throws Exception
 	{
-		String sql = "select * from test;\n\n" + "select * from person;\n";
+		String sql = "select * from foo;\n\n" + "select * from bar;\n";
 		LexerBasedParser parser = new LexerBasedParser(ParserType.Postgres);
 		parser.setEmptyLineIsDelimiter(true);
+		parser.setAllowMixedTerminator(true);
 		parser.setScript(sql);
-		List<String> statements = getStatements(parser);
-		for (String stmt : statements)
-		{
-			System.out.println(stmt);
-		}
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar", cmd.getSQL());
+
+		sql =
+			"select * from foo;\n" +
+			"select * from bar;\n" +
+			"select * from foobar;\n" +
+			"\n" +
+			"select * from foo;";
+		parser.setScript(sql);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foobar", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL());
+
+		assertFalse(parser.hasMoreCommands());
 	}
 
 	@Test
-	public void testSqlServerEmptyLineDelim()
+	public void testEmptyLinesWithTerminator()
 		throws Exception
 	{
-		String sql = "select * from test;\n\n" + "select * from person;\n";
-		LexerBasedParser parser = new LexerBasedParser(ParserType.SqlServer);
+		String sql = "select * from foo;\n\n" + "select * from bar;\n";
+		LexerBasedParser parser = new LexerBasedParser(ParserType.Postgres);
 		parser.setEmptyLineIsDelimiter(true);
+		parser.setAllowMixedTerminator(false);
 		parser.setScript(sql);
-		List<String> statements = getStatements(parser);
-		for (String stmt : statements)
-		{
-			System.out.println(stmt);
-		}
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo;", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar;", cmd.getSQL());
+
+		sql =
+			"select * from foo;\n" +
+			"select * from bar;\n" +
+			"select * from foobar;\n" +
+			"\n" +
+			"select * from foo;";
+		parser.setScript(sql);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo;\n" +
+			"select * from bar;\n" +
+			"select * from foobar;", cmd.getSQL());
 	}
 
 	@Test
@@ -266,8 +310,21 @@ public class LexerBasedParserTest
 			{
 				fail("Wrong command index: " + index);
 			}
-
 		}
+
+		sql = "select *\nfrom foo\n\nselect * from bar";
+		parser = new LexerBasedParser(sql);
+		parser.setEmptyLineIsDelimiter(true);
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select *\nfrom foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar", cmd.getSQL());
+
+		assertFalse(parser.hasMoreCommands());
 	}
 
 	@Test
@@ -480,7 +537,6 @@ public class LexerBasedParserTest
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		stmt = sql.substring(cmd.getStartPositionInScript(), cmd.getEndPositionInScript());
-		System.out.println(stmt);
 		assertEquals("create table two (id integer)", stmt.trim());
 	}
 

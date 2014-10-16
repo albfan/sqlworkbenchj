@@ -63,6 +63,8 @@ public class LexerBasedParser
 	protected boolean checkOracleInclude;
 	protected boolean calledOnce;
 	protected boolean checkPgQuoting;
+	protected boolean lastStatementUsedTerminator;
+	protected boolean allowEmptyLineMixed;
 	protected ParserType parserType;
 	protected Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
 	protected Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
@@ -100,6 +102,11 @@ public class LexerBasedParser
 	public void setEmptyLineIsDelimiter(boolean flag)
 	{
 		emptyLineIsDelimiter = flag;
+	}
+
+	public void setAllowMixedTerminator(boolean flag)
+	{
+		allowEmptyLineMixed = flag;
 	}
 
 	public void setCheckPgQuoting(boolean flag)
@@ -140,7 +147,17 @@ public class LexerBasedParser
 
 		int previousEnd = -1;
 
-		SQLToken token = lexer.getNextToken(true, true);
+		SQLToken token = null;
+
+		if (lastStatementUsedTerminator && emptyLineIsDelimiter)
+		{
+			token = skipEmptyLines();
+		}
+		else
+		{
+			token = lexer.getNextToken(true, true);
+		}
+
 		boolean startOfLine = false;
 		boolean singleLineCommand = false;
 		boolean danglingQuote = false;
@@ -149,12 +166,22 @@ public class LexerBasedParser
 
 		String pgQuoteString = null;
 
+		lastStatementUsedTerminator = false;
+
 		while (token != null)
 		{
 			if (lastStart == -1) lastStart = token.getCharBegin();
 			String text = token.getText();
 
-			boolean checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
+			boolean checkForDelimiter;
+			if (emptyLineIsDelimiter && !allowEmptyLineMixed)
+			{
+				checkForDelimiter = false;
+			}
+			else
+			{
+				checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
+			}
 
 			if (checkPgQuoting && isDollarQuote(text))
 			{
@@ -193,6 +220,7 @@ public class LexerBasedParser
 
 				if (checkForDelimiter && delimiterString.equals(text))
 				{
+					lastStatementUsedTerminator = true;
 					break;
 				}
 				else if (checkForDelimiter && delimiterString.startsWith(text))
@@ -214,6 +242,7 @@ public class LexerBasedParser
 					boolean delimiterMatched = delimiterString.equals(delim.toString());
 					if (delimiterMatched)
 					{
+						lastStatementUsedTerminator = true;
 						scriptEnd = token == null;
 						break;
 					}
@@ -223,6 +252,7 @@ public class LexerBasedParser
 				{
 					if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text)))
 					{
+						lastStatementUsedTerminator = false;
 						break;
 					}
 					startOfLine = true;
@@ -248,6 +278,23 @@ public class LexerBasedParser
 		}
 		hasMoreCommands = false;
 		return null;
+	}
+
+	protected SQLToken skipEmptyLines()
+	{
+		SQLToken token = lexer.getNextToken(true, true);
+		if (token == null) return null;
+
+		String text = token.getText();
+		while (token != null && (isLineBreak(text) || isMultiLine(text)))
+		{
+			token = lexer.getNextToken(true, true);
+			if (token != null)
+			{
+				text = token.getText();
+			}
+		}
+		return token;
 	}
 
 	boolean isLineBreak(String text)

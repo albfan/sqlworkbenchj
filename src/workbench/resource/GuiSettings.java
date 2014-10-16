@@ -1140,5 +1140,4 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.sql.uselast.alternative", flag);
 	}
-
 }
