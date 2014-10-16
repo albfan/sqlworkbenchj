@@ -197,6 +197,36 @@ public class LexerBasedParserTest
 	}
 
 	@Test
+	public void testPostgresEmptyLineDelim()
+		throws Exception
+	{
+		String sql = "select * from test;\n\n" + "select * from person;\n";
+		LexerBasedParser parser = new LexerBasedParser(ParserType.Postgres);
+		parser.setEmptyLineIsDelimiter(true);
+		parser.setScript(sql);
+		List<String> statements = getStatements(parser);
+		for (String stmt : statements)
+		{
+			System.out.println(stmt);
+		}
+	}
+
+	@Test
+	public void testSqlServerEmptyLineDelim()
+		throws Exception
+	{
+		String sql = "select * from test;\n\n" + "select * from person;\n";
+		LexerBasedParser parser = new LexerBasedParser(ParserType.SqlServer);
+		parser.setEmptyLineIsDelimiter(true);
+		parser.setScript(sql);
+		List<String> statements = getStatements(parser);
+		for (String stmt : statements)
+		{
+			System.out.println(stmt);
+		}
+	}
+
+	@Test
 	public void testEmptyLineDelimiter()
 		throws Exception
 	{
