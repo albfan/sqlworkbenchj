@@ -173,6 +173,12 @@ public class XsltTransformer
 					transformer.setParameter(entry.getKey(), value);
 				}
 			}
+			File outDir = outputFile.getParentFile();
+			transformer.setParameter("wb-basedir", outDir.getAbsolutePath());
+
+			File scriptDir = inputFile.getParentFile();
+			transformer.setParameter("wb-scriptdir", scriptDir.getAbsolutePath());
+
 			in = new BufferedInputStream(new FileInputStream(inputFile),32*1024);
 			out = new BufferedOutputStream(new FileOutputStream(outputFile), 32*1024);
 			Source xmlSource = new StreamSource(in);
