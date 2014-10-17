@@ -30,6 +30,7 @@ import java.util.Set;
 import workbench.resource.ResourceMgr;
 
 import workbench.util.CollectionUtil;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 
 /**
@@ -92,7 +93,7 @@ public class DatastoreTransposer
 
 		for (int i=0; i < rows.length; i++)
 		{
-			columns[i+1] = ResourceMgr.getString("TxtRow") + " #" + Integer.toString(rows[i] + 1);
+			columns[i+1] = ResourceMgr.getString("TxtRow") + " " + NumberStringCache.getNumberString(rows[i] + 1);
 			types[i+1] = Types.VARCHAR;
 		}
 
