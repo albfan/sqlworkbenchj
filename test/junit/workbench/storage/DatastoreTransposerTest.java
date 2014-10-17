@@ -56,8 +56,8 @@ public class DatastoreTransposerTest
 //		DataStorePrinter printer = new DataStorePrinter(result);
 //		printer.printTo(System.out);
 
-		assertEquals("Row #1", result.getColumnDisplayName(1));
-		assertEquals("Row #3", result.getColumnDisplayName(2));
+		assertEquals("Row 1", result.getColumnDisplayName(1));
+		assertEquals("Row 3", result.getColumnDisplayName(2));
 
 		assertEquals("1", result.getValueAsString(0, 1));
 		assertEquals("Arthur", result.getValueAsString(1, 1));
