@@ -216,6 +216,7 @@ public class ResultInfo
 				catch (Throwable th)
 				{
 					LogMgr.logWarning("ResultInfo.<init>", "Error when checking readonly attribute for column : " + name, th);
+					checkReadOnly = false;
 				}
 			}
 
