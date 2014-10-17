@@ -65,17 +65,17 @@ import workbench.util.CharSequenceReader;
 	private StringBuilder commentBuffer = new StringBuilder();
 	private int commentNestCount = 0;
 	private int commentStartChar = 0;
-  private boolean checkStupidQuoting = false;
+	private boolean checkStupidQuoting = false;
 
-  public void setCheckStupidQuoting(boolean flag)
-  {
-    checkStupidQuoting = flag;
-  }
+	public void setCheckStupidQuoting(boolean flag)
+	{
+		checkStupidQuoting = flag;
+	}
 
-  public boolean getCheckStupidQuoting()
-  {
-    return checkStupidQuoting;
-  }
+	public boolean getCheckStupidQuoting()
+	{
+		return checkStupidQuoting;
+	}
 
 	/**
 	 * next Token method that allows you to control if whitespace and comments are
@@ -86,11 +86,11 @@ import workbench.util.CharSequenceReader;
 		try
 		{
 			SQLToken t = getNextToken();
-      if (t != null && checkStupidQuoting && "[".equals(t.getText()))
-      {
-         return findStupidQuoteEnd(t);
-      }
-      if (returnComments && returnWhiteSpace) return t;
+			if (t != null && checkStupidQuoting && "[".equals(t.getText()))
+			{
+				 return findStupidQuoteEnd(t);
+			}
+			if (returnComments && returnWhiteSpace) return t;
 
 			while (t != null && ((!returnWhiteSpace && t.isWhiteSpace()) || (!returnComments && t.isComment())))
 			{
@@ -109,8 +109,8 @@ import workbench.util.CharSequenceReader;
 		}
 	}
 
-  public SQLToken findStupidQuoteEnd(SQLToken current)
-  {
+	public SQLToken findStupidQuoteEnd(SQLToken current)
+	{
 		StringBuilder realText = new StringBuilder(30);
 		realText.append(current.getText());
 		SQLToken next = getNextToken(true, true);
@@ -127,7 +127,7 @@ import workbench.util.CharSequenceReader;
 			next = getNextToken(true, true);
 		}
 		return new SQLToken(SQLToken.ERROR, realText.toString(), current.getCharBegin(), lastEnd);
-  }
+	}
 
 	/**
 	 * Closes the current input stream, and resets the scanner to read from a new input stream.
@@ -154,12 +154,12 @@ import workbench.util.CharSequenceReader;
 
 	NonStandardLexer(String source)
 	{
-	  this(new StringReader(source));
+		this(new StringReader(source));
 	}
 
 	NonStandardLexer(CharSequence source)
 	{
-	  this(new CharSequenceReader(source));
+		this(new CharSequenceReader(source));
 	}
 %}
 

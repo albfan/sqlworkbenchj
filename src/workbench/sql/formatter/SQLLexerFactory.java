@@ -75,20 +75,14 @@ public class SQLLexerFactory
 	public static SQLLexer createLexer(Reader input, ParserType type)
 	{
 		SQLLexer lexer = new NonStandardLexer(input);
-		if (type == ParserType.SqlServer)
-		{
-			lexer.setCheckStupidQuoting(true);
-		}
+		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
 	}
 
 	public static SQLLexer createNonStandardLexer(Reader input, ParserType type)
 	{
 		SQLLexer lexer = new NonStandardLexer(input);
-		if (type == ParserType.SqlServer)
-		{
-			lexer.setCheckStupidQuoting(true);
-		}
+		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
 	}
 
@@ -96,10 +90,7 @@ public class SQLLexerFactory
 	public static SQLLexer createNonStandardLexer(String sql, ParserType type)
 	{
 		SQLLexer lexer = new NonStandardLexer(sql);
-		if (type == ParserType.SqlServer)
-		{
-			lexer.setCheckStupidQuoting(true);
-		}
+		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
 	}
 

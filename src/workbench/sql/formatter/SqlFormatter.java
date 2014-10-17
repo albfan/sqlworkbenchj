@@ -29,8 +29,6 @@ import java.util.Set;
 import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
-import workbench.db.DbMetadata;
-
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
 import workbench.sql.syntax.SqlKeywordHelper;
@@ -345,8 +343,7 @@ public class SqlFormatter
 		saveLeadingWhitespace();
 		if (this.sql.length() == 0) return "";
 
-		this.lexer = SQLLexerFactory.createLexer(this.sql);
-		this.lexer.setCheckStupidQuoting(DbMetadata.DBID_MS.equals(this.dbId));
+		this.lexer = SQLLexerFactory.createLexerForDbId(dbId, this.sql);
 		this.result = new StringBuilder(this.sql.length() + 100);
 
 		this.formatSql();
@@ -2256,8 +2253,7 @@ public class SqlFormatter
 		// Now process the collected column definitions
 		for (StringBuilder col : cols)
 		{
-			SQLLexer lex = SQLLexerFactory.createLexer(col.toString());
-			lex.setCheckStupidQuoting(this.lexer.getCheckStupidQuoting());
+			SQLLexer lex = SQLLexerFactory.createLexerForDbId(dbId, col.toString());
 			SQLToken column = lex.getNextToken(false, false);
 			if (column == null) continue;
 			String colname = column.getContents();
