@@ -2,7 +2,6 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-10-05">
-    <entry dev-build="7" type="enh">When enabling empty lines as a statement delimiter it's now possible to mix empty lines and the standard delimiter in the editor</entry>
     <entry dev-build="7" type="enh">It's now possible to pass a SQL statement through the -command parameter using Linux "Here Documents"</entry>
     <entry dev-build="7" type="enh">WbRowCount now has an option to exclude some columns from the result</entry>
     <entry dev-build="6" type="enh">The amount of details retrieved from the database when editing a result set can now be reduced through a configuration property. Refer to the Chapter "Advanced configuration options" in the manual for details.</entry>
@@ -34,6 +33,7 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="7" type="fix">For Postgres and SQL Server it was no longer possible to use empty lines as a delimiter and mix that with the standard delimiter</entry>
     <entry dev-build="7" type="fix">The global alternate delimiter (Tools -&gt; Options -&gt; Editor) could not be edited any more</entry>
     <entry dev-build="7" type="fix">In console mode, the output did not honor the setting for "Decimal Digits"</entry>
     <entry dev-build="7" type="fix">For Oracle 12c the automatically generated sequence for identity columns were not displayed</entry>

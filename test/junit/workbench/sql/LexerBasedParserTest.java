@@ -203,7 +203,6 @@ public class LexerBasedParserTest
 		String sql = "select * from foo;\n\n" + "select * from bar;\n";
 		LexerBasedParser parser = new LexerBasedParser(ParserType.Postgres);
 		parser.setEmptyLineIsDelimiter(true);
-		parser.setAllowMixedTerminator(true);
 		parser.setScript(sql);
 		ScriptCommandDefinition cmd = parser.getNextCommand();
 		assertNotNull(cmd);
@@ -237,37 +236,6 @@ public class LexerBasedParserTest
 		assertEquals("select * from foo", cmd.getSQL());
 
 		assertFalse(parser.hasMoreCommands());
-	}
-
-	@Test
-	public void testEmptyLinesWithTerminator()
-		throws Exception
-	{
-		String sql = "select * from foo;\n\n" + "select * from bar;\n";
-		LexerBasedParser parser = new LexerBasedParser(ParserType.Postgres);
-		parser.setEmptyLineIsDelimiter(true);
-		parser.setAllowMixedTerminator(false);
-		parser.setScript(sql);
-		ScriptCommandDefinition cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from foo;", cmd.getSQL());
-
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from bar;", cmd.getSQL());
-
-		sql =
-			"select * from foo;\n" +
-			"select * from bar;\n" +
-			"select * from foobar;\n" +
-			"\n" +
-			"select * from foo;";
-		parser.setScript(sql);
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from foo;\n" +
-			"select * from bar;\n" +
-			"select * from foobar;", cmd.getSQL());
 	}
 
 	@Test

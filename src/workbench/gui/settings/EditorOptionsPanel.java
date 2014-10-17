@@ -128,7 +128,6 @@ public class EditorOptionsPanel
 		alwaysAllowExecSel.setSelected(!GuiSettings.getExecuteOnlySelected());
 		allowEditDuringExec.setSelected(!GuiSettings.getDisableEditorDuringExecution());
 		emptyLineDelimiter.setSelected(Settings.getInstance().getEmptyLineIsDelimiter());
-		mixEmptyLines.setSelected(Settings.getInstance().getAllowMixingEmptyLinesAndTerminator());
 		hiliteError.setSelected(GuiSettings.getHighlightErrorStatement());
 		autoCloseBrackets.setText(Settings.getInstance().getProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, ""));
 		int lines = GuiSettings.getWheelScrollLines();
@@ -140,7 +139,6 @@ public class EditorOptionsPanel
 		{
 			wheelScrollLines.setText(Integer.toString(lines));
 		}
-		mixEmptyLines.setEnabled(emptyLineDelimiter.isSelected());
 		WbSwingUtilities.makeEqualSize(externalLineEnding, internalLineEnding);
 	}
 
@@ -183,7 +181,6 @@ public class EditorOptionsPanel
 		set.setEditorUseTabCharacter(useTabs.isSelected());
 		set.setProperty(Settings.PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, hiliteCurrent.isSelected());
 		set.setEmptyLineIsDelimiter(emptyLineDelimiter.isSelected());
-		set.setAllowMixingEmptyLinesAndTerminator(mixEmptyLines.isSelected());
 		set.setStoreScriptDirInWksp(storeDirInWksp.isSelected());
 		GuiSettings.setDefaultFileDir(defaultDir.getFilename());
 		GuiSettings.setFollowFileDirectory(followCurrentDir.isSelected());
@@ -263,7 +260,6 @@ public class EditorOptionsPanel
     emptyLineDelimiter = new JCheckBox();
     hiliteError = new JCheckBox();
     useCurrentLineStmt = new JCheckBox();
-    mixEmptyLines = new JCheckBox();
     jPanel1 = new JPanel();
     followCurrentDir = new JCheckBox();
     jLabel1 = new JLabel();
@@ -503,7 +499,6 @@ public class EditorOptionsPanel
     emptyLineDelimiter.setBorder(null);
     emptyLineDelimiter.setHorizontalAlignment(SwingConstants.LEFT);
     emptyLineDelimiter.setHorizontalTextPosition(SwingConstants.RIGHT);
-    emptyLineDelimiter.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
@@ -530,17 +525,6 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     jPanel2.add(useCurrentLineStmt, gridBagConstraints);
-
-    mixEmptyLines.setText(ResourceMgr.getString("LblAllowEmptyLineMix")); // NOI18N
-    mixEmptyLines.setBorder(null);
-    mixEmptyLines.setHorizontalAlignment(SwingConstants.LEFT);
-    mixEmptyLines.setHorizontalTextPosition(SwingConstants.RIGHT);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 15, 0, 0);
-    jPanel2.add(mixEmptyLines, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -681,21 +665,12 @@ public class EditorOptionsPanel
     {
       EditorOptionsPanel.this.followCurrentDirActionPerformed(evt);
     }
-    else if (evt.getSource() == emptyLineDelimiter)
-    {
-      EditorOptionsPanel.this.emptyLineDelimiterActionPerformed(evt);
-    }
   }// </editor-fold>//GEN-END:initComponents
 
 	private void followCurrentDirActionPerformed(ActionEvent evt)//GEN-FIRST:event_followCurrentDirActionPerformed
 	{//GEN-HEADEREND:event_followCurrentDirActionPerformed
 		defaultDir.setEnabled(followCurrentDir.isSelected());
 	}//GEN-LAST:event_followCurrentDirActionPerformed
-
-  private void emptyLineDelimiterActionPerformed(ActionEvent evt)//GEN-FIRST:event_emptyLineDelimiterActionPerformed
-  {//GEN-HEADEREND:event_emptyLineDelimiterActionPerformed
-		mixEmptyLines.setEnabled(emptyLineDelimiter.isSelected());
-  }//GEN-LAST:event_emptyLineDelimiterActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -725,7 +700,6 @@ public class EditorOptionsPanel
   private JPanel jPanel1;
   private JPanel jPanel2;
   private JCheckBox keepHilite;
-  private JCheckBox mixEmptyLines;
   private JTextField noWordSep;
   private JLabel noWordSepLabel;
   private JLabel reloadLabel;

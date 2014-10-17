@@ -104,6 +104,11 @@ public class DelimiterDefinition
 		return this.delimiter.equals(";");
 	}
 
+	public boolean isNonStandard()
+	{
+		return !this.isStandard();
+	}
+
 	public void resetChanged()
 	{
 		this.changed = false;
@@ -127,7 +132,7 @@ public class DelimiterDefinition
 		{
 			return STANDARD_DELIMITER;
 		}
-		
+
 		String delim = arg;
 
 		int pos = arg.indexOf(':');

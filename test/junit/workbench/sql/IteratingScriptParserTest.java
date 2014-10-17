@@ -85,4 +85,51 @@ public class IteratingScriptParserTest
 		assertNotNull(c);
 		assertEquals("-- some comment \n2", c.getSQL());
 	}
+
+	@Test
+	public void testMixedEmptyLinesWithTerminator()
+		throws Exception
+	{
+		String sql =
+			"select * from foo;\n" +
+			"\n" +
+			"select * from bar;\n";
+		IteratingScriptParser parser = new IteratingScriptParser();
+		parser.setEmptyLineIsDelimiter(true);
+		parser.setScript(sql);
+		parser.setStoreStatementText(true);
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar", cmd.getSQL());
+
+		sql =
+			"select * from foo;\n" +
+			"select * from bar;\n" +
+			"select * from foobar;\n" +
+			"\n" +
+			"select * from foo;";
+		parser.setScript(sql);
+		parser.setStoreStatementText(true);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foobar", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL());
+
+		assertFalse(parser.hasMoreCommands());
+	}
 }

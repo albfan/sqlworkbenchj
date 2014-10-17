@@ -479,13 +479,12 @@ public class ScriptParser
 		if (parserType == ParserType.Postgres || parserType == ParserType.SqlServer)
 		{
 			LexerBasedParser l = new LexerBasedParser(parserType);
-			l.setAllowMixedTerminator(Settings.getInstance().getAllowMixingEmptyLinesAndTerminator());
 			p = l;
 		}
 		else if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands || supportIdioticQuotes)
 		{
 			p = new IteratingScriptParser();
-			((IteratingScriptParser)p).setSupportIdioticQuotes(this.supportIdioticQuotes);
+			((IteratingScriptParser)p).setSupportIdioticQuotes(supportIdioticQuotes);
 		}
 		else
 		{
@@ -498,7 +497,7 @@ public class ScriptParser
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
 		p.setAlternateLineComment(this.alternateLineComment);
 
-		if (useAlternateDelimiter || !DelimiterDefinition.STANDARD_DELIMITER.equals(this.delimiter))
+		if (useAlternateDelimiter || this.delimiter.isNonStandard())
 		{
 			p.setCheckForSingleLineCommands(false);
 		}

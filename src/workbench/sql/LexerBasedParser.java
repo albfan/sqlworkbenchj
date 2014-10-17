@@ -64,7 +64,6 @@ public class LexerBasedParser
 	protected boolean calledOnce;
 	protected boolean checkPgQuoting;
 	protected boolean lastStatementUsedTerminator;
-	protected boolean allowEmptyLineMixed;
 	protected ParserType parserType;
 	protected Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
 	protected Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
@@ -102,11 +101,6 @@ public class LexerBasedParser
 	public void setEmptyLineIsDelimiter(boolean flag)
 	{
 		emptyLineIsDelimiter = flag;
-	}
-
-	public void setAllowMixedTerminator(boolean flag)
-	{
-		allowEmptyLineMixed = flag;
 	}
 
 	public void setCheckPgQuoting(boolean flag)
@@ -173,16 +167,8 @@ public class LexerBasedParser
 			if (lastStart == -1) lastStart = token.getCharBegin();
 			String text = token.getText();
 
-			boolean checkForDelimiter;
-			if (emptyLineIsDelimiter && !allowEmptyLineMixed)
-			{
-				checkForDelimiter = false;
-			}
-			else
-			{
-				checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
-			}
-
+			boolean checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
+			
 			if (checkPgQuoting && isDollarQuote(text))
 			{
 				if (inPgQuote && text.equals(pgQuoteString))

@@ -2034,16 +2034,6 @@ public class Settings
 		setProperty("workbench.editor.sql.emptyline.delimiter", flag);
 	}
 
-	public boolean getAllowMixingEmptyLinesAndTerminator()
-	{
-		return getBoolProperty("workbench.editor.sql.emptyline.delimiter.mixed", true);
-	}
-
-	public void setAllowMixingEmptyLinesAndTerminator(boolean flag)
-	{
-		setProperty("workbench.editor.sql.emptyline.delimiter.mixed", flag);
-	}
-
 	public boolean getAutoSaveExternalFiles()
 	{
 		return getBoolProperty("workbench.editor.autosave", getAutoSaveWorkspace());
