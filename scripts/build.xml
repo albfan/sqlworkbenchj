@@ -872,8 +872,30 @@
     <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
       <jvmarg value="-Xmx256m"/>
       <arg value="-q"/>
-      <arg value="../src/workbench/sql/formatter/SQLLexer.flex"/>
+      <arg value="../src/workbench/sql/formatter/StandardLexer.flex"/>
     </java>
+
+    <copy file="../src/workbench/sql/formatter/StandardLexer.flex"
+          tofile="../src/workbench/sql/formatter/NonStandardLexer.flex"
+          overwrite="true"/>
+
+    <replace file="../src/workbench/sql/formatter/NonStandardLexer.flex">
+      <replacefilter>
+        <replacetoken>StandardLexer</replacetoken>
+        <replacevalue>NonStandardLexer</replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>string=([\'](([^\']|\'\')*)[\'])</replacetoken>
+        <replacevalue>string=([\'](([^\']|\'\'|\\\')*)[\'])</replacevalue>
+      </replacefilter>
+    </replace>
+
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
+      <jvmarg value="-Xmx256m"/>
+      <arg value="-q"/>
+      <arg value="../src/workbench/sql/formatter/NonStandardLexer.flex"/>
+    </java>
+    
   </target>
 
 <path id="junit.path">
