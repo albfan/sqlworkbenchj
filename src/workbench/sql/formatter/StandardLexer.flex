@@ -1,10 +1,10 @@
-/* SQLLexer.java is a generated file.  You probably want to
- * edit SQLLexer.lex to make changes.  Use JFlex to generate it.
- * To generate SQLLexer.java
+/* StandardLexer.java is a generated file.  You probably want to
+ * edit StandardLexer.lex to make changes.  Use JFlex to generate it.
+ * To generate StandardLexer.java
  * Install <a href="http://jflex.de/">JFlex</a> v1.3.2 or later.
  * Once JFlex is in your classpath run<br>
- * <code>java JFlex.Main SQLLexer.lex</code><br>
- * You will then have a file called SQLLexer.java
+ * <code>java JFlex.Main StandardLexer.lex</code><br>
+ * You will then have a file called StandardLexer.java
  */
 
 /*
@@ -32,10 +32,10 @@ import java.io.*;
 import workbench.util.CharSequenceReader;
 
 /**
- * SQLLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
+ * StandardLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
  *  <CODE>
  *  <PRE>
- *  SQLLexer shredder = new SQLLexer(System.in);
+ *  StandardLexer shredder = new StandardLexer(System.in);
  *  SQLToken t;
  *  while ((t = shredder.getNextToken()) != null){
  *      System.out.println(t);
@@ -49,7 +49,8 @@ import workbench.util.CharSequenceReader;
 %%
 
 %public
-%class SQLLexer
+%implements SQLLexer
+%class StandardLexer
 %function getNextToken
 %type SQLToken
 %column
@@ -66,7 +67,7 @@ import workbench.util.CharSequenceReader;
 	private int commentStartChar = 0;
   private boolean checkStupidQuoting = false;
 
-  void setCheckStupidQuoting(boolean flag)
+  public void setCheckStupidQuoting(boolean flag)
   {
     checkStupidQuoting = flag;
   }
@@ -151,12 +152,12 @@ import workbench.util.CharSequenceReader;
 		this.yycolumn = yycolumn;
 	}
 
-	SQLLexer(String source)
+	StandardLexer(String source)
 	{
 	  this(new StringReader(source));
 	}
 
-	SQLLexer(CharSequence source)
+	StandardLexer(CharSequence source)
 	{
 	  this(new CharSequenceReader(source));
 	}

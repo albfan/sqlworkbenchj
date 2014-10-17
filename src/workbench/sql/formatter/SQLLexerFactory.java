@@ -23,6 +23,7 @@ import java.io.Reader;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+
 import workbench.sql.ParserType;
 
 /**
@@ -33,47 +34,68 @@ public class SQLLexerFactory
 {
 	public static SQLLexer createLexer()
 	{
-		SQLLexer lexer = new SQLLexer("");
+		SQLLexer lexer = new StandardLexer("");
 		return lexer;
 	}
 
 	public static SQLLexer createLexer(WbConnection conn)
 	{
-		SQLLexer lexer = new SQLLexer("");
+		SQLLexer lexer = new StandardLexer("");
 		configureLexer(lexer, conn);
 		return lexer;
 	}
 
 	public static SQLLexer createLexer(CharSequence sql)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = new StandardLexer(sql);
 		return lexer;
 	}
 
 	public static SQLLexer createLexer(WbConnection conn, String sql)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = new StandardLexer(sql);
 		configureLexer(lexer, conn);
 		return lexer;
 	}
 
 	public static SQLLexer createLexer(WbConnection conn, CharSequence sql)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = new StandardLexer(sql);
 		configureLexer(lexer, conn);
 		return lexer;
 	}
 
 	public static SQLLexer createLexerForDbId(String dbId, CharSequence sql)
 	{
-		SQLLexer lexer = new SQLLexer(sql);
+		SQLLexer lexer = new StandardLexer(sql);
 		configureLexer(lexer, dbId);
 		return lexer;
 	}
 
 	public static SQLLexer createLexer(Reader input, ParserType type)
 	{
-		SQLLexer lexer = new SQLLexer(input);
+		SQLLexer lexer = new NonStandardLexer(input);
+		if (type == ParserType.SqlServer)
+		{
+			lexer.setCheckStupidQuoting(true);
+		}
+		return lexer;
+	}
+
+	public static SQLLexer createNonStandardLexer(Reader input, ParserType type)
+	{
+		SQLLexer lexer = new NonStandardLexer(input);
+		if (type == ParserType.SqlServer)
+		{
+			lexer.setCheckStupidQuoting(true);
+		}
+		return lexer;
+	}
+
+
+	public static SQLLexer createNonStandardLexer(String sql, ParserType type)
+	{
+		SQLLexer lexer = new NonStandardLexer(sql);
 		if (type == ParserType.SqlServer)
 		{
 			lexer.setCheckStupidQuoting(true);

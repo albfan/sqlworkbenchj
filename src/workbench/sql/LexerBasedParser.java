@@ -54,6 +54,7 @@ public class LexerBasedParser
 	protected DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 	protected int lastStart = -1;
 	protected int currentStatementIndex;
+	protected boolean checkEscapedQuotes;
 	protected boolean storeStatementText = true;
 	protected boolean returnLeadingWhitespace;
 	protected boolean emptyLineIsDelimiter;
@@ -105,7 +106,7 @@ public class LexerBasedParser
 
 	public void setCheckPgQuoting(boolean flag)
 	{
-		this.checkPgQuoting = flag;
+		checkPgQuoting = flag;
 	}
 
 	/**
@@ -168,7 +169,7 @@ public class LexerBasedParser
 			String text = token.getText();
 
 			boolean checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
-			
+
 			if (checkPgQuoting && isDollarQuote(text))
 			{
 				if (inPgQuote && text.equals(pgQuoteString))
@@ -339,6 +340,7 @@ public class LexerBasedParser
 	@Override
 	public void setCheckEscapedQuotes(boolean flag)
 	{
+		checkEscapedQuotes = flag;
 	}
 
 	@Override
@@ -347,14 +349,26 @@ public class LexerBasedParser
 		checkOracleInclude = flag;
 	}
 
+	private void createLexer()
+	{
+		if (checkEscapedQuotes)
+		{
+			lexer = SQLLexerFactory.createNonStandardLexer(input, parserType);
+		}
+		else
+		{
+			lexer = SQLLexerFactory.createLexer(input, parserType);
+		}
+	}
+
 	@Override
 	public final void setFile(File f, String encoding)
 		throws IOException
 	{
+		cleanup();
 		scriptLength = (int)FileUtil.getCharacterLength(f, encoding);
 		input = EncodingUtil.createBufferedReader(f, encoding);
-		lexer = SQLLexerFactory.createLexer(input, parserType);
-		calledOnce = false;
+		createLexer();
 		hasMoreCommands = (scriptLength > 0);
 		fileEncoding = encoding;
 		originalFile = f;
@@ -369,13 +383,21 @@ public class LexerBasedParser
 	@Override
 	public final void setScript(String script)
 	{
+		cleanup();
 		String toUse = StringUtil.rtrim(script);
 		input = new StringReader(toUse);
-		lexer = SQLLexerFactory.createLexer(input, parserType);
+		createLexer();
 		scriptLength = toUse.length();
 		realScriptLength = script.length();
-		calledOnce = false;
 		hasMoreCommands = (scriptLength > 0);
+	}
+
+	private void cleanup()
+	{
+		calledOnce = false;
+		lastStart = -1;
+		currentStatementIndex = 0;
+		lastStatementUsedTerminator = false;
 	}
 
 	@Override

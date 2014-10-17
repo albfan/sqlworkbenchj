@@ -22,7 +22,6 @@
  */
 package workbench.sql;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -197,105 +196,6 @@ public class LexerBasedParserTest
 	}
 
 	@Test
-	public void testMixedEmptyLinesWithTerminator()
-		throws Exception
-	{
-		String sql = "select * from foo;\n\n" + "select * from bar;\n";
-		LexerBasedParser parser = new LexerBasedParser(ParserType.Postgres);
-		parser.setEmptyLineIsDelimiter(true);
-		parser.setScript(sql);
-		ScriptCommandDefinition cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from foo", cmd.getSQL());
-
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from bar", cmd.getSQL());
-
-		sql =
-			"select * from foo;\n" +
-			"select * from bar;\n" +
-			"select * from foobar;\n" +
-			"\n" +
-			"select * from foo;";
-		parser.setScript(sql);
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from foo", cmd.getSQL());
-
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from bar", cmd.getSQL());
-
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from foobar", cmd.getSQL());
-
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from foo", cmd.getSQL());
-
-		assertFalse(parser.hasMoreCommands());
-	}
-
-	@Test
-	public void testEmptyLineDelimiter()
-		throws Exception
-	{
-		String sql = "select * from test\n\n" + "select * from person\n";
-		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser.setEmptyLineIsDelimiter(true);
-		ScriptCommandDefinition cmd = null;
-		while ((cmd = parser.getNextCommand()) != null)
-		{
-			int index = cmd.getIndexInScript();
-			if (index == 0)
-			{
-				assertEquals("select * from test", cmd.getSQL().trim());
-			}
-			else if (index == 1)
-			{
-				assertEquals("select * from person", cmd.getSQL().trim());
-			}
-			else
-			{
-				fail("Wrong command index: " + index);
-			}
-		}
-
-		sql = "select a,b,c\r\nfrom test\r\nwhere x = 1";
-		parser = new LexerBasedParser(sql);
-		parser.setEmptyLineIsDelimiter(true);
-
-		while ((cmd = parser.getNextCommand()) != null)
-		{
-			int index = cmd.getIndexInScript();
-			if (index == 0)
-			{
-				assertEquals("select a,b,c\r\nfrom test\r\nwhere x = 1", cmd.getSQL());
-			}
-			else
-			{
-				fail("Wrong command index: " + index);
-			}
-		}
-
-		sql = "select *\nfrom foo\n\nselect * from bar";
-		parser = new LexerBasedParser(sql);
-		parser.setEmptyLineIsDelimiter(true);
-
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select *\nfrom foo", cmd.getSQL());
-
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertEquals("select * from bar", cmd.getSQL());
-
-		assertFalse(parser.hasMoreCommands());
-	}
-
-	@Test
 	public void testPgParser()
 		throws Exception
 	{
@@ -463,25 +363,6 @@ public class LexerBasedParserTest
 		}
 	}
 
-	@Test
-	public void testQuotedDelimiter()
-		throws Exception
-	{
-		String sql = "select 'test\n;lines' from test;";
-		LexerBasedParser parser = new LexerBasedParser(sql);
-		ScriptCommandDefinition cmd = null;
-		int count = 0;
-		while ((cmd = parser.getNextCommand()) != null)
-		{
-			int index = cmd.getIndexInScript();
-			if (index == 0)
-			{
-				assertEquals("select 'test\n;lines' from test", cmd.getSQL());
-				count++;
-			}
-		}
-		assertEquals(1, count);
-	}
 
 	@Test
 	public void testAlternateDelimiter()
@@ -506,27 +387,6 @@ public class LexerBasedParserTest
 		assertNotNull(cmd);
 		stmt = sql.substring(cmd.getStartPositionInScript(), cmd.getEndPositionInScript());
 		assertEquals("create table two (id integer)", stmt.trim());
-	}
-
-	@Test
-	public void testWhiteSpaceAtEnd()
-		throws IOException
-	{
-		String sql = "create table target_table (id integer);\n" +
-			"wbcopy \n";
-
-		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser.setCheckEscapedQuotes(false);
-		parser.setEmptyLineIsDelimiter(false);
-		parser.setStoreStatementText(false);
-		ScriptCommandDefinition cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertNull(cmd.getSQL());
-
-		cmd = parser.getNextCommand();
-		assertNotNull(cmd);
-		assertNull(cmd.getSQL());
-		assertEquals(sql.length(), cmd.getEndPositionInScript());
 	}
 
 	@Test

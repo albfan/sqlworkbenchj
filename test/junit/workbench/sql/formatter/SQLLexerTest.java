@@ -49,7 +49,7 @@ public class SQLLexerTest
 	{
 		ArrayList<SQLToken> result = new ArrayList<>();
 
-		SQLLexer l = new SQLLexer(sql);
+		SQLLexer l = new StandardLexer(sql);
 		SQLToken t = l.getNextToken(false, false);
 		while (t != null)
 		{
@@ -129,7 +129,7 @@ public class SQLLexerTest
 			throws Exception
 	{
 		String sql = "Select [one AND two] from thetable;";
-		SQLLexer l = new SQLLexer(sql);
+		SQLLexer l = new StandardLexer(sql);
 		l.setCheckStupidQuoting(true);
 		SQLToken select = l.getNextToken(false, false);
 		assertEquals(select.getContents(), "SELECT");
@@ -139,7 +139,7 @@ public class SQLLexerTest
 		assertTrue(col.isIdentifier());
 
 		sql = "Select '[one AND two]' from thetable;";
-		l = new SQLLexer(sql);
+		l = new StandardLexer(sql);
 		l.setCheckStupidQuoting(true);
 		select = l.getNextToken(false, false);
 		assertEquals(select.getContents(), "SELECT");
@@ -149,7 +149,7 @@ public class SQLLexerTest
 		assertTrue(col.isLiteral());
 
 		sql = "CREATE TABLE [dumb]([Id]        [int] NOT NULL);";
-		l = new SQLLexer(sql);
+		l = new StandardLexer(sql);
 		l.setCheckStupidQuoting(true);
 		SQLToken t = l.getNextToken(true, true); // create
 		t = l.getNextToken(true, true); // whitespace
@@ -169,7 +169,7 @@ public class SQLLexerTest
 		assertEquals("[int]", t.getText());
 
 		sql = "SELECT * FROM [Some;Table];";
-		l = new SQLLexer(sql);
+		l = new StandardLexer(sql);
 		l.setCheckStupidQuoting(true);
 		t = l.getNextToken(false, false); // select
 		t = l.getNextToken(false, false); // *
@@ -185,7 +185,7 @@ public class SQLLexerTest
 	public void testQuotedIdentifier()
 	{
 		String sql = "Select \"one AND two\" from thetable;";
-		SQLLexer l = new SQLLexer(sql);
+		SQLLexer l = new StandardLexer(sql);
 		SQLToken select = l.getNextToken(false, false);
 
 		assertEquals(select.getContents(), "SELECT");
@@ -194,7 +194,7 @@ public class SQLLexerTest
 
 
 		sql = "WbExport -file=\"c:\\Documents and Settings\\test.txt\" -type=text";
-		l = new SQLLexer(sql);
+		l = new StandardLexer(sql);
 		SQLToken t = l.getNextToken(false, false);
 		assertEquals("WBEXPORT", t.getText().toUpperCase());
 		t = l.getNextToken(false, false);
@@ -260,7 +260,7 @@ public class SQLLexerTest
 		String sql = "values (\n   'line 1 \n x \n   line2;\n');";
 		ArrayList<SQLToken> tokens = new ArrayList<>();
 
-		SQLLexer l = new SQLLexer(sql);
+		SQLLexer l = new StandardLexer(sql);
 		SQLToken t = null;
 		while ((t = l.getNextToken()) != null)
 		{
