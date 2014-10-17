@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
-                xmlns:redirect="org.apache.xalan.xslt.extensions.Redirect"
+                xmlns:redirect="http://xml.apache.org/xalan/redirect"
                 extension-element-prefixes="redirect"
                 >
-  <xsl:output 
-    encoding="iso-8859-15" 
-    method="text" 
-    indent="no" 
-    omit-xml-declaration="yes"
-    doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
-  />
+<xsl:output encoding="iso-8859-15" method="text" indent="no" omit-xml-declaration="yes" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"/>
+  <xsl:param name="wb-basedir">.</xsl:param>
   <xsl:strip-space elements="*"/>
   <xsl:variable name="newline"><xsl:text>&#10;</xsl:text></xsl:variable>
   <xsl:template match="/">
     <xsl:for-each select="/schema-report/table-def">
       <xsl:variable name="table" select="table-name"/>
-      <xsl:variable name="filename" select="concat($table, '.ctl')"/>
-      <redirect:write select="$filename">OPTIONS (skip=1)
+      <xsl:variable name="filename" select="concat($wb-basedir, '/', $table, '.ctl')"/>
+      <redirect:write file="{$filename}">OPTIONS (skip=1)
 LOAD DATA CHARACTERSET UTF8
 TRUNCATE
 INTO TABLE <xsl:value-of select="$table"/>
@@ -38,7 +33,6 @@ FIELDS TERMINATED BY '\t'
 </xsl:for-each>
 )
       </redirect:write>
-      
     </xsl:for-each>
 
   </xsl:template>
