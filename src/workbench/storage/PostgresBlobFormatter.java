@@ -30,7 +30,7 @@ import workbench.db.exporter.BlobMode;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.FileUtil;
-import workbench.util.StringUtil;
+import workbench.util.NumberStringCache;
 
 /**
  * A class to format a byte[] array to be used as a literal in a SQL statement for PostgreSQL.
@@ -49,7 +49,7 @@ import workbench.util.StringUtil;
 public class PostgresBlobFormatter
 	implements BlobLiteralFormatter
 {
-	private BlobLiteralType blobLiteral;
+	private final BlobLiteralType blobLiteral;
 
 	public PostgresBlobFormatter()
 	{
@@ -109,11 +109,7 @@ public class PostgresBlobFormatter
 
 		StringBuilder result = new StringBuilder(buffer.length * 2 + 20);
 		result.append("decode('");
-		for (int i = 0; i < buffer.length; i++)
-		{
-			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
-			result.append(StringUtil.hexString(c, 2));
-		}
+		appendBuffer(buffer, result);
 		result.append("', 'hex')");
 		return result;
 	}
@@ -126,12 +122,17 @@ public class PostgresBlobFormatter
 
 		StringBuilder result = new StringBuilder(buffer.length * 2 + 5);
 		result.append("\\\\x");
+		appendBuffer(buffer, result);
+		return result;
+	}
+
+	private void appendBuffer(byte[] buffer, StringBuilder result)
+	{
 		for (int i = 0; i < buffer.length; i++)
 		{
 			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
-			result.append(StringUtil.hexString(c, 2));
+			result.append(NumberStringCache.getHexString(c));
 		}
-		return result;
 	}
 
 	private CharSequence getEscapeString(Object value)

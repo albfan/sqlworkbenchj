@@ -51,5 +51,10 @@ public class PostgresBlobFormatterTest
 		formatter = new PostgresBlobFormatter(BlobLiteralType.pgDecode);
 		String decodeLiteral = formatter.getBlobLiteral(blob).toString();
 		assertEquals("Wrong literal created", "decode('ff00100f', 'hex')", decodeLiteral);
+
+		formatter = new PostgresBlobFormatter(BlobLiteralType.pgHex);
+		decodeLiteral = formatter.getBlobLiteral(blob).toString();
+		assertEquals("Wrong literal created", "\\\\xff00100f", decodeLiteral);
 	}
+	
 }
