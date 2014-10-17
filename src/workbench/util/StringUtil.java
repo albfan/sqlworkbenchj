@@ -1412,7 +1412,7 @@ public class StringUtil
 						{
 							case pgHex:
 								outBuffer.append("\\x");
-								outBuffer.append(hexString(aChar, 2));
+								outBuffer.append(NumberStringCache.getHexString(aChar));
 								break;
 							case hex:
 								outBuffer.append(hexString(aChar, 4));

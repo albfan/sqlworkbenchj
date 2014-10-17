@@ -22,22 +22,11 @@
  */
 package workbench.util;
 
-import java.awt.Color;
-
 /**
  * @author Thomas Kellerer
  */
 public class HtmlUtil
 {
-
-	public static String getHtmlColor(Color c)
-	{
-		StringBuilder result = new StringBuilder(7);
-		result.append(StringUtil.hexString(c.getRed(), 2));
-		result.append(StringUtil.hexString(c.getGreen(), 2));
-		result.append(StringUtil.hexString(c.getBlue(), 2));
-		return result.toString();
-	}
 
 	public static String escapeXML(CharSequence s)
 	{

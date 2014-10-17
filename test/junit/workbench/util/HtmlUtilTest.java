@@ -34,16 +34,6 @@ public class HtmlUtilTest
 {
 
 	@Test
-	public void testHtmlColor()
-	{
-		assertEquals("ff0000", HtmlUtil.getHtmlColor(Color.RED));
-		assertEquals("00ff00", HtmlUtil.getHtmlColor(Color.GREEN));
-		assertEquals("0000ff", HtmlUtil.getHtmlColor(Color.BLUE));
-		assertEquals("000000", HtmlUtil.getHtmlColor(Color.BLACK));
-		assertEquals("ffffff", HtmlUtil.getHtmlColor(Color.WHITE));
-	}
-
-	@Test
   public void testEscapeHTML()
 	{
 		String input = "<sometag> sometext";
