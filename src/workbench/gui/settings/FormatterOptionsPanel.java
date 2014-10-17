@@ -127,13 +127,9 @@ public class FormatterOptionsPanel
     spaceAfterComma = new javax.swing.JCheckBox();
     addSpaceAfterLineBreakComma = new javax.swing.JCheckBox();
     commaAfterLineBreak = new javax.swing.JCheckBox();
-    keywordCaseLabel = new javax.swing.JLabel();
     joinWrappingStyle = new javax.swing.JComboBox();
     insertWithColumnNames = new javax.swing.JCheckBox();
-    keywordCase = new javax.swing.JComboBox();
     jLabel2 = new javax.swing.JLabel();
-    identifierCaseLabel = new javax.swing.JLabel();
-    identifierCase = new javax.swing.JComboBox();
     jLabel3 = new javax.swing.JLabel();
     jSeparator1 = new javax.swing.JSeparator();
     jSeparator2 = new javax.swing.JSeparator();
@@ -141,8 +137,6 @@ public class FormatterOptionsPanel
     jPanel1 = new javax.swing.JPanel();
     subselectMaxLabel = new javax.swing.JLabel();
     subselectMaxLength = new javax.swing.JTextField();
-    functionCaseLabel = new javax.swing.JLabel();
-    functionCase = new javax.swing.JComboBox();
     jPanel2 = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
     maxCharElementsLabel = new javax.swing.JLabel();
@@ -157,6 +151,13 @@ public class FormatterOptionsPanel
     insertColumns = new javax.swing.JTextField();
     updateColumnsLabel = new javax.swing.JLabel();
     updateColumns = new javax.swing.JTextField();
+    jPanel3 = new javax.swing.JPanel();
+    keywordCaseLabel = new javax.swing.JLabel();
+    keywordCase = new javax.swing.JComboBox();
+    functionCase = new javax.swing.JComboBox();
+    functionCaseLabel = new javax.swing.JLabel();
+    identifierCaseLabel = new javax.swing.JLabel();
+    identifierCase = new javax.swing.JComboBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -165,7 +166,7 @@ public class FormatterOptionsPanel
     spaceAfterComma.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
@@ -176,7 +177,7 @@ public class FormatterOptionsPanel
     addSpaceAfterLineBreakComma.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 25, 0, 0);
@@ -188,25 +189,16 @@ public class FormatterOptionsPanel
     commaAfterLineBreak.addActionListener(this);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
     add(commaAfterLineBreak, gridBagConstraints);
 
-    keywordCaseLabel.setLabelFor(keywordCase);
-    keywordCaseLabel.setText(ResourceMgr.getString("LblFmtKeyWord")); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
-    add(keywordCaseLabel, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 10;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
     add(joinWrappingStyle, gridBagConstraints);
@@ -216,45 +208,20 @@ public class FormatterOptionsPanel
     insertWithColumnNames.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
     add(insertWithColumnNames, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
-    add(keywordCase, gridBagConstraints);
 
     jLabel2.setText(ResourceMgr.getString("LblJoinWrapStyle")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(jLabel2, gridBagConstraints);
-
-    identifierCaseLabel.setLabelFor(identifierCase);
-    identifierCaseLabel.setText(ResourceMgr.getString("LblFmtIdentifiers")); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
-    add(identifierCaseLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
-    add(identifierCase, gridBagConstraints);
 
     jLabel3.setText(ResourceMgr.getString("LblMaxCols")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -280,10 +247,10 @@ public class FormatterOptionsPanel
     add(jSeparator2, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(20, 5, 4, 5);
+    gridBagConstraints.insets = new java.awt.Insets(11, 5, 4, 5);
     add(jSeparator3, gridBagConstraints);
 
     jPanel1.setLayout(new java.awt.GridBagLayout());
@@ -314,23 +281,6 @@ public class FormatterOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(6, 5, 0, 0);
     add(jPanel1, gridBagConstraints);
-
-    functionCaseLabel.setLabelFor(functionCase);
-    functionCaseLabel.setText(ResourceMgr.getString("LblFmtFuncLower")); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
-    add(functionCaseLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
-    add(functionCase, gridBagConstraints);
 
     jPanel2.setLayout(new java.awt.GridBagLayout());
 
@@ -386,7 +336,7 @@ public class FormatterOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weighty = 1.0;
@@ -394,7 +344,7 @@ public class FormatterOptionsPanel
     add(jPanel2, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(7, 5, 0, 5);
@@ -465,6 +415,63 @@ public class FormatterOptionsPanel
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
     add(colsPerLinePanel, gridBagConstraints);
+
+    jPanel3.setLayout(new java.awt.GridBagLayout());
+
+    keywordCaseLabel.setLabelFor(keywordCase);
+    keywordCaseLabel.setText(ResourceMgr.getString("LblFmtKeyWord")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
+    jPanel3.add(keywordCaseLabel, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 0);
+    jPanel3.add(keywordCase, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 0);
+    jPanel3.add(functionCase, gridBagConstraints);
+
+    functionCaseLabel.setLabelFor(functionCase);
+    functionCaseLabel.setText(ResourceMgr.getString("LblFmtFuncLower")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
+    jPanel3.add(functionCaseLabel, gridBagConstraints);
+
+    identifierCaseLabel.setLabelFor(identifierCase);
+    identifierCaseLabel.setText(ResourceMgr.getString("LblFmtIdentifiers")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(8, 24, 0, 0);
+    jPanel3.add(identifierCaseLabel, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
+    jPanel3.add(identifierCase, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    add(jPanel3, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -499,6 +506,7 @@ public class FormatterOptionsPanel
   private javax.swing.JLabel jLabel3;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
+  private javax.swing.JPanel jPanel3;
   private javax.swing.JSeparator jSeparator1;
   private javax.swing.JSeparator jSeparator2;
   private javax.swing.JSeparator jSeparator3;
