@@ -60,6 +60,7 @@ import workbench.db.WbConnection;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.ParserType;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.formatter.SQLLexer;
@@ -76,8 +77,6 @@ import workbench.util.WbFile;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-
-import workbench.sql.ParserType;
 
 /**
  *
@@ -535,6 +534,13 @@ public class TestUtil
 				SqlUtil.closeStatement(stmt);
 			}
 		}
+	}
+
+	public static int getNumberValue(WbConnection conn, String query)
+	{
+		Number result = (Number)getSingleQueryValue(conn, query);
+		if (result == null) return Integer.MIN_VALUE;
+		return result.intValue();
 	}
 
 	public static Object getSingleQueryValue(WbConnection conn, String query)
