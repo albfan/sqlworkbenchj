@@ -875,9 +875,9 @@
       <arg value="../src/workbench/sql/formatter/StandardLexer.flex"/>
     </java>
 
-    <copy file="../src/workbench/sql/formatter/StandardLexer.flex"
-          tofile="../src/workbench/sql/formatter/NonStandardLexer.flex"
-          overwrite="true"/>
+    <copy quiet="true" overwrite="true"
+					file="../src/workbench/sql/formatter/StandardLexer.flex"
+          tofile="../src/workbench/sql/formatter/NonStandardLexer.flex"/>
 
     <replace file="../src/workbench/sql/formatter/NonStandardLexer.flex">
       <replacefilter>
@@ -895,7 +895,7 @@
       <arg value="-q"/>
       <arg value="../src/workbench/sql/formatter/NonStandardLexer.flex"/>
     </java>
-    
+
   </target>
 
 <path id="junit.path">
