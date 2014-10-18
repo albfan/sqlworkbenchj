@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
@@ -35,7 +36,6 @@ import workbench.db.DefaultExpressionBuilder;
 import workbench.db.DmlExpressionBuilder;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.GeneratedIdentifierCase;
 
 import workbench.util.SqlUtil;
 
@@ -239,7 +239,7 @@ public class StatementFactory
 		{
 			if (!includeIdentityColumns)
 			{
-				LogMgr.logDebug("StatementFactory.includeInsertColumn()", "Ignoring column " + getTableNameToUse() + "." + colId.getColumnName() + " because it is an auto-increment column");
+				LogMgr.logDebug("StatementFactory.includeInsertColumn()", "Ignoring column " + getTableNameToUse() + "." + colId.getColumnName() + " because it is an auto-increment/identity column");
 				return false;
 			}
 		}

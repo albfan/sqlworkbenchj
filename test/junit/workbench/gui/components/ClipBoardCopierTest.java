@@ -203,6 +203,60 @@ public class ClipBoardCopierTest
 		}
 	}
 
+	@Test
+	public void testCopyReadOnlyColumns()
+		throws Exception
+	{
+		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
+		TestUtil util = getTestUtil();
+		WbConnection conn = util.getHSQLConnection("clipboard");
+
+		TestUtil.executeScript(conn,
+			"create table foo (id integer generated always as identity, c1 integer, c2 integer);\n" +
+			"insert into foo values (default,1,1), (default,2,2);\n" +
+			"commit;\n");
+
+		boolean check = Settings.getInstance().getCheckEditableColumns();
+		boolean identity = Settings.getInstance().getGenerateInsertIgnoreIdentity();
+		boolean format = Settings.getInstance().getDoFormatInserts();
+		try
+		{
+			Settings.getInstance().setCheckEditableColumns(false);
+			Settings.getInstance().setDoFormatInserts(false);
+			Settings.getInstance().setGenerateInsertIgnoreIdentity(true);
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select * from foo order by id");
+			DataStore ds = new DataStore(rs, true);
+			ds.setOriginalConnection(conn);
+			ds.setUpdateTable(new TableIdentifier("FOO"));
+			ds.getResultInfo().getColumn(1).setReadonly(true);
+			ds.getResultInfo().getColumn(2).setReadonly(true);
+			ClipBoardCopier copier = new ClipBoardCopier(ds);
+			String sql = copier.createSqlString(ExportType.SQL_INSERT, false, false);
+
+			ScriptParser parser = new ScriptParser(sql);
+			int size = parser.getSize();
+			assertEquals(2, size);
+			assertEquals("INSERT INTO FOO (C1,C2) VALUES (1,1)", parser.getCommand(0));
+			assertEquals("INSERT INTO FOO (C1,C2) VALUES (2,2)", parser.getCommand(1));
+
+			Settings.getInstance().setGenerateInsertIgnoreIdentity(false);
+			Settings.getInstance().setCheckEditableColumns(true);
+			sql = copier.createSqlString(ExportType.SQL_INSERT, false, false);
+			parser = new ScriptParser(sql);
+			size = parser.getSize();
+			assertEquals(2, size);
+			assertEquals("INSERT INTO FOO (ID) VALUES (0)", parser.getCommand(0));
+			assertEquals("INSERT INTO FOO (ID) VALUES (1)", parser.getCommand(1));
+		}
+		finally
+		{
+			Settings.getInstance().setCheckEditableColumns(check);
+			Settings.getInstance().setGenerateInsertIgnoreIdentity(identity);
+			Settings.getInstance().setDoFormatInserts(format);
+			TestUtil.executeScript(conn, "drop table foo;");
+		}
+	}
 
 	@Test
 	public void testCopyAsSqlDeleteInsert()

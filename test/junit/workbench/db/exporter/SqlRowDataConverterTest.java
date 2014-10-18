@@ -31,6 +31,7 @@ import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
@@ -320,6 +321,79 @@ public class SqlRowDataConverterTest
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testIncludeReadOnlyColumns()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection conn = util.getHSQLConnection("readonlycols");
+
+		TestUtil.executeScript(conn,
+			"create table foo (id integer generated always as identity, c1 integer, c2 integer);\n" +
+			"insert into foo values (default,1,1), (default,2,2);\n" +
+			"commit;\n");
+
+		boolean check = Settings.getInstance().getCheckEditableColumns();
+		boolean identity = Settings.getInstance().getGenerateInsertIgnoreIdentity();
+		boolean format = Settings.getInstance().getDoFormatInserts();
+		try
+		{
+			Settings.getInstance().setCheckEditableColumns(false);
+			Settings.getInstance().setDoFormatInserts(false);
+			Settings.getInstance().setGenerateInsertIgnoreIdentity(true);
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select * from foo order by id");
+			DataStore ds = new DataStore(rs, true);
+			ds.setOriginalConnection(conn);
+			ds.setUpdateTable(new TableIdentifier("FOO"));
+			ds.getResultInfo().getColumn(1).setReadonly(true);
+			ds.getResultInfo().getColumn(2).setReadonly(true);
+
+			SqlRowDataConverter converter = new SqlRowDataConverter(conn);
+			converter.setResultInfo(ds.getResultInfo());
+
+			String insert = converter.convertRowData(ds.getRow(0), 0).toString();
+			assertEquals("INSERT INTO FOO (C1,C2) VALUES (1,1);", insert.trim());
+
+			insert = converter.convertRowData(ds.getRow(1), 0).toString();
+			assertEquals("INSERT INTO FOO (C1,C2) VALUES (2,2);", insert.trim());
+
+			Settings.getInstance().setGenerateInsertIgnoreIdentity(false);
+			Settings.getInstance().setCheckEditableColumns(true);
+
+			converter = new SqlRowDataConverter(conn);
+			converter.setResultInfo(ds.getResultInfo());
+
+			insert = converter.convertRowData(ds.getRow(0), 0).toString();
+			assertEquals("INSERT INTO FOO (ID) VALUES (0);", insert.trim());
+
+			insert = converter.convertRowData(ds.getRow(1), 0).toString();
+			assertEquals("INSERT INTO FOO (ID) VALUES (1);", insert.trim());
+
+			converter.setIncludeIdentityColumns(true);
+			converter.setIncludeReadOnlyColumns(true);
+			insert = converter.convertRowData(ds.getRow(0), 0).toString();
+			assertEquals("INSERT INTO FOO (ID,C1,C2) VALUES (0,1,1);", insert.trim());
+
+			converter.setIncludeIdentityColumns(false);
+			converter.setIncludeReadOnlyColumns(true);
+			insert = converter.convertRowData(ds.getRow(0), 0).toString();
+			assertEquals("INSERT INTO FOO (C1,C2) VALUES (1,1);", insert.trim());
+
+			converter.setIncludeIdentityColumns(false);
+			converter.setIncludeReadOnlyColumns(false);
+			insert = converter.convertRowData(ds.getRow(0), 0).toString();
+			assertEquals("INSERT INTO FOO () VALUES ();", insert.trim());
+		}
+		finally
+		{
+			Settings.getInstance().setCheckEditableColumns(check);
+			Settings.getInstance().setGenerateInsertIgnoreIdentity(identity);
+			Settings.getInstance().setDoFormatInserts(format);
+			TestUtil.executeScript(conn, "drop table foo;");
 		}
 	}
 }
