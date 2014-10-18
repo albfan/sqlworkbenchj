@@ -291,6 +291,8 @@ public class StatementFactory
 
 		boolean first = true;
 
+		int realColcount = 0;
+
 		for (int col=0; col < cols; col ++)
 		{
 			ColumnIdentifier colId = this.resultInfo.getColumn(col);
@@ -310,6 +312,7 @@ public class StatementFactory
 				if (!isSelectedColumn) continue;
 			}
 
+			realColcount ++;
 			Object value = aRow.getValue(col);
 			boolean isNull = isNull(value);
 
@@ -344,6 +347,11 @@ public class StatementFactory
 		sql.append(valuePart);
 		sql.append(')');
 		dml = new DmlStatement(sql.toString(), values);
+
+		if (realColcount == 0)
+		{
+			LogMgr.logError("StatementFactory.createInsertStatement()", "No columns included in the INSERT statement for the table " + getTableNameToUse() + " Please turn on DEBUG logging to see why the columns where excluded", null);
+		}
 		return dml;
 	}
 
