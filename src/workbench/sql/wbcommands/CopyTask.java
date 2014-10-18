@@ -52,6 +52,8 @@ public interface CopyTask
 
 	boolean isSuccess();
 
+	boolean hasWarnings();
+	
 	CharSequence getMessages();
 
 	void cancel();

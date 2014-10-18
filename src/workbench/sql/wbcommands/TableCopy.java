@@ -180,6 +180,13 @@ class TableCopy
 	}
 
 	@Override
+	public boolean hasWarnings()
+	{
+		if (copier == null) return false;
+		return copier.hasWarnings();
+	}
+
+	@Override
 	public CharSequence getMessages()
 	{
 		if (this.copier == null) return null;

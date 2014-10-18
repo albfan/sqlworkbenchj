@@ -397,7 +397,11 @@ public class DataImporter
 		this.commitEvery = aCount;
 	}
 
-	public boolean getContinueOnError() { return this.continueOnError; }
+	public boolean getContinueOnError()
+	{
+		return this.continueOnError;
+	}
+
 	public void setContinueOnError(boolean flag)
 	{
 		this.continueOnError = flag;
@@ -445,7 +449,7 @@ public class DataImporter
 		if (!this.isModeInsert())
 		{
 			LogMgr.logWarning("DataImporter.deleteTargetTables()", "Target tables will not be deleted because import mode is not set to 'insert'");
-			this.messages.append(ResourceMgr.getString("ErrImpNoDeleteUpd"));
+			this.messages.appendMessageKey("ErrImpNoDeleteUpd");
 			this.messages.appendNewLine();
 			return;
 		}
@@ -728,7 +732,7 @@ public class DataImporter
 				// the result of the first statement to decide
 				// whether we have to send another one
 				this.useBatch = false;
-				this.messages.append(ResourceMgr.getString("ErrImportNoBatchMode"));
+				this.messages.appendMessageKey("ErrImportNoBatchMode");
 			}
 		}
 
@@ -739,7 +743,7 @@ public class DataImporter
 		catch (CycleErrorException e)
 		{
 			this.hasErrors = true;
-			messages.append(ResourceMgr.getString("ErrImpCycle"));
+			messages.appendMessageKey("ErrImpCycle");
 			messages.append(" (" + e.getRootTable() + ")");
 			this.messages.append(this.source.getMessages());
 			throw e;
@@ -1111,7 +1115,6 @@ public class DataImporter
 		}
 		catch (SQLException e)
 		{
-			this.hasErrors = true;
 			LogMgr.logError("DataImporter.processRow()", "Error importing row " + currentImportRow + ": " + ExceptionUtil.getDisplay(e), null);
 			String rec = this.source.getLastRecord();
 			if (rec == null)
@@ -1120,7 +1123,15 @@ public class DataImporter
 				rec = display.toString();
 			}
 			recordRejected(rec, currentImportRow, e);
-			if (!this.continueOnError) throw e;
+			if (this.continueOnError)
+			{
+				this.hasWarnings = true;
+			}
+			else
+			{
+				this.hasErrors = true;
+				throw e;
+			}
 		}
 
 		if (MemoryWatcher.isMemoryLow(false))
@@ -1656,6 +1667,9 @@ public class DataImporter
 
 			checkConstantValues();
 
+			this.currentImportRow = 0;
+			this.totalRows = 0;
+
 			if (this.mode != MODE_UPDATE)
 			{
 				this.prepareInsertStatement();
@@ -1697,9 +1711,6 @@ public class DataImporter
 				}
 			}
 
-			this.currentImportRow = 0;
-			this.totalRows = 0;
-
 			if (progressMonitor != null) this.progressMonitor.restoreType("importDelete");
 
 			if (this.reportInterval == 0 && this.progressMonitor != null)
@@ -1723,11 +1734,19 @@ public class DataImporter
 			}
 			runPreTableStatement();
 		}
-		catch (RuntimeException th)
+		catch (Exception th)
 		{
-			this.hasErrors = true;
 			String tname = targetTable == null ? "null" : this.targetTable.getTableExpression();
-			LogMgr.logError("DataImporter.setTargetTable()", "Error when setting target table " + tname, th);
+			String msg = "Error initializing import for table " + tname;
+			if (this.continueOnError)
+			{
+				this.hasWarnings = true;
+			}
+			else
+			{
+				this.hasErrors = true;
+			}
+			LogMgr.logError("DataImporter.setTargetTable()", msg, th);
 			throw th;
 		}
 	}
@@ -1904,7 +1923,7 @@ public class DataImporter
 			if (!this.hasKeyColumns())
 			{
 				if (messages.getLength() > 0) this.messages.appendNewLine();
-				this.messages.append(ResourceMgr.getString("ErrImportNoKeyForUpdate"));
+				this.messages.append(ResourceMgr.getFormattedString("ErrImportNoKeyForUpdate", this.targetTable.getTableExpression()));
 				throw new SQLException("No key columns defined for update mode");
 			}
 		}
@@ -2142,8 +2161,8 @@ public class DataImporter
 				this.messages.append(this.badWriter.getMessage());
 			}
 			this.messages.appendNewLine();
-			this.hasErrors = this.source.hasErrors();
-			this.hasWarnings = this.source.hasWarnings();
+			this.hasErrors = hasErrors || this.source.hasErrors();
+			this.hasWarnings = hasWarnings || this.source.hasWarnings();
 		}
 		catch (SQLException e)
 		{

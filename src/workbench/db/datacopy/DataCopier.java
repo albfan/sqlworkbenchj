@@ -485,6 +485,11 @@ public class DataCopier
 		this.importer.setDeleteTarget(delete);
 	}
 
+	public boolean getContinueOnError()
+	{
+		return this.importer.getContinueOnError();
+	}
+	
 	public void setContinueOnError(boolean cont)
 	{
 		this.importer.setContinueOnError(cont);

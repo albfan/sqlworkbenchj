@@ -157,12 +157,29 @@ class SchemaCopy
 				this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", sourceTable.getTableName()));
 				this.messages.appendNewLine();
 
-				copier.copyFromTable(sourceConnection, targetConnection, sourceTable, targetTable, null, null, createTableType, dropTable, ignoreDropError, skipTargetCheck);
-				totalRows += copier.startCopy();
-
-				this.messages.append(copier.getMessageBuffer());
+				try
+				{
+					copier.copyFromTable(sourceConnection, targetConnection, sourceTable, targetTable, null, null, createTableType, dropTable, ignoreDropError, skipTargetCheck);
+					totalRows += copier.startCopy();
+					this.messages.append(copier.getMessageBuffer());
+				}
+				catch (Exception ex)
+				{
+					this.messages.append(copier.getMessageBuffer());
+					messages.appendNewLine();
+					if (copier.getContinueOnError())
+					{
+						messages.appendMessageKey("MsgSkipTbl");
+						messages.appendNewLine();
+						LogMgr.logWarning("SchemaCopy.copyData()", "Skipping table " + sourceTable + " due to previous error");
+					}
+					else
+					{
+						throw ex;
+					}
+				}
 			}
-			this.success = true;
+			this.success = copier.isSuccess();
 		}
 		catch (Exception e)
 		{
@@ -392,6 +409,13 @@ class SchemaCopy
 	private boolean createTargetTable()
 	{
 		return createTableType != null;
+	}
+
+	@Override
+	public boolean hasWarnings()
+	{
+		if (copier == null) return false;
+		return copier.hasWarnings();
 	}
 
 	@Override

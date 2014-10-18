@@ -25,7 +25,9 @@ package workbench.util;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
 import workbench.interfaces.ResultLogger;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
@@ -169,6 +171,11 @@ public class MessageBuffer
 		length += s.length();
 	}
 
+	public synchronized void appendMessageKey(String key)
+	{
+		append(ResourceMgr.getString(key));
+	}
+	
 	public synchronized void appendNewLine()
 	{
 		append(newLine);

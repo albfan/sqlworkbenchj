@@ -1461,7 +1461,78 @@ public class WbCopyTest
 			int count = rs.getInt(1);
 			assertEquals(1, count);
 		}
-
 	}
+
+	@Test
+	public void testContinueOnError()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+
+		util.prepareEnvironment();
+		WbConnection source = util.getHSQLConnection("namedSchemaCopySource");
+		WbConnection target = util.getConnection("namedSchemaCopyTarget");
+
+		try
+		{
+			TestUtil.executeScript(source,
+				"create table test_1 (id integer not null, some_data varchar(10)); \n" +
+				"create table test_2 (id integer not null primary key, some_data varchar(10)); \n" +
+				"create table test_3 (id integer not null primary key, some_data varchar(10)); \n" +
+				"create table test_4 (id integer not null, some_data varchar(10)); \n" +
+				"create table test_5 (id integer not null, some_data varchar(10)); \n" +
+				"insert into test_1 values (1, 'foo'); \n" +
+				"insert into test_1 values (2, 'foo'); \n" +
+				"insert into test_2 values (1, 'foo'); \n" +
+				"insert into test_2 values (2, 'foo'); \n" +
+				"insert into test_3 values (1, 'foo'); \n" +
+				"insert into test_3 values (2, 'foo'); \n" +
+				"insert into test_4 values (1, 'foo'); \n" +
+				"insert into test_4 values (2, 'foo'); \n" +
+				"insert into test_5 values (1, 'foo'); \n" +
+				"insert into test_5 values (2, 'foo'); \n" +
+				"commit;");
+
+			TestUtil.executeScript(target,
+				"create table test_1 (id integer not null, some_data varchar(10)); \n" +
+				"create table test_2 (id integer not null primary key, some_data varchar(10)); \n" +
+				"create table test_3 (id integer not null primary key, some_data varchar(10)); \n" +
+				"create table test_4 (id integer not null, some_data varchar(10)); \n" +
+				"create table test_5 (id integer not null, some_data varchar(10)); \n" +
+				"commit;");
+
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(source);
+
+			String sql =
+				"wbcopy -sourceTable=* " +
+        "       -mode=update,insert " +
+				"       -continueOnError=true " +
+				"       -sourceProfile='namedSchemaCopySource' " +
+				"       -targetProfile='namedSchemaCopyTarget'";
+
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertTrue(result.isSuccess());
+			assertTrue(result.hasWarning());
+//			String msg = result.getMessageBuffer().toString();
+//			System.out.println(msg);
+			Number count = (Number)TestUtil.getSingleQueryValue(target, "select count(*) from test_2");
+			assertEquals(2, count.intValue());
+			count = (Number)TestUtil.getSingleQueryValue(target, "select count(*) from test_3");
+			assertEquals(2, count.intValue());
+
+			count = (Number)TestUtil.getSingleQueryValue(target, "select count(*) from test_1");
+			assertEquals(0, count.intValue());
+			count = (Number)TestUtil.getSingleQueryValue(target, "select count(*) from test_4");
+			assertEquals(0, count.intValue());
+			count = (Number)TestUtil.getSingleQueryValue(target, "select count(*) from test_5");
+			assertEquals(0, count.intValue());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 
 }

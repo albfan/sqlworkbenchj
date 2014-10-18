@@ -284,6 +284,7 @@ public class WbCopy
 			{
 				result.setFailure();
 			}
+			result.setWarning(copier.hasWarnings());
 			result.addMessage(copier.getMessages());
 		}
 		catch (TableNotFoundException tnf)

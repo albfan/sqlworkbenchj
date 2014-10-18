@@ -3920,21 +3920,28 @@ public class WbImportTest
 		{
 			File importFile  = new File(this.basedir, "bad_import.txt");
 			File badFile = new File(this.basedir, "import.bad");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("nr\tfirstname\tlastname");
-			out.println("1\tMary\tMoviestar");
-			out.println("2\tHarry\tHandsome");
-			out.println("1\tZaphod\tBeeblebrox");
-			out.close();
+			TestUtil.writeFile(importFile,
+				"nr\tfirstname\tlastname\n" +
+				"1\tMary\tMoviestar\n" +
+				"2\tHarry\tHandsome\n" +
+				"1\tZaphod\tBeeblebrox\n");
 
-			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=true -table=junit_test_pk -badFile='" + badFile.getCanonicalPath() + "'");
+			StatementRunnerResult result = importCmd.execute(
+				"wbimport -encoding=utf8 " +
+					"-file='" + importFile.getAbsolutePath() + "' " +
+					"-multiline=false -type=text -header=true " +
+					"-continueonerror=true " +
+					"-table=junit_test_pk -badFile='" + badFile.getCanonicalPath() + "'");
+
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			assertEquals("Bad file not created", true, badFile.exists());
 
-			BufferedReader r = new BufferedReader(new FileReader(badFile));
-			String line = r.readLine();
-			r.close();
+			String line;
+			try (BufferedReader r = new BufferedReader(new FileReader(badFile)))
+			{
+				line = r.readLine();
+			}
 			assertEquals("Wrong record rejected", "1\tZaphod\tBeeblebrox", line);
 
 			Statement stmt = this.connection.createStatementForQuery();
