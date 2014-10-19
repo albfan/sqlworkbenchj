@@ -28,6 +28,8 @@ import java.util.List;
 
 import workbench.WbTestCase;
 
+import workbench.sql.ParserType;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -447,6 +449,46 @@ public class SQLLexerTest
 			"end;\n" +
 			"'";
 		assertEquals(literal, tokens.get(12).getText());
+	}
+
+	@Test
+	public void testStupidComments()
+	{
+		String sql =
+			"-- this is a comment\n" +
+			"#this is another comment\n" +
+			"/* a \n" +
+			"   long comment\n" +
+			"*/\n" +
+			"select * from foo;";
+
+		SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.MySQL, sql);
+		SQLToken token = lexer.getNextToken(true, false);
+		assertTrue(token.isComment());
+
+		token = lexer.getNextToken(true, false);
+		assertTrue(token.isComment());
+
+		token = lexer.getNextToken(true, false);
+		assertTrue(token.isComment());
+
+	}
+
+	@Test
+	public void testComments()
+	{
+		String sql =
+			"-- this is a comment\n" +
+			"/* this is another comment */\n" +
+			"select * from foo;";
+
+		SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Standard, sql);
+		SQLToken token = lexer.getNextToken(true, false);
+		assertTrue(token.isComment());
+
+		token = lexer.getNextToken(true, false);
+		System.out.println(token.getText());
+		assertTrue(token.isComment());
 	}
 
 }

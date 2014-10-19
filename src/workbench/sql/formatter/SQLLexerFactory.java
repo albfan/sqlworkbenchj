@@ -21,10 +21,11 @@ package workbench.sql.formatter;
 
 import java.io.Reader;
 
-import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 
 import workbench.sql.ParserType;
+
+import workbench.util.CharSequenceReader;
 
 /**
  *
@@ -40,9 +41,8 @@ public class SQLLexerFactory
 
 	public static SQLLexer createLexer(WbConnection conn)
 	{
-		SQLLexer lexer = new StandardLexer("");
-		configureLexer(lexer, conn);
-		return lexer;
+		ParserType type = ParserType.getTypeFromConnection(conn);
+		return createLexer(type, "");
 	}
 
 	public static SQLLexer createLexer(CharSequence sql)
@@ -53,57 +53,54 @@ public class SQLLexerFactory
 
 	public static SQLLexer createLexer(WbConnection conn, String sql)
 	{
-		SQLLexer lexer = new StandardLexer(sql);
-		configureLexer(lexer, conn);
-		return lexer;
+		ParserType type = ParserType.getTypeFromConnection(conn);
+		return createLexer(type, sql);
 	}
 
 	public static SQLLexer createLexer(WbConnection conn, CharSequence sql)
 	{
-		SQLLexer lexer = new StandardLexer(sql);
-		configureLexer(lexer, conn);
-		return lexer;
+		ParserType type = ParserType.getTypeFromConnection(conn);
+		return createLexer(type, sql);
 	}
 
 	public static SQLLexer createLexerForDbId(String dbId, CharSequence sql)
 	{
-		SQLLexer lexer = new StandardLexer(sql);
-		configureLexer(lexer, dbId);
+		ParserType type = ParserType.getTypeFromDBID(dbId);
+		return createLexer(type, sql);
+	}
+
+	public static SQLLexer createLexer(ParserType type, CharSequence sql)
+	{
+		return createLexer(type, new CharSequenceReader(sql));
+	}
+
+	public static SQLLexer createLexer(ParserType type, Reader input)
+	{
+		SQLLexer lexer;
+		if (type == ParserType.MySQL)
+		{
+			lexer = new MySQLLexer(input);
+		}
+		else
+		{
+			 lexer = new StandardLexer(input);
+		}
+		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
 	}
 
-	public static SQLLexer createLexer(Reader input, ParserType type)
+	public static SQLLexer createNonStandardLexer(ParserType type, Reader input)
 	{
 		SQLLexer lexer = new NonStandardLexer(input);
 		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
 	}
 
-	public static SQLLexer createNonStandardLexer(Reader input, ParserType type)
-	{
-		SQLLexer lexer = new NonStandardLexer(input);
-		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
-		return lexer;
-	}
-
-
-	public static SQLLexer createNonStandardLexer(String sql, ParserType type)
+	public static SQLLexer createNonStandardLexer(ParserType type, String sql)
 	{
 		SQLLexer lexer = new NonStandardLexer(sql);
 		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
-	}
-
-	private static void configureLexer(SQLLexer lexer, WbConnection conn)
-	{
-		if (conn == null) return;
-		configureLexer(lexer, conn.getDbId());
-	}
-
-	private static void configureLexer(SQLLexer lexer, String dbId)
-	{
-		if (dbId == null) return;
-		lexer.setCheckStupidQuoting(dbId.equalsIgnoreCase(DbMetadata.DBID_MS));
 	}
 
 }

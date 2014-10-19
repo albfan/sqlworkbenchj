@@ -1267,9 +1267,42 @@ public class ScriptParserTest
 			"delete from bar \n" +
 			"where id = 42\n" +
 			"/\n";
-		
+
 		parser.setScript(sql);
 		size = parser.getSize();
 		assertEquals(2, size);
+
+		String script =
+			"create type footype as object (id integer);\n" +
+			"/\n" +
+			"create or replace procedure foo \n" +
+			"is \n" +
+			"begin \n" +
+			"  for rec in (select id from foo) loop\n" +
+			"     delete from bar where id = rec.id;\n" +
+			"  end loop;\n" +
+			"end;\n" +
+			"/\n" +
+			"\n" +
+			"create view v_foo\n" +
+			"as\n" +
+			"select *\n" +
+			"from foo;\n" +
+			"\n" +
+			"insert into bar (c1, c2)\n" +
+			"values (1,2)\n" +
+			";";
+
+		parser.setScript(script);
+		size = parser.getSize();
+		assertEquals(4, size);
+		assertTrue(parser.getCommand(0).startsWith("create type footype"));
+		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(0));
+		assertTrue(parser.getCommand(1).startsWith("create or replace procedure"));
+		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(1));
+		assertTrue(parser.getCommand(2).startsWith("create view v_foo"));
+		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(2));
+		assertTrue(parser.getCommand(3).startsWith("insert into bar"));
+		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(3));
 	}
 }

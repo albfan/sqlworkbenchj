@@ -31,7 +31,8 @@ public enum ParserType
 	Standard,
 	Postgres,
 	SqlServer,
-	Oracle;
+	Oracle,
+	MySQL;
 
 	public static ParserType getTypeFromConnection(WbConnection conn)
 	{
@@ -45,6 +46,7 @@ public enum ParserType
 		if (DbMetadata.DBID_PG.equals(dbid)) return Postgres;
 		if (DbMetadata.DBID_ORA.equals(dbid)) return Oracle;
 		if (DbMetadata.DBID_MS.equals(dbid)) return SqlServer;
+		if (DbMetadata.DBID_MYSQL.equals(dbid)) return MySQL;
 		return Standard;
 	}
 

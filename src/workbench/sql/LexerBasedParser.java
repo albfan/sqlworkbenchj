@@ -473,11 +473,11 @@ public class LexerBasedParser
 	{
 		if (checkEscapedQuotes)
 		{
-			lexer = SQLLexerFactory.createNonStandardLexer(input, parserType);
+			lexer = SQLLexerFactory.createNonStandardLexer(parserType, input);
 		}
 		else
 		{
-			lexer = SQLLexerFactory.createLexer(input, parserType);
+			lexer = SQLLexerFactory.createLexer(parserType, input);
 		}
 	}
 
