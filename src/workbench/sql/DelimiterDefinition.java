@@ -49,14 +49,12 @@ public class DelimiterDefinition
 	 */
 	public static final DelimiterDefinition DEFAULT_MS_DELIMITER = new DelimiterDefinition("GO", true);
 
-	public static final DelimiterDefinition EMPTY_DELIMITER = new DelimiterDefinition(true);
-
 	private String delimiter;
 	private boolean singleLineDelimiter;
 	private boolean changed;
 	private Pattern slePattern;
 	private boolean isImmutable;
-
+	private boolean isStandard;
 	public DelimiterDefinition()
 	{
 		this.delimiter = "";
@@ -70,6 +68,7 @@ public class DelimiterDefinition
 		this.changed = false;
 		this.slePattern = null;
 		this.isImmutable = immutable;
+		this.isStandard = false;
 	}
 
 	private DelimiterDefinition(String delim, boolean immutable)
@@ -89,6 +88,7 @@ public class DelimiterDefinition
 
 	public DelimiterDefinition createCopy()
 	{
+		if (this.isImmutable) return this;
 		DelimiterDefinition copy = new DelimiterDefinition(this.delimiter);
 		copy.changed = false;
 		return copy;
@@ -101,7 +101,7 @@ public class DelimiterDefinition
 
 	public boolean isStandard()
 	{
-		return this.delimiter.equals(";");
+		return this.isStandard;
 	}
 
 	public boolean isNonStandard()
@@ -169,6 +169,7 @@ public class DelimiterDefinition
 			this.delimiter = d.trim();
 			this.singleLineDelimiter = !delimiter.equals(";");
 			this.changed = true;
+			this.isStandard = delimiter.equals(";");
 			initPattern();
 		}
 	}

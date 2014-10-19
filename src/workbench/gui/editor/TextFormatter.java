@@ -58,20 +58,19 @@ public class TextFormatter
 		parser.setAlternateLineComment(lineComment);
 		parser.setScript(sql);
 
-		DelimiterDefinition delimiter = parser.getDelimiter();
-
 		boolean isSelected = editor.isTextSelected();
-		boolean selectionWithDelimiter = sql.trim().endsWith(delimiter.getDelimiter());
 
 		int count = parser.getSize();
 		if (count < 1) return;
 
 		StringBuilder newSql = new StringBuilder(sql.length() + 100);
-		boolean needDelimiter = (count > 1) || (count == 1 && isSelected && selectionWithDelimiter);
+		boolean needDelimiter = false;
 		boolean addNewLine = false;
 		for (int i=0; i < count; i++)
 		{
 			String command = parser.getCommand(i);
+
+			DelimiterDefinition delimiter = parser.getDelimiterUsed(i);
 
 			// no need to format "empty" strings
 			if (StringUtil.isBlank(command))
@@ -79,6 +78,8 @@ public class TextFormatter
 				newSql.append(command);
 				continue;
 			}
+
+			needDelimiter = (count > 1) || (isSelected && delimiter.terminatesScript(sql, false));
 
 			addNewLine = (i < count);
 

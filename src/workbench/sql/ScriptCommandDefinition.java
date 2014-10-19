@@ -36,6 +36,7 @@ public class ScriptCommandDefinition
 	private int whiteSpaceStart = -1;
 
 	private int indexInScript;
+	private DelimiterDefinition delimiterUsed;
 
 	public ScriptCommandDefinition(String c, int start, int end)
 	{
@@ -93,6 +94,16 @@ public class ScriptCommandDefinition
 	public void setIndexInScript(int index)
 	{
 		this.indexInScript = index;
+	}
+
+	public DelimiterDefinition getDelimiterUsed()
+	{
+		return delimiterUsed;
+	}
+
+	public void setDelimiterUsed(DelimiterDefinition delimiter)
+	{
+		this.delimiterUsed = delimiter;
 	}
 
 	@Override

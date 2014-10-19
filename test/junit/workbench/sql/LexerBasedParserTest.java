@@ -318,12 +318,17 @@ public class LexerBasedParserTest
 		parser = new LexerBasedParser(sql);
 		parser.setDelimiter(new DelimiterDefinition("/?"));
 		parser.setCheckPgQuoting(true);
-		script = getStatements(parser);
-		assertEquals(2, script.size());
-		assertEquals("drop function foo()", script.get(0));
+		parser.setStoreStatementText(true);
+
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("drop function foo()", cmd.getSQL());
+
 //		System.out.println(script.get(1));
-		assertTrue(script.get(1).startsWith("create or replace"));
-		assertTrue(script.get(1).endsWith("language plpgsql"));
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertTrue(cmd.getSQL().startsWith("create or replace"));
+		assertTrue(cmd.getSQL().endsWith("language plpgsql"));
 	}
 
 	private List<String> getStatements(LexerBasedParser parser)
@@ -343,24 +348,16 @@ public class LexerBasedParserTest
 	{
 		String sql = "select * from test\n GO \n" + "select * from person\nGO";
 		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser.setDelimiter(new DelimiterDefinition("GO"));
-		ScriptCommandDefinition cmd = null;
-		while ((cmd = parser.getNextCommand()) != null)
-		{
-			int index = cmd.getIndexInScript();
-			if (index == 0)
-			{
-				assertEquals("select * from test", cmd.getSQL());
-			}
-			else if (index == 1)
-			{
-				assertEquals("select * from person", cmd.getSQL());
-			}
-			else
-			{
-				fail("Wrong command index: " + index);
-			}
-		}
+		parser.setDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
+		parser.setStoreStatementText(true);
+
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from test", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from person", cmd.getSQL());
 	}
 
 
@@ -380,11 +377,13 @@ public class LexerBasedParserTest
 
 		ScriptCommandDefinition cmd = parser.getNextCommand();
 		assertNotNull(cmd);
+		assertNotNull(cmd.getDelimiterUsed());
 		String stmt = sql.substring(cmd.getStartPositionInScript(), cmd.getEndPositionInScript());
 		assertEquals("create table one (id integer)", stmt.trim());
 
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
+		assertNotNull(cmd.getDelimiterUsed());
 		stmt = sql.substring(cmd.getStartPositionInScript(), cmd.getEndPositionInScript());
 		assertEquals("create table two (id integer)", stmt.trim());
 	}

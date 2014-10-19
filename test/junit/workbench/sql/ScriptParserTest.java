@@ -563,6 +563,7 @@ public class ScriptParserTest
 
 	@Test
 	public void testAlternateDelimiter()
+		throws Exception
 	{
 		String sql = "SELECT id \n" +
 								 "FROM person \n" +
@@ -572,85 +573,83 @@ public class ScriptParserTest
 								 "select * \n" +
 								 "from country \n" +
 								 "@@";
-		try
-		{
-			ScriptParser p = new ScriptParser(sql);
-			p.setAlternateDelimiter(new DelimiterDefinition("@@"));
-			p.setCheckForSingleLineCommands(false);
-			p.setSupportOracleInclude(false);
-			int size = p.getSize();
-			assertEquals("Wrong number of statements", 2, size);
+		ScriptParser p = new ScriptParser(sql);
+		p.setAlternateDelimiter(new DelimiterDefinition("@@"));
+		p.setCheckForSingleLineCommands(false);
+		p.setSupportOracleInclude(false);
+		int size = p.getSize();
+		assertEquals("Wrong number of statements", 2, size);
 
-			p.setAlternateDelimiter(new DelimiterDefinition("./"));
-			size = p.getSize();
-			assertEquals("Wrong number of statements", 1, size);
+		p.setAlternateDelimiter(new DelimiterDefinition("./"));
+		size = p.getSize();
+		assertEquals("Wrong number of statements", 1, size);
 
-			sql = "SELECT id; \n" +
-								 "FROM person \n" +
-								 "./ \n" +
-								 " \n" +
-								 "select * \n" +
-								 "from country \n" +
-								 "./";
-			p.setScript(sql);
-			size = p.getSize();
-			assertEquals("Wrong number of statements", 2, size);
+		sql = "SELECT id; \n" +
+							 "FROM person \n" +
+							 "./ \n" +
+							 " \n" +
+							 "select * \n" +
+							 "from country \n" +
+							 "./";
+		p.setScript(sql);
+		size = p.getSize();
+		assertEquals("Wrong number of statements", 2, size);
 
-			sql = "CREATE PROCEDURE remove_emp (employee_id NUMBER) AS\n" +
-					"  tot_emps NUMBER;\n" +
-					"  BEGIN\n" +
-					"			DELETE FROM employees\n"+
-					"			WHERE employees.employee_id = remove_emp.employee_id;\n"+
-					"	 tot_emps := tot_emps - 1;\n"+
-					"	 END;\n"+
-					"/";
-			p.setScript(sql);
-			p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
-			size = p.getSize();
-			assertEquals("Wrong number of statements", 1, size);
-			assertEquals(sql.substring(0, sql.lastIndexOf('/')).trim(), p.getCommand(0));
+		sql = "CREATE PROCEDURE remove_emp (employee_id NUMBER) AS\n" +
+				"  tot_emps NUMBER;\n" +
+				"  BEGIN\n" +
+				"			DELETE FROM employees\n"+
+				"			WHERE employees.employee_id = remove_emp.employee_id;\n"+
+				"	 tot_emps := tot_emps - 1;\n"+
+				"	 END;\n"+
+				"/";
+		p.setScript(sql);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		size = p.getSize();
+		assertEquals("Wrong number of statements", 1, size);
+		assertEquals(sql.substring(0, sql.lastIndexOf('/')).trim(), p.getCommand(0));
 
-			sql = "DECLARE \n" +
-             "   Last_name    VARCHAR2(10) \n" +
-             "   Cursor       c1 IS SELECT last_name  \n" +
-             "                       FROM employees \n" +
-             "                       WHERE department_id = 20 \n" +
-             "BEGIN \n" +
-             "   OPEN c1 \n" +
-             "   LOOP \n" +
-             "      FETCH c1 INTO Last_name \n" +
-             "      EXIT WHEN c1%NOTFOUND \n" +
-             "      DBMS_OUTPUT.PUT_LINE(Last_name) \n" +
-             "   END LOOP \n" +
-             "END \n" +
-             "/";
-			p.setScript(sql);
-			size = p.getSize();
+		sql = "DECLARE \n" +
+					 "   Last_name    VARCHAR2(10) \n" +
+					 "   Cursor       c1 IS SELECT last_name  \n" +
+					 "                       FROM employees \n" +
+					 "                       WHERE department_id = 20 \n" +
+					 "BEGIN \n" +
+					 "   OPEN c1 \n" +
+					 "   LOOP \n" +
+					 "      FETCH c1 INTO Last_name \n" +
+					 "      EXIT WHEN c1%NOTFOUND \n" +
+					 "      DBMS_OUTPUT.PUT_LINE(Last_name) \n" +
+					 "   END LOOP \n" +
+					 "END \n" +
+					 "/";
+		p.setScript(sql);
+		size = p.getSize();
 
-			assertEquals("Wrong number of statements", 1, size);
-			assertEquals(sql.substring(0, sql.lastIndexOf('/')).trim(), p.getCommand(0));
+		assertEquals("Wrong number of statements", 1, size);
+		assertEquals(sql.substring(0, sql.lastIndexOf('/')).trim(), p.getCommand(0));
 
-			sql = "DECLARE\n" +
-					   "\tresult varchar (100) := 'Hello, world!';\n" +
-             "BEGIN \n" +
-             "\t\tdbms_output.put_line(result);\n" +
-             "END;\n" +
-             "/ ";
-			p.setScript(sql);
-			String expected = sql.substring(0, sql.lastIndexOf('/') - 1).trim();
+		sql = "DECLARE\n" +
+					 "\tresult varchar (100) := 'Hello, world!';\n" +
+					 "BEGIN \n" +
+					 "\t\tdbms_output.put_line(result);\n" +
+					 "END;\n" +
+					 "/ ";
+		p.setScript(sql);
+		String expected = sql.substring(0, sql.lastIndexOf('/') - 1).trim();
 
-			p.setScript(sql);
-			p.setAlternateDelimiter(new DelimiterDefinition("/"));
-			size = p.getSize();
-			String cmd = p.getCommand(0);
+		p.setScript(sql);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		size = p.getSize();
+		String cmd = p.getCommand(0);
 //			System.out.println("--- sql ---\n" + cmd + "\n----- expected -----\n" + expected + "\n-----------");
-			assertEquals(expected, cmd);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		assertEquals(expected, cmd);
+
+		sql = "update foo set bar = 1 where id = 1\n/\nupdate foo set bar = 2 where id = 2\n/\n";
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		p.setScript(sql);
+		size = p.getSize();
+		assertEquals(2, size);
 	}
 
 	@Test
@@ -1190,7 +1189,7 @@ public class ScriptParserTest
 		assertEquals(3, count);
 		assertEquals("create table one (id integer)", parser.getCommand(0));
 		assertEquals("create table two (id integer)", parser.getCommand(1));
-		System.out.println(parser.getCommand(2));
+//		System.out.println(parser.getCommand(2));
 		assertFalse(parser.getCommand(2).contains("/?"));
 		assertTrue(parser.getCommand(2).trim().endsWith("$$"));
 
@@ -1224,5 +1223,53 @@ public class ScriptParserTest
 		assertEquals("create table two (id integer)", parser.getCommand(1));
 		assertFalse(parser.getCommand(2).contains("GO"));
 		assertTrue(parser.getCommand(2).trim().endsWith("$$"));
+	}
+
+	@Test
+	public void testDynamicDelimiter()
+		throws Exception
+	{
+		String sql =
+			"create or replace procedure foo \n" +
+			"is \n" +
+			"begin \n" +
+			"  for rec in (select id from foo) loop\n" +
+			"     delete from bar where id = rec.id;\n" +
+			"  end loop;\n" +
+			"end;\n" +
+			"/\n" +
+			"\n" +
+			"create table bar (id integer not null primary key);\n";
+		ScriptParser parser = new ScriptParser(ParserType.Oracle);
+		parser.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		parser.setScript(sql);
+		int size = parser.getSize();
+		assertEquals(2, size);
+
+		String create =
+			"create or replace procedure foo \n" +
+			"is \n" +
+			"begin \n" +
+			"  for rec in (select id from foo) loop\n" +
+			"     delete from bar where id = rec.id;\n" +
+			"  end loop;\n" +
+			"end;";
+
+		assertEquals(create, parser.getCommand(0).trim());
+		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(0));
+		assertEquals("create table bar (id integer not null primary key)", parser.getCommand(1).trim());
+		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(1));
+
+		sql =
+			"select * \n" +
+			"from foo\n" +
+			"/\n" +
+			"delete from bar \n" +
+			"where id = 42\n" +
+			"/\n";
+		
+		parser.setScript(sql);
+		size = parser.getSize();
+		assertEquals(2, size);
 	}
 }

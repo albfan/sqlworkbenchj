@@ -224,6 +224,17 @@ public class IteratingScriptParser
 	}
 
 	@Override
+	public boolean supportsMixedDelimiter()
+	{
+		return false;
+	}
+
+	@Override
+	public void setAlternateDelimiter(DelimiterDefinition delim)
+	{
+	}
+
+	@Override
 	public void setDelimiter(DelimiterDefinition delim)
 	{
 		if (delim == null)
@@ -548,6 +559,7 @@ public class IteratingScriptParser
 		}
 		ScriptCommandDefinition c = new ScriptCommandDefinition(value, startPos, endPos);
 		c.setWhitespaceStart(realStart);
+		c.setDelimiterUsed(this.delimiter);
 
 		return c;
 	}

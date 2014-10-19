@@ -32,17 +32,17 @@ import java.io.IOException;
 public interface ScriptIterator
 {
 	int getScriptLength();
-	
+
 	boolean hasMoreCommands();
-	
+
 	void setCheckForSingleLineCommands(boolean flag);
-	
+
 	void setAlternateLineComment(String comment);
-	
+
 	void setCheckEscapedQuotes(boolean flag);
-	
+
 	void setSupportOracleInclude(boolean flag);
-	
+
 	void setEmptyLineIsDelimiter(boolean flag);
 
 	/**
@@ -61,7 +61,10 @@ public interface ScriptIterator
 	ScriptCommandDefinition getNextCommand();
 
 	void setDelimiter(DelimiterDefinition delim);
+	void setAlternateDelimiter(DelimiterDefinition delim);
 
+	boolean supportsMixedDelimiter();
+	
 	/**
 	 * Define the source file to be used and the encoding of the file.
 	 * If the encoding is null, the default encoding will be used.

@@ -19,33 +19,21 @@
  */
 package workbench.sql;
 
-import workbench.db.DbMetadata;
-import workbench.db.WbConnection;
+import workbench.sql.formatter.SQLToken;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public enum ParserType
+public interface DelimiterTester
 {
-	Standard,
-	Postgres,
-	SqlServer,
-	Oracle;
+	void setAlternateDelimiter(DelimiterDefinition delimiter);
+	DelimiterDefinition getAlternateDelimiter();
 
-	public static ParserType getTypeFromConnection(WbConnection conn)
-	{
-		if (conn == null) return Standard;
-		return getTypeFromDBID(conn.getDbId());
-	}
+	void currentToken(SQLToken token, boolean isStartOfLine);
 
-	public static ParserType getTypeFromDBID(String dbid)
-	{
-		if (dbid == null) return Standard;
-		if (DbMetadata.DBID_PG.equals(dbid)) return Postgres;
-		if (DbMetadata.DBID_ORA.equals(dbid)) return Oracle;
-		if (DbMetadata.DBID_MS.equals(dbid)) return SqlServer;
-		return Standard;
-	}
+	DelimiterDefinition getCurrentDelimiter();
+
+	void statementFinished();
 
 }

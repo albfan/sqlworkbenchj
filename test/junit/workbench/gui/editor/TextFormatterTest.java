@@ -65,6 +65,7 @@ public class TextFormatterTest
 	@Test
 	public void testFormatSql()
 	{
+		// <editor-fold desc="Editor Mock" defaultstate="collapsed">
 		SqlTextContainer editor = new SqlTextContainer()
 		{
 			@Override
@@ -150,6 +151,7 @@ public class TextFormatterTest
 				return getSelectionStart() < getSelectionEnd();
 			}
 		};
+		// </editor-fold>
 
 		editorText = "update foo set bar = 1;\nupdate bar set foo = 2; ";
 		selectionStart = 0;

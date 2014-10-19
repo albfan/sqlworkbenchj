@@ -54,7 +54,7 @@ public class ScriptParser
 	private DelimiterDefinition alternateDelimiter;
 	private int currentIteratorIndex = -42;
 	private boolean checkEscapedQuotes;
-	private ScriptIterator iteratingParser;
+	private ScriptIterator scriptIterator;
 	private boolean emptyLineIsSeparator;
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands;
@@ -147,12 +147,11 @@ public class ScriptParser
 		if (f.length() < this.maxFileSize)
 		{
 			this.readScriptFromFile(f, encoding);
-			this.findDelimiterToUse();
 		}
 		else
 		{
-			iteratingParser = getParserInstance();
-			iteratingParser.setFile(f, encoding);
+			scriptIterator = getParserInstance();
+			scriptIterator.setFile(f, encoding);
 		}
 		this.source = f;
 	}
@@ -163,15 +162,15 @@ public class ScriptParser
 	 */
 	public WbFile getScriptFile()
 	{
-		if (this.iteratingParser == null || source == null) return null;
+		if (this.scriptIterator == null || source == null) return null;
 		return new WbFile(this.source);
 	}
 
 	public int getScriptLength()
 	{
-		if (this.iteratingParser != null)
+		if (this.scriptIterator != null)
 		{
-			return this.iteratingParser.getScriptLength();
+			return this.scriptIterator.getScriptLength();
 		}
 		if (this.originalScript != null)
 		{
@@ -244,9 +243,8 @@ public class ScriptParser
 		if (script == null) throw new NullPointerException("SQL script may not be null");
 		if (script.equals(this.originalScript)) return;
 		this.originalScript = script;
-		this.findDelimiterToUse();
 		this.commands = null;
-		this.iteratingParser = null;
+		this.scriptIterator = null;
 		this.source = null;
 	}
 
@@ -276,14 +274,21 @@ public class ScriptParser
 	public void setDelimiters(DelimiterDefinition defaultDelim, DelimiterDefinition alternateDelim)
 	{
 		this.delimiter = defaultDelim;
-		this.alternateDelimiter = alternateDelim;
-
-		if (this.originalScript != null)
+		if (alternateDelimiterChanged(alternateDelim))
 		{
-			findDelimiterToUse();
+			this.commands = null;
+			this.scriptIterator = null;
 		}
+		this.alternateDelimiter = alternateDelim;
 	}
 
+	private boolean alternateDelimiterChanged(DelimiterDefinition newDelim)
+	{
+		if (this.alternateDelimiter == null && newDelim == null) return false;
+		if (this.alternateDelimiter == null && newDelim != null) return true;
+		if (this.alternateDelimiter != null && newDelim == null) return true;
+		return !alternateDelimiter.equals(newDelim);
+	}
 	/**
 	 *	Try to find out which delimiter should be used for the current script.
 	 *	First it will check if the script ends with the alternate delimiter
@@ -400,6 +405,13 @@ public class ScriptParser
 		return getCommand(index, true);
 	}
 
+	public DelimiterDefinition getDelimiterUsed(int commandIndex)
+	{
+		ScriptCommandDefinition c = getCommandDefinition(commandIndex);
+		if (c != null) return c.getDelimiterUsed();
+		return getDelimiter();
+	}
+
 	/**
 	 * Return the command at the given index position.
 	 * <br/>
@@ -408,12 +420,25 @@ public class ScriptParser
 	 */
 	public String getCommand(int index, boolean rightTrimCommand)
 	{
+		ScriptCommandDefinition c = getCommandDefinition(index);
+		String s = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
+
+		if (rightTrimCommand)
+		{
+			return StringUtil.rtrim(s);
+		}
+		else
+		{
+			return s;
+		}
+	}
+
+	private ScriptCommandDefinition getCommandDefinition(int index)
+	{
 		if (this.commands == null) this.parseCommands();
 		if (index < 0 || index >= this.commands.size()) return null;
-		ScriptCommandDefinition c = this.commands.get(index);
-		String s = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
-		if (rightTrimCommand) return StringUtil.rtrim(s);
-		else return s;
+
+		return this.commands.get(index);
 	}
 
 	/**
@@ -433,21 +458,21 @@ public class ScriptParser
 	public void startIterator()
 	{
 		this.currentIteratorIndex = 0;
-		if (this.iteratingParser == null && this.commands == null)
+		if (this.scriptIterator == null && this.commands == null)
 		{
 			this.parseCommands();
 		}
-		else if (this.iteratingParser != null)
+		else if (this.scriptIterator != null)
 		{
-			this.iteratingParser.reset();
+			this.scriptIterator.reset();
 		}
 	}
 
 	public void done()
 	{
-		if (this.iteratingParser != null)
+		if (this.scriptIterator != null)
 		{
-			this.iteratingParser.done();
+			this.scriptIterator.done();
 		}
 	}
 
@@ -476,7 +501,7 @@ public class ScriptParser
 		ScriptIterator p = null;
 		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", true);
 
-		if (parserType == ParserType.Postgres || parserType == ParserType.SqlServer)
+		if (parserType == ParserType.Postgres || parserType == ParserType.SqlServer || parserType == ParserType.Oracle)
 		{
 			LexerBasedParser l = new LexerBasedParser(parserType);
 			p = l;
@@ -493,7 +518,18 @@ public class ScriptParser
 		p.setSupportOracleInclude(this.supportOracleInclude);
 		p.setEmptyLineIsDelimiter(this.emptyLineIsSeparator && !useAlternateDelimiter);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
-		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
+		if (p.supportsMixedDelimiter())
+		{
+			p.setDelimiter(delimiter);
+			p.setAlternateDelimiter(this.alternateDelimiter);
+		}
+		else
+		{
+			findDelimiterToUse();
+			p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
+			p.setAlternateDelimiter(null);
+		}
+
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
 		p.setAlternateLineComment(this.alternateLineComment);
 
@@ -513,8 +549,8 @@ public class ScriptParser
 	 */
 	private void parseCommands()
 	{
-		this.commands = new ArrayList<>();
 		ScriptIterator p = getParserInstance();
+		commands = new ArrayList<>();
 		p.setScript(this.originalScript);
 		p.setStoreStatementText(false); // no need to store the statements twice
 
@@ -538,7 +574,7 @@ public class ScriptParser
 	 */
 	public int getStatementCount()
 	{
-		if (this.iteratingParser != null)
+		if (this.scriptIterator != null)
 		{
 			return -1;
 		}
@@ -551,9 +587,9 @@ public class ScriptParser
 	 */
 	public boolean hasNext()
 	{
-		if (this.iteratingParser != null)
+		if (this.scriptIterator != null)
 		{
-			return this.iteratingParser.hasMoreCommands();
+			return this.scriptIterator.hasMoreCommands();
 		}
 		else
 		{
@@ -570,9 +606,9 @@ public class ScriptParser
 	{
 		ScriptCommandDefinition command = null;
 		String result = null;
-		if (this.iteratingParser != null)
+		if (this.scriptIterator != null)
 		{
-			command = this.iteratingParser.getNextCommand();
+			command = this.scriptIterator.getNextCommand();
 			if (command == null) return null;
 			result = command.getSQL();
 		}
