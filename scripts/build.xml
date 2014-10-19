@@ -879,6 +879,10 @@
 					file="../src/workbench/sql/formatter/StandardLexer.flex"
           tofile="../src/workbench/sql/formatter/NonStandardLexer.flex"/>
 
+    <copy quiet="true" overwrite="true"
+					file="../src/workbench/sql/formatter/StandardLexer.flex"
+          tofile="../src/workbench/sql/formatter/MySQLLexer.flex"/>
+
     <replace file="../src/workbench/sql/formatter/NonStandardLexer.flex">
       <replacefilter>
         <replacetoken>StandardLexer</replacetoken>
@@ -890,10 +894,27 @@
       </replacefilter>
     </replace>
 
+    <replace file="../src/workbench/sql/formatter/MySQLLexer.flex">
+      <replacefilter>
+        <replacetoken>StandardLexer</replacetoken>
+        <replacevalue>MySQLLexer</replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>linecomment=("--"[^\r\n]*)</replacetoken>
+        <replacevalue>linecomment=("--"[ \t]+[^\r\n]*)|("#"[^\r\n]*)</replacevalue>
+      </replacefilter>
+    </replace>
+
     <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
       <jvmarg value="-Xmx256m"/>
       <arg value="-q"/>
       <arg value="../src/workbench/sql/formatter/NonStandardLexer.flex"/>
+    </java>
+
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
+      <jvmarg value="-Xmx256m"/>
+      <arg value="-q"/>
+      <arg value="../src/workbench/sql/formatter/MySQLLexer.flex"/>
     </java>
 
   </target>
