@@ -312,12 +312,13 @@ public class LexerBasedParser
 
 	private DelimiterCheckResult isDelimiter(DelimiterDefinition currentDelimiter, SQLToken token, boolean startOfLine)
 	{
-		boolean checkForAlternateDelim = currentDelimiter.isStandard() && delimiterTester != null;
 		DelimiterCheckResult result = checkDelimiter(currentDelimiter, token, startOfLine);
 		if (result.found)
 		{
 			return result;
 		}
+		
+		boolean checkForAlternateDelim = currentDelimiter != null && currentDelimiter.isStandard() && delimiterTester != null;
 		if (checkForAlternateDelim)
 		{
 			result = isDelimiter(alternateDelimiter, token, startOfLine);
