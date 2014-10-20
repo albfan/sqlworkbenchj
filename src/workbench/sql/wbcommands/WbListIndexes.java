@@ -22,6 +22,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import workbench.resource.ResourceMgr;
@@ -29,6 +30,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
+import workbench.db.TableIdentifier;
 
 import workbench.storage.DataStore;
 
@@ -116,10 +118,28 @@ public class WbListIndexes
 			catalog = currentConnection.getMetadata().getCurrentCatalog();
 		}
 
-		String tablePattern = cmdLine.getValue(ARG_TABLE_NAME);
+		SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(ARG_TABLE_NAME), currentConnection);
 		String indexPattern = cmdLine.getValue(ARG_INDEX_NAME);
 
-		List<IndexDefinition> indexes = reader.getIndexes(catalog, schema, tablePattern, indexPattern);
+		List<TableIdentifier> tables = tableArg.getTables();
+		List<IndexDefinition> indexes = null;
+		if (tables.isEmpty())
+		{
+			indexes = reader.getIndexes(catalog, schema, null, indexPattern);
+		}
+		else
+		{
+			indexes = new ArrayList<>();
+			for (TableIdentifier tbl : tables)
+			{
+				String tschema = schema == null ? tbl.getRawSchema() : schema;
+				String tcat = catalog == null ? tbl.getRawCatalog() : catalog;
+				String name = tbl.getRawTableName();
+				List<IndexDefinition> indexList = reader.getIndexes(tcat, tschema, name, indexPattern);
+				indexes.addAll(indexList);
+			}
+		}
+
 		DataStore ds = reader.fillDataStore(indexes, true);
 		ds.setResultName(ResourceMgr.getString("TxtDbExplorerIndexes"));
 		result.addDataStore(ds);
