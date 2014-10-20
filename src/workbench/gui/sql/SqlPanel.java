@@ -2960,24 +2960,6 @@ public class SqlPanel
 		scriptParser.setAlternateDelimiter(dbConnection.getAlternateDelimiter());
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		scriptParser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
-
-		if (this.dbConnection != null)
-		{
-			DbSettings db = this.dbConnection.getDbSettings();
-			if (db == null)
-			{
-				LogMgr.logError("SqlPanel.createScriptParser()", "No db settings available!", null);
-				return scriptParser;
-			}
-			scriptParser.setSupportOracleInclude(db.supportShortInclude());
-			scriptParser.setCheckForSingleLineCommands(db.supportSingleLineCommands());
-			scriptParser.setAlternateLineComment(db.getLineComment());
-			scriptParser.setSupportIdioticQuotes(db.getUseIdioticQuotes());
-		}
-		else
-		{
-			LogMgr.logError("SqlPanel.createScriptParser", "Created a script parser without a connection!", null);
-		}
 		return scriptParser;
 	}
 

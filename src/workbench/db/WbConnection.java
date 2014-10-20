@@ -474,7 +474,6 @@ public class WbConnection
 
 		ScriptParser p = new ScriptParser(sql);
 		p.setParserType(ParserType.getTypeFromConnection(this));
-		p.setAlternateLineComment(this.getDbSettings().getLineComment());
 
 		// The statemenRunner will call clearMessages() when statementDone()
 		// is called which in turn will call clearWarnings() on this instance.

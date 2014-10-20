@@ -73,9 +73,6 @@ public class IteratingScriptParser
 	private boolean returnStartingWhitespace;
 	private String alternateLineComment;
 
-	// Enables the idiotic MS Style quoting using []
-	private boolean supportIdioticQuotes;
-
 	// These patterns cover the statements that
 	// can be used in a single line without a delimiter
 	// This is basically to make the parser as Oracle compatible as possible
@@ -152,10 +149,6 @@ public class IteratingScriptParser
 		storeSqlInCommands = flag;
 	}
 
-	public void setSupportIdioticQuotes(boolean flag)
-	{
-		supportIdioticQuotes = flag;
-	}
 	/**
 	 * Should the parser check for MySQL hash comments?
 	 */
@@ -166,24 +159,9 @@ public class IteratingScriptParser
 	}
 
 	@Override
-	public void setCheckForSingleLineCommands(boolean flag)
-	{
-		this.checkSingleLineCommands = flag;
-	}
-
-	@Override
 	public void setReturnStartingWhitespace(boolean flag)
 	{
 		this.returnStartingWhitespace = flag;
-	}
-
-	/**
-	 * Support Oracle style @ includes
-	 */
-	@Override
-	public void setSupportOracleInclude(boolean flag)
-	{
-		this.supportOracleInclude = flag;
 	}
 
 	@Override
@@ -296,15 +274,10 @@ public class IteratingScriptParser
 		return StringUtil.lineStartsWith(this.script, pos, "--") || StringUtil.lineStartsWith(this.script, pos, alternateLineComment);
 	}
 
-	private boolean isQuoteChar(boolean inQuotes, char currentChar)
+	private boolean isQuoteChar(char currentChar)
 	{
 		if (currentChar == '\'') return true;
 		if (currentChar == '"') return true;
-		if (supportIdioticQuotes)
-		{
-			if (inQuotes) return currentChar == ']';
-			else return currentChar == '[';
-		}
 		return false;
 	}
 
@@ -329,7 +302,7 @@ public class IteratingScriptParser
 			char nextChar = (pos < scriptLength - 1 ? this.script.charAt(pos + 1) : 0);
 
 			// ignore quotes in comments
-			if (!commentOn && isQuoteChar(quoteOn, currChar))
+			if (!commentOn && isQuoteChar(currChar))
 			{
 				if (!quoteOn)
 				{

@@ -56,9 +56,6 @@ public class ScriptParser
 	private boolean checkEscapedQuotes;
 	private ScriptIterator scriptIterator;
 	private boolean emptyLineIsSeparator;
-	private boolean supportOracleInclude = true;
-	private boolean checkSingleLineCommands;
-	private boolean supportIdioticQuotes;
 	private boolean returnTrailingWhitesapce;
 	private String alternateLineComment;
 	private boolean useAlternateDelimiter;
@@ -89,6 +86,7 @@ public class ScriptParser
 	public ScriptParser(String aScript)
 	{
 		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
+		parserType = ParserType.Standard;
 		this.setScript(aScript);
 	}
 
@@ -100,6 +98,7 @@ public class ScriptParser
 	 */
 	public ScriptParser(int fileSize)
 	{
+		parserType = ParserType.Standard;
 		maxFileSize = fileSize;
 	}
 
@@ -198,36 +197,9 @@ public class ScriptParser
 		this.emptyLineIsSeparator = flag;
 	}
 
-	public void setAlternateLineComment(String comment)
-	{
-		if (StringUtil.isNonBlank(comment) && !comment.trim().equals("--"))
-		{
-			this.alternateLineComment = comment.trim();
-		}
-		else
-		{
-			this.alternateLineComment = null;
-		}
-	}
-
 	public void setReturnStartingWhitespace(boolean flag)
 	{
 		this.returnTrailingWhitesapce = flag;
-	}
-
-	public void setCheckForSingleLineCommands(boolean flag)
-	{
-		this.checkSingleLineCommands = flag;
-	}
-
-	public void setSupportOracleInclude(boolean flag)
-	{
-		this.supportOracleInclude = flag;
-	}
-
-	public void setSupportIdioticQuotes(boolean flag)
-	{
-		this.supportIdioticQuotes = flag;
 	}
 
 	/**
@@ -504,24 +476,7 @@ public class ScriptParser
 
 	private ScriptIterator getParserInstance()
 	{
-		ScriptIterator p = null;
-		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", true);
-
-		if (parserType == ParserType.Postgres || parserType == ParserType.SqlServer || parserType == ParserType.Oracle)
-		{
-			LexerBasedParser l = new LexerBasedParser(parserType);
-			p = l;
-		}
-		else if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands || supportIdioticQuotes)
-		{
-			p = new IteratingScriptParser();
-			((IteratingScriptParser)p).setSupportIdioticQuotes(supportIdioticQuotes);
-		}
-		else
-		{
-			p = new LexerBasedParser();
-		}
-		p.setSupportOracleInclude(this.supportOracleInclude);
+		LexerBasedParser p = new LexerBasedParser(parserType);
 		p.setEmptyLineIsDelimiter(this.emptyLineIsSeparator && !useAlternateDelimiter);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		if (p.supportsMixedDelimiter())
@@ -535,18 +490,8 @@ public class ScriptParser
 			p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 			p.setAlternateDelimiter(null);
 		}
-
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
 		p.setAlternateLineComment(this.alternateLineComment);
-
-		if (useAlternateDelimiter || this.delimiter.isNonStandard())
-		{
-			p.setCheckForSingleLineCommands(false);
-		}
-		else
-		{
-			p.setCheckForSingleLineCommands(this.checkSingleLineCommands);
-		}
 		return p;
 	}
 

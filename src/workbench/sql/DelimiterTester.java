@@ -36,4 +36,7 @@ public interface DelimiterTester
 
 	void statementFinished();
 
+	boolean isSingleLineStatement(SQLToken token, boolean isStartOfLine);
+	void lineEnd();
+
 }

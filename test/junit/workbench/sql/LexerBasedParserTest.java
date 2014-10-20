@@ -389,63 +389,97 @@ public class LexerBasedParserTest
 	}
 
 	@Test
-	public void testOraInclude()
+	public void quotedQuotes()
+	{
+		String sql = "select \";\" from foobar;\ncommit;";
+		LexerBasedParser parser = new LexerBasedParser(ParserType.Standard);
+		parser.setScript(sql);
+		parser.setStoreStatementText(true);
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select \";\" from foobar", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("commit", cmd.getSQL());
+
+		sql = "select ';', \"'\" from foobar;\ncommit;";
+		parser.setScript(sql);
+		parser.setStoreStatementText(true);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select ';', \"'\" from foobar", cmd.getSQL());
+
+		sql =
+			"wbexport  -type=text -delimiter=';' -quoteChar=\"'\" -file=test.txt; \n" +
+      "wbimport  -type=text;";
+
+		parser.setScript(sql);
+		parser.setStoreStatementText(true);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		System.out.println(cmd.getSQL());
+		assertEquals("wbexport  -type=text -delimiter=';' -quoteChar=\"'\" -file=test.txt", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("wbimport  -type=text", cmd.getSQL());
+	}
+
+	@Test
+	public void testOracleInclude()
 		throws Exception
 	{
 		String sql = "select \n@i = 1,id from test;\n" + "select * from person;delete from test2;commit;";
-		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser.setSupportOracleInclude(false);
-		ScriptCommandDefinition cmd = null;
-		while ((cmd = parser.getNextCommand()) != null)
-		{
-//			System.out.println(cmd.getSQL() + "\n**************************");
-			int index = cmd.getIndexInScript();
-			if (index == 0)
-			{
-				assertEquals("select \n@i = 1,id from test", cmd.getSQL().trim());
-			}
-			else if (index == 1)
-			{
-				assertEquals("select * from person", cmd.getSQL().trim());
-			}
-			else if (index == 2)
-			{
-				assertEquals("delete from test2", cmd.getSQL().trim());
-			}
-			else if (index == 3)
-			{
-				assertEquals("commit", cmd.getSQL().trim());
-			}
-			else
-			{
-				fail("Wrong command index: " + index);
-			}
-		}
+		LexerBasedParser parser = new LexerBasedParser(ParserType.Standard);
+		parser.setScript(sql);
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select \n@i = 1,id from test", cmd.getSQL().trim());
 
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from person", cmd.getSQL().trim());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("delete from test2", cmd.getSQL().trim());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("commit", cmd.getSQL().trim());
+
+		parser = new LexerBasedParser(ParserType.Oracle);
 		sql = "delete from person;\n  @insert_person.sql\ncommit;";
-		parser = new LexerBasedParser(sql);
-		parser.setSupportOracleInclude(true);
-		while ((cmd = parser.getNextCommand()) != null)
-		{
-//			System.out.println(cmd.getSQL() + "\n**************************");
-			int index = cmd.getIndexInScript();
-			if (index == 0)
-			{
-				assertEquals("delete from person", cmd.getSQL());
-			}
-			else if (index == 1)
-			{
-				assertEquals("@insert_person.sql", cmd.getSQL());
-			}
-			else if (index == 2)
-			{
-				assertEquals("commit", cmd.getSQL());
-			}
-			else
-			{
-				fail("Wrong command index: " + index);
-			}
-		}
+		parser.setScript(sql);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("delete from person", cmd.getSQL());
 
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("@insert_person.sql", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("commit", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+
+		parser = new LexerBasedParser(ParserType.Standard);
+		sql = "delete from person;\n  @insert_person.sql\ncommit;";
+		parser.setScript(sql);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("delete from person", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("@insert_person.sql\ncommit", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
 	}
+
 }

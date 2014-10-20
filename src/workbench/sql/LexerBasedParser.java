@@ -62,7 +62,6 @@ public class LexerBasedParser
 	protected int scriptLength;
 	protected int realScriptLength;
 	protected boolean hasMoreCommands;
-	protected boolean checkOracleInclude;
 	protected boolean calledOnce;
 	protected boolean checkPgQuoting;
 	protected boolean lastStatementUsedTerminator;
@@ -244,9 +243,9 @@ public class LexerBasedParser
 			}
 			else if (!inPgQuote)
 			{
-				if (checkOracleInclude && startOfLine && !singleLineCommand && text.charAt(0) == '@')
+				if (!singleLineCommand && delimiterTester != null)
 				{
-					singleLineCommand = true;
+					singleLineCommand = delimiterTester.isSingleLineStatement(token, startOfLine);
 				}
 
 				if (checkForDelimiter)
@@ -256,8 +255,13 @@ public class LexerBasedParser
 					{
 						lastStatementUsedTerminator = true;
 						matchedDelimiter = check.matchedDelimiter;
-						scriptEnd = (token == null);
-						break;
+						scriptEnd = (check.lastToken == null);
+						// if previousEnd is still -1
+						// this means we have a completely empty statement --> silently ignore this
+						if (previousEnd > -1)
+						{
+							break;
+						}
 					}
 
 					if (check.skippedText != null)
@@ -281,8 +285,13 @@ public class LexerBasedParser
 					}
 					startOfLine = true;
 					singleLineCommand = false;
+					if (delimiterTester != null)
+					{
+						delimiterTester.lineEnd();
+					}
 				}
 			}
+
 			previousEnd = token.getCharEnd();
 			token = lexer.getNextToken(true, true);
 			if (sql != null)
@@ -317,7 +326,7 @@ public class LexerBasedParser
 		{
 			return result;
 		}
-		
+
 		boolean checkForAlternateDelim = currentDelimiter != null && currentDelimiter.isStandard() && delimiterTester != null;
 		if (checkForAlternateDelim)
 		{
@@ -417,7 +426,7 @@ public class LexerBasedParser
 
 	protected ScriptCommandDefinition createCommandDef(StringBuilder sql, int start, int end)
 	{
-		if (returnLeadingWhitespace || sql == null || !Character.isWhitespace(sql.charAt(0)) || sql.length() == 0)
+		if (returnLeadingWhitespace || StringUtil.isEmptyString(sql) || !Character.isWhitespace(sql.charAt(0)))
 		{
 			String toStore = storeStatementText ? sql.toString() : null;
 			return new ScriptCommandDefinition(toStore, start, end);
@@ -449,11 +458,6 @@ public class LexerBasedParser
 	}
 
 	@Override
-	public void setCheckForSingleLineCommands(boolean flag)
-	{
-	}
-
-	@Override
 	public void setAlternateLineComment(String comment)
 	{
 	}
@@ -462,12 +466,6 @@ public class LexerBasedParser
 	public void setCheckEscapedQuotes(boolean flag)
 	{
 		checkEscapedQuotes = flag;
-	}
-
-	@Override
-	public void setSupportOracleInclude(boolean flag)
-	{
-		checkOracleInclude = flag;
 	}
 
 	private void createLexer()

@@ -564,14 +564,6 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "blob.literal.upcase", false);
 	}
 
-	public boolean supportSingleLineCommands()
-	{
-		String ids = Settings.getInstance().getProperty("workbench.db.checksinglelinecmd", "");
-		if ("*".equals(ids)) return true;
-		List dbs = StringUtil.stringToList(ids, ",", true, true);
-		return dbs.contains(this.getDbId());
-	}
-
 	public boolean getUseIdioticQuotes()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "bracket.quoting", false);

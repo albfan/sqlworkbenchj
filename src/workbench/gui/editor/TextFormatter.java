@@ -55,7 +55,6 @@ public class TextFormatter
 		ScriptParser parser = new ScriptParser(ParserType.getTypeFromDBID(dbId));
 		parser.setAlternateDelimiter(alternateDelimiter);
 		parser.setReturnStartingWhitespace(true);
-		parser.setAlternateLineComment(lineComment);
 		parser.setScript(sql);
 
 		boolean isSelected = editor.isTextSelected();

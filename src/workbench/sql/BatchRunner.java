@@ -661,17 +661,6 @@ public class BatchRunner
 			}
 		}
 
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
-		// The connection might not be initialized!
-		// When running  a single WbCopy command it is not necessary to define a
-		// connection on the commandline
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		if (this.connection != null && !this.connection.isClosed())
-		{
-			parser.setSupportOracleInclude(this.connection.getDbSettings().supportShortInclude());
-			parser.setCheckForSingleLineCommands(this.connection.getDbSettings().supportSingleLineCommands());
-			parser.setAlternateLineComment(this.connection.getDbSettings().getLineComment());
-		}
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		return parser;
 	}
