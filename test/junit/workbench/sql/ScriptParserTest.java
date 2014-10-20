@@ -1304,5 +1304,38 @@ public class ScriptParserTest
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(2));
 		assertTrue(parser.getCommand(3).startsWith("insert into bar"));
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(3));
+
+		script =
+			"whenever sqlerror continue;\n" +
+			"\n" +
+			"set serveroutput on;\n" +
+			"\n" +
+			"declare\n" +
+			"  l_count integer;\n" +
+			"begin\n" +
+			"  l_count := 42;\n" +
+			"end;\n" +
+			"/\n" +
+			"\n" +
+			"begin\n" +
+			"  execute immediate 'drop table foo';\n" +
+			"end;\n" +
+			"/\n" +
+			"\n" +
+			"select count(*) from dual;";
+
+		parser.setScript(script);
+		size = parser.getSize();
+		assertEquals(5, size);
+		assertTrue(parser.getCommand(0).startsWith("whenever"));
+		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(0));
+		assertTrue(parser.getCommand(1).startsWith("set serveroutput"));
+		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(1));
+		assertTrue(parser.getCommand(2).startsWith("declare"));
+		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(2));
+		assertTrue(parser.getCommand(3).startsWith("begin"));
+		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(3));
+		assertTrue(parser.getCommand(4).startsWith("select count(*)"));
+		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(4));
 	}
 }

@@ -34,8 +34,9 @@ public class OracleDelimiterTester
 {
 	private DelimiterDefinition alternateDelimiter = DelimiterDefinition.DEFAULT_ORA_DELIMITER;
 	private boolean useAlternateDelimiter;
-	private Set<String> keywords = CollectionUtil.caseInsensitiveSet("CREATE", "CREATE OR REPLACE");
-	private Set<String> types = CollectionUtil.caseInsensitiveSet("PROCEDURE", "PACKAGE", "PACKAGE BODY", "FUNCTION", "TRIGGER", "TYPE");
+	private final Set<String> blockStart = CollectionUtil.caseInsensitiveSet("BEGIN", "DECLARE");
+	private final Set<String> keywords = CollectionUtil.caseInsensitiveSet("CREATE", "CREATE OR REPLACE", "DECLARE");
+	private final Set<String> types = CollectionUtil.caseInsensitiveSet("PROCEDURE", "PACKAGE", "PACKAGE BODY", "FUNCTION", "TRIGGER", "TYPE");
 
 	private SQLToken lastToken;
 
@@ -63,6 +64,10 @@ public class OracleDelimiterTester
 				useAlternateDelimiter = false;
 			}
 		}
+		else if (blockStart.contains(token.getText()) && lastToken == null)
+		{
+			useAlternateDelimiter = true;
+		}
 		else if (lastToken != null)
 		{
 			useAlternateDelimiter = (types.contains(token.getText()) && keywords.contains(lastToken.getText()));
@@ -89,6 +94,5 @@ public class OracleDelimiterTester
 		useAlternateDelimiter = false;
 		lastToken = null;
 	}
-
 
 }
