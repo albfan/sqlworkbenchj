@@ -647,8 +647,18 @@ public class BatchRunner
 		}
 		else
 		{
-			// if a delimiter has been defined, then use only this
-			parser.setDelimiters(this.delimiter, null);
+			// If the ScriptParser supports dynamic alternate delimiters
+			// use the defined delimiter as the alternate delimiter
+			if (parser.supportsMixedDelimiter())
+			{
+				parser.setAlternateDelimiter(this.delimiter);
+			}
+			else
+			{
+				// if the parser only supports a single delimiter
+				// use the defined one, and don't use an alternate delimiter
+				parser.setDelimiters(this.delimiter, null);
+			}
 		}
 
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11

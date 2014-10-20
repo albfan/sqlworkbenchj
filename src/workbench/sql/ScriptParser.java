@@ -496,6 +496,12 @@ public class ScriptParser
 		return this.delimiter;
 	}
 
+	public boolean supportsMixedDelimiter()
+	{
+		ScriptIterator parser = getParserInstance();
+		return parser.supportsMixedDelimiter();
+	}
+
 	private ScriptIterator getParserInstance()
 	{
 		ScriptIterator p = null;

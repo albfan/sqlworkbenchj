@@ -64,6 +64,7 @@ public class WbInclude
 	public static final String ARG_CHECK_ESCAPED_QUOTES = "checkEscapedQuotes";
 	public static final String ARG_PRINT_STATEMENTS = "printStatements";
 	public static final String ARG_FILE = "file";
+	public static final String ARG_ALT_DELIMITER = "delimiter";
 
 	/*
 	 * I need to store the instance in a variable to be able to cancel the execution.
@@ -79,7 +80,7 @@ public class WbInclude
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CHECK_ESCAPED_QUOTES, ArgumentType.BoolArgument);
-		cmdLine.addArgument("delimiter",StringUtil.stringToList("';',oracle,mssql"));
+		cmdLine.addArgument(ARG_ALT_DELIMITER,StringUtil.stringToList("';',oracle,mssql"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		ConditionCheck.addParameters(cmdLine);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
@@ -217,7 +218,7 @@ public class WbInclude
 			defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 			ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
 			encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
-			delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue("delimiter"));
+			delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue(ARG_ALT_DELIMITER));
 			setUnknownMessage(result, cmdLine, null);
 			showStmts = cmdLine.getBoolean(ARG_PRINT_STATEMENTS, this.runner.getTraceStatements());
 			showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, false);
