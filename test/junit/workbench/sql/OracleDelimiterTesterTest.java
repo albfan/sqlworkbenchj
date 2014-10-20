@@ -67,5 +67,34 @@ public class OracleDelimiterTesterTest
 		delim = tester.getCurrentDelimiter();
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, delim);
 	}
+	@Test
+	public void testBlock()
+	{
+		OracleDelimiterTester tester = new OracleDelimiterTester();
+		tester.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+		SQLToken begin = new SQLToken(SQLToken.RESERVED_WORD, "BEGIN", 0, 0);
+		tester.currentToken(begin, false);
+		DelimiterDefinition delim = tester.getCurrentDelimiter();
+		assertEquals(tester.getAlternateDelimiter(), delim);
+
+		tester.statementFinished();
+
+		SQLToken declare = new SQLToken(SQLToken.RESERVED_WORD, "DECLARE", 0, 0);
+		tester.currentToken(declare, false);
+		delim = tester.getCurrentDelimiter();
+		assertEquals(tester.getAlternateDelimiter(), delim);
+
+		tester.statementFinished();
+
+		tester.currentToken(begin, false);
+		delim = tester.getCurrentDelimiter();
+		assertEquals(tester.getAlternateDelimiter(), delim);
+
+		SQLToken select = new SQLToken(SQLToken.RESERVED_WORD, "SELECT", 0, 0);
+		tester.currentToken(select, false);
+		delim = tester.getCurrentDelimiter();
+		assertEquals(tester.getAlternateDelimiter(), delim);
+	}
 
 }
