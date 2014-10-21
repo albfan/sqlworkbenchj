@@ -33,6 +33,7 @@ import workbench.storage.DataStore;
 
 import workbench.sql.VariablePool;
 import workbench.sql.preparedstatement.StatementParameters;
+import workbench.sql.wbcommands.WbDefineVar;
 import workbench.util.HtmlUtil;
 
 import workbench.util.SqlUtil;
@@ -68,6 +69,11 @@ public class ConsolePrompter
 	@Override
 	public boolean processParameterPrompts(String sql)
 	{
+		String verb = SqlUtil.getSqlVerb(sql);
+
+		// Don't prompt for variables when defining a macro
+		if (verb.equalsIgnoreCase(WbDefineVar.VERB)) return true;
+
 		VariablePool pool = VariablePool.getInstance();
 
 		DataStore ds = pool.getParametersToBePrompted(sql);

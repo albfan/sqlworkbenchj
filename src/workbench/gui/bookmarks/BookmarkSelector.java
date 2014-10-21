@@ -29,6 +29,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -51,8 +53,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.TableColumnModel;
 
 import workbench.interfaces.MainPanel;
@@ -98,7 +98,7 @@ import workbench.util.StringUtil;
  */
 public class BookmarkSelector
 	extends JPanel
-implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent, ChangeListener
+	implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingComponent, ItemListener
 {
 	private static final String PROP_SORT_DEF = GuiSettings.PROP_BOOKMARK_PREFIX + "sort";
 	private static final String PROP_USE_CURRENT_TAB = GuiSettings.PROP_BOOKMARK_PREFIX + "current.tab.default";
@@ -168,7 +168,10 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		useCurrentEditorCbx.setText(ResourceMgr.getString("LblBookUseCurrent"));
 		useCurrentEditorCbx.setToolTipText(ResourceMgr.getDescription("LblBookUseCurrent"));
 		useCurrentEditorCbx.setSelected(useCurrent);
-		useCurrentEditorCbx.addChangeListener(this);
+
+		// adding an ActionListener does not work
+		// if the checkbox is toggled by using the mnemonic
+		useCurrentEditorCbx.addItemListener(this);
 
 		tabSelector = new JComboBox(getTabs());
 		if (useCurrent)
@@ -388,7 +391,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 	}
 
 	@Override
-	public void stateChanged(ChangeEvent e)
+	public void itemStateChanged(ItemEvent e)
 	{
 		// the checkbox for "Current tab only" was changed
 		if (useCurrentEditorCbx.isSelected())
@@ -399,6 +402,7 @@ implements KeyListener, MouseListener, Reloadable, ActionListener, ValidatingCom
 		{
 			tabSelector.setSelectedIndex(0);
 		}
+		filterValue.setText("");
 	}
 
 	@Override
