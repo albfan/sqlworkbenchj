@@ -155,6 +155,7 @@ public class EditorPanel
 	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<>();
 	private WbFile currentFile;
 	private boolean saveInProgress;
+	private boolean loadInProgress;
 	private long fileModifiedTime;
 	private String fileEncoding;
 	private Set<String> dbFunctions;
@@ -341,35 +342,46 @@ public class EditorPanel
 	{
 		if (this.currentFile == null) return;
 		if (this.saveInProgress) return;
+		if (this.loadInProgress) return;
 
-		long currentFileTime = currentFile.lastModified();
-
-		if (currentFileTime > fileModifiedTime)
+		try
 		{
-			String fname = getCurrentFileName();
-			FileReloadType reloadType = GuiSettings.getReloadType();
-			if (reloadType != FileReloadType.none)
+			loadInProgress = true;
+
+			long currentFileTime = currentFile.lastModified();
+			int graceTime = Settings.getInstance().getIntProperty("workbench.gui.editor.reload.check.mindiff", 2000);
+
+			if (currentFileTime - fileModifiedTime > graceTime)
 			{
-				LogMgr.logDebug("EditorPanel", "File " + fname + " has been modified externally. currentFileTime=" + currentFileTime + ", saved lastModifiedTime=" + fileModifiedTime);
-			}
-			if (reloadType == FileReloadType.automatic)
-			{
-				this.reloadFile();
-				this.statusBar.setStatusMessage(ResourceMgr.getFormattedString("MsgFileReloaded", fname), 5000);
-			}
-			else if (reloadType == FileReloadType.prompt)
-			{
-				boolean doReload = WbSwingUtilities.getYesNo(this, ResourceMgr.getFormattedString("MsgReloadFile", fname));
-				if (doReload)
+				String fname = getCurrentFileName();
+				FileReloadType reloadType = GuiSettings.getReloadType();
+				if (reloadType != FileReloadType.none)
+				{
+					LogMgr.logDebug("EditorPanel", "File " + fname + " has been modified externally. currentFileTime=" + currentFileTime + ", saved lastModifiedTime=" + fileModifiedTime);
+				}
+				if (reloadType == FileReloadType.automatic)
 				{
 					this.reloadFile();
+					this.statusBar.setStatusMessage(ResourceMgr.getFormattedString("MsgFileReloaded", fname), 5000);
 				}
-				else
+				else if (reloadType == FileReloadType.prompt)
 				{
-					// don't check again until the file changes another time
-					this.fileModifiedTime = currentFileTime;
+					boolean doReload = WbSwingUtilities.getYesNo(this, ResourceMgr.getFormattedString("MsgReloadFile", fname));
+					if (doReload)
+					{
+						reloadFile();
+					}
+					else
+					{
+						// don't check again until the file changes another time
+						fileModifiedTime = currentFileTime;
+					}
 				}
 			}
+		}
+		finally
+		{
+			loadInProgress = false;
 		}
 	}
 
