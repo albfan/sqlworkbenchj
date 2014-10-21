@@ -172,6 +172,10 @@ public class SQLConsole
 							{
 								runner.runScript(macro);
 							}
+							if (ConsoleSettings.showScriptFinishTime())
+							{
+								printMessage("(" + StringUtil.getCurrentTimestamp() + ")");
+							}
 						}
 					}
 					catch (Throwable th)

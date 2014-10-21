@@ -122,5 +122,10 @@ public class ConsoleSettings
 		return Settings.getInstance().getProperty("workbench.console.nullstring", GuiSettings.getDisplayNullString());
 	}
 
+	public static boolean showScriptFinishTime()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.console.script.showtime", false);
+	}
+
 
 }
