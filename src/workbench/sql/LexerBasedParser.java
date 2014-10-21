@@ -199,6 +199,7 @@ public class LexerBasedParser
 		boolean danglingQuote = false;
 		boolean inPgQuote = false;
 		boolean scriptEnd = false;
+		boolean firstToken = true;
 
 		String pgQuoteString = null;
 
@@ -245,7 +246,7 @@ public class LexerBasedParser
 			{
 				if (!singleLineCommand && delimiterTester != null)
 				{
-					singleLineCommand = delimiterTester.isSingleLineStatement(token, startOfLine);
+					singleLineCommand = delimiterTester.isSingleLineStatement(token, startOfLine || firstToken);
 				}
 
 				if (!singleLineCommand && checkForDelimiter)
@@ -294,6 +295,7 @@ public class LexerBasedParser
 
 			previousEnd = token.getCharEnd();
 			token = lexer.getNextToken(true, true);
+			firstToken = false;
 			if (sql != null)
 			{
 				sql.append(text);

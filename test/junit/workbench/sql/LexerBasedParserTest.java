@@ -418,7 +418,7 @@ public class LexerBasedParserTest
 		parser.setStoreStatementText(true);
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
-		System.out.println(cmd.getSQL());
+//		System.out.println(cmd.getSQL());
 		assertEquals("wbexport  -type=text -delimiter=';' -quoteChar=\"'\" -file=test.txt", cmd.getSQL());
 
 		cmd = parser.getNextCommand();
@@ -493,6 +493,25 @@ public class LexerBasedParserTest
 		parser.setStoreStatementText(true);
 		parser.setScript(sql);
 		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("whenever sql error continue", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("drop table foo", cmd.getSQL());
+
+		sql =
+			"select 1 from dual; \n" +
+			"whenever sql error continue\n" +
+			"\n" +
+			"drop table foo;\n";
+		parser.setScript(sql);
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select 1 from dual", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertEquals("whenever sql error continue", cmd.getSQL());
 
