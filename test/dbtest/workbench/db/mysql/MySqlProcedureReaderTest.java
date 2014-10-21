@@ -40,6 +40,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.ParserType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -96,7 +98,7 @@ public class MySqlProcedureReaderTest
 		con.getProfile().setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		String source = proc.getSource(con).toString();
 //		System.out.println(source);
-		ScriptParser p = new ScriptParser(source);
+		ScriptParser p = new ScriptParser(source, ParserType.MySQL);
 		p.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(con, DelimiterDefinition.DEFAULT_ORA_DELIMITER));
 		assertEquals(2, p.getSize());
 		String create = p.getCommand(1);

@@ -86,7 +86,6 @@ public class ScriptParser
 	public ScriptParser(String aScript)
 	{
 		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
-		parserType = ParserType.Standard;
 		this.setScript(aScript);
 	}
 

@@ -24,14 +24,17 @@ package workbench.db.postgres;
 
 import java.util.Collection;
 import java.util.List;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.EnumIdentifier;
 import workbench.db.WbConnection;
+import workbench.sql.ParserType;
 import workbench.sql.ScriptParser;
 import workbench.util.CollectionUtil;
 
@@ -101,7 +104,7 @@ public class PostgresEnumReaderTest
 		assertEquals("my enum", enumId.getComment());
 
 		String sql = enumId.getSource(con).toString();
-		ScriptParser parser = new ScriptParser(sql.toString());
+		ScriptParser parser = new ScriptParser(sql.toString(), ParserType.Postgres);
 		assertEquals(2, parser.getSize());
 		String create = parser.getCommand(0);
 		assertEquals(create, "CREATE TYPE stimmung_enum AS ENUM ('sad','ok','happy')");

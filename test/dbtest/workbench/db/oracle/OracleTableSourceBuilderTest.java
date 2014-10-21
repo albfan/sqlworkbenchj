@@ -42,6 +42,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.ParserType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -195,7 +197,7 @@ public class OracleTableSourceBuilderTest
 
 //		System.out.println(sql);
 		//assertTrue(sql.indexOf("USING INDEX (") > 0);
-		ScriptParser p = new ScriptParser(sql);
+		ScriptParser p = new ScriptParser(sql, ParserType.Oracle);
 		assertEquals(2, p.getSize());
 		String indexSql = p.getCommand(1);
 		indexSql = indexSql.replaceAll("\\s+", " ");
@@ -220,7 +222,7 @@ public class OracleTableSourceBuilderTest
 			String sql = table.getSource(con).toString();
 
 //			System.out.println(sql);
-			ScriptParser parser = new ScriptParser(sql);
+			ScriptParser parser = new ScriptParser(sql, ParserType.Oracle);
 			int size = parser.getSize();
 			assertEquals(3, size);
 

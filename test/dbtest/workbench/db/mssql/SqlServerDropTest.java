@@ -44,6 +44,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.ParserType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -100,7 +102,7 @@ public class SqlServerDropTest
 		dropper.setObjects(Collections.singletonList(tbl));
 
 		CharSequence sql = dropper.getScript();
-		ScriptParser p = new ScriptParser(sql.toString());
+		ScriptParser p = new ScriptParser(sql.toString(), ParserType.SqlServer);
 		assertEquals(2, p.getSize());
 		String drop = p.getCommand(0);
 		//System.out.println(drop);
@@ -128,7 +130,7 @@ public class SqlServerDropTest
 		dropper.setObjectTable(tbl);
 		CharSequence sql = dropper.getScript();
 
-		ScriptParser p = new ScriptParser(sql.toString());
+		ScriptParser p = new ScriptParser(sql.toString(), ParserType.SqlServer);
 		assertEquals(3, p.getSize());
 		String drop = p.getCommand(0);
 		assertEquals("DROP INDEX idx_foo_1 ON wb_junit.dbo.foo", drop);

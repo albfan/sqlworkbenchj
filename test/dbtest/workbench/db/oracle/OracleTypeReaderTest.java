@@ -38,6 +38,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.ParserType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -110,7 +112,7 @@ public class OracleTypeReaderTest
 		assertEquals(1, typ1.getNumberOfAttributes());
 		assertEquals(1, typ1.getNumberOfMethods());
 		String source = typ1.getSource(con).toString();
-		ScriptParser p = new ScriptParser(source);
+		ScriptParser p = new ScriptParser(source, ParserType.Oracle);
 		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		System.out.println(source);
 		assertEquals(2, p.getSize());

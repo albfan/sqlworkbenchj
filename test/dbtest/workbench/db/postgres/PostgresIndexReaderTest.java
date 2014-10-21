@@ -44,6 +44,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.ParserType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -198,7 +200,7 @@ public class PostgresIndexReaderTest
 
 		String source = table.getSource(conn).toString();
 //		System.out.println("***** \n" + source);
-		ScriptParser p = new ScriptParser(source);
+		ScriptParser p = new ScriptParser(source, ParserType.Postgres);
 		assertEquals(4, p.getSize());
 		String alter = p.getCommand(1);
 		assertTrue(alter.startsWith("ALTER TABLE films"));

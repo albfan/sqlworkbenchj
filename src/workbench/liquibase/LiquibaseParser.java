@@ -209,8 +209,7 @@ public class LiquibaseParser
 	private List<String> splitStatements(String content, DelimiterDefinition delimiter)
 	{
 		List<String> result = new ArrayList<>();
-		ScriptParser parser = new ScriptParser(content);
-		parser.setParserType(sqlParserType);
+		ScriptParser parser = new ScriptParser(content, sqlParserType);
 		parser.setAlternateDelimiter(delimiter);
 		int count = parser.getSize();
 
