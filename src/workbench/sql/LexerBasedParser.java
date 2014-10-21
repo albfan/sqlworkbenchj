@@ -248,7 +248,7 @@ public class LexerBasedParser
 					singleLineCommand = delimiterTester.isSingleLineStatement(token, startOfLine);
 				}
 
-				if (checkForDelimiter)
+				if (!singleLineCommand && checkForDelimiter)
 				{
 					DelimiterCheckResult check = isDelimiter(currentDelim, token, startOfLine);
 					if (check.found)

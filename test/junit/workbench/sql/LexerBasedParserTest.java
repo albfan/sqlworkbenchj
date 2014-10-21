@@ -482,4 +482,22 @@ public class LexerBasedParserTest
 		assertNull(cmd);
 	}
 
+	@Test
+	public void testOracleSingleLine()
+	{
+		String sql =
+			"whenever sql error continue\n" +
+			"\n" +
+			"drop table foo;\n";
+		LexerBasedParser parser = new LexerBasedParser(ParserType.Oracle);
+		parser.setStoreStatementText(true);
+		parser.setScript(sql);
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("whenever sql error continue", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("drop table foo", cmd.getSQL());
+	}
 }
