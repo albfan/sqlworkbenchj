@@ -36,7 +36,6 @@ import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -907,29 +906,6 @@ public class ScriptParserTest
 			assertEquals(1, index);
 			String cmd = p.getCommand(index);
 			assertEquals("-- comment'\nselect 'b' from dual", cmd);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
-
-	@Test
-	@Ignore
-	public void testSingleLineStatements()
-	{
-		try
-		{
-			String sql = "set nocount on\ndeclare @x int\nselect 123;";
-			ScriptParser p = new ScriptParser(ParserType.SqlServer);
-			p.setScript(sql);
-			assertEquals(3, p.getSize());
-
-			sql = "declare @x int\nset nocount on\nselect 123;";
-			p = new ScriptParser(ParserType.Oracle);
-			p.setScript(sql);
-			assertEquals(3, p.getSize());
 		}
 		catch (Exception e)
 		{
