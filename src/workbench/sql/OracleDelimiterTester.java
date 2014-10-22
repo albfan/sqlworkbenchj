@@ -36,10 +36,9 @@ public class OracleDelimiterTester
 	private boolean useAlternateDelimiter;
 	private final Set<String> blockStart = CollectionUtil.caseInsensitiveSet("BEGIN", "DECLARE");
 	private final Set<String> keywords = CollectionUtil.caseInsensitiveSet("CREATE", "CREATE OR REPLACE");
-	private final Set<String> singleLineCommands = CollectionUtil.caseInsensitiveSet("WHENEVER", "ECHO");
+	private final Set<String> singleLineCommands = CollectionUtil.caseInsensitiveSet("WHENEVER", "ECHO", "DESC", "DESCRIBE");
 	private final Set<String> types = CollectionUtil.caseInsensitiveSet("FUNCTION", "LIBRARY", "PACKAGE", "PACKAGE BODY", "PROCEDURE", "TRIGGER", "TYPE");
 
-	private SQLToken singleLineStartToken;
 	private SQLToken lastToken;
 
 	@Override
@@ -94,7 +93,6 @@ public class OracleDelimiterTester
 	public void statementFinished()
 	{
 		useAlternateDelimiter = false;
-		singleLineStartToken = null;
 		lastToken = null;
 	}
 
@@ -105,7 +103,6 @@ public class OracleDelimiterTester
 
 		if (isStartOfLine && !token.isWhiteSpace())
 		{
-			singleLineStartToken = token;
 			String text = token.getText();
 			if (text.charAt(0) == '@')
 			{
@@ -122,8 +119,6 @@ public class OracleDelimiterTester
 	@Override
 	public void lineEnd()
 	{
-		singleLineStartToken = null;
 	}
-
 
 }

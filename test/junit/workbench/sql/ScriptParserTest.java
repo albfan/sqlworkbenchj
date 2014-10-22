@@ -990,8 +990,10 @@ public class ScriptParserTest
 		int pos = sql.indexOf("from test2");
 		int index = parser.getCommandIndexAtCursorPos(pos);
 		assertEquals(1, index);
-		String cmd = parser.getCommand(index);
-//		System.out.println("cmd=" + cmd);
+
+		pos = sql.indexOf("from test;");
+		index = parser.getCommandIndexAtCursorPos(pos);
+		assertEquals(0, index);
 	}
 
 	@Test

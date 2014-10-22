@@ -347,7 +347,8 @@ public class LexerBasedParserTest
 		throws Exception
 	{
 		String sql = "select * from test\n GO \n" + "select * from person\nGO";
-		LexerBasedParser parser = new LexerBasedParser(sql);
+		LexerBasedParser parser = new LexerBasedParser(ParserType.SqlServer);
+		parser.setScript(sql);
 		parser.setDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
 		parser.setStoreStatementText(true);
 
@@ -358,6 +359,45 @@ public class LexerBasedParserTest
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertEquals("select * from person", cmd.getSQL());
+
+		sql =
+			"declare @x;\n" +
+			"set @x = 42;" +
+			"select * " +
+			"from foo \n" +
+			"where id = @x;\n" +
+			"GO\n";
+		parser.setScript(sql);
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertTrue(cmd.getSQL().startsWith("declare @x;"));
+		assertTrue(cmd.getSQL().endsWith("where id = @x;"));
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+
+		parser = new LexerBasedParser(ParserType.Standard);
+		parser.setScript(sql);
+		parser.setDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
+		parser.setStoreStatementText(true);
+
+		sql =
+			"declare @x;\n" +
+			"set @x = 42;" +
+			"select * " +
+			"from foo \n" +
+			"where id = @x;\n" +
+			"GO\n";
+		parser.setScript(sql);
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertTrue(cmd.getSQL().startsWith("declare @x;"));
+		assertTrue(cmd.getSQL().endsWith("where id = @x;"));
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
 	}
 
 
@@ -518,5 +558,24 @@ public class LexerBasedParserTest
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertEquals("drop table foo", cmd.getSQL());
+
+		sql =
+			"select 1 from dual; \n" +
+			"describe foo\n" +
+			"select 2 from foo;\n";
+		parser.setScript(sql);
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select 1 from dual", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("describe foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select 2 from foo", cmd.getSQL());
+
 	}
 }
