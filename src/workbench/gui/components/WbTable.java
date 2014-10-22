@@ -175,7 +175,7 @@ public class WbTable
 	private DataStoreTableModel dwModel;
 	private int lastFoundRow = -1;
 
-	private WbTextCellEditor defaultEditor;
+	protected WbTextCellEditor defaultEditor;
 	private WbCellEditor multiLineEditor;
 	private TableCellRenderer multiLineRenderer;
 	private SortHeaderRenderer sortRenderer;

@@ -24,32 +24,35 @@ package workbench.gui.sql;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
 import workbench.WbManager;
+import workbench.interfaces.ValidatingComponent;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
 import workbench.gui.renderer.RendererSetup;
-import workbench.interfaces.ValidatingComponent;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.sql.VariablePool;
+
 import workbench.storage.DataStore;
+
+import workbench.sql.VariablePool;
 
 /**
  * A panel to enter the value for Workbench variables inside SQL statements
@@ -64,7 +67,7 @@ public class VariablesEditor
 {
 	private DataStore varData;
 	private WbTable variablesTable;
-	private ValidatingDialog parentDialog;
+	private ValidatingDialog dialog;
 	private boolean autoAdvance;
 
 	public VariablesEditor(DataStore data)
@@ -72,16 +75,14 @@ public class VariablesEditor
 		super();
 		autoAdvance = Settings.getInstance().getBoolProperty("workbench.gui.variables.editor.autoadvance", true);
 
-		this.variablesTable = new WbTable()
+		this.variablesTable = new AutoAdvanceTable()
 		{
 			@Override
-			public void editingStopped(ChangeEvent e)
+			public void userStoppedEditing(int row)
 			{
-				final int editRow = getEditingRow();
-				super.editingStopped(e);
 				if (autoAdvance)
 				{
-					closeOrAdvance(editRow);
+					closeOrAdvance(row);
 				}
 			}
 		};
@@ -94,7 +95,7 @@ public class VariablesEditor
 		DataStoreTableModel model = new DataStoreTableModel(data);
 		model.setLockedColumn(0);
 		this.variablesTable.setModel(model);
-		this.variablesTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		this.variablesTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
 		JLabel l = new JLabel(ResourceMgr.getString("TxtVariableInputText"));
 		Border b = BorderFactory.createEmptyBorder(5, 2, 5, 2);
@@ -118,7 +119,7 @@ public class VariablesEditor
 	{
 		if (editedRow == variablesTable.getRowCount() - 1)
 		{
-			parentDialog.approveAndClose();
+			dialog.approveAndClose();
 		}
 		else if (editedRow >= 0)
 		{
@@ -183,12 +184,34 @@ public class VariablesEditor
 			public void run()
 			{
 				VariablesEditor editor = new VariablesEditor(vardata);
-				Dimension d = new Dimension(300,250);
-				editor.setMinimumSize(d);
-				editor.setPreferredSize(d);
-				editor.parentDialog = ValidatingDialog.createDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditVariablesWindowTitle"), null, 0, false);
-				editor.parentDialog.setVisible(true);
-				dialogResult = !editor.parentDialog.isCancelled();
+
+				String settingsId = "workbench.gui.variables.dialog";
+				JFrame window = WbManager.getInstance().getCurrentWindow();
+
+				editor.dialog = ValidatingDialog.createDialog(window, editor, ResourceMgr.getString("TxtEditVariablesWindowTitle"), null, 0, false);
+				int width = -1;
+				if (Settings.getInstance().restoreWindowSize(editor.dialog, settingsId))
+				{
+					editor.dialog.setLocationRelativeTo(window);
+					width = (int)(editor.dialog.getWidth() * 0.92);
+				}
+				else
+				{
+					width = (int)(editor.dialog.getPreferredSize().getWidth() * 0.92);
+				}
+
+				// make the first column use as much space as needed
+				// and the second one all the rest
+				ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(editor.variablesTable);
+				optimizer.optimizeColWidth(0, true);
+
+				int w1 = editor.variablesTable.getColumnModel().getColumn(0).getWidth();
+				int w2 = width - w1;
+				editor.variablesTable.getColumnModel().getColumn(1).setPreferredWidth(w2);
+
+				editor.dialog.setVisible(true);
+				dialogResult = !editor.dialog.isCancelled();
+				Settings.getInstance().storeWindowSize(editor.dialog, settingsId);
 			}
 		});
 

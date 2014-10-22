@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Frame;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.EventObject;
@@ -72,6 +73,7 @@ public class WbTextCellEditor
 	private SetNullAction setNull;
 	private SelectFkValueAction selectFk;
 	private TextComponentMouseListener contextMenu;
+
 	public static WbTextCellEditor createInstance()
 	{
 		return createInstance(null);
@@ -111,11 +113,38 @@ public class WbTextCellEditor
 		super.addCellEditorListener(parent);
 	}
 
+	public void addActionListener(ActionListener l)
+	{
+		if (textField != null)
+		{
+			textField.addActionListener(l);
+		}
+	}
+
+	public void removeActionListener(ActionListener l)
+	{
+		if (textField != null)
+		{
+			textField.removeActionListener(l);
+		}
+	}
+
 	public void dispose()
 	{
 		WbSwingUtilities.removeAllListeners(textField);
 		WbAction.dispose(restoreValue, setNull, selectFk);
 		contextMenu.dispose();
+		if (textField != null)
+		{
+			ActionListener[] listeners = textField.getActionListeners();
+			if (listeners != null)
+			{
+				for (ActionListener l : listeners)
+				{
+					textField.removeActionListener(l);
+				}
+			}
+		}
 	}
 
 	@Override
