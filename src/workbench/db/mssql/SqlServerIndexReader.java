@@ -97,7 +97,7 @@ public class SqlServerIndexReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("SqlServerIndexReader.getIncludedColumns()", "Using SQL=\n" +
+			LogMgr.logDebug("SqlServerIndexReader.getIncludedColumns()", "Retrieving index information using:\n" +
 				SqlUtil.replaceParameters(sql, index.getName(), table.getRawTableName(), table.getRawSchema()));
 		}
 
