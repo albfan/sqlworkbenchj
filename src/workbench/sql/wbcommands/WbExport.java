@@ -407,7 +407,7 @@ public class WbExport
 
 		String tables = cmdLine.getValue(ARG_SOURCETABLE);
 		String od = cmdLine.getValue(ARG_OUTPUTDIR);
-		WbFile outputdir = (od == null ? null : new WbFile(od));
+		WbFile outputdir = evaluateFileArgument(od);
 
 		if (outputFile == null && outputdir == null)
 		{
