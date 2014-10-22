@@ -1252,6 +1252,11 @@ public class BatchRunner
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
 		runner.setVerboseLogging(feedback);
+		if (!feedback)
+		{
+			runner.setShowStatementSummary(false);
+			runner.setShowStatementWithResult(false);
+		}
 		runner.setConsolidateLog(consolidateLog);
 		runner.setShowProgress(showProgress);
 
