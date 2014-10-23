@@ -41,6 +41,7 @@ cp=$cp:$scriptpath/stax-api-1.0.1.jar
 cp=$cp:$scriptpath/xmlbeans-2.3.0.jar
 
 $JAVACMD -Djava.awt.headless=true \
+         -Xrs \
          -Xmx512m \
          -Dvisualvm.display.name=SQLWorkbench \
          -cp $cp workbench.console.SQLConsole $@
