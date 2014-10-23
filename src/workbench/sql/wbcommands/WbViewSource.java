@@ -64,17 +64,16 @@ public class WbViewSource
 		String args = getCommandLine(sql);
 
 		TableIdentifier object = new TableIdentifier(args, currentConnection);
-		object.setType(currentConnection.getMetadata().getViewTypeName());
+		TableIdentifier tbl = currentConnection.getMetadata().findObject(object);
 
-		ViewReader reader = ViewReaderFactory.createViewReader(currentConnection);
-		CharSequence source = reader.getExtendedViewSource(object, false);
-		if (StringUtil.isEmptyString(source))
+		CharSequence source = null;
+		if (tbl != null)
 		{
-			object.setType(DbMetadata.MVIEW_NAME);
-			TableIdentifier mview = currentConnection.getMetadata().findObject(object);
-			source = reader.getExtendedViewSource(mview, false);
+			ViewReader reader = ViewReaderFactory.createViewReader(currentConnection);
+			source = reader.getExtendedViewSource(tbl, false);
 		}
-		if (source != null)
+
+		if (StringUtil.isNonEmpty(source))
 		{
 			result.addMessage(source);
 			result.setSuccess();
