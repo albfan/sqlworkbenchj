@@ -69,11 +69,12 @@ public class VariablesEditor
 	private WbTable variablesTable;
 	private ValidatingDialog dialog;
 	private boolean autoAdvance;
-
+	private boolean autoCloseOnAdvance;
 	public VariablesEditor(DataStore data)
 	{
 		super();
 		autoAdvance = Settings.getInstance().getBoolProperty("workbench.gui.variables.editor.autoadvance", true);
+		autoCloseOnAdvance = Settings.getInstance().getBoolProperty("workbench.gui.variables.editor.autoclose", autoAdvance);
 
 		this.variablesTable = new AutoAdvanceTable()
 		{
@@ -117,7 +118,7 @@ public class VariablesEditor
 
 	private void closeOrAdvance(final int editedRow)
 	{
-		if (editedRow == variablesTable.getRowCount() - 1)
+		if (editedRow == variablesTable.getRowCount() - 1 && autoCloseOnAdvance)
 		{
 			dialog.approveAndClose();
 		}
