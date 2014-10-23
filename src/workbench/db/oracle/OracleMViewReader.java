@@ -88,12 +88,9 @@ public class OracleMViewReader
 			String sql = retrieveMViewQuery(dbConnection, table);
 			if (includeDrop)
 			{
-				result.append("CREATE MATERIALIZED VIEW ");
+				result.append("DROP MATERIALIZED VIEW ");
 			}
-			else
-			{
-				result.append("CREATE OR REPLACE MATERIALIZED VIEW ");
-			}
+			result.append("CREATE MATERIALIZED VIEW ");
 			result.append(table.getTableExpression(dbConnection));
 
 			// getMViewOptions() will store any defined primary key in pkIndex

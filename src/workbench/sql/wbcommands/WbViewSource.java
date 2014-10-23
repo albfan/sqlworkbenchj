@@ -23,6 +23,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
+import workbench.db.DbMetadata;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.TableIdentifier;
@@ -31,6 +32,7 @@ import workbench.db.ViewReaderFactory;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.StringUtil;
 
 /**
  * Display the source code of a view.
@@ -66,6 +68,12 @@ public class WbViewSource
 
 		ViewReader reader = ViewReaderFactory.createViewReader(currentConnection);
 		CharSequence source = reader.getExtendedViewSource(object, false);
+		if (StringUtil.isEmptyString(source))
+		{
+			object.setType(DbMetadata.MVIEW_NAME);
+			TableIdentifier mview = currentConnection.getMetadata().findObject(object);
+			source = reader.getExtendedViewSource(mview, false);
+		}
 		if (source != null)
 		{
 			result.addMessage(source);

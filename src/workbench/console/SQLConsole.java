@@ -62,6 +62,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.WbThread;
 
 /**
  * A simple console interface for SQL Workbench/J
@@ -75,16 +76,16 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class SQLConsole
-	implements OutputPrinter
+	implements OutputPrinter, Runnable
 {
 	private static final String HISTORY_FILENAME = "sqlworkbench_history.txt";
 	private final ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
-
+	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private Map<String, String> abbreviations = new HashMap<>();
 	private final StatementHistory history;
-
+	private BatchRunner runner;
 	public SQLConsole()
 	{
 		prompter = new ConsolePrompter();
@@ -92,7 +93,7 @@ public class SQLConsole
 		history.doAppend(true);
 	}
 
-	public void run()
+	public void startConsole()
 	{
 		AppArguments cmdLine = WbManager.getInstance().getCommandLine();
 
@@ -104,7 +105,7 @@ public class SQLConsole
 
 		boolean optimizeColWidths = cmdLine.getBoolean(AppArguments.ARG_CONSOLE_OPT_COLS, true);
 
-		BatchRunner runner = initBatchRunner(cmdLine, optimizeColWidths);
+		runner = initBatchRunner(cmdLine, optimizeColWidths);
 
 		String currentPrompt = DEFAULT_PROMPT;
 		try
@@ -525,8 +526,16 @@ public class SQLConsole
 			System.setProperty("workbench.log.console", "false");
 			WbManager.initConsoleMode(args);
 			SQLConsole console = new SQLConsole();
-			console.run();
+			Runtime.getRuntime().addShutdownHook(console.shutdownHook);
+			console.startConsole();
 		}
 	}
+
+	@Override
+	public void run()
+	{
+
+	}
+
 
 }

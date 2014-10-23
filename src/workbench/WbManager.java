@@ -105,7 +105,15 @@ public final class WbManager
 
 	private WbManager()
 	{
-		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+		this(false);
+	}
+
+	private WbManager(boolean forConsole)
+	{
+		if (!forConsole)
+		{
+			Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+		}
 		Thread.setDefaultUncaughtExceptionHandler(this);
 	}
 
@@ -1075,7 +1083,7 @@ public final class WbManager
 
 	public static void initConsoleMode(String[] args)
 	{
-		wb = new WbManager();
+		wb = new WbManager(false);
 		wb.cmdLine.removeArgument(AppArguments.ARG_ABORT);
 		wb.cmdLine.removeArgument(AppArguments.ARG_SUCCESS_SCRIPT);
 		wb.cmdLine.removeArgument(AppArguments.ARG_ERROR_SCRIPT);
