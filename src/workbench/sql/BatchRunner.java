@@ -778,11 +778,16 @@ public class BatchRunner
 				if (printStatements)
 				{
 					printMessage(sql.trim());
+					if (!logAllStatements)
+					{
+						// If the statements should be printed, log them also on info level unless all statements are logged anyway
+						StatementRunner.logStatement(sql, -1, connection);
+					}
 				}
-				
-				if (!logAllStatements)
+				else if (!logAllStatements)
 				{
-					LogMgr.logDebug("BatchRunner.executeScript()", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);
+					// Make sure the statements is logged for debugging purposes
+					LogMgr.logDebug("BatchRunner.executeScript()", "Executing statement: "  + sql);
 				}
 
 				long verbstart = System.currentTimeMillis();
