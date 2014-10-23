@@ -105,12 +105,12 @@ public final class WbManager
 
 	private WbManager()
 	{
-		this(false);
+		this(true);
 	}
 
-	private WbManager(boolean forConsole)
+	private WbManager(boolean forGUI)
 	{
-		if (!forConsole)
+		if (forGUI)
 		{
 			Runtime.getRuntime().addShutdownHook(this.shutdownHook);
 		}
