@@ -124,6 +124,7 @@ public class BatchRunner
 	private MessageBuffer errors;
 	private final List<DataStore> queryResults = new ArrayList<>();
 	private Replacer replacer;
+	private boolean isBusy;
 
 	public BatchRunner()
 	{
@@ -178,6 +179,11 @@ public class BatchRunner
 	public void setPrintStatements(boolean flag)
 	{
 		this.printStatements = flag;
+	}
+
+	public boolean isBusy()
+	{
+		return isBusy;
 	}
 
 	/**
@@ -495,7 +501,7 @@ public class BatchRunner
 		}
 		else
 		{
-			BatchRunner.this.runScript();
+			runScript();
 		}
 	}
 
@@ -668,9 +674,17 @@ public class BatchRunner
 	private boolean executeScript(WbFile scriptFile)
 		throws IOException
 	{
-		ScriptParser parser = createParser();
-		parser.setFile(scriptFile, this.encoding);
-		return executeScript(parser);
+		try
+		{
+			isBusy = true;
+			ScriptParser parser = createParser();
+			parser.setFile(scriptFile, this.encoding);
+			return executeScript(parser);
+		}
+		finally
+		{
+			isBusy = false;
+		}
 	}
 
 	/**
@@ -684,12 +698,20 @@ public class BatchRunner
 	{
 		ScriptParser parser = createParser();
 		parser.setScript(script);
-		boolean result = executeScript(parser);
-		if (this.rowMonitor  != null)
+		try
 		{
-			this.rowMonitor.jobFinished();
+			isBusy = true;
+			boolean result = executeScript(parser);
+			if (this.rowMonitor  != null)
+			{
+				this.rowMonitor.jobFinished();
+			}
+			return result;
 		}
-		return result;
+		finally
+		{
+			isBusy = false;
+		}
 	}
 
 	private boolean executeScript(ScriptParser parser)

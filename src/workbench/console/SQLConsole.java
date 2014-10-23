@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import workbench.AppArguments;
@@ -539,7 +540,7 @@ public class SQLConsole
 
 	public void cancelStatement()
 	{
-		if (runner != null && runner.isConnected())
+		if (runner != null && runner.isBusy())
 		{
 			WbThread cancelThread = new WbThread(new Runnable()
 			{
@@ -591,23 +592,27 @@ public class SQLConsole
 
 	private void installSignalHandler()
 	{
-		String signalName = Settings.getInstance().getProperty("workbench.console.signal", "INT");
+		List<String> signals = Settings.getInstance().getListProperty("workbench.console.signal", false, "INT,QUIT");
 
-		try
+		for (String name : signals)
 		{
-			Signal signal = new Signal(signalName);
-			Signal.handle(signal, this);
-			LogMgr.logInfo("SQLConsole.installSignalHandler()", "Installed signal handler for " + signalName);
-		}
-		catch (Throwable th)
-		{
-			System.err.println("could not register signal handler for: " + signalName + " (" + th.getMessage() + ")");
+			try
+			{
+				Signal signal = new Signal(name.toUpperCase());
+				Signal.handle(signal, this);
+				LogMgr.logInfo("SQLConsole.installSignalHandler()", "Installed signal handler for " + name);
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logInfo("SQLConsole.installSignalHandler()", "could not register signal handler for: " + name, th);
+			}
 		}
 	}
 
 	@Override
 	public void handle(Signal signal)
 	{
+		LogMgr.logDebug("SQLConsole.handl()", "Received signal: " + signal.getName());
 		cancelStatement();
 	}
 
