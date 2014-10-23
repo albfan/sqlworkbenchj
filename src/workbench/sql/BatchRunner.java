@@ -778,14 +778,6 @@ public class BatchRunner
 				if (printStatements)
 				{
 					printMessage(sql.trim());
-					if (!logAllStatements)
-					{
-						StatementRunner.logStatement(sql, -1, connection);
-					}
-				}
-				else if (!logAllStatements)
-				{
-					LogMgr.logDebug("BatchRunner.executeScript()", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);
 				}
 
 				long verbstart = System.currentTimeMillis();
