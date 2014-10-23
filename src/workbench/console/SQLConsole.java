@@ -24,6 +24,7 @@ package workbench.console;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,6 +65,9 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
 
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
+
 /**
  * A simple console interface for SQL Workbench/J
  * <br>
@@ -76,7 +80,7 @@ import workbench.util.WbThread;
  * @author Thomas Kellerer
  */
 public class SQLConsole
-	implements OutputPrinter, Runnable
+	implements OutputPrinter, Runnable, SignalHandler
 {
 	private static final String HISTORY_FILENAME = "sqlworkbench_history.txt";
 	private final ConsolePrompter prompter;
@@ -86,11 +90,14 @@ public class SQLConsole
 	private Map<String, String> abbreviations = new HashMap<>();
 	private final StatementHistory history;
 	private BatchRunner runner;
+
 	public SQLConsole()
 	{
 		prompter = new ConsolePrompter();
 		history = new StatementHistory(Settings.getInstance().getConsoleHistorySize());
 		history.doAppend(true);
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
+		installSignalHandler();
 	}
 
 	public void startConsole()
@@ -206,6 +213,7 @@ public class SQLConsole
 					currentPrompt = CONTINUE_PROMPT;
 				}
 			}
+			Runtime.getRuntime().removeShutdownHook(shutdownHook);
 		}
 		catch (Throwable th)
 		{
@@ -325,35 +333,35 @@ public class SQLConsole
 
 	private BatchRunner initBatchRunner(AppArguments cmdLine, boolean optimizeColWidths)
 	{
-		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine, false);
-		runner.showResultSets(true);
-		runner.setShowStatementWithResult(false);
-		runner.setShowStatementSummary(false);
-		runner.setOptimizeColWidths(optimizeColWidths);
-		runner.setShowDataLoading(false);
-		runner.setConnectionId("Console");
-		runner.setTraceOutput(this);
+		BatchRunner batchRunner = BatchRunner.createBatchRunner(cmdLine, false);
+		batchRunner.showResultSets(true);
+		batchRunner.setShowStatementWithResult(false);
+		batchRunner.setShowStatementSummary(false);
+		batchRunner.setOptimizeColWidths(optimizeColWidths);
+		batchRunner.setShowDataLoading(false);
+		batchRunner.setConnectionId("Console");
+		batchRunner.setTraceOutput(this);
 		// initialize a default max rows.
 		// In console mode it doesn't really make sense to display that many rows
 		int maxRows = Settings.getInstance().getIntProperty("workbench.console.default.maxrows", 5000);
-		runner.setMaxRows(maxRows);
+		batchRunner.setMaxRows(maxRows);
 		if (cmdLine.isArgNotPresent(AppArguments.ARG_SHOWPROGRESS))
 		{
-			runner.setShowProgress(true);
+			batchRunner.setShowProgress(true);
 		}
 		// Make the current directory the base directory for the BatchRunner
 		// so that e.g. WbIncludes work properly
 		WbFile currentDir = new WbFile(System.getProperty("user.dir"));
-		runner.setBaseDir(currentDir.getFullPath());
+		batchRunner.setBaseDir(currentDir.getFullPath());
 		boolean showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, false);
-		runner.setShowTiming(showTiming);
-		runner.setShowStatementTiming(!showTiming);
-		runner.setHistoryProvider(this.history);
-		runner.setPersistentConnect(true);
-		runner.setExecutionController(prompter);
-		runner.setParameterPrompter(prompter);
+		batchRunner.setShowTiming(showTiming);
+		batchRunner.setShowStatementTiming(!showTiming);
+		batchRunner.setHistoryProvider(this.history);
+		batchRunner.setPersistentConnect(true);
+		batchRunner.setExecutionController(prompter);
+		batchRunner.setParameterPrompter(prompter);
 
-		return runner;
+		return batchRunner;
 	}
 
 	private void initAbbreviations()
@@ -526,16 +534,81 @@ public class SQLConsole
 			System.setProperty("workbench.log.console", "false");
 			WbManager.initConsoleMode(args);
 			SQLConsole console = new SQLConsole();
-			Runtime.getRuntime().addShutdownHook(console.shutdownHook);
 			console.startConsole();
 		}
 	}
 
+	public void cancelStatement()
+	{
+		if (runner != null && runner.isConnected())
+		{
+			WbThread cancelThread = new WbThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					LogMgr.logInfo("SQLConsole.cancelStatement()", "Trying to cancel the current statement");
+					printMessage(ResourceMgr.getString("MsgCancellingStmt"));
+					runner.cancel();
+				}
+			}, "ConsoleStatementCancel");
+
+			try
+			{
+				cancelThread.start();
+				cancelThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 2500));
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logWarning("SQLConsole.cancelStatement()", "Could not cancel statement", ex);
+			}
+		}
+	}
+
+	/**
+	 * Callback for the shutdown hook
+	 */
 	@Override
 	public void run()
 	{
+		LogMgr.logWarning("SQLConsole.shutdownHook()", "SQL Workbench/J process has been interrupted.");
+
+		cancelStatement();
+
+		boolean exitImmediately = Settings.getInstance().getBoolProperty("workbench.exitonbreak", true);
+		if (exitImmediately)
+		{
+			LogMgr.logWarning("SQLConsole.shutdownHook()", "Aborting process...");
+			LogMgr.shutdown();
+			Runtime.getRuntime().halt(15); // exit() doesn't work properly from inside a shutdownhook!
+		}
+		else
+		{
+			ConnectionMgr.getInstance().abortAll(Collections.singletonList(runner.getConnection()));
+			LogMgr.shutdown();
+		}
 
 	}
 
+	private void installSignalHandler()
+	{
+		String signalName = Settings.getInstance().getProperty("workbench.console.signales", "INT");
+
+		try
+		{
+			Signal signal = new Signal(signalName);
+			Signal.handle(signal, this);
+		}
+		catch (Throwable th)
+		{
+			System.out.println("could not register signal handler for: " + signalName + " (" + th.getMessage() + ")");
+		}
+	}
+
+	@Override
+	public void handle(Signal signal)
+	{
+		cancelStatement();
+	}
 
 }
