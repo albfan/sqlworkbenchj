@@ -86,17 +86,17 @@ public class SQLConsole
 	private final ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
-	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
+	private final WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private Map<String, String> abbreviations = new HashMap<>();
 	private final StatementHistory history;
 	private BatchRunner runner;
-
+	private SignalHandler oldHandler;
+	
 	public SQLConsole()
 	{
 		prompter = new ConsolePrompter();
 		history = new StatementHistory(Settings.getInstance().getConsoleHistorySize());
 		history.doAppend(true);
-		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		installSignalHandler();
 	}
 
@@ -592,16 +592,17 @@ public class SQLConsole
 
 	private void installSignalHandler()
 	{
-		String signalName = Settings.getInstance().getProperty("workbench.console.signales", "INT");
+		String signalName = Settings.getInstance().getProperty("workbench.console.signal", "INT");
 
 		try
 		{
 			Signal signal = new Signal(signalName);
-			Signal.handle(signal, this);
+			oldHandler = Signal.handle(signal, this);
+			LogMgr.logInfo("SQLConsole.installSignalHandler()", "Installed signal handler for " + signalName);
 		}
 		catch (Throwable th)
 		{
-			System.out.println("could not register signal handler for: " + signalName + " (" + th.getMessage() + ")");
+			System.err.println("could not register signal handler for: " + signalName + " (" + th.getMessage() + ")");
 		}
 	}
 
