@@ -25,12 +25,14 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.List;
 
+import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DbSearchPath;
 import workbench.db.DbSettings;
 import workbench.db.IndexReader;
+import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.SequenceDefinition;
@@ -41,6 +43,7 @@ import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
+import workbench.db.ViewReader;
 import workbench.db.WbConnection;
 
 import workbench.storage.ColumnRemover;
@@ -230,11 +233,12 @@ public class ObjectInfo
 		}
 
 		DataStore details = null;
+		TableDefinition describedDefinition = null;
 		if (connection.getMetadata().objectTypeCanContainData(toDescribe.getType()))
 		{
-			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
-			connection.getObjectCache().addTable(def);
-			details = new TableColumnsDatastore(def);
+			describedDefinition = connection.getMetadata().getTableDefinition(toDescribe);
+			connection.getObjectCache().addTable(describedDefinition);
+			details = new TableColumnsDatastore(describedDefinition);
 		}
 		else
 		{
@@ -260,6 +264,18 @@ public class ObjectInfo
 			connection.getObjectCache().addTable(def);
 			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
 			displayName = showSchema ? def.getTable().getTableExpression() : def.getTable().getTableExpression(connection);
+		}
+		else if (toDescribe != null && toDescribe.getType().equals(DbMetadata.MVIEW_NAME))
+		{
+			ViewReader reader = connection.getMetadata().getViewReader();
+			try
+			{
+				source = reader.getViewSource(toDescribe);
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logWarning("ObjectInfo.getObjectInfo()", "Could not retrieve mview source", ex);
+			}
 		}
 		else if (isExtended)
 		{
@@ -348,6 +364,7 @@ public class ObjectInfo
 				}
 			}
 		}
+
 		result.setExecutionDuration(System.currentTimeMillis() - start);
 		return result;
 	}
