@@ -779,6 +779,11 @@ public class BatchRunner
 				{
 					printMessage(sql.trim());
 				}
+				
+				if (!logAllStatements)
+				{
+					LogMgr.logDebug("BatchRunner.executeScript()", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);
+				}
 
 				long verbstart = System.currentTimeMillis();
 				this.stmtRunner.runStatement(sql);
