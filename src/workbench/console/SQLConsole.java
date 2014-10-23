@@ -87,11 +87,10 @@ public class SQLConsole
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
 	private final WbThread shutdownHook = new WbThread(this, "ShutdownHook");
-	private Map<String, String> abbreviations = new HashMap<>();
+	private final Map<String, String> abbreviations = new HashMap<>();
 	private final StatementHistory history;
 	private BatchRunner runner;
-	private SignalHandler oldHandler;
-	
+
 	public SQLConsole()
 	{
 		prompter = new ConsolePrompter();
@@ -213,7 +212,6 @@ public class SQLConsole
 					currentPrompt = CONTINUE_PROMPT;
 				}
 			}
-			Runtime.getRuntime().removeShutdownHook(shutdownHook);
 		}
 		catch (Throwable th)
 		{
@@ -222,6 +220,7 @@ public class SQLConsole
 		}
 		finally
 		{
+			Runtime.getRuntime().removeShutdownHook(shutdownHook);
 			history.saveTo(getHistoryFile());
 
 			ConsoleReaderFactory.getConsoleReader().shutdown();
@@ -597,7 +596,7 @@ public class SQLConsole
 		try
 		{
 			Signal signal = new Signal(signalName);
-			oldHandler = Signal.handle(signal, this);
+			Signal.handle(signal, this);
 			LogMgr.logInfo("SQLConsole.installSignalHandler()", "Installed signal handler for " + signalName);
 		}
 		catch (Throwable th)
