@@ -104,7 +104,19 @@ public class WbDescribeObject
 				includeDependencies = cmdLine.getBoolean(ARG_DEPEND, true);
 			}
 
-			boolean includeSource = !WbManager.getInstance().isConsoleMode();
+			boolean includeSource = true;
+			if (WbManager.getInstance().isConsoleMode())
+			{
+				if (cmdLine.isArgPresent(ARG_DEPEND))
+				{
+					includeSource = includeDependencies;
+				}
+				else
+				{
+					includeSource = false;
+				}
+			}
+
 			ObjectInfo info = new ObjectInfo();
 			StatementRunnerResult result = info.getObjectInfo(currentConnection, object, includeDependencies, includeSource);
 			result.setSourceCommand(sql);

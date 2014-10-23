@@ -57,6 +57,11 @@ public class InputBuffer
 		script.setLength(0);
 	}
 
+	public DelimiterDefinition getDelimiter()
+	{
+		return delimiter;
+	}
+	
 	public void setDelimiter(DelimiterDefinition delim)
 	{
 		this.delimiter = delim;
