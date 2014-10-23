@@ -458,6 +458,13 @@ public class StringUtilTest
 		value = "\u0016";
 		enc = StringUtil.escapeText(value, CharacterRange.RANGE_CONTROL, "", CharacterEscapeType.pgHex);
 		assertEquals("\\x16", enc);
+
+		enc = StringUtil.escapeText("a\nnewline and a tab\t", CharacterRange.RANGE_CONTROL, "", CharacterEscapeType.pgHex);
+		assertEquals("a\\nnewline and a tab\\t", enc);
+
+		enc = StringUtil.escapeText("a windows newline\r\n", CharacterRange.RANGE_CONTROL, "", CharacterEscapeType.pgHex);
+		assertEquals("a windows newline\\r\\n", enc);
+
 	}
 
 	@Test
