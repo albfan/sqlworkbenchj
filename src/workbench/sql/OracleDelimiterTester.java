@@ -97,6 +97,12 @@ public class OracleDelimiterTester
 	}
 
 	@Override
+	public boolean supportsSingleLineStatements()
+	{
+		return true;
+	}
+
+	@Override
 	public boolean isSingleLineStatement(SQLToken token, boolean isStartOfLine)
 	{
 		if (token == null) return false;

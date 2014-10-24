@@ -190,13 +190,14 @@ public class ScriptParserTest
 			parser.startIterator();
 
 			int commandsInFile = 0;
-			while (parser.hasNext())
+			String command = parser.getNextCommand();
+			while (command != null)
 			{
 				String sql = "insert into address (id, street) \nvalues \n(" + commandsInFile + ", ' \u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153')";
-				String command = parser.getNextCommand();
-				if (StringUtil.isEmptyString(command)) break;
 				assertEquals("Statement #" + commandsInFile + " of " + statementCount + " not correct!", sql, command.trim());
 				commandsInFile++;
+				command = parser.getNextCommand();
+				if (StringUtil.isEmptyString(command)) break;
 			}
 			assertEquals(statementCount, commandsInFile);
 		}
@@ -287,6 +288,25 @@ public class ScriptParserTest
 	}
 
 	@Test
+	public void testOracleSingleLine()
+	{
+		String sql =
+			"select * from person order by id\ndesc;\n" +
+			"\n" +
+			"desc person\n" +
+			"\n" +
+			"delete from person;";
+		ScriptParser p = new ScriptParser(ParserType.Oracle);
+		p.setScript(sql);
+		int size = p.getSize();
+		assertEquals(3, size);
+
+		assertEquals("select * from person order by id\ndesc", p.getCommand(0));
+		assertEquals("desc person", p.getCommand(1));
+		assertEquals("delete from person", p.getCommand(2));
+	}
+
+	@Test
 	public void testSingleLineDelimiter()
 	{
 		String sql = "DROP\n" +
@@ -344,10 +364,9 @@ public class ScriptParserTest
 		p.setFile(scriptFile);
 		p.startIterator();
 		int size = 0;
-		while (p.hasNext())
+		String sql = p.getNextCommand();
+		while (sql != null)
 		{
-			String sql = p.getNextCommand();
-			if (sql == null) break;
 			if (StringUtil.isBlank(sql)) break;
 			size ++;
 
@@ -355,6 +374,7 @@ public class ScriptParserTest
 			{
 				assertEquals("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')", sql);
 			}
+			sql = p.getNextCommand();
 		}
 		assertEquals("Wrong number of statements", 5, size);
 		p.done();

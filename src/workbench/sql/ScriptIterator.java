@@ -33,8 +33,6 @@ public interface ScriptIterator
 {
 	int getScriptLength();
 
-	boolean hasMoreCommands();
-
 	void setAlternateLineComment(String comment);
 
 	void setCheckEscapedQuotes(boolean flag);
@@ -49,6 +47,9 @@ public interface ScriptIterator
 	 * @param flag if true, the actual SQL is returned otherwise only the start and end
 	 */
 	void setStoreStatementText(boolean flag);
+
+	boolean supportsSingleLineCommands();
+	boolean isSingleLimeCommand();
 
 	/**
 	 * Return the next command from the script.

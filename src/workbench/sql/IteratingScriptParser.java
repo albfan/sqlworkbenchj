@@ -175,6 +175,19 @@ public class IteratingScriptParser
 		if (this.script != null) this.script.done();
 	}
 
+	@Override
+	public boolean supportsSingleLineCommands()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isSingleLimeCommand()
+	{
+		return false;
+	}
+
+
 	/**
 	 *	Define the script to be parsed
 	 */
@@ -244,29 +257,6 @@ public class IteratingScriptParser
 			c = script.charAt(pos);
 		}
 		return pos;
-	}
-
-	@Override
-	public boolean hasMoreCommands()
-	{
-		if (lastPos < this.scriptLength)
-		{
-			int nextPos = findNextNonWhiteSpace(lastPos);
-			return nextPos < scriptLength;
-		}
-		return false;
-	}
-
-
-	private int findNextNonWhiteSpace(int start)
-	{
-		char ch = this.script.charAt(start);
-		while (start < this.scriptLength && Character.isWhitespace(ch))
-		{
-			start ++;
-			if (start < this.scriptLength) ch = this.script.charAt(start);
-		}
-		return start;
 	}
 
 	private boolean isLineComment(int pos)

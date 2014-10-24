@@ -28,8 +28,8 @@
 IS
 result INTEGER;
 BEGIN
-SELECT max(col1) INTO result FROM sometable;
-RETURN result;
+  SELECT max(col1) INTO result FROM sometable;
+  RETURN result;
 END;</programlisting>
 
   <para>
@@ -55,8 +55,8 @@ END;</programlisting>
 IS
 result INTEGER;
 BEGIN
-SELECT max(col1) INTO result FROM sometable;
-RETURN result;
+  SELECT max(col1) INTO result FROM sometable;
+  RETURN result;
 END;
 /</programlisting>
 
@@ -65,53 +65,35 @@ END;
     use of the alternate delimiter. If you run scripts with embedded semicolons and you get
     an error, please verify the setting for your alternate delimiter.
   </para>
+
+  <note>
   <para>
     The alternate delimiter is not needed when using PostgreSQL because the function's body is
-    essentially a string literal and delimiter inside string literals are not relevant for splitting
+    effectively a string literal and delimiters inside string literals are not relevant for splitting
     a script into several statements.
   </para>
+  </note>
 
   <para id="alternate-delimiter-usage"><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
+
+	<para>
+		When using Oracle, the standard delimiter (the semicolon) and the alternate delimiter
+		can be mixed in a single script. Whenever a PL/SQL block (either a stored procedure or
+		an anonymous block) is encountered, &wb-productname; expects the alternated delimiter to
+		terminate that block. This follows essentially the
+		same rules <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_four.htm#i1039663">as used in SQL*Plus</ulink>.
+	</para>
   <para>
-    As soon as the statement (or script) that you execute is terminated with the
-    alternate delimiter, the alternate delimiter is used to separate the individual
-    SQL statements. When you execute selected text from the editor, be sure to
-    select the alternate delimiter as well, otherwise it will not be
+		For all other DBMS, the use of the alternate delimiter is defined by the
+		last delimiter used in the script. As soon as the statement (or script) that you
+		execute ends with the alternate delimiter, the alternate delimiter
+		is used to separate all SQL statements. When you execute selected
+		text from the editor, be sure to select the alternate delimiter as well, otherwise it will not be
     recognized (if the alternate delimiter is not selected, the statement to be executed
     does not end with the alternate delimiter).
   </para>
-  <note>
-    <para>
-    You cannot mix the standard semicolon and the alternate delimiter inside
-    a single script.
-    </para>
-  </note>
 
   <para>
-    If you use the alternate delimiter (by terminating the whole script with it), then
-    <emphasis role="bold">all</emphasis> statements have to be delimited with it.
-    You cannot mix the the standard semicolon and the alternate delimiter for one execution.
-    The following statement (when executed as a complete scrip) would produce an error message:
-  </para>
-  <programlisting>SELECT sysdate FROM DUAL;
-
-CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
-IS
-result INTEGER;
-BEGIN
-SELECT max(col1) INTO result FROM sometable;
-RETURN result;
-END;
-/</programlisting>
-
-  <para>
-    &wb-productname; will use the alternate delimiter which terminates the script. Thus the whole script
-    will be seen as a <emphasis role="bold">single</emphasis> statement - which of course is invalid.
-    You will need to either select and run each statement individually or change the delimiter
-    after the <literal>SELECT</literal> to the alternate delimiter.
-  </para>
-
-  <para>
-    Currently there is no possibility to change the alternate delimiter dynamically (e.g. through a SQL command).
+    Currently there is no possibility to change the alternate delimiter dynamically inside a SQL script through a SQL command.
   </para>
 </section>

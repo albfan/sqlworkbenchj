@@ -107,8 +107,6 @@ public class AppArguments
 	public static final String ARG_PROP = "prop";
 	public static final String ARG_LOG_ALL_STMT = "logAllStatements";
 
-	private String systemIn;
-
 	public AppArguments()
 	{
 		super();

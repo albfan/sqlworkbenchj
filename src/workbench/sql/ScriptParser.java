@@ -75,7 +75,6 @@ public class ScriptParser
 		parserType = type;
 	}
 
-
 	public ScriptParser(String aScript, ParserType type)
 	{
 		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
@@ -260,6 +259,7 @@ public class ScriptParser
 		if (this.alternateDelimiter != null && newDelim == null) return true;
 		return !alternateDelimiter.equals(newDelim);
 	}
+
 	/**
 	 *	Try to find out which delimiter should be used for the current script.
 	 *	First it will check if the script ends with the alternate delimiter
@@ -533,22 +533,6 @@ public class ScriptParser
 	}
 
 	/**
-	 *	Check if more commands are present.
-	 */
-	public boolean hasNext()
-	{
-		if (this.scriptIterator != null)
-		{
-			return this.scriptIterator.hasMoreCommands();
-		}
-		else
-		{
-			if (commands == null) parseCommands();
-			return this.currentIteratorIndex < this.commands.size();
-		}
-	}
-
-	/**
 	 * Return the next {@link ScriptCommandDefinition} from the script.
 	 *
 	 */
@@ -573,6 +557,17 @@ public class ScriptParser
 			}
 		}
 		return result;
+	}
+
+	public boolean isSingleLineCommand(String sql)
+	{
+		ScriptIterator parser = getParserInstance();
+		if (parser.supportsSingleLineCommands())
+		{
+			parser.setScript(sql);
+			return parser.isSingleLimeCommand();
+		}
+		return false;
 	}
 
 }

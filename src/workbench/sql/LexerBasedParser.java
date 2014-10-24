@@ -61,7 +61,6 @@ public class LexerBasedParser
 	protected boolean emptyLineIsDelimiter;
 	protected int scriptLength;
 	protected int realScriptLength;
-	protected boolean hasMoreCommands;
 	protected boolean calledOnce;
 	protected boolean checkPgQuoting;
 	protected boolean lastStatementUsedTerminator;
@@ -244,9 +243,9 @@ public class LexerBasedParser
 			}
 			else if (!inPgQuote)
 			{
-				if (!singleLineCommand && delimiterTester != null)
+				if (firstToken && !token.isWhiteSpace() && delimiterTester != null)
 				{
-					singleLineCommand = delimiterTester.isSingleLineStatement(token, startOfLine || firstToken);
+					singleLineCommand = delimiterTester.isSingleLineStatement(token, firstToken);
 				}
 
 				if (!singleLineCommand && checkForDelimiter)
@@ -293,9 +292,13 @@ public class LexerBasedParser
 				}
 			}
 
+			if (firstToken && !token.isWhiteSpace())
+			{
+				firstToken = false;
+			}
 			previousEnd = token.getCharEnd();
 			token = lexer.getNextToken(true, true);
-			firstToken = false;
+
 			if (sql != null)
 			{
 				sql.append(text);
@@ -310,14 +313,12 @@ public class LexerBasedParser
 			cmd.setDelimiterUsed(matchedDelimiter == null ? getCurrentDelimiter() : matchedDelimiter);
 			currentStatementIndex ++;
 			lastStart = -1;
-			hasMoreCommands = token != null && token.getCharEnd() < scriptLength;
 			if (delimiterTester != null)
 			{
 				delimiterTester.statementFinished();
 			}
 			return cmd;
 		}
-		hasMoreCommands = false;
 		return null;
 	}
 
@@ -454,12 +455,6 @@ public class LexerBasedParser
 	}
 
 	@Override
-	public boolean hasMoreCommands()
-	{
-		return hasMoreCommands;
-	}
-
-	@Override
 	public void setAlternateLineComment(String comment)
 	{
 	}
@@ -490,7 +485,6 @@ public class LexerBasedParser
 		scriptLength = (int)FileUtil.getCharacterLength(f, encoding);
 		input = EncodingUtil.createBufferedReader(f, encoding);
 		createLexer();
-		hasMoreCommands = (scriptLength > 0);
 		fileEncoding = encoding;
 		originalFile = f;
 	}
@@ -510,7 +504,6 @@ public class LexerBasedParser
 		createLexer();
 		scriptLength = toUse.length();
 		realScriptLength = script.length();
-		hasMoreCommands = (scriptLength > 0);
 	}
 
 	private void cleanup()
@@ -548,6 +541,22 @@ public class LexerBasedParser
 		{
 			LogMgr.logError("LexerBasedParser.reset()", "Cannot re-open input stream", io2);
 		}
+	}
+
+	@Override
+	public boolean isSingleLimeCommand()
+	{
+		if (this.delimiterTester == null) return false;
+		reset();
+		SQLToken first = lexer.getNextToken(false, false);
+		return delimiterTester.isSingleLineStatement(first, true);
+	}
+
+	@Override
+	public boolean supportsSingleLineCommands()
+	{
+		if (delimiterTester == null) return false;
+		return delimiterTester.supportsSingleLineStatements();
 	}
 
 	protected boolean isDollarQuote(String text)

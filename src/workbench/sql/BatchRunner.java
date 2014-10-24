@@ -772,10 +772,15 @@ public class BatchRunner
 		long errorCount = 0;
 
 		boolean logAllStatements = Settings.getInstance().getLogAllStatements();
-		while (parser.hasNext())
+
+		String sql = null;
+		while ((sql = parser.getNextCommand()) != null)
 		{
-			String sql = parser.getNextCommand();
-			if (sql == null) continue;
+
+			if (sql.isEmpty())
+			{
+				continue;
+			}
 
 			try
 			{
@@ -883,6 +888,7 @@ public class BatchRunner
 					if (verboseLogging) this.printMessage(ResourceMgr.getString("MsgStatementCancelled"));
 					break;
 				}
+
 			}
 			catch (Exception e)
 			{

@@ -42,7 +42,6 @@ public class LexerBasedParserTest
 	{
 		String sql = "select * from test;\n" + "select * from person;";
 		LexerBasedParser parser = new LexerBasedParser(sql);
-		assertTrue(parser.hasMoreCommands());
 		ScriptCommandDefinition cmd = null;
 		while ((cmd = parser.getNextCommand()) != null)
 		{
@@ -334,10 +333,11 @@ public class LexerBasedParserTest
 	private List<String> getStatements(LexerBasedParser parser)
 	{
 		List<String> result = new ArrayList<>();
-		while (parser.hasMoreCommands())
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		while (cmd != null)
 		{
-			ScriptCommandDefinition cmd = parser.getNextCommand();
 			result.add(cmd.getSQL());
+			cmd = parser.getNextCommand();
 		}
 		return result;
 	}
@@ -577,5 +577,13 @@ public class LexerBasedParserTest
 		assertNotNull(cmd);
 		assertEquals("select 2 from foo", cmd.getSQL());
 
+		sql = "select id from person order by id \ndesc";
+		parser.setScript(sql);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select id from person order by id \ndesc", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
 	}
 }

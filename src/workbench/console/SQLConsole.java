@@ -37,7 +37,6 @@ import workbench.resource.Settings;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
-import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 
 import workbench.gui.profiles.ProfileKey;
@@ -48,6 +47,7 @@ import workbench.sql.StatementHistory;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbConnInfo;
+import workbench.sql.wbcommands.WbConnect;
 import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbHistory;
@@ -57,6 +57,7 @@ import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
 import workbench.sql.wbcommands.WbProcSource;
 import workbench.sql.wbcommands.WbSysExec;
+import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.ExceptionUtil;
@@ -67,9 +68,6 @@ import workbench.util.WbThread;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
-
-import workbench.sql.wbcommands.WbConnect;
-import workbench.sql.wbcommands.console.WbRun;
 
 /**
  * A simple console interface for SQL Workbench/J
@@ -132,6 +130,7 @@ public class SQLConsole
 			boolean startOfStatement = true;
 
 			InputBuffer buffer = new InputBuffer();
+			buffer.setDbId(getDbId(runner));
 			while (true)
 			{
 				String line = ConsoleReaderFactory.getConsoleReader().readLine(currentPrompt);
@@ -200,8 +199,8 @@ public class SQLConsole
 						startOfStatement = true;
 					}
 
-					// this needs to be tested after each statement as the connection might have changed.
-					buffer.setCheckMySQLComments(isMySQL(runner));
+					// this needs to be done after each statement as the connection might have changed.
+					buffer.setDbId(getDbId(runner));
 
 					// Restore the printing consumer in case a WbExport changed it
 					if (printer != null && runner.getResultSetConsumer() == null)
@@ -400,14 +399,12 @@ public class SQLConsole
 		System.out.println(trace);
 	}
 
-	private boolean isMySQL(BatchRunner runner)
+	private String getDbId(BatchRunner runner)
 	{
-		if (runner == null) return false;
+		if (runner == null) return null;
 		WbConnection conn = runner.getConnection();
-		if (conn == null) return false;
-		DbMetadata meta = conn.getMetadata();
-		if (meta == null) return false;
-		return meta.isMySql();
+		if (conn == null) return null;
+		return conn.getDbId();
 	}
 
 	private void handleHistory(BatchRunner runner, String stmt)

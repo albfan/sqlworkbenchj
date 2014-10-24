@@ -22,7 +22,11 @@
  */
 package workbench.console;
 
+import workbench.db.DbMetadata;
+
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.ParserType;
+import workbench.sql.ScriptParser;
 
 /**
  * A buffer that collects pieces of text entered by the user until
@@ -35,11 +39,25 @@ public class InputBuffer
 	private StringBuilder script;
 	private DelimiterDefinition delimiter;
 	private boolean checkMySQLComments;
+	private ScriptParser parser;
+	private ParserType parserType = ParserType.Standard;
 
 	public InputBuffer()
 	{
 		this.delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 		script = new StringBuilder(1000);
+		parser = new ScriptParser(parserType);
+	}
+
+	public void setDbId(String dbid)
+	{
+		ParserType type = ParserType.getTypeFromDBID(dbid);
+		if (type != this.parserType)
+		{
+			parser = new ScriptParser(type);
+			parserType = type;
+		}
+		checkMySQLComments = DbMetadata.DBID_MYSQL.equals(dbid);
 	}
 
 	public String getScript()
@@ -61,7 +79,7 @@ public class InputBuffer
 	{
 		return delimiter;
 	}
-	
+
 	public void setDelimiter(DelimiterDefinition delim)
 	{
 		this.delimiter = delim;
@@ -74,13 +92,16 @@ public class InputBuffer
 		return isComplete();
 	}
 
-	public void setCheckMySQLComments(boolean flag)
-	{
-		this.checkMySQLComments = flag;
-	}
-
 	public boolean isComplete()
 	{
+		String sql = script.toString();
+		if (parser.supportsMixedDelimiter())
+		{
+			if (parser.isSingleLineCommand(sql))
+			{
+				return true;
+			}
+		}
 		return delimiter.terminatesScript(script.toString(), checkMySQLComments);
 	}
 }

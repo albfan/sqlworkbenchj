@@ -87,7 +87,9 @@ public class ScriptIteratorTest
 		assertNotNull(cmd);
 		assertEquals("select * from foo", cmd.getSQL());
 
-		assertFalse(parser.hasMoreCommands());
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+
 	}
 
 	@Test
@@ -137,7 +139,8 @@ public class ScriptIteratorTest
 		assertNotNull(cmd);
 		assertEquals("select * from bar", cmd.getSQL());
 
-		assertFalse(parser.hasMoreCommands());
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
 	}
 
 
@@ -161,7 +164,9 @@ public class ScriptIteratorTest
 		ScriptCommandDefinition cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertEquals("select 'test\n;lines' from test", cmd.getSQL());
-		assertFalse(parser.hasMoreCommands());
+		
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
 	}
 
 	@Test
