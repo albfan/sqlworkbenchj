@@ -57,7 +57,6 @@ import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListSchemas;
 import workbench.sql.wbcommands.WbProcSource;
 import workbench.sql.wbcommands.WbSysExec;
-import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.ExceptionUtil;
@@ -70,6 +69,7 @@ import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
 import workbench.sql.wbcommands.WbConnect;
+import workbench.sql.wbcommands.console.WbRun;
 
 /**
  * A simple console interface for SQL Workbench/J
