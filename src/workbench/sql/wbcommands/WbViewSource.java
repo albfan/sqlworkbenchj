@@ -23,7 +23,6 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
-import workbench.db.DbMetadata;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.TableIdentifier;
