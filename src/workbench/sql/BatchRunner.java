@@ -625,6 +625,15 @@ public class BatchRunner
 		}
 	}
 
+	public void abort()
+	{
+		this.cancelExecution = true;
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.abort();
+		}
+	}
+
 	public ResultSetConsumer getResultSetConsumer()
 	{
 		if (this.stmtRunner != null)

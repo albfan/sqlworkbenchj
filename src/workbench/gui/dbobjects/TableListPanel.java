@@ -1512,7 +1512,9 @@ public class TableListPanel
 	@Override
 	public boolean canChangeSelection()
 	{
+		if (this.isBusy()) return false;
 		if (this.tableData == null) return true;
+
 		if (GuiSettings.getConfirmDiscardResultSetChanges() && isModified())
 		{
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges"))
@@ -1833,57 +1835,11 @@ public class TableListPanel
 
 	protected Thread panelRetrieveThread;
 
-	protected void startCancelThread()
-	{
-		Thread t = new WbThread("TableListPanel Cancel")
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					if (tableData.isRetrieving())
-					{
-						showCancelMessage();
-						tableData.cancelRetrieve();
-					}
-					else if (importedKeys.isRetrieving())
-					{
-						showCancelMessage();
-						importedKeys.cancel();
-					}
-					else if (exportedKeys.isRetrieving())
-					{
-						showCancelMessage();
-						exportedKeys.cancel();
-					}
-					else
-					{
-						showWaitMessage();
-					}
-
-					if (panelRetrieveThread != null)
-					{
-						panelRetrieveThread.join();
-						panelRetrieveThread = null;
-					}
-				}
-				catch (InterruptedException e)
-				{
-				}
-				setBusy(false);
-				invalidateData();
-				startRetrieveThread();
-			}
-		};
-		t.start();
-	}
-
 	protected void startRetrieveCurrentPanel()
 	{
 		if (isBusy())
 		{
-			startCancelThread();
+			LogMgr.logWarning("TableListPanel.startRetrieveCurrentPanel()", "Start retrieve called while connection was busy");
 		}
 		else
 		{
@@ -2011,7 +1967,9 @@ public class TableListPanel
 	{
 		synchronized (busyLock)
 		{
-			return this.busy;
+			if (busy) return true;
+			if (dbConnection != null && dbConnection.isBusy()) return true;
+			return false;
 		}
 	}
 
@@ -2463,8 +2421,8 @@ public class TableListPanel
 		});
 	}
 
-	/** Invoked when the displayed tab has changed.
-	 *	Retrieve table detail information here.
+	/**
+	 * Invoked when the displayed tab has changed (e.g. from source to data).
 	 */
 	@Override
 	public void stateChanged(ChangeEvent e)
@@ -2473,6 +2431,12 @@ public class TableListPanel
 
 		if (e.getSource() == this.displayTab)
 		{
+			if (isBusy())
+			{
+				WbSwingUtilities.showMessageKey(SwingUtilities.getWindowAncestor(this), "ErrConnectionBusy");
+				return;
+			}
+
 			EventQueue.invokeLater(new Runnable()
 			{
 				@Override

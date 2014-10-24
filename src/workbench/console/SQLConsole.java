@@ -561,6 +561,7 @@ public class SQLConsole
 			catch (Exception ex)
 			{
 				LogMgr.logWarning("SQLConsole.cancelStatement()", "Could not cancel statement", ex);
+				runner.abort();
 			}
 		}
 	}
