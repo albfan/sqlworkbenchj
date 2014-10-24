@@ -69,6 +69,8 @@ import workbench.util.WbThread;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
+import workbench.sql.wbcommands.WbConnect;
+
 /**
  * A simple console interface for SQL Workbench/J
  * <br>
@@ -385,6 +387,8 @@ public class SQLConsole
 		abbreviations.put("\\df", cmd.formatVerb(WbListProcedures.VERB));
 		abbreviations.put("\\dn", cmd.formatVerb(WbListSchemas.VERB));
 		abbreviations.put("\\conninfo", cmd.formatVerb(WbConnInfo.VERB));
+		abbreviations.put("\\connect", cmd.formatVerb(WbConnect.VERB));
+		abbreviations.put("\\c", cmd.formatVerb(WbConnect.VERB));
 
 		// some limited SQL*Plus compatibility
 		abbreviations.put("/", last);
