@@ -586,4 +586,36 @@ public class LexerBasedParserTest
 		cmd = parser.getNextCommand();
 		assertNull(cmd);
 	}
+
+	@Test
+	public void testDynamicDelimiter()
+	{
+		String script =
+			"drop procedure foo;\n" +
+			"\n" +
+			"create procedure foo\n" +
+			"is\n" +
+			"   l_value integer;\n" +
+			"begin\n" +
+			"\n" +
+			"   l_value := 42;\n" +
+			"\n" +
+			"end;\n" +
+			"/\n";
+		
+		LexerBasedParser parser = new LexerBasedParser(ParserType.Oracle);
+		parser.setScript(script);
+		parser.setEmptyLineIsDelimiter(true);
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("drop procedure foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertTrue(cmd.getSQL().startsWith("create procedure"));
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+	}
+
 }

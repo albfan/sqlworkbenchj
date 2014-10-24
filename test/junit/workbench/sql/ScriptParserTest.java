@@ -304,6 +304,17 @@ public class ScriptParserTest
 		assertEquals("select * from person order by id\ndesc", p.getCommand(0));
 		assertEquals("desc person", p.getCommand(1));
 		assertEquals("delete from person", p.getCommand(2));
+
+		sql =
+			"\n   desc person\n" +
+			"\n" +
+			"select * from dual;";
+		p.setScript(sql);
+		size = p.getSize();
+		assertEquals(2, size);
+		assertEquals("desc person", p.getCommand(0));
+		assertEquals("select * from dual", p.getCommand(1));
+
 	}
 
 	@Test
@@ -1305,5 +1316,23 @@ public class ScriptParserTest
 		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(3));
 		assertTrue(parser.getCommand(4).startsWith("select count(*)"));
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(4));
+
+		script =
+			"drop procedure foo;\n" +
+			"\n" +
+			"create procedure foo\n" +
+			"is\n" +
+			"   l_value integer;\n" +
+			"begin\n" +
+			"\n" +
+			"   l_value := 42;\n" +
+			"\n" +
+			"end;\n" +
+			"/\n";
+		parser.setScript(script);
+		parser.setEmptyLineIsDelimiter(true);
+		size = parser.getSize();
+		assertEquals(2, size);
 	}
+	
 }

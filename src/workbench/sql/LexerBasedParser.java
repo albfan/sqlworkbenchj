@@ -278,7 +278,7 @@ public class LexerBasedParser
 
 				if (isLineBreak(text))
 				{
-					if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text)))
+					if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text) && currentDelim.equals(delimiter)))
 					{
 						lastStatementUsedTerminator = false;
 						break;

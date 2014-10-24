@@ -654,7 +654,7 @@ public class BatchRunner
 	private ScriptParser createParser()
 	{
 		ScriptParser parser = new ScriptParser(ParserType.getTypeFromConnection(connection));
-		// If no delimiter has been defined, than use the default fallback
+		// If no delimiter has been defined, then use the alternate delimiter from the connection
 		if (this.delimiter == null)
 		{
 			DelimiterDefinition altDelim = Settings.getInstance().getAlternateDelimiter(this.connection, null);

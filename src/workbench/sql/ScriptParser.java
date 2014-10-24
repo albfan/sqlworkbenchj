@@ -476,18 +476,34 @@ public class ScriptParser
 	private ScriptIterator getParserInstance()
 	{
 		LexerBasedParser p = new LexerBasedParser(parserType);
-		p.setEmptyLineIsDelimiter(this.emptyLineIsSeparator && !useAlternateDelimiter);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		if (p.supportsMixedDelimiter())
 		{
 			p.setDelimiter(delimiter);
-			p.setAlternateDelimiter(this.alternateDelimiter);
+			p.setAlternateDelimiter(alternateDelimiter);
+			p.setEmptyLineIsDelimiter(emptyLineIsSeparator);
 		}
 		else
 		{
+			// the parser does not support mixed delimiters
+			// so we need to find the delimiter to be used
 			findDelimiterToUse();
-			p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
+
+			// and disable the alternate delimiter alltogether
+			// because only a single delimiter will be used
 			p.setAlternateDelimiter(null);
+			if (useAlternateDelimiter)
+			{
+				p.setDelimiter(alternateDelimiter);
+			  // we can't have empty lines as delimiter if using the alternate delimiter
+				p.setEmptyLineIsDelimiter(false);
+			}
+			else
+			{
+				p.setDelimiter(delimiter);
+				p.setEmptyLineIsDelimiter(emptyLineIsSeparator);
+			}
+
 		}
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
 		p.setAlternateLineComment(this.alternateLineComment);
