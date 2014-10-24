@@ -232,6 +232,8 @@ public class TableListPanel
 	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
 
 	private final int maxTypeItems = 25;
+	private int currentRetrievalPanel = -1;
+
 	// </editor-fold>
 
 	public TableListPanel(MainWindow aParent)
@@ -1533,6 +1535,18 @@ public class TableListPanel
 		return true;
 	}
 
+	private void updateSelectedTable()
+	{
+		int count = this.tableList.getSelectedRowCount();
+		int row = this.tableList.getSelectedRow();
+		if (row < 0) return;
+
+		if (count == 1 && row > -1)
+		{
+			this.selectedTable = createTableIdentifier(row);
+		}
+	}
+
 	public void updateDisplay()
 	{
 		int count = this.tableList.getSelectedRowCount();
@@ -1544,7 +1558,7 @@ public class TableListPanel
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 
-		this.selectedTable = createTableIdentifier(row);
+		updateSelectedTable();
 
 		this.invalidateData();
 
@@ -1661,6 +1675,7 @@ public class TableListPanel
 
 		try
 		{
+			setActivePanelIndex(tableSource);
 			WbSwingUtilities.showWaitCursor(this);
 			WbSwingUtilities.showWaitCursor(tableSource);
 
@@ -1742,6 +1757,7 @@ public class TableListPanel
 		}
 		finally
 		{
+			setActivePanelIndex(null);
 			WbSwingUtilities.showDefaultCursor(tableSource);
 			WbSwingUtilities.showDefaultCursor(this);
 		}
@@ -1753,6 +1769,19 @@ public class TableListPanel
 	{
 		try
 		{
+			setActivePanelIndex(tableDefinition);
+			if (selectedTable == null)
+			{
+				LogMgr.logDebug("TableListPanel.retrieveTableDefinition()","No current table available!", new Exception("TraceBack"));
+				updateSelectedTable();
+			}
+
+			if (selectedTable == null)
+			{
+				LogMgr.logWarning("TableListPanel.retrieveTableDefinition()","No table selected!");
+				return;
+			}
+
 			WbSwingUtilities.showWaitCursor(this);
 			tableDefinition.retrieve(selectedTable);
 			shouldRetrieveTable = false;
@@ -1764,6 +1793,7 @@ public class TableListPanel
 		}
 		finally
 		{
+			currentRetrievalPanel = -1;
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
@@ -1865,6 +1895,22 @@ public class TableListPanel
 			}
 		};
 		panelRetrieveThread.start();
+	}
+
+	private void setActivePanelIndex(JPanel panel)
+	{
+		if (panel == null)
+		{
+			currentRetrievalPanel = -1;
+		}
+		else
+		{
+			if (currentRetrievalPanel > -1)
+			{
+				LogMgr.logWarning("TableListPanel.setActivePanelIndex()", "New active panel set before clearing the old index: " + currentRetrievalPanel, new Exception("BackTrace"));
+			}
+			currentRetrievalPanel = displayTab.indexOfComponent(panel);
+		}
 	}
 
 	protected void retrieveCurrentPanel()
@@ -2001,6 +2047,7 @@ public class TableListPanel
 	{
 		try
 		{
+			setActivePanelIndex(triggers);
 			WbSwingUtilities.showDefaultCursor(this);
 			triggers.readTriggers(getObjectTable());
 			this.shouldRetrieveTriggers = false;
@@ -2013,6 +2060,7 @@ public class TableListPanel
 		}
 		finally
 		{
+			setActivePanelIndex(null);
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
@@ -2022,6 +2070,7 @@ public class TableListPanel
 	{
 		try
 		{
+			setActivePanelIndex(indexPanel);
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStore ds = meta.getIndexReader().getTableIndexInformation(getObjectTable());
@@ -2045,6 +2094,7 @@ public class TableListPanel
 		}
 		finally
 		{
+			setActivePanelIndex(null);
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
@@ -2054,6 +2104,7 @@ public class TableListPanel
 	{
 		try
 		{
+			setActivePanelIndex(exportedKeys);
 			WbSwingUtilities.showWaitCursor(this);
 			exportedKeys.retrieve(getObjectTable());
 			this.shouldRetrieveExportedKeys = false;
@@ -2064,6 +2115,11 @@ public class TableListPanel
 			LogMgr.logError("TableListPanel.retrieveExportedTables()", "Error retrieving table references", th);
 			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
 		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+			setActivePanelIndex(null);
+		}
 	}
 
 	protected void retrieveImportedTables()
@@ -2071,6 +2127,7 @@ public class TableListPanel
 	{
 		try
 		{
+			setActivePanelIndex(importedKeys);
 			WbSwingUtilities.showWaitCursor(this);
 			importedKeys.retrieve(getObjectTable());
 			this.shouldRetrieveImportedKeys = false;
@@ -2083,30 +2140,33 @@ public class TableListPanel
 		}
 		finally
 		{
+			setActivePanelIndex(null);
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
 
 	protected void retrieveProjections()
-			throws SQLException
+		throws SQLException
+	{
+		try
 		{
-			try
-			{
-				WbSwingUtilities.showWaitCursor(this);
-				projections.retrieve(getObjectTable());
-				this.shouldRetrieveProjections = false;
-			}
-			catch (Throwable th)
-			{
-				this.shouldRetrieveProjections = true;
-				LogMgr.logError("TableListPanel.retrieveProjections()", "Error retrieving projections", th);
-				WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
-			}
-			finally
-			{
-				WbSwingUtilities.showDefaultCursor(this);
-			}
+			setActivePanelIndex(projections);
+			WbSwingUtilities.showWaitCursor(this);
+			projections.retrieve(getObjectTable());
+			this.shouldRetrieveProjections = false;
 		}
+		catch (Throwable th)
+		{
+			this.shouldRetrieveProjections = true;
+			LogMgr.logError("TableListPanel.retrieveProjections()", "Error retrieving projections", th);
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
+		}
+		finally
+		{
+			setActivePanelIndex(null);
+			WbSwingUtilities.showDefaultCursor(this);
+		}
+	}
 
 	@Override
 	public void reload()
@@ -2431,7 +2491,7 @@ public class TableListPanel
 
 		if (e.getSource() == this.displayTab)
 		{
-			if (isBusy())
+			if (isBusy() && displayTab.getSelectedIndex() != this.currentRetrievalPanel)
 			{
 				WbSwingUtilities.showMessageKey(SwingUtilities.getWindowAncestor(this), "ErrConnectionBusy");
 				return;
