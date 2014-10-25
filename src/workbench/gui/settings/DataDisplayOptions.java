@@ -22,8 +22,6 @@
  */
 package workbench.gui.settings;
 
-
-
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Comparator;

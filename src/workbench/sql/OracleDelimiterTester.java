@@ -21,6 +21,8 @@ package workbench.sql;
 
 import java.util.Set;
 
+import workbench.resource.Settings;
+
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
@@ -37,9 +39,30 @@ public class OracleDelimiterTester
 	private final Set<String> blockStart = CollectionUtil.caseInsensitiveSet("BEGIN", "DECLARE");
 	private final Set<String> keywords = CollectionUtil.caseInsensitiveSet("CREATE", "CREATE OR REPLACE");
 	private final Set<String> singleLineCommands = CollectionUtil.caseInsensitiveSet("WHENEVER", "ECHO", "DESC", "DESCRIBE");
-	private final Set<String> types = CollectionUtil.caseInsensitiveSet("FUNCTION", "LIBRARY", "PACKAGE", "PACKAGE BODY", "PROCEDURE", "TRIGGER", "TYPE");
+	private final Set<String> types = CollectionUtil.caseInsensitiveSet("FUNCTION", "LIBRARY", "PACKAGE", "PACKAGE BODY", "PROCEDURE", "TRIGGER", "TYPE", "TYPE BODY");
 
 	private SQLToken lastToken;
+
+	public OracleDelimiterTester()
+	{
+		boolean typesLikeSqlPlus = Settings.getInstance().getBoolProperty("workbench.oracle.sql.parser.types.altdelimiter", true);
+		if (!typesLikeSqlPlus)
+		{
+			types.remove("TYPE");
+		}
+	}
+
+	public void setRequireAlternateDelimiterForTypes(boolean flag)
+	{
+		if (flag)
+		{
+			types.add("TYPE");
+		}
+		else
+		{
+			types.remove("TYPE");
+		}
+	}
 
 	@Override
 	public void setAlternateDelimiter(DelimiterDefinition delimiter)
@@ -73,7 +96,7 @@ public class OracleDelimiterTester
 		{
 			useAlternateDelimiter = (types.contains(token.getText()) && keywords.contains(lastToken.getText()));
 		}
-		if (!token.isWhiteSpace())
+		if (!token.isWhiteSpace() && !token.getContents().equalsIgnoreCase("EDITIONABLE"))
 		{
 			lastToken = token;
 		}

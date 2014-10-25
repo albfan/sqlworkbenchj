@@ -165,7 +165,9 @@ public class WbCallOraTest
 
 		sql =
 			"CREATE TYPE some_type AS OBJECT (some_value varchar(100), some_id integer);\n" +
-			"create type some_type_table as table of some_type;\n";
+			"/\n" +
+			"create type some_type_table as table of some_type;\n" +
+			"/";
 		TestUtil.executeScript(con, sql, true);
 
 		sql =
@@ -258,7 +260,8 @@ public class WbCallOraTest
 
 		String cmd = "WbCall overload_pkg.get_data(?,?,1,2,3,4,some_type_table(),?)";
 		StatementRunnerResult result = call.execute(cmd);
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> results = result.getDataStores();
 		assertEquals(1, results.size());

@@ -34,6 +34,11 @@ public class Alias
 	protected String objectName;
 	private String alias;
 	private String display;
+	private String asKeyword;
+
+	public Alias()
+	{
+	}
 
 	/**
 	 * Create a new Alias
@@ -71,6 +76,38 @@ public class Alias
 		display = value;
 	}
 
+	public void setAsKeyword(String text)
+	{
+		this.asKeyword = text;
+	}
+
+	public boolean isNotEmpty()
+	{
+		return StringUtil.isNonEmpty(objectName);
+	}
+
+	public void appendObjectName(String name)
+	{
+		if (objectName == null)
+		{
+			objectName = name;
+		}
+		else
+		{
+			objectName += name;
+		}
+	}
+
+	public void setObjectName(String name)
+	{
+		this.objectName = name;
+	}
+
+	public void setAlias(String alias)
+	{
+		this.alias = alias;
+	}
+
 	/**
 	 * Returned the alias defined for the object.
 	 * Might be null
@@ -88,6 +125,19 @@ public class Alias
 	 */
 	public final String getObjectName()
 	{
+		return objectName;
+	}
+
+	public String getName()
+	{
+		if (alias != null)
+		{
+			if (asKeyword != null)
+			{
+				return objectName + " " + asKeyword + " " + alias;
+			}
+			return objectName + " " + alias;
+		}
 		return objectName;
 	}
 

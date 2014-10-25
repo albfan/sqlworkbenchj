@@ -42,6 +42,7 @@ import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
 import workbench.storage.RowDataReaderFactory;
 
+import workbench.util.Alias;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
@@ -201,10 +202,10 @@ public abstract class ExportWriter
 
 		if (this.converter.needsUpdateTable() || !exporter.getControlFileFormats().isEmpty())
 		{
-			List<String> tables = SqlUtil.getTables(query, false, this.exporter.getConnection());
+			List<Alias> tables = SqlUtil.getTables(query, false, this.exporter.getConnection());
 			if (tables.size() > 0)
 			{
-				info.setUpdateTable(new TableIdentifier(tables.get(0), exporter.getConnection()));
+				info.setUpdateTable(new TableIdentifier(tables.get(0).getObjectName(), exporter.getConnection()));
 			}
 		}
 

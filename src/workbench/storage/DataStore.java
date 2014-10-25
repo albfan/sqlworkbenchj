@@ -56,6 +56,7 @@ import workbench.storage.filter.FilterExpression;
 
 import workbench.sql.ResultNameParser;
 
+import workbench.util.Alias;
 import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
@@ -1428,10 +1429,10 @@ public class DataStore
 			String name = parser.getResultName(sql);
 			if (name == null && GuiSettings.getUseTablenameAsResultName())
 			{
-				List<String> tables = SqlUtil.getTables(aSql, false, this.originalConnection);
+				List<Alias> tables = SqlUtil.getTables(aSql, false, this.originalConnection);
 				if (tables.size() > 0)
 				{
-					name = tables.get(0);
+					name = tables.get(0).getObjectName();
 				}
 			}
 			setResultName(name);
@@ -1477,13 +1478,13 @@ public class DataStore
 		else if (this.updateTable == null)
 		{
 			if (this.sql == null) return false;
-			List<String> tables = SqlUtil.getTables(this.sql, false, aConn);
+			List<Alias> tables = SqlUtil.getTables(this.sql, false, aConn);
 			if (tables.size() != 1)
 			{
 				LogMgr.logWarning("DataStore.checkUpdateTable()", "More than one table found in the original query. No update table will be set.");
 				return false;
 			}
-			String table = tables.get(0);
+			String table = tables.get(0).getObjectName();
 			LogMgr.logDebug("DataStore.checkUpdateTable()", "Using table name: " + table);
 			this.setUpdateTable(table, aConn);
 		}
@@ -1504,9 +1505,9 @@ public class DataStore
 		if (this.updateTableToBeUsed != null) return this.updateTableToBeUsed.getTableExpression();
 		if (this.sql == null) return null;
 		if (!this.sqlHasUpdateTable()) return null;
-		List<String> tables = SqlUtil.getTables(this.sql, false, originalConnection);
+		List<Alias> tables = SqlUtil.getTables(this.sql, false, originalConnection);
 		if (tables.size() != 1) return null;
-		String table = tables.get(0);
+		String table = tables.get(0).getObjectName();
 		return table;
 	}
 
@@ -1538,7 +1539,7 @@ public class DataStore
 	{
 		if (this.updateTable != null) return true;
 		if (this.sql == null) return false;
-		List<String> tables = SqlUtil.getTables(this.sql, false, this.originalConnection);
+		List<Alias> tables = SqlUtil.getTables(this.sql, false, this.originalConnection);
 		return (tables.size() == 1);
 	}
 

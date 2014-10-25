@@ -38,6 +38,7 @@ import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 
+import workbench.util.Alias;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -82,7 +83,7 @@ public class SelectAnalyzer
 		int orderPos = SqlUtil.getKeywordPosition("ORDER BY", sql);
 
 		// find the tables from the FROM clause
-		List<String> tables = SqlUtil.getTables(sql, true, dbConnection);
+		List<Alias> tables = SqlUtil.getTables(sql, true, dbConnection);
 
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
 		boolean afterGroup = (groupPos > 0 && cursorPos > groupPos);
@@ -224,7 +225,7 @@ public class SelectAnalyzer
 			}
 			else if (count == 1)
 			{
-				TableAlias tbl = new TableAlias(tables.get(0), catalogSep, schemaSep);
+				TableAlias tbl = new TableAlias(tables.get(0).getObjectName(), catalogSep, schemaSep);
 				tableForColumnList = tbl.getTable();
 			}
 
@@ -233,9 +234,9 @@ public class SelectAnalyzer
 				this.context = CONTEXT_FROM_LIST;
 				this.addAllMarker = false;
 				this.elements = new ArrayList();
-				for (String entry : tables)
+				for (Alias entry : tables)
 				{
-					TableAlias tbl = new TableAlias(entry, catalogSep, schemaSep);
+					TableAlias tbl = new TableAlias(entry.getObjectName(), catalogSep, schemaSep);
 					this.elements.add(tbl);
 					setAppendDot(true);
 				}
@@ -256,12 +257,13 @@ public class SelectAnalyzer
 		}
 	}
 
-	private TableAlias findAlias(String toSearch, List<String> possibleTables, char catalogSeparator, char schemaSeparator)
+	private TableAlias findAlias(String toSearch, List<Alias> possibleTables, char catalogSeparator, char schemaSeparator)
 	{
-		for (String element : possibleTables)
+		for (Alias element : possibleTables)
 		{
-			TableAlias tbl = new TableAlias(element, catalogSeparator, schemaSeparator);
-
+			TableAlias tbl = new TableAlias(element.getObjectName(), catalogSeparator, schemaSeparator);
+			tbl.setAlias(element.getAlias());
+			
 			if (tbl.isTableOrAlias(toSearch, catalogSeparator, schemaSeparator))
 			{
 				return tbl;
@@ -376,11 +378,13 @@ public class SelectAnalyzer
 	@Override
 	public List<TableAlias> getTables()
 	{
-		List<String> tables = SqlUtil.getTables(sql, true, dbConnection);
+		List<Alias> tables = SqlUtil.getTables(sql, true, dbConnection);
 		List<TableAlias> result = new ArrayList<>(tables.size());
-		for (String s : tables)
+		for (Alias s : tables)
 		{
-			result.add(new TableAlias(s));
+			TableAlias tbl = new TableAlias(s.getObjectName());
+			tbl.setAlias(s.getAlias());
+			result.add(tbl);
 		}
 		return result;
 	}

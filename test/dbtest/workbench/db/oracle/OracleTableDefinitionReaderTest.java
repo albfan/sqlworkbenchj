@@ -79,6 +79,7 @@ public class OracleTableDefinitionReaderTest
 			"create synonym syn_person for person;\n" +
 			"create materialized view mv_person as select * from person;\n" +
 			"create type address_type as object (street varchar(100), city varchar(50), zipcode varchar(10));\n" +
+			"/\n" +
 			"create index idx_person_a on person (upper(first_name));\n" +
 		  "create index idx_person_b on person (last_name) reverse;\n" +
 			"create table ts_test (modified_at timestamp(3));\n" +
@@ -135,7 +136,7 @@ public class OracleTableDefinitionReaderTest
 		assertEquals("person id", id.getComment());
 
 		String sql = tbl.getSource(con).toString().trim();
-		assertTrue(sql.startsWith("CREATE OR REPLACE MATERIALIZED VIEW MV_PERSON"));
+		assertTrue(sql.startsWith("CREATE MATERIALIZED VIEW MV_PERSON"));
 		IndexReader r = con.getMetadata().getIndexReader();
 		assertNotNull(r);
 		assertTrue(r instanceof OracleIndexReader);

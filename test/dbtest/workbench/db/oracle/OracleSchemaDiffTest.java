@@ -75,9 +75,11 @@ public class OracleSchemaDiffTest
 			"   firstname varchar(100), " +
 			"   lastname varchar(100)\n" +
 			");\n" +
+			"/\n" +
 			"create type foo_type is object (\n" +
 			"   id integer \n " +
-			");";
+			");\n" +
+			"/";
 
 		TestUtil.executeScript(con1, sql1);
 
@@ -87,7 +89,8 @@ public class OracleSchemaDiffTest
 			"   id integer, " +
 			"   firstname varchar(50), " +
 			"   lastname varchar(50)\n" +
-			");";
+			");\n" +
+			"/";
 		TestUtil.executeScript(con2, sql2);
 	}
 

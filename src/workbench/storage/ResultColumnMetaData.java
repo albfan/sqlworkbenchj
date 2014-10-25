@@ -23,6 +23,7 @@
 package workbench.storage;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.util.Alias;
 import workbench.util.CollectionUtil;
 import workbench.util.SelectColumn;
 import workbench.util.SqlUtil;
@@ -50,7 +52,6 @@ import workbench.util.TableAlias;
  */
 public class ResultColumnMetaData
 {
-
 	private List<String> tables;
 	private List<String> columns;
 	private WbConnection connection;
@@ -65,9 +66,14 @@ public class ResultColumnMetaData
 		connection = conn;
 		if (StringUtil.isBlank(sql)) return;
 
-		tables = SqlUtil.getTables(sql, true, conn);
-		if (CollectionUtil.isEmpty(tables)) return;
+		List<Alias> list = SqlUtil.getTables(sql, true, conn);
+		if (CollectionUtil.isEmpty(list)) return;
 
+		tables = new ArrayList<>(list.size());
+		for (Alias a : list)
+		{
+			tables.add(a.getName());
+		}
 		columns = SqlUtil.getSelectColumns(sql, true, conn);
 	}
 

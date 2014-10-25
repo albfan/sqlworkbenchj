@@ -57,6 +57,7 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 
 import workbench.sql.ErrorDescriptor;
+import workbench.sql.ParserType;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
@@ -730,11 +731,11 @@ public class SqlUtil
 			}
 
 			result = new ResultInfo(meta, conn);
-			List<String> tables = getTables(sql, false, conn);
+			List<Alias> tables = getTables(sql, false, conn);
 			if (tables.size() == 1)
 			{
-				String table = tables.get(0);
-				TableIdentifier tbl = new TableIdentifier(table, conn);
+				Alias table = tables.get(0);
+				TableIdentifier tbl = new TableIdentifier(table.getObjectName(), conn);
 				result.setUpdateTable(tbl);
 			}
 			conn.releaseSavepoint(sp);
@@ -750,20 +751,6 @@ public class SqlUtil
 			closeAll(rs, stmt);
 		}
 		return result;
-	}
-
-	/**
-	 * Returns the real table name assuming that the passed String is a table name with an alias
-
-	 * @param table
-	 * @param keepAlias
-	 */
-	private static String getTableDefinition(String table, boolean keepAlias)
-	{
-		if (keepAlias) return table;
-		int pos = StringUtil.findFirstWhiteSpace(table.trim());
-		if (pos > -1) return table.substring(0, pos);
-		return table;
 	}
 
 	/**
@@ -1020,148 +1007,21 @@ public class SqlUtil
 		return (String)elements.get(0);
 	}
 
-	public static List<String> getTables(String aSql)
+	public static List<Alias> getTables(String sql, boolean includeAlias, WbConnection conn)
 	{
-		return getTables(aSql, false);
+		return getTables(sql, includeAlias, getCatalogSeparator(conn), getSchemaSeparator(conn), conn);
 	}
 
-	/**
-	 * Returns a List of tables defined in the SQL query. If the
-	 * query is not a SELECT query the result is undefined
-	 */
-	public static List<String> getTables(String sql, boolean includeAlias)
+	public static List<Alias> getTables(String sql, boolean includeAlias, char catalogSeparator, char schemaSeparator, WbConnection conn)
 	{
-		return getTables(sql, includeAlias, '.', '.', null);
+		ParserType type = ParserType.getTypeFromConnection(conn);
+		return getTables(sql, includeAlias, catalogSeparator, schemaSeparator, type);
 	}
 
-	public static List<String> getTables(String sql, boolean includeAlias, WbConnection conn)
+	public static List<Alias> getTables(String sql, boolean includeAlias, char catalogSeparator, char schemaSeparator, ParserType parserType)
 	{
-		return getTables(sql, includeAlias, SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn), conn);
-	}
-
-	public static List<String> getTables(String sql, boolean includeAlias, char catalogSeparator, char schemaSeparator, WbConnection conn)
-	{
-		String from = getFromPart(sql);
-		if (StringUtil.isBlank(from)) return Collections.emptyList();
-		List<String> result = new LinkedList<>();
-
-		try
-		{
-			SQLLexer lex = SQLLexerFactory.createLexer(conn, from);
-			SQLToken t = lex.getNextToken(false, false);
-
-			boolean collectTable = true;
-			StringBuilder currentTable = new StringBuilder();
-			int bracketCount = 0;
-			boolean subSelect = false;
-			int subSelectBracketCount = -1;
-
-			while (t != null)
-			{
-				String s = t.getContents();
-
-				if (s.equals("SELECT") && bracketCount > 0)
-				{
-					subSelect = true;
-					subSelectBracketCount = bracketCount;
-				}
-
-				if ("(".equals(s))
-				{
-					bracketCount ++;
-				}
-				else if (")".equals(s))
-				{
-					if (subSelect && bracketCount == subSelectBracketCount)
-					{
-						subSelect = false;
-					}
-					bracketCount --;
-					t = lex.getNextToken(false, false);
-					continue;
-				}
-
-				if (!subSelect)
-				{
-					if (getJoinKeyWords().contains(s))
-					{
-						collectTable = true;
-						if (currentTable.length() > 0)
-						{
-							result.add(getTableDefinition(currentTable.toString(), includeAlias));
-							currentTable = new StringBuilder();
-						}
-					}
-					else if (",".equals(s))
-					{
-							collectTable = true;
-							result.add(getTableDefinition(currentTable.toString(), includeAlias));
-							currentTable = new StringBuilder();
-					}
-					else if ("ON".equals(s) || "USING".equals(s))
-					{
-						collectTable = false;
-						result.add(getTableDefinition(currentTable.toString(), includeAlias));
-						currentTable = new StringBuilder();
-					}
-					else if (collectTable && !s.equals("("))
-					{
-						if (currentTable.length() > 0
-							  && !startsWithSeparator(s, schemaSeparator, catalogSeparator)
-							  && !endsWithSeparator(currentTable, schemaSeparator, catalogSeparator))
-						{
-							currentTable.append(' ');
-						}
-
-						// if we hit an AS keyword but have not current table name
-						// then this is most probably a derived table: select * from (select x from y) as t
-						// in that case the as must not be added to the table name returned
-						if (! ("AS".equalsIgnoreCase(s) && currentTable.length() == 0) )
-						{
-							currentTable.append(s);
-						}
-					}
-				}
-				t = lex.getNextToken(false, false);
-			}
-
-			if (currentTable.length() > 0)
-			{
-				String tbl = getTableDefinition(currentTable.toString(), includeAlias);
-				if (StringUtil.isEmptyString(tbl))
-				{
-					LogMgr.logWarning("SqlUtil.getTables()", "Empty table name returned for table definition: " + currentTable);
-				}
-				else
-				{
-					result.add(tbl);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlUtil.getTable()", "Error parsing sql", e);
-		}
-		return result;
-	}
-
-	private static boolean endsWithSeparator(CharSequence sql, char catSep, char schemaSep)
-	{
-		if (sql == null) return false;
-		int len = sql.length();
-		if (len < 1) return false;
-		if (sql.charAt(len - 1) == catSep) return true;
-		if (sql.charAt(len - 1) == schemaSep) return true;
-		return false;
-	}
-
-	private static boolean startsWithSeparator(CharSequence sql, char catSep, char schemaSep)
-	{
-		if (sql == null) return false;
-		if (sql.length() == 0) return false;
-		if (sql.charAt(0) == catSep) return true;
-		if (sql.charAt(0) == schemaSep) return true;
-		return false;
+		TableListParser parser = new TableListParser(catalogSeparator, schemaSeparator, parserType);
+		return parser.getTables(sql, includeAlias);
 	}
 
 	/**

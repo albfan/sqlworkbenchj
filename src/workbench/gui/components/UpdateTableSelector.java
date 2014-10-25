@@ -22,6 +22,7 @@
  */
 package workbench.gui.components;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
@@ -30,8 +31,10 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.storage.DataStore;
 
+import workbench.util.Alias;
 import workbench.util.SqlUtil;
 
 /**
@@ -56,13 +59,18 @@ public class UpdateTableSelector
 
 		String csql = data.getGeneratingSql();
 		WbConnection conn = data.getOriginalConnection();
-		List<String> tables = SqlUtil.getTables(csql, false, conn);
+		List<Alias> tables = SqlUtil.getTables(csql, false, conn);
 
 		TableIdentifier table = null;
 
 		if (tables.size() > 1)
 		{
-			SelectTablePanel p = new SelectTablePanel(tables);
+			List<String> tableNames = new ArrayList<>(tables.size());
+			for (Alias a : tables)
+			{
+				tableNames.add(a.getObjectName());
+			}
+			SelectTablePanel p = new SelectTablePanel(tableNames);
 
 			boolean ok = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(tableData), p, ResourceMgr.getString("MsgSelectTableTitle"));
 			String selectedTable = null;
@@ -80,7 +88,7 @@ public class UpdateTableSelector
 			table = data.getUpdateTable();
 			if (table == null)
 			{
-				table = new TableIdentifier(tables.get(0), conn);
+				table = new TableIdentifier(tables.get(0).getObjectName(), conn);
 			}
 		}
 		return table;

@@ -29,6 +29,7 @@ import java.util.Set;
 
 import workbench.resource.ResourceMgr;
 
+import workbench.util.Alias;
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -73,10 +74,10 @@ public class DatastoreTransposer
 		if (resultName == null)
 		{
 			String sql = source.getGeneratingSql();
-			List<String> tables = SqlUtil.getTables(sql, false);
+			List<Alias> tables = SqlUtil.getTables(sql, false, source.getOriginalConnection());
 			if (tables.size() == 1)
 			{
-				resultName = tables.get(0);
+				resultName = tables.get(0).getObjectName();
 			}
 		}
 	}

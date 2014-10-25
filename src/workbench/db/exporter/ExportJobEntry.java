@@ -26,10 +26,14 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
+
 import workbench.storage.ResultInfo;
+
+import workbench.util.Alias;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -49,10 +53,10 @@ public class ExportJobEntry
 	{
 		outputFile = new WbFile(file);
 		query = sql;
-		List<String> tables = SqlUtil.getTables(query, false, conn);
+		List<Alias> tables = SqlUtil.getTables(query, false, conn);
 		if (tables.size() == 1)
 		{
-			this.baseTable = new TableIdentifier(tables.get(0), conn);
+			this.baseTable = new TableIdentifier(tables.get(0).getObjectName(), conn);
 		}
 		appendWhere(where);
 	}

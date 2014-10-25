@@ -47,6 +47,7 @@ import workbench.storage.filter.OrExpression;
 import workbench.storage.filter.StartsWithComparator;
 import workbench.storage.filter.StringEqualsComparator;
 
+import workbench.util.Alias;
 import workbench.util.SqlUtil;
 
 import org.junit.Test;
@@ -329,10 +330,10 @@ public class DataStoreTest
 			DataStore ds = new DataStore(rs, con);
 			SqlUtil.closeResult(rs);
 
-			List<String> tbl = SqlUtil.getTables(sql);
+			List<Alias> tbl = SqlUtil.getTables(sql, true, null);
 			assertEquals("Wrong number of tables retrieved from SQL", 1, tbl.size());
 
-			String table = tbl.get(0);
+			String table = tbl.get(0).getObjectName();
 			assertEquals("Wrong update table returned", "junit_test", table);
 
 			TableIdentifier id = new TableIdentifier(table);

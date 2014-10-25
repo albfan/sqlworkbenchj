@@ -27,9 +27,9 @@ import workbench.log.LogMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.util.Alias;
 import workbench.util.SelectColumn;
 import workbench.util.SqlUtil;
-import workbench.util.TableAlias;
 
 /**
  * A class to detect to which table a column from a result set belongs.
@@ -43,12 +43,7 @@ public class SourceTableDetector
 	{
 		resetResult(result);
 
-		List<String> tableNames = SqlUtil.getTables(sql, true, connection);
-		List<TableAlias> tables = new ArrayList<>(tableNames.size());
-		for (String name : tableNames)
-		{
-			tables.add(new TableAlias(name));
-		}
+		List<Alias> tables = SqlUtil.getTables(sql, true, connection);
 
 		List<String> colNames = SqlUtil.getSelectColumns(sql, true, connection);
 		List<SelectColumn> columns = new ArrayList<>(colNames.size());
@@ -89,9 +84,9 @@ public class SourceTableDetector
 		result.setColumnTableDetected(matchedCols == columns.size());
 	}
 
-	private String findTableFromAlias(String alias, List<TableAlias> tables)
+	private String findTableFromAlias(String alias, List<Alias> tables)
 	{
-		for (TableAlias tbl : tables)
+		for (Alias tbl : tables)
 		{
 			if (tbl.getNameToUse().equalsIgnoreCase(alias)) return tbl.getObjectName();
 		}

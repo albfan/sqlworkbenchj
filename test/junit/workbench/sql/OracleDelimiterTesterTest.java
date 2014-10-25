@@ -20,6 +20,8 @@
 package workbench.sql;
 
 
+import workbench.WbTestCase;
+
 import workbench.sql.formatter.SQLToken;
 
 import org.junit.Test;
@@ -31,10 +33,12 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class OracleDelimiterTesterTest
+	extends WbTestCase
 {
 
 	public OracleDelimiterTesterTest()
 	{
+		super("OracleDelimiterTesterTest");
 	}
 
 	@Test
@@ -67,6 +71,7 @@ public class OracleDelimiterTesterTest
 		delim = tester.getCurrentDelimiter();
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, delim);
 	}
+	
 	@Test
 	public void testBlock()
 	{
