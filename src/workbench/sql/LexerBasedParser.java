@@ -243,7 +243,7 @@ public class LexerBasedParser
 			}
 			else if (!inPgQuote)
 			{
-				if (firstToken && !token.isWhiteSpace() && delimiterTester != null)
+				if (firstToken && delimiterTester != null && !token.isWhiteSpace())
 				{
 					singleLineCommand = delimiterTester.isSingleLineStatement(token, firstToken);
 				}

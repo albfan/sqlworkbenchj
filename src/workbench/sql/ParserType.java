@@ -43,10 +43,25 @@ public enum ParserType
 	public static ParserType getTypeFromDBID(String dbid)
 	{
 		if (dbid == null) return Standard;
+
+		// This will properly handle Postgres' dollar quoting
 		if (DbMetadata.DBID_PG.equals(dbid)) return Postgres;
+
+		// This will allow mixing the standard delimiter with the alternate delimiter
 		if (DbMetadata.DBID_ORA.equals(dbid)) return Oracle;
+
+		// This will properly deal with the stupid [..] "quotes".
 		if (DbMetadata.DBID_MS.equals(dbid)) return SqlServer;
+
+		// This will use a different lexer that supports MySQL's stupid backticks
+		// and non-standard line comments
 		if (DbMetadata.DBID_MYSQL.equals(dbid)) return MySQL;
+
+		// SQLite also allows these stupid [...] quoting style
+		// As currently this is the only thing that makes the Lexer for SQL server
+		// different from the standard Lexer I'm using it for SQLite as well.
+		if ("sqlite".equals(dbid)) return SqlServer;
+
 		return Standard;
 	}
 
