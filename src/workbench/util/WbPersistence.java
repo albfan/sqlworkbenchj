@@ -91,11 +91,9 @@ public class WbPersistence
 	public Object readObject(InputStream in)
 		throws Exception
 	{
-		try
+		try (XMLDecoder e = new XMLDecoder(in, null, this))
 		{
-			XMLDecoder e = new XMLDecoder(in, null, this);
 			Object result = e.readObject();
-			e.close();
 			return result;
 		}
 		finally
@@ -109,17 +107,10 @@ public class WbPersistence
 	{
 		if (aValue == null) return;
 
-		BufferedOutputStream out = null;
-		try
+		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename), 32*1024);
+				XMLEncoder e = new XMLEncoder(out))
 		{
-			out = new BufferedOutputStream(new FileOutputStream(filename), 32*1024);
-			XMLEncoder e = new XMLEncoder(out);
 			e.writeObject(aValue);
-			e.close();
-		}
-		finally
-		{
-			FileUtil.closeQuietely(out);
 		}
 	}
 
