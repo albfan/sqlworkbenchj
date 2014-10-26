@@ -255,6 +255,6 @@ public class SqlParsingUtil
 		{
 			return LazyInstanceHolder.instance;
 		}
-		return conn.getKeywordUtil();
+		return conn.getParsingUtil();
 	}
 }

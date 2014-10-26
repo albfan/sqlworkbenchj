@@ -86,7 +86,7 @@ public class SqlServerStatementHook
 		}
 
 		// If verbs were defined, only append the (unnecessary) semicolon to those
-		String verb = runner.getConnection().getKeywordUtil().getSqlVerb(sql);
+		String verb = runner.getConnection().getParsingUtil().getSqlVerb(sql);
 		if (verbsWithSemicolon.contains(verb))
 		{
 			return sql + ";";

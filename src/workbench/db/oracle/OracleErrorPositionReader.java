@@ -91,7 +91,7 @@ public class OracleErrorPositionReader
 	@Override
 	public ErrorDescriptor getErrorPosition(WbConnection con, String sql, Exception ex)
 	{
-		String verb = con.getKeywordUtil().getSqlVerb(sql);
+		String verb = con.getParsingUtil().getSqlVerb(sql);
 
 		// We can only use dbms_sql for the defined types of SQL statements
 		// in all other cases (e.g. an anonymous PL/SQL block) we try to get the information from the exception

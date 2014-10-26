@@ -142,7 +142,7 @@ public class WbConnection
 		}
 	}
 
-	public synchronized SqlParsingUtil getKeywordUtil()
+	public synchronized SqlParsingUtil getParsingUtil()
 	{
 		if (keywordUtil == null)
 		{

@@ -675,7 +675,7 @@ public class DataCopier
 		if (StringUtil.isNonBlank(addWhere))
 		{
 			sql.append(' ');
-			String first = this.sourceConnection.getKeywordUtil().getSqlVerb(addWhere);
+			String first = this.sourceConnection.getParsingUtil().getSqlVerb(addWhere);
 			if (!first.equals("WHERE"))
 			{
 				sql.append(" WHERE ");

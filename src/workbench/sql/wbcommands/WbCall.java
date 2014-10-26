@@ -119,7 +119,7 @@ public class WbCall
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-		SqlParsingUtil util = currentConnection.getKeywordUtil();
+		SqlParsingUtil util = currentConnection.getParsingUtil();
 		String verbUsed = util.getSqlVerb(sql).toUpperCase();
 		String cleanSql = util.stripVerb(sql);
 		if (OracleUtils.shouldTrimContinuationCharacter(currentConnection))

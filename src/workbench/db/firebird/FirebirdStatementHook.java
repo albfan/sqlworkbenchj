@@ -95,7 +95,7 @@ public class FirebirdStatementHook
 
 	private String getExecutionPlan(WbConnection connection, String sql)
 	{
-		String verb = connection.getKeywordUtil().getSqlVerb(sql);
+		String verb = connection.getParsingUtil().getSqlVerb(sql);
 		if (!explainable.contains(verb)) return null;
 
 		if (getPlan == null) return null;

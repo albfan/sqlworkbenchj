@@ -111,7 +111,7 @@ public class DefaultViewReader
 		StringBuilder result = new StringBuilder(source.length() + 100);
 
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
-		String verb = connection.getKeywordUtil().getSqlVerb(source.toString());
+		String verb = connection.getParsingUtil().getSqlVerb(source.toString());
 
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
 

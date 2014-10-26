@@ -86,7 +86,7 @@ public class JoinCompletionAction
 			return;
 		}
 
-		String verb = conn.getKeywordUtil().getSqlVerb(sql);
+		String verb = conn.getParsingUtil().getSqlVerb(sql);
 		if (!"SELECT".equalsIgnoreCase(verb))
 		{
 			String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");

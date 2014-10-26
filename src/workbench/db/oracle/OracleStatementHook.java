@@ -579,7 +579,7 @@ public class OracleStatementHook
 		WbConnection con = runner.getConnection();
 		if (con == null) return null;
 		
-		String verb = con.getKeywordUtil().getSqlVerb(sql);
+		String verb = con.getParsingUtil().getSqlVerb(sql);
 
 		if (skipStatistics(verb))
 		{

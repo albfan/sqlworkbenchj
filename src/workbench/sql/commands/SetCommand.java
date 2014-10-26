@@ -182,7 +182,7 @@ public class SetCommand
 				else
 				{
 					result = new StatementRunnerResult();
-					String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", currentConnection.getKeywordUtil().getSqlVerb(userSql));
+					String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", currentConnection.getParsingUtil().getSqlVerb(userSql));
 					result.addMessage(msg);
 					result.setSuccess();
 				}
