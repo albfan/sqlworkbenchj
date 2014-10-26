@@ -264,7 +264,7 @@ public class SQLLexerTest
 
 		SQLLexer l = new StandardLexer(sql);
 		SQLToken t = null;
-		while ((t = l.getNextToken()) != null)
+		while ((t = l.getNextToken(false, true)) != null)
 		{
 			tokens.add(t);
 		}
@@ -487,7 +487,6 @@ public class SQLLexerTest
 		assertTrue(token.isComment());
 
 		token = lexer.getNextToken(true, false);
-		System.out.println(token.getText());
 		assertTrue(token.isComment());
 	}
 

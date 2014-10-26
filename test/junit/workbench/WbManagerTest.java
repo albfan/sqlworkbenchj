@@ -24,7 +24,6 @@ package workbench;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
@@ -39,6 +38,7 @@ import workbench.util.FileUtil;
 import workbench.util.WbFile;
 
 import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  *
@@ -53,6 +53,7 @@ public class WbManagerTest
 		super(testName);
 	}
 
+	@Test
 	public void testBatchMode()
 		throws Exception
 	{
@@ -65,42 +66,43 @@ public class WbManagerTest
 
 		try
 		{
-
 			WbFile scriptFile = new WbFile(util.getBaseDir(), "batch_script.sql");
 			String script =
-				"create table batch_test (nr integer, name varchar(100));\n"  +
+				"create table batch_test (nr integer, name varchar(100));\n" +
 				"insert into batch_test (nr, name) values (1, '" + umlauts + "');\n" +
 				"commit;\n";
 
 			TestUtil.writeFile(scriptFile, script, "UTF-8");
 
 			File db = new File(util.getBaseDir(), getName());
-			String[] args = { "-" + AppArguments.ARG_NOSETTNGS,
-												"-configdir=" + util.getBaseDir(),
-												"-url='jdbc:h2:" + db.getAbsolutePath() + "'",
-												"-" + AppArguments.ARG_CONN_USER + "=sa",
-												"-logfile='" + logfile.getFullPath() + "'",
-												"-password= ",
-												"-feedback=false",
-												"-driver=org.h2.Driver ",
-												"-script='" + scriptFile.getFullPath() + "'",
-												"-encoding=UTF8"
-												};
+			String[] args =
+			{
+				"-" + AppArguments.ARG_NOSETTNGS,
+				"-configdir=" + util.getBaseDir(),
+				"-url='jdbc:h2:" + db.getAbsolutePath() + "'",
+				"-" + AppArguments.ARG_CONN_USER + "=sa",
+				"-logfile='" + logfile.getFullPath() + "'",
+				"-password= ",
+				"-feedback=false",
+				"-driver=org.h2.Driver ",
+				"-script='" + scriptFile.getFullPath() + "'",
+				"-encoding=UTF8"
+			};
 
 			WbManager.main(args);
 			assertEquals(0, WbManager.getInstance().exitCode);
 			WbConnection con = util.getConnection(db);
-			Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery("select nr, name from batch_test");
-			if (rs.next())
+			try (Statement stmt = con.createStatement();
+					ResultSet rs = stmt.executeQuery("select nr, name from batch_test"))
 			{
-				int nr = rs.getInt(1);
-				String name = rs.getString(2);
-				assertEquals("Wrong id retrieved", 1, nr);
-				assertEquals("Wrong name retrieved", umlauts, name);
+				if (rs.next())
+				{
+					int nr = rs.getInt(1);
+					String name = rs.getString(2);
+					assertEquals("Wrong id retrieved", 1, nr);
+					assertEquals("Wrong name retrieved", umlauts, name);
+				}
 			}
-			rs.close();
-			stmt.close();
 			assertTrue(logfile.exists());
 			assertTrue(scriptFile.delete());
 		}
@@ -113,7 +115,7 @@ public class WbManagerTest
 		}
 	}
 
-
+	@Test
 	public void testCommandParameter()
 		throws Exception
 	{
@@ -129,16 +131,18 @@ public class WbManagerTest
 			File db = new File(util.getBaseDir(), getName());
 			WbFile export = new WbFile(util.getBaseDir(), "export.txt");
 
-			String[] args = { "-" + AppArguments.ARG_NOSETTNGS + " ",
-												"-driver='org.h2.Driver' -configdir='" + util.getBaseDir() + "' ",
-												"-url='jdbc:h2:" + db.getAbsolutePath() + "' ",
-												"-" + AppArguments.ARG_CONN_USER + "='sa' ",
-												"-logfile='" + logfile.getFullPath() + "'",
-												"-password= ",
-												"-feedback=false -abortOnError=true ",
-												"-command='WbExport -type=\"text\" -file=\"" + export.getFullPath() + "\" "+
-												"-delimiter=\";\" -decimal=\",\"; select TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE from information_schema.tables;' "
-												};
+			String[] args =
+			{
+				"-" + AppArguments.ARG_NOSETTNGS + " ",
+				"-driver='org.h2.Driver' -configdir='" + util.getBaseDir() + "' ",
+				"-url='jdbc:h2:" + db.getAbsolutePath() + "' ",
+				"-" + AppArguments.ARG_CONN_USER + "='sa' ",
+				"-logfile='" + logfile.getFullPath() + "'",
+				"-password= ",
+				"-feedback=false -abortOnError=true ",
+				"-command='WbExport -type=\"text\" -file=\"" + export.getFullPath() + "\" " +
+				"-delimiter=\";\" -decimal=\",\"; select TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE from information_schema.tables;' "
+			};
 
 			WbManager.main(args);
 			assertEquals(0, WbManager.getInstance().exitCode);
@@ -157,6 +161,7 @@ public class WbManagerTest
 		}
 	}
 
+	@Test
 	public void testPropfile()
 		throws Exception
 	{
@@ -171,24 +176,24 @@ public class WbManagerTest
 			File db = new File(util.getBaseDir(), getName());
 			WbFile export = new WbFile(util.getBaseDir(), "export.txt");
 
-			WbFile propfile = new WbFile(util.getBaseDir(), "wbconnection.txt");
-			PrintWriter writer = new PrintWriter(EncodingUtil.createWriter(propfile, "ISO-8859-1", false));
-
 			WbFile script = new WbFile(util.getBaseDir(), "export.sql");
-			TestUtil.writeFile(script, "WbExport -type=text -file='" + export.getFullPath() + "'\n "+
-												          "         -delimiter=| -decimal=',';\n" +
-																	"select TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE from information_schema.tables;\n");
+			TestUtil.writeFile(script,
+				"WbExport -type=text -file='" + export.getFullPath() + "'\n " +
+				"         -delimiter=| -decimal=',';\n" +
+				"select TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE from information_schema.tables;\n");
 
-			writer.println("driver=org.h2.Driver");
-			writer.println("configdir=" + util.getBaseDir());
-			writer.println("url=jdbc:h2:" + db.getAbsolutePath());
-			writer.println(AppArguments.ARG_CONN_USER + "=sa");
-			writer.println("logfile=" + logfile.getFullPath());
-			writer.println("password= ");
-			writer.println("feedback=false");
-			writer.println("abortOnError=true");
-			writer.println("script=" + script.getFullPath());
-			writer.close();
+			WbFile propfile = new WbFile(util.getBaseDir(), "wbconnection.txt");
+			String props =
+				"driver=org.h2.Driver \n" +
+				"configdir=" + util.getBaseDir() + "\n" +
+				"url=jdbc:h2:" + db.getAbsolutePath() + "\n" +
+				AppArguments.ARG_CONN_USER + "=sa\n"+
+				"logfile=" + logfile.getFullPath() + "\n" +
+				"password= \n"+
+				"feedback=false\n"+
+				"abortOnError=true\n"+
+				"script=" + script.getFullPath() + "\n";
+			FileUtil.writeString(propfile, props, "ISO-8859-1", false);
 
 			String[] args = { "-" + AppArguments.ARG_PROPFILE + "=" + propfile.getFullPath() };
 

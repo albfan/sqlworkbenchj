@@ -29,9 +29,8 @@ public interface SQLLexer
 {
 	void setCheckStupidQuoting(boolean flag);
 	boolean getCheckStupidQuoting();
+	
 	SQLToken getNextToken(boolean returnComments, boolean returnWhiteSpace);
-	SQLToken getNextToken()
-		throws IOException;
 
 	void reset(java.io.Reader reader, int yychar, int yycolumn)
 		throws IOException;

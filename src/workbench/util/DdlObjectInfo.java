@@ -120,7 +120,7 @@ public class DdlObjectInfo
 				SQLToken next = lexer.getNextToken(false, false);
 				if (next != null && next.getContents().equals("."))
 				{
-					next = lexer.getNextToken();
+					next = lexer.getNextToken(false, false);
 					if (next != null) name = next;
 				}
 
