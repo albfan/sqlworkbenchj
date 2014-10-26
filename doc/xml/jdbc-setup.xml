@@ -103,8 +103,7 @@
 
 		<caution>
       <para>
-        The JDBC/ODBC bridge will be removed with Java 8 and will no longer be usable then. The JDBC/ODBC bridge is also
-        quite unreliable, slow and considered a workaround.
+        The JDBC/ODBC bridge is very unreliable, slow and considered a workaround. It also <emphasis roloe="bold">no longer available in Java 8</emphasis>.
         A real JDBC driver should always be preferred over using the JDBC/ODBC bridge.
       </para>
     </caution>
@@ -122,6 +121,12 @@
       If you named your ODBC datasource <literal>ProductDB</literal>, then the JDBC url for &wb-productname; would be
       <literal>jdbc:odbc:ProductDB</literal>
     </para>
+    <para>
+      The ODBC driver's architecture <emphasis role="bold">must</emphasis> match the architecture of the Java version you are
+      using. If you are using a 64bit Java runtime, the ODBC drivers must be 64bit as well. If you are using
+      a 32bit Java runtime, the ODBC driver must be 32bit as well.
+    </para>
+
   </section>
 
 	<section id="jdbc-lib-dir">
@@ -154,8 +159,8 @@
 
 		<informaltable frame="all">
 			<tgroup cols="3" align="left">
-				<colspec colname="c1" colwidth="2.4cm" />
-				<colspec colname="c2" colwidth="6.9cm" />
+				<colspec colname="c1" colwidth="2cm" />
+				<colspec colname="c2" colwidth="7.5cm" />
 				<colspec colname="c3"  />
 				<thead valign="top">
 					<row>
@@ -238,7 +243,7 @@
 						<entry>
 							<simplelist columns="1">
 								<member><literal>jt400.jar</literal></member>
-								<member><ulink url="http://www-01.ibm.com/software/data/db2/java/"/></member>
+								<member><ulink url="http://jt400.sourceforge.net/"/></member>
 							</simplelist>
 						</entry>
 					</row>
