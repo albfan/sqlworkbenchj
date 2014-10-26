@@ -872,22 +872,22 @@
     <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
       <jvmarg value="-Xmx256m"/>
       <arg value="-q"/>
-      <arg value="../src/workbench/sql/formatter/StandardLexer.flex"/>
+      <arg value="../src/workbench/sql/lexer/StandardLexer.flex"/>
     </java>
 
     <copy quiet="true" overwrite="true"
-					file="../src/workbench/sql/formatter/StandardLexer.flex"
-          tofile="../src/workbench/sql/formatter/NonStandardLexer.flex"/>
+					file="../src/workbench/sql/lexer/StandardLexer.flex"
+          tofile="../src/workbench/sql/lexer/NonStandardLexer.flex"/>
 
     <copy quiet="true" overwrite="true"
-					file="../src/workbench/sql/formatter/StandardLexer.flex"
-          tofile="../src/workbench/sql/formatter/MySQLLexer.flex"/>
+					file="../src/workbench/sql/lexer/StandardLexer.flex"
+          tofile="../src/workbench/sql/lexer/MySQLLexer.flex"/>
 
     <copy quiet="true" overwrite="true"
-					file="../src/workbench/sql/formatter/StandardLexer.flex"
-          tofile="../src/workbench/sql/formatter/SqlServerLexer.flex"/>
+					file="../src/workbench/sql/lexer/StandardLexer.flex"
+          tofile="../src/workbench/sql/lexer/SqlServerLexer.flex"/>
 
-    <replace file="../src/workbench/sql/formatter/SqlServerLexer.flex">
+    <replace file="../src/workbench/sql/lexer/SqlServerLexer.flex">
       <replacefilter>
         <replacetoken>StandardLexer</replacetoken>
         <replacevalue>SqlServerLexer</replacevalue>
@@ -898,7 +898,7 @@
       </replacefilter>
     </replace>
 
-    <replace file="../src/workbench/sql/formatter/NonStandardLexer.flex">
+    <replace file="../src/workbench/sql/lexer/NonStandardLexer.flex">
       <!-- this generates a Lexer that can handle the backslash for escaping single quotes inside a string literal -->
       <replacefilter>
         <replacetoken>StandardLexer</replacetoken>
@@ -910,7 +910,7 @@
       </replacefilter>
     </replace>
 
-    <replace file="../src/workbench/sql/formatter/MySQLLexer.flex">
+    <replace file="../src/workbench/sql/lexer/MySQLLexer.flex">
       <replacefilter>
         <replacetoken>StandardLexer</replacetoken>
         <replacevalue>MySQLLexer</replacevalue>
@@ -928,19 +928,19 @@
     <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
       <jvmarg value="-Xmx256m"/>
       <arg value="-q"/>
-      <arg value="../src/workbench/sql/formatter/NonStandardLexer.flex"/>
+      <arg value="../src/workbench/sql/lexer/NonStandardLexer.flex"/>
     </java>
 
     <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
       <jvmarg value="-Xmx256m"/>
       <arg value="-q"/>
-      <arg value="../src/workbench/sql/formatter/MySQLLexer.flex"/>
+      <arg value="../src/workbench/sql/lexer/MySQLLexer.flex"/>
     </java>
 
     <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
       <jvmarg value="-Xmx256m"/>
       <arg value="-q"/>
-      <arg value="../src/workbench/sql/formatter/SqlServerLexer.flex"/>
+      <arg value="../src/workbench/sql/lexer/SqlServerLexer.flex"/>
     </java>
 
   </target>
