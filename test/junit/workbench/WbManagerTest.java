@@ -37,20 +37,21 @@ import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
 
-import junit.framework.TestCase;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class WbManagerTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public WbManagerTest(String testName)
+	public WbManagerTest()
 	{
-		super(testName);
+		super("WbManagerTest");
 	}
 
 	@Test
