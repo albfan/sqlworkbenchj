@@ -354,7 +354,7 @@ and  sysobjects.type = &apos;TR&apos;</string>
    <string>Firebird</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>SELECT 'CREATE TRIGGER '||trim(rdb$trigger_name)||'\n'||
+     <string>select 'CREATE TRIGGER '||trim(rdb$trigger_name)||'\n  FOR '||rdb$relation_name||'\n  '||
           trim(case
             when mod(rdb$trigger_type, 2) = 0 then 'AFTER'
           else 'BEFORE'
