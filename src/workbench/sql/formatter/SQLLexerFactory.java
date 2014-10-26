@@ -83,7 +83,7 @@ public class SQLLexerFactory
 		}
 		else
 		{
-			 lexer = new StandardLexer(input);
+			lexer = new StandardLexer(input);
 		}
 		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
