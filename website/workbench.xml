@@ -167,9 +167,9 @@ WHERE id=42;</p>
         You have to install <b>Java 7</b> or higher before you can run SQL Workbench/J.
       </p>
       <p>
-	     Java 6 will work as well, but it is not recommended as it is no longer supported<br/>
-		 Build 116 will be the last release to support Java 6.
-	  </p>
+       Java 6 will work as well, but it is not recommended as it is no longer supported<br/>
+     Build 116 will be the last release to support Java 6.
+    </p>
 
       <h3 style="padding-top:10px">Installation</h3>
       <p>
@@ -298,6 +298,7 @@ WHERE id=42;</p>
             The script includes <a href="liquibase_common.xslt">liquibase_common.xslt</a>. Both files are needed</li>
         <li><a href="wbreport2proc.xslt">Extract procedures</a></li>
         <li><a href="wbreport2wiki.xslt">Generate Confluence Wiki code</a></li>
+        <li><a href="wbreport2benerator.xslt">Generate an initial stub for a</a> <a target="_blank" href="http://databene.org/databene-benerator/">Benerator</a> script</li>
        </ul>
 
       <h2 style="text-align:left;padding-top:5px">WbSchemaDiff transformations</h2>
