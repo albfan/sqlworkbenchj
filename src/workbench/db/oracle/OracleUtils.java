@@ -50,6 +50,7 @@ public class OracleUtils
 	public static final int BYTE_SEMANTICS = 1;
 	public static final int CHAR_SEMANTICS = 2;
 	public static final String PROP_KEY_TBLSPACE = "oracle_default_tablespace";
+	public static final String KEYWORD_EDITIONABLE = "EDITIONABLE";
 
 	public static final Set<String> STANDARD_TYPES = CollectionUtil.caseInsensitiveSet
 		("INTERVALDS", "INTERVALYM", "TIMESTAMP WITH LOCAL TIME ZONE", "TIMESTAMP WITH TIME ZONE",

@@ -23,6 +23,8 @@ import java.util.Set;
 
 import workbench.resource.Settings;
 
+import workbench.db.oracle.OracleUtils;
+
 import workbench.sql.formatter.SQLToken;
 
 import workbench.util.CollectionUtil;
@@ -96,7 +98,7 @@ public class OracleDelimiterTester
 		{
 			useAlternateDelimiter = (types.contains(token.getText()) && keywords.contains(lastToken.getText()));
 		}
-		if (!token.isWhiteSpace() && !token.getContents().equalsIgnoreCase("EDITIONABLE"))
+		if (!token.isWhiteSpace() && !token.getContents().equalsIgnoreCase(OracleUtils.KEYWORD_EDITIONABLE))
 		{
 			lastToken = token;
 		}

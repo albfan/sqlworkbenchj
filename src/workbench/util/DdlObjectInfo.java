@@ -26,6 +26,7 @@ import java.util.Set;
 import workbench.log.LogMgr;
 
 import workbench.db.WbConnection;
+import workbench.db.oracle.OracleUtils;
 
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLLexerFactory;
@@ -111,7 +112,7 @@ public class DdlObjectInfo
 				SQLToken name = lexer.getNextToken(false, false);
 				if (name == null) return;
 				String content = name.getContents();
-				if (content.equals("IF NOT EXISTS") || content.equals("IF EXISTS"))
+				if (content.equals("IF NOT EXISTS") || content.equals("IF EXISTS") || content.equals(OracleUtils.KEYWORD_EDITIONABLE))
 				{
 					name = lexer.getNextToken(false, false);
 					if (name == null) return;
