@@ -27,7 +27,7 @@ import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
 

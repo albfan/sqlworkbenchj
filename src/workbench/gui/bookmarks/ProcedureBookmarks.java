@@ -26,7 +26,7 @@ import java.util.Set;
 
 import workbench.resource.GuiSettings;
 
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLToken;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;

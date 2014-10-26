@@ -20,7 +20,10 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql;
+package workbench.sql.parser;
+
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,6 +40,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 import org.junit.Test;
+
+import workbench.sql.DelimiterDefinition;
 
 import static org.junit.Assert.*;
 

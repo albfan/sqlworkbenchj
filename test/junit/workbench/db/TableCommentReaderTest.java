@@ -24,12 +24,18 @@ package workbench.db;
 
 import java.sql.Statement;
 import java.util.List;
+
 import workbench.TestUtil;
-import workbench.sql.ScriptParser;
+
+import workbench.sql.parser.ScriptParser;
+
 import workbench.util.SqlUtil;
+
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 import org.junit.Before;
+
 import workbench.WbTestCase;
 
 /**

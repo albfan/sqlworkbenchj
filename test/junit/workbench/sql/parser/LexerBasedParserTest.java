@@ -20,12 +20,18 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql;
+package workbench.sql.parser;
+
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.LexerBasedParser;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.ScriptCommandDefinition;
 
 import static org.junit.Assert.*;
 

@@ -47,7 +47,7 @@ import workbench.db.exporter.ExportType;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;

@@ -26,7 +26,7 @@
  * See COPYING.TXT for details.
  */
 
-package workbench.sql.formatter;
+package workbench.sql.lexer;
 
 import java.io.*;
 import workbench.util.CharSequenceReader;
@@ -65,7 +65,6 @@ import workbench.util.CharSequenceReader;
 	private StringBuilder commentBuffer = new StringBuilder();
 	private int commentNestCount = 0;
 	private int commentStartChar = 0;
-	private boolean checkStupidQuoting = false;
 
 	/**
 	 * next Token method that allows you to control if whitespace and comments are

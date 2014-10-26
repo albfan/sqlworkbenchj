@@ -23,7 +23,7 @@ import java.util.List;
 
 import workbench.db.TableIdentifier;
 
-import workbench.sql.ParserType;
+import workbench.sql.parser.ParserType;
 
 import org.junit.Test;
 

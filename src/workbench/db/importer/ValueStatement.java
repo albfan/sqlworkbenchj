@@ -34,9 +34,9 @@ import java.util.regex.Pattern;
 
 import workbench.db.WbConnection;
 
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLLexerFactory;
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 
 import workbench.util.SqlUtil;
 

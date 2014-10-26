@@ -44,7 +44,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.DbObjectCache;
 
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLToken;
 import workbench.sql.syntax.SqlKeywordHelper;
 
 import workbench.util.SelectColumn;

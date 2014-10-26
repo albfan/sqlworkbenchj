@@ -20,7 +20,7 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql;
+package workbench.sql.parser;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +29,9 @@ import java.util.regex.Pattern;
 
 import workbench.interfaces.CharacterSequence;
 import workbench.resource.Settings;
+
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.ScriptCommandDefinition;
 
 import workbench.util.FileMappedSequence;
 import workbench.util.SqlUtil;

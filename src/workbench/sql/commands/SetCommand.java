@@ -36,9 +36,9 @@ import workbench.db.firebird.FirebirdStatementHook;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLLexerFactory;
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;

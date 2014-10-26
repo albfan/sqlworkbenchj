@@ -25,8 +25,8 @@ package workbench.console;
 import workbench.db.DbMetadata;
 
 import workbench.sql.DelimiterDefinition;
-import workbench.sql.ParserType;
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 
 /**
  * A buffer that collects pieces of text entered by the user until

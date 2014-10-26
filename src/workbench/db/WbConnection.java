@@ -49,8 +49,8 @@ import workbench.db.oracle.OracleWarningsClearer;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorReportLevel;
-import workbench.sql.ParserType;
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.preparedstatement.PreparedStatementPool;

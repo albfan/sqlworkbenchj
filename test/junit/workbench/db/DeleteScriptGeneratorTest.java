@@ -35,10 +35,9 @@ import java.util.regex.Pattern;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
-
 import workbench.storage.ColumnData;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;

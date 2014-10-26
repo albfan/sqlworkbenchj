@@ -22,6 +22,10 @@
  */
 package workbench.sql.formatter;
 
+import workbench.sql.lexer.SQLToken;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

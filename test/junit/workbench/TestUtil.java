@@ -60,12 +60,12 @@ import workbench.db.WbConnection;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
-import workbench.sql.ParserType;
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 import workbench.sql.StatementRunner;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLLexerFactory;
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 
 import workbench.util.ArgumentParser;
 import workbench.util.DdlObjectInfo;

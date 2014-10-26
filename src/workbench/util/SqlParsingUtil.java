@@ -26,10 +26,10 @@ import workbench.log.LogMgr;
 
 import workbench.db.WbConnection;
 
-import workbench.sql.ParserType;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLLexerFactory;
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.parser.ParserType;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 
 /**
@@ -56,7 +56,9 @@ public class SqlParsingUtil
 	}
 
 	/**
-	 * Thread safe singleton-instance
+	 * Thread safe singleton-instance.
+	 * For a standard SQL parser, we keep a global instance for performance reasons.
+	 * 
 	 */
 	private static class LazyInstanceHolder
 	{

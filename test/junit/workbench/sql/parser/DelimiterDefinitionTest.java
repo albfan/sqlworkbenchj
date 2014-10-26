@@ -20,8 +20,10 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql;
+package workbench.sql.parser;
 import org.junit.Test;
+
+import workbench.sql.DelimiterDefinition;
 
 import static org.junit.Assert.*;
 

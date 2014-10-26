@@ -26,11 +26,12 @@ import java.util.*;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
-import workbench.sql.ParserType;
+
+import workbench.sql.parser.ParserType;
 
 import workbench.storage.RowActionMonitor;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;

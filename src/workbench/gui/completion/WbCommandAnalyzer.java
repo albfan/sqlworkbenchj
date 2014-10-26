@@ -40,7 +40,7 @@ import workbench.db.WbConnection;
 import workbench.db.importer.SpreadsheetReader;
 
 import workbench.sql.CommandMapper;
-import workbench.sql.ParserType;
+import workbench.sql.parser.ParserType;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
 import workbench.sql.wbcommands.CommonArgs;

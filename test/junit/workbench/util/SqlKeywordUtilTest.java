@@ -19,7 +19,7 @@
  */
 package workbench.util;
 
-import workbench.sql.ParserType;
+import workbench.sql.parser.ParserType;
 
 import org.junit.Test;
 

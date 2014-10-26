@@ -55,10 +55,10 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 
 import workbench.sql.ErrorDescriptor;
-import workbench.sql.ParserType;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLLexerFactory;
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.parser.ParserType;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.sql.syntax.SqlKeywordHelper;
 

@@ -17,7 +17,7 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.sql;
+package workbench.sql.parser;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;

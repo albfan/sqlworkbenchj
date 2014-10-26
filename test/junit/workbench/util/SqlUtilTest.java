@@ -37,7 +37,7 @@ import workbench.db.WbConnection;
 import workbench.storage.ResultInfo;
 
 import workbench.sql.ErrorDescriptor;
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLToken;
 
 import org.junit.Test;
 

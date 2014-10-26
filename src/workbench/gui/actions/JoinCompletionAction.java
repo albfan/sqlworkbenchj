@@ -39,7 +39,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 import workbench.sql.fksupport.JoinCreator;
 
 import workbench.util.StringUtil;

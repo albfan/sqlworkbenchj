@@ -34,7 +34,7 @@ import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -42,7 +42,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import workbench.sql.ParserType;
+import workbench.sql.parser.ParserType;
 
 /**
  *

@@ -34,8 +34,8 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.sql.DelimiterDefinition;
-import workbench.sql.ParserType;
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;

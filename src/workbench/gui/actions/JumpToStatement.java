@@ -36,7 +36,7 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.sql.SqlPanel;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.StringUtil;
 

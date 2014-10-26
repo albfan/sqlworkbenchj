@@ -20,7 +20,12 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql.formatter;
+package workbench.sql.lexer;
+
+import workbench.sql.lexer.SQLToken;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.StandardLexer;
+import workbench.sql.lexer.SQLLexerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +33,7 @@ import java.util.List;
 
 import workbench.WbTestCase;
 
-import workbench.sql.ParserType;
+import workbench.sql.parser.ParserType;
 
 import org.junit.Test;
 

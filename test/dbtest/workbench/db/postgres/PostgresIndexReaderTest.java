@@ -34,7 +34,7 @@ import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.SqlUtil;
 
@@ -44,7 +44,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import workbench.sql.ParserType;
+import workbench.sql.parser.ParserType;
 
 /**
  *

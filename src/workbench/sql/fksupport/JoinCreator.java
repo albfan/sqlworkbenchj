@@ -38,9 +38,9 @@ import workbench.db.WbConnection;
 import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.StatementContext;
 
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLLexerFactory;
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 import workbench.sql.syntax.SqlKeywordHelper;
 
 import workbench.util.SqlUtil;

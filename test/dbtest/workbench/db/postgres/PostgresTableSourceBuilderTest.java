@@ -29,8 +29,8 @@ import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
-import workbench.sql.ParserType;
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

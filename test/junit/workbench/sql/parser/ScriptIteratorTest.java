@@ -17,11 +17,18 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.sql;
+package workbench.sql.parser;
+
+import workbench.sql.parser.IteratingScriptParser;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.LexerBasedParser;
+import workbench.sql.parser.ScriptIterator;
 
 import java.io.IOException;
 
 import org.junit.Test;
+
+import workbench.sql.ScriptCommandDefinition;
 
 import static org.junit.Assert.*;
 

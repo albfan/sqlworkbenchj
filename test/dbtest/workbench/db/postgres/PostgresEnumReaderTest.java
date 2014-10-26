@@ -28,14 +28,18 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.EnumIdentifier;
 import workbench.db.WbConnection;
-import workbench.sql.ParserType;
-import workbench.sql.ScriptParser;
+
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
+
 import workbench.util.CollectionUtil;
 
 /**

@@ -24,17 +24,25 @@ package workbench.db.compare;
 
 import org.junit.Test;
 import org.junit.Before;
+
 import workbench.WbTestCase;
+
 import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Set;
+
 import workbench.TestUtil;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.sql.ScriptParser;
+
+import workbench.sql.parser.ScriptParser;
+
 import workbench.util.SqlUtil;
+
 import static org.junit.Assert.*;
+
 import workbench.util.CollectionUtil;
 
 /**

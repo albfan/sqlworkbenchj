@@ -44,8 +44,8 @@ import workbench.db.WbConnection;
 
 import workbench.gui.editor.JEditTextArea;
 
-import workbench.sql.ParserType;
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlParsingUtil;

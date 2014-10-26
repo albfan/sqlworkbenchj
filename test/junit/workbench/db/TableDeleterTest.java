@@ -28,12 +28,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.interfaces.JobErrorHandler;
-import workbench.sql.ScriptParser;
+
+import workbench.sql.parser.ScriptParser;
+
 import workbench.util.SqlUtil;
+
 import static org.junit.Assert.*;
+
 import org.junit.Test;
+
 import workbench.WbTestCase;
 
 /**

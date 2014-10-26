@@ -39,7 +39,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 
 import workbench.sql.BatchRunner;
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 

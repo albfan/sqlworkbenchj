@@ -44,7 +44,7 @@ import workbench.storage.RowDataReader;
 import workbench.storage.RowDataReaderFactory;
 import workbench.storage.SqlLiteralFormatter;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;

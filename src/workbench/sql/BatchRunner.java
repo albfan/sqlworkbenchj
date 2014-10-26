@@ -22,6 +22,9 @@
  */
 package workbench.sql;
 
+import workbench.sql.parser.ScriptParser;
+import workbench.sql.parser.ParserType;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;

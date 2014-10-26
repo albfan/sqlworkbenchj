@@ -25,7 +25,7 @@ import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
-import workbench.sql.ParserType;
+import workbench.sql.parser.ParserType;
 
 import workbench.util.MessageBuffer;
 import workbench.util.WbFile;

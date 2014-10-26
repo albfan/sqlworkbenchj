@@ -17,14 +17,18 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.sql;
+package workbench.sql.parser;
 
+
+import workbench.sql.parser.OracleDelimiterTester;
 
 import workbench.WbTestCase;
 
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLToken;
 
 import org.junit.Test;
+
+import workbench.sql.DelimiterDefinition;
 
 import static org.junit.Assert.*;
 

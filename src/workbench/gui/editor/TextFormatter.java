@@ -29,8 +29,8 @@ import workbench.resource.Settings;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.sql.DelimiterDefinition;
-import workbench.sql.ParserType;
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
 
 import workbench.util.StringUtil;

@@ -15,7 +15,7 @@
  *
  * See COPYING.TXT for details.
  */
-package workbench.sql.formatter;
+package workbench.sql.lexer;
 
 import java.util.regex.Pattern;
 

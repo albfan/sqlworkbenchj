@@ -32,7 +32,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.storage.RowActionMonitor;
 
-import workbench.sql.ParserType;
+import workbench.sql.parser.ParserType;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 

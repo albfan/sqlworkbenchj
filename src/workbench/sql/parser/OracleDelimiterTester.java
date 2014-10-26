@@ -17,7 +17,7 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.sql;
+package workbench.sql.parser;
 
 import java.util.Set;
 
@@ -25,7 +25,8 @@ import workbench.resource.Settings;
 
 import workbench.db.oracle.OracleUtils;
 
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.lexer.SQLToken;
 
 import workbench.util.CollectionUtil;
 

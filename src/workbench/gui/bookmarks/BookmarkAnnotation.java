@@ -28,9 +28,9 @@ import workbench.resource.GuiSettings;
 import workbench.sql.AnnotationReader;
 import workbench.sql.ResultNameParser;
 import workbench.sql.UseTabAnnotation;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLLexerFactory;
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 
 import workbench.util.StringUtil;
 

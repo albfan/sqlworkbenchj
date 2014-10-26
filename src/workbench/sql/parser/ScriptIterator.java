@@ -20,10 +20,13 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.sql;
+package workbench.sql.parser;
 
 import java.io.File;
 import java.io.IOException;
+
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.ScriptCommandDefinition;
 
 /**
  *

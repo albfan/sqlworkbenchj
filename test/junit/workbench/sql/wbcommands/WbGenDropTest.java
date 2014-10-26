@@ -29,7 +29,7 @@ import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.SqlUtil;

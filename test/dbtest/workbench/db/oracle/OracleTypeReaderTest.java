@@ -30,7 +30,7 @@ import workbench.WbTestCase;
 import workbench.db.WbConnection;
 
 import workbench.sql.DelimiterDefinition;
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -38,7 +38,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import workbench.sql.ParserType;
+import workbench.sql.parser.ParserType;
 
 /**
  *

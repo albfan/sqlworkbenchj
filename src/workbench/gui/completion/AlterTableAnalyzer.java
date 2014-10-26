@@ -27,9 +27,9 @@ import workbench.log.LogMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLLexerFactory;
-import workbench.sql.formatter.SQLToken;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 
 /**
  * Analyze an ALTER TABLE statement to provide completion for tables and columns

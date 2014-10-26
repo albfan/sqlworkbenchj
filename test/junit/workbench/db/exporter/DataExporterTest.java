@@ -41,7 +41,7 @@ import workbench.gui.dialogs.export.TextOptions;
 
 import workbench.storage.DataStore;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;

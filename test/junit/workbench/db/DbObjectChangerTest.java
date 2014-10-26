@@ -30,7 +30,7 @@ import java.util.Map;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
-import workbench.sql.ScriptParser;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
 
@@ -107,7 +107,7 @@ public class DbObjectChangerTest
 		sql = changer.getCommentSql(table, newTable);
 		assertEquals("COMMENT ON TABLE person_address IS 'new comment'", sql);
 
-		Map<DbObject, DbObject> changed = new HashMap<DbObject, DbObject>();
+		Map<DbObject, DbObject> changed = new HashMap<>();
 		newTable = new TableIdentifier("pers_addr");
 		newTable.setComment("new comment");
 		changed.put(table, newTable);
