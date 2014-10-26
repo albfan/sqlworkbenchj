@@ -39,6 +39,7 @@ import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 
 import workbench.util.Alias;
+import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -69,18 +70,21 @@ public class SelectAnalyzer
 
 		setAppendDot(false);
 		setColumnPrefix(null);
-		int fromPos = SqlUtil.getFromPosition(this.sql);
+
+		SqlParsingUtil util = SqlParsingUtil.getInstance(dbConnection);
+
+		int fromPos = util.getFromPosition(this.sql);
 
 		int wherePos = -1;
 
 		if (fromPos > 0)
 		{
-			wherePos = SqlUtil.getWherePosition(sql);
+			wherePos = util.getWherePosition(sql);
 		}
 
-		int groupPos = SqlUtil.getKeywordPosition("GROUP BY", sql);
-		int havingPos = SqlUtil.getKeywordPosition("HAVING", sql);
-		int orderPos = SqlUtil.getKeywordPosition("ORDER BY", sql);
+		int groupPos = util.getKeywordPosition("GROUP BY", sql);
+		int havingPos = util.getKeywordPosition("HAVING", sql);
+		int orderPos = util.getKeywordPosition("ORDER BY", sql);
 
 		// find the tables from the FROM clause
 		List<Alias> tables = SqlUtil.getTables(sql, true, dbConnection);
@@ -263,7 +267,7 @@ public class SelectAnalyzer
 		{
 			TableAlias tbl = new TableAlias(element.getObjectName(), catalogSeparator, schemaSeparator);
 			tbl.setAlias(element.getAlias());
-			
+
 			if (tbl.isTableOrAlias(toSearch, catalogSeparator, schemaSeparator))
 			{
 				return tbl;

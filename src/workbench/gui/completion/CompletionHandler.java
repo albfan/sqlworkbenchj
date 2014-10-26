@@ -48,7 +48,7 @@ import workbench.sql.ParserType;
 import workbench.sql.ScriptParser;
 
 import workbench.util.CollectionUtil;
-import workbench.util.SqlUtil;
+import workbench.util.SqlParsingUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -277,7 +277,7 @@ public class CompletionHandler
 
 	private void showFailedMessage(String sql)
 	{
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = SqlParsingUtil.getInstance(dbConnection).getSqlVerb(sql);
 		String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");
 		statusBar.setStatusMessage(msg, 2500);
 	}

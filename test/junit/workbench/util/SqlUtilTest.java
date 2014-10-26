@@ -57,36 +57,6 @@ public class SqlUtilTest
 	}
 
 	@Test
-	public void testGetFromPart()
-	{
-		String sql =
-			"with some_data as (\n" +
-			"  select foo,\n" +
-			"         bar \n" +
-			"  from foobar f \n" +
-			"  where f.id = 42\n" +
-			")\n" +
-			"select foo, \n" +
-			"       count(*) as hit_count \n" +
-			"from some_data d\n" +
-			"group by d.foo\n" +
-			"order by 2 desc";
-		int pos = SqlUtil.getFromPosition(sql);
-		int fromPos = sql.indexOf("from some_data d");
-		assertEquals(fromPos, pos);
-
-		String from = SqlUtil.getFromPart(sql);
-		assertEquals("some_data d", from.trim());
-
-		sql = "select a.id, b.pid from foo a join bar b where a.id > 42;";
-
-		from = SqlUtil.getFromPart(sql);
-		assertEquals("foo a join bar b", from.trim());
-	}
-
-
-
-	@Test
 	public void testGetErrorOffset()
 	{
 		String sql = "select x from foo";

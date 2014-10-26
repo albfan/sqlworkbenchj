@@ -74,7 +74,6 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.Replacer;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbStringTokenizer;
@@ -855,7 +854,7 @@ public class BatchRunner
 					}
 					else if (result.hasWarning() && stmtRunner.getVerboseLogging())
 					{
-						String verb = SqlUtil.getSqlVerb(sql);
+						String verb = stmtRunner.getConnection().getKeywordUtil().getSqlVerb(sql);
 						String msg = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);
 						this.printMessage("\n" + msg);
 					}

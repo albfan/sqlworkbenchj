@@ -48,6 +48,7 @@ import workbench.sql.formatter.SQLToken;
 import workbench.sql.syntax.SqlKeywordHelper;
 
 import workbench.util.SelectColumn;
+import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -135,7 +136,7 @@ public abstract class BaseAnalyzer
 	{
 		this.dbConnection = conn;
 		this.sql = statement;
-		this.verb = SqlUtil.getSqlVerb(sql);
+		this.verb = SqlParsingUtil.getInstance(conn).getSqlVerb(sql);
 		this.cursorPos = cursorPos;
 		this.catalogSeparator = SqlUtil.getCatalogSeparator(this.dbConnection);
 	}
@@ -452,7 +453,7 @@ public abstract class BaseAnalyzer
 		}
 		else if (context == CONTEXT_SYNTAX_COMPLETION || context == CONTEXT_STATEMENT_PARAMETER)
 		{
-			this.title = SqlUtil.getSqlVerb(sql);
+			this.title = SqlParsingUtil.getInstance(dbConnection).getSqlVerb(sql);
 		}
 		else
 		{

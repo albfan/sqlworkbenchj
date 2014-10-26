@@ -30,7 +30,6 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLLexerFactory;
 import workbench.sql.formatter.SQLToken;
 
-import static workbench.util.SqlUtil.*;
 
 /**
  *
@@ -51,22 +50,24 @@ public class TableListParser
 		this('.', '.', type);
 	}
 
-	public TableListParser(char catalogSeparator, char schemaSeparator, ParserType type)
+	public TableListParser(char catSep, char schemaSep, ParserType type)
 	{
 		parserType = type;
-		this.catalogSeparator = catalogSeparator;
-		this.schemaSeparator = schemaSeparator;
+		catalogSeparator = catSep;
+		schemaSeparator = schemaSep;
 	}
 
 	public List<Alias> getTables(String sql, boolean includeAlias)
 	{
-		String fromPart = getFromPart(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(parserType, "");
+
+		String fromPart = SqlParsingUtil.getFromPart(sql, lexer);
 		if (StringUtil.isBlank(fromPart)) return Collections.emptyList();
 		List<Alias> result = new LinkedList<>();
 
 		try
 		{
-			SQLLexer lexer = SQLLexerFactory.createLexer(parserType, fromPart);
+			lexer.setInput(fromPart);
 			SQLToken t = lexer.getNextToken(false, false);
 
 			boolean collectTable = true;

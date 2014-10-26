@@ -94,10 +94,10 @@ import workbench.sql.wbcommands.WbSchemaReport;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbSetProp;
 import workbench.sql.wbcommands.WbShowEncoding;
+import workbench.sql.wbcommands.WbShowProps;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbSysExec;
 import workbench.sql.wbcommands.WbSysOpen;
-import workbench.sql.wbcommands.WbShowProps;
 import workbench.sql.wbcommands.WbTableSource;
 import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbViewSource;
@@ -118,7 +118,7 @@ import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
-import workbench.util.SqlUtil;
+import workbench.util.SqlParsingUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -381,7 +381,10 @@ public class CommandMapper
 	public SqlCommand getCommandToUse(String sql)
 	{
 		SqlCommand cmd = null;
-		String verb = SqlUtil.getSqlVerb(sql);
+
+		WbConnection conn = metaData == null ? null : metaData.getWbConnection();
+		String verb = SqlParsingUtil.getInstance(conn).getSqlVerb(sql);
+
 		if (StringUtil.isEmptyString(verb)) return null;
 
 		if (this.supportsSelectInto && "SELECT".equals(verb) && this.metaData != null && this.metaData.isSelectIntoNewTable(sql))

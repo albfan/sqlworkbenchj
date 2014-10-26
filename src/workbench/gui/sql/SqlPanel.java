@@ -3303,7 +3303,7 @@ public class SqlPanel
 				else if (statementResult.hasWarning())
 				{
 					// Warnings should always be shown, even if the log output is "compressed"
-					String verb = SqlUtil.getSqlVerb(currentSql);
+					String verb = stmtRunner.getConnection().getKeywordUtil().getSqlVerb(currentSql);
 					String warn = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);
 					this.appendToLog(warn + "\n");
 				}
@@ -3478,7 +3478,7 @@ public class SqlPanel
 
 		if (statementIndex + 1 < parser.getSize())
 		{
-			String verb = SqlUtil.getSqlVerb(parser.getCommand(statementIndex + 1));
+			String verb = stmtRunner.getConnection().getKeywordUtil().getSqlVerb(parser.getCommand(statementIndex + 1));
 			Collection<String> autoRunVerbs = Settings.getInstance().getAutoRunVerbs();
 			if (autoRunVerbs.contains(verb))
 			{

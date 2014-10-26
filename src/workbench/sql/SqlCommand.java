@@ -131,7 +131,7 @@ public class SqlCommand
 		String verb = getVerb();
 		if (StringUtil.isEmptyString(verb) && result != null)
 		{
-			verb = SqlUtil.getSqlVerb(result.getSourceCommand());
+			verb = currentConnection.getKeywordUtil().getSqlVerb(result.getSourceCommand());
 		}
 
 		String dbid = null;
@@ -155,7 +155,7 @@ public class SqlCommand
 		String verb = getVerb();
 		if (StringUtil.isEmptyString(verb))
 		{
-			verb = SqlUtil.getSqlVerb(sql);
+			verb = currentConnection.getKeywordUtil().getSqlVerb(sql);
 		}
 		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql, currentConnection);
 		if (info != null)
@@ -429,7 +429,7 @@ public class SqlCommand
 		this.isCancelled = false;
 
 		sql = getSqlToExecute(sql);
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = currentConnection.getKeywordUtil().getSqlVerb(sql);
 
 		result.ignoreUpdateCounts(currentConnection.getDbSettings().verbsWithoutUpdateCount().contains(verb));
 
@@ -815,7 +815,7 @@ public class SqlCommand
 			}
 			if (prof.getPreventDMLWithoutWhere())
 			{
-				return SqlUtil.isUnRestrictedDML(sql);
+				return SqlUtil.isUnRestrictedDML(sql, con);
 			}
 		}
 		return false;
@@ -839,7 +839,7 @@ public class SqlCommand
 		if (this.isUpdatingCommand) return true;
 		if (con == null) return isUpdatingCommand;
 		if (con.isClosed()) return isUpdatingCommand;
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = currentConnection.getKeywordUtil().getSqlVerb(sql);
 		boolean updating = con.getDbSettings().isUpdatingCommand(verb);
 		if (updating) return true;
 		return con.getMetadata().isSelectIntoNewTable(sql);

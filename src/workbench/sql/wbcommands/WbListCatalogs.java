@@ -72,7 +72,7 @@ public class WbListCatalogs
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = currentConnection.getKeywordUtil().getSqlVerb(sql);
 
 		DataStore ds = null;
 		String catName = StringUtil.capitalize(currentConnection.getMetadata().getCatalogTerm());

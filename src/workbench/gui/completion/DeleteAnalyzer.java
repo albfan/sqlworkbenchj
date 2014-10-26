@@ -24,8 +24,11 @@ package workbench.gui.completion;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.TableAlias;
 
@@ -46,7 +49,7 @@ public class DeleteAnalyzer
 	{
 		this.context = -1;
 
-		int wherePos = SqlUtil.getKeywordPosition("WHERE", sql);
+		int wherePos = SqlParsingUtil.getInstance(dbConnection).getKeywordPosition("WHERE", sql);
 		checkOverwrite();
 
 		if ( wherePos == -1 || wherePos > -1 && cursorPos < wherePos)
@@ -73,7 +76,7 @@ public class DeleteAnalyzer
 	{
 		String table = SqlUtil.getDeleteTable(this.sql, this.catalogSeparator, dbConnection);
 		TableAlias a = new TableAlias(table, SqlUtil.getCatalogSeparator(this.dbConnection), SqlUtil.getSchemaSeparator(dbConnection));
-		List<TableAlias> result = new ArrayList<TableAlias>(1);
+		List<TableAlias> result = new ArrayList<>(1);
 		result.add(a);
 		return result;
 	}

@@ -57,6 +57,7 @@ import workbench.sql.preparedstatement.PreparedStatementPool;
 
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
@@ -109,6 +110,7 @@ public class WbConnection
 	private Boolean sessionConfirmUpdates;
 	private final Map<String, String> sessionProps = new HashMap<>();
 	private DdlObjectInfo lastDdlObject;
+	private SqlParsingUtil keywordUtil;
 
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
@@ -138,6 +140,15 @@ public class WbConnection
 			}
 			removeNewLines = db.removeNewLinesInSQL();
 		}
+	}
+
+	public synchronized SqlParsingUtil getKeywordUtil()
+	{
+		if (keywordUtil == null)
+		{
+			keywordUtil = new SqlParsingUtil(this);
+		}
+		return keywordUtil;
 	}
 
 	public boolean isSqlServer()

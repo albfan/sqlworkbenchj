@@ -576,13 +576,15 @@ public class OracleStatementHook
 
 	private DataStore retrieveStatistics(StatementRunner runner, String sql)
 	{
-		String verb = SqlUtil.getSqlVerb(sql);
+		WbConnection con = runner.getConnection();
+		if (con == null) return null;
+		
+		String verb = con.getKeywordUtil().getSqlVerb(sql);
+
 		if (skipStatistics(verb))
 		{
 			return null;
 		}
-
-		WbConnection con = runner.getConnection();
 
 		ResultSet rs = null;
 		DataStore statValues = createResult();

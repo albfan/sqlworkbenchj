@@ -77,29 +77,29 @@ public class SQLLexerFactory
 	public static SQLLexer createLexer(ParserType type, Reader input)
 	{
 		SQLLexer lexer;
-		if (type == ParserType.MySQL)
+		switch (type)
 		{
-			lexer = new MySQLLexer(input);
+			case MySQL:
+				lexer = new MySQLLexer(input);
+				break;
+			case SqlServer:
+				lexer = new SqlServerLexer(input);
+				break;
+			default:
+				lexer = new StandardLexer(input);
 		}
-		else
-		{
-			lexer = new StandardLexer(input);
-		}
-		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
 	}
 
 	public static SQLLexer createNonStandardLexer(ParserType type, Reader input)
 	{
 		SQLLexer lexer = new NonStandardLexer(input);
-		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
 	}
 
 	public static SQLLexer createNonStandardLexer(ParserType type, String sql)
 	{
 		SQLLexer lexer = new NonStandardLexer(sql);
-		lexer.setCheckStupidQuoting(type == ParserType.SqlServer);
 		return lexer;
 	}
 

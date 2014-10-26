@@ -24,7 +24,7 @@ package workbench.db;
 
 import java.util.Collections;
 
-import workbench.util.SqlUtil;
+import workbench.util.SqlParsingUtil;
 
 /**
  *
@@ -468,9 +468,10 @@ public class GetMetaDataSql
 		if (sql == null) return false;
 		sql = sql.toLowerCase();
 		if (!sql.contains("where")) return false;
-		int fromPos = SqlUtil.getFromPosition(sql);
+		SqlParsingUtil util = SqlParsingUtil.getInstance(null);
+		int fromPos = util.getFromPosition(sql);
 		if (fromPos == -1) return false;
-		int wherePos = SqlUtil.getKeywordPosition(Collections.singleton("WHERE"), sql, fromPos);
+		int wherePos = util.getKeywordPosition(Collections.singleton("WHERE"), sql, fromPos);
 		return wherePos > -1;
 	}
 }

@@ -56,7 +56,6 @@ import workbench.storage.RowActionMonitor;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -489,7 +488,7 @@ public class DataCopier
 	{
 		return this.importer.getContinueOnError();
 	}
-	
+
 	public void setContinueOnError(boolean cont)
 	{
 		this.importer.setContinueOnError(cont);
@@ -676,7 +675,7 @@ public class DataCopier
 		if (StringUtil.isNonBlank(addWhere))
 		{
 			sql.append(' ');
-			String first = SqlUtil.getSqlVerb(addWhere);
+			String first = this.sourceConnection.getKeywordUtil().getSqlVerb(addWhere);
 			if (!first.equals("WHERE"))
 			{
 				sql.append(" WHERE ");

@@ -59,6 +59,7 @@ import workbench.sql.preparedstatement.StatementParameters;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -118,8 +119,9 @@ public class WbCall
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-		String verbUsed = SqlUtil.getSqlVerb(sql).toUpperCase();
-		String cleanSql = SqlUtil.stripVerb(sql);
+		SqlParsingUtil util = currentConnection.getKeywordUtil();
+		String verbUsed = util.getSqlVerb(sql).toUpperCase();
+		String cleanSql = util.stripVerb(sql);
 		if (OracleUtils.shouldTrimContinuationCharacter(currentConnection))
 		{
 			cleanSql = OracleUtils.trimSQLPlusLineContinuation(cleanSql);

@@ -34,7 +34,6 @@ import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.CollectionUtil;
-import workbench.util.SqlUtil;
 
 /**
  * A statement hook that works around SQL Server's broken handling of semicolons together with the MERGE statement.
@@ -87,7 +86,7 @@ public class SqlServerStatementHook
 		}
 
 		// If verbs were defined, only append the (unnecessary) semicolon to those
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = runner.getConnection().getKeywordUtil().getSqlVerb(sql);
 		if (verbsWithSemicolon.contains(verb))
 		{
 			return sql + ";";

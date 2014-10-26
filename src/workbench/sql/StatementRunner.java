@@ -58,6 +58,7 @@ import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
 
+import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -356,7 +357,7 @@ public class StatementRunner
 		if (command == null) return false;
 		if (command.isUpdatingCommand()) return false;
 		if (command instanceof SingleVerbCommand) return false; // commit or rollback
-		if (command instanceof AlterSessionCommand) return false; 
+		if (command instanceof AlterSessionCommand) return false;
 		if (command instanceof SetCommand) return false;
 		if (command.isWbCommand()) return false;
 		return true;
@@ -469,7 +470,7 @@ public class StatementRunner
 
 		if (this.currentConnection == null && this.currentCommand.isConnectionRequired())
 		{
-			String verb = SqlUtil.getSqlVerb(aSql);
+			String verb = SqlParsingUtil.getInstance(null).getSqlVerb(aSql);
 			throw new SQLException("Cannot execute command '" + verb + "' without a connection!");
 		}
 
@@ -501,7 +502,7 @@ public class StatementRunner
 			ConnectionProfile target = currentCommand.getModificationTarget(currentConnection, aSql);
 			String profileName = (target == null ? "" : target.getName());
 			this.result = new StatementRunnerResult();
-			String verb = SqlUtil.getSqlVerb(aSql);
+			String verb = SqlParsingUtil.getInstance(currentConnection).getSqlVerb(aSql);
 			String msg = ResourceMgr.getFormattedString("MsgReadOnlyMode", profileName, verb);
 			LogMgr.logWarning("DefaultStatementRunner.runStatement()", "Statement " + verb + " ignored because connection is set to read only!");
 			this.result.addMessage(msg);

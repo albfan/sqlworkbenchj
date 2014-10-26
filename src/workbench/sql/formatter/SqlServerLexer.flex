@@ -1,10 +1,10 @@
-/* NonStandardLexer.java is a generated file.  You probably want to
- * edit NonStandardLexer.lex to make changes.  Use JFlex to generate it.
- * To generate NonStandardLexer.java
+/* SqlServerLexer.java is a generated file.  You probably want to
+ * edit SqlServerLexer.lex to make changes.  Use JFlex to generate it.
+ * To generate SqlServerLexer.java
  * Install <a href="http://jflex.de/">JFlex</a> v1.3.2 or later.
  * Once JFlex is in your classpath run<br>
- * <code>java JFlex.Main NonStandardLexer.lex</code><br>
- * You will then have a file called NonStandardLexer.java
+ * <code>java JFlex.Main SqlServerLexer.lex</code><br>
+ * You will then have a file called SqlServerLexer.java
  */
 
 /*
@@ -32,10 +32,10 @@ import java.io.*;
 import workbench.util.CharSequenceReader;
 
 /**
- * NonStandardLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
+ * SqlServerLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
  *  <CODE>
  *  <PRE>
- *  NonStandardLexer shredder = new NonStandardLexer(System.in);
+ *  SqlServerLexer shredder = new SqlServerLexer(System.in);
  *  SQLToken t;
  *  while ((t = shredder.getNextToken()) != null){
  *      System.out.println(t);
@@ -50,7 +50,7 @@ import workbench.util.CharSequenceReader;
 
 %public
 %implements SQLLexer
-%class NonStandardLexer
+%class SqlServerLexer
 %function getNextToken
 %type SQLToken
 %column
@@ -138,12 +138,12 @@ import workbench.util.CharSequenceReader;
     }
   }
 
-	NonStandardLexer(String source)
+	SqlServerLexer(String source)
 	{
 		this(new StringReader(source));
 	}
 
-	NonStandardLexer(CharSequence source)
+	SqlServerLexer(CharSequence source)
 	{
 		this(new CharSequenceReader(source));
 	}
@@ -483,13 +483,13 @@ keyword=(
 
 whitespace=([ \r\n\t\f])
 wbvar=(\$\[)(\&|\?)?[a-zA-Z_0-9]+(\])|(\$\{)(\&|\?)?[a-zA-Z_0-9]+(\})
-identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")
+identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(\[[^\r\n\t\f\[]*\]) 
 digit=([0-9])
 digits=({digit}+)
 separator=([\(\)\[\]\,\;\:\*])
 operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"(+)")
 integer=([-+]?{digits})
-string=([\'](([^\']|\'\'|\\\')*)[\'])
+string=([\'](([^\']|\'\')*)[\'])
 
 bitstring=("B"[\']([01]+)[\'])
 stringerror=([\'](([^\r\n\']|[\\][\'])*)[\r\n])

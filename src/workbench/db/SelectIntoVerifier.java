@@ -24,9 +24,11 @@ package workbench.db;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.util.SqlUtil;
+
+import workbench.util.SqlParsingUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -70,7 +72,7 @@ public class SelectIntoVerifier
 		if (this.selectIntoPattern == null) return false;
 		if (StringUtil.isEmptyString(sql)) return false;
 
-		int pos = SqlUtil.getKeywordPosition("SELECT", sql);
+		int pos = SqlParsingUtil.getInstance(null).getKeywordPosition("SELECT", sql);
 		if (pos > -1)
 		{
 			sql = sql.substring(pos);

@@ -34,9 +34,9 @@ import workbench.storage.DataStore;
 import workbench.sql.VariablePool;
 import workbench.sql.preparedstatement.StatementParameters;
 import workbench.sql.wbcommands.WbDefineVar;
-import workbench.util.HtmlUtil;
 
-import workbench.util.SqlUtil;
+import workbench.util.HtmlUtil;
+import workbench.util.SqlParsingUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -69,7 +69,7 @@ public class ConsolePrompter
 	@Override
 	public boolean processParameterPrompts(String sql)
 	{
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = SqlParsingUtil.getInstance(null).getSqlVerb(sql);
 
 		// Don't prompt for variables when defining a macro
 		if (verb.equalsIgnoreCase(WbDefineVar.VERB)) return true;
@@ -139,7 +139,7 @@ public class ConsolePrompter
 	{
 		if (executeAll) return true;
 
-		String verb = SqlUtil.getSqlVerb(command);
+		String verb = SqlParsingUtil.getInstance(null).getSqlVerb(command);
 		String yes = ResourceMgr.getString("MsgConfirmYes");
 		String all = ResourceMgr.getString("MsgConfirmConsoleAll");
 

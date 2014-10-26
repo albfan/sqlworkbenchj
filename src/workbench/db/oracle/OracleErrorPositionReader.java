@@ -49,7 +49,7 @@ public class OracleErrorPositionReader
 	{
 		this(Settings.getInstance().getBoolProperty("workbench.db.oracle.errorposition.check_create", true), Settings.getInstance().getBoolProperty("workbench.db.oracle.errorposition.check_drop", false));
 	}
-	
+
 	public OracleErrorPositionReader(boolean checkCreate, boolean checkDrop)
 	{
 		super("(?i)\\s(line|zeile)\\s[0-9]+", "(?i)\\s(column|spalte)\\s[0-9]+");
@@ -91,7 +91,7 @@ public class OracleErrorPositionReader
 	@Override
 	public ErrorDescriptor getErrorPosition(WbConnection con, String sql, Exception ex)
 	{
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = con.getKeywordUtil().getSqlVerb(sql);
 
 		// We can only use dbms_sql for the defined types of SQL statements
 		// in all other cases (e.g. an anonymous PL/SQL block) we try to get the information from the exception

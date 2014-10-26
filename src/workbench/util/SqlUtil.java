@@ -22,8 +22,6 @@
  */
 package workbench.util;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,8 +71,6 @@ public class SqlUtil
 {
 	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_#@][\\w\\$#@]*");
 
-	private static final SQLLexer LEXER_INSTANCE = SQLLexerFactory.createLexer();
-
 	private static class JoinKeywordsHolder
 	{
 		protected static final Set<String> JOIN_KEYWORDS = Collections.unmodifiableSet(
@@ -121,12 +117,6 @@ public class SqlUtil
 		return value.replace("'" ,"''");
 	}
 
-	private static void resetLexerInstance(String sql)
-		throws IOException
-	{
-		LEXER_INSTANCE.reset(new StringReader(sql),0,0);
-	}
-
 	public static String 	getPlainTypeName(String input)
 	{
 		int pos = input.indexOf('(');
@@ -141,25 +131,8 @@ public class SqlUtil
 	 */
 	public static String stripVerb(String sql)
 	{
-		String result;
-		try
-		{
-			synchronized (LEXER_INSTANCE)
-			{
-				resetLexerInstance(sql);
-				SQLToken t = LEXER_INSTANCE.getNextToken(false, false);
-				int pos = -1;
-				if (t != null) pos = t.getCharEnd();
-				if (pos > -1) result = sql.substring(pos).trim();
-				else result = "";
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlUtil.stripVerb()", "Error cleaning up SQL", e);
-			result = "";
-		}
-		return result;
+		SqlParsingUtil util = SqlParsingUtil.getInstance(null);
+		return util.stripVerb(sql);
 	}
 
 	/**
@@ -607,38 +580,11 @@ public class SqlUtil
 		return index;
 	}
 
-	/**
-	 *  Returns the SQL Verb for the given SQL string.
-	 */
 	public static String getSqlVerb(String sql)
 	{
-		if (StringUtil.isEmptyString(sql)) return "";
-
-		synchronized (LEXER_INSTANCE)
-		{
-			try
-			{
-				// Re-using an instance of SQLLexer is a lot faster than
-				// creating a new one for each call of getSqlVerb
-				resetLexerInstance(sql);
-				SQLToken t = LEXER_INSTANCE.getNextToken(false, false);
-				if (t == null) return "";
-
-				// The SQLLexer does not recognize @ as a keyword (which is basically
-				// correct, but to support the Oracle style includes we'll treat it
-				// as a keyword here.
-				String v = t.getContents();
-				if (v.charAt(0) == '@') return "@";
-
-				return t.getContents();
-			}
-			catch (Exception e)
-			{
-				return "";
-			}
-		}
+		return SqlParsingUtil.getInstance(null).getSqlVerb(sql);
 	}
-
+	
 	/**
 	 * Returns the columns for the result set defined by the passed query.
 	 *
@@ -1029,124 +975,15 @@ public class SqlUtil
 	 * @param sql the sql to check
 	 * @return true if the sql is not a DML or it contains a WHERE clause.
 	 */
-	public static boolean isUnRestrictedDML(String sql)
+	public static boolean isUnRestrictedDML(String sql, WbConnection conn)
 	{
-		String verb = getSqlVerb(sql);
+		SqlParsingUtil util = SqlParsingUtil.getInstance(conn);
+		String verb = util.getSqlVerb(sql);
 		if (verb.equalsIgnoreCase("update") || verb.equalsIgnoreCase("delete"))
 		{
-			return getWherePosition(sql) < 0;
+			return util.getWherePosition(sql) < 0;
 		}
 		return false;
-	}
-
-	/**
-	 * Extract the FROM part of a SQL statement. That is anything after the FROM
-	 * up to (but not including) the WHERE, GROUP BY, ORDER BY, whichever comes first
-	 */
-	public static String getFromPart(String sql)
-	{
-		int fromPos = getFromPosition(sql);
-		if (fromPos == -1) return null;
-		fromPos += "FROM".length();
-		if (fromPos >= sql.length()) return null;
-		int fromEnd = getKeywordPosition(SqlFormatter.FROM_TERMINAL, sql, fromPos);
-		if (fromEnd == -1)
-		{
-			return sql.substring(fromPos);
-		}
-		return sql.substring(fromPos, fromEnd);
-	}
-
-	/**
-	 * Return the position of the FROM keyword in the given SQL
-	 */
-	public static int getFromPosition(String sql)
-	{
-		Set<String> s = Collections.singleton("FROM");
-		return getKeywordPosition(s, sql);
-	}
-
-	public static int getWherePosition(String sql)
-	{
-		Set<String> s = Collections.singleton("WHERE");
-		return getKeywordPosition(s, sql);
-	}
-
-	public static int getKeywordPosition(String keyword, CharSequence sql)
-	{
-		if (keyword == null) return -1;
-		Set<String> s = Collections.singleton(keyword.toUpperCase());
-		return getKeywordPosition(s, sql);
-	}
-
-	/**
-	 * Returns the position of the first keyword found in the SQL input string.
-	 *
-	 * @param keywords the keywords to look for
-	 * @param sql the SQL Statement to search.
-	 * @return returns the position of the first keyword found
-	 */
-	public static int getKeywordPosition(Set<String> keywords, CharSequence sql)
-	{
-		return getKeywordPosition(keywords, sql, 0);
-	}
-
-	/**
-	 * Returns the position of the first keyword found in the SQL input string.
-	 *
-	 * @param keywords the keywords to look for
-	 * @param sql      the SQL Statement to search.
-	 * @param startPos start searching only after this position
-	 * <p>
-	 * @return returns the position of the first keyword found
-	 */
-	public static int getKeywordPosition(Set<String> keywords, CharSequence sql, int startPos)
-	{
-		if (StringUtil.isEmptyString(sql)) return -1;
-
-		int pos = -1;
-		try
-		{
-			synchronized (LEXER_INSTANCE)
-			{
-				resetLexerInstance(sql.toString());
-
-				SQLToken t = LEXER_INSTANCE.getNextToken(false, false);
-				int bracketCount = 0;
-				while (t != null)
-				{
-					if (t.getCharBegin() < startPos)
-					{
-						t = LEXER_INSTANCE.getNextToken(false, false);
-						continue;
-					}
-					String value = t.getContents();
-					if ("(".equals(value))
-					{
-						bracketCount ++;
-					}
-					else if (")".equals(value))
-					{
-						bracketCount --;
-					}
-					else if (bracketCount == 0)
-					{
-						if (keywords.contains(value))
-						{
-							pos = t.getCharBegin();
-							break;
-						}
-					}
-
-					t = LEXER_INSTANCE.getNextToken(false, false);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			pos = -1;
-		}
-		return pos;
 	}
 
 	public static String makeCleanSql(String aSql, boolean keepNewlines)

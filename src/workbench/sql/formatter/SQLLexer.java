@@ -27,12 +27,12 @@ import java.io.IOException;
  */
 public interface SQLLexer
 {
-	void setCheckStupidQuoting(boolean flag);
-	boolean getCheckStupidQuoting();
-	
 	SQLToken getNextToken(boolean returnComments, boolean returnWhiteSpace);
 
 	void reset(java.io.Reader reader, int yychar, int yycolumn)
 		throws IOException;
+
+	void setInput(String sql);
+	void setInput(CharSequence sql);
 
 }

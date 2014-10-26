@@ -131,8 +131,7 @@ public class SQLLexerTest
 			throws Exception
 	{
 		String sql = "Select [one AND two] from thetable;";
-		SQLLexer l = new StandardLexer(sql);
-		l.setCheckStupidQuoting(true);
+		SQLLexer l = SQLLexerFactory.createLexer(ParserType.SqlServer, sql);
 		SQLToken select = l.getNextToken(false, false);
 		assertEquals(select.getContents(), "SELECT");
 
@@ -141,8 +140,7 @@ public class SQLLexerTest
 		assertTrue(col.isIdentifier());
 
 		sql = "Select '[one AND two]' from thetable;";
-		l = new StandardLexer(sql);
-		l.setCheckStupidQuoting(true);
+		l.setInput(sql);
 		select = l.getNextToken(false, false);
 		assertEquals(select.getContents(), "SELECT");
 
@@ -151,8 +149,7 @@ public class SQLLexerTest
 		assertTrue(col.isLiteral());
 
 		sql = "CREATE TABLE [dumb]([Id]        [int] NOT NULL);";
-		l = new StandardLexer(sql);
-		l.setCheckStupidQuoting(true);
+		l.setInput(sql);
 		SQLToken t = l.getNextToken(true, true); // create
 		t = l.getNextToken(true, true); // whitespace
 		t = l.getNextToken(true, true); // table
@@ -171,8 +168,7 @@ public class SQLLexerTest
 		assertEquals("[int]", t.getText());
 
 		sql = "SELECT * FROM [Some;Table];";
-		l = new StandardLexer(sql);
-		l.setCheckStupidQuoting(true);
+		l.setInput(sql);
 		t = l.getNextToken(false, false); // select
 		t = l.getNextToken(false, false); // *
 		t = l.getNextToken(false, false); // from
@@ -182,6 +178,40 @@ public class SQLLexerTest
 		assertEquals(";", t.getText());
 	}
 
+	@Test
+	public void testStupidQuotedIdentifier2()
+			throws Exception
+	{
+		String sql = "select `foo` from `foo bar` order by `why?;`";
+		SQLLexer l = SQLLexerFactory.createLexer(ParserType.MySQL, sql);
+		SQLToken t = l.getNextToken(false, false);
+		assertNotNull(t);
+		assertEquals("SELECT", t.getContents());
+		t = l.getNextToken(false, false);
+		assertNotNull(t);
+		assertEquals("`foo`", t.getText());
+		assertTrue(t.isIdentifier());
+
+		t = l.getNextToken(false, false);
+		assertNotNull(t);
+		assertEquals("FROM", t.getContents());
+		assertTrue(t.isReservedWord());
+
+		t = l.getNextToken(false, false);
+		assertNotNull(t);
+		assertEquals("`foo bar`", t.getText());
+		assertTrue(t.isIdentifier());
+
+		t = l.getNextToken(false, false);
+		assertNotNull(t);
+		assertEquals("ORDER BY", t.getContents());
+		assertTrue(t.isReservedWord());
+
+		t = l.getNextToken(false, false);
+		assertNotNull(t);
+		assertEquals("`why?;`", t.getText());
+		assertTrue(t.isIdentifier());
+	}
 
 	@Test
 	public void testQuotedIdentifier()
@@ -193,7 +223,6 @@ public class SQLLexerTest
 		assertEquals(select.getContents(), "SELECT");
 		SQLToken col = l.getNextToken(false, false);
 		assertEquals("\"one AND two\"", col.getContents());
-
 
 		sql = "WbExport -file=\"c:\\Documents and Settings\\test.txt\" -type=text";
 		l = new StandardLexer(sql);

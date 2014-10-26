@@ -26,18 +26,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.util.List;
-import javax.swing.*;
+
+import javax.swing.KeyStroke;
+
+import workbench.interfaces.StatusBar;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.StatusBar;
 
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.sql.ScriptParser;
 import workbench.sql.fksupport.JoinCreator;
-import workbench.util.SqlUtil;
+
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 
@@ -82,7 +86,7 @@ public class JoinCompletionAction
 			return;
 		}
 
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = conn.getKeywordUtil().getSqlVerb(sql);
 		if (!"SELECT".equalsIgnoreCase(verb))
 		{
 			String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");

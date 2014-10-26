@@ -26,9 +26,10 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 
-import workbench.db.DbSettings;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DbSettings;
 
 import workbench.storage.DataStore;
 
@@ -38,7 +39,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 
@@ -81,7 +81,7 @@ public class WbSetProp
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = currentConnection.getKeywordUtil().getSqlVerb(sql);
 		boolean isConfig = verb.equalsIgnoreCase(ALTERNATE_VERB);
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);

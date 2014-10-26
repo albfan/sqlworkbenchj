@@ -36,7 +36,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.FixedSizeList;
-import workbench.util.SqlUtil;
+import workbench.util.SqlParsingUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -63,7 +63,7 @@ public class StatementHistory
 		String last = entries.size() > 0 ? entries.getLast() : "";
 		if (last != null && last.equals(statement)) return false;
 
-		String verb = SqlUtil.getSqlVerb(statement);
+		String verb = SqlParsingUtil.getInstance(null).getSqlVerb(statement);
 		if (verb.equalsIgnoreCase(WbHistory.VERB) || verb.equalsIgnoreCase(WbHistory.SHORT_VERB)) return false;
 
 		return super.add(statement);

@@ -38,7 +38,7 @@ import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbSelectBlob;
 
 import workbench.util.CollectionUtil;
-import workbench.util.SqlUtil;
+import workbench.util.SqlParsingUtil;
 
 /**
  * A factory to generate a BaseAnalyzer based on a given SQL statement.
@@ -83,7 +83,7 @@ public class StatementContext
 
 	private BaseAnalyzer createAnalyzer(WbConnection conn, String sql, int pos)
 	{
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = SqlParsingUtil.getInstance(conn).getSqlVerb(sql);
 
 		BaseAnalyzer verbAnalyzer = null;
 
@@ -152,7 +152,7 @@ public class StatementContext
 	 */
 	private BaseAnalyzer checkCTE(WbConnection conn, String sql, int pos)
 	{
-		String verb = SqlUtil.getSqlVerb(sql);
+		String verb = SqlParsingUtil.getInstance(conn).getSqlVerb(sql);
 		if (!"WITH".equalsIgnoreCase(verb)) return null;
 
 		CteParser cteParser = new CteParser(conn, sql);
