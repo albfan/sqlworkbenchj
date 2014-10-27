@@ -164,7 +164,7 @@ public class ConnectionMgr
 		conn.runPostConnectScript();
 		String driverVersion = conn.getDriverVersion();
 		String jdbcVersion = conn.getJDBCVersion();
-		String dbVersion = conn.getSqlConnection().getMetaData().getDatabaseProductVersion();
+		String dbVersion = conn.getDatabaseProductVersion();
 
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" +
 			conn.getMetadata().getProductName() + "], Database version: [" + dbVersion + "], Driver version: [" +

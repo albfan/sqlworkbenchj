@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import workbench.interfaces.DbExecutionListener;
 import workbench.log.LogMgr;
@@ -1210,6 +1211,11 @@ public class WbConnection
 			{
 				DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
 				dbProductVersion = jdbcmeta.getDatabaseProductVersion();
+				if (dbProductVersion != null)
+				{
+					Matcher matcher = StringUtil.PATTERN_CRLF.matcher(dbProductVersion);
+					dbProductVersion = matcher.replaceAll(" ");
+				}
 			}
 			catch (Throwable e)
 			{

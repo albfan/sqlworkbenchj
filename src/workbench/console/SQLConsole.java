@@ -91,6 +91,7 @@ public class SQLConsole
 	private final Map<String, String> abbreviations = new HashMap<>();
 	private final StatementHistory history;
 	private BatchRunner runner;
+	private WbThread cancelThread;
 
 	public SQLConsole()
 	{
@@ -539,11 +540,41 @@ public class SQLConsole
 		}
 	}
 
+	public void abortStatement()
+	{
+		if (cancelThread != null)
+		{
+			try
+			{
+				LogMgr.logInfo("SQLConsole.cancelStatement()", "Trying to forcefully abort current statement");
+				printMessage(ResourceMgr.getString("MsgAbortStmt"));
+				cancelThread.interrupt();
+				cancelThread.stop();
+				if (runner != null)
+				{
+					runner.abort();
+				}
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logWarning("SQLConsole.cancelStatement()", "Could not cancel statement", ex);
+			}
+			finally
+			{
+				cancelThread = null;
+			}
+		}
+	}
+
 	public void cancelStatement()
 	{
-		if (runner != null && runner.isBusy())
+		if (cancelThread != null)
 		{
-			WbThread cancelThread = new WbThread(new Runnable()
+			abortStatement();
+		}
+		else if (runner != null && runner.isBusy() && cancelThread == null)
+		{
+			cancelThread = new WbThread(new Runnable()
 			{
 				@Override
 				public void run()
@@ -557,21 +588,19 @@ public class SQLConsole
 			try
 			{
 				cancelThread.start();
-				cancelThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 2500));
+				cancelThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 5000));
+				cancelThread = null;
 			}
 			catch (Exception ex)
 			{
-				LogMgr.logWarning("SQLConsole.cancelStatement()", "Could not cancel statement", ex);
-				runner.abort();
+				printMessage(ResourceMgr.getString("MsgAbortStmt"));
+				LogMgr.logWarning("SQLConsole.cancelStatement()", "Could not cancel statement. Trying to forcefully abort the statemnt", ex);
+				abortStatement();
 			}
 		}
 	}
 
-	/**
-	 * Callback for the shutdown hook
-	 */
-	@Override
-	public void run()
+	public void exit()
 	{
 		LogMgr.logWarning("SQLConsole.shutdownHook()", "SQL Workbench/J process has been interrupted.");
 
@@ -589,7 +618,15 @@ public class SQLConsole
 			ConnectionMgr.getInstance().abortAll(Collections.singletonList(runner.getConnection()));
 			LogMgr.shutdown();
 		}
-
+	}
+	
+	/**
+	 * Callback for the shutdown hook
+	 */
+	@Override
+	public void run()
+	{
+		exit();
 	}
 
 	private void installSignalHandler()
@@ -615,7 +652,14 @@ public class SQLConsole
 	public void handle(Signal signal)
 	{
 		LogMgr.logDebug("SQLConsole.handl()", "Received signal: " + signal.getName());
-		cancelStatement();
+		if (signal.getName().equals("INT"))
+		{
+			cancelStatement();
+		}
+		if (signal.getName().equals("QUIT"))
+		{
+			exit();
+		}
 	}
 
 }
