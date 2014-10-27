@@ -23,7 +23,14 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
+import javax.swing.JFrame;
+
+import workbench.WbManager;
+import workbench.db.WbConnection;
+import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.interfaces.MainPanel;
 import workbench.util.BrowserLauncher;
 import workbench.util.ExceptionUtil;
 
@@ -48,16 +55,33 @@ public class HelpContactAction
 	}
 
 	@Override
-	public synchronized void executeAction(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
+		sendEmail();
+	}
+	
+	public synchronized static void sendEmail()
+	{
+		WbConnection currentConnection = null;
+		JFrame frame = WbManager.getInstance().getCurrentWindow();
+		if (frame instanceof MainWindow)
+		{
+			MainWindow win = (MainWindow)frame;
+			MainPanel panel = win.getCurrentPanel();
+			if (panel != null)
+			{
+				currentConnection = panel.getConnection();
+			}
+		}
 		try
 		{
-			BrowserLauncher.openEmail("support@sql-workbench.net");
+			BrowserLauncher.openEmail("support@sql-workbench.net", currentConnection);
 		}
 		catch (Exception ex)
 		{
 			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
 		}
 	}
+
 
 }

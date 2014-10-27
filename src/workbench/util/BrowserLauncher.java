@@ -27,6 +27,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 
+import workbench.db.ConnectionInfoBuilder;
+import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -38,7 +40,7 @@ import workbench.resource.ResourceMgr;
  */
 public class BrowserLauncher
 {
-	public static void openEmail(final String email)
+	public static void openEmail(final String email, final WbConnection currentConnection)
 	{
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.MAIL))
 		{
@@ -50,7 +52,18 @@ public class BrowserLauncher
 					try
 					{
 						String subject = urlEncode("SQL Workbench/J (Build " + ResourceMgr.getBuildNumber()+ ") - feedback");
-						String body = urlEncode(ResourceMgr.getFormattedString("TxtFeedbackMail", LogMgr.getLogfile().getFullPath()));
+						String body = ResourceMgr.getFormattedString("TxtFeedbackMail", LogMgr.getLogfile().getFullPath());
+						if (currentConnection != null)
+						{
+							ConnectionInfoBuilder builder = new ConnectionInfoBuilder();
+							String info = builder.getPlainTextDisplay(currentConnection, 5);
+							if (StringUtil.isNonEmpty(info))
+							{
+								String msg = ResourceMgr.getFormattedString("TxtFeedbackMailConInfo", info);
+								body += "\n\n" + msg;
+							}
+						}
+						body = urlEncode(body);
 						URI uri = new URI("mailto:" + email + "?subject=" + subject + "&body=" + body);
 						Desktop.getDesktop().mail(uri);
 					}

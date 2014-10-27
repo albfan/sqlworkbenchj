@@ -52,6 +52,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.actions.EscAction;
+import workbench.gui.actions.HelpContactAction;
 import workbench.gui.components.WbLabelField;
 
 import workbench.util.BrowserLauncher;
@@ -349,7 +350,10 @@ public class WbAboutDialog
 	{//GEN-HEADEREND:event_mailToLabelMouseClicked
 		try
 		{
-			if (evt.getClickCount() == 1) BrowserLauncher.openEmail("support@sql-workbench.net");
+			if (evt.getClickCount() == 1)
+			{
+				HelpContactAction.sendEmail();
+			}
 		}
 		catch (Exception e)
 		{
