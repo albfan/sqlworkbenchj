@@ -804,7 +804,7 @@ public class TableDataPanel
 
 		try
 		{
-			tableDefinition = dbConnection.getMetadata().getTableDefinition(table, false);
+			tableDefinition = dbConnection.getMetadata().getTableDefinition(table, true);
 		}
 		catch (SQLException sql)
 		{
