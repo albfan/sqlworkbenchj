@@ -1,4 +1,5 @@
 
+
 <section id="wb-commands">
   <title>Other &wb-productname; specific commands</title>
 
@@ -2199,20 +2200,20 @@ WHERE id=42;</programlisting>
 							</entry>
 						</row>
 						<row>
-							<entry>-excludeCols</entry>
+							<entry>-excludeColumns</entry>
 							<entry>
-                <para>Possible values: <literal>catalog</literal><literal>schema</literal>, <literal>type</literal></para>
+                <para>Possible values: <literal>catalog</literal>, <literal>schema</literal>, <literal>type</literal></para>
                 <para>
                   By default <literal>WbRowCount</literal> will display the same columns as the table list in the
                   DbExplorer. If not all columns are needed or wanted, this parameter can be used to exclude
                   certain columns.
                 </para>
 								<para>
-                  The is a comma separated list of columns to be excluded. The columns <literal>ROWCOUNT</literal>
-                  and <literal>NAME</literal> can not be excluded.
+                  You can specify a comma separated list of columns to be excluded, e.g. <literal>-excludeColumns=type,catalog</literal>.
+                  The columns <literal>ROWCOUNT</literal> and <literal>NAME</literal> can not be excluded.
 								</para>
                 <para>
-                  The column name <literal>database</literal> can be used instead of <literal>catalog</literal>.
+                  The name <literal>database</literal> can be used instead of <literal>catalog</literal>.
                 </para>
 							</entry>
 						</row>
