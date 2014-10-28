@@ -127,8 +127,11 @@ public class ReportView
 		if (includeGrants)
 		{
 			ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(conn);
-			Collection<TableGrant> viewGrants = grantReader.getViewGrants(conn, tbl);
-			grants = new ReportTableGrants(viewGrants);
+			if (grantReader != null)
+			{
+				Collection<TableGrant> viewGrants = grantReader.getViewGrants(conn, tbl);
+				grants = new ReportTableGrants(viewGrants);
+			}
 		}
 		this.setColumns(cols);
 		if (includeIndex)
