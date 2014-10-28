@@ -26,14 +26,14 @@ package workbench.sql.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import workbench.WbTestCase;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptCommandDefinition;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -333,7 +333,7 @@ public class LexerBasedParserTest
 
 		ScriptCommandDefinition cmd = parser.getNextCommand();
 		assertNotNull(cmd);
-		assertEquals("drop function foo()", cmd.getSQL());
+		assertEquals("drop function foo()", cmd.getSQL().trim());
 
 //		System.out.println(script.get(1));
 		cmd = parser.getNextCommand();
@@ -366,11 +366,11 @@ public class LexerBasedParserTest
 
 		ScriptCommandDefinition cmd = parser.getNextCommand();
 		assertNotNull(cmd);
-		assertEquals("select * from test", cmd.getSQL());
+		assertEquals("select * from test", cmd.getSQL().trim());
 
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
-		assertEquals("select * from person", cmd.getSQL());
+		assertEquals("select * from person", cmd.getSQL().trim());
 
 		sql =
 			"declare @x;\n" +
@@ -401,8 +401,8 @@ public class LexerBasedParserTest
 			"from foo \n" +
 			"where id = @x;\n" +
 			"GO\n";
-		parser.setScript(sql);
 
+		parser.setScript(sql);
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertTrue(cmd.getSQL().startsWith("declare @x;"));
@@ -410,6 +410,26 @@ public class LexerBasedParserTest
 
 		cmd = parser.getNextCommand();
 		assertNull(cmd);
+
+		sql =
+			"SELECT id \n" +
+			"FROM person GO\n" +
+			"  GO  \n" +
+			" \n" +
+			" \n" +
+			"select * \n" +
+			"from country \n" +
+			"  GO";
+		parser.setScript(sql);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("SELECT id \nFROM person GO", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * \nfrom country", cmd.getSQL().trim());
+
+
 	}
 
 
@@ -626,14 +646,52 @@ public class LexerBasedParserTest
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertTrue(cmd.getSQL().startsWith("create procedure"));
+		assertTrue(cmd.getSQL().endsWith("end;"));
 
 		cmd = parser.getNextCommand();
-		assertNull(cmd);
+		assertNull("unexpected statement: " + cmd, cmd);
 
 		parser.setScript("WbVardef outfile=/temp/foo.txt;");
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertEquals("WbVardef outfile=/temp/foo.txt", cmd.getSQL().trim());
+
+
+		script = "select a/b from some_table;" +
+			"\n" +
+			"select c/d from other_table\n" +
+			"/\n";
+		parser.setScript(script);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select a/b from some_table", cmd.getSQL().trim());
+
+		script = "select * from foo\n" +
+			"/\n" +
+			"select * from bar\n" +
+			"/\n";
+		parser.setScript(script);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL().trim());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar", cmd.getSQL().trim());
+
+		script =
+				"select 1 \n" +
+				"/ 2 from some_table;";
+		parser.setScript(script);
+		cmd = parser.getNextCommand();
+
+		assertEquals(
+			"select 1 \n" +
+			"/ 2 from some_table", cmd.getSQL().trim());
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+
 	}
 
 }
