@@ -2485,10 +2485,6 @@ WHERE id=42;</programlisting>
       To run an internal Windows command using the second format, use the following syntax:
     </para>
     <programlisting>WbSysExec -program='cmd.exe' -argument='/c' -argument='dir /n' -dir='c:\temp\'</programlisting>
-    <para>
-      Due to limitations of the Java console mode, it is not possible to use this command to run an editor in console
-      mode (putting &wb-productname; into the background).
-    </para>
   </section>
 
   <section id="command-sysopen">
@@ -2498,6 +2494,13 @@ WHERE id=42;</programlisting>
     </para>
     <programlisting>WbExport -file=c:/temp/person.txt -sourceTable=person -type=text -header=true;
 WbSysOpen c:/temp/person.txt;</programlisting>
+
+    <note id="console-external-editor">
+      <para>
+        Due to limitations of the Java console mode, neither <literal>WbSysExec</literal> nor <literal>WbSysOpen</literal> can be used to
+        run a text editor (vi, vim) in console mode (and putting &wb-productname; into the background).
+      </para>
+    </note>
 
   </section>
   <section id="command-dbms-output" xreflabel="ENABLEOUT">
