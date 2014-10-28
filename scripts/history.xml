@@ -35,6 +35,8 @@
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
     <entry dev-build="7" type="fix">When resizing the input dialog for variables or the columns in the table, the dialog was closed</entry>
+    <entry dev-build="8" type="fix">The alternate delimiter was not always detected correctly.</entry>
+    <entry dev-build="8" type="fix">When inlcuding Views and Grants for WbSchemaDiff the output file was not written properly for some DBMS.</entry>
     <entry dev-build="7" type="fix">When copying multiple tables with WbCopy and -mode=update,insert the copy would abort if one table did no have a primary key even if -continueOnError=true was used</entry>
     <entry dev-build="7" type="fix">For Postgres and SQL Server it was no longer possible to use empty lines as a delimiter and mix that with the standard delimiter</entry>
     <entry dev-build="7" type="fix">The global alternate delimiter (Tools -&gt; Options -&gt; Editor) could not be edited any more</entry>
