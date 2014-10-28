@@ -230,8 +230,6 @@ public class LexerBasedParser
 				currentDelim = delimiterTester.getCurrentDelimiter();
 			}
 
-			boolean checkForDelimiter = !currentDelim.isSingleLine() || (startOfLine && currentDelim.isSingleLine()) || (startOfLine && alternateDelimiter != null);
-
 			if (checkPgQuoting && isDollarQuote(text))
 			{
 				if (inPgQuote && text.equals(pgQuoteString))
@@ -246,6 +244,8 @@ public class LexerBasedParser
 			}
 			else if (token.isUnclosedString())
 			{
+				// this ensures that a statement with a dangling quote is still "detected".
+				// If this test wasn't here, the incorrect statement would never be returned by the parser at all.
 				danglingQuote = true;
 			}
 			else if (danglingQuote)
@@ -262,14 +262,12 @@ public class LexerBasedParser
 					singleLineCommand = delimiterTester.isSingleLineStatement(token, firstToken);
 				}
 
-				if (!singleLineCommand && checkForDelimiter && !currentDelim.isSingleLine())
+				if (!singleLineCommand && !currentDelim.isSingleLine())
 				{
-					DelimiterCheckResult check = checkDelimiter(currentDelim, token, startOfLine);
-					if (check.found)
+					if (text.equals(currentDelim.getDelimiter()))
 					{
 						lastStatementUsedTerminator = true;
-						matchedDelimiter = check.matchedDelimiter;
-						scriptEnd = (check.lastToken == null);
+						matchedDelimiter = currentDelim;
 						// if previousEnd is still -1
 						// this means we have a completely empty statement --> silently ignore this
 						if (statementEnd > -1)
@@ -277,12 +275,6 @@ public class LexerBasedParser
 							break;
 						}
 					}
-
-					if (check.skippedText != null)
-					{
-						text += check.skippedText;
-					}
-
 				}
 
 				if (startOfLine && !token.isWhiteSpace())
@@ -297,10 +289,16 @@ public class LexerBasedParser
 						delimiterTester.lineEnd();
 					}
 
-					DelimiterDefinition lineDelim = matchesLineDelimiter(currentLine, currentDelim);
+					DelimiterDefinition lineDelim = null;
+					if (!singleLineCommand)
+					{
+						lineDelim = matchesLineDelimiter(currentLine, currentDelim);
+					}
+
 					if (lineDelim != null)
 					{
 						lastStatementUsedTerminator = true;
+						matchedDelimiter = lineDelim;
 						break;
 					}
 					else if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text) && currentDelim.equals(delimiter)))
@@ -327,7 +325,7 @@ public class LexerBasedParser
 			}
 		}
 
-		boolean matchAtEnd = false;
+		boolean matchedAtEnd = false;
 		if (lineStartIndex > -1)
 		{
 			DelimiterDefinition lineDelim = matchesLineDelimiter(currentLine, currentDelim);
@@ -336,13 +334,13 @@ public class LexerBasedParser
 				trimStatement(sql, lineStartIndex, statementEnd);
 				statementEnd = lineStartIndex;
 				matchedDelimiter = lineDelim;
-				matchAtEnd = true;
+				matchedAtEnd = true;
 			}
 		}
 
 		if (statementEnd > 0)
 		{
-			if (token == null && !scriptEnd && !matchAtEnd) statementEnd = realScriptLength;
+			if (token == null && !scriptEnd && !matchedAtEnd) statementEnd = realScriptLength;
 			ScriptCommandDefinition cmd = createCommandDef(sql, statementStart, statementEnd);
 			cmd.setIndexInScript(currentStatementIndex);
 			cmd.setDelimiterUsed(matchedDelimiter == null ? getCurrentDelimiter() : matchedDelimiter);
@@ -383,68 +381,6 @@ public class LexerBasedParser
 			// so we need to remove that
 			sql.delete(sql.length() - num, sql.length());
 		}
-	}
-
-	private DelimiterCheckResult checkDelimiter(DelimiterDefinition delimiter, SQLToken token, boolean startOfLine)
-	{
-		DelimiterCheckResult result = new DelimiterCheckResult();
-		result.lastToken = token;
-		result.skippedText = null;
-
-		if (token == null) return result;
-		if (delimiter == null) return result;
-
-		String tokenText = token.getText();
-		String delimiterString = delimiter.getDelimiter();
-
-		if (tokenText.equals(delimiterString) )
-		{
-			if (delimiter.isSingleLine() && startOfLine || !delimiter.isSingleLine())
-			{
-				result.matchedDelimiter = delimiter;
-				result.found = true;
-				return result;
-			}
-		}
-
-		if (!delimiterString.startsWith(tokenText))
-		{
-			result.found = false;
-			return result;
-		}
-
-		// handle delimiters that are not parsed as a single token
-		StringBuilder delim = new StringBuilder(delimiterString.length());
-		delim.append(tokenText);
-		StringBuilder skippedText = new StringBuilder(tokenText.length() + 5);
-		skippedText.append(tokenText);
-
-		while ((token = lexer.getNextToken(true, true)) != null)
-		{
-			if (storeStatementText) skippedText.append(token.getText());
-			if (token.isComment() || token.isWhiteSpace() || token.isLiteral()) break;
-			delim.append(token.getText());
-			if (delim.length() > delimiterString.length()) break;
-			if (!delimiterString.startsWith(delim.toString())) break;
-		}
-		boolean delimiterMatched = delimiterString.equals(delim.toString());
-		if (delimiterMatched)
-		{
-			if (delimiter.isSingleLine())
-			{
-				result.found = startOfLine;
-			}
-			else
-			{
-				result.found = true;
-			}
-			if (result.found)
-			{
-				result.matchedDelimiter = delimiter;
-			}
-		}
-		result.skippedText = skippedText.toString();
-		return result;
 	}
 
 	protected SQLToken skipEmptyLines()
@@ -499,11 +435,6 @@ public class LexerBasedParser
 	public int getScriptLength()
 	{
 		return scriptLength;
-	}
-
-	@Override
-	public void setAlternateLineComment(String comment)
-	{
 	}
 
 	@Override

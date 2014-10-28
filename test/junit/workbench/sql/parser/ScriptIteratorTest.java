@@ -19,16 +19,11 @@
  */
 package workbench.sql.parser;
 
-import workbench.sql.parser.IteratingScriptParser;
-import workbench.sql.parser.ParserType;
-import workbench.sql.parser.LexerBasedParser;
-import workbench.sql.parser.ScriptIterator;
-
 import java.io.IOException;
 
-import org.junit.Test;
-
 import workbench.sql.ScriptCommandDefinition;
+
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -96,7 +91,6 @@ public class ScriptIteratorTest
 
 		cmd = parser.getNextCommand();
 		assertNull(cmd);
-
 	}
 
 	@Test
@@ -171,7 +165,7 @@ public class ScriptIteratorTest
 		ScriptCommandDefinition cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertEquals("select 'test\n;lines' from test", cmd.getSQL());
-		
+
 		cmd = parser.getNextCommand();
 		assertNull(cmd);
 	}

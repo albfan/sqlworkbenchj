@@ -155,7 +155,6 @@ public class IteratingScriptParser
 	/**
 	 * Should the parser check for MySQL hash comments?
 	 */
-	@Override
 	public void setAlternateLineComment(String comment)
 	{
 		this.alternateLineComment = (StringUtil.isBlank(comment) ? null : comment.trim());

@@ -398,44 +398,6 @@ public class SQLToken
 	}
 
 	/**
-	 * get a String that explains the error, if this token is an error.
-	 *
-	 * @return a  String that explains the error, if this token is an error, null otherwise.
-	 */
-	public String errorString()
-	{
-		String s;
-		if (isError())
-		{
-			s = "Error at position " + charBegin + ": ";
-			switch (ID)
-			{
-				case ERROR:
-					s += "Unexpected token: " + contents;
-					break;
-				case ERROR_UNCLOSED_COMMENT:
-					s += "Unclosed comment: " + contents;
-					break;
-				case ERROR_UNCLOSED_STRING:
-					s += "Unclosed string literal: " + contents;
-					break;
-				case ERROR_UNCLOSED_BIT_STRING:
-					s += "Unclosed bit-string literal: " + contents;
-					break;
-				case ERROR_BAD_BIT_STRING:
-					s += "Bit-strings can only contain 0 and 1: " + contents;
-					break;
-			}
-
-		}
-		else
-		{
-			s = null;
-		}
-		return (s);
-	}
-
-	/**
 	 * get a representation of this token as a human readable string.
 	 * The format of this string is subject to change and should only be used
 	 * for debugging purposes.

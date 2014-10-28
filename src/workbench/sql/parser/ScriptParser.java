@@ -60,7 +60,6 @@ public class ScriptParser
 	private ScriptIterator scriptIterator;
 	private boolean emptyLineIsSeparator;
 	private boolean returnTrailingWhitesapce;
-	private String alternateLineComment;
 	private boolean useAlternateDelimiter;
 	private ParserType parserType;
 	private File source;
@@ -275,8 +274,7 @@ public class ScriptParser
 		if (this.alternateDelimiter == null) return;
 		if (this.originalScript == null) return;
 
-		boolean isMySQL = "#".equals(this.alternateLineComment);
-		useAlternateDelimiter = alternateDelimiter.terminatesScript(originalScript, isMySQL);
+		useAlternateDelimiter = alternateDelimiter.terminatesScript(originalScript, this.parserType == ParserType.MySQL);
 		this.commands = null;
 	}
 
@@ -509,7 +507,6 @@ public class ScriptParser
 
 		}
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
-		p.setAlternateLineComment(this.alternateLineComment);
 		return p;
 	}
 

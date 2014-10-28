@@ -36,8 +36,6 @@ public interface ScriptIterator
 {
 	int getScriptLength();
 
-	void setAlternateLineComment(String comment);
-
 	void setCheckEscapedQuotes(boolean flag);
 
 	void setEmptyLineIsDelimiter(boolean flag);

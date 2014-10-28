@@ -23,6 +23,7 @@
 package workbench.sql.parser;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -428,10 +429,27 @@ public class LexerBasedParserTest
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertEquals("select * \nfrom country", cmd.getSQL().trim());
-
-
 	}
 
+	@Test
+	public void testDanglingQuotes()
+		throws Exception
+	{
+		String sql = "delete from foo;\n" +
+			"\n" +
+			"insert into foo (col1, col2s) values ('one, two);";
+		LexerBasedParser parser = new LexerBasedParser(ParserType.Standard);
+		parser.setStoreStatementText(true);
+		parser.setScript(sql);
+
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("delete from foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("insert into foo (col1, col2s) values ('one, two)", cmd.getSQL());
+	}
 
 	@Test
 	public void testAlternateDelimiter()
@@ -691,7 +709,196 @@ public class LexerBasedParserTest
 
 		cmd = parser.getNextCommand();
 		assertNull(cmd);
-
 	}
+
+	@Test
+	public void testMixedEmptyLinesWithTerminator()
+		throws Exception
+	{
+		doTestMixedEmptyLinesWithTerminator(new LexerBasedParser(ParserType.Standard));
+		doTestMixedEmptyLinesWithTerminator(new LexerBasedParser(ParserType.Postgres));
+		doTestMixedEmptyLinesWithTerminator(new LexerBasedParser(ParserType.SqlServer));
+	}
+
+	private void doTestMixedEmptyLinesWithTerminator(ScriptIterator parser)
+		throws Exception
+	{
+		String sql = "select * from foo;\n\n" + "select * from bar;\n";
+		parser.setEmptyLineIsDelimiter(true);
+		parser.setScript(sql);
+		parser.setStoreStatementText(true);
+
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar", cmd.getSQL());
+
+		sql =
+			"select * from foo;\n" +
+			"select * from bar;\n" +
+			"select * from foobar;\n" +
+			"\n" +
+			"select * from foo;";
+		parser.setScript(sql);
+		parser.setStoreStatementText(true);
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foobar", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+	}
+
+	@Test
+	public void testEmptyLineDelimiter()
+		throws Exception
+	{
+		doTestEmptyLineDelimiter(new LexerBasedParser(ParserType.Postgres));
+		doTestEmptyLineDelimiter(new LexerBasedParser(ParserType.SqlServer));
+		doTestEmptyLineDelimiter(new LexerBasedParser(ParserType.Standard));
+	}
+
+	private void doTestEmptyLineDelimiter(final ScriptIterator parser)
+		throws Exception
+	{
+		String sql = "select * from test\n\n" + "select * from person\n";
+		parser.setScript(sql);
+		parser.setEmptyLineIsDelimiter(true);
+		parser.setStoreStatementText(true);
+
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from test", cmd.getSQL().trim());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from person", cmd.getSQL().trim());
+
+		sql = "select a,b,c\r\nfrom test\r\nwhere x = 1";
+		parser.setScript(sql);
+		parser.setEmptyLineIsDelimiter(true);
+		parser.setStoreStatementText(true);
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select a,b,c\r\nfrom test\r\nwhere x = 1", cmd.getSQL());
+
+		sql = "select *\nfrom foo\n\nselect * from bar";
+		parser.setScript(sql);
+		parser.setStoreStatementText(true);
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select *\nfrom foo", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select * from bar", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+	}
+
+
+	@Test
+	public void testQuotedDelimiter()
+		throws Exception
+	{
+		doTestQuotedDelimiter(new LexerBasedParser(ParserType.Standard));
+		doTestQuotedDelimiter(new LexerBasedParser(ParserType.Postgres));
+		doTestQuotedDelimiter(new LexerBasedParser(ParserType.SqlServer));
+	}
+
+	private void doTestQuotedDelimiter(ScriptIterator parser)
+		throws Exception
+	{
+		String sql = "select 'test\n;lines' from test;";
+		parser.setScript(sql);
+		parser.setStoreStatementText(true);
+
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select 'test\n;lines' from test", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+	}
+
+	@Test
+	public void testWhiteSpaceAtEnd()
+		throws Exception
+	{
+		doTestWhiteSpaceAtEnd(new LexerBasedParser(ParserType.Standard));
+		doTestWhiteSpaceAtEnd(new LexerBasedParser(ParserType.Postgres));
+		doTestWhiteSpaceAtEnd(new LexerBasedParser(ParserType.SqlServer));
+	}
+
+	public void doTestWhiteSpaceAtEnd(ScriptIterator parser)
+		throws IOException
+	{
+		String sql = "create table target_table (id integer);\n" +
+			"wbcopy \n";
+
+		parser.setScript(sql);
+		parser.setCheckEscapedQuotes(false);
+		parser.setEmptyLineIsDelimiter(false);
+		parser.setStoreStatementText(false);
+
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertNull(cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertNull(cmd.getSQL());
+		assertEquals(sql.length(), cmd.getEndPositionInScript());
+	}
+
+	@Test
+	public void testEscapedQuotes()
+	{
+		doTestEscapedQuotes(new LexerBasedParser(ParserType.Standard));
+		doTestEscapedQuotes(new LexerBasedParser(ParserType.Postgres));
+		doTestEscapedQuotes(new LexerBasedParser(ParserType.SqlServer));
+	}
+
+	public void doTestEscapedQuotes(ScriptIterator parser)
+	{
+		parser.setCheckEscapedQuotes(true);
+		parser.setScript(
+			"insert into foo (data) values ('foo\\'s data1');\n" +
+			"insert into foo (data) values ('foo\\'s data2');" +
+			"commit;\n");
+		parser.setStoreStatementText(true);
+
+		ScriptCommandDefinition c = parser.getNextCommand();
+		assertNotNull(c);
+		assertTrue(c.getSQL().startsWith("insert"));
+
+		c = parser.getNextCommand();
+		assertNotNull(c);
+		assertTrue(c.getSQL().startsWith("insert"));
+
+		c = parser.getNextCommand();
+		assertNotNull(c);
+		assertEquals("commit", c.getSQL());
+	}
+
 
 }
