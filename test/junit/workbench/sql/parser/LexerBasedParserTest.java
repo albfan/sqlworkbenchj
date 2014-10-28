@@ -22,8 +22,6 @@
  */
 package workbench.sql.parser;
 
-import workbench.sql.parser.ParserType;
-import workbench.sql.parser.LexerBasedParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +33,20 @@ import workbench.sql.ScriptCommandDefinition;
 
 import static org.junit.Assert.*;
 
+import workbench.WbTestCase;
+
 /**
  *
  * @author Thomas Kellerer
  */
 public class LexerBasedParserTest
+	extends WbTestCase
 {
+
+	public LexerBasedParserTest()
+	{
+		super("LexerBasedParserTest");
+	}
 
 	@Test
 	public void testGetNextCommand()
@@ -608,9 +614,10 @@ public class LexerBasedParserTest
 			"\n" +
 			"end;\n" +
 			"/\n";
-		
+
 		LexerBasedParser parser = new LexerBasedParser(ParserType.Oracle);
 		parser.setScript(script);
+		parser.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		parser.setEmptyLineIsDelimiter(true);
 		ScriptCommandDefinition cmd = parser.getNextCommand();
 		assertNotNull(cmd);
@@ -622,6 +629,11 @@ public class LexerBasedParserTest
 
 		cmd = parser.getNextCommand();
 		assertNull(cmd);
+
+		parser.setScript("WbVardef outfile=/temp/foo.txt;");
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("WbVardef outfile=/temp/foo.txt", cmd.getSQL().trim());
 	}
 
 }

@@ -327,15 +327,22 @@ public class LexerBasedParser
 	private DelimiterCheckResult isDelimiter(DelimiterDefinition currentDelimiter, SQLToken token, boolean startOfLine)
 	{
 		DelimiterCheckResult result = checkDelimiter(currentDelimiter, token, startOfLine);
-		if (result.found)
+		if (result.found || alternateDelimiter == null)
 		{
 			return result;
 		}
 
-		boolean checkForAlternateDelim = currentDelimiter != null && currentDelimiter.isStandard() && delimiterTester != null;
+		if (delimiterTester == null)
+		{
+			// if no delimiterTester is defined, we can't have dynamic delimiters anyway.
+			// so there is no need to check for the alternate delimiter dynamically
+			return result;
+		}
+
+		boolean checkForAlternateDelim = currentDelimiter != null && currentDelimiter.isStandard() && alternateDelimiter.isSingleLine() && startOfLine;
 		if (checkForAlternateDelim)
 		{
-			result = isDelimiter(alternateDelimiter, token, startOfLine);
+			result = checkDelimiter(alternateDelimiter, token, startOfLine);
 		}
 		return result;
 	}
