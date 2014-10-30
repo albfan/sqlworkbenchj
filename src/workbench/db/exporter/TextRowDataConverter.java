@@ -211,18 +211,25 @@ public class TextRowDataConverter
 			}
 			else
 			{
-				value = this.getValueAsFormattedString(row, colIndex);
+				Object data = row.getValue(colIndex);
+				if (data == null)
+				{
+					// don't format NULL values, otherwise a NULL display string might be escaped
+					// based on the current character escaping which we don't want here
+					value = null;
+				}
+				else
+				{
+					value = this.getValueAsFormattedString(row, colIndex);
+				}
 			}
 
 			boolean isNull = (value == null);
 			if (isNull)
 			{
-				if (!returnNulls)
-				{
-					value = getNullDisplay();
-					// Never quote null values
-					addQuote = nullString == null ? false : quoteAlways;
-				}
+				value = getNullDisplay();
+				// Never quote null values
+				addQuote = nullString == null ? false : quoteAlways;
 			}
 			else if (SqlUtil.isCharacterType(colType))
 			{

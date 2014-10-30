@@ -153,7 +153,7 @@ public abstract class RowDataConverter
 	 *
 	 * @return the display String, never null
 	 */
-	public final String getNullDisplay()
+	public String getNullDisplay()
 	{
 		return nullString == null ? "" : nullString;
 	}
