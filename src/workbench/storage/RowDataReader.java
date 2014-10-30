@@ -66,7 +66,7 @@ import workbench.util.StringUtil;
  */
 public class RowDataReader
 {
-	private List<Closeable> streams = new LinkedList<>();
+	private final List<Closeable> streams = new LinkedList<>();
 	private DataConverter converter;
 	private boolean ignoreReadErrors;
 	private boolean useStreamsForBlobs;
@@ -378,15 +378,21 @@ public class RowDataReader
 	private void addStream(Closeable in)
 	{
 		if (in == null) return;
-		streams.add(in);
+		synchronized (streams)
+		{
+			streams.add(in);
+		}
 	}
 
 	public void closeStreams()
 	{
-		if (streams.size() > 0)
+		synchronized (streams)
 		{
-			FileUtil.closeStreams(streams);
-			streams.clear();
+			if (streams.size() > 0)
+			{
+				FileUtil.closeStreams(streams);
+				streams.clear();
+			}
 		}
 	}
 

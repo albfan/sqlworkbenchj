@@ -63,7 +63,6 @@ public class RowDataSearcher
 		filterExpression = new ColumnExpression(comp, searchValue);
 		filterExpression.setIgnoreCase(ignoreCase);
 		converter = new TextRowDataConverter();
-		converter.setReturnNulls(true);
 	}
 
 	public void setBlobTextEncoding(String encoding)

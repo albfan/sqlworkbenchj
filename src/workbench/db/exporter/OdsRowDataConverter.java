@@ -430,6 +430,10 @@ public class OdsRowDataConverter
 			if (!this.includeColumnInExport(i)) continue;
 			Object o = row.getValue(i);
 			String value = getValueAsFormattedString(row, i);
+			if (value == null && getNullDisplay() != null)
+			{
+				value = getNullDisplay();
+			}
 			if (o == null && StringUtil.isEmptyString(value))
 			{
 				xml.append("<table:table-cell />");

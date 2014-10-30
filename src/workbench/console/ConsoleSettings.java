@@ -29,6 +29,7 @@ import java.util.List;
 
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  * A singleton to control and manage the current display style in the console.
@@ -119,7 +120,9 @@ public class ConsoleSettings
 	 */
 	public static String getNullString()
 	{
-		return Settings.getInstance().getProperty("workbench.console.nullstring", GuiSettings.getDisplayNullString());
+		String display = Settings.getInstance().getProperty("workbench.console.nullstring", GuiSettings.getDisplayNullString());
+		if (display == null) return StringUtil.EMPTY_STRING;
+		return display;
 	}
 
 	public static boolean showScriptFinishTime()

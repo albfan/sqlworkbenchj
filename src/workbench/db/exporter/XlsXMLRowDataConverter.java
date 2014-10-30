@@ -171,6 +171,7 @@ public class XlsXMLRowDataConverter
 			else
 			{
 				value = getValueAsFormattedString(row, i);
+				if (value == null) value = getNullDisplay();
 			}
 			boolean isMultiline = (value == null ? false : value.indexOf('\n') > 0);
 

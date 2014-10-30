@@ -1372,6 +1372,8 @@ public class StringUtil
 		int len = value.length();
 		if (len == 0) return value;
 
+		if (additionalCharsToEncode == null) additionalCharsToEncode = EMPTY_STRING;
+
 		StringBuilder outBuffer = null;
 
 		for (int x = 0; x < len; x++)

@@ -120,7 +120,15 @@ public class HtmlRowDataConverter
 
 			if (value == null)
 			{
-				result.append("&nbsp;");
+				String nullDisplay = getNullDisplay();
+				if (nullDisplay != null)
+				{
+					result.append(nullDisplay);
+				}
+				else
+				{
+					result.append("&nbsp;");
+				}
 			}
 			else
 			{

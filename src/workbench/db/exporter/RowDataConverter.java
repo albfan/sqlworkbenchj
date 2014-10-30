@@ -167,11 +167,6 @@ public abstract class RowDataConverter
 		this.nullString = value;
 	}
 
-	public void setReturnNulls(boolean flag)
-	{
-		returnNulls = flag;
-	}
-
 	public void setDataModifier(ExportDataModifier modifier)
 	{
 		columnModifier = modifier;
@@ -839,7 +834,7 @@ public abstract class RowDataConverter
 		Object value = row.getValue(col);
 		if (value == null)
 		{
-			return returnNulls ? null : getNullDisplay();
+			return null;
 		}
 		else
 		{

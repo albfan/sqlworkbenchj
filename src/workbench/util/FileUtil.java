@@ -70,7 +70,14 @@ public class FileUtil
 
 		for (Closeable str : streams)
 		{
-			closeQuietely(str);
+			try
+			{
+				closeQuietely(str);
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logWarning("FileUtil.closeStreams()", "Error when closing stream", ex);
+			}
 		}
 	}
 

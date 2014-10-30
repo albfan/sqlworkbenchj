@@ -32,6 +32,7 @@ import workbench.db.WbConnection;
 import workbench.storage.DataConverter;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
+import workbench.util.CharacterEscapeType;
 
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
@@ -67,6 +68,7 @@ public class TextRowDataConverter
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	private String rowIndexColumnName;
 	private DataConverter converter;
+	private CharacterEscapeType escapeType;
 
 	public void setWriteClobToFile(boolean flag)
 	{
@@ -139,7 +141,7 @@ public class TextRowDataConverter
 		int count = this.metaData.getColumnCount();
 		StringBuilder result = new StringBuilder(count * 30);
 
-		boolean canQuote = this.quoteCharacter != null;
+		boolean hasQuoteChar = this.quoteCharacter != null;
 
 		DbSettings dbs = originalConnection != null ? this.originalConnection.getDbSettings() : null;
 
@@ -205,23 +207,14 @@ public class TextRowDataConverter
 					}
 					catch (Exception e)
 					{
+						LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing CLOB file", e);
 						throw new RuntimeException("Error writing CLOB file", e);
 					}
 				}
 			}
 			else
 			{
-				Object data = row.getValue(colIndex);
-				if (data == null)
-				{
-					// don't format NULL values, otherwise a NULL display string might be escaped
-					// based on the current character escaping which we don't want here
-					value = null;
-				}
-				else
-				{
-					value = this.getValueAsFormattedString(row, colIndex);
-				}
+				value = this.getValueAsFormattedString(row, colIndex);
 			}
 
 			boolean isNull = (value == null);
@@ -234,28 +227,29 @@ public class TextRowDataConverter
 			else if (SqlUtil.isCharacterType(colType))
 			{
 				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
-				addQuote = (this.quoteAlways || (canQuote && containsDelimiter));
+				addQuote = (this.quoteAlways || (hasQuoteChar && containsDelimiter));
 
 				if (this.escapeRange != CharacterRange.RANGE_NONE)
 				{
 					if (addQuote)
 					{
-						value = StringUtil.escapeText(value, this.escapeRange, this.quoteCharacter, exporter.getEscapeType());
+						value = StringUtil.escapeText(value, this.escapeRange, this.quoteCharacter, getEscapeType());
 					}
 					else
 					{
-						value = StringUtil.escapeText(value, this.escapeRange, this.delimiterAndQuote, exporter.getEscapeType());
+						value = StringUtil.escapeText(value, this.escapeRange, this.delimiterAndQuote, getEscapeType());
 					}
 				}
-				if (this.quoteEscape != QuoteEscapeType.none && value.indexOf(this.quoteCharacter) > -1)
+				if (this.quoteEscape != QuoteEscapeType.none && hasQuoteChar && value.indexOf(this.quoteCharacter) > -1)
 				{
-					if (this.quoteEscape == QuoteEscapeType.escape)
+					switch (quoteEscape)
 					{
-						value = StringUtil.replace(value, this.quoteCharacter, "\\" + this.quoteCharacter);
-					}
-					else
-					{
-						value = StringUtil.replace(value, this.quoteCharacter, this.quoteCharacter + this.quoteCharacter);
+						case duplicate:
+							value = StringUtil.replace(value, this.quoteCharacter, this.quoteCharacter + this.quoteCharacter);
+							break;
+						case escape:
+							value = StringUtil.replace(value, this.quoteCharacter, "\\" + this.quoteCharacter);
+							break;
 					}
 				}
 			}
@@ -384,4 +378,17 @@ public class TextRowDataConverter
 		}
 	}
 
+	public void setEscapeType(CharacterEscapeType type)
+	{
+		this.escapeType = type;
+	}
+
+	public CharacterEscapeType getEscapeType()
+	{
+		if (this.escapeType == null && exporter != null)
+		{
+			return exporter.getEscapeType();
+		}
+		return escapeType;
+	}
 }

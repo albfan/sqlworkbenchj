@@ -42,6 +42,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.util.CharacterEscapeType;
+import workbench.util.CharacterRange;
+
 /**
  *
  * @author Thomas Kellerer
@@ -109,6 +112,19 @@ public class TextRowDataConverterTest
 
 		line = converter.convertRowData(data, 0);
 		assertEquals("Wrong data", "foobar;[null]", line.toString().trim());
+
+		converter.setDelimiter(";");
+		converter.setEscapeRange(CharacterRange.RANGE_7BIT);
+		converter.setEscapeType(CharacterEscapeType.pgHex);
+		converter.setQuoteCharacter("'");
+		converter.setNullString("\\foobar");
+		line = converter.convertRowData(data, 0);
+		assertEquals("foobar;\\foobar", line.toString().trim());
+
+		converter.setNullString("\\NULL");
+		data.setValue(0, "foo;bar");
+		line = converter.convertRowData(data, 0);
+		assertEquals("'foo;bar';\\NULL", line.toString().trim());
 	}
 
 	@Test
@@ -152,7 +168,7 @@ public class TextRowDataConverterTest
 		StringBuilder line = converter.convertRowData(data, 0);
 		assertEquals("Wrong columns exporter", "data1;42;2006-10-26;2006-10-26 17:00:00;23:42:24", line.toString().trim());
 
-		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> columns = new ArrayList<>();
 		columns.add(info.getColumn(0));
 		columns.add(info.getColumn(1));
 		converter.setColumnsToExport(columns);

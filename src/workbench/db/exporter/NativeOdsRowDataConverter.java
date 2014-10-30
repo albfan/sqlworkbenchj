@@ -233,9 +233,9 @@ public class NativeOdsRowDataConverter
 
 			Cell cell = worksheet.getCellByPosition(column, rowNum);
 
-			if (value == null && StringUtil.isNonBlank(formatted))
+			if (value == null && StringUtil.isNonEmpty(getNullDisplay()))
 			{
-				cell.setStringValue(formatted);
+				cell.setStringValue(getNullDisplay());
 			}
 			else
 			{
