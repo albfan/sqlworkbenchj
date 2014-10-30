@@ -39,9 +39,9 @@ import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 
 import workbench.sql.BatchRunner;
-import workbench.sql.parser.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.DdlObjectInfo;
 import workbench.util.EncodingUtil;
@@ -1306,6 +1306,50 @@ public class WbExportTest
 		StatementRunnerResult result = exportCmd.execute("wbexport -header=true -file='" + f.getFullPath() + "' -type=text -sourcetable=person -writeEmptyResults=false");
 		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 		assertFalse(f.exists());
+	}
+
+	@Test
+	public void testNullString()
+		throws Exception
+	{
+		try
+		{
+			WbFile f = new WbFile(util.getBaseDir(), "person.txt");
+			TestUtil.executeScript(connection,
+				"update person set firstname = null where nr = 1;\n" +
+				"update person set firstname = 'NULL' where nr = 2;\n" +
+				"delete from person where nr not in (1,2);\n" +
+				"commit;");
+
+			StatementRunnerResult result = exportCmd.execute(
+				"wbexport -header=true " +
+					"-file='" + f.getFullPath() + "' " +
+					"-type=text " +
+					"-header=false " +
+					"-sourcetable=person " +
+					"-nullString='\\null' -escapeText=7bit");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			BufferedReader in = new BufferedReader(new FileReader(f));
+			List<String> lines = FileUtil.getLines(in);
+			assertEquals(2, lines.size());
+			String line = lines.get(0);
+			String[] values = line.split("\t");
+			assertEquals(3, values.length);
+			assertEquals("\\null", values[1]);
+			assertEquals("LastName1", values[2]);
+
+			line = lines.get(1);
+			System.out.println(line);
+			values = line.split("\t");
+			assertEquals(3, values.length);
+			assertEquals("NULL", values[1]);
+			assertEquals("LastName2", values[2]);
+		}
+		finally
+		{
+			util.emptyBaseDirectory();
+		}
 	}
 
 	@Test

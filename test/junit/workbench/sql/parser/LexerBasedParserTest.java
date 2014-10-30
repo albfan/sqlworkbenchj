@@ -55,24 +55,17 @@ public class LexerBasedParserTest
 	{
 		String sql = "select * from test;\n" + "select * from person;";
 		LexerBasedParser parser = new LexerBasedParser(sql);
-		ScriptCommandDefinition cmd = null;
-		while ((cmd = parser.getNextCommand()) != null)
-		{
-			int index = cmd.getIndexInScript();
-			if (index == 0)
-			{
-				assertEquals("select * from test", cmd.getSQL());
-			}
-			else if (index == 1)
-			{
-				assertEquals("select * from person", cmd.getSQL());
-			}
-			else
-			{
-				fail("Wrong command index: " + index);
-			}
-		}
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertEquals("select * from test", cmd.getSQL());
+		cmd = parser.getNextCommand();
+		assertEquals("select * from person", cmd.getSQL());
 
+		sql = "delete from test;commit;";
+		parser.setScript(sql);
+		cmd = parser.getNextCommand();
+		assertEquals("delete from test", cmd.getSQL());
+		cmd = parser.getNextCommand();
+		assertEquals("commit", cmd.getSQL());
 	}
 
 	@Test
