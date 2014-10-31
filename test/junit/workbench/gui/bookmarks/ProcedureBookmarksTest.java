@@ -27,12 +27,11 @@ import workbench.WbTestCase;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
+import workbench.sql.parser.ParserType;
 
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.sql.parser.ParserType;
 
 /**
  *
@@ -93,14 +92,14 @@ public class ProcedureBookmarksTest
 		script =
 			"create or replace package repmgr\n" +
 			"as\n" +
-			"  procedure create_mview(p_tablename varchar, p_do_refresh boolean default false, p_dblink varchar default 'MP_PROD');\n" +
+			"  procedure do_stuff(p_name varchar, p_flag boolean default false, p_dblink varchar default 'LINK');\n" +
 			"end;\n" +
 			"/";
 		parser = new ProcedureBookmarks();
 		parseScript(script, parser, ParserType.Oracle);
 		bookmarks = parser.getBookmarks();
 		assertEquals(1, bookmarks.size());
-		assertEquals("$ create_mview(varchar,boolean,varchar)", bookmarks.get(0).getName().trim());
+		assertEquals("$ do_stuff(varchar,boolean,varchar)", bookmarks.get(0).getName().trim());
 	}
 
 	@Test

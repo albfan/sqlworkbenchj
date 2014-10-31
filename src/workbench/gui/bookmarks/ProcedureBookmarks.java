@@ -67,7 +67,8 @@ public class ProcedureBookmarks
 	private Set<String> createKeywords = CollectionUtil.caseInsensitiveSet("CREATE", "ALTER", "CREATE OR REPLACE");
 	private Set<String> noParse = CollectionUtil.caseInsensitiveSet("DROP");
 	private Set<String> parameterStart = CollectionUtil.caseInsensitiveSet("(");
-	private Set<String> parameterEnd = CollectionUtil.caseInsensitiveSet(")", "DEFAULT", "COLLATE", "NOT NULL");
+	private Set<String> parameterEnd = CollectionUtil.caseInsensitiveSet(")", "COLLATE", "NOT NULL");
+	private Set<String> parameterDefault = CollectionUtil.caseInsensitiveSet("DEFAULT");
 	private Set<String> createTerminal = CollectionUtil.caseInsensitiveSet("AS", "RETURN", "IS", "BEGIN", ";", "DECLARE", "RETURNS");
 
 	private List<NamedScriptLocation> procedures = new ArrayList<>();
@@ -81,6 +82,9 @@ public class ProcedureBookmarks
 	private SQLToken currentStartToken;
 	private String currentIdentifier;
 	private String parameterList;
+
+	// counts opening/closing brackets while inside the parameterlist
+	// in order to cope with data types that contain commas, e.g. numeric(12,1)
 	private int bracketCount;
 	private boolean includeParameterNames;
 
@@ -205,25 +209,21 @@ public class ProcedureBookmarks
 					{
 						parmState = ParameterState.name;
 					}
+					else if (parameterDefault.contains(content) || (content.equals("=") && (parmState == ParameterState.dataType || parmState == ParameterState.none)))
+					{
+						parmState = ParameterState.defaultValue;
+					}
 					else if (modeKeywords.contains(content))
 					{
 						parmState = ParameterState.dataType;
 					}
 					else if (parmState == ParameterState.none || parmState == ParameterState.dataType)
 					{
-						// This is for SQL Server
-						if (content.equals("="))
+						if (parameterList.length() > 0 && bracketCount == 0)
 						{
-							parmState = ParameterState.defaultValue;
+							parameterList += includeParameterNames ? " " : ",";
 						}
-						else
-						{
-							if (parameterList.length() > 0 && bracketCount == 0)
-							{
-								parameterList += includeParameterNames ? " " : ",";
-							}
-							parameterList += token.getText();
-						}
+						parameterList += token.getText();
 					}
 					else if (parmState == ParameterState.name)
 					{
@@ -234,6 +234,7 @@ public class ProcedureBookmarks
 							parameterList += token.getText();
 						}
 					}
+
 					if (")".equals(content) && bracketCount > 0)
 					{
 						bracketCount--;
