@@ -90,9 +90,9 @@ public class ProcedureBookmarksTest
 		assertEquals("foo(p_one integer, p_two varchar(20))", bookmarks.get(0).getName());
 
 		script =
-			"create or replace package repmgr\n" +
+			"create or replace package my_package\n" +
 			"as\n" +
-			"  procedure do_stuff(p_name varchar, p_flag boolean default false, p_dblink varchar default 'LINK');\n" +
+			"  procedure do_stuff(p_name varchar, p_flag boolean default false, p_value varchar default 'VALUE');\n" +
 			"end;\n" +
 			"/";
 		parser = new ProcedureBookmarks();
@@ -173,7 +173,7 @@ public class ProcedureBookmarksTest
 			"$$" +
 			"language sql;\n" +
 			"\n" +
-			"create function foobar(p_foo integer) returns boolean \n" +
+			"create function foobar(p_foo integer, px integer default = 42, py integer default = 24) returns boolean \n" +
 			"as $$\n" +
 			"begin" +
 			"   select 42;\n" +
@@ -187,7 +187,7 @@ public class ProcedureBookmarksTest
 //		System.out.println(bookmarks);
 		assertEquals(2, bookmarks.size());
 		assertEquals("get_answer(p_foo integer, p_bar integer)", bookmarks.get(0).getName());
-		assertEquals("foobar(p_foo integer)", bookmarks.get(1).getName());
+		assertEquals("foobar(p_foo integer, px integer, py integer)", bookmarks.get(1).getName());
 	}
 
 
