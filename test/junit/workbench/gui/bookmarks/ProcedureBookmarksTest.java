@@ -164,6 +164,31 @@ public class ProcedureBookmarksTest
 //		System.out.println(bookmarks);
 		assertEquals(1, bookmarks.size());
 		assertEquals("get_answer(p_foo integer, p_bar integer)", bookmarks.get(0).getName());
+
+		script =
+			"create function get_answer(p_foo integer, p_bar integer default = 0) returns boolean \n" +
+			"as $$\n" +
+			"begin" +
+			"   select 42;\n" +
+			"end;\n" +
+			"$$" +
+			"language sql;\n" +
+			"\n" +
+			"create function foobar(p_foo integer) returns boolean \n" +
+			"as $$\n" +
+			"begin" +
+			"   select 42;\n" +
+			"end;\n" +
+			"$$" +
+			"language sql;";
+
+		parser.setIncludeParameterNames(true);
+		parseScript(script, parser, ParserType.Postgres);
+		bookmarks = parser.getBookmarks();
+//		System.out.println(bookmarks);
+		assertEquals(2, bookmarks.size());
+		assertEquals("get_answer(p_foo integer, p_bar integer)", bookmarks.get(0).getName());
+		assertEquals("foobar(p_foo integer)", bookmarks.get(1).getName());
 	}
 
 
