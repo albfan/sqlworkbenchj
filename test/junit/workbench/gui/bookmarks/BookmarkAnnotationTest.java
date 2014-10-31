@@ -28,6 +28,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.parser.ParserType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -55,7 +57,7 @@ public class BookmarkAnnotationTest
 			"commit;\n";
 
 		BookmarkAnnotation reader = new BookmarkAnnotation();
-		List<NamedScriptLocation> bookmarks = reader.getBookmarks(script, "one");
+		List<NamedScriptLocation> bookmarks = reader.getBookmarks(script, "one", ParserType.Standard);
 		assertNotNull(bookmarks);
 		assertEquals(2, bookmarks.size());
 		assertEquals("delete all", bookmarks.get(0).getName());
@@ -73,7 +75,7 @@ public class BookmarkAnnotationTest
 			"commit;\n";
 
 		reader.setUseResultTag(true);
-		bookmarks = reader.getBookmarks(script, "one");
+		bookmarks = reader.getBookmarks(script, "one", ParserType.Standard);
 		assertNotNull(bookmarks);
 		assertEquals(2, bookmarks.size());
 		assertEquals("delete all", bookmarks.get(0).getName());

@@ -31,6 +31,7 @@ import workbench.sql.UseTabAnnotation;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
+import workbench.sql.parser.ParserType;
 
 import workbench.util.StringUtil;
 
@@ -75,7 +76,7 @@ public class BookmarkAnnotation
 	 * @see GuiSettings#getParseProceduresForBookmarks()
 	 * @see ProcedureBookmarks
 	 */
-	public List<NamedScriptLocation> getBookmarks(String script, String tabId)
+	public List<NamedScriptLocation> getBookmarks(String script, String tabId, ParserType type)
 	{
 		List<NamedScriptLocation> bookmarks = new ArrayList<>();
 
@@ -85,7 +86,7 @@ public class BookmarkAnnotation
 			parser = new ProcedureBookmarks(tabId);
 		}
 
-		SQLLexer lexer = SQLLexerFactory.createLexer(script);
+		SQLLexer lexer = SQLLexerFactory.createLexer(type, script);
 		SQLToken token = lexer.getNextToken(true, false);
 
 		while (token != null)

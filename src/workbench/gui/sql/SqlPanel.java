@@ -434,7 +434,8 @@ public class SqlPanel
 		String text = editor.getText();
 		if (StringUtil.isEmptyString(text)) return Collections.emptyList();
 		BookmarkAnnotation reader = new BookmarkAnnotation();
-		List<NamedScriptLocation> bookmarks = reader.getBookmarks(text, getId());
+		ParserType type = ParserType.getTypeFromConnection(getConnection());
+		List<NamedScriptLocation> bookmarks = reader.getBookmarks(text, getId(), type);
 		for (NamedScriptLocation loc : bookmarks)
 		{
 			int line = editor.getLineOfOffset(loc.getOffset());

@@ -32,6 +32,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.parser.ParserType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -45,10 +47,10 @@ public class ProcedureBookmarksTest
 		super("ProcedureBookmarksTest");
 	}
 
-	public void parseScript(String script, ProcedureBookmarks parser)
+	public void parseScript(String script, ProcedureBookmarks parser, ParserType type)
 	{
 		parser.reset();
-		SQLLexer lexer = SQLLexerFactory.createLexer(script);
+		SQLLexer lexer = SQLLexerFactory.createLexer(type, script);
 		SQLToken token = lexer.getNextToken(false, false);
 		while (token != null)
 		{
@@ -69,7 +71,7 @@ public class ProcedureBookmarksTest
 			"create procedure bar as begin null; end;\n";
 		ProcedureBookmarks parser = new ProcedureBookmarks();
 		parser.setIncludeParameterNames(false);
-		parseScript(script, parser);
+		parseScript(script, parser, ParserType.Oracle);
 		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
 		assertEquals(2, bookmarks.size());
@@ -82,11 +84,23 @@ public class ProcedureBookmarksTest
 			"create or replace function foo(p_one integer, p_two varchar(20) default 'foo') return boolean as begin return 42; end;\n";
 		parser = new ProcedureBookmarks();
 		parser.setIncludeParameterNames(true);
-		parseScript(script, parser);
+		parseScript(script, parser, ParserType.Oracle);
 		bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
 		assertEquals(1, bookmarks.size());
 		assertEquals("foo(p_one integer, p_two varchar(20))", bookmarks.get(0).getName());
+
+		script =
+			"create or replace package repmgr\n" +
+			"as\n" +
+			"  procedure create_mview(p_tablename varchar, p_do_refresh boolean default false, p_dblink varchar default 'MP_PROD');\n" +
+			"end;\n" +
+			"/";
+		parser = new ProcedureBookmarks();
+		parseScript(script, parser, ParserType.Oracle);
+		bookmarks = parser.getBookmarks();
+		assertEquals(1, bookmarks.size());
+		assertEquals("$ create_mview(varchar,boolean,varchar)", bookmarks.get(0).getName().trim());
 	}
 
 	@Test
@@ -100,14 +114,14 @@ public class ProcedureBookmarksTest
 			"end;\n";
 		ProcedureBookmarks parser = new ProcedureBookmarks();
 		parser.setIncludeParameterNames(false);
-		parseScript(script, parser);
+		parseScript(script, parser, ParserType.SqlServer);
 
 		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
 		assertEquals(1, bookmarks.size());
 		assertEquals("foo(int,varchar(20))", bookmarks.get(0).getName());
 		parser.setIncludeParameterNames(true);
-		parseScript(script, parser);
+		parseScript(script, parser, ParserType.SqlServer);
 		bookmarks = parser.getBookmarks();
 		assertEquals(1, bookmarks.size());
 		assertEquals("foo(@p_foo int, @p_bar varchar(20))", bookmarks.get(0).getName());
@@ -128,7 +142,7 @@ public class ProcedureBookmarksTest
 
 		ProcedureBookmarks parser = new ProcedureBookmarks();
 		parser.setIncludeParameterNames(false);
-		parseScript(script, parser);
+		parseScript(script, parser, ParserType.Postgres);
 
 		List<NamedScriptLocation> bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
@@ -145,7 +159,7 @@ public class ProcedureBookmarksTest
 			"language sql;";
 
 		parser.setIncludeParameterNames(true);
-		parseScript(script, parser);
+		parseScript(script, parser, ParserType.Postgres);
 		bookmarks = parser.getBookmarks();
 //		System.out.println(bookmarks);
 		assertEquals(1, bookmarks.size());
