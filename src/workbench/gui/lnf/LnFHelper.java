@@ -244,8 +244,8 @@ public class LnFHelper
 		{
 			LogMgr.logError("LnFHelper.setJGoodiesTheme()", "Could not set theme", th);
 		}
-
 	}
+	
 	private void setSystemLnF()
 	{
 		try

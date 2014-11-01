@@ -91,7 +91,6 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
@@ -653,15 +652,12 @@ public class TableDataPanel
 			columns = Collections.emptyList();
 		}
 		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
-		String sql = builder.getSelectForColumns(tbl, columns);
+		String sort = null;
 		if (DbExplorerSettings.getApplySQLSortInDbExplorer() && lastSort != null)
 		{
-			String sort = lastSort.getSqlExpression(dbConnection.getMetadata());
-			if (StringUtil.isNonBlank(sort))
-			{
-				sql += " \nORDER BY " + sort;
-			}
+			sort = lastSort.getSqlExpression(dbConnection.getMetadata());
 		}
+		String sql = builder.getSelectForColumns(tbl, columns, sort, dataDisplay.getMaxRows());
 		return sql;
 	}
 

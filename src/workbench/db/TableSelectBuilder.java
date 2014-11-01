@@ -42,12 +42,17 @@ public class TableSelectBuilder
 	public static final String TABLEDATA_TEMPLATE_NAME = "tabledata";
 	public static final String ROWCOUNT_TEMPLATE_NAME = "tablerowcount";
 
+	public static final String LIMIT_EXPRESSION_PLACEHOLDER = "%limit_expression%";
+	public static final String ORDER_BY_PLACEHOLDER = "%order_by%";
+	public static final String MAX_ROWS_PLACEHOLDER = "%max_rows%";
+
 	private WbConnection dbConnection;
 	private boolean includeBLOBColumns = true;
 	private boolean includeCLOBColumns = true;
 	private boolean useColumnAlias;
 	private boolean sortPksFirst;
 	private String sqlTemplate;
+	private String limitClause;
 
 	public TableSelectBuilder(WbConnection source)
 	{
@@ -62,14 +67,17 @@ public class TableSelectBuilder
 	public TableSelectBuilder(WbConnection source, String templateKey, String fallbackTemplate)
 	{
 		this.dbConnection = source;
-		if (StringUtil.isNonBlank(templateKey))
+		if (this.dbConnection != null)
 		{
-			sqlTemplate = source.getDbSettings().getTableSelectTemplate(templateKey.toLowerCase());
-		}
-
-		if (StringUtil.isBlank(sqlTemplate) && StringUtil.isNonBlank(fallbackTemplate))
-		{
-			sqlTemplate = source.getDbSettings().getTableSelectTemplate(fallbackTemplate.toLowerCase());
+			if (StringUtil.isNonBlank(templateKey))
+			{
+				sqlTemplate = dbConnection.getDbSettings().getTableSelectTemplate(templateKey.toLowerCase());
+			}
+			if (StringUtil.isBlank(sqlTemplate) && StringUtil.isNonBlank(fallbackTemplate))
+			{
+				sqlTemplate = dbConnection.getDbSettings().getTableSelectTemplate(fallbackTemplate.toLowerCase());
+			}
+			limitClause = dbConnection.getDbSettings().getLimitClause();
 		}
 
 		if (StringUtil.isBlank(sqlTemplate))
@@ -114,7 +122,8 @@ public class TableSelectBuilder
 			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "Not table supplied!");
 			return null;
 		}
-		String select = replacePlaceholders(table, "count(*)");
+		String select = replacePlaceholders(table, "count(*)", -1);
+		select = TemplateHandler.removePlaceholder(select, TableSelectBuilder.ORDER_BY_PLACEHOLDER, false);
 		return select;
 	}
 
@@ -129,7 +138,7 @@ public class TableSelectBuilder
 	 * @throws SQLException
 	 * @see DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
 	 */
-	public String getSelectForTable(TableIdentifier table)
+	public String getSelectForTable(TableIdentifier table, int maxRows)
 		throws SQLException
 	{
 		TableIdentifier tbl = null;
@@ -142,7 +151,7 @@ public class TableSelectBuilder
 			tbl = dbConnection.getMetadata().getSynonymTable(table);
 		}
 		TableDefinition def = dbConnection.getMetadata().getTableDefinition(tbl == null ? table : tbl, false);
-		return getSelectForColumns(def.getTable(), def.getColumns());
+		return getSelectForColumns(def.getTable(), def.getColumns(), maxRows);
 	}
 
 	/**
@@ -156,7 +165,12 @@ public class TableSelectBuilder
 	 * @return a SELECT for all rows in the table
 	 * @see #getColumnExpression(workbench.db.ColumnIdentifier)
 	 */
-	public String getSelectForColumns(TableIdentifier table, List<ColumnIdentifier> columns)
+	public String getSelectForColumns(TableIdentifier table, List<ColumnIdentifier> columns, int maxRows)
+	{
+		return getSelectForColumns(table, columns, null, maxRows);
+	}
+
+	public String getSelectForColumns(TableIdentifier table, List<ColumnIdentifier> columns, String sortCols, int maxRows)
 	{
 		if (table == null)
 		{
@@ -217,12 +231,34 @@ public class TableSelectBuilder
 			}
 		}
 
-		String select = replacePlaceholders(table, selectCols);
+		String select = replacePlaceholders(table, selectCols, maxRows);
+		select = applyOrderBy(select, sortCols);
 
 		return select;
 	}
 
-	private String replacePlaceholders(TableIdentifier table, CharSequence selectCols)
+	private String applyOrderBy(String sql, String sortCols)
+	{
+		if (StringUtil.isNonBlank(sortCols))
+		{
+			String orderBy = " \nORDER BY " + sortCols;
+			if (sql.contains(ORDER_BY_PLACEHOLDER))
+			{
+				sql = TemplateHandler.replacePlaceholder(sql, TableSelectBuilder.ORDER_BY_PLACEHOLDER, orderBy, true);
+			}
+			else
+			{
+				sql += orderBy;
+			}
+		}
+		else
+		{
+			sql = TemplateHandler.removePlaceholder(sql, TableSelectBuilder.ORDER_BY_PLACEHOLDER, false);
+		}
+		return sql;
+	}
+
+	private String replacePlaceholders(TableIdentifier table, CharSequence selectCols, int maxRows)
 	{
 		String fqTableName = SqlUtil.fullyQualifiedName(dbConnection, table);
 
@@ -256,6 +292,9 @@ public class TableSelectBuilder
 			// to avoid unnecessary calls, this is only done if really needed
 			select = TemplateHandler.replacePlaceholder(select, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.dbConnection), true);
 		}
+
+		select = applyLimit(select, maxRows);
+
 		return select;
 	}
 
@@ -287,9 +326,37 @@ public class TableSelectBuilder
 		return expr;
 	}
 
+	/**
+	 * Return the SQL expression that limits the returned rows.
+	 *
+	 * The result of this function is used as a replacement for the {@link #LIMIT_EXPRESSION_PLACEHOLDER} parameter
+	 * in the final SELECT statement
+	 * @param maxRows   the max number of rows. if <= 0 an empty string is returned.
+	 * @return The expression to be used
+	 */
+	public String getLimitExpression(int maxRows)
+	{
+		if (maxRows <= 0) return StringUtil.EMPTY_STRING;
+		if (StringUtil.isEmptyString(limitClause)) return StringUtil.EMPTY_STRING;
+		if (!limitClause.contains(MAX_ROWS_PLACEHOLDER)) return StringUtil.EMPTY_STRING;
+		return limitClause.replace(MAX_ROWS_PLACEHOLDER, Integer.toString(maxRows));
+	}
+
+	public String applyLimit(String baseSelect, int maxRows)
+	{
+		String expression = getLimitExpression(maxRows);
+		return TemplateHandler.replacePlaceholder(baseSelect, LIMIT_EXPRESSION_PLACEHOLDER, expression, false);
+	}
+
+	// =========================================
+
 	void setTemplate(String template)
 	{
 		this.sqlTemplate = template;
 	}
 
+	void setLimitClause(String limit)
+	{
+		this.limitClause = limit;
+	}
 }

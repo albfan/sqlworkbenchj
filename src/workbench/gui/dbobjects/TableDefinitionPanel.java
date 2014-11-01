@@ -769,7 +769,7 @@ public class TableDefinitionPanel
 	{
 		List<ColumnIdentifier> cols = TableColumnsDatastore.createColumnIdentifiers(this.dbConnection.getMetadata(), this.tableDefinition.getDataStore());
 		TableSelectBuilder builder = new TableSelectBuilder(dbConnection);
-		return builder.getSelectForColumns(currentTable, cols);
+		return builder.getSelectForColumns(currentTable, cols, -1);
 	}
 
 	public int getRowCount()

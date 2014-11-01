@@ -204,7 +204,7 @@ public class ClientSideTableSearcher
 			builder.setIncludeBLOBColumns(includeBLOBs);
 			builder.setIncludeCLOBColumns(includeCLOBs);
 
-			String sql = builder.getSelectForTable(table);
+			String sql = builder.getSelectForTable(table, -1);
 			if (StringUtil.isEmptyString(sql))
 			{
 				LogMgr.logWarning("CleintSideTableSearcher.searchTable()", "No SELECT generated for " + table.getTableExpression() + ". Most probably the table was not fund");

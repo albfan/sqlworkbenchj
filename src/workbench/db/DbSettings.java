@@ -1956,4 +1956,8 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + propName, global);
 	}
 
+	public String getLimitClause()
+	{
+		return Settings.getInstance().getProperty(prefix + "select.limit", null);
+	}
 }

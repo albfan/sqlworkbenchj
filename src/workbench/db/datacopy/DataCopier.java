@@ -669,7 +669,7 @@ public class DataCopier
 			cols.add(tid);
 		}
 
-		String select = builder.getSelectForColumns(sourceTable, sourceCols);
+		String select = builder.getSelectForColumns(sourceTable, sourceCols, -1);
 		sql.append(select);
 
 		if (StringUtil.isNonBlank(addWhere))

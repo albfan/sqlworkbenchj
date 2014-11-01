@@ -68,7 +68,7 @@ public class ExportJobEntry
 		outputFile = new WbFile(file);
 		baseTable = resultInfo.getUpdateTable();
 		TableSelectBuilder builder = new TableSelectBuilder(con, "export");
-		query = builder.getSelectForColumns(table, Arrays.asList(resultInfo.getColumns()));
+		query = builder.getSelectForColumns(table, Arrays.asList(resultInfo.getColumns()), -1);
 		resultInfo.setUpdateTable(baseTable);
 		appendWhere(where);
 	}

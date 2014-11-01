@@ -95,7 +95,7 @@ public class LookupDataLoader
 			builder.setSortPksFirst(true);
 			builder.setIncludeBLOBColumns(false);
 			builder.setIncludeCLOBColumns(false);
-			sql = builder.getSelectForColumns(lookupTable.getTable(), lookupTable.getColumns());
+			sql = builder.getSelectForColumns(lookupTable.getTable(), lookupTable.getColumns(), maxRows);
 		}
 		else
 		{

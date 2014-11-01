@@ -258,7 +258,7 @@ public class ServerSideTableSearcher
 		TableSelectBuilder builder = new TableSelectBuilder(this.connection, sqlTemplateKey);
 		builder.setIncludeBLOBColumns(this.retrieveLobColumns);
 		builder.setIncludeCLOBColumns(this.retrieveLobColumns);
-		sql.append(builder.getSelectForColumns(def.getTable(), def.getColumns()));
+		sql.append(builder.getSelectForColumns(def.getTable(), def.getColumns(), -1));
 		sql.append("\n WHERE ");
 		boolean first = true;
 		int colcount = 0;

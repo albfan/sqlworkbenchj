@@ -23,12 +23,14 @@
 package workbench.db;
 
 import java.util.ArrayList;
-
-import org.junit.Test;
-import static org.junit.Assert.*;
+import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -63,7 +65,7 @@ public class TableSelectBuilderTest
 		t1.setSchema(null);
 		t1.setCatalog(null);
 
-		String sql = builder.getSelectForColumns(t1, def.getColumns());
+		String sql = builder.getSelectForColumns(t1, def.getColumns(), -1);
 		String expected = "select NR,\n" +
 			"       FIRSTNAME,\n" +
 			"       LASTNAME\nfrom PERSON";
@@ -73,7 +75,7 @@ public class TableSelectBuilderTest
 		t1 = tbl.createCopy();
 		t1.setCatalog(null);
 
-		sql = builder.getSelectForColumns(t1, def.getColumns());
+		sql = builder.getSelectForColumns(t1, def.getColumns(), -1);
 		expected = "select NR,\n" +
 			"       FIRSTNAME,\n" +
 			"       LASTNAME\nfrom FOO.PERSON";
@@ -83,14 +85,14 @@ public class TableSelectBuilderTest
 		t1 = tbl.createCopy();
 		t1.setSchema(null);
 
-		sql = builder.getSelectForColumns(t1, def.getColumns());
+		sql = builder.getSelectForColumns(t1, def.getColumns(), -1);
 		expected = "select NR,\n" +
 			"       FIRSTNAME,\n" +
 			"       LASTNAME\nfrom TABLESELECTBUILDERTEST.PERSON";
 //			System.out.println("----\n" + expected + "\n------\n" + sql);
 		assertEquals(expected, sql);
 
-		sql = builder.getSelectForTable(tbl);
+		sql = builder.getSelectForTable(tbl, -1);
 		expected = "select NR,\n" +
 			"       FIRSTNAME,\n" +
 			"       LASTNAME\nfrom TABLESELECTBUILDERTEST.FOO.PERSON";
@@ -109,13 +111,13 @@ public class TableSelectBuilderTest
 		builder.setTemplate("select %columnlist%\nfrom %table_name% with (nolock)");
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("person"));
 
-		String sql = builder.getSelectForTable(tbl);
+		String sql = builder.getSelectForTable(tbl, -1);
 		String expected = "select NR,\n" +
 			"       FIRSTNAME,\n" +
 			"       LASTNAME\nfrom PERSON with (nolock)";
 		assertEquals(expected, sql);
 
-		sql = builder.getSelectForColumns(tbl, new ArrayList<ColumnIdentifier>());
+		sql = builder.getSelectForColumns(tbl, new ArrayList<ColumnIdentifier>(), -1);
 		expected = "select *\nfrom PERSON with (nolock)";
 		assertEquals(expected, sql);
 	}
@@ -131,7 +133,7 @@ public class TableSelectBuilderTest
 		TableSelectBuilder builder = new TableSelectBuilder(con);
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("person"));
 
-		String sql = builder.getSelectForColumns(tbl, new ArrayList<ColumnIdentifier>());
+		String sql = builder.getSelectForColumns(tbl, new ArrayList<ColumnIdentifier>(), -1);
 		String expected = "SELECT *\nFROM PERSON";
 		assertEquals(expected, sql);
 	}
@@ -148,7 +150,7 @@ public class TableSelectBuilderTest
 		TableSelectBuilder builder = new TableSelectBuilder(con);
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("person"));
 
-		String sql = builder.getSelectForTable(tbl);
+		String sql = builder.getSelectForTable(tbl, -1);
 		String expected = "SELECT NR,\n" +
 			"       FIRSTNAME,\n" +
 			"       LASTNAME\n" +
@@ -157,7 +159,7 @@ public class TableSelectBuilderTest
 
 		dbconfig.setDataTypeExpression("varchar", "upper(" + TableSelectBuilder.COLUMN_PLACEHOLDER + ")");
 
-		sql = builder.getSelectForTable(tbl);
+		sql = builder.getSelectForTable(tbl, -1);
 		expected = "SELECT NR,\n" +
 			"       upper(FIRSTNAME),\n" +
 			"       upper(LASTNAME)\n" +
@@ -168,7 +170,7 @@ public class TableSelectBuilderTest
 
 		// test invalid expression
 		dbconfig.setDataTypeExpression("integer", "abs()");
-		sql = builder.getSelectForTable(tbl);
+		sql = builder.getSelectForTable(tbl, -1);
 		expected = "SELECT NR,\n" +
 			"       FIRSTNAME,\n" +
 			"       LASTNAME\n" +
@@ -179,6 +181,37 @@ public class TableSelectBuilderTest
 		expected = "SELECT count(*)\n" +
 			"FROM PERSON";
 		assertEquals(expected, sql);
-
 	}
+
+	@Test
+	public void testLimit()
+		throws Exception
+	{
+		TableSelectBuilder builder = new TableSelectBuilder(null, "junittabledata");
+
+		builder.setTemplate("select %columnlist% from %table_name% " + TableSelectBuilder.LIMIT_EXPRESSION_PLACEHOLDER);
+		builder.setLimitClause("LIMIT " + TableSelectBuilder.MAX_ROWS_PLACEHOLDER);
+		TableIdentifier tbl = new TableIdentifier("person");
+
+		List<ColumnIdentifier> cols = new ArrayList<>();
+		String sql = builder.getSelectForColumns(tbl, cols, -1);
+		assertEquals("select * from person", sql.trim());
+
+		sql = sql = builder.getSelectForColumns(tbl, cols, 5);
+		assertEquals("select * from person LIMIT 5", sql.trim());
+
+		builder.setTemplate("select " + TableSelectBuilder.LIMIT_EXPRESSION_PLACEHOLDER + " %columnlist% from %table_name% ");
+		builder.setLimitClause("TOP (" + TableSelectBuilder.MAX_ROWS_PLACEHOLDER + ")");
+
+		sql = builder.getSelectForColumns(tbl, cols, -1);
+		assertEquals("select  * from person", sql.trim());
+
+		sql = builder.getSelectForColumns(tbl, cols, 5);
+		assertEquals("select TOP (5) * from person", sql.trim());
+
+		builder.setLimitClause(null);
+		sql = builder.getSelectForColumns(tbl, cols, 5);
+		assertEquals("select  * from person", sql.trim());
+	}
+
 }
