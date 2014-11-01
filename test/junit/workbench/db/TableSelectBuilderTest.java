@@ -197,7 +197,7 @@ public class TableSelectBuilderTest
 		String sql = builder.getSelectForColumns(tbl, cols, -1);
 		assertEquals("select * from person", sql.trim());
 
-		sql = sql = builder.getSelectForColumns(tbl, cols, 5);
+		sql = builder.getSelectForColumns(tbl, cols, 5);
 		assertEquals("select * from person LIMIT 5", sql.trim());
 
 		builder.setTemplate("select " + TableSelectBuilder.LIMIT_EXPRESSION_PLACEHOLDER + " %columnlist% from %table_name% ");
@@ -212,6 +212,23 @@ public class TableSelectBuilderTest
 		builder.setLimitClause(null);
 		sql = builder.getSelectForColumns(tbl, cols, 5);
 		assertEquals("select  * from person", sql.trim());
+
+		builder.setTemplate("select %columnlist% from %table_name% %order_by% " + TableSelectBuilder.LIMIT_EXPRESSION_PLACEHOLDER);
+		builder.setLimitClause("LIMIT " + TableSelectBuilder.MAX_ROWS_PLACEHOLDER);
+		sql = builder.getSelectForColumns(tbl, cols, 5);
+		assertEquals("select * from person  LIMIT 5", sql.trim());
+
+		sql = builder.getSelectForColumns(tbl, cols, "id", 5);
+		assertEquals("select * from person  \nORDER BY id LIMIT 5", sql.trim());
+
+		builder.setTemplate("select %columnlist% from %table_name%");
+		builder.setLimitClause("LIMIT " + TableSelectBuilder.MAX_ROWS_PLACEHOLDER);
+
+		sql = builder.getSelectForColumns(tbl, cols, "id", 5);
+		assertEquals("select * from person \nORDER BY id", sql.trim());
+
+		sql = builder.getSelectForColumns(tbl, cols, null, 5);
+		assertEquals("select * from person", sql.trim());
 	}
 
 }
