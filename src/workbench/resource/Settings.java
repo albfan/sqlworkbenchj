@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1652,6 +1653,14 @@ public class Settings
 		if (con != null && con.getProfile() != null)
 		{
 			delim = con.getProfile().getAlternateDelimiter();
+		}
+		if (delim == null && con != null)
+		{
+			String text = getDbDelimiter(con.getDbId());
+			if (text != null)
+			{
+				delim = new DelimiterDefinition(text);
+			}
 		}
 		if (delim == null)
 		{
@@ -3454,6 +3463,39 @@ public class Settings
 		{
 			PkMapping.getInstance().saveMapping(this.getPKMappingFilename());
 		}
+	}
+
+	public String getDbDelimiter(String dbId)
+	{
+		return getProperty("workbench.db." + dbId + ".alternatedelimiter", null);
+	}
+
+	public void setDbDelimiter(String dbId, String delimiterText)
+	{
+		setProperty("workbench.db." + dbId + ".alternatedelimiter", delimiterText);
+	}
+
+	public Map<String, String> getDbIdMapping()
+	{
+		Map<String, String> mapping = new LinkedHashMap<>();
+
+		List<String> propKeys = this.props.getKeysWithPrefix("workbench.db.dbname");
+		for (String key : propKeys)
+		{
+			int pos = key.lastIndexOf('.');
+			String dbid = key.substring(pos + 1);
+			String name = getProperty(key, null);
+			if (name != null)
+			{
+				mapping.put(dbid, name);
+			}
+		}
+		return mapping;
+	}
+
+	public String getDbmsForDbId(String dbId)
+	{
+		return getProperty("workbench.db.dbname." + dbId, StringUtil.capitalize(dbId));
 	}
 
 	@Override

@@ -29,6 +29,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 
 import javax.swing.DefaultComboBoxModel;
@@ -52,8 +54,6 @@ import workbench.gui.components.WbFilePicker;
 import workbench.gui.editor.BracketCompleter;
 import workbench.gui.sql.FileReloadType;
 
-import workbench.sql.DelimiterDefinition;
-
 import workbench.util.StringUtil;
 
 /**
@@ -62,7 +62,7 @@ import workbench.util.StringUtil;
  */
 public class EditorOptionsPanel
 	extends JPanel
-	implements Restoreable, ActionListener, ValidatingComponent
+	implements Restoreable, ActionListener, ValidatingComponent, ItemListener
 {
 
 	public EditorOptionsPanel()
@@ -84,6 +84,9 @@ public class EditorOptionsPanel
 			ResourceMgr.getString("LblLTUnix")
 		};
 
+		DbDelimiter[] names = DbDelimiter.getMapping();
+		cbxDbName.setModel(new DefaultComboBoxModel(names));
+
 		internalLineEnding.setModel(new DefaultComboBoxModel(items));
 		externalLineEnding.setModel(new DefaultComboBoxModel(items));
 		useCurrentLineStmt.setSelected(GuiSettings.getUseStatementInCurrentLine());
@@ -99,16 +102,6 @@ public class EditorOptionsPanel
 
 		value = Settings.getInstance().getExternalLineEndingValue();
 		externalLineEnding.setSelectedIndex(lineEndingValueToIndex(value));
-
-		DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(null);
-		if (delim == null)
-		{
-			alternateDelimiter.setText("");
-		}
-		else
-		{
-			alternateDelimiter.setText(delim.getDelimiter());
-		}
 
 		noWordSep.setText(Settings.getInstance().getEditorNoWordSep());
 		useTabs.setSelected(Settings.getInstance().getEditorUseTabCharacter());
@@ -168,7 +161,19 @@ public class EditorOptionsPanel
 		Settings set = Settings.getInstance();
 		set.setMaxHistorySize(((NumberField)this.historySizeField).getValue());
 
-		set.setAlternateDelimiter(alternateDelimiter.getText());
+		// Synchronize current text with the corresponding item in the dropdown
+		DbDelimiter delim = (DbDelimiter)cbxDbName.getSelectedItem();
+		delim.setDelimiter(alternateDelimiter.getText());
+
+		DbDelimiter defDelim = (DbDelimiter)cbxDbName.getItemAt(0);
+		set.setAlternateDelimiter(defDelim.getDelimiter());
+
+		for (int i=1; i < cbxDbName.getItemCount(); i++)
+		{
+			DbDelimiter dbDelim = (DbDelimiter)cbxDbName.getItemAt(i);
+			set.setDbDelimiter(dbDelim.getDbid(), dbDelim.getDelimiter());
+		}
+
 		set.setRightClickMovesCursor(rightClickMovesCursor.isSelected());
 		set.setAutoJumpNextStatement(this.autoAdvance.isSelected());
 		set.setEditorTabWidth(StringUtil.getIntValue(this.tabSize.getText(), 2));
@@ -271,7 +276,9 @@ public class EditorOptionsPanel
     wheelScrollLines = new NumberField();
     reloadLabel = new JLabel();
     reloadType = new JComboBox();
+    jPanel3 = new JPanel();
     alternateDelimiter = new JTextField();
+    cbxDbName = new JComboBox();
 
     setLayout(new GridBagLayout());
 
@@ -647,14 +654,35 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(reloadType, gridBagConstraints);
 
-    alternateDelimiter.setColumns(4);
+    jPanel3.setLayout(new GridBagLayout());
+
+    alternateDelimiter.setColumns(10);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 7, 0, 15);
+    jPanel3.add(alternateDelimiter, gridBagConstraints);
+
+    cbxDbName.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+    cbxDbName.addItemListener(this);
+    cbxDbName.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    jPanel3.add(cbxDbName, gridBagConstraints);
+
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 11, 0, 15);
-    add(alternateDelimiter, gridBagConstraints);
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(6, 11, 0, 0);
+    add(jPanel3, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -665,6 +693,18 @@ public class EditorOptionsPanel
     {
       EditorOptionsPanel.this.followCurrentDirActionPerformed(evt);
     }
+    else if (evt.getSource() == cbxDbName)
+    {
+      EditorOptionsPanel.this.cbxDbNameActionPerformed(evt);
+    }
+  }
+
+  public void itemStateChanged(ItemEvent evt)
+  {
+    if (evt.getSource() == cbxDbName)
+    {
+      EditorOptionsPanel.this.cbxDbNameItemStateChanged(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
 
 	private void followCurrentDirActionPerformed(ActionEvent evt)//GEN-FIRST:event_followCurrentDirActionPerformed
@@ -672,6 +712,20 @@ public class EditorOptionsPanel
 		defaultDir.setEnabled(followCurrentDir.isSelected());
 	}//GEN-LAST:event_followCurrentDirActionPerformed
 
+  private void cbxDbNameActionPerformed(ActionEvent evt)//GEN-FIRST:event_cbxDbNameActionPerformed
+  {//GEN-HEADEREND:event_cbxDbNameActionPerformed
+		DbDelimiter delim = (DbDelimiter)cbxDbName.getSelectedItem();
+		alternateDelimiter.setText(delim.getDelimiter());
+  }//GEN-LAST:event_cbxDbNameActionPerformed
+
+  private void cbxDbNameItemStateChanged(ItemEvent evt)//GEN-FIRST:event_cbxDbNameItemStateChanged
+  {//GEN-HEADEREND:event_cbxDbNameItemStateChanged
+		if (evt.getStateChange() == ItemEvent.DESELECTED)
+		{
+			DbDelimiter def = (DbDelimiter)evt.getItem();
+			def.setDelimiter(alternateDelimiter.getText());
+		}
+  }//GEN-LAST:event_cbxDbNameItemStateChanged
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox allowEditDuringExec;
@@ -680,6 +734,7 @@ public class EditorOptionsPanel
   private JCheckBox alwaysAllowExecSel;
   private JCheckBox autoAdvance;
   private JTextField autoCloseBrackets;
+  private JComboBox cbxDbName;
   private WbFilePicker defaultDir;
   private JLabel editorTabSizeLabel;
   private JTextField electricScroll;
@@ -699,6 +754,7 @@ public class EditorOptionsPanel
   private JLabel jLabel2;
   private JPanel jPanel1;
   private JPanel jPanel2;
+  private JPanel jPanel3;
   private JCheckBox keepHilite;
   private JTextField noWordSep;
   private JLabel noWordSepLabel;

@@ -46,6 +46,7 @@ public enum ParserType
 
 		// This will properly handle Postgres' dollar quoting
 		if (DbMetadata.DBID_PG.equals(dbid)) return Postgres;
+		if ("vertica_database".equals(dbid)) return Postgres;
 
 		// This will allow mixing the standard delimiter with the alternate delimiter
 		if (DbMetadata.DBID_ORA.equals(dbid)) return Oracle;

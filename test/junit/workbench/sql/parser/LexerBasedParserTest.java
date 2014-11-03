@@ -473,9 +473,18 @@ public class LexerBasedParserTest
 
 	@Test
 	public void quotedQuotes()
+		throws Exception
+	{
+		for (ParserType type : ParserType.values())
+		{
+			doTestQuotedQuotes(new LexerBasedParser(type));
+		}
+	}
+
+	public void doTestQuotedQuotes(LexerBasedParser parser)
+		throws Exception
 	{
 		String sql = "select \";\" from foobar;\ncommit;";
-		LexerBasedParser parser = new LexerBasedParser(ParserType.Standard);
 		parser.setScript(sql);
 		parser.setStoreStatementText(true);
 		ScriptCommandDefinition cmd = parser.getNextCommand();
@@ -708,9 +717,10 @@ public class LexerBasedParserTest
 	public void testMixedEmptyLinesWithTerminator()
 		throws Exception
 	{
-		doTestMixedEmptyLinesWithTerminator(new LexerBasedParser(ParserType.Standard));
-		doTestMixedEmptyLinesWithTerminator(new LexerBasedParser(ParserType.Postgres));
-		doTestMixedEmptyLinesWithTerminator(new LexerBasedParser(ParserType.SqlServer));
+		for (ParserType type : ParserType.values())
+		{
+			doTestMixedEmptyLinesWithTerminator(new LexerBasedParser(type));
+		}
 	}
 
 	private void doTestMixedEmptyLinesWithTerminator(ScriptIterator parser)
@@ -762,9 +772,10 @@ public class LexerBasedParserTest
 	public void testEmptyLineDelimiter()
 		throws Exception
 	{
-		doTestEmptyLineDelimiter(new LexerBasedParser(ParserType.Postgres));
-		doTestEmptyLineDelimiter(new LexerBasedParser(ParserType.SqlServer));
-		doTestEmptyLineDelimiter(new LexerBasedParser(ParserType.Standard));
+		for (ParserType type : ParserType.values())
+		{
+			doTestEmptyLineDelimiter(new LexerBasedParser(type));
+		}
 	}
 
 	private void doTestEmptyLineDelimiter(final ScriptIterator parser)
@@ -813,9 +824,10 @@ public class LexerBasedParserTest
 	public void testQuotedDelimiter()
 		throws Exception
 	{
-		doTestQuotedDelimiter(new LexerBasedParser(ParserType.Standard));
-		doTestQuotedDelimiter(new LexerBasedParser(ParserType.Postgres));
-		doTestQuotedDelimiter(new LexerBasedParser(ParserType.SqlServer));
+		for (ParserType type : ParserType.values())
+		{
+			doTestQuotedDelimiter(new LexerBasedParser(type));
+		}
 	}
 
 	private void doTestQuotedDelimiter(ScriptIterator parser)
@@ -837,9 +849,10 @@ public class LexerBasedParserTest
 	public void testWhiteSpaceAtEnd()
 		throws Exception
 	{
-		doTestWhiteSpaceAtEnd(new LexerBasedParser(ParserType.Standard));
-		doTestWhiteSpaceAtEnd(new LexerBasedParser(ParserType.Postgres));
-		doTestWhiteSpaceAtEnd(new LexerBasedParser(ParserType.SqlServer));
+		for (ParserType type : ParserType.values())
+		{
+			doTestWhiteSpaceAtEnd(new LexerBasedParser(type));
+		}
 	}
 
 	public void doTestWhiteSpaceAtEnd(ScriptIterator parser)
@@ -866,9 +879,10 @@ public class LexerBasedParserTest
 	@Test
 	public void testEscapedQuotes()
 	{
-		doTestEscapedQuotes(new LexerBasedParser(ParserType.Standard));
-		doTestEscapedQuotes(new LexerBasedParser(ParserType.Postgres));
-		doTestEscapedQuotes(new LexerBasedParser(ParserType.SqlServer));
+		for (ParserType type : ParserType.values())
+		{
+			doTestEscapedQuotes(new LexerBasedParser(type));
+		}
 	}
 
 	public void doTestEscapedQuotes(ScriptIterator parser)
@@ -894,7 +908,16 @@ public class LexerBasedParserTest
 	}
 
 	@Test
-	public void testCreateProcGran()
+	public void testCreateProcGrant()
+		throws Exception
+	{
+		for (ParserType type : ParserType.values())
+		{
+			doTestCreateProcGrant(new LexerBasedParser(type));
+		}
+	}
+
+	public void doTestCreateProcGrant(LexerBasedParser parser)
 		throws Exception
 	{
 		String sql =
@@ -902,8 +925,6 @@ public class LexerBasedParserTest
 			"grant create procedure to arthur;\n" +
 			"grant create view to arthur;";
 
-		LexerBasedParser parser = new LexerBasedParser(ParserType.Oracle);
-		parser.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		parser.setStoreStatementText(true);
 		parser.setScript(sql);
 
