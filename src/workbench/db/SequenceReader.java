@@ -50,6 +50,7 @@ public interface SequenceReader
 	public static final String PROP_USER_DATA_TYPE = "user_data_type";
 	public static final String PROP_CURRENT_VALUE = "current_value";
 	public static final String PROP_PRECISION = "precision";
+	public static final String PROP_LAST_VALUE = "last_value";
 
 	String DEFAULT_TYPE_NAME = "SEQUENCE";
 

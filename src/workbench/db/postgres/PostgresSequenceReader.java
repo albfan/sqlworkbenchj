@@ -57,7 +57,7 @@ public class PostgresSequenceReader
 			"       sn.nspname as sequence_schema \n" +
 			"FROM pg_class seq   \n" +
 			"  JOIN pg_namespace sn ON sn.oid = seq.relnamespace \n" +
-			"  CROSS JOIN (SELECT min_value, max_value, increment_by, cache_value, is_cycled FROM " + NAME_PLACEHOLDER + " ) seq_info \n" +
+			"  CROSS JOIN (SELECT min_value, max_value, last_value, increment_by, cache_value, is_cycled FROM " + NAME_PLACEHOLDER + " ) seq_info \n" +
 			"  LEFT JOIN pg_depend d ON d.objid = seq.oid AND deptype = 'a' \n" +
 			"  LEFT JOIN pg_class tab ON d.objid = seq.oid AND d.refobjid = tab.oid   \n" +
 			"  LEFT JOIN pg_attribute col ON (d.refobjid, d.refobjsubid) = (col.attrelid, col.attnum)  \n" +
@@ -189,6 +189,7 @@ public class PostgresSequenceReader
 		def.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(0, "min_value"));
 		def.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(0, "cache_value"));
 		def.setSequenceProperty(PROP_CYCLE, ds.getValue(0, "is_cycled"));
+		def.setSequenceProperty(PROP_LAST_VALUE, ds.getValue(0, "last_value"));
 		String ownedBy = ds.getValueAsString(0, "owned_by");
 		if (StringUtil.isNonEmpty(ownedBy))
 		{
@@ -225,7 +226,7 @@ public class PostgresSequenceReader
 		try
 		{
 			String sql =
-				"select min_value, max_value, increment_by, cache_value, is_cycled, remarks, owned_by \n" +
+				"select min_value, max_value, last_value, increment_by, cache_value, is_cycled, remarks, owned_by \n" +
 				"from ( \n" + baseSql.replace(NAME_PLACEHOLDER, fullname) + "\n) t \n";
 			sql += " where sequence_name = ? ";
 			if (schema != null)
