@@ -87,7 +87,7 @@ public class ValueConverter
 														"MM/dd/yy HH:mm:ss",
 														"MM/dd/yyyy HH:mm:ss");
 
-	private final String[] timeFormats = new String[] { "HH:mm:ss.SS", "HH:mm:ss", "HH:mm", "HH" };
+	private final String[] timeFormats = new String[] { "HH:mm:ss.SS", "HH:mm:ss", "HH:mm", "HHmm", "HH" };
 
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
