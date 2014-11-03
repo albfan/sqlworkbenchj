@@ -3479,7 +3479,7 @@ public class Settings
 	{
 		Map<String, String> mapping = new LinkedHashMap<>();
 
-		List<String> propKeys = this.props.getKeysWithPrefix("workbench.db.dbname");
+		List<String> propKeys = this.props.getKeysWithPrefix("workbench.db.name");
 		for (String key : propKeys)
 		{
 			int pos = key.lastIndexOf('.');
@@ -3495,7 +3495,7 @@ public class Settings
 
 	public String getDbmsForDbId(String dbId)
 	{
-		return getProperty("workbench.db.dbname." + dbId, StringUtil.capitalize(dbId));
+		return getProperty("workbench.db.name." + dbId, StringUtil.capitalize(dbId));
 	}
 
 	@Override
