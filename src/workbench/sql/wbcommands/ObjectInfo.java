@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -44,6 +45,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+import workbench.resource.GuiSettings;
 
 import workbench.storage.ColumnRemover;
 import workbench.storage.DataStore;
@@ -131,10 +133,14 @@ public class ObjectInfo
 				if (synonymTarget != null)
 				{
 					DataStore synDs = getPlainSynonymInfo(connection, toDescribe);
-					synDs.setResultName(toDescribe.getObjectType() + ": " + toDescribe.getTableName());
+					String name = toDescribe.getFullyQualifiedName(connection);
+					synDs.setResultName(name + " (" + toDescribe.getObjectType() + ")");
 					result.addDataStore(synDs);
 				}
-				toDescribe = synonymTarget;
+				if (!WbManager.getInstance().isGUIMode() || GuiSettings.showSynonymTargetInDbExplorer())
+				{
+					toDescribe = synonymTarget;
+				}
 			}
 			catch (Exception e)
 			{
