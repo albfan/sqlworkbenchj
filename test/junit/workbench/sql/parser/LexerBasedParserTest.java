@@ -893,5 +893,30 @@ public class LexerBasedParserTest
 		assertEquals("commit", c.getSQL());
 	}
 
+	@Test
+	public void testCreateProcGran()
+		throws Exception
+	{
+		String sql =
+			"grant create table to arthur;\n" +
+			"grant create procedure to arthur;\n" +
+			"grant create view to arthur;";
 
+		LexerBasedParser parser = new LexerBasedParser(ParserType.Oracle);
+		parser.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		parser.setStoreStatementText(true);
+		parser.setScript(sql);
+
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertEquals("grant create table to arthur", cmd.getSQL().trim());
+
+		cmd = parser.getNextCommand();
+		assertEquals("grant create procedure to arthur", cmd.getSQL().trim());
+
+		cmd = parser.getNextCommand();
+		assertEquals("grant create view to arthur", cmd.getSQL().trim());
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+	}
 }
