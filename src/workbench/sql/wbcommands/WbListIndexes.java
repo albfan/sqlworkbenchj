@@ -118,17 +118,14 @@ public class WbListIndexes
 			catalog = currentConnection.getMetadata().getCurrentCatalog();
 		}
 
-		SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(ARG_TABLE_NAME), currentConnection);
 		String indexPattern = cmdLine.getValue(ARG_INDEX_NAME);
 
-		List<TableIdentifier> tables = tableArg.getTables();
 		List<IndexDefinition> indexes = null;
-		if (tables.isEmpty())
+
+		if (cmdLine.isArgPresent(ARG_TABLE_NAME))
 		{
-			indexes = reader.getIndexes(catalog, schema, null, indexPattern);
-		}
-		else
-		{
+			SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(ARG_TABLE_NAME), currentConnection);
+			List<TableIdentifier> tables = tableArg.getTables();
 			indexes = new ArrayList<>();
 			for (TableIdentifier tbl : tables)
 			{
@@ -138,6 +135,10 @@ public class WbListIndexes
 				List<IndexDefinition> indexList = reader.getIndexes(tcat, tschema, name, indexPattern);
 				indexes.addAll(indexList);
 			}
+		}
+		else
+		{
+			indexes = reader.getIndexes(catalog, schema, null, indexPattern);
 		}
 
 		DataStore ds = reader.fillDataStore(indexes, true);
