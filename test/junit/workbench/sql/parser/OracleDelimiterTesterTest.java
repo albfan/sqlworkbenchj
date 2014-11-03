@@ -20,7 +20,6 @@
 package workbench.sql.parser;
 
 
-import workbench.sql.parser.OracleDelimiterTester;
 
 import workbench.WbTestCase;
 
@@ -52,7 +51,7 @@ public class OracleDelimiterTesterTest
 		tester.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 
 		SQLToken create = new SQLToken(SQLToken.RESERVED_WORD, "CREATE", 0, 0);
-		tester.currentToken(create, false);
+		tester.currentToken(create, true);
 		DelimiterDefinition delim = tester.getCurrentDelimiter();
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, delim);
 
@@ -75,7 +74,7 @@ public class OracleDelimiterTesterTest
 		delim = tester.getCurrentDelimiter();
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, delim);
 	}
-	
+
 	@Test
 	public void testBlock()
 	{
@@ -83,7 +82,7 @@ public class OracleDelimiterTesterTest
 		tester.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 
 		SQLToken begin = new SQLToken(SQLToken.RESERVED_WORD, "BEGIN", 0, 0);
-		tester.currentToken(begin, false);
+		tester.currentToken(begin, true);
 		DelimiterDefinition delim = tester.getCurrentDelimiter();
 		assertEquals(tester.getAlternateDelimiter(), delim);
 

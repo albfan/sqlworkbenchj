@@ -898,7 +898,6 @@ public class LexerBasedParserTest
 		throws Exception
 	{
 		String sql =
-			"grant create table to arthur;\n" +
 			"grant create procedure to arthur;\n" +
 			"grant create view to arthur;";
 
@@ -908,9 +907,6 @@ public class LexerBasedParserTest
 		parser.setScript(sql);
 
 		ScriptCommandDefinition cmd = parser.getNextCommand();
-		assertEquals("grant create table to arthur", cmd.getSQL().trim());
-
-		cmd = parser.getNextCommand();
 		assertEquals("grant create procedure to arthur", cmd.getSQL().trim());
 
 		cmd = parser.getNextCommand();

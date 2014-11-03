@@ -186,12 +186,12 @@ public class LexerBasedParser
 			token = lexer.getNextToken(true, true);
 		}
 
-		boolean startOfLine = false;
+		boolean isStartOfLine = true;
 		boolean singleLineCommand = false;
 		boolean danglingQuote = false;
 		boolean inPgQuote = false;
 		boolean scriptEnd = false;
-		boolean firstToken = true;
+		boolean isFirstToken = true;
 		boolean isNewline = false;
 
 		int statementEnd = -1;
@@ -226,7 +226,7 @@ public class LexerBasedParser
 
 			if (delimiterTester != null)
 			{
-				delimiterTester.currentToken(token, startOfLine);
+				delimiterTester.currentToken(token, isFirstToken);
 				currentDelim = delimiterTester.getCurrentDelimiter();
 			}
 
@@ -257,9 +257,9 @@ public class LexerBasedParser
 			}
 			else if (!inPgQuote)
 			{
-				if (firstToken && delimiterTester != null && !token.isWhiteSpace())
+				if (isFirstToken && delimiterTester != null && !token.isWhiteSpace())
 				{
-					singleLineCommand = delimiterTester.isSingleLineStatement(token, firstToken);
+					singleLineCommand = delimiterTester.isSingleLineStatement(token, isFirstToken);
 				}
 
 				if (!singleLineCommand && !currentDelim.isSingleLine())
@@ -277,9 +277,9 @@ public class LexerBasedParser
 					}
 				}
 
-				if (startOfLine && !token.isWhiteSpace())
+				if (isStartOfLine && !token.isWhiteSpace())
 				{
-					startOfLine = false;
+					isStartOfLine = false;
 				}
 
 				if (isNewline || (token.isWhiteSpace() && isMultiLine(text)))
@@ -306,15 +306,15 @@ public class LexerBasedParser
 						lastStatementUsedTerminator = false;
 						break;
 					}
-					startOfLine = true;
+					isStartOfLine = true;
 					singleLineCommand = false;
 					currentLine = "";
 				}
 			}
 
-			if (firstToken && !token.isWhiteSpace())
+			if (isFirstToken && !token.isWhiteSpace())
 			{
-				firstToken = false;
+				isFirstToken = false;
 			}
 			statementEnd = token.getCharEnd();
 			token = lexer.getNextToken(true, true);

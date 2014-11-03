@@ -31,7 +31,7 @@ public interface DelimiterTester
 	void setAlternateDelimiter(DelimiterDefinition delimiter);
 	DelimiterDefinition getAlternateDelimiter();
 
-	void currentToken(SQLToken token, boolean isStartOfLine);
+	void currentToken(SQLToken token, boolean isStartOfStatement);
 
 	DelimiterDefinition getCurrentDelimiter();
 
