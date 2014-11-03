@@ -186,7 +186,6 @@ public class LexerBasedParser
 			token = lexer.getNextToken(true, true);
 		}
 
-		boolean isStartOfLine = true;
 		boolean singleLineCommand = false;
 		boolean danglingQuote = false;
 		boolean inPgQuote = false;
@@ -277,11 +276,6 @@ public class LexerBasedParser
 					}
 				}
 
-				if (isStartOfLine && !token.isWhiteSpace())
-				{
-					isStartOfLine = false;
-				}
-
 				if (isNewline || (token.isWhiteSpace() && isMultiLine(text)))
 				{
 					if (delimiterTester != null)
@@ -306,7 +300,6 @@ public class LexerBasedParser
 						lastStatementUsedTerminator = false;
 						break;
 					}
-					isStartOfLine = true;
 					singleLineCommand = false;
 					currentLine = "";
 				}
