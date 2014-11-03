@@ -32,7 +32,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +55,6 @@ import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
-import workbench.db.DbSettings;
 import workbench.db.IndexColumn;
 import workbench.db.IndexReader;
 import workbench.db.TableColumnsDatastore;
@@ -84,6 +82,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
+import workbench.sql.wbcommands.ObjectInfo;
 
 import workbench.storage.DataStore;
 
@@ -356,44 +355,6 @@ public class TableDefinitionPanel
 		retrieveTableDefinition();
 	}
 
-	private DataStore getPlainSynonymInfo(TableIdentifier syn)
-	{
-		String[] columns = {"NAME", "VALUE" };
-		int[] types = { Types.VARCHAR, Types.VARCHAR };
-		int[] sizes = {20, 20 };
-		DataStore ds = new DataStore(columns, types, sizes);
-
-		DbMetadata meta = this.dbConnection.getMetadata();
-		DbSettings dbs = this.dbConnection.getDbSettings();
-
-		int row = -1;
-		if (dbs.supportsCatalogs())
-		{
-			row = ds.addRow();
-			ds.setValue(row, 0, "SYNONYM_CATALOG");
-			ds.setValue(row, 1, syn.getCatalog());
-		}
-		if (dbs.supportsSchemas())
-		{
-			row = ds.addRow();
-			ds.setValue(row, 0, "SYNONYM_SCHEMA");
-			ds.setValue(row, 1, syn.getSchema());
-		}
-		row = ds.addRow();
-		ds.setValue(row, 0, "SYNONYM_NAME");
-		ds.setValue(row, 1, syn.getObjectName());
-
-		TableIdentifier baseTable = meta.getSynonymTable(syn);
-		if (baseTable != null)
-		{
-			row = ds.addRow();
-			ds.setValue(row, 0, "BASE_TABLE");
-			ds.setValue(row, 1, baseTable.getTableExpression(dbConnection));
-		}
-		dbConnection.getObjectCache().addSynonym(syn, baseTable);
-		return ds;
-	}
-
 	protected void retrieveTableDefinition()
 		throws SQLException
 	{
@@ -421,7 +382,7 @@ public class TableDefinitionPanel
 				DataStore def = null;
 				if (dbConnection.getDbSettings().isSynonymType(currentTable.getType()) && !GuiSettings.showSynonymTargetInDbExplorer())
 				{
-					def = getPlainSynonymInfo(currentTable);
+					def = ObjectInfo.getPlainSynonymInfo(dbConnection, currentTable);
 				}
 				else
 				{

@@ -23,8 +23,10 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
+import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
@@ -128,14 +130,9 @@ public class ObjectInfo
 				synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
 				if (synonymTarget != null)
 				{
-					String msg = "--------[ " + StringUtil.capitalize(toDescribe.getType()) + ": " + toDescribe.getTableName() + " ]--------\n" +
-							toDescribe.getTableExpression() + " --> " +
-							synonymTarget.getTableExpression() + " (" +
-							synonymTarget.getObjectType() + ")";
-
-					connection.getObjectCache().addSynonym(toDescribe, synonymTarget);
-					result.addMessage(msg + "\n");
-					result.setSourceCommand(msg);
+					DataStore synDs = getPlainSynonymInfo(connection, toDescribe);
+					synDs.setResultName(toDescribe.getObjectType() + ": " + toDescribe.getTableName());
+					result.addDataStore(synDs);
 				}
 				toDescribe = synonymTarget;
 			}
@@ -354,4 +351,45 @@ public class ObjectInfo
 		return result;
 	}
 
+	public static DataStore getPlainSynonymInfo(WbConnection dbConnection, TableIdentifier syn)
+	{
+		String[] columns = {"NAME", "VALUE" };
+		int[] types = { Types.VARCHAR, Types.VARCHAR };
+		int[] sizes = {20, 20 };
+		DataStore ds = new DataStore(columns, types, sizes);
+
+		DbMetadata meta = dbConnection.getMetadata();
+		DbSettings dbs = dbConnection.getDbSettings();
+
+		if (meta == null || dbs == null) return ds;
+
+		int row = -1;
+		if (dbs.supportsCatalogs())
+		{
+			String catalogTerm = meta.getCatalogTerm().toUpperCase();
+			row = ds.addRow();
+			ds.setValue(row, 0, "SYNONYM_" + catalogTerm);
+			ds.setValue(row, 1, syn.getCatalog());
+		}
+		if (dbs.supportsSchemas())
+		{
+			String schemaTerm = meta.getSchemaTerm().toUpperCase();
+			row = ds.addRow();
+			ds.setValue(row, 0, "SYNONYM_" + schemaTerm);
+			ds.setValue(row, 1, syn.getSchema());
+		}
+		row = ds.addRow();
+		ds.setValue(row, 0, "SYNONYM_NAME");
+		ds.setValue(row, 1, syn.getObjectName());
+
+		TableIdentifier baseTable = meta.getSynonymTable(syn);
+		if (baseTable != null)
+		{
+			row = ds.addRow();
+			ds.setValue(row, 0, "BASE_TABLE");
+			ds.setValue(row, 1, baseTable.getTableExpression(dbConnection));
+		}
+		ds.resetStatus();
+		return ds;
+	}
 }
