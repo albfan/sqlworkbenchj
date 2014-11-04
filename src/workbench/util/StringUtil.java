@@ -1852,4 +1852,27 @@ public class StringUtil
 		}
 		return sb.toString();
 	}
+
+	public static int findOccurance(String value, char toFind, int occurance)
+	{
+		int found = 0;
+		int pos = -1;
+		do
+		{
+			pos = value.indexOf(toFind, pos + 1);
+			if (pos == -1)
+			{
+				found = -1;
+				break;
+			}
+			else
+			{
+				found ++;
+			}
+		}
+		while (found < occurance);
+
+		return pos;
+	}
+
 }

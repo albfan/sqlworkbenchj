@@ -66,12 +66,16 @@ public class WindowTitleBuilder
 
 			if (showURL)
 			{
+				String url = makeCleanUrl(profile.getUrl());
 				if (includeUser)
 				{
 					title.append(profile.getUsername());
-					title.append('@');
+					if (url.charAt(0) != '@')
+					{
+						title.append('@');
+					}
 				}
-				title.append(profile.getUrl());
+				title.append(url);
 			}
 			else
 			{
@@ -114,7 +118,6 @@ public class WindowTitleBuilder
 		int showTitle = GuiSettings.getShowFilenameInWindowTitle();
 		if (editorFile != null && showTitle != GuiSettings.SHOW_NO_FILENAME)
 		{
-
 			title.append(" - ");
 			if (showTitle == GuiSettings.SHOW_FULL_PATH)
 			{
@@ -151,7 +154,23 @@ public class WindowTitleBuilder
 		if (open == '(') return ')';
 		if (open == '<') return '>';
 		return 0;
+	}
 
+	public String makeCleanUrl(String url)
+	{
+		if (StringUtil.isEmptyString(url)) return url;
+
+		int numColon = 2;
+		if (url.startsWith("jdbc:oracle:") || url.startsWith("jdbc:jtds:"))
+		{
+			numColon = 3;
+		}
+		int pos = StringUtil.findOccurance(url, ':', numColon);
+		if (pos > 0)
+		{
+			return url.substring(pos + 1);
+		}
+		return url;
 	}
 
 }

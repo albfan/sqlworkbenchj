@@ -894,4 +894,23 @@ public class StringUtilTest
 		assertArrayEquals(data, data2);
 	}
 
+	@Test
+	public void testFindOccurance()
+	{
+		String value = "jdbc:oracle:thin:@localhost:1521:orcl";
+		int pos = StringUtil.findOccurance(value, ':', 3);
+		assertEquals(value.indexOf('@') -1, pos);
+
+		value = "foobar";
+		pos = StringUtil.findOccurance(value, ':', 3);
+		assertEquals(-1, pos);
+
+		value = "jdbc:oracle:thin:@localhost:1521:orcl";
+		pos = StringUtil.findOccurance(value, ':', 8);
+		assertEquals(-1, pos);
+
+		value = "jdbc:oracle:thin:@localhost:1521:orcl";
+		pos = StringUtil.findOccurance(value, ':', 1);
+		assertEquals(4, pos);
+	}
 }
