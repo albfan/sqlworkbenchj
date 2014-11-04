@@ -961,7 +961,6 @@ public class BatchRunner
 			return;
 		}
 
-
 		if (showStatementWithResult && !printStatements)
 		{
 			console.println(sql.trim());
@@ -970,6 +969,8 @@ public class BatchRunner
 		RowDisplay current = ConsoleSettings.getInstance().getNextRowDisplay();
 		boolean rowsAsLine = (current != null && current == RowDisplay.SingleLine);
 
+		boolean showRowCount = showSummary && result.getShowRowCount();
+		
 		for (int i=0; i < data.size(); i++)
 		{
 			DataStore ds = data.get(i);
@@ -977,7 +978,7 @@ public class BatchRunner
 			{
 				DataStorePrinter printer = new DataStorePrinter(ds);
 				printer.setFormatColumns(optimizeCols);
-				printer.setPrintRowCount(result.getShowRowCount());
+				printer.setPrintRowCount(showRowCount);
 				printer.setPrintRowsAsLine(rowsAsLine);
 				printer.printTo(console);
 				if (i < data.size() -1) console.println();
