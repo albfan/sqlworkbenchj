@@ -2017,12 +2017,12 @@ public class DataImporter
 		}
 
 		sql.append(where);
-		if (!StringUtil.isEmptyString(this.whereClauseForUpdate))
+
+		if (StringUtil.isNonEmpty(this.whereClauseForUpdate))
 		{
 			boolean addBracket = false;
-			if (!this.whereClauseForUpdate.trim().toUpperCase().startsWith("AND") &&
-				  !this.whereClauseForUpdate.trim().toUpperCase().startsWith("OR")
-				)
+			String whereClause = this.whereClauseForUpdate.trim().toUpperCase();
+			if (!whereClause.startsWith("AND") && !whereClause.startsWith("OR"))
 			{
 				sql.append(" AND (");
 				addBracket = true;
