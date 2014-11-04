@@ -274,8 +274,8 @@ SQLCMD</screen>
 				the data through an <link linkend="command-export"><literal>WbExport</literal></link>,
 				you can optionally display the results to the console using the parameter
 				<literal>-displayResult=true</literal>. If this parameter is not passed or set
-				to false, results sets will not be visible (for a <literal>SELECT</literal> statement
-				you will simply see the message '<literal>SELECT executed successfully</literal>'.
+				to false, results sets will not be visible. For a <literal>SELECT</literal> statement
+				you will simply see the message <screen>SELECT executed successfully</screen>
 			</para>
 		</section>
 
