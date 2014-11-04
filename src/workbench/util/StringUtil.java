@@ -1862,7 +1862,6 @@ public class StringUtil
 			pos = value.indexOf(toFind, pos + 1);
 			if (pos == -1)
 			{
-				found = -1;
 				break;
 			}
 			else
