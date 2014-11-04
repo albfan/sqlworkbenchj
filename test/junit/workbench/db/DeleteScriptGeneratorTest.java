@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -53,8 +54,6 @@ import static org.junit.Assert.*;
 public class DeleteScriptGeneratorTest
 	extends WbTestCase
 {
-	private WbConnection dbConnection;
-
 	public DeleteScriptGeneratorTest()
 	{
 		super("DeleteScriptGeneratorTest");
@@ -65,7 +64,7 @@ public class DeleteScriptGeneratorTest
 		throws Exception
 	{
 		TestUtil util = getTestUtil();
-		this.dbConnection = util.getConnection();
+		WbConnection dbConnection = util.getConnection();
 
 		InputStream in = getClass().getResourceAsStream("gen_delete_schema.sql");
 		Reader r = new InputStreamReader(in);
@@ -78,7 +77,7 @@ public class DeleteScriptGeneratorTest
 		generator.setFormatSql(false);
 		generator.setTable(tbl);
 
-		List<ColumnData> pk = new ArrayList<ColumnData>();
+		List<ColumnData> pk = new ArrayList<>();
 		ColumnData id = new ColumnData("42", new ColumnIdentifier("country_id", ColumnIdentifier.NO_TYPE_INFO));
 		pk.add(id);
 		List<String> script = generator.getStatementsForValues(pk, true);
@@ -118,11 +117,11 @@ public class DeleteScriptGeneratorTest
 	public void testGenerateScript()
 		throws Exception
 	{
-		createSimpleTables();
+		WbConnection dbConnection = createSimpleTables();
 		DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
 		TableIdentifier table = new TableIdentifier("PERSON");
 		generator.setTable(table);
-		List<ColumnData> pk = new ArrayList<ColumnData>();
+		List<ColumnData> pk = new ArrayList<>();
 		ColumnData id = new ColumnData(new Integer(1), new ColumnIdentifier("ID"));
 		pk.add(id);
 		CharSequence sql = generator.getScriptForValues(pk);
@@ -143,11 +142,11 @@ public class DeleteScriptGeneratorTest
 	public void testGenerateStatements()
 		throws Exception
 	{
-		createMultiColumnPkTables();
+		WbConnection dbConnection = createMultiColumnPkTables();
 		DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
 		TableIdentifier table = new TableIdentifier("BASE");
 		generator.setTable(table);
-		List<ColumnData> pk = new ArrayList<ColumnData>();
+		List<ColumnData> pk = new ArrayList<>();
 		pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("BASE_ID1")));
 		pk.add(new ColumnData(new Integer(1), new ColumnIdentifier("BASE_ID2")));
 
@@ -200,14 +199,14 @@ public class DeleteScriptGeneratorTest
 	public void testExpression()
 		throws Exception
 	{
-		createSimpleTables();
+		WbConnection dbConnection = createSimpleTables();
 
 		DeleteScriptGenerator generator = new DeleteScriptGenerator(dbConnection);
 		generator.setFormatSql(false);
 		TableIdentifier table = new TableIdentifier("PERSON");
 		generator.setTable(table);
 
-		List<ColumnData> pk = new ArrayList<ColumnData>();
+		List<ColumnData> pk = new ArrayList<>();
 		ColumnData id = new ColumnData("IN (1,2,3)", new ColumnIdentifier("ID"));
 		pk.add(id);
 
@@ -233,7 +232,7 @@ public class DeleteScriptGeneratorTest
 	}
 
 
-	private void createMultiColumnPkTables()
+	private WbConnection createMultiColumnPkTables()
 		throws Exception
 	{
 		String sql = "CREATE TABLE base \n" +
@@ -291,25 +290,22 @@ public class DeleteScriptGeneratorTest
 					 ;
 
 		TestUtil util = new TestUtil("DependencyDeleter");
-		this.dbConnection = util.getConnection();
+		WbConnection dbConnection = util.getConnection();
 		TestUtil.executeScript(dbConnection, sql);
-		Statement stmt = this.dbConnection.createStatement();
-		stmt.executeUpdate("insert into base (base_id1, base_id2) values (1,1)");
-		stmt.executeUpdate("insert into base (base_id1, base_id2) values (2,2)");
-
-		stmt.executeUpdate("insert into child1 (child1_id1, child1_id2, c1base_id1, c1base_id2) values (11,11,1,1)");
-		stmt.executeUpdate("insert into child1 (child1_id1, child1_id2, c1base_id1, c1base_id2) values (12,12,2,2)");
-
-		stmt.executeUpdate("insert into child2 (child2_id1, child2_id2, c2c1_id1, c2c1_id2) values (101,101,11,11)");
-		stmt.executeUpdate("insert into child2 (child2_id1, child2_id2, c2c1_id1, c2c1_id2) values (102,102,12,12)");
-
-		stmt.executeUpdate("insert into child22 (child22_id1, child22_id2, c22c1_id1, c22c1_id2) values (201,201,11,11)");
-		stmt.executeUpdate("insert into child22 (child22_id1, child22_id2, c22c1_id1, c22c1_id2) values (202,202,12,12)");
-		dbConnection.commit();
-		stmt.close();
+		TestUtil.executeScript(dbConnection,
+		"insert into base (base_id1, base_id2) values (1,1);\n" +
+		"insert into base (base_id1, base_id2) values (2,2);\n" +
+		"insert into child1 (child1_id1, child1_id2, c1base_id1, c1base_id2) values (11,11,1,1);\n" +
+		"insert into child1 (child1_id1, child1_id2, c1base_id1, c1base_id2) values (12,12,2,2);\n" +
+		"insert into child2 (child2_id1, child2_id2, c2c1_id1, c2c1_id2) values (101,101,11,11);\n" +
+		"insert into child2 (child2_id1, child2_id2, c2c1_id1, c2c1_id2) values (102,102,12,12);\n" +
+		"insert into child22 (child22_id1, child22_id2, c22c1_id1, c22c1_id2) values (201,201,11,11);\n" +
+		"insert into child22 (child22_id1, child22_id2, c22c1_id1, c22c1_id2) values (202,202,12,12);\n" +
+		"commit;");
+		return dbConnection;
 	}
 
-	private void createSimpleTables()
+	private WbConnection createSimpleTables()
 		throws Exception
 	{
 		String sql =
@@ -340,8 +336,46 @@ public class DeleteScriptGeneratorTest
 
 
 		TestUtil util = new TestUtil("DeleteScriptGenerator");
-		this.dbConnection = util.getConnection();
+		WbConnection dbConnection = util.getConnection();
 		TestUtil.executeScript(dbConnection, sql);
+		return dbConnection;
 	}
 
+	@Test
+	public void testVarcharPK()
+		throws Exception
+	{
+		WbConnection con = null;
+		try
+		{
+			TestUtil util = getTestUtil();
+			con = util.getConnection();
+			TestUtil.executeScript(con,
+				"create table parent (id varchar(36) primary key); \n" +
+				"create table child (pid varchar(36), foreign key (pid) references parent (id)); \n" +
+				"insert into parent (id) values ('some-id');\n" +
+				"insert into child  (pid) values ('some-id');\n" +
+				"commit;");
+
+			DeleteScriptGenerator generator = new DeleteScriptGenerator(con);
+			generator.setFormatSql(false);
+			TableIdentifier table = new TableIdentifier("PARENT");
+			generator.setTable(table);
+
+			List<ColumnData> pk = new ArrayList<>();
+			ColumnIdentifier col = new ColumnIdentifier("ID");
+			col.setDataType(Types.VARCHAR);
+			col.setDbmsType("VARCHAR(36)");
+			ColumnData id = new ColumnData("some-id", col);
+			pk.add(id);
+			List<String> statements = generator.getStatementsForValues(pk, true);
+			assertEquals(2, statements.size());
+			assertEquals("DELETE FROM CHILD \nWHERE PID = 'some-id'", statements.get(0));
+			assertEquals("DELETE FROM PARENT\nWHERE ID = 'some-id'", statements.get(1));
+		}
+		finally
+		{
+			con.disconnect();
+		}
+	}
 }

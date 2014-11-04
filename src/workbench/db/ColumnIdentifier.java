@@ -229,7 +229,7 @@ public class ColumnIdentifier
 
 	/**
 	 * Set the name of the source table if this column was used in a query.
-	 * 
+	 *
 	 * @param name
 	 */
 	public void setSourceTableName(String name)

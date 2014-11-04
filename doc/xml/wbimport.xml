@@ -324,9 +324,12 @@
 								Defines the key columns for the target table. This parameter
 								is only necessary if import is running in <literal>UPDATE</literal> mode.
 							</para>
+              <para>
+                It is assumed that the values for the key columns will never be <literal>NULL</literal>.
+              </para>
 							<para>
 								This parameter is ignored if files are imported using the <literal>-sourcedir</literal>
-								parameter
+								parameter.
 							</para>
 						</entry>
 					</row>

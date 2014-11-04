@@ -187,6 +187,9 @@
 								It is ignored when specifying more than one table with the <literal>-sourceTable</literal>
 								argument. In that case each table must have a primary key.
 							</para>
+              <para>
+                It is assumed that the values for the key columns will never be <literal>NULL</literal>.
+              </para>
 						</entry>
 					</row>
 

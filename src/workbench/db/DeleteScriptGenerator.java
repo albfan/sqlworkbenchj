@@ -23,6 +23,7 @@
 package workbench.db;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,10 +53,10 @@ import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
 import workbench.storage.SqlLiteralFormatter;
 
+import workbench.sql.formatter.SqlFormatter;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
-import workbench.sql.formatter.SqlFormatter;
 
 import workbench.util.AggregatingMap;
 import workbench.util.CollectionUtil;
@@ -450,16 +451,18 @@ public class DeleteScriptGenerator
 			return false;
 		}
 
+		ColumnIdentifier col = data.getIdentifier();
+		if (col != null && col.getDataType() != Types.OTHER && col.getDataType() != ColumnIdentifier.NO_TYPE_INFO && col.getDbmsType() != null)
+		{
+			return false;
+		}
+
 		if (value instanceof String)
 		{
 			String s = (String)value;
 			SQLLexer lexer = SQLLexerFactory.createLexer(connection, s);
 			SQLToken first = lexer.getNextToken(false, false);
-			if (first.isNumberLiteral() || first.isLiteral())
-			{
-				return false;
-			}
-			return true;
+			return first.isReservedWord() || first.isOperator();
 		}
 		return false;
 	}
