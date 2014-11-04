@@ -23,6 +23,7 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+import java.awt.event.KeyListener;
 import java.util.List;
 
 import javax.swing.ComboBoxEditor;
@@ -72,6 +73,11 @@ public class HistoryTextField
 			if (comp != null)
 			{
 				comp.removeMouseListener(contextMenu);
+				KeyListener[] keyListeners = comp.getKeyListeners();
+				for (KeyListener l : keyListeners)
+				{
+					comp.removeKeyListener(l);
+				}
 			}
 		}
 		contextMenu.dispose();

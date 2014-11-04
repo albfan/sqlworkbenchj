@@ -3340,7 +3340,7 @@ public class SqlPanel
 
 						if (!macroRun && !editor.isModifiedAfter(scriptStart))
 						{
-							highlightError(true, scriptParser, commandWithError, selectionOffset, null);
+							highlightError(highlightOnError, scriptParser, commandWithError, selectionOffset, null);
 						}
 
 						// force a refresh in order to display the selection

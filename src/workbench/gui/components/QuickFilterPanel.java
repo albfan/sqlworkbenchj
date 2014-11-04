@@ -169,15 +169,15 @@ public class QuickFilterPanel
 
 	private void enableAutoFilter()
 	{
-		Component ed = filterValue.getEditor().getEditorComponent();
-		ed.addKeyListener(this);
+//		Component ed = filterValue.getEditor().getEditorComponent();
+//		ed.addKeyListener(this);
 		autoFilterEnabled = true;
 	}
 
 	private void disableAutoFilter()
 	{
-		Component ed = filterValue.getEditor().getEditorComponent();
-		ed.removeKeyListener(this);
+//		Component ed = filterValue.getEditor().getEditorComponent();
+//		ed.removeKeyListener(this);
 		autoFilterEnabled = false;
 	}
 
@@ -282,6 +282,8 @@ public class QuickFilterPanel
 		this.setFocusTraversalPolicy(pol);
 		this.setFocusCycleRoot(false);
 		this.filterValue.addActionListener(this);
+		Component ed = filterValue.getEditor().getEditorComponent();
+		ed.addKeyListener(this);
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_QUICK_FILTER_REGEX);
 	}
 
@@ -531,7 +533,7 @@ public class QuickFilterPanel
 			else
 			{
 				String cmd = e.getActionCommand();
-				if (cmd.equals("comboBoxChanged") || cmd.equals("comboBoxEdited"))
+				if (cmd.equals("comboBoxChanged"))
 				{
 					applyQuickFilter();
 				}
@@ -651,7 +653,7 @@ public class QuickFilterPanel
 				{
 					filterByEditorValue(true);
 				}
-				else
+				else if (autoFilterEnabled)
 				{
 					filterByEditorValue(false);
 				}
