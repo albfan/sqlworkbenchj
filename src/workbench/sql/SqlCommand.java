@@ -125,9 +125,6 @@ public class SqlCommand
 
 	protected String getDefaultSuccessMessage(StatementRunnerResult result)
 	{
-		String msg = result == null ? null : getSuccessMessage(result.getSourceCommand());
-		if (msg != null) return msg;
-
 		String verb = getVerb();
 		if (StringUtil.isEmptyString(verb) && result != null)
 		{
@@ -135,6 +132,9 @@ public class SqlCommand
 		}
 
 		if (!Settings.getInstance().showSuccessMessageForVerb(verb)) return null;
+
+		String msg = result == null ? null : getSuccessMessage(verb, result.getSourceCommand());
+		if (msg != null) return msg;
 
 		String dbid = null;
 		if (currentConnection != null)
@@ -152,13 +152,8 @@ public class SqlCommand
 		return ResourceMgr.getFormattedString("MsgKnownStatementOK", verb);
 	}
 
-	protected String getSuccessMessage(String sql)
+	protected String getSuccessMessage(String verb, String sql)
 	{
-		String verb = getVerb();
-		if (StringUtil.isEmptyString(verb))
-		{
-			verb = currentConnection.getParsingUtil().getSqlVerb(sql);
-		}
 		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql, currentConnection);
 		if (info != null)
 		{
