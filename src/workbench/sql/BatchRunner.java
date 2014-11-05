@@ -802,7 +802,7 @@ public class BatchRunner
 				}
 				else if (!logAllStatements)
 				{
-					// Make sure the statements is logged for debugging purposes
+					// Make sure the statement is logged for debugging purposes
 					LogMgr.logDebug("BatchRunner.executeScript()", "Executing statement: "  + sql);
 				}
 
@@ -969,8 +969,8 @@ public class BatchRunner
 		RowDisplay current = ConsoleSettings.getInstance().getNextRowDisplay();
 		boolean rowsAsLine = (current != null && current == RowDisplay.SingleLine);
 
-		boolean showRowCount = showSummary && result.getShowRowCount();
-		
+		boolean showRowCount = result.getShowRowCount();
+
 		for (int i=0; i < data.size(); i++)
 		{
 			DataStore ds = data.get(i);
