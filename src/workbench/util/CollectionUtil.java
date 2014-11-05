@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -129,23 +128,6 @@ public class CollectionUtil
 	public static <E> List<E> readOnlyList(E... a)
 	{
 		return Collections.unmodifiableList(arrayList(a));
-	}
-
-	/**
-	 * Removes all NULL values from the given collection.
-	 *
-	 * @param elements the collection to cleanup
-	 */
-	public static void removeNullValues(Collection elements)
-	{
-		Iterator itr = elements.iterator();
-		while (itr.hasNext())
-		{
-			if (itr.next() == null)
-			{
-				itr.remove();
-			}
-		}
 	}
 
 }
