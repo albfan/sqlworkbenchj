@@ -771,6 +771,12 @@ public class Settings
 		setProperty(PROPERTY_LOG_ALL_SQL, flag);
 	}
 
+	public boolean showSuccessMessageForVerb(String verb)
+	{
+		if (verb == null) return false;
+		return getBoolProperty("workbench.sql." + verb.toLowerCase() + ".show.success", true);
+	}
+	
 	public boolean getFixSqlServerTimestampDisplay()
 	{
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", false);

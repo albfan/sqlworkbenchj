@@ -134,6 +134,8 @@ public class SqlCommand
 			verb = currentConnection.getParsingUtil().getSqlVerb(result.getSourceCommand());
 		}
 
+		if (!Settings.getInstance().showSuccessMessageForVerb(verb)) return null;
+
 		String dbid = null;
 		if (currentConnection != null)
 		{
@@ -217,7 +219,11 @@ public class SqlCommand
 
 	protected void appendSuccessMessage(StatementRunnerResult result)
 	{
-		result.addMessage(getDefaultSuccessMessage(result));
+		String msg = getDefaultSuccessMessage(result);
+		if (msg != null)
+		{
+			result.addMessage(msg);
+		}
 	}
 
 	public void setParameterPrompter(ParameterPrompter p)

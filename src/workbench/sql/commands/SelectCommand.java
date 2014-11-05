@@ -53,7 +53,7 @@ public class SelectCommand
 
 	/**
 	 * Runs the passed SQL statement using Statement.executeQuery()
-	 * 
+	 *
 	 * @param sql the statement to execute
 	 * @return the result of the execution
 	 * @throws java.sql.SQLException
@@ -144,13 +144,13 @@ public class SelectCommand
 			{
 				processResults(result, hasResult, rs);
 
-				if (!isCancelled)
+				if (isCancelled)
 				{
-					this.appendSuccessMessage(result);
+					result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
 				}
 				else
 				{
-					result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
+					this.appendSuccessMessage(result);
 				}
 				result.setSuccess();
 			}
