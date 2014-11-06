@@ -106,18 +106,18 @@ public class VerticaProjectionReader
 	{
 		String sql =
 			"SELECT p.projection_name as name, \n" +
-			"       coalesce(p.node_name,ps.node_name) as node_name, \n" +
+			"       coalesce(p.node_name,ps.node_name) as node, \n" +
 			"       p.created_epoch, \n" +
-			"       ps.projection_column_count, \n" +
-			"       ps.wos_row_count, \n" +
-			"       ps.ros_row_count, \n" +
-			"       ps.wos_used_bytes, \n" +
-			"       ps.ros_used_bytes, \n" +
-			"       ps.ros_count \n" +
+			"       ps.projection_column_count as columns, \n" +
+			"       ps.ros_count as ROSes, \n" +
+			"       ps.wos_row_count as wos_rows, \n" +
+			"       ps.ros_row_count as ros_rows, \n" +
+			"       round(ps.wos_used_bytes/1024/1024,2) as wos_mb, \n" +
+			"       round(ps.ros_used_bytes/1024/1024,2) as ros_mb \n" +
 			"FROM projections p \n" +
 			"  left outer join projection_storage ps using (projection_id) \n" +
 			"WHERE p.projection_basename = ? \n" +
-			"ORDER BY p.projection_name, node_name ";
+			"ORDER BY p.projection_name, node ";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -149,25 +149,24 @@ public class VerticaProjectionReader
 		throws SQLException
 	{
 		String sql =
-			"SELECT pc.projection_name as name, \n" +
+			"SELECT pc.column_position, \n" +
 			"       pc.projection_column_name, \n" +
 			"       decode(pc.projection_column_name,pc.table_column_name,'',pc.table_column_name) as table_column_name, \n" +
-			"       pc.column_position, \n" +
 			"       pc.sort_position, \n" +
 			"       pc.data_type, \n" +
 			"       pc.encoding_type, \n" +
 			"       pc.access_rank, \n" +
 			"       pc.group_id, \n" +
-			"       pc.statistics_type, \n" +
-			"       pc.statistics_updated_timestamp, \n" +
-			"       sum(used_bytes) as bytes_total, \n" +
+			"       round(sum(used_bytes)/1024/1024,2) as mb_total, \n" +
 			"       sum(ros_count) as ros_total, \n" +
-			"       avg(used_bytes) as bytes_per_node, \n" +
-			"       avg(ros_count) as ros_per_node \n" +
+			"       round(avg(used_bytes)/1024/1024,2) as mb_per_node, \n" +
+			"       avg(ros_count) as ros_per_node, \n" +
+			"       pc.statistics_type, \n" +
+			"       pc.statistics_updated_timestamp \n" +
 			"FROM projection_columns pc \n" +
-			"  left outer join column_storage ps using (projection_id,column_id) \n" +
+			" left outer join column_storage ps using (projection_id,column_id) \n" +
 			"WHERE pc.projection_id = (select projection_id FROM projections WHERE projection_basename = ? limit 1) \n" +
-			"GROUP BY 1,2,3,4,5,6,7,8,9,10,11 \n" +
+			"GROUP BY 1,2,3,4,5,6,7,8,13,14 \n" +
 			"ORDER BY pc.column_position ";
 
 		if (Settings.getInstance().getDebugMetadataSql())
