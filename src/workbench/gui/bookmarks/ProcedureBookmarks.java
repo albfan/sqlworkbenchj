@@ -65,7 +65,7 @@ public class ProcedureBookmarks
 	private Set<String> modeKeywords = CollectionUtil.caseInsensitiveSet("OUT", "IN", "INOUT");
 	private Set<String> typeKeywords = CollectionUtil.caseInsensitiveSet("PROCEDURE", "FUNCTION");
 	private Set<String> createKeywords = CollectionUtil.caseInsensitiveSet("CREATE", "ALTER", "CREATE OR REPLACE");
-	private Set<String> noParse = CollectionUtil.caseInsensitiveSet("DROP", "GRANT");
+	private Set<String> noParse = CollectionUtil.caseInsensitiveSet("DROP", "GRANT", "REVOKE", "RENAME");
 	private Set<String> parameterStart = CollectionUtil.caseInsensitiveSet("(");
 	private Set<String> parameterEnd = CollectionUtil.caseInsensitiveSet(")", "COLLATE", "NOT NULL");
 	private Set<String> parameterDefault = CollectionUtil.caseInsensitiveSet("DEFAULT");
