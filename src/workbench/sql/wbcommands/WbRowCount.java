@@ -159,8 +159,8 @@ public class WbRowCount
 		String catalogTerm =  currentConnection.getMetadata().getCatalogTerm().toLowerCase();
 
 		boolean includeType = true;
-		boolean includeSchema = true;
-		boolean includeCatalog = true;
+		boolean includeSchema = currentConnection.getDbSettings().supportsSchemas();
+		boolean includeCatalog = currentConnection.getDbSettings().supportsCatalogs();
 
 		if (excludeCols.contains("type"))
 		{

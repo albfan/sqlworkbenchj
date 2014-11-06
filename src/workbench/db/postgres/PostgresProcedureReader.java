@@ -386,8 +386,9 @@ public class PostgresProcedureReader
 		{
 			sql += " AND p.proargtypes = cast('" + oids + "' as oidvector) \n ";
 		}
-		else
+		else if (def.getDisplayName().contains("("))
 		{
+			// only restrict the arguments if the procedure name contained them as well.
 			sql += " AND (p.proargtypes IS NULL OR array_length(p.proargtypes,1) = 0)";
 		}
 
