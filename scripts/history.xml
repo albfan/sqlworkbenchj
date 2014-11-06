@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-10-30">
-    <entry dev-build="8" type="enh">It's now possible to define a default (global) alternate delimiter based on the DBMS.</entry>
+    <entry dev-build="9" type="enh">It's now possible to define a default (global) alternate delimiter based on the DBMS.</entry>
     <entry dev-build="7" type="enh">When using Oracle it's now possible to mix standard delimiter and alternate delimiter in a single script.</entry>
     <entry dev-build="7" type="enh">It's now possible to pass a SQL statement through the -command parameter using Linux "Here Documents"</entry>
     <entry dev-build="7" type="enh">WbRowCount now has an option to exclude some columns from the result</entry>
@@ -36,7 +36,7 @@
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
     <entry dev-build="7" type="fix">When resizing the input dialog for variables or the columns in the table, the dialog was closed</entry>
-    <entry dev-build="8" type="fix">Deleting dependent rows from a result did not work if the PK was not a numberic value</entry>
+    <entry dev-build="9" type="fix">Deleting dependent rows from a result did not work if the PK was not a numberic value</entry>
     <entry dev-build="8" type="fix">When using -nullString together with -escapeText the null string was escaped in the output file</entry>
     <entry dev-build="8" type="fix">When editing data in the DbExplorer the primary key of a table was not automatically detected any more.</entry>
     <entry dev-build="8" type="fix">The alternate delimiter was not always detected correctly.</entry>
