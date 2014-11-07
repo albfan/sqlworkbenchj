@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import workbench.resource.Settings;
-
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptCommandDefinition;
 
@@ -61,66 +59,28 @@ public class ScriptParser
 	private boolean emptyLineIsSeparator;
 	private boolean returnTrailingWhitesapce;
 	private boolean useAlternateDelimiter;
-	private ParserType parserType;
+	private ParserType parserType = ParserType.Standard;
 	private File source;
-
-	private int maxFileSize;
 
 	public ScriptParser()
 	{
-		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
+		this(ParserType.Standard);
 	}
 
 	public ScriptParser(ParserType type)
 	{
-		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
 		parserType = type;
 	}
 
 	public ScriptParser(String aScript, ParserType type)
 	{
-		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
-		parserType = type;
+		this(type);
 		this.setScript(aScript);
 	}
 
 	public ScriptParser(String aScript)
 	{
-		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
 		this.setScript(aScript);
-	}
-
-
-	/** Create a ScriptParser
-	 *
-	 *	The actual script needs to be specified with setScript()
-	 *  The delimiter will be evaluated dynamically
-	 */
-	public ScriptParser(int fileSize)
-	{
-		parserType = ParserType.Standard;
-		maxFileSize = fileSize;
-	}
-
-	/**
-	 *	Initialize a ScriptParser from a file.
-	 *	The delimiter will be evaluated dynamically
-	 */
-	public ScriptParser(File f)
-		throws IOException
-	{
-		this(f, null);
-	}
-
-	/**
-	 *	Initialize a ScriptParser from a file.
-	 *	The delimiter will be evaluated dynamically
-	 */
-	public ScriptParser(File f, String encoding)
-		throws IOException
-	{
-		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
-		setFile(f, encoding);
 	}
 
 	public void setFile(File f)
@@ -131,7 +91,12 @@ public class ScriptParser
 
 	public void setParserType(ParserType type)
 	{
-		this.parserType = type;
+		parserType = type;
+		this.commands = null;
+		if (scriptIterator != null)
+		{
+			scriptIterator = getParserInstance();
+		}
 	}
 
 	/**
@@ -143,15 +108,8 @@ public class ScriptParser
 	{
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
 
-		if (f.length() < this.maxFileSize)
-		{
-			this.readScriptFromFile(f, encoding);
-		}
-		else
-		{
-			scriptIterator = getParserInstance();
-			scriptIterator.setFile(f, encoding);
-		}
+		scriptIterator = getParserInstance();
+		scriptIterator.setFile(f, encoding);
 		this.source = f;
 	}
 

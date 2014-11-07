@@ -22,8 +22,6 @@
  */
 package workbench.sql.parser;
 
-import workbench.sql.parser.ParserType;
-import workbench.sql.parser.ScriptParser;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -373,7 +371,7 @@ public class ScriptParserTest
 
 		// Make sure the iterating parser is used, by setting
 		// a very low max file size
-		ScriptParser p = new ScriptParser(10);
+		ScriptParser p = new ScriptParser();
 		p.setDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		p.setCheckEscapedQuotes(false);
 
@@ -751,7 +749,7 @@ public class ScriptParserTest
 		{
 			int counter = 500;
 			File script = createScript(counter, "\n");
-			ScriptParser p = new ScriptParser(100);
+			ScriptParser p = new ScriptParser();
 			p.setFile(script);
 			p.startIterator();
 			int count = 0;
@@ -1339,5 +1337,5 @@ public class ScriptParserTest
 		size = parser.getSize();
 		assertEquals(2, size);
 	}
-	
+
 }

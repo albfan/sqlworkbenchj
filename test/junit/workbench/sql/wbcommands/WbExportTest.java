@@ -1030,7 +1030,7 @@ public class WbExportTest
 			contents = FileUtil.readCharacters(in);
 			assertEquals("Wrong second clob content", "Second clob", contents);
 
-			ScriptParser p = new ScriptParser(1024*1024);
+			ScriptParser p = new ScriptParser();
 			p.setFile(exportFile);
 
 			assertEquals("Wrong number of statements", 3, p.getSize());
@@ -1071,7 +1071,7 @@ public class WbExportTest
 			dataFile = new File(this.basedir, "blob_export_r2_c2.data");
 			assertEquals("Second blob file not created", true, dataFile.exists());
 
-			ScriptParser p = new ScriptParser(1024 * 1024);
+			ScriptParser p = new ScriptParser();
 			p.setFile(exportFile);
 
 			assertEquals("Wrong number of statements", 3, p.getSize());
@@ -1101,7 +1101,7 @@ public class WbExportTest
 
 		assertEquals("Export file not created", true, exportFile.exists());
 
-		ScriptParser p = new ScriptParser(1024*1024);
+		ScriptParser p = new ScriptParser();
 		p.setFile(exportFile);
 
 		assertEquals("Wrong number of statements", rowcount + 1, p.getSize());
@@ -1123,7 +1123,7 @@ public class WbExportTest
 
 		assertEquals("Export file not created", true, exportFile.exists());
 
-		ScriptParser p = new ScriptParser(1024*1024);
+		ScriptParser p = new ScriptParser();
 		p.setFile(exportFile);
 
 		assertEquals("Wrong number of statements", (rowcount * 2) + 1, p.getSize());
@@ -1153,7 +1153,7 @@ public class WbExportTest
 
 		assertEquals("Export file not created", true, exportFile.exists());
 
-		ScriptParser p = new ScriptParser(1024*1024);
+		ScriptParser p = new ScriptParser();
 		p.setFile(exportFile);
 
 		assertEquals("Wrong number of statements", rowcount + 1, p.getSize());
@@ -1175,7 +1175,7 @@ public class WbExportTest
 
 		assertEquals("Export file not created", true, exportFile.exists());
 
-		ScriptParser p = new ScriptParser(1024*1024);
+		ScriptParser p = new ScriptParser();
 		p.setFile(exportFile);
 
 //		String script = FileUtil.readFile(exportFile, "UTF-8");

@@ -558,7 +558,8 @@ public class WbDataDiffTest
 			}
 
 			File update = new File(util.getBaseDir(), "person_$update.sql");
-			ScriptParser p = new ScriptParser(update);
+			ScriptParser p = new ScriptParser();
+			p.setFile(update);
 			assertEquals(2, p.getSize());
 			assertTrue(SqlUtil.getSqlVerb(p.getCommand(0)).equals("UPDATE"));
 			assertTrue(SqlUtil.getSqlVerb(p.getCommand(1)).equals("UPDATE"));

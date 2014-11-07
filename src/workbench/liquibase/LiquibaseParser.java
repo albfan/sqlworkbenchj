@@ -326,8 +326,9 @@ public class LiquibaseParser
 		{
 			if (splitStatements)
 			{
-				ScriptParser parser = new ScriptParser(include, encoding);
+				ScriptParser parser = new ScriptParser();
 				parser.setAlternateDelimiter(delimiter);
+				parser.setFile(include, encoding);
 				parser.setParserType(sqlParserType);
 				int count = parser.getSize();
 				for (int i=0; i < count; i++)
