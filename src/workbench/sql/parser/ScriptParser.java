@@ -108,9 +108,10 @@ public class ScriptParser
 	{
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
 
+		useAlternateDelimiter = this.alternateDelimiter != null;
 		scriptIterator = getParserInstance();
 		scriptIterator.setFile(f, encoding);
-		this.source = f;
+		source = f;
 	}
 
 	/**
@@ -351,6 +352,8 @@ public class ScriptParser
 	public String getCommand(int index, boolean rightTrimCommand)
 	{
 		ScriptCommandDefinition c = getCommandDefinition(index);
+		if (c.getSQL() != null) return c.getSQL();
+
 		String s = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
 
 		if (rightTrimCommand)
@@ -473,21 +476,37 @@ public class ScriptParser
 	 */
 	private void parseCommands()
 	{
-		ScriptIterator p = getParserInstance();
+		boolean fileParsing = false;
+		ScriptIterator p = null;
+		if (scriptIterator == null)
+		{
+			p = getParserInstance();
+			p.setScript(this.originalScript);
+			p.setStoreStatementText(false); // no need to store the statements twice
+		}
+		else
+		{
+			p = scriptIterator;
+			p.setStoreStatementText(true);
+			fileParsing = true;
+		}
 		commands = new ArrayList<>();
-		p.setScript(this.originalScript);
-		p.setStoreStatementText(false); // no need to store the statements twice
 
 		ScriptCommandDefinition c = null;
 		int index = 0;
 
 		while ((c = p.getNextCommand()) != null)
 		{
+			if (fileParsing && StringUtil.isBlank(c.getSQL())) continue;
 			c.setIndexInScript(index);
 			index++;
 			this.commands.add(c);
 		}
 		currentIteratorIndex = 0;
+		if (scriptIterator != null)
+		{
+			scriptIterator.done();
+		}
 	}
 
 	/**

@@ -32,14 +32,14 @@ import java.io.Writer;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.sql.DelimiterDefinition;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 import org.junit.Test;
-
-import workbench.sql.DelimiterDefinition;
 
 import static org.junit.Assert.*;
 
@@ -317,7 +317,6 @@ public class ScriptParserTest
 		assertEquals(2, size);
 		assertEquals("desc person", p.getCommand(0));
 		assertEquals("select * from dual", p.getCommand(1));
-
 	}
 
 	@Test
@@ -682,39 +681,31 @@ public class ScriptParserTest
 	@Test
 	public void testShortInclude()
 	{
-		try
-		{
-			String sql = "-- comment line 1\n" +
-				"select * from person where name = 'Dent';\n" +
-				"\n" +
-				"-- next comment\n" +
-				"insert into bla (nr, name) values (1,'laber');\n" +
-				"\n" +
-				"@myfile.sql";
-			ScriptParser p = new ScriptParser(ParserType.Oracle);
-			p.setScript(sql);
-			assertEquals("Not enough commands", 3, p.getSize());
-			assertEquals("Wrong command", "@myfile.sql", p.getCommand(2));
+		String sql = "-- comment line 1\n" +
+			"select * from person where name = 'Dent';\n" +
+			"\n" +
+			"-- next comment\n" +
+			"insert into bla (nr, name) values (1,'laber');\n" +
+			"\n" +
+			"@myfile.sql";
+		ScriptParser p = new ScriptParser(ParserType.Oracle);
+		p.setScript(sql);
+		assertEquals("Not enough commands", 3, p.getSize());
+		assertEquals("Wrong command", "@myfile.sql", p.getCommand(2));
 
-			sql = "-- comment line 1\n" +
-				"select * from person where name = 'Dent';\n" +
-				"\n" +
-				"-- next comment\n" +
-				"insert into bla (nr, name) values (1,'laber');\n" +
-				"\n" +
-				"@myfile.sql\n" +
-				"\n" +
-				"delete from theTable;";
-			p.setScript(sql);
-			assertEquals("Not enough commands", 4, p.getSize());
-			assertEquals("Wrong command", "@myfile.sql", p.getCommand(2));
-			assertEquals("Wrong command", "delete from theTable", p.getCommand(3));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		sql = "-- comment line 1\n" +
+			"select * from person where name = 'Dent';\n" +
+			"\n" +
+			"-- next comment\n" +
+			"insert into bla (nr, name) values (1,'laber');\n" +
+			"\n" +
+			"@myfile.sql\n" +
+			"\n" +
+			"delete from theTable;";
+		p.setScript(sql);
+		assertEquals("Not enough commands", 4, p.getSize());
+		assertEquals("Wrong command", "@myfile.sql", p.getCommand(2));
+		assertEquals("Wrong command", "delete from theTable", p.getCommand(3));
 	}
 
 	private File createScript(int counter, String lineEnd)
@@ -744,11 +735,12 @@ public class ScriptParserTest
 
 	@Test
 	public void testFileParsing()
+		throws Exception
 	{
+		int counter = 500;
+		File script = createScript(counter, "\n");
 		try
 		{
-			int counter = 500;
-			File script = createScript(counter, "\n");
 			ScriptParser p = new ScriptParser();
 			p.setFile(script);
 			p.startIterator();
@@ -782,10 +774,9 @@ public class ScriptParserTest
 			assertEquals("Wrong number of statements using CRL", counter, count);
 			script.delete();
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail();
+			script.delete();
 		}
 	}
 
@@ -804,8 +795,6 @@ public class ScriptParserTest
 		File scriptFile = new File(util.getBaseDir(), "foo.sql");
 		TestUtil.writeFile(scriptFile, sql, "UTF-8");
 
-		// Make sure the iterating parser is used, by setting
-		// a very low max file size
 		ScriptParser p = new ScriptParser(ParserType.Standard);
 		p.setFile(scriptFile, "UTF-8");
 		String cmd = p.getNextCommand();
@@ -825,9 +814,39 @@ public class ScriptParserTest
 		assertEquals("commit", cmd);
 
 		cmd = p.getNextCommand();
+		// the trailing newline is returned
+		assertNotNull(cmd);
+		assertTrue(cmd.isEmpty());
+
+		cmd = p.getNextCommand();
 		assertNull(cmd);
+		p.done();
+		assertTrue(scriptFile.delete());
 	}
 
+	@Test
+	public void testFileParsing3()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		util.prepareEnvironment();
+		String sql =
+			"insert into foo values (1)\n" +
+			"/\n" +
+			"insert into foo values (2)\n" +
+			"/\n" +
+			"commit\n" +
+			"/\n";
+
+		File scriptFile = new File(util.getBaseDir(), "foo.sql");
+		TestUtil.writeFile(scriptFile, sql, "UTF-8");
+
+		ScriptParser p = new ScriptParser(ParserType.Standard);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		p.setFile(scriptFile, "UTF-8");
+		int size = p.getSize();
+		assertEquals(3, size);
+	}
 
 	@Test
 	public void testMultiStatements()

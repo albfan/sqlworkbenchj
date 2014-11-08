@@ -150,6 +150,7 @@ public class Settings
 	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
 	public static final String PROPERTY_ERROR_STATEMENT_LOG_LEVEL = "workbench.gui.log.errorstatement";
 
+	public static final String PROPERTY_SORT_VARS = "workbench.sql.parameter.prompt.sort";
 	public static final String PROPERTY_VAR_PREFIX = "workbench.sql.parameter.prefix";
 	public static final String PROPERTY_VAR_SUFFIX = "workbench.sql.parameter.suffix";
 	public static final String PROPERTY_DECIMAL_DIGITS = "workbench.gui.display.maxfractiondigits";
@@ -776,7 +777,7 @@ public class Settings
 		if (verb == null) return false;
 		return getBoolProperty("workbench.sql." + verb.toLowerCase() + ".show.success", true);
 	}
-	
+
 	public boolean getFixSqlServerTimestampDisplay()
 	{
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", false);
@@ -2632,6 +2633,11 @@ public class Settings
 	public int getSyncChunkSize()
 	{
 		return getIntProperty("workbench.sql.sync.chunksize", 25);
+	}
+
+	public boolean getSortPromptVariables()
+	{
+		return getBoolProperty(PROPERTY_SORT_VARS, true);
 	}
 
 	public String getSqlParameterPrefix()

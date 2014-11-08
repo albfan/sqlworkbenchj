@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,7 +72,7 @@ public class VariablePool
 	implements PropertyChangeListener
 {
 	public static final String PROP_PREFIX = "wbp.";
-	private final Map<String, String> data = new HashMap<>();
+	private final Map<String, String> data = new LinkedHashMap<>();
 
 	private final Object lock = new Object();
 	private String prefix;
@@ -236,7 +236,7 @@ public class VariablePool
 	{
 		Set<String> toPrompt = getVariablesNeedingPrompt(sql);
 		if (toPrompt.isEmpty()) return null;
-		return getVariablesDataStore(toPrompt);
+		return getVariablesDataStore(toPrompt, Settings.getInstance().getSortPromptVariables());
 	}
 
 	public boolean hasPrompt(String sql)
@@ -283,26 +283,32 @@ public class VariablePool
 	{
 		synchronized (this.data)
 		{
-			return this.getVariablesDataStore(data.keySet());
+			return this.getVariablesDataStore(data.keySet(), true);
 		}
 	}
 
-	public DataStore getVariablesDataStore(Set<String> varNames)
+	public DataStore getVariablesDataStore(Set<String> varNames, boolean doSort)
 	{
 		DataStore vardata = new VariableDataStore();
 
 		synchronized (this.data)
 		{
-			for (String key : varNames)
+			for (String key : data.keySet())
 			{
-				if (!this.data.containsKey(key)) continue;
-				String value = this.data.get(key);
-				int row = vardata.addRow();
-				vardata.setValue(row, 0, key);
-				vardata.setValue(row, 1, value);
+				if (varNames.contains(key))
+				{
+					String value = this.data.get(key);
+					int row = vardata.addRow();
+					vardata.setValue(row, 0, key);
+					vardata.setValue(row, 1, value);
+				}
 			}
 		}
-		vardata.sortByColumn(0, true);
+
+		if (doSort)
+		{
+			vardata.sortByColumn(0, true);
+		}
 		vardata.resetStatus();
 		return vardata;
 	}

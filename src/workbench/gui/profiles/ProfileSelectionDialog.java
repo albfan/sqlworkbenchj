@@ -27,6 +27,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -166,7 +167,7 @@ public class ProfileSelectionDialog
 
 		setTitle(ResourceMgr.getString("LblSelectProfile"));
 		this.restoreSize();
-		
+
 		WbSwingUtilities.requestComponentFocus(this, profiles.getInitialFocusComponent());
 	}
 
@@ -263,11 +264,11 @@ public class ProfileSelectionDialog
 
 			if (selectedProfile != null && this.selectedProfile.getPromptForUsername())
 			{
-				ok = promptUsername();
+				ok = promptUsername(this, selectedProfile);
 			}
 			else if (selectedProfile != null && !this.selectedProfile.getStorePassword())
 			{
-				ok = promptPassword();
+				ok = promptPassword(this, selectedProfile);
 			}
 
 			if (ok)
@@ -282,25 +283,41 @@ public class ProfileSelectionDialog
 		}
 	}
 
-	private boolean promptUsername()
+	public static boolean doPrompt(Window parent, ConnectionProfile profile)
 	{
-		if (this.selectedProfile == null) return false;
+		if (profile == null) return true;
 
-		LoginPrompt prompt = new LoginPrompt(selectedProfile.getSettingsKey());
-		boolean ok = ValidatingDialog.showConfirmDialog(this, prompt, ResourceMgr.getString("TxtEnterLogin"));
-		if (!ok) return false;
-		this.selectedProfile.setPassword(prompt.getPassword());
-		this.selectedProfile.setTemporaryUsername(prompt.getUserName());
+		if (profile.getPromptForUsername())
+		{
+			return promptUsername(parent, profile);
+		}
+
+		if (!profile.getStorePassword())
+		{
+			return promptPassword(parent, profile);
+		}
 		return true;
 	}
 
-	private boolean promptPassword()
+	private static boolean promptUsername(Window parent, ConnectionProfile profile)
 	{
-		if (this.selectedProfile == null) return false;
+		if (profile == null) return false;
 
-		String pwd = WbSwingUtilities.getUserInputHidden(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
+		LoginPrompt prompt = new LoginPrompt(profile.getSettingsKey());
+		boolean ok = ValidatingDialog.showConfirmDialog(parent, prompt, ResourceMgr.getString("TxtEnterLogin"));
+		if (!ok) return false;
+		profile.setPassword(prompt.getPassword());
+		profile.setTemporaryUsername(prompt.getUserName());
+		return true;
+	}
+
+	private static boolean promptPassword(Window parent, ConnectionProfile profile)
+	{
+		if (profile == null) return false;
+
+		String pwd = WbSwingUtilities.getUserInputHidden(parent, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
 		if (StringUtil.isEmptyString(pwd)) return false;
-		this.selectedProfile.setPassword(pwd);
+		profile.setPassword(pwd);
 		return true;
 	}
 
