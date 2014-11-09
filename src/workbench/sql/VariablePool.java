@@ -218,6 +218,7 @@ public class VariablePool
 		synchronized (this.data)
 		{
 			this.data.clear();
+			this.lookups.clear();
 		}
 	}
 

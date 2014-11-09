@@ -22,9 +22,12 @@
  */
 package workbench.gui.macros;
 
-import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.sql.macros.MacroDefinition;
+
 import workbench.util.StringUtil;
 
 /**

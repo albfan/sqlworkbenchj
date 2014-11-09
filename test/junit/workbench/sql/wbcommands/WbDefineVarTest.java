@@ -23,9 +23,8 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
+import java.sql.SQLException;
+import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -37,7 +36,6 @@ import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
 
-import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -148,10 +146,9 @@ public class WbDefineVarTest
 
 		File f = new File(util.getBaseDir(), "vardef.props");
 
-		PrintWriter pw = new PrintWriter(new FileWriter(f));
-		pw.println("lastname=Dent");
-		pw.println("firstname=Arthur");
-		pw.close();
+		TestUtil.writeFile(f,
+			"lastname=Dent\n" +
+			"firstname=Arthur");
 
 		StatementRunnerResult result = cmd.execute("wbvardef -file=this_will_not_exist.blafile");
 		assertFalse("Invalid file not detected", result.isSuccess());
@@ -179,6 +176,36 @@ public class WbDefineVarTest
 	}
 
 	@Test
+	public void testLookup()
+		throws SQLException
+	{
+		VariablePool.getInstance().clear();
+		WbDefineVar cmd = new WbDefineVar();
+		StatementRunnerResult result = cmd.execute("wbvardef -variable=xxx -values=one,two,three");
+		assertNotNull(result);
+		assertTrue(result.isSuccess());
+		List<String> values = VariablePool.getInstance().getLookupValues("xxx");
+		assertNotNull(values);
+		assertEquals(3, values.size());
+		assertEquals("one", values.get(0));
+		assertEquals("two", values.get(1));
+		assertEquals("three", values.get(2));
+
+		VariablePool.getInstance().clear();
+		result = cmd.execute("wbvardef -variable=xxx -value=foo -values=one,two,three,four");
+		assertNotNull(result);
+		assertTrue(result.isSuccess());
+		values = VariablePool.getInstance().getLookupValues("xxx");
+		assertNotNull(values);
+		assertEquals("foo", VariablePool.getInstance().getParameterValue("xxx"));
+		assertEquals(4, values.size());
+		assertEquals("one", values.get(0));
+		assertEquals("two", values.get(1));
+		assertEquals("three", values.get(2));
+		assertEquals("four", values.get(3));
+	}
+
+	@Test
 	public void testReadFileContent()
 		throws Exception
 	{
@@ -186,11 +213,8 @@ public class WbDefineVarTest
 		WbDefineVar cmd = new WbDefineVar();
 		TestUtil util = getTestUtil();
 		WbFile data = new WbFile(util.getBaseDir(), "data.txt");
-		Writer out = EncodingUtil.createWriter(data, "UTF-8", false);
 		String content = "this is the variable value";
-		out.write(content);
-		out.close();
-
+		TestUtil.writeFile(data, content, "UTF-8");
 		cmd.execute("WbDefineVar -contentFile='" + data.getFullPath() + "' -encoding='UTF-8' -variable=filevar");
 		assertEquals(content, VariablePool.getInstance().getParameterValue("filevar"));
 	}
@@ -205,10 +229,8 @@ public class WbDefineVarTest
 		WbDefineVar cmd = new WbDefineVar();
 		TestUtil util = getTestUtil();
 		WbFile data = new WbFile(util.getBaseDir(), "data.txt");
-		Writer out = EncodingUtil.createWriter(data, "UTF-8", false);
 		String content = "the answer: $[somevalue]";
-		out.write(content);
-		out.close();
+		TestUtil.writeFile(data, content, "UTF-8");
 
 		cmd.execute("WbDefineVar -contentFile='" + data.getFullPath() + "' -encoding='UTF-8' -variable=filevar");
 		String expected = "the answer: 42";

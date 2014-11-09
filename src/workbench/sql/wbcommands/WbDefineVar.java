@@ -128,7 +128,7 @@ public class WbDefineVar
 
 		if (file != null)
 		{
-			initFromFile(result, contentFile);
+			initFromFile(result, file);
 			return result;
 		}
 
@@ -204,8 +204,7 @@ public class WbDefineVar
 				result.addMessage(removed);
 			}
 		}
-
-		if (valueParameter.trim().startsWith("@") || StringUtil.trimQuotes(valueParameter).startsWith("@"))
+		else if (valueParameter.trim().startsWith("@") || StringUtil.trimQuotes(valueParameter).startsWith("@"))
 		{
 			readValuesFromDatabase(result, varNames, valueParameter);
 		}
