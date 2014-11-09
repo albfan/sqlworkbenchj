@@ -20,21 +20,32 @@
 package workbench.gui.sql;
 
 import java.awt.event.ActionEvent;
+import java.util.List;
+
+import javax.swing.table.TableCellEditor;
 
 import workbench.gui.components.WbTable;
+
+import workbench.sql.VariablePool;
+
+import workbench.util.CollectionUtil;
 
 
 /**
  *
  * @author Thomas Kellerer
  */
-public abstract class AutoAdvanceTable
+public abstract class VariablesTable
 	extends WbTable
 {
-	public AutoAdvanceTable()
+	private DropDownCellEditor dropDownEditor;
+
+	public VariablesTable()
 	{
 		super();
 		defaultEditor.addActionListener(this);
+		dropDownEditor = new DropDownCellEditor(this);
+		dropDownEditor.addActionListener(this);
 	}
 
 	@Override
@@ -43,6 +54,25 @@ public abstract class AutoAdvanceTable
 		int editRow = getEditingRow();
 		stopEditing();
 		userStoppedEditing(editRow);
+	}
+
+	@Override
+	public TableCellEditor getCellEditor(int row, int column)
+	{
+		if (column == 0)
+		{
+			return super.getCellEditor(row, column);
+		}
+		String varName = (String)getValueAt(row, 0);
+
+		List<String> values = VariablePool.getInstance().getLookupValues(varName);
+
+		if (CollectionUtil.isEmpty(values))
+		{
+			return super.getCellEditor(row, column);
+		}
+		dropDownEditor.setValues(values);
+		return dropDownEditor;
 	}
 
 	public abstract void userStoppedEditing(int row);

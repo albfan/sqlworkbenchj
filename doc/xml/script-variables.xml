@@ -21,20 +21,18 @@
 				Variables are case sensitive: <literal>WbVarDef foo=bar</literal> is different to <literal>WbVarDef FOO=bar</literal>.
 			</para>
 
-      <note>
+      <para>
+        Variable substitution is also done within <link linkend="macros">Macros</link>. If your macro definition
+        contains a reference to a &wb-productname; variable, this will be treated the same way as in regular
+        statements.
+      </para>
+
       <para>
         The definition of variables can also be read from a properties file. This can be done by specifying
         <literal>-file=filename</literal> for the <literal>WbVarDef</literal> command,
         or by passing the <literal>-vardef</literal> parameter when starting &wb-productname;.
         Please see the description for the <link linkend="cmdline-vardef">command line parameters</link>
         for details.
-      </para>
-      </note>
-
-      <para>
-        Variable substitution is also done within <link linkend="macros">Macros</link>. If your macro definition
-        contains a reference to a &wb-productname; variable, this will be treated the same way as in regular
-        statements.
       </para>
 
       <programlisting>WbVarDef -file=/temp/myvars.def</programlisting>
@@ -216,6 +214,11 @@ workbench.sql.parameter.suffix=#</programlisting>
       statement referencing <literal>$[&amp;search_name]</literal>) will re-use the value
       you entered.
     </para>
+
+    <para>
+      When defining a variable, you can specify a list of values that should be entered in the dialog.
+    </para>
+    <programlisting>WbVardef -variable=status -values='active,pending,closed';</programlisting>
 
   </section>
 </section>

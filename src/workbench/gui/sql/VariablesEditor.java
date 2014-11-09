@@ -70,13 +70,14 @@ public class VariablesEditor
 	private ValidatingDialog dialog;
 	private boolean autoAdvance;
 	private boolean autoCloseOnAdvance;
+
 	public VariablesEditor(DataStore data)
 	{
 		super();
 		autoAdvance = Settings.getInstance().getBoolProperty("workbench.gui.variables.editor.autoadvance", true);
 		autoCloseOnAdvance = Settings.getInstance().getBoolProperty("workbench.gui.variables.editor.autoclose", autoAdvance);
 
-		this.variablesTable = new AutoAdvanceTable()
+		this.variablesTable = new VariablesTable()
 		{
 			@Override
 			public void userStoppedEditing(int row)

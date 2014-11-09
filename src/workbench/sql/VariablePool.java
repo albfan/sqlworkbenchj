@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,7 @@ public class VariablePool
 {
 	public static final String PROP_PREFIX = "wbp.";
 	private final Map<String, String> data = new LinkedHashMap<>();
+	private final Map<String, List<String>> lookups = new HashMap<>();
 
 	private final Object lock = new Object();
 	private String prefix;
@@ -427,6 +429,28 @@ public class VariablePool
 		{
 			Object old = this.data.remove(varName);
 			return (old != null);
+		}
+	}
+
+	public List<String> getLookupValues(String varName)
+	{
+		if (varName == null) return null;
+
+		synchronized (this.data)
+		{
+			return this.lookups.get(varName);
+		}
+	}
+
+	public void setLookupValues(String varName, List<String> values)
+	{
+		synchronized (this.data)
+		{
+			this.lookups.put(varName, values);
+			if (!this.data.containsKey(varName))
+			{
+				this.data.put(varName, "");
+			}
 		}
 	}
 
