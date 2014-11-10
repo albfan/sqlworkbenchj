@@ -1140,4 +1140,9 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.sql.uselast.alternative", flag);
 	}
+
+	public static boolean getVariablesDDEditable()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.dd.editable", false);
+	}
 }

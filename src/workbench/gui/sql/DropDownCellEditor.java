@@ -35,6 +35,8 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
+import workbench.resource.GuiSettings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
 
@@ -55,7 +57,7 @@ public class DropDownCellEditor
 		table = dataTable;
 		input = new JComboBox();
 		input.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
-		input.setEditable(true);
+		input.setEditable(GuiSettings.getVariablesDDEditable());
 	}
 
 	public void setValues(List<String> values)
