@@ -592,6 +592,7 @@ WHERE id=42;</programlisting>
       <link linkend="manual-setting-objectinfo-dependent">adding a configuration property</link>.
     </para>
   </section>
+
 	<section id="server-messages">
 		<title>Viewing server messages</title>
 
@@ -612,7 +613,7 @@ BEGIN
   RETURN 42;
 END;
 $body$
-/</programlisting>
+</programlisting>
 		</section>
 
 		<section id="server-msg-ora">
@@ -625,12 +626,12 @@ $body$
 			</para>
 			<para>
 				If you want to turn on support for <literal>DBMS_OUTPUT</literal> automatically when
-				connecting to an Oracle database, you can put the <literal>ENABLEOUT</literal> command
+				connecting to an Oracle database, you can put the <literal>set serveroutput on</literal> command
 				into the <link linkend="profile-connect-scripts">pre-connect</link> script.
 			</para>
 			<para>
 				Any message "printed" with <literal>DBMS_OUTPUT.put_line()</literal> will
-				be displayed in the message part after the SQL command has finished. Please
+        be displayed in the message part <emphasis>after</emphasis> the SQL command has finished. Please
 				refer to the Oracle documentation if you want to learn more about the
 				<literal>DBMS_OUTPUT</literal> package.
 			</para>
@@ -667,6 +668,12 @@ PRINT "Done."</programlisting>
 			<programlisting>Deleting records...
 Done.</programlisting>
 
+      <para>
+        Due to the way the JDBC API works, the messages are only show <emphasis>after</emphasis> the statement
+        has finished (this is different to e.g. SQL Server Management Studio where the messages are displayed
+        as soon as <literal>PRINT</literal> is called, even when the overall script or procedure is still running.
+      </para>
+      
 		</section>
 
 		<section id="server-msg-other">
