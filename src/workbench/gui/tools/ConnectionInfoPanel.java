@@ -28,12 +28,16 @@ import java.awt.FontMetrics;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.io.PrintWriter;
 import java.io.StringWriter;
+
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.text.Document;
+
 import workbench.WbManager;
+import workbench.console.DataStorePrinter;
 import workbench.db.ConnectionInfoBuilder;
 import workbench.db.DriverInfo;
 import workbench.db.WbConnection;
@@ -42,6 +46,7 @@ import workbench.gui.components.*;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
 /**
@@ -51,6 +56,7 @@ import workbench.util.StringUtil;
 public class ConnectionInfoPanel
 	extends JPanel
 {
+	private WbTable extendedInfoData;
 
 	public ConnectionInfoPanel(WbConnection conn)
 	{
@@ -82,12 +88,12 @@ public class ConnectionInfoPanel
 			else
 			{
 				DriverInfo drvInfo = new DriverInfo(conn.getSqlConnection());
-				WbTable data = new WbTable(true, false, false);
-				WbScrollPane scroll = new WbScrollPane(data);
+				extendedInfoData = new WbTable(true, false, false);
+				WbScrollPane scroll = new WbScrollPane(extendedInfoData);
 				scroll.setPreferredSize(d);
 				scroll.setMaximumSize(d);
 				DataStoreTableModel ds = new DataStoreTableModel(drvInfo.getInfo());
-				data.setModel(ds, true);
+				extendedInfoData.setModel(ds, true);
 				extendedPanel.add(scroll, BorderLayout.CENTER);
 				infoTabs.setTitleAt(1, ResourceMgr.getString("TxtInfoExt"));
 			}
@@ -95,6 +101,14 @@ public class ConnectionInfoPanel
 		catch (Exception e)
 		{
 			LogMgr.logError("ConnectionInfoPanel", "Could not read connection properties", e);
+		}
+	}
+
+	public void dispose()
+	{
+		if (this.extendedInfoData != null)
+		{
+			this.extendedInfoData.dispose();
 		}
 	}
 
@@ -106,6 +120,7 @@ public class ConnectionInfoPanel
 		d.pack();
 		WbSwingUtilities.center(d, f);
 		d.setVisible(true);
+		p.dispose();
 		d.dispose();
 	}
 
@@ -185,6 +200,20 @@ public class ConnectionInfoPanel
 		clean = clean.replaceAll("<div[0-9 a-zA-Z;=\\-\":]*>", "");
 		clean = clean.replaceAll("</div>", "\r\n");
 		clean = clean.replaceAll("<[/a-z]*>", "").trim();
+
+		if (extendedInfoData != null)
+		{
+			DataStore ds = extendedInfoData.getDataStore();
+			DataStorePrinter printer = new DataStorePrinter(ds);
+			printer.setPrintRowCount(false);
+
+			StringWriter sw = new StringWriter(100);
+			PrintWriter pw = new PrintWriter(sw);
+			printer.printTo(pw);
+
+			clean += "\n\n" + sw.toString();
+		}
+
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(clean);
 		clp.setContents(sel, sel);
