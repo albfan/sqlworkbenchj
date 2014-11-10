@@ -3,6 +3,7 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-10-30">
     <entry dev-build="9" type="enh">It's now possible to define a default (global) alternate delimiter based on the DBMS.</entry>
+    <entry dev-build="9" type="enh">The DbExplorer's data tab now limits the number of rows through the generated SQL statement for DBMS that support e.g. "LIMIT" or similar operators</entry>
     <entry dev-build="7" type="enh">When using Oracle it's now possible to mix standard delimiter and alternate delimiter in a single script.</entry>
     <entry dev-build="7" type="enh">It's now possible to pass a SQL statement through the -command parameter using Linux "Here Documents"</entry>
     <entry dev-build="7" type="enh">WbRowCount now has an option to exclude some columns from the result</entry>
