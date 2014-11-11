@@ -22,6 +22,7 @@
  */
 package workbench.resource;
 
+import workbench.db.WbConnection;
 import static workbench.resource.Settings.*;
 
 
@@ -164,6 +165,13 @@ public class DbExplorerSettings
 		Settings.getInstance().setProperty(PROP_INSTANT_FILTER, flag);
 	}
 
+	public static boolean isOwnTransaction(WbConnection dbConnection)
+	{
+		if (dbConnection == null) return false;
+		if (dbConnection.getAutoCommit()) return false;
+		return (dbConnection.getProfile().getUseSeparateConnectionPerTab() || getAlwaysUseSeparateConnForDbExpWindow());
+	}
+	
 	public static boolean getAlwaysUseSeparateConnForDbExpWindow()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.connection.always.separate", false);

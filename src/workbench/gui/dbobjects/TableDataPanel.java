@@ -458,7 +458,7 @@ public class TableDataPanel
 
 	private void setSavepoint()
 	{
-		if (dbConnection.getDbSettings().useSavePointForDML() && !this.isOwnTransaction())
+		if (dbConnection.getDbSettings().useSavePointForDML() && !DbExplorerSettings.isOwnTransaction(dbConnection))
 		{
 			try
 			{
@@ -750,16 +750,11 @@ public class TableDataPanel
 		return this.retrieveRunning || this.updateRunning;
 	}
 
-	private boolean isOwnTransaction()
-	{
-		return (!this.dbConnection.getAutoCommit() && this.dbConnection.getProfile().getUseSeparateConnectionPerTab());
-	}
-
 	private void rollbackIfNeeded()
 	{
-		if (isOwnTransaction())
+		if (DbExplorerSettings.isOwnTransaction(dbConnection))
 		{
-			try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			this.dbConnection.rollbackSilently();
 		}
 		else if (this.currentSavepoint != null)
 		{
@@ -770,7 +765,7 @@ public class TableDataPanel
 
 	private void commitRetrieveIfNeeded()
 	{
-		if (isOwnTransaction())
+		if (DbExplorerSettings.isOwnTransaction(dbConnection))
 		{
 			if (this.dbConnection.selectStartsTransaction())
 			{

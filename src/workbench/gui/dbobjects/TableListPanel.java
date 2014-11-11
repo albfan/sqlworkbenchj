@@ -268,20 +268,7 @@ public class TableListPanel
 			public void reload()
 			{
 				shouldRetrieveIndexes = true;
-				if (dbConnection.isBusy()) return;
-				try
-				{
-					dbConnection.setBusy(true);
-					retrieveIndexes();
-				}
-				catch (SQLException e)
-				{
-					LogMgr.logError("TableListPanel.indexReloader", "Error retrieving indexes", e);
-				}
-				finally
-				{
-					dbConnection.setBusy(false);
-				}
+				startRetrieveCurrentPanel();
 			}
 		};
 
@@ -299,17 +286,8 @@ public class TableListPanel
 			{
 				shouldRetrieveTable = true;
 				shouldRetrieveIndexes = true;
-				if (dbConnection.isBusy()) return;
-
-				try
-				{
-					dbConnection.setBusy(true);
-					retrieveTableSource();
-				}
-				finally
-				{
-					dbConnection.setBusy(false);
-				}
+				shouldRetrieveTableSource = true;
+				startRetrieveCurrentPanel();
 			}
 		};
 
@@ -1726,7 +1704,7 @@ public class TableListPanel
 			}
 
 			final String s = (sql == null ? "" : sql.toString());
-			WbSwingUtilities.invoke(new Runnable()
+			WbSwingUtilities.invokeLater(new Runnable()
 			{
 				@Override
 				public void run()
@@ -1873,6 +1851,7 @@ public class TableListPanel
 		}
 		else
 		{
+			System.out.println("starting retrieve");
 			startRetrieveThread();
 		}
 	}
@@ -1998,12 +1977,9 @@ public class TableListPanel
 
 	private void endTransaction()
 	{
-		if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
+		if (DbExplorerSettings.isOwnTransaction(dbConnection) && this.dbConnection.selectStartsTransaction())
 		{
-			if (this.dbConnection.selectStartsTransaction() && !this.dbConnection.getAutoCommit())
-			{
-				try { this.dbConnection.commit(); } catch (Throwable th) {}
-			}
+			dbConnection.rollbackSilently();
 		}
 	}
 
