@@ -286,10 +286,18 @@ public abstract class ConsolePrinter
 				{
 					int colwidth = columnWidths.get(Integer.valueOf(col));
 					String[] lines = value.split(StringUtil.REGEX_CRLF);
-					writePadded(pw, lines[0], colwidth, alignRight(col));
-					if (lines.length > 1)
+					if (lines.length == 0)
 					{
-						continuationLines.put(col, lines);
+						// the value only contained newlines --> treat as an empty string (thus a single line)
+						writePadded(pw, value.trim(), colwidth, alignRight(col));
+					}
+					else
+					{
+						writePadded(pw, lines[0], colwidth, alignRight(col));
+						if (lines.length > 1)
+						{
+							continuationLines.put(col, lines);
+						}
 					}
 				}
 				else
