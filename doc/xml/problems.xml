@@ -383,6 +383,19 @@ SELECT 42 FROM dual;</programlisting>
     <indexterm><primary>Microsoft SQL Server</primary><secondary>Problems</secondary></indexterm>
 
 		<section id="mssql-remarks-nodisplay">
+		  <title>The value of DATE columns is not correct</title>
+      <indexterm><primary>Microsoft SQL Server</primary><secondary>Incorrect value for DATE columns</secondary></indexterm>
+		  <para>
+        It seems that the version 3.0 of the Microsoft JDBC driver returns the value of <literal>DATE</literal> columns
+        with a wrong value (two days less than expected).
+		  </para>
+		  <para>
+        Version 4.0 of the Micrsoft driver does not show this behaviour. If you see wrong values for <literal>DATE</literal> columns
+        and are using version 3.0, please upgrade your driver.
+		  </para>
+		</section>
+
+		<section id="mssql-remarks-nodisplay">
 		  <title>Column and table comments are not displayed</title>
 		  <para>
         SQL Server does not support standard object remarks using <literal>COMMENT ON</literal> and the
@@ -400,6 +413,7 @@ SELECT 42 FROM dual;</programlisting>
 
 		<section id="mssql-nt-authentication">
 		  <title>Using Windows authentication to connect to a SQL Server</title>
+      <indexterm><primary>Microsoft SQL Server</primary><secondary>Windows authentication</secondary></indexterm>
 		  <para>
         In order to use the integrated Windows authentication (as opposed SQL Server Authentication) the Microsoft
         JDBC driver is <emphasis role="bold">required</emphasis>. It does not work with the jTDS driver.
