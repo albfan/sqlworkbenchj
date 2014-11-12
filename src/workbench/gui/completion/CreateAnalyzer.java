@@ -99,7 +99,7 @@ public class CreateAnalyzer
 					else if (")".equals(t))
 					{
 						bracketCount --;
-						if (this.cursorPos > token.getCharBegin())
+						if (bracketCount == 0 && this.cursorPos > token.getCharBegin())
 						{
 							showTables = false;
 							showColumns = false;

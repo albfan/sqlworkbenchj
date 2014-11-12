@@ -472,7 +472,7 @@ public abstract class BaseAnalyzer
 	private List<String> readKeywords()
 	{
 		if (this.keywordFile == null) return null;
-		SqlKeywordHelper helper = new SqlKeywordHelper(dbConnection.getDbId());
+		SqlKeywordHelper helper = new SqlKeywordHelper(dbConnection == null ? null : dbConnection.getDbId());
 		Set<String> kwlist = helper.loadKeywordsFromFile(keywordFile);
 		return new ArrayList<>(kwlist);
 	}
