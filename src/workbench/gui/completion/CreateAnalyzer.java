@@ -58,6 +58,7 @@ public class CreateAnalyzer
 		int tableEndPos = -1;
 		int tokenCount = 0;
 		boolean afterCreate = true;
+		int bracketCount = 0;
 
 		try
 		{
@@ -84,15 +85,20 @@ public class CreateAnalyzer
 					}
 					else if ("(".equals(t))
 					{
-						tableEndPos = token.getCharBegin() - 1;
-						if (this.cursorPos >= token.getCharBegin())
+						bracketCount ++;
+						if (bracketCount == 1)
 						{
-							showTables = false;
-							showColumns = true;
+							tableEndPos = token.getCharBegin() - 1;
+							if (this.cursorPos >= token.getCharBegin())
+							{
+								showTables = false;
+								showColumns = true;
+							}
 						}
 					}
 					else if (")".equals(t))
 					{
+						bracketCount --;
 						if (this.cursorPos > token.getCharBegin())
 						{
 							showTables = false;
