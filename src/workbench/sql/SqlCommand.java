@@ -520,6 +520,8 @@ public class SqlCommand
 			return;
 		}
 
+		boolean fetchOnly = runner.getStatementHook().fetchResults() && !runner.getStatementHook().displayResults();
+
 		int updateCount = -1;
 		boolean moreResults = false;
 
@@ -621,9 +623,9 @@ public class SqlCommand
 						monitorToUse = this.rowMonitor;
 					}
 
-					// we have to use an instance variable for the retrieval, otherwise the retrieval
-					// cannot be cancelled!
+					// we have to use an instance variable for the retrieval, otherwise the retrieval cannot be cancelled!
 					this.currentRetrievalData = new DataStore(rs, false, monitorToUse, maxRows, this.currentConnection);
+
 					try
 					{
 						// Not reading the data in the constructor enables us
@@ -632,7 +634,15 @@ public class SqlCommand
 						// The DataStore checks for the cancel flag during processing
 						// of the ResulSet
 						this.currentRetrievalData.setGeneratingSql(result.getSourceCommand());
-						this.currentRetrievalData.initData(rs, maxRows);
+						if (fetchOnly)
+						{
+							int rows = currentRetrievalData.fetchOnly(rs, maxRows);
+							result.setRowsProcessed(rows);
+						}
+						else
+						{
+							this.currentRetrievalData.initData(rs, maxRows);
+						}
 					}
 					catch (SQLException e)
 					{

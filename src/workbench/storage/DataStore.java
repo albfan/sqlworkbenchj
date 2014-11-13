@@ -1288,6 +1288,29 @@ public class DataStore
 		this.loadedAt = System.currentTimeMillis();
 	}
 
+	public int fetchOnly(ResultSet rs, int maxRows)
+	{
+		int rowCount = 0;
+		try
+		{
+			while (rs.next())
+			{
+				rowCount++;
+				if (this.cancelRetrieve) break;
+				if (maxRows > 0 && rowCount > maxRows) break;
+			}
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("DataStore.fetchOnly()", "Could not fetch results.", ex);
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+		return rowCount;
+	}
+
 	/**
 	 * Read the column definitions from the result set's meta data
 	 * and store the data from the ResultSet in this DataStore (up to maxRows)
