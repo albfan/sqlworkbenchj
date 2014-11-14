@@ -1108,13 +1108,43 @@ public final class WbManager
 	 */
 	public static void prepareForEmbedded()
 	{
+		runEmbedded(null, false);
+	}
+
+	/**
+	 * Run SQL Workbench in embedded mode supplying all parameters.
+	 * 
+	 * @param args
+	 */
+	public static void runEmbedded(String[] args)
+	{
+		runEmbedded(args, true);
+	}
+
+	private static void runEmbedded(String[] args, boolean doStart)
+	{
 		wb = new WbManager();
 		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
-		String args = "-notemplates -nosettings";
+		String[] realArgs = null;
+		String embeddedArgs = "-notemplates -nosettings";
+		if (args == null)
+		{
+			realArgs = new String[] { embeddedArgs };
+		}
+		else
+		{
+			realArgs = new String[args.length + 1];
+			System.arraycopy(args, 0, realArgs, 0, args.length);
+			realArgs[args.length] = embeddedArgs;
+		}
 		System.setProperty("workbench.system.doexit", "false");
 		System.setProperty(Settings.TEST_MODE_PROPERTY, "true");
-		wb.readParameters(new String[] { args} );
+		wb.readParameters(realArgs);
+		if (doStart)
+		{
+			wb.startApplication();
+		}
 	}
 
 	public static boolean isTest()

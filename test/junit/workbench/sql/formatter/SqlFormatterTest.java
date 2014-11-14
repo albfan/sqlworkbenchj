@@ -170,6 +170,7 @@ public class SqlFormatterTest
 		String sql = "select * from foo join bar on foo.id = bar.id outer apply fn_foo (bar.id) st";
 		SqlFormatter f = new SqlFormatter(sql, 150, "microsoft_sql_server");
 		f.setColumnsPerInsert(1);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
