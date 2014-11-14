@@ -53,6 +53,7 @@ public class OracleTableSourceBuilder
 	private static final String REV_IDX_TYPE = "NORMAL/REV";
 	private static final String INDEX_USAGE_PLACEHOLDER = "%pk_index_usage%";
 	private String defaultTablespace;
+	private String currentUser;
 
 	public OracleTableSourceBuilder(WbConnection con)
 	{
@@ -61,6 +62,7 @@ public class OracleTableSourceBuilder
 		{
 			defaultTablespace = OracleUtils.getDefaultTablespace(con);
 		}
+		currentUser = con.getCurrentUser();
 	}
 
 	/**
@@ -96,8 +98,31 @@ public class OracleTableSourceBuilder
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
+		boolean useUserTables = false;
+		if (OracleUtils.optimizeCatalogQueries())
+		{
+			String schema = tbl.getRawSchema();
+			if (StringUtil.isEmptyString(schema) || schema.equalsIgnoreCase(currentUser))
+			{
+				useUserTables = true;
+			}
+		}
+
+		String archiveJoin = "";
+		if (supportsArchives)
+		{
+			if (useUserTables)
+			{
+				archiveJoin = "  left join user_flashback_archive_tables fat on fat.table_name = atb.table_name ";
+			}
+			else
+			{
+				archiveJoin = "  left join dba_flashback_archive_tables fat on fat.table_name = atb.table_name and fat.owner_name = atb.owner ";
+			}
+		}
+
 		String sql =
-			"select /* SQLWorkbench */ atb.tablespace_name, \n" +
+			"select /* SQLWorkbench */ coalesce(atb.tablespace_name, pt.def_tablespace_name) as tablespace_name, \n" +
 			"       atb.degree, \n" +
 			"       atb.row_movement, \n" +
 			"       atb.temporary, \n" +
@@ -121,25 +146,35 @@ public class OracleTableSourceBuilder
 			"       atb.compress_for \n " :
 			"       null as compression, \n       null as compress_for \n ") +
 			"from all_tables atb \n" +
-			"  left join all_tables iot on atb.owner = iot.owner and atb.table_name = iot.iot_name \n" +
-			"  left join all_constraints ac on ac.owner = atb.owner and ac.table_name = atb.table_name and ac.constraint_type = 'P' \n" +
-			"  left join all_indexes ai on ai.owner = coalesce(ac.index_owner, ac.owner) and ai.table_name = ac.table_name and ai.index_name = ac.index_name \n" +
-			(supportsArchives ?
-			"  left join user_flashback_archive_tables fat on fat.owner_name = atb.owner and fat.table_name = atb.table_name \n" :
-			"") +
-			"where atb.owner = ? \n" +
-			"and atb.table_name = ? ";
+			"  left join all_tables iot on atb.table_name = iot.iot_name " + (useUserTables ? "\n" : " and atb.owner = iot.owner \n")  +
+			"  left join all_constraints ac on ac.table_name = atb.table_name and ac.constraint_type = 'P' " + (useUserTables ? "\n" : " and ac.owner = atb.owner \n") +
+			"  left join all_indexes ai on ai.table_name = ac.table_name and ai.index_name = ac.index_name " + (useUserTables ? "\n" : " and ai.owner = coalesce(ac.index_owner, ac.owner) \n") +
+			archiveJoin + "\n" +
+			"  left join all_part_tables pt on pt.table_name = iot.table_name " + (useUserTables ? "\n" : " and pt.owner = iot.owner \n") +
+			"where atb.table_name = ? ";
+
+		if (useUserTables)
+		{
+			sql = sql.replace(" all_", " user_");
+		}
+		else
+		{
+			sql += "\n and atb.owner = ?";
+		}
 
 		String archive = null;
 		try
 		{
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, tbl.getSchema());
-			pstmt.setString(2, tbl.getTableName());
+			pstmt.setString(1, tbl.getRawTableName());
+			if (!useUserTables)
+			{
+				pstmt.setString(2, tbl.getRawSchema());
+			}
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
 				LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Using sql:\n" +
-					SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
+					SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema()));
 			}
 
 			rs = pstmt.executeQuery();

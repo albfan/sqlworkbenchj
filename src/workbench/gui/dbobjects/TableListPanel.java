@@ -1851,7 +1851,6 @@ public class TableListPanel
 		}
 		else
 		{
-			System.out.println("starting retrieve");
 			startRetrieveThread();
 		}
 	}

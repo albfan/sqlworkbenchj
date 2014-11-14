@@ -149,10 +149,19 @@ public class OracleIndexReader
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.metaData.getWbConnection());
 
-		StringBuilder sql = new StringBuilder(200);
-		sql.append(
+		boolean useUserTables = false;
+		if (OracleUtils.optimizeCatalogQueries())
+		{
+			String schema = tbl.getRawSchema();
+			if (StringUtil.isEmptyString(schema) || schema.equalsIgnoreCase(currentUser))
+			{
+				useUserTables = true;
+			}
+		}
+
+		String sql =
 			"SELECT null as table_cat, \n" +
-			"       i.owner as table_schem, \n" +
+			"       " + (useUserTables ? "user" : "i.owner") + " as table_schem, \n" +
 			"       i.table_name, \n" +
 			"       decode (i.uniqueness, 'UNIQUE', 0, 1) as non_unique, \n" +
 			"       null as index_qualifier, \n" +
@@ -172,54 +181,66 @@ public class OracleIndexReader
 			"       i.prefix_length \n" :
 			// no compression
 			"       null as compression, \n" +
-			"       -1 as prefix_length \n") +
-			"FROM all_indexes i" +
-			"  JOIN all_ind_columns c " +
+			"       -1 as prefix_length \n");
+
+		if (useUserTables)
+		{
+			sql +=
+			"FROM user_indexes i \n" +
+			"  JOIN user_ind_columns c \n" +
+			"    ON i.index_name = c.index_name \n" +
+			"   AND i.table_name = c.table_name \n";
+		}
+		else
+		{
+			sql +=
+			"FROM all_indexes i \n" +
+			"  JOIN all_ind_columns c \n" +
 			"    ON i.index_name = c.index_name \n" +
 			"   AND i.table_owner = c.table_owner \n" +
 			"   AND i.table_name = c.table_name \n" +
-			"   AND i.owner = c.index_owner \n" +
-			"WHERE i.table_name = ? \n");
+			"   AND i.owner = c.index_owner \n";
+		}
 
-		if (tbl.getSchema() != null)
+		sql += "WHERE i.table_name = ? \n";
+
+		if (tbl.getRawSchema() != null && !useUserTables)
 		{
-			sql.append("  AND i.owner = ? \n");
+			sql += "  AND i.owner = ? \n";
 		}
 
 		if (unique)
 		{
-			sql.append("  AND i.uniqueness = 'UNIQUE'\n");
+			sql += "  AND i.uniqueness = 'UNIQUE'\n";
 		}
 
 		if (StringUtil.isNonBlank(indexName))
 		{
-			sql.append("  AND i.index_name = '");
-			sql.append(indexName);
-			sql.append("'\n");
+			sql += "  AND i.index_name = '" + indexName + "' \n";
 		}
 
-		if (StringUtil.isNonBlank(indexSchema))
+		if (StringUtil.isNonEmpty(indexSchema) && !useUserTables)
 		{
-			sql.append("  AND i.owner = '");
-			sql.append(indexSchema);
-			sql.append("'\n");
+			sql += "  AND i.owner = '" +  indexSchema + "' \n";
 		}
 
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.indexlist.filtersnapindex", true))
 		{
-			sql.append("  AND i.index_name NOT LIKE 'I_SNAP$%' \n");
+			sql += "  AND i.index_name NOT LIKE 'I_SNAP$%' \n";
 		}
 
-		sql.append("ORDER BY non_unique, type, index_name, ordinal_position ");
+		sql += "ORDER BY non_unique, type, index_name, ordinal_position ";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleIndexReader.getIndexInfo()", "Using SQL to retrieve index info for " + table.getTableExpression() + ":\n" + sql.toString());
+			String s = SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema());
+			LogMgr.logDebug("OracleIndexReader.getIndexInfo()", "Retrieving index information using query:\n " + s);
 		}
-		this.indexStatement = this.metaData.getWbConnection().getSqlConnection().prepareStatement(sql.toString());
 
-		this.indexStatement.setString(1,table.getTableName());
-		if (table.getSchema() != null) this.indexStatement.setString(2, table.getSchema());
+		this.indexStatement = this.metaData.getWbConnection().getSqlConnection().prepareStatement(sql);
+
+		this.indexStatement.setString(1,table.getRawTableName());
+		if (table.getSchema() != null && !useUserTables) this.indexStatement.setString(2, table.getRawSchema());
 		ResultSet rs = this.indexStatement.executeQuery();
 		return rs;
 	}
