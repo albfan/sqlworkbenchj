@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -187,12 +188,15 @@ public class WbRowCount
 		int schemaIndex = rowCounts.getColumnIndex(currentConnection.getMetadata().getSchemaTerm());
 
 		int tableCount = resultList.getRowCount();
+		Set<TableIdentifier> processed = new HashSet<>(tableCount);
+
 		for (int row=0; row < tableCount; row++)
 		{
 			ResultSet rs = null;
+			TableIdentifier table = meta.buildTableIdentifierFromDs(resultList, row);
 			try
 			{
-				TableIdentifier table = meta.buildTableIdentifierFromDs(resultList, row);
+				if (processed.contains(table)) continue;
 
 				String countQuery = builder.getSelectForCount(table);
 				String msg = ResourceMgr.getFormattedString("MsgCalculatingRowCount", table.getTableExpression(), row + 1, tableCount);
@@ -221,6 +225,7 @@ public class WbRowCount
 			finally
 			{
 				SqlUtil.closeResult(rs);
+				processed.add(table);
 			}
 		}
 
