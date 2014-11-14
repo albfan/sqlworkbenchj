@@ -171,6 +171,10 @@ public class OracleTableSourceBuilder
 					{
 						options.append("\n  INCLUDING ");
 						options.append(included);
+						if (StringUtil.isEmptyString(overflow))
+						{
+							options.append(" OVERFLOW");
+						}
 						tbl.getSourceOptions().addConfigSetting("iot_included_cols", included);
 					}
 
