@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Struct;
 import java.sql.Types;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -66,7 +66,7 @@ import workbench.util.StringUtil;
  */
 public class RowDataReader
 {
-	private final List<Closeable> streams = new LinkedList<>();
+	private final List<Closeable> streams;
 	private DataConverter converter;
 	private boolean ignoreReadErrors;
 	private boolean useStreamsForBlobs;
@@ -90,6 +90,22 @@ public class RowDataReader
 		useGetStringForBit = info.useGetStringForBit();
 		useGetXML = info.useGetXML();
 		adjustArrayDisplay = info.getConvertArrays();
+		streams = new ArrayList<>(countLobColumns());
+	}
+
+	private int countLobColumns()
+	{
+		if (resultInfo == null) return 0;
+		int lobCount = 0;
+		for (int i=0; i < resultInfo.getColumnCount(); i++)
+		{
+			int type = resultInfo.getColumnType(i);
+			if (SqlUtil.isBlobType(type) || SqlUtil.isClobType(type))
+			{
+				lobCount ++;
+			}
+		}
+		return lobCount;
 	}
 
 	/**

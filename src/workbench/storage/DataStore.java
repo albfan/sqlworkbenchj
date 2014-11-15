@@ -1288,27 +1288,10 @@ public class DataStore
 		this.loadedAt = System.currentTimeMillis();
 	}
 
-	public int fetchOnly(ResultSet rs, int maxRows)
+	public int fetchOnly(ResultSet rs)
+		throws SQLException
 	{
-		int rowCount = 0;
-		try
-		{
-			while (rs.next())
-			{
-				rowCount++;
-				if (this.cancelRetrieve) break;
-				if (maxRows > 0 && rowCount > maxRows) break;
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("DataStore.fetchOnly()", "Could not fetch results.", ex);
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-		return rowCount;
+		return initData(rs, 0, false);
 	}
 
 	/**
@@ -1321,14 +1304,20 @@ public class DataStore
 	 * @param maxRows max. number of rows to read. Zero or lower to read all rows
 	 * @see #initData(ResultSet)
 	 */
-	public final void initData(ResultSet aResultSet, int maxRows)
+	public void initData(ResultSet aResultSet, int maxRows)
+		throws SQLException
+	{
+		initData(aResultSet, maxRows, true);
+	}
+
+	protected int initData(ResultSet rs, int maxRows, boolean bufferData)
 		throws SQLException
 	{
 		if (this.resultInfo == null)
 		{
 			try
 			{
-				ResultSetMetaData metaData = aResultSet.getMetaData();
+				ResultSetMetaData metaData = rs.getMetaData();
 				this.initMetaData(metaData);
 			}
 			catch (SQLException e)
@@ -1355,22 +1344,30 @@ public class DataStore
 
 		setLoadTimeToNow();
 
-		this.cancelRetrieve = false;
+		cancelRetrieve = false;
 		boolean lowMemory = false;
 
+		int rowCount = 0;
 		final int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 		final int checkInterval = Settings.getInstance().getIntProperty("workbench.gui.data.memcheckinterval", 10);
+
+		if (bufferData && this.data == null)
+		{
+			this.data = createData();
+		}
+
 		try
 		{
-			int rowCount = 0;
-			if (this.data == null) this.data = createData();
 			RowDataReader reader = RowDataReaderFactory.createReader(resultInfo, originalConnection);
 
-			// we cannot use streams because they would never be properly closed
-			reader.setUseStreamsForBlobs(false);
-			reader.setUseStreamsForClobs(false);
+			if (bufferData)
+			{
+				// we cannot use streams because they would never be properly closed
+				reader.setUseStreamsForBlobs(false);
+				reader.setUseStreamsForClobs(false);
+			}
 
-			while (!this.cancelRetrieve && aResultSet.next())
+			while (!this.cancelRetrieve && rs.next())
 			{
 				rowCount ++;
 
@@ -1379,11 +1376,15 @@ public class DataStore
 					this.rowActionMonitor.setCurrentRow(rowCount, -1);
 				}
 
-				RowData row = reader.read(aResultSet, trimCharData);
-				this.data.add(row);
+				if (bufferData)
+				{
+					RowData row = reader.read(rs, trimCharData);
+					data.add(row);
+				}
 
 				if (maxRows > 0 && rowCount > maxRows) break;
-				if (rowCount % checkInterval == 0 && MemoryWatcher.isMemoryLow(false))
+
+				if (bufferData && rowCount % checkInterval == 0 && MemoryWatcher.isMemoryLow(false))
 				{
 					LogMgr.logError("DataStore.initData()", "Memory is running low. Aborting reading...", null);
 					lowMemory = true;
@@ -1424,6 +1425,7 @@ public class DataStore
 		{
 			throw new LowMemoryException();
 		}
+		return rowCount;
 	}
 
 	/**

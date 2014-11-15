@@ -37,6 +37,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -64,7 +65,7 @@ public class FileUtil
 	 * @param a list of streams to close
 	 * @see #closeQuitely(Closeable)
 	 */
-	public static void closeStreams(List<Closeable> streams)
+	public static void closeStreams(Collection<Closeable> streams)
 	{
 		if (streams == null) return;
 

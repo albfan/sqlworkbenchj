@@ -631,12 +631,12 @@ public class SqlCommand
 						// Not reading the data in the constructor enables us
 						// to cancel the retrieval of the data from the ResultSet
 						// without using statement.cancel()
-						// The DataStore checks for the cancel flag during processing
-						// of the ResulSet
+						// The DataStore checks for the cancel flag during processing of the ResulSet
 						this.currentRetrievalData.setGeneratingSql(result.getSourceCommand());
+						
 						if (fetchOnly)
 						{
-							int rows = currentRetrievalData.fetchOnly(rs, maxRows);
+							int rows = currentRetrievalData.fetchOnly(rs);
 							result.setRowsProcessed(rows);
 						}
 						else

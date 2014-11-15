@@ -36,10 +36,9 @@ public class RowDataList
 	private static final int DEFAULT_SIZE = 150;
 
 	// growth factor when increasing the array
-	private float grow = 1.10f;
+	private final float grow = 1.2f;
 	private int size;
 	private RowData[] data;
-	// private final Object dataLock = new Object();
 
 	public RowDataList()
 	{
