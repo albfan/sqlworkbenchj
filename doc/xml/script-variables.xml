@@ -219,6 +219,30 @@ workbench.sql.parameter.suffix=#</programlisting>
       When defining a variable, you can specify a list of values that should be entered in the dialog.
     </para>
     <programlisting>WbVardef -variable=status -values='active,pending,closed';</programlisting>
-
   </section>
+  <section id="sort-var-prompt">
+    <title>Controlling the order of variables during prompting</title>
+    <para>
+      By default the variables shown in the prompt dialog are sorted alphabetically. This behaviour can be
+      changed by setting the configuration property <literal>workbench.sql.parameter.prompt.sort</literal> to true,
+      e.g. using <link linkend="command-setconfig">WbSetConfig</link>
+      <programlisting>WbSetConfig workbench.sql.parameter.prompt.sort=false</programlisting>
+    </para>
+    <para>
+      If the property is set to <literal>false</literal>, the variables are shown in the order they were
+      declared:
+      <programlisting>
+WbVarDef zzz='';
+WbVarDef vvv='';
+WbVarDef aaa='';
+
+select *
+from foobar
+where col1 = $[?aaa]
+  and col2 = $[?vvv]
+  and col3 > $[?zzz]</programlisting>
+  The dialog to enter the variables will show them in the order <literal>zzz</literal>, <literal>vvv</literal>, <literal>aaa</literal>
+    </para>
+  </section>
+
 </section>
