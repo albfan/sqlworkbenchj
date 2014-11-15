@@ -113,11 +113,11 @@ public class OracleTableSourceBuilder
 		{
 			if (useUserTables)
 			{
-				archiveJoin = "  left join user_flashback_archive_tables fat on fat.table_name = atb.table_name ";
+				archiveJoin = "  left join user_flashback_archive_tables fat on fat.table_name = atb.table_name \n";
 			}
 			else
 			{
-				archiveJoin = "  left join dba_flashback_archive_tables fat on fat.table_name = atb.table_name and fat.owner_name = atb.owner ";
+				archiveJoin = "  left join dba_flashback_archive_tables fat on fat.table_name = atb.table_name and fat.owner_name = atb.owner \n";
 			}
 		}
 
@@ -149,7 +149,7 @@ public class OracleTableSourceBuilder
 			"  left join all_tables iot on atb.table_name = iot.iot_name " + (useUserTables ? "\n" : " and atb.owner = iot.owner \n")  +
 			"  left join all_constraints ac on ac.table_name = atb.table_name and ac.constraint_type = 'P' " + (useUserTables ? "\n" : " and ac.owner = atb.owner \n") +
 			"  left join all_indexes ai on ai.table_name = ac.table_name and ai.index_name = ac.index_name " + (useUserTables ? "\n" : " and ai.owner = coalesce(ac.index_owner, ac.owner) \n") +
-			archiveJoin + "\n" +
+			archiveJoin +
 			"  left join all_part_tables pt on pt.table_name = iot.table_name " + (useUserTables ? "\n" : " and pt.owner = iot.owner \n") +
 			"where atb.table_name = ? ";
 

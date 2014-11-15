@@ -147,6 +147,7 @@ public class OracleFKHandler
 	 *
 	 * @param tbl the table for which the query should be generated
 	 * @return the query to use
+	 * @see OracleUtils#optimizeCatalogQueries() 
 	 */
 	private String getQuery(TableIdentifier tbl)
 	{

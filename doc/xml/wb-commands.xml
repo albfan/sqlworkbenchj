@@ -73,8 +73,7 @@
               an XML report for all tables that start with <literal>CONTRACT_</literal>.
             </para>
             <para>
-              If auto-completion is invoked for this parameter, it behaves like the auto-completion e.g. in the <literal>FROM</literal>
-              clause of a SQL statement.
+              This parameter supports auto-completion.
             </para>
           </entry>
         </row>
@@ -125,6 +124,9 @@
               You can include any type shown in the DbExplorer's Objects tab. To e.g. include <literal>domain</literal>
               and <literal>enum</literal> definitions for PostgreSQL use: <literal>-types=table,view,sequence,domain,enum</literal>
             </para>
+            <para>
+              This parameter supports auto-completion.
+            </para>
           </entry>
         </row>
 
@@ -135,6 +137,9 @@
             -tables is also specified. To create a report on all tables, but exclude those that start
             with 'DEV', use <literal>-tables=* -excludeTableNames=DEV*</literal>
 					</entry>
+          <para>
+            This parameter supports auto-completion.
+          </para>
 				</row>
 
 				<row>
@@ -172,7 +177,7 @@
 
 				<row>
 					<entry>-includeTables</entry>
-					<entry>Control the output of table information for the report. The default is
+					<entry>Controls the output of table information for the report. The default is
 						<literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
 					</entry>
 				</row>

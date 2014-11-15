@@ -210,6 +210,7 @@ public class OracleIndexReaderTest
 			pk.setPkName("PK_T");
 			pk.setPkIndexName("UNIQUE_ID");
 			String pkSource = builder.getPkSource(tbl.getTable(), pk, false).toString();
+//			System.out.println(pkSource);
 			assertTrue(pkSource.indexOf("USING INDEX") > -1);
 			assertTrue(pkSource.indexOf("CREATE UNIQUE INDEX UNIQUE_ID") > -1);
 		}
