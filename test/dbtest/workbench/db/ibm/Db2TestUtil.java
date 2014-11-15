@@ -46,7 +46,6 @@ public class Db2TestUtil
 {
 	private static boolean isAvailable = true;
 
-
 	public static String getSchemaName()
 	{
 		return getProperty("wbjunit.db2.schema", "wbjunit").toUpperCase();

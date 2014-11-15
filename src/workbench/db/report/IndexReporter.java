@@ -43,7 +43,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
-import static workbench.db.report.ReportTable.TAG_TABLESPACE;
+import static workbench.db.report.ReportTable.*;
 
 /**
  * Class to retrieve all index definitions for a table and
@@ -67,7 +67,7 @@ public class IndexReporter
 	private Collection<IndexDefinition> indexList;
 	private TagWriter tagWriter = new TagWriter();
 	private String mainTagToUse;
-	private Map<IndexDefinition, List<ObjectOption>> indexOptions = new HashMap<IndexDefinition, List<ObjectOption>>();
+	private Map<IndexDefinition, List<ObjectOption>> indexOptions = new HashMap<>();
 
 	public IndexReporter(TableIdentifier tbl, WbConnection conn, boolean includePartitions)
 	{
@@ -81,7 +81,7 @@ public class IndexReporter
 
 	public IndexReporter(IndexDefinition index)
 	{
-		indexList  = new LinkedList<IndexDefinition>();
+		indexList  = new LinkedList<>();
 		indexList.add(index);
 	}
 

@@ -102,6 +102,8 @@ public class DbMetadata
 	public static final String DBID_VERTICA = "vertica_database";
 	public static final String DBID_MYSQL = "mysql";
 	public static final String DBID_FIREBIRD = "firebird";
+	public static final String DBID_DB2_LUW = "db2";
+	public static final String DBID_H2 = "h2";
 
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};

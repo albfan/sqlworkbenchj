@@ -467,6 +467,8 @@ public class JdbcIndexReader
 		String type = indexDefinition.getIndexType();
 		type = getSQLKeywordForType(type);
 
+		String options = getIndexOptions(table, indexDefinition);
+		
 		WbConnection conn = metaData.getWbConnection();
 		String sql = template;
 
@@ -514,7 +516,7 @@ public class JdbcIndexReader
 		sql = StringUtil.replace(sql, MetaDataSqlManager.FQ_INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectExpression(metaData.getWbConnection()));
 		sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectName());
 		idx.append(sql);
-		String options = getIndexOptions(table, indexDefinition);
+
 		if (StringUtil.isNonBlank(options))
 		{
 			idx.append(options);

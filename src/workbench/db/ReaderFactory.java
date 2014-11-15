@@ -38,6 +38,7 @@ import workbench.db.h2database.H2SequenceReader;
 import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2ConstraintReader;
+import workbench.db.ibm.Db2IndexReader;
 import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.InformixProcedureReader;
 import workbench.db.ibm.InformixSequenceReader;
@@ -143,7 +144,7 @@ public class ReaderFactory
 		{
 			return new CubridSequenceReader(con);
 		}
-		if (meta.getDbId().equals("vertica_database"))
+		if (meta.getDbId().equals(DbMetadata.DBID_VERTICA))
 		{
 			return new VerticaSequenceReader(con);
 		}
@@ -200,6 +201,10 @@ public class ReaderFactory
 		{
 			return new MonetDbIndexReader(meta);
 		}
+		if (meta.getDbId().equals(DbMetadata.DBID_DB2_LUW))
+		{
+			return new Db2IndexReader(meta);
+		}
 		return new JdbcIndexReader(meta);
 	}
 
@@ -230,7 +235,7 @@ public class ReaderFactory
 		{
 			return new FirebirdConstraintReader();
 		}
-		if ("h2".equals(dbid))
+		if (DbMetadata.DBID_H2.equals(dbid))
 		{
 			return new H2ConstraintReader();
 		}
