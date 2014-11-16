@@ -25,12 +25,13 @@ package workbench.gui.lnf;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
-import java.lang.reflect.Method;
 import java.util.Set;
 
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.metal.MetalTheme;
 
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
@@ -234,20 +235,22 @@ public class LnFHelper
 			String className = "com.jgoodies.looks.plastic.theme." + themeName;
 			LogMgr.logDebug("LnFHelper.setJGoodiesTheme()", "Trying to set theme: " + className);
 
-			Class lnf = loader.loadClass("com.jgoodies.looks.plastic.PlasticLookAndFeel");
-			Class baseThemeClass = loader.loadClass("com.jgoodies.looks.plastic.PlasticTheme");
 			Class themeClass = loader.loadClass(className);
 
 			Object themeInstance = themeClass.newInstance();
-			Method setTheme = lnf.getMethod("setPlasticTheme", baseThemeClass);
-			setTheme.invoke(null, themeInstance);
+			if (themeInstance instanceof MetalTheme)
+			{
+				// PlasticLookAndFeel.setPlasticTheme() simply
+				// calls MetalLookAndFeel.setCurrentTheme() as the plastic look and feel is only a themed MetalLookAndFeel
+				MetalLookAndFeel.setCurrentTheme((MetalTheme)themeInstance);
+			}
 		}
 		catch (Throwable th)
 		{
 			LogMgr.logError("LnFHelper.setJGoodiesTheme()", "Could not set theme", th);
 		}
 	}
-	
+
 	private void setSystemLnF()
 	{
 		try
