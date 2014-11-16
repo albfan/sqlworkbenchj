@@ -23,6 +23,7 @@ import java.awt.Point;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -2552,12 +2553,31 @@ public class JEditTextArea
 			Clipboard clipboard = getToolkit().getSystemClipboard();
 			try
 			{
-				String selection = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor));
-				setSelectedText(selection);
+				Transferable content = clipboard.getContents(this);
+				if (content.isDataFlavorSupported(DataFlavor.stringFlavor))
+				{
+					Object data = content.getTransferData(DataFlavor.stringFlavor);
+					if (data instanceof String)
+					{
+						setSelectedText((String)data);
+					}
+				}
+				else
+				{
+					DataFlavor[] flavors = content.getTransferDataFlavors();
+					String info = "";
+					int count = 0;
+					for (DataFlavor f : flavors)
+					{
+						if (count > 0) info += ", ";
+						info += f.getHumanPresentableName();
+					}
+					LogMgr.logWarning("JEditTextArea.paste()", "Clipboard doesn't contain a String value. Current flavors: " + info);
+				}
 			}
-			catch(Exception e)
+			catch(Throwable th)
 			{
-				getToolkit().beep();
+				LogMgr.logError("JEditTextArea.paste()", "Could not get string data from clipboard", th);
 			}
 		}
 	}

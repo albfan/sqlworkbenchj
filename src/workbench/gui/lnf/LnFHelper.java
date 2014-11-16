@@ -147,6 +147,9 @@ public class LnFHelper
 
 	private void scaleDefaultFonts()
 	{
+		int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+		LogMgr.logDebug("LnfHelper.scaleDefaultFonts()", "Current DPI is: " + dpi);
+
 		if (!Settings.getInstance().getScaleFonts()) return;
 
 		UIDefaults def = UIManager.getDefaults();
