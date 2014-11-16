@@ -210,7 +210,7 @@ public class LnFHelper
 
 				if (className.startsWith("com.jgoodies.looks.plastic"))
 				{
-					String theme = Settings.getInstance().getProperty("workbench.gui.lnf.jgoodies.theme", "DesertBlue");
+					String theme = Settings.getInstance().getProperty("workbench.gui.lnf.jgoodies.theme", "Silver");
 					setJGoodiesTheme(loader, theme);
 				}
 
@@ -236,12 +236,21 @@ public class LnFHelper
 			LogMgr.logDebug("LnFHelper.setJGoodiesTheme()", "Trying to set theme: " + className);
 
 			Class themeClass = loader.loadClass(className);
-
 			Object themeInstance = themeClass.newInstance();
+
+			/*
+			  for some reason using reflection does not work any longer with
+			  newer JGoodies versions. But using MetalLookAndFeel.setCurrentTheme() seems
+			  to work just as good
+			Class lnf = loader.loadClass("com.jgoodies.looks.plastic.PlasticLookAndFeel");
+			Class baseThemeClass = loader.loadClass("com.jgoodies.looks.plastic.PlasticTheme");
+			Method setTheme = lnf.getDeclaredMethod("setPlasticTheme", baseThemeClass);
+			setTheme.invoke(null, themeInstance);
+			*/
+
 			if (themeInstance instanceof MetalTheme)
 			{
-				// PlasticLookAndFeel.setPlasticTheme() simply
-				// calls MetalLookAndFeel.setCurrentTheme() as the plastic look and feel is only a themed MetalLookAndFeel
+				// PlasticLookAndFeel.setPlasticTheme() simply calls MetalLookAndFeel.setCurrentTheme()
 				MetalLookAndFeel.setCurrentTheme((MetalTheme)themeInstance);
 			}
 		}
