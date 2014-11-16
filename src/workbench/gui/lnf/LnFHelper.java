@@ -39,6 +39,7 @@ import workbench.resource.Settings;
 import workbench.gui.components.TabbedPaneUIFactory;
 
 import workbench.util.CollectionUtil;
+import workbench.util.PlatformHelper;
 import workbench.util.StringUtil;
 
 /**
@@ -213,6 +214,7 @@ public class LnFHelper
 				}
 
 				UIManager.setLookAndFeel(lnf);
+				PlatformHelper.installGtkPopupBugWorkaround();
 			}
 		}
 		catch (Throwable e)

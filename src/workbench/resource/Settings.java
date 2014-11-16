@@ -1307,17 +1307,14 @@ public class Settings
 	 */
 	public boolean getScaleFonts()
 	{
-		if (PlatformHelper.isWindows())
-		{
-			int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
-			LogMgr.logInfo("Settings.getScaleFonts()", "Current DPI is: " + dpi);
-			// 120 DPI is the "125% scale" setting in Windows
-			// anything bigger than that indicates we should also scale the fonts
-			// TODO: scale the images as well.
-			boolean scaleDefault = (dpi >= 120);
-			return getBoolProperty("workbench.gui.desktop.scalefonts", scaleDefault);
-		}
-		return getBoolProperty("workbench.gui.desktop.scalefonts", false);
+		int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+		LogMgr.logInfo("Settings.getScaleFonts()", "Current DPI is: " + dpi);
+		// 120 DPI is the "125% scale" setting in Windows
+		// anything bigger than that indicates we should also scale the fonts
+		// for Linux it seems Java always returns 96dpi regardless of the 
+		// the DPI factor defined in the system
+		boolean scaleDefault = (dpi >= 120);
+		return getBoolProperty("workbench.gui.desktop.scalefonts", scaleDefault);
 	}
 
 	public void setScaleFonts(boolean flag)
