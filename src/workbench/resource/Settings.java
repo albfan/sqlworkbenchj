@@ -1307,7 +1307,17 @@ public class Settings
 	 */
 	public boolean getScaleFonts()
 	{
-		return PlatformHelper.isWindows() && getBoolProperty("workbench.gui.desktop.scalefonts", false);
+		if (PlatformHelper.isWindows())
+		{
+			int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+			LogMgr.logInfo("Settings.getScaleFonts()", "Current DPI is: " + dpi);
+			// 120 DPI is the "125% scale" setting in Windows
+			// anything bigger than that indicates we should also scale the fonts
+			// TODO: scale the images as well.
+			boolean scaleDefault = (dpi >= 120);
+			return getBoolProperty("workbench.gui.desktop.scalefonts", scaleDefault);
+		}
+		return getBoolProperty("workbench.gui.desktop.scalefonts", false);
 	}
 
 	public void setScaleFonts(boolean flag)
@@ -3443,7 +3453,7 @@ public class Settings
 			try
 			{
 				File bck = version.createBackup(configfile);
-				LogMgr.logInfo("Settings.saveSettings()", "Created new version of global settings file: " + bck.getAbsolutePath()+ "(" + bck.length() + " bytes)");
+				LogMgr.logInfo("Settings.saveSettings()", "Created new version of global settings file: " + bck.getAbsolutePath()+ " (" + bck.length() + " bytes)");
 			}
 			catch (IOException e)
 			{
