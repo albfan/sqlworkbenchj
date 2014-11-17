@@ -322,4 +322,33 @@ public class TableListParserTest
 		assertEquals("t2", l.get(1).getName());
 	}
 
+	@Test
+	public void getTablesFromUnion()
+	{
+		String sql =
+			"select count(*) \n" +
+			"from (\n" +
+			"  (\n" +
+			"     select * \n" +
+			"     from table_1 \n" +
+			"     except \n" +
+			"     select * \n" +
+			"     from table_2 \n" +
+			"  )\n" +
+			"  union all \n" +
+			"  (\n" +
+			"     select * \n" +
+			"     from table_2 \n" +
+			"     except \n" +
+			"     select * \n" +
+			"     from table_1 \n" +
+			"  )\n" +
+			") as diff_table";
+
+		List<Alias> tables = SqlUtil.getTables(sql, false, '.', '.', ParserType.Standard);
+		assertNotNull(tables);
+		assertEquals(1, tables.size());
+		assertEquals("diff_table", tables.get(0).getName());
+	}
+	
 }
