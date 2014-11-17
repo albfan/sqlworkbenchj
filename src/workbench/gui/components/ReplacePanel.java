@@ -28,6 +28,8 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.WindowListener;
 
 import javax.swing.JDialog;
@@ -49,7 +51,7 @@ import workbench.util.StringUtil;
  */
 public class ReplacePanel
 	extends JPanel
-	implements ActionListener, WindowListener
+	implements ActionListener, WindowListener, FocusListener
 {
 	private String settingsKey;
 	private String caseProperty;
@@ -120,7 +122,28 @@ public class ReplacePanel
 			this.selectedTextCheckBox.setText(selectedText);
 		}
 
+		replaceValue.getEditor().getEditorComponent().addFocusListener(this);
+		searchCriteria.getEditor().getEditorComponent().addFocusListener(this);
 	}
+
+	@Override
+	public void focusLost(FocusEvent e)
+	{
+	}
+
+	@Override
+	public void focusGained(FocusEvent e)
+	{
+		if (e.getComponent() == replaceValue.getEditor().getEditorComponent())
+		{
+			replaceValue.getEditor().selectAll();
+		}
+		else if (e.getComponent() == searchCriteria.getEditor().getEditorComponent())
+		{
+			searchCriteria.getEditor().selectAll();
+		}
+	}
+
 
 	/** This method is called from within the constructor to
 	 * initialize the form.
