@@ -25,10 +25,10 @@ import java.util.List;
 
 import workbench.log.LogMgr;
 
-import workbench.sql.parser.ParserType;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
+import workbench.sql.parser.ParserType;
 
 
 /**
@@ -103,6 +103,11 @@ public class TableListParser
 					if (t != null && t.getContents().equals("AS"))
 					{
 						t = lexer.getNextToken(false, false);
+						collectTable = true;
+					}
+					else
+					{
+						collectTable = bracketCount == 0;
 					}
 					continue;
 				}
