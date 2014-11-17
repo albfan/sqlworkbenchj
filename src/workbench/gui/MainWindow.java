@@ -1958,11 +1958,11 @@ public class MainWindow
 				{
 					doDisconnect();
 					if (closeWorkspace) closeWorkspace(background);
-					if (background) closeConnectingInfo();
 				}
 				finally
 				{
 					clearConnectIsInProgress();
+					if (background) closeConnectingInfo();
 				}
 			}
 		};
@@ -1985,7 +1985,6 @@ public class MainWindow
 	{
 		try
 		{
-			ConnectionMgr mgr = ConnectionMgr.getInstance();
 			WbConnection conn = null;
 
 			for (int i = 0; i < this.sqlTab.getTabCount(); i++)
