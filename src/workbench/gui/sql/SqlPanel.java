@@ -191,8 +191,6 @@ import workbench.storage.DataStore;
 import workbench.sql.AppendResultAnnotation;
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.OutputPrinter;
-import workbench.sql.parser.ParserType;
-import workbench.sql.parser.ScriptParser;
 import workbench.sql.ScrollAnnotation;
 import workbench.sql.StatementHistory;
 import workbench.sql.StatementRunner;
@@ -201,6 +199,8 @@ import workbench.sql.UseTabAnnotation;
 import workbench.sql.VariablePool;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.macros.MacroManager;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 
@@ -3265,7 +3265,14 @@ public class SqlPanel
 					cancelMsg = cancelMsg.replace("%nr%", NumberStringCache.getNumberString(i+1));
 					this.appendToLog(cancelMsg);
 					this.showLogPanel();
-					continue;
+					if (GuiSettings.cancellingVariablePromptStopsExecution())
+					{
+						break;
+					}
+					else
+					{
+						continue;
+					}
 				}
 
 				resultSets += this.addResult(statementResult);

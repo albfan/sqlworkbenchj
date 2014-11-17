@@ -1145,4 +1145,9 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.dd.editable", false);
 	}
+
+	public static boolean cancellingVariablePromptStopsExecution()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.cancel.stops", true);
+	}
 }
