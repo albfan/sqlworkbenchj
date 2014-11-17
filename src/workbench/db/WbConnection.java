@@ -862,7 +862,7 @@ public class WbConnection
 			{
 				this.rollback();
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				LogMgr.logWarning("WbConnection.close()", "Error when calling rollback before disconnect", e);
 			}
