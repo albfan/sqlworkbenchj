@@ -459,12 +459,19 @@ public class TextFileParser
 		this.streamImporter = importer;
 	}
 
-	protected void sendCompleteFile(List<ColumnIdentifier> columns, Reader in, String encoding)
+	protected void sendCompleteFile(List<ColumnIdentifier> columns, String encoding)
 		throws Exception
 	{
-		streamImporter.setup(targetTable.getTable(), columns, in, this, encoding);
-		receiver.processFile(streamImporter);
-		fileHandler.done();
+		try
+		{
+			Reader in = this.fileHandler.getMainFileReader();
+			streamImporter.setup(targetTable.getTable(), columns, in, this, encoding);
+			receiver.processFile(streamImporter);
+		}
+		finally
+		{
+			fileHandler.done();
+		}
 	}
 
 	@Override
@@ -570,8 +577,7 @@ public class TextFileParser
 		{
 			// need to reset the stream to the beginning
 			FileUtil.closeQuietely(in);
-			in = this.fileHandler.getMainFileReader();
-			sendCompleteFile(columnsToImport, in, fileHandler.getEncoding());
+			sendCompleteFile(columnsToImport, fileHandler.getEncoding());
 			return;
 		}
 
