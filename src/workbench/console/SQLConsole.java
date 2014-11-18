@@ -589,7 +589,6 @@ public class SQLConsole
 			{
 				cancelThread.start();
 				cancelThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 5000));
-				cancelThread = null;
 			}
 			catch (Exception ex)
 			{
@@ -597,6 +596,7 @@ public class SQLConsole
 				LogMgr.logWarning("SQLConsole.cancelStatement()", "Could not cancel statement. Trying to forcefully abort the statemnt", ex);
 				abortStatement();
 			}
+			cancelThread = null;
 		}
 	}
 
@@ -619,7 +619,7 @@ public class SQLConsole
 			LogMgr.shutdown();
 		}
 	}
-	
+
 	/**
 	 * Callback for the shutdown hook
 	 */
