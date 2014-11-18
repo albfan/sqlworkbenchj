@@ -462,8 +462,15 @@ public class TextFileParser
 	protected void sendCompleteFile(List<ColumnIdentifier> columns, Reader in, String encoding)
 		throws Exception
 	{
-		streamImporter.setup(targetTable.getTable(), columns, in, this, encoding);
-		receiver.processFile(streamImporter);
+		try
+		{
+			streamImporter.setup(targetTable.getTable(), columns, in, this, encoding);
+			receiver.processFile(streamImporter);
+		}
+		finally
+		{
+			FileUtil.closeQuietely(in);
+		}
 	}
 
 	@Override
