@@ -22,6 +22,7 @@
  */
 package workbench.db.postgres;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
@@ -122,10 +123,34 @@ public class PgCopyImporter
 		}
 	}
 
+	private void skipOneLine(Reader in)
+	{
+		try
+		{
+			if (in instanceof BufferedReader)
+			{
+				((BufferedReader) in).readLine();
+			}
+			else
+			{
+				BufferedReader r = new BufferedReader(in);
+				r.readLine();
+			}
+		}
+		catch (IOException ex)
+		{
+			LogMgr.logError("PgCopyImporter.skipOneLine()", "Could not read line", ex);
+		}
+	}
+
 	@Override
 	public void setup(TableIdentifier table, List<ColumnIdentifier> columns, Reader in, TextImportOptions options, String encoding)
 	{
 		sql = createCopyStatement(table, columns, options, encoding);
+		if (options.getContainsHeader() && sql.contains("format text"))
+		{
+			skipOneLine(in);
+		}
 		data = in;
 	}
 
@@ -201,7 +226,7 @@ public class PgCopyImporter
 		}
 		copySql.append(") FROM stdin WITH (format ");
 
-		boolean useText = options.getTextQuoteChar() == null && options.getContainsHeader() == false && options.getDecode();
+		boolean useText = options.getTextQuoteChar() == null && options.getDecode();
 		String nullString = options.getNullString();
 
 		if (useText)

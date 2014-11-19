@@ -45,7 +45,7 @@ import workbench.util.ZipUtil;
 /**
  * This class manages access to an import file and possible attachments that
  * were created by {@link workbench.db.exporter.DataExporter}.
- * 
+ *
  * The import file can either be a regular file, or stored in a ZIP archive.
  *
  * @author Thomas Kellerer
@@ -105,10 +105,7 @@ public class ImportFileHandler
 	public BufferedReader getMainFileReader()
 		throws IOException
 	{
-		if (this.mainReader != null)
-		{
-			FileUtil.closeQuietely(mainReader);
-		}
+		FileUtil.closeQuietely(mainReader);
 
 		Reader r = null;
 		if (baseFile instanceof ClipboardFile)
@@ -118,7 +115,10 @@ public class ImportFileHandler
 		}
 		else if (isZip)
 		{
-			mainArchive = new ZipFile(baseFile);
+			if (mainArchive == null)
+			{
+				mainArchive = new ZipFile(baseFile);
+			}
 			Enumeration entries = mainArchive.entries();
 			if (entries.hasMoreElements())
 			{
