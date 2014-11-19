@@ -103,11 +103,13 @@ public class WbDefineMacro
 			return result;
 		}
 		String macroText = cmdLine.getValue(ARG_TEXT);
-		String fname = cmdLine.getValue(ARG_FILE);
-		String groupName = cmdLine.getValue(ARG_GROUP);
+		WbFile sourceFile = evaluateFileArgument(cmdLine.getValue(ARG_FILE));
+		String groupName = StringUtil.trimQuotes(cmdLine.getValue(ARG_GROUP));
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, null);
 		String macroName = cmdLine.getValue(ARG_NAME);
 		boolean expand = cmdLine.getBoolean(ARG_EXPAND);
+
+		boolean newMacro = false;
 
 		if (StringUtil.isBlank(macroName))
 		{
@@ -121,13 +123,9 @@ public class WbDefineMacro
 
 		MacroGroup groupToUse = null;
 
-		if (StringUtil.isNonBlank(fname))
+		if (sourceFile != null && sourceFile.exists())
 		{
-			WbFile f = new WbFile(fname);
-			if (f.exists())
-			{
-				macroText = FileUtil.readFile(f, encoding);
-			}
+			macroText = FileUtil.readFile(sourceFile, encoding);
 		}
 		else
 		{
@@ -141,19 +139,22 @@ public class WbDefineMacro
 		{
 			def = new MacroDefinition(macroName, macroText);
 			msg = ResourceMgr.getFormattedString("MsgMacroAdded", macroName);
+			newMacro = true;
 		}
 		else
 		{
 			def.setText(macroText);
 			msg = ResourceMgr.getFormattedString("MsgMacroRedef", macroName);
+			newMacro = false;
 		}
+
 		def.setExpandWhileTyping(expand);
 
 		if (StringUtil.isNonEmpty(groupName))
 		{
 			for (MacroGroup grp : groups)
 			{
-				if (grp.getName().equals(groupName))
+				if (grp.getName().equalsIgnoreCase(groupName))
 				{
 					groupToUse = grp;
 				}

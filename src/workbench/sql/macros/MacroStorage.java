@@ -302,14 +302,12 @@ public class MacroStorage
 
 	public synchronized void moveMacro(MacroDefinition macro, MacroGroup newGroup)
 	{
-		for (MacroGroup group : groups)
-		{
-			if (!group.equals(newGroup))
-			{
-				group.removeMacro(macro);
-			}
-		}
+		MacroGroup currentGroup = findMacroGroup(macro.getName());
+		if (currentGroup != null && currentGroup.equals(newGroup)) return;
+
+		currentGroup.removeMacro(macro);
 		newGroup.addMacro(macro);
+		
 		this.modified = true;
 		this.fireMacroListChanged();
 	}
