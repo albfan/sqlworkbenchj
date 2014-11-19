@@ -670,7 +670,7 @@
           </row>
 
           <row>
-            <entry id="wbvardef-varname">-file</entry>
+            <entry id="wbvardef-file">-file</entry>
             <entry>
               Read the variable definitions from the specified file.
             </entry>
@@ -2358,7 +2358,7 @@ WHERE id=42;</programlisting>
           </thead>
 
           <tbody valign="top">
-            <row id="id">
+            <row id="connect-descriptor">
               <entry>-connection</entry>
               <entry>
                 &connect-descriptor;

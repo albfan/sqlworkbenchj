@@ -382,7 +382,7 @@ SELECT 42 FROM dual;</programlisting>
     <indexterm><primary>Problems</primary><secondary>Microsoft SQL Server</secondary></indexterm>
     <indexterm><primary>Microsoft SQL Server</primary><secondary>Problems</secondary></indexterm>
 
-		<section id="mssql-remarks-nodisplay">
+		<section id="mssql-wrong-date-value">
 		  <title>The value of DATE columns is not correct</title>
       <indexterm><primary>Microsoft SQL Server</primary><secondary>Incorrect value for DATE columns</secondary></indexterm>
 		  <para>
