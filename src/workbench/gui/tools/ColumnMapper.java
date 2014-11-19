@@ -27,6 +27,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.DefaultCellEditor;
@@ -142,7 +144,7 @@ public class ColumnMapper
 		return t;
 	}
 
-	public void defineColumns(List<ColumnIdentifier> source, List<ColumnIdentifier> target, boolean syncDataTypes)
+	public void defineColumns(List<ColumnIdentifier> source, List<ColumnIdentifier> target, boolean syncDataTypes, boolean keepSourceOrder)
 	{
 		if (source == null || target == null) throw new IllegalArgumentException("Both column lists have to be specified");
 		this.sourceColumns = source;
@@ -171,6 +173,10 @@ public class ColumnMapper
 		}
 
 		this.data = new MapDataModel(this.mapping);
+		if (keepSourceOrder)
+		{
+			data.sortBySourcePosition();
+		}
 		this.data.setAllowTargetEditing(this.allowTargetEditing);
 		this.columnDisplay.setModel(this.data);
 		TableColumnModel colMod = this.columnDisplay.getColumnModel();
@@ -260,7 +266,7 @@ public class ColumnMapper
 	public List<ColumnIdentifier> getMappingForImport()
 	{
 		int count = this.sourceColumns.size();
-		ArrayList<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
+		ArrayList<ColumnIdentifier> result = new ArrayList<>(count);
 		ColumnIdentifier skipId = new ColumnIdentifier(RowDataProducer.SKIP_INDICATOR);
 		for (int i=0; i < count; i++)
 		{
@@ -336,7 +342,7 @@ class MapDataModel
 	private final String sourceColName = ResourceMgr.getString("LblSourceColumn");
 	private final String targetColName = ResourceMgr.getString("LblTargetColumn");
 
-	public MapDataModel(ColumnMapRow[] data)
+	MapDataModel(ColumnMapRow[] data)
 	{
 		super();
 		this.data = data;
@@ -494,7 +500,27 @@ class MapDataModel
 		}
 	}
 
+	public void sortBySourcePosition()
+	{
+		Comparator<ColumnMapRow> comp = new Comparator<ColumnMapRow>()
+		{
+			@Override
+			public int compare(ColumnMapRow o1, ColumnMapRow o2)
+			{
+				if (o1 == null) return 1;
+				if (o2 == null) return -1;
+
+				ColumnIdentifier c1 = o1.getSource();
+				ColumnIdentifier c2 = o2.getSource();
+				if (c1 == null) return 1;
+				if (c1 == null) return -1;
+				return c1.getPosition() - c2.getPosition();
+			}
+		};
+		Arrays.sort(data, comp);
+	}
 }
+
 class ColumnMapRow
 {
 	private ColumnIdentifier source;
@@ -536,4 +562,5 @@ class SkipColumnIndicator
 	{
 		return display;
 	}
+
 }

@@ -1947,13 +1947,13 @@ public class DataPumper
 
 			if (newTable)
 			{
-				this.columnMapper.defineColumns(sourceCols, sourceCols, false);
+				this.columnMapper.defineColumns(sourceCols, sourceCols, false, useQuery);
 			}
 			else
 			{
 				List<ColumnIdentifier> targetCols = this.targetConnection.getMetadata().getTableColumns(target);
 				boolean syncDataTypes = (this.fileImporter != null);
-				this.columnMapper.defineColumns(sourceCols, targetCols, syncDataTypes);
+				this.columnMapper.defineColumns(sourceCols, targetCols, syncDataTypes, useQuery);
 			}
 
 			this.columnMapper.setAllowSourceEditing(!useQuery && !newTable);
@@ -2062,7 +2062,7 @@ public class DataPumper
 				}
 				if (!ignoreSelect) where = this.sqlEditor.getText();
 
-				Map<String, String> mapping = new HashMap<String, String>();
+				Map<String, String> mapping = new HashMap<>();
 				int count = colMapping.sourceColumns.length;
 				for (int i=0; i < count; i++)
 				{
