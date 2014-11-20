@@ -29,8 +29,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Statement;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.util.FileUtil;
@@ -57,7 +58,7 @@ public class BatchedStatement
 	private int batchSize;
 	private int currentSize;
 	private boolean commitBatch;
-	private final List<Closeable> streams = new LinkedList<>();
+	private final List<Closeable> streams = new ArrayList<>();
 
 	/**
 	 * Creates a BatchedStatement with a batch size of 10.
