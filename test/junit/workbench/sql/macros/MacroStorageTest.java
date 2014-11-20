@@ -165,7 +165,7 @@ public class MacroStorageTest
 		throws Exception
 	{
 		TestUtil util = new TestUtil(this.getName());
-		Map<String, String> old = new HashMap<String, String>();
+		Map<String, String> old = new HashMap<>();
 		old.put("macro1", "select 42 from dual;");
 		old.put("macro2", "explain ${current_statement}");
 		old.put("macro3", "select * from pg_stat_activity");
