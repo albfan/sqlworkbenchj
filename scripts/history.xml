@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-10-30">
+  <release build="-1" date="2014-11-19">
     <entry dev-build="9" type="enh">Variables can now be displayed in the order they were defined during prompting (rather than sorted alphabetically) by setting the config property workbench.sql.parameter.prompt.sort to false</entry>
     <entry dev-build="9" type="enh">When a connection profile specified with -profile rqeuires the input of a username or the password, only the input dialog is displayed without the profile dialog</entry>
     <entry dev-build="9" type="enh">It's now possible to define a default (global) alternate delimiter based on the DBMS.</entry>
