@@ -25,9 +25,7 @@ package workbench.sql;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
@@ -146,16 +144,15 @@ public class BatchRunnerTest
 			WbFile scriptFile = new WbFile(util.getBaseDir(), "myscript.sql");
 			WbFile logfile = new WbFile(util.getBaseDir(), "junit_transaction_test.txt");
 
-			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
-			writer.println("-- test script");
-			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
-			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');");
-			writer.println("commit;");
-			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
-			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
-			writer.println("-- import data should fail!");
-			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false");
-			writer.close();
+			TestUtil.writeFile(scriptFile,
+			"-- test script\n" +
+			"CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');\n" +
+			"commit;\n" +
+			"insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');\n" +
+			"insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');\n" +
+			"-- import data should fail!\n" +
+			"WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false\n");
 
 			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "errtest");
@@ -216,16 +213,15 @@ public class BatchRunnerTest
 				"7\tGeneral\tFailure\n";
 			TestUtil.writeFile(importFile, data);
 			WbFile scriptFile = new WbFile(util.getBaseDir(), "myscript.sql");
-			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
-			writer.println("-- test script");
-			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
-			writer.println("commit;");
-			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');");
-			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
-			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
-			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false;");
-			writer.println("insert into person (nr, firstname, lastname) values (8,'Tricia', 'McMillian');");
-			writer.close();
+			TestUtil.writeFile(scriptFile,
+			"-- test script\n" +
+			"CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"commit;\n" +
+			"insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');\n" +
+			"insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');\n" +
+			"insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');\n" +
+			"WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false;\n" +
+			"insert into person (nr, firstname, lastname) values (8,'Tricia', 'McMillian');");
 
 			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "successtest");
@@ -302,9 +298,7 @@ public class BatchRunnerTest
 		util.emptyBaseDirectory();
 
 		File scriptFile = new File(util.getBaseDir(), "testbatch.sql");
-		FileWriter writer = new FileWriter(scriptFile);
-		writer.write(sql);
-		writer.close();
+		TestUtil.writeFile(scriptFile, sql);
 
 		ArgumentParser parser = new AppArguments();
 		String script = "-script='" + scriptFile.getAbsolutePath() + "'";
@@ -343,18 +337,18 @@ public class BatchRunnerTest
 			util.prepareEnvironment(true);
 
 			WbFile scriptFile = new WbFile(util.getBaseDir(), "preparedata.sql");
-			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
-			writer.println("-- test script");
-			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
-			writer.println("-- first row");
-			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');");
-			writer.println("-- first row");
-			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');");
-			writer.println("-- first row");
-			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');");
-			writer.println("/* make everything permanent\nmore comments */");
-			writer.println("commit;");
-			writer.close();
+			TestUtil.writeFile(scriptFile,
+			"-- test script\n" +
+			"CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"-- first row\n" +
+			"insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');\n" +
+			"-- first row\n" +
+			"insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');\n" +
+			"-- first row\n" +
+			"insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox');\n" +
+			"/* make everything permanent\nmore comments */\n" +
+			"commit;\n" );
+
 
 			ArgumentParser parser = new AppArguments();
 			parser.parse("-url='jdbc:h2:mem:testBatchRunner' " +
@@ -455,26 +449,24 @@ public class BatchRunnerTest
 
 			ArgumentParser parser = new AppArguments();
 			File scriptFile = new File(util.getBaseDir(), "preparedata.sql");
-			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
-			writer.println("-- test script");
-			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100))");
-			writer.println("/");
-			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')");
-			writer.println("/");
-			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect')");
-			writer.println("/");
-			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox')");
-			writer.println("/");
-			writer.println("commit");
-			writer.println("/");
-			writer.close();
+			TestUtil.writeFile(scriptFile,
+			"-- test script\n" +
+			"CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100))\n" +
+			"/\n" +
+			"insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')\n" +
+			"/\n" +
+			"insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect')\n" +
+			"/\n" +
+			"insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox')\n" +
+			"/\n" +
+			"commit\n" +
+			"/");
 
 			File scriptFile2 = new File(util.getBaseDir(), "insert.sql");
-			PrintWriter writer2 = new PrintWriter(new FileWriter(scriptFile2));
-			writer2.println("-- test script");
-			writer2.println("insert into person (nr, firstname, lastname) values (4,'Tricia', 'McMillian');");
-			writer2.println("commit;");
-			writer2.close();
+			TestUtil.writeFile(scriptFile2,
+			"-- test script\n" +
+			"insert into person (nr, firstname, lastname) values (4,'Tricia', 'McMillian');\n" +
+			"commit;");
 
 			parser.parse("-url='jdbc:h2:mem:testAltDelimiter' -altdelimiter='/;nl' -username=sa -password='' -driver=org.h2.Driver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
@@ -534,9 +526,7 @@ public class BatchRunnerTest
 			con.commit();
 
 			File scriptFile = new File(util.getBaseDir(), "runselect.sql");
-			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
-			writer.println("select * from person;");
-			writer.close();
+			TestUtil.writeFile(scriptFile, "select * from person;");
 
 			ArgumentParser parser = new AppArguments();
 			parser.parse("-displayresult=true -altdelimiter='/;nl' -script=" + scriptFile.getAbsolutePath());
