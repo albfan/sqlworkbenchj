@@ -31,8 +31,11 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.postgres.PgPassReader;
 
 import workbench.gui.profiles.ProfileKey;
 
@@ -607,9 +610,13 @@ public class ConnectionProfile
 	public String getPassword()
 	{
 		if (this.storePassword)
+		{
 			return this.password;
+		}
 		else
+		{
 			return null;
+		}
 	}
 
 	/**
@@ -618,10 +625,21 @@ public class ConnectionProfile
 	 */
 	public String getInputPassword()
 	{
-		if (this.storePassword)
+		if (useStoredPassword())
+		{
 			return this.decryptPassword();
-		else
-			return "";
+		}
+		return "";
+	}
+
+	private boolean usePgPass()
+	{
+		return (url != null && url.startsWith("jdbc:postgresql") && Settings.getInstance().usePgPassFile());
+	}
+
+	private boolean useStoredPassword()
+	{
+		return storePassword || usePgPass();
 	}
 
 	/**
@@ -641,6 +659,16 @@ public class ConnectionProfile
 	 */
 	public String decryptPassword()
 	{
+		if (usePgPass())
+		{
+			PgPassReader reader = new PgPassReader(url, getUsername());
+			String pwd = reader.getPasswordFromFile();
+			if (pwd != null)
+			{
+				LogMgr.logDebug("ConnectionProfile.decryptPassword()", "Using password from pgpass file for URL: " + url);
+				return pwd;
+			}
+		}
 		return this.decryptPassword(this.password);
 	}
 

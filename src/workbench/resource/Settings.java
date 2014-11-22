@@ -515,6 +515,11 @@ public class Settings
 		return getBoolProperty("workbench.help.singlepage", false);
 	}
 
+	public boolean usePgPassFile()
+	{
+		return getBoolProperty("workbench.db.postgresql.use.pgpass", true);
+	}
+	
 	// <editor-fold defaultstate="collapsed" desc="Language settings">
 	public void setLanguage(Locale locale)
 	{
