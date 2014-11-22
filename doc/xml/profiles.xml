@@ -179,6 +179,34 @@
   </section>
 </section>
 
+<section id="profile-postgres">
+  <indexterm><primary>PostgreSQL</primary><secondary>pgpass</secondary></indexterm>
+  <indexterm><primary>PostgreSQL</primary><secondary>libpq</secondary></indexterm>
+  <title>PostgreSQL connections</title>
+  <para>
+    When connecting to a PostgreSQL database it's not necessary to specify username and password.
+    Username and password will then be resolved according to the rules as <literal>psql</literal> or any
+    other <ulink url="http://www.postgresql.org/docs/current/static/libpq.html">libpq</ulink> application would do:
+  </para>
+
+  <simplesect>
+    <title>Username</title>
+    <para>
+      If no username is specified in the connection profile, &wb-productname; will first check the
+      <ulink url="http://www.postgresql.org/docs/current/static/libpq-envars.html">environment variable <literal>PGUSER</literal></ulink>,
+      if that is not defined, the current operating system user will be used.
+    </para>
+  </simplesect>
+  <simplesect>
+    <title>Password</title>
+    <para>
+      If no password is specified, &wb-productname; will look for a
+      <ulink url="http://www.postgresql.org/docs/current/static/libpq-pgpass.html">Postgres password file</ulink>. If that is found
+      and the host, database, port and user are found in the password file, the stored password will be used.
+    </para>
+  </simplesect>
+</section>
+
 <section id="profile-extended-properties">
 	<title>Extended properties for the JDBC driver</title>
   <indexterm><primary>Connection profile</primary><secondary>extended properties</secondary></indexterm>
@@ -692,6 +720,7 @@
 		</para>
 	</section>
 
+  <!--
   <section id="odbc">
 		<title>ODBC connections without a data source</title>
     <para>
@@ -737,6 +766,7 @@
 		</informaltable>
 
 	</section>
+    -->
 
 
 </section>
