@@ -378,7 +378,7 @@ public class WbConnection
 	{
 		if (this.profile != null && !profile.getPromptForUsername())
 		{
-			return this.profile.getUsername();
+			return this.profile.getLoginUser();
 		}
 
 		try
