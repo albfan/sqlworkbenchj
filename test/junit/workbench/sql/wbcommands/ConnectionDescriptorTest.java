@@ -60,14 +60,14 @@ public class ConnectionDescriptorTest
 		ConnectionProfile profile = def.parseDefinition("username=\"thomas\", url=jdbc:postgresql://localhost/thomas, password='secret'");
 		assertNotNull(profile);
 		assertEquals("thomas", profile.getUsername());
-		assertEquals("secret", profile.getInputPassword());
+		assertEquals("secret", profile.getLoginPassword());
 		assertEquals("jdbc:postgresql://localhost/thomas", profile.getUrl());
 		assertEquals("org.postgresql.Driver", profile.getDriverclass());
 
 		profile = def.parseDefinition("username=Arthur, url=jdbc:somedb:someparameter, password=MyPassword, driverjar=xyz.jar, driver=com.foobar.Driver");
 		assertNotNull(profile);
 		assertEquals("Arthur", profile.getUsername());
-		assertEquals("MyPassword", profile.getInputPassword());
+		assertEquals("MyPassword", profile.getLoginPassword());
 		assertEquals("jdbc:somedb:someparameter", profile.getUrl());
 		assertEquals("com.foobar.Driver", profile.getDriverclass());
 	}
