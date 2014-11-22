@@ -625,11 +625,6 @@ public class ConnectionProfile
 		return usePgPass;
 	}
 
-	private boolean useStoredPassword()
-	{
-		return storePassword || usePgPass();
-	}
-
 	/**
 	 * Set the password from a plain readable text
 	 * @param aPassword
@@ -830,16 +825,16 @@ public class ConnectionProfile
 		{
 			return PgPassReader.passFileExists();
 		}
-		
-		if (useStoredPassword())
-		{
-			return StringUtil.isNonEmpty(password);
-		}
-		return false;
+		return StringUtil.isNonEmpty(password) || usePgPass();
 	}
 
 	public String getLoginPassword()
 	{
+		if (StringUtil.isNonEmpty(password))
+		{
+			return this.decryptPassword();
+		}
+
 		if (usePgPass())
 		{
 			PgPassReader reader = new PgPassReader(url, getLoginUser());
@@ -849,10 +844,6 @@ public class ConnectionProfile
 				LogMgr.logDebug("ConnectionProfile.getLoginPassword()", "Using password from pgpass file for URL: " + url);
 				return pwd;
 			}
-		}
-		if (useStoredPassword())
-		{
-			return this.decryptPassword();
 		}
 		return "";
 	}
