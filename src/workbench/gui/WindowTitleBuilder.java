@@ -69,7 +69,7 @@ public class WindowTitleBuilder
 				String url = makeCleanUrl(profile.getUrl());
 				if (includeUser)
 				{
-					title.append(profile.getUsername());
+					title.append(profile.getLoginUser());
 					if (url.charAt(0) != '@')
 					{
 						title.append('@');
@@ -82,7 +82,7 @@ public class WindowTitleBuilder
 				if (profile.getPromptForUsername())
 				{
 					// always display the username if prompted
-					title.append(profile.getUsername());
+					title.append(profile.getLoginUser());
 					title.append(" - ");
 				}
 				if (showProfileGroup)

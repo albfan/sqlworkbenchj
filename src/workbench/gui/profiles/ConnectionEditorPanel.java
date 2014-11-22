@@ -1566,9 +1566,9 @@ public class ConnectionEditorPanel
 		}
 		else if (e.getSource() == this.showPassword)
 		{
-			String pwd = this.getProfile().getInputPassword();
+			String pwd = this.getProfile().getLoginPassword();
 			String title = ResourceMgr.getString("LblCurrentPassword");
-			title += " " + this.getProfile().getUsername();
+			title += " " + this.getProfile().getLoginUser();
 			JTextField f = new JTextField();
 			f.setDisabledTextColor(Color.BLACK);
 			f.setEditable(false);

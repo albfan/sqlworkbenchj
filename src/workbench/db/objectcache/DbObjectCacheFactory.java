@@ -164,7 +164,7 @@ public class DbObjectCacheFactory
 
 	private String makeKey(WbConnection connection)
 	{
-		return connection.getProfile().getUsername() + "@" + connection.getProfile().getUrl();
+		return connection.getProfile().getLoginUser()+ "@" + connection.getProfile().getUrl();
 	}
 
 	/**

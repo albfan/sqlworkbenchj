@@ -230,7 +230,7 @@ public class ConnectionMgr
 			{
 				DriverManager.setLoginTimeout(timeout);
 			}
-			sql = drv.connect(profile.getUrl(), profile.getUsername(), profile.decryptPassword(), anId, getConnectionProperties(profile));
+			sql = drv.connect(profile.getUrl(), profile.getLoginUser(), profile.getLoginPassword(), anId, getConnectionProperties(profile));
 		}
 		finally
 		{

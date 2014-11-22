@@ -72,6 +72,7 @@ public class ConnectionProfile
 	private boolean changed;
 	private boolean groupChanged;
 	private boolean isNew;
+	private boolean usePgPass;
 	private boolean storePassword = true;
 	private boolean separateConnection;
 	private Properties connectionProperties;
@@ -619,22 +620,9 @@ public class ConnectionProfile
 		}
 	}
 
-	/**
-	 * Returns the user's password in plain readable text.
-	 * (This value is send to the DB server)
-	 */
-	public String getInputPassword()
+	public boolean usePgPass()
 	{
-		if (useStoredPassword())
-		{
-			return this.decryptPassword();
-		}
-		return "";
-	}
-
-	private boolean usePgPass()
-	{
-		return (url != null && url.startsWith("jdbc:postgresql") && Settings.getInstance().usePgPassFile());
+		return usePgPass;
 	}
 
 	private boolean useStoredPassword()
@@ -659,17 +647,7 @@ public class ConnectionProfile
 	 */
 	public String decryptPassword()
 	{
-		if (usePgPass())
-		{
-			PgPassReader reader = new PgPassReader(url, getUsername());
-			String pwd = reader.getPasswordFromFile();
-			if (pwd != null)
-			{
-				LogMgr.logDebug("ConnectionProfile.decryptPassword()", "Using password from pgpass file for URL: " + url);
-				return pwd;
-			}
-		}
-		return this.decryptPassword(this.password);
+		return this.decryptPassword(getPassword());
 	}
 
 	/**
@@ -684,17 +662,17 @@ public class ConnectionProfile
 	 *
 	 *	@param aPwd the encrypted password
 	 */
-	public String decryptPassword(String aPwd)
+	public String decryptPassword(String pwd)
 	{
-		if (aPwd == null) return null;
-		if (!isEncrypted(aPwd))
+		if (StringUtil.isEmptyString(pwd)) return "";
+		if (!isEncrypted(pwd))
 		{
-			return aPwd;
+			return pwd;
 		}
 		else
 		{
 			WbCipher des = WbDesCipher.getInstance();
-			return des.decryptString(aPwd.substring(CRYPT_PREFIX.length()));
+			return des.decryptString(pwd.substring(CRYPT_PREFIX.length()));
 		}
 	}
 
@@ -800,6 +778,7 @@ public class ConnectionProfile
 		if (newUrl != null) newUrl = newUrl.trim();
 		if (!StringUtil.equalString(newUrl, url)) changed = true;
 		this.url = newUrl;
+		usePgPass = (url != null && url.startsWith("jdbc:postgresql") && Settings.getInstance().usePgPassFile());
 	}
 
 	public String getDriverName()
@@ -845,8 +824,60 @@ public class ConnectionProfile
 		return this.username;
 	}
 
+	public boolean hasPassword()
+	{
+		if (usePgPass())
+		{
+			return PgPassReader.passFileExists();
+		}
+		
+		if (useStoredPassword())
+		{
+			return StringUtil.isNonEmpty(password);
+		}
+		return false;
+	}
+
+	public String getLoginPassword()
+	{
+		if (usePgPass())
+		{
+			PgPassReader reader = new PgPassReader(url, getLoginUser());
+			String pwd = reader.getPasswordFromFile();
+			if (pwd != null)
+			{
+				LogMgr.logDebug("ConnectionProfile.getLoginPassword()", "Using password from pgpass file for URL: " + url);
+				return pwd;
+			}
+		}
+		if (useStoredPassword())
+		{
+			return this.decryptPassword();
+		}
+		return "";
+	}
+
+	public String getLoginUser()
+	{
+		String user = getUsername();
+		if (usePgPass() && StringUtil.isEmptyString(user))
+		{
+			user = System.getenv("PGUSER");
+			if (user == null)
+			{
+				user = System.getProperty("user.name");
+			}
+			if (user != null)
+			{
+				LogMgr.logDebug("ConnectionProfile.getLoginUser()", "Using PG username: " + user);
+			}
+		}
+		return user;
+	}
+
 	public void setTemporaryUsername(String tempName)
 	{
+		Thread.dumpStack();
 		this.temporaryUsername = tempName;
 	}
 
@@ -928,6 +959,7 @@ public class ConnectionProfile
 	public ConnectionProfile createCopy()
 	{
 		ConnectionProfile result = new ConnectionProfile();
+		result.setUrl(url);
 		result.setAutocommit(autocommit);
 		result.setDriverclass(driverclass);
 		result.setConnectionTimeout(connectionTimeout);
@@ -936,7 +968,6 @@ public class ConnectionProfile
 		result.setGroup(group);
 		result.setIcon(icon);
 		result.setPassword(getPassword());
-		result.setUrl(url);
 		result.setOracleSysDBA(oracleSysDBA);
 		result.setUsername(username);
 		result.setWorkspaceFile(workspaceFile);
@@ -968,6 +999,7 @@ public class ConnectionProfile
 		result.setStoreCacheLocally(this.storeCacheLocally);
 		result.setMacroFilename(this.macroFileName);
 		result.lastSettingsKey = this.lastSettingsKey;
+		result.temporaryUsername = null;
 		if (connectionProperties != null)
 		{
 			Enumeration keys = connectionProperties.propertyNames();

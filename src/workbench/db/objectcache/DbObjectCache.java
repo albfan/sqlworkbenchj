@@ -112,7 +112,7 @@ public class DbObjectCache
 		{
 			ConnectionProfile prof = dbConnection.getProfile();
 			ObjectCachePersistence persistence = new ObjectCachePersistence();
-			persistence.deleteCacheFile(prof.getUrl(), prof.getUsername());
+			persistence.deleteCacheFile(prof.getUrl(), prof.getLoginUser());
 		}
 	}
 

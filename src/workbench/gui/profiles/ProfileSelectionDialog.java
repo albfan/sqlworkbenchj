@@ -314,11 +314,9 @@ public class ProfileSelectionDialog
 	private static boolean promptPassword(Window parent, ConnectionProfile profile)
 	{
 		if (profile == null) return false;
-
-		String pwd = profile.getInputPassword();
-		if (StringUtil.isNonEmpty(pwd)) return true;
+		if (profile.hasPassword()) return true;
 		
-		pwd = WbSwingUtilities.getUserInputHidden(parent, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
+		String pwd = WbSwingUtilities.getUserInputHidden(parent, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
 		if (StringUtil.isEmptyString(pwd)) return false;
 		profile.setPassword(pwd);
 		return true;

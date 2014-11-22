@@ -48,6 +48,12 @@ public class PgPassReader
 		parseUrl(url);
 	}
 
+	public static boolean passFileExists()
+	{
+		File file = getPgPassFile();
+		return file != null && file.exists();
+	}
+
 	public String getPort()
 	{
 		return StringUtil.isEmptyString(port) ? "5432" : port;
@@ -125,7 +131,7 @@ public class PgPassReader
 		return null;
 	}
 
-	private File getPgPassFile()
+	private static File getPgPassFile()
 	{
 		String passFile = System.getenv("PGPASSFILE");
 		File result = null;
@@ -136,11 +142,15 @@ public class PgPassReader
 				String home = System.getenv("APPDATA");
 				result = new File(home + "/postgresql/pgpass.conf");
 			}
+			else
+			{
+				String home = System.getenv("HOME");
+				result = new File(home + "/.pgpass");
+			}
 		}
 		else
 		{
-			String home = System.getenv("HOME");
-			result = new File(home + ".pgpass");
+			result = new File(passFile);
 		}
 		return result;
 	}
