@@ -54,7 +54,7 @@ public class ConnectionDescriptor
 	}
 
 	/**
-	 * Parses a compact connection string in the format user=foo,pwd=bar,url=...,driver=com...,jar=
+	 * Parses a compact connection string in the format username=foo,pwd=bar,url=...,driver=com...,jar=
 	 *
 	 * @param connectionString  the connection string to parse
 	 * @param driverString      the driver string to parse {@link #parseDriver(java.lang.String) }

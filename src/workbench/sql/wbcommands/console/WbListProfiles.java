@@ -37,6 +37,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 /**
  * List all defined profiles
@@ -92,17 +93,24 @@ public class WbListProfiles
 		prof.addAll(ConnectionMgr.getInstance().getProfiles());
 		ProfileGroupMap map = new ProfileGroupMap(prof);
 
-		String userTxt = ResourceMgr.getString("TxtUser");
+		String userTxt = ResourceMgr.getString("TxtUsername");
 		for (String group : map.keySet())
 		{
-			if (groupsOnly) continue;
 			if (groupToShow == null || groupToShow.equalsIgnoreCase(group))
 			{
 				result.addMessage(group);
+				if (groupsOnly) continue;
+				
 				List<ConnectionProfile> profiles = map.get(group);
 				for (ConnectionProfile profile : profiles)
 				{
-					result.addMessage("  " + profile.getName() + ", " + userTxt + "=" + profile.getUsername() + ", URL=" + profile.getUrl());
+					String msg = "  " + profile.getName();
+					if (StringUtil.isNonBlank(profile.getUsername()))
+					{
+						msg += ", " + userTxt + "=" + profile.getUsername();
+					}
+					msg += ", URL=" + profile.getUrl();
+					result.addMessage(msg);
 				}
 			}
 		}
