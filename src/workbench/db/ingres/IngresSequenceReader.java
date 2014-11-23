@@ -81,7 +81,7 @@ public class IngresSequenceReader
 			ownerIndex = 1;
 			sql.append(" WHERE seq_owner = ?");
 		}
-		
+
 		if (StringUtil.isNonBlank(namePattern))
 		{
 			if (whereAdded)
@@ -148,7 +148,7 @@ public class IngresSequenceReader
 
 	private SequenceDefinition getDefinition(DataStore ds, int row, String owner, String sequence)
 	{
-		SequenceDefinition def = new SequenceDefinition(owner, sequence);
+		SequenceDefinition def = new SequenceDefinition(owner.trim(), sequence.trim());
 		def.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
 		def.setSequenceProperty("MAX_VALUE", ds.getValue(row, "MAX_VALUE"));
 		def.setSequenceProperty("INCREMENT_VALUE", ds.getValue(row, "INCREMENT_VALUE"));
