@@ -1318,11 +1318,26 @@ public class ConnectionEditorPanel
 
 		boolean changed = false;
 
+		if (currentProfile.isNew())
+		{
+			String workspace = tfWorkspaceFile.getText();
+			if (StringUtil.isNonEmpty(workspace))
+			{
+				WbFile f = new WbFile(workspace);
+				String ext = f.getExtension();
+				if (StringUtil.isEmptyString(ext))
+				{
+					tfWorkspaceFile.setText(workspace + ".wksp");
+				}
+			}
+		}
+
 		for (SimplePropertyEditor editor : editors)
 		{
 			changed = changed || editor.isChanged();
 			editor.applyChanges();
 		}
+
 
 		DbDriver current = getCurrentDriver();
 		String driverName = currentProfile.getDriverName();
