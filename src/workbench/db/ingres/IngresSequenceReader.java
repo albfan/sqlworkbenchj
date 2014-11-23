@@ -121,7 +121,10 @@ public class IngresSequenceReader
 			if (ownerIndex != -1) stmt.setString(ownerIndex, owner.trim());
 			if (nameIndex != -1) stmt.setString(nameIndex, namePattern.trim());
 			rs = stmt.executeQuery();
-			DataStore ds = new DataStore(rs, true);
+			DataStore ds = new DataStore(rs);
+			ds.setTrimCharData(true);
+			ds.initData(rs);
+
 			for (int i=0; i < ds.getRowCount(); i++)
 			{
 				result.add(getDefinition(ds, i, ds.getValueAsString(i, 1), ds.getValueAsString(i, 0)));
@@ -172,7 +175,9 @@ public class IngresSequenceReader
 			stmt.setString(1, owner.trim());
 			stmt.setString(2, sequence.trim());
 			rs = stmt.executeQuery();
-			result = new DataStore(rs, true);
+			result = new DataStore(rs);
+			result.setTrimCharData(true);
+			result.initData(rs);
 		}
 		catch (Throwable e)
 		{

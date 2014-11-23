@@ -114,6 +114,7 @@ public class DataStore
 	private int currentInsertRow;
 	private int currentDeleteRow;
 
+	private boolean trimCharData;
 	private boolean hasGeneratedKeys;
 	private long loadedAt;
 
@@ -291,6 +292,11 @@ public class DataStore
 		this.data = createData();
 	}
 
+	public void setTrimCharData(boolean flag)
+	{
+		this.trimCharData = flag;
+	}
+
 	/**
 	 * Return the connection that was used to retrieve the result.
 	 * Can be null if the DataStore was not populated using a ResultSet
@@ -304,6 +310,14 @@ public class DataStore
 	public void setOriginalConnection(WbConnection aConn)
 	{
 		this.originalConnection = aConn;
+		if (this.originalConnection != null)
+		{
+			ConnectionProfile prof = this.originalConnection.getProfile();
+			if (prof != null)
+			{
+				trimCharData = prof.getTrimCharData();
+			}
+		}
 	}
 
 	public void setColumnSizes(int[] sizes)
@@ -1330,16 +1344,6 @@ public class DataStore
 		if (this.rowActionMonitor != null)
 		{
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_LOAD);
-		}
-
-		boolean trimCharData = false;
-		if (this.originalConnection != null)
-		{
-			ConnectionProfile prof = this.originalConnection.getProfile();
-			if (prof != null)
-			{
-				trimCharData = prof.getTrimCharData();
-			}
 		}
 
 		setLoadTimeToNow();
