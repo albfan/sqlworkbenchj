@@ -23,12 +23,17 @@
 package workbench.sql.wbcommands.console;
 
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.StringUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -70,6 +75,6 @@ public class WbListProfilesTest
 		String[] lines = msg.split(StringUtil.REGEX_CRLF);
 		assertEquals(2, lines.length);
 		assertEquals("Default group", lines[0]);
-		assertEquals("  TestProfile, User=user, URL=jdbc:test", lines[1]);
+		assertEquals("  TestProfile, Username=user, URL=jdbc:test", lines[1]);
 	}
 }
