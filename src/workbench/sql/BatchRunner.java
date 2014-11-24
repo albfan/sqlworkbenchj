@@ -969,7 +969,7 @@ public class BatchRunner
 		RowDisplay current = ConsoleSettings.getInstance().getNextRowDisplay();
 		boolean rowsAsLine = (current != null && current == RowDisplay.SingleLine);
 
-		boolean showRowCount = result.getShowRowCount();
+		boolean showRowCount = result.getShowRowCount() && showSummary;
 
 		for (int i=0; i < data.size(); i++)
 		{
