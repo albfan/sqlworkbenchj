@@ -283,6 +283,18 @@ public class ConnectionProfileTest
 	}
 
 	@Test
+	public void testGetPwd()
+	{
+		ConnectionProfile profile = new ConnectionProfile();
+		profile.setStorePassword(false);
+		profile.setPassword("welcome");
+		profile.setTemporaryUsername("arthur");
+		assertEquals("welcome", profile.getLoginPassword());
+		assertNull(profile.getPassword());
+		assertEquals("arthur", profile.getLoginUser());
+	}
+
+	@Test
 	public void testGetSettingsKey()
 	{
 		ConnectionProfile profile = new ConnectionProfile();
