@@ -160,15 +160,9 @@ public class MacroStorage
 	{
 		if (file == null) return;
 
-		if (!isModified())
-		{
-			LogMgr.logDebug("MacroStorage.saveMacros()", "Macros from " + file.getAbsolutePath() + " were not changed. Nothing saved.");
-			return;
-		}
-
 		synchronized (lock)
 		{
-			if (this.getSize() == 0)
+			if (this.getSize() == 0 && isModified())
 			{
 				if (file.exists())
 				{
