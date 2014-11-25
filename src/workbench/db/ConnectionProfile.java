@@ -832,7 +832,7 @@ public class ConnectionProfile
 	{
 		if (StringUtil.isNonEmpty(password))
 		{
-			return this.decryptPassword();
+			return this.decryptPassword(password);
 		}
 
 		if (usePgPass())
@@ -868,7 +868,6 @@ public class ConnectionProfile
 
 	public void setTemporaryUsername(String tempName)
 	{
-		Thread.dumpStack();
 		this.temporaryUsername = tempName;
 	}
 
