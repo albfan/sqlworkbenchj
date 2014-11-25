@@ -98,6 +98,7 @@ public class MacroStorage
 	public void removeGroup(MacroGroup group)
 	{
 		groups.remove(group);
+		modified = true;
 	}
 
 	public synchronized int getSize()
@@ -159,6 +160,12 @@ public class MacroStorage
 	{
 		if (file == null) return;
 
+		if (!isModified())
+		{
+			LogMgr.logDebug("MacroStorage.saveMacros()", "Macros from " + file.getAbsolutePath() + " were not changed. Nothing saved.");
+			return;
+		}
+
 		synchronized (lock)
 		{
 			if (this.getSize() == 0)
@@ -166,6 +173,7 @@ public class MacroStorage
 				if (file.exists())
 				{
 					file.delete();
+					LogMgr.logDebug("MacroStorage.saveMacros()", "All macros from " + file.getAbsolutePath() + " were removed. Macro file deleted.");
 				}
 			}
 			else
@@ -207,6 +215,7 @@ public class MacroStorage
 				groups.get(i).setSortOrder(i);
 				groups.get(i).applySort();
 			}
+			modified = true;
 		}
 	}
 
