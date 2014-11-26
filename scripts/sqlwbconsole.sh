@@ -40,7 +40,11 @@ cp=$cp:$scriptpath/poi.jar
 cp=$cp:$scriptpath/stax-api-1.0.1.jar
 cp=$cp:$scriptpath/xmlbeans-2.3.0.jar
 
+echo -e "\033]0;SQL Workbench/J\007"
+
 $JAVACMD -Djava.awt.headless=true \
          -Xmx512m \
          -Dvisualvm.display.name=SQLWorkbench \
          -cp $cp workbench.console.SQLConsole $@
+
+echo -e "\033]0;${PS1}\007"
