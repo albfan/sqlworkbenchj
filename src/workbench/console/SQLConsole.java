@@ -495,9 +495,11 @@ public class SQLConsole
 	private String checkConnection(BatchRunner runner)
 	{
 		String newprompt = null;
+		String profile = null;
 		WbConnection current = runner.getConnection();
 		if (current != null)
 		{
+			profile = current.getProfile().getName();
 			String user = current.getCurrentUser();
 			String catalog = current.getDisplayCatalog();
 			if (catalog == null) catalog = current.getCurrentCatalog();
@@ -525,7 +527,7 @@ public class SQLConsole
 				newprompt = user + "@" + catalog + "/" + schema;
 			}
 		}
-		setTerminalTitle(newprompt);
+		setTerminalTitle(profile);
 		return (newprompt == null ? DEFAULT_PROMPT : newprompt + "> ");
 	}
 
