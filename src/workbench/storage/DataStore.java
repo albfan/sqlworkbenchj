@@ -1353,7 +1353,7 @@ public class DataStore
 
 		int rowCount = 0;
 		final int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
-		final int checkInterval = Settings.getInstance().getIntProperty("workbench.gui.data.memcheckinterval", 10);
+		final int checkInterval = Settings.getInstance().getIntProperty("workbench.gui.data.memcheckinterval", 100);
 
 		if (bufferData && this.data == null)
 		{
