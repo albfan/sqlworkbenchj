@@ -571,8 +571,7 @@ public class OracleTableSourceBuilder
 			if (pkIdx != null)
 			{
 				OracleIndexPartition partIndex =  new OracleIndexPartition(this.dbConnection);
-				partIndex.retrieve(pkIdx, dbConnection);
-				isPartitioned = partIndex.isPartitioned();
+				isPartitioned = partIndex.hasPartitions(pkIdx, dbConnection);
 			}
 		}
 		catch (SQLException ex)

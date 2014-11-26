@@ -78,11 +78,13 @@ public abstract class AbstractOraclePartition
 	public void retrieve(DbObject object, WbConnection conn)
 		throws SQLException
 	{
+		if (object == null) return;
+
 		if (OracleUtils.checkDefaultTablespace())
 		{
 			defaultUserTablespace = OracleUtils.getDefaultTablespace(conn);
 		}
-		boolean hasPartitions = object != null ? retrieveDefinition(object, conn) : false;
+		boolean hasPartitions = retrieveDefinition(object, conn);
 		if (hasPartitions)
 		{
 			retrieveColumns(object, conn);
@@ -214,7 +216,7 @@ public abstract class AbstractOraclePartition
 	}
 
 
-	private boolean retrieveDefinition(DbObject dbObject, WbConnection conn)
+	protected boolean retrieveDefinition(DbObject dbObject, WbConnection conn)
 		throws SQLException
 	{
 		PreparedStatement pstmt = null;

@@ -23,6 +23,8 @@
 package workbench.db.oracle;
 
 import java.sql.SQLException;
+
+import workbench.db.IndexDefinition;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 
@@ -49,6 +51,21 @@ public class OracleIndexPartition
 		isIndex = true;
 		supportsIntervals = false; // indexes do not support the INTERVAL option
 		showLocalIndexPartitions = Settings.getInstance().getBoolProperty("workbench.db.oracle.partition.index.local.retrieve", false);
+	}
+
+	public boolean hasPartitions(IndexDefinition idx, WbConnection conn)
+	{
+		if (getPartitionType() != null) return true;
+		
+		try
+		{
+			retrieveDefinition(idx, conn);
+			return getPartitionType() != null;
+		}
+		catch (SQLException sql)
+		{
+			return false;
+		}
 	}
 
 	public String getLocality()
