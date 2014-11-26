@@ -68,6 +68,7 @@ import workbench.util.WbThread;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
+import workbench.util.PlatformHelper;
 
 /**
  * A simple console interface for SQL Workbench/J
@@ -93,12 +94,18 @@ public class SQLConsole
 	private BatchRunner runner;
 	private WbThread cancelThread;
 
+	private final boolean changeTerminalTitle;
+	private final String titlePrefix = "\033]0;";
+	private final String titleSuffix = "\007";
+	
+	
 	public SQLConsole()
 	{
 		prompter = new ConsolePrompter();
 		history = new StatementHistory(Settings.getInstance().getConsoleHistorySize());
 		history.doAppend(true);
 		installSignalHandler();
+		changeTerminalTitle = !PlatformHelper.isWindows();
 	}
 
 	public void startConsole()
@@ -518,9 +525,22 @@ public class SQLConsole
 				newprompt = user + "@" + catalog + "/" + schema;
 			}
 		}
+		setTerminalTitle(newprompt);
 		return (newprompt == null ? DEFAULT_PROMPT : newprompt + "> ");
 	}
 
+	private void setTerminalTitle(String title)
+	{
+		if (!changeTerminalTitle) return;
+		String toPrint = titlePrefix + ResourceMgr.TXT_PRODUCT_NAME;
+		if (title != null)
+		{
+			toPrint += " - " + title;
+		}
+		toPrint += titleSuffix;
+		System.out.println(toPrint);
+	}
+	
 	public static void main(String[] args)
 	{
 		AppArguments cmdLine = new AppArguments();
@@ -536,6 +556,7 @@ public class SQLConsole
 			System.setProperty("workbench.log.console", "false");
 			WbManager.initConsoleMode(args);
 			SQLConsole console = new SQLConsole();
+			console.setTerminalTitle(null);
 			console.startConsole();
 		}
 	}
