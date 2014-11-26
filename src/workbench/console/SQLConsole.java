@@ -95,7 +95,7 @@ public class SQLConsole
 	private WbThread cancelThread;
 
 	private final boolean changeTerminalTitle;
-	private final String titlePrefix = "\033]0;";
+	private final String titlePrefix = "\033]0;" + ResourceMgr.TXT_PRODUCT_NAME;
 	private final String titleSuffix = "\007";
 
 
@@ -534,7 +534,7 @@ public class SQLConsole
 	private void setTerminalTitle(String title)
 	{
 		if (!changeTerminalTitle) return;
-		String toPrint = titlePrefix + ResourceMgr.TXT_PRODUCT_NAME;
+		String toPrint = titlePrefix;
 		if (title != null)
 		{
 			toPrint += " - " + title;
