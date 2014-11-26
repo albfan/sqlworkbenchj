@@ -61,6 +61,7 @@ import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.ExceptionUtil;
+import workbench.util.PlatformHelper;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -68,7 +69,6 @@ import workbench.util.WbThread;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
-import workbench.util.PlatformHelper;
 
 /**
  * A simple console interface for SQL Workbench/J
@@ -97,15 +97,15 @@ public class SQLConsole
 	private final boolean changeTerminalTitle;
 	private final String titlePrefix = "\033]0;";
 	private final String titleSuffix = "\007";
-	
-	
+
+
 	public SQLConsole()
 	{
 		prompter = new ConsolePrompter();
 		history = new StatementHistory(Settings.getInstance().getConsoleHistorySize());
 		history.doAppend(true);
 		installSignalHandler();
-		changeTerminalTitle = !PlatformHelper.isWindows();
+		changeTerminalTitle = !PlatformHelper.isWindows() && ConsoleSettings.changeTerminalTitle();
 	}
 
 	public void startConsole()
@@ -540,7 +540,7 @@ public class SQLConsole
 		toPrint += titleSuffix;
 		System.out.println(toPrint);
 	}
-	
+
 	public static void main(String[] args)
 	{
 		AppArguments cmdLine = new AppArguments();

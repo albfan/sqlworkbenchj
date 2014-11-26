@@ -29,6 +29,7 @@ import java.util.List;
 
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -130,5 +131,9 @@ public class ConsoleSettings
 		return Settings.getInstance().getBoolProperty("workbench.console.script.showtime", false);
 	}
 
+	public static boolean changeTerminalTitle()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.console.terminal.title.change", true);
+	}
 
 }
