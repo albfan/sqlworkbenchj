@@ -105,7 +105,7 @@ public class ConnectionInfoBuilder
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoClass") + ":" + boldEnd + conn.getProfile().getDriverclass() + lineEnd);
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoVersion") + ":" + boldEnd + conn.getDriverVersion() + lineEnd);
 			content.append(lineStart + boldStart + ResourceMgr.getString("LblDbURL") + ":" + boldEnd + conn.getUrl() + lineEnd);
-			content.append(space + boldStart + "Isolation Level:" + boldEnd + " " + isolationlevel + newLine);
+			content.append(space + boldStart + "Isolation Level:" + boldEnd + isolationlevel + newLine);
 			content.append(space + boldStart + ResourceMgr.getString("LblUsername") + ":" + boldEnd + username + newLine);
 
 			String term = wbmeta.getSchemaTerm();
