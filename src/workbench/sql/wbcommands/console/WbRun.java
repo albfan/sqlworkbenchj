@@ -121,6 +121,7 @@ public class WbRun
 			batchRunner.setShowProgress(false);
 			batchRunner.setShowStatementWithResult(runner.getTraceStatements());
 			batchRunner.setShowStatementSummary(runner.getVerboseLogging());
+			batchRunner.setShowRowCounts(true);
 
 			if (WbManager.getInstance().isGUIMode())
 			{
