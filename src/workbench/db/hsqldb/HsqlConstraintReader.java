@@ -23,8 +23,11 @@
 package workbench.db.hsqldb;
 
 import workbench.db.AbstractConstraintReader;
+import workbench.db.ColumnIdentifier;
 import workbench.db.JdbcUtils;
+import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
+
 import workbench.util.StringUtil;
 
 /**
@@ -39,10 +42,12 @@ public class HsqlConstraintReader
 	public HsqlConstraintReader(WbConnection dbConnection)
 	{
 		super(dbConnection.getDbId());
-		this.sql = "select chk.constraint_name, chk.check_clause \n" +
-			"from information_schema.system_check_constraints chk, information_schema.system_table_constraints cons \n" +
-			"where chk.constraint_name = cons.constraint_name  \n" +
-			"and cons.constraint_type = 'CHECK' \n" +
+
+		this.sql =
+			"select chk.constraint_name, chk.check_clause \n" +
+			"from information_schema.system_check_constraints chk" +
+			"  join  information_schema.system_table_constraints cons on chk.constraint_name = cons.constraint_name  \n" +
+			"where cons.constraint_type = 'CHECK' \n" +
 			"and cons.table_name = ?; \n";
 
 		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
@@ -68,6 +73,47 @@ public class HsqlConstraintReader
 	public boolean isSystemConstraintName(String name)
 	{
 		if (StringUtil.isBlank(name))	return false;
-		return name.trim().startsWith("SYS_");
+		return name.startsWith("SYS_");
 	}
+
+	@Override
+	protected boolean shouldIncludeTableConstraint(String constraintName, String constraint, TableDefinition table)
+	{
+		if (constraint == null) return false;
+		if (!constraint.toUpperCase().endsWith("IS NOT NULL")) return true;
+
+		int pos = constraint.indexOf(' ');
+		if (pos < 0) return true;
+
+		String colname = constraint.substring(0,pos);
+		int pos2 = colname.lastIndexOf('.');
+		if (pos2 < 0) return true;
+
+		colname = colname.substring(pos2 + 1);
+		ColumnIdentifier col = findColumn(table, colname);
+		if (col != null && !col.isNullable())
+		{
+			if (isSystemConstraintName(constraintName))
+			{
+				// the constraint name is system generated and the column is already marked
+				// as NOT NULL, so there is no need to include this constraint here
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private ColumnIdentifier findColumn(TableDefinition table, String columnName)
+	{
+		for (ColumnIdentifier col : table.getColumns())
+		{
+			if (col.getColumnName().equalsIgnoreCase(columnName))
+			{
+				return col;
+			}
+		}
+		return null;
+	}
+
 }

@@ -231,16 +231,15 @@ public abstract class AbstractConstraintReader
 			while (rs.next())
 			{
 				String name = rs.getString(1);
-				String constraint = rs.getString(2);
+				String constraint = StringUtil.trim(rs.getString(2));
 				String comment = null;
 				if (hasComment)
 				{
 					comment = rs.getString(3);
 				}
-				if (constraint != null)
-				{
-					constraint = constraint.trim();
 
+				if (shouldIncludeTableConstraint(name, constraint, table))
+				{
 					Matcher m = p.matcher(constraint);
 					if (constraint.charAt(0) != '(' && !m.matches() && !constraint.startsWith("EXCLUDE"))
 					{
@@ -264,6 +263,11 @@ public abstract class AbstractConstraintReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
+	}
+
+	protected boolean shouldIncludeTableConstraint(String constraintName, String constraint, TableDefinition table)
+	{
+		return StringUtil.isNonEmpty(constraint);
 	}
 
 }

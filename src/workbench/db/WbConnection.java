@@ -50,10 +50,10 @@ import workbench.db.oracle.OracleWarningsClearer;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorReportLevel;
-import workbench.sql.parser.ParserType;
-import workbench.sql.parser.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 
 import workbench.util.DdlObjectInfo;
@@ -1081,7 +1081,7 @@ public class WbConnection
 		{
 			return getCurrentUser();
 		}
-		String username = profile.getUsername();
+		String username = profile.getLoginUser();
 		if (StringUtil.isEmptyString(username))
 		{
 			// This is for SQL Server connections with "Windows authentication"
