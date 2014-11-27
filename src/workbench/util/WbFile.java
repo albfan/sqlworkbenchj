@@ -25,7 +25,12 @@ package workbench.util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
+
+import workbench.log.LogMgr;
 
 /**
  * A wrapper around Java's File object to allow of automatic "expansion" of
@@ -98,7 +103,16 @@ public class WbFile
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		String newname = this.getName() + "." + sdf.format(new java.util.Date());
 		WbFile newfile = new WbFile(this.getParent(), newname);
-		this.renameTo(newfile);
+		Path newPath = newfile.toPath();
+		Path myPath = this.toPath();
+		try
+		{
+			Files.move(myPath, newPath, StandardCopyOption.REPLACE_EXISTING);
+		}
+		catch (IOException io)
+		{
+			LogMgr.logWarning("WbFile.makeBackup()", "Could not create backup: " + newfile.getFullPath() + " for " + this.getFullPath());
+		}
 		return newfile.getFullPath();
 	}
 

@@ -24,6 +24,7 @@ package workbench.util;
 
 import java.io.File;
 import java.io.IOException;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -94,18 +95,18 @@ public class FileVersioner
 	 * or the directory of the file that is backed up (if no backup directory was
 	 * specified)
 	 *
-	 * @param target the file to backup
+	 * @param toBackup the file to backup
 	 * @return the complete filename of the backup
 	 * @throws java.io.IOException
 	 */
-	public File createBackup(File target)
+	public File createBackup(File toBackup)
 		throws IOException
 	{
-		if (target == null) return null;
-		if (!target.exists()) return null;
+		if (toBackup == null) return null;
+		if (!toBackup.exists()) return null;
 
-		int nextVersion = findNextIndex(target);
-		File dir = getTargetDir(target);
+		int nextVersion = findNextIndex(toBackup);
+		File dir = getTargetDir(toBackup);
 		if (dir == null)
 		{
 			LogMgr.logWarning("FileVersioner.createBackup()", "Could not determine target directory. Using current directory");
@@ -116,12 +117,12 @@ public class FileVersioner
 		{
 			if (!dir.mkdirs())
 			{
-				LogMgr.logError("FileVersioner.createBackup", "Could not create backup dir: " + dir.getAbsolutePath() + ", using workspace directory: " + target.getParentFile().getAbsolutePath(), null);
-				dir = target.getParentFile();
+				LogMgr.logError("FileVersioner.createBackup", "Could not create backup dir: " + dir.getAbsolutePath() + ", using workspace directory: " + toBackup.getParentFile().getAbsolutePath(), null);
+				dir = toBackup.getParentFile();
 			}
 		}
-		File backup = new File(dir, target.getName() + versionSeparator + nextVersion);
-		FileUtil.copy(target, backup);
+		File backup = new File(dir, toBackup.getName() + versionSeparator + nextVersion);
+		FileUtil.copy(toBackup, backup);
 		return backup;
 	}
 
