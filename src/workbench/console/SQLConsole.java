@@ -376,7 +376,7 @@ public class SQLConsole
 		batchRunner.setPersistentConnect(true);
 		batchRunner.setExecutionController(prompter);
 		batchRunner.setParameterPrompter(prompter);
-
+		batchRunner.setShowRowCounts(true);
 		return batchRunner;
 	}
 

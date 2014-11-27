@@ -117,6 +117,7 @@ public class BatchRunner
 	private boolean consolidateMessages;
 	private boolean showStatementWithResult = true;
 	private boolean showSummary = verboseLogging;
+	private boolean showRowCounts = showSummary;
 	private boolean optimizeCols = true;
 	private boolean showStatementTiming = true;
 	private boolean printStatements;
@@ -274,6 +275,11 @@ public class BatchRunner
 		this.showSummary = flag;
 	}
 
+	public void setShowRowCounts(boolean flag)
+	{
+		this.showRowCounts = flag;
+	}
+
 	public boolean getVerboseLogging()
 	{
 		return this.verboseLogging;
@@ -285,6 +291,7 @@ public class BatchRunner
 		this.showSummary = flag;
 		this.stmtRunner.setVerboseLogging(flag);
 		this.showTiming = this.verboseLogging;
+		this.showRowCounts = flag;
 	}
 
 	public void setConsolidateLog(boolean flag)
@@ -969,7 +976,7 @@ public class BatchRunner
 		RowDisplay current = ConsoleSettings.getInstance().getNextRowDisplay();
 		boolean rowsAsLine = (current != null && current == RowDisplay.SingleLine);
 
-		boolean showRowCount = result.getShowRowCount() && showSummary;
+		boolean showRowCount = result.getShowRowCount() && showRowCounts;
 
 		for (int i=0; i < data.size(); i++)
 		{
