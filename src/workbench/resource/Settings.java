@@ -519,7 +519,7 @@ public class Settings
 	{
 		return getBoolProperty("workbench.db.postgresql.use.pgpass", true);
 	}
-	
+
 	// <editor-fold defaultstate="collapsed" desc="Language settings">
 	public void setLanguage(Locale locale)
 	{
@@ -1217,22 +1217,7 @@ public class Settings
 
 	public Font getEditorFont(boolean returnDefault)
 	{
-		Font f = this.getFont(PROPERTY_EDITOR_FONT);
-
-		boolean isDefaultFont = false;
-
-		if (f == null && returnDefault)
-		{
-			f = new Font("Monospaced", Font.PLAIN, 12);
-			isDefaultFont = true;
-		}
-
-		if (getScaleFonts() && isDefaultFont)
-		{
-			FontScaler scaler = new FontScaler();
-			f = scaler.scaleFont(f);
-		}
-		return f;
+		return getMonospacedFont(PROPERTY_EDITOR_FONT, returnDefault);
 	}
 
 	public void setMsgLogFont(Font f)
@@ -1242,17 +1227,7 @@ public class Settings
 
 	public Font getMsgLogFont()
 	{
-		Font f = this.getFont(PROPERTY_MSGLOG_FONT);
-		if (f == null)
-		{
-			f = new Font("Monospaced", Font.PLAIN, 12);
-			if (getScaleFonts())
-			{
-				FontScaler scaler = new FontScaler();
-				f = scaler.scaleFont(f);
-			}
-		}
-		return f;
+		return getMonospacedFont(PROPERTY_MSGLOG_FONT, true);
 	}
 
 	public void setDataFont(Font f)
@@ -1267,18 +1242,18 @@ public class Settings
 
 	public Font getDataFont(boolean returnDefault)
 	{
+		return getMonospacedFont(PROPERTY_DATA_FONT, returnDefault);
+	}
+
+	private Font getMonospacedFont(String property, boolean returnDefault)
+	{
 		Font f = this.getFont(PROPERTY_DATA_FONT);
-		boolean isDefault = false;
 		if (f == null && returnDefault)
 		{
-			f = UIManager.getFont("Table.font");
-			isDefault = true;
+			f = new Font("Monospaced", Font.PLAIN, 12);
 		}
-		if (getScaleFonts() && isDefault)
+		if (getScaleFonts())
 		{
-			// when retrieving the default font from UIManager there is no need
-			// to scale it, as this has already been done in LnfHelper during
-			// initialization of the UI
 			FontScaler scaler = new FontScaler();
 			f = scaler.scaleFont(f);
 		}

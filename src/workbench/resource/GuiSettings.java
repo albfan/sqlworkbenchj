@@ -346,7 +346,7 @@ public class GuiSettings
 
 	public static boolean getPartialCompletionSearch()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.partialsearch", false);
+		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.partialsearch", true);
 	}
 
 	public static void setPartialCompletionSearch(boolean flag)
