@@ -70,6 +70,8 @@ import workbench.util.WbThread;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
+import workbench.gui.WindowTitleBuilder;
+
 /**
  * A simple console interface for SQL Workbench/J
  * <br>
@@ -95,9 +97,9 @@ public class SQLConsole
 	private WbThread cancelThread;
 
 	private final boolean changeTerminalTitle;
-	private final String titlePrefix = "\033]0;" + ResourceMgr.TXT_PRODUCT_NAME;
+	private final String titlePrefix = "\033]0;";
 	private final String titleSuffix = "\007";
-
+	private WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
 
 	public SQLConsole()
 	{
@@ -106,6 +108,11 @@ public class SQLConsole
 		history.doAppend(true);
 		installSignalHandler();
 		changeTerminalTitle = !PlatformHelper.isWindows() && ConsoleSettings.changeTerminalTitle();
+		titleBuilder.setShowWorkspace(false);
+		titleBuilder.setShowProductNameAtEnd(ConsoleSettings.termTitleAppNameAtEnd());
+		titleBuilder.setShowProfileGroup(false);
+		titleBuilder.setShowURL(ConsoleSettings.termTitleIncludeUrl());
+		titleBuilder.setShowNotConnected(false);
 	}
 
 	public void startConsole()
@@ -495,11 +502,9 @@ public class SQLConsole
 	private String checkConnection(BatchRunner runner)
 	{
 		String newprompt = null;
-		String profile = null;
 		WbConnection current = runner.getConnection();
 		if (current != null)
 		{
-			profile = current.getProfile().getName();
 			String user = current.getCurrentUser();
 			String catalog = current.getDisplayCatalog();
 			if (catalog == null) catalog = current.getCurrentCatalog();
@@ -527,19 +532,19 @@ public class SQLConsole
 				newprompt = user + "@" + catalog + "/" + schema;
 			}
 		}
-		setTerminalTitle(profile);
+		setTerminalTitle(current);
 		return (newprompt == null ? DEFAULT_PROMPT : newprompt + "> ");
 	}
 
-	private void setTerminalTitle(String title)
+	private void setTerminalTitle(WbConnection conn)
 	{
 		if (!changeTerminalTitle) return;
-		String toPrint = titlePrefix;
-		if (title != null)
+		ConnectionProfile profile = null;
+		if (conn != null)
 		{
-			toPrint += " - " + title;
+			profile = conn.getProfile();
 		}
-		toPrint += titleSuffix;
+		String toPrint = titlePrefix + titleBuilder.getWindowTitle(profile) + titleSuffix;
 		System.out.println(toPrint);
 	}
 

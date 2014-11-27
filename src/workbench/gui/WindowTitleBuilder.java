@@ -38,12 +38,55 @@ import workbench.util.StringUtil;
 public class WindowTitleBuilder
 {
 
+	private boolean showProfileGroup = GuiSettings.getShowProfileGroupInWindowTitle();
+	private boolean showURL = GuiSettings.getShowURLinWindowTitle();
+	private boolean includeUser = GuiSettings.getIncludeUserInTitleURL();
+	private boolean showProductNameAtEnd = GuiSettings.getShowProductNameAtEnd();
+	private boolean showWorkspace = GuiSettings.getShowWorkspaceInWindowTitle();
+	private boolean showNotConnected = true;
+
+	public WindowTitleBuilder()
+	{
+	}
+
+	public void setShowProfileGroup(boolean flag)
+	{
+		this.showProfileGroup = flag;
+	}
+
+	public void setShowURL(boolean flag)
+	{
+		this.showURL = flag;
+	}
+
+	public void setIncludeUser(boolean flag)
+	{
+		this.includeUser = flag;
+	}
+
+	public void setShowProductNameAtEnd(boolean flag)
+	{
+		this.showProductNameAtEnd = flag;
+	}
+
+	public void setShowWorkspace(boolean flag)
+	{
+		this.showWorkspace = flag;
+	}
+
+	public void setShowNotConnected(boolean flag)
+	{
+		this.showNotConnected = flag;
+	}
+
+	public String getWindowTitle(ConnectionProfile profile)
+	{
+		return getWindowTitle(profile, null, null);
+	}
+
 	public String getWindowTitle(ConnectionProfile profile, String workspaceFile, String editorFile)
 	{
 		final StringBuilder title = new StringBuilder(50);
-
-		boolean showProductNameAtEnd = GuiSettings.getShowProductNameAtEnd();
-		boolean showWorkspace = GuiSettings.getShowWorkspaceInWindowTitle();
 
 		String enclose = GuiSettings.getTitleGroupBracket();
 		String sep = GuiSettings.getTitleGroupSeparator();
@@ -54,20 +97,18 @@ public class WindowTitleBuilder
 			title.append(" - ");
 		}
 
-		if (profile == null)
+		if (profile == null && showNotConnected)
 		{
 			title.append(ResourceMgr.getString("TxtNotConnected"));
 		}
 		else
 		{
-			boolean showProfileGroup = GuiSettings.getShowProfileGroupInWindowTitle();
-			boolean showURL = GuiSettings.getShowURLinWindowTitle();
-			boolean includeUser = GuiSettings.getIncludeUserInTitleURL() || profile.getPromptForUsername();
+			boolean showUser = includeUser || profile.getPromptForUsername();
 
 			if (showURL)
 			{
 				String url = makeCleanUrl(profile.getUrl());
-				if (includeUser)
+				if (showUser)
 				{
 					title.append(profile.getLoginUser());
 					if (url.charAt(0) != '@')

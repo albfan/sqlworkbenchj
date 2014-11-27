@@ -136,4 +136,14 @@ public class ConsoleSettings
 		return Settings.getInstance().getBoolProperty("workbench.console.terminal.title.change", true);
 	}
 
+	public static boolean termTitleAppNameAtEnd()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.console.terminal.title.appname.end", true);
+	}
+
+	public static boolean termTitleIncludeUrl()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.console.terminal.title.show.url", false);
+	}
+
 }
