@@ -94,14 +94,9 @@ public class WindowTitleBuilder
 		if (!showProductNameAtEnd)
 		{
 			title.append(ResourceMgr.TXT_PRODUCT_NAME);
-			title.append(" - ");
 		}
 
-		if (profile == null && showNotConnected)
-		{
-			title.append(ResourceMgr.getString("TxtNotConnected"));
-		}
-		else
+		if (profile != null)
 		{
 			boolean showUser = includeUser || profile.getPromptForUsername();
 
@@ -146,6 +141,10 @@ public class WindowTitleBuilder
 				title.append(profile.getName());
 			}
 		}
+		else if (showNotConnected)
+		{
+			title.append(ResourceMgr.getString("TxtNotConnected"));
+		}
 
 		if (workspaceFile != null && showWorkspace)
 		{
@@ -156,11 +155,11 @@ public class WindowTitleBuilder
 			title.append(" ");
 		}
 
-		int showTitle = GuiSettings.getShowFilenameInWindowTitle();
-		if (editorFile != null && showTitle != GuiSettings.SHOW_NO_FILENAME)
+		int showFilename = GuiSettings.getShowFilenameInWindowTitle();
+		if (editorFile != null && showFilename != GuiSettings.SHOW_NO_FILENAME)
 		{
 			title.append(" - ");
-			if (showTitle == GuiSettings.SHOW_FULL_PATH)
+			if (showFilename == GuiSettings.SHOW_FULL_PATH)
 			{
 				title.append(editorFile);
 			}
@@ -173,7 +172,7 @@ public class WindowTitleBuilder
 
 		if (showProductNameAtEnd)
 		{
-			title.append(" - ");
+			if (title.length() > 0) title.append(" - ");
 			title.append(ResourceMgr.TXT_PRODUCT_NAME);
 		}
 
