@@ -37,16 +37,19 @@ import workbench.util.StringUtil;
  */
 public class WindowTitleBuilder
 {
+	private static final int NAME_AT_END = 1;
+	private static final int NAME_AT_START = 2;
 
 	private boolean showProfileGroup = GuiSettings.getShowProfileGroupInWindowTitle();
 	private boolean showURL = GuiSettings.getShowURLinWindowTitle();
 	private boolean includeUser = GuiSettings.getIncludeUserInTitleURL();
-	private boolean showProductNameAtEnd = GuiSettings.getShowProductNameAtEnd();
+	private int productNamePosition = NAME_AT_START;
 	private boolean showWorkspace = GuiSettings.getShowWorkspaceInWindowTitle();
 	private boolean showNotConnected = true;
 
 	public WindowTitleBuilder()
 	{
+		setShowProductNameAtEnd(GuiSettings.getShowProductNameAtEnd());
 	}
 
 	public void setShowProfileGroup(boolean flag)
@@ -66,7 +69,14 @@ public class WindowTitleBuilder
 
 	public void setShowProductNameAtEnd(boolean flag)
 	{
-		this.showProductNameAtEnd = flag;
+		if (flag)
+		{
+			productNamePosition = NAME_AT_END;
+		}
+		else
+		{
+			productNamePosition = NAME_AT_START;
+		}
 	}
 
 	public void setShowWorkspace(boolean flag)
@@ -91,7 +101,7 @@ public class WindowTitleBuilder
 		String enclose = GuiSettings.getTitleGroupBracket();
 		String sep = GuiSettings.getTitleGroupSeparator();
 
-		if (!showProductNameAtEnd)
+		if (productNamePosition == NAME_AT_START)
 		{
 			title.append(ResourceMgr.TXT_PRODUCT_NAME);
 		}
@@ -143,6 +153,7 @@ public class WindowTitleBuilder
 		}
 		else if (showNotConnected)
 		{
+			if (title.length() > 0) title.append(" - ");
 			title.append(ResourceMgr.getString("TxtNotConnected"));
 		}
 
@@ -170,7 +181,7 @@ public class WindowTitleBuilder
 			}
 		}
 
-		if (showProductNameAtEnd)
+		if (productNamePosition == NAME_AT_END)
 		{
 			if (title.length() > 0) title.append(" - ");
 			title.append(ResourceMgr.TXT_PRODUCT_NAME);
