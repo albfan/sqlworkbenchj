@@ -1082,7 +1082,7 @@ public class WbConnection
 			return getCurrentUser();
 		}
 		String username = profile.getLoginUser();
-		if (StringUtil.isEmptyString(username))
+		if (StringUtil.isEmptyString(username) && metaData.isSqlServer())
 		{
 			// This is for SQL Server connections with "Windows authentication"
 			username = getWindowsUser();
