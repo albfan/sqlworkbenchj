@@ -185,7 +185,7 @@ public class SQLConsole
 						{
 							handleHistory(runner, stmt);
 						}
-						else if (!stmt.trim().equals(buffer.getDelimiter().getDelimiter()))
+						else if (StringUtil.isNonEmpty(stmt))
 						{
 							history.add(stmt);
 							if (StringUtil.isBlank(macro))

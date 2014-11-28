@@ -336,7 +336,8 @@ public class LexerBasedParser
 			if (token == null && !scriptEnd && !matchedAtEnd) statementEnd = realScriptLength;
 			ScriptCommandDefinition cmd = createCommandDef(sql, statementStart, statementEnd);
 			cmd.setIndexInScript(currentStatementIndex);
-			cmd.setDelimiterUsed(matchedDelimiter == null ? getCurrentDelimiter() : matchedDelimiter);
+			cmd.setDelimiterNeeded(lastStatementUsedTerminator);
+			cmd.setDelimiterUsed(matchedDelimiter);
 			currentStatementIndex ++;
 			if (delimiterTester != null)
 			{

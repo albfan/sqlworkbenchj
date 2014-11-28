@@ -55,7 +55,7 @@ public class DelimiterDefinition
 	private Pattern slePattern;
 	private boolean isImmutable;
 	private boolean isStandard;
-	
+
 	public DelimiterDefinition()
 	{
 		this.delimiter = "";

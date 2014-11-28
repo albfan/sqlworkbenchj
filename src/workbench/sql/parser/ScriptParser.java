@@ -163,11 +163,6 @@ public class ScriptParser
 
 	/**
 	 *	Define the script to be parsed.
-	 *	The delimiter to be used will be checked automatically
-	 *	First the it will check if the script ends with the alternate delimiter
-	 *	if this is not the case, the script will be checked if it ends with GO
-	 *	If so, GO will be used (MS SQL Server script style)
-	 *	If none of the above is true, ; (semicolon) will be used
 	 */
 	public final void setScript(String script)
 	{
@@ -531,25 +526,42 @@ public class ScriptParser
 	 */
 	public String getNextCommand()
 	{
-		ScriptCommandDefinition command = null;
+		ScriptCommandDefinition command = getNextCommandDefinition();
 		String result = null;
+		if (command == null) return null;
+		if (scriptIterator != null)
+		{
+			result = command.getSQL();
+		}
+		else
+		{
+			result = originalScript.substring(command.getStartPositionInScript(), command.getEndPositionInScript());
+		}
+		return result;
+	}
+
+	/**
+	 * Return the next {@link ScriptCommandDefinition} from the script.
+	 *
+	 */
+	public ScriptCommandDefinition getNextCommandDefinition()
+	{
+		ScriptCommandDefinition command = null;
+
 		if (this.scriptIterator != null)
 		{
 			command = this.scriptIterator.getNextCommand();
-			if (command == null) return null;
-			result = command.getSQL();
 		}
 		else
 		{
 			if (commands == null) parseCommands();
 			if (currentIteratorIndex < commands.size())
 			{
-				command = this.commands.get(this.currentIteratorIndex);
-				result = this.originalScript.substring(command.getStartPositionInScript(), command.getEndPositionInScript());
-				this.currentIteratorIndex ++;
+				command = this.commands.get(currentIteratorIndex);
+				currentIteratorIndex ++;
 			}
 		}
-		return result;
+		return command;
 	}
 
 	public boolean isSingleLineCommand(String sql)

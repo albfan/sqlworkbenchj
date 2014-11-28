@@ -37,6 +37,7 @@ public class ScriptCommandDefinition
 
 	private int indexInScript;
 	private DelimiterDefinition delimiterUsed;
+	private boolean delimiterNeeded;
 
 	public ScriptCommandDefinition(String c, int start, int end)
 	{
@@ -94,6 +95,16 @@ public class ScriptCommandDefinition
 	public void setIndexInScript(int index)
 	{
 		this.indexInScript = index;
+	}
+
+	public boolean getDelimiterNeeded()
+	{
+		return delimiterNeeded;
+	}
+
+	public void setDelimiterNeeded(boolean flag)
+	{
+		this.delimiterNeeded = flag;
 	}
 
 	public DelimiterDefinition getDelimiterUsed()

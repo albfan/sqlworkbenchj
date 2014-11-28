@@ -1329,7 +1329,8 @@ public class ScriptParserTest
 		size = parser.getSize();
 		assertEquals(5, size);
 		assertTrue(parser.getCommand(0).startsWith("whenever"));
-		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(0));
+		//assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(0));
+		assertNull(parser.getDelimiterUsed(0));
 		assertTrue(parser.getCommand(1).startsWith("set serveroutput"));
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(1));
 		assertTrue(parser.getCommand(2).startsWith("declare"));

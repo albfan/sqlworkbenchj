@@ -70,6 +70,10 @@ public class TextFormatter
 			String command = parser.getCommand(i);
 
 			DelimiterDefinition delimiter = parser.getDelimiterUsed(i);
+			if (delimiter == null)
+			{
+				delimiter = parser.getDelimiter();
+			}
 
 			// no need to format "empty" strings
 			if (StringUtil.isBlank(command))

@@ -25,7 +25,9 @@ package workbench.console;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
+
 import workbench.WbTestCase;
+import workbench.db.DbMetadata;
 import workbench.sql.DelimiterDefinition;
 
 
@@ -52,7 +54,8 @@ public class InputBufferTest
 		result = buffer.addLine(";");
 		assertTrue(result);
 
-		buffer.setDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		//buffer.setDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		buffer.setDbId(DbMetadata.DBID_ORA);
 		buffer.clear();
 
 		result = buffer.addLine("create or replace procedure proc");

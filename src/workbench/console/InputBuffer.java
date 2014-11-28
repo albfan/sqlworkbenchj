@@ -22,9 +22,7 @@
  */
 package workbench.console;
 
-import workbench.db.DbMetadata;
-
-import workbench.sql.DelimiterDefinition;
+import workbench.sql.ScriptCommandDefinition;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 
@@ -37,14 +35,11 @@ import workbench.sql.parser.ScriptParser;
 public class InputBuffer
 {
 	private StringBuilder script;
-	private DelimiterDefinition delimiter;
-	private boolean checkMySQLComments;
 	private ScriptParser parser;
 	private ParserType parserType = ParserType.Standard;
 
 	public InputBuffer()
 	{
-		this.delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 		script = new StringBuilder(1000);
 		parser = new ScriptParser(parserType);
 	}
@@ -57,7 +52,6 @@ public class InputBuffer
 			parser = new ScriptParser(type);
 			parserType = type;
 		}
-		checkMySQLComments = DbMetadata.DBID_MYSQL.equals(dbid);
 	}
 
 	public String getScript()
@@ -75,16 +69,6 @@ public class InputBuffer
 		script.setLength(0);
 	}
 
-	public DelimiterDefinition getDelimiter()
-	{
-		return delimiter;
-	}
-
-	public void setDelimiter(DelimiterDefinition delim)
-	{
-		this.delimiter = delim;
-	}
-
 	public boolean addLine(String line)
 	{
 		script.append('\n');
@@ -95,13 +79,11 @@ public class InputBuffer
 	public boolean isComplete()
 	{
 		String sql = script.toString();
-		if (parser.supportsMixedDelimiter())
-		{
-			if (parser.isSingleLineCommand(sql))
-			{
-				return true;
-			}
-		}
-		return delimiter.terminatesScript(script.toString(), checkMySQLComments);
+		parser.setScript(sql);
+		parser.startIterator();
+
+		ScriptCommandDefinition cmd = parser.getNextCommandDefinition();
+		if (cmd == null) return false;
+		return cmd.getDelimiterUsed() != null;
 	}
 }
