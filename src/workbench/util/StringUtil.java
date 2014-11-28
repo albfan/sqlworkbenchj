@@ -682,7 +682,7 @@ public class StringUtil
 	 * @param startPos the position where to start searching
 	 * @return the position of the first whitespace or the length of the string
 	 */
-	public static int findFirstNonWhitespace(final CharSequence line, int startPos, boolean treadNewLineAsWhitespace)
+	public static int findFirstNonWhitespace(final CharSequence line, int startPos, boolean treatNewLineAsWhitespace)
 	{
 		if (line == null) return -1;
 		int len = line.length();
@@ -690,25 +690,20 @@ public class StringUtil
 		if (startPos >= len) return -1;
 
 		int pos = startPos;
-
 		char c = line.charAt(pos);
-		while (pos < len)
+
+		do
 		{
-			if (!treadNewLineAsWhitespace)
+			c = line.charAt(pos);
+			if (!treatNewLineAsWhitespace)
 			{
 				if (c == '\n' || c == '\r') return -1;
 			}
 			if (c > ' ') return pos;
 			pos ++;
-			if (pos < len)
-			{
-				c = line.charAt(pos);
-			}
-			else
-			{
-				break;
-			}
 		}
+		while (pos < len);
+		
 		return -1;
 	}
 
