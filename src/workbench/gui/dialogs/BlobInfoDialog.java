@@ -26,16 +26,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
+
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.BlobHandler;
 import workbench.gui.components.EncodingPanel;
 import workbench.gui.components.FlatButton;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
@@ -174,6 +178,7 @@ public class BlobInfoDialog
 		saveAsButton.setEnabled(len > 0);
 		showImageButton.setEnabled(len > 0);
 		showHexButton.setEnabled(len > 0);
+		showAsTextButton.setEnabled(len > 0);
 		externalViewer.setEnabled(len > 0 && hasTools);
 	}
 
@@ -410,7 +415,6 @@ public class BlobInfoDialog
 		{
 			LogMgr.logError("BlobInfoDialog.showHexButtonActionPerformed()", "Error showing hex data", e);
 		}
-
 	}//GEN-LAST:event_showHexButtonActionPerformed
 
 	private void showAsTextButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showAsTextButtonActionPerformed
