@@ -84,6 +84,11 @@ public class InputBuffer
 
 		ScriptCommandDefinition cmd = parser.getNextCommandDefinition();
 		if (cmd == null) return false;
-		return cmd.getDelimiterUsed() != null;
+		
+		if (cmd.getDelimiterNeeded())
+		{
+			return cmd.getDelimiterUsed() != null;
+		}
+		return true;
 	}
 }

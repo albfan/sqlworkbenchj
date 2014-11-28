@@ -692,7 +692,7 @@ public class StringUtil
 		int pos = startPos;
 
 		char c = line.charAt(pos);
-		while (pos < len - 1)
+		while (pos < len)
 		{
 			if (!treadNewLineAsWhitespace)
 			{
@@ -700,7 +700,14 @@ public class StringUtil
 			}
 			if (c > ' ') return pos;
 			pos ++;
-			c = line.charAt(pos);
+			if (pos < len)
+			{
+				c = line.charAt(pos);
+			}
+			else
+			{
+				break;
+			}
 		}
 		return -1;
 	}

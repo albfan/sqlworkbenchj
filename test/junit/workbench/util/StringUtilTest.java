@@ -248,6 +248,9 @@ public class StringUtilTest
 		String empty = "   ";
 		pos = StringUtil.findFirstNonWhitespace(empty);
 		assertEquals(-1, pos);
+
+		pos = StringUtil.findFirstNonWhitespace("\nx");
+		assertEquals(1, pos);
 	}
 
 	@Test

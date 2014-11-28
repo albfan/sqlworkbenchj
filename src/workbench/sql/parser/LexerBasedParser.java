@@ -267,12 +267,11 @@ public class LexerBasedParser
 					{
 						lastStatementUsedTerminator = true;
 						matchedDelimiter = currentDelim;
-						// if previousEnd is still -1
-						// this means we have a completely empty statement --> silently ignore this
-						if (statementEnd > -1)
+						if (statementEnd == -1)
 						{
-							break;
+							statementEnd  = token.getCharBegin();
 						}
+						break;
 					}
 				}
 
@@ -336,8 +335,8 @@ public class LexerBasedParser
 			if (token == null && !scriptEnd && !matchedAtEnd) statementEnd = realScriptLength;
 			ScriptCommandDefinition cmd = createCommandDef(sql, statementStart, statementEnd);
 			cmd.setIndexInScript(currentStatementIndex);
-			cmd.setDelimiterNeeded(lastStatementUsedTerminator);
 			cmd.setDelimiterUsed(matchedDelimiter);
+			cmd.setDelimiterNeeded(!singleLineCommand);
 			currentStatementIndex ++;
 			if (delimiterTester != null)
 			{
@@ -413,15 +412,14 @@ public class LexerBasedParser
 		}
 
 		int i = StringUtil.findFirstNonWhitespace(sql);
+		if (i < 0) i = 0;
 		String toStore = null;
 		if (storeStatementText)
 		{
-			if (i > -1) toStore = sql.substring(i);
-			else toStore = sql.toString();
+			toStore = sql.substring(i);
 		}
 		ScriptCommandDefinition cmd = new ScriptCommandDefinition(toStore, start + i, end);
 		cmd.setWhitespaceStart(start);
-
 		return cmd;
 	}
 

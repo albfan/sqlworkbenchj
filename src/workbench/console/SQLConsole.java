@@ -39,6 +39,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
+import workbench.gui.WindowTitleBuilder;
 import workbench.gui.profiles.ProfileKey;
 
 import workbench.sql.BatchRunner;
@@ -69,8 +70,6 @@ import workbench.util.WbThread;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
-
-import workbench.gui.WindowTitleBuilder;
 
 /**
  * A simple console interface for SQL Workbench/J
@@ -169,18 +168,23 @@ public class SQLConsole
 				}
 
 				String firstWord = getFirstWord(line);
-				if (isCompleteStatement || (abbreviations.containsKey(firstWord) && startOfStatement)  )
+
+				if (startOfStatement && abbreviations.containsKey(firstWord))
+				{
+					String longCommand = abbreviations.get(firstWord);
+					if (longCommand != null)
+					{
+						stmt = line.replace(firstWord, longCommand);
+						firstWord = getFirstWord(stmt); // I can't use longCommand as the history shortcuts may have a parameter
+					}
+					isCompleteStatement = true;
+				}
+				
+				if (isCompleteStatement)
 				{
 					try
 					{
 						prompter.resetExecuteAll();
-						String longCommand = abbreviations.get(firstWord);
-						if (longCommand != null)
-						{
-							stmt = line.replace(firstWord, longCommand);
-							firstWord = getFirstWord(stmt); // I can't use longCommand as the history shortcuts may have a parameter
-						}
-
 						if (firstWord.equalsIgnoreCase(WbHistory.VERB))
 						{
 							handleHistory(runner, stmt);

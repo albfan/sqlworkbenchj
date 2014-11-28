@@ -57,7 +57,7 @@ public class ScriptParser
 	private boolean checkEscapedQuotes;
 	private ScriptIterator scriptIterator;
 	private boolean emptyLineIsSeparator;
-	private boolean returnTrailingWhitesapce;
+	private boolean returnLeadingWhitespace;
 	private boolean useAlternateDelimiter;
 	private ParserType parserType = ParserType.Standard;
 	private File source;
@@ -158,7 +158,7 @@ public class ScriptParser
 
 	public void setReturnStartingWhitespace(boolean flag)
 	{
-		this.returnTrailingWhitesapce = flag;
+		this.returnLeadingWhitespace = flag;
 	}
 
 	/**
@@ -462,7 +462,7 @@ public class ScriptParser
 			}
 
 		}
-		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);
+		p.setReturnStartingWhitespace(this.returnLeadingWhitespace);
 		return p;
 	}
 
@@ -471,8 +471,8 @@ public class ScriptParser
 	 */
 	private void parseCommands()
 	{
-		boolean fileParsing = false;
 		ScriptIterator p = null;
+		boolean storeStatement = false;
 		if (scriptIterator == null)
 		{
 			p = getParserInstance();
@@ -483,7 +483,7 @@ public class ScriptParser
 		{
 			p = scriptIterator;
 			p.setStoreStatementText(true);
-			fileParsing = true;
+			storeStatement = true;
 		}
 		commands = new ArrayList<>();
 
@@ -492,7 +492,15 @@ public class ScriptParser
 
 		while ((c = p.getNextCommand()) != null)
 		{
-			if (fileParsing && StringUtil.isBlank(c.getSQL())) continue;
+			if (storeStatement)
+			{
+				if (StringUtil.isBlank(c.getSQL())) continue;
+			}
+			else
+			{
+				if (isEmpty(c.getStartPositionInScript(), c.getEndPositionInScript())) continue;
+			}
+
 			c.setIndexInScript(index);
 			index++;
 			this.commands.add(c);
@@ -502,6 +510,20 @@ public class ScriptParser
 		{
 			scriptIterator.done();
 		}
+	}
+
+	private boolean isEmpty(int startPos, int endPos)
+	{
+		if (startPos < 0) return true;
+		if (endPos < 0 || endPos < startPos) return true;
+		if (this.originalScript == null) return true;
+
+		for (int i=startPos; i < endPos; i++)
+		{
+			char c = this.originalScript.charAt(i);
+			if (!Character.isWhitespace(c)) return false;
+		}
+		return true;
 	}
 
 	/**

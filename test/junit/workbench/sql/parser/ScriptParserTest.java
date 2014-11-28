@@ -215,10 +215,18 @@ public class ScriptParserTest
 	public void testEmptyStatement()
 		throws Exception
 	{
-		String sql = "command1\n;;command2\n;\n";
 		ScriptParser p = new ScriptParser();
-		p.setScript(sql);
+		p.setScript("command1\n;;command2\n;\n");
 		assertEquals(2, p.getSize());
+
+		p.setScript("select;\n;");
+		assertEquals(1,p.getSize());
+
+		p.setScript("select;\n;select;\n");
+		assertEquals(2, p.getSize());
+
+		p.setScript(";");
+		assertEquals(0, p.getSize());
 	}
 
 	@Test
@@ -229,9 +237,9 @@ public class ScriptParserTest
 		ScriptParser p = new ScriptParser();
 		p.setEmptyLineIsDelimiter(false);
 		p.setScript(sql);
+		assertEquals(2, p.getSize());
 		int index = p.getCommandIndexAtCursorPos(0);
 		assertEquals("Wrong statement index", 0, index);
-		assertEquals(2, p.getSize());
 	}
 
 	@Test
