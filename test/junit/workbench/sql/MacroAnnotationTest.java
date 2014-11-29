@@ -30,12 +30,12 @@ import static org.junit.Assert.*;
  */
 public class MacroAnnotationTest
 {
-	
+
 	@Test
 	public void testSetValue()
 	{
 		MacroAnnotation macro = new MacroAnnotation();
-		macro.setValue("some_macro map=a:b map=c:d");
+		macro.setValue("name=some_macro map=a:b map=c:d");
 		assertEquals("some_macro", macro.getMacroName());
 		assertNotNull(macro.getColumnMap());
 		assertEquals(2, macro.getColumnMap().size());

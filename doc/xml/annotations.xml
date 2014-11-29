@@ -127,6 +127,10 @@ from person;
          <literal>id</literal> column from the selected row.
       </para>
       <para>
+        The <literal>map</literal> parameter can be repeated several times to re-map multiple columns, e.g.
+        <literal>map=p_id:PersonID map=o_id:OrderID</literal>
+      </para>
+      <para>
         It is possible to specify more than one macro for the context menu:
     <programlisting>
 -- @WbMacro name="Person Address" map="id:PersonAddressID"

@@ -2,8 +2,7 @@ Features:
 ---------
 - Copy current statement to clipboard
 - WbExport -type=text -formatted=true to generate an export similar to a plain select in the console
-- search in editor
-  - search text in all editor tabs
+- search text in all editor tabs
 - support for named parameters from e.g. JPA Queries
   select * from foo where x = :id;
 - WbVarDef
@@ -30,7 +29,6 @@ Features:
   - handling of multiple schemas in a single compare run (e.g. for PostgreSQL databases that have multiple schemas)
 - SQL source for partitioned tables in SQL Server and MySQL
 - Access to result data through expressions: where id = ${results[1].columns("foo")}
-- Allow macros to be put into the context menu of a result (e.g. through an annotation)
 - "Copy as Select"
 - Compare ResultSets
 - Support ${guid} calls
