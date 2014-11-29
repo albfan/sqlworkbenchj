@@ -102,6 +102,10 @@ public class WbMenu
 			JMenuItem item = this.getItem(i);
 			if (item != null)
 			{
+				if (item instanceof WbMenuItem)
+				{
+					((WbMenuItem)item).dispose();
+				}
 				item.removeAll();
 			}
 		}

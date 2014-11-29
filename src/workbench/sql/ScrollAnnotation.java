@@ -32,12 +32,12 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class ScrollAnnotation
-	extends AnnotationReader
+	extends WbAnnotation
 {
 	public static final String ANNOTATION = "WbScrollTo";
 	public static final String END_KEYWORD = "end";
 
-	private final Set<String> endKeywords = CollectionUtil.caseInsensitiveSet("bottom", "last", END_KEYWORD);
+	private static final Set<String> endKeywords = CollectionUtil.caseInsensitiveSet("bottom", "last", END_KEYWORD);
 
 	public ScrollAnnotation()
 	{
@@ -49,15 +49,13 @@ public class ScrollAnnotation
 		return "-- @" + ANNOTATION + " " + END_KEYWORD;
 	}
 
-	public boolean scrollToEnd(String sql)
+	public static boolean scrollToEnd(String value)
 	{
-		String value = getAnnotationValue(sql);
 		return endKeywords.contains(value);
 	}
 
-	public int scrollToLine(String sql)
+	public static int scrollToLine(String value)
 	{
-		String value = getAnnotationValue(sql);
 		if (StringUtil.isNonBlank(value))
 		{
 			if (value.startsWith("#"))

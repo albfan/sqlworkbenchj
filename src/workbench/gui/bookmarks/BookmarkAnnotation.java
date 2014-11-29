@@ -25,7 +25,7 @@ import java.util.List;
 
 import workbench.resource.GuiSettings;
 
-import workbench.sql.AnnotationReader;
+import workbench.sql.WbAnnotation;
 import workbench.sql.ResultNameParser;
 import workbench.sql.UseTabAnnotation;
 import workbench.sql.lexer.SQLLexer;
@@ -40,7 +40,7 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class BookmarkAnnotation
-	extends AnnotationReader
+	extends WbAnnotation
 {
 	public static final String ANNOTATION = "WbTag";
 

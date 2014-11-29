@@ -66,6 +66,7 @@ import javax.swing.JToolTip;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.MenuElement;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
@@ -831,6 +832,18 @@ public class WbTable
 
 		if (popup != null)
 		{
+			MenuElement[] elements = popup.getSubElements();
+			for (MenuElement item : elements)
+			{
+				if (item instanceof WbMenuItem)
+				{
+					((WbMenuItem)item).dispose();
+				}
+				if (item instanceof WbMenu)
+				{
+					((WbMenu)item).dispose();
+				}
+			}
 			popup.removeAll();
 			popup = null;
 		}
@@ -859,6 +872,29 @@ public class WbTable
 		this.setModel(EmptyTableModel.EMPTY_MODEL, false);
 	}
 
+	public void addMacroMenu(final WbMenu submenu)
+	{
+		if (submenu == null) return;
+		final int index = findPopupItem(transposeRow);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (popup == null) popup = new JPopupMenu();
+
+				if (index > -1)
+				{
+					popup.add(submenu, index + 1);
+				}
+				else
+				{
+					popup.addSeparator();
+					popup.add(submenu);
+				}
+			}
+		});
+	}
 	private void addPopupSubMenu(final WbMenu submenu, final boolean withSep)
 	{
 		WbSwingUtilities.invoke(new Runnable()

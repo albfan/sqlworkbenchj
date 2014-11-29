@@ -26,7 +26,7 @@ package workbench.sql;
  * @author Thomas Kellerer
  */
 public class UseTabAnnotation
-	extends AnnotationReader
+	extends WbAnnotation
 {
 	public static final String ANNOTATION = "WbUseTab";
 

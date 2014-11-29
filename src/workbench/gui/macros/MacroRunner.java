@@ -22,13 +22,23 @@
  */
 package workbench.gui.macros;
 
+
+import java.util.Map;
+
 import workbench.resource.Settings;
+
+import workbench.db.exporter.TextRowDataConverter;
 
 import workbench.gui.WbSwingUtilities;
 
+import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
+
+import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroDefinition;
 
 import workbench.util.StringUtil;
+
 
 /**
  *
@@ -127,6 +137,29 @@ public class MacroRunner
 			return StringUtil.replace(sql, selectedStatementKey, stmt);
 		}
 		return sql;
+	}
+
+
+	public void runDataMacro(MacroDefinition macro, ResultInfo info, RowData row, MacroClient client, Map<String, String> columnMap)
+	{
+		if (macro == null) return;
+		if (info == null) return;
+		if (row == null) return;
+		if (client == null) return;
+
+		TextRowDataConverter converter = new TextRowDataConverter();
+		converter.setResultInfo(info);
+
+		for (int i=0; i < info.getColumnCount(); i++)
+		{
+			String col = info.getColumnName(i);
+			String varName = columnMap.get(col);
+			if (varName == null) varName = col;
+			String data = converter.getValueAsFormattedString(row, i);
+			VariablePool.getInstance().setParameterValue(varName, data);
+		}
+		String sql = macro.getText();
+		client.executeMacroSql(sql, false, true);
 	}
 
 }

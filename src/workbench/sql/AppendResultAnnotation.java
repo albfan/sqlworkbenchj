@@ -26,7 +26,7 @@ package workbench.sql;
  * @author Thomas Kellerer
  */
 public class AppendResultAnnotation
-	extends AnnotationReader
+	extends WbAnnotation
 {
 	public static final String ANNOTATION = "WbAppendResult";
 

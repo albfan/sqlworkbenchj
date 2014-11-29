@@ -23,16 +23,28 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.util.Collections;
+import java.util.Map;
+
 import javax.swing.Action;
 import javax.swing.KeyStroke;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import workbench.resource.ResourceMgr;
+import workbench.resource.StoreableKeyStroke;
 
 import workbench.gui.MainWindow;
+import workbench.gui.components.WbTable;
 import workbench.gui.editor.MacroExpander;
 import workbench.gui.macros.MacroRunner;
 import workbench.gui.sql.SqlPanel;
-import workbench.resource.ResourceMgr;
-import workbench.resource.StoreableKeyStroke;
+
+import workbench.storage.DataStore;
+import workbench.storage.RowData;
+
 import workbench.sql.macros.MacroDefinition;
+
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
@@ -41,9 +53,12 @@ import workbench.util.StringUtil;
  */
 public class RunMacroAction
 	extends WbAction
+	implements ListSelectionListener
 {
 	private MainWindow client;
 	private MacroDefinition macro;
+	private WbTable dataTable;
+	private Map<String, String> columnMap;
 
 	public RunMacroAction(MainWindow aClient, MacroDefinition def, int index)
 	{
@@ -61,7 +76,7 @@ public class RunMacroAction
 		else
 		{
 			String menuTitle = def.getName();
-			if (index < 10)
+			if (index < 10 && index > 0)
 			{
 				menuTitle = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
 			}
@@ -81,16 +96,39 @@ public class RunMacroAction
 		setEnabled(macro != null && client != null);
 	}
 
+	public void setDataTable(WbTable table, Map<String, String> colMap)
+	{
+		this.dataTable = table;
+		this.columnMap = colMap;
+		if (columnMap == null)
+		{
+			columnMap = Collections.emptyMap();
+		}
+		if (dataTable != null)
+		{
+			dataTable.getSelectionModel().addListSelectionListener(this);
+			setEnabled(dataTable.getSelectedRowCount() == 1);
+		}
+	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		if (dataTable != null)
+		{
+			dataTable.getSelectionModel().removeListSelectionListener(this);
+		}
+	}
+
+
 	public void setMacro(MacroDefinition def)
 	{
 		this.macro = def;
 	}
 
-	@Override
-	public void executeAction(ActionEvent e)
+	private void executeStandardMacro(ActionEvent e)
 	{
-		if (this.client == null || this.macro == null) return;
-
 		SqlPanel sql = this.client.getCurrentSqlPanel();
 		if (sql == null) return;
 
@@ -110,4 +148,48 @@ public class RunMacroAction
 			runner.runMacro(macro, sql, shiftPressed);
 		}
 	}
+
+	private void executeDataMacro()
+	{
+		if (dataTable == null) return;
+
+		SqlPanel sql = this.client.getCurrentSqlPanel();
+		if (sql == null) return;
+
+		int row = dataTable.getSelectedRow();
+		if (row < 0) return;
+
+		DataStore ds = dataTable.getDataStore();
+		if (ds == null) return;
+
+		RowData rowData = ds.getRow(row);
+		if (rowData == null) return;
+
+		MacroRunner runner = new MacroRunner();
+		runner.runDataMacro(macro, ds.getResultInfo(), rowData, sql, columnMap);
+	}
+
+	@Override
+	public void executeAction(ActionEvent e)
+	{
+		if (this.client == null || this.macro == null) return;
+
+		if (this.dataTable != null)
+		{
+			executeDataMacro();
+		}
+		else
+		{
+			executeStandardMacro(e);
+		}
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent e)
+	{
+		if (e.getValueIsAdjusting()) return;
+		setEnabled(e.getFirstIndex() > -1 && e.getFirstIndex() == e.getLastIndex());
+	}
+
+
 }

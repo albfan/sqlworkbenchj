@@ -80,7 +80,64 @@ FROM person;
 SELECT *
 FROM activity_log;
 </programlisting>
+    </section>
 
+
+    <section id="macro-menu-annotation">
+      <title>Adding macros to the result's context menu</title>
+      <para>
+        The annotation <literal>@WbMacro</literal> can be used to add macros to the context menu of the result.
+      </para>
+      <para>
+         When such a macro is executed, the values of all columns of the currently selected row will be defined
+         as variables that are usable in the macro. The result of the macro will always be appended to the current result regardless
+        of the setting in the macro definition.
+      </para>
+      <important>
+        <para>
+          Variables which are defined through a macro menu will not be deleted after the macro has been executed.
+        </para>
+      </important>
+      <para>
+        Assume the following macro with the name <literal>"Person Address"</literal>:
+    <programlisting>
+select *
+from address
+where person_id = $[id];
+</programlisting>
+        and the following SQL query:
+    <programlisting>
+-- @WbMacro name="Person Address"
+select id, firstname, lastname
+from person;
+</programlisting>
+        The context menu of the result will then contain a new submenu:
+        <menuchoice><guimenu>Macros</guimenu><guimenuitem>Person Address</guimenuitem></menuchoice>.
+        The variables <literal>$[id]</literal>, <literal>$[firstname]</literal> and <literal>$[lastname]</literal> will
+        contain the values of the currently selected row when the macro is executed.
+      </para>
+      <para>
+        It is also possible to re-map the column names to different variable names.
+    <programlisting>
+-- @WbMacro name="Person Address" map="id:PersonAddressID"
+select id, firstname, lastname
+from person;
+</programlisting>
+         In this case a variable named <literal>PersonAddressID</literal> will be created with the value of the
+         <literal>id</literal> column from the selected row.
+      </para>
+      <para>
+        It is possible to specify more than one macro for the context menu:
+    <programlisting>
+-- @WbMacro name="Person Address" map="id:PersonAddressID"
+-- @WbMacro name="Customer Orders" map="id:PersonOrderID"
+select id, firstname, lastname
+from person;
+</programlisting>
+      </para>
+      <para>
+        A macro can only be executed from the menu when exactly one row is selected in the result.
+      </para>
     </section>
 
     <section id="append-annotation">

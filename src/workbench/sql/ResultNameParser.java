@@ -29,7 +29,7 @@ package workbench.sql;
  * @author Thomas Kellerer
  */
 public class ResultNameParser
-	extends AnnotationReader
+	extends WbAnnotation
 {
 	public static final String ANNOTATION = "WbResult";
 

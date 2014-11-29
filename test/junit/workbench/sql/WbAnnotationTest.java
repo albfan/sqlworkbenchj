@@ -1,5 +1,5 @@
 /*
- * AnnotationReaderTest.java
+ * WbAnnotationTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -22,17 +22,22 @@
  */
 package workbench.sql;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import java.util.List;
+import java.util.Set;
+
+import workbench.util.CollectionUtil;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class AnnotationReaderTest
+public class WbAnnotationTest
 {
-	public AnnotationReaderTest()
+	public WbAnnotationTest()
 	{
 	}
 
@@ -40,7 +45,7 @@ public class AnnotationReaderTest
 	public void testGetAnnotationValue()
 	{
 		String sql = "/* test select */\nSELECT * FROM dummy;";
-		AnnotationReader p = new AnnotationReader("scroll");
+		WbAnnotation p = new WbAnnotation("scroll");
 		String name = p.getAnnotationValue(sql);
 		assertNull(name);
 
@@ -52,4 +57,26 @@ public class AnnotationReaderTest
 		name = p.getAnnotationValue(sql);
 		assertEquals("top", name);
 	}
+
+	@Test
+	public void testGetAllAnnotations()
+	{
+		String sql = "-- @" + MacroAnnotation.ANNOTATION + " someMacro";
+		Set<String> keys = CollectionUtil.treeSet(MacroAnnotation.ANNOTATION);
+		List<WbAnnotation> annotations = WbAnnotation.readAllAnnotations(sql, keys);
+		assertNotNull(annotations);
+		assertEquals(1, annotations.size());
+		assertEquals("someMacro", annotations.get(0).getValue());
+
+		sql =
+			"-- @" + MacroAnnotation.ANNOTATION + " someMacro\n" +
+			"-- @" + MacroAnnotation.ANNOTATION + " Another Macro\n";
+
+		annotations = WbAnnotation.readAllAnnotations(sql, keys);
+		assertNotNull(annotations);
+		assertEquals(2, annotations.size());
+		assertEquals("someMacro", annotations.get(0).getValue());
+		assertEquals("Another Macro", annotations.get(1).getValue());
+	}
+
 }

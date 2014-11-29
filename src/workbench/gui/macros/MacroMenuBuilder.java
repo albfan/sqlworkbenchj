@@ -29,11 +29,15 @@ import javax.swing.JMenu;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.RunMacroAction;
 import workbench.gui.components.WbMenu;
+import workbench.gui.components.WbTable;
 
+import workbench.sql.MacroAnnotation;
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
+import workbench.sql.macros.MacroStorage;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -78,5 +82,27 @@ public class MacroMenuBuilder
 			if (groupMenu != null) macroMenu.add(groupMenu);
 		}
 	}
+
+	public WbMenu buildDataMacroMenu(MainWindow main, WbTable table, List<MacroAnnotation> macroAnnotations)
+	{
+		if (table == null) return null;
+		if (CollectionUtil.isEmpty(macroAnnotations)) return null;
+
+		MacroStorage macros = MacroManager.getInstance().getMacros(main.getMacroClientId());
+		WbMenu result = new WbMenu("Macros");
+
+		for (MacroAnnotation annotation: macroAnnotations)
+		{
+			MacroDefinition macro = macros.getMacro(annotation.getMacroName());
+			if (macro != null)
+			{
+				RunMacroAction run = new RunMacroAction(main, macro, -1);
+				run.setDataTable(table, annotation.getColumnMap());
+				run.addToMenu(result);
+			}
+		}
+		return result;
+	}
+
 
 }
