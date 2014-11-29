@@ -45,7 +45,19 @@ public class WbAnnotation
 
 	public WbAnnotation(String key)
 	{
-		keyword = "@" + key.toLowerCase();
+		if (key.charAt(0) == '@')
+		{
+			keyword = key;
+		}
+		else
+		{
+			keyword = getTag(key);
+		}
+	}
+
+	public static String getTag(String key)
+	{
+		return "@" + key.toLowerCase();
 	}
 
 	public String getValue()
@@ -74,11 +86,6 @@ public class WbAnnotation
 		return extractAnnotationValue(token);
 	}
 
-	public WbAnnotation createNewInstance()
-	{
-		return new WbAnnotation(keyword);
-	}
-
 	public static List<WbAnnotation> readAllAnnotations(String sql, Set<String> keys)
 	{
 		if (StringUtil.isBlank(sql)) return Collections.emptyList();
@@ -96,7 +103,7 @@ public class WbAnnotation
 			for (String key : keys)
 			{
 				if (key == null) continue;
-				int pos = comment.toLowerCase().indexOf(key.toLowerCase());
+				int pos = comment.toLowerCase().indexOf(key);
 				if (pos >= 0)
 				{
 					pos += key.length();

@@ -3742,7 +3742,7 @@ public class SqlPanel
 		data.checkLimitReachedDisplay();
 		String sql = (ds != null ? ds.getGeneratingSql() : "");
 
-		Set<String> keys = CollectionUtil.treeSet(ScrollAnnotation.ANNOTATION, MacroAnnotation.ANNOTATION);
+		Set<String> keys = CollectionUtil.treeSet(WbAnnotation.getTag(ScrollAnnotation.ANNOTATION), WbAnnotation.getTag(MacroAnnotation.ANNOTATION));
 		List<WbAnnotation> annotations = WbAnnotation.readAllAnnotations(sql, keys);
 		List<MacroAnnotation> macros = new ArrayList<>();
 
