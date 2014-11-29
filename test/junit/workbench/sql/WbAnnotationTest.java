@@ -62,7 +62,7 @@ public class WbAnnotationTest
 	public void testGetAllAnnotations()
 	{
 		String sql = "-- @" + MacroAnnotation.ANNOTATION + " someMacro";
-		Set<String> keys = CollectionUtil.treeSet(MacroAnnotation.ANNOTATION);
+		Set<String> keys = CollectionUtil.treeSet(WbAnnotation.getTag(MacroAnnotation.ANNOTATION));
 		List<WbAnnotation> annotations = WbAnnotation.readAllAnnotations(sql, keys);
 		assertNotNull(annotations);
 		assertEquals(1, annotations.size());
