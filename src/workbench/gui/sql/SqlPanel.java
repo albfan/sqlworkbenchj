@@ -3751,7 +3751,7 @@ public class SqlPanel
 
 		for (WbAnnotation annotation : annotations)
 		{
-			if (annotation instanceof ScrollAnnotation)
+			if (annotation.getKeyWord().equals(WbAnnotation.getTag(ScrollAnnotation.ANNOTATION)))
 			{
 				String scrollValue = annotation.getValue();
 				if (scrollValue != null)
