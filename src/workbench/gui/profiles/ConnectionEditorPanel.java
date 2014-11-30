@@ -818,7 +818,7 @@ public class ConnectionEditorPanel
     jPanel3.add(jPanel4, gridBagConstraints);
 
     jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    jLabel4.setText(ResourceMgr.getString("LblMacroFile")); // NOI18N
+    jLabel4.setText(ResourceMgr.getString("LblMacros")); // NOI18N
     jLabel4.setToolTipText(ResourceMgr.getString("d_LblMacroFile")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;

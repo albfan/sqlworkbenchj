@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.swing.Action;
@@ -184,7 +183,6 @@ import workbench.gui.editor.actions.IndentSelection;
 import workbench.gui.editor.actions.ShowTipAction;
 import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
-import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
 
@@ -192,15 +190,12 @@ import workbench.storage.DataStore;
 
 import workbench.sql.AppendResultAnnotation;
 import workbench.sql.ErrorDescriptor;
-import workbench.sql.MacroAnnotation;
 import workbench.sql.OutputPrinter;
-import workbench.sql.ScrollAnnotation;
 import workbench.sql.StatementHistory;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.UseTabAnnotation;
 import workbench.sql.VariablePool;
-import workbench.sql.WbAnnotation;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.parser.ParserType;
@@ -208,7 +203,6 @@ import workbench.sql.parser.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 
-import workbench.util.CollectionUtil;
 import workbench.util.DurationFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.util.HtmlUtil;
@@ -3740,58 +3734,10 @@ public class SqlPanel
 			this.resultTab.setSelectedIndex(0);
 		}
 		data.checkLimitReachedDisplay();
-		String sql = (ds != null ? ds.getGeneratingSql() : "");
 
-		Set<String> keys = CollectionUtil.treeSet(WbAnnotation.getTag(ScrollAnnotation.ANNOTATION), WbAnnotation.getTag(MacroAnnotation.ANNOTATION));
-		List<WbAnnotation> annotations = WbAnnotation.readAllAnnotations(sql, keys);
-		List<MacroAnnotation> macros = new ArrayList<>();
-
-		boolean scrollToEnd = false;
-		int line = -1;
-
-		for (WbAnnotation annotation : annotations)
-		{
-			if (annotation.getKeyWord().equals(WbAnnotation.getTag(ScrollAnnotation.ANNOTATION)))
-			{
-				String scrollValue = annotation.getValue();
-				if (scrollValue != null)
-				{
-					scrollToEnd = ScrollAnnotation.scrollToEnd(scrollValue);
-					line = ScrollAnnotation.scrollToLine(scrollValue);
-				}
-			}
-			else
-			{
-				MacroAnnotation macro = new MacroAnnotation();
-				macro.setValue(annotation.getValue());
-				macros.add(macro);
-			}
-		}
-
-		if (macros.size() > 0 && tbl != null)
-		{
-			try
-			{
-				MainWindow main = (MainWindow)SwingUtilities.getWindowAncestor(this);
-				MacroMenuBuilder builder = new MacroMenuBuilder();
-				WbMenu menu = builder.buildDataMacroMenu(main, tbl, macros);
-				tbl.addMacroMenu(menu);
-			}
-			catch (Exception ex)
-			{
-				// ignore
-			}
-		}
-
-		if (scrollToEnd && tbl != null)
-		{
-			tbl.scrollToRow(tbl.getRowCount() - 1);
-		}
-		else if (line > 0)
-		{
-			tbl.scrollToRow(line - 1);
-		}
-
+		TableAnnotationProcessor processor = new TableAnnotationProcessor();
+		processor.handleAnnotations(tbl);
+		
 		return newIndex;
 	}
 

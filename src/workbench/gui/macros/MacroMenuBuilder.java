@@ -26,6 +26,8 @@ import java.util.List;
 
 import javax.swing.JMenu;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.MainWindow;
 import workbench.gui.actions.RunMacroAction;
 import workbench.gui.components.WbMenu;
@@ -89,7 +91,7 @@ public class MacroMenuBuilder
 		if (CollectionUtil.isEmpty(macroAnnotations)) return null;
 
 		MacroStorage macros = MacroManager.getInstance().getMacros(main.getMacroClientId());
-		WbMenu result = new WbMenu("Macros");
+		WbMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_MACRO));
 
 		for (MacroAnnotation annotation: macroAnnotations)
 		{
@@ -97,6 +99,7 @@ public class MacroMenuBuilder
 			if (macro != null)
 			{
 				RunMacroAction run = new RunMacroAction(main, macro, -1);
+				run.setTooltip(null);
 				run.setDataTable(table, annotation.getColumnMap());
 				run.addToMenu(result);
 			}
