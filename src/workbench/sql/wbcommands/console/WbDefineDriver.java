@@ -98,15 +98,11 @@ public class WbDefineDriver
 
 		name = name.trim();
 
-		if (!isNameUnique(name))
-		{
-			result.addMessageByKey("ErrDrvNameNotUnique");
-			result.addMessageByKey("ErrDefDrv");
-			result.setFailure();
-			return result;
-		}
+		DbDriver drv = findDriver(name);
 
-		if (StringUtil.isBlank(drvClass))
+		boolean driverExists = drv != null;
+
+		if (StringUtil.isBlank(drvClass) && drv == null)
 		{
 			result.addMessageByKey("ErrDefDrvNoClass");
 			result.addMessageByKey("ErrDefDrv");
@@ -114,10 +110,23 @@ public class WbDefineDriver
 			return result;
 		}
 
-		DbDriver drv = new DbDriver();
-		drv.setLibrary(jarFile);
-		drv.setName(name);
-		drv.setDriverClass(drvClass);
+
+		if (drv == null)
+		{
+			drv = new DbDriver();
+			drv.setName(name);
+			ConnectionMgr.getInstance().getDrivers().add(drv);
+		}
+
+		if (StringUtil.isNonBlank(jarFile))
+		{
+			drv.setLibrary(jarFile);
+		}
+
+		if (StringUtil.isNonBlank(drvClass))
+		{
+			drv.setDriverClass(drvClass);
+		}
 
 		List<String> libs = drv.getLibraryList();
 		for (String file : libs)
@@ -130,29 +139,37 @@ public class WbDefineDriver
 				result.setFailure();
 			}
 		}
+
 		if (!result.isSuccess())
 		{
 			return result;
 		}
 
-		ConnectionMgr.getInstance().getDrivers().add(drv);
 		ConnectionMgr.getInstance().saveDrivers();
-		result.addMessage(ResourceMgr.getFormattedString("MsgDriverAdded", name));
+		
+		if (driverExists)
+		{
+			result.addMessage(ResourceMgr.getFormattedString("MsgDriverUpdated", name));
+		}
+		else
+		{
+			result.addMessage(ResourceMgr.getFormattedString("MsgDriverAdded", name));
+		}
 		result.setSuccess();
 		return result;
 	}
 
-	private boolean isNameUnique(String name)
+	private DbDriver findDriver(String name)
 	{
 		List<DbDriver> drivers = ConnectionMgr.getInstance().getDrivers();
 		for (DbDriver drv : drivers)
 		{
 			if (drv.getName().equalsIgnoreCase(name))
 			{
-				return false;
+				return drv;
 			}
 		}
-		return true;
+		return null;
 	}
 
 	@Override
