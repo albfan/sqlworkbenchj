@@ -93,7 +93,8 @@ public class SqlServerProcedureReaderTest
 		CharSequence source = procedureList.get(0).getSource(conn);
 		assertNotNull(source);
 		String sourceSql = source.toString();
-		assertEquals(SqlUtil.trimSemicolon(sql) + "\nGO", sourceSql.trim());
+		String delimiter = conn.getAlternateDelimiter().getDelimiter();
+		assertEquals(SqlUtil.trimSemicolon(sql) + "\n" + delimiter, sourceSql.trim());
 
 		procedureList = reader.getProcedureList(SQLServerTestUtil.DB_NAME, "dbo", "answer");
 		assertEquals(1, procedureList.size());
