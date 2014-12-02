@@ -1247,7 +1247,7 @@ public class Settings
 
 	private Font getMonospacedFont(String property, boolean returnDefault)
 	{
-		Font f = this.getFont(PROPERTY_DATA_FONT);
+		Font f = this.getFont(property);
 		if (f == null && returnDefault)
 		{
 			f = new Font("Monospaced", Font.PLAIN, 12);
