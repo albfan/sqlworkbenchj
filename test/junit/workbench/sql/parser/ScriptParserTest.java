@@ -1337,8 +1337,7 @@ public class ScriptParserTest
 		size = parser.getSize();
 		assertEquals(5, size);
 		assertTrue(parser.getCommand(0).startsWith("whenever"));
-		//assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(0));
-		assertNull(parser.getDelimiterUsed(0));
+		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(0));
 		assertTrue(parser.getCommand(1).startsWith("set serveroutput"));
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(1));
 		assertTrue(parser.getCommand(2).startsWith("declare"));
@@ -1347,6 +1346,28 @@ public class ScriptParserTest
 		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(3));
 		assertTrue(parser.getCommand(4).startsWith("select count(*)"));
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(4));
+
+		script =
+			"whenever sqlerror continue\n" +
+			"\n" +
+			"set serveroutput on\n" +
+			"\n" +
+			"begin\n" +
+			"  null;\n" +
+			"end;\n" +
+			"/";
+
+		assertTrue(parser.getCommand(0).startsWith("whenever"));
+		System.out.println("Delimiter: " + parser.getDelimiterUsed(0));
+		assertNull(parser.getDelimiterUsed(0));
+		assertTrue(parser.getCommand(1).startsWith("set serveroutput"));
+		assertNull(parser.getDelimiterUsed(1));
+		assertTrue(parser.getCommand(2).startsWith("begin"));
+		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(2));
+
+		parser.setScript(script);
+		size = parser.getSize();
+		assertEquals(3, size);
 
 		script =
 			"drop procedure foo;\n" +

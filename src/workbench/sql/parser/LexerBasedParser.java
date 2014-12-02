@@ -261,7 +261,7 @@ public class LexerBasedParser
 					singleLineCommand = delimiterTester.isSingleLineStatement(token, isFirstToken);
 				}
 
-				if (!singleLineCommand && !currentDelim.isSingleLine())
+				if (!currentDelim.isSingleLine())
 				{
 					if (text.equals(currentDelim.getDelimiter()))
 					{
