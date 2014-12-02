@@ -41,7 +41,7 @@ public class OracleDelimiterTester
 	private boolean useAlternateDelimiter;
 	private final Set<String> blockStart = CollectionUtil.caseInsensitiveSet("BEGIN", "DECLARE");
 	private final Set<String> keywords = CollectionUtil.caseInsensitiveSet("CREATE", "CREATE OR REPLACE");
-	private final Set<String> singleLineCommands = CollectionUtil.caseInsensitiveSet("WHENEVER", "ECHO", "DESC", "DESCRIBE");
+	private final Set<String> singleLineCommands = CollectionUtil.caseInsensitiveSet("WHENEVER", "ECHO", "DESC", "DESCRIBE", "SET");
 	private final Set<String> types = CollectionUtil.caseInsensitiveSet("FUNCTION", "LIBRARY", "PACKAGE", "PACKAGE BODY", "PROCEDURE", "TRIGGER", "TYPE", "TYPE BODY");
 
 	private SQLToken lastToken;
@@ -84,6 +84,7 @@ public class OracleDelimiterTester
 	public void currentToken(SQLToken token, boolean isStartOfStatement)
 	{
 		if (token == null) return;
+		if (token.isComment()) return;
 
 		if (useAlternateDelimiter && lastToken != null)
 		{
@@ -104,7 +105,7 @@ public class OracleDelimiterTester
 		{
 			lastToken = token;
 		}
-		if (isStartOfStatement && !token.isWhiteSpace())
+		if (firstToken == null && !token.isWhiteSpace())
 		{
 			firstToken = token;
 		}
@@ -125,6 +126,7 @@ public class OracleDelimiterTester
 	{
 		useAlternateDelimiter = false;
 		lastToken = null;
+		firstToken = null;
 	}
 
 	@Override

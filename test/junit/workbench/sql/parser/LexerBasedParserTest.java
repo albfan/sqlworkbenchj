@@ -637,6 +637,54 @@ public class LexerBasedParserTest
 
 		cmd = parser.getNextCommand();
 		assertNull(cmd);
+
+		parser.setScript(
+			"set serveroutput on\n" +
+			"BEGIN\n" +
+			"  some_proc;\n" +
+			"end;\n" +
+			"/");
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("set serveroutput on", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertTrue(cmd.getSQL().trim().startsWith("BEGIN"));
+		assertTrue(cmd.getSQL().trim().endsWith("end;"));
+	}
+
+	@Test
+	public void testOracleDDL()
+	{
+		String script =
+			"/* this function \n" +
+			"   does something useful \n" +
+			"*/\n" +
+			"create or replace function foo \n" +
+			"  (\n" +
+			"     p_one integer, -- some value \n" +
+			"     p_two integer -- other value \n" +
+			"  )\n" +
+			"  RETURN integer\n" +
+			"IS\n" +
+			"BEGIN\n" +
+			"  IF p_one IS NULL then \n" +
+			"    return 41;" +
+			"  end if;\n" +
+			"  return 42;\n" +
+			"END foo;\n" +
+			"/";
+		LexerBasedParser parser = new LexerBasedParser(ParserType.Oracle);
+		parser.setStoreStatementText(true);
+		parser.setScript(script);
+		parser.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		parser.setEmptyLineIsDelimiter(false);
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertTrue(cmd.getSQL().trim().endsWith("END foo;"));
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
 	}
 
 	@Test

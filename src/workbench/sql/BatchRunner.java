@@ -836,6 +836,10 @@ public class BatchRunner
 					{
 						LogMgr.logError("BatchRunner.execute()", feedback, null);
 						errorCount ++;
+						if (parser.getScriptFile() != null)
+						{
+							feedback += "\n" + ResourceMgr.getFormattedString("MsgInFile", parser.getScriptFile().getFullPath());
+						}
 						if (storeErrorMessages)
 						{
 							if (errors == null)

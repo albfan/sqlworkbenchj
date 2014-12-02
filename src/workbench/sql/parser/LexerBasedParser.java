@@ -212,7 +212,7 @@ public class LexerBasedParser
 		{
 			String text = token.getText();
 
-			isNewline = isLineBreak(text);
+			isNewline = !token.isComment() && isLineBreak(text);
 
 			if (!isNewline)
 			{
@@ -256,7 +256,7 @@ public class LexerBasedParser
 			}
 			else if (!inPgQuote)
 			{
-				if (isFirstToken && delimiterTester != null && !token.isWhiteSpace())
+				if (isFirstToken && delimiterTester != null && !token.isWhiteSpace() && !token.isComment())
 				{
 					singleLineCommand = delimiterTester.isSingleLineStatement(token, isFirstToken);
 				}
@@ -304,7 +304,7 @@ public class LexerBasedParser
 				}
 			}
 
-			if (isFirstToken && !token.isWhiteSpace())
+			if (isFirstToken && !token.isWhiteSpace() && !token.isComment())
 			{
 				isFirstToken = false;
 			}
