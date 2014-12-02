@@ -1357,8 +1357,10 @@ public class ScriptParserTest
 			"end;\n" +
 			"/";
 
+		parser.setScript(script);
+		size = parser.getSize();
+		assertEquals(3, size);
 		assertTrue(parser.getCommand(0).startsWith("whenever"));
-		System.out.println("Delimiter: " + parser.getDelimiterUsed(0));
 		assertNull(parser.getDelimiterUsed(0));
 		assertTrue(parser.getCommand(1).startsWith("set serveroutput"));
 		assertNull(parser.getDelimiterUsed(1));
