@@ -1282,8 +1282,10 @@ public class ScriptParserTest
 		assertEquals(2, size);
 
 		String script =
+			"/* this is a new tyep */\n" +
 			"create type footype as object (id integer);\n" +
 			"/\n" +
+			"-- bla bla bla\n" +
 			"create or replace procedure foo \n" +
 			"is \n" +
 			"begin \n" +
@@ -1305,9 +1307,9 @@ public class ScriptParserTest
 		parser.setScript(script);
 		size = parser.getSize();
 		assertEquals(4, size);
-		assertTrue(parser.getCommand(0).startsWith("create type footype"));
+		assertTrue(parser.getCommand(0).contains("create type footype as object"));
 		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(0));
-		assertTrue(parser.getCommand(1).startsWith("create or replace procedure"));
+		assertTrue(parser.getCommand(1).contains("create or replace procedure foo"));
 		assertEquals(DelimiterDefinition.DEFAULT_ORA_DELIMITER, parser.getDelimiterUsed(1));
 		assertTrue(parser.getCommand(2).startsWith("create view v_foo"));
 		assertEquals(DelimiterDefinition.STANDARD_DELIMITER, parser.getDelimiterUsed(2));
