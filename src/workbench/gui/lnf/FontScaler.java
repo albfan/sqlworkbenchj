@@ -43,7 +43,6 @@ public class FontScaler
 
 	public FontScaler()
 	{
-		scaleFont = Settings.getInstance().getScaleFonts();
 		dpi = Toolkit.getDefaultToolkit().getScreenResolution();
 		defaultDPI = Settings.getInstance().getIntProperty("workbench.gui.desktop.defaultdpi", 96);
 		if (dpi == defaultDPI)
@@ -53,9 +52,14 @@ public class FontScaler
 		}
 		else
 		{
+			scaleFont = true;
 			scaleFactor = ((float)dpi / (float)defaultDPI);
 		}
-		LogMgr.logDebug("FontScaler.<init>", "Current DPI: "  + dpi + ", Default DPI: " + defaultDPI + ", scale factor: " + scaleFactor + ", font scaling enabled: " + scaleFont);
+	}
+
+	public void logSettings()
+	{
+		LogMgr.logDebug("FontScaler.logSettings()", "Current DPI: "  + dpi + ", Default DPI: " + defaultDPI + ", scale factor: " + scaleFactor + ", font scaling enabled: " + scaleFont);
 	}
 
 	public Font scaleFont(Font baseFont)
