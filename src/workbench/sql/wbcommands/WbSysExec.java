@@ -39,6 +39,7 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.PlatformHelper;
@@ -163,7 +164,7 @@ public class WbSysExec
 
 			// it seems that Windows actually needs IBM437...
 			String encoding = cmdLine.getValue(ARG_ENCODING, System.getProperty("file.encoding"));
-			LogMgr.logDebug("WbSysExec.execute()", "Using encoding: " + encoding + ", running statement: " + StringUtil.listToString(args, ' '));
+			LogMgr.logDebug("WbSysExec.execute()", "Using encoding: " + encoding);
 
 			ProcessBuilder pb = new ProcessBuilder(args);
 			String dir = cmdLine.getValue(ARG_WORKING_DIR);
@@ -177,6 +178,7 @@ public class WbSysExec
 				pb.directory(cwd);
 			}
 
+			LogMgr.logDebug("WbSysExec.execute()", "Running program: " + pb.command());
 			this.task = pb.start();
 
 			stdIn = new BufferedReader(new InputStreamReader(task.getInputStream(), encoding));
@@ -225,20 +227,25 @@ public class WbSysExec
 
 	private List<String> getShell(List<String> command)
 	{
+		if (CollectionUtil.isEmpty(command)) return command;
+		
 		String os = getOSID();
 		List<String> args = new ArrayList<>(command.size() + 2);
 
 		String first = StringUtil.getFirstWord(command.get(0)).toLowerCase();
+
 		String shell = System.getenv("SHELL");
 
-		if ("windows".equals(os) && !first.startsWith("cmd"))
+		if ("windows".equals(os))
 		{
-			args.add("cmd");
-			args.add("/c");
-			args.addAll(command);
+			if (!first.startsWith("cmd"))
+			{
+				args.add("cmd");
+				args.add("/c");
+				args.addAll(command);
+			}
 		}
-
-		if (!"windows".equals(os) && !first.startsWith(shell))
+		else if (!first.startsWith(shell))
 		{
 			args.add(shell);
 			args.add("-c");
