@@ -246,7 +246,6 @@ keyword=(
 "CURSOR"|
 "CURSOR_NAME"|
 "CYCLE"|
-"DATA"|
 "DATABASE"|
 "DATABASE LINK"|
 "DATE"|
