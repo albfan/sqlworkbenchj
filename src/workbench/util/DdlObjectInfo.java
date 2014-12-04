@@ -31,6 +31,7 @@ import workbench.db.oracle.OracleUtils;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
+import workbench.sql.parser.ParserType;
 
 /**
  *
@@ -43,7 +44,12 @@ public class DdlObjectInfo
 
 	public DdlObjectInfo(CharSequence sql)
 	{
-		parseSQL(sql, null);
+		parseSQL(sql, ParserType.Standard);
+	}
+
+	public DdlObjectInfo(CharSequence sql, ParserType type)
+	{
+		parseSQL(sql, type);
 	}
 
 	public DdlObjectInfo(CharSequence sql, WbConnection conn)
@@ -79,7 +85,13 @@ public class DdlObjectInfo
 
 	private void parseSQL(CharSequence sql, WbConnection conn)
 	{
-		SQLLexer lexer = SQLLexerFactory.createLexer(conn, sql);
+		ParserType type = ParserType.getTypeFromConnection(conn);
+		parseSQL(sql, type);
+	}
+
+	private void parseSQL(CharSequence sql, ParserType type)
+	{
+		SQLLexer lexer = SQLLexerFactory.createLexer(type, sql);
 		SQLToken t = lexer.getNextToken(false, false);
 
 		if (t == null) return;

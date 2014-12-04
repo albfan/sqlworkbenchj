@@ -25,6 +25,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.parser.ParserType;
+
 
 /**
  *
@@ -36,22 +38,148 @@ public class DdlObjectInfoTest
 	{
 	}
 
-
 	@Test
-	public void testGetObjectInfo()
+	public void testOracle()
 		throws Exception
 	{
 		String sql = "-- test\ncreate or \t replace\n\nprocedure bla";
-		DdlObjectInfo info = new DdlObjectInfo(sql);
+		DdlObjectInfo info = new DdlObjectInfo(sql, ParserType.Oracle);
 		assertTrue(info.isValid());
 		assertEquals(info.getObjectName(), "bla");
 		assertEquals(info.getDisplayType(), "Procedure");
 
 		sql = "-- test\ncreate unique bitmap index idx_test on table (x,y);";
-		info = new DdlObjectInfo(sql);
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
 		assertTrue(info.isValid());
 		assertEquals(info.getObjectName(), "idx_test");
 		assertEquals(info.getDisplayType(), "Index");
+
+		sql = "-- test\ncreate or replace package \n\n some_package \t\t\n as something";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+		assertEquals("some_package", info.getObjectName());
+		assertEquals("PACKAGE", info.getObjectType());
+
+		sql = "-- test\ncreate package body \n\n some_body \t\t\n as something";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+		assertEquals("some_body", info.getObjectName());
+		assertEquals("PACKAGE BODY", info.getObjectType());
+
+		sql = "CREATE FLASHBACK ARCHIVE main_archive";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+		assertEquals("main_archive", info.getObjectName());
+		assertEquals("FLASHBACK ARCHIVE", info.getObjectType());
+
+		sql = "analyze table foo validate structure";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+		assertEquals("foo", info.getObjectName());
+		assertEquals("TABLE", info.getObjectType());
+
+		sql = "analyze index foo_idx validate structure";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+		assertEquals("foo_idx", info.getObjectName());
+		assertEquals("INDEX", info.getObjectType());
+
+		sql = "create type body my_type is begin\n null; end;";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+		assertEquals("my_type", info.getObjectName());
+		assertEquals("TYPE BODY", info.getObjectType());
+
+		sql = "alter function mystuff compile";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+		assertNotNull(info);
+		assertEquals("mystuff", info.getObjectName());
+		assertEquals("FUNCTION", info.getObjectType());
+
+		sql = "create force view v_test as select * from t;";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+		assertEquals(info.getObjectName(), "v_test");
+		assertEquals(info.getDisplayType(), "View");
+	}
+
+	@Test
+	public void testPostgres()
+	{
+		DdlObjectInfo info;
+
+		info = new DdlObjectInfo("create global temporary table stuff.temp if not exists (id integer);", ParserType.Postgres);
+		assertTrue(info.isValid());
+		assertEquals("stuff.temp", info.getObjectName());
+		assertEquals("TABLE", info.getObjectType());
+
+		info = new DdlObjectInfo("create tablespace users location 'foobar';", ParserType.Postgres);
+		assertTrue(info.isValid());
+		assertEquals("users", info.getObjectName());
+		assertEquals("TABLESPACE", info.getObjectType());
+
+		info = new DdlObjectInfo("create unlogged table foobar if not exists (id integer);", ParserType.Postgres);
+		assertTrue(info.isValid());
+		assertEquals("foobar", info.getObjectName());
+		assertEquals("TABLE", info.getObjectType());
+
+		info = new DdlObjectInfo("create extension hstore", ParserType.Postgres);
+		assertTrue(info.isValid());
+		assertEquals("hstore", info.getObjectName());
+		assertEquals("EXTENSION", info.getObjectType());
+	}
+
+	@Test
+	public void testSqlServer()
+	{
+		DdlObjectInfo info;
+		String sql;
+
+		sql = "create nonclustered index idx_test on table (x,y);";
+		info = new DdlObjectInfo(sql, ParserType.SqlServer);
+		assertTrue(info.isValid());
+		assertEquals(info.getObjectName(), "idx_test");
+		assertEquals(info.getDisplayType(), "Index");
+
+		sql = "create table ##mytemp (id integer);";
+		info = new DdlObjectInfo(sql, ParserType.SqlServer);
+		assertTrue(info.isValid());
+		assertEquals("##mytemp", info.getObjectName());
+		assertEquals("TABLE", info.getObjectType());
+
+		sql = "create table [ignore the standard] (id integer);";
+		info = new DdlObjectInfo(sql, ParserType.SqlServer);
+		assertTrue(info.isValid());
+		assertEquals("ignore the standard", info.getObjectName());
+		assertEquals("TABLE", info.getObjectType());
+
+		sql = "create table #someTemp(some_col integer);";
+		info = new DdlObjectInfo(sql, ParserType.SqlServer);
+		assertTrue(info.isValid());
+		assertEquals("#someTemp", info.getObjectName());
+		assertEquals("TABLE", info.getObjectType());
+	}
+
+	@Test
+	public void testMySQL()
+	{
+		DdlObjectInfo info;
+		String sql;
+
+		sql = "create table `stupid` (id integer;";
+		info = new DdlObjectInfo(sql, ParserType.MySQL);
+		assertTrue(info.isValid());
+		assertEquals("stupid", info.getObjectName());
+		assertEquals("TABLE", info.getObjectType());
+	}
+
+	@Test
+	public void testGetObjectInfo()
+		throws Exception
+	{
+		DdlObjectInfo info;
+		String sql;
 
 		sql = "recreate view v_test as select * from t;";
 		info = new DdlObjectInfo(sql);
@@ -59,29 +187,17 @@ public class DdlObjectInfoTest
 		assertEquals(info.getObjectName(), "v_test");
 		assertEquals(info.getDisplayType(), "View");
 
-		sql = "create nonclustered index idx_test on table (x,y);";
+		sql = "create table my_schema.my_table (nr integer);";
 		info = new DdlObjectInfo(sql);
 		assertTrue(info.isValid());
-		assertEquals(info.getObjectName(), "idx_test");
-		assertEquals(info.getDisplayType(), "Index");
+		assertEquals(info.getObjectName(), "my_schema.my_table");
+		assertEquals(info.getDisplayType(), "Table");
 
 		sql = "-- test\ncreate memory table my_table (nr integer);";
 		info = new DdlObjectInfo(sql);
 		assertTrue(info.isValid());
 		assertEquals(info.getObjectName(), "my_table");
 		assertEquals(info.getDisplayType(), "Table");
-
-		sql = "create table dbo.my_table (nr integer);";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals(info.getObjectName(), "dbo.my_table");
-		assertEquals(info.getDisplayType(), "Table");
-
-		sql = "create force view v_test as select * from t;";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals(info.getObjectName(), "v_test");
-		assertEquals(info.getDisplayType(), "View");
 
 		sql = "drop memory table my_table;";
 		info = new DdlObjectInfo(sql);
@@ -98,14 +214,14 @@ public class DdlObjectInfoTest
 		sql = "drop function f_answer;";
 		info = new DdlObjectInfo(sql);
 		assertTrue(info.isValid());
-		assertEquals(info.getObjectName(), "f_answer");
-		assertEquals(info.getDisplayType(), "Function");
+		assertEquals("f_answer", info.getObjectName());
+		assertEquals("Function", info.getDisplayType());
 
 		sql = "drop procedure f_answer;";
 		info = new DdlObjectInfo(sql);
 		assertTrue(info.isValid());
-		assertEquals(info.getObjectName(), "f_answer");
-		assertEquals(info.getDisplayType(), "Procedure");
+		assertEquals("f_answer", info.getObjectName());
+		assertEquals("Procedure", info.getDisplayType());
 
 		sql = "drop sequence s;";
 		info = new DdlObjectInfo(sql);
@@ -125,24 +241,6 @@ public class DdlObjectInfoTest
 		assertEquals("test_trg", info.getObjectName());
 		assertEquals("TRIGGER", info.getObjectType());
 
-		sql = "-- test\ncreate or replace package \n\n some_package \t\t\n as something";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals("some_package", info.getObjectName());
-		assertEquals("PACKAGE", info.getObjectType());
-
-		sql = "-- test\ncreate package body \n\n some_body \t\t\n as something";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals("some_body", info.getObjectName());
-		assertEquals("PACKAGE BODY", info.getObjectType());
-
-		sql = "CREATE FLASHBACK ARCHIVE main_archive";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals("main_archive", info.getObjectName());
-		assertEquals("FLASHBACK ARCHIVE", info.getObjectType());
-
 		sql = "CREATE TABLE IF NOT EXISTS some_table (id integer)";
 		info = new DdlObjectInfo(sql);
 		assertTrue(info.isValid());
@@ -154,43 +252,6 @@ public class DdlObjectInfoTest
 		assertTrue(info.isValid());
 		assertEquals("old_table", info.getObjectName());
 		assertEquals("TABLE", info.getObjectType());
-
-		sql = "create table #someTemp(some_col integer);";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals("#someTemp", info.getObjectName());
-		assertEquals("TABLE", info.getObjectType());
-
-		sql = "create type body my_type is begin\n null; end;";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals("my_type", info.getObjectName());
-		assertEquals("TYPE BODY", info.getObjectType());
-
-		sql = "alter function mystuff compile";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertNotNull(info);
-		assertEquals("mystuff", info.getObjectName());
-		assertEquals("FUNCTION", info.getObjectType());
-
-		sql = "create extension hstore";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals("hstore", info.getObjectName());
-		assertEquals("EXTENSION", info.getObjectType());
-
-		sql = "analyze table foo validate structure";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals("foo", info.getObjectName());
-		assertEquals("TABLE", info.getObjectType());
-
-		sql = "analyze index foo_idx validate structure";
-		info = new DdlObjectInfo(sql);
-		assertTrue(info.isValid());
-		assertEquals("foo_idx", info.getObjectName());
-		assertEquals("INDEX", info.getObjectType());
 
 		sql = "analyze local table foobar";
 		info = new DdlObjectInfo(sql);
@@ -204,10 +265,14 @@ public class DdlObjectInfoTest
 		assertEquals("IDX", info.getObjectName());
 		assertEquals("INDEX", info.getObjectType());
 
-		sql = "create table ##mytemp (id integer);";
-		info = new DdlObjectInfo(sql);
+		info = new DdlObjectInfo("create temporary table if not exists temp (id integer);");
 		assertTrue(info.isValid());
-		assertEquals("##mytemp", info.getObjectName());
+		assertEquals("temp", info.getObjectName());
+		assertEquals("TABLE", info.getObjectType());
+
+		info = new DdlObjectInfo("create table foo_backup as select * from foo;");
+		assertTrue(info.isValid());
+		assertEquals("foo_backup", info.getObjectName());
 		assertEquals("TABLE", info.getObjectType());
 	}
 
