@@ -125,15 +125,7 @@ public class DdlObjectInfo
 					if (next != null) name = next;
 				}
 
-				if (!name.isReservedWord())
-				{
-					this.objectName = name.getContents();
-				}
-
-				if (this.objectName != null)
-				{
-					this.objectName = SqlUtil.removeObjectQuotes(this.objectName);
-				}
+				this.objectName = SqlUtil.removeObjectQuotes(name.getContents());
 			}
 		}
 		catch (Exception e)
