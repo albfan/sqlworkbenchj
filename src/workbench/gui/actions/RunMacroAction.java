@@ -188,8 +188,13 @@ public class RunMacroAction
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		setEnabled(e.getFirstIndex() > -1 && e.getFirstIndex() == e.getLastIndex());
+		
+		if (dataTable == null)
+		{
+			setEnabled(false);
+			return;
+		}
+		setEnabled(dataTable.getSelectedRowCount() == 1);
 	}
-
 
 }
