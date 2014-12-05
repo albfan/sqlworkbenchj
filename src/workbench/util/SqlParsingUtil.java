@@ -58,7 +58,7 @@ public class SqlParsingUtil
 	/**
 	 * Thread safe singleton-instance.
 	 * For a standard SQL parser, we keep a global instance for performance reasons.
-	 * 
+	 *
 	 */
 	private static class LazyInstanceHolder
 	{
@@ -135,6 +135,11 @@ public class SqlParsingUtil
 	{
 		Set<String> s = Collections.singleton("FROM");
 		return getKeywordPosition(s, sql);
+	}
+
+	public int getJoinPosition(String sql)
+	{
+		return getKeywordPosition(SqlUtil.getJoinKeyWords(), sql);
 	}
 
 	public int getWherePosition(String sql)

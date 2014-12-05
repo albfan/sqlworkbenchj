@@ -361,10 +361,15 @@ public abstract class BaseAnalyzer
 		this.parentAnalyzer = analyzer;
 	}
 
+	protected int getPos(int pos)
+	{
+		if (pos == -1) return Integer.MAX_VALUE;
+		return pos;
+	}
+
 	protected boolean between(int toTest, int start, int end)
 	{
-		if (start == -1 || end == -1) return false;
-		return (toTest > start && toTest < end);
+		return (toTest > getPos(start) && toTest < getPos(end));
 	}
 
 	public int getContext()

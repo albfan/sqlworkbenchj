@@ -154,6 +154,7 @@ public class StatementContextTest
 		BaseAnalyzer analyzer = context.getAnalyzer();
 		assertTrue(analyzer instanceof SelectAnalyzer);
 		TableIdentifier tbl = analyzer.getTableForColumnList();
+		assertNotNull(tbl);
 		assertEquals("one", tbl.getTableName().toLowerCase());
 	}
 

@@ -171,7 +171,7 @@ public class StatementContext
 
 	private BaseAnalyzer checkSubselect(WbConnection conn, String sql, int pos)
 	{
-		Set<String> unionKeywords = CollectionUtil.caseInsensitiveSet("UNION", "UNION ALL", "MINUS", "INTERSECT");
+		Set<String> unionKeywords = CollectionUtil.caseInsensitiveSet("UNION", "UNION ALL", "MINUS", "INTERSECT", "EXCEPT");
 
 		try
 		{

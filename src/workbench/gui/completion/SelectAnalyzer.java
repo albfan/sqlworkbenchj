@@ -74,12 +74,12 @@ public class SelectAnalyzer
 		SqlParsingUtil util = SqlParsingUtil.getInstance(dbConnection);
 
 		int fromPos = util.getFromPosition(this.sql);
-
 		int wherePos = -1;
-
+		int joinPos = -1;
 		if (fromPos > 0)
 		{
 			wherePos = util.getWherePosition(sql);
+			joinPos = util.getJoinPosition(sql);
 		}
 
 		int groupPos = util.getKeywordPosition("GROUP BY", sql);
@@ -91,7 +91,6 @@ public class SelectAnalyzer
 
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
 		boolean afterGroup = (groupPos > 0 && cursorPos > groupPos);
-		boolean beforeOrder = (orderPos > -1 && cursorPos < orderPos) || orderPos == -1;
 
 		if (havingPos > -1 && afterGroup)
 		{
@@ -109,20 +108,20 @@ public class SelectAnalyzer
 			afterHaving = (cursorPos < orderPos);
 		}
 
-		boolean inTableList = ( fromPos < 0 ||
-			   (wherePos < 0 && cursorPos > fromPos) ||
-			   (wherePos > -1 && cursorPos > fromPos && cursorPos <= wherePos));
+		boolean inTableList = between(cursorPos, fromPos, joinPos) || between(cursorPos, fromPos, wherePos);
 
-		boolean inWhere = afterWhere && !afterGroup && !afterHaving && beforeOrder;
+		boolean inWhere =  between(cursorPos, wherePos, orderPos) || between(cursorPos, wherePos, groupPos) || between(cursorPos, wherePos, havingPos);
 
 		if (inTableList && afterGroup) inTableList = false;
 		if (inTableList && orderPos > -1 && cursorPos > orderPos) inTableList = false;
 
-		int joinState = inJoinONPart();
-
-		if (inTableList && joinState != JOIN_ON_TABLE_LIST)
+		if (joinPos > 0 && inTableList)
 		{
-			inTableList = false;
+			int joinState = inJoinONPart();
+			if (joinState == JOIN_ON_COLUMN_LIST)
+			{
+				inTableList = false;
+			}
 		}
 
 		if (inTableList)

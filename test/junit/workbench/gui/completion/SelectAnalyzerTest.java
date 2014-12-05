@@ -56,7 +56,7 @@ public class SelectAnalyzerTest
               "  join y on x.id = y.xid \n" +
               "  join z on x.id = z.yid";
 		int pos = sql.indexOf("from") + 5;
-		StatementContext ctx = new StatementContext(null, sql, pos);
+		StatementContext ctx = new StatementContext(null, sql, pos, false);
 		BaseAnalyzer analyzer = ctx.getAnalyzer();
 		analyzer.checkContext();
 		int context = analyzer.getContext();
@@ -70,7 +70,7 @@ public class SelectAnalyzerTest
 			"select b. \n" +
 			" from public.t1 a join public.t2 as b using (id)";
 		int pos = sql.indexOf('.') + 1;
-		StatementContext ctx = new StatementContext(null, sql, pos);
+		StatementContext ctx = new StatementContext(null, sql, pos, false);
 		BaseAnalyzer analyzer = ctx.getAnalyzer();
 		analyzer.checkContext();
 		int context = analyzer.getContext();
@@ -91,7 +91,7 @@ public class SelectAnalyzerTest
 			"select *\n" +
 			"from foobar;";
 		int pos = sql.indexOf("t2.") + 3;
-		StatementContext ctx = new StatementContext(null, sql, pos);
+		StatementContext ctx = new StatementContext(null, sql, pos, false);
 		BaseAnalyzer analyzer = ctx.getAnalyzer();
 		analyzer.checkContext();
 		int context = analyzer.getContext();
@@ -149,7 +149,7 @@ public class SelectAnalyzerTest
 		analyzer.checkContext();
 		tbl = analyzer.getTableForColumnList();
 		assertNull(tbl);
-		assertEquals(BaseAnalyzer.CONTEXT_FROM_LIST, analyzer.context);
+		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, analyzer.context);
 
 		pos = sql.indexOf("JOIN") + "JOIN".length() + 1;
 		analyzer = new SelectAnalyzer(null, sql, pos);
