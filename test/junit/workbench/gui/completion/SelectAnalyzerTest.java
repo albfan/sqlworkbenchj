@@ -48,6 +48,22 @@ public class SelectAnalyzerTest
 	}
 
 	@Test
+	public void testJoin2()
+	{
+		String sql =
+              "select * \n" +
+              "from  \n" +
+              "  join y on x.id = y.xid \n" +
+              "  join z on x.id = z.yid";
+		int pos = sql.indexOf("from") + 5;
+		StatementContext ctx = new StatementContext(null, sql, pos);
+		BaseAnalyzer analyzer = ctx.getAnalyzer();
+		analyzer.checkContext();
+		int context = analyzer.getContext();
+		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, context);
+	}
+
+	@Test
 	public void testJoin()
 	{
 		String sql =
