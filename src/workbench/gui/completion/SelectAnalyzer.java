@@ -33,10 +33,10 @@ import workbench.resource.ResourceMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.sql.formatter.SqlFormatter;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
-import workbench.sql.formatter.SqlFormatter;
 
 import workbench.util.Alias;
 import workbench.util.SqlParsingUtil;
@@ -91,6 +91,7 @@ public class SelectAnalyzer
 
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
 		boolean afterGroup = (groupPos > 0 && cursorPos > groupPos);
+		boolean afterOrder = (orderPos > 0 && cursorPos > orderPos);
 
 		if (havingPos > -1 && afterGroup)
 		{
@@ -109,11 +110,12 @@ public class SelectAnalyzer
 		}
 
 		boolean inTableList = between(cursorPos, fromPos, joinPos) || between(cursorPos, fromPos, wherePos);
-
 		boolean inWhere =  between(cursorPos, wherePos, orderPos) || between(cursorPos, wherePos, groupPos) || between(cursorPos, wherePos, havingPos);
 
-		if (inTableList && afterGroup) inTableList = false;
-		if (inTableList && orderPos > -1 && cursorPos > orderPos) inTableList = false;
+		if (inTableList)
+		{
+			if (inWhere || afterGroup || afterOrder) inTableList = false;
+		}
 
 		if (joinPos > 0 && inTableList)
 		{

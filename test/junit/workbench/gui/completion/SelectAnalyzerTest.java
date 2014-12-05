@@ -48,6 +48,18 @@ public class SelectAnalyzerTest
 	}
 
 	@Test
+	public void testWhere()
+	{
+		String sql = "select id2 from two where two. ";
+		int pos = sql.indexOf("one.") + 4;
+		StatementContext context = new StatementContext(null, sql, pos, false);
+		BaseAnalyzer analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+		TableIdentifier tbl = analyzer.getTableForColumnList();
+		assertEquals("two", tbl.getTableName().toLowerCase());
+	}
+
+	@Test
 	public void testJoin2()
 	{
 		String sql =
