@@ -30,6 +30,7 @@ import workbench.resource.Settings;
 import workbench.db.exporter.TextRowDataConverter;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -155,8 +156,15 @@ public class MacroRunner
 			String col = info.getColumnName(i);
 			String varName = columnMap.get(col);
 			if (varName == null) varName = col;
-			String data = converter.getValueAsFormattedString(row, i);
-			VariablePool.getInstance().setParameterValue(varName, data);
+			if (VariablePool.getInstance().isValidVariableName(varName))
+			{
+				String data = converter.getValueAsFormattedString(row, i);
+				VariablePool.getInstance().setParameterValue(varName, data);
+			}
+			else
+			{
+				LogMgr.logWarning("MacroRunner.runDataMacro()", "Column name: " + col + " is not a valid SQL Workbench variable name. Column will be ignore");
+			}
 		}
 		String sql = macro.getText();
 		client.executeMacroSql(sql, false, true);
