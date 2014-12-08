@@ -163,7 +163,7 @@ public class MacroRunner
 			}
 			else
 			{
-				LogMgr.logWarning("MacroRunner.runDataMacro()", "Column name: " + col + " is not a valid SQL Workbench variable name. Column will be ignore");
+				LogMgr.logWarning("MacroRunner.runDataMacro()", "Column name: " + col + " is not a valid SQL Workbench variable name. Column will be ignored.");
 			}
 		}
 		String sql = macro.getText();
