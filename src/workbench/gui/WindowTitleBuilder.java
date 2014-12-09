@@ -104,6 +104,7 @@ public class WindowTitleBuilder
 		if (productNamePosition == NAME_AT_START)
 		{
 			title.append(ResourceMgr.TXT_PRODUCT_NAME);
+			title.append(' ');
 		}
 
 		if (profile != null)
@@ -129,7 +130,7 @@ public class WindowTitleBuilder
 				{
 					// always display the username if prompted
 					title.append(profile.getLoginUser());
-					title.append(" - ");
+					title.append("- ");
 				}
 				if (showProfileGroup)
 				{
@@ -147,13 +148,12 @@ public class WindowTitleBuilder
 					}
 					if (sep != null) title.append(sep);
 				}
-
 				title.append(profile.getName());
 			}
 		}
 		else if (showNotConnected)
 		{
-			if (title.length() > 0) title.append(" - ");
+			if (title.length() > 0) title.append("- ");
 			title.append(ResourceMgr.getString("TxtNotConnected"));
 		}
 
