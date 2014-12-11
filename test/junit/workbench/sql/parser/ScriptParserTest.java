@@ -299,6 +299,46 @@ public class ScriptParserTest
 	}
 
 	@Test
+	public void testEmptyLines2()
+	{
+		String sql = "\n\nselect now();\n";
+		ScriptParser p = new ScriptParser(ParserType.Standard);
+		p.setScript(sql);
+		p.setEmptyLineIsDelimiter(true);
+		p.setAlternateDelimiter(null);
+		int size = p.getSize();
+		assertEquals(1, size);
+		int index = p.getCommandIndexAtCursorPos(sql.indexOf("now()"));
+		assertEquals(0, index);
+		String cmd = p.getCommand(index);
+		assertEquals("select now()", cmd);
+
+		sql = "\nselect now();\n";
+		p.setScript(sql);
+		size = p.getSize();
+		assertEquals(1, size);
+		index = p.getCommandIndexAtCursorPos(sql.indexOf("now()"));
+		assertEquals(0, index);
+		cmd = p.getCommand(index);
+		assertEquals("select now()", cmd);
+
+		sql = "select 1\n\nselect 2\n\n";
+		p.setScript(sql);
+		size = p.getSize();
+		assertEquals(2, size);
+		assertEquals("select 1", p.getCommand(0));
+		assertEquals("select 2", p.getCommand(1));
+
+		sql = "select 1;\n\nselect 2;\n\n";
+		p.setScript(sql);
+		size = p.getSize();
+		assertEquals(2, size);
+		assertEquals("select 1", p.getCommand(0));
+		assertEquals("select 2", p.getCommand(1));
+	}
+
+
+	@Test
 	public void testOracleSingleLine()
 	{
 		String sql =

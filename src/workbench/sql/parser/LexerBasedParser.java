@@ -294,7 +294,7 @@ public class LexerBasedParser
 						matchedDelimiter = lineDelim;
 						break;
 					}
-					else if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text) && currentDelim.equals(delimiter)))
+					else if (singleLineCommand || (emptyLineIsDelimiter && !isFirstToken && isMultiLine(text) && currentDelim.equals(delimiter)))
 					{
 						lastStatementUsedTerminator = false;
 						break;

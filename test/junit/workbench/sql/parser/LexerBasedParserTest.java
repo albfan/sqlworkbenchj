@@ -50,6 +50,21 @@ public class LexerBasedParserTest
 	}
 
 	@Test
+	public void testSingleEmptyLine()
+	{
+		String sql = "\n\nselect now();\n";
+		LexerBasedParser p = new LexerBasedParser(ParserType.Standard);
+		p.setEmptyLineIsDelimiter(true);
+		p.setAlternateDelimiter(null);
+		p.setScript(sql);
+		ScriptCommandDefinition cmd = p.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("select now()", cmd.getSQL());
+		cmd = p.getNextCommand();
+		assertNull(cmd);
+	}
+
+	@Test
 	public void testGetNextCommand()
 		throws Exception
 	{
