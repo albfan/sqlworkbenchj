@@ -209,7 +209,6 @@ public class SelectAnalyzerTest
 		assertEquals("#some_schema", analyzer.getSchemaForTableList());
 	}
 
-	@Test
 	public void testOrderBy()
 	{
 		String sql =

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-11-30">
+  <release build="-1" date="2014-12-02">
     <entry dev-build="11" type="enh">It is now possible to put macros into the context menu of a result through the @WbMacro annotation</entry>
     <entry dev-build="11" type="enh">When using the console on Linux, the window title of the terminal window will now show the name of current profile.</entry>
     <entry dev-build="11" type="enh">For Postgres, SQL Workbench now reads the contents of .pgpass to retrieve passwords if the password is not stored in the connection profile.</entry>
@@ -41,6 +41,9 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="12" type="fix">When the option "allow empty lines as delimiter" was enabled, multiple empty lines at the beginning of the script would break the detection of the SQL statements</entry>
+    <entry dev-build="12" type="fix">The code completion did not work correctly when the cursor was located between the FROM keyword and a JOIN keyword with no tables in between</entry>
+    <entry dev-build="12" type="fix">When entering PL/SQL blocks in console mode the alternate delimiter was not detected.</entry>
     <entry dev-build="7" type="fix">When resizing the input dialog for variables or the columns in the table, the dialog was closed</entry>
     <entry dev-build="9" type="fix">When using a SQL query as the source in the DataPumper the columns from the result were not correctly mapped to the target columns</entry>
     <entry dev-build="9" type="fix">When using WbImport with ZIP files, the file locks on the ZIP files were not released after the import has finished</entry>
