@@ -703,7 +703,7 @@ public class StringUtil
 			pos ++;
 		}
 		while (pos < len);
-		
+
 		return -1;
 	}
 
@@ -1874,6 +1874,16 @@ public class StringUtil
 		while (found < occurance);
 
 		return pos;
+	}
+
+	public static String coalesce(String ... args)
+	{
+		if (args == null) return null;
+		for (String s : args)
+		{
+			if (s != null) return s;
+		}
+		return null;
 	}
 
 }

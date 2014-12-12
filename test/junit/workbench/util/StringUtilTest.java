@@ -916,4 +916,28 @@ public class StringUtilTest
 		pos = StringUtil.findOccurance(value, ':', 1);
 		assertEquals(4, pos);
 	}
+
+	@Test
+	public void testCoalesce()
+	{
+		String one = null;
+		String two = "two";
+		String three = "three";
+
+		String result = StringUtil.coalesce(one, two, three);
+		assertNotNull(result);
+		assertEquals(two, result);
+
+		one = "one";
+		result = StringUtil.coalesce(one, two, three);
+		assertEquals(one, result);
+
+		one = null;
+		two = null;
+		result = StringUtil.coalesce(one, two, three);
+		assertEquals(three, result);
+
+		result = StringUtil.coalesce("foo");
+		assertEquals("foo", result);
+	}
 }

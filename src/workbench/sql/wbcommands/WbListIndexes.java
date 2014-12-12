@@ -108,15 +108,8 @@ public class WbListIndexes
 			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
 		}
 
-		if (StringUtil.isBlank(schema))
-		{
-			schema = currentConnection.getMetadata().getCurrentSchema();
-		}
-
-		if (StringUtil.isBlank(catalog))
-		{
-			catalog = currentConnection.getMetadata().getCurrentCatalog();
-		}
+		String currentSchema = currentConnection.getMetadata().getCurrentSchema();
+		String currentCatalog = currentConnection.getMetadata().getCurrentCatalog();
 
 		String indexPattern = cmdLine.getValue(ARG_INDEX_NAME);
 
@@ -124,13 +117,14 @@ public class WbListIndexes
 
 		if (cmdLine.isArgPresent(ARG_TABLE_NAME))
 		{
-			SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(ARG_TABLE_NAME), currentConnection);
+			SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(ARG_TABLE_NAME), null, StringUtil.coalesce(schema, currentSchema), currentConnection);
+
 			List<TableIdentifier> tables = tableArg.getTables();
 			indexes = new ArrayList<>();
 			for (TableIdentifier tbl : tables)
 			{
-				String tschema = schema == null ? tbl.getRawSchema() : schema;
-				String tcat = catalog == null ? tbl.getRawCatalog() : catalog;
+				String tschema = StringUtil.coalesce(tbl.getRawSchema(), schema, currentSchema);
+				String tcat = StringUtil.coalesce(tbl.getRawCatalog(), catalog, currentCatalog);
 				String name = tbl.getRawTableName();
 				List<IndexDefinition> indexList = reader.getIndexes(tcat, tschema, name, indexPattern);
 				indexes.addAll(indexList);
@@ -138,7 +132,7 @@ public class WbListIndexes
 		}
 		else
 		{
-			indexes = reader.getIndexes(catalog, schema, null, indexPattern);
+			indexes = reader.getIndexes(StringUtil.coalesce(catalog, currentCatalog), StringUtil.coalesce(schema, currentSchema), null, indexPattern);
 		}
 
 		DataStore ds = reader.fillDataStore(indexes, true);
