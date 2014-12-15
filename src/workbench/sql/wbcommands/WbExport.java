@@ -458,7 +458,7 @@ public class WbExport
 		exporter.setWriteClobAsFile(cmdLine.getBoolean(ARG_CLOB_AS_FILE, false));
 		boolean includeIdentityDefault = !Settings.getInstance().getGenerateInsertIgnoreIdentity();
 		exporter.setIncludeIdentityCols(cmdLine.getBoolean(ARG_INCLUDE_IDENTITY, includeIdentityDefault));
-		exporter.setIncludeReadOnlyCols(cmdLine.getBoolean(ARG_INCLUDE_READONLY, false));
+		exporter.setIncludeReadOnlyCols(cmdLine.getBoolean(ARG_INCLUDE_READONLY, true));
 
 		this.continueOnError = cmdLine.getBoolean(ARG_CONTINUE_ON_ERROR, false);
 

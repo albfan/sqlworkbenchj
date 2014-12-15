@@ -264,8 +264,6 @@ public class DataExporter
 		this.includeReadOnlyCols = flag;
 	}
 
-
-
 	public boolean getTrimCharData()
 	{
 		return trimCharData;
