@@ -50,7 +50,7 @@ import workbench.gui.menu.TextPopup;
 public class TextComponentMouseListener
 	implements MouseListener, CaretListener
 {
-	private List<JMenuItem> additionalItems = new LinkedList<JMenuItem>();
+	private List<JMenuItem> additionalItems = new LinkedList<>();
 	private TextPopup popup;
 	private JTextComponent text;
 	private int originalComponentCount = -1;
