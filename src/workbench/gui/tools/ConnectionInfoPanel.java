@@ -34,7 +34,6 @@ import java.io.StringWriter;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.text.Document;
 
 import workbench.WbManager;
 import workbench.console.DataStorePrinter;
@@ -189,19 +188,23 @@ public class ConnectionInfoPanel
 
 	private void copyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyButtonActionPerformed
 		String content = infotext.getText();
-		copyText(content);
+		copyText(content, true);
 	}//GEN-LAST:event_copyButtonActionPerformed
 
-	public void copyText(String content)
+	public void copyText(String content, boolean copyExtended)
 	{
-		String clean = content.replaceAll(StringUtil.REGEX_CRLF, " ");
+		String clean = content;
+		if (copyExtended)
+		{
+			clean = content.replaceAll(StringUtil.REGEX_CRLF, " ");
+		}
 		clean = clean.replaceAll(" {2,}", "");
 		clean = clean.replaceAll("<br>", "\r\n");
 		clean = clean.replaceAll("<div[0-9 a-zA-Z;=\\-\":]*>", "");
 		clean = clean.replaceAll("</div>", "\r\n");
 		clean = clean.replaceAll("<[/a-z]*>", "").trim();
 
-		if (extendedInfoData != null)
+		if (extendedInfoData != null && copyExtended)
 		{
 			DataStore ds = extendedInfoData.getDataStore();
 			DataStorePrinter printer = new DataStorePrinter(ds);
@@ -236,30 +239,15 @@ public class ConnectionInfoPanel
 			super();
 		}
 
-		public String getSelection()
-		{
-			Document doc = getDocument();
-			int start = Math.min(getCaret().getDot(), getCaret().getMark());
-			int end = Math.max(getCaret().getDot(), getCaret().getMark());
-			if (start == end) return null;
-			StringWriter out = new StringWriter();
-			try
-			{
-				getUI().getEditorKit(this).write(out, doc, start, end - start);
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
-			return out.toString();
-		}
-
 		@Override
 		public void copy()
 		{
-			String content = getSelection();
-			if (content == null) content = getText();
-			copyText(content);
+			String content = getSelectedText();
+			if (content == null)
+			{
+				content = getText();
+			}
+			copyText(content, false);
 		}
 	}
 }
