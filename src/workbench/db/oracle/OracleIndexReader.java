@@ -404,7 +404,7 @@ public class OracleIndexReader
 	 * 	of the index definition.
 	 */
 	@Override
-	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
+	public void processIndexList(Collection<IndexDefinition> indexDefs)
 	{
 		if (CollectionUtil.isEmpty(indexDefs)) return;
 
@@ -420,17 +420,10 @@ public class OracleIndexReader
 
 		StringBuilder sql = new StringBuilder(300);
 		sql.append(base);
-		String schema = tbl.getSchema();
-
-		if (schema != null && schema.length() > 0)
-		{
-			sql.append(" AND i.owner = '");
-			sql.append(schema);
-			sql.append("'\n");
-		}
+		
 		boolean found = false;
 
-		sql.append(" AND i.index_name IN (");
+		sql.append(" AND (i.owner, i.index_name) IN (");
 		for (IndexDefinition def : indexDefs)
 		{
 			String type = def.getIndexType();
@@ -439,19 +432,30 @@ public class OracleIndexReader
 			{
 				if (found) sql.append(',');
 				found = true;
-				sql.append('\'');
-				sql.append(def.getName());
-				sql.append('\'');
+				sql.append(" (");
+				String schema = StringUtil.coalesce(def.getSchema(), def.getBaseTable().getSchema());
+				if (schema == null)
+				{
+					schema = "USER";
+				}
+				else
+				{
+					schema = "'" + metaData.removeQuotes(schema) + "'";
+				}
+				sql.append(schema);
+				sql.append(",'");
+				sql.append(metaData.removeQuotes(def.getName()));
+				sql.append("')");
 			}
 		}
-		sql.append(") \n");
+		sql.append(" ) \n");
 		sql.append(" ORDER BY 1,3");
 
 		if (!found) return;
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleIndexReader.processIndexList()", "Using SQL to enhance index info for " + tbl.getTableExpression() + ":\n" + sql.toString());
+			LogMgr.logDebug("OracleIndexReader.processIndexList()", "Using SQL to enhance index info:\n" + sql.toString());
 		}
 
 		ResultSet rs = null;

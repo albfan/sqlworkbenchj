@@ -468,7 +468,7 @@ public class JdbcIndexReader
 		type = getSQLKeywordForType(type);
 
 		String options = getIndexOptions(table, indexDefinition);
-		
+
 		WbConnection conn = metaData.getWbConnection();
 		String sql = template;
 
@@ -601,7 +601,7 @@ public class JdbcIndexReader
 	 * @param indexList the indexes retrieved (never null)
 	 */
 	@Override
-	public void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexList)
+	public void processIndexList(Collection<IndexDefinition> indexList)
 	{
 		// Nothing implemented
 	}
@@ -914,7 +914,7 @@ public class JdbcIndexReader
 			}
 		}
 
-		processIndexList(tbl, indexes);
+		processIndexList(indexes);
 		return new ArrayList<>(indexes);
 	}
 
@@ -1093,6 +1093,7 @@ public class JdbcIndexReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+		processIndexList(result);
 		Collections.sort(result, IndexDefinition.getNameSorter());
 		return result;
 	}

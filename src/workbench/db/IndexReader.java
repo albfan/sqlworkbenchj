@@ -100,7 +100,7 @@ public interface IndexReader
 	 * This can be used to e.g. retrieve additional index information
 	 * that can't be read with getIndexInfo()
 	 */
-	void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexDefinitions);
+	void processIndexList(Collection<IndexDefinition> indexDefinitions);
 
 	/**
 	 * Return the index information for a table as a DataStore. This is

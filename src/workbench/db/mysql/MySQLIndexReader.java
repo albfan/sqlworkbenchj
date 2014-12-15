@@ -26,13 +26,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import workbench.log.LogMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -53,7 +58,7 @@ public class MySQLIndexReader
 	}
 
 	@Override
-	public void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexList)
+	public void processIndexList(Collection<IndexDefinition> indexList)
 	{
 		if (indexList.isEmpty()) return;
 
@@ -61,25 +66,31 @@ public class MySQLIndexReader
 		Statement stmt = null;
 		WbConnection conn = this.metaData.getWbConnection();
 
+		Set<TableIdentifier> tables = getIndexTables(indexList);
+
 		try
 		{
-			String sql =
-				"show index from " + SqlUtil.fullyQualifiedName(conn, table) +
-				" where sub_part is not null";
-
 			stmt = conn.createStatementForQuery();
-			rs = stmt.executeQuery(sql);
 
-			while (rs.next())
+			for (TableIdentifier table : tables)
 			{
-				String indexName = rs.getString("Key_name");
-				String col = rs.getString("Column_name");
-				int part = rs.getInt("Sub_part");
-				IndexDefinition def = findIndex(indexList, indexName);
-				IndexColumn iCol = findColumn(def, col);
-				if (iCol != null)
+				String sql =
+					"show index from " + SqlUtil.fullyQualifiedName(conn, table) +
+					" where sub_part is not null";
+
+				rs = stmt.executeQuery(sql);
+
+				while (rs.next())
 				{
-					iCol.setColumn(col + "(" + Integer.toString(part) + ")");
+					String indexName = rs.getString("Key_name");
+					String col = rs.getString("Column_name");
+					int part = rs.getInt("Sub_part");
+					IndexDefinition def = findIndex(indexList, indexName);
+					IndexColumn iCol = findColumn(def, col);
+					if (iCol != null)
+					{
+						iCol.setColumn(col + "(" + Integer.toString(part) + ")");
+					}
 				}
 			}
 		}
@@ -91,6 +102,19 @@ public class MySQLIndexReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+	}
+
+	private Set<TableIdentifier> getIndexTables(Collection<IndexDefinition> indexList)
+	{
+		Set<TableIdentifier> result = new HashSet<>();
+		for (IndexDefinition def : indexList)
+		{
+			if (def.getBaseTable() != null)
+			{
+				result.add(def.getBaseTable());
+			}
+		}
+		return result;
 	}
 
 	private IndexColumn findColumn(IndexDefinition index, String colName)

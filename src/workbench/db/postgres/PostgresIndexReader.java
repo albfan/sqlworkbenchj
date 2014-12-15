@@ -219,7 +219,7 @@ public class PostgresIndexReader
 	 * @see PostgresIndexReader#PROP_RETRIEVE_TABLESPACE
 	 */
 	@Override
-	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
+	public void processIndexList(Collection<IndexDefinition> indexDefs)
 	{
 		if (!Settings.getInstance().getBoolProperty(PROP_RETRIEVE_TABLESPACE, true)) return;
 
@@ -235,13 +235,12 @@ public class PostgresIndexReader
 
 		StringBuilder sql = new StringBuilder(50 + count * 20);
 		sql.append("SELECT indexname, tablespace FROM pg_indexes WHERE (schemaname, indexname) IN (");
-		String schema = "quote_ident('" + tbl.getRawSchema() + "')";
 
 		int indexCount = 0;
 		for (IndexDefinition index : indexDefs)
 		{
 			String idxName = con.getMetadata().removeQuotes(index.getName());
-
+			String schema = con.getMetadata().removeQuotes(index.getSchema());
 			if (indexCount > 0) sql.append(',');
 			sql.append('(');
 			sql.append(schema);

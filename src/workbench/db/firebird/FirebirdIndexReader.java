@@ -28,9 +28,18 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import workbench.db.*;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DbMetadata;
+import workbench.db.IndexColumn;
+import workbench.db.IndexDefinition;
+import workbench.db.JdbcIndexReader;
+import workbench.db.ReaderFactory;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -105,7 +114,7 @@ public class FirebirdIndexReader
 	}
 
 	@Override
-	public void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexList)
+	public void processIndexList(Collection<IndexDefinition> indexList)
 	{
 		for (IndexDefinition index : indexList)
 		{
