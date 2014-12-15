@@ -212,8 +212,11 @@ public class StatementRunnerResult
 	public int addDataStore(DataStore ds)
 	{
 		if (this.datastores == null) this.datastores = new ArrayList<>(5);
-		ds.resetCancelStatus();
-		this.datastores.add(ds);
+		if (ds != null)
+		{
+			ds.resetCancelStatus();
+			this.datastores.add(ds);
+		}
 		return this.datastores.size();
 	}
 
