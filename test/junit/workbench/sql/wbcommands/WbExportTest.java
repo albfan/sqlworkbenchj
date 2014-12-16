@@ -217,7 +217,7 @@ public class WbExportTest
 		SqlUtil.closeStatement(stmt);
 
 		WbFile exportFile = new WbFile(util.getBaseDir(), "create_tbl.sql");
-		StatementRunnerResult result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -sourceTable=junit_test");
+		StatementRunnerResult result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -useSchema=false -sourceTable=junit_test");
 		String msg = result.getMessageBuffer().toString();
 		assertTrue(msg, result.isSuccess());
 		assertTrue(exportFile.exists());
@@ -229,15 +229,14 @@ public class WbExportTest
 		ScriptParser p = new ScriptParser(script);
 		assertEquals(2, p.getSize()); // 3 Statements: CREATE TABLE, ALTER TABLE
 
-
-		result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -sourceTable=person -append=true");
+		result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -sourceTable=person -useSchema=false -append=true");
 		msg = result.getMessageBuffer().toString();
 		assertTrue(result.isSuccess());
 		assertTrue(exportFile.exists());
 		long fsize2 = exportFile.length();
 		assertTrue(fsize2 > fsize);
 
-		result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -sourceTable=person -append=true -writeEmptyResults=false");
+		result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -sourceTable=person -useSchema=false -append=true -writeEmptyResults=false");
 		msg = result.getMessageBuffer().toString();
 		assertTrue(result.isSuccess());
 		assertTrue(exportFile.exists());

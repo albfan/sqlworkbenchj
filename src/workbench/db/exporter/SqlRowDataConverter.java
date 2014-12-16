@@ -395,14 +395,15 @@ public class SqlRowDataConverter
 
 		TableIdentifier t = alternateUpdateTable == null ? updateTable : alternateUpdateTable;
 		TableIdentifier toUse = t.createCopy();
-		if (!exporter.getUseSchemaInSql())
+		boolean useSchema = exporter == null ? true : exporter.getUseSchemaInSql();
+		if (!useSchema)
 		{
 			toUse.setSchema(null);
 			toUse.setCatalog(null);
 		}
 		boolean includePK = Settings.getInstance().getBoolProperty("workbench.sql.export.createtable.pk", true);
 
-		CharSequence create = builder.getCreateTable(toUse, cols, null, null, false, false, includePK, exporter.getUseSchemaInSql());
+		CharSequence create = builder.getCreateTable(toUse, cols, null, null, false, false, includePK, useSchema);
 		String source = create.toString();
 		StringBuilder createSql = new StringBuilder(source);
 		createSql.append(doubleLineTerminator);

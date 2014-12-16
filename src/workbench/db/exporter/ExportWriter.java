@@ -212,7 +212,10 @@ public abstract class ExportWriter
 		startProgress();
 
 		boolean first = true;
-		if (this.exporter.writeEmptyResults()) writeStart();
+		if (this.exporter.writeEmptyResults())
+		{
+			writeStart();
+		}
 
 		RowDataReader reader = RowDataReaderFactory.createReader(info, exporter.getConnection());
 		reader.setUseStreamsForBlobs(useStreamsForBlobs);
