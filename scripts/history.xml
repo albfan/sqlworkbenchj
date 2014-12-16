@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2014-12-02">
+  <release build="-1" date="2014-12-16">
     <entry dev-build="12" type="enh">For Oracle the generated table source will now contain LOB storage parameters.</entry>
     <entry dev-build="11" type="enh">It is now possible to put macros into the context menu of a result through the @WbMacro annotation</entry>
     <entry dev-build="11" type="enh">When using the console on Linux, the window title of the terminal window will now show the name of current profile.</entry>
