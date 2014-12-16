@@ -393,10 +393,16 @@ public class SqlRowDataConverter
 		List<ColumnIdentifier> cols = CollectionUtil.arrayList(this.metaData.getColumns());
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(originalConnection);
 
-		TableIdentifier toUse = alternateUpdateTable == null ? updateTable : alternateUpdateTable;
+		TableIdentifier t = alternateUpdateTable == null ? updateTable : alternateUpdateTable;
+		TableIdentifier toUse = t.createCopy();
+		if (!exporter.getUseSchemaInSql())
+		{
+			toUse.setSchema(null);
+			toUse.setCatalog(null);
+		}
 		boolean includePK = Settings.getInstance().getBoolProperty("workbench.sql.export.createtable.pk", true);
 
-		CharSequence create = builder.getCreateTable(toUse, cols, null, null, false, false, includePK);
+		CharSequence create = builder.getCreateTable(toUse, cols, null, null, false, false, includePK, exporter.getUseSchemaInSql());
 		String source = create.toString();
 		StringBuilder createSql = new StringBuilder(source);
 		createSql.append(doubleLineTerminator);

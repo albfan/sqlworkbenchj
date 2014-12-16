@@ -298,6 +298,11 @@ public class TableSourceBuilder
 
 	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, boolean includeDrop, boolean includeFk, boolean includePK)
 	{
+		return getCreateTable(table, columns, indexList, fkDefinitions, includeDrop, includeFk, includePK, false);
+	}
+
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, boolean includeDrop, boolean includeFk, boolean includePK, boolean useFQN)
+	{
 		if (table == null) return StringUtil.EMPTY_STRING;
 
 		String nativeSql = getNativeTableSource(table, includeDrop);
@@ -322,7 +327,7 @@ public class TableSourceBuilder
 		ObjectSourceOptions sourceOptions = table.getSourceOptions();
 		String typeOption = sourceOptions.getTypeModifier();
 
-		result.append(generateCreateObject(includeDrop, table, typeOption));
+		result.append(generateCreateObject(includeDrop, table, typeOption, useFQN));
 		result.append("\n(\n");
 
 		appendColumnDefinitions(result, columns, meta, COL_INDENT);
@@ -473,6 +478,11 @@ public class TableSourceBuilder
 	 */
 	public StringBuilder generateCreateObject(boolean includeDrop, DbObject toCreate, String typeOption)
 	{
+		return generateCreateObject(includeDrop, toCreate, typeOption, false);
+	}
+
+	public StringBuilder generateCreateObject(boolean includeDrop, DbObject toCreate, String typeOption, boolean useFQN)
+	{
 		StringBuilder result = new StringBuilder();
 		boolean replaceAvailable = false;
 
@@ -482,7 +492,7 @@ public class TableSourceBuilder
 		String prefix = "workbench.db.";
 		String suffix = "." + DbSettings.getKeyValue(objectType) + ".sql." + dbConnection.getDbId();
 
-		String name = toCreate.getObjectExpression(dbConnection);
+		String name = useFQN ? toCreate.getFullyQualifiedName(dbConnection) : toCreate.getObjectExpression(dbConnection);
 
 		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
 		if (replace != null)
