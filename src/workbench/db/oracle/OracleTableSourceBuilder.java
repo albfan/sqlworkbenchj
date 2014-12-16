@@ -25,6 +25,7 @@ package workbench.db.oracle;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -39,6 +40,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.db.sqltemplates.TemplateHandler;
+import workbench.util.CollectionUtil;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -369,8 +371,153 @@ public class OracleTableSourceBuilder
 		{
 			retrieveFlashbackInfo(tbl);
 		}
+
+		StringBuilder lobOptions = retrieveLobOptions(tbl, columns);
+		if (lobOptions != null)
+		{
+			options.insert(0, lobOptions + "\n");
+		}
+
 		tbl.getSourceOptions().setTableOption(options.toString());
 		tbl.getSourceOptions().setInitialized();
+	}
+
+	private StringBuilder retrieveLobOptions(TableIdentifier tbl, List<ColumnIdentifier> columns)
+	{
+		if (!hasLobColumns(columns)) return null;
+
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		String sql =
+			"select column_name, tablespace_name, chunk, retention, cache, logging, encrypt, compression, deduplication, in_row, securefile, retention_type, retention_value \n" +
+			"from all_lobs \n" +
+			"where table_name = '" +tbl.getRawTableName() + "' \n " +
+			"  and owner = '" + tbl.getRawSchema() + "' ";
+
+		StringBuilder result = new StringBuilder(100);
+
+		try
+		{
+			boolean first = true;
+			stmt = this.dbConnection.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+			while (rs.next())
+			{
+				String column = rs.getString("column_name");
+				String tbspace = rs.getString("tablespace_name");
+				long chunkSize = rs.getLong("chunk");
+				long retention = rs.getLong("retention");
+				long sfRetention = rs.getLong("retention_value");
+				String retentionType = rs.getString("retention_type");
+				if (rs.wasNull()) retention = -1;
+				String cache = rs.getString("cache");
+				String logging = rs.getString("logging");
+				String encrypt = rs.getString("encrypt");
+				String compress = rs.getString("compression");
+				String securefile = rs.getString("securefile");
+				String deduplication = rs.getString("deduplication");
+				String inRow = rs.getString("in_row");
+
+				StringBuilder colOptions = new StringBuilder(50);
+
+				boolean isSecureFile = false;
+
+				if ("YES".equals(securefile))
+				{
+					colOptions.append(" SECUREFILE (");
+					isSecureFile = true;
+				}
+				else
+				{
+					colOptions.append(" BASICFILE (");
+				}
+
+				if (!StringUtil.equalStringIgnoreCase(tbspace, tbl.getTablespace()))
+				{
+					colOptions.append("TABLESPACE");
+					colOptions.append(tbspace);
+					colOptions.append(' ');
+				}
+
+				if ("YES".equalsIgnoreCase(inRow))
+				{
+					colOptions.append("ENABLE STORAGE IN ROW");
+				}
+				else
+				{
+					colOptions.append("DISABLE STORAGE IN ROW");
+				}
+
+				if (chunkSize != 8192)
+				{
+					colOptions.append(" CHUNK ");
+					colOptions.append(chunkSize);
+				}
+
+				if (isSecureFile)
+				{
+					colOptions.append(" RETENTION ");
+					colOptions.append(retentionType);
+					if ("MIN".equalsIgnoreCase(retentionType))
+					{
+						colOptions.append(' ');
+						colOptions.append(sfRetention);
+					}
+
+					if ("NO".equals(compress))
+					{
+						colOptions.append(" NOCOMPRESS");
+					}
+					else
+					{
+						colOptions.append(" COMPRESS ");
+						colOptions.append(compress);
+					}
+				}
+
+				switch (cache)
+				{
+					case "NO":
+						colOptions.append(" NOCACHE");
+						break;
+					case "YES":
+						colOptions.append(" CACHE");
+						break;
+					case "CACHEREADS":
+						colOptions.append(" CACHE READS");
+						break;
+				}
+				colOptions.append(')');
+				if (!first) result.append(",\n");
+				String key = "LOB (" + column + ")";
+				result.append(key);
+				result.append(" STORE AS");
+				result.append(colOptions);
+				tbl.getSourceOptions().addConfigSetting(key, colOptions.toString());
+				first = false;
+			}
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logWarning("OracleTableSourceBuilder.retrieveLobOptions()", "Could not retrieve LOB storage information using:\n" + sql, ex);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
+	}
+
+
+	private boolean hasLobColumns(List<ColumnIdentifier> columns)
+	{
+		if (CollectionUtil.isEmpty(columns)) return false;
+		for (ColumnIdentifier column : columns)
+		{
+			if (column.getDbmsType().endsWith("LOB")) return true;
+		}
+		return false;
 	}
 
 	private void retrieveFlashbackInfo(TableIdentifier tbl)

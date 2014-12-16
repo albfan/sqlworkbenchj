@@ -240,7 +240,24 @@ public class OracleTableSourceBuilderTest
 		{
 			Settings.getInstance().setProperty("workbench.db.oracle.retrieve_tablespace", showTablespace);
 		}
+	}
 
+	@Test
+	public void testLobOptions()
+	{
+		String sql =
+			"CREATE TABLE foo \n" +
+			"( \n" +
+			"  ID   INTEGER NOT NULL, \n" +
+			"  B1   BLOB, \n" +
+			"  B2   BLOB, \n" +
+			"  B3   BLOB, \n" +
+			"  B4   BLOB \n" +
+			") \n" +
+			"LOB (B1) STORE AS SECUREFILE ( DISABLE STORAGE IN ROW RETENTION NONE COMPRESS MEDIUM NOCACHE ), \n" +
+			"LOB (B2) STORE AS SECUREFILE ( ENABLE STORAGE IN ROW RETENTION AUTO COMPRESS HIGH CACHE READS ), \n" +
+			"LOB (B3) STORE AS SECUREFILE ( ENABLE STORAGE IN ROW RETENTION MIN 1000 NOCOMPRESS CACHE ), \n" +
+			"LOB (B4) STORE AS BASICFILE ( ENABLE STORAGE IN ROW NOCACHE )";
 	}
 
 }
