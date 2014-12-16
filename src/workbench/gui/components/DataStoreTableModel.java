@@ -740,7 +740,7 @@ public class DataStoreTableModel
 
 	private boolean sortingInProgress = false;
 
-	public void sortInBackground(WbTable table, int aColumn, boolean addSortColumn)
+	public void startBackgroundSort(WbTable table, int aColumn, boolean addSortColumn, boolean descSortIfFirst)
 	{
 		if (sortingInProgress) return;
 
@@ -751,7 +751,11 @@ public class DataStoreTableModel
 		}
 		int sortCols = this.sortDefinition.getColumnCount();
 		boolean ascending = true;
-		if (sortCols <= 1)
+		if (descSortIfFirst && (sortCols == 0 || !addSortColumn))
+		{
+			ascending = false;
+		}
+		else if (sortCols <= 1)
 		{
 			// toggle the ascending status only if there is a single sort column
 			ascending = !this.isSortAscending(aColumn);

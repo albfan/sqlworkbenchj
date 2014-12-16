@@ -2253,6 +2253,7 @@ public class WbTable
 			int viewColumn = colMod.getColumnIndexAtX(e.getX());
 			int realColumn = this.convertColumnIndexToModel(viewColumn);
 			boolean addSortColumn = e.isControlDown();
+			boolean descending = e.isAltDown();
 			if (realColumn >= 0)
 			{
 				if (e.isShiftDown())
@@ -2262,7 +2263,7 @@ public class WbTable
 				}
 				else
 				{
-					dwModel.sortInBackground(this, realColumn, addSortColumn);
+					dwModel.startBackgroundSort(this, realColumn, addSortColumn, descending);
 				}
 			}
 		}
