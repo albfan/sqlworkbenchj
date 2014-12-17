@@ -91,6 +91,13 @@ public class LibraryElement
 		}
 	}
 
+	public String getRealPath()
+	{
+		LibListUtil util = new LibListUtil();
+		WbFile file = util.replacePlaceHolder(new WbFile(fullPath));
+		return file.getFullPath();
+	}
+
 	public String getPath()
 	{
 		return fullPath;

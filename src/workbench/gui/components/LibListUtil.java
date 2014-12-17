@@ -61,7 +61,7 @@ public class LibListUtil
 		if (dir != null && dir.toLowerCase().contains(Settings.LIB_DIR_KEY.toLowerCase()))
 		{
 			String fullpath = dir.replace(Settings.LIB_DIR_KEY, libDir);
-			return new WbFile(fullpath);
+			return new WbFile(fullpath, file.getName());
 		}
 		else
 		{

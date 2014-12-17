@@ -51,9 +51,7 @@ public class ClasspathEditor
 {
 	private String lastDirProperty;
 	private String lastDir = null;
-	private List<ActionListener> listener = new ArrayList<ActionListener>();
-	private String replacmentKey;
-	private String replacementDirName;
+	private List<ActionListener> listener = new ArrayList<>();
 
 	public ClasspathEditor()
 	{
@@ -63,12 +61,6 @@ public class ClasspathEditor
 		btnDown.addActionListener(this);
 		btnRemove.addActionListener(this);
 		btnAdd.addActionListener(this);
-	}
-
-	public void setReplacementDir(String key, String dir)
-	{
-		this.replacmentKey = key;
-		this.replacementDirName = dir;
 	}
 
 	public void restoreSettings()
@@ -125,10 +117,22 @@ public class ClasspathEditor
 		checkButtons();
 	}
 
+	public List<String> getRealJarPaths()
+	{
+		int size = libList.getModel().getSize();
+		List<String> result = new ArrayList<>(size);
+		for (int i=0; i < size; i++)
+		{
+			LibraryElement lib = (LibraryElement)libList.getModel().getElementAt(i);
+			result.add(lib.getRealPath());
+		}
+		return result;
+	}
+
 	public List<String> getLibraries()
 	{
 		int size = libList.getModel().getSize();
-		List<String> result = new ArrayList<String>(size);
+		List<String> result = new ArrayList<>(size);
 		for (int i=0; i < size; i++)
 		{
 			LibraryElement lib = (LibraryElement)libList.getModel().getElementAt(i);

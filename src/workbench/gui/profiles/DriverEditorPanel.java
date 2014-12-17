@@ -52,6 +52,7 @@ import workbench.gui.components.FlatButton;
 import workbench.gui.components.TextComponentMouseListener;
 
 import workbench.util.ClassFinder;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -103,10 +104,7 @@ public class DriverEditorPanel
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == classpathEditor)
-		{
-			selectClass();
-		}
+		selectClass();
 	}
 
 	protected void selectClass()
@@ -117,7 +115,8 @@ public class DriverEditorPanel
 		List<String> classes = Settings.getInstance().getListProperty("workbench.db.drivers.deprecated", false);
 		finder.setExcludedClasses(classes);
 
-		List<String> libs = classpathEditor.getLibraries();
+		List<String> libs = classpathEditor.getRealJarPaths();
+		detectDriverButton.setEnabled(CollectionUtil.isNonEmpty(libs));
 
 		ClassFinderGUI gui = new ClassFinderGUI(finder, tfClassName, statusLabel);
 		gui.setStatusBarKey("TxtSearchingDriver");
