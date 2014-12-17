@@ -1456,13 +1456,8 @@ public class DataPumper
 
 	private boolean isSelectQuery()
 	{
-		String sql = this.sqlEditor.getText();
-		if (StringUtil.isNonBlank(sql))
-		{
-			sql = SqlUtil.makeCleanSql(sql, false).toLowerCase();
-			return sql.startsWith("select");
-		}
-		return false;
+		String verb = SqlUtil.getSqlVerb(this.sqlEditor.getText());
+		return verb.equalsIgnoreCase("select");
 	}
 
 	@Override

@@ -208,7 +208,7 @@ public class DelimiterDefinition
 
 		// cleaning the SQL from all "noise" ensures that the alternate delimiter is still
 		// recognized even if the script is terminated with only comments.
-		sql = SqlUtil.makeCleanSql(sql, true, false, '\'', checkNonStandardComments, false);
+		sql = SqlUtil.makeCleanSql(sql, true, false, checkNonStandardComments, false);
 
 		if (this.isSingleLine())
 		{

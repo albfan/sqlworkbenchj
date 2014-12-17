@@ -423,6 +423,9 @@ public class SqlUtilTest
 		sql = "/* this is a comment */\n select from \"project\"";
 		clean = SqlUtil.makeCleanSql(sql, false, true);
 		assertEquals("Not correctly cleaned", "/* this is a comment */  select from \"project\"", clean);
+
+		sql = "    \"some /* comment */ in identifier\"\r\n";
+		assertEquals("\"some /* comment */ in identifier\"", SqlUtil.makeCleanSql(sql, false));
 	}
 
 	@Test

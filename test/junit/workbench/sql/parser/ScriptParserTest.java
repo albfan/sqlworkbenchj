@@ -939,7 +939,7 @@ public class ScriptParserTest
 		String verb = SqlUtil.getSqlVerb(p.getCommand(1));
 		assertEquals("drop", verb.toLowerCase());
 		String s = p.getCommand(0);
-		String clean = SqlUtil.makeCleanSql(s, false, false, '\'', false, true);
+		String clean = SqlUtil.makeCleanSql(s, false, false, false, true);
 		assertEquals("alter table participants drop constraint r_05", clean);
 		s = p.getCommand(2);
 		assertEquals("@include.sql", s);
@@ -951,7 +951,7 @@ public class ScriptParserTest
 		verb = SqlUtil.getSqlVerb(p.getCommand(1));
 		assertEquals("drop", verb.toLowerCase());
 		s = p.getCommand(0);
-		clean = SqlUtil.makeCleanSql(s, false, false, '\'', false, true);
+		clean = SqlUtil.makeCleanSql(s, false, false, false, true);
 		assertEquals("alter table participants drop constraint r_05", clean);
 		s = p.getCommand(2);
 		assertEquals("@include.sql", s);

@@ -127,7 +127,9 @@ public class SqlUtil
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.
+	 * 
 	 * @see #getSqlVerb(java.lang.String)
+	 * @see SqlParsingUtil#stripVerb(java.lang.String)
 	 */
 	public static String stripVerb(String sql)
 	{
@@ -584,7 +586,7 @@ public class SqlUtil
 	{
 		return SqlParsingUtil.getInstance(null).getSqlVerb(sql);
 	}
-	
+
 	/**
 	 * Returns the columns for the result set defined by the passed query.
 	 *
@@ -988,12 +990,12 @@ public class SqlUtil
 
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
-		return makeCleanSql(aSql, keepNewlines, false, '\'', false, true);
+		return makeCleanSql(aSql, keepNewlines, false, false, true);
 	}
 
 	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments)
 	{
-		return makeCleanSql(aSql, keepNewlines, keepComments, '\'', false, true);
+		return makeCleanSql(aSql, keepNewlines, keepComments, false, true);
 	}
 
 	/**
@@ -1006,7 +1008,7 @@ public class SqlUtil
 	 *	@return String
 	 */
 	@SuppressWarnings("AssignmentToForLoopParameter")
-	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, char quote, boolean checkNonStandardComments, boolean removeSemicolon)
+	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, boolean checkNonStandardComments, boolean removeSemicolon)
 	{
 		if (aSql == null) return null;
 		aSql = aSql.trim();
@@ -1024,7 +1026,7 @@ public class SqlUtil
 		{
 			char c = aSql.charAt(i);
 
-			if (c == quote)
+			if (c == '\'' || c == '"')
 			{
 				inQuotes = !inQuotes;
 			}
