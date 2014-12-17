@@ -95,6 +95,16 @@ public class SqlUtil
 			"DATABASE", "DATABASE LINK", "PFILE", "SPFILE"));
 	}
 
+	public static Set<String> getDMLVerbs()
+	{
+		return ModifyingVerbsHolder.DML_VERB;
+	}
+
+	private static class ModifyingVerbsHolder
+	{
+		protected final static Set<String> DML_VERB = Collections.unmodifiableSet(CollectionUtil.caseInsensitiveSet("update", "delete"));
+	}
+
 	private static class TypesWithoutNamesHolder
 	{
 		protected final static Set<String> TYPES =
@@ -127,7 +137,7 @@ public class SqlUtil
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.
-	 * 
+	 *
 	 * @see #getSqlVerb(java.lang.String)
 	 * @see SqlParsingUtil#stripVerb(java.lang.String)
 	 */
@@ -973,15 +983,17 @@ public class SqlUtil
 	}
 
 	/**
-	 * Checks if the given SQL if either not a DML statement or if it is, contains a WHERE clause
+	 * Checks if the given SQL if either not a DML statement or - if it is, contains a WHERE clause
 	 * @param sql the sql to check
 	 * @return true if the sql is not a DML or it contains a WHERE clause.
 	 */
 	public static boolean isUnRestrictedDML(String sql, WbConnection conn)
 	{
+		if (StringUtil.isEmptyString(sql)) return false;
+		
 		SqlParsingUtil util = SqlParsingUtil.getInstance(conn);
 		String verb = util.getSqlVerb(sql);
-		if (verb.equalsIgnoreCase("update") || verb.equalsIgnoreCase("delete"))
+		if (getDMLVerbs().contains(verb))
 		{
 			return util.getWherePosition(sql) < 0;
 		}
@@ -1004,7 +1016,8 @@ public class SqlUtil
 	 *	@param aSql The sql script to "clean out"
 	 *  @param keepNewlines if true, newline characters (\n) are kept
 	 *  @param keepComments if true, comments (single line, block comments) are kept
-	 *  @param quote The quote character
+	 *  @param checkNonStandardComments check for non-standard MySQL single line comments
+	 *  @param removeSemicolon if true, a trailing semicolon will be removed
 	 *	@return String
 	 */
 	@SuppressWarnings("AssignmentToForLoopParameter")
