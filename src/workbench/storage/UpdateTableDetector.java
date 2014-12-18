@@ -50,7 +50,7 @@ public class UpdateTableDetector
 	private WbConnection conn;
 	private boolean checkPkOnly;
 	private boolean logDuration;
-	
+
 	public UpdateTableDetector(WbConnection db)
 	{
 		conn = db;
@@ -86,14 +86,18 @@ public class UpdateTableDetector
 		DbMetadata meta = conn.getMetadata();
 		if (meta == null) return;
 
-		TableIdentifier tbl = table.createCopy();
+		TableIdentifier tbl = getFullyQualifiedTable(table);
 		tbl.adjustCase(conn);
 
 		if (checkPkOnly)
 		{
 			LogMgr.logDebug("UpdateTableDetector.setUpdateTable()", "Only checking the PK definition for " + tbl.getTableExpression());
 			checkPkOnlyForUpdateTable(tbl, resultInfo);
-			if (updateTable != null) return;
+			if (updateTable != null)
+			{
+				LogMgr.logDebug("UpdateTableDetector.setUpdateTable()", "Using update table: " + updateTable.getTableExpression());
+				return;
+			}
 
 			// the table either has no PK or unique index at all or does not exist
 			// if it does not exist, this might be a synonym
@@ -169,6 +173,9 @@ public class UpdateTableDetector
 			this.updateTable = null;
 			LogMgr.logError("UpdateTableDetector.setUpdateTable()", "Could not read table definition", e);
 		}
+
+		LogMgr.logDebug("UpdateTableDetector.setUpdateTable()", "Using update table: " + updateTable);
+
 		resultInfo.setUpdateTable(updateTable);
 	}
 

@@ -38,6 +38,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.util.CollectionUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -59,6 +61,7 @@ public class UpdateTableDetectorTest
 	@After
 	public void tearDown()
 	{
+		ConnectionMgr.getInstance().disconnectAll();
 	}
 
 	@Test
@@ -181,6 +184,38 @@ public class UpdateTableDetectorTest
 		assertEquals("ID2", cols.get(0).getColumnName());
 	}
 
+	@Test
+	public void testMultipleSchemas()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+
+		TestUtil.executeScript(con,
+			"create schema one;\n" +
+			"create schema two;\n" +
+			"create table public.foobar (id integer not null primary key, somedata varchar(50));\n" +
+			"create table one.foobar (id_one integer not null primary key, somedata varchar(50));\n" +
+			"create table two.foobar (id_two integer not null primary key, somedata varchar(50));\n" +
+			"commit;");
+
+		String sql = "select id, somedata from foobar";
+		ResultInfo info = null;
+		try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(sql))
+		{
+			info = new ResultInfo(rs.getMetaData(), con);
+		}
+
+		UpdateTableDetector detector = new UpdateTableDetector(con);
+		detector.setCheckPKOnly(false);
+
+		TableIdentifier toCheck = new TableIdentifier("foobar");
+		detector.checkUpdateTable(toCheck, info);
+		TableIdentifier tbl = detector.getUpdateTable();
+		assertEquals("FOOBAR", tbl.getTableName());
+		assertEquals("PUBLIC", tbl.getSchema());
+		assertTrue(CollectionUtil.isEmpty(detector.getMissingPkColumns()));
+	}
 
 	private void resetInfo(ResultInfo info)
 	{
