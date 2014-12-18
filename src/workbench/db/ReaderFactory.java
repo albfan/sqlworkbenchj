@@ -63,6 +63,8 @@ import workbench.db.postgres.PostgresConstraintReader;
 import workbench.db.postgres.PostgresIndexReader;
 import workbench.db.postgres.PostgresProcedureReader;
 import workbench.db.postgres.PostgresSequenceReader;
+import workbench.db.teradata.TeradataIndexReader;
+import workbench.db.teradata.TeradataProcedureReader;
 import workbench.db.vertica.VerticaSequenceReader;
 
 /**
@@ -97,6 +99,10 @@ public class ReaderFactory
 		if (meta.isMySql())
 		{
 			return new MySqlProcedureReader(meta.getWbConnection());
+		}
+		if (meta.getDbId().equals(DbMetadata.DBID_TERADATA))
+		{
+			return new TeradataProcedureReader(meta.getWbConnection());
 		}
 		if (meta.getDbId().equals("monetdb") && !Settings.getInstance().getBoolProperty("workbench.db.monetdb.procedurelist.usedriver"))
 		{
@@ -204,6 +210,10 @@ public class ReaderFactory
 		if (meta.getDbId().equals(DbMetadata.DBID_DB2_LUW))
 		{
 			return new Db2IndexReader(meta);
+		}
+		if (meta.getDbId().equals(DbMetadata.DBID_TERADATA))
+		{
+			return new TeradataIndexReader(meta);
 		}
 		return new JdbcIndexReader(meta);
 	}

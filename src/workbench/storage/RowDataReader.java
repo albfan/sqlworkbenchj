@@ -77,6 +77,7 @@ public class RowDataReader
 	private boolean useGetStringForBit;
 	private boolean useGetXML;
 	private boolean adjustArrayDisplay;
+	private boolean fixStupidMySQLZeroDate;
 	protected ResultInfo resultInfo;
 
 	RowDataReader(ResultInfo info, WbConnection conn)
@@ -91,6 +92,7 @@ public class RowDataReader
 		useGetXML = info.useGetXML();
 		adjustArrayDisplay = info.getConvertArrays();
 		streams = new ArrayList<>(countLobColumns());
+		fixStupidMySQLZeroDate = conn != null ? conn.getDbSettings().fixStupidMySQLZeroDate() : false;
 	}
 
 	private int countLobColumns()
@@ -388,7 +390,18 @@ public class RowDataReader
 	protected Object readTimestampValue(ResultSet rs, int column)
 		throws SQLException
 	{
-		return rs.getTimestamp(column);
+		try
+		{
+			return rs.getTimestamp(column);
+		}
+		catch (SQLException ex)
+		{
+			if (fixStupidMySQLZeroDate && "S1009".equals(ex.getSQLState()))
+			{
+				return rs.getString(column);
+			}
+			throw ex;
+		}
 	}
 
 	private void addStream(Closeable in)

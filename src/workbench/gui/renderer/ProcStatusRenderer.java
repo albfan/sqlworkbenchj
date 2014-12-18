@@ -23,8 +23,10 @@
 package workbench.gui.renderer;
 
 import javax.swing.JLabel;
-import workbench.db.JdbcProcedureReader;
+
 import workbench.log.LogMgr;
+
+import workbench.db.JdbcProcedureReader;
 
 /**
  * Displays the return type of a stored procedure as a readable text.

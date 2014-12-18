@@ -3,6 +3,21 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>Teradata</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select RequestText from DBC.Triggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>TriggerName</string>
+    </void>
+    <void property="schemaField">
+     <string>DatabaseName</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>MonetDB</string>
    <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

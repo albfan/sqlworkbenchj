@@ -267,6 +267,10 @@ public class ColumnDefinitionTemplate
 		{
 			sql = getProperty("coldef.generator", ColumnChanger.PARAM_DATATYPE + " " + PARAM_GENERATED);
 		}
+		else if (isAutoincrement)
+		{
+			sql = getProperty("coldef.autoinc", ColumnChanger.PARAM_DATATYPE + " " + ColumnChanger.PARAM_DEFAULT_VALUE + " " + PARAM_NOT_NULL + " " + PARAM_COL_CONSTRAINTS);
+		}
 		else
 		{
 			sql = getProperty("coldef", ColumnChanger.PARAM_DATATYPE + " " + ColumnChanger.PARAM_DEFAULT_VALUE + " " + PARAM_NOT_NULL + " " + PARAM_COL_CONSTRAINTS);

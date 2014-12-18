@@ -1960,4 +1960,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + "select.limit", null);
 	}
+
+	public boolean fixStupidMySQLZeroDate()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "zerodate.ignore.errors", true);
+	}
 }

@@ -55,11 +55,11 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 
 import workbench.sql.ErrorDescriptor;
-import workbench.sql.parser.ParserType;
+import workbench.sql.formatter.SqlFormatter;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.parser.ParserType;
 import workbench.sql.syntax.SqlKeywordHelper;
 
 /**
@@ -990,7 +990,7 @@ public class SqlUtil
 	public static boolean isUnRestrictedDML(String sql, WbConnection conn)
 	{
 		if (StringUtil.isEmptyString(sql)) return false;
-		
+
 		SqlParsingUtil util = SqlParsingUtil.getInstance(conn);
 		String verb = util.getSqlVerb(sql);
 		if (getDMLVerbs().contains(verb))
@@ -1403,8 +1403,9 @@ public class SqlUtil
 			case Types.CHAR:
 			case Types.NVARCHAR:
 			case Types.NCHAR:
-				// Postgres' text datatype does not have a size parameter
-				if ("text".equals(typeName)) return "text";
+				// Postgres' text datatype and MySQL's XXXtext types do not have a size parameter
+				Set<String> plainTypes = CollectionUtil.caseInsensitiveSet("text", "tinytext", "mediumtext", "longtext");
+				if (plainTypes.contains(typeName)) return typeName;
 
 				if (size > 0 && typeName.indexOf('(') == -1)
 				{
@@ -1426,11 +1427,10 @@ public class SqlUtil
 
 			case Types.DECIMAL:
 			case Types.NUMERIC:
-				if ("money".equalsIgnoreCase(typeName)) // SQL Server
-				{
-					display = typeName;
-				}
-				else if ((typeName.indexOf('(') == -1))
+				// SQL Server
+				if ("money".equalsIgnoreCase(typeName)) return typeName;
+
+				if ((typeName.indexOf('(') == -1))
 				{
 					if (digits > 0 && size > 0)
 					{

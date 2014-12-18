@@ -25,6 +25,34 @@ from sysadm.systriggers trg
   </void>
 
   <void method="put">
+   <string>Teradata</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select TriggerName as trigger_name,
+       case ActionTime
+          when 'A' then 'AFTER'
+          when 'B' then 'BEFORE'
+       end as trigger_type,
+       case Event
+         when 'U' then 'UPDATE'
+         when 'D' then 'DELETE'
+         when 'I' then 'INSERT'
+       end as trigger_event,
+       TableName as trigger_table
+from DBC.Triggers
+</string>
+    </void>
+    <void property="objectNameField">
+     <string>TableName</string>
+    </void>
+    <void property="schemaField">
+     <string>DatabaseName</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>MonetDB</string>
    <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

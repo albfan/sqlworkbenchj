@@ -162,7 +162,7 @@ public class DataStore
 		throws SQLException
   {
 		if (result == null) return;
-		this.originalConnection = connection;
+		setOriginalConnection(connection);
 		this.initData(result);
   }
 
@@ -264,7 +264,7 @@ public class DataStore
 		throws SQLException
 	{
 		this.rowActionMonitor = aMonitor;
-		this.originalConnection = conn;
+		setOriginalConnection(conn);
 		if (readData)
 		{
 			this.initData(aResult, maxRows);
@@ -287,7 +287,7 @@ public class DataStore
 	public DataStore(ResultSetMetaData metaData, WbConnection aConn)
 		throws SQLException
 	{
-		this.originalConnection = aConn;
+		setOriginalConnection(aConn);
 		this.initMetaData(metaData);
 		this.data = createData();
 	}
