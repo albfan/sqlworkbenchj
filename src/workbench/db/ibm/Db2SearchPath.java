@@ -124,4 +124,10 @@ public class Db2SearchPath
 		return searchPath;
 	}
 
+	@Override
+	public boolean supportsSearchPath()
+	{
+		return true;
+	}
+
 }

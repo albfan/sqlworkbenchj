@@ -34,6 +34,7 @@ import workbench.db.postgres.PostgresUtil;
  */
 public interface DbSearchPath
 {
+	boolean supportsSearchPath();
 	List<String> getSearchPath(WbConnection dbConn, String defaultSchema);
 
 	DbSearchPath DEFAULT_HANDLER = new DbSearchPath()
@@ -51,6 +52,12 @@ public interface DbSearchPath
 			}
 			return Collections.singletonList(dbConn.getMetadata().adjustSchemaNameCase(defaultSchema));
 		}
+
+		@Override
+		public boolean supportsSearchPath()
+		{
+			return false;
+		}
 	};
 
 	DbSearchPath PG_HANDLER = new DbSearchPath()
@@ -63,6 +70,12 @@ public interface DbSearchPath
 				return Collections.singletonList(dbConn.getMetadata().adjustSchemaNameCase(defaultSchema));
 			}
 			return PostgresUtil.getSearchPath(dbConn);
+		}
+		
+		@Override
+		public boolean supportsSearchPath()
+		{
+			return true;
 		}
 	};
 

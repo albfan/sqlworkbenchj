@@ -27,6 +27,7 @@ import workbench.log.LogMgr;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.DbSearchPath;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
@@ -359,11 +360,23 @@ public class UpdateTableDetector
 
 	private TableIdentifier getFullyQualifiedTable(TableIdentifier table)
 	{
+
 		TableIdentifier tbl = table.createCopy();
 		if (tbl.getSchema() == null)
 		{
+			DbSearchPath handler = DbSearchPath.Factory.getSearchPathHandler(conn);
+
+			if (handler.supportsSearchPath())
+			{
+				List<String> path = handler.getSearchPath(conn, null);
+				if (path.size() > 1)
+				{
+					return findTable(table);
+				}
+			}
 			tbl.setSchema(conn.getMetadata().getCurrentSchema());
 		}
+
 		if (tbl.getCatalog() == null)
 		{
 			tbl.setCatalog(conn.getMetadata().getCurrentCatalog());

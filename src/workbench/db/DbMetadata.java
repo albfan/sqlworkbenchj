@@ -877,6 +877,7 @@ public class DbMetadata
 			// Object names may never be prefixed with PUBLIC in Oracle
 			if (this.isOracle && "PUBLIC".equalsIgnoreCase(tblSchema)) return false;
 
+			if (!dbSettings.supportsSchemas()) return false;
 			if (dbSettings.alwaysUseSchema()) return true;
 
 			String currentSchema = getCurrentSchema();
@@ -910,10 +911,10 @@ public class DbMetadata
 		if (this.isAccess) return true;
 
 		String cat = table.getCatalog();
+		if (StringUtil.isEmptyString(cat)) return false;
+
 		if (this.isExcel)
 		{
-			if (StringUtil.isEmptyString(cat)) return false;
-
 			String currentCat = getCurrentCatalog();
 			if (StringUtil.isEmptyString(currentCat)) return true;
 
@@ -924,10 +925,9 @@ public class DbMetadata
 			return !c1.equals(c2);
 		}
 
+		if (!dbSettings.supportsCatalogs()) return false;
 		if (!dbSettings.useCatalogInDML()) return false;
 		if (dbSettings.alwaysUseCatalog()) return true;
-
-		if (StringUtil.isEmptyString(cat)) return false;
 
 		if (this.dbSettings.needsCatalogIfNoCurrent())
 		{
