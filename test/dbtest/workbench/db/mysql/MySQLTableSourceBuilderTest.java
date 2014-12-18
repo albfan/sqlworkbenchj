@@ -136,7 +136,8 @@ public class MySQLTableSourceBuilderTest
 		assertEquals("   foo  VARCHAR(10)   DEFAULT 'bar',", lines[3]);
 		assertEquals("   bar  DATE          DEFAULT '2014-01-01',", lines[4]);
 		assertEquals("   dts  DATETIME      DEFAULT '2014-01-01 01:02:03',", lines[5]);
-		assertEquals("   ts   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL", lines[6]);
+		assertEquals("   ts   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL,", lines[6]);
+		assertEquals("   PRIMARY KEY (id)", lines[7]);
 	}
 
 }
