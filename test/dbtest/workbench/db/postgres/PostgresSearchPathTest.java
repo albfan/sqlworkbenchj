@@ -39,6 +39,7 @@ import workbench.storage.DataStore;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ObjectInfo;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 import org.junit.AfterClass;
@@ -69,10 +70,13 @@ public class PostgresSearchPathTest
 
 		TestUtil.executeScript(con,
 			"CREATE SCHEMA path_2;\n" +
-			"CREATE table path_1.t1 (id1 integer);\n" +
-			"CREATE table path_2.t2 (id2 integer, c2 text);\n" +
+			"CREATE SCHEMA path_3;\n" +
+			"CREATE table path_1.t1 (id1 integer primary key);\n" +
+			"CREATE table path_2.t2 (id2 integer primary key, c2 text);\n" +
+			"CREATE table path_3.t2 (id3 integer primary key, c2 text);\n" +
 			"insert into path_1.t1 values (1);\n" +
 			"insert into path_2.t2 values (2);\n" +
+			"insert into path_3.t2 values (2);\n" +
 			"COMMIT; \n");
 	}
 
@@ -118,6 +122,41 @@ public class PostgresSearchPathTest
 			TableIdentifier tbl2 = ds2.getUpdateTable();
 			assertNotNull(tbl2);
 			assertEquals("path_2", tbl2.getSchema());
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
+	}
+
+	@Test
+	public void testDetectUpdateTable2()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null) return;
+
+		TestUtil.executeScript(con, "set search_path=path_2,path3,path_1");
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = con.createStatement();
+
+			String sql = "select * from t2";
+			rs = stmt.executeQuery(sql);
+			DataStore ds1 = new DataStore(rs, con);
+			SqlUtil.closeResult(rs);
+
+			ds1.setGeneratingSql(sql);
+			ds1.checkUpdateTable(con);
+			TableIdentifier tbl1 = ds1.getUpdateTable();
+			assertNotNull(tbl1);
+			assertEquals("path_2", tbl1.getSchema());
+			assertEquals("t2", tbl1.getTableName());
+			assertTrue(ds1.hasPkColumns());
+			List<ColumnIdentifier> missing = ds1.getMissingPkColumns();
+			assertTrue(CollectionUtil.isEmpty(missing));
 		}
 		finally
 		{

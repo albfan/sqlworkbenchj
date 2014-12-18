@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -36,7 +37,6 @@ import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
 
 import workbench.util.CollectionUtil;
 
@@ -360,7 +360,6 @@ public class UpdateTableDetector
 
 	private TableIdentifier getFullyQualifiedTable(TableIdentifier table)
 	{
-
 		TableIdentifier tbl = table.createCopy();
 		if (tbl.getSchema() == null)
 		{
