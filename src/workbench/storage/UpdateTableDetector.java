@@ -366,7 +366,7 @@ public class UpdateTableDetector
 		{
 			DbSearchPath handler = DbSearchPath.Factory.getSearchPathHandler(conn);
 
-			if (handler.supportsSearchPath())
+			if (handler.isRealSearchPath())
 			{
 				List<String> path = handler.getSearchPath(conn, null);
 				if (path.size() > 1)

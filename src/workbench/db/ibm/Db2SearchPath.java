@@ -125,7 +125,7 @@ public class Db2SearchPath
 	}
 
 	@Override
-	public boolean supportsSearchPath()
+	public boolean isRealSearchPath()
 	{
 		return true;
 	}

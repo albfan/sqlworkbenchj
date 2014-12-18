@@ -34,7 +34,7 @@ import workbench.db.postgres.PostgresUtil;
  */
 public interface DbSearchPath
 {
-	boolean supportsSearchPath();
+	boolean isRealSearchPath();
 	List<String> getSearchPath(WbConnection dbConn, String defaultSchema);
 
 	DbSearchPath DEFAULT_HANDLER = new DbSearchPath()
@@ -54,7 +54,7 @@ public interface DbSearchPath
 		}
 
 		@Override
-		public boolean supportsSearchPath()
+		public boolean isRealSearchPath()
 		{
 			return false;
 		}
@@ -73,7 +73,7 @@ public interface DbSearchPath
 		}
 		
 		@Override
-		public boolean supportsSearchPath()
+		public boolean isRealSearchPath()
 		{
 			return true;
 		}
