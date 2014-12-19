@@ -232,14 +232,24 @@ public class WbSchemaReportTest
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/referenced-columns/column)");
 			assertEquals("Incorrect source column count", "2", count);
 
-			String col1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/foreign-keys/foreign-key[1]/source-columns/column[1]/text()");
-			String col2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/foreign-keys/foreign-key[1]/referenced-columns/column[1]/text()");
-			assertEquals("PER_ID", col1);
+			String col1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/column-def[@name='ADR_ID']/references/column-name/text()");
+			String col2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/column-def[@name='PER_ID']/references/column-name/text()");
+			assertEquals("ADDRESS_ID", col1);
 			assertEquals("PERSON_ID", col2);
 
-			col1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/source-columns/column[1]/text()");
-			col2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/foreign-keys/foreign-key[1]/referenced-columns/column[1]/text()");
+			col1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/foreign-keys/foreign-key/constraint-name[text()='FK_PA_PERSON']/../referenced-columns/column/text()");
+			col2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/foreign-keys/foreign-key/constraint-name[text()='FK_PA_ADDRESS']/../referenced-columns/column/text()");
 			assertEquals("PERSON_ID", col1);
+			assertEquals("ADDRESS_ID", col2);
+
+			String fk1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/column-def[@name='ADR_ID']/references/constraint-name/text()");
+			String fk2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS']/column-def[@name='PER_ID']/references/constraint-name/text()");
+			assertEquals("FK_PA_ADDRESS", fk1);
+			assertEquals("FK_PA_PERSON", fk2);
+
+			col1 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/column-def[@name='ADDRESS_ID']/references/column-name/text()");
+			col2 = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PERSON_ADDRESS_STATUS']/column-def[@name='PERSON_ID']//references/column-name/text()");
+			assertEquals("ADR_ID", col1);
 			assertEquals("PER_ID", col2);
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS']/column-def/references)");
