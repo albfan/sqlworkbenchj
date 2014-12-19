@@ -1963,6 +1963,6 @@ public class DbSettings
 
 	public boolean fixStupidMySQLZeroDate()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "timestamp.ignore.errors", false);
+		return Settings.getInstance().getBoolProperty(prefix + "timestamp.ignore.read.errors", false);
 	}
 }
