@@ -127,9 +127,9 @@ public class TableSourceBuilderTest
 			TableSourceBuilder builder = new TableSourceBuilder(con);
 			TableIdentifier tbl = new TableIdentifier("ORDERS");
 			String sql = builder.getTableSource(tbl, false, false);
-//			System.out.println(sql);
-			assertTrue(sql.contains("CONSTRAINT CHK_AMOUNT CHECK (AMOUNT >= 0),"));
-			assertTrue(sql.contains("CONSTRAINT CHK_STATUS CHECK (STATUS_FLAG IN(0, 1, 2))\n);"));
+			System.out.println(sql);
+			assertTrue(sql.contains("CONSTRAINT CHK_AMOUNT CHECK (AMOUNT >= 0)"));
+			assertTrue(sql.contains("CONSTRAINT CHK_STATUS CHECK (STATUS_FLAG IN(0, 1, 2))"));
 
 			TestUtil.executeScript(con,
 				"drop table orders; \n" +

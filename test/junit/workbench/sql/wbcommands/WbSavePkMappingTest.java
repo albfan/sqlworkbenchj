@@ -64,10 +64,9 @@ public class WbSavePkMappingTest
 		assertTrue(result.isSuccess());
 
 		BufferedReader in = EncodingUtil.createBufferedReader(f, "ISO-8859-1");
-		List<String> lines = FileUtil.getLines(in, true);
-		assertEquals(3, lines.size());
-		assertEquals("# Primary key mapping for SQL Workbench/J", lines.get(0));
-		assertEquals("person=id", lines.get(1));
-		assertEquals("v_person=id", lines.get(2));
+		String lines = FileUtil.readCharacters(in);
+		assertTrue(lines.contains("# Primary key mapping for SQL Workbench/J"));
+		assertTrue(lines.contains("person=id"));
+		assertTrue(lines.contains("v_person=id"));
 	}
 }

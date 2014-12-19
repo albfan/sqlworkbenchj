@@ -103,7 +103,9 @@ public class JoinColumnsDetectorTest
 		detector.setKeywordCase(GeneratedIdentifierCase.upper);
 
 		String join = detector.getJoinCondition();
-		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", join.trim());
+//		System.out.println(join);
+		assertTrue(join.contains("p.tenant_id = a.person_tenant_id"));
+		assertTrue(join.contains("p.per_id = a.person_id"));
 
 		detector = new JoinColumnsDetector(conn, address, history);
 		detector.setIdentifierCase(GeneratedIdentifierCase.lower);

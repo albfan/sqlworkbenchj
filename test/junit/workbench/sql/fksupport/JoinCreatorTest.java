@@ -154,7 +154,10 @@ public class JoinCreatorTest
 		assertEquals("address", joined.getObjectName());
 		assertEquals("a", joined.getNameToUse());
 		String condition = creator.getJoinCondition();
-		assertEquals("ON p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", condition);
+		assertTrue(condition.contains("p.tenant_id = a.person_tenant_id"));
+		assertTrue(condition.contains("p.per_id = a.person_id"));
+		assertTrue(condition.contains("AND"));
+		assertTrue(condition.startsWith("ON"));
 
 		pos = sql.indexOf("address_type adt on") + "address_type adt on".length();
 		creator.setCursorPosition(pos);
@@ -200,8 +203,10 @@ public class JoinCreatorTest
 		join = creator.getJoinTable();
 		assertEquals("address", join.getObjectName());
 		condition = creator.getJoinCondition().trim();
-		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", condition);
-
+		assertTrue(condition.contains("p.tenant_id = a.person_tenant_id"));
+		assertTrue(condition.contains("p.per_id = a.person_id"));
+		assertTrue(condition.contains("AND"));
+		
 		creator.setPreferUsingOperator(true);
 
 		String cond2 = creator.getJoinCondition().trim();
