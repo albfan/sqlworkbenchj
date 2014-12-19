@@ -25,6 +25,7 @@ package workbench.util;
 import java.lang.reflect.Field;
 import java.sql.Types;
 import java.util.List;
+import static org.hamcrest.CoreMatchers.is;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -42,6 +43,7 @@ import workbench.sql.lexer.SQLToken;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeThat;
 
 /**
  *
@@ -584,6 +586,8 @@ public class SqlUtilTest
 	public void testDataTypeNames()
 		throws Exception
 	{
+		assumeThat(System.getProperty("java.version"), is("1.7"));
+		
 		Field[] fields = java.sql.Types.class.getDeclaredFields();
 		boolean missing = false;
 		for (Field field : fields)
