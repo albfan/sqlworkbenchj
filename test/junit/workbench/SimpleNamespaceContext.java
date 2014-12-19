@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 
@@ -44,7 +45,7 @@ public class SimpleNamespaceContext
 
 	public SimpleNamespaceContext(Map<String, String> nameMap)
 	{
-		namespaceMap = new HashMap<String, String>(nameMap);
+		namespaceMap = new HashMap<>(nameMap);
 		namespaceMap.put(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
 		namespaceMap.put(XMLConstants.XMLNS_ATTRIBUTE, XMLConstants.XMLNS_ATTRIBUTE_NS_URI);
 	}
@@ -71,7 +72,7 @@ public class SimpleNamespaceContext
 	@Override
 	public Iterator getPrefixes(String namespaceURI)
 	{
-		List<String> prefixes = new ArrayList<String>();
+		List<String> prefixes = new ArrayList<>();
 
 		for ( String prefix : namespaceMap.keySet())
 		{
