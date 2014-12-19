@@ -112,6 +112,7 @@ public class WbConnection
 	private final Map<String, String> sessionProps = new HashMap<>();
 	private DdlObjectInfo lastDdlObject;
 	private SqlParsingUtil keywordUtil;
+	private boolean pingAvailable = true;
 
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
@@ -1479,6 +1480,28 @@ public class WbConnection
 			LogMgr.logWarning("WbConnection.oracleCancel()", "Could not call OracleConnection.cancel()", th);
 		}
 
+		try
+		{
+			// calling pingDatabase() after a cancel() fixes the problem that the next statement
+			// right after calling cancel() is cancelled immediately with "ORA-01013: user requested cancel of current operation"
+			Method ping = sqlConnection.getClass().getMethod("pingDatabase", (Class[])null);
+			LogMgr.logDebug("WbConnection.oracleCancel()", "Calling pingDatabase() to clear the communication");
 
+			// setAccessible() is needed, otherwise I get a strange exception that a "public" method cannot be accessed...
+			ping.setAccessible(true);
+
+			ping.invoke(sqlConnection, (Object[])null);
+		}
+		catch (NoSuchMethodException | SecurityException | IllegalAccessException ex)
+		{
+			LogMgr.logDebug("WbConnection.oracleCancel()", "pingDatabase() not available", ex);
+			// only try once for the livetime of this connection
+			pingAvailable = false;
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logDebug("WbConnection.oracleCancel()", "Could not call OracleConnection.pingDatabase()", th);
+		}
 	}
+
 }
