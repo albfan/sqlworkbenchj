@@ -22,15 +22,18 @@
  */
 package workbench.db;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 
-import workbench.sql.parser.ParserType;
-
 import workbench.storage.RowActionMonitor;
 
+import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
@@ -248,8 +251,6 @@ public class DropScriptGenerator
 			{
 				appendCreateFks(script);
 			}
-
-
 		}
 		else
 		{

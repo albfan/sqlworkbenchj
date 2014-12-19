@@ -22,6 +22,8 @@
  */
 package workbench.db;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.TestUtil;
@@ -87,19 +89,26 @@ public class DropScriptGeneratorTest
 		gen.setIncludeRecreateStatements(false);
 		gen.generateScript();
 		String script = gen.getScript();
+		System.out.println(script);
 		ScriptParser parser = new ScriptParser(script);
 		int size = parser.getSize();
 		assertEquals(8, size);
-		assertEquals("ALTER TABLE INVOICE DROP CONSTRAINT FK_INV_ORDER", parser.getCommand(0));
-		assertEquals("ALTER TABLE ORDER_ITEM DROP CONSTRAINT FK_OI_ORDERS", parser.getCommand(1));
-		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST", parser.getCommand(2));
-		assertEquals("ALTER TABLE DELIVERY DROP CONSTRAINT FK_DEL_OI", parser.getCommand(3));
+		List<String> statements = new ArrayList<>(size);
+		for (int i=0; i<size; i++)
+		{
+			statements.add(parser.getCommand(i));
+		}
+		Collections.sort(statements);
 
-		assertEquals("DROP TABLE ORDERS", parser.getCommand(4));
-		assertEquals("DROP TABLE DELIVERY", parser.getCommand(5));
-		assertEquals("DROP TABLE CUSTOMER", parser.getCommand(6));
-		assertEquals("DROP TABLE ORDER_ITEM", parser.getCommand(7));
+		assertEquals("ALTER TABLE DELIVERY DROP CONSTRAINT FK_DEL_OI", statements.get(0));
+		assertEquals("ALTER TABLE INVOICE DROP CONSTRAINT FK_INV_ORDER", statements.get(1));
+		assertEquals("ALTER TABLE ORDERS DROP CONSTRAINT FK_ORDERS_CUST", statements.get(2));
+		assertEquals("ALTER TABLE ORDER_ITEM DROP CONSTRAINT FK_OI_ORDERS", statements.get(3));
 
+		assertEquals("DROP TABLE CUSTOMER", statements.get(4));
+		assertEquals("DROP TABLE DELIVERY", statements.get(5));
+		assertEquals("DROP TABLE ORDERS", statements.get(6));
+		assertEquals("DROP TABLE ORDER_ITEM", statements.get(7));
 	}
 
 	@Test
@@ -166,7 +175,7 @@ public class DropScriptGeneratorTest
 
 		generator.setTables(CollectionUtil.arrayList(cust,orders,orderItem));
 		String custScript = generator.getScriptFor(cust);
-		System.out.println(custScript);
+//		System.out.println(custScript);
 
 		ScriptParser p = new ScriptParser(custScript);
 		p.setScript(custScript);
