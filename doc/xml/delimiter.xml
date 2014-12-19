@@ -21,7 +21,7 @@
   <section id="delimiter-postgres">
     <title>PostgreSQL</title>
     <para>
-      The body of a function in PostgreSQL is a character literal. Because a delimiter inside
+      The body of a function in Postgres is a character literal. Because a delimiter inside
       a character literal does not delimit the statement, no special treatment is needed for Postgres.
     </para>
   </section>
@@ -76,7 +76,7 @@ END;
       terminate that block. This follows essentially the same
       rules <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_four.htm#i1039663">as used in SQL*Plus</ulink>.
     </para>
-    
+
     <para>
       The following script will therefore work when connected to an Oracle database:
     </para>

@@ -559,9 +559,8 @@
 				defined delimiter, this one will be used instead of the standard semicolon. The profile
 				setting will overwrite the global setting for this connection. This way you can
 				define the <literal>GO</literal> keyword for SQL Server connections, and use
-				the forward slash in Oracle connections. The delimiter can be defined as a "single line delimiter",
-				which means that it will only be recognized if put on a single line.
-				Please refer to <link linkend="understand-alternate-delim">using the alternate delimiter</link>
+				the forward slash in Oracle connections.
+        Please refer to <link linkend="understand-alternate-delim">using the alternate delimiter</link>
 				for details on this property.
 			</para>
 		</section>

@@ -347,6 +347,9 @@ SELECT 42 FROM dual;</programlisting>
 				set this value to either <literal>convertToNull</literal> or to <literal>round</literal>. For details
 				see <ulink url="http://dev.mysql.com/doc/connector-j/en/connector-j-reference-configuration-properties.html"/>
 			</para>
+      <para>
+        To ignore errors 
+      </para>
 		</section>
 
 		<section id="mysql-no-view-source">

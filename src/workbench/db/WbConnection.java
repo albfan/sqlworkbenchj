@@ -1462,6 +1462,11 @@ public class WbConnection
 		}
 	}
 
+	/**
+	 * Calls Oracle's own cancel() method on the current connection.
+	 * This seems to make cancelling statements much more reliable.
+	 * If this is not an Oracle connection, nothing happens.
+	 */
 	public void oracleCancel()
 	{
 		if (this.metaData == null) return;
@@ -1483,13 +1488,11 @@ public class WbConnection
 		try
 		{
 			// calling pingDatabase() after a cancel() fixes the problem that the next statement
-			// right after calling cancel() is cancelled immediately with "ORA-01013: user requested cancel of current operation"
+			// right after calling cancel() is cancelled immediately again with "ORA-01013: user requested cancel of current operation"
 			Method ping = sqlConnection.getClass().getMethod("pingDatabase", (Class[])null);
-			LogMgr.logDebug("WbConnection.oracleCancel()", "Calling pingDatabase() to clear the communication");
-
-			// setAccessible() is needed, otherwise I get a strange exception that a "public" method cannot be accessed...
 			ping.setAccessible(true);
 
+			LogMgr.logDebug("WbConnection.oracleCancel()", "Calling pingDatabase() to clear the communication");
 			ping.invoke(sqlConnection, (Object[])null);
 		}
 		catch (NoSuchMethodException | SecurityException | IllegalAccessException ex)
