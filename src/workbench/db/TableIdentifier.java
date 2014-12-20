@@ -63,6 +63,7 @@ public class TableIdentifier
 	private boolean commentWasInitialized;
 	private boolean retrieveFkSource;
 	private boolean useInlinePK;
+	private boolean useTableNameOnlyInExpression;
 
 	// for Synonyms
 	private TableIdentifier realTable;
@@ -141,6 +142,16 @@ public class TableIdentifier
 		}
 		this.setCatalog(aCatalog);
 		this.setSchema(aSchema);
+	}
+
+	public boolean getUseNameOnly()
+	{
+		return useTableNameOnlyInExpression;
+	}
+	
+	public void setUseNameOnly(boolean flag)
+	{
+		this.useTableNameOnlyInExpression = flag;
 	}
 
 	public TableIdentifier getRealTable()
@@ -334,6 +345,7 @@ public class TableIdentifier
 		copy.useInlinePK = this.useInlinePK;
 		copy.owner = this.owner;
 		copy.realTable = this.realTable == null ? null : realTable.createCopy();
+		copy.useTableNameOnlyInExpression = this.useTableNameOnlyInExpression;
 		return copy;
 	}
 
@@ -375,12 +387,12 @@ public class TableIdentifier
 		}
 		if (conn == null)
 		{
-			if (this.catalog != null)
+			if (this.catalog != null && !useTableNameOnlyInExpression)
 			{
 				result.append(SqlUtil.quoteObjectname(this.catalog, preserveQuotes && catalogWasQuoted, true, '"'));
 				result.append(catalogSeparator);
 			}
-			if (this.schema != null)
+			if (this.schema != null && !useTableNameOnlyInExpression)
 			{
 				result.append(SqlUtil.quoteObjectname(this.schema, preserveQuotes && schemaWasQuoted, true, '"'));
 				result.append(schemaSeparator);
@@ -421,6 +433,8 @@ public class TableIdentifier
 
 	public String getSchemaToUse(WbConnection conn)
 	{
+		if (useTableNameOnlyInExpression) return null;
+
 		DbMetadata meta = conn.getMetadata();
 		if (meta.needSchemaInDML(this))
 		{
@@ -441,6 +455,8 @@ public class TableIdentifier
 
 	public String getCatalogToUse(WbConnection conn)
 	{
+		if (useTableNameOnlyInExpression) return null;
+
 		DbMetadata meta = conn.getMetadata();
 		if (meta.needCatalogInDML(this))
 		{

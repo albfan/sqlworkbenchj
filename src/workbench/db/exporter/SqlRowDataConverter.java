@@ -379,27 +379,33 @@ public class SqlRowDataConverter
 
 		if (!this.createTable) return null;
 
-		TableIdentifier updateTable = this.metaData.getUpdateTable();
-		if (updateTable == null && alternateUpdateTable == null)
+		TableIdentifier tableName = alternateUpdateTable != null ? alternateUpdateTable : this.metaData.getUpdateTable();
+		if (tableName == null)
 		{
 			LogMgr.logError("SqlRowDataConverter.getStart()", "Cannot write create table without update table!",null);
 			return null;
-		}
-		else if (updateTable == null)
-		{
-			updateTable = alternateUpdateTable;
 		}
 
 		List<ColumnIdentifier> cols = CollectionUtil.arrayList(this.metaData.getColumns());
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(originalConnection);
 
-		TableIdentifier t = alternateUpdateTable == null ? updateTable : alternateUpdateTable;
-		TableIdentifier toUse = t.createCopy();
+		TableIdentifier toUse = tableName.createCopy();
 		boolean useSchema = exporter == null ? true : exporter.getUseSchemaInSql();
-		if (!useSchema)
+
+		if (useSchema)
 		{
-			toUse.setSchema(null);
-			toUse.setCatalog(null);
+			if (toUse.getSchema() == null)
+			{
+				toUse.setSchema(toUse.getSchemaToUse(originalConnection));
+			}
+			if (toUse.getCatalog() == null)
+			{
+				toUse.setCatalog(toUse.getCatalogToUse(originalConnection));
+			}
+		}
+		else
+		{
+			toUse.setUseNameOnly(true);
 		}
 		boolean includePK = Settings.getInstance().getBoolProperty("workbench.sql.export.createtable.pk", true);
 

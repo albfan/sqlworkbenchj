@@ -34,7 +34,7 @@ import workbench.db.WbConnection;
 
 import workbench.util.StringUtil;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -60,8 +60,8 @@ public class MySQLTableSourceBuilderTest
 		MySQLTestUtil.initTestcase("MySQLDataStoreTest");
 	}
 
-	@AfterClass
-	public static void tearDownClass()
+	@After
+	public void after()
 		throws Exception
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
@@ -130,7 +130,7 @@ public class MySQLTableSourceBuilderTest
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("foo"));
 
 		String create = tbl.getSource(con).toString();
-		System.out.println(create);
+//		System.out.println(create);
 		String[] lines = create.trim().split("\n");
 		assertEquals("CREATE TABLE foo", lines[0]);
 		assertEquals("   foo  VARCHAR(10)   DEFAULT 'bar',", lines[3]);
@@ -138,6 +138,23 @@ public class MySQLTableSourceBuilderTest
 		assertEquals("   dts  DATETIME      DEFAULT '2014-01-01 01:02:03',", lines[5]);
 		assertEquals("   ts   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL,", lines[6]);
 		assertEquals("   PRIMARY KEY (id)", lines[7]);
+	}
+
+	@Test
+	public void testAutoIncrement()
+		throws Exception
+	{
+		WbConnection con = MySQLTestUtil.getMySQLConnection();
+		assertNotNull("No connection available", con);
+
+		TestUtil.executeScript(con, "create table foo (id integer not null auto_increment, primary key (id));");
+
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("foo"));
+
+		String create = tbl.getSource(con).toString();
+//		System.out.println(create);
+		assertTrue(create.contains("id  INT   NOT NULL AUTO_INCREMENT"));
+		assertTrue(create.contains("PRIMARY KEY (id)"));
 	}
 
 }

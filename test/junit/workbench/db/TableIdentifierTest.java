@@ -35,6 +35,7 @@ import workbench.util.StringUtil;
 
 import org.junit.Test;
 
+import static org.hamcrest.core.Is.*;
 import static org.junit.Assert.*;
 
 /**
@@ -342,18 +343,27 @@ public class TableIdentifierTest
 	}
 
 	@Test
+	public void testNameOnly()
+	{
+		TableIdentifier foo = new TableIdentifier("myschema", "foo");
+		foo.setUseNameOnly(true);
+		assertThat(foo.getTableExpression(), is("foo"));
+	}
+
+	@Test
 	public void testEqualsAndHashCode()
 	{
 		TableIdentifier one = new TableIdentifier("person");
 		TableIdentifier two = new TableIdentifier("person");
 		TableIdentifier three = new TableIdentifier("address");
-		Set<TableIdentifier> ids = new HashSet<TableIdentifier>();
+		Set<TableIdentifier> ids = new HashSet<>();
 		ids.add(one);
 		ids.add(two);
 		ids.add(three);
 		assertEquals("Too many entries", 2, ids.size());
 
-		Set<TableIdentifier> tids = new TreeSet<TableIdentifier>();
+		Set<TableIdentifier> tids;
+		tids = new TreeSet<TableIdentifier>();
 		tids.add(one);
 		tids.add(two);
 		tids.add(three);
