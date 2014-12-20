@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2014-12-16">
+    <entry dev-build="13" type="enh">Added support for triggers and stored procedures in Teradata</entry>
     <entry dev-build="12" type="enh">For Oracle the generated table source will now contain LOB storage parameters.</entry>
     <entry dev-build="11" type="enh">It is now possible to put macros into the context menu of a result through the @WbMacro annotation</entry>
     <entry dev-build="11" type="enh">When using the console on Linux, the window title of the terminal window will now show the name of current profile.</entry>
@@ -42,9 +43,9 @@
     <entry dev-build="1" type="enh">An new command WbCreateProfile is available to to create a connection profile (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">An new command WbDefineDriver is available to to create a driver definition (intended for commandline mode)</entry>
     <entry dev-build="1" type="enh">For Oracle the list of indexes in the DbExplorer now also shows the index status</entry>
+    <entry dev-build="13" type="fix">When using WbExport with -useSchema=false and -createTable=true the create table statement still contained the schema in some cases.</entry>
     <entry dev-build="13" type="fix">The detection of the primary key of a table did not work properly if tables with the same name but different primary keys were present in other schemas</entry>
     <entry dev-build="12" type="fix">The editor and  message panel were using the font the was configured for displaying data</entry>
-    <entry dev-build="12" type="fix">When using WbExport with -useSchema=false and -createTable=true the create table statement still contained the schema in some cases.</entry>
     <entry dev-build="12" type="fix">For Oracle WbListIndexes did not show the expression for function based indexes</entry>
     <entry dev-build="12" type="fix">When the option "allow empty lines as delimiter" was enabled, multiple empty lines at the beginning of the script would break the detection of the SQL statements</entry>
     <entry dev-build="12" type="fix">The code completion did not work correctly when the cursor was located between the FROM keyword and a JOIN keyword with no tables in between</entry>
