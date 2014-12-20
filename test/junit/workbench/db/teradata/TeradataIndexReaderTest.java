@@ -19,42 +19,39 @@
  */
 package workbench.db.teradata;
 
-import workbench.db.DbMetadata;
+import workbench.WbTestCase;
+
 import workbench.db.IndexDefinition;
-import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class TeradataIndexReader
-	extends JdbcIndexReader
+public class TeradataIndexReaderTest
+extends WbTestCase
 {
 
-	public TeradataIndexReader(DbMetadata meta)
+	public TeradataIndexReaderTest()
 	{
-		super(meta);
+		super("TeradataIndexReaderTest");
 	}
 
-	@Override
-	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition idx)
+	@Test
+	public void testGetIndexSource()
 	{
-		if (table == null) return null;
-		if (idx == null) return null;
-
-		String sql = "CREATE";
-		if (idx.isUnique())
-		{
-			sql += " UNIQUE";
-		}
-
-		WbConnection con = metaData == null ? null : metaData.getWbConnection();
-
-		sql += " INDEX (" + idx.getColumnList() + ") ON " + table.getTableExpression(con) + ";";
-		
-		return sql;
+		TableIdentifier table = new TableIdentifier("FOO");
+		IndexDefinition idx = new IndexDefinition(table, "IX_NAME");
+		idx.addColumn("FIRSTNAME", null);
+		idx.addColumn("LASTNAME", null);
+		TeradataIndexReader instance = new TeradataIndexReader(null);
+		CharSequence result = instance.getIndexSource(table, idx);
+		assertNotNull(result);
+		assertEquals("CREATE INDEX (FIRSTNAME, LASTNAME) ON FOO;", result.toString());
 	}
 
 }
