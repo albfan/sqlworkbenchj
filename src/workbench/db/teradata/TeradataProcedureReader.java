@@ -49,7 +49,7 @@ public class TeradataProcedureReader
 		throws NoConfigException
 	{
 
-		String query = "show procedure " + def.getSchema() + "." + def.getProcedureName();
+		String query = "show procedure " + SqlUtil.buildExpression(connection, def);
 		Statement stmt = null;
 		ResultSet rs = null;
 		StringBuilder source = new StringBuilder(100);

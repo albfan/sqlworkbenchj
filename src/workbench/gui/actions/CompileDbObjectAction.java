@@ -34,14 +34,16 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import workbench.log.LogMgr;
+
 import workbench.db.DbObject;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleObjectCompiler;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectCompilerUI;
-import workbench.log.LogMgr;
 
 /**
  * @author Thomas Kellerer
@@ -127,8 +129,8 @@ public class CompileDbObjectAction
 			return null;
 		}
 
-		List<String> catalogs = new ArrayList<String>();
-		List<DbObject> objects = new ArrayList<DbObject>();
+		List<String> catalogs = new ArrayList<>();
+		List<DbObject> objects = new ArrayList<>();
 		for (DbObject dbo : selected)
 		{
 			if (!OracleObjectCompiler.canCompile(dbo))
