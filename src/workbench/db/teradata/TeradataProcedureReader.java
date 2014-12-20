@@ -50,17 +50,21 @@ public class TeradataProcedureReader
 	{
 
 		String query = "show procedure " + SqlUtil.buildExpression(connection, def);
+
+		LogMgr.logDebug("TeradataProcedureReader.retrieveProcedureSource", "Query to retrieve procedure source: " + query);
+
 		Statement stmt = null;
 		ResultSet rs = null;
 		StringBuilder source = new StringBuilder(100);
+
 		try
 		{
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery(query);
 			while (rs.next())
 			{
+				if (source.length() > 0) source.append('\n');
 				source.append(rs.getString(1));
-				source.append('\n');
 			}
 		}
 		catch (Exception ex)

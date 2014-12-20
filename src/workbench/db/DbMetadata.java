@@ -825,7 +825,7 @@ public class DbMetadata
 			String current = (currentSchema == null ? getCurrentSchema() : currentSchema);
 			if (current != null)
 			{
-				return schema.equals(current);
+				return SqlUtil.objectNamesAreEqual(schema, current);
 			}
 		}
 		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
@@ -961,7 +961,10 @@ public class DbMetadata
 		if (catalogsToIgnore.contains("$current"))
 		{
 			String current = getCurrentCatalog();
-			if (current != null && catalog.equals(current)) return true;
+			if (current != null)
+			{
+				return SqlUtil.objectNamesAreEqual(current, catalog);
+			}
 		}
 		return catalogsToIgnore.contains("*") || catalogsToIgnore.contains(catalog);
 	}
