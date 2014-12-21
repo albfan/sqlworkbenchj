@@ -77,7 +77,7 @@ public class ShowDbmsManualAction
 		if (StringUtil.isNonBlank(dbid))
 		{
 			String url = null;
-			if (majorVersion > 0 && minorVersion >= 0)
+			if (majorVersion > 0 && minorVersion > 0)
 			{
 				url = Settings.getInstance().getProperty("workbench.db." + dbid + "." + Integer.toString(majorVersion) + "." + Integer.toString(minorVersion) + ".manual", null);
 			}
