@@ -367,5 +367,8 @@ public class TableIdentifierTest
 		tids.add(two);
 		tids.add(three);
 		assertEquals("Too many entries", 2, tids.size());
+
+		assertEquals(one, two);
+		assertFalse(one.equals(three));
 	}
 }
