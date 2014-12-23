@@ -120,12 +120,12 @@ public class TableIdentifierTest
 	@Test
 	public void testRemoveCollection()
 	{
-		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+		List<TableIdentifier> tables = new ArrayList<>();
 		tables.add(new TableIdentifier("SCHEMA", "TABLE_1"));
 		tables.add(new TableIdentifier("SCHEMA", "TABLE_2"));
 		tables.add(new TableIdentifier("SCHEMA", "TABLE_3"));
 
-		List<TableIdentifier> toRemove = new ArrayList<TableIdentifier>();
+		List<TableIdentifier> toRemove = new ArrayList<>();
 		toRemove.add(new TableIdentifier("SCHEMA", "TABLE_2"));
 		tables.removeAll(toRemove);
 
@@ -362,8 +362,7 @@ public class TableIdentifierTest
 		ids.add(three);
 		assertEquals("Too many entries", 2, ids.size());
 
-		Set<TableIdentifier> tids;
-		tids = new TreeSet<TableIdentifier>();
+		Set<TableIdentifier> tids = new TreeSet<>();
 		tids.add(one);
 		tids.add(two);
 		tids.add(three);
