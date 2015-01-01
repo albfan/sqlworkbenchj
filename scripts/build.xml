@@ -79,10 +79,6 @@
     <propertyfile file="devbuild.number">
       <entry key="dev-build.number" type="int" operation="=" value="0"/>
     </propertyfile>
-
-    <propertyfile file="internal-build.properties">
-      <entry key="internal-build.number" type="int" operation="=" value="0"/>
-    </propertyfile>
     <antcall target="replace-build-number"/>
   </target>
 
@@ -95,27 +91,12 @@
     <propertyfile file="devbuild.number">
       <entry key="dev-build.number" type="int" operation="+" value="1"/>
     </propertyfile>
-    <propertyfile file="internal-build.properties">
-      <entry key="internal-build.number" type="int" operation="=" value="0"/>
-    </propertyfile>
     <loadproperties srcFile="release.property"/>
     <loadproperties srcFile="devbuild.number"/>
 
     <property name="build.number" value="${release.build.number}.${dev-build.number}"/>
     <echo message="Build number is ${build.number}"/>
     <antcall target="replace-build-number"/>
-  </target>
-
-  <target name="set-internal-build" depends="prepare">
-    <propertyfile file="internal-build.properties">
-      <entry key="internal-build.number" type="int" operation="+" value="1"/>
-    </propertyfile>
-    <loadproperties srcFile="release.property"/>
-    <loadproperties srcFile="devbuild.number"/>
-    <loadproperties srcFile="internal-build.properties"/>
-
-    <property name="build.number" value="${release.build.number}.${dev-build.number}.${internal-build.number}"/>
-    <echo message="Build number is ${build.number}"/>
   </target>
 
   <target name="get-dev-build" depends="prepare">
@@ -631,9 +612,6 @@
   <target name="jar-only" depends="set-dev-prop, copy-resources, compile, get-dev-build, replace-build-number, make-jar"/>
 
   <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, replace-build-number, make-jar"/>
-
-  <!-- create an internal build (= unpublished dev-build) -->
-  <target name="internal-build" depends="clean, compile, set-internal-build, replace-build-number, make-jar"/>
 
   <!-- build a development release -->
   <target name="dev-release" depends="clean, compile, test, set-dev-build, set-history-build-date, make-jar, pdf, publish, publish-single, release-package, release-src-zip">
