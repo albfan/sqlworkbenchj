@@ -3260,9 +3260,7 @@ public class SqlPanel
 
 				if (statementResult.promptingWasCancelled())
 				{
-					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");
-					cancelMsg = cancelMsg.replace("%nr%", NumberStringCache.getNumberString(i+1));
-					this.appendToLog(cancelMsg);
+					this.printMessage(ResourceMgr.getFormattedString("MsgSqlCancelledDuringPrompt", NumberStringCache.getNumberString(i+1)));
 					this.showLogPanel();
 					if (GuiSettings.cancellingVariablePromptStopsExecution())
 					{
@@ -3737,7 +3735,7 @@ public class SqlPanel
 
 		TableAnnotationProcessor processor = new TableAnnotationProcessor();
 		processor.handleAnnotations(tbl);
-		
+
 		return newIndex;
 	}
 
