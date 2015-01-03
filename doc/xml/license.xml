@@ -1,7 +1,7 @@
 <section id="license">
   <title>Software license</title>
 
-  <para>Copyright 2002-20134, Thomas Kellerer</para>
+  <para>Copyright 2002-2015, Thomas Kellerer</para>
 
   <para>
     This software is licensed under the Apache License, Version 2.0
@@ -84,7 +84,7 @@
   <section id="license-restrictions">
     <title>Restrictions</title>
     <para>
-      The right to use this software is explicitely <emphasis role="bold">NOT</emphasis> granted to the government of the United States of America 
+      The right to use this software is explicitely <emphasis role="bold">NOT</emphasis> granted to the government of the United States of America
 	  or organizations directly related to it.
 	 </para>
 	 <para>
