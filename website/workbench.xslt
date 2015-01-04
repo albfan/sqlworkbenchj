@@ -385,13 +385,11 @@
   </xsl:template>
 
   <xsl:template match="mac-link">
-    <a href="Workbench-Build{$buildNumber}-Mac.tgz">Download package for MacOS with Java6 installed</a><br/>
-    <a href="Workbench-Build{$buildNumber}-MacJava7.tgz">Download package for MacOS with Java7 installed</a>
+    <a href="Workbench-Build{$buildNumber}-MacJava7.tgz">Download package for MacOS</a>
   </xsl:template>
 
   <xsl:template match="mac-office-link">
-    <a href="Workbench-Build{$buildNumber}-Mac-with-office-libs.tgz">MacOS and Java6 including libraries to read and write office (ods,xls,xlsx) documents</a><br/>
-    <a href="Workbench-Build{$buildNumber}-MacJava7-with-office-libs.tgz">MacOS and Java7 including libraries to read and write office (ods,xls,xlsx) documents</a>
+    <a href="Workbench-Build{$buildNumber}-MacJava7-with-office-libs.tgz">MacOS including libraries to read and write office (ods,xls,xlsx) documents</a>
   </xsl:template>
 
   <xsl:template match="build-number">

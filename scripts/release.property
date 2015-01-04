@@ -1,7 +1,4 @@
-#Tue, 16 Dec 2014 22:07:06 +0100
+#Sun, 04 Jan 2015 21:01:57 +0100
 
-release.build.number=116
-release.build.date=2014-04-06
-
-dev.build.date=2014-12-16
-dev.build.number=116.12
+release.build.number=117
+release.build.date=2015-01-04

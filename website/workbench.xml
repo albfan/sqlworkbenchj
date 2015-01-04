@@ -166,10 +166,6 @@ WHERE id=42;</p>
         SQL Workbench/J needs a <a target="_blank" href="http://www.java.com/en/">Java runtime</a>.<br/>
         You have to install <b>Java 7</b> or higher before you can run SQL Workbench/J.
       </p>
-      <p>
-       Java 6 will work as well, but it is not recommended as it is no longer supported<br/>
-     Build 116 will be the last release to support Java 6.
-    </p>
 
       <h3 style="padding-top:10px">Installation</h3>
       <p>
@@ -332,10 +328,7 @@ WHERE id=42;</p>
         <content>
         <not-mysql/>
           <p style="margin-top:15px;text-align:center;font-weight:bold;margin-bottom:0px">
-                SQL Workbench/J requires Java 7 or later.
-            </p>
-            <p style="margin-top:0px;text-align:center">
-               Java 6 will work as well, but it is not recommended as it is no longer supported. <i>Build 116 is the last release to support Java 6.</i>
+                SQL Workbench/J requires Java <b>7</b> or later.
             </p>
         <h3 style="margin-top:25px">Stable release</h3>
         <p>
@@ -401,9 +394,6 @@ WHERE id=42;</p>
         Bugfixes will show up in these builds first.
         <br/>
       </p>
-      <p>
-        <b>The development builds now require Java 7</b>
-      </p>
       <dev-build/>
     </content>
   </page>
@@ -431,6 +421,14 @@ WHERE id=42;</p>
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 116<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build116.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build116-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/Workbench-Build116-MacJava7.tgz">Mac Package for Java7</a></li>
+            <li><a href="archive/WorkbenchSrc-Build116.zip">Source Code</a></li>
+          </ul>
+        </li>
         <li>Build 115<br/>
           <ul>
             <li><a href="archive/Workbench-Build115.zip">All Platforms</a></li>
@@ -691,7 +689,7 @@ WHERE id=42;</p>
 
       <p>To prepare your environment to build SQL Workbench/J from source you will need to</p>
       <ul>
-        <li>Download and install a Java6 <b>JDK</b>. The Java runtime (JRE) does not contain a compiler, therefor the JDK is required.</li>
+        <li>Download and install a Java7 <b>JDK</b>. The Java runtime (JRE) does not contain a compiler, therefor the JDK is required.</li>
         <li>Download and install Ant 1.7 (or later) from <a href="http://ant.apache.org/">http://ant.apache.org</a></li>
         <li>
           Download the <a href="http://informagen.com/JarBundler/index.html">JarBundler Ant task</a>. As the jarbundler library is referenced from within <tt>build.xml</tt>,

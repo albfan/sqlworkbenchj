@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-01-02">
+  <release build="117" date="2015-01-04">
     <entry dev-build="13" type="enh">Added support for triggers and stored procedures in Teradata</entry>
     <entry dev-build="13" type="enh">When defining a variable a list of possible values can be specified to be used when prompting for the variable value</entry>
     <entry dev-build="12" type="enh">For Oracle the generated table source will now contain LOB storage parameters.</entry>
