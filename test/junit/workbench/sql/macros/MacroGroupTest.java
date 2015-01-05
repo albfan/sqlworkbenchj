@@ -22,8 +22,9 @@
  */
 package workbench.sql.macros;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -38,12 +39,14 @@ public class MacroGroupTest
 		MacroGroup group = new MacroGroup("Default Group");
 		group.setSortOrder(2);
 		group.setVisibleInMenu(false);
+		group.setVisibleInPopup(false);
 
 		group.addMacro(new MacroDefinition("one", "test one"));
 
 		MacroGroup copy = group.createCopy();
 		assertFalse(copy.isModified());
 		assertFalse(copy.isVisibleInMenu());
+		assertFalse(copy.isVisibleInPopup());
 		assertEquals(2, copy.getSortOrder());
 		assertEquals(1, copy.getSize());
 	}

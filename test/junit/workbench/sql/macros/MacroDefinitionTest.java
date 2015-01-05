@@ -46,6 +46,7 @@ public class MacroDefinitionTest
 		MacroDefinition macro = new MacroDefinition("test", "select 42 from dual");
 		assertTrue(macro.isVisibleInMenu());
 		macro.setVisibleInMenu(false);
+		macro.setVisibleInPopup(false);
 		macro.setExpandWhileTyping(true);
 		macro.setSortOrder(5);
 		macro.setAppendResult(true);
@@ -58,6 +59,7 @@ public class MacroDefinitionTest
 		assertEquals(key, key2);
 		assertTrue(copy.isAppendResult());
 		assertFalse(copy.isVisibleInMenu());
+		assertFalse(copy.isVisibleInPopup());
 		assertFalse(copy.isModified());
 		assertEquals(5, copy.getSortOrder());
 		assertEquals(macro.getName(), copy.getName());
@@ -82,6 +84,10 @@ public class MacroDefinitionTest
 		macro.setAppendResult(false);
 		assertTrue(macro.isModified());
 		macro.setExpandWhileTyping(false);
+		assertTrue(macro.isModified());
+
+		macro.resetModified();
+		macro.setVisibleInPopup(false);
 		assertTrue(macro.isModified());
 	}
 }

@@ -139,6 +139,10 @@ public class MacroDefinitionPanel
 		menu.setSourceObject(macro, "visibleInMenu");
 		menu.setImmediateUpdate(true);
 
+		BooleanPropertyEditor popup = (BooleanPropertyEditor)visibleInPopup;
+		popup.setSourceObject(macro, "visibleInPopup");
+		popup.setImmediateUpdate(true);
+
 		BooleanPropertyEditor expand = (BooleanPropertyEditor)doExpansion;
 		expand.setSourceObject(macro, "expandWhileTyping");
 		expand.setImmediateUpdate(true);
@@ -271,15 +275,16 @@ public class MacroDefinitionPanel
     optionsPanel = new JPanel();
     visibleInMenu = new BooleanPropertyEditor();
     jSeparator1 = new JSeparator();
+    visibleInPopup = new BooleanPropertyEditor();
+    jSeparator2 = new JSeparator();
     doExpansion = new BooleanPropertyEditor();
-    appendResults = new BooleanPropertyEditor();
     jSeparator3 = new JSeparator();
+    appendResults = new BooleanPropertyEditor();
     shortcutPanel = new JPanel();
     shortcutLabel = new JLabel();
     assignShortcutButton = new JButton();
     clearShortcutButton = new JButton();
 
-    setMinimumSize(null);
     setLayout(new GridBagLayout());
 
     jLabel1.setText(ResourceMgr.getString("LblMacroName")); // NOI18N
@@ -303,45 +308,59 @@ public class MacroDefinitionPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 9, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 5, 0, 5);
     optionsPanel.add(visibleInMenu, gridBagConstraints);
 
     jSeparator1.setOrientation(SwingConstants.VERTICAL);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.VERTICAL;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 5);
     optionsPanel.add(jSeparator1, gridBagConstraints);
+
+    visibleInPopup.setText(ResourceMgr.getString("LblMacroGrpPop")); // NOI18N
+    visibleInPopup.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 5, 0, 5);
+    optionsPanel.add(visibleInPopup, gridBagConstraints);
+
+    jSeparator2.setOrientation(SwingConstants.VERTICAL);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.VERTICAL;
+    optionsPanel.add(jSeparator2, gridBagConstraints);
 
     doExpansion.setText(ResourceMgr.getString("LblExpandMacro")); // NOI18N
     doExpansion.setToolTipText(ResourceMgr.getString("d_LblExpandMacro")); // NOI18N
     doExpansion.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 3, 0, 3);
     optionsPanel.add(doExpansion, gridBagConstraints);
+
+    jSeparator3.setOrientation(SwingConstants.VERTICAL);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.VERTICAL;
+    optionsPanel.add(jSeparator3, gridBagConstraints);
 
     appendResults.setText(ResourceMgr.getString("LblAppendMacroData")); // NOI18N
     appendResults.setToolTipText(ResourceMgr.getString("d_LblAppendMacroData")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridx = 6;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 3, 0, 3);
     optionsPanel.add(appendResults, gridBagConstraints);
-
-    jSeparator3.setOrientation(SwingConstants.VERTICAL);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 4;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = GridBagConstraints.VERTICAL;
-    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(0, 6, 0, 5);
-    optionsPanel.add(jSeparator3, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -458,11 +477,13 @@ public class MacroDefinitionPanel
   private JCheckBox doExpansion;
   private JLabel jLabel1;
   private JSeparator jSeparator1;
+  private JSeparator jSeparator2;
   private JSeparator jSeparator3;
   private JPanel optionsPanel;
   private JLabel shortcutLabel;
   private JPanel shortcutPanel;
   private JTextField tfName;
   private JCheckBox visibleInMenu;
+  private JCheckBox visibleInPopup;
   // End of variables declaration//GEN-END:variables
 }

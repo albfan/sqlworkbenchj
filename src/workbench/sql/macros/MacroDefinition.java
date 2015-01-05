@@ -47,6 +47,7 @@ public class MacroDefinition
 	private boolean modified;
 	private StoreableKeyStroke shortcut;
 	private boolean showInMenu = true;
+	private boolean showInPopup = true;
 	private boolean expandWhileTyping;
 	private boolean appendResult;
 	private boolean shortcutChanged;
@@ -81,6 +82,17 @@ public class MacroDefinition
 	{
 		modified = modified || (showInMenu != flag);
 		this.showInMenu = flag;
+	}
+
+	public boolean isVisibleInPopup()
+	{
+		return showInPopup;
+	}
+
+	public void setVisibleInPopup(boolean flag)
+	{
+		modified = modified || (showInPopup != flag);
+		showInPopup = flag;
 	}
 
 	public boolean isAppendResult()
@@ -135,6 +147,7 @@ public class MacroDefinition
 		def.setText(this.text);
 		def.setSortOrder(this.sortOrder);
 		def.setVisibleInMenu(this.showInMenu);
+		def.setVisibleInPopup(this.showInPopup);
 		def.setShortcut(this.shortcut);
 		def.setExpandWhileTyping(this.expandWhileTyping);
 		def.setAppendResult(this.appendResult);

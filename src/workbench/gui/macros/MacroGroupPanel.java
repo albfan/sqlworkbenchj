@@ -30,6 +30,7 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import workbench.resource.ResourceMgr;
@@ -59,6 +60,10 @@ public class MacroGroupPanel
 		menu.setSourceObject(group, "visibleInMenu");
 		menu.setImmediateUpdate(true);
 
+		BooleanPropertyEditor popup = (BooleanPropertyEditor)includeInPopup;
+		popup.setSourceObject(group, "visibleInPopup");
+		popup.setImmediateUpdate(true);
+
 		StringPropertyEditor name = (StringPropertyEditor)jTextField1;
 		name.setSourceObject(group, "name");
 		name.setImmediateUpdate(true);
@@ -83,7 +88,9 @@ public class MacroGroupPanel
 
     jLabel1 = new JLabel();
     jTextField1 = new StringPropertyEditor();
+    jPanel1 = new JPanel();
     includeInMenu = new BooleanPropertyEditor();
+    includeInPopup = new BooleanPropertyEditor();
 
     setMinimumSize(new Dimension(120, 90));
     setLayout(new GridBagLayout());
@@ -100,20 +107,41 @@ public class MacroGroupPanel
     gridBagConstraints.insets = new Insets(5, 5, 0, 5);
     add(jTextField1, gridBagConstraints);
 
+    jPanel1.setLayout(new GridBagLayout());
+
     includeInMenu.setText(ResourceMgr.getString("LblMacroGrpMenu")); // NOI18N
     includeInMenu.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
+    jPanel1.add(includeInMenu, gridBagConstraints);
+
+    includeInPopup.setText(ResourceMgr.getString("LblMacroGrpPop")); // NOI18N
+    includeInPopup.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 8, 0, 0);
+    jPanel1.add(includeInPopup, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(11, 5, 0, 0);
-    add(includeInMenu, gridBagConstraints);
+    add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox includeInMenu;
+  private JCheckBox includeInPopup;
   private JLabel jLabel1;
+  private JPanel jPanel1;
   private JTextField jTextField1;
   // End of variables declaration//GEN-END:variables
 }

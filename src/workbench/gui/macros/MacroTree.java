@@ -91,11 +91,11 @@ public class MacroTree
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
 	private final int macroClientId;
 
-	public MacroTree(int clientId)
+	public MacroTree(int clientId, boolean forPopup)
 	{
 		super();
 		macroClientId = clientId;
-		loadMacros();
+		loadMacros(forPopup);
 		setRootVisible(false);
 		putClientProperty("JTree.lineStyle", "Angled");
 		setShowsRootHandles(true);
@@ -131,13 +131,13 @@ public class MacroTree
 		WbSwingUtilities.adjustTreeRowHeight(this);
 	}
 
-	public final void loadMacros()
+	public final void loadMacros(boolean forPopup)
 	{
 		if (macroModel != null)
 		{
 			macroModel.removeTreeModelListener(this);
 		}
-		macroModel = new MacroListModel(MacroManager.getInstance().getMacros(macroClientId));
+		macroModel = new MacroListModel(MacroManager.getInstance().getMacros(macroClientId), forPopup);
 		setModel(macroModel);
 		macroModel.addTreeModelListener(this);
 	}

@@ -25,6 +25,7 @@ package workbench.sql.macros;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import workbench.util.StringUtil;
 
 /**
@@ -45,6 +46,7 @@ public class MacroGroup
 	private int sortOrder;
 	private boolean modified = false;
 	private boolean showInMenu = true;
+	private boolean showInPopup = true;
 
 	public MacroGroup()
 	{
@@ -64,6 +66,17 @@ public class MacroGroup
 	{
 		this.modified = modified || flag != showInMenu;
 		this.showInMenu = flag;
+	}
+
+	public boolean isVisibleInPopup()
+	{
+		return showInPopup;
+	}
+
+	public void setVisibleInPopup(boolean flag)
+	{
+		this.modified = modified || flag != showInPopup;
+		this.showInPopup = flag;
 	}
 
 	@Override
@@ -123,6 +136,7 @@ public class MacroGroup
 	 * This ignores the isVisibleInMenu() setting of this group.
 	 *
 	 * @see #getVisibleMacroSize()
+	 * @see MacroDefinition#isVisibleInMenu() ()
 	 */
 	public synchronized List<MacroDefinition> getVisibleMacros()
 	{
@@ -130,6 +144,28 @@ public class MacroGroup
 		for (MacroDefinition macro : macros)
 		{
 			if (macro.isVisibleInMenu())
+			{
+				result.add(macro);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns those macros that should be shown in the "Macro Popup" window.
+	 * returns true.
+	 * <br/>
+	 * This ignores the isVisibleInMenu() setting of this group.
+	 *
+	 * @see #getVisibleMacroSize()
+	 * @see MacroDefinition#isVisibleInPopup()
+	 */
+	public synchronized List<MacroDefinition> getMacrosForPopup()
+	{
+		List<MacroDefinition> result = new ArrayList<>(macros.size());
+		for (MacroDefinition macro : macros)
+		{
+			if (macro.isVisibleInPopup())
 			{
 				result.add(macro);
 			}
@@ -181,6 +217,7 @@ public class MacroGroup
 		copy.name = this.name;
 		copy.sortOrder = this.sortOrder;
 		copy.showInMenu = this.showInMenu;
+		copy.showInPopup = this.showInPopup;
 		copy.modified = false;
 		for (MacroDefinition def : macros)
 		{

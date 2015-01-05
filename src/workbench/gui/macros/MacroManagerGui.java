@@ -77,7 +77,7 @@ public class MacroManagerGui
 	public MacroManagerGui(int macroId)
 	{
 		super();
-		this.macroTree = new MacroTree(macroId);
+		this.macroTree = new MacroTree(macroId, false);
 		this.setLayout(new BorderLayout());
 
 		this.toolbar = new WbToolbar();

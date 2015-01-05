@@ -100,7 +100,7 @@ public class MacroPopup
 		setTitle(ResourceMgr.getString("TxtMacroManagerWindowTitle"));
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-		tree = new MacroTree(parent.getMacroClientId());
+		tree = new MacroTree(parent.getMacroClientId(), true);
 		JScrollPane p = new JScrollPane(tree);
 		add(p, BorderLayout.CENTER);
 		if (!Settings.getInstance().restoreWindowSize(this))
@@ -396,7 +396,7 @@ public class MacroPopup
 	public void macroListChanged()
 	{
 		List<String> groups = tree.getExpandedGroupNames();
-		tree.loadMacros();
+		tree.loadMacros(true);
 		tree.expandGroups(groups);
 	}
 
