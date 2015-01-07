@@ -427,7 +427,8 @@ public class TableListPanel
 
 	private boolean getApplyFilterWhileTyping()
 	{
-		return DbExplorerSettings.getDbExpFilterDuringTyping() && !DbExplorerSettings.getUseFilterForRetrieve();
+		if (DbExplorerSettings.getUseFilterForRetrieve()) return false;
+		return DbExplorerSettings.getDbExpFilterDuringTyping();
 	}
 
 	private void hideTableHistory()

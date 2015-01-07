@@ -128,6 +128,7 @@ public class OracleStatementHook
 	private PreparedStatement statisticsStmt;
 	private final Object lock = new Object();
 	private CommandTester wbTester = new CommandTester();
+	private final SQLLexer lexer = SQLLexerFactory.createLexer();
 
 	public OracleStatementHook()
 	{
@@ -277,11 +278,15 @@ public class OracleStatementHook
 		boolean addComment = false;
 		int pos = -1;
 
-		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
-		SQLToken verb = lexer.getNextToken(false, false);
-
-		if (verb == null) return getIDPrefix() + "  " + sql;
-		SQLToken secondElement = lexer.getNextToken(true, false);
+		SQLToken verb = null;
+		SQLToken secondElement = null;
+		synchronized (lexer)
+		{
+			lexer.setInput(sql);
+			verb = lexer.getNextToken(false, false);
+			if (verb == null)	return getIDPrefix() + "  " + sql;
+			secondElement = lexer.getNextToken(true, false);
+		}
 
 		if (secondElement == null) return getIDPrefix() + "  " + sql;
 
@@ -377,15 +382,18 @@ public class OracleStatementHook
 
 	private boolean shouldTraceStatement(String sql)
 	{
-		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
-		SQLToken verb = lexer.getNextToken(false, false);
-		if (verb == null) return false;
-		String sqlVerb = verb.getContents();
-		if (noStatistics.contains(sqlVerb))
+		synchronized (lexer)
 		{
-			return false;
+			lexer.setInput(sql);
+			SQLToken verb = lexer.getNextToken(false, false);
+			if (verb == null) return false;
+			String sqlVerb = verb.getContents();
+			if (noStatistics.contains(sqlVerb))
+			{
+				return false;
+			}
+			return true;
 		}
-		return true;
 	}
 
 	/**
@@ -578,7 +586,7 @@ public class OracleStatementHook
 	{
 		WbConnection con = runner.getConnection();
 		if (con == null) return null;
-		
+
 		String verb = con.getParsingUtil().getSqlVerb(sql);
 
 		if (skipStatistics(verb))
@@ -637,29 +645,31 @@ public class OracleStatementHook
 	 */
 	private boolean canExplain(String sql)
 	{
-		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
-		SQLToken verb = lexer.getNextToken(false, false);
-		if (verb == null) return false;
-
-		if (!explainable.contains(verb.getContents())) return false;
-
-		String sqlVerb = verb.getContents();
-		if ("CREATE".equalsIgnoreCase(sqlVerb))
+		synchronized (lexer)
 		{
-			SQLToken type = lexer.getNextToken(false, false);
-			if (type == null) return false;
-			String typeName = type.getContents();
-			return typeName.equalsIgnoreCase("TABLE") || typeName.equalsIgnoreCase("INDEX");
+			lexer.setInput(sql);
+			SQLToken verb = lexer.getNextToken(false, false);
+			if (verb == null) return false;
+			if (!explainable.contains(verb.getContents())) return false;
+
+			String sqlVerb = verb.getContents();
+			if ("CREATE".equalsIgnoreCase(sqlVerb))
+			{
+				SQLToken type = lexer.getNextToken(false, false);
+				if (type == null) return false;
+				String typeName = type.getContents();
+				return typeName.equalsIgnoreCase("TABLE") || typeName.equalsIgnoreCase("INDEX");
+			}
+			if ("ALTER".equalsIgnoreCase(sqlVerb))
+			{
+				SQLToken token = lexer.getNextToken(false, false);
+				if (token == null) return false;
+				token = lexer.getNextToken(false, false);
+				if (token == null) return false;
+				return "REBUILD".equalsIgnoreCase(token.getContents());
+			}
+			return true;
 		}
-		if ("ALTER".equalsIgnoreCase(sqlVerb))
-		{
-			SQLToken token = lexer.getNextToken(false, false);
-			if (token == null) return false;
-			token = lexer.getNextToken(false, false);
-			if (token == null) return false;
-			return "REBUILD".equalsIgnoreCase(token.getContents());
-		}
-		return true;
 	}
 
 	@Override

@@ -173,6 +173,26 @@ where type = 'VIEW'
 	</void>
 
   <void method="put">
+    <string>DB2-10</string>
+    <object id="db2_host_10" class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>SELECT statement FROM SYSIBM.SYSVIEWS</string>
+      </void>
+      <void property="objectNameField">
+        <string>NAME</string>
+      </void>
+      <void property="schemaField">
+        <string>CREATOR</string>
+      </void>
+    </object>
+  </void>
+
+	<void method="put">
+   <string>DB2-11</string>
+   <object idref="db2_host_10"/>
+	</void>
+
+  <void method="put">
     <string>DB2</string>
     <object id="db2_host" class="workbench.db.GetMetaDataSql">
       <void property="baseSql">

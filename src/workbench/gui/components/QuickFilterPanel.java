@@ -152,33 +152,12 @@ public class QuickFilterPanel
 
 	public void setFilterOnType(boolean flag)
 	{
-		if (flag)
-		{
-			enableAutoFilter();
-		}
-		else
-		{
-			disableAutoFilter();
-		}
+		autoFilterEnabled = flag;
 	}
 
 	public void setAlwaysUseContainsFilter(boolean flag)
 	{
 		this.assumeWildcards = flag;
-	}
-
-	private void enableAutoFilter()
-	{
-//		Component ed = filterValue.getEditor().getEditorComponent();
-//		ed.addKeyListener(this);
-		autoFilterEnabled = true;
-	}
-
-	private void disableAutoFilter()
-	{
-//		Component ed = filterValue.getEditor().getEditorComponent();
-//		ed.removeKeyListener(this);
-		autoFilterEnabled = false;
 	}
 
 	private void initDropDown()
@@ -530,13 +509,13 @@ public class QuickFilterPanel
 			{
 				reload.executeAction(e);
 			}
-			else
+			// when typing in the editor, the combobox sends a comboBoxEdited followed by a comboBoxChanged event
+			// so this would also do a "filter as you type"
+			// the only way to distinguish the "comboBoxChanged" event when selecting a dropdown entry
+			// from the typing event is the fact that the dropDown selection has a modifier (usuall Button1)
+			else if (e.getModifiers() != 0 && "comboBoxChanged".equals(e.getActionCommand()))
 			{
-				String cmd = e.getActionCommand();
-				if (cmd.equals("comboBoxChanged"))
-				{
-					applyQuickFilter();
-				}
+				applyQuickFilter();
 			}
 		}
 		else if (e.getSource() instanceof JMenuItem)

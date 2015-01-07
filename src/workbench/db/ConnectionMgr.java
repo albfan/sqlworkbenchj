@@ -57,6 +57,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.FileVersioner;
 import workbench.util.PropertiesCopier;
+import workbench.util.VersionNumber;
 import workbench.util.WbFile;
 import workbench.util.WbPersistence;
 
@@ -165,10 +166,11 @@ public class ConnectionMgr
 		String driverVersion = conn.getDriverVersion();
 		String jdbcVersion = conn.getJDBCVersion();
 		String dbVersion = conn.getDatabaseProductVersion();
+		VersionNumber versionNr = conn.getDatabaseVersion();
 
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" +
-			conn.getMetadata().getProductName() + "], Database version: [" + dbVersion + "], Driver version: [" +
-			driverVersion + "], JDBC Version: [" + jdbcVersion + "], ID: ["  + connId + "]"
+			conn.getMetadata().getProductName() + "], Database version info: [" + dbVersion + "], Database version number: [" + versionNr.toString() + "], Driver version: [" +
+			driverVersion + "], JDBC version: [" + jdbcVersion + "], ID: ["  + connId + "]"
 		);
 
 		this.activeConnections.put(connId, conn);
