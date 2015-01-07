@@ -28,15 +28,16 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-
 import java.io.BufferedReader;
 import java.io.StringReader;
+
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.TextContainer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -83,6 +84,8 @@ public class CreateSnippetAction extends WbAction
 
 		String prefix = Settings.getInstance().getProperty("workbench.clipcreate.codeprefix", "String sql = ");
 		String concat = Settings.getInstance().getProperty("workbench.clipcreate.concat", "+");
+		String suffix = StringUtil.trimQuotes(Settings.getInstance().getProperty("workbench.clipcreate.codeend", ";"));
+
 		int indentSize = Settings.getInstance().getIntProperty("workbench.clipcreate.indent", -1);
 		boolean includeNewLine = Settings.getInstance().getBoolProperty("workbench.clipcreate.includenewline", true);
 		boolean newLineAfterPrefix = Settings.getInstance().getBoolProperty("workbench.clipcreate.startnewline", false);
@@ -144,7 +147,7 @@ public class CreateSnippetAction extends WbAction
 					result.append('"');
 				}
 			}
-			result.append(';');
+			result.append(suffix);
 		}
 		catch (Exception e)
 		{
