@@ -23,6 +23,7 @@
 package workbench.db.firebird;
 
 import workbench.db.AbstractConstraintReader;
+import workbench.db.DbMetadata;
 
 /**
  * An implementation of {@link AbstractConstraintReader} for the
@@ -35,18 +36,16 @@ public class FirebirdConstraintReader
 
 	private final String TABLE_SQL =
 		 "select trim(cc.rdb$constraint_name), trg.rdb$trigger_source " +
-		 "from rdb$relation_constraints rc,  \n" +
-		 "     rdb$check_constraints cc, \n" +
-		 "     rdb$triggers trg \n" +
+		 "from rdb$relation_constraints rc  \n" +
+		 "  join rdb$check_constraints cc on rc.rdb$constraint_name = cc.rdb$constraint_name \n" +
+		 "  join rdb$triggers trg on cc.rdb$trigger_name = trg.rdb$trigger_name \n" +
 		 "where rc.rdb$relation_name = ? \n" +
-		 "and   rc.rdb$constraint_type = 'CHECK' \n" +
-		 "and   rc.rdb$constraint_name = cc.rdb$constraint_name \n" +
-		 "and   cc.rdb$trigger_name = trg.rdb$trigger_name \n" +
-		 "and   trg.rdb$trigger_type = 1 \n";
+		 "  and rc.rdb$constraint_type = 'CHECK' \n" +
+		 "  and trg.rdb$trigger_type = 1 \n";
 
 	public FirebirdConstraintReader()
 	{
-		super("firebird");
+		super(DbMetadata.DBID_FIREBIRD);
 	}
 
 	@Override

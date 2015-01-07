@@ -87,7 +87,7 @@ public class FirebirdDomainReader
 	{
 		return false;
 	}
-	
+
 	private String getSql(WbConnection connection, String name)
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 40);
@@ -125,7 +125,7 @@ public class FirebirdDomainReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
-		List<DomainIdentifier> result = new ArrayList<DomainIdentifier>();
+		List<DomainIdentifier> result = new ArrayList<>();
 		String sql = null;
 		try
 		{

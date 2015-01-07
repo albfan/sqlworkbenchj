@@ -83,8 +83,8 @@ public class FirebirdColumnEnhancer
 		{
 			LogMgr.logInfo("FirebirdColumnEnhancer.updateColumnDefinition()", "Query to retrieve column information:\n " + sql);
 		}
-		Map<String, String> expressions = new HashMap<String, String>();
-		Map<String, String> identityCols = new HashMap<String, String>();
+		Map<String, String> expressions = new HashMap<>();
+		Map<String, String> identityCols = new HashMap<>();
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);

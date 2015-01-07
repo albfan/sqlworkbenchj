@@ -105,7 +105,7 @@ public class FirebirdSequenceAdjuster
 
 	private List<String> getIdentityColumns(WbConnection dbConnection, TableIdentifier table)
 	{
-		List<String> result = new ArrayList<String>(1);
+		List<String> result = new ArrayList<>(1);
 		try
 		{
 			List<ColumnIdentifier> columns = dbConnection.getMetadata().getTableColumns(table, false);
