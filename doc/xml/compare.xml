@@ -107,7 +107,7 @@
           </entry>
         </row>
         <row>
-          <entry id="schema-diff-refconn">-targetConnection</entry>
+          <entry id="schema-diff-targetconn">-targetConnection</entry>
           <entry>
             &connect-descriptor;
             <para>
