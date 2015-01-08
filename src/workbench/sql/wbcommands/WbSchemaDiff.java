@@ -82,7 +82,7 @@ public class WbSchemaDiff
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		diffParams = new CommonDiffParameters(cmdLine);
+		diffParams = new CommonDiffParameters(cmdLine, getBaseDir());
 		cmdLine.addArgument(ARG_NAMESPACE);
 		cmdLine.addArgument(ARG_INCLUDE_FK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);

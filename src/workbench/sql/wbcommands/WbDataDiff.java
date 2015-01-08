@@ -111,7 +111,7 @@ public class WbDataDiff
 		CommonArgs.addProgressParameter(cmdLine);
 
 		// Add common diff parameters
-		params = new CommonDiffParameters(this.cmdLine);
+		params = new CommonDiffParameters(this.cmdLine, getBaseDir());
 	}
 
 	@Override

@@ -23,6 +23,8 @@ import workbench.WbTestCase;
 
 import workbench.db.ConnectionProfile;
 
+import workbench.util.WbFile;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +58,7 @@ public class ConnectionDescriptorTest
 	public void testParseDefinition()
 		throws Exception
 	{
-		ConnectionDescriptor def = new ConnectionDescriptor();
+		ConnectionDescriptor def = new ConnectionDescriptor(null);
 		ConnectionProfile profile = def.parseDefinition("username=\"thomas\", url=jdbc:postgresql://localhost/thomas, password='secret'");
 		assertNotNull(profile);
 		assertEquals("thomas", profile.getUsername());
@@ -70,6 +72,10 @@ public class ConnectionDescriptorTest
 		assertEquals("MyPassword", profile.getLoginPassword());
 		assertEquals("jdbc:somedb:someparameter", profile.getUrl());
 		assertEquals("com.foobar.Driver", profile.getDriverclass());
+		String jarPath = def.getJarPath();
+		assertNotNull(jarPath);
+		WbFile f = new WbFile(jarPath);
+		assertEquals("xyz.jar", f.getName());
 	}
 
 }

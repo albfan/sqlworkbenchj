@@ -39,17 +39,18 @@ import workbench.util.WbFile;
 public class ConnectionDescriptor
 {
 	private File baseDir;
+	private String jarfile;
 	private int instance;
 	private static int instanceCounter;
 
 	public ConnectionDescriptor()
 	{
-		this(System.getProperty("user.dir"));
+		this(null);
 	}
 
 	public ConnectionDescriptor(String dirName)
 	{
-		baseDir = new File(dirName);
+		baseDir = new File(StringUtil.isBlank(dirName) ? System.getProperty("user.dir") : dirName);
 		instance = ++instanceCounter;
 	}
 
@@ -70,7 +71,8 @@ public class ConnectionDescriptor
 		String user = null;
 		String pwd = null;
 		String driverClass = null;
-		String jarfile = null;
+		jarfile = null;
+		
 		for (String element : elements)
 		{
 			String lower = element.toLowerCase();
@@ -166,6 +168,30 @@ public class ConnectionDescriptor
 		return null;
 	}
 
+	/**
+	 * For testing purposes.
+	 */
+	public String getJarPath()
+	{
+		return getJarPath(this.jarfile);
+	}
+
+	private String getJarPath(String jarFile)
+	{
+		String jarPath = null;
+		WbFile df = new WbFile(jarFile == null ? "" : jarFile);
+		if (df.isAbsolute() || baseDir == null)
+		{
+			jarPath = df.getFullPath();
+		}
+		else
+		{
+			df = new WbFile(baseDir, jarFile);
+			jarPath = df.getFullPath();
+		}
+		return jarPath;
+	}
+
 	private DbDriver getDriver(String className, String jarFile)
 	{
 		DbDriver drv = null;
@@ -175,17 +201,7 @@ public class ConnectionDescriptor
 		}
 		else
 		{
-			String jarPath = null;
-			WbFile df = new WbFile(jarFile);
-			if (df.isAbsolute() || baseDir == null)
-			{
-				jarPath = df.getFullPath();
-			}
-			else
-			{
-				df = new WbFile(baseDir, jarFile);
-				jarPath = df.getFullPath();
-			}
+			String jarPath = getJarPath(jarFile);
 			drv = ConnectionMgr.getInstance().registerDriver(className, jarPath);
 		}
 		return drv;
