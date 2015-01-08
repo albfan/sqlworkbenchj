@@ -22,10 +22,6 @@
  */
 package workbench.sql.formatter;
 
-import workbench.sql.lexer.SQLToken;
-import workbench.sql.lexer.SQLLexer;
-import workbench.sql.lexer.SQLLexerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +31,9 @@ import workbench.resource.Settings;
 
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
 
@@ -839,15 +838,39 @@ public class SqlFormatter
 		{
 			columnsPerLine = getColumnsPerUpdate();
 		}
-		SQLToken t = this.lexer.getNextToken(true, false);
+		SQLToken t = this.lexer.getNextToken(true, true);
 		SQLToken lastToken = last;
-
+		SQLToken lastWhiteSpace = null;
 		while (t != null)
 		{
+			if (t.isWhiteSpace())
+			{
+				lastWhiteSpace = t;
+				t = this.lexer.getNextToken(true, true);
+				continue;
+			}
+
 			final String text = t.getContents();
 			if (t.isComment())
 			{
-				this.appendComment(text);
+				boolean needNewLine = false;
+				if (lastWhiteSpace != null)
+				{
+					needNewLine = lastWhiteSpace.getText().contains("\n") || lastWhiteSpace.getText().contains("\r");
+				}
+
+				boolean lineComment = text.startsWith("--");
+				if (lineComment && needNewLine && !isStartOfLine(myIndent))
+				{
+					appendNewline();
+					indent(myIndent);
+				}
+				this.appendText(text);
+				if (lineComment)
+				{
+					appendNewline();
+					indent(myIndent);
+				}
 			}
 			else if (isSelect && "DECODE".equalsIgnoreCase(text))
 			{
@@ -955,7 +978,8 @@ public class SqlFormatter
 				this.appendTokenText(t);
 			}
 			lastToken = t;
-			t = this.lexer.getNextToken(true, false);
+			lastWhiteSpace = null;
+			t = this.lexer.getNextToken(true, true);
 		}
 		return null;
 	}
@@ -1512,6 +1536,11 @@ public class SqlFormatter
 
 	private boolean isStartOfLine()
 	{
+		return isStartOfLine(indent);
+	}
+
+	private boolean isStartOfLine(CharSequence currentIndent)
+	{
 		int len = this.result.length();
 		if (len == 0) return true;
 
@@ -1523,7 +1552,7 @@ public class SqlFormatter
 		// if the "current line" consist of the current indent, it
 		// is considered as a "start of line" as well.
 		String remain = result.substring(pos + NL.length());
-		int indentLength = (indent == null ? 0 : indent.length());
+		int indentLength = (currentIndent == null ? 0 : currentIndent.length());
 		if (StringUtil.isWhitespace(remain) && remain.length() == indentLength) return true;
 		return false;
 	}

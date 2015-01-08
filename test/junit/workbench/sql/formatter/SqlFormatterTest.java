@@ -48,6 +48,71 @@ public class SqlFormatterTest
 	}
 
 	@Test
+	public void testNestedCase()
+	{
+		String sql = "select one, case when x = 1 then case when y = 1 then 1 when y = 2 then 4 end else 6 end as some_col from foo";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+
+		String expected =
+			"SELECT one,\n" +
+			"       -- comment \n" +
+			"       two,\n" +
+			"       three,\n" +
+			"       four\n" +
+			"FROM some_table t";
+		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		assertEquals(expected, formatted);
+	}
+
+	@Test
+	public void testCommentLinesInSelect()
+	{
+		String sql =
+			"select one, \n" +
+			"       -- comment \n " +
+			"       two, three, four from some_table t";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+
+		String expected =
+			"SELECT one,\n" +
+			"       -- comment \n" +
+			"       two,\n" +
+			"       three,\n" +
+			"       four\n" +
+			"FROM some_table t";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
+	public void testCommentLinesInSelect2()
+	{
+		String sql =
+			"select one, -- comment \n " +
+			"       two, three, four from some_table t";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+
+		String expected =
+			"SELECT one,\n" +
+			"       -- comment \n" +
+			"       two,\n" +
+			"       three,\n" +
+			"       four\n" +
+			"FROM some_table t";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
+
+	@Test
 	public void testAllCols()
 	{
 		String sql = "select t.* from some_table t";
@@ -2061,6 +2126,7 @@ public class SqlFormatterTest
 			f = new SqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
 			expected = "SELECT x,\n       y\nFROM y\nORDER BY x\n--trailing comment";
+//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 			assertEquals(expected, formatted.toString().trim());
 
 			sql = "select x,y,z from y where a = 1 and b = 2";
