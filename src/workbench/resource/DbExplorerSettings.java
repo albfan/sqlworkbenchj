@@ -171,7 +171,7 @@ public class DbExplorerSettings
 		if (dbConnection.getAutoCommit()) return false;
 		return (dbConnection.getProfile().getUseSeparateConnectionPerTab() || getAlwaysUseSeparateConnForDbExpWindow());
 	}
-	
+
 	public static boolean getAlwaysUseSeparateConnForDbExpWindow()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.connection.always.separate", false);
@@ -219,7 +219,7 @@ public class DbExplorerSettings
 
 	public static boolean getGenerateColumnListInViews()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.sql.create.view.columnlist");
+		return Settings.getInstance().getBoolProperty("workbench.sql.create.view.columnlist", true);
 	}
 
 	public static void setAutoGeneratePKName(boolean flag)
