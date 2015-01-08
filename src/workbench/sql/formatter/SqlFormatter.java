@@ -863,7 +863,6 @@ public class SqlFormatter
 				if (lineComment && needNewLine && !isStartOfLine(myIndent))
 				{
 					appendNewline();
-					indent(myIndent);
 				}
 				this.appendText(text);
 				if (lineComment)

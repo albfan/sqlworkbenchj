@@ -63,7 +63,7 @@ public class SqlFormatterTest
 			"       three,\n" +
 			"       four\n" +
 			"FROM some_table t";
-		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 //		assertEquals(expected, formatted);
 	}
 
