@@ -173,7 +173,7 @@ public class XsltTransformer
 					transformer.setParameter(entry.getKey(), value);
 				}
 			}
-			File outDir = outputFile.getParentFile();
+			File outDir = outputFile.getAbsoluteFile().getParentFile();
 			transformer.setParameter("wb-basedir", outDir.getAbsolutePath());
 
 			File scriptDir = inputFile.getParentFile();
