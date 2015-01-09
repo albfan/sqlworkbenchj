@@ -864,6 +864,10 @@ public class SqlFormatter
 				{
 					appendNewline();
 				}
+				else if (!lineComment && !isStartOfLine(myIndent))
+				{
+					appendText(' ');
+				}
 				this.appendText(text);
 				if (lineComment)
 				{
@@ -1197,11 +1201,21 @@ public class SqlFormatter
 				if (last != null && this.needsWhitespace(last, t)) appendText(' ');
 				this.appendTokenText(t);
 			}
+			else if ("CASE".equals(text))
+			{
+				this.appendNewline();
+				this.indent(current.length() + 4);
+				this.appendTokenText(t);
+				t = this.processCase(current.length() + 4);
+				this.indent(current.length() + 2);
+				this.appendTokenText(t);
+			}
 			else if ("END".equals(text) || "END CASE".equals(text))
 			{
 				this.appendNewline();
 				this.indent(current);
 				this.appendTokenText(t);
+				this.appendText(' ');
 				// Get the next token after the END. If that is the keyword AS,
 				// the CASE statement ist not yet ended and we have to add the AS keyword
 				// and the alias that was given before returning to the caller
@@ -1209,7 +1223,6 @@ public class SqlFormatter
 				if (t != null && (t.isIdentifier() || t.getContents().equals("AS")))
 				{
 					boolean aliasWithAs = t.getContents().equals("AS");
-					this.appendText(' ');
 					this.appendTokenText(t);
 					t = this.lexer.getNextToken(true, false);
 					if (aliasWithAs)
@@ -1222,6 +1235,10 @@ public class SqlFormatter
 							t = this.lexer.getNextToken(true, false);
 						}
 					}
+				}
+				else
+				{
+					this.appendNewline();
 				}
 				return t;
 			}

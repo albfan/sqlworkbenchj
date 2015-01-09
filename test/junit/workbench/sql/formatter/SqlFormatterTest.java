@@ -58,13 +58,17 @@ public class SqlFormatterTest
 
 		String expected =
 			"SELECT one,\n" +
-			"       -- comment \n" +
-			"       two,\n" +
-			"       three,\n" +
-			"       four\n" +
-			"FROM some_table t";
+			"       CASE\n" +
+			"         WHEN x = 1 THEN\n" +
+			"           CASE\n" +
+			"             WHEN y = 1 THEN 1\n" +
+			"             WHEN y = 2 THEN 4\n" +
+			"           END \n" +
+			"         ELSE 6\n" +
+			"       END AS some_col\n" +
+			"FROM foo";
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
-//		assertEquals(expected, formatted);
+		assertEquals(expected, formatted);
 	}
 
 	@Test
@@ -88,6 +92,31 @@ public class SqlFormatterTest
 			"FROM some_table t";
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
+
+		sql = "select one /* comment */, two from foo";
+		f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT one /* comment */,\n" +
+			"       two\n" +
+			"FROM foo";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+		sql = "select one, /* comment */ two from foo";
+		f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT one,\n" +
+			"       /* comment */ two\n" +
+			"FROM foo";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
 	}
 
 	@Test
@@ -786,7 +815,7 @@ public class SqlFormatterTest
 			"       CASE\n" +
 			"         WHEN 1 THEN 2\n" +
 			"         WHEN 2 THEN 3\n" +
-			"       END\n" +
+			"       END \n" +
 			"FROM foo";
 		formatted = f.getFormattedSql();
 //		System.out.println("----------------\n" + expected + "\n*************\n" + formatted + "\n==================");
