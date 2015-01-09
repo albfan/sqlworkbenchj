@@ -141,7 +141,7 @@ public class WbRowCount
 		}
 
 		ObjectLister lister = new ObjectLister();
-		DataStore resultList = lister.getObjects(cmdLine, options, currentConnection);
+		DataStore resultList = lister.getSelectableObjects(cmdLine, options, currentConnection);
 
 		if (resultList == null)
 		{

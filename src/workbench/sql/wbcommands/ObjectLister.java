@@ -38,13 +38,26 @@ import workbench.util.StringUtil;
 public class ObjectLister
 {
 
+	public DataStore getSelectableObjects(ArgumentParser cmdLine, String userInput, WbConnection connection)
+		throws SQLException
+	{
+		String[] types = connection.getMetadata().getSelectableTypes();
+		return getObjects(cmdLine, userInput, connection, types);
+	}
+
 	public DataStore getObjects(ArgumentParser cmdLine, String userInput, WbConnection connection)
+		throws SQLException
+	{
+		String[] types = connection.getMetadata().getTableTypesArray();
+		return getObjects(cmdLine, userInput, connection, types);
+	}
+
+	private DataStore getObjects(ArgumentParser cmdLine, String userInput, WbConnection connection, String[] types)
 		throws SQLException
 	{
 		String objects = userInput;
 		String schema = null;
 		String catalog = null;
-		String[] types = connection.getMetadata().getTableTypesArray();
 
 		cmdLine.parse(userInput);
 
