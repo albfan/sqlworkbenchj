@@ -36,7 +36,7 @@
 
 				<tbody valign="top">
 					<row>
-						<entry>-sourceProfile</entry>
+						<entry id="copy-source-con-profile">-sourceProfile</entry>
 						<entry>
 							<para>
 								The name of the connection profile to use as the source connection.
@@ -79,7 +79,7 @@
 					</row>
 
 					<row>
-						<entry>-targetProfile</entry>
+						<entry id="copy-target-con-profile">-targetProfile</entry>
 						<entry>
 							<para>
 								The name of the connection profile to use as the target connection. If
@@ -119,7 +119,7 @@
 					</row>
 
 					<row>
-						<entry>-commitEvery</entry>
+						<entry id="copy-commit">-commitEvery</entry>
 						<entry>
 							The number of rows after which a commit is sent to the target database. This parameter
 							is ignored if JDBC batching (<literal>-batchSize</literal>) is used.
@@ -127,7 +127,7 @@
 					</row>
 
 					<row>
-						<entry>-deleteTarget</entry>
+						<entry id="copy-delete-target">-deleteTarget</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -138,7 +138,7 @@
 					</row>
 
 					<row>
-						<entry>-mode</entry>
+						<entry id="copy-mode">-mode</entry>
 						<entry>
 							<para>
 								Defines how the data should be sent to the database. Possible
@@ -194,7 +194,7 @@
 					</row>
 
 					<row>
-						<entry>-ignoreIdentityColumns</entry>
+						<entry id="copy-ignore-identity">-ignoreIdentityColumns</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -226,7 +226,7 @@
 					</row>
 
 					<row>
-						<entry>-commitBatch</entry>
+						<entry id="copy-commit-batch">-commitBatch</entry>
 						<entry>
 							<para>Valid values: <literal>true</literal>, <literal>false</literal></para>
 							<para>When using the <literal>-batchSiez</literal> parameter, the
@@ -240,7 +240,7 @@
 					</row>
 
 					<row>
-						<entry>-continueOnError</entry>
+						<entry id="copy-continue">-continueOnError</entry>
 						<entry>
 							<para>
 								Defines the behaviour if an error occurs in one of the statements.
@@ -256,7 +256,7 @@
 					</row>
 
 					<row>
-						<entry>-useSavepoint</entry>
+						<entry id="copy-savepoint">-useSavepoint</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -382,7 +382,7 @@
 					</row>
 
 					<row>
-						<entry>-createTarget</entry>
+						<entry id="copy-create-target">-createTarget</entry>
 						<entry>
 							<para>
 								If this parameter is set to <literal>true</literal> the target table
@@ -404,6 +404,11 @@
                   a proper schema management. If you have the requirement to keep the schema definition
                   of different DBMS in sync please consider a tool like <ulink url="http://liquibase.org/">Liquibase</ulink>
                   or <ulink url="http://flywaydb.org/">Flyway</ulink>. Do not try to use <literal>WbCopy</literal> for this.
+                </para>
+                <para>
+                  If you want to migrate a table (or several tables) from one DBMS to another, consider user
+                  <link linkend="command-schema-report">WbSchemaReport</link> together with an
+                  <ulink url="http://www.sql-workbench.net/xslt.html">XSLT</ulink> transformation
                 </para>
               </important>
 							<para>
@@ -508,7 +513,7 @@
 							<para>
 								A column mapping defines which column from the source table maps to which column
 								of the target table (if the column names do not match)
-								If <literal>-createtable=true</literal> then the
+								If <literal>-createTarget=true</literal> then the
 								target table will be created from the specified target names:
 								<literal>-columns=firstname/surname, lastname/name, zipcode/zip</literal> Will copy the column
 								<literal>firstname</literal> from the source table to a column named <literal>surname</literal>
