@@ -1485,6 +1485,8 @@ public class WbConnection
 			LogMgr.logWarning("WbConnection.oracleCancel()", "Could not call OracleConnection.cancel()", th);
 		}
 
+		if (!pingAvailable) return;
+
 		try
 		{
 			// calling pingDatabase() after a cancel() fixes the problem that the next statement
