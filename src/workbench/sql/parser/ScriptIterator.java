@@ -50,7 +50,6 @@ public interface ScriptIterator
 	void setStoreStatementText(boolean flag);
 
 	boolean supportsSingleLineCommands();
-	boolean isSingleLimeCommand();
 
 	/**
 	 * Return the next command from the script.

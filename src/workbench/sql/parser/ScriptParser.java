@@ -586,15 +586,4 @@ public class ScriptParser
 		return command;
 	}
 
-	public boolean isSingleLineCommand(String sql)
-	{
-		ScriptIterator parser = getParserInstance();
-		if (parser.supportsSingleLineCommands())
-		{
-			parser.setScript(sql);
-			return parser.isSingleLimeCommand();
-		}
-		return false;
-	}
-
 }

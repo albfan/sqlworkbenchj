@@ -74,7 +74,6 @@ public class OracleDelimiterTester
 		alternateDelimiter = delimiter.createCopy();
 	}
 
-	@Override
 	public DelimiterDefinition getAlternateDelimiter()
 	{
 		return alternateDelimiter;

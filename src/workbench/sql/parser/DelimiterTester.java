@@ -29,7 +29,6 @@ import workbench.sql.lexer.SQLToken;
 public interface DelimiterTester
 {
 	void setAlternateDelimiter(DelimiterDefinition delimiter);
-	DelimiterDefinition getAlternateDelimiter();
 
 	void currentToken(SQLToken token, boolean isStartOfStatement);
 

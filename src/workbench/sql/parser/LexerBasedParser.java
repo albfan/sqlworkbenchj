@@ -83,6 +83,10 @@ public class LexerBasedParser
 		{
 			delimiterTester = new OracleDelimiterTester();
 		}
+		else if (type == ParserType.Postgres)
+		{
+			delimiterTester = new PostgresDelimiterTester();
+		}
 	}
 
 	public LexerBasedParser(String script)
@@ -513,15 +517,6 @@ public class LexerBasedParser
 	}
 
 	@Override
-	public boolean isSingleLimeCommand()
-	{
-		if (this.delimiterTester == null) return false;
-		reset();
-		SQLToken first = lexer.getNextToken(false, false);
-		return delimiterTester.isSingleLineStatement(first, true);
-	}
-
-	@Override
 	public boolean supportsSingleLineCommands()
 	{
 		if (delimiterTester == null) return false;
@@ -534,14 +529,6 @@ public class LexerBasedParser
 		if (text.charAt(0) != '$') return false;
 		if (text.equals(RowDataProducer.SKIP_INDICATOR)) return false;
 		return text.endsWith("$");
-	}
-
-	private class DelimiterCheckResult
-	{
-		boolean found;
-		String skippedText;
-		SQLToken lastToken;
-		DelimiterDefinition matchedDelimiter;
 	}
 
 }

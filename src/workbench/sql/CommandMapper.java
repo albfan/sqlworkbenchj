@@ -381,6 +381,10 @@ public class CommandMapper
 		this.cmdDispatch.put("\\set", set);
 		this.dbSpecificCommands.add("\\set");
 
+		SqlCommand include = this.cmdDispatch.get(WbInclude.VERB);
+		this.cmdDispatch.put("\\i", include);
+		this.dbSpecificCommands.add("\\i");
+
 		SqlCommand echo = this.cmdDispatch.get(WbEcho.VERB);
 		this.cmdDispatch.put("\\echo", echo);
 		this.cmdDispatch.put("\\qecho", echo);

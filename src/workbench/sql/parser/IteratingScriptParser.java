@@ -183,13 +183,6 @@ public class IteratingScriptParser
 		return false;
 	}
 
-	@Override
-	public boolean isSingleLimeCommand()
-	{
-		return false;
-	}
-
-
 	/**
 	 *	Define the script to be parsed
 	 */
