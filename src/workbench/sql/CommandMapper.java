@@ -323,6 +323,10 @@ public class CommandMapper
 			this.cmdDispatch.put(recreate.getVerb(), recreate);
 			this.dbSpecificCommands.add(recreate.getVerb());
 		}
+		else if (metaData.isPostgres())
+		{
+			mapPsql();
+		}
 
 		if (metaData.isMySql())
 		{
@@ -365,6 +369,29 @@ public class CommandMapper
 		// huge scripts the repeated call to getCommandToUse should
 		// be as quick as possible
 		this.supportsSelectInto = metaData.supportsSelectIntoNewTable();
+	}
+
+	private void mapPsql()
+	{
+		SqlCommand connInfo = this.cmdDispatch.get(WbConnInfo.VERB);
+		this.cmdDispatch.put("\\conninfo", connInfo);
+		this.dbSpecificCommands.add("\\conninfo");
+
+		SqlCommand set = this.cmdDispatch.get(SetCommand.VERB);
+		this.cmdDispatch.put("\\set", set);
+		this.dbSpecificCommands.add("\\set");
+
+		SqlCommand echo = this.cmdDispatch.get(WbEcho.VERB);
+		this.cmdDispatch.put("\\echo", echo);
+		this.cmdDispatch.put("\\qecho", echo);
+		this.dbSpecificCommands.add("\\echo");
+		this.dbSpecificCommands.add("\\qecho");
+
+		SqlCommand help = this.cmdDispatch.get(WbHelp.VERB);
+		this.cmdDispatch.put("\\help", help);
+		this.cmdDispatch.put("\\h", help);
+		this.dbSpecificCommands.add("\\help");
+		this.dbSpecificCommands.add("\\h");
 	}
 
 	/**
