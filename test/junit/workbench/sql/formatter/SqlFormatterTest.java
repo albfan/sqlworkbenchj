@@ -117,20 +117,15 @@ public class SqlFormatterTest
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
 
-	}
-
-	@Test
-	public void testCommentLinesInSelect2()
-	{
-		String sql =
+		sql =
 			"select one, -- comment \n " +
 			"       two, three, four from some_table t";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		f = new SqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
-		String formatted = f.getFormattedSql();
+		formatted = f.getFormattedSql();
 
-		String expected =
+		expected =
 			"SELECT one,\n" +
 			"       -- comment \n" +
 			"       two,\n" +
