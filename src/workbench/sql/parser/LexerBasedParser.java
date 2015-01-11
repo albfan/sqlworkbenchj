@@ -79,14 +79,7 @@ public class LexerBasedParser
 	{
 		parserType = type;
 		setCheckPgQuoting(parserType == ParserType.Postgres);
-		if (type == ParserType.Oracle)
-		{
-			delimiterTester = new OracleDelimiterTester();
-		}
-		else if (type == ParserType.Postgres)
-		{
-			delimiterTester = new PostgresDelimiterTester();
-		}
+		delimiterTester = DelimiterTesterFactory.getDelimiterTester(type);
 	}
 
 	public LexerBasedParser(String script)
