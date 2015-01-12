@@ -1488,11 +1488,6 @@ public class SqlUtil
 
 	public static WarningContent getWarnings(WbConnection con, Statement stmt)
 	{
-		return getWarnings(con, stmt, null);
-	}
-
-	public static WarningContent getWarnings(WbConnection con, Statement stmt, String currentError)
-	{
 		if (con == null) return null;
 
 		try
@@ -1518,7 +1513,7 @@ public class SqlUtil
 				isRealWarning = isRealWarning && isRealWarning(con, warn);
 				count ++;
 				s = warn.getMessage();
-				if (s != null && s.length() > 0 && !StringUtil.equalString(s, currentError))
+				if (s != null && s.length() > 0)
 				{
 					msg = append(msg, s);
 					if (s.charAt(s.length() - 1) != '\n') msg.append('\n');
@@ -1564,8 +1559,7 @@ public class SqlUtil
 			}
 
 			// make sure the warnings are cleared from both objects!
-			con.clearWarnings();
-			if (stmt != null) stmt.clearWarnings();
+			clearWarnings(con, stmt);
 			StringUtil.trimTrailingWhitespace(msg);
 			WarningContent content = new WarningContent(msg, isRealWarning);
 			return content;
@@ -1574,6 +1568,25 @@ public class SqlUtil
 		{
 			LogMgr.logWarning("SqlUtil.getWarnings()", "Error retrieving warnings", e);
 			return null;
+		}
+	}
+
+	public static void clearWarnings(WbConnection con, Statement stmt)
+	{
+		try
+		{
+			if (con != null) con.clearWarnings();
+		}
+		catch (Throwable th)
+		{
+
+		}
+		try
+		{
+			if (stmt != null) con.clearWarnings();
+		}
+		catch (Throwable th)
+		{
 		}
 	}
 

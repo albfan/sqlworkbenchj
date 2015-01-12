@@ -34,6 +34,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.LowMemoryException;
+import workbench.util.SqlUtil;
 
 /**
  * Implementation of the SELECT statement.
@@ -167,7 +168,17 @@ public class SelectCommand
 		catch (Exception e)
 		{
 			addErrorInfo(result, sql, e);
-			appendWarnings(result, true, e.getMessage());
+
+			// this config is only for MySQL because it repeats the error message
+			// as a warning on the statement instance
+			if (currentConnection.getDbSettings().addWarningsOnError())
+			{
+				appendWarnings(result, true);
+			}
+			else
+			{
+				SqlUtil.clearWarnings(currentConnection, currentStatement);
+			}
 			LogMgr.logUserSqlError("SelectCommand.execute()", sql, e);
 			this.runner.rollbackSavepoint();
 		}

@@ -1965,4 +1965,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "timestamp.ignore.read.errors", false);
 	}
+
+	public boolean addWarningsOnError()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "error.include.warning", true);
+	}
 }

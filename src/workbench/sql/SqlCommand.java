@@ -261,14 +261,9 @@ public class SqlCommand
 	 */
 	protected boolean appendWarnings(StatementRunnerResult result, boolean addLabel)
 	{
-		return appendWarnings(result, addLabel, null);
-	}
-
-	protected boolean appendWarnings(StatementRunnerResult result, boolean addLabel, String currentError)
-	{
 		if (this.runner.getHideWarnings()) return false;
 
-		WarningContent warnings = SqlUtil.getWarnings(this.currentConnection, this.currentStatement, currentError);
+		WarningContent warnings = SqlUtil.getWarnings(this.currentConnection, this.currentStatement);
 		if (warnings == null) return false;
 
 		CharSequence warn = warnings.allWarnings;
