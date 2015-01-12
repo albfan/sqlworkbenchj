@@ -261,9 +261,14 @@ public class SqlCommand
 	 */
 	protected boolean appendWarnings(StatementRunnerResult result, boolean addLabel)
 	{
+		return appendWarnings(result, addLabel, null);
+	}
+
+	protected boolean appendWarnings(StatementRunnerResult result, boolean addLabel, String currentError)
+	{
 		if (this.runner.getHideWarnings()) return false;
 
-		WarningContent warnings = SqlUtil.getWarnings(this.currentConnection, this.currentStatement);
+		WarningContent warnings = SqlUtil.getWarnings(this.currentConnection, this.currentStatement, currentError);
 		if (warnings == null) return false;
 
 		CharSequence warn = warnings.allWarnings;
@@ -633,7 +638,7 @@ public class SqlCommand
 						// without using statement.cancel()
 						// The DataStore checks for the cancel flag during processing of the ResulSet
 						this.currentRetrievalData.setGeneratingSql(result.getSourceCommand());
-						
+
 						if (fetchOnly)
 						{
 							int rows = currentRetrievalData.fetchOnly(rs);

@@ -1488,6 +1488,11 @@ public class SqlUtil
 
 	public static WarningContent getWarnings(WbConnection con, Statement stmt)
 	{
+		return getWarnings(con, stmt, null);
+	}
+
+	public static WarningContent getWarnings(WbConnection con, Statement stmt, String currentError)
+	{
 		if (con == null) return null;
 
 		try
@@ -1513,7 +1518,7 @@ public class SqlUtil
 				isRealWarning = isRealWarning && isRealWarning(con, warn);
 				count ++;
 				s = warn.getMessage();
-				if (s != null && s.length() > 0)
+				if (s != null && s.length() > 0 && !StringUtil.equalString(s, currentError))
 				{
 					msg = append(msg, s);
 					if (s.charAt(s.length() - 1) != '\n') msg.append('\n');

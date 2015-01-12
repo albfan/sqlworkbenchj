@@ -167,7 +167,7 @@ public class SelectCommand
 		catch (Exception e)
 		{
 			addErrorInfo(result, sql, e);
-			appendWarnings(result, true);
+			appendWarnings(result, true, e.getMessage());
 			LogMgr.logUserSqlError("SelectCommand.execute()", sql, e);
 			this.runner.rollbackSavepoint();
 		}
