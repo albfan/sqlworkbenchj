@@ -369,14 +369,17 @@ public class BatchRunner
 			return;
 		}
 
+		boolean promptPwd = !profile.getStorePassword();
+		
 		if (profile.getPromptForUsername())
 		{
 			String user = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("LblUsername") + ": ");
 			profile.setTemporaryUsername(user);
 			profile.setInputPassword(null);
+			promptPwd = true;
 		}
 
-		if (!profile.getStorePassword() && profile.getLoginPassword() == null)
+		if (promptPwd && profile.getLoginPassword() == null)
 		{
 			String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd") + " ");
 			profile.setInputPassword(pwd);
