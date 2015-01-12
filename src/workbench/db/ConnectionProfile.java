@@ -907,6 +907,7 @@ public class ConnectionProfile
 
 	public boolean getStorePassword()
 	{
+		if (this.promptForUsername) return false;
 		return this.storePassword;
 	}
 

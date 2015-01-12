@@ -179,7 +179,7 @@ public class SQLConsole
 					}
 					isCompleteStatement = true;
 				}
-				
+
 				if (isCompleteStatement)
 				{
 					try
@@ -319,13 +319,6 @@ public class SQLConsole
 	{
 		if (runner.hasProfile())
 		{
-			ConnectionProfile profile = runner.getProfile();
-			if (!profile.getStorePassword())
-			{
-				String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd"));
-				profile.setInputPassword(pwd);
-			}
-
 			try
 			{
 				runner.connect();

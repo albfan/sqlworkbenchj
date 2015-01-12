@@ -22,9 +22,6 @@
  */
 package workbench.sql;
 
-import workbench.sql.parser.ScriptParser;
-import workbench.sql.parser.ParserType;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -65,6 +62,8 @@ import workbench.gui.profiles.ProfileKey;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 import workbench.sql.wbcommands.ConnectionDescriptor;
 import workbench.sql.wbcommands.InvalidConnectionDescriptor;
 import workbench.sql.wbcommands.WbConnect;
@@ -370,9 +369,16 @@ public class BatchRunner
 			return;
 		}
 
-		if (!profile.getStorePassword())
+		if (profile.getPromptForUsername())
 		{
-			String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd"));
+			String user = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("LblUsername") + ": ");
+			profile.setTemporaryUsername(user);
+			profile.setInputPassword(null);
+		}
+
+		if (!profile.getStorePassword() && StringUtil.isEmptyString(profile.getLoginPassword()))
+		{
+			String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd") + " ");
 			profile.setInputPassword(pwd);
 		}
 
