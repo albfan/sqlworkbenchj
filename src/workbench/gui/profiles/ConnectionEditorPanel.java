@@ -1587,7 +1587,7 @@ public class ConnectionEditorPanel
 			JTextField f = new JTextField();
 			f.setDisabledTextColor(Color.BLACK);
 			f.setEditable(false);
-			f.setText(pwd);
+			f.setText(pwd == null ? "" : pwd);
 			Border b = new CompoundBorder(new LineBorder(Color.LIGHT_GRAY), new EmptyBorder(2, 2, 2, 2));
 			f.setBorder(b);
 			TextComponentMouseListener l = new TextComponentMouseListener();

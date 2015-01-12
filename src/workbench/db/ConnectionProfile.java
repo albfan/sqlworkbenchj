@@ -772,7 +772,7 @@ public class ConnectionProfile
 	{
 		if (newUrl != null) newUrl = newUrl.trim();
 		if (!StringUtil.equalString(newUrl, url)) changed = true;
-		this.url = newUrl;
+		url = newUrl;
 		usePgPass = (url != null && url.startsWith("jdbc:postgresql") && Settings.getInstance().usePgPassFile());
 	}
 
@@ -823,9 +823,19 @@ public class ConnectionProfile
 	{
 		if (usePgPass())
 		{
-			return PgPassReader.passFileExists();
+			return getPgPassPassword() != null;
 		}
 		return StringUtil.isNonEmpty(password) || usePgPass();
+	}
+
+	private String getPgPassPassword()
+	{
+		if (usePgPass())
+		{
+			PgPassReader reader = new PgPassReader(url, getLoginUser());
+			return reader.getPasswordFromFile();
+		}
+		return null;
 	}
 
 	public String getLoginPassword()
@@ -837,15 +847,9 @@ public class ConnectionProfile
 
 		if (usePgPass())
 		{
-			PgPassReader reader = new PgPassReader(url, getLoginUser());
-			String pwd = reader.getPasswordFromFile();
-			if (pwd != null)
-			{
-				LogMgr.logDebug("ConnectionProfile.getLoginPassword()", "Using password from pgpass file for URL: " + url);
-				return pwd;
-			}
+			return getPgPassPassword();
 		}
-		return "";
+		return null;
 	}
 
 	public String getLoginUser()
