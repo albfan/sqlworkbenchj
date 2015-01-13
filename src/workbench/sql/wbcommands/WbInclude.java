@@ -78,6 +78,7 @@ public class WbInclude
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(AppArguments.ARG_SHOWPROGRESS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CHECK_ESCAPED_QUOTES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ALT_DELIMITER,StringUtil.stringToList("';',oracle,mssql"));
@@ -121,6 +122,7 @@ public class WbInclude
 
 		String clean = SqlUtil.makeCleanSql(aSql, false, false);
 		boolean checkParms = true;
+		boolean showProgress = true;
 
 		WbFile file = null;
 
@@ -135,6 +137,7 @@ public class WbInclude
 				file = new WbFile(fullname);
 			}
 			checkParms = false;
+			showProgress = false;
 		}
 		else
 		{
@@ -222,6 +225,7 @@ public class WbInclude
 			setUnknownMessage(result, cmdLine, null);
 			showStmts = cmdLine.getBoolean(ARG_PRINT_STATEMENTS, this.runner.getTraceStatements());
 			showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, false);
+			showProgress = cmdLine.getBoolean(AppArguments.ARG_SHOWPROGRESS, true);
 		}
 
 		if (encoding == null)
@@ -246,7 +250,11 @@ public class WbInclude
 			batchRunner.setDelimiter(delim);
 			batchRunner.setResultLogger(this.resultLogger);
 			batchRunner.setVerboseLogging(verbose);
-			batchRunner.setRowMonitor(this.rowMonitor);
+			if (showProgress)
+			{
+				batchRunner.setRowMonitor(this.rowMonitor);
+			}
+			batchRunner.setShowProgress(showProgress);
 			batchRunner.setAbortOnError(!continueOnError);
 			batchRunner.setCheckEscapedQuotes(checkEscape);
 			batchRunner.setShowTiming(showTiming);
