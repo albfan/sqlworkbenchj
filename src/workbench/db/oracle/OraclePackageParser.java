@@ -33,6 +33,7 @@ import workbench.db.ProcedureDefinition;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
+import workbench.sql.parser.ParserType;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -73,10 +74,17 @@ public class OraclePackageParser
 		return this.packageName;
 	}
 
+	public void getProcedureCode(String name)
+	{
+		SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Oracle, packageBody);
+
+
+	}
+
 	private void parse(String sql)
 		throws IOException
 	{
-		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
+		SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Oracle, sql);
 		SQLToken t = lexer.getNextToken(false, false);
 
 		int defBegin = -1;
@@ -171,10 +179,17 @@ public class OraclePackageParser
 
 	public static int findProcedurePosition(CharSequence source, ProcedureDefinition def, List<String> parameters)
 	{
+		CodeArea area = findProcedureArea(source, def, parameters);
+		return area.startPos;
+	}
+
+	private static CodeArea findProcedureArea(CharSequence source, ProcedureDefinition def, List<String> parameters)
+	{
 		int procPos = -1;
 
 		SQLLexer lexer = SQLLexerFactory.createLexer(source);
 		SQLToken t = lexer.getNextToken(false, false);
+		CodeArea result = new CodeArea();
 
 		boolean packageHeaderFound = false;
 		String procType = def.isFunction() ? "FUNCTION" : "PROCEDURE";
@@ -191,7 +206,7 @@ public class OraclePackageParser
 			t = lexer.getNextToken(false, false);
 		}
 
-		if (t == null && !packageHeaderFound) return -1;
+		if (t == null && !packageHeaderFound) return result;
 		if (packageHeaderFound && t == null)
 		{
 			// apparently only the defintion but not the body is available
@@ -239,7 +254,19 @@ public class OraclePackageParser
 			}
 			t = lexer.getNextToken(false, false);
 		}
-		return procPos;
+		result.startPos = procPos;
+
+//		// now find the end of the procedure/function
+//		int blockCount = 0;
+//		while (t != null)
+//		{
+//			String text = t.getContents();
+//			if (text.equals("BEGIN"))
+//			{
+//				blockCount ++;
+//			}
+//		}
+		return result;
 	}
 
 	private static List<String> getParameters(SQLLexer lexer)
@@ -280,4 +307,11 @@ public class OraclePackageParser
 		}
 		return true;
 	}
+
+	private static class CodeArea
+	{
+		int startPos = -1;
+		int endPos = -1;
+	}
+
 }
