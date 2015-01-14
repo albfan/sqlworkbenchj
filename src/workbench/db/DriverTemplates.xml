@@ -28,7 +28,7 @@
      <string>monetdb-jdbc-2.9-java6.jar</string>
     </void>
     <void property="name">
-     <string>Apache Derby Embedded</string>
+     <string>MonetDB</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:monetdb://(hostname)/(database)</string>
