@@ -130,12 +130,6 @@ public class WbInclude
 		{
 			clean = clean.substring(1);
 			file = evaluateFileArgument(clean);
-			String ext = file.getExtension();
-			if (ext != null && !ext.toLowerCase().equals("sql"))
-			{
-				String fullname = file.getFullPath() + ".sql";
-				file = new WbFile(fullname);
-			}
 			checkParms = false;
 			showProgress = false;
 		}
@@ -150,6 +144,11 @@ public class WbInclude
 				file = evaluateFileArgument(clean);
 				checkParms = false;
 			}
+		}
+
+		if (file != null && StringUtil.isEmptyString(file.getExtension()))
+		{
+			file = new WbFile(file.getFullPath() + ".sql");
 		}
 
 		if (!ConditionCheck.isCommandLineOK(result, cmdLine))
