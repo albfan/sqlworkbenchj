@@ -2028,6 +2028,28 @@ public class SqlFormatterTest
 		CharSequence formatted = f.getFormattedSql();
 		String expected = "SELECT a,\n       b,\n       \"c d\"\nFROM mytable";
 		assertEquals(expected, formatted);
+
+		sql = "select x.\"Foo\", x.\"Bar\" from mytable x";
+		f = new SqlFormatter(sql, 100);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT x.\"Foo\",\n" +
+			"       x.\"Bar\"\n" +
+			"FROM mytable x";
+//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+//		assertEquals(expected, formatted);
+
+		sql = "select x.Foo, x.Bar from mytable x";
+		f = new SqlFormatter(sql, 100);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		formatted = f.getFormattedSql();
+		expected =
+			"SELECT x.foo,\n" +
+			"       x.bar\n" +
+			"FROM mytable x";
+//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+		assertEquals(expected, formatted);
 	}
 
 	@Test
