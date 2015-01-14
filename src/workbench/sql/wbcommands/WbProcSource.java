@@ -65,10 +65,20 @@ public class WbProcSource
 		TableIdentifier object = new TableIdentifier(args, currentConnection);
 		object.adjustCase(currentConnection);
 
-		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
-		ProcedureDefinition def = new ProcedureDefinition(object.getCatalog(), object.getSchema(), object.getObjectName());
+		if (object.getSchema() == null)
+		{
+			object.setSchema(currentConnection.getCurrentSchema());
+		}
 
-		if (reader.procedureExists(def))
+		if (object.getCatalog() == null)
+		{
+			object.setCatalog(currentConnection.getCurrentCatalog());
+		}
+
+		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
+		ProcedureDefinition def = reader.findProcedure(object);
+
+		if (def != null)
 		{
 			CharSequence source = def.getSource(currentConnection);
 			result.addMessage(source);
@@ -82,7 +92,7 @@ public class WbProcSource
 
 		return result;
 	}
-	
+
 	@Override
 	public boolean isWbCommand()
 	{
