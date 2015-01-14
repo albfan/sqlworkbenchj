@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DbMetadata;
+import workbench.db.DbObject;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
 import workbench.db.NoConfigException;
@@ -511,4 +512,48 @@ public class OracleProcedureReader
 			def.setSource(source);
 		}
 	}
+
+	@Override
+	public ProcedureDefinition findProcedure(DbObject toFind)
+		throws SQLException
+	{
+		if (toFind == null) return null;
+
+		String objSchema = toFind.getSchema();
+		String objCat = toFind.getCatalog();
+
+		if (objSchema != null && objCat != null)
+		{
+			// this is a fully qualified packaged procedure: scott.some_package.some_proc
+			// we need to "swap" catalog and owner in order to properly find the procedure
+			DataStore procs = getProcedures(objSchema, objCat, toFind.getObjectName());
+			if (procs.getRowCount() == 0) return null;
+			if (procs.getRowCount() > 0) return (ProcedureDefinition)procs.getRow(0).getUserObject();
+		}
+
+		String user = connection.getMetadata().adjustObjectnameCase(connection.getCurrentUser());
+
+		if (objSchema != null)
+		{
+			// this could be user.procedure or package.procedure
+			// first we check for package.procedure for the current user:
+
+			DataStore procs = getProcedures(objSchema, user, toFind.getObjectName());
+			if (procs.getRowCount() > 0) return (ProcedureDefinition)procs.getRow(0).getUserObject();
+
+			// not a package procedure for the current user, check regular procedures assuming this is for a different user
+			procs = getProcedures(null, objSchema, toFind.getObjectName());
+			if (procs.getRowCount() > 0) return (ProcedureDefinition)procs.getRow(0).getUserObject();
+		}
+
+		// no schema, no user specified, try the current user
+		DataStore procs = getProcedures(null, user, toFind.getObjectName());
+		if (procs.getRowCount() > 0) return (ProcedureDefinition)procs.getRow(0).getUserObject();
+
+		procs = getProcedures(null, null, toFind.getObjectName());
+		if (procs.getRowCount() > 0) return (ProcedureDefinition)procs.getRow(0).getUserObject();
+
+		return null;
+	}
+
 }

@@ -32,10 +32,14 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 import workbench.db.oracle.OraclePackageParser;
+import workbench.db.oracle.OracleProcedureReader;
+
+import workbench.storage.DataStore;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
+
+import workbench.util.StringUtil;
 
 /**
  * Display the source code for a procedure.
@@ -69,16 +73,6 @@ public class WbProcSource
 		TableIdentifier object = new TableIdentifier(args, currentConnection);
 		object.adjustCase(currentConnection);
 
-		if (object.getSchema() == null)
-		{
-			object.setSchema(currentConnection.getCurrentSchema());
-		}
-
-		if (object.getCatalog() == null)
-		{
-			object.setCatalog(currentConnection.getCurrentCatalog());
-		}
-
 		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
 		ProcedureDefinition def = reader.findProcedure(object);
 
@@ -91,6 +85,9 @@ public class WbProcSource
 				CharSequence procSrc = OraclePackageParser.getProcedureSource(source, def, getParameterNames(cols));
 				if (procSrc != null)
 				{
+					String msg = "Package: " + def.getPackageName();
+					result.addMessage(msg);
+					result.addMessage(StringUtil.padRight("-", msg.length(), '-') + "\n");
 					result.addMessage(procSrc);
 				}
 				else
@@ -106,10 +103,20 @@ public class WbProcSource
 		}
 		else
 		{
+			if (reader instanceof OracleProcedureReader)
+			{
+				// maybe this is just the package name
+				String user = currentConnection.getMetadata().adjustObjectnameCase(currentConnection.getCurrentUser());
+				CharSequence source = ((OracleProcedureReader)reader).getPackageSource(user, object.getObjectName());
+				if (source != null)
+				{
+					result.addMessage(source);
+					return result;
+				}
+			}
 			result.addMessage(ResourceMgr.getFormattedString("ErrProcNotFound", args));
 			result.setFailure();
 		}
-
 		return result;
 	}
 
