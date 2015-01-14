@@ -109,11 +109,7 @@ public class DdlCommand
 			// but only for "PL/SQL" objects, the last error is not overwritten by creating a table or a view
 			currentConnection.setLastDDLObject(info);
 		}
-		else if (info == null)
-		{
-			currentConnection.setLastDDLObject(null);
-		}
-		
+
 		boolean isDrop = false;
 		try
 		{
