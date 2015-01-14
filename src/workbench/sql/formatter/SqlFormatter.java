@@ -520,7 +520,7 @@ public class SqlFormatter
 		if (last.isWhiteSpace()) return false;
 		String lastText = last.getContents();
 		String currentText = current.getContents();
-		char lastChar = lastText.charAt(0);
+		char lastChar = lastText.charAt(lastText.length() - 1);
 		char currChar = currentText.charAt(0);
 		if (currChar == catalogSeparator) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
@@ -560,8 +560,8 @@ public class SqlFormatter
 		if (lastChar == '[' && !last.isIdentifier()) return false;
 
 		if (lastChar == catalogSeparator && current.isIdentifier()) return false;
-		if (lastChar == catalogSeparator && currChar == '*') return true; // e.g. person.*
-		if (lastChar == catalogSeparator && currChar == '[') return true; // e.g. p.[id] for the dreaded SQL Server "quotes"
+		if (lastChar == catalogSeparator && currChar == '*') return false; // e.g. person.*
+		if (lastChar == catalogSeparator && currChar == '[') return false; // e.g. p.[id] for the dreaded SQL Server "quotes"
 		if (last.isLiteral() && isCurrentOpenBracket) return true;
 		if (isLastOpenBracket && isKeyword(currentText)) return false;
 		if (isLastCloseBracket && !current.isSeparator() ) return true;

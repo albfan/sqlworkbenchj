@@ -2037,8 +2037,8 @@ public class SqlFormatterTest
 			"SELECT x.\"Foo\",\n" +
 			"       x.\"Bar\"\n" +
 			"FROM mytable x";
-//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
-//		assertEquals(expected, formatted);
+//		System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+		assertEquals(expected, formatted);
 
 		sql = "select x.Foo, x.Bar from mytable x";
 		f = new SqlFormatter(sql, 100);
