@@ -23,9 +23,13 @@
 package workbench.db.oracle;
 
 import org.junit.Test;
+
 import java.sql.DatabaseMetaData;
+import java.util.List;
+
 import workbench.db.ProcedureDefinition;
 import workbench.util.CollectionUtil;
+
 import static org.junit.Assert.*;
 
 /**
@@ -94,6 +98,26 @@ public class OraclePackageParserTest
              "---------------------------------------------------- \n" +
              "END emp_actions;";
 
+
+	@Test
+	public void testGetProcSource()
+	{
+		String script = decl + "\n/\n/" + body + "\n/\n/";
+		List<String> params = CollectionUtil.arrayList("emp_id", "fire_date");
+		ProcedureDefinition proc = new ProcedureDefinition("FIRE_EMPLOYEE", DatabaseMetaData.procedureNoResult);
+		CharSequence source = OraclePackageParser.getProcedureSource(script, proc, params);
+		assertNotNull(source);
+		String src = source.toString().trim();
+		assertTrue(src.startsWith("PROCEDURE fire_employee"));
+
+		params = CollectionUtil.arrayList("ename", "job", "mgr", "sal","comm", "deptno");
+		proc = new ProcedureDefinition("HIRE_EMPLOYEE", DatabaseMetaData.procedureNoResult);
+		source = OraclePackageParser.getProcedureSource(script, proc, params);
+		assertNotNull(source);
+		src = source.toString().trim();
+		assertTrue(src.startsWith("PROCEDURE hire_employee"));
+		assertTrue(src.endsWith("END hire_employee;"));
+	}
 
 	@Test
 	public void testParser()

@@ -74,11 +74,14 @@ public class OraclePackageParser
 		return this.packageName;
 	}
 
-	public void getProcedureCode(String name)
+	public static CharSequence getProcedureSource(CharSequence source, ProcedureDefinition def, List<String> parameters)
 	{
-		SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Oracle, packageBody);
-
-
+		CodeArea bounds = findProcedureArea(source, def, parameters);
+		if (bounds.startPos > -1 && bounds.endPos > -1)
+		{
+			return source.subSequence(bounds.startPos, bounds.endPos);
+		}
+		return null;
 	}
 
 	private void parse(String sql)
@@ -144,7 +147,7 @@ public class OraclePackageParser
 		}
 	}
 
-	private boolean isCreate(String text)
+	private static boolean isCreate(String text)
 	{
 		return text.equals("CREATE") || text.equals("CREATE OR REPLACE");
 	}
@@ -256,16 +259,29 @@ public class OraclePackageParser
 		}
 		result.startPos = procPos;
 
-//		// now find the end of the procedure/function
-//		int blockCount = 0;
-//		while (t != null)
-//		{
-//			String text = t.getContents();
-//			if (text.equals("BEGIN"))
-//			{
-//				blockCount ++;
-//			}
-//		}
+		// now find the end of the procedure/function
+		SQLToken lastToken = t;
+		SQLToken lastEnd = null;
+
+		while (t != null)
+		{
+			String text = t.getContents();
+			if (text.equals("PROCEDURE") || text.equals("FUNCTION"))
+			{
+				result.endPos = lastToken == null ? t.getCharBegin() - 1 : lastToken.getCharEnd();
+				break;
+			}
+			if (text.equals("END"))
+			{
+				lastEnd = t;
+			}
+			lastToken = t;
+			t = lexer.getNextToken(false, false);
+		}
+		if (result.endPos == -1 && lastEnd != null)
+		{
+			result.endPos = lastEnd.getCharBegin() - 1;
+		}
 		return result;
 	}
 
