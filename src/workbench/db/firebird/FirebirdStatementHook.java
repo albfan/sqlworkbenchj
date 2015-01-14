@@ -53,7 +53,7 @@ public class FirebirdStatementHook
 	private Method getPlan;
 	private boolean useDefaultClassloader;
 
-	private Set<String> explainable = CollectionUtil.caseInsensitiveSet("select", "update", "delete", "insert");
+	private Set<String> explainable = CollectionUtil.caseInsensitiveSet("with", "select", "update", "delete", "insert");
 	private String toExplain;
 
 	public FirebirdStatementHook(WbConnection connection)
