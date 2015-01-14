@@ -14,8 +14,15 @@
   omit-xml-declaration="yes"
 />
 
+<!-- 
+  Parameters can be overriden by using -xsltParameters
+  For example: -xsltParameters="useJdbcTypes=true" sets param useJdbcTypes to true.
+-->
   <xsl:param name="useJdbcTypes">false</xsl:param>
   <xsl:param name="makeLowerCase">true</xsl:param>
+  <!-- Should column names be quoted (surrounded by variable quote)? -->
+  <xsl:param name="quoteColumnName">true</xsl:param>
+  <xsl:param name="commitAfterEachTable">true</xsl:param>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -28,8 +35,11 @@
     <xsl:text>&#96;</xsl:text>
   </xsl:variable>
 
-
   <xsl:template match="/">
+  	<xsl:if test="$useJdbcTypes = 'false'">
+  		<xsl:message>NOTE: You are not using JDBC types !! Use -xsltParameters="useJdbcTypes=true" for using JDBC-Types</xsl:message>
+  	</xsl:if>
+  	
     <xsl:apply-templates select="/schema-report/sequence-def">
       <xsl:with-param name="definition-part" select="'create'"/>
     </xsl:apply-templates>
@@ -114,7 +124,10 @@
       </xsl:variable>
 
       <xsl:text>  </xsl:text>
-      <xsl:copy-of select="$colname"/>
+      <xsl:if test="$quoteColumnName = 'true'"><xsl:value-of select="$quote" /></xsl:if>
+ 	  <xsl:copy-of select="$colname"/>
+ 	  <xsl:if test="$quoteColumnName = 'true'"><xsl:value-of select="$quote" /></xsl:if>
+      
       <xsl:text> </xsl:text>
       <xsl:value-of select="$datatype"/>
       <xsl:value-of select="$defaultvalue"/>
@@ -201,7 +214,11 @@
       </xsl:call-template>
     </xsl:for-each>
     <xsl:value-of select="$newline"/>
-
+    
+    <xsl:if test="$commitAfterEachTable = 'true'">
+    	<xsl:text>COMMIT;</xsl:text>
+    	<xsl:value-of select="$newline"/>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template name="create-index">
