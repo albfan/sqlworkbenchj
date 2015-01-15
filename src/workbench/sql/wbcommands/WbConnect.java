@@ -138,20 +138,22 @@ public class WbConnect
 			return result;
 		}
 
-		if (!profile.getStorePassword())
+		boolean promptPwd = !profile.getStorePassword();
+
+		ExecutionController controller = this.runner.getExecutionController();
+
+		if (profile.getPromptForUsername() && controller != null)
 		{
-			ExecutionController controller = this.runner.getExecutionController();
-			if (controller == null)
-			{
-				result.addMessage(ResourceMgr.getString("ErrConnectNoPwd"));
-				result.setFailure();
-				return result;
-			}
-			else
-			{
-				String pwd = controller.getPassword(ResourceMgr.getString("MsgInputPwd"));
-				profile.setInputPassword(pwd);
-			}
+			String user = controller.getPassword(ResourceMgr.getString("LblUsername"));
+			profile.setTemporaryUsername(user);
+			profile.setInputPassword(null);
+			promptPwd = true;
+		}
+
+		if (promptPwd && profile.getLoginPassword() == null && controller != null)
+		{
+			String pwd = controller.getPassword(ResourceMgr.getString("MsgInputPwd"));
+			profile.setInputPassword(pwd);
 		}
 
 		WbConnection newConn = null;

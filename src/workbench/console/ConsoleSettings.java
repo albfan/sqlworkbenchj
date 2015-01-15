@@ -146,4 +146,8 @@ public class ConsoleSettings
 		return Settings.getInstance().getBoolProperty("workbench.console.terminal.title.show.url", false);
 	}
 
+	public static boolean useHistoryPerProfile()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.console.history.per_profile", true);
+	}
 }

@@ -137,7 +137,7 @@ public class SQLConsole
 
 			ResultSetPrinter printer = createPrinter(cmdLine, optimizeColWidths, runner);
 
-			history.readFrom(getHistoryFile());
+			loadHistory();
 
 			initAbbreviations();
 
@@ -180,6 +180,10 @@ public class SQLConsole
 					isCompleteStatement = true;
 				}
 
+				boolean changeHistory = false;
+				boolean addToHistory = true;
+				
+				WbFile lastHistory = getHistoryFile();
 				if (isCompleteStatement)
 				{
 					try
@@ -187,11 +191,20 @@ public class SQLConsole
 						prompter.resetExecuteAll();
 						if (firstWord.equalsIgnoreCase(WbHistory.VERB))
 						{
-							handleHistory(runner, stmt);
+							stmt = handleHistory(runner, stmt);
+							firstWord = getFirstWord(stmt);
+							addToHistory = false;
 						}
-						else if (StringUtil.isNonEmpty(stmt))
+
+						if (StringUtil.isNonEmpty(stmt))
 						{
-							history.add(stmt);
+							if (addToHistory) history.add(stmt);
+							changeHistory = firstWord.equalsIgnoreCase(WbConnect.VERB) && ConsoleSettings.useHistoryPerProfile();
+							if (changeHistory)
+							{
+								saveHistory();
+							}
+
 							if (StringUtil.isBlank(macro))
 							{
 								runner.runScript(stmt);
@@ -221,6 +234,11 @@ public class SQLConsole
 					// this needs to be done after each statement as the connection might have changed.
 					buffer.setDbId(getDbId(runner));
 
+					if (changeHistory && !lastHistory.equals(getHistoryFile()))
+					{
+						loadHistory();
+					}
+
 					// Restore the printing consumer in case a WbExport changed it
 					if (printer != null && runner.getResultSetConsumer() == null)
 					{
@@ -242,7 +260,7 @@ public class SQLConsole
 		finally
 		{
 			Runtime.getRuntime().removeShutdownHook(shutdownHook);
-			history.saveTo(getHistoryFile());
+			saveHistory();
 
 			ConsoleReaderFactory.getConsoleReader().shutdown();
 			ConnectionMgr.getInstance().disconnectAll();
@@ -419,7 +437,7 @@ public class SQLConsole
 		return conn.getDbId();
 	}
 
-	private void handleHistory(BatchRunner runner, String stmt)
+	private String handleHistory(BatchRunner runner, String stmt)
 		throws IOException
 	{
 		adjustHistoryDisplay(runner);
@@ -457,8 +475,9 @@ public class SQLConsole
 
 		if (index > 0 && index <= history.size())
 		{
-			runner.runScript(history.get(index - 1));
+			return history.get(index - 1);
 		}
+		return null;
 	}
 
 	private String getMacroText(String sql)
@@ -466,13 +485,33 @@ public class SQLConsole
 		return MacroManager.getInstance().getMacroText(MacroManager.DEFAULT_STORAGE, SqlUtil.trimSemicolon(sql));
 	}
 
-	private WbFile getHistoryFile()
+	private void saveHistory()
 	{
-		String fname = Settings.getInstance().getProperty("workbench.console.history.file", HISTORY_FILENAME);
-		WbFile file = new WbFile(Settings.getInstance().getConfigDir(), fname);
-		return file;
+		history.saveTo(getHistoryFile());
 	}
 
+	private void loadHistory()
+	{
+		history.clear();
+		history.readFrom(getHistoryFile());
+	}
+
+	private WbFile getHistoryFile()
+	{
+		String fname = null;
+
+		if (ConsoleSettings.useHistoryPerProfile() && runner != null && runner.getConnection() != null)
+		{
+			fname = runner.getConnection().createFilename() + "_history.txt";
+		}
+
+		if (fname == null)
+		{
+			fname = Settings.getInstance().getProperty("workbench.console.history.file", HISTORY_FILENAME);
+		}
+		WbFile result = new WbFile(Settings.getInstance().getConfigDir(), fname);
+		return result;
+	}
 
 	private void adjustHistoryDisplay(BatchRunner runner)
 	{
@@ -488,12 +527,7 @@ public class SQLConsole
 
 	private String getFirstWord(String input)
 	{
-		// I can't use SqlUtil.getSqlVerb() because that would not return e.g. \s as a single "word"
-		if (StringUtil.isBlank(input)) return null;
-		input = input.trim();
-		int pos = input.indexOf(' ');
-		if (pos <= 0) return SqlUtil.trimSemicolon(input);
-		return SqlUtil.trimSemicolon(input.substring(0, pos));
+		return SqlUtil.getSqlVerb(input);
 	}
 
 	private String checkConnection(BatchRunner runner)

@@ -1509,4 +1509,8 @@ public class WbConnection
 		}
 	}
 
+	public String createFilename()
+	{
+		return ConnectionProfile.makeFilename(getUrl(), getDisplayUser());
+	}
 }

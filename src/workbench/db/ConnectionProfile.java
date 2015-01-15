@@ -1216,4 +1216,22 @@ public class ConnectionProfile
 		}
 	}
 
+	public static String makeFilename(String jdbcUrl, String userName)
+	{
+		Pattern invalidChars = Pattern.compile("[^a-zA-Z0-9$]+");
+		Matcher urlMatcher = invalidChars.matcher(jdbcUrl);
+		String url = urlMatcher.replaceAll("_");
+
+		// remove the jdbc_ prefix, it is not needed
+		url = url.substring(5);
+
+		String user = "";
+		if (StringUtil.isNonBlank(userName))
+		{
+			Matcher userMatcher = invalidChars.matcher(userName);
+			user = userMatcher.replaceAll("_") + "@";
+		}
+		return user.toLowerCase() + url.toLowerCase();
+	}
+	
 }

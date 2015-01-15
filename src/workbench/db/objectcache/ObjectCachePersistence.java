@@ -31,8 +31,6 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -42,6 +40,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionProfile;
 import workbench.db.DependencyNode;
 import workbench.db.IndexDefinition;
 import workbench.db.PkDefinition;
@@ -50,7 +49,6 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.util.DurationNumber;
-import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
@@ -276,20 +274,7 @@ class ObjectCachePersistence
 
 	private WbFile getCacheFile(String jdbcUrl, String userName)
 	{
-		Pattern invalidChars = Pattern.compile("[^a-zA-Z0-9$]+");
-		Matcher urlMatcher = invalidChars.matcher(jdbcUrl);
-		String url = urlMatcher.replaceAll("_");
-
-		// remove the jdbc_ prefix, it is not needed
-		url = url.substring(5);
-
-		String user = "";
-		if (StringUtil.isNonBlank(userName))
-		{
-			Matcher userMatcher = invalidChars.matcher(userName);
-			user = userMatcher.replaceAll("_") + "@";
-		}
-
+		String fileName = ConnectionProfile.makeFilename(jdbcUrl, userName);
 		WbFile configDir = new WbFile(Settings.getInstance().getConfigDir());
 		String cacheDirName = Settings.getInstance().getProperty(GuiSettings.PROP_LOCAL_OBJECT_CACHE_DIR, ".cache");
 		WbFile cDir = new WbFile(cacheDirName);
@@ -317,6 +302,6 @@ class ObjectCachePersistence
 				cacheDir = configDir;
 			}
 		}
-		return new WbFile(cacheDir, user.toLowerCase() + url.toLowerCase() + ".wbcache");
+		return new WbFile(cacheDir, fileName + ".wbcache");
 	}
 }

@@ -86,7 +86,7 @@ public class ConsolePrompter
 			String value = ds.getValueAsString(row, 1);
 
 			String msg = StringUtil.isBlank(value) ? varName + ": " : varName + " [" + value + "]: ";
-			String newValue = readLine(msg);
+			String newValue = getInput(msg);
 			if (StringUtil.isEmptyString(newValue) && StringUtil.isNonEmpty(value))
 			{
 				newValue = value;
@@ -105,7 +105,8 @@ public class ConsolePrompter
 		return true;
 	}
 
-	protected String readLine(String prompt)
+	@Override
+	public String getInput(String prompt)
 	{
 		return ConsoleReaderFactory.getConsoleReader().readLine(prompt);
 	}
@@ -123,7 +124,7 @@ public class ConsolePrompter
 		String no = noText == null ? ResourceMgr.getString("MsgConfirmNo") : noText;
 		String yesNo = yes + "/" + no;
 		String msg = HtmlUtil.cleanHTML(prompt) + " (" + yesNo + ")";
-		String choice = readLine(msg + " ");
+		String choice = getInput(msg + " ");
 
 		if (StringUtil.isBlank(choice))
 		{
@@ -146,7 +147,7 @@ public class ConsolePrompter
 		String yesNo = yes + "/" + ResourceMgr.getString("MsgConfirmNo") + "/" + all;
 
 		String msg = ResourceMgr.getFormattedString("MsgConfirmConsoleExec", verb, yesNo);
-		String choice = readLine(msg + " ");
+		String choice = getInput(msg + " ");
 
 		if (all.equalsIgnoreCase(choice))
 		{
@@ -170,7 +171,7 @@ public class ConsolePrompter
 
 			String msg = StringUtil.isBlank(stringValue) ? varName : varName + " [" + stringValue + "]";
 
-			String newValue = readLine(msg + ": ");
+			String newValue = getInput(msg + ": ");
 			parms.setParameterValue(param, newValue);
 		}
 		return true;

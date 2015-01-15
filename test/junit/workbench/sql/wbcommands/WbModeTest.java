@@ -162,5 +162,12 @@ public class WbModeTest
 		{
 			return "";
 		}
+
+		@Override
+		public String getInput(String prompt)
+		{
+			return "";
+		}
+
 	}
 }

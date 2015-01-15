@@ -117,7 +117,6 @@ public class StatementRunnerTest
 
 			ExecutionController controller = new ExecutionController()
 			{
-
 				@Override
 				public boolean confirmStatementExecution(String command)
 				{
@@ -134,6 +133,12 @@ public class StatementRunnerTest
 
 				@Override
 				public String getPassword(String prompt)
+				{
+					return null;
+				}
+
+				@Override
+				public String getInput(String prompt)
 				{
 					return null;
 				}
