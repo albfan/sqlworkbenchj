@@ -31,6 +31,7 @@ import workbench.sql.wbcommands.console.WbAbout;
 import workbench.sql.wbcommands.console.WbCreateProfile;
 import workbench.sql.wbcommands.console.WbDefineDriver;
 import workbench.sql.wbcommands.console.WbDefineMacro;
+import workbench.sql.wbcommands.console.WbDeleteMacro;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbDisplay;
@@ -129,6 +130,7 @@ public class CommandTester
 		putVerb(WbEcho.VERB);
 		putVerb(WbHistory.VERB);
 		putVerb(WbDefineMacro.VERB);
+		putVerb(WbDeleteMacro.VERB);
 		putVerb(WbListMacros.VERB);
 		putVerb(WbListIndexes.VERB);
 		putVerb(WbRowCount.VERB);

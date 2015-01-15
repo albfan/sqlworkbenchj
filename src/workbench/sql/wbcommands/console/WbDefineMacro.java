@@ -109,8 +109,6 @@ public class WbDefineMacro
 		String macroName = cmdLine.getValue(ARG_NAME);
 		boolean expand = cmdLine.getBoolean(ARG_EXPAND);
 
-		boolean newMacro = false;
-
 		if (StringUtil.isBlank(macroName))
 		{
 			result.setFailure();
@@ -139,13 +137,11 @@ public class WbDefineMacro
 		{
 			def = new MacroDefinition(macroName, macroText);
 			msg = ResourceMgr.getFormattedString("MsgMacroAdded", macroName);
-			newMacro = true;
 		}
 		else
 		{
 			def.setText(macroText);
 			msg = ResourceMgr.getFormattedString("MsgMacroRedef", macroName);
-			newMacro = false;
 		}
 
 		def.setExpandWhileTyping(expand);
