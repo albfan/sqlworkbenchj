@@ -63,6 +63,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 import static workbench.gui.completion.BaseAnalyzer.*;
+import workbench.sql.wbcommands.WbViewSource;
 
 
 /**
@@ -155,6 +156,10 @@ public class WbCommandAnalyzer
 			if (showTableList(cmd, args))
 			{
 				this.context = CONTEXT_TABLE_LIST;
+			}
+			else if (cmd instanceof WbViewSource)
+			{
+				this.context = CONTEXT_VIEW_LIST;
 			}
 			else
 			{
@@ -282,7 +287,7 @@ public class WbCommandAnalyzer
 	@Override
 	protected void buildResult()
 	{
-		if (this.context == CONTEXT_TABLE_LIST)
+		if (this.context == CONTEXT_TABLE_LIST || context == CONTEXT_VIEW_LIST)
 		{
 			super.buildResult();
 		}

@@ -46,6 +46,7 @@ import workbench.db.objectcache.DbObjectCache;
 
 import workbench.sql.lexer.SQLToken;
 import workbench.sql.syntax.SqlKeywordHelper;
+import workbench.util.CollectionUtil;
 
 import workbench.util.SelectColumn;
 import workbench.util.SqlParsingUtil;
@@ -110,6 +111,7 @@ public abstract class BaseAnalyzer
 	protected static final int CONTEXT_CATALOG_LIST = 12;
 	protected static final int CONTEXT_SEQUENCE_LIST = 13;
 	protected static final int CONTEXT_INDEX_LIST = 14;
+	protected static final int CONTEXT_VIEW_LIST = 15;
 
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private List<String> typeFilter;
@@ -420,6 +422,10 @@ public abstract class BaseAnalyzer
 		{
 			if (this.elements == null) retrieveTables();
 		}
+		else if (context == CONTEXT_VIEW_LIST)
+		{
+			if (this.elements == null) retrieveViews();
+		}
 		else if (context == CONTEXT_COLUMN_LIST)
 		{
 			retrieveColumns();
@@ -539,6 +545,23 @@ public abstract class BaseAnalyzer
 		{
 			LogMgr.logError("BaseAnalyzer.retrieveSequences()", "Could not retrieve sequences", se);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void retrieveViews()
+	{
+		DbObjectCache cache = this.dbConnection.getObjectCache();
+		Set<TableIdentifier> tables = cache.getTables(schemaForTableList, CollectionUtil.arrayList(dbConnection.getMetadata().getViewTypeName()));
+		if (schemaForTableList == null || cache.getSearchPath(schemaForTableList).size() > 1)
+		{
+			this.title = ResourceMgr.getString("LblCompletionListTables");
+		}
+		else
+		{
+			this.title = schemaForTableList + ".*";
+		}
+		this.elements = new ArrayList(tables.size());
+		this.elements.addAll(tables);
 	}
 
 
