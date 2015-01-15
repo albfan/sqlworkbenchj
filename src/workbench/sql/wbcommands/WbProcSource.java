@@ -89,6 +89,7 @@ public class WbProcSource
 					result.addMessage(msg);
 					result.addMessage(StringUtil.padRight("-", msg.length(), '-') + "\n");
 					result.addMessage(procSrc);
+					result.addMessageNewLine();
 				}
 				else
 				{
@@ -111,6 +112,7 @@ public class WbProcSource
 				if (source != null)
 				{
 					result.addMessage(source);
+					result.addMessageNewLine();
 					return result;
 				}
 			}
