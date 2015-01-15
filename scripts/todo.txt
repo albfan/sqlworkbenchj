@@ -1,5 +1,7 @@
 Features:
 ---------
+- Commandline history per connection profile
+- Expand environment variables in file names
 - Copy current statement to clipboard
 - WbExport -type=text -formatted=true to generate an export similar to a plain select in the console
 - search text in all editor tabs
@@ -38,7 +40,6 @@ Features:
   - autofilter dropdown directly in the result set
 - Paging for console mode
 - DbExplorer: dependencies between tables and views (tables used in views, views in which the table is used)
-- WbCopy with multiple tables and -deleteTarget (do a delete with dependencies first, then run Copy)
 - Show table data from the result of "Search table data" (or make the result editable)
 - Multi-Threaded WbImport
 - Workspace "Explorer"
@@ -50,10 +51,9 @@ Features:
 
 Bugs:
 -----
+- Wb Macro commands will not honor dynamically loaded macro files
 - excludeFiles is case-sensitiv
 - Export Query Results does not replace macros
-- short include @ und nested includes without ; does not owrk
-   -> if @t1.sql contains a  "@t2.sql"
 
 
 ToDo/Cleanup
