@@ -182,7 +182,7 @@ public class SQLConsole
 
 				boolean changeHistory = false;
 				boolean addToHistory = true;
-				
+
 				WbFile lastHistory = getHistoryFile();
 				if (isCompleteStatement)
 				{
@@ -494,6 +494,9 @@ public class SQLConsole
 	{
 		history.clear();
 		history.readFrom(getHistoryFile());
+		WbConsoleReader console = ConsoleReaderFactory.getConsoleReader();
+		console.clearHistory();
+		console.addToHistory(history.getHistoryEntries());
 	}
 
 	private WbFile getHistoryFile()

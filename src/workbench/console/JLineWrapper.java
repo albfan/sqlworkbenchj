@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 
 import jline.ArgumentCompletor;
@@ -119,4 +120,31 @@ public class JLineWrapper
 			FileUtil.closeQuietely(h.getOutput());
 		}
 	}
+
+	@Override
+	public void clearHistory()
+	{
+		History h = reader.getHistory();
+		if (h != null)
+		{
+			h.clear();
+		}
+	}
+
+	@Override
+	public void addToHistory(List<String> lines)
+	{
+		if (CollectionUtil.isEmpty(lines)) return;
+
+		History h = reader.getHistory();
+		if (h != null)
+		{
+			for (String line : lines)
+			{
+				h.addToHistory(line);
+			}
+		}
+	}
+
+
 }

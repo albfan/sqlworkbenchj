@@ -22,6 +22,7 @@
  */
 package workbench.console;
 
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -69,6 +70,16 @@ public class SimpleConsole
 	public String readLineWithoutHistory(String prompt)
 	{
 		return readLine(prompt);
+	}
+
+	@Override
+	public void clearHistory()
+	{
+	}
+
+	@Override
+	public void addToHistory(List<String> lines)
+	{
 	}
 
 }

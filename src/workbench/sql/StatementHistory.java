@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.interfaces.SqlHistoryProvider;
@@ -72,7 +73,7 @@ public class StatementHistory
 	@Override
 	public List<String> getHistoryEntries()
 	{
-		return this.getEntries();
+		return Collections.unmodifiableList(this.getEntries());
 	}
 
 	@Override

@@ -22,6 +22,8 @@
  */
 package workbench.console;
 
+import java.util.List;
+
 /**
  *
  * @author Thomas Kellerer
@@ -33,4 +35,6 @@ public interface WbConsoleReader
 	void shutdown();
 	int getColumns();
 	String readLineWithoutHistory(String prompt);
+	void clearHistory();
+	void addToHistory(List<String> lines);
 }
