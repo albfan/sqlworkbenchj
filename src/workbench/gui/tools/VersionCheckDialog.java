@@ -253,6 +253,7 @@ public class VersionCheckDialog
 		dispose();
 	}//GEN-LAST:event_closeDialog
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.versionReader)
@@ -284,6 +285,7 @@ public class VersionCheckDialog
 		}
 	}
 
+	@Override
 	public void mouseClicked(java.awt.event.MouseEvent e)
 	{
 		if (e.getSource() == this.headingLabel &&
@@ -301,18 +303,22 @@ public class VersionCheckDialog
 		}
 	}
 
+	@Override
 	public void mouseEntered(java.awt.event.MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(java.awt.event.MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mousePressed(java.awt.event.MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(java.awt.event.MouseEvent e)
 	{
 	}
