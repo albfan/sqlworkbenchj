@@ -65,7 +65,7 @@ public class SqlServerColumnEnhancer
 	@Override
 	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
 	{
-		if (SqlServerUtil.isSqlServer2000(conn))
+		if (SqlServerUtil.isSqlServer2005(conn))
 		{
 			updateComputedColumns(table, conn);
 		}

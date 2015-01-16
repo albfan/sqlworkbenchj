@@ -177,7 +177,6 @@ public class Settings
 	private static final String TOOLS_PARAM = ".parameter";
 	private static final String TOOLS_PREFIX = "workbench.tools.";
 
-
 	private WbProperties props;
 	private WbFile configfile;
 

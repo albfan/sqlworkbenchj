@@ -296,8 +296,8 @@ public class WbSchemaReport
 			result.addMessage(e.getMessage());
 		}
 
-		String xslt = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
-		String xsltOutput = cmdLine.getValue(WbXslt.ARG_OUTPUT);
+		WbFile xslt = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_STYLESHEET));
+		WbFile xsltOutput = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_OUTPUT));
 
 		if (result.isSuccess())
 		{
@@ -306,7 +306,7 @@ public class WbSchemaReport
 			result.setSuccess();
 		}
 
-		if (!StringUtil.isEmptyString(xslt) && !StringUtil.isEmptyString(xsltOutput))
+		if (xslt != null && xsltOutput != null)
 		{
 			XsltTransformer transformer = new XsltTransformer();
 			Map<String, String> params = cmdLine.getMapValue(WbXslt.ARG_PARAMETERS);
@@ -314,7 +314,7 @@ public class WbSchemaReport
 			try
 			{
 				transformer.setXsltBaseDir(new File(getBaseDir()));
-				transformer.transform(output.getFullPath(), xsltOutput, xslt, params);
+				transformer.transform(output, xsltOutput, xslt, params);
 				String msg = transformer.getAllOutputs();
 				if (msg.length() != 0)
 				{

@@ -86,6 +86,7 @@ import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.VersionNumber;
 
 /**
  * Retrieve meta data information from the database.
@@ -364,7 +365,8 @@ public class DbMetadata
 			LogMgr.logError("DbMetadata.<init>", "Error when retrieving identifier quote character", e);
 		}
 
-		this.dbSettings = new DbSettings(this.getDbId());
+		VersionNumber dbVersion = aConnection.getDatabaseVersion();
+		this.dbSettings = new DbSettings(this.getDbId(), dbVersion.getMajorVersion(), dbVersion.getMinorVersion());
 
 		String quote = dbSettings.getIdentifierQuoteString();
 		if (quote != null)

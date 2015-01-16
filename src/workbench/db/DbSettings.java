@@ -47,6 +47,7 @@ import workbench.sql.EndReadOnlyTrans;
 import workbench.sql.commands.SingleVerbCommand;
 
 import workbench.util.CollectionUtil;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -68,6 +69,8 @@ public class DbSettings
 	public static final String DEFAULT_CREATE_TABLE_TYPE = "default";
 	public static final String DBID_PLACEHOLDER = "[dbid]";
 
+	private static final String NOT_THERE = "$wb$_not_there_$wb$";
+
 	private final String dbId;
 	private boolean caseSensitive;
 	private boolean useJdbcCommit;
@@ -83,6 +86,8 @@ public class DbSettings
 	private Set<String> noUpdateCountVerbs = CollectionUtil.caseInsensitiveSet();
 
 	private final String prefix;
+	private final String prefixMajorVersion;
+	private final String prefixFullVersion;
 
 	public static enum GenerateOwnerType
 	{
@@ -93,8 +98,16 @@ public class DbSettings
 
 	public DbSettings(String id)
 	{
-		this.dbId = id;
-		this.prefix = "workbench.db." + id + ".";
+		this(id, -1, -1);
+	}
+
+	public DbSettings(String id, int majorVersion, int minorVersion)
+	{
+		dbId = id;
+		prefix = "workbench.db." + id + ".";
+		prefixMajorVersion = "workbench.db." + id + "_" + NumberStringCache.getNumberString(majorVersion) + ".";
+		prefixFullVersion = "workbench.db." + id + "_" + NumberStringCache.getNumberString(majorVersion) + "_" + NumberStringCache.getNumberString(minorVersion) + ".";
+
 		Settings settings = Settings.getInstance();
 
 		this.caseSensitive = settings.getBoolProperty(prefix + "casesensitive", false);
@@ -126,6 +139,23 @@ public class DbSettings
 	public boolean supportsCommentInSql()
 	{
 		return this.supportsCommentInSql;
+	}
+
+	public String getProperty(String prop, String defaultValue)
+	{
+		return getVersionedString(prop, defaultValue);
+	}
+
+	private String getVersionedString(String prop, String defaultValue)
+	{
+		Settings set = Settings.getInstance();
+
+		String result = set.getProperty(prefixFullVersion + prop, NOT_THERE);
+		if (result != NOT_THERE) return result;
+
+		result = set.getProperty(prefixMajorVersion + prop, NOT_THERE);
+		if (result != NOT_THERE) return result;
+		return set.getProperty(prefix + prop, defaultValue);
 	}
 
 	/**
@@ -451,7 +481,7 @@ public class DbSettings
 		if (StringUtil.isBlank(type)) return null;
 		String cascade = getCascadeConstraintsVerb(type);
 
-		String ddl = Settings.getInstance().getProperty(prefix + "drop." + getKeyValue(type), null);
+		String ddl = getProperty("drop." + getKeyValue(type), null);
 		if (ddl == null)
 		{
 			ddl = "DROP " + type.toUpperCase() + " %name%";
@@ -611,14 +641,6 @@ public class DbSettings
 	{
 		boolean result = Settings.getInstance().getBoolProperty(prefix + "supports.transactions", true);
 		return result;
-	}
-
-	public boolean supportShortInclude()
-	{
-		String ids = Settings.getInstance().getProperty("workbench.db.supportshortinclude", "");
-		if ("*".equals(ids)) return true;
-		List dbs = StringUtil.stringToList(ids, ",", true, true);
-		return dbs.contains(this.getDbId());
 	}
 
 	public String getProcVersionDelimiter()
@@ -823,8 +845,7 @@ public class DbSettings
 	 */
 	public String getQueryForCurrentCatalog()
 	{
-		String query = Settings.getInstance().getProperty(prefix + "currentcatalog.query", null);
-		return query;
+		return getProperty("currentcatalog.query", null);
 	}
 
 	/**
@@ -875,7 +896,7 @@ public class DbSettings
 	 */
 	public String getDropSingleColumnSql()
 	{
-		return Settings.getInstance().getProperty(prefix + "drop.column", null);
+		return getProperty("drop.column", null);
 	}
 
 	/**
@@ -890,7 +911,7 @@ public class DbSettings
 	 */
 	public String getDropMultipleColumnSql()
 	{
-		return Settings.getInstance().getProperty(prefix + "drop.column.multi", null);
+		return getProperty("drop.column.multi", null);
 	}
 
 
@@ -905,7 +926,7 @@ public class DbSettings
 	 */
 	public String getAddColumnSql()
 	{
-		return Settings.getInstance().getProperty(prefix + "add.column", null);
+		return getProperty("add.column", null);
 	}
 
 	public boolean supportsSortedIndex()
@@ -957,7 +978,7 @@ public class DbSettings
 	public String getDataTypeSelectExpression(String dbmsType)
 	{
 		if (dbmsType == null) return null;
-		return Settings.getInstance().getProperty(prefix + "selectexpression." + dbmsType.toLowerCase(), null);
+		return getProperty("selectexpression." + dbmsType.toLowerCase(), null);
 	}
 
 	/**
@@ -1139,7 +1160,7 @@ public class DbSettings
 	public String getRetrieveTableSourceSql()
 	{
 		if (!getUseCustomizedCreateTableRetrieval()) return null;
-		return Settings.getInstance().getProperty(prefix + "retrieve.create.table.query", null);
+		return getProperty("retrieve.create.table.query", null);
 	}
 
 	/**
@@ -1153,7 +1174,6 @@ public class DbSettings
 	{
 		return Settings.getInstance().getIntProperty(prefix + "retrieve.create.table.sourcecol", 1);
 	}
-
 
 	/**
 	 * Returns the result set column in which the index source from getRetrieveIndexSourceSql()
@@ -1175,7 +1195,7 @@ public class DbSettings
 	public String getRetrieveIndexSourceSql()
 	{
 		if (!getUseCustomizedCreateIndexRetrieval()) return null;
-		return Settings.getInstance().getProperty(prefix + "retrieve.create.index.query", null);
+		return getProperty("retrieve.create.index.query", null);
 	}
 
 	/**
@@ -1251,7 +1271,7 @@ public class DbSettings
 
 		if (StringUtil.isBlank(type)) type = DEFAULT_CREATE_TABLE_TYPE;
 
-		return Settings.getInstance().getProperty(prefix + "create.table." + getKeyValue(type), defaultSql);
+		return getProperty("create.table." + getKeyValue(type), defaultSql);
 	}
 
 	public Set<String> getViewTypes()
@@ -1294,22 +1314,22 @@ public class DbSettings
 
 	public String getAlterColumnDataTypeSql()
 	{
-		return Settings.getInstance().getProperty(prefix + "alter.column.type", null);
+		return getProperty("alter.column.type", null);
 	}
 
 	public String getRenameColumnSql()
 	{
-		return Settings.getInstance().getProperty(prefix + "alter.column.rename", null);
+		return getProperty("alter.column.rename", null);
 	}
 
 	public String getAlterColumnSetNotNull()
 	{
-		return Settings.getInstance().getProperty(prefix + "alter.column.notnull.set", null);
+		return getProperty("alter.column.notnull.set", null);
 	}
 
 	public String getAlterColumnDropNotNull()
 	{
-		return Settings.getInstance().getProperty(prefix + "alter.column.notnull.drop", null);
+		return getProperty("alter.column.notnull.drop", null);
 	}
 
 	/**
@@ -1319,7 +1339,7 @@ public class DbSettings
 	 */
 	public String getAlterColumnDefaultSql()
 	{
-		return Settings.getInstance().getProperty(prefix + "alter.column.default", null);
+		return getProperty("alter.column.default", null);
 	}
 
 	/**
@@ -1327,12 +1347,12 @@ public class DbSettings
 	 */
 	public String getSetColumnDefaultSql()
 	{
-		return Settings.getInstance().getProperty(prefix + "alter.column.default.set", null);
+		return getProperty("alter.column.default.set", null);
 	}
 
 	public String getDropColumnDefaultSql()
 	{
-		return Settings.getInstance().getProperty(prefix + "alter.column.default.drop", null);
+		return getProperty("alter.column.default.drop", null);
 	}
 
 	/**
@@ -1345,7 +1365,7 @@ public class DbSettings
 	public String getRenameObjectSql(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".rename", null);
+		return getProperty("alter." + getKeyValue(type) + ".rename", null);
 	}
 
 	/**
@@ -1357,7 +1377,7 @@ public class DbSettings
 	public String getChangeSchemaSql(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".change.schema", null);
+		return getProperty("alter." + getKeyValue(type) + ".change.schema", null);
 	}
 
 	/**
@@ -1369,7 +1389,7 @@ public class DbSettings
 	public String getChangeCatalogSql(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".change.catalog", null);
+		return getProperty("alter." + getKeyValue(type) + ".change.catalog", null);
 	}
 
 	/**
@@ -1379,7 +1399,7 @@ public class DbSettings
 	public String getDropPrimaryKeySql(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".drop.pk", null);
+		return getProperty("alter." + getKeyValue(type) + ".drop.pk", null);
 	}
 
 	/**
@@ -1389,7 +1409,7 @@ public class DbSettings
 	public String getDropConstraint(String type)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		return Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".drop.constraint", null);
+		return getProperty("alter." + getKeyValue(type) + ".drop.constraint", null);
 	}
 
 	/**
@@ -1405,7 +1425,7 @@ public class DbSettings
 	public String getAddPK(String type, boolean checkDefault)
 	{
 		if (StringUtil.isBlank(type)) return null;
-		String sql = Settings.getInstance().getProperty(prefix + "alter." + getKeyValue(type) + ".add.pk", null);
+		String sql = getProperty("alter." + getKeyValue(type) + ".add.pk", null);
 		if (StringUtil.isEmptyString(sql) && checkDefault)
 		{
 			sql = Settings.getInstance().getProperty("workbench.db.sql.alter." + getKeyValue(type) + ".add.pk", null);
@@ -1469,7 +1489,7 @@ public class DbSettings
 
 	public String getInlinePKKeyword()
 	{
-		return Settings.getInstance().getProperty(prefix + "sql.pk.inline", "PRIMARY KEY");
+		return getProperty("sql.pk.inline", "PRIMARY KEY");
 	}
 
 	/**
@@ -1696,7 +1716,7 @@ public class DbSettings
 	public String getTableSelectTemplate(String keyname)
 	{
 		String general = Settings.getInstance().getProperty("workbench.db.sql." + keyname + ".select", null);
-		return Settings.getInstance().getProperty(prefix + keyname + ".select", general);
+		return getProperty(keyname + ".select", general);
 	}
 
 	public boolean getSwitchCatalogInExplorer()
@@ -1716,12 +1736,12 @@ public class DbSettings
 
 	public String getDisabledConstraintKeyword()
 	{
-		return Settings.getInstance().getProperty(prefix + "sql.constraint.disabled", null);
+		return getProperty("sql.constraint.disabled", null);
 	}
 
 	public String getNoValidateConstraintKeyword()
 	{
-		return Settings.getInstance().getProperty(prefix + "sql.constraint.notvalid", null);
+		return getProperty("sql.constraint.notvalid", null);
 	}
 
 	public boolean getUseStreamsForBlobExport()
@@ -1753,11 +1773,6 @@ public class DbSettings
 	public boolean useReadUncommittedForDbExplorer()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "dbexplorer.use.read_uncommitted", false);
-	}
-
-	public String getIndexListStatement()
-	{
-		return Settings.getInstance().getProperty(prefix + "indexlist.select", null);
 	}
 
 	public boolean useFullSearchPathForCompletion()
@@ -1817,11 +1832,6 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "procedurelist.only.accessible", true);
 	}
 
-	public String getProperty(String prop, String defaultValue)
-	{
-		return Settings.getInstance().getProperty(prefix + prop, defaultValue);
-	}
-
 	public boolean getBoolProperty(String prop, boolean defaultValue)
 	{
 		return Settings.getInstance().getBoolProperty(prefix + prop, defaultValue);
@@ -1835,17 +1845,17 @@ public class DbSettings
 
 	public String getErrorColumnInfoRegex()
 	{
-		return Settings.getInstance().getProperty(prefix + "errorinfo.regex.column", null);
+		return getProperty("errorinfo.regex.column", null);
 	}
 
 	public String getErrorLineInfoRegex()
 	{
-		return Settings.getInstance().getProperty(prefix + "errorinfo.regex.line", null);
+		return getProperty("errorinfo.regex.line", null);
 	}
 
 	public String getErrorPosInfoRegex()
 	{
-		return Settings.getInstance().getProperty(prefix + "errorinfo.regex.position", null);
+		return getProperty("errorinfo.regex.position", null);
 	}
 
 	public boolean getErrorPosIsZeroBased()
@@ -1958,7 +1968,7 @@ public class DbSettings
 
 	public String getLimitClause()
 	{
-		return Settings.getInstance().getProperty(prefix + "select.limit", null);
+		return getVersionedString("select.limit", null);
 	}
 
 	public boolean fixStupidMySQLZeroDate()
