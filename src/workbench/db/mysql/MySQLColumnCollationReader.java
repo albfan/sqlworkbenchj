@@ -78,8 +78,8 @@ public class MySQLColumnCollationReader
 
 		PreparedStatement stmt = null;
 
-		HashMap<String, String> collations = new HashMap<String, String>(table.getColumnCount());
-		HashMap<String, String> expressions = new HashMap<String, String>(table.getColumnCount());
+		HashMap<String, String> collations = new HashMap<>(table.getColumnCount());
+		HashMap<String, String> expressions = new HashMap<>(table.getColumnCount());
 		String sql =
 			"SELECT column_name, \n" +
 			"       character_set_name, \n" +
