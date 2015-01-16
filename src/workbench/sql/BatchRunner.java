@@ -370,7 +370,7 @@ public class BatchRunner
 		}
 
 		boolean promptPwd = !profile.getStorePassword();
-		
+
 		if (profile.getPromptForUsername())
 		{
 			String user = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("LblUsername") + ": ");
@@ -830,9 +830,9 @@ public class BatchRunner
 				error = false;
 
 				StatementRunnerResult result = this.stmtRunner.getResult();
-
 				if (result != null)
 				{
+					result.setExecutionDuration(verbend - verbstart);
 					error = !result.isSuccess();
 
 					// We have to store the result of hasMessages()
@@ -886,11 +886,7 @@ public class BatchRunner
 
 				if (this.showTiming && showStatementTiming && !consolidateMessages)
 				{
-					DurationFormatter f = new DurationFormatter();
-					long millis = (verbend - verbstart);
-					boolean includeFraction = (millis < DurationFormatter.ONE_MINUTE);
-					String time = f.formatDuration(millis, includeFraction);
-					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + time);
+					this.printMessage(result.getTimingMessage());
 				}
 
 				if (this.rowMonitor != null && (executedCount % interval == 0) && !printStatements)
@@ -1054,9 +1050,11 @@ public class BatchRunner
 
 	private void printMessage(String msg)
 	{
+		if (msg == null) return;
+
 		if (this.resultDisplay == null)
 		{
-			if (msg != null && msg.length() > 0)
+			if (msg.length() > 0)
 			{
 				System.out.print('\r');
 				System.out.println(msg);

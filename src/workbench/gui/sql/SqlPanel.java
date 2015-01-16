@@ -2477,6 +2477,7 @@ public class SqlPanel
 	@Override
 	public void appendToLog(final String logMessage)
 	{
+		if (logMessage == null) return;
 		appendMessage(logMessage);
 	}
 
