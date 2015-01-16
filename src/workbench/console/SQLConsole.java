@@ -161,21 +161,22 @@ public class SQLConsole
 					break;
 				}
 
+				String firstWord = getFirstWord(line);
+
 				String macro = getMacroText(stmt);
 				if (StringUtil.isNonEmpty(macro))
 				{
 					isCompleteStatement = true;
+					stmt = macro;
+					firstWord = getFirstWord(macro);
 				}
-
-				String firstWord = getFirstWord(line);
-
-				if (startOfStatement && abbreviations.containsKey(firstWord))
+				else if (startOfStatement && abbreviations.containsKey(firstWord))
 				{
 					String longCommand = abbreviations.get(firstWord);
 					if (longCommand != null)
 					{
 						stmt = line.replace(firstWord, longCommand);
-						firstWord = getFirstWord(stmt); // I can't use longCommand as the history shortcuts may have a parameter
+						firstWord = getFirstWord(stmt);
 					}
 					isCompleteStatement = true;
 				}
@@ -205,14 +206,8 @@ public class SQLConsole
 								saveHistory();
 							}
 
-							if (StringUtil.isBlank(macro))
-							{
-								runner.runScript(stmt);
-							}
-							else
-							{
-								runner.runScript(macro);
-							}
+							runner.runScript(stmt);
+
 							if (ConsoleSettings.showScriptFinishTime())
 							{
 								printMessage("(" + StringUtil.getCurrentTimestamp() + ")");
@@ -493,7 +488,9 @@ public class SQLConsole
 	private void loadHistory()
 	{
 		history.clear();
-		history.readFrom(getHistoryFile());
+		WbFile histFile = getHistoryFile();
+		LogMgr.logDebug("SQLConsole.loadHistory()", "Loading history file: " + histFile.getFullPath());
+		history.readFrom(histFile);
 		WbConsoleReader console = ConsoleReaderFactory.getConsoleReader();
 		console.clearHistory();
 		console.addToHistory(history.getHistoryEntries());
@@ -530,7 +527,12 @@ public class SQLConsole
 
 	private String getFirstWord(String input)
 	{
-		return SqlUtil.getSqlVerb(input);
+		// I can't use SqlUtil.getSqlVerb() because that would not return e.g. \! 
+		if (StringUtil.isBlank(input)) return null;
+		input = input.trim();
+		int pos = StringUtil.findFirstWhiteSpace(input);
+		if (pos <= 0) return SqlUtil.trimSemicolon(input);
+		return SqlUtil.trimSemicolon(input.substring(0, pos));
 	}
 
 	private String checkConnection(BatchRunner runner)
