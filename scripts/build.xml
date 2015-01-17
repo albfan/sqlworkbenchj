@@ -788,7 +788,7 @@
       <zipfileset dir="${distdir}/manual" prefix="manual">
         <include name="**/*.*"/>
       </zipfileset>
-      <zipfileset dir="../xlst" prefix="xslt">
+      <zipfileset dir="../xslt" prefix="xslt">
         <include name="**/*.xslt"/>
       </zipfileset>
     </zip>
