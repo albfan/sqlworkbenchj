@@ -41,39 +41,20 @@ public class FileAttributeChanger
 	{
 		if (PlatformHelper.isWindows())
 		{
-			boolean done = removeAttribute(dir);
-			if (!done)
-			{
-				runAttribCommand(dir);
-			}
+			removeAttribute(dir);
 		}
 	}
 
-	private void runAttribCommand(File dir)
-	{
-		try
-		{
-			LogMgr.logDebug("FileAttributeChanger.runAttribCommand()", "Using Runtime to remove hidden attribute");
-			Runtime.getRuntime().exec("attrib -H \""  + dir.getAbsolutePath() + "\"");
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logWarning("FileAttributeChanger.runAttribCommand()", "Could not run attrib command", th);
-		}
-	}
-
-	private boolean removeAttribute(File dir)
+	private void removeAttribute(File dir)
 	{
 		try
 		{
 			Path file = dir.toPath();
 			Files.setAttribute(file, "dos:hidden", false, LinkOption.NOFOLLOW_LINKS);
-			return true;
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logWarning("FileAttributeChanger.removeAttribute()", "Could not remove hidden attribute", th);
-			return false;
+			LogMgr.logWarning("FileAttributeChanger.removeAttribute()", "Could not remove hidden attribute of config dir: " + dir.getAbsolutePath(), th);
 		}
 	}
 

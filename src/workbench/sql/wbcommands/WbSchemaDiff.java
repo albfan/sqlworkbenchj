@@ -311,17 +311,17 @@ public class WbSchemaDiff
 				String msg = ResourceMgr.getString("MsgDiffFileWritten") + " " + output.getFullPath();
 				result.addMessage(msg);
 
-				String xslt = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
-				String xsltOutput = cmdLine.getValue(WbXslt.ARG_OUTPUT);
+				File  xslt = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_STYLESHEET));
+				File xsltOutput = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_OUTPUT));
 				Map<String, String> xsltParams = cmdLine.getMapValue(ARG_PARAMETERS);
 
-				if (StringUtil.isNonBlank(xslt) && StringUtil.isNonBlank(xsltOutput))
+				if (xslt != null && xsltOutput != null)
 				{
 					XsltTransformer transformer = new XsltTransformer();
 					try
 					{
 						transformer.setXsltBaseDir(new File(getBaseDir()));
-						transformer.transform(output.getFullPath(), xsltOutput, xslt, xsltParams);
+						transformer.transform(output, xsltOutput, xslt, xsltParams);
 						String xsltMsg = transformer.getAllOutputs();
 						if (xsltMsg.length() != 0)
 						{

@@ -31,7 +31,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -862,10 +861,6 @@ public class ConnectionProfile
 			{
 				user = System.getProperty("user.name");
 			}
-			if (user != null)
-			{
-				LogMgr.logDebug("ConnectionProfile.getLoginUser()", "Using PG username: " + user);
-			}
 		}
 		return user;
 	}
@@ -1233,5 +1228,5 @@ public class ConnectionProfile
 		}
 		return user.toLowerCase() + url.toLowerCase();
 	}
-	
+
 }

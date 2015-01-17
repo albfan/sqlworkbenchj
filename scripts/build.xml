@@ -750,11 +750,8 @@
       <zipfileset dir="${distdir}/manual" prefix="manual">
         <include name="**/*.*"/>
       </zipfileset>
-      <zipfileset dir="${scriptsrc}" prefix="xslt">
+      <zipfileset dir="../xslt" prefix="xslt">
         <include name="**/*.xslt"/>
-        <exclude name="get_builds_from_history.xslt"/>
-        <exclude name="history2html.xslt"/>
-        <exclude name="history2docbook.xslt"/>
       </zipfileset>
     </zip>
 
@@ -791,11 +788,8 @@
       <zipfileset dir="${distdir}/manual" prefix="manual">
         <include name="**/*.*"/>
       </zipfileset>
-      <zipfileset dir="${scriptsrc}" prefix="xslt">
+      <zipfileset dir="../xlst" prefix="xslt">
         <include name="**/*.xslt"/>
-        <exclude name="get_builds_from_history.xslt"/>
-        <exclude name="history2html.xslt"/>
-        <exclude name="history2docbook.xslt"/>
       </zipfileset>
     </zip>
 
@@ -842,6 +836,10 @@
         <exclude name="**/.nb*"/>
         <exclude name="**/tags"/>
         <exclude name="**/*.tws"/>
+      </zipfileset>
+
+      <zipfileset dir="../xslt" prefix="xslt">
+        <include name="*.*"/>
       </zipfileset>
     </zip>
   </target>

@@ -224,7 +224,7 @@ public class Settings
 
 		// The check for a null WbManager is necessary to allow design-time loading
 		// of some GUI forms in NetBeans. As they access the ResourceMgr and that in turn
-		// usess the Settings class, this class might be instantiated without a valid WbManager
+		// uses the Settings class, this class might be instantiated without a valid WbManager
 		if (WbManager.getInstance() != null)
 		{
 			// Make the installation directory available as a system property as well.
@@ -297,6 +297,7 @@ public class Settings
 
 			// These messages should not be logged before initLogging() has been called!
 			LogMgr.logInfo("Settings.initialize()", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
+			LogMgr.logDebug("Settings.initialize()", "Using default xstlDir: " + getDefaultXsltDirectory());
 			LogMgr.logDebug("Settings.initialize()", "Last modification time of loaded config file: " + this.fileTime);
 
 			if (getBoolProperty("workbench.db.resetdefaults"))
@@ -1339,14 +1340,6 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Date Formats">
-	public void setCopyDefault(String value)
-	{
-		if (value == null) return;
-		if (value.equalsIgnoreCase("all") || value.equalsIgnoreCase("selected"))
-		{
-			setProperty("workbench.gui.table.copydefault", value.toLowerCase());
-		}
-	}
 
 	public List<String> getLiteralTypeList()
 	{
@@ -1394,6 +1387,15 @@ public class Settings
 		setProperty("workbench.diff.sql.default.dateliterals", type);
 	}
 
+	/**
+	 *
+	 * Return true if the query for WbExport should be run automatically.
+	 *
+	 * This method will return true if the statement following a WbExport should automatically
+	 * be executed if WbExport was run using "Execute current"
+	 *
+	 * @see #getAutoRunVerbs()
+	 */
 	public boolean getAutoRunExportStatement()
 	{
 		return getBoolProperty("workbench.export.sql.autorun.executecurrent", true);
@@ -1404,6 +1406,12 @@ public class Settings
 		setProperty("workbench.export.sql.autorun.executecurrent", flag);
 	}
 
+	/**
+	 * Return a list of SQL verbs that should automatically be executed if they
+	 * immediately follow a WbExport and the WbExport is run with "Execute current".
+	 *
+	 * @see #getAutoRunExportStatement()
+	 */
 	public Collection<String> getAutoRunVerbs()
 	{
 		List<String> list = getListProperty("workbench.export.sql.autorun.verbs", false, null);

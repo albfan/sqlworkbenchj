@@ -288,7 +288,8 @@ public class XsltTransformer
 	 * Searches for a stylesheet. <br/>
 	 * If the filename is an absolute filename, no searching takes place.
 	 * <br/>
-	 * If the filename does not include a directory then the xslt sub-directory
+	 * If the filename does not include a directory then the directory where the main Stylesheet is located
+	 * is checked first (in case that is an absolute file)
 	 * of the installation directory is checked first. <br/>
 	 * Then the supplied base directory is checked, if nothing is found
 	 * the confid directory is checked and finally the installation directory.
@@ -296,32 +297,45 @@ public class XsltTransformer
 	 * If the supplied filename does not have the .xslt extension, it is added
 	 * before searching for the file.
 	 */
-	public File findStylesheet(String file)
+	public File findStylesheet(String fname)
 	{
-		WbFile f = new WbFile(file);
+		WbFile f = new WbFile(fname);
 		if (StringUtil.isEmptyString(f.getExtension()))
 		{
-			f = new WbFile(file + ".xslt");
+			fname += ".xslt";
+			f = new WbFile(fname);
 		}
 
-		if (f.isAbsolute()) return f;
+		if (f.exists()) return f;
+
 		if (f.getParentFile() == null)
 		{
+			// findStylesheet is also used to resolve the path to the main file
+			// so it might not yet be initialized
+			if (xsltUsed != null && xsltUsed.getParentFile() != null && xsltUsed.exists())
+			{
+				File mainDir = xsltUsed.getParentFile();
+				File toTest = new File(mainDir, fname);
+				if (toTest.exists()) return toTest;
+			}
+
 			// This is the default directory layout in the distribution archive
 			File xsltdir = Settings.getInstance().getDefaultXsltDirectory();
 
-			File totest = new File(xsltdir, file);
-			if (totest.exists()) return totest;
+			File toTest = new File(xsltdir, fname);
+			if (toTest.exists()) return toTest;
 		}
+
 		if (this.xsltBasedir != null)
 		{
-			File totest = new File(xsltBasedir, file);
+			File totest = new File(xsltBasedir, fname);
 			if (totest.exists()) return totest;
 		}
+
 		File configdir = Settings.getInstance().getConfigDir();
-		File totest = new File(configdir, file);
+		File totest = new File(configdir, fname);
 		if (totest.exists()) return totest;
-		return new File(file);
+		return new File(fname);
 	}
 
 }
