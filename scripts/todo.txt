@@ -1,6 +1,5 @@
 Features:
 ---------
-- Commandline history per connection profile
 - Expand environment variables in file names
 - Copy current statement to clipboard
 - WbExport -type=text -formatted=true to generate an export similar to a plain select in the console
@@ -45,7 +44,6 @@ Features:
 - Workspace "Explorer"
 - Option panel to modify DB specific stuff (ddlneedscommit etc)
 - Scripting (Groovy, JavaScript, awk, ..)
-- Window (workspace) specific set of macros
 - automatic refresh of a result
 
 
