@@ -7,7 +7,7 @@
     <entry dev-build="1" type="fix">Using pgpass for Postgres connections did not work in console or batch mode</entry>
     <entry dev-build="1" type="fix">WbProcSource would not show the code for a packaged procedure in Oracle</entry>
     <entry dev-build="1" type="fix">Fixed some problems in the SQL formatter that would lead to invalid SQL syntax</entry>
-    <entry dev-build="1" type="fix">XSLT transformations failed when the output filename wasn't an absolute file</entry>
+    <entry dev-build="1" type="fix">XSLT transformations failed when the output filename didn't include a directory</entry>
     <entry dev-build="1" type="fix">Disabling "Filter while typing" in the DbExplorer was not possible</entry>
     <entry dev-build="1" type="fix">-targetConnection and -referenceConnection for WbSchemaDiff and WbDataDiff were broken</entry>
   </release>
