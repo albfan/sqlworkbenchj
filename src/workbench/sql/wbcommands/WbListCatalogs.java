@@ -72,12 +72,10 @@ public class WbListCatalogs
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		String verb = currentConnection.getParsingUtil().getSqlVerb(sql);
-
 		DataStore ds = null;
 		String catName = StringUtil.capitalize(currentConnection.getMetadata().getCatalogTerm());
 
-		if (verb.equalsIgnoreCase(VERB) && currentConnection.getMetadata().isPostgres())
+		if (currentConnection.getMetadata().isPostgres())
 		{
 			ds = listPgDatabases();
 		}
