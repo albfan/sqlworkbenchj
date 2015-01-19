@@ -138,23 +138,7 @@ public class WbConnect
 			return result;
 		}
 
-		boolean promptPwd = !profile.getStorePassword();
-
-		ExecutionController controller = this.runner.getExecutionController();
-
-		if (profile.getPromptForUsername() && controller != null)
-		{
-			String user = controller.getPassword(ResourceMgr.getString("LblUsername"));
-			profile.setTemporaryUsername(user);
-			profile.setInputPassword(null);
-			promptPwd = true;
-		}
-
-		if ((promptPwd || profile.getLoginPassword() == null) && controller != null)
-		{
-			String pwd = controller.getPassword(ResourceMgr.getString("MsgInputPwd"));
-			profile.setInputPassword(pwd);
-		}
+		BatchRunner.loginPrompt(profile, this.runner.getExecutionController());
 
 		WbConnection newConn = null;
 		try

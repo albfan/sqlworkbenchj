@@ -38,7 +38,6 @@ import java.util.Properties;
 import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.console.ConsolePrompter;
-import workbench.console.ConsoleReaderFactory;
 import workbench.console.ConsoleSettings;
 import workbench.console.ConsoleStatusBar;
 import workbench.console.DataStorePrinter;
@@ -356,6 +355,31 @@ public class BatchRunner
 		}
 	}
 
+	public static void loginPrompt(ConnectionProfile profile, ExecutionController controller)
+	{
+		boolean promptPwd = !profile.getStorePassword();
+		
+		if (controller == null && (promptPwd || profile.getPromptForUsername()))
+		{
+			LogMgr.logError("BartchRunner.loginPrompt()", "A login prompt is needed but no ExecutionController was provided.", new NullPointerException("No ExecutionController"));
+			return;
+		}
+
+		if (profile.getPromptForUsername())
+		{
+			String user = controller.getInput(ResourceMgr.getString("LblUsername"));
+			profile.setTemporaryUsername(user);
+			profile.setInputPassword(null);
+			promptPwd = true;
+		}
+
+		if (promptPwd || profile.getLoginPassword() == null)
+		{
+			String pwd = controller.getPassword(ResourceMgr.getString("MsgInputPwd"));
+			profile.setInputPassword(pwd);
+		}
+	}
+
 	public void connect()
 		throws SQLException, ClassNotFoundException
 	{
@@ -369,21 +393,7 @@ public class BatchRunner
 			return;
 		}
 
-		boolean promptPwd = !profile.getStorePassword();
-
-		if (profile.getPromptForUsername())
-		{
-			String user = ConsoleReaderFactory.getConsoleReader().readLine(ResourceMgr.getString("LblUsername") + ": ");
-			profile.setTemporaryUsername(user);
-			profile.setInputPassword(null);
-			promptPwd = true;
-		}
-
-		if (promptPwd || profile.getLoginPassword() == null)
-		{
-			String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd") + " ");
-			profile.setInputPassword(pwd);
-		}
+		loginPrompt(profile, stmtRunner.getExecutionController());
 
 		try
 		{
