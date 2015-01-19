@@ -150,7 +150,7 @@ public class WbConnect
 			promptPwd = true;
 		}
 
-		if (promptPwd && profile.getLoginPassword() == null && controller != null)
+		if ((promptPwd || profile.getLoginPassword() == null) && controller != null)
 		{
 			String pwd = controller.getPassword(ResourceMgr.getString("MsgInputPwd"));
 			profile.setInputPassword(pwd);
