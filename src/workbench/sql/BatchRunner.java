@@ -379,7 +379,7 @@ public class BatchRunner
 			promptPwd = true;
 		}
 
-		if (promptPwd && profile.getLoginPassword() == null)
+		if (promptPwd || profile.getLoginPassword() == null)
 		{
 			String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd") + " ");
 			profile.setInputPassword(pwd);
