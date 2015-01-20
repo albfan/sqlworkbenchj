@@ -1015,10 +1015,14 @@ public class DwPanel
 
 	public void showGeneratingSQLAsTooltip(boolean includeMaxRowsWarning)
 	{
-		if (sql == null)
+		if (sql == null) return;
+
+		if (!GuiSettings.showSQLAsDataTooltip())
 		{
+			this.showSQLAsTooltip = false;
 			return;
 		}
+
 		JTabbedPane tab = getTabParent();
 		int index = getTabIndex(tab);
 		if (index == -1) return;
@@ -1112,7 +1116,7 @@ public class DwPanel
 			if (this.selectKeys != null) this.selectKeys.setEnabled(false);
 			return;
 		}
-		
+
 		boolean hasResult = this.hasResultSet();
 		int rows = this.getTable().getSelectedRowCount();
 
