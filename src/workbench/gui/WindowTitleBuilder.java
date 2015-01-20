@@ -96,6 +96,11 @@ public class WindowTitleBuilder
 
 	public String getWindowTitle(ConnectionProfile profile, String workspaceFile, String editorFile)
 	{
+		return getWindowTitle(profile, workspaceFile, editorFile, ResourceMgr.TXT_PRODUCT_NAME);
+	}
+
+	public String getWindowTitle(ConnectionProfile profile, String workspaceFile, String editorFile, String appName)
+	{
 		final StringBuilder title = new StringBuilder(50);
 
 		String enclose = GuiSettings.getTitleGroupBracket();
@@ -103,7 +108,7 @@ public class WindowTitleBuilder
 
 		if (productNamePosition == NAME_AT_START)
 		{
-			title.append(ResourceMgr.TXT_PRODUCT_NAME);
+			title.append(appName);
 			title.append(' ');
 		}
 
@@ -184,7 +189,7 @@ public class WindowTitleBuilder
 		if (productNamePosition == NAME_AT_END)
 		{
 			if (title.length() > 0) title.append(" - ");
-			title.append(ResourceMgr.TXT_PRODUCT_NAME);
+			title.append(appName);
 		}
 
 		return title.toString();

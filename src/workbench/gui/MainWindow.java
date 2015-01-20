@@ -2549,7 +2549,7 @@ public class MainWindow
 	{
 		DbExplorerPanel explorer = new DbExplorerPanel(this);
 		explorer.restoreSettings();
-		DbExplorerWindow w = explorer.openWindow(this.currentProfile.getName());
+		DbExplorerWindow w = explorer.openWindow(this.currentProfile);
 
 		boolean useNewConnection = DbExplorerSettings.getAlwaysUseSeparateConnForDbExpWindow()
 			      || currentProfile.getUseSeparateConnectionPerTab()

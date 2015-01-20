@@ -659,10 +659,7 @@ public class DbExplorerPanel
 
 			if (this.window != null)
 			{
-				String name = null;
-				ConnectionProfile prof = aConnection.getProfile();
-				if (prof != null) name = prof.getName();
-				if (name != null) this.window.setProfileName(name);
+				this.window.setProfile(aConnection.getProfile());
 			}
 
 			this.connectionInfo.setConnection(aConnection);
@@ -980,11 +977,11 @@ public class DbExplorerPanel
 		PanelTitleSetter.setTabTitle(tab, this, index, plainTitle);
 	}
 
-	public DbExplorerWindow openWindow(String aProfileName)
+	public DbExplorerWindow openWindow(ConnectionProfile profile)
 	{
 		if (this.window == null)
 		{
-			window = new DbExplorerWindow(this, aProfileName);
+			window = new DbExplorerWindow(this, profile);
 		}
 		window.setVisible(true);
 		return window;

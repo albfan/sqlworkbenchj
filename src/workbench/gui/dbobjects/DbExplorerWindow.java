@@ -41,6 +41,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.WindowTitleBuilder;
 import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.RunningJobIndicator;
 
@@ -62,7 +63,7 @@ public class DbExplorerWindow
 		this(aPanel, null);
 	}
 
-	public DbExplorerWindow(DbExplorerPanel aPanel, String aProfileName)
+	public DbExplorerWindow(DbExplorerPanel aPanel, ConnectionProfile profile)
 	{
 		super();
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -71,7 +72,7 @@ public class DbExplorerWindow
 		this.getContentPane().add(this.panel);
 		ResourceMgr.setWindowIcons(this, "database");
 
-		this.setProfileName(aProfileName);
+		this.setProfile(profile);
 		this.restorePosition();
 		this.jobIndicator = new RunningJobIndicator(this);
 		this.panel.setDbExecutionListener(this);
@@ -96,16 +97,12 @@ public class DbExplorerWindow
 		return "database";
 	}
 
-	public final void setProfileName(String aProfileName)
+	public final void setProfile(ConnectionProfile profile)
 	{
-		if (aProfileName != null)
-		{
-			this.setTitle(ResourceMgr.getString("TxtDbExplorerTitel") + " - [" + aProfileName + "]");
-		}
-		else
-		{
-			this.setTitle(ResourceMgr.getString("TxtDbExplorerTitel"));
-		}
+		WindowTitleBuilder builder = new WindowTitleBuilder();
+		builder.setShowWorkspace(false);
+		String windowTitle = builder.getWindowTitle(profile, null, null, ResourceMgr.getString("TxtDbExplorerTitel"));
+		setTitle(windowTitle);
 	}
 
 	public void setStandalone(boolean flag)
@@ -265,7 +262,7 @@ public class DbExplorerWindow
 	@Override
 	public void connectFailed(String error)
 	{
-		this.setProfileName(null);
+		this.setProfile(null);
 		this.panel.setConnection(null);
 		WbSwingUtilities.showFriendlyErrorMessage(this, ResourceMgr.getString("ErrConnectFailed"), error.trim());
 	}
@@ -273,7 +270,7 @@ public class DbExplorerWindow
 	@Override
 	public void connected(WbConnection conn)
 	{
-		this.setProfileName(conn.getProfile().getName());
+		this.setProfile(conn.getProfile());
 		this.panel.setConnection(conn);
 	}
 
