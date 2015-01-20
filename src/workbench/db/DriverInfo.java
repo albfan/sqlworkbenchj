@@ -128,6 +128,8 @@ public class DriverInfo
 			LogMgr.logError("DriverInfo.fillMap()", "Could not obtain MetaData", sql);
 		}
 
+		if (metaData == null) return;
+
 		for (String method : methods)
 		{
 			String value = getValue(metaData, method);
@@ -163,6 +165,8 @@ public class DriverInfo
 
 	private String getValue(DatabaseMetaData meta, String methodName)
 	{
+		if (meta == null) return "n/a";
+
 		try
 		{
 			Method method = meta.getClass().getMethod(methodName);

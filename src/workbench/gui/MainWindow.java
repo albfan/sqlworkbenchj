@@ -2407,14 +2407,22 @@ public class MainWindow
 
 	public void closeExplorerWindows(boolean doDisconnect)
 	{
-		for (ToolWindow w : explorerWindows)
+		try
 		{
-			WbConnection conn = w.getConnection();
-			if (conn != null && doDisconnect && conn != this.currentConnection)
+			List<ToolWindow> copy = new ArrayList<>(explorerWindows);
+			for (ToolWindow w : copy)
 			{
-				conn.disconnect();
+				WbConnection conn = w.getConnection();
+				if (conn != null && doDisconnect && conn != this.currentConnection)
+				{
+					conn.disconnect();
+				}
+				w.closeWindow();
 			}
-			w.closeWindow();
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("MainWindow.closeExplorerWindows()", "Error when closing explorer windows", th);
 		}
 	}
 
