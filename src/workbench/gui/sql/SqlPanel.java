@@ -3734,7 +3734,10 @@ public class SqlPanel
 			tbl.setPrintHeader(resultName);
 		}
 		this.resultTab.insertTab(resultName, null, data, null, newIndex);
-		data.showGeneratingSQLAsTooltip();
+		if (GuiSettings.showSQLAsDataTooltip())
+		{
+			data.showGeneratingSQLAsTooltip();
+		}
 		data.setName("dwresult" + NumberStringCache.getNumberString(newIndex));
 		if (this.resultTab.getTabCount() == 2)
 		{
@@ -3826,7 +3829,10 @@ public class SqlPanel
 								p.showData(ds, gen, time);
 								panels.add(p);
 								p.setReUsed(true);
-								p.showGeneratingSQLAsTooltip();
+								if (GuiSettings.showSQLAsDataTooltip())
+								{
+									p.showGeneratingSQLAsTooltip();
+								}
 							}
 							else
 							{

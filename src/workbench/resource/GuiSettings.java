@@ -1150,4 +1150,9 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.cancel.stops", true);
 	}
+
+	public static boolean showSQLAsDataTooltip()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.data.sql.tooltip", true);
+	}
 }
