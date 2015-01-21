@@ -222,7 +222,7 @@ public class SQLConsole
 					finally
 					{
 						buffer.clear();
-						currentPrompt = checkConnection(runner);
+						currentPrompt = checkConnection(runner, currentPrompt);
 						startOfStatement = true;
 					}
 
@@ -352,7 +352,7 @@ public class SQLConsole
 					System.out.println(warn);
 				}
 			}
-			currentPrompt = checkConnection(runner);
+			currentPrompt = checkConnection(runner, null);
 		}
 		return currentPrompt;
 	}
@@ -535,9 +535,9 @@ public class SQLConsole
 		return SqlUtil.trimSemicolon(input.substring(0, pos));
 	}
 
-	private String checkConnection(BatchRunner runner)
+	private String checkConnection(BatchRunner runner, String currentPrompt)
 	{
-		String newprompt = null;
+		String newprompt = currentPrompt;
 		WbConnection current = runner.getConnection();
 		if (current != null && !runner.hasPendingActions())
 		{
