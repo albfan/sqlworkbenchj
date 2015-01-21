@@ -52,4 +52,6 @@ public interface StatementHook
 	boolean fetchResults();
 
 	void close(WbConnection conn);
+
+	boolean isPending();
 }

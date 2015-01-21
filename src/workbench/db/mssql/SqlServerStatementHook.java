@@ -100,6 +100,12 @@ public class SqlServerStatementHook
 	}
 
 	@Override
+	public boolean isPending()
+	{
+		return false;
+	}
+	
+	@Override
 	public boolean displayResults()
 	{
 		return true;

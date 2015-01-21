@@ -51,6 +51,12 @@ public class DefaultStatementHook
 	}
 
 	@Override
+	public boolean isPending()
+	{
+		return false;
+	}
+	
+	@Override
 	public boolean fetchResults()
 	{
 		return true;

@@ -527,7 +527,7 @@ public class SQLConsole
 
 	private String getFirstWord(String input)
 	{
-		// I can't use SqlUtil.getSqlVerb() because that would not return e.g. \! 
+		// I can't use SqlUtil.getSqlVerb() because that would not return e.g. \!
 		if (StringUtil.isBlank(input)) return null;
 		input = input.trim();
 		int pos = StringUtil.findFirstWhiteSpace(input);
@@ -539,7 +539,7 @@ public class SQLConsole
 	{
 		String newprompt = null;
 		WbConnection current = runner.getConnection();
-		if (current != null)
+		if (current != null && !runner.hasPendingActions())
 		{
 			String user = current.getCurrentUser();
 			String catalog = current.getDisplayCatalog();

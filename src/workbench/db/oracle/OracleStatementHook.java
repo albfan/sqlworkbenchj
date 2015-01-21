@@ -173,6 +173,12 @@ public class OracleStatementHook
 	}
 
 	@Override
+	public boolean isPending()
+	{
+		return autotrace;
+	}
+
+	@Override
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
 	{
 		checkRunnerSession(runner);

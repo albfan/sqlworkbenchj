@@ -247,6 +247,12 @@ public class StatementRunner
 		return this.ignoreDropErrors;
 	}
 
+	public boolean hasPendingActions()
+	{
+		if (this.currentConsumer != null) return true;
+		return statementHook.isPending();
+	}
+	
 	/**
 	 * For testing purposes only, so that non-default commands can be added during a JUnit test.
 	 */

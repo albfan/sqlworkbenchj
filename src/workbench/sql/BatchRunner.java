@@ -223,6 +223,11 @@ public class BatchRunner
 		return this.connection;
 	}
 
+	public boolean hasPendingActions()
+	{
+		return stmtRunner.hasPendingActions();
+	}
+
 	public SqlCommand getCommand(String verb)
 	{
 		return stmtRunner.cmdMapper.getCommandToUse(verb);
@@ -358,7 +363,7 @@ public class BatchRunner
 	public static void loginPrompt(ConnectionProfile profile, ExecutionController controller)
 	{
 		boolean promptPwd = !profile.getStorePassword();
-		
+
 		if (controller == null && (promptPwd || profile.getPromptForUsername()))
 		{
 			LogMgr.logError("BartchRunner.loginPrompt()", "A login prompt is needed but no ExecutionController was provided.", new NullPointerException("No ExecutionController"));

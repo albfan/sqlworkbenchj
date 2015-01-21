@@ -78,6 +78,12 @@ public class FirebirdStatementHook
 	}
 
 	@Override
+	public boolean isPending()
+	{
+		return (showPlan || planOnly);
+	}
+
+	@Override
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
 	{
 		if (showPlan || planOnly)
