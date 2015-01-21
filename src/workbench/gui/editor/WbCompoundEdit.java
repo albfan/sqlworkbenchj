@@ -36,7 +36,7 @@ import javax.swing.undo.UndoableEdit;
 public class WbCompoundEdit
 	implements UndoableEdit
 {
-	private List<UndoableEdit> edits = new ArrayList<>();
+	private final List<UndoableEdit> edits = new ArrayList<>();
 	private boolean acceptNew = true;
 	private long lastEditTime;
 
@@ -63,7 +63,7 @@ public class WbCompoundEdit
 
 	public UndoableEdit getLast()
 	{
-		if (edits.size() == 0) return null;
+		if (edits.isEmpty()) return null;
 		return edits.get(edits.size() - 1);
 	}
 
@@ -71,7 +71,7 @@ public class WbCompoundEdit
 	public void undo()
 		throws CannotUndoException
 	{
-		if (edits.size() == 0) return;
+		if (edits.isEmpty()) return;
 		for (int i=edits.size() - 1; i > -1; i--)
 		{
 			UndoableEdit edit = edits.get(i);
@@ -82,7 +82,7 @@ public class WbCompoundEdit
 	@Override
 	public boolean canUndo()
 	{
-		if (edits.size() == 0) return false;
+		if (edits.isEmpty()) return false;
 		for (UndoableEdit edit : edits)
 		{
 			if (!edit.canUndo()) return false;
@@ -94,7 +94,7 @@ public class WbCompoundEdit
 	public void redo()
 		throws CannotRedoException
 	{
-		if (edits.size() == 0) return;
+		if (edits.isEmpty()) return;
 
 		for (UndoableEdit edit : edits)
 		{
@@ -105,7 +105,7 @@ public class WbCompoundEdit
 	@Override
 	public boolean canRedo()
 	{
-		if (edits.size() == 0) return false;
+		if (edits.isEmpty()) return false;
 		for (UndoableEdit edit : edits)
 		{
 			if (!edit.canRedo()) return false;
