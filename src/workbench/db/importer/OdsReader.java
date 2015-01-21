@@ -37,6 +37,7 @@ import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.StringUtil;
+import workbench.util.ValueConverter;
 
 import org.odftoolkit.simple.SpreadsheetDocument;
 import org.odftoolkit.simple.table.Cell;
@@ -61,6 +62,7 @@ public class OdsReader
 	private List<String> headerColumns;
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
 	private MessageBuffer messages = new MessageBuffer();
+	private final ValueConverter converter = new ValueConverter();
 
 	public OdsReader(File odsFile, int sheetIndex, String name)
 	{
@@ -218,7 +220,21 @@ public class OdsReader
 	public List<Object> getRowValues(int row)
 	{
 		Row rowData = worksheet.getRowByIndex(row);
-		int colCount = rowData.getCellCount();
+		int colCount = 0;
+		if (headerColumns != null)
+		{
+			colCount = headerColumns.size();
+		}
+		else if (Settings.getInstance().getBoolProperty("workbench.ods.use.get_cell_count", true))
+		{
+			colCount = rowData.getCellCount();
+		}
+		else
+		{
+			List<Column> columnList = worksheet.getColumnList();
+			colCount = columnList.size();
+		}
+
 		List<Object> result = new ArrayList<>(colCount);
 		int nullCount = 0;
 
@@ -231,7 +247,24 @@ public class OdsReader
 			{
 				value = cell.getBooleanValue();
 			}
-			else if ("date".equals(type) || "time".equals(type))
+			else if ("time".equals(type))
+			{
+				String text = cell.getDisplayText();
+				try
+				{
+					value = converter.parseTime(text);
+				}
+				catch (Exception ex)
+				{
+					LogMgr.logError("OdsReader.getRowValues()", "Could not parse time value: " + text, ex);
+					Calendar cal = cell.getTimeValue();
+					if (cal != null)
+					{
+						value = new java.sql.Time(cal.getTime().getTime());
+					}
+				}
+			}
+			else if ("date".equals(type))
 			{
 				String fmt = cell.getFormatString();
 				String text = cell.getDisplayText();
@@ -251,15 +284,7 @@ public class OdsReader
 				catch (Exception ex)
 				{
 					LogMgr.logError("OdsReader.getRowValues()", "Could not parse date format: " + fmt, ex);
-					Calendar cal = null;
-					if ("time".equals(type))
-					{
-						cal = cell.getTimeValue();
-					}
-					else
-					{
-						cal = cell.getDateValue();
-					}
+					Calendar cal = cell.getDateValue();
 					if (cal != null)
 					{
 						value = cal.getTime();
@@ -328,6 +353,7 @@ public class OdsReader
 		{
 			dataFile = SpreadsheetDocument.loadDocument(inputFile);
 			initCurrentWorksheet();
+			LogMgr.logDebug("OdsReader.load()", "Document loaded. Rows: " + getRowCount());
 		}
 		catch (Exception ex)
 		{
