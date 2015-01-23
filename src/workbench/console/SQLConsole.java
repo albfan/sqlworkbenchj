@@ -71,8 +71,6 @@ import workbench.util.WbThread;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
-import workbench.gui.components.RunningJobIndicator;
-
 /**
  * A simple console interface for SQL Workbench/J
  * <br>
@@ -91,6 +89,7 @@ public class SQLConsole
 	private final ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
+	private static final String PROMPT_END = "> ";
 	private final WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private final Map<String, String> abbreviations = new HashMap<>();
 	private final StatementHistory history;
@@ -143,6 +142,7 @@ public class SQLConsole
 
 			initAbbreviations();
 
+			String previousPrompt = null;
 			boolean startOfStatement = true;
 
 			InputBuffer buffer = new InputBuffer();
@@ -225,7 +225,8 @@ public class SQLConsole
 					finally
 					{
 						buffer.clear();
-						currentPrompt = checkConnection(runner, currentPrompt);
+						currentPrompt = checkConnection(runner, previousPrompt == null ? currentPrompt : previousPrompt);
+						previousPrompt = null;
 						startOfStatement = true;
 					}
 
@@ -246,6 +247,7 @@ public class SQLConsole
 				else
 				{
 					startOfStatement = false;
+					if (previousPrompt == null) previousPrompt = currentPrompt;
 					currentPrompt = CONTINUE_PROMPT;
 				}
 			}
@@ -538,6 +540,13 @@ public class SQLConsole
 		return SqlUtil.trimSemicolon(input.substring(0, pos));
 	}
 
+	private String appendSuffix(String prompt)
+	{
+		if (prompt == null) return null;
+		if (prompt.endsWith(PROMPT_END)) return prompt;
+		return prompt + PROMPT_END;
+	}
+
 	private String checkConnection(BatchRunner runner, String currentPrompt)
 	{
 		String newprompt = currentPrompt;
@@ -572,7 +581,7 @@ public class SQLConsole
 			}
 		}
 		setTerminalTitle(current, false);
-		return (newprompt == null ? DEFAULT_PROMPT : newprompt + "> ");
+		return (newprompt == null ? DEFAULT_PROMPT : appendSuffix(newprompt));
 	}
 
 	private void setTerminalTitle(WbConnection conn, boolean isRunning)
