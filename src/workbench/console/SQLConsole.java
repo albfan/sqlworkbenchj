@@ -71,6 +71,8 @@ import workbench.util.WbThread;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
+import workbench.gui.components.RunningJobIndicator;
+
 /**
  * A simple console interface for SQL Workbench/J
  * <br>
@@ -206,6 +208,7 @@ public class SQLConsole
 								saveHistory();
 							}
 
+							setTerminalTitle(runner.getConnection(), true);
 							runner.runScript(stmt);
 
 							if (ConsoleSettings.showScriptFinishTime())
@@ -568,11 +571,11 @@ public class SQLConsole
 				newprompt = user + "@" + catalog + "/" + schema;
 			}
 		}
-		setTerminalTitle(current);
+		setTerminalTitle(current, false);
 		return (newprompt == null ? DEFAULT_PROMPT : newprompt + "> ");
 	}
 
-	private void setTerminalTitle(WbConnection conn)
+	private void setTerminalTitle(WbConnection conn, boolean isRunning)
 	{
 		if (!changeTerminalTitle) return;
 		ConnectionProfile profile = null;
@@ -580,7 +583,8 @@ public class SQLConsole
 		{
 			profile = conn.getProfile();
 		}
-		String toPrint = titlePrefix + titleBuilder.getWindowTitle(profile) + titleSuffix;
+		String indicator = isRunning ? "> " : "";
+		String toPrint = titlePrefix + indicator + titleBuilder.getWindowTitle(profile) + titleSuffix;
 		System.out.println(toPrint);
 	}
 
@@ -599,7 +603,7 @@ public class SQLConsole
 			System.setProperty("workbench.log.console", "false");
 			WbManager.initConsoleMode(args);
 			SQLConsole console = new SQLConsole();
-			console.setTerminalTitle(null);
+			console.setTerminalTitle(null, false);
 			console.startConsole();
 		}
 	}
