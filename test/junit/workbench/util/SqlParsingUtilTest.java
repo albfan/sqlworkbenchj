@@ -55,4 +55,21 @@ public class SqlParsingUtilTest
 		assertEquals("42", util.stripVerb(sql));
 	}
 
+	@Test
+	public void testGetPos()
+	{
+		String sql = "select /* from */ some_column from some_table join other_table using (x)";
+		SqlParsingUtil util = new SqlParsingUtil(ParserType.Standard);
+		int pos = util.getKeywordPosition("FROM", sql);
+		assertEquals(30, pos);
+		String fromPart = util.getFromPart(sql);
+		assertEquals(" some_table join other_table using (x)", fromPart);
+
+		sql = "select /* from */ \n" +
+			"some_column, \n" +
+			" -- from blabla \n" +
+			" from some_table join other_table using (x)";
+		fromPart = util.getFromPart(sql);
+		assertEquals(" some_table join other_table using (x)", fromPart);
+	}
 }

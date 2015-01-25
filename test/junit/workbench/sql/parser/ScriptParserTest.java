@@ -56,6 +56,27 @@ public class ScriptParserTest
 		super("ScriptParserTest");
 	}
 
+	@Test public void testCommentedWb()
+		throws Exception
+	{
+		String sql =
+			"wbvardef var1=\"\n" +
+			"   x\";\n" +
+			"\n" +
+			"-- wbvardef var2=\"$[var1]\";\n" +
+			"wbvardef var3=\"$[var1]\";\n" +
+			"\n" +
+			"select '$[var3]';";
+
+		ScriptParser p = new ScriptParser(ParserType.Standard);
+		p.setScript(sql);
+		p.setDelimiter(DelimiterDefinition.STANDARD_DELIMITER);
+		p.setScript(sql);
+		int count = p.getSize();
+		assertEquals(3, count);
+		assertTrue(p.getCommand(2).startsWith("select"));
+	}
+
 	@Test
 	public void testQuotes()
 		throws Exception
