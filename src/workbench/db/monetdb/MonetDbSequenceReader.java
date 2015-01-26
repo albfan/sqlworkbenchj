@@ -129,7 +129,7 @@ public class MonetDbSequenceReader
 		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		List<SequenceDefinition> result = new ArrayList<>();
 
 		for (int row = 0; row < ds.getRowCount(); row++)
 		{
