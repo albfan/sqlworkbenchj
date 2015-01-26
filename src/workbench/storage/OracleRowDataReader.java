@@ -104,6 +104,26 @@ public class OracleRowDataReader
 		try
 		{
 			String tsValue = (String) stringValue.invoke(tz, sqlConnection);
+
+			// SimpleDateFormat doesn't support more than 3 digits for milliseconds
+			// Oracle returns 6 digits, e.g: 2015-01-26 11:42:46.894119 Europe/Berlin
+			// apparently SimpleDateFormat does some strange rounding there and will return
+			// the above timestamp as 11:57:40.119
+			// so we need to strip the additional milliseconds and we also need to remove the timezone name
+			// as Java can't handle that either.
+
+			int pos = tsValue.lastIndexOf(' ');
+			if (pos > 10)
+			{
+				// SimpleDateFormat cannot handle a timezone definition like Europe/Berlin so we need to remove it
+				tsValue = tsValue.substring(0, pos);
+			}
+
+			int msPos = tsValue.indexOf('.');
+			if (msPos == 19)
+			{
+				tsValue = tsValue.substring(0, 23);
+			}
 			java.util.Date date = tsParser.parse(tsValue);
 			// this loses the time zone information stored in Oracle's TIMESTAMPTZ or TIMESTAMPLTZ values
 			// but otherwise the displayed time would be totally wrong.
