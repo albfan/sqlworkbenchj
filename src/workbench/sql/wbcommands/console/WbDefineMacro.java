@@ -97,6 +97,13 @@ public class WbDefineMacro
 
 		cmdLine.parse(getCommandLine(sql));
 
+		if (!cmdLine.hasArguments())
+		{
+			result.setFailure();
+			result.addMessageByKey("ErrDefineMacro");
+			return result;
+		}
+
 		if (cmdLine.hasUnknownArguments())
 		{
 			setUnknownMessage(result, cmdLine, null);
@@ -112,7 +119,7 @@ public class WbDefineMacro
 		if (StringUtil.isBlank(macroName))
 		{
 			result.setFailure();
-			result.addMessage("ErrMacroNameReq");
+			result.addMessageByKey("ErrMacroNameReq");
 			return result;
 		}
 
