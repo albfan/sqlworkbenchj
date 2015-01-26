@@ -72,10 +72,9 @@ public class OracleRowDataReader
 		}
 		catch (Throwable t)
 		{
-			LogMgr.logError("OracleRowDataReader.initialize()", "Could not access TIMESTAMPTZ class", t);
+			LogMgr.logError("OracleRowDataReader.initialize()", "Could not access oracle.sql.Datum class", t);
 			throw new ClassNotFoundException("TIMESTAMPTZ");
 		}
-
 	}
 
 	@Override
@@ -122,7 +121,8 @@ public class OracleRowDataReader
 			int msPos = tsValue.indexOf('.');
 			if (msPos == 19)
 			{
-				tsValue = tsValue.substring(0, 23);
+				int end = Math.min(tsValue.length(), 23);
+				tsValue = tsValue.substring(0, end);
 			}
 			java.util.Date date = tsParser.parse(tsValue);
 			// this loses the time zone information stored in Oracle's TIMESTAMPTZ or TIMESTAMPLTZ values
@@ -136,5 +136,6 @@ public class OracleRowDataReader
 		}
 		return tz;
 	}
+
 
 }
