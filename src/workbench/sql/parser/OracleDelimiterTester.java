@@ -45,15 +45,11 @@ public class OracleDelimiterTester
 	private final Set<String> types = CollectionUtil.caseInsensitiveSet("FUNCTION", "LIBRARY", "PACKAGE", "PACKAGE BODY", "PROCEDURE", "TRIGGER", "TYPE", "TYPE BODY");
 
 	private SQLToken lastToken;
-	private SQLToken firstToken;
 
 	public OracleDelimiterTester()
 	{
 		boolean typesLikeSqlPlus = Settings.getInstance().getBoolProperty("workbench.oracle.sql.parser.types.altdelimiter", true);
-		if (!typesLikeSqlPlus)
-		{
-			types.remove("TYPE");
-		}
+		setRequireAlternateDelimiterForTypes(typesLikeSqlPlus);
 	}
 
 	public void setRequireAlternateDelimiterForTypes(boolean flag)
@@ -96,17 +92,13 @@ public class OracleDelimiterTester
 		{
 			useAlternateDelimiter = true;
 		}
-		else if (firstToken != null)
+		else if (lastToken != null)
 		{
-			useAlternateDelimiter = (types.contains(token.getText()) && keywords.contains(firstToken.getText()));
+			useAlternateDelimiter = (types.contains(token.getText()) && keywords.contains(lastToken.getText()));
 		}
 		if (!token.isWhiteSpace() && !token.getContents().equalsIgnoreCase(OracleUtils.KEYWORD_EDITIONABLE))
 		{
 			lastToken = token;
-		}
-		if (firstToken == null && !token.isWhiteSpace())
-		{
-			firstToken = token;
 		}
 	}
 
@@ -125,7 +117,6 @@ public class OracleDelimiterTester
 	{
 		useAlternateDelimiter = false;
 		lastToken = null;
-		firstToken = null;
 	}
 
 	@Override

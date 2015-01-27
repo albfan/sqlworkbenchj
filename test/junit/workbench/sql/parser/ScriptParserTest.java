@@ -56,7 +56,42 @@ public class ScriptParserTest
 		super("ScriptParserTest");
 	}
 
-	@Test public void testCommentedWb()
+	@Test
+	public void testOra()
+	{
+		String sql =
+			"create table my_ext_table \n" +
+			"organization external \n" +
+			"( \n" +
+			" type oracle_datapump \n" +
+			" default directory EXPDP_DIR \n" +
+			" location ('export.dmp') \n" +
+			") \n" +
+			"as  \n" +
+			"select *  \n" +
+			"from person \n" +
+			"; \n" +
+			" \n" +
+			"create table my_export \n" +
+			"organization external \n" +
+			"(  \n" +
+			"  type oracle_datapump \n" +
+			"  default directory EXPDP_DIR \n" +
+			"  location ('person.dmp') \n" +
+			")  \n" +
+			"as  \n" +
+			"select *  \n" +
+			"from person \n" +
+			"; \n" +
+			"";
+		ScriptParser p = new ScriptParser(ParserType.Oracle);
+		p.setScript(sql);
+		int count = p.getSize();
+		assertEquals(2, count);
+	}
+
+	@Test
+	public void testCommentedWb()
 		throws Exception
 	{
 		String sql =
@@ -69,7 +104,6 @@ public class ScriptParserTest
 			"select '$[var3]';";
 
 		ScriptParser p = new ScriptParser(ParserType.Standard);
-		p.setScript(sql);
 		p.setDelimiter(DelimiterDefinition.STANDARD_DELIMITER);
 		p.setScript(sql);
 		int count = p.getSize();
