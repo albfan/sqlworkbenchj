@@ -161,6 +161,7 @@ public class PostgresExplainAnalyzer
 		options.put("costs", booleanValues);
 		options.put("buffers", booleanValues);
 		options.put("format", CollectionUtil.arrayList("text", "xml", "json", "yaml"));
+		options.put("timing", booleanValues);
 		return options;
 	}
 
