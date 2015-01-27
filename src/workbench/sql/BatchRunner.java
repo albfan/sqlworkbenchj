@@ -364,14 +364,13 @@ public class BatchRunner
 	{
 		boolean promptPwd = !profile.getStorePassword();
 
-		if (controller == null && (promptPwd || profile.getPromptForUsername()))
-		{
-			LogMgr.logError("BartchRunner.loginPrompt()", "A login prompt is needed but no ExecutionController was provided.", new NullPointerException("No ExecutionController"));
-			return;
-		}
-
 		if (profile.getPromptForUsername())
 		{
+			if (controller == null)
+			{
+				LogMgr.logError("BartchRunner.loginPrompt()", "A login prompt is needed but no ExecutionController was provided.", new NullPointerException("No ExecutionController"));
+				return;
+			}
 			String user = controller.getInput(ResourceMgr.getString("LblUsername"));
 			profile.setTemporaryUsername(user);
 			profile.setInputPassword(null);
@@ -380,6 +379,11 @@ public class BatchRunner
 
 		if (promptPwd || profile.getLoginPassword() == null)
 		{
+			if (controller == null)
+			{
+				LogMgr.logError("BartchRunner.loginPrompt()", "A passwort prompt is needed but no ExecutionController was provided.", new NullPointerException("No ExecutionController"));
+				return;
+			}
 			String pwd = controller.getPassword(ResourceMgr.getString("MsgInputPwd"));
 			profile.setInputPassword(pwd);
 		}

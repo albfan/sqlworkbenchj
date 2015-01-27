@@ -45,6 +45,7 @@ public class OracleDelimiterTester
 	private final Set<String> types = CollectionUtil.caseInsensitiveSet("FUNCTION", "LIBRARY", "PACKAGE", "PACKAGE BODY", "PROCEDURE", "TRIGGER", "TYPE", "TYPE BODY");
 
 	private SQLToken lastToken;
+	private boolean isCreateStatement;
 
 	public OracleDelimiterTester()
 	{
@@ -92,13 +93,18 @@ public class OracleDelimiterTester
 		{
 			useAlternateDelimiter = true;
 		}
-		else if (lastToken != null)
+		else if (lastToken != null && isCreateStatement)
 		{
 			useAlternateDelimiter = (types.contains(token.getText()) && keywords.contains(lastToken.getText()));
 		}
 		if (!token.isWhiteSpace() && !token.getContents().equalsIgnoreCase(OracleUtils.KEYWORD_EDITIONABLE))
 		{
 			lastToken = token;
+		}
+
+		if (isStartOfStatement)
+		{
+			this.isCreateStatement = keywords.contains(token.getText());
 		}
 	}
 
@@ -117,6 +123,7 @@ public class OracleDelimiterTester
 	{
 		useAlternateDelimiter = false;
 		lastToken = null;
+		isCreateStatement = false;
 	}
 
 	@Override

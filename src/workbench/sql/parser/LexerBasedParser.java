@@ -96,6 +96,11 @@ public class LexerBasedParser
 		setFile(f, encoding);
 	}
 
+	public ParserType getParserType()
+	{
+		return parserType;
+	}
+
 	@Override
 	public boolean supportsMixedDelimiter()
 	{

@@ -992,13 +992,13 @@ public class LexerBasedParserTest
 		parser.setScript(sql);
 
 		ScriptCommandDefinition cmd = parser.getNextCommand();
-		assertEquals("grant create table to arthur", cmd.getSQL().trim());
+		assertEquals("Wrong grant for table (" + parser.getParserType() + ")", "grant create table to arthur", cmd.getSQL().trim());
 
 		cmd = parser.getNextCommand();
-		assertEquals("grant create procedure to arthur", cmd.getSQL().trim());
+		assertEquals("Wrong grant for procedure (" + parser.getParserType() + ")", "grant create procedure to arthur", cmd.getSQL().trim());
 
 		cmd = parser.getNextCommand();
-		assertEquals("grant create view to arthur", cmd.getSQL().trim());
+		assertEquals("Wrong grant for view (" + parser.getParserType() + ")", "grant create view to arthur", cmd.getSQL().trim());
 
 		cmd = parser.getNextCommand();
 		assertNull(cmd);
