@@ -51,7 +51,24 @@ public interface StatementHook
 	 */
 	boolean fetchResults();
 
+	/**
+	 * This method is called to cleanup any resources kept open by the StatementHook for the given connection.
+	 *
+	 * @param conn the connection
+	 */
 	void close(WbConnection conn);
 
+
+	/**
+	 * Indicates that the hook as pending statements on the current connection.
+	 *
+	 * If this method returns true, no additional statements should be executed on the connection
+	 * until the StatementRunner has finished running the current statement.
+	 *
+	 * Currently this is only used by the OracleStatementHook to signal that the sessions
+	 * statistics are collected and no other statements should be executed.
+	 *
+	 * @return true if any pending actions are open on the StatementHook
+	 */
 	boolean isPending();
 }
