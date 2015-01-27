@@ -65,7 +65,7 @@ public class ScriptParserTest
 			"( \n" +
 			" type oracle_datapump \n" +
 			" default directory EXPDP_DIR \n" +
-			" location ('export.dmp') \n" +
+			" location ('t1.dmp') \n" +
 			") \n" +
 			"as  \n" +
 			"select *  \n" +
@@ -77,7 +77,7 @@ public class ScriptParserTest
 			"(  \n" +
 			"  type oracle_datapump \n" +
 			"  default directory EXPDP_DIR \n" +
-			"  location ('person.dmp') \n" +
+			"  location ('t2.dmp') \n" +
 			")  \n" +
 			"as  \n" +
 			"select *  \n" +
@@ -85,9 +85,12 @@ public class ScriptParserTest
 			"; \n" +
 			"";
 		ScriptParser p = new ScriptParser(ParserType.Oracle);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		p.setScript(sql);
 		int count = p.getSize();
 		assertEquals(2, count);
+		assertTrue(p.getCommand(0).startsWith("create table my_ext_table"));
+		assertTrue(p.getCommand(1).startsWith("create table my_export"));
 	}
 
 	@Test
