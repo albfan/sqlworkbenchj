@@ -215,7 +215,12 @@ public class ConstantColumnValues
 		return columnValues.get(index).getIdentifier();
 	}
 
-	public ColumnData getColumn(String columnName)
+	public ColumnData getColumnData(int index)
+	{
+		return columnValues.get(index);
+	}
+	
+	public ColumnData getColumnData(String columnName)
 	{
 		for (ColumnData col : columnValues)
 		{
