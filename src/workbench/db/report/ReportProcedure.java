@@ -135,6 +135,10 @@ public class ReportProcedure
 		{
 			tagWriter.appendTag(result, indent2, TAG_PROC_CATALOG, procDef.getCatalog());
 		}
+		else if (procDef.isOraclePackage())
+		{
+			objectName = procDef.getPackageName();
+		}
 		tagWriter.appendTag(result, indent2, TAG_PROC_SCHEMA, getSchema());
 		tagWriter.appendTag(result, indent2, TAG_PROC_NAME, objectName);
 		if (StringUtil.isNonBlank(fullName))

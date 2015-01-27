@@ -36,8 +36,8 @@ import workbench.db.TableCommentReader;
 import workbench.db.TableGrant;
 import workbench.db.TableIdentifier;
 import workbench.db.ViewGrantReader;
+import workbench.db.ViewReader;
 import workbench.db.WbConnection;
-
 import workbench.util.StringUtil;
 
 /**
@@ -57,6 +57,7 @@ public class ReportView
 	public static final String TAG_VIEW_SCHEMA = "view-schema";
 	public static final String TAG_VIEW_COMMENT = "view-comment";
 	public static final String TAG_VIEW_SOURCE = "view-source";
+	public static final String TAG_VIEW_TYPE = "view-type";
 
 	private TableIdentifier view;
 	private ReportColumn[] columns;
@@ -117,7 +118,8 @@ public class ReportView
 		}
 		try
 		{
-			this.viewSource = conn.getMetadata().getViewReader().getViewSource(tbl);
+			ViewReader viewReader = conn.getMetadata().getViewReader();
+			this.viewSource = viewReader.getViewSource(tbl);
 		}
 		catch (NoConfigException no)
 		{
@@ -247,6 +249,10 @@ public class ReportView
 		line.append('\n');
 		appendTableNameXml(line, colindent);
 		tagWriter.appendTag(line, colindent, TAG_VIEW_COMMENT, this.viewComment, true);
+		if (!view.getType().equals("VIEW"))
+		{
+			tagWriter.appendTag(line, colindent, TAG_VIEW_TYPE, view.getType());
+		}
 		int cols = this.columns.length;
 		for (int i=0; i < cols; i++)
 		{
