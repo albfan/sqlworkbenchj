@@ -1944,13 +1944,14 @@ public class DataImporter
 		sql.append(" SET ");
 		where.append(" WHERE ");
 		boolean pkAdded = false;
+		boolean needComma = false;
 
 		if (columnConstants != null && columnConstants.getColumnCount() > 0)
 		{
 			SqlLiteralFormatter formatter = new SqlLiteralFormatter(dbConn);
 			for (ColumnIdentifier col : keyColumns)
 			{
-				ColumnData data = columnConstants.getColumn(col.getColumnName());
+				ColumnData data = columnConstants.getColumnData(col.getColumnName());
 				if (data != null)
 				{
 					String colname = meta.quoteObjectname(data.getIdentifier().getColumnName());
@@ -1965,6 +1966,32 @@ public class DataImporter
 					// this is a column that is not part of the input file
 					// so it's not counted through colCount and therefor the index must be increased by one
 					pkIndex++;
+				}
+			}
+			int cols = columnConstants.getColumnCount();
+			for (int i=0; i < cols; i++)
+			{
+				ColumnData data = columnConstants.getColumnData(i);
+				if (data.getIdentifier().isPkColumn()) continue;
+
+				if (needComma)
+				{
+					sql.append(", ");
+				}
+				else
+				{
+					needComma = true;
+				}
+				String colname = meta.quoteObjectname(data.getIdentifier().getColumnName());
+				sql.append(colname);
+				sql.append(" = ");
+				if (columnConstants.isFunctionCall(i))
+				{
+					sql.append(columnConstants.getFunctionLiteral(i));
+				}
+				else
+				{
+					sql.append(formatter.getDefaultLiteral(data));
 				}
 			}
 		}
@@ -1995,9 +2022,13 @@ public class DataImporter
 			else
 			{
 				this.columnMap[i] = colIndex;
-				if (colIndex > 0)
+				if (needComma)
 				{
 					sql.append(", ");
+				}
+				else
+				{
+					needComma = true;
 				}
 				sql.append(colname);
 				sql.append(" = ");
@@ -2005,7 +2036,6 @@ public class DataImporter
 				colIndex ++;
 			}
 		}
-
 
 		if (!pkAdded)
 		{
