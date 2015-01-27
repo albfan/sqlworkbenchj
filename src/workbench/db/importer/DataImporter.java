@@ -53,6 +53,7 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
 import workbench.db.DmlExpressionBuilder;
 import workbench.db.SequenceAdjuster;
 import workbench.db.TableCreator;
@@ -60,7 +61,9 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.BatchedStatement;
 
+import workbench.storage.ColumnData;
 import workbench.storage.RowActionMonitor;
+import workbench.storage.SqlLiteralFormatter;
 
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
@@ -1941,6 +1944,31 @@ public class DataImporter
 		sql.append(" SET ");
 		where.append(" WHERE ");
 		boolean pkAdded = false;
+
+		if (columnConstants != null && columnConstants.getColumnCount() > 0)
+		{
+			SqlLiteralFormatter formatter = new SqlLiteralFormatter(dbConn);
+			for (ColumnIdentifier col : keyColumns)
+			{
+				ColumnData data = columnConstants.getColumn(col.getColumnName());
+				if (data != null)
+				{
+					String colname = meta.quoteObjectname(data.getIdentifier().getColumnName());
+					if (pkAdded) where.append(" AND ");
+					else pkAdded = true;
+					where.append(colname);
+					where.append(" = ");
+					where.append(formatter.getDefaultLiteral(data));
+					data.getIdentifier().setIsPkColumn(true); // just to be sure
+					pkCount++;
+
+					// this is a column that is not part of the input file
+					// so it's not counted through colCount and therefor the index must be increased by one
+					pkIndex++;
+				}
+			}
+		}
+
 		for (int i=0; i < this.colCount; i++)
 		{
 			ColumnIdentifier col = this.targetColumns.get(i);
@@ -1977,6 +2005,7 @@ public class DataImporter
 				colIndex ++;
 			}
 		}
+
 
 		if (!pkAdded)
 		{

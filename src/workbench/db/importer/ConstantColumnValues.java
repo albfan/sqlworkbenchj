@@ -28,11 +28,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import workbench.log.LogMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.storage.ColumnData;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.SqlUtil;
@@ -209,6 +213,18 @@ public class ConstantColumnValues
 	public ColumnIdentifier getColumn(int index)
 	{
 		return columnValues.get(index).getIdentifier();
+	}
+
+	public ColumnData getColumn(String columnName)
+	{
+		for (ColumnData col : columnValues)
+		{
+			if (col.getIdentifier().getColumnName().equalsIgnoreCase(columnName))
+			{
+				return col;
+			}
+		}
+		return null;
 	}
 
 	public Object getValue(int index)
