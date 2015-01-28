@@ -321,18 +321,11 @@ public class StringUtil
 
 		if (!Character.isWhitespace(c)) return;
 
-		if (len == 1 && Character.isWhitespace(c))
-		{
-			value.deleteCharAt(0);
-			return;
-		}
-
-		while (Character.isWhitespace(c))
+		while (pos > 0 && Character.isWhitespace(value.charAt(pos - 1)))
 		{
 			pos --;
-			c = value.charAt(pos);
 		}
-		value.delete(pos + 1, len);
+		value.setLength(pos);
 	}
 
 	public static boolean isMixedCase(String s)

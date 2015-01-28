@@ -1095,7 +1095,10 @@ public class SqlUtil
 					{
 						// only replace the \n, \r are simply removed
 						// thus replacing \r\n with only one space
-						if (c == '\n') newSql.append(' ');
+						if (c == '\n' && newSql.length() > 0)
+						{
+							newSql.append(' ');
+						}
 					}
 					else if (c != '\n' && (c < 32 || (c > 126 && c < 145) || c == 255))
 					{
@@ -1103,7 +1106,7 @@ public class SqlUtil
 					}
 					else
 					{
-						newSql.append(c);
+						appendNoLeadingWhitespace(newSql, c);
 					}
 				}
 			}
@@ -1125,10 +1128,16 @@ public class SqlUtil
 		if (removeSemicolon && StringUtil.endsWith(newSql, ';'))
 		{
 			StringUtil.removeFromEnd(newSql, 1);
+			StringUtil.trimTrailingWhitespace(newSql);
 		}
 		return newSql.toString();
 	}
 
+	private static void appendNoLeadingWhitespace(StringBuilder target, char c)
+	{
+		if (c <= 32 && target.length() == 0) return;
+		target.append(c);
+	}
 
 	/**
 	 * returns true if the passed data type (from java.sql.Types)
