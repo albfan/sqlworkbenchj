@@ -211,7 +211,6 @@ public class VerticaProjectionPanel
 			isRetrieving = true;
 
 			final DataStoreTableModel model = new DataStoreTableModel(getProjectionDataStore(table));
-
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				@Override
@@ -261,9 +260,16 @@ public class VerticaProjectionPanel
 			int selected = Math.max(0, projectionList.getSelectedRow());
 			String basename = projectionList.getValueAsString(selected, 0);
 
-			DataStoreTableModel model = new DataStoreTableModel(getProjectionCopiesDataStore(basename));
-			projectionBuddies.setModel(model, true);
-			projectionBuddies.adjustRowsAndColumns();
+			final DataStoreTableModel model = new DataStoreTableModel(getProjectionCopiesDataStore(basename));
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					projectionBuddies.setModel(model, true);
+					projectionBuddies.adjustRowsAndColumns();
+				}
+			});
 		}
 		catch (SQLException se)
 		{
@@ -278,9 +284,16 @@ public class VerticaProjectionPanel
 			int selected = Math.max(0, projectionList.getSelectedRow());
 			String basename = projectionList.getValueAsString(selected, 0);
 
-			DataStoreTableModel model = new DataStoreTableModel(getProjectionColumnsDataStore(basename));
-			projectionColumns.setModel(model, true);
-			projectionColumns.adjustRowsAndColumns();
+			final DataStoreTableModel model = new DataStoreTableModel(getProjectionColumnsDataStore(basename));
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					projectionColumns.setModel(model, true);
+					projectionColumns.adjustRowsAndColumns();
+				}
+			});
 		}
 		catch (SQLException se)
 		{

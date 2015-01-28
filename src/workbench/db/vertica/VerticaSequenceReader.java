@@ -58,6 +58,7 @@ public class VerticaSequenceReader
               "       session_cache_count, \n" +
               "       allow_cycle \n" +
               "from v_catalog.sequences";
+
 	public VerticaSequenceReader(WbConnection conn)
 	{
 		this.dbConnection = conn;
@@ -145,7 +146,7 @@ public class VerticaSequenceReader
 	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String schema, String namePattern)
 	{
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+		List<SequenceDefinition> result = new ArrayList<>();
 
 		ResultSet rs = null;
 		Statement stmt = null;

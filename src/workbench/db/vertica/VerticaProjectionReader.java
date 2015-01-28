@@ -97,6 +97,10 @@ public class VerticaProjectionReader
 		{
 			LogMgr.logError("Vertica", "error", ex);
 		}
+		finally
+		{
+			SqlUtil.closeAll(rs, projectionStatement);
+		}
 
 		return null;
 	}

@@ -73,6 +73,8 @@ import workbench.db.postgres.PostgresRangeTypeReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
 import workbench.db.sqlite.SQLiteDataTypeResolver;
+import workbench.db.vertica.VerticaTableDefinitionReader;
+import workbench.db.vertica.VerticaTableReader;
 
 import workbench.storage.DataStore;
 import workbench.storage.DatastoreTransposer;
@@ -337,6 +339,11 @@ public class DbMetadata
 		else if (productLower.contains("informix"))
 		{
 			this.dataTypeResolver = new InformixDataTypeResolver();
+		}
+		else if (productLower.equals("vertica database"))
+		{
+			definitionReader = new VerticaTableDefinitionReader(aConnection);
+			extenders.add(new VerticaTableReader());
 		}
 
 		if (schemaInfoReader == null)
@@ -770,7 +777,7 @@ public class DbMetadata
 
 	public boolean isMySql() { return this.isMySql; }
 	public boolean isPostgres() { return this.isPostgres; }
-  public boolean isOracle() { return this.isOracle; }
+	public boolean isOracle() { return this.isOracle; }
 	public boolean isHsql() { return this.isHsql; }
 	public boolean isFirebird() { return this.isFirebird; }
 	public boolean isSqlServer() { return this.isSqlServer; }
