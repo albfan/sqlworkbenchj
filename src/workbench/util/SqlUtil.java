@@ -1002,12 +1002,12 @@ public class SqlUtil
 
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
-		return makeCleanSql(aSql, keepNewlines, false, false, true, "'\"");
+		return makeCleanSql(aSql, keepNewlines, false, false, true);
 	}
 
 	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments)
 	{
-		return makeCleanSql(aSql, keepNewlines, keepComments, false, true, "'\"");
+		return makeCleanSql(aSql, keepNewlines, keepComments, false, true);
 	}
 
 	/**
@@ -1021,22 +1021,6 @@ public class SqlUtil
 	 *	@return String
 	 */
 	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, boolean checkNonStandardComments, boolean removeSemicolon)
-	{
-		return makeCleanSql(aSql, keepNewlines, keepComments, checkNonStandardComments, removeSemicolon, "'\"");
-	}
-
-	/**
-	 *	Replaces all white space characters with a single space (But not inside
-	 *	string literals) and removes -- style and Java style comments
-	 *	@param aSql The sql script to "clean out"
-	 *  @param keepNewlines if true, newline characters (\n) are kept
-	 *  @param keepComments if true, comments (single line, block comments) are kept
-	 *  @param checkNonStandardComments check for non-standard MySQL single line comments
-	 *  @param removeSemicolon if true, a trailing semicolon will be removed
-	 *	@return String
-	 */
-	@SuppressWarnings("AssignmentToForLoopParameter")
-	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, boolean checkNonStandardComments, boolean removeSemicolon, String quotes)
 	{
 		if (aSql == null) return null;
 		aSql = aSql.trim();
@@ -1056,7 +1040,7 @@ public class SqlUtil
 		{
 			char c = aSql.charAt(i);
 
-			if (quotes.indexOf(c) > -1)
+			if (c == '\'' || c == '"')
 			{
 				inQuotes = !inQuotes;
 			}

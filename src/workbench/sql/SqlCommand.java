@@ -931,7 +931,7 @@ public class SqlCommand
 	 */
 	protected String getCommandLine(String sql)
 	{
-		return SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false, false, true, "'"));
+		return SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
 	}
 
 	/**

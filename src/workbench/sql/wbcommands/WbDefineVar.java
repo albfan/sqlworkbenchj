@@ -32,6 +32,7 @@ import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
 
@@ -213,6 +214,11 @@ public class WbDefineVar
 			// WbStringTokenizer returned any quotes that were used, so we have to remove them again
 			// as they should not be part of the variable value
 			valueParameter = StringUtil.trimQuotes(valueParameter.trim());
+			if (Settings.getInstance().getCleanupVariableValues())
+			{
+				valueParameter = SqlUtil.makeCleanSql(valueParameter, false, false);
+			}
+
 			if (removeUndefined)
 			{
 				// as the SQL that was passed to this command already has all variables replaced,
@@ -241,10 +247,6 @@ public class WbDefineVar
 		return result;
 	}
 
-	private void setValue(StatementRunnerResult result, String nameParameter, String valueParameter)
-	{
-
-	}
 	private void readValuesFromDatabase(StatementRunnerResult result, List<String> varNames, String valueParameter)
 	{
 		String valueSql = null;
