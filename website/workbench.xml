@@ -293,7 +293,7 @@ WHERE id=42;</p>
         <li><a href="wbreport2liquibase.xslt">Generate a Liquibase Changeset</a><br/>
             The script includes <a href="liquibase_common.xslt">liquibase_common.xslt</a>. Both files are needed</li>
         <li><a href="wbreport2proc.xslt">Extract procedures</a></li>
-        <li><a href="wbreport2wiki.xslt">Generate Confluence Wiki code</a></li>
+        <li><a href="wbreport2confluence.xslt">Generate Confluence Wiki code</a></li>
         <li><a href="wbreport2benerator.xslt">Generate an initial stub for a</a> <a target="_blank" href="http://databene.org/databene-benerator/">Benerator</a> script</li>
        </ul>
 

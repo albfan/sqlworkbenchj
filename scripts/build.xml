@@ -599,7 +599,7 @@
       <fileset dir="${distdir}">
         <include name="WorkbenchSrc-Build${build.number}.zip"/>
         <include name="Workbench-Build${build.number}.zip"/>
-        <include name="Workbench-Build${build.number}-Mac.tgz"/>
+        <include name="Workbench-Build${build.number}-MacJava7.tgz"/>
       </fileset>
     </move>
 
