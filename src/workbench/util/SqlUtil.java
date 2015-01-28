@@ -1002,12 +1002,27 @@ public class SqlUtil
 
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
-		return makeCleanSql(aSql, keepNewlines, false, false, true);
+		return makeCleanSql(aSql, keepNewlines, false, false, true, "'\"");
 	}
 
 	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments)
 	{
-		return makeCleanSql(aSql, keepNewlines, keepComments, false, true);
+		return makeCleanSql(aSql, keepNewlines, keepComments, false, true, "'\"");
+	}
+
+	/**
+	 *	Replaces all white space characters with a single space (But not inside
+	 *	string literals) and removes -- style and Java style comments
+	 *	@param aSql The sql script to "clean out"
+	 *  @param keepNewlines if true, newline characters (\n) are kept
+	 *  @param keepComments if true, comments (single line, block comments) are kept
+	 *  @param checkNonStandardComments check for non-standard MySQL single line comments
+	 *  @param removeSemicolon if true, a trailing semicolon will be removed
+	 *	@return String
+	 */
+	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, boolean checkNonStandardComments, boolean removeSemicolon)
+	{
+		return makeCleanSql(aSql, keepNewlines, keepComments, checkNonStandardComments, removeSemicolon, "'\"");
 	}
 
 	/**
@@ -1021,7 +1036,7 @@ public class SqlUtil
 	 *	@return String
 	 */
 	@SuppressWarnings("AssignmentToForLoopParameter")
-	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, boolean checkNonStandardComments, boolean removeSemicolon)
+	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, boolean checkNonStandardComments, boolean removeSemicolon, String quotes)
 	{
 		if (aSql == null) return null;
 		aSql = aSql.trim();
@@ -1035,11 +1050,13 @@ public class SqlUtil
 
 		char last = ' ';
 
-		for (int i=0; i < count; i++)
+		int start = StringUtil.findFirstNonWhitespace(aSql);
+
+		for (int i=start; i < count; i++)
 		{
 			char c = aSql.charAt(i);
 
-			if (c == '\'' || c == '"')
+			if (quotes.indexOf(c) > -1)
 			{
 				inQuotes = !inQuotes;
 			}
@@ -1104,9 +1121,12 @@ public class SqlUtil
 			}
 			last = c;
 		}
-		String s = newSql.toString().trim();
-		if (removeSemicolon && s.endsWith(";")) s = s.substring(0, s.length() - 1).trim();
-		return s;
+		StringUtil.trimTrailingWhitespace(newSql);
+		if (removeSemicolon && StringUtil.endsWith(newSql, ';'))
+		{
+			StringUtil.removeFromEnd(newSql, 1);
+		}
+		return newSql.toString();
 	}
 
 

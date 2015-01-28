@@ -521,6 +521,9 @@ public class StringUtilTest
 		StringUtil.trimTrailingWhitespace(s);
 		assertEquals("", s.toString());
 
+		s = new StringBuilder("         ");
+		StringUtil.trimTrailingWhitespace(s);
+		assertEquals("", s.toString());
 	}
 
 	@Test
