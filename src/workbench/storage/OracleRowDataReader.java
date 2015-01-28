@@ -108,25 +108,15 @@ public class OracleRowDataReader
 			// Oracle returns 6 digits, e.g: 2015-01-26 11:42:46.894119 Europe/Berlin
 			// apparently SimpleDateFormat does some strange rounding there and will return
 			// the above timestamp as 11:57:40.119
-			// so we need to strip the additional milliseconds and we also need to remove the timezone name
-			// as Java can't handle that either.
+			// so we need to strip the additional milliseconds
+			// and the timezone name as Java can't handle that either.
+			String cleanValue = cleanupTSValue(tsValue);
 
-			int pos = tsValue.lastIndexOf(' ');
-			if (pos > 10)
-			{
-				// SimpleDateFormat cannot handle a timezone definition like Europe/Berlin so we need to remove it
-				tsValue = tsValue.substring(0, pos);
-			}
+//			LogMgr.logTrace("OracleRowDataReader.adjustTIMESTAMP", "Converted [" + tsValue + "] to [" + cleanValue + "]");
 
-			int msPos = tsValue.indexOf('.');
-			if (msPos == 19)
-			{
-				int end = Math.min(tsValue.length(), 23);
-				tsValue = tsValue.substring(0, end);
-			}
-			java.util.Date date = tsParser.parse(tsValue);
 			// this loses the time zone information stored in Oracle's TIMESTAMPTZ or TIMESTAMPLTZ values
 			// but otherwise the displayed time would be totally wrong.
+			java.util.Date date = tsParser.parse(cleanValue);
 			Timestamp ts = new java.sql.Timestamp(date.getTime());
 			return ts;
 		}
@@ -137,5 +127,31 @@ public class OracleRowDataReader
 		return tz;
 	}
 
+	public static String cleanupTSValue(String tsValue)
+	{
+		int len = tsValue.length();
+		if (len < 19)
+		{
+			return tsValue;
+		}
+		int msPos = tsValue.indexOf('.');
+		int end = -1;
+		if (msPos == 19)
+		{
+			end = tsValue.indexOf(' ', msPos);
+		}
+		else
+		{
+			// no milliseconds, find the timezone name
+			end = tsValue.indexOf(' ', 12);
+		}
 
+		end = Math.min(len, 23);
+
+		if (end < len)
+		{
+			tsValue = tsValue.substring(0, end);
+		}
+		return tsValue;
+	}
 }
