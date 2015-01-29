@@ -21,6 +21,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 import workbench.db.TableIdentifier;
@@ -66,7 +67,12 @@ public class ObjectLister
 			objects = cmdLine.getValue(CommonArgs.ARG_OBJECTS);
 
 			List<String> typeList = cmdLine.getListValue(CommonArgs.ARG_TYPES);
-			if (typeList.size() > 0)
+			if (typeList.size() == 1 && (typeList.get(0).equals("*") || typeList.get(0).equals("%")))
+			{
+				Collection<String> allTypes = connection.getMetadata().getObjectTypes();
+				types = StringUtil.toArray(allTypes, true, true);
+			}
+			else if (typeList.size() > 0)
 			{
 				types = StringUtil.toArray(typeList, true, true);
 			}
