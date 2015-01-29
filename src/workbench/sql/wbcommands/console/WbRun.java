@@ -63,7 +63,9 @@ public class WbRun
 	@Override
 	protected boolean isConnectionRequired()
 	{
-		return true;
+		// the included script could use WbConnect to establish the connection
+		// so a connection is not required.
+		return false;
 	}
 
 	@Override
