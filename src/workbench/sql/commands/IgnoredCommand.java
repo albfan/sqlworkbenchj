@@ -25,6 +25,7 @@ package workbench.sql.commands;
 import java.sql.SQLException;
 
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -53,8 +54,11 @@ public class IgnoredCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", this.verb);
-		result.addMessage(msg);
+		if (Settings.getInstance().getShowIgnoredWarning())
+		{
+			String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", this.verb);
+			result.addMessage(msg);
+		}
 		result.setSuccess();
 		this.done();
 		return result;

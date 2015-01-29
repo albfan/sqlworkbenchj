@@ -130,13 +130,19 @@ public class JdbcTableDefinitionReader
 			}
 
 			boolean jdbc4 = false;
-
+			boolean jdbc41 = false;
 			if (rsmeta.getColumnCount() > 22)
 			{
 				String name = rsmeta.getColumnName(23);
 
 				// HSQLDB 1.8 returns 23 columns, but is not JDBC4, so I need to check for the name as well.
 				jdbc4 = name.equals("IS_AUTOINCREMENT");
+			}
+
+			if (rsmeta.getColumnCount() > 23)
+			{
+				String name = rsmeta.getColumnName(24);
+				jdbc41 = name.equals("IS_GENERATEDCOLUMN");
 			}
 
 			while (rs.next())
@@ -196,6 +202,14 @@ public class JdbcTableDefinitionReader
 					// (And they refuse to fix this: http://social.msdn.microsoft.com/Forums/en/sqldataaccess/thread/20df12f3-d1bf-4526-9daa-239a83a8e435)
 					// This hack works around Microsoft's ignorance regarding Java and JDBC
 					autoincrement = display.contains("identity");
+				}
+
+				boolean isGenerated = false;
+				if (jdbc41)
+				{
+					String generated = useColumnNames ? rs.getString("IS_GENERATEDCOLUMN") : rs.getString(24);
+					isGenerated = StringUtil.stringToBool(generated);
+					col.setIsGenerated(Boolean.valueOf(isGenerated));
 				}
 
 				col.setDbmsType(display);

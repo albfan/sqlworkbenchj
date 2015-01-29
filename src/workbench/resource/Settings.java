@@ -148,6 +148,7 @@ public class Settings
 
 	public static final String PROPERTY_CONSOLIDATE_LOG_MESSAGES = "workbench.gui.log.consolidate";
 	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
+	public static final String PROPERTY_SHOW_IGNORED_WARN = "workbench.sql.ignored.show.warning";
 	public static final String PROPERTY_ERROR_STATEMENT_LOG_LEVEL = "workbench.gui.log.errorstatement";
 
 	public static final String PROPERTY_VAR_CLEANUP = "workbench.sql.parameter.values.cleanup";
@@ -1694,6 +1695,11 @@ public class Settings
 		setProperty("workbench.editor.rightclickmovescursor", flag);
 	}
 
+	public boolean getShowIgnoredWarning()
+	{
+		return getBoolProperty(PROPERTY_SHOW_IGNORED_WARN, true);
+	}
+
 	public boolean getShowLineNumbers()
 	{
 		return getBoolProperty(PROPERTY_SHOW_LINE_NUMBERS, true);
@@ -2633,7 +2639,7 @@ public class Settings
 	{
 		return getBoolProperty(PROPERTY_VAR_CLEANUP, false);
 	}
-	
+
 	public boolean getSortPromptVariables()
 	{
 		return getBoolProperty(PROPERTY_SORT_VARS, true);

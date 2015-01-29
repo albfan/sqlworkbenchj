@@ -44,6 +44,7 @@ public class ReportColumn
 	public static final String TAG_COLUMN_DIGITS = "dbms-data-digits";
 	public static final String TAG_COLUMN_POSITION = "dbms-position";
 	public static final String TAG_COLUMN_AUTO_INC = "auto-increment";
+	public static final String TAG_COLUMN_GENERATED = "generated-column";
 	public static final String TAG_COLUMN_DEFAULT = "default-value";
 	public static final String TAG_COLUMN_COLLATION = "collation";
 	public static final String TAG_COLUMN_NULLABLE = "nullable";
@@ -119,6 +120,10 @@ public class ReportColumn
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_NULLABLE, this.column.isNullable());
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_DEFAULT, this.column.getDefaultValue(), true);
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_AUTO_INC, this.column.isAutoincrement());
+		if (isRealColumn && this.column.isGenerated() != null)
+		{
+			tagWriter.appendTag(result, myindent, TAG_COLUMN_GENERATED, this.column.isGenerated());
+		}
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_SIZE, this.column.getColumnSize());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDigitsDisplay());
 		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());

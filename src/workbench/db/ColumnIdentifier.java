@@ -56,6 +56,7 @@ public class ColumnIdentifier
 	private int type = Types.OTHER;
 	private boolean isPk;
 	private boolean isExpression;
+	private Boolean isGenerated;
 	private boolean isNullable = true;
 	private boolean isUpdateable = true;
 	private boolean readOnly;
@@ -142,6 +143,15 @@ public class ColumnIdentifier
 		this.columnConstraint = constraint;
 	}
 
+	public Boolean isGenerated()
+	{
+		return isGenerated;
+	}
+
+	public void setIsGenerated(Boolean flag)
+	{
+		this.isGenerated = flag;
+	}
 
 	/**
 	 * Returns the keyword that should be used to define the default value.
@@ -554,6 +564,7 @@ public class ColumnIdentifier
 		result.collation = this.collation;
 		result.collationExpression = this.collationExpression;
 		result.generatorExpression = this.generatorExpression;
+		result.isGenerated = this.isGenerated;
 		return result;
 	}
 
