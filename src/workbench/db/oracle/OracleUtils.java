@@ -254,7 +254,7 @@ public class OracleUtils
 
 	public static boolean showDbmsOutputFeedback()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db.oracle.set_serveroutput.feedback", false);
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.set_serveroutput.feedback", true);
 	}
 
 	public static boolean is12_1_0_2(WbConnection conn)
