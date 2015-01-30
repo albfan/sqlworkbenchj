@@ -21,6 +21,7 @@ package workbench.sql.parser;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 
 /**
  *
@@ -54,6 +55,7 @@ public enum ParserType
 		// This will properly deal with the stupid [..] "quotes" in T-SQL
 		if (DbMetadata.DBID_MS.equals(dbid)) return SqlServer;
 		if ("adaptive_server_enterprise".equals(dbid)) return SqlServer;
+		if ("excel".equals(dbid)) return SqlServer;
 
 		// This will use a different lexer that supports MySQL's stupid backticks
 		// and non-standard line comments
@@ -63,6 +65,20 @@ public enum ParserType
 		// As currently this is the only thing that makes the Lexer for SQL server
 		// different from the standard Lexer I'm using it for SQLite as well.
 		if ("sqlite".equals(dbid)) return SqlServer;
+
+		String name = Settings.getInstance().getProperty("workbench.db." + dbid + ".parsertype", null);
+
+		if (name != null)
+		{
+			try
+			{
+				return ParserType.valueOf(name);
+			}
+			catch (Throwable th)
+			{
+				// ignore
+			}
+		}
 
 		return Standard;
 	}

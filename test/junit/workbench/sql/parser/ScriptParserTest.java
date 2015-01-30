@@ -835,6 +835,16 @@ public class ScriptParserTest
 		assertTrue(p.getCommand(1).startsWith("@install.sql"));
 		assertTrue(p.getCommand(2).startsWith("commit"));
 
+		sql =
+			"set schema myschema;\n" +
+			"@install.sql\n" +
+			"commit;";
+		p = new ScriptParser(ParserType.Postgres);
+		p.setScript(sql);
+		assertEquals(3, p.getSize());
+		assertTrue(p.getCommand(0).startsWith("set schema myschema"));
+		assertTrue(p.getCommand(1).startsWith("@install.sql"));
+		assertTrue(p.getCommand(2).startsWith("commit"));
 	}
 
 	private File createScript(int counter, String lineEnd)
@@ -1106,13 +1116,16 @@ public class ScriptParserTest
 		assertEquals(2, count);
 		assertEquals("SELECT * FROM [Some;Table]", parser.getCommand(0).trim());
 
-    parser = new ScriptParser(sql, ParserType.SqlServer);
+    parser.setScript(sql);
 		count = parser.getSize();
 		assertEquals(2, count);
 		assertEquals("SELECT * FROM [Some;Table]", parser.getCommand(0).trim());
 
+		parser.setScript("select * from [Excel 8.0;Database=c:\\foo.xls].[Tabelle1$]");
+		assertEquals(1, parser.getSize());
+		assertEquals("select * from [Excel 8.0;Database=c:\\foo.xls].[Tabelle1$]", parser.getCommand(0).trim());
+
 		sql = "SELECT '[SomeTable];' FROM dual;DELETE FROM \"[Other];Table\";";
-		parser = new ScriptParser(ParserType.SqlServer);
 		parser.setScript(sql);
 		count = parser.getSize();
 		assertEquals(2, count);
