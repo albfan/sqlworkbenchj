@@ -123,7 +123,6 @@ public class WbListProcedures
 
 		// adjust the type info, just be sure
 		ResultInfo info = ds.getResultInfo();
-		info.setColumnClassName(ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, info.getColumnClassName(0));
 		info.getColumn(ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE).setDataType(Types.VARCHAR);
 		ds.setResultName(ResourceMgr.getString("TxtDbExplorerProcs"));
 		ds.setGeneratingSql(aSql);
