@@ -1017,6 +1017,14 @@ public class DataExporter
 		}
 	}
 
+	public void setFixedDigits(int digits, String symbol)
+	{
+		if (StringUtil.isNonBlank(symbol))
+		{
+			this.numberFormatter = new WbNumberFormatter(digits, symbol.charAt(0), true);
+		}
+	}
+
 	public WbNumberFormatter getDecimalFormatter()
 	{
 		return this.numberFormatter;

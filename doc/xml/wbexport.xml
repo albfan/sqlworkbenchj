@@ -821,7 +821,7 @@
 					</row>
 
 					<row>
-						<entry>-quoteAlways</entry>
+						<entry id="export-param-quotealways">-quoteAlways</entry>
 
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
@@ -845,10 +845,20 @@
 					</row>
 
 					<row>
-						<entry>-decimal</entry>
+						<entry id="export-param-decimalsymbol">-decimal</entry>
 						<entry>
               The decimal symbol to be used for numbers. The default is a dot e.g. the number Pi would be written as <literal>3.14152</literal>
               When using <literal>-decimal=','</literal> the number Pi would be written as: <literal>3,14152</literal>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="export-param-decimaldigits">-decimalDigits</entry>
+						<entry>
+              Defines a fixed number of decimal digits. If this parameter is not specified decimal values are exported
+              with as many digits as necessary. If this parameter is specified all decimal values are exported with
+              the defined number of digits. <literal>-decimalDigits=4</literal> will result in <literal>1.2</literal>
+              to be written as <literal>1.2000</literal>.
 						</entry>
 					</row>
 

@@ -118,6 +118,7 @@ public class WbExport
 	public static final String ARG_CREATEFULL_HTML_PAGE = "createFullHTML";
 	public static final String ARG_DATEFORMAT = "dateFormat";
 	public static final String ARG_DECIMAL_SYMBOL = "decimal";
+	public static final String ARG_DECIMAL_DIGITS = "decimalDigits";
 	public static final String ARG_ESCAPETEXT = "escapeText";
 	public static final String ARG_ESCAPE_HTML = "escapeHTML";
 	public static final String ARG_INCLUDE_CREATETABLE = "createTable";
@@ -173,6 +174,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_TIMESTAMP_FORMAT);
 		cmdLine.addArgument(ARG_TIMEFORMAT);
 		cmdLine.addArgument(ARG_DECIMAL_SYMBOL);
+		cmdLine.addArgument(ARG_DECIMAL_DIGITS);
 		cmdLine.addArgument(ARG_CHARFUNC);
 		cmdLine.addArgument(ARG_CONCAT_OPERATOR);
 		cmdLine.addArgument(ARG_CONCAT_FUNCTION);
@@ -471,8 +473,17 @@ public class WbExport
 		format = cmdLine.getValue(ARG_TIMEFORMAT);
 		if (format != null) exporter.setTimeFormat(format);
 
-		format = cmdLine.getValue(ARG_DECIMAL_SYMBOL);
-		if (format != null) exporter.setDecimalSymbol(format);
+		String decimal = cmdLine.getValue(ARG_DECIMAL_SYMBOL);
+		int digits = cmdLine.getIntValue(ARG_DECIMAL_DIGITS, -1);
+
+		if (digits > 0)
+		{
+			exporter.setFixedDigits(digits, decimal == null ? "." : decimal);
+		}
+		else if (decimal != null)
+		{
+			exporter.setDecimalSymbol(format);
+		}
 
 		exporter.setAppendInfoSheet(cmdLine.getBoolean(ARG_ADD_INFOSHEET, Settings.getInstance().getDefaultExportInfoSheet(type)));
 
