@@ -33,6 +33,7 @@ import workbench.resource.Settings;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.db.firebird.FirebirdStatementHook;
+import workbench.db.oracle.OracleUtils;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -378,12 +379,18 @@ public class SetCommand
 		if ("off".equalsIgnoreCase(param))
 		{
 			connection.getMetadata().disableOutput();
-			result.addMessageByKey("MsgDbmsOutputDisabled");
+			if (OracleUtils.showDbmsOutputFeedback())
+			{
+				result.addMessageByKey("MsgDbmsOutputDisabled");
+			}
 		}
 		else if ("on".equalsIgnoreCase(param))
 		{
 			connection.getMetadata().enableOutput();
-			result.addMessageByKey("MsgDbmsOutputEnabled");
+			if (OracleUtils.showDbmsOutputFeedback())
+			{
+				result.addMessageByKey("MsgDbmsOutputEnabled");
+			}
 		}
 		else
 		{
