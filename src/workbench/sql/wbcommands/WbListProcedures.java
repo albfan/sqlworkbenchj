@@ -23,18 +23,22 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.sql.Types;
 
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DbObject;
+import workbench.db.JdbcProcedureReader;
+import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 
 import workbench.storage.DataStore;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.storage.ResultInfo;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -106,8 +110,25 @@ public class WbListProcedures
 		}
 
 		DataStore ds = currentConnection.getMetadata().getProcedureReader().getProcedures(catalog, schema, name);
+
+		// Displaying this DataStore will not use the ProcStatusRenderer to display the
+		// "ResultType" column. So we just convert the integer value to a string
+		int count = ds.getRowCount();
+		for (int row=0; row < count; row++)
+		{
+			int type = ds.getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, -1);
+			String typeName = JdbcProcedureReader.convertProcTypeToSQL(type);
+			ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, typeName);
+		}
+
+		// adjust the type info, just be sure
+		ResultInfo info = ds.getResultInfo();
+		info.setColumnClassName(ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, info.getColumnClassName(0));
+		info.getColumn(ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE).setDataType(Types.VARCHAR);
 		ds.setResultName(ResourceMgr.getString("TxtDbExplorerProcs"));
 		ds.setGeneratingSql(aSql);
+		ds.resetStatus();
+
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;
