@@ -3447,6 +3447,10 @@ public class SqlPanel
 				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + duration + "\n";
 				this.appendToLog(s);
 			}
+			else if (GuiSettings.showScriptFinishTime())
+			{
+				this.appendToLog("(" + StringUtil.getCurrentTimestamp() + ")\n");
+			}
 
 			restoreSelection = restoreSelection && !GuiSettings.getKeepCurrentSqlHighlight() && !editorWasModified;
 			restoreSelection(highlightCurrent, jumpToNext, restoreSelection, currentCursor, oldSelectionStart, oldSelectionEnd, commandWithError, startIndex, endIndex, scriptParser);
