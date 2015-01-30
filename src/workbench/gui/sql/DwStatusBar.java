@@ -133,7 +133,7 @@ public class DwStatusBar
 		tfRowCount.setEditable(false);
 		tfRowCount.setHorizontalAlignment(JTextField.RIGHT);
 		tfRowCount.setBorder(MAX_ROWS_BORDER);
-		tfRowCount.setDisabledTextColor(Color.BLACK);
+		tfRowCount.setDisabledTextColor(tfRowCount.getForeground());
 		tfRowCount.setMargin(new Insets(0, 15, 0, 10));
 		tfRowCount.setMinimumSize(d);
 		tfRowCount.setPreferredSize(null);
