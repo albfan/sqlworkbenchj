@@ -85,7 +85,7 @@ public class PostgresIndexReader
 		// index. So all we need to do, is retrieve the indexdef value
 		// from that table for all indexes defined for this table.
 		int count = indexList.size();
-		String schema = "quote_ident('" + table.getRawSchema() + "')";
+		String schema = "'" + table.getRawSchema() + "'";
 
 		StringBuilder sql = new StringBuilder(50 + count * 20);
 		if (JdbcUtils.hasMinimumServerVersion(con, "8.0"))
@@ -122,9 +122,9 @@ public class PostgresIndexReader
 					if (indexCount > 0) sql.append(',');
 					sql.append('(');
 					sql.append(schema);
-					sql.append(",quote_ident('");
+					sql.append(",'");
 					sql.append(idxName);
-					sql.append("'))");
+					sql.append("')");
 					indexCount++;
 				}
 			}
@@ -242,11 +242,11 @@ public class PostgresIndexReader
 			String idxName = con.getMetadata().removeQuotes(index.getName());
 			String schema = con.getMetadata().removeQuotes(index.getSchema());
 			if (indexCount > 0) sql.append(',');
-			sql.append('(');
+			sql.append("('");
 			sql.append(schema);
-			sql.append(",quote_ident('");
+			sql.append("','");
 			sql.append(idxName);
-			sql.append("'))");
+			sql.append("')");
 			indexCount++;
 		}
 		sql.append(')');
