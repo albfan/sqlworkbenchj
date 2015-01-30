@@ -2337,6 +2337,10 @@ public class Settings
 
 	public File getDefaultXsltDirectory()
 	{
+		// this can happen if the Settings instance is accessed by
+		// a component that is instantiated in the GUI editor
+		if (WbManager.getInstance() == null) return new File(".");
+
 		String dir = getProperty("workbench.xslt.dir", null);
 		File result = null;
 		if (dir == null)

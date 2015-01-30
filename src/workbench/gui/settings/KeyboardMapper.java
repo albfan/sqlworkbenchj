@@ -22,7 +22,6 @@
  */
 package workbench.gui.settings;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -33,6 +32,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+
 import workbench.resource.ResourceMgr;
 
 /**
@@ -52,8 +53,8 @@ public class KeyboardMapper
 		this.display = new JTextField(20);
 		this.display.addKeyListener(this);
 		this.display.setEditable(false);
-		this.display.setDisabledTextColor(Color.BLACK);
-		this.display.setBackground(Color.WHITE);
+		this.display.setDisabledTextColor(display.getForeground());
+		this.display.setBackground(UIManager.getColor("TextArea.background"));
 		this.add(display);
 	}
 

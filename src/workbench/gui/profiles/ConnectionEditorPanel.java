@@ -1585,7 +1585,7 @@ public class ConnectionEditorPanel
 			String title = ResourceMgr.getString("LblCurrentPassword");
 			title += " " + this.getProfile().getLoginUser();
 			JTextField f = new JTextField();
-			f.setDisabledTextColor(Color.BLACK);
+			f.setDisabledTextColor(f.getForeground());
 			f.setEditable(false);
 			f.setText(pwd == null ? "" : pwd);
 			Border b = new CompoundBorder(new LineBorder(Color.LIGHT_GRAY), new EmptyBorder(2, 2, 2, 2));

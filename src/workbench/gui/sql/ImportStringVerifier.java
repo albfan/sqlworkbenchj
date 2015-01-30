@@ -23,18 +23,20 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.List;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.importer.TextFileParser;
@@ -164,7 +166,7 @@ public class ImportStringVerifier
 		preview.setText(s.toString());
 		preview.setFont(Settings.getInstance().getEditorFont());
 		preview.setEditable(false);
-		preview.setDisabledTextColor(Color.BLACK);
+		preview.setDisabledTextColor(preview.getForeground());
 		preview.setCaretPosition(0);
 
 		JScrollPane scroll = new JScrollPane(preview);
@@ -176,8 +178,8 @@ public class ImportStringVerifier
 		JTextField msg = new JTextField();
 		msg.setEnabled(false);
 		msg.setText(ResourceMgr.getString("MsgClipFormat"));
-		msg.setBackground(Color.WHITE);
-		msg.setDisabledTextColor(Color.BLACK);
+		msg.setBackground(UIManager.getColor("TextArea.background"));
+		msg.setDisabledTextColor(msg.getForeground());
 		Border b = new EmptyBorder(4,2,4,2);
 		msg.setBorder(b);
 
