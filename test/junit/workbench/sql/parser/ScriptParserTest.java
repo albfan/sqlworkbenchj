@@ -56,6 +56,7 @@ public class ScriptParserTest
 		super("ScriptParserTest");
 	}
 
+
 	@Test
 	public void testOra()
 	{
@@ -812,6 +813,31 @@ public class ScriptParserTest
 		assertEquals("Not enough commands", 4, p.getSize());
 		assertEquals("Wrong command", "@myfile.sql", p.getCommand(2));
 		assertEquals("Wrong command", "delete from theTable", p.getCommand(3));
+
+		sql =
+			"set schema myschema;\n" +
+			"@install.sql\n" +
+			"commit;";
+		p = new ScriptParser(ParserType.Standard);
+		p.setScript(sql);
+		int count = p.getSize();
+		assertEquals(3, count);
+		assertTrue(p.getCommand(0).startsWith("set schema myschema"));
+		assertTrue(p.getCommand(1).startsWith("@install.sql"));
+		assertTrue(p.getCommand(2).startsWith("commit"));
+
+		sql =
+			"set schema myschema;\n" +
+			"@install.sql;\n" +
+			"commit;";
+		p = new ScriptParser(ParserType.Standard);
+		p.setScript(sql);
+		count = p.getSize();
+		assertEquals(3, count);
+		assertTrue(p.getCommand(0).startsWith("set schema myschema"));
+		assertTrue(p.getCommand(1).startsWith("@install.sql"));
+		assertTrue(p.getCommand(2).startsWith("commit"));
+
 	}
 
 	private File createScript(int counter, String lineEnd)

@@ -20,21 +20,18 @@
 package workbench.sql.parser;
 
 
-
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.lexer.SQLToken;
-
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class PostgresDelimiterTester
+public class ShortIncludeDelimiterTester
 	implements DelimiterTester
 {
-	private SQLToken firstToken;
 
-	public PostgresDelimiterTester()
+	public ShortIncludeDelimiterTester()
 	{
 	}
 
@@ -46,13 +43,6 @@ public class PostgresDelimiterTester
 	@Override
 	public void currentToken(SQLToken token, boolean isStartOfStatement)
 	{
-		if (token == null) return;
-		if (token.isComment() || token.isWhiteSpace()) return;
-
-		if (firstToken == null)
-		{
-			firstToken = token;
-		}
 	}
 
 	@Override
@@ -64,7 +54,6 @@ public class PostgresDelimiterTester
 	@Override
 	public void statementFinished()
 	{
-		firstToken = null;
 	}
 
 	@Override
@@ -81,8 +70,7 @@ public class PostgresDelimiterTester
 		if (isStartOfLine && !token.isWhiteSpace())
 		{
 			String text = token.getText();
-			char c = text.charAt(0);
-			return c == '\\' || c == '@';
+			return text.charAt(0) == '@';
 		}
 		return false;
 	}

@@ -161,7 +161,7 @@ $[my_select];</programlisting>
       the default prefix for marking variables in your statements, you can configure a different
       prefix and suffix for flagging variables. To change the the prefix e.g. to <literal>%#</literal> and
       the suffix (i.e end of the variable name) to <literal>#</literal>, add the following lines to
-      your <literal>workbench.seliteralings</literal> file:
+      your <literal>workbench.settings</literal> file:
     </para>
     <programlisting>workbench.sql.parameter.prefix=%#
 workbench.sql.parameter.suffix=#</programlisting>

@@ -51,8 +51,9 @@ public enum ParserType
 		// This will allow mixing the standard delimiter with the alternate delimiter
 		if (DbMetadata.DBID_ORA.equals(dbid)) return Oracle;
 
-		// This will properly deal with the stupid [..] "quotes".
+		// This will properly deal with the stupid [..] "quotes" in T-SQL
 		if (DbMetadata.DBID_MS.equals(dbid)) return SqlServer;
+		if ("adaptive_server_enterprise".equals(dbid)) return SqlServer;
 
 		// This will use a different lexer that supports MySQL's stupid backticks
 		// and non-standard line comments
