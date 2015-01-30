@@ -37,6 +37,7 @@ import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.macros.MacroStorage;
+import workbench.storage.SortDefinition;
 
 
 /**
@@ -119,6 +120,14 @@ public class WbListMacros
 			}
 		}
 
+		if (!showGroup)
+		{
+			// sort macros by name in console mode
+			SortDefinition sort = new SortDefinition(0, true);
+			sort.setIgnoreCase(true);
+			ds.sort(sort);
+		}
+
 		ds.resetStatus();
 		ds.setGeneratingSql("WbListMacros");
 		result.addDataStore(ds);
@@ -126,7 +135,7 @@ public class WbListMacros
 		result.setSuccess();
 		return result;
 	}
-	
+
 	@Override
 	public boolean isWbCommand()
 	{
