@@ -820,8 +820,7 @@ public class ScriptParserTest
 			"commit;";
 		p = new ScriptParser(ParserType.Standard);
 		p.setScript(sql);
-		int count = p.getSize();
-		assertEquals(3, count);
+		assertEquals(3, p.getSize());
 		assertTrue(p.getCommand(0).startsWith("set schema myschema"));
 		assertTrue(p.getCommand(1).startsWith("@install.sql"));
 		assertTrue(p.getCommand(2).startsWith("commit"));
@@ -830,10 +829,8 @@ public class ScriptParserTest
 			"set schema myschema;\n" +
 			"@install.sql;\n" +
 			"commit;";
-		p = new ScriptParser(ParserType.Standard);
 		p.setScript(sql);
-		count = p.getSize();
-		assertEquals(3, count);
+		assertEquals(3, p.getSize());
 		assertTrue(p.getCommand(0).startsWith("set schema myschema"));
 		assertTrue(p.getCommand(1).startsWith("@install.sql"));
 		assertTrue(p.getCommand(2).startsWith("commit"));
