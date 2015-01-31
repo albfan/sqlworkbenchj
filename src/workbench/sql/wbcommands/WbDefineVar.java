@@ -70,6 +70,7 @@ public class WbDefineVar
 	public static final String ARG_VAR_NAME = "variable";
 	public static final String ARG_VAR_VALUE = "value";
 	public static final String ARG_CONTENT_FILE = "contentFile";
+	public static final String ARG_CLEANUP_VALUE = "cleanupValue";
 
 	public WbDefineVar()
 	{
@@ -81,6 +82,7 @@ public class WbDefineVar
 		this.cmdLine.addArgument(ARG_VAR_VALUE);
 		this.cmdLine.addArgument(ARG_REPLACE_VARS, ArgumentType.BoolArgument);
 		this.cmdLine.addArgument(ARG_REMOVE_UNDEFINED, ArgumentType.BoolSwitch);
+		this.cmdLine.addArgument(ARG_CLEANUP_VALUE, ArgumentType.BoolArgument);
 		this.cmdLine.addArgument(ARG_LOOKUP_VALUES);
 
 		CommonArgs.addEncodingParameter(cmdLine);
@@ -214,7 +216,8 @@ public class WbDefineVar
 			// WbStringTokenizer returned any quotes that were used, so we have to remove them again
 			// as they should not be part of the variable value
 			valueParameter = StringUtil.trimQuotes(valueParameter.trim());
-			if (Settings.getInstance().getCleanupVariableValues())
+			boolean cleanup = cmdLine.getBoolean(ARG_CLEANUP_VALUE, Settings.getInstance().getCleanupVariableValues());
+			if (cleanup)
 			{
 				valueParameter = SqlUtil.makeCleanSql(valueParameter, false, false);
 			}
