@@ -24,16 +24,18 @@ package workbench.db.derby;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.SequenceDefinition;
 import workbench.db.WbConnection;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
 /**

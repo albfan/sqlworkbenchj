@@ -33,6 +33,7 @@ import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
 
+import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -48,6 +49,13 @@ public class DropScriptGeneratorTest
 	public DropScriptGeneratorTest()
 	{
 		super("DropScriptGeneratorTest");
+	}
+
+	@After
+	public void cleanup()
+		throws Exception
+	{
+		ConnectionMgr.getInstance().disconnectAll();
 	}
 
 	public void createTables(WbConnection conn)
@@ -89,7 +97,7 @@ public class DropScriptGeneratorTest
 		gen.setIncludeRecreateStatements(false);
 		gen.generateScript();
 		String script = gen.getScript();
-		System.out.println(script);
+//		System.out.println(script);
 		ScriptParser parser = new ScriptParser(script);
 		int size = parser.getSize();
 		assertEquals(8, size);

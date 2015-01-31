@@ -22,11 +22,14 @@
  */
 package workbench.db;
 
-import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import workbench.db.derby.DerbyTestUtil;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *

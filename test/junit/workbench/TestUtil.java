@@ -60,12 +60,12 @@ import workbench.db.WbConnection;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
-import workbench.sql.parser.ParserType;
-import workbench.sql.parser.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.ArgumentParser;
 import workbench.util.DdlObjectInfo;
@@ -187,6 +187,7 @@ public class TestUtil
 			}
 			if (file.getName().equals("workbench.settings")) continue;
 			if (file.getName().equals("workbench.log"))	continue;
+			if (file.getName().equals("derby.log"))	continue;
 
 			if (!file.delete())
 			{
