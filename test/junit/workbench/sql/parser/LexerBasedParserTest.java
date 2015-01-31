@@ -574,7 +574,8 @@ public class LexerBasedParserTest
 		cmd = parser.getNextCommand();
 		assertNull(cmd);
 
-		parser = new LexerBasedParser(ParserType.Standard);
+		// For SQL Server, the short include using @ should not be used
+		parser = new LexerBasedParser(ParserType.SqlServer);
 		sql = "delete from person;\n  @insert_person.sql\ncommit;";
 		parser.setScript(sql);
 		cmd = parser.getNextCommand();
@@ -584,6 +585,24 @@ public class LexerBasedParserTest
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertEquals("@insert_person.sql\ncommit", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNull(cmd);
+
+		parser = new LexerBasedParser(ParserType.Standard);
+		sql = "delete from person;\n  @insert_person.sql\ncommit;";
+		parser.setScript(sql);
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("delete from person", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("@insert_person.sql", cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertEquals("commit", cmd.getSQL());
 
 		cmd = parser.getNextCommand();
 		assertNull(cmd);

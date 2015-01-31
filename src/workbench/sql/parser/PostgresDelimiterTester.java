@@ -33,9 +33,22 @@ public class PostgresDelimiterTester
 	implements DelimiterTester
 {
 	private SQLToken firstToken;
+	private DelimiterDefinition defaultDelimiter = DelimiterDefinition.STANDARD_DELIMITER;
 
 	public PostgresDelimiterTester()
 	{
+	}
+
+	@Override
+	public void setDelimiter(DelimiterDefinition delim)
+	{
+		this.defaultDelimiter = delim;
+	}
+
+	@Override
+	public boolean supportsMixedDelimiters()
+	{
+		return false;
 	}
 
 	@Override
@@ -58,6 +71,7 @@ public class PostgresDelimiterTester
 	@Override
 	public DelimiterDefinition getCurrentDelimiter()
 	{
+		if (defaultDelimiter != null) return defaultDelimiter;
 		return DelimiterDefinition.STANDARD_DELIMITER;
 	}
 

@@ -56,7 +56,6 @@ public class ScriptParserTest
 		super("ScriptParserTest");
 	}
 
-
 	@Test
 	public void testOra()
 	{

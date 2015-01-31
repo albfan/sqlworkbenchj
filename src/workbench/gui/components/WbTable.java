@@ -1898,13 +1898,15 @@ public class WbTable
 
 		Settings sett = Settings.getInstance();
 		int maxDigits = sett.getMaxFractionDigits();
+		boolean fixedDigits = sett.getUsedFixedDigits();
+
 		char sep = sett.getDecimalSymbol().charAt(0);
 
 		this.setDefaultRenderer(Object.class, new ToolTipRenderer());
 
 		this.setDefaultRenderer(byte[].class, new BlobColumnRenderer());
 
-		TableCellRenderer numberRenderer = new NumberColumnRenderer(maxDigits, sep);
+		TableCellRenderer numberRenderer = new NumberColumnRenderer(maxDigits, sep, fixedDigits);
 		this.setDefaultRenderer(Number.class, numberRenderer);
 		this.setDefaultRenderer(Double.class, numberRenderer);
 		this.setDefaultRenderer(Float.class, numberRenderer);

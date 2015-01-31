@@ -44,6 +44,7 @@ public class WbNumberFormatterTest
 		WbNumberFormatter f = new WbNumberFormatter(3, '.');
 		assertEquals("1.124", f.format(new BigDecimal("1.1237")));
 		assertEquals("1.123", f.format(new BigDecimal("1.1231")));
+		assertEquals("0", f.format(new BigDecimal("0")));
 		assertEquals("42", f.format(new Integer(42)));
 		assertEquals("1.5", f.format(new Double(1.5)));
 		assertEquals("1.5", f.format(new BigDecimal("1.5")));
@@ -75,4 +76,17 @@ public class WbNumberFormatterTest
 		assertEquals("0,1", f.format(new Double(0.1)));
 	}
 
+	@Test
+	public void testFixedDigits()
+	{
+		WbNumberFormatter f = new WbNumberFormatter(6, '.', true);
+		assertEquals("1.123700", f.format(new BigDecimal("1.1237")));
+		assertEquals("0.000000", f.format(new BigDecimal("0")));
+		assertEquals("1.500000", f.format(new Double(1.5)));
+		assertEquals("0.000000", f.format(new Double(0)));
+		assertEquals("42", f.format(new Integer(42)));
+
+		f = new WbNumberFormatter(4, ',', true);
+		assertEquals("1,5000", f.format(new Double(1.5)));
+	}
 }

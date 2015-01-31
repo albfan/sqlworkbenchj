@@ -29,6 +29,7 @@ import workbench.sql.lexer.SQLToken;
 public interface DelimiterTester
 {
 	void setAlternateDelimiter(DelimiterDefinition delimiter);
+	void setDelimiter(DelimiterDefinition delimiter);
 
 	void currentToken(SQLToken token, boolean isStartOfStatement);
 
@@ -36,6 +37,7 @@ public interface DelimiterTester
 
 	void statementFinished();
 
+	boolean supportsMixedDelimiters();
 	boolean supportsSingleLineStatements();
 	boolean isSingleLineStatement(SQLToken token, boolean isStartOfLine);
 	void lineEnd();

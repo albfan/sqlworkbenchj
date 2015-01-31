@@ -46,6 +46,7 @@ public class OracleDelimiterTester
 
 	private SQLToken lastToken;
 	private boolean isCreateStatement;
+	private DelimiterDefinition defaultDelimiter = DelimiterDefinition.STANDARD_DELIMITER;
 
 	public OracleDelimiterTester()
 	{
@@ -63,6 +64,18 @@ public class OracleDelimiterTester
 		{
 			types.remove("TYPE");
 		}
+	}
+
+	@Override
+	public boolean supportsMixedDelimiters()
+	{
+		return true;
+	}
+
+	@Override
+	public void setDelimiter(DelimiterDefinition delimiter)
+	{
+		defaultDelimiter = delimiter;
 	}
 
 	@Override
@@ -115,7 +128,7 @@ public class OracleDelimiterTester
 		{
 			return alternateDelimiter;
 		}
-		return DelimiterDefinition.STANDARD_DELIMITER;
+		return defaultDelimiter;
 	}
 
 	@Override

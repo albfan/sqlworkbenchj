@@ -39,6 +39,7 @@ public class WbNumberFormatter
 	private final DecimalFormat decimalFormatter;
 	private final char decimalSeparator;
 	private final int maxDigits;
+	private final boolean fixedDigits;
 
 	public WbNumberFormatter(char sep)
 	{
@@ -49,7 +50,7 @@ public class WbNumberFormatter
 	{
 		this(maxDigits, sep, false);
 	}
-	
+
 	public WbNumberFormatter(int maxDigits, char sep, boolean fixedDigits)
 	{
 		char filler = fixedDigits ? '0' : '#';
@@ -59,6 +60,7 @@ public class WbNumberFormatter
 		symb.setDecimalSeparator(sep);
 		this.decimalFormatter = new DecimalFormat(pattern, symb);
 		this.maxDigits = maxDigits;
+		this.fixedDigits = fixedDigits;
 	}
 
 	public char getDecimalSymbol()
@@ -127,12 +129,47 @@ public class WbNumberFormatter
 		if (maxDigits <= 0 && decimalSeparator == '.') return display; // no maximum given
 
 		int scale = value.scale();
-		if (scale <= 0) return display; // no decimal digits, nothing to do
+		if (scale <= 0 && !fixedDigits) return display; // no decimal digits, nothing to do
 
 		if (scale > maxDigits && maxDigits > 0)
 		{
 			BigDecimal rounded = value.setScale(this.maxDigits, RoundingMode.HALF_UP);
 			display = rounded.toPlainString();
+		}
+
+		if (fixedDigits && maxDigits > 0)
+		{
+			int pos = display.lastIndexOf('.');
+			int digits;
+			if (pos == -1)
+			{
+				digits = 0;
+			}
+			else
+			{
+				digits = display.length() - pos - 1;
+			}
+
+			if (digits < maxDigits)
+			{
+				int num = (maxDigits - digits);
+				StringBuilder sb = new StringBuilder(display.length() + num);
+				sb.append(display);
+				if (digits == 0)
+				{
+					sb.append(decimalSeparator);
+				}
+
+				for (int i=0; i < num; i++)
+				{
+					sb.append('0');
+				}
+				if (decimalSeparator != '.' && digits > 0)
+				{
+					sb.setCharAt(pos, decimalSeparator);
+				}
+				return sb.toString();
+			}
 		}
 
 		if (decimalSeparator != '.' )

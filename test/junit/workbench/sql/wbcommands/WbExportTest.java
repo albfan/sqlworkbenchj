@@ -179,14 +179,22 @@ public class WbExportTest
 		WbFile out = util.getFile("products.txt");
 
 		StatementRunnerResult result = exportCmd.execute(
-			"wbexport -sourceTable=products -delimiter='|' -header=false -type=text -decimal=',' -file='" + out.getFullPath() + "'"
-		);
+			"wbexport -sourceTable=products -delimiter='|' -header=false -type=text -decimal=',' -file='" + out.getFullPath() + "'");
 		String msg = result.getMessageBuffer().toString();
 		assertTrue(msg, result.isSuccess());
 		assertTrue(out.exists());
 		String content = FileUtil.readFile(out, null);
 		assertNotNull(content);
 		assertEquals("1|3,14", content.trim());
+
+		result = exportCmd.execute(
+			"wbexport -sourceTable=products -delimiter='|' -header=false -type=text -decimal=',' -decimalDigits=4 -file='" + out.getFullPath() + "'");
+		msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+		assertTrue(out.exists());
+		content = FileUtil.readFile(out, null);
+		assertNotNull(content);
+		assertEquals("1|3,1400", content.trim());
 	}
 
 	@Test

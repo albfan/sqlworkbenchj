@@ -104,7 +104,8 @@ public class LexerBasedParser
 	@Override
 	public boolean supportsMixedDelimiter()
 	{
-		return delimiterTester != null;
+		if (delimiterTester == null) return false;
+		return delimiterTester.supportsMixedDelimiters();
 	}
 
 	@Override
@@ -128,6 +129,10 @@ public class LexerBasedParser
 	public void setDelimiter(DelimiterDefinition def)
 	{
 		delimiter = def.createCopy();
+		if (delimiterTester != null)
+		{
+			delimiterTester.setDelimiter(delimiter);
+		}
 	}
 
 	@Override

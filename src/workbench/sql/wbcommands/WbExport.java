@@ -482,7 +482,7 @@ public class WbExport
 		}
 		else if (decimal != null)
 		{
-			exporter.setDecimalSymbol(format);
+			exporter.setDecimalSymbol(decimal);
 		}
 
 		exporter.setAppendInfoSheet(cmdLine.getBoolean(ARG_ADD_INFOSHEET, Settings.getInstance().getDefaultExportInfoSheet(type)));

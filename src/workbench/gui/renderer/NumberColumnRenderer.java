@@ -47,8 +47,13 @@ public class NumberColumnRenderer
 
 	public NumberColumnRenderer(int maxDigits, char sep)
 	{
+		this(maxDigits, sep, false);
+	}
+	
+	public NumberColumnRenderer(int maxDigits, char sep, boolean fixedDigits)
+	{
 		super();
-		formatter = new WbNumberFormatter(maxDigits, sep);
+		formatter = new WbNumberFormatter(maxDigits, sep, fixedDigits);
 		this.setHorizontalAlignment(GuiSettings.getNumberDataAlignment());
 	}
 

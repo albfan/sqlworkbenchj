@@ -30,14 +30,30 @@ import workbench.sql.lexer.SQLToken;
 public class ShortIncludeDelimiterTester
 	implements DelimiterTester
 {
+	private DelimiterDefinition defaultDelimiter = DelimiterDefinition.STANDARD_DELIMITER;
+	private boolean checkShortInclude = true;
 
 	public ShortIncludeDelimiterTester()
 	{
 	}
 
+
+	@Override
+	public void setDelimiter(DelimiterDefinition delim)
+	{
+		defaultDelimiter = delim;
+		checkShortInclude = defaultDelimiter.isStandard();
+	}
+
 	@Override
 	public void setAlternateDelimiter(DelimiterDefinition delimiter)
 	{
+	}
+
+	@Override
+	public boolean supportsMixedDelimiters()
+	{
+		return false;
 	}
 
 	@Override
@@ -48,6 +64,7 @@ public class ShortIncludeDelimiterTester
 	@Override
 	public DelimiterDefinition getCurrentDelimiter()
 	{
+		if (defaultDelimiter != null) return defaultDelimiter;
 		return DelimiterDefinition.STANDARD_DELIMITER;
 	}
 
@@ -65,6 +82,8 @@ public class ShortIncludeDelimiterTester
 	@Override
 	public boolean isSingleLineStatement(SQLToken token, boolean isStartOfLine)
 	{
+		if (!checkShortInclude) return false;
+		
 		if (token == null) return false;
 
 		if (isStartOfLine && !token.isWhiteSpace())

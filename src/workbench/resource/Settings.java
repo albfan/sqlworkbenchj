@@ -156,6 +156,7 @@ public class Settings
 	public static final String PROPERTY_VAR_PREFIX = "workbench.sql.parameter.prefix";
 	public static final String PROPERTY_VAR_SUFFIX = "workbench.sql.parameter.suffix";
 	public static final String PROPERTY_DECIMAL_DIGITS = "workbench.gui.display.maxfractiondigits";
+	public static final String PROPERTY_FIXED_DIGITS = "workbench.gui.display.decimal.digits.fixed";
 	public static final String PROPERTY_DECIMAL_SEP = "workbench.gui.display.decimal.separator";
 
 	public static final String PROP_JOIN_COMPLETION_USE_PARENS = "workbench.gui.sql.join.completion.use.parenthesis";
@@ -2564,6 +2565,16 @@ public class Settings
 	public String getDefaultTimeFormat()
 	{
 		return getProperty(PROPERTY_TIME_FORMAT, "HH:mm:ss");
+	}
+
+	public boolean getUsedFixedDigits()
+	{
+		return getBoolProperty(PROPERTY_FIXED_DIGITS, false);
+	}
+
+	public void setUsedFixedDigits(boolean flag)
+	{
+		setProperty(PROPERTY_FIXED_DIGITS, flag);
 	}
 
 	public int getMaxFractionDigits()
