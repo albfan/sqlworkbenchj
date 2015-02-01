@@ -1746,6 +1746,7 @@ public class TableListPanel
 	private void retrieveTableDefinition()
 		throws SQLException
 	{
+		int currentIndex = currentRetrievalPanel;
 		try
 		{
 			setActivePanelIndex(tableDefinition);
@@ -1772,7 +1773,7 @@ public class TableListPanel
 		}
 		finally
 		{
-			currentRetrievalPanel = -1;
+			currentRetrievalPanel = currentIndex;
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
@@ -1884,10 +1885,6 @@ public class TableListPanel
 		}
 		else
 		{
-			if (currentRetrievalPanel > -1)
-			{
-				LogMgr.logWarning("TableListPanel.setActivePanelIndex()", "New active panel set before clearing the old index: " + currentRetrievalPanel, new Exception("BackTrace"));
-			}
 			currentRetrievalPanel = displayTab.indexOfComponent(panel);
 		}
 	}
