@@ -880,7 +880,10 @@ public class BatchRunner
 					}
 					else
 					{
-						if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
+						if (result.hasWarning() && StringUtil.isNonBlank(feedback))
+						{
+							LogMgr.logWarning("BatchRunner.execute()", feedback);
+						}
 						totalRows += result.getTotalUpdateCount();
 					}
 
