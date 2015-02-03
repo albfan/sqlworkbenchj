@@ -724,6 +724,7 @@ public class SpreadsheetFileParser
 		if (reader != null)
 		{
 			reader.done();
+			reader = null;
 		}
 	}
 

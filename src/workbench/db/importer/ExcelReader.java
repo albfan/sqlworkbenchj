@@ -433,6 +433,7 @@ public class ExcelReader
 	@Override
 	public void done()
 	{
+		dataSheet = null;
 		dataFile = null;
 	}
 
