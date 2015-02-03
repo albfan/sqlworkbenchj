@@ -49,7 +49,7 @@ public class ObjectLister
 	public DataStore getObjects(ArgumentParser cmdLine, String userInput, WbConnection connection)
 		throws SQLException
 	{
-		String[] types = connection.getMetadata().getTableTypesArray();
+		String[] types = types = connection.getMetadata().getSelectableTypes();
 		return getObjects(cmdLine, userInput, connection, types);
 	}
 
