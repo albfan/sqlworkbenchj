@@ -234,6 +234,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "array.adjust.display", false);
 	}
 
+	public boolean showArrayType()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "array.show.type", true);
+	}
+
 	public boolean useGetStringForBit()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "bit.use.getstring", false);

@@ -33,7 +33,7 @@ import java.sql.Struct;
  */
 public class ArrayConverter
 {
-	public static String getArrayDisplay(Object value, String dbmsType)
+	public static String getArrayDisplay(Object value, String dbmsType, boolean showType)
 		throws SQLException
 	{
 		if (value == null) return null;
@@ -56,8 +56,11 @@ public class ArrayConverter
 		{
 			int len = elements.length;
 			StringBuilder sb = new StringBuilder(len * 10);
-			sb.append(prefix);
-			sb.append('(');
+			if (showType)
+			{
+				sb.append(prefix);
+			}
+			sb.append('[');
 			StructConverter conv = StructConverter.getInstance();
 
 			for (int x=0; x < len; x++)
@@ -76,7 +79,7 @@ public class ArrayConverter
 					conv.appendValue(sb, elements[x]);
 				}
 			}
-			sb.append(')');
+			sb.append(']');
 			return sb.toString();
 		}
 		return value.toString();

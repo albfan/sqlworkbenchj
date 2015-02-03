@@ -60,6 +60,7 @@ public class ResultInfo
 	private boolean useGetStringForBit;
 	private boolean useGetXML;
 	private boolean convertArrays;
+	private boolean showArrayType;
 	private boolean columnTablesDetected;
 
 	public ResultInfo(ColumnIdentifier[] cols)
@@ -139,6 +140,7 @@ public class ResultInfo
 			useGetStringForClobs = sourceConnection.getDbSettings().useGetStringForClobs();
 			useGetStringForBit = sourceConnection.getDbSettings().useGetStringForBit();
 			convertArrays = sourceConnection.getDbSettings().handleArrayDisplay();
+			showArrayType = sourceConnection.getDbSettings().showArrayType();
 			useGetXML = sourceConnection.getDbSettings().useGetXML();
 		}
 	}
@@ -381,6 +383,11 @@ public class ResultInfo
 		columnTablesDetected = flag;
 	}
 
+	public boolean showArrayType()
+	{
+		return showArrayType;
+	}
+	
 	public boolean getConvertArrays()
 	{
 		return convertArrays;

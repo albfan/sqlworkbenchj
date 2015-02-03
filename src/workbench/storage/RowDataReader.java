@@ -77,6 +77,7 @@ public class RowDataReader
 	private boolean useGetStringForBit;
 	private boolean useGetXML;
 	private boolean adjustArrayDisplay;
+	private boolean showArrayType;
 	private boolean fixStupidMySQLZeroDate;
 	protected ResultInfo resultInfo;
 
@@ -91,6 +92,7 @@ public class RowDataReader
 		useGetStringForBit = info.useGetStringForBit();
 		useGetXML = info.useGetXML();
 		adjustArrayDisplay = info.getConvertArrays();
+		showArrayType = info.showArrayType();
 		streams = new ArrayList<>(countLobColumns());
 		fixStupidMySQLZeroDate = conn != null ? conn.getDbSettings().fixStupidMySQLZeroDate() : false;
 	}
@@ -235,7 +237,7 @@ public class RowDataReader
 					// this is mainly here for Oracle nested tables and VARRAYS, but should basically work
 					// for other arrays as well.
 					Object o = rs.getObject(i+1);
-					value = ArrayConverter.getArrayDisplay(o, resultInfo.getDbmsTypeName(i));
+					value = ArrayConverter.getArrayDisplay(o, resultInfo.getDbmsTypeName(i), showArrayType);
 				}
 				else if (type == java.sql.Types.STRUCT)
 				{
