@@ -3092,20 +3092,30 @@ public class Settings
 	{
 		if (target == null) return false;
 
-
 		final int x = this.getWindowPosX(id);
 		final int y = this.getWindowPosY(id);
 
-		if (x < 0 || y < 0) return false;
+		// nothing stored, nothing to do
+		if (x == Integer.MIN_VALUE || y == Integer.MIN_VALUE) return false;
+
+		// this happens if multiple monitors where active when saving the window position but aren't available any more
+		if (x < 0 || y < 0)
+		{
+			LogMgr.logInfo("Settings.restoreWindowPosition()", "Window position " + displayString(x,y) + " not restored because it is invalid");
+			return false;
+		}
 
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+
+		int xp = (int)(screen.getWidth() * 0.025);
+		int yp = (int)(screen.getHeight() * 0.025);
 
 		LogMgr.logDebug("Settings.restoreWindowPosition()", "Restoring window position for '" + id + "', " +
 			"current screen size: " + displayString(screen)  + ", requested position: " + displayString(x,y) + ", component size: " + displayString(target.getSize()));
 
 		boolean result = false;
 
-		if (x <= screen.getWidth() - 50 && y <= screen.getHeight() - 50)
+		if (x <= screen.getWidth() - xp && y <= screen.getHeight() - yp)
 		{
 			result = true;
 			WbSwingUtilities.invoke(new Runnable()
@@ -3119,7 +3129,7 @@ public class Settings
 		}
 		else
 		{
-			LogMgr.logInfo("Settings.restoreWindowPosition()", "Window position (" + displayString(x,y) + " not restored because it is outside the current screen dimensions: " + displayString(screen));
+			LogMgr.logDebug("Settings.restoreWindowPosition()", "Window position " + displayString(x,y) + " not restored because it is outside the current screen dimensions: " + displayString(screen));
 		}
 		return result;
 	}
