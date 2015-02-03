@@ -62,7 +62,7 @@ public class ImportFileLister
 	{
 		if (!dir.isDirectory()) throw new IllegalArgumentException(dir + " is not a directory");
 
-		toProcess = new ArrayList<WbFile>();
+		toProcess = new ArrayList<>();
 		dbConn = con;
 		sourceDir = new WbFile(dir);
 		extension = ext;
@@ -98,7 +98,7 @@ public class ImportFileLister
 	{
 		if (!baseDir.isDirectory()) throw new IllegalArgumentException(baseDir + " is not a directory");
 
-		toProcess = new ArrayList<WbFile>();
+		toProcess = new ArrayList<>();
 		dbConn = con;
 		sourceDir = new WbFile(baseDir);
 
@@ -191,7 +191,7 @@ public class ImportFileLister
 		if (CollectionUtil.isEmpty(containedNames)) return;
 
 		Iterator<WbFile> itr = toProcess.iterator();
-		Set<WbFile> toRemove = new TreeSet<WbFile>();
+		Set<WbFile> toRemove = new TreeSet<>();
 		while (itr.hasNext())
 		{
 			WbFile f = itr.next();
@@ -252,9 +252,9 @@ public class ImportFileLister
 	protected List<WbFile> getSortedList()
 		throws CycleErrorException
 	{
-		Map<String, WbFile> fileMapping = new TreeMap<String, WbFile>(CaseInsensitiveComparator.INSTANCE);
+		Map<String, WbFile> fileMapping = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
-		tables = new LinkedList<TableIdentifier>();
+		tables = new LinkedList<>();
 		for (WbFile f : toProcess)
 		{
 			TableIdentifier tbl = getTableForFile(f);
@@ -269,7 +269,7 @@ public class ImportFileLister
 			throw new CycleErrorException(sorter.getErrorTables().get(0));
 		}
 
-		List<WbFile> result = new LinkedList<WbFile>();
+		List<WbFile> result = new LinkedList<>();
 		for (TableIdentifier tbl : sorted)
 		{
 			WbFile f = fileMapping.get(tbl.getTableName());
