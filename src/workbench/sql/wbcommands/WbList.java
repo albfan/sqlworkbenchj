@@ -58,6 +58,7 @@ public class WbList
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
+		cmdLine.addArgument(CommonArgs.ARG_HELP, ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -76,10 +77,10 @@ public class WbList
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
 		cmdLine.parse(options);
-		if (cmdLine.hasUnknownArguments())
+		if (cmdLine.isArgPresent(CommonArgs.ARG_HELP))
 		{
 			result.addMessage(ResourceMgr.getString("ErrListWrongArgs"));
-			result.setFailure();
+			result.setSuccess();
 			return result;
 		}
 

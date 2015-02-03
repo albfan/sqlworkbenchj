@@ -82,6 +82,10 @@ public class ObjectLister
 		else
 		{
 			objects = userInput;
+			if (types == null)
+			{
+				types = connection.getMetadata().getSelectableTypes();
+			}
 		}
 
 		if (StringUtil.isBlank(schema))
