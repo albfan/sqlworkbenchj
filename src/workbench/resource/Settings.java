@@ -3077,15 +3077,35 @@ public class Settings
 		return this.restoreWindowPosition(target, target.getClass().getName());
 	}
 
+	private String displayString(Dimension d)
+	{
+		if (d == null) return "";
+		return "[w:" + (int)d.getWidth() + ",h:" + (int)d.getHeight() + "]";
+	}
+
+	private String displayString(int x, int y)
+	{
+		return "[x:" + x + ",y:" + y + "]";
+	}
+
 	public boolean restoreWindowPosition(final Component target, final String id)
 	{
-		boolean result = false;
+		if (target == null) return false;
+
+
 		final int x = this.getWindowPosX(id);
 		final int y = this.getWindowPosY(id);
+
+		if (x == Integer.MIN_VALUE || y == Integer.MIN_VALUE) return false;
+
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
-		if (x != Integer.MIN_VALUE && y != Integer.MIN_VALUE
-			&& x <= screen.getWidth() - 20 && y <= screen.getHeight() - 20)
+		LogMgr.logDebug("Settings.restoreWindowPosition()", "Restoring window position for '" + id + "', " +
+			"current screen size: " + displayString(screen)  + ", requested position: " + displayString(x,y) + ", component size: " + displayString(target.getSize()));
+
+		boolean result = false;
+
+		if (x <= screen.getWidth() - 50 && y <= screen.getHeight() - 50)
 		{
 			result = true;
 			WbSwingUtilities.invoke(new Runnable()
@@ -3096,6 +3116,10 @@ public class Settings
 					target.setLocation(new Point(x, y));
 				}
 			});
+		}
+		else
+		{
+			LogMgr.logInfo("Settings.restoreWindowPosition()", "Window position (" + displayString(x,y) + " not restored because it is outside the current screen dimensions: " + displayString(screen));
 		}
 		return result;
 	}
