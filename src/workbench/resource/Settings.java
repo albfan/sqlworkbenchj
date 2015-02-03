@@ -3096,7 +3096,7 @@ public class Settings
 		final int x = this.getWindowPosX(id);
 		final int y = this.getWindowPosY(id);
 
-		if (x == Integer.MIN_VALUE || y == Integer.MIN_VALUE) return false;
+		if (x < 0 || y < 0) return false;
 
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
