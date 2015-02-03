@@ -3077,16 +3077,6 @@ public class Settings
 		return this.restoreWindowPosition(target, target.getClass().getName());
 	}
 
-	private String displayString(Dimension d)
-	{
-		if (d == null) return "";
-		return "[w:" + (int)d.getWidth() + ",h:" + (int)d.getHeight() + "]";
-	}
-
-	private String displayString(int x, int y)
-	{
-		return "[x:" + x + ",y:" + y + "]";
-	}
 
 	public boolean restoreWindowPosition(final Component target, final String id)
 	{
@@ -3098,40 +3088,28 @@ public class Settings
 		// nothing stored, nothing to do
 		if (x == Integer.MIN_VALUE || y == Integer.MIN_VALUE) return false;
 
-		// this happens if multiple monitors where active when saving the window position but aren't available any more
-		if (x < 0 || y < 0)
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+
+		// do not move the window too far over the edges (either left/right or upper/lower)
+		if (WbSwingUtilities.isOutsideOfScreen(x, y, target.getSize()))
 		{
-			LogMgr.logInfo("Settings.restoreWindowPosition()", "Window position " + displayString(x,y) + " not restored because it is invalid");
+			LogMgr.logInfo("Settings.restoreWindowPosition()", "Window position " + WbSwingUtilities.displayString(x,y) + " not restored because it is outside the current screen size: " + WbSwingUtilities.displayString(screen));
 			return false;
 		}
 
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-
-		int xp = (int)(screen.getWidth() * 0.025);
-		int yp = (int)(screen.getHeight() * 0.025);
-
 		LogMgr.logDebug("Settings.restoreWindowPosition()", "Restoring window position for '" + id + "', " +
-			"current screen size: " + displayString(screen)  + ", requested position: " + displayString(x,y) + ", component size: " + displayString(target.getSize()));
+			"current screen size: " + WbSwingUtilities.displayString(screen)  + ", requested position: " + WbSwingUtilities.displayString(x,y) + ", component size: " + WbSwingUtilities.displayString(target.getSize()));
 
-		boolean result = false;
-
-		if (x <= screen.getWidth() - xp && y <= screen.getHeight() - yp)
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			result = true;
-			WbSwingUtilities.invoke(new Runnable()
+			@Override
+			public void run()
 			{
-				@Override
-				public void run()
-				{
-					target.setLocation(new Point(x, y));
-				}
-			});
-		}
-		else
-		{
-			LogMgr.logDebug("Settings.restoreWindowPosition()", "Window position " + displayString(x,y) + " not restored because it is outside the current screen dimensions: " + displayString(screen));
-		}
-		return result;
+				target.setLocation(new Point(x, y));
+			}
+		});
+
+		return true;
 	}
 
 	private void migrateProps()

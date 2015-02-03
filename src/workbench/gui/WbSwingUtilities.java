@@ -209,6 +209,43 @@ public class WbSwingUtilities
 		}
 	}
 
+	public static String displayString(Dimension d)
+	{
+		if (d == null) return "";
+		return "[w:" + (int)d.getWidth() + ",h:" + (int)d.getHeight() + "]";
+	}
+
+	public static String displayString(int x, int y)
+	{
+		return "[x:" + x + ",y:" + y + "]";
+	}
+
+	public static boolean isOutsideOfScreen(int x, int y, Dimension size)
+	{
+		return !isFullyVisible(x, y, size);
+	}
+
+	public static boolean isFullyVisible(Point pos, Dimension size)
+	{
+		return isFullyVisible(pos.x, pos.y, size);
+	}
+
+	public static boolean isFullyVisible(int x, int y, Dimension size)
+	{
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+
+		int xp = (int)(screen.getWidth() * 0.05);
+		int yp = (int)(screen.getHeight() * 0.05);
+
+		// do not move the window too far over the edges (either left/right or upper/lower)
+		if ( (x + size.width < xp || y + size.height < yp) || (x > screen.width - xp || y > screen.height - yp))
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	/**
 	 * Centers the given window against another one on the screen.
 	 * If aReference is not null, the first window is centered relative to the
@@ -220,6 +257,12 @@ public class WbSwingUtilities
 	public static void center(Window aWinToCenter, Component aReference)
 	{
 		Point location = getLocationToCenter(aWinToCenter, aReference);
+		if (!isFullyVisible(location, aWinToCenter.getSize()))
+		{
+			// centering against the reference would move the dialog outside
+			// the current screen --> display the window centered on the current screen
+			location = getLocationToCenter(aWinToCenter, null);
+		}
 		aWinToCenter.setLocation(location);
 	}
 
