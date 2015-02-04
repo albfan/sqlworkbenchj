@@ -550,7 +550,7 @@ public class CompletionPopup
 						cols.append(context.getAnalyzer().getColumnPrefix());
 						cols.append(".");
 					}
-					cols.append(v);
+					cols.append(getPasteValue(v));
 				}
 				value = cols.toString();
 				break;
