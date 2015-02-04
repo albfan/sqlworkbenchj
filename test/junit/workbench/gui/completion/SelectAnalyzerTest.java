@@ -67,6 +67,52 @@ public class SelectAnalyzerTest
 		tbl = analyzer.getTableForColumnList();
 		assertNotNull(tbl);
 		assertEquals("bar", tbl.getTableName().toLowerCase());
+
+		sql = "select f. from foo f except select b. from bar b";
+		pos = sql.indexOf("b.") + 2;
+		context = new StatementContext(null, sql, pos, false);
+		analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+		tbl = analyzer.getTableForColumnList();
+		assertNotNull(tbl);
+		assertEquals("bar", tbl.getTableName().toLowerCase());
+
+		sql = "select f. from foo f intersect select b. from bar b";
+		pos = sql.indexOf("b.") + 2;
+		context = new StatementContext(null, sql, pos, false);
+		analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+		tbl = analyzer.getTableForColumnList();
+		assertNotNull(tbl);
+		assertEquals("bar", tbl.getTableName().toLowerCase());
+	}
+
+	@Test
+	public void testUnion2()
+	{
+		String sql =
+			"select * \n" +
+			"from (\n" +
+			"  select t1. from t1\n" +
+			"  union \n" +
+			"  select t2. from t2\n" +
+			") u1";
+
+		int pos = sql.indexOf("t1.") + 3;
+		StatementContext context = new StatementContext(null, sql, pos, false);
+		BaseAnalyzer analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+		TableIdentifier tbl = analyzer.getTableForColumnList();
+		assertNotNull(tbl);
+		assertEquals("t1", tbl.getTableName().toLowerCase());
+
+		pos = sql.indexOf("t2.") + 3;
+		context = new StatementContext(null, sql, pos, false);
+		analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+		tbl = analyzer.getTableForColumnList();
+		assertNotNull(tbl);
+		assertEquals("t2", tbl.getTableName().toLowerCase());
 	}
 
 	@Test

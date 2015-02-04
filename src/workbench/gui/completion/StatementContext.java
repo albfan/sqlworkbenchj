@@ -212,7 +212,8 @@ public class StatementContext
 						{
 							int newpos = pos - lastStart - 1;
 							String sub = sql.substring(lastStart + 1, lastEnd);
-							return new SelectAnalyzer(conn, sub, newpos);
+							StatementContext context = new StatementContext(conn, sub, newpos);
+							return context.getAnalyzer();
 						}
 					}
 					if (bracketCount == 0)
@@ -275,7 +276,8 @@ public class StatementContext
 					if (lastPos <= pos && pos <= startPos)
 					{
 						int newPos = pos - lastPos;
-						return new SelectAnalyzer(conn, sql.substring(lastPos, startPos), newPos);
+						StatementContext context = new StatementContext(conn, sql.substring(lastPos, startPos), newPos);
+						return context.getAnalyzer();
 					}
 					lastPos = startPos;
 					index ++;
@@ -285,7 +287,8 @@ public class StatementContext
 				if (pos >= startPos)
 				{
 					int newPos = pos - startPos;
-					return new SelectAnalyzer(conn, sql.substring(startPos), newPos);
+					StatementContext context = new StatementContext(conn, sql.substring(startPos), newPos);
+					return context.getAnalyzer();
 				}
 			}
 		}
