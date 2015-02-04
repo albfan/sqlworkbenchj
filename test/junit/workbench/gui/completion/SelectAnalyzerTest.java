@@ -47,6 +47,28 @@ public class SelectAnalyzerTest
 		super("SelectAnalyzerTest");
 	}
 
+
+	@Test
+	public void testUnion()
+	{
+		String sql = "select f. from foo f union select b. from bar";
+		int pos = sql.indexOf("f.") + 2;
+		StatementContext context = new StatementContext(null, sql, pos, false);
+		BaseAnalyzer analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+		TableIdentifier tbl = analyzer.getTableForColumnList();
+		assertNotNull(tbl);
+		assertEquals("foo", tbl.getTableName().toLowerCase());
+
+		pos = sql.indexOf("b.") + 2;
+		context = new StatementContext(null, sql, pos, false);
+		analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+		tbl = analyzer.getTableForColumnList();
+		assertNotNull(tbl);
+		assertEquals("bar", tbl.getTableName().toLowerCase());
+	}
+
 	@Test
 	public void testWhere()
 	{
