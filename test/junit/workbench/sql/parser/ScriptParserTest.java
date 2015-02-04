@@ -735,24 +735,6 @@ public class ScriptParserTest
 		assertEquals("select 1 from dual", p.getCommand(0));
 		assertEquals("select 2 from dual", p.getCommand(1));
 		assertEquals("@foo.sql", p.getCommand(2));
-
-		TestUtil util = getTestUtil();
-
-		File scriptFile = new File(util.getBaseDir(), "run.sql");
-		TestUtil.writeFile(scriptFile, sql, "UTF-8");
-
-		// works if the instance is kept,
-		// fails if a new instance is created
-//		p = new ScriptParser(ParserType.Standard);
-		p.setAlternateDelimiter(new DelimiterDefinition("@"));
-		p.setFile(scriptFile);
-		int size = p.getSize();
-		assertEquals(3, size);
-
-		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
-		p.setFile(scriptFile);
-		size = p.getSize();
-		assertEquals(3, size);
 	}
 
 	@Test
