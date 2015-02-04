@@ -78,8 +78,7 @@ public class WbListTest
 			DataStore objectList = data.get(0);
 			assertNotNull(objectList);
 
-			// default is to list tables only
-			assertEquals(2, objectList.getRowCount());
+			assertEquals(4, objectList.getRowCount());
 
 			result = list.execute("wblist -types=VIEW,TABLE");
 			assertTrue(result.isSuccess());
