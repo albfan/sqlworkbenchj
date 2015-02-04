@@ -28,12 +28,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.resource.Settings;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptCommandDefinition;
 
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+
 
 
 /**
@@ -83,12 +86,6 @@ public class ScriptParser
 		this.setScript(aScript);
 	}
 
-	public void setFile(File f)
-		throws IOException
-	{
-		setFile(f, null);
-	}
-
 	public void setParserType(ParserType type)
 	{
 		parserType = type;
@@ -99,6 +96,12 @@ public class ScriptParser
 		}
 	}
 
+	public void setFile(File f)
+		throws IOException
+	{
+		setFile(f, null, true);
+	}
+
 	/**
 	 * Define the source file for this ScriptParser.
 	 * Depending on the size the file might be read into memory or not
@@ -106,8 +109,25 @@ public class ScriptParser
 	public final void setFile(File f, String encoding)
 		throws IOException
 	{
+		this.setFile(f, encoding, true);
+	}
+
+	public final void setFile(File f, String encoding, boolean loadScriptToMemory)
+		throws IOException
+	{
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
 
+		// Load small scripts into memory to be able to properly detect the alternate delimiter if necesssary
+		// For Oracle this is not necessary because we support mixing standard and alternate delimiter in the script.
+		if (parserType != ParserType.Oracle && loadScriptToMemory && f.length() <= Settings.getInstance().getInMemoryScriptSizeThreshold())
+		{
+			String script = FileUtil.readFile(f, encoding);
+			if (script != null)
+			{
+				setScript(script);
+				return;
+			}
+		}
 		useAlternateDelimiter = this.alternateDelimiter != null;
 		scriptIterator = getParserInstance();
 		scriptIterator.setFile(f, encoding);

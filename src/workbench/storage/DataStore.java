@@ -767,8 +767,26 @@ public class DataStore
 		if (StringUtil.isEmptyString(sourceTable)) return true;
 
 		TableIdentifier tbl = new TableIdentifier(sourceTable);
-		return (TableIdentifier.tablesAreEqual(tbl, updateTable, originalConnection));
+		return tablesAreEqual(tbl, updateTable);
 	}
+
+	private boolean tablesAreEqual(TableIdentifier t1, TableIdentifier t2)
+	{
+		if (t1 == null && t2 == null) return true;
+		if (t1 == null || t2 == null) return false;
+
+		if (!StringUtil.equalStringIgnoreCase(t1.getTableName(), t2.getTableName())) return false;
+		String s1 = t1.getSchema();
+		String s2 = t2.getSchema();
+		if (s1 != null && s2 != null && !StringUtil.equalStringIgnoreCase(s1, s2)) return false;
+
+		String c1 = t1.getCatalog();
+		String c2 = t2.getCatalog();
+
+		if (c1 != null && c2 != null && !StringUtil.equalStringIgnoreCase(c1, c2)) return false;
+		return true;
+	}
+
 
 	/**
 	 * Restore the original column values for all columns that are marked as not modifieable and have been modified.

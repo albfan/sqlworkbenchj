@@ -472,7 +472,7 @@ public class ScriptParserTest
 			"/ \n" +
 			"commit \n" +
 			"/";
-		TestUtil.writeFile(scriptFile, script);
+		TestUtil.writeFile(scriptFile, script, "UTF-8");
 
 		// Make sure the iterating parser is used, by setting
 		// a very low max file size
@@ -480,7 +480,7 @@ public class ScriptParserTest
 		p.setDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		p.setCheckEscapedQuotes(false);
 
-		p.setFile(scriptFile);
+		p.setFile(scriptFile, "UTF-8", false);
 		p.startIterator();
 		int size = 0;
 		String sql = p.getNextCommand();
@@ -952,7 +952,7 @@ public class ScriptParserTest
 		TestUtil.writeFile(scriptFile, sql, "UTF-8");
 
 		ScriptParser p = new ScriptParser(ParserType.Standard);
-		p.setFile(scriptFile, "UTF-8");
+		p.setFile(scriptFile, "UTF-8", false);
 		String cmd = p.getNextCommand();
 		assertNotNull(cmd);
 		assertEquals("create table foo (data varchar(100) not null)", cmd);
