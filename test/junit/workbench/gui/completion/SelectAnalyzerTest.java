@@ -51,7 +51,7 @@ public class SelectAnalyzerTest
 	@Test
 	public void testUnion()
 	{
-		String sql = "select f. from foo f union select b. from bar";
+		String sql = "select f. from foo f union select b. from bar b";
 		int pos = sql.indexOf("f.") + 2;
 		StatementContext context = new StatementContext(null, sql, pos, false);
 		BaseAnalyzer analyzer = context.getAnalyzer();
