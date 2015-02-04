@@ -720,6 +720,42 @@ public class ScriptParserTest
 	}
 
 	@Test
+	public void testAlternateDelimiter2()
+		throws Exception
+	{
+		String sql =
+			"select 1 from dual;\n" +
+			"select 2 from dual;\n" +
+			"@foo.sql\n";
+		ScriptParser p = new ScriptParser(ParserType.Standard);
+		p.setAlternateDelimiter(new DelimiterDefinition("@"));
+		p.setScript(sql);
+		int count = p.getSize();
+		assertEquals(3, count);
+		assertEquals("select 1 from dual", p.getCommand(0));
+		assertEquals("select 2 from dual", p.getCommand(1));
+		assertEquals("@foo.sql", p.getCommand(2));
+
+		TestUtil util = getTestUtil();
+
+		File scriptFile = new File(util.getBaseDir(), "run.sql");
+		TestUtil.writeFile(scriptFile, sql, "UTF-8");
+
+		// works if the instance is kept,
+		// fails if a new instance is created
+//		p = new ScriptParser(ParserType.Standard);
+		p.setAlternateDelimiter(new DelimiterDefinition("@"));
+		p.setFile(scriptFile);
+		int size = p.getSize();
+		assertEquals(3, size);
+
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		p.setFile(scriptFile);
+		size = p.getSize();
+		assertEquals(3, size);
+	}
+
+	@Test
 	public void testAccessByCursorPos()
 	{
 		try
@@ -984,6 +1020,31 @@ public class ScriptParserTest
 		p.setFile(scriptFile, "UTF-8");
 		int size = p.getSize();
 		assertEquals(3, size);
+	}
+
+	@Test
+	public void testFileParsing4()
+		throws Exception
+	{
+		String sql =
+			"select 1 from sysibm.sysdummy;\n" +
+			"select 2 from sysibm.sysdummy;\n" +
+			"WbInclude -file=/temp/foo.sql;";
+
+		TestUtil util = getTestUtil();
+
+		File scriptFile = new File(util.getBaseDir(), "run.sql");
+		TestUtil.writeFile(scriptFile, sql, "UTF-8");
+
+		ScriptParser p = new ScriptParser(ParserType.Standard);
+		p.setAlternateDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+		p.setFile(scriptFile);
+
+		int size = p.getSize();
+		assertEquals(3, size);
+		assertEquals("select 1 from sysibm.sysdummy", p.getCommand(0));
+		assertEquals("select 2 from sysibm.sysdummy", p.getCommand(1));
+		assertEquals("WbInclude -file=/temp/foo.sql", p.getCommand(2));
 	}
 
 	@Test
