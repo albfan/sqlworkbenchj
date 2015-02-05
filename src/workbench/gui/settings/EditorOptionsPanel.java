@@ -87,6 +87,9 @@ public class EditorOptionsPanel
 		DbDelimiter[] names = DbDelimiter.getMapping();
 		cbxDbName.setModel(new DefaultComboBoxModel(names));
 
+		DbDelimiter def = (DbDelimiter)cbxDbName.getSelectedItem();
+		alternateDelimiter.setText(def.getDelimiter());
+
 		internalLineEnding.setModel(new DefaultComboBoxModel(items));
 		externalLineEnding.setModel(new DefaultComboBoxModel(items));
 		useCurrentLineStmt.setSelected(GuiSettings.getUseStatementInCurrentLine());
