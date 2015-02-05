@@ -96,10 +96,15 @@ public class ScriptParser
 		}
 	}
 
+	private boolean doLoadFile(File f)
+	{
+		return f.length() <= Settings.getInstance().getInMemoryScriptSizeThreshold();
+	}
+
 	public void setFile(File f)
 		throws IOException
 	{
-		setFile(f, null, true);
+		setFile(f, null, doLoadFile(f));
 	}
 
 	/**
@@ -109,7 +114,7 @@ public class ScriptParser
 	public final void setFile(File f, String encoding)
 		throws IOException
 	{
-		this.setFile(f, encoding, true);
+		this.setFile(f, encoding, doLoadFile(f));
 	}
 
 	public final void setFile(File f, String encoding, boolean loadScriptToMemory)
@@ -119,7 +124,7 @@ public class ScriptParser
 
 		// Load small scripts into memory to be able to properly detect the alternate delimiter if necesssary
 		// For Oracle this is not necessary because we support mixing standard and alternate delimiter in the script.
-		if (parserType != ParserType.Oracle && loadScriptToMemory && f.length() <= Settings.getInstance().getInMemoryScriptSizeThreshold())
+		if (parserType != ParserType.Oracle && loadScriptToMemory)
 		{
 			String script = FileUtil.readFile(f, encoding);
 			if (script != null)
