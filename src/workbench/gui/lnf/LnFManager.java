@@ -41,7 +41,7 @@ import workbench.util.StringUtil;
  */
 public class LnFManager
 {
-	private List<LnFDefinition> lnfList = new ArrayList<LnFDefinition>();
+	private List<LnFDefinition> lnfList = new ArrayList<>();
 
 	public LnFManager()
 	{
