@@ -2779,9 +2779,9 @@ public class Settings
 
 	public int getInMemoryScriptSizeThreshold()
 	{
-		// Process scripts up to 1 MB in memory
+		// Process scripts up to 2 MB in memory
 		// this is used by the ScriptParser
-		return getIntProperty("workbench.sql.script.inmemory.maxsize", 1024 * 1024);
+		return getIntProperty("workbench.sql.script.inmemory.maxsize", 2 * 1024 * 1024);
 	}
 
 	public void setInMemoryScriptSizeThreshold(int size)
