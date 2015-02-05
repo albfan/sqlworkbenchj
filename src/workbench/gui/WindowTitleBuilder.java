@@ -106,7 +106,7 @@ public class WindowTitleBuilder
 		String enclose = GuiSettings.getTitleGroupBracket();
 		String sep = GuiSettings.getTitleGroupSeparator();
 
-		if (productNamePosition == NAME_AT_START)
+		if (appName != null && productNamePosition == NAME_AT_START)
 		{
 			title.append(appName);
 			title.append(' ');
@@ -186,7 +186,7 @@ public class WindowTitleBuilder
 			}
 		}
 
-		if (productNamePosition == NAME_AT_END)
+		if (appName != null && productNamePosition == NAME_AT_END)
 		{
 			if (title.length() > 0) title.append(" - ");
 			title.append(appName);

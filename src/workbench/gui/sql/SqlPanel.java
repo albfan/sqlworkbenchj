@@ -90,6 +90,7 @@ import workbench.db.importer.TextImportOptions;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.WindowTitleBuilder;
 import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.actions.AutoJumpNextStatement;
@@ -2520,12 +2521,16 @@ public class SqlPanel
 	@Override
 	public boolean confirmExecution(String prompt, String yes, String no)
 	{
-		String title = null;
+		String title = "";
+		Window w = SwingUtilities.getWindowAncestor(this);
+
 		if (dbConnection != null)
 		{
-			title = dbConnection.getProfile().getName();
+			WindowTitleBuilder builder = new WindowTitleBuilder();
+			title = builder.getWindowTitle(dbConnection.getProfile(), null, null, null) + " - ";
 		}
-		Window w = SwingUtilities.getWindowAncestor(this);
+		title += getRealTabTitle();
+
 		int result = WbSwingUtilities.getYesNo(w, title, prompt, yes, no);
 		return result == JOptionPane.YES_OPTION;
 	}
