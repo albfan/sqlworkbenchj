@@ -1030,7 +1030,7 @@ public class SqlUtil
 		boolean inQuotes = false;
 		boolean lineComment = false;
 
-		StringBuilder newSql = new StringBuilder(count);
+		StringBuilder newSql = new StringBuilder((int)(count * 0.8));
 
 		char last = ' ';
 
