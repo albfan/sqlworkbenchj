@@ -926,7 +926,7 @@
 			<title>Date, timestamp and time formats</title><blockquote>
 			<para>Define the format for displaying date, date/time (timestamp) and time columns in the result
 				set. For details on the format of this option, please refer to the
-				documentation of the <ulink url="http://java.sun.com/javase/6/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
+				documentation of the <ulink url="http://java.sun.com/javase/7/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
 				This format is also used when parsing input for date or timestamp fields, so if you
 				enter a date while <link linkend="edit-data">editing</link> the data,
 				make sure you enter it the same way as defined with this option.

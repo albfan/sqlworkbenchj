@@ -148,7 +148,7 @@
     <title>Fetch size</title>
     <para>
       This setting controls the default fetch size for data retrieval. This parameter will directly be passed to the
-      <ulink url="http://java.sun.com/javase/6/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink>
+      <ulink url="http://java.sun.com/javase/7/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink>
       method of the <literal>Statement</literal> object.
       For some combinations of JDBC driver and DBMS, setting this parameter to a
       rather large number can improve retrieval performance because it saves network traffic.

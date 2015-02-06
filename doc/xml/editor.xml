@@ -318,7 +318,7 @@ WHERE p.person_id = a.person_id;</programlisting>
 			<title>Support for prepared statements</title>
 			<para>
 				For better performance Java applications usually make use of
-				<ulink url="http://java.sun.com/javase/6/docs/api/java/sql/PreparedStatement.html">prepared statements</ulink>.
+				<ulink url="http://java.sun.com/javase/7/docs/api/java/sql/PreparedStatement.html">prepared statements</ulink>.
 				The SQL for a prepared statement does not contain the actual values that should be used e.g.
 				in the WHERE clause, but uses quotation marks instead. Let's assume the above example should be
 				enhanced to retrieve the person information for a specific ID. The code could look like
@@ -362,8 +362,8 @@ WHERE p.person_id = a.person_id;</programlisting>
 			</para>
 			<note>
 				<para>
-					This feature requires that the <ulink url="http://java.sun.com/javase/6/docs/api/java/sql/ParameterMetaData.html#getParameterCount()">getParameterCount()</ulink> and
-					<ulink url="http://java.sun.com/javase/6/docs/api/java/sql/ParameterMetaData.html#getParameterType(int)">getParameterType()</ulink>
+					This feature requires that the <ulink url="http://java.sun.com/javase/7/docs/api/java/sql/ParameterMetaData.html#getParameterCount()">getParameterCount()</ulink> and
+					<ulink url="http://java.sun.com/javase/7/docs/api/java/sql/ParameterMetaData.html#getParameterType(int)">getParameterType()</ulink>
 					methods of the <literal>ParameterMetaData</literal> class are implemented by the JDBC driver and return the correct
 					information about the available parameters.
 				</para>

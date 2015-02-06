@@ -623,7 +623,7 @@
 				<link linkend="command-copy">WbCopy</link>, the type mapping from the JDBC driver might
 				not be sufficient or correct. With this setting you can define your own type mapping
 				for a specific dbms. The entry is a list of mappings that map the numeric value
-				of a JDBC datatype (as defined in <ulink url="http://java.sun.com/javase/6/docs/api/java/sql/Types.html">java.sql.Types</ulink>)
+				of a JDBC datatype (as defined in <ulink url="http://java.sun.com/javase/7/docs/api/java/sql/Types.html">java.sql.Types</ulink>)
         to a real data type name for the <emphasis>target</emphasis> DBMS. The numeric JDBC datatype value
         and the DBMS specific datatype name are separated with a colon. Each pair is separated by a semicolon.
 			</para>
