@@ -42,11 +42,18 @@ import workbench.sql.VariablePool;
 public class WbListVars extends SqlCommand
 {
 	public static final String VERB = "WbVarList";
+	public static final String VERB_ALTERNATE = "WbListVars";
 
 	@Override
 	public String getVerb()
 	{
 		return VERB;
+	}
+
+	@Override
+	public String getAlternateVerb()
+	{
+		return VERB_ALTERNATE;
 	}
 
 	@Override
