@@ -810,7 +810,7 @@ public class SqlFormatter
 					else if (joinWrapping == JoinWrapStyle.always)
 					{
 						appendNewline();
-						indent(indentPos - text.length() - 1);
+						indent(indentPos - text.length());
 					}
 				}
 				if (needsWhitespace(last, t)) appendText(' ');
@@ -860,7 +860,8 @@ public class SqlFormatter
 				}
 
 				boolean lineComment = text.startsWith("--");
-				if (lineComment && needNewLine && !isStartOfLine(myIndent))
+				boolean startOfLine = isStartOfLine(myIndent);
+				if (lineComment && needNewLine && !startOfLine)
 				{
 					appendNewline();
 				}
@@ -1564,13 +1565,8 @@ public class SqlFormatter
 		int pos = result.lastIndexOf(SqlFormatter.NL);
 		if (pos == len - NL.length()) return true;
 
-		// Current text does not end with a newline, but
-		// if the "current line" consist of the current indent, it
-		// is considered as a "start of line" as well.
 		String remain = result.substring(pos + NL.length());
-		int indentLength = (currentIndent == null ? 0 : currentIndent.length());
-		if (StringUtil.isWhitespace(remain) && remain.length() == indentLength) return true;
-		return false;
+		return remain.isEmpty() || StringUtil.isWhitespace(remain);
 	}
 
 	private void formatSql()

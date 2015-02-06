@@ -29,9 +29,12 @@ import workbench.resource.Settings;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
-import workbench.sql.formatter.SqlFormatter;
 
 import workbench.util.StringUtil;
 
@@ -47,6 +50,13 @@ public class TextFormatter
 	public TextFormatter(String id)
 	{
 		this.dbId = id;
+	}
+
+	private boolean isEmpty(String sql)
+	{
+		SQLLexer lexer = SQLLexerFactory.createLexerForDbId(dbId, sql);
+		SQLToken token = lexer.getNextToken(false, false);
+		return token == null;
 	}
 
 	public void formatSql(final SqlTextContainer editor, DelimiterDefinition alternateDelimiter, String lineComment)
@@ -82,6 +92,8 @@ public class TextFormatter
 				continue;
 			}
 
+			boolean isEmpty = isEmpty(command);
+
 			needDelimiter = (count > 1) || (isSelected && delimiter.terminatesScript(sql, false));
 
 			addNewLine = (i < count);
@@ -92,7 +104,7 @@ public class TextFormatter
 			{
 				String formattedSql = f.getFormattedSql();
 				newSql.append(formattedSql.trim());
-				if (needDelimiter)
+				if (needDelimiter && !isEmpty)
 				{
 					if (delimiter.isSingleLine())
 					{

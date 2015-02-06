@@ -47,6 +47,21 @@ public class SqlFormatterTest
 		super("SqlFormatterTest");
 	}
 
+
+	@Test
+	public void testCommentOnly()
+	{
+		String sql =
+			"-- select a,\n" +
+			"--        b,\n" +
+			"-- from foo";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+		assertEquals(sql, formatted);
+	}
+
 	@Test
 	public void testNestedCase()
 	{
@@ -118,20 +133,25 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql =
-			"select one, -- comment \n " +
-			"       two, three, four from some_table t";
-		f = new SqlFormatter(sql, 150);
+			"select * from (\n" +
+			"select one,\n" +
+			"       --- foo\n" +
+			"       two\n" +
+			"from bar\n" +
+			") as t;";
+		f = new SqlFormatter(sql, 1);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		f.setNewLineForSubselects(true);
 		formatted = f.getFormattedSql();
-
 		expected =
-			"SELECT one,\n" +
-			"       -- comment \n" +
-			"       two,\n" +
-			"       three,\n" +
-			"       four\n" +
-			"FROM some_table t";
+			"SELECT *\n" +
+			"FROM (\n" +
+			"  SELECT one,\n" +
+			"         --- foo\n" +
+			"         two\n" +
+			"  FROM bar\n" +
+			") AS t;";
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
 	}
@@ -2106,6 +2126,7 @@ public class SqlFormatterTest
 			"FROM foo\n" +
 			"  JOIN bar\n" +
 			"    ON foo.id = bar.fid";
+//		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");
 		assertEquals(expected, formatted);
 
 		f = new SqlFormatter("select * from foo join bar on foo.id = bar.fid and foo.id2=bar.fid2", 100);

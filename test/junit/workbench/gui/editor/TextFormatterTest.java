@@ -223,5 +223,25 @@ public class TextFormatterTest
 //		System.out.println("expected: \n" + expected + "\n------------- formatted: --------- \n" + formatted);
 		assertEquals(expected, editorText.trim());
 
+		editorText =
+			"select a,b from foo;\n" +
+			"\n"+
+			"-- select a,\n" +
+			"--        b,\n" +
+			"-- from foo";
+		selectionStart = 0;
+		selectionEnd = 0;
+		instance.formatSql(editor, null, "--");
+		expected =
+			"SELECT a,\n" +
+			"       b\n" +
+			"FROM foo;\n" +
+			"\n" +
+			"-- select a,\n" +
+			"--        b,\n" +
+			"-- from foo";
+		formatted = editorText.trim();
+//		System.out.println("expected: \n" + expected + "\n------------- formatted: --------- \n" + formatted);
+		assertEquals(expected, formatted);
 	}
 }
