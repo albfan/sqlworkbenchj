@@ -2192,7 +2192,7 @@ public class Settings
 
 	public boolean getCheckEditableColumns()
 	{
-		return getBoolProperty("workbench.db.edit.verify.updateable", true);
+		return getBoolProperty("workbench.db.edit.verify.updateable", false);
 	}
 
 	public void setCheckEditableColumns(boolean flag)
