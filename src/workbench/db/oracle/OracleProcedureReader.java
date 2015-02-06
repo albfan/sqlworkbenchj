@@ -357,6 +357,10 @@ public class OracleProcedureReader
 		schema = DbMetadata.cleanupWildcards(schema);
 		name = DbMetadata.cleanupWildcards(name);
 
+		schema = connection.getMetadata().adjustObjectnameCase(schema);
+		catalog = connection.getMetadata().adjustObjectnameCase(catalog);
+		name = connection.getMetadata().adjustObjectnameCase(name);
+
 		// ALL_PROCEDURES does not return invalid procedures
 		// so an outer join against ALL_OBJECTS is necessary
 		String standardProcs =
@@ -422,7 +426,15 @@ public class OracleProcedureReader
 
 		pkgProcs += "\n AND aa.object_name LIKE '" + name + "' ";
 
-		String sql = standardProcs + "\n UNION ALL \n" + pkgProcs + "\n ORDER BY 2,3";
+		String sql;
+		if (StringUtil.isBlank(catalog))
+		{
+			sql = standardProcs + "\n UNION ALL \n" + pkgProcs + "\n ORDER BY 2,3";
+		}
+		else
+		{
+			sql = pkgProcs + "\n ORDER BY 2,3";
+		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

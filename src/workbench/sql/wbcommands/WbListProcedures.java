@@ -63,6 +63,7 @@ public class WbListProcedures
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
+		cmdLine.addArgument("package");
 	}
 
 	@Override
@@ -90,6 +91,10 @@ public class WbListProcedures
 		{
 			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
+			if (StringUtil.isBlank(catalog))
+			{
+				catalog = cmdLine.getValue("package");
+			}
 		}
 		else if (StringUtil.isNonBlank(args))
 		{
