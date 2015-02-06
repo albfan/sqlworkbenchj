@@ -73,6 +73,7 @@ public class WbSetProp
 		configMap.put("time_format", Settings.PROPERTY_TIME_FORMAT);
 		configMap.put("digits", Settings.PROPERTY_DECIMAL_DIGITS);
 		configMap.put("dec_separator", Settings.PROPERTY_DECIMAL_SEP);
+		configMap.put("showscriptfinish", "workbench.gui.sql.script.showtime");
 	}
 
 	@Override
