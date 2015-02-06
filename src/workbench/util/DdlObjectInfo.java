@@ -63,6 +63,11 @@ public class DdlObjectInfo
 		return "Type: " + objectType + ", name: " + objectName;
 	}
 
+	public void setObjectType(String newType)
+	{
+		this.objectType = newType;
+	}
+	
 	public String getDisplayType()
 	{
 		return StringUtil.capitalize(objectType);

@@ -102,6 +102,12 @@ public class DdlCommand
 		}
 
 		DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql, currentConnection);
+		if (info != null && verb.equals("ALTER") && info.getObjectType().equals("PACKAGE"))
+		{
+			// an "alter package .. compile"  will report errors for the package body, not the package
+			info.setObjectType("PACKAGE BODY");
+		}
+
 		if (info != null && typesToRemember.contains(info.getObjectType()))
 		{
 			// this is only here to mimic SQL*Plus' behaviour for a "SHOW ERROR" without a parameter
