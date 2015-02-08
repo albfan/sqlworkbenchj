@@ -32,13 +32,13 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.derby.DerbyTestUtil;
 
+import workbench.util.CollectionUtil;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.util.CollectionUtil;
 
 /**
  *
@@ -65,49 +65,73 @@ public class UpdateTableDetectorTest
 	}
 
 	@Test
+	public void testNotNullIndex()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection conn = util.getConnection();
+
+		TestUtil.executeScript(conn,
+			"create table person (id integer, id2 integer not null, name varchar(20) not null);\n" +
+			"create unique index aaaa on person (id);\n" +
+			"create unique index zzzz on person (id2);\n" +
+			"commit;");
+
+		String sql = "select id, id2, name from person";
+		ResultInfo info = null;
+		try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql))
+		{
+			info = new ResultInfo(rs.getMetaData(), conn);
+		}
+
+		UpdateTableDetector detector = new UpdateTableDetector(conn);
+		detector.setCheckPKOnly(false);
+		TableIdentifier toCheck = new TableIdentifier("person");
+		detector.checkUpdateTable(toCheck, info);
+
+		TableIdentifier tbl = detector.getUpdateTable();
+		assertEquals("PERSON", tbl.getTableName());
+		assertFalse(info.getColumn(0).isPkColumn());
+		assertTrue(info.getColumn(1).isPkColumn());
+	}
+
+	@Test
 	public void testSynonyms()
 		throws Exception
 	{
-		try
+		TestUtil util = getTestUtil();
+		WbConnection conn = DerbyTestUtil.getDerbyConnection(util.getBaseDir());
+
+		TestUtil.executeScript(conn,
+			"create table person (id integer primary key, name varchar(20) not null);\n" +
+			"create synonym psyn for person;\n"
+		);
+		String sql = "select id, name from psyn";
+		ResultInfo info = null;
+		try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql))
 		{
-			TestUtil util = getTestUtil();
-			WbConnection conn = DerbyTestUtil.getDerbyConnection(util.getBaseDir());
-
-			TestUtil.executeScript(conn,
-				"create table person (id integer primary key, name varchar(20) not null);\n" +
-				"create synonym psyn for person;\n"
-			);
-			String sql = "select id, name from psyn";
-			ResultInfo info = null;
-			try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql))
-			{
-				info = new ResultInfo(rs.getMetaData(), conn);
-			}
-
-			info.getColumn(0).setIsPkColumn(false);
-
-			UpdateTableDetector detector = new UpdateTableDetector(conn);
-			detector.setCheckPKOnly(false);
-			TableIdentifier toCheck = new TableIdentifier("psyn");
-			detector.checkUpdateTable(toCheck, info);
-
-			TableIdentifier tbl = detector.getUpdateTable();
-			assertEquals("PSYN", tbl.getTableName());
-			assertTrue(info.getColumn(0).isPkColumn());
-			assertFalse(info.getColumn(1).isPkColumn());
-
-			resetInfo(info);
-
-			detector.setCheckPKOnly(true);
-			detector.checkUpdateTable(toCheck, info);
-			assertEquals("PSYN", tbl.getTableName());
-			assertTrue(info.getColumn(0).isPkColumn());
-			assertFalse(info.getColumn(1).isPkColumn());
+			info = new ResultInfo(rs.getMetaData(), conn);
 		}
-		finally
-		{
-			ConnectionMgr.getInstance().disconnectAll();
-		}
+
+		info.getColumn(0).setIsPkColumn(false);
+
+		UpdateTableDetector detector = new UpdateTableDetector(conn);
+		detector.setCheckPKOnly(false);
+		TableIdentifier toCheck = new TableIdentifier("psyn");
+		detector.checkUpdateTable(toCheck, info);
+
+		TableIdentifier tbl = detector.getUpdateTable();
+		assertEquals("PSYN", tbl.getTableName());
+		assertTrue(info.getColumn(0).isPkColumn());
+		assertFalse(info.getColumn(1).isPkColumn());
+
+		resetInfo(info);
+
+		detector.setCheckPKOnly(true);
+		detector.checkUpdateTable(toCheck, info);
+		assertEquals("PSYN", tbl.getTableName());
+		assertTrue(info.getColumn(0).isPkColumn());
+		assertFalse(info.getColumn(1).isPkColumn());
 	}
 
 	@Test

@@ -60,7 +60,7 @@ public class UpdateTableDetector
 
 	public void setCheckPKOnly(boolean flag)
 	{
-		this.checkPkOnly = true;
+		this.checkPkOnly = flag;
 	}
 
 	public TableIdentifier getUpdateTable()
@@ -166,7 +166,7 @@ public class UpdateTableDetector
 
 			if (!resultInfo.hasPkColumns() && meta.getDbSettings().checkUniqueIndexesForPK())
 			{
-				checkUniqueIndexesFor(conn, updateTable, resultInfo);
+				checkUniqueIndexesFor(updateTable, resultInfo);
 			}
 		}
 		catch (Exception e)
@@ -245,7 +245,7 @@ public class UpdateTableDetector
 
 		if (pk == null || CollectionUtil.isEmpty(pk.getColumns()))
 		{
-			checkUniqueIndexesFor(conn, tbl, resultInfo);
+			checkUniqueIndexesFor(tbl, resultInfo);
 		}
 		else
 		{
@@ -270,20 +270,20 @@ public class UpdateTableDetector
 		}
 	}
 
-	private void checkUniqueIndexesFor(WbConnection con, TableIdentifier tableToUse, ResultInfo result)
+	private void checkUniqueIndexesFor(TableIdentifier tableToUse, ResultInfo result)
 	{
 		if (tableToUse == null || result == null) return;
 		LogMgr.logInfo("UpdateTableDetector.checkUniqueIndexesForPK()", "No PK found for table " + tableToUse.getTableName()+ " Trying to find an unique index.");
 		List<IndexDefinition> indexes = null;
 
 		long start = System.currentTimeMillis();
-		if (con.getDbSettings().useCompletionCacheForUpdateTableCheck())
+		if (conn.getDbSettings().useCompletionCacheForUpdateTableCheck())
 		{
-			indexes = con.getObjectCache().getUniqueIndexes(tableToUse);
+			indexes = conn.getObjectCache().getUniqueIndexes(tableToUse);
 		}
 		else
 		{
-			IndexReader reader = ReaderFactory.getIndexReader(con.getMetadata());
+			IndexReader reader = ReaderFactory.getIndexReader(conn.getMetadata());
 			indexes = reader.getUniqueIndexes(tableToUse);
 		}
 		long duration = System.currentTimeMillis() - start;
@@ -295,10 +295,11 @@ public class UpdateTableDetector
 
 		if (CollectionUtil.isEmpty(indexes)) return;
 
-		IndexDefinition idx = indexes.get(0);
-		List<IndexColumn> columns = idx.getColumns();
+		IndexDefinition idx = findSuitableIndex(indexes, result);
+		if (idx == null) return;
 		LogMgr.logInfo("UpdateTableDetector.checkUniqueIndexesForPK()", "Using unique index " + idx.getObjectName() + " as a surrogate PK for table: " + tableToUse.getTableExpression());
 
+		List<IndexColumn> columns = idx.getColumns();
 		for (IndexColumn col : columns)
 		{
 			int index = result.findColumn(col.getColumn(), conn.getMetadata());
@@ -312,6 +313,34 @@ public class UpdateTableDetector
 				missingPkcolumns.add(new ColumnIdentifier(col.getColumn()));
 			}
 		}
+	}
+
+	/**
+	 * Search for the first index where all columns are defined as NOT NULL
+	 *
+	 * @param indexes the indexes to search
+	 * @return the index to use, null if no such index could be found
+	 */
+	private IndexDefinition findSuitableIndex(List<IndexDefinition> indexes, ResultInfo info)
+	{
+		for (IndexDefinition index : indexes)
+		{
+			if (!hasNullableColumns(index, info)) return index;
+		}
+		return null;
+	}
+
+	private boolean hasNullableColumns(IndexDefinition index, ResultInfo info)
+	{
+		for (IndexColumn col : index.getColumns())
+		{
+			int colIdx = info.findColumn(col.getColumn(), conn.getMetadata());
+			if (colIdx > -1 && info.getColumn(colIdx).isNullable())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void syncResultColumn(int index, ColumnIdentifier column, ResultInfo info)
