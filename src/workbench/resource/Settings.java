@@ -1940,7 +1940,7 @@ public class Settings
 
 	public boolean getEditorUseTabCharacter()
 	{
-		return getBoolProperty("workbench.editor.usetab", true);
+		return getBoolProperty("workbench.editor.usetab", false);
 	}
 
 	public void setEditorUseTabCharacter(boolean flag)
