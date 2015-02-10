@@ -125,6 +125,8 @@ public class ObjectInfo
 
 		DbSettings dbs = connection.getDbSettings();
 		TableIdentifier synonymTarget = null;
+		DataStore synonymInfo = null;
+
 		if (toDescribe != null && dbs.isSynonymType(toDescribe.getType()))
 		{
 			try
@@ -132,10 +134,9 @@ public class ObjectInfo
 				synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
 				if (synonymTarget != null)
 				{
-					DataStore synDs = getPlainSynonymInfo(connection, toDescribe);
+					synonymInfo = getPlainSynonymInfo(connection, toDescribe);
 					String name = toDescribe.getFullyQualifiedName(connection);
-					synDs.setResultName(name + " (" + toDescribe.getObjectType() + ")");
-					result.addDataStore(synDs);
+					synonymInfo.setResultName(name + " (" + toDescribe.getObjectType() + ")");
 				}
 				if (!WbManager.getInstance().isGUIMode() || GuiSettings.showSynonymTargetInDbExplorer())
 				{
@@ -275,6 +276,12 @@ public class ObjectInfo
 			displayName = toDescribe.getTableExpression(connection);
 		}
 
+		// in console/batch mode the synonym information should be displayed before the actual table information
+		if (!WbManager.getInstance().isGUIMode() && synonymInfo != null)
+		{
+			result.addDataStore(synonymInfo);
+		}
+
 		if (details != null)
 		{
 			ColumnRemover remover = new ColumnRemover(details);
@@ -285,6 +292,12 @@ public class ObjectInfo
 			result.setSourceCommand("DESCRIBE " + fname);
 			result.addDataStore(cols);
 			result.setSuccess();
+		}
+
+		// in GUI mode the synonym information should be displayed after the actual table information
+		if (WbManager.getInstance().isGUIMode() && synonymInfo != null)
+		{
+			result.addDataStore(synonymInfo);
 		}
 
 		if (source != null)
