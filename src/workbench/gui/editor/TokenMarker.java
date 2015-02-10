@@ -9,6 +9,7 @@
 package workbench.gui.editor;
 
 import java.util.ArrayList;
+
 import javax.swing.text.Segment;
 
 /**
@@ -30,7 +31,7 @@ public abstract class TokenMarker
 	 * Stores the first {@link Token} for each line that
 	 * has been tokenized
 	 */
-	protected ArrayList<Token> lineStartTokens = new ArrayList<Token>(250);
+	protected ArrayList<Token> lineStartTokens = new ArrayList<>(250);
 
 	/**
 	 * The number of lines in the model being tokenized. This can be
@@ -192,7 +193,7 @@ public abstract class TokenMarker
 		{
 			clearLine(i);
 		}
-		lineStartTokens = new ArrayList<Token>(250);
+		lineStartTokens = new ArrayList<>(250);
 		length = 0;
 	}
 

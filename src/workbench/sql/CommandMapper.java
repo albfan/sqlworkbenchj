@@ -233,6 +233,16 @@ public class CommandMapper
 
 		this.dbSpecificCommands = new LinkedList<>();
 		this.allowAbbreviated = Settings.getInstance().getBoolProperty("workbench.sql.allow.abbreviation", false);
+		registerExtensions();
+	}
+
+	private void registerExtensions()
+	{
+		List<SqlCommand> commands = CommandRegistry.getInstance().getCommands();
+		for (SqlCommand cmd : commands)
+		{
+			addCommand(cmd);
+		}
 	}
 
 	public Collection<String> getAllWbCommands()

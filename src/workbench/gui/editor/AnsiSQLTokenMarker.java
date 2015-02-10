@@ -12,13 +12,17 @@
 package workbench.gui.editor;
 
 import java.util.Collection;
+import java.util.List;
+
+import workbench.sql.CommandRegistry;
+import workbench.sql.SqlCommand;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
 
 /**
  * @author Thomas Kellerer
  */
-public class AnsiSQLTokenMarker 
+public class AnsiSQLTokenMarker
 	extends SQLTokenMarker
 {
 	public AnsiSQLTokenMarker()
@@ -31,7 +35,7 @@ public class AnsiSQLTokenMarker
 	{
 		this.addKeywordList(operators, Token.KEYWORD1);
 	}
-	
+
 	public void addDatatypes(Collection<String> types)
 	{
 		this.addKeywordList(types, Token.DATATYPE);
@@ -50,7 +54,7 @@ public class AnsiSQLTokenMarker
 	private void addKeywordList(Collection<String> words, byte anId)
 	{
 		if (words == null) return;
-		
+
 		for (String keyword : words)
 		{
 			if (!keywords.containsKey(keyword))
@@ -88,6 +92,16 @@ public class AnsiSQLTokenMarker
 		for (String verb : tester.getCommands())
 		{
 			keywords.add(verb, Token.KEYWORD2);
+		}
+
+		List<SqlCommand> commands = CommandRegistry.getInstance().getCommands();
+		for (SqlCommand cmd : commands)
+		{
+			keywords.add(cmd.getVerb(), Token.KEYWORD2);
+			if (cmd.getAlternateVerb() != null)
+			{
+				keywords.add(cmd.getAlternateVerb(), Token.KEYWORD2);
+			}
 		}
 	}
 

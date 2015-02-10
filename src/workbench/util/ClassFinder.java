@@ -102,6 +102,30 @@ public class ClassFinder
 	{
 		List<String> result = new ArrayList<>();
 
+		List<Class> classes = scanJarFile(archive, loader, excludedClasses);
+
+		for (Class clz : classes)
+		{
+			try
+			{
+				if (toFind.isAssignableFrom(clz) && !Modifier.isAbstract(clz.getModifiers()))
+				{
+					result.add(clz.getCanonicalName());
+				}
+			}
+			catch (Throwable cnf)
+			{
+				// ignore
+			}
+		}
+		return result;
+	}
+
+	private static List<Class> scanJarFile(String archive, ClassLoader loader, Set<String> excluded)
+		throws IOException
+	{
+		List<Class> result = new ArrayList<>();
+
 		try (JarFile jarFile = new JarFile(archive))
 		{
 			Enumeration<JarEntry> entries = jarFile.entries();
@@ -120,7 +144,7 @@ public class ClassFinder
 				// somepackage.classprefix.SomeClass could exist
 				String clsName = name.replace(".class", "").replace("/", ".");
 
-				if (excludedClasses.contains(clsName))
+				if (excluded.contains(clsName))
 				{
 					continue;
 				}
@@ -128,10 +152,7 @@ public class ClassFinder
 				try
 				{
 					Class clz = loader.loadClass(clsName);
-					if (toFind.isAssignableFrom(clz) && !Modifier.isAbstract(clz.getModifiers()))
-					{
-						result.add(clsName);
-					}
+					result.add(clz);
 				}
 				catch (Throwable cnf)
 				{
@@ -170,28 +191,51 @@ public class ClassFinder
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<Class> getClasses(String packageName)
 		throws ClassNotFoundException, IOException
 	{
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		return getClasses(packageName, classLoader);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<Class> getClasses(String packageName, ClassLoader classLoader)
+		throws ClassNotFoundException, IOException
+	{
 		assert classLoader != null;
 		String path = packageName.replace('.', '/');
+
+		ArrayList<Class> result = new ArrayList<>();
 		Enumeration<URL> resources = classLoader.getResources(path);
 		List<File> dirs = new ArrayList<>();
 		while (resources.hasMoreElements())
 		{
 			URL resource = resources.nextElement();
-			String fileName = resource.getFile();
-			String fileNameDecoded = URLDecoder.decode(fileName, "UTF-8");
-			dirs.add(new File(fileNameDecoded));
+			String fname = resource.getFile();
+			String fileName = URLDecoder.decode(fname, "UTF-8");
+			if (fileName.startsWith("file:") && fileName.toLowerCase().contains("jar!"))
+			{
+				String realName = fileName.substring("file:".length() + 1, fileName.indexOf('!'));
+				File jarFile = new File(realName);
+				System.out.println("jarFile: " + jarFile.getAbsolutePath());
+				Set<String> empty = Collections.emptySet();
+				List<Class> classes = scanJarFile(jarFile.getAbsolutePath(), classLoader, empty);
+				for (Class cls : classes)
+				{
+					result.add(cls);
+				}
+			}
+			else
+			{
+				dirs.add(new File(fileName));
+			}
 		}
-		ArrayList<Class> classes = new ArrayList<>();
+
 		for (File directory : dirs)
 		{
-			classes.addAll(findClasses(directory, packageName));
+			result.addAll(findClasses(directory, packageName));
 		}
-		return classes;
+		return result;
 	}
 
     /**
@@ -209,12 +253,15 @@ public class ClassFinder
 		List<Class> classes = new ArrayList<>();
 		if (!directory.exists())
 		{
+			System.out.println(directory + " does not exist!");
 			return classes;
 		}
+
 		File[] files = directory.listFiles();
 		for (File file : files)
 		{
 			String fileName = file.getName();
+			System.out.println("  file: " + fileName);
 			if (file.isDirectory())
 			{
 				assert !fileName.contains(".");

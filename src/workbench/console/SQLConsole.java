@@ -43,6 +43,7 @@ import workbench.gui.WindowTitleBuilder;
 import workbench.gui.profiles.ProfileKey;
 
 import workbench.sql.BatchRunner;
+import workbench.sql.CommandRegistry;
 import workbench.sql.OutputPrinter;
 import workbench.sql.StatementHistory;
 import workbench.sql.macros.MacroManager;
@@ -113,6 +114,7 @@ public class SQLConsole
 		titleBuilder.setShowProfileGroup(false);
 		titleBuilder.setShowURL(ConsoleSettings.termTitleIncludeUrl());
 		titleBuilder.setShowNotConnected(false);
+		CommandRegistry.getInstance().scanForExtensions();
 	}
 
 	public void startConsole()

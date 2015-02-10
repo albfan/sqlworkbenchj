@@ -65,6 +65,7 @@ import workbench.gui.tools.DataPumper;
 import workbench.gui.tools.ObjectSourceSearchPanel;
 
 import workbench.sql.BatchRunner;
+import workbench.sql.CommandRegistry;
 import workbench.sql.OutputPrinter;
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
@@ -917,10 +918,12 @@ public final class WbManager
 		// batchMode flag is set by readParameters()
 		if (isBatchMode())
 		{
+			CommandRegistry.getInstance().scanForExtensions();
 			runBatch();
 		}
 		else
 		{
+			initRegistry();
 			boolean doWarmup = Settings.getInstance().getBoolProperty("workbench.gui.warmup", false);
 			if (!doWarmup)
 			{
@@ -946,6 +949,20 @@ public final class WbManager
 				}
 			});
 		}
+	}
+
+	private void initRegistry()
+	{
+		WbThread t1 = new WbThread("ExtensionScannerThread")
+		{
+			@Override
+			public void run()
+			{
+				CommandRegistry registry = CommandRegistry.getInstance();
+				registry.scanForExtensions();
+			}
+		};
+		t1.start();
 	}
 
 	private void warmUp()
@@ -1113,7 +1130,7 @@ public final class WbManager
 
 	/**
 	 * Run SQL Workbench in embedded mode supplying all parameters.
-	 * 
+	 *
 	 * @param args
 	 */
 	public static void runEmbedded(String[] args)
