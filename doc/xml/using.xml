@@ -673,7 +673,7 @@ Done.</programlisting>
         has finished (this is different to e.g. SQL Server Management Studio where the messages are displayed
         as soon as <literal>PRINT</literal> is called, even when the overall script or procedure is still running.
       </para>
-      
+
 		</section>
 
 		<section id="server-msg-other">
@@ -700,9 +700,12 @@ Done.</programlisting>
 		<para>
 			If you have primary keys defined for the underlying tables, those primary key columns will be used for the
 			<literal>WHERE</literal> statements for <literal>UPDATE</literal> and <literal>DELETE</literal>.
-			If no primary key columns are found, the JDBC driver is asked for a <emphasis>best row identifier</emphasis>. If
-			that doesn&#39;t return any information, your defined <link linkend="options-pkmapping">PK Mapping</link> will
-			be queried. If still no PK columns can be found, you will be prompted to select
+			If no primary key is found, the unique indexes for the table will be retrieved. The first unique index
+      found that only consists of columns defined as NOT NULL will be used.
+    </para>
+    <para>
+      If no PK or unique index can be found, the custom <link linkend="options-pkmapping">PK Mapping</link> will be checked.
+      If still no PK columns can be found, you will be prompted to select
 			the key columns based on the current result set.
 		</para>
 
@@ -726,7 +729,7 @@ Done.</programlisting>
       incorrect SQL statements will be generated.
     </para>
     <para>
-      If no primary key can be found for the update table, you will be prompted to select the
+      If no primary (or unique) key can be found for the update table, you will be prompted to select the
 			columns that should be used to uniquely identify a row in the update table.
 		</para>
 
