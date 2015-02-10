@@ -20,6 +20,7 @@
 package workbench.sql;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -36,6 +37,7 @@ public class CommandRegistry
 {
 	private static final String PACKAGE_NAME = "workbench.extensions";
 	private final List<Class> commands = new ArrayList<>();
+	private List<String> verbs;
 
 	/**
 	 * Thread safe singleton-instance
@@ -52,6 +54,29 @@ public class CommandRegistry
 
 	private CommandRegistry()
 	{
+	}
+
+	public synchronized List<String> getVerbs()
+	{
+		if (verbs == null)
+		{
+			initVerbs();
+		}
+		return Collections.unmodifiableList(verbs);
+	}
+
+	private void initVerbs()
+	{
+		List<SqlCommand> cmdList = getCommands();
+		verbs = new ArrayList<>(cmdList.size());
+		for (SqlCommand cmd : cmdList)
+		{
+			verbs.add(cmd.getVerb());
+			if (cmd.getAlternateVerb() != null)
+			{
+				verbs.add(cmd.getAlternateVerb());
+			}
+		}
 	}
 
 	public List<SqlCommand> getCommands()
@@ -95,6 +120,5 @@ public class CommandRegistry
 			LogMgr.logWarning("CommandRegistry.scanForExtensions", "Error when scanning for exentensions", ex);
 		}
 	}
-
 
 }

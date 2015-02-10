@@ -24,9 +24,11 @@ package workbench.sql.wbcommands;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import workbench.sql.CommandRegistry;
 import workbench.sql.wbcommands.console.WbAbout;
 import workbench.sql.wbcommands.console.WbCreateProfile;
 import workbench.sql.wbcommands.console.WbDefineDriver;
@@ -139,6 +141,12 @@ public class CommandTester
 		putVerb(WbListDrivers.VERB);
 		putVerb(WbCreateProfile.VERB);
 		putVerb(WbShowEncoding.VERB);
+		
+		List<String> verbs = CommandRegistry.getInstance().getVerbs();
+		for (String verb : verbs)
+		{
+			putVerb(verb);
+		}
 	}
 
 	private void putVerb(String verb)
