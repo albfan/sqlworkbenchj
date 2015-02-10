@@ -217,7 +217,6 @@ public class ClassFinder
 			{
 				String realName = fileName.substring("file:".length() + 1, fileName.indexOf('!'));
 				File jarFile = new File(realName);
-				System.out.println("jarFile: " + jarFile.getAbsolutePath());
 				Set<String> empty = Collections.emptySet();
 				List<Class> classes = scanJarFile(jarFile.getAbsolutePath(), classLoader, empty);
 				for (Class cls : classes)
@@ -253,7 +252,6 @@ public class ClassFinder
 		List<Class> classes = new ArrayList<>();
 		if (!directory.exists())
 		{
-			System.out.println(directory + " does not exist!");
 			return classes;
 		}
 
@@ -261,7 +259,6 @@ public class ClassFinder
 		for (File file : files)
 		{
 			String fileName = file.getName();
-			System.out.println("  file: " + fileName);
 			if (file.isDirectory())
 			{
 				assert !fileName.contains(".");
