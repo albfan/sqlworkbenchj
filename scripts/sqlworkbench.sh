@@ -35,4 +35,13 @@ fi
 #   -Djava.awt.headless=true
 # might be needed for some combinations of OS and JDK
 
-exec $JAVACMD -Dvisualvm.display.name=SQLWorkbench -Xmx512m -jar $scriptpath/sqlworkbench.jar $@
+cp=$scriptpath/sqlworkbench.jar
+cp=$cp:$scriptpath/dom4j-1.6.1.jar
+cp=$cp:$scriptpath/poi-ooxml-schemas.jar
+cp=$cp:$scriptpath/poi-ooxml.jar
+cp=$cp:$scriptpath/poi.jar
+cp=$cp:$scriptpath/stax-api-1.0.1.jar
+cp=$cp:$scriptpath/xmlbeans-2.3.0.jar
+cp=$cp:$scriptpath/ext/*
+
+exec $JAVACMD -Dvisualvm.display.name=SQLWorkbench -Xmx512m -cp $cp workbench.WbStarter $@

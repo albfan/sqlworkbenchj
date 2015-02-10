@@ -489,7 +489,7 @@
     <jar compress="true" level="6" jarfile="${distdir}/${jarfile}">
       <manifest>
         <attribute name="Main-Class" value="workbench.WbStarter"/>
-        <attribute name="Class-Path" value=". log4j.jar dbunit-2.3.0.jar slf4j-api-1.5.10.jar slf4j-log4j12-1.5.6.jar mail.jar poi.jar poi-ooxml.jar dom4j-1.6.1.jar stax-api-1.0.1.jar poi-ooxml-schemas.jar xmlbeans-2.3.0.jar odfdom-java.jar resolver.jar serializer.jar simple-odf.jar xercesImpl.jar xml-apis.jar"/>
+        <attribute name="Class-Path" value=". log4j.jar dbunit-2.3.0.jar slf4j-api-1.5.10.jar slf4j-log4j12-1.5.6.jar mail.jar poi.jar poi-ooxml.jar dom4j-1.6.1.jar stax-api-1.0.1.jar poi-ooxml-schemas.jar xmlbeans-2.3.0.jar odfdom-java.jar resolver.jar serializer.jar simple-odf.jar xercesImpl.jar xml-apis.jar ext/"/>
         <attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
         <attribute name="Implementation-Title" value="SQL Workbench/J"/>
         <attribute name="Implementation-URL" value="http://www.sql-workbench.net"/>
