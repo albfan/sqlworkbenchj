@@ -103,7 +103,7 @@ public class OracleStatementHook
 	 * A list of SQL commands where no statistics should be shown.
 	 */
 	private final Set<String> noStatistics = CollectionUtil.caseInsensitiveSet(SetCommand.VERB,
-		SingleVerbCommand.COMMIT_VERB, SingleVerbCommand.ROLLBACK_VERB);
+		SingleVerbCommand.COMMIT_VERB, SingleVerbCommand.ROLLBACK_VERB, "SET", "SHOW", "EXPLAIN");
 
 	/**
 	 * Stores the statistic values before the execution of the statement.
