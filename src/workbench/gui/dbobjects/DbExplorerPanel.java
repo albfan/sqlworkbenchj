@@ -1184,15 +1184,17 @@ public class DbExplorerPanel
 	@Override
 	public void executionEnd(WbConnection conn, Object source)
 	{
+		if (!this.isVisible()) return;
+
 		if (this.connectionInitPending)
 		{
 			this.initConnection();
 		}
-		if (this.isVisible() && this.schemaRetrievePending)
+		if (this.schemaRetrievePending)
 		{
 			this.readSchemas(true);
 		}
-		if (this.isVisible() && this.retrievePending)
+		if (this.retrievePending)
 		{
 			retrieve();
 		}

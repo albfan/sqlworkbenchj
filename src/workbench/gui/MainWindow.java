@@ -1522,9 +1522,17 @@ public class MainWindow
 	@Override
 	public void connected(WbConnection conn)
 	{
+		MainPanel panel = this.getCurrentPanel();
+		if (panel == null)
+		{
+			Thread.yield();
+			panel = this.getCurrentPanel();
+			LogMgr.logError("MainWindow.connected()", "Connection established but no current panel!", new NullPointerException("Backtrace"));
+		}
+
 		if (this.currentProfile.getUseSeparateConnectionPerTab())
 		{
-			this.getCurrentPanel().setConnection(conn);
+			if (panel != null) panel.setConnection(conn);
 		}
 		else
 		{
@@ -1544,11 +1552,14 @@ public class MainWindow
 		this.disconnectTab.checkState();
 		this.showMacroPopup.workspaceChanged();
 
-		this.getCurrentPanel().clearLog();
-		this.getCurrentPanel().showResultPanel();
+		if (panel != null)
+		{
+			panel.clearLog();
+			panel.showResultPanel();
+		}
 		VersionNumber version = conn.getDatabaseVersion();
 		showDbmsManual.setDbms(conn.getDbId(), version);
-		showConnectionWarnings(conn, this.getCurrentPanel());
+		showConnectionWarnings(conn, panel);
 		selectCurrentEditor();
 	}
 
@@ -2377,6 +2388,7 @@ public class MainWindow
 
 	private void showConnectionWarnings(WbConnection conn, MainPanel panel)
 	{
+		if (panel == null) return;
 		String warn = (conn != null ? conn.getWarnings() : null);
 		if (warn != null && panel != null)
 		{

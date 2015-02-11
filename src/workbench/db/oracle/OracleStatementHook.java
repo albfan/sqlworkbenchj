@@ -421,14 +421,6 @@ public class OracleStatementHook
 	{
 		WbConnection con = runner.getConnection();
 
-		String findSql
-			= wbSelectMarker + " sql.sql_id, sql.child_number \n" +
-				"from v$sql sql \n" +
-				"where sql_text like '" + getIDPrefix() + "%' \n" +
-				"order by last_active_time desc";
-
-		LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "SQL to find last explained statement: \n" + findSql);
-
 		PreparedStatement planStatement = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -465,6 +457,13 @@ public class OracleStatementHook
 			stmt = con.createStatementForQuery();
 			if (searchSQL)
 			{
+				String findSql
+					= wbSelectMarker + " sql.sql_id, sql.child_number \n" +
+						"from v$sql sql \n" +
+						"where sql_text like '" + getIDPrefix() + "%' \n" +
+						"order by last_active_time desc";
+
+				LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "SQL to find last explained statement: \n" + findSql);
 				rs = stmt.executeQuery(findSql);
 				if (rs.next())
 				{
