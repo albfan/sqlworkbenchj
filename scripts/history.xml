@@ -7,6 +7,7 @@
     <entry dev-build="1" type="enh">For Vertica tables and views from the schema "v_internal" are now show in the DbExplorer (contributed by Tatiana Saltykova)</entry>
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
+    <entry dev-build="2" type="fix">Fixed some issues with restoring the window position on multi-monitor systems</entry>
     <entry dev-build="2" type="fix">Fixed some issues where the alternate delimiter was incrrectly used when running scripts through WbInclude</entry>
     <entry dev-build="2" type="fix">When importing multiple Excel files with WbImport using the -sourceDir argument, only the first file was imported</entry>
     <entry dev-build="1" type="fix">The abbreviated WbInclude using @ only worked with Oracle</entry>
