@@ -182,8 +182,16 @@ public class OracleTableSourceBuilder
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
-				String tablespace = rs.getString("tablespace_name");
-				tbl.setTablespace(tablespace);
+
+				String tempTable = rs.getString("temporary");
+				boolean isTempTable = StringUtil.equalString("Y", tempTable);
+
+				if (!isTempTable)
+				{
+					// you can't specify a tablespace for a temp table
+					String tablespace = rs.getString("tablespace_name");
+					tbl.setTablespace(tablespace);
+				}
 
 				String iot = rs.getString("IOT_TYPE");
 				if (StringUtil.isNonBlank(iot))
@@ -257,8 +265,6 @@ public class OracleTableSourceBuilder
 					tbl.getSourceOptions().addConfigSetting("row_movement", "enabled");
 				}
 
-				String tempTable = rs.getString("temporary");
-				boolean isTempTable = StringUtil.equalString("Y", tempTable);
 				String duration = rs.getString("duration");
 				if (isTempTable)
 				{
