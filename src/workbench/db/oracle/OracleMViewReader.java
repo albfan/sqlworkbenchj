@@ -86,10 +86,6 @@ public class OracleMViewReader
 		if (!retrieved)
 		{
 			String sql = retrieveMViewQuery(dbConnection, table);
-			if (includeDrop)
-			{
-				result.append("DROP MATERIALIZED VIEW ");
-			}
 			result.append("CREATE MATERIALIZED VIEW ");
 			result.append(table.getTableExpression(dbConnection));
 
