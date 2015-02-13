@@ -163,6 +163,6 @@ public class ReportColumn
 	@Override
 	public String toString()
 	{
-		return column.toString();
+		return column.getColumnName();
 	}
 }

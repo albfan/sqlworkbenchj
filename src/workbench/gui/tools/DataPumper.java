@@ -1661,7 +1661,7 @@ public class DataPumper
 		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();
 		if (colMapping == null) return Collections.emptyList();
 		int count = colMapping.targetColumns.length;
-		List<ColumnIdentifier> keys = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> keys = new ArrayList<>();
 
 		for (int i=0; i < count; i++)
 		{
@@ -1850,12 +1850,10 @@ public class DataPumper
 				result.append(s);
 				result.append('"');
 			}
-
-			mapping.append(indent);
-			mapping.append("-" + WbCopy.PARAM_COLUMNS + "='");
-
 		}
 
+		mapping.append(indent);
+		mapping.append("-" + WbCopy.PARAM_COLUMNS + "='");
 		for (int i=0; i < count; i++)
 		{
 			if (i > 0) mapping.append(", ");

@@ -727,8 +727,8 @@ public class DataCopier
 		}
 		else
 		{
-			LogMgr.logWarning("DataCopier.initColumnMapping()", "Column " + sourceCol.toString() + " not found in target table " + this.targetTable + ". Ignoring mapping!");
-			String msg = ResourceMgr.getFormattedString("ErrCopyTargetColumnNotFound", sourceCol.toString());
+			LogMgr.logWarning("DataCopier.initColumnMapping()", "Column " + sourceCol.getColumnName() + " not found in target table " + this.targetTable + ". Ignoring mapping!");
+			String msg = ResourceMgr.getFormattedString("ErrCopyTargetColumnNotFound", sourceCol.getColumnName());
 			this.addMessage(msg);
 		}
 	}

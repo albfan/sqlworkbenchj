@@ -628,7 +628,7 @@ public class ColumnIdentifier
 	@Override
 	public String toString()
 	{
-		return this.name;
+		return this.getDisplayName();
 	}
 
 	/**

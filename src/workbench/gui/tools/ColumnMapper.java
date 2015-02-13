@@ -155,7 +155,7 @@ public class ColumnMapper
 			ColumnIdentifier targetCol = this.targetColumns.get(i);
 			row.setTarget(targetCol);
 
-			ColumnIdentifier sourceCol = this.findSourceColumnByName(SqlUtil.removeObjectQuotes(targetCol.getColumnName()));
+			ColumnIdentifier sourceCol = this.findSourceColumnByName(SqlUtil.removeObjectQuotes(targetCol.getDisplayName()));
 			if (syncDataTypes && sourceCol != null)
 			{
 				sourceCol.setDataType(targetCol.getDataType());
@@ -203,7 +203,7 @@ public class ColumnMapper
 	{
 		for (ColumnIdentifier col : this.sourceColumns)
 		{
-			if (SqlUtil.removeObjectQuotes(col.getColumnName()).equalsIgnoreCase(aName)) return col;
+			if (SqlUtil.removeObjectQuotes(col.getDisplayName()).equalsIgnoreCase(aName)) return col;
 		}
 		return null;
 	}
@@ -246,7 +246,7 @@ public class ColumnMapper
 			ColumnMapRow row = this.mapping[i];
 			ColumnIdentifier sourceCol = row.getSource();
 			if (sourceCol == null) continue;
-			if (sourceCol.getColumnName().equals(source.getColumnName()))
+			if (sourceCol.getDisplayName().equals(source.getDisplayName()))
 			{
 				return row.getTarget();
 			}
@@ -292,7 +292,7 @@ public class ColumnMapper
 
 			if (row.getSource() != null)
 			{
-				s = row.getSource().getColumnName();
+				s = row.getSource().getDisplayName();
 				if (StringUtil.isBlank(s)) continue;
 				realCount ++;
 			}
@@ -310,7 +310,7 @@ public class ColumnMapper
 
 			if (row.getSource() != null)
 			{
-				s = row.getSource().getColumnName();
+				s = row.getSource().getDisplayName();
 				if (StringUtil.isBlank(s)) continue;
 				def.sourceColumns[index] = row.getSource();
 				def.targetColumns[index] = row.getTarget();
