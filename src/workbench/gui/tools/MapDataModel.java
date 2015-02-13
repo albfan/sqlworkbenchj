@@ -214,7 +214,7 @@ class MapDataModel
 				ColumnIdentifier c1 = o1.getSource();
 				ColumnIdentifier c2 = o2.getSource();
 				if (c1 == null) return 1;
-				if (c1 == null) return -1;
+				if (c2 == null) return -1;
 				return c1.getPosition() - c2.getPosition();
 			}
 		};
