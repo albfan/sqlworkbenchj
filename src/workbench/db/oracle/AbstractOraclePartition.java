@@ -28,11 +28,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbObject;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -122,25 +125,35 @@ public abstract class AbstractOraclePartition
 
 	public String getSourceForTableDefinition()
 	{
-		return getSource(true, "");
+		return getSource(true, "", true);
+	}
+
+	public String getSourceForTableDefinition(boolean includeTablespace)
+	{
+		return getSource(true, "", includeTablespace);
 	}
 
 	public String getSourceForTableDefinition(String indent)
 	{
-		return getSource(true, indent);
+		return getSource(true, indent, true);
+	}
+
+	public String getSourceForTableDefinition(String indent, boolean includeTablespace)
+	{
+		return getSource(true, indent, includeTablespace);
 	}
 
 	public String getSourceForIndexDefinition(String indent)
 	{
-		return getSource(false, indent);
+		return getSource(false, indent, true);
 	}
 
 	public String getSourceForIndexDefinition()
 	{
-		return getSource(false, "");
+		return getSource(false, "", true);
 	}
 
-	private String getSource(boolean forTable, String indent)
+	private String getSource(boolean forTable, String indent, boolean includeTablespace)
 	{
 		if (!this.isPartitioned()) return null;
 		StringBuilder result = new StringBuilder(partitions.size() * 15);
@@ -205,7 +218,7 @@ public abstract class AbstractOraclePartition
 			result.append(indent);
 			result.append(')');
 		}
-		if (OracleUtils.shouldAppendTablespace(tableSpace, defaultUserTablespace, objectOwner, currentUser))
+		if (includeTablespace && OracleUtils.shouldAppendTablespace(tableSpace, defaultUserTablespace, objectOwner, currentUser))
 		{
 			result.append('\n');
 			result.append(indent);

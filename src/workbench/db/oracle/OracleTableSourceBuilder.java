@@ -40,8 +40,8 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.db.sqltemplates.TemplateHandler;
-import workbench.util.CollectionUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -355,7 +355,7 @@ public class OracleTableSourceBuilder
 
 		if (includePartitions)
 		{
-			StringBuilder partition = getPartitionSql(tbl);
+			StringBuilder partition = getPartitionSql(tbl, "", true);
 			if (partition != null && partition.length() > 0)
 			{
 				if (options.length() > 0 && options.charAt(options.length() - 1) != '\n')
@@ -596,7 +596,7 @@ public class OracleTableSourceBuilder
 		}
 	}
 
-	private StringBuilder getPartitionSql(TableIdentifier table)
+	StringBuilder getPartitionSql(TableIdentifier table, String indent, boolean includeTablespace)
 	{
 		StringBuilder result = new StringBuilder(100);
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_partitions", true))
@@ -605,7 +605,7 @@ public class OracleTableSourceBuilder
 			{
 				OracleTablePartition reader = new OracleTablePartition(this.dbConnection);
 				reader.retrieve(table, dbConnection);
-				String sql = reader.getSourceForTableDefinition();
+				String sql = reader.getSourceForTableDefinition(indent, includeTablespace);
 				if (sql != null)
 				{
 					result.append(sql);

@@ -28,14 +28,16 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -83,12 +85,20 @@ public class OracleMViewReader
 			}
 		}
 
+		OracleTableSourceBuilder tsource = new OracleTableSourceBuilder(dbConnection);
+		StringBuilder partitionSql = tsource.getPartitionSql(table, "  ", false);
+
 		if (!retrieved)
 		{
 			String sql = retrieveMViewQuery(dbConnection, table);
 			result.append("CREATE MATERIALIZED VIEW ");
 			result.append(table.getTableExpression(dbConnection));
 
+			if (StringUtil.isNonEmpty(partitionSql))
+			{
+				result.append('\n');
+				result.append(partitionSql);
+			}
 			// getMViewOptions() will store any defined primary key in pkIndex
 			String options = getMViewOptions(dbConnection, table);
 			if (options != null)
