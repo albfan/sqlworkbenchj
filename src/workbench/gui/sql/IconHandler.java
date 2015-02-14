@@ -131,7 +131,7 @@ public class IconHandler
 		{
 			if (this.fileModifiedIcon == null)
 			{
-				this.fileModifiedIcon = ResourceMgr.getPicture("file-modified-icon");
+				this.fileModifiedIcon = ResourceMgr.getGifIcon("file-modified-icon");
 			}
 			icon = this.fileModifiedIcon;
 		}
@@ -139,7 +139,7 @@ public class IconHandler
 		{
 			if (this.fileIcon == null)
 			{
-				this.fileIcon = ResourceMgr.getPicture("file-icon");
+				this.fileIcon = ResourceMgr.getGifIcon("file-icon");
 			}
 			icon = this.fileIcon;
 		}

@@ -35,9 +35,11 @@ import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 
-import workbench.db.DependencyNode;
-import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.DependencyNode;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -61,8 +63,8 @@ public class DependencyTreeCellRenderer
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setVerticalAlignment(SwingConstants.TOP);
 		this.setHorizontalAlignment(SwingConstants.LEFT);
-		this.fk = ResourceMgr.getPicture("key");
-		this.table = ResourceMgr.getPicture("table");
+		this.fk = ResourceMgr.getGifIcon("key");
+		this.table = ResourceMgr.getGifIcon("table");
 		this.selectedForeground = UIManager.getColor("Tree.selectionForeground");
 		this.selectedBackground = UIManager.getColor("Tree.selectionBackground");
 		this.unselectedForeground = UIManager.getColor("Tree.textForeground");

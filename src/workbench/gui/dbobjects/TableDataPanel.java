@@ -331,7 +331,7 @@ public class TableDataPanel
 	{
 		if (this.loadingIcon == null)
 		{
-			this.loadingImage = ResourceMgr.getPicture("wait").getImage();
+			this.loadingImage = ResourceMgr.getGifIcon("wait").getImage();
 			this.loadingIcon = new ImageIcon(this.loadingImage);
 		}
 		return this.loadingIcon;

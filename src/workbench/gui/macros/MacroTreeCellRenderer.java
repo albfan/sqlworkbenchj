@@ -56,7 +56,7 @@ public class MacroTreeCellRenderer
 	{
 		super();
 		setIconTextGap(5);
-		setLeafIcon(ResourceMgr.getPng("macro"));
+		setLeafIcon(ResourceMgr.getPngIcon("macro"));
 		setOpenIcon(ResourceMgr.getGifIcon("Tree"));
 		setClosedIcon(ResourceMgr.getGifIcon("Tree"));
 		moveToGroupBorder = new CompoundBorder(new LineBorder(Color.DARK_GRAY, 1), new EmptyBorder(1, 1, 1, 1));
@@ -87,11 +87,11 @@ public class MacroTreeCellRenderer
 				MacroDefinition macro = (MacroDefinition) node.getDataObject();
 				if (macro.getExpandWhileTyping())
 				{
-					setIcon(ResourceMgr.getPng("macro_expand"));
+					setIcon(ResourceMgr.getPngIcon("macro_expand"));
 				}
 				else
 				{
-					setIcon(ResourceMgr.getPng("macro"));
+					setIcon(ResourceMgr.getPngIcon("macro"));
 				}
 				setToolTipText("<html><pre>" + HtmlUtil.escapeXML(StringUtil.getMaxSubstring(macro.getText(), 500)) + "</pre></html>");
 			}

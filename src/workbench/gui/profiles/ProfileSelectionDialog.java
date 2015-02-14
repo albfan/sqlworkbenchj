@@ -197,7 +197,7 @@ public class ProfileSelectionDialog
 			public void run()
 			{
 				versionInfo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				versionInfo.setIcon(ResourceMgr.getImageByName(event.getIconKey()));
+				versionInfo.setIcon(ResourceMgr.getPngIcon(event.getIconKey()));
 				versionInfo.setText("<html><b>" + event.getMessage() + "</b></html>");
 				String tip = event.getTooltip();
 				if (StringUtil.isNonEmpty(tip))
@@ -315,7 +315,7 @@ public class ProfileSelectionDialog
 	{
 		if (profile == null) return false;
 		if (profile.hasPassword()) return true;
-		
+
 		String pwd = WbSwingUtilities.getUserInputHidden(parent, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
 		if (StringUtil.isEmptyString(pwd)) return false;
 		profile.setPassword(pwd);

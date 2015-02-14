@@ -420,7 +420,7 @@ public class DataPumper
 		this.isConnecting = true;
 
 		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.sourceProfile.getName() + " ...";
-		this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
+		this.sourceProfileLabel.setIcon(ResourceMgr.getGifIcon("wait"));
 		this.sourceProfileLabel.setText(label);
 
 		try
@@ -502,7 +502,7 @@ public class DataPumper
 
 		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.targetProfile.getName() + " ...";
 		this.targetProfileLabel.setText(label);
-		this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
+		this.targetProfileLabel.setIcon(ResourceMgr.getGifIcon("wait"));
 
 		try
 		{
@@ -1224,7 +1224,7 @@ public class DataPumper
 		{
 			String label = ResourceMgr.getString("MsgDisconnecting");
 			this.targetProfileLabel.setText(label);
-			this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
+			this.targetProfileLabel.setIcon(ResourceMgr.getGifIcon("wait"));
 
 			this.targetTable.removeChangeListener();
 			this.targetConnection.disconnect();
@@ -1251,7 +1251,7 @@ public class DataPumper
 		{
 			String label = ResourceMgr.getString("MsgDisconnecting");
 			this.sourceProfileLabel.setText(label);
-			this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
+			this.sourceProfileLabel.setIcon(ResourceMgr.getGifIcon("wait"));
 
 			this.sourceTable.removeChangeListener();
 			this.sourceConnection.disconnect();

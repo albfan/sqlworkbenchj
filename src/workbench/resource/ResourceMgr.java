@@ -75,7 +75,6 @@ public class ResourceMgr
 
 	private static ResourceBundle resources;
 	private static final String PROP_CHANGE_LOCALE = "workbench.gui.setdefaultlocale";
-	private static boolean useLargeIcons;
 
 	private ResourceMgr()
 	{
@@ -160,12 +159,12 @@ public class ResourceMgr
 	public static void setWindowIcons(Window window, String baseName)
 	{
 		List<Image> icons = new ArrayList<>(2);
-		ImageIcon image16 = retrieveImage(baseName + "16.png");
+		ImageIcon image16 = IconMgr.getInstance().getPngIcon(baseName, 16);
 		if (image16 != null)
 		{
 			icons.add(image16.getImage());
 		}
-		ImageIcon image32 = retrieveImage(baseName + "32.png");
+		ImageIcon image32 = IconMgr.getInstance().getPngIcon(baseName, 32);
 		if (image32 != null)
 		{
 			icons.add(image32.getImage());
@@ -183,10 +182,20 @@ public class ResourceMgr
 
 	public static String getFormattedString(String key, Object ... values)
 	{
-		return MessageFormat.format(getString(key), values);
+		return getFormattedString(null, key, values);
+	}
+
+	public static String getFormattedString(ResourcePath bundlePath, String key, Object ... values)
+	{
+		return MessageFormat.format(getString(bundlePath, key, false), values);
 	}
 
 	public static String getDynamicString(String baseKey, String option, String dbid)
+	{
+		return getDynamicString(null, baseKey, option, dbid);
+	}
+
+	public static String getDynamicString(ResourcePath bundlePath, String baseKey, String option, String dbid)
 	{
 		if (baseKey == null || option == null) return null;
 
@@ -204,23 +213,23 @@ public class ResourceMgr
 			key = baseKey + "." + option.toLowerCase();
 		}
 
-		if (getResources().containsKey(key))
+		if (getResources(bundlePath).containsKey(key))
 		{
-			return getResources().getString(key);
+			return getResources(bundlePath).getString(key);
 		}
 		return null;
 	}
 
 	public static String getString(String aKey)
 	{
-		return getString(aKey, false);
+		return getString(null, aKey, false);
 	}
 
-	public static String getString(String aKey, boolean replaceModifiers)
+	public static String getString(ResourcePath path, String aKey, boolean replaceModifiers)
 	{
 		try
 		{
-			String value = getResources().getString(aKey);
+			String value = getResources(path).getString(aKey);
 			if (replaceModifiers)
 			{
 				return replaceModifierText(value);
@@ -280,24 +289,9 @@ public class ResourceMgr
 		return in;
 	}
 
-	/**
-	 * Returns an empty 16x16 gif image
-	 */
-	public static ImageIcon getBlankImage()
+	public static ImageIcon getIcon(String baseKey, boolean isPng)
 	{
-		return retrieveImage("blank16.gif");
-	}
-
-	public static ImageIcon getActionIcon(String baseKey, boolean isPng)
-	{
-		if (isPng)
-		{
-			return retrieveImage(baseKey + (useLargeIcons ? "32.png" : "16.png"));
-		}
-		else
-		{
-			return retrieveImage(baseKey + (useLargeIcons ? "32.gif" : "16.gif"));
-		}
+		return IconMgr.getInstance().getIcon(baseKey, isPng);
 	}
 
 	/**
@@ -305,15 +299,7 @@ public class ResourceMgr
 	 */
 	public static ImageIcon getGifIcon(String aKey)
 	{
-		return retrieveImage(aKey + (useLargeIcons ? "32.gif" : "16.gif"));
-	}
-
-	/**
-	 * Retrieves an image specified by the full name
-	 */
-	public static ImageIcon getImageByName(String fname)
-	{
-		return retrieveImage(fname);
+		return IconMgr.getInstance().getGifIcon(aKey);
 	}
 
 	/**
@@ -321,41 +307,12 @@ public class ResourceMgr
 	 */
 	public static ImageIcon getPicture(String aName)
 	{
-		return retrieveImage(aName + ".gif");
+		return IconMgr.getInstance().getPicture(aName);
 	}
 
 	public static ImageIcon getPngIcon(String aName)
 	{
-		return retrieveImage(aName + (useLargeIcons ? "32.png" : "16.png"));
-	}
-
-	/**
-	 * Retrieves a PNG image with no size specified
-	 * @param aName the base name of the icon
-	 * @return the ImageIcon
-	 */
-	public static ImageIcon getPng(String aName)
-	{
-		return retrieveImage(aName + ".png");
-	}
-
-	private static ImageIcon retrieveImage(String fname)
-	{
-		ImageIcon result = null;
-		URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + fname);
-		if (imageIconUrl != null)
-		{
-			result = new ImageIcon(imageIconUrl);
-		}
-		else
-		{
-			imageIconUrl = ResourceMgr.class.getClassLoader().getResource(fname);
-			if (imageIconUrl != null)
-			{
-				result = new ImageIcon(imageIconUrl);
-			}
-		}
-		return result;
+		return IconMgr.getInstance().getPngIcon(aName);
 	}
 
 	/**
@@ -363,10 +320,20 @@ public class ResourceMgr
 	 */
 	static ResourceBundle getResourceBundle(Locale l)
 	{
+		return getResourceBundle(l, null);
+	}
+
+	static ResourceBundle getResourceBundle(Locale l, String bundlePath)
+	{
+		if (bundlePath == null)
+		{
+			bundlePath = "language";
+		}
+
 		if (Settings.getInstance().isUTF8Language(l))
 		{
 			ResourceBundle.Control control = ResourceBundle.Control.getControl(ResourceBundle.Control.FORMAT_PROPERTIES);
-			String bundleName = "/" + control.toBundleName("language/wbstrings", l) + ".properties";
+			String bundleName = "/" + control.toBundleName(bundlePath + "/wbstrings", l) + ".properties";
 			InputStream in = null;
 			Reader r = null;
 
@@ -390,12 +357,17 @@ public class ResourceMgr
 				FileUtil.closeQuietely(in);
 			}
 		}
-		return ResourceBundle.getBundle("language/wbstrings", l);
+		return ResourceBundle.getBundle(bundlePath + "/wbstrings", l);
 	}
 
 	public static ResourceBundle getResources()
 	{
-		if (resources == null)
+		return getResources(null);
+	}
+
+	public static ResourceBundle getResources(ResourcePath bundlePath)
+	{
+		if (resources == null && bundlePath == null)
 		{
 			Locale l = Settings.getInstance().getLanguage();
 			resources = getResourceBundle(l);
@@ -411,6 +383,11 @@ public class ResourceMgr
 				Locale def = Locale.getDefault();
 				LogMgr.logInfo("ResourceMgr.getResources()", "Default locale is : " + def.toString());
 			}
+		}
+		else if (bundlePath != null)
+		{
+			Locale l = Settings.getInstance().getLanguage();
+			return getResourceBundle(l, bundlePath.getPath());
 		}
 		return resources;
   }

@@ -1405,7 +1405,7 @@ public class ConnectionEditorPanel
 		boolean hasFilter = (f1 + f2) > 0;
 		if (hasFilter)
 		{
-			filterLabel.setIcon(ResourceMgr.getPicture("tick"));
+			filterLabel.setIcon(ResourceMgr.getGifIcon("tick"));
 		}
 		else
 		{
@@ -1418,7 +1418,7 @@ public class ConnectionEditorPanel
 		boolean hasScript = (currentProfile == null ? false : currentProfile.hasConnectScript());
 		if (hasScript)
 		{
-			scriptLabel.setIcon(ResourceMgr.getPicture("tick"));
+			scriptLabel.setIcon(ResourceMgr.getGifIcon("tick"));
 		}
 		else
 		{
@@ -1431,7 +1431,7 @@ public class ConnectionEditorPanel
 		Properties props = (currentProfile == null ? null : currentProfile.getConnectionProperties());
 		if (props != null && props.size() > 0)
 		{
-			propLabel.setIcon(ResourceMgr.getPicture("tick"));
+			propLabel.setIcon(ResourceMgr.getGifIcon("tick"));
 		}
 		else
 		{

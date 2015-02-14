@@ -23,7 +23,9 @@
 package workbench.gui.settings;
 
 import java.awt.Image;
+
 import javax.swing.ImageIcon;
+
 import workbench.resource.ResourceMgr;
 
 /**
@@ -44,7 +46,7 @@ class LoadingImage
 	LoadingImage(String name)
 	{
 		imageName = name;
-		image = ResourceMgr.getPicture(name);
+		image = ResourceMgr.getGifIcon(name);
 	}
 
 	public void setName(String name)

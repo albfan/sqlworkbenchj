@@ -57,7 +57,7 @@ public class TabButtonComponent
 	private final JLabel label;
 	private final WbButton closeButton;
 	private static final Insets INSETS = new Insets(0, 0, 1, 4);
-	
+
 	public TabButtonComponent(String title, final WbTabbedPane tabPane, boolean showButton)
 	{
 		super(new GridBagLayout());
@@ -77,7 +77,7 @@ public class TabButtonComponent
 
 		label = new JLabel(title);
 
-		closeButton = new WbButton(ResourceMgr.getPng("closePanel"));
+		closeButton = new WbButton(ResourceMgr.getPngIcon("closePanel"));
 		closeButton.setBackground(getBackground());
 		Dimension d = new Dimension(12, 15);
 		closeButton.setPreferredSize(d);

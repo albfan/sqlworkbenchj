@@ -511,7 +511,7 @@ public class LookupValuePicker
 
 					if (rows >= maxRowNum) // some drivers return one row more than requested
 					{
-						rowCount.setIcon(ResourceMgr.getPng("alert"));
+						rowCount.setIcon(ResourceMgr.getPngIcon("alert"));
 					}
 					else
 					{

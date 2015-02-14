@@ -50,7 +50,7 @@ public class IgnoreErrorsAction
 		this.toggleButton = new JToggleButton(this);
 		this.toggleButton.setText(null);
 		this.toggleButton.setMargin(WbToolbarButton.MARGIN);
-		this.toggleButton.setIcon(ResourceMgr.getPicture("IgnoreError"));
+		this.toggleButton.setIcon(ResourceMgr.getGifIcon("IgnoreError"));
 		this.toggleButton.setSelected(isSwitchedOn());
 		return this.toggleButton;
 	}

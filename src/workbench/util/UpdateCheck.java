@@ -41,9 +41,10 @@ public class UpdateCheck
 {
 	private static final String TYPE_WB_VERSION = "version_check";
 	private static final String TYPE_JAVA_VERSION = "java_check";
-
-	private WbVersionReader versionReader;
 	public static final boolean DEBUG = Boolean.getBoolean("workbench.debug.versioncheck");
+	
+	private WbVersionReader versionReader;
+	private final boolean checkJava8 = false;
 
 	public void startUpdateCheck()
 	{
@@ -68,13 +69,14 @@ public class UpdateCheck
 
 	private void checkJavaVersion()
 	{
+		if (!checkJava8) return;
 		if (ResourceMgr.getBuildNumber().getMajorVersion() == 999) return; // don't check if started from IDE
 
-		VersionNumber minVersion = new VersionNumber(1,7);
+		VersionNumber minVersion = new VersionNumber(1,8);
 		VersionNumber currentVersion = VersionNumber.getJavaVersion();
 		if (!currentVersion.isNewerOrEqual(minVersion))
 		{
-			NotifierEvent event = new NotifierEvent("alert.png", ResourceMgr.getString("MsgOldJava"), this);
+			NotifierEvent event = new NotifierEvent("alert", ResourceMgr.getString("MsgOldJava"), this);
 			event.setTooltip(ResourceMgr.getString("MsgOldJavaDetail"));
 			event.setType(TYPE_JAVA_VERSION);
 			EventNotifier.getInstance().displayNotification(event);
@@ -133,12 +135,12 @@ public class UpdateCheck
 			if (DEBUG || update == UpdateVersion.stable)
 			{
 				LogMgr.logInfo("UpdateCheck.run()", "New stable version available");
-				event = new NotifierEvent("updates.png", ResourceMgr.getString("LblVersionNewStableAvailable"), this);
+				event = new NotifierEvent("updates", ResourceMgr.getString("LblVersionNewStableAvailable"), this);
 			}
 			else if (update == UpdateVersion.devBuild)
 			{
 				LogMgr.logInfo("UpdateCheck.run()", "New dev build available");
-				event = new NotifierEvent("updates.png", ResourceMgr.getString("LblVersionNewDevAvailable"), this);
+				event = new NotifierEvent("updates", ResourceMgr.getString("LblVersionNewDevAvailable"), this);
 			}
 			else
 			{

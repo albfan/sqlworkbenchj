@@ -1650,6 +1650,16 @@ public class Settings
 		this.setProperty("workbench.sql.historysize", aValue);
 	}
 
+	public int getIconSize()
+	{
+		return getIntProperty("workbench.gui.iconsize", 16);
+	}
+
+	public void setIconSize(int aValue)
+	{
+		this.setProperty("workbench.gui.iconsize", aValue);
+	}
+
 	public DelimiterDefinition getAlternateDelimiter(WbConnection con, DelimiterDefinition defaultDelim)
 	{
 		DelimiterDefinition delim = null;

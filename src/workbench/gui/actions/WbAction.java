@@ -74,7 +74,7 @@ public class WbAction
 	protected WbAction proxy;
 	private WbAction original;
 	private String iconKey;
-	private final List<WeakReference<JMenuItem>> createdItems = new LinkedList<WeakReference<JMenuItem>>();
+	private final List<WeakReference<JMenuItem>> createdItems = new LinkedList<>();
 	protected boolean isConfigurable = true;
 	private String descriptiveName;
 	private boolean isPngIcon;
@@ -573,7 +573,7 @@ public class WbAction
 			if (icon == null)
 			{
 				// now retrieve the icon and store it
-				icon = ResourceMgr.getActionIcon(iconKey, isPngIcon);
+				icon = ResourceMgr.getIcon(iconKey, isPngIcon);
 				if (icon != null)
 				{
 					this.putValue(key, icon);

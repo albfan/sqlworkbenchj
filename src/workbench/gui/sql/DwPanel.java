@@ -1078,7 +1078,7 @@ public class DwPanel
 	{
 		if (warningIcon == null)
 		{
-			warningIcon = ResourceMgr.getPng("alert");
+			warningIcon = ResourceMgr.getPngIcon("alert");
 		}
 		return warningIcon;
 	}

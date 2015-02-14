@@ -167,7 +167,7 @@ public class RunningJobIndicator
 			{
 				if (trayIcon == null)
 				{
-					trayIcon = new TrayIcon(ResourceMgr.getPng("workbench16").getImage());
+					trayIcon = new TrayIcon(ResourceMgr.getPngIcon("workbench").getImage());
 					trayIcon.addActionListener(this);
 					trayIcon.setToolTip(msg + " (" + StringUtil.getCurrentTimestamp() + ")");
 					tray.add(trayIcon);
