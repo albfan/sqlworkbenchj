@@ -69,15 +69,9 @@ public class MacroTreeCellRenderer
 	}
 
 	@Override
-	public Component getTreeCellRendererComponent(JTree tree,
-	                                              Object value,
-	                                              boolean sel,
-	                                              boolean expanded,
-	                                              boolean leaf,
-	                                              int row,
-	                                              boolean hasFocus)
+	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean isLeaf, int row, boolean hasFocus)
 	{
-		Component result = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+		Component result = super.getTreeCellRendererComponent(tree, value, isSelected, expanded, isLeaf, row, hasFocus);
 		if (value instanceof MacroTreeNode)
 		{
 			MacroTreeNode node = (MacroTreeNode)value;
