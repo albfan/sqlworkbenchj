@@ -63,7 +63,7 @@ public class WbFontPicker
 		this.resetButton.setEnabled(flag);
 		if (flag)
 		{
-			this.resetButton.setIcon(IconMgr.getInstance().getLabelGifIcon("Delete"));
+			this.resetButton.setIcon(IconMgr.getInstance().getLabelIcon("Delete"));
 			WbSwingUtilities.adjustButtonWidth(resetButton,22,22);
 		}
 	}

@@ -57,8 +57,8 @@ public class MacroTreeCellRenderer
 		super();
 		setIconTextGap(5);
 		setLeafIcon(IconMgr.getInstance().getLabelIcon("macro"));
-		setOpenIcon(IconMgr.getInstance().getLabelGifIcon("Tree"));
-		setClosedIcon(IconMgr.getInstance().getLabelGifIcon("Tree"));
+		setOpenIcon(IconMgr.getInstance().getLabelIcon("folder-open"));
+		setClosedIcon(IconMgr.getInstance().getLabelIcon("folder"));
 		moveToGroupBorder = new CompoundBorder(new LineBorder(Color.DARK_GRAY, 1), new EmptyBorder(1, 1, 1, 1));
 	}
 
