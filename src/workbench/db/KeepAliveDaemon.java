@@ -24,7 +24,9 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import workbench.log.LogMgr;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -48,7 +50,7 @@ public class KeepAliveDaemon
 	{
 		this.idleTime = idle;
 		this.dbConnection = con;
-		this.sqlScript = sql;
+		this.sqlScript = SqlUtil.trimSemicolon(sql);
 	}
 
 	public void startThread()
