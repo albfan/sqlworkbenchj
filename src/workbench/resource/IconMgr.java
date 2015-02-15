@@ -28,8 +28,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 
 import workbench.log.LogMgr;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.lnf.LnFHelper;
 
 /**
  *
@@ -37,14 +41,14 @@ import workbench.log.LogMgr;
  */
 public class IconMgr
 {
+	public static final String IMG_SAVE = "save";
+
 	private final RenderingHints scaleHint = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
 	private final Map<String, ImageIcon> iconCache = new HashMap<>();
-	private final int imageSize;
-	private final String defaultPngSuffix;
-	private final String defaultGifSuffix;
 	private final String filepath;
 
-	protected static class LazyInstanceHolder
+ 	protected static class LazyInstanceHolder
 	{
 		protected static final IconMgr instance = new IconMgr();
 	}
@@ -56,20 +60,17 @@ public class IconMgr
 
 	private IconMgr()
 	{
-		imageSize = Settings.getInstance().getIconSize();
 		filepath = ResourcePath.ICONS.getPath() + "/";
-		defaultGifSuffix = Integer.toString(imageSize) + ".gif";
-		defaultPngSuffix = Integer.toString(imageSize) + ".png";
 	}
 
 	public ImageIcon getGifIcon(String baseName)
 	{
-		return getIcon(baseName, false);
+		return getIcon(baseName, Settings.getInstance().getToolbarIconSize(), false);
 	}
 
 	public ImageIcon getPngIcon(String baseName)
 	{
-		return getIcon(baseName, true);
+		return getIcon(baseName.toLowerCase(), Settings.getInstance().getToolbarIconSize(), true);
 	}
 
 	public ImageIcon getPicture(String filename)
@@ -82,9 +83,64 @@ public class IconMgr
 		return retrieveImage(basename + Integer.toString(size) + ".png");
 	}
 
-	public ImageIcon getIcon(String baseName, boolean isPng)
+	public ImageIcon getToolbarIcon(String basename)
 	{
-		String fname = makeFilename(baseName, isPng);
+		int size = Settings.getInstance().getToolbarIconSize();
+		return getPngIcon(basename, size);
+	}
+
+	public int getSizeForMenuFont()
+	{
+		int fontHeight = LnFHelper.getMenuFontHeight();
+		return getSizeForFont(fontHeight);
+	}
+
+	public int getSizeForLabel()
+	{
+		int fontHeight = LnFHelper.getLabelFontHeight();
+		return getSizeForFont(fontHeight);
+	}
+
+	public int getSizeForFont(int fontHeight)
+	{
+		if (fontHeight < 24)
+		{
+			return 16;
+		}
+		else if (fontHeight < 32)
+		{
+			return 24;
+		}
+		return 32;
+	}
+
+	public int getSizeForComponentFont(JComponent comp)
+	{
+		int fontHeight = WbSwingUtilities.getFontHeight(comp);
+		return getSizeForFont(fontHeight);
+	}
+
+	public ImageIcon getLabelIcon(String basename)
+	{
+		int imgSize = getSizeForLabel();
+		return getIcon(basename.toLowerCase(), imgSize, true);
+	}
+
+	public ImageIcon getMenuGifIcon(String basename)
+	{
+		int imgSize = getSizeForMenuFont();
+		return getIcon(basename, imgSize, false);
+	}
+
+	public ImageIcon getLabelGifIcon(String basename)
+	{
+		int imgSize = getSizeForLabel();
+		return getIcon(basename, imgSize, false);
+	}
+
+	public ImageIcon getIcon(String baseName, int imageSize, boolean isPng)
+	{
+		String fname = makeFilename(baseName, imageSize, isPng);
 
 		ImageIcon result = null;
 		synchronized (this)
@@ -99,15 +155,15 @@ public class IconMgr
 					{
 						LogMgr.logDebug("IconMgr.getIcon()", "Icon " + fname + " not found. Scaling existing 16px image");
 						ImageIcon small = retrieveImage(makeBaseFilename(baseName, isPng));
-						result = scale(small);
+						result = scale(small, imageSize);
 					}
 					else
 					{
 						result = retrieveImage("empty.gif");
 					}
 				}
+				iconCache.put(fname, result);
 			}
-			iconCache.put(fname, result);
 		}
 		return result;
 	}
@@ -117,9 +173,11 @@ public class IconMgr
 		return basename + (isPng ? "16.png" : "16.gif");
 	}
 
-	private String makeFilename(String basename, boolean isPng)
+	private String makeFilename(String basename, int size, boolean isPng)
 	{
-		return basename + (isPng ? defaultPngSuffix : defaultGifSuffix);
+		String sz = Integer.toString(size);
+		if (isPng) basename = basename.toLowerCase();
+		return basename + (isPng ? sz + ".png" : sz + ".gif");
 	}
 
 	private ImageIcon retrieveImage(String fname)
@@ -132,8 +190,8 @@ public class IconMgr
 		}
 		return result;
 	}
-	
-	private ImageIcon scale(ImageIcon original)
+
+	private ImageIcon scale(ImageIcon original, int imageSize)
 	{
 		BufferedImage bi = new BufferedImage(imageSize, imageSize, BufferedImage.TRANSLUCENT);
 		Graphics2D g2d = null;

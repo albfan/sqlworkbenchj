@@ -58,8 +58,6 @@ public class ResourceMgr
 	public static final String TXT_OK = "LblOK";
 	public static final String TXT_CANCEL = "LblCancel";
 
-	public static final String IMG_SAVE = "Save";
-
 	public static final String MNU_TXT_WORKSPACE = "MnuTxtWorkspace";
 	public static final String MNU_TXT_FILE = "MnuTxtFile";
 	public static final String MNU_TXT_MACRO = "MnuTxtMacro";
@@ -287,32 +285,6 @@ public class ResourceMgr
 		InputStream in = ResourceMgr.class.getResourceAsStream("default.properties");
 
 		return in;
-	}
-
-	public static ImageIcon getIcon(String baseKey, boolean isPng)
-	{
-		return IconMgr.getInstance().getIcon(baseKey, isPng);
-	}
-
-	/**
-	 * Retrieves a GIF Image.
-	 */
-	public static ImageIcon getGifIcon(String aKey)
-	{
-		return IconMgr.getInstance().getGifIcon(aKey);
-	}
-
-	/**
-	 * Retrieves a GIF image with no size specified
-	 */
-	public static ImageIcon getPicture(String aName)
-	{
-		return IconMgr.getInstance().getPicture(aName);
-	}
-
-	public static ImageIcon getPngIcon(String aName)
-	{
-		return IconMgr.getInstance().getPngIcon(aName);
 	}
 
 	/**

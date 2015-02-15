@@ -1650,12 +1650,12 @@ public class Settings
 		this.setProperty("workbench.sql.historysize", aValue);
 	}
 
-	public int getIconSize()
+	public int getToolbarIconSize()
 	{
 		return getIntProperty("workbench.gui.iconsize", 16);
 	}
 
-	public void setIconSize(int aValue)
+	public void setToolbarIconSize(int aValue)
 	{
 		this.setProperty("workbench.gui.iconsize", aValue);
 	}
