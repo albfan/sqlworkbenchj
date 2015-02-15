@@ -45,6 +45,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.TableIdentifier;
@@ -495,7 +496,7 @@ public class TableSelectorPanel
     gridBagConstraints.insets = new Insets(3, 0, 2, 0);
     add(schemaLabel, gridBagConstraints);
 
-    editNewTableNameButton.setIcon(ResourceMgr.getGifIcon("Rename"));
+    editNewTableNameButton.setIcon(IconMgr.getInstance().getLabelGifIcon("Rename"));
     editNewTableNameButton.setToolTipText(ResourceMgr.getString("LblEditNewTableName"));
     editNewTableNameButton.setEnabled(false);
     editNewTableNameButton.setMaximumSize(new Dimension(22, 22));
@@ -508,7 +509,7 @@ public class TableSelectorPanel
     gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     add(editNewTableNameButton, gridBagConstraints);
 
-    refreshButton.setIcon(ResourceMgr.getGifIcon("Refresh"));
+    refreshButton.setIcon(IconMgr.getInstance().getLabelIcon("Refresh"));
     refreshButton.setToolTipText("");
     refreshButton.setEnabled(false);
     refreshButton.setMaximumSize(new Dimension(22, 22));

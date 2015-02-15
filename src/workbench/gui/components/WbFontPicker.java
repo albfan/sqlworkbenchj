@@ -32,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
@@ -62,7 +63,7 @@ public class WbFontPicker
 		this.resetButton.setEnabled(flag);
 		if (flag)
 		{
-			this.resetButton.setIcon(ResourceMgr.getGifIcon("Delete"));
+			this.resetButton.setIcon(IconMgr.getInstance().getLabelGifIcon("Delete"));
 			WbSwingUtilities.adjustButtonWidth(resetButton,22,22);
 		}
 	}

@@ -46,6 +46,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
 import workbench.interfaces.EventDisplay;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -197,7 +198,7 @@ public class ProfileSelectionDialog
 			public void run()
 			{
 				versionInfo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				versionInfo.setIcon(ResourceMgr.getPngIcon(event.getIconKey()));
+				versionInfo.setIcon(IconMgr.getInstance().getLabelIcon(event.getIconKey()));
 				versionInfo.setText("<html><b>" + event.getMessage() + "</b></html>");
 				String tip = event.getTooltip();
 				if (StringUtil.isNonEmpty(tip))

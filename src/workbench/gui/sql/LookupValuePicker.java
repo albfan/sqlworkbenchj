@@ -72,6 +72,7 @@ import workbench.interfaces.StatusBar;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -511,7 +512,7 @@ public class LookupValuePicker
 
 					if (rows >= maxRowNum) // some drivers return one row more than requested
 					{
-						rowCount.setIcon(ResourceMgr.getPngIcon("alert"));
+						rowCount.setIcon(IconMgr.getInstance().getLabelIcon("alert"));
 					}
 					else
 					{

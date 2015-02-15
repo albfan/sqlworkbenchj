@@ -51,7 +51,7 @@ public class CutAction extends WbAction
 		{
 			setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.SHIFT_MASK));
 		}
-		this.setIcon("Cut");
+		this.setPngIcon("cut");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

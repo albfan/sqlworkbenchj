@@ -84,7 +84,7 @@ public class OpenFileAction
 		mainWindow = window;
 		container = client;
 		this.initMenuDefinition("MnuTxtFileOpen", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("Open");
+		this.setPngIcon("Open");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		setCreateMenuSeparator(true);
 	}
@@ -136,7 +136,7 @@ public class OpenFileAction
 			WbFileChooser fc = new WbFileChooser(lastDir);
 			fc.setSettingsID("workbench.editor.file.opendialog");
 			fc.setMultiSelectionEnabled(true);
-			
+
 			JPanel acc = new JPanel(new GridBagLayout());
 			JComponent p = EncodingUtil.createEncodingPanel();
 			p.setBorder(new EmptyBorder(0, 5, 0, 0));

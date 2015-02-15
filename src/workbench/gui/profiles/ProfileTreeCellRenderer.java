@@ -31,7 +31,7 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import workbench.resource.ResourceMgr;
+import workbench.resource.IconMgr;
 
 /**
  * A tree cell renderer that can indicate a drop target.
@@ -49,9 +49,9 @@ public class ProfileTreeCellRenderer
 		super();
 		Color c = getBackgroundSelectionColor();
 		dropBorder = new LineBorder(c, 1);
-		setLeafIcon(ResourceMgr.getGifIcon("profile"));
-		setOpenIcon(ResourceMgr.getGifIcon("Tree"));
-		setClosedIcon(ResourceMgr.getGifIcon("Tree"));
+		setLeafIcon(IconMgr.getInstance().getLabelGifIcon("profile"));
+		setOpenIcon(IconMgr.getInstance().getLabelIcon("folder-open"));
+		setClosedIcon(IconMgr.getInstance().getLabelIcon("folder"));
 	}
 
 	public void setDropTargetItem(Object target)

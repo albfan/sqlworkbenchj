@@ -24,8 +24,9 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.gui.sql.DwPanel;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.DwPanel;
 
 /**
  *	@author  Thomas Kellerer
@@ -41,7 +42,7 @@ public class SelectKeyColumnsAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtSelectKeyColumns");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setIcon("key");
+		this.setPngIcon("key");
 		this.setEnabled(false);
 	}
 

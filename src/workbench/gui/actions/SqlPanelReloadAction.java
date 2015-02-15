@@ -44,7 +44,7 @@ public class SqlPanelReloadAction
 	{
 		initMenuDefinition("TxtReloadResult");
 		setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		setIcon("Refresh");
+		setPngIcon("refresh");
 		setClient(panel);
 	}
 

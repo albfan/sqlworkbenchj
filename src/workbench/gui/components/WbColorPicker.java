@@ -31,6 +31,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Serializable;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -39,8 +40,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
-import workbench.gui.WbSwingUtilities;
+
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -64,13 +68,14 @@ public class WbColorPicker
 		initComponents();
 		this.resetButton.setEnabled(showReset);
 		this.resetButton.setVisible(showReset);
+		int iconSize = IconMgr.getInstance().getSizeForLabel();
 		if (showReset)
 		{
-			this.resetButton.setIcon(ResourceMgr.getGifIcon("Delete"));
-			WbSwingUtilities.adjustButtonWidth(resetButton,22,22);
+	    resetButton.setIcon(IconMgr.getInstance().getLabelIcon("delete"));
+			WbSwingUtilities.adjustButtonWidth(resetButton, iconSize + 6, iconSize + 6);
 		}
 		this.defaultLabel.setVisible(false);
-		Dimension d = null;
+		Dimension d;
 		if (showReset)
 		{
 			d = resetButton.getPreferredSize();
@@ -83,7 +88,7 @@ public class WbColorPicker
 		d.width--;
 		this.sampleColor.setPreferredSize(d);
 		this.sampleBorder = new BevelBorder(BevelBorder.LOWERED);
-		WbSwingUtilities.adjustButtonWidth(selectColor,22,22);
+		WbSwingUtilities.adjustButtonWidth(selectColor,iconSize + 6, iconSize + 6);
 	}
 
 	/**

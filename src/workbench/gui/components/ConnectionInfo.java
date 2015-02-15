@@ -38,6 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ConnectionProfile;
@@ -262,7 +263,7 @@ public class ConnectionInfo
 		c.gridx = 0;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
-		ImageIcon png = ResourceMgr.getPngIcon(name);
+		ImageIcon png = IconMgr.getInstance().getLabelIcon(name);
 		iconLabel.setIcon(png);
 		add(iconLabel, c);
 	}

@@ -50,6 +50,10 @@ import workbench.util.StringUtil;
  */
 public class LnFHelper
 {
+	public static final String MENU_FONT_KEY = "MenuItem.font";
+	public static final String LABEL_FONT_KEY = "Label.font";
+	public static final String TREE_FONT_KEY = "Tree.font";
+
 	private boolean isWindowsClassic;
 
 	// Font properties that are automatically scaled by Java
@@ -68,11 +72,11 @@ public class LnFHelper
 		"ComboBox.font",
 		"EditorPane.font",
 		"FileChooser.font",
-		"Label.font",
+		LABEL_FONT_KEY,
 		"List.font",
 		"Menu.font",
 		"MenuBar.font",
-		"MenuItem.font",
+		MENU_FONT_KEY,
 		"OptionPane.font",
 		"Panel.font",
 		"PasswordField.font",
@@ -91,12 +95,31 @@ public class LnFHelper
 		"ToggleButton.font",
 		"ToolBar.font",
 		"ToolTip.font",
-		"Tree.font",
+		TREE_FONT_KEY,
 		"ViewPort.font");
 
 	public boolean isWindowsClassic()
 	{
 		return isWindowsClassic;
+	}
+
+	public static int getMenuFontHeight()
+	{
+		return getFontHeight(MENU_FONT_KEY);
+	}
+
+	public static int getLabelFontHeight()
+	{
+		return getFontHeight(LABEL_FONT_KEY);
+	}
+
+	private static int getFontHeight(String key)
+	{
+		UIDefaults def = UIManager.getDefaults();
+		double factor = Toolkit.getDefaultToolkit().getScreenResolution() / 72.0;
+		Font font = def.getFont(key);
+		if (font == null) return 18;
+		return (int)Math.ceil((double)font.getSize() / factor);
 	}
 
 	public void initUI()

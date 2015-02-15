@@ -144,7 +144,12 @@ public class DependencyNode
 	@Override
 	public String toString()
 	{
-		return this.table.getTableName() + " (" + this.fkName + ")";
+		String result = this.table.getTableName();
+		if (this.fkName != null)
+		{
+			result += " (" + this.fkName + ")";
+		}
+		return result;
 	}
 
 	public String debugString()

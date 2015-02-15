@@ -59,6 +59,7 @@ import javax.swing.border.MatteBorder;
 import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -151,23 +152,23 @@ public class PrintPreview
 
 		tb.addSeparator();
 
-		this.pageDown = new WbToolbarButton(ResourceMgr.getGifIcon("Down"));
+		this.pageDown = new WbToolbarButton(IconMgr.getInstance().getLabelGifIcon("Down"));
 		this.pageDown.addActionListener(this);
 		this.pageDown.setEnabled(false);
 		tb.add(this.pageDown);
 
-		this.pageUp = new WbToolbarButton(ResourceMgr.getGifIcon("Up"));
+		this.pageUp = new WbToolbarButton(IconMgr.getInstance().getLabelGifIcon("Up"));
 		this.pageUp.addActionListener(this);
 		this.pageUp.setEnabled(false);
 		tb.add(this.pageUp);
 
 
-		this.pageLeft = new WbToolbarButton(ResourceMgr.getGifIcon("Back"));
+		this.pageLeft = new WbToolbarButton(IconMgr.getInstance().getLabelGifIcon("Back"));
 		this.pageLeft.addActionListener(this);
 		this.pageLeft.setEnabled(false);
 		tb.add(this.pageLeft);
 
-		this.pageRight = new WbToolbarButton(ResourceMgr.getGifIcon("Forward"));
+		this.pageRight = new WbToolbarButton(IconMgr.getInstance().getLabelGifIcon("Forward"));
 		this.pageRight.addActionListener(this);
 		this.pageRight.setEnabled(false);
 		tb.add(this.pageRight);

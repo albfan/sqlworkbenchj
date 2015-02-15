@@ -43,7 +43,7 @@ public class UndoAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtUndo",KeyStroke.getKeyStroke(KeyEvent.VK_Z, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("Undo");
+		this.setPngIcon("Undo");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

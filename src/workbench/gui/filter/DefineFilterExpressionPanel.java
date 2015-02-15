@@ -47,6 +47,7 @@ import javax.swing.filechooser.FileFilter;
 
 import workbench.interfaces.ValidatingComponent;
 import workbench.interfaces.ValueProvider;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -81,7 +82,7 @@ public class DefineFilterExpressionPanel
 	implements ActionListener, ValidatingComponent
 {
 	private ValueProvider data;
-	private List<PanelEntry> panels = new ArrayList<PanelEntry>();
+	private List<PanelEntry> panels = new ArrayList<>();
 	private JButton addLineButton;
 	private JRadioButton andButton;
 	private JRadioButton orButton;
@@ -135,11 +136,11 @@ public class DefineFilterExpressionPanel
 		{
 			WbToolbar bar = new WbToolbar();
 			bar.setBorder(BorderFactory.createEtchedBorder());
-			saveButton.setIcon(ResourceMgr.getGifIcon(ResourceMgr.IMG_SAVE));
+			saveButton.setIcon(IconMgr.getInstance().getLabelIcon(IconMgr.IMG_SAVE));
 			saveButton.setMargin(ins);
 			saveButton.setToolTipText(ResourceMgr.getDescription("SaveFilter"));
 
-			loadButton.setIcon(ResourceMgr.getGifIcon("Open"));
+			loadButton.setIcon(IconMgr.getInstance().getLabelIcon("Open"));
 			loadButton.setMargin(new Insets(0,0,0,0));
 			loadButton.setToolTipText(ResourceMgr.getDescription("LoadFilter"));
 
@@ -361,7 +362,7 @@ public class DefineFilterExpressionPanel
 	private Dimension addExpressionPanel(ExpressionValue filter)
 	{
 		final ColumnExpressionPanel exp = new ColumnExpressionPanel(data, filter);
-		JButton b = new FlatButton(ResourceMgr.getGifIcon("Remove"));
+		JButton b = new FlatButton(IconMgr.getInstance().getLabelIcon("delete"));
 		b.setPreferredSize(new Dimension(21,21));
 		b.addActionListener(this);
 		JPanel p = new JPanel(new GridBagLayout());

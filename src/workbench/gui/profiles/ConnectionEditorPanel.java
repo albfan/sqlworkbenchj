@@ -57,6 +57,7 @@ import javax.swing.border.LineBorder;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -1405,7 +1406,7 @@ public class ConnectionEditorPanel
 		boolean hasFilter = (f1 + f2) > 0;
 		if (hasFilter)
 		{
-			filterLabel.setIcon(ResourceMgr.getGifIcon("tick"));
+			filterLabel.setIcon(IconMgr.getInstance().getLabelGifIcon("tick"));
 		}
 		else
 		{
@@ -1418,7 +1419,7 @@ public class ConnectionEditorPanel
 		boolean hasScript = (currentProfile == null ? false : currentProfile.hasConnectScript());
 		if (hasScript)
 		{
-			scriptLabel.setIcon(ResourceMgr.getGifIcon("tick"));
+			scriptLabel.setIcon(IconMgr.getInstance().getLabelGifIcon("tick"));
 		}
 		else
 		{
@@ -1431,7 +1432,7 @@ public class ConnectionEditorPanel
 		Properties props = (currentProfile == null ? null : currentProfile.getConnectionProperties());
 		if (props != null && props.size() > 0)
 		{
-			propLabel.setIcon(ResourceMgr.getGifIcon("tick"));
+			propLabel.setIcon(IconMgr.getInstance().getLabelGifIcon("tick"));
 		}
 		else
 		{

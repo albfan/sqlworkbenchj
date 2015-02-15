@@ -82,9 +82,10 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
-import workbench.sql.wbcommands.ObjectInfo;
 
 import workbench.storage.DataStore;
+
+import workbench.sql.wbcommands.ObjectInfo;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -260,7 +261,6 @@ public class TableDefinitionPanel
 		alterButton = new FlatButton(alterColumnsAction);
 
 		alterButton.showMessageOnEnable("MsgApplyDDLHint");
-		// alterColumnsAction.setButton(alterButton);
 		alterButton.setIcon(null);
 		alterButton.setUseDefaultMargin(true);
 		toolbar.add(alterButton, cc);

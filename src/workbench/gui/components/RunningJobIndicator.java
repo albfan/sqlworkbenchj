@@ -34,6 +34,7 @@ import javax.swing.JFrame;
 
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
@@ -167,7 +168,7 @@ public class RunningJobIndicator
 			{
 				if (trayIcon == null)
 				{
-					trayIcon = new TrayIcon(ResourceMgr.getPngIcon("workbench").getImage());
+					trayIcon = new TrayIcon(IconMgr.getInstance().getLabelIcon("workbench").getImage());
 					trayIcon.addActionListener(this);
 					trayIcon.setToolTip(msg + " (" + StringUtil.getCurrentTimestamp() + ")");
 					tray.add(trayIcon);

@@ -24,7 +24,9 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.KeyStroke;
+
 import workbench.gui.help.HelpManager;
 
 /**
@@ -37,13 +39,13 @@ public class ShowHelpAction
 	{
 		super();
 		initMenuDefinition("MnuTxtHelpContents",KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
-		setIcon("help");
+		setPngIcon("help");
 	}
-	
+
 	@Override
 	public synchronized void executeAction(ActionEvent e)
 	{
 		HelpManager.showHelpIndex();
 	}
-	
+
 }

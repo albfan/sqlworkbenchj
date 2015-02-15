@@ -65,6 +65,7 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -1078,7 +1079,7 @@ public class DwPanel
 	{
 		if (warningIcon == null)
 		{
-			warningIcon = ResourceMgr.getPngIcon("alert");
+			warningIcon = IconMgr.getInstance().getLabelIcon("alert");
 		}
 		return warningIcon;
 	}

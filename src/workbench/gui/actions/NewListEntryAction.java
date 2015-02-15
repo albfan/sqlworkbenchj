@@ -41,7 +41,7 @@ public class NewListEntryAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition(aKey);
-		this.setIcon("New");
+		this.setPngIcon("New");
 	}
 
 	public NewListEntryAction(FileActions aClient)

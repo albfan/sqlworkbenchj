@@ -32,7 +32,7 @@ import javax.swing.JTabbedPane;
 
 import workbench.interfaces.TextChangeListener;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
@@ -101,10 +101,10 @@ public class IconHandler
 		if (this.loadingIcon == null)
 		{
 			String name = Settings.getInstance().getProperty(PROP_LOADING_IMAGE, DEFAULT_BUSY_IMAGE);
-			this.loadingIcon = ResourceMgr.getPicture(name);
+			this.loadingIcon = IconMgr.getInstance().getLabelGifIcon(name);
 			if (loadingIcon == null)
 			{
-				this.loadingIcon = ResourceMgr.getPicture(DEFAULT_BUSY_IMAGE);
+				this.loadingIcon = IconMgr.getInstance().getLabelGifIcon(DEFAULT_BUSY_IMAGE);
 			}
 		}
 		return this.loadingIcon;
@@ -115,10 +115,10 @@ public class IconHandler
 		if (this.cancelIcon == null)
 		{
 			String name = Settings.getInstance().getProperty(PROP_CANCEL_IMAGE, DEFAULT_CANCEL_IMAGE);
-			cancelIcon = ResourceMgr.getPicture(name);
+			cancelIcon = IconMgr.getInstance().getLabelGifIcon(name);
 			if (cancelIcon == null)
 			{
-				cancelIcon = ResourceMgr.getPicture(DEFAULT_CANCEL_IMAGE);
+				cancelIcon = IconMgr.getInstance().getLabelGifIcon(DEFAULT_CANCEL_IMAGE);
 			}
 		}
 		return this.cancelIcon;
@@ -131,7 +131,7 @@ public class IconHandler
 		{
 			if (this.fileModifiedIcon == null)
 			{
-				this.fileModifiedIcon = ResourceMgr.getGifIcon("file-modified-icon");
+				this.fileModifiedIcon = IconMgr.getInstance().getLabelGifIcon("file-modified-icon");
 			}
 			icon = this.fileModifiedIcon;
 		}
@@ -139,7 +139,7 @@ public class IconHandler
 		{
 			if (this.fileIcon == null)
 			{
-				this.fileIcon = ResourceMgr.getGifIcon("file-icon");
+				this.fileIcon = IconMgr.getInstance().getLabelGifIcon("file-icon");
 			}
 			icon = this.fileIcon;
 		}

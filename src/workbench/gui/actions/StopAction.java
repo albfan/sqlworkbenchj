@@ -40,7 +40,7 @@ public class StopAction
 		super();
 		this.panel = aPanel;
 		this.initMenuDefinition("MnuTxtStopStmt");
-		this.setIcon("Stop");
+		this.setPngIcon("Stop");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(true);
 	}

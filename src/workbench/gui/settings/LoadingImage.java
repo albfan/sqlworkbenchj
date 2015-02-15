@@ -26,7 +26,7 @@ import java.awt.Image;
 
 import javax.swing.ImageIcon;
 
-import workbench.resource.ResourceMgr;
+import workbench.resource.IconMgr;
 
 /**
  * A container to store the name and the real image for the busy icon dropdown.
@@ -46,7 +46,7 @@ class LoadingImage
 	LoadingImage(String name)
 	{
 		imageName = name;
-		image = ResourceMgr.getGifIcon(name);
+		image = IconMgr.getInstance().getLabelGifIcon(name);
 	}
 
 	public void setName(String name)

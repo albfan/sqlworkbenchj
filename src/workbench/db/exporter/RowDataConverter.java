@@ -955,6 +955,7 @@ public abstract class RowDataConverter
 		WbFile f = new WbFile(of);
 
 		String extension = f.getExtension();
+		if (StringUtil.isEmptyString(extension)) return false;
 		return extension.equalsIgnoreCase(ext);
 	}
 

@@ -60,6 +60,7 @@ import workbench.interfaces.TableDeleteListener;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -331,7 +332,7 @@ public class TableDataPanel
 	{
 		if (this.loadingIcon == null)
 		{
-			this.loadingImage = ResourceMgr.getGifIcon("wait").getImage();
+			this.loadingImage = IconMgr.getInstance().getLabelIcon("wait").getImage();
 			this.loadingIcon = new ImageIcon(this.loadingImage);
 		}
 		return this.loadingIcon;

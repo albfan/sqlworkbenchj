@@ -32,7 +32,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import workbench.resource.ResourceMgr;
+import workbench.resource.IconMgr;
 
 import workbench.sql.macros.MacroDefinition;
 
@@ -56,9 +56,9 @@ public class MacroTreeCellRenderer
 	{
 		super();
 		setIconTextGap(5);
-		setLeafIcon(ResourceMgr.getPngIcon("macro"));
-		setOpenIcon(ResourceMgr.getGifIcon("Tree"));
-		setClosedIcon(ResourceMgr.getGifIcon("Tree"));
+		setLeafIcon(IconMgr.getInstance().getLabelIcon("macro"));
+		setOpenIcon(IconMgr.getInstance().getLabelGifIcon("Tree"));
+		setClosedIcon(IconMgr.getInstance().getLabelGifIcon("Tree"));
 		moveToGroupBorder = new CompoundBorder(new LineBorder(Color.DARK_GRAY, 1), new EmptyBorder(1, 1, 1, 1));
 	}
 
@@ -87,11 +87,11 @@ public class MacroTreeCellRenderer
 				MacroDefinition macro = (MacroDefinition) node.getDataObject();
 				if (macro.getExpandWhileTyping())
 				{
-					setIcon(ResourceMgr.getPngIcon("macro_expand"));
+					setIcon(IconMgr.getInstance().getLabelIcon("macro_expand"));
 				}
 				else
 				{
-					setIcon(ResourceMgr.getPngIcon("macro"));
+					setIcon(IconMgr.getInstance().getLabelIcon("macro"));
 				}
 				setToolTipText("<html><pre>" + HtmlUtil.escapeXML(StringUtil.getMaxSubstring(macro.getText(), 500)) + "</pre></html>");
 			}

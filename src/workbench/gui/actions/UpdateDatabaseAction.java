@@ -25,6 +25,7 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.interfaces.DbUpdater;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -40,7 +41,7 @@ public class UpdateDatabaseAction
 		super();
 		this.panel = aPanel;
 		this.initMenuDefinition("MnuTxtUpdateDatabase");
-		this.setIcon(ResourceMgr.IMG_SAVE);
+		this.setPngIcon(IconMgr.IMG_SAVE);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(true);
 		this.setEnabled(false);

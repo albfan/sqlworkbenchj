@@ -1,4 +1,4 @@
-/*
+	/*
  * AddMacroAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
@@ -52,7 +52,7 @@ public class AddMacroAction
 {
 	private EditorPanel client;
 	private final int macroClientId;
-	
+
 	public AddMacroAction(int macroId)
 	{
 		super();

@@ -45,6 +45,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.util.CollectionUtil;
@@ -512,7 +513,7 @@ public class MultiSelectComboBox<T extends Object>
 		private Dimension iconSize;
 		MultiSelectRenderer()
 		{
-			icon = ResourceMgr.getGifIcon("filter_go");
+			icon = IconMgr.getInstance().getLabelGifIcon("filter_go");
 			int width = icon.getIconWidth();
 			int height = icon.getIconHeight();
 			iconSize = new Dimension((int)(width * 1.5), (int)(height * 1.5));

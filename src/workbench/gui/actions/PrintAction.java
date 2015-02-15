@@ -23,16 +23,19 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import workbench.gui.components.WbTable;
+
 import workbench.print.TablePrinter;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.WbTable;
 
 /**
  *	@author  Thomas Kellerer
  */
-public class PrintAction 
+public class PrintAction
 		extends WbAction
 		implements TableModelListener
 {
@@ -44,7 +47,7 @@ public class PrintAction
 		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtPrint");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		this.setIcon("Print");
+		this.setPngIcon("print");
 		this.setEnabled(false);
 	}
 
@@ -54,7 +57,7 @@ public class PrintAction
 		TablePrinter printer = new TablePrinter(this.client);
 		printer.startPrint();
 	}
-	
+
 	@Override
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{

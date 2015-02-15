@@ -41,6 +41,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import workbench.interfaces.Validator;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -321,7 +322,7 @@ public class DriverEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(14, 6, 0, 7);
     add(statusLabel, gridBagConstraints);
 
-    detectDriverButton.setIcon(ResourceMgr.getPngIcon("magnifier"));
+    detectDriverButton.setIcon(IconMgr.getInstance().getLabelIcon("magnifier"));
     detectDriverButton.setToolTipText(ResourceMgr.getString("MsgDetectDriver")); // NOI18N
     detectDriverButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
     detectDriverButton.setMaximumSize(new java.awt.Dimension(22, 22));

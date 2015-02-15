@@ -64,6 +64,7 @@ import workbench.WbManager;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -420,7 +421,7 @@ public class DataPumper
 		this.isConnecting = true;
 
 		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.sourceProfile.getName() + " ...";
-		this.sourceProfileLabel.setIcon(ResourceMgr.getGifIcon("wait"));
+		this.sourceProfileLabel.setIcon(IconMgr.getInstance().getLabelIcon("wait"));
 		this.sourceProfileLabel.setText(label);
 
 		try
@@ -502,7 +503,7 @@ public class DataPumper
 
 		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.targetProfile.getName() + " ...";
 		this.targetProfileLabel.setText(label);
-		this.targetProfileLabel.setIcon(ResourceMgr.getGifIcon("wait"));
+		this.targetProfileLabel.setIcon(IconMgr.getInstance().getLabelIcon("wait"));
 
 		try
 		{
@@ -640,7 +641,7 @@ public class DataPumper
     gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     sourceProfilePanel.add(selectSourceButton, gridBagConstraints);
 
-    openFileButton.setIcon(ResourceMgr.getGifIcon("Open"));
+    openFileButton.setIcon(IconMgr.getInstance().getLabelIcon("Open"));
     openFileButton.setToolTipText(ResourceMgr.getString("d_DataPumperOpenFile"));
     openFileButton.setIconTextGap(0);
     openFileButton.setPreferredSize(new Dimension(22, 22));
@@ -1224,7 +1225,7 @@ public class DataPumper
 		{
 			String label = ResourceMgr.getString("MsgDisconnecting");
 			this.targetProfileLabel.setText(label);
-			this.targetProfileLabel.setIcon(ResourceMgr.getGifIcon("wait"));
+			this.targetProfileLabel.setIcon(IconMgr.getInstance().getLabelIcon("wait"));
 
 			this.targetTable.removeChangeListener();
 			this.targetConnection.disconnect();
@@ -1251,7 +1252,7 @@ public class DataPumper
 		{
 			String label = ResourceMgr.getString("MsgDisconnecting");
 			this.sourceProfileLabel.setText(label);
-			this.sourceProfileLabel.setIcon(ResourceMgr.getGifIcon("wait"));
+			this.sourceProfileLabel.setIcon(IconMgr.getInstance().getLabelIcon("wait"));
 
 			this.sourceTable.removeChangeListener();
 			this.sourceConnection.disconnect();

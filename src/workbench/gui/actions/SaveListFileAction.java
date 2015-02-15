@@ -26,12 +26,13 @@ import java.awt.event.ActionEvent;
 
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+import workbench.resource.IconMgr;
 
 /**
  *	@author  Thomas Kellerer
  */
-public class SaveListFileAction extends WbAction
+public class SaveListFileAction
+	extends WbAction
 {
 	private FileActions client;
 
@@ -45,7 +46,7 @@ public class SaveListFileAction extends WbAction
 		super();
 		this.client = aClient;
 		this.setMenuTextByKey(labelKey);
-		this.setIcon(ResourceMgr.IMG_SAVE);
+		this.setPngIcon(IconMgr.IMG_SAVE);
 	}
 
 	@Override

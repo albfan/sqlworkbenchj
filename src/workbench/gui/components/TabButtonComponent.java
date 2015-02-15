@@ -32,11 +32,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
@@ -77,9 +78,11 @@ public class TabButtonComponent
 
 		label = new JLabel(title);
 
-		closeButton = new WbButton(ResourceMgr.getPngIcon("closePanel"));
+		int imgSize = IconMgr.getInstance().getSizeForComponentFont(label);
+		ImageIcon img = IconMgr.getInstance().getPngIcon("closePanel", imgSize);
+		closeButton = new WbButton(img);
 		closeButton.setBackground(getBackground());
-		Dimension d = new Dimension(12, 15);
+		Dimension d = new Dimension(img.getIconWidth() + 4, img.getIconHeight() + 4);
 		closeButton.setPreferredSize(d);
 		closeButton.setMinimumSize(d);
 		closeButton.enableBasicRollover();

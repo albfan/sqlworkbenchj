@@ -35,6 +35,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -45,8 +46,10 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
 import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
 
 import workbench.gui.components.WbMenuItem;
@@ -563,35 +566,42 @@ public class WbAction
 	{
 		if (key.equals(Action.SMALL_ICON))
 		{
-			// No resource key assigned --> no icon
-			if (this.iconKey == null)
-			{
-				return null;
-			}
-
-			Object icon = super.getValue(key);
-			if (icon == null)
-			{
-				// now retrieve the icon and store it
-				icon = ResourceMgr.getIcon(iconKey, isPngIcon);
-				if (icon != null)
-				{
-					this.putValue(key, icon);
-				}
-				else
-				{
-					LogMgr.logWarning("WbAction.getValue()", "Could not retrieve icon with key: " + iconKey + " for actio " + this.getClass().getName());
-				}
-			}
-			return icon;
+			return getIcon(Action.SMALL_ICON, IconMgr.getInstance().getSizeForMenuFont());
+		}
+		else if (key.equals(Action.LARGE_ICON_KEY))
+		{
+			return getIcon(Action.LARGE_ICON_KEY, Settings.getInstance().getToolbarIconSize());
 		}
 		return super.getValue(key);
+	}
+
+
+	private ImageIcon getIcon(String key, int size)
+	{
+		// No resource key assigned --> no icon
+		if (this.iconKey == null)
+		{
+			return null;
+		}
+		ImageIcon icon = (ImageIcon)super.getValue(Action.SMALL_ICON);
+		if (icon != null) return icon;
+		icon = IconMgr.getInstance().getIcon(iconKey, size, isPngIcon);
+		if (icon != null)
+		{
+			this.putValue(key, icon);
+		}
+		else
+		{
+			LogMgr.logWarning("WbAction.getValue()", "Could not retrieve icon with key: " + iconKey + " for action " + this.getClass().getName());
+		}
+		return icon;
 	}
 
 	public void removeIcon()
 	{
 		iconKey = null;
 		putValue(Action.SMALL_ICON, null);
+		putValue(Action.LARGE_ICON_KEY, null);
 	}
 
 	@Override

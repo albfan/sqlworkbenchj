@@ -1481,6 +1481,19 @@ public class WbSwingUtilities
 		}
 	}
 
+	public static int getFontHeight(JComponent comp)
+	{
+		if (comp == null) return 0;
+		Font font = comp.getFont();
+		if (font == null) return 0;
+		FontMetrics fm = comp.getFontMetrics(font);
+		if (fm == null)
+		{
+			return 16;
+		}
+		return fm.getHeight();
+	}
+
 	public static void scale(Window toScale, double factorWidth, double factorHeight)
 	{
 		Dimension size = toScale.getSize();

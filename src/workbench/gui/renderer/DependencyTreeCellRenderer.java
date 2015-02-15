@@ -35,7 +35,7 @@ import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 
-import workbench.resource.ResourceMgr;
+import workbench.resource.IconMgr;
 
 import workbench.db.DependencyNode;
 
@@ -63,8 +63,8 @@ public class DependencyTreeCellRenderer
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setVerticalAlignment(SwingConstants.TOP);
 		this.setHorizontalAlignment(SwingConstants.LEFT);
-		this.fk = ResourceMgr.getGifIcon("key");
-		this.table = ResourceMgr.getGifIcon("table");
+		this.fk = IconMgr.getInstance().getLabelIcon("key");
+		this.table = IconMgr.getInstance().getLabelGifIcon("table");
 		this.selectedForeground = UIManager.getColor("Tree.selectionForeground");
 		this.selectedBackground = UIManager.getColor("Tree.selectionBackground");
 		this.unselectedForeground = UIManager.getColor("Tree.textForeground");
@@ -89,7 +89,12 @@ public class DependencyTreeCellRenderer
 		{
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
 			Object o = node.getUserObject();
-			if (o instanceof DependencyNode)
+			if (o == null)
+			{
+				this.setIcon(null);
+				this.setToolTipText(null);
+			}
+			else if (o instanceof DependencyNode)
 			{
 				this.setIcon(table);
 				DependencyNode depnode = (DependencyNode)o;
@@ -140,7 +145,7 @@ public class DependencyTreeCellRenderer
 	{
 		Color bColor;
 
-		if(this.isSelected)
+		if (this.isSelected)
 		{
 			bColor = this.selectedBackground;
 		}
@@ -156,7 +161,7 @@ public class DependencyTreeCellRenderer
 			imageOffset = getLabelStart();
 			Color oldColor = g.getColor();
 			g.setColor(bColor);
-			if(getComponentOrientation().isLeftToRight())
+			if (getComponentOrientation().isLeftToRight())
 			{
 				g.fillRect(imageOffset, 0, getWidth() - 1 - imageOffset,
 				getHeight());
@@ -174,7 +179,7 @@ public class DependencyTreeCellRenderer
 	private int getLabelStart()
 	{
 		Icon currentI = getIcon();
-		if(currentI != null && getText() != null)
+		if (currentI != null && getText() != null)
 		{
 			return currentI.getIconWidth() + Math.max(0, getIconTextGap() - 1);
 		}

@@ -23,6 +23,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import workbench.interfaces.Undoable;
 import workbench.resource.ResourceMgr;
 
@@ -38,7 +39,7 @@ public class RedoAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtRedo");
-		this.setIcon("Redo");
+		this.setPngIcon("redo");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

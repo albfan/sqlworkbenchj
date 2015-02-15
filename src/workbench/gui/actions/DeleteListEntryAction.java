@@ -24,6 +24,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.FileActions;
@@ -49,7 +50,7 @@ public class DeleteListEntryAction extends WbAction
 		isConfigurable = false;
 		setMenuTextByKey(aKey);
 		setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
-		setIcon("Delete");
+		setPngIcon("delete");
 	}
 
 	@Override

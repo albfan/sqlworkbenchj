@@ -34,6 +34,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -295,7 +296,7 @@ public class ClasspathEditor
     gridBagConstraints.weighty = 1.0;
     add(jScrollPane1, gridBagConstraints);
 
-    btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/workbench/resource/images/Open16.gif"))); // NOI18N
+    btnAdd.setIcon(IconMgr.getInstance().getLabelIcon("Open"));
     btnAdd.setToolTipText(ResourceMgr.getString("d_LblDriverLibrary")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -305,7 +306,7 @@ public class ClasspathEditor
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 0);
     add(btnAdd, gridBagConstraints);
 
-    btnRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/workbench/resource/images/Remove16.gif"))); // NOI18N
+    btnRemove.setIcon(IconMgr.getInstance().getLabelIcon("delete"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -314,7 +315,7 @@ public class ClasspathEditor
     gridBagConstraints.insets = new java.awt.Insets(4, 8, 0, 0);
     add(btnRemove, gridBagConstraints);
 
-    btnUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/workbench/resource/images/Up16.gif"))); // NOI18N
+    btnUp.setIcon(IconMgr.getInstance().getLabelGifIcon("Up"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
@@ -323,7 +324,7 @@ public class ClasspathEditor
     gridBagConstraints.insets = new java.awt.Insets(16, 8, 0, 0);
     add(btnUp, gridBagConstraints);
 
-    btnDown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/workbench/resource/images/Down16.gif"))); // NOI18N
+    btnDown.setIcon(IconMgr.getInstance().getLabelGifIcon("Down"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;

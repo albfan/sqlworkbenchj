@@ -75,7 +75,7 @@
     <Component class="javax.swing.JButton" name="editNewTableNameButton">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getGifIcon(&quot;Rename&quot;)" type="code"/>
+          <Connection code="IconMgr.getInstance().getLabelGifIcon(&quot;Rename&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getString(&quot;LblEditNewTableName&quot;)" type="code"/>
@@ -103,7 +103,7 @@
     <Component class="javax.swing.JButton" name="refreshButton">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getGifIcon(&quot;Refresh&quot;)" type="code"/>
+          <Connection code="IconMgr.getInstance().getLabelIcon(&quot;Refresh&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" value=""/>
         <Property name="enabled" type="boolean" value="false"/>

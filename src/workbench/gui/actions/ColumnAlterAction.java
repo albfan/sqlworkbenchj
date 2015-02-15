@@ -68,7 +68,6 @@ public class ColumnAlterAction
 		super();
 		this.definition = defTable;
 		this.initMenuDefinition("MnuTxtRunAlter");
-		this.setIcon("runAlter");
 		this.setEnabled(false);
 		definition.addTableModelListener(this);
 	}

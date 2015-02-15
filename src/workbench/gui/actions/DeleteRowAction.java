@@ -44,7 +44,7 @@ public class DeleteRowAction
 		this.client = aClient;
 		this.setEnabled(false);
 		this.initMenuDefinition("MnuTxtDeleteRow");
-		this.setIcon("Delete");
+		this.setPngIcon("delete");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 

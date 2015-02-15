@@ -30,7 +30,9 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.storage.RowData;
 
 /**
@@ -43,9 +45,8 @@ import workbench.storage.RowData;
 public class RowStatusRenderer
 	extends DefaultTableCellRenderer
 {
-	private static final ImageIcon STATUS_MODIFIED_ICON = ResourceMgr.getPicture("modifiedrow");
-	private static final ImageIcon STATUS_NOT_MODIFIED_ICON = ResourceMgr.getPicture("blank");
-	private static final ImageIcon STATUS_NEW_ICON = ResourceMgr.getPicture("newrow");
+	private final ImageIcon modifiedIcon = IconMgr.getInstance().getLabelGifIcon("modifiedrow");
+	private final ImageIcon newIcon = IconMgr.getInstance().getLabelGifIcon("newrow");
 
 	private final String newTip = ResourceMgr.getString("TxtRowNew");
 	private final String modifiedTip = ResourceMgr.getString("TxtRowModified");
@@ -54,7 +55,7 @@ public class RowStatusRenderer
 	public RowStatusRenderer()
 	{
 		super();
-		Dimension dim = new Dimension(18, 18);
+		Dimension dim = new Dimension(modifiedIcon.getIconWidth() + 2, newIcon.getIconHeight() + 2);
 		this.setMaximumSize(dim);
 		this.setMinimumSize(dim);
 		this.setPreferredSize(dim);
@@ -72,21 +73,21 @@ public class RowStatusRenderer
 			switch (status)
 			{
 				case RowData.NEW:
-					this.setIcon(STATUS_NEW_ICON);
+					this.setIcon(newIcon);
 					this.setToolTipText(newTip);
 					break;
 				case RowData.MODIFIED:
-					this.setIcon(STATUS_MODIFIED_ICON);
+					this.setIcon(modifiedIcon);
 					this.setToolTipText(modifiedTip);
 					break;
 				default:
-					this.setIcon(STATUS_NOT_MODIFIED_ICON);
+					this.setIcon(null);
 					this.setToolTipText(notModifiedTip);
 			}
 		}
 		catch (Exception e)
 		{
-			this.setIcon(STATUS_NOT_MODIFIED_ICON);
+			this.setIcon(null);
 			this.setToolTipText(notModifiedTip);
 		}
 		return this;

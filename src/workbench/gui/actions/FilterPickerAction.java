@@ -36,6 +36,7 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 
 import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
@@ -125,7 +126,7 @@ public class FilterPickerAction
     JButton result = null;
 		if (this.dropDownButton == null || createNew)
 		{
-      DropDownButton b = new DropDownButton(ResourceMgr.getGifIcon("dropdown"));
+			DropDownButton b = new DropDownButton(IconMgr.getInstance().getGifIcon("dropdown"));
 			b.setAction(this);
 			b.setText(null);
 			b.setMnemonic(0);

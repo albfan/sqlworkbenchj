@@ -23,6 +23,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import workbench.gui.help.HelpManager;
 
 /**
@@ -35,9 +36,9 @@ public class ShowManualAction
 	{
 		super();
 		initMenuDefinition("MnuTxtHelpManual");
-		setIcon("pdf");
+		setPngIcon("pdf");
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
