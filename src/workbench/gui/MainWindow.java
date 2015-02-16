@@ -2620,13 +2620,14 @@ public class MainWindow
 			showDbmsManual = new ShowDbmsManualAction();
 		}
 		result.add(showDbmsManual);
-		result.add(HelpContactAction.getInstance());
+		result.add(new HelpContactAction(this));
 		result.add(WhatsNewAction.getInstance());
 		result.addSeparator();
 
 		result.add(ViewLogfileAction.getInstance());
-		new VersionCheckAction().addToMenu(result);
-		new AboutAction().addToMenu(result);
+		result.add(new VersionCheckAction());
+		result.add(new AboutAction(this));
+
 		return result;
 	}
 

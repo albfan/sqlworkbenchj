@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.report.TagWriter;
+import workbench.log.LogMgr;
 
 import workbench.util.StringUtil;
 
@@ -130,6 +131,7 @@ public class ConnectionInfoBuilder
 		}
 		catch (SQLException e)
 		{
+			LogMgr.logError("ConnectionInfoBuilder.getDisplay()", "Could not retrieve display", e);
 			return e.getMessage();
 		}
 	}

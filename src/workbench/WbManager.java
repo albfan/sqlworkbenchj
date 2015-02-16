@@ -221,7 +221,8 @@ public final class WbManager
 
 		for (MainWindow w : mainWindows)
 		{
-			if (w != null && w.hasFocus()) return w;
+			if (w == null) continue;
+			if (w.hasFocus() || w.isActive()) return w;
 		}
 
 		return null;

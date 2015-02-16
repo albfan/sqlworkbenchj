@@ -30,6 +30,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -47,6 +48,7 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import workbench.gui.MainWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -352,7 +354,13 @@ public class WbAboutDialog
 		{
 			if (evt.getClickCount() == 1)
 			{
-				HelpContactAction.sendEmail();
+				Window owner = this.getOwner();
+				MainWindow mainWin = null;
+				if (owner instanceof MainWindow)
+				{
+					mainWin = (MainWindow)owner;
+				}
+				HelpContactAction.sendEmail(mainWin);
 			}
 		}
 		catch (Exception e)

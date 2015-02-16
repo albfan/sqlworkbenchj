@@ -40,16 +40,12 @@ import workbench.util.ExceptionUtil;
 public class HelpContactAction
 	extends WbAction
 {
-	private static HelpContactAction instance = new HelpContactAction();
-
-	public static HelpContactAction getInstance()
-	{
-		return instance;
-	}
-
-	private HelpContactAction()
+	private MainWindow mainWindow;
+	
+	public HelpContactAction(MainWindow parent)
 	{
 		super();
+		mainWindow = parent;
 		initMenuDefinition("MnuTxtHelpContact");
 		removeIcon();
 	}
@@ -59,20 +55,25 @@ public class HelpContactAction
 	{
 		sendEmail();
 	}
-	
-	public synchronized static void sendEmail()
+
+	private void sendEmail()
+	{
+		sendEmail(mainWindow);
+	}
+
+	public static void sendEmail(MainWindow mainWin)
 	{
 		WbConnection currentConnection = null;
-		JFrame frame = WbManager.getInstance().getCurrentWindow();
-		if (frame instanceof MainWindow)
+
+		if (mainWin != null)
 		{
-			MainWindow win = (MainWindow)frame;
-			MainPanel panel = win.getCurrentPanel();
+			MainPanel panel = mainWin.getCurrentPanel();
 			if (panel != null)
 			{
 				currentConnection = panel.getConnection();
 			}
 		}
+
 		try
 		{
 			BrowserLauncher.openEmail("support@sql-workbench.net", currentConnection);
@@ -82,6 +83,5 @@ public class HelpContactAction
 			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
 		}
 	}
-
 
 }

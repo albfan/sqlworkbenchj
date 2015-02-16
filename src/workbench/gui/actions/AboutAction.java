@@ -23,7 +23,12 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.WbManager;
+
+import javax.swing.JDialog;
+
+import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.dialogs.WbAboutDialog;
 
 /**
  * Action to display program version information
@@ -33,9 +38,12 @@ import workbench.WbManager;
 public class AboutAction
 	extends WbAction
 {
-	public AboutAction()
+	private MainWindow mainWindow;
+	
+	public AboutAction(MainWindow parent)
 	{
 		super();
+		this.mainWindow = parent;
 		initMenuDefinition("MnuTxtAbout");
 		removeIcon();
 	}
@@ -43,6 +51,9 @@ public class AboutAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		WbManager.getInstance().showDialog("workbench.gui.dialogs.WbAboutDialog");
+		WbAboutDialog about = new WbAboutDialog(mainWindow);
+		about.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		WbSwingUtilities.center(about, mainWindow);
+		about.setVisible(true);
 	}
 }
