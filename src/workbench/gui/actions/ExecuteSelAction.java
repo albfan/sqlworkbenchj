@@ -29,12 +29,13 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.KeyStroke;
 
-import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.TextSelectionListener;
 import workbench.resource.GuiSettings;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.sql.SqlPanel;
 
 /**
  * Run the selected text as a script in the current SQL Panel
@@ -49,13 +50,13 @@ public class ExecuteSelAction
 	private SqlPanel target;
 	private boolean isEnabled;
 	private boolean checkSelection;
-	
+
 	public ExecuteSelAction(SqlPanel aPanel)
 	{
 		super();
 		this.target = aPanel;
 		this.initMenuDefinition("MnuTxtExecuteSel", KeyStroke.getKeyStroke(KeyEvent.VK_E, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("ExecuteSel");
+		this.setPngIcon("execute_sel");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
 		this.setEnabled(false);
@@ -112,7 +113,7 @@ public class ExecuteSelAction
 	{
 		if (target == null) return;
 		if (target.getEditor() == null) return;
-		
+
 		if (GuiSettings.PROPERTY_EXEC_SEL_ONLY.equals(evt.getPropertyName()))
 		{
 			boolean wasChecking = checkSelection;

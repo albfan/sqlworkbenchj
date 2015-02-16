@@ -490,7 +490,7 @@ public class EditorPanel
 	public final void addPopupMenuItem(WbAction anAction, boolean withSeparator)
 	{
 		if (popup == null) return;
-		popup.addAction(anAction, withSeparator);
+		popup.add(anAction.getMenuItem(), withSeparator);
 		this.addKeyBinding(anAction);
 	}
 

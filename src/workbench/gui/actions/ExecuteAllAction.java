@@ -28,9 +28,10 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import workbench.gui.sql.SqlPanel;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.SqlPanel;
 
 /**
  * Run all statements in the current SQL Panel
@@ -46,7 +47,7 @@ public class ExecuteAllAction extends WbAction
 		super();
 		this.client = aPanel;
 		this.initMenuDefinition("MnuTxtExecuteAll", KeyStroke.getKeyStroke(KeyEvent.VK_E, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setIcon("ExecuteAll");
+		this.setPngIcon("execute_all");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
 	}

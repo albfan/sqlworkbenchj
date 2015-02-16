@@ -583,7 +583,7 @@ public class WbAction
 		{
 			return null;
 		}
-		ImageIcon icon = (ImageIcon)super.getValue(Action.SMALL_ICON);
+		ImageIcon icon = (ImageIcon)super.getValue(key);
 		if (icon != null) return icon;
 		icon = IconMgr.getInstance().getIcon(iconKey, size, isPngIcon);
 		if (icon != null)

@@ -30,6 +30,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -126,11 +127,14 @@ public class FilterPickerAction
     JButton result = null;
 		if (this.dropDownButton == null || createNew)
 		{
-			DropDownButton b = new DropDownButton(IconMgr.getInstance().getGifIcon("dropdown"));
+			ImageIcon icon = IconMgr.getInstance().getGifIcon("dropdown");
+			DropDownButton b = new DropDownButton(icon);
 			b.setAction(this);
 			b.setText(null);
 			b.setMnemonic(0);
-			Dimension d = new Dimension(12,24);
+			int w = icon.getIconWidth();
+			int h = icon.getIconHeight();
+			Dimension d = new Dimension(w, h);
 			b.setMaximumSize(d);
 			b.setPreferredSize(d);
 			b.setMinimumSize(d);

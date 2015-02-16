@@ -43,7 +43,7 @@ public class FindAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtFind", KeyStroke.getKeyStroke(KeyEvent.VK_F, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("Find");
+		this.setPngIcon("find");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setCreateToolbarSeparator(true);
 		this.setDescriptiveName(ResourceMgr.getString("TxtEdPrefix") + " " + getMenuLabel());

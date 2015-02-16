@@ -28,15 +28,17 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.SqlPanel;
 
 /**
  * Run all statements in the current SQL Panel
  * @see workbench.gui.sql.SqlPanel#runCurrentStatement()
  *	@author  Thomas Kellerer
  */
-public class ExecuteCurrentAction extends WbAction
+public class ExecuteCurrentAction
+	extends WbAction
 {
 	private SqlPanel target;
 
@@ -45,7 +47,7 @@ public class ExecuteCurrentAction extends WbAction
 		super();
 		this.target = aPanel;
 		this.initMenuDefinition("MnuTxtExecuteCurrent", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
-		this.setIcon("ExecuteCurrent");
+		this.setPngIcon("execute_current");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
 	}

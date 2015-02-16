@@ -46,7 +46,7 @@ public class RollbackAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtRollback", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setIcon("Rollback");
+		this.setPngIcon("Rollback");
 		this.setEnabled(false);
 	}
 

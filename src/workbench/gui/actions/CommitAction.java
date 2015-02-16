@@ -47,7 +47,7 @@ public class CommitAction extends WbAction
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.ALT_MASK);
 		this.initMenuDefinition("MnuTxtCommit",key);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setIcon("Commit");
+		this.setPngIcon("Commit");
 		this.setEnabled(false);
 	}
 

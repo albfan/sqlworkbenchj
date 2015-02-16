@@ -33,6 +33,8 @@ import javax.swing.border.Border;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import workbench.gui.WbSwingUtilities;
+
 /**
  * @author Thomas Kellerer
  */
@@ -60,6 +62,8 @@ public class DropDownButton
 	{
 		setFocusable(false);
 		addActionListener(this);
+		setMargin(WbSwingUtilities.EMPTY_INSETS);
+		setBorderPainted(false);
 		enableToolbarRollover();
 	}
 
