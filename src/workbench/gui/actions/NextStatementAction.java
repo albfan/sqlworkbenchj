@@ -41,7 +41,7 @@ public class NextStatementAction extends WbAction
 		super();
 		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtNextStatement", PlatformShortcuts.getDefaultNextStatement());
-		this.setIcon("Forward");
+		this.setPngIcon("Forward");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(false);
 		this.setCreateToolbarSeparator(false);

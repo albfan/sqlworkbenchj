@@ -23,11 +23,14 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.components.WbTable;
 import workbench.gui.filter.DefineFilterExpressionPanel;
-import workbench.resource.ResourceMgr;
 
 /**
  *	Filter data from a WbTable
@@ -44,7 +47,7 @@ public class FilterDataAction
 		super();
 		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtFilter");
-		this.setIcon("filter");
+		this.setPngIcon("filter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 		this.setEnabled(false);

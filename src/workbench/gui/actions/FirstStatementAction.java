@@ -41,7 +41,7 @@ public class FirstStatementAction extends WbAction
 		super();
 		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtFirstStatement");
-		this.setIcon("First");
+		this.setPngIcon("First");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(true);
 		this.setCreateToolbarSeparator(true);

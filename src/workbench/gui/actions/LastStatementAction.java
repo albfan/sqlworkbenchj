@@ -41,7 +41,7 @@ public class LastStatementAction extends WbAction
 		super();
 		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtLastStatement");
-		this.setIcon("Last");
+		this.setPngIcon("Last");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(false);
 		this.setCreateToolbarSeparator(false);

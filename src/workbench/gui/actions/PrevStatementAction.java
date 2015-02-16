@@ -42,7 +42,7 @@ public class PrevStatementAction
 		super();
 		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtPrevStatement", PlatformShortcuts.getDefaultPrevStatement());
-		this.setIcon("Back");
+		this.setPngIcon("Back");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(false);
 		this.setCreateToolbarSeparator(false);

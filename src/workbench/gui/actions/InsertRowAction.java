@@ -41,7 +41,7 @@ public class InsertRowAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtInsertRow");
-		this.setIcon("RowInsertAfter");
+		this.setPngIcon("insert_row");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setEnabled(false);
 	}

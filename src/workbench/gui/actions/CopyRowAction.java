@@ -41,7 +41,7 @@ public class CopyRowAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCopyRow");
-		this.setIcon("CopyRow");
+		this.setPngIcon("copy_row");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setEnabled(false);
 	}
@@ -51,10 +51,10 @@ public class CopyRowAction extends WbAction
 	{
 		this.client.duplicateRow();
 	}
-	
+
 	public void setClient(DbData db)
 	{
 		this.client = db;
-	}	
-	
+	}
+
 }

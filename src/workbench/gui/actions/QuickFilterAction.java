@@ -23,24 +23,25 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import workbench.interfaces.QuickFilter;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Filter data from a WbTable 
+ *	Filter data from a WbTable
  *	@author  Thomas Kellerer
  */
-public class QuickFilterAction 
+public class QuickFilterAction
 		extends WbAction
 {
 	private QuickFilter client;
-	
+
 	public QuickFilterAction(QuickFilter filterGui)
 	{
 		super();
 		this.client = filterGui;
 		this.initMenuDefinition("MnuTxtQuickFilter");
-		this.setIcon("filter");
+		this.setPngIcon("filter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 	}

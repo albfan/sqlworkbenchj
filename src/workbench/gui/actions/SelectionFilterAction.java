@@ -23,16 +23,19 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import workbench.gui.components.WbTable;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.WbTable;
 import workbench.gui.filter.SelectionFilter;
 
 /**
  *	Filters data from a WbTable based on the currently selected column value.
- * 
+ *
  *	@author  Thomas Kellerer
  */
 public class SelectionFilterAction
@@ -45,7 +48,7 @@ public class SelectionFilterAction
 	{
 		super();
 		this.initMenuDefinition("MnuTxtColFilter");
-		this.setIcon("colfilter");
+		this.setPngIcon("colfilter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 		this.setEnabled(false);
