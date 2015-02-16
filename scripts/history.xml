@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-02-01">
-    <entry dev-build="2" type="fix">For Oracle, the partitions of a materialized view are now shown in the source code</entry>
+    <entry dev-build="2" type="enh">For Oracle, the partitions of a materialized view are now shown in the source code</entry>
     <entry dev-build="2" type="enh">For tables without a primary key, unique indexes that contain nullable columns are no longer considered when checking the update table</entry>
     <entry dev-build="1" type="enh">WbExport now supports the parameter -decimalDigits to control the (fixed) number of digits written to the export file</entry>
     <entry dev-build="1" type="enh">For Vertica tables and views from the schema "v_internal" are now show in the DbExplorer (contributed by Tatiana Saltykova)</entry>
