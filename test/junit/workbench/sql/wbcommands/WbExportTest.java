@@ -1360,6 +1360,28 @@ public class WbExportTest
 	}
 
 	@Test
+	public void testMultipleXlsX()
+		throws Exception
+	{
+		WbFile dir = new WbFile(util.getBaseDir());
+
+		StatementRunnerResult result = exportCmd.execute(
+			"wbexport -type=xlsx " +
+			"-outputDir='" + util.getBaseDir() + "' " +
+			"-sourceTable=person,junit_test ");
+
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File f1 = new File(dir, "person.xlsx");
+		assertTrue(f1.exists());
+		assertTrue(f1.length() > 1000);
+
+		File f2 = new File(dir, "junit_test.xlsx");
+		assertTrue(f2.exists());
+		assertTrue(f2.length() > 1000);
+	}
+
+
+	@Test
 	public void testEmptyResult()
 		throws Exception
 	{
