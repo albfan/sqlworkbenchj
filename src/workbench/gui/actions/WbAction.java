@@ -566,7 +566,7 @@ public class WbAction
 	{
 		if (key.equals(Action.SMALL_ICON))
 		{
-			return getIcon(Action.SMALL_ICON, IconMgr.getInstance().getSizeForMenuFont());
+			return getIcon(Action.SMALL_ICON, IconMgr.getInstance().getSizeForMenuItem());
 		}
 		else if (key.equals(Action.LARGE_ICON_KEY))
 		{

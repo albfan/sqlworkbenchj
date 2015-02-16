@@ -63,44 +63,89 @@ public class IconMgr
 		filepath = ResourcePath.ICONS.getPath() + "/";
 	}
 
+	/**
+	 * Return a GIF icon in a size suitable for the toolbar.
+	 *
+	 * @param basename the basename of the GIF icon
+	 * @return the icon
+	 * @see Settings#getToolbarIconSize()
+	 */
 	public ImageIcon getGifIcon(String baseName)
 	{
 		return getIcon(baseName, Settings.getInstance().getToolbarIconSize(), false);
 	}
 
-	public ImageIcon getPngIcon(String baseName)
-	{
-		return getIcon(baseName.toLowerCase(), Settings.getInstance().getToolbarIconSize(), true);
-	}
-
+	/**
+	 * Get a picture based on the complete filename name.
+	 *
+	 * This method will not try to detect the correct image size for filename,
+	 * but takes it "as is".
+	 *
+	 * @param filename  the complete filename of the picture
+	 * @return
+	 */
 	public ImageIcon getPicture(String filename)
 	{
 		return retrieveImage(filename);
 	}
 
+	/**
+	 * Return a PNG icon in the requested size.
+	 *
+	 * @param basename the basename of the GIF icon
+	 * @param size     the icon size in pixel (16,24,32)
+	 * @return the icon
+	 */
 	public ImageIcon getPngIcon(String basename, int size)
 	{
 		return retrieveImage(basename + Integer.toString(size) + ".png");
 	}
 
+	/**
+	 * Return a PNG icon in a size suitable for the toolbar.
+	 *
+	 * @param basename the basename of the GIF icon
+	 * @return the icon
+	 * @see Settings#getToolbarIconSize()
+	 */
 	public ImageIcon getToolbarIcon(String basename)
 	{
 		int size = Settings.getInstance().getToolbarIconSize();
-		return getPngIcon(basename, size);
+		return getPngIcon(basename.toLowerCase(), size);
 	}
 
-	public int getSizeForMenuFont()
+	/**
+	 * Calculate the icon size for a menu item in the UI
+	 *
+	 * @return the preferred icon size (16,24,32)
+	 * @see LnFHelper#getMenuFontHeight()
+	 * @see #getSizeForFont(int)
+	 */
+	public int getSizeForMenuItem()
 	{
 		int fontHeight = LnFHelper.getMenuFontHeight();
 		return getSizeForFont(fontHeight);
 	}
 
+	/**
+	 * Calculate the icon size for a label in the UI
+	 *
+	 * @return the preferred icon size (16,24,32)
+	 * @see LnFHelper#getLabelFontHeight()
+	 * @see #getSizeForFont(int)
+	 */
 	public int getSizeForLabel()
 	{
 		int fontHeight = LnFHelper.getLabelFontHeight();
 		return getSizeForFont(fontHeight);
 	}
 
+	/**
+	 * Calculate the corresponding image size for the given fontheight.
+	 *
+	 * @param fontHeight the height as returned by Font.getSize();
+	 * @return the approriate icon size for the font (16,24,32)
+	 */
 	public int getSizeForFont(int fontHeight)
 	{
 		if (fontHeight < 24)
@@ -114,24 +159,49 @@ public class IconMgr
 		return 32;
 	}
 
+	/**
+	 * Calculate the corresponding image size based on the font of the component.
+	 *
+	 * @param fontHeight the height as returned by Font.getSize();
+	 * @return the approriate icon size for the font (16,24,32)
+	 * @see WbSwingUtilities#getFontHeight(javax.swing.JComponent) 
+	 */
 	public int getSizeForComponentFont(JComponent comp)
 	{
 		int fontHeight = WbSwingUtilities.getFontHeight(comp);
 		return getSizeForFont(fontHeight);
 	}
 
+	/**
+	 * Return a PNG icon properly sized for a label in the UI.
+	 *
+	 * @param basename the basename of the GIF icon
+	 * @return
+	 */
 	public ImageIcon getLabelIcon(String basename)
 	{
 		int imgSize = getSizeForLabel();
 		return getIcon(basename.toLowerCase(), imgSize, true);
 	}
 
+	/**
+	 * Return a GIF icon properly sized for a menu item in the UI.
+	 *
+	 * @param basename the basename of the GIF icon
+	 * @return
+	 */
 	public ImageIcon getMenuGifIcon(String basename)
 	{
-		int imgSize = getSizeForMenuFont();
+		int imgSize = getSizeForMenuItem();
 		return getIcon(basename, imgSize, false);
 	}
 
+	/**
+	 * Return a GIF icon properly sized for a label in the UI.
+	 *
+	 * @param basename the basename of the GIF icon
+	 * @return
+	 */
 	public ImageIcon getLabelGifIcon(String basename)
 	{
 		int imgSize = getSizeForLabel();
@@ -146,6 +216,13 @@ public class IconMgr
 		synchronized (this)
 		{
 			result = iconCache.get(fname);
+			if (result == null && !isPng && imageSize == 16)
+			{
+				// for small GIFs, try without a size
+				// this is basically only for the busy and cancel icons (until they have been reworked)
+				result = retrieveImage(baseName + ".gif");
+			}
+
 			if (result == null)
 			{
 				result = retrieveImage(fname);
@@ -159,7 +236,7 @@ public class IconMgr
 					}
 					else
 					{
-						result = retrieveImage("empty.gif");
+							result = retrieveImage("empty.gif");
 					}
 				}
 				iconCache.put(fname, result);
