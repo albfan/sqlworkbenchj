@@ -164,7 +164,7 @@ public class IconMgr
 	 *
 	 * @param fontHeight the height as returned by Font.getSize();
 	 * @return the approriate icon size for the font (16,24,32)
-	 * @see WbSwingUtilities#getFontHeight(javax.swing.JComponent) 
+	 * @see WbSwingUtilities#getFontHeight(javax.swing.JComponent)
 	 */
 	public int getSizeForComponentFont(JComponent comp)
 	{
@@ -270,6 +270,7 @@ public class IconMgr
 
 	private ImageIcon scale(ImageIcon original, int imageSize)
 	{
+		if (original == null) return null;
 		BufferedImage bi = new BufferedImage(imageSize, imageSize, BufferedImage.TRANSLUCENT);
 		Graphics2D g2d = null;
 		try
@@ -280,7 +281,9 @@ public class IconMgr
 		}
 		catch (Throwable th)
 		{
-			return new ImageIcon(original.getImage().getScaledInstance(imageSize, imageSize, Image.SCALE_SMOOTH));
+			Image image = original.getImage();
+			if (image == null) return original;
+			return new ImageIcon(image.getScaledInstance(imageSize, imageSize, Image.SCALE_SMOOTH));
 		}
 		finally
 		{
