@@ -23,10 +23,13 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import workbench.gui.components.WbTable;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.WbTable;
 
 /**
  *	Reset the filter defined on a WbTable
@@ -43,7 +46,7 @@ public class ResetFilterAction
 		super();
 		this.initMenuDefinition("MnuTxtResetFilter");
 		this.setClient(aClient);
-		this.setIcon("resetFilter");
+		this.setPngIcon("resetfilter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 		this.setEnabled(false);

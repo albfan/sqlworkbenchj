@@ -66,7 +66,7 @@ public class FilterPickerAction
 		super();
 		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtPickFilter");
-		this.setIcon("dropdown");
+		this.setPngIcon("dropdown");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		FilterDefinitionManager mgr = FilterDefinitionManager.getInstance();
 		mgr.addPropertyChangeListener(this);
@@ -127,7 +127,7 @@ public class FilterPickerAction
     JButton result = null;
 		if (this.dropDownButton == null || createNew)
 		{
-			ImageIcon icon = IconMgr.getInstance().getGifIcon("dropdown");
+			ImageIcon icon = IconMgr.getInstance().getToolbarIcon("dropdown");
 			DropDownButton b = new DropDownButton(icon);
 			b.setAction(this);
 			b.setText(null);
