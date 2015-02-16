@@ -596,7 +596,7 @@ public class WbExport
 			}
 			exporter.setQuoteEscaping(quoteEscaping);
 			exporter.setRowIndexColumnName(cmdLine.getValue(ARG_ROWNUM));
-			this.defaultExtension = ".txt";
+			defaultExtension = ".txt";
 		}
 		else if (type.startsWith("sql"))
 		{
@@ -614,7 +614,7 @@ public class WbExport
 				List cols = StringUtil.stringToList(c, ",");
 				exporter.setKeyColumnsToUse(cols);
 			}
-			this.defaultExtension = ".sql";
+			defaultExtension = ".sql";
 			String literal = cmdLine.getValue(CommonArgs.ARG_DATE_LITERAL_TYPE);
 			if (literal != null)
 			{
@@ -675,15 +675,20 @@ public class WbExport
 			exporter.setHtmlHeading(cmdLine.getValue(ARG_PREDATA_HTML));
 			exporter.setHtmlTrailer(cmdLine.getValue(ARG_POSTDATA_HTML));
 
-			this.defaultExtension = ".html";
+			defaultExtension = ".html";
 		}
 		else if ("json".equals(type))
 		{
 			exporter.setNullString(cmdLine.getValue(ARG_NULL_STRING, null));
+			defaultExtension = ".json";
+		}
+		else
+		{
+			defaultExtension = "." + type.toLowerCase();
 		}
 
 		String ext = cmdLine.getValue(WbImport.ARG_FILE_EXT, null);
-		if (ext != null)
+		if (StringUtil.isNonBlank(ext))
 		{
 			defaultExtension = ext;
 		}
