@@ -59,6 +59,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.util.CollectionUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -94,6 +96,7 @@ public class WbExportTest
 		throws Exception
 	{
 		connection.disconnect();
+		util.emptyBaseDirectory();
 	}
 
 	@Test
@@ -1360,26 +1363,32 @@ public class WbExportTest
 	}
 
 	@Test
-	public void testMultipleXlsX()
+	public void testMultipleSpreadsheets()
 		throws Exception
 	{
+
 		WbFile dir = new WbFile(util.getBaseDir());
 
-		StatementRunnerResult result = exportCmd.execute(
-			"wbexport -type=xlsx " +
-			"-outputDir='" + util.getBaseDir() + "' " +
-			"-sourceTable=person,junit_test ");
+		List<String> types = CollectionUtil.arrayList("xlsx", "xls", "ods");
 
-		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-		File f1 = new File(dir, "person.xlsx");
-		assertTrue(f1.exists());
-		assertTrue(f1.length() > 1000);
+		for (String type : types)
+		{
+			util.emptyBaseDirectory();
+			StatementRunnerResult result = exportCmd.execute(
+				"wbexport -type=" + type + " " +
+				"-outputDir='" + util.getBaseDir() + "' " +
+				"-sourceTable=person,junit_test ");
 
-		File f2 = new File(dir, "junit_test.xlsx");
-		assertTrue(f2.exists());
-		assertTrue(f2.length() > 1000);
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			File f1 = new File(dir, "person." + type);
+			assertTrue(f1.exists());
+			assertTrue(f1.length() > 1000);
+
+			File f2 = new File(dir, "junit_test." + type);
+			assertTrue(f2.exists());
+			assertTrue(f2.length() > 1000);
+		}
 	}
-
 
 	@Test
 	public void testEmptyResult()
