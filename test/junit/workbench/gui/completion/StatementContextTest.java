@@ -277,6 +277,18 @@ public class StatementContextTest
 		assertTrue(o instanceof ColumnIdentifier);
 		ColumnIdentifier c = (ColumnIdentifier) o;
 		assertEquals("firstname", c.getColumnName().toLowerCase());
+
+		context = new StatementContext(con, "create or replace materialized view v_test as select  from one", 53);
+		analyzer = context.getAnalyzer();
+		assertTrue(analyzer instanceof SelectAnalyzer);
+		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
+		objects = analyzer.getData();
+		assertNotNull(objects);
+		assertEquals(4, objects.size());
+		o = objects.get(1); // the first element will be the "select all" marker
+		assertTrue(o instanceof ColumnIdentifier);
+		c = (ColumnIdentifier) o;
+		assertEquals("firstname", c.getColumnName().toLowerCase());
 	}
 
 	@Test
