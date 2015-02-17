@@ -137,12 +137,27 @@ public class QuickFilterPanel
 		toolbar.setEnabled(flag);
 		filterAction.setEnabled(flag);
 		filterValue.setEnabled(flag);
+		if (searchTable != null)
+		{
+			ResetFilterAction action = searchTable.getResetFilterAction();
+			if (action != null)
+			{
+				action.setEnabled(flag);
+			}
+		}
 	}
 
 	public void setActionsEnabled(boolean flag)
 	{
 		filterAction.setEnabled(flag);
-		searchTable.getResetFilterAction().setEnabled(flag);
+		if (searchTable != null)
+		{
+			ResetFilterAction action = searchTable.getResetFilterAction();
+			if (action != null)
+			{
+				action.setEnabled(flag);
+			}
+		}
 	}
 
 	public void setEnableMultipleValues(boolean flag)
