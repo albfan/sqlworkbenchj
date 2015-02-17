@@ -133,7 +133,7 @@ public class IconHandler
 		{
 			if (this.fileModifiedIcon == null)
 			{
-				this.fileModifiedIcon = IconMgr.getInstance().getLabelGifIcon("file-modified-icon");
+				this.fileModifiedIcon = IconMgr.getInstance().getLabelIcon("file-modified");
 			}
 			icon = this.fileModifiedIcon;
 		}
@@ -141,7 +141,7 @@ public class IconHandler
 		{
 			if (this.fileIcon == null)
 			{
-				this.fileIcon = IconMgr.getInstance().getLabelGifIcon("file-icon");
+				this.fileIcon = IconMgr.getInstance().getLabelIcon("file-icon");
 			}
 			icon = this.fileIcon;
 		}

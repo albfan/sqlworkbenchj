@@ -45,8 +45,8 @@ import workbench.storage.RowData;
 public class RowStatusRenderer
 	extends DefaultTableCellRenderer
 {
-	private final ImageIcon modifiedIcon = IconMgr.getInstance().getLabelGifIcon("modifiedrow");
-	private final ImageIcon newIcon = IconMgr.getInstance().getLabelGifIcon("newrow");
+	private final ImageIcon modifiedIcon = IconMgr.getInstance().getLabelIcon("modifiedrow");
+	private final ImageIcon newIcon = IconMgr.getInstance().getLabelIcon("newrow");
 
 	private final String newTip = ResourceMgr.getString("TxtRowNew");
 	private final String modifiedTip = ResourceMgr.getString("TxtRowModified");

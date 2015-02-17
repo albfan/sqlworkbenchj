@@ -503,7 +503,7 @@ public class MultiSelectComboBox<T extends Object>
 		private Dimension iconSize;
 		MultiSelectRenderer()
 		{
-			icon = IconMgr.getInstance().getLabelGifIcon("filter_go");
+			icon = IconMgr.getInstance().getLabelIcon("filter_go");
 			int width = icon.getIconWidth();
 			int height = icon.getIconHeight();
 			iconSize = new Dimension((int)(width * 1.5), (int)(height * 1.5));

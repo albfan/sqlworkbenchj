@@ -41,7 +41,7 @@ public class NewGroupAction
 	{
 		super();
 		this.client = panel;
-		this.setIcon("NewFolder");
+		this.setPngIcon("folder_new");
 		this.initMenuDefinition(resourceKey);
 	}
 
