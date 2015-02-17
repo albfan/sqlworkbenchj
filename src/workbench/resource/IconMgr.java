@@ -208,21 +208,31 @@ public class IconMgr
 		return getIcon(basename, imgSize, false);
 	}
 
+	/**
+	 * Return an image icon used to show the "loading" image in the SQL Panel.
+	 *
+	 * These images are currently not adjusted to the correct size.
+	 * The loading images are also not cached to allow clearing their state using flush()
+	 *
+	 * @param baseName
+	 * @return the icon
+	 */
+	public ImageIcon getLoadingImage(String baseName)
+	{
+		return retrieveImage(baseName + ".gif");
+	}
+
 	public ImageIcon getIcon(String baseName, int imageSize, boolean isPng)
 	{
 		String fname = makeFilename(baseName, imageSize, isPng);
 
+		boolean useCache = Settings.getInstance().getCacheIcons();
+
 		ImageIcon result = null;
+		
 		synchronized (this)
 		{
 			result = iconCache.get(fname);
-			if (result == null && !isPng && imageSize == 16)
-			{
-				// for small GIFs, try without a size
-				// this is basically only for the busy and cancel icons (until they have been reworked)
-				result = retrieveImage(baseName + ".gif");
-			}
-
 			if (result == null)
 			{
 				result = retrieveImage(fname);
@@ -236,10 +246,10 @@ public class IconMgr
 					}
 					else
 					{
-							result = retrieveImage("empty.gif");
+						result = retrieveImage("empty.gif");
 					}
 				}
-				iconCache.put(fname, result);
+				if (useCache) iconCache.put(fname, result);
 			}
 		}
 		return result;

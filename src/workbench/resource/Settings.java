@@ -1660,6 +1660,16 @@ public class Settings
 		this.setProperty("workbench.gui.iconsize", aValue);
 	}
 
+	public boolean getCacheIcons()
+	{
+		return getBoolProperty("workbench.gui.icon.cache.enabled", true);
+	}
+
+	public void setCacheIcons(boolean flag)
+	{
+		setProperty("workbench.gui.icon.cache.enabled", flag);
+	}
+
 	public DelimiterDefinition getAlternateDelimiter(WbConnection con, DelimiterDefinition defaultDelim)
 	{
 		DelimiterDefinition delim = null;

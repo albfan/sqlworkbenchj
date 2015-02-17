@@ -26,7 +26,6 @@ import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -123,7 +122,6 @@ public class TableDataPanel
 	private TableIdentifier table;
 	private TableDefinition tableDefinition;
 	private ImageIcon loadingIcon;
-	private Image loadingImage;
 	protected StopAction cancelRetrieve;
 	private List<DbExecutionListener> execListener;
 	private Savepoint currentSavepoint;
@@ -330,12 +328,11 @@ public class TableDataPanel
 
 	private ImageIcon getLoadingIndicator()
 	{
-		if (this.loadingIcon == null)
+		if (loadingIcon == null)
 		{
-			this.loadingImage = IconMgr.getInstance().getLabelIcon("wait").getImage();
-			this.loadingIcon = new ImageIcon(this.loadingImage);
+			loadingIcon = IconMgr.getInstance().getLabelIcon("wait");
 		}
-		return this.loadingIcon;
+		return loadingIcon;
 	}
 
 	public void dispose()
@@ -664,7 +661,6 @@ public class TableDataPanel
 
 	private void clearLoadingImage()
 	{
-		if (this.loadingImage != null) this.loadingImage.flush();
 		if (rowCountLabel != null) this.rowCountLabel.setIcon(null);
 	}
 

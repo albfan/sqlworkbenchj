@@ -74,8 +74,11 @@ public class IconHandler
 	{
 		if (cancelIcon != null) cancelIcon.getImage().flush();
 		if (loadingIcon != null) loadingIcon.getImage().flush();
-		if (fileIcon != null) fileIcon.getImage().flush();
-		if (fileModifiedIcon != null) fileModifiedIcon.getImage().flush();
+		if (!Settings.getInstance().getCacheIcons())
+		{
+			if (fileIcon != null) fileIcon.getImage().flush();
+			if (fileModifiedIcon != null) fileModifiedIcon.getImage().flush();
+		}
 	}
 
 	public void removeIcon()
@@ -93,7 +96,6 @@ public class IconHandler
 	public void showCancelIcon()
 	{
 		showIconForTab(this.getCancelIndicator());
-//		if (loadingIcon != null) loadingIcon.getImage().flush();
 	}
 
 	private ImageIcon getLoadingIndicator()
@@ -101,10 +103,10 @@ public class IconHandler
 		if (this.loadingIcon == null)
 		{
 			String name = Settings.getInstance().getProperty(PROP_LOADING_IMAGE, DEFAULT_BUSY_IMAGE);
-			this.loadingIcon = IconMgr.getInstance().getLabelGifIcon(name);
+			this.loadingIcon = IconMgr.getInstance().getLoadingImage(name);
 			if (loadingIcon == null)
 			{
-				this.loadingIcon = IconMgr.getInstance().getLabelGifIcon(DEFAULT_BUSY_IMAGE);
+				this.loadingIcon = IconMgr.getInstance().getLoadingImage(DEFAULT_BUSY_IMAGE);
 			}
 		}
 		return this.loadingIcon;
@@ -115,10 +117,10 @@ public class IconHandler
 		if (this.cancelIcon == null)
 		{
 			String name = Settings.getInstance().getProperty(PROP_CANCEL_IMAGE, DEFAULT_CANCEL_IMAGE);
-			cancelIcon = IconMgr.getInstance().getLabelGifIcon(name);
+			cancelIcon = IconMgr.getInstance().getLoadingImage(name);
 			if (cancelIcon == null)
 			{
-				cancelIcon = IconMgr.getInstance().getLabelGifIcon(DEFAULT_CANCEL_IMAGE);
+				cancelIcon = IconMgr.getInstance().getLoadingImage(DEFAULT_CANCEL_IMAGE);
 			}
 		}
 		return this.cancelIcon;

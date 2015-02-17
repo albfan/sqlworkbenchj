@@ -352,16 +352,6 @@ public class MultiSelectComboBox<T extends Object>
 		}
 	}
 
-	@Override
-	public void removeNotify()
-	{
-		super.removeNotify();
-		if (myRenderer != null)
-		{
-			myRenderer.dispose();
-		}
-	}
-
 	private boolean isChanged()
 	{
 		List<T> selected = getSelectedItems();
@@ -517,14 +507,6 @@ public class MultiSelectComboBox<T extends Object>
 			int width = icon.getIconWidth();
 			int height = icon.getIconHeight();
 			iconSize = new Dimension((int)(width * 1.5), (int)(height * 1.5));
-		}
-
-		void dispose()
-		{
-			if (icon != null && icon.getImage() != null)
-			{
-				icon.getImage().flush();
-			}
 		}
 
 		@Override

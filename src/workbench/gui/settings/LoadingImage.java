@@ -46,7 +46,7 @@ class LoadingImage
 	LoadingImage(String name)
 	{
 		imageName = name;
-		image = IconMgr.getInstance().getLabelGifIcon(name);
+		image = IconMgr.getInstance().getLoadingImage(name);
 	}
 
 	public void setName(String name)
