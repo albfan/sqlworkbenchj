@@ -64,7 +64,7 @@ public class DependencyTreeCellRenderer
 		this.setVerticalAlignment(SwingConstants.TOP);
 		this.setHorizontalAlignment(SwingConstants.LEFT);
 		this.fk = IconMgr.getInstance().getLabelIcon("key");
-		this.table = IconMgr.getInstance().getLabelGifIcon("table");
+		this.table = IconMgr.getInstance().getLabelIcon("table");
 		this.selectedForeground = UIManager.getColor("Tree.selectionForeground");
 		this.selectedBackground = UIManager.getColor("Tree.selectionBackground");
 		this.unselectedForeground = UIManager.getColor("Tree.textForeground");
