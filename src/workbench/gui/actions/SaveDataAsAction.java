@@ -49,7 +49,7 @@ public class SaveDataAsAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtSaveDataAs");
-		this.setIcon("SaveAs");
+		this.setPngIcon("save-as");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setEnabled(false);
 	}

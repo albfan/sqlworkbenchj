@@ -1809,7 +1809,7 @@ public class DataImporter
 		if (this.targetTable == null) return;
 
 		DbMetadata meta = this.dbConn.getMetadata();
-		boolean exists = meta.tableExists(this.targetTable);
+		boolean exists = meta.objectExists(this.targetTable, meta.getTablesAndViewTypes());
 		if (!exists)
 		{
 			throw new SQLException("Table " + this.targetTable.getTableExpression(this.dbConn) + " not found!");

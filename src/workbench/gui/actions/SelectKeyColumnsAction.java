@@ -42,7 +42,7 @@ public class SelectKeyColumnsAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtSelectKeyColumns");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setPngIcon("key");
+		this.setPngIcon("table_key");
 		this.setEnabled(false);
 	}
 

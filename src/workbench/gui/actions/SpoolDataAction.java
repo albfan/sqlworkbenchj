@@ -25,8 +25,9 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.interfaces.Exporter;
-import workbench.resource.ResourceMgr;
 import workbench.interfaces.TextSelectionListener;
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.sql.EditorPanel;
 
 /**
@@ -49,7 +50,7 @@ public class SpoolDataAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition(msgKey);
-		this.setIcon("SpoolData");
+		this.setPngIcon("spool-data");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
 	}

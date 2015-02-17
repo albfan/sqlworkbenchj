@@ -133,7 +133,7 @@ public class WbCopy
 		cmdLine.addArgument(CommonArgs.ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET, CollectionUtil.arrayList("false", "true", "cascade"));
-		cmdLine.addArgument(PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolSwitch);
 
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_REMOVE_DEFAULTS, ArgumentType.BoolArgument);
