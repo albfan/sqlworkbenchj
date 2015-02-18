@@ -24,8 +24,10 @@ package workbench.util;
 
 import java.util.List;
 import java.util.Set;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -33,7 +35,7 @@ import org.junit.Test;
  */
 public class CollectionUtilTest
 {
-	
+
 	@Test
 	public void testCreateHashSet()
 	{
@@ -75,5 +77,23 @@ public class CollectionUtilTest
 		assertEquals(3, result.size());
 		result.add(4);
 		assertEquals(4, result.size());
+	}
+
+	@Test
+	public void testRemoveElement()
+	{
+		String[] list = new String[] {"ONE", "TWO", "THREE"};
+		String[] clean = CollectionUtil.removeElement(list, "TWO");
+		assertNotNull(clean);
+		assertEquals(2, clean.length);
+		assertEquals("ONE", clean[0]);
+		assertEquals("THREE", clean[1]);
+
+		clean = CollectionUtil.removeElement(list, "foo");
+		assertNotNull(clean);
+		assertEquals(3, clean.length);
+		assertEquals("ONE", clean[0]);
+		assertEquals("TWO", clean[1]);
+		assertEquals("THREE", clean[2]);
 	}
 }

@@ -215,8 +215,10 @@ class SchemaCopy
 	{
 		targetToSourceMap = new HashMap<>(sourceTables.size());
 
-		String schema = this.targetSchema != null ? targetConnection.getMetadata().adjustSchemaNameCase(targetSchema) : this.targetConnection.getMetadata().getCurrentSchema();
-		String catalog = this.targetCatalog != null ? targetConnection.getMetadata().adjustObjectnameCase(targetCatalog) : this.targetConnection.getMetadata().getCurrentCatalog();
+		String currentTargetSchema = this.targetConnection.getMetadata().getCurrentSchema();
+		String currentTargetCatalog = this.targetConnection.getMetadata().getCurrentCatalog();
+		String schema = this.targetSchema != null ? targetConnection.getMetadata().adjustSchemaNameCase(targetSchema) : currentTargetSchema;
+		String catalog = this.targetCatalog != null ? targetConnection.getMetadata().adjustObjectnameCase(targetCatalog) : currentTargetCatalog;
 
 		for (TableIdentifier sourceTable : sourceTables)
 		{
@@ -233,7 +235,7 @@ class SchemaCopy
 
 			if (createTargetTable())
 			{
-				targetTable.setCatalog(this.targetConnection.getMetadata().getCurrentCatalog());
+				targetTable.setCatalog(currentTargetCatalog);
 			}
 			else
 			{
@@ -245,11 +247,11 @@ class SchemaCopy
 					targetTable = new TableIdentifier(sourceTable.getTableName(), sourceConnection);
 					if (sourceTable.getSchema() == null)
 					{
-						targetTable.setSchema(this.targetConnection.getMetadata().getCurrentSchema());
+						targetTable.setSchema(currentTargetSchema);
 					}
 					if (sourceTable.getCatalog() == null)
 					{
-						targetTable.setCatalog(this.targetConnection.getMetadata().getCurrentCatalog());
+						targetTable.setCatalog(currentTargetCatalog);
 					}
 					targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
 				}

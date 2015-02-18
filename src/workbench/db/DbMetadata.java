@@ -1452,8 +1452,11 @@ public class DbMetadata
 
 		// When TABLE and MATERIALIZED VIEW is specified for getTables() the Oracle driver returns
 		// materialized views twice, so we need to get rid of them.
-		boolean detectDuplicates = isOracle && typeIncluded("TABLE", types) && typeIncluded(MVIEW_NAME, types);
-		Set<String> processed = new TreeSet<>();
+		// As mviews are automatically returned when TABLE is specified we can remove the mview type
+		if (isOracle && typeIncluded("TABLE", types) && typeIncluded(MVIEW_NAME, types))
+		{
+			types = CollectionUtil.removeElement(types, MVIEW_NAME);
+		}
 
 		String escape = dbConnection.getSearchStringEscape();
 
@@ -1526,7 +1529,6 @@ public class DbMetadata
 			long duration = System.currentTimeMillis() - start;
 			LogMgr.logDebug("DbMetadata.getObjects()", "Retrieving table list took: " + duration + "ms");
 
-
 			if (tableRs != null && Settings.getInstance().getDebugMetadataSql())
 			{
 				SqlUtil.dumpResultSetInfo("DatabaseMetaData.getTables() returned:", tableRs.getMetaData());
@@ -1558,15 +1560,6 @@ public class DbMetadata
 				}
 
 				if (isIndexType(ttype)) continue;
-
-				if (detectDuplicates)
-				{
-					// As this name is only used to workaround an Oracle problem,
-					// schema and table name are enough for a fully qualified name
-					String fqName = schema + "." + name;
-					if (processed.contains(fqName)) continue;
-					processed.add(fqName);
-				}
 
 				int row = result.addRow();
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);

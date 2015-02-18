@@ -207,8 +207,8 @@ public class GenericSchemaInfoReader
 			LogMgr.logWarning("GenericSchemaInfoReader.getCurrentSchema()", "Error reading current schema using query: " + schemaQuery, e);
 			if (e instanceof SQLException)
 			{
-				// When a SQLException is thrown, we assume an error with the configured
-				// query, so it's disabled to avoid subsequent errors
+				// When a SQLException is thrown, we assume an error with the configured query
+				// So disabled it to avoid subsequent errors
 				this.schemaQuery = null;
 				SqlUtil.closeStatement(query);
 				this.query = null;
@@ -217,8 +217,7 @@ public class GenericSchemaInfoReader
 		}
 		finally
 		{
-			SqlUtil.closeResult(rs);
-			SqlUtil.closeStatement(stmt);
+			SqlUtil.closeAll(rs, stmt);
 		}
 
 		if (isCacheable)
@@ -255,12 +254,7 @@ public class GenericSchemaInfoReader
 	@Override
 	public void dispose()
 	{
-		if (query != null)
-		{
-			LogMgr.logDebug("GenericSchemaInformationReader.dispose()", "Freeing statement.");
-			SqlUtil.closeStatement(query);
-			query = null;
-		}
+		SqlUtil.closeStatement(query);
 		cachedSchema = null;
 		connection = null;
 		Settings.getInstance().removePropertyChangeListener(this);

@@ -48,7 +48,7 @@ public class NewListEntryAction
 	{
 		super();
 		this.client = aClient;
-		this.setIcon("New");
+		this.setPngIcon("New");
 		String tip = ResourceMgr.getDescription("LblNewListEntry", true);
 		this.initMenuDefinition(ResourceMgr.getString("LblNewListEntry"), tip, null);
 	}

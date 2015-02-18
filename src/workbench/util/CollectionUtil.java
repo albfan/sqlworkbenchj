@@ -130,4 +130,26 @@ public class CollectionUtil
 		return Collections.unmodifiableList(arrayList(a));
 	}
 
+	/**
+	 * Remove the given element from the array.
+	 *
+	 * The check is done using String.equals() so it's case sensitive.
+	 * 
+	 * @param array   the array
+	 * @param remove  the element to remove
+	 * @return a copy of the original array without the element.
+	 */
+	public static String[] removeElement(String[] array, String remove)
+	{
+		if (array == null) return array;
+		if (remove == null) return array;
+
+		List<String> elements = new ArrayList<>(array.length);
+		for (String s : array)
+		{
+			if (s.equals(remove)) continue;
+			elements.add(s);
+		}
+		return elements.toArray(new String[0]);
+	}
 }
