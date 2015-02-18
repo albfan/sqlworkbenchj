@@ -135,16 +135,8 @@ public class QuickFilterPanel
 	{
 		super.setEnabled(flag);
 		toolbar.setEnabled(flag);
-		filterAction.setEnabled(flag);
 		filterValue.setEnabled(flag);
-		if (searchTable != null)
-		{
-			ResetFilterAction action = searchTable.getResetFilterAction();
-			if (action != null)
-			{
-				action.setEnabled(flag);
-			}
-		}
+		setActionsEnabled(flag);
 	}
 
 	public void setActionsEnabled(boolean flag)
