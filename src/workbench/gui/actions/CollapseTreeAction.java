@@ -23,6 +23,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import workbench.interfaces.ExpandableTree;
 
 /**
@@ -40,7 +41,7 @@ public class CollapseTreeAction
 		super();
 		this.client = tree;
 		this.initMenuDefinition("LblCollapseAll");
-		this.setIcon("collapse");
+		this.setPngIcon("collapse");
 	}
 
 	@Override

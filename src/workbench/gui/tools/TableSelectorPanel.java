@@ -88,6 +88,8 @@ public class TableSelectorPanel
 		this.editNewTableNameButton.setVisible(false);
 		autoSync.setText(ResourceMgr.getString("LblDPAutoSyncTarget"));
 		autoSync.setToolTipText(ResourceMgr.getDescription("LblDPAutoSyncTarget"));
+		WbSwingUtilities.makeEqualSize(refreshButton, editNewTableNameButton);
+		WbSwingUtilities.makeEqualHeight(refreshButton, tableSelector, schemaSelector);
 	}
 
 	public void reset()
@@ -462,7 +464,6 @@ public class TableSelectorPanel
 
     schemaSelector.setAlignmentX(0.0F);
     schemaSelector.setAlignmentY(0.0F);
-    schemaSelector.setMaximumSize(new Dimension(200, 25));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -474,13 +475,13 @@ public class TableSelectorPanel
     tableSelector.setMaximumRowCount(0);
     tableSelector.setAlignmentX(0.0F);
     tableSelector.setAlignmentY(0.0F);
-    tableSelector.setMaximumSize(new Dimension(80, 25));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.7;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
     add(tableSelector, gridBagConstraints);
 
     schemaLabel.setText("jLabel1");
@@ -496,15 +497,15 @@ public class TableSelectorPanel
     gridBagConstraints.insets = new Insets(3, 0, 2, 0);
     add(schemaLabel, gridBagConstraints);
 
-    editNewTableNameButton.setIcon(IconMgr.getInstance().getLabelGifIcon("Rename"));
+    editNewTableNameButton.setIcon(IconMgr.getInstance().getLabelIcon("rename"));
     editNewTableNameButton.setToolTipText(ResourceMgr.getString("LblEditNewTableName"));
     editNewTableNameButton.setEnabled(false);
-    editNewTableNameButton.setMaximumSize(new Dimension(22, 22));
     editNewTableNameButton.setMinimumSize(new Dimension(22, 22));
     editNewTableNameButton.setPreferredSize(new Dimension(22, 22));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     add(editNewTableNameButton, gridBagConstraints);
@@ -525,6 +526,7 @@ public class TableSelectorPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     add(refreshButton, gridBagConstraints);
@@ -557,6 +559,7 @@ public class TableSelectorPanel
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
     add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

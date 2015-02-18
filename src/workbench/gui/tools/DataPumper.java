@@ -28,6 +28,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -159,7 +160,7 @@ public class DataPumper
 		this.targetProfile = target;
 
 		initComponents();
-		WbSwingUtilities.makeEqualSize(cancelButton, closeButton, startButton, showLogButton, showWbCommand, helpButton);
+		WbSwingUtilities.makeEqualWidth(cancelButton, closeButton, startButton, showLogButton, showWbCommand, helpButton);
 
 		sourceTable.setAutoSyncVisible(false);
 
@@ -191,6 +192,7 @@ public class DataPumper
 
 		this.sourceTable.setTableDropDownName("sourceTable");
 		this.targetTable.setTableDropDownName("targetTable");
+		WbSwingUtilities.makeEqualSize(openFileButton, selectSourceButton, selectTargetButton);
 	}
 
 	@Override
@@ -452,6 +454,7 @@ public class DataPumper
 
 		if (this.sourceConnection != null)
 		{
+			this.sourceTable.setEnabled(true);
 			this.sourceTable.setChangeListener(this, "source-table");
 
 			Thread t = new WbThread("Retrieve source tables")
@@ -564,17 +567,20 @@ public class DataPumper
     GridBagConstraints gridBagConstraints;
 
     jPanel6 = new JPanel();
+    connectionPanel = new JPanel();
+    sourcePanel = new JPanel();
+    sourceHeader = new JLabel();
     sourceProfilePanel = new JPanel();
     sourceProfileLabel = new JLabel();
     selectSourceButton = new FlatButton();
     openFileButton = new FlatButton();
+    sourceTable = new TableSelectorPanel();
+    targetPanel = new JPanel();
+    targetHeader = new JLabel();
     targetProfilePanel = new JPanel();
     targetProfileLabel = new JLabel();
     selectTargetButton = new FlatButton();
-    sourceTable = new TableSelectorPanel();
     targetTable = new TableSelectorPanel();
-    targetHeader = new JLabel();
-    sourceHeader = new JLabel();
     jSplitPane1 = new WbSplitPane();
     mapperPanel = new JPanel();
     optionsPanel = new JPanel();
@@ -616,122 +622,9 @@ public class DataPumper
 
     setLayout(new GridBagLayout());
 
-    sourceProfilePanel.setLayout(new GridBagLayout());
+    connectionPanel.setLayout(new GridLayout(1, 0));
 
-    sourceProfileLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(0, 2, 0, 0)));
-    sourceProfileLabel.setMaximumSize(new Dimension(32768, 24));
-    sourceProfileLabel.setMinimumSize(new Dimension(25, 24));
-    sourceProfileLabel.setPreferredSize(new Dimension(50, 24));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 1.0;
-    sourceProfilePanel.add(sourceProfileLabel, gridBagConstraints);
-
-    selectSourceButton.setText("...");
-    selectSourceButton.setMaximumSize(new Dimension(22, 22));
-    selectSourceButton.setMinimumSize(new Dimension(22, 22));
-    selectSourceButton.setName("selectSource"); // NOI18N
-    selectSourceButton.setPreferredSize(new Dimension(22, 22));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.EAST;
-    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
-    sourceProfilePanel.add(selectSourceButton, gridBagConstraints);
-
-    openFileButton.setIcon(IconMgr.getInstance().getLabelIcon("Open"));
-    openFileButton.setToolTipText(ResourceMgr.getString("d_DataPumperOpenFile"));
-    openFileButton.setIconTextGap(0);
-    openFileButton.setPreferredSize(new Dimension(22, 22));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
-    sourceProfilePanel.add(openFileButton, gridBagConstraints);
-
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
-    gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new Insets(0, 2, 0, 2);
-    add(sourceProfilePanel, gridBagConstraints);
-
-    targetProfilePanel.setLayout(new GridBagLayout());
-
-    targetProfileLabel.setHorizontalAlignment(SwingConstants.LEFT);
-    targetProfileLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(0, 2, 0, 0)));
-    targetProfileLabel.setMaximumSize(new Dimension(32768, 24));
-    targetProfileLabel.setMinimumSize(new Dimension(25, 24));
-    targetProfileLabel.setPreferredSize(new Dimension(0, 24));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 1.0;
-    targetProfilePanel.add(targetProfileLabel, gridBagConstraints);
-
-    selectTargetButton.setText("...");
-    selectTargetButton.setMaximumSize(new Dimension(22, 22));
-    selectTargetButton.setMinimumSize(new Dimension(22, 22));
-    selectTargetButton.setName("selectTarget"); // NOI18N
-    selectTargetButton.setPreferredSize(new Dimension(22, 22));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.EAST;
-    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
-    targetProfilePanel.add(selectTargetButton, gridBagConstraints);
-
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new Insets(0, 2, 0, 2);
-    add(targetProfilePanel, gridBagConstraints);
-
-    sourceTable.setMaximumSize(new Dimension(2147483647, 65));
-    sourceTable.setMinimumSize(new Dimension(25, 50));
-    sourceTable.setPreferredSize(new Dimension(25, 50));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(5, 2, 6, 2);
-    add(sourceTable, gridBagConstraints);
-
-    targetTable.setToolTipText("");
-    targetTable.setMaximumSize(new Dimension(2147483647, 65));
-    targetTable.setMinimumSize(new Dimension(25, 50));
-    targetTable.setPreferredSize(new Dimension(25, 50));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(5, 4, 6, 2);
-    add(targetTable, gridBagConstraints);
-
-    targetHeader.setBackground(new Color(255, 255, 255));
-    targetHeader.setHorizontalAlignment(SwingConstants.CENTER);
-    targetHeader.setText("<html><b>" + ResourceMgr.getString("LblTargetConnection") + "</b></html>");
-    targetHeader.setMaximumSize(new Dimension(23768, 22));
-    targetHeader.setMinimumSize(new Dimension(25, 22));
-    targetHeader.setOpaque(true);
-    targetHeader.setPreferredSize(new Dimension(25, 22));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new Insets(4, 2, 4, 2);
-    add(targetHeader, gridBagConstraints);
+    sourcePanel.setLayout(new GridBagLayout());
 
     sourceHeader.setBackground(new Color(255, 255, 255));
     sourceHeader.setHorizontalAlignment(SwingConstants.CENTER);
@@ -741,12 +634,139 @@ public class DataPumper
     sourceHeader.setOpaque(true);
     sourceHeader.setPreferredSize(new Dimension(50, 22));
     gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 0, 5, 0);
+    sourcePanel.add(sourceHeader, gridBagConstraints);
+
+    sourceProfilePanel.setLayout(new GridBagLayout());
+
+    sourceProfileLabel.setText("Source Profile");
+    sourceProfileLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(0, 2, 0, 0)));
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    sourceProfilePanel.add(sourceProfileLabel, gridBagConstraints);
+
+    selectSourceButton.setText("...");
+    selectSourceButton.setMaximumSize(new Dimension(22, 22));
+    selectSourceButton.setMinimumSize(new Dimension(22, 22));
+    selectSourceButton.setName("selectSource"); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.EAST;
+    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
+    sourceProfilePanel.add(selectSourceButton, gridBagConstraints);
+
+    openFileButton.setIcon(IconMgr.getInstance().getLabelIcon("Open"));
+    openFileButton.setToolTipText(ResourceMgr.getString("d_DataPumperOpenFile"));
+    openFileButton.setIconTextGap(0);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
+    sourceProfilePanel.add(openFileButton, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.insets = new Insets(4, 2, 4, 2);
-    add(sourceHeader, gridBagConstraints);
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 0, 0, 3);
+    sourcePanel.add(sourceProfilePanel, gridBagConstraints);
+
+    sourceTable.setMinimumSize(new Dimension(25, 50));
+    sourceTable.setPreferredSize(new Dimension(25, 50));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 0, 0, 2);
+    sourcePanel.add(sourceTable, gridBagConstraints);
+
+    connectionPanel.add(sourcePanel);
+
+    targetPanel.setLayout(new GridBagLayout());
+
+    targetHeader.setBackground(new Color(255, 255, 255));
+    targetHeader.setHorizontalAlignment(SwingConstants.CENTER);
+    targetHeader.setText("<html><b>" + ResourceMgr.getString("LblTargetConnection") + "</b></html>");
+    targetHeader.setMaximumSize(new Dimension(23768, 22));
+    targetHeader.setMinimumSize(new Dimension(25, 22));
+    targetHeader.setOpaque(true);
+    targetHeader.setPreferredSize(new Dimension(25, 22));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 0, 5, 0);
+    targetPanel.add(targetHeader, gridBagConstraints);
+
+    targetProfilePanel.setLayout(new GridBagLayout());
+
+    targetProfileLabel.setHorizontalAlignment(SwingConstants.LEFT);
+    targetProfileLabel.setText("Target Profile");
+    targetProfileLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(0, 2, 0, 0)));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    targetProfilePanel.add(targetProfileLabel, gridBagConstraints);
+
+    selectTargetButton.setText("...");
+    selectTargetButton.setName("selectTarget"); // NOI18N
+    selectTargetButton.setPreferredSize(new Dimension(22, 22));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.EAST;
+    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
+    targetProfilePanel.add(selectTargetButton, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
+    targetPanel.add(targetProfilePanel, gridBagConstraints);
+
+    targetTable.setToolTipText("");
+    targetTable.setMinimumSize(new Dimension(25, 50));
+    targetTable.setPreferredSize(new Dimension(25, 50));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
+    targetPanel.add(targetTable, gridBagConstraints);
+
+    connectionPanel.add(targetPanel);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(2, 3, 0, 3);
+    add(connectionPanel, gridBagConstraints);
 
     jSplitPane1.setDividerLocation(100);
     jSplitPane1.setOrientation(JSplitPane.VERTICAL_SPLIT);
@@ -1012,7 +1032,7 @@ public class DataPumper
     gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.anchor = GridBagConstraints.NORTH;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(0, 2, 0, 2);
+    gridBagConstraints.insets = new Insets(8, 2, 0, 2);
     add(jSplitPane1, gridBagConstraints);
 
     statusLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(0, 2, 0, 0)));
@@ -1093,6 +1113,7 @@ public class DataPumper
     gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(9, 0, 8, 0);
     add(buttonPanel, gridBagConstraints);
@@ -1124,6 +1145,7 @@ public class DataPumper
   protected JButton closeButton;
   protected JTextField commitEvery;
   protected JLabel commitLabel;
+  protected JPanel connectionPanel;
   protected JCheckBox continueOnErrorCbx;
   protected JCheckBox deleteTargetCbx;
   protected JCheckBox dropTargetCbx;
@@ -1152,6 +1174,7 @@ public class DataPumper
   protected JButton showLogButton;
   protected JButton showWbCommand;
   protected JLabel sourceHeader;
+  protected JPanel sourcePanel;
   protected JLabel sourceProfileLabel;
   protected JPanel sourceProfilePanel;
   protected TableSelectorPanel sourceTable;
@@ -1160,6 +1183,7 @@ public class DataPumper
   protected JButton startButton;
   protected JLabel statusLabel;
   protected JLabel targetHeader;
+  protected JPanel targetPanel;
   protected JLabel targetProfileLabel;
   protected JPanel targetProfilePanel;
   protected TableSelectorPanel targetTable;

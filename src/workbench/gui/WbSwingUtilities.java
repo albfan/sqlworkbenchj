@@ -1396,13 +1396,41 @@ public class WbSwingUtilities
 		}
 	}
 
+	public static void makeEqualHeight(JComponent reference, JComponent ... others)
+	{
+		if (reference == null) return;
+		if (others == null) return;
+
+		int height = reference.getPreferredSize().height;
+
+		for (JComponent comp : others)
+		{
+			Dimension size = comp.getPreferredSize();
+			size.height = height;
+			comp.setPreferredSize(size);
+		}
+	}
+
+	public static void makeEqualSize(JComponent reference, JComponent ... others)
+	{
+		if (reference == null) return;
+		if (others == null) return;
+
+		Dimension size = reference.getPreferredSize();
+
+		for (JComponent comp : others)
+		{
+			comp.setPreferredSize(size);
+		}
+	}
+
 	/**
 	 * Sets the minimum width of all components to the width of the widest component.
 	 * <p/>
 	 * @param components the components to change
 	 * @see #setPreferredWidth(javax.swing.JComponent, int)
 	 */
-	public static void makeEqualSize(JComponent ... components)
+	public static void makeEqualWidth(JComponent ... components)
 	{
 		int maxSize = 0;
 		for (JComponent comp : components)

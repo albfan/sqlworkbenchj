@@ -41,7 +41,7 @@ public class CopyProfileAction
 	{
 		super();
 		this.client = aClient;
-		this.setIcon("CopyProfile");
+		this.setPngIcon("copy-profile");
 		this.initMenuDefinition("LblCopyProfile");
 	}
 

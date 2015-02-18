@@ -68,7 +68,7 @@ public class DataDisplayOptions
 		WbSwingUtilities.setMinimumSizeFromCols(multiLineThreshold);
 		WbSwingUtilities.setMinimumSizeFromCols(minColSizeField);
 		WbSwingUtilities.setMinimumSizeFromCols(maxColSizeField);
-		WbSwingUtilities.makeEqualSize(nullString, defMaxRows, alignmentDropDown);
+		WbSwingUtilities.makeEqualWidth(nullString, defMaxRows, alignmentDropDown);
 	}
 
 	@Override

@@ -91,7 +91,7 @@ public class CompletionOptionsPanel
 		localStorageType.doLayout();
 
 		maxAgeField.setText(GuiSettings.getLocalStorageMaxAge());
-		WbSwingUtilities.makeEqualSize(completionColumnSort, completionPasteCase, localStorageType);
+		WbSwingUtilities.makeEqualWidth(completionColumnSort, completionPasteCase, localStorageType);
 	}
 
 	@Override

@@ -173,7 +173,7 @@ public class ValidatingDialog
 
 		b = BorderFactory.createEmptyBorder(2, 0, 0, 0);
 
-		WbSwingUtilities.makeEqualSize(allButtons);
+		WbSwingUtilities.makeEqualWidth(allButtons);
 		buttonPanel.setBorder(b);
 		content.add(buttonPanel, BorderLayout.SOUTH);
 		this.getContentPane().add(content);

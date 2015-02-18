@@ -135,7 +135,7 @@ public class EditorOptionsPanel
 		{
 			wheelScrollLines.setText(Integer.toString(lines));
 		}
-		WbSwingUtilities.makeEqualSize(externalLineEnding, internalLineEnding);
+		WbSwingUtilities.makeEqualWidth(externalLineEnding, internalLineEnding);
 	}
 
 	private String indexToLineEndingValue(int index)

@@ -147,7 +147,7 @@ public class DriverEditorDialog
 		dummyPanel.setMinimumSize(new Dimension(1, 1));
 		dummyPanel.setPreferredSize(new Dimension(2, 2));
 		getContentPane().add(dummyPanel, BorderLayout.NORTH);
-		WbSwingUtilities.makeEqualSize(okButton, cancelButton, helpButton);
+		WbSwingUtilities.makeEqualWidth(okButton, cancelButton, helpButton);
 	}
 
 	@Override

@@ -23,6 +23,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import workbench.interfaces.ExpandableTree;
 
 /**
@@ -40,7 +41,7 @@ public class ExpandTreeAction
 		super();
 		this.client = tree;
 		this.initMenuDefinition("LblExpandAll");
-		this.setIcon("expand");
+		this.setPngIcon("expand");
 	}
 
 	@Override

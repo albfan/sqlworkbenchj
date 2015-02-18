@@ -194,7 +194,7 @@ public class MacroManagerDialog
 
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
-		WbSwingUtilities.makeEqualSize(runButton, okButton, cancelButton);
+		WbSwingUtilities.makeEqualWidth(runButton, okButton, cancelButton);
 	}
 
 	@Override
