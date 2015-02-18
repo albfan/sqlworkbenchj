@@ -119,7 +119,7 @@ public class LnFHelper
 		double factor = Toolkit.getDefaultToolkit().getScreenResolution() / 72.0;
 		Font font = def.getFont(key);
 		if (font == null) return 18;
-		return (int)Math.ceil((double)font.getSize() / factor);
+		return (int)Math.ceil((double)font.getSize() * factor);
 	}
 
 	public void initUI()

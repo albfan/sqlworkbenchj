@@ -47,6 +47,8 @@ public class IconMgr
 
 	private final Map<String, ImageIcon> iconCache = new HashMap<>();
 	private final String filepath;
+	private int menuFontHeight;
+	private int labelFontHeight;
 
  	protected static class LazyInstanceHolder
 	{
@@ -61,6 +63,8 @@ public class IconMgr
 	private IconMgr()
 	{
 		filepath = ResourcePath.ICONS.getPath() + "/";
+		menuFontHeight = LnFHelper.getMenuFontHeight();
+		labelFontHeight = LnFHelper.getLabelFontHeight();
 	}
 
 	/**
@@ -98,7 +102,7 @@ public class IconMgr
 	 */
 	public ImageIcon getPngIcon(String basename, int size)
 	{
-		return retrieveImage(basename + Integer.toString(size) + ".png");
+		return getIcon(basename, size, true);
 	}
 
 	/**
@@ -111,7 +115,7 @@ public class IconMgr
 	public ImageIcon getToolbarIcon(String basename)
 	{
 		int size = Settings.getInstance().getToolbarIconSize();
-		return getPngIcon(basename.toLowerCase(), size);
+		return getIcon(basename.toLowerCase(), size, true);
 	}
 
 	/**
@@ -123,8 +127,7 @@ public class IconMgr
 	 */
 	public int getSizeForMenuItem()
 	{
-		int fontHeight = LnFHelper.getMenuFontHeight();
-		return getSizeForFont(fontHeight);
+		return getSizeForFont(menuFontHeight);
 	}
 
 	/**
@@ -136,8 +139,7 @@ public class IconMgr
 	 */
 	public int getSizeForLabel()
 	{
-		int fontHeight = LnFHelper.getLabelFontHeight();
-		return getSizeForFont(fontHeight);
+		return getSizeForFont(labelFontHeight);
 	}
 
 	/**
@@ -229,7 +231,7 @@ public class IconMgr
 		boolean useCache = Settings.getInstance().getCacheIcons();
 
 		ImageIcon result = null;
-		
+
 		synchronized (this)
 		{
 			result = iconCache.get(fname);
