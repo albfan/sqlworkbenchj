@@ -28,7 +28,7 @@
 		</itemizedlist>
 
 		<para>
-			After you have selected the .jar file(s) for a driver (by clicking on the <guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/open16.gif" format="GIF"/></guiicon></guibutton>
+			After you have selected the .jar file(s) for a driver (by clicking on the <guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/open16.png" format="PNG"/></guiicon></guibutton>
       button), &wb-productname; will scan the jar file looking for a JDBC driver. If only a single driver is found,
       the classname is automatically put into the entry field for the classname. If more than one JDBC driver implementation is found, you
 			will be prompted to select one. In that case, please refer to the manual of your driver or database to choose the correct one.

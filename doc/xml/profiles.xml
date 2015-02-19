@@ -27,12 +27,12 @@
 	<para>
     <indexterm><primary>Connection profile</primary><secondary>create</secondary></indexterm>
     To create a new profile click on the
-		<literal>New Profile</literal> button (<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/NewProfile16.gif" format="GIF"/></guiicon>).
+		<literal>New Profile</literal> button (<guibutton><guiicon><inlinegraphic valign="bottom" fileref="@IMAGE_DIR@/new-profile16.png" format="PNG"/></guiicon></guibutton>).
 		This will create a new profile with the name "New Profile". The new profile
 		will be created in the currently active group.
 		The other properties will be empty. To create a copy of the currently
 		selected profile click on the <literal>Copy Profile</literal> button
-		(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/CopyProfile16.gif" format="GIF"/></guiicon>).
+		(<guibutton><guiicon><inlinegraphic valign="bottom" fileref="@IMAGE_DIR@/copy-profile16.png" format="PNG"/></guiicon></guibutton>).
 		The copy will be created in the current group. If you want to place the copy
 		into a different group, you can either choose to Copy &amp; Paste a copy of the profile
 		into that group, or move the copied profile, once it is created.
@@ -42,7 +42,7 @@
     <indexterm><primary>Connection profile</primary><secondary>delete</secondary></indexterm>
 		To delete an existing profile, select the profile in the list and
 		click on the <literal>Delete Profile</literal> button
-		(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
+    (<guibutton><guiicon><inlinegraphic valign="bottom" fileref="@IMAGE_DIR@/delete16.png" format="PNG"/></guiicon></guibutton>)
 	</para>
 
 </section>
@@ -54,7 +54,7 @@
 		or customer or database system. When you start &wb-productname; for the first time,
 		no groups are created and the tree will only display the default group node.
 		To add a new group click on the <literal>Add profile group</literal>
-		(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/NewFolder16.gif" format="GIF"/></guiicon>)
+		(<guibutton><guiicon><inlinegraphic valign="bottom" fileref="@IMAGE_DIR@/folder_new16.png" format="PNG"/></guiicon></guibutton>)
 		button. The new group will be appended at the end of the tree. If you create a new profile, it will
 		be created in the currently selected group. If a profile is selected in the tree and not a group
 		node, the new profile will be created in the group of the currently selected profile.
@@ -233,7 +233,7 @@
 		into the table, where you can define the property. To edit an existing property,
 		simply doubleclick in the table cell that you want to edit. To delete an existing property
 		click on the <literal>Delete</literal> button
-		(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>).
+		(<guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/delete16.png" format="PNG"/></guiicon></guibutton>).
 	</para>
 
   <para>
@@ -545,7 +545,7 @@
 				Once a connection has been established, information about the connection are display
 				in the toolbar of the main window. You can select a color for the background of this
 				display to e.g. indicate "sensitive" connections. To use the default background,
-				click on the <literal>Reset</literal> (<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
+				click on the <literal>Reset</literal> (<guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/delete16.png" format="PNG"/></guiicon></guibutton>)
 				button. If no color is selected this is indicated with the text <literal>(None)</literal>
 				next to the selection button. If you have selected a color, a preview of the color is
 				displayed.

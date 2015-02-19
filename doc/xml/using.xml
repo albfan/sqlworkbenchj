@@ -855,7 +855,7 @@ Done.</programlisting>
 			<title>Defining a filter manually</title>
 
 			<para>
-				To define a filter, click on the <literal>Filter</literal> button (<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>)
+				To define a filter, click on the <literal>Filter</literal> button (<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/filter16.png" format="PNG"/></guiicon>)
 				in the toolbar or select <menuchoice><guimenu>Data</guimenu><guimenuitem>Filter data</guimenuitem></menuchoice>.
 				A dialog will appear where you can define a filter for the current result set. Each line
 				in the filter dialog defines an expression that will be applied to the column selected
@@ -874,7 +874,7 @@ Done.</programlisting>
 			<para>
 				To add a multi-column expression, press the <guibutton>More</guibutton> button, to create
 				a new line. To remove a column expression from the filter, click the <literal>Remove</literal>
-				(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/Remove16.gif" format="GIF"/></guiicon>) button.
+				(<guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/delete16.png" format="PNG"/></guiicon></guibutton>) button.
 				For character based column data, you can select to ignore the case of the column's data
 				when applying the expression, i.e. when <literal>Ignore case</literal> is selected, the
 				expression <literal>'NAME = arthur'</literal> will match the column value '<literal>Arthur</literal>',
@@ -905,7 +905,7 @@ Done.</programlisting>
 				You can also quickly filter the data based on the value(s) of the currenlty
 				selected column(s). To apply the filter, select the column values by which
 				you want to filter then click on the <literal>Quickfilter</literal> button
-				(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/colfilter16.gif" format="GIF"/></guiicon>)
+				(<guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/colfilter16.png" format="PNG"/></guiicon></guibutton>)
 				in the toolbar or select
 				<menuchoice><guimenu>Data</guimenu><guimenuitem>Filter by value</guimenuitem></menuchoice>
 				from the menu bar.
