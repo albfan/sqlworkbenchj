@@ -70,7 +70,10 @@ public class JumpToStatement
 		{
 			input.addItem(Integer.toString(i + 1));
 		}
-		input.setSelectedIndex(0);
+		
+		int current = p.getCommandIndexAtCursorPos(client.getEditor().getCaretPosition());
+		input.setSelectedItem(Integer.toString(current+1));
+
 		input.setMinimumSize(new Dimension(50, 24));
 		boolean ok = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(client), input, ResourceMgr.getString("TxtJumpTo"));
 		if (!ok)

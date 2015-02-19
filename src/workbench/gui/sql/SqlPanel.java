@@ -108,6 +108,7 @@ import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlMergeAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
 import workbench.gui.actions.CopyAsTextAction;
+import workbench.gui.actions.CopyCurrentStatementAction;
 import workbench.gui.actions.CopyRowAction;
 import workbench.gui.actions.CreateDeleteScriptAction;
 import workbench.gui.actions.CreateSnippetAction;
@@ -292,6 +293,7 @@ public class SqlPanel
 	protected SqlPanelReloadAction reloadAction;
 	protected ShowObjectInfoAction showObjectInfoAction;
 	protected JoinCompletionAction joinCompletion;
+	protected CopyCurrentStatementAction copyStatementAction;
 
 	protected WbMenu copyAsSQLMenu;
 	protected WbMenu copySelectedMenu;
@@ -993,7 +995,8 @@ public class SqlPanel
 		new CleanJavaCodeAction(this.editor).addToMenu(codeTools);
 		new MakeInListAction(this.editor).addToMenu(codeTools);
 		new MakeNonCharInListAction(this.editor).addToMenu(codeTools);
-
+		copyStatementAction = new CopyCurrentStatementAction(this.editor);
+		copyStatementAction.addToMenu(codeTools);
 		this.actions.add(codeTools);
 		this.actions.add(config);
 
@@ -1665,7 +1668,8 @@ public class SqlPanel
 		}
 
 		if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
-
+		if (this.copyStatementAction != null) this.copyStatementAction.setConnection(this.dbConnection);
+		
 		checkResultSetActions();
 		checkCommitAction();
 
