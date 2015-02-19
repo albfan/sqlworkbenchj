@@ -66,7 +66,7 @@
     <Component class="javax.swing.JButton" name="btnUp">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="IconMgr.getInstance().getLabelGifIcon(&quot;Up&quot;)" type="code"/>
+          <Connection code="IconMgr.getInstance().getLabelIcon(&quot;Up&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -78,7 +78,7 @@
     <Component class="javax.swing.JButton" name="btnDown">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="IconMgr.getInstance().getLabelGifIcon(&quot;Down&quot;)" type="code"/>
+          <Connection code="IconMgr.getInstance().getLabelIcon(&quot;Down&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>

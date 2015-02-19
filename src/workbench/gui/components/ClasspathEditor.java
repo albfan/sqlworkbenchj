@@ -315,7 +315,7 @@ public class ClasspathEditor
     gridBagConstraints.insets = new java.awt.Insets(4, 8, 0, 0);
     add(btnRemove, gridBagConstraints);
 
-    btnUp.setIcon(IconMgr.getInstance().getLabelGifIcon("Up"));
+    btnUp.setIcon(IconMgr.getInstance().getLabelIcon("Up"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
@@ -324,7 +324,7 @@ public class ClasspathEditor
     gridBagConstraints.insets = new java.awt.Insets(16, 8, 0, 0);
     add(btnUp, gridBagConstraints);
 
-    btnDown.setIcon(IconMgr.getInstance().getLabelGifIcon("Down"));
+    btnDown.setIcon(IconMgr.getInstance().getLabelIcon("Down"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;

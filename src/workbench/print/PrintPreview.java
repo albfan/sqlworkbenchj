@@ -152,23 +152,23 @@ public class PrintPreview
 
 		tb.addSeparator();
 
-		this.pageDown = new WbToolbarButton(IconMgr.getInstance().getLabelGifIcon("Down"));
+		this.pageDown = new WbToolbarButton(IconMgr.getInstance().getLabelIcon("Down"));
 		this.pageDown.addActionListener(this);
 		this.pageDown.setEnabled(false);
 		tb.add(this.pageDown);
 
-		this.pageUp = new WbToolbarButton(IconMgr.getInstance().getLabelGifIcon("Up"));
+		this.pageUp = new WbToolbarButton(IconMgr.getInstance().getLabelIcon("Up"));
 		this.pageUp.addActionListener(this);
 		this.pageUp.setEnabled(false);
 		tb.add(this.pageUp);
 
 
-		this.pageLeft = new WbToolbarButton(IconMgr.getInstance().getLabelGifIcon("Back"));
+		this.pageLeft = new WbToolbarButton(IconMgr.getInstance().getLabelIcon("Back"));
 		this.pageLeft.addActionListener(this);
 		this.pageLeft.setEnabled(false);
 		tb.add(this.pageLeft);
 
-		this.pageRight = new WbToolbarButton(IconMgr.getInstance().getLabelGifIcon("Forward"));
+		this.pageRight = new WbToolbarButton(IconMgr.getInstance().getLabelIcon("Forward"));
 		this.pageRight.addActionListener(this);
 		this.pageRight.setEnabled(false);
 		tb.add(this.pageRight);
@@ -441,14 +441,13 @@ public class PrintPreview
 			int h = (pageHeight * scale / 100);
 
 			Component[] comps = this.preview.getComponents();
-			for (int k = 0; k < comps.length; k++)
+			for (Component comp : comps)
 			{
-				if (!(comps[k] instanceof PagePreview))
+				if (comp instanceof PagePreview)
 				{
-					continue;
+					PagePreview pp = (PagePreview) comp;
+					pp.setScaledSize(w, h);
 				}
-				PagePreview pp = (PagePreview) comps[k];
-				pp.setScaledSize(w, h);
 			}
 		}
 		catch (Throwable th)

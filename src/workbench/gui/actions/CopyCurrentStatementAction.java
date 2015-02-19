@@ -27,13 +27,16 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 
-import workbench.db.WbConnection;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
+
 import workbench.util.StringUtil;
 
 /**
@@ -85,6 +88,18 @@ public class CopyCurrentStatementAction
 
 		int index = parser.getCommandIndexAtCursorPos(cursor);
 		String command = parser.getCommand(index);
+
+		boolean makeSnippet = false;
+		if (invokedByMouse(e) && isCtrlPressed(e))
+		{
+			makeSnippet = true;
+		}
+
+		if (makeSnippet)
+		{
+			command = CreateSnippetAction.makeJavaString(command, true);
+		}
+
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(command);
 		clp.setContents(sel, sel);
