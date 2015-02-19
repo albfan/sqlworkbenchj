@@ -43,12 +43,19 @@ public class IconMgr
 {
 	public static final String IMG_SAVE = "save";
 
+	private static final int SMALL_ICON = 16;
+	private static final int MEDIUM_ICON = 24;
+	private static final int LARGE_ICON = 32;
+
 	private final RenderingHints scaleHint = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
 	private final Map<String, ImageIcon> iconCache = new HashMap<>();
 	private final String filepath;
-	private int menuFontHeight;
-	private int labelFontHeight;
+
+	private final int menuFontHeight;
+	private final int labelFontHeight;
+	private final int toolbarIconSize;
+	private final boolean scaleMenuIcons;
 
  	protected static class LazyInstanceHolder
 	{
@@ -65,6 +72,8 @@ public class IconMgr
 		filepath = ResourcePath.ICONS.getPath() + "/";
 		menuFontHeight = LnFHelper.getMenuFontHeight();
 		labelFontHeight = LnFHelper.getLabelFontHeight();
+		toolbarIconSize = Settings.getInstance().getToolbarIconSize();
+		scaleMenuIcons = Settings.getInstance().getScaleMenuIcons();
 	}
 
 	/**
@@ -76,7 +85,7 @@ public class IconMgr
 	 */
 	public ImageIcon getGifIcon(String baseName)
 	{
-		return getIcon(baseName, Settings.getInstance().getToolbarIconSize(), false);
+		return getIcon(baseName, toolbarIconSize, false);
 	}
 
 	/**
@@ -114,8 +123,7 @@ public class IconMgr
 	 */
 	public ImageIcon getToolbarIcon(String basename)
 	{
-		int size = Settings.getInstance().getToolbarIconSize();
-		return getIcon(basename.toLowerCase(), size, true);
+		return getIcon(basename.toLowerCase(), toolbarIconSize, true);
 	}
 
 	/**
@@ -127,7 +135,11 @@ public class IconMgr
 	 */
 	public int getSizeForMenuItem()
 	{
-		return getSizeForFont(menuFontHeight);
+		if (scaleMenuIcons)
+		{
+			return getSizeForFont(menuFontHeight);
+		}
+		return SMALL_ICON;
 	}
 
 	/**
@@ -139,7 +151,11 @@ public class IconMgr
 	 */
 	public int getSizeForLabel()
 	{
-		return getSizeForFont(labelFontHeight);
+		if (scaleMenuIcons)
+		{
+			return getSizeForFont(labelFontHeight);
+		}
+		return SMALL_ICON;
 	}
 
 	/**
@@ -152,13 +168,13 @@ public class IconMgr
 	{
 		if (fontHeight < 24)
 		{
-			return 16;
+			return SMALL_ICON;
 		}
 		else if (fontHeight < 32)
 		{
-			return 24;
+			return MEDIUM_ICON;
 		}
-		return 32;
+		return LARGE_ICON;
 	}
 
 	/**
@@ -170,7 +186,11 @@ public class IconMgr
 	 */
 	public int getSizeForComponentFont(JComponent comp)
 	{
-		int fontHeight = WbSwingUtilities.getFontHeight(comp);
+		int fontHeight = 16;
+		if (scaleMenuIcons)
+		{
+			fontHeight = WbSwingUtilities.getFontHeight(comp);
+		}
 		return getSizeForFont(fontHeight);
 	}
 
@@ -240,7 +260,7 @@ public class IconMgr
 				result = retrieveImage(fname);
 				if (result == null)
 				{
-					if (imageSize > 16)
+					if (imageSize > SMALL_ICON)
 					{
 						LogMgr.logDebug("IconMgr.getIcon()", "Icon " + fname + " not found. Scaling existing 16px image");
 						ImageIcon small = retrieveImage(makeBaseFilename(baseName, isPng));
@@ -259,7 +279,7 @@ public class IconMgr
 
 	private String makeBaseFilename(String basename, boolean isPng)
 	{
-		return basename + (isPng ? "16.png" : "16.gif");
+		return makeFilename(basename, SMALL_ICON, isPng);
 	}
 
 	private String makeFilename(String basename, int size, boolean isPng)

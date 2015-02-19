@@ -1660,6 +1660,16 @@ public class Settings
 		this.setProperty("workbench.gui.iconsize", aValue);
 	}
 
+	public boolean getScaleMenuIcons()
+	{
+		return getBoolProperty("workbench.gui.scale.menuicon", true);
+	}
+
+	public void setScaleMenuIcons(boolean flag)
+	{
+		this.setProperty("workbench.gui.scale.menuicon", flag);
+	}
+
 	public boolean getCacheIcons()
 	{
 		return getBoolProperty("workbench.gui.icon.cache.enabled", true);
