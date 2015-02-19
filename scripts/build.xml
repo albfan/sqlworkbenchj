@@ -214,7 +214,7 @@
        into the PDF manual by the target "pdf" -->
   <target name="fop" depends="init, docbook-history">
     <!-- fop seems to require absolute pathnames... -->
-    <dirname property="docdir" file="${docbook.root}/images/note.png"/>
+    <dirname property="docdir" file="${docbook.root}/images/colorsvg/note.svg"/>
     <dirname property="imgdir" file="${src}/workbench/resource/images/filter16.png"/>
     <!--
     <echo message="${docdir}"/>
@@ -252,7 +252,7 @@
       <param name="ignore.image.scaling" expression="0"/>
       <param name="admon.graphics" expression="1"/>
       <param name="admon.graphics.path" expression="${docdir}/"/>
-      <param name="admon.graphics.extension" expression=".png"/>
+      <param name="admon.graphics.extension" expression=".svg"/>
       <param name="admon.graphic.width" expression="16p"/>
       <param name="admon.textlabel" expression="0"/>
       <param name="body.font.master" expression="10"/>
@@ -277,6 +277,7 @@
       <param name="generate.index" expression="1"/>
       <param name="index.prefer.titleabbrev" expression="1"/>
       <param name="column.count.index" expression="2"/>
+      <param name="use.svg" expression="1"/>
 
       <!-- <param name="axf.extensions" expression="1"/> -->
     </xslt>
@@ -307,21 +308,22 @@
 
     <copy todir="${html-outdir}/${html-resource-dir}" flatten="true">
       <fileset dir="${src}/workbench/resource/images">
-        <include name="colfilter16.gif"/>
-        <include name="ExecuteSel16.gif"/>
-        <include name="Remove16.gif"/>
-        <include name="filter16.gif"/>
-        <include name="NewProfile16.gif"/>
-        <include name="NewFolder16.gif"/>
-        <include name="Delete16.gif"/>
-        <include name="CopyProfile16.gif"/>
-        <include name="ExecuteSel16.gif"/>
-        <include name="Open16.gif"/>
+        <include name="colfilter16.png"/>
+        <include name="execute_sel16.png"/>
+        <include name="delete16.png"/>
+        <include name="filter16.png"/>
+        <include name="new-profile16.png"/>
+        <include name="folder_new16.png"/>
+        <include name="copy-profile16.png"/>
+        <include name="open16.png"/>
       </fileset>
       <fileset dir="${docbook.root}/images">
         <include name="note.png"/>
         <include name="caution.png"/>
         <include name="important.png"/>
+        <include name="note.svg"/>
+        <include name="caution.svg"/>
+        <include name="important.svg"/>
       </fileset>
     </copy>
 
@@ -413,6 +415,7 @@
       <param name="html.cleanup" expression="1"/>
       <param name="navig.showtitles" expression="1"/>
       <param name="css.decoration" expression="1"/>
+      <param name="use.svg" expression="1"/>
     </xslt>
 
     <delete>
@@ -464,7 +467,7 @@
       <param name="html.cleanup" expression="1"/>
       <param name="navig.showtitles" expression="1"/>
       <param name="css.decoration" expression="1"/>
-
+      <param name="use.svg" expression="1"/>
     </xslt>
   </target>
 
