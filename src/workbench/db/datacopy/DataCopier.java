@@ -624,7 +624,7 @@ public class DataCopier
 
 	public void cancel()
 	{
-		this.sourceData.cancel();
+		if (sourceData != null) this.sourceData.cancel();
 	}
 
 	private void initImporterForQuery(String query, boolean skipTargetCheck)

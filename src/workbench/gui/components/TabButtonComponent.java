@@ -79,7 +79,7 @@ public class TabButtonComponent
 		label = new JLabel(title);
 
 		int imgSize = IconMgr.getInstance().getSizeForComponentFont(label);
-		ImageIcon img = IconMgr.getInstance().getPngIcon("closePanel", imgSize);
+		ImageIcon img = IconMgr.getInstance().getPngIcon("close-panel", imgSize);
 		closeButton = new WbButton(img);
 		closeButton.setBackground(getBackground());
 		Dimension d = new Dimension(img.getIconWidth() + 4, img.getIconHeight() + 4);

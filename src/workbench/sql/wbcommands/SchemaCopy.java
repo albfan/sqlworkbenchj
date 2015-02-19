@@ -275,6 +275,12 @@ class SchemaCopy
 			}
 			LogMgr.logTrace("SchemaCopy.mapTables()", "Copying " + sourceTable.getFullyQualifiedName(sourceConnection) + " to "  + targetTable.getFullyQualifiedName(targetConnection));
 			targetToSourceMap.put(targetTable, sourceTable);
+
+			if (cancel)
+			{
+				System.out.println("#### Cancelling!");
+				break;
+			}
 		}
 	}
 
@@ -396,6 +402,8 @@ class SchemaCopy
 		this.doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && (!createTargetTable());
 		mapTables();
 
+		if (cancel) return false;
+
 		if (checkDependencies && !doSyncDelete)
 		{
 			List<TableIdentifier> targetTables = new ArrayList<>(targetToSourceMap.keySet());
@@ -436,6 +444,7 @@ class SchemaCopy
 	public void cancel()
 	{
 		this.cancel = true;
+		this.messages.appendMessageKey("MsgCopyCancelled");
 		if (this.copier != null)
 		{
 			this.copier.cancel();
