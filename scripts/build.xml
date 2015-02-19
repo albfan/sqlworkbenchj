@@ -215,7 +215,7 @@
   <target name="fop" depends="init, docbook-history">
     <!-- fop seems to require absolute pathnames... -->
     <dirname property="docdir" file="${docbook.root}/images/note.png"/>
-    <dirname property="imgdir" file="${src}/workbench/resource/images/filter16.gif"/>
+    <dirname property="imgdir" file="${src}/workbench/resource/images/filter16.png"/>
     <!--
     <echo message="${docdir}"/>
     <echo message="${imgdir}"/>
