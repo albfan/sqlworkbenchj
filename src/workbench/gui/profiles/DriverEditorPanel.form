@@ -123,7 +123,7 @@
     <Component class="javax.swing.JButton" name="detectDriverButton">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getPngIcon(&quot;magnifier&quot;)" type="code"/>
+          <Connection code="IconMgr.getInstance().getLabelIcon(&quot;magnifier&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="language/wbstrings.properties" key="MsgDetectDriver" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
@@ -156,7 +156,7 @@
     <Component class="workbench.gui.components.ClasspathEditor" name="classpathEditor">
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="1" gridY="2" gridWidth="2" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="7" insetsLeft="3" insetsBottom="0" insetsRight="0" anchor="17" weightX="0.0" weightY="0.0"/>
+          <GridBagConstraints gridX="1" gridY="2" gridWidth="2" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="7" insetsLeft="3" insetsBottom="0" insetsRight="3" anchor="17" weightX="0.0" weightY="0.0"/>
         </Constraint>
       </Constraints>
     </Component>

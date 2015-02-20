@@ -268,7 +268,7 @@ public class IconMgr
 					}
 					else
 					{
-						result = retrieveImage("empty.gif");
+						LogMgr.logWarning("IconMgr.getIcon()", "Icon " + fname + " not found!");
 					}
 				}
 				if (useCache) iconCache.put(fname, result);
