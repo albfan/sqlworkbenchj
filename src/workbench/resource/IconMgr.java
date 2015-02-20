@@ -207,30 +207,6 @@ public class IconMgr
 	}
 
 	/**
-	 * Return a GIF icon properly sized for a menu item in the UI.
-	 *
-	 * @param basename the basename of the GIF icon
-	 * @return
-	 */
-	public ImageIcon getMenuGifIcon(String basename)
-	{
-		int imgSize = getSizeForMenuItem();
-		return getIcon(basename, imgSize, false);
-	}
-
-	/**
-	 * Return a GIF icon properly sized for a label in the UI.
-	 *
-	 * @param basename the basename of the GIF icon
-	 * @return
-	 */
-	public ImageIcon getLabelGifIcon(String basename)
-	{
-		int imgSize = getSizeForLabel();
-		return getIcon(basename, imgSize, false);
-	}
-
-	/**
 	 * Return an image icon used to show the "loading" image in the SQL Panel.
 	 *
 	 * These images are currently not adjusted to the correct size.

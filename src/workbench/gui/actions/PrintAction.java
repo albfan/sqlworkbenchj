@@ -47,7 +47,7 @@ public class PrintAction
 		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtPrint");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		this.setPngIcon("print");
+		this.setIcon("print");
 		this.setEnabled(false);
 	}
 

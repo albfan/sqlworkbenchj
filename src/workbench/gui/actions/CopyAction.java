@@ -52,7 +52,7 @@ public class CopyAction
 		{
 			setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.CTRL_MASK));
 		}
-		this.setPngIcon("copy");
+		this.setIcon("copy");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

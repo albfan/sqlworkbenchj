@@ -36,7 +36,7 @@ public class ShowManualAction
 	{
 		super();
 		initMenuDefinition("MnuTxtHelpManual");
-		setPngIcon("pdf");
+		setIcon("pdf");
 	}
 
 	@Override

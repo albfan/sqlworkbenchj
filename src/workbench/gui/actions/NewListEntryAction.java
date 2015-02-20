@@ -41,14 +41,14 @@ public class NewListEntryAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition(aKey);
-		this.setPngIcon("New");
+		this.setIcon("New");
 	}
 
 	public NewListEntryAction(FileActions aClient)
 	{
 		super();
 		this.client = aClient;
-		this.setPngIcon("New");
+		this.setIcon("New");
 		String tip = ResourceMgr.getDescription("LblNewListEntry", true);
 		this.initMenuDefinition(ResourceMgr.getString("LblNewListEntry"), tip, null);
 	}

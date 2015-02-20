@@ -39,7 +39,7 @@ public class ShowHelpAction
 	{
 		super();
 		initMenuDefinition("MnuTxtHelpContents",KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
-		setPngIcon("help");
+		setIcon("help");
 	}
 
 	@Override

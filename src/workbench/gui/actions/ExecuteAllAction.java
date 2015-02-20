@@ -47,7 +47,7 @@ public class ExecuteAllAction extends WbAction
 		super();
 		this.client = aPanel;
 		this.initMenuDefinition("MnuTxtExecuteAll", KeyStroke.getKeyStroke(KeyEvent.VK_E, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setPngIcon("execute_all");
+		this.setIcon("execute_all");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
 	}

@@ -50,7 +50,7 @@ public class SpoolDataAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition(msgKey);
-		this.setPngIcon("spool-data");
+		this.setIcon("spool-data");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
 	}

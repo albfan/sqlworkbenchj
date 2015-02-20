@@ -47,7 +47,7 @@ public class DataPumperAction
 		super();
 		this.initMenuDefinition("MnuTxtDataPumper");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_TOOLS);
-		this.setPngIcon("datapumper");
+		this.setIcon("datapumper");
 		this.parent = win;
 	}
 

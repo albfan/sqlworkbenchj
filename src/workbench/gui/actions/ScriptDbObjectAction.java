@@ -54,7 +54,7 @@ public class ScriptDbObjectAction
 		this.source = client;
 		this.selection = list;
 		setEnabled(false);
-		setPngIcon("script");
+		setIcon("script");
 		list.addListSelectionListener(this);
 	}
 

@@ -46,7 +46,7 @@ public class SaveListFileAction
 		super();
 		this.client = aClient;
 		this.setMenuTextByKey(labelKey);
-		this.setPngIcon(IconMgr.IMG_SAVE);
+		this.setIcon(IconMgr.IMG_SAVE);
 	}
 
 	@Override

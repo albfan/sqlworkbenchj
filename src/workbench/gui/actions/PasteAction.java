@@ -52,7 +52,7 @@ public class PasteAction extends WbAction
 		{
 			setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.SHIFT_MASK));
 		}
-		this.setPngIcon("paste");
+		this.setIcon("paste");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

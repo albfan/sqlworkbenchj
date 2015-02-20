@@ -39,7 +39,7 @@ public class RedoAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtRedo");
-		this.setPngIcon("redo");
+		this.setIcon("redo");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

@@ -48,7 +48,7 @@ public class SelectionFilterAction
 	{
 		super();
 		this.initMenuDefinition("MnuTxtColFilter");
-		this.setPngIcon("colfilter");
+		this.setIcon("colfilter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 		this.setEnabled(false);

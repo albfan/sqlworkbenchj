@@ -49,7 +49,7 @@ public class ProfileTreeCellRenderer
 		super();
 		Color c = getBackgroundSelectionColor();
 		dropBorder = new LineBorder(c, 1);
-//		setLeafIcon(IconMgr.getInstance().getLabelGifIcon("profile"));
+		setLeafIcon(IconMgr.getInstance().getLabelIcon("profile"));
 		setOpenIcon(IconMgr.getInstance().getLabelIcon("folder-open"));
 		setClosedIcon(IconMgr.getInstance().getLabelIcon("folder"));
 	}

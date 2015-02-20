@@ -46,7 +46,7 @@ public class FormatSqlAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtReformatSql",KeyStroke.getKeyStroke(KeyEvent.VK_R, PlatformShortcuts.getDefaultModifier()));
-		this.setPngIcon("format");
+		this.setIcon("format");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateToolbarSeparator(true);
 	}

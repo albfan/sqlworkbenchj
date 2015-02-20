@@ -66,7 +66,7 @@ public class FilterPickerAction
 		super();
 		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtPickFilter");
-		this.setPngIcon("dropdown");
+		this.setIcon("dropdown");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		FilterDefinitionManager mgr = FilterDefinitionManager.getInstance();
 		mgr.addPropertyChangeListener(this);

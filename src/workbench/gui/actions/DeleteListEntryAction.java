@@ -50,7 +50,7 @@ public class DeleteListEntryAction extends WbAction
 		isConfigurable = false;
 		setMenuTextByKey(aKey);
 		setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
-		setPngIcon("delete");
+		setIcon("delete");
 	}
 
 	@Override

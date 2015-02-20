@@ -46,7 +46,7 @@ public class ResetFilterAction
 		super();
 		this.initMenuDefinition("MnuTxtResetFilter");
 		this.setClient(aClient);
-		this.setPngIcon("resetfilter");
+		this.setIcon("resetfilter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 		this.setEnabled(false);

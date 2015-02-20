@@ -41,7 +41,7 @@ public class QuickFilterAction
 		super();
 		this.client = filterGui;
 		this.initMenuDefinition("MnuTxtQuickFilter");
-		this.setPngIcon("filter");
+		this.setIcon("filter");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 	}

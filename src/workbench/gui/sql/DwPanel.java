@@ -153,7 +153,6 @@ public class DwPanel
 	private StatementRunner stmtRunner;
 	private GenericRowMonitor genericRowMonitor;
 	private ReferenceTableNavigator referenceNavigator;
-	private ImageIcon warningIcon;
 	private boolean showSQLAsTooltip;
 	private JLabel sqlInfo;
 	private boolean enableSqlInfo;
@@ -997,10 +996,6 @@ public class DwPanel
 
 	private void clearWarningIcon()
 	{
-		if (warningIcon != null)
-		{
-			warningIcon.getImage().flush();
-		}
 		JTabbedPane tab = getTabParent();
 		int index = getTabIndex(tab);
 		if (index > -1)
@@ -1077,11 +1072,7 @@ public class DwPanel
 
 	private ImageIcon getWarningIcon()
 	{
-		if (warningIcon == null)
-		{
-			warningIcon = IconMgr.getInstance().getLabelIcon("alert");
-		}
-		return warningIcon;
+		return IconMgr.getInstance().getLabelIcon("alert");
 	}
 
 	public void readColumnComments()

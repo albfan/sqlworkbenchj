@@ -38,7 +38,7 @@ public class BookmarksAction
 	{
 		super();
 		initMenuDefinition("MnuTxtBookmarks");
-		setPngIcon("bookmark");
+		setIcon("bookmark");
 		parent = window;
 	}
 

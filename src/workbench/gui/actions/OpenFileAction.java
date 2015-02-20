@@ -84,7 +84,7 @@ public class OpenFileAction
 		mainWindow = window;
 		container = client;
 		this.initMenuDefinition("MnuTxtFileOpen", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier()));
-		this.setPngIcon("Open");
+		this.setIcon("Open");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		setCreateMenuSeparator(true);
 	}

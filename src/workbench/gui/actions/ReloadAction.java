@@ -40,7 +40,7 @@ public class ReloadAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("TxtReload");
-		this.setPngIcon("refresh");
+		this.setIcon("refresh");
 	}
 
 	public boolean ctrlPressed()

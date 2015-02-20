@@ -116,7 +116,7 @@ public class ProfileEditorPanel
 		p.setLayout(new BorderLayout());
 		this.toolbar = new WbToolbar();
 		newItem = new NewListEntryAction(this, "LblNewProfile");
-		newItem.setPngIcon("new-profile");
+		newItem.setIcon("new-profile");
 		this.toolbar.add(newItem);
 
 		copyItem = new CopyProfileAction(this);

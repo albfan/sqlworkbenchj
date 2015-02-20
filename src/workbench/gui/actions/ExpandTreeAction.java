@@ -41,7 +41,7 @@ public class ExpandTreeAction
 		super();
 		this.client = tree;
 		this.initMenuDefinition("LblExpandAll");
-		this.setPngIcon("expand");
+		this.setIcon("expand");
 	}
 
 	@Override

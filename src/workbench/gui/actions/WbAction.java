@@ -45,7 +45,6 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
-import workbench.log.LogMgr;
 import workbench.resource.IconMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
@@ -80,7 +79,6 @@ public class WbAction
 	private final List<WeakReference<JMenuItem>> createdItems = new LinkedList<>();
 	protected boolean isConfigurable = true;
 	private String descriptiveName;
-	private boolean isPngIcon;
 
 	public WbAction()
 	{
@@ -536,16 +534,6 @@ public class WbAction
 		return (KeyStroke) getValue(DEFAULT_ACCELERATOR);
 	}
 
-	public void setPngIcon(String key)
-	{
-		this.iconKey = key;
-		this.isPngIcon = true;
-		if (key == null)
-		{
-			removeIcon();
-		}
-	}
-
 	public void setIcon(String key)
 	{
 		// Just store the key for the resource manager
@@ -553,8 +541,7 @@ public class WbAction
 		// needed in getValue()
 		// this will retrieve the icons "lazily" so not all
 		// of them are actually loaded during startup
-		iconKey = key;
-		isPngIcon = false;
+		this.iconKey = key;
 		if (key == null)
 		{
 			removeIcon();
@@ -585,7 +572,7 @@ public class WbAction
 		}
 		ImageIcon icon = (ImageIcon)super.getValue(key);
 		if (icon != null) return icon;
-		icon = IconMgr.getInstance().getIcon(iconKey, size, isPngIcon);
+		icon = IconMgr.getInstance().getIcon(iconKey, size, true);
 		if (icon != null)
 		{
 			this.putValue(key, icon);

@@ -41,7 +41,7 @@ public class CollapseTreeAction
 		super();
 		this.client = tree;
 		this.initMenuDefinition("LblCollapseAll");
-		this.setPngIcon("collapse");
+		this.setIcon("collapse");
 	}
 
 	@Override
