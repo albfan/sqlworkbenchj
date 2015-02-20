@@ -590,10 +590,6 @@ public class WbAction
 		{
 			this.putValue(key, icon);
 		}
-		else
-		{
-			LogMgr.logWarning("WbAction.getValue()", "Could not retrieve icon with key: " + iconKey + " for action " + this.getClass().getName());
-		}
 		return icon;
 	}
 
