@@ -77,6 +77,13 @@ public class SelectAnalyzerTest
 		assertNotNull(tbl);
 		assertEquals("bar", tbl.getTableName().toLowerCase());
 
+		sql = "select * from  minus select b. from bar b";
+		context = new StatementContext(null, sql, 13, false);
+		analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+		int ctx = analyzer.getContext();
+		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, ctx);
+
 		sql = "select f. from foo f intersect select b. from bar b";
 		pos = sql.indexOf("b.") + 2;
 		context = new StatementContext(null, sql, pos, false);
