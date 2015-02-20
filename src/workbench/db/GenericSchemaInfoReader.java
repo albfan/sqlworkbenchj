@@ -205,14 +205,6 @@ public class GenericSchemaInfoReader
 		{
 			connection.rollback(sp);
 			LogMgr.logWarning("GenericSchemaInfoReader.getCurrentSchema()", "Error reading current schema using query: " + schemaQuery, e);
-			if (e instanceof SQLException)
-			{
-				// When a SQLException is thrown, we assume an error with the configured query
-				// So disabled it to avoid subsequent errors
-				this.schemaQuery = null;
-				SqlUtil.closeStatement(query);
-				this.query = null;
-			}
 			currentSchema = null;
 		}
 		finally
