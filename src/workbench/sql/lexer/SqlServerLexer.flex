@@ -157,6 +157,7 @@ keyword=(
 (PRIMARY{wsp}KEY)|
 (FOREIGN{wsp}KEY)|
 (UNION{wsp}ALL)|
+(EXCEPT{wsp}ALL)|
 (PARTITION{wsp}BY)|
 (GROUP{wsp}BY)|
 (ORDER{wsp}BY)|

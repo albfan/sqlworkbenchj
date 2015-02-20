@@ -171,7 +171,7 @@ public class StatementContext
 
 	private BaseAnalyzer checkSubselect(WbConnection conn, String sql, int pos)
 	{
-		Set<String> unionKeywords = CollectionUtil.caseInsensitiveSet("UNION", "UNION ALL", "MINUS", "INTERSECT", "EXCEPT");
+		Set<String> unionKeywords = CollectionUtil.caseInsensitiveSet("UNION", "UNION ALL", "MINUS", "INTERSECT", "EXCEPT", "EXCEPT ALL");
 
 		try
 		{
@@ -186,9 +186,9 @@ public class StatementContext
 			int lastEnd = 0;
 			String verb = t.getContents();
 
-			// Will contain the position of each SELECT verb
-			// if a UNION is encountered.
-			List<Integer> unionStarts = new ArrayList<>();
+			// Will contain each "union" token to find the start and end of each sub-statement
+			List<SQLToken> unionStarts = new ArrayList<>();
+			
 			int bracketCount = 0;
 			boolean inSubselect = false;
 			boolean checkForInsertSelect = verb.equals("INSERT") || verb.equals("CREATE") || verb.equals("CREATE OR REPLACE");
@@ -233,28 +233,7 @@ public class StatementContext
 				}
 				else if (bracketCount == 0 && unionKeywords.contains(value))
 				{
-					if (value.equals("UNION"))
-					{
-						SQLToken t2 = lexer.getNextToken(false, false);
-						if (t2.getContents().equals("ALL"))
-						{
-							// swallow potential UNION ALL
-							unionStarts.add(Integer.valueOf(t.getCharBegin()));
-						}
-						else
-						{
-							unionStarts.add(Integer.valueOf(t.getCharEnd()));
-
-							// continue with the token just read
-							lastToken = t;
-							t = t2;
-							continue;
-						}
-					}
-					else
-					{
-						unionStarts.add(Integer.valueOf(t.getCharEnd()));
-					}
+					unionStarts.add(t);
 				}
 
 				if (bracketCount == 1 && lastToken.getContents().equals("(") && value.equals("SELECT"))
@@ -272,18 +251,19 @@ public class StatementContext
 				int lastPos = 0;
 				while (index < unionStarts.size())
 				{
-					int startPos = unionStarts.get(index).intValue();
+					int startPos = unionStarts.get(index).getCharBegin();
 					if (lastPos <= pos && pos <= startPos)
 					{
 						int newPos = pos - lastPos;
-						StatementContext context = new StatementContext(conn, sql.substring(lastPos, startPos), newPos);
+						String subSql = sql.substring(lastPos, startPos);
+						StatementContext context = new StatementContext(conn, subSql, newPos);
 						return context.getAnalyzer();
 					}
 					lastPos = startPos;
 					index ++;
 				}
 				// check last union
-				int startPos = unionStarts.get(unionStarts.size() - 1).intValue();
+				int startPos = unionStarts.get(unionStarts.size() - 1).getCharEnd();
 				if (pos >= startPos)
 				{
 					int newPos = pos - startPos;

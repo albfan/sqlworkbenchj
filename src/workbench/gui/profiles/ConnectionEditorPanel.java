@@ -281,6 +281,7 @@ public class ConnectionEditorPanel
     jPanel6 = new javax.swing.JPanel();
     editConnectionScriptsButton = new FlatButton();
     editFilterButton = new FlatButton();
+    filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
     groupNameLabel = new javax.swing.JLabel();
     tfProfileName = new StringPropertyEditor();
 
@@ -628,6 +629,7 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 7;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
     jPanel2.add(extendedProps, gridBagConstraints);
 
     timeoutLabel.setLabelFor(tfTimeout);
@@ -887,7 +889,9 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weighty = 1.0;
     jPanel6.add(editConnectionScriptsButton, gridBagConstraints);
 
     editFilterButton.setText(ResourceMgr.getString("LblSchemaFilterBtn")); // NOI18N
@@ -899,9 +903,12 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     jPanel6.add(editFilterButton, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.weightx = 1.0;
+    jPanel6.add(filler2, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -1061,14 +1068,14 @@ public class ConnectionEditorPanel
 	private void editConnectionScriptsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editConnectionScriptsButtonActionPerformed
 		Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
 		EditConnectScriptsPanel.editScripts(d, this.getProfile());
-		checkScripts();
+		checkScriptsAndFilters();
 	}//GEN-LAST:event_editConnectionScriptsButtonActionPerformed
 
 	private void editFilterButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editFilterButtonActionPerformed
 	{//GEN-HEADEREND:event_editFilterButtonActionPerformed
 		Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
 		EditConnectionFiltersPanel.editFilter(d, this.getProfile());
-		checkFilters();
+		checkScriptsAndFilters();
 	}//GEN-LAST:event_editFilterButtonActionPerformed
 
   private void tfURLFocusLost(java.awt.event.FocusEvent evt)//GEN-FIRST:event_tfURLFocusLost
@@ -1094,6 +1101,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox emptyStringIsNull;
   protected javax.swing.JButton extendedProps;
   protected javax.swing.JLabel fetchSizeLabel;
+  protected javax.swing.Box.Filler filler2;
   protected javax.swing.JLabel groupNameLabel;
   protected javax.swing.JCheckBox hideWarnings;
   protected javax.swing.JTextField icon;
@@ -1362,32 +1370,37 @@ public class ConnectionEditorPanel
 		cbStorePassword.setEnabled(!prompt);
 	}
 
-	private void checkFilters()
+	private void checkScriptsAndFilters()
 	{
+		editConnectionScriptsButton.setIcon(null);
+		editFilterButton.setIcon(null);
+
 		int f1 = currentProfile == null ? 0 : getFilterSize(currentProfile.getSchemaFilter());
 		int f2 = currentProfile == null ? 0 : getFilterSize(currentProfile.getCatalogFilter());
+
 		boolean hasFilter = (f1 + f2) > 0;
+
 		if (hasFilter)
 		{
 			editFilterButton.setIcon(IconMgr.getInstance().getLabelIcon("tick"));
 		}
-		else
-		{
-			editFilterButton.setIcon(null);
-		}
-	}
 
-	private void checkScripts()
-	{
 		boolean hasScript = (currentProfile == null ? false : currentProfile.hasConnectScript());
 		if (hasScript)
 		{
 			editConnectionScriptsButton.setIcon(IconMgr.getInstance().getLabelIcon("tick"));
 		}
-		else
-		{
-			editConnectionScriptsButton.setIcon(null);
-		}
+
+//		if (!hasFilter && !hasScript) return;
+//
+//		if (hasFilter && !hasScript)
+//		{
+//			WbSwingUtilities.makeEqualHeight(editFilterButton, editConnectionScriptsButton);
+//		}
+//		else
+//		{
+//			WbSwingUtilities.makeEqualHeight(editConnectionScriptsButton, editFilterButton);
+//		}
 	}
 
 	private void checkExtendedProps()
@@ -1433,8 +1446,7 @@ public class ConnectionEditorPanel
 			Color c = this.currentProfile.getInfoDisplayColor();
 			this.infoColor.setSelectedColor(c);
 			checkExtendedProps();
-			checkScripts();
-			checkFilters();
+			checkScriptsAndFilters();
 			checkOracle();
 			checkUncommitted();
 			checkPromptUsername();
