@@ -84,11 +84,20 @@
   <section id="license-restrictions">
     <title>Restrictions</title>
     <para>
-      The right to use this software is explicitely <emphasis role="bold">NOT</emphasis> granted to the government of the United States of America
-	  or organizations directly related to it.
+      The right to use this software is explicitely <emphasis role="bold">NOT</emphasis> granted to the governments of the following countries or 
+      organizations directly related to them:
 	 </para>
-	 <para>
-	  Therefor members of the USA government or any of its organization are <emphasis role="bold">not</emphasis> allowed to download or use this software.
+   <para>
+		<itemizedlist spacing="normal">
+			<listitem>The United States of America</listitem>
+			<listitem>United Kingdom of Great Britain and Northern Ireland</listitem>
+			<listitem>The People's Republic of China</listitem>
+			<listitem>The Russian Federation</listitem>
+		</itemizedlist>
+    </para>
+	  <para>
+	    Members of the above mentioned governments or any of its organizations (especially, but not limited to, the so called "intelligence" agencies) are 
+      <emphasis role="bold">NOT ALLOWED</emphasis> to download or use this software.
     </para>
   </section>
 
@@ -113,6 +122,11 @@
       with or without modifications, and in Source or Object form, provided that You meet the following conditions:
     </para>
     <orderedlist>
+      <listitem>
+        <para>
+          You are not subject to the <link linkend="license-restrictions">restrictions</link>
+        </para>
+      </listitem>
       <listitem>
         <para>
           You must give any other recipients of the Work or Derivative Works a copy of this License; and
