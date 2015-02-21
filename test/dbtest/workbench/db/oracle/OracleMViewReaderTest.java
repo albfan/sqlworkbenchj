@@ -65,6 +65,47 @@ public class OracleMViewReaderTest
 	}
 
 	@Test
+	public void testPartitionedMview()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		assertNotNull("Oracle not available", con);
+
+		String sql =
+			"CREATE table person (id integer primary key, name varchar(100));" +
+			"create materialized view mv_person  \n" +
+			"  partition by list (id) \n" +
+			"  ( \n " +
+			"    partition p_1 values (1), \n" +
+			"    partition p_2 values (2) \n" +
+			"  )\n" +
+			"  build deferred \n" +
+			"  refresh complete on demand with rowid \n" +
+			"  enable query rewrite \n" +
+			"as\n" +
+			"select * from person;";
+		TestUtil.executeScript(con, sql);
+		TableIdentifier mview = con.getMetadata().findObject(new TableIdentifier("MV_PERSON"));
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+		String source = builder.getTableSource(mview, false, false);
+		assertNotNull(source);
+//		System.out.println(source);
+		String expected =
+			"CREATE MATERIALIZED VIEW MV_PERSON\n" +
+			"  PARTITION BY LIST (ID)\n" +
+			"  (\n" +
+			"    PARTITION P_1 VALUES (1),  \n" +
+			"    PARTITION P_2 VALUES (2)\n" +
+			"  )\n" +
+			"  BUILD DEFERRED\n" +
+			"  REFRESH COMPLETE ON DEMAND WITH ROWID\n" +
+			"  ENABLE QUERY REWRITE\n" +
+			"AS\n" +
+			"SELECT PERSON.ID ID,PERSON.NAME NAME FROM PERSON PERSON;";
+		assertEquals(expected, source.trim());
+	}
+
+	@Test
 	public void testGetMViewSource1()
 		throws Exception
 	{
