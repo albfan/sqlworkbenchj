@@ -48,7 +48,6 @@ import javax.swing.UIManager;
 import workbench.resource.IconMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
 
 import workbench.gui.components.WbMenuItem;
@@ -557,7 +556,7 @@ public class WbAction
 		}
 		else if (key.equals(Action.LARGE_ICON_KEY))
 		{
-			return getIcon(Action.LARGE_ICON_KEY, Settings.getInstance().getToolbarIconSize());
+			return getIcon(Action.LARGE_ICON_KEY, IconMgr.getInstance().getToolbarIconSize());
 		}
 		return super.getValue(key);
 	}
