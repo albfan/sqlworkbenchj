@@ -1128,6 +1128,7 @@ public class WbConnection
 			StringBuilder buff = new StringBuilder(100);
 			String user = getDisplayUser();
 			boolean hasUser = false;
+			boolean hasCatalog = false;
 			if (StringUtil.isNonBlank(user))
 			{
 				buff.append(ResourceMgr.getString("TxtUser"));
@@ -1135,6 +1136,7 @@ public class WbConnection
 				buff.append(user);
 				hasUser = true;
 			}
+
 			String catalog = isBusy ? currentCatalog : metaData.getCurrentCatalog();
 			if (StringUtil.isNonBlank(catalog))
 			{
@@ -1143,6 +1145,7 @@ public class WbConnection
 				buff.append(catName == null ? "Catalog" : StringUtil.capitalize(catName));
 				buff.append('=');
 				buff.append(catalog);
+				hasCatalog = true;
 			}
 
 			String schema = useDisplaySchema ? getDisplaySchema() : null;
@@ -1157,10 +1160,10 @@ public class WbConnection
 			}
 
 			// the dummy schema in the ignoreSchema() call is there to prevent another lookup for the current schema
-			if (schema != null && !schema.equalsIgnoreCase(user) && !metaData.ignoreSchema(schema, "%.INVALID.%"))
+			if (schema != null && !schema.equalsIgnoreCase(user) && !metaData.ignoreSchema(schema, "<% INVALID %>"))
 			{
 				String schemaName = metaData.getSchemaTerm();
-				buff.append(", ");
+				if (hasUser || hasCatalog) buff.append(", ");
 				buff.append(schemaName == null ? "Schema" : StringUtil.capitalize(schemaName));
 				buff.append('=');
 				buff.append(schema);

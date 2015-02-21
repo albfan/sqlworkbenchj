@@ -217,6 +217,7 @@ public class ProcedureListPanel
 		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
 
 		ReloadAction a = new ReloadAction(this);
+    a.setUseLabelIconSize(true);
 
 		this.findPanel.addToToolbar(a, true, false);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshProcedureList"));

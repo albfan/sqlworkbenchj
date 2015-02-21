@@ -128,7 +128,10 @@ public class MacroTree
 		setAutoscrolls(true);
 		this.setMinimumSize(new Dimension(200, 400));
 		new MacroTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
-		WbSwingUtilities.adjustTreeRowHeight(this);
+
+		// setting the row height to 0 makes it dynamic
+		// so it will adjust properly to the font of the renderer
+		setRowHeight(0);
 	}
 
 	public final void loadMacros(boolean forPopup)

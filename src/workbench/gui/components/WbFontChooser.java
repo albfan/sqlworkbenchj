@@ -32,6 +32,7 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -48,9 +49,12 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.util.StringUtil;
 
 /**
@@ -168,17 +172,17 @@ public class WbFontChooser
 		String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 		DefaultListModel model = new DefaultListModel();
 
-		for (int i = 0; i < fonts.length; i++)
+		for (String font : fonts)
 		{
 			if (monospacedOnly)
 			{
-				Font f = new Font(fonts[i], Font.PLAIN, 10);
+				Font f = new Font(font, Font.PLAIN, 10);
 				FontMetrics fm = getFontMetrics(f);
 				int iWidth = fm.charWidth('i');
 				int mWidth = fm.charWidth('M');
 				if (iWidth != mWidth) continue;
 			}
-			model.addElement(fonts[i]);
+			model.addElement(font);
 		}
 		this.fontNameList.setModel(model);
 	}
@@ -219,7 +223,7 @@ public class WbFontChooser
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents()
   {
-		GridBagConstraints gridBagConstraints;
+    GridBagConstraints gridBagConstraints;
 
     fontSizeComboBox = new JComboBox();
     jScrollPane1 = new JScrollPane();
@@ -234,6 +238,7 @@ public class WbFontChooser
 
     fontSizeComboBox.setEditable(true);
     fontSizeComboBox.setModel(new DefaultComboBoxModel(new String[] { "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "36" }));
+    fontSizeComboBox.setSelectedIndex(4);
     fontSizeComboBox.setMaximumSize(new Dimension(200, 22));
     fontSizeComboBox.setMinimumSize(new Dimension(30, 22));
     fontSizeComboBox.setPreferredSize(new Dimension(40, 22));

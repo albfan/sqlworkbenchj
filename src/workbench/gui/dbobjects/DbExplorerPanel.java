@@ -60,6 +60,7 @@ import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -219,20 +220,16 @@ public class DbExplorerPanel
 			reloadSchemasAction =new ReloadAction(schemaReloader);
 			reloadSchemasAction.setEnabled(false);
 			reloadSchemasAction.setTooltip(ResourceMgr.getString("TxtReload"));
+      reloadSchemasAction.setUseLabelIconSize(true);
 
 			schemaLabel = new JLabel(ResourceMgr.getString("LblSchema"));
 
 			this.schemaSelector = new JComboBox();
-			Dimension d = new Dimension(80, 20);
-			Dimension max = new Dimension(150,40);
-			this.schemaSelector.setMinimumSize(d);
-			this.schemaSelector.setMaximumSize(max);
 
 			this.catalogSelector  = new JComboBox();
 			this.catalogLabel = new JLabel("Catalog");
 			this.catalogSelector.setVisible(false);
 			this.catalogSelector.setEnabled(false);
-			this.catalogSelector.setMaximumSize(max);
 			this.catalogLabel.setVisible(false);
 			reloadButton = new FlatButton(reloadSchemasAction);
 			reloadButton.setText(null);
@@ -266,12 +263,19 @@ public class DbExplorerPanel
 
 			this.toolbar = new WbToolbar();
 			this.toolbar.addDefaultBorder();
-			d = new Dimension(100, 30);
-			this.toolbar.setMinimumSize(d);
-			this.toolbar.setPreferredSize(d);
 			this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
-			this.connectionInfo.setMinimumSize(d);
 			this.toolbar.add(this.connectionInfo);
+
+      // this dummy button is used to calculate the height of the regular toolbar
+      // To avoid the UI from "jumping" when switchting between a SQL tab and the DbExplorer
+      WbToolbarButton button = new WbToolbarButton(IconMgr.getInstance().getToolbarIcon("empty"));
+      Dimension d = button.getPreferredSize();
+
+      Dimension cd = connectionInfo.getPreferredSize();
+      cd.height = d.height;
+      connectionInfo.setMinimumSize(cd);
+      connectionInfo.setPreferredSize(cd);
+
 			if (mainWindow != null) mainWindow.addExecutionListener(this);
 
 			KeyboardFocusManager focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();

@@ -331,6 +331,7 @@ public class TableListPanel
 		);
 
 		reloadAction = new ReloadAction(this);
+    reloadAction.setUseLabelIconSize(true);
 		reloadAction.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
 		reloadAction.addToInputMap(tableList);
 

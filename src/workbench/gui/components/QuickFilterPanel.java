@@ -229,7 +229,9 @@ public class QuickFilterPanel
 
 		this.toolbar = new WbToolbar();
 		this.filterAction = new QuickFilterAction(this);
+    filterAction.setUseLabelIconSize(true);
 		ResetFilterAction resetFilterAction = this.searchTable.getResetFilterAction();
+    resetFilterAction.setUseLabelIconSize(true);
 
 		this.toolbar.add(this.filterAction);
 		this.toolbar.add(resetFilterAction);

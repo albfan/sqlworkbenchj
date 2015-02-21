@@ -168,7 +168,7 @@ public class TriggerListPanel
 		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
 
 		ReloadAction a = new ReloadAction(this);
-
+    a.setUseLabelIconSize(true);
 		this.findPanel.addToToolbar(a, true, false);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTriggerList"));
 		listPanel.setLayout(new BorderLayout());

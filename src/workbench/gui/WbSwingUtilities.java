@@ -55,7 +55,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
-import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
@@ -1461,12 +1460,6 @@ public class WbSwingUtilities
 			size.width = minWidth;
 			button.setPreferredSize(size);
 		}
-	}
-
-	public static void adjustTreeRowHeight(JTree tree)
-	{
-		int height = getFontHeight(tree);
-		tree.setRowHeight(height);
 	}
 
 	public static void removeAllListeners(JComponent comp)

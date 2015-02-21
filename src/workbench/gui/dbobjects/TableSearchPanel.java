@@ -153,6 +153,7 @@ public class TableSearchPanel
 		WbToolbar toolbar = new WbToolbar();
 
 		WbAction reload = new ReloadAction(this.tableListSource);
+    reload.setUseLabelIconSize(true);
 		reload.setTooltip(ResourceMgr.getString("TxtRefreshTableList"));
 		toolbar.add(reload);
 		buttonPanel.add(toolbar);

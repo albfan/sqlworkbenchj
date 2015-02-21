@@ -263,7 +263,7 @@ public class ConnectionInfo
 		c.gridx = 0;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
-		ImageIcon png = IconMgr.getInstance().getLabelIcon(name);
+		ImageIcon png = IconMgr.getInstance().getPngIcon(name, IconMgr.getInstance().getToolbarIconSize());
 		iconLabel.setIcon(png);
 		add(iconLabel, c);
 	}

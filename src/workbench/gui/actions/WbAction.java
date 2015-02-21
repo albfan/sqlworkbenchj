@@ -78,6 +78,7 @@ public class WbAction
 	private final List<WeakReference<JMenuItem>> createdItems = new LinkedList<>();
 	protected boolean isConfigurable = true;
 	private String descriptiveName;
+  private boolean useLabelSizeAsLargeIcon;
 
 	public WbAction()
 	{
@@ -136,6 +137,11 @@ public class WbAction
 		boolean ctrlPressed = ((modifiers & ctrl) == ctrl);
 		return ctrlPressed;
 	}
+
+  public void setUseLabelIconSize(boolean flag)
+  {
+    this.useLabelSizeAsLargeIcon = flag;
+  }
 
 	public boolean isConfigurable()
 	{
@@ -556,7 +562,12 @@ public class WbAction
 		}
 		else if (key.equals(Action.LARGE_ICON_KEY))
 		{
-			return getIcon(Action.LARGE_ICON_KEY, IconMgr.getInstance().getToolbarIconSize());
+      int size = IconMgr.getInstance().getToolbarIconSize();
+      if (useLabelSizeAsLargeIcon)
+      {
+        size = IconMgr.getInstance().getSizeForLabel();
+      }
+			return getIcon(Action.LARGE_ICON_KEY, size);
 		}
 		return super.getValue(key);
 	}

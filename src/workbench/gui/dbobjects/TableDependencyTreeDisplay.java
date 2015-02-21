@@ -32,8 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.swing.JMenuItem;
 
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
@@ -42,18 +42,20 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+
 import workbench.WbManager;
+import workbench.interfaces.Resettable;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.renderer.DependencyTreeCellRenderer;
-import workbench.interfaces.Resettable;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -166,6 +168,7 @@ public class TableDependencyTreeDisplay
 			tree.putClientProperty("JTree.lineStyle", "Angled");
 			tree.setCellRenderer(renderer);
 			tree.addMouseListener(this);
+			tree.setRowHeight(0);
 			ToolTipManager.sharedInstance().registerComponent(tree);
 			WbScrollPane scroll = new WbScrollPane(tree);
 			add(scroll, BorderLayout.CENTER);
@@ -174,12 +177,12 @@ public class TableDependencyTreeDisplay
 
 	private void createTreeDisplay(final DefaultMutableTreeNode root)
 	{
-		createTree();
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
 			public void run()
 			{
+				createTree();
 				DefaultTreeModel model = new DefaultTreeModel(root, false);
 				tree.setModel(model);
 				expandNodes();
