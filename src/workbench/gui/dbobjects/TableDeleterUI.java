@@ -94,6 +94,7 @@ public class TableDeleterUI
 	{
 		super();
 		initComponents();
+    statusLabel.setText("  ");
 	}
 
 	/** This method is called from within the constructor to
@@ -187,10 +188,9 @@ public class TableDeleterUI
 
     optionPanel.setLayout(new GridBagLayout());
 
+    statusLabel.setText("  ");
     statusLabel.setBorder(BorderFactory.createEtchedBorder());
-    statusLabel.setMaximumSize(new Dimension(32768, 24));
     statusLabel.setMinimumSize(new Dimension(150, 24));
-    statusLabel.setPreferredSize(new Dimension(150, 24));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;

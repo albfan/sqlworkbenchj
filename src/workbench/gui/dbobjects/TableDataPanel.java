@@ -24,7 +24,6 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -185,7 +184,6 @@ public class TableDataPanel
 		this.dataDisplay.setDefaultStatusMessage("");
 
 		topPanel = new JPanel();
-		topPanel.setMaximumSize(new Dimension(32768, 32768));
 		BoxLayout box = new BoxLayout(topPanel, BoxLayout.X_AXIS);
 		topPanel.setLayout(box);
 

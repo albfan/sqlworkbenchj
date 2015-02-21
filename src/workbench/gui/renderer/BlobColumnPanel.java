@@ -29,12 +29,16 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+
+import workbench.resource.IconMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FlatButton;
-import workbench.resource.ResourceMgr;
 
 /**
  * A panel with a button to open the BlobInfo dialog
@@ -47,7 +51,7 @@ import workbench.resource.ResourceMgr;
 public class BlobColumnPanel
 	extends JPanel
 {
-	private final int BUTTON_WIDTH = 16;
+	private final int BUTTON_WIDTH = IconMgr.getInstance().getSizeForLabel();
 	private FlatButton openButton = new FlatButton("...");
 	private JLabel label = new JLabel();
 	private Insets insets = ToolTipRenderer.getDefaultInsets();
@@ -60,7 +64,6 @@ public class BlobColumnPanel
 		openButton.setBasicUI();
 		openButton.setFlatLook();
 		openButton.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
-//		openButton.setMaximumSize(d);
 		openButton.setPreferredSize(d);
 		openButton.setMinimumSize(d);
 		openButton.setEnabled(true);

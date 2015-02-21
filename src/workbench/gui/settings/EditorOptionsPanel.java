@@ -22,7 +22,6 @@
  */
 package workbench.gui.settings;
 
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -470,8 +469,6 @@ public class EditorOptionsPanel
     rightClickMovesCursor.setText(ResourceMgr.getString("LblRightClickMove")); // NOI18N
     rightClickMovesCursor.setToolTipText(ResourceMgr.getString("d_LblRightClickMove")); // NOI18N
     rightClickMovesCursor.setBorder(null);
-    rightClickMovesCursor.setMaximumSize(new Dimension(93, 15));
-    rightClickMovesCursor.setMinimumSize(new Dimension(93, 15));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;

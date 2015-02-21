@@ -24,9 +24,13 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.JFrame;
 
 import workbench.WbManager;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.tools.VersionCheckDialog;
 
 /**
  *	@author  Thomas Kellerer
@@ -44,6 +48,10 @@ public class VersionCheckAction extends WbAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		WbManager.getInstance().showDialog("workbench.gui.tools.VersionCheckDialog");
+ 		JFrame parent = WbManager.getInstance().getCurrentWindow();
+    VersionCheckDialog dialog = new VersionCheckDialog(parent);
+    dialog.pack();
+		WbSwingUtilities.center(dialog, parent);
+    dialog.setVisible(true);
 	}
 }

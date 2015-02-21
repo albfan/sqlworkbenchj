@@ -500,8 +500,6 @@ public class TableSelectorPanel
     editNewTableNameButton.setIcon(IconMgr.getInstance().getLabelIcon("rename"));
     editNewTableNameButton.setToolTipText(ResourceMgr.getString("LblEditNewTableName"));
     editNewTableNameButton.setEnabled(false);
-    editNewTableNameButton.setMinimumSize(new Dimension(22, 22));
-    editNewTableNameButton.setPreferredSize(new Dimension(22, 22));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
@@ -513,9 +511,6 @@ public class TableSelectorPanel
     refreshButton.setIcon(IconMgr.getInstance().getLabelIcon("Refresh"));
     refreshButton.setToolTipText("");
     refreshButton.setEnabled(false);
-    refreshButton.setMaximumSize(new Dimension(22, 22));
-    refreshButton.setMinimumSize(new Dimension(22, 22));
-    refreshButton.setPreferredSize(new Dimension(22, 22));
     refreshButton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent evt)

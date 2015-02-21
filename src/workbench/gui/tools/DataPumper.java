@@ -622,17 +622,16 @@ public class DataPumper
 
     setLayout(new GridBagLayout());
 
-    connectionPanel.setLayout(new GridLayout(1, 0));
+    connectionPanel.setLayout(new GridLayout(1, 0, 2, 5));
 
     sourcePanel.setLayout(new GridBagLayout());
 
     sourceHeader.setBackground(new Color(255, 255, 255));
     sourceHeader.setHorizontalAlignment(SwingConstants.CENTER);
     sourceHeader.setText("<html><b>" + ResourceMgr.getString("LblSourceConnection") + "</b></html>");
-    sourceHeader.setMaximumSize(new Dimension(32768, 22));
+    sourceHeader.setBorder(BorderFactory.createEmptyBorder(10, 1, 10, 1));
     sourceHeader.setMinimumSize(new Dimension(25, 22));
     sourceHeader.setOpaque(true);
-    sourceHeader.setPreferredSize(new Dimension(50, 22));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
@@ -686,7 +685,7 @@ public class DataPumper
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
@@ -700,10 +699,9 @@ public class DataPumper
     targetHeader.setBackground(new Color(255, 255, 255));
     targetHeader.setHorizontalAlignment(SwingConstants.CENTER);
     targetHeader.setText("<html><b>" + ResourceMgr.getString("LblTargetConnection") + "</b></html>");
-    targetHeader.setMaximumSize(new Dimension(23768, 22));
+    targetHeader.setBorder(BorderFactory.createEmptyBorder(10, 1, 10, 1));
     targetHeader.setMinimumSize(new Dimension(25, 22));
     targetHeader.setOpaque(true);
-    targetHeader.setPreferredSize(new Dimension(25, 22));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -750,7 +748,7 @@ public class DataPumper
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
@@ -763,7 +761,8 @@ public class DataPumper
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = GridBagConstraints.NORTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(2, 3, 0, 3);
     add(connectionPanel, gridBagConstraints);
@@ -812,9 +811,6 @@ public class DataPumper
     checkQueryButton.setToolTipText(ResourceMgr.getString("d_LblDPCheckQuery")); // NOI18N
     checkQueryButton.setEnabled(false);
     checkQueryButton.setMargin(new Insets(2, 5, 2, 5));
-    checkQueryButton.setMaximumSize(new Dimension(200, 24));
-    checkQueryButton.setMinimumSize(new Dimension(120, 24));
-    checkQueryButton.setPreferredSize(new Dimension(130, 24));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
@@ -1027,7 +1023,7 @@ public class DataPumper
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.anchor = GridBagConstraints.NORTH;
@@ -1036,12 +1032,10 @@ public class DataPumper
     add(jSplitPane1, gridBagConstraints);
 
     statusLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(0, 2, 0, 0)));
-    statusLabel.setMaximumSize(new Dimension(32768, 24));
     statusLabel.setMinimumSize(new Dimension(4, 24));
-    statusLabel.setPreferredSize(new Dimension(4, 24));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.SOUTHEAST;
@@ -1110,7 +1104,7 @@ public class DataPumper
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;

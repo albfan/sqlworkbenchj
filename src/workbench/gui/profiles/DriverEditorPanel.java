@@ -325,9 +325,6 @@ public class DriverEditorPanel
     detectDriverButton.setIcon(IconMgr.getInstance().getLabelIcon("magnifier"));
     detectDriverButton.setToolTipText(ResourceMgr.getString("MsgDetectDriver")); // NOI18N
     detectDriverButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-    detectDriverButton.setMaximumSize(new java.awt.Dimension(22, 22));
-    detectDriverButton.setMinimumSize(new java.awt.Dimension(22, 22));
-    detectDriverButton.setPreferredSize(new java.awt.Dimension(22, 22));
     detectDriverButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)

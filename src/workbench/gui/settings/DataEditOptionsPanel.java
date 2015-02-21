@@ -198,7 +198,6 @@ public class DataEditOptionsPanel
     jPanel1.add(pkMapFile, gridBagConstraints);
 
     selectMapFile.setText("...");
-    selectMapFile.setMaximumSize(new java.awt.Dimension(22, 22));
     selectMapFile.setMinimumSize(new java.awt.Dimension(22, 22));
     selectMapFile.setPreferredSize(new java.awt.Dimension(22, 22));
     selectMapFile.addActionListener(this);

@@ -326,7 +326,6 @@ public class ObjectDropperUI
     mainPanel.setLayout(new java.awt.BorderLayout(0, 2));
 
     objectList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-    objectList.setMaximumSize(new java.awt.Dimension(800, 0));
     objectList.setSelectionModel(new NoSelectionModel());
     jScrollPane1.setViewportView(objectList);
 
@@ -434,7 +433,6 @@ public class ObjectDropperUI
     add(buttonPanel, gridBagConstraints);
 
     statusLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    statusLabel.setMaximumSize(new java.awt.Dimension(32768, 24));
     statusLabel.setMinimumSize(new java.awt.Dimension(150, 24));
     statusLabel.setPreferredSize(new java.awt.Dimension(150, 24));
     gridBagConstraints = new java.awt.GridBagConstraints();

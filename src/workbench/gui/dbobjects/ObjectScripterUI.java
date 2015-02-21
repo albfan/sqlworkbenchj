@@ -23,10 +23,10 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.event.WindowListener;
+
 import javax.swing.BorderFactory;
 
 import javax.swing.JFrame;
@@ -36,14 +36,17 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.sql.EditorPanel;
+
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -70,9 +73,9 @@ public class ObjectScripterUI
 
 		this.statusMessage = new JLabel("");
 		this.statusMessage.setBorder(new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(0, 2, 0, 0)));
-		this.statusMessage.setMaximumSize(new Dimension(32768, 22));
-		this.statusMessage.setMinimumSize(new Dimension(10, 22));
-		this.statusMessage.setPreferredSize(new Dimension(60, 22));
+//		this.statusMessage.setMaximumSize(new Dimension(32768, 22));
+//		this.statusMessage.setMinimumSize(new Dimension(10, 22));
+//		this.statusMessage.setPreferredSize(new Dimension(60, 22));
 		this.setLayout(new BorderLayout());
 		this.add(this.statusMessage, BorderLayout.SOUTH);
 		this.editor = EditorPanel.createSqlEditor();

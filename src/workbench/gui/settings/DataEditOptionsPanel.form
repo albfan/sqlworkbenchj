@@ -152,9 +152,6 @@
         <Component class="javax.swing.JButton" name="selectMapFile">
           <Properties>
             <Property name="text" type="java.lang.String" value="..."/>
-            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[22, 22]"/>
-            </Property>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[22, 22]"/>
             </Property>

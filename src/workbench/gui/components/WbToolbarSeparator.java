@@ -26,6 +26,9 @@ import java.awt.Dimension;
 
 import javax.swing.JPanel;
 
+import workbench.resource.IconMgr;
+
+
 /**
  *
  * @author  Thomas Kellerer
@@ -37,11 +40,15 @@ public class WbToolbarSeparator
 	public WbToolbarSeparator()
 	{
 		super();
-		Dimension d = new Dimension(7, 16);
+    // this dummy button is used to calculate the height of the regular toolbar
+    // to avoid the UI from "jumping" when switchting between a SQL tab and the DbExplorer
+    WbToolbarButton button = new WbToolbarButton(IconMgr.getInstance().getToolbarIcon("save"));
+    Dimension bs = button.getPreferredSize();
+
+		Dimension d = new Dimension(7, bs.height);
 		setOpaque(false);
 		this.setPreferredSize(d);
 		this.setMinimumSize(d);
-		this.setMaximumSize(new Dimension(7, 24));
 		this.setBorder(new DividerBorder(DividerBorder.VERTICAL_MIDDLE));
 	}
 

@@ -239,9 +239,6 @@ public class WbFontChooser
     fontSizeComboBox.setEditable(true);
     fontSizeComboBox.setModel(new DefaultComboBoxModel(new String[] { "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "36" }));
     fontSizeComboBox.setSelectedIndex(4);
-    fontSizeComboBox.setMaximumSize(new Dimension(200, 22));
-    fontSizeComboBox.setMinimumSize(new Dimension(30, 22));
-    fontSizeComboBox.setPreferredSize(new Dimension(40, 22));
     fontSizeComboBox.addItemListener(new ItemListener()
     {
       public void itemStateChanged(ItemEvent evt)
@@ -254,7 +251,6 @@ public class WbFontChooser
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 0.5;
     gridBagConstraints.insets = new Insets(0, 8, 0, 1);
     add(fontSizeComboBox, gridBagConstraints);
 
@@ -280,8 +276,8 @@ public class WbFontChooser
     gridBagConstraints.gridheight = 4;
     gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 0.5;
-    gridBagConstraints.weighty = 0.5;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
     add(jScrollPane1, gridBagConstraints);
 
     boldCheckBox.setText(ResourceMgr.getString("LblBold")); // NOI18N
@@ -323,6 +319,9 @@ public class WbFontChooser
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     add(sampleLabel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
