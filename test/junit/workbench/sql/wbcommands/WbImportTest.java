@@ -112,6 +112,49 @@ public class WbImportTest
 	}
 
 	@Test
+	public void testImportIntoView()
+		throws Exception
+	{
+		WbConnection con = getTestUtil().getHSQLConnection("view_import");
+		try
+		{
+			TestUtil.executeScript(con,
+				"create table foo (id integer primary key, data varchar(100));\n" +
+				"create view v_foo as select * from foo;");
+			File data = new File(basedir, "data.txt");
+			FileUtil.writeString(data,
+				"id,data\n" +
+				"1,foo\n" +
+				"2,bar");
+			WbImport cmd = new WbImport();
+			cmd.setConnection(con);
+			StatementRunnerResult result = cmd.execute("WbImport -file='" + data.getAbsolutePath() + "' -type=text -delimiter=',' -header=true -table=v_foo");
+			String msg = result.getMessageBuffer().toString();
+			assertTrue(msg, result.isSuccess());
+
+			int rows = TestUtil.getNumberValue(con, "select count(*) from v_foo");
+			assertEquals(2, rows);
+
+			FileUtil.writeString(data,
+				"id,data\n" +
+				"1,foobar\n" +
+				"2,barfoo");
+
+			result = cmd.execute("WbImport -file='" + data.getAbsolutePath() + "' -type=text -mode=update -keyColumns=id -delimiter=',' -header=true -table=v_foo");
+			assertTrue(result.isSuccess());
+
+			int id = TestUtil.getNumberValue(con, "select id from v_foo where data = 'foobar'");
+			assertEquals(1, id);
+			id = TestUtil.getNumberValue(con, "select id from v_foo where data = 'barfoo'");
+			assertEquals(2, id);
+		}
+		finally
+		{
+			con.disconnect();
+		}
+	}
+
+	@Test
 	public void testMultiSheetExcelImport()
 		throws Exception
 	{
