@@ -267,8 +267,8 @@ public class DbExplorerPanel
 			this.toolbar.add(this.connectionInfo);
 
       // this dummy button is used to calculate the height of the regular toolbar
-      // To avoid the UI from "jumping" when switchting between a SQL tab and the DbExplorer
-      WbToolbarButton button = new WbToolbarButton(IconMgr.getInstance().getToolbarIcon("empty"));
+      // to avoid the UI from "jumping" when switchting between a SQL tab and the DbExplorer
+      WbToolbarButton button = new WbToolbarButton(IconMgr.getInstance().getToolbarIcon("save"));
       Dimension d = button.getPreferredSize();
 
       Dimension cd = connectionInfo.getPreferredSize();

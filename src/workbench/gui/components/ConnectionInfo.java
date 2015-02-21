@@ -25,6 +25,7 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -263,6 +264,7 @@ public class ConnectionInfo
 		c.gridx = 0;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
+    c.insets = new Insets(0, 4, 0, 0);
 		ImageIcon png = IconMgr.getInstance().getPngIcon(name, IconMgr.getInstance().getToolbarIconSize());
 		iconLabel.setIcon(png);
 		add(iconLabel, c);
