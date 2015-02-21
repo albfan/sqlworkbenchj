@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-02-19">
+  <release build="-1" date="2015-02-21">
     <entry dev-build="2" type="enh">The statement at the cursor position can now be copied directly into the clipboard (Code Tools -&gt; Copy current statement)</entry>
     <entry dev-build="2" type="enh">For Oracle, the partitions of a materialized view are now shown in the source code</entry>
     <entry dev-build="2" type="enh">WbImport or the DataPumper could not be used to insert data into a view</entry>
