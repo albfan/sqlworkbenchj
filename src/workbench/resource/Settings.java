@@ -1662,7 +1662,7 @@ public class Settings
 
 	public boolean getScaleMenuIcons()
 	{
-		return getBoolProperty("workbench.gui.scale.menuicon", true);
+		return getBoolProperty("workbench.gui.scale.menuicon", false);
 	}
 
 	public void setScaleMenuIcons(boolean flag)
