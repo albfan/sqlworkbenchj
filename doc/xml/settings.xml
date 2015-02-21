@@ -169,15 +169,18 @@
 			<para>Default value: 10485760 (10MB)</para>
 		</simplesect>
 
+  </section>
+  <section id="code-snippet-settings">
+    <title>Controlling code generation for code snippets</title>
     <simplesect id="manual-setting-snippet-no-newline">
 			<title>Controlling newlines in code snippets</title>
 			<para>Property: <literal>workbench.clipcreate.includenewline</literal></para>
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
-				When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
+				When creating a <link linkend="editor-copy-java-code-snippet">Copy code snippet</link>,
 				the newlines inside the editor are preserved by putting a <literal>\n</literal>
 				character into the String declaration. Setting this property to false, will
-				tell &wb-productname; not put any <literal>\n</literal> characters into the Java string.
+				tell &wb-productname; to not put any <literal>\n</literal> characters into the Java string.
 			</para>
 			<para>Default: <literal>true</literal></para>
     </simplesect>
@@ -186,7 +189,7 @@
 			<title>Controlling the concatenation character for code snippets</title>
 			<para>Property: <literal>workbench.clipcreate.concat</literal></para>
 			<para>
-				When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
+				When creating a <link linkend="editor-copy-java-code-snippet">Copy code snippet</link>,
 				each line is concatenated using the standard + operator. If your programming language
 				uses a different concatenation character (e.g. &amp;), this can be changed with this
 				property.
@@ -198,14 +201,22 @@
 			<title>Controlling the prefix for code snippets</title>
 			<para>Property: <literal>workbench.clipcreate.codeprefix</literal></para>
 			<para>
-				When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
+				When creating a <link linkend="editor-copy-java-code-snippet">Copy code snippet</link>,
 				this is prefixed with <literal>String sql = </literal>. With this property you can
 				adjust this prefix.
 			</para>
 			<para>Default: <literal>String sql =</literal></para>
     </simplesect>
 
-
+    <simplesect id="manual-setting-snippet-codeend">
+			<title>Controlling termination character code snippets</title>
+			<para>Property: <literal>workbench.clipcreate.codeend</literal></para>
+			<para>
+				When creating a <link linkend="editor-copy-java-code-snippet">Copy code snippet</link>,
+				this character will be appended to the end of the generated code.
+			</para>
+			<para>Default: <literal>;</literal></para>
+    </simplesect>
 	</section>
 
 	<section id="db-explorer-settings">
