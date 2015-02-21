@@ -72,8 +72,18 @@ public class IconMgr
 		filepath = ResourcePath.ICONS.getPath() + "/";
 		menuFontHeight = LnFHelper.getMenuFontHeight();
 		labelFontHeight = LnFHelper.getLabelFontHeight();
-		toolbarIconSize = Settings.getInstance().getToolbarIconSize();
 		scaleMenuIcons = Settings.getInstance().getScaleMenuIcons();
+		toolbarIconSize = getToolbarIconSize();
+		LogMgr.logInfo("IconMgr.<init>", "Using sizes: toolbar: " + toolbarIconSize + ", menu: " + getSizeForMenuItem());
+	}
+
+	public int getToolbarIconSize()
+	{
+		if (Settings.getInstance().getScaleMenuIcons())
+		{
+			return getSizeForMenuItem();
+		}
+		return Settings.getInstance().getToolbarIconSize();
 	}
 
 	/**

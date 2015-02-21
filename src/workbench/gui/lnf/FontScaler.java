@@ -59,9 +59,14 @@ public class FontScaler
 
 	public void logSettings()
 	{
-		LogMgr.logDebug("FontScaler.logSettings()", "Current DPI: "  + dpi + ", Default DPI: " + defaultDPI + ", scale factor: " + scaleFactor + ", font scaling enabled: " + scaleFont);
+		LogMgr.logDebug("FontScaler.logSettings()", "Current DPI: "  + dpi + ", Default DPI: " + defaultDPI + ", scale factor: " + scaleFactor);
 	}
 
+	public float getScaleFactor()
+	{
+		return scaleFactor;
+	}
+	
 	public Font scaleFont(Font baseFont)
 	{
 		if (!scaleFont) return baseFont;

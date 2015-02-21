@@ -1304,7 +1304,6 @@ public class Settings
 		setProperty("workbench.gui.desktop.scalefonts", flag);
 	}
 
-
 	/**
 	 *	Returns the font configured for this keyword
 	 */
@@ -1662,7 +1661,7 @@ public class Settings
 
 	public boolean getScaleMenuIcons()
 	{
-		return getBoolProperty("workbench.gui.scale.menuicon", false);
+		return getBoolProperty("workbench.gui.scale.menuicon", true);
 	}
 
 	public void setScaleMenuIcons(boolean flag)

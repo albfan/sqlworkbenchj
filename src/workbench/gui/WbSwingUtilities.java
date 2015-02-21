@@ -1465,19 +1465,8 @@ public class WbSwingUtilities
 
 	public static void adjustTreeRowHeight(JTree tree)
 	{
-		Font std = Settings.getInstance().getStandardFont();
-		if (std == null) return; // nothing to do
-
-		Font font = tree.getFont();
-		if (font != null)
-		{
-			FontMetrics fm = tree.getFontMetrics(font);
-			if (fm != null)
-			{
-				int height = fm.getHeight();
-				tree.setRowHeight(height);
-			}
-		}
+		int height = getFontHeight(tree);
+		tree.setRowHeight(height);
 	}
 
 	public static void removeAllListeners(JComponent comp)
