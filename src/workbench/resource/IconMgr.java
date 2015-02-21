@@ -79,11 +79,13 @@ public class IconMgr
 
 	public int getToolbarIconSize()
 	{
+		int size = Settings.getInstance().getToolbarIconSize();
 		if (Settings.getInstance().getScaleMenuIcons())
 		{
-			return getSizeForMenuItem();
+			int menuSize = getSizeForMenuItem();
+			if (menuSize > size) return menuSize;
 		}
-		return Settings.getInstance().getToolbarIconSize();
+		return size;
 	}
 
 	/**
