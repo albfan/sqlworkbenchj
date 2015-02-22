@@ -251,9 +251,7 @@ public class WbCopy
 			return result;
 		}
 
-		boolean schemaCopy = tablesToExport.size() > 1;
-
-		if (schemaCopy)
+		if (tablesToExport.size() > 1 || sourceTables.wasWildcardArgument())
 		{
 			this.copier = new SchemaCopy(tablesToExport);
 			// TODO: add support for catalogs

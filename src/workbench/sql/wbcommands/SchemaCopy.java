@@ -220,6 +220,7 @@ class SchemaCopy
 		String schema = this.targetSchema != null ? targetConnection.getMetadata().adjustSchemaNameCase(targetSchema) : currentTargetSchema;
 		String catalog = this.targetCatalog != null ? targetConnection.getMetadata().adjustObjectnameCase(targetCatalog) : currentTargetCatalog;
 
+    String[] types = targetConnection.getMetadata().getTablesAndViewTypes();
 		for (TableIdentifier sourceTable : sourceTables)
 		{
 			TableIdentifier targetTable = sourceTable.createCopy();
@@ -239,7 +240,7 @@ class SchemaCopy
 			}
 			else
 			{
-				targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
+				targetTable = this.targetConnection.getMetadata().findTable(targetTable, types);
 				if (targetTable == null && targetSchema == null && targetCatalog == null)
 				{
 					// if the table was not found using the schema/catalog as specified in the source
@@ -253,7 +254,7 @@ class SchemaCopy
 					{
 						targetTable.setCatalog(currentTargetCatalog);
 					}
-					targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
+					targetTable = this.targetConnection.getMetadata().findTable(targetTable, types);
 				}
 
 				// check if the target table exists. DataCopier will throw an exception if

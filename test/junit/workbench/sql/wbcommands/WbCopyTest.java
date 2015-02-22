@@ -74,6 +74,72 @@ public class WbCopyTest
 
 
 	@Test
+	public void testImportIntoView()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+
+		util.prepareEnvironment();
+		WbConnection source = util.getHSQLConnection("viewCopySource");
+		WbConnection target = util.getHSQLConnection("viewCopyTarget");
+
+		try
+		{
+			TestUtil.executeScript(source,
+        "create table foo (id integer primary key, data varchar(100));\n" +
+        "insert into foo (id, data) values (1, 'foo');\n" +
+        "insert into foo (id, data) values (2, 'bar');\n" +
+        "commit;");
+
+			TestUtil.executeScript(target,
+        "create table foo (id integer primary key, data varchar(100));\n" +
+				"create view v_foo as select * from foo;");
+
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(source);
+
+			String sql =
+				"wbcopy -sourceTable=foo " +
+        "       -targetTable=v_foo " +
+				"       -sourceProfile='viewCopySource' " +
+				"       -targetProfile='viewCopyTarget'";
+
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			int rows = TestUtil.getNumberValue(target, "select count(*) from v_foo");
+			assertEquals(2, rows);
+
+			TestUtil.executeScript(source,
+        "drop table foo;\n" +
+        "create table v_foo (id integer primary key, data varchar(100));\n" +
+        "insert into v_foo (id, data) values (1, 'foo');\n" +
+        "insert into v_foo (id, data) values (2, 'bar');\n" +
+        "commit;");
+
+			TestUtil.executeScript(target,
+        "delete from foo;\n" +
+				"commit;");
+
+			sql =
+				"wbcopy -sourceTable=* " +
+				"       -sourceProfile='viewCopySource' " +
+				"       -targetProfile='viewCopyTarget'";
+
+			result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			rows = TestUtil.getNumberValue(target, "select count(*) from v_foo");
+			assertEquals(2, rows);
+		}
+		finally
+		{
+			source.disconnect();
+      target.disconnect();
+		}
+	}
+
+	@Test
 	public void testTrimData()
 		throws Exception
 	{
