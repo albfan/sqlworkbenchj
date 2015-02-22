@@ -108,6 +108,7 @@ public class TableDefinitionPanel
 	public static final String DEFINITION_PROP = "tableDefinition";
 
 	private final Object connectionLock = new Object();
+	private final Object busyLock = new Object();
 
 	private WbTable tableDefinition;
 	private WbLabelField tableNameLabel;
@@ -317,7 +318,6 @@ public class TableDefinitionPanel
 		firePropertyChange(INDEX_PROP, null, indexName);
 	}
 
-	private final Object busyLock = new Object();
 	public boolean isBusy()
 	{
 		synchronized (this.busyLock)

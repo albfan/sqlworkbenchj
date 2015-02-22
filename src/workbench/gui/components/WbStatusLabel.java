@@ -69,18 +69,20 @@ public class WbStatusLabel
 
   private void initSize()
   {
-		Font f = getFont();
-		FontMetrics fm = null;
-		if (f != null) fm = getFontMetrics(f);
-    int height = 0;
-    int width = 0;
+    Font f = getFont();
+    FontMetrics fm = null;
+    if (f != null) fm = getFontMetrics(f);
+
+    int height;
+    int width;
     int borderHeight = 6;
+
     if (fm != null)
     {
       height = (int)(fm.getHeight() * 1.2) + borderHeight;
       width = fm.charWidth('W');
       height = Math.max(22, height);
-      width = Math.max(80, width * 10);
+      width = width * 10;
     }
     else
     {
@@ -88,9 +90,9 @@ public class WbStatusLabel
       width = size;
       height = size;
     }
-		Dimension d = new Dimension(width, height);
-		setMinimumSize(d);
-		setPreferredSize(d);
+    Dimension d = new Dimension(width, height);
+    setMinimumSize(d);
+    setPreferredSize(d);
   }
 
   public RowActionMonitor getMonitor()
@@ -120,7 +122,6 @@ public class WbStatusLabel
       {
         setText(message);
       }
-
     });
   }
 
@@ -134,14 +135,7 @@ public class WbStatusLabel
       {
         setText("");
       }
-
     });
-  }
-
-  @Override
-  public String getText()
-  {
-    return super.getText();
   }
 
 }

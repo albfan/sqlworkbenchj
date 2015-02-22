@@ -40,7 +40,7 @@ public class WbToolbarSeparator
 	public WbToolbarSeparator()
 	{
 		super();
-    // this dummy button is used to calculate the width of a regular toolbar button
+    // creating a dummy button is used to calculate the size of a regular toolbar button
     // so that the separator can be adjusted to the same height
     WbToolbarButton button = new WbToolbarButton(IconMgr.getInstance().getToolbarIcon("save"));
     Dimension bs = button.getPreferredSize();

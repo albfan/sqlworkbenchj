@@ -29,8 +29,6 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicTextFieldUI;
 
-import workbench.resource.Settings;
-
 import workbench.gui.actions.WbAction;
 
 /**
@@ -40,57 +38,54 @@ import workbench.gui.actions.WbAction;
  * @author Thomas Kellerer
  */
 public class WbLabelField
-	extends JTextField
+  extends JTextField
 {
-	private TextComponentMouseListener mouseListener;
+  private TextComponentMouseListener mouseListener;
 
-	public WbLabelField()
-	{
-		super();
-		init();
-	}
+  public WbLabelField()
+  {
+    super();
+    init();
+  }
 
-	public WbLabelField(String text)
-	{
-		super(text);
-		init();
-	}
+  public WbLabelField(String text)
+  {
+    super(text);
+    init();
+  }
 
-	private void init()
-	{
-		setUI(new BasicTextFieldUI());
-		setEditable(false);
-		setOpaque(true);
-		mouseListener = new TextComponentMouseListener();
-		addMouseListener(mouseListener);
-		setBorder(new EmptyBorder(2, 5, 2, 2));
-		Font f = UIManager.getFont("Label.font");
-		if (f == null)
-		{
-			f = Settings.getInstance().getStandardFont();
-		}
-		setFont(f);
-		setBackground(UIManager.getColor("Label.background"));
-		setForeground(UIManager.getColor("Label.foreground"));
-	}
+  private void init()
+  {
+    setUI(new BasicTextFieldUI());
+    setEditable(false);
+    setOpaque(true);
+    mouseListener = new TextComponentMouseListener();
+    addMouseListener(mouseListener);
+    setBorder(new EmptyBorder(2, 5, 2, 2));
+    Font f = UIManager.getFont("Label.font");
+    setFont(f);
+    setBackground(UIManager.getColor("Label.background"));
+    setForeground(UIManager.getColor("Label.foreground"));
+  }
 
   public void useBoldFont()
   {
-		Font std = getFont();
-		Font bold = std.deriveFont(Font.BOLD);
-		setFont(bold);
+    Font std = getFont();
+    Font bold = std.deriveFont(Font.BOLD);
+    setFont(bold);
   }
 
-	public void addPopupAction(WbAction a)
-	{
-		mouseListener.addAction(a);
-	}
+  public void addPopupAction(WbAction a)
+  {
+    mouseListener.addAction(a);
+  }
 
-	public void dispose()
-	{
-		if (mouseListener != null)
-		{
-			mouseListener.dispose();
-		}
-	}
+  public void dispose()
+  {
+    if (mouseListener != null)
+    {
+      mouseListener.dispose();
+    }
+  }
+
 }

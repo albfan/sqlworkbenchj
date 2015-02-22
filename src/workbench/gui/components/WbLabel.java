@@ -46,36 +46,36 @@ public class WbLabel
 	}
 
 	@Override
-	public void setText(String aText)
+	public void setText(String text)
 	{
-		if (aText == null)
-		{
-			return;
-		}
-		int pos = aText.indexOf('&');
-		if (pos > -1)
-		{
-			char mnemonic = aText.charAt(pos + 1);
-			if (mnemonic != ' ')
-			{
-				aText = aText.substring(0, pos) + aText.substring(pos + 1);
-			}
-			super.setText(aText);
-			if (mnemonic != ' ' && mnemonic != '&')
-			{
-				setDisplayedMnemonic(mnemonic);
-				try
-				{
-					this.setDisplayedMnemonicIndex(pos);
-				}
-				catch (Exception e)
-				{
-				}
-			}
-		}
-		else
-		{
-			super.setText(aText);
-		}
-	}
+    if (text == null) return;
+
+    int pos = text.indexOf('&');
+    if (pos > -1)
+    {
+      char mnemonic = text.charAt(pos + 1);
+      if (mnemonic != ' ')
+      {
+        text = text.substring(0, pos) + text.substring(pos + 1);
+      }
+
+      super.setText(text);
+
+      if (mnemonic != ' ' && mnemonic != '&')
+      {
+        setDisplayedMnemonic(mnemonic);
+        try
+        {
+          this.setDisplayedMnemonicIndex(pos);
+        }
+        catch (Exception e)
+        {
+        }
+      }
+    }
+    else
+    {
+      super.setText(text);
+    }
+  }
 }
