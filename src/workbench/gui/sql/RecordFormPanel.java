@@ -37,6 +37,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.sql.Types;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -52,14 +53,20 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
+
+import workbench.interfaces.ValidatingComponent;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.MultilineWrapAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.BlobHandler;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbCellEditor;
 import workbench.gui.components.WbDocument;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
@@ -68,12 +75,10 @@ import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.WbRenderer;
 import workbench.gui.renderer.WrapEnabledEditor;
-import workbench.interfaces.ValidatingComponent;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -272,10 +277,10 @@ public class RecordFormPanel
 
 		// Initialize the correct tab focus order
 		WbTraversalPolicy policy = new WbTraversalPolicy();
-		for (int i=0; i < inputControls.length; i++)
-		{
-			policy.addComponent(inputControls[i]);
-		}
+    for (JComponent inputControl : inputControls)
+    {
+      policy.addComponent(inputControl);
+    }
 
 		// Put the input form into a scrollpane in case there are a lot of columns in the row
 		JScrollPane formScroll = new JScrollPane(formPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -296,7 +301,6 @@ public class RecordFormPanel
 		initRenderer();
 
 		this.add(new FormNavigation(this), BorderLayout.SOUTH);
-		this.setMaximumSize(new Dimension(100,100));
 	}
 
 	private void initRenderer()
@@ -402,18 +406,18 @@ public class RecordFormPanel
 	/**
 	 * Reset the modified flag of the input fields
 	 */
-	protected void resetDocuments()
-	{
-		for (int i=0; i < inputControls.length; i++)
-		{
-			if (inputControls[i] instanceof JTextComponent)
-			{
-				JTextComponent text = (JTextComponent)inputControls[i];
-				WbDocument doc = (WbDocument)text.getDocument();
-				doc.resetModified();
-			}
-		}
-	}
+  protected void resetDocuments()
+  {
+    for (JComponent inputControl : inputControls)
+    {
+      if (inputControl instanceof JTextComponent)
+      {
+        JTextComponent text = (JTextComponent)inputControl;
+        WbDocument doc = (WbDocument)text.getDocument();
+        doc.resetModified();
+      }
+    }
+  }
 
 	/**
 	 * Check if anything has changed on the input fields

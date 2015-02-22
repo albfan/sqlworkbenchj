@@ -29,6 +29,7 @@ import javax.swing.JToolBar;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 

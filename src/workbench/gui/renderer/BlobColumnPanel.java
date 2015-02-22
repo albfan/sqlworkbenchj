@@ -47,6 +47,7 @@ import workbench.gui.components.FlatButton;
  * is null, nothing will be displayed.
  * <br/>
  * @author  Thomas Kellerer
+ * @see BlobColumnRenderer
  */
 public class BlobColumnPanel
 	extends JPanel
@@ -94,14 +95,17 @@ public class BlobColumnPanel
 		return insets;
 	}
 
-
-	public int getButtonWidth()
-	{
-		if (openButton != null && openButton.isVisible())
-			return BUTTON_WIDTH;
-		else
-			return 0;
-	}
+  public int getButtonWidth()
+  {
+    if (openButton != null && openButton.isVisible())
+    {
+      return BUTTON_WIDTH;
+    }
+    else
+    {
+      return 0;
+    }
+  }
 
 	public void setValue(Object value)
 	{

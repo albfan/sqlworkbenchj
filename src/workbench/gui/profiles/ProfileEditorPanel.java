@@ -44,7 +44,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
-import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
@@ -90,7 +89,7 @@ public class ProfileEditorPanel
 	implements FileActions, ValidatingComponent, PropertyChangeListener, KeyListener
 {
 	private ProfileListModel model;
-	private JToolBar toolbar;
+	private WbToolbar toolbar;
 	protected ConnectionEditorPanel connectionEditor;
 	private MouseListener listMouseListener;
 	private NewListEntryAction newItem;

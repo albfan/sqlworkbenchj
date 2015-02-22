@@ -46,6 +46,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;
+import workbench.gui.components.WbStatusLabel;
 
 import workbench.storage.RowActionMonitor;
 
@@ -319,7 +320,7 @@ public class ObjectDropperUI
     buttonPanel = new javax.swing.JPanel();
     dropButton = new WbButton();
     cancelButton = new WbButton();
-    statusLabel = new javax.swing.JLabel();
+    statusLabel = new WbStatusLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -335,7 +336,7 @@ public class ObjectDropperUI
 
     checkPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
 
-    checkFKButton.setText(ResourceMgr.getString("LblCheckFKDeps"));
+    checkFKButton.setText(ResourceMgr.getString("LblCheckFKDeps")); // NOI18N
     checkFKButton.setToolTipText(ResourceMgr.getDescription("LblCheckFKDeps"));
     checkFKButton.addActionListener(new java.awt.event.ActionListener()
     {
@@ -347,7 +348,7 @@ public class ObjectDropperUI
     checkPanel.add(checkFKButton);
 
     addMissingTables.setSelected(true);
-    addMissingTables.setText(ResourceMgr.getString("LblIncFkTables"));
+    addMissingTables.setText(ResourceMgr.getString("LblIncFkTables")); // NOI18N
     addMissingTables.setToolTipText(ResourceMgr.getDescription("LblIncFkTables"));
     addMissingTables.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 0));
     checkPanel.add(addMissingTables);
@@ -360,7 +361,7 @@ public class ObjectDropperUI
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 6, 0);
     optionPanel.add(checkPanel, gridBagConstraints);
 
-    showScriptButton.setText(ResourceMgr.getString("LblShowScript"));
+    showScriptButton.setText(ResourceMgr.getString("LblShowScript")); // NOI18N
     showScriptButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -375,14 +376,14 @@ public class ObjectDropperUI
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 3, 0);
     optionPanel.add(showScriptButton, gridBagConstraints);
 
-    checkBoxCascadeConstraints.setText(ResourceMgr.getString("LblCascadeConstraints"));
+    checkBoxCascadeConstraints.setText(ResourceMgr.getString("LblCascadeConstraints")); // NOI18N
     checkBoxCascadeConstraints.setToolTipText(ResourceMgr.getDescription("LblCascadeConstraints"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 3, 3, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 11, 3, 0);
     optionPanel.add(checkBoxCascadeConstraints, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -404,7 +405,7 @@ public class ObjectDropperUI
 
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-    dropButton.setText(ResourceMgr.getString("LblDrop"));
+    dropButton.setText(ResourceMgr.getString("LblDrop")); // NOI18N
     dropButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -414,7 +415,7 @@ public class ObjectDropperUI
     });
     buttonPanel.add(dropButton);
 
-    cancelButton.setText(ResourceMgr.getString("LblCancel"));
+    cancelButton.setText(ResourceMgr.getString("LblCancel")); // NOI18N
     cancelButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -432,7 +433,6 @@ public class ObjectDropperUI
     gridBagConstraints.weightx = 1.0;
     add(buttonPanel, gridBagConstraints);
 
-    statusLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     statusLabel.setMinimumSize(new java.awt.Dimension(150, 24));
     statusLabel.setPreferredSize(new java.awt.Dimension(150, 24));
     gridBagConstraints = new java.awt.GridBagConstraints();

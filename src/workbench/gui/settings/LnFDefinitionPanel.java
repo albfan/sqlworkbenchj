@@ -57,6 +57,7 @@ import workbench.gui.components.FlatButton;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbButton;
+import workbench.gui.components.WbStatusLabel;
 import workbench.gui.lnf.LnFDefinition;
 import workbench.gui.lnf.LnFLoader;
 
@@ -188,7 +189,7 @@ public class LnFDefinitionPanel
     jSeparator1 = new JSeparator();
     changeLnfButton = new WbButton();
     currentLabel = new HtmlLabel();
-    statusLabel = new JLabel();
+    statusLabel = new WbStatusLabel();
     selectClass = new FlatButton();
     classpathEditor = new ClasspathEditor();
 

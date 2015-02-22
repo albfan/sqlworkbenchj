@@ -68,8 +68,8 @@
               <SubComponents>
                 <Component class="javax.swing.JButton" name="checkFKButton">
                   <Properties>
-                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="ResourceMgr.getString(&quot;LblCheckFKDeps&quot;)" type="code"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="language/wbstrings.properties" key="LblCheckFKDeps" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                       <Connection code="ResourceMgr.getDescription(&quot;LblCheckFKDeps&quot;)" type="code"/>
@@ -82,8 +82,8 @@
                 <Component class="javax.swing.JCheckBox" name="addMissingTables">
                   <Properties>
                     <Property name="selected" type="boolean" value="true"/>
-                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="ResourceMgr.getString(&quot;LblIncFkTables&quot;)" type="code"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="language/wbstrings.properties" key="LblIncFkTables" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                       <Connection code="ResourceMgr.getDescription(&quot;LblIncFkTables&quot;)" type="code"/>
@@ -99,8 +99,8 @@
             </Container>
             <Component class="javax.swing.JButton" name="showScriptButton">
               <Properties>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ResourceMgr.getString(&quot;LblShowScript&quot;)" type="code"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="language/wbstrings.properties" key="LblShowScript" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
               <Events>
@@ -114,8 +114,8 @@
             </Component>
             <Component class="javax.swing.JCheckBox" name="checkBoxCascadeConstraints">
               <Properties>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ResourceMgr.getString(&quot;LblCascadeConstraints&quot;)" type="code"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="language/wbstrings.properties" key="LblCascadeConstraints" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="ResourceMgr.getDescription(&quot;LblCascadeConstraints&quot;)" type="code"/>
@@ -123,7 +123,7 @@
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-                  <GridBagConstraints gridX="1" gridY="2" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="3" insetsBottom="3" insetsRight="0" anchor="17" weightX="0.0" weightY="0.0"/>
+                  <GridBagConstraints gridX="1" gridY="2" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="11" insetsBottom="3" insetsRight="0" anchor="17" weightX="0.0" weightY="0.0"/>
                 </Constraint>
               </Constraints>
             </Component>
@@ -151,8 +151,8 @@
       <SubComponents>
         <Component class="javax.swing.JButton" name="dropButton">
           <Properties>
-            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LblDrop&quot;)" type="code"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="language/wbstrings.properties" key="LblDrop" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -164,8 +164,8 @@
         </Component>
         <Component class="javax.swing.JButton" name="cancelButton">
           <Properties>
-            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LblCancel&quot;)" type="code"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="language/wbstrings.properties" key="LblCancel" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -179,11 +179,6 @@
     </Container>
     <Component class="javax.swing.JLabel" name="statusLabel">
       <Properties>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-            <EtchetBorder/>
-          </Border>
-        </Property>
         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[150, 24]"/>
         </Property>
@@ -191,6 +186,9 @@
           <Dimension value="[150, 24]"/>
         </Property>
       </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbStatusLabel();"/>
+      </AuxValues>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
           <GridBagConstraints gridX="0" gridY="1" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="6" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="0.0" weightY="0.0"/>

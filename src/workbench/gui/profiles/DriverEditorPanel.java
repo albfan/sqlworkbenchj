@@ -51,6 +51,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ClassFinderGUI;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbStatusLabel;
 
 import workbench.util.ClassFinder;
 import workbench.util.CollectionUtil;
@@ -72,6 +73,8 @@ public class DriverEditorPanel
 	{
 		super();
 		initComponents();
+    statusLabel.setText("");
+    statusLabel.setBorder(new EmptyBorder(0,0,0,0));
     defaultErrorConstraints = new GridBagConstraints();
 		defaultErrorConstraints.gridx = 0;
 		defaultErrorConstraints.gridy = 0;
@@ -92,7 +95,6 @@ public class DriverEditorPanel
 		tfName.getDocument().addDocumentListener(this);
 		classpathEditor.setLastDirProperty("workbench.drivers.lastlibdir");
 		classpathEditor.addActionListener(this);
-		WbSwingUtilities.setMinimumSize(statusLabel, 1, 20);
 		WbSwingUtilities.setMinimumSize(tfName, 40);
 		WbSwingUtilities.setMinimumSize(tfClassName, 50);
 	}
@@ -224,7 +226,7 @@ public class DriverEditorPanel
     lblLibrary = new javax.swing.JLabel();
     lblSample = new javax.swing.JLabel();
     tfSampleUrl = new javax.swing.JTextField();
-    statusLabel = new javax.swing.JLabel();
+    statusLabel = new WbStatusLabel();
     detectDriverButton = new FlatButton();
     classpathEditor = new workbench.gui.components.ClasspathEditor();
 
@@ -310,7 +312,7 @@ public class DriverEditorPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 3, 0, 3);
+    gridBagConstraints.insets = new java.awt.Insets(6, 3, 0, 5);
     add(tfSampleUrl, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -319,7 +321,7 @@ public class DriverEditorPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(14, 6, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(14, 10, 0, 5);
     add(statusLabel, gridBagConstraints);
 
     detectDriverButton.setIcon(IconMgr.getInstance().getLabelIcon("magnifier"));
@@ -335,7 +337,7 @@ public class DriverEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 5);
     add(detectDriverButton, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;

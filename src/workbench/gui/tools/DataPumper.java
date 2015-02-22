@@ -90,7 +90,7 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.RunningJobIndicator;
-import workbench.gui.components.SimpleStatusBar;
+import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
@@ -608,7 +608,7 @@ public class DataPumper
     jLabel3 = new JLabel();
     preTableStmt = new JTextField();
     postTableStmt = new JTextField();
-    statusLabel = new SimpleStatusBar();
+    statusLabel = new WbStatusLabel();
     buttonPanel = new JPanel();
     jPanel3 = new JPanel();
     startButton = new WbButton();

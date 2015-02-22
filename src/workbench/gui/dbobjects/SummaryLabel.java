@@ -22,43 +22,22 @@
  */
 package workbench.gui.dbobjects;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.WbStatusLabel;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class SummaryLabel
-	extends JLabel
+	extends WbStatusLabel
 {
-	private static final Border DEFAULT_BORDER = new CompoundBorder(new EmptyBorder(2, 0, 0, 0), new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(1, 1, 1, 0)));
-
+  
 	public SummaryLabel(String text)
 	{
 		super(text);
-		Font f = getFont();
-		FontMetrics fm = null;
-		if (f != null) fm = getFontMetrics(f);
-		int height = fm == null ? 0 : fm.getHeight() + 8;
-		int width = fm == null ? 0 : fm.charWidth('W');
-		height = Math.min(22, height);
-		width = Math.max(80, width * 10);
-		Dimension d = new Dimension(width, height);
-		setMinimumSize(d);
-		setPreferredSize(d);
-		setBorder(DEFAULT_BORDER);
 	}
 
 	public void showObjectListInfo(DataStoreTableModel model)

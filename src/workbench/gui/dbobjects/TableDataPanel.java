@@ -25,6 +25,9 @@ package workbench.gui.dbobjects;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,8 +39,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -78,6 +79,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbButton;
+import workbench.gui.components.WbLabelField;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
@@ -108,7 +110,7 @@ public class TableDataPanel
 	private ReloadAction reloadAction;
 
 	private FlatButton config;
-	private JLabel tableNameLabel;
+	private WbLabelField tableNameLabel;
 	private JLabel rowCountLabel;
 	private WbButton rowCountButton;
 	private JCheckBox autoRetrieve;
@@ -183,84 +185,71 @@ public class TableDataPanel
 		this.dataDisplay.setShowLoadProcess(true);
 		this.dataDisplay.setDefaultStatusMessage("");
 
+    createToolbar();
+
 		topPanel = new JPanel();
-		BoxLayout box = new BoxLayout(topPanel, BoxLayout.X_AXIS);
-		topPanel.setLayout(box);
+    topPanel.setLayout(new GridBagLayout());
 
-		this.reloadAction = new ReloadAction(this);
-		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData", true));
-		this.reloadAction.addToInputMap(this.dataDisplay.getTable());
+    GridBagConstraints gc = new GridBagConstraints();
+    gc.gridx = 0;
+    gc.gridy = 0;
+    gc.anchor = GridBagConstraints.LINE_START;
 
-		toolbar = new WbToolbar();
-		toolbar.addDefaultBorder();
-		topPanel.add(toolbar);
-		toolbar.add(this.reloadAction);
-		toolbar.addSeparator();
+		topPanel.add(toolbar, gc);
 
-		this.cancelRetrieve = new StopAction(this);
-		this.cancelRetrieve.setEnabled(false);
-		toolbar.add(this.cancelRetrieve);
-		toolbar.addSeparator();
+    int buttonWidth = IconMgr.getInstance().getToolbarIconSize();
 
-		topPanel.add(Box.createHorizontalStrut(15));
+    gc.gridx ++;
+    gc.insets = new Insets(0, buttonWidth, 0, 0);
 		JLabel l = new JLabel(ResourceMgr.getString("LblTable") + ":");
-		topPanel.add(l);
+		topPanel.add(l, gc);
+
 		Font std = l.getFont();
 		Font bold = std.deriveFont(Font.BOLD);
-		tableNameLabel = new JLabel();
+    tableNameLabel = new WbLabelField();
 		tableNameLabel.setFont(bold);
-		topPanel.add(Box.createHorizontalStrut(5));
-		topPanel.add(tableNameLabel);
 
-		topPanel.add(Box.createHorizontalStrut(10));
+    gc.gridx ++;
+    gc.insets = new Insets(0, 1, 0, 0);
+		topPanel.add(tableNameLabel, gc);
+
 		rowCountButton = new WbButton();
 		rowCountButton.setResourceKey("LblTableDataRowCount");
 		rowCountButton.enableBasicRollover();
 		rowCountButton.addActionListener(this);
 		rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
 		rowCountButton.setFocusable(false);
+    gc.gridx ++;
+    gc.insets = new Insets(0, (int)(buttonWidth/2), 0, 0);
+    topPanel.add(rowCountButton, gc);
 
-		topPanel.add(rowCountButton);
-		topPanel.add(Box.createHorizontalStrut(5));
 		rowCountLabel = new JLabel();
 		rowCountLabel.setFont(bold);
 		rowCountLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-		topPanel.add(rowCountLabel);
-		topPanel.add(Box.createHorizontalStrut(10));
+    gc.gridx ++;
+    gc.insets = new Insets(0, (int)(buttonWidth/4), 0, 0);
+    topPanel.add(rowCountLabel, gc);
 
 		autoRetrieve = new JCheckBox(ResourceMgr.getString("LblAutoLoad"));
 		autoRetrieve.setToolTipText(ResourceMgr.getDescription("LblAutoLoadTableData"));
 		autoRetrieve.setHorizontalTextPosition(SwingConstants.LEFT);
-		topPanel.add(autoRetrieve);
+    gc.gridx ++;
+    gc.weightx = 1.0;
+    gc.insets = new Insets(0, buttonWidth, 0, 0);
+		topPanel.add(autoRetrieve, gc);
 
-		topPanel.add(Box.createHorizontalGlue());
-		this.config = new FlatButton(ResourceMgr.getString("LblConfigureWarningThreshold"));
-		this.config.setToolTipText(ResourceMgr.getDescription("LblConfigureWarningThreshold"));
-		this.config.addActionListener(this);
-		config.setUseDefaultMargin(true);
-		topPanel.add(this.config);
+    config = new FlatButton(ResourceMgr.getString("LblConfigureWarningThreshold"));
+    config.setToolTipText(ResourceMgr.getDescription("LblConfigureWarningThreshold"));
+    config.addActionListener(this);
+    config.setUseDefaultMargin(true);
+    gc.gridx ++;
+    gc.weightx = 0.0;
+    gc.anchor = GridBagConstraints.LINE_END;
+    topPanel.add(this.config, gc);
 
 		this.add(topPanel, BorderLayout.NORTH);
-
-		toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
-		toolbar.add(this.dataDisplay.getSelectKeysAction());
-		toolbar.addSeparator();
-		toolbar.add(this.dataDisplay.getInsertRowAction());
-		toolbar.add(this.dataDisplay.getCopyRowAction());
-		toolbar.add(this.dataDisplay.getDeleteRowAction());
-		toolbar.addSeparator();
-		SelectionFilterAction a = new SelectionFilterAction();
-		a.setClient(this.dataDisplay.getTable());
-		toolbar.add(a);
-		toolbar.addSeparator();
-		toolbar.add(this.dataDisplay.getTable().getFilterAction());
-
-		FilterPickerAction p = new FilterPickerAction(dataDisplay.getTable());
-		toolbar.add(p);
-		toolbar.addSeparator();
-		toolbar.add(this.dataDisplay.getTable().getResetFilterAction());
-
 		this.add(dataDisplay, BorderLayout.CENTER);
+
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(dataDisplay);
 		policy.setDefaultComponent(dataDisplay);
@@ -285,6 +274,38 @@ public class TableDataPanel
 
 		initialized = true;
 	}
+
+  private void createToolbar()
+  {
+
+    toolbar = new WbToolbar();
+    toolbar.addDefaultBorder();
+		reloadAction = new ReloadAction(this);
+		reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData", true));
+		reloadAction.addToInputMap(this.dataDisplay.getTable());
+    toolbar.add(this.reloadAction);
+    toolbar.addSeparator();
+    cancelRetrieve = new StopAction(this);
+    cancelRetrieve.setEnabled(false);
+    toolbar.add(this.cancelRetrieve);
+    toolbar.addSeparator();
+    toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
+    toolbar.add(this.dataDisplay.getSelectKeysAction());
+    toolbar.addSeparator();
+    toolbar.add(this.dataDisplay.getInsertRowAction());
+    toolbar.add(this.dataDisplay.getCopyRowAction());
+    toolbar.add(this.dataDisplay.getDeleteRowAction());
+    toolbar.addSeparator();
+    SelectionFilterAction a = new SelectionFilterAction();
+    a.setClient(this.dataDisplay.getTable());
+    toolbar.add(a);
+    toolbar.addSeparator();
+    toolbar.add(this.dataDisplay.getTable().getFilterAction());
+    FilterPickerAction p = new FilterPickerAction(dataDisplay.getTable());
+    toolbar.add(p);
+    toolbar.addSeparator();
+    toolbar.add(this.dataDisplay.getTable().getResetFilterAction());
+  }
 
 	@Override
 	public void addNotify()

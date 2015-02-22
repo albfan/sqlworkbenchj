@@ -74,6 +74,7 @@ import workbench.gui.components.EmptyTableModel;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
@@ -689,7 +690,7 @@ public class TableSearchPanel
     selectAllButton = new FlatButton();
     jPanel2 = new javax.swing.JPanel();
     selectNoneButton = new FlatButton();
-    statusInfo = new javax.swing.JLabel();
+    statusInfo = new WbStatusLabel();
     entryPanel = new javax.swing.JPanel();
     buttonPanel = new javax.swing.JPanel();
     criteriaContainer = new javax.swing.JPanel();
@@ -757,10 +758,6 @@ public class TableSearchPanel
     jSplitPane1.setLeftComponent(tablePane);
 
     add(jSplitPane1, java.awt.BorderLayout.CENTER);
-
-    statusInfo.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    statusInfo.setMinimumSize(new java.awt.Dimension(4, 22));
-    statusInfo.setPreferredSize(new java.awt.Dimension(4, 22));
     add(statusInfo, java.awt.BorderLayout.SOUTH);
 
     entryPanel.setLayout(new java.awt.GridBagLayout());

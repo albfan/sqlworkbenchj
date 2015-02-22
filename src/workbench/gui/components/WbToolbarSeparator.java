@@ -40,15 +40,16 @@ public class WbToolbarSeparator
 	public WbToolbarSeparator()
 	{
 		super();
-    // this dummy button is used to calculate the height of the regular toolbar
-    // to avoid the UI from "jumping" when switchting between a SQL tab and the DbExplorer
+    // this dummy button is used to calculate the width of a regular toolbar button
+    // so that the separator can be adjusted to the same height
     WbToolbarButton button = new WbToolbarButton(IconMgr.getInstance().getToolbarIcon("save"));
     Dimension bs = button.getPreferredSize();
 
-		Dimension d = new Dimension(7, bs.height);
+		Dimension d = new Dimension((int)(bs.width * 0.3), bs.height);
 		setOpaque(false);
 		this.setPreferredSize(d);
-		this.setMinimumSize(d);
+		this.setPreferredSize(d);
+		this.setMaximumSize(d);
 		this.setBorder(new DividerBorder(DividerBorder.VERTICAL_MIDDLE));
 	}
 

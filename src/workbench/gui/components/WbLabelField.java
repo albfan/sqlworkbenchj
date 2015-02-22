@@ -74,6 +74,13 @@ public class WbLabelField
 		setForeground(UIManager.getColor("Label.foreground"));
 	}
 
+  public void useBoldFont()
+  {
+		Font std = getFont();
+		Font bold = std.deriveFont(Font.BOLD);
+		setFont(bold);
+  }
+
 	public void addPopupAction(WbAction a)
 	{
 		mouseListener.addAction(a);

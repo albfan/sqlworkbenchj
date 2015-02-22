@@ -65,10 +65,10 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.RunningJobIndicator;
-import workbench.gui.components.SimpleStatusBar;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.DbObjectSourcePanel;
 import workbench.gui.profiles.ProfileSelectionDialog;
@@ -141,7 +141,7 @@ public class ObjectSourceSearchPanel
 	{
 		clearSearch();
 		searcher = new ObjectSourceSearcher(connection);
-		searcher.setRowMonitor(((SimpleStatusBar)statusbar).getMonitor());
+		searcher.setRowMonitor(((WbStatusLabel)statusbar).getMonitor());
 		startButton.setText(ResourceMgr.getString("LblCancelPlain"));
 
 		List<String> schemas = StringUtil.stringToList(schemaNames.getText(), ",", true, true, false);
@@ -739,7 +739,8 @@ public class ObjectSourceSearchPanel
 	 */
 	@SuppressWarnings("unchecked")
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
+  private void initComponents()
+  {
     java.awt.GridBagConstraints gridBagConstraints;
 
     topPanel = new javax.swing.JPanel();
@@ -761,7 +762,7 @@ public class ObjectSourceSearchPanel
     resultContainer = new javax.swing.JPanel();
     splitPane = new WbSplitPane();
     footerPanel = new javax.swing.JPanel();
-    statusbar = new SimpleStatusBar();
+    statusbar = new WbStatusLabel();
     buttonPanel = new javax.swing.JPanel();
     startButton = new javax.swing.JButton();
     showScriptButton = new javax.swing.JButton();
@@ -885,8 +886,10 @@ public class ObjectSourceSearchPanel
 
     selectSchemasButton.setText("...");
     selectSchemasButton.setToolTipText(ResourceMgr.getString("d_LblSchemaSelect")); // NOI18N
-    selectSchemasButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    selectSchemasButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
         selectSchemasButtonActionPerformed(evt);
       }
     });
@@ -898,8 +901,10 @@ public class ObjectSourceSearchPanel
 
     selectTypesButton.setText("...");
     selectTypesButton.setToolTipText(ResourceMgr.getString("d_LblTypeSelect")); // NOI18N
-    selectTypesButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    selectTypesButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
         selectTypesButtonActionPerformed(evt);
       }
     });
@@ -911,8 +916,10 @@ public class ObjectSourceSearchPanel
     topPanel.add(selectTypesButton, gridBagConstraints);
 
     selectConnection.setText(ResourceMgr.getString("LblSelectConnection")); // NOI18N
-    selectConnection.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    selectConnection.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
         selectConnectionActionPerformed(evt);
       }
     });
@@ -947,8 +954,10 @@ public class ObjectSourceSearchPanel
     buttonPanel.setLayout(new java.awt.GridBagLayout());
 
     startButton.setText(ResourceMgr.getString("LblStartSearch")); // NOI18N
-    startButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    startButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
         startButtonActionPerformed(evt);
       }
     });
@@ -959,8 +968,10 @@ public class ObjectSourceSearchPanel
     buttonPanel.add(startButton, gridBagConstraints);
 
     showScriptButton.setText(ResourceMgr.getString("LblShowScript")); // NOI18N
-    showScriptButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    showScriptButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
         showScriptButtonActionPerformed(evt);
       }
     });
@@ -973,8 +984,10 @@ public class ObjectSourceSearchPanel
     buttonPanel.add(showScriptButton, gridBagConstraints);
 
     closeButton.setText(ResourceMgr.getString("LblClose")); // NOI18N
-    closeButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    closeButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
         closeButtonActionPerformed(evt);
       }
     });

@@ -67,8 +67,8 @@ import workbench.db.importer.TableDependencySorter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.NoSelectionModel;
-import workbench.gui.components.SimpleStatusBar;
 import workbench.gui.components.WbButton;
+import workbench.gui.components.WbStatusLabel;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.WbThread;
@@ -116,7 +116,7 @@ public class TableDeleterUI
     jScrollPane1 = new JScrollPane();
     objectList = new JList();
     optionPanel = new JPanel();
-    statusLabel = new SimpleStatusBar();
+    statusLabel = new WbStatusLabel();
     jPanel2 = new JPanel();
     commitEach = new JRadioButton();
     commitAtEnd = new JRadioButton();

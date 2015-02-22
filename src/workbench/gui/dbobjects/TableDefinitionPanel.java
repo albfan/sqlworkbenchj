@@ -77,6 +77,7 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EmptyTableModel;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.QuickFilterPanel;
+import workbench.gui.components.WbLabelField;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
@@ -109,7 +110,7 @@ public class TableDefinitionPanel
 	private final Object connectionLock = new Object();
 
 	private WbTable tableDefinition;
-	private JLabel tableNameLabel;
+	private WbLabelField tableNameLabel;
 	private QuickFilterPanel columnFilter;
 	private WbAction createIndexAction;
 	private CreatePKAction createPKAction;
@@ -244,7 +245,9 @@ public class TableDefinitionPanel
 		cc.insets = new Insets(0, 5, 0, 5);
 		toolbar.add(l, cc);
 
-		tableNameLabel = new JLabel();
+		tableNameLabel = new WbLabelField();
+    tableNameLabel.useBoldFont();
+
 		cc.fill = GridBagConstraints.HORIZONTAL;
 		cc.gridx ++;
 		cc.weightx = 1.0;
@@ -296,11 +299,11 @@ public class TableDefinitionPanel
 			tableDefinition.showFocusBorder();
 		}
 
-		if (doRestore)
-		{
-			restoreSettings();
-		}
-		initialized = true;
+    if (doRestore)
+    {
+      restoreSettings();
+    }
+    initialized = true;
 	}
 
 	protected void fireTableDefinitionChanged()
@@ -373,7 +376,7 @@ public class TableDefinitionPanel
 					{
 						tableDefinition.reset();
 						reloadAction.setEnabled(false);
-						String msg = "<html>" + ResourceMgr.getString("TxtRetrieveTableDef") + " <b>" + currentTable.getTableName() + "</b></html>";
+						String msg = ResourceMgr.getString("TxtRetrieveTableDef") + " " + currentTable.getTableName();
 						tableNameLabel.setText(msg);
 					}
 				});
@@ -476,7 +479,7 @@ public class TableDefinitionPanel
 		}
 		else
 		{
-			tableNameLabel.setText("<html><b>" + displayName + "</b></html>");
+			tableNameLabel.setText(displayName);
 		}
 
 		TableColumnModel colmod = tableDefinition.getColumnModel();
@@ -650,8 +653,6 @@ public class TableDefinitionPanel
 		int count = rows.length;
 		List<IndexColumn> columns = new ArrayList<>(count);
 		String indexName = ResourceMgr.getString("TxtNewIndexName");
-		//String indexName = WbSwingUtilities.getUserInput(this, msg, defaultName);
-		if (StringUtil.isBlank(indexName)) return;
 
 		for (int i=0; i < count; i++)
 		{

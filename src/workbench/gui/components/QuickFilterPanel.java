@@ -181,12 +181,13 @@ public class QuickFilterPanel
 		columnDropDown.setSelectedIndex(0);
 		columnDropDown.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnSelector"));
 
-		GridBagConstraints gridBagConstraints = new GridBagConstraints();
-		gridBagConstraints.anchor = GridBagConstraints.WEST;
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.fill = GridBagConstraints.NONE;
-		gridBagConstraints.weightx = 0.0;
-		this.add(columnDropDown, gridBagConstraints);
+		GridBagConstraints gc = new GridBagConstraints();
+		gc.anchor = GridBagConstraints.WEST;
+		gc.gridx = 2;
+		gc.fill = GridBagConstraints.NONE;
+		gc.weightx = 0.0;
+    gc.insets = new Insets(0, 5, 0, 2);
+		this.add(columnDropDown, gc);
 	}
 
 	public void setFilterTooltip()

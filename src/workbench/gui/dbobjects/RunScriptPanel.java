@@ -34,22 +34,28 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.EscAction;
-import workbench.gui.components.SimpleStatusBar;
-import workbench.gui.sql.SqlEditor;
+
 import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.EscAction;
+import workbench.gui.components.WbStatusLabel;
+import workbench.gui.sql.SqlEditor;
+
 import workbench.sql.BatchRunner;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -226,7 +232,7 @@ public class RunScriptPanel
 
 		try
 		{
-			runner.setRowMonitor(((SimpleStatusBar)statusbar).getMonitor());
+			runner.setRowMonitor(((WbStatusLabel)statusbar).getMonitor());
 			runner.setAbortOnError(true);
 			runner.setStoreErrors(true);
 
@@ -358,14 +364,15 @@ public class RunScriptPanel
 	 */
 	@SuppressWarnings("unchecked")
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
-		GridBagConstraints gridBagConstraints;
+  private void initComponents()
+  {
+    GridBagConstraints gridBagConstraints;
 
     editor = new SqlEditor();
     startButton = new JButton();
     cancelButton = new JButton();
     closeButton = new JButton();
-    statusbar = new SimpleStatusBar();
+    statusbar = new WbStatusLabel();
     saveAsButton = new JButton();
 
     setLayout(new GridBagLayout());

@@ -37,7 +37,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -45,6 +44,8 @@ import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.WbStatusLabel;
 
 import workbench.util.BrowserLauncher;
 import workbench.util.UpdateVersion;
@@ -135,7 +136,7 @@ public class VersionCheckDialog
     stableVersion = new JLabel();
     devVersionLabel = new JLabel();
     devVersion = new JLabel();
-    statusLabel = new JLabel();
+    statusLabel = new WbStatusLabel();
     headingLabel = new JLabel();
     jSeparator2 = new JSeparator();
 
@@ -215,7 +216,6 @@ public class VersionCheckDialog
     getContentPane().add(devVersion, gridBagConstraints);
 
     statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-    statusLabel.setBorder(BorderFactory.createEtchedBorder());
     statusLabel.setMinimumSize(new Dimension(100, 28));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;

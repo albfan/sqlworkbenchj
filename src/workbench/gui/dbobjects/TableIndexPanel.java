@@ -39,43 +39,46 @@ import workbench.gui.components.WbToolbar;
  * @author Thomas Kellerer
  */
 public class TableIndexPanel
-	extends JPanel
-	implements Resettable
+  extends JPanel
+  implements Resettable
 {
-	private ReloadAction reloadIndex;
-	private WbTable indexList;
-	private WbToolbar toolbar;
+  private ReloadAction reloadIndex;
+  private WbTable indexList;
+  private WbToolbar toolbar;
 
-	public TableIndexPanel(WbTable indexTable, Reloadable reloader)
-	{
-		super();
-		this.setLayout(new BorderLayout());
-		indexList = indexTable;
-		WbScrollPane p = new WbScrollPane(indexTable);
-		this.add(p, BorderLayout.CENTER);
-		if (reloader != null)
-		{
-			reloadIndex = new ReloadAction(reloader);
-			reloadIndex.setEnabled(true);
-			toolbar = new WbToolbar();
-			toolbar.add(reloadIndex);
-			this.add(toolbar, BorderLayout.NORTH);
-		}
-	}
+  public TableIndexPanel(WbTable indexTable, Reloadable reloader)
+  {
+    super();
+    this.setLayout(new BorderLayout());
+    indexList = indexTable;
+    WbScrollPane p = new WbScrollPane(indexTable);
+    this.add(p, BorderLayout.CENTER);
+    if (reloader != null)
+    {
+      reloadIndex = new ReloadAction(reloader);
+      reloadIndex.setEnabled(true);
+      toolbar = new WbToolbar();
+      toolbar.add(reloadIndex);
+      this.add(toolbar, BorderLayout.NORTH);
+    }
+  }
 
-	@Override
-	public void reset()
-	{
-		if (indexList != null)
-		{
-			indexList.reset();
-		}
-	}
+  @Override
+  public void reset()
+  {
+    if (indexList != null)
+    {
+      indexList.reset();
+    }
+  }
 
-	public void dispose()
-	{
-		WbAction.dispose(reloadIndex);
-		if (toolbar != null) toolbar.removeAll();
-	}
+  public void dispose()
+  {
+    WbAction.dispose(reloadIndex);
+    if (toolbar != null)
+    {
+      toolbar.removeAll();
+    }
+  }
 
 }

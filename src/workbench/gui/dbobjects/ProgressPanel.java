@@ -56,7 +56,7 @@ import workbench.util.NumberStringCache;
  * @author  Thomas Kellerer
  */
 public class ProgressPanel
-	extends javax.swing.JPanel
+	extends JPanel
 	implements RowActionMonitor
 {
 	private Interruptable task;
