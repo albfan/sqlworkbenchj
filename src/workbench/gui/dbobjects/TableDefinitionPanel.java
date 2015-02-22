@@ -281,6 +281,7 @@ public class TableDefinitionPanel
 		dropPKAction = new DropPKAction(this);
 
 		tableDefinition.addPopupAction(CreateDummySqlAction.createDummyInsertAction(this, tableDefinition.getSelectionModel()), true);
+		tableDefinition.addPopupAction(CreateDummySqlAction.createDummyUpdateAction(this, tableDefinition.getSelectionModel()), false);
 		tableDefinition.addPopupAction(CreateDummySqlAction.createDummySelectAction(this, tableDefinition.getSelectionModel()), false);
 
 		tableDefinition.getSelectionModel().addListSelectionListener(this);
