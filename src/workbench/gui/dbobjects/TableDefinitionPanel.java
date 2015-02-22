@@ -242,7 +242,7 @@ public class TableDefinitionPanel
 		cc.fill = GridBagConstraints.NONE;
 		cc.gridx ++;
 		cc.weightx = 0.0;
-		cc.insets = new Insets(0, 5, 0, 5);
+		cc.insets = new Insets(0, 5, 0, 0);
 		toolbar.add(l, cc);
 
 		tableNameLabel = new WbLabelField();
@@ -376,7 +376,7 @@ public class TableDefinitionPanel
 					{
 						tableDefinition.reset();
 						reloadAction.setEnabled(false);
-						String msg = ResourceMgr.getString("TxtRetrieveTableDef") + " " + currentTable.getTableName();
+						String msg = " " + ResourceMgr.getString("TxtRetrieveTableDef") + " " + currentTable.getTableName();
 						tableNameLabel.setText(msg);
 					}
 				});
