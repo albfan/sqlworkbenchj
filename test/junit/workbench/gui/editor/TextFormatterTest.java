@@ -158,7 +158,7 @@ public class TextFormatterTest
 		selectionEnd = 0;
 
 		TextFormatter instance = new TextFormatter("postgresql");
-		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER, "--");
+		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 
 		String expected =
 			"UPDATE foo\n" +
@@ -173,7 +173,7 @@ public class TextFormatterTest
 		editorText = "update foo set bar = 1;\nupdate bar set foo = 2; ";
 		selectionStart = 0;
 		selectionEnd = editorText.length();
-		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER, "--");
+		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 //		System.out.println("formatted:\n" + editorText);
 		assertEquals(expected, editorText.trim());
 
@@ -181,7 +181,7 @@ public class TextFormatterTest
 		selectionStart = 0;
 		selectionEnd = editorText.length() - 1;
 //		System.out.println("selected: " + editor.getSelectedStatement());
-		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER, "--");
+		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		expected =
 			"UPDATE foo\n" +
 			"   SET bar = 1";
@@ -193,7 +193,7 @@ public class TextFormatterTest
 		selectionStart = 0;
 		selectionEnd = editorText.length();
 //		System.out.println("selected: " + editor.getSelectedStatement());
-		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER, "--");
+		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		expected =
 			"UPDATE foo\n" +
 			"   SET bar = 1;";
@@ -207,7 +207,7 @@ public class TextFormatterTest
 		selectionStart = 0;
 		selectionEnd = 0;
 //		System.out.println("selected: " + editor.getSelectedStatement());
-		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER, "--");
+		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		expected =
 			"UPDATE foo\n" +
 			"   SET bar = 1\n" +
@@ -231,7 +231,7 @@ public class TextFormatterTest
 			"-- from foo";
 		selectionStart = 0;
 		selectionEnd = 0;
-		instance.formatSql(editor, null, "--");
+		instance.formatSql(editor, null);
 		expected =
 			"SELECT a,\n" +
 			"       b\n" +

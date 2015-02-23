@@ -59,7 +59,7 @@ public class TextFormatter
 		return token == null;
 	}
 
-	public void formatSql(final SqlTextContainer editor, DelimiterDefinition alternateDelimiter, String lineComment)
+	public void formatSql(final SqlTextContainer editor, DelimiterDefinition alternateDelimiter)
 	{
 		String sql = editor.getSelectedStatement();
 		ScriptParser parser = new ScriptParser(ParserType.getTypeFromDBID(dbId));

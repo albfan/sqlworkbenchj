@@ -160,7 +160,6 @@ public class EditorPanel
 	private String fileEncoding;
 	private Set<String> dbFunctions;
 	private Set<String> dbDatatypes;
-	private boolean isMySQL;
 	private DelimiterDefinition alternateDelimiter;
 	private String dbId;
 	private QuoteHandler quoteHandler = QuoteHandler.STANDARD_HANDLER;
@@ -279,7 +278,7 @@ public class EditorPanel
 		{
 			quoteHandler = aConnection.getMetadata();
 			// Support MySQL's non-standard line comment
-			isMySQL = aConnection.getMetadata().isMySql();
+			boolean isMySQL = aConnection.getMetadata().isMySql();
 			token.setIsMySQL(isMySQL);
 			if (isMySQL && Settings.getInstance().getBoolProperty("workbench.editor.mysql.usehashcomment", false))
 			{
@@ -479,7 +478,7 @@ public class EditorPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			TextFormatter f = new TextFormatter(this.dbId);
-			f.formatSql(this, alternateDelimiter, isMySQL ? "#" : "--");
+			f.formatSql(this, alternateDelimiter);
 		}
 		finally
 		{
