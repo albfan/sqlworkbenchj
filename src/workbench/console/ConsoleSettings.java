@@ -126,6 +126,11 @@ public class ConsoleSettings
 		return display;
 	}
 
+	public static boolean showProfileInPrompt()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.console.prompt.useprofilename", false);
+	}
+
 	public static boolean showScriptFinishTime()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.console.script.showtime", false);

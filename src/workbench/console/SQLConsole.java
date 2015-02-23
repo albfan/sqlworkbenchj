@@ -98,6 +98,7 @@ public class SQLConsole
 	private WbThread cancelThread;
 
 	private final boolean changeTerminalTitle;
+  private boolean showProfileInPrompt;
 	private final String titlePrefix = "\033]0;";
 	private final String titleSuffix = "\007";
 	private WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
@@ -114,7 +115,9 @@ public class SQLConsole
 		titleBuilder.setShowProfileGroup(false);
 		titleBuilder.setShowURL(ConsoleSettings.termTitleIncludeUrl());
 		titleBuilder.setShowNotConnected(false);
+    showProfileInPrompt = ConsoleSettings.showProfileInPrompt();
 		CommandRegistry.getInstance().scanForExtensions();
+
 	}
 
 	public void startConsole()
@@ -553,34 +556,38 @@ public class SQLConsole
 	{
 		String newprompt = currentPrompt;
 		WbConnection current = runner.getConnection();
-		if (current != null && !runner.hasPendingActions())
+    if (current != null && showProfileInPrompt)
+    {
+      newprompt = current.getProfile().getName();
+    }
+    else if (current != null && !runner.hasPendingActions())
 		{
-			String user = current.getCurrentUser();
-			String catalog = current.getDisplayCatalog();
-			if (catalog == null) catalog = current.getCurrentCatalog();
+      String user = current.getCurrentUser();
+      String catalog = current.getDisplayCatalog();
+      if (catalog == null) catalog = current.getCurrentCatalog();
 
-			String schema = current.getDisplaySchema();
-			if (schema == null) current.getCurrentSchema();
+      String schema = current.getDisplaySchema();
+      if (schema == null) current.getCurrentSchema();
 
-			if (StringUtil.isBlank(catalog) && StringUtil.isNonBlank(schema))
-			{
-				if (schema.equalsIgnoreCase(user))
-				{
-					newprompt = user;
-				}
-				else
-				{
-					newprompt = user + "@" + schema;
-				}
-			}
-			else if (StringUtil.isNonBlank(catalog) && StringUtil.isBlank(schema))
-			{
-				newprompt = user + "@" + catalog;
-			}
-			else if (StringUtil.isNonBlank(catalog) && StringUtil.isNonBlank(schema))
-			{
-				newprompt = user + "@" + catalog + "/" + schema;
-			}
+      if (StringUtil.isBlank(catalog) && StringUtil.isNonBlank(schema))
+      {
+        if (schema.equalsIgnoreCase(user))
+        {
+          newprompt = user;
+        }
+        else
+        {
+          newprompt = user + "@" + schema;
+        }
+      }
+      else if (StringUtil.isNonBlank(catalog) && StringUtil.isBlank(schema))
+      {
+        newprompt = user + "@" + catalog;
+      }
+      else if (StringUtil.isNonBlank(catalog) && StringUtil.isNonBlank(schema))
+      {
+        newprompt = user + "@" + catalog + "/" + schema;
+      }
 		}
 		setTerminalTitle(current, false);
 		return (newprompt == null ? DEFAULT_PROMPT : appendSuffix(newprompt));

@@ -97,6 +97,7 @@ import workbench.storage.DataStore;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
 /**
@@ -384,7 +385,7 @@ public class ProcedureListPanel
 		this.currentCatalog = aCatalog;
 		if (initialized && this.isVisible() && retrieve)
 		{
-			this.retrieve();
+			this.startRetrieve();
 		}
 		else
 		{
@@ -395,27 +396,40 @@ public class ProcedureListPanel
 
 	public void panelSelected()
 	{
-		retrieveIfNeeded();
+    if (this.shouldRetrieve)
+    {
+      this.startRetrieve();
+    }
 	}
 
-	public void retrieveIfNeeded()
-	{
-		if (this.shouldRetrieve) this.retrieve();
-	}
-
-	public void retrieve()
+	public void startRetrieve()
 	{
 		initGui();
 
 		if (this.isRetrieving) return;
 		if (!WbSwingUtilities.isConnectionIdle(this, this.dbConnection)) return;
 
+    reset();
+
+    WbThread retrieve = new WbThread("RetrieveProcedures")
+    {
+      @Override
+      public void run()
+      {
+        _retrieve();
+      }
+    };
+    retrieve.start();
+  }
+
+  private void _retrieve()
+  {
 		final Container parent = this.getParent();
 		try
 		{
 			this.dbConnection.setBusy(true);
 			WbSwingUtilities.showWaitCursor(parent);
-			reset();
+
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				@Override
@@ -425,7 +439,6 @@ public class ProcedureListPanel
 				}
 			});
 
-			this.isRetrieving = true;
 			levelChanger.changeIsolationLevel(dbConnection);
 			DbMetadata meta = dbConnection.getMetadata();
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
@@ -486,7 +499,7 @@ public class ProcedureListPanel
 				@Override
 				public void run()
 				{
-					retrieve();
+					startRetrieve();
 				}
 			});
 		}
@@ -876,8 +889,7 @@ public class ProcedureListPanel
 	public void reload()
 	{
 		if (!WbSwingUtilities.isConnectionIdle(this, dbConnection)) return;
-		this.reset();
-		this.retrieve();
+		this.startRetrieve();
 	}
 
 	@Override

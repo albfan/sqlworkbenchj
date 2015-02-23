@@ -95,6 +95,8 @@ public class WbExport
 	public static final String ARG_COL_COMMENTS = "includeColumnComments";
 	public static final String ARG_DISTRIBUTE_LOB_FILES = "lobsPerDirectory";
 	public static final String ARG_QUOTE_ALWAYS = "quoteAlways";
+	public static final String ARG_QUOTE_HEADER = "quoteHeader";
+	public static final String ARG_QUOTE_NULL = "quoteNulls";
 	public static final String ARG_QUOTECHAR = "quotechar";
 	public static final String ARG_APPEND = "append";
 	public static final String ARG_CLOB_AS_FILE = "clobAsFile";
@@ -196,6 +198,8 @@ public class WbExport
 		cmdLine.addArgument(ARG_USE_CDATA, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ESCAPETEXT, StringUtil.stringToList("control,7bit,8bit,extended,none,pgcopy"));
 		cmdLine.addArgument(ARG_QUOTE_ALWAYS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_QUOTE_HEADER, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_QUOTE_NULL, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_LINEENDING, StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument(ARG_SHOW_ENCODINGS);
 		cmdLine.addArgument(ARG_FORMATFILE, StringUtil.stringToList("postgres,oracle,sqlserver,db2,mysql"));
@@ -587,6 +591,8 @@ public class WbExport
 				}
 			}
 			exporter.setQuoteAlways(cmdLine.getBoolean(ARG_QUOTE_ALWAYS));
+			exporter.setQuoteHeader(cmdLine.getBoolean(ARG_QUOTE_HEADER));
+			exporter.setQuoteNulls(cmdLine.getBoolean(ARG_QUOTE_NULL));
 			QuoteEscapeType quoteEscaping = CommonArgs.getQuoteEscaping(cmdLine);
 			if (quoteEscaping != QuoteEscapeType.none && StringUtil.isBlank(quote))
 			{

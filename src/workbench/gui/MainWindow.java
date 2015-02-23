@@ -2912,6 +2912,7 @@ public class MainWindow
 				MainPanel p = getSqlPanel(i);
 				p.saveToWorkspace(w,i);
 			}
+			LogMgr.logDebug("MainWindow.saveWorkspace()", "Workspace " + filename + " saved");
 		}
 		catch (Throwable e)
 		{

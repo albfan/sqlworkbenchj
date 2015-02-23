@@ -1669,7 +1669,7 @@ public class SqlPanel
 
 		if (this.editor != null) this.editor.setDatabaseConnection(this.dbConnection);
 		if (this.copyStatementAction != null) this.copyStatementAction.setConnection(this.dbConnection);
-		
+
 		checkResultSetActions();
 		checkCommitAction();
 
@@ -3303,47 +3303,51 @@ public class SqlPanel
 				finishedMsg.append(finishedMsg2);
 				String currentMsg = finishedMsg.toString();
 
-				if (!logWasCompressed)
-				{
-					showResultMessage(statementResult);
-					StringBuilder logmsg = new StringBuilder(100);
-					String timing = statementResult.getTimingMessage();
-					if (timing != null)
-					{
-						logmsg.append('\n');
-						logmsg.append(timing);
-					}
+        if (!logWasCompressed)
+        {
+          showResultMessage(statementResult);
+          StringBuilder logmsg = new StringBuilder(100);
+          String timing = statementResult.getTimingMessage();
+          if (timing != null)
+          {
+            logmsg.append('\n');
+            logmsg.append(timing);
+          }
 
-					logmsg.append('\n');
-					if (count > 1)
-					{
-						logmsg.append('(');
-						logmsg.append(currentMsg);
-						logmsg.append(")\n\n");
-					}
-					this.appendToLog(logmsg.toString());
-				}
-				else if (statementResult.hasWarning())
-				{
-					// Warnings should always be shown, even if the log output is "compressed"
-					String verb = stmtRunner.getConnection().getParsingUtil().getSqlVerb(currentSql);
-					String warn = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);
-					this.appendToLog(warn + "\n");
-				}
+          logmsg.append('\n');
+          if (count > 1)
+          {
+            logmsg.append('(');
+            logmsg.append(currentMsg);
+            logmsg.append(")\n\n");
+          }
+          this.appendToLog(logmsg.toString());
+          if (count > 1 && GuiSettings.showScriptStmtFinishTime())
+          {
+            this.appendToLog("(" + StringUtil.getCurrentTimestamp() + ")\n");
+          }
+        }
+        else if (statementResult.hasWarning())
+        {
+          // Warnings should always be shown, even if the log output is "compressed"
+          String verb = stmtRunner.getConnection().getParsingUtil().getSqlVerb(currentSql);
+          String warn = StringUtil.replace(ResourceMgr.getString("MsgStmtCompletedWarn"), "%verb%", verb);
+          this.appendToLog(warn + "\n");
+        }
 
-				if (count > 1)
-				{
-					this.statusBar.setStatusMessage(currentMsg);
-				}
+        if (count > 1)
+        {
+          this.statusBar.setStatusMessage(currentMsg);
+        }
 
 				// this will be set by confirmExecution() if
 				// Cancel was selected
-				if (cancelAll) break;
+        if (cancelAll) break;
 
-				if (statementResult.isSuccess())
-				{
-					totalRows += statementResult.getTotalUpdateCount();
-				}
+        if (statementResult.isSuccess())
+        {
+          totalRows += statementResult.getTotalUpdateCount();
+        }
 				else
 				{
 					commandWithError = i;

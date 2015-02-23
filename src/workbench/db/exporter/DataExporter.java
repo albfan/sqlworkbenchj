@@ -177,6 +177,8 @@ public class DataExporter
 
 	private int maxBlobFilesPerDir = -1;
 	private boolean trimCharData;
+  private boolean quoteHeader;
+  private boolean quoteNulls;
 
 
 	/**
@@ -243,6 +245,26 @@ public class DataExporter
 	{
 		return escapeType;
 	}
+
+  public boolean getQuoteHeader()
+  {
+    return quoteHeader;
+  }
+
+  public void setQuoteHeader(boolean flag)
+  {
+    this.quoteHeader = flag;
+  }
+
+  public boolean getQuoteNulls()
+  {
+    return quoteNulls;
+  }
+
+  public void setQuoteNulls(boolean flag)
+  {
+    this.quoteNulls = flag;
+  }
 
 	public boolean getIncludeIdentityCols()
 	{

@@ -117,12 +117,13 @@ public class FileVersioner
 		{
 			if (!dir.mkdirs())
 			{
-				LogMgr.logError("FileVersioner.createBackup", "Could not create backup dir: " + dir.getAbsolutePath() + ", using workspace directory: " + toBackup.getParentFile().getAbsolutePath(), null);
+				LogMgr.logError("FileVersioner.createBackup()", "Could not create backup dir: " + dir.getAbsolutePath() + ", using workspace directory: " + toBackup.getParentFile().getAbsolutePath(), null);
 				dir = toBackup.getParentFile();
 			}
 		}
 		File backup = new File(dir, toBackup.getName() + versionSeparator + nextVersion);
 		FileUtil.copy(toBackup, backup);
+		LogMgr.logDebug("FileVersioner.createBackup()", "Createb backup file: " + backup.getAbsolutePath());
 		return backup;
 	}
 

@@ -77,10 +77,16 @@ public class ClientSideTableSearcher
 	private ColumnComparator comparator;
 	private boolean treatBlobAsText;
 	private String blobEncoding;
+  private boolean showOnlyMatchedColumns;
 
 	public ClientSideTableSearcher()
 	{
 	}
+
+  public void setShowOnlyMatchedColumns(boolean flag)
+  {
+    this.showOnlyMatchedColumns = flag;
+  }
 
 	@Override
 	public String getCriteria()
@@ -237,7 +243,7 @@ public class ClientSideTableSearcher
 			{
 				if (cancelSearch) break;
 				RowData row = reader.read(rs, trimCharData);
-				if (searcher.isSearchStringContained(row, info))
+				if (searcher.isSearchStringContained(row, info, showOnlyMatchedColumns))
 				{
 					result.addRow(row);
 				}

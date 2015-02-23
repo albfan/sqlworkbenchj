@@ -1121,6 +1121,11 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.sql.script.showtime", false);
 	}
 
+	public static boolean showScriptStmtFinishTime()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.sql.script.statement.showtime", showScriptFinishTime());
+	}
+
 	public static boolean getUseStatementInCurrentLine()
 	{
 		return Settings.getInstance().getBoolProperty(PROP_USE_CURRENT_LINE_FOR_CURRENT_STMT, false);

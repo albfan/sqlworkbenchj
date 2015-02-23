@@ -217,17 +217,16 @@ public class TextRowDataConverter
 				value = this.getValueAsFormattedString(row, colIndex);
 			}
 
-			boolean isNull = (value == null);
-			if (isNull)
-			{
-				value = getNullDisplay();
-				// Never quote null values
-				addQuote = nullString == null ? false : quoteAlways;
-			}
+      if (value == null)
+      {
+        value = getNullDisplay();
+        // Never quote null values
+        boolean quoteNulls = exporter == null ? false : exporter.getQuoteNulls();
+        addQuote = value.isEmpty() ? quoteNulls : quoteAlways;
+      }
 			else if (SqlUtil.isCharacterType(colType))
 			{
-				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
-				addQuote = (this.quoteAlways || (hasQuoteChar && containsDelimiter));
+				addQuote = needsQuotes(value);
 
 				if (this.escapeRange != CharacterRange.RANGE_NONE)
 				{
@@ -264,6 +263,16 @@ public class TextRowDataConverter
 		return result;
 	}
 
+  private boolean needsQuotes(String value)
+  {
+    if (quoteAlways) return true;
+    if (value == null) return false;
+
+    boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
+    boolean hasQuoteChar = this.quoteCharacter != null;
+    return hasQuoteChar && containsDelimiter;
+  }
+
 	public void setLineEnding(String ending)
 	{
 		if (ending != null) this.lineEnding = ending;
@@ -280,6 +289,8 @@ public class TextRowDataConverter
 		this.setAdditionalEncodeCharacters();
 
 		if (!this.writeHeader) return null;
+
+    boolean quoteHeader = exporter != null ? exporter.getQuoteHeader() : false;
 
 		int colCount = this.metaData.getColumnCount();
 		StringBuilder result = new StringBuilder(colCount * 10);
@@ -306,7 +317,14 @@ public class TextRowDataConverter
 				result.append(delimiter);
 			}
 
+      boolean addQuotes = false;
+      if (quoteHeader)
+      {
+        addQuotes = needsQuotes(name);
+      }
+      if (addQuotes) result.append(quoteCharacter);
 			result.append(name);
+      if (addQuotes) result.append(quoteCharacter);
 		}
 		result.append(lineEnding);
 		return result;

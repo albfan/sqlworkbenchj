@@ -77,7 +77,7 @@ public class RowDataSearcher
 		return expr;
 	}
 
-	public boolean isSearchStringContained(RowData row, ResultInfo metaData)
+	public boolean isSearchStringContained(RowData row, ResultInfo metaData, boolean showOnlyMatchedColumns)
 	{
 		for (int c = 0; c < row.getColumnCount(); c++)
 		{
@@ -105,7 +105,14 @@ public class RowDataSearcher
 				{
 					value = converter.getValueAsFormattedString(row, c);
 				}
-				if (filterExpression.evaluate(value)) return true;
+				if (filterExpression.evaluate(value))
+        {
+          return true;
+        }
+        else if (showOnlyMatchedColumns)
+        {
+          row.setValue(c, null);
+        }
 			}
 		}
 		return false;

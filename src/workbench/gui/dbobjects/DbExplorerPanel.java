@@ -50,8 +50,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import workbench.interfaces.Connectable;
 import workbench.interfaces.DbExecutionListener;
@@ -108,47 +106,47 @@ import workbench.util.WbWorkspace;
  */
 public class DbExplorerPanel
 	extends JPanel
-	implements ActionListener, MainPanel, ChangeListener, DbExecutionListener, PropertyChangeListener
+	implements ActionListener, MainPanel, DbExecutionListener, PropertyChangeListener
 {
-	private JTabbedPane tabPane;
-	protected TableListPanel tables;
-	protected TableSearchPanel searchPanel;
-	protected ProcedureListPanel procs;
-	protected TriggerListPanel triggers;
-	protected JComboBox schemaSelector;
-	private JComboBox catalogSelector;
-	private JLabel schemaLabel;
-	private JLabel catalogLabel;
-	private JPanel selectorPanel;
-	boolean connected;
-	private WbConnection dbConnection;
-	private DbExplorerWindow window;
-	private WbToolbar toolbar;
-	private ConnectionInfo connectionInfo;
-	protected boolean retrievePending;
-	private boolean schemaRetrievePending = true;
-	private boolean connectionInitPending = true;
-	private int internalId = 0;
-	private ConnectionSelector connectionSelector;
-	private JButton selectConnectionButton;
-	private String tabTitle;
-	private static int instanceCount = 0;
-	private MainWindow mainWindow;
-	private boolean busy;
-	private String schemaFromWorkspace;
-	private String catalogFromWorkspace;
-	private boolean switchCatalog;
-	private JComponent currentFocus;
-	private ReloadAction reloadSchemasAction;
-	private Reloadable schemaReloader;
-	private FlatButton reloadButton;
-	private boolean locked;
-	protected String tabName;
+  private JTabbedPane tabPane;
+  protected TableListPanel tables;
+  protected TableSearchPanel searchPanel;
+  protected ProcedureListPanel procs;
+  protected TriggerListPanel triggers;
+  protected JComboBox schemaSelector;
+  private JComboBox catalogSelector;
+  private JLabel schemaLabel;
+  private JLabel catalogLabel;
+  private JPanel selectorPanel;
+  boolean connected;
+  private WbConnection dbConnection;
+  private DbExplorerWindow window;
+  private WbToolbar toolbar;
+  private ConnectionInfo connectionInfo;
+  protected boolean retrievePending;
+  private boolean schemaRetrievePending = true;
+  private boolean connectionInitPending = true;
+  private int internalId = 0;
+  private ConnectionSelector connectionSelector;
+  private JButton selectConnectionButton;
+  private String tabTitle;
+  private static int instanceCount = 0;
+  private MainWindow mainWindow;
+  private boolean busy;
+  private String schemaFromWorkspace;
+  private String catalogFromWorkspace;
+  private boolean switchCatalog;
+  private JComponent currentFocus;
+  private ReloadAction reloadSchemasAction;
+  private Reloadable schemaReloader;
+  private FlatButton reloadButton;
+  private boolean locked;
+  protected String tabName;
 
-	public DbExplorerPanel()
-	{
-		this(null);
-	}
+  public DbExplorerPanel()
+  {
+    this(null);
+  }
 
 	public DbExplorerPanel(MainWindow aParent)
 	{
@@ -287,41 +285,41 @@ public class DbExplorerPanel
 		}
 	}
 
-	@Override
-	public boolean isModifiedAfter(long time)
-	{
-		return false;
-	}
+  @Override
+  public boolean isModifiedAfter(long time)
+  {
+    return false;
+  }
 
-	@Override
-	public boolean supportsBookmarks()
-	{
-		return false;
-	}
+  @Override
+  public boolean supportsBookmarks()
+  {
+    return false;
+  }
 
-	@Override
-	public List<NamedScriptLocation> getBookmarks()
-	{
-		return null;
-	}
+  @Override
+  public List<NamedScriptLocation> getBookmarks()
+  {
+    return null;
+  }
 
-	@Override
-	public void jumpToBookmark(NamedScriptLocation bookmark)
-	{
-	}
+  @Override
+  public void jumpToBookmark(NamedScriptLocation bookmark)
+  {
+  }
 
-	@Override
-	public void setLocked(boolean flag)
-	{
-		this.locked = flag;
-		updateTabTitle();
-	}
+  @Override
+  public void setLocked(boolean flag)
+  {
+    this.locked = flag;
+    updateTabTitle();
+  }
 
-	@Override
-	public boolean isLocked()
-	{
-		return locked;
-	}
+  @Override
+  public boolean isLocked()
+  {
+    return locked;
+  }
 
 	@Override
 	public boolean isCancelling()
@@ -1050,18 +1048,6 @@ public class DbExplorerPanel
 			mainWindow.explorerWindowClosed(this.window);
 		}
 		window = null;
-	}
-
-	@Override
-	public void stateChanged(ChangeEvent e)
-	{
-		if (e.getSource() == this.tabPane)
-		{
-			if (this.tabPane.getSelectedIndex() == 1)
-			{
-				this.procs.retrieveIfNeeded();
-			}
-		}
 	}
 
 	@Override
