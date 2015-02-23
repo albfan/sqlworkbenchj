@@ -312,6 +312,11 @@ from syscat.triggers</string>
    <object idref="db2_lst_trg"/>
 	</void>
 
+	<void method="put">
+   <string>DB2/LINUXX8664</string>
+   <object idref="db2_lst_trg"/>
+	</void>
+
   <void method="put">
    <string>Oracle</string>
    <object id="list_oracle_trg" class="workbench.db.GetMetaDataSql">

@@ -139,6 +139,11 @@
   </void>
 
   <void method="put">
+   <string>DB2/LINUXX8664</string>
+   <object idref="db2_trg_source"/>
+  </void>
+
+  <void method="put">
    <string>DB2/NT64</string>
    <object idref="db2_trg_source"/>
   </void>
