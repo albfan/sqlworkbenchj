@@ -43,6 +43,7 @@ import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.parser.ScriptParser;
 
+import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
@@ -58,8 +59,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.util.CollectionUtil;
 
 /**
  *
@@ -116,6 +115,48 @@ public class WbExportTest
 		assertFalse(exp.isTypeValid("calc"));
 		assertFalse(exp.isTypeValid("excel"));
 		assertFalse(exp.isTypeValid("odt"));
+	}
+
+	@Test
+	public void testQuoteHeader()
+		throws Exception
+	{
+		WbConnection con = util.getHSQLConnection("quoteheader");
+		try
+		{
+			TestUtil.executeScript(con,
+				"create table test (id integer, some_value varchar(20)); \n" +
+				"insert into test values (1, 'foo'), (2, 'bar'); \n" +
+				"commit;");
+
+			WbFile out = util.getFile("quoted.txt");
+
+			exportCmd.setConnection(con);
+			StatementRunnerResult result = exportCmd.execute(
+				"wbexport -sourceTable=test -delimiter='|' -header=true -quoteAlways=true -quoteChar='\"' -quoteHeader=true -type=text -file='" + out.getFullPath() + "'");
+
+			String msg = result.getMessageBuffer().toString();
+			assertTrue(msg, result.isSuccess());
+			assertTrue(out.exists());
+      List<String> lines = TestUtil.readLines(out, null);
+			assertNotNull(lines);
+      assertEquals(3, lines.size());
+			assertEquals("\"ID\"|\"SOME_VALUE\"", lines.get(0));
+
+			result = exportCmd.execute(
+				"wbexport -sourceTable=test -delimiter='_' -header=true -quoteAlways=false -quoteChar='\"' -quoteHeader=true -type=text -file='" + out.getFullPath() + "'");
+
+			msg = result.getMessageBuffer().toString();
+			assertTrue(msg, result.isSuccess());
+      lines = TestUtil.readLines(out, null);
+			assertNotNull(lines);
+      assertEquals(3, lines.size());
+			assertEquals("ID_\"SOME_VALUE\"", lines.get(0).trim());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
 
 	@Test

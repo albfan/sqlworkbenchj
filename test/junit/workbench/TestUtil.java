@@ -42,6 +42,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -754,4 +755,10 @@ public class TestUtil
 		}
 		System.out.println("");
 	}
+
+  public static List<String> readLines(File input, String encoding)
+    throws IOException
+  {
+    return FileUtil.getLines(EncodingUtil.createBufferedReader(input, encoding));
+  }
 }
