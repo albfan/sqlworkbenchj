@@ -98,7 +98,6 @@ public class SQLConsole
 	private WbThread cancelThread;
 
 	private final boolean changeTerminalTitle;
-  private boolean showProfileInPrompt;
 	private final String titlePrefix = "\033]0;";
 	private final String titleSuffix = "\007";
 	private WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
@@ -115,9 +114,7 @@ public class SQLConsole
 		titleBuilder.setShowProfileGroup(false);
 		titleBuilder.setShowURL(ConsoleSettings.termTitleIncludeUrl());
 		titleBuilder.setShowNotConnected(false);
-    showProfileInPrompt = ConsoleSettings.showProfileInPrompt();
 		CommandRegistry.getInstance().scanForExtensions();
-
 	}
 
 	public void startConsole()
@@ -556,7 +553,7 @@ public class SQLConsole
 	{
 		String newprompt = currentPrompt;
 		WbConnection current = runner.getConnection();
-    if (current != null && showProfileInPrompt)
+    if (current != null && ConsoleSettings.showProfileInPrompt())
     {
       newprompt = current.getProfile().getName();
     }
