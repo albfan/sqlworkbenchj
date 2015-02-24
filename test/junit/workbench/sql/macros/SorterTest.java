@@ -24,8 +24,10 @@ package workbench.sql.macros;
 
 import java.util.Set;
 import java.util.TreeSet;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -36,7 +38,7 @@ public class SorterTest
 	@Test
 	public void testCompare()
 	{
-		Set<SortOrderElement> list = new TreeSet<SortOrderElement>(new Sorter());
+		Set<SortOrderElement> list = new TreeSet<>(new Sorter());
 		list.add(new SortOrderElement(4));
 		list.add(new SortOrderElement(5));
 		list.add(new SortOrderElement(1));
@@ -56,15 +58,24 @@ public class SorterTest
 	{
 		private int sortOrder;
 
-		public SortOrderElement(int i)
+    @Override
+    public String getSortName()
+    {
+      return null;
+    }
+
+		SortOrderElement(int i)
 		{
 			sortOrder = i;
 		}
 
+    @Override
 		public void setSortOrder(int index)
 		{
 			sortOrder = index;
 		}
+
+    @Override
 		public int getSortOrder()
 		{
 			return sortOrder;

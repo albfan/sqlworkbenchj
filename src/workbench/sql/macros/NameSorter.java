@@ -1,5 +1,5 @@
 /*
- * Sortable.java
+ * Sorter.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -22,14 +22,25 @@
  */
 package workbench.sql.macros;
 
+import java.util.Comparator;
+
 /**
- * An interface for items that can have a sort order.
+ * A comparator to sort <tt>Sortable> objects.
  *
  * @author Thomas Kellerer
+ * @see Sortable
  */
-public interface Sortable
+public class NameSorter
+	implements Comparator<Sortable>
 {
-  String getSortName();
-	int getSortOrder();
-	void setSortOrder(int newIndex);
+
+	@Override
+	public int compare(Sortable o1, Sortable o2)
+	{
+		if (o1 == null && o2 == null) return 0;
+		if (o1 == null) return -1;
+		if (o2 == null) return 1;
+    return o1.getSortName().compareToIgnoreCase(o2.getSortName());
+	}
+
 }

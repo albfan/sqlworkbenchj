@@ -79,6 +79,12 @@ public class MacroGroup
 		this.showInPopup = flag;
 	}
 
+  @Override
+  public String getSortName()
+  {
+    return name;
+  }
+
 	@Override
 	public int getSortOrder()
 	{
@@ -114,6 +120,18 @@ public class MacroGroup
 		macros.add(macro);
 		applySort();
 		modified = true;
+	}
+
+	/**
+	 * Sorts the macros by name.
+	 */
+	public synchronized void sortByName()
+	{
+		Collections.sort(macros, new NameSorter());
+		for (int i=0; i < macros.size(); i++)
+		{
+			macros.get(i).setSortOrder(i);
+		}
 	}
 
 	/**

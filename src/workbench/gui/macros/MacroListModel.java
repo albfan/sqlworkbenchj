@@ -158,6 +158,32 @@ public class MacroListModel
 		return nodes;
 	}
 
+  public void sortByName(MacroGroup group)
+  {
+    group.sortByName();
+		int groupCount = rootNode.getChildCount();
+		for (int i = 0; i < groupCount; i++)
+		{
+			MacroTreeNode groupNode = (MacroTreeNode)rootNode.getChildAt(i);
+			if (groupNode == null) continue;
+
+      MacroGroup g = (MacroGroup)groupNode.getDataObject();
+      if (g.equals(group))
+      {
+        while (groupNode.getChildCount() > 0)
+        {
+          MacroTreeNode ch = (MacroTreeNode)groupNode.getChildAt(0);
+          removeNodeFromParent(ch);
+        }
+        for (MacroDefinition macro : group.getMacros())
+        {
+          MacroTreeNode macroNode = new MacroTreeNode(macro, false);
+          insertNodeInto(macroNode, groupNode, groupNode.getChildCount());
+        }
+      }
+		}
+  }
+
 	private void buildTree(boolean showPopupMacrosOnly)
 	{
 		rootNode = new MacroTreeNode("Macros", true);
@@ -166,7 +192,7 @@ public class MacroListModel
 		for (MacroGroup group : groups)
 		{
 			if (showPopupMacrosOnly && !group.isVisibleInPopup()) continue;
-			
+
 			MacroTreeNode groupNode = new MacroTreeNode(group, true);
 			rootNode.add(groupNode);
 			Collection<MacroDefinition> groupMacros;
@@ -271,8 +297,7 @@ public class MacroListModel
 		{
 			sourceIsGroup = sourceIsGroup && node.getAllowsChildren();
 		}
-		if (sourceIsGroup && target.getAllowsChildren() ||
-			 source.length == 1 && !target.getAllowsChildren())
+		if (sourceIsGroup && target.getAllowsChildren() || source.length == 1 && !target.getAllowsChildren())
 		{
 			putInFront(source[0], target);
 		}

@@ -80,6 +80,9 @@ public class MacroTree
 						 GroupTree,
 						 ExpandableTree
 {
+  private final String pasteCmd = "paste-action";
+  private final String sortCmd = "sort-action";
+
 	private MacroListModel macroModel;
 	private MacroTreeNode[] clipboardNodes;
 	private static final int CLIP_COPY = 1;
@@ -87,6 +90,7 @@ public class MacroTree
 	private int clipboardType;
 	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
+  private WbAction sortMacrosAction;
 
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
 	private final int macroClientId;
@@ -118,10 +122,15 @@ public class MacroTree
 		a = popup.getCutAction();
 		a.addToInputMap(im, am);
 
-		pasteToFolderAction = new WbAction(this, "pasteToFolder");
+		pasteToFolderAction = new WbAction(this, pasteCmd);
 		pasteToFolderAction.removeIcon();
 		pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
 		popup.addAction(pasteToFolderAction, false);
+
+		sortMacrosAction = new WbAction(this, sortCmd);
+		sortMacrosAction.removeIcon();
+		sortMacrosAction.initMenuDefinition("MnuTxtSortByName");
+		popup.addAction(sortMacrosAction, false);
 
 		MacroTreeCellRenderer renderer = new MacroTreeCellRenderer();
 		setCellRenderer(renderer);
@@ -570,12 +579,22 @@ public class MacroTree
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		// invoked from the "paste into new folder" action
-		String group = addGroup();
-		if (group != null)
-		{
-			paste();
-		}
+    if (e.getActionCommand().equals(pasteCmd))
+    {
+      // invoked from the "paste into new folder" action
+      String group = addGroup();
+      if (group != null)
+      {
+        paste();
+      }
+    }
+    if (e.getActionCommand().equals(sortCmd))
+    {
+      MacroGroup group = getCurrentGroup();
+      macroModel.sortByName(group);
+      doLayout();
+      validate();
+    }
 	}
 
 	public void deleteSelection()
