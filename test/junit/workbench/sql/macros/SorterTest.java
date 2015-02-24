@@ -58,13 +58,7 @@ public class SorterTest
 	{
 		private int sortOrder;
 
-    @Override
-    public String getSortName()
-    {
-      return null;
-    }
-
-		SortOrderElement(int i)
+  	SortOrderElement(int i)
 		{
 			sortOrder = i;
 		}

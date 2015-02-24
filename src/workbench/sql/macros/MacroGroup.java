@@ -24,6 +24,7 @@ package workbench.sql.macros;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import workbench.util.StringUtil;
@@ -79,12 +80,6 @@ public class MacroGroup
 		this.showInPopup = flag;
 	}
 
-  @Override
-  public String getSortName()
-  {
-    return name;
-  }
-
 	@Override
 	public int getSortOrder()
 	{
@@ -127,7 +122,19 @@ public class MacroGroup
 	 */
 	public synchronized void sortByName()
 	{
-		Collections.sort(macros, new NameSorter());
+    Comparator<MacroDefinition> comp = new Comparator<MacroDefinition>()
+    {
+      @Override
+      public int compare(MacroDefinition o1, MacroDefinition o2)
+      {
+        if (o1 == null && o2 == null) return 0;
+        if (o1 == null) return -1;
+        if (o2 == null) return 1;
+        return o1.getName().compareToIgnoreCase(o2.getName());
+      }
+    };
+    
+    Collections.sort(macros, comp);
 		for (int i=0; i < macros.size(); i++)
 		{
 			macros.get(i).setSortOrder(i);

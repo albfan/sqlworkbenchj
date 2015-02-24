@@ -29,7 +29,6 @@ package workbench.sql.macros;
  */
 public interface Sortable
 {
-  String getSortName();
 	int getSortOrder();
 	void setSortOrder(int newIndex);
 }

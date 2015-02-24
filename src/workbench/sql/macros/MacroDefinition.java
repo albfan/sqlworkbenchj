@@ -106,12 +106,6 @@ public class MacroDefinition
 		this.appendResult = flag;
 	}
 
-  @Override
-  public String getSortName()
-  {
-    return name;
-  }
-
 	@Override
 	public int getSortOrder()
 	{
