@@ -258,6 +258,8 @@ public class TextFileParser
 			columnsToImport = Collections.emptyList();
 		}
 
+    List<String> warnings = new ArrayList<>();
+
 		try
 		{
 			for (ColumnIdentifier sourceCol : fileColumns)
@@ -274,7 +276,7 @@ public class TextFileParser
 				{
 					if (this.abortOnError && !ignoreMissingColumns)
 					{
-						String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", sourceCol.getColumnName(), this.tableName);
+						String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", sourceCol.getColumnName(), getSourceFilename(), this.tableName);
 						this.messages.append(msg);
 						this.messages.appendNewLine();
 						this.hasErrors = true;
@@ -282,11 +284,10 @@ public class TextFileParser
 					}
 					else
 					{
-						String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", sourceCol.getColumnName(), this.tableName);
+						String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", sourceCol.getColumnName(), getSourceFilename(), this.tableName);
 						LogMgr.logWarning("TextFileParser.setColumns()", msg);
 						this.hasWarnings = true;
-						this.messages.append(msg);
-						this.messages.appendNewLine();
+            warnings.add(msg);
 						ignoreColumn = true;
 					}
 				}
@@ -318,12 +319,21 @@ public class TextFileParser
 			this.importColumns = null;
 		}
 
+    if (warnings.size() > 0)
+    {
+      this.messages.appendNewLine();
+      for (String warn : warnings)
+      {
+        this.messages.append(warn);
+        this.messages.appendNewLine();
+      }
+    }
 		if (colCount == 0)
 		{
 			String msg = ResourceMgr.getFormattedString("ErrImportNoColumns", tableName, getSourceFilename());
 			this.hasErrors = true;
 			this.messages.append(msg);
-			this.messages.appendNewLine();
+      this.messages.appendNewLine();
 			this.importColumns = null;
 			throw new SQLException("No column matched in import file");
 		}

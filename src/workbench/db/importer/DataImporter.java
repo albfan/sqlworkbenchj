@@ -755,6 +755,12 @@ public class DataImporter
 		{
 			this.hasErrors = true;
 			this.messages.append(this.source.getMessages());
+      if (parser != null)
+      {
+        String msg = ResourceMgr.getFormattedString("ErrFileNotImported", parser.getSourceFilename());
+        messages.append(msg);
+        messages.appendNewLine();
+      }
 			throw e;
 		}
 	}
