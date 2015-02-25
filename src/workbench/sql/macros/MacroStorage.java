@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -199,6 +200,27 @@ public class MacroStorage
 		}
 	}
 
+  public void sortGroupsByName()
+  {
+		synchronized (lock)
+		{
+      Comparator<MacroGroup> comp = new Comparator<MacroGroup>()
+      {
+
+        @Override
+        public int compare(MacroGroup o1, MacroGroup o2)
+        {
+          if (o1 == null && o2 == null) return 0;
+          if (o1 == null) return -1;
+          if (o2 == null) return 1;
+          return o1.getName().compareToIgnoreCase(o2.getName());
+        }
+      };
+			Collections.sort(groups, comp);
+			modified = true;
+		}
+
+  }
 	public void applySort()
 	{
 		synchronized (lock)

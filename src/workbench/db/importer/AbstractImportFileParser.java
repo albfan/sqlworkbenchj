@@ -213,6 +213,10 @@ public abstract class AbstractImportFileParser
 	public String getSourceFilename()
 	{
 		if (this.inputFile == null) return null;
+    if (this.fileHandler != null)
+    {
+      return fileHandler.getInputFilename();
+    }
 		return this.inputFile.getAbsolutePath();
 	}
 

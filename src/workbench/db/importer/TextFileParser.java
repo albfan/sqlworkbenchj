@@ -320,8 +320,7 @@ public class TextFileParser
 
 		if (colCount == 0)
 		{
-			String msg = ResourceMgr.getString("ErrImportNoColumns");
-			msg = StringUtil.replace(msg, "%table%", this.tableName);
+			String msg = ResourceMgr.getFormattedString("ErrImportNoColumns", tableName, getSourceFilename());
 			this.hasErrors = true;
 			this.messages.append(msg);
 			this.messages.appendNewLine();

@@ -25,6 +25,7 @@ package workbench.gui.macros;
 import java.util.Collection;
 
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
@@ -157,6 +158,23 @@ public class MacroListModel
 		}
 		return nodes;
 	}
+
+  public void sortGroups()
+  {
+    macros.sortGroupsByName();
+		int groupCount = rootNode.getChildCount();
+		for (int i = 0; i < groupCount; i++)
+    {
+      MutableTreeNode group = (MutableTreeNode)rootNode.getChildAt(i);
+      if (group == null) continue;
+      removeNodeFromParent(group);
+    }
+    for (MacroGroup group : macros.getGroups())
+    {
+      MacroTreeNode node = new MacroTreeNode(group, true);
+      insertNodeInto(node, rootNode, rootNode.getChildCount());
+    }
+  }
 
   public void sortByName(MacroGroup group)
   {

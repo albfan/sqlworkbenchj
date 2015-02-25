@@ -34,8 +34,12 @@ import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import workbench.db.exporter.RowDataConverter;
+
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.exporter.RowDataConverter;
+
 import workbench.util.ClipboardFile;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
@@ -59,6 +63,7 @@ public class ImportFileHandler
 	private ZipFile mainArchive;
 	private ZipFile attachments;
 	private BufferedReader mainReader;
+  private String usedZipEntry;
 
 	/**
 	 * Define the main input file used by this handler.
@@ -123,7 +128,9 @@ public class ImportFileHandler
 			if (entries.hasMoreElements())
 			{
 				ZipEntry entry = (ZipEntry)entries.nextElement();
-				InputStream in = mainArchive.getInputStream(entry);
+        LogMgr.logInfo("ImportFileHandler.getMainFileReader()", "Using ZIP entry " + entry.getName() + " from input file " + baseFile.getAbsolutePath());
+        usedZipEntry = entry.getName();
+        InputStream in = mainArchive.getInputStream(entry);
 				r = EncodingUtil.createReader(in, encoding);
 			}
 			else
@@ -138,6 +145,17 @@ public class ImportFileHandler
 		mainReader = new BufferedReader(r, getFileBufferSize());
 		return mainReader;
 	}
+
+  public String getInputFilename()
+  {
+    if (this.baseFile == null) return "";
+    String result = baseFile.getAbsolutePath();
+    if (this.isZip && usedZipEntry != null)
+    {
+      result += ":" + usedZipEntry;
+    }
+    return result;
+  }
 
 	private int getFileBufferSize()
 	{
@@ -276,5 +294,6 @@ public class ImportFileHandler
 		mainReader = null;
 		mainArchive = null;
 		attachments = null;
+    usedZipEntry = null;
 	}
 }

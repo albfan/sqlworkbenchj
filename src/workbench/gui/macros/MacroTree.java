@@ -338,7 +338,8 @@ public class MacroTree
 		boolean canCopy = onlyMacrosSelected();
 
 		pasteToFolderAction.setEnabled(canPaste);
-
+    sortMacrosAction.setEnabled(groupSelected);
+    
 		WbAction a = popup.getPasteAction();
 		a.setEnabled(canPaste);
 
@@ -590,8 +591,19 @@ public class MacroTree
     }
     if (e.getActionCommand().equals(sortCmd))
     {
-      MacroGroup group = getCurrentGroup();
-      macroModel.sortByName(group);
+      if (onlyGroupSelected())
+      {
+        MacroGroup group = getCurrentGroup();
+        macroModel.sortByName(group);
+      }
+      else
+      {
+        MacroTreeNode node = getSelectedNode();
+        if (node.getParent() == null)
+        {
+          macroModel.sortGroups();
+        }
+      }
       doLayout();
       validate();
     }
