@@ -44,7 +44,7 @@ public interface RowDataProducer
 
 	/**
 	 * Abort the current import.
-	 * 
+	 *
 	 * This is usually called when the user cancels the running SQL statement.
 	 */
 	void cancel();
@@ -77,5 +77,7 @@ public interface RowDataProducer
 	 * @return for each column index the value in the inputfile
 	 */
 	Map<Integer, Object> getInputColumnValues(Collection<Integer> inputFileIndexes);
+
+  void setMessageBuffer(MessageBuffer messages);
 
 }

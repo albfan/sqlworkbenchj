@@ -58,18 +58,18 @@ import workbench.util.ValueConverter;
 public class QueryCopySource
 	implements RowDataProducer
 {
-	private DataReceiver receiver;
-	private volatile boolean keepRunning = true;
-	private boolean regularStop = false;
-	private WbConnection sourceConnection;
-	private Statement retrieveStatement;
-	private String retrieveSql;
-	private boolean abortOnError;
-	private boolean hasErrors = false;
-	private boolean hasWarnings = false;
-	private RowData currentRow;
+  private DataReceiver receiver;
+  private volatile boolean keepRunning = true;
+  private boolean regularStop = false;
+  private WbConnection sourceConnection;
+  private Statement retrieveStatement;
+  private String retrieveSql;
+  private boolean abortOnError;
+  private boolean hasErrors = false;
+  private boolean hasWarnings = false;
+  private RowData currentRow;
 
-	private boolean trimCharData;
+  private boolean trimCharData;
 
 	public QueryCopySource(WbConnection source, String sql)
 	{
@@ -82,6 +82,10 @@ public class QueryCopySource
 		this.trimCharData = trim;
 	}
 
+  @Override
+  public void setMessageBuffer(MessageBuffer messages)
+  {
+  }
 
 	@Override
 	public boolean hasErrors()

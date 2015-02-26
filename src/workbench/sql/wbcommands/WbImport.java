@@ -23,6 +23,7 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -337,7 +338,7 @@ public class WbImport
 
 		boolean skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
 		imp.skipTargetCheck(skipTargetCheck);
-		
+
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 
@@ -836,7 +837,7 @@ public class WbImport
 			// Logging already done.
 			result.setFailure();
 		}
-		catch (SQLException | ConverterException e)
+		catch (IOException | SQLException | ConverterException e)
 		{
 			LogMgr.logError("WbImport.execute()", "Error importing " + (inputFile == null ? dir : inputFile), e);
 			result.setFailure();

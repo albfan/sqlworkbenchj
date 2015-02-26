@@ -720,12 +720,14 @@ public class DataImporter
 		if (this.source == null) return;
 		this.isRunning = true;
 
+    this.source.setMessageBuffer(messages);
+
 		if (this.useBatch)
 		{
 			if (!supportsBatch())
 			{
 				LogMgr.logWarning("DataImporter.setUseBatch()", "JDBC driver does not support batch updates. Ignoring request to use batch updates");
-				this.messages.append(ResourceMgr.getString("MsgJDBCDriverNoBatch") + "\n");
+				messages.append(ResourceMgr.getString("MsgJDBCDriverNoBatch") + "\n");
 				useBatch = false;
 			}
 			else if (this.isModeInsertUpdate() || this.isModeUpdateInsert())
@@ -2204,12 +2206,12 @@ public class DataImporter
 
 			LogMgr.logInfo("DataImporter.finishTable()", msg);
 
-			MessageBuffer msgBuffer = this.source.getMessages();
-			if (msgBuffer != null)
-			{
-				messages.append(msgBuffer);
-				msgBuffer.clear();
-			}
+//			MessageBuffer msgBuffer = this.source.getMessages();
+//			if (msgBuffer != null)
+//			{
+//				messages.append(msgBuffer);
+//				msgBuffer.clear();
+//			}
 
 			if (this.insertedRows > -1)
 			{

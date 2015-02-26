@@ -79,6 +79,7 @@ public abstract class AbstractImportFileParser
 	protected WbConnection connection;
 
 	protected MessageBuffer messages = new MessageBuffer();
+  protected boolean sharedMessages;
 	protected boolean hasErrors;
 	protected boolean hasWarnings;
 
@@ -105,6 +106,16 @@ public abstract class AbstractImportFileParser
 		this();
 		this.inputFile = aFile;
 	}
+
+  @Override
+  public void setMessageBuffer(MessageBuffer buffer)
+  {
+    if (buffer != null)
+    {
+      messages = buffer;
+      sharedMessages = true;
+    }
+  }
 
 	@Override
 	public void setIgnoreMissingColumns(boolean flag)
@@ -402,7 +413,7 @@ public abstract class AbstractImportFileParser
 	{
 		this.cancelImport = false;
 		this.regularStop = false;
-		messages = new MessageBuffer();
+    if (!sharedMessages) messages.clear();
 		if (!multiFileImport) tableName = null;
 	}
 

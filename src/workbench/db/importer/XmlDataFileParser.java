@@ -103,7 +103,6 @@ public class XmlDataFileParser
   public XmlDataFileParser()
   {
 		super();
-    this.messages = new MessageBuffer();
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setValidating(false);
     try
@@ -484,7 +483,7 @@ public class XmlDataFileParser
 
 		blobDecoder.setBaseDir(inputFile.getParentFile());
 
-		this.messages = new MessageBuffer();
+		if (!sharedMessages) this.messages = new MessageBuffer();
 		this.sendTableDefinition();
 		Reader in = null;
 

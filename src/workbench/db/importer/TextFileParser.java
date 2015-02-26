@@ -276,15 +276,14 @@ public class TextFileParser
 				{
 					if (this.abortOnError && !ignoreMissingColumns)
 					{
-						String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", sourceCol.getColumnName(), getSourceFilename(), this.tableName);
+						String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", sourceCol.getColumnName(), getSourceFilename(), this.tableName) + "\n";
 						this.messages.append(msg);
-						this.messages.appendNewLine();
 						this.hasErrors = true;
 						throw new SQLException(msg);
 					}
 					else
 					{
-						String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", sourceCol.getColumnName(), getSourceFilename(), this.tableName);
+						String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", sourceCol.getColumnName(), getSourceFilename(), this.tableName) + "\n";
 						LogMgr.logWarning("TextFileParser.setColumns()", msg);
 						this.hasWarnings = true;
             warnings.add(msg);
@@ -325,15 +324,13 @@ public class TextFileParser
       for (String warn : warnings)
       {
         this.messages.append(warn);
-        this.messages.appendNewLine();
       }
     }
 		if (colCount == 0)
 		{
-			String msg = ResourceMgr.getFormattedString("ErrImportNoColumns", tableName, getSourceFilename());
+			String msg = ResourceMgr.getFormattedString("ErrImportNoColumns", tableName, getSourceFilename()) + "\n";
 			this.hasErrors = true;
 			this.messages.append(msg);
-      this.messages.appendNewLine();
 			this.importColumns = null;
 			throw new SQLException("No column matched in import file");
 		}
@@ -537,33 +534,40 @@ public class TextFileParser
 		currentLine = null;
 		long lineNumber = 0;
 
-		try
-		{
-			currentLine = in.readLine();
-			lineNumber ++;
-			if (this.withHeader)
-			{
-				if (currentLine == null) throw new IOException("Could not read header line!");
+    try
+    {
+      currentLine = in.readLine();
+      lineNumber++;
+      if (this.withHeader)
+      {
+        if (currentLine == null)
+        {
+          hasErrors = true;
+          String msg = ResourceMgr.getFormattedString("ErrImportNoHeader", getSourceFilename()) +  "\n";
+          messages.appendNewLine();
+          messages.append(msg);
+          throw new IOException("Could not read header line from " + getSourceFilename());
+        }
 				if (this.importColumns == null) this.readColumns(currentLine);
 				currentLine = in.readLine();
 			}
 		}
-		catch (EOFException eof)
-		{
-			currentLine = null;
-		}
-		catch (IOException e)
-		{
-			LogMgr.logWarning("TextFileParser.processOneFile()", "Error reading input file " + inputFile.getAbsolutePath(), e);
-			FileUtil.closeQuietely(in);
-			throw e;
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("TextFileParser.processOneFile()", "Column definition could not be read.", e);
-			FileUtil.closeQuietely(in);
-			throw e;
-		}
+    catch (EOFException eof)
+    {
+      currentLine = null;
+    }
+    catch (IOException e)
+    {
+      LogMgr.logWarning("TextFileParser.processOneFile()", "Error reading input file " + inputFile.getAbsolutePath(), e);
+      FileUtil.closeQuietely(in);
+      throw e;
+    }
+    catch (SQLException e)
+    {
+      LogMgr.logError("TextFileParser.processOneFile()", "Column definition could not be read.", e);
+      FileUtil.closeQuietely(in);
+      throw e;
+    }
 
 		if (CollectionUtil.isEmpty(importColumns))
 		{
