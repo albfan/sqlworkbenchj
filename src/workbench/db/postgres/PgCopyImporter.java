@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.List;
 
+import workbench.WbManager;
 import workbench.log.LogMgr;
 
 import workbench.db.ColumnIdentifier;
@@ -61,20 +62,10 @@ public class PgCopyImporter
 	public PgCopyImporter(WbConnection conn)
 	{
 		this.connection = conn;
-	}
 
-	/**
-	 * Instruct this instance to use the default (system) classloader
-	 * instead of the the ConnectionMgr.loadClassFromDriverLib().
-	 *
-	 * During unit testing the classloader in the ConnectionMgr is not initialized
-	 * because all drivers are alread on the classpath. Therefor this switch is needed
-	 *
-	 * @param flag if true, load the CopyManager from the system classpath, otherwise use the ConnectionMgr.
-	 */
-	public void setUseDefaultClassloader(boolean flag)
-	{
-		useDefaultClassloader = flag;
+    // During unit testing the classloader in the ConnectionMgr is not initialized because all drivers are alread on the classpath.
+    // Therefor we need to load the CopyManager class from the default classpath
+    useDefaultClassloader = WbManager.isTest();
 	}
 
 	public boolean isSupported()
@@ -100,15 +91,17 @@ public class PgCopyImporter
 			{
 				Class baseConnClass = null;
 				Class copyMgrClass = null;
+        String baseConnName = "org.postgresql.core.BaseConnection";
+        String copyMgrName = "org.postgresql.copy.CopyManager";
 				if (useDefaultClassloader)
 				{
-					baseConnClass = Class.forName("org.postgresql.core.BaseConnection");
-					copyMgrClass = Class.forName("org.postgresql.copy.CopyManager");
+					baseConnClass = Class.forName(baseConnName);
+					copyMgrClass = Class.forName(copyMgrName);
 				}
 				else
 				{
-					baseConnClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), "org.postgresql.core.BaseConnection");
-					copyMgrClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), "org.postgresql.copy.CopyManager");
+					baseConnClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), baseConnName);
+					copyMgrClass = ConnectionMgr.getInstance().loadClassFromDriverLib(connection.getProfile(), copyMgrName);
 				}
 
 				Constructor constr = copyMgrClass.getConstructor(baseConnClass);

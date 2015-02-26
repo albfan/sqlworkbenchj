@@ -86,7 +86,7 @@ public class WbImportPostgresTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		TestUtil util = getTestUtil();
 		WbImport cmd = new WbImport();
@@ -112,11 +112,51 @@ public class WbImportPostgresTest
 	}
 
 	@Test
+	public void testImportCopyWithError()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		assertNotNull(con);
+
+    TestUtil.executeScript(con,
+      "create table t1 (id integer, data text);\n" +
+      "create table t2 (id integer, data text);\n" +
+      "commit;");
+
+		TestUtil util = getTestUtil();
+		StatementRunner runner = util.createConnectedStatementRunner(con);
+
+		String content = "id|data\n1|foo";
+
+		File t1 = new File(util.getBaseDir(), "t1.txt");
+		TestUtil.writeFile(t1, content, "UTF-8");
+
+    File t2 = new File(util.getBaseDir(), "t2.txt");
+		TestUtil.writeFile(t2, content, "UTF-8");
+
+    File t3 = new File(util.getBaseDir(), "t3.txt");
+		TestUtil.writeFile(t3, content, "UTF-8");
+
+    runner.runStatement("wbimport -usePgCopy -continueOnError=false -ignoreMissingColumns=true -sourceDir='" + util.getBaseDir() + "' -type=text -delimiter='|';");
+		StatementRunnerResult result = runner.getResult();
+
+//    System.out.println(result.getMessageBuffer().toString());
+
+    assertFalse(result.isSuccess());
+
+		int rows = TestUtil.getNumberValue(con, "select count(*) from t1");
+  	assertEquals(1, rows);
+
+		rows = TestUtil.getNumberValue(con, "select count(*) from t2");
+  	assertEquals(1, rows);
+  }
+
+	@Test
 	public void testImportCopy()
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		TestUtil util = getTestUtil();
 		StatementRunner runner = util.createConnectedStatementRunner(con);
@@ -130,25 +170,11 @@ public class WbImportPostgresTest
 
 //		String msg = result.getMessageBuffer().toString();
 //		System.out.println(msg);
+    
 		assertTrue(result.isSuccess());
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		int rows = 0;
-		try
-		{
-			stmt = con.createStatement();
-			rs = stmt.executeQuery("select count(*) from foo");
-			if (rs.next())
-			{
-				rows = rs.getInt(1);
-				assertEquals(2, rows);
-			}
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
+		int rows = TestUtil.getNumberValue(con, "select count(*) from foo");
+  	assertEquals(2, rows);
 
 		content = "id\tfirstname\tlastname\n1\tArthur\tDent\n2\tFord\tPrefect\n";
 		TestUtil.writeFile(data, content, "UTF-8");
@@ -156,8 +182,11 @@ public class WbImportPostgresTest
 		runner.runStatement("WbImport -truncateTable=true -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='\\t' -usePgCopy");
 		result = runner.getResult();
 
+		Statement stmt = null;
+		ResultSet rs = null;
 		try
 		{
+      stmt = con.createStatement();
 			rs = stmt.executeQuery("select id, firstname, lastname from foo");
 			rows = 0;
 			while (rs.next())
