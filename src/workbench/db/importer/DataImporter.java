@@ -969,11 +969,13 @@ public class DataImporter
 		{
 			try
 			{
-				this.insertedRows += stream.processStreamData();
+				insertedRows += stream.processStreamData();
+        tableImportFinished();
 			}
 			catch (SQLException sql)
 			{
 				this.hasErrors = true;
+        tableImportError();
 				LogMgr.logError("DataImporter.processFile()", "Error importing file: " + ExceptionUtil.getDisplay(sql), null);
 				this.addError(sql.getLocalizedMessage()+ "\n");
 			}
