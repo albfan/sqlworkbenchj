@@ -332,6 +332,7 @@ public abstract class AbstractImportFileParser
 	@Override
 	public MessageBuffer getMessages()
 	{
+    if (this.sharedMessages) return null;
 		return this.messages;
 	}
 
