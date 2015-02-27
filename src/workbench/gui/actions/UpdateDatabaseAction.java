@@ -27,35 +27,47 @@ import java.awt.event.ActionEvent;
 import workbench.interfaces.DbUpdater;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
+import workbench.db.WbConnection;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class UpdateDatabaseAction
-	extends WbAction
+  extends WbAction
 {
-	private DbUpdater panel;
+  private DbUpdater panel;
 
-	public UpdateDatabaseAction(DbUpdater aPanel)
-	{
-		super();
-		this.panel = aPanel;
-		this.initMenuDefinition("MnuTxtUpdateDatabase");
-		this.setIcon(IconMgr.IMG_SAVE);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setCreateToolbarSeparator(true);
-		this.setEnabled(false);
-	}
+  public UpdateDatabaseAction(DbUpdater aPanel)
+  {
+    super();
+    this.panel = aPanel;
+    this.initMenuDefinition("MnuTxtUpdateDatabase");
+    this.setIcon(IconMgr.IMG_SAVE);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    this.setCreateToolbarSeparator(true);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		panel.saveChangesToDatabase();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    boolean confirm = Settings.getInstance().getPreviewDml();
 
-	public void setClient(DbUpdater client)
-	{
-		this.panel = client;
-	}
+    WbConnection connection = panel.getConnection();
+    if (connection != null)
+    {
+      confirm = confirm || connection.confirmUpdatesInSession();
+    }
+    confirm = confirm || isCtrlPressed(e);
+
+    panel.saveChangesToDatabase(confirm);
+  }
+
+  public void setClient(DbUpdater client)
+  {
+    this.panel = client;
+  }
 
 }

@@ -390,7 +390,7 @@ public class DwPanel
 	 * statement preview, false will be returned. In that
 	 * case saveChanges() should not be called
 	 */
-	boolean prepareDatabaseUpdate()
+	boolean prepareDatabaseUpdate(boolean confirm)
 	{
 		if (this.dbConnection == null) return false;
 		DataStore ds = this.dataTable.getDataStore();
@@ -431,19 +431,29 @@ public class DwPanel
 			if (!ok) return false;
 		}
 
-		// check if we really want to save the currentData
-		// it fhe SQL Preview is not enabled this will
-		// always return true, otherwise it depends on the user's
-		// selection after the SQL preview has been displayed
-		if (!this.shouldSaveChanges(this.dbConnection)) return false;
+    if (confirm)
+    {
+      if (!this.shouldSaveChanges(this.dbConnection)) return false;
+    }
 		return true;
+	}
+
+	private boolean shouldSaveChanges(WbConnection aConnection)
+	{
+		this.dataTable.stopEditing();
+		DataStore ds = this.dataTable.getDataStore();
+		DwUpdatePreview preview = new DwUpdatePreview();
+
+		boolean doSave = preview.confirmUpdate(this, ds, aConnection);
+
+		return doSave;
 	}
 
 	/**
 	 * Starts the saving of the data in the background
 	 */
 	@Override
-	public void saveChangesToDatabase()
+	public void saveChangesToDatabase(boolean confirm)
 	{
 		if (savingData)
 		{
@@ -452,7 +462,7 @@ public class DwPanel
 			return;
 		}
 
-		if (!this.prepareDatabaseUpdate()) return;
+		if (!this.prepareDatabaseUpdate(confirm)) return;
 
 		WbThread t = new WbThread("DwPanel update")
 		{
@@ -471,21 +481,15 @@ public class DwPanel
 			}
 		};
 		t.start();
-
 	}
 
-	public boolean shouldSaveChanges(WbConnection aConnection)
-	{
-		if (!Settings.getInstance().getPreviewDml() && !this.dbConnection.getProfile().getConfirmUpdates()) return true;
+  @Override
+  public WbConnection getConnection()
+  {
+    return dbConnection;
+  }
 
-		this.dataTable.stopEditing();
-		DataStore ds = this.dataTable.getDataStore();
-		DwUpdatePreview preview = new DwUpdatePreview();
 
-		boolean doSave = preview.confirmUpdate(this, ds, dbConnection);
-
-		return doSave;
-	}
 
 	public int saveChanges(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException

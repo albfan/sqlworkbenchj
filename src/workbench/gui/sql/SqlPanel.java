@@ -1195,7 +1195,7 @@ public class SqlPanel
 	 * @see #updateDb()
 	 */
 	@Override
-	public void saveChangesToDatabase()
+	public void saveChangesToDatabase(boolean confirm)
 	{
 		if (this.currentData == null)
 		{
@@ -1204,7 +1204,7 @@ public class SqlPanel
 			return;
 		}
 
-		if (!this.currentData.prepareDatabaseUpdate()) return;
+		if (!this.currentData.prepareDatabaseUpdate(confirm)) return;
 
 		this.setBusy(true);
 		this.setCancelState(true);
@@ -4237,32 +4237,32 @@ public class SqlPanel
 		copySelectedMenu.dispose();
 	}
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		String prop = evt.getPropertyName();
-		if (prop == null) return;
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+    String prop = evt.getPropertyName();
+    if (prop == null) return;
 
-		if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(prop))
-		{
-			this.checkCommitAction();
-		}
-		else if (evt.getSource() == this.currentData && prop.equals("updateTable"))
-		{
-			this.checkResultSetActions();
-		}
-		else if (GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON.equals(prop))
-		{
-			if (GuiSettings.getShowResultTabCloseButton())
-			{
-				resultTab.showCloseButton(this);
-			}
-			else
-			{
-				resultTab.showCloseButton(null);
-			}
-		}
-	}
+    if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(prop))
+    {
+      this.checkCommitAction();
+    }
+    else if (evt.getSource() == this.currentData && prop.equals("updateTable"))
+    {
+      this.checkResultSetActions();
+    }
+    else if (GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON.equals(prop))
+    {
+      if (GuiSettings.getShowResultTabCloseButton())
+      {
+        resultTab.showCloseButton(this);
+      }
+      else
+      {
+        resultTab.showCloseButton(null);
+      }
+    }
+  }
 
 	private boolean hasMoved;
 
@@ -4275,20 +4275,20 @@ public class SqlPanel
 		return canMove;
 	}
 
-	@Override
-	public void endMove(int finalIndex)
-	{
-		ignoreStateChange = false;
-		if (!hasMoved) return;
-		if (resultTab.getSelectedIndex() != finalIndex)
-		{
-			resultTab.setSelectedIndex(finalIndex);
-		}
-		else
-		{
-			updateResultInfos();
-		}
-	}
+  @Override
+  public void endMove(int finalIndex)
+  {
+    ignoreStateChange = false;
+    if (!hasMoved) return;
+    if (resultTab.getSelectedIndex() != finalIndex)
+    {
+      resultTab.setSelectedIndex(finalIndex);
+    }
+    else
+    {
+      updateResultInfos();
+    }
+  }
 
 	@Override
 	public void moveCancelled()
@@ -4310,21 +4310,21 @@ public class SqlPanel
 		return true;
 	}
 
-	@Override
-	public boolean canCloseTab(int index)
-	{
-		return (index != resultTab.getTabCount() - 1);
-	}
+  @Override
+  public boolean canCloseTab(int index)
+  {
+    return (index != resultTab.getTabCount() - 1);
+  }
 
-	@Override
-	public void tabCloseButtonClicked(int index)
-	{
-		if (!canCloseTab(index)) return;
+  @Override
+  public void tabCloseButtonClicked(int index)
+  {
+    if (!canCloseTab(index)) return;
 
-		if (confirmDiscardChanges(index))
-		{
-			discardResult(index, true);
-		}
-	}
+    if (confirmDiscardChanges(index))
+    {
+      discardResult(index, true);
+    }
+  }
 
 }
