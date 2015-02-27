@@ -2,41 +2,37 @@
 <java version="1.5" class="java.beans.XMLDecoder">
   <object class="java.util.HashMap">
 
- <object class="java.util.HashMap">  
-  <void method="put">  
-   <string>OpenEdge RDBMS</string>  
-   <object class="workbench.db.GetMetaDataSql">  
-    <void property="baseSql">  
-     <string>
-		select viewtext
-		from sysprogress.sysviews
-	 </string>  
-    </void>  
-    <void property="objectNameField">  
-     <string>viewname</string>  
-    </void>  
-    <void property="schemaField">  
-     <string>owner</string>  
-    </void>  
-    <void property="orderBy">  
-     <string>order by seq</string>  
-    </void>  
-   </object>  
-  </void>  
+  <void method="put">
+    <string>OpenEdge RDBMS</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>select viewtext from sysprogress.sysviews</string>
+      </void>
+      <void property="objectNameField">
+        <string>viewname</string>
+      </void>
+      <void property="schemaField">
+        <string>owner</string>
+      </void>
+      <void property="orderBy">
+        <string>order by seq</string>
+      </void>
+    </object>
+  </void>
 
   <void method="put">
-   <string>Teradata</string>
-   <object class="workbench.db.GetMetaDataSql">
-    <void property="baseSql">
-     <string>select requesttext FROM DBC.Tables WHERE tablekind = 'V'</string>
-    </void>
-    <void property="objectNameField">
-     <string>tablename</string>
-    </void>
-    <void property="schemaField">
-     <string>databasename</string>
-    </void>
-   </object>
+    <string>Teradata</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>select requesttext FROM DBC.Tables WHERE tablekind = 'V'</string>
+      </void>
+      <void property="objectNameField">
+        <string>tablename</string>
+      </void>
+      <void property="schemaField">
+        <string>databasename</string>
+      </void>
+    </object>
   </void>
 
   <void method="put">
