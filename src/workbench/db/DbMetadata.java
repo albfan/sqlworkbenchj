@@ -72,6 +72,7 @@ import workbench.db.postgres.PostgresEnumReader;
 import workbench.db.postgres.PostgresRangeTypeReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
+import workbench.db.progress.OpenEdgeObjectListEnhancer;
 import workbench.db.sqlite.SQLiteDataTypeResolver;
 import workbench.db.vertica.VerticaTableDefinitionReader;
 import workbench.db.vertica.VerticaTableReader;
@@ -108,6 +109,7 @@ public class DbMetadata
 	public static final String DBID_DB2_LUW = "db2";
 	public static final String DBID_TERADATA = "teradata";
 	public static final String DBID_H2 = "h2";
+	public static final String DBID_OPENEDGE = "openedge_rdbms";
 
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};
@@ -345,6 +347,10 @@ public class DbMetadata
 			definitionReader = new VerticaTableDefinitionReader(aConnection);
 			extenders.add(new VerticaTableReader());
 		}
+    else if (productLower.contains("openedge"))
+    {
+ 			objectListEnhancer = new OpenEdgeObjectListEnhancer();
+    }
 
 		if (schemaInfoReader == null)
 		{
