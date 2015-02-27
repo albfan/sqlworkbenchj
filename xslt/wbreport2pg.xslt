@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:wb="workbench.sql.NameUtil">
 <!--
   Convert a SQL Workbench/J schema report (http://www.sql-workbench.net)
   into a SQL script for PostgreSQL (http://www.postgresql.org)
@@ -38,19 +38,12 @@
   <xsl:template match="/">
     <xsl:message>
 Supported parameters:
-      
-* useJdbcTypes (default: false)
-* makeLowerCase (default: true)
-* quoteColumnName (default: true)
-* commitAfterEachTable (default: true)
-    </xsl:message>
 
-    <xsl:if test="$useJdbcTypes = 'false'">
-      <xsl:message>
-NOTE: You are not using JDBC types!
-Use -xsltParameters="useJdbcTypes=true" for using JDBC-Types
-      </xsl:message>
-    </xsl:if>
+* useJdbcTypes (current value: <xsl:value-of select="$useJdbcTypes"/>)
+* makeLowerCase (current value: <xsl:value-of select="$makeLowerCase"/>)
+* quoteColumnName (current value: <xsl:value-of select="$quoteColumnName"/>)
+* commitAfterEachTable (current value: <xsl:value-of select="$commitAfterEachTable"/>)
+    </xsl:message>
 
     <xsl:apply-templates select="/schema-report/sequence-def">
       <xsl:with-param name="definition-part" select="'create'"/>
@@ -67,11 +60,19 @@ Use -xsltParameters="useJdbcTypes=true" for using JDBC-Types
 
   <xsl:template match="table-def">
 
+    <!-- plain XSLT solution to cleanup the identifier name -->
     <xsl:variable name="tablename">
       <xsl:call-template name="write-object-name">
         <xsl:with-param name="objectname" select="table-name"/>
       </xsl:call-template>
     </xsl:variable>
+
+    <!-- alternatively: use the Workbench utility class:
+         Using this, the XSLT can only be executed from within SQL Workbench
+    <xsl:variable name="tablename" select="wb:cleanupIdentifier(table-name, 'true')"/>
+    <xsl:variable name="tablename" select="wb:cleanupIdentifier(table-name, $makeLowerCase)"/>
+    -->
+
 
     <xsl:text>DROP TABLE IF EXISTS </xsl:text>
     <xsl:value-of select="$tablename"/>

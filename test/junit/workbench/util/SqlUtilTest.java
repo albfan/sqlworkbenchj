@@ -527,19 +527,19 @@ public class SqlUtilTest
 	public void testStripColumnAlias()
 	{
 		String expression = "p.name as lastname";
-		String col = SqlUtil.striptColumnAlias(expression);
+		String col = SqlUtil.stripColumnAlias(expression);
 		assertEquals("p.name", col);
 
 		expression = "p.name";
-		col = SqlUtil.striptColumnAlias(expression);
+		col = SqlUtil.stripColumnAlias(expression);
 		assertEquals("p.name", col);
 
 		expression = "p.name as";
-		col = SqlUtil.striptColumnAlias(expression);
+		col = SqlUtil.stripColumnAlias(expression);
 		assertEquals("p.name", col);
 
 		expression = "to_char(dt, 'YYYY')";
-		col = SqlUtil.striptColumnAlias(expression);
+		col = SqlUtil.stripColumnAlias(expression);
 		assertEquals("to_char(dt, 'YYYY')", col);
 
 	}

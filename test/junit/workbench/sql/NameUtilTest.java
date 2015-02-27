@@ -23,6 +23,7 @@
 package workbench.sql;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -46,6 +47,14 @@ public class NameUtilTest
     assertEquals("foo_bar", NameUtil.camelCaseToSnake("foo-bar"));
     assertEquals("foo_bar20", NameUtil.camelCaseToSnake("foo-bar20"));
     assertEquals("some_things_are_stupid", NameUtil.camelCaseToSnake("some things Are Stupid"));
+  }
+  
+  @Test
+  public void cleanupIdentifier()
+  {
+    assertEquals("foobar", NameUtil.cleanupIdentifier("foo bar ", "true"));
+    assertEquals("foobar", NameUtil.cleanupIdentifier("FooBar", "true"));
+    assertEquals("FooBar", NameUtil.cleanupIdentifier("-:FooBar", "false"));
   }
 
 }

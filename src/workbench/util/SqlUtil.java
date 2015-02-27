@@ -819,7 +819,7 @@ public class SqlUtil
 					}
 					else
 					{
-						col = striptColumnAlias(col);
+						col = stripColumnAlias(col);
 					}
 					result.add(new ElementInfo(col, lastColStart, t.getCharBegin()));
 
@@ -848,7 +848,7 @@ public class SqlUtil
 				}
 				else
 				{
-					result.add(new ElementInfo(striptColumnAlias(col), lastColStart, select.length()));
+					result.add(new ElementInfo(stripColumnAlias(col), lastColStart, select.length()));
 				}
 			}
 		}
@@ -956,7 +956,7 @@ public class SqlUtil
 		return params;
 	}
 
-	public static String striptColumnAlias(String expression)
+	public static String stripColumnAlias(String expression)
 	{
 		if (expression == null) return null;
 
@@ -1789,6 +1789,7 @@ public class SqlUtil
 	 */
 	public static String cleanupIdentifier(String identifier)
 	{
+    if (identifier == null) return "";
 		return identifier.replaceAll("[^A-Za-z0-9_]+", "");
 	}
 
