@@ -36,6 +36,15 @@
   </xsl:variable>
 
   <xsl:template match="/">
+    <xsl:message>
+Supported parameters:
+      
+* useJdbcTypes (default: false)
+* makeLowerCase (default: true)
+* quoteColumnName (default: true)
+* commitAfterEachTable (default: true)
+    </xsl:message>
+
     <xsl:if test="$useJdbcTypes = 'false'">
       <xsl:message>
 NOTE: You are not using JDBC types!
