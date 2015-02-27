@@ -230,10 +230,11 @@ public class TableDefinitionPanel
 
 		GridBagConstraints cc = new GridBagConstraints();
 
-		cc.anchor = GridBagConstraints.WEST;
+		cc.anchor = GridBagConstraints.LINE_START;
 		cc.fill = GridBagConstraints.NONE;
 		cc.gridx = 0;
 		cc.weightx = 0.0;
+		cc.weighty = 0.0;
 		cc.ipadx = 0;
 		cc.ipady = 0;
 		cc.insets = new Insets(0, 0, 0, 5);
@@ -252,7 +253,6 @@ public class TableDefinitionPanel
 		cc.fill = GridBagConstraints.HORIZONTAL;
 		cc.gridx ++;
 		cc.weightx = 1.0;
-		cc.fill = GridBagConstraints.NONE;
 		cc.insets = new Insets(0, 0, 0, 0);
 		toolbar.add(tableNameLabel, cc);
 

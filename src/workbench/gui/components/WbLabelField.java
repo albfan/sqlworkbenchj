@@ -68,6 +68,13 @@ public class WbLabelField
     setForeground(UIManager.getColor("Label.foreground"));
   }
 
+  @Override
+  public void setText(String t)
+  {
+    super.setText(t);
+    setCaretPosition(0);
+  }
+
   public void useBoldFont()
   {
     Font std = getFont();
