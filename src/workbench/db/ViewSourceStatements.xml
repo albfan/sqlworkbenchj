@@ -229,21 +229,22 @@ where type = 'VIEW'
   </void>
 
   <void method="put">
-   <string>Cloudscape</string>
-   <object id="id_list_cloudscape_views" class="workbench.db.GetMetaDataSql">
-    <void property="baseSql">
-     <string>SELECT v.viewdefinition
-     FROM sys.sysviews v, sys.systables t, sys.sysschemas s
-     WHERE v.tableid = t.tableid
-     AND   t.schemaid = s.schemaid
-     </string>
-    </void>
-    <void property="objectNameField">
-     <string>t.tablename</string>
-    </void>
-    <void property="schemaField">
-     <string>s.schemaname</string>
-    </void>
+    <string>Cloudscape</string>
+    <object id="id_list_cloudscape_views" class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>
+          SELECT v.viewdefinition
+          FROM sys.sysviews v, sys.systables t, sys.sysschemas s
+          WHERE v.tableid = t.tableid
+          AND   t.schemaid = s.schemaid
+        </string>
+      </void>
+      <void property="objectNameField">
+        <string>t.tablename</string>
+      </void>
+      <void property="schemaField">
+        <string>s.schemaname</string>
+      </void>
    </object>
   </void>
 
