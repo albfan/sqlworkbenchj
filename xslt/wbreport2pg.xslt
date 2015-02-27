@@ -14,7 +14,7 @@
   omit-xml-declaration="yes"
 />
 
-<!-- 
+<!--
   Parameters can be overriden by using -xsltParameters
   For example: -xsltParameters="useJdbcTypes=true" sets param useJdbcTypes to true.
 -->
@@ -36,10 +36,13 @@
   </xsl:variable>
 
   <xsl:template match="/">
-  	<xsl:if test="$useJdbcTypes = 'false'">
-  		<xsl:message>NOTE: You are not using JDBC types !! Use -xsltParameters="useJdbcTypes=true" for using JDBC-Types</xsl:message>
-  	</xsl:if>
-  	
+    <xsl:if test="$useJdbcTypes = 'false'">
+      <xsl:message>
+NOTE: You are not using JDBC types!
+Use -xsltParameters="useJdbcTypes=true" for using JDBC-Types
+      </xsl:message>
+    </xsl:if>
+
     <xsl:apply-templates select="/schema-report/sequence-def">
       <xsl:with-param name="definition-part" select="'create'"/>
     </xsl:apply-templates>
@@ -127,7 +130,7 @@
       <xsl:if test="$quoteColumnName = 'true'"><xsl:value-of select="$quote" /></xsl:if>
  	  <xsl:copy-of select="$colname"/>
  	  <xsl:if test="$quoteColumnName = 'true'"><xsl:value-of select="$quote" /></xsl:if>
-      
+
       <xsl:text> </xsl:text>
       <xsl:value-of select="$datatype"/>
       <xsl:value-of select="$defaultvalue"/>
@@ -214,7 +217,7 @@
       </xsl:call-template>
     </xsl:for-each>
     <xsl:value-of select="$newline"/>
-    
+
     <xsl:if test="$commitAfterEachTable = 'true'">
     	<xsl:text>COMMIT;</xsl:text>
     	<xsl:value-of select="$newline"/>
