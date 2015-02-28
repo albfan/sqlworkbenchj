@@ -40,15 +40,17 @@ public class NameUtilTest
   @Test
   public void testCamelCaseToSnake()
   {
-    assertEquals("camel_case_to_snake", NameUtil.camelCaseToSnake("camelCaseToSnake"));
-    assertEquals("foo_bar", NameUtil.camelCaseToSnake("FooBar"));
-    assertEquals("foobar", NameUtil.camelCaseToSnake("FOOBAR"));
-    assertEquals("foobar", NameUtil.camelCaseToSnake("foobar"));
-    assertEquals("foo_bar", NameUtil.camelCaseToSnake("foo-bar"));
-    assertEquals("foo_bar20", NameUtil.camelCaseToSnake("foo-bar20"));
-    assertEquals("some_things_are_stupid", NameUtil.camelCaseToSnake("some things Are Stupid"));
+    assertEquals("camel_case_to_snake", NameUtil.camelCaseToSnakeLower("camelCaseToSnake"));
+    assertEquals("foo_bar", NameUtil.camelCaseToSnakeLower("FooBar"));
+    assertEquals("foobar", NameUtil.camelCaseToSnakeLower("FOOBAR"));
+    assertEquals("foobar", NameUtil.camelCaseToSnakeLower("foobar"));
+    assertEquals("foo_bar", NameUtil.camelCaseToSnakeLower("foo-bar"));
+    assertEquals("FOO_BAR", NameUtil.camelCaseToSnakeUpper("foo-bar"));
+    assertEquals("foo_bar20", NameUtil.camelCaseToSnakeLower("foo-bar20"));
+    assertEquals("some_things_are_stupid", NameUtil.camelCaseToSnakeLower("some things Are Stupid"));
+    assertEquals("SOME_THINGS_ARE_STUPID", NameUtil.camelCaseToSnakeUpper("some things Are Stupid"));
   }
-  
+
   @Test
   public void cleanupIdentifier()
   {

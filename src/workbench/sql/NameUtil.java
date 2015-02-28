@@ -22,6 +22,8 @@
  */
 package workbench.sql;
 
+import workbench.db.IdentifierCase;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -45,12 +47,33 @@ public class NameUtil
   private static final String INVALID_CHARS = "- .:\\/\"'!%&()=?+*";
 
   /**
+   * Cleanup an identifier and convert CamelCase to SNAKE_CASE
+   *
+   * @param input  the identifier to cleanup
+   * @return a clean identifier in uppercase
+   */
+  public static String camelCaseToSnakeUpper(String input)
+  {
+    return camelCaseToSnake(input, IdentifierCase.upper);
+  }
+
+  /**
    * Cleanup an identifier and convert CamelCase to snake_case
    *
    * @param input  the identifier to cleanup
    * @return a clean identifier in lowercase
    */
+  public static String camelCaseToSnakeLower(String input)
+  {
+    return camelCaseToSnake(input, IdentifierCase.lower);
+  }
+
   public static String camelCaseToSnake(String input)
+  {
+    return camelCaseToSnake(input, IdentifierCase.mixed);
+  }
+
+  public static String camelCaseToSnake(String input, IdentifierCase idCase)
   {
     if (input == null) return "";
     input = SqlUtil.removeObjectQuotes(input);
@@ -70,7 +93,18 @@ public class NameUtil
         current = '_';
       }
       previous = current;
-      result.append(Character.toLowerCase(current));
+      switch (idCase)
+      {
+        case lower:
+          result.append(Character.toLowerCase(current));
+          break;
+        case upper:
+          result.append(Character.toUpperCase(current));
+          break;
+        default:
+          result.append(current);
+          break;
+      }
     }
     return result.toString();
   }
