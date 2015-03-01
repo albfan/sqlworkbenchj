@@ -81,8 +81,6 @@ public class TextFileParser
 	private boolean illegalDateIsNull;
 
 	private Pattern lineFilter;
-
-	private boolean clobsAreFilenames;
 	private boolean fixedWidthImport;
 
 	private String currentLine;
@@ -161,29 +159,6 @@ public class TextFileParser
 		}
 	}
 
-	@Override
-	public void addColumnFilter(String colname, String regex)
-	{
-		int index = this.getColumnIndex(colname);
-		if (index == -1) return;
-
-		try
-		{
-			Pattern p = Pattern.compile(regex);
-			importColumns.get(index).setColumnFilter(p);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("TextFileParser.addColumnFilter()", "Error compiling regular expression " + regex + " for column " + colname, e);
-			String msg = ResourceMgr.getString("ErrImportBadRegex");
-			msg = StringUtil.replace(msg, "%regex%", regex);
-			this.messages.append(msg);
-			this.messages.appendNewLine();
-			this.hasWarnings = true;
-			importColumns.get(index).setColumnFilter(null);
-		}
-	}
-
 	public void setIllegalDateIsNull(boolean flag)
 	{
 		this.illegalDateIsNull = flag;
@@ -197,19 +172,6 @@ public class TextFileParser
 	public void setTreatClobAsFilenames(boolean flag)
 	{
 		this.clobsAreFilenames = flag;
-	}
-
-	/**
-	 * Return the index of the specified column
-	 * in the import file.
-	 *
-	 * @param colName the column to search for
-	 * @return the index of the named column or -1 if the column was not found
-	 */
-	private int getColumnIndex(String colName)
-	{
-		if (colName == null) return -1;
-		return this.importColumns.indexOf(colName);
 	}
 
 	@Override
@@ -724,20 +686,11 @@ public class TextFileParser
 						int colType = col.getDataType();
 						String dbmsType = col.getDbmsType();
 
-						if (fileCol.getColumnFilter() != null)
-						{
-							if (value == null)
-							{
-								includeLine = false;
-								break;
-							}
-							Matcher m = fileCol.getColumnFilter().matcher(value);
-							if (!m.matches())
-							{
-								includeLine = false;
-								break;
-							}
-						}
+            if (isColumnFiltered(sourceIndex, value))
+            {
+              includeLine = false;
+              break;
+            }
 
 						if (valueModifier != null)
 						{

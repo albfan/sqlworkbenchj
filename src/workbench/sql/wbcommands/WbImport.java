@@ -523,14 +523,6 @@ public class WbImport
 				return result;
 			}
 
-			// The column filter has to bee applied after the
-			// columns are defined!
-			String colFilter = cmdLine.getValue(ARG_COL_FILTER);
-			if (colFilter != null)
-			{
-				addColumnFilter(colFilter, textParser);
-			}
-
 			String btype = cmdLine.getValue(WbExport.ARG_BLOB_TYPE);
 			BlobMode mode = BlobMode.getMode(btype);
 			if (btype != null && mode != null)
@@ -715,6 +707,14 @@ public class WbImport
 				return result;
 			}
 		}
+
+    // The column filter has to bee applied after the
+    // columns are defined!
+    String colFilter = cmdLine.getValue(ARG_COL_FILTER);
+    if (colFilter != null)
+    {
+      addColumnFilter(colFilter, parser);
+    }
 
 		imp.setProducer(parser);
 		parser.setRowMonitor(this.rowMonitor);
@@ -961,7 +961,7 @@ public class WbImport
 		return lister;
 	}
 
-	private void addColumnFilter(String filters, TextFileParser textParser)
+	private void addColumnFilter(String filters, ImportFileParser parser)
 	{
 		List<String> filterList = StringUtil.stringToList(filters, ",", false);
 
@@ -974,7 +974,7 @@ public class WbImport
 
 			String col = l.get(0);
 			String regex = l.get(1);
-			textParser.addColumnFilter(col, StringUtil.trimQuotes(regex));
+			parser.addColumnFilter(col, StringUtil.trimQuotes(regex));
 		}
 	}
 

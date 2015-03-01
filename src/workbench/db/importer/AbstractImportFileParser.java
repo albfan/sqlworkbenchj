@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.interfaces.ImportFileParser;
 import workbench.interfaces.JobErrorHandler;
@@ -46,6 +48,8 @@ import workbench.storage.RowActionMonitor;
 
 import workbench.util.BlobDecoder;
 import workbench.util.MessageBuffer;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbFile;
 
@@ -96,6 +100,7 @@ public abstract class AbstractImportFileParser
 	protected BlobDecoder blobDecoder = new BlobDecoder();
 	protected RowActionMonitor rowMonitor;
 	protected boolean ignoreMissingColumns;
+	protected boolean clobsAreFilenames;
 
 	public AbstractImportFileParser()
 	{
@@ -562,6 +567,64 @@ public abstract class AbstractImportFileParser
 	public void setTrimValues(boolean trim)
 	{
 		this.trimValues = trim;
+	}
+
+  protected boolean isColumnFiltered(int colIndex, String importValue)
+  {
+    if (importColumns == null) return false;
+    if (colIndex < 0 || colIndex > importColumns.size()) return false;
+
+    ImportFileColumn fileCol = importColumns.get(colIndex);
+    if (fileCol.getColumnFilter() == null) return false;
+
+    int type = fileCol.getColumn().getDataType();
+
+    if (SqlUtil.isBlobType(type)) return false;
+    if (SqlUtil.isClobType(type) && clobsAreFilenames) return false;
+
+    if (importValue == null)
+    {
+      return true;
+    }
+    Matcher m = fileCol.getColumnFilter().matcher(importValue);
+    return !m.matches();
+  }
+
+	/**
+	 * Return the index of the specified column
+	 * in the import file.
+	 *
+	 * @param colName the column to search for
+	 * @return the index of the named column or -1 if the column was not found
+	 */
+	protected int getColumnIndex(String colName)
+	{
+		if (colName == null) return -1;
+    if (importColumns == null) return -1;
+		return this.importColumns.indexOf(colName);
+	}
+
+	@Override
+	public void addColumnFilter(String colname, String regex)
+	{
+		int index = this.getColumnIndex(colname);
+		if (index == -1) return;
+
+		try
+		{
+			Pattern p = Pattern.compile(regex);
+			importColumns.get(index).setColumnFilter(p);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TextFileParser.addColumnFilter()", "Error compiling regular expression " + regex + " for column " + colname, e);
+			String msg = ResourceMgr.getString("ErrImportBadRegex");
+			msg = StringUtil.replace(msg, "%regex%", regex);
+			this.messages.append(msg);
+			this.messages.appendNewLine();
+			this.hasWarnings = true;
+			importColumns.get(index).setColumnFilter(null);
+		}
 	}
 
 }

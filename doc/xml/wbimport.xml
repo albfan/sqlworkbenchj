@@ -490,6 +490,24 @@
 					</row>
 
 					<row>
+						<entry>-columnFilter</entry>
+						<entry>
+							<para>
+								This defines a filter on column level that selects only certain rows
+								from the input file to be sent to the database. The filter has to be
+								defined as <literal>column1="regex",column2="regex"</literal>.
+								Only Rows matching all of the supplied regular expressions will
+								be included by the import.
+							</para>
+							<para>
+								This parameter is ignored when the <literal>-sourcedir</literal>
+								parameter is used.
+							</para>
+						</entry>
+					</row>
+
+
+					<row>
 						<entry>-badFile</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
@@ -948,23 +966,6 @@
 								then you need to set <literal>-decode=true</literal> in order to interpret string sequences
 								like \t, \n or escaped Unicode characters properly. This is not enabled by default
 								because applying the necessary checks has an impact on the performance.
-							</para>
-						</entry>
-					</row>
-
-					<row>
-						<entry>-columnFilter</entry>
-						<entry>
-							<para>
-								This defines a filter on column level that selects only certain rows
-								from the input file to be sent to the database. The filter has to be
-								defined as <literal>column1="regex",column2="regex"</literal>.
-								Only Rows matching all of the supplied regular expressions will
-								be included by the import.
-							</para>
-							<para>
-								This parameter is ignored when the <literal>-sourcedir</literal>
-								parameter is used.
 							</para>
 						</entry>
 					</row>

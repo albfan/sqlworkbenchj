@@ -1007,13 +1007,12 @@ public class WbImportTest
 		File xmlFile = new File(this.basedir, "partial_xml_import.xml");
 		TestUtil.writeFile(xmlFile, xml, "UTF-8");
 
-		String cmd = "wbimport -importcolumns=nr,lastname -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
+		String cmd = "wbimport -importColumns=nr,lastname -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 		StatementRunnerResult result = importCmd.execute(cmd);
 		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 		try (Statement stmt = this.connection.createStatementForQuery();
-				ResultSet rs = stmt.executeQuery("select nr, lastname, firstname from junit_test");
-			)
+				 ResultSet rs = stmt.executeQuery("select nr, lastname, firstname from junit_test"))
 		{
 			int rowCount = 0;
 
@@ -1409,16 +1408,15 @@ public class WbImportTest
 		throws Exception
 	{
 		File importfile = new File(this.basedir, "bool_numeric_values.txt");
-		BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(importfile, "UTF-8", false));
-		out.write("nr,int_flag\n");
-		out.write("1,true\n");
-		out.write("2,ja\n");
-		out.write("3,true\n");
-		out.write("4,no\n");
-		out.write("5,nein\n");
-		out.write("6,yes\n");
-		out.write("7,false\n");
-		out.close();
+    TestUtil.writeFile(importfile,
+		"nr,int_flag\n" +
+		"1,true\n" +
+		"2,ja\n" +
+		"3,true\n" +
+		"4,no\n" +
+		"5,nein\n" +
+		"6,yes\n" +
+		"7,false\n", "UTF-8");
 
 		// Test importing correct true/false values
 		String cmd = "wbimport -literalsFalse='false,no,nein' -literalsTrue='true,ja,yes' -type=text -header=true  -table=bool_int_test -continueOnError=false -delimiter=',' -numericFalse='-24' -numericTrue='42' -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
@@ -1426,25 +1424,8 @@ public class WbImportTest
 		String msg = result.getMessageBuffer().toString();
 		assertEquals(msg, true, result.isSuccess());
 
-		Statement stmt = this.connection.createStatement();
-		ResultSet rs = stmt.executeQuery("select count(*) from bool_int_test where int_flag = -24");
-		int rows = 0;
-		if (rs.next())
-		{
-			rows = rs.getInt(1);
-		}
-		assertEquals("Wrong number of rows imported", 3, rows);
-		rs.close();
-
-		rs = stmt.executeQuery("select count(*) from bool_int_test where int_flag = 42");
-		rows = 0;
-		if (rs.next())
-		{
-			rows = rs.getInt(1);
-		}
-		assertEquals("Wrong number of rows imported", 4, rows);
-		rs.close();
-		stmt.close();
+    int rows = TestUtil.getNumberValue(connection, "select count(*) from bool_int_test where int_flag = -24");
+    assertEquals("Wrong number of rows imported", 3, rows);
 		assertTrue("Could not delete input file: " + importfile.getCanonicalPath(), importfile.delete());
 	}
 
@@ -1454,25 +1435,26 @@ public class WbImportTest
 		try
 		{
 			File importFile  = new File(this.basedir, "import_text_clob.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("nr\ttext_data");
-			out.println("1\ttext_data_r1_c2.data");
-			out.println("2\ttext_data_r2_c2.data");
-			out.close();
+
+      TestUtil.writeFile(importFile,
+      "nr\ttext_data\n" +
+      "1\ttext_data_r1_c2.data\n" +
+      "2\ttext_data_r2_c2.data\n", "UTF-8");
+
 			String data1 = "This is a CLOB string to be put into row 1";
 			String data2 = "This is a CLOB string to be put into row 2";
 
 			File datafile = new File(this.basedir, "text_data_r1_c2.data");
-			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(datafile), "UTF-8"));
-			out.print(data1);
-			out.close();
+      TestUtil.writeFile(datafile, data1);
 
 			datafile = new File(this.basedir, "text_data_r2_c2.data");
-			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(datafile), "UTF-8"));
-			out.print(data2);
-			out.close();
+      TestUtil.writeFile(datafile, data2);
 
-			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -clobIsFilename=true -type=text -header=true -continueonerror=false -table=clob_test");
+			StatementRunnerResult result = importCmd.execute(
+        "-- this is the import test\n" +
+          "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -clobIsFilename=true " +
+          "         -type=text -header=true -continueonerror=false -table=clob_test"
+      );
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			Statement stmt = this.connection.createStatement();
@@ -1516,79 +1498,46 @@ public class WbImportTest
 	public void testRegularImport()
 		throws Exception
 	{
-		int rowCount = 10;
-		try
-		{
-			String name = "\u0627\u0644\u0633\u0639\u0631 \u0627\u0644\u0645\u0642\u062A\u0631\u062D \u0644\u0644\u0645\u0633\u0647\u0644\u0643";
-			File importFile  = new File(this.basedir, "regular_import.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("nr\tfirstname\tlastname");
-			for (int i = 0; i < rowCount; i++)
-			{
-				out.print(Integer.toString(i));
-				out.print('\t');
-				out.println("First" + i + "\tLastname" + i);
-			}
-			// Make sure encoding is working
-			out.println("999\tUnifirst\t"+name);
-			rowCount ++;
+    int rowCount = 10;
+    String name = "\u0627\u0644\u0633\u0639\u0631 \u0627\u0644\u0645\u0642\u062A\u0631\u062D \u0644\u0644\u0645\u0633\u0647\u0644\u0643";
+    File importFile  = new File(this.basedir, "regular_import.txt");
+    try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8")))
+    {
+      out.println("nr\tfirstname\tlastname");
+      for (int i = 0; i < rowCount; i++)
+      {
+        out.print(Integer.toString(i));
+        out.print('\t');
+        out.println("First" + i + "\tLastname" + i);
+      }
+      // Make sure encoding is working
+      out.println("999\tUnifirst\t"+name);
+      rowCount ++;
 
-			// test for empty values (should be stored as NULL)
-			out.println("  \tempty nr\tempty");
-			rowCount ++;
+      // test for empty values (should be stored as NULL)
+      out.println("  \tempty nr\tempty");
+      rowCount ++;
 
-			// Check that quote characters are used if not specified
-			out.println("42\tarthur\"dent\tempty");
-			rowCount ++;
-			out.close();
+      // Check that quote characters are used if not specified
+      out.println("42\tarthur\"dent\tempty");
+      rowCount ++;
+    }
 
-			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=false -table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=false -table=junit_test");
+    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
-			int count = -1;
-			if (rs.next())
-			{
-				count = rs.getInt(1);
-			}
-			assertEquals("Not enough values imported", rowCount, count);
+    int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
+    assertEquals("Not enough values imported", rowCount, count);
 
-			rs.close();
+    String sname = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr = 999");
+    assertEquals("Unicode incorrectly imported", name, sname);
 
-			rs = stmt.executeQuery("select lastname from junit_test where nr = 999");
-			if (rs.next())
-			{
-				String sname = rs.getString(1);
-				assertEquals("Unicode incorrectly imported", name, sname);
-			}
-			else
-			{
-				fail("Unicode row not imported");
-			}
-			rs.close();
-
-			rs = stmt.executeQuery("select firstname from junit_test where nr = 42");
-			if (rs.next())
-			{
-				String sname = rs.getString(1);
-				assertEquals("Embedded quote not imported", "arthur\"dent", sname);
-			}
-			else
-			{
-				fail("Row with embedded quote not imported");
-			}
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+    sname = (String)TestUtil.getSingleQueryValue(connection, "select firstname from junit_test where nr = 42");
+    assertEquals("Embedded quote not imported", "arthur\"dent", sname);
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
@@ -1596,40 +1545,39 @@ public class WbImportTest
 		throws Exception
 	{
 		File importFile  = new File(this.basedir, "col_limit.txt");
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-		out.println("nr\tfirstname\tlastname");
-		out.println("x1\tArthur\tDent");
-		out.println("x2\tZaphod\tBeeblebrox");
-		out.close();
+    TestUtil.writeFile(importFile,
+      "nr\tfirstname\tlastname\n" +
+      "x1\tArthur\tDent\n" +
+      "x2\tZaphod\tBeeblebrox\n", "UTF-8");
 
 		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -colSubstring=nr=1:5 -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
 		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-		Statement stmt = this.connection.createStatementForQuery();
-		ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-		while (rs.next())
-		{
-			int nr = rs.getInt(1);
-			String fname = rs.getString(2);
-			String lname = rs.getString(3);
-			if (nr == 1)
-			{
-				assertEquals("Wrong lastname", "Dent", lname);
-				assertEquals("Wrong firstname", "Arthur", fname);
-			}
-			else if (nr == 2)
-			{
-				assertEquals("Wrong lastname", "Beeb", lname);
-				assertEquals("Wrong firstname", "Zaphod", fname);
-			}
-			else
-			{
-				fail("Wrong lines imported");
-			}
-		}
+    try (Statement stmt = this.connection.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
+    {
+      while (rs.next())
+      {
+        int nr = rs.getInt(1);
+        String fname = rs.getString(2);
+        String lname = rs.getString(3);
+        if (nr == 1)
+        {
+          assertEquals("Wrong lastname", "Dent", lname);
+          assertEquals("Wrong firstname", "Arthur", fname);
+        }
+        else if (nr == 2)
+        {
+          assertEquals("Wrong lastname", "Beeb", lname);
+          assertEquals("Wrong firstname", "Zaphod", fname);
+        }
+        else
+        {
+          fail("Wrong lines imported");
+        }
+      }
 
-		rs.close();
-		stmt.close();
+    }
 		if (!importFile.delete())
 		{
 			fail("Could not delete input file: " + importFile.getCanonicalPath());
@@ -1641,11 +1589,10 @@ public class WbImportTest
 		throws Exception
 	{
 		File importFile  = new File(this.basedir, "partial_skip.txt");
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-		out.println("nr\tfirstname\tlastname");
-		out.println("1\tArthur\tDent");
-		out.println("2\tZaphod\tBeeblebrox");
-		out.close();
+    TestUtil.writeFile(importFile,
+      "nr\tfirstname\tlastname\n" +
+      "1\tArthur\tDent\n" +
+      "2\tZaphod\tBeeblebrox\n", "UTF-8");
 
 		StatementRunnerResult result = importCmd.execute(
 			"-- this is the import test\nwbimport " +
@@ -1660,70 +1607,29 @@ public class WbImportTest
 		assertEquals("2 row(s) inserted", lines[1]);
 		assertEquals("0 row(s) updated", lines[2]);
 
-		Statement stmt = this.connection.createStatementForQuery();
-		ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-		while (rs.next())
-		{
-			int nr = rs.getInt(1);
-			String fname = rs.getString(2);
-			String lname = rs.getString(3);
-			assertNull("Firstname imported for nr=" + nr, fname);
-			if (nr == 1)
-			{
-				assertEquals("Wrong lastname", "Dent", lname);
-			}
-			else if (nr == 2)
-			{
-				assertEquals("Wrong lastname", "Beeblebrox", lname);
-			}
-			else
-			{
-				fail("Wrong lines imported");
-			}
-		}
-		rs.close();
-
-
-		stmt.executeUpdate("delete from junit_test");
-		connection.commit();
-
-		result = importCmd.execute(
-			"-- this is the import test\nwbimport " +
-			"-encoding=utf8 -file='" + importFile.getAbsolutePath() + "' " +
-			"-filecolumns=nr,firstnae,lastname -importColumns=nr,lastname -type=text " +
-			"-header=true -continueonerror=false -table=junit_test");
-
-		msg = result.getMessageBuffer().toString();
-		assertEquals("Import failed: " + msg, result.isSuccess(), true);
-		lines = msg.split(StringUtil.REGEX_CRLF);
-		assertEquals(3, lines.length);
-		assertTrue(lines[0].endsWith("into table JUNIT_TEST"));
-		assertEquals("2 row(s) inserted", lines[1]);
-		assertEquals("0 row(s) updated", lines[2]);
-
-		rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-		while (rs.next())
-		{
-			int nr = rs.getInt(1);
-			String fname = rs.getString(2);
-			String lname = rs.getString(3);
-			assertNull("Firstname imported for nr=" + nr, fname);
-			if (nr == 1)
-			{
-				assertEquals("Wrong lastname", "Dent", lname);
-			}
-			else if (nr == 2)
-			{
-				assertEquals("Wrong lastname", "Beeblebrox", lname);
-			}
-			else
-			{
-				fail("Wrong lines imported");
-			}
-		}
-		rs.close();
-
-		stmt.close();
+    try (Statement stmt = this.connection.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
+    {
+      while (rs.next())
+      {
+        int nr = rs.getInt(1);
+        String fname = rs.getString(2);
+        String lname = rs.getString(3);
+        assertNull("Firstname imported for nr=" + nr, fname);
+        if (nr == 1)
+        {
+          assertEquals("Wrong lastname", "Dent", lname);
+        }
+        else if (nr == 2)
+        {
+          assertEquals("Wrong lastname", "Beeblebrox", lname);
+        }
+        else
+        {
+          fail("Wrong lines imported");
+        }
+      }
+    }
 		if (!importFile.delete())
 		{
 			fail("Could not delete input file: " + importFile.getCanonicalPath());
@@ -1735,417 +1641,338 @@ public class WbImportTest
 		throws Exception
 	{
 		int rowCount = 100;
-		try
-		{
-			File importFile  = new File(this.basedir, "partial1.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("nr\tfirstname\tlastname");
-			for (int i = 0; i < rowCount; i++)
-			{
-				int id = i+1;
-				out.println(id + "\tFirstname" + id + "\tLastname" + id);
-			}
-			out.close();
+    File importFile  = new File(this.basedir, "partial1.txt");
+    try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8")))
+    {
+      out.println("nr\tfirstname\tlastname");
+      for (int i = 0; i < rowCount; i++)
+      {
+        int id = i+1;
+        out.println(id + "\tFirstname" + id + "\tLastname" + id);
+      }
+    }
 
-			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -type=text -header=true -continueonerror=false -startrow=10 -endrow=20 -table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -type=text -header=true -continueonerror=false -startrow=10 -endrow=20 -table=junit_test");
+    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select min(nr), max(nr), count(*) from junit_test");
-			if (rs.next())
-			{
-				int min = rs.getInt(1);
-				int max = rs.getInt(2);
-				int count = rs.getInt(3);
-				assertEquals("Import started at wrong id", 10, min);
-				assertEquals("Import ended at wrong id", 20, max);
-				assertEquals("Wrong number of rows imported", 11, count);
-			}
-			else
-			{
-				fail("No data imported");
-			}
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+    try (Statement stmt = this.connection.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select min(nr), max(nr), count(*) from junit_test"))
+    {
+      if (rs.next())
+      {
+        int min = rs.getInt(1);
+        int max = rs.getInt(2);
+        int count = rs.getInt(3);
+        assertEquals("Import started at wrong id", 10, min);
+        assertEquals("Import ended at wrong id", 20, max);
+        assertEquals("Wrong number of rows imported", 11, count);
+      }
+      else
+      {
+        fail("No data imported");
+      }
+    }
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
 	public void testUnmatchedFileColumn()
 		throws Exception
 	{
-		try
-		{
-			File importFile  = new File(this.basedir, "partial2.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("1\tArthur");
-			out.println("2\tZaphod");
-			out.close();
+    File importFile  = new File(this.basedir, "partial2.txt");
+    TestUtil.writeFile(importFile, "1\tArthur\n2\tZaphod\n", "UTF-8");
 
-			StatementRunnerResult result = importCmd.execute("" +
-				"wbimport -encoding=utf8 " +
-				"-file='" + importFile.getAbsolutePath() + "' " +
-				"-type=text " +
-				"-header=false " +
-				"-continueonerror=false " +
-				"-table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("" +
+      "wbimport -encoding=utf8 " +
+      "-file='" + importFile.getAbsolutePath() + "' " +
+      "-type=text " +
+      "-header=false " +
+      "-continueonerror=false " +
+      "-table=junit_test");
+    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-			while (rs.next())
-			{
-				int nr = rs.getInt(1);
-				String fname = rs.getString(2);
-				String lname = rs.getString(3);
-				assertNull("Lastname not null for nr=" + nr, lname);
-				if (nr == 1)
-				{
-					assertEquals("Wrong lastname", "Arthur", fname);
-				}
-				else if (nr == 2)
-				{
-					assertEquals("Wrong lastname", "Zaphod", fname);
-				}
-				else
-				{
-					fail("Wrong lines imported");
-				}
-			}
+    try (Statement stmt = this.connection.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
+    {
+      while (rs.next())
+      {
+        int nr = rs.getInt(1);
+        String fname = rs.getString(2);
+        String lname = rs.getString(3);
+        assertNull("Lastname not null for nr=" + nr, lname);
+        if (nr == 1)
+        {
+          assertEquals("Wrong lastname", "Arthur", fname);
+        }
+        else if (nr == 2)
+        {
+          assertEquals("Wrong lastname", "Zaphod", fname);
+        }
+        else
+        {
+          fail("Wrong lines imported");
+        }
+      }
 
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-
-		}
-		finally
-		{
-			ConnectionMgr.getInstance().disconnectAll();
-		}
+    }
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
 	public void testPartialColumnTextImport()
 		throws Exception
 	{
-		try
-		{
-			File importFile  = new File(this.basedir, "partial2.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("nr\tfirstname\tlastname");
-			out.println("1\tArthur\tDent");
-			out.println("2\tZaphod\tBeeblebrox");
-			out.close();
+    File importFile  = new File(this.basedir, "partial2.txt");
+    TestUtil.writeFile(importFile,
+        "nr\tfirstname\tlastname\n" +
+        "1\tArthur\tDent\n"  +
+        "2\tZaphod\tBeeblebrox\n");
 
-			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -importcolumns=nr,lastname -type=text -header=true -continueonerror=false -table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -importcolumns=nr,lastname -type=text -header=true -continueonerror=false -table=junit_test");
+    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-			while (rs.next())
-			{
-				int nr = rs.getInt(1);
-				String fname = rs.getString(2);
-				String lname = rs.getString(3);
-				assertNull("Firstname imported for nr=" + nr, fname);
-				if (nr == 1)
-				{
-					assertEquals("Wrong lastname", "Dent", lname);
-				}
-				else if (nr == 2)
-				{
-					assertEquals("Wrong lastname", "Beeblebrox", lname);
-				}
-				else
-				{
-					fail("Wrong lines imported");
-				}
-			}
+    try (Statement stmt = this.connection.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
+    {
+      while (rs.next())
+      {
+        int nr = rs.getInt(1);
+        String fname = rs.getString(2);
+        String lname = rs.getString(3);
+        assertNull("Firstname imported for nr=" + nr, fname);
+        if (nr == 1)
+        {
+          assertEquals("Wrong lastname", "Dent", lname);
+        }
+        else if (nr == 2)
+        {
+          assertEquals("Wrong lastname", "Beeblebrox", lname);
+        }
+        else
+        {
+          fail("Wrong lines imported");
+        }
+      }
 
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-		}
-		finally
-		{
-			ConnectionMgr.getInstance().disconnectAll();
-		}
+    }
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
 	public void testMultiLineImport()
+    throws Exception
 	{
-		int rowCount = 10;
-		try
-		{
-			File importFile  = new File(this.basedir, "multi.txt");
-			String content = "firstname\tlastname\tnr\n" +
-				"First\t\"Last\nname\"\t1\n" +
-				"first2\tlast2\t2\n" +
-				"first3\t\"last3\nlast3last3\"\t3\n" +
-				"first4\t\"last4\tlast4\"\t4\n";
+    File importFile  = new File(this.basedir, "multi.txt");
+    String content = "firstname\tlastname\tnr\n" +
+      "First\t\"Last\nname\"\t1\n" +
+      "first2\tlast2\t2\n" +
+      "first3\t\"last3\nlast3last3\"\t3\n" +
+      "first4\t\"last4\tlast4\"\t4\n";
 
-			TestUtil.writeFile(importFile, content);
+    TestUtil.writeFile(importFile, content);
 
-			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
+    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-			int count = 0;
-			while (rs.next())
-			{
-				count ++;
-				int nr = rs.getInt(1);
-				String first = rs.getString(2);
-				String last = rs.getString(3);
-				assertEquals("Wrong nr imported", count, nr);
-				if (count == 1)
-				{
-					assertEquals("Wrong firstname imported", "First", first);
-					assertEquals("Wrong firstname imported", "Last\nname", last);
-				}
-				else if (count == 2)
-				{
-					assertEquals("Wrong firstname imported", "first2", first);
-					assertEquals("Wrong firstname imported", "last2", last);
-				}
-				else if (count == 3)
-				{
-					assertEquals("Wrong firstname imported", "first3", first);
-					assertEquals("Wrong firstname imported", "last3\nlast3last3", last);
-				}
-				else if (count == 4)
-				{
-					assertEquals("Wrong firstname imported", "first4", first);
-					assertEquals("Wrong firstname imported", "last4\tlast4", last);
-				}
-			}
-			assertEquals("Wrong number of rows imported", 4, count);
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+    try (Statement stmt = this.connection.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
+    {
+      int count = 0;
+      while (rs.next())
+      {
+        count ++;
+        int nr = rs.getInt(1);
+        String first = rs.getString(2);
+        String last = rs.getString(3);
+        assertEquals("Wrong nr imported", count, nr);
+        if (count == 1)
+        {
+          assertEquals("Wrong firstname imported", "First", first);
+          assertEquals("Wrong firstname imported", "Last\nname", last);
+        }
+        else if (count == 2)
+        {
+          assertEquals("Wrong firstname imported", "first2", first);
+          assertEquals("Wrong firstname imported", "last2", last);
+        }
+        else if (count == 3)
+        {
+          assertEquals("Wrong firstname imported", "first3", first);
+          assertEquals("Wrong firstname imported", "last3\nlast3last3", last);
+        }
+        else if (count == 4)
+        {
+          assertEquals("Wrong firstname imported", "first4", first);
+          assertEquals("Wrong firstname imported", "last4\tlast4", last);
+        }
+      }
+      assertEquals("Wrong number of rows imported", 4, count);
+    }
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
 	public void testZipMultiLineImport()
+    throws Exception
 	{
-		try
-		{
-			File importFile  = new File(this.basedir, "zipmulti.txt");
+    File importFile  = new File(this.basedir, "zipmulti.txt");
 
-			File archive = new File(this.basedir, "zipmulti.zip");
-			ZipOutputFactory zout = new ZipOutputFactory(archive);
-			PrintWriter out = new PrintWriter(zout.createWriter(importFile, "UTF-8"));
+    File archive = new File(this.basedir, "zipmulti.zip");
+    ZipOutputFactory zout = new ZipOutputFactory(archive);
+    try (PrintWriter out = new PrintWriter(zout.createWriter(importFile, "UTF-8")))
+    {
+      out.print("nr\tfirstname\tlastname\n");
+      out.print("1\tFirst\t\"Last\n");
+      out.print("name\"\n");
+    }
+    zout.done();
 
-			out.print("nr\tfirstname\tlastname\n");
-			out.print("1\tFirst\t\"Last\n");
-			out.print("name\"\n");
-			out.close();
-			zout.done();
+    StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
+    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    try (Statement stmt = this.connection.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
+    {
+      if (rs.next())
+      {
+        int nr = rs.getInt(1);
+        assertEquals("Wrong nr imported", 1, nr);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
-			int count = -1;
-			if (rs.next())
-			{
-				int nr = rs.getInt(1);
-				assertEquals("Wrong nr imported", 1, nr);
+        String first = rs.getString(2);
+        assertEquals("Wrong firstname imported", "First", first);
 
-				String first = rs.getString(2);
-				assertEquals("Wrong firstname imported", "First", first);
-
-				String last = rs.getString(3);
-				assertEquals("Wrong firstname imported", "Last\nname", last);
-			}
-			else
-			{
-				fail("No data imported");
-			}
-			rs.close();
-			stmt.close();
-			if (!archive.delete())
-			{
-				fail("Could not delete archive! " + archive.getAbsolutePath());
-			}
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+        String last = rs.getString(3);
+        assertEquals("Wrong firstname imported", "Last\nname", last);
+      }
+      else
+      {
+        fail("No data imported");
+      }
+    }
+    if (!archive.delete())
+    {
+      fail("Could not delete archive! " + archive.getAbsolutePath());
+    }
 	}
 
 	@Test
 	public void testEmptyStringIsNull()
 		throws Exception
 	{
-		try
-		{
-			File importFile  = new File(this.basedir, "import_empty.txt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			out.println("1\tFirstname\t");
-			out.close();
+    File importFile  = new File(this.basedir, "import_empty.txt");
+    TestUtil.writeFile(importFile, "1\tFirstname\t");
 
-			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=true -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=true -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
+    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
-			if (rs.next())
-			{
-				int nr = rs.getInt(1);
-				assertEquals("Wrong values imported", nr, 1);
-				String first = rs.getString(2);
-				assertEquals("Wrong firstname", "Firstname", first);
+    try (Statement stmt = this.connection.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr"))
+    {
+      if (rs.next())
+      {
+        int nr = rs.getInt(1);
+        assertEquals("Wrong values imported", nr, 1);
+        String first = rs.getString(2);
+        assertEquals("Wrong firstname", "Firstname", first);
 
-				String last = rs.getString(3);
-				assertNull("Lastname not null", last);
-			}
-			rs.close();
-
-			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=false -type=text -filecolumns=nr,firstname,lastname -deleteTarget=true -header=false -table=junit_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-
-			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
-			if (rs.next())
-			{
-				int nr = rs.getInt(1);
-				assertEquals("Wrong values imported", nr, 1);
-				String first = rs.getString(2);
-				assertEquals("Wrong firstname", "Firstname", first);
-
-				String last = rs.getString(3);
-				assertNotNull("Lastname is null", last);
-			}
-
-			if (rs.next())
-			{
-				fail("Too many rows");
-			}
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+        String last = rs.getString(3);
+        assertNull("Lastname not null", last);
+      }
+    }
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
 	public void testNullNumeric()
 		throws Exception
 	{
-		try
-		{
-			File importFile  = new File(this.basedir, "import_null_numeric.txt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			out.println("nr\tamount\tprod_name");
-			out.println("1\t1.1\tfirst");
-			out.println("2\t\tsecond");
-			out.println("3\t3.3\tthird");
-			out.close();
+    File importFile  = new File(this.basedir, "import_null_numeric.txt");
+    TestUtil.writeFile(importFile,
+      "nr\tamount\tprod_name\n" +
+      "1\t1.1\tfirst\n" +
+      "2\t\tsecond\n" +
+      "3\t3.3\tthird\n");
 
-			StatementRunnerResult result = importCmd.execute("wbimport -decimal=. -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=numeric_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("wbimport -decimal=. -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=numeric_test");
+    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, amount, prod_name from numeric_test order by nr");
-			while (rs.next())
-			{
-				int nr = rs.getInt(1);
-				double amount = rs.getDouble(2);
-				if (rs.wasNull()) amount = -1;
+    Statement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = this.connection.createStatementForQuery();
+      rs = stmt.executeQuery("select nr, amount, prod_name from numeric_test order by nr");
+      while (rs.next())
+      {
+        int nr = rs.getInt(1);
+        double amount = rs.getDouble(2);
+        if (rs.wasNull()) amount = -1;
 
-				switch (nr)
-				{
-					case 1:
-						assertEquals(1.1, amount, 0.1);
-						break;
-					case 2:
-						assertEquals(-1, amount, 0.1);
-						break;
-					case 3:
-						assertEquals(3.3, amount, 0.1);
-				}
-			}
-			SqlUtil.closeAll(rs, stmt);
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+        switch (nr)
+        {
+          case 1:
+            assertEquals(1.1, amount, 0.1);
+            break;
+          case 2:
+            assertEquals(-1, amount, 0.1);
+            break;
+          case 3:
+            assertEquals(3.3, amount, 0.1);
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 	}
 
 	@Test
 	public void testMissingTarget()
 		throws Exception
 	{
-		int rowCount = 10;
-		try
-		{
-			File importFile  = new File(this.basedir, "dummy.txt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			for (int i = 0; i < 10; i++)
-			{
-				out.print(Integer.toString(i));
-				out.print('\t');
-				out.println("First" + i + "\tLastname" + i);
-			}
-			out.close();
+    File importFile  = new File(this.basedir, "dummy.txt");
+    try (PrintWriter out = new PrintWriter(new FileWriter(importFile)))
+    {
+      for (int i = 0; i < 10; i++)
+      {
+        out.print(Integer.toString(i));
+        out.print('\t');
+        out.println("First" + i + "\tLastname" + i);
+      }
+    }
 
-			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -filecolumns=nr,firstname,lastname -header=false -table=not_there");
-			String msg = result.getMessageBuffer().toString();
-			assertEquals("Export did not fail", false, result.isSuccess());
-			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
+    StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -filecolumns=nr,firstname,lastname -header=false -table=not_there");
+    String msg = result.getMessageBuffer().toString();
+    assertEquals("Export did not fail", false, result.isSuccess());
+    assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
 
-			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -table=not_there");
-			msg = result.getMessageBuffer().toString();
-			assertEquals("Export did not fail", false, result.isSuccess());
-			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
+    result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -table=not_there");
+    msg = result.getMessageBuffer().toString();
+    assertEquals("Export did not fail", false, result.isSuccess());
+    assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
 
-			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=not_there");
-			msg = result.getMessageBuffer().toString();
-			assertEquals("Export did not fail", false, result.isSuccess());
-			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
+    result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=not_there");
+    msg = result.getMessageBuffer().toString();
+    assertEquals("Export did not fail", false, result.isSuccess());
+    assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
 
-			importFile.delete();
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+    importFile.delete();
 	}
 
 	@Test
@@ -2153,47 +1980,27 @@ public class WbImportTest
 		throws Exception
 	{
 		int rowCount = 10;
-		try
-		{
-			File importFile  = new File(this.basedir, "import_no_header.txt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			for (int i = 0; i < rowCount; i++)
-			{
-				out.print(Integer.toString(i));
-				out.print('\t');
-				out.println("First" + i + "\tLastname" + i);
-			}
-			out.close();
+    File importFile  = new File(this.basedir, "import_no_header.txt");
+    try (PrintWriter out = new PrintWriter(new FileWriter(importFile)))
+    {
+      for (int i = 0; i < rowCount; i++)
+      {
+        out.print(Integer.toString(i));
+        out.print('\t');
+        out.println("First" + i + "\tLastname" + i);
+      }
+    }
 
-			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true  -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true  -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
+    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
-			int count = -1;
-			if (rs.next())
-			{
-				count = rs.getInt(1);
-			}
-			assertEquals("Not enough values imported", rowCount, count);
-			rs.close();
-			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
-			if (rs.next())
-			{
-				int nr = rs.getInt(1);
-				assertEquals("Wrong values imported", nr, 0);
-			}
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+    int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
+    assertEquals("Not enough values imported", rowCount, count);
+
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
@@ -2201,48 +2008,28 @@ public class WbImportTest
 		throws Exception
 	{
 		int rowCount = 10;
-		try
-		{
-			File importFile  = new File(this.basedir, "import_tbl_cols.txt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			for (int i = 0; i < rowCount; i++)
-			{
-				out.print(Integer.toString(i));
-				out.print('\t');
-				out.println("First" + i + "\tLastname" + i);
-			}
-			out.close();
+    File importFile  = new File(this.basedir, "import_tbl_cols.txt");
+    try (PrintWriter out = new PrintWriter(new FileWriter(importFile)))
+    {
+      for (int i = 0; i < rowCount; i++)
+      {
+        out.print(Integer.toString(i));
+        out.print('\t');
+        out.println("First" + i + "\tLastname" + i);
+      }
+    }
 
-			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=false -table=junit_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute(
+      "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=false -table=junit_test");
+    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
-			int count = -1;
-			if (rs.next())
-			{
-				count = rs.getInt(1);
-			}
-			assertEquals("Not enough values imported", rowCount, count);
-			rs.close();
-			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
-			if (rs.next())
-			{
-				int nr = rs.getInt(1);
-				assertEquals("Wrong values imported", nr, 0);
-			}
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
+    int rows = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
+    assertEquals("Not enough values imported", rowCount, rows);
 
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
@@ -2250,58 +2037,50 @@ public class WbImportTest
 		throws Exception
 	{
 		int rowCount = 10;
-		try
-		{
-			util.emptyBaseDirectory();
+    util.emptyBaseDirectory();
 
-			File importFile  = new File(this.basedir, "junit_test.txt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			//out.println("nr\tfirstname\tlastname");
-			for (int i = 0; i < rowCount; i++)
-			{
-				out.print(Integer.toString(i));
-				out.print('\t');
-				out.println("First" + i + "\tLastname" + i);
-			}
-			out.close();
+    File importFile  = new File(this.basedir, "junit_test.txt");
+    PrintWriter out = new PrintWriter(new FileWriter(importFile));
+    //out.println("nr\tfirstname\tlastname");
+    for (int i = 0; i < rowCount; i++)
+    {
+      out.print(Integer.toString(i));
+      out.print('\t');
+      out.println("First" + i + "\tLastname" + i);
+    }
+    out.close();
 
-			out = new PrintWriter(new FileWriter(new File(this.basedir, "datatype_test.txt")));
-			//out.println("int_col\tdouble_col\tchar_col\tdate_col\ttime_col\tts_col");
-			out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34:14\t");
-			out.close();
+    out = new PrintWriter(new FileWriter(new File(this.basedir, "datatype_test.txt")));
+    //out.println("int_col\tdouble_col\tchar_col\tdate_col\ttime_col\tts_col");
+    out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34:14\t");
+    out.close();
 
-			StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text");
+    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
-			int count = -1;
-			if (rs.next())
-			{
-				count = rs.getInt(1);
-			}
-			assertEquals("Not enough values in table junit_test", rowCount, count);
+    Statement stmt = this.connection.createStatementForQuery();
+    ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
+    int count = -1;
+    if (rs.next())
+    {
+      count = rs.getInt(1);
+    }
+    assertEquals("Not enough values in table junit_test", rowCount, count);
 
-			rs = stmt.executeQuery("select count(*) from datatype_test");
-			count = -1;
-			if (rs.next())
-			{
-				count = rs.getInt(1);
-			}
-			assertEquals("Not enough values in table datatype_test", 1, count);
+    rs = stmt.executeQuery("select count(*) from datatype_test");
+    count = -1;
+    if (rs.next())
+    {
+      count = rs.getInt(1);
+    }
+    assertEquals("Not enough values in table datatype_test", 1, count);
 
-			rs.close();
-			stmt.close();
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+    rs.close();
+    stmt.close();
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
@@ -2309,68 +2088,61 @@ public class WbImportTest
 		throws Exception
 	{
 		int rowCount = 10;
-		try
-		{
-			util.emptyBaseDirectory();
+    util.emptyBaseDirectory();
 
-			File importFile  = new File(this.basedir, "multi_test1_nohead.mtxt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			for (int i = 0; i < 5; i++)
-			{
-				out.print("to-ignore\t");
-				out.print(Integer.toString(i));
-				out.print('\t');
-				out.println("First" + i + "\tLastname" + i);
-			}
-			out.close();
+    File importFile  = new File(this.basedir, "multi_test1_nohead.mtxt");
+    PrintWriter out = new PrintWriter(new FileWriter(importFile));
+    for (int i = 0; i < 5; i++)
+    {
+      out.print("to-ignore\t");
+      out.print(Integer.toString(i));
+      out.print('\t');
+      out.println("First" + i + "\tLastname" + i);
+    }
+    out.close();
 
-			importFile  = new File(this.basedir, "multi_test2_nohead.mtxt");
-			out = new PrintWriter(new FileWriter(importFile));
-			for (int i = 5; i < rowCount; i++)
-			{
-				out.print("to-ignore\t");
-				out.print(Integer.toString(i));
-				out.print('\t');
-				out.println("First" + i + "\tLastname" + i);
-			}
-			out.close();
+    importFile  = new File(this.basedir, "multi_test2_nohead.mtxt");
+    out = new PrintWriter(new FileWriter(importFile));
+    for (int i = 5; i < rowCount; i++)
+    {
+      out.print("to-ignore\t");
+      out.print(Integer.toString(i));
+      out.print('\t');
+      out.println("First" + i + "\tLastname" + i);
+    }
+    out.close();
 
-			Statement stmt = this.connection.createStatementForQuery();
-			stmt.executeUpdate("DELETE FROM junit_test");
-			this.connection.commit();
+    Statement stmt = this.connection.createStatementForQuery();
+    stmt.executeUpdate("DELETE FROM junit_test");
+    this.connection.commit();
 
-			StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=gaga -table=junit_test");
-			String msg = result.getMessageBuffer().toString();
-			assertFalse(result.isSuccess());
-			assertTrue(msg.indexOf("No files with extension gaga found in directory") > -1);
+    StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=gaga -table=junit_test");
+    String msg = result.getMessageBuffer().toString();
+    assertFalse(result.isSuccess());
+    assertTrue(msg.indexOf("No files with extension gaga found in directory") > -1);
 
-			result = importCmd.execute("wbimport -header=false -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
-			assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
+    result = importCmd.execute("wbimport -header=false -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
+    assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
 
-			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
-			int count = -1;
-			if (rs.next())
-			{
-				count = rs.getInt(1);
-			}
-			assertEquals("Not enough values in table junit_test", rowCount, count);
+    ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
+    int count = -1;
+    if (rs.next())
+    {
+      count = rs.getInt(1);
+    }
+    assertEquals("Not enough values in table junit_test", rowCount, count);
 
-			importFile  = new File(this.basedir, "multi_test1_nohead.mtxt");
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
+    importFile  = new File(this.basedir, "multi_test1_nohead.mtxt");
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 
-			importFile  = new File(this.basedir, "multi_test2_nohead.mtxt");
-			if (!importFile.delete())
-			{
-				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+    importFile  = new File(this.basedir, "multi_test2_nohead.mtxt");
+    if (!importFile.delete())
+    {
+      fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
 	}
 
 	@Test
@@ -2807,28 +2579,8 @@ public class WbImportTest
 			assertEquals("15 row(s) inserted", lines[4]);
 			assertEquals("0 row(s) updated", lines[5]);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select count(*) from a");
-			int rowCount = 0;
-
-			if (rs.next())
-			{
-				rowCount = rs.getInt(1);
-			}
-			rs.close();
+      int rowCount = TestUtil.getNumberValue(connection, "select count(*) from a");
 			assertEquals("Wrong number of rows for table a", 15, rowCount);
-
-			rs = stmt.executeQuery("select count(*) from a");
-			rowCount = 0;
-
-			if (rs.next())
-			{
-				rowCount = rs.getInt(1);
-			}
-			rs.close();
-			assertEquals("Wrong number of rows for table a", 15, rowCount);
-
-			stmt.close();
 		}
 		finally
 		{
@@ -2891,7 +2643,9 @@ public class WbImportTest
 		String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 		//System.out.println("cmd=" + cmd);
 		StatementRunnerResult result = importCmd.execute(cmd);
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    String msg = result.getMessageBuffer().toString();
+    System.out.println(msg);
+		assertEquals(true, result.isSuccess());
 
 		try (Statement stmt = this.connection.createStatementForQuery();
 				ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
@@ -3285,55 +3039,52 @@ public class WbImportTest
 		try
 		{
 			File xmlFile = new File(this.basedir, "xml_import.xml");
-			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
-			out.write(xml);
-			out.close();
+      TestUtil.writeFile(xmlFile, xml, "UTF-8");
 
 			File dataFile = new File(this.basedir, "test_r1_c2.data");
-			FileOutputStream binaryOut = new FileOutputStream(dataFile);
-			byte[] testData = new byte[1024];
-			for (int i = 0; i < testData.length; i++)
-			{
-				testData[i] = (byte)(i % 255);
-			}
-			binaryOut.write(testData);
-			binaryOut.close();
+      try (FileOutputStream binaryOut = new FileOutputStream(dataFile))
+      {
+        byte[] testData = new byte[1024];
+        for (int i = 0; i < testData.length; i++)
+        {
+          testData[i] = (byte)(i % 255);
+        }
+        binaryOut.write(testData);
+      }
 
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
-			int rowCount = 0;
+      try (Statement stmt = this.connection.createStatementForQuery();
+           ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test"))
+      {
 
-			if (rs.next())
-			{
-				rowCount ++;
-				int nr = rs.getInt(1);
-				assertEquals("Wrong data imported", 1, nr);
+        if (rs.next())
+        {
+          int nr = rs.getInt(1);
+          assertEquals("Wrong data imported", 1, nr);
 
-				Object blob = rs.getObject(2);
-				assertNotNull("No blob data imported", blob);
-				if (blob instanceof byte[])
-				{
-					byte[] retrievedData = (byte[])blob;
-					assertEquals("Wrong blob size imported", 1024, retrievedData.length);
-					assertEquals("Wrong content of blob data", retrievedData[0], 0);
-					assertEquals("Wrong content of blob data", retrievedData[1], 1);
-					assertEquals("Wrong content of blob data", retrievedData[2], 2);
-					assertEquals("Wrong content of blob data", retrievedData[3], 3);
-				}
-				else
-				{
-					fail("Wrong blob data returned");
-				}
-			}
-			else
-			{
-				fail("Not enough data imported");
-			}
-			rs.close();
-			stmt.close();
+          Object blob = rs.getObject(2);
+          assertNotNull("No blob data imported", blob);
+          if (blob instanceof byte[])
+          {
+            byte[] retrievedData = (byte[])blob;
+            assertEquals("Wrong blob size imported", 1024, retrievedData.length);
+            assertEquals("Wrong content of blob data", retrievedData[0], 0);
+            assertEquals("Wrong content of blob data", retrievedData[1], 1);
+            assertEquals("Wrong content of blob data", retrievedData[2], 2);
+            assertEquals("Wrong content of blob data", retrievedData[3], 3);
+          }
+          else
+          {
+            fail("Wrong blob data returned");
+          }
+        }
+        else
+        {
+          fail("Not enough data imported");
+        }
+      }
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
@@ -3394,39 +3145,32 @@ public class WbImportTest
 		try
 		{
 			File xmlFile = new File(this.basedir, "xml_import.xml");
-			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
-			out.write(xml);
-			out.close();
+      TestUtil.writeFile(xmlFile, xml, "UTF-8");
 
 			File datafile = new File(this.basedir, "test_r1_c2.data");
-			String data1 = "This is a CLOB string to be put into row 1";
 
-			Writer pw = EncodingUtil.createWriter(datafile, "UTF-8", false);
-			pw.write(data1);
-			pw.close();
+      TestUtil.writeFile(datafile, "This is a CLOB string to be put into row 1", "UTF-8");
 
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=clob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, text_data from clob_test");
-			int rowCount = 0;
+      try (Statement stmt = this.connection.createStatementForQuery();
+           ResultSet rs = stmt.executeQuery("select nr, text_data from clob_test"))
+      {
 
-			if (rs.next())
-			{
-				rowCount ++;
-				int nr = rs.getInt(1);
-				assertEquals("Wrong data imported", 1, nr);
+        if (rs.next())
+        {
+          int nr = rs.getInt(1);
+          assertEquals("Wrong data imported", 1, nr);
 
-				String data = rs.getString(2);
-				assertEquals(data, data);
-			}
-			else
-			{
-				fail("Not enough data imported");
-			}
-			rs.close();
-			stmt.close();
+          String data = rs.getString(2);
+          assertEquals(data, data);
+        }
+        else
+        {
+          fail("Not enough data imported");
+        }
+      }
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
@@ -3562,6 +3306,7 @@ public class WbImportTest
 
 	@Test
 	public void testZippedXmlBlobImport()
+    throws Exception
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
              "<wb-export> \n" +
@@ -3620,72 +3365,62 @@ public class WbImportTest
              "<rd><cd>1</cd><cd dataFile=\"test_r1_c2.data\"/></rd> \n" +
              "</data> \n" +
              "</wb-export>";
-		try
-		{
-			File xmlFile = new File(this.basedir, "xml_import.xml");
 
-			File archive = new File(this.basedir, "blob_test.zip");
-			ZipOutputFactory zout = new ZipOutputFactory(archive);
-			Writer w = zout.createWriter(xmlFile, "UTF-8");
-			w.write(xml);
-			w.close();
-			zout.done();
+    File xmlFile = new File(this.basedir, "xml_import.xml");
 
-			File blobarchive = new File(this.basedir, "blob_test" + RowDataConverter.BLOB_ARCHIVE_SUFFIX + ".zip");
-			zout = new ZipOutputFactory(blobarchive);
-			OutputStream binaryOut = zout.createOutputStream(new File("test_r1_c2.data"));
+    File archive = new File(this.basedir, "blob_test.zip");
+    ZipOutputFactory zout = new ZipOutputFactory(archive);
+    try (Writer w = zout.createWriter(xmlFile, "UTF-8"))
+    {
+      w.write(xml);
+    }
+    zout.done();
 
-			byte[] testData = new byte[1024];
-			for (int i = 0; i < testData.length; i++)
-			{
-				testData[i] = (byte)(i % 255);
-			}
-			binaryOut.write(testData);
-			binaryOut.close();
-			zout.done();
+    File blobarchive = new File(this.basedir, "blob_test" + RowDataConverter.BLOB_ARCHIVE_SUFFIX + ".zip");
+    zout = new ZipOutputFactory(blobarchive);
+    try (OutputStream binaryOut = zout.createOutputStream(new File("test_r1_c2.data")))
+    {
+      byte[] testData = new byte[1024];
+      for (int i = 0; i < testData.length; i++)
+      {
+        testData[i] = (byte)(i % 255);
+      }
+      binaryOut.write(testData);
+    }
+    zout.done();
 
-			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + archive.getAbsolutePath() + "' -type=xml -table=blob_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + archive.getAbsolutePath() + "' -type=xml -table=blob_test");
+    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
-			int rowCount = 0;
+    try (Statement stmt = this.connection.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test"))
+    {
+      if (rs.next())
+      {
+        int nr = rs.getInt(1);
+        assertEquals("Wrong data imported", 1, nr);
 
-			if (rs.next())
-			{
-				rowCount ++;
-				int nr = rs.getInt(1);
-				assertEquals("Wrong data imported", 1, nr);
-
-				Object data = rs.getObject(2);
-				Object blob = rs.getObject(2);
-				assertNotNull("No blob data imported", blob);
-				if (blob instanceof byte[])
-				{
-					byte[] retrievedData = (byte[])blob;
-					assertEquals("Wrong blob size imported", 1024, retrievedData.length);
-					assertEquals("Wrong content of blob data", retrievedData[0], 0);
-					assertEquals("Wrong content of blob data", retrievedData[1], 1);
-					assertEquals("Wrong content of blob data", retrievedData[2], 2);
-					assertEquals("Wrong content of blob data", retrievedData[3], 3);
-				}
-				else
-				{
-					fail("Wrong blob data returned");
-				}
-			}
-			else
-			{
-				fail("Not enough data imported");
-			}
-			rs.close();
-			stmt.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+        Object blob = rs.getObject(2);
+        assertNotNull("No blob data imported", blob);
+        if (blob instanceof byte[])
+        {
+          byte[] retrievedData = (byte[])blob;
+          assertEquals("Wrong blob size imported", 1024, retrievedData.length);
+          assertEquals("Wrong content of blob data", retrievedData[0], 0);
+          assertEquals("Wrong content of blob data", retrievedData[1], 1);
+          assertEquals("Wrong content of blob data", retrievedData[2], 2);
+          assertEquals("Wrong content of blob data", retrievedData[3], 3);
+        }
+        else
+        {
+          fail("Wrong blob data returned");
+        }
+      }
+      else
+      {
+        fail("Not enough data imported");
+      }
+    }
 	}
 
 	@Test
@@ -3694,52 +3429,52 @@ public class WbImportTest
 		try
 		{
 			File importFile  = new File(this.basedir, "blob_test.txt");
-			PrintWriter out = new PrintWriter(new FileWriter(importFile));
-			out.println("nr\tbinary_data");
-			out.println("1\tblob_data_r1_c1.data");
-			out.close();
+      TestUtil.writeFile(importFile,
+        "nr\tbinary_data\n" +
+        "1\tblob_data_r1_c1.data\n");
 
-			FileOutputStream binaryOut = new FileOutputStream(new File(this.basedir, "blob_data_r1_c1.data"));
-			byte[] testData = new byte[1024];
-			for (int i = 0; i < testData.length; i++)
-			{
-				testData[i] = (byte)(i % 255);
-			}
-			binaryOut.write(testData);
-			binaryOut.close();
+      try (FileOutputStream binaryOut = new FileOutputStream(new File(this.basedir, "blob_data_r1_c1.data")))
+      {
+        byte[] testData = new byte[1024];
+        for (int i = 0; i < testData.length; i++)
+        {
+          testData[i] = (byte)(i % 255);
+        }
+        binaryOut.write(testData);
+      }
 
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			Statement stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
-			if (rs.next())
-			{
-				int nr = rs.getInt(1);
-				assertEquals("Wrong data imported", 1, nr);
+      try (Statement stmt = this.connection.createStatementForQuery();
+           ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test"))
+      {
+        if (rs.next())
+        {
+          int nr = rs.getInt(1);
+          assertEquals("Wrong data imported", 1, nr);
 
-				Object blob = rs.getObject(2);
-				assertNotNull("No blob data imported", blob);
-				if (blob instanceof byte[])
-				{
-					byte[] retrievedData = (byte[])blob;
-					assertEquals("Wrong blob size imported", 1024, retrievedData.length);
-					assertEquals("Wrong content of blob data", retrievedData[0], 0);
-					assertEquals("Wrong content of blob data", retrievedData[1], 1);
-					assertEquals("Wrong content of blob data", retrievedData[2], 2);
-					assertEquals("Wrong content of blob data", retrievedData[3], 3);
-				}
-				else
-				{
-					fail("Wrong blob data returned");
-				}
-			}
-			else
-			{
-				fail("No rows imported");
-			}
-			rs.close();
-			stmt.close();
+          Object blob = rs.getObject(2);
+          assertNotNull("No blob data imported", blob);
+          if (blob instanceof byte[])
+          {
+            byte[] retrievedData = (byte[])blob;
+            assertEquals("Wrong blob size imported", 1024, retrievedData.length);
+            assertEquals("Wrong content of blob data", retrievedData[0], 0);
+            assertEquals("Wrong content of blob data", retrievedData[1], 1);
+            assertEquals("Wrong content of blob data", retrievedData[2], 2);
+            assertEquals("Wrong content of blob data", retrievedData[3], 3);
+          }
+          else
+          {
+            fail("Wrong blob data returned");
+          }
+        }
+        else
+        {
+          fail("No rows imported");
+        }
+      }
 		}
 		catch (Exception e)
 		{
@@ -4025,6 +3760,74 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
+
+  @Test
+  public void testColumnFilter()
+    throws Exception
+  {
+    File importFile = new File(basedir, "person.txt");
+
+    TestUtil.writeFile(importFile,
+      "nr|firstname|lastname\n" +
+      "1|Arthur|Dent\n" +
+      "2|Ford|Prefect;\n" +
+      "3|Zaphod|Beeblebrox\n" +
+      "4|Tricia|McMillan", "UTF-8");
+
+		StatementRunnerResult result = importCmd.execute(
+      "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text " +
+      "         -header=true " +
+      "         -delimiter='|' " +
+      "         -columnFilter='nr=[^3]'" +
+      "         -continueonerror=false -table=junit_test " +
+      "         -deleteTarget=true");
+
+//		String msg = result.getMessageBuffer().toString();
+//		System.out.println(" ***** message=" + msg);
+		assertTrue(result.isSuccess());
+    int rows = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
+    assertEquals(3, rows);
+
+		File ods = util.copyResourceFile(this, "col_filter_test.ods");
+
+		result = importCmd.execute(
+      "wbimport -file='" + ods.getAbsolutePath() + "' " +
+      "         -header=true " +
+      "         -deleteTarget=true " +
+      "         -continueonerror=false " +
+      "         -columnFilter='nr=^[^3]*'" +
+      "         -table=junit_test ");
+
+//		String msg = result.getMessageBuffer().toString();
+//		System.out.println(" ***** message=" + msg);
+
+		assertTrue(result.isSuccess());
+    rows = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
+    assertEquals(3, rows);
+
+    rows = TestUtil.getNumberValue(connection, "select count(*) from junit_test where nr = 3");
+    assertEquals(0, rows);
+
+		File xls = util.copyResourceFile(this, "col_filter_test.xlsx");
+
+		result = importCmd.execute(
+      "wbimport -file='" + xls.getAbsolutePath() + "' " +
+      "         -header=true " +
+      "         -deleteTarget=true " +
+      "         -continueonerror=false " +
+      "         -columnFilter='nr=^[^1]*'" +
+      "         -table=junit_test ");
+
+//		String msg = result.getMessageBuffer().toString();
+//		System.out.println(" ***** message=" + msg);
+
+		assertTrue(result.isSuccess());
+    rows = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
+    assertEquals(3, rows);
+
+    rows = TestUtil.getNumberValue(connection, "select count(*) from junit_test where nr = 1");
+    assertEquals(0, rows);
+  }
 
 	@Test
 	public void testDeleteTargetFails()
@@ -4392,20 +4195,18 @@ public class WbImportTest
 		try
 		{
 			File importFile  = new File(this.basedir, "junit_test.txt");
-			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("nr\tfirstname\tlastname\tnot_there");
-			out.println("1\tArthur\tDent\t1");
-			out.println("2\tFord\tPrefect\t1");
-			out.println("3\tZaphod\tBeeblebrox\t1");
-			out.close();
+      TestUtil.writeFile(importFile,
+        "nr\tfirstname\tlastname\tnot_there\n" +
+        "1\tArthur\tDent\t1\n" +
+        "2\tFord\tPrefect\t1\n" +
+        "3\tZaphod\tBeeblebrox\t1\n", "UTF-8");
 
 			importFile  = new File(this.basedir, "zzbase.txt");
-			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-			out.println("id\tinfo");
-			out.println("1\tArthur");
-			out.println("2\tFord");
-			out.println("3\tZaphod");
-			out.close();
+      TestUtil.writeFile(importFile,
+        "id\tinfo\n" +
+        "1\tArthur\n" +
+        "2\tFord\n" +
+        "3\tZaphod\n", "UTF-8");
 
 			StatementRunnerResult result = importCmd.execute("wbimport -header=true -continueonerror=true -sourcedir='" + importFile.getParent() + "' -type=text");
 			String msg = result.getMessageBuffer().toString();

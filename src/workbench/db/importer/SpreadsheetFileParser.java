@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.ScriptGenerationMonitor;
@@ -616,22 +615,15 @@ public class SpreadsheetFileParser
 
 				ColumnIdentifier col = fileCol.getColumn();
 				int colType = col.getDataType();
+        includeRow = true;
+
 				try
 				{
-					if (fileCol.getColumnFilter() != null)
-					{
-						if (value == null)
-						{
-							includeRow = false;
-							break;
-						}
-						Matcher m = fileCol.getColumnFilter().matcher(svalue);
-						if (!m.matches())
-						{
-							includeRow = false;
-							break;
-						}
-					}
+          if (isColumnFiltered(sourceIndex, svalue))
+          {
+            includeRow = false;
+            break;
+          }
 
 					if (valueModifier != null)
 					{
@@ -811,11 +803,6 @@ public class SpreadsheetFileParser
 	public void setEmptyStringIsNull(boolean flag)
 	{
 		this.emptyStringIsNull = flag;
-	}
-
-	@Override
-	public void addColumnFilter(String colname, String regex)
-	{
 	}
 
 	@Override

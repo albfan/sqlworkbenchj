@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +75,6 @@ public class XmlDataFileParser
 	private int colCount;
 	private int realColCount;
 
-	private List<ColumnIdentifier> columnsToImport;
 	private ColumnIdentifier[] columns;
 
 	private Object[] currentRow;
@@ -125,7 +123,7 @@ public class XmlDataFileParser
 	@Override
 	public String getColumns()
 	{
-		return StringUtil.listToString(this.columnsToImport, ',', false);
+		return StringUtil.listToString(this.importColumns, ',', false);
 	}
 
 	@Override
@@ -170,7 +168,7 @@ public class XmlDataFileParser
 		if (StringUtil.isNonBlank(columnList))
 		{
 			WbStringTokenizer tok = new WbStringTokenizer(columnList, ",");
-			this.columnsToImport = new ArrayList<>();
+			importColumns = ImportFileColumn.createList();
 			while (tok.hasMoreTokens())
 			{
 				String col = tok.nextToken();
@@ -178,12 +176,12 @@ public class XmlDataFileParser
 				col = col.trim();
 				if (col.length() == 0) continue;
 				ColumnIdentifier ci = new ColumnIdentifier(col);
-				this.columnsToImport.add(ci);
+        importColumns.add(new ImportFileColumn(ci));
 			}
 		}
 		else
 		{
-			this.columnsToImport = null;
+			importColumns = null;
 		}
 		checkImportColumns();
 	}
@@ -197,20 +195,20 @@ public class XmlDataFileParser
 	{
 		if (cols != null && cols.size() > 0)
 		{
-			this.columnsToImport = new ArrayList<>(cols.size());
+			importColumns = ImportFileColumn.createList();
 			Iterator<ColumnIdentifier> itr = cols.iterator();
 			while (itr.hasNext())
 			{
 				ColumnIdentifier id = itr.next();
 				if (!id.getColumnName().equals(RowDataProducer.SKIP_INDICATOR))
 				{
-					this.columnsToImport.add(id);
+          importColumns.add(new ImportFileColumn(id));
 				}
 			}
 		}
 		else
 		{
-			this.columnsToImport = null;
+			this.importColumns = null;
 		}
 		checkImportColumns();
 	}
@@ -249,7 +247,7 @@ public class XmlDataFileParser
 			}
 		}
 		List<ColumnIdentifier> tableCols = this.connection.getMetadata().getTableColumns(tbl);
-		List<ColumnIdentifier> validCols = new LinkedList<>();
+		List<ImportFileColumn> validCols = ImportFileColumn.createList();
 
 		for (int colIndex=0; colIndex < this.columns.length; colIndex++)
 		{
@@ -264,7 +262,7 @@ public class XmlDataFileParser
 				// but the columns retrieved from the XML file are not quoted correctly)
 				ColumnIdentifier tc = tableCols.get(i);
 				this.columns[colIndex] = tc;
-				validCols.add(tc);
+        validCols.add(new ImportFileColumn(tc));
 			}
 			else
 			{
@@ -288,15 +286,15 @@ public class XmlDataFileParser
 		// Make sure we are using the columns collected during the check
 		if (validCols.size() != columns.length)
 		{
-			this.columnsToImport = validCols;
-			this.realColCount = this.columnsToImport.size();
+			this.importColumns = validCols;
+			this.realColCount = this.importColumns.size();
 		}
 	}
 
 	private void checkImportColumns()
 		throws SQLException
 	{
-		if (this.columnsToImport == null)
+		if (importColumns == null)
 		{
 			this.realColCount = this.colCount;
 			return;
@@ -315,10 +313,10 @@ public class XmlDataFileParser
 			throw new SQLException("Could not read table definition from XML file");
 		}
 
-		Iterator<ColumnIdentifier> cols = columnsToImport.iterator();
+		Iterator<ImportFileColumn> cols = importColumns.iterator();
 		while (cols.hasNext())
 		{
-			ColumnIdentifier c = cols.next();
+			ColumnIdentifier c = cols.next().getColumn();
 			if (!this.containsColumn(c))
 			{
 				if (ignoreMissingColumns || !abortOnError)
@@ -338,7 +336,7 @@ public class XmlDataFileParser
 				}
 			}
 		}
-		this.realColCount = this.columnsToImport.size();
+		this.realColCount = this.importColumns.size();
 	}
 
 	/**
@@ -468,13 +466,13 @@ public class XmlDataFileParser
 		}
 		detectBlobEncoding();
 
-		if (this.columnsToImport == null)
+		if (this.importColumns == null)
 		{
 			this.realColCount = this.colCount;
 		}
 		else
 		{
-			this.realColCount = this.columnsToImport.size();
+			this.realColCount = this.importColumns.size();
 		}
 
 		// Re-initialize the reader in case we are reading from a ZIP archive
@@ -544,7 +542,7 @@ public class XmlDataFileParser
 		isNull = false;
 		chars = null;
 		columns = null;
-		columnsToImport = null;
+		importColumns = null;
 	}
 
 	private void clearRowData()
@@ -568,7 +566,7 @@ public class XmlDataFileParser
 	private void buildColumnData()
 		throws ParsingConverterException
 	{
-		if (this.columnsToImport != null && !this.columnsToImport.contains(this.columns[this.currentColIndex])) return;
+		if (importColumns != null && getColumnIndex(this.columns[currentColIndex].getColumnName()) < 0) return;
 		this.currentRow[this.realColIndex] = null;
 
 		if (!this.receiver.shouldProcessNextRow()) return;
@@ -698,7 +696,7 @@ public class XmlDataFileParser
 			TableIdentifier tbl = getImportTable();
 
 			checkTargetColumns(tbl);
-			if (this.columnsToImport == null)
+			if (this.importColumns == null)
 			{
 				this.receiver.setTargetTable(tbl, Arrays.asList(this.columns));
 			}
@@ -707,7 +705,7 @@ public class XmlDataFileParser
 				List<ColumnIdentifier> cols = new ArrayList<>(this.realColCount);
 				for (int i=0; i < this.colCount; i++)
 				{
-					if (this.columnsToImport.contains(this.columns[i]))
+					if (getColumnIndex(this.columns[i].getColumnName()) > -1)
 					{
 						cols.add(this.columns[i]);
 					}
@@ -724,6 +722,23 @@ public class XmlDataFileParser
 		}
 	}
 
+  private boolean includeCurrentRow()
+  {
+    for (int colIndex = 0; colIndex < currentRow.length; colIndex ++)
+    {
+      Object value = currentRow[colIndex];
+      if (value != null)
+      {
+        String svalue = value.toString();
+        if (isColumnFiltered(colIndex, svalue))
+        {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
 	private void sendRowData()
 		throws SAXException, Exception
 	{
@@ -731,7 +746,10 @@ public class XmlDataFileParser
 		{
 			try
 			{
-				this.receiver.processRow(this.currentRow);
+				if (includeCurrentRow())
+        {
+          this.receiver.processRow(this.currentRow);
+        }
 			}
 			catch (Exception e)
 			{
