@@ -138,29 +138,7 @@ public class DdlCommand
 			isDrop = isDropCommand(sql);
 			if (isDrop && this.runner.getIgnoreDropErrors())
 			{
-				try
-				{
-					this.currentStatement.executeUpdate(sql);
-					removeFromCache(info);
-					result.addMessage(getSuccessMessage(info, getVerb()));
-				}
-				catch (Exception th)
-				{
-					this.currentConnection.rollback(ddlSavepoint);
-					this.ddlSavepoint = null;
-          String msg = null;
-          if (info != null)
-          {
-            msg = ResourceMgr.getFormattedString("MsgDropWarningNamed", info.getObjectName());
-          }
-          else
-          {
-            msg = ResourceMgr.getString("MsgDropWarning");
-          }
-					result.addMessage(msg);
-					addErrorPosition(result, sql, th);
-					result.setSuccess();
-				}
+        handleDrop(sql, info, result);
 			}
 			else
 			{
@@ -211,6 +189,33 @@ public class DdlCommand
 
 		return result;
 	}
+
+  private void handleDrop(String sql, DdlObjectInfo info, StatementRunnerResult result)
+  {
+    try
+    {
+      this.currentStatement.executeUpdate(sql);
+      removeFromCache(info);
+      result.addMessage(getSuccessMessage(info, getVerb()));
+    }
+    catch (Exception th)
+    {
+      this.currentConnection.rollback(ddlSavepoint);
+      this.ddlSavepoint = null;
+      String msg = null;
+      if (info != null)
+      {
+        msg = ResourceMgr.getFormattedString("MsgDropWarningNamed", info.getObjectName());
+      }
+      else
+      {
+        msg = ResourceMgr.getString("MsgDropWarning");
+      }
+      result.addMessage(msg);
+      addErrorPosition(result, sql, th);
+      result.setSuccess();
+    }
+  }
 
 	private void removeFromCache(DdlObjectInfo info)
 	{
