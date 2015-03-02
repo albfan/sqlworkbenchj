@@ -241,7 +241,14 @@ public class ProfileEditorPanel
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
-		applyFilter();
+    EventQueue.invokeLater(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        applyFilter();
+      }
+    });
 	}
 
 	@Override
