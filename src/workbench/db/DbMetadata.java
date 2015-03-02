@@ -109,7 +109,7 @@ public class DbMetadata
 	public static final String DBID_DB2_LUW = "db2";
 	public static final String DBID_TERADATA = "teradata";
 	public static final String DBID_H2 = "h2";
-	public static final String DBID_OPENEDGE = "openedge_rdbms";
+	public static final String DBID_OPENEDGE = "openedge";
 
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};
@@ -349,6 +349,8 @@ public class DbMetadata
 		}
     else if (productLower.contains("openedge"))
     {
+      // Progress returns a different name through JDBC and ODBC
+      dbId = DBID_OPENEDGE;
  			objectListEnhancer = new OpenEdgeObjectListEnhancer();
     }
 

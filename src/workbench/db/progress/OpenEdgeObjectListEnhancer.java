@@ -94,16 +94,25 @@ public class OpenEdgeObjectListEnhancer
       schema = con.getMetadata().getCurrentSchema();
     }
 
-    String sql
-      = "select tbl, description\n" +
-      "from sysprogress.systables_full\n" +
-      "where owner = ? \n" +
-      "and description is not null \n" +
-      "and description <> '' \n" +
-      "and tbltype = 'T' \n";
+    int schemaIndex = -1;
+    int tableIndex = -1;
+
+    String sql =
+      "select owner, tbl, description \n" +
+      "from sysprogress.systables_full \n" +
+      "where description is not null \n" +
+      "  and description <> '' \n" +
+      "  and tbltype = 'T' \n";
+
+    if (schema != null)
+    {
+      schemaIndex = 1;
+      sql += "and owner = ? \n";
+    }
 
     if (object != null)
     {
+      tableIndex = (schemaIndex == -1 ? 1 : 2);
       sql += " and tbl = ? ";
     }
 
@@ -117,17 +126,18 @@ public class OpenEdgeObjectListEnhancer
         LogMgr.logInfo("OpenEdgeObjectListEnhancer.updateObjectRemarks()", "Retrieving table remarks using:\n" + SqlUtil.replaceParameters(sql, schema, object));
       }
       stmt = con.getSqlConnection().prepareStatement(sql);
-      stmt.setString(1, schema);
-      if (object != null) stmt.setString(2, object);
+      if (schemaIndex > 0) stmt.setString(schemaIndex, schema);
+      if (tableIndex > 0) stmt.setString(tableIndex, object);
 
       rs = stmt.executeQuery();
       while (rs.next())
       {
-        String objectname = rs.getString(1);
-        String remark = rs.getString(2);
-        if (objectname != null && StringUtil.isNonEmpty(remark))
+        String objectSchema = rs.getString(1);
+        String objectName = rs.getString(2);
+        String remark = rs.getString(3);
+        if (objectName != null && StringUtil.isNonEmpty(remark))
         {
-          remarks.put(schema + "." + objectname.trim(), remark);
+          remarks.put(objectSchema + "." + objectName.trim(), remark);
         }
       }
       SqlUtil.closeResult(rs);
