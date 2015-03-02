@@ -148,7 +148,16 @@ public class DdlCommand
 				{
 					this.currentConnection.rollback(ddlSavepoint);
 					this.ddlSavepoint = null;
-					result.addMessage(ResourceMgr.getString("MsgDropWarning"));
+          String msg = null;
+          if (info != null)
+          {
+            msg = ResourceMgr.getFormattedString("MsgDropWarningNamed", info.getObjectName());
+          }
+          else
+          {
+            msg = ResourceMgr.getString("MsgDropWarning");
+          }
+					result.addMessage(msg);
 					addErrorPosition(result, sql, th);
 					result.setSuccess();
 				}
