@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-02-23">
+  <release build="-1" date="2015-03-02">
     <entry dev-build="2" type="enh">The macros in a group can now be sorted alphabetically</entry>
     <entry dev-build="2" type="enh">The quoting of the null values for text exports can now be enabled through the option -quoteNulls</entry>
     <entry dev-build="2" type="enh">The quoting of the header for text exports can now be enabled through the option -quoteHeader</entry>
