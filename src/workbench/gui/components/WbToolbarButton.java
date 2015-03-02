@@ -73,6 +73,7 @@ public class WbToolbarButton
 	private void init()
 	{
 		this.setMargin(MARGIN);
+    this.setFocusable(false);
 	}
 
 }
