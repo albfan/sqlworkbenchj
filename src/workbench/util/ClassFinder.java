@@ -181,15 +181,15 @@ public class ClassFinder
 		return classLoader;
 	}
 
-	// Taken from http://snippets.dzone.com/posts/show/4831
-
 	/**
 	 * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
-	 *
+   *
 	 * @param packageName The base package
 	 * @return The classes
 	 * @throws ClassNotFoundException
 	 * @throws IOException
+   *
+   * @see #getClasses(java.lang.String, java.lang.ClassLoader)
 	 */
 	public static List<Class> getClasses(String packageName)
 		throws ClassNotFoundException, IOException
@@ -198,6 +198,18 @@ public class ClassFinder
 		return getClasses(packageName, classLoader);
 	}
 
+	/**
+	 * Scans all classes accessible from given class loader which belong to the given package and subpackages.
+   *
+   * Taken from http://snippets.dzone.com/posts/show/4831
+	 *
+	 * @param packageName the base package
+   * @param classLoader the class loader to use
+   * 
+	 * @return The classes
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	public static List<Class> getClasses(String packageName, ClassLoader classLoader)
 		throws ClassNotFoundException, IOException
@@ -208,6 +220,7 @@ public class ClassFinder
 		ArrayList<Class> result = new ArrayList<>();
 		Enumeration<URL> resources = classLoader.getResources(path);
 		List<File> dirs = new ArrayList<>();
+
 		while (resources.hasMoreElements())
 		{
 			URL resource = resources.nextElement();
@@ -221,7 +234,10 @@ public class ClassFinder
 				List<Class> classes = scanJarFile(jarFile.getAbsolutePath(), classLoader, empty);
 				for (Class cls : classes)
 				{
-					result.add(cls);
+					if (cls.getPackage() != null && cls.getPackage().getName().startsWith(packageName))
+					{
+						result.add(cls);
+					}
 				}
 			}
 			else
