@@ -500,7 +500,9 @@ public class ObjectSourceSearchPanel
 			}
 		};
 
-		boolean showConnect = standalone || Settings.getInstance().getBoolProperty("workbench.gui.objectsearcher.allowconnect", false);
+		final ConnectionProfile profile = parent == null ? null : parent.getCurrentProfile();
+
+		boolean showConnect = standalone || profile == null || Settings.getInstance().getBoolProperty("workbench.gui.objectsearcher.allowconnect", false);
 		selectConnection.setVisible(showConnect);
 		selectConnection.setEnabled(showConnect);
 
@@ -508,9 +510,10 @@ public class ObjectSourceSearchPanel
 
 		ResourceMgr.setWindowIcons(window, "searchsource");
 
-		this.window.getContentPane().add(this);
-		this.restoreSettings();
-		this.window.addWindowListener(this);
+		window.getContentPane().add(this);
+		restoreSettings();
+		window.addWindowListener(this);
+
 		WbManager.getInstance().registerToolWindow(this);
 
 		// Window size has already been restored in restoreSettings()
@@ -523,20 +526,17 @@ public class ObjectSourceSearchPanel
     rootPane.setDefaultButton(startButton);
 
 		this.window.setVisible(true);
-		if (Settings.getInstance().getAutoConnectObjectSearcher() && parent != null)
+
+		if (Settings.getInstance().getAutoConnectObjectSearcher() && profile != null)
 		{
-			final ConnectionProfile profile = parent.getCurrentProfile();
-			if (profile != null)
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						connect(profile);
-					}
-				});
-			}
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          connect(profile);
+        }
+      });
 		}
 	}
 
@@ -581,12 +581,12 @@ public class ObjectSourceSearchPanel
 		{
 			model.addElement(type);
 		}
-		JList elementList = new JList(model);
+		final JList elementList = new JList(model);
 
 		if (CollectionUtil.isNonEmpty(selected))
 		{
 			int firstSelected = -1;
-			int[] indexes = new int[selected.size()];
+			final int[] indexes = new int[selected.size()];
 			for (int i=0; i < selected.size(); i++)
 			{
 				int index = model.indexOf(selected.get(i));
@@ -599,9 +599,19 @@ public class ObjectSourceSearchPanel
 					}
 				}
 			}
-			elementList.setSelectedIndices(indexes);
-			elementList.ensureIndexIsVisible(firstSelected);
+
+      final int toSelect = firstSelected;
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          elementList.setSelectedIndices(indexes);
+          elementList.ensureIndexIsVisible(toSelect);
+        }
+      });
 		}
+
 		elementList.setVisibleRowCount(14);
 
 		JScrollPane pane = new JScrollPane(elementList);
