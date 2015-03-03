@@ -22,7 +22,6 @@
  */
 package workbench.sql.commands;
 
-
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.List;
@@ -36,7 +35,6 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ErrorInformationReader;
 import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.SqlCommand;
@@ -79,12 +77,18 @@ public class DdlCommand
 	private String verb;
 	private Savepoint ddlSavepoint;
 	private final Set<String> typesToRemember = CollectionUtil.caseInsensitiveSet("procedure", "function", "trigger", "package", "package body", "type");
+  private Pattern alterDropPattern;
 
 	private DdlCommand(String sqlVerb)
 	{
 		super();
 		this.verb = sqlVerb;
 		this.isUpdatingCommand = true;
+    if ("ALTER".equals(verb))
+    {
+   		// an ALTER ... statement might also be a DROP (e.g. ALTER TABLE someTable DROP PRIMARY KEY)
+      alterDropPattern = Pattern.compile("DROP\\s+(PRIMARY\\s+KEY|CONSTRAINT)\\s+", Pattern.CASE_INSENSITIVE);
+    }
 	}
 
 	@Override
@@ -110,13 +114,14 @@ public class DdlCommand
 
 		if (info != null && typesToRemember.contains(info.getObjectType()))
 		{
-			// this is only here to mimic SQL*Plus' behaviour for a "SHOW ERROR" without a parameter
-			// remember the last "object" in order to be able to show the errors
-			// but only for "PL/SQL" objects, the last error is not overwritten by creating a table or a view
+			// This is only here to mimic SQL*Plus' behaviour for a "SHOW ERROR" without a parameter.
+			// remember the last "object" in order to be able to show the errors but only for "PL/SQL" objects.
+      // The last error is not overwritten by creating a table or a view
 			currentConnection.setLastDDLObject(info);
 		}
 
 		boolean isDrop = false;
+    boolean ignoreDropError = false;
 		try
 		{
 			this.currentStatement = currentConnection.createStatement();
@@ -136,33 +141,28 @@ public class DdlCommand
 			}
 
 			isDrop = isDropCommand(sql);
-			if (isDrop && this.runner.getIgnoreDropErrors())
-			{
-        handleDrop(sql, info, result);
-			}
-			else
-			{
-				boolean hasResult = this.currentStatement.execute(sql);
+      ignoreDropError = isDrop && this.runner.getIgnoreDropErrors();
 
-				// Using a generic execute and result processing ensures that DBMS that
-				// can process more than one statement with a single SQL are treated correctly.
-				// e.g. when sending a SELECT and other statements as a "batch" with SQL Server
-				processMoreResults(sql, result, hasResult);
+      boolean hasResult = this.currentStatement.execute(sql);
 
-				// Process result will have added any warnings and set the warning flag
-				if (result.hasWarning())
-				{
-					// if the warning is actually an error, addExtendErrorInfo() will set
-					// the result to "failure"
-					this.addExtendErrorInfo(currentConnection, sql, info, result);
-				}
+      // Using a generic execute and result processing ensures that DBMS that
+      // can process more than one statement with a single SQL are treated correctly.
+      // e.g. when sending a SELECT and other statements as a "batch" with SQL Server
+      processMoreResults(sql, result, hasResult);
 
-				if (result.isSuccess())
-				{
-					result.addMessage(getSuccessMessage(info, getVerb()));
-				}
-			}
-			this.currentConnection.releaseSavepoint(ddlSavepoint);
+      // processMoreResults() will have added any warnings and set the warning flag
+      if (result.hasWarning())
+      {
+        // if the warning is actually an error, addExtendErrorInfo() will set the result to "failure"
+        this.addExtendErrorInfo(sql, info, result);
+      }
+
+      if (result.isSuccess())
+      {
+        result.addMessage(getSuccessMessage(info, getVerb()));
+      }
+
+      this.currentConnection.releaseSavepoint(ddlSavepoint);
 
 			if (isDrop && result.isSuccess())
 			{
@@ -172,13 +172,26 @@ public class DdlCommand
 		catch (Exception e)
 		{
 			this.currentConnection.rollback(ddlSavepoint);
-			result.setFailure();
-			addErrorStatementInfo(result, sql);
-			if (isDrop || !addExtendErrorInfo(currentConnection, sql, info, result))
-			{
-				addErrorPosition(result, sql, e);
-			}
-			LogMgr.logUserSqlError("DdlCommand.execute()", sql, e);
+
+      if (ignoreDropError)
+      {
+        addDropWarning(info, result);
+        addErrorPosition(result, sql, e);
+        result.setSuccess(); // must be done after addErrorPosition!
+      }
+			else
+      {
+        result.setFailure();
+        addErrorStatement(result, sql);
+
+        // if addExtendedErrorInfo() added something, then there is no need to add the error possition
+        // (assuming the more verbose error message already contains that information)
+        if (!addExtendErrorInfo(sql, info, result))
+        {
+          addErrorPosition(result, sql, e);
+        }
+        LogMgr.logUserSqlError("DdlCommand.execute()", sql, e);
+      }
 		}
 		finally
 		{
@@ -190,37 +203,25 @@ public class DdlCommand
 		return result;
 	}
 
-  private void handleDrop(String sql, DdlObjectInfo info, StatementRunnerResult result)
+  private void addDropWarning(DdlObjectInfo info, StatementRunnerResult result)
   {
-    try
+    String msg;
+    if (info != null)
     {
-      this.currentStatement.executeUpdate(sql);
-      removeFromCache(info);
-      result.addMessage(getSuccessMessage(info, getVerb()));
+      msg = ResourceMgr.getFormattedString("MsgDropWarningNamed", info.getObjectName());
     }
-    catch (Exception th)
+    else
     {
-      this.currentConnection.rollback(ddlSavepoint);
-      this.ddlSavepoint = null;
-      String msg = null;
-      if (info != null)
-      {
-        msg = ResourceMgr.getFormattedString("MsgDropWarningNamed", info.getObjectName());
-      }
-      else
-      {
-        msg = ResourceMgr.getString("MsgDropWarning");
-      }
-      result.addMessage(msg);
-      addErrorPosition(result, sql, th);
-      result.setSuccess();
+      msg = ResourceMgr.getString("MsgDropWarning");
     }
+    result.addMessage(msg);
   }
 
 	private void removeFromCache(DdlObjectInfo info)
 	{
 		if (info == null) return;
 		if (StringUtil.isEmptyString(info.getObjectName())) return;
+    if (currentConnection == null) return;
 
 		currentConnection.getObjectCache().removeTable(new TableIdentifier(info.getObjectName(), currentConnection));
 	}
@@ -242,10 +243,7 @@ public class DdlCommand
 		{
 			return false;
 		}
-		// If this is an ALTER ... command it might also be a DROP
-		// e.g. ALTER TABLE someTable DROP PRIMARY KEY
-		Pattern p = Pattern.compile("DROP\\s+(PRIMARY\\s+KEY|CONSTRAINT)\\s+", Pattern.CASE_INSENSITIVE);
-		Matcher m = p.matcher(sql);
+		Matcher m = alterDropPattern.matcher(sql);
 		return m.find();
 	}
 
@@ -268,12 +266,12 @@ public class DdlCommand
 	 * @see ErrorInformationReader#getErrorInfo(java.lang.String, java.lang.String, java.lang.String, boolean)
 	 * @see ReaderFactory#getErrorInformationReader(workbench.db.WbConnection)
 	 */
-	private boolean addExtendErrorInfo(WbConnection aConnection, String sql, DdlObjectInfo info , StatementRunnerResult result)
+	private boolean addExtendErrorInfo(String sql, DdlObjectInfo info , StatementRunnerResult result)
 	{
 		if (info == null) return false;
-		if (aConnection == null) return false;
+		if (currentConnection == null) return false;
 
-		ErrorInformationReader reader = ReaderFactory.getErrorInformationReader(aConnection);
+		ErrorInformationReader reader = ReaderFactory.getErrorInformationReader(currentConnection);
 		if (reader == null) return false;
 
 		ErrorDescriptor error = reader.getErrorInfo(null, info.getObjectName(), info.getObjectType(), true);
@@ -283,7 +281,7 @@ public class DdlCommand
 		{
 			int startOffset = 0;
 
-			if (!aConnection.getDbSettings().getErrorPosIncludesLeadingComments())
+			if (!currentConnection.getDbSettings().getErrorPosIncludesLeadingComments())
 			{
 				startOffset = SqlUtil.getRealStart(sql);
 				sql = sql.substring(startOffset);

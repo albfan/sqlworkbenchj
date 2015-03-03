@@ -758,9 +758,9 @@ public class SqlCommand
 
 			return SqlUtil.makeCleanSql(originalSql, !removeNewLines, !removeComments);
 		}
-		catch (NullPointerException npe)
+		catch (Exception ex)
 		{
-			// Just in case currentConnection is not initialized for some reason!
+			// Just in case ...
 			return originalSql;
 		}
 	}
@@ -966,7 +966,17 @@ public class SqlCommand
 		return f;
 	}
 
-	protected void addErrorStatementInfo(StatementRunnerResult result, String sql)
+  /**
+   * Adds the failing SQL statement (or part of it) to the passed StatementRunnerResult.
+   *
+   * If errorLevel is none then no message is added
+   * If errorLevel is limited, only the beginning of the SQL statement is added
+   * If errorLevel is full, the complete SQL statement is added to the result
+   *
+   * @param result  the result to which the statement should be added
+   * @param sql     the failing SQL statement
+   */
+	protected void addErrorStatement(StatementRunnerResult result, String sql)
 	{
 		if (errorLevel != ErrorReportLevel.none)
 		{
@@ -988,7 +998,7 @@ public class SqlCommand
 
 	protected void addErrorInfo(StatementRunnerResult result, String executedSql, Exception e)
 	{
-		addErrorStatementInfo(result, executedSql);
+		addErrorStatement(result, executedSql);
 		addErrorPosition(result, executedSql, e);
 	}
 
