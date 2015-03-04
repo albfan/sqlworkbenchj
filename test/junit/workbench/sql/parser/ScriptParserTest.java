@@ -43,6 +43,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.sql.ScriptCommandDefinition;
+
 /**
  *
  * @author Thomas Kellerer

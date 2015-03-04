@@ -148,7 +148,7 @@ public class SQLConsole
 			boolean startOfStatement = true;
 
 			InputBuffer buffer = new InputBuffer();
-			buffer.setDbId(getDbId(runner));
+			buffer.setConnection(runner == null ? null : runner.getConnection());
 			while (true)
 			{
 				String line = ConsoleReaderFactory.getConsoleReader().readLine(currentPrompt);
@@ -233,7 +233,7 @@ public class SQLConsole
 					}
 
 					// this needs to be done after each statement as the connection might have changed.
-					buffer.setDbId(getDbId(runner));
+					buffer.setConnection(runner.getConnection());
 
 					if (changeHistory && !lastHistory.equals(getHistoryFile()))
 					{
@@ -429,14 +429,6 @@ public class SQLConsole
 	public void printMessage(String trace)
 	{
 		System.out.println(trace);
-	}
-
-	private String getDbId(BatchRunner runner)
-	{
-		if (runner == null) return null;
-		WbConnection conn = runner.getConnection();
-		if (conn == null) return null;
-		return conn.getDbId();
 	}
 
 	private String handleHistory(BatchRunner runner, String stmt)

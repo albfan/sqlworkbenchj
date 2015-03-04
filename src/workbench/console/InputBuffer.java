@@ -22,6 +22,7 @@
  */
 package workbench.console;
 
+import workbench.db.WbConnection;
 import workbench.sql.ScriptCommandDefinition;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
@@ -44,6 +45,13 @@ public class InputBuffer
 		parser = new ScriptParser(parserType);
 	}
 
+  public void setConnection(WbConnection conn)
+  {
+    if (conn == null) return;
+    setDbId(conn.getDbId());
+    parser.setAlternateDelimiter(conn.getAlternateDelimiter());
+  }
+  
 	public void setDbId(String dbid)
 	{
 		ParserType type = ParserType.getTypeFromDBID(dbid);
@@ -84,7 +92,7 @@ public class InputBuffer
 
 		ScriptCommandDefinition cmd = parser.getNextCommandDefinition();
 		if (cmd == null) return false;
-		
+
 		if (cmd.getDelimiterNeeded())
 		{
 			return cmd.getDelimiterUsed() != null;

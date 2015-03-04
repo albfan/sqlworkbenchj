@@ -3116,7 +3116,6 @@ public class SqlPanel
 
 		try
 		{
-
 			scriptParser.setScript(script);
 
 			int commandWithError = -1;
@@ -3187,8 +3186,6 @@ public class SqlPanel
 				clearResultTabs();
 				firstResultIndex = 0;
 			}
-
-
 
 			if (count > 1)
 			{
