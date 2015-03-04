@@ -81,7 +81,20 @@ public class OracleObjectCompiler
 			stmt = dbConnection.createStatement();
 			this.dbConnection.setBusy(true);
 			stmt.executeUpdate(sql);
-			ErrorDescriptor error = errorReader.getErrorInfo(null, object.getObjectName(), object.getObjectType(), false);
+      String type = object.getObjectType();
+      String name = object.getObjectName();
+      if ("PACKAGE".equals(type))
+      {
+        // an "alter package .. compile"  will report errors for the package body, not the package
+        type = "PACKAGE BODY";
+      }
+      
+      if ("PACKAGE BODY".equals(type))
+      {
+        // the errors will be reported for the package name, not the procedure name
+        name = object.getCatalog();
+      }
+      ErrorDescriptor error = errorReader.getErrorInfo(null, name, type, false);
 			if (error == null)
 			{
 				return null;
