@@ -491,7 +491,7 @@ integer=([-+]?{digits})
 string=([\'](([^\']|\'\')*)[\'])
 
 bitstring=("B"[\']([01]+)[\'])
-stringerror=([\'](([^\r\n\']|[\\][\'])*)[\r\n])
+stringerror=([\'](([^\r\n\'])*)[\r\n])
 bitstringerror1=("B"[\']([^01\r\n]*)[\'])
 bitstringerror2=("B"[\'](([^\r\n\']|[\\][\'])*)[\r\n])
 floatpoint=(([+-]?{digits}"."({digits}?)("E"[+-]{digits})?)|(([+-]?{digits}?)"."{digits}("E"[+-]{digits})?)|([+-]?{digits}"E"[+-]{digits}))

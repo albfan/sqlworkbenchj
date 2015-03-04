@@ -49,6 +49,19 @@ public class LexerBasedParserTest
 		super("LexerBasedParserTest");
 	}
 
+  @Test
+  public void testBackslash()
+  {
+    String sql =
+      "select '\\'\n" +
+      ";";
+    LexerBasedParser p = new LexerBasedParser(ParserType.Oracle);
+    p.setStoreStatementText(true);
+    p.setScript(sql);
+    ScriptCommandDefinition cmd = p.getNextCommand();
+    assertEquals("select '\\'", cmd.toString());
+  }
+
 	@Test
 	public void testSingleEmptyLine()
 	{
