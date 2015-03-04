@@ -101,7 +101,6 @@ public class SqlTabPopup
 		}
 
 		this.addSeparator();
-		this.add(new OpenFileAction(aClient));
 
 		if (panel instanceof SqlPanel)
 		{
@@ -111,6 +110,7 @@ public class SqlTabPopup
 
 			this.add(editor.getFileSaveAction());
 			this.add(editor.getFileSaveAsAction());
+      this.add(new OpenFileAction(aClient));
 
 			if (editor.hasFileLoaded())
 			{
@@ -124,6 +124,10 @@ public class SqlTabPopup
 				this.add(new OpenFileDirAction(editor));
 			}
 		}
+    else
+    {
+      this.add(new OpenFileAction(aClient));
+    }
 	}
 
 }

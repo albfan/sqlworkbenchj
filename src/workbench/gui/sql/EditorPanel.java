@@ -191,8 +191,10 @@ public class EditorPanel
 		this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		this.setCaretBlinkEnabled(true);
 		this.fileSave = new FileSaveAction(this);
+    this.fileSave.setEnabled(false);
 		this.fileSaveAs = new FileSaveAsAction(this);
-		this.addPopupMenuItem(fileSaveAs, true);
+		this.addPopupMenuItem(fileSave, true);
+		this.addPopupMenuItem(fileSaveAs, false);
 		this.fileOpen = new OpenFileAction(this);
 		this.addPopupMenuItem(this.fileOpen, false);
 		this.jumpToLineAction = new JumpToLineAction(this);
@@ -493,42 +495,6 @@ public class EditorPanel
 		this.addKeyBinding(anAction);
 	}
 
-	private void addFileSaveAction()
-	{
-		int index = findItemOnPopup(fileSaveAs);
-		if (index > -1)
-		{
-			popup.add(fileSave.getMenuItem(), index);
-		}
-	}
-
-	private void removeFileSaveAction()
-	{
-		int index = findItemOnPopup(fileSave);
-		if (index > -1)
-		{
-			popup.remove(index);
-		}
-	}
-
-	private int findItemOnPopup(WbAction action)
-	{
-		if (this.popup == null) return -1;
-		for (int i=0; i < popup.getComponentCount(); i++)
-		{
-			Component component = popup.getComponent(i);
-			if (component instanceof JMenuItem)
-			{
-				JMenuItem menu = (JMenuItem)component;
-				if (menu.getAction() == action)
-				{
-					return i;
-				}
-			}
-		}
-		return -1;
-	}
-
 	@Override
 	public void dispose()
 	{
@@ -588,7 +554,7 @@ public class EditorPanel
 			this.reset();
 		}
 		fireFilenameChanged(null);
-		removeFileSaveAction();
+		checkFileActions();
 
 		return true;
 	}
@@ -804,7 +770,7 @@ public class EditorPanel
 				result = true;
 				fireFilenameChanged(toLoad.getAbsolutePath());
 			}
-			addFileSaveAction();
+			checkFileActions();
 		}
 		catch (BadLocationException | IOException bl)
 		{
