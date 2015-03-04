@@ -1078,7 +1078,13 @@ public class TableDataPanel
 	public void removeTableDisplay()
 	{
 		this.topPanel.removeAll();
-		this.topPanel.add(toolbar);
+    GridBagConstraints gc = new GridBagConstraints();
+    gc.gridx = 0;
+    gc.gridy = 0;
+    gc.weightx = 1.0;
+    gc.anchor = GridBagConstraints.LINE_START;
+		this.topPanel.add(toolbar, gc);
+
 		config.removeActionListener(this);
 		rowCountButton.removeActionListener(this);
 		this.autoloadRowCount = false;

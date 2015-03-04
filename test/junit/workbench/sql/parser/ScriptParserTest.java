@@ -56,6 +56,24 @@ public class ScriptParserTest
 		super("ScriptParserTest");
 	}
 
+  @Test
+  public void testEscapedQuotes()
+  {
+    String sql =
+      "UPDATE foo set bar = 42\n" +
+      ";\n" +
+      "select '\\'||bar from foo f\n" +
+      ";";
+		ScriptParser p = new ScriptParser(ParserType.Oracle);
+		p.setCheckEscapedQuotes(false);
+		p.setScript(sql);
+		int count = p.getSize();
+		assertEquals(2, count);
+    assertEquals("UPDATE foo set bar = 42", p.getCommand(0).trim());
+//    System.out.println("***\n" + p.getCommand(1)+ "\n####");
+    assertEquals("select '\\'||bar from foo f", p.getCommand(1).trim());
+  }
+
 	@Test
 	public void testOra()
 	{
