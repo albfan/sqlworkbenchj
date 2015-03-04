@@ -22,11 +22,6 @@
  */
 package workbench.sql.lexer;
 
-import workbench.sql.lexer.SQLToken;
-import workbench.sql.lexer.SQLLexer;
-import workbench.sql.lexer.StandardLexer;
-import workbench.sql.lexer.SQLLexerFactory;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +60,42 @@ public class SQLLexerTest
 		}
 		return result;
 	}
+
+  @Test
+  public void testDanglingQuotes()
+    throws Exception
+  {
+    StandardLexer l = new StandardLexer("select ';");
+    SQLToken t = l.getNextToken(true, true);
+    assertNotNull(t);
+    t = l.getNextToken(true, true);
+    assertNotNull(t);
+    assertTrue(t.isWhiteSpace());
+
+    t = l.getNextToken(true, true);
+    assertNotNull(t);
+    assertTrue(t.isError());
+//    assertTrue(t.isUnclosedString());
+  }
+
+  @Test
+  public void testBackslash()
+    throws Exception
+  {
+    StandardLexer l = new StandardLexer("select '\\';");
+    SQLToken t = l.getNextToken(true, true);
+    assertNotNull(t);
+    assertEquals("select", t.getText());
+    
+    t = l.getNextToken(true, true);
+    assertNotNull(t);
+    assertTrue(t.isWhiteSpace());
+
+    t = l.getNextToken(true, true);
+    assertNotNull(t);
+    assertEquals("'\\'", t.getText());
+//    assertTrue(t.isUnclosedString());
+  }
 
 	@Test
 	public void testNonStandardIdentifiers()

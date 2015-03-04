@@ -643,7 +643,6 @@ commentend=(([\*]*)"/")
     return(t);
 }
 
-
 <YYINITIAL> {stringerror} {
     nextState = YYINITIAL;
     lastToken = SQLToken.ERROR_UNCLOSED_STRING;
