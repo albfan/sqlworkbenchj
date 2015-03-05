@@ -2491,7 +2491,7 @@ public class SqlFormatter
 			{
 				if (bracketCount == 1)
 				{
-					List elements = StringUtil.stringToList(definition.toString(), ",");
+					List elements = StringUtil.stringToList(definition.toString(), ",", false, false, false, true);
 					this.outputElements(elements, maxElements, indentCount);
 					return this.lexer.getNextToken(true, false);
 				}

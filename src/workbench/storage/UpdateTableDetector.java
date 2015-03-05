@@ -211,8 +211,7 @@ public class UpdateTableDetector
 
 		if (conn.getDbSettings().useCompletionCacheForUpdateTableCheck())
 		{
-			TableIdentifier syn = conn.getObjectCache().getSynonymTable(toCheck);
-			return (syn == null ? toCheck : syn);
+			return conn.getObjectCache().getSynonymTable(toCheck);
 		}
 		return conn.getMetadata().resolveSynonym(toCheck);
 	}

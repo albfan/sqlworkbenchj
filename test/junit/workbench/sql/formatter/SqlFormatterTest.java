@@ -48,6 +48,28 @@ public class SqlFormatterTest
 	}
 
 
+  @Test
+  public void testFormatView()
+  {
+    String sql = "create view foo (col_1, \"Some Column\") as select dummy, 'Arthur' as \"Some Column\" from dual;";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+    String expected =
+      "CREATE VIEW foo \n" +
+      " (\n" +
+      "   col_1,\n" +
+      "   \"Some Column\"\n" +
+      " )\n" +
+      "AS\n" +
+      "SELECT dummy,\n" +
+      "       'Arthur' AS \"Some Column\"\n" +
+      "FROM dual;";
+		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+
 	@Test
 	public void testCommentOnly()
 	{

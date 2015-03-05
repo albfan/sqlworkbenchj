@@ -393,35 +393,60 @@ class ObjectCache
 		this.synonymMap.put(synonym, baseTable);
 	}
 
-	public synchronized TableIdentifier getSynonymTable(WbConnection dbConn, TableIdentifier synonym)
+  /**
+   * Return the underlying table for a possible synonym.
+   *
+   * If the passed table is not a synonym, the passed table will be returned.
+   *
+   * i.e. if <tt>getSynonymTable(conn, someTable) == someTable</tt>, then <tt>someTable</tt>
+   * is not a synonym.
+   *
+   * @param dbConn   then connection to use
+   * @param toCheck  the table to check
+   *
+   * @return  the underlying table for the passed table, or the table if no synonym was found
+   */
+	public synchronized TableIdentifier getSynonymTable(WbConnection dbConn, TableIdentifier toCheck)
 	{
-		if (!dbConn.getMetadata().supportsSynonyms()) return synonym;
+		if (!dbConn.getMetadata().supportsSynonyms()) return toCheck;
 
-		TableIdentifier baseTable = this.synonymMap.get(synonym);
-		if (baseTable == dummyTable)
+		TableIdentifier key = findInCache(toCheck, this.synonymMap.keySet());
+    TableIdentifier baseTable = null;
+
+    if (key != null)
+    {
+      baseTable = this.synonymMap.get(key);
+    }
+
+		if (baseTable != null && baseTable.equals(dummyTable))
 		{
-			// we already tested for a synonym but did not found any
-			return null;
+			// we already tested for a synonym but did not find any
+			return toCheck;
 		}
+
 		if (baseTable != null)
 		{
+      // we found a synonym
 			return baseTable;
 		}
 
 		if (baseTable == null)
 		{
-			baseTable = dbConn.getMetadata().resolveSynonym(synonym);
+      // no synonym found and we did not yet test for one, so hit the database and try to find one.
+			baseTable = dbConn.getMetadata().resolveSynonym(toCheck);
 		}
-		if (baseTable == null)
+
+		if (baseTable == null || baseTable == toCheck)
 		{
-			// "negative caching. Avoid repeated lookup for non-synonyms
-			synonymMap.put(synonym, dummyTable);
+			// "negative caching". Avoid repeated lookup for non-synonyms
+			synonymMap.put(toCheck, dummyTable);
 		}
 		else
 		{
-			synonymMap.put(synonym, baseTable);
+			synonymMap.put(toCheck, baseTable);
 		}
-		return baseTable;
+
+		return baseTable == null ? toCheck : baseTable;
 	}
 
 	/**
@@ -585,7 +610,7 @@ class ObjectCache
 	public synchronized void addTable(TableIdentifier table, WbConnection con)
 	{
 		if (table == null) return;
-		if (findInCache(con, table) == null)
+		if (findInCache(table) == null)
 		{
 			this.objects.put(table, null);
 		}
@@ -635,13 +660,13 @@ class ObjectCache
 				{
 					copy.setCatalog(schema);
 				}
-				TableIdentifier tbl = findInCache(con, copy);
+				TableIdentifier tbl = findInCache(copy);
 				if (tbl != null) return tbl;
 			}
 		}
 		else
 		{
-			return findInCache(con, toSearch);
+			return findInCache(toSearch);
 		}
 
 		return null;
@@ -658,7 +683,7 @@ class ObjectCache
 			if (pk == null)
 			{
 				// No column definitions in the cache, check the PK cache
-				TableIdentifier tbl = findInCache(con, table, pkMap.keySet());
+				TableIdentifier tbl = findInCache(table, pkMap.keySet());
 				if (tbl != null)
 				{
 					pk = pkMap.get(table);
@@ -697,7 +722,7 @@ class ObjectCache
 	{
 		synchronized (indexMap)
 		{
-			TableIdentifier tbl = findInCache(con, table, indexMap.keySet());
+			TableIdentifier tbl = findInCache(table, indexMap.keySet());
 			List<IndexDefinition> indexes = null;
 			if (tbl != null)
 			{
@@ -716,18 +741,18 @@ class ObjectCache
 	}
 
 
-	private TableIdentifier findInCache(WbConnection con, TableIdentifier toSearch)
+	private TableIdentifier findInCache(TableIdentifier toSearch)
 	{
-		return findInCache(con, toSearch, objects.keySet());
+		return findInCache(toSearch, objects.keySet());
 	}
 
-	private TableIdentifier findInCache(WbConnection con, TableIdentifier toSearch, Set<TableIdentifier> keys)
+	private TableIdentifier findInCache(TableIdentifier toSearch, Set<TableIdentifier> keys)
 	{
-		TableIdentifier tbl = toSearch.createCopy();
-		tbl.adjustCase(con);
+    if (toSearch == null) return null;
+
 		for (TableIdentifier key : keys)
 		{
-			if (tbl.compareNames(key)) return key;
+			if (toSearch.compareNames(key)) return key;
 		}
 		return null;
 	}

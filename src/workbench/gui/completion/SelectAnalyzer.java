@@ -85,6 +85,7 @@ public class SelectAnalyzer
 		int groupPos = util.getKeywordPosition("GROUP BY", sql);
 		int havingPos = util.getKeywordPosition("HAVING", sql);
 		int orderPos = util.getKeywordPosition("ORDER BY", sql);
+    int connectPos = Math.min(util.getKeywordPosition("CONNECT BY", sql), util.getKeywordPosition("START WITH", sql));
 
 		// find the tables from the FROM clause
 		List<Alias> tables = SqlUtil.getTables(sql, true, dbConnection);
@@ -110,7 +111,10 @@ public class SelectAnalyzer
 		}
 
 		boolean inTableList = between(cursorPos, fromPos, joinPos) || between(cursorPos, fromPos, wherePos);
-		boolean inWhere =  between(cursorPos, wherePos, orderPos) || between(cursorPos, wherePos, groupPos) || between(cursorPos, wherePos, havingPos);
+		boolean inWhere =  between(cursorPos, wherePos, orderPos) ||
+                       between(cursorPos, wherePos, groupPos) ||
+                       between(cursorPos, wherePos, havingPos) ||
+                       between(cursorPos, connectPos, groupPos);
 
 		if (inTableList)
 		{
