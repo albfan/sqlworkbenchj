@@ -27,12 +27,16 @@ import java.sql.Types;
 import java.util.List;
 
 import workbench.WbManager;
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DbSearchPath;
 import workbench.db.DbSettings;
+import workbench.db.DependencyNode;
+import workbench.db.FKHandler;
+import workbench.db.FKHandlerFactory;
 import workbench.db.IndexReader;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -51,6 +55,7 @@ import workbench.storage.ColumnRemover;
 import workbench.storage.DataStore;
 
 import workbench.sql.StatementRunnerResult;
+import workbench.util.CollectionUtil;
 
 import workbench.util.StringUtil;
 
@@ -70,7 +75,6 @@ import workbench.util.StringUtil;
  */
 public class ObjectInfo
 {
-
 	public ObjectInfo()
 	{
 	}
@@ -101,27 +105,10 @@ public class ObjectInfo
 		long start = System.currentTimeMillis();
 		TableIdentifier dbObject = new TableIdentifier(objectName, connection);
 
-		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
-		boolean showSchema = false;
-		TableIdentifier toDescribe = null;
 		List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
+		boolean showSchema = dbObject.getSchema() == null && !searchPath.isEmpty();
 
-		if (dbObject.getSchema() == null && !searchPath.isEmpty())
-		{
-			LogMgr.logDebug("ObjectInfo.getObjectInfo()", "Searching schemas: " + searchPath + " for " + objectName);
-			showSchema = true;
-			for (String schema : searchPath)
-			{
-				TableIdentifier tb = dbObject.createCopy();
-				tb.setSchema(schema);
-				toDescribe = connection.getMetadata().findObject(tb, true, false);
-				if (toDescribe != null) break;
-			}
-		}
-		else
-		{
-			toDescribe = connection.getMetadata().findObject(dbObject, true, searchAllSchemas);
-		}
+		TableIdentifier toDescribe = findObject(connection, dbObject);
 
 		DbSettings dbs = connection.getDbSettings();
 		TableIdentifier synonymTarget = null;
@@ -234,12 +221,11 @@ public class ObjectInfo
 		}
 
 		DataStore details = null;
-		TableDefinition describedDefinition = null;
+		TableDefinition def = null;
 		if (connection.getMetadata().objectTypeCanContainData(toDescribe.getType()))
 		{
-			describedDefinition = connection.getMetadata().getTableDefinition(toDescribe);
-			connection.getObjectCache().addTable(describedDefinition);
-			details = new TableColumnsDatastore(describedDefinition);
+			def = getTableDefinition(connection, toDescribe);
+			details = new TableColumnsDatastore(def);
 		}
 		else
 		{
@@ -261,8 +247,6 @@ public class ObjectInfo
 		}
 		else if (toDescribe != null && dbs.isViewType(toDescribe.getType()))
 		{
-			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
-			connection.getObjectCache().addTable(def);
 			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
 			displayName = showSchema ? def.getTable().getTableExpression() : def.getTable().getTableExpression(connection);
 		}
@@ -345,19 +329,7 @@ public class ObjectInfo
 			{
 				try
 				{
-					TableDependency deps = new TableDependency(connection, toDescribe);
-					DataStore references = deps.getDisplayDataStore(true);
-					if (references.getRowCount() > 0)
-					{
-						references.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
-						result.addDataStore(references);
-					}
-					DataStore referencedBy = deps.getDisplayDataStore(false);
-					if (referencedBy.getRowCount() > 0)
-					{
-						referencedBy.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
-						result.addDataStore(referencedBy);
-					}
+          retrieveForeignKeys(connection, displayName, toDescribe, result);
 				}
 				catch (Exception e)
 				{
@@ -369,6 +341,161 @@ public class ObjectInfo
 		result.setExecutionDuration(System.currentTimeMillis() - start);
 		return result;
 	}
+
+  private void retrieveForeignKeys(WbConnection connection, String displayName, TableIdentifier toDescribe, StatementRunnerResult result)
+    throws SQLException
+  {
+    retrieveReferencedTables(connection, displayName, toDescribe, result);
+    retrieveReferencingTables(connection, displayName, toDescribe, result);
+  }
+
+  private void retrieveReferencingTables(WbConnection connection, String displayName, TableIdentifier toDescribe, StatementRunnerResult result)
+    throws SQLException
+  {
+    DataStore referencedBy  = null;
+    boolean useCache = connection.getDbSettings().useCacheForObjectInfo();
+
+    if (useCache)
+    {
+      boolean busy = connection.isBusy();
+      try
+      {
+        connection.setBusy(false);
+        FKHandler fkHandler = FKHandlerFactory.createInstance(connection);
+
+        List<DependencyNode> referencingTables = connection.getObjectCache().getReferencingTables(toDescribe);
+        if (CollectionUtil.isNonEmpty(referencingTables))
+        {
+          referencedBy = TableDependency.createDisplayDataStore(connection, toDescribe, referencingTables, true, fkHandler.supportsStatus());
+        }
+      }
+      finally
+      {
+        connection.setBusy(busy);
+      }
+    }
+    else
+    {
+      TableDependency deps = new TableDependency(connection, toDescribe);
+      referencedBy = deps.getDisplayDataStore(true);
+    }
+
+    if (referencedBy != null && referencedBy.getRowCount() > 0)
+    {
+      referencedBy.setResultName(displayName + " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
+      result.addDataStore(referencedBy);
+    }
+  }
+
+  private void retrieveReferencedTables(WbConnection connection, String displayName, TableIdentifier toDescribe, StatementRunnerResult result)
+    throws SQLException
+  {
+    DataStore references = null;
+    boolean useCache = connection.getDbSettings().useCacheForObjectInfo();
+
+    if (useCache)
+    {
+      boolean busy = connection.isBusy();
+      try
+      {
+        connection.setBusy(false);
+        FKHandler fkHandler = FKHandlerFactory.createInstance(connection);
+        List<DependencyNode> refTables = connection.getObjectCache().getReferencedTables(toDescribe);
+        if (CollectionUtil.isNonEmpty(refTables))
+        {
+          references = TableDependency.createDisplayDataStore(connection, toDescribe, refTables, false, fkHandler.supportsStatus());
+        }
+      }
+      finally
+      {
+        connection.setBusy(busy);
+      }
+    }
+    else
+    {
+      TableDependency deps = new TableDependency(connection, toDescribe);
+      references = deps.getDisplayDataStore(false);
+    }
+    if (references != null && references.getRowCount() > 0)
+    {
+      references.setResultName(displayName + " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
+      result.addDataStore(references);
+    }
+  }
+
+
+  private TableIdentifier findObject(WbConnection connection, TableIdentifier dbObject)
+  {
+    boolean busy = connection.isBusy();
+    boolean useCache = connection.getDbSettings().useCacheForObjectInfo();
+    try
+    {
+      connection.setBusy(false);
+      TableIdentifier toDescribe = null;
+
+      if (useCache)
+      {
+        toDescribe = connection.getObjectCache().getOrRetrieveTable(dbObject);
+        if (toDescribe != null)
+        {
+          return toDescribe;
+        }
+      }
+
+      List<String> searchPath = DbSearchPath.Factory.getSearchPathHandler(connection).getSearchPath(connection, null);
+      boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
+
+      if (dbObject.getSchema() == null && !searchPath.isEmpty())
+      {
+        LogMgr.logDebug("ObjectInfo.findObject()", "Searching schemas: " + searchPath + " for " + dbObject.getTableName());
+        for (String schema : searchPath)
+        {
+          TableIdentifier tb = dbObject.createCopy();
+          tb.setSchema(schema);
+          toDescribe = connection.getMetadata().findObject(tb, true, false);
+          if (toDescribe != null) break;
+        }
+      }
+      else
+      {
+        toDescribe = connection.getMetadata().findObject(dbObject, true, searchAllSchemas);
+      }
+      return toDescribe;
+    }
+    finally
+    {
+      connection.setBusy(busy);
+    }
+  }
+
+  private TableDefinition getTableDefinition(WbConnection connection, TableIdentifier toDescribe)
+    throws SQLException
+  {
+    TableDefinition def = null;
+    boolean useCache = connection.getDbSettings().useCacheForObjectInfo();
+    if (useCache)
+    {
+      boolean busy = connection.isBusy();
+      try
+      {
+        // The object cache will not retrieve anything if the connection is busy
+        connection.setBusy(false);
+        TableIdentifier tbl = connection.getObjectCache().getOrRetrieveTable(toDescribe);
+        List<ColumnIdentifier> columns = connection.getObjectCache().getColumns(tbl);
+        def = new TableDefinition(toDescribe, columns);
+      }
+      finally
+      {
+        connection.setBusy(busy);
+      }
+    }
+    else
+    {
+      def = connection.getMetadata().getTableDefinition(toDescribe);
+      connection.getObjectCache().addTable(def);
+    }
+    return def;
+  }
 
 	public static DataStore getPlainSynonymInfo(WbConnection dbConnection, TableIdentifier syn)
 	{

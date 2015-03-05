@@ -210,10 +210,12 @@ class ObjectCache
 
 	public List<DependencyNode> getReferencingTables(WbConnection dbConn, TableIdentifier table)
 	{
-		if (table == null || dbConn.isBusy()) return Collections.emptyList();
+		if (table == null) return Collections.emptyList();
 
 		TableIdentifier tbl = dbConn.getMetadata().findTable(table, false);
 		List<DependencyNode> referencing = referencingTables.get(tbl);
+    if (referencing == null && dbConn.isBusy()) return Collections.emptyList();
+    
 		if (referencing == null)
 		{
 			TableDependency deps = new TableDependency(dbConn, tbl);
@@ -470,9 +472,9 @@ class ObjectCache
 		}
 
 		// nothing in the cache. We can only retrieve this from the database if the connection isn't busy
-		if (dbConnection.isBusy())
+		if (cols == null && dbConnection.isBusy())
 		{
-			return Collections.emptyList();
+      return Collections.emptyList();
 		}
 
 		if (cols == null)

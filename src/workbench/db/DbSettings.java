@@ -1635,6 +1635,12 @@ public class DbSettings
 		return quote;
 	}
 
+	public boolean useCacheForObjectInfo()
+	{
+		boolean global = Settings.getInstance().getBoolProperty("workbench.db.objectinfo.usecache", false);
+		return Settings.getInstance().getBoolProperty(prefix + "objectinfo.usecache", global);
+	}
+
 	public boolean objectInfoWithFK()
 	{
 		boolean global = Settings.getInstance().getBoolProperty("workbench.db.objectinfo.includefk", false);

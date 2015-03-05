@@ -603,36 +603,48 @@ public class TableDependency
 	}
 
 	public DataStore getDisplayDataStore(boolean showImportedKeys)
-	{
+  {
 		setRetrieveDirectChildrenOnly(true);
-		String refColName = null;
+    String refColName = null;
 
-		if (showImportedKeys)
-		{
-			readTreeForParents();
-			refColName = "REFERENCES";
-		}
-		else
-		{
-			readTreeForChildren();
-			refColName = "REFERENCED BY";
-		}
+    if (showImportedKeys)
+    {
+      readTreeForParents();
+    }
+    else
+    {
+      readTreeForChildren();
+    }
 
-		DbObjectCache cache = DbObjectCacheFactory.getInstance().getCache(this.connection);
-		if (showImportedKeys)
-		{
-			cache.addReferencedTables(this.theTable, leafs);
-		}
-		else
-		{
-			cache.addReferencingTables(this.theTable, leafs);
-		}
+    DbObjectCache cache = DbObjectCacheFactory.getInstance().getCache(this.connection);
+    if (showImportedKeys)
+    {
+      cache.addReferencedTables(this.theTable, leafs);
+    }
+    else
+    {
+      cache.addReferencingTables(this.theTable, leafs);
+    }
+    return createDisplayDataStore(connection, theTable, leafs, showImportedKeys, fkHandler.supportsStatus());
+  }
 
+	public static DataStore createDisplayDataStore(WbConnection connection, TableIdentifier theTable, List<DependencyNode> nodes, boolean showImportedKeys, boolean supportsStatus)
+	{
 		String[] cols;
 		int[] types;
 		int[] sizes;
 
-		if (fkHandler.supportsStatus())
+    String refColName = null;
+    if (showImportedKeys)
+    {
+      refColName = "REFERENCES";
+    }
+    else
+    {
+      refColName = "REFERENCED BY";
+    }
+
+		if (supportsStatus)
 		{
 			cols = new String[] { "FK_NAME", "COLUMN", refColName , "ENABLED", "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE"};
 			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
@@ -647,14 +659,14 @@ public class TableDependency
 		}
 		DataStore result = new DataStore(cols, types, sizes);
 
-		for (DependencyNode node : leafs)
+		for (DependencyNode node : nodes)
 		{
 			int row = result.addRow();
 			int col = 0;
 			result.setValue(row, col++, node.getFkName());
 			result.setValue(row, col++, node.getTargetColumnsList());
 			result.setValue(row, col++, node.getTable().getTableExpression(connection) + "(" + node.getSourceColumnsList() + ")");
-			if (fkHandler.supportsStatus())
+			if (supportsStatus)
 			{
 				result.setValue(row, col++, node.isEnabled() ? "YES" : "NO");
 			}
