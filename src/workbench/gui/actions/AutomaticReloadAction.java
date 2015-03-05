@@ -25,6 +25,7 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.AutomaticRefreshMgr;
@@ -70,8 +71,10 @@ public class AutomaticReloadAction
 	public void executeAction(ActionEvent evt)
 	{
     DwPanel dw =  client.getCurrentResult();
-    String interval = WbSwingUtilities.getUserInput(client, ResourceMgr.getString("LblRefreshIntv"), null);
+    String lastValue = Settings.getInstance().getProperty("workbench.gui.result.refresh.last_interval", null);
+    String interval = WbSwingUtilities.getUserInput(client, ResourceMgr.getString("LblRefreshIntv"), lastValue);
     if (interval == null) return;
+    Settings.getInstance().setProperty("workbench.gui.result.refresh.last_interval", interval);
     int milliSeconds = AutomaticRefreshMgr.parseInterval(interval);
     if (dw != null)
     {

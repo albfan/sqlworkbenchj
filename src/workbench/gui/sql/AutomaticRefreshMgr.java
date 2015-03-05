@@ -25,11 +25,16 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.Timer;
 
 import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 
 import workbench.db.KeepAliveDaemon;
+
+import workbench.gui.components.CompoundIcon;
 
 import workbench.util.StringUtil;
 
@@ -108,6 +113,56 @@ public class AutomaticRefreshMgr
     }
   }
 
+  public Icon getTabIcon(Icon currentIcon, DwPanel panel)
+  {
+    ImageIcon refresh = IconMgr.getInstance().getLabelIcon("auto_refresh");
+    int gap = (int)(refresh.getIconWidth() / 5);
+    if (isRegistered(panel))
+    {
+      if (currentIcon == null)
+      {
+        return refresh;
+      }
+      if (currentIcon == refresh)
+      {
+        return currentIcon;
+      }
+      if (currentIcon instanceof CompoundIcon)
+      {
+        CompoundIcon cicon = (CompoundIcon)currentIcon;
+        if (cicon.contains(refresh))
+        {
+          return cicon;
+        }
+        else
+        {
+          return new CompoundIcon(CompoundIcon.Axis.X_AXIS, gap, cicon, refresh);
+        }
+      }
+      return new CompoundIcon(CompoundIcon.Axis.X_AXIS, gap, currentIcon, refresh);
+    }
+    else
+    {
+      if (currentIcon == null)
+      {
+        return null;
+      }
+      if (currentIcon == refresh)
+      {
+        return null;
+      }
+      if (currentIcon instanceof CompoundIcon)
+      {
+        CompoundIcon cicon = (CompoundIcon)currentIcon;
+        if (cicon.contains(refresh))
+        {
+          return cicon.getIcon(0);
+        }
+      }
+    }
+    return currentIcon;
+  }
+
   public static int parseInterval(String interval)
   {
     if (StringUtil.isBlank(interval)) return 0;
@@ -141,8 +196,7 @@ public class AutomaticRefreshMgr
     entry.timer.removeActionListener(this);
     entry.timer = null;
     entry.panel = null;
-    LogMgr.logDebug("AutomaticRefreshMgr.actionPerformed()", "Un-Registered panel with id:" + entry.panelId);
-
+    LogMgr.logDebug("AutomaticRefreshMgr.disposePanel()", "Un-Registered panel with id:" + entry.panelId);
   }
 
   private PanelEntry findEntry(int id)

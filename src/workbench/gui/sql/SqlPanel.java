@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
+import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -170,7 +171,6 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DbUnitHelper;
 import workbench.gui.components.EtchedBorderTop;
 import workbench.gui.components.GenericRowMonitor;
-import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.TabCloser;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbScrollPane;
@@ -2170,25 +2170,8 @@ public class SqlPanel
   {
     int index = resultTab.indexOfComponent(panel);
     if (index < 0) return;
-
-    String title = resultTab.getTitleAt(index);
-    String newTitle = null;
-    if (refreshMgr.isRegistered(panel))
-    {
-      if (!title.startsWith(RunningJobIndicator.TITLE_PREFIX))
-      {
-        newTitle = RunningJobIndicator.TITLE_PREFIX + title;
-      }
-    }
-    else if (title.startsWith(RunningJobIndicator.TITLE_PREFIX))
-    {
-      newTitle = title.substring(RunningJobIndicator.TITLE_PREFIX.length());
-    }
-
-    if (newTitle != null)
-    {
-      resultTab.setTitleAt(index, newTitle);
-    }
+    Icon tabIcon = resultTab.getIconAt(index);
+    resultTab.setIconAt(index, refreshMgr.getTabIcon(tabIcon, panel));
   }
 
 	private void runCurrentSql(DwPanel dataPanel)
