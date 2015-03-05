@@ -2154,9 +2154,6 @@ public class SqlPanel
 		cancelExecution = false;
 		setBusy(true);
 
-		// the dbStart should be fired *after* updating the
-		// history, as the history might be saved ("AutoSaveHistory") if the MainWindow
-		// receives the execStart event
 		fireDbExecStart();
 		setCancelState(true);
 		try
@@ -2173,13 +2170,13 @@ public class SqlPanel
 			clearStatusMessage();
 			setCancelState(false);
 			updateResultInfos();
-			this.fireDbExecEnd();
+			fireDbExecEnd();
 
 			// setBusy(false) should be called after dbExecEnd()
 			// otherwise the panel would indicate it's not busy, but
 			// the connection would still be marked as busy
-			this.setBusy(false);
-			this.executionThread = null;
+			setBusy(false);
+			executionThread = null;
 		}
 	}
 
