@@ -49,6 +49,21 @@ public class SqlFormatterTest
 
 
   @Test
+  public void testCreateIndex()
+  {
+    String sql = "create index idx_foo on bar (some_col, \"other_col\")";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+    String expected =
+      "CREATE INDEX idx_foo\n" +
+      "  ON bar(some_col, \"other_col\")";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+
+  @Test
   public void testFormatView()
   {
     String sql = "create view foo (col_1, \"Some Column\") as select dummy, 'Arthur' as \"Some Column\" from dual;";
@@ -58,15 +73,52 @@ public class SqlFormatterTest
 		String formatted = f.getFormattedSql();
     String expected =
       "CREATE VIEW foo \n" +
-      " (\n" +
-      "   col_1,\n" +
-      "   \"Some Column\"\n" +
-      " )\n" +
+      "(\n" +
+      "  col_1,\n" +
+      "  \"Some Column\"\n" +
+      ")\n" +
       "AS\n" +
       "SELECT dummy,\n" +
       "       'Arthur' AS \"Some Column\"\n" +
       "FROM dual;";
-		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+		f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setCommaAfterLineBreak(true);
+		formatted = f.getFormattedSql();
+    expected =
+      "CREATE VIEW foo \n" +
+      "(\n" +
+      "  col_1\n" +
+      "  ,\"Some Column\"\n" +
+      ")\n" +
+      "AS\n" +
+      "SELECT dummy\n" +
+      "       ,'Arthur' AS \"Some Column\"\n" +
+      "FROM dual;";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+		f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setCommaAfterLineBreak(true);
+    f.setAddSpaceAfterLineBreakComma(true);
+		formatted = f.getFormattedSql();
+    expected =
+      "CREATE VIEW foo \n" +
+      "(\n" +
+      "  col_1\n" +
+      "  , \"Some Column\"\n" +
+      ")\n" +
+      "AS\n" +
+      "SELECT dummy\n" +
+      "       , 'Arthur' AS \"Some Column\"\n" +
+      "FROM dual;";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
   }
 

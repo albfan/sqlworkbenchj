@@ -860,12 +860,12 @@ public class SqlFormatter
 				}
 
 				boolean lineComment = text.startsWith("--");
-				boolean startOfLine = isStartOfLine(myIndent);
+				boolean startOfLine = isStartOfLine();
 				if (lineComment && needNewLine && !startOfLine)
 				{
 					appendNewline();
 				}
-				else if (!lineComment && !isStartOfLine(myIndent))
+				else if (!lineComment && !isStartOfLine())
 				{
 					appendText(' ');
 				}
@@ -1553,11 +1553,6 @@ public class SqlFormatter
 
 	private boolean isStartOfLine()
 	{
-		return isStartOfLine(indent);
-	}
-
-	private boolean isStartOfLine(CharSequence currentIndent)
-	{
 		int len = this.result.length();
 		if (len == 0) return true;
 
@@ -1728,7 +1723,7 @@ public class SqlFormatter
 				if (word.equalsIgnoreCase("VALUES"))
 				{
 					// the next (non-whitespace token has to be a (
-					t = skipComments();//this.lexer.getNextToken(false, false);
+					t = skipComments();
 					if (t != null && t.getContents().equals("("))
 					{
 						t = this.processBracketList(indentInsert ? 2 : 0, getColumnsPerInsert(), insertColumns, false);
@@ -2463,117 +2458,6 @@ public class SqlFormatter
 	}
 
 	/**
-	 *	Process the elements in a () combination
-	 *	Any bracket inside the brackets are assumed to be "function calls"
-	 *  and just treated as further elements.
-	 *	It is assumed that the passed SQLToken is the opening bracket
-	 *
-	 *  @return the token after the closing bracket
-	 */
-	private SQLToken processCommaList(SQLToken previous, int maxElements, int indentCount)
-	{
-		StringBuilder definition = new StringBuilder(200);
-		SQLToken t = previous;
-		SQLToken last = previous;
-		int bracketCount = 0;
-
-		while (t != null)
-		{
-			if (t.getContents().equals("(") )
-			{
-				if (bracketCount > 0)
-				{
-					definition.append('(');
-				}
-				bracketCount ++;
-			}
-			else if (t.getContents().equals(")"))
-			{
-				if (bracketCount == 1)
-				{
-					List elements = StringUtil.stringToList(definition.toString(), ",", false, false, false, true);
-					this.outputElements(elements, maxElements, indentCount);
-					return this.lexer.getNextToken(true, false);
-				}
-				else
-				{
-					definition.append(')');
-				}
-				bracketCount--;
-			}
-			else if (bracketCount > 0)
-			{
-				if (this.needsWhitespace(last, t, true))
-				{
-					definition.append(' ');
-				}
-				definition.append(t.getContents());
-			}
-			last = t;
-			t = this.lexer.getNextToken(true, false);
-		}
-		return t;
-	}
-
-	/*
-	 *	Output the elements of the given List comma separated
-	 *  If the list contains more elements, then maxElements
-	 *  each element will be put on a single line
-	 *	If more then one line is "printed" they will be indented by
-	 *  indentCount spaces
-	 */
-	private void outputElements(List elements, int maxElements, int indentCount)
-	{
-		String myIndent = StringUtil.padRight(" ", indentCount);
-
-		int count = elements.size();
-
-		if (count > maxElements)
-		{
-			this.appendNewline();
-			this.indent(myIndent);
-			this.appendText("(");
-		}
-		else
-		{
-			this.appendText(" (");
-		}
-
-		if (count > maxElements)
-		{
-			this.appendNewline();
-			this.indent(myIndent);
-			this.indent("  ");
-		}
-
-		for (int i=0; i < count; i++)
-		{
-			String text = (String)elements.get(i);
-			this.appendText(text);
-			if (i < count - 1)
-			{
-				if (count > maxElements)
-				{
-					this.appendText(',');
-					this.appendNewline();
-					this.indent(myIndent);
-					this.indent("  ");
-				}
-				else
-				{
-					this.appendText(", ");
-				}
-			}
-		}
-		if (count > maxElements)
-		{
-			this.appendNewline();
-			this.indent(myIndent);
-		}
-		this.appendText(")");
-	}
-
-	/**
 	 * Format a CREATE VIEW statement
 	 */
 	private SQLToken processCreateView(SQLToken previous)
@@ -2589,9 +2473,15 @@ public class SqlFormatter
 				if (bracketCount == 0)
 				{
 					// start of column definitions...
-					t = this.processCommaList(t, 1, 0);
+          appendNewline();
+          appendText('(');
+					t = this.processCommaList(1, 2);
+          if (t == null) return t;
 				}
-				bracketCount ++;
+        else
+        {
+          bracketCount ++;
+        }
 			}
 
 			if ("SELECT".equals(t.getContents()))
@@ -2628,12 +2518,14 @@ public class SqlFormatter
 			String text = t.getContents();
 			if (t.getContents().equals("(") )
 			{
-				return this.processCommaList(t, 5, 7);
+        appendText('(');
+				t = this.processCommaList(10, 4);
+        appendTokenText(t);
 			}
 			else if ("ON".equalsIgnoreCase(text))
 			{
 				this.appendNewline();
-				this.indent("       ");
+				this.indent("  ");
 				this.appendTokenText(t);
 			}
 			else
@@ -2645,6 +2537,134 @@ public class SqlFormatter
 		}
 		return t;
 	}
+
+	/**
+	 * Process the elements inside parentheses.
+	 * Any parentheses inside assumed to be "function calls" and just treated as further elements
+   * (and commas inside parentheses are not considered).
+   *
+	 *	It is assumed that the passed SQLToken is the first token after the opening parentheses
+	 *
+	 *  @return the token after the closing bracket
+	 */
+  private SQLToken processCommaList(int maxElements, int indentCount)
+	{
+    List<StringBuilder> elements = new ArrayList<>();
+    StringBuilder element = new StringBuilder(30);
+    int bracketCount = 0;
+    SQLToken t = lexer.getNextToken(true, true);
+    while (t != null)
+    {
+      String text = t.getText();
+      if ("(".equals(text))
+      {
+        bracketCount ++;
+      }
+      else if (")".equals(text))
+      {
+        if (bracketCount == 0)
+        {
+          elements.add(element);
+          break;
+        }
+        bracketCount --;
+      }
+      if (",".equals(text) && bracketCount == 0)
+      {
+        elements.add(element);
+        element = new StringBuilder(30);
+      }
+      else
+      {
+        if (t.isWhiteSpace() && (text.indexOf('\n') > -1 || text.indexOf('\r') > -1))
+        {
+          text = " ";
+        }
+        element.append(text);
+      }
+      t = lexer.getNextToken(true, true);
+    }
+    outputCommaElements(elements, maxElements, indentCount);
+		return t;
+	}
+
+
+
+	/*
+	 * Output the elements of the given List separated by commas.
+   *
+	 * If the list contains more elements, then a maximum of maxElements elements will be put on a single line
+	 * If more then one line is "printed" they will be indented by indentCount spaces.
+   *
+   * Any opening or closing parentheses must be inserted by the caller.
+	 */
+	private void outputCommaElements(List<StringBuilder> elements, int maxElements, int indentCount)
+	{
+		String myIndent = StringUtil.padRight(" ", indentCount);
+
+		int count = elements.size();
+
+		if (count > maxElements)
+		{
+			this.appendNewline();
+		}
+
+		for (int i=0; i < count; i++)
+		{
+			String text = elements.get(i).toString().trim();
+      boolean isFirst = i == 0;
+      boolean isLast = i == count -1;
+      if (count > maxElements)
+      {
+        appendCommaElementWithNewline(text, myIndent, isFirst, isLast);
+      }
+      else
+      {
+        appendText(text);
+        if (!isLast)
+        {
+          appendText(", ");
+        }
+      }
+		}
+
+		if (count > maxElements)
+		{
+			this.appendNewline();
+		}
+	}
+
+  private void appendCommaElementWithNewline(String value, String indent, boolean isFirst, boolean isLast)
+  {
+    if (commaAfterLineBreak)
+    {
+      if (isFirst)
+      {
+        indent(indent);
+      }
+      else
+      {
+        appendNewline();
+        indent(indent);
+        appendText(',');
+        if (addSpaceAfterLineBreakComma)
+        {
+          appendText(' ');
+        }
+      }
+      appendText(value);
+    }
+    else
+    {
+      appendText(indent);
+      appendText(value);
+      if (!isLast)
+      {
+        appendText(',');
+        appendNewline();
+      }
+    }
+  }
 
 
 }
