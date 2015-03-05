@@ -144,6 +144,11 @@ public class KeepAliveDaemon
 			interval = interval.substring(0, interval.length() - 1);
 			result = StringUtil.getLongValue(interval, 0) * 1000 * 60;
 		}
+		else if (interval.endsWith("h"))
+		{
+			interval = interval.substring(0, interval.length() - 1);
+			result = StringUtil.getLongValue(interval, 0) * 1000 * 60 * 60;
+		}
 		else
 		{
 			result = StringUtil.getLongValue(interval, 0);

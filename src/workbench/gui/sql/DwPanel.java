@@ -123,7 +123,8 @@ public class DwPanel
 				     DbData, DbUpdater, Interruptable, JobErrorHandler, PropertyChangeListener, StatusBar
 {
 	public static final String PROP_UPDATE_TABLE = "updateTable";
-
+  private static int nextId;
+  private final int id;
 	protected WbTable dataTable;
 
 	protected DwStatusBar statusBar;
@@ -167,6 +168,7 @@ public class DwPanel
 	public DwPanel(DwStatusBar statusBar)
 	{
 		super();
+    this.id = ++nextId;
 		this.initLayout(statusBar);
 
 		this.setDoubleBuffered(true);
@@ -194,6 +196,29 @@ public class DwPanel
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SHOW_RESULT_SQL);
 		initColors();
 	}
+
+  @Override
+  public int hashCode()
+  {
+    int hash = 7;
+    hash = 97 * hash + this.id;
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    final DwPanel other = (DwPanel)obj;
+    if (this.id != other.id) return false;
+    return true;
+  }
+
+  public int getId()
+  {
+    return id;
+  }
 
 	public void setReUsed(boolean flag)
 	{

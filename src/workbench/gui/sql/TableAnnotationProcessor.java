@@ -33,6 +33,7 @@ import workbench.gui.macros.MacroMenuBuilder;
 import workbench.storage.DataStore;
 
 import workbench.sql.MacroAnnotation;
+import workbench.sql.RefreshAnnotation;
 import workbench.sql.ScrollAnnotation;
 import workbench.sql.WbAnnotation;
 
@@ -45,14 +46,19 @@ import workbench.util.StringUtil;
  */
 public class TableAnnotationProcessor
 {
-	public void handleAnnotations(WbTable tbl)
+	public void handleAnnotations(DwPanel panel, AutomaticRefreshMgr refreshMgr)
 	{
+    if (panel == null) return;
+    WbTable tbl = panel.getTable();
 		DataStore ds = tbl.getDataStore();
 		if (ds == null) return;
 		String sql = ds.getGeneratingSql();
 		if (StringUtil.isEmptyString(sql)) return;
 
-		Set<String> keys = CollectionUtil.treeSet(WbAnnotation.getTag(ScrollAnnotation.ANNOTATION), WbAnnotation.getTag(MacroAnnotation.ANNOTATION));
+    Set<String> keys = CollectionUtil.treeSet(WbAnnotation.getTag(ScrollAnnotation.ANNOTATION),
+      WbAnnotation.getTag(MacroAnnotation.ANNOTATION),
+      WbAnnotation.getTag(RefreshAnnotation.ANNOTATION));
+
 		List<WbAnnotation> annotations = WbAnnotation.readAllAnnotations(sql, keys);
 		List<MacroAnnotation> macros = new ArrayList<>();
 
@@ -70,6 +76,12 @@ public class TableAnnotationProcessor
 					line = ScrollAnnotation.scrollToLine(scrollValue);
 				}
 			}
+      else if (refreshMgr != null && annotation.getKeyWord().equalsIgnoreCase(WbAnnotation.getTag(RefreshAnnotation.ANNOTATION)))
+      {
+        String interval = annotation.getValue();
+        int milliSeconds = AutomaticRefreshMgr.parseInterval(interval);
+        refreshMgr.addRefresh(panel, milliSeconds);
+      }
 			else
 			{
 				MacroAnnotation macro = new MacroAnnotation();

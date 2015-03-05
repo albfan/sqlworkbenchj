@@ -58,6 +58,7 @@ import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -252,7 +253,7 @@ public class StatementRunner
 		if (this.currentConsumer != null) return true;
 		return statementHook.isPending();
 	}
-	
+
 	/**
 	 * For testing purposes only, so that non-default commands can be added during a JUnit test.
 	 */
@@ -579,7 +580,10 @@ public class StatementRunner
 	{
 		if (removeAnnotation.containsAnnotation(sql))
 		{
-			Iterator<DataStore> itr = result.getDataStores().iterator();
+      List<DataStore> dataStores = result.getDataStores();
+      if (CollectionUtil.isEmpty(dataStores)) return;
+
+			Iterator<DataStore> itr = dataStores.iterator();
 			while (itr.hasNext())
 			{
 				DataStore ds = itr.next();

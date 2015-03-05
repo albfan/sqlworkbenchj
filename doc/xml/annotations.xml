@@ -170,4 +170,19 @@ FROM activity_log;
       </para>
     </section>
 
+    <section id="automatic-refresh-annotation">
+      <title>Automatic refresh of the result</title>
+      <para>
+        To automatically refresh a result in a defined interval, the <literal>@WbRefresh</literal> annotation
+        can be used. The interval is specified as a parameter to the annotation:
+      </para>
+    <programlisting>-- @WbRefresh 15s
+SELECT *
+FROM pg_stat_activity;
+</programlisting>
+      <para>
+        The automatic refresh can also be enabled through the context menu of the result tab.
+      </para>
+    </section>
+
 </section>

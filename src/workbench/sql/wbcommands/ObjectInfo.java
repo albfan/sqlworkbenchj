@@ -27,11 +27,12 @@ import java.sql.Types;
 import java.util.List;
 
 import workbench.WbManager;
-import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
 import workbench.db.DbSearchPath;
 import workbench.db.DbSettings;
 import workbench.db.DependencyNode;
@@ -49,14 +50,13 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
-import workbench.resource.GuiSettings;
 
 import workbench.storage.ColumnRemover;
 import workbench.storage.DataStore;
 
 import workbench.sql.StatementRunnerResult;
-import workbench.util.CollectionUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -366,7 +366,7 @@ public class ObjectInfo
         List<DependencyNode> referencingTables = connection.getObjectCache().getReferencingTables(toDescribe);
         if (CollectionUtil.isNonEmpty(referencingTables))
         {
-          referencedBy = TableDependency.createDisplayDataStore(connection, toDescribe, referencingTables, true, fkHandler.supportsStatus());
+          referencedBy = TableDependency.createDisplayDataStore(connection, toDescribe, referencingTables, false, fkHandler.supportsStatus());
         }
       }
       finally
@@ -377,7 +377,7 @@ public class ObjectInfo
     else
     {
       TableDependency deps = new TableDependency(connection, toDescribe);
-      referencedBy = deps.getDisplayDataStore(true);
+      referencedBy = deps.getDisplayDataStore(false);
     }
 
     if (referencedBy != null && referencedBy.getRowCount() > 0)
@@ -403,7 +403,7 @@ public class ObjectInfo
         List<DependencyNode> refTables = connection.getObjectCache().getReferencedTables(toDescribe);
         if (CollectionUtil.isNonEmpty(refTables))
         {
-          references = TableDependency.createDisplayDataStore(connection, toDescribe, refTables, false, fkHandler.supportsStatus());
+          references = TableDependency.createDisplayDataStore(connection, toDescribe, refTables, true, fkHandler.supportsStatus());
         }
       }
       finally
@@ -414,8 +414,9 @@ public class ObjectInfo
     else
     {
       TableDependency deps = new TableDependency(connection, toDescribe);
-      references = deps.getDisplayDataStore(false);
+      references = deps.getDisplayDataStore(true);
     }
+
     if (references != null && references.getRowCount() > 0)
     {
       references.setResultName(displayName + " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));

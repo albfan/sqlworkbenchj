@@ -170,6 +170,7 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DbUnitHelper;
 import workbench.gui.components.EtchedBorderTop;
 import workbench.gui.components.GenericRowMonitor;
+import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.TabCloser;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbScrollPane;
@@ -337,16 +338,19 @@ public class SqlPanel
 	private long lastScriptExecTime;
 	protected final List<ToolWindow> resultWindows = new ArrayList<>(1);
 	private final int macroClientId;
+  private final AutomaticRefreshMgr refreshMgr;
 
 //</editor-fold>
 
 	public SqlPanel(int clientId)
 	{
 		super(new BorderLayout());
-		this.internalId = ++instanceCount;
-		this.macroClientId = clientId;
-		this.setName("sqlpanel-" + internalId);
-		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		internalId = ++instanceCount;
+
+    refreshMgr = new AutomaticRefreshMgr(this);
+		macroClientId = clientId;
+		setName("sqlpanel-" + internalId);
+		setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		editor = EditorPanel.createSqlEditor();
 		statusBar = new DwStatusBar(true, true);
@@ -2122,6 +2126,11 @@ public class SqlPanel
 		}
 	}
 
+  public AutomaticRefreshMgr getRefreshMgr()
+  {
+    return refreshMgr;
+  }
+
 	/**
 	 * Re-run the SQL of the current result in the background.
 	 */
@@ -2134,31 +2143,72 @@ public class SqlPanel
 		{
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}
+    startReloadPanel(currentData);
+  }
+
+  public void startReloadPanel(final DwPanel panel)
+  {
+    if (panel == null) return;
 
 		this.executionThread = new WbThread("SQL Execution Thread " + getThreadId())
 		{
 			@Override
 			public void run()
 			{
-				runCurrentSql();
+				runCurrentSql(panel);
 			}
 		};
 		this.executionThread.start();
 	}
 
 	protected void runCurrentSql()
+  {
+    runCurrentSql(currentData);
+  }
+
+  public void checkAutoRefreshIndicator(DwPanel panel)
+  {
+    int index = resultTab.indexOfComponent(panel);
+    if (index < 0) return;
+
+    String title = resultTab.getTitleAt(index);
+    String newTitle = null;
+    if (refreshMgr.isRegistered(panel))
+    {
+      if (!title.startsWith(RunningJobIndicator.TITLE_PREFIX))
+      {
+        newTitle = RunningJobIndicator.TITLE_PREFIX + title;
+      }
+    }
+    else if (title.startsWith(RunningJobIndicator.TITLE_PREFIX))
+    {
+      newTitle = title.substring(RunningJobIndicator.TITLE_PREFIX.length());
+    }
+
+    if (newTitle != null)
+    {
+      resultTab.setTitleAt(index, newTitle);
+    }
+  }
+
+	private void runCurrentSql(DwPanel dataPanel)
 	{
 		if (isBusy()) return;
-		if (currentData == null) return;
+		if (dataPanel == null) return;
 
 		cancelExecution = false;
 		setBusy(true);
 
 		fireDbExecStart();
 		setCancelState(true);
+ 		setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
+
 		try
 		{
-			currentData.runCurrentSql(true);
+			dataPanel.runCurrentSql(true);
+    	TableAnnotationProcessor processor = new TableAnnotationProcessor();
+  		processor.handleAnnotations(dataPanel, null);
+      checkAutoRefreshIndicator(dataPanel);
 		}
 		catch (Exception e)
 		{
@@ -2770,6 +2820,7 @@ public class SqlPanel
 		try
 		{
 			DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
+      refreshMgr.removeRefresh(panel);
 			panel.removePropertyChangeListener(SqlPanel.this);
 			if (disposeData)
 			{
@@ -2862,6 +2913,7 @@ public class SqlPanel
 						if (c instanceof DwPanel)
 						{
 							DwPanel panel = (DwPanel)c;
+              refreshMgr.removeRefresh(panel);
 							panel.removePropertyChangeListener(SqlPanel.this);
 							panel.dispose();
 						}
@@ -3744,7 +3796,7 @@ public class SqlPanel
 		{
 			tbl.setPrintHeader(resultName);
 		}
-		this.resultTab.insertTab(resultName, null, data, null, newIndex);
+		resultTab.insertTab(resultName, null, data, null, newIndex);
 		data.showGeneratingSQLAsTooltip();
 		data.setName("dwresult" + NumberStringCache.getNumberString(newIndex));
 		if (this.resultTab.getTabCount() == 2)
@@ -3754,8 +3806,8 @@ public class SqlPanel
 		data.checkLimitReachedDisplay();
 
 		TableAnnotationProcessor processor = new TableAnnotationProcessor();
-		processor.handleAnnotations(tbl);
-
+		processor.handleAnnotations(data, this.getRefreshMgr());
+    checkAutoRefreshIndicator(data);
 		return newIndex;
 	}
 
@@ -4155,6 +4207,7 @@ public class SqlPanel
 		if (editor != null) editor.reset();
 		clearLog();
 		clearResultTabs();
+    refreshMgr.reset();
 		if (this.currentData != null)
 		{
 			this.currentData.dispose();

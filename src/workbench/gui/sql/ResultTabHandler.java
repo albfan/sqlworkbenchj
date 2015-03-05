@@ -32,6 +32,8 @@ import javax.swing.event.ChangeListener;
 
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.actions.AutomaticReloadAction;
+import workbench.gui.actions.CancelAutoReloadAction;
 import workbench.gui.actions.CloseAllResultsAction;
 import workbench.gui.actions.CloseEmptyResultsAction;
 import workbench.gui.actions.CloseOtherResultsAction;
@@ -114,6 +116,9 @@ public class ResultTabHandler
 		menu.add(new CloseEmptyResultsAction(client));
 		menu.add(new CloseAllResultsAction(client));
 		menu.addSeparator();
+    menu.add(new AutomaticReloadAction(client));
+    menu.add(new CancelAutoReloadAction(client));
+    menu.addSeparator();
 		menu.add(new DetachResultTabAction(client));
 		return menu;
 	}
