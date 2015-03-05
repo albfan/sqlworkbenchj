@@ -81,7 +81,7 @@ public class AutomaticRefreshMgr
   {
     if (panel == null) return;
     if (isRegistered(panel)) return;
-    if (milliSeconds < 1000) return;
+    if (milliSeconds < 10) return;
 
     Timer timer = new Timer(milliSeconds, this);
     int id = panel.getId();
@@ -105,8 +105,16 @@ public class AutomaticRefreshMgr
     int id = StringUtil.getIntValue(cmd, -1);
 
     PanelEntry entry = findEntry(id);
+    if (entry == null) return;
+
     DwPanel panel = entry.panel.get();
     if (panel != null)
+    {
+      // the panel seems to be gone, so remove this entry
+      int index = getIndexForId(id);
+      removePanel(index);
+    }
+    else
     {
       LogMgr.logDebug("AutomaticRefreshMgr.actionPerformed()", "Refreshing panel: " + panel.getName() + ", id=" + id);
       sqlPanel.startReloadPanel(panel);
@@ -119,23 +127,24 @@ public class AutomaticRefreshMgr
     int gap = (int)(refresh.getIconWidth() / 5);
     if (isRegistered(panel))
     {
-      if (currentIcon == null)
+      // the comparison between currentIcon and refresh works,
+      // because IconMgr cashes the icons and always returns the same instance
+      if (currentIcon == null || currentIcon == refresh)
       {
         return refresh;
       }
-      if (currentIcon == refresh)
-      {
-        return currentIcon;
-      }
+
       if (currentIcon instanceof CompoundIcon)
       {
         CompoundIcon cicon = (CompoundIcon)currentIcon;
         if (cicon.contains(refresh))
         {
+          // refresh icon already included, stick to the current compound icon
           return cicon;
         }
         else
         {
+          // this can't really happen
           return new CompoundIcon(CompoundIcon.Axis.X_AXIS, gap, cicon, refresh);
         }
       }
@@ -143,16 +152,18 @@ public class AutomaticRefreshMgr
     }
     else
     {
-      if (currentIcon == null)
+      // the comparison between currentIcon and refresh works,
+      // because IconMgr cashes the icons and always returns the same instance
+      if (currentIcon == null || currentIcon == refresh)
       {
         return null;
       }
-      if (currentIcon == refresh)
-      {
-        return null;
-      }
+
       if (currentIcon instanceof CompoundIcon)
       {
+        // currently there are only two possible icons for a result tab
+        // and the refresh icon is always the last one, so it's safe
+        // to return the first icon from the compound icon
         CompoundIcon cicon = (CompoundIcon)currentIcon;
         if (cicon.contains(refresh))
         {
@@ -166,10 +177,10 @@ public class AutomaticRefreshMgr
   public static int parseInterval(String interval)
   {
     if (StringUtil.isBlank(interval)) return 0;
-    int seconds = StringUtil.getIntValue(interval, -1);
-    // just a plain number --> the default is seconds
+    int seconds = StringUtil.getIntValue(interval, Integer.MIN_VALUE);
     if (seconds > 0)
     {
+      // just a plain number --> the default is seconds
       seconds = seconds * 1000;
     }
     else
@@ -182,7 +193,7 @@ public class AutomaticRefreshMgr
 
   private synchronized void removePanel(int index)
   {
-    if (index < 0) return;
+    if (index < 0 || index >= panels.size()) return;
     PanelEntry entry = panels.get(index);
     disposePanel(entry);
     panels.remove(index);
@@ -191,9 +202,11 @@ public class AutomaticRefreshMgr
   private void disposePanel(PanelEntry entry)
   {
     if (entry == null) return;
-    if (entry.timer == null) return;
-    entry.timer.stop();
-    entry.timer.removeActionListener(this);
+    if (entry.timer != null)
+    {
+      entry.timer.stop();
+      entry.timer.removeActionListener(this);
+    }
     entry.timer = null;
     entry.panel = null;
     LogMgr.logDebug("AutomaticRefreshMgr.disposePanel()", "Un-Registered panel with id:" + entry.panelId);

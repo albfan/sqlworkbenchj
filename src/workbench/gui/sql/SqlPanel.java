@@ -4190,6 +4190,10 @@ public class SqlPanel
 		if (editor != null) editor.reset();
 		clearLog();
 		clearResultTabs();
+
+    // calling RefreshMgr.reset() is not really necessary
+    // because clearResultTabs() should have unregistered any
+    // auto-refreshing result tab...
     refreshMgr.reset();
 		if (this.currentData != null)
 		{
