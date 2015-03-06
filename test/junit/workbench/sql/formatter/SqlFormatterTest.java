@@ -51,14 +51,14 @@ public class SqlFormatterTest
   @Test
   public void testCreateIndex()
   {
-    String sql = "create index idx_foo on bar (some_col, \"other_col\")";
+    String sql = "create index idx_foo on bar (case when some_col is null then 1 else some_col end, \"other_col\")";
 		SqlFormatter f = new SqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
     String expected =
       "CREATE INDEX idx_foo\n" +
-      "  ON bar(some_col, \"other_col\")";
+      "  ON bar(CASE WHEN some_col IS NULL THEN 1 ELSE some_col END, \"other_col\")";
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
   }

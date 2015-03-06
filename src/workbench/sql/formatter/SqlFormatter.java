@@ -404,7 +404,13 @@ public class SqlFormatter
 
 	private void appendTokenText(SQLToken t)
 	{
-		if (t == null) return;
+    if (t == null) return;
+    appendText(getTokenText(t));
+  }
+
+	private String getTokenText(SQLToken t)
+	{
+		if (t == null) return null;
 		String text = t.getText();
 
 		if (this.dbFunctions.contains(text))
@@ -441,7 +447,7 @@ public class SqlFormatter
 			}
 		}
 
-		appendText(text);
+		return text;
 	}
 
 	private void appendComment(String text)
@@ -2475,7 +2481,7 @@ public class SqlFormatter
 					// start of column definitions...
           appendNewline();
           appendText('(');
-					t = this.processCommaList(1, 2);
+					t = processCommaList(1, 2);
           if (t == null) return t;
 				}
         else
@@ -2490,16 +2496,16 @@ public class SqlFormatter
 			}
 			else if ("AS".equals(t.getContents()))
 			{
-				this.appendNewline();
-				this.appendTokenText(t);
-				this.appendNewline();
+				appendNewline();
+				appendTokenText(t);
+				appendNewline();
 			}
 			else
 			{
-				this.appendTokenText(t);
-				if (this.needsWhitespace(last, t, true))
+				appendTokenText(t);
+				if (needsWhitespace(last, t, true))
 				{
-					this.appendText(' ');
+					appendText(' ');
 				}
 			}
 			last = t;
@@ -2524,9 +2530,9 @@ public class SqlFormatter
 			}
 			else if ("ON".equalsIgnoreCase(text))
 			{
-				this.appendNewline();
-				this.indent("  ");
-				this.appendTokenText(t);
+				appendNewline();
+				indent("  ");
+				appendTokenText(t);
 			}
 			else
 			{
@@ -2578,9 +2584,12 @@ public class SqlFormatter
       {
         if (t.isWhiteSpace() && (text.indexOf('\n') > -1 || text.indexOf('\r') > -1))
         {
-          text = " ";
+          element.append(' ');
         }
-        element.append(text);
+        else
+        {
+          element.append(getTokenText(t));
+        }
       }
       t = lexer.getNextToken(true, true);
     }
