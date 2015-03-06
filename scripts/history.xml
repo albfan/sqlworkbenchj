@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-03-02">
+    <entry dev-build="3" type="enh">Results can now automatically be refreshed either through an annotation or through the context menu of the result tab</entry>
     <entry dev-build="2" type="enh">The macros in a group can now be sorted alphabetically</entry>
     <entry dev-build="2" type="enh">The quoting of the null values for text exports can now be enabled through the option -quoteNulls</entry>
     <entry dev-build="2" type="enh">The quoting of the header for text exports can now be enabled through the option -quoteHeader</entry>
@@ -14,6 +15,8 @@
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
     <entry dev-build="2" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
+    <entry dev-build="3" type="fix">For Postgres the wrong DROP FUNCTION statement was generated if a function contained OUT parameter</entry>
+    <entry dev-build="3" type="fix">Scripts that contained statements including character literals with a backslash were not always parsed correctly.</entry>
     <entry dev-build="2" type="fix">When WbImport did not find any matching columns, the error message did not include the (faulty) source file</entry>
     <entry dev-build="2" type="fix">Fixed the display of the profile tree with large fonts</entry>
     <entry dev-build="2" type="fix">The DataPumper did not work if source and destination had a different number of columns</entry>
