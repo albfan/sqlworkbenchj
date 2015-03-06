@@ -34,9 +34,11 @@ import workbench.resource.IconMgr;
 
 import workbench.db.KeepAliveDaemon;
 
+import workbench.gui.PanelReloader;
 import workbench.gui.components.CompoundIcon;
 
 import workbench.util.StringUtil;
+
 
 /**
  *
@@ -45,12 +47,10 @@ import workbench.util.StringUtil;
 public class AutomaticRefreshMgr
   implements ActionListener
 {
-  private final SqlPanel sqlPanel;
   private List<PanelEntry> panels = new ArrayList<>();
 
-  public AutomaticRefreshMgr(SqlPanel panel)
+  public AutomaticRefreshMgr()
   {
-    this.sqlPanel = panel;
   }
 
   public synchronized void removeRefresh(DwPanel panel)
@@ -61,13 +61,23 @@ public class AutomaticRefreshMgr
     removePanel(index);
   }
 
-  public synchronized void reset()
+  public synchronized void clear()
   {
     for (PanelEntry entry : panels)
     {
       disposePanel(entry);
     }
     panels.clear();
+  }
+
+  public int getRefreshPeriod(DwPanel panel)
+  {
+    if (panel == null) return -1;
+    int index = getIndexForId(panel.getId());
+    if (index < 0) return -1;
+    PanelEntry entry = panels.get(index);
+    if (entry == null || entry.panel.get() == null || entry.timer == null) return -1;
+    return entry.timer.getDelay();
   }
 
   public synchronized boolean isRegistered(DwPanel panel)
@@ -77,7 +87,7 @@ public class AutomaticRefreshMgr
     return index > -1;
   }
 
-  public synchronized void addRefresh(DwPanel panel, int milliSeconds)
+  public synchronized void addRefresh(PanelReloader loader, DwPanel panel, int milliSeconds)
   {
     if (panel == null) return;
     if (isRegistered(panel)) return;
@@ -91,6 +101,7 @@ public class AutomaticRefreshMgr
     PanelEntry entry = new PanelEntry(id);
     entry.panel = new WeakReference(panel);
     entry.timer = timer;
+    entry.reloader = loader;
     panels.add(entry);
     timer.start();
     LogMgr.logDebug("AutomaticRefreshMgr.addRefresh()", "Registered panel: " + panel.getName() + ", id=" + id + ", interval=" + KeepAliveDaemon.getTimeDisplay(milliSeconds));
@@ -99,13 +110,13 @@ public class AutomaticRefreshMgr
   @Override
   public void actionPerformed(ActionEvent e)
   {
-    if (sqlPanel == null) return;
-
     String cmd = e.getActionCommand();
     int id = StringUtil.getIntValue(cmd, -1);
 
     PanelEntry entry = findEntry(id);
     if (entry == null) return;
+
+    if (entry.reloader == null) return;
 
     DwPanel panel = entry.panel.get();
     if (panel == null)
@@ -117,8 +128,8 @@ public class AutomaticRefreshMgr
     }
     else
     {
-      LogMgr.logDebug("AutomaticRefreshMgr.actionPerformed()", "Refreshing panel: " + panel.getName() + ", id=" + id);
-      sqlPanel.startReloadPanel(panel);
+      LogMgr.logDebug("AutomaticRefreshMgr.actionPerformed()", "Refreshing panel id=" + id);
+      entry.reloader.startReloadPanel(panel);
     }
   }
 
@@ -238,6 +249,7 @@ public class AutomaticRefreshMgr
     Timer timer;
     final int panelId;
     int numRepeats;
+    PanelReloader reloader;
     PanelEntry(int id)
     {
       panelId = id;

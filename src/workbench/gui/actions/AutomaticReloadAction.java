@@ -78,7 +78,7 @@ public class AutomaticReloadAction
     int milliSeconds = AutomaticRefreshMgr.parseInterval(interval);
     if (dw != null)
     {
-      client.getRefreshMgr().addRefresh(dw, milliSeconds);
+      client.getRefreshMgr().addRefresh(client, dw, milliSeconds);
       client.checkAutoRefreshIndicator(dw);
     }
 	}

@@ -90,6 +90,7 @@ import workbench.db.importer.ImportOptions;
 import workbench.db.importer.TextImportOptions;
 
 import workbench.gui.MainWindow;
+import workbench.gui.PanelReloader;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.WindowTitleBuilder;
 import workbench.gui.actions.AppendResultsAction;
@@ -231,7 +232,7 @@ public class SqlPanel
 	implements FontChangedListener, PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar, ToolWindowManager, OutputPrinter
+		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar, ToolWindowManager, OutputPrinter, PanelReloader
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -347,7 +348,7 @@ public class SqlPanel
 		super(new BorderLayout());
 		internalId = ++instanceCount;
 
-    refreshMgr = new AutomaticRefreshMgr(this);
+    refreshMgr = new AutomaticRefreshMgr();
 		macroClientId = clientId;
 		setName("sqlpanel-" + internalId);
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -679,7 +680,7 @@ public class SqlPanel
 			this.fileDiscardAction.setEnabled(hasFile);
 			if (hasFile)
 			{
-				// reset a user-defined tab name if a file is loaded
+				// clear a user-defined tab name if a file is loaded
 				this.tabName = null;
 			}
 			fireFilenameChanged(newFilename);
@@ -1044,17 +1045,22 @@ public class SqlPanel
 		return panel.isModified();
 	}
 
-	protected boolean isDataModified()
+	protected int getFirstModified()
 	{
-		if (this.currentData == null) return false;
-		if (this.resultTab.getTabCount() == 1) return false; // only messages
+		if (this.currentData == null) return -1;
+		if (this.resultTab.getTabCount() == 1) return -1;
 
 		for (int i=0; i < resultTab.getTabCount() - 1; i++)
 		{
 			DwPanel panel = (DwPanel)resultTab.getComponentAt(i);
-			if (panel.isModified()) return true;
+			if (panel.isModified()) return i;
 		}
-		return false;
+		return -1;
+	}
+
+	protected boolean isDataModified()
+	{
+    return getFirstModified() != -1;
 	}
 
 	@Override
@@ -1399,14 +1405,28 @@ public class SqlPanel
 		handler.readFromWorkspace(w, index);
 	}
 
-	public boolean confirmDiscardChanges(int index)
+	private boolean confirmDiscardChanges(int index, boolean showResultName)
 	{
+    if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
 		if (index >= resultTab.getTabCount() - 1) return false;
 
 		boolean isModified = (index == -1 ? isDataModified() : isResultModified(index));
 		if (!isModified) return true;
-		String title = getRealTabTitle();
-		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
+
+		String title = null;
+    if (showResultName)
+    {
+      if (index == -1)
+      {
+        index = getFirstModified();
+      }
+      title = resultTab.getTitleAt(index);
+    }
+    else
+    {
+      title = getRealTabTitle();
+    }
+
 		return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", HtmlUtil.cleanHTML(title));
 	}
 
@@ -1440,7 +1460,7 @@ public class SqlPanel
 	@Override
 	public boolean canClosePanel(boolean checkTransAction)
 	{
-		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1);
+		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1, false);
 		if (checkTransAction)
 		{
 			fileOk = fileOk && confirmDiscardTransaction();
@@ -2034,10 +2054,10 @@ public class SqlPanel
 	{
 		if (this.isBusy()) return;
 
-		if (GuiSettings.getConfirmDiscardResultSetChanges() && !appendResult && isDataModified())
-		{
-			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
-		}
+    if (!appendResult && !confirmDiscardChanges(-1, true))
+    {
+      return;
+    }
 
 		synchronized (this.connectionLock)
 		{
@@ -2139,16 +2159,16 @@ public class SqlPanel
 		if (isBusy()) return;
 		if (currentData == null) return;
 
-		if (GuiSettings.getConfirmDiscardResultSetChanges() && currentData != null && currentData.isModified())
-		{
-			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
-		}
     startReloadPanel(currentData);
   }
 
+  @Override
   public void startReloadPanel(final DwPanel panel)
   {
     if (panel == null) return;
+
+    int index = resultTab.indexOfComponent(panel);
+    if (!confirmDiscardChanges(index, true)) return;
 
 		this.executionThread = new WbThread("SQL Execution Thread " + getThreadId())
 		{
@@ -2190,7 +2210,7 @@ public class SqlPanel
 		{
 			dataPanel.runCurrentSql(true);
     	TableAnnotationProcessor processor = new TableAnnotationProcessor();
-  		processor.handleAnnotations(dataPanel, null);
+  		processor.handleAnnotations(this, dataPanel, null);
       checkAutoRefreshIndicator(dataPanel);
 		}
 		catch (Exception e)
@@ -2731,7 +2751,7 @@ public class SqlPanel
 	public void removeCurrentResult()
 	{
 		int index = resultTab.getSelectedIndex();
-		if (!confirmDiscardChanges(index)) return;
+		if (!confirmDiscardChanges(index, true)) return;
 		discardResult(index, false);
 	}
 
@@ -2744,7 +2764,7 @@ public class SqlPanel
 	 */
 	public void closeResult(int index)
 	{
-		if (!confirmDiscardChanges(index)) return;
+		if (!confirmDiscardChanges(index, true)) return;
 		discardResult(index, true);
 	}
 
@@ -2768,7 +2788,7 @@ public class SqlPanel
 					{
 						Component c = resultTab.getComponentAt(index);
 						DwPanel panel = (DwPanel)c;
-						if (filter.shouldClose(panel, index) && confirmDiscardChanges(index))
+						if (filter.shouldClose(panel, index) && confirmDiscardChanges(index, true))
 						{
 							panel.removePropertyChangeListener(SqlPanel.this);
 							panel.dispose();
@@ -2845,7 +2865,7 @@ public class SqlPanel
 	{
 		for (int i=0; i < resultTab.getTabCount() - 1; i ++)
 		{
-			if (!confirmDiscardChanges(i)) return;
+			if (!confirmDiscardChanges(i, true)) return;
 		}
 		clearResultTabs();
 	}
@@ -3789,7 +3809,7 @@ public class SqlPanel
 		data.checkLimitReachedDisplay();
 
 		TableAnnotationProcessor processor = new TableAnnotationProcessor();
-		processor.handleAnnotations(data, this.getRefreshMgr());
+		processor.handleAnnotations(this, data, this.getRefreshMgr());
     checkAutoRefreshIndicator(data);
 		return newIndex;
 	}
@@ -4191,10 +4211,10 @@ public class SqlPanel
 		clearLog();
 		clearResultTabs();
 
-    // calling RefreshMgr.reset() is not really necessary
+    // calling RefreshMgr.clear() is not really necessary
     // because clearResultTabs() should have unregistered any
     // auto-refreshing result tab...
-    refreshMgr.reset();
+    refreshMgr.clear();
 		if (this.currentData != null)
 		{
 			this.currentData.dispose();
@@ -4355,7 +4375,7 @@ public class SqlPanel
   {
     if (!canCloseTab(index)) return;
 
-    if (confirmDiscardChanges(index))
+    if (confirmDiscardChanges(index, true))
     {
       discardResult(index, true);
     }

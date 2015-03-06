@@ -70,6 +70,7 @@ import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
 
 import workbench.gui.MainWindow;
+import workbench.gui.PanelReloader;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FilterPickerAction;
 import workbench.gui.actions.ReloadAction;
@@ -83,6 +84,7 @@ import workbench.gui.components.WbLabelField;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.sql.AutomaticRefreshMgr;
 import workbench.gui.sql.DwPanel;
 
 import workbench.storage.DataStore;
@@ -102,7 +104,7 @@ import workbench.util.WbWorkspace;
 public class TableDataPanel
   extends JPanel
 	implements ActionListener, Reloadable, Interruptable,
-		TableDeleteListener, Resettable, DbExecutionNotifier
+             TableDeleteListener, Resettable, DbExecutionNotifier, PanelReloader
 {
 	private WbConnection dbConnection;
 	protected DwPanel dataDisplay;
@@ -131,8 +133,12 @@ public class TableDataPanel
 	private WbToolbar toolbar;
 
 	private boolean initialized;
-	private boolean useDataStoreSource = false;
+	private boolean useDataStoreSource;
+  private boolean showRefreshButton;
+  private WbButton enableRefreshButton;
 	private FilteredProperties workspaceSettings;
+
+  private AutomaticRefreshMgr refreshMgr = new AutomaticRefreshMgr();
 
 	public TableDataPanel()
 	{
@@ -275,6 +281,18 @@ public class TableDataPanel
 		initialized = true;
 	}
 
+  public void showRefreshButton(boolean show)
+  {
+    showRefreshButton = show;
+  }
+
+  public void refreshAutomatically(int interval)
+  {
+    if (interval <= 0) return;
+    refreshMgr.addRefresh(this, dataDisplay, interval);
+    checkRefreshButton();
+  }
+
   private void createToolbar()
   {
 
@@ -314,6 +332,10 @@ public class TableDataPanel
 		initTableNavigation();
 	}
 
+  public DwPanel getPanel()
+  {
+    return dataDisplay;
+  }
 
 	/**
 	 * Return the displayed table data.
@@ -357,8 +379,7 @@ public class TableDataPanel
 	public void dispose()
 	{
 		if (!initialized) return;
-		this.reset();
-
+    reset();
 		dataDisplay.dispose();
 		WbAction.dispose(reloadAction, cancelRetrieve);
 		WbSwingUtilities.removeAllListeners(this);
@@ -412,6 +433,8 @@ public class TableDataPanel
 		storeSort();
 
 		storeColumnOrder();
+
+    refreshMgr.clear();
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -959,6 +982,13 @@ public class TableDataPanel
 		}
 	}
 
+  @Override
+  public void startReloadPanel(DwPanel panel)
+  {
+    if (panel != this.dataDisplay) return;
+    reload();
+  }
+
 	/**
 	 * Start a new thread to retrieve the table data.
 	 * @param respectMaxRows
@@ -1071,9 +1101,8 @@ public class TableDataPanel
 	public void showData()
 	{
 		initGui();
-		this.showData(true);
+		showData(true);
 	}
-
 
 	public void removeTableDisplay()
 	{
@@ -1085,6 +1114,18 @@ public class TableDataPanel
     gc.anchor = GridBagConstraints.LINE_START;
 		this.topPanel.add(toolbar, gc);
 
+    if (showRefreshButton)
+    {
+      enableRefreshButton = new WbButton();
+      enableRefreshButton.addActionListener(this);
+      checkRefreshButton();
+      gc.gridx = 1;
+      gc.gridy = 0;
+      gc.weightx = 0.0;
+      gc.anchor = GridBagConstraints.LINE_END;
+      topPanel.add(enableRefreshButton, gc);
+    }
+
 		config.removeActionListener(this);
 		rowCountButton.removeActionListener(this);
 		this.autoloadRowCount = false;
@@ -1094,6 +1135,41 @@ public class TableDataPanel
 		this.tableNameLabel = null;
 	}
 
+  private void handleRefreshButton()
+  {
+    if (refreshMgr.isRegistered(dataDisplay))
+    {
+      // a refresh is enabled, turn it off
+      refreshMgr.removeRefresh(dataDisplay);
+    }
+    else
+    {
+      String lastValue = Settings.getInstance().getProperty("workbench.gui.result.refresh.last_interval", null);
+      String interval = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("LblRefreshIntv"), lastValue);
+      if (interval == null) return;
+      Settings.getInstance().setProperty("workbench.gui.result.refresh.last_interval", interval);
+
+      int milliSeconds = AutomaticRefreshMgr.parseInterval(interval);
+      refreshMgr.addRefresh(this, dataDisplay, milliSeconds);
+    }
+    checkRefreshButton();
+    WbSwingUtilities.requestFocus(dataDisplay.getTable());
+  }
+
+  private void checkRefreshButton()
+  {
+    if (refreshMgr.isRegistered(dataDisplay))
+    {
+      enableRefreshButton.setResourceKey("MnuTxtRemoveRefresh");
+      enableRefreshButton.setIcon(IconMgr.getInstance().getLabelIcon("auto_refresh"));
+    }
+    else
+    {
+      enableRefreshButton.setResourceKey("MnuTxtReloadAutomatic");
+      enableRefreshButton.setIcon(null);
+    }
+  }
+
 	public void displayData(DataStore result, long lastExecutionTime)
 	{
 		initGui();
@@ -1101,8 +1177,9 @@ public class TableDataPanel
 		useDataStoreSource = true;
 		try
 		{
-			this.setConnection(result.getOriginalConnection());
-			this.dataDisplay.showData(result, result.getGeneratingSql(), lastExecutionTime);
+			setConnection(result.getOriginalConnection());
+			dataDisplay.showData(result, result.getGeneratingSql(), lastExecutionTime);
+      WbSwingUtilities.requestFocus(dataDisplay.getTable());
 		}
 		catch (SQLException sql)
 		{
@@ -1189,6 +1266,10 @@ public class TableDataPanel
 		{
 			this.startRetrieveRowCount();
 		}
+    else if (e.getSource() == enableRefreshButton)
+    {
+      handleRefreshButton();
+    }
 	}
 
 	@Override

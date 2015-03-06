@@ -315,14 +315,19 @@ public class ProcedureDefinition
 
 	@Override
 	public String getObjectNameForDrop(WbConnection con)
+  {
+		boolean needParameters = con == null ? false : con.getDbSettings().needParametersToDropFunction();
+		boolean includeOutParameters = con == null ? false : con.getDbSettings().includeOutParameterForDropFunction();
+		boolean useSpecificName = con == null ? false : con.getDbSettings().useSpecificNameForDropProcedure();
+    return getObjectNameForDrop(con, needParameters, includeOutParameters, useSpecificName);
+  }
+
+	public String getObjectNameForDrop(WbConnection con, boolean needParameters, boolean includeOutParameters, boolean useSpecificName)
 	{
 		if (oracleType != null)
 		{
 			return catalog;
 		}
-		boolean needParameters = con.getDbSettings().needParametersToDropFunction();
-		boolean includeOutParameters = con.getDbSettings().includeOutParameterForDropFunction();
-		boolean useSpecificName = con.getDbSettings().useSpecificNameForDropProcedure();
 
 		boolean nameContainsParameters = this.procName.indexOf('(') > -1;
 		if (useSpecificName && specificName != null)
@@ -367,7 +372,6 @@ public class ProcedureDefinition
         colCount ++;
       }
     }
-
 		result.append(')');
 		return result.toString();
 	}

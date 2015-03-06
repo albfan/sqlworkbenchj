@@ -27,6 +27,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 
 import javax.swing.SwingUtilities;
+
 import workbench.gui.sql.DetachedResultWindow;
 import workbench.gui.sql.DwPanel;
 import workbench.gui.sql.SqlPanel;
@@ -59,6 +60,7 @@ public class DetachResultTabAction
 		if (result.getTable() == null) return;
 		if (result.getDataStore() == null) return;
 
+    final int timer = panel.getRefreshMgr().getRefreshPeriod(result);
 		panel.removeCurrentResult();
 		final Window parent = SwingUtilities.getWindowAncestor(panel);
 
@@ -68,6 +70,10 @@ public class DetachResultTabAction
 			public void run()
 			{
 				DetachedResultWindow window = new DetachedResultWindow(result, parent, panel);
+        if (timer > 0)
+        {
+          window.refreshAutomatically(timer);
+        }
 				window.showWindow();
 			}
 		});

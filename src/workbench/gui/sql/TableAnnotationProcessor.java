@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 
 import workbench.gui.MainWindow;
+import workbench.gui.PanelReloader;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbTable;
 import workbench.gui.macros.MacroMenuBuilder;
@@ -46,7 +47,7 @@ import workbench.util.StringUtil;
  */
 public class TableAnnotationProcessor
 {
-	public void handleAnnotations(DwPanel panel, AutomaticRefreshMgr refreshMgr)
+	public void handleAnnotations(PanelReloader reloader, DwPanel panel, AutomaticRefreshMgr refreshMgr)
 	{
     if (panel == null) return;
     WbTable tbl = panel.getTable();
@@ -80,7 +81,7 @@ public class TableAnnotationProcessor
       {
         String interval = annotation.getValue();
         int milliSeconds = AutomaticRefreshMgr.parseInterval(interval);
-        refreshMgr.addRefresh(panel, milliSeconds);
+        refreshMgr.addRefresh(reloader, panel, milliSeconds);
       }
 			else
 			{

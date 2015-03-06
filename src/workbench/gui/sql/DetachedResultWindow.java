@@ -63,9 +63,10 @@ public class DetachedResultWindow
 		super(new BorderLayout(0,0));
 		id = ++instanceCount;
 
-		this.data = new TableDataPanel();
+		data = new TableDataPanel();
+    data.showRefreshButton(true);
 
-		this.add(data, BorderLayout.CENTER);
+		add(data, BorderLayout.CENTER);
 		data.displayData(result.getDataStore(), result.getLastExecutionTime());
 
 		String title = result.getDataStore().getResultName();
@@ -96,9 +97,14 @@ public class DetachedResultWindow
 
 		WbSwingUtilities.center(this.window, parent);
 
-		this.window.addWindowListener(this);
+		window.addWindowListener(this);
 		registry.registerToolWindow(this);
 	}
+
+  public void refreshAutomatically(int interval)
+  {
+    data.refreshAutomatically(interval);
+  }
 
 	public void showWindow()
 	{
@@ -116,9 +122,9 @@ public class DetachedResultWindow
 	private void doClose()
 	{
 		saveSettings();
-		this.window.setVisible(false);
-		this.window.dispose();
-		this.window = null;
+		window.setVisible(false);
+		window.dispose();
+		window = null;
 	}
 
 	@Override
