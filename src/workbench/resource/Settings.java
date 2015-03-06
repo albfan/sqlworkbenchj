@@ -943,6 +943,16 @@ public class Settings
 		setIdentifierCase("workbench.sql.formatter.identifier.case", identifierCase);
 	}
 
+	public boolean getFormatterIndentWhereConditions()
+	{
+		return getBoolProperty("workbench.sql.formatter.where.condition.indent", false);
+	}
+
+	public void setFormatterIndentWhereConditions(boolean flag)
+	{
+		setProperty("workbench.sql.formatter.where.condition.indent", flag);
+	}
+
 	public boolean getFormatterAddSpaceAfterComma()
 	{
 		return getBoolProperty("workbench.sql.formatter.comma.spaceafter", false);

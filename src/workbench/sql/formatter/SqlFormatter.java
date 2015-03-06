@@ -108,6 +108,7 @@ public class SqlFormatter
 	private GeneratedIdentifierCase keywordCase = GeneratedIdentifierCase.upper;
 	private GeneratedIdentifierCase identifierCase = GeneratedIdentifierCase.asIs;
 	private GeneratedIdentifierCase functionCase = GeneratedIdentifierCase.lower;
+  private boolean indentWhereConditions;
 	private boolean addSpaceAfterComma;
 	private boolean commaAfterLineBreak;
 	private boolean addSpaceAfterLineBreakComma;
@@ -159,6 +160,7 @@ public class SqlFormatter
 		addColumnCommentForInsert = Settings.getInstance().getFormatterAddColumnNameComment();
 		keywordCase = Settings.getInstance().getFormatterKeywordsCase();
 		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
+		indentWhereConditions = Settings.getInstance().getFormatterIndentWhereConditions();
 		commaAfterLineBreak = Settings.getInstance().getFormatterCommaAfterLineBreak();
 		addSpaceAfterLineBreakComma = Settings.getInstance().getFormatterAddSpaceAfterLineBreakComma();
 		joinWrapping = Settings.getInstance().getFormatterJoinWrapStyle();
@@ -171,6 +173,11 @@ public class SqlFormatter
 	{
 		this.identifierCase = idCase;
 	}
+
+  public void setIndentWhereCondition(boolean flag)
+  {
+    this.indentWhereConditions = true;
+  }
 
 	public void setColumnsPerInsert(int cols)
 	{
@@ -2033,8 +2040,14 @@ public class SqlFormatter
 					// the end of the WHERE clause)
 					if (!this.isStartOfLine()) this.appendNewline();
 				}
+
+        if (indentWhereConditions)
+        {
+          if (verb.equals("OR")) this.appendText("   ");
+          if (verb.equals("AND")) this.appendText("  ");
+        }
 				this.appendTokenText(t);
-				if (!noBreakOnCondition)
+				if (!noBreakOnCondition && !indentWhereConditions)
 				{
 					this.appendText("  ");
 					if (verb.equals("OR")) this.appendText(' ');

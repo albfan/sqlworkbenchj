@@ -49,6 +49,24 @@ public class SqlFormatterTest
 
 
   @Test
+  public void testIndentWhere()
+  {
+    String sql = "select * from foo where x = 1 and y = 2;";
+		SqlFormatter f = new SqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setIndentWhereCondition(true);
+		String formatted = f.getFormattedSql();
+    String expected =
+      "SELECT *\n" +
+      "FROM foo\n" +
+      "WHERE x = 1\n" +
+      "  AND y = 2;";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+
+  @Test
   public void testCreateIndex()
   {
     String sql = "create index idx_foo on bar (case when some_col is null then 1 else some_col end, \"other_col\")";
