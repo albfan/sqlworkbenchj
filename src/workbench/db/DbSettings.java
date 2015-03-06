@@ -529,6 +529,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "drop.function.includeparameters", false);
 	}
 
+	public boolean includeOutParameterForDropFunction()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "drop.function.include.out.parameters", true);
+	}
+
 	/**
 	 * Returns if the DataImporter should use savepoints for each statement.
 	 * <br/>

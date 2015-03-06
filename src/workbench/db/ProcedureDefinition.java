@@ -321,6 +321,7 @@ public class ProcedureDefinition
 			return catalog;
 		}
 		boolean needParameters = con.getDbSettings().needParametersToDropFunction();
+		boolean includeOutParameters = con.getDbSettings().includeOutParameterForDropFunction();
 		boolean useSpecificName = con.getDbSettings().useSpecificNameForDropProcedure();
 
 		boolean nameContainsParameters = this.procName.indexOf('(') > -1;
@@ -337,16 +338,36 @@ public class ProcedureDefinition
 		// we need the parameters, so retrieve them now
 		readParameters(con);
 
-		List<String> params = getParameterTypes();
-		if (params.isEmpty()) return getObjectExpression(con) + "()";
-		StringBuilder result = new StringBuilder(procName.length() + params.size() * 5 + 5);
+    if (CollectionUtil.isEmpty(parameters)) return getObjectExpression(con) + "()";
+
+    int paramCount = 0;
+    for (ColumnIdentifier col : parameters)
+    {
+      boolean shouldInclude = includeOutParameters || col.getArgumentMode().startsWith("IN");
+      if (shouldInclude)
+      {
+        paramCount ++;
+      }
+    }
+    if (paramCount == 0) return getObjectExpression(con) + "()";
+
+		StringBuilder result = new StringBuilder(procName.length() + paramCount * 5 + 5);
 		result.append(getObjectExpression(con));
 		result.append('(');
-		for (int i=0; i < params.size(); i++)
-		{
-			if (i > 0) result.append(',');
-			result.append(params.get(i));
-		}
+
+    int colCount = 0;
+    for (ColumnIdentifier parameter : parameters)
+    {
+      ColumnIdentifier col = parameter;
+      boolean shouldInclude = includeOutParameters || col.getArgumentMode().startsWith("IN");
+      if (shouldInclude)
+      {
+        if (colCount > 0) result.append(',');
+        result.append(parameter.getDbmsType());
+        colCount ++;
+      }
+    }
+
 		result.append(')');
 		return result.toString();
 	}

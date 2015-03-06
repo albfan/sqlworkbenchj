@@ -2435,24 +2435,19 @@ public class TableListPanel
 		if (rowCount <= 0) return;
 
 		final TableExporter exporter = new TableExporter(this.dbConnection);
-		final Frame f;
-		if (parentWindow == null)
+		final Frame f = parentWindow == null ? (Frame)SwingUtilities.getWindowAncestor(this) : parentWindow;
+
+		if (exporter.selectTables(getSelectedObjects(), f))
 		{
-			f = (Frame)SwingUtilities.getWindowAncestor(this);
-		}
-		else
-		{
-			f  = parentWindow;
-		}
-		exporter.selectTables(getSelectedObjects(), f);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
+			EventQueue.invokeLater(new Runnable()
 			{
-				exporter.startExport(f);
-			}
-		});
+				@Override
+				public void run()
+				{
+					exporter.startExport(f);
+				}
+			});
+		}
 	}
 
 	/**

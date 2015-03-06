@@ -73,9 +73,9 @@ public class TableExporter
 		return exporter;
 	}
 
-	public void selectTables(List<DbObject> tables, Frame caller)
+	public boolean selectTables(List<DbObject> tables, Frame caller)
 	{
-		if (CollectionUtil.isEmpty(tables)) return;
+		if (CollectionUtil.isEmpty(tables)) return false;
 
 		ExportFileDialog dialog = new ExportFileDialog(caller);
 		dialog.setIncludeSqlUpdate(false);
@@ -106,10 +106,13 @@ public class TableExporter
 				this.toExport.add((TableIdentifier)dbo);
 			}
 		}
+		return answer;
 	}
 
 	public void startExport(final Frame parent)
 	{
+    if (toExport == null) return;
+
 		progress = new ProgressDialog(ResourceMgr.getString("MsgSpoolWindowTitle"), parent, exporter);
 		exporter.setRowMonitor(progress.getMonitor());
 		progress.showProgress();
@@ -126,20 +129,20 @@ public class TableExporter
 			@Override
 			public void run()
 			{
-				for (TableIdentifier tbl : toExport)
-				{
-					String fname = StringUtil.makeFilename(tbl.getObjectName());
-					WbFile f = new WbFile(outputDirectory, fname + extension);
-					try
-					{
-						exporter.addTableExportJob(f, tbl);
-					}
-					catch (SQLException e)
-					{
-						LogMgr.logError("TableListPanel.exportTables()", "Error adding ExportJob", e);
-						WbSwingUtilities.showMessage(parent, e.getMessage());
-					}
-				}
+        for (TableIdentifier tbl : toExport)
+        {
+          String fname = StringUtil.makeFilename(tbl.getObjectName());
+          WbFile f = new WbFile(outputDirectory, fname + extension);
+          try
+          {
+            exporter.addTableExportJob(f, tbl);
+          }
+          catch (SQLException e)
+          {
+            LogMgr.logError("TableListPanel.exportTables()", "Error adding ExportJob", e);
+            WbSwingUtilities.showMessage(parent, e.getMessage());
+          }
+        }
 				progress.getInfoPanel().setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 				exporter.addExecutionListener(TableExporter.this);
 				exporter.startBackgroundExport();
