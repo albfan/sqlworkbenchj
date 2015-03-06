@@ -93,7 +93,7 @@ public class AutomaticRefreshMgr
     entry.timer = timer;
     panels.add(entry);
     timer.start();
-    LogMgr.logDebug("AutomaticRefreshMgr.addRefresh()", "Registered panel: " + panel.getName() + ", id=" + id + ", interval=" + milliSeconds);
+    LogMgr.logDebug("AutomaticRefreshMgr.addRefresh()", "Registered panel: " + panel.getName() + ", id=" + id + ", interval=" + KeepAliveDaemon.getTimeDisplay(milliSeconds));
   }
 
   @Override
@@ -108,9 +108,10 @@ public class AutomaticRefreshMgr
     if (entry == null) return;
 
     DwPanel panel = entry.panel.get();
-    if (panel != null)
+    if (panel == null)
     {
       // the panel seems to be gone, so remove this entry
+      LogMgr.logWarning("AutomaticRefreshMgr.actionPerformed()", "Panel with id=" + id + " is no longer valid");
       int index = getIndexForId(id);
       removePanel(index);
     }
