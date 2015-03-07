@@ -59,7 +59,6 @@ public class ExecuteSelAction
 		this.setIcon("execute_sel");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
-		this.setEnabled(false);
 		if (GuiSettings.getExecuteOnlySelected())
 		{
 			checkSelection = true;

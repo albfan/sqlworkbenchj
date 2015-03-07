@@ -340,7 +340,7 @@ public class SqlPanel
 	protected final List<ToolWindow> resultWindows = new ArrayList<>(1);
 	private final int macroClientId;
   private final AutomaticRefreshMgr refreshMgr;
-
+  private final Highlighter highlighter;
 //</editor-fold>
 
 	public SqlPanel(int clientId)
@@ -354,6 +354,8 @@ public class SqlPanel
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		editor = EditorPanel.createSqlEditor();
+    highlighter = new Highlighter(editor);
+
 		statusBar = new DwStatusBar(true, true);
 
 		int defRows = GuiSettings.getDefaultMaxRows();
@@ -426,6 +428,10 @@ public class SqlPanel
 		editor.setMacroExpansionEnabled(true, macroClientId);
 		editor.setBracketCompletionEnabled(true);
 		historyStatements = new StatementHistory(Settings.getInstance().getMaxHistorySize());
+
+    stmtRunner = new StatementRunner();
+    stmtRunner.setRowMonitor(this.rowMonitor);
+    stmtRunner.setMessagePrinter(this);
 	}
 
 	@Override
@@ -914,8 +920,8 @@ public class SqlPanel
 		actions.add(new JumpToStatement(this));
 		actions.add(editor.getJumpToLineAction());
 
-		this.executeAll.setEnabled(false);
-		this.executeSelected.setEnabled(false);
+//		this.executeAll.setEnabled(false);
+//		this.executeSelected.setEnabled(false);
 
 		this.toolbarActions.add(this.executeSelected);
 		this.toolbarActions.add(this.executeCurrent);
@@ -1677,13 +1683,6 @@ public class SqlPanel
 		if (this.autoCompletion != null) this.autoCompletion.setConnection(this.dbConnection);
 		if (showObjectInfoAction != null) showObjectInfoAction.checkEnabled();
 
-		if (this.stmtRunner == null)
-		{
-			this.stmtRunner = new StatementRunner();
-			this.stmtRunner.setRowMonitor(this.rowMonitor);
-			this.stmtRunner.setMessagePrinter(this);
-		}
-
 		if (this.stmtRunner != null)
 		{
 			this.stmtRunner.setConnection(aConnection);
@@ -1970,7 +1969,7 @@ public class SqlPanel
 			// might not have any effect.
 			try
 			{
-				executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 2500));
+				executionThread.join(Settings.getInstance().getIntProperty("workbench.sql.cancel.timeout", 5000));
 			}
 			catch (InterruptedException ex)
 			{
@@ -2061,13 +2060,7 @@ public class SqlPanel
 
 		synchronized (this.connectionLock)
 		{
-			if (!this.isConnected())
-			{
-				LogMgr.logError("SqlPanel.startExecution()", "startExecution() was called but no connection available!", null);
-				return;
-			}
-
-			if (this.dbConnection.isBusy())
+			if (dbConnection != null && this.dbConnection.isBusy())
 			{
 				showLogMessage(ResourceMgr.getString("ErrConnectionBusy"));
 				return;
@@ -3027,7 +3020,7 @@ public class SqlPanel
 	public ScriptParser createScriptParser()
 	{
 		ScriptParser scriptParser = new ScriptParser(ParserType.getTypeFromConnection(this.dbConnection));
-		scriptParser.setAlternateDelimiter(dbConnection.getAlternateDelimiter());
+		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(dbConnection, null));
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		scriptParser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 		return scriptParser;
@@ -3307,7 +3300,7 @@ public class SqlPanel
 
 				if (highlightCurrent && !editor.isModifiedAfter(scriptStart))
 				{
-					highlightStatement(scriptParser, i, selectionOffset);
+					highlighter.highlightStatement(scriptParser, i, selectionOffset);
 				}
 
 				stmtRunner.setQueryTimeout(timeout);
@@ -3415,7 +3408,7 @@ public class SqlPanel
 
 						if (!macroRun && !editor.isModifiedAfter(scriptStart))
 						{
-							highlightError(highlightOnError, scriptParser, commandWithError, selectionOffset, null);
+							highlighter.highlightError(highlightOnError, scriptParser, commandWithError, selectionOffset, null);
 						}
 
 						// force a refresh in order to display the selection
@@ -3462,7 +3455,7 @@ public class SqlPanel
 			if (commandWithError > -1 && !macroRun)
 			{
 				restoreSelection = false;
-				highlightError(highlightOnError, scriptParser, commandWithError, selectionOffset, errorDetails);
+				highlighter.highlightError(highlightOnError, scriptParser, commandWithError, selectionOffset, errorDetails);
 			}
 
 			if (failuresIgnored > 0)
@@ -3517,10 +3510,6 @@ public class SqlPanel
 			restoreSelection = restoreSelection && !GuiSettings.getKeepCurrentSqlHighlight() && !editorWasModified;
 			restoreSelection(highlightCurrent, jumpToNext, restoreSelection, currentCursor, oldSelectionStart, oldSelectionEnd, commandWithError, startIndex, endIndex, scriptParser);
 		}
-		catch (SQLException e)
-		{
-			if (statementResult != null) this.showLogMessage(statementResult.getMessageBuffer().toString());
-		}
 		catch (LowMemoryException mem)
 		{
 			WbManager.getInstance().showLowMemoryError();
@@ -3539,9 +3528,13 @@ public class SqlPanel
 			LogMgr.logError("SqlPanel.displayResult()", "Error executing statement", e);
 			if (statementResult != null)
 			{
-				this.showLogMessage(statementResult.getMessageBuffer().toString());
+				showLogMessage(statementResult.getMessageBuffer().toString());
 				statementResult.clear();
 			}
+      else
+      {
+        showLogMessage(e.getLocalizedMessage());
+      }
 		}
 		finally
 		{
@@ -3949,84 +3942,6 @@ public class SqlPanel
 		return count;
 	}
 
-	private void highlightStatement(ScriptParser scriptParser, int command, int startOffset)
-	{
-		if (this.editor == null) return;
-		final int startPos = scriptParser.getStartPosForCommand(command) + startOffset;
-		final int endPos = scriptParser.getEndPosForCommand(command) + startOffset;
-		final int line = this.editor.getLineOfOffset(startPos);
-
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				editor.scrollTo(line, 0);
-				editor.selectStatementTemporary(startPos, endPos);
-			}
-		});
-	}
-
-	protected void highlightError(final boolean doHighlight, ScriptParser scriptParser, int commandWithError, int startOffset, ErrorDescriptor error)
-	{
-		if (this.editor == null) return;
-		if (!doHighlight && !GuiSettings.jumpToError()) return;
-		if (scriptParser == null) return;
-
-		final int startPos;
-		final int endPos;
-		final int line;
-		final int newCaret;
-
-		boolean jumpToError = false;
-
-		if (error != null && error.getErrorPosition() > -1)
-		{
-			int startOfCommand = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
-			line = this.editor.getLineOfOffset(startOfCommand + error.getErrorPosition());
-			startPos = editor.getLineStartOffset(line);
-			endPos = editor.getLineEndOffset(line) - 1;
-			jumpToError = true;
-			if (error.getErrorColumn() > -1)
-			{
-				newCaret = startPos + error.getErrorColumn();
-			}
-			else
-			{
-				newCaret = startOfCommand + error.getErrorPosition();
-			}
-		}
-		else
-		{
-			startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
-			endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
-			line = this.editor.getLineOfOffset(startPos);
-			newCaret = -1;
-		}
-
-		if (!doHighlight && !jumpToError) return;
-
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (!editor.isLineVisible(line))
-				{
-					editor.scrollTo(line, 0);
-				}
-				if (doHighlight)
-				{
-					editor.selectError(startPos, endPos);
-				}
-				else
-				{
-					editor.setCaretPosition(newCaret);
-				}
-			}
-		});
-	}
-
 	@Override
 	public void registerToolWindow(ToolWindow window)
 	{
@@ -4090,10 +4005,6 @@ public class SqlPanel
 			@Override
 			public void run()
 			{
-				executeAll.setEnabled(flag);
-				executeSelected.setEnabled(flag);
-				executeCurrent.setEnabled(flag);
-
 				if (flag)
 				{
 					checkCommitAction();

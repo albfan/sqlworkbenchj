@@ -477,8 +477,17 @@ public class StatementRunner
 
 		if (this.currentConnection == null && this.currentCommand.isConnectionRequired())
 		{
-			String verb = SqlParsingUtil.getInstance(null).getSqlVerb(aSql);
-			throw new SQLException("Cannot execute command '" + verb + "' without a connection!");
+			final String verb = SqlParsingUtil.getInstance(null).getSqlVerb(aSql);
+
+			SQLException ex = new SQLException("Cannot execute command '" + verb + "' without a connection!")
+      {
+        @Override
+        public String getLocalizedMessage()
+        {
+          return ResourceMgr.getFormattedString("ErrConnRequired", verb);
+        }
+      };
+      throw ex;
 		}
 
 		this.currentCommand.setStatementRunner(this);
