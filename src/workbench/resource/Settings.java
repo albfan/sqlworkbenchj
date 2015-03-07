@@ -61,6 +61,8 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.dbobjects.objecttree.DbTreePanel;
+import workbench.gui.dbobjects.objecttree.TreePosition;
 import workbench.gui.lnf.FontScaler;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.settings.ExternalFileHandling;
@@ -2651,7 +2653,26 @@ public class Settings
 
 	// </editor-fold>
 
-	public String getSqlServerRemarksProperty()
+
+  public TreePosition getDbTreePosition()
+  {
+    String pos = getProperty(DbTreePanel.SETTINGS_PREFIX + "position", TreePosition.left.name());
+    try
+    {
+      return TreePosition.valueOf(pos);
+    }
+    catch (Throwable th)
+    {
+      return TreePosition.left;
+    }
+  }
+
+  public void setDbTreePosition(TreePosition pos)
+  {
+    setProperty("workbench.gui.mainwindow.dbtree.position", pos.name());
+  }
+
+  public String getSqlServerRemarksProperty()
 	{
 		return getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
 	}

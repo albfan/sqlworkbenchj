@@ -72,13 +72,7 @@ import workbench.util.StringUtil;
  */
 public class MacroTree
 	extends JTree
-	implements TreeModelListener,
-	           MouseListener,
-	           ClipboardSupport,
-	           ActionListener,
-	           TreeSelectionListener,
-						 GroupTree,
-						 ExpandableTree
+	implements TreeModelListener, MouseListener, ClipboardSupport, ActionListener, TreeSelectionListener, GroupTree, ExpandableTree
 {
   private final String pasteCmd = "paste-action";
   private final String sortCmd = "sort-action";
@@ -101,7 +95,6 @@ public class MacroTree
 		macroClientId = clientId;
 		loadMacros(forPopup);
 		setRootVisible(false);
-		putClientProperty("JTree.lineStyle", "Angled");
 		setShowsRootHandles(true);
 		setEditable(false);
 		setExpandsSelectedPaths(true);
@@ -339,7 +332,7 @@ public class MacroTree
 
 		pasteToFolderAction.setEnabled(canPaste);
     sortMacrosAction.setEnabled(groupSelected);
-    
+
 		WbAction a = popup.getPasteAction();
 		a.setEnabled(canPaste);
 

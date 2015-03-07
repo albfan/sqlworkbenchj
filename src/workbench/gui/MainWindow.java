@@ -112,6 +112,7 @@ import workbench.gui.actions.SaveMacrosAction;
 import workbench.gui.actions.SaveWorkspaceAction;
 import workbench.gui.actions.SelectTabAction;
 import workbench.gui.actions.ShowDbExplorerAction;
+import workbench.gui.actions.ShowDbTreeAction;
 import workbench.gui.actions.ShowDbmsManualAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.ShowMacroPopupAction;
@@ -130,10 +131,13 @@ import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.TabCloser;
 import workbench.gui.components.TabbedPaneHistory;
 import workbench.gui.components.WbMenu;
+import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.gui.dbobjects.objecttree.DbTreePanel;
+import workbench.gui.dbobjects.objecttree.TreePosition;
 import workbench.gui.fontzoom.DecreaseFontSize;
 import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.fontzoom.IncreaseFontSize;
@@ -196,7 +200,7 @@ public class MainWindow
 	private ShowDbExplorerAction dbExplorerAction;
 	private NewDbExplorerPanelAction newDbExplorerPanel;
 	private NewDbExplorerWindowAction newDbExplorerWindow;
-
+  private ShowDbTreeAction showDbTree;
 	private final WbTabbedPane sqlTab;
 	private final TabbedPaneHistory tabHistory;
 	private WbToolbar currentToolbar;
@@ -233,6 +237,7 @@ public class MainWindow
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
 	private DropHandler dropHandler;
+  private DbTreePanel treePanel;
 
 	/**
 	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
@@ -339,6 +344,50 @@ public class MainWindow
 			});
 		}
 	}
+
+  public void showDbTree()
+  {
+    if (treePanel == null)
+    {
+      treePanel = new DbTreePanel();
+      getContentPane().remove(sqlTab);
+
+      WbSplitPane split = new WbSplitPane();
+      if (Settings.getInstance().getDbTreePosition() == TreePosition.left)
+      {
+        split.setLeftComponent(treePanel);
+        split.setRightComponent(sqlTab);
+        split.setDividerLocation((int)(getWidth() * 0.15));
+      }
+      else
+      {
+        split.setLeftComponent(sqlTab);
+        split.setRightComponent(treePanel);
+        split.setDividerLocation((int)(getWidth() * 0.85));
+      }
+      getContentPane().add(split, BorderLayout.CENTER);
+      doLayout();
+      validate();
+      treePanel.connect(currentProfile);
+    }
+    else
+    {
+      treePanel.requestFocusInWindow();
+    }
+  }
+
+  public void hideDbTree()
+  {
+    if (treePanel != null)
+    {
+      getContentPane().removeAll();
+      getContentPane().add(sqlTab, BorderLayout.CENTER);
+      doLayout();
+      validate();
+      treePanel.disconnect(false);
+      treePanel = null;
+    }
+  }
 
 	@Override
 	public void fileNameChanged(Object sender, String newFilename)
@@ -464,6 +513,7 @@ public class MainWindow
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
 		this.newDbExplorerPanel = new NewDbExplorerPanelAction(this);
 		this.newDbExplorerWindow = new NewDbExplorerWindowAction(this);
+    this.showDbTree = new ShowDbTreeAction(this);
 
 		int tabCount = this.sqlTab.getTabCount();
 		for (int tab=0; tab < tabCount; tab ++)
@@ -1545,6 +1595,7 @@ public class MainWindow
 		this.dbExplorerAction.setEnabled(true);
 		this.newDbExplorerPanel.setEnabled(true);
 		this.newDbExplorerWindow.setEnabled(true);
+		this.showDbTree.setEnabled(true);
 
 		this.disconnectAction.setEnabled(true);
 		this.reconnectAction.setEnabled(true);
@@ -1561,6 +1612,12 @@ public class MainWindow
 		showDbmsManual.setDbms(conn.getDbId(), version);
 		showConnectionWarnings(conn, panel);
 		selectCurrentEditor();
+
+    if (treePanel != null)
+    {
+      treePanel.connect(currentProfile);
+    }
+
 	}
 
 	@Override
@@ -1928,11 +1985,15 @@ public class MainWindow
 	@Override
 	public void dispose()
 	{
+    if (treePanel != null)
+    {
+      treePanel.dispose();
+    }
 		sqlTab.removeAll();
 		WbAction.dispose(
 			this.assignWorkspaceAction,this.closeWorkspaceAction,this.createMacro,this.createNewConnection,
 			this.dbExplorerAction,this.disconnectAction,this.reconnectAction,this.disconnectTab,this.loadWorkspaceAction,this.manageMacros,
-			this.newDbExplorerPanel,this.newDbExplorerWindow,this.nextTab,this.prevTab,this.saveAsWorkspaceAction,
+			this.newDbExplorerPanel,this.newDbExplorerWindow,this.showDbTree, this.nextTab,this.prevTab,this.saveAsWorkspaceAction,
 			this.saveWorkspaceAction,this.showDbmsManual,this.showMacroPopup, this.reloadWorkspace, this.loadMacros, this.saveMacros
 		);
 		for (JMenuBar bar : panelMenus)
@@ -1996,6 +2057,11 @@ public class MainWindow
 	{
 		try
 		{
+      if (treePanel != null)
+      {
+        treePanel.disconnect(true);
+      }
+
 			WbConnection conn = null;
 
 			for (int i = 0; i < this.sqlTab.getTabCount(); i++)
@@ -2049,6 +2115,7 @@ public class MainWindow
 		this.dbExplorerAction.setEnabled(false);
 		this.newDbExplorerPanel.setEnabled(false);
 		this.newDbExplorerWindow.setEnabled(false);
+		this.showDbTree.setEnabled(false);
 		this.showStatusMessage("");
 		for (int i=0; i < sqlTab.getTabCount(); i++)
 		{
@@ -2645,6 +2712,10 @@ public class MainWindow
 		result.add(this.dbExplorerAction);
 		result.add(this.newDbExplorerPanel);
 		result.add(this.newDbExplorerWindow);
+    if (Settings.getInstance().getBoolProperty("workbench.gui.enable.dbtree", false))
+    {
+      result.add(this.showDbTree);
+    }
 		result.addSeparator();
 
 		result.add(new DataPumperAction(this));
@@ -2756,8 +2827,8 @@ public class MainWindow
 
 	/**
 	 *	Closes the current workspace.
-	 *  The tab count is reset to 1, the SQL history for the tab will be emptied
-	 *  and the workspace filename will be "forgotten".
+	 *  The tab count is dispose to 1, the SQL history for the tab will be emptied
+  and the workspace filename will be "forgotten".
 	 */
 	public void closeWorkspace(boolean checkUnsaved)
 	{

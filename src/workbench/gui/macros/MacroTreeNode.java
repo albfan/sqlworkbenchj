@@ -32,28 +32,19 @@ import javax.swing.tree.TreePath;
 public class MacroTreeNode
 	extends DefaultMutableTreeNode
 {
-	private Object data;
-
 	public MacroTreeNode(Object dataObject)
 	{
 		super(dataObject);
-		setDataObject(dataObject);
 	}
 
 	public MacroTreeNode(Object dataObject, boolean allowsChildren)
 	{
 		super(dataObject, allowsChildren);
-		setDataObject(dataObject);
 	}
 
 	public Object getDataObject()
 	{
-		return data;
-	}
-
-	public void setDataObject(Object dataObject)
-	{
-		this.data = dataObject;
+		return getUserObject();
 	}
 
 	public DragType getDropType(TreePath[] source)
@@ -73,7 +64,7 @@ public class MacroTreeNode
 			}
 		}
 		if (sourceBelongsToUs) return DragType.none;
-		
+
 		if (getAllowsChildren())
 		{
 			if (sourceIsGroup) return DragType.reorderItems;
