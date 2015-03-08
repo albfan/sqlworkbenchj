@@ -31,6 +31,7 @@ public class ShowDbTreeAction
 	extends WbAction
 {
 	private MainWindow mainWin;
+
 	public ShowDbTreeAction(MainWindow aWindow)
 	{
 		super();

@@ -19,6 +19,7 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.DbObject;
 import workbench.db.WbConnection;
@@ -63,9 +64,34 @@ public class EditorDropHandler
     DbObject dbo = node.getDbObject();
     if (dbo == null)
     {
+      if (TreeLoader.TYPE_COLUMN_LIST.equals(node.getType()))
+      {
+        return getColumnList(node);
+      }
       return node.getName();
     }
     return dbo.getObjectExpression(conn);
   }
 
+  private String getColumnList(ObjectTreeNode columns)
+  {
+    int count = columns.getChildCount();
+    StringBuilder result = new StringBuilder(count * 10);
+    int colCount = 0;
+    for (int i=0; i < count; i++)
+    {
+      ObjectTreeNode col = (ObjectTreeNode)columns.getChildAt(i);
+      if (col != null && col.getDbObject() != null)
+      {
+        DbObject dbo = col.getDbObject();
+        if (dbo instanceof ColumnIdentifier)
+        {
+          if (colCount > 0) result.append(", ");
+          result.append(dbo.getObjectName());
+          colCount++;
+        }
+      }
+    }
+    return result.toString();
+  }
 }

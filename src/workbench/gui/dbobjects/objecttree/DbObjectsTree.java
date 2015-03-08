@@ -53,7 +53,7 @@ public class DbObjectsTree
 
   public DbObjectsTree()
   {
-    super();
+    super(new DbObjectTreeModel(new ObjectTreeNode("Database", "database")));
     setShowsRootHandles(true);
     addTreeExpansionListener(this);
 		setCellRenderer(new DbObjectNodeRenderer());

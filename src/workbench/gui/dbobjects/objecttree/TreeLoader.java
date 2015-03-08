@@ -31,6 +31,7 @@ import workbench.db.DbObject;
 import workbench.db.DependencyNode;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
+import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -201,6 +202,7 @@ public class TreeLoader
       if (isTable(tbl))
       {
         addTableNodes(node);
+        connection.getObjectCache().addTable(new TableDefinition(tbl));
       }
       typeNode.add(node);
       node.setChildrenLoaded(true);
@@ -282,6 +284,7 @@ public class TreeLoader
     if (!hasColumns(tbl)) return;
 
     List<ColumnIdentifier> columns = meta.getTableColumns(tbl);
+    connection.getObjectCache().addTable(new TableDefinition(tbl, columns));
     for (ColumnIdentifier col : columns)
     {
       ObjectTreeNode node = new ObjectTreeNode(col);
