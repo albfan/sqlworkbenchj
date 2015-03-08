@@ -32,6 +32,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeEvent;
@@ -95,7 +96,8 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbMenuItem;
-import workbench.gui.dbobjects.objecttree.ObjectTreeNode;
+import workbench.gui.dbobjects.objecttree.EditorDropHandler;
+import workbench.gui.dbobjects.objecttree.ObjectTreeTransferable;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.SearchAndReplace;
@@ -1025,19 +1027,19 @@ public class EditorPanel
 	}
 
 	@Override
-	public void dragOver(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+	public void dragOver(DropTargetDragEvent evt)
 	{
 	}
 
 	@Override
-	public void drop(java.awt.dnd.DropTargetDropEvent dropTargetDropEvent)
+	public void drop(DropTargetDropEvent evt)
 	{
 		try
 		{
-			Transferable tr = dropTargetDropEvent.getTransferable();
+			Transferable tr = evt.getTransferable();
       if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
 			{
-				dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
+				evt.acceptDrop(DnDConstants.ACTION_COPY);
 				java.util.List fileList = (java.util.List)tr.getTransferData(DataFlavor.javaFileListFlavor);
 				if (fileList != null && fileList.size() == 1)
 				{
@@ -1045,16 +1047,16 @@ public class EditorPanel
 					if (this.canCloseFile() != YesNoCancelResult.cancel)
 					{
 						this.readFile(file);
-						dropTargetDropEvent.getDropTargetContext().dropComplete(true);
+						evt.getDropTargetContext().dropComplete(true);
 					}
 					else
 					{
-						dropTargetDropEvent.getDropTargetContext().dropComplete(false);
+						evt.getDropTargetContext().dropComplete(false);
 					}
 				}
 				else
 				{
-					dropTargetDropEvent.getDropTargetContext().dropComplete(false);
+					evt.getDropTargetContext().dropComplete(false);
 					final Window w = SwingUtilities.getWindowAncestor(this);
 					EventQueue.invokeLater(new Runnable()
 					{
@@ -1068,20 +1070,21 @@ public class EditorPanel
 					});
 				}
 			}
-      else if (tr.isDataFlavorSupported(ObjectTreeNode.DATA_FLAVOR))
+      else if (tr.isDataFlavorSupported(ObjectTreeTransferable.DATA_FLAVOR))
       {
-        ObjectTreeNode node = (ObjectTreeNode)tr.getTransferData(ObjectTreeNode.DATA_FLAVOR);
-        this.setSelectedText(node.getName());
+        ObjectTreeTransferable selection = (ObjectTreeTransferable)tr.getTransferData(ObjectTreeTransferable.DATA_FLAVOR);
+        EditorDropHandler handler = new EditorDropHandler(this);
+        handler.handleDrop(selection);
       }
 			else
 			{
-				dropTargetDropEvent.rejectDrop();
+				evt.rejectDrop();
 			}
 		}
-		catch (IOException | UnsupportedFlavorException io)
+		catch (IOException | UnsupportedFlavorException ex)
 		{
-			io.printStackTrace();
-			dropTargetDropEvent.rejectDrop();
+      LogMgr.logDebug("EditorPanel.drop()", "Error when processing drop event", ex);
+			evt.rejectDrop();
 		}
 	}
 

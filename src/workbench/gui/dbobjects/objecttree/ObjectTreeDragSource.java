@@ -27,6 +27,7 @@ import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.DragSourceDropEvent;
 import java.awt.dnd.DragSourceEvent;
 import java.awt.dnd.DragSourceListener;
+import java.io.Serializable;
 
 import javax.swing.tree.TreePath;
 
@@ -35,10 +36,10 @@ import javax.swing.tree.TreePath;
  * @author Thomas Kellerer
  */
 public class ObjectTreeDragSource
-  implements DragSourceListener, DragGestureListener
+implements DragSourceListener, DragGestureListener, Serializable
 {
   private DragSource source;
-  private ObjectTreeNode transferable;
+  private ObjectTreeTransferable transferable;
   private DbObjectsTree sourceTree;
 
   public ObjectTreeDragSource(DbObjectsTree tree)
@@ -54,8 +55,15 @@ public class ObjectTreeDragSource
   @Override
   public void dragGestureRecognized(DragGestureEvent dge)
   {
-    TreePath path = sourceTree.getSelectionPath();
-    transferable = (ObjectTreeNode)path.getLastPathComponent();
+    TreePath[] selected = sourceTree.getSelectionPaths();
+    if (selected == null) return;
+
+    ObjectTreeNode[] nodes = new ObjectTreeNode[selected.length];
+    for (int i=0; i < selected.length; i++)
+    {
+      nodes[i] = (ObjectTreeNode)selected[i].getLastPathComponent();
+    }
+    transferable = new ObjectTreeTransferable(nodes, sourceTree.getConnection().getId());
     source.startDrag(dge, DragSource.DefaultCopyDrop, transferable, this);
   }
 

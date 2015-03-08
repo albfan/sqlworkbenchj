@@ -20,6 +20,7 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.awt.EventQueue;
+import java.io.Serializable;
 import java.sql.SQLException;
 
 import javax.swing.JTree;
@@ -28,6 +29,7 @@ import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import workbench.interfaces.ExpandableTree;
 import workbench.log.LogMgr;
@@ -44,7 +46,7 @@ import workbench.util.WbThread;
  */
 public class DbObjectsTree
   extends JTree
-  implements TreeExpansionListener, ExpandableTree
+  implements TreeExpansionListener, ExpandableTree, Serializable
 {
   private TreeLoader loader;
   private ObjectTreeDragSource dragSource;
@@ -59,12 +61,19 @@ public class DbObjectsTree
 
 		setEditable(false);
 		setExpandsSelectedPaths(true);
+    getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
 		// setting the row height to 0 makes it dynamic
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
     ToolTipManager.sharedInstance().registerComponent(this);
     dragSource = new ObjectTreeDragSource(this);
+  }
+
+  public WbConnection getConnection()
+  {
+    if (loader == null) return null;
+    return loader.getConnection();
   }
 
   public void setConnection(WbConnection conn)
@@ -188,7 +197,6 @@ public class DbObjectsTree
   @Override
   public void treeCollapsed(TreeExpansionEvent event)
   {
-
   }
 
   public void dispose()
@@ -200,20 +208,16 @@ public class DbObjectsTree
   @Override
 	public void expandAll()
   {
-
   }
 
   @Override
 	public void collapseAll()
   {
-
   }
 
   private DbObjectTreeModel getTreeModel()
   {
     return (DbObjectTreeModel)getModel();
   }
-
-
 
 }

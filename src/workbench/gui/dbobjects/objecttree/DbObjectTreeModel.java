@@ -40,7 +40,7 @@ public class DbObjectTreeModel
   public ObjectTreeNode findNodeByType(String name, String type)
   {
     if (StringUtil.isEmptyString(name) || StringUtil.isEmptyString(type)) return null;
-    
+
     return findNodeByType((ObjectTreeNode)getRoot(), name, type);
   }
 
