@@ -80,6 +80,7 @@ public class ExcelReader
 
 	private final boolean useXLSX;
 	private MessageBuffer messages = new MessageBuffer();
+  private boolean emptyStringIsNull;
 
 	public ExcelReader(File excelFile, int sheetNumber, String name)
 	{
@@ -95,6 +96,12 @@ public class ExcelReader
 		}
 		useXLSX = inputFile.getExtension().equalsIgnoreCase("xlsx");
 	}
+
+  @Override
+  public void setEmptyStringIsNull(boolean flag)
+  {
+    emptyStringIsNull = flag;
+  }
 
 	@Override
 	public MessageBuffer getMessages()
@@ -406,7 +413,7 @@ public class ExcelReader
 				break;
 			default:
 				String svalue = cell.getStringCellValue();
-				if (svalue != null && StringUtil.equalString(svalue, nullString))
+        if (isNullString(svalue))
 				{
 					value = null;
 				}
@@ -417,6 +424,13 @@ public class ExcelReader
 		}
 		return value;
 	}
+
+  private boolean isNullString(String value)
+  {
+    if (value == null) return true;
+    if (emptyStringIsNull && StringUtil.isEmptyString(value)) return true;
+    return StringUtil.equalString(value, nullString);
+  }
 
 	@Override
 	public void setNullString(String nullString)

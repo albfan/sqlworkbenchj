@@ -32,6 +32,7 @@ import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.sql.SplitPaneExpander;
 
 /**
  * A JSplitPane which restores the divider size after a UI Change
@@ -43,6 +44,7 @@ public class WbSplitPane
 	extends JSplitPane
 {
 	public int DEFAULT_DIVIDER_SIZE = 7;
+  private SplitPaneExpander expander;
 
 	public WbSplitPane()
 	{
@@ -108,7 +110,13 @@ public class WbSplitPane
 		this.setDividerSize(DEFAULT_DIVIDER_SIZE);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setContinuousLayout(true);
+    expander = new SplitPaneExpander(this);
 	}
+
+  public SplitPaneExpander getExpander()
+  {
+    return expander;
+  }
 
 	public Border getDividerBorder()
 	{

@@ -41,7 +41,8 @@ public interface SpreadsheetReader
 	void setActiveWorksheet(String name);
 	List<Object> getRowValues(int row);
 	void setNullString(String nullString);
-
+  void setEmptyStringIsNull(boolean flag);
+  
 	/**
 	 * Return the total row count in the spreadsheet including a possible header row.
 	 *

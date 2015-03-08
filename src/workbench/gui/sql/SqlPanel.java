@@ -821,7 +821,7 @@ public class SqlPanel
 		this.actions.add(selectResult);
 		this.actions.add(new ViewMessageLogAction(this));
 
-		SplitPaneExpander expander = new SplitPaneExpander(this.contentPanel);
+		SplitPaneExpander expander = contentPanel.getExpander();
 		a = new ExpandEditorAction(expander);
 		a.setCreateMenuSeparator(true);
 		this.actions.add(a);

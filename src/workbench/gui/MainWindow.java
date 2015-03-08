@@ -48,6 +48,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -345,6 +346,11 @@ public class MainWindow
 		}
 	}
 
+  public boolean isDbTreeVisible()
+  {
+    return treePanel != null;
+  }
+
   public void showDbTree()
   {
     if (treePanel == null)
@@ -352,19 +358,26 @@ public class MainWindow
       treePanel = new DbTreePanel();
       getContentPane().remove(sqlTab);
 
+      int defaultLocation = -1;
+
       WbSplitPane split = new WbSplitPane();
+      split.setOneTouchExpandable(true);
       if (Settings.getInstance().getDbTreePosition() == TreePosition.left)
       {
+        defaultLocation = (int)(getWidth() * 0.15);
         split.setLeftComponent(treePanel);
         split.setRightComponent(sqlTab);
-        split.setDividerLocation((int)(getWidth() * 0.15));
       }
       else
       {
         split.setLeftComponent(sqlTab);
         split.setRightComponent(treePanel);
-        split.setDividerLocation((int)(getWidth() * 0.85));
+        defaultLocation = (int)(getWidth() * 0.85);
       }
+
+      int location = Settings.getInstance().getIntProperty(DbTreePanel.SETTINGS_PREFIX + "divider", defaultLocation);
+      split.setDividerLocation(location);
+
       getContentPane().add(split, BorderLayout.CENTER);
       doLayout();
       validate();
@@ -378,9 +391,26 @@ public class MainWindow
 
   public void hideDbTree()
   {
+    if (treePanel == null) return;
+    WbSplitPane split = (WbSplitPane)treePanel.getParent();
+    split.getExpander().toggleLowerComponentExpand();
+  }
+
+  public void restoreDbTree()
+  {
+    if (treePanel == null) return;
+    WbSplitPane split = (WbSplitPane)treePanel.getParent();
+    split.getExpander().toggleLowerComponentExpand();
+  }
+
+  public void closeDbTree()
+  {
     if (treePanel != null)
     {
-      getContentPane().removeAll();
+      JSplitPane split = (JSplitPane)treePanel.getParent();
+      int location = split.getDividerLocation();
+      Settings.getInstance().setProperty(DbTreePanel.SETTINGS_PREFIX + "divider", location);
+      getContentPane().remove(split);
       getContentPane().add(sqlTab, BorderLayout.CENTER);
       doLayout();
       validate();
@@ -1302,6 +1332,20 @@ public class MainWindow
 		{
 			BookmarkManager.getInstance().updateInBackground(MainWindow.this, getSqlPanel(lastIndex), false);
 		}
+
+    if (getCurrentPanel() instanceof DbExplorerPanel)
+    {
+      hideDbTree();
+    }
+    else
+    {
+      MainPanel lastPanel = getSqlPanel(lastIndex);
+      if (lastPanel instanceof DbExplorerPanel)
+      {
+        restoreDbTree();
+      }
+    }
+
 	}
 
 	private void updateCurrentTab(int index)
@@ -1361,6 +1405,14 @@ public class MainWindow
 		}
 		boolean macroVisible = (showMacroPopup != null && showMacroPopup.isPopupVisible());
 		sett.setProperty(this.getClass().getName() + ".macropopup.visible", macroVisible);
+
+    Component component = getContentPane().getComponent(0);
+    if (component instanceof JSplitPane)
+    {
+      JSplitPane split = (JSplitPane)component;
+      int location = split.getDividerLocation();
+      Settings.getInstance().setProperty(DbTreePanel.SETTINGS_PREFIX + "divider", location);
+    }
 	}
 
 	@Override

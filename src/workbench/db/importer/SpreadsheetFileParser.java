@@ -355,6 +355,7 @@ public class SpreadsheetFileParser
 		if (reader == null)
 		{
 			reader = SpreadsheetReader.Factory.createReader(inputFile, sheetIndex, sheetName);
+      reader.setEmptyStringIsNull(emptyStringIsNull);
 			if (sheetIndex < 0 && StringUtil.isNonBlank(sheetName))
 			{
 				reader.setActiveWorksheet(sheetName);
@@ -570,10 +571,9 @@ public class SpreadsheetFileParser
 			if (cancelImport) break;
 
 			boolean processRow = receiver.shouldProcessNextRow();
-			if (!processRow) receiver.nextRowSkipped();
-
 			if (!processRow)
 			{
+        receiver.nextRowSkipped();
 				continue;
 			}
 
@@ -581,7 +581,11 @@ public class SpreadsheetFileParser
 			dataRowValues = reader.getRowValues(currentRow);
 
 			// Silently ignore empty rows
-			if (dataRowValues.isEmpty()) continue;
+			if (dataRowValues.isEmpty())
+      {
+        receiver.nextRowSkipped();
+        continue;
+      }
 
 			if (dataRowValues.size() < rowData.length)
 			{
@@ -803,6 +807,10 @@ public class SpreadsheetFileParser
 	public void setEmptyStringIsNull(boolean flag)
 	{
 		this.emptyStringIsNull = flag;
+    if (reader != null)
+    {
+      reader.setEmptyStringIsNull(flag);
+    }
 	}
 
 	@Override

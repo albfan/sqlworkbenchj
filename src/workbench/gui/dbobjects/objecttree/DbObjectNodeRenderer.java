@@ -44,16 +44,21 @@ public class DbObjectNodeRenderer
 	extends DefaultTreeCellRenderer
 {
   private Map<String, String> iconMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+  private Map<String, String> iconMapOpen = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
 	public DbObjectNodeRenderer()
 	{
 		super();
-    iconMap.put("table", "table");
+    iconMap.put(TreeLoader.TYPE_TABLE, "table");
+    iconMap.put(TreeLoader.TYPE_VIEW, "table");
     iconMap.put(DbMetadata.MVIEW_NAME, "table");
     iconMap.put("database", "profile");
-    iconMap.put("schema", "folder");
-    iconMap.put("catalog", "folder");
-    iconMap.put("type", "db_type");
+    iconMap.put(TreeLoader.TYPE_SCHEMA, "folder");
+    iconMap.put(TreeLoader.TYPE_CATALOG, "folder");
+    iconMap.put(TreeLoader.TYPE_DBO_TYPE_NODE, "db_type");
+
+    iconMapOpen.put(TreeLoader.TYPE_SCHEMA, "folder-open");
+    iconMapOpen.put(TreeLoader.TYPE_CATALOG, "folder-open");
 	}
 
 	@Override
@@ -76,7 +81,14 @@ public class DbObjectNodeRenderer
       }
       else
       {
-        String key = iconMap.get(type);
+        String key = null;
+
+        if (expanded)
+        {
+          key = iconMapOpen.get(type);
+        }
+        if (key == null) key = iconMap.get(type);
+
         if (key != null)
         {
           setIcon(IconMgr.getInstance().getLabelIcon(key));

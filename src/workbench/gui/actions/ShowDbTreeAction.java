@@ -41,6 +41,13 @@ public class ShowDbTreeAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-    mainWin.showDbTree();
+    if (mainWin.isDbTreeVisible())
+    {
+      mainWin.closeDbTree();
+    }
+    else
+    {
+      mainWin.showDbTree();
+    }
   }
 }

@@ -274,10 +274,13 @@ public class TreeLoader
       return;
     }
 
-    DbMetadata meta = connection.getMetadata();
-    if (!meta.isTableType(dbo.getObjectType())) return;
+    if (!(dbo instanceof TableIdentifier)) return;
 
     TableIdentifier tbl = (TableIdentifier)dbo;
+    DbMetadata meta = connection.getMetadata();
+
+    if (!hasColumns(tbl)) return;
+
     List<ColumnIdentifier> columns = meta.getTableColumns(tbl);
     for (ColumnIdentifier col : columns)
     {

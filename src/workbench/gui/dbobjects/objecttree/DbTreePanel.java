@@ -63,6 +63,7 @@ public class DbTreePanel
   implements Reloadable
 {
   public static final String SETTINGS_PREFIX = "workbench.gui.mainwindow.dbtree.";
+  
   private static int instanceCount = 0;
 	private DbObjectsTree tree;
   private int id;

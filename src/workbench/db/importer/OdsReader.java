@@ -63,6 +63,7 @@ public class OdsReader
 	private final Set<String> tsFormats = CollectionUtil.treeSet("HH", "mm", "ss", "SSS", "KK", "kk");
 	private MessageBuffer messages = new MessageBuffer();
 	private final ValueConverter converter = new ValueConverter();
+  private boolean emptyStringIsNull;
 
 	public OdsReader(File odsFile, int sheetIndex, String name)
 	{
@@ -105,6 +106,12 @@ public class OdsReader
 		}
 		return headerColumns;
 	}
+
+  @Override
+  public void setEmptyStringIsNull(boolean flag)
+  {
+    emptyStringIsNull = flag;
+  }
 
 	private void readHeaderColsDefault()
 	{
@@ -301,15 +308,18 @@ public class OdsReader
 			}
 			else
 			{
-				value = cell.getStringValue();
+				String sValue = cell.getStringValue();
+        if (isNullString(sValue))
+        {
+          value = null;
+        }
+        else
+        {
+          value = sValue;
+        }
 			}
 
-			if (value != null && nullIndicator != null && value.equals(nullIndicator))
-			{
-				value = null;
-			}
-
-			if (value == null)
+      if (value == null)
 			{
 				nullCount ++;
 			}
@@ -321,6 +331,13 @@ public class OdsReader
 		}
 		return result;
 	}
+
+  private boolean isNullString(String value)
+  {
+    if (value == null) return true;
+    if (emptyStringIsNull && StringUtil.isEmptyString(value)) return true;
+    return StringUtil.equalString(value, nullIndicator);
+  }
 
 	@Override
 	public void setNullString(String nullString)
