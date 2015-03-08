@@ -23,13 +23,18 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
@@ -40,6 +45,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
+import workbench.gui.MainWindow;
 import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.ReloadAction;
@@ -47,7 +53,6 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.MultiSelectComboBox;
 import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbToolbarButton;
 
 import workbench.util.CollectionUtil;
 import workbench.util.WbThread;
@@ -60,10 +65,10 @@ import workbench.util.WbThread;
  */
 public class DbTreePanel
 	extends JPanel
-  implements Reloadable
+  implements Reloadable, ActionListener
 {
   public static final String SETTINGS_PREFIX = "workbench.gui.mainwindow.dbtree.";
-  
+
   private static int instanceCount = 0;
 	private DbObjectsTree tree;
   private int id;
@@ -73,7 +78,7 @@ public class DbTreePanel
   private List<String> selectedTypes;
   private JPanel toolPanel;
   private ReloadAction reload;
-  private WbToolbarButton closeButton;
+  private WbAction closeAction;
 
 	public DbTreePanel()
 	{
@@ -110,7 +115,7 @@ public class DbTreePanel
     bar.add(new ExpandTreeAction(tree));
     bar.add(new CollapseTreeAction(tree));
     bar.addSeparator();
-    WbAction closeAction = new WbAction("close-panel");
+    closeAction = new WbAction(this, "close-panel");
     closeAction.setIcon("close-panel");
     bar.add(closeAction);
     gc.gridx ++;
@@ -221,5 +226,25 @@ public class DbTreePanel
   {
     return tree.requestFocusInWindow();
   }
+
+  @Override
+  public void actionPerformed(ActionEvent e)
+  {
+    Window frame = SwingUtilities.getWindowAncestor(this);
+
+    if (frame instanceof MainWindow)
+    {
+      final MainWindow mainWin = (MainWindow)frame;
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          mainWin.closeDbTree();
+        }
+      });
+    }
+  }
+
 
 }

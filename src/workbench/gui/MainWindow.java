@@ -403,6 +403,11 @@ public class MainWindow
     split.getExpander().toggleLowerComponentExpand();
   }
 
+  public DbTreePanel getDbTree()
+  {
+    return treePanel;
+  }
+
   public void closeDbTree()
   {
     if (treePanel != null)

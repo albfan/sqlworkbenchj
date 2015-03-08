@@ -23,6 +23,7 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.gui.MainWindow;
+import workbench.gui.dbobjects.objecttree.DbTreePanel;
 
 /**
  *	@author  Thomas Kellerer
@@ -44,7 +45,8 @@ public class ShowDbTreeAction
 	{
     if (mainWin.isDbTreeVisible())
     {
-      mainWin.closeDbTree();
+      DbTreePanel dbTree = mainWin.getDbTree();
+      dbTree.requestFocusInWindow();
     }
     else
     {
