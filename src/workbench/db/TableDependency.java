@@ -195,6 +195,21 @@ public class TableDependency
 		readDependencyTree(false);
 	}
 
+	public List<DependencyNode> getIncomingForeignKeys()
+	{
+		boolean direct = this.directChildrenOnly;
+		try
+		{
+			setRetrieveDirectChildrenOnly(true);
+			readTreeForChildren();
+		}
+		finally
+		{
+			setRetrieveDirectChildrenOnly(direct);
+		}
+		return getLeafs();
+	}
+
 	public List<DependencyNode> getOutgoingForeignKeys()
 	{
 		boolean direct = this.directChildrenOnly;
@@ -605,7 +620,6 @@ public class TableDependency
 	public DataStore getDisplayDataStore(boolean showImportedKeys)
   {
 		setRetrieveDirectChildrenOnly(true);
-    String refColName = null;
 
     if (showImportedKeys)
     {

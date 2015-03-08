@@ -31,6 +31,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeEvent;
@@ -47,7 +48,6 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -95,6 +95,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbMenuItem;
+import workbench.gui.dbobjects.objecttree.ObjectTreeNode;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.SearchAndReplace;
@@ -1006,11 +1007,11 @@ public class EditorPanel
 	}
 
 	@Override
-	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+	public void dragEnter(DropTargetDragEvent dropTargetDragEvent)
 	{
-		if (this.isEditable())
+		if (isEditable())
 		{
-			dropTargetDragEvent.acceptDrag (DnDConstants.ACTION_COPY);
+			dropTargetDragEvent.acceptDrag(DnDConstants.ACTION_COPY);
 		}
 		else
 		{
@@ -1034,7 +1035,7 @@ public class EditorPanel
 		try
 		{
 			Transferable tr = dropTargetDropEvent.getTransferable();
-			if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
+      if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
 			{
 				dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
 				java.util.List fileList = (java.util.List)tr.getTransferData(DataFlavor.javaFileListFlavor);
@@ -1067,6 +1068,11 @@ public class EditorPanel
 					});
 				}
 			}
+      else if (tr.isDataFlavorSupported(ObjectTreeNode.DATA_FLAVOR))
+      {
+        ObjectTreeNode node = (ObjectTreeNode)tr.getTransferData(ObjectTreeNode.DATA_FLAVOR);
+        this.setSelectedText(node.getName());
+      }
 			else
 			{
 				dropTargetDropEvent.rejectDrop();

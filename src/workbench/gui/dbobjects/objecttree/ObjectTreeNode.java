@@ -19,6 +19,11 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -35,7 +40,10 @@ import workbench.util.StringUtil;
  */
 public class ObjectTreeNode
   extends DefaultMutableTreeNode
+  implements Transferable, Serializable
 {
+	public static final DataFlavor DATA_FLAVOR = new DataFlavor(ObjectTreeNode.class, "DbObjectNode");
+
   private Set<String> typesWithChildren = CollectionUtil.caseInsensitiveSet(
     "database", "catalog", "schema", "table", "view", "materialized view", "type", "package", "enum");
   private String nodeType;
@@ -47,6 +55,7 @@ public class ObjectTreeNode
     super(dbo);
     nodeType = dbo.getObjectType();
     nodeName = dbo.getObjectName();
+    allowsChildren = false;
   }
 
   public ObjectTreeNode(String name, String type)
@@ -81,12 +90,7 @@ public class ObjectTreeNode
   @Override
   public boolean isLeaf()
   {
-    if (canHaveChildren()) return false;
-    if (isLoaded)
-    {
-      return getChildCount() > 0;
-    }
-    return true;
+    return !allowsChildren;
   }
 
   public DbObject getDbObject()
@@ -140,4 +144,24 @@ public class ObjectTreeNode
     if (StringUtil.isEmptyString(remarks)) return null;
     return remarks;
   }
+
+  @Override
+  public DataFlavor[] getTransferDataFlavors()
+  {
+    return new DataFlavor[] { DATA_FLAVOR };
+  }
+
+  @Override
+  public boolean isDataFlavorSupported(DataFlavor flavor)
+  {
+    return DATA_FLAVOR.equals(flavor);
+  }
+
+  @Override
+  public Object getTransferData(DataFlavor flavor)
+    throws UnsupportedFlavorException, IOException
+  {
+    return this;
+  }
+
 }

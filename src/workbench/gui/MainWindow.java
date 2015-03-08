@@ -384,7 +384,7 @@ public class MainWindow
       getContentPane().add(sqlTab, BorderLayout.CENTER);
       doLayout();
       validate();
-      treePanel.disconnect(false);
+      treePanel.disconnect(false); // this will be done in the background
       treePanel = null;
     }
   }

@@ -88,6 +88,13 @@ public class WbAction
 		putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
 
+	public WbAction(String actionCommand)
+	{
+		super();
+		actionName = actionCommand;
+		putValue(ACTION_COMMAND_KEY, this.actionName);
+	}
+
 	/**
 	 * Creates a WbAction which dispatches its {@link #executeAction(ActionEvent)}
 	 * event to the passed ActionListener, instead of executing it itself.

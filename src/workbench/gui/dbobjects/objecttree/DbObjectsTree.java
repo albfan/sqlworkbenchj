@@ -19,12 +19,14 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
+import java.awt.EventQueue;
 import java.sql.SQLException;
 
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import workbench.interfaces.ExpandableTree;
@@ -45,6 +47,7 @@ public class DbObjectsTree
   implements TreeExpansionListener, ExpandableTree
 {
   private TreeLoader loader;
+  private ObjectTreeDragSource dragSource;
 
   public DbObjectsTree()
   {
@@ -61,6 +64,7 @@ public class DbObjectsTree
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
     ToolTipManager.sharedInstance().registerComponent(this);
+    dragSource = new ObjectTreeDragSource(this);
   }
 
   public void setConnection(WbConnection conn)
@@ -93,11 +97,44 @@ public class DbObjectsTree
     {
       loader.load();
       setModel(loader.getModel());
+
+      EventQueue.invokeLater(new Runnable()
+      {
+
+        @Override
+        public void run()
+        {
+          selectCurrentSchema();
+        }
+      });
     }
     catch (SQLException ex)
     {
       LogMgr.logError("DbObjectsTree.<init>", "Could not load tree", ex);
     }
+  }
+
+  public void expandNode(ObjectTreeNode node)
+  {
+    TreeNode[] nodes = getTreeModel().getPathToRoot(node);
+    selectPath(new TreePath(nodes));
+  }
+
+	public void selectPath(TreePath path)
+	{
+		if (path == null) return;
+		expandPath(path);
+		setSelectionPath(path);
+		scrollPathToVisible(path);
+	}
+
+  public void selectCurrentSchema()
+  {
+    WbConnection conn = loader.getConnection();
+    if (conn == null || conn.isBusy()) return;
+    String schema = conn.getCurrentSchema();
+    ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_SCHEMA);
+    expandNode(node);
   }
 
   @Override
@@ -171,6 +208,12 @@ public class DbObjectsTree
   {
 
   }
+
+  private DbObjectTreeModel getTreeModel()
+  {
+    return (DbObjectTreeModel)getModel();
+  }
+
 
 
 }

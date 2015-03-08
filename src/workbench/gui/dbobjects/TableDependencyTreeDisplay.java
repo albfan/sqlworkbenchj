@@ -211,16 +211,12 @@ public class TableDependencyTreeDisplay
 
 		this.nodesToExpand = new ArrayList<>();
 
-		DependencyNode child = null;
 		DefaultMutableTreeNode treeNode = null;
 		String table = null;
 
-		List children = parent.getChildren();
-		int count = children.size();
-		for (int i=0; i<count; i++)
+		List<DependencyNode> children = parent.getChildren();
+		for (DependencyNode child : children)
 		{
-			child = (DependencyNode)children.get(i);
-
 			treeNode = new DefaultMutableTreeNode(child, true);
 			treeNode.setAllowsChildren(true);
 			treeParent.add(treeNode);

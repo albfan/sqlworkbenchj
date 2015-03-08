@@ -29,6 +29,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import workbench.resource.IconMgr;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 
 import workbench.util.CaseInsensitiveComparator;
@@ -48,6 +49,7 @@ public class DbObjectNodeRenderer
 	{
 		super();
     iconMap.put("table", "table");
+    iconMap.put(DbMetadata.MVIEW_NAME, "table");
     iconMap.put("database", "profile");
     iconMap.put("schema", "folder");
     iconMap.put("catalog", "folder");

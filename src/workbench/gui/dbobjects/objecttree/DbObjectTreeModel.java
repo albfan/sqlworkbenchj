@@ -22,6 +22,8 @@ package workbench.gui.dbobjects.objecttree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
+import workbench.util.StringUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -35,5 +37,24 @@ public class DbObjectTreeModel
     super(root);
   }
 
+  public ObjectTreeNode findNodeByType(String name, String type)
+  {
+    if (StringUtil.isEmptyString(name) || StringUtil.isEmptyString(type)) return null;
+    
+    return findNodeByType((ObjectTreeNode)getRoot(), name, type);
+  }
+
+  private ObjectTreeNode findNodeByType(ObjectTreeNode node, String name, String type)
+  {
+    if (node.getName().equalsIgnoreCase(name) && node.getType().equalsIgnoreCase(type)) return node;
+    int count = node.getChildCount();
+    for (int i=0; i < count; i ++)
+    {
+      ObjectTreeNode child = (ObjectTreeNode)node.getChildAt(i);
+      ObjectTreeNode nd1 = findNodeByType(child, name, type);
+      if (nd1 != null) return nd1;
+    }
+    return null;
+  }
 
 }

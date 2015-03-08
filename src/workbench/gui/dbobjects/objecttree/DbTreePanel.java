@@ -23,12 +23,15 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -39,9 +42,12 @@ import workbench.db.WbConnection;
 
 import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.ExpandTreeAction;
+import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.MultiSelectComboBox;
 import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbToolbarButton;
 
 import workbench.util.CollectionUtil;
 import workbench.util.WbThread;
@@ -54,6 +60,7 @@ import workbench.util.WbThread;
  */
 public class DbTreePanel
 	extends JPanel
+  implements Reloadable
 {
   public static final String SETTINGS_PREFIX = "workbench.gui.mainwindow.dbtree.";
   private static int instanceCount = 0;
@@ -64,29 +71,57 @@ public class DbTreePanel
   private MultiSelectComboBox typeFilter;
   private List<String> selectedTypes;
   private JPanel toolPanel;
+  private ReloadAction reload;
+  private WbToolbarButton closeButton;
 
 	public DbTreePanel()
 	{
 		super(new BorderLayout());
     id = ++instanceCount;
+
     tree = new DbObjectsTree();
     JScrollPane scroll = new JScrollPane(tree);
-    add(scroll, BorderLayout.CENTER);
     statusBar = new WbStatusLabel();
-    add(statusBar, BorderLayout.PAGE_END);
+    createToolbar();
 
-    toolPanel = new JPanel(new BorderLayout());
-    typeFilter = new MultiSelectComboBox<>();
-    toolPanel.add(typeFilter, BorderLayout.LINE_START);
     add(toolPanel, BorderLayout.PAGE_START);
-
-    WbToolbar bar = new WbToolbar();
-    bar.add(new ExpandTreeAction(tree));
-    bar.add(new CollapseTreeAction(tree));
-    toolPanel.add(bar, BorderLayout.LINE_END);
+    add(scroll, BorderLayout.CENTER);
+    add(statusBar, BorderLayout.PAGE_END);
 
     selectedTypes = Settings.getInstance().getListProperty(SETTINGS_PREFIX + "selectedtypes", false);
 	}
+
+  private void createToolbar()
+  {
+    toolPanel = new JPanel(new GridBagLayout());
+    typeFilter = new MultiSelectComboBox<>();
+    GridBagConstraints gc = new GridBagConstraints();
+    gc.gridx = 0;
+    gc.gridy = 0;
+    gc.anchor = GridBagConstraints.LINE_START;
+    toolPanel.add(typeFilter, gc);
+
+    reload = new ReloadAction(this);
+
+    WbToolbar bar = new WbToolbar();
+    bar.add(reload);
+    bar.addSeparator();
+    bar.add(new ExpandTreeAction(tree));
+    bar.add(new CollapseTreeAction(tree));
+    bar.addSeparator();
+    WbAction closeAction = new WbAction("close-panel");
+    closeAction.setIcon("close-panel");
+    bar.add(closeAction);
+    gc.gridx ++;
+    gc.weightx = 1.0;
+    gc.anchor = GridBagConstraints.LINE_END;
+    toolPanel.add(bar, gc);
+  }
+
+  @Override
+  public void reload()
+  {
+  }
 
   public void connect(final ConnectionProfile profile)
   {
