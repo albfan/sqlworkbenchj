@@ -439,6 +439,7 @@ public class QuickFilterPanel
 			}
 			else
 			{
+        filterValue.setText(filterExpression);
 				try
 				{
 					String pattern = getPattern(filterExpression);
@@ -447,7 +448,7 @@ public class QuickFilterPanel
 					searchTable.applyFilter(col);
 					if (storeInHistory)
 					{
-						this.filterValue.addToHistory(filterExpression);
+						filterValue.addToHistory(filterExpression);
 					}
 				}
 				catch (PatternSyntaxException e)
@@ -513,7 +514,7 @@ public class QuickFilterPanel
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == filterValue  && !autoFilterEnabled)
+		if (e.getSource() == filterValue)
 		{
 			if (reload != null)
 			{
@@ -611,15 +612,21 @@ public class QuickFilterPanel
 		{
 			JTextField editor = (JTextField)comp;
 			String value = editor.getText();
-			if (StringUtil.isNonBlank(value))
-			{
-				int currentPos = editor.getCaretPosition();
-				filterValue.setText(value);
-				applyFilter(value, storeInHistory);
-				// this is necessary to remove the text selection that is automatically done
-				// because of setting the text in applyFilter
-				editor.setCaretPosition(currentPos);
-			}
+      int currentPos = editor.getCaretPosition();
+      try
+      {
+        applyFilter(value, storeInHistory);
+      }
+      finally
+      {
+        if (editor.getCaretPosition() != currentPos)
+        {
+          // this is necessary to remove the text selection that is automatically done
+          // because of setting the text in applyFilter
+          editor.select(currentPos,currentPos);
+          editor.setCaretPosition(currentPos);
+        }
+      }
 		}
 	}
 
@@ -647,7 +654,10 @@ public class QuickFilterPanel
 					filterByEditorValue(false);
 				}
 				// make sure the input field keeps the focus
-				filterValue.requestFocusInWindow();
+				if (!filterValue.hasFocus())
+        {
+          filterValue.requestFocusInWindow();
+        }
 			}
 		});
 	}

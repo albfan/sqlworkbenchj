@@ -29,7 +29,6 @@ import java.util.List;
 import javax.swing.ComboBoxEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.JTextField;
 
 import workbench.interfaces.PropertyStorage;
 import workbench.resource.Settings;
@@ -58,7 +57,14 @@ public class HistoryTextField
 		setEditable(true);
 		setSettingsProperty(prop);
 		contextMenu = new TextComponentMouseListener();
-		getEditor().getEditorComponent().addMouseListener(contextMenu);
+
+    // The wrapper prevents the editor from selecting the text
+    // when a new item is set via setSelectedItem() or setText()
+    ComboBoxEditor myEditor = getEditor();
+    ComboboxEditorWrapper wrapper = new ComboboxEditorWrapper(myEditor);
+    setEditor(wrapper);
+
+    getEditor().getEditorComponent().addMouseListener(contextMenu);
 		getEditor().getEditorComponent().setFocusTraversalKeysEnabled(true);
 		setFocusTraversalKeysEnabled(true);
 	}
@@ -112,13 +118,7 @@ public class HistoryTextField
 
 	public void setText(String s)
 	{
-		this.setSelectedItem(s);
-		Component edit = this.getEditor().getEditorComponent();
-		if (edit instanceof JTextField)
-		{
-			JTextField field = (JTextField)edit;
-			field.setCaretPosition(0);
-		}
+		setSelectedItem(s);
 	}
 
 	public void saveSettings(PropertyStorage props, String prefix)
@@ -140,7 +140,10 @@ public class HistoryTextField
 		this.updateModel();
 		String lastValue = props.getProperty(prefix + propName + ".lastvalue", null);
 
-		if (lastValue != null) this.setText(lastValue);
+		if (lastValue != null)
+    {
+      setText(lastValue);
+    }
 	}
 
 	public void restoreSettings()
@@ -177,4 +180,5 @@ public class HistoryTextField
 		}
 		setModel(model);
 	}
+
 }
