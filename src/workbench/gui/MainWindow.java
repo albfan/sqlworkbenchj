@@ -138,6 +138,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.dbobjects.objecttree.DbTreePanel;
+import workbench.gui.dbobjects.objecttree.DbTreeSettings;
 import workbench.gui.dbobjects.objecttree.TreePosition;
 import workbench.gui.fontzoom.DecreaseFontSize;
 import workbench.gui.fontzoom.FontZoomer;
@@ -356,13 +357,14 @@ public class MainWindow
     if (treePanel == null)
     {
       treePanel = new DbTreePanel();
+      treePanel.restoreSettings();
       getContentPane().remove(sqlTab);
 
       int defaultLocation = -1;
 
       WbSplitPane split = new WbSplitPane();
       split.setOneTouchExpandable(true);
-      if (Settings.getInstance().getDbTreePosition() == TreePosition.left)
+      if (DbTreeSettings.getDbTreePosition() == TreePosition.left)
       {
         defaultLocation = (int)(getWidth() * 0.15);
         split.setLeftComponent(treePanel);
@@ -375,7 +377,7 @@ public class MainWindow
         defaultLocation = (int)(getWidth() * 0.85);
       }
 
-      int location = Settings.getInstance().getIntProperty(DbTreePanel.SETTINGS_PREFIX + "divider", defaultLocation);
+      int location = DbTreeSettings.getDividerLocation(defaultLocation);
       split.setDividerLocation(location);
 
       getContentPane().add(split, BorderLayout.CENTER);
@@ -414,12 +416,13 @@ public class MainWindow
     {
       JSplitPane split = (JSplitPane)treePanel.getParent();
       int location = split.getDividerLocation();
-      Settings.getInstance().setProperty(DbTreePanel.SETTINGS_PREFIX + "divider", location);
+      DbTreeSettings.setDividerLocation(location);
       getContentPane().remove(split);
       getContentPane().add(sqlTab, BorderLayout.CENTER);
       doLayout();
       validate();
       treePanel.disconnect(false); // this will be done in the background
+      treePanel.saveSettings();
       treePanel = null;
     }
   }
@@ -548,8 +551,10 @@ public class MainWindow
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
 		this.newDbExplorerPanel = new NewDbExplorerPanelAction(this);
 		this.newDbExplorerWindow = new NewDbExplorerWindowAction(this);
-    this.showDbTree = new ShowDbTreeAction(this);
-
+    if (DbTreeSettings.enableDbTree())
+    {
+      this.showDbTree = new ShowDbTreeAction(this);
+    }
 		int tabCount = this.sqlTab.getTabCount();
 		for (int tab=0; tab < tabCount; tab ++)
 		{
@@ -1416,7 +1421,7 @@ public class MainWindow
     {
       JSplitPane split = (JSplitPane)component;
       int location = split.getDividerLocation();
-      Settings.getInstance().setProperty(DbTreePanel.SETTINGS_PREFIX + "divider", location);
+      DbTreeSettings.setDividerLocation(location);
     }
 	}
 
@@ -1652,7 +1657,7 @@ public class MainWindow
 		this.dbExplorerAction.setEnabled(true);
 		this.newDbExplorerPanel.setEnabled(true);
 		this.newDbExplorerWindow.setEnabled(true);
-		this.showDbTree.setEnabled(true);
+		if (showDbTree != null) showDbTree.setEnabled(true);
 
 		this.disconnectAction.setEnabled(true);
 		this.reconnectAction.setEnabled(true);
@@ -2172,7 +2177,7 @@ public class MainWindow
 		this.dbExplorerAction.setEnabled(false);
 		this.newDbExplorerPanel.setEnabled(false);
 		this.newDbExplorerWindow.setEnabled(false);
-		this.showDbTree.setEnabled(false);
+		if (showDbTree != null) showDbTree.setEnabled(false);
 		this.showStatusMessage("");
 		for (int i=0; i < sqlTab.getTabCount(); i++)
 		{
@@ -2769,7 +2774,7 @@ public class MainWindow
 		result.add(this.dbExplorerAction);
 		result.add(this.newDbExplorerPanel);
 		result.add(this.newDbExplorerWindow);
-    if (Settings.getInstance().getBoolProperty("workbench.gui.enable.dbtree", false))
+    if (showDbTree != null)
     {
       result.add(this.showDbTree);
     }

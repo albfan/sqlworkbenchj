@@ -2654,24 +2654,6 @@ public class Settings
 	// </editor-fold>
 
 
-  public TreePosition getDbTreePosition()
-  {
-    String pos = getProperty(DbTreePanel.SETTINGS_PREFIX + "position", TreePosition.left.name());
-    try
-    {
-      return TreePosition.valueOf(pos);
-    }
-    catch (Throwable th)
-    {
-      return TreePosition.left;
-    }
-  }
-
-  public void setDbTreePosition(TreePosition pos)
-  {
-    setProperty("workbench.gui.mainwindow.dbtree.position", pos.name());
-  }
-
   public String getSqlServerRemarksProperty()
 	{
 		return getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");

@@ -59,6 +59,12 @@ public class ObjectTreeNode
     nodeName = name;
   }
 
+  public void setNameAndType(String name, String type)
+  {
+    nodeType = type;
+    nodeName = name;
+  }
+  
   public void setChildrenLoaded(boolean flag)
   {
     isLoaded = flag;

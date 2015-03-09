@@ -23,15 +23,18 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -39,7 +42,6 @@ import javax.swing.SwingUtilities;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -49,10 +51,11 @@ import workbench.gui.MainWindow;
 import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.actions.WbAction;
 import workbench.gui.components.MultiSelectComboBox;
 import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbToolbarButton;
+import workbench.resource.IconMgr;
 
 import workbench.util.CollectionUtil;
 import workbench.util.WbThread;
@@ -67,8 +70,6 @@ public class DbTreePanel
 	extends JPanel
   implements Reloadable, ActionListener
 {
-  public static final String SETTINGS_PREFIX = "workbench.gui.mainwindow.dbtree.";
-
   private static int instanceCount = 0;
 	private DbObjectsTree tree;
   private int id;
@@ -78,7 +79,8 @@ public class DbTreePanel
   private List<String> selectedTypes;
   private JPanel toolPanel;
   private ReloadAction reload;
-  private WbAction closeAction;
+  // private WbAction closeAction;
+  private WbToolbarButton closeButton;
 
 	public DbTreePanel()
 	{
@@ -94,7 +96,7 @@ public class DbTreePanel
     add(scroll, BorderLayout.CENTER);
     add(statusBar, BorderLayout.PAGE_END);
 
-    selectedTypes = Settings.getInstance().getListProperty(SETTINGS_PREFIX + "selectedtypes", false);
+    selectedTypes = DbTreeSettings.getSelectedObjectTypes();
 	}
 
   private void createToolbar()
@@ -112,21 +114,46 @@ public class DbTreePanel
     WbToolbar bar = new WbToolbar();
     bar.add(reload);
     bar.addSeparator();
-    bar.add(new ExpandTreeAction(tree));
+    ExpandTreeAction expand = new ExpandTreeAction(tree);
+    bar.add(expand);
     bar.add(new CollapseTreeAction(tree));
     bar.addSeparator();
-    closeAction = new WbAction(this, "close-panel");
-    closeAction.setIcon("close-panel");
-    bar.add(closeAction);
     gc.gridx ++;
     gc.weightx = 1.0;
     gc.anchor = GridBagConstraints.LINE_END;
     toolPanel.add(bar, gc);
+
+    ImageIcon icon = IconMgr.getInstance().getLabelIcon("close-panel");
+    closeButton = new WbToolbarButton(icon);
+    closeButton.setActionCommand("close-panel");
+    closeButton.addActionListener(this);
+    closeButton.setRolloverEnabled(true);
+
+    // calculate the regular size of a toolbarbutton.
+    WbToolbarButton button = new WbToolbarButton(IconMgr.getInstance().getToolbarIcon("save"));
+    Dimension bs = button.getPreferredSize();
+
+    int iconWidth = icon.getIconWidth()/2;
+    int iconHeight = icon.getIconHeight()/2;
+    int wmargin = (int)(bs.width/2) - iconWidth - 2;
+    int hmargin = (int)(bs.height/2) - iconHeight - 2;
+    closeButton.setMargin(new Insets(hmargin, wmargin, hmargin, wmargin));
+    bar.add(closeButton);
   }
 
   @Override
   public void reload()
   {
+    WbThread th = new WbThread(new Runnable()
+    {
+
+      @Override
+      public void run()
+      {
+        tree.load();
+      }
+    }, "DbTree Load Thread");
+    th.start();
   }
 
   public void connect(final ConnectionProfile profile)
@@ -175,17 +202,12 @@ public class DbTreePanel
       toSelect = types;
     }
     typeFilter.setItems(types, toSelect);
-
+    typeFilter.setMaximumRowCount(Math.min(typeFilter.getItemCount() + 1, 25));
   }
 
   public void dispose()
   {
     tree.clear();
-  }
-
-  public void load()
-  {
-    tree.load();
   }
 
 	public void saveSettings()
@@ -211,13 +233,17 @@ public class DbTreePanel
       }
     }, "Disconnect");
 
+    th.start();
     if (wait)
     {
-      th.run();
-    }
-    else
-    {
-      th.start();
+      try
+      {
+        th.join();
+      }
+      catch (Exception ex)
+      {
+        LogMgr.logWarning("DbTreePanel.disconnect()", "Error waiting for disconnect thread", ex);
+      }
     }
   }
 

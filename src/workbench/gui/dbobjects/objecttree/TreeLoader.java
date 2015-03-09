@@ -22,6 +22,7 @@ package workbench.gui.dbobjects.objecttree;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import workbench.resource.ResourceMgr;
 
@@ -35,6 +36,7 @@ import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.util.CollectionUtil;
 
 
 /**
@@ -102,6 +104,9 @@ public class TreeLoader
   private WbConnection connection;
   private DbObjectTreeModel model;
   private ObjectTreeNode root;
+  private Collection<String> availableTypes;
+  private final Set<String> typesToShow = CollectionUtil.caseInsensitiveSet();
+
 
   public TreeLoader(String name)
   {
@@ -113,6 +118,10 @@ public class TreeLoader
   public void setConnection(WbConnection conn)
   {
     connection = conn;
+    if (connection != null)
+    {
+      availableTypes = connection.getMetadata().getObjectTypes();
+    }
   }
 
   private void removeAllChildren(ObjectTreeNode node)
@@ -145,17 +154,28 @@ public class TreeLoader
   public void loadSchemas(ObjectTreeNode parentNode)
     throws SQLException
   {
-    List<String> schemas = connection.getMetadata().getSchemas(connection.getSchemaFilter());
-    for (String schema : schemas)
+    if (DbTreeSettings.showOnlyCurrentSchema(connection.getDbId()))
     {
-      ObjectTreeNode node = new ObjectTreeNode(schema, TYPE_SCHEMA);
-      node.setAllowsChildren(true);
-      parentNode.add(node);
+      String schema = connection.getCurrentSchema();
+      parentNode.setNameAndType(schema, TYPE_SCHEMA);
+      parentNode.setAllowsChildren(true);
+      parentNode.setChildrenLoaded(false);
+      addTypeNodes(parentNode);
+    }
+    else
+    {
+      List<String> schemas = connection.getMetadata().getSchemas(connection.getSchemaFilter());
+      for (String schema : schemas)
+      {
+        ObjectTreeNode node = new ObjectTreeNode(schema, TYPE_SCHEMA);
+        node.setAllowsChildren(true);
+        parentNode.add(node);
+        addTypeNodes(node);
+      }
+      parentNode.setChildrenLoaded(true);
     }
     model.nodeStructureChanged(parentNode);
-    parentNode.setChildrenLoaded(true);
   }
-
 
   public void loadCatalogs(ObjectTreeNode parentNode)
     throws SQLException
@@ -166,19 +186,25 @@ public class TreeLoader
       ObjectTreeNode node = new ObjectTreeNode(cat, TYPE_CATALOG);
       node.setAllowsChildren(true);
       parentNode.add(node);
+      if (!connection.getDbSettings().supportsSchemas())
+      {
+        addTypeNodes(node);
+      }
     }
     model.nodeStructureChanged(parentNode);
   }
 
-  public void loadTypes(ObjectTreeNode schemaNode)
+  public void addTypeNodes(ObjectTreeNode schemaNode)
   {
     if (schemaNode == null) return;
-    Collection<String> types = connection.getMetadata().getObjectTypes();
-    for (String type : types)
+    for (String type : availableTypes)
     {
-      ObjectTreeNode node = new ObjectTreeNode(type, TYPE_DBO_TYPE_NODE);
-      node.setAllowsChildren(true);
-      schemaNode.add(node);
+      if (typesToShow.isEmpty() || typesToShow.contains(type))
+      {
+        ObjectTreeNode node = new ObjectTreeNode(type, TYPE_DBO_TYPE_NODE);
+        node.setAllowsChildren(true);
+        schemaNode.add(node);
+      }
     }
     model.nodeStructureChanged(schemaNode);
     schemaNode.setChildrenLoaded(true);
@@ -386,11 +412,11 @@ public class TreeLoader
       this.connection.setBusy(true);
       String type = node.getType();
 
-      if (TYPE_SCHEMA.equals(type))
+      if (TYPE_CATALOG.equals(type) && connection.getDbSettings().supportsSchemas())
       {
-        loadTypes(node);
+        loadSchemas(node);
       }
-      else if (TYPE_DBO_TYPE_NODE.equals(type))
+      if (TYPE_DBO_TYPE_NODE.equals(type))
       {
         loadObjectsByType(node);
       }

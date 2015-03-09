@@ -30,6 +30,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import workbench.db.objectcache.ObjectCacheStorage;
+import workbench.gui.dbobjects.objecttree.DbTreePanel;
 
 import workbench.gui.sql.FileReloadType;
 
