@@ -22,6 +22,7 @@ package workbench.gui.dbobjects.objecttree;
 import java.awt.EventQueue;
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
@@ -84,6 +85,11 @@ public class DbObjectsTree
       loader = new TreeLoader(conn.getProfile().getName());
       loader.setConnection(conn);
     }
+  }
+
+  public void setTypesToShow(List<String> types)
+  {
+    loader.setSelectedTypes(types);
   }
 
   public void clear()

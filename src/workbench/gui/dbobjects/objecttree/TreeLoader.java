@@ -135,6 +135,15 @@ public class TreeLoader
     node.removeAllChildren();
   }
 
+  public void setSelectedTypes(List<String> types)
+  {
+    typesToShow.clear();
+    if (types != null)
+    {
+      typesToShow.addAll(types);
+    }
+  }
+  
   public void clear()
   {
     removeAllChildren(root);

@@ -75,7 +75,7 @@ public class DbTreePanel
   private int id;
   private WbConnection connection;
   private WbStatusLabel statusBar;
-  private MultiSelectComboBox typeFilter;
+  private MultiSelectComboBox<String> typeFilter;
   private List<String> selectedTypes;
   private JPanel toolPanel;
   private ReloadAction reload;
@@ -106,6 +106,8 @@ public class DbTreePanel
     GridBagConstraints gc = new GridBagConstraints();
     gc.gridx = 0;
     gc.gridy = 0;
+    gc.weightx = 1.0;
+    gc.fill = GridBagConstraints.HORIZONTAL;
     gc.anchor = GridBagConstraints.LINE_START;
     toolPanel.add(typeFilter, gc);
 
@@ -120,6 +122,7 @@ public class DbTreePanel
     bar.addSeparator();
     gc.gridx ++;
     gc.weightx = 1.0;
+    gc.fill = GridBagConstraints.NONE;
     gc.anchor = GridBagConstraints.LINE_END;
     toolPanel.add(bar, gc);
 
@@ -139,6 +142,7 @@ public class DbTreePanel
     int hmargin = (int)(bs.height/2) - iconHeight - 2;
     closeButton.setMargin(new Insets(hmargin, wmargin, hmargin, wmargin));
     bar.add(closeButton);
+    typeFilter.addActionListener(this);
   }
 
   @Override
@@ -195,14 +199,22 @@ public class DbTreePanel
 
   private void loadTypes()
   {
-    List<String> types = new ArrayList<>(connection.getMetadata().getObjectTypes());
-    List<String> toSelect = selectedTypes;
-    if (CollectionUtil.isEmpty(toSelect))
+    try
     {
-      toSelect = types;
+      typeFilter.removeActionListener(this);
+      List<String> types = new ArrayList<>(connection.getMetadata().getObjectTypes());
+      List<String> toSelect = selectedTypes;
+      if (CollectionUtil.isEmpty(toSelect))
+      {
+        toSelect = types;
+      }
+      typeFilter.setItems(types, toSelect);
+      typeFilter.setMaximumRowCount(Math.min(typeFilter.getItemCount() + 1, 25));
     }
-    typeFilter.setItems(types, toSelect);
-    typeFilter.setMaximumRowCount(Math.min(typeFilter.getItemCount() + 1, 25));
+    finally
+    {
+      typeFilter.addActionListener(this);
+    }
   }
 
   public void dispose()
@@ -253,14 +265,12 @@ public class DbTreePanel
     return tree.requestFocusInWindow();
   }
 
-  @Override
-  public void actionPerformed(ActionEvent e)
+  private void closePanel()
   {
     Window frame = SwingUtilities.getWindowAncestor(this);
-
     if (frame instanceof MainWindow)
     {
-      final MainWindow mainWin = (MainWindow)frame;
+      final MainWindow mainWin = (MainWindow) frame;
       EventQueue.invokeLater(new Runnable()
       {
         @Override
@@ -269,6 +279,20 @@ public class DbTreePanel
           mainWin.closeDbTree();
         }
       });
+    }
+
+  }
+  @Override
+  public void actionPerformed(ActionEvent evt)
+  {
+    if (evt.getSource() == closeButton)
+    {
+      closePanel();
+    }
+    if (evt.getSource() == typeFilter)
+    {
+      tree.setTypesToShow(typeFilter.getSelectedItems());
+      reload();
     }
   }
 
