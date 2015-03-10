@@ -256,7 +256,7 @@ public class WbSchemaDiff
 
 		Writer out = null;
 		boolean outputToConsole = false;
-		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonDiffParameters.PARAM_FILENAME));
+		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 
 		try
 		{

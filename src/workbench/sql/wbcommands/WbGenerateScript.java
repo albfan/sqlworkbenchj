@@ -81,7 +81,7 @@ public class WbGenerateScript
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("useSeparator", ArgumentType.BoolSwitch);
-		cmdLine.addArgument("file", ArgumentType.Filename);
+		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument("includeDrop", ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
@@ -158,7 +158,7 @@ public class WbGenerateScript
 			return result;
 		}
 
-		WbFile output = evaluateFileArgument(cmdLine.getValue("file"));
+		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 
 		scripter = new ObjectScripter(objects, currentConnection);
 		scripter.setUseSeparator(cmdLine.getBoolean("useSeparator", false));

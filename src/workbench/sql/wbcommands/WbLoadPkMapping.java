@@ -34,6 +34,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -51,7 +52,7 @@ public class WbLoadPkMapping
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("file");
+		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 	}
 
 	@Override
@@ -73,7 +74,7 @@ public class WbLoadPkMapping
 		StatementRunnerResult result = new StatementRunnerResult();
 		String sql = getCommandLine(sqlCommand);
 		cmdLine.parse(sql);
-		String file = cmdLine.getValue("file");
+		String file = cmdLine.getValue(CommonArgs.ARG_FILE);
 		if (file == null)
 		{
 			file = Settings.getInstance().getPKMappingFilename();

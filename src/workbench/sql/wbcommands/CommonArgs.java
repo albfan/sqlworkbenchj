@@ -87,6 +87,8 @@ public class CommonArgs
 	public static final String ARG_OBJECTS = "objects";
 	public static final String ARG_IGNORE_IDENTITY = "ignoreIdentityColumns";
 	public static final String ARG_HELP = "help";
+	public static final String ARG_VERBOSE = "verbose";
+	public static final String ARG_FILE = "file";
 
 
 	private static List<String> getDelimiterArguments()

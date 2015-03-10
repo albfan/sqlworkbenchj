@@ -81,7 +81,6 @@ public class WbExport
 	public static final String ARG_SOURCETABLE = "sourceTable";
 	public static final String ARG_OUTPUTDIR = "outputDir";
 	public static final String ARG_EXPORT_TYPE = "type";
-	public static final String ARG_OUTPUT_FILENAME = "file";
 
 	public static final String ARG_CREATE_OUTPUTDIR = "createDir";
 	public static final String ARG_BLOB_TYPE = "blobType";
@@ -167,7 +166,7 @@ public class WbExport
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
 
 		cmdLine.addArgument(ARG_EXPORT_TYPE, StringUtil.stringToList(exportTypes));
-		cmdLine.addArgument(ARG_OUTPUT_FILENAME, ArgumentType.Filename);
+		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_TABLE_PREFIX);
 		cmdLine.addArgument(ARG_PAGE_TITLE);
 		cmdLine.addArgument(ARG_TABLE);
@@ -339,7 +338,7 @@ public class WbExport
 			return result;
 		}
 
-		WbFile outputFile = evaluateFileArgument(cmdLine.getValue(ARG_OUTPUT_FILENAME));
+		WbFile outputFile = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 		String type = cmdLine.getValue(ARG_EXPORT_TYPE);
 
 		if (type == null)

@@ -56,8 +56,6 @@ public class CommonDiffParameters
 	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
 	public static final String PARAM_TARGET_CONN = "targetConnection";
 
-	public static final String PARAM_FILENAME = "file";
-
 	public static final String PARAM_REFERENCETABLES = "referenceTables";
 	public static final String PARAM_TARGETTABLES = "targetTables";
 
@@ -77,7 +75,7 @@ public class CommonDiffParameters
 	{
 		this(args, null);
 	}
-	
+
 	public CommonDiffParameters(ArgumentParser args, String directory)
 	{
 		cmdLine = args;
@@ -89,7 +87,7 @@ public class CommonDiffParameters
 		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_TARGET_CONN);
 
-		cmdLine.addArgument(PARAM_FILENAME);
+		cmdLine.addArgument(CommonArgs.ARG_FILE);
 		CommonArgs.addEncodingParameter(cmdLine);
 		cmdLine.addArgument(PARAM_REFERENCETABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_TARGETTABLES, ArgumentType.TableArgument);

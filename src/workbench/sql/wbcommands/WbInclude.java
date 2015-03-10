@@ -63,7 +63,6 @@ public class WbInclude
 	public static final String ARG_REPLACE_IGNORECASE = "ignoreCase";
 	public static final String ARG_CHECK_ESCAPED_QUOTES = "checkEscapedQuotes";
 	public static final String ARG_PRINT_STATEMENTS = "printStatements";
-	public static final String ARG_FILE = "file";
 	public static final String ARG_DELIMITER = "delimiter";
 
 	/*
@@ -76,13 +75,13 @@ public class WbInclude
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_FILE, ArgumentType.Filename);
+		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_SHOWPROGRESS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CHECK_ESCAPED_QUOTES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_DELIMITER,StringUtil.stringToList("';',oracle,mssql"));
-		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
+		cmdLine.addArgument(CommonArgs.ARG_VERBOSE, ArgumentType.BoolSwitch);
 		ConditionCheck.addParameters(cmdLine);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
@@ -137,7 +136,7 @@ public class WbInclude
 		{
 			clean = getCommandLine(aSql);
 			cmdLine.parse(clean);
-			file = evaluateFileArgument(cmdLine.getValue(ARG_FILE));
+			file = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 			if (file == null)
 			{
 				// support a short version of WbInclude that simply specifies the filename
@@ -172,9 +171,9 @@ public class WbInclude
 		}
 
 		List<File> allFiles = null;
-		if (FileUtil.hasWildcard(cmdLine.getValue(ARG_FILE)))
+		if (FileUtil.hasWildcard(cmdLine.getValue(CommonArgs.ARG_FILE)))
 		{
-			String search = StringUtil.trimQuotes(cmdLine.getValue(ARG_FILE));
+			String search = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_FILE));
 			File f = new File(search);
 			if (f.getParentFile() == null && this.runner != null)
 			{
@@ -216,7 +215,7 @@ public class WbInclude
 		{
 			continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, Settings.getInstance().getIncludeDefaultContinue());
 			checkEscape = cmdLine.getBoolean(ARG_CHECK_ESCAPED_QUOTES, Settings.getInstance().getCheckEscapedQuotes());
-			verbose = cmdLine.getBoolean("verbose", false);
+			verbose = cmdLine.getBoolean(CommonArgs.ARG_VERBOSE, false);
 			defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 			ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
 			encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);

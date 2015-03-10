@@ -83,7 +83,7 @@ public class WbSchemaReport
 		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
-		cmdLine.addArgument("file", ArgumentType.Filename);
+		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(PARAM_TABLE_NAMES, ArgumentType.Deprecated);
 		cmdLine.addArgument(PARAM_OBJECT_NAMES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_EXCLUDE_OBJECTS, ArgumentType.TableArgument);
@@ -124,7 +124,7 @@ public class WbSchemaReport
 			return result;
 		}
 
-		WbFile output = evaluateFileArgument(cmdLine.getValue("file"));
+		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 
 		if (output == null)
 		{

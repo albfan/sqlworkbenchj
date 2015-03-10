@@ -54,17 +54,15 @@ public class WbRunLB
 	public static final String VERB = "WbRunLB";
 
 	public static final String ARG_CHANGESET = "changeSet";
-	public static final String ARG_VERBOSE = "verbose";
-	public static final String ARG_FILE = "file";
 
 	public WbRunLB()
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_FILE, ArgumentType.Filename);
+		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CHANGESET, ArgumentType.Repeatable);
-		cmdLine.addArgument(ARG_VERBOSE, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(CommonArgs.ARG_VERBOSE, ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
 		isUpdatingCommand = true;
 	}
@@ -94,7 +92,7 @@ public class WbRunLB
 		WbFile file = null;
 		if (cmdLine.hasArguments())
 		{
-			file = evaluateFileArgument(cmdLine.getValue(ARG_FILE));
+			file = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 		}
 		else
 		{
@@ -119,7 +117,7 @@ public class WbRunLB
 		}
 
 		boolean continueOnError = checkParameters ? cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false) : false;
-		boolean verbose = checkParameters ? cmdLine.getBoolean(ARG_VERBOSE, false) : false;
+		boolean verbose = checkParameters ? cmdLine.getBoolean(CommonArgs.ARG_VERBOSE, false) : false;
 
 		List<String> idStrings = checkParameters ? cmdLine.getListValue(ARG_CHANGESET) : null;
 		List<ChangeSetIdentifier> ids = null;

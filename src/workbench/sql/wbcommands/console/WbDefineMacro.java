@@ -54,7 +54,6 @@ public class WbDefineMacro
 
 	public static final String ARG_NAME = "name";
 	public static final String ARG_TEXT = "text";
-	public static final String ARG_FILE = "file";
 	public static final String ARG_GROUP = "group";
 	public static final String ARG_EXPAND = "autoExpand";
 
@@ -66,7 +65,7 @@ public class WbDefineMacro
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_NAME);
 		cmdLine.addArgument(ARG_TEXT);
-		cmdLine.addArgument(ARG_FILE, ArgumentType.Filename);
+		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_GROUP);
 		cmdLine.addArgument(ARG_EXPAND, ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
@@ -110,7 +109,7 @@ public class WbDefineMacro
 			return result;
 		}
 		String macroText = cmdLine.getValue(ARG_TEXT);
-		WbFile sourceFile = evaluateFileArgument(cmdLine.getValue(ARG_FILE));
+		WbFile sourceFile = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 		String groupName = StringUtil.trimQuotes(cmdLine.getValue(ARG_GROUP));
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, null);
 		String macroName = cmdLine.getValue(ARG_NAME);

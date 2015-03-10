@@ -196,7 +196,7 @@ public class WbDataDiff
 			return result;
 		}
 
-		WbFile mainScript = evaluateFileArgument(cmdLine.getValue(CommonDiffParameters.PARAM_FILENAME));
+		WbFile mainScript = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 		if (mainScript == null)
 		{
 			result.setFailure();

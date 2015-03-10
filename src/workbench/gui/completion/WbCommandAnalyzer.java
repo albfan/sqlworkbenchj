@@ -418,7 +418,7 @@ public class WbCommandAnalyzer
 	private List getChangeSets(SqlCommand wbRunLb, ArgumentParser cmdLine)
 	{
 		cmdLine.parse(this.sql);
-		WbFile file = wbRunLb.evaluateFileArgument(cmdLine.getValue(WbRunLB.ARG_FILE));
+		WbFile file = wbRunLb.evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, "UTF-8");
 		try
 		{
@@ -457,7 +457,7 @@ public class WbCommandAnalyzer
 		String fname = cmdLine.getValue(WbImport.ARG_FILE);
 		if (fname == null)
 		{
-			fname = cmdLine.getValue(WbExport.ARG_OUTPUT_FILENAME);
+			fname = cmdLine.getValue(CommonArgs.ARG_FILE);
 		}
 		fname = VariablePool.getInstance().replaceAllParameters(fname);
 		WbFile input = wbImport.evaluateFileArgument(fname);

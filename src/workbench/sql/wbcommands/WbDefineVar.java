@@ -64,7 +64,6 @@ public class WbDefineVar
 {
 	public static final String VERB = "WbVarDef";
 	public static final String ARG_LOOKUP_VALUES = "values";
-	public static final String ARG_DEFINITION_FILE = "file";
 	public static final String ARG_REMOVE_UNDEFINED = "removeUndefined";
 	public static final String ARG_REPLACE_VARS = "replaceVars";
 	public static final String ARG_VAR_NAME = "variable";
@@ -76,7 +75,7 @@ public class WbDefineVar
 	{
 		super();
 		this.cmdLine = new ArgumentParser();
-		this.cmdLine.addArgument(ARG_DEFINITION_FILE, ArgumentType.StringArgument);
+		this.cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		this.cmdLine.addArgument(ARG_CONTENT_FILE, ArgumentType.StringArgument);
 		this.cmdLine.addArgument(ARG_VAR_NAME);
 		this.cmdLine.addArgument(ARG_VAR_VALUE);
@@ -108,7 +107,7 @@ public class WbDefineVar
 		String sql = getCommandLine(aSql);
 
 		cmdLine.parse(sql);
-		WbFile file = this.evaluateFileArgument(cmdLine.getValue(ARG_DEFINITION_FILE));
+		WbFile file = this.evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 		WbFile contentFile = this.evaluateFileArgument(cmdLine.getValue(ARG_CONTENT_FILE));
 
 		boolean removeUndefined = cmdLine.getBoolean(ARG_REMOVE_UNDEFINED);
