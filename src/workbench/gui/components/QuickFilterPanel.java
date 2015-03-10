@@ -104,6 +104,7 @@ public class QuickFilterPanel
 	private boolean autoFilterEnabled;
 	private boolean enableMultiValue = true;
 	private ReloadAction reload;
+  private boolean ignoreEvents;
 
 	public QuickFilterPanel(WbTable table, boolean showDropDown, String historyProperty)
 	{
@@ -219,35 +220,35 @@ public class QuickFilterPanel
 	{
 		GridBagConstraints gridBagConstraints;
 
-		this.setLayout(new GridBagLayout());
-		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		setLayout(new GridBagLayout());
+		setBorder(WbSwingUtilities.EMPTY_BORDER);
 
-		this.filterValue = new HistoryTextField(historyProperty);
+		filterValue = new HistoryTextField(historyProperty);
 		setFilterTooltip();
 		filterValue.setColumns(10);
 
 		initPopup();
 
-		this.toolbar = new WbToolbar();
-		this.filterAction = new QuickFilterAction(this);
+		toolbar = new WbToolbar();
+		filterAction = new QuickFilterAction(this);
     filterAction.setUseLabelIconSize(true);
 		ResetFilterAction resetFilterAction = this.searchTable.getResetFilterAction();
     resetFilterAction.setUseLabelIconSize(true);
 
-		this.toolbar.add(this.filterAction);
-		this.toolbar.add(resetFilterAction);
-		this.toolbar.setMargin(new Insets(0,0,0,0));
+		toolbar.add(this.filterAction);
+		toolbar.add(resetFilterAction);
+		toolbar.setMargin(new Insets(0,0,0,0));
 		toolbar.setBorderPainted(true);
 
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.anchor = GridBagConstraints.WEST;
 		gridBagConstraints.gridx = 0;
-		this.add(toolbar, gridBagConstraints);
+		add(toolbar, gridBagConstraints);
 
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.weightx = 1;
-		this.add(filterValue, gridBagConstraints);
+		add(filterValue, gridBagConstraints);
 
 		if (showColumnDropDown)
 		{
@@ -257,20 +258,20 @@ public class QuickFilterPanel
 		InputMap im = new ComponentInputMap(this);
 		ActionMap am = new ActionMap();
 		setupActionMap(im, am);
-		this.setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
-		this.setActionMap(am);
+		setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
+		setActionMap(am);
 
-		this.filterValue.setInputMap(JComponent.WHEN_FOCUSED, im);
-		this.filterValue.setActionMap(am);
+		filterValue.setInputMap(JComponent.WHEN_FOCUSED, im);
+		filterValue.setActionMap(am);
 
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(filterValue);
 		pol.addComponent(filterValue);
 		pol.addComponent(filterAction.getToolbarButton());
 		pol.addComponent(resetFilterAction.getToolbarButton());
-		this.setFocusTraversalPolicy(pol);
-		this.setFocusCycleRoot(false);
-		this.filterValue.addActionListener(this);
+		setFocusTraversalPolicy(pol);
+		setFocusCycleRoot(false);
+		filterValue.addActionListener(this);
 		Component ed = filterValue.getEditor().getEditorComponent();
 		ed.addKeyListener(this);
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_QUICK_FILTER_REGEX);
@@ -278,24 +279,23 @@ public class QuickFilterPanel
 
 	public void setToolbarBorder(Border b)
 	{
-		this.toolbar.setBorder(b);
+		toolbar.setBorder(b);
 	}
 
 	public void addToToolbar(WbAction action, int index)
 	{
-		this.toolbar.add(action, index);
+		toolbar.add(action, index);
 	}
 
 	private void initPopup()
 	{
-		if (this.columnList == null) return;
+		if (columnList == null) return;
 
 		Component ed = filterValue.getEditor().getEditorComponent();
 		if (this.textListener != null) ed.removeMouseListener(this.textListener);
 
 		this.textListener = new TextComponentMouseListener();
 		JMenu menu = new WbMenu(ResourceMgr.getString("MnuTextFilterOnColumn"));
-		//menu.setIcon(null);
 		columnItems = new JCheckBoxMenuItem[columnList.length];
 		for (int i=0; i < this.columnList.length; i++)
 		{
@@ -420,7 +420,7 @@ public class QuickFilterPanel
 	@Override
 	public void applyQuickFilter()
 	{
-		applyFilter(this.filterValue.getText(), true);
+		applyFilter(filterValue.getText(), true);
 	}
 
 	public void resetFilter()
@@ -432,10 +432,10 @@ public class QuickFilterPanel
 	{
 		try
 		{
-			filterValue.removeActionListener(this);
+      ignoreEvents = true;
 			if (StringUtil.isEmptyString(filterExpression) || filterExpression.trim().equals("*") || filterExpression.trim().equals("%"))
 			{
-				this.searchTable.resetFilter();
+				searchTable.resetFilter();
 			}
 			else
 			{
@@ -443,7 +443,7 @@ public class QuickFilterPanel
 				try
 				{
 					String pattern = getPattern(filterExpression);
-					ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, pattern);
+					ColumnExpression col = new ColumnExpression(searchColumn, comparator, pattern);
 					col.setIgnoreCase(true);
 					searchTable.applyFilter(col);
 					if (storeInHistory)
@@ -458,7 +458,7 @@ public class QuickFilterPanel
 					String msg = ResourceMgr.getFormattedString("ErrBadRegex", filterExpression);
 					WbSwingUtilities.showErrorMessage(this, msg);
 				}
-				catch (Exception ex)
+				catch (Throwable ex)
 				{
 					LogMgr.logError("QuickFilterPanel.applyQuickFilter()", "Cannot apply filter expression", ex);
 					WbSwingUtilities.showErrorMessage(this, ex.getLocalizedMessage());
@@ -467,7 +467,7 @@ public class QuickFilterPanel
 		}
 		finally
 		{
-			this.filterValue.addActionListener(this);
+      ignoreEvents = false;
 		}
 	}
 
@@ -514,17 +514,17 @@ public class QuickFilterPanel
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == filterValue)
+		if (e.getSource() == filterValue && !ignoreEvents)
 		{
 			if (reload != null)
 			{
 				reload.executeAction(e);
 			}
-			// when typing in the editor, the combobox sends a comboBoxEdited followed by a comboBoxChanged event
-			// so this would also do a "filter as you type"
-			// the only way to distinguish the "comboBoxChanged" event when selecting a dropdown entry
-			// from the typing event is the fact that the dropDown selection has a modifier (usuall Button1)
-			else if (e.getModifiers() != 0 && "comboBoxChanged".equals(e.getActionCommand()))
+			// when typing in the editor, the combobox sends an actionPerformed event with "comboBoxEdited" followed by a "comboBoxChanged"
+			// We only want to respond to the actionPerformed event if the user selected an entry from the dropdown
+      // everything else related to typing is handled in the keyTyped() method.
+			// The only way to distinguish between a dropdown selection and "typing" seems to be to check if the dropdown is visible
+			else if (filterValue.isPopupVisible() && "comboBoxChanged".equals(e.getActionCommand()))
 			{
 				applyQuickFilter();
 			}
@@ -591,11 +591,11 @@ public class QuickFilterPanel
 	{
 		if (evt.getSource() == searchTable)
 		{
-			int count = this.searchTable.getColumnCount();
+			int count = searchTable.getColumnCount();
 			String[] names = new String[count];
 			for (int i = 0; i < count; i++)
 			{
-				names[i] = this.searchTable.getColumnName(i);
+				names[i] = searchTable.getColumnName(i);
 			}
 			setColumnList(names);
 		}
@@ -633,6 +633,8 @@ public class QuickFilterPanel
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
+    if (ignoreEvents) return;
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override

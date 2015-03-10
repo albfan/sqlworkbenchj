@@ -254,7 +254,7 @@ public class DbExplorerSettings
 	 */
 	public static boolean getRememberMetaColumnOrder(String tableType)
 	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer." + tableType + ".remembersort", true);
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer." + tableType + ".remember.columnorder", true);
 	}
 
 	/**
@@ -266,7 +266,7 @@ public class DbExplorerSettings
 	 */
 	public static void setRememberMetaColumnOrder(String tableType, boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.dbexplorer." + tableType + ".remembersort", flag);
+		Settings.getInstance().setProperty("workbench.dbexplorer." + tableType + ".remember.columnorder", flag);
 	}
 
 	public static boolean showFocusInDbExplorer()
