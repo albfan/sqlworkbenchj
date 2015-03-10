@@ -397,11 +397,10 @@ public class WbExport
 
 		if ("text".equals(type) && !CommonArgs.checkQuoteEscapting(cmdLine))
 		{
-			String msg = ResourceMgr.getString("ErrQuoteAlwaysEscape");
-			LogMgr.logError("WbExport.execute()", msg, null);
+			String msg = ResourceMgr.getString("WarnQuoteAlwaysEscape") + "\n";
+			LogMgr.logWarning("WbExport.execute()", msg, null);
 			result.addMessage(msg);
-			result.setFailure();
-			return result;
+			result.setWarning(true);
 		}
 
 		this.exporter = new DataExporter(this.currentConnection);
