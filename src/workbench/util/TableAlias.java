@@ -34,18 +34,29 @@ public class TableAlias
 
 	public TableAlias(String value)
 	{
-		this(value, '.', '.');
+		super(value);
+    checkTable('.', '.');
 	}
 
-	public TableAlias(String value, char catalogSeparator, char schemaSeparator)
+	public TableAlias(String objectName, char catalogSeparator, char schemaSeparator)
 	{
-		super(value);
+		super(objectName);
+    checkTable(catalogSeparator, schemaSeparator);
+  }
 
+	public TableAlias(String objectName, String alias, char catalogSeparator, char schemaSeparator)
+	{
+		super(objectName, alias);
+    checkTable(catalogSeparator, schemaSeparator);
+  }
+
+  private void checkTable(char catalogSeparator, char schemaSeparator)
+  {
 		if (getObjectName() != null)
 		{
 			this.table = new TableIdentifier(getObjectName(), catalogSeparator, schemaSeparator);
 		}
-	}
+  }
 
 	public final TableIdentifier getTable()
 	{

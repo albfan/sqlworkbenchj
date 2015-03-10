@@ -234,7 +234,7 @@ public class SelectAnalyzer
 			}
 			else if (count == 1)
 			{
-				TableAlias tbl = new TableAlias(tables.get(0).getObjectName(), catalogSep, schemaSep);
+				TableAlias tbl = new TableAlias(tables.get(0).getObjectName(), null, catalogSep, schemaSep);
 				tableForColumnList = tbl.getTable();
 			}
 
@@ -245,7 +245,7 @@ public class SelectAnalyzer
 				this.elements = new ArrayList();
 				for (Alias entry : tables)
 				{
-					TableAlias tbl = new TableAlias(entry.getObjectName(), catalogSep, schemaSep);
+					TableAlias tbl = new TableAlias(entry.getObjectName(), entry.getAlias(), catalogSep, schemaSep);
 					this.elements.add(tbl);
 					setAppendDot(true);
 				}
@@ -270,7 +270,7 @@ public class SelectAnalyzer
 	{
 		for (Alias element : possibleTables)
 		{
-			TableAlias tbl = new TableAlias(element.getObjectName(), catalogSeparator, schemaSeparator);
+			TableAlias tbl = new TableAlias(element.getObjectName(), element.getAlias(), catalogSeparator, schemaSeparator);
 			tbl.setAlias(element.getAlias());
 
 			if (tbl.isTableOrAlias(toSearch, catalogSeparator, schemaSeparator))

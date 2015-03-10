@@ -40,6 +40,12 @@ public class Alias
 	{
 	}
 
+	public Alias(String name, String alias)
+  {
+    this.objectName = name;
+    this.alias = alias;
+  }
+  
 	/**
 	 * Create a new Alias
 	 * @param value  the SQL part that should be parsed

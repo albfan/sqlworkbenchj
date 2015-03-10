@@ -48,6 +48,24 @@ public class SelectAnalyzerTest
 	}
 
 
+  @Test
+  public void testAlias()
+  {
+    String sql =
+      "select \n" +
+      "from some_table t1\n" +
+      "  join join other_table t2 on t1.id = t2.id";
+    int pos = 7;
+		StatementContext context = new StatementContext(null, sql, pos, false);
+		BaseAnalyzer analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+    List data = analyzer.getData();
+    assertNotNull(data);
+    assertEquals(2, data.size());
+    assertEquals("t1 (some_table)", data.get(0).toString());
+    assertEquals("t2 (other_table)", data.get(1).toString());
+  }
+
 	@Test
 	public void testUnion()
 	{
