@@ -88,6 +88,7 @@ public class CommandTester
 		putVerb(WbListVars.VERB_ALTERNATE);
 		putVerb(WbList.VERB);
 		putVerb(WbListProcedures.VERB);
+		putVerb(WbListProcedures.ALTERNATE_VERB);
 		putVerb(WbListCatalogs.VERB);
 		putVerb(WbListCatalogs.VERB_ALTERNATE);
 		putVerb(WbListSchemas.VERB);
@@ -141,7 +142,7 @@ public class CommandTester
 		putVerb(WbListDrivers.VERB);
 		putVerb(WbCreateProfile.VERB);
 		putVerb(WbShowEncoding.VERB);
-		
+
 		List<String> verbs = CommandRegistry.getInstance().getVerbs();
 		for (String verb : verbs)
 		{

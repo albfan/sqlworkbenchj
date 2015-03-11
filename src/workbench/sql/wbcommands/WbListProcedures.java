@@ -57,6 +57,7 @@ public class WbListProcedures
 	extends SqlCommand
 {
 	public static final String VERB = "WbListProcs";
+	public static final String ALTERNATE_VERB = "WbListProcedures";
 
 	public WbListProcedures()
 	{
@@ -71,6 +72,12 @@ public class WbListProcedures
 	{
 		return VERB;
 	}
+
+  @Override
+  public String getAlternateVerb()
+  {
+    return ALTERNATE_VERB;
+  }
 
 	@Override
 	public StatementRunnerResult execute(String aSql)

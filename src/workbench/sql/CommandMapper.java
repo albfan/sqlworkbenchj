@@ -251,10 +251,10 @@ public class CommandMapper
 		TreeSet<String> result = new TreeSet<>();
 		for (SqlCommand cmd : commands)
 		{
-			String verb = cmd.getVerb();
 			if (cmd.isWbCommand())
 			{
-				result.add(verb);
+				result.add(cmd.getVerb());
+        result.add(cmd.getAlternateVerb());
 			}
 		}
 		return result;
