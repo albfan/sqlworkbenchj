@@ -118,8 +118,12 @@ public class WbAction
 
 	public static boolean isAltPressed(ActionEvent e)
 	{
-		boolean altPressed = ((e.getModifiers() & ActionEvent.ALT_MASK) == ActionEvent.ALT_MASK);
-		return altPressed;
+		return isAltPressed(e.getModifiers());
+	}
+
+	public static boolean isAltPressed(int modifiers)
+	{
+		return ((modifiers & ActionEvent.ALT_MASK) == ActionEvent.ALT_MASK);
 	}
 
 	public static boolean isShiftPressed(ActionEvent e)
@@ -129,8 +133,7 @@ public class WbAction
 
 	public static boolean isShiftPressed(int modifiers)
 	{
-		boolean shiftPressed = ((modifiers & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
-		return shiftPressed;
+		return ((modifiers & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 	}
 
 	public static boolean isCtrlPressed(ActionEvent e)

@@ -425,7 +425,7 @@ public class QuickFilterPanel
 
 	public void resetFilter()
 	{
-		applyFilter("", false);
+		applyFilter(null, false);
 	}
 
 	private void applyFilter(String filterExpression, boolean storeInHistory)
@@ -634,6 +634,9 @@ public class QuickFilterPanel
 	public void keyTyped(final KeyEvent e)
 	{
     if (ignoreEvents) return;
+
+    // ignore key events with Alt or Ctrl Modifiers
+    if (WbAction.isAltPressed(e.getModifiers()) || WbAction.isCtrlPressed(e.getModifiers())) return;
 
 		EventQueue.invokeLater(new Runnable()
 		{
