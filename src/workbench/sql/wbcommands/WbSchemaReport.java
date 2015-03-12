@@ -59,18 +59,19 @@ public class WbSchemaReport
 	extends SqlCommand
 	implements RowActionMonitor
 {
-	public static final String PARAM_EXCLUDE_TABLES = "excludeTableNames";
-	public static final String PARAM_EXCLUDE_OBJECTS = "excludeObjectNames";
-	public static final String PARAM_INCLUDE_TABLES = "includeTables";
-	public static final String PARAM_INCLUDE_PROCS = "includeProcedures";
-	public static final String PARAM_INCLUDE_PARTITIONS = "includePartitions";
-	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
-	public static final String PARAM_INCLUDE_SEQUENCES = "includeSequences";
-	public static final String PARAM_INCLUDE_TRIGGERS = "includeTriggers";
-	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
-	public static final String PARAM_TABLE_NAMES = "tables";
-	public static final String PARAM_OBJECT_NAMES = "objects";
-	public static final String PARAM_OBJECT_TYPE_NAMES = "objectTypeNames";
+	public static final String ARG_EXCLUDE_TABLES = "excludeTableNames";
+	public static final String ARG_EXCLUDE_OBJECTS = "excludeObjectNames";
+	public static final String ARG_INCLUDE_TABLES = "includeTables";
+	public static final String ARG_INCLUDE_PROCS = "includeProcedures";
+	public static final String ARG_INCLUDE_PARTITIONS = "includePartitions";
+	public static final String ARG_INCLUDE_GRANTS = "includeTableGrants";
+	public static final String ARG_INCLUDE_SEQUENCES = "includeSequences";
+	public static final String ARG_INCLUDE_TRIGGERS = "includeTriggers";
+	public static final String ARG_INCLUDE_VIEWS = "includeViews";
+	public static final String ARG_TABLE_NAMES = "tables";
+	public static final String ARG_OBJECT_NAMES = "objects";
+	public static final String ARG_OBJECT_TYPE_NAMES = "objectTypeNames";
+	public static final String ARG_EXTENDED_SOURCE = "writeExtendedSource";
 
 	public static final String ALTERNATE_VERB = "WbReport";
 	public static final String VERB = "WbSchemaReport";
@@ -84,24 +85,25 @@ public class WbSchemaReport
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
-		cmdLine.addArgument(PARAM_TABLE_NAMES, ArgumentType.Deprecated);
-		cmdLine.addArgument(PARAM_OBJECT_NAMES, ArgumentType.TableArgument);
-		cmdLine.addArgument(PARAM_EXCLUDE_OBJECTS, ArgumentType.TableArgument);
-		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.Deprecated);
-		cmdLine.addArgument(PARAM_OBJECT_TYPE_NAMES, ArgumentType.Repeatable);
+		cmdLine.addArgument(ARG_TABLE_NAMES, ArgumentType.Deprecated);
+		cmdLine.addArgument(ARG_OBJECT_NAMES, ArgumentType.TableArgument);
+		cmdLine.addArgument(ARG_EXCLUDE_OBJECTS, ArgumentType.TableArgument);
+		cmdLine.addArgument(ARG_EXCLUDE_TABLES, ArgumentType.Deprecated);
+		cmdLine.addArgument(ARG_OBJECT_TYPE_NAMES, ArgumentType.Repeatable);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS);
 		cmdLine.addArgument("reportTitle");
 		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_TABLES, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_PARTITIONS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_VIEWS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_PROCS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_TABLES, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_PARTITIONS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_GRANTS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_PARAMETERS, ArgumentType.Repeatable);
+		cmdLine.addArgument(ARG_EXTENDED_SOURCE, ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -134,21 +136,21 @@ public class WbSchemaReport
 		}
 
 		this.reporter = new SchemaReporter(currentConnection);
-		boolean includeViews = cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true);
-		boolean includeSequences = cmdLine.getBoolean(PARAM_INCLUDE_SEQUENCES, true);
-		boolean includeTables = cmdLine.getBoolean(PARAM_INCLUDE_TABLES, true);
+		boolean includeViews = cmdLine.getBoolean(ARG_INCLUDE_VIEWS, true);
+		boolean includeSequences = cmdLine.getBoolean(ARG_INCLUDE_SEQUENCES, true);
+		boolean includeTables = cmdLine.getBoolean(ARG_INCLUDE_TABLES, true);
 
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);
-		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
-
+		this.reporter.setIncludeProcedures(cmdLine.getBoolean(ARG_INCLUDE_PROCS, false));
+    reporter.writeExtendedSource(cmdLine.getBoolean(ARG_EXTENDED_SOURCE, false));
 		Set<String> types = CollectionUtil.caseInsensitiveSet();
 		types.addAll(cmdLine.getListValue(CommonArgs.ARG_TYPES));
 
-		String tableNames = this.cmdLine.getValue(PARAM_OBJECT_NAMES, this.cmdLine.getValue(PARAM_TABLE_NAMES));
-		String exclude = cmdLine.getValue(PARAM_EXCLUDE_OBJECTS, cmdLine.getValue(PARAM_EXCLUDE_TABLES));
+		String tableNames = this.cmdLine.getValue(ARG_OBJECT_NAMES, this.cmdLine.getValue(ARG_TABLE_NAMES));
+		String exclude = cmdLine.getValue(ARG_EXCLUDE_OBJECTS, cmdLine.getValue(ARG_EXCLUDE_TABLES));
 		String schemaNames = cmdLine.getValue(CommonArgs.ARG_SCHEMAS);
-		List<String> typeFilter = cmdLine.getList(PARAM_OBJECT_TYPE_NAMES);
+		List<String> typeFilter = cmdLine.getList(ARG_OBJECT_TYPE_NAMES);
 
 		if (types.isEmpty())
 		{
@@ -179,8 +181,8 @@ public class WbSchemaReport
 
 		String[] typesArray = StringUtil.toArray(types, true);
 
-		reporter.setIncludeTriggers(cmdLine.getBoolean(PARAM_INCLUDE_TRIGGERS, true));
-		reporter.setIncludePartitions(cmdLine.getBoolean(PARAM_INCLUDE_PARTITIONS, false));
+		reporter.setIncludeTriggers(cmdLine.getBoolean(ARG_INCLUDE_TRIGGERS, true));
+		reporter.setIncludePartitions(cmdLine.getBoolean(ARG_INCLUDE_PARTITIONS, false));
 
 		List<String> schemas = StringUtil.stringToList(schemaNames, ",");
 		if (schemas.isEmpty())
@@ -235,7 +237,7 @@ public class WbSchemaReport
 				}
 				else
 				{
-					result.addMessage(ResourceMgr.getFormattedString("ErrIgnoringArg", filter, PARAM_OBJECT_TYPE_NAMES));
+					result.addMessage(ResourceMgr.getFormattedString("ErrIgnoringArg", filter, ARG_OBJECT_TYPE_NAMES));
 					result.setWarning(true);
 				}
 			}
@@ -255,7 +257,7 @@ public class WbSchemaReport
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
 
-		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
+		this.reporter.setIncludeGrants(cmdLine.getBoolean(ARG_INCLUDE_GRANTS, false));
 
 		if (currentConnection != null)
 		{

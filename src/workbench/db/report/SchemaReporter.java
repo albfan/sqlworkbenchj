@@ -83,7 +83,8 @@ public class SchemaReporter
 	private boolean includePartitions;
 	private String schemaNameToUse = null;
 	private String reportTitle = null;
-
+  private boolean extendedSource;
+  
 	/**
 	 * Creates a new SchemaReporter for the supplied connection
 	 * @param conn The connection that the schema report should use
@@ -175,6 +176,11 @@ public class SchemaReporter
 	{
 		return procedureNames != null;
 	}
+
+  public void writeExtendedSource(boolean flag)
+  {
+    extendedSource = flag;
+  }
 
 	public void setIncludeProcedures(boolean flag)
 	{
@@ -291,7 +297,7 @@ public class SchemaReporter
 
 				if (dbs.isViewType(type))
 				{
-					ReportView rview = new ReportView((TableIdentifier)object, this.dbConn, true, includeGrants);
+					ReportView rview = new ReportView((TableIdentifier)object, this.dbConn, true, includeGrants, extendedSource);
 					rview.setSchemaNameToUse(this.schemaNameToUse);
 					rview.writeXml(out);
 				}

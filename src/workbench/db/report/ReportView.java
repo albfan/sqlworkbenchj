@@ -38,6 +38,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.ViewGrantReader;
 import workbench.db.ViewReader;
 import workbench.db.WbConnection;
+
 import workbench.util.StringUtil;
 
 /**
@@ -74,7 +75,6 @@ public class ReportView
 
 	private CharSequence viewSource;
 
-
 	/**
 	 * Initialize this ReportView.
 	 * This will read the following information for the table:
@@ -84,7 +84,7 @@ public class ReportView
 	 *  <li>the source for the view using {@link workbench.db.ViewReader#getViewSource(workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
-	public ReportView(TableIdentifier tbl, WbConnection conn, boolean includeIndex, boolean includeViewGrants)
+	public ReportView(TableIdentifier tbl, WbConnection conn, boolean includeIndex, boolean includeViewGrants, boolean extendedSource)
 		throws SQLException
 	{
 		this.view = tbl;
@@ -119,7 +119,14 @@ public class ReportView
 		try
 		{
 			ViewReader viewReader = conn.getMetadata().getViewReader();
-			this.viewSource = viewReader.getViewSource(tbl);
+      if (extendedSource)
+      {
+        this.viewSource = viewReader.getExtendedViewSource(tbl);
+      }
+			else
+      {
+        this.viewSource = viewReader.getViewSource(tbl);
+      }
 		}
 		catch (NoConfigException no)
 		{

@@ -77,9 +77,9 @@ public class WbGenerateScript
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
 		cmdLine.addArgument(ARG_EXCLUDE);
-		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolSwitch);
-		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolSwitch);
-		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_PROCS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_TRIGGERS, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("useSeparator", ArgumentType.BoolSwitch);
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument("includeDrop", ArgumentType.BoolSwitch);
@@ -130,7 +130,7 @@ public class WbGenerateScript
 			objects.addAll(selector.getTables());
 		}
 
-		if (cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_PROCS, false))
+		if (cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_PROCS, false))
 		{
 			ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
 			for (String schema : schemas)
@@ -141,7 +141,7 @@ public class WbGenerateScript
 			}
 		}
 
-		if (cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, false))
+		if (cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_TRIGGERS, false))
 		{
 			TriggerReader reader = TriggerReaderFactory.createReader(currentConnection);
 			for (String schema : schemas)
@@ -163,7 +163,7 @@ public class WbGenerateScript
 		scripter = new ObjectScripter(objects, currentConnection);
 		scripter.setUseSeparator(cmdLine.getBoolean("useSeparator", false));
 		scripter.setIncludeDrop(cmdLine.getBoolean("includeDrop", false));
-		scripter.setIncludeGrants(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_GRANTS, true));
+		scripter.setIncludeGrants(cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_GRANTS, true));
 
 		if (this.rowMonitor != null)
 		{
