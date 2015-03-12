@@ -29,6 +29,7 @@ import java.util.List;
 import javax.swing.ComboBoxEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JTextField;
 
 import workbench.interfaces.PropertyStorage;
 import workbench.resource.Settings;
@@ -51,12 +52,12 @@ public class HistoryTextField
 		this(null);
 	}
 
-	public HistoryTextField(String prop)
-	{
-		super();
-		setEditable(true);
-		setSettingsProperty(prop);
-		contextMenu = new TextComponentMouseListener();
+  public HistoryTextField(String prop)
+  {
+    super();
+    setEditable(true);
+    setSettingsProperty(prop);
+    contextMenu = new TextComponentMouseListener();
 
     // The wrapper prevents the editor from selecting the text
     // when a new item is set via setSelectedItem() or setText()
@@ -65,9 +66,9 @@ public class HistoryTextField
     setEditor(wrapper);
 
     getEditor().getEditorComponent().addMouseListener(contextMenu);
-		getEditor().getEditorComponent().setFocusTraversalKeysEnabled(true);
-		setFocusTraversalKeysEnabled(true);
-	}
+    getEditor().getEditorComponent().setFocusTraversalKeysEnabled(true);
+    setFocusTraversalKeysEnabled(true);
+  }
 
 	public void dispose()
 	{
@@ -98,7 +99,12 @@ public class HistoryTextField
 
 	public void selectAll()
 	{
-		getEditor().selectAll();
+    Component comp = getEditor().getEditorComponent();
+    if (comp instanceof JTextField)
+    {
+      JTextField text = (JTextField)comp;
+      text.select(0, text.getText().length());
+    }
 	}
 
 	public void setColumns(int cols)
@@ -118,7 +124,10 @@ public class HistoryTextField
 
 	public void setText(String s)
 	{
-		setSelectedItem(s);
+    if (!StringUtil.equalString(s, getText()))
+    {
+      setSelectedItem(s);
+    }
 	}
 
 	public void saveSettings(PropertyStorage props, String prefix)
@@ -127,24 +136,24 @@ public class HistoryTextField
 		props.setProperty(prefix + propName + ".lastvalue", this.getText());
 	}
 
-	public void restoreSettings(PropertyStorage props, String prefix)
-	{
-		String s = props.getProperty(prefix + propName + ".history", "");
-		List<String> l = StringUtil.stringToList(s, ";", true, true);
-		this.setText("");
-		this.historyValues.clear();
-		for (String value : l)
-		{
-			historyValues.append(value);
-		}
-		this.updateModel();
-		String lastValue = props.getProperty(prefix + propName + ".lastvalue", null);
+  public void restoreSettings(PropertyStorage props, String prefix)
+  {
+    String s = props.getProperty(prefix + propName + ".history", "");
+    List<String> l = StringUtil.stringToList(s, ";", true, true);
+    this.setText("");
+    this.historyValues.clear();
+    for (String value : l)
+    {
+      historyValues.append(value);
+    }
+    this.updateModel();
+    String lastValue = props.getProperty(prefix + propName + ".lastvalue", null);
 
-		if (lastValue != null)
+    if (lastValue != null)
     {
       setText(lastValue);
     }
-	}
+  }
 
 	public void restoreSettings()
 	{
@@ -161,24 +170,24 @@ public class HistoryTextField
 		addToHistory(getText());
 	}
 
-	public void addToHistory(String s)
-	{
-		if (StringUtil.isEmptyString(s)) return;
-		s = s.trim();
-		Object item = getSelectedItem();
-		historyValues.addEntry(s);
-		updateModel();
-		setSelectedItem(item);
-	}
+  public void addToHistory(String s)
+  {
+    if (StringUtil.isEmptyString(s)) return;
+    s = s.trim();
+    Object item = getSelectedItem();
+    historyValues.addEntry(s);
+    updateModel();
+    setSelectedItem(item);
+  }
 
-	private void updateModel()
-	{
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
-		for (String entry : this.historyValues.getEntries())
-		{
-			model.addElement(entry);
-		}
-		setModel(model);
-	}
+  private void updateModel()
+  {
+    DefaultComboBoxModel model = new DefaultComboBoxModel();
+    for (String entry : this.historyValues.getEntries())
+    {
+      model.addElement(entry);
+    }
+    setModel(model);
+  }
 
 }

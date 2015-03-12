@@ -24,6 +24,9 @@ import java.awt.event.ActionListener;
 
 import javax.swing.ComboBoxEditor;
 import javax.swing.JTextField;
+import javax.swing.text.DefaultCaret;
+
+import workbench.util.MacOSHelper;
 
 /**
  *
@@ -37,6 +40,20 @@ public class ComboboxEditorWrapper
   public ComboboxEditorWrapper(ComboBoxEditor editor)
   {
     this.delegate = editor;
+    if (MacOSHelper.isMacOS())
+    {
+      // inspired by: http://stackoverflow.com/questions/1543480/mac-lf-problems-differing-behavior-of-jtextfield-requestfocus
+      Component comp = editor.getEditorComponent();
+      if (comp instanceof JTextField)
+      {
+        JTextField text = (JTextField)comp;
+        text.putClientProperty("Quaqua.TextComponent.autoSelect", Boolean.FALSE);
+        text.putClientProperty("Quaqua.TextField.autoSelect", Boolean.FALSE);
+        text.putClientProperty("TextComponent.autoSelect", Boolean.FALSE);
+        text.putClientProperty("TextField.autoSelect=false", Boolean.FALSE);
+        text.setCaret(new DefaultCaret());
+      }
+    }
   }
 
   @Override
@@ -66,7 +83,8 @@ public class ComboboxEditorWrapper
   @Override
   public void selectAll()
   {
-    delegate.selectAll();
+    // don't do anything.
+    // this is to avoid any implicit (and unwanted) selectAll() calls
   }
 
   @Override

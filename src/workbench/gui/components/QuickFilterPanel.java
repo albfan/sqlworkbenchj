@@ -39,19 +39,14 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.swing.ActionMap;
-import javax.swing.ComponentInputMap;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 
 import workbench.interfaces.CriteriaPanel;
@@ -255,15 +250,6 @@ public class QuickFilterPanel
 			initDropDown();
 		}
 
-		InputMap im = new ComponentInputMap(this);
-		ActionMap am = new ActionMap();
-		setupActionMap(im, am);
-		setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
-		setActionMap(am);
-
-		filterValue.setInputMap(JComponent.WHEN_FOCUSED, im);
-		filterValue.setActionMap(am);
-
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(filterValue);
 		pol.addComponent(filterValue);
@@ -271,9 +257,11 @@ public class QuickFilterPanel
 		pol.addComponent(resetFilterAction.getToolbarButton());
 		setFocusTraversalPolicy(pol);
 		setFocusCycleRoot(false);
+
 		filterValue.addActionListener(this);
 		Component ed = filterValue.getEditor().getEditorComponent();
 		ed.addKeyListener(this);
+
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_QUICK_FILTER_REGEX);
 	}
 
@@ -331,13 +319,6 @@ public class QuickFilterPanel
 				columnDropDown.setModel(new DefaultComboBoxModel(this.columnList));
 			}
 		}
-	}
-
-	private void setupActionMap(InputMap im, ActionMap am)
-	{
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), filterAction.getActionName());
-		im.put(filterAction.getAccelerator(), filterAction.getActionName());
-		am.put(filterAction.getActionName(), this.filterAction);
 	}
 
 	@Override
@@ -470,12 +451,34 @@ public class QuickFilterPanel
 		finally
     {
       // this is necessary to remove the text selection that is automatically done
-      // because of setting the text in applyFilter
-      editor.select(currentPos, currentPos);
+      // because of calling filterValue.setText()
       editor.setCaretPosition(currentPos);
+
+      // try again a bit later just to make sure.
+      // A desperate measure to cope with strange issues on MacOS
+      setCaretPosition(editor, currentPos);
       ignoreEvents = false;
     }
 	}
+
+  private void setCaretPosition(final JTextField editor, final int pos)
+  {
+    WbSwingUtilities.invokeLater(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (editor.getCaretPosition() != pos)
+        {
+          editor.setCaretPosition(pos);
+        }
+        if (editor.getSelectionStart() != editor.getSelectionEnd())
+        {
+          editor.select(pos, pos);
+        }
+      }
+    });
+  }
 
 	private boolean containsWildcards(String filter)
 	{
@@ -487,11 +490,6 @@ public class QuickFilterPanel
 	public String getText()
 	{
 		return filterValue.getText();
-	}
-
-	public void setSelectedText(String aText)
-	{
-		setText(aText);
 	}
 
 	@Override
