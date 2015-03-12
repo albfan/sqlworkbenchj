@@ -214,8 +214,8 @@ public class ProcedureListPanel
 		this.procList.setRememberColumnOrder(DbExplorerSettings.getRememberMetaColumnOrder("procedurelist"));
 		this.procList.addTableModelListener(this);
 		this.findPanel = new QuickFilterPanel(this.procList, false, "procedurelist");
-		findPanel.setFilterOnType(DbExplorerSettings.getDbExpFilterDuringTyping());
-		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
+    
+    configureFindPanel();
 
 		ReloadAction a = new ReloadAction(this);
     a.setUseLabelIconSize(true);
@@ -288,6 +288,13 @@ public class ProcedureListPanel
 		if (findPanel != null) findPanel.dispose();
 	}
 
+  private void configureFindPanel()
+  {
+    if (findPanel == null) return;
+    findPanel.setFilterOnType(DbExplorerSettings.getDbExpFilterDuringTyping());
+    findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
+  }
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
@@ -295,6 +302,10 @@ public class ProcedureListPanel
 		{
 			checkAlterButton();
 		}
+    else if (evt.getPropertyName().equals(DbExplorerSettings.PROP_INSTANT_FILTER) || evt.getPropertyName().equals(DbExplorerSettings.PROP_ASSUME_WILDCARDS))
+    {
+      configureFindPanel();
+    }
 	}
 
 	protected void checkAlterButton()

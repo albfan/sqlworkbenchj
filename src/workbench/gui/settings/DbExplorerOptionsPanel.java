@@ -65,7 +65,7 @@ public class DbExplorerOptionsPanel
 		DbExplorerSettings.setDbExpGenerateDrop(generateDrop.isSelected());
 		GuiSettings.setUseRegexInQuickFilter(useQuickFilterRegex.isSelected());
 		DbExplorerSettings.setAllowAlterInDbExplorer(allowTableAlter.isSelected());
-		DbExplorerSettings.setAutorRetrieveFKTree(retrieveFKTree.isSelected());
+		DbExplorerSettings.setAutoRetrieveFKTree(retrieveFKTree.isSelected());
 		DbExplorerSettings.setApplySQLSortInDbExplorer(applySQLSort.isSelected());
 		DbExplorerSettings.setShowSynonymTargetInDbExplorer(showSynDetails.isSelected());
 		DbExplorerSettings.setDbExplorerShowTableHistory(showTableHistory.isSelected());

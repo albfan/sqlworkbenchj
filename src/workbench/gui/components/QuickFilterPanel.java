@@ -103,7 +103,7 @@ public class QuickFilterPanel
 	private boolean assumeWildcards;
 	private boolean autoFilterEnabled;
 	private boolean enableMultiValue = true;
-	private ReloadAction reload;
+	private ReloadAction delegateFilterAction;
   private boolean ignoreEvents;
 
 	public QuickFilterPanel(WbTable table, boolean showDropDown, String historyProperty)
@@ -117,13 +117,13 @@ public class QuickFilterPanel
 
 	public void setReloadAction(ReloadAction action)
 	{
-		this.reload = action;
+		this.delegateFilterAction = action;
 	}
 
 	public void dispose()
 	{
 		WbAction.dispose(filterAction);
-		reload = null;
+		delegateFilterAction = null;
 		if (filterValue != null) filterValue.dispose();
 		if (textListener != null) textListener.dispose();
 		if (toolbar != null) toolbar.removeAll();
@@ -430,6 +430,8 @@ public class QuickFilterPanel
 
 	private void applyFilter(String filterExpression, boolean storeInHistory)
 	{
+    JTextField editor = (JTextField)filterValue.getEditor().getEditorComponent();
+    int currentPos = editor.getCaretPosition();
 		try
 		{
       ignoreEvents = true;
@@ -466,9 +468,13 @@ public class QuickFilterPanel
 			}
 		}
 		finally
-		{
+    {
+      // this is necessary to remove the text selection that is automatically done
+      // because of setting the text in applyFilter
+      editor.select(currentPos, currentPos);
+      editor.setCaretPosition(currentPos);
       ignoreEvents = false;
-		}
+    }
 	}
 
 	private boolean containsWildcards(String filter)
@@ -516,9 +522,9 @@ public class QuickFilterPanel
 	{
 		if (e.getSource() == filterValue && !ignoreEvents)
 		{
-			if (reload != null)
+			if (delegateFilterAction != null)
 			{
-				reload.executeAction(e);
+				delegateFilterAction.executeAction(e);
 			}
 			// when typing in the editor, the combobox sends an actionPerformed event with "comboBoxEdited" followed by a "comboBoxChanged"
 			// We only want to respond to the actionPerformed event if the user selected an entry from the dropdown
@@ -612,21 +618,7 @@ public class QuickFilterPanel
 		{
 			JTextField editor = (JTextField)comp;
 			String value = editor.getText();
-      int currentPos = editor.getCaretPosition();
-      try
-      {
-        applyFilter(value, storeInHistory);
-      }
-      finally
-      {
-        if (editor.getCaretPosition() != currentPos)
-        {
-          // this is necessary to remove the text selection that is automatically done
-          // because of setting the text in applyFilter
-          editor.select(currentPos,currentPos);
-          editor.setCaretPosition(currentPos);
-        }
-      }
+      applyFilter(value, storeInHistory);
 		}
 	}
 
@@ -649,20 +641,18 @@ public class QuickFilterPanel
 					// resetting the filter does not change the cursor location in the edit field
 					// so there is no need to take care of that (as done in filterByEditorValue()
 					applyFilter(null, false);
+          e.consume();
 				}
 				else if (e.getKeyChar() == KeyEvent.VK_ENTER)
 				{
 					filterByEditorValue(true);
+          e.consume();
 				}
 				else if (autoFilterEnabled)
 				{
 					filterByEditorValue(false);
+          e.consume();
 				}
-				// make sure the input field keeps the focus
-				if (!filterValue.hasFocus())
-        {
-          filterValue.requestFocusInWindow();
-        }
 			}
 		});
 	}

@@ -340,7 +340,7 @@ public class DbExplorerSettings
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.fktree.autoload", true);
 	}
 
-	public static void setAutorRetrieveFKTree(boolean flag)
+	public static void setAutoRetrieveFKTree(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.dbexplorer.fktree.autoload", flag);
 	}
