@@ -86,7 +86,7 @@ Supported parameters:
     <xsl:value-of select="$newline"/>
 
     <xsl:for-each select="column-def">
-      <xsl:sort select="dbms-position"/>
+      <xsl:sort select="dbms-position" data-type="number"/>
       <xsl:variable name="colname">
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname" select="column-name"/>
@@ -202,7 +202,7 @@ Supported parameters:
 
     <xsl:value-of select="$newline"/>
     <xsl:for-each select="column-def">
-      <xsl:sort select="column-name"/>
+      <xsl:sort select="column-name" data-type="number"/>
       <xsl:variable name="colname">
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname" select="column-name"/>
@@ -429,7 +429,7 @@ Supported parameters:
     <xsl:value-of select="$newline"/>
 
     <xsl:for-each select="column-def">
-      <xsl:sort select="dbms-position"/>
+      <xsl:sort select="dbms-position" data-type="number"/>
 
       <xsl:variable name="colname">
         <xsl:call-template name="write-object-name">
