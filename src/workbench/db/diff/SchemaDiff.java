@@ -113,7 +113,7 @@ public class SchemaDiff
 	private boolean diffTriggers = true;
 	private boolean diffSequences = true;
 	private boolean diffPartitions;
-  private boolean extendedSource;
+  private boolean useFullSource;
 	private boolean treatViewAsTable;
 	private boolean compareConstraintsByName;
 	private String[] additionalTypes;
@@ -173,9 +173,9 @@ public class SchemaDiff
 		}
 	}
 
-  public void useExtendedSource(boolean flag)
+  public void setUseFullObjectSource(boolean flag)
   {
-    extendedSource = flag;
+    useFullSource = flag;
   }
 
 	public void setIncludeSequences(boolean flag)
@@ -363,7 +363,7 @@ public class SchemaDiff
 		throws SQLException
 	{
 		tbl.adjustCase(con);
-		ReportView view = new ReportView(tbl, con, diffIndex, diffGrants, extendedSource);
+		ReportView view = new ReportView(tbl, con, diffIndex, diffGrants, useFullSource);
 		return view;
 	}
 

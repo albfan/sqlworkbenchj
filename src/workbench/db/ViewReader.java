@@ -55,6 +55,24 @@ public interface ViewReader
 		throws SQLException;
 
 	/**
+	 * Returns a complete SQL statement to create the given view.
+	 *
+	 * This method will extend the stored source to a valid CREATE VIEW.
+	 *
+	 * If no SQL Statement was configured to retrieve the source, an explanation
+	 * on how to configure will be returned.
+   *
+   * Unlike getExtendedViewSource() this method will not add any addtional SQL statements like
+   * the grants, a commit or a drop statement.
+	 *
+	 * @param view The view for which thee source should be created
+   * 
+	 * @see #getExtendedViewSource(workbench.db.TableDefinition, boolean, boolean)
+	 */
+	CharSequence getFullViewSource(TableDefinition view)
+		throws SQLException, NoConfigException;
+
+	/**
 	 * Return the source of a view definition as it is stored in the database.
 	 * <br/>
 	 * Usually (depending on how the meta data is stored in the database) the DBMS

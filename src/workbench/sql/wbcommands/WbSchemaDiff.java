@@ -94,7 +94,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(WbSchemaReport.ARG_EXTENDED_SOURCE, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(WbSchemaReport.ARG_FULL_SOURCE, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_VIEWS_AS_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
@@ -177,7 +177,7 @@ public class WbSchemaDiff
 		diff.setCompareConstraintsByName(cmdLine.getBoolean(ARG_COMPARE_CHK_CONS_BY_NAME, true));
 		diff.setIncludeTriggers(cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_TRIGGERS, true));
 		diff.setIncludePartitions(cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_PARTITIONS, false));
-    diff.useExtendedSource(cmdLine.getBoolean(WbSchemaReport.ARG_EXTENDED_SOURCE, false));
+    diff.setUseFullObjectSource(cmdLine.getBoolean(WbSchemaReport.ARG_FULL_SOURCE, false));
 		List<String> types = cmdLine.getListValue(ARG_ADD_TYPES);
 		diff.setAdditionalTypes(types);
 

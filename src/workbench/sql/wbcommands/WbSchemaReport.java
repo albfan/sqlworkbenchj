@@ -71,7 +71,7 @@ public class WbSchemaReport
 	public static final String ARG_TABLE_NAMES = "tables";
 	public static final String ARG_OBJECT_NAMES = "objects";
 	public static final String ARG_OBJECT_TYPE_NAMES = "objectTypeNames";
-	public static final String ARG_EXTENDED_SOURCE = "writeExtendedSource";
+	public static final String ARG_FULL_SOURCE = "writeFullSource";
 
 	public static final String ALTERNATE_VERB = "WbReport";
 	public static final String VERB = "WbSchemaReport";
@@ -103,7 +103,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT, ArgumentType.Filename);
 		cmdLine.addArgument(WbXslt.ARG_PARAMETERS, ArgumentType.Repeatable);
-		cmdLine.addArgument(ARG_EXTENDED_SOURCE, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_FULL_SOURCE, ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public class WbSchemaReport
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(ARG_INCLUDE_PROCS, false));
-    reporter.writeExtendedSource(cmdLine.getBoolean(ARG_EXTENDED_SOURCE, false));
+    reporter.setCreateFullObjectSource(cmdLine.getBoolean(ARG_FULL_SOURCE, false));
 		Set<String> types = CollectionUtil.caseInsensitiveSet();
 		types.addAll(cmdLine.getListValue(CommonArgs.ARG_TYPES));
 

@@ -33,6 +33,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.IndexDefinition;
 import workbench.db.NoConfigException;
 import workbench.db.TableCommentReader;
+import workbench.db.TableDefinition;
 import workbench.db.TableGrant;
 import workbench.db.TableIdentifier;
 import workbench.db.ViewGrantReader;
@@ -84,7 +85,7 @@ public class ReportView
 	 *  <li>the source for the view using {@link workbench.db.ViewReader#getViewSource(workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
-	public ReportView(TableIdentifier tbl, WbConnection conn, boolean includeIndex, boolean includeViewGrants, boolean extendedSource)
+	public ReportView(TableIdentifier tbl, WbConnection conn, boolean includeIndex, boolean includeViewGrants, boolean fullSource)
 		throws SQLException
 	{
 		this.view = tbl;
@@ -119,9 +120,9 @@ public class ReportView
 		try
 		{
 			ViewReader viewReader = conn.getMetadata().getViewReader();
-      if (extendedSource)
+      if (fullSource)
       {
-        this.viewSource = viewReader.getExtendedViewSource(tbl);
+        this.viewSource = viewReader.getFullViewSource(new TableDefinition(tbl, cols));
       }
 			else
       {

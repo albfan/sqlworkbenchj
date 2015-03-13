@@ -76,6 +76,7 @@ public class ObjectScripterTest
 
 		objects.add(new ViewDefinition("V_PERSON"));
 		ObjectScripter scripter = new ObjectScripter(objects, con);
+    scripter.setUseSeparator(false);
 		String script = scripter.getScript();
 //		System.out.println(script);
 

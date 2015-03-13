@@ -71,32 +71,18 @@ public class DefaultViewReader
 		return getExtendedViewSource(new TableDefinition(tbl), includeDrop, false);
 	}
 
-	/**
-	 * Returns a complete SQL statement to (re)create the given view.
-	 *
-	 * This method will extend the stored source to a valid CREATE VIEW.
-	 *
-	 * @param view The view for which thee source should be created
-	 * @param includeCommit if true, terminate the whole statement with a COMMIT
-	 * @param includeDrop if true, add a DROP statement before the CREATE statement
-	 *
-	 * @see #getViewSource(workbench.db.TableIdentifier)
-	 */
-	@Override
-	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
-		throws SQLException
-	{
+  @Override
+	public CharSequence getFullViewSource(TableDefinition view)
+		throws SQLException, NoConfigException
+  {
+    return createFullViewSource(view, false, false);
+  }
+
+	protected CharSequence createFullViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
+		throws SQLException, NoConfigException
+  {
 		TableIdentifier viewTable = view.getTable();
-		CharSequence source = null;
-		try
-		{
-			source = this.getViewSource(viewTable);
-		}
-		catch (NoConfigException no)
-		{
-			SourceStatementsHelp help = new SourceStatementsHelp(this.connection.getMetadata().getMetaDataSQLMgr());
-			return help.explainMissingViewSourceSql();
-		}
+		CharSequence source = this.getViewSource(viewTable);
 
 		List<ColumnIdentifier> columns = view.getColumns();
 
@@ -137,7 +123,7 @@ public class DefaultViewReader
 		}
 		else
 		{
-			result.append(builder.generateCreateObject(includeDrop, viewTable, null));
+			result.append(builder.generateCreateObject(false, viewTable, null));
 
 			if (connection.getDbSettings().generateColumnListInViews())
 			{
@@ -167,6 +153,43 @@ public class DefaultViewReader
 			result.append(source);
 			result.append(lineEnding);
 		}
+    return result;
+  }
+
+	/**
+	 * Returns a complete SQL statement to (re)create the given view.
+	 *
+	 * This method will extend the stored source to a valid CREATE VIEW.
+	 *
+	 * @param view The view for which thee source should be created
+	 * @param includeCommit if true, terminate the whole statement with a COMMIT
+	 * @param includeDrop if true, add a DROP statement before the CREATE statement
+	 *
+	 * @see #getViewSource(workbench.db.TableIdentifier)
+	 */
+	@Override
+	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
+		throws SQLException
+	{
+		TableIdentifier viewTable = view.getTable();
+
+		CharSequence source = null;
+		try
+		{
+			source = createFullViewSource(view, includeDrop, includeCommit);
+		}
+		catch (NoConfigException no)
+		{
+			SourceStatementsHelp help = new SourceStatementsHelp(this.connection.getMetadata().getMetaDataSQLMgr());
+			return help.explainMissingViewSourceSql();
+		}
+
+		if (StringUtil.isEmptyString(source)) return StringUtil.EMPTY_STRING;
+
+		StringBuilder result = new StringBuilder(source.length() + 100);
+    result.append(source);
+
+		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 
 		ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(connection);
 		if (grantReader != null)
