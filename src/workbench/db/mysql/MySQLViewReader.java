@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.db.DefaultViewReader;
+import workbench.db.NoConfigException;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 
@@ -46,12 +47,12 @@ public class MySQLViewReader
 	}
 
 	@Override
-	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
-		throws SQLException
+	protected CharSequence createFullViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
+		throws SQLException, NoConfigException
 	{
 		if (!this.connection.getDbSettings().getUseMySQLShowCreate("view"))
 		{
-			return super.getExtendedViewSource(view, includeDrop, includeCommit);
+			return super.createFullViewSource(view, includeDrop, includeCommit);
 		}
 
 		String source = null;
