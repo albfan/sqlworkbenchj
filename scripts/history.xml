@@ -15,6 +15,7 @@
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
     <entry dev-build="2" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
+    <entry dev-build="3" type="fix">Overloaded functions and procedures where not handled correctly by WbSchemaDiff</entry>
     <entry dev-build="3" type="fix">For Postgres the wrong DROP FUNCTION statement was generated if a function contained OUT parameter</entry>
     <entry dev-build="3" type="fix">Scripts that contained statements including character literals with a backslash were not always parsed correctly.</entry>
     <entry dev-build="2" type="fix">When WbImport did not find any matching columns, the error message did not include the (faulty) source file</entry>
