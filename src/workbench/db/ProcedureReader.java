@@ -57,21 +57,26 @@ public interface ProcedureReader
 
 	StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType);
 
-
-	boolean procedureExists(ProcedureDefinition def);
-
 	DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException;
 
 	DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException;
 
+  void readProcedureParameters(ProcedureDefinition def)
+    throws SQLException;
+
 	void readProcedureSource(ProcedureDefinition def)
+		throws NoConfigException;
+
+	void readProcedureSource(ProcedureDefinition def, String catalogForSource, String schemaForSource)
 		throws NoConfigException;
 
 	List<ProcedureDefinition> getProcedureList(String catalog, String schema, String name)
 		throws SQLException;
 
-	ProcedureDefinition findProcedure(DbObject procName)
+	ProcedureDefinition findProcedureByName(DbObject procName)
 		throws SQLException;
+
+	ProcedureDefinition findProcedureDefinition(ProcedureDefinition def);
 }

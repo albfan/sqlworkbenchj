@@ -496,22 +496,10 @@ public class OracleProcedureReader
 	}
 
 	@Override
-	public void readProcedureSource(ProcedureDefinition def)
+	public void readProcedureSource(ProcedureDefinition def, String catalogForSource, String schemaForSource)
 		throws NoConfigException
 	{
-		if (def.getPackageName() == null)
-		{
-			super.readProcedureSource(def);
-			return;
-		}
-
-		if (def.isOracleObjectType())
-		{
-			OracleObjectType type = new OracleObjectType(def.getSchema(), def.getPackageName());
-			CharSequence source = typeReader.getObjectSource(connection, type);
-			def.setSource(source);
-		}
-		else
+		if (def.getPackageName() != null)
 		{
 			CharSequence source = getPackageSource(def.getSchema(), def.getPackageName());
 			if (StringUtil.isBlank(source))
@@ -523,10 +511,20 @@ public class OracleProcedureReader
 			}
 			def.setSource(source);
 		}
+    else if (def.isOracleObjectType())
+		{
+			OracleObjectType type = new OracleObjectType(def.getSchema(), def.getPackageName());
+			CharSequence source = typeReader.getObjectSource(connection, type, schemaForSource);
+			def.setSource(source);
+		}
+		else
+		{
+			super.readProcedureSource(def, catalogForSource, schemaForSource);
+		}
 	}
 
 	@Override
-	public ProcedureDefinition findProcedure(DbObject toFind)
+	public ProcedureDefinition findProcedureByName(DbObject toFind)
 		throws SQLException
 	{
 		if (toFind == null) return null;

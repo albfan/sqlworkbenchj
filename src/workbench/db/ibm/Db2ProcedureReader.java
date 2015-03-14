@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -35,6 +36,7 @@ import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
 import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
@@ -87,6 +89,10 @@ public class Db2ProcedureReader
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
 			DataStore ds = fillProcedureListDataStore(rs);
+      if (connection.getDbSettings().showProcedureParameters())
+      {
+        updateDisplayName(ds);
+      }
 			return ds;
 		}
 		catch (Exception e)
@@ -101,6 +107,30 @@ public class Db2ProcedureReader
 			SqlUtil.closeStatement(stmt);
 		}
 	}
+
+  private void updateDisplayName(DataStore procs)
+  {
+    for (int row=0; row < procs.getRowCount(); row ++)
+    {
+      ProcedureDefinition def  = (ProcedureDefinition)procs.getRow(row).getUserObject();
+      def.readParameters(connection);
+      updateDisplayName(def);
+      if (def.getDisplayName() != null)
+      {
+        procs.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, def.getDisplayName());
+      }
+    }
+  }
+
+  private void updateDisplayName(ProcedureDefinition def)
+  {
+    List<String> types = def.getParameterTypes();
+    if (types.size() > 0)
+    {
+      String display = def.getProcedureName() + "(" + StringUtil.listToString(types, ',') + ")";
+      def.setDisplayName(display);
+    }
+  }
 
 	private String getSQL(String schemaPattern, String namePattern)
 	{
@@ -162,16 +192,24 @@ public class Db2ProcedureReader
 		return sql.toString();
 	}
 
-	@Override
-	public DataStore getProcedureColumns(ProcedureDefinition def)
-		throws SQLException
-	{
-		if (def.isFunction() && retrieveFunctionParameters)
-		{
-			return getFunctionParameters(def);
-		}
-		return super.getProcedureColumns(def);
-	}
+  @Override
+  public void readProcedureParameters(ProcedureDefinition def)
+    throws SQLException
+  {
+    super.readProcedureParameters(def);
+    updateDisplayName(def);
+  }
+
+  @Override
+  public DataStore getProcedureColumns(ProcedureDefinition def)
+    throws SQLException
+  {
+    if (def.isFunction() && retrieveFunctionParameters)
+    {
+      return getFunctionParameters(def);
+    }
+    return super.getProcedureColumns(def);
+  }
 
 	/**
 	 * Retrieve parameters for a stored function.

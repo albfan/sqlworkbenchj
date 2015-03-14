@@ -321,9 +321,10 @@ public class OracleTypeReader
 		return type;
 	}
 
-	private String retrieveSource(WbConnection con, DbObject object)
+	private String retrieveSource(WbConnection con, DbObject object, String schemaForSource)
 	{
 		if (object == null) return null;
+
 
 		String sql = "select dbms_metadata.get_ddl('TYPE', ?, ?) from dual";
 
@@ -332,11 +333,18 @@ public class OracleTypeReader
 			LogMgr.logDebug("OracleTypeReader.retrieveSource()", "Using SQL: " + SqlUtil.replaceParameters(sql, object.getObjectName(), object.getSchema()));
 		}
 
+
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		String source = null;
+
 		try
 		{
+      if (StringUtil.isNonEmpty(schemaForSource))
+      {
+        // TODO: remap schema names
+      }
+
 			stmt = con.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, object.getObjectName());
 			stmt.setString(2, object.getSchema());
@@ -393,6 +401,11 @@ public class OracleTypeReader
 
 	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
+  {
+    return getObjectSource(con, object, null);
+  }
+
+	public String getObjectSource(WbConnection con, DbObject object, String schemaForSource)
 	{
 		if (object == null) return null;
 		if (!handlesType(object.getObjectType())) return null;
@@ -403,7 +416,7 @@ public class OracleTypeReader
 
 		if (StringUtil.isBlank(source))
 		{
-			source = retrieveSource(con, object);
+			source = retrieveSource(con, object, schemaForSource);
 			type.setSource(source);
 		}
 		return source;

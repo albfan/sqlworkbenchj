@@ -835,13 +835,14 @@ public class SchemaDiff
 			else
 			{
 				ProcDiffEntry entry;
-				ProcedureDefinition tp = new ProcedureDefinition(
-					getTargetCatalog(targetSchema),
-					getTargetSchema(targetSchema), refProc.getProcedureName(),refProc.getResultType());
 
-				if (targetMeta.getProcedureReader().procedureExists(tp))
+				ProcedureDefinition toFind = new ProcedureDefinition(getTargetCatalog(targetSchema), getTargetSchema(targetSchema), refProc.getProcedureName(), refProc.getResultType());
+        toFind.setParameters(refProc.getParameters(referenceDb));
+
+        ProcedureDefinition targetProc = targetMeta.getProcedureReader().findProcedureDefinition(toFind);
+				if (targetProc != null)
 				{
-					entry = new ProcDiffEntry(refProc,tp);
+					entry = new ProcDiffEntry(refProc, targetProc);
 				}
 				else
 				{
@@ -849,7 +850,7 @@ public class SchemaDiff
 				}
 				objectsToCompare.add(entry);
 			}
-			refProcNames.add(refProc.getProcedureName());
+			refProcNames.add(refProc.getDisplayName());
 		}
 
 		for (ProcedureDefinition tProc : targetProcs)
@@ -863,7 +864,7 @@ public class SchemaDiff
 				break;
 			}
 
-			String procname = tProc.getProcedureName();
+			String procname = tProc.getDisplayName();
 			if (!refProcNames.contains(procname))
 			{
 				this.procsToDelete.add(tProc);
@@ -1159,6 +1160,13 @@ public class SchemaDiff
 				ProcDiffEntry entry = (ProcDiffEntry)o;
 				ReportProcedure rp = new ReportProcedure(entry.reference, this.referenceDb);
 				ReportProcedure tp = new ReportProcedure(entry.target, this.targetDb);
+
+        String tschema = tp.getSchema() == null ? targetSchema : tp.getSchema();
+        if (!StringUtil.equalString(rp.getSchema(), tschema))
+        {
+          rp.setSchemaToUse(tschema);
+        }
+
 				ProcDiff diff = new ProcDiff(rp, tp);
 				diff.setIndent(indent);
 				StringBuilder xml = diff.getMigrateTargetXml();
@@ -1179,8 +1187,6 @@ public class SchemaDiff
 		for (ProcedureDefinition def : procsToDelete)
 		{
 			ReportProcedure rp = new ReportProcedure(def, targetDb);
-			String fullName = def.getObjectNameForDrop(targetDb);
-			rp.setFullname(fullName);
 			rp.setIndent(myindent);
 			StringBuilder xml = rp.getXml(false);
 			out.write(xml.toString());
@@ -1362,10 +1368,8 @@ public class SchemaDiff
 			else if (o instanceof ProcDiffEntry)
 			{
 				ProcDiffEntry pe = (ProcDiffEntry)o;
-				tbls[0] = pe.reference.getFullyQualifiedName(referenceDb);
-				tbls[1] = (pe.target == null ? "" : pe.target.getFullyQualifiedName(targetDb));
-
-				tw.appendOpenTag(info, indent2, TAG_PROC_PAIR, pattr, tbls, false);
+        String[] procs = new String[] { getProcedureNameInfo(referenceDb, pe.reference), getProcedureNameInfo(targetDb, pe.target) };
+				tw.appendOpenTag(info, indent2, TAG_PROC_PAIR, pattr, procs, false);
 			}
 			else if (o instanceof PackageDiffEntry)
 			{
@@ -1389,6 +1393,23 @@ public class SchemaDiff
 
 		out.write(info.toString());
 	}
+
+  private String getProcedureNameInfo(WbConnection conn, ProcedureDefinition def)
+  {
+    if (def == null) return "";
+    String result = "";
+
+    if (StringUtil.isNonBlank(def.getCatalog()))
+    {
+      result += def.getCatalog().trim() + conn.getMetadata().getCatalogSeparator();
+    }
+    if (StringUtil.isNonBlank(def.getSchema()))
+    {
+      result += def.getSchema().trim() + conn.getMetadata().getSchemaSeparator();
+    }
+    result += def.getDisplayName();
+    return result;
+  }
 
 	private void writeTag(Writer out, StringBuilder indent, String tag, boolean isOpeningTag)
 		throws IOException

@@ -1996,4 +1996,14 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "error.include.warning", true);
 	}
+
+  public boolean supportsFunctionOverloading()
+  {
+    return Settings.getInstance().getBoolProperty(prefix + "function.overloading.supported", false);
+  }
+
+  public boolean showProcedureParameters()
+  {
+    return getBoolProperty("procedurelist.showparameters", false);
+  }
 }

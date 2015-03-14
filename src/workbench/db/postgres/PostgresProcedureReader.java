@@ -199,7 +199,7 @@ public class PostgresProcedureReader
 		Savepoint sp = null;
 		ResultSet rs = null;
 
-		boolean showParametersInName = connection.getDbSettings().getBoolProperty("procedurelist.showparameters", true);
+		boolean showParametersInName = connection.getDbSettings().showProcedureParameters();
 
 		try
 		{
@@ -325,7 +325,7 @@ public class PostgresProcedureReader
 	}
 
 	@Override
-	public void readProcedureSource(ProcedureDefinition def)
+	public void readProcedureSource(ProcedureDefinition def, String catalogForSource, String schemaForSource)
 		throws NoConfigException
 	{
 		boolean usePGFunction = Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", false);
@@ -430,7 +430,7 @@ public class PostgresProcedureReader
 			if (!isAggregate && hasRow)
 			{
 				source.append("CREATE OR REPLACE FUNCTION ");
-				source.append(schema);
+				source.append(schemaForSource == null ? schema : schemaForSource);
 				source.append('.');
 				source.append(name.getName());
 
@@ -631,6 +631,7 @@ public class PostgresProcedureReader
 						source.append(delim.getDelimiter());
 					}
 					source.append('\n');
+
 					if (StringUtil.isNonBlank(def.getComment()))
 					{
 						source.append("\nCOMMENT ON FUNCTION ");
@@ -643,8 +644,8 @@ public class PostgresProcedureReader
 							source.append(delim.getDelimiter());
 							source.append('\n');
 						}
-
 					}
+
 				}
 			}
 		}

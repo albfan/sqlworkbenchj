@@ -810,6 +810,12 @@ public class StringUtil
 		return compareStrings(one, other, false) == 0;
 	}
 
+	public static boolean stringsAreNotEqual(String one, String other)
+	{
+		return compareStrings(one, other, false) != 0;
+	}
+
+
 	/**
 	 * @param value1 the first String, maybe null
 	 * @param value2 the second String, maybe null

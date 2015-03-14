@@ -269,6 +269,42 @@ public class PostgresProcedureReaderTest
 		assertEquals("boost", name);
 	}
 
+  @Test
+  public void testFindProcDef()
+    throws Exception
+  {
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		PostgresProcedureReader reader = new PostgresProcedureReader(con);
+    TestUtil.executeScript(con,
+			"CREATE FUNCTION fn_answer(p1 varchar, p2 varchar)  \n" +
+			"  RETURNS integer  \n" +
+			"AS $$ \n" +
+			"BEGIN \n" +
+			"    RETURN 42;\n" +
+			"END; \n" +
+			"$$ LANGUAGE plpgsql; \n" +
+			"\n "  +
+			"commit;");
+
+		List<ProcedureDefinition> procs = reader.getProcedureList(null, TEST_ID, "fn_answer%");
+		assertEquals(3, procs.size());
+
+		ProcedureDefinition toFind = procs.get(0);
+    ProcedureDefinition found = reader.findProcedureDefinition(toFind);
+    assertNotNull(found);
+    assertEquals(toFind.getObjectNameForDrop(con), found.getObjectNameForDrop(con));
+
+    toFind = procs.get(1);
+    found = reader.findProcedureDefinition(toFind);
+    assertNotNull(found);
+    assertEquals(toFind.getObjectNameForDrop(con), found.getObjectNameForDrop(con));
+
+    toFind = procs.get(2);
+    found = reader.findProcedureDefinition(toFind);
+    assertNotNull(found);
+    assertEquals(toFind.getObjectNameForDrop(con), found.getObjectNameForDrop(con));
+  }
+
 	@Test
 	public void testQualifiedParams()
 		throws Exception
@@ -300,9 +336,7 @@ public class PostgresProcedureReaderTest
 		TableIdentifier object = new TableIdentifier("foo.bar(integer)", con);
 		object.adjustCase(con);
 
-		ProcedureReader reader = con.getMetadata().getProcedureReader();
 		ProcedureDefinition def = new ProcedureDefinition(object.getCatalog(), object.getSchema(), object.getObjectName());
-		assertTrue(reader.procedureExists(def));
 		CharSequence sql = def.getSource(con);
 		assertNotNull(sql);
 		assertTrue(sql.toString().contains("FUNCTION foo.bar(p_in integer)"));

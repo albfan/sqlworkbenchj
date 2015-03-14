@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -69,43 +70,6 @@ public class JdbcProcedureReader
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
 		return StringUtil.emptyBuilder();
-	}
-
-
-	/**
-	 * Checks if the given procedure exists in the database
-	 */
-	@Override
-	public boolean procedureExists(ProcedureDefinition def)
-	{
-		String catalog = def.getCatalog();
-		String schema = def.getSchema();
-		String procName = def.getProcedureName();
-		int procType = def.getResultType();
-
-		boolean exists = false;
-
-		Savepoint sp = null;
-		try
-		{
-			DataStore ds = getProcedures(catalog, schema, procName);
-
-			if (ds.getRowCount() > 0)
-			{
-				int type = ds.getValueAsInt(0, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-
-				if (procType == DatabaseMetaData.procedureResultUnknown || type == procType)
-				{
-					exists = true;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			this.connection.rollback(sp);
-			LogMgr.logError("JdbcProcedureReader.procedureExists()", "Error checking procedure", e);
-		}
-		return exists;
 	}
 
 	@Override
@@ -268,6 +232,30 @@ public class JdbcProcedureReader
 		if (pos < 0) return procname;
 		return procname.substring(0,pos);
 	}
+
+  @Override
+  public void readProcedureParameters(ProcedureDefinition def)
+    throws SQLException
+  {
+    DataStore ds = getProcedureColumns(def);
+    List<ColumnIdentifier> parameters = new ArrayList<>(ds.getRowCount());
+
+    for (int i = 0; i < ds.getRowCount(); i++)
+    {
+      String type = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+      if ("IN".equalsIgnoreCase(type) || "INOUT".equalsIgnoreCase(type))
+      {
+        String colName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+        String typeName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
+        int jdbcType = ds.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
+        ColumnIdentifier col = new ColumnIdentifier(colName, jdbcType);
+        col.setDbmsType(typeName);
+        parameters.add(col);
+      }
+    }
+    def.setParameters(parameters);
+  }
+
 
 	@Override
 	public DataStore getProcedureColumns(ProcedureDefinition def)
@@ -432,6 +420,13 @@ public class JdbcProcedureReader
 	@Override
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
+  {
+    readProcedureSource(def, null, null);
+  }
+
+	@Override
+	public void readProcedureSource(ProcedureDefinition def, String catalogForSource, String schemaForSource)
+		throws NoConfigException
 	{
 		if (def == null) return;
 
@@ -466,7 +461,25 @@ public class JdbcProcedureReader
 			{
 				template = template.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, def.getProcedureName());
 				template = template.replace("%specific_name%", def.getSpecificName());
-				template = template.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, def.getSchema());
+
+        if (schemaForSource != null)
+        {
+          template = template.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, schemaForSource);
+        }
+				else
+        {
+          template = template.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, def.getSchema());
+        }
+
+        if (catalogForSource != null)
+        {
+          template = template.replace(TableSourceBuilder.CATALOG_PLACEHOLDER, catalogForSource);
+        }
+				else
+        {
+          template = template.replace(TableSourceBuilder.CATALOG_PLACEHOLDER, def.getCatalog());
+        }
+
 				template = template.replace(CommentSqlManager.COMMENT_PLACEHOLDER, comment.replace("'", "''"));
 				source.append('\n');
 				source.append(template);
@@ -600,12 +613,13 @@ public class JdbcProcedureReader
 	}
 
 	@Override
-	public ProcedureDefinition findProcedure(DbObject toFind)
+	public ProcedureDefinition findProcedureByName(DbObject toFind)
 		throws SQLException
 	{
 		if (toFind == null) return null;
 		String objSchema = toFind.getSchema();
 		String objCat = toFind.getCatalog();
+
 		if (StringUtil.isNonEmpty(objCat) || StringUtil.isNonBlank(objSchema))
 		{
 			if (StringUtil.isEmptyString(objCat))
@@ -645,4 +659,47 @@ public class JdbcProcedureReader
 		}
 		return null;
 	}
+
+  @Override
+  public ProcedureDefinition findProcedureDefinition(ProcedureDefinition toFind)
+  {
+    List<ProcedureDefinition> procList = null;
+    try
+    {
+      procList = getProcedureList(toFind.getCatalog(), toFind.getSchema(), toFind.getProcedureName());
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logWarning("JdbcProcedureReader.findProcedureDefinition()", "Could not read procedures", ex);
+      return null;
+    }
+
+    if (CollectionUtil.isEmpty(procList))
+    {
+      return null;
+    }
+
+    List<String> typeSignature = toFind.getParameterTypes();
+
+    if (!connection.getDbSettings().supportsFunctionOverloading())
+    {
+      if (procList.size() == 1)
+      {
+        return procList.get(0);
+      }
+      return null;
+    }
+
+    for (ProcedureDefinition def : procList)
+    {
+      def.readParameters(connection);
+      List<String> parameterTypes = def.getParameterTypes();
+      if (parameterTypes.equals(typeSignature))
+      {
+        return def;
+      }
+    }
+    return null;
+  }
+
 }

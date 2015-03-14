@@ -203,9 +203,17 @@ public class PostgresSchemaDiffTest
 			"\n" +
 			"create function " + REFERENCE_SCHEMA + ".to_modify() returns integer as $$ begin return 42; end; $$ language plpgsql; \n" +
 			"\n" +
-			"create function " + TARGET_SCHEMA + ".to_modify() returns integer as $$ begin return 1; end; $$ language plpgsql; \n" +
+			"create function " + REFERENCE_SCHEMA + ".to_modify(p1 integer) returns integer as $$ begin return 42; end; $$ language plpgsql; \n" +
+			"\n" +
+			"create function " + REFERENCE_SCHEMA + ".to_delete() returns integer as $$ begin return 1; end; $$ language plpgsql; \n" +
+			"\n"  +
+			"create function " + TARGET_SCHEMA + ".to_modify() returns integer as $$ begin return 42; end; $$ language plpgsql; \n" +
+			"\n" +
+			"create function " + TARGET_SCHEMA + ".to_modify(p1 integer) returns integer as $$ begin return 1; end; $$ language plpgsql; \n" +
 			"\n" +
 			"create function " + TARGET_SCHEMA + ".to_delete() returns integer as $$ begin return 1; end; $$ language plpgsql; \n" +
+			"\n"  +
+			"create function " + TARGET_SCHEMA + ".to_delete(p1 integer) returns integer as $$ begin return 1; end; $$ language plpgsql; \n" +
 			"\n"  +
 			"commit;\n");
 
@@ -234,11 +242,11 @@ public class PostgresSchemaDiffTest
 		String value = TestUtil.getXPathValue(xml, "/schema-diff/create-proc/proc-def/proc-name");
 		assertEquals("to_create", value);
 
-		value = TestUtil.getXPathValue(xml, "/schema-diff/update-proc/proc-def/proc-name");
-		assertEquals("to_modify", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/update-proc/proc-def/proc-full-name");
+		assertEquals("to_modify(integer)", value);
 
-		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-procedure/proc-def/proc-name");
-		assertEquals("to_delete", value);
+		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-procedure/proc-def/proc-full-name");
+		assertEquals("to_delete(integer)", value);
 
 		assertTrue("Could not delete output", outfile.delete());
 	}

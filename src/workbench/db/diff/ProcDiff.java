@@ -33,63 +33,72 @@ import workbench.util.StringUtil;
  */
 public class ProcDiff
 {
-	public static final String TAG_CREATE_PROC = "create-proc";
-	public static final String TAG_UPDATE_PROC = "update-proc";
+  public static final String TAG_CREATE_PROC = "create-proc";
+  public static final String TAG_UPDATE_PROC = "update-proc";
 
-	private ReportProcedure reference;
-	private ReportProcedure target;
-	private final TagWriter writer = new TagWriter();
-	private StringBuilder indent = StringUtil.emptyBuilder();
+  private ReportProcedure reference;
+  private ReportProcedure target;
+  private final TagWriter writer = new TagWriter();
+  private StringBuilder indent = StringUtil.emptyBuilder();
 
-	public ProcDiff(ReportProcedure ref, ReportProcedure tar)
-	{
-		reference = ref;
-		target = tar;
-	}
+  public ProcDiff(ReportProcedure ref, ReportProcedure tar)
+  {
+    reference = ref;
+    target = tar;
+  }
 
-	public StringBuilder getMigrateTargetXml()
-	{
-		StringBuilder result = new StringBuilder(500);
+  public StringBuilder getMigrateTargetXml()
+  {
+    StringBuilder result = new StringBuilder(500);
 
-		boolean isDifferent = true;
-		String tagToUse = TAG_CREATE_PROC;
+    boolean isDifferent = true;
+    String tagToUse = TAG_CREATE_PROC;
 
-		CharSequence refSource = reference.getSource();
-		CharSequence targetSource = target.getSource();
+    CharSequence refSource = reference.getSource();
+    CharSequence targetSource = target.getSource();
 
-		if (targetSource != null)
-		{
-			isDifferent = !refSource.toString().trim().equals(targetSource.toString().trim());
-			tagToUse = TAG_UPDATE_PROC;
-		}
+    try
+    {
+      if (targetSource != null)
+      {
+        isDifferent = !refSource.toString().trim().equals(targetSource.toString().trim());
+        tagToUse = TAG_UPDATE_PROC;
+      }
 
-		StringBuilder myIndent = new StringBuilder(indent);
-		myIndent.append("  ");
-		if (isDifferent)
-		{
-			writer.appendOpenTag(result, this.indent, tagToUse);
-			result.append('\n');
-			reference.setIndent(myIndent);
-			result.append(reference.getXml());
-			writer.appendCloseTag(result, this.indent, tagToUse);
-		}
-		return result;
-	}
+      StringBuilder myIndent = new StringBuilder(indent);
+      myIndent.append("  ");
+      if (isDifferent)
+      {
+        writer.appendOpenTag(result, this.indent, tagToUse);
+        result.append('\n');
+        reference.setIndent(myIndent);
+        reference.setFullname(reference.getProcedure().getDisplayName());
+        result.append(reference.getXml());
+        writer.appendCloseTag(result, this.indent, tagToUse);
+      }
+    }
+    finally
+    {
+      // reset the schema hack
+      reference.setSchemaToUse(null);
+      reference.getProcedure().setSource(null);
+    }
+    return result;
+  }
 
 	/**
 	 *	Set an indent for generating the XML
 	 */
-	public void setIndent(StringBuilder ind)
-	{
-		if (ind == null)
-		{
-			this.indent = StringUtil.emptyBuilder();
-		}
-		else
-		{
-			this.indent = ind;
-		}
-
-	}
+  public void setIndent(StringBuilder ind)
+  {
+    if (ind == null)
+    {
+      this.indent = StringUtil.emptyBuilder();
+    }
+    else
+    {
+      this.indent = ind;
+    }
+  }
 
 }

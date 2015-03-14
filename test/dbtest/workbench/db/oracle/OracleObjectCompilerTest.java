@@ -149,7 +149,7 @@ public class OracleObjectCompilerTest
 		assertNull(msg);
 
 		TestUtil.executeScript(con, "create procedure nocando as begin null end;");
-		ProcedureDefinition proc = reader.findProcedure(new ProcedureDefinition(null, OracleTestUtil.SCHEMA_NAME, "NOCANDO"));
+		ProcedureDefinition proc = reader.findProcedureByName(new ProcedureDefinition(null, OracleTestUtil.SCHEMA_NAME, "NOCANDO"));
 		msg = compiler.compileObject(proc);
 		assertNotNull(msg);
 		assertTrue(msg.contains("PLS-00103"));

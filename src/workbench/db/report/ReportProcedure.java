@@ -60,6 +60,7 @@ public class ReportProcedure
 	{
 		this.procDef = def;
 		this.dbConn = conn;
+    fullName = def != null ? def.getDisplayName() : null;
 	}
 
 	public void setFullname(String name)
@@ -69,11 +70,12 @@ public class ReportProcedure
 
 	public void setSchemaToUse(String targetSchema)
 	{
-		this.schemaToUse = targetSchema;
+		schemaToUse = targetSchema;
 	}
 
-	private String getSchema()
+	public String getSchema()
 	{
+    if (procDef == null) return null;
 		return schemaToUse == null ? procDef.getSchema() : schemaToUse;
 	}
 
@@ -84,7 +86,7 @@ public class ReportProcedure
 		{
 			try
 			{
-				this.dbConn.getMetadata().getProcedureReader().readProcedureSource(this.procDef);
+				this.dbConn.getMetadata().getProcedureReader().readProcedureSource(this.procDef, null, schemaToUse);
 			}
 			catch (NoConfigException e)
 			{
@@ -141,7 +143,7 @@ public class ReportProcedure
 		}
 		tagWriter.appendTag(result, indent2, TAG_PROC_SCHEMA, getSchema());
 		tagWriter.appendTag(result, indent2, TAG_PROC_NAME, objectName);
-		if (StringUtil.isNonBlank(fullName))
+    if (StringUtil.isNonBlank(fullName) && StringUtil.stringsAreNotEqual(fullName, objectName))
 		{
 			tagWriter.appendTag(result, indent2, TAG_PROC_FULL_NAME, fullName);
 		}

@@ -239,22 +239,7 @@ public class ProcedureDefinition
 				try
 				{
 					ProcedureReader reader = con.getMetadata().getProcedureReader();
-					DataStore ds = reader.getProcedureColumns(this);
-					parameters = new ArrayList<>(ds.getRowCount());
-
-					for (int i = 0; i < ds.getRowCount(); i++)
-					{
-						String type = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-						if ("IN".equalsIgnoreCase(type) || "INOUT".equalsIgnoreCase(type))
-						{
-							String colName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
-							String typeName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
-							int jdbcType = ds.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
-							ColumnIdentifier col = new ColumnIdentifier(colName, jdbcType);
-							col.setDbmsType(typeName);
-							parameters.add(col);
-						}
-					}
+          reader.readProcedureParameters(this);
 				}
 				catch (SQLException s)
 				{

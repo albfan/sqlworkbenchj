@@ -74,7 +74,7 @@ public class WbProcSource
 		object.adjustCase(currentConnection);
 
 		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
-		ProcedureDefinition def = reader.findProcedure(object);
+		ProcedureDefinition def = reader.findProcedureByName(object);
 
 		if (def != null)
 		{

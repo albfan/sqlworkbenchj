@@ -191,7 +191,7 @@ public class ObjectInfo
 				// No table or something similar found, try to find a procedure with that name
 				dbObject.adjustCase(connection);
 				ProcedureReader reader = connection.getMetadata().getProcedureReader();
-				ProcedureDefinition def = reader.findProcedure(dbObject);
+				ProcedureDefinition def = reader.findProcedureByName(dbObject);
 
 				if (def != null)
 				{
