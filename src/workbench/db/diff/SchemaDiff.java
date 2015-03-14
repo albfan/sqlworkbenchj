@@ -1164,6 +1164,9 @@ public class SchemaDiff
         String tschema = tp.getSchema() == null ? targetSchema : tp.getSchema();
         if (!StringUtil.equalString(rp.getSchema(), tschema))
         {
+          // pretend both procedures are stored in the same schema
+          // otherwise a comparison of the source code that includes the schema name will not work.
+          // this will not work for every DBMS though (i.e. every ProcedureReader)
           rp.setSchemaToUse(tschema);
         }
 

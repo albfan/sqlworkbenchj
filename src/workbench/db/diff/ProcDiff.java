@@ -57,32 +57,24 @@ public class ProcDiff
     CharSequence refSource = reference.getSource();
     CharSequence targetSource = target.getSource();
 
-    try
+    if (targetSource != null)
     {
-      if (targetSource != null)
-      {
-        isDifferent = !refSource.toString().trim().equals(targetSource.toString().trim());
-        tagToUse = TAG_UPDATE_PROC;
-      }
+      isDifferent = !refSource.toString().trim().equals(targetSource.toString().trim());
+      tagToUse = TAG_UPDATE_PROC;
+    }
 
+    if (isDifferent)
+    {
       StringBuilder myIndent = new StringBuilder(indent);
       myIndent.append("  ");
-      if (isDifferent)
-      {
-        writer.appendOpenTag(result, this.indent, tagToUse);
-        result.append('\n');
-        reference.setIndent(myIndent);
-        reference.setFullname(reference.getProcedure().getDisplayName());
-        result.append(reference.getXml());
-        writer.appendCloseTag(result, this.indent, tagToUse);
-      }
+      writer.appendOpenTag(result, this.indent, tagToUse);
+      result.append('\n');
+      reference.setIndent(myIndent);
+      reference.setFullname(reference.getProcedure().getDisplayName());
+      result.append(reference.getXml());
+      writer.appendCloseTag(result, this.indent, tagToUse);
     }
-    finally
-    {
-      // reset the schema hack
-      reference.setSchemaToUse(null);
-      reference.getProcedure().setSource(null);
-    }
+    
     return result;
   }
 
