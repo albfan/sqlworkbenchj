@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-03-02">
+    <entry dev-build="3" type="enh">WbSchemaReport has a new (boolean) option -writeFullSource to write a valid CREATE VIEW statement to the XML output in case the DBMS does not store the complete SQL</entry>
     <entry dev-build="3" type="enh">Results can now automatically be refreshed either through an annotation or through the context menu of the result tab</entry>
     <entry dev-build="2" type="enh">The macros in a group can now be sorted alphabetically</entry>
     <entry dev-build="2" type="enh">The quoting of the null values for text exports can now be enabled through the option -quoteNulls</entry>
