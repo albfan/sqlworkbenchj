@@ -242,7 +242,7 @@ public class OracleTableSourceBuilder
 
 				String degree = rs.getString("degree");
 				if (degree != null) degree = degree.trim();
-				if (!StringUtil.equalString("1", degree))
+				if (StringUtil.stringsAreNotEqual("1", degree))
 				{
 					if (options.length() > 0) options.append('\n');
 					if ("DEFAULT".equals(degree))

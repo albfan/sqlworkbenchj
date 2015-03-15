@@ -380,13 +380,6 @@ public class ColumnChanger
 		return sql;
 	}
 
-	private boolean defaultValueChanged(ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
-	{
-		String oldDefault = oldDefinition.getDefaultValue();
-		String newDefault = newDefinition.getDefaultValue();
-		return !StringUtil.equalString(oldDefault, newDefault);
-	}
-
 	private String changeDefault(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
 	{
 		String alterDefault = dbSettings.getAlterColumnDefaultSql();

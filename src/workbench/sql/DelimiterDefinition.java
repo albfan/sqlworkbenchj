@@ -160,42 +160,42 @@ public class DelimiterDefinition
 		return this.delimiter;
 	}
 
-	public final void setDelimiter(String d)
+	public final void setDelimiter(String newDelimiter)
 	{
 		if (isImmutable) return;
+		if (newDelimiter == null) return;
 
-		if (d == null) return;
-		if (!StringUtil.equalString(this.delimiter, d))
-		{
-			this.delimiter = d.trim();
-			this.singleLineDelimiter = !delimiter.equals(";");
-			this.changed = true;
-			this.isStandard = delimiter.equals(";");
-			initPattern();
-		}
+    if (StringUtil.stringsAreNotEqual(this.delimiter, newDelimiter))
+    {
+      this.delimiter = newDelimiter.trim();
+      this.singleLineDelimiter = !delimiter.equals(";");
+      this.changed = true;
+      this.isStandard = delimiter.equals(";");
+      initPattern();
+    }
 	}
 
-	public boolean isChanged()
-	{
-		return this.changed;
-	}
+  public boolean isChanged()
+  {
+    return this.changed;
+  }
 
-	public boolean isSingleLine()
-	{
-		return this.singleLineDelimiter;
-	}
+  public boolean isSingleLine()
+  {
+    return this.singleLineDelimiter;
+  }
 
-	public void setSingleLine(boolean flag)
-	{
-		if (isImmutable) return;
+  public void setSingleLine(boolean flag)
+  {
+    if (isImmutable) return;
 
-		if (flag != this.singleLineDelimiter)
-		{
-			this.singleLineDelimiter = flag;
-			this.changed = true;
-			initPattern();
-		}
-	}
+    if (flag != this.singleLineDelimiter)
+    {
+      this.singleLineDelimiter = flag;
+      this.changed = true;
+      initPattern();
+    }
+  }
 
 	/**
 	 * Return true if the given SQL script ends

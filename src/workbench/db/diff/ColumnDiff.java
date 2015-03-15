@@ -154,15 +154,15 @@ public class ColumnDiff
 		boolean nullableDifferent = (sId.isNullable() != tId.isNullable());
 		String sdef = sId.getDefaultValue();
 		String tdef = tId.getDefaultValue();
-		boolean defaultDifferent = !StringUtil.equalString(sdef, tdef);
-		boolean computedColIsDifferent = !StringUtil.equalString(sId.getComputedColumnExpression(), tId.getComputedColumnExpression());
+    boolean defaultDifferent = StringUtil.stringsAreNotEqual(sdef, tdef);
+		boolean computedColIsDifferent = StringUtil.stringsAreNotEqual(sId.getComputedColumnExpression(), tId.getComputedColumnExpression());
 
 		ColumnReference refFk = this.referenceColumn.getForeignKey();
 		ColumnReference targetFk = this.targetColumn.getForeignKey();
 
 		boolean fkDefinitionDifferent = false;
 		boolean fkNameDifferent = false;
-		boolean collationsDifferent = !StringUtil.equalString(sId.getCollation(), tId.getCollation());
+		boolean collationsDifferent = StringUtil.stringsAreNotEqual(sId.getCollation(), tId.getCollation());
 
 		if (this.compareFK)
 		{

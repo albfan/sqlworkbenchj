@@ -179,7 +179,7 @@ public class ConnectionProfile
 
 	public void setMacroFilename(String fname)
 	{
-		if (!StringUtil.equalString(fname, macroFileName))
+		if (StringUtil.stringsAreNotEqual(fname, macroFileName))
 		{
 			this.macroFileName = fname;
 			this.changed = true;
@@ -770,7 +770,7 @@ public class ConnectionProfile
 	public final void setUrl(String newUrl)
 	{
 		if (newUrl != null) newUrl = newUrl.trim();
-		if (!StringUtil.equalString(newUrl, url)) changed = true;
+		if (StringUtil.stringsAreNotEqual(newUrl, url)) changed = true;
 		url = newUrl;
 		usePgPass = (url != null && url.startsWith("jdbc:postgresql") && Settings.getInstance().usePgPassFile());
 	}
@@ -782,7 +782,7 @@ public class ConnectionProfile
 
 	public final void setDriverName(String name)
 	{
-		if (name != null && !StringUtil.equalStringOrEmpty(name, this.driverName))
+		if (name != null && StringUtil.stringsAreNotEqual(name, this.driverName))
 		{
 			this.driverName = name.trim();
 			this.changed = true;
@@ -796,7 +796,7 @@ public class ConnectionProfile
 
 	public final void setDriverclass(String drvClass)
 	{
-		if (drvClass != null && !StringUtil.equalString(drvClass, driverclass))
+		if (drvClass != null && StringUtil.stringsAreNotEqual(drvClass, driverclass))
 		{
 			changed = true;
 			this.driverclass = drvClass.trim();

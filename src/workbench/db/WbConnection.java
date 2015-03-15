@@ -1405,7 +1405,7 @@ public class WbConnection
 
 	public void schemaChanged(String oldSchema, String newSchema)
 	{
-		boolean changed = (currentSchema != null && !currentSchema.equals(newSchema)) || !StringUtil.equalString(oldSchema, newSchema);
+		boolean changed = (currentSchema != null && !currentSchema.equals(newSchema)) || StringUtil.stringsAreNotEqual(oldSchema, newSchema);
 		this.currentSchema = newSchema;
 		if (changed)
 		{

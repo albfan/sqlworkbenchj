@@ -28,6 +28,9 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import workbench.log.LogMgr;
+
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
 import workbench.db.JdbcUtils;
@@ -35,7 +38,7 @@ import workbench.db.SequenceDefinition;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -116,7 +119,7 @@ public class HsqlColumnEnhancer
 					String start = rs.getString(6);
 					String inc = rs.getString(7);
 					columnExpression = "GENERATED " + identityExpr + " AS IDENTITY";
-					if (!StringUtil.equalString("0", start) || !StringUtil.equalString("1", inc))
+					if (StringUtil.stringsAreNotEqual("0", start) || StringUtil.stringsAreNotEqual("1", inc))
 					{
 						columnExpression += " (START WITH " + start + " INCREMENT BY " + inc + ")";
 					}

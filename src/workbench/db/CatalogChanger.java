@@ -24,8 +24,10 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -95,7 +97,7 @@ public class CatalogChanger
 		}
 
 		String newCat = meta.getCurrentCatalog();
-		if (!StringUtil.equalString(old, newCat))
+		if (StringUtil.stringsAreNotEqual(old, newCat))
 		{
 			conn.catalogChanged(old, newCatalog);
 		}

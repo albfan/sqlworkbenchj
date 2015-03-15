@@ -367,7 +367,7 @@ public class WbProperties
 			}
 		}
 
-		if (firePropChange && !StringUtil.equalString(oldValue, value))
+		if (firePropChange && StringUtil.stringsAreNotEqual(oldValue, value))
 		{
 			this.firePropertyChanged(name, oldValue, value);
 		}

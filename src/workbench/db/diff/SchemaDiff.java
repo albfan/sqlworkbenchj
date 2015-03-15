@@ -1162,7 +1162,7 @@ public class SchemaDiff
 				ReportProcedure tp = new ReportProcedure(entry.target, this.targetDb);
 
         String tschema = tp.getSchema() == null ? targetSchema : tp.getSchema();
-        if (!StringUtil.equalString(rp.getSchema(), tschema))
+        if (StringUtil.stringsAreNotEqual(rp.getSchema(), tschema))
         {
           // pretend both procedures are stored in the same schema
           // otherwise a comparison of the source code that includes the schema name will not work.

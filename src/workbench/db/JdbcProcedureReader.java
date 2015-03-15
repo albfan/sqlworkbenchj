@@ -300,7 +300,7 @@ public class JdbcProcedureReader
 					String procSpecName = rs.getString(specIndex);
 
 					// if the specific name is relevant, only process columns for the matching specific name
-					if (!StringUtil.equalString(procSpecName, specificName)) continue;
+					if (StringUtil.stringsAreNotEqual(procSpecName, specificName)) continue;
 				}
 				processProcedureColumnResultRow(ds, rs);
 			}

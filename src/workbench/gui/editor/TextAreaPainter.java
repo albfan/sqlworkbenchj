@@ -148,42 +148,42 @@ public class TextAreaPainter
 		}
 	}
 
-	@Override
-	public void setCursor(Cursor current)
-	{
-		if (current != null && current.equals(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)))
-		{
-			super.setCursor(current);
-		}
-		else
-		{
-			super.setCursor(DEFAULT_CURSOR);
-		}
-	}
+  @Override
+  public void setCursor(Cursor current)
+  {
+    if (current != null && current.equals(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)))
+    {
+      super.setCursor(current);
+    }
+    else
+    {
+      super.setCursor(DEFAULT_CURSOR);
+    }
+  }
 
-	public void setHighlightValue(String text)
-	{
-		boolean changed = false;
-		if (StringUtil.isNonEmpty(text))
-		{
-			changed = !StringUtil.equalString(highlighText, text);
-			this.highlighText = text;
-		}
-		else
-		{
-			changed = this.highlighText != null;
-			this.highlighText = null;
-		}
-		if (changed)
-		{
-			invalidateVisibleLines();
-		}
-	}
+  public void setHighlightValue(String text)
+  {
+    boolean changed = false;
+    if (StringUtil.isNonEmpty(text))
+    {
+      changed = StringUtil.stringsAreNotEqual(highlighText, text);
+      highlighText = text;
+    }
+    else
+    {
+      changed = highlighText != null;
+      highlighText = null;
+    }
+    if (changed)
+    {
+      invalidateVisibleLines();
+    }
+  }
 
-	public void dispose()
-	{
-		Settings.getInstance().removePropertyChangeListener(this);
-	}
+  public void dispose()
+  {
+    Settings.getInstance().removePropertyChangeListener(this);
+  }
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)

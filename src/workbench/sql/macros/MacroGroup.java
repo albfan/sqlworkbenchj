@@ -74,41 +74,41 @@ public class MacroGroup
 		return showInPopup;
 	}
 
-	public void setVisibleInPopup(boolean flag)
-	{
-		this.modified = modified || flag != showInPopup;
-		this.showInPopup = flag;
-	}
+  public void setVisibleInPopup(boolean flag)
+  {
+    this.modified = modified || flag != showInPopup;
+    this.showInPopup = flag;
+  }
 
-	@Override
-	public int getSortOrder()
-	{
-		return sortOrder;
-	}
+  @Override
+  public int getSortOrder()
+  {
+    return sortOrder;
+  }
 
-	@Override
-	public void setSortOrder(int order)
-	{
-		this.modified = modified || sortOrder != order;
-		this.sortOrder = order;
-	}
+  @Override
+  public void setSortOrder(int order)
+  {
+    this.modified = modified || sortOrder != order;
+    this.sortOrder = order;
+  }
 
-	@Override
-	public String toString()
-	{
-		return name;
-	}
+  @Override
+  public String toString()
+  {
+    return name;
+  }
 
-	public String getName()
-	{
-		return name;
-	}
+  public String getName()
+  {
+    return name;
+  }
 
-	public void setName(String macroName)
-	{
-		this.modified = modified || !StringUtil.equalString(name, macroName);
-		this.name = macroName;
-	}
+  public void setName(String macroName)
+  {
+    modified = modified || StringUtil.stringsAreNotEqual(name, macroName);
+    name = macroName;
+  }
 
 	public synchronized void addMacro(MacroDefinition macro)
 	{
@@ -133,13 +133,13 @@ public class MacroGroup
         return o1.getName().compareToIgnoreCase(o2.getName());
       }
     };
-    
+
     Collections.sort(macros, comp);
-		for (int i=0; i < macros.size(); i++)
-		{
-			macros.get(i).setSortOrder(i);
-		}
-	}
+    for (int i=0; i < macros.size(); i++)
+    {
+      macros.get(i).setSortOrder(i);
+    }
+  }
 
 	/**
 	 * Synchronizes the sort order of each macro with the
@@ -154,27 +154,27 @@ public class MacroGroup
 		}
 	}
 
-	/**
-	 * Returns those macros that are set to "display in menu" (i.e. where MacroDefinition.isVisibleInMenu()
-	 * returns true.
-	 * <br/>
-	 * This ignores the isVisibleInMenu() setting of this group.
-	 *
-	 * @see #getVisibleMacroSize()
-	 * @see MacroDefinition#isVisibleInMenu() ()
-	 */
-	public synchronized List<MacroDefinition> getVisibleMacros()
-	{
-		List<MacroDefinition> result = new ArrayList<>(macros.size());
-		for (MacroDefinition macro : macros)
-		{
-			if (macro.isVisibleInMenu())
-			{
-				result.add(macro);
-			}
-		}
-		return result;
-	}
+  /**
+   * Returns those macros that are set to "display in menu" (i.e. where MacroDefinition.isVisibleInMenu()
+   * returns true.
+   * <br/>
+   * This ignores the isVisibleInMenu() setting of this group.
+   *
+   * @see #getVisibleMacroSize()
+   * @see MacroDefinition#isVisibleInMenu() ()
+   */
+  public synchronized List<MacroDefinition> getVisibleMacros()
+  {
+    List<MacroDefinition> result = new ArrayList<>(macros.size());
+    for (MacroDefinition macro : macros)
+    {
+      if (macro.isVisibleInMenu())
+      {
+        result.add(macro);
+      }
+    }
+    return result;
+  }
 
 	/**
 	 * Returns those macros that should be shown in the "Macro Popup" window.

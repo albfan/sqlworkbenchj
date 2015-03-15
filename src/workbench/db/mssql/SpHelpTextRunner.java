@@ -48,7 +48,7 @@ public class SpHelpTextRunner
 		String currentDb = connection.getCurrentCatalog();
 		CharSequence sql = null;
 
-		boolean changeCatalog = !StringUtil.equalString(currentDb, dbName) && StringUtil.isNonBlank(dbName);
+		boolean changeCatalog = StringUtil.stringsAreNotEqual(currentDb, dbName) && StringUtil.isNonBlank(dbName);
 		Statement stmt = null;
 		ResultSet rs = null;
 
