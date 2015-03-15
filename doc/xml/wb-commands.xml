@@ -226,6 +226,22 @@
 						transforming the XML e.g. into a HTML file.
 					</entry>
 				</row>
+
+				<row>
+					<entry>-writeFullSource</entry>
+					<entry>
+            <para>
+            By default the sourcce code for views is written as retrieved from the DBMS into the XML file.
+            This might not be a complete <literal>create view</literal> statement though. When <literal>-writeFullSource=true</literal>
+            is specified &wb-productname; will generate a complete <literal>create view</literal> statement, similar to the code
+            that is shown in the DbExplorer.
+            </para>
+            <para>
+              The default is <literal>false</literal>. Valid values are: <literal>true</literal>, <literal>false</literal>.
+            </para>
+					</entry>
+				</row>
+
 				<row>
 					<entry>-stylesheet</entry>
 					<entry>Apply a XSLT transformation to the generated XML file.</entry>
