@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:wb="workbench.sql.NameUtil">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+                xmlns:wb-name-util="workbench.sql.NameUtil" 
+                xmlns:wb-string-util="workbench.util.StringUtil"
+                xmlns:wb-sql-util="workbench.util.SqlUtil">
 <!--
   Convert a SQL Workbench/J schema report (http://www.sql-workbench.net)
   into a SQL script for PostgreSQL (http://www.postgresql.org)
@@ -21,8 +24,9 @@
   <xsl:param name="useJdbcTypes">false</xsl:param>
   <xsl:param name="makeLowerCase">true</xsl:param>
   <!-- Should column names be quoted (surrounded by variable quote)? -->
-  <xsl:param name="quoteColumnName">true</xsl:param>
+  <xsl:param name="quoteAllNames">true</xsl:param>
   <xsl:param name="commitAfterEachTable">true</xsl:param>
+  <xsl:param name="prefixIndexNames">false</xsl:param>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -39,10 +43,11 @@
     <xsl:message>
 Supported parameters:
 
-* useJdbcTypes (current value: <xsl:value-of select="$useJdbcTypes"/>)
-* makeLowerCase (current value: <xsl:value-of select="$makeLowerCase"/>)
-* quoteColumnName (current value: <xsl:value-of select="$quoteColumnName"/>)
-* commitAfterEachTable (current value: <xsl:value-of select="$commitAfterEachTable"/>)
+* useJdbcTypes         - if true create column definitions based on JDBC types, not DBMS data types (current value: <xsl:value-of select="$useJdbcTypes"/>)
+* makeLowerCase        - if true make all identifiers lowercase (current value: <xsl:value-of select="$makeLowerCase"/>)
+* quoteAllNames        - if true all identifiers are quoted using double quotes (current value: <xsl:value-of select="$quoteAllNames"/>)
+* commitAfterEachTable - if false, write only one commit at the end (current value: <xsl:value-of select="$commitAfterEachTable"/>)
+* prefixIndexNames     - prefix each index name with the table name (current value: <xsl:value-of select="$prefixIndexNames"/>)
     </xsl:message>
 
     <xsl:apply-templates select="/schema-report/sequence-def">
@@ -69,10 +74,9 @@ Supported parameters:
 
     <!-- alternatively: use the Workbench utility class:
          Using this, the XSLT can only be executed from within SQL Workbench
-    <xsl:variable name="tablename" select="wb:cleanupIdentifier(table-name, 'true')"/>
-    <xsl:variable name="tablename" select="wb:cleanupIdentifier(table-name, $makeLowerCase)"/>
+    <xsl:variable name="tablename" select="wb-name-util:cleanupIdentifier(table-name, 'true')"/>
+    <xsl:variable name="tablename" select="wb-name-util:cleanupIdentifier(table-name, $makeLowerCase)"/>
     -->
-
 
     <xsl:text>DROP TABLE IF EXISTS </xsl:text>
     <xsl:value-of select="$tablename"/>
@@ -95,13 +99,6 @@ Supported parameters:
       <xsl:variable name="nullable">
         <xsl:if test="nullable = 'false'">
           <xsl:text> NOT NULL</xsl:text>
-        </xsl:if>
-      </xsl:variable>
-
-      <xsl:variable name="defaultvalue">
-        <xsl:if test="string-length(default-value) &gt; 0">
-          <xsl:text> DEFAULT </xsl:text>
-          <xsl:value-of select="default-value"/>
         </xsl:if>
       </xsl:variable>
 
@@ -136,10 +133,26 @@ Supported parameters:
 
       </xsl:variable>
 
+      <xsl:variable name="defaultvalue">
+        <xsl:if test="string-length(default-value) &gt; 0">
+          <xsl:text> DEFAULT </xsl:text>
+          <xsl:choose>
+            <xsl:when test="$datatype = 'boolean' and default-value = '0'">
+              <xsl:value-of select="'false'"/>
+            </xsl:when>
+            <xsl:when test="$datatype = 'boolean' and default-value = '1'">
+              <xsl:value-of select="'true'"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="default-value"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:if>
+      </xsl:variable>
+
+
       <xsl:text>  </xsl:text>
-      <xsl:if test="$quoteColumnName = 'true'"><xsl:value-of select="$quote" /></xsl:if>
- 	  <xsl:copy-of select="$colname"/>
- 	  <xsl:if test="$quoteColumnName = 'true'"><xsl:value-of select="$quote" /></xsl:if>
+      <xsl:copy-of select="$colname"/>
 
       <xsl:text> </xsl:text>
       <xsl:value-of select="$datatype"/>
@@ -192,10 +205,15 @@ Supported parameters:
     </xsl:if>
 
     <xsl:if test="string-length(table-comment) &gt; 0">
+      <xsl:variable name="tab-comment">
+        <xsl:call-template name="cleanup-comment">
+          <xsl:with-param name="object-comment" select="table-comment"/>
+        </xsl:call-template>
+      </xsl:variable>
       <xsl:text>COMMENT ON TABLE </xsl:text>
       <xsl:value-of select="$tablename"/>
       <xsl:text> IS '</xsl:text>
-      <xsl:value-of select="table-comment"/>
+      <xsl:value-of select="$tab-comment"/>
       <xsl:text>';</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
@@ -209,12 +227,17 @@ Supported parameters:
         </xsl:call-template>
       </xsl:variable>
       <xsl:if test="string-length(comment) &gt; 0">
+        <xsl:variable name="col-comment">
+          <xsl:call-template name="cleanup-comment">
+            <xsl:with-param name="object-comment" select="comment"/>
+          </xsl:call-template>
+        </xsl:variable>
         <xsl:text>COMMENT ON COLUMN </xsl:text>
         <xsl:value-of select="$tablename"/>
         <xsl:text>.</xsl:text>
         <xsl:value-of select="$colname"/>
         <xsl:text> IS '</xsl:text>
-        <xsl:value-of select="comment"/>
+        <xsl:value-of select="$col-comment"/>
         <xsl:text>';</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:if>
@@ -224,6 +247,7 @@ Supported parameters:
       <xsl:value-of select="$newline"/>
       <xsl:call-template name="create-index">
         <xsl:with-param name="tablename" select="$tablename"/>
+        <xsl:with-param name="real-tablename" select="../table-name"/>
       </xsl:call-template>
     </xsl:for-each>
     <xsl:value-of select="$newline"/>
@@ -236,26 +260,51 @@ Supported parameters:
 
   <xsl:template name="create-index">
     <xsl:param name="tablename"/>
+    <xsl:param name="real-tablename"/>
     <xsl:variable name="pk" select="primary-key"/>
     <xsl:if test="$pk = 'false'">
       <xsl:variable name="unique">
         <xsl:if test="unique='true'">UNIQUE </xsl:if>
       </xsl:variable>
+      
       <xsl:variable name="prefix">
         <xsl:choose>
-          <xsl:when test="contains(name, 'IDX')">
+          <xsl:when test="$prefixIndexNames = 'false' or contains(name, $real-tablename)">
             <xsl:value-of select="''"/>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:value-of select="'IDX_'"/>
+            <xsl:value-of select="concat($real-tablename, '_')"/>
           </xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
+      
+      <xsl:variable name="idx-name">
+        <xsl:call-template name="write-object-name">
+          <xsl:with-param name="objectname">
+            <xsl:choose>
+              <xsl:when test="string-length(name) = 0">
+                <xsl:value-of select="concat($prefix, 'index')"/>
+              </xsl:when>
+              <xsl:when test="name = $real-tablename">
+                <!-- 
+                  Tables, indexes, views and other "relation" like objects share the same namespace
+                  If for some reason the index name is the same as the table name, add the "_index" suffix
+                  to avoid a name clash (this can happen if the XML report was generated from a different DBMS)
+                -->
+                <xsl:value-of select="concat(name, '_index')"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="concat($prefix, name)"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:with-param>
+        </xsl:call-template>
+      </xsl:variable>
+      
       <xsl:text>CREATE </xsl:text>
       <xsl:value-of select="$unique"/>
       <xsl:text>INDEX </xsl:text>
-      <xsl:value-of select="$prefix"/>
-      <xsl:value-of select="name"/>
+      <xsl:value-of select="$idx-name"/>
       <xsl:text> ON </xsl:text>
       <xsl:value-of select="$tablename"/>
       <xsl:value-of select="$newline"/>
@@ -572,6 +621,14 @@ Supported parameters:
     </xsl:choose>
   </xsl:template>
 
+  <xsl:template name="cleanup-comment">
+    <xsl:param name="object-comment"/>
+    <xsl:variable name="trimmed">
+      <xsl:value-of select="wb-string-util:trim($object-comment)"/>
+    </xsl:variable>
+    <xsl:value-of select="wb-sql-util:escapeQuotes($trimmed)"/>
+  </xsl:template>
+  
   <xsl:template name="write-object-name">
     <xsl:param name="objectname"/>
     <xsl:variable name="lcletters">abcdefghijklmnopqrstuvwxyz</xsl:variable>
@@ -597,6 +654,9 @@ Supported parameters:
     </xsl:variable>
 
     <xsl:choose>
+      <xsl:when test="$quoteAllNames = 'true'">
+        <xsl:text>"</xsl:text><xsl:value-of select="$objectname"/><xsl:text>"</xsl:text>
+      </xsl:when>
       <xsl:when test="substring($clean-name,1,1) = $quote and substring($clean-name,string-length($clean-name),1) = $quote">
         <xsl:value-of select="$clean-name"/>
       </xsl:when>
