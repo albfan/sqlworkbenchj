@@ -838,7 +838,7 @@ public class JdbcIndexReader
 
       if (ignoreZeroOrdinalPos && ordinal < 1)
       {
-        LogMgr.logDebug("JdbcIndexReader.processIndexResult()", "Ignoring index column " + colName + " because ordinal_position was: " + ordinal);
+        LogMgr.logDebug("JdbcIndexReader.processIndexResult()", "Ignoring column " + colName + " for index " + indexName + " because ordinal_position was: " + ordinal);
         continue;
       }
 
