@@ -77,6 +77,7 @@ public class WbCopy
 	public static final String PARAM_REMOVE_DEFAULTS = "removeDefaults";
 	public static final String PARAM_SOURCE_CONN = "sourceConnection";
 	public static final String PARAM_TARGET_CONN = "targetConnection";
+	public static final String PARAM_ADJUST_NAMES = "fixTableNameCase";
 
 	/**
 	 * If PARAM_CREATETARGET is set to true, this parameter defines
@@ -128,6 +129,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_COLUMNS);
 		cmdLine.addArgument(PARAM_SOURCEWHERE);
+		cmdLine.addArgument(PARAM_ADJUST_NAMES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_DELETE_TARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
@@ -251,15 +253,19 @@ public class WbCopy
 			return result;
 		}
 
+    boolean adjustNames = cmdLine.getBoolean(PARAM_ADJUST_NAMES, true);
+
 		if (tablesToExport.size() > 1 || sourceTables.wasWildcardArgument())
 		{
-			this.copier = new SchemaCopy(tablesToExport);
+      SchemaCopy schemaCopy = new SchemaCopy(tablesToExport);
+      schemaCopy.setAdjustNameCase(adjustNames);
+			copier = schemaCopy;
 			// TODO: add support for catalogs
-			this.copier.setTargetSchemaAndCatalog(cmdLine.getValue(PARAM_TARGETSCHEMA), null);
+			copier.setTargetSchemaAndCatalog(cmdLine.getValue(PARAM_TARGETSCHEMA), null);
 		}
 		else
 		{
-			this.copier = new TableCopy();
+			copier = new TableCopy();
 		}
 
 		try

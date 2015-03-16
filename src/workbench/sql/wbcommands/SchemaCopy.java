@@ -71,6 +71,7 @@ class SchemaCopy
 	private boolean ignoreDropError;
 	private boolean checkDependencies;
 	private boolean skipTargetCheck;
+  private boolean adjustNames = true;
 
 	private List<TableIdentifier> sourceTables;
 	private Map<TableIdentifier, TableIdentifier> targetToSourceMap;
@@ -86,6 +87,11 @@ class SchemaCopy
 	{
 		this.sourceTables = tables;
 	}
+
+  public void setAdjustNameCase(boolean flag)
+  {
+    this.adjustNames = flag;
+  }
 
 	@Override
 	public void setAdjustSequences(boolean flag)
@@ -232,7 +238,14 @@ class SchemaCopy
 				targetTable.setCatalog(catalog);
 			}
 
-			targetTable.adjustCase(targetConnection);
+			if (adjustNames)
+      {
+        targetTable.adjustCase(targetConnection);
+      }
+      else
+      {
+        targetTable.setNeverAdjustCase(true);
+      }
 
 			if (createTargetTable())
 			{
