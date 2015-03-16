@@ -22,7 +22,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -135,7 +134,7 @@ public class WbXslt
 		try
 		{
 			transformer.setSaveSystemOutMessages(true);
-			transformer.setXsltBaseDir(new File(getBaseDir()));
+			transformer.setXsltBaseDir(getXsltBaseDir());
 
 			transformer.transform(inputFile, outputFile, xsltFile, params);
 

@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,7 @@ public class IndexReporter
 	public IndexReporter(TableIdentifier tbl, WbConnection conn, boolean includePartitions)
 	{
 		indexList  = conn.getMetadata().getIndexReader().getTableIndexList(tbl);
+    removeEmptyIndexes();
 		if (includePartitions)
 		{
 			retrieveOracleOptions(conn);
@@ -99,9 +101,6 @@ public class IndexReporter
 
 		for (IndexDefinition index : indexList)
 		{
-      // Some DBMS seem to allow indexes with no columns or empty column names.
-			if (isEmpty(index)) continue;
-
 			tagWriter.appendOpenTag(result, indent, mainTagToUse == null ? TAG_INDEX : mainTagToUse);
 			result.append('\n');
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, index.getName());
@@ -143,16 +142,6 @@ public class IndexReporter
 			tagWriter.appendCloseTag(result, indent, mainTagToUse == null ? TAG_INDEX : mainTagToUse);
 		}
 	}
-
-  private boolean isEmpty(IndexDefinition index)
-  {
-    if (index == null) return true;
-    for (IndexColumn col : index.getColumns())
-    {
-      if (col != null && StringUtil.isNonEmpty(col.getColumn())) return false;
-    }
-    return true;
-  }
 
 	private void writeDbmsOptions(StringBuilder output, StringBuilder indent, IndexDefinition index)
 	{
@@ -227,7 +216,17 @@ public class IndexReporter
 		return this.indexList;
 	}
 
-	public void done()
-	{
-	}
+  private void removeEmptyIndexes()
+  {
+    if (indexList == null) return;
+    Iterator<IndexDefinition> itr = indexList.iterator();
+    while (itr.hasNext())
+    {
+      IndexDefinition idx = itr.next();
+      if (idx.isEmpty())
+      {
+        itr.remove();
+      }
+    }
+  }
 }

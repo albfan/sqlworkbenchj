@@ -313,7 +313,7 @@ public class WbSchemaDiff
 				String msg = ResourceMgr.getString("MsgDiffFileWritten") + " " + output.getFullPath();
 				result.addMessage(msg);
 
-				File  xslt = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_STYLESHEET));
+				File xslt = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_STYLESHEET));
 				File xsltOutput = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_OUTPUT));
 				Map<String, String> xsltParams = cmdLine.getMapValue(ARG_PARAMETERS);
 
@@ -322,7 +322,7 @@ public class WbSchemaDiff
 					XsltTransformer transformer = new XsltTransformer();
 					try
 					{
-						transformer.setXsltBaseDir(new File(getBaseDir()));
+						transformer.setXsltBaseDir(getXsltBaseDir());
 						transformer.transform(output, xsltOutput, xslt, xsltParams);
 						String xsltMsg = transformer.getAllOutputs();
 						if (xsltMsg.length() != 0)

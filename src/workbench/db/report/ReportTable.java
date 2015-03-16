@@ -595,7 +595,6 @@ public class ReportTable
 	public void done()
 	{
 		this.columns = null;
-		this.reporter.done();
 	}
 
 	@Override

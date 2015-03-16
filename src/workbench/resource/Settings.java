@@ -61,8 +61,6 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.dbobjects.objecttree.DbTreePanel;
-import workbench.gui.dbobjects.objecttree.TreePosition;
 import workbench.gui.lnf.FontScaler;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.settings.ExternalFileHandling;
@@ -2380,7 +2378,7 @@ public class Settings
 	public File getDefaultXsltDirectory()
 	{
 		// this can happen if the Settings instance is accessed by
-		// a component that is instantiated in the GUI editor
+		// a component that is instantiated in the NetBeans GUI editor
 		if (WbManager.getInstance() == null) return new File(".");
 
 		String dir = getProperty("workbench.xslt.dir", null);

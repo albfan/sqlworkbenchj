@@ -22,7 +22,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -200,11 +199,14 @@ public class WbSchemaReport
 			for (String schema : schemas)
 			{
 				SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, schema, typesArray, this.currentConnection);
-				List<TableIdentifier> tables = tableArg.getTables();
-				if (tables != null && tables.size() > 0)
-				{
-					this.reporter.setObjectList(tables);
-				}
+        if (isCancelled == false)
+        {
+          List<TableIdentifier> tables = tableArg.getTables();
+          if (tables != null && tables.size() > 0)
+          {
+            reporter.setObjectList(tables);
+          }
+        }
 			}
 		}
 		else
@@ -227,11 +229,14 @@ public class WbSchemaReport
 						else
 						{
 							SourceTableArgument tableArg = new SourceTableArgument(names, exclude, schema, typeNames, this.currentConnection);
-							List<TableIdentifier> tables = tableArg.getTables();
-							if (tables != null && tables.size() > 0)
-							{
-								this.reporter.setObjectList(tables);
-							}
+              if (isCancelled == false)
+              {
+                List<TableIdentifier> tables = tableArg.getTables();
+                if (tables != null && tables.size() > 0)
+                {
+                  reporter.setObjectList(tables);
+                }
+              }
 						}
 					}
 				}
@@ -243,12 +248,19 @@ public class WbSchemaReport
 			}
 		}
 
+    if (isCancelled)
+    {
+      result.setWarning(true);
+      result.addMessageByKey("MsgStatementCancelled");
+      return result;
+    }
+
 		// this is important for the retrieval of the stored procedures
 		// which is the only thing the SchemaReporter retrieves
 		reporter.setSchemas(schemas);
 
 		String alternateSchema = cmdLine.getValue("useschemaname");
-		this.reporter.setSchemaNameToUse(alternateSchema);
+		reporter.setSchemaNameToUse(alternateSchema);
 
 		this.reporter.setProgressMonitor(this);
 
@@ -290,7 +302,7 @@ public class WbSchemaReport
 
 		try
 		{
-			this.reporter.writeXml();
+			reporter.writeXml();
 		}
 		catch (IOException e)
 		{
@@ -315,7 +327,7 @@ public class WbSchemaReport
 
 			try
 			{
-				transformer.setXsltBaseDir(new File(getBaseDir()));
+				transformer.setXsltBaseDir(getXsltBaseDir());
 				transformer.transform(output, xsltOutput, xslt, params);
 				String msg = transformer.getAllOutputs();
 				if (msg.length() != 0)
@@ -348,6 +360,7 @@ public class WbSchemaReport
 	public void cancel()
 		throws SQLException
 	{
+    super.cancel();
 		if (this.reporter != null)
 		{
 			this.reporter.cancelExecution();

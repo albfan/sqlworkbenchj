@@ -23,6 +23,7 @@
 package workbench.sql;
 
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -112,6 +113,16 @@ public class SqlCommand
 	{
 		return false;
 	}
+
+  protected File getXsltBaseDir()
+  {
+    String dir = runner == null ? null : runner.getBaseDir();
+    if (dir == null)
+    {
+      return Settings.getInstance().getDefaultXsltDirectory();
+    }
+    return new File(dir);
+  }
 
 	protected String getBaseDir()
 	{
