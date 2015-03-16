@@ -92,6 +92,7 @@ public class SchemaDiff
 	public static final String TAG_PROC_INFO = "include-procs";
 	public static final String TAG_SEQUENCE_INFO = "include-sequences";
 	public static final String TAG_VIEWS_AS_TABLE = "views-as-tables";
+	public static final String TAG_FULL_SOURCE = "full-object-source";
 
 	private GenericDiffLoader objectDiffs;
 	private List<Object> objectsToCompare;
@@ -1334,6 +1335,7 @@ public class SchemaDiff
 		tw.appendTag(info, indent2, TAG_GRANT_INFO, this.diffGrants);
 		tw.appendTag(info, indent2, TAG_VIEW_INFO, this.diffViews);
 		tw.appendTag(info, indent2, TAG_VIEWS_AS_TABLE, this.treatViewAsTable);
+		tw.appendTag(info, indent2, TAG_FULL_SOURCE, useFullSource);
 
 
 		if (this.referenceSchema != null && this.targetSchema != null)

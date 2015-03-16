@@ -172,7 +172,7 @@ public class ColumnDefinitionTemplate
 	 * @param column the column
 	 * @return a valid expression for the column default.
 	 */
-	private String getDefaultExpression(ColumnIdentifier column)
+	public String getDefaultExpression(ColumnIdentifier column)
 	{
 		String value = column.getDefaultValue();
 
@@ -194,6 +194,9 @@ public class ColumnDefinitionTemplate
 		boolean addQuotes = false;
 		if (SqlUtil.isCharacterType(column.getDataType()))
 		{
+      // don't quote NULL for character data
+      if ("NULL".equalsIgnoreCase(value)) return "NULL";
+
 			if (!value.startsWith("'") && !value.startsWith("N'") && !value.startsWith("E'") && !value.startsWith("U&'"))
 			{
 				addQuotes = true;

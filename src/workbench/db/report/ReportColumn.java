@@ -23,6 +23,7 @@
 package workbench.db.report;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.sqltemplates.ColumnDefinitionTemplate;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -57,11 +58,17 @@ public class ReportColumn
 	private TagWriter tagWriter = new TagWriter();
 	private boolean isRealColumn = true;
 	private boolean isReferenced = false;
+  private ColumnDefinitionTemplate template = new ColumnDefinitionTemplate();
 
 	public ReportColumn(ColumnIdentifier col)
 	{
 		this.column = col;
 	}
+
+  public void setFixDefaultValue(boolean flag)
+  {
+    template.setFixDefaultValues(flag);
+  }
 
 	public ColumnIdentifier getColumn()
 	{
@@ -118,7 +125,7 @@ public class ReportColumn
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DBMS_TYPE, this.column.getDbmsType());
 		if (isRealColumn && !shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_PK, this.column.isPkColumn());
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_NULLABLE, this.column.isNullable());
-		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_DEFAULT, this.column.getDefaultValue(), true);
+		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_DEFAULT, getDefaultValue(), true);
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_AUTO_INC, this.column.isAutoincrement());
 		if (isRealColumn && this.column.isGenerated() != null)
 		{
@@ -147,6 +154,12 @@ public class ReportColumn
 		}
 		tagWriter.appendCloseTag(result, indent, mainTagToUse);
 	}
+
+  private String getDefaultValue()
+  {
+    if (column.getDefaultValue() == null) return "";
+    return template.getDefaultExpression(column);
+  }
 
 	/**
 	 * Marks this column as being a "real" column or not.

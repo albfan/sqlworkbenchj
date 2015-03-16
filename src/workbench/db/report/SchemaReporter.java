@@ -50,6 +50,7 @@ import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.diff.SchemaDiff;
 
 import workbench.storage.RowActionMonitor;
 
@@ -66,6 +67,11 @@ import workbench.util.StringUtil;
 public class SchemaReporter
 	implements Interruptable
 {
+  public static final String TAG_SETTINGS = "report-settings";
+	public static final String TAG_TRG_INFO = "include-triggers";
+	public static final String TAG_PARTITION_INFO = "include-partitions";
+	public static final String TAG_OBJECT_TYPES = "included-types";
+
 	private WbConnection dbConn;
 	private List<DbObject> objects = new ArrayList<>();
 	private List<ReportProcedure> procedures = new ArrayList<>();
@@ -368,13 +374,44 @@ public class SchemaReporter
 	{
 		StringBuilder info = new StringBuilder();
 		StringBuilder indent = new StringBuilder("  ");
+		StringBuilder indent2 = new StringBuilder("    ");
+
 		if (!StringUtil.isEmptyString(this.reportTitle))
 		{
 			this.tagWriter.appendTag(info, indent, "report-title", this.reportTitle);
 		}
+
 		ConnectionInfoBuilder builder = new ConnectionInfoBuilder();
 		info.append(builder.getDatabaseInfoAsXml(dbConn, indent));
-		out.append(info);
+
+		TagWriter tw = new TagWriter();
+		info.append(indent);
+		info.append("<generated-at>");
+		info.append(StringUtil.getCurrentTimestampWithTZString());
+		info.append("</generated-at>\n\n");
+
+		tw.appendOpenTag(info, indent, TAG_SETTINGS);
+		info.append('\n');
+
+		tw.appendTag(info, indent2, SchemaDiff.TAG_GRANT_INFO, includeGrants);
+		tw.appendTag(info, indent2, TAG_PARTITION_INFO, includePartitions);
+		tw.appendTag(info, indent2, TAG_TRG_INFO, includeTriggers);
+		tw.appendTag(info, indent2, SchemaDiff.TAG_FULL_SOURCE, fullObjectSource);
+
+    if (CollectionUtil.isNonEmpty(types))
+    {
+      tw.appendOpenTag(info, indent2, TAG_OBJECT_TYPES);
+  		info.append('\n');
+      StringBuilder indent3 = new StringBuilder(indent2);
+      indent3.append("  ");
+      for (String type : types)
+      {
+        tw.appendTag(info, indent3, "type", type);
+      }
+      tw.appendCloseTag(info, indent2, TAG_OBJECT_TYPES);
+    }
+		tw.appendCloseTag(info, indent, TAG_SETTINGS);
+    out.write(info.toString());
 	}
 
 

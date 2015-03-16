@@ -99,6 +99,7 @@ public class ReportTable
 	private List<TriggerDefinition> triggers;
 	private ReportTableGrants grants;
 	private final List<ObjectOption> dbmsOptions = new ArrayList<>();
+  private boolean fixDefaultValues;
 
 	/**
 	 * Initialize this ReportTable.
@@ -123,6 +124,7 @@ public class ReportTable
 	{
 		this.includePrimaryKey = includePk;
 		this.includePartitions = includePartitioning;
+    this.fixDefaultValues = !conn.getDbSettings().returnsValidDefaultExpressions();
 
 		// By using getTableDefinition() the TableIdentifier is completely initialized
 		// (mainly it will contain the primary key name, which it doesn't when the TableIdentifier
@@ -308,7 +310,9 @@ public class ReportTable
 		this.columns = new ArrayList<>(numCols);
 		for (ColumnIdentifier col : cols)
 		{
-			columns.add(new ReportColumn(col));
+      ReportColumn repCol = new ReportColumn(col);
+      repCol.setFixDefaultValue(fixDefaultValues);
+			columns.add(repCol);
 		}
 	}
 

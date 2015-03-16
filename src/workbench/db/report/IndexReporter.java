@@ -99,7 +99,9 @@ public class IndexReporter
 
 		for (IndexDefinition index : indexList)
 		{
-			if (index == null) continue;
+      // Some DBMS seem to allow indexes with no columns or empty column names.
+			if (isEmpty(index)) continue;
+
 			tagWriter.appendOpenTag(result, indent, mainTagToUse == null ? TAG_INDEX : mainTagToUse);
 			result.append('\n');
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, index.getName());
@@ -121,7 +123,7 @@ public class IndexReporter
 				for (IndexColumn col : columns)
 				{
 
-					List<TagAttribute> attrs = new ArrayList<TagAttribute>(2);
+					List<TagAttribute> attrs = new ArrayList<>(2);
 					attrs.add(new TagAttribute("name", SqlUtil.removeObjectQuotes(col.getColumn())));
 
 					if (col.getDirection() != null)
@@ -141,6 +143,16 @@ public class IndexReporter
 			tagWriter.appendCloseTag(result, indent, mainTagToUse == null ? TAG_INDEX : mainTagToUse);
 		}
 	}
+
+  private boolean isEmpty(IndexDefinition index)
+  {
+    if (index == null) return true;
+    for (IndexColumn col : index.getColumns())
+    {
+      if (col != null && StringUtil.isNonEmpty(col.getColumn())) return false;
+    }
+    return true;
+  }
 
 	private void writeDbmsOptions(StringBuilder output, StringBuilder indent, IndexDefinition index)
 	{
@@ -204,7 +216,7 @@ public class IndexReporter
 		List<ObjectOption> options = indexOptions.get(index);
 		if (options == null)
 		{
-			options = new ArrayList<ObjectOption>();
+			options = new ArrayList<>();
 			indexOptions.put(index, options);
 		}
 		options.add(option);
