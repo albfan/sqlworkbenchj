@@ -51,6 +51,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
+import workbench.util.StringUtil;
 
 
 /**
@@ -217,6 +218,29 @@ class SchemaCopy
 		return totalRows;
 	}
 
+  private boolean adjustTargetName(TableIdentifier sourceTable)
+  {
+    if (!adjustNames) return false;
+    String tname = sourceTable.getRawTableName();
+    if (StringUtil.isMixedCase(tname) && !targetConnection.getMetadata().storesMixedCaseIdentifiers())
+    {
+      return false;
+    }
+    boolean isLower = tname.toLowerCase().equals(tname);
+
+    if (isLower && !targetConnection.getMetadata().storesLowerCaseIdentifiers())
+    {
+      return false;
+    }
+
+    boolean isUpper = tname.toUpperCase().equals(tname);
+    if (isUpper && !targetConnection.getMetadata().storesUpperCaseIdentifiers())
+    {
+      return false;
+    }
+    return true;
+  }
+
 	private void mapTables()
 	{
 		targetToSourceMap = new HashMap<>(sourceTables.size());
@@ -238,7 +262,7 @@ class SchemaCopy
 				targetTable.setCatalog(catalog);
 			}
 
-			if (adjustNames)
+			if (adjustTargetName(sourceTable))
       {
         targetTable.adjustCase(targetConnection);
       }

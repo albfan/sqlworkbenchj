@@ -1222,9 +1222,9 @@ public class SqlPanel
 
 		if (!this.currentData.prepareDatabaseUpdate(confirm)) return;
 
-		this.setBusy(true);
-		this.setCancelState(true);
-		this.setExecuteActionStates(false);
+		setBusy(true);
+		setCancelState(true);
+		setConnActionsState(false);
 
 		Thread t = new WbThread("Workbench DB Update Thread")
 		{
@@ -1696,7 +1696,7 @@ public class SqlPanel
 		checkResultSetActions();
 		checkCommitAction();
 
-		setExecuteActionStates(false);
+		setConnActionsState(false);
 
 		if (this.dbConnection != null)
 		{
@@ -1724,7 +1724,7 @@ public class SqlPanel
 					}
 					finally
 					{
-						setExecuteActionStates(true);
+						setConnActionsState(true);
 					}
 				}
 			};
@@ -3996,9 +3996,23 @@ public class SqlPanel
 				showFormAction.setEnabled(hasRows);
 			}
 		});
+  }
+
+	private void setExecActionsState(final boolean flag)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+        executeAll.setEnabled(flag);
+        executeCurrent.setEnabled(flag);
+        executeSelected.setEnabled(flag);
+			}
+		});
 	}
 
-	private void setExecuteActionStates(final boolean flag)
+	private void setConnActionsState(final boolean flag)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -4037,7 +4051,8 @@ public class SqlPanel
 		{
 			threadBusy = busy;
 			if (iconHandler != null) iconHandler.showBusyIcon(busy);
-			setExecuteActionStates(!busy);
+			setConnActionsState(!busy);
+      setExecActionsState(!busy);
 			if (disableEditor())
 			{
 				if (editor != null) editor.setEditable(!busy);

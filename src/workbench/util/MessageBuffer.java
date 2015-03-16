@@ -58,7 +58,7 @@ public class MessageBuffer
 	 */
 	public MessageBuffer()
 	{
-		this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 1500));
+		this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 2500));
 	}
 
 	/**
@@ -175,7 +175,7 @@ public class MessageBuffer
 	{
 		append(ResourceMgr.getString(key));
 	}
-	
+
 	public synchronized void appendNewLine()
 	{
 		append(newLine);
