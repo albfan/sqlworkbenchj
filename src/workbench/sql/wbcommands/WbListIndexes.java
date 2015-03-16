@@ -82,14 +82,6 @@ public class WbListIndexes
 
 		StatementRunnerResult result = new StatementRunnerResult();
 
-
-		if (!reader.supportsIndexList())
-		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrIdxListNotSupported", meta.getProductName()));
-			result.setFailure();
-			return result;
-
-		}
 		cmdLine.parse(options);
 
 		String schema = null;
@@ -123,15 +115,18 @@ public class WbListIndexes
 			indexes = new ArrayList<>();
 			for (TableIdentifier tbl : tables)
 			{
-				String tschema = StringUtil.coalesce(tbl.getRawSchema(), schema, currentSchema);
-				String tcat = StringUtil.coalesce(tbl.getRawCatalog(), catalog, currentCatalog);
-				String name = tbl.getRawTableName();
-				List<IndexDefinition> indexList = reader.getIndexes(tcat, tschema, name, indexPattern);
+        List<IndexDefinition> indexList = reader.getTableIndexList(tbl);
 				indexes.addAll(indexList);
 			}
 		}
 		else
 		{
+      if (!reader.supportsIndexList())
+      {
+        result.addMessage(ResourceMgr.getFormattedString("ErrIdxListNotSupported", meta.getProductName()));
+        result.setFailure();
+        return result;
+      }
 			indexes = reader.getIndexes(StringUtil.coalesce(catalog, currentCatalog), StringUtil.coalesce(schema, currentSchema), null, indexPattern);
 		}
 

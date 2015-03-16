@@ -32,7 +32,7 @@ import workbench.resource.Settings;
 import workbench.db.WbConnection;
 
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.wbcommands.*;
+import workbench.sql.wbcommands.WbCopy;
 
 import workbench.util.SqlUtil;
 
@@ -167,6 +167,7 @@ public class WbCopyPostgresTest
 
 		StatementRunnerResult result = copyCmd.execute(sql);
 		String msg = result.getMessageBuffer().toString();
+//    System.out.println(msg);
 		assertEquals(msg, true, result.isSuccess());
 
 		Integer id = (Integer)TestUtil.getSingleQueryValue(pgCon, "select id from public.person where last_name = 'Dent'");

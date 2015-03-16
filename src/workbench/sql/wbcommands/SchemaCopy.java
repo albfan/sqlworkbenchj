@@ -72,7 +72,7 @@ class SchemaCopy
 	private boolean ignoreDropError;
 	private boolean checkDependencies;
 	private boolean skipTargetCheck;
-  private boolean adjustNames = true;
+  private Boolean adjustNames = null;
 
 	private List<TableIdentifier> sourceTables;
 	private Map<TableIdentifier, TableIdentifier> targetToSourceMap;
@@ -91,7 +91,7 @@ class SchemaCopy
 
   public void setAdjustNameCase(boolean flag)
   {
-    this.adjustNames = flag;
+    adjustNames = Boolean.valueOf(flag);
   }
 
 	@Override
@@ -220,24 +220,36 @@ class SchemaCopy
 
   private boolean adjustTargetName(TableIdentifier sourceTable)
   {
-    if (!adjustNames) return false;
-    String tname = sourceTable.getRawTableName();
-    if (StringUtil.isMixedCase(tname) && !targetConnection.getMetadata().storesMixedCaseIdentifiers())
+    if (adjustNames != null)
     {
-      return false;
+      return adjustNames.booleanValue();
     }
-    boolean isLower = tname.toLowerCase().equals(tname);
 
-    if (isLower && !targetConnection.getMetadata().storesLowerCaseIdentifiers())
+    String tname = sourceTable.getRawTableName();
+
+    boolean isLower = tname.toLowerCase().equals(tname);
+    if (isLower && sourceConnection.getMetadata().storesLowerCaseIdentifiers())
     {
-      return false;
+      return !targetConnection.getMetadata().storesLowerCaseIdentifiers();
     }
 
     boolean isUpper = tname.toUpperCase().equals(tname);
-    if (isUpper && !targetConnection.getMetadata().storesUpperCaseIdentifiers())
+    if (isUpper && sourceConnection.getMetadata().storesUpperCaseIdentifiers())
+    {
+      return !targetConnection.getMetadata().storesUpperCaseIdentifiers();
+    }
+
+    boolean isMixed = StringUtil.isMixedCase(tname);
+    if (isMixed && sourceConnection.getMetadata().storesMixedCaseIdentifiers())
+    {
+      return !targetConnection.getMetadata().storesMixedCaseIdentifiers();
+    }
+
+    if (sourceTable.wasQuoted())
     {
       return false;
     }
+
     return true;
   }
 

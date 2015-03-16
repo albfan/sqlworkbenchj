@@ -80,8 +80,15 @@ public class InformixColumnEnhancer
 			if (types.contains(plainType))
 			{
 				checkRequired = true;
-				break;
 			}
+
+      int type = col.getDataType();
+      String val = col.getDefaultValue();
+      if (defaultNeedsQuotes(val, type, plainType))
+      {
+        val = "'" + val + "'";
+        col.setDefaultValue(val);
+      }
 		}
 
 		if (checkRequired)
@@ -89,6 +96,21 @@ public class InformixColumnEnhancer
 			updateDateColumns(table, conn);
 		}
 	}
+
+  private boolean defaultNeedsQuotes(String defaultValue, int jdbcType, String typeName)
+  {
+    if (defaultValue == null) return false;
+    if (SqlUtil.isNumberType(jdbcType)) return false;
+    if (SqlUtil.isCharacterType(jdbcType)) return true;
+    if ("boolean".equalsIgnoreCase(typeName)) return true;
+    if (SqlUtil.isDateType(jdbcType))
+    {
+      Set<String> keyWords = CollectionUtil.caseInsensitiveSet("today", "current");
+      if (keyWords.contains(defaultValue)) return false;
+      return true;
+    }
+    return false;
+  }
 
 	private void updateDateColumns(TableDefinition table, WbConnection conn)
 	{

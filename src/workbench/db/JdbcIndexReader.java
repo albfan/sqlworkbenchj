@@ -814,6 +814,8 @@ public class JdbcIndexReader
 		HashMap<String, IndexDefinition> defs = new HashMap<>();
 
 		boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
+    boolean ignoreZeroOrdinalPos = metaData.getDbSettings().ignoreIndexColumnWithOrdinalZero();
+
 		boolean isPartitioned = false;
 
 		boolean useColumnNames = metaData.getDbSettings().useColumnNameForMetadata();
@@ -825,7 +827,20 @@ public class JdbcIndexReader
 
 			if (idxRs.wasNull() || indexName == null) continue;
 
+      int ordinal = useColumnNames ? idxRs.getInt("ORDINAL_POSITION") : idxRs.getInt(8);
+      if (idxRs.wasNull())
+      {
+        ordinal = -1;
+      }
+
 			String colName = useColumnNames ? idxRs.getString("COLUMN_NAME") : idxRs.getString(9);
+
+      if (ignoreZeroOrdinalPos && ordinal < 1)
+      {
+        LogMgr.logDebug("JdbcIndexReader.processIndexResult()", "Ignoring column " + colName + " because ordinal_position was: " + ordinal);
+        continue;
+      }
+
 			String dir = null;
 			if (supportsDirection)
 			{

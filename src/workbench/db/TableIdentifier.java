@@ -148,7 +148,7 @@ public class TableIdentifier
 	{
 		return useTableNameOnlyInExpression;
 	}
-	
+
 	public void setUseNameOnly(boolean flag)
 	{
 		this.useTableNameOnlyInExpression = flag;
@@ -246,6 +246,11 @@ public class TableIdentifier
 		return tableComment;
 	}
 
+  public boolean wasQuoted()
+  {
+    return tableWasQuoted || schemaWasQuoted || catalogWasQuoted;
+  }
+  
 	public boolean commentIsDefined()
 	{
 		return commentWasInitialized;

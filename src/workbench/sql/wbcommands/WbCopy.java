@@ -253,12 +253,13 @@ public class WbCopy
 			return result;
 		}
 
-    boolean adjustNames = cmdLine.getBoolean(PARAM_ADJUST_NAMES, true);
-
 		if (tablesToExport.size() > 1 || sourceTables.wasWildcardArgument())
 		{
       SchemaCopy schemaCopy = new SchemaCopy(tablesToExport);
-      schemaCopy.setAdjustNameCase(adjustNames);
+      if (cmdLine.isArgPresent(PARAM_ADJUST_NAMES))
+      {
+        schemaCopy.setAdjustNameCase(cmdLine.getBoolean(PARAM_ADJUST_NAMES, true));
+      }
 			copier = schemaCopy;
 			// TODO: add support for catalogs
 			copier.setTargetSchemaAndCatalog(cmdLine.getValue(PARAM_TARGETSCHEMA), null);

@@ -944,6 +944,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "index.sorted", true);
 	}
 
+	public boolean ignoreIndexColumnWithOrdinalZero()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "index.ignore.ordinal_zero", true);
+	}
+
 	public final boolean includeSystemTablesInSelectable()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "systemtables.selectable", false);
