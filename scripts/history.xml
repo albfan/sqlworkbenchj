@@ -16,6 +16,7 @@
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
     <entry dev-build="2" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
+    <entry dev-build="4" type="fix">Each time when reloading a result that uses the @WbMacro annotation, the macro sub-menu would be added to the context menu again</entry>
     <entry dev-build="4" type="fix">For Informix, default clauses for columns were not generated properly in the DbExplorer</entry>
     <entry dev-build="4" type="fix">For Informix, index definitions were not always displayed correctly</entry>
     <entry dev-build="3" type="fix">Overloaded functions and procedures where not handled correctly by WbSchemaDiff</entry>
