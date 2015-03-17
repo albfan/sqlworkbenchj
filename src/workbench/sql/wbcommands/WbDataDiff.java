@@ -205,7 +205,7 @@ public class WbDataDiff
 			return result;
 		}
 
-		outputDir = new WbFile(mainScript.getParentFile());
+		outputDir = new WbFile(mainScript.getAbsoluteFile().getParentFile());
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		if (encoding == null)
 		{

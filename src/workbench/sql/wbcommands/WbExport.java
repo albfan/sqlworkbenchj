@@ -805,7 +805,7 @@ public class WbExport
 			WbFile dir = null;
 			if (outputFile != null)
 			{
-				dir = new WbFile(outputFile.getParentFile());
+				dir = new WbFile(outputFile.getAbsoluteFile().getParentFile());
 			}
 			else if (outputdir != null)
 			{

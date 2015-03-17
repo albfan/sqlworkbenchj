@@ -135,7 +135,7 @@ public class XsltTransformer
 		try
 		{
 			xlsInput = new FileInputStream(xslfile);
-			sourceDir = xslfile.getParentFile();
+			sourceDir = xslfile.getAbsoluteFile().getParentFile();
 
 			if (saveSystemOut)
 			{
@@ -176,7 +176,7 @@ public class XsltTransformer
 			File outDir = outputFile.getAbsoluteFile().getParentFile();
 			transformer.setParameter("wb-basedir", outDir.getAbsolutePath());
 
-			File scriptDir = inputFile.getParentFile();
+			File scriptDir = inputFile.getAbsoluteFile().getParentFile();
 			transformer.setParameter("wb-scriptdir", scriptDir.getAbsolutePath());
 
 			in = new BufferedInputStream(new FileInputStream(inputFile),32*1024);
