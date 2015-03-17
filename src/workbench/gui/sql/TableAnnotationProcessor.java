@@ -37,6 +37,8 @@ import workbench.sql.MacroAnnotation;
 import workbench.sql.RefreshAnnotation;
 import workbench.sql.ScrollAnnotation;
 import workbench.sql.WbAnnotation;
+import workbench.sql.macros.MacroManager;
+import workbench.sql.macros.MacroStorage;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -66,6 +68,10 @@ public class TableAnnotationProcessor
 		boolean scrollToEnd = false;
 		int line = -1;
 
+    MainWindow main = (MainWindow) SwingUtilities.getWindowAncestor(tbl);
+
+    MacroStorage macroMgr = MacroManager.getInstance().getMacros(main.getMacroClientId());
+
 		for (WbAnnotation annotation : annotations)
 		{
 			if (annotation.getKeyWord().equalsIgnoreCase(WbAnnotation.getTag(ScrollAnnotation.ANNOTATION)))
@@ -87,7 +93,11 @@ public class TableAnnotationProcessor
 			{
 				MacroAnnotation macro = new MacroAnnotation();
 				macro.setValue(annotation.getValue());
-				macros.add(macro);
+        String macroName = macro.getMacroName();
+        if (macroName != null && macroMgr.getMacro(macroName) != null)
+        {
+          macros.add(macro);
+        }
 			}
 		}
 
@@ -95,7 +105,6 @@ public class TableAnnotationProcessor
 		{
 			try
 			{
-				MainWindow main = (MainWindow) SwingUtilities.getWindowAncestor(tbl);
 				MacroMenuBuilder builder = new MacroMenuBuilder();
 				WbMenu menu = builder.buildDataMacroMenu(main, tbl, macros);
 				tbl.addMacroMenu(menu);

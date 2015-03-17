@@ -22,7 +22,6 @@
  */
 package workbench.db;
 
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -873,9 +872,9 @@ public class JdbcIndexReader
 
           // this is a fix for Informix which claims the column is of type VARCHAR
           // but in reality it contains a numeric value
-          if (typeName != null && typeName.length() > 0 && Character.isDigit(typeName.charAt(0)))
+          int typeVal = StringUtil.getIntValue(typeName, Integer.MIN_VALUE);
+          if (typeVal != Integer.MIN_VALUE)
           {
-            type = StringUtil.getIntValue(typeName, DatabaseMetaData.tableIndexOther);
             def.setIndexType(metaData.getDbSettings().mapIndexType(type));
           }
 					else

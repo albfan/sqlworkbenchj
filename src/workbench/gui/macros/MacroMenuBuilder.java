@@ -48,6 +48,7 @@ import workbench.util.StringUtil;
  */
 public class MacroMenuBuilder
 {
+  public static final String MENU_ITEM_NAME = "macroDataMenu";
 
 	public void buildMacroMenu(MainWindow main, JMenu macroMenu)
 	{
@@ -92,6 +93,7 @@ public class MacroMenuBuilder
 
 		MacroStorage macros = MacroManager.getInstance().getMacros(main.getMacroClientId());
 		WbMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_MACRO));
+    result.setName(MENU_ITEM_NAME);
 
 		for (MacroAnnotation annotation: macroAnnotations)
 		{

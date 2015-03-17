@@ -135,6 +135,7 @@ import workbench.gui.fontzoom.FontZoomProvider;
 import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.fontzoom.IncreaseFontSize;
 import workbench.gui.fontzoom.ResetFontSize;
+import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.renderer.BlobColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RendererFactory;
@@ -160,6 +161,7 @@ import workbench.storage.filter.FilterExpression;
 import workbench.util.FileDialogUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -873,28 +875,61 @@ public class WbTable
 	}
 
 	public void addMacroMenu(final WbMenu submenu)
-	{
-		if (submenu == null) return;
-		final int index = findPopupItem(transposeRow);
+  {
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				if (popup == null) popup = new JPopupMenu();
+        _addMacroMenu(submenu);
+      }
+    });
+  }
 
-				if (index > -1)
-				{
-					popup.add(submenu, index + 1);
-				}
-				else
-				{
-					popup.addSeparator();
-					popup.add(submenu);
-				}
-			}
-		});
+  private void _addMacroMenu(WbMenu submenu)
+	{
+    if (submenu == null) return;
+    if (popup == null) return;
+    removeMacroMenu();
+
+    int index = findPopupItem(transposeRow);
+    if (index > -1)
+    {
+      popup.add(submenu, index + 1);
+    }
+    else
+    {
+      popup.addSeparator();
+      popup.add(submenu);
+    }
 	}
+
+
+  private void removeMacroMenu()
+  {
+    if (popup == null) return;
+		int count = popup.getComponentCount();
+    int menuIndex = -1;
+		for (int i=0; i < count; i++)
+		{
+			Component item = popup.getComponent(i);
+			if (item instanceof JMenuItem)
+			{
+				JMenuItem menu = (JMenuItem)item;
+        if (StringUtil.equalString(menu.getName(), MacroMenuBuilder.MENU_ITEM_NAME))
+        {
+          menuIndex = i;
+          break;
+        }
+			}
+    }
+    if (menuIndex > -1)
+    {
+      popup.remove(menuIndex);
+    }
+  }
+
+
 	private void addPopupSubMenu(final WbMenu submenu, final boolean withSep)
 	{
 		WbSwingUtilities.invoke(new Runnable()
@@ -915,6 +950,7 @@ public class WbTable
 	private int findPopupItem(WbAction reference)
 	{
 		if (reference == null) return -1;
+    if (popup == null) return -1;
 
 		int count = popup.getComponentCount();
 		for (int i=0; i < count; i++)

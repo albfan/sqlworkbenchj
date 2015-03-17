@@ -745,7 +745,7 @@ public class StringUtil
 		int result = aDefault;
 		try
 		{
-			result = Integer.parseInt(aValue.trim());
+			result = Integer.parseInt(aValue);
 		}
 		catch (NumberFormatException e)
 		{
