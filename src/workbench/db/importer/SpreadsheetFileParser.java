@@ -330,8 +330,12 @@ public class SpreadsheetFileParser
 	@Override
 	public String getSourceFilename()
 	{
-		if (this.inputFile == null) return null;
+		if (inputFile == null) return "";
+
 		String fname = inputFile.getAbsolutePath();
+
+    if (reader == null) return fname;
+
 		String sheet = sheetName;
 		if (sheet == null && sheetIndex > -1)
 		{
