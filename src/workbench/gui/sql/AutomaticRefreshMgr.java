@@ -90,8 +90,9 @@ public class AutomaticRefreshMgr
   public synchronized void addRefresh(PanelReloader loader, DwPanel panel, int milliSeconds)
   {
     if (panel == null) return;
-    if (isRegistered(panel)) return;
-    if (milliSeconds < 10) return;
+    if (milliSeconds < 5) return;
+
+    removeRefresh(panel);
 
     Timer timer = new Timer(milliSeconds, this);
     int id = panel.getId();

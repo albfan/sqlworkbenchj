@@ -59,7 +59,7 @@ public class AutomaticReloadAction
 	{
 		boolean canRefresh = false;
     DwPanel dw =  client.getCurrentResult();
-    if (!client.getRefreshMgr().isRegistered(dw) && dw != null)
+    if (dw != null)
     {
       DataStore ds = dw.getDataStore();
       canRefresh = (ds != null ? ds.getOriginalConnection() != null : false);

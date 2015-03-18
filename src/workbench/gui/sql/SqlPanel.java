@@ -103,6 +103,7 @@ import workbench.gui.actions.ClearMessagesAction;
 import workbench.gui.actions.CloseAllResultsAction;
 import workbench.gui.actions.CloseResultTabAction;
 import workbench.gui.actions.CommitAction;
+import workbench.gui.actions.ConsolidateLogAction;
 import workbench.gui.actions.CopyAsDbUnitXMLAction;
 import workbench.gui.actions.CopyAsSqlDeleteAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
@@ -289,7 +290,6 @@ public class SqlPanel
 	protected AppendResultsAction appendResultsAction;
 	protected CloseResultTabAction closeResultAction;
 	protected CloseAllResultsAction closeAllResultsAction;
-	protected CheckPreparedStatementsAction checkPreparedAction;
 	protected ClearCompletionCacheAction clearCompletionCache;
 	protected AutoCompletionAction autoCompletion;
 	protected SqlPanelReloadAction reloadAction;
@@ -994,11 +994,14 @@ public class SqlPanel
 		config.setParentMenuId(ResourceMgr.MNU_TXT_SQL);
 		new AutoJumpNextStatement().addToMenu(config);
 		appendResultsAction.addToMenu(config);
+    config.addSeparator();
 		new HighlightCurrentStatement().addToMenu(config);
 		new HighlightErrorLineAction().addToMenu(config);
-		this.checkPreparedAction = new CheckPreparedStatementsAction();
-		this.checkPreparedAction.addToMenu(config);
 		ignore.addToMenu(config);
+    new ConsolidateLogAction().addToMenu(config);
+    
+    config.addSeparator();
+		new CheckPreparedStatementsAction().addToMenu(config);
 
 		WbMenu codeTools = new WbMenu(ResourceMgr.getString("MnuTxtCodeTools"));
 		codeTools.setParentMenuId(ResourceMgr.MNU_TXT_SQL);
