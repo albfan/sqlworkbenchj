@@ -22,8 +22,6 @@
  */
 package workbench.gui.dialogs.dataimport;
 
-import workbench.db.importer.ImportOptions;
-import workbench.db.importer.TextImportOptions;
 import java.awt.Component;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
@@ -33,12 +31,17 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
+import workbench.db.importer.ImportOptions;
 import workbench.db.importer.ProducerFactory;
+import workbench.db.importer.TextImportOptions;
 
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -156,6 +159,7 @@ public class ImportFileDialog
 		}
 
 		chooser.setAccessory(this.importOptions);
+    chooser.setEncodingSelector(importOptions);
 
 		Window parentWindow = SwingUtilities.getWindowAncestor(this.parentComponent);
 
@@ -213,6 +217,7 @@ public class ImportFileDialog
 		return null;
 	}
 
+  @Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (this.importOptions == null) return;
