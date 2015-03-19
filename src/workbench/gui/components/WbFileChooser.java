@@ -27,6 +27,9 @@ import java.awt.HeadlessException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -38,6 +41,10 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.interfaces.EncodingSelector;
+import workbench.util.CollectionUtil;
+import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -49,6 +56,8 @@ public class WbFileChooser
 {
 	private String windowSettingsId;
 	private JDialog dialog;
+  private EncodingSelector selector;
+  private final Set<String> changeEvents = CollectionUtil.treeSet(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY, JFileChooser.SELECTED_FILES_CHANGED_PROPERTY);
 
 	public WbFileChooser()
 	{
@@ -70,7 +79,7 @@ public class WbFileChooser
 
 	private void init()
 	{
-		addPropertyChangeListener("JFileChooserDialogIsClosingProperty", this);
+		addPropertyChangeListener(this);
 		putClientProperty("FileChooser.useShellFolder", GuiSettings.getUseShellFolders());
 	}
 
@@ -83,6 +92,11 @@ public class WbFileChooser
 	{
 		return dialog;
 	}
+
+  public void setEncodingSelector(EncodingSelector component)
+  {
+    selector = component;
+  }
 
 	@Override
 	public JDialog createDialog(Component parent)
@@ -112,6 +126,25 @@ public class WbFileChooser
 				// ignore
 			}
 		}
+    else if (selector != null && changeEvents.contains(evt.getPropertyName()))
+    {
+      // synchronize encoding selector with selected file(s)
+      List<String> fileEncodings = getFileEncodings();
+      if (CollectionUtil.isNonEmpty(fileEncodings))
+      {
+        String selectedEncoding = selector.getEncoding();
+
+        if (fileEncodings.size() == 1 && StringUtil.stringsAreNotEqual(selectedEncoding, fileEncodings.get(0)))
+        {
+          selector.setEncoding(fileEncodings.get(0));
+          WbSwingUtilities.showToolTip(getAccessory(), "Encoding was changed!");
+        }
+        else if (fileEncodings.size() > 1)
+        {
+          WbSwingUtilities.showErrorMessage("The selected files have different encodings!");
+        }
+      }
+    }
 	}
 
 	public boolean validateInput()
@@ -123,7 +156,11 @@ public class WbFileChooser
 			return vc.validateInput();
 		}
 
-		if (!this.isFileSelectionEnabled())
+		if (isFileSelectionEnabled())
+    {
+      return encodingMatches();
+    }
+    else
 		{
 			File f = getSelectedFile();
 			String errKey = null;
@@ -146,6 +183,46 @@ public class WbFileChooser
 		}
 		return true;
 	}
+
+  private List<String> getFileEncodings()
+  {
+    Set<String> fileEncodings = CollectionUtil.caseInsensitiveSet();
+    File[] files = getSelectedFiles();
+    for (File f : files)
+    {
+      String fileEncoding = FileUtil.detectFileEncoding(f);
+      if (fileEncoding != null)
+      {
+        fileEncodings.add(fileEncoding);
+      }
+    }
+    return new ArrayList<>(fileEncodings);
+  }
+
+  private boolean encodingMatches()
+  {
+    if (selector == null) return true;
+
+    String selectedEncoding = selector.getEncoding();
+    File[] files = getSelectedFiles();
+
+    if (files == null || files.length == 0) return true;
+
+    List<String> fileEncodings = getFileEncodings();
+    if (CollectionUtil.isEmpty(fileEncodings)) return true;
+
+    if (fileEncodings.size() != 1)
+    {
+      WbSwingUtilities.showErrorMessage("The selected files have different encodings!");
+      return false;
+    }
+
+    if (StringUtil.stringsAreNotEqual(fileEncodings.get(0), selectedEncoding))
+    {
+      WbSwingUtilities.showErrorMessage("The selected encoding does not match the detected file encoding: " + fileEncodings.get(0));
+    }
+    return true;
+  }
 
 	@Override
 	public void approveSelection()

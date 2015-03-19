@@ -56,7 +56,10 @@ public class CollectionUtil
 	public static <E> Set<E> treeSet(E... add)
 	{
 		Set<E> result = new TreeSet<>();
-		result.addAll(Arrays.asList(add));
+    if (add != null)
+    {
+      result.addAll(Arrays.asList(add));
+    }
 		return result;
 	}
 
@@ -64,7 +67,10 @@ public class CollectionUtil
 	{
 		Set<E> result = new TreeSet<>();
 		result.addAll(base);
-		result.addAll(Arrays.asList(add));
+    if (add != null)
+    {
+      result.addAll(Arrays.asList(add));
+    }
 		return result;
 	}
 
@@ -134,7 +140,7 @@ public class CollectionUtil
 	 * Remove the given element from the array.
 	 *
 	 * The check is done using String.equals() so it's case sensitive.
-	 * 
+	 *
 	 * @param array   the array
 	 * @param remove  the element to remove
 	 * @return a copy of the original array without the element.

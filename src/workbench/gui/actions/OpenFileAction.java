@@ -138,8 +138,8 @@ public class OpenFileAction
 			fc.setMultiSelectionEnabled(true);
 
 			JPanel acc = new JPanel(new GridBagLayout());
-			JComponent p = EncodingUtil.createEncodingPanel();
-			p.setBorder(new EmptyBorder(0, 5, 0, 0));
+			JComponent encodingPanel = EncodingUtil.createEncodingPanel();
+			encodingPanel.setBorder(new EmptyBorder(0, 5, 0, 0));
 
 			boolean rememberNewTabSetting = true;
 			JCheckBox newTab = null;
@@ -150,7 +150,7 @@ public class OpenFileAction
 				c.gridy = 0;
 				c.anchor = GridBagConstraints.NORTHEAST;
 				c.fill = GridBagConstraints.HORIZONTAL;
-				acc.add(p, c);
+				acc.add(encodingPanel, c);
 
 				newTab = new JCheckBox(ResourceMgr.getString("LblOpenNewTab"));
 				newTab.setToolTipText(ResourceMgr.getDescription("LblOpenNewTab"));
@@ -173,10 +173,11 @@ public class OpenFileAction
 				acc.add(newTab, c);
 			}
 
-			EncodingSelector selector = (EncodingSelector) p;
+			EncodingSelector selector = (EncodingSelector) encodingPanel;
 			selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
 
 			fc.setAccessory(acc);
+      fc.setEncodingSelector(selector);
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 
 			int answer = fc.showOpenDialog(window);
