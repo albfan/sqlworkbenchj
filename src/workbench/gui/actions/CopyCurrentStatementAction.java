@@ -88,6 +88,7 @@ public class CopyCurrentStatementAction
 
 		int index = parser.getCommandIndexAtCursorPos(cursor);
 		String command = parser.getCommand(index);
+    command += ";\n";
 
 		boolean makeSnippet = false;
 		if (invokedByMouse(e) && isCtrlPressed(e))
