@@ -127,24 +127,6 @@ public class WbFileChooser
 				// ignore
 			}
 		}
-    else if (selector != null && JFileChooser.SELECTED_FILE_CHANGED_PROPERTY.equals(evt.getPropertyName()))
-    {
-      List<String> fileEncodings = getFileEncodings();
-      if (CollectionUtil.isNonEmpty(fileEncodings))
-      {
-        String selectedEncoding = selector.getEncoding();
-
-        if (fileEncodings.size() == 1 && StringUtil.stringsAreNotEqual(selectedEncoding, fileEncodings.get(0)))
-        {
-          selector.setEncoding(fileEncodings.get(0));
-          WbSwingUtilities.showToolTip(getAccessory(), ResourceMgr.getString("MsgEncodingChanged"));
-        }
-        else if (fileEncodings.size() > 1)
-        {
-          WbSwingUtilities.showErrorMessage(ResourceMgr.getString("MsgEncodingsMismatch"));
-        }
-      }
-    }
 	}
 
 	public boolean validateInput()
@@ -233,7 +215,8 @@ public class WbFileChooser
 
     if (StringUtil.stringsAreNotEqual(fileEncodings.get(0), selectedEncoding))
     {
-      WbSwingUtilities.showErrorMessage(ResourceMgr.getFormattedString("MsgEncodingWrong", selectedEncoding,  fileEncodings.get(0)));
+      String msg = ResourceMgr.getFormattedString("MsgEncodingWrong", selectedEncoding,  fileEncodings.get(0));
+      return WbSwingUtilities.getYesNo(this, msg);
     }
     return true;
   }
