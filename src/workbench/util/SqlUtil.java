@@ -1516,11 +1516,15 @@ public class SqlUtil
 			Set<String> added = new HashSet<>();
 			StringBuilder msg = null;
 			String s = null;
+
+			int count = 0;
+      int statementCount = 0;
+      int connectionCount = 0;
+			int maxLoops = con.getDbSettings().getMaxWarnings();
+			boolean isRealWarning = true;
+
 			SQLWarning warn = (stmt == null ? null : stmt.getWarnings());
 			boolean hasWarnings = warn != null;
-			boolean isRealWarning = true;
-			int count = 0;
-			int maxLoops = con.getDbSettings().getMaxWarnings();
 			while (warn != null)
 			{
 				isRealWarning = isRealWarning && isRealWarning(con, warn);
@@ -1531,6 +1535,7 @@ public class SqlUtil
 					msg = append(msg, s);
 					if (s.charAt(s.length() - 1) != '\n') msg.append('\n');
 					added.add(s);
+          statementCount ++;
 				}
 
 				 // prevent endless loop
@@ -1551,6 +1556,7 @@ public class SqlUtil
 			while (warn != null)
 			{
 				s = warn.getMessage();
+        connectionCount ++;
 				// Some JDBC drivers duplicate the warnings between
 				// the statement and the connection.
 				// This is to prevent adding them twice
@@ -1571,6 +1577,10 @@ public class SqlUtil
 				warn = warn.getNextWarning();
 			}
 
+      if (statementCount > 0 || connectionCount > 0)
+      {
+        LogMgr.logTrace("SqlUtil.getWarnings()", "Got "  + statementCount + " warning(s) from the Statement object and " + connectionCount + " warning(s) from the Connection");
+      }
 			// make sure the warnings are cleared from both objects!
 			clearWarnings(con, stmt);
 			StringUtil.trimTrailingWhitespace(msg);

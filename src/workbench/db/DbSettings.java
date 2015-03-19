@@ -2011,4 +2011,9 @@ public class DbSettings
   {
     return getBoolProperty("procedurelist.showparameters", false);
   }
+
+  public boolean retrieveWarningsForEachResult()
+  {
+    return getBoolProperty("warning.retrieve.eachresult", false);
+  }
 }

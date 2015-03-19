@@ -575,12 +575,13 @@ public class SqlCommand
 		// if no result was passed, we need to call getResultSet() immediately
 		boolean firstResultProcessed = (firstResult == null);
 
-		ResultSet rs = null;
+    boolean retrieveResultWarnings = currentConnection.getDbSettings().retrieveWarningsForEachResult();
 		boolean multipleUpdateCounts = this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts();
 
 		int counter = 0;
 		int maxLoops = currentConnection.getDbSettings().getMaxResults();
 
+		ResultSet rs = null;
 		while (moreResults || updateCount > -1)
 		{
 
@@ -618,7 +619,10 @@ public class SqlCommand
 
 				// this is for SQL Server messages sent with "PRINT"
 				// they need to be retrieved for each result set.
-				appendWarnings(result, false);
+        if (retrieveResultWarnings)
+        {
+          appendWarnings(result, false);
+        }
 
 				ResultSetConsumer consumer = runner.getConsumer();
 				if (consumer != null)
@@ -652,7 +656,7 @@ public class SqlCommand
 						}
 						else
 						{
-							this.currentRetrievalData.initData(rs, maxRows);
+							currentRetrievalData.initData(rs, maxRows);
 						}
 					}
 					catch (SQLException e)

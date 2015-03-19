@@ -147,6 +147,7 @@ public class OracleErrorPositionReader
 
 		if (errorPos > -1)
 		{
+      LogMgr.logDebug("OracleErrorPositionReader.getErrorPosition()", "Error at position: " + errorPos + " reported by Oracle");
 			ErrorDescriptor error = new ErrorDescriptor();
 			error.setErrorOffset(errorPos);
 			return error;
