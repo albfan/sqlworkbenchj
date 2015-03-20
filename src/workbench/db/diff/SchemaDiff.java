@@ -1140,11 +1140,19 @@ public class SchemaDiff
 		writeTag(out, indent, TAG_DROP_SEQUENCE, true);
 		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
+		StringBuilder myindent2 = new StringBuilder(myindent);
+		myindent2.append("  ");
+
 		for (SequenceDefinition def : sequencesToDelete)
 		{
-			writeTagValue(out, myindent, ReportSequence.TAG_SEQ_CATALOG, def.getCatalog());
-			writeTagValue(out, myindent, ReportSequence.TAG_SEQ_SCHEMA, def.getSchema());
-			writeTagValue(out, myindent, ReportSequence.TAG_SEQ_NAME, def.getSequenceName());
+      writeTag(out, myindent, ReportSequence.TAG_SEQ_DEF, true);
+      if (StringUtil.isNonEmpty(def.getCatalog()))
+      {
+        writeTagValue(out, myindent2, ReportSequence.TAG_SEQ_CATALOG, def.getCatalog());
+      }
+			writeTagValue(out, myindent2, ReportSequence.TAG_SEQ_SCHEMA, def.getSchema());
+			writeTagValue(out, myindent2, ReportSequence.TAG_SEQ_NAME, def.getSequenceName());
+      writeTag(out, myindent, ReportSequence.TAG_SEQ_DEF, false);
 		}
 		writeTag(out, indent, TAG_DROP_SEQUENCE, false);
 	}

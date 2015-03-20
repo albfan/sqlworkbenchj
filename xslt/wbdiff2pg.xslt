@@ -23,6 +23,29 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
 
 <xsl:template match="/">
 
+  <xsl:text>-- Add sequences</xsl:text>
+  <xsl:value-of select="$newline"/>
+  <xsl:for-each select="/schema-diff/create-sequence/sequence-def">
+    <xsl:text>CREATE SEQUENCE </xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="sequence-schema"/>
+    </xsl:call-template>
+    <xsl:text>.</xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="sequence-name"/>
+    </xsl:call-template>
+    <xsl:for-each select="sequence-properties/property">
+        <xsl:if test="@name != 'LAST_VALUE'">
+          <xsl:text> </xsl:text><xsl:value-of select="@name"/><xsl:text> </xsl:text><xsl:value-of select="@value"/>
+        </xsl:if>
+    </xsl:for-each>
+    <xsl:value-of select="$stmt-terminator"/>
+    <xsl:value-of select="$newline"/>
+  </xsl:for-each>
+  <xsl:if test="count(/schema-diff/create-sequence/sequence-def) &gt; 0">
+     <xsl:value-of select="$newline"/>
+  </xsl:if>
+
   <xsl:text>-- Add Tables without Foreign Keys</xsl:text>
   <xsl:value-of select="$newline"/>
   <!-- Added Tables without Foreign Keys-->
@@ -199,7 +222,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
       <xsl:with-param name="objectname" select="view-name"/>
     </xsl:call-template>
     <xsl:value-of select="$stmt-terminator"/>
-      <xsl:value-of select="$newline"/>
+    <xsl:value-of select="$newline"/>
   </xsl:for-each>
 
   <xsl:text>-- Create views</xsl:text>
@@ -214,10 +237,28 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     <xsl:apply-templates select="view-def"/>
   </xsl:for-each>
 
+  <xsl:text>-- Drop sequences</xsl:text>
+  <xsl:value-of select="$newline"/>
+  <xsl:for-each select="/schema-diff/drop-sequence/sequence-def">
+    <xsl:text>DROP SEQUENCE </xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="sequence-schema"/>
+    </xsl:call-template>
+    <xsl:text>.</xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="sequence-name"/>
+    </xsl:call-template>
+    <xsl:value-of select="$stmt-terminator"/>
+    <xsl:value-of select="$newline"/>
+  </xsl:for-each>
+  <xsl:if test="count(/schema-diff/drop-sequence) &gt; 0">
+     <xsl:value-of select="$newline"/>
+  </xsl:if>
+
   <xsl:text>-- Drop functions</xsl:text>
   <xsl:value-of select="$newline"/>
-  <xsl:for-each select="/schema-diff/drop-procedure">
-    <xsl:text>DROP FUNCTION </xsl:text><xsl:value-of select="proc-def/proc-full-name"/><xsl:value-of select="$stmt-terminator"/>
+  <xsl:for-each select="/schema-diff/drop-procedure/proc-def">
+    <xsl:text>DROP FUNCTION </xsl:text><xsl:value-of select="proc-full-name"/><xsl:value-of select="$stmt-terminator"/>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
   <xsl:if test="count(/schema-diff/drop-procedure) &gt; 0">
@@ -226,8 +267,8 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
 
   <xsl:text>-- Create/Update functions</xsl:text>
   <xsl:value-of select="$newline"/>
-  <xsl:for-each select="/schema-diff/create-proc | /schema-diff/update-proc">
-    <xsl:value-of select="proc-def/proc-source"/>
+  <xsl:for-each select="/schema-diff/create-proc/proc-def | /schema-diff/update-proc/proc-def">
+    <xsl:value-of select="proc-source"/>
     <xsl:value-of select="$newline"/>
     <xsl:if test="$proc-terminator != ';'">
       <xsl:value-of select="$proc-terminator"/>
