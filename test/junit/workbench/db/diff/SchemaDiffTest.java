@@ -22,6 +22,7 @@
  */
 package workbench.db.diff;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -76,8 +77,8 @@ public class SchemaDiffTest
 		diff.setSchemas("REF", "OLD");
 
 		String xml = diff.getMigrateTargetXml();
-//		TestUtil util = getTestUtil();
-//		TestUtil.writeFile(new File(util.getBaseDir(), "basediff.xml"), xml);
+		TestUtil util = getTestUtil();
+		TestUtil.writeFile(new File(util.getBaseDir(), "basediff.xml"), xml);
 //		System.out.println("---------------\n" + xml + "\n---------------");
 
 		String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
@@ -139,7 +140,7 @@ public class SchemaDiffTest
 		value = TestUtil.getXPathValue(xml, "/schema-diff/create-sequence[1]/sequence-def/sequence-name");
 		assertEquals("Sequence not created", "SEQ_THREE", value);
 
-		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-name[1]");
+		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-def/sequence-name[1]");
 		assertEquals("Sequence not dropped", "SEQ_TO_BE_DELETED", value);
 
 		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/create-trigger/trigger-def/trigger-name");
