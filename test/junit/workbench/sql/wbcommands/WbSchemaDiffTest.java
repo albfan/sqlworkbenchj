@@ -26,16 +26,23 @@ import java.io.File;
 import java.io.FileReader;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+
 import workbench.gui.profiles.ProfileKey;
+
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -145,7 +152,7 @@ public class WbSchemaDiffTest
 		value = TestUtil.getXPathValue(xml, "/schema-diff/create-sequence/sequence-def/@name");
 		assertEquals("Incorrect sequence to create", "SEQ_THREE", value);
 
-		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-name/text()");
+		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-def/sequence-name/text()");
 		assertEquals("Incorrect sequence to delete", "SEQ_TO_BE_DELETED", value);
 
 		value = TestUtil.getXPathValue(xml, "count(/schema-diff/drop-table/table-name)");
