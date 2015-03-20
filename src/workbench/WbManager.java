@@ -552,6 +552,8 @@ public final class WbManager
 
 	private void closeAllWindows()
 	{
+    if (!this.isGUIMode()) return;
+    
 		LogMgr.logDebug("WbManager.closeAllWindows()", "Closing all open windows");
 		for (MainWindow w : mainWindows)
 		{
