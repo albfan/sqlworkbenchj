@@ -217,8 +217,9 @@ public class SQLConsole
 							}
 
 							setTerminalTitle(runner.getConnection(), true);
-              boolean wasRefresh = refreshHandler.handleRefresh(runner, stmt, history);
-              if (!wasRefresh)
+              HandlerState state = refreshHandler.handleRefresh(runner, stmt, history);
+              
+              if (state == HandlerState.notHandled)
               {
                 runner.runScript(stmt);
               }
@@ -430,6 +431,7 @@ public class SQLConsole
 		abbreviations.put("\\conninfo", cmd.formatVerb(WbConnInfo.VERB));
 		abbreviations.put("\\connect", cmd.formatVerb(WbConnect.VERB));
 		abbreviations.put("\\c", cmd.formatVerb(WbConnect.VERB));
+		abbreviations.put("\\watch", RefreshAnnotation.ANNOTATION + " 2s");
 
 		// some limited SQL*Plus compatibility
 		abbreviations.put("/", last);
