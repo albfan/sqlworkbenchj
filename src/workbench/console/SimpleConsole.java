@@ -22,6 +22,7 @@
  */
 package workbench.console;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -41,6 +42,20 @@ public class SimpleConsole
 	{
 		inputScanner = new Scanner(System.in);
 	}
+
+  @Override
+  public char readCharacter()
+  {
+    try
+    {
+      int value = System.in.read();
+      return (char)value;
+    }
+    catch (IOException ex)
+    {
+    }
+    return (char)0;
+  }
 
 	@Override
 	public String readPassword(String prompt)

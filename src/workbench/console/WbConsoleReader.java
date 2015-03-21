@@ -32,6 +32,7 @@ public interface WbConsoleReader
 {
 	String readPassword(String prompt);
 	String readLine(String prompt);
+  char readCharacter();
 	void shutdown();
 	int getColumns();
 	String readLineWithoutHistory(String prompt);

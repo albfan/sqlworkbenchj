@@ -22,6 +22,7 @@
  */
 package workbench.console;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -40,6 +41,21 @@ public class SystemConsole
 	public SystemConsole()
 	{
 	}
+
+  @Override
+  public char readCharacter()
+  {
+		if (System.console() == null) return 0;
+    try
+    {
+      int value = System.console().reader().read();
+      return (char)value;
+    }
+    catch (IOException ex)
+    {
+    }
+    return 0;
+  }
 
 	@Override
 	public String readPassword(String prompt)

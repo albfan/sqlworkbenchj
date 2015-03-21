@@ -59,6 +59,20 @@ public class JLineWrapper
 		reader.addCompletor(new ArgumentCompletor(completors));
 	}
 
+
+  @Override
+  public char readCharacter()
+  {
+    try
+    {
+      return (char)reader.readVirtualKey();
+    }
+    catch (IOException ex)
+    {
+    }
+    return 0;
+  }
+
 	@Override
 	public String readLineWithoutHistory(String prompt)
 	{

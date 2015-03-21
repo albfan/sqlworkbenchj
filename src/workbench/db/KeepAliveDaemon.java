@@ -134,6 +134,8 @@ public class KeepAliveDaemon
 		if (StringUtil.isBlank(interval)) return 0;
 		long result = 0;
 
+    interval = interval.trim();
+    
 		if (interval.endsWith("s"))
 		{
 			interval = interval.substring(0, interval.length() - 1);

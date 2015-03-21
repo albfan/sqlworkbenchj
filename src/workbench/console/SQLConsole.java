@@ -45,6 +45,7 @@ import workbench.gui.profiles.ProfileKey;
 import workbench.sql.BatchRunner;
 import workbench.sql.CommandRegistry;
 import workbench.sql.OutputPrinter;
+import workbench.sql.RefreshAnnotation;
 import workbench.sql.StatementHistory;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.wbcommands.CommandTester;
@@ -96,6 +97,7 @@ public class SQLConsole
 	private final StatementHistory history;
 	private BatchRunner runner;
 	private WbThread cancelThread;
+  private ConsoleRefresh refreshHandler = new ConsoleRefresh();
 
 	private final boolean changeTerminalTitle;
 	private final String titlePrefix = "\033]0;";
@@ -200,6 +202,10 @@ public class SQLConsole
 							firstWord = getFirstWord(stmt);
 							addToHistory = false;
 						}
+            else if (firstWord.equalsIgnoreCase(RefreshAnnotation.ANNOTATION))
+            {
+              addToHistory = false;
+            }
 
 						if (StringUtil.isNonEmpty(stmt))
 						{
@@ -211,7 +217,11 @@ public class SQLConsole
 							}
 
 							setTerminalTitle(runner.getConnection(), true);
-							runner.runScript(stmt);
+              boolean wasRefresh = refreshHandler.handleRefresh(runner, stmt, history);
+              if (!wasRefresh)
+              {
+                runner.runScript(stmt);
+              }
 
 							if (ConsoleSettings.showScriptFinishTime())
 							{

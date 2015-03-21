@@ -362,7 +362,7 @@ public class BatchRunner
 
 	public static void loginPrompt(ConnectionProfile profile, ExecutionController controller)
 	{
-		boolean promptPwd = !profile.getStorePassword();
+		boolean promptPwd = profile.getLoginPassword() == null;
 
 		if (profile.getPromptForUsername())
 		{
@@ -377,7 +377,7 @@ public class BatchRunner
 			promptPwd = true;
 		}
 
-		if (promptPwd || profile.getLoginPassword() == null)
+		if (promptPwd)
 		{
 			if (controller == null)
 			{
