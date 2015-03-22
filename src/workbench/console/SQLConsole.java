@@ -178,24 +178,25 @@ public class SQLConsole
 				}
 				else if (startOfStatement && abbreviations.containsKey(firstWord))
 				{
-					String longCommand = abbreviations.get(firstWord);
-					if (longCommand != null)
-					{
-						stmt = line.replace(firstWord, longCommand);
-						firstWord = getFirstWord(stmt);
-					}
+          stmt = replaceShortcuts(stmt);
+					firstWord = getFirstWord(stmt);
 					isCompleteStatement = true;
 				}
 
 				boolean changeHistory = false;
 				boolean addToHistory = true;
 
+        // WbConnect might change the history file, so we need to detect a change
 				WbFile lastHistory = getHistoryFile();
+
 				if (isCompleteStatement)
 				{
+          stmt = replaceShortcuts(stmt);
+
 					try
 					{
 						prompter.resetExecuteAll();
+
 						if (firstWord.equalsIgnoreCase(WbHistory.VERB))
 						{
 							stmt = handleHistory(runner, stmt);
@@ -218,7 +219,7 @@ public class SQLConsole
 
 							setTerminalTitle(runner.getConnection(), true);
               HandlerState state = refreshHandler.handleRefresh(runner, stmt, history);
-              
+
               if (state == HandlerState.notHandled)
               {
                 runner.runScript(stmt);
@@ -294,6 +295,19 @@ public class SQLConsole
 			System.exit(1);
 		}
 	}
+
+  private String replaceShortcuts(String sql)
+  {
+    if (StringUtil.isEmptyString(sql)) return sql;
+    for (Map.Entry<String, String> entry : abbreviations.entrySet())
+    {
+      if (sql.contains(entry.getKey()))
+      {
+        return sql.replace(entry.getKey(), entry.getValue());
+      }
+    }
+    return sql;
+  }
 
 	private ResultSetPrinter createPrinter(AppArguments cmdLine, boolean optimizeColWidths, BatchRunner runner)
 		throws SQLException

@@ -155,4 +155,9 @@ public class ConsoleSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.console.history.per_profile", true);
 	}
+
+	public static String getDefaultRefreshInterval()
+	{
+		return Settings.getInstance().getProperty("workbench.console.refresh.interval.default", "5s");
+	}
 }

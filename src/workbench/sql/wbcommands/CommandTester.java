@@ -42,6 +42,7 @@ import workbench.sql.wbcommands.console.WbListMacros;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
+import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.CaseInsensitiveComparator;
 
@@ -71,8 +72,9 @@ public class CommandTester
 		putVerb(WbCopy.VERB);
 		putVerb(WbDataDiff.VERB);
 		putVerb(WbDefinePk.VERB);
-		putVerb(WbDefineVar.VERB);
 		putVerb(WbDeleteProfile.VERB);
+		putVerb(WbCreateProfile.VERB);
+		putVerb(WbStoreProfile.VERB);
 		putVerb(WbDescribeObject.VERB);
 		putVerb(WbDescribeObject.VERB_LONG);
 		putVerb(WbDisableOraOutput.VERB);
@@ -92,9 +94,14 @@ public class CommandTester
 		putVerb(WbListCatalogs.VERB);
 		putVerb(WbListCatalogs.VERB_ALTERNATE);
 		putVerb(WbListSchemas.VERB);
+		putVerb(WbListMacros.VERB);
+		putVerb(WbListIndexes.VERB);
+		putVerb(WbListDrivers.VERB);
+		putVerb(WbListProfiles.VERB);
 		putVerb(WbLoadPkMapping.VERB);
-		putVerb(WbRemoveVar.VERB);
 		putVerb(WbSavePkMapping.VERB);
+		putVerb(WbDefineVar.VERB);
+		putVerb(WbRemoveVar.VERB);
 		putVerb(WbSchemaDiff.VERB);
 		putVerb(WbSchemaReport.VERB);
 		putVerb(WbSelectBlob.VERB);
@@ -103,21 +110,19 @@ public class CommandTester
 		putVerb(WbConnect.VERB);
 		putVerb(WbDisconnect.VERB);
 		putVerb(WbHideWarnings.VERB);
-		putVerb(WbListProfiles.VERB);
-		putVerb(WbStoreProfile.VERB);
 		putVerb(WbHelp.VERB);
-		putVerb(WbProcSource.VERB);
 		putVerb(WbRun.VERB);
+		putVerb(WbRunLB.VERB);
 		putVerb(WbListTriggers.VERB);
 		putVerb(WbTriggerSource.VERB);
 		putVerb(WbTableSource.VERB);
+		putVerb(WbProcSource.VERB);
 		putVerb(WbViewSource.VERB);
 		putVerb(WbGrepSource.VERB);
 		putVerb(WbGrepData.VERB);
 		putVerb(WbMode.VERB);
 		putVerb(WbFetchSize.VERB);
 		putVerb(WbAbout.VERB);
-		putVerb(WbRunLB.VERB);
 		putVerb(WbIsolationLevel.VERB);
 		putVerb(WbConnInfo.VERB);
 		putVerb(WbSysExec.VERB);
@@ -135,13 +140,10 @@ public class CommandTester
 		putVerb(WbHistory.VERB);
 		putVerb(WbDefineMacro.VERB);
 		putVerb(WbDeleteMacro.VERB);
-		putVerb(WbListMacros.VERB);
-		putVerb(WbListIndexes.VERB);
 		putVerb(WbRowCount.VERB);
 		putVerb(WbDefineDriver.VERB);
-		putVerb(WbListDrivers.VERB);
-		putVerb(WbCreateProfile.VERB);
 		putVerb(WbShowEncoding.VERB);
+    putVerb(WbToggleDisplay.VERB);
 
 		List<String> verbs = CommandRegistry.getInstance().getVerbs();
 		for (String verb : verbs)

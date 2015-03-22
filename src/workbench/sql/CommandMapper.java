@@ -254,7 +254,10 @@ public class CommandMapper
 			if (cmd.isWbCommand())
 			{
 				result.add(cmd.getVerb());
-        result.add(cmd.getAlternateVerb());
+        if (cmd.getAlternateVerb() != null)
+        {
+          result.add(cmd.getAlternateVerb());
+        }
 			}
 		}
 		return result;
