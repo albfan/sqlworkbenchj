@@ -299,11 +299,17 @@ public class SQLConsole
   private String replaceShortcuts(String sql)
   {
     if (StringUtil.isEmptyString(sql)) return sql;
+
+    // this will change the original statement
+    // but trimming whitespace from the start and end
+    // doesn't matter for a valid SQL statement
+    sql = sql.trim();
+
     for (Map.Entry<String, String> entry : abbreviations.entrySet())
     {
-      if (sql.contains(entry.getKey()))
+      if (sql.startsWith(entry.getKey()))
       {
-        return sql.replace(entry.getKey(), entry.getValue());
+        return entry.getValue() + sql.substring(entry.getKey().length());
       }
     }
     return sql;
