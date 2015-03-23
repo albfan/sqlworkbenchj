@@ -240,6 +240,7 @@ public class MainWindow
 	protected WbThread connectThread;
 	private DropHandler dropHandler;
   private DbTreePanel treePanel;
+  private int lastTreeDivider = -1;
 
 	/**
 	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
@@ -394,15 +395,26 @@ public class MainWindow
   public void hideDbTree()
   {
     if (treePanel == null) return;
+    if (!treePanel.isVisible()) return;
+
     WbSplitPane split = (WbSplitPane)treePanel.getParent();
-    split.getExpander().toggleLowerComponentExpand();
+    lastTreeDivider = split.getDividerLocation();
+    DbTreeSettings.setDividerLocation(lastTreeDivider);
+    treePanel.setVisible(false);
   }
 
   public void restoreDbTree()
   {
     if (treePanel == null) return;
-    WbSplitPane split = (WbSplitPane)treePanel.getParent();
-    split.getExpander().toggleLowerComponentExpand();
+    if (treePanel.isVisible()) return;
+    
+    treePanel.setVisible(true);
+    if (lastTreeDivider > 0)
+    {
+      WbSplitPane split = (WbSplitPane)treePanel.getParent();
+      split.setDividerLocation(lastTreeDivider);
+      lastTreeDivider = -1;
+    }
   }
 
   public DbTreePanel getDbTree()
