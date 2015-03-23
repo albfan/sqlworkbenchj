@@ -25,7 +25,6 @@ package workbench.gui.dbobjects.objecttree;
 import java.util.List;
 
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
 
 /**
  *
