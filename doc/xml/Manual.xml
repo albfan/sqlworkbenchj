@@ -27,6 +27,7 @@
 	<!ENTITY settings SYSTEM "settings.xml">
 	<!ENTITY variables SYSTEM "script-variables.xml">
 	<!ENTITY problems SYSTEM "problems.xml">
+	<!ENTITY db-problems SYSTEM "db-problems.xml">
 	<!ENTITY wbexport SYSTEM "wbexport.xml">
 	<!ENTITY wbimport SYSTEM "wbimport.xml">
 	<!ENTITY comparedb SYSTEM "compare.xml">
@@ -68,6 +69,7 @@
 &data-pumper;
 &dbexplorer;
 &problems;
+&db-problems;
 &options;
 &shortcuts;
 &settings;
