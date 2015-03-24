@@ -94,6 +94,7 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
 import workbench.gui.renderer.RendererSetup;
+import workbench.resource.DataTooltipType;
 
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
@@ -1035,14 +1036,24 @@ public class DwPanel
 
 	public void showGeneratingSQLAsTooltip()
 	{
-		showGeneratingSQLAsTooltip(maxRowsReached());
+		showGeneratingSQLAsTooltip(maxRowsReached(), GuiSettings.showSQLAsDataTooltip());
 	}
 
-	public void showGeneratingSQLAsTooltip(boolean includeMaxRowsWarning)
+  public void showGeneratingSQLAsTooltip(boolean includeMaxRowsWarning)
+  {
+    showGeneratingSQLAsTooltip(includeMaxRowsWarning, GuiSettings.showSQLAsDataTooltip());
+  }
+
+  public void showGeneratingSQLAsTooltip(DataTooltipType tooltipType)
+  {
+    showGeneratingSQLAsTooltip(maxRowsReached(), tooltipType);
+  }
+
+	public void showGeneratingSQLAsTooltip(boolean includeMaxRowsWarning, DataTooltipType tooltipType)
 	{
 		if (sql == null) return;
 
-		if (!GuiSettings.showSQLAsDataTooltip())
+    if (tooltipType == DataTooltipType.none)
 		{
 			this.showSQLAsTooltip = false;
 			return;
@@ -1063,7 +1074,12 @@ public class DwPanel
 		{
 			tip += "<b>" + ResourceMgr.getString("MsgRetrieveAbort") + "</b><br>";
 		}
-		tip += "(" + msg + ")<br><pre>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
+		tip += "(" + msg + ")";
+
+    if (tooltipType == DataTooltipType.full)
+    {
+      tip += "<br><pre>" + HtmlUtil.escapeXML(sql.trim(), false) + "</pre></html>";
+    }
 		tab.setToolTipTextAt(index, tip);
 		showSQLAsTooltip = true;
 		if (sqlInfo != null)

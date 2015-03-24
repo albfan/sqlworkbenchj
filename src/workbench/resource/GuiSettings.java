@@ -30,7 +30,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import workbench.db.objectcache.ObjectCacheStorage;
-import workbench.gui.dbobjects.objecttree.DbTreePanel;
 
 import workbench.gui.sql.FileReloadType;
 
@@ -1157,8 +1156,18 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.cancel.stops", true);
 	}
 
-	public static boolean showSQLAsDataTooltip()
+	public static DataTooltipType showSQLAsDataTooltip()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.data.sql.tooltip", true);
+    String value = Settings.getInstance().getProperty("workbench.gui.data.sql.tooltip", DataTooltipType.full.name());
+    try
+    {
+      return DataTooltipType.valueOf(value);
+    }
+    catch (Throwable th)
+    {
+      if ("true".equalsIgnoreCase(value)) return DataTooltipType.full;
+      if ("false".equalsIgnoreCase(value)) return DataTooltipType.none;
+    }
+    return DataTooltipType.full;
 	}
 }
