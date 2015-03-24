@@ -133,6 +133,22 @@ public class StatementContextTest
 
 	}
 
+  @Test
+  public void testCTAS()
+  {
+		StatementContext context = new StatementContext(con, "create table foo as select  from bar;", 27);
+		BaseAnalyzer analyzer = context.getAnalyzer();
+		assertTrue(analyzer instanceof SelectAnalyzer);
+    analyzer.checkContext();
+    assertEquals("bar", analyzer.getTableForColumnList().getTableName());
+
+		context = new StatementContext(con, "create table foo (a int, b varchar(100)) as select  from bar;", 51);
+		analyzer = context.getAnalyzer();
+		assertTrue(analyzer instanceof SelectAnalyzer);
+    analyzer.checkContext();
+    assertEquals("bar", analyzer.getTableForColumnList().getTableName());
+  }
+
 	@Test
 	public void testSubSelect()
 	{
