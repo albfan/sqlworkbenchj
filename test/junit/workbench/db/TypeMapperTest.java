@@ -62,6 +62,15 @@ public class TypeMapperTest
 	}
 
 	@Test
+	public void testExtendedColtype()
+	{
+		TypeMapper mapper = new TypeMapper();
+		mapper.parseUserTypeMap("12:VARCHAR($size) UNICODE");
+		String type = mapper.getUserMapping(12, 30, 0);
+    assertEquals("VARCHAR(30) UNICODE", type);
+	}
+
+	@Test
 	public void testDbMapping()
 		throws SQLException, ClassNotFoundException
 	{
