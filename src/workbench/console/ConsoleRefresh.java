@@ -163,14 +163,8 @@ public class ConsoleRefresh
         {
           break;
         }
-        if (ConsoleSettings.showScriptFinishTime())
-        {
-          System.out.println(msg);
-        }
-        else
-        {
-          System.out.println(msg + " (" + StringUtil.getCurrentTimestamp() + ")");
-        }
+        System.out.println("(" + StringUtil.getCurrentTimestamp() + ")");
+        System.out.println(msg);
         waitForInput(interval);
       }
       catch (InterruptedException ir)
