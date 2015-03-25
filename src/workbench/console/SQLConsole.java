@@ -174,12 +174,10 @@ public class SQLConsole
 				{
 					isCompleteStatement = true;
 					stmt = macro;
-					firstWord = getFirstWord(macro);
 				}
 				else if (startOfStatement && abbreviations.containsKey(firstWord))
 				{
           stmt = replaceShortcuts(stmt);
-					firstWord = getFirstWord(stmt);
 					isCompleteStatement = true;
 				}
 
@@ -192,18 +190,19 @@ public class SQLConsole
 				if (isCompleteStatement)
 				{
           stmt = replaceShortcuts(stmt);
+					String verb = getFirstWord(stmt);
 
 					try
 					{
 						prompter.resetExecuteAll();
 
-						if (firstWord.equalsIgnoreCase(WbHistory.VERB))
+						if (verb.equalsIgnoreCase(WbHistory.VERB))
 						{
 							stmt = handleHistory(runner, stmt);
-							firstWord = getFirstWord(stmt);
+							verb = getFirstWord(stmt);
 							addToHistory = false;
 						}
-            else if (firstWord.equalsIgnoreCase(RefreshAnnotation.ANNOTATION))
+            else if (verb.equalsIgnoreCase(RefreshAnnotation.ANNOTATION))
             {
               addToHistory = false;
             }
@@ -211,7 +210,7 @@ public class SQLConsole
 						if (StringUtil.isNonEmpty(stmt))
 						{
 							if (addToHistory) history.add(stmt);
-							changeHistory = firstWord.equalsIgnoreCase(WbConnect.VERB) && ConsoleSettings.useHistoryPerProfile();
+							changeHistory = verb.equalsIgnoreCase(WbConnect.VERB) && ConsoleSettings.useHistoryPerProfile();
 							if (changeHistory)
 							{
 								saveHistory();

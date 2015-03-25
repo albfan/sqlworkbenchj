@@ -62,7 +62,7 @@ public class ConsoleRefresh
     if (RefreshAnnotation.ANNOTATION.equalsIgnoreCase(verb))
     {
       if (history.size() == 0) return HandlerState.notHandled;
-      
+
       interval = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
       if (StringUtil.isBlank(interval))
       {
@@ -107,24 +107,45 @@ public class ConsoleRefresh
       }
     }, "Console Refresh");
 
-    refreshThread.start();
-
-    WbConsoleReader console = ConsoleReaderFactory.getConsoleReader();
-
-    char c = 0;
-    while ( c != 'q')
+    try
     {
-      c = console.readCharacter();
-      if (Character.toLowerCase(c) == 'q' || Character.toLowerCase(c) == 'x')
+      refreshThread.start();
+      refreshThread.join();
+    }
+    catch (InterruptedException ex)
+    {
+      // this is excpected
+    }
+    finally
+    {
+      refreshThread = null;
+      doRefresh = false;
+    }
+  }
+
+  private void waitForInput(final int interval)
+     throws InterruptedException
+  {
+    final WbConsoleReader console = ConsoleReaderFactory.getConsoleReader();
+    WbThread inputThread = new WbThread(new Runnable()
+    {
+      @Override
+      public void run()
       {
-        doRefresh = false;
-        if (refreshThread != null)
+        while (doRefresh)
         {
-          refreshThread.interrupt();
+          char c = console.readCharacter();
+          if (Character.toLowerCase(c) == 'q' || Character.toLowerCase(c) == 'x')
+          {
+            doRefresh = false;
+            break;
+          }
         }
       }
-    }
-
+    }, "Console Refresh Input");
+    inputThread.start();
+    inputThread.join(interval);
+    inputThread.interrupt();
   }
 
   private void doRefresh(BatchRunner runner, String sql, int interval)
@@ -150,7 +171,7 @@ public class ConsoleRefresh
         {
           System.out.println(msg + " (" + StringUtil.getCurrentTimestamp() + ")");
         }
-        Thread.sleep(interval);
+        waitForInput(interval);
       }
       catch (InterruptedException ir)
       {
