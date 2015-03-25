@@ -46,6 +46,7 @@ public class ConsoleRefresh
 {
   private boolean doRefresh;
   private WbThread refreshThread;
+  private WbThread inputThread;
 
   public ConsoleRefresh()
   {
@@ -97,6 +98,27 @@ public class ConsoleRefresh
   private void startRefresh(final BatchRunner runner, final String sql, final int interval)
   {
     doRefresh = true;
+
+    inputThread = new WbThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        WbConsoleReader console = ConsoleReaderFactory.getConsoleReader();
+        while (doRefresh)
+        {
+          char c = console.readCharacter();
+          if (Character.toLowerCase(c) == 'q' || Character.toLowerCase(c) == 'x')
+          {
+            doRefresh = false;
+            break;
+          }
+        }
+        inputThread = null;
+      }
+    }, "Console Refresh Input");
+    inputThread.start();
+
     refreshThread = new WbThread(new Runnable()
     {
 
@@ -118,41 +140,21 @@ public class ConsoleRefresh
     }
     finally
     {
+      if (inputThread != null)
+      {
+        inputThread.interrupt();
+        ConsoleReaderFactory.getConsoleReader().reset();
+        inputThread = null;
+      }
       refreshThread = null;
       doRefresh = false;
     }
-  }
-
-  private void waitForInput(final int interval)
-     throws InterruptedException
-  {
-    final WbConsoleReader console = ConsoleReaderFactory.getConsoleReader();
-    WbThread inputThread = new WbThread(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        while (doRefresh)
-        {
-          char c = console.readCharacter();
-          if (Character.toLowerCase(c) == 'q' || Character.toLowerCase(c) == 'x')
-          {
-            doRefresh = false;
-            break;
-          }
-        }
-      }
-    }, "Console Refresh Input");
-    inputThread.start();
-    inputThread.join(interval);
-    inputThread.interrupt();
   }
 
   private void doRefresh(BatchRunner runner, String sql, int interval)
   {
     DurationFormatter formatter = new DurationFormatter();
     String intDisplay = formatter.formatDuration(interval, false);
-    String msg = ResourceMgr.getFormattedString("MsgRefreshing", intDisplay);
 
     while (doRefresh)
     {
@@ -163,14 +165,9 @@ public class ConsoleRefresh
         {
           break;
         }
-        System.out.println("(" + StringUtil.getCurrentTimestamp() + ")");
+        String msg = ResourceMgr.getFormattedString("MsgRefreshing", intDisplay, StringUtil.getCurrentTimestamp());
         System.out.println(msg);
-        waitForInput(interval);
-      }
-      catch (InterruptedException ir)
-      {
-        // this is expected
-        break;
+        inputThread.join(interval);
       }
       catch (Exception ex)
       {
@@ -181,4 +178,5 @@ public class ConsoleRefresh
     refreshThread = null;
     doRefresh = false;
   }
+
 }

@@ -59,6 +59,17 @@ public class JLineWrapper
 		reader.addCompletor(new ArgumentCompletor(completors));
 	}
 
+  @Override
+  public void reset()
+  {
+    try
+    {
+      reader.getInput().reset();
+    }
+    catch (IOException ex)
+    {
+    }
+  }
 
   @Override
   public char readCharacter()

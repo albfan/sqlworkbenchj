@@ -57,6 +57,18 @@ public class SimpleConsole
     return (char)0;
   }
 
+  @Override
+  public void reset()
+  {
+    try
+    {
+      System.in.reset();
+    }
+    catch (IOException ex)
+    {
+    }
+  }
+
 	@Override
 	public String readPassword(String prompt)
 	{

@@ -57,6 +57,19 @@ public class SystemConsole
     return 0;
   }
 
+  @Override
+  public void reset()
+  {
+		if (System.console() == null) return;
+    try
+    {
+      System.console().reader().reset();
+    }
+    catch (IOException ex)
+    {
+    }
+  }
+
 	@Override
 	public String readPassword(String prompt)
 	{

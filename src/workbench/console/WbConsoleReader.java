@@ -38,4 +38,5 @@ public interface WbConsoleReader
 	String readLineWithoutHistory(String prompt);
 	void clearHistory();
 	void addToHistory(List<String> lines);
+  void reset();
 }
