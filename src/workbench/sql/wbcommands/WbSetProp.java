@@ -87,7 +87,8 @@ public class WbSetProp
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-		String verb = currentConnection.getParsingUtil().getSqlVerb(sql);
+
+		String verb = getParsingUtil().getSqlVerb(sql);
 		boolean isConfig = verb.equalsIgnoreCase(ALTERNATE_VERB);
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);

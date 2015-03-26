@@ -22,13 +22,19 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+
 import javax.swing.JFrame;
+
 import workbench.WbManager;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.LogFileViewer;
-import workbench.log.LogMgr;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
 
@@ -58,9 +64,41 @@ public class ViewLogfileAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		final WbFile logFile = LogMgr.getLogfile();
+		WbFile logFile = LogMgr.getLogfile();
 		if (logFile == null) return;
 
+    boolean useSystem = isCtrlPressed(e) || Settings.getInstance().getOpenLogfileWithSystem();
+
+    boolean opened = false;
+
+    if (useSystem)
+    {
+      opened = openWithSystem(logFile);
+    }
+
+    if (!opened)
+    {
+      openInteralViewer(logFile);
+    }
+  }
+
+  private boolean openWithSystem(final WbFile logfile)
+  {
+    try
+    {
+      Desktop.getDesktop().open(logfile);
+      return true;
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("ViewLogFileAction.openWithSystem()", "Error when opening logfile", ex);
+      WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
+    }
+    return false;
+  }
+
+  private void openInteralViewer(final WbFile logfile)
+  {
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
@@ -74,7 +112,7 @@ public class ViewLogfileAction
 						viewer = lview;
 						viewer.setVisible(true);
 						lview.setText("Loading...");
-						lview.showFile(logFile);
+						lview.showFile(logfile);
 					}
 					catch (Exception e)
 					{

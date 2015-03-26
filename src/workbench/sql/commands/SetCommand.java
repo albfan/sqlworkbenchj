@@ -185,7 +185,7 @@ public class SetCommand
 					result = new StatementRunnerResult();
 					if (Settings.getInstance().getShowIgnoredWarning())
 					{
-						String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", currentConnection.getParsingUtil().getSqlVerb(userSql));
+						String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", getParsingUtil().getSqlVerb(userSql));
 						result.addMessage(msg);
 					}
 					result.setSuccess();

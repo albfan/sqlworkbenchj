@@ -50,6 +50,7 @@ import workbench.sql.wbcommands.WbEnableOraOutput;
 import workbench.util.ArgumentParser;
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WarningContent;
@@ -124,6 +125,11 @@ public class SqlCommand
     return new File(dir);
   }
 
+  protected SqlParsingUtil getParsingUtil()
+  {
+    return SqlParsingUtil.getInstance(currentConnection);
+  }
+
 	protected String getBaseDir()
 	{
 		String dir = runner == null ? null : runner.getBaseDir();
@@ -139,7 +145,7 @@ public class SqlCommand
 		String verb = getVerb();
 		if (StringUtil.isEmptyString(verb) && result != null)
 		{
-			verb = currentConnection.getParsingUtil().getSqlVerb(result.getSourceCommand());
+			verb = getParsingUtil().getSqlVerb(result.getSourceCommand());
 		}
 
 		if (!Settings.getInstance().showSuccessMessageForVerb(verb)) return null;
@@ -441,7 +447,7 @@ public class SqlCommand
 		this.isCancelled = false;
 
 		sql = getSqlToExecute(sql);
-		String verb = currentConnection.getParsingUtil().getSqlVerb(sql);
+		String verb = getParsingUtil().getSqlVerb(sql);
 
 		result.ignoreUpdateCounts(currentConnection.getDbSettings().verbsWithoutUpdateCount().contains(verb));
 
@@ -865,7 +871,7 @@ public class SqlCommand
 		if (this.isUpdatingCommand) return true;
 		if (con == null) return isUpdatingCommand;
 		if (con.isClosed()) return isUpdatingCommand;
-		String verb = currentConnection.getParsingUtil().getSqlVerb(sql);
+		String verb = con.getParsingUtil().getSqlVerb(sql);
 		boolean updating = con.getDbSettings().isUpdatingCommand(verb);
 		if (updating) return true;
 		return con.getMetadata().isSelectIntoNewTable(sql);

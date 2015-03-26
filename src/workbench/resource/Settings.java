@@ -687,6 +687,11 @@ public class Settings
 		return getExternalTools(false, false);
 	}
 
+  public boolean getOpenLogfileWithSystem()
+  {
+    return getBoolProperty("workbench.logfile.viewer.system", false);
+  }
+  
 	public List<ToolDefinition> getExternalTools(boolean checkExists, boolean addPdfReader)
 	{
 		int numTools = getIntProperty("workbench.tools.count", 0);
