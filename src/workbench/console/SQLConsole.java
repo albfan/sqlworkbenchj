@@ -210,6 +210,7 @@ public class SQLConsole
 						if (StringUtil.isNonEmpty(stmt))
 						{
 							if (addToHistory) history.add(stmt);
+
 							changeHistory = verb.equalsIgnoreCase(WbConnect.VERB) && ConsoleSettings.useHistoryPerProfile();
 							if (changeHistory)
 							{
@@ -217,17 +218,17 @@ public class SQLConsole
 							}
 
 							setTerminalTitle(runner.getConnection(), true);
+
               HandlerState state = refreshHandler.handleRefresh(runner, stmt, history);
 
               if (state == HandlerState.notHandled)
               {
                 runner.runScript(stmt);
+                if (ConsoleSettings.showScriptFinishTime())
+                {
+                  printMessage("(" + StringUtil.getCurrentTimestamp() + ")");
+                }
               }
-
-							if (ConsoleSettings.showScriptFinishTime())
-							{
-								printMessage("(" + StringUtil.getCurrentTimestamp() + ")");
-							}
 						}
 					}
 					catch (Throwable th)
