@@ -164,6 +164,9 @@ public class Settings
 	public static final String PROP_EDITOR_TRIM = "workbench.file.save.trim.trailing";
 
 	public static final String PROP_LIBDIR = "workbench.libdir";
+
+  public static final String PROP_LOGFILE_VIEWER = "workbench.logfile.viewer.program";
+
 	// </editor-fold>
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
@@ -689,7 +692,7 @@ public class Settings
 
   public String getOpenLogFileTool()
   {
-    return getProperty("workbench.logfile.viewer.program", "internal");
+    return getProperty(PROP_LOGFILE_VIEWER, "internal");
   }
 
 	public List<ToolDefinition> getExternalTools(boolean checkExists, boolean addPdfReader)

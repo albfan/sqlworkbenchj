@@ -79,6 +79,7 @@ public class WbSetProp
 		configMap.put("showendtime", "workbench.gui.sql.script.showtime");
 		configMap.put("showfinishtime", "workbench.gui.sql.script.showtime");
 		configMap.put("clearonrefresh", ConsoleSettings.PROP_CLEAR_SCREEN);
+		configMap.put("logfileviewer", Settings.PROP_LOGFILE_VIEWER);
 	}
 
 	@Override
