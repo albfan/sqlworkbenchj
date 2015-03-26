@@ -223,7 +223,7 @@ public class LogFileViewer
 		BufferedReader reader = EncodingUtil.createBufferedReader(src, LogMgr.DEFAULT_ENCODING, buffSize);
 		try
 		{
-			FixedSizeList<String> lines = new FixedSizeList<String>(maxLines);
+			FixedSizeList<String> lines = new FixedSizeList<>(maxLines);
 			lines.doAppend(true);
 			lines.setAllowDuplicates(true);
 			for (String line = reader.readLine(); line != null; line = reader.readLine())

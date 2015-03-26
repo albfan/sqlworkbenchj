@@ -25,6 +25,8 @@ package workbench.gui.actions;
 import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -46,6 +48,7 @@ import workbench.util.WbFile;
  */
 public class ViewLogfileAction
 	extends WbAction
+  implements WindowListener
 {
 	private static ViewLogfileAction instance = new ViewLogfileAction();
 	private JFrame viewer = null;
@@ -143,6 +146,7 @@ public class ViewLogfileAction
 					{
 						LogFileViewer lview = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
 						viewer = lview;
+            viewer.addWindowListener(ViewLogfileAction.this);
 						viewer.setVisible(true);
 						lview.setText("Loading...");
 						lview.showFile(logfile);
@@ -161,4 +165,40 @@ public class ViewLogfileAction
 			}
 		});
 	}
+
+  @Override
+  public void windowOpened(WindowEvent e)
+  {
+  }
+
+  @Override
+  public void windowClosing(WindowEvent e)
+  {
+  }
+
+  @Override
+  public void windowClosed(WindowEvent e)
+  {
+    viewer = null;
+  }
+
+  @Override
+  public void windowIconified(WindowEvent e)
+  {
+  }
+
+  @Override
+  public void windowDeiconified(WindowEvent e)
+  {
+  }
+
+  @Override
+  public void windowActivated(WindowEvent e)
+  {
+  }
+
+  @Override
+  public void windowDeactivated(WindowEvent e)
+  {
+  }
 }
