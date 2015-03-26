@@ -44,6 +44,9 @@ import workbench.util.StringUtil;
  */
 public class ConsoleSettings
 {
+  public static final String PROP_CLEAR_SCREEN = "workbench.console.refresh.clear.screen";
+  public static final String PROP_NULL_STRING = "workbench.console.nullstring";
+
 	private RowDisplay rowDisplay = RowDisplay.SingleLine;
 	private RowDisplay nextRowDisplay;
 	private List<PropertyChangeListener> listener = new ArrayList<>();
@@ -121,7 +124,7 @@ public class ConsoleSettings
 	 */
 	public static String getNullString()
 	{
-		String display = Settings.getInstance().getProperty("workbench.console.nullstring", GuiSettings.getDisplayNullString());
+		String display = Settings.getInstance().getProperty(PROP_NULL_STRING, GuiSettings.getDisplayNullString());
 		if (display == null) return StringUtil.EMPTY_STRING;
 		return display;
 	}
@@ -163,7 +166,7 @@ public class ConsoleSettings
 
 	public static boolean getClearScreenForRefresh()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.console.refresh.clear.screen", false);
+		return Settings.getInstance().getBoolProperty(PROP_CLEAR_SCREEN, false);
 	}
 
 }

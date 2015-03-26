@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import workbench.console.ConsoleSettings;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -51,20 +52,20 @@ public class WbSetProp
 {
 	public static final String VERB = "WbSetProp";
 	public static final String ALTERNATE_VERB = "WbSetConfig";
-	public static final String PARAM_TYPE = "type";
-	public static final String PARAM_PROP = "property";
-	public static final String PARAM_VALUE = "value";
+	public static final String ARG_TYPE = "type";
+	public static final String ARG_PROP = "property";
+	public static final String ARG_VALUE = "value";
 	private final Map<String, String> configMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
 	public WbSetProp()
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_TYPE, CollectionUtil.arrayList("temp","default"));
-		cmdLine.addArgument(PARAM_PROP);
-		cmdLine.addArgument(PARAM_VALUE);
-		configMap.put("nulldisplay", "workbench.console.nullstring");
-		configMap.put("nullstring", "workbench.console.nullstring");
+		cmdLine.addArgument(ARG_TYPE, CollectionUtil.arrayList("temp","default"));
+		cmdLine.addArgument(ARG_PROP);
+		cmdLine.addArgument(ARG_VALUE);
+		configMap.put("nulldisplay", ConsoleSettings.PROP_NULL_STRING);
+		configMap.put("nullstring", ConsoleSettings.PROP_NULL_STRING);
 		configMap.put("varsuffix", Settings.PROPERTY_VAR_SUFFIX);
 		configMap.put("varprefix", Settings.PROPERTY_VAR_PREFIX);
 		configMap.put("debugmeta", "workbench.dbmetadata.debugmetasql");
@@ -73,7 +74,11 @@ public class WbSetProp
 		configMap.put("time_format", Settings.PROPERTY_TIME_FORMAT);
 		configMap.put("digits", Settings.PROPERTY_DECIMAL_DIGITS);
 		configMap.put("dec_separator", Settings.PROPERTY_DECIMAL_SEP);
+		configMap.put("dec_sep", Settings.PROPERTY_DECIMAL_SEP);
 		configMap.put("showscriptfinish", "workbench.gui.sql.script.showtime");
+		configMap.put("showendtime", "workbench.gui.sql.script.showtime");
+		configMap.put("showfinishtime", "workbench.gui.sql.script.showtime");
+		configMap.put("clearonrefresh", ConsoleSettings.PROP_CLEAR_SCREEN);
 	}
 
 	@Override
@@ -89,13 +94,13 @@ public class WbSetProp
 
 		if (cmdLine.hasArguments())
 		{
-			String type = cmdLine.getValue(PARAM_TYPE, "temp");
-			String prop = cmdLine.getValue(PARAM_PROP);
+			String type = cmdLine.getValue(ARG_TYPE, "temp");
+			String prop = cmdLine.getValue(ARG_PROP);
 			String value = null;
 			int pos = prop != null ? prop.indexOf(':') : -1;
 			if (pos < 0)
 			{
-				value = cmdLine.getValue(PARAM_VALUE);
+				value = cmdLine.getValue(ARG_VALUE);
 			}
 			else
 			{
@@ -108,7 +113,7 @@ public class WbSetProp
 				result.setFailure();
 				result.addMessage("Property name required!");
 			}
-			else if (value == null && cmdLine.isArgNotPresent(PARAM_VALUE))
+			else if (value == null && cmdLine.isArgNotPresent(ARG_VALUE))
 			{
 				String currentValue = Settings.getInstance().getProperty(prop, "");
 				result.addMessage(prop + "=" + currentValue);
