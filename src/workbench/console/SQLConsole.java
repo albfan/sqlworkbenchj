@@ -451,7 +451,7 @@ public class SQLConsole
 		abbreviations.put("\\conninfo", cmd.formatVerb(WbConnInfo.VERB));
 		abbreviations.put("\\connect", cmd.formatVerb(WbConnect.VERB));
 		abbreviations.put("\\c", cmd.formatVerb(WbConnect.VERB));
-		abbreviations.put("\\watch", RefreshAnnotation.ANNOTATION + " 5s");
+		abbreviations.put("\\watch", RefreshAnnotation.ANNOTATION);
 
 		// some limited SQL*Plus compatibility
 		abbreviations.put("/", last);
