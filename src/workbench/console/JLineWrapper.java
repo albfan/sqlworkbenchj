@@ -41,7 +41,7 @@ import jline.Terminal;
  * @author Thomas Kellerer
  */
 public class JLineWrapper
-	implements WbConsoleReader
+	implements WbConsole
 {
 	private ConsoleReader reader;
 
@@ -58,6 +58,18 @@ public class JLineWrapper
 		completors.add(new NullCompletor());
 		reader.addCompletor(new ArgumentCompletor(completors));
 	}
+
+  @Override
+  public void clearScreen()
+  {
+    try
+    {
+      reader.clearScreen();
+    }
+    catch (IOException ex)
+    {
+    }
+  }
 
   @Override
   public void reset()

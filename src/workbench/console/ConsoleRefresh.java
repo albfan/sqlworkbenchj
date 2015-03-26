@@ -104,7 +104,7 @@ public class ConsoleRefresh
       @Override
       public void run()
       {
-        WbConsoleReader console = ConsoleReaderFactory.getConsoleReader();
+        WbConsole console = WbConsoleFactory.getConsole();
         while (doRefresh)
         {
           char c = console.readCharacter();
@@ -143,7 +143,7 @@ public class ConsoleRefresh
       if (inputThread != null)
       {
         inputThread.interrupt();
-        ConsoleReaderFactory.getConsoleReader().reset();
+        WbConsoleFactory.getConsole().reset();
         inputThread = null;
       }
       refreshThread = null;
@@ -156,10 +156,16 @@ public class ConsoleRefresh
     DurationFormatter formatter = new DurationFormatter();
     String intDisplay = formatter.formatDuration(interval, false);
 
+    boolean clearScreen = ConsoleSettings.getClearScreenForRefresh();
+
     while (doRefresh)
     {
       try
       {
+        if (clearScreen)
+        {
+          WbConsoleFactory.getConsole().clearScreen();
+        }
         boolean hasError = runner.runScript(sql);
         if (hasError)
         {

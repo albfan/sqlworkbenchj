@@ -34,7 +34,7 @@ import java.util.Scanner;
  * @author Thomas Kellerer
  */
 public class SimpleConsole
-	implements WbConsoleReader
+	implements WbConsole
 {
 	private static Scanner inputScanner;
 
@@ -42,6 +42,12 @@ public class SimpleConsole
 	{
 		inputScanner = new Scanner(System.in);
 	}
+
+
+  @Override
+  public void clearScreen()
+  {
+  }
 
   @Override
   public char readCharacter()

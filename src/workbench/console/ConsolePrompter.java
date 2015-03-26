@@ -50,7 +50,7 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  * @see workbench.interfaces.ParameterPrompter
  * @see workbench.interfaces.ExecutionController
- * @see ConsoleReaderFactory
+ * @see WbConsoleFactory
  */
 public class ConsolePrompter
 	implements ParameterPrompter, ExecutionController, StatementParameterPrompter
@@ -108,13 +108,13 @@ public class ConsolePrompter
 	@Override
 	public String getInput(String prompt)
 	{
-		return ConsoleReaderFactory.getConsoleReader().readLine(prompt);
+		return WbConsoleFactory.getConsole().readLine(prompt);
 	}
 
 	@Override
 	public String getPassword(String prompt)
 	{
-		return ConsoleReaderFactory.getConsoleReader().readPassword(prompt + " ");
+		return WbConsoleFactory.getConsole().readPassword(prompt + " ");
 	}
 
 	@Override

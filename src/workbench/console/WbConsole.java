@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Thomas Kellerer
  */
-public interface WbConsoleReader
+public interface WbConsole
 {
 	String readPassword(String prompt);
 	String readLine(String prompt);
@@ -39,4 +39,5 @@ public interface WbConsoleReader
 	void clearHistory();
 	void addToHistory(List<String> lines);
   void reset();
+  void clearScreen();
 }

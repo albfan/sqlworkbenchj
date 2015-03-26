@@ -80,7 +80,7 @@ import sun.misc.SignalHandler;
  * JLine library.
  *
  * @see jline.ConsoleReader
- * @see workbench.console.ConsoleReaderFactory
+ * @see workbench.console.WbConsoleFactory
  *
  * @author Thomas Kellerer
  */
@@ -104,20 +104,20 @@ public class SQLConsole
 	private final String titleSuffix = "\007";
 	private WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
 
-	public SQLConsole()
-	{
-		prompter = new ConsolePrompter();
-		history = new StatementHistory(Settings.getInstance().getConsoleHistorySize());
-		history.doAppend(true);
-		installSignalHandler();
-		changeTerminalTitle = !PlatformHelper.isWindows() && ConsoleSettings.changeTerminalTitle();
-		titleBuilder.setShowWorkspace(false);
-		titleBuilder.setShowProductNameAtEnd(ConsoleSettings.termTitleAppNameAtEnd());
-		titleBuilder.setShowProfileGroup(false);
-		titleBuilder.setShowURL(ConsoleSettings.termTitleIncludeUrl());
-		titleBuilder.setShowNotConnected(false);
-		CommandRegistry.getInstance().scanForExtensions();
-	}
+  public SQLConsole()
+  {
+    prompter = new ConsolePrompter();
+    history = new StatementHistory(Settings.getInstance().getConsoleHistorySize());
+    history.doAppend(true);
+    installSignalHandler();
+    changeTerminalTitle = !PlatformHelper.isWindows() && ConsoleSettings.changeTerminalTitle();
+    titleBuilder.setShowWorkspace(false);
+    titleBuilder.setShowProductNameAtEnd(ConsoleSettings.termTitleAppNameAtEnd());
+    titleBuilder.setShowProfileGroup(false);
+    titleBuilder.setShowURL(ConsoleSettings.termTitleIncludeUrl());
+    titleBuilder.setShowNotConnected(false);
+    CommandRegistry.getInstance().scanForExtensions();
+  }
 
 	public void startConsole()
 	{
@@ -153,7 +153,7 @@ public class SQLConsole
 			buffer.setConnection(runner == null ? null : runner.getConnection());
 			while (true)
 			{
-				String line = ConsoleReaderFactory.getConsoleReader().readLine(currentPrompt);
+				String line = WbConsoleFactory.getConsole().readLine(currentPrompt);
 				if (line == null) continue;
 
 				if (buffer.getLength() == 0 && StringUtil.isEmptyString(line)) continue;
@@ -276,7 +276,7 @@ public class SQLConsole
 			Runtime.getRuntime().removeShutdownHook(shutdownHook);
 			saveHistory();
 
-			ConsoleReaderFactory.getConsoleReader().shutdown();
+			WbConsoleFactory.getConsole().shutdown();
 			ConnectionMgr.getInstance().disconnectAll();
 
 			if (Settings.getInstance().isModified())
@@ -479,7 +479,7 @@ public class SQLConsole
 				runner.runScript(stmt);
 				// WbHistory without parameters was executed prompt for an index to be executed
 				System.out.println("");
-				String input = ConsoleReaderFactory.getConsoleReader().readLineWithoutHistory(">>> " + ResourceMgr.getString("TxtEnterStmtIndex") + " >>> ");
+				String input = WbConsoleFactory.getConsole().readLineWithoutHistory(">>> " + ResourceMgr.getString("TxtEnterStmtIndex") + " >>> ");
 				index = StringUtil.getIntValue(input, -1);
 			}
 			finally
@@ -522,7 +522,7 @@ public class SQLConsole
 		WbFile histFile = getHistoryFile();
 		LogMgr.logDebug("SQLConsole.loadHistory()", "Loading history file: " + histFile.getFullPath());
 		history.readFrom(histFile);
-		WbConsoleReader console = ConsoleReaderFactory.getConsoleReader();
+		WbConsole console = WbConsoleFactory.getConsole();
 		console.clearHistory();
 		console.addToHistory(history.getHistoryEntries());
 	}
@@ -546,7 +546,7 @@ public class SQLConsole
 
 	private void adjustHistoryDisplay(BatchRunner runner)
 	{
-		int columns = ConsoleReaderFactory.getConsoleReader().getColumns();
+		int columns = WbConsoleFactory.getConsole().getColumns();
 		LogMgr.logDebug("SQLConsole.adjustHistoryDisplay()", "Console width: " + columns);
 		if (columns < 0)
 		{

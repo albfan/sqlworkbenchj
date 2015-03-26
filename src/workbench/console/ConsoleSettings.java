@@ -160,4 +160,10 @@ public class ConsoleSettings
 	{
 		return Settings.getInstance().getProperty("workbench.console.refresh.interval.default", "5s");
 	}
+
+	public static boolean getClearScreenForRefresh()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.console.refresh.clear.screen", false);
+	}
+
 }

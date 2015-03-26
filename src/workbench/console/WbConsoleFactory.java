@@ -31,11 +31,11 @@ import workbench.resource.Settings;
  *
  * @author Thomas Kellerer
  */
-public class ConsoleReaderFactory
+public class WbConsoleFactory
 {
-	private static WbConsoleReader instance;
+	private static WbConsole instance;
 
-	public synchronized static WbConsoleReader getConsoleReader()
+	public synchronized static WbConsole getConsole()
 	{
 		if (instance == null)
 		{

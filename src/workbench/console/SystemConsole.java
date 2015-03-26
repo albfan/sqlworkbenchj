@@ -35,12 +35,17 @@ import java.util.Scanner;
  * @author Thomas Kellerer
  */
 public class SystemConsole
-	implements WbConsoleReader
+	implements WbConsole
 {
 
 	public SystemConsole()
 	{
 	}
+
+  @Override
+  public void clearScreen()
+  {
+  }
 
   @Override
   public char readCharacter()
