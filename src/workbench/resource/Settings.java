@@ -687,11 +687,11 @@ public class Settings
 		return getExternalTools(false, false);
 	}
 
-  public boolean getOpenLogfileWithSystem()
+  public String getOpenLogFileTool()
   {
-    return getBoolProperty("workbench.logfile.viewer.system", false);
+    return getProperty("workbench.logfile.viewer.program", "internal");
   }
-  
+
 	public List<ToolDefinition> getExternalTools(boolean checkExists, boolean addPdfReader)
 	{
 		int numTools = getIntProperty("workbench.tools.count", 0);

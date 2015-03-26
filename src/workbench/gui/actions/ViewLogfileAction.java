@@ -25,6 +25,7 @@ package workbench.gui.actions;
 import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 
@@ -36,6 +37,8 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.LogFileViewer;
 
 import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
+import workbench.util.ToolDefinition;
 import workbench.util.WbFile;
 
 /**
@@ -67,18 +70,48 @@ public class ViewLogfileAction
 		WbFile logFile = LogMgr.getLogfile();
 		if (logFile == null) return;
 
-    boolean useSystem = isCtrlPressed(e) || Settings.getInstance().getOpenLogfileWithSystem();
+    String viewType = Settings.getInstance().getOpenLogFileTool();
+
+    if (invokedByMouse(e) && isCtrlPressed(e))
+    {
+      viewType = "system";
+    }
+    else if (invokedByMouse(e) && isShiftPressed(e))
+    {
+      viewType = "internal";
+    }
 
     boolean opened = false;
 
-    if (useSystem)
+    if (StringUtil.equalStringIgnoreCase("system", viewType))
     {
       opened = openWithSystem(logFile);
+    }
+    else if (StringUtil.stringsAreNotEqual("internal", viewType))
+    {
+      opened = openWithProgram(viewType, logFile);
     }
 
     if (!opened)
     {
       openInteralViewer(logFile);
+    }
+  }
+
+  private boolean openWithProgram(String program, WbFile logfile)
+  {
+    WbFile tool = new WbFile(program);
+    if (!tool.exists()) return false;
+
+    ToolDefinition def = new ToolDefinition(program, null, null);
+    try
+    {
+      def.runApplication('"' + logfile.getAbsolutePath() + '"');
+      return true;
+    }
+    catch (IOException ex)
+    {
+      return false;
     }
   }
 
