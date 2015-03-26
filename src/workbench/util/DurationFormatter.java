@@ -78,6 +78,11 @@ public class DurationFormatter
 	}
 
 	public String formatDuration(long millis, boolean includeFractionalSeconds)
+  {
+    return formatDuration(millis, includeFractionalSeconds, true);
+  }
+
+	public String formatDuration(long millis, boolean includeFractionalSeconds, boolean includeZeroSeconds)
 	{
 		long hours = (millis / ONE_HOUR);
 		millis -= (hours * ONE_HOUR);
@@ -107,8 +112,12 @@ public class DurationFormatter
 		}
 		else
 		{
-			result.append(Long.toString(millis / 1000));
-			result.append('s');
+      int seconds = (int)millis / 1000;
+      if (seconds > 0 || includeZeroSeconds)
+      {
+        result.append(Long.toString(seconds));
+        result.append('s');
+      }
 		}
 
 		return result.toString();

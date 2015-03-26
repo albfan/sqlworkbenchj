@@ -1055,7 +1055,7 @@ public class DwPanel
 
     if (tooltipType == DataTooltipType.none)
 		{
-			this.showSQLAsTooltip = false;
+			showSQLAsTooltip = false;
 			return;
 		}
 

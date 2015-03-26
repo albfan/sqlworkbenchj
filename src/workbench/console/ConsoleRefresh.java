@@ -157,6 +157,7 @@ public class ConsoleRefresh
     String intDisplay = formatter.formatDuration(interval, false);
 
     boolean clearScreen = ConsoleSettings.getClearScreenForRefresh();
+    String quitMsg = ResourceMgr.getString("MsgRefreshQuit");
 
     while (doRefresh)
     {
@@ -166,12 +167,15 @@ public class ConsoleRefresh
         {
           WbConsoleFactory.getConsole().clearScreen();
         }
+
         boolean hasError = runner.runScript(sql);
+
         if (hasError)
         {
           break;
         }
-        String msg = ResourceMgr.getFormattedString("MsgRefreshing", intDisplay, StringUtil.getCurrentTimestamp());
+        
+        String msg = "*** " + ResourceMgr.getFormattedString("MsgRefreshing", intDisplay, StringUtil.getCurrentTimestamp()) + " - " + quitMsg;
         System.out.println(msg);
         inputThread.join(interval);
       }

@@ -190,7 +190,6 @@ import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
-import workbench.resource.DataTooltipType;
 
 import workbench.storage.DataStore;
 
@@ -2189,10 +2188,14 @@ public class SqlPanel
     if (index < 0) return;
     Icon tabIcon = resultTab.getIconAt(index);
     resultTab.setIconAt(index, refreshMgr.getTabIcon(tabIcon, panel));
-    if (refreshMgr.isRegistered(panel) && GuiSettings.showSQLAsDataTooltip() == DataTooltipType.none)
+    if (refreshMgr.isRegistered(panel))
     {
-      // if no tooltip is displayed, show at least the last execution time
-      panel.showGeneratingSQLAsTooltip(DataTooltipType.lastExec);
+      // replace the standard tooltip with the refresh information
+      int interval = refreshMgr.getRefreshPeriod(panel);
+      DurationFormatter formatter = new DurationFormatter();
+      String intDisplay = formatter.formatDuration(interval, false, false).trim();
+      String msg = ResourceMgr.getFormattedString("MsgRefreshing", intDisplay, StringUtil.getCurrentTimestamp());
+      resultTab.setToolTipTextAt(index, msg);
     }
   }
 

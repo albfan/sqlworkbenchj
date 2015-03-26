@@ -75,5 +75,8 @@ public class DurationFormatterTest
 		millis += DurationFormatter.ONE_SECOND;
 		s = f.formatDuration(millis, true);
 		assertEquals("1m 0s", s);
+
+    s = f.formatDuration(DurationFormatter.ONE_MINUTE, false, false);
+		assertEquals("1m", s.trim());
 	}
 }
