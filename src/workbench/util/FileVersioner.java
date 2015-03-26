@@ -123,7 +123,7 @@ public class FileVersioner
 		}
 		File backup = new File(dir, toBackup.getName() + versionSeparator + nextVersion);
 		FileUtil.copy(toBackup, backup);
-		LogMgr.logDebug("FileVersioner.createBackup()", "Createb backup file: " + backup.getAbsolutePath());
+		LogMgr.logDebug("FileVersioner.createBackup()", "Created backup file: " + backup.getAbsolutePath());
 		return backup;
 	}
 
