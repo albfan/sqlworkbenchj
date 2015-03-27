@@ -476,7 +476,7 @@ public class SqlPanel
 			public void run()
 			{
 				editor.setCaretPosition(offset);
-				editor.setFirstLine(line);
+        editor.centerLine(line);
 				editor.validate();
 				editor.requestFocusInWindow();
 			}

@@ -22,6 +22,7 @@
  */
 package workbench.util;
 
+import java.sql.Timestamp;
 import java.text.DateFormatSymbols;
 import java.text.FieldPosition;
 import java.text.ParseException;
@@ -46,24 +47,44 @@ public class WbDateFormatter
 
 	private InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
 
+  private int millisStart = -1;
+  private int millisLength = -1;
+
 	public WbDateFormatter(String pattern, DateFormatSymbols formatSymbols)
 	{
 		super(pattern, formatSymbols);
+    checkMicroSeconds(pattern);
 	}
 
 	public WbDateFormatter(String pattern, Locale locale)
 	{
 		super(pattern, locale);
+    checkMicroSeconds(pattern);
 	}
 
 	public WbDateFormatter(String pattern)
 	{
 		super(pattern);
+    checkMicroSeconds(pattern);
 	}
 
 	public WbDateFormatter()
 	{
 	}
+
+  @Override
+  public void applyLocalizedPattern(String pattern)
+  {
+    super.applyLocalizedPattern(pattern);
+    checkMicroSeconds(pattern);
+  }
+
+  @Override
+  public void applyPattern(String pattern)
+  {
+    super.applyPattern(pattern);
+    checkMicroSeconds(pattern);
+  }
 
 	public void setInfinityLiterals(InfinityLiterals literals)
 	{
@@ -85,10 +106,34 @@ public class WbDateFormatter
 				return toAppendTo.append(infinityLiterals.getNegativeInfinity());
 			}
 		}
-    // TODO: properly handle nanoseconds from java.sql.Timestamp instanced
-    // e.g. http://stackoverflow.com/a/10074408/330315  or http://stackoverflow.com/a/24453423/330315
+
+    if (date instanceof Timestamp && millisLength > 3)
+    {
+      // SimpleDateFormat does not take nanoseconds from java.sql.Timestamp into account
+      return formatTimestamp((Timestamp)date, toAppendTo, pos);
+    }
+
 		return super.format(date, toAppendTo, pos);
 	}
+
+  private StringBuffer formatTimestamp(Timestamp date, StringBuffer toAppendTo, FieldPosition pos)
+  {
+    StringBuffer result = super.format(date, toAppendTo, pos);
+
+    // Timestamp.toString() always returns the timestamp in ISO format with 6 fractional digits
+    String value = date.toString();
+
+    // extract the nanoseconds as formatted by java.sql.Timestamp
+    // and replace the "formatted" milliseconds from the original result
+    // with the correct values
+    String fractionalSeconds = value.substring(value.lastIndexOf('.') + 1);
+    String display = fractionalSeconds.substring(0, millisLength);
+
+    result.delete(millisStart, millisStart + millisLength);
+    result.insert(millisStart, display);
+    
+    return result;
+  }
 
 	@Override
 	public Date parse(String source)
@@ -119,6 +164,29 @@ public class WbDateFormatter
 			return null;
 		}
 	}
+
+
+  private void checkMicroSeconds(String pattern)
+  {
+    millisLength = 0;
+    millisStart = pattern.indexOf('S');
+    if (millisStart < 0)
+    {
+      return;
+    }
+    millisLength = 0;
+    for (int i=millisStart; i < pattern.length(); i++)
+    {
+      if (pattern.charAt(i) == 'S')
+      {
+        millisLength++;
+      }
+      else
+      {
+        break;
+      }
+    }
+  }
 
 	public static String getDisplayValue(Object value)
 	{
@@ -153,4 +221,6 @@ public class WbDateFormatter
 
 		return value.toString();
 	}
+
+
 }

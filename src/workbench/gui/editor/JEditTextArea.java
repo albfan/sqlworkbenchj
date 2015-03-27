@@ -779,18 +779,18 @@ public class JEditTextArea
 
   public void ensureCaretIsVisible()
   {
-    ensureLineIsVisible(getCaretLine());
+    int line = getCaretLine();
+    if (isLineVisible(line)) return;
+    centerLine(line);
   }
 
-  public void ensureLineIsVisible(int line)
+  public void centerLine(int line)
   {
-//    if (isLineVisible(line)) return;
 
     int newFirst = line - ( (getVisibleLines() - electricScroll) / 2);
 
-//    setFirstLine(newFirst, true);
-		firstLine = newFirst;
     painter.invalidateLineRange(firstLine, firstLine + getVisibleLines());
+    setFirstLine(newFirst, true);
     updateScrollBars();
     invalidate();
   }

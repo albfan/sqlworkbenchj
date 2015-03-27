@@ -1194,6 +1194,22 @@
 
   </section>
 
+  <section id="logfile-viewer">
+    <title>Configuring the logfile viewer</title>
+    <para>Property: <literal>workbench.logfile.viewer.program</literal></para>
+    <para>
+      This property controls which application is used to display the logfile when using <menuchoice><guimenu>Help</guimenu><guimenuitem>Show log file</guimenuitem></menuchoice>.
+    </para>
+    <para>
+      The possible values for this property are:
+      <itemizedlist spacing="compact">
+        <listitem><literal>internal</literal> - this is the default and uses the built-in logviewer</listitem>
+        <listitem><literal>system</literal> - this will use the tool registered in the operating system to open files with the extension <literal>.log</literal></listitem>
+        <listitem>a path to an existing application - if the value denotes an existing filename, it is assumed that this is an application and accpets a filename as a command line parameter</listitem>
+      </itemizedlist>
+    </para>
+  </section>
+
   <section id="setting-sql-generation">
     <title>Settings related to SQL statement generation</title>
 

@@ -22,11 +22,15 @@
  */
 package workbench.util;
 
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
-import org.junit.*;
-import static org.junit.Assert.*;
+
 import workbench.db.exporter.InfinityLiterals;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -68,6 +72,31 @@ public class WbDateFormatterTest
 		expected = new Date(WbDateFormatter.DATE_POSITIVE_INFINITY);
 		assertEquals(expected, formatter.parse(InfinityLiterals.PG_POSITIVE_LITERAL));
 	}
+
+  @Test
+  public void testTimestamp()
+  {
+    WbDateFormatter format = new WbDateFormatter("dd.MM.yyyy HH:mm:ss");
+    Timestamp ts = Timestamp.valueOf("2015-03-27 20:21:22.123456");
+    assertEquals("27.03.2015 20:21:22", format.format(ts));
+
+    format.applyPattern("dd.MM.yyyy HH:mm:ss.SSS");
+    assertEquals("27.03.2015 20:21:22.123", format.format(ts));
+
+    format.applyPattern("dd.MM.yyyy HH:mm:ss.SSSSSS");
+    assertEquals("27.03.2015 20:21:22.123456", format.format(ts));
+
+    format.applyPattern("SSSSSS dd.MM.yyyy HH:mm:ss");
+    assertEquals("123456 27.03.2015 20:21:22", format.format(ts));
+
+    format.applyPattern("SSS dd.MM.yyyy HH:mm:ss");
+    assertEquals("123 27.03.2015 20:21:22", format.format(ts));
+
+    ts = Timestamp.valueOf("2015-03-27 20:21:22.123789");
+
+    format.applyPattern("dd.MM.yyyy HH:mm:ss.SSS");
+    assertEquals("27.03.2015 20:21:22.123", format.format(ts));
+  }
 
 	/**
 	 * Test of getDisplayValue method, of class WbDateFormatter.
