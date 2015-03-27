@@ -1876,9 +1876,6 @@ public class MainWindow
 					MainPanel p = getCurrentPanel();
 					checkConnectionForPanel(p);
 					setMacroMenuEnabled(true);
-					JComponent comp = (JComponent)p;
-					comp.validate();
-					comp.repaint();
 				}
 				catch (Throwable e)
 				{
@@ -1892,6 +1889,7 @@ public class MainWindow
 					setIgnoreTabChange(false);
 					FileUtil.closeQuietely(w);
 					updateGuiForTab(sqlTab.getSelectedIndex());
+          syncEditor();
 				}
 			}
 		});
@@ -1913,6 +1911,22 @@ public class MainWindow
 
 		return resultForWorkspaceClose;
 	}
+
+  private void syncEditor()
+  {
+    final SqlPanel panel = getCurrentSqlPanel();
+    if (panel == null) return;
+    WbSwingUtilities.invoke(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        panel.getEditor().ensureCaretIsVisible();
+        panel.getEditor().doLayout();
+        panel.validate();
+      }
+    });
+  }
 
 	private void checkReloadWkspAction()
 	{

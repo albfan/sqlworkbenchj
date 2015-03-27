@@ -702,7 +702,7 @@ public class EditorPanel
 
 		try
 		{
-			this.selectNone();
+			setCaretPosition(0);
 			// try to free memory by releasing the current document
 			// these is also done later when calling setDocument()
 			// but that would mean, that the old and the new document would

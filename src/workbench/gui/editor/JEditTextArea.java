@@ -784,11 +784,15 @@ public class JEditTextArea
 
   public void ensureLineIsVisible(int line)
   {
-    if (isLineVisible(line)) return;
+//    if (isLineVisible(line)) return;
 
     int newFirst = line - ( (getVisibleLines() - electricScroll) / 2);
 
-    setFirstLine(newFirst);
+//    setFirstLine(newFirst, true);
+		firstLine = newFirst;
+    painter.invalidateLineRange(firstLine, firstLine + getVisibleLines());
+    updateScrollBars();
+    invalidate();
   }
 
 	/**
@@ -1479,6 +1483,7 @@ public class JEditTextArea
 	{
 		try
 		{
+      select(0,0,null);
 			document.beginCompoundEdit();
 
 			if (document.getLength() > 0)
@@ -1973,7 +1978,7 @@ public class JEditTextArea
 		// Clear the `magic' caret position used by up/down
 		magicCaret = -1;
 
-    ensureCaretIsVisible();
+		scrollToCaret();
 		fireSelectionEvent();
 	}
 
