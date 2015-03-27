@@ -407,7 +407,7 @@ public class MainWindow
   {
     if (treePanel == null) return;
     if (treePanel.isVisible()) return;
-    
+
     treePanel.setVisible(true);
     if (lastTreeDivider > 0)
     {
@@ -836,8 +836,8 @@ public class MainWindow
 			public void run()
 			{
 				JComponent content = (JComponent)getContentPane();
-				sqlTab.invalidate();
-				content.revalidate();
+        sqlTab.validate();
+				content.validate();
 			}
 		});
 		WbSwingUtilities.repaintLater(this);
@@ -1834,6 +1834,7 @@ public class MainWindow
 
 					w = new WbWorkspace(realFilename, false);
 					final int entryCount = w.getEntryCount();
+
 					for (int i = 0; i < entryCount; i++)
 					{
 						if (w.getPanelType(i) == PanelType.dbExplorer)
@@ -1846,8 +1847,8 @@ public class MainWindow
 						}
 						MainPanel p = getSqlPanel(i);
 						p.readFromWorkspace(w, i);
-						((JComponent)p).invalidate();
 					}
+
 					if (entryCount == 0)
 					{
 						LogMgr.logWarning("MainWindow.loadWorkspace()", "No panels stored in the workspace: " + realFilename);

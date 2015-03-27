@@ -776,6 +776,21 @@ public class JEditTextArea
 		}
 	}
 
+
+  public void ensureCaretIsVisible()
+  {
+    ensureLineIsVisible(getCaretLine());
+  }
+
+  public void ensureLineIsVisible(int line)
+  {
+    if (isLineVisible(line)) return;
+
+    int newFirst = line - ( (getVisibleLines() - electricScroll) / 2);
+
+    setFirstLine(newFirst);
+  }
+
 	/**
 	 * Returns the line displayed at the text area's origin.
 	 */
@@ -801,7 +816,6 @@ public class JEditTextArea
 		{
 			updateScrollBars();
 		}
-
 		painter.repaint();
 	}
 
@@ -1882,7 +1896,7 @@ public class JEditTextArea
 
 	public void select(int start, int end)
 	{
-		this.select(start, end, null);
+		select(start, end, null);
 	}
 
 	/**
@@ -1954,12 +1968,12 @@ public class JEditTextArea
 		if (caretTimer != null) caretTimer.restart();
 
 		// Disable rectangle select if selection start = selection end
-		if(selectionStart == selectionEnd) rectSelect = false;
+		if (selectionStart == selectionEnd) rectSelect = false;
 
 		// Clear the `magic' caret position used by up/down
 		magicCaret = -1;
 
-		scrollToCaret();
+    ensureCaretIsVisible();
 		fireSelectionEvent();
 	}
 

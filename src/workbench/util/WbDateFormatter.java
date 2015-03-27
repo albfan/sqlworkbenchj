@@ -85,6 +85,8 @@ public class WbDateFormatter
 				return toAppendTo.append(infinityLiterals.getNegativeInfinity());
 			}
 		}
+    // TODO: properly handle nanoseconds from java.sql.Timestamp instanced
+    // e.g. http://stackoverflow.com/a/10074408/330315  or http://stackoverflow.com/a/24453423/330315
 		return super.format(date, toAppendTo, pos);
 	}
 

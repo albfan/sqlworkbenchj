@@ -107,15 +107,14 @@ public class SqlHistoryEntry
 		try
 		{
 			editor.setText(this.text);
-			// Setting the caret to position 0 before scrolling to the real
-			// position prevents scrolling in case the cursorposition is in the
-			// already visible area
-			editor.setCaretPosition(0);
 			if (this.cursorPos > -1)
 			{
 				editor.setCaretPosition(this.cursorPos);
-				editor.scrollToCaret();
 			}
+      else
+      {
+        editor.setCaretPosition(0);
+      }
 			if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart && this.selectionEnd < editor.getDocumentLength())
 			{
 				editor.select(this.selectionStart, this.selectionEnd);

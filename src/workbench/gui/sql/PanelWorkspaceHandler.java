@@ -24,6 +24,7 @@ package workbench.gui.sql;
 
 import java.io.IOException;
 import java.util.Properties;
+
 import workbench.gui.settings.ExternalFileHandling;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -77,7 +78,15 @@ public class PanelWorkspaceHandler
 			fileLoaded = client.readFile(filename, encoding);
 		}
 
-		if (!fileLoaded)
+		if (fileLoaded)
+		{
+			int cursorPos = w.getExternalFileCursorPos(index);
+			if (cursorPos > -1 && cursorPos < client.editor.getText().length())
+      {
+        client.editor.setCaretPosition(cursorPos);
+      }
+		}
+		else
 		{
 			try
 			{
@@ -87,11 +96,6 @@ public class PanelWorkspaceHandler
 			{
 				LogMgr.logError("PanelWorkspaceHandler.readFromWorkspace()", "Error when showing current history entry", e);
 			}
-		}
-		else
-		{
-			int cursorPos = w.getExternalFileCursorPos(index);
-			if (cursorPos > -1 && cursorPos < client.editor.getText().length()) client.editor.setCaretPosition(cursorPos);
 		}
 
 		WbProperties props = w.getSettings();
@@ -108,6 +112,7 @@ public class PanelWorkspaceHandler
 		client.updateAppendAction();
 		client.editor.clearUndoBuffer();
 		client.editor.resetModified();
+    client.editor.invalidate();
 	}
 
 

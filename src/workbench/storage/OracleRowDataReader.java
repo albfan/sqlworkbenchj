@@ -110,14 +110,16 @@ public class OracleRowDataReader
 			// the above timestamp as 11:57:40.119
 			// so we need to strip the additional milliseconds
 			// and the timezone name as Java can't handle that either.
-			String cleanValue = cleanupTSValue(tsValue);
 
-//			LogMgr.logTrace("OracleRowDataReader.adjustTIMESTAMP", "Converted [" + tsValue + "] to [" + cleanValue + "]");
+			String cleanValue = cleanupTSValue(tsValue);
 
 			// this loses the time zone information stored in Oracle's TIMESTAMPTZ or TIMESTAMPLTZ values
 			// but otherwise the displayed time would be totally wrong.
 			java.util.Date date = tsParser.parse(cleanValue);
 			Timestamp ts = new java.sql.Timestamp(date.getTime());
+      
+      // TODO: extract the stripped nanoseconds from the passed object
+      // and set them in the Timestamp instance using setNanos();
 			return ts;
 		}
 		catch (Throwable ex)

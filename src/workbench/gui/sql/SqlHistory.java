@@ -68,7 +68,7 @@ public class SqlHistory
 	public SqlHistory(EditorPanel ed, int size)
 	{
 		this.maxSize = size;
-		this.history = new ArrayList<SqlHistoryEntry>(size + 2);
+		this.history = new ArrayList<>(size + 2);
 		this.editor = ed;
 		this.firstStmtAction = new FirstStatementAction(this);
 		this.firstStmtAction.setEnabled(false);
