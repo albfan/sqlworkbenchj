@@ -105,7 +105,7 @@ public class PanelContentSender
 		t.start();
 	}
 
-	public void sendContent(final String text, final int panelIndex, final boolean appendText)
+	public void sendContent(final String text, final int panelIndex, final PasteType type)
 	{
 		if (text == null) return;
 
@@ -117,14 +117,18 @@ public class PanelContentSender
 			@Override
 			public void run()
 			{
-				if (appendText)
+        if (type == PasteType.append)
 				{
 					panel.appendStatementText(text);
 				}
-				else
+        else if (type == PasteType.overwrite)
 				{
 					panel.setStatementText(text);
 				}
+        else if (type == PasteType.insert)
+        {
+          panel.addStatement(text);
+        }
 				target.requestFocus();
 				panel.selectEditor();
 			}

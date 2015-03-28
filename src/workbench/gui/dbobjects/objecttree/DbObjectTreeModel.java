@@ -44,13 +44,13 @@ public class DbObjectTreeModel
     return findNodeByType((ObjectTreeNode)getRoot(), name, type);
   }
 
-  private ObjectTreeNode findNodeByType(ObjectTreeNode node, String name, String type)
+  public ObjectTreeNode findNodeByType(ObjectTreeNode parentNode, String name, String type)
   {
-    if (node.getName().equalsIgnoreCase(name) && node.getType().equalsIgnoreCase(type)) return node;
-    int count = node.getChildCount();
+    if (parentNode.getName().equalsIgnoreCase(name) && parentNode.getType().equalsIgnoreCase(type)) return parentNode;
+    int count = parentNode.getChildCount();
     for (int i=0; i < count; i ++)
     {
-      ObjectTreeNode child = (ObjectTreeNode)node.getChildAt(i);
+      ObjectTreeNode child = (ObjectTreeNode)parentNode.getChildAt(i);
       ObjectTreeNode nd1 = findNodeByType(child, name, type);
       if (nd1 != null) return nd1;
     }

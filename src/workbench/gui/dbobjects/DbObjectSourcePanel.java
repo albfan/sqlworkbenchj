@@ -48,6 +48,7 @@ import workbench.gui.components.FocusIndicator;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelContentSender;
+import workbench.gui.sql.PasteType;
 
 import workbench.util.StringUtil;
 
@@ -169,7 +170,7 @@ public class DbObjectSourcePanel
 					@Override
 					public void run()
 					{
-						editText(panelIndex, false);
+						editText(panelIndex);
 					}
 				});
 			}
@@ -180,12 +181,12 @@ public class DbObjectSourcePanel
 		}
 	}
 
-	private void editText(final int panelIndex, final boolean appendText)
+	private void editText(final int panelIndex)
 	{
 		if (this.parentWindow != null)
 		{
 			PanelContentSender sender = new PanelContentSender(this.parentWindow, this.objectName);
-			sender.sendContent(getText(), panelIndex, appendText);
+			sender.sendContent(getText(), panelIndex, PasteType.overwrite);
 		}
 	}
 

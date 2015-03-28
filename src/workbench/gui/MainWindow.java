@@ -386,10 +386,7 @@ public class MainWindow
       validate();
       treePanel.connect(currentProfile);
     }
-    else
-    {
-      treePanel.requestFocusInWindow();
-    }
+    treePanel.requestFocusInWindow();
   }
 
   public void hideDbTree()

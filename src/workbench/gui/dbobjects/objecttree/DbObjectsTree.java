@@ -102,7 +102,72 @@ public class DbObjectsTree
     }
   }
 
-  public void load()
+  private ObjectTreeNode expandAndLoad(TreePath path)
+  {
+    if (path == null) return null;
+
+    try
+    {
+      int count = path.getPathCount();
+      ObjectTreeNode toExpand = (ObjectTreeNode)path.getPathComponent(0);
+      ObjectTreeNode parent = getTreeModel().findNodeByType(toExpand.getName(), toExpand.getType());
+      if (!parent.isLoaded())
+      {
+        loader.loadChildren(parent);
+      }
+      expandNode(parent);
+
+      for (int i=1; i < count; i++)
+      {
+        ObjectTreeNode toFind = (ObjectTreeNode)path.getPathComponent(i);
+        ObjectTreeNode node = getTreeModel().findNodeByType(parent, toFind.getName(), toFind.getType());
+        if (node != null)
+        {
+          if (!node.isLoaded())
+          {
+            loader.loadChildren(node);
+          }
+          expandNode(node);
+          parent = node;
+        }
+        else
+        {
+          break;
+        }
+      }
+      return parent;
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("DbObjectsTree.loadNodesForPath()", "Could not load nodes", ex);
+    }
+    return null;
+  }
+
+  public void reload()
+  {
+    TreePath selection = getSelectionPath();
+
+    load(false);
+    final ObjectTreeNode toSelect = expandAndLoad(selection);
+
+    EventQueue.invokeLater(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (toSelect != null)
+        {
+          TreeNode[] nodes = getTreeModel().getPathToRoot(toSelect);
+          TreePath path = new TreePath(nodes);
+          setSelectionPath(path);
+          scrollPathToVisible(path);
+        }
+      }
+    });
+  }
+
+  public void load(boolean selectCurrentSchema)
   {
     if (loader == null) return;
     if (!WbSwingUtilities.isConnectionIdle(this, loader.getConnection())) return;
@@ -112,16 +177,20 @@ public class DbObjectsTree
     try
     {
       loader.load();
+
       setModel(loader.getModel());
 
-      EventQueue.invokeLater(new Runnable()
+      if (selectCurrentSchema)
       {
-        @Override
-        public void run()
+        EventQueue.invokeLater(new Runnable()
         {
-          selectCurrentSchema();
-        }
-      });
+          @Override
+          public void run()
+          {
+            selectCurrentSchema();
+          }
+        });
+      }
     }
     catch (SQLException ex)
     {
@@ -138,7 +207,7 @@ public class DbObjectsTree
 	public void selectPath(TreePath path)
 	{
 		if (path == null) return;
-		expandPath(path);
+    setExpandedState(path, true);
 		setSelectionPath(path);
 		scrollPathToVisible(path);
 	}
@@ -181,9 +250,6 @@ public class DbObjectsTree
 
   private void doLoad(final ObjectTreeNode node)
   {
-    if (loader == null) return;
-    if (!WbSwingUtilities.isConnectionIdle(this, loader.getConnection())) return;
-
     try
     {
       WbSwingUtilities.showWaitCursor(this);
@@ -231,7 +297,7 @@ public class DbObjectsTree
     if (StringUtil.isEmptyString(type)) return null;
 
     int childCount = parent.getChildCount();
-    for (int i=0; i < childCount; i++)
+    for (int i = 0; i < childCount; i++)
     {
       ObjectTreeNode child = (ObjectTreeNode)parent.getChildAt(i);
       if (child != null && child.getType().equals(type))

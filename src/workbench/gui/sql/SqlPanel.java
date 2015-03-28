@@ -1608,19 +1608,26 @@ public class SqlPanel
 
 	public void appendStatementText(String text)
 	{
-		this.editor.appendLine("\n\n");
+		this.editor.appendLine("\n");
 		int pos = this.editor.getText().length();
 		this.editor.appendLine(text);
 		this.editor.setCaretPosition(pos);
 		this.editor.scrollToCaret();
 	}
 
-	public void setStatementText(String aStatement)
+	public void setStatementText(String text)
 	{
 		this.storeStatementInHistory();
 		if (this.editor.getCurrentFile() != null) this.editor.saveCurrentFile();
 		this.editor.closeFile(true);
-		this.editor.setText(aStatement);
+		this.editor.setText(text);
+	}
+
+	public void addStatement(String text)
+	{
+    this.editor.insertText("\n");
+    this.editor.insertText(text);
+    this.editor.scrollToCaret();
 	}
 
 	@Override

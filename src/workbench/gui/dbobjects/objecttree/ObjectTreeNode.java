@@ -26,6 +26,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
+import workbench.db.IndexDefinition;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -64,7 +65,7 @@ public class ObjectTreeNode
     nodeType = type;
     nodeName = name;
   }
-  
+
   public void setChildrenLoaded(boolean flag)
   {
     isLoaded = flag;
@@ -129,6 +130,18 @@ public class ObjectTreeNode
     {
       ColumnIdentifier col = (ColumnIdentifier)dbo;
       return col.getColumnName() + " - " + col.getDbmsType();
+    }
+    if (dbo instanceof IndexDefinition)
+    {
+      IndexDefinition idx = (IndexDefinition)dbo;
+      if (idx.isPrimaryKeyIndex())
+      {
+        return idx.getName() + " (PK)";
+      }
+      if (idx.isUnique())
+      {
+        return idx.getName() + " (UNIQUE)";
+      }
     }
     return dbo.getObjectName();
   }

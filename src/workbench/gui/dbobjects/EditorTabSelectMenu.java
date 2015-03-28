@@ -45,6 +45,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.sql.PanelContentSender;
+import workbench.gui.sql.PasteType;
 
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
@@ -66,6 +67,7 @@ public class EditorTabSelectMenu
 	private DependencyNode node;
 	private boolean withClipboard;
   private DbObjectList objectList;
+  private PasteType pasteType = PasteType.overwrite;
 
 	public EditorTabSelectMenu(String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent)
 	{
@@ -86,6 +88,10 @@ public class EditorTabSelectMenu
 		}
 	}
 
+  public void setPasteType(PasteType type)
+  {
+    pasteType = type;
+  }
 
   public void setActionListener(ActionListener l)
   {
@@ -235,50 +241,49 @@ public class EditorTabSelectMenu
 		super.dispose();
 	}
 
-	private void showTableData(final int panelIndex, final boolean appendText)
+	private void showTableData(final int panelIndex, final PasteType type)
 	{
     TableDefinition selectedTable = objectList.getCurrentTableDefinition();
 		if (selectedTable == null) return;
 
-		PanelContentSender sender = new PanelContentSender(this.parentWindow, selectedTable.getTable().getTableName());
+    final PanelContentSender sender = new PanelContentSender(this.parentWindow, selectedTable.getTable().getTableName());
     TableSelectBuilder builder = new TableSelectBuilder(objectList.getConnection(), "select", null);
+
     try
     {
-      String sql = builder.getSelectForTableData(selectedTable.getTable(), selectedTable.getColumns(), true);
+      final String sql = builder.getSelectForTableData(selectedTable.getTable(), selectedTable.getColumns(), true);
       if (sql == null) return;
-      sender.sendContent(sql, panelIndex, appendText);
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          sender.sendContent(sql, panelIndex, type);
+        }
+      });
     }
     catch (Exception ex)
     {
       LogMgr.logError("EditorTabSelectMenu.showTableData()", "Could not build SELECT statement", ex);
     }
-	}
+  }
 
 	@Override
 	public void actionPerformed(ActionEvent e)
   {
-			String command = e.getActionCommand();
-			if (command.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX) && this.parentWindow != null)
-			{
-				try
-				{
-					final int panelIndex = Integer.parseInt(command.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()));
-					final boolean appendText = WbAction.isCtrlPressed(e);
-					// Allow the selection change to finish so that
-					// we have the correct table name in the instance variables
-					EventQueue.invokeLater(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							showTableData(panelIndex, appendText);
-						}
-					});
-				}
-				catch (Exception ex)
-				{
-					LogMgr.logError("TableListPanel().actionPerformed()", "Error when accessing editor tab", ex);
-				}
-			}
+    String command = e.getActionCommand();
+    if (command.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX) && this.parentWindow != null)
+    {
+      try
+      {
+        int panelIndex = Integer.parseInt(command.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()));
+        PasteType type = WbAction.isCtrlPressed(e) ? PasteType.append : pasteType;
+        showTableData(panelIndex, type);
+      }
+      catch (Exception ex)
+      {
+        LogMgr.logError("TableListPanel().actionPerformed()", "Error when accessing editor tab", ex);
+      }
+    }
   }
 }

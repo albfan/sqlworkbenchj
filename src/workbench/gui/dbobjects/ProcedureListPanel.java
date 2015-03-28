@@ -93,6 +93,7 @@ import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
+import workbench.gui.sql.PasteType;
 
 import workbench.storage.DataStore;
 
@@ -943,7 +944,7 @@ public class ProcedureListPanel
 			try
 			{
 				final int panelIndex = Integer.parseInt(command.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()));
-				final boolean appendText = WbAction.isCtrlPressed(e);
+				final PasteType type = WbAction.isCtrlPressed(e) ? PasteType.append : PasteType.overwrite;
 
 				// Allow the selection change to finish so that
 				// we have the correct table name in the instance variables
@@ -952,7 +953,7 @@ public class ProcedureListPanel
 					@Override
 					public void run()
 					{
-						showProcedureCallData(panelIndex, appendText);
+						showProcedureCallData(panelIndex, type);
 					}
 				});
 			}
@@ -963,13 +964,13 @@ public class ProcedureListPanel
 		}
 	}
 
-	private void showProcedureCallData(int panelIndex, boolean appendText)
+	private void showProcedureCallData(int panelIndex, PasteType type)
 	{
 		PanelContentSender sender = new PanelContentSender(this.parentWindow, null);
 		String sql = buildProcedureCallForTable();
 		if (sql != null)
 		{
-			sender.sendContent(sql, panelIndex, appendText);
+			sender.sendContent(sql, panelIndex, type);
 		}
 	}
 

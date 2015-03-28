@@ -36,6 +36,7 @@ import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.dbobjects.EditorTabSelectMenu;
+import workbench.gui.sql.PasteType;
 
 /**
  *
@@ -49,7 +50,7 @@ class ContextMenuFactory
 
     SpoolDataAction export = new SpoolDataAction(dbTree);
     menu.add(export);
-    
+
     CountTableRowsAction countAction = new CountTableRowsAction(dbTree, selection);
     countAction.setConnection(dbTree.getConnection());
     if (countAction.isEnabled())
@@ -61,7 +62,8 @@ class ContextMenuFactory
     if (w instanceof MainWindow)
     {
       MainWindow mw = (MainWindow)w;
-      EditorTabSelectMenu showSelect = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblShowDataInTab", mw, true);
+      EditorTabSelectMenu showSelect = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblDbTreePutSelectInto", mw, true);
+      showSelect.setPasteType(PasteType.insert);
       showSelect.setObjectList(dbTree);
       menu.add(showSelect);
 		}

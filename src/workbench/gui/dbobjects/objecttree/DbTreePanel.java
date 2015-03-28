@@ -161,11 +161,10 @@ public class DbTreePanel
   {
     WbThread th = new WbThread(new Runnable()
     {
-
       @Override
       public void run()
       {
-        tree.load();
+        tree.reload();
       }
     }, "DbTree Load Thread");
     th.start();
@@ -196,7 +195,7 @@ public class DbTreePanel
 			connection = mgr.getConnection(profile, cid);
       tree.setConnection(connection);
       loadTypes();
-      tree.load();
+      tree.load(true);
 		}
     catch (Throwable th)
     {
@@ -270,7 +269,6 @@ public class DbTreePanel
       }
     }
   }
-
 
   protected ObjectTreeNode getSelectedNode()
   {
