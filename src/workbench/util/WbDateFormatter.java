@@ -125,13 +125,15 @@ public class WbDateFormatter
 
     // extract the nanoseconds as formatted by java.sql.Timestamp
     // and replace the "formatted" milliseconds from the original result
-    // with the correct values
+    // with the correct value
     String fractionalSeconds = value.substring(value.lastIndexOf('.') + 1);
-    String display = fractionalSeconds.substring(0, millisLength);
+
+    int len = Math.min(millisLength, fractionalSeconds.length());
+    String display = fractionalSeconds.substring(0, len);
 
     result.delete(millisStart, millisStart + millisLength);
     result.insert(millisStart, display);
-    
+
     return result;
   }
 
