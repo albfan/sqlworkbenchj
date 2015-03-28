@@ -52,6 +52,7 @@ import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
@@ -65,6 +66,7 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.ReaderFactory;
 import workbench.db.SourceStatementsHelp;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.SourceCache;
@@ -214,7 +216,7 @@ public class ProcedureListPanel
 		this.procList.setRememberColumnOrder(DbExplorerSettings.getRememberMetaColumnOrder("procedurelist"));
 		this.procList.addTableModelListener(this);
 		this.findPanel = new QuickFilterPanel(this.procList, false, "procedurelist");
-    
+
     configureFindPanel();
 
 		ReloadAction a = new ReloadAction(this);
@@ -332,18 +334,20 @@ public class ProcedureListPanel
 	{
 		if (this.parentWindow != null)
 		{
-			this.generateWbCall = new EditorTabSelectMenu(this, ResourceMgr.getString("MnuTxtShowProcData"), "LblWbCallInNewTab", "LblWbCallInTab", parentWindow, true);
+			this.generateWbCall = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowProcData"), "LblWbCallInNewTab", "LblWbCallInTab", parentWindow, true);
+      generateWbCall.setActionListener(this);
 			this.generateWbCall.setEnabled(false);
 			this.procList.addPopupMenu(this.generateWbCall, true);
 		}
 
-		ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, procList.getSelectionModel());
+    WbSelectionModel list = WbSelectionModel.Factory.createFacade(procList.getSelectionModel());
+    ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, list);
 		procList.addPopupAction(createScript, true);
 
-		this.compileAction = new CompileDbObjectAction(this, this.procList.getSelectionModel());
+		this.compileAction = new CompileDbObjectAction(this, list);
 		procList.addPopupAction(compileAction, false);
 
-		DropDbObjectAction dropAction = new DropDbObjectAction(this, procList.getSelectionModel(), this);
+		DropDbObjectAction dropAction = new DropDbObjectAction(this, list, this);
 		procList.addPopupAction(dropAction, false);
 	}
 
@@ -851,6 +855,18 @@ public class ProcedureListPanel
 
 		return (pos < 0 ? 0 : pos);
 	}
+
+  @Override
+  public int getSelectionCount()
+  {
+    return procList.getSelectedRowCount();
+  }
+
+  @Override
+  public TableDefinition getCurrentTableDefinition()
+  {
+    return null;
+  }
 
 	@Override
 	public TableIdentifier getObjectTable()

@@ -344,7 +344,8 @@ public class ReferenceTableNavigator
 						index++;
 					}
 					display.append(')');
-					EditorTabSelectMenu item = new EditorTabSelectMenu(this, display.toString(), "LblShowDataInNewTab", "MsgRelatedTabHint", container);
+					EditorTabSelectMenu item = new EditorTabSelectMenu(display.toString(), "LblShowDataInNewTab", "MsgRelatedTabHint", container);
+          item.setActionListener(this);
 					item.setDependencyNode(node);
 					item.setVisible(true);
 					item.setToolTipText(tooltip.toString());

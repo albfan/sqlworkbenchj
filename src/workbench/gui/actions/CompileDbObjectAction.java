@@ -29,11 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JMenuItem;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
+import workbench.interfaces.WbSelectionListener;
+import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
 
 import workbench.db.DbObject;
@@ -50,20 +49,20 @@ import workbench.gui.dbobjects.ObjectCompilerUI;
  */
 public class CompileDbObjectAction
 	extends WbAction
-	implements ListSelectionListener
+	implements WbSelectionListener
 {
 	private JMenuItem menuItem;
 	private DbObjectList source;
-	private ListSelectionModel selection;
+	private WbSelectionModel selection;
 
-	public CompileDbObjectAction(DbObjectList client, ListSelectionModel list)
+	public CompileDbObjectAction(DbObjectList client, WbSelectionModel list)
 	{
 		super();
 		this.initMenuDefinition("MnuTxtRecompile");
 		this.source = client;
 		this.selection = list;
 		setVisible(false);
-		setEnabled(false);
+		setEnabled(list.hasSelection());
 	}
 
 	public void setVisible(boolean flag)
@@ -79,15 +78,15 @@ public class CompileDbObjectAction
 	{
 		if (conn != null && conn.getMetadata().isOracle())
 		{
-			this.setVisible(true);
-			selection.addListSelectionListener(this);
+			setVisible(true);
+      selection.addSelectionListener(this);
 			checkState();
 		}
 		else
 		{
-			selection.removeListSelectionListener(this);
-			this.setVisible(false);
-			this.setEnabled(false);
+      selection.removeSelectionListener(this);
+			setVisible(false);
+			setEnabled(false);
 		}
 	}
 
@@ -168,9 +167,9 @@ public class CompileDbObjectAction
 		this.setEnabled(selected != null && selected.size() > 0);
 	}
 
-	@Override
-	public void valueChanged(ListSelectionEvent e)
-	{
+  @Override
+  public void selectionChanged(WbSelectionModel source)
+  {
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
@@ -179,5 +178,5 @@ public class CompileDbObjectAction
 				checkState();
 			}
 		});
-	}
+  }
 }

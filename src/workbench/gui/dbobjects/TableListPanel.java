@@ -28,7 +28,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
@@ -71,18 +70,19 @@ import javax.swing.table.TableModel;
 
 import workbench.WbManager;
 import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.Exporter;
 import workbench.interfaces.ListSelectionControl;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.interfaces.ShareableDisplay;
+import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbSettings;
@@ -93,6 +93,7 @@ import workbench.db.SynonymDDLHandler;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSelectBuilder;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
 import workbench.db.TriggerReader;
@@ -126,7 +127,6 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.settings.PlacementChooser;
-import workbench.gui.sql.PanelContentSender;
 
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
@@ -152,7 +152,7 @@ import static workbench.storage.NamedSortDefinition.*;
 public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
-						 ShareableDisplay, Exporter, PropertyChangeListener,
+						 ShareableDisplay, PropertyChangeListener,
 						 TableModelListener, DbObjectList, ListSelectionControl, TableLister
 {
 	private static final String PROP_DO_SAVE_SORT = "workbench.gui.dbexplorer.tablelist.sort";
@@ -510,6 +510,18 @@ public class TableListPanel
 				return TableListPanel.this.getObjectTable();
 			}
 
+      @Override
+      public TableDefinition getCurrentTableDefinition()
+      {
+        return TableListPanel.this.getCurrentTableDefinition();
+      }
+
+      @Override
+      public int getSelectionCount()
+      {
+        return TableListPanel.this.getSelectionCount();
+      }
+
 			@Override
 			public List<DbObject> getSelectedObjects()
 			{
@@ -559,12 +571,13 @@ public class TableListPanel
 
 	private void extendPopupMenu()
 	{
-		countAction = new CountTableRowsAction(this, tableList.getSelectionModel());
+		countAction = new CountTableRowsAction(this, WbSelectionModel.Factory.createFacade(tableList.getSelectionModel()));
 		tableList.addPopupAction(countAction, false);
 
 		if (this.parentWindow != null)
 		{
-			this.showDataMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblShowDataInTab", parentWindow, true);
+			this.showDataMenu = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblShowDataInTab", parentWindow, true);
+      this.showDataMenu.setObjectList(this);
 			this.showDataMenu.setEnabled(false);
 			this.tableList.addPopupMenu(this.showDataMenu, false);
 		}
@@ -573,22 +586,23 @@ public class TableListPanel
 		this.tableList.addPopupAction(CreateDummySqlAction.createDummyUpdateAction(this, tableList.getSelectionModel()), false);
 		this.tableList.addPopupAction(CreateDummySqlAction.createDummySelectAction(this, tableList.getSelectionModel()), false);
 
-		ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, tableList.getSelectionModel());
+    WbSelectionModel list = WbSelectionModel.Factory.createFacade(tableList.getSelectionModel());
+    ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, list);
 		this.tableList.addPopupAction(createScript, false);
 
 		SchemaReportAction action = new SchemaReportAction(this);
 		tableList.addPopupMenu(action.getMenuItem(), false);
 
-		compileAction = new CompileDbObjectAction(this, tableList.getSelectionModel());
+    compileAction = new CompileDbObjectAction(this, list);
 		tableList.addPopupAction(compileAction, false);
 
-		DropDbObjectAction dropAction = new DropDbObjectAction(this, this.tableList.getSelectionModel(), this);
+		DropDbObjectAction dropAction = new DropDbObjectAction(this, list, this);
 		tableList.addPopupAction(dropAction, true);
 
-		CreateDropScriptAction dropScript = new CreateDropScriptAction(this, tableList.getSelectionModel());
+		CreateDropScriptAction dropScript = new CreateDropScriptAction(this, list);
 		this.tableList.addPopupAction(dropScript, false);
 
-		tableList.addPopupAction(new DeleteTablesAction(this, tableList.getSelectionModel(), this.tableData), false);
+		tableList.addPopupAction(new DeleteTablesAction(this, list, this.tableData), false);
 		tableList.addPopupAction(renameAction, true);
 	}
 
@@ -2149,20 +2163,16 @@ public class TableListPanel
 		this.startRetrieve(false);
 	}
 
-	private void showTableData(final int panelIndex, final boolean appendText)
-	{
-		if (this.selectedTable == null) return;
+  @Override
+  public int getSelectionCount()
+  {
+    return tableList.getSelectedRowCount();
+  }
 
-		PanelContentSender sender = new PanelContentSender(this.parentWindow, selectedTable.getTableName());
-		String sql = buildSqlForTable(true);
-		if (sql == null) return;
-
-		sender.sendContent(sql, panelIndex, appendText);
-	}
-
-	private String buildSqlForTable(boolean withComment)
-	{
-		if (this.selectedTable == null) return null;
+  @Override
+  public TableDefinition getCurrentTableDefinition()
+  {
+    if (selectedTable == null) return null;
 
 		if (this.shouldRetrieveTable || this.tableDefinition.getRowCount() == 0)
 		{
@@ -2178,24 +2188,25 @@ public class TableListPanel
 				return null;
 			}
 		}
+    List<ColumnIdentifier> columns = tableDefinition.getColumns();
+    return new TableDefinition(selectedTable, columns);
+  }
 
-		String sql = tableDefinition.getSelectForTable();
+  private String buildSqlForTable(boolean withComment)
+	{
+    TableDefinition tbl = getCurrentTableDefinition();
+    if (tbl == null) return null;
+
+    TableSelectBuilder builder = new TableSelectBuilder(dbConnection);
+    String sql = builder.getSelectForTableData(tbl.getTable(), tbl.getColumns(), withComment);
+
 		if (sql == null)
 		{
 			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replace("%table%", this.selectedTable.getTableName());
 			WbSwingUtilities.showErrorMessage(this, msg);
 			return null;
 		}
-		StringBuilder select = new StringBuilder(sql.length() + 40);
-		if (withComment)
-		{
-			select.append("-- @WbResult ");
-			select.append(selectedTable.getTableName());
-			select.append('\n');
-		}
-		select.append(sql);
-		select.append(';');
-		return select.toString();
+    return sql;
 	}
 
 	/**
@@ -2246,28 +2257,6 @@ public class TableListPanel
 				StringSelection sel = new StringSelection(sql);
 				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 				clp.setContents(sel, sel);
-			}
-			if (command.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX) && this.parentWindow != null)
-			{
-				try
-				{
-					final int panelIndex = Integer.parseInt(command.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()));
-					final boolean appendText = WbAction.isCtrlPressed(e);
-					// Allow the selection change to finish so that
-					// we have the correct table name in the instance variables
-					EventQueue.invokeLater(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							showTableData(panelIndex, appendText);
-						}
-					});
-				}
-				catch (Exception ex)
-				{
-					LogMgr.logError("TableListPanel().actionPerformed()", "Error when accessing editor tab", ex);
-				}
 			}
 		}
 	}
@@ -2425,29 +2414,6 @@ public class TableListPanel
 			}
 		}
 		return -1;
-	}
-
-	@Override
-	public void exportData()
-	{
-		if (!WbSwingUtilities.isConnectionIdle(this, this.dbConnection)) return;
-		int rowCount = this.tableList.getSelectedRowCount();
-		if (rowCount <= 0) return;
-
-		final TableExporter exporter = new TableExporter(this.dbConnection);
-		final Frame f = parentWindow == null ? (Frame)SwingUtilities.getWindowAncestor(this) : parentWindow;
-
-		if (exporter.selectTables(getSelectedObjects(), f))
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					exporter.startExport(f);
-				}
-			});
-		}
 	}
 
 	/**

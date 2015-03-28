@@ -22,7 +22,7 @@ package workbench.gui.bookmarks;
 
 import java.util.List;
 
-import workbench.sql.ResultNameParser;
+import workbench.sql.ResultNameAnnotation;
 
 import org.junit.Test;
 
@@ -69,7 +69,7 @@ public class BookmarkAnnotationTest
 			"commit;\n " +
 			"\n\n" +
 			"/* \n" +
-			"  @" + ResultNameParser.ANNOTATION + " get people\n" +
+			"  @" + ResultNameAnnotation.ANNOTATION + " get people\n" +
 			"*/\n" +
 			"select * from person;\n" +
 			"commit;\n";

@@ -88,7 +88,7 @@ import workbench.storage.filter.DataRowExpression;
 import workbench.storage.filter.ExpressionValue;
 import workbench.storage.filter.FilterExpression;
 
-import workbench.sql.ResultNameParser;
+import workbench.sql.ResultNameAnnotation;
 
 import workbench.util.StringUtil;
 
@@ -244,7 +244,7 @@ public class BookmarkSelector
 		String close  = "</b></tt>";
 		if (GuiSettings.getUseResultTagForBookmarks())
 		{
-			tags = prefix + BookmarkAnnotation.ANNOTATION + close + " " + ResourceMgr.getString("TxtOr") + " " + prefix + ResultNameParser.ANNOTATION + close;
+			tags = prefix + BookmarkAnnotation.ANNOTATION + close + " " + ResourceMgr.getString("TxtOr") + " " + prefix + ResultNameAnnotation.ANNOTATION + close;
 		}
 		else
 		{

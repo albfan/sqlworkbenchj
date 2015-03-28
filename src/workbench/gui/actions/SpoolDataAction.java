@@ -22,13 +22,25 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.util.List;
+
+import javax.swing.SwingUtilities;
 
 import workbench.interfaces.Exporter;
 import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.DbObject;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.dbobjects.DbObjectList;
+import workbench.gui.dbobjects.TableExporter;
 import workbench.gui.sql.EditorPanel;
+
+import workbench.util.CollectionUtil;
 
 /**
  *	@author  Thomas Kellerer
@@ -37,22 +49,34 @@ public class SpoolDataAction
 	extends WbAction
 	implements TextSelectionListener
 {
-	private Exporter client;
 	private EditorPanel editor;
 	private boolean canExport = false;
+  private DbObjectList objects;
+  private Exporter dataExporter;
 
-	public SpoolDataAction(Exporter aClient)
+  public SpoolDataAction(DbObjectList list)
 	{
-		this(aClient, "MnuTxtSpoolData");
+		this(list, "MnuTxtSpoolData");
 	}
-	public SpoolDataAction(Exporter aClient, String msgKey)
+
+	public SpoolDataAction(DbObjectList list, String msgKey)
 	{
 		super();
-		this.client = aClient;
+		this.objects = list;
 		this.initMenuDefinition(msgKey);
 		this.setIcon("spool-data");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setEnabled(false);
+		setEnabled(objects.getSelectionCount() > 0);
+	}
+
+	public SpoolDataAction(Exporter exporter, String msgKey)
+	{
+		super();
+		dataExporter = exporter;
+		this.initMenuDefinition(msgKey);
+		this.setIcon("spool-data");
+		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+		setEnabled(false);
 	}
 
 	public void canExport(boolean flag)
@@ -64,8 +88,38 @@ public class SpoolDataAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		this.client.exportData();
+    if (objects != null)
+    {
+      exportData();
+    }
+    else if (dataExporter != null)
+    {
+      dataExporter.exportData();
+    }
 	}
+
+  private void exportData()
+  {
+ 		if (!WbSwingUtilities.isConnectionIdle(objects.getComponent(), objects.getConnection())) return;
+
+    List<? extends DbObject> tables = objects.getSelectedObjects();
+    if (CollectionUtil.isEmpty(tables)) return;
+
+		final TableExporter exporter = new TableExporter(objects.getConnection());
+		final Frame f = (Frame)SwingUtilities.getWindowAncestor(objects.getComponent());
+
+		if (exporter.selectTables(tables, f))
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					exporter.startExport(f);
+				}
+			});
+		}
+  }
 
 	public void setEditor(EditorPanel ed)
 	{

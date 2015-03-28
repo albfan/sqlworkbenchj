@@ -39,6 +39,7 @@ import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
 
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -167,7 +168,6 @@ public class DbObjectsTree
       {
         WbThread load = new WbThread(new Runnable()
         {
-
           @Override
           public void run()
           {
@@ -225,4 +225,24 @@ public class DbObjectsTree
     return (DbObjectTreeModel)getModel();
   }
 
+  public ObjectTreeNode findNodeByType(ObjectTreeNode parent, String type)
+  {
+    if (!parent.canHaveChildren()) return null;
+    if (StringUtil.isEmptyString(type)) return null;
+
+    int childCount = parent.getChildCount();
+    for (int i=0; i < childCount; i++)
+    {
+      ObjectTreeNode child = (ObjectTreeNode)parent.getChildAt(i);
+      if (child != null && child.getType().equals(type))
+      {
+        if (!child.isLoaded())
+        {
+          doLoad(child);
+        }
+        return child;
+      }
+    }
+    return null;
+  }
 }

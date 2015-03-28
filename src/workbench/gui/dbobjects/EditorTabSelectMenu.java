@@ -24,6 +24,7 @@ package workbench.gui.dbobjects;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
@@ -36,10 +37,14 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DependencyNode;
+import workbench.db.TableDefinition;
+import workbench.db.TableSelectBuilder;
 
 import workbench.gui.MainWindow;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
+import workbench.gui.sql.PanelContentSender;
 
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
@@ -49,7 +54,7 @@ import workbench.util.NumberStringCache;
  */
 public class EditorTabSelectMenu
 	extends WbMenu
-	implements FilenameChangeListener, ChangeListener
+	implements FilenameChangeListener, ChangeListener, ActionListener
 {
 	public static final String CMD_CLIPBOARD = "clipboard";
 
@@ -60,27 +65,39 @@ public class EditorTabSelectMenu
 	public static final String PANEL_CMD_PREFIX = "panel_";
 	private DependencyNode node;
 	private boolean withClipboard;
+  private DbObjectList objectList;
 
-	public EditorTabSelectMenu(ActionListener l, String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent)
+	public EditorTabSelectMenu(String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent)
 	{
-		this(l,label, tooltipKeyNewTab, tooltipKeyTab, parent, false);
+		this(label, tooltipKeyNewTab, tooltipKeyTab, parent, false);
 	}
 
-	public EditorTabSelectMenu(ActionListener l, String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent, boolean includeClipboard)
+	public EditorTabSelectMenu(String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent, boolean includeClipboard)
 	{
 		super(label);
 		parentWindow = parent;
-		target = l;
 		newTabTooltip = ResourceMgr.getDescription(tooltipKeyNewTab, true);
 		regularTooltip = ResourceMgr.getDescription(tooltipKeyTab, true);
-		this.withClipboard = includeClipboard;
+		withClipboard = includeClipboard;
 		if (parentWindow != null)
 		{
-			updateMenu();
 			parentWindow.addFilenameChangeListener(this);
 			parentWindow.addTabChangeListener(this);
 		}
 	}
+
+
+  public void setActionListener(ActionListener l)
+  {
+    this.target = l;
+    updateMenu();
+  }
+
+  public void setObjectList(DbObjectList list)
+  {
+    this.objectList = list;
+    updateMenu();
+  }
 
 	public void setDependencyNode(DependencyNode dep)
 	{
@@ -117,7 +134,7 @@ public class EditorTabSelectMenu
 		JMenuItem show = new WbMenuItem(ResourceMgr.getString("LblShowDataInNewTab"));
 		show.setActionCommand(PANEL_CMD_PREFIX + "-1");
 		show.setToolTipText(newTabTooltip);
-		show.addActionListener(target);
+    show.addActionListener(target == null ? this : target);
 		this.add(show);
 
 		if (withClipboard)
@@ -157,7 +174,7 @@ public class EditorTabSelectMenu
 
 			// The tooltip is the same for all items
 			item.setToolTipText(regularTooltip);
-			item.addActionListener(target);
+			item.addActionListener(target == null ? this : target);
 			this.add(item);
 		}
 	}
@@ -217,4 +234,51 @@ public class EditorTabSelectMenu
 		}
 		super.dispose();
 	}
+
+	private void showTableData(final int panelIndex, final boolean appendText)
+	{
+    TableDefinition selectedTable = objectList.getCurrentTableDefinition();
+		if (selectedTable == null) return;
+
+		PanelContentSender sender = new PanelContentSender(this.parentWindow, selectedTable.getTable().getTableName());
+    TableSelectBuilder builder = new TableSelectBuilder(objectList.getConnection(), "select", null);
+    try
+    {
+      String sql = builder.getSelectForTableData(selectedTable.getTable(), selectedTable.getColumns(), true);
+      if (sql == null) return;
+      sender.sendContent(sql, panelIndex, appendText);
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("EditorTabSelectMenu.showTableData()", "Could not build SELECT statement", ex);
+    }
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e)
+  {
+			String command = e.getActionCommand();
+			if (command.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX) && this.parentWindow != null)
+			{
+				try
+				{
+					final int panelIndex = Integer.parseInt(command.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()));
+					final boolean appendText = WbAction.isCtrlPressed(e);
+					// Allow the selection change to finish so that
+					// we have the correct table name in the instance variables
+					EventQueue.invokeLater(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							showTableData(panelIndex, appendText);
+						}
+					});
+				}
+				catch (Exception ex)
+				{
+					LogMgr.logError("TableListPanel().actionPerformed()", "Error when accessing editor tab", ex);
+				}
+			}
+  }
 }

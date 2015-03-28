@@ -25,39 +25,40 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JFrame;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+
+import workbench.interfaces.TableDeleteListener;
+import workbench.interfaces.WbSelectionListener;
+import workbench.interfaces.WbSelectionModel;
+
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.TableDeleterUI;
-import workbench.interfaces.TableDeleteListener;
 
 /**
  * @author Thomas Kellerer
  */
 public class DeleteTablesAction
 	extends WbAction
-	implements ListSelectionListener
+	implements WbSelectionListener
 {
 	private DbObjectList source;
-	private ListSelectionModel selection;
 	private TableDeleteListener deleteListener;
 
-	public DeleteTablesAction(DbObjectList client, ListSelectionModel list, TableDeleteListener l)
+	public DeleteTablesAction(DbObjectList client, WbSelectionModel list, TableDeleteListener l)
 	{
 		super();
 		this.initMenuDefinition("MnuTxtDeleteTableData");
 		this.source = client;
-		this.selection = list;
 		this.deleteListener = l;
-		setEnabled(false);
-		list.addListSelectionListener(this);
+    selectionChanged(list);
+		list.addSelectionListener(this);
 	}
 
 	@Override
@@ -80,7 +81,7 @@ public class DeleteTablesAction
 		List<? extends DbObject> objects = source.getSelectedObjects();
 		if (objects == null || objects.isEmpty()) return null;
 
-		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(objects.size());
+		List<TableIdentifier> tables = new ArrayList<>(objects.size());
 		for (DbObject dbo : objects)
 		{
 			if (dbo instanceof TableIdentifier)
@@ -94,7 +95,7 @@ public class DeleteTablesAction
 	}
 
 	@Override
-	public void valueChanged(ListSelectionEvent e)
+	public void selectionChanged(WbSelectionModel model)
 	{
 		WbConnection conn = this.source.getConnection();
 		if (conn == null || conn.isSessionReadOnly())
@@ -103,7 +104,7 @@ public class DeleteTablesAction
 		}
 		else
 		{
-			setEnabled(this.selection.getMinSelectionIndex() >= 0);
+			setEnabled(model.hasSelection());
 		}
 	}
 

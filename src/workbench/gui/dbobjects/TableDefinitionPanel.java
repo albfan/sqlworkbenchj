@@ -60,7 +60,6 @@ import workbench.db.IndexReader;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
-import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
@@ -647,6 +646,18 @@ public class TableDefinitionPanel
 		return this.currentTable;
 	}
 
+  @Override
+  public int getSelectionCount()
+  {
+    return tableDefinition.getSelectedRowCount();
+  }
+
+  @Override
+  public TableDefinition getCurrentTableDefinition()
+  {
+    return null;
+  }
+
 	protected void createIndex()
 	{
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return;
@@ -723,17 +734,10 @@ public class TableDefinitionPanel
 		}
 	}
 
-	/**
-	 * Returns a SELECT statement to  retrieve all rows and columns from the displayed table.
-	 *
-	 * @see TableSelectBuilder#getSelectForTable(workbench.db.TableIdentifier)
-	 */
-	public String getSelectForTable()
-	{
-		List<ColumnIdentifier> cols = TableColumnsDatastore.createColumnIdentifiers(this.dbConnection.getMetadata(), this.tableDefinition.getDataStore());
-		TableSelectBuilder builder = new TableSelectBuilder(dbConnection);
-		return builder.getSelectForColumns(currentTable, cols, -1);
-	}
+  public List<ColumnIdentifier> getColumns()
+  {
+    return TableColumnsDatastore.createColumnIdentifiers(this.dbConnection.getMetadata(), this.tableDefinition.getDataStore());
+  }
 
 	public int getRowCount()
 	{

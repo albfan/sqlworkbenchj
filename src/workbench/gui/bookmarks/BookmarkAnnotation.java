@@ -26,7 +26,7 @@ import java.util.List;
 import workbench.resource.GuiSettings;
 
 import workbench.sql.WbAnnotation;
-import workbench.sql.ResultNameParser;
+import workbench.sql.ResultNameAnnotation;
 import workbench.sql.UseTabAnnotation;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
@@ -58,7 +58,7 @@ public class BookmarkAnnotation
 		validTags.add(ANNOTATION.toLowerCase());
 		if (useResultTag)
 		{
-			validTags.add("@" + ResultNameParser.ANNOTATION.toLowerCase());
+			validTags.add("@" + ResultNameAnnotation.ANNOTATION.toLowerCase());
 			validTags.add("@" + UseTabAnnotation.ANNOTATION.toLowerCase());
 		}
 	}

@@ -28,8 +28,9 @@ import java.util.List;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+
+import workbench.interfaces.WbSelectionListener;
+import workbench.interfaces.WbSelectionModel;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
@@ -47,10 +48,9 @@ import workbench.gui.dbobjects.ObjectScripterUI;
  */
 public class CreateDummySqlAction
 	extends WbAction
-	implements ListSelectionListener
+	implements WbSelectionListener
 {
 	private DbObjectList source;
-	private ListSelectionModel selection;
 	private String scriptType;
 
 	public static CreateDummySqlAction createDummyUpdateAction(DbObjectList client, ListSelectionModel list)
@@ -68,16 +68,35 @@ public class CreateDummySqlAction
 		return new CreateDummySqlAction("MnuTxtCreateDefaultSelect", client, list, ObjectScripter.TYPE_SELECT);
 	}
 
+	public static CreateDummySqlAction createDummyUpdateAction(DbObjectList client, WbSelectionModel list)
+	{
+		return new CreateDummySqlAction("MnuTxtCreateDummyUpdate", client, list, ObjectScripter.TYPE_UPDATE);
+	}
+
+	public static CreateDummySqlAction createDummyInsertAction(DbObjectList client, WbSelectionModel list)
+	{
+		return new CreateDummySqlAction("MnuTxtCreateDummyInsert", client, list, ObjectScripter.TYPE_INSERT);
+	}
+
+	public static CreateDummySqlAction createDummySelectAction(DbObjectList client, WbSelectionModel list)
+	{
+		return new CreateDummySqlAction("MnuTxtCreateDefaultSelect", client, list, ObjectScripter.TYPE_SELECT);
+	}
+
 	private CreateDummySqlAction(String key, DbObjectList client, ListSelectionModel list, String type)
+  {
+    this(key, client, WbSelectionModel.Factory.createFacade(list), type);
+  }
+
+	private CreateDummySqlAction(String key, DbObjectList client, WbSelectionModel list, String type)
 	{
 		super();
 		isConfigurable = false;
 		this.initMenuDefinition(key);
 		this.source = client;
-		this.selection = list;
 		this.scriptType = type;
-		setEnabled(false);
-		list.addListSelectionListener(this);
+		setEnabled(list.hasSelection());
+		list.addSelectionListener(this);
 	}
 
   @Override
@@ -129,9 +148,10 @@ public class CreateDummySqlAction
     scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
   }
 
-	@Override
-	public void valueChanged(ListSelectionEvent e)
-	{
-		setEnabled(this.selection.getMinSelectionIndex() >= 0);
-	}
+  @Override
+  public void selectionChanged(WbSelectionModel source)
+  {
+		setEnabled(source.hasSelection());
+  }
+
 }

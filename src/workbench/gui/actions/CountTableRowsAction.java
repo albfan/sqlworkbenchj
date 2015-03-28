@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.JMenuItem;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+
+import workbench.interfaces.WbSelectionListener;
+import workbench.interfaces.WbSelectionModel;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -48,20 +48,20 @@ import workbench.gui.dbobjects.TableRowCountPanel;
  */
 public class CountTableRowsAction
 	extends WbAction
-	implements ListSelectionListener
+	implements WbSelectionListener
 {
 	private JMenuItem menuItem;
 	private DbObjectList source;
-	private ListSelectionModel selection;
+	private WbSelectionModel selection;
 
-	public CountTableRowsAction(DbObjectList client, ListSelectionModel list)
+	public CountTableRowsAction(DbObjectList client, WbSelectionModel list)
 	{
 		super();
 		this.initMenuDefinition("MnuTxtCountRows");
 		this.source = client;
 		this.selection = list;
 		setVisible(false);
-		setEnabled(false);
+		setEnabled(list.hasSelection());
 	}
 
 	public void setVisible(boolean flag)
@@ -78,12 +78,12 @@ public class CountTableRowsAction
 		if (conn != null)
 		{
 			this.setVisible(true);
-			selection.addListSelectionListener(this);
+			selection.addSelectionListener(this);
 			checkState();
 		}
 		else
 		{
-			selection.removeListSelectionListener(this);
+			selection.removeSelectionListener(this);
 			this.setVisible(false);
 			this.setEnabled(false);
 		}
@@ -121,7 +121,7 @@ public class CountTableRowsAction
 
 		DbMetadata meta = source.getConnection().getMetadata();
 		Set<String> typesWithData = meta.getObjectsWithData();
-		List<TableIdentifier> objects = new ArrayList<TableIdentifier>();
+		List<TableIdentifier> objects = new ArrayList<>();
 
 		for (DbObject dbo : selected)
 		{
@@ -141,7 +141,7 @@ public class CountTableRowsAction
 	}
 
 	@Override
-	public void valueChanged(ListSelectionEvent e)
+	public void selectionChanged(WbSelectionModel model)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{

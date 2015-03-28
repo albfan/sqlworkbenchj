@@ -73,7 +73,7 @@ public class TableExporter
 		return exporter;
 	}
 
-	public boolean selectTables(List<DbObject> tables, Frame caller)
+	public boolean selectTables(List<? extends DbObject> tables, Frame caller)
 	{
 		if (CollectionUtil.isEmpty(tables)) return false;
 

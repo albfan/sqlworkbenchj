@@ -1,5 +1,5 @@
 /*
- * ResultNameParser.java
+ * ResultNameAnnotation.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -28,12 +28,12 @@ package workbench.sql;
  *
  * @author Thomas Kellerer
  */
-public class ResultNameParser
+public class ResultNameAnnotation
 	extends WbAnnotation
 {
 	public static final String ANNOTATION = "WbResult";
 
-	public ResultNameParser()
+	public ResultNameAnnotation()
 	{
 		super(ANNOTATION);
 	}

@@ -36,7 +36,7 @@ public class ResultNameParserTest
 	public void testGetResultName()
 	{
 		String sql = "/* test select */\nSELECT * FROM dummy;";
-		ResultNameParser p = new ResultNameParser();
+		ResultNameAnnotation p = new ResultNameAnnotation();
 		String name = p.getResultName(sql);
 		assertNull(name);
 

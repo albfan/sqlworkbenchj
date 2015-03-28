@@ -23,6 +23,7 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
@@ -31,20 +32,30 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.tree.TreePath;
 
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbObject;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.gui.MainWindow;
@@ -55,7 +66,7 @@ import workbench.gui.components.MultiSelectComboBox;
 import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
-import workbench.resource.IconMgr;
+import workbench.gui.dbobjects.DbObjectList;
 
 import workbench.util.CollectionUtil;
 import workbench.util.WbThread;
@@ -68,7 +79,7 @@ import workbench.util.WbThread;
  */
 public class DbTreePanel
 	extends JPanel
-  implements Reloadable, ActionListener
+  implements Reloadable, ActionListener, MouseListener, DbObjectList
 {
   private static int instanceCount = 0;
 	private DbObjectsTree tree;
@@ -79,7 +90,6 @@ public class DbTreePanel
   private List<String> selectedTypes;
   private JPanel toolPanel;
   private ReloadAction reload;
-  // private WbAction closeAction;
   private WbToolbarButton closeButton;
 
 	public DbTreePanel()
@@ -88,6 +98,7 @@ public class DbTreePanel
     id = ++instanceCount;
 
     tree = new DbObjectsTree();
+    tree.addMouseListener(this);
     JScrollPane scroll = new JScrollPane(tree);
     statusBar = new WbStatusLabel();
     createToolbar();
@@ -219,6 +230,7 @@ public class DbTreePanel
 
   public void dispose()
   {
+    tree.removeMouseListener(this);
     tree.clear();
   }
 
@@ -259,6 +271,106 @@ public class DbTreePanel
     }
   }
 
+
+  protected ObjectTreeNode getSelectedNode()
+  {
+    TreePath p = tree.getSelectionPath();
+    if (p == null) return null;
+
+    ObjectTreeNode node = (ObjectTreeNode)p.getLastPathComponent();
+    return node;
+  }
+
+  public WbSelectionModel getSelectionModel()
+  {
+    return WbSelectionModel.Factory.createFacade(tree.getSelectionModel());
+  }
+
+  @Override
+  public int getSelectionCount()
+  {
+    return tree.getSelectionModel().getSelectionCount();
+  }
+
+  @Override
+  public TableDefinition getCurrentTableDefinition()
+  {
+    ObjectTreeNode node = getSelectedNode();
+    if (node == null) return null;
+
+    DbObject dbo = node.getDbObject();
+    if (!(dbo instanceof TableIdentifier)) return null;
+    ObjectTreeNode columnNode = tree.findNodeByType(node, TreeLoader.TYPE_COLUMN_LIST);
+    if (columnNode == null) return null;
+    int childCount = columnNode.getChildCount();
+    List<ColumnIdentifier> columns = new ArrayList<>(childCount);
+    for (int i=0; i < childCount; i++)
+    {
+      ObjectTreeNode column = (ObjectTreeNode)columnNode.getChildAt(i);
+      DbObject dboCol = column.getDbObject();
+      if (dboCol instanceof ColumnIdentifier)
+      {
+        columns.add((ColumnIdentifier)dboCol);
+      }
+    }
+    TableDefinition def = new TableDefinition((TableIdentifier)dbo, columns);
+    return def;
+  }
+
+  @Override
+  public TableIdentifier getObjectTable()
+  {
+    if (tree.getSelectionCount() != 1) return null;
+    ObjectTreeNode node = getSelectedNode();
+    if (node == null) return null;
+
+    DbObject dbo = node.getDbObject();
+    if (dbo instanceof TableIdentifier)
+    {
+      return (TableIdentifier)dbo;
+    }
+    return null;
+  }
+
+  @Override
+  public List<? extends DbObject> getSelectedObjects()
+  {
+    int count = tree.getSelectionCount();
+
+    List<DbObject> result = new ArrayList<>(count);
+    if (count == 0) return result;
+
+    TreePath[] paths = tree.getSelectionPaths();
+    for (TreePath path : paths)
+    {
+      if (path != null)
+      {
+        ObjectTreeNode node = (ObjectTreeNode)path.getLastPathComponent();
+        if (node != null)
+        {
+          DbObject dbo = node.getDbObject();
+          if  (dbo != null)
+          {
+            result.add(dbo);
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  @Override
+  public WbConnection getConnection()
+  {
+    return connection;
+  }
+
+  @Override
+  public Component getComponent()
+  {
+    return tree;
+  }
+
   @Override
   public boolean requestFocusInWindow()
   {
@@ -295,6 +407,48 @@ public class DbTreePanel
       reload();
     }
   }
+
+  @Override
+  public void mouseClicked(MouseEvent e)
+  {
+		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
+		{
+			TreePath p = tree.getClosestPathForLocation(e.getX(), e.getY());
+			if (p == null) return;
+
+			if (tree.getSelectionCount() == 1)
+			{
+				tree.setSelectionPath(p);
+			}
+
+      JPopupMenu popup = ContextMenuFactory.createContextMenu(this, getSelectionModel());
+      if (popup != null)
+      {
+        popup.show(tree, e.getX(), e.getY());
+      }
+		}
+  }
+
+  @Override
+  public void mousePressed(MouseEvent e)
+  {
+  }
+
+  @Override
+  public void mouseReleased(MouseEvent e)
+  {
+  }
+
+  @Override
+  public void mouseEntered(MouseEvent e)
+  {
+  }
+
+  @Override
+  public void mouseExited(MouseEvent e)
+  {
+  }
+
 
 
 }

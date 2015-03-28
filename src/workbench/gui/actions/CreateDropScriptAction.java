@@ -27,11 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import workbench.WbManager;
+import workbench.interfaces.WbSelectionListener;
+import workbench.interfaces.WbSelectionModel;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -43,31 +41,31 @@ import workbench.gui.dbobjects.ObjectScripterUI;
 
 import workbench.util.CollectionUtil;
 
-import static workbench.gui.actions.WbAction.isCtrlPressed;
+import static workbench.gui.actions.WbAction.*;
 
 /**
  * @author Thomas Kellerer
  */
 public class CreateDropScriptAction
 	extends WbAction
-	implements ListSelectionListener
+	implements WbSelectionListener
 {
 	private DbObjectList source;
 
-	public CreateDropScriptAction(DbObjectList client, ListSelectionModel list)
+	public CreateDropScriptAction(DbObjectList client, WbSelectionModel list)
 	{
 		super();
 		this.initMenuDefinition("MnuTxtGenerateDrop");
 		this.source = client;
-		setEnabled(false);
-		list.addListSelectionListener(this);
+    selectionChanged(list);
+		list.addSelectionListener(this);
 	}
 
 	@Override
 	public void executeAction(ActionEvent e)
 	{
 		List<? extends DbObject> objects = source.getSelectedObjects();
-		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(objects.size());
+		List<TableIdentifier> tables = new ArrayList<>(objects.size());
 		DbMetadata meta = source.getConnection().getMetadata();
 		Set<String> types = CollectionUtil.caseInsensitiveSet();
 		types.addAll(meta.getTableTypes());
@@ -96,16 +94,11 @@ public class CreateDropScriptAction
 	}
 
 	@Override
-	public void valueChanged(ListSelectionEvent e)
+	public void selectionChanged(WbSelectionModel selection)
 	{
-		List<? extends DbObject> objects = source.getSelectedObjects();
-
-		if (CollectionUtil.isEmpty(objects))
+		if (selection.hasSelection())
 		{
-			setEnabled(false);
-		}
-		else
-		{
+      List<? extends DbObject> objects = source.getSelectedObjects();
 			DbMetadata meta = source.getConnection().getMetadata();
 			Set<String> types = CollectionUtil.caseInsensitiveSet();
 			types.addAll(meta.getTableTypes());
@@ -119,6 +112,10 @@ public class CreateDropScriptAction
 				setEnabled(true);
 			}
 		}
+    else
+    {
+      setEnabled(false);
+    }
 	}
 
 }

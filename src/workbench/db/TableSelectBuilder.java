@@ -29,6 +29,8 @@ import workbench.log.LogMgr;
 
 import workbench.db.sqltemplates.TemplateHandler;
 
+import workbench.sql.ResultNameAnnotation;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -154,6 +156,23 @@ public class TableSelectBuilder
 		return getSelectForColumns(def.getTable(), def.getColumns(), maxRows);
 	}
 
+  public String getSelectForTableData(TableIdentifier table, List<ColumnIdentifier> columns, boolean withAnnotation)
+  {
+    String sql = getSelectForColumns(table, columns, -1);
+		StringBuilder select = new StringBuilder(sql.length() + 40);
+		if (withAnnotation)
+		{
+			select.append("-- @");
+      select.append(ResultNameAnnotation.ANNOTATION);
+      select.append(' ');
+			select.append(table.getTableName());
+			select.append('\n');
+		}
+		select.append(sql);
+		select.append(';');
+		return select.toString();
+  }
+  
 	/**
 	 * Create a SELECT statement for the columns of the the table.
 	 *

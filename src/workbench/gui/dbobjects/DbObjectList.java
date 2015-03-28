@@ -23,10 +23,13 @@
 package workbench.gui.dbobjects;
 import java.awt.Component;
 import java.util.List;
+
+import workbench.interfaces.Reloadable;
+
 import workbench.db.DbObject;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.Reloadable;
 
 /**
  * @author Thomas Kellerer
@@ -36,7 +39,9 @@ public interface DbObjectList
 	extends Reloadable
 {
 	TableIdentifier getObjectTable();
+  TableDefinition getCurrentTableDefinition();
 	List<? extends DbObject> getSelectedObjects();
 	WbConnection getConnection();
 	Component getComponent();
+  int getSelectionCount();
 }

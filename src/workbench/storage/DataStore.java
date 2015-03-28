@@ -54,7 +54,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
 
-import workbench.sql.ResultNameParser;
+import workbench.sql.ResultNameAnnotation;
 
 import workbench.util.Alias;
 import workbench.util.CollectionUtil;
@@ -1470,7 +1470,7 @@ public class DataStore
 	public void setGeneratingSql(String aSql)
 	{
 		this.sql = aSql;
-		ResultNameParser parser = new ResultNameParser();
+		ResultNameAnnotation parser = new ResultNameAnnotation();
 		if (resultName == null)
 		{
 			String name = parser.getResultName(sql);

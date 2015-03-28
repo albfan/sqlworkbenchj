@@ -42,12 +42,14 @@ import javax.swing.event.TableModelListener;
 import workbench.WbManager;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DbObject;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
@@ -197,9 +199,10 @@ public class TriggerListPanel
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
 
-		this.dropAction = new DropDbObjectAction(this, triggerList.getSelectionModel(), this);
+    WbSelectionModel list = WbSelectionModel.Factory.createFacade(triggerList.getSelectionModel());
+    this.dropAction = new DropDbObjectAction(this, list, this);
 		triggerList.addPopupAction(dropAction, true);
-		this.compileAction = new CompileDbObjectAction(this, this.triggerList.getSelectionModel());
+		this.compileAction = new CompileDbObjectAction(this, list);
 		triggerList.addPopupAction(compileAction, false);
 
 		if (dbConnection != null)
@@ -497,6 +500,18 @@ public class TriggerListPanel
 			});
 		}
 	}
+
+  @Override
+  public int getSelectionCount()
+  {
+    return triggerList.getSelectedRowCount();
+  }
+  
+  @Override
+  public TableDefinition getCurrentTableDefinition()
+  {
+    return null;
+  }
 
 	@Override
 	public TableIdentifier getObjectTable()

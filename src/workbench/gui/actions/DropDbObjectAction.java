@@ -25,47 +25,54 @@ package workbench.gui.actions;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.util.List;
+
 import javax.swing.JFrame;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+
+import workbench.interfaces.ObjectDropper;
+import workbench.interfaces.Reloadable;
+import workbench.interfaces.WbSelectionListener;
+import workbench.interfaces.WbSelectionModel;
+
 import workbench.db.DbObject;
 import workbench.db.GenericObjectDropper;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectDropperUI;
-import workbench.interfaces.ObjectDropper;
-import workbench.interfaces.Reloadable;
 
 /**
  * @author Thomas Kellerer
  */
 public class DropDbObjectAction
 	extends WbAction
-	implements ListSelectionListener
+	implements WbSelectionListener
 {
 	private DbObjectList source;
-	private ListSelectionModel selection;
 	private ObjectDropper dropper;
 	private Reloadable data;
 	private boolean available = true;
 
-	public DropDbObjectAction(DbObjectList client, ListSelectionModel list, Reloadable r)
+	public DropDbObjectAction(String labelKey, DbObjectList client, ListSelectionModel list, Reloadable r)
+	{
+    this("MnuTxtDropDbObject", client, WbSelectionModel.Factory.createFacade(list), r);
+	}
+
+	public DropDbObjectAction(DbObjectList client, WbSelectionModel list, Reloadable r)
 	{
 		this("MnuTxtDropDbObject", client, list, r);
 	}
 
-	public DropDbObjectAction(String labelKey, DbObjectList client, ListSelectionModel list, Reloadable r)
+	public DropDbObjectAction(String labelKey, DbObjectList client, WbSelectionModel list, Reloadable r)
 	{
 		super();
 		this.initMenuDefinition(labelKey);
 		this.source = client;
-		this.selection = list;
 		this.data = r;
-		setEnabled(false);
-		list.addListSelectionListener(this);
+		setEnabled(list.hasSelection());
+		list.addSelectionListener(this);
 	}
 
 	@Override
@@ -115,9 +122,9 @@ public class DropDbObjectAction
 		}
 	}
 
-	@Override
-	public void valueChanged(ListSelectionEvent e)
-	{
+  @Override
+    public void selectionChanged(WbSelectionModel list)
+  {
 		WbConnection conn = this.source.getConnection();
 		if (conn == null || conn.isSessionReadOnly())
 		{
@@ -125,8 +132,8 @@ public class DropDbObjectAction
 		}
 		else
 		{
-			setEnabled(this.available && this.selection.getMinSelectionIndex() >= 0);
+			setEnabled(this.available && list.hasSelection());
 		}
-	}
+  }
 
 }

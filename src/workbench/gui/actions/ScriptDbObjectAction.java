@@ -25,10 +25,10 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+
+import workbench.interfaces.WbSelectionListener;
+import workbench.interfaces.WbSelectionModel;
 
 import workbench.db.DbObject;
 import workbench.db.ObjectScripter;
@@ -42,20 +42,20 @@ import workbench.gui.dbobjects.ObjectScripterUI;
  */
 public class ScriptDbObjectAction
 	extends WbAction
-	implements ListSelectionListener
+  implements WbSelectionListener
 {
 	private DbObjectList source;
-	private ListSelectionModel selection;
+	private WbSelectionModel selection;
 
-	public ScriptDbObjectAction(DbObjectList client, ListSelectionModel list)
+	public ScriptDbObjectAction(DbObjectList client, WbSelectionModel list)
 	{
 		super();
 		this.initMenuDefinition("MnuTxtCreateScript");
 		this.source = client;
 		this.selection = list;
-		setEnabled(false);
+		setEnabled(selection.hasSelection());
 		setIcon("script");
-		list.addListSelectionListener(this);
+		list.addSelectionListener(this);
 	}
 
 	@Override
@@ -72,10 +72,10 @@ public class ScriptDbObjectAction
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}
 
-	@Override
-	public void valueChanged(ListSelectionEvent e)
-	{
-		setEnabled(this.selection.getMinSelectionIndex() >= 0);
-	}
+  @Override
+  public void selectionChanged(WbSelectionModel source)
+  {
+    setEnabled(source.hasSelection());
+  }
 
 }
