@@ -84,11 +84,14 @@ public class DefaultTriggerReader
 			String tableName = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
 			String comment = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
 			String status = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_STATUS);
+			String level = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_LEVEL);
+
 			TriggerDefinition trg = new TriggerDefinition(catalog, schema, trgName);
 			trg.setTriggerType(trgType);
 			trg.setTriggerEvent(trgEvent);
 			trg.setComment(comment);
 			trg.setStatus(status);
+      trg.setLevel(TriggerLevel.parseLevel(level));
 
 			if (tableName != null)
 			{
@@ -114,8 +117,8 @@ public class DefaultTriggerReader
 	protected DataStore getTriggers(String catalog, String schema, String tableName)
 		throws SQLException
 	{
-		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int[] sizes =   {30, 30, 20, 20, 20, 10};
+		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		final int[] sizes =   {30, 30, 20, 20, 20, 10, 10};
 
 		DataStore result = new DataStore(LIST_COLUMNS, types, sizes);
 
@@ -154,6 +157,7 @@ public class DefaultTriggerReader
 			boolean hasTableName =  colCount >= 4;
 			boolean hasComment = colCount >= 5;
 			boolean hasStatus = colCount >= 6;
+			boolean hasLevel = colCount >= 7;
 
 			while (rs.next())
 			{
@@ -189,6 +193,13 @@ public class DefaultTriggerReader
 					value = rs.getString(6);
 					if (!rs.wasNull() && value != null) value = value.trim();
 					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_STATUS, value);
+				}
+
+				if (hasLevel)
+				{
+					value = rs.getString(7);
+					if (!rs.wasNull() && value != null) value = value.trim();
+					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_LEVEL, value);
 				}
 			}
 			result.resetStatus();

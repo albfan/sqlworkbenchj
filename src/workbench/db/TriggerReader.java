@@ -64,9 +64,15 @@ public interface TriggerReader {
 
 	/**
 	 * The column index in the DataStore returned by getTableTriggers which identifies
-	 * the comment of the trigger.
+	 * the status of the trigger.
 	 */
 	int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_STATUS = 5;
+
+	/**
+	 * The column index in the DataStore returned by getTableTriggers which identifies
+	 * the level (row/statement) of the trigger.
+	 */
+  int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_LEVEL = 6;
 
 	String TRIGGER_COMMENT_COLUMN = "REMARKS";
 	String TRIGGER_EVENT_COLUMN = "EVENT";
@@ -74,6 +80,7 @@ public interface TriggerReader {
 	String TRIGGER_TABLE_COLUMN = "TABLE";
 	String TRIGGER_TYPE_COLUMN = "TYPE";
 	String TRIGGER_STATUS_COLUMN = "STATUS";
+	String TRIGGER_LEVEL_COLUMN = "LEVEL";
 
 	String[] LIST_COLUMNS = {
 		TriggerReader.TRIGGER_NAME_COLUMN,
@@ -81,7 +88,8 @@ public interface TriggerReader {
 		TriggerReader.TRIGGER_EVENT_COLUMN,
 		TriggerReader.TRIGGER_TABLE_COLUMN,
 		TriggerReader.TRIGGER_COMMENT_COLUMN,
-		TriggerReader.TRIGGER_STATUS_COLUMN
+		TriggerReader.TRIGGER_STATUS_COLUMN,
+    TriggerReader.TRIGGER_LEVEL_COLUMN
 	};
 
 	TriggerDefinition findTrigger(String catalog, String schema, String name)

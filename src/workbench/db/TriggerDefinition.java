@@ -48,6 +48,7 @@ public class TriggerDefinition
 	private TableIdentifier table;
 	private CharSequence source;
 	private String status;
+  private TriggerLevel level;
 
 	public TriggerDefinition(String cat, String schem, String name)
 	{
@@ -72,6 +73,16 @@ public class TriggerDefinition
 	{
 		return status;
 	}
+
+  public TriggerLevel getLevel()
+  {
+    return level;
+  }
+
+  public void setLevel(TriggerLevel triggerLevel)
+  {
+    this.level = triggerLevel;
+  }
 
 	public void setStatus(String statusText)
 	{

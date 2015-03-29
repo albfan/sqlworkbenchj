@@ -27,6 +27,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
+import workbench.db.TriggerDefinition;
+import workbench.db.TriggerLevel;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -152,6 +154,21 @@ public class ObjectTreeNode
     if (dbo == null)
     {
       return null;
+    }
+    if (dbo instanceof TriggerDefinition)
+    {
+      TriggerDefinition trg = (TriggerDefinition)dbo;
+      String tip = trg.getTriggerType() + " " + trg.getTriggerEvent() + " ON " + trg.getRelatedTable().getTableName();
+      TriggerLevel level = trg.getLevel();
+      if (level == TriggerLevel.row)
+      {
+        tip += " FOR EACH ROW";
+      }
+      else if (level == TriggerLevel.statement)
+      {
+        tip += " FOR EACH STATEMENT";
+      }
+      return tip;
     }
     String remarks = dbo.getComment();
     if (StringUtil.isEmptyString(remarks)) return null;

@@ -35,6 +35,9 @@ import workbench.db.IndexDefinition;
 import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
+import workbench.db.TriggerDefinition;
+import workbench.db.TriggerReader;
+import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
@@ -101,6 +104,8 @@ public class TreeLoader
   public static final String TYPE_DBO_TYPE_NODE = "dbobject-type";
 
   public static final String TYPE_FK_DEF = "fk-definition";
+
+  public static final String TYPE_TRIGGERS = "table-trigger";
 
   private WbConnection connection;
   private DbObjectTreeModel model;
@@ -274,6 +279,35 @@ public class TreeLoader
     ObjectTreeNode ref = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), TYPE_REF_LIST);
     ref.setAllowsChildren(true);
     node.add(ref);
+
+    ObjectTreeNode trg = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS);
+    trg.setAllowsChildren(true);
+    node.add(trg);
+  }
+
+  public void loadTableTriggers(DbObject dbo, ObjectTreeNode trgNode)
+    throws SQLException
+  {
+    if (trgNode == null) return;
+    if (dbo == null)
+    {
+      trgNode.setAllowsChildren(false);
+      return;
+    }
+
+    TriggerReader reader = TriggerReaderFactory.createReader(connection);
+
+    TableIdentifier tbl = (TableIdentifier)dbo;
+    List<TriggerDefinition> triggers = reader.getTriggerList(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
+    for (TriggerDefinition trg : triggers)
+    {
+      ObjectTreeNode node = new ObjectTreeNode(trg);
+      node.setAllowsChildren(false);
+      node.setChildrenLoaded(true);
+      trgNode.add(node);
+    }
+    model.nodeStructureChanged(trgNode);
+    trgNode.setChildrenLoaded(true);
   }
 
   public void loadTableIndexes(DbObject dbo, ObjectTreeNode indexNode)
@@ -460,6 +494,12 @@ public class TreeLoader
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();
         loadForeignKeys(dbo, node, true);
+      }
+      else if (TYPE_TRIGGERS.equals(type))
+      {
+        ObjectTreeNode parent = node.getParent();
+        DbObject dbo = parent.getDbObject();
+        loadTableTriggers(dbo, node);
       }
       else
       {

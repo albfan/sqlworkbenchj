@@ -475,12 +475,14 @@ from syscat.triggers</string>
    <string>PostgreSQL</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>select trg.tgname,
-       case trg.tgtype &amp; cast(2 as int2)
-         when 0 then 'AFTER'
-         else 'BEFORE'
-       end as trigger_type,
-       case trg.tgtype &amp; cast(28 as int2)
+     <string>
+     select trg.tgname,
+        CASE trg.tgtype::integer &amp; 66
+            WHEN 2 THEN 'BEFORE'
+            WHEN 64 THEN 'INSTEAD OF'
+            ELSE 'AFTER'
+        end as trigger_type,
+       case trg.tgtype::integer &amp; cast(28 as int2)
          when 16 then 'UPDATE'
          when 8 then 'DELETE'
          when 4 then 'INSERT'
@@ -489,17 +491,21 @@ from syscat.triggers</string>
          when 24 then 'UPDATE, DELETE'
          when 12 then 'INSERT, DELETE'
        end as trigger_event,
-       ns.nspname||'.'||tbl.relname as table_name,
+       ns.nspname||'.'||tbl.relname as trigger_table,
        obj_description(trg.oid) as remarks,
 	     case
           when trg.tgenabled='O' then 'ENABLED'
 	        else 'DISABLED'
-        end as status
+        end as status,
+        case trg.tgtype::integer &amp; 1
+          when 1 then 'ROW'::text
+          else 'STATEMENT'::text
+        end as trigger_level
 FROM pg_trigger trg
  JOIN pg_class tbl on trg.tgrelid = tbl.oid
  JOIN pg_namespace ns ON ns.oid = tbl.relnamespace
-AND trg.tgname not like 'RI_ConstraintTrigger%'
-AND trg.tgname not like 'pg_sync_pg%'
+WHERE trg.tgname not like 'RI_ConstraintTrigger%'
+  AND trg.tgname not like 'pg_sync_pg%'
 </string>
     </void>
     <void property="objectNameField">
@@ -518,11 +524,12 @@ AND trg.tgname not like 'pg_sync_pg%'
    <string>MySQL</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>SELECT trigger_name,
-                    action_timing AS trigger_type,
-                    event_manipulation as trigger_event,
-                    event_object_table as trigger_table
-             FROM information_schema.triggers
+     <string>
+       SELECT trigger_name,
+              action_timing AS trigger_type,
+              event_manipulation as trigger_event,
+              event_object_table as trigger_table
+       FROM information_schema.triggers
       </string>
     </void>
     <void property="objectNameField">
@@ -564,8 +571,9 @@ AND trg.tgname not like 'pg_sync_pg%'
      <string>
        SELECT trigger_name,
               trigger_type,
-              triggering_event as trigger_event, table_name as trigger_table
-      FROM information_schema.system_triggers</string>
+              triggering_event as trigger_event,
+              table_name as trigger_table
+       FROM information_schema.system_triggers</string>
     </void>
     <void property="objectNameField">
      <string>table_name</string>
@@ -584,7 +592,10 @@ AND trg.tgname not like 'pg_sync_pg%'
        SELECT trigger_name,
               action_timing as trigger_type,
               event_manipulation as trigger_event,
-              event_object_table as trigger_table
+              event_object_table as trigger_table,
+              null as remarks,
+              null as status,
+              action_orientation as trigger_level
        FROM information_schema.triggers</string>
     </void>
     <void property="schemaField">
@@ -624,7 +635,12 @@ AND trg.tgname not like 'pg_sync_pg%'
              when  60 then 'UPDATE OR DELETE OR INSERT'
              when  78 then 'DELETE OR INSERT OR UPDATE'
           end as trigger_event,
-          trim(rdb$relation_name) as trigger_table
+          trim(rdb$relation_name) as trigger_table,
+          null as remarks,
+          case rdb$trigger_inactive
+            when 1 then 'DISABLED'
+            else 'ENABLED'
+          end as status
     FROM rdb$triggers
     WHERE rdb$system_flag = 0
 </string>
