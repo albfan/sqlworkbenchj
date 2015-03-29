@@ -22,8 +22,6 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
-import java.util.List;
-
 import workbench.resource.Settings;
 
 /**
@@ -38,11 +36,6 @@ public class DbTreeSettings
   public static boolean enableDbTree()
   {
     return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "enabled", false);
-  }
-
-  public static List<String> getSelectedObjectTypes()
-  {
-    return Settings.getInstance().getListProperty(SETTINGS_PREFIX + "selectedtypes", false);
   }
 
   public static boolean showOnlyCurrentSchema(String dbId)
@@ -68,16 +61,4 @@ public class DbTreeSettings
   {
     Settings.getInstance().setProperty(SETTINGS_PREFIX + "position", pos.name());
   }
-
-  public static void setDividerLocation(int location)
-  {
-    Settings.getInstance().setProperty(SETTINGS_PREFIX + "divider", location);
-  }
-
-  public static int getDividerLocation(int defaultLocation)
-  {
-    return Settings.getInstance().getIntProperty(SETTINGS_PREFIX + "divider", defaultLocation);
-  }
-
-
 }

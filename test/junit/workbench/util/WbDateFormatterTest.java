@@ -111,6 +111,11 @@ public class WbDateFormatterTest
     format.applyPattern("dd.MM.yyyy HH:mm:ss.SSSSSS");
     ts = Timestamp.valueOf("2015-03-27 20:21:22");
     assertEquals("27.03.2015 20:21:22.0", format.format(ts));
+
+    format.applyPattern("dd.MM.yyyy HH:mm:ss.SSSSSSSSSSSS");
+    ts = Timestamp.valueOf("2015-03-27 20:21:22.789");
+    assertEquals("27.03.2015 20:21:22.789", format.format(ts));
+
   }
 
 	/**

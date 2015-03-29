@@ -70,6 +70,7 @@ public class DbObjectsTree
 		setRowHeight(0);
     ToolTipManager.sharedInstance().registerComponent(this);
     dragSource = new ObjectTreeDragSource(this);
+    loader = new TreeLoader();
   }
 
   public WbConnection getConnection()
@@ -80,11 +81,14 @@ public class DbObjectsTree
 
   public void setConnection(WbConnection conn)
   {
-    clear();
     if (conn != null)
     {
-      loader = new TreeLoader(conn.getProfile().getName());
-      loader.setConnection(conn);
+      loader.setConnection(conn, conn.getProfile().getName());
+      setModel(loader.getModel());
+    }
+    else
+    {
+      clear();
     }
   }
 

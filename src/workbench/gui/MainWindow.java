@@ -184,6 +184,7 @@ public class MainWindow
 {
 	private static final String DEFAULT_WORKSPACE = "Default.wksp";
 	private static final String RECENTMACROS_NAME = "recent-macros";
+	private static final String DB_TREE_PROPS = "dbtree";
 
 	private static int instanceCount;
 	private final int windowId;
@@ -240,7 +241,7 @@ public class MainWindow
 	protected WbThread connectThread;
 	private DropHandler dropHandler;
   private DbTreePanel treePanel;
-  private int lastTreeDivider = -1;
+  private boolean shouldShowTree;
 
 	/**
 	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
@@ -355,10 +356,16 @@ public class MainWindow
 
   public void showDbTree()
   {
+    showDbTree(true);
+  }
+
+  public void showDbTree(boolean requestFocus)
+  {
     if (treePanel == null)
     {
       treePanel = new DbTreePanel();
-      treePanel.restoreSettings();
+      treePanel.restoreSettings(getToolProperties(DB_TREE_PROPS));
+
       getContentPane().remove(sqlTab);
 
       int defaultLocation = -1;
@@ -378,15 +385,22 @@ public class MainWindow
         defaultLocation = (int)(getWidth() * 0.85);
       }
 
-      int location = DbTreeSettings.getDividerLocation(defaultLocation);
+      int location = getToolProperties(DB_TREE_PROPS).getIntProperty(DbTreePanel.PROP_DIVIDER, defaultLocation);
       split.setDividerLocation(location);
 
       getContentPane().add(split, BorderLayout.CENTER);
       doLayout();
       validate();
+    }
+
+    if (treePanel.getConnection() == null)
+    {
       treePanel.connect(currentProfile);
     }
-    treePanel.requestFocusInWindow();
+    if (requestFocus)
+    {
+      treePanel.requestFocusInWindow();
+    }
   }
 
   public void hideDbTree()
@@ -394,9 +408,7 @@ public class MainWindow
     if (treePanel == null) return;
     if (!treePanel.isVisible()) return;
 
-    WbSplitPane split = (WbSplitPane)treePanel.getParent();
-    lastTreeDivider = split.getDividerLocation();
-    DbTreeSettings.setDividerLocation(lastTreeDivider);
+    treePanel.saveSettings(getToolProperties(DB_TREE_PROPS));
     treePanel.setVisible(false);
   }
 
@@ -404,14 +416,8 @@ public class MainWindow
   {
     if (treePanel == null) return;
     if (treePanel.isVisible()) return;
-
+    treePanel.restoreSettings(getToolProperties(DB_TREE_PROPS));
     treePanel.setVisible(true);
-    if (lastTreeDivider > 0)
-    {
-      WbSplitPane split = (WbSplitPane)treePanel.getParent();
-      split.setDividerLocation(lastTreeDivider);
-      lastTreeDivider = -1;
-    }
   }
 
   public DbTreePanel getDbTree()
@@ -423,15 +429,14 @@ public class MainWindow
   {
     if (treePanel != null)
     {
+      treePanel.saveSettings(getToolProperties(DB_TREE_PROPS));
+
       JSplitPane split = (JSplitPane)treePanel.getParent();
-      int location = split.getDividerLocation();
-      DbTreeSettings.setDividerLocation(location);
       getContentPane().remove(split);
       getContentPane().add(sqlTab, BorderLayout.CENTER);
       doLayout();
       validate();
       treePanel.disconnect(false); // this will be done in the background
-      treePanel.saveSettings();
       treePanel = null;
     }
   }
@@ -1361,7 +1366,15 @@ public class MainWindow
       MainPanel lastPanel = getSqlPanel(lastIndex);
       if (lastPanel instanceof DbExplorerPanel)
       {
-        restoreDbTree();
+        if (shouldShowTree)
+        {
+          showDbTree(false);
+          shouldShowTree = false;
+        }
+        else
+        {
+          restoreDbTree();
+        }
       }
     }
 
@@ -1424,14 +1437,6 @@ public class MainWindow
 		}
 		boolean macroVisible = (showMacroPopup != null && showMacroPopup.isPopupVisible());
 		sett.setProperty(this.getClass().getName() + ".macropopup.visible", macroVisible);
-
-    Component component = getContentPane().getComponent(0);
-    if (component instanceof JSplitPane)
-    {
-      JSplitPane split = (JSplitPane)component;
-      int location = split.getDividerLocation();
-      DbTreeSettings.setDividerLocation(location);
-    }
 	}
 
 	@Override
@@ -1903,6 +1908,21 @@ public class MainWindow
 				}
 			});
 		}
+
+    shouldShowTree = getToolProperties(DB_TREE_PROPS).getBoolProperty(DbTreePanel.PROP_VISIBLE, false);
+
+    if (shouldShowTree && getCurrentSqlPanel() != null)
+    {
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          showDbTree(false);
+          shouldShowTree = false;
+        }
+      });
+    }
 
 		BookmarkManager.getInstance().updateInBackground(this);
 
@@ -3041,6 +3061,13 @@ public class MainWindow
 
 		this.showMacroPopup.saveWorkspaceSettings();
 
+    getToolProperties(DB_TREE_PROPS).setProperty(DbTreePanel.PROP_VISIBLE, isDbTreeVisible());
+
+    if (treePanel != null)
+    {
+      treePanel.saveSettings(getToolProperties(DB_TREE_PROPS));
+    }
+
 		try
 		{
 			int count = this.sqlTab.getTabCount();
@@ -3080,7 +3107,6 @@ public class MainWindow
 		{
 			FileUtil.closeQuietely(w);
 		}
-
 
 		this.currentWorkspaceFile = filename;
 

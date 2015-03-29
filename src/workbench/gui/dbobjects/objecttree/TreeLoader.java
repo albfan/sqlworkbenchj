@@ -36,6 +36,7 @@ import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.util.CollectionUtil;
 
 
@@ -107,16 +108,14 @@ public class TreeLoader
   private Collection<String> availableTypes;
   private final Set<String> typesToShow = CollectionUtil.caseInsensitiveSet();
 
-
-  public TreeLoader(String name)
+  public TreeLoader()
   {
-    root = new ObjectTreeNode(name, "database");
-    root.setAllowsChildren(true);
-    model = new DbObjectTreeModel(root);
+    setRootName(ResourceMgr.getString("TxtDbExplorerTables"));
   }
 
-  public void setConnection(WbConnection conn)
+  public void setConnection(WbConnection conn, String name)
   {
+    setRootName(name);
     connection = conn;
     if (connection != null)
     {
@@ -124,8 +123,17 @@ public class TreeLoader
     }
   }
 
+  private void setRootName(String name)
+  {
+    removeAllChildren(root);
+    root = new ObjectTreeNode(name, "database");
+    root.setAllowsChildren(true);
+    model = new DbObjectTreeModel(root);
+  }
+
   private void removeAllChildren(ObjectTreeNode node)
   {
+    if (node == null) return;
     int count = node.getChildCount();
     for (int i=0; i < count; i++)
     {
@@ -143,7 +151,7 @@ public class TreeLoader
       typesToShow.addAll(types);
     }
   }
-  
+
   public void clear()
   {
     removeAllChildren(root);

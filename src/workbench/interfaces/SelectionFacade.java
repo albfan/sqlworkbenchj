@@ -19,6 +19,9 @@
  */
 package workbench.interfaces;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -35,46 +38,32 @@ public class SelectionFacade
 {
   private final ListSelectionModel listModel;
   private final TreeSelectionModel treeModel;
-  private WbSelectionListener listener;
+  private List<WbSelectionListener> listenerList = new ArrayList<>(2);
 
   public SelectionFacade(ListSelectionModel selection)
   {
     listModel = selection;
+    listModel.addListSelectionListener(this);
     treeModel = null;
   }
 
   public SelectionFacade(TreeSelectionModel selection)
   {
     treeModel = selection;
+    treeModel.addTreeSelectionListener(this);
     listModel = null;
   }
 
   @Override
-  public void addSelectionListener(WbSelectionListener selectionListener)
+  public void addSelectionListener(WbSelectionListener listener)
   {
-    if (treeModel != null)
-    {
-      treeModel.addTreeSelectionListener(this);
-    }
-    else
-    {
-      listModel.addListSelectionListener(this);
-    }
-    listener = selectionListener;
+    listenerList.add(listener);
   }
 
   @Override
   public void removeSelectionListener(WbSelectionListener listener)
   {
-    listener = null;
-    if (treeModel != null)
-    {
-      treeModel.removeTreeSelectionListener(this);
-    }
-    else
-    {
-      listModel.removeListSelectionListener(this);
-    }
+    listenerList.remove(listener);
   }
 
   @Override
@@ -111,18 +100,18 @@ public class SelectionFacade
   @Override
   public void valueChanged(ListSelectionEvent e)
   {
-    if (listener != null)
+    for (WbSelectionListener l : listenerList)
     {
-      listener.selectionChanged(this);
+      l.selectionChanged(this);
     }
   }
 
   @Override
   public void valueChanged(TreeSelectionEvent e)
   {
-    if (listener != null)
+    for (WbSelectionListener l : listenerList)
     {
-      listener.selectionChanged(this);
+      l.selectionChanged(this);
     }
   }
 

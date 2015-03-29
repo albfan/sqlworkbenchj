@@ -88,6 +88,7 @@ public class ObjectScripter
 		if (sequenceType != null)
 		{
 			commitTypes.add(sequenceType.toLowerCase());
+      knownTypes.add(sequenceType);
 		}
 		typesWithoutSeparator = CollectionUtil.caseInsensitiveSet(TYPE_SELECT, TYPE_INSERT, TYPE_UPDATE);
 		dropper = new GenericObjectDropper();

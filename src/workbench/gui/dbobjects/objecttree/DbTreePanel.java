@@ -63,12 +63,15 @@ import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.MultiSelectComboBox;
+import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.dbobjects.DbObjectList;
 
 import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbProperties;
 import workbench.util.WbThread;
 
 
@@ -81,6 +84,10 @@ public class DbTreePanel
 	extends JPanel
   implements Reloadable, ActionListener, MouseListener, DbObjectList
 {
+  public static final String PROP_DIVIDER = "divider.location";
+  public static final String PROP_VISIBLE = "tree.visible";
+  public static final String PROP_TYPES = "tree.selectedtypes";
+
   private static int instanceCount = 0;
 	private DbObjectsTree tree;
   private int id;
@@ -106,8 +113,6 @@ public class DbTreePanel
     add(toolPanel, BorderLayout.PAGE_START);
     add(scroll, BorderLayout.CENTER);
     add(statusBar, BorderLayout.PAGE_END);
-
-    selectedTypes = DbTreeSettings.getSelectedObjectTypes();
 	}
 
   private void createToolbar()
@@ -233,12 +238,38 @@ public class DbTreePanel
     tree.clear();
   }
 
-	public void saveSettings()
+  private int getDividerLocation()
+  {
+    WbSplitPane split = (WbSplitPane)getParent();
+    if (split == null) return -1;
+    return split.getDividerLocation();
+  }
+
+	public void saveSettings(WbProperties props)
 	{
+    if (this.isVisible())
+    {
+      props.setProperty(PROP_DIVIDER, getDividerLocation());
+    }
+    List<String> types = typeFilter.getSelectedItems();
+    props.setProperty(PROP_TYPES, StringUtil.listToString(types, ','));
 	}
 
-  public void restoreSettings()
+  public void restoreSettings(WbProperties props)
   {
+    int location = props.getIntProperty(PROP_DIVIDER, -1);
+    String typeString = props.getProperty(PROP_TYPES);
+    selectedTypes = StringUtil.stringToList(typeString, ",", true, true, false);
+    tree.setTypesToShow(selectedTypes);
+    
+    if (location > -1)
+    {
+      WbSplitPane split = (WbSplitPane)getParent();
+      if (split != null)
+      {
+        split.setDividerLocation(location);
+      }
+    }
   }
 
   public void disconnect(boolean wait)
@@ -390,8 +421,8 @@ public class DbTreePanel
         }
       });
     }
-
   }
+
   @Override
   public void actionPerformed(ActionEvent evt)
   {
@@ -446,7 +477,5 @@ public class DbTreePanel
   public void mouseExited(MouseEvent e)
   {
   }
-
-
 
 }
