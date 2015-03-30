@@ -181,6 +181,7 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarSeparator;
+import workbench.gui.dbobjects.objecttree.ResultTabDropHandler;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.gui.dialogs.export.ExportFileDialog;
 import workbench.gui.editor.InsertTipProvider;
@@ -341,6 +342,8 @@ public class SqlPanel
 	private final int macroClientId;
   private final AutomaticRefreshMgr refreshMgr;
   private final Highlighter highlighter;
+  private ResultTabDropHandler dropHandler;
+
 //</editor-fold>
 
 	public SqlPanel(int clientId)
@@ -432,6 +435,8 @@ public class SqlPanel
     stmtRunner = new StatementRunner();
     stmtRunner.setRowMonitor(this.rowMonitor);
     stmtRunner.setMessagePrinter(this);
+
+    dropHandler = new ResultTabDropHandler(this, resultTab);
 	}
 
 	@Override
@@ -4177,7 +4182,8 @@ public class SqlPanel
 
 		reset();
 		if (iconHandler != null) iconHandler.dispose();
-		if (this.stmtRunner != null) this.stmtRunner.dispose();
+		if (stmtRunner != null) this.stmtRunner.dispose();
+    if (dropHandler != null) dropHandler.dispose();
 
 		if (this.execListener != null) execListener.clear();
 		this.execListener = null;
