@@ -323,11 +323,19 @@ from syscat.triggers</string>
     <void property="baseSql">
      <string>
        SELECT trigger_name,
-              trigger_type,
+              case
+                when trigger_type like 'BEFORE%' then 'BEFORE'
+                when trigger_type like 'AFTER%' then 'AFTER'
+                else trigger_type
+              end as trigger_type,
               triggering_event as trigger_event,
               table_name,
               '' as remarks,
-              status
+              status,
+              case
+                when trigger_type like '%ROW' then 'ROW'
+                when trigger_type like '%STATEMENT' then 'STATEMENT'
+              end as trigger_level
       FROM all_triggers
       WHERE trigger_name not like 'BIN$%'
     </string>
