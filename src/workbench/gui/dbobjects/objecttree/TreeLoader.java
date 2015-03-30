@@ -204,6 +204,7 @@ public class TreeLoader
       parentNode.setChildrenLoaded(true);
     }
     model.nodeStructureChanged(parentNode);
+    model.nodeChanged(parentNode);
   }
 
   public void loadCatalogs(ObjectTreeNode parentNode)
@@ -221,6 +222,7 @@ public class TreeLoader
       }
     }
     model.nodeStructureChanged(parentNode);
+    model.nodeChanged(parentNode);
   }
 
   private void addTypeNodes(ObjectTreeNode parentNode)
@@ -252,8 +254,8 @@ public class TreeLoader
       loadObjectsByType((ObjectTreeNode)schemaNode.getChildAt(i));
     }
     model.nodeStructureChanged(schemaNode);
+    model.nodeChanged(schemaNode);
   }
-
 
   public void loadObjectsByType(ObjectTreeNode typeNode)
     throws SQLException
@@ -281,6 +283,7 @@ public class TreeLoader
       node.setChildrenLoaded(true);
     }
     model.nodeStructureChanged(typeNode);
+    model.nodeChanged(typeNode);
     typeNode.setChildrenLoaded(true);
   }
 
