@@ -1,0 +1,11 @@
+<body>
+Actions used in the GUI frontend. 
+Every Action is a descendant of {@link workbench.gui.actions.WbAction} that provides 
+several utility functions to work with Actions.
+Each WbAction will register itself with the {@link workbench.resource.ShortcutManager}, in order 
+to allow a remapping of keyboard shortcuts.
+Some actions are not created during startup, in this case they have to be 
+registered with the Shortcut manager using the ActionRegistration class.
+If that is not done, they won't be available in the "Configure shortcuts" dialog
+which is implemented through {@link workbench.gui.settings.ShortcutEditor}
+</body>

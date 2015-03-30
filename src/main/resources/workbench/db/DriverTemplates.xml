@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.4.0_01" class="java.beans.XMLDecoder">
+ <object class="java.util.ArrayList">
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.pervasive.jdbc.v2.Driver </string>
+    </void>
+    <void property="library">
+     <string>pvjdbc2.jar</string>
+    </void>
+    <void property="name">
+     <string>Pervasive PSQL</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:pervasive://(hostname):(port)/(database)</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>nl.cwi.monetdb.jdbc.MonetDriver</string>
+    </void>
+    <void property="library">
+     <string>monetdb-jdbc-2.9-java6.jar</string>
+    </void>
+    <void property="name">
+     <string>MonetDB</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:monetdb://(hostname)/(database)</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.apache.derby.jdbc.EmbeddedDriver</string>
+    </void>
+    <void property="library">
+     <string>derby.jar</string>
+    </void>
+    <void property="name">
+     <string>Apache Derby Embedded</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:derby:/path/to/database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.vertica.Driver</string>
+    </void>
+    <void property="library">
+     <string>vertica_5.1.1_jdk_5.jar</string>
+    </void>
+    <void property="name">
+     <string>Vertica</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:vertica://(hostname):5433/(database)</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.apache.derby.jdbc.ClientDriver</string>
+    </void>
+    <void property="library">
+     <string>derbyclient.jar</string>
+    </void>
+    <void property="name">
+		 <string>Apache Derby Network Client</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:derby://(hostname):1527/(database)</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.h2.Driver</string>
+    </void>
+    <void property="library">
+     <string>h2.jar</string>
+    </void>
+    <void property="name">
+     <string>H2 Database Engine</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:h2:/path/to/database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.informix.jdbc.IfxDriver</string>
+    </void>
+    <void property="library">
+     <string>ifxjdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>Informix</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:informix-sqli://host-name:port-number/dbName:INFORMIXSERVER=serverName</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.edb.Driver</string>
+    </void>
+    <void property="library">
+     <string>edb-jdbc14.jar</string>
+    </void>
+    <void property="name">
+     <string>EnterpriseDB</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:edb://servername:port/database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.sap.dbtech.jdbc.DriverSapDB</string>
+    </void>
+    <void property="library">
+     <string>sapdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>MaxDB</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:sapdb://hostname[:port]/database_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.hsqldb.jdbc.JDBCDriver</string>
+    </void>
+    <void property="library">
+     <string>hsqldb.jar</string>
+    </void>
+    <void property="name">
+     <string>HSQLDB</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:hsqldb:full_path_to_database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>net.sourceforge.jtds.jdbc.Driver</string>
+    </void>
+    <void property="library">
+     <string>jtds.jar</string>
+    </void>
+    <void property="name">
+     <string>jTDS</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:jtds:sqlserver://serverName[:port][/;databaseName]</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.microsoft.sqlserver.jdbc.SQLServerDriver</string>
+    </void>
+    <void property="library">
+     <string>sqljdbc4.jar</string>
+    </void>
+    <void property="name">
+     <string>SQL Server 2005</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:sqlserver://serverName[\instanceName][:portNumber];property=value;property=value</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.sybase.jdbc3.jdbc.SybDriver</string>
+    </void>
+    <void property="library">
+     <string>jconn3.jar</string>
+    </void>
+    <void property="name">
+     <string>Sybase jConnect 6.0</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:sybase:Tds:machine-name:port-number</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.mysql.jdbc.Driver</string>
+    </void>
+    <void property="library">
+     <string>mysql-connector-java-5.1.7-bin.jar</string>
+    </void>
+    <void property="name">
+     <string>MySQL</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:mysql://hostname:port/name_of_database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>oracle.jdbc.OracleDriver</string>
+    </void>
+    <void property="library">
+     <string>ojdbc6.jar</string>
+    </void>
+    <void property="name">
+     <string>Oracle</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:oracle:thin://@hostname:port/service_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>de.sag.jdbc.adabasd.ADriver</string>
+    </void>
+    <void property="library">
+     <string>adabasd.jar</string>
+    </void>
+    <void property="name">
+     <string>Adabas</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:adabasd://servername/name_of_database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.postgresql.Driver</string>
+    </void>
+    <void property="library">
+     <string>postgresql-9.3-1101.jdbc4.jar</string>
+    </void>
+    <void property="name">
+     <string>PostgreSQL</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:postgresql://host:port/name_of_database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.firebirdsql.jdbc.FBDriver</string>
+    </void>
+    <void property="library">
+     <string>firebirdsql-full.jar</string>
+    </void>
+    <void property="name">
+     <string>FirebirdSQL</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:firebirdsql://host:port/name_of_database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+    <object class="workbench.db.DbDriver">
+     <void property="driverClass">
+      <string>com.ibm.as400.access.AS400JDBCDriver</string>
+     </void>
+     <void property="library">
+      <string>jt400.jar</string>
+     </void>
+     <void property="name">
+      <string>IBM DB2 UDB for AS/400 (iSeries)</string>
+     </void>
+     <void property="sampleUrl">
+      <string>jdbc:as400://server_name/database_name</string>
+     </void>
+    </object>
+   </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.ibm.db2.jcc.DB2Driver</string>
+    </void>
+    <void property="library">
+     <string>db2jcc.jar</string>
+    </void>
+    <void property="name">
+     <string>IBM DB2</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:db2://server_name:50000/database_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.teradata.jdbc.TeraDriver</string>
+    </void>
+    <void property="library">
+     <string>terajdbc4.jar|tdgssconfig.jar</string>
+    </void>
+    <void property="name">
+     <string>Teradata</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:teradata://DatabaseServerName/Param1,Param2</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>cubrid.jdbc.driver.CUBRIDDriver</string>
+    </void>
+    <void property="library">
+     <string>cubrid_jdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>Cubrid</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:cubrid:serverhost:33000:databasename</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.nuodb.jdbc.Driver</string>
+    </void>
+    <void property="library">
+     <string>nuodbjdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>NuoDB</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:com.nuodb://localhost/test</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>net.ucanaccess.jdbc.UcanaccessDriver</string>
+    </void>
+    <void property="libraryList">
+      <object class="java.util.Collections" method="unmodifiableList">
+      <object class="java.util.ArrayList">
+       <void method="add">
+        <string>ucanaccess-2.0.3.jar</string>
+       </void>
+       <void method="add">
+        <string>jackcess-2.0.3.jar</string>
+       </void>
+       <void method="add">
+        <string>hsqldb.jar</string>
+       </void>
+       <void method="add">
+        <string>commons-logging-1.0.4.jar</string>
+       </void>
+       <void method="add">
+        <string>commons-lang-2.6.jar</string>
+       </void>
+      </object>
+     </object>
+    </void>
+    <void property="name">
+     <string>Microsoft Access JDBC Driver</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:ucanaccess://c:/path/to/database.mdb</string>
+    </void>
+   </object>
+  </void>
+
+ </object>
+</java>

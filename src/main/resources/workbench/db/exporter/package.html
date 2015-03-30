@@ -1,0 +1,26 @@
+<body>
+Export data in various formats.
+
+The classes in this package are used to create export files a ResultSet
+
+The DataExporter class will handle the generation of the ResultSets and manages
+access to the Writer or Stream of the outputfile. The DataExporter will
+create an ExportWriter that will take care of writing the data to the 
+output file (created by the DataExporter).
+
+To convert a single row into the desired output format, the ExportWriter will
+create a RowDataConvert that is suitable to convert a complete {@link workbench.storage.RowData}
+object into the output format
+
+The data can be exported in different formats:
+<ul>
+  <li>Text (CSV)</li>
+  <li>XML</li>
+  <li>SQL (INSERT, UPDATE, DELETE/INSERT)</li>
+	<li>OpenDocument (aka OpenOffice)</li>
+	<li>Excel (OfficeOpen XML Format)</li>
+	<li>Excel native (if POI is available></li>
+  <li>HTML</li>
+</ul>
+
+</body>

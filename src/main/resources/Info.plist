@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<plist version="1.0">
+  <dict>
+    <key>CFBundleName</key>
+    <string>SQL Workbench</string>
+    <key>CFBundleShortVersionString</key>
+    <string>114</string>
+    <key>CFBundleGetInfoString</key>
+    <string>SQL Workbench/J</string>
+    <key>CFBundleAllowMixedLocalizations</key>
+    <string>false</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleExecutable</key>
+    <string>SQLWorkbench</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>sqwb</string>
+    <key>CFBundleIconFile</key>
+    <string>Workbench.icns</string>
+    <key>Java</key>
+  </dict>
+</plist>
