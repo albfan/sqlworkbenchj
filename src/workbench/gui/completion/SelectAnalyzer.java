@@ -85,7 +85,21 @@ public class SelectAnalyzer
 		int groupPos = util.getKeywordPosition("GROUP BY", sql);
 		int havingPos = util.getKeywordPosition("HAVING", sql);
 		int orderPos = util.getKeywordPosition("ORDER BY", sql);
-    int connectPos = Math.min(util.getKeywordPosition("CONNECT BY", sql), util.getKeywordPosition("START WITH", sql));
+
+    int connectPos = util.getKeywordPosition("CONNECT BY", sql);
+    int connectByPos = util.getKeywordPosition("CONNECT BY", sql);
+    int startWithPos = util.getKeywordPosition("START WITH", sql);
+
+    // treat the position of a "connect by" and "start with" as the same
+    // any position "inside" those operators will need a column list
+    if (connectByPos == -1)
+    {
+      connectPos = startWithPos;
+    }
+    else if (startWithPos > -1)
+    {
+      connectPos = startWithPos;
+    }
 
 		// find the tables from the FROM clause
 		List<Alias> tables = SqlUtil.getTables(sql, true, dbConnection);

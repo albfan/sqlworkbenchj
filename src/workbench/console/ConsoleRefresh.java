@@ -110,6 +110,7 @@ public class ConsoleRefresh
           char c = console.readCharacter();
           if (Character.toLowerCase(c) == 'q' || Character.toLowerCase(c) == 'x')
           {
+            WbConsoleFactory.getConsole().reset();
             doRefresh = false;
             break;
           }
@@ -143,7 +144,6 @@ public class ConsoleRefresh
       if (inputThread != null)
       {
         inputThread.interrupt();
-        WbConsoleFactory.getConsole().reset();
         inputThread = null;
       }
       refreshThread = null;
@@ -154,7 +154,7 @@ public class ConsoleRefresh
   private void doRefresh(BatchRunner runner, String sql, int interval)
   {
     DurationFormatter formatter = new DurationFormatter();
-    String intDisplay = formatter.formatDuration(interval, false);
+    String intDisplay = formatter.formatDuration(interval, false, false);
 
     boolean clearScreen = ConsoleSettings.getClearScreenForRefresh();
     String quitMsg = ResourceMgr.getString("MsgRefreshQuit");
@@ -174,7 +174,7 @@ public class ConsoleRefresh
         {
           break;
         }
-        
+
         String msg = "*** " + ResourceMgr.getFormattedString("MsgRefreshing", intDisplay, StringUtil.getCurrentTimestamp()) + " - " + quitMsg;
         System.out.println(msg);
         inputThread.join(interval);

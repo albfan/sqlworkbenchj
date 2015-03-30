@@ -76,6 +76,9 @@ public class JLineWrapper
   {
     try
     {
+      reader.printString("\u001b[2K");
+      reader.killLine();
+      reader.printNewline();
       reader.getInput().reset();
     }
     catch (IOException ex)

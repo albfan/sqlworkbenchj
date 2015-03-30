@@ -120,6 +120,6 @@ public class DurationFormatter
       }
 		}
 
-		return result.toString();
+		return result.toString().trim();
 	}
 }
