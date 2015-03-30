@@ -30,6 +30,7 @@ import javax.swing.JFrame;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
+import workbench.interfaces.ObjectDropListener;
 import workbench.interfaces.ObjectDropper;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.WbSelectionListener;
@@ -52,6 +53,7 @@ public class DropDbObjectAction
 {
 	private DbObjectList source;
 	private ObjectDropper dropper;
+  private ObjectDropListener dropListener;
 	private Reloadable data;
 	private boolean available = true;
 
@@ -75,6 +77,11 @@ public class DropDbObjectAction
 		list.addSelectionListener(this);
 	}
 
+  public void addDropListener(ObjectDropListener listener)
+  {
+    dropListener = listener;
+  }
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
@@ -96,7 +103,7 @@ public class DropDbObjectAction
 	{
 		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
 
-		List<? extends DbObject> objects = source.getSelectedObjects();
+		final List<DbObject> objects = source.getSelectedObjects();
 		if (objects == null || objects.isEmpty()) return;
 
 		ObjectDropper dropperToUse = (this.dropper != null ? this.dropper : new GenericObjectDropper());
@@ -109,14 +116,21 @@ public class DropDbObjectAction
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
 		dropperUI.showDialog(f);
 
-		if (!dropperUI.dialogWasCancelled() && data != null)
+		if (!dropperUI.dialogWasCancelled())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					data.reload();
+					if (data != null)
+          {
+            data.reload();
+          }
+          if (dropListener != null)
+          {
+            dropListener.objectsDropped(objects);
+          }
 				}
 			});
 		}

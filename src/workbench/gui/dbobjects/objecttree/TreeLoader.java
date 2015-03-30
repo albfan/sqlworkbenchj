@@ -223,7 +223,7 @@ public class TreeLoader
     model.nodeStructureChanged(parentNode);
   }
 
-  public void addTypeNodes(ObjectTreeNode parentNode)
+  private void addTypeNodes(ObjectTreeNode parentNode)
   {
     if (parentNode == null) return;
     for (String type : availableTypes)
@@ -235,9 +235,25 @@ public class TreeLoader
         parentNode.add(node);
       }
     }
-    model.nodeStructureChanged(parentNode);
     parentNode.setChildrenLoaded(true);
   }
+
+  public void reloadSchema(ObjectTreeNode schemaNode)
+    throws SQLException
+  {
+    if (schemaNode == null) return;
+    if (!schemaNode.getType().equals(TYPE_SCHEMA)) return;
+
+    schemaNode.removeAllChildren();
+    addTypeNodes(schemaNode);
+    int count = schemaNode.getChildCount();
+    for (int i=0; i < count; i++)
+    {
+      loadObjectsByType((ObjectTreeNode)schemaNode.getChildAt(i));
+    }
+    model.nodeStructureChanged(schemaNode);
+  }
+
 
   public void loadObjectsByType(ObjectTreeNode typeNode)
     throws SQLException
@@ -249,13 +265,15 @@ public class TreeLoader
     for (TableIdentifier tbl : objects)
     {
       ObjectTreeNode node = new ObjectTreeNode(tbl);
-      node.setAllowsChildren(true);
+      node.setAllowsChildren(false);
       if (hasColumns(tbl))
       {
+        node.setAllowsChildren(true);
         addColumnsNode(node);
       }
       if (isTable(tbl))
       {
+        node.setAllowsChildren(true);
         addTableNodes(node);
         connection.getObjectCache().addTable(new TableDefinition(tbl));
       }

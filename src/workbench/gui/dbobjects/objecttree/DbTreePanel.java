@@ -36,6 +36,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -44,6 +45,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
 
+import workbench.interfaces.ObjectDropListener;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
@@ -59,6 +61,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.ReloadAction;
@@ -82,7 +85,7 @@ import workbench.util.WbThread;
  */
 public class DbTreePanel
 	extends JPanel
-  implements Reloadable, ActionListener, MouseListener, DbObjectList
+  implements Reloadable, ActionListener, MouseListener, DbObjectList, ObjectDropListener
 {
   public static final String PROP_DIVIDER = "divider.location";
   public static final String PROP_VISIBLE = "tree.visible";
@@ -104,10 +107,10 @@ public class DbTreePanel
 		super(new BorderLayout());
     id = ++instanceCount;
 
-    tree = new DbObjectsTree();
+    statusBar = new WbStatusLabel();
+    tree = new DbObjectsTree(statusBar);
     tree.addMouseListener(this);
     JScrollPane scroll = new JScrollPane(tree);
-    statusBar = new WbStatusLabel();
     createToolbar();
 
     add(toolPanel, BorderLayout.PAGE_START);
@@ -261,7 +264,7 @@ public class DbTreePanel
     String typeString = props.getProperty(PROP_TYPES);
     selectedTypes = StringUtil.stringToList(typeString, ",", true, true, false);
     tree.setTypesToShow(selectedTypes);
-    
+
     if (location > -1)
     {
       WbSplitPane split = (WbSplitPane)getParent();
@@ -316,6 +319,35 @@ public class DbTreePanel
   }
 
   @Override
+  public void objectsDropped(List<DbObject> objects)
+  {
+    final Set<String> schemas = CollectionUtil.caseInsensitiveSet();
+    for (DbObject dbo : objects)
+    {
+      schemas.add(dbo.getSchema());
+    }
+    statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrieving"));
+    WbThread th = new WbThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        try
+        {
+          WbSwingUtilities.showWaitCursor(DbTreePanel.this);
+          tree.reloadSchemas(schemas);
+        }
+        finally
+        {
+          WbSwingUtilities.showDefaultCursor(DbTreePanel.this);
+          statusBar.clearStatusMessage();
+        }
+      }
+    }, "Schema Reload");
+    th.start();
+  }
+
+  @Override
   public int getSelectionCount()
   {
     return tree.getSelectionModel().getSelectionCount();
@@ -362,7 +394,7 @@ public class DbTreePanel
   }
 
   @Override
-  public List<? extends DbObject> getSelectedObjects()
+  public List<DbObject> getSelectedObjects()
   {
     int count = tree.getSelectionCount();
 

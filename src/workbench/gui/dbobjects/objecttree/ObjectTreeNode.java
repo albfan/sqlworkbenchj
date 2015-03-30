@@ -78,6 +78,13 @@ public class ObjectTreeNode
     return isLoaded;
   }
 
+  @Override
+  public void removeAllChildren()
+  {
+    super.removeAllChildren();
+    isLoaded = false;
+  }
+
   public boolean canHaveChildren()
   {
     if (getType() == null) return false;
@@ -131,7 +138,7 @@ public class ObjectTreeNode
     if (dbo instanceof ColumnIdentifier)
     {
       ColumnIdentifier col = (ColumnIdentifier)dbo;
-      return col.getColumnName() + " - " + col.getDbmsType();
+      return "<html>" + col.getColumnName() + " - <tt>" + col.getDbmsType() + "</tt></html>";
     }
     if (dbo instanceof IndexDefinition)
     {

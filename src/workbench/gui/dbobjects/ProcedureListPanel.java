@@ -888,14 +888,14 @@ public class ProcedureListPanel
 	}
 
 	@Override
-	public List<? extends DbObject> getSelectedObjects()
+	public List<DbObject> getSelectedObjects()
 	{
 		if (!initialized) return null;
 
 		if (this.procList.getSelectedRowCount() == 0) return null;
 		int[] rows = this.procList.getSelectedRows();
 		int count = rows.length;
-		List<ProcedureDefinition> result = new ArrayList<>(count);
+		List<DbObject> result = new ArrayList<>(count);
 		if (count == 0) return result;
 
 		for (int i=0; i < count; i ++)

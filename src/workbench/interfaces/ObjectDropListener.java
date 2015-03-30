@@ -1,5 +1,5 @@
 /*
- * DbObjectList.java
+ * TableDeleteListener.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -20,28 +20,17 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.gui.dbobjects;
-import java.awt.Component;
+package workbench.interfaces;
+
 import java.util.List;
 
-import workbench.interfaces.Reloadable;
-
 import workbench.db.DbObject;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 
 /**
- * @author Thomas Kellerer
+ *
+ * @author  Thomas Kellerer
  */
-
-public interface DbObjectList
-	extends Reloadable
+public interface ObjectDropListener
 {
-	TableIdentifier getObjectTable();
-  TableDefinition getCurrentTableDefinition();
-	List<DbObject> getSelectedObjects();
-	WbConnection getConnection();
-	Component getComponent();
-  int getSelectionCount();
+	void objectsDropped(List<DbObject> objects);
 }

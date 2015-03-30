@@ -31,6 +31,7 @@ import workbench.resource.IconMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.SynonymReader;
 
 import workbench.util.CaseInsensitiveComparator;
 
@@ -51,6 +52,8 @@ public class DbObjectNodeRenderer
 		super();
     iconMap.put(TreeLoader.TYPE_TABLE, "table");
     iconMap.put(TreeLoader.TYPE_VIEW, "table");
+    iconMap.put(SynonymReader.SYN_TYPE_NAME, "synonym");
+    iconMap.put("sequence", "sequence");
     iconMap.put(DbMetadata.MVIEW_NAME, "table");
     iconMap.put("database", "profile");
     iconMap.put(TreeLoader.TYPE_SCHEMA, "folder");

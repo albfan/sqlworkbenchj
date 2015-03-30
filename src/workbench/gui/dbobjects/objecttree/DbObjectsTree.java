@@ -23,6 +23,7 @@ import java.awt.EventQueue;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
@@ -34,10 +35,12 @@ import javax.swing.tree.TreeSelectionModel;
 
 import workbench.interfaces.ExpandableTree;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.WbStatusLabel;
 
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -52,8 +55,9 @@ public class DbObjectsTree
 {
   private TreeLoader loader;
   private ObjectTreeDragSource dragSource;
+  private WbStatusLabel statusBar;
 
-  public DbObjectsTree()
+  public DbObjectsTree(WbStatusLabel status)
   {
     super(new DbObjectTreeModel(new ObjectTreeNode("Database", "database")));
     setShowsRootHandles(true);
@@ -71,6 +75,7 @@ public class DbObjectsTree
     ToolTipManager.sharedInstance().registerComponent(this);
     dragSource = new ObjectTreeDragSource(this);
     loader = new TreeLoader();
+    statusBar = status;
   }
 
   public WbConnection getConnection()
@@ -146,6 +151,59 @@ public class DbObjectsTree
       LogMgr.logError("DbObjectsTree.loadNodesForPath()", "Could not load nodes", ex);
     }
     return null;
+  }
+
+  public void reloadSchemas(Set<String> schemas)
+  {
+    if (!WbSwingUtilities.isConnectionIdle(this, loader.getConnection())) return;
+    TreePath selection = getSelectionPath();
+
+    try
+    {
+      loader.getConnection().setBusy(true);
+      for (String schema : schemas)
+      {
+        reloadSchema(schema);
+      }
+    }
+    finally
+    {
+      loader.getConnection().setBusy(false);
+    }
+
+    final ObjectTreeNode toSelect = expandAndLoad(selection);
+
+    EventQueue.invokeLater(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (toSelect != null)
+        {
+          TreeNode[] nodes = getTreeModel().getPathToRoot(toSelect);
+          TreePath path = new TreePath(nodes);
+          setSelectionPath(path);
+          scrollPathToVisible(path);
+        }
+      }
+    });
+
+  }
+
+  public void reloadSchema(String schema)
+  {
+    ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_SCHEMA);
+    if (node == null) return;
+
+    node.removeAllChildren();
+    try
+    {
+      loader.reloadSchema(node);
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("DbObjectsTree.reloadSchema", "Could not load schema", ex);
+    }
   }
 
   public void reload()
@@ -260,6 +318,7 @@ public class DbObjectsTree
     try
     {
       WbSwingUtilities.showWaitCursor(this);
+      statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrieving"));
       loader.loadChildren(node);
     }
     catch (SQLException ex)
@@ -269,6 +328,7 @@ public class DbObjectsTree
     finally
     {
       WbSwingUtilities.showDefaultCursor(this);
+      statusBar.clearStatusMessage();
     }
   }
 
