@@ -170,7 +170,14 @@ public class TreeLoader
   public void load()
     throws SQLException
   {
-    loadSchemas(root);
+    if (connection.getDbSettings().supportsCatalogs())
+    {
+      loadCatalogs(root);
+    }
+    else
+    {
+      loadSchemas(root);
+    }
   }
 
   public void loadSchemas(ObjectTreeNode parentNode)
@@ -216,20 +223,20 @@ public class TreeLoader
     model.nodeStructureChanged(parentNode);
   }
 
-  public void addTypeNodes(ObjectTreeNode schemaNode)
+  public void addTypeNodes(ObjectTreeNode parentNode)
   {
-    if (schemaNode == null) return;
+    if (parentNode == null) return;
     for (String type : availableTypes)
     {
       if (typesToShow.isEmpty() || typesToShow.contains(type))
       {
         ObjectTreeNode node = new ObjectTreeNode(type, TYPE_DBO_TYPE_NODE);
         node.setAllowsChildren(true);
-        schemaNode.add(node);
+        parentNode.add(node);
       }
     }
-    model.nodeStructureChanged(schemaNode);
-    schemaNode.setChildrenLoaded(true);
+    model.nodeStructureChanged(parentNode);
+    parentNode.setChildrenLoaded(true);
   }
 
   public void loadObjectsByType(ObjectTreeNode typeNode)

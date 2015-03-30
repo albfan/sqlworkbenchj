@@ -205,7 +205,10 @@ public class DbObjectsTree
   public void expandNode(ObjectTreeNode node)
   {
     TreeNode[] nodes = getTreeModel().getPathToRoot(node);
-    selectPath(new TreePath(nodes));
+    if (nodes != null)
+    {
+      selectPath(new TreePath(nodes));
+    }
   }
 
 	public void selectPath(TreePath path)
