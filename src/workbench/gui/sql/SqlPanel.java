@@ -342,7 +342,8 @@ public class SqlPanel
 	private final int macroClientId;
   private final AutomaticRefreshMgr refreshMgr;
   private final Highlighter highlighter;
-  private ResultTabDropHandler dropHandler;
+  private ResultTabDropHandler tabDropHandler;
+  private ResultTabDropHandler logDropHandler;
 
 //</editor-fold>
 
@@ -436,7 +437,7 @@ public class SqlPanel
     stmtRunner.setRowMonitor(this.rowMonitor);
     stmtRunner.setMessagePrinter(this);
 
-    dropHandler = new ResultTabDropHandler(this, resultTab);
+    tabDropHandler = new ResultTabDropHandler(this, resultTab, log);
 	}
 
 	@Override
@@ -2251,6 +2252,13 @@ public class SqlPanel
 	}
 
 	private boolean macroExecution = false;
+
+  public void showData(final String sql)
+  {
+		if (isBusy()) return;
+		if (StringUtil.isBlank(sql)) return;
+    this.startExecution(sql, 0, -1, false, true);
+  }
 
 	@Override
 	public void executeMacroSql(final String sql, final boolean replaceText, boolean appendData)
@@ -4183,7 +4191,7 @@ public class SqlPanel
 		reset();
 		if (iconHandler != null) iconHandler.dispose();
 		if (stmtRunner != null) this.stmtRunner.dispose();
-    if (dropHandler != null) dropHandler.dispose();
+    if (tabDropHandler != null) tabDropHandler.dispose();
 
 		if (this.execListener != null) execListener.clear();
 		this.execListener = null;

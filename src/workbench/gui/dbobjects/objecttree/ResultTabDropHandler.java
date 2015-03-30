@@ -26,7 +26,7 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
 import java.io.IOException;
 
-import javax.swing.JTabbedPane;
+import javax.swing.JComponent;
 
 import workbench.log.LogMgr;
 
@@ -43,17 +43,16 @@ import workbench.gui.sql.SqlPanel;
  */
 public class ResultTabDropHandler
 	implements DropTargetListener
-
 {
-  private JTabbedPane resultTab;
   private SqlPanel sqlPanel;
-  private final DropTarget target;
+  private final DropTarget target1;
+  private final DropTarget target2;
 
-  public ResultTabDropHandler(SqlPanel panel, JTabbedPane tab)
+  public ResultTabDropHandler(SqlPanel panel, JComponent dropTarget, JComponent secondTarget)
   {
     sqlPanel = panel;
-    resultTab = tab;
-    target = new DropTarget(tab, DnDConstants.ACTION_COPY, this);
+    target1 = new DropTarget(dropTarget, DnDConstants.ACTION_COPY, this);
+    target2 = new DropTarget(secondTarget, DnDConstants.ACTION_COPY, this);
   }
 
   public void handleDrop(ObjectTreeTransferable selection)
@@ -74,16 +73,20 @@ public class ResultTabDropHandler
     {
       TableIdentifier tbl = (TableIdentifier)dbo;
       String sql = "select * from " + tbl.getTableExpression(connection);
-      sqlPanel.executeMacroSql(sql, false, true);
+      sqlPanel.showData(sql);
     }
   }
 
 	public void dispose()
 	{
-		if (target != null)
+		if (target1 != null)
 		{
-			target.removeDropTargetListener(this);
+			target1.removeDropTargetListener(this);
 		}
+    if (target2 != null)
+    {
+			target2.removeDropTargetListener(this);
+    }
 	}
 
 	@Override
