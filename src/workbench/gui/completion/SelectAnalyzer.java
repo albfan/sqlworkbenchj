@@ -86,19 +86,20 @@ public class SelectAnalyzer
 		int havingPos = util.getKeywordPosition("HAVING", sql);
 		int orderPos = util.getKeywordPosition("ORDER BY", sql);
 
-    int connectPos = util.getKeywordPosition("CONNECT BY", sql);
+    int connectPos = -1;
     int connectByPos = util.getKeywordPosition("CONNECT BY", sql);
     int startWithPos = util.getKeywordPosition("START WITH", sql);
 
-    // treat the position of a "connect by" and "start with" as the same
-    // any position "inside" those operators will need a column list
-    if (connectByPos == -1)
+    if (connectByPos > -1 && startWithPos > -1)
     {
-      connectPos = startWithPos;
+      // use the first position as the position for checking if the cursor is located inside
+      // the connect by part of the query
+      connectPos = Math.min(connectByPos, startWithPos);
     }
-    else if (startWithPos > -1)
+    else
     {
-      connectPos = startWithPos;
+      // at least one position was not found, so take the bigger value
+      connectPos = Math.max(connectByPos, startWithPos);
     }
 
 		// find the tables from the FROM clause
