@@ -27,6 +27,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
+import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerLevel;
 
@@ -46,6 +47,7 @@ public class ObjectTreeNode
   private String nodeType;
   private String nodeName;
   private boolean isLoaded;
+  private Integer rowCount;
 
   public ObjectTreeNode(DbObject dbo)
   {
@@ -76,6 +78,16 @@ public class ObjectTreeNode
   public boolean isLoaded()
   {
     return isLoaded;
+  }
+
+  public void setRowCount(int count)
+  {
+    rowCount = count;
+  }
+
+  public Integer getRowCount()
+  {
+    return rowCount;
   }
 
   @Override
@@ -151,6 +163,10 @@ public class ObjectTreeNode
       {
         return idx.getName() + " (UNIQUE)";
       }
+    }
+    if (dbo instanceof TableIdentifier && rowCount != null)
+    {
+      return dbo.getObjectName() + " (" + rowCount.toString() + ")";
     }
     return dbo.getObjectName();
   }

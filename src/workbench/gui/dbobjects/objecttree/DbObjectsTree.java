@@ -190,7 +190,7 @@ public class DbObjectsTree
 
   }
 
-  public void reloadSchema(String schema)
+  private void reloadSchema(String schema)
   {
     ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_SCHEMA);
     if (node == null) return;
