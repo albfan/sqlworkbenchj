@@ -229,7 +229,7 @@ public class DbObjectsTree
     });
   }
 
-  public void load(boolean selectCurrentSchema)
+  public void load(boolean selectDefaultNamespace)
   {
     if (loader == null) return;
     if (!WbSwingUtilities.isConnectionIdle(this, loader.getConnection())) return;
@@ -242,14 +242,22 @@ public class DbObjectsTree
 
       setModel(loader.getModel());
 
-      if (selectCurrentSchema)
+      if (selectDefaultNamespace)
       {
+        final boolean useCatalog = loader.getConnection().getDbSettings().supportsCatalogs();
         EventQueue.invokeLater(new Runnable()
         {
           @Override
           public void run()
           {
-            selectCurrentSchema();
+            if (useCatalog)
+            {
+              selectCurrentCatalog();
+            }
+            else
+            {
+              selectCurrentSchema();
+            }
           }
         });
       }
@@ -283,6 +291,15 @@ public class DbObjectsTree
     if (conn == null || conn.isBusy()) return;
     String schema = conn.getCurrentSchema();
     ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_SCHEMA);
+    expandNode(node);
+  }
+
+  public void selectCurrentCatalog()
+  {
+    WbConnection conn = loader.getConnection();
+    if (conn == null || conn.isBusy()) return;
+    String schema = conn.getCurrentCatalog();
+    ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_CATALOG);
     expandNode(node);
   }
 

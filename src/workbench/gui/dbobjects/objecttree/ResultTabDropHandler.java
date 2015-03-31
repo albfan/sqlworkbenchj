@@ -20,11 +20,9 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
-import java.io.IOException;
 
 import javax.swing.JComponent;
 
@@ -32,7 +30,6 @@ import workbench.log.LogMgr;
 
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 
 import workbench.gui.sql.SqlPanel;
 
@@ -64,16 +61,10 @@ public class ResultTabDropHandler
     if (nodes == null || nodes.length != 1) return;
 
     DbObject dbo = nodes[0].getDbObject();
-    if (dbo == null) return;
-
-    WbConnection connection = sqlPanel.getConnection();
-    if (connection == null) return;
-
     if (dbo instanceof TableIdentifier)
     {
       TableIdentifier tbl = (TableIdentifier)dbo;
-      String sql = "select * from " + tbl.getTableExpression(connection);
-      sqlPanel.showData(sql);
+      sqlPanel.showData(tbl);
     }
   }
 
@@ -108,14 +99,15 @@ public class ResultTabDropHandler
         if (nodes != null && nodes.length == 1)
         {
           dropTargetDragEvent.acceptDrag(DnDConstants.ACTION_COPY);
+          return;
         }
-        return;
       }
       catch (Exception ex)
       {
-        // ignore
+        LogMgr.logError("ResultTabDropHandler.dragEnter()", "Error processing drag event", ex);
       }
     }
+
     dropTargetDragEvent.rejectDrag();
 	}
 
@@ -145,9 +137,9 @@ public class ResultTabDropHandler
 				dropTargetDropEvent.rejectDrop();
 			}
 		}
-		catch (IOException | UnsupportedFlavorException io)
+    catch (Exception ex)
 		{
-			LogMgr.logError("ResultTabDropHandler.drop()", "Error processing drop event", io);
+			LogMgr.logError("ResultTabDropHandler.drop()", "Error processing drop event", ex);
 			dropTargetDropEvent.rejectDrop();
 		}
 	}

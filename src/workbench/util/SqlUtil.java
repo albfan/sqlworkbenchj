@@ -1260,6 +1260,7 @@ public class SqlUtil
 	public static void closeResult(ResultSet rs)
 	{
 		if (rs == null) return;
+    clearWarnings(rs);
 		try { rs.close(); } catch (Throwable th) {}
 	}
 
@@ -1593,6 +1594,17 @@ public class SqlUtil
 			return null;
 		}
 	}
+
+  public static void clearWarnings(ResultSet rs)
+  {
+    try
+    {
+      if (rs != null) rs.clearWarnings();
+    }
+    catch (Throwable th)
+    {
+    }
+  }
 
 	public static void clearWarnings(WbConnection con, Statement stmt)
 	{

@@ -1098,8 +1098,7 @@ public class WbExport
 
 				ResultSet toExport = toConsume.getResultSets().get(0);
 				// The exporter will close the resultSet that it exported
-				// so we can remove it from the list of ResultSets in the StatementRunnerResult
-				// object.
+				// so we can remove it from the list of ResultSets in the StatementRunnerResult object.
 				// Thus the later call to clearResultSets() will only free any not used ResultSet
 				toConsume.getResultSets().remove(0);
 				rowCount = this.exporter.exportResultSet(pendingOutput, toExport, sql);
@@ -1131,7 +1130,7 @@ public class WbExport
 			toConsume.setFailure();
 			toConsume.addMessage(ResourceMgr.getString("ErrExportExecute"));
 			toConsume.addMessage(ExceptionUtil.getAllExceptions(e));
-			LogMgr.logError("WbExportCommand.consumeResult()", "Error spooling data", e);
+			LogMgr.logError("WbExportCommand.consumeResult()", "Error exporting data", e);
 		}
 		finally
 		{

@@ -39,6 +39,7 @@ import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 
 import workbench.util.CollectionUtil;
 
@@ -262,8 +263,23 @@ public class TreeLoader
   {
     if (typeNode == null) return;
     ObjectTreeNode parent = typeNode.getParent();
+    String schema = parent.getName();
+    String catalog = null;
 
-    List<TableIdentifier> objects = connection.getMetadata().getObjectList(parent.getName(), new String[] { typeNode.getName() });
+    if (connection.getDbSettings().supportsCatalogs())
+    {
+      ObjectTreeNode catNode = parent.getParent();
+      if (catNode == null)
+      {
+        LogMgr.logError("TreeLoader.loadObjectsByType()", "No catalog parent for schema!", null);
+      }
+      else
+      {
+        catalog = catNode.getName();
+      }
+    }
+
+    List<TableIdentifier> objects = connection.getMetadata().getObjectList(null, catalog, schema, new String[] { typeNode.getName() });
     for (TableIdentifier tbl : objects)
     {
       ObjectTreeNode node = new ObjectTreeNode(tbl);
@@ -495,7 +511,7 @@ public class TreeLoader
       {
         loadSchemas(node);
       }
-      if (TYPE_DBO_TYPE_NODE.equals(type))
+      else if (TYPE_DBO_TYPE_NODE.equals(type))
       {
         loadObjectsByType(node);
       }
@@ -528,10 +544,6 @@ public class TreeLoader
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
-      }
-      else
-      {
-        node.setAllowsChildren(false);
       }
     }
     finally

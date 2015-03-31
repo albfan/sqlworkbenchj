@@ -1319,29 +1319,10 @@ public class DataExporter
 			this.exportWriter.exportStarting();
 			this.exportWriter.writeExport(rs, info == null ? rsInfo : info, generatingSql);
 		}
-		catch (SQLException e)
-		{
-			this.addError(e.getMessage());
-			LogMgr.logError("DataExporter.startExport()", "SQL Error", e);
-			throw e;
-		}
 		finally
 		{
 			exportFinished();
-			try
-			{
-				rs.clearWarnings();
-			}
-			catch (Throwable th)
-			{
-			}
-			try
-			{
-				rs.close();
-			}
-			catch (Throwable th)
-			{
-			}
+      SqlUtil.closeResult(rs);
 		}
 		long numRows = this.exportWriter.getNumberOfRecords();
 		String msg = "Exported " + numRows + " rows to " + this.outputfile;

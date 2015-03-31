@@ -80,6 +80,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DbSettings;
+import workbench.db.TableIdentifier;
 import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
@@ -2253,10 +2254,11 @@ public class SqlPanel
 
 	private boolean macroExecution = false;
 
-  public void showData(final String sql)
+  public void showData(TableIdentifier table)
   {
 		if (isBusy()) return;
-		if (StringUtil.isBlank(sql)) return;
+    if (table == null) return;
+		String sql = "select * from " + table.getTableExpression(getConnection());
     this.startExecution(sql, 0, -1, false, true);
   }
 
@@ -2320,8 +2322,11 @@ public class SqlPanel
 				{
 					boolean newLineAppended = false;
 					StringBuilder messages = new StringBuilder();
+
 					long rowCount = exporter.startExport();
+
 					long execTime = (System.currentTimeMillis() - start);
+
 					CharSequence errors = exporter.getErrors();
 					if (errors.length() > 0)
 					{
@@ -2338,6 +2343,7 @@ public class SqlPanel
 						messages.append(warnings);
 						messages.append('\n');
 					}
+
 					if (exporter.isSuccess())
 					{
 						messages.append("\n");
@@ -2348,6 +2354,7 @@ public class SqlPanel
 						messages.append(exporter.getFullOutputFilename());
 						messages.append("\n\n");
 					}
+
 					messages.append(ResourceMgr.getString("MsgExecTime"));
 					messages.append(' ');
 					messages.append(Double.toString( ((double)execTime) / 1000.0));
@@ -2357,6 +2364,7 @@ public class SqlPanel
 				}
 				catch (Exception e)
 				{
+          appendToLog(ExceptionUtil.getDisplay(e));
 					LogMgr.logError("SqlPanel.spoolData()", "Error exporting data", e);
 				}
 				finally

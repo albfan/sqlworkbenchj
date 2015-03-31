@@ -52,7 +52,7 @@ public class SimpleLogger
 		if (newFormat == null) return;
 
 		messageFormat = newFormat.replace("{type}", "%1$-5s");
-		messageFormat = messageFormat.replace("{timestamp}", "%2$tF %2$tR");
+		messageFormat = messageFormat.replace("{timestamp}", "%2$tF %2$tT");
 		messageFormat = messageFormat.replace("{source}", "%3$s");
 		messageFormat = messageFormat.replace("{message}", "%4$s");
 		messageFormat = messageFormat.replace("{error}", "%5$s");
