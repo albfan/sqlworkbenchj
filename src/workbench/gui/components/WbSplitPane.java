@@ -33,6 +33,7 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.SplitPaneExpander;
+import workbench.resource.IconMgr;
 
 /**
  * A JSplitPane which restores the divider size after a UI Change
@@ -43,7 +44,6 @@ import workbench.gui.sql.SplitPaneExpander;
 public class WbSplitPane
 	extends JSplitPane
 {
-	public int DEFAULT_DIVIDER_SIZE = 7;
   private SplitPaneExpander expander;
 
 	public WbSplitPane()
@@ -107,7 +107,20 @@ public class WbSplitPane
 	}
 	private void initDefaults()
 	{
-		this.setDividerSize(DEFAULT_DIVIDER_SIZE);
+    int divSize;
+    int iconSize = IconMgr.getInstance().getSizeForLabel();
+    switch (iconSize)
+    {
+      case 24:
+        divSize = 10;
+        break;
+      case 32:
+        divSize = 14;
+        break;
+      default:
+        divSize = 8;
+    }
+		this.setDividerSize(divSize);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setContinuousLayout(true);
     expander = new SplitPaneExpander(this);

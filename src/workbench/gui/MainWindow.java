@@ -372,6 +372,7 @@ public class MainWindow
 
       WbSplitPane split = new WbSplitPane();
       split.setOneTouchExpandable(true);
+      split.setContinuousLayout(true);
       if (DbTreeSettings.getDbTreePosition() == TreePosition.left)
       {
         defaultLocation = (int)(getWidth() * 0.15);

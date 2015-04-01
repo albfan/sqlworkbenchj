@@ -391,8 +391,6 @@ public class SqlPanel
 		resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
 
 		contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
-		contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		contentPanel.setDividerSize(8);
 		contentPanel.setOneTouchExpandable(true);
 		contentPanel.setContinuousLayout(true);
 

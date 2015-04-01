@@ -62,8 +62,6 @@ import workbench.db.WbConnection;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.CollapseTreeAction;
-import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.MultiSelectComboBox;
 import workbench.gui.components.WbSplitPane;
@@ -76,8 +74,6 @@ import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
-
-
 
 /**
  *
@@ -134,11 +130,6 @@ public class DbTreePanel
 
     WbToolbar bar = new WbToolbar();
     bar.add(reload);
-    bar.addSeparator();
-    ExpandTreeAction expand = new ExpandTreeAction(tree);
-    bar.add(expand);
-    bar.add(new CollapseTreeAction(tree));
-    bar.addSeparator();
     gc.gridx ++;
     gc.weightx = 1.0;
     gc.fill = GridBagConstraints.NONE;
@@ -180,11 +171,23 @@ public class DbTreePanel
 
   public void connect(final ConnectionProfile profile)
   {
+    if (profile == null) return;
+
+    // do not create a new connection if we are already connected for this profile
+    if (connection != null && connection.getProfile().equals(profile)) return;
+
+    // if a new connection profile is specified, we need to disconnect the old connection
+    final boolean doDisconnect = connection != null;
+
     WbThread th = new WbThread(new Runnable()
     {
       @Override
       public void run()
       {
+        if (doDisconnect)
+        {
+          disconnect(true);
+        }
         doConnect(profile);
       }
     }, "DbTree Connect Thread");

@@ -460,7 +460,7 @@ public class WbConnection
 	private void runConnectScript(String sql, String type)
 	{
 		if (StringUtil.isBlank(sql)) return;
-		LogMgr.logInfo("WbConnection.runConnectScript()", "Executing " + type + " script for connection " + getDisplayString(true) + " ..." );
+		LogMgr.logInfo("WbConnection.runConnectScript()", "Executing " + type + " script for connection [" + getDbId() + "]: "+ getDisplayString(true) + " ..." );
 
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(this);
@@ -492,7 +492,7 @@ public class WbConnection
 					StatementRunnerResult result = runner.getResult();
 					String msg = ResourceMgr.getString(resKey) + " " + stmtSql;
 					messages.append(msg);
-					LogMgr.logDebug("WbConnection.runConnectScript()", "  Executed statement: " + stmtSql);
+					LogMgr.logDebug("WbConnection.runConnectScript()", "  (" + getId() + ") Executed statement: " + stmtSql);
 					if (!result.isSuccess())
 					{
 						messages.append("\n  ");
@@ -511,7 +511,7 @@ public class WbConnection
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("WbConnection.runConnectScript()", "Error executing " + type + " script", e);
+			LogMgr.logError("WbConnection.runConnectScript()", "Error executing " + type + " script for connection: " + getId(), e);
 			messages = new StringBuilder(50);
 			messages.append(ResourceMgr.getString("MsgBatchStatementError"));
 			messages.append(": ");
