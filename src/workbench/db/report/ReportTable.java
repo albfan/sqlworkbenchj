@@ -202,14 +202,14 @@ public class ReportTable
 		retrieveOptions(conn);
 	}
 
+	public ReportTable(TableIdentifier tbl)
+	{
+		this.table = tbl;
+	}
+
 	public boolean grantsIncluded()
 	{
 		return grants != null;
-	}
-
-	ReportTable(TableIdentifier tbl)
-	{
-		this.table = tbl;
 	}
 
 	public List<ObjectOption> getDbmsOptions()
