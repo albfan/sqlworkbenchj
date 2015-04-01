@@ -351,7 +351,7 @@ public class MainWindow
 
   public boolean isDbTreeVisible()
   {
-    return treePanel != null;
+    return (treePanel != null && treePanel.isVisible());
   }
 
   public void showDbTree()
@@ -1690,11 +1690,10 @@ public class MainWindow
 		showConnectionWarnings(conn, panel);
 		selectCurrentEditor();
 
-    if (treePanel != null)
+    if (isDbTreeVisible())
     {
       treePanel.connect(currentProfile);
     }
-
 	}
 
 	@Override

@@ -76,6 +76,7 @@ public class DbObjectsTree
     dragSource = new ObjectTreeDragSource(this);
     loader = new TreeLoader();
     statusBar = status;
+    setRowHeight(0);
   }
 
   public WbConnection getConnection()

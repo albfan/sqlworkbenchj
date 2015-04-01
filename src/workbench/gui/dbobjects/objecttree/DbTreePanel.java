@@ -127,6 +127,7 @@ public class DbTreePanel
     toolPanel.add(typeFilter, gc);
 
     reload = new ReloadAction(this);
+    reload.setUseLabelIconSize(true);
 
     WbToolbar bar = new WbToolbar();
     bar.add(reload);
@@ -142,8 +143,9 @@ public class DbTreePanel
     closeButton.addActionListener(this);
     closeButton.setRolloverEnabled(true);
 
-    // calculate the regular size of a toolbarbutton.
-    WbToolbarButton button = new WbToolbarButton(IconMgr.getInstance().getToolbarIcon("save"));
+    // calculate the regular size of the buttons
+    // as the toolbar also display a dropdown, I'm using the label size here
+    WbToolbarButton button = new WbToolbarButton(IconMgr.getInstance().getLabelIcon("save"));
     Dimension bs = button.getPreferredSize();
 
     int iconWidth = icon.getIconWidth()/2;
