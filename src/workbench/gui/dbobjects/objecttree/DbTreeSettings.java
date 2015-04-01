@@ -61,4 +61,15 @@ public class DbTreeSettings
   {
     Settings.getInstance().setProperty(SETTINGS_PREFIX + "position", pos.name());
   }
+
+  public static boolean getFilterWhileTyping()
+  {
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "quickfilter", false);
+  }
+
+  public static void setFilterWhileTyping(boolean flag)
+  {
+    Settings.getInstance().setProperty(SETTINGS_PREFIX + "quickfilter", flag);
+  }
+
 }

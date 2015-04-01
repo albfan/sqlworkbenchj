@@ -599,14 +599,17 @@ public class DbTreePanel
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
-    EventQueue.invokeLater(new Runnable()
+    if (DbTreeSettings.getFilterWhileTyping())
     {
-      @Override
-      public void run()
+      EventQueue.invokeLater(new Runnable()
       {
-        applyQuickFilter();
-      }
-    });
+        @Override
+        public void run()
+        {
+          applyQuickFilter();
+        }
+      });
+    }
 	}
 
 	@Override
