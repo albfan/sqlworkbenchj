@@ -20,6 +20,8 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -48,6 +50,8 @@ public class ObjectTreeNode
   private String nodeName;
   private boolean isLoaded;
   private Integer rowCount;
+  private int originalIndex;
+  private List<ObjectTreeNode> filteredNodes = new ArrayList<>();
 
   public ObjectTreeNode(DbObject dbo)
   {
@@ -95,12 +99,20 @@ public class ObjectTreeNode
   {
     super.removeAllChildren();
     isLoaded = false;
+    filteredNodes.clear();
   }
 
   public boolean canHaveChildren()
   {
     if (getType() == null) return false;
     return typesWithChildren.contains(getType());
+  }
+
+
+  @Override
+  public ObjectTreeNode getChildAt(int index)
+  {
+    return (ObjectTreeNode)super.getChildAt(index);
   }
 
   @Override
@@ -198,4 +210,57 @@ public class ObjectTreeNode
     return remarks;
   }
 
+  public boolean applyFilter(String text)
+  {
+    resetFilter();
+
+    if (StringUtil.isEmptyString(text)) return false;
+
+    int count = getChildCount();
+    if (count == 0) return false;
+
+    text = text.toLowerCase().trim();
+
+    for (int i=0; i < count; i++)
+    {
+      ObjectTreeNode child = getChildAt(i);
+      DbObject dbo = child.getDbObject();
+      if (dbo != null)
+      {
+        String name = dbo.getObjectName();
+        if (!name.toLowerCase().contains(text))
+        {
+          child.originalIndex = i;
+          filteredNodes.add(child);
+        }
+      }
+    }
+    for (ObjectTreeNode node : filteredNodes)
+    {
+      remove(node);
+    }
+    return filteredNodes.size() > 0;
+  }
+
+  public void resetFilter()
+  {
+    if (filteredNodes.isEmpty()) return;
+    for (ObjectTreeNode node : filteredNodes)
+    {
+      if (node.originalIndex > getChildCount())
+      {
+        add(node);
+      }
+      else
+      {
+        insert(node, node.originalIndex);
+      }
+    }
+    filteredNodes.clear();
+  }
+
+  public boolean hasFilteredChildren()
+  {
+    return filteredNodes.size() > 0;
+  }
 }

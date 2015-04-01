@@ -28,4 +28,5 @@ package workbench.interfaces;
 public interface QuickFilter
 {
 	void applyQuickFilter();
+  void resetFilter();
 }

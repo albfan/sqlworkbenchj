@@ -57,4 +57,57 @@ public class DbObjectTreeModel
     return null;
   }
 
+  @Override
+  public ObjectTreeNode getRoot()
+  {
+    return (ObjectTreeNode)super.getRoot();
+  }
+
+  public void resetFilter()
+  {
+    resetFilter(getRoot());
+    nodeStructureChanged(getRoot());
+  }
+
+  public void resetFilter(ObjectTreeNode node)
+  {
+    int childCount = node.getChildCount();
+    for (int i=0; i < childCount; i++)
+    {
+      ObjectTreeNode child = node.getChildAt(i);
+      child.resetFilter();
+      resetFilter(child);
+    }
+  }
+
+  public void applyFilter(String text)
+  {
+    applyFilter(getRoot(), text);
+  }
+
+  private boolean applyFilter(ObjectTreeNode node, String text)
+  {
+    int childCount = node.getChildCount();
+    boolean changed = false;
+    for (int i=0; i < childCount; i++)
+    {
+      ObjectTreeNode child = node.getChildAt(i);
+      if (child.applyFilter(text))
+      {
+        changed = true;
+      }
+      else
+      {
+        if (applyFilter(child, text))
+        {
+          changed = true;
+        }
+      }
+    }
+    if (changed)
+    {
+      nodeStructureChanged(node);
+    }
+    return changed;
+  }
 }

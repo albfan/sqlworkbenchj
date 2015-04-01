@@ -79,6 +79,13 @@ public class DbObjectsTree
     setRowHeight(0);
   }
 
+  @Override
+  public DbObjectTreeModel getModel()
+  {
+    return (DbObjectTreeModel)super.getModel(); 
+  }
+
+
   public WbConnection getConnection()
   {
     if (loader == null) return null;

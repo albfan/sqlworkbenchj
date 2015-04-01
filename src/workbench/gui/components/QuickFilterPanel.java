@@ -404,6 +404,7 @@ public class QuickFilterPanel
 		applyFilter(filterValue.getText(), true);
 	}
 
+  @Override
 	public void resetFilter()
 	{
 		applyFilter(null, false);

@@ -32,6 +32,8 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -42,10 +44,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import javax.swing.tree.TreePath;
 
 import workbench.interfaces.ObjectDropListener;
+import workbench.interfaces.QuickFilter;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
@@ -62,7 +67,9 @@ import workbench.db.WbConnection;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.MultiSelectComboBox;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbStatusLabel;
@@ -81,7 +88,7 @@ import workbench.util.WbThread;
  */
 public class DbTreePanel
 	extends JPanel
-  implements Reloadable, ActionListener, MouseListener, DbObjectList, ObjectDropListener
+  implements Reloadable, ActionListener, MouseListener, DbObjectList, ObjectDropListener, KeyListener, QuickFilter
 {
   public static final String PROP_DIVIDER = "divider.location";
   public static final String PROP_VISIBLE = "tree.visible";
@@ -97,6 +104,9 @@ public class DbTreePanel
   private JPanel toolPanel;
   private ReloadAction reload;
   private WbToolbarButton closeButton;
+  private JTextField filterValue;
+  private QuickFilterAction filterAction;
+  private WbAction resetFilter;
 
 	public DbTreePanel()
 	{
@@ -155,6 +165,41 @@ public class DbTreePanel
     closeButton.setMargin(new Insets(hmargin, wmargin, hmargin, wmargin));
     bar.add(closeButton);
     typeFilter.addActionListener(this);
+
+    JPanel filterPanel = new JPanel(new BorderLayout(0, 1));
+    filterPanel.setBorder(new EmptyBorder(2,0,2,0));
+    filterValue = new JTextField();
+
+    filterAction = new QuickFilterAction(this);
+    resetFilter = new WbAction()
+    {
+      @Override
+      public void executeAction(ActionEvent e)
+      {
+        resetFilter();
+      }
+    };
+    resetFilter.setIcon("resetfilter");
+    resetFilter.setEnabled(false);
+
+    WbToolbar filterBar = new WbToolbar();
+    filterBar.add(filterAction);
+    filterBar.add(resetFilter);
+		filterBar.setMargin(new Insets(0,0,0,0));
+		filterBar.setBorderPainted(true);
+
+    filterPanel.add(filterBar, BorderLayout.LINE_START);
+    filterPanel.add(filterValue, BorderLayout.CENTER);
+
+    filterValue.addKeyListener(this);
+
+    gc.gridy = 1;
+    gc.gridx = 0;
+    gc.weightx = 1.0;
+    gc.gridwidth = GridBagConstraints.REMAINDER;
+    gc.fill = GridBagConstraints.HORIZONTAL;
+    gc.anchor = GridBagConstraints.LINE_START;
+    toolPanel.add(filterPanel, gc);
   }
 
   @Override
@@ -514,5 +559,99 @@ public class DbTreePanel
   public void mouseExited(MouseEvent e)
   {
   }
+
+	private int getSelectedRow()
+	{
+		if (tree.getSelectionCount() != 1) return -1;
+		return tree.getSelectionRows()[0];
+	}
+
+	private void selectPreviousItem()
+	{
+		int row = getSelectedRow();
+		if (row < 0)
+		{
+			row = 0;
+		}
+		else if (row > 0)
+		{
+			row --;
+		}
+		tree.setSelectionRow(row);
+	}
+
+	private void selectNextItem()
+	{
+		int row = getSelectedRow();
+		int count = tree.getRowCount();
+		if (row < 0)
+		{
+			row = 0;
+		}
+		else if (row < count - 1)
+		{
+			row ++;
+		}
+		tree.setSelectionRow(row);
+	}
+
+
+	@Override
+	public void keyTyped(final KeyEvent e)
+	{
+    EventQueue.invokeLater(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        applyQuickFilter();
+      }
+    });
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.getSource() != this.filterValue || e.getModifiers() != 0) return;
+
+		switch (e.getKeyCode())
+		{
+			case KeyEvent.VK_UP:
+				selectPreviousItem();
+				e.consume();
+				break;
+			case KeyEvent.VK_DOWN:
+				selectNextItem();
+				e.consume();
+				break;
+			case KeyEvent.VK_ENTER:
+        e.consume();
+        applyQuickFilter();
+        break;
+			case KeyEvent.VK_ESCAPE:
+        e.consume();
+        resetFilter();
+        break;
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
+	}
+
+  @Override
+  public void resetFilter()
+  {
+    tree.getModel().resetFilter();
+    resetFilter.setEnabled(false);
+  }
+
+  @Override
+	public void applyQuickFilter()
+	{
+    tree.getModel().applyFilter(filterValue.getText());
+    resetFilter.setEnabled(true);
+	}
 
 }
