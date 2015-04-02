@@ -25,6 +25,7 @@ package workbench.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -1385,10 +1386,10 @@ public class MainWindow
 	{
 		MainPanel current = getSqlPanel(index);
 		if (current == null) return;
-		this.checkConnectionForPanel(current);
-		this.updateAddMacroAction();
-		this.updateGuiForTab(index);
-		this.updateWindowTitle();
+		checkConnectionForPanel(current);
+		updateAddMacroAction();
+		updateGuiForTab(index);
+		updateWindowTitle();
 	}
 
 	protected void updateAddMacroAction()
@@ -1396,7 +1397,7 @@ public class MainWindow
 		SqlPanel sql = this.getCurrentSqlPanel();
 		if (sql != null)
 		{
-			this.createMacro.setClient(sql.getEditor());
+			createMacro.setClient(sql.getEditor());
 		}
 	}
 
@@ -1406,7 +1407,7 @@ public class MainWindow
 		int i = StringUtil.getIntValue(state, NORMAL);
 		if (i == MAXIMIZED_BOTH)
 		{
-			this.setExtendedState(i);
+			setExtendedState(i);
 		}
 	}
 
@@ -1416,7 +1417,10 @@ public class MainWindow
 
 		if (!s.restoreWindowSize(this))
 		{
-			this.setSize(950,750);
+      Dimension screenSize = WbSwingUtilities.getScreenSize();
+      int w = (int)(screenSize.width * 0.75);
+      int h = (int)(w * 0.75);
+			this.setSize(w, h);
 		}
 
 		if (!s.restoreWindowPosition(this))

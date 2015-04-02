@@ -29,6 +29,8 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -275,9 +277,36 @@ public class WbSwingUtilities
 		return SwingUtilities.getWindowAncestor(caller);
 	}
 
+  public static Insets getScreenOffset()
+  {
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsConfiguration conf = ge.getDefaultScreenDevice().getDefaultConfiguration();
+
+    Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(conf);
+    return insets;
+  }
+
+  public static Dimension getScreenSize()
+  {
+    return getScreenSize(getScreenOffset());
+  }
+
+  public static Dimension getScreenSize(Insets insets)
+  {
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsConfiguration conf = ge.getDefaultScreenDevice().getDefaultConfiguration();
+
+    screen.width -= (insets.left + insets.right);
+    screen.height -= (insets.bottom + insets.top);
+    return screen;
+  }
+
 	public static Point getLocationToCenter(Window aWinToCenter, Component aReference)
 	{
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+    Insets offset = getScreenOffset();
+		Dimension screen = getScreenSize(offset);
+
 		boolean centerOnScreen = false;
 
 		int referenceWidth,  referenceHeight;
@@ -321,6 +350,12 @@ public class WbSwingUtilities
 		{
 			y = ((referenceHeight / 2) - (winHeight / 2));
 		}
+
+    if (centerOnScreen && offset != null)
+    {
+      x += offset.left;
+      x += offset.top;
+    }
 
 		if (aReference != null && aReference.isVisible() && !centerOnScreen)
 		{
