@@ -64,7 +64,7 @@ public class DbTreeSettings
 
   public static boolean getFilterWhileTyping()
   {
-    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "quickfilter", false);
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "quickfilter", true);
   }
 
   public static void setFilterWhileTyping(boolean flag)

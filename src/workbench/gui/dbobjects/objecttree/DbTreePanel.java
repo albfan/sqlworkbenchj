@@ -107,6 +107,7 @@ public class DbTreePanel
   private JTextField filterValue;
   private QuickFilterAction filterAction;
   private WbAction resetFilter;
+  private List<TreePath> expandedNodes;
 
 	public DbTreePanel()
 	{
@@ -205,6 +206,7 @@ public class DbTreePanel
   @Override
   public void reload()
   {
+    resetExpanded();
     WbThread th = new WbThread(new Runnable()
     {
       @Override
@@ -245,6 +247,7 @@ public class DbTreePanel
   {
     String cid = "DbTree-" + Integer.toString(id);
 
+    resetExpanded();
   	statusBar.setStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + profile.getName() + " ...");
 
 		ConnectionMgr mgr = ConnectionMgr.getInstance();
@@ -287,6 +290,7 @@ public class DbTreePanel
 
   public void dispose()
   {
+    resetExpanded();
     tree.removeMouseListener(this);
     tree.clear();
   }
@@ -376,7 +380,9 @@ public class DbTreePanel
     {
       schemas.add(dbo.getSchema());
     }
+
     statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrieving"));
+
     WbThread th = new WbThread(new Runnable()
     {
       @Override
@@ -599,6 +605,9 @@ public class DbTreePanel
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
+    if (e.isConsumed()) return;
+    if (Character.isISOControl(e.getKeyChar())) return;
+
     if (DbTreeSettings.getFilterWhileTyping())
     {
       EventQueue.invokeLater(new Runnable()
@@ -646,15 +655,44 @@ public class DbTreePanel
   @Override
   public void resetFilter()
   {
+    List<TreePath> expanded = expandedNodes;
+    if (expanded == null)
+    {
+      expanded = tree.getExpandedNodes();
+    }
     tree.getModel().resetFilter();
+    tree.expandNodes(expanded);
     resetFilter.setEnabled(false);
   }
 
   @Override
 	public void applyQuickFilter()
 	{
-    tree.getModel().applyFilter(filterValue.getText());
-    resetFilter.setEnabled(true);
+    if (expandedNodes == null)
+    {
+      expandedNodes = tree.getExpandedNodes();
+    }
+    List<TreePath> expanded = tree.getExpandedNodes();
+    String text = filterValue.getText();
+    if (StringUtil.isEmptyString(text))
+    {
+      tree.getModel().resetFilter();
+      resetFilter.setEnabled(false);
+    }
+    else
+    {
+      tree.getModel().applyFilter(text);
+      resetFilter.setEnabled(true);
+    }
+    tree.expandNodes(expanded);
 	}
 
+  private void resetExpanded()
+  {
+    if (expandedNodes != null)
+    {
+      expandedNodes.clear();
+      expandedNodes = null;
+    }
+  }
 }

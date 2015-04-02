@@ -82,7 +82,14 @@ public class DbObjectTreeModel
 
   public void applyFilter(String text)
   {
-    applyFilter(getRoot(), text);
+    if (StringUtil.isEmptyString(text))
+    {
+      resetFilter();
+    }
+    else
+    {
+      applyFilter(getRoot(), text);
+    }
   }
 
   private boolean applyFilter(ObjectTreeNode node, String text)

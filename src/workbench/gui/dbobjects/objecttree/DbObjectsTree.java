@@ -22,6 +22,7 @@ package workbench.gui.dbobjects.objecttree;
 import java.awt.EventQueue;
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +34,6 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import workbench.interfaces.ExpandableTree;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
@@ -51,7 +51,7 @@ import workbench.util.WbThread;
  */
 public class DbObjectsTree
   extends JTree
-  implements TreeExpansionListener, ExpandableTree, Serializable
+  implements TreeExpansionListener, Serializable
 {
   private TreeLoader loader;
   private ObjectTreeDragSource dragSource;
@@ -82,7 +82,7 @@ public class DbObjectsTree
   @Override
   public DbObjectTreeModel getModel()
   {
-    return (DbObjectTreeModel)super.getModel(); 
+    return (DbObjectTreeModel)super.getModel();
   }
 
 
@@ -368,16 +368,6 @@ public class DbObjectsTree
     loader = null;
   }
 
-  @Override
-	public void expandAll()
-  {
-  }
-
-  @Override
-	public void collapseAll()
-  {
-  }
-
   private DbObjectTreeModel getTreeModel()
   {
     return (DbObjectTreeModel)getModel();
@@ -403,4 +393,31 @@ public class DbObjectsTree
     }
     return null;
   }
+
+  public void expandNodes(List<TreePath> nodes)
+  {
+    if (nodes == null) return;
+    
+    for (TreePath path : nodes)
+    {
+      expandPath(path);
+    }
+  }
+
+  public List<TreePath> getExpandedNodes()
+  {
+    List<TreePath> result = new ArrayList<>();
+    int count = getRowCount();
+    for (int i=0; i < count; i++)
+    {
+      if (isExpanded(i))
+      {
+        TreePath path = getPathForRow(i);
+        result.add(path);
+      }
+    }
+    return result;
+  }
+
+
 }
