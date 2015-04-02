@@ -800,6 +800,8 @@ public class JEditTextArea
       newFirst = numLines - getVisibleLines();
     }
 
+    if (newFirst < 0) newFirst = 0;
+
     setFirstLine(newFirst, true);
     painter.invalidateLineRange(firstLine, firstLine + getVisibleLines());
     updateScrollBars();
