@@ -394,10 +394,27 @@ public class DbObjectsTree
     return null;
   }
 
+  public void reloadNode(ObjectTreeNode node)
+    throws SQLException
+  {
+    if (node == null) return;
+
+    if (TreeLoader.TYPE_SCHEMA.equals(node.getType()))
+    {
+      loader.reloadSchema(node);
+    }
+    else
+    {
+      node.removeAllChildren();
+      loader.loadChildren(node);
+    }
+
+  }
+
   public void expandNodes(List<TreePath> nodes)
   {
     if (nodes == null) return;
-    
+
     for (TreePath path : nodes)
     {
       expandPath(path);

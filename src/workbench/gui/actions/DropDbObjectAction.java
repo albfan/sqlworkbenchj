@@ -73,7 +73,7 @@ public class DropDbObjectAction
 		this.initMenuDefinition(labelKey);
 		this.source = client;
 		this.data = r;
-		setEnabled(list.hasSelection());
+		selectionChanged(list);
 		list.addSelectionListener(this);
 	}
 
@@ -146,7 +146,7 @@ public class DropDbObjectAction
 		}
 		else
 		{
-			setEnabled(this.available && list.hasSelection());
+			setEnabled(this.available && source.getSelectionCount() > 0);
 		}
   }
 

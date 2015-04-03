@@ -49,7 +49,7 @@ public class ObjectTreeNode
   private String nodeType;
   private String nodeName;
   private boolean isLoaded;
-  private Integer rowCount;
+  private Long rowCount;
   private int originalIndex;
   private List<ObjectTreeNode> filteredNodes = new ArrayList<>();
 
@@ -84,12 +84,12 @@ public class ObjectTreeNode
     return isLoaded;
   }
 
-  public void setRowCount(int count)
+  public void setRowCount(Long count)
   {
     rowCount = count;
   }
 
-  public Integer getRowCount()
+  public Long getRowCount()
   {
     return rowCount;
   }
@@ -259,8 +259,4 @@ public class ObjectTreeNode
     filteredNodes.clear();
   }
 
-  public boolean hasFilteredChildren()
-  {
-    return filteredNodes.size() > 0;
-  }
 }

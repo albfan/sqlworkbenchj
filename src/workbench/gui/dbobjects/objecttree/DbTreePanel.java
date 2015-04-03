@@ -36,6 +36,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +89,7 @@ import workbench.util.WbThread;
  */
 public class DbTreePanel
 	extends JPanel
-  implements Reloadable, ActionListener, MouseListener, DbObjectList, ObjectDropListener, KeyListener, QuickFilter
+  implements Reloadable, ActionListener, MouseListener, DbObjectList, ObjectDropListener, KeyListener, QuickFilter, RowCountDisplay
 {
   public static final String PROP_DIVIDER = "divider.location";
   public static final String PROP_VISIBLE = "tree.visible";
@@ -288,18 +289,39 @@ public class DbTreePanel
     }
   }
 
+  public void reloadSelectedNodes()
+  {
+    List<ObjectTreeNode> nodes = getSelectedNodes();
+    if (nodes.isEmpty()) return;
+
+    try
+    {
+      statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrieving"));
+      WbSwingUtilities.showWaitCursor(this);
+      for (ObjectTreeNode node : nodes)
+      {
+        try
+        {
+          tree.reloadNode(node);
+        }
+        catch (SQLException ex)
+        {
+          LogMgr.logError("DbTreePanel.reloadSelectedNodes()", "Could not load node " + node.getType() + " - " + node.getName(), ex);
+        }
+      }
+    }
+    finally
+    {
+      statusBar.clearStatusMessage();
+      WbSwingUtilities.showDefaultCursor(this);
+    }
+  }
+
   public void dispose()
   {
     resetExpanded();
     tree.removeMouseListener(this);
     tree.clear();
-  }
-
-  private int getDividerLocation()
-  {
-    WbSplitPane split = (WbSplitPane)getParent();
-    if (split == null) return -1;
-    return split.getDividerLocation();
   }
 
 	public void saveSettings(WbProperties props)
@@ -406,7 +428,8 @@ public class DbTreePanel
   @Override
   public int getSelectionCount()
   {
-    return tree.getSelectionModel().getSelectionCount();
+    List<DbObject> selected = getSelectedObjects();
+    return selected == null ? 0 : selected.size();
   }
 
   @Override
@@ -449,12 +472,11 @@ public class DbTreePanel
     return null;
   }
 
-  @Override
-  public List<DbObject> getSelectedObjects()
+  public List<ObjectTreeNode> getSelectedNodes()
   {
     int count = tree.getSelectionCount();
 
-    List<DbObject> result = new ArrayList<>(count);
+    List<ObjectTreeNode> result = new ArrayList<>(count);
     if (count == 0) return result;
 
     TreePath[] paths = tree.getSelectionPaths();
@@ -465,12 +487,28 @@ public class DbTreePanel
         ObjectTreeNode node = (ObjectTreeNode)path.getLastPathComponent();
         if (node != null)
         {
-          DbObject dbo = node.getDbObject();
-          if  (dbo != null)
-          {
-            result.add(dbo);
-          }
+          result.add(node);
         }
+      }
+    }
+    return result;
+  }
+
+  @Override
+  public List<DbObject> getSelectedObjects()
+  {
+    List<ObjectTreeNode> nodes = getSelectedNodes();
+
+    int count = nodes.size();
+    List<DbObject> result = new ArrayList<>(count);
+    if (count == 0) return result;
+
+    for (ObjectTreeNode node : nodes)
+    {
+      DbObject dbo = node.getDbObject();
+      if  (dbo != null)
+      {
+        result.add(dbo);
       }
     }
     return result;
@@ -566,42 +604,6 @@ public class DbTreePanel
   {
   }
 
-	private int getSelectedRow()
-	{
-		if (tree.getSelectionCount() != 1) return -1;
-		return tree.getSelectionRows()[0];
-	}
-
-	private void selectPreviousItem()
-	{
-		int row = getSelectedRow();
-		if (row < 0)
-		{
-			row = 0;
-		}
-		else if (row > 0)
-		{
-			row --;
-		}
-		tree.setSelectionRow(row);
-	}
-
-	private void selectNextItem()
-	{
-		int row = getSelectedRow();
-		int count = tree.getRowCount();
-		if (row < 0)
-		{
-			row = 0;
-		}
-		else if (row < count - 1)
-		{
-			row ++;
-		}
-		tree.setSelectionRow(row);
-	}
-
-
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
@@ -687,6 +689,32 @@ public class DbTreePanel
     tree.expandNodes(expanded);
 	}
 
+
+  @Override
+  public void showRowCount(TableIdentifier table, long rows)
+  {
+    if (table == null) return;
+
+    // The show row count action can only be invoked if something is selected
+    // Therefor it's enough to loop through the selected nodes.
+    List<ObjectTreeNode> nodes = getSelectedNodes();
+    for (final ObjectTreeNode node : nodes)
+    {
+      if (table.equals(node.getDbObject()))
+      {
+        node.setRowCount(Long.valueOf(rows));
+        EventQueue.invokeLater(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            tree.getModel().nodeChanged(node);
+          }
+        });
+      }
+    }
+  }
+
   private void resetExpanded()
   {
     if (expandedNodes != null)
@@ -695,4 +723,48 @@ public class DbTreePanel
       expandedNodes = null;
     }
   }
+
+  private int getDividerLocation()
+  {
+    WbSplitPane split = (WbSplitPane)getParent();
+    if (split == null) return -1;
+    return split.getDividerLocation();
+  }
+
+	private int getSelectedRow()
+	{
+		if (tree.getSelectionCount() != 1) return -1;
+		return tree.getSelectionRows()[0];
+	}
+
+	private void selectPreviousItem()
+	{
+		int row = getSelectedRow();
+		if (row < 0)
+		{
+			row = 0;
+		}
+		else if (row > 0)
+		{
+			row --;
+		}
+		tree.setSelectionRow(row);
+	}
+
+	private void selectNextItem()
+	{
+		int row = getSelectedRow();
+		int count = tree.getRowCount();
+		if (row < 0)
+		{
+			row = 0;
+		}
+		else if (row < count - 1)
+		{
+			row ++;
+		}
+		tree.setSelectionRow(row);
+	}
+
+
 }

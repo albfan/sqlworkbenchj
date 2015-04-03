@@ -104,7 +104,7 @@ public class DeleteTablesAction
 		}
 		else
 		{
-			setEnabled(model.hasSelection());
+			setEnabled(source.getSelectionCount() > 0);
 		}
 	}
 

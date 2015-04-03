@@ -95,7 +95,7 @@ public class CreateDummySqlAction
 		this.initMenuDefinition(key);
 		this.source = client;
 		this.scriptType = type;
-		setEnabled(list.hasSelection());
+		setEnabled(client.getSelectionCount() > 0);
 		list.addSelectionListener(this);
 	}
 
@@ -151,7 +151,7 @@ public class CreateDummySqlAction
   @Override
   public void selectionChanged(WbSelectionModel source)
   {
-		setEnabled(source.hasSelection());
+		setEnabled(source.getSelectionCount() > 0);
   }
 
 }

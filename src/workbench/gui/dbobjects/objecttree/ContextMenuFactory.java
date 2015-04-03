@@ -48,15 +48,25 @@ class ContextMenuFactory
   {
     JPopupMenu menu = new JPopupMenu();
 
+    ReloadNodeAction reload = new ReloadNodeAction(dbTree);
+    menu.add(reload);
+    menu.addSeparator();
+
     SpoolDataAction export = new SpoolDataAction(dbTree);
     menu.add(export);
 
-    CountTableRowsAction countAction = new CountTableRowsAction(dbTree, selection);
-    countAction.setConnection(dbTree.getConnection());
-    if (countAction.isEnabled())
+    if (DbTreeSettings.showCountRowsAction())
     {
-      menu.add(countAction);
+      CountTableRowsAction countAction = new CountTableRowsAction(dbTree, selection);
+      countAction.setConnection(dbTree.getConnection());
+      if (countAction.isEnabled())
+      {
+        menu.add(countAction);
+      }
     }
+
+    ShowRowCountAction showCount = new ShowRowCountAction(dbTree, selection, dbTree);
+    menu.add(showCount);
 
     Window w = SwingUtilities.getWindowAncestor(dbTree);
     if (w instanceof MainWindow)
@@ -73,9 +83,6 @@ class ContextMenuFactory
     menu.add(CreateDummySqlAction.createDummyInsertAction(dbTree, selection));
 		menu.add(CreateDummySqlAction.createDummyUpdateAction(dbTree, selection));
 		menu.add(CreateDummySqlAction.createDummySelectAction(dbTree, selection));
-
-//		SchemaReportAction action = new SchemaReportAction(dbTree);
-//		menu.add(action);
 
     ScriptDbObjectAction script = new ScriptDbObjectAction(dbTree, selection);
     menu.add(script);

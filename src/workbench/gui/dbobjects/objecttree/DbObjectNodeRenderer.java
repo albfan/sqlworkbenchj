@@ -59,6 +59,7 @@ public class DbObjectNodeRenderer
     iconMap.put(TreeLoader.TYPE_SCHEMA, "folder");
     iconMap.put(TreeLoader.TYPE_CATALOG, "folder");
     iconMap.put(TreeLoader.TYPE_DBO_TYPE_NODE, "db_type");
+    iconMap.put("index", "index");
 
     iconMapOpen.put(TreeLoader.TYPE_SCHEMA, "folder-open");
     iconMapOpen.put(TreeLoader.TYPE_CATALOG, "folder-open");

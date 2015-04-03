@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
@@ -39,7 +40,6 @@ import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
 
 import workbench.util.CollectionUtil;
 
@@ -252,13 +252,42 @@ public class TreeLoader
     int count = schemaNode.getChildCount();
     for (int i=0; i < count; i++)
     {
-      loadObjectsByType((ObjectTreeNode)schemaNode.getChildAt(i));
+      loadObjectsForTypeNode((ObjectTreeNode)schemaNode.getChildAt(i));
     }
     model.nodeStructureChanged(schemaNode);
     model.nodeChanged(schemaNode);
   }
 
-  public void loadObjectsByType(ObjectTreeNode typeNode)
+  public void reloadTableNode(ObjectTreeNode node)
+    throws SQLException
+  {
+    DbObject dbo = node.getDbObject();
+    if (! (dbo instanceof TableIdentifier) ) return;
+
+    node.removeAllChildren();
+    addColumnsNode(node);
+    addTableNodes(node);
+
+    int count = node.getChildCount();
+
+    for (int i=0; i < count; i++)
+    {
+      ObjectTreeNode child = node.getChildAt(i);
+      loadChildren(child);
+    }
+    model.nodeStructureChanged(node);
+  }
+
+  public void reloadNode(ObjectTreeNode node)
+    throws SQLException
+  {
+    if (node == null) return;
+
+    node.removeAllChildren();
+    loadChildren(node);
+  }
+
+  public void loadObjectsForTypeNode(ObjectTreeNode typeNode)
     throws SQLException
   {
     if (typeNode == null) return;
@@ -513,7 +542,7 @@ public class TreeLoader
       }
       else if (TYPE_DBO_TYPE_NODE.equals(type))
       {
-        loadObjectsByType(node);
+        loadObjectsForTypeNode(node);
       }
       else if (TYPE_COLUMN_LIST.equals(type))
       {
@@ -544,6 +573,10 @@ public class TreeLoader
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
+      }
+      else if (node.getDbObject() instanceof TableIdentifier)
+      {
+        reloadTableNode(node);
       }
     }
     finally

@@ -264,19 +264,13 @@ public class TableRowCountPanel
 
 				rs = JdbcUtils.runStatement(dbConnection, currentStatement, sql, useSeparateConnection, useSavepoint);
 
-				if (cancel) break;
-
-				long rowCount = 0;
-				if (rs == null)
+				if (rs != null && rs.next())
 				{
-					rowCount = -1;
-				}
-				else if (rs.next())
-				{
-					rowCount = rs.getLong(1);
+					long rowCount = rs.getLong(1);
+          addRowCount(table, rowCount);
 				}
 				SqlUtil.closeResult(rs);
-				addRowCount(table, rowCount);
+				if (cancel) break;
 			}
 		}
 		catch (SQLException sql)

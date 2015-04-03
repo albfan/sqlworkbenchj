@@ -36,6 +36,7 @@ import workbench.interfaces.FilenameChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.DbObject;
 import workbench.db.DependencyNode;
 import workbench.db.TableDefinition;
 import workbench.db.TableSelectBuilder;
@@ -183,6 +184,9 @@ public class EditorTabSelectMenu
 			item.addActionListener(target == null ? this : target);
 			this.add(item);
 		}
+
+    List<DbObject> objects = objectList == null ? null : objectList.getSelectedObjects();
+    setEnabled(CollectionUtil.isNonEmpty(objects));
 	}
 
 	/**

@@ -53,7 +53,7 @@ public class ScriptDbObjectAction
 		this.initMenuDefinition("MnuTxtCreateScript");
 		this.source = client;
 		this.selection = list;
-		setEnabled(selection.hasSelection());
+		setEnabled(source.getSelectionCount() > 0);
 		setIcon("script");
 		list.addSelectionListener(this);
 	}
@@ -75,7 +75,7 @@ public class ScriptDbObjectAction
   @Override
   public void selectionChanged(WbSelectionModel source)
   {
-    setEnabled(source.hasSelection());
+    setEnabled(source.getSelectionCount() > 0);
   }
 
 }

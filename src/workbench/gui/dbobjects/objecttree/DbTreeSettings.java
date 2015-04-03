@@ -72,4 +72,14 @@ public class DbTreeSettings
     Settings.getInstance().setProperty(SETTINGS_PREFIX + "quickfilter", flag);
   }
 
+  public static boolean showCountRowsAction()
+  {
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "count.rows.visible", false);
+  }
+
+  public static void setShowCountRowsAction(boolean flag)
+  {
+    Settings.getInstance().setProperty(SETTINGS_PREFIX + "count.rows.visible", flag);
+  }
+
 }
