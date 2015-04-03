@@ -323,6 +323,23 @@ public class DB2TypeReader
 		return sql.toString();
 	}
 
+  @Override
+  public boolean hasColumns()
+  {
+    return true;
+  }
+
+  @Override
+	public List<ColumnIdentifier> getColumns(WbConnection con, DbObject type)
+  {
+    if (type instanceof DB2ObjectType)
+    {
+      return getAttributes(con, (DB2ObjectType)type);
+    }
+    return null;
+  }
+
+
 	public List<ColumnIdentifier> getAttributes(WbConnection con, DB2ObjectType type)
 	{
 		if (type == null) return null;
@@ -407,4 +424,6 @@ public class DB2TypeReader
 		}
 		return type.intValue();
 	}
+
+
 }

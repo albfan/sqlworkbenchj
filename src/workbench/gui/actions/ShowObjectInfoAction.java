@@ -101,38 +101,7 @@ public class ShowObjectInfoAction
 			ObjectInfo info = new ObjectInfo();
 
 			boolean deps = conn.getDbSettings().objectInfoWithDependencies();
-			String text = display.getSelectedText();
-			if (StringUtil.isEmptyString(text))
-			{
-				// Use valid SQL characters including schema/catalog separator and the quote character
-				// for the list of allowed (additional) word characters so that fully qualified names (public.foo)
-				// and quoted names ("public"."Foo") are identified correctly
-
-				// this will not cover more complex situations where non-standard names are used inside quotes (e.g. "Stupid Name")
-				// but will cover most of the usual situations
-
-				String wordChars = "_$";
-
-				char schemaSeparator = SqlUtil.getSchemaSeparator(conn);
-				wordChars += schemaSeparator;
-				char catSeparator = SqlUtil.getCatalogSeparator(conn);
-
-				if (catSeparator != schemaSeparator)
-				{
-					wordChars += catSeparator;
-				}
-
-				// now add the quote character used by the DBMS
-				wordChars += conn.getMetadata().getQuoteCharacter();
-
-				if (conn.getMetadata().isSqlServer())
-				{
-					// add the stupid Microsoft quoting stuff
-					wordChars += "[]";
-				}
-
-				text = display.getEditor().getWordAtCursor(wordChars);
-			}
+      String text = SqlUtil.getIdentifierAtCursor(display.getEditor(), conn);
 
 			if (StringUtil.isNonBlank(text))
 			{

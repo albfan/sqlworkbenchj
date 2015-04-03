@@ -19,55 +19,61 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-import java.util.List;
 
-import workbench.gui.WbSwingUtilities;
+import workbench.interfaces.TextContainer;
+
+import workbench.db.TableIdentifier;
+
 import workbench.gui.actions.WbAction;
 
-import workbench.util.WbThread;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class ReloadNodeAction
+public class FindObjectAction
   extends WbAction
 {
-  private DbTreePanel panel;
+  private ObjectFinder finder;
+  private TextContainer textContainer;
 
-  public ReloadNodeAction(DbTreePanel tree)
+  public FindObjectAction(TextContainer container)
   {
-		super();
-		initMenuDefinition("TxtReload");
-    panel = tree;
-    List<ObjectTreeNode> nodes = tree.getSelectedNodes();
-    int containerNodes = 0;
-    for (ObjectTreeNode node : nodes)
-    {
-      if (node.canHaveChildren())
-      //if (node.getDbObject() == null || node.getDbObject() instanceof TableIdentifier)
-      {
-        containerNodes ++;
-      }
-    }
-    setEnabled(containerNodes == nodes.size());
+    super();
+    initMenuDefinition("MnuTxtFindObjInTree");
+    textContainer = container;
+    setEnabled(false);
+  }
+
+  public void setFinder(ObjectFinder objFinder)
+  {
+    finder = objFinder;
+    setEnabled(finder != null);
   }
 
   @Override
   public void executeAction(ActionEvent e)
   {
-    if (!WbSwingUtilities.isConnectionIdle(panel, panel.getConnection())) return;
+    if (textContainer == null) return;
+    if (finder == null) return;
 
-    WbThread load = new WbThread(new Runnable()
+    String text = SqlUtil.getIdentifierAtCursor(textContainer, finder.getConnection());
+    if (StringUtil.isBlank(text)) return;
+
+    final TableIdentifier tbl = new TableIdentifier(text);
+    EventQueue.invokeLater(new Runnable()
     {
+
       @Override
       public void run()
       {
-        panel.reloadSelectedNodes();
+        finder.selectObject(tbl);
       }
-    }, "Node Reload Thread");
-    load.start();
+    });
   }
 
 }

@@ -242,7 +242,19 @@ public class OracleTypeReader
 		return result;
 	}
 
-	public List<ColumnIdentifier> getAttributes(WbConnection con, OracleObjectType type)
+  @Override
+  public boolean hasColumns()
+  {
+    return true;
+  }
+
+  @Override
+  public List<ColumnIdentifier> getColumns(WbConnection con, DbObject object)
+  {
+    return getAttributes(con, object);
+  }
+
+	public List<ColumnIdentifier> getAttributes(WbConnection con, DbObject type)
 	{
 		if (type == null) return null;
 
@@ -260,7 +272,7 @@ public class OracleTypeReader
 		sql += " ORDER BY attr_no";
 		Statement stmt = null;
 		ResultSet rs = null;
-		List<ColumnIdentifier> result = new ArrayList<>(type.getNumberOfAttributes());
+		List<ColumnIdentifier> result = new ArrayList<>();
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

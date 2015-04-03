@@ -2190,6 +2190,50 @@ public class DbMetadata
 		return StringUtil.equalStringIgnoreCase(type, reader.getSequenceTypeName());
 	}
 
+  public List<ColumnIdentifier> getObjectColumns(DbObject object)
+    throws SQLException
+  {
+    if (object == null) return null;
+
+    if ((isTableType(object.getObjectType()) || isExtendedTableType(object.getObjectType())) && (object instanceof TableIdentifier))
+    {
+      return getTableColumns((TableIdentifier)object);
+    }
+
+		for (ObjectListExtender extender : extenders)
+		{
+			if (extender.handlesType(object.getObjectType()))
+			{
+        return extender.getColumns(dbConnection, object);
+			}
+		}
+    return null;
+  }
+
+  public boolean hasColumns(DbObject object)
+  {
+    if (object == null) return false;
+    return hasColumns(object.getObjectType());
+  }
+
+  public boolean hasColumns(String objectType)
+  {
+    if (objectType == null) return false;
+    if (isTableType(objectType) || isExtendedTableType(objectType)) return true;
+
+    if (getViewTypeName().equalsIgnoreCase(objectType)) return true;
+
+
+		for (ObjectListExtender extender : extenders)
+		{
+			if (extender.handlesType(objectType))
+			{
+        return extender.hasColumns();
+			}
+		}
+    return false;
+  }
+
 	public DataStore getObjectDetails(TableIdentifier table)
 		throws SQLException
 	{
@@ -2654,7 +2698,7 @@ public class DbMetadata
 
 		if (supportsSynonyms())
 		{
-			result.add("SYNONYM");
+			result.add(getSynonymReader().getSynonymTypeName());
 		}
 
 		SequenceReader reader = getSequenceReader();

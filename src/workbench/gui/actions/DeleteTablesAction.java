@@ -104,7 +104,8 @@ public class DeleteTablesAction
 		}
 		else
 		{
-			setEnabled(source.getSelectionCount() > 0);
+      List<TableIdentifier> tables = DbObjectList.Util.getSelectedTableObjects(source);
+			setEnabled(tables.size() > 0);
 		}
 	}
 

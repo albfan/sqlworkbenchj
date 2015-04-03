@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
@@ -171,11 +170,13 @@ public class TreeLoader
   public void load()
     throws SQLException
   {
+    boolean loaded = false;
+
     if (connection.getDbSettings().supportsCatalogs())
     {
-      loadCatalogs(root);
+      loaded = loadCatalogs(root);
     }
-    else
+    if (!loaded)
     {
       loadSchemas(root);
     }
@@ -208,7 +209,7 @@ public class TreeLoader
     model.nodeChanged(parentNode);
   }
 
-  public void loadCatalogs(ObjectTreeNode parentNode)
+  public boolean loadCatalogs(ObjectTreeNode parentNode)
     throws SQLException
   {
     List<String> catalogs = connection.getMetadata().getCatalogInformation(connection.getCatalogFilter());
@@ -224,6 +225,7 @@ public class TreeLoader
     }
     model.nodeStructureChanged(parentNode);
     model.nodeChanged(parentNode);
+    return catalogs.size() > 0;
   }
 
   private void addTypeNodes(ObjectTreeNode parentNode)
@@ -292,22 +294,31 @@ public class TreeLoader
   {
     if (typeNode == null) return;
     ObjectTreeNode parent = typeNode.getParent();
-    String schema = parent.getName();
+    String schema = null;
     String catalog = null;
 
-    if (connection.getDbSettings().supportsCatalogs())
+    if (parent.getType().equals(TYPE_CATALOG))
     {
+      catalog = parent.getName();
+    }
+
+    if (parent.getType().equals(TYPE_SCHEMA))
+    {
+      schema = parent.getName();
+    }
+
+    if (connection.getDbSettings().supportsCatalogs() && connection.getDbSettings().supportsSchemas())
+    {
+      // if schemas and catalogs are supported, the current node must be a schema
+      // and the parent of that must be a catalog
       ObjectTreeNode catNode = parent.getParent();
-      if (catNode == null)
-      {
-        LogMgr.logError("TreeLoader.loadObjectsByType()", "No catalog parent for schema!", null);
-      }
-      else
+      if (catNode != null && catNode.getType().equals(TYPE_CATALOG))
       {
         catalog = catNode.getName();
       }
     }
 
+    boolean loaded = true;
     List<TableIdentifier> objects = connection.getMetadata().getObjectList(null, catalog, schema, new String[] { typeNode.getName() });
     for (TableIdentifier tbl : objects)
     {
@@ -316,7 +327,14 @@ public class TreeLoader
       if (hasColumns(tbl))
       {
         node.setAllowsChildren(true);
-        addColumnsNode(node);
+        if (connection.getMetadata().isExtendedObject(tbl))
+        {
+          loaded = false;
+        }
+        else
+        {
+          addColumnsNode(node);
+        }
       }
       if (isTable(tbl))
       {
@@ -325,7 +343,7 @@ public class TreeLoader
         connection.getObjectCache().addTable(new TableDefinition(tbl));
       }
       typeNode.add(node);
-      node.setChildrenLoaded(true);
+      node.setChildrenLoaded(loaded);
     }
     model.nodeStructureChanged(typeNode);
     model.nodeChanged(typeNode);
@@ -426,15 +444,17 @@ public class TreeLoader
       return;
     }
 
-    if (!(dbo instanceof TableIdentifier)) return;
+    List<ColumnIdentifier> columns = connection.getMetadata().getObjectColumns(dbo);
+    if (columns == null)
+    {
+      return;
+    }
 
-    TableIdentifier tbl = (TableIdentifier)dbo;
-    DbMetadata meta = connection.getMetadata();
-
-    if (!hasColumns(tbl)) return;
-
-    List<ColumnIdentifier> columns = meta.getTableColumns(tbl);
-    connection.getObjectCache().addTable(new TableDefinition(tbl, columns));
+    if (dbo instanceof TableIdentifier)
+    {
+      TableIdentifier tbl = (TableIdentifier)dbo;
+      connection.getObjectCache().addTable(new TableDefinition(tbl, columns));
+    }
     for (ColumnIdentifier col : columns)
     {
       ObjectTreeNode node = new ObjectTreeNode(col);
@@ -512,13 +532,11 @@ public class TreeLoader
     return meta.isExtendedTableType(dbo.getObjectType());
   }
 
-  private boolean hasColumns(TableIdentifier tbl)
+  private boolean hasColumns(DbObject dbo)
   {
-    if (tbl == null) return false;
-    if (isTable(tbl)) return true;
+    if (dbo == null) return false;
     DbMetadata meta = connection.getMetadata();
-    if (meta.isExtendedTableType(tbl.getObjectType())) return true;
-    return meta.getViewTypeName().equalsIgnoreCase(tbl.getType());
+    return meta.hasColumns(dbo);
   }
 
   public WbConnection getConnection()
@@ -573,6 +591,10 @@ public class TreeLoader
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
+      }
+      else if (connection.getMetadata().hasColumns(node.getType()))
+      {
+        loadTableColumns(node.getDbObject(), node);
       }
       else if (node.getDbObject() instanceof TableIdentifier)
       {

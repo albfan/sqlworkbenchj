@@ -182,6 +182,8 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarSeparator;
+import workbench.gui.dbobjects.objecttree.FindObjectAction;
+import workbench.gui.dbobjects.objecttree.ObjectFinder;
 import workbench.gui.dbobjects.objecttree.ResultTabDropHandler;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.gui.dialogs.export.ExportFileDialog;
@@ -314,6 +316,8 @@ public class SqlPanel
 	protected FindDataAgainAction findDataAgainAction;
 	protected ReplaceDataAction replaceDataAction;
 	protected ResetHighlightAction resetHighlightAction;
+
+  protected FindObjectAction findInDbTree;
 
 	protected WbToolbar toolbar;
 	protected ConnectionInfo connectionInfo;
@@ -487,6 +491,20 @@ public class SqlPanel
 			}
 		});
 	}
+
+  @Override
+  public void registerObjectFinder(ObjectFinder finder)
+  {
+    findInDbTree.setFinder(finder);
+    if (finder == null)
+    {
+      editor.removePopupMenuItem(findInDbTree);
+    }
+    else
+    {
+      editor.addPopupMenuItem(findInDbTree, false);
+    }
+  }
 
 	public void setDividerLocation(int location)
 	{
@@ -1041,6 +1059,8 @@ public class SqlPanel
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
 		editor.addKeyBinding(showTip);
+
+    findInDbTree = new FindObjectAction(editor);
 	}
 
 	@Override

@@ -51,19 +51,25 @@ public class DbObjectNodeRenderer
 	{
 		super();
     iconMap.put(TreeLoader.TYPE_TABLE, "table");
-    iconMap.put(TreeLoader.TYPE_VIEW, "table");
+    iconMap.put(TreeLoader.TYPE_VIEW, "view");
     iconMap.put(SynonymReader.SYN_TYPE_NAME, "synonym");
     iconMap.put("sequence", "sequence");
-    iconMap.put(DbMetadata.MVIEW_NAME, "table");
+    iconMap.put(DbMetadata.MVIEW_NAME, "mview");
     iconMap.put("database", "profile");
     iconMap.put(TreeLoader.TYPE_SCHEMA, "folder");
     iconMap.put(TreeLoader.TYPE_CATALOG, "folder");
     iconMap.put(TreeLoader.TYPE_DBO_TYPE_NODE, "db_type");
     iconMap.put("index", "index");
+    iconMap.put("type", "type");
 
     iconMapOpen.put(TreeLoader.TYPE_SCHEMA, "folder-open");
     iconMapOpen.put(TreeLoader.TYPE_CATALOG, "folder-open");
 	}
+
+  public void setSynonymTypeName(String name)
+  {
+    iconMap.put(name, "synonym");
+  }
 
 	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean isLeaf, int row, boolean hasFocus)

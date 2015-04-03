@@ -57,7 +57,7 @@ public interface ObjectListExtender
 	 * This is currently only used in the DbExplorer to hide some types from the "Type dropdown"
 	 *
 	 * @return true if this type is derived from an existing one.
-	 * @see DbMetadata#getObjectTypes() 
+	 * @see DbMetadata#getObjectTypes()
 	 */
 	boolean isDerivedType();
 
@@ -99,4 +99,16 @@ public interface ObjectListExtender
 	DbObject getObjectDefinition(WbConnection con, DbObject name);
 
 	String getObjectSource(WbConnection con, DbObject object);
+
+  /**
+   * Return a list of columns if this object type supports them.
+   *
+   * @param con     the connection to use
+   * @param object  the object for which to return the column
+   *
+   * @return a list of column or null if this type does not have something similar
+   */
+  List<ColumnIdentifier> getColumns(WbConnection con, DbObject object);
+
+  boolean hasColumns();
 }

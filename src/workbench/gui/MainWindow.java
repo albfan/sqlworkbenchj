@@ -403,6 +403,13 @@ public class MainWindow
     {
       treePanel.requestFocusInWindow();
     }
+
+    int count = getTabCount();
+    for (int i=0; i < count - 1; i++)
+    {
+      MainPanel sqlPanel = getSqlPanel(i);
+      sqlPanel.registerObjectFinder(treePanel);
+    }
   }
 
   public void hideDbTree()
@@ -440,6 +447,12 @@ public class MainWindow
       validate();
       treePanel.disconnect(false); // this will be done in the background
       treePanel = null;
+      int count = getTabCount();
+      for (int i=0; i < count - 1; i++)
+      {
+        MainPanel sqlPanel = getSqlPanel(i);
+        sqlPanel.registerObjectFinder(treePanel);
+      }
     }
   }
 
@@ -3205,6 +3218,7 @@ public class MainWindow
 	private MainPanel addTabAtIndex(boolean selectNew, boolean checkConnection, boolean renumber, int index)
 	{
 		final SqlPanel sql = new SqlPanel(getMacroClientId());
+    sql.registerObjectFinder(treePanel);
 		addTabAtIndex(sql, selectNew, checkConnection, renumber, index);
 		return sql;
 	}

@@ -33,6 +33,7 @@ import workbench.db.WbConnection;
 import workbench.gui.actions.WbAction;
 import workbench.gui.bookmarks.NamedScriptLocation;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.dbobjects.objecttree.ObjectFinder;
 
 import workbench.util.WbWorkspace;
 
@@ -73,4 +74,5 @@ public interface MainPanel
 	boolean isModifiedAfter(long time);
 	void jumpToBookmark(NamedScriptLocation bookmark);
 	boolean supportsBookmarks();
+  void registerObjectFinder(ObjectFinder finder);
 }

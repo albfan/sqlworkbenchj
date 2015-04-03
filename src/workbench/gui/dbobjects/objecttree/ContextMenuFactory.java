@@ -97,10 +97,7 @@ class ContextMenuFactory
     menu.add(dropScript);
 
     DeleteTablesAction deleteData = new DeleteTablesAction(dbTree, selection, null);
-    if (deleteData.isEnabled())
-    {
-      menu.add(deleteData);
-    }
+    menu.add(deleteData);
 
     return menu;
   }

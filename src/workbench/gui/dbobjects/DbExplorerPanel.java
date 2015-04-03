@@ -79,6 +79,7 @@ import workbench.gui.components.FlatButton;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
+import workbench.gui.dbobjects.objecttree.ObjectFinder;
 import workbench.gui.sql.PanelTitleSetter;
 import workbench.gui.sql.PanelType;
 
@@ -284,6 +285,11 @@ public class DbExplorerPanel
 			LogMgr.logError(this, "Could not initialize DbExplorerPanel", e);
 		}
 	}
+
+  @Override
+  public void registerObjectFinder(ObjectFinder finder)
+  {
+  }
 
   @Override
   public boolean isModifiedAfter(long time)

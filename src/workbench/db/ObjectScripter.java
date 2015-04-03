@@ -72,6 +72,7 @@ public class ObjectScripter
 	private boolean includeGrants = true;
 	private Collection<String> typesWithoutSeparator;
 	private String sequenceType;
+	private String synonymType = TYPE_SYNONYM;
 	private GenericObjectDropper dropper;
 
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
@@ -84,12 +85,27 @@ public class ObjectScripter
 		{
 			sequenceType = reader.getSequenceTypeName();
 		}
-		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM, TYPE_TYPE, TYPE_RULE);
+
+    SynonymReader synReader = aConnection.getMetadata().getSynonymReader();
+    if (synReader != null)
+    {
+      synonymType = synReader.getSynonymTypeName();
+    }
+
+		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM, TYPE_TYPE, TYPE_RULE);
+
 		if (sequenceType != null)
 		{
 			commitTypes.add(sequenceType.toLowerCase());
       knownTypes.add(sequenceType);
 		}
+
+    if (synonymType != null)
+		{
+			commitTypes.add(synonymType.toLowerCase());
+      knownTypes.add(synonymType);
+		}
+
 		typesWithoutSeparator = CollectionUtil.caseInsensitiveSet(TYPE_SELECT, TYPE_INSERT, TYPE_UPDATE);
 		dropper = new GenericObjectDropper();
 		dropper.setConnection(dbConnection);
@@ -151,7 +167,7 @@ public class ObjectScripter
 			if (!cancel) this.appendObjectType(TYPE_TABLE);
 			if (!cancel) this.appendForeignKeys();
 			if (!cancel) this.appendObjectType(TYPE_VIEW);
-			if (!cancel) this.appendObjectType(TYPE_SYNONYM);
+			if (!cancel && synonymType != null) this.appendObjectType(synonymType);
 			if (!cancel) this.appendObjectType(TYPE_MVIEW);
 			if (!cancel) this.appendObjectType(TYPE_INSERT);
 			if (!cancel) this.appendObjectType(TYPE_UPDATE);
@@ -307,5 +323,4 @@ public class ObjectScripter
 			}
 		}
 	}
-
 }

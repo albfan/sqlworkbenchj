@@ -37,12 +37,13 @@ import javax.swing.JTextArea;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.editor.SearchAndReplace;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.editor.SearchAndReplace;
 
 /**
  * A simple text editor based on a JTextArea.
@@ -219,5 +220,11 @@ public class PlainEditor
 	{
 		return (getSelectionStart() < getSelectionEnd());
 	}
+
+  @Override
+  public String getWordAtCursor(String wordChars)
+  {
+    return null;
+  }
 
 }

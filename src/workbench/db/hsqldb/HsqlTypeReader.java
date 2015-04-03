@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.BaseObjectType;
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.ObjectListExtender;
@@ -76,7 +77,7 @@ public class HsqlTypeReader
 
 	public List<HsqlType> getTypes(WbConnection con, String schemaPattern, String objectPattern)
 	{
-		List<HsqlType> result = new ArrayList<HsqlType>();
+		List<HsqlType> result = new ArrayList<>();
 
     StringBuilder select = new StringBuilder(100);
 
@@ -147,7 +148,7 @@ public class HsqlTypeReader
 	{
 		return false;
 	}
-	
+
 	@Override
 	public List<String> supportedTypes()
 	{
@@ -225,4 +226,17 @@ public class HsqlTypeReader
 		sql.append(";\n");
 		return sql.toString();
 	}
+
+  @Override
+  public List<ColumnIdentifier> getColumns(WbConnection con, DbObject object)
+  {
+    return null;
+  }
+  
+  @Override
+  public boolean hasColumns()
+  {
+    return false;
+  }
+
 }

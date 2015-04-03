@@ -49,6 +49,7 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -491,11 +492,36 @@ public class EditorPanel
 		}
 	}
 
+	public final void removePopupMenuItem(WbAction anAction)
+	{
+		if (popup == null) return;
+    if (anAction == null) return;
+    int count = getComponentCount();
+    int removeIndex = -1;
+    for (int i=0; i < count; i++)
+    {
+      Component comp = popup.getComponent(i);
+      if (comp instanceof JMenuItem)
+      {
+        JMenuItem item = (JMenuItem)comp;
+        if (item.getAction() == anAction)
+        {
+          removeIndex = -1;
+          break;
+        }
+      }
+    }
+    if (removeIndex > -1)
+    {
+      popup.remove(removeIndex);
+    }
+	}
+
 	public final void addPopupMenuItem(WbAction anAction, boolean withSeparator)
 	{
 		if (popup == null) return;
 		popup.addAction(anAction, withSeparator);
-		this.addKeyBinding(anAction);
+		addKeyBinding(anAction);
 	}
 
 	@Override

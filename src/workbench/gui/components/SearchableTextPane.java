@@ -27,10 +27,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
+
 import javax.swing.JTextArea;
-import workbench.gui.editor.SearchAndReplace;
+
 import workbench.interfaces.TextContainer;
 import workbench.resource.Settings;
+
+import workbench.gui.editor.SearchAndReplace;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 
@@ -76,5 +80,11 @@ public class SearchableTextPane
 			FileUtil.closeQuietely(in);
 		}
 	}
+
+  @Override
+  public String getWordAtCursor(String wordChars)
+  {
+    return null;
+  }
 
 }

@@ -37,6 +37,7 @@ import javax.swing.tree.TreeSelectionModel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
@@ -56,13 +57,15 @@ public class DbObjectsTree
   private TreeLoader loader;
   private ObjectTreeDragSource dragSource;
   private WbStatusLabel statusBar;
+  private DbObjectNodeRenderer renderer;
 
   public DbObjectsTree(WbStatusLabel status)
   {
     super(new DbObjectTreeModel(new ObjectTreeNode("Database", "database")));
     setShowsRootHandles(true);
     addTreeExpansionListener(this);
-		setCellRenderer(new DbObjectNodeRenderer());
+    renderer = new DbObjectNodeRenderer();
+		setCellRenderer(renderer);
 		setAutoscrolls(true);
 
 		setEditable(false);
@@ -98,6 +101,10 @@ public class DbObjectsTree
     {
       loader.setConnection(conn, conn.getProfile().getName());
       setModel(loader.getModel());
+      if (conn.getMetadata().getSynonymReader() != null)
+      {
+        renderer.setSynonymTypeName(conn.getMetadata().getSynonymReader().getSynonymTypeName());
+      }
     }
     else
     {
@@ -198,6 +205,44 @@ public class DbObjectsTree
 
   }
 
+  public void selectObject(TableIdentifier tbl)
+  {
+    if (tbl == null) return;
+
+    ObjectTreeNode node = findNodeByDbObject(getModel().getRoot(), tbl);
+    if (node != null)
+    {
+      expandNode(node);
+    }
+  }
+
+  public ObjectTreeNode findNodeByDbObject(ObjectTreeNode parent, TableIdentifier table)
+  {
+    if (parent == null) return null;
+    if (table == null) return null;
+
+    int childCount = parent.getChildCount();
+    for (int i = 0; i < childCount; i++)
+    {
+      ObjectTreeNode child = (ObjectTreeNode)parent.getChildAt(i);
+      if (child != null && child.getDbObject() != null)
+      {
+        if (child.getDbObject() instanceof TableIdentifier)
+        {
+          TableIdentifier other = (TableIdentifier)child.getDbObject();
+          if (table.compareNames(other))
+          {
+            return child;
+          }
+        }
+      }
+      ObjectTreeNode n2 = findNodeByDbObject(child, table);
+      if (n2 != null) return n2;
+    }
+    return null;
+  }
+
+
   private void reloadSchema(String schema)
   {
     ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_SCHEMA);
@@ -258,11 +303,12 @@ public class DbObjectsTree
           @Override
           public void run()
           {
+            boolean selected = false;
             if (useCatalog)
             {
-              selectCurrentCatalog();
+              selected = selectCurrentCatalog();
             }
-            else
+            if (!selected)
             {
               selectCurrentSchema();
             }
@@ -302,13 +348,15 @@ public class DbObjectsTree
     expandNode(node);
   }
 
-  public void selectCurrentCatalog()
+  public boolean selectCurrentCatalog()
   {
     WbConnection conn = loader.getConnection();
-    if (conn == null || conn.isBusy()) return;
-    String schema = conn.getCurrentCatalog();
-    ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_CATALOG);
+    if (conn == null || conn.isBusy()) return false;
+    String catalog = conn.getCurrentCatalog();
+    if (catalog == null) return false;
+    ObjectTreeNode node = getTreeModel().findNodeByType(catalog, TreeLoader.TYPE_CATALOG);
     expandNode(node);
+    return node != null;
   }
 
   @Override

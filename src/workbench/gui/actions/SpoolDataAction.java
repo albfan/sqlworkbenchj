@@ -66,7 +66,7 @@ public class SpoolDataAction
 		this.initMenuDefinition(msgKey);
 		this.setIcon("spool-data");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		setEnabled(objects.getSelectionCount() > 0);
+    setEnabled(DbObjectList.Util.getSelectedTableObjects(list).size() > 0);
 	}
 
 	public SpoolDataAction(Exporter exporter, String msgKey)

@@ -89,7 +89,9 @@ import workbench.util.WbThread;
  */
 public class DbTreePanel
 	extends JPanel
-  implements Reloadable, ActionListener, MouseListener, DbObjectList, ObjectDropListener, KeyListener, QuickFilter, RowCountDisplay
+  implements Reloadable, ActionListener, MouseListener, DbObjectList,
+             ObjectDropListener, KeyListener, QuickFilter, RowCountDisplay,
+             ObjectFinder
 {
   public static final String PROP_DIVIDER = "divider.location";
   public static final String PROP_VISIBLE = "tree.visible";
@@ -217,6 +219,12 @@ public class DbTreePanel
       }
     }, "DbTree Load Thread");
     th.start();
+  }
+
+  @Override
+  public void selectObject(TableIdentifier tbl)
+  {
+    tree.selectObject(tbl);
   }
 
   public void connect(final ConnectionProfile profile)

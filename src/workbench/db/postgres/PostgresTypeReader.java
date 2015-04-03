@@ -23,6 +23,7 @@
 package workbench.db.postgres;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -259,9 +260,8 @@ public class PostgresTypeReader
 			List<BaseObjectType> types = getTypes(con, name.getSchema(), name.getObjectName());
 			if (types.size() == 1)
 			{
-				TableDefinition tdef = con.getMetadata().getTableDefinition(createTableIdentifier(name));
 				BaseObjectType result = types.get(0);
-				result.setAttributes(tdef.getColumns());
+				result.setAttributes(getColumns(con, name));
 				return result;
 			}
 		}
@@ -271,6 +271,33 @@ public class PostgresTypeReader
 		}
 		return null;
 	}
+
+  @Override
+  public boolean hasColumns()
+  {
+    return true;
+  }
+
+  @Override
+  public List<ColumnIdentifier> getColumns(WbConnection con, DbObject object)
+  {
+    if (object == null) return null;
+    if (con == null) return null;
+
+    try
+    {
+      TableDefinition tdef = con.getMetadata().getTableDefinition(createTableIdentifier(object));
+      if (tdef != null)
+      {
+        return tdef.getColumns();
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logWarning("PostgresTypeReader.getColumns()", "Could not read colums for type: " + object.getFullyQualifiedName(con), ex);
+    }
+    return null;
+  }
 
 	private TableIdentifier createTableIdentifier(DbObject object)
 	{

@@ -34,6 +34,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DomainIdentifier;
@@ -268,4 +269,15 @@ public class H2DomainReader
 		return getDomainSource(getObjectDefinition(con, object));
 	}
 
+  @Override
+  public List<ColumnIdentifier> getColumns(WbConnection con, DbObject object)
+  {
+    return null;
+  }
+
+  @Override
+  public boolean hasColumns()
+  {
+    return false;
+  }
 }

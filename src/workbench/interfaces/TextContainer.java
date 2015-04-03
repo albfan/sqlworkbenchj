@@ -40,4 +40,5 @@ public interface TextContainer
 	void setEditable(boolean flag);
 	boolean isEditable();
 	boolean isTextSelected();
+  String getWordAtCursor(String wordChars);
 }

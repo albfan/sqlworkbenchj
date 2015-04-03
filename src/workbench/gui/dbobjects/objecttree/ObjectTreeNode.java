@@ -52,6 +52,7 @@ public class ObjectTreeNode
   private Long rowCount;
   private int originalIndex;
   private List<ObjectTreeNode> filteredNodes = new ArrayList<>();
+  private boolean supportsChildren;
 
   public ObjectTreeNode(DbObject dbo)
   {
@@ -104,10 +105,10 @@ public class ObjectTreeNode
 
   public boolean canHaveChildren()
   {
-    if (getType() == null) return false;
-    return typesWithChildren.contains(getType());
+    if (getAllowsChildren()) return true;
+    if (getType() != null && typesWithChildren.contains(getType())) return true;
+    return false;
   }
-
 
   @Override
   public ObjectTreeNode getChildAt(int index)
@@ -206,7 +207,10 @@ public class ObjectTreeNode
       return tip;
     }
     String remarks = dbo.getComment();
-    if (StringUtil.isEmptyString(remarks)) return null;
+    if (StringUtil.isEmptyString(remarks))
+    {
+      return dbo.getObjectType();
+    }
     return remarks;
   }
 

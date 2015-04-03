@@ -250,7 +250,7 @@ public class TableIdentifier
   {
     return tableWasQuoted || schemaWasQuoted || catalogWasQuoted;
   }
-  
+
 	public boolean commentIsDefined()
 	{
 		return commentWasInitialized;
@@ -919,7 +919,7 @@ public class TableIdentifier
 		{
 			source = meta.getViewReader().getExtendedViewSource(new TableDefinition(this, null), false, false);
 		}
-		else if ("SYNONYM".equalsIgnoreCase(type))
+    else if (meta.isSynonym(this))
 		{
 			SynonymDDLHandler synHandler = new SynonymDDLHandler();
 			source = synHandler.getSynonymSource(con, this, false, false);

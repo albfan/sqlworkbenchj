@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.interfaces.TextContainer;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 
@@ -2160,4 +2161,40 @@ public class SqlUtil
 		}
 		return ds;
 	}
+
+  public static String getIdentifierAtCursor(TextContainer display, WbConnection conn)
+  {
+    String text = display.getSelectedText();
+    if (StringUtil.isEmptyString(text))
+    {
+			// Use valid SQL characters including schema/catalog separator and the quote character
+      // for the list of allowed (additional) word characters so that fully qualified names (public.foo)
+      // and quoted names ("public"."Foo") are identified correctly
+
+      // this will not cover more complex situations where non-standard names are used inside quotes (e.g. "Stupid Name")
+      // but will cover most of the usual situations
+      String wordChars = "_$";
+
+      char schemaSeparator = SqlUtil.getSchemaSeparator(conn);
+      wordChars += schemaSeparator;
+      char catSeparator = SqlUtil.getCatalogSeparator(conn);
+
+      if (catSeparator != schemaSeparator)
+      {
+        wordChars += catSeparator;
+      }
+
+      // now add the quote character used by the DBMS
+      wordChars += conn.getMetadata().getQuoteCharacter();
+
+      if (conn.getMetadata().isSqlServer())
+      {
+        // add the stupid Microsoft quoting stuff
+        wordChars += "[]";
+      }
+
+      text = display.getWordAtCursor(wordChars);
+    }
+    return text;
+  }
 }

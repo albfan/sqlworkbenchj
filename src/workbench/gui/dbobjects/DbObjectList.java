@@ -22,14 +22,19 @@
  */
 package workbench.gui.dbobjects;
 import java.awt.Component;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.interfaces.Reloadable;
 
+import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import workbench.util.CollectionUtil;
 
 /**
  * @author Thomas Kellerer
@@ -44,4 +49,29 @@ public interface DbObjectList
 	WbConnection getConnection();
 	Component getComponent();
   int getSelectionCount();
+
+  public static class Util
+  {
+    public static List<TableIdentifier> getSelectedTableObjects(DbObjectList objectList)
+    {
+      if (objectList == null) return Collections.emptyList();
+      List<DbObject> objects = objectList.getSelectedObjects();
+      if (CollectionUtil.isEmpty(objects)) return Collections.emptyList();
+
+      List<TableIdentifier> tables = new ArrayList<>(objects.size());
+      if (objects != null)
+      {
+        DbMetadata meta = objectList.getConnection().getMetadata();
+        for (DbObject dbo : objects)
+        {
+          if (dbo instanceof TableIdentifier && meta.isTableType(dbo.getObjectType()))
+          {
+            tables.add((TableIdentifier)dbo);
+          }
+        }
+      }
+      return tables;
+    }
+  }
+
 }

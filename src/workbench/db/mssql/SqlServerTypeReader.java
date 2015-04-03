@@ -357,4 +357,16 @@ public class SqlServerTypeReader
 		result.append(";\n");
 		return result.toString();
 	}
+
+  @Override
+  public List<ColumnIdentifier> getColumns(WbConnection con, DbObject object)
+  {
+    return null;
+  }
+
+  @Override
+  public boolean hasColumns()
+  {
+    return false;
+  }
 }
