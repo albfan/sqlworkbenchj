@@ -22,9 +22,11 @@
  */
 package workbench.gui.editor;
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
-import org.junit.Test;
 import workbench.interfaces.TextContainer;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -165,6 +167,12 @@ public class SearchAndReplaceTest
 		{
 			return false;
 		}
+
+    @Override
+    public String getWordAtCursor(String wordChars)
+    {
+      return null;
+    }
 	}
 }
 

@@ -150,6 +150,13 @@ public class TextFormatterTest
 			{
 				return getSelectionStart() < getSelectionEnd();
 			}
+
+      @Override
+      public String getWordAtCursor(String wordChars)
+      {
+        return null;
+      }
+
 		};
 		// </editor-fold>
 
