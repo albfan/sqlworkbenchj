@@ -29,7 +29,7 @@ import workbench.db.WbConnection;
  *
  * @author Thomas Kellerer
  */
-class IsolationLevelChanger
+public class IsolationLevelChanger
 {
 	private int oldLevel = Connection.TRANSACTION_NONE;
 

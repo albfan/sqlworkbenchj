@@ -24,7 +24,9 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
@@ -58,6 +60,7 @@ public class DbObjectsTree
   private ObjectTreeDragSource dragSource;
   private WbStatusLabel statusBar;
   private DbObjectNodeRenderer renderer;
+  private Map<ObjectTreeNode, Runnable> afterLoadProcess = new ConcurrentHashMap<>();
 
   public DbObjectsTree(WbStatusLabel status)
   {
@@ -87,7 +90,6 @@ public class DbObjectsTree
   {
     return (DbObjectTreeModel)super.getModel();
   }
-
 
   public WbConnection getConnection()
   {
@@ -354,11 +356,33 @@ public class DbObjectsTree
   {
     WbConnection conn = loader.getConnection();
     if (conn == null || conn.isBusy()) return false;
-    String catalog = conn.getCurrentCatalog();
+    final String catalog = conn.getCurrentCatalog();
     if (catalog == null) return false;
-    ObjectTreeNode node = getTreeModel().findNodeByType(catalog, TreeLoader.TYPE_CATALOG);
-    expandNode(node);
-    return node != null;
+    final ObjectTreeNode catNode = getTreeModel().findNodeByType(catalog, TreeLoader.TYPE_CATALOG);
+    expandNode(catNode);
+
+    if (catNode != null && conn.getDbSettings().supportsSchemas())
+    {
+      // we can't call findNodeByType() right after calling expandNode()
+      // because loading of the schemas is done in a background thread.
+      // therefor we need to register a "post load" event
+      Runnable r = new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          String schema = loader.getConnection().getCurrentSchema();
+          ObjectTreeNode schemaNode = getTreeModel().findNodeByType(catNode, schema, TreeLoader.TYPE_SCHEMA);
+          if (schemaNode != null)
+          {
+            expandNode(schemaNode);
+          }
+        }
+      };
+      afterLoadProcess.put(catNode, r);
+    }
+
+    return catNode != null;
   }
 
   @Override
@@ -395,6 +419,12 @@ public class DbObjectsTree
       WbSwingUtilities.showWaitCursor(this);
       statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrieving"));
       loader.loadChildren(node);
+      Runnable postLoad = afterLoadProcess.get(node);
+      if (postLoad != null)
+      {
+        afterLoadProcess.remove(node);
+        postLoad.run();
+      }
     }
     catch (SQLException ex)
     {

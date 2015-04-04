@@ -78,6 +78,7 @@ import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.dbobjects.DbObjectList;
+import workbench.gui.dbobjects.IsolationLevelChanger;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -112,6 +113,7 @@ public class DbTreePanel
   private QuickFilterAction filterAction;
   private WbAction resetFilter;
   private List<TreePath> expandedNodes;
+  private IsolationLevelChanger changer = new IsolationLevelChanger();
 
 	public DbTreePanel()
 	{
@@ -264,6 +266,7 @@ public class DbTreePanel
 		try
 		{
 			connection = mgr.getConnection(profile, cid);
+      changer.changeIsolationLevel(connection);
       tree.setConnection(connection);
       loadTypes();
       tree.load(true);
@@ -375,7 +378,9 @@ public class DbTreePanel
       @Override
       public void run()
       {
-        ConnectionMgr.getInstance().disconnect(connection);
+        WbConnection old = connection;
+        connection = null;
+        ConnectionMgr.getInstance().disconnect(old);
       }
     }, "Disconnect");
 
