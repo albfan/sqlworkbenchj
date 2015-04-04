@@ -46,7 +46,6 @@ import workbench.db.objectcache.DbObjectCache;
 
 import workbench.sql.lexer.SQLToken;
 import workbench.sql.syntax.SqlKeywordHelper;
-import workbench.util.CollectionUtil;
 
 import workbench.util.SelectColumn;
 import workbench.util.SqlParsingUtil;
@@ -551,7 +550,7 @@ public abstract class BaseAnalyzer
 	protected void retrieveViews()
 	{
 		DbObjectCache cache = this.dbConnection.getObjectCache();
-		Set<TableIdentifier> tables = cache.getTables(schemaForTableList, CollectionUtil.arrayList(dbConnection.getMetadata().getViewTypeName()));
+		Set<TableIdentifier> tables = cache.getTables(schemaForTableList, dbConnection.getMetadata().getViewTypes());
 		if (schemaForTableList == null || cache.getSearchPath(schemaForTableList).size() > 1)
 		{
 			this.title = ResourceMgr.getString("LblCompletionListTables");

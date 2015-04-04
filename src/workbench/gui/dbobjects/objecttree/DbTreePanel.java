@@ -55,6 +55,7 @@ import workbench.interfaces.QuickFilter;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
@@ -283,6 +284,10 @@ public class DbTreePanel
     {
       typeFilter.removeActionListener(this);
       List<String> types = new ArrayList<>(connection.getMetadata().getObjectTypes());
+      if (DbExplorerSettings.getShowTriggerPanel())
+      {
+        types.add("TRIGGER");
+      }
       List<String> toSelect = selectedTypes;
       if (CollectionUtil.isEmpty(toSelect))
       {

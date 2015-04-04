@@ -155,6 +155,7 @@ public class DbMetadata
 	private String baseTableTypeName;
 
 	private Set<String> tableTypesList;
+  private Set<String> viewTypesList;
 	private String[] tableTypesArray;
 	private String[] selectableTypes;
 	private Set<String> schemasToIgnore;
@@ -430,6 +431,8 @@ public class DbMetadata
 		tableTypesList = CollectionUtil.caseInsensitiveSet();
 		tableTypesList.addAll(ttypes);
 
+    initViewTypes();
+
 		tableTypesArray = StringUtil.toArray(tableTypesList, true);
 
 		// The selectableTypes array will be used
@@ -590,7 +593,7 @@ public class DbMetadata
 	public String[] getTablesAndViewTypes()
 	{
 		List<String> types = new ArrayList<>(tableTypesList);
-		types.add(getViewTypeName());
+		types.addAll(viewTypesList);
 		return types.toArray(EMPTY_STRING_ARRAY);
 	}
 
@@ -598,6 +601,11 @@ public class DbMetadata
 	{
 		return Arrays.copyOf(selectableTypes, selectableTypes.length);
 	}
+
+  public List<String> getViewTypes()
+  {
+    return new ArrayList<>(viewTypesList);
+  }
 
 	public List<String> getTableTypes()
 	{
@@ -2195,7 +2203,7 @@ public class DbMetadata
   {
     if (object == null) return null;
 
-    if ((isTableType(object.getObjectType()) || isExtendedTableType(object.getObjectType())) && (object instanceof TableIdentifier))
+    if (isViewOrTable(object.getObjectType()) && (object instanceof TableIdentifier))
     {
       return getTableColumns((TableIdentifier)object);
     }
@@ -2220,9 +2228,7 @@ public class DbMetadata
   {
     if (objectType == null) return false;
     if (isTableType(objectType) || isExtendedTableType(objectType)) return true;
-
-    if (getViewTypeName().equalsIgnoreCase(objectType)) return true;
-
+    if (isViewType(objectType)) return true;
 
 		for (ObjectListExtender extender : extenders)
 		{
@@ -2634,6 +2640,18 @@ public class DbMetadata
 		return result;
 	}
 
+  private void initViewTypes()
+  {
+		Collection<String> vtypes = Settings.getInstance().getListProperty("workbench.db." + getDbId() + ".viewtypes", false, null);
+		if (!vtypes.isEmpty())
+		{
+			LogMgr.logInfo("DbMetadata.<init>", "Using configured view types: " + vtypes);
+		}
+		viewTypesList = CollectionUtil.caseInsensitiveSet();
+		viewTypesList.addAll(vtypes);
+    viewTypesList.add("VIEW");
+  }
+
 	private boolean isIndexType(String type)
 	{
 		if (type == null) return false;
@@ -2753,6 +2771,17 @@ public class DbMetadata
 		List<String> types = Settings.getInstance().getListProperty("workbench.db." + this.getDbId() + ".additional.tabletypes",false);
 		return types.contains(type);
 	}
+
+  public boolean isViewOrTable(String type)
+  {
+    return isTableType(type) || isExtendedTableType(type) || isViewType(type);
+  }
+
+  public boolean isViewType(String type)
+  {
+    if (type == null) return false;
+    return viewTypesList.contains(type);
+  }
 
 	public boolean isTableType(String type)
 	{

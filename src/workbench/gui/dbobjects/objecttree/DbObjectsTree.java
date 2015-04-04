@@ -105,6 +105,8 @@ public class DbObjectsTree
       {
         renderer.setSynonymTypeName(conn.getMetadata().getSynonymReader().getSynonymTypeName());
       }
+      renderer.setTableTypes(conn.getMetadata().getTableTypes());
+      renderer.setViewTypes(conn.getMetadata().getViewTypes());
     }
     else
     {

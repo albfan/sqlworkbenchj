@@ -20,6 +20,8 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.awt.Component;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -34,6 +36,7 @@ import workbench.db.DbObject;
 import workbench.db.SynonymReader;
 
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 
 
 
@@ -46,6 +49,8 @@ public class DbObjectNodeRenderer
 {
   private Map<String, String> iconMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
   private Map<String, String> iconMapOpen = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+  private List<String> tableTypes = new ArrayList<>();
+  private List<String> viewTypes = new ArrayList<>();
 
 	public DbObjectNodeRenderer()
 	{
@@ -65,6 +70,39 @@ public class DbObjectNodeRenderer
     iconMapOpen.put(TreeLoader.TYPE_SCHEMA, "folder-open");
     iconMapOpen.put(TreeLoader.TYPE_CATALOG, "folder-open");
 	}
+
+  public void setViewTypes(List<String> types)
+  {
+    if (CollectionUtil.isEmpty(types)) return;
+    for (String type : viewTypes)
+    {
+      iconMap.remove(type);
+    }
+
+    viewTypes = new ArrayList<>(types);
+    for (String type : types)
+    {
+      iconMap.put(type, "view");
+    }
+    // just to be sure
+    iconMap.put(TreeLoader.TYPE_VIEW, "view");
+  }
+  
+  public void setTableTypes(List<String> types)
+  {
+    if (CollectionUtil.isEmpty(types)) return;
+    for (String type : tableTypes)
+    {
+      iconMap.remove(type);
+    }
+    tableTypes = new ArrayList<>(types);
+    for (String type : types)
+    {
+      iconMap.put(type, "table");
+    }
+    // just to be sure
+    iconMap.put(TreeLoader.TYPE_TABLE, "table");
+  }
 
   public void setSynonymTypeName(String name)
   {

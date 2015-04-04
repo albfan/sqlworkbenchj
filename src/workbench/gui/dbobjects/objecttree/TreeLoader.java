@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
@@ -126,6 +127,10 @@ public class TreeLoader
     {
       availableTypes = connection.getMetadata().getObjectTypes();
     }
+    if (DbExplorerSettings.getShowTriggerPanel())
+    {
+      availableTypes.add("TRIGGER");
+    }
   }
 
   private void setRootName(String name)
@@ -172,22 +177,34 @@ public class TreeLoader
   {
     boolean loaded = false;
 
+    if (connection == null) return;
+    
     if (connection.getDbSettings().supportsCatalogs())
     {
       loaded = loadCatalogs(root);
     }
+
+    if (!loaded && connection.getDbSettings().supportsSchemas())
+    {
+      loaded = loadSchemas(root);
+    }
+
     if (!loaded)
     {
-      loadSchemas(root);
+      addTypeNodes(root);
+      root.setChildrenLoaded(true);
+      model.nodeStructureChanged(root);
     }
   }
 
-  public void loadSchemas(ObjectTreeNode parentNode)
+  public boolean loadSchemas(ObjectTreeNode parentNode)
     throws SQLException
   {
     if (DbTreeSettings.showOnlyCurrentSchema(connection.getDbId()))
     {
       String schema = connection.getCurrentSchema();
+      if (schema == null) return false;
+
       parentNode.setNameAndType(schema, TYPE_SCHEMA);
       parentNode.setAllowsChildren(true);
       parentNode.setChildrenLoaded(false);
@@ -196,6 +213,8 @@ public class TreeLoader
     else
     {
       List<String> schemas = connection.getMetadata().getSchemas(connection.getSchemaFilter());
+      if (CollectionUtil.isEmpty(schemas)) return false;
+
       for (String schema : schemas)
       {
         ObjectTreeNode node = new ObjectTreeNode(schema, TYPE_SCHEMA);
@@ -206,7 +225,7 @@ public class TreeLoader
       parentNode.setChildrenLoaded(true);
     }
     model.nodeStructureChanged(parentNode);
-    model.nodeChanged(parentNode);
+    return true;
   }
 
   public boolean loadCatalogs(ObjectTreeNode parentNode)
@@ -224,7 +243,6 @@ public class TreeLoader
       }
     }
     model.nodeStructureChanged(parentNode);
-    model.nodeChanged(parentNode);
     return catalogs.size() > 0;
   }
 
@@ -233,12 +251,20 @@ public class TreeLoader
     if (parentNode == null) return;
     for (String type : availableTypes)
     {
+      if (type.equals("TRIGGER")) continue;
       if (typesToShow.isEmpty() || typesToShow.contains(type))
       {
         ObjectTreeNode node = new ObjectTreeNode(type, TYPE_DBO_TYPE_NODE);
         node.setAllowsChildren(true);
         parentNode.add(node);
       }
+    }
+    // always add triggers at the end
+    if (typesToShow.isEmpty() || typesToShow.contains("TRIGGER"))
+    {
+      ObjectTreeNode node = new ObjectTreeNode("TRIGGER", TYPE_DBO_TYPE_NODE);
+      node.setAllowsChildren(true);
+      parentNode.add(node);
     }
     parentNode.setChildrenLoaded(true);
   }
@@ -289,11 +315,13 @@ public class TreeLoader
     loadChildren(node);
   }
 
-  public void loadObjectsForTypeNode(ObjectTreeNode typeNode)
-    throws SQLException
+  private TableIdentifier getParentInfo(ObjectTreeNode node)
   {
-    if (typeNode == null) return;
-    ObjectTreeNode parent = typeNode.getParent();
+    ObjectTreeNode parent = node.getParent();
+    if (parent == null)
+    {
+      return new TableIdentifier(null, null, "$wb-dummy$", false);
+    }
     String schema = null;
     String catalog = null;
 
@@ -317,6 +345,22 @@ public class TreeLoader
         catalog = catNode.getName();
       }
     }
+    return new TableIdentifier(catalog, schema, "$wb-dummy$", false);
+  }
+
+  public void loadObjectsForTypeNode(ObjectTreeNode typeNode)
+    throws SQLException
+  {
+    if (typeNode == null) return;
+    if (typeNode.getName().equalsIgnoreCase("TRIGGER"))
+    {
+      loadTriggers(typeNode);
+      return;
+    }
+
+    TableIdentifier info = getParentInfo(typeNode);
+    String schema = info.getRawSchema();
+    String catalog = info.getRawCatalog();
 
     boolean loaded = true;
     List<TableIdentifier> objects = connection.getMetadata().getObjectList(null, catalog, schema, new String[] { typeNode.getName() });
@@ -342,6 +386,12 @@ public class TreeLoader
         addTableNodes(node);
         connection.getObjectCache().addTable(new TableDefinition(tbl));
       }
+
+      if (connection.getMetadata().isViewType(typeNode.getName()))
+      {
+        addViewTriggerNode(node);
+      }
+
       typeNode.add(node);
       node.setChildrenLoaded(loaded);
     }
@@ -350,6 +400,17 @@ public class TreeLoader
     typeNode.setChildrenLoaded(true);
   }
 
+  private void addViewTriggerNode(ObjectTreeNode node)
+  {
+		TriggerReader reader = TriggerReaderFactory.createReader(connection);
+		if (reader == null) return;
+		if (reader.supportsTriggersOnViews())
+    {
+      ObjectTreeNode trg = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS);
+      trg.setAllowsChildren(true);
+      node.add(trg);
+    }
+  }
   private void addColumnsNode(ObjectTreeNode node)
   {
     ObjectTreeNode cols = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTableDefinition"), TYPE_COLUMN_LIST);
@@ -374,6 +435,26 @@ public class TreeLoader
     ObjectTreeNode trg = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS);
     trg.setAllowsChildren(true);
     node.add(trg);
+  }
+
+  public void loadTriggers(ObjectTreeNode trgNode)
+    throws SQLException
+  {
+    if (trgNode == null) return;
+
+    TableIdentifier info = getParentInfo(trgNode);
+    TriggerReader reader = TriggerReaderFactory.createReader(connection);
+    List<TriggerDefinition> triggers = reader.getTriggerList(info.getRawCatalog(), info.getRawSchema(), null);
+
+    for (TriggerDefinition trg : triggers)
+    {
+      ObjectTreeNode node = new ObjectTreeNode(trg);
+      node.setAllowsChildren(false);
+      node.setChildrenLoaded(true);
+      trgNode.add(node);
+    }
+    model.nodeStructureChanged(trgNode);
+    trgNode.setChildrenLoaded(true);
   }
 
   public void loadTableTriggers(DbObject dbo, ObjectTreeNode trgNode)

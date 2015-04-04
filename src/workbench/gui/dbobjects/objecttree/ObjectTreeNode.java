@@ -194,7 +194,11 @@ public class ObjectTreeNode
     if (dbo instanceof TriggerDefinition)
     {
       TriggerDefinition trg = (TriggerDefinition)dbo;
-      String tip = trg.getTriggerType() + " " + trg.getTriggerEvent() + " ON " + trg.getRelatedTable().getTableName();
+      String tip = trg.getTriggerType() + " " + trg.getTriggerEvent();
+      if (trg.getRelatedTable() != null)
+      {
+        tip += " ON " + trg.getRelatedTable().getTableName();
+      }
       TriggerLevel level = trg.getLevel();
       if (level == TriggerLevel.row)
       {

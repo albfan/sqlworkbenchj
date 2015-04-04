@@ -407,7 +407,7 @@ public class TableDefinitionPanel
 					int pkIndex = dsModel.findColumn("PK");
 					dsModel.setNonEditableColums(typeIndex, posIndex, pkIndex);
 
-					if (meta.isTableType(currentTable.getType()) || meta.getViewTypeName().equals(currentTable.getType()))
+					if (meta.isTableType(currentTable.getType()) || meta.isViewType(currentTable.getType()))
 					{
 						List<ColumnIdentifier> cols = TableColumnsDatastore.createColumnIdentifiers(meta, def);
 						TableDefinition tbl = new TableDefinition(currentTable, cols);

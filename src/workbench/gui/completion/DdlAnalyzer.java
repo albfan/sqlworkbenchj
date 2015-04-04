@@ -31,7 +31,6 @@ import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
 
-import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -132,7 +131,7 @@ public class DdlAnalyzer
 			else if ("VIEW".equals(type) && showObjectList)
 			{
 				context = CONTEXT_TABLE_LIST;
-				setTableTypeFilter(CollectionUtil.arrayList(this.dbConnection.getMetadata().getViewTypeName()));
+				setTableTypeFilter(dbConnection.getMetadata().getViewTypes());
 			}
 			else if (isDropSchema(type))
 			{
