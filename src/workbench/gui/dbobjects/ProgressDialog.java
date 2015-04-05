@@ -25,10 +25,15 @@ package workbench.gui.dbobjects;
 import java.awt.Frame;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+
 import javax.swing.JDialog;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.interfaces.Interruptable;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.WbThread;
 
 /**
@@ -49,14 +54,18 @@ public class ProgressDialog
 	 * @param workerThread
 	 */
 	public ProgressDialog(String title, Frame parent, final Interruptable workerThread)
+  {
+    this(title, parent, workerThread, true);
+  }
+
+	public ProgressDialog(String title, Frame parent, final Interruptable workerThread, boolean showFilename)
 	{
 		super(parent, true);
 		setTitle(title);
 		worker = workerThread;
 		parentWindow = parent;
-		progressPanel = new ProgressPanel(worker);
+		progressPanel = new ProgressPanel(worker, showFilename);
 		progressPanel.setParentDialog(this);
-//		progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolStart"));
 		getContentPane().add(progressPanel);
 		pack();
 		addWindowListener(this);

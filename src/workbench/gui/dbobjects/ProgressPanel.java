@@ -22,7 +22,6 @@
  */
 package workbench.gui.dbobjects;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
@@ -50,6 +49,7 @@ import workbench.gui.components.WbButton;
 import workbench.storage.RowActionMonitor;
 
 import workbench.util.NumberStringCache;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -64,12 +64,16 @@ public class ProgressPanel
 	private JDialog parent;
 	private int monitorType = RowActionMonitor.MONITOR_PLAIN;
 
-	public ProgressPanel(Interruptable aWorker)
+	public ProgressPanel(Interruptable aWorker, boolean showFilename)
 	{
 		super();
-		this.task = aWorker;
+		task = aWorker;
 		initComponents();
-		setRowSize(20);
+    if (!showFilename)
+    {
+      remove(fileNameField);
+    }
+    setRowSize(20);
     WbSwingUtilities.setMinimumSize(rowInfo, 20);
 	}
 
@@ -78,20 +82,31 @@ public class ProgressPanel
 		parent = d;
 	}
 
-	public void setRowInfo(long aRow)
+	public void setRowInfo(long row)
 	{
-		this.rowInfo.setText(Long.toString(aRow));
+    if (row < 0)
+    {
+      rowInfo.setText("");
+    }
+		else
+    {
+      rowInfo.setText(Long.toString(row));
+    }
 	}
 
-	public void setInfoText(String aText)
+	public void setInfoText(String text)
 	{
-		this.progressInfoText.setText(aText);
+		progressInfoText.setText(text);
 	}
 
 	public void setObject(String name)
 	{
-		this.fileNameField.setText(name);
-		updateLayout();
+    boolean changed = StringUtil.stringsAreNotEqual(name, fileNameField.getText());
+    if (changed)
+    {
+      fileNameField.setText(name);
+      updateLayout();
+    }
 	}
 
 	protected void updateLayout()
@@ -109,7 +124,6 @@ public class ProgressPanel
 		}
 
 		invalidate();
-		validate();
 
 		if (parent != null)
 		{
@@ -127,13 +141,6 @@ public class ProgressPanel
 		this.rowInfo.setPreferredSize(d);
 		this.rowInfo.setMinimumSize(d);
 		updateLayout();
-	}
-
-
-	public void setInfoSize(int cols)
-	{
-		this.progressInfoText.setColumns(cols);
-		this.updateLayout();
 	}
 
 	@Override
@@ -221,26 +228,39 @@ public class ProgressPanel
     cancelButton = new WbButton();
     fileNameField = new JTextField();
 
-    setMinimumSize(new Dimension(250, 120));
-    setPreferredSize(new Dimension(250, 120));
+    setMinimumSize(new Dimension(250, 10));
     setLayout(new GridBagLayout());
 
     infoPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(1, 1, 1, 1)));
-    infoPanel.setLayout(new BorderLayout(0, 5));
+    infoPanel.setLayout(new GridBagLayout());
 
     progressInfoText.setEditable(false);
     progressInfoText.setBorder(null);
     progressInfoText.setDisabledTextColor(progressInfoText.getForeground());
-    infoPanel.add(progressInfoText, BorderLayout.CENTER);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 0.8;
+    infoPanel.add(progressInfoText, gridBagConstraints);
 
     rowInfo.setHorizontalAlignment(SwingConstants.RIGHT);
-    rowInfo.setMinimumSize(new Dimension(30, 18));
-    infoPanel.add(rowInfo, BorderLayout.EAST);
+    rowInfo.setMinimumSize(new Dimension(40, 20));
+    rowInfo.setPreferredSize(new Dimension(40, 0));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_END;
+    gridBagConstraints.weightx = 0.2;
+    infoPanel.add(rowInfo, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(5, 6, 0, 6);
     add(infoPanel, gridBagConstraints);
@@ -256,7 +276,7 @@ public class ProgressPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = GridBagConstraints.SOUTH;
+    gridBagConstraints.anchor = GridBagConstraints.NORTH;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(12, 0, 10, 0);
     add(cancelButton, gridBagConstraints);
@@ -267,6 +287,8 @@ public class ProgressPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(4, 6, 0, 6);
     add(fileNameField, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents

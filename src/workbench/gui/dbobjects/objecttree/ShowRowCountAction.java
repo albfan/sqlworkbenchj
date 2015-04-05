@@ -48,6 +48,8 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ProgressDialog;
 
+import workbench.storage.RowActionMonitor;
+
 import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 
@@ -93,7 +95,8 @@ public class ShowRowCountAction
 		}
 
     Frame parent = (Frame)SwingUtilities.getWindowAncestor(source.getComponent());
-		progress = new ProgressDialog(ResourceMgr.getString("MsgSpoolWindowTitle"), parent, this);
+		progress = new ProgressDialog(ResourceMgr.getString("MsgSpoolWindowTitle"), parent, this, false);
+    progress.getMonitor().setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		progress.showProgress();
     WbThread counter = new WbThread("RowCount Thread")
     {
