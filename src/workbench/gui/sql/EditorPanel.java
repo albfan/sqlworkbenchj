@@ -1100,7 +1100,7 @@ public class EditorPanel
       {
         ObjectTreeTransferable selection = (ObjectTreeTransferable)tr.getTransferData(ObjectTreeTransferable.DATA_FLAVOR);
         EditorDropHandler handler = new EditorDropHandler(this);
-        handler.handleDrop(selection);
+        handler.handleDrop(selection, evt.getLocation());
       }
 			else
 			{

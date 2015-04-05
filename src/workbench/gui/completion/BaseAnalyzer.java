@@ -65,52 +65,52 @@ public abstract class BaseAnalyzer
 	public static final String WORD_DELIM = QUALIFIER_DELIM + "@";
 	public static final String SELECT_WORD_DELIM = WORD_DELIM + ".";
 
-	protected static final int NO_CONTEXT = -1;
+	public static final int NO_CONTEXT = -1;
 
 	/**
 	 *  Context value to list the available tables
 	 */
-	protected static final int CONTEXT_TABLE_LIST = 1;
+	public static final int CONTEXT_TABLE_LIST = 1;
 
 	/**
 	 *  Context value to list the columns for a table
 	 */
-	protected static final int CONTEXT_COLUMN_LIST = 2;
+	public static final int CONTEXT_COLUMN_LIST = 2;
 
 	/**
 	 * Context value to list the tables that are available in the FROM list
 	 */
-	protected static final int CONTEXT_FROM_LIST = 3;
+	public static final int CONTEXT_FROM_LIST = 3;
 
-	protected static final int CONTEXT_TABLE_OR_COLUMN_LIST = 4;
+	public static final int CONTEXT_TABLE_OR_COLUMN_LIST = 4;
 
 	/**
 	 * Context value to list keywords available at this point
 	 */
-	protected static final int CONTEXT_KW_LIST = 5;
+	public static final int CONTEXT_KW_LIST = 5;
 
 	/**
 	 * Context value to list parameters for WB commands
 	 */
-	protected static final int CONTEXT_WB_PARAMS = 6;
+	public static final int CONTEXT_WB_PARAMS = 6;
 
 	/**
 	 * Context value to list all workbench commands
 	 */
-	protected static final int CONTEXT_WB_COMMANDS = 7;
+	public static final int CONTEXT_WB_COMMANDS = 7;
 
 	/**
 	 * Context value to list values for a specific command parameter
 	 */
-	protected static final int CONTEXT_WB_PARAMVALUES = 8;
+	public static final int CONTEXT_WB_PARAMVALUES = 8;
 
-	protected static final int CONTEXT_SYNTAX_COMPLETION = 9;
-	protected static final int CONTEXT_STATEMENT_PARAMETER = 10;
-	protected static final int CONTEXT_SCHEMA_LIST = 11;
-	protected static final int CONTEXT_CATALOG_LIST = 12;
-	protected static final int CONTEXT_SEQUENCE_LIST = 13;
-	protected static final int CONTEXT_INDEX_LIST = 14;
-	protected static final int CONTEXT_VIEW_LIST = 15;
+	public static final int CONTEXT_SYNTAX_COMPLETION = 9;
+	public static final int CONTEXT_STATEMENT_PARAMETER = 10;
+	public static final int CONTEXT_SCHEMA_LIST = 11;
+	public static final int CONTEXT_CATALOG_LIST = 12;
+	public static final int CONTEXT_SEQUENCE_LIST = 13;
+	public static final int CONTEXT_INDEX_LIST = 14;
+	public static final int CONTEXT_VIEW_LIST = 15;
 
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private List<String> typeFilter;

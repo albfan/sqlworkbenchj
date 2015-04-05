@@ -19,12 +19,25 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
+import java.awt.Point;
+import java.util.List;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.DbObject;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.gui.completion.BaseAnalyzer;
+import workbench.gui.completion.StatementContext;
 import workbench.gui.sql.EditorPanel;
+
+import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
+
+import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -39,7 +52,7 @@ public class EditorDropHandler
     this.editor = editor;
   }
 
-  public void handleDrop(ObjectTreeTransferable selection)
+  public void handleDrop(ObjectTreeTransferable selection, Point location)
   {
     if (selection == null) return;
     ObjectTreeNode[] nodes = selection.getSelectedNodes();
@@ -47,18 +60,54 @@ public class EditorDropHandler
 
     String id = selection.getConnectionId();
     WbConnection conn = ConnectionMgr.getInstance().findConnection(id);
-    StringBuilder text = new StringBuilder(nodes.length * 20);
-    boolean first = true;
-    for (ObjectTreeNode node : nodes)
+
+    ScriptParser parser = new ScriptParser(ParserType.getTypeFromConnection(conn));
+    parser.setScript(editor.getSelectedStatement());
+
+    int editorPos = editor.xyToOffset((int)location.getX(), (int)location.getY());
+    int context = BaseAnalyzer.NO_CONTEXT;
+    int index = parser.getCommandIndexAtCursorPos(editorPos);
+
+    String sql = null;
+
+    if (index > -1)
     {
-      if (first) first = false;
-      else text.append(", ");
-      text.append(getDisplayString(conn, node));
+      sql = parser.getCommand(index, false);
+			StatementContext ctx = new StatementContext(conn, sql, index);
+
+			if (ctx.isStatementSupported())
+			{
+        context = ctx.getAnalyzer().getContext();
+      }
+    }
+
+    // handle the case where a single table is dragged
+    // into an "empty" area of the editor. In that case
+    // generate a select statement for the table instead
+    // of just inserting the table name
+    if (nodes.length == 1 && StringUtil.isEmptyString(sql))
+    {
+      DbObject dbo = nodes[0].getDbObject();
+      if (dbo instanceof TableIdentifier)
+      {
+        String text = "select * from " + dbo.getObjectExpression(conn);
+        SqlFormatter formatter = new SqlFormatter(text, conn.getDbId());
+        text = formatter.getFormattedSql();
+        editor.setSelectedText(text);
+        return;
+      }
+    }
+
+    StringBuilder text = new StringBuilder(nodes.length * 20);
+    for (int i=0; i < nodes.length; i++)
+    {
+      if (i > 0) text.append(", ");
+      text.append(getDisplayString(conn, nodes[i], context));
     }
     editor.setSelectedText(text.toString());
   }
 
-  private String getDisplayString(WbConnection conn, ObjectTreeNode node)
+  private String getDisplayString(WbConnection conn, ObjectTreeNode node, int context)
   {
     if (node == null) return "";
     DbObject dbo = node.getDbObject();
@@ -70,6 +119,23 @@ public class EditorDropHandler
       }
       return node.getName();
     }
+
+    if (context == BaseAnalyzer.CONTEXT_COLUMN_LIST && dbo instanceof TableIdentifier)
+    {
+      List<ColumnIdentifier> columns = conn.getObjectCache().getColumns((TableIdentifier)dbo);
+      if (CollectionUtil.isNonEmpty(columns))
+      {
+        int count = columns.size();
+        StringBuilder result = new StringBuilder(count * 10);
+        for (int i=0; i < count; i++)
+        {
+          if (i > 0) result.append(", ");
+          result.append(columns.get(i).getColumnName());
+        }
+        return result.toString();
+      }
+    }
+
     return dbo.getObjectExpression(conn);
   }
 

@@ -45,14 +45,13 @@ public class ObjectTreeNode
   implements Serializable
 {
   private Set<String> typesWithChildren = CollectionUtil.caseInsensitiveSet(
-    "database", "catalog", "schema", "table", "view", "materialized view", "type", "package", "enum");
+    "database", "catalog", "schema", "table", "view", "materialized view", "type", "package", "enum", "index");
   private String nodeType;
   private String nodeName;
   private boolean isLoaded;
   private Long rowCount;
   private int originalIndex;
   private List<ObjectTreeNode> filteredNodes = new ArrayList<>();
-  private boolean supportsChildren;
 
   public ObjectTreeNode(DbObject dbo)
   {
