@@ -121,6 +121,16 @@ public class SpoolDataAction
 		}
   }
 
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    if (editor != null)
+    {
+      editor.removeSelectionListener(this);
+    }
+  }
+
 	public void setEditor(EditorPanel ed)
 	{
 		this.editor = ed;

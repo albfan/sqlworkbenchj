@@ -27,6 +27,7 @@ import javax.swing.JMenuItem;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.WbAction;
 
 /**
  *
@@ -99,6 +100,10 @@ public class WbMenuItem
 	public void dispose()
 	{
 		WbSwingUtilities.removeAllListeners(this);
+    if (getAction() instanceof WbAction)
+    {
+      ((WbAction)getAction()).dispose();
+    }
 		removeAll();
 	}
 }

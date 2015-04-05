@@ -52,6 +52,7 @@ public class CreateDummySqlAction
 {
 	private DbObjectList source;
 	private String scriptType;
+  private WbSelectionModel selection;
 
 	public static CreateDummySqlAction createDummyUpdateAction(DbObjectList client, ListSelectionModel list)
 	{
@@ -95,9 +96,20 @@ public class CreateDummySqlAction
 		this.initMenuDefinition(key);
 		this.source = client;
 		this.scriptType = type;
+    selection = list;
 		setEnabled(client.getSelectionCount() > 0);
-		list.addSelectionListener(this);
+		selection.addSelectionListener(this);
 	}
+
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    if (selection != null)
+    {
+      selection.removeSelectionListener(this);
+    }
+  }
 
   @Override
   public void executeAction(ActionEvent e)

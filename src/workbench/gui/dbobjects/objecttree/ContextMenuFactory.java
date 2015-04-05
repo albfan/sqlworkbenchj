@@ -23,6 +23,8 @@ import java.awt.Window;
 
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import workbench.interfaces.WbSelectionModel;
 import workbench.resource.ResourceMgr;
@@ -35,6 +37,7 @@ import workbench.gui.actions.DeleteTablesAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.actions.SpoolDataAction;
+import workbench.gui.components.WbPopupMenu;
 import workbench.gui.dbobjects.EditorTabSelectMenu;
 import workbench.gui.sql.PasteType;
 
@@ -46,7 +49,24 @@ class ContextMenuFactory
 {
   static JPopupMenu createContextMenu(DbTreePanel dbTree, WbSelectionModel selection)
   {
-    JPopupMenu menu = new JPopupMenu();
+    final JPopupMenu menu = new WbPopupMenu();
+
+    menu.addPopupMenuListener(new PopupMenuListener()
+    {
+      @Override
+      public void popupMenuWillBecomeVisible(PopupMenuEvent e)
+      {
+      }
+      @Override
+      public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
+      {
+        menu.removeAll();
+      }
+      @Override
+      public void popupMenuCanceled(PopupMenuEvent e)
+      {
+      }
+    });
 
     ReloadNodeAction reload = new ReloadNodeAction(dbTree);
     menu.add(reload);
@@ -65,7 +85,7 @@ class ContextMenuFactory
       }
     }
 
-    ShowRowCountAction showCount = new ShowRowCountAction(dbTree, selection, dbTree);
+    ShowRowCountAction showCount = new ShowRowCountAction(dbTree, dbTree);
     menu.add(showCount);
 
     Window w = SwingUtilities.getWindowAncestor(dbTree);

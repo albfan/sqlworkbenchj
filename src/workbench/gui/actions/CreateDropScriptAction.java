@@ -51,15 +51,26 @@ public class CreateDropScriptAction
 	implements WbSelectionListener
 {
 	private DbObjectList source;
-
+  private WbSelectionModel selection;
 	public CreateDropScriptAction(DbObjectList client, WbSelectionModel list)
 	{
 		super();
 		this.initMenuDefinition("MnuTxtGenerateDrop");
 		this.source = client;
     selectionChanged(list);
-		list.addSelectionListener(this);
+    selection = list;
+		selection.addSelectionListener(this);
 	}
+
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    if (selection != null)
+    {
+      selection.removeSelectionListener(this);
+    }
+  }
 
 	@Override
 	public void executeAction(ActionEvent e)

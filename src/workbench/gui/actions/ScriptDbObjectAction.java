@@ -58,6 +58,13 @@ public class ScriptDbObjectAction
 		list.addSelectionListener(this);
 	}
 
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    selection.removeSelectionListener(this);
+  }
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{

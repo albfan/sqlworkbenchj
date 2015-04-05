@@ -50,6 +50,7 @@ public class DeleteTablesAction
 {
 	private DbObjectList source;
 	private TableDeleteListener deleteListener;
+  private WbSelectionModel selection;
 
 	public DeleteTablesAction(DbObjectList client, WbSelectionModel list, TableDeleteListener l)
 	{
@@ -57,9 +58,20 @@ public class DeleteTablesAction
 		this.initMenuDefinition("MnuTxtDeleteTableData");
 		this.source = client;
 		this.deleteListener = l;
+    selection = list;
     selectionChanged(list);
-		list.addSelectionListener(this);
+		selection.addSelectionListener(this);
 	}
+
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    if (selection != null)
+    {
+      selection.removeSelectionListener(this);
+    }
+  }
 
 	@Override
 	public void executeAction(ActionEvent e)

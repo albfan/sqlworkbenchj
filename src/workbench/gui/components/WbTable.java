@@ -66,7 +66,6 @@ import javax.swing.JToolTip;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.MenuElement;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
@@ -173,7 +172,7 @@ public class WbTable
 						 Resettable, FontZoomProvider
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
-	protected JPopupMenu popup;
+	protected WbPopupMenu popup;
 
 	private DataStoreTableModel dwModel;
 	private int lastFoundRow = -1;
@@ -834,18 +833,6 @@ public class WbTable
 
 		if (popup != null)
 		{
-			MenuElement[] elements = popup.getSubElements();
-			for (MenuElement item : elements)
-			{
-				if (item instanceof WbMenuItem)
-				{
-					((WbMenuItem)item).dispose();
-				}
-				if (item instanceof WbMenu)
-				{
-					((WbMenu)item).dispose();
-				}
-			}
 			popup.removeAll();
 			popup = null;
 		}
@@ -937,7 +924,7 @@ public class WbTable
 			@Override
 			public void run()
 			{
-				if (popup == null) popup = new JPopupMenu();
+				if (popup == null) popup = new WbPopupMenu();
 				if (withSep)
 				{
 					popup.addSeparator();
@@ -1023,7 +1010,7 @@ public class WbTable
 			@Override
 			public void run()
 			{
-				if (popup == null) popup = new JPopupMenu();
+				if (popup == null) popup = new WbPopupMenu();
 				if (printDataAction != null)
 				{
 					if (withSep)

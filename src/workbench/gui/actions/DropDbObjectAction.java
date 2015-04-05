@@ -56,7 +56,7 @@ public class DropDbObjectAction
   private ObjectDropListener dropListener;
 	private Reloadable data;
 	private boolean available = true;
-
+  private WbSelectionModel selection;
 	public DropDbObjectAction(String labelKey, DbObjectList client, ListSelectionModel list, Reloadable r)
 	{
     this("MnuTxtDropDbObject", client, WbSelectionModel.Factory.createFacade(list), r);
@@ -73,9 +73,20 @@ public class DropDbObjectAction
 		this.initMenuDefinition(labelKey);
 		this.source = client;
 		this.data = r;
+    selection = list;
 		selectionChanged(list);
-		list.addSelectionListener(this);
+		selection.addSelectionListener(this);
 	}
+
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    if (selection != null)
+    {
+      selection.removeSelectionListener(this);
+    }
+  }
 
   public void addDropListener(ObjectDropListener listener)
   {

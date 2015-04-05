@@ -33,7 +33,6 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 
 import workbench.interfaces.Interruptable;
-import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
@@ -65,7 +64,7 @@ public class ShowRowCountAction
   private Statement currentStatement;
   private RowCountDisplay display;
 
-	public ShowRowCountAction(DbObjectList client, WbSelectionModel list, RowCountDisplay countDisplay)
+	public ShowRowCountAction(DbObjectList client, RowCountDisplay countDisplay)
 	{
 		super();
 		initMenuDefinition("MnuTxtShowRowCounts");
