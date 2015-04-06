@@ -79,8 +79,10 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSelectBuilder;
 import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
@@ -2276,7 +2278,10 @@ public class SqlPanel
   {
 		if (isBusy()) return;
     if (table == null) return;
-		String sql = "select * from " + table.getTableExpression(getConnection());
+
+    List<ColumnIdentifier> columns = dbConnection.getObjectCache().getColumns(table);
+    TableSelectBuilder builder = new TableSelectBuilder(dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
+		String sql = builder.getSelectForColumns(table, columns, statusBar.getMaxRows());
     this.startExecution(sql, 0, -1, false, true);
   }
 

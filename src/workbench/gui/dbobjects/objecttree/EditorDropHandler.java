@@ -93,7 +93,7 @@ public class EditorDropHandler
         String text = "select * from " + dbo.getObjectExpression(conn);
         SqlFormatter formatter = new SqlFormatter(text, conn.getDbId());
         text = formatter.getFormattedSql();
-        editor.setSelectedText(text);
+        editor.insertText(editorPos, text);
         return;
       }
     }
@@ -104,7 +104,7 @@ public class EditorDropHandler
       if (i > 0) text.append(", ");
       text.append(getDisplayString(conn, nodes[i], context));
     }
-    editor.setSelectedText(text.toString());
+    editor.insertText(editorPos, text.toString());
   }
 
   private String getDisplayString(WbConnection conn, ObjectTreeNode node, int context)
