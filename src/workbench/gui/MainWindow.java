@@ -2720,7 +2720,10 @@ public class MainWindow
 					addTabAtIndex(false, false, false, -1);
 					p = getSqlPanel(0);
 				}
-				p.reset();
+        else
+        {
+          p.reset();
+        }
 				resetTabTitles();
 
 				// make sure the toolbar and menus are updated correctly

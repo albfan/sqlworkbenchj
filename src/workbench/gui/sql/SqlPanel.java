@@ -4211,6 +4211,7 @@ public class SqlPanel
 		currentData = null;
 		if (iconHandler != null) iconHandler.flush();
 		if (sqlHistory != null) sqlHistory.clear();
+    contentPanel.setDividerLocation(0.5d);
 	}
 
 	@Override
