@@ -184,6 +184,7 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarSeparator;
+import workbench.gui.dbobjects.objecttree.DbTreeSettings;
 import workbench.gui.dbobjects.objecttree.FindObjectAction;
 import workbench.gui.dbobjects.objecttree.ObjectFinder;
 import workbench.gui.dbobjects.objecttree.ResultTabDropHandler;
@@ -2279,9 +2280,18 @@ public class SqlPanel
 		if (isBusy()) return;
     if (table == null) return;
 
-    List<ColumnIdentifier> columns = dbConnection.getObjectCache().getColumns(table);
-    TableSelectBuilder builder = new TableSelectBuilder(dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
-		String sql = builder.getSelectForColumns(table, columns, statusBar.getMaxRows());
+    String sql = null;
+    
+    if (DbTreeSettings.useColumnListForTableDataDisplay())
+    {
+      List<ColumnIdentifier> columns = dbConnection.getObjectCache().getColumns(table);
+      TableSelectBuilder builder = new TableSelectBuilder(dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
+      sql = builder.getSelectForColumns(table, columns, statusBar.getMaxRows());
+    }
+    else
+    {
+      sql = "select * from " + table.getTableExpression(dbConnection);
+    }
     this.startExecution(sql, 0, -1, false, true);
   }
 

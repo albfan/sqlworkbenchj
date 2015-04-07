@@ -82,4 +82,19 @@ public class DbTreeSettings
     Settings.getInstance().setProperty(SETTINGS_PREFIX + "count.rows.visible", flag);
   }
 
+
+  /**
+   * Controls if the SELECT statement for displaying a table's data through drag and drop
+   * should use the full column list.
+   *
+   * If this is true the columns for a dropped table will be retrieved and the generated
+   * SQL will include all columns explicitely. This enables the use of the expression
+   * replacement for certain data types.
+   *
+   * @return
+   */
+  public static boolean useColumnListForTableDataDisplay()
+  {
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "tabledata.select.use.columns", true);
+  }
 }
