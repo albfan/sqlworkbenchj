@@ -2281,7 +2281,7 @@ public class SqlPanel
     if (table == null) return;
 
     String sql = null;
-    
+
     if (DbTreeSettings.useColumnListForTableDataDisplay())
     {
       List<ColumnIdentifier> columns = dbConnection.getObjectCache().getColumns(table);
@@ -3212,22 +3212,26 @@ public class SqlPanel
 		int currentCursor = this.editor.getCaretPosition();
 		int currentResultCount = this.resultTab.getTabCount() - 1;
 
+    String macroMsg = null;
 		if (this.macroExecution)
 		{
 			// executeMacro() will set "macroExecution" so that we can
 			// log the macro statement here. Otherwise we wouldn't know at this point
 			// that a macro is beeing executed
+      // we don't need to log this here, as this can only occur when the user
+      // execute the macro through the menu
 			macroRun = true;
-			appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + script + "\n");
 		}
 		else
 		{
-			String cleanSql = SqlUtil.trimSemicolon(script.trim());
-			String macro = MacroManager.getInstance().getMacroText(macroClientId, cleanSql);
-			if (macro != null)
+			String macroKey = SqlUtil.trimSemicolon(script.trim());
+			String macroText = MacroManager.getInstance().getMacroText(macroClientId, macroKey);
+			if (macroText != null)
 			{
-				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + cleanSql + "\n");
-				script = macro;
+        // log the fact that the current SQL text was taken as a macro statement
+        // we can't append the message here, as the log output might be cleared later
+				macroMsg = ResourceMgr.getString("MsgExecutingMacro") + ": " + macroKey + "\n";
+				script = macroText;
 				macroRun = true;
 			}
 		}
@@ -3305,6 +3309,11 @@ public class SqlPanel
 				firstResultIndex = 0;
 			}
 
+      if (macroMsg != null)
+      {
+        appendToLog(macroMsg);
+      }
+
 			if (count > 1)
 			{
 				logWasCompressed = !this.stmtRunner.getVerboseLogging();
@@ -3361,7 +3370,7 @@ public class SqlPanel
 				String macro = MacroManager.getInstance().getMacroText(macroClientId, currentSql);
 				if (macro != null)
 				{
-					appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + currentSql + "\n");
+					appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ": " + currentSql + "\n");
 					macroRun = true;
 					currentSql = macro;
 				}
