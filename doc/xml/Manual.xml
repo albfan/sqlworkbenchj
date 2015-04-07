@@ -21,6 +21,7 @@
 	<!ENTITY export-import SYSTEM "export-import.xml">
 	<!ENTITY wb-commands SYSTEM "wb-commands.xml">
 	<!ENTITY dbexplorer SYSTEM "dbexplorer.xml">
+	<!ENTITY db-tree SYSTEM "db-tree.xml">
 	<!ENTITY data-pumper SYSTEM "data-pumper.xml">
 	<!ENTITY options SYSTEM "options.xml">
 	<!ENTITY shortcuts SYSTEM "shortcuts.xml">
@@ -68,6 +69,7 @@
 &wb-commands;
 &data-pumper;
 &dbexplorer;
+&db-tree;
 &problems;
 &db-problems;
 &options;

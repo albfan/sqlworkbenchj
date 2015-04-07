@@ -266,6 +266,7 @@ public class DbTreePanel
 		try
 		{
 			connection = mgr.getConnection(profile, cid);
+      connection.setAutoCommit(true);
       changer.changeIsolationLevel(connection);
       tree.setConnection(connection);
       loadTypes();

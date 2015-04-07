@@ -193,12 +193,25 @@ public class GenericObjectDropper
 	public void dropObjects()
 		throws SQLException
 	{
+    if (this.connection == null) throw new NullPointerException("No connection!");
+    if (this.objects == null || this.objects.isEmpty()) return;
+
 		cancel = false;
+    boolean autoCommitChanged = false;
+    boolean autoCommit = connection.getAutoCommit();
+
+    // this is essentially here for the DbTree, because the DbTree sets its own connection
+    // to autocommit regardless of the profile to reduce locking when retrieving the data
+    // from the database. If the profile was not set to autocommit the dropping of the
+    // objects should be done in a transaction.
+    if (autoCommit && !connection.getProfile().getAutocommit())
+    {
+      connection.setAutoCommit(false);
+      autoCommitChanged = true;
+    }
 
 		try
 		{
-			if (this.connection == null) throw new NullPointerException("No connection!");
-			if (this.objects == null || this.objects.isEmpty()) return;
 			int count = this.objects.size();
 
     	currentStatement = this.connection.createStatement();
@@ -243,7 +256,11 @@ public class GenericObjectDropper
 		finally
 		{
 			SqlUtil.closeStatement(currentStatement);
-			this.currentStatement = null;
+			currentStatement = null;
+      if (autoCommitChanged)
+      {
+        connection.setAutoCommit(autoCommit);
+      }
 		}
 	}
 

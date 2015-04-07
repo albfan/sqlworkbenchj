@@ -37,7 +37,8 @@ public class ShowDbTreeAction
 	{
 		super();
 		mainWin = aWindow;
-		this.initMenuDefinition("MnuTxtNewDbTreeWindow");
+		initMenuDefinition("MnuTxtNewDbTreeWindow");
+    setEnabled(false);
 	}
 
 	@Override

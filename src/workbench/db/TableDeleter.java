@@ -27,11 +27,14 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.db.importer.TableDependencySorter;
+
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.importer.TableDependencySorter;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 
@@ -130,6 +133,20 @@ public class TableDeleter
 			LogMgr.logError("TableDeleterUI.deleteTables()", "Error creating statement", e);
 			throw e;
 		}
+
+    boolean autoCommitChanged = false;
+    boolean autoCommit = connection.getAutoCommit();
+
+    // this is essentially here for the DbTree, because the DbTree sets its own connection
+    // to autocommit regardless of the profile to reduce locking when retrieving the data
+    // from the database. If the profile was not set to autocommit the deletion of the
+    // rows should be done in a transaction. When everything is done the
+    // auto commit will be restored
+    if (autoCommit && !connection.getProfile().getAutocommit())
+    {
+      connection.setAutoCommit(false);
+      autoCommitChanged = true;
+    }
 
 		try
 		{
@@ -244,7 +261,12 @@ public class TableDeleter
 		{
 			SqlUtil.closeStatement(currentStatement);
 			connection.setBusy(false);
+      if (autoCommitChanged)
+      {
+        connection.setAutoCommit(autoCommit);
+      }
 		}
+
 		if (statusDisplay != null)
 		{
 			statusDisplay.clearStatusMessage();

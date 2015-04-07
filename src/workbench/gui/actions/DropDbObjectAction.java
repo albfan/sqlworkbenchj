@@ -57,6 +57,7 @@ public class DropDbObjectAction
 	private Reloadable data;
 	private boolean available = true;
   private WbSelectionModel selection;
+  
 	public DropDbObjectAction(String labelKey, DbObjectList client, ListSelectionModel list, Reloadable r)
 	{
     this("MnuTxtDropDbObject", client, WbSelectionModel.Factory.createFacade(list), r);
