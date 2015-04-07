@@ -548,12 +548,17 @@ public class MainWindow
 		}
 	}
 
+  public boolean hasProfileWorkspace()
+  {
+    return currentProfile != null && StringUtil.isNonEmpty(currentProfile.getWorkspaceFile());
+  }
+
 	protected void checkWorkspaceActions()
 	{
 		this.saveWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);
 		this.assignWorkspaceAction.setEnabled(this.currentWorkspaceFile != null && this.currentProfile != null);
 		this.closeWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);
-		this.reloadWorkspace.setEnabled(this.currentProfile != null && StringUtil.isNonEmpty(currentProfile.getWorkspaceFile()));
+		checkReloadWkspAction();
 	}
 
 	private void initMenu()
@@ -580,10 +585,7 @@ public class MainWindow
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
 		this.newDbExplorerPanel = new NewDbExplorerPanelAction(this);
 		this.newDbExplorerWindow = new NewDbExplorerWindowAction(this);
-    if (DbTreeSettings.enableDbTree())
-    {
-      this.showDbTree = new ShowDbTreeAction(this);
-    }
+    this.showDbTree = new ShowDbTreeAction(this);
 		int tabCount = this.sqlTab.getTabCount();
 		for (int tab=0; tab < tabCount; tab ++)
 		{

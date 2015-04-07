@@ -58,7 +58,7 @@ public class ReloadProfileWkspAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		if (hasWorkspace())
+		if (client.hasProfileWorkspace())
 		{
       boolean canSwitch = client.saveWorkspace();
 			if (canSwitch)
@@ -68,14 +68,4 @@ public class ReloadProfileWkspAction
 		}
 	}
 
-	private boolean hasWorkspace()
-	{
-		ConnectionProfile profile = client.getCurrentProfile();
-		if (profile != null)
-		{
-			String workspaceFile = profile.getWorkspaceFile();
-			return StringUtil.isNonEmpty(workspaceFile);
-		}
-		return false;
-	}
 }

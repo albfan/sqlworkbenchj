@@ -32,12 +32,6 @@ public class DbTreeSettings
 {
   public static final String SETTINGS_PREFIX = "workbench.gui.dbtree.";
 
-
-  public static boolean enableDbTree()
-  {
-    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "enabled", false);
-  }
-
   public static boolean showOnlyCurrentSchema(String dbId)
   {
     boolean defaultValue = Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "only.currentschema", false);
