@@ -22,7 +22,12 @@ package workbench.gui.dbobjects.objecttree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
-import workbench.resource.ResourceMgr;
+import workbench.resource.DbExplorerSettings;
+
+import workbench.gui.dbobjects.QuickFilterExpressionBuilder;
+
+import workbench.storage.filter.ColumnExpression;
+
 import workbench.util.StringUtil;
 
 /**
@@ -94,24 +99,27 @@ public class DbObjectTreeModel
     }
     else
     {
-      applyFilter(getRoot(), text);
+      QuickFilterExpressionBuilder builder = new QuickFilterExpressionBuilder();
+      ColumnExpression expression = builder.buildExpression(text, DbExplorerSettings.getDbExpUsePartialMatch());
+      applyFilter(getRoot(), expression);
     }
   }
 
-  private boolean applyFilter(ObjectTreeNode node, String text)
+  private boolean applyFilter(ObjectTreeNode node, ColumnExpression expression)
   {
     int childCount = node.getChildCount();
     boolean changed = false;
+
     for (int i=0; i < childCount; i++)
     {
       ObjectTreeNode child = node.getChildAt(i);
-      if (child.applyFilter(text))
+      if (child.applyFilter(expression))
       {
         changed = true;
       }
       else
       {
-        if (applyFilter(child, text))
+        if (applyFilter(child, expression))
         {
           changed = true;
         }

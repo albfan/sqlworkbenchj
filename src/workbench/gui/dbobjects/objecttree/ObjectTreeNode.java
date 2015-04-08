@@ -33,6 +33,8 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerLevel;
 
+import workbench.storage.filter.ColumnExpression;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -217,31 +219,32 @@ public class ObjectTreeNode
     return remarks;
   }
 
-  public boolean applyFilter(String text)
+  public boolean applyFilter(ColumnExpression searchTerm)
   {
     resetFilter();
 
-    if (StringUtil.isEmptyString(text)) return false;
+    if (searchTerm == null) return false;
 
     int count = getChildCount();
     if (count == 0) return false;
 
-    text = text.toLowerCase().trim();
-
-    for (int i=0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
       ObjectTreeNode child = getChildAt(i);
+
       DbObject dbo = child.getDbObject();
       if (dbo != null)
       {
         String name = dbo.getObjectName();
-        if (!name.toLowerCase().contains(text))
+        boolean matches = searchTerm.evaluate(name);
+        if (!matches)
         {
           child.originalIndex = i;
           filteredNodes.add(child);
         }
       }
     }
+
     for (ObjectTreeNode node : filteredNodes)
     {
       remove(node);

@@ -35,8 +35,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import javax.swing.DefaultComboBoxModel;
@@ -62,10 +60,9 @@ import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.dbobjects.QuickFilterExpressionBuilder;
 
-import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
-import workbench.storage.filter.RegExComparator;
 
 import workbench.util.StringUtil;
 
@@ -90,14 +87,12 @@ public class QuickFilterPanel
 	private WbToolbar toolbar;
 	private JComboBox columnDropDown;
 	private QuickFilterAction filterAction;
-	private final ColumnComparator comparator = new RegExComparator();
 	private String[] columnList;
 	private final boolean showColumnDropDown;
 	private JCheckBoxMenuItem[] columnItems;
 	private TextComponentMouseListener textListener;
 	private boolean assumeWildcards;
 	private boolean autoFilterEnabled;
-	private boolean enableMultiValue = true;
 	private ReloadAction delegateFilterAction;
   private boolean ignoreEvents;
 
@@ -146,11 +141,6 @@ public class QuickFilterPanel
 				action.setEnabled(flag);
 			}
 		}
-	}
-
-	public void setEnableMultipleValues(boolean flag)
-	{
-		this.enableMultiValue = flag;
 	}
 
 	public void setFilterOnType(boolean flag)
@@ -355,49 +345,6 @@ public class QuickFilterPanel
 		this.filterValue.grabFocus();
 	}
 
-	private String getPattern(String input)
-		throws PatternSyntaxException
-	{
-		if (GuiSettings.getUseRegexInQuickFilter())
-		{
-			Pattern.compile(input);
-			// no exception, so everything is OK
-			return input;
-		}
-
-		String regex;
-
-		if (enableMultiValue)
-		{
-			List<String> elements = StringUtil.stringToList(input,",", true, true, false, false);
-
-			for (int i=0; i < elements.size(); i++)
-			{
-				String element = elements.get(i);
-				if (assumeWildcards && !containsWildcards(element))
-				{
-					element = "*" + element + "*";
-				}
-				String regexElement = StringUtil.wildcardToRegex(element, true);
-				elements.set(i, regexElement);
-			}
-			regex = StringUtil.listToString(elements, "|",false, '"');
-		}
-		else
-		{
-			if (assumeWildcards && !containsWildcards(input))
-			{
-				input = "*" + input + "*";
-			}
-			regex = StringUtil.wildcardToRegex(input, true);
-		}
-
-		// Test the "translated" pattern, if that throws an exception let the caller handle it
-		Pattern.compile(regex);
-
-		return regex;
-	}
-
 	@Override
 	public void applyQuickFilter()
 	{
@@ -426,9 +373,8 @@ public class QuickFilterPanel
         filterValue.setText(filterExpression);
 				try
 				{
-					String pattern = getPattern(filterExpression);
-					ColumnExpression col = new ColumnExpression(searchColumn, comparator, pattern);
-					col.setIgnoreCase(true);
+          QuickFilterExpressionBuilder builder = new QuickFilterExpressionBuilder();
+          ColumnExpression col = builder.buildExpression(filterExpression, searchColumn, assumeWildcards);
 					searchTable.applyFilter(col);
 					if (storeInHistory)
 					{
@@ -480,12 +426,6 @@ public class QuickFilterPanel
       }
     });
   }
-
-	private boolean containsWildcards(String filter)
-	{
-		if (filter == null) return false;
-		return filter.indexOf('%') > -1 || filter.indexOf('*') > -1;
-	}
 
 	@Override
 	public String getText()
