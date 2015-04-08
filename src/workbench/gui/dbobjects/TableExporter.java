@@ -115,7 +115,7 @@ public class TableExporter
 
 		progress = new ProgressDialog(ResourceMgr.getString("MsgSpoolWindowTitle"), parent, exporter);
 		exporter.setRowMonitor(progress.getMonitor());
-		progress.showProgress();
+		progress.showProgressWindow();
 
 		progress.getInfoPanel().setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		progress.getInfoPanel().setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);

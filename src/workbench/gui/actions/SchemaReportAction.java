@@ -92,7 +92,7 @@ public class SchemaReportAction
 		progress.getInfoPanel().setObject(filename);
 		progress.getInfoPanel().setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		reporter.setProgressMonitor(progress.getInfoPanel());
-		progress.showProgress();
+		progress.showProgressWindow();
 
 		Thread t = new WbThread("Schema Report")
 		{

@@ -20,7 +20,6 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
-import javax.swing.SwingUtilities;
 
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
@@ -46,9 +43,8 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.dbobjects.DbObjectList;
-import workbench.gui.dbobjects.ProgressDialog;
+import workbench.interfaces.StatusBar;
 
-import workbench.storage.RowActionMonitor;
 
 import workbench.util.SqlUtil;
 import workbench.util.WbThread;
@@ -61,17 +57,18 @@ public class ShowRowCountAction
   implements Interruptable
 {
 	private DbObjectList source;
-  private ProgressDialog progress;
+  private StatusBar statusBar;
   private boolean cancelCount;
   private Statement currentStatement;
   private RowCountDisplay display;
 
-	public ShowRowCountAction(DbObjectList client, RowCountDisplay countDisplay)
+	public ShowRowCountAction(DbObjectList client, RowCountDisplay countDisplay, StatusBar status)
 	{
 		super();
 		initMenuDefinition("MnuTxtShowRowCounts");
 		source = client;
     display = countDisplay;
+    statusBar = status;
     setEnabled(getSelectedObjects().size() > 0);
 	}
 
@@ -94,10 +91,6 @@ public class ShowRowCountAction
 			return;
 		}
 
-    Frame parent = (Frame)SwingUtilities.getWindowAncestor(source.getComponent());
-		progress = new ProgressDialog(ResourceMgr.getString("MsgSpoolWindowTitle"), parent, this, false);
-    progress.getMonitor().setMonitorType(RowActionMonitor.MONITOR_PROCESS);
-		progress.showProgress();
     WbThread counter = new WbThread("RowCount Thread")
     {
 
@@ -143,9 +136,11 @@ public class ShowRowCountAction
   	boolean useSavepoint = conn.getDbSettings().useSavePointForDML();
 
     ResultSet rs = null;
+
     try
     {
       conn.setBusy(true);
+      WbSwingUtilities.showWaitCursor(source.getComponent());
 			currentStatement = conn.createStatementForQuery();
 
       int count = tables.size();
@@ -153,7 +148,11 @@ public class ShowRowCountAction
       {
         TableIdentifier table = tables.get(i);
 
-        progress.getInfoPanel().setCurrentObject(table.getTableName(), i + 1, count);
+				if (statusBar != null)
+				{
+          String msg = ResourceMgr.getFormattedString("MsgProcessing", table.getRawTableName(), i + 1, count);
+					statusBar.setStatusMessage(msg);
+				}
 
 				String sql = builder.getSelectForCount(table);
 
@@ -178,8 +177,11 @@ public class ShowRowCountAction
 			SqlUtil.closeAll(rs, currentStatement);
 			currentStatement = null;
 			conn.setBusy(false);
-      progress.setVisible(false);
-      progress.dispose();
+      if (statusBar != null)
+      {
+        statusBar.clearStatusMessage();
+      }
+      WbSwingUtilities.showDefaultCursor(source.getComponent());
 		}
 
   }
@@ -187,7 +189,6 @@ public class ShowRowCountAction
   public void cancelExecution()
   {
     cancelCount = true;
-    progress.getInfoPanel().setInfoText(ResourceMgr.getString("MsgCancelling"));
 		if (currentStatement != null)
 		{
 			LogMgr.logDebug("ShowRowCountAction.cancel()", "Trying to cancel the current statement");

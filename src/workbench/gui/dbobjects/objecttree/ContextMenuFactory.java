@@ -85,7 +85,7 @@ class ContextMenuFactory
       }
     }
 
-    ShowRowCountAction showCount = new ShowRowCountAction(dbTree, dbTree);
+    ShowRowCountAction showCount = new ShowRowCountAction(dbTree, dbTree, dbTree.getStatusBar());
     menu.add(showCount);
 
     Window w = SwingUtilities.getWindowAncestor(dbTree);

@@ -79,6 +79,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.IsolationLevelChanger;
+import workbench.interfaces.StatusBar;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -341,6 +342,11 @@ public class DbTreePanel
     tree.clear();
   }
 
+  public StatusBar getStatusBar()
+  {
+    return statusBar;
+  }
+  
 	public void saveSettings(WbProperties props)
 	{
     if (this.isVisible())

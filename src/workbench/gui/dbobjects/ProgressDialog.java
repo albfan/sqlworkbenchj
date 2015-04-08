@@ -91,7 +91,7 @@ public class ProgressDialog
 	/**
 	 * Open the progress monitor window.
 	 */
-	public void showProgress()
+	public void showProgressWindow()
 	{
 		WbThread t = new WbThread("ShowProgress")
 		{

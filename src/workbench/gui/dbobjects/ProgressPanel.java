@@ -74,7 +74,8 @@ public class ProgressPanel
       remove(fileNameField);
     }
     setRowSize(20);
-    WbSwingUtilities.setMinimumSize(rowInfo, 20);
+    WbSwingUtilities.setMinimumSize(rowInfo, 15);
+    WbSwingUtilities.setMinimumSize(progressInfoText, 30);
 	}
 
 	public void setParentDialog(JDialog d)
@@ -242,7 +243,7 @@ public class ProgressPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 0.8;
+    gridBagConstraints.weightx = 1.0;
     infoPanel.add(progressInfoText, gridBagConstraints);
 
     rowInfo.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -253,7 +254,7 @@ public class ProgressPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_END;
-    gridBagConstraints.weightx = 0.2;
+    gridBagConstraints.weightx = 1.0;
     infoPanel.add(rowInfo, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
