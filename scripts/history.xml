@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-03-15">
+    <entry dev-build="4" type="enh">The application to be used for displaying the logfile can now be configured.</entry>
     <entry dev-build="3" type="enh">WbSchemaReport has a new (boolean) option -writeFullSource to write a valid CREATE VIEW statement to the XML output in case the DBMS does not store the complete SQL</entry>
     <entry dev-build="3" type="enh">Results can now automatically be refreshed either through an annotation or through the context menu of the result tab</entry>
     <entry dev-build="2" type="enh">The macros in a group can now be sorted alphabetically</entry>
@@ -16,6 +17,10 @@
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
     <entry dev-build="2" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
+    <entry dev-build="4" type="fix">The SQL source for sequences for SQL Server was not generated correctly.</entry>
+    <entry dev-build="4" type="fix">"Create DDL script" in the DbExplorer would generate the source code for sequnces twice</entry>
+    <entry dev-build="4" type="fix">Nano (or micro) seconds from timestamp values where not displayed correctly</entry>
+    <entry dev-build="4" type="fix">When opening a file, it is now checked if the selected encoding matches the one from the file</entry>
     <entry dev-build="4" type="fix">Each time when reloading a result that uses the @WbMacro annotation, the macro sub-menu would be added to the context menu again</entry>
     <entry dev-build="4" type="fix">For Informix, default clauses for columns were not generated properly in the DbExplorer</entry>
     <entry dev-build="4" type="fix">For Informix, index definitions were not always displayed correctly</entry>
