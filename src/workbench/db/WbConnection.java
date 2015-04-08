@@ -733,6 +733,18 @@ public class WbConnection
 		}
 	}
 
+	public void changeAutoCommit(boolean flag)
+  {
+    try
+    {
+      setAutoCommit(flag);
+    }
+    catch (SQLException ex)
+    {
+      // ignore
+    }
+  }
+
 	public void setAutoCommit(boolean flag)
 		throws SQLException
 	{

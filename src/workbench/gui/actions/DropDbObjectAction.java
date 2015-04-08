@@ -57,7 +57,7 @@ public class DropDbObjectAction
 	private Reloadable data;
 	private boolean available = true;
   private WbSelectionModel selection;
-  
+
 	public DropDbObjectAction(String labelKey, DbObjectList client, ListSelectionModel list, Reloadable r)
 	{
     this("MnuTxtDropDbObject", client, WbSelectionModel.Factory.createFacade(list), r);
@@ -118,15 +118,39 @@ public class DropDbObjectAction
 		final List<DbObject> objects = source.getSelectedObjects();
 		if (objects == null || objects.isEmpty()) return;
 
-		ObjectDropper dropperToUse = (this.dropper != null ? this.dropper : new GenericObjectDropper());
-		dropperToUse.setObjects(objects);
-		dropperToUse.setConnection(source.getConnection());
-		dropperToUse.setObjectTable(source.getObjectTable());
+    boolean autoCommitChanged = false;
+    boolean autoCommit = source.getConnection().getAutoCommit();
 
-		ObjectDropperUI dropperUI = new ObjectDropperUI(dropperToUse);
+    ObjectDropperUI dropperUI = null;
+    try
+    {
+      // this is essentially here for the DbTree, because the DbTree sets its own connection
+      // to autocommit regardless of the profile to reduce locking when retrieving the data
+      // from the database. If the profile was not set to autocommit the dropping of the
+      // objects should be done in a transaction.
+      if (autoCommit && !source.getConnection().getProfile().getAutocommit())
+      {
+        source.getConnection().changeAutoCommit(false);
+        autoCommitChanged = true;
+      }
 
-		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
-		dropperUI.showDialog(f);
+      ObjectDropper dropperToUse = (this.dropper != null ? this.dropper : new GenericObjectDropper());
+      dropperToUse.setObjects(objects);
+      dropperToUse.setConnection(source.getConnection());
+      dropperToUse.setObjectTable(source.getObjectTable());
+
+      dropperUI = new ObjectDropperUI(dropperToUse);
+
+      JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
+      dropperUI.showDialog(f);
+    }
+    finally
+    {
+      if (autoCommitChanged)
+      {
+        source.getConnection().changeAutoCommit(autoCommit);
+      }
+    }
 
 		if (!dropperUI.dialogWasCancelled())
 		{

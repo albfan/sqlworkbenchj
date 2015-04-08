@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -55,34 +56,19 @@ public class OracleUniqueConstraintReader
 
 		StringBuilder sql = new StringBuilder(500);
 		sql.append(
-			"select /* SQL Workbench */ index_name, constraint_name, deferrable, deferred, status, validated \n" +
+			"select /* SQLWorkbench */ index_name, constraint_name, deferrable, deferred, status, validated \n" +
 			"from all_constraints \n" +
 			"where constraint_type = 'U' \n" +
-			" AND (");
+			"  and ");
 
-		boolean first = true;
-
-		for (IndexDefinition idx : indexList)
-		{
-			if (first)
-			{
-				first = false;
-			}
-			else
-			{
-				sql.append(" OR ");
-			}
-			String schema = con.getMetadata().removeQuotes(idx.getSchema());
-			String idxName = con.getMetadata().removeQuotes(idx.getObjectName());
-			sql.append(" (nvl(index_owner, '");
-			sql.append(schema);
-			sql.append("') = '");
-			sql.append(schema);
-			sql.append("' AND index_name = '");
-			sql.append(idxName);
-			sql.append("') ");
-		}
-		sql.append(')');
+    if (hasMultipleOwners(indexList))
+    {
+      appendMultiOwnerQuery(sql, indexList);
+    }
+    else
+    {
+      appendSingleOwnerQuery(sql, indexList);
+    }
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -121,7 +107,6 @@ public class OracleUniqueConstraintReader
 					cons.setValid(StringUtil.equalStringIgnoreCase(validated, "VALIDATED"));
 					def.setUniqueConstraint(cons);
 				}
-
 			}
 		}
 		catch (SQLException se)
@@ -133,4 +118,70 @@ public class OracleUniqueConstraintReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
+
+  private boolean hasMultipleOwners(List<IndexDefinition> indexList)
+  {
+    Set<String> owners = CollectionUtil.caseInsensitiveSet();
+    for (IndexDefinition idx : indexList)
+    {
+      owners.add(idx.getSchema());
+    }
+    return owners.size() > 1;
+  }
+
+  private void appendMultiOwnerQuery(StringBuilder sql, List<IndexDefinition> indexList)
+  {
+    int count = 0;
+    sql.append(" (");
+    // I have to check the constraints for all indexes regardless if the index is defined
+    // as unique or not, because a unique (or primary key) constraint can be enforced by a non-unique index
+    // So retrieving this only for unique indexes is not reliable
+		for (IndexDefinition idx : indexList)
+		{
+			if (count > 0)
+			{
+				sql.append(" OR ");
+			}
+      String schema = SqlUtil.removeObjectQuotes(idx.getSchema());
+      String idxName = SqlUtil.removeObjectQuotes(idx.getObjectName());
+      sql.append(" (nvl(index_owner, '");
+      sql.append(schema);
+      sql.append("'), index_name) = (('");
+      sql.append(schema);
+      sql.append("', '");
+      sql.append(idxName);
+      sql.append("')) ");
+
+      count ++;
+		}
+		sql.append(')');
+  }
+
+  private void appendSingleOwnerQuery(StringBuilder sql, List<IndexDefinition> indexList)
+  {
+    String schema = SqlUtil.removeObjectQuotes(indexList.get(0).getSchema());
+    sql.append("nvl(index_owner,'");
+    sql.append(schema);
+    sql.append("') = '");
+    sql.append(schema);
+    sql.append("'\n  AND index_name IN (");
+
+    int nr = 0;
+    // I have to check the constraints for all indexes regardless if the index is defined
+    // as unique or not, because a unique (or primary key) constraint can be enforced by a non-unique index
+    // So retrieving this only for unique indexes is not reliable
+		for (IndexDefinition idx : indexList)
+		{
+			if (nr > 0)
+			{
+				sql.append(',');
+			}
+      String idxName = SqlUtil.removeObjectQuotes(idx.getObjectName());
+      sql.append('\'');
+      sql.append(idxName);
+      sql.append('\'');
+      nr ++;
+		}
+		sql.append(')');
+  }
 }

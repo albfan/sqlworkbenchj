@@ -80,12 +80,35 @@ public class DeleteTablesAction
 
 		List<TableIdentifier> tables = getSelectedTables();
 
-		TableDeleterUI deleter = new TableDeleterUI();
-		deleter.addDeleteListener(this.deleteListener);
-		deleter.setObjects(tables);
-		deleter.setConnection(source.getConnection());
-		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
-		deleter.showDialog(f);
+    boolean autoCommitChanged = false;
+    boolean autoCommit = source.getConnection().getAutoCommit();
+
+    // this is essentially here for the DbTree, because the DbTree sets its own connection
+    // to autocommit regardless of the profile to reduce locking when retrieving the data
+    // from the database. If the profile was not set to autocommit the dropping of the
+    // objects should be done in a transaction.
+    if (autoCommit && !source.getConnection().getProfile().getAutocommit())
+    {
+      source.getConnection().changeAutoCommit(false);
+      autoCommitChanged = true;
+    }
+
+    try
+    {
+      TableDeleterUI deleter = new TableDeleterUI();
+      deleter.addDeleteListener(this.deleteListener);
+      deleter.setObjects(tables);
+      deleter.setConnection(source.getConnection());
+      JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
+      deleter.showDialog(f);
+    }
+    finally
+    {
+      if (autoCommitChanged)
+      {
+        source.getConnection().changeAutoCommit(autoCommit);
+      }
+    }
 	}
 
 	private List<TableIdentifier> getSelectedTables()
