@@ -64,7 +64,7 @@ public class DbObjectsTree
 
   public DbObjectsTree(WbStatusLabel status)
   {
-    super(new DbObjectTreeModel(new ObjectTreeNode("Database", "database")));
+    super(new DbObjectTreeModel());
     setShowsRootHandles(true);
     addTreeExpansionListener(this);
     renderer = new DbObjectNodeRenderer();

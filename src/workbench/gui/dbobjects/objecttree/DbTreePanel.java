@@ -346,7 +346,7 @@ public class DbTreePanel
   {
     return statusBar;
   }
-  
+
 	public void saveSettings(WbProperties props)
 	{
     if (this.isVisible())
@@ -378,8 +378,10 @@ public class DbTreePanel
   {
     if (tree != null)
     {
+      tree.clear();
       tree.setConnection(null);
     }
+
     WbThread th = new WbThread(new Runnable()
     {
       @Override

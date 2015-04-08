@@ -22,6 +22,7 @@ package workbench.gui.dbobjects.objecttree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
+import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -31,6 +32,11 @@ import workbench.util.StringUtil;
 public class DbObjectTreeModel
   extends DefaultTreeModel
 {
+
+  public DbObjectTreeModel()
+  {
+    super(new RootNode());
+  }
 
   public DbObjectTreeModel(TreeNode root)
   {

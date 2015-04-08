@@ -53,7 +53,13 @@ public class TreeLoader
   /**
    * The node type for schema elements.
    */
+  public static final String TYPE_ROOT = "database";
+
+  /**
+   * The node type for schema elements.
+   */
   public static final String TYPE_SCHEMA = "schema";
+
   /**
    * The node type for catalog elements.
    */
@@ -116,7 +122,8 @@ public class TreeLoader
 
   public TreeLoader()
   {
-    setRootName(ResourceMgr.getString("TxtDbExplorerTables"));
+    root = new RootNode();
+    model = new DbObjectTreeModel(root);
   }
 
   public void setConnection(WbConnection conn, String name)
@@ -136,8 +143,7 @@ public class TreeLoader
   private void setRootName(String name)
   {
     removeAllChildren(root);
-    root = new ObjectTreeNode(name, "database");
-    root.setAllowsChildren(true);
+    root = new RootNode(name);
     model = new DbObjectTreeModel(root);
   }
 
@@ -165,6 +171,8 @@ public class TreeLoader
   public void clear()
   {
     removeAllChildren(root);
+    root.setNameAndType(ResourceMgr.getString("TxtDbExplorerTables"), TYPE_ROOT);
+    model.nodeStructureChanged(root);
   }
 
   public DbObjectTreeModel getModel()
@@ -178,7 +186,7 @@ public class TreeLoader
     boolean loaded = false;
 
     if (connection == null) return;
-    
+
     if (connection.getDbSettings().supportsCatalogs())
     {
       loaded = loadCatalogs(root);

@@ -163,8 +163,8 @@ public class SqlServerSequenceReader
 		result.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "maximum_value"));
 		result.setSequenceProperty(PROP_START_VALUE, ds.getValue(row, "start_value"));
 		result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "increment"));
-		result.setSequenceProperty(PROP_CYCLE, "CYCLE".equals(ds.getValueAsString(row, "cycle_flag")));
-		result.setSequenceProperty(PROP_IS_CACHED, ds.getValue(row, "is_cached"));
+		result.setSequenceProperty(PROP_CYCLE, Boolean.valueOf("CYCLE".equals(ds.getValueAsString(row, "cycle_flag"))));
+		result.setSequenceProperty(PROP_IS_CACHED, Boolean.valueOf(StringUtil.stringToBool(ds.getValueAsString(row, "is_cached"))));
 		result.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(row, "cache_size"));
 		result.setSequenceProperty(PROP_CURRENT_VALUE, ds.getValue(row, "current_value"));
 		result.setSequenceProperty(PROP_DATA_TYPE, ds.getValue(row, "data_type"));
@@ -173,8 +173,7 @@ public class SqlServerSequenceReader
 		return result;
 	}
 
-
-	private BigDecimal getNumberValue(SequenceDefinition def, String property)
+  private BigDecimal getNumberValue(SequenceDefinition def, String property)
 	{
 		Object v = def.getSequenceProperty(property);
 		if (v == null) return null;
@@ -208,7 +207,7 @@ public class SqlServerSequenceReader
 
 		Number increment = getNumberValue(def, PROP_INCREMENT);
 
-		boolean cycle = Boolean.getBoolean((String)def.getSequenceProperty(PROP_CYCLE));
+		Boolean cycle = (Boolean)def.getSequenceProperty(PROP_CYCLE);
 		Boolean isCached = (Boolean)def.getSequenceProperty(PROP_IS_CACHED);
 		Number cache = (Number) def.getSequenceProperty(PROP_CACHE_SIZE);
 		Number precision = (Number)def.getSequenceProperty(PROP_PRECISION);
@@ -233,7 +232,7 @@ public class SqlServerSequenceReader
 		result.append(nl).append("       INCREMENT BY ");
 		result.append(increment);
 
-		if (minValue != null && isMinValue(typeToUse, minValue))
+		if (minValue != null && !isMinValue(typeToUse, minValue))
 		{
 			result.append(nl).append("       MINVALUE ");
 			result.append(minValue);
@@ -243,7 +242,7 @@ public class SqlServerSequenceReader
 			result.append(nl).append("       NO MINVALUE");
 		}
 
-		if (maxValue != null && isMaxValue(typeToUse, maxValue))
+		if (maxValue != null && !isMaxValue(typeToUse, maxValue))
 		{
 			result.append(nl).append("       MAXVALUE ");
 			result.append(maxValue);
@@ -273,7 +272,7 @@ public class SqlServerSequenceReader
 		}
 
 		result.append(nl).append("       ");
-		result.append(cycle);
+		result.append(cycle ? "CYCLE" : "NOCYCLE");
 
 		result.append(';');
 		result.append(nl);
@@ -286,7 +285,7 @@ public class SqlServerSequenceReader
 		if (maxValue == null) return true;
 		if ("bigint".equals(type))
 		{
-			return maxValue.toString().equals("9223372036854776000");
+			return maxValue.toString().equals("9223372036854775807");
 		}
 		if ("tinyint".equals(type))
 		{
@@ -308,7 +307,7 @@ public class SqlServerSequenceReader
 		if (minValue == null) return true;
 		if ("bigint".equals(type))
 		{
-			return minValue.toString().equals("-9223372036854776000");
+			return minValue.toString().equals("-9223372036854775808");
 		}
 		if ("tinyint".equals(type))
 		{
