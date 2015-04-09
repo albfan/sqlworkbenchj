@@ -73,7 +73,7 @@ public class EditorDropHandler
     if (index > -1)
     {
       sql = parser.getCommand(index, false);
-			StatementContext ctx = new StatementContext(conn, sql, index);
+      StatementContext ctx = new StatementContext(conn, sql, editorPos - parser.getStartPosForCommand(index));
 
 			if (ctx.isStatementSupported())
 			{
@@ -93,7 +93,7 @@ public class EditorDropHandler
         String text = "select * from " + dbo.getObjectExpression(conn);
         SqlFormatter formatter = new SqlFormatter(text, conn.getDbId());
         text = formatter.getFormattedSql();
-        editor.insertText(editorPos, text);
+        insertString(text, editorPos);
         return;
       }
     }
@@ -104,7 +104,22 @@ public class EditorDropHandler
       if (i > 0) text.append(", ");
       text.append(getDisplayString(conn, nodes[i], context));
     }
-    editor.insertText(editorPos, text.toString());
+    insertString(text.toString(), editorPos);
+  }
+
+  private void insertString(String text, int location)
+  {
+    int start = editor.getSelectionStart();
+    int end = editor.getSelectionEnd();
+
+    if (start < end && start <= location && location <= end)
+    {
+      editor.setSelectedText(text);
+    }
+    else
+    {
+      editor.insertText(location, text);
+    }
   }
 
   private String getDisplayString(WbConnection conn, ObjectTreeNode node, int context)

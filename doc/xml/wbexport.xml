@@ -1349,7 +1349,22 @@
               </para>
             </entry>
           </row>
-
+          <row>
+            <entry id="export-data-offset">-offset</entry>
+            <entry>
+              <para>Possible values: either a column/row combination or a cell reference in Excel format ("D3")</para>
+              <para>This parameter is only available for XLS and XLSX exports</para>
+              <para>
+                When this parameter is specified the data is written starting at the specified location. No data will
+                be written above or to the left of the specified cell.
+              </para>
+              <para>
+                The values can be given as a numeric row column combination, e.g. <literal>-offset=5,6</literal>.
+                Data will then be written starting with the fifth column in the sixth row. Alternatively the reference
+                can be specified as an Excel reference: <literal>-offset=C5</literal>.
+              </para>
+            </entry>
+          </row>
 				</tbody>
 			</tgroup>
 		</informaltable>

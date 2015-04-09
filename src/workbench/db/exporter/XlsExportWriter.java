@@ -22,6 +22,8 @@
  */
 package workbench.db.exporter;
 
+import java.awt.Point;
+
 /**
  * Export data into an Excel spreadsheet using Apache's POI
  *
@@ -53,6 +55,11 @@ public class XlsExportWriter
 		xls.setAppend(exporter.getAppendToFile());
 		xls.setTargetSheetIndex(exporter.getTargetSheetIndex());
 		xls.setTargetSheetName(exporter.getTargetSheetName());
+    Point offset = exporter.getSpreadSheetOffset();
+    if (offset != null)
+    {
+      xls.setStartOffset(offset.y, offset.x);
+    }
 	}
 
 	@Override

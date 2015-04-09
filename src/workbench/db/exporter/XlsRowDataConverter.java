@@ -72,7 +72,13 @@ public class XlsRowDataConverter
 	private Sheet sheet = null;
 	private ExcelDataFormat excelFormat = null;
 	private boolean useXLSX;
+
+  // controls the offset of the first row when a header is used
 	private int firstRow = 0;
+
+  private int rowOffset;
+  private int columnOffset;
+
 	private boolean optimizeCols = true;
 	private boolean append;
 	private int targetSheetIndex = -1;
@@ -114,6 +120,12 @@ public class XlsRowDataConverter
 	{
 		this.optimizeCols = flag;
 	}
+
+  public void setStartOffset(int startRow, int startColumn)
+  {
+    rowOffset = startRow;
+    columnOffset = startColumn;
+  }
 
 	// This should not be called in the constructor as
 	// at that point in time the formatters are not initialized
@@ -271,26 +283,31 @@ public class XlsRowDataConverter
 	{
 		if (applyFormatting())
 		{
-			return row.createCell(cellIndex);
+			return row.createCell(cellIndex + columnOffset);
 		}
-		Cell cell = row.getCell(cellIndex);
+		Cell cell = row.getCell(cellIndex + columnOffset);
 		if (cell == null)
 		{
-			cell = row.createCell(cellIndex);
+			cell = row.createCell(cellIndex + columnOffset);
 		}
 		return cell;
 	}
 
 	private Row createSheetRow(int rowIndex)
 	{
+    // TODO: shift rows down in order to preserver possible formulas
+    // int rows = sheet.getLastRowNum();
+    // sheet.shiftRows(rowIndex + rowOffset, rows, 1);
+
 		if (this.applyFormatting())
 		{
-			return sheet.createRow(rowIndex);
+			return sheet.createRow(rowIndex + rowOffset);
 		}
-		Row row = sheet.getRow(rowIndex);
+
+		Row row = sheet.getRow(rowIndex + rowOffset);
 		if (row == null)
 		{
-			row = sheet.createRow(rowIndex);
+			row = sheet.createRow(rowIndex + rowOffset);
 		}
 		return row;
 	}
@@ -310,9 +327,10 @@ public class XlsRowDataConverter
 
 		if (getEnableAutoFilter() && writeHeader)
 		{
-			String lastColumn = CellReference.convertNumToColString(metaData.getColumnCount() - 1);
+			String lastColumn = CellReference.convertNumToColString(metaData.getColumnCount() - 1 + columnOffset);
+      String firstColumn = CellReference.convertNumToColString(columnOffset);
 
-			String rangeName = "A1:" + lastColumn + Long.toString(totalRows + 1);
+			String rangeName = firstColumn + Integer.toString(rowOffset + 1) + ":" + lastColumn + Long.toString(totalRows + 1 + rowOffset);
 			CellRangeAddress range = CellRangeAddress.valueOf(rangeName);
 			sheet.setAutoFilter(range);
 		}
@@ -321,7 +339,7 @@ public class XlsRowDataConverter
 		{
 			for (int col = 0; col < this.metaData.getColumnCount(); col++)
 			{
-				sheet.autoSizeColumn(col);
+				sheet.autoSizeColumn(col + columnOffset);
 			}
 
 			// POI seems to use a strange unit for specifying column widths.
@@ -329,7 +347,7 @@ public class XlsRowDataConverter
 
 			for (int col = 0; col < this.metaData.getColumnCount(); col++)
 			{
-				int width = sheet.getColumnWidth(col);
+				int width = sheet.getColumnWidth(col + columnOffset);
 				int minWidth = metaData.getColumnName(col).length() * charWidth;
 				if (getEnableAutoFilter())
 				{
@@ -338,12 +356,12 @@ public class XlsRowDataConverter
 				if (width < minWidth)
 				{
 					LogMgr.logDebug("XlsRowDataConverter.getEnd()", "Calculated width of column " + col + " is: " + width + ". Applying min width: " + minWidth);
-					sheet.setColumnWidth(col, minWidth);
+					sheet.setColumnWidth(col + columnOffset, minWidth);
 					if (sheet instanceof XSSFSheet)
 					{
 						ColumnHelper helper = ((XSSFSheet)sheet).getColumnHelper();
-						helper.setColBestFit(col, false);
-						helper.setColHidden(col, false);
+						helper.setColBestFit(col + columnOffset, false);
+						helper.setColHidden(col + columnOffset, false);
 					}
 				}
 			}

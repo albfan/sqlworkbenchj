@@ -22,7 +22,11 @@
  */
 package workbench.db.exporter;
 
+import java.awt.Point;
+
 import workbench.log.LogMgr;
+
+import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
 
 /**
@@ -97,4 +101,26 @@ public class PoiHelper
 		}
 		return xlsxAvailable;
 	}
+
+  public static Point excelToNumbers(String excelAddress)
+  {
+    if (StringUtil.isEmptyString(excelAddress)) return null;
+
+    String col = excelAddress.toLowerCase().replaceAll("[^a-z]", "");
+    String row = excelAddress.toLowerCase().replaceAll("[^0-9]", "");
+
+    if (StringUtil.isEmptyString(col)) return null;
+    if (StringUtil.isEmptyString(row)) return null;
+
+    int y = StringUtil.getIntValue(row, -1);
+    if (y == -1) return null;
+
+    int x = 0;
+    for (int i=0; i < col.length(); i++)
+    {
+      x *= 26;
+      x += (int)col.charAt(i) - 96;
+    }
+    return new Point(x-1,y-1);
+  }
 }

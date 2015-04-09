@@ -22,6 +22,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -110,6 +111,7 @@ public class WbExport
 	public static final String ARG_FIXED_HEADER = "fixedHeader";
 	public static final String ARG_TARGET_SHEET_IDX = "targetSheet";
 	public static final String ARG_TARGET_SHEET_NAME = "targetSheetName";
+	public static final String ARG_DATA_OFFSET = "offset";
 
 	public static final String ARG_PAGE_TITLE = "title";
 
@@ -229,6 +231,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_TRIM_CHARDATA, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_TARGET_SHEET_IDX);
 		cmdLine.addArgument(ARG_TARGET_SHEET_NAME);
+		cmdLine.addArgument(ARG_DATA_OFFSET);
 		cmdLine.addArgument(ARG_INCLUDE_IDENTITY, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_INCLUDE_READONLY, ArgumentType.BoolArgument);
 		RegexModifierParameter.addArguments(cmdLine);
@@ -501,6 +504,7 @@ public class WbExport
 		exporter.setExportHeaders(cmdLine.getBoolean(ARG_HEADER, getHeaderDefault(type)));
 		exporter.setPageTitle(cmdLine.getValue(ARG_PAGE_TITLE));
 		exporter.setIncludeColumnComments(cmdLine.getBoolean(ARG_COL_COMMENTS, false));
+    exporter.setSpreadSheetOffset(parseOffset(cmdLine.getValue(ARG_DATA_OFFSET)));
 
 		ExportDataModifier modifier = RegexModifierParameter.buildFromCommandline(cmdLine);
 		exporter.setDataModifier(modifier);
@@ -933,6 +937,26 @@ public class WbExport
 		}
 		return result;
 	}
+
+  private Point parseOffset(String value)
+  {
+    if (StringUtil.isBlank(value)) return null;
+    if (value.indexOf(',') > -1)
+    {
+      // x,y parameter
+      String[] numbers = value.trim().split(",");
+      if (numbers == null || numbers.length != 2) return null;
+
+      int x = StringUtil.getIntValue(numbers[0], -1);
+      int y = StringUtil.getIntValue(numbers[1], -1);
+      if (x < 1 || y < 1) return null;
+      return new Point(x-1, y-1); // the exporter expects a zero based offset
+    }
+    else
+    {
+      return PoiHelper.excelToNumbers(value);
+    }
+  }
 
 	boolean isTypeValid(String type)
 	{

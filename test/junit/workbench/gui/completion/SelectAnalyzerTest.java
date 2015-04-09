@@ -49,6 +49,21 @@ public class SelectAnalyzerTest
 
 
   @Test
+  public void testPosition()
+  {
+    String sql =
+      "select id, firstname, lastname, comment\n" +
+      "from address as x\n" +
+      "order by id";
+
+    int pos = sql.indexOf('x');
+		StatementContext context = new StatementContext(null, sql, pos, false);
+		BaseAnalyzer analyzer = context.getAnalyzer();
+		analyzer.checkContext();
+    assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, analyzer.getContext());
+  }
+
+  @Test
   public void testAlias()
   {
     String sql =

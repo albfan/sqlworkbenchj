@@ -22,6 +22,7 @@
  */
 package workbench.db.exporter;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -180,6 +181,8 @@ public class DataExporter
   private boolean quoteHeader;
   private boolean quoteNulls;
 
+  private Point dataOffset;
+
 
 	/**
 	 * Toggles an additional sheet for Spreedsheet exports
@@ -311,6 +314,16 @@ public class DataExporter
 	{
 		return enableFixedHeader;
 	}
+
+  public Point getSpreadSheetOffset()
+  {
+    return dataOffset;
+  }
+
+  public void setSpreadSheetOffset(Point location)
+  {
+    dataOffset = location;
+  }
 
 	@Override
 	public String getNullString()
