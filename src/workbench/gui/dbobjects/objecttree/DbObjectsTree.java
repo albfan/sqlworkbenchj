@@ -75,7 +75,7 @@ public class DbObjectsTree
 		setEditable(false);
 		setExpandsSelectedPaths(true);
     getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
-
+    
 		// setting the row height to 0 makes it dynamic
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);

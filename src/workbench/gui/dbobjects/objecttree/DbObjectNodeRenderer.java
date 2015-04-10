@@ -69,6 +69,7 @@ public class DbObjectNodeRenderer
 
     iconMapOpen.put(TreeLoader.TYPE_SCHEMA, "folder-open");
     iconMapOpen.put(TreeLoader.TYPE_CATALOG, "folder-open");
+    setLeafIcon(IconMgr.getInstance().getLabelIcon("bullet_black"));
 	}
 
   public void setViewTypes(List<String> types)
@@ -87,7 +88,7 @@ public class DbObjectNodeRenderer
     // just to be sure
     iconMap.put(TreeLoader.TYPE_VIEW, "view");
   }
-  
+
   public void setTableTypes(List<String> types)
   {
     if (CollectionUtil.isEmpty(types)) return;
@@ -125,6 +126,10 @@ public class DbObjectNodeRenderer
         if (col.isPkColumn())
         {
           setIcon(IconMgr.getInstance().getLabelIcon("key"));
+        }
+        else
+        {
+          setIcon(IconMgr.getInstance().getLabelIcon("bullet_black"));
         }
       }
       else

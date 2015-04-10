@@ -654,7 +654,7 @@ public class TableListPanel
 					}
 					else
 					{
-						displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), indexPanel);
+						addIndexPanel();
 					}
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedKeys);
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedKeys);
@@ -707,6 +707,7 @@ public class TableListPanel
 
 					addBaseObjectPanels();
 					if (includeDataPanel) addDataPanel();
+          showIndexesIfSupported();
 					showTriggerIfSupported();
 
 					exportedKeys.reset();
@@ -746,10 +747,30 @@ public class TableListPanel
 			addTriggerPanel();
 		}
 	}
+  
+	private void showIndexesIfSupported()
+	{
+		TableIdentifier tbl = getObjectTable();
+		if (tbl == null) return;
+		DbSettings dbs = dbConnection.getDbSettings();
+		if (dbs.isViewType(tbl.getType()) && dbs.supportsIndexedViews())
+		{
+			addIndexPanel();
+		}
+    if (dbs.isMview(tbl.getType()))
+    {
+      addIndexPanel();
+    }
+	}
 
 	protected void addTriggerPanel()
 	{
 		displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
+	}
+
+	protected void addIndexPanel()
+	{
+		displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), indexPanel);
 	}
 
 	protected void addBaseObjectPanels()

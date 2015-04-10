@@ -118,11 +118,6 @@ public class JdbcIndexReader
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
-		if (metaData.getDbSettings().isViewType(table.getType()) && !metaData.getDbSettings().supportsIndexedViews())
-		{
-			return null;
-		}
-
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("JdbcIndexReader.getIndexInfo()",

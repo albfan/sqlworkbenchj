@@ -30,6 +30,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.DbSettings;
 import workbench.db.DependencyNode;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
@@ -388,16 +389,22 @@ public class TreeLoader
           addColumnsNode(node);
         }
       }
+
       if (isTable(tbl))
       {
-        node.setAllowsChildren(true);
         addTableNodes(node);
         connection.getObjectCache().addTable(new TableDefinition(tbl));
+      }
+      else if (hasIndexes(node))
+      {
+        node.setAllowsChildren(true);
+        addIndexNode(node);
       }
 
       if (connection.getMetadata().isViewType(typeNode.getName()))
       {
         addViewTriggerNode(node);
+        connection.getObjectCache().addTable(new TableDefinition(tbl));
       }
 
       typeNode.add(node);
@@ -406,6 +413,19 @@ public class TreeLoader
     model.nodeStructureChanged(typeNode);
     model.nodeChanged(typeNode);
     typeNode.setChildrenLoaded(true);
+  }
+
+  private boolean hasIndexes(ObjectTreeNode node)
+  {
+    if (node == null) return false;
+    DbObject dbo = node.getDbObject();
+    if (dbo == null) return false;
+		DbSettings dbs = connection.getDbSettings();
+		if (dbs.isViewType(dbo.getObjectType()) && dbs.supportsIndexedViews())
+		{
+			return true;
+		}
+    return dbs.isMview(dbo.getObjectType());
   }
 
   private void addViewTriggerNode(ObjectTreeNode node)
@@ -426,11 +446,16 @@ public class TreeLoader
     node.add(cols);
   }
 
-  private void addTableNodes(ObjectTreeNode node)
+  private void addIndexNode(ObjectTreeNode node)
   {
     ObjectTreeNode idx = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerIndexes"), TYPE_INDEX_LIST);
     idx.setAllowsChildren(true);
     node.add(idx);
+  }
+
+  private void addTableNodes(ObjectTreeNode node)
+  {
+    addIndexNode(node);
 
     ObjectTreeNode fk = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerFkColumns"), TYPE_FK_LIST);
     fk.setAllowsChildren(true);
@@ -501,7 +526,6 @@ public class TreeLoader
     }
 
     DbMetadata meta = connection.getMetadata();
-    if (!meta.isTableType(dbo.getObjectType())) return;
 
     TableIdentifier tbl = (TableIdentifier)dbo;
     List<IndexDefinition> indexes = meta.getIndexReader().getTableIndexList(tbl);
@@ -681,13 +705,13 @@ public class TreeLoader
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
       }
-      else if (node.getDbObject() instanceof TableIdentifier)
+      else if (connection.getMetadata().isExtendedTableType(type))
       {
         reloadTableNode(node);
       }
-      else if (connection.getMetadata().hasColumns(node.getType()))
+      else if (connection.getMetadata().hasColumns(type))
       {
-        loadObjectsForTypeNode(node);
+        loadTableColumns(node.getDbObject(), node);
       }
     }
     finally

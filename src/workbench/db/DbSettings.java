@@ -698,6 +698,13 @@ public class DbSettings
 		return types.contains(type.toLowerCase());
 	}
 
+	public boolean isMview(String type)
+	{
+		if (type == null) return false;
+		String mviewname = Settings.getInstance().getProperty(prefix + "mviewname", "materialized view").toLowerCase();
+		return mviewname.equalsIgnoreCase(type);
+	}
+
 	String mapIndexType(int type)
 	{
 		switch (type)

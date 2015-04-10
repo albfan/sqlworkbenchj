@@ -697,8 +697,31 @@ public class TableDefinitionPanel
 
 	protected boolean isTable()
 	{
-		return (currentTable != null ? "TABLE".equalsIgnoreCase(currentTable.getType()) : false);
+    if (currentTable == null) return false;
+    if (dbConnection == null) return false;
+
+    String type = currentTable.getType();
+    return dbConnection.getMetadata().isExtendedTableType(type);
 	}
+
+	protected boolean isMview()
+	{
+    if (currentTable == null) return false;
+    if (dbConnection == null) return false;
+
+    String type = currentTable.getType();
+    return dbConnection.getDbSettings().isMview(type);
+	}
+
+  protected boolean hasIndex()
+  {
+    if (currentTable == null) return false;
+    if (dbConnection == null) return false;
+    if (isTable()) return true;
+    if (isMview()) return true;
+    String type = currentTable.getType();
+    return dbConnection.getMetadata().isViewType(type) && dbConnection.getDbSettings().supportsIndexedViews();
+  }
 
 	protected boolean hasPkColumn()
 	{
@@ -726,11 +749,12 @@ public class TableDefinitionPanel
 			boolean rowsSelected = (this.tableDefinition.getSelectedRowCount() > 0);
 
 			boolean isTable = isTable();
+			boolean isMview = isMview();
 			boolean hasPk = hasPkColumn();
 			createPKAction.setEnabled(rowsSelected && isTable && !hasPk);
 			dropPKAction.setEnabled(isTable && hasPk);
-			createIndexAction.setEnabled(rowsSelected && isTable);
-			deleteColumn.setEnabled(rowsSelected && isTable && DbExplorerSettings.allowAlterInDbExplorer());
+			createIndexAction.setEnabled(rowsSelected && hasIndex());
+			deleteColumn.setEnabled(rowsSelected && (isTable || isMview) && DbExplorerSettings.allowAlterInDbExplorer());
 		}
 	}
 
