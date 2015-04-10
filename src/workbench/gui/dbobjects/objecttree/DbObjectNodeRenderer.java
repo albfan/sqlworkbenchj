@@ -62,13 +62,13 @@ public class DbObjectNodeRenderer
     iconMap.put(DbMetadata.MVIEW_NAME, "mview");
     iconMap.put("database", "profile");
     iconMap.put(TreeLoader.TYPE_SCHEMA, "folder");
-    iconMap.put(TreeLoader.TYPE_CATALOG, "folder");
+    iconMap.put(TreeLoader.TYPE_CATALOG, "folder-db");
     iconMap.put(TreeLoader.TYPE_DBO_TYPE_NODE, "db_type");
     iconMap.put("index", "index");
     iconMap.put("type", "type");
 
     iconMapOpen.put(TreeLoader.TYPE_SCHEMA, "folder-open");
-    iconMapOpen.put(TreeLoader.TYPE_CATALOG, "folder-open");
+    iconMapOpen.put(TreeLoader.TYPE_CATALOG, "folder-open-db");
     setLeafIcon(IconMgr.getInstance().getLabelIcon("bullet_black"));
 	}
 
