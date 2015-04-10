@@ -681,13 +681,13 @@ public class TreeLoader
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
       }
-      else if (connection.getMetadata().hasColumns(node.getType()))
-      {
-        loadTableColumns(node.getDbObject(), node);
-      }
       else if (node.getDbObject() instanceof TableIdentifier)
       {
         reloadTableNode(node);
+      }
+      else if (connection.getMetadata().hasColumns(node.getType()))
+      {
+        loadObjectsForTypeNode(node);
       }
     }
     finally

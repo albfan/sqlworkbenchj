@@ -45,6 +45,7 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbStatusLabel;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -328,6 +329,7 @@ public class DbObjectsTree
 
   public void expandNode(ObjectTreeNode node)
   {
+    if (node == null) return;
     TreeNode[] nodes = getTreeModel().getPathToRoot(node);
     if (nodes != null)
     {
@@ -485,10 +487,31 @@ public class DbObjectsTree
     }
     else
     {
+      Set<String> expandedTypes = CollectionUtil.caseInsensitiveSet();
+      for (int i=0; i < node.getChildCount(); i++)
+      {
+        ObjectTreeNode child = node.getChildAt(i);
+        TreePath path = new TreePath(getTreeModel().getPathToRoot(child));
+        if (isExpanded(path))
+        {
+          expandedTypes.add(child.getType());
+        }
+      }
       node.removeAllChildren();
       loader.loadChildren(node);
+      if (node.getDbObject() instanceof TableIdentifier)
+      {
+        for (int i=0; i < node.getChildCount(); i++)
+        {
+          ObjectTreeNode child = node.getChildAt(i);
+          String type = child.getType();
+          if (expandedTypes.contains(type))
+          {
+            setExpandedState(new TreePath(getTreeModel().getPathToRoot(child)), true);
+          }
+        }
+      }
     }
-
   }
 
   public void expandNodes(List<TreePath> nodes)

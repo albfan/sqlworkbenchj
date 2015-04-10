@@ -994,12 +994,11 @@
 		<simplesect id="options-decimal-digits">
 			<title>Decimal digits</title><blockquote>
 			<para>Define the maximum number of digits which will be displayed for
-				numeric columns. This only affects the display of the number internally
-				they are still stored as the DBMS returned them. To see the internal
+				numeric columns. This only affects the display of the number, not the storage or retrieval.
+        Internally they are still stored as the DBMS returned them. To see the internal
 				value, leave the mouse cursor over the cell. The tooltip which is
 				displayed will contain the number as it was returned by the JDBC driver.
-				When exporting data or copying it to the clipboard, the real value will
-				be used.
+				When exporting data or copying it to the clipboard, the real value will be used.
 			</para>
 		</blockquote></simplesect>
 
