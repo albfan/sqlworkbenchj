@@ -275,4 +275,10 @@ public class GenericObjectDropper
 		}
 	}
 
+  @Override
+  public boolean supportsObject(DbObject object)
+  {
+    return !(object instanceof ColumnIdentifier);
+  }
+
 }

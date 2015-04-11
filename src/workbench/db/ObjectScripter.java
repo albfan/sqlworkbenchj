@@ -28,6 +28,7 @@ import java.util.Set;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -67,7 +68,7 @@ public class ObjectScripter
 	private String nl = Settings.getInstance().getInternalEditorLineEnding();
 	private Collection<String> commitTypes;
 	private boolean appendCommit;
-	private boolean useSeparator = true;
+	private boolean useSeparator;
 	private boolean includeDrop;
 	private boolean includeGrants = true;
 	private Collection<String> typesWithoutSeparator;
@@ -105,6 +106,8 @@ public class ObjectScripter
 			commitTypes.add(synonymType.toLowerCase());
       knownTypes.add(synonymType);
 		}
+
+    useSeparator = DbExplorerSettings.getGenerateScriptSeparator();
 
 		typesWithoutSeparator = CollectionUtil.caseInsensitiveSet(TYPE_SELECT, TYPE_INSERT, TYPE_UPDATE);
 		dropper = new GenericObjectDropper();

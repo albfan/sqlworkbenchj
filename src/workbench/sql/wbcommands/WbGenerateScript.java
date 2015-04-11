@@ -30,6 +30,7 @@ import java.util.List;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DbObject;
@@ -161,7 +162,7 @@ public class WbGenerateScript
 		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 
 		scripter = new ObjectScripter(objects, currentConnection);
-		scripter.setUseSeparator(cmdLine.getBoolean("useSeparator", false));
+		scripter.setUseSeparator(cmdLine.getBoolean("useSeparator", DbExplorerSettings.getGenerateScriptSeparator()));
 		scripter.setIncludeDrop(cmdLine.getBoolean("includeDrop", false));
 		scripter.setIncludeGrants(cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_GRANTS, true));
 

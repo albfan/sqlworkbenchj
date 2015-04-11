@@ -53,6 +53,7 @@ import javax.swing.tree.TreePath;
 import workbench.interfaces.ObjectDropListener;
 import workbench.interfaces.QuickFilter;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.StatusBar;
 import workbench.interfaces.WbSelectionModel;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
@@ -79,7 +80,6 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.IsolationLevelChanger;
-import workbench.interfaces.StatusBar;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -487,14 +487,47 @@ public class DbTreePanel
   @Override
   public TableIdentifier getObjectTable()
   {
-    if (tree.getSelectionCount() != 1) return null;
-    ObjectTreeNode node = getSelectedNode();
-    if (node == null) return null;
+    if (tree.getSelectionCount() <= 0) return null;
 
-    DbObject dbo = node.getDbObject();
-    if (dbo instanceof TableIdentifier)
+    if (tree.getSelectionCount() == 1)
     {
-      return (TableIdentifier)dbo;
+      ObjectTreeNode node = getSelectedNode();
+      if (node == null) return null;
+
+      DbObject dbo = node.getDbObject();
+      if (dbo instanceof TableIdentifier)
+      {
+        return (TableIdentifier)dbo;
+      }
+    }
+
+    // Multiple objects are selected. Returning the "object table"
+    // only makes sense if all of them are columns of the same table
+    List<ObjectTreeNode> nodes = getSelectedNodes();
+    ObjectTreeNode firstParent = nodes.get(0).getParent();
+
+    int colCount = 0;
+    // if all nodes have the same parent this might be a selection of multiple columns of the same table
+    for (ObjectTreeNode node : nodes)
+    {
+      if (node.getParent() != firstParent) return null;
+      if (node.getDbObject() instanceof ColumnIdentifier)
+      {
+        colCount ++;
+      }
+    }
+
+    // not all selected objects are columns
+    if (colCount != nodes.size()) return null;
+
+    // when we wind up here, all nodes belong to the same parent and are columns
+    // so the parent of the first parent must be the table to which these columns belong to
+    ObjectTreeNode tableNode = firstParent.getParent();
+
+    // the parent could be an index as well so we need to check the type of the DbObject
+    if (tableNode.getDbObject() instanceof TableIdentifier)
+    {
+      return (TableIdentifier)tableNode.getDbObject();
     }
     return null;
   }

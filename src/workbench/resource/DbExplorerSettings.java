@@ -23,6 +23,7 @@
 package workbench.resource;
 
 import workbench.db.WbConnection;
+
 import static workbench.resource.Settings.*;
 
 
@@ -345,4 +346,13 @@ public class DbExplorerSettings
 		Settings.getInstance().setProperty("workbench.dbexplorer.fktree.autoload", flag);
 	}
 
+  public static boolean getGenerateScriptSeparator()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.dbexplorer.sqlscript.separator", false);
+  }
+
+  public static void setGenerateScriptSeparator(boolean flag)
+  {
+    Settings.getInstance().setProperty("workbench.dbexplorer.sqlscript.separator", flag);
+  }
 }

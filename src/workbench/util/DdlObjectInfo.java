@@ -67,7 +67,7 @@ public class DdlObjectInfo
 	{
 		this.objectType = newType;
 	}
-	
+
 	public String getDisplayType()
 	{
 		return StringUtil.capitalize(objectType);
@@ -142,7 +142,16 @@ public class DdlObjectInfo
 					if (next != null) name = next;
 				}
 
-				this.objectName = SqlUtil.removeObjectQuotes(name.getContents());
+        if (this.objectType.equalsIgnoreCase("index") && name.getContents().equals("ON"))
+        {
+          // this is for unnamed indexes in Postgres to avoid the message
+          // Index "ON" created.
+          this.objectName = null;
+        }
+				else
+        {
+          this.objectName = SqlUtil.removeObjectQuotes(name.getContents());
+        }
 			}
 		}
 		catch (Exception e)

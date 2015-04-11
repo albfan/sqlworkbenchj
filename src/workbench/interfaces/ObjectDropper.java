@@ -57,4 +57,5 @@ public interface ObjectDropper
 
 	CharSequence getScript();
 	CharSequence getDropForObject(DbObject toDrop);
+  boolean supportsObject(DbObject object);
 }

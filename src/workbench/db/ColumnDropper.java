@@ -147,9 +147,8 @@ public class ColumnDropper
 		{
 			result.append(sql);
 			result.append(";\n");
-			if (needCommit) result.append("COMMIT;\n");
-			result.append('\n');
 		}
+    if (needCommit) result.append("COMMIT;\n");
 		return result;
 	}
 
@@ -258,4 +257,11 @@ public class ColumnDropper
 
 		return result;
 	}
+
+  @Override
+  public boolean supportsObject(DbObject object)
+  {
+    return object instanceof ColumnIdentifier;
+  }
+
 }
