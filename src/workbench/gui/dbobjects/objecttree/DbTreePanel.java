@@ -424,32 +424,7 @@ public class DbTreePanel
   @Override
   public void objectsDropped(List<DbObject> objects)
   {
-    final Set<String> schemas = CollectionUtil.caseInsensitiveSet();
-    for (DbObject dbo : objects)
-    {
-      schemas.add(dbo.getSchema());
-    }
-
-    statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrieving"));
-
-    WbThread th = new WbThread(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        try
-        {
-          WbSwingUtilities.showWaitCursor(DbTreePanel.this);
-          tree.reloadSchemas(schemas);
-        }
-        finally
-        {
-          WbSwingUtilities.showDefaultCursor(DbTreePanel.this);
-          statusBar.clearStatusMessage();
-        }
-      }
-    }, "Schema Reload");
-    th.start();
+    tree.getModel().removeObjects(objects);
   }
 
   @Override

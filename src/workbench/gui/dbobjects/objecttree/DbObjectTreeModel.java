@@ -19,9 +19,13 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
+import workbench.db.DbObject;
 import workbench.resource.DbExplorerSettings;
 
 import workbench.gui.dbobjects.QuickFilterExpressionBuilder;
@@ -66,6 +70,42 @@ public class DbObjectTreeModel
       if (nd1 != null) return nd1;
     }
     return null;
+  }
+
+  public void removeObjects(List<DbObject> toRemove)
+  {
+    removeObjects(toRemove, getRoot());
+  }
+
+  private void removeObjects(List<DbObject> toRemove, ObjectTreeNode node)
+  {
+    if (node == null) return;
+    if (node.getChildCount() == 0) return;
+    
+    List<ObjectTreeNode> toDelete = new ArrayList<>();
+    for (int i = 0; i < node.getChildCount(); i++)
+    {
+      ObjectTreeNode child = (ObjectTreeNode)node.getChildAt(i);
+      DbObject dbo = child.getDbObject();
+      if (dbo == null)
+      {
+        removeObjects(toRemove, child);
+      }
+      else if (toRemove.contains(dbo))
+      {
+        toDelete.add(child);
+      }
+    }
+
+    for (ObjectTreeNode delete : toDelete)
+    {
+      node.remove(delete);
+    }
+
+    if (toDelete.size() > 0)
+    {
+      nodeStructureChanged(node);
+    }
   }
 
   @Override
