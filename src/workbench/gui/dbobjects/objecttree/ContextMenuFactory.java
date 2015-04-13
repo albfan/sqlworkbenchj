@@ -109,7 +109,7 @@ class ContextMenuFactory
 
     menu.addSeparator();
 
-    DropDbObjectAction drop = new DropDbObjectAction(dbTree, selection, null);
+    DropDbObjectAction drop = new DropDbObjectAction(dbTree, selection);
     drop.addDropListener(dbTree);
     menu.add(drop);
 

@@ -25,8 +25,9 @@ import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
-import workbench.db.DbObject;
 import workbench.resource.DbExplorerSettings;
+
+import workbench.db.DbObject;
 
 import workbench.gui.dbobjects.QuickFilterExpressionBuilder;
 
@@ -81,7 +82,9 @@ public class DbObjectTreeModel
   {
     if (node == null) return;
     if (node.getChildCount() == 0) return;
-    
+
+    resetFilter();
+
     List<ObjectTreeNode> toDelete = new ArrayList<>();
     for (int i = 0; i < node.getChildCount(); i++)
     {

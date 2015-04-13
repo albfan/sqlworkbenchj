@@ -73,6 +73,11 @@ public class DropDbObjectAction
 		this("MnuTxtDropDbObject", client, list, r);
 	}
 
+	public DropDbObjectAction(DbObjectList client, WbSelectionModel list)
+	{
+		this("MnuTxtDropDbObject", client, list, null);
+	}
+
 	public DropDbObjectAction(String labelKey, DbObjectList client, WbSelectionModel list, Reloadable r)
 	{
 		super();
@@ -191,7 +196,7 @@ public class DropDbObjectAction
     public void selectionChanged(WbSelectionModel list)
   {
 		WbConnection conn = this.source.getConnection();
-    
+
 		if (conn == null || conn.isSessionReadOnly())
 		{
 			setEnabled(false);

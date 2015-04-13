@@ -71,6 +71,7 @@ import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.ListSelectionControl;
+import workbench.interfaces.ObjectDropListener;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
@@ -153,7 +154,8 @@ public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
 						 ShareableDisplay, PropertyChangeListener,
-						 TableModelListener, DbObjectList, ListSelectionControl, TableLister
+						 TableModelListener, DbObjectList, ListSelectionControl, TableLister,
+             ObjectDropListener
 {
 	private static final String PROP_DO_SAVE_SORT = "workbench.gui.dbexplorer.tablelist.sort";
 
@@ -519,7 +521,7 @@ public class TableListPanel
       @Override
       public int getSelectionCount()
       {
-        return TableListPanel.this.getSelectionCount();
+        return indexes.getSelectedRowCount();
       }
 
 			@Override
@@ -596,7 +598,8 @@ public class TableListPanel
     compileAction = new CompileDbObjectAction(this, list);
 		tableList.addPopupAction(compileAction, false);
 
-		DropDbObjectAction dropAction = new DropDbObjectAction(this, list, this);
+		DropDbObjectAction dropAction = new DropDbObjectAction(this, list);
+    dropAction.addDropListener(this);
 		tableList.addPopupAction(dropAction, true);
 
 		CreateDropScriptAction dropScript = new CreateDropScriptAction(this, list);
@@ -747,7 +750,7 @@ public class TableListPanel
 			addTriggerPanel();
 		}
 	}
-  
+
 	private void showIndexesIfSupported()
 	{
 		TableIdentifier tbl = getObjectTable();
@@ -2311,6 +2314,28 @@ public class TableListPanel
 			}
 		}
 	}
+
+  @Override
+  public void objectsDropped(List<DbObject> objects)
+  {
+    if (CollectionUtil.isEmpty(objects)) return;
+
+    tableList.resetFilter();
+    DataStore ds = tableList.getDataStore();
+    int count = ds.getRowCount();
+
+    for (int row=count - 1; row >= 0; row--)
+    {
+      int viewRow = tableList.convertRowIndexToView(row);
+      Object uo = createTableIdentifier(viewRow);
+      DbObject dbo = (DbObject)uo;
+      if (objects.contains(dbo))
+      {
+        ds.deleteRow(row);
+      }
+    }
+    tableList.getDataStoreTableModel().fireTableDataChanged();
+  }
 
 	@Override
 	public void addTableListDisplayClient(JTable aClient)
