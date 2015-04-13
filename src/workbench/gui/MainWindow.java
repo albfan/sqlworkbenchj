@@ -2984,6 +2984,7 @@ public class MainWindow
 			{
         try
         {
+          closeDbTree();
 					removeAllPanels(true);
         }
         catch (Exception e)
