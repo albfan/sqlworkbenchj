@@ -2704,6 +2704,7 @@ public class MainWindow
 		try
 		{
 			setIgnoreTabChange(true);
+      closeDbTree();
 			int keep = (keepOne ? 1 : 0);
 			while (sqlTab.getTabCount() > keep)
 			{
@@ -2984,7 +2985,6 @@ public class MainWindow
 			{
         try
         {
-          closeDbTree();
 					removeAllPanels(true);
         }
         catch (Exception e)
