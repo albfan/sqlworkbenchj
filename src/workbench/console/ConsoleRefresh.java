@@ -154,7 +154,7 @@ public class ConsoleRefresh
   private void doRefresh(BatchRunner runner, String sql, int interval)
   {
     DurationFormatter formatter = new DurationFormatter();
-    String intDisplay = formatter.formatDuration(interval, false, false);
+    String intDisplay = formatter.formatDuration(interval, false, false).trim();
 
     boolean clearScreen = ConsoleSettings.getClearScreenForRefresh();
     String quitMsg = ResourceMgr.getString("MsgRefreshQuit");
