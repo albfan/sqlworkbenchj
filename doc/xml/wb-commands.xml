@@ -2485,7 +2485,8 @@ WHERE id=42;</programlisting>
             <entry>-xsltParameters</entry>
             <entry>
               A list of parameters (key/value pairs) that should be passed to the XSLT processor. When using e.g. the <literal>wbreport2liquibase.xslt</literal>
-              stylesheet, the value of the <literal>author</literal> attribute can be set using <literal>-xsltParameters="authorName=42"</literal>.
+              stylesheet, the value of the <literal>author</literal> attribute can be set using <literal>-xsltParameters="authorName=42"</literal>. This parameter
+              can be provided multiple times for multiple parameters.
             </entry>
           </row>
 
