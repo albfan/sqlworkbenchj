@@ -60,7 +60,9 @@ Supported parameters:
     <xsl:apply-templates select="/schema-report/view-def"/>
     <xsl:call-template name="process-fk"/>
     <xsl:value-of select="$newline"/>
-    <xsl:text>COMMIT;</xsl:text>
+    <xsl:if test="$commitAfterEachTable = 'false'">
+      <xsl:text>COMMIT;</xsl:text>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="table-def">
@@ -250,12 +252,12 @@ Supported parameters:
         <xsl:with-param name="real-tablename" select="../table-name"/>
       </xsl:call-template>
     </xsl:for-each>
-    <xsl:value-of select="$newline"/>
 
     <xsl:if test="$commitAfterEachTable = 'true'">
     	<xsl:text>COMMIT;</xsl:text>
     	<xsl:value-of select="$newline"/>
     </xsl:if>
+    <xsl:value-of select="$newline"/>
   </xsl:template>
 
   <xsl:template name="create-index">
@@ -631,22 +633,25 @@ Supported parameters:
   
   <xsl:template name="write-object-name">
     <xsl:param name="objectname"/>
+    
     <xsl:variable name="lcletters">abcdefghijklmnopqrstuvwxyz</xsl:variable>
     <xsl:variable name="ucletters">ABCDEFGHIJKLMNOPQRSTUVWXYZ</xsl:variable>
 
-    <xsl:variable name="lower-name">
-      <xsl:value-of select="translate($objectname,$ucletters,$lcletters)"/>
+    <xsl:variable name="name-to-use">
+      <xsl:choose>
+        <xsl:when test="$makeLowerCase = 'true'">
+          <xsl:value-of select="translate($objectname,$ucletters,$lcletters)"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$objectname"/>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:variable>
 
     <xsl:variable name="clean-name">
       <xsl:call-template name="_replace_text">
         <xsl:with-param name="text">
-          <xsl:choose>
-            <xsl:when test="$makeLowerCase = 'true'"><xsl:value-of select="$lower-name"/></xsl:when>
-            <xsl:otherwise>
-              <xsl:value-of select="$objectname"/>
-            </xsl:otherwise>
-          </xsl:choose>
+          <xsl:value-of select="$name-to-use"/>
         </xsl:with-param>
         <xsl:with-param name="replace" select="$backtick"/>
         <xsl:with-param name="by" select="''"/>
@@ -654,22 +659,23 @@ Supported parameters:
     </xsl:variable>
 
     <xsl:choose>
-      <xsl:when test="$quoteAllNames = 'true'">
-        <xsl:text>"</xsl:text><xsl:value-of select="$objectname"/><xsl:text>"</xsl:text>
-      </xsl:when>
       <xsl:when test="substring($clean-name,1,1) = $quote and substring($clean-name,string-length($clean-name),1) = $quote">
         <xsl:value-of select="$clean-name"/>
+      </xsl:when>
+      <xsl:when test="$quoteAllNames = 'true'">
+        <xsl:text>"</xsl:text><xsl:value-of select="$name-to-use"/><xsl:text>"</xsl:text>
       </xsl:when>
       <xsl:when test="contains($clean-name,' ')">
         <xsl:value-of select="concat($quote, $clean-name, $quote)"/>
       </xsl:when>
-      <xsl:when test="$objectname != $lower-name and $makeLowerCase = 'false'">
+      <xsl:when test="$objectname != $name-to-use and $makeLowerCase = 'false'">
         <xsl:text>"</xsl:text><xsl:value-of select="$objectname"/><xsl:text>"</xsl:text>
       </xsl:when>
       <xsl:otherwise>
         <xsl:value-of select="$clean-name"/>
       </xsl:otherwise>
     </xsl:choose>
+   
   </xsl:template>
 
 </xsl:stylesheet>
