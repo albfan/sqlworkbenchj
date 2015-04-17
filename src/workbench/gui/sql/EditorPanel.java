@@ -340,7 +340,14 @@ public class EditorPanel
 	public void focusGained(FocusEvent e)
 	{
 		super.focusGained(e);
-		checkFileChange();
+    WbSwingUtilities.invokeLater(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        checkFileChange();
+      }
+    });
 	}
 
 	protected void checkFileChange()
@@ -366,15 +373,15 @@ public class EditorPanel
 				}
 				if (reloadType == FileReloadType.automatic)
 				{
-					this.reloadFile();
-					this.statusBar.setStatusMessage(ResourceMgr.getFormattedString("MsgFileReloaded", fname), 5000);
+					reloadCurrentFile();
+					statusBar.setStatusMessage(ResourceMgr.getFormattedString("MsgFileReloaded", fname), 5000);
 				}
 				else if (reloadType == FileReloadType.prompt)
 				{
 					boolean doReload = WbSwingUtilities.getYesNo(this, ResourceMgr.getFormattedString("MsgReloadFile", fname));
 					if (doReload)
 					{
-						reloadFile();
+						reloadCurrentFile();
 					}
 					else
 					{
@@ -628,9 +635,24 @@ public class EditorPanel
 	}
 
 	public boolean reloadFile()
+  {
+		if (this.saveInProgress) return false;
+		if (this.loadInProgress) return false;
+    
+    try
+    {
+      loadInProgress = true;
+      return reloadCurrentFile();
+    }
+    finally
+    {
+      loadInProgress = false;
+    }
+  }
+
+	private boolean reloadCurrentFile()
 	{
 		if (!this.hasFileLoaded()) return false;
-		if (this.currentFile == null) return false;
 
 		if (this.isModified())
 		{
@@ -652,8 +674,8 @@ public class EditorPanel
 
 	public boolean hasFileLoaded()
 	{
-		String file = this.getCurrentFileName();
-		return (file != null) && (file.length() > 0);
+		String fileName = this.getCurrentFileName();
+		return StringUtil.isNonEmpty(fileName);
 	}
 
 	public int checkAndSaveFile()
