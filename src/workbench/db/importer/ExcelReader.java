@@ -44,10 +44,12 @@ import workbench.util.MessageBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
+import org.apache.poi.hssf.usermodel.HSSFDataFormatter;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -81,6 +83,8 @@ public class ExcelReader
 	private final boolean useXLSX;
 	private MessageBuffer messages = new MessageBuffer();
   private boolean emptyStringIsNull;
+  private boolean useStringDates;
+  private DataFormatter dataFormatter = new DataFormatter(true);
 
 	public ExcelReader(File excelFile, int sheetNumber, String name)
 	{
@@ -96,6 +100,12 @@ public class ExcelReader
 		}
 		useXLSX = inputFile.getExtension().equalsIgnoreCase("xlsx");
 	}
+
+  @Override
+  public void setReturnDatesAsString(boolean flag)
+  {
+    useStringDates = flag;
+  }
 
   @Override
   public void setEmptyStringIsNull(boolean flag)
@@ -389,26 +399,21 @@ public class ExcelReader
 				break;
 			case Cell.CELL_TYPE_NUMERIC:
 				boolean isDate = HSSFDateUtil.isCellDateFormatted(cell);
-				String fmt = cell.getCellStyle().getDataFormatString();
-				double dv = cell.getNumericCellValue();
 				if (isDate)
 				{
-					java.util.Date dval = getJavaDate(dv);
-					if (dval != null)
-					{
-						if (isTimestampFormat(fmt))
-						{
-							value = new java.sql.Timestamp(dval.getTime());
-						}
-						else
-						{
-							value = new java.sql.Date(dval.getTime());
-						}
-					}
+          if (useStringDates)
+          {
+            value = dataFormatter.formatCellValue(cell);
+          }
+          else
+          {
+            value = getDateValue(cell);
+          }
 				}
 				else
 				{
-					value = Double.valueOf(dv);
+          double dv = cell.getNumericCellValue();
+          value = Double.valueOf(dv);
 				}
 				break;
 			default:
@@ -424,6 +429,42 @@ public class ExcelReader
 		}
 		return value;
 	}
+
+  private java.util.Date getDateValue(Cell cell)
+  {
+    HSSFDataFormatter formatter = new HSSFDataFormatter();
+    String strValue = formatter.formatCellValue(cell);
+    System.out.println("strValue: " + strValue);
+
+    java.util.Date dtValue = null;
+    try
+    {
+      dtValue = cell.getDateCellValue();
+    }
+    catch (Exception ex)
+    {
+      // ignore
+    }
+    String fmt = cell.getCellStyle().getDataFormatString();
+    double dv = cell.getNumericCellValue();
+    if (dtValue == null)
+    {
+      dtValue = getJavaDate(dv);
+    }
+
+    if (dtValue != null)
+    {
+      if (isTimestampFormat(fmt))
+      {
+        return new java.sql.Timestamp(dtValue.getTime());
+      }
+      else
+      {
+        return new java.sql.Date(dtValue.getTime());
+      }
+    }
+    return null;
+  }
 
   private boolean isNullString(String value)
   {

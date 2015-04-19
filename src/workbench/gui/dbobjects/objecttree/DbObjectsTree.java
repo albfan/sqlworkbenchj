@@ -75,7 +75,7 @@ public class DbObjectsTree
 		setEditable(false);
 		setExpandsSelectedPaths(true);
     getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
-    
+
 		// setting the row height to 0 makes it dynamic
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
@@ -350,7 +350,7 @@ public class DbObjectsTree
     WbConnection conn = loader.getConnection();
     if (conn == null || conn.isBusy()) return;
     String schema = conn.getCurrentSchema();
-    ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_SCHEMA);
+    final ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_SCHEMA);
     expandNode(node);
   }
 

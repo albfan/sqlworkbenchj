@@ -36,8 +36,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -108,6 +110,8 @@ public class DataExporter
 
 	private WbFile outputfile;
 	private String xsltFile;
+  private Map<String, String> xsltParameters;
+
 	private String transformOutputFile;
 	private ExportType exportType = ExportType.TEXT;
 	private String mergeType;
@@ -767,6 +771,16 @@ public class DataExporter
 			this.progressInterval = interval;
 		}
 	}
+
+  public void setXsltParameters(Map<String, String> params)
+  {
+    this.xsltParameters = params == null ? new HashMap<String, String>(0) : params;
+  }
+
+  public Map<String, String> getXsltParameters()
+  {
+    return xsltParameters;
+  }
 
 	public void setXsltTransformation(String xsltFileName)
 	{

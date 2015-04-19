@@ -22,11 +22,14 @@
  */
 package workbench.db.exporter;
 
+import workbench.log.LogMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.storage.BlobFormatterFactory;
 import workbench.storage.BlobLiteralType;
+
 import workbench.util.XsltTransformer;
 
 /**
@@ -96,7 +99,7 @@ public class XmlExportWriter
 			XsltTransformer transformer = new XsltTransformer();
 			try
 			{
-				transformer.transform(exportFile, output, xsltFile);
+				transformer.transform(exportFile, output, xsltFile, exporter.getXsltParameters());
 			}
 			catch (Exception e)
 			{

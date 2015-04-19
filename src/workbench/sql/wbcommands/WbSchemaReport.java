@@ -84,10 +84,10 @@ public class WbSchemaReport
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
-		cmdLine.addArgument(ARG_TABLE_NAMES, ArgumentType.Deprecated);
+		cmdLine.addDeprecatedArgument(ARG_TABLE_NAMES, ArgumentType.StringArgument);
 		cmdLine.addArgument(ARG_OBJECT_NAMES, ArgumentType.TableArgument);
 		cmdLine.addArgument(ARG_EXCLUDE_OBJECTS, ArgumentType.TableArgument);
-		cmdLine.addArgument(ARG_EXCLUDE_TABLES, ArgumentType.Deprecated);
+		cmdLine.addDeprecatedArgument(ARG_EXCLUDE_TABLES, ArgumentType.StringArgument);
 		cmdLine.addArgument(ARG_OBJECT_TYPE_NAMES, ArgumentType.Repeatable);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS);
 		cmdLine.addArgument("reportTitle");
@@ -99,9 +99,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(ARG_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
-		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
-		cmdLine.addArgument(WbXslt.ARG_OUTPUT, ArgumentType.Filename);
-		cmdLine.addArgument(WbXslt.ARG_PARAMETERS, ArgumentType.Repeatable);
+    WbXslt.addCommonXsltParameters(cmdLine);
 		cmdLine.addArgument(ARG_FULL_SOURCE, ArgumentType.BoolSwitch);
 	}
 
@@ -323,7 +321,7 @@ public class WbSchemaReport
 		if (xslt != null && xsltOutput != null)
 		{
 			XsltTransformer transformer = new XsltTransformer();
-			Map<String, String> params = cmdLine.getMapValue(WbXslt.ARG_PARAMETERS);
+      Map<String, String> params = WbXslt.getParameters(cmdLine);
 
 			try
 			{

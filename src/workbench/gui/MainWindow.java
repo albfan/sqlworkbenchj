@@ -365,18 +365,16 @@ public class MainWindow
     if (treePanel == null)
     {
       treePanel = new DbTreePanel();
-      treePanel.restoreSettings(getToolProperties(DB_TREE_PROPS));
 
       getContentPane().remove(sqlTab);
-
-      int defaultLocation = -1;
 
       WbSplitPane split = new WbSplitPane();
       split.setOneTouchExpandable(true);
       split.setContinuousLayout(true);
-      if (DbTreeSettings.getDbTreePosition() == TreePosition.left)
+
+      TreePosition position = DbTreeSettings.getDbTreePosition();
+      if (position == TreePosition.left)
       {
-        defaultLocation = (int)(getWidth() * 0.15);
         split.setLeftComponent(treePanel);
         split.setRightComponent(sqlTab);
       }
@@ -384,11 +382,9 @@ public class MainWindow
       {
         split.setLeftComponent(sqlTab);
         split.setRightComponent(treePanel);
-        defaultLocation = (int)(getWidth() * 0.85);
       }
 
-      int location = getToolProperties(DB_TREE_PROPS).getIntProperty(DbTreePanel.PROP_DIVIDER, defaultLocation);
-      split.setDividerLocation(location);
+      treePanel.restoreSettings(getToolProperties(DB_TREE_PROPS));
 
       getContentPane().add(split, BorderLayout.CENTER);
       doLayout();
@@ -399,6 +395,7 @@ public class MainWindow
     {
       treePanel.connect(currentProfile);
     }
+
     if (requestFocus)
     {
       treePanel.requestFocusInWindow();
@@ -445,13 +442,13 @@ public class MainWindow
       getContentPane().add(sqlTab, BorderLayout.CENTER);
       doLayout();
       validate();
-      treePanel.disconnect(false); // this will be done in the background
+      treePanel.disconnectInBackground(); // this will be done in the background
       treePanel = null;
       int count = getTabCount();
       for (int i=0; i < count - 1; i++)
       {
         MainPanel sqlPanel = getSqlPanel(i);
-        sqlPanel.registerObjectFinder(treePanel);
+        sqlPanel.registerObjectFinder(null);
       }
     }
   }
@@ -2184,7 +2181,7 @@ public class MainWindow
 		{
       if (treePanel != null)
       {
-        treePanel.disconnect(true);
+        treePanel.disconnect();
       }
 
 			WbConnection conn = null;

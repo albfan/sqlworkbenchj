@@ -269,4 +269,9 @@ public class ObjectTreeNode
     filteredNodes.clear();
   }
 
+  public String displayString()
+  {
+    return nodeType + ": " + getName();
+  }
+
 }

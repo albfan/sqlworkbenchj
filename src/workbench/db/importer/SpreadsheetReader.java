@@ -42,7 +42,8 @@ public interface SpreadsheetReader
 	List<Object> getRowValues(int row);
 	void setNullString(String nullString);
   void setEmptyStringIsNull(boolean flag);
-  
+  void setReturnDatesAsString(boolean flag);
+
 	/**
 	 * Return the total row count in the spreadsheet including a possible header row.
 	 *

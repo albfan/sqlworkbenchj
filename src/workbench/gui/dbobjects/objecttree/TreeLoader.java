@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 
@@ -230,6 +231,12 @@ public class TreeLoader
         node.setAllowsChildren(true);
         parentNode.add(node);
         addTypeNodes(node);
+        if (DbTreeSettings.autoloadSchemaObjects())
+        {
+          // by pretending that nothing was loaded, expanding the schema will automatically
+          // trigger loading of all objects in the the type nodes
+          node.setChildrenLoaded(false);
+        }
       }
       parentNode.setChildrenLoaded(true);
     }
@@ -276,6 +283,27 @@ public class TreeLoader
       parentNode.add(node);
     }
     parentNode.setChildrenLoaded(true);
+  }
+
+  public void loadTypesForSchema(ObjectTreeNode schemaNode)
+  {
+    if (schemaNode == null) return;
+    if (!schemaNode.getType().equals(TYPE_SCHEMA)) return;
+
+    int count = schemaNode.getChildCount();
+    for (int i=0; i < count; i++)
+    {
+      ObjectTreeNode child = schemaNode.getChildAt(i);
+      try
+      {
+        child.removeAllChildren();
+        loadObjectsForTypeNode(child);
+      }
+      catch (SQLException ex)
+      {
+        LogMgr.logError("TreeLoader.loadTypesForSchema()", "Could not load schema nodes for " + child.displayString(), ex);
+      }
+    }
   }
 
   public void reloadSchema(ObjectTreeNode schemaNode)
@@ -670,6 +698,10 @@ public class TreeLoader
       if (TYPE_CATALOG.equals(type) && connection.getDbSettings().supportsSchemas())
       {
         loadSchemas(node);
+      }
+      else if (TYPE_SCHEMA.equals(type))
+      {
+        loadTypesForSchema(node);
       }
       else if (TYPE_DBO_TYPE_NODE.equals(type))
       {

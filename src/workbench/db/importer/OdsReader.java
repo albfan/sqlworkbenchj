@@ -83,6 +83,12 @@ public class OdsReader
 		}
 	}
 
+  @Override
+  public void setReturnDatesAsString(boolean flag)
+  {
+    // we always use Strings anyway
+  }
+
 	@Override
 	public MessageBuffer getMessages()
 	{

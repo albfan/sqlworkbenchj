@@ -92,7 +92,7 @@ public class WbGrepData
 		cmdLine.addArgument(ARG_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
-		cmdLine.addArgument(ARG_EXCLUDE_LOBS, ArgumentType.Deprecated);
+		cmdLine.addDeprecatedArgument(ARG_EXCLUDE_LOBS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_IGNORE_CASE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_RETRIEVE_CLOBS, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_RETRIEVE_BLOBS, ArgumentType.BoolSwitch);

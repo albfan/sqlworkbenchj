@@ -59,7 +59,7 @@
 					<entry>The filename of the output file.</entry>
 				</row>
 
-        <row>
+        <row id="schema-report-objects">
           <entry>-objects</entry>
           <entry>
             <para>
@@ -78,7 +78,7 @@
           </entry>
         </row>
 
-				<row>
+				<row id="schema-report-schemas">
 					<entry>-schemas</entry>
 					<entry>
             <para>
@@ -102,7 +102,7 @@
           </entry>
 				</row>
 
-        <row>
+        <row id="schema-report-types">
           <entry>-types</entry>
           <entry>
             <para>
@@ -130,7 +130,7 @@
           </entry>
         </row>
 
-				<row>
+				<row id="schema-report-exclude-names">
 					<entry>-excludeObjectNames</entry>
 					<entry>
             A (comma separated) list of tables to exclude from reporting. This is only used if
@@ -142,7 +142,7 @@
           </para>
 				</row>
 
-				<row>
+				<row id="schema-report-object-typenames">
 					<entry>-objectTypeNames</entry>
 					<entry>
             <para>
@@ -175,14 +175,14 @@
 					</entry>
 				</row>
 
-				<row>
+				<row id="schema-report-include-tables">
 					<entry>-includeTables</entry>
 					<entry>Controls the output of table information for the report. The default is
 						<literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
 					</entry>
 				</row>
 
-				<row>
+				<row id="schema-report-include-sequences">
 					<entry>-includeSequences</entry>
 					<entry>
             <para>
@@ -196,21 +196,21 @@
 					</entry>
 				</row>
 
-				<row>
+				<row id="schema-report-include-grants">
 					<entry>-includeTableGrants</entry>
 					<entry>If tables are included in the output, the grants for each table can also be included with
 						this parameter. The default value is <literal>false</literal>.
 					</entry>
 				</row>
 
-				<row>
+				<row id="schema-report-include-procs">
 					<entry>-includeProcedures</entry>
 					<entry>Control the output of stored procedure information for the report. The default is
 						<literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
 					</entry>
 				</row>
 
-				<row>
+				<row id="schema-report-include-triggers">
 					<entry>-includeTriggers</entry>
 					<entry>
             This parameter controls if table triggers are added to the output.
@@ -218,7 +218,7 @@
 					</entry>
 				</row>
 
-				<row>
+				<row id="schema-report-title">
 					<entry>-reportTitle</entry>
 					<entry>
 						Defines the title for the generated XML file. The specified title is written
@@ -227,7 +227,7 @@
 					</entry>
 				</row>
 
-				<row>
+				<row id="schema-report-full-source">
 					<entry>-writeFullSource</entry>
 					<entry>
             <para>
@@ -242,15 +242,18 @@
 					</entry>
 				</row>
 
-				<row>
-					<entry>-stylesheet</entry>
+				<row id="schema-report-stylesheet">
+					<entry>-styleSheet</entry>
 					<entry>Apply a XSLT transformation to the generated XML file.</entry>
 				</row>
-				<row>
+				<row id="schema-report-xslt-output">
 					<entry>-xsltOutput</entry>
 					<entry>The name of the generated output file when applying the XSLT transformation.</entry>
 				</row>
+        &common-xslt-args;
+
 			</tbody>
+
       </tgroup>
     </informaltable>
   </section>
@@ -298,7 +301,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepsrc-regex">
             <entry>-useRegex</entry>
             <entry>
 						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
@@ -311,7 +314,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepsrc-matchall">
             <entry>-matchAll</entry>
             <entry>
 						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
@@ -324,7 +327,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepsrc-ignorecase">
             <entry>-ignoreCase</entry>
             <entry>
 						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
@@ -337,7 +340,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepsrc-types">
             <entry>-types</entry>
             <entry>
               <para>
@@ -362,7 +365,7 @@
             </entry>
           </row>
 
-          <row>
+          <row id="command-grepsrc-objects">
             <entry>-objects</entry>
             <entry>
               <para>
@@ -374,7 +377,7 @@
             </entry>
           </row>
 
-          <row>
+          <row id="command-grepsrc-schemas">
             <entry>-schemas</entry>
             <entry>
               <para>
@@ -443,7 +446,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepdata-ignorecase">
             <entry>-ignoreCase</entry>
             <entry>
 						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
@@ -456,7 +459,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepdata-comparetype">
             <entry>-compareType</entry>
             <entry>
 						  <para>
@@ -475,7 +478,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepdata-tables">
             <entry>-tables</entry>
             <entry>
               <para>
@@ -489,7 +492,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepdata-types">
             <entry>-types</entry>
             <entry>
               <para>
@@ -504,7 +507,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepdata-exclude-tables">
             <entry>-excludeTables</entry>
             <entry>
               <para>
@@ -520,7 +523,7 @@
               </para>
             </entry>
           </row>
-          <row>
+          <row id="command-grepdata-clob">
             <entry>-retrieveCLOB</entry>
             <entry>
               <para>
@@ -539,7 +542,7 @@
             </entry>
           </row>
 
-          <row>
+          <row id="command-grepdata-blob">
             <entry>-retrieveBLOB</entry>
             <entry>
               <para>
@@ -555,7 +558,7 @@
             </entry>
           </row>
 
-          <row>
+          <row id="command-grepdata-blobhandling">
             <entry>-treatBlobAs</entry>
             <entry>
               <para>
@@ -2481,14 +2484,7 @@ WHERE id=42;</programlisting>
             <entry>The name of the XSLT stylesheet to be used.</entry>
           </row>
 
-          <row>
-            <entry>-xsltParameters</entry>
-            <entry>
-              A list of parameters (key/value pairs) that should be passed to the XSLT processor. When using e.g. the <literal>wbreport2liquibase.xslt</literal>
-              stylesheet, the value of the <literal>author</literal> attribute can be set using <literal>-xsltParameters="authorName=42"</literal>. This parameter
-              can be provided multiple times for multiple parameters.
-            </entry>
-          </row>
+          &common-xslt-args;
 
         </tbody>
       </tgroup>

@@ -39,7 +39,6 @@ import java.awt.event.MouseListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -351,15 +350,23 @@ public class DbTreePanel
 	{
     if (this.isVisible())
     {
-      props.setProperty(PROP_DIVIDER, getDividerLocation());
+      props.setProperty(PROP_DIVIDER + "." + getCurrentPosition().name(), getDividerLocation());
     }
     List<String> types = typeFilter.getSelectedItems();
     props.setProperty(PROP_TYPES, StringUtil.listToString(types, ','));
 	}
 
+  private TreePosition getCurrentPosition()
+  {
+    WbSplitPane split = (WbSplitPane)getParent();
+    if (split == null) return DbTreeSettings.getDbTreePosition();
+    if (split.getLeftComponent() == this) return TreePosition.left;
+    return TreePosition.right;
+  }
+
   public void restoreSettings(WbProperties props)
   {
-    int location = props.getIntProperty(PROP_DIVIDER, -1);
+    int location = props.getIntProperty(PROP_DIVIDER + "." + getCurrentPosition().name(), -1);
     String typeString = props.getProperty(PROP_TYPES);
     selectedTypes = StringUtil.stringToList(typeString, ",", true, true, false);
     tree.setTypesToShow(selectedTypes);
@@ -374,7 +381,27 @@ public class DbTreePanel
     }
   }
 
-  public void disconnect(boolean wait)
+  /**
+   * Close the connection used by this panel in a background thread.
+   *
+   * This method will return immediately, the physical closing of the connection is done in a background thread.
+   */
+  public void disconnectInBackground()
+  {
+    disconnect(false);
+  }
+
+  /**
+   * Close the connection used by this panel.
+   *
+   * This method will wait until the connection is physically closed.
+   */
+  public void disconnect()
+  {
+    disconnect(true);
+  }
+
+  private void disconnect(boolean wait)
   {
     if (tree != null)
     {
@@ -393,17 +420,13 @@ public class DbTreePanel
       }
     }, "Disconnect");
 
-    th.start();
     if (wait)
     {
-      try
-      {
-        th.join();
-      }
-      catch (Exception ex)
-      {
-        LogMgr.logWarning("DbTreePanel.disconnect()", "Error waiting for disconnect thread", ex);
-      }
+      th.run();
+    }
+    else
+    {
+      th.start();
     }
   }
 
@@ -762,7 +785,10 @@ public class DbTreePanel
   private int getDividerLocation()
   {
     WbSplitPane split = (WbSplitPane)getParent();
-    if (split == null) return -1;
+    if (split == null)
+    {
+      return -1;
+    }
     return split.getDividerLocation();
   }
 

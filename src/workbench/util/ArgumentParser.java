@@ -57,6 +57,7 @@ public class ArgumentParser
 	private Map<String, ArgumentType> argTypes;
 
 	private List<String> unknownParameters = new ArrayList<>();
+  private Set<String> deprecatedParameters = CollectionUtil.caseInsensitiveSet();
 
 	// Stores the allowed values for a parameter
 	private Map<String, Collection<ArgumentValue>> allowedValues;
@@ -170,6 +171,15 @@ public class ArgumentParser
 
 		this.arguments.put(key, null);
 		this.argTypes.put(key, type);
+	}
+
+	public void addDeprecatedArgument(String key, ArgumentType type)
+	{
+		if (key == null) throw new NullPointerException("Key may not be null");
+
+		this.arguments.put(key, null);
+		this.argTypes.put(key, type);
+    deprecatedParameters.add(key);
 	}
 
 	public void parseProperties(File propFile)
@@ -356,7 +366,7 @@ public class ArgumentParser
 		while (itr.hasNext())
 		{
 			Map.Entry<String, ArgumentType> entry = itr.next();
-			if (entry.getValue() != ArgumentType.Deprecated)
+      if (!deprecatedParameters.contains(entry.getKey()))
 			{
 				result.add(entry.getKey());
 			}
@@ -600,7 +610,7 @@ public class ArgumentParser
 	public Map<String, String> getMapValue(String key)
 	{
 		List<String> entries = getListValue(key);
-		if (CollectionUtil.isEmpty(entries)) return Collections.emptyMap();
+		if (CollectionUtil.isEmpty(entries)) return new HashMap<>();
 
 		Map<String, String> result = new HashMap<>(entries.size());
 		for (String entry : entries)

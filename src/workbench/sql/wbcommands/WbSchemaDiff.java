@@ -54,7 +54,6 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
 
-import static workbench.sql.wbcommands.WbXslt.*;
 
 /**
  * @author  Thomas Kellerer
@@ -97,9 +96,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(WbSchemaReport.ARG_FULL_SOURCE, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_VIEWS_AS_TABLES, ArgumentType.BoolArgument);
-		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
-		cmdLine.addArgument(WbXslt.ARG_OUTPUT, ArgumentType.Filename);
-		cmdLine.addArgument(WbXslt.ARG_PARAMETERS, ArgumentType.Repeatable);
+    WbXslt.addCommonXsltParameters(cmdLine);
 		cmdLine.addArgument(ARG_COMPARE_CHK_CONS_BY_NAME, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ADD_TYPES, ArgumentType.ListArgument);
 	}
@@ -315,7 +312,7 @@ public class WbSchemaDiff
 
 				File xslt = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_STYLESHEET));
 				File xsltOutput = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_OUTPUT));
-				Map<String, String> xsltParams = cmdLine.getMapValue(ARG_PARAMETERS);
+        Map<String, String> xsltParams = WbXslt.getParameters(cmdLine);
 
 				if (xslt != null && xsltOutput != null)
 				{

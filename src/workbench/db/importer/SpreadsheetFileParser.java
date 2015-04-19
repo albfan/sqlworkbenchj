@@ -67,6 +67,7 @@ public class SpreadsheetFileParser
 	private boolean illegalDateIsNull;
 	private boolean checkDependencies;
 	private boolean ignoreOwner;
+  private boolean readDatesAsStrings;
 
 	private String nullString;
 	private int currentRow;
@@ -83,11 +84,10 @@ public class SpreadsheetFileParser
 		converter.setDefaultDateFormat(StringUtil.ISO_DATE_FORMAT);
 	}
 
-	public SpreadsheetFileParser(File aFile)
-	{
-		this();
-		this.inputFile = aFile;
-	}
+  public void setReadDatesAsStrings(boolean flag)
+  {
+    this.readDatesAsStrings = flag;
+  }
 
 	public void setIgnoreOwner(boolean flag)
 	{
@@ -359,6 +359,7 @@ public class SpreadsheetFileParser
 		{
 			reader = SpreadsheetReader.Factory.createReader(inputFile, sheetIndex, sheetName);
       reader.setEmptyStringIsNull(emptyStringIsNull);
+      reader.setReturnDatesAsString(readDatesAsStrings);
 			if (sheetIndex < 0 && StringUtil.isNonBlank(sheetName))
 			{
 				reader.setActiveWorksheet(sheetName);

@@ -22,7 +22,9 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
+
 import workbench.resource.Settings;
+
 
 /**
  *
@@ -90,5 +92,10 @@ public class DbTreeSettings
   public static boolean useColumnListForTableDataDisplay()
   {
     return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "tabledata.select.use.columns", true);
+  }
+
+  public static boolean autoloadSchemaObjects()
+  {
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".autoload.types", true);
   }
 }

@@ -1504,10 +1504,21 @@
                 </para>
               </entry>
             </row>
+            <row id="import-excel-stringdates">
+              <entry>-stringDates</entry>
+              <entry>
+                <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+                <para>
+                  By default WbImport tries to read "native" date and timestamp values from an Excel Worksheet. When
+                  this parameter is set to <literal>true</literal>, the values for date and timestamp values
+                  will be retrieved as a (formatted) string value and then converted using the format specified
+                  through the <literal>-timestampFormat</literal> and <literal>-dateFormat</literal> parameters.
+                </para>
+              </entry>
+            </row>
           </tbody>
 				</tgroup>
 			</informaltable>
-
   </section>
 
 

@@ -97,7 +97,5 @@ public enum ArgumentType
 
 	Filename,
 
-	DirName,
-
-	Deprecated;
+	DirName;
 }

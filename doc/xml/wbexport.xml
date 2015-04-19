@@ -999,6 +999,7 @@
 						</entry>
 					</row>
 
+          &common-xslt-args;
 					<row>
 						<entry id="export-stylesheet">-stylesheet</entry>
 						<entry>The name of the XSLT stylesheet that should be used
@@ -1009,11 +1010,11 @@
 
 					<row>
 						<entry>-xsltOutput</entry>
-						<entry>The resulting output file (specified
-						with the -file parameter), can be transformed using XSLT after
-						the export has finished. This parameter then defines
-						the name of the outputfile of the transformation.</entry>
+						<entry>
+              This parameter defines the output file for the XSLT transformation specified through the
+              <literal>-styleSheet</literal> parameter</entry>
 					</row>
+
 					<row>
 						<entry>-verboseXML</entry>
 						<entry>

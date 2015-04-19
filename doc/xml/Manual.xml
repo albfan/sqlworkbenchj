@@ -36,6 +36,7 @@
   <!ENTITY dbms-specific SYSTEM "dbms-specific.xml">
 	<!ENTITY progress-parameter SYSTEM "progress.xml">
 	<!ENTITY common-connect-args SYSTEM "common-connect-args.xml">
+	<!ENTITY common-xslt-args SYSTEM "common-xslt-args.xml">
 	<!ENTITY conditionals SYSTEM "conditionals.xml">
   <!ENTITY table-statements SYSTEM "table-statements.xml">
 	<!ENTITY release-history SYSTEM "docbook-history.xml">

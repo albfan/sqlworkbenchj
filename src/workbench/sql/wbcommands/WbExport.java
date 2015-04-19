@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import workbench.WbManager;
@@ -186,8 +187,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_KEY_COLUMNS);
 		cmdLine.addArgument(ARG_APPEND, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_XML_VERSION, StringUtil.stringToList("1.0", "1.1"));
-		cmdLine.addArgument(WbXslt.ARG_STYLESHEET, ArgumentType.Filename);
-		cmdLine.addArgument(WbXslt.ARG_OUTPUT, ArgumentType.Filename);
+    WbXslt.addCommonXsltParameters(cmdLine);
 		cmdLine.addArgument(WbImport.ARG_FILE_EXT);
 		cmdLine.addArgument(ARG_ESCAPE_HTML, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CREATEFULL_HTML_PAGE, ArgumentType.BoolArgument);
@@ -206,7 +206,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_FORMATFILE, StringUtil.stringToList("postgres,oracle,sqlserver,db2,mysql"));
 		cmdLine.addArgument("compress", ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_EMPTY_RESULTS, ArgumentType.BoolArgument);
-		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
+		cmdLine.addDeprecatedArgument("blobIdCols", ArgumentType.StringArgument);
 		cmdLine.addArgument("lobIdCols");
 		cmdLine.addArgument("filenameColumn");
 		cmdLine.addArgument(ARG_BLOB_TYPE, BlobMode.getTypes());
@@ -646,12 +646,14 @@ public class WbExport
 
 			if (xsl != null && output != null)
 			{
+        Map<String, String> parameters = WbXslt.getParameters(cmdLine);
 				XsltTransformer transformer = new XsltTransformer();
 				File f = transformer.findStylesheet(xsl);
 				if (f.exists())
 				{
 					exporter.setXsltTransformation(xsl);
 					exporter.setXsltTransformationOutput(output);
+          exporter.setXsltParameters(parameters);
 				}
 				else
 				{

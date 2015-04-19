@@ -48,16 +48,14 @@ public class WbXslt
 	public static final String ARG_STYLESHEET = "stylesheet";
 	public static final String ARG_OUTPUT = "xsltOutput";
 	public static final String ARG_INPUT = "inputFile";
-	public static final String ARG_PARAMETERS = "xsltParameters";
+	public static final String ARG_PARAMETER = "xsltParameter";
 
 	public WbXslt()
 	{
 		super();
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_STYLESHEET, ArgumentType.Filename);
-		cmdLine.addArgument(ARG_OUTPUT, ArgumentType.Filename);
+    addCommonXsltParameters(cmdLine);
 		cmdLine.addArgument(ARG_INPUT, ArgumentType.Filename);
-		cmdLine.addArgument(ARG_PARAMETERS, ArgumentType.Repeatable);
 	}
 
 	@Override
@@ -127,7 +125,7 @@ public class WbXslt
 			return result;
 		}
 
-		Map<String, String> params = cmdLine.getMapValue(ARG_PARAMETERS);
+    Map<String, String> params = getParameters(cmdLine);
 
 		XsltTransformer transformer = new XsltTransformer();
 
@@ -171,4 +169,19 @@ public class WbXslt
 		return true;
 	}
 
+  public static Map<String, String> getParameters(ArgumentParser cmdLine)
+  {
+		Map<String, String> params = cmdLine.getMapValue(ARG_PARAMETER);
+ 		Map<String, String> old = cmdLine.getMapValue("xsltParameters");
+    params.putAll(old);
+    return params;
+  }
+
+  public static void addCommonXsltParameters(ArgumentParser cmdLine)
+  {
+    cmdLine.addArgument(ARG_STYLESHEET, ArgumentType.Filename);
+    cmdLine.addArgument(ARG_PARAMETER, ArgumentType.Repeatable);
+    cmdLine.addDeprecatedArgument("xsltParameters", ArgumentType.Repeatable); // for backward compatibility
+		cmdLine.addArgument(ARG_OUTPUT, ArgumentType.Filename);
+  }
 }
