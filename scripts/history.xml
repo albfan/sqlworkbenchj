@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-03-15">
+  <release build="-1" date="2015-04-19">
     <entry dev-build="4" type="enh">For Excel imports, the option -stringDates=true retrieves Dates as formatted strings and converts them using the date/timestamp format specified in the WbImport command rathr then reading a converted value from the Excel file.</entry>
     <entry dev-build="4" type="enh">For Excel exports, the start location where the data should be written to in the excel file can now be specified using the -offset parameter</entry>
     <entry dev-build="4" type="enh">The application to be used for displaying the logfile can now be configured.</entry>
