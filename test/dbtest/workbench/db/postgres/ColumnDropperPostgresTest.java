@@ -92,12 +92,11 @@ public class ColumnDropperPostgresTest
 //		System.out.println(sql);
 		ScriptParser p = new ScriptParser(sql.trim());
 		p.setReturnStartingWhitespace(false);
-		assertEquals(4, p.getSize());
+		assertEquals(3, p.getSize());
 
 		assertEquals("ALTER TABLE person DROP COLUMN dummy1 CASCADE", p.getCommand(0).trim());
-		assertEquals("COMMIT", p.getCommand(1).trim());
-		assertEquals("ALTER TABLE person DROP COLUMN dummy2 CASCADE", p.getCommand(2).trim());
-		assertEquals("COMMIT", p.getCommand(3).trim());
+		assertEquals("ALTER TABLE person DROP COLUMN dummy2 CASCADE", p.getCommand(1).trim());
+		assertEquals("COMMIT", p.getCommand(2).trim());
 
 		dropper.dropObjects();
 
