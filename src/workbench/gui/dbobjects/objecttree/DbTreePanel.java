@@ -39,6 +39,7 @@ import java.awt.event.MouseListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -572,6 +573,90 @@ public class DbTreePanel
     return result;
   }
 
+  public List<TableIdentifier> getSelectedTables()
+  {
+    List<ObjectTreeNode> nodes = getSelectedTableNodes();
+
+    int count = nodes.size();
+    List<TableIdentifier> result = new ArrayList<>(count);
+    if (count == 0) return result;
+
+ 		Set<String> typesWithData = getConnection().getMetadata().getObjectsWithData();
+    for (ObjectTreeNode node : nodes)
+    {
+      DbObject dbo = node.getDbObject();
+      if (dbo instanceof TableIdentifier && typesWithData.contains(dbo.getObjectType()))
+      {
+        result.add((TableIdentifier)dbo);
+      }
+    }
+    return result;
+  }
+
+  public List<ObjectTreeNode> getSelectedTableNodes()
+  {
+    int count = tree.getSelectionCount();
+
+    List<ObjectTreeNode> result = new ArrayList<>(count);
+    if (count == 0) return result;
+
+    Set<String> nodeTypesWithTables = CollectionUtil.caseInsensitiveSet(TreeLoader.TYPE_TABLE, TreeLoader.TYPE_VIEW);
+    TreePath[] paths = tree.getSelectionPaths();
+
+    for (TreePath path : paths)
+    {
+      if (path != null)
+      {
+        ObjectTreeNode node = (ObjectTreeNode)path.getLastPathComponent();
+        if (node != null)
+        {
+          if (TreeLoader.TYPE_DBO_TYPE_NODE.equalsIgnoreCase(node.getType()) && nodeTypesWithTables.contains(node.getName()))
+          {
+            result.addAll(getTableNodes(node));
+          }
+          else if (TreeLoader.TYPE_SCHEMA.equalsIgnoreCase(node.getType()))
+          {
+            result.addAll(getSchemaTableNodes(node));
+          }
+          result.add(node);
+        }
+      }
+    }
+    return result;
+  }
+
+  private List<ObjectTreeNode> getSchemaTableNodes(ObjectTreeNode schemaNode)
+  {
+    List<ObjectTreeNode> result = new ArrayList<>();
+    Set<String> nodeTypesWithTables = CollectionUtil.caseInsensitiveSet(TreeLoader.TYPE_TABLE, TreeLoader.TYPE_VIEW);
+    int count = schemaNode.getChildCount();
+    for (int i=0;  i < count; i++)
+    {
+      ObjectTreeNode child = schemaNode.getChildAt(i);
+      if (TreeLoader.TYPE_DBO_TYPE_NODE.equalsIgnoreCase(child.getType()) && nodeTypesWithTables.contains(child.getName()))
+      {
+        result.addAll(getTableNodes(child));
+      }
+    }
+    return result;
+  }
+
+  private List<ObjectTreeNode> getTableNodes(ObjectTreeNode node)
+  {
+    int count = node.getChildCount();
+    List<ObjectTreeNode> tables = new ArrayList<>(count);
+    for (int i=0; i < count; i++)
+    {
+      ObjectTreeNode child = node.getChildAt(i);
+      if (child == null) continue;
+      if (child.getDbObject() instanceof TableIdentifier)
+      {
+        tables.add(child);
+      }
+    }
+    return tables;
+  }
+
   @Override
   public WbConnection getConnection()
   {
@@ -755,7 +840,7 @@ public class DbTreePanel
 
     // The show row count action can only be invoked if something is selected
     // Therefor it's enough to loop through the selected nodes.
-    List<ObjectTreeNode> nodes = getSelectedNodes();
+    List<ObjectTreeNode> nodes = getSelectedTableNodes();
     for (final ObjectTreeNode node : nodes)
     {
       if (table.equals(node.getDbObject()))

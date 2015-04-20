@@ -35,6 +35,7 @@ import java.sql.Statement;
 import workbench.log.LogMgr;
 
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
 
@@ -231,20 +232,21 @@ public class JdbcUtils
 
 		try
 		{
-			if (useSavepoint)
+			if (useSavepoint && !dbConnection.getAutoCommit())
 			{
 				sp = dbConnection.setSavepoint();
 			}
 
 			rs = statement.executeQuery(sql);
+      
 			if (useSeparateConnection)
 			{
-				if (dbConnection.selectStartsTransaction())
+				if (dbConnection.selectStartsTransaction() && !dbConnection.getAutoCommit())
 				{
 					dbConnection.rollback();
 				}
 			}
-			else
+      else
 			{
 				dbConnection.rollback(sp);
 			}
@@ -253,6 +255,7 @@ public class JdbcUtils
 		{
 			dbConnection.rollback(sp);
 			LogMgr.logError("JdbcUtils.runStatement()", "Error running statement", ex);
+      SqlUtil.closeResult(rs);
 			rs = null;
 		}
 		return rs;

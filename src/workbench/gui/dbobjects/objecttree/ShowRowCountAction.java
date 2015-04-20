@@ -24,17 +24,13 @@ import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import workbench.interfaces.Interruptable;
+import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
-import workbench.db.DbMetadata;
-import workbench.db.DbObject;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
@@ -42,9 +38,6 @@ import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
-import workbench.gui.dbobjects.DbObjectList;
-import workbench.interfaces.StatusBar;
-
 
 import workbench.util.SqlUtil;
 import workbench.util.WbThread;
@@ -56,20 +49,20 @@ public class ShowRowCountAction
 	extends WbAction
   implements Interruptable
 {
-	private DbObjectList source;
+	private DbTreePanel source;
   private StatusBar statusBar;
   private boolean cancelCount;
   private Statement currentStatement;
   private RowCountDisplay display;
 
-	public ShowRowCountAction(DbObjectList client, RowCountDisplay countDisplay, StatusBar status)
+	public ShowRowCountAction(DbTreePanel client, RowCountDisplay countDisplay, StatusBar status)
 	{
 		super();
 		initMenuDefinition("MnuTxtShowRowCounts");
 		source = client;
     display = countDisplay;
     statusBar = status;
-    setEnabled(getSelectedObjects().size() > 0);
+    setEnabled(source.getSelectedTables().size() > 0);
 	}
 
 	@Override
@@ -85,7 +78,7 @@ public class ShowRowCountAction
 			return;
 		}
 
-		List<TableIdentifier> objects = getSelectedObjects();
+		List<TableIdentifier> objects = source.getSelectedTables();
 		if (objects == null || objects.isEmpty())
 		{
 			return;
@@ -103,32 +96,9 @@ public class ShowRowCountAction
     counter.start();
 	}
 
-	private List<TableIdentifier> getSelectedObjects()
-	{
-		List<? extends DbObject> selected = this.source.getSelectedObjects();
-		if (selected == null || selected.isEmpty())
-		{
-			return Collections.emptyList();
-		}
-
-		DbMetadata meta = source.getConnection().getMetadata();
-		Set<String> typesWithData = meta.getObjectsWithData();
-		List<TableIdentifier> objects = new ArrayList<>();
-
-		for (DbObject dbo : selected)
-		{
-			String type = dbo.getObjectType();
-			if (typesWithData.contains(type) && dbo instanceof TableIdentifier)
-			{
-				objects.add((TableIdentifier)dbo);
-			}
-		}
-		return objects;
-	}
-
   private void doCount()
   {
-    List<TableIdentifier> tables = getSelectedObjects();
+    List<TableIdentifier> tables = source.getSelectedTables();
     if (tables.isEmpty()) return;
     WbConnection conn = source.getConnection();
 
