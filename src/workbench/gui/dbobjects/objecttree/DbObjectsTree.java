@@ -354,6 +354,18 @@ public class DbObjectsTree
     expandNode(node);
   }
 
+  private void loadSchemaTypes(ObjectTreeNode schemaNode)
+  {
+    try
+    {
+      loader.loadSchemaTypes(schemaNode);
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("DbObjectsTree.selectCurrentSchema()", "Could not expand current schema", ex);
+    }
+  }
+
   public boolean selectCurrentCatalog()
   {
     WbConnection conn = loader.getConnection();
@@ -387,31 +399,39 @@ public class DbObjectsTree
     return catNode != null;
   }
 
+  private boolean shouldLoadNode(ObjectTreeNode node)
+  {
+    if (!node.isLoaded()) return true;
+
+    if (node.isSchemaNode())
+    {
+      return !node.isLoaded() || DbTreeSettings.autoloadSchemaObjects();
+    }
+    return false;
+  }
+
   @Override
   public void treeExpanded(TreeExpansionEvent event)
   {
     if (loader == null) return;
-    if (!WbSwingUtilities.isConnectionIdle(this, loader.getConnection())) return;
 
     TreePath path = event.getPath();
-    Object obj = path.getLastPathComponent();
-    if (obj instanceof ObjectTreeNode)
-    {
-      final ObjectTreeNode node = (ObjectTreeNode)obj;
+    if (path == null) return;
 
-      if (!node.isLoaded())
+    final ObjectTreeNode node = (ObjectTreeNode)path.getLastPathComponent();
+
+    if (!shouldLoadNode(node)) return;
+    if (!WbSwingUtilities.isConnectionIdle(this, loader.getConnection())) return;
+
+    WbThread load = new WbThread(new Runnable()
+    {
+      @Override
+      public void run()
       {
-        WbThread load = new WbThread(new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            doLoad(node);
-          }
-        }, "DbTree Load Thread");
-        load.start();
+        doLoad(node);
       }
-    }
+    }, "DbTree Load Thread");
+    load.start();
   }
 
   private void doLoad(final ObjectTreeNode node)
@@ -420,7 +440,14 @@ public class DbObjectsTree
     {
       WbSwingUtilities.showWaitCursor(this);
       statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrieving"));
-      loader.loadChildren(node);
+      if (!node.isLoaded())
+      {
+        loader.loadChildren(node);
+      }
+      if (DbTreeSettings.autoloadSchemaObjects())
+      {
+        loadSchemaTypes(node);
+      }
       Runnable postLoad = afterLoadProcess.get(node);
       if (postLoad != null)
       {

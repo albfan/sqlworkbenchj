@@ -32,6 +32,7 @@ import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerLevel;
+import static workbench.gui.dbobjects.objecttree.TreeLoader.TYPE_SCHEMA;
 
 import workbench.storage.filter.ColumnExpression;
 
@@ -274,4 +275,8 @@ public class ObjectTreeNode
     return nodeType + ": " + getName();
   }
 
+  public boolean isSchemaNode()
+  {
+    return nodeType.equals(TreeLoader.TYPE_SCHEMA);
+  }
 }

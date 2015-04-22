@@ -231,12 +231,6 @@ public class TreeLoader
         node.setAllowsChildren(true);
         parentNode.add(node);
         addTypeNodes(node);
-        if (DbTreeSettings.autoloadSchemaObjects())
-        {
-          // by pretending that nothing was loaded, expanding the schema will automatically
-          // trigger loading of all objects in the the type nodes
-          node.setChildrenLoaded(false);
-        }
       }
       parentNode.setChildrenLoaded(true);
     }
@@ -267,7 +261,7 @@ public class TreeLoader
     if (parentNode == null) return;
     for (String type : availableTypes)
     {
-      if (type.equals("TRIGGER")) continue;
+      if (type.equalsIgnoreCase("TRIGGER")) continue;
       if (typesToShow.isEmpty() || typesToShow.contains(type))
       {
         ObjectTreeNode node = new ObjectTreeNode(type, TYPE_DBO_TYPE_NODE);
@@ -310,15 +304,29 @@ public class TreeLoader
     throws SQLException
   {
     if (schemaNode == null) return;
-    if (!schemaNode.getType().equals(TYPE_SCHEMA)) return;
+    if (!schemaNode.isSchemaNode()) return;
 
     schemaNode.removeAllChildren();
     addTypeNodes(schemaNode);
+    loadSchemaTypes(schemaNode);
+  }
+
+  public void loadSchemaTypes(ObjectTreeNode schemaNode)
+    throws SQLException
+  {
+    if (schemaNode == null) return;
+    if (!schemaNode.isSchemaNode()) return;
+
     int count = schemaNode.getChildCount();
     for (int i=0; i < count; i++)
     {
-      loadObjectsForTypeNode((ObjectTreeNode)schemaNode.getChildAt(i));
+      ObjectTreeNode child = (ObjectTreeNode)schemaNode.getChildAt(i);
+      if (!child.isLoaded())
+      {
+        loadObjectsForTypeNode(child);
+      }
     }
+    schemaNode.setChildrenLoaded(true);
     model.nodeStructureChanged(schemaNode);
     model.nodeChanged(schemaNode);
   }
@@ -340,6 +348,7 @@ public class TreeLoader
       ObjectTreeNode child = node.getChildAt(i);
       loadChildren(child);
     }
+    node.setChildrenLoaded(true);
     model.nodeStructureChanged(node);
   }
 
@@ -350,6 +359,7 @@ public class TreeLoader
 
     node.removeAllChildren();
     loadChildren(node);
+    node.setChildrenLoaded(true);
   }
 
   private TableIdentifier getParentInfo(ObjectTreeNode node)
@@ -438,9 +448,9 @@ public class TreeLoader
       typeNode.add(node);
       node.setChildrenLoaded(loaded);
     }
+    typeNode.setChildrenLoaded(true);
     model.nodeStructureChanged(typeNode);
     model.nodeChanged(typeNode);
-    typeNode.setChildrenLoaded(true);
   }
 
   private boolean hasIndexes(ObjectTreeNode node)
@@ -737,7 +747,7 @@ public class TreeLoader
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
       }
-      else if (connection.getMetadata().isExtendedTableType(type))
+      else if (connection.getMetadata().isExtendedTableType(type) || connection.getMetadata().isViewType(type))
       {
         reloadTableNode(node);
       }
