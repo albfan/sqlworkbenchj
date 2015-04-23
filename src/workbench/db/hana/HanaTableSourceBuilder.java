@@ -19,7 +19,8 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.hsqldb;
+package workbench.db.hana;
+
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,16 +36,17 @@ import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class HsqlTableSourceBuilder
+public class HanaTableSourceBuilder
 	extends TableSourceBuilder
 {
 
-	public HsqlTableSourceBuilder(WbConnection con)
+	public HanaTableSourceBuilder(WbConnection con)
 	{
 		super(con);
 	}
@@ -55,44 +57,36 @@ public class HsqlTableSourceBuilder
 		if (tbl == null) return;
 		if (tbl.getSourceOptions().isInitialized()) return;
 
-		boolean alwaysShowType = Settings.getInstance().getBoolProperty("workbench.db.hsql_database_engine.table_type.show_always", false);
-
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
-			"select hsqldb_type, \n" +
-			"       (select upper(property_value) from information_schema.system_properties where property_name = 'hsqldb.default_table_type') as default_type \n" +
-			"from information_schema.system_tables \n" +
+			"select table_type \n" +
+			"from sys.tables\n" +
 			"where table_name = ? \n" +
-			"and table_schem = ?";
+			"and schema_name = ?";
 
 		try
 		{
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, tbl.getTableName());
-			pstmt.setString(2, tbl.getSchema());
+			pstmt.setString(1, tbl.getRawTableName());
+			pstmt.setString(2, tbl.getRawSchema());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("HsqlTableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
+				LogMgr.logDebug("HanaTableSourceBuilder.readTableConfigOptions()", "Retrieving table type using SQL: " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
 			}
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
 				String type = rs.getString(1);
-				String defaultType = rs.getString(2);
-				if (defaultType == null)
-				{
-					defaultType = "CACHED";
-				}
-				if (alwaysShowType || !defaultType.equals(type))
-				{
-					tbl.getSourceOptions().setTypeModifier(type);
-				}
+        if (StringUtil.stringsAreNotEqual("ROW", type))
+        {
+          tbl.getSourceOptions().setTypeModifier(type);
+        }
 			}
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("HsqlTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
+			LogMgr.logError("HanaTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
 		}
 		finally
 		{
