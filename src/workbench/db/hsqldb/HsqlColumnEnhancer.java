@@ -78,7 +78,7 @@ public class HsqlColumnEnhancer
 								"and table_schema = ? \n" +
 								"and (is_generated = 'ALWAYS' OR (is_identity = 'YES' AND identity_generation IS NOT NULL))  \n";
 
-		Map<String, String> expressions = new HashMap<String, String>();
+		Map<String, String> expressions = new HashMap<>();
 		Map<String, SequenceDefinition> sequences = getColumnSequences(conn, table.getTable());
 
 		try
@@ -130,7 +130,7 @@ public class HsqlColumnEnhancer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("H2ColumnEnhancer.updateComputedColumns()", "Error retrieving remarks", e);
+			LogMgr.logError("HsqlColumnEnhancer.updateComputedColumns()", "Error retrieving remarks", e);
 		}
 		finally
 		{
@@ -163,7 +163,7 @@ public class HsqlColumnEnhancer
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		Map<String, SequenceDefinition> result = new HashMap<String, SequenceDefinition>();
+		Map<String, SequenceDefinition> result = new HashMap<>();
 
 		try
 		{

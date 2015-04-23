@@ -35,6 +35,7 @@ import workbench.resource.Settings;
 import workbench.db.derby.DerbyColumnEnhancer;
 import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.h2database.H2ColumnEnhancer;
+import workbench.db.hana.HanaColumnEnhancer;
 import workbench.db.hsqldb.HsqlColumnEnhancer;
 import workbench.db.ibm.Db2ColumnEnhancer;
 import workbench.db.ibm.InformixColumnEnhancer;
@@ -375,6 +376,10 @@ public class JdbcTableDefinitionReader
     if (meta.getDbId().equals(DbMetadata.DBID_OPENEDGE))
     {
       return new OpenEdgeColumnEnhancer();
+    }
+    if (meta.getDbId().equals(DbMetadata.DBID_HANA))
+    {
+      return new HanaColumnEnhancer();
     }
     return null;
   }
