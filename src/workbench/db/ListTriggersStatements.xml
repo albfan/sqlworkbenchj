@@ -3,6 +3,34 @@
  <object class="java.util.HashMap">
 
   <void method="put">
+   <string>HDB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select trigger_name,
+       trigger_action_time as trigger_type,
+       trigger_event,
+       subject_table_schema||'.'||subject_table_name as trigger_table,
+       null as remarks,
+	     case
+          when is_enabled = 'TRUE' then 'ENABLED'
+	        else 'DISABLED'
+       end as status,
+       triggered_action_level as trigger_level
+from triggers
+where trigger_name not like '#_SYS#_TRIGGER%' escape '#'
+</string>
+    </void>
+    <void property="objectNameField">
+     <string>subject_table_name</string>
+    </void>
+    <void property="schemaField">
+     <string>subject_table_schema</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>SQLBase</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

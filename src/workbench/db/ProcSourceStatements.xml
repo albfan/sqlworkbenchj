@@ -19,6 +19,30 @@
   </void>
 
   <void method="put">
+   <string>HDB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select definition
+from (
+   select schema_name, function_name as name, definition
+   from functions
+   union all
+   select schema_name, procedure_name as name, definition
+   from procedures
+) t
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="schemaField">
+     <string>schema_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>SAP DB</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

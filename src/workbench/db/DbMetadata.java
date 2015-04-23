@@ -49,6 +49,7 @@ import workbench.db.derby.DerbyTypeReader;
 import workbench.db.firebird.FirebirdDomainReader;
 import workbench.db.h2database.H2ConstantReader;
 import workbench.db.h2database.H2DomainReader;
+import workbench.db.hana.HanaSequenceReader;
 import workbench.db.hsqldb.HsqlTypeReader;
 import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ProcedureReader;
@@ -110,6 +111,7 @@ public class DbMetadata
 	public static final String DBID_TERADATA = "teradata";
 	public static final String DBID_H2 = "h2";
 	public static final String DBID_OPENEDGE = "openedge";
+	public static final String DBID_HANA = "hdb";
 
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};
@@ -353,6 +355,10 @@ public class DbMetadata
       // Progress returns a different name through JDBC and ODBC
       dbId = DBID_OPENEDGE;
  			objectListEnhancer = new OpenEdgeObjectListEnhancer();
+    }
+    else if (productLower.equals("hdb"))
+    {
+      sequenceReader = new HanaSequenceReader(aConnection);
     }
 
 		if (schemaInfoReader == null)
