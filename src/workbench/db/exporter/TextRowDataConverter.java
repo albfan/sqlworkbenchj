@@ -306,7 +306,7 @@ public class TextRowDataConverter
 		{
 			int colIndex = getRealIndex(c, colMap);
 			if (!this.includeColumnInExport(colIndex)) continue;
-			String name = this.metaData.getColumnDisplayName(colIndex);
+			String name = SqlUtil.removeObjectQuotes(this.metaData.getColumnDisplayName(colIndex));
 
 			if (first)
 			{
