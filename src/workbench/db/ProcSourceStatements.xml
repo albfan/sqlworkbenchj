@@ -26,10 +26,10 @@
 select definition
 from (
    select schema_name, function_name as name, definition
-   from functions
+   from sys.functions
    union all
    select schema_name, procedure_name as name, definition
-   from procedures
+   from sys.procedures
 ) t
      </string>
     </void>

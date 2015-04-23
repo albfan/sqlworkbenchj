@@ -35,6 +35,7 @@ import workbench.db.firstsql.FirstSqlConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
 import workbench.db.h2database.H2IndexReader;
 import workbench.db.h2database.H2SequenceReader;
+import workbench.db.hana.HanaProcedureReader;
 import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2ConstraintReader;
@@ -112,6 +113,10 @@ public class ReaderFactory
 		{
 			return new InformixProcedureReader(meta.getWbConnection());
 		}
+    if (meta.getDbId().equals(DbMetadata.DBID_HANA))
+    {
+      return new HanaProcedureReader(meta.getWbConnection());
+    }
 		return new JdbcProcedureReader(meta.getWbConnection());
 	}
 

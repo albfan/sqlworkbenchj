@@ -67,7 +67,7 @@ public class HanaSequenceReader
       "       is_cycled, \n" +
       "       cache_size, \n" +
       "       reset_by_query \n" +
-			"FROM sequences";
+			"FROM sys.sequences";
 	}
 
 	@Override

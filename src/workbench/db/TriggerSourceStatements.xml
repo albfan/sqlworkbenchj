@@ -6,7 +6,7 @@
    <string>HDB</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>select definition from triggers</string>
+     <string>select definition from sys.triggers</string>
     </void>
     <void property="objectNameField">
      <string>trigger_name</string>

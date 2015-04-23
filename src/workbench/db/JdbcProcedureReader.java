@@ -137,13 +137,19 @@ public class JdbcProcedureReader
 	}
 
 	public DataStore fillProcedureListDataStore(ResultSet rs)
-		throws SQLException
-	{
+    throws SQLException
+  {
 		int specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFIC_NAME");
 		boolean useSpecificName = specIndex > -1;
 
-		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), useSpecificName);
+    DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), useSpecificName);
+    fillProcedureListDataStore(rs, ds, useSpecificName);
+    return ds;
+  }
 
+	public void fillProcedureListDataStore(ResultSet rs, DataStore ds, boolean useSpecificName)
+		throws SQLException
+	{
 		try
 		{
 			while (rs.next())
@@ -191,7 +197,6 @@ public class JdbcProcedureReader
 		{
 			SqlUtil.closeResult(rs);
 		}
-		return ds;
 	}
 
 	/**

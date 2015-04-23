@@ -17,7 +17,7 @@ select trigger_name,
 	        else 'DISABLED'
        end as status,
        triggered_action_level as trigger_level
-from triggers
+from sys.triggers
 where trigger_name not like '#_SYS#_TRIGGER%' escape '#'
 </string>
     </void>
