@@ -63,8 +63,8 @@ public class HsqlColumnEnhancer
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		String tablename = table.getTable().getTableName();
-		String schema = table.getTable().getSchema();
+		String tablename = table.getTable().getRawTableName();
+		String schema = table.getTable().getRawSchema();
 
 		String sql = "select column_name, " +
 								"        generation_expression, " +
