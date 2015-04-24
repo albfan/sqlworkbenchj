@@ -410,7 +410,7 @@ public class DbTreePanel
       tree.setConnection(null);
     }
 
-    WbThread th = new WbThread(new Runnable()
+    Runnable runner = new Runnable()
     {
       @Override
       public void run()
@@ -419,14 +419,15 @@ public class DbTreePanel
         connection = null;
         ConnectionMgr.getInstance().disconnect(old);
       }
-    }, "Disconnect");
+    };
 
     if (wait)
     {
-      th.run();
+      runner.run();
     }
     else
     {
+      WbThread th = new WbThread(runner, "Disconnect");
       th.start();
     }
   }
@@ -808,30 +809,30 @@ public class DbTreePanel
     tree.getModel().resetFilter();
     tree.expandNodes(expanded);
     resetFilter.setEnabled(false);
+    expandedNodes = null;
   }
 
   @Override
 	public void applyQuickFilter()
 	{
-    if (expandedNodes == null)
-    {
-      expandedNodes = tree.getExpandedNodes();
-    }
-    List<TreePath> expanded = tree.getExpandedNodes();
     String text = filterValue.getText();
     if (StringUtil.isEmptyString(text))
     {
-      tree.getModel().resetFilter();
-      resetFilter.setEnabled(false);
+      resetFilter();
+      return;
     }
-    else
+
+    List<TreePath> expanded = tree.getExpandedNodes();
+    if (expandedNodes == null)
     {
-      tree.getModel().applyFilter(text);
-      resetFilter.setEnabled(true);
+      // first invocation, save the currently expanded nodes
+      // so that this can be restored when the filter is cleared
+      expandedNodes = expanded;
     }
+    tree.getModel().applyFilter(text);
+    resetFilter.setEnabled(true);
     tree.expandNodes(expanded);
 	}
-
 
   @Override
   public void showRowCount(TableIdentifier table, long rows)
