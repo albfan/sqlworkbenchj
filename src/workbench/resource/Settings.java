@@ -2118,7 +2118,7 @@ public class Settings
 		this.setProperty("workbench.workspace.autosave", flag);
 	}
 
-	public int getMaxWorkspaceBackup()
+	public int getMaxBackupFiles()
 	{
 		return getIntProperty("workbench.workspace.maxbackup", 5);
 	}
@@ -2160,7 +2160,7 @@ public class Settings
 
 	public boolean getCreateDriverBackup()
 	{
-		return getBoolProperty("workbench.drivers.createbackup", getCreateProfileBackup());
+		return getBoolProperty("workbench.drivers.createbackup", true);
 	}
 
 	public void setCreateDriverBackup(boolean flag)
@@ -2168,9 +2168,19 @@ public class Settings
 		setProperty("workbench.drivers.createbackup", flag);
 	}
 
+	public boolean getCreateMacroBackup()
+	{
+		return getBoolProperty("workbench.macros.createbackup", true);
+	}
+
+	public void setCreateMacroBackup(boolean flag)
+	{
+		setProperty("workbench.macro.createbackup", flag);
+	}
+
 	public boolean getCreateSettingsBackup()
 	{
-		return getBoolProperty("workbench.settings.createbackup", getCreateProfileBackup());
+		return getBoolProperty("workbench.settings.createbackup", false);
 	}
 
 	public void setCreateSettingsBackup(boolean flag)
@@ -3516,7 +3526,7 @@ public class Settings
 			// renameExistingFile will be true if an out of memory error occurred at some point.
 			// If that happened FileVersioning might not work properly (because the JVM acts strange once an OOME occurred)
 			// So both things are done.
-			int maxVersions = getMaxWorkspaceBackup();
+			int maxVersions = getMaxBackupFiles();
 			String dir = getBackupDir();
 			String sep = getFileVersionDelimiter();
 			FileVersioner version = new FileVersioner(maxVersions, dir, sep);

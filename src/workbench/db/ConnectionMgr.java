@@ -690,7 +690,7 @@ public class ConnectionMgr
 
 	private void createBackup(WbFile f)
 	{
-		int maxVersions = Settings.getInstance().getMaxWorkspaceBackup();
+		int maxVersions = Settings.getInstance().getMaxBackupFiles();
 		String dir = Settings.getInstance().getBackupDir();
 		String sep = Settings.getInstance().getFileVersionDelimiter();
 		FileVersioner version = new FileVersioner(maxVersions, dir, sep);

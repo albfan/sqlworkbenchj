@@ -35,10 +35,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import workbench.gui.components.WbFilePicker;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.components.WbFilePicker;
+
 import workbench.util.StringUtil;
 
 /**
@@ -62,9 +64,10 @@ public class BackupOptions
 		backupSettingsFile.setSelected(Settings.getInstance().getCreateSettingsBackup());
 		backupDrivers.setSelected(Settings.getInstance().getCreateDriverBackup());
 		backupProfiles.setSelected(Settings.getInstance().getCreateProfileBackup());
+		backupMacros.setSelected(Settings.getInstance().getCreateMacroBackup());
 
 		backupCount.setEnabled(createWkspBackup.isSelected());
-		backupCount.setText(Integer.toString(Settings.getInstance().getMaxWorkspaceBackup()));
+		backupCount.setText(Integer.toString(Settings.getInstance().getMaxBackupFiles()));
 		backupDirPicker.setFilename(Settings.getInstance().getBackupDir());
 	}
 
@@ -78,12 +81,13 @@ public class BackupOptions
 		{
 			set.setMaxWorkspaceBackup(value);
 		}
-		
+
 		set.setBackupDir(backupDirPicker.getFilename());
 		set.setCreateSettingsBackup(backupSettingsFile.isSelected());
 		set.setCreateWorkspaceBackup(createWkspBackup.isSelected());
 		set.setCreateDriverBackup(backupDrivers.isSelected());
 		set.setCreateProfileBackup(backupProfiles.isSelected());
+		set.setCreateMacroBackup(backupMacros.isSelected());
 	}
 
 	/** This method is called from within the constructor to
@@ -98,12 +102,13 @@ public class BackupOptions
 
     createWkspBackup = new JCheckBox();
     backupSettingsFile = new JCheckBox();
+    backupMacros = new JCheckBox();
+    backupProfiles = new JCheckBox();
+    backupDrivers = new JCheckBox();
     jLabel1 = new JLabel();
     jLabel2 = new JLabel();
     backupCount = new JTextField();
     backupDirPicker = new WbFilePicker();
-    backupProfiles = new JCheckBox();
-    backupDrivers = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -131,6 +136,45 @@ public class BackupOptions
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(7, 8, 3, 0);
     add(backupSettingsFile, gridBagConstraints);
+
+    backupMacros.setText(ResourceMgr.getString("LblBckMacros")); // NOI18N
+    backupMacros.setBorder(null);
+    backupMacros.setHorizontalAlignment(SwingConstants.LEFT);
+    backupMacros.setHorizontalTextPosition(SwingConstants.RIGHT);
+    backupMacros.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 8, 3, 0);
+    add(backupMacros, gridBagConstraints);
+
+    backupProfiles.setText(ResourceMgr.getString("LblBckProfiles")); // NOI18N
+    backupProfiles.setBorder(null);
+    backupProfiles.setHorizontalAlignment(SwingConstants.LEFT);
+    backupProfiles.setHorizontalTextPosition(SwingConstants.RIGHT);
+    backupProfiles.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 8, 3, 0);
+    add(backupProfiles, gridBagConstraints);
+
+    backupDrivers.setText(ResourceMgr.getString("LblBckDrivers")); // NOI18N
+    backupDrivers.setBorder(null);
+    backupDrivers.setHorizontalAlignment(SwingConstants.LEFT);
+    backupDrivers.setHorizontalTextPosition(SwingConstants.RIGHT);
+    backupDrivers.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 8, 3, 0);
+    add(backupDrivers, gridBagConstraints);
 
     jLabel1.setLabelFor(backupCount);
     jLabel1.setText(ResourceMgr.getString("LblMaxWkspBck")); // NOI18N
@@ -176,32 +220,6 @@ public class BackupOptions
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(6, 13, 5, 11);
     add(backupDirPicker, gridBagConstraints);
-
-    backupProfiles.setText(ResourceMgr.getString("LblBckProfiles")); // NOI18N
-    backupProfiles.setBorder(null);
-    backupProfiles.setHorizontalAlignment(SwingConstants.LEFT);
-    backupProfiles.setHorizontalTextPosition(SwingConstants.RIGHT);
-    backupProfiles.setIconTextGap(5);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 8, 3, 0);
-    add(backupProfiles, gridBagConstraints);
-
-    backupDrivers.setText(ResourceMgr.getString("LblBckDrivers")); // NOI18N
-    backupDrivers.setBorder(null);
-    backupDrivers.setHorizontalAlignment(SwingConstants.LEFT);
-    backupDrivers.setHorizontalTextPosition(SwingConstants.RIGHT);
-    backupDrivers.setIconTextGap(5);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 8, 3, 0);
-    add(backupDrivers, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -223,6 +241,7 @@ public class BackupOptions
   private JTextField backupCount;
   private WbFilePicker backupDirPicker;
   private JCheckBox backupDrivers;
+  private JCheckBox backupMacros;
   private JCheckBox backupProfiles;
   private JCheckBox backupSettingsFile;
   private JCheckBox createWkspBackup;

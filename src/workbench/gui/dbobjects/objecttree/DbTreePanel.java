@@ -806,14 +806,23 @@ public class DbTreePanel
     {
       expanded = tree.getExpandedNodes();
     }
-    tree.getModel().resetFilter();
-    tree.expandNodes(expanded);
-    resetFilter.setEnabled(false);
-    expandedNodes = null;
+    
+    try
+    {
+      tree.suspendAutoLoading();
+      tree.getModel().resetFilter();
+      tree.expandNodes(expanded);
+      resetFilter.setEnabled(false);
+      resetExpanded();
+    }
+    finally
+    {
+      tree.resumeAutoLoading();
+    }
   }
 
   @Override
-	public void applyQuickFilter()
+	public synchronized void applyQuickFilter()
 	{
     String text = filterValue.getText();
     if (StringUtil.isEmptyString(text))
@@ -822,16 +831,27 @@ public class DbTreePanel
       return;
     }
 
-    List<TreePath> expanded = tree.getExpandedNodes();
+    final List<TreePath> expanded = tree.getExpandedNodes();
     if (expandedNodes == null)
     {
       // first invocation, save the currently expanded nodes
       // so that this can be restored when the filter is cleared
       expandedNodes = expanded;
     }
-    tree.getModel().applyFilter(text);
-    resetFilter.setEnabled(true);
-    tree.expandNodes(expanded);
+
+    try
+    {
+      // prevent automatic reloading of expanding nodes
+      tree.suspendAutoLoading();
+
+      tree.getModel().applyFilter(text);
+      resetFilter.setEnabled(true);
+      tree.expandNodes(expanded);
+    }
+    finally
+    {
+      tree.resumeAutoLoading();
+    }
 	}
 
   @Override

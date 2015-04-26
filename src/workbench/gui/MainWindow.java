@@ -1949,12 +1949,12 @@ public class MainWindow
   {
     final SqlPanel panel = getCurrentSqlPanel();
     if (panel == null) return;
-    WbSwingUtilities.invoke(new Runnable()
+    WbSwingUtilities.invokeLater(new Runnable()
     {
       @Override
       public void run()
       {
-        panel.getEditor().ensureCaretIsVisible();
+        panel.getEditor().centerLine(panel.getEditor().getCaretLine());
         panel.getEditor().doLayout();
         panel.validate();
       }
@@ -3058,7 +3058,7 @@ public class MainWindow
 
 		if (Settings.getInstance().getCreateWorkspaceBackup())
 		{
-			int maxVersions = Settings.getInstance().getMaxWorkspaceBackup();
+			int maxVersions = Settings.getInstance().getMaxBackupFiles();
 			String dir = Settings.getInstance().getBackupDir();
 			String sep = Settings.getInstance().getFileVersionDelimiter();
 			FileVersioner version = new FileVersioner(maxVersions, dir, sep);

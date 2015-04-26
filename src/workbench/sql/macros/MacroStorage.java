@@ -36,10 +36,13 @@ import java.util.TreeMap;
 import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
 
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
+import workbench.util.FileVersioner;
+import workbench.util.WbFile;
 import workbench.util.WbPersistence;
 
 /**
@@ -157,9 +160,28 @@ public class MacroStorage
 		this.saveMacros(this.sourceFile);
 	}
 
+	private void createBackup(WbFile f)
+	{
+    if (!Settings.getInstance().getCreateMacroBackup()) return;
+		int maxVersions = Settings.getInstance().getMaxBackupFiles();
+		String dir = Settings.getInstance().getBackupDir();
+		String sep = Settings.getInstance().getFileVersionDelimiter();
+		FileVersioner version = new FileVersioner(maxVersions, dir, sep);
+		try
+		{
+			version.createBackup(f);
+		}
+		catch (IOException e)
+		{
+			LogMgr.logWarning("MacroStorage.createBackup()", "Error when creating backup for: " + f.getAbsolutePath(), e);
+		}
+	}
+
 	public void saveMacros(File file)
 	{
 		if (file == null) return;
+
+    createBackup(new WbFile(file));
 
 		synchronized (lock)
 		{

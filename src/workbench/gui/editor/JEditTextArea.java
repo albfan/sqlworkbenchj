@@ -781,7 +781,7 @@ public class JEditTextArea
   {
     int line = getCaretLine();
 
-    if (getVisibleLines() == 0)
+    if (visibleLines <= 0)
     {
       recalculateVisibleLines();
     }
@@ -793,17 +793,23 @@ public class JEditTextArea
   public void centerLine(int line)
   {
     int numLines = getLineCount();
-    int newFirst = line - ( (getVisibleLines() - electricScroll) / 2);
-
-    if (newFirst + getVisibleLines() > numLines)
+    if (visibleLines <= 0)
     {
-      newFirst = numLines - getVisibleLines();
+      recalculateVisibleLines();
+    }
+
+    int newFirst = line - ((visibleLines - electricScroll) / 2);
+
+    if (newFirst + visibleLines > numLines)
+    {
+      newFirst = numLines - visibleLines;
     }
 
     if (newFirst < 0) newFirst = 0;
 
-    setFirstLine(newFirst, true);
-    painter.invalidateLineRange(firstLine, firstLine + getVisibleLines());
+    firstLine = newFirst;
+    painter.invalidateLineRange(firstLine, firstLine + visibleLines);
+    painter.repaint();
     updateScrollBars();
   }
 
@@ -1979,18 +1985,16 @@ public class JEditTextArea
 
 		updateOccuranceHilite();
 
-		// When the user is typing, etc, we don't want the caret
-		// to blink
+		// When the user is typing, etc, we don't want the caret to blink
 		blink = true;
 		if (caretTimer != null) caretTimer.restart();
 
 		// Disable rectangle select if selection start = selection end
 		if (selectionStart == selectionEnd) rectSelect = false;
 
-		// Clear the `magic' caret position used by up/down
+		// Clear the "magic" caret position used by up/down
 		magicCaret = -1;
 
-		scrollToCaret();
 		fireSelectionEvent();
 	}
 

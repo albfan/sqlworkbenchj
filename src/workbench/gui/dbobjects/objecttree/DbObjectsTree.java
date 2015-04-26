@@ -62,6 +62,7 @@ public class DbObjectsTree
   private WbStatusLabel statusBar;
   private DbObjectNodeRenderer renderer;
   private Map<ObjectTreeNode, Runnable> afterLoadProcess = new ConcurrentHashMap<>();
+  private boolean suspendAutoLoad;
 
   public DbObjectsTree(WbStatusLabel status)
   {
@@ -399,13 +400,27 @@ public class DbObjectsTree
     return catNode != null;
   }
 
+  public void suspendAutoLoading()
+  {
+    suspendAutoLoad = true;
+  }
+
+  public void resumeAutoLoading()
+  {
+    suspendAutoLoad = false;
+  }
+
   private boolean shouldLoadNode(ObjectTreeNode node)
   {
     if (!node.isLoaded()) return true;
 
     if (node.isSchemaNode())
     {
-      return !node.isLoaded() || DbTreeSettings.autoloadSchemaObjects();
+      if (suspendAutoLoad)
+      {
+        return false;
+      }
+      return DbTreeSettings.autoloadSchemaObjects();
     }
     return false;
   }
@@ -547,7 +562,7 @@ public class DbObjectsTree
 
     for (TreePath path : nodes)
     {
-      expandPath(path);
+      setExpandedState(path, true);
     }
   }
 
