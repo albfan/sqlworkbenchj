@@ -32,7 +32,6 @@ import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerLevel;
-import static workbench.gui.dbobjects.objecttree.TreeLoader.TYPE_SCHEMA;
 
 import workbench.storage.filter.ColumnExpression;
 
@@ -80,6 +79,18 @@ public class ObjectTreeNode
   public void setChildrenLoaded(boolean flag)
   {
     isLoaded = flag;
+  }
+
+  public boolean childrenAreLoaded()
+  {
+    if (!this.isLoaded) return false;
+    int count = getChildCount();
+    for (int i=0; i < count; i ++)
+    {
+      ObjectTreeNode child = getChildAt(i);
+      if (!child.isLoaded) return false;
+    }
+    return true;
   }
 
   public boolean isLoaded()
@@ -279,4 +290,5 @@ public class ObjectTreeNode
   {
     return nodeType.equals(TreeLoader.TYPE_SCHEMA);
   }
+
 }

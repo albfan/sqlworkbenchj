@@ -806,19 +806,11 @@ public class DbTreePanel
     {
       expanded = tree.getExpandedNodes();
     }
-    
-    try
-    {
-      tree.suspendAutoLoading();
-      tree.getModel().resetFilter();
-      tree.expandNodes(expanded);
-      resetFilter.setEnabled(false);
-      resetExpanded();
-    }
-    finally
-    {
-      tree.resumeAutoLoading();
-    }
+
+    tree.getModel().resetFilter();
+    tree.expandNodes(expanded);
+    resetFilter.setEnabled(false);
+    resetExpanded();
   }
 
   @Override
@@ -839,19 +831,9 @@ public class DbTreePanel
       expandedNodes = expanded;
     }
 
-    try
-    {
-      // prevent automatic reloading of expanding nodes
-      tree.suspendAutoLoading();
-
-      tree.getModel().applyFilter(text);
-      resetFilter.setEnabled(true);
-      tree.expandNodes(expanded);
-    }
-    finally
-    {
-      tree.resumeAutoLoading();
-    }
+    tree.getModel().applyFilter(text);
+    resetFilter.setEnabled(true);
+    tree.expandNodes(expanded);
 	}
 
   @Override
