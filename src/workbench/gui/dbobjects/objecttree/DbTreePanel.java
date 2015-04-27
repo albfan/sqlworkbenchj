@@ -748,11 +748,27 @@ public class DbTreePanel
   {
   }
 
+  private boolean isEditKey(KeyEvent event)
+  {
+    int key = event.getKeyChar();
+    switch (key)
+    {
+      case KeyEvent.VK_BACK_SPACE:
+      case KeyEvent.VK_DELETE:
+      case KeyEvent.VK_CUT:
+      case KeyEvent.VK_INSERT:
+      case KeyEvent.VK_CLEAR:
+        return true;
+      default:
+        return false;
+    }
+  }
+
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
     if (e.isConsumed()) return;
-    if (Character.isISOControl(e.getKeyChar())) return;
+    if (Character.isISOControl(e.getKeyChar()) && isEditKey(e) == false) return;
 
     if (DbTreeSettings.getFilterWhileTyping())
     {
@@ -823,16 +839,24 @@ public class DbTreePanel
       return;
     }
 
-    final List<TreePath> expanded = tree.getExpandedNodes();
     if (expandedNodes == null)
     {
       // first invocation, save the currently expanded nodes
       // so that this can be restored when the filter is cleared
-      expandedNodes = expanded;
+      expandedNodes = tree.getExpandedNodes();
     }
 
     tree.getModel().applyFilter(text);
     resetFilter.setEnabled(true);
+    List<TreePath> expanded = null;
+    if (DbTreeSettings.autoExpandFilteredNodes())
+    {
+      expanded = tree.getFilteredNodes();
+    }
+    else
+    {
+      expanded = tree.getExpandedNodes();
+    }
     tree.expandNodes(expanded);
 	}
 

@@ -24,6 +24,7 @@ import java.util.List;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 import workbench.resource.DbExplorerSettings;
 
@@ -173,5 +174,30 @@ public class DbObjectTreeModel
       nodeStructureChanged(node);
     }
     return changed;
+  }
+
+  public List<ObjectTreeNode> getFilteredNodes()
+  {
+    return getFilteredNodes(getRoot());
+  }
+
+  private List<ObjectTreeNode> getFilteredNodes(ObjectTreeNode parent)
+  {
+    List<ObjectTreeNode> result = new ArrayList<>();
+    int count = parent.getChildCount();
+    for (int i=0; i < count; i ++)
+    {
+      ObjectTreeNode node = parent.getChildAt(i);
+      if (node.isFiltered())
+      {
+        result.add(node);
+      }
+      else
+      {
+        result.addAll(getFilteredNodes(node));
+      }
+    }
+    return result;
+
   }
 }

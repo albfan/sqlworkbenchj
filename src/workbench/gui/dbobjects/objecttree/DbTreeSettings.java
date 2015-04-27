@@ -98,4 +98,9 @@ public class DbTreeSettings
   {
     return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".autoload.types", true);
   }
+
+  public static boolean autoExpandFilteredNodes()
+  {
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".filter.autoexpand", true);
+  }
 }

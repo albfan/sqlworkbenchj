@@ -1995,6 +1995,7 @@ public class JEditTextArea
 		// Clear the "magic" caret position used by up/down
 		magicCaret = -1;
 
+		scrollToCaret();
 		fireSelectionEvent();
 	}
 

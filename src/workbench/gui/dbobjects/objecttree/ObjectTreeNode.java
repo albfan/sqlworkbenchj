@@ -231,6 +231,11 @@ public class ObjectTreeNode
     return remarks;
   }
 
+  public boolean isFiltered()
+  {
+    return CollectionUtil.isNonEmpty(filteredNodes);
+  }
+  
   public boolean applyFilter(ColumnExpression searchTerm)
   {
     resetFilter();

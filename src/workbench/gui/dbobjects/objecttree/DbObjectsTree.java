@@ -566,5 +566,16 @@ public class DbObjectsTree
     return result;
   }
 
+  public List<TreePath> getFilteredNodes()
+  {
+    List<ObjectTreeNode> filtered = getModel().getFilteredNodes();
+    List<TreePath> result = new ArrayList<>(filtered.size());
+
+    for (ObjectTreeNode node : filtered)
+    {
+      result.add(new TreePath(getTreeModel().getPathToRoot(node)));
+    }
+    return result;
+  }
 
 }
