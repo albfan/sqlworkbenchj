@@ -25,10 +25,12 @@ package workbench.gui.sql;
 import java.io.IOException;
 import java.util.Properties;
 
-import workbench.gui.settings.ExternalFileHandling;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.settings.ExternalFileHandling;
+
 import workbench.util.WbProperties;
 import workbench.util.WbWorkspace;
 

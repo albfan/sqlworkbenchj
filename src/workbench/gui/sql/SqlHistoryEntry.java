@@ -23,6 +23,7 @@
 package workbench.gui.sql;
 
 import workbench.log.LogMgr;
+
 import workbench.util.StringUtil;
 
 /**

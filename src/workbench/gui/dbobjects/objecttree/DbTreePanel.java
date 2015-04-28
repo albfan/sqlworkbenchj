@@ -449,7 +449,9 @@ public class DbTreePanel
   @Override
   public void objectsDropped(List<DbObject> objects)
   {
+    List<TreePath> nodes = tree.getExpandedNodes();
     tree.getModel().removeObjects(objects);
+    tree.expandNodes(nodes);
   }
 
   @Override
