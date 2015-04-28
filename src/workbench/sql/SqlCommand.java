@@ -221,6 +221,10 @@ public class SqlCommand
 				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", typeName);
 			}
 		}
+    else if ("ALTER".equals(verb) && info != null)
+    {
+      return ResourceMgr.getFormattedString("MsgDMLSuccess", verb, info.getObjectType() + " " + info.getObjectName());
+    }
 		else if ("ANALYZE".equals(verb))
 		{
 			String name = currentConnection.getMetadata().adjustObjectnameCase(info.getObjectName());
