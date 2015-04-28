@@ -403,7 +403,7 @@ public class SqlPanel
 
 		appendResults = GuiSettings.getDefaultAppendResults();
 
-		this.add(this.contentPanel, BorderLayout.CENTER);
+		this.add(contentPanel, BorderLayout.CENTER);
 		this.add(statusBar, BorderLayout.SOUTH);
 
 		this.initStatementHistory();

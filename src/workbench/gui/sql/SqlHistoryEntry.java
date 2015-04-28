@@ -110,7 +110,8 @@ public class SqlHistoryEntry
 			editor.setText(this.text);
 			if (this.cursorPos > -1)
 			{
-				editor.setCaretPosition(this.cursorPos);
+        editor.setCaretPosition(cursorPos);
+        editor.centerLine(editor.getCaretLine());
 			}
       else
       {

@@ -67,10 +67,20 @@ public class PanelWorkspaceHandler
 
 		client.setTabName(w.getTabTitle(index));
 
+		WbProperties props = w.getSettings();
+
+		int loc = props.getIntProperty("tab" + (index) + ".divider.location", 200);
+		client.setDividerLocation(loc);
+		loc = props.getIntProperty("tab" + (index) + ".divider.lastlocation", 0);
+    client.contentPanel.setLastDividerLocation(loc);
+
 		int v = w.getMaxRows(index);
 		client.statusBar.setMaxRows(v);
 		v = w.getQueryTimeout(index);
 		client.statusBar.setQueryTimeout(v);
+
+    client.invalidate();
+    client.doLayout();
 
 		String filename = w.getExternalFileName(index);
 		boolean fileLoaded = false;
@@ -99,13 +109,6 @@ public class PanelWorkspaceHandler
 				LogMgr.logError("PanelWorkspaceHandler.readFromWorkspace()", "Error when showing current history entry", e);
 			}
 		}
-
-		WbProperties props = w.getSettings();
-
-		int loc = props.getIntProperty("tab" + (index) + ".divider.location", 200);
-		client.setDividerLocation(loc);
-		loc = props.getIntProperty("tab" + (index) + ".divider.lastlocation", 0);
-		if (loc > 0) client.contentPanel.setLastDividerLocation(loc);
 
 		boolean appendResults = props.getBoolProperty("tab" + (index) + ".append.results", false);
 		boolean locked = props.getBoolProperty("tab" + (index) + ".locked", false);

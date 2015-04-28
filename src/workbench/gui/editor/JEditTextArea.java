@@ -729,7 +729,7 @@ public class JEditTextArea
 	{
 		if (!EventQueue.isDispatchThread())
 		{
-			LogMgr.logDebug("JEditTextArea.updateScrollbars()", "Not called from within the EDT!", new Exception());
+			LogMgr.logDebug("JEditTextArea.updateScrollbars()", "updateScrollbars() not called from within the EDT!", new Exception());
 		}
 
 		boolean changed = false;
@@ -792,25 +792,24 @@ public class JEditTextArea
 
   public void centerLine(int line)
   {
-    int numLines = getLineCount();
     if (visibleLines <= 0)
     {
       recalculateVisibleLines();
     }
 
-    int newFirst = line - ((visibleLines - electricScroll) / 2);
+    int newFirst = line - (visibleLines / 2);
+    int numLines = getLineCount();
 
     if (newFirst + visibleLines > numLines)
     {
       newFirst = numLines - visibleLines;
     }
 
-    if (newFirst < 0) newFirst = 0;
+    System.out.println("**** visible: " + visibleLines + ", numLines: " + numLines + ", line: " + line + ", newFirst: " + newFirst);
 
+    if (newFirst < 0) newFirst = 0;
     firstLine = newFirst;
-    painter.invalidateLineRange(firstLine, firstLine + visibleLines);
-    painter.repaint();
-    updateScrollBars();
+    validate();
   }
 
 	/**
@@ -855,15 +854,19 @@ public class JEditTextArea
 	 */
 	final void recalculateVisibleLines()
 	{
-		if (painter == null)
-		{
-			return;
-		}
+		if (painter == null) return;
+
 		int height = painter.getHeight();
 		int lineHeight = painter.getFontMetrics().getHeight();
 		if (lineHeight == 0) return;
+
+    int lines = visibleLines;
 		visibleLines = height / lineHeight;
-		updateScrollBars();
+
+    if (lines != visibleLines)
+    {
+      updateScrollBars();
+    }
 	}
 
 	/**
@@ -1283,11 +1286,10 @@ public class JEditTextArea
 				@Override
 				public void run()
 				{
-					invalidate();
-					painter.repaint();
-					painter.validate();
 					updateScrollBars();
+					invalidate();
 					validate();
+					painter.repaint();
 				}
 			});
 
@@ -1531,9 +1533,7 @@ public class JEditTextArea
 				@Override
 				public void run()
 				{
-					invalidate();
 					updateScrollBars();
-					painter.invalidateLineRange(0, getLineCount());
 					validate();
 				}
 			});

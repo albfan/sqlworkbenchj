@@ -1864,6 +1864,7 @@ public class MainWindow
 							addTabAtIndex(false, false, false, -1);
 						}
 						MainPanel p = getSqlPanel(i);
+            ((JComponent)p).validate();
 						p.readFromWorkspace(w, i);
 					}
 
@@ -1907,7 +1908,6 @@ public class MainWindow
 					setIgnoreTabChange(false);
 					FileUtil.closeQuietely(w);
 					updateGuiForTab(sqlTab.getSelectedIndex());
-          syncEditor();
 				}
 			}
 		});
@@ -1944,22 +1944,6 @@ public class MainWindow
 
 		return resultForWorkspaceClose;
 	}
-
-  private void syncEditor()
-  {
-    final SqlPanel panel = getCurrentSqlPanel();
-    if (panel == null) return;
-    WbSwingUtilities.invokeLater(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        panel.getEditor().centerLine(panel.getEditor().getCaretLine());
-        panel.getEditor().doLayout();
-        panel.validate();
-      }
-    });
-  }
 
 	private void checkReloadWkspAction()
 	{
