@@ -78,6 +78,7 @@ public class DriverInfo
 		methods.add("storesLowerCaseQuotedIdentifiers");
 		methods.add("storesUpperCaseQuotedIdentifiers");
 		methods.add("supportsAlterTableWithAddColumn");
+		methods.add("supportsAlterTableWithDropColumn");
 		methods.add("supportsANSI92EntryLevelSQL");
 		methods.add("supportsANSI92FullSQL");
 		methods.add("supportsANSI92IntermediateSQL");
