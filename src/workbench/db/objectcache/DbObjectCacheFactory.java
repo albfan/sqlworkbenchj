@@ -34,6 +34,7 @@ import workbench.resource.GuiSettings;
 
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.util.CollectionUtil;
 
 /**
  * A factory for DbObjectCache instances.
@@ -129,11 +130,13 @@ public class DbObjectCacheFactory
 			}
 			DbObjectCache result = new DbObjectCache(cache, connection);
 			connection.addChangeListener(this);
-			boolean isUsed = isConnectionUsed(key, connection.getId());
+			boolean isUsed = isCacheInUse(key);
 			if (!isUsed)
 			{
+        // first time used, load the local storage
 				loadCache(cache, connection);
 			}
+      increaseRefCount(key, connection.getId());
 			return result;
 		}
 	}
@@ -149,17 +152,21 @@ public class DbObjectCacheFactory
 		return ids.size();
 	}
 
-	private boolean isConnectionUsed(String key, String connectionId)
+	private void increaseRefCount(String key, String connectionId)
 	{
 		Set<String> ids = refCounter.get(key);
 		if (ids == null)
 		{
 			ids = new HashSet<>();
 			refCounter.put(key, ids);
-			ids.add(connectionId);
-			return false;
 		}
-		return ids.contains(connectionId);
+		ids.add(connectionId);
+	}
+
+	private boolean isCacheInUse(String key)
+	{
+		Set<String> ids = refCounter.get(key);
+    return CollectionUtil.isNonEmpty(ids);
 	}
 
 	private String makeKey(WbConnection connection)
