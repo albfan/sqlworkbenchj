@@ -215,7 +215,7 @@ class ObjectCache
 		TableIdentifier tbl = dbConn.getMetadata().findTable(table, false);
 		List<DependencyNode> referencing = referencingTables.get(tbl);
     if (referencing == null && dbConn.isBusy()) return Collections.emptyList();
-    
+
 		if (referencing == null)
 		{
 			TableDependency deps = new TableDependency(dbConn, tbl);
@@ -474,6 +474,7 @@ class ObjectCache
 		// nothing in the cache. We can only retrieve this from the database if the connection isn't busy
 		if (cols == null && dbConnection.isBusy())
 		{
+      LogMgr.logDebug("ObjectCache.getColumns()", "No columns found for table " + tbl.getTableExpression() + ", but connection " + dbConnection.getId() + " is busy.");
       return Collections.emptyList();
 		}
 
@@ -512,6 +513,7 @@ class ObjectCache
 
 			if (toSearch != null && CollectionUtil.isNonEmpty(cols))
 			{
+        LogMgr.logDebug("ObjectCache.getColumns()", "Adding columns for " + toSearch.getTableExpression() + " to cache");
 				this.objects.put(toSearch, cols);
 			}
 
