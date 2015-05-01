@@ -753,7 +753,7 @@ public class JEditTextArea
 
 		int charWidth = painter.getFontMetrics().charWidth('M');
 		int maxLineLength = getDocument().getMaxLineLength();
-		int maxLineWidth = (charWidth * maxLineLength) + this.painter.getGutterWidth() + 10;
+		int maxLineWidth = (charWidth * maxLineLength) + this.painter.getGutterWidth() + charWidth;
 		int width = painter.getWidth();
 		if (horizontal != null && width != 0)
 		{
@@ -776,21 +776,7 @@ public class JEditTextArea
 		}
 	}
 
-
-  public void ensureCaretIsVisible()
-  {
-    int line = getCaretLine();
-
-    if (visibleLines <= 0)
-    {
-      recalculateVisibleLines();
-    }
-
-    if (isLineVisible(line)) return;
-    centerLine(line);
-  }
-
-  public void centerLine(int line)
+  public void centerLine(final int line)
   {
     if (visibleLines <= 0)
     {
@@ -805,11 +791,16 @@ public class JEditTextArea
       newFirst = numLines - visibleLines;
     }
 
-    System.out.println("**** visible: " + visibleLines + ", numLines: " + numLines + ", line: " + line + ", newFirst: " + newFirst);
+    if (newFirst < 0)
+    {
+      newFirst = 0;
+    }
 
-    if (newFirst < 0) newFirst = 0;
     firstLine = newFirst;
+
+    updateScrollBars();
     validate();
+		painter.repaint();
   }
 
 	/**
@@ -828,10 +819,10 @@ public class JEditTextArea
 		setFirstLine(firstLine, true);
 	}
 
-	protected void setFirstLine(int firstLine, boolean updateScrollbar)
+	protected void setFirstLine(int newFirst, boolean updateScrollbar)
 	{
-		if (firstLine == this.firstLine) return;
-		this.firstLine = firstLine;
+		if (newFirst == this.firstLine) return;
+		firstLine = newFirst;
 
 		if (updateScrollbar && firstLine != vertical.getValue())
 		{
@@ -856,7 +847,8 @@ public class JEditTextArea
 	{
 		if (painter == null) return;
 
-		int height = painter.getHeight();
+		int height = painter != null ? painter.getHeight() : this.getHeight();
+    if (height <= 0) height = this.getHeight();
 		int lineHeight = painter.getFontMetrics().getHeight();
 		if (lineHeight == 0) return;
 
@@ -933,23 +925,23 @@ public class JEditTextArea
 	/**
 	 * A fast way of changing both the first line and horizontal
 	 * offset.
-	 * @param firstLine The new first line
-	 * @param horizontalOffset The new horizontal offset
+	 * @param newFirst The new first line
+	 * @param newLeft The new horizontal offset
 	 * @return True if any of the values were changed, false otherwise
 	 */
-	public boolean setOrigin(int firstLine, int horizontalOffset)
+	public boolean setOrigin(int newFirst, int newLeft)
 	{
 		boolean changed = false;
 
-		if (horizontalOffset != this.horizontalOffset)
+		if (newLeft != this.horizontalOffset)
 		{
-			this.horizontalOffset = horizontalOffset;
+			this.horizontalOffset = newLeft;
 			changed = true;
 		}
 
-		if (firstLine != this.firstLine)
+		if (newFirst != this.firstLine)
 		{
-			this.firstLine = firstLine;
+			this.firstLine = newFirst;
 			changed = true;
 		}
 
@@ -987,7 +979,6 @@ public class JEditTextArea
 		return firstLine + electricScroll <= line && line <= firstLine + visibleLines - electricScroll;
 	}
 
-	private int scrollRetries = 0;
 	/**
 	 * Ensures that the specified line and offset is visible by scrolling
 	 * the text area if necessary.
@@ -999,27 +990,7 @@ public class JEditTextArea
 	 */
 	public boolean scrollTo(final int line, final int offset)
 	{
-		if (visibleLines == 0)
-		{
-			scrollRetries ++;
-			// if the editor is very small (e.g. because it has been made so by the user),
-			// visibleLines might never be > 0. In order to avoid an "endless loop" an upper limit is applied
-			if (scrollRetries < 25)
-			{
-				// visibleLines might be 0 before the component is realized
-				// we can't do any proper scrolling, so we'll try again later
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						scrollTo(line, offset);
-					}
-				});
-			}
-			return false;
-		}
-		scrollRetries = 0;
+		if (visibleLines == 0) return false;
 
 		int newFirstLine = firstLine;
 		int newHorizontalOffset = horizontalOffset;
@@ -1526,7 +1497,7 @@ public class JEditTextArea
 			document.tokenizeLines();
 		}
 
-		if (isReallyVisible())
+		if (isVisible())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{

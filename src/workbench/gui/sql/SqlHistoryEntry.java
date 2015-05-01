@@ -22,6 +22,8 @@
  */
 package workbench.gui.sql;
 
+import java.awt.EventQueue;
+
 import workbench.log.LogMgr;
 
 import workbench.util.StringUtil;
@@ -102,25 +104,29 @@ public class SqlHistoryEntry
 		return this.selectionEnd;
 	}
 
-	public void applyTo(EditorPanel editor)
+	public void applyTo(final EditorPanel editor)
 	{
 		if (editor == null) return;
 		try
 		{
 			editor.setText(this.text);
-			if (this.cursorPos > -1)
-			{
-        editor.setCaretPosition(cursorPos);
-        editor.centerLine(editor.getCaretLine());
-			}
-      else
-      {
-        editor.setCaretPosition(0);
-      }
-			if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart && this.selectionEnd < editor.getDocumentLength())
+      if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart && this.selectionEnd < editor.getDocumentLength())
 			{
 				editor.select(this.selectionStart, this.selectionEnd);
 			}
+      else
+      {
+        editor.setCaretPosition(cursorPos > -1 ? cursorPos : 0);
+      }
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          int line = editor.getCaretLine();
+          editor.centerLine(line);
+        }
+      });
 		}
 		catch (Exception e)
 		{
