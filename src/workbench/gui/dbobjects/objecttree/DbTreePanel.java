@@ -450,7 +450,17 @@ public class DbTreePanel
   public void objectsDropped(List<DbObject> objects)
   {
     List<TreePath> nodes = tree.getExpandedNodes();
+
+    // removeObjects will reset any filter, so we need to re-apply it
+    // after the objects have been removed
+    boolean isFiltered = tree.getModel().getFilteredNodes().size() > 0;
+
     tree.getModel().removeObjects(objects);
+    
+    if (isFiltered)
+    {
+      applyQuickFilter();
+    }
     tree.expandNodes(nodes);
   }
 
