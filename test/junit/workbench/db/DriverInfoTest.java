@@ -25,10 +25,11 @@ package workbench.db;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.junit.*;
-import static org.junit.Assert.*;
-
 import workbench.WbTestCase;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -49,8 +50,8 @@ public class DriverInfoTest
 	{
 		WbConnection con = getTestUtil().getConnection();
 		DriverInfo info = new DriverInfo(con.getSqlConnection());
-		Map<String, String> infoMap = new TreeMap<String, String>(info.getInfoMap());
-		Map<String, String> expected = new TreeMap<String, String>();
+		Map<String, String> infoMap = new TreeMap<>(info.getInfoMap());
+		Map<String, String> expected = new TreeMap<>();
 		expected.put("defaultIsolationLevel", "READ COMMITTED");
 		expected.put("maxTableNameLength","0");
 		expected.put("maxTableNameLength","0");
@@ -96,6 +97,7 @@ public class DriverInfoTest
 		expected.put("storesLowerCaseQuotedIdentifiers", "false");
 		expected.put("identifierQuoteString", "\"");
 		expected.put("supportsAlterTableWithAddColumn", "true");
+		expected.put("supportsAlterTableWithDropColumn", "true");
 		expected.put("allTablesAreSelectable", "true");
 		expected.put("maxColumnNameLength", "0");
 		expected.put("procedureTerm", "procedure");
