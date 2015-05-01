@@ -489,7 +489,6 @@ public class SqlPanel
 			{
 				editor.setCaretPosition(offset);
         editor.centerLine(line);
-				editor.validate();
 				editor.requestFocusInWindow();
 			}
 		});
