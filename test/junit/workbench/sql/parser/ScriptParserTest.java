@@ -300,6 +300,13 @@ public class ScriptParserTest
 
 		p.setScript(";");
 		assertEquals(0, p.getSize());
+
+    // currently not working
+//    p.setScript(
+//      "select 1;\n" +
+//      "select 2;\n" +
+//      "-- delete foo;");
+//    assertEquals(2, p.getSize());
 	}
 
 	@Test
