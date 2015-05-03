@@ -22,9 +22,11 @@
  */
 package workbench.gui.sql;
 
+
 import java.awt.EventQueue;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.util.StringUtil;
 
@@ -105,6 +107,11 @@ public class SqlHistoryEntry
 	}
 
 	public void applyTo(final EditorPanel editor)
+  {
+    applyTo(editor, Settings.getInstance().getBoolProperty("workbench.gui.history.center", false));
+  }
+
+	public void applyTo(final EditorPanel editor, boolean centerLine)
 	{
 		if (editor == null) return;
 		try
@@ -118,15 +125,18 @@ public class SqlHistoryEntry
       {
         editor.setCaretPosition(cursorPos > -1 ? cursorPos : 0);
       }
-      EventQueue.invokeLater(new Runnable()
+      if (centerLine)
       {
-        @Override
-        public void run()
+        EventQueue.invokeLater(new Runnable()
         {
-          int line = editor.getCaretLine();
-          editor.centerLine(line);
-        }
-      });
+          @Override
+          public void run()
+          {
+            int line = editor.getCaretLine();
+            editor.centerLine(line);
+          }
+        });
+      }
 		}
 		catch (Exception e)
 		{

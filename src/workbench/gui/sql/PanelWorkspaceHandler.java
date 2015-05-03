@@ -102,7 +102,7 @@ public class PanelWorkspaceHandler
 		{
 			try
 			{
-				client.sqlHistory.showCurrent();
+        client.sqlHistory.showCurrent();
 			}
 			catch (Exception e)
 			{

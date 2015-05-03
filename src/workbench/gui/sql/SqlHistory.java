@@ -190,11 +190,11 @@ public class SqlHistory
 	}
 
 	public void showCurrent()
-	{
+  {
 		if (this.currentEntry >= this.history.size()) return;
 		if (!editor.isEditable()) return;
 		SqlHistoryEntry entry = this.history.get(this.currentEntry);
-		entry.applyTo(editor);
+		entry.applyTo(editor, true);
 		checkActions();
 	}
 
