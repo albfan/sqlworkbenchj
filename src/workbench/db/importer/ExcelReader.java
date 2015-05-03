@@ -44,7 +44,6 @@ import workbench.util.MessageBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
-import org.apache.poi.hssf.usermodel.HSSFDataFormatter;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -432,10 +431,6 @@ public class ExcelReader
 
   private java.util.Date getDateValue(Cell cell)
   {
-    HSSFDataFormatter formatter = new HSSFDataFormatter();
-    String strValue = formatter.formatCellValue(cell);
-    System.out.println("strValue: " + strValue);
-
     java.util.Date dtValue = null;
     try
     {
