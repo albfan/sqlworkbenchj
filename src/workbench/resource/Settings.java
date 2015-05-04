@@ -1268,12 +1268,14 @@ public class Settings
 
 	private Font getMonospacedFont(String property, boolean returnDefault)
 	{
+    boolean isDefault = false;
 		Font f = this.getFont(property);
 		if (f == null && returnDefault)
 		{
 			f = new Font("Monospaced", Font.PLAIN, 12);
+      isDefault = true;
 		}
-		if (getScaleFonts())
+		if (getScaleFonts() && isDefault)
 		{
 			FontScaler scaler = new FontScaler();
 			f = scaler.scaleFont(f);
@@ -1291,7 +1293,7 @@ public class Settings
 		return f;
 	}
 
-	 public Font getStandardFont()
+	 public Font getSnogtandardFont()
 	{
 		return this.getFont(PROPERTY_STANDARD_FONT);
 	}
