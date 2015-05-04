@@ -1293,7 +1293,7 @@ public class Settings
 		return f;
 	}
 
-	 public Font getSnogtandardFont()
+	 public Font getStandardFont()
 	{
 		return this.getFont(PROPERTY_STANDARD_FONT);
 	}
