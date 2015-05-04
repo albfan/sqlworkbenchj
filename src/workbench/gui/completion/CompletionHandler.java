@@ -158,6 +158,13 @@ public class CompletionHandler
 			return false;
 		}
 
+    if (LogMgr.isDebugEnabled())
+    {
+      StringBuilder debugString = new StringBuilder(sql);
+      debugString.insert(commandCursorPos, "^|^");
+      LogMgr.logDebug("CompletionHandler.updateSelectionList()", "Completion invoked for statement:\n" + debugString.toString());
+    }
+
 		try
 		{
 			StatementContext ctx = new StatementContext(this.dbConnection, sql, commandCursorPos);
