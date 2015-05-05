@@ -722,7 +722,7 @@ public class SqlCommand
 			{
 				// Some drivers do not support getMoreResults() properly.
 				// So, this exception is simply ignored, so that processing can proceed normally
-				LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", th);
+				LogMgr.logWarning("SqlCommand.processResults()", "Error when calling getMoreResults()", th);
 				break;
 			}
 

@@ -1228,7 +1228,10 @@ public class SqlPanel
 				@Override
 				public void run()
 				{
-					currentData.getTable().requestFocusInWindow();
+          if (currentData != null)
+          {
+            currentData.getTable().requestFocusInWindow();
+          }
 				}
 			});
 		}
