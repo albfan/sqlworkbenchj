@@ -19,6 +19,7 @@
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
     <entry dev-build="2" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
+    <entry dev-build="5" type="fix">The SQL source for inherited tables in Postgres was not generated correctly.</entry>
     <entry dev-build="4" type="fix">The SQL source for sequences for SQL Server was not generated correctly.</entry>
     <entry dev-build="4" type="fix">"Create DDL script" in the DbExplorer would generate the source code for sequnces twice</entry>
     <entry dev-build="4" type="fix">Nano (or micro) seconds from timestamp values where not displayed correctly</entry>

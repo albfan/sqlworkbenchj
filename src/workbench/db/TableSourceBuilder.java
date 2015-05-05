@@ -584,6 +584,10 @@ public class TableSourceBuilder
 			if (type == null) type = "";
 
 			result.append(indent);
+      if (column.isInherited())
+      {
+        result.append("-- inherited: ");
+      }
 			result.append(quotedColName);
 
 			for (int k=0; k < maxColLength - quotedColName.length(); k++)
@@ -595,7 +599,8 @@ public class TableSourceBuilder
 			result.append(coldef);
 			if (itr.hasNext())
 			{
-				result.append(",\n");
+        if (!column.isInherited()) result.append(',');
+				result.append('\n');
 			}
 		}
 	}

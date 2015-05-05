@@ -89,6 +89,11 @@ public class ColumnIdentifier
 	 */
 	private int pgStorage;
 
+  /**
+   * Used to identify inherited columns in a table
+   */
+  private boolean inherited;
+
 	private int displaySize = -1;
 
 	/** The position of the column in the table or result set */
@@ -129,6 +134,16 @@ public class ColumnIdentifier
 	{
 		return pgStorage;
 	}
+
+  public boolean isInherited()
+  {
+    return inherited;
+  }
+
+  public void setInherited(boolean flag)
+  {
+    this.inherited = flag;
+  }
 
 	/**
 	 * Returns the SQL for a constraint defined on this column.

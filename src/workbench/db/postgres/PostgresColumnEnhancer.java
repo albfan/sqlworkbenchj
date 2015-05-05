@@ -153,11 +153,6 @@ public class PostgresColumnEnhancer
 			"  and ns.nspname = ? \n" +
 			"  and att.attndims > 0";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("PostgresColumnEnhancer.updateArrayTypes()", "PostgresColumnEnhancer using SQL=\n" + SqlUtil.replaceParameters(sql, table.getTable().getTableName(), table.getTable().getSchema()));
-		}
-
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
@@ -168,6 +163,10 @@ public class PostgresColumnEnhancer
 			stmt = conn.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, table.getTable().getTableName());
 			stmt.setString(2, table.getTable().getSchema());
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("PostgresColumnEnhancer.updateArrayTypes()", "Retrieving array information using SQL=\n" + stmt.toString());
+      }
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
@@ -180,7 +179,7 @@ public class PostgresColumnEnhancer
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("PostgresColumnEnhancer.updateArrayTypes()", "Could not read column collations", ex);
+			LogMgr.logError("PostgresColumnEnhancer.updateArrayTypes()", "Could not read array information using:\n" + stmt.toString(), ex);
 		}
 		finally
 		{
@@ -209,7 +208,8 @@ public class PostgresColumnEnhancer
 			"       case  \n" +
 			"          when att.attlen = -1 then att.attstorage \n" +
 			"          else null \n" +
-			"       end as attstorage \n" +
+			"       end as attstorage, \n" +
+			"       attinhcount \n" +
 			"from pg_attribute att  \n" +
 			"  join pg_class tbl on tbl.oid = att.attrelid   \n" +
 			"  join pg_namespace ns on tbl.relnamespace = ns.oid   \n" +
@@ -218,22 +218,24 @@ public class PostgresColumnEnhancer
 			"  and ns.nspname = ? \n" +
 			"  and not att.attisdropped";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("PostgresColumnEnhancer.readCollations()", "Retrieving column information using SQL=\n" + sql);
-		}
-
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, table.getTable().getTableName());
 			stmt.setString(2, table.getTable().getSchema());
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("PostgresColumnEnhancer.readCollations()", "Retrieving column information using SQL=\n" + stmt.toString());
+      }
+
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
 				String colname = rs.getString(1);
 				String collation = rs.getString(2);
 				String storage = rs.getString(3);
+        int ancestorCount = rs.getInt(4);
+
 				ColumnIdentifier col = table.findColumn(colname);
 				if (col == null) continue;
 
@@ -242,6 +244,8 @@ public class PostgresColumnEnhancer
 					col.setCollation(collation);
 					col.setCollationExpression(" COLLATE \"" + collation + "\"");
 				}
+
+        col.setInherited(ancestorCount > 0);
 
 				if (storage != null && !storage.isEmpty())
 				{
@@ -265,7 +269,7 @@ public class PostgresColumnEnhancer
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("PostgresColumnEnhancer.readColumnInfo()", "Could not read column collations", ex);
+			LogMgr.logError("PostgresColumnEnhancer.readColumnInfo()", "Could not read column information using: " + stmt.toString(), ex);
 		}
 		finally
 		{

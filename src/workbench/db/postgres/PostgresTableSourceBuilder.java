@@ -64,7 +64,7 @@ public class PostgresTableSourceBuilder
 		super(con);
 	}
 
-	@Override
+  @Override
 	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		ObjectSourceOptions option = table.getSourceOptions();
@@ -245,7 +245,7 @@ public class PostgresTableSourceBuilder
 			pstmt.setString(2, table.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.readInherits()", "Using sql: " + pstmt.toString());
+				LogMgr.logDebug("PostgresTableSourceBuilder.readInherits()", "Reading parent tables using:\n" + pstmt);
 			}
 			rs = pstmt.executeQuery();
 			if (rs.next())
@@ -272,7 +272,7 @@ public class PostgresTableSourceBuilder
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.readInherits()", "Error retrieving table inheritance", e);
+			LogMgr.logError("PostgresTableSourceBuilder.readInherits()", "Error retrieving table inheritance using:\n" + pstmt, e);
 			return null;
 		}
 		finally
@@ -305,6 +305,12 @@ public class PostgresTableSourceBuilder
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, table.getTableName());
 			stmt.setString(2, table.getSchema());
+
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("PostgresTableSourceBuilder.readForeignTableOptions()", "Retrieving table options using:\n" + stmt);
+			}
+
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{
@@ -333,7 +339,7 @@ public class PostgresTableSourceBuilder
 		{
 			dbConnection.rollback(sp);
 			sp = null;
-			LogMgr.logError("PostgresTableSourceBuilder.getForeignTableOptions()", "Could not retrieve table options", ex);
+			LogMgr.logError("PostgresTableSourceBuilder.readForeignTableOptions()", "Could not retrieve table options using:\n" + stmt, ex);
 		}
 		finally
 		{
@@ -412,7 +418,7 @@ public class PostgresTableSourceBuilder
 		if (columnType == Types.NUMERIC && storage == PostgresColumnEnhancer.STORAGE_MAIN) return true;
 		return storage == PostgresColumnEnhancer.STORAGE_EXTENDED;
 	}
-	
+
 	private String getOwnerSql(TableIdentifier table)
 	{
 		DbSettings.GenerateOwnerType genType = dbConnection.getDbSettings().getGenerateTableOwner();
@@ -469,7 +475,7 @@ public class PostgresTableSourceBuilder
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logWarning("PostgresTableSourceBuilder.getColumnSequenceInformation()", "Error reading sequence info", e);
+			LogMgr.logWarning("PostgresTableSourceBuilder.getColumnSequenceInformation()", "Error reading sequence information", e);
 		}
 		finally
 		{
@@ -587,7 +593,7 @@ public class PostgresTableSourceBuilder
 			pstmt.setString(2, table.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.getChildTables()", "Using sql: " + pstmt.toString());
+				LogMgr.logDebug("PostgresTableSourceBuilder.getChildTables()", "Retrieving child tables using:\n" + pstmt.toString());
 			}
 			rs = pstmt.executeQuery();
 			int count = 0;
