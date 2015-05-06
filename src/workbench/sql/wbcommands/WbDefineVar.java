@@ -63,6 +63,7 @@ public class WbDefineVar
 	extends SqlCommand
 {
 	public static final String VERB = "WbVarDef";
+	public static final String ALTERNATE_VERB = "WbDefineVar";
 	public static final String ARG_LOOKUP_VALUES = "values";
 	public static final String ARG_REMOVE_UNDEFINED = "removeUndefined";
 	public static final String ARG_REPLACE_VARS = "replaceVars";
@@ -92,6 +93,12 @@ public class WbDefineVar
 	{
 		return VERB;
 	}
+
+  @Override
+  public String getAlternateVerb()
+  {
+    return ALTERNATE_VERB;
+  }
 
 	@Override
 	protected boolean isConnectionRequired()

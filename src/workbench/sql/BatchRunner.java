@@ -906,7 +906,7 @@ public class BatchRunner
 					executedCount ++;
 				}
 
-				if (this.showTiming && showStatementTiming && !consolidateMessages)
+				if (this.showTiming && showStatementTiming && !consolidateMessages && result != null)
 				{
 					this.printMessage(result.getTimingMessage());
 				}
