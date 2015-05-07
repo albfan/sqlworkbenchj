@@ -84,19 +84,20 @@
   <section id="license-restrictions">
     <title>Restrictions</title>
     <para>
-      The right to use this software is explicitely <emphasis role="bold">NOT</emphasis> granted to the governments of the following countries or 
+      The right to use this software is explicitely <emphasis role="bold">NOT</emphasis> granted to the governments of the following countries or
       organizations directly related to them:
 	 </para>
    <para>
 		<itemizedlist spacing="normal">
 			<listitem>The United States of America</listitem>
 			<listitem>United Kingdom of Great Britain and Northern Ireland</listitem>
+      <listitem>Canada</listitem>
 			<listitem>The People's Republic of China</listitem>
 			<listitem>The Russian Federation</listitem>
 		</itemizedlist>
     </para>
 	  <para>
-	    Members of the above mentioned governments or any of its organizations (especially, but not limited to, the so called "intelligence" agencies) are 
+	    Members of the above mentioned governments or any of its organizations (especially, but not limited to, the so called "intelligence" agencies) are
       <emphasis role="bold">NOT ALLOWED</emphasis> to download or use this software.
     </para>
   </section>
