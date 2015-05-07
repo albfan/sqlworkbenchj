@@ -33,7 +33,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
@@ -331,14 +331,14 @@ public class SelectAnalyzer
 							result = NO_JOIN_ON;
 						}
 					}
-					else if (SqlFormatter.FROM_TERMINAL.contains(t))
+					else if (WbSqlFormatter.FROM_TERMINAL.contains(t))
 					{
 						return result;
 					}
 				}
 				else
 				{
-					if (SqlFormatter.FROM_TERMINAL.contains(t)) break;
+					if (WbSqlFormatter.FROM_TERMINAL.contains(t)) break;
 					if (t.equals("FROM"))
 					{
 						if (cursorPos < token.getCharBegin()) return NO_JOIN_ON;

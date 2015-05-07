@@ -24,12 +24,12 @@ package workbench.gui.editor;
 
 import workbench.interfaces.SqlTextContainer;
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.SqlFormatterFactory;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
@@ -75,6 +75,9 @@ public class TextFormatter
 		StringBuilder newSql = new StringBuilder(sql.length() + 100);
 		boolean needDelimiter = false;
 		boolean addNewLine = false;
+
+    SqlFormatter f = SqlFormatterFactory.createFormatter(dbId);
+
 		for (int i=0; i < count; i++)
 		{
 			String command = parser.getCommand(i);
@@ -98,11 +101,9 @@ public class TextFormatter
 
 			addNewLine = (i < count);
 
-			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength(), dbId);
-
 			try
 			{
-				String formattedSql = f.getFormattedSql();
+				String formattedSql = f.getFormattedSql(command);
 				newSql.append(formattedSql.trim());
 				if (needDelimiter && !isEmpty)
 				{

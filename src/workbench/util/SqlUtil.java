@@ -56,7 +56,7 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 
 import workbench.sql.ErrorDescriptor;
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
@@ -803,7 +803,7 @@ public class SqlUtil
 					bracketCount --;
 				}
 				else if ( (bracketCount == 0 || (ignoreFirstBracket && bracketCount == 1))
-					&& (",".equals(v) || SqlFormatter.SELECT_TERMINAL.contains(v)))
+					&& (",".equals(v) || WbSqlFormatter.SELECT_TERMINAL.contains(v)))
 				{
 					String col = select.substring(lastColStart, t.getCharBegin());
 
@@ -824,7 +824,7 @@ public class SqlUtil
 					}
 					result.add(new ElementInfo(col, lastColStart, t.getCharBegin()));
 
-					if (SqlFormatter.SELECT_TERMINAL.contains(v))
+					if (WbSqlFormatter.SELECT_TERMINAL.contains(v))
 					{
 						nextIsCol = false;
 						lastColStart = -1;

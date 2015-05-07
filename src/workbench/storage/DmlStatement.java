@@ -52,7 +52,7 @@ import workbench.db.DmlExpressionBuilder;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.WbSqlFormatter;
 
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
@@ -462,7 +462,7 @@ public class DmlStatement
 
 		if ((isInsert && formatInserts) || (isUpdate && formatUpdates) || (isDelete && formatDeletes))
 		{
-			SqlFormatter f = new SqlFormatter(toUse, con == null ? null : con.getDbId());
+			WbSqlFormatter f = new WbSqlFormatter(toUse, con == null ? null : con.getDbId());
 			if (con != null)
 			{
 				f.setCatalogSeparator(con.getMetadata().getCatalogSeparator());

@@ -53,7 +53,7 @@ import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
 import workbench.storage.SqlLiteralFormatter;
 
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
@@ -307,7 +307,7 @@ public class DeleteScriptGenerator
 
 		try
 		{
-			SqlFormatter f = new SqlFormatter(sql, Settings.getInstance().getFormatterMaxSubselectLength(), connection.getDbId());
+			WbSqlFormatter f = new WbSqlFormatter(sql, Settings.getInstance().getFormatterMaxSubselectLength(), connection.getDbId());
 			String formatted = f.getFormattedSql() + "\n";
 			return formatted;
 		}

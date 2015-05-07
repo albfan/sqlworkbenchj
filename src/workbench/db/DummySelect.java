@@ -28,7 +28,7 @@ import java.util.List;
 
 import workbench.resource.Settings;
 
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.WbSqlFormatter;
 
 import workbench.util.StringUtil;
 
@@ -156,7 +156,7 @@ public class DummySelect
 		sql.append(';');
 		sql.append(nl);
 
-		SqlFormatter formatter = new SqlFormatter(sql, con.getDbId());
+		WbSqlFormatter formatter = new WbSqlFormatter(sql, con.getDbId());
 		try
 		{
 			return formatter.getFormattedSql();

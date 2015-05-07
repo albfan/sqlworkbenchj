@@ -30,7 +30,7 @@ import workbench.sql.parser.ParserType;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.WbSqlFormatter;
 
 /**
  *
@@ -119,7 +119,7 @@ public class SqlParsingUtil
 		if (fromPos == -1) return null;
 		fromPos += "FROM".length();
 		if (fromPos >= sql.length()) return null;
-		int fromEnd = getKeywordPosition(SqlFormatter.FROM_TERMINAL, sql, fromPos, sqlLexer);
+		int fromEnd = getKeywordPosition(WbSqlFormatter.FROM_TERMINAL, sql, fromPos, sqlLexer);
 		if (fromEnd == -1)
 		{
 			return sql.substring(fromPos);

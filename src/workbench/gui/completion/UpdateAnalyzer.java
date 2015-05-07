@@ -31,7 +31,7 @@ import workbench.db.WbConnection;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.WbSqlFormatter;
 
 import workbench.util.SqlUtil;
 import workbench.util.TableAlias;
@@ -97,7 +97,7 @@ public class UpdateAnalyzer
 					state = IN_SET;
 				}
 			}
-			else if (SqlFormatter.SET_TERMINAL.contains(t.getContents()))
+			else if (WbSqlFormatter.SET_TERMINAL.contains(t.getContents()))
 			{
 				if (cursorPos > t.getCharEnd())
 				{
@@ -159,7 +159,7 @@ public class UpdateAnalyzer
 
 			if (inColumns)
 			{
-				if (SqlFormatter.SET_TERMINAL.contains(text))
+				if (WbSqlFormatter.SET_TERMINAL.contains(text))
 				{
 					nextIsColumn = true;
 					ColumnInfo last = (result.size() > 0 ? result.get(result.size()-1) : null);

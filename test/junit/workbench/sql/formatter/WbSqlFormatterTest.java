@@ -1,5 +1,5 @@
 /*
- * SqlFormatterTest.java
+ * WbSqlFormatterTest.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -39,10 +39,10 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class SqlFormatterTest
+public class WbSqlFormatterTest
 	extends WbTestCase
 {
-	public SqlFormatterTest()
+	public WbSqlFormatterTest()
 	{
 		super("SqlFormatterTest");
 	}
@@ -52,7 +52,7 @@ public class SqlFormatterTest
   public void testIndentWhere()
   {
     String sql = "select * from foo where x = 1 and y = 2;";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
     f.setIndentWhereCondition(true);
@@ -70,7 +70,7 @@ public class SqlFormatterTest
   public void testCreateIndex()
   {
     String sql = "create index idx_foo on bar (case when some_col is null then 1 else some_col end, \"other_col\")";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -85,7 +85,7 @@ public class SqlFormatterTest
   public void testFormatView()
   {
     String sql = "create view foo (col_1, \"Some Column\") as select dummy, 'Arthur' as \"Some Column\" from dual;";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -102,7 +102,7 @@ public class SqlFormatterTest
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
 
-		f = new SqlFormatter(sql, 150);
+		f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
     f.setCommaAfterLineBreak(true);
@@ -120,7 +120,7 @@ public class SqlFormatterTest
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
 
-		f = new SqlFormatter(sql, 150);
+		f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
     f.setCommaAfterLineBreak(true);
@@ -147,7 +147,7 @@ public class SqlFormatterTest
 			"-- select a,\n" +
 			"--        b,\n" +
 			"-- from foo";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -158,7 +158,7 @@ public class SqlFormatterTest
 	public void testNestedCase()
 	{
 		String sql = "select one, case when x = 1 then case when y = 1 then 1 when y = 2 then 4 end else 6 end as some_col from foo";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -185,7 +185,7 @@ public class SqlFormatterTest
 			"select one, \n" +
 			"       -- comment \n " +
 			"       two, three, four from some_table t";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -201,7 +201,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select one /* comment */, two from foo";
-		f = new SqlFormatter(sql, 150);
+		f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		formatted = f.getFormattedSql();
@@ -213,7 +213,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select one, /* comment */ two from foo";
-		f = new SqlFormatter(sql, 150);
+		f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		formatted = f.getFormattedSql();
@@ -231,7 +231,7 @@ public class SqlFormatterTest
 			"       two\n" +
 			"from bar\n" +
 			") as t;";
-		f = new SqlFormatter(sql, 1);
+		f = new WbSqlFormatter(sql, 1);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		f.setNewLineForSubselects(true);
@@ -252,7 +252,7 @@ public class SqlFormatterTest
 	public void testAllCols()
 	{
 		String sql = "select t.* from some_table t";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -269,7 +269,7 @@ public class SqlFormatterTest
 	{
 		String sql =
 			"merge into foobar using (select a,b,c from foo join bar using (x)) t on (t.a = foobar.x) when matched then update set y = t.b, z = t.c when not matched then insert (x,y,z) values (t.a, t.b, t.c);";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setColumnsPerInsert(5);
 		String formatted = f.getFormattedSql();
 		String expected =
@@ -302,7 +302,7 @@ public class SqlFormatterTest
 			"from table1 t1\n" +
 			"  left outer join table2 t2 on t1.id = t2.id and t2.foo in (1,2), tabelle3\n" +
 			"where x=42";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT *\n" +
@@ -319,7 +319,7 @@ public class SqlFormatterTest
 	public void testNestedSelectExpression()
 	{
 		String sql = "select limit 1 (select count(*) from table1) + (select count(*) from table2) from foobar";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT limit 1 (SELECT COUNT(*) FROM table1) +(SELECT COUNT(*) FROM table2)\n" +
@@ -328,7 +328,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		String sql2 = "select (select count(*) from foo) + (select count(*) from bar) from foobar where id=42";
-		SqlFormatter f2 = new SqlFormatter(sql2, 150);
+		WbSqlFormatter f2 = new WbSqlFormatter(sql2, 150);
 		String formatted2 = f2.getFormattedSql();
 		String expected2 =
 			"SELECT (SELECT COUNT(*) FROM foo) +(SELECT COUNT(*) FROM bar)\n" +
@@ -345,7 +345,7 @@ public class SqlFormatterTest
 			"SELECT a,  \n" +
 			"       (foo(a) - foo(b)) as total \n" +
 			"FROM foobar";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
@@ -360,7 +360,7 @@ public class SqlFormatterTest
 	public void testNVarcharLiteral()
 	{
 		String sql = "insert into foo (col) values (N'bar')";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		assertTrue(formatted.contains("N'bar'"));
 	}
@@ -369,7 +369,7 @@ public class SqlFormatterTest
 	public void testSqlServer()
 	{
 		String sql = "select * from foo join bar on foo.id = bar.id outer apply fn_foo (bar.id) st";
-		SqlFormatter f = new SqlFormatter(sql, 150, "microsoft_sql_server");
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150, "microsoft_sql_server");
 		f.setColumnsPerInsert(1);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
@@ -387,7 +387,7 @@ public class SqlFormatterTest
 	public void testNestedSelect()
 	{
 		String sql = "select 1, (select foo from bar where bar.id = foobar.id) as foo, col2, col3 from foobar";
-		SqlFormatter f = new SqlFormatter(sql, 150);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setColumnsPerInsert(1);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -414,7 +414,7 @@ public class SqlFormatterTest
 			"       end col1, " +
 			"       col2\n" +
 			"from foobar";
-		SqlFormatter f = new SqlFormatter(sql, 10);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 10);
 		f.setColumnsPerInsert(1);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -442,7 +442,7 @@ public class SqlFormatterTest
 			"       col2, \n" +
 			"\n" +
 			"       col3 from foo";
-		SqlFormatter f = new SqlFormatter(sql, 10);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 10);
 		f.setColumnsPerInsert(1);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -467,7 +467,7 @@ public class SqlFormatterTest
 			")\n" +
 			"select 1,2,3,4 \n"  +
 			"from someTable";
-		SqlFormatter f = new SqlFormatter(sql, 10);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 10);
 		f.setColumnsPerInsert(1);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -493,7 +493,7 @@ public class SqlFormatterTest
 	public void testHaving()
 	{
 		String sql = "select b.id from bar b group by b.groupid having count(*) = (select count(*) from foo f where f.id = b.groupid);";
-		SqlFormatter f = new SqlFormatter(sql, 10);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 10);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
@@ -508,7 +508,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select b.id from bar b group by b.groupid having count(*) = 2";
-		f = new SqlFormatter(sql, 10);
+		f = new WbSqlFormatter(sql, 10);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		formatted = f.getFormattedSql();
 		expected =
@@ -521,7 +521,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select b.id from bar b group by b.groupid having count(distinct id) = 2 and count(foo) = 42";
-		f = new SqlFormatter(sql, 10);
+		f = new WbSqlFormatter(sql, 10);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		formatted = f.getFormattedSql();
 		expected =
@@ -540,7 +540,7 @@ public class SqlFormatterTest
 	public void testGrant()
 	{
 		String sql = "grant insert,select,update on foobar to arthur;";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"GRANT INSERT, SELECT, UPDATE\n" +
@@ -550,7 +550,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "revoke insert,update on foobar from public;";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected =
 			"REVOKE INSERT, UPDATE\n" +
@@ -564,21 +564,21 @@ public class SqlFormatterTest
 	public void testNumericLiterals()
 	{
 		String sql = "select * from foo where bar = -1";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT *\nFROM foo\nWHERE bar = -1";
 		//System.out.println(formatted);
 		assertEquals(expected, formatted);
 
 		sql = "select * from foo where bar = +1";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected = "SELECT *\nFROM foo\nWHERE bar = +1";
 		//System.out.println(formatted);
 		assertEquals(expected, formatted);
 
 		sql = "select * from foo where bar < -1.5";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected = "SELECT *\nFROM foo\nWHERE bar < -1.5";
 		//System.out.println(formatted);
@@ -589,7 +589,7 @@ public class SqlFormatterTest
 	public void testJDBCEscapes()
 	{
 		String sql = "insert into test (some_col) values ( {d '2011-01-01'})";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected = "INSERT INTO test\n(\n  some_col\n)\nVALUES\n(\n  {d '2011-01-01'}\n)";
 		assertEquals(expected, formatted);
@@ -599,7 +599,7 @@ public class SqlFormatterTest
 	public void testAlternateSeparator()
 	{
 		String sql = "select * from mylib/sometable";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.setCatalogSeparator('/');
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT *\nFROM mylib/sometable";
@@ -610,26 +610,26 @@ public class SqlFormatterTest
 	public void testLobParameter()
 	{
 		String sql = "insert into test (some_col) values ( {$blobfile='/temp/picture.jpg'})";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected = "INSERT INTO test\n(\n  some_col\n)\nVALUES\n(\n  {$blobfile='/temp/picture.jpg'}\n)";
 		assertEquals(expected, formatted);
 
 		sql = "insert into test (some_col) values ( {$clobfile=/temp/picture.txt encoding='UTF-8'})";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected = "INSERT INTO test\n(\n  some_col\n)\nVALUES\n(\n  {$clobfile=/temp/picture.txt encoding='UTF-8'}\n)";
 		assertEquals(expected, formatted);
 
 		sql = "update some_table set some_col = {$clobfile=/temp/picture.txt encoding='UTF-8'} where id = 42";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 //		System.out.println(formatted);
 		expected = "UPDATE some_table\n   SET some_col = {$clobfile=/temp/picture.txt encoding='UTF-8'}\nWHERE id = 42";
 		assertEquals(expected, formatted);
 
 		sql = "update some_table set some_col = {$blobfile=?} where id = ?";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 //		System.out.println(formatted);
 		expected = "UPDATE some_table\n   SET some_col = {$blobfile=?}\nWHERE id = ?";
@@ -641,7 +641,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "CREATE TABLE [DDD]( [Id] [int] NOT NULL, [DayId] [int] NOT NULL, [MonthId] [int] NOT NULL, [YearId] [int] NOT NULL, [D1] [datetime] NOT NULL, [D2] [datetime] NOT NULL, [D3] [date] NOT NULL, [D4] [date] NOT NULL, [D5] [time](7) NOT NULL, [D6] [smalldatetime] NULL, CONSTRAINT [PK_DDD] PRIMARY KEY CLUSTERED ( [Id] ASC ))";
-		SqlFormatter f = new SqlFormatter(sql, "microsoft_sql_server");
+		WbSqlFormatter f = new WbSqlFormatter(sql, "microsoft_sql_server");
 		String formatted = f.getFormattedSql();
 		String expected =
 				"CREATE TABLE [DDD] \n" +
@@ -662,7 +662,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "CREATE TABLE [dbo].[DDD]( [Id] [int] NOT NULL, [DayId] [int] NOT NULL, [MonthId] [int] NOT NULL, [YearId] [int] NOT NULL, [D1] [datetime] NOT NULL, [D2] [datetime] NOT NULL, [D3] [date] NOT NULL, [D4] [date] NOT NULL, [D5] [time](7) NOT NULL, [D6] [smalldatetime] NULL, CONSTRAINT [PK_DDD] PRIMARY KEY CLUSTERED ( [Id] ASC ))";
-		f = new SqlFormatter(sql, "microsoft_sql_server");
+		f = new WbSqlFormatter(sql, "microsoft_sql_server");
 		formatted = f.getFormattedSql();
 		expected =
 				"CREATE TABLE [dbo].[DDD] \n" +
@@ -684,7 +684,7 @@ public class SqlFormatterTest
 
 		sql =
 		"select this_field,that_field,[a field With Select In the name] from user_dept_screen where user_id = 'a-user'";
-		f = new SqlFormatter(sql, "microsoft_sql_server");
+		f = new WbSqlFormatter(sql, "microsoft_sql_server");
 		formatted = f.getFormattedSql();
 //		System.out.println("----------\n" + formatted + "\n-------------------");
 		expected =
@@ -716,7 +716,7 @@ public class SqlFormatterTest
 			"  c   INT AS (a MOD 10) virtual,\n" +
 			"  d   VARCHAR(5) AS (LEFT(b,5)) persistent\n" +
 			")";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("LEFT"));
 		String formatted = f.getFormattedSql();
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
@@ -730,7 +730,7 @@ public class SqlFormatterTest
 		String sql = "INSERT INTO test (id, wert) VALUES ( uuid(), 1)";
 		String expected = "INSERT INTO test\n  (id, wert)\nVALUES\n  (uuid(), 1)";
 
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		int cols = Settings.getInstance().getFormatterMaxColumnsInInsert();
 		try
 		{
@@ -750,7 +750,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select * from test";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT *\n" +
@@ -758,14 +758,14 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select * from test;";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected =
 			"SELECT *\n" +
 			"FROM test;";
 		assertEquals(expected, formatted);
 
-		f = new SqlFormatter("select");
+		f = new WbSqlFormatter("select");
 		assertEquals("SELECT", 	f.getFormattedSql());
 	}
 
@@ -774,7 +774,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select * from my_table where birthday = date'1950-05-06'";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT *\n" +
@@ -783,7 +783,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "insert into some_table (id, created_at) values (1, timestamp      '2011-12-13 01:02:03')";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected =
 			"INSERT INTO some_table\n" +
@@ -805,7 +805,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select * from table1, table2 where table1.col1 = table2.col1 and table1.col3 in (1,2,3,4,5)";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.setCommaAfterLineBreak(false);
 		String expected =
 				"SELECT *\n"+
@@ -815,7 +815,7 @@ public class SqlFormatterTest
 				"AND   table1.col3 IN (1,2,3,4,5)";
 		String formatted = f.getFormattedSql().trim();
 		assertEquals(expected, formatted);
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		f.setCommaAfterLineBreak(true);
 		formatted = f.getFormattedSql().trim();
 		expected =
@@ -825,7 +825,7 @@ public class SqlFormatterTest
 				"WHERE table1.col1 = table2.col1\n"+
 				"AND   table1.col3 IN (1,2,3,4,5)";
 		assertEquals(expected, formatted);
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		f.setCommaAfterLineBreak(true);
 		f.setAddSpaceAfterLineBreakComma(true);
 		formatted = f.getFormattedSql().trim();
@@ -843,7 +843,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select * from table1 join table2 on table1.col1 = table2.col1 and table1.col3 in (1,2,3,4,5)";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String expected =
 			"SELECT *\n" +
 			"FROM table1\n"+
@@ -860,7 +860,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select case when a is null then b else c end as some_col, other_col from foo";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.setCommaAfterLineBreak(false);
 		String expected =
 			"SELECT CASE\n" +
@@ -872,7 +872,7 @@ public class SqlFormatterTest
 		String formatted = f.getFormattedSql();
 //		System.out.println("***** result:\n" + formatted + "\n--------- expected:\n" + expected);
 		assertEquals(expected, formatted);
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		f.setCommaAfterLineBreak(true);
 		formatted = f.getFormattedSql();
 		expected =
@@ -890,7 +890,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select case when 1 then 2 when 2 then 3 end some_col from foo";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.setCommaAfterLineBreak(false);
 		String expected =
 			"SELECT CASE\n" +
@@ -903,7 +903,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select 1, case when 1 then 2 when 2 then 3 end some_col from foo";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		expected =
 			"SELECT 1,\n" +
 			"       CASE\n" +
@@ -916,7 +916,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select 1, case when 1 then 2 when 2 then 3 end from foo";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		expected =
 			"SELECT 1,\n" +
 			"       CASE\n" +
@@ -939,7 +939,7 @@ public class SqlFormatterTest
 		try
 		{
 			String sql = "select col1, col2, col3, col4, col5 from some_table;";
-			SqlFormatter f = new SqlFormatter(sql);
+			WbSqlFormatter f = new WbSqlFormatter(sql);
 			f.setCommaAfterLineBreak(true);
 			Settings.getInstance().setFormatterMaxColumnsInSelect(1);
 			String formatted = f.getFormattedSql();
@@ -952,7 +952,7 @@ public class SqlFormatterTest
 				"FROM some_table;";
 			assertEquals(expected, formatted);
 
-			f = new SqlFormatter(sql);
+			f = new WbSqlFormatter(sql);
 			f.setCommaAfterLineBreak(true);
 			f.setAddSpaceAfterLineBreakComma(true);
 			Settings.getInstance().setFormatterMaxColumnsInSelect(1);
@@ -967,7 +967,7 @@ public class SqlFormatterTest
 			assertEquals(expected, formatted);
 
 			Settings.getInstance().setFormatterMaxColumnsInSelect(3);
-			f = new SqlFormatter(sql);
+			f = new WbSqlFormatter(sql);
 			f.setCommaAfterLineBreak(true);
 			formatted = f.getFormattedSql();
 			expected =
@@ -996,7 +996,7 @@ public class SqlFormatterTest
              "       ) \n" +
              "from fact_eventplayerdamage f \n";
 
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT id,\n" +
              "       (SELECT SUM(damage)\n" +
@@ -1014,7 +1014,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select foo from (select id, foo from some_table where some_flag) t where id > 1";
-		SqlFormatter f = new SqlFormatter(sql, 10);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 10);
 		f.setNewLineForSubselects(true);
 		String formatted = f.getFormattedSql();
 		String expected =
@@ -1030,7 +1030,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select foo from (select id, foo from (select nr as id, bar as foo from foobar where some_flag) x where nr > 0)  t where id > 1";
-		f = new SqlFormatter(sql, 10);
+		f = new WbSqlFormatter(sql, 10);
 		f.setNewLineForSubselects(true);
 		formatted = f.getFormattedSql();
 		expected =
@@ -1051,7 +1051,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select foo from some_table where id in (select id from other_table)";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		f.setNewLineForSubselects(true);
 		formatted = f.getFormattedSql();
 		expected =
@@ -1062,7 +1062,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select * from ( select x from ( select y from (select z from foo) a ) b) c";
-		f = new SqlFormatter(sql, 5);
+		f = new WbSqlFormatter(sql, 5);
 		f.setNewLineForSubselects(true);
 		formatted = f.getFormattedSql();
 		expected =
@@ -1090,7 +1090,7 @@ public class SqlFormatterTest
 			"           y\n" +
 			"    FROM some_table\n" +
 			"  ) t2 ON t1.x = t2.x";
-		f = new SqlFormatter(sql, 5);
+		f = new WbSqlFormatter(sql, 5);
 		f.setNewLineForSubselects(true);
 		formatted = f.getFormattedSql();
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
@@ -1101,7 +1101,7 @@ public class SqlFormatterTest
 	public void testColumnComments()
 	{
 		String sql = "insert into foobar (id, foo, bar) values (42, 'arthur''s house', 'dent');";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.setAddColumnNameComment(true);
 		f.setColumnsPerInsert(1);
 		String formatted = f.getFormattedSql();
@@ -1121,7 +1121,7 @@ public class SqlFormatterTest
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		f.setAddColumnNameComment(true);
 		f.setColumnsPerInsert(5);
 		formatted = f.getFormattedSql();
@@ -1133,7 +1133,7 @@ public class SqlFormatterTest
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		f.setAddColumnNameComment(true);
 		f.setColumnsPerInsert(1);
 		f.setCommaAfterLineBreak(true);
@@ -1155,7 +1155,7 @@ public class SqlFormatterTest
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		f.setAddColumnNameComment(true);
 		f.setColumnsPerInsert(1);
 		f.setCommaAfterLineBreak(true);
@@ -1183,7 +1183,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select ' test '''||firstname||''' test' from person";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT ' test ''' ||firstname|| ''' test'\nFROM person";
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
@@ -1195,7 +1195,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "update tableA set completed_Date =  ( select min(disconnect_Date) from tableB ) ";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected = "UPDATE tableA\n" +
 							"   SET completed_Date = (SELECT MIN(disconnect_Date) FROM tableB)";
@@ -1204,7 +1204,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "update tableA set completed_Date =  ( select id from tableB ) ";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected = "UPDATE tableA\n" +
 							"   SET completed_Date = (SELECT id FROM tableB)";
@@ -1218,7 +1218,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select x1 as ofx from the_table;";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT x1 AS ofx\n" +
 			"FROM the_table;";
@@ -1242,7 +1242,7 @@ public class SqlFormatterTest
              "              0 AS pop\n" +
              "       FROM orders o\n" +
              "       GROUP BY o.state))";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
@@ -1257,7 +1257,7 @@ public class SqlFormatterTest
              "GROUP BY state)) summary \n" +
              "GROUP BY state \n" +
              "ORDER BY 2 DESC";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected = "SELECT state,\n" +
              "       SUM(numorders) AS numorders,\n" +
@@ -1298,7 +1298,7 @@ public class SqlFormatterTest
              "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
              "    INNER JOIN DirectReports AS d \n" +
              "        ON e.ManagerID = d.EmployeeID";
-		SqlFormatter f = new SqlFormatter(sql, "postgresql");
+		WbSqlFormatter f = new WbSqlFormatter(sql, "postgresql");
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT e.ManagerID,\n" +
              "       e.EmployeeID,\n" +
@@ -1331,7 +1331,7 @@ public class SqlFormatterTest
              "(SELECT state, 0 as numorders, SUM(pop) as pop \n" +
              "FROM zipcensus \n" +
              "GROUP BY state)";
-		f = new SqlFormatter(sql, "oracle");
+		f = new WbSqlFormatter(sql, "oracle");
 		formatted = f.getFormattedSql();
 		expected = "(SELECT o.state,\n" +
              "       COUNT(*) AS numorders,\n" +
@@ -1353,7 +1353,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "SELECT right(name,5) FROM person";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		f.addDBFunctions(CollectionUtil.treeSet("RIGHT", "LEFT"));
 		String formatted = f.getFormattedSql();
@@ -1367,20 +1367,20 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "SELECT * FROM mytable WHERE id in ($[somestuff])";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT *\nFROM mytable\nWHERE id IN ($[somestuff])";
 //		System.out.println("*******\n" + formatted + "\n**********");
 		assertEquals(expected, formatted);
 
 		sql = "SELECT * FROM mytable WHERE id in ($[&somestuff])";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected = "SELECT *\nFROM mytable\nWHERE id IN ($[&somestuff])";
 		assertEquals(expected, formatted);
 
 		sql = "SELECT * FROM mytable where id=$[var_id]";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		//System.out.println("*******\n" + formatted + "\n**********");
 		expected = "SELECT *\nFROM mytable\nWHERE id = $[var_id]";
@@ -1392,7 +1392,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "SELECT * FROM mytable WHERE id between 1 and 5 and some_date between current_date -2 and current_date and x > 5 ";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT *\n" +
@@ -1435,7 +1435,7 @@ public class SqlFormatterTest
              "    ON DirectReports.DeptID = dp.DepartmentID \n" +
              "WHERE dp.GroupName = N'Research and Development' OR Level = 0";
 
-		SqlFormatter f = new SqlFormatter(sql, "postgresql");
+		WbSqlFormatter f = new WbSqlFormatter(sql, "postgresql");
 		String formatted = f.getFormattedSql();
 		String expected =
 						"WITH RECURSIVE DirectReports (ManagerID, EmployeeID, Title, DeptID, Level) \n" +
@@ -1491,7 +1491,7 @@ public class SqlFormatterTest
 							"SELECT tmp.*,\n" +
 							"       nvl((SELECT 1 FROM td_cdma_ip WHERE tmp.src_ip BETWEEN ip_fromip AND ip_endip),0) isNew\n" +
 							"FROM tmp";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("nvl"));
 		formatted = f.getFormattedSql();
@@ -1504,7 +1504,7 @@ public class SqlFormatterTest
 					"AS \n" +
 					"SELECT id, name FROM foo WHERE id BETWEEN 1 AND 10000 \n" +
 					"WITH CHECK OPTION";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 
 		expected = "CREATE VIEW vfoo \n" +
@@ -1522,7 +1522,7 @@ public class SqlFormatterTest
 			"second_cte (col1, col2) as " +
 			"( select col4, col5 from table_2), third_cte as (select 1,2 from dual)" +
 			"select * from first_cte f join second_cte s on (f.col1 = s.col2)";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected = "WITH first_cte (col1, col2) AS\n" +
              "(\n" +
@@ -1548,7 +1548,7 @@ public class SqlFormatterTest
              ") \n" +
              "SELECT * \n" +
              "FROM temp1";
-	  f = new SqlFormatter(sql);
+	  f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected = "WITH temp1 (c1, t1, t2) AS\n" +
              "(\n" +
@@ -1571,7 +1571,7 @@ public class SqlFormatterTest
 				"SELECT *\n" +
 				"FROM customers\n" +
 				"WHERE rownum <= 1000";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 //		System.out.println("**************\n" + formatted + "\n------------------\n" + expected + "\n*************");
 		assertEquals(expected, formatted);
@@ -1582,7 +1582,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select row_number() over (order by id) from table";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected = "SELECT row_number() OVER (ORDER BY id)\nFROM TABLE";
@@ -1615,7 +1615,7 @@ public class SqlFormatterTest
 			"ORDER BY d.deptno,\n" +
 			"         e.empno";
 
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("nvl"));
 		String formatted = f.getFormattedSql();
@@ -1633,7 +1633,7 @@ public class SqlFormatterTest
 			"from bar\n" +
 			"where x = 1\n" +
 			"and   y = 2";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		f.setKeywordCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
@@ -1641,7 +1641,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "SELECT * FROM person WHERE LOWER(firstname) LIKE 'arthur%'";
-		f = new SqlFormatter(sql, 60, "oracle");
+		f = new WbSqlFormatter(sql, 60, "oracle");
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		f.setKeywordCase(GeneratedIdentifierCase.lower);
 
@@ -1658,7 +1658,7 @@ public class SqlFormatterTest
 		try
 		{
 			String sql = "insert into my_table (col1, col2, col3) values (1,2,3), (4,5,6), (7,8,9)";
-			SqlFormatter f = new SqlFormatter(sql);
+			WbSqlFormatter f = new WbSqlFormatter(sql);
 			String formatted = f.getFormattedSql();
 			String expected = "INSERT INTO my_table\n" +
              "(\n" +
@@ -1685,7 +1685,7 @@ public class SqlFormatterTest
 //				System.out.println("******************\n" + formatted + "\n-------------------------\n" + expected + "\n************************");
 			assertEquals(expected, formatted);
 			Settings.getInstance().setFormatterMaxColumnsInInsert(3);
-			f = new SqlFormatter(sql);
+			f = new WbSqlFormatter(sql);
 			formatted = f.getFormattedSql().trim();
 			expected =
 				"INSERT INTO my_table\n" +
@@ -1716,7 +1716,7 @@ public class SqlFormatterTest
 
 			String sql = "insert into x ( col1,col2,col3) values (1,2,3)";
 			String expected = "INSERT INTO x\n  (col1, col2, col3)\nVALUES\n  (1, 2, 3)";
-			SqlFormatter f = new SqlFormatter(sql, 100);
+			WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 			String formatted = f.getFormattedSql();
 //			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
@@ -1724,7 +1724,7 @@ public class SqlFormatterTest
 			Settings.getInstance().setFormatterMaxColumnsInInsert(3);
 			sql = "insert into x ( col1,col2,col3,col4,col5) values (1,2,3,4,5)";
 			expected = "INSERT INTO x\n  (col1, col2, col3,\n   col4, col5)\nVALUES\n  (1, 2, 3,\n   4, 5)";
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
 //			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
@@ -1732,21 +1732,21 @@ public class SqlFormatterTest
 			Settings.getInstance().setFormatterMaxColumnsInInsert(1);
 			sql = "insert into x ( col1,col2,col3,col4,col5) values (1,2,3,4,5)";
 			expected = "INSERT INTO x\n(\n  col1,\n  col2,\n  col3,\n  col4,\n  col5\n)\nVALUES\n(\n  1,\n  2,\n  3,\n  4,\n  5\n)";
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
 //			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
 
 			sql = "insert into x ( col1,col2,col3,col4,col5) values (1,2,3,4,5)";
 			expected = "INSERT INTO x\n(\n  col1\n  ,col2\n  ,col3\n  ,col4\n  ,col5\n)\nVALUES\n(\n  1\n  ,2\n  ,3\n  ,4\n  ,5\n)";
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			f.setCommaAfterLineBreak(true);
 			f.setAddSpaceAfterLineBreakComma(false);
 			formatted = f.getFormattedSql();
 //			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
 
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			f.setCommaAfterLineBreak(true);
 			f.setAddSpaceAfterLineBreakComma(true);
 			formatted = f.getFormattedSql();
@@ -1770,13 +1770,13 @@ public class SqlFormatterTest
 			Settings.getInstance().setFormatterMaxColumnsInUpdate(3);
 			String sql = "update mytable set col1=5,col2=6,col3=4";
 			String expected = "UPDATE mytable\n   SET col1 = 5, col2 = 6, col3 = 4";
-			SqlFormatter f = new SqlFormatter(sql, 100);
+			WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 			String formatted = f.getFormattedSql();
 //			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
 			sql = "update mytable set col1=1,col2=2,col3=3,col4=4,col5=5";
 			expected = "UPDATE mytable\n   SET col1 = 1, col2 = 2, col3 = 3,\n       col4 = 4, col5 = 5";
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
 //			System.out.println("*********\n" + formatted + "\n--- expected\n" + expected + "\n************");
 			assertEquals(expected, formatted);
@@ -1793,7 +1793,7 @@ public class SqlFormatterTest
 	{
 		String sql = "insert into x(ss2,ss3,ss2) values('\u32A5\u0416','dsaffds',234)";
 		String expected = "INSERT INTO x\n(\n  ss2,\n  ss3,\n  ss2\n)\nVALUES\n(\n  '\u32A5\u0416',\n  'dsaffds',\n  234\n)";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		String formatted = f.getFormattedSql();
 		assertEquals(expected, formatted);
 	}
@@ -1803,7 +1803,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "create table \"public\".\"users\" ( \"id\" integer, \"firstname\" varchar(100), \"lastname\" varchar(100))";
-		SqlFormatter f = new SqlFormatter(sql);
+		WbSqlFormatter f = new WbSqlFormatter(sql);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"CREATE TABLE \"public\".\"users\" \n" +
@@ -1815,7 +1815,7 @@ public class SqlFormatterTest
 //		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
 		assertEquals(expected, formatted.trim());
 		sql = "create table \"users\" ( \"id\" integer, \"firstname\" varchar(100), \"lastname\" varchar(100))";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
 		expected =
 			"CREATE TABLE \"users\" \n" +
@@ -1833,7 +1833,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = null;
-		SqlFormatter f = null;
+		WbSqlFormatter f = null;
 
 		String expected =
 			"CREATE TABLE ##foo_tmp \n" +
@@ -1843,13 +1843,13 @@ public class SqlFormatterTest
 			")";
 
 		sql = "create table ##foo_tmp (foo integer, bar integer)";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		String formatted = f.getFormattedSql();
 //		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
 		assertEquals(expected, formatted.trim());
 
 		sql = "create table #foo_tmp (foo integer, bar integer)";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 		expected =
 			"CREATE TABLE #foo_tmp \n" +
@@ -1866,7 +1866,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "create table if not exists person (id integer not null primary key, firstname varchar(50), lastname varchar(50));";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		String formatted = f.getFormattedSql();
 //		System.out.println("***\n" + formatted + "\n***");
 		assertNotNull(formatted);
@@ -1880,12 +1880,12 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = null;
-		SqlFormatter f = null;
+		WbSqlFormatter f = null;
 		String formatted = null;
 		List<String> lines = null;
 
 		sql = "create table person (id1 integer not null, id2 integer not null, id3 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2), foreign key (id3) references othertable(id));";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 		lines = StringUtil.getLines(formatted);
 //		System.out.println("***\n" + formatted + "\n***");
@@ -1894,20 +1894,20 @@ public class SqlFormatterTest
 		assertEquals("  FOREIGN KEY (id3) REFERENCES othertable (id)", lines.get(8));
 
 		sql = "create table person (somecol integer primary key, firstname varchar(50), lastname varchar(50));";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 		lines = StringUtil.getLines(formatted);
 		assertEquals("  somecol     INTEGER PRIMARY KEY,", lines.get(2));
 
 		sql = "create table person (id1 integer not null, id2 integer not null, firstname varchar(50), lastname varchar(50), primary key (id1, id2));";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 		lines = StringUtil.getLines(formatted);
 		assertEquals("  id1         INTEGER NOT NULL,", lines.get(2));
 		assertEquals("  PRIMARY KEY (id1,id2)", lines.get(6));
 
 		sql = "create table person (id1 integer not null, constraint xyz exclude (id1 with =))";
-		f = new SqlFormatter(sql, "postgresql");
+		f = new WbSqlFormatter(sql, "postgresql");
 		formatted = f.getFormattedSql();
 		String expected =
 				"CREATE TABLE person \n"+
@@ -1918,7 +1918,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted.trim());
 
 		sql = "create table person (id1 integer not null primary key, some_data varchar (100), constraint xyz exclude (some_data with =))";
-		f = new SqlFormatter(sql, "postgresql");
+		f = new WbSqlFormatter(sql, "postgresql");
 		formatted = f.getFormattedSql();
 //		System.out.println("++++\n" + formatted + "\n-----");
 		expected =
@@ -1937,7 +1937,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "wbexport -file=\"c:\\Documents and Settings\\test.txt\" -type=text";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		String formatted = f.getFormattedSql();
 		assertTrue(formatted.indexOf("\"c:\\Documents and Settings\\test.txt\"") > 0);
 	}
@@ -1947,7 +1947,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "wbconfirm 'my message'";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		CharSequence formatted = f.getFormattedSql();
 		String expected = "WbConfirm 'my message'";
 		assertEquals("WbConfirm not formatted correctly", expected, formatted);
@@ -1958,7 +1958,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select a,b, (select a,b from t2) col4 from t1";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		CharSequence formatted = f.getFormattedSql();
 		String expected = "SELECT a,\n" + "       b,\n" + "       (SELECT a, b FROM t2) col4\n" + "FROM t1";
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
@@ -1969,7 +1969,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select t1.a, t2.b from bla as t1, t2";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		CharSequence formatted = f.getFormattedSql();
 		String expected = "SELECT t1.a,\n" + "       t2.b\n" + "FROM bla AS t1,\n" + "     t2";
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
@@ -1981,7 +1981,7 @@ public class SqlFormatterTest
 	{
 		String sql = "insert into tble (a,b) values ( (select max(x) from y), 'bla')";
 		String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ")\n" + "VALUES\n" + "(\n" + "  (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		CharSequence formatted = f.getFormattedSql();
 //		System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
@@ -1993,7 +1993,7 @@ public class SqlFormatterTest
 	{
 		String sql = "select col1, MAX(col2) from theTable group by col1;";
 		String expected = "SELECT col1,\n       max(col2)\nFROM theTable\nGROUP BY col1;";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		CharSequence formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
@@ -2012,7 +2012,7 @@ public class SqlFormatterTest
 			"         ELSE 3\n" +
 			"       END AS y\n" +
 			"FROM person";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		CharSequence formatted = f.getFormattedSql();
 		assertEquals("CASE alias not formatted", expected, formatted);
 
@@ -2023,7 +2023,7 @@ public class SqlFormatterTest
 			"         ELSE 3\n" +
 			"       END AS y\n" +
 			"FROM person";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 		assertEquals("CASE alias not formatted", expected, formatted);
@@ -2040,7 +2040,7 @@ public class SqlFormatterTest
 			"           WHEN a = 2 THEN 1\n" +
 			"           ELSE 3\n" +
 			"         END";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 		assertEquals("CASE alias not formatted", expected, formatted);
@@ -2053,7 +2053,7 @@ public class SqlFormatterTest
 		{
 			String sql = "alter table epg_value add constraint fk_value_attr foreign key (id_attribute) references attribute(id);";
 			String expected = "ALTER TABLE epg_value ADD CONSTRAINT fk_value_attr FOREIGN KEY (id_attribute) REFERENCES attribute (id);";
-			SqlFormatter f = new SqlFormatter(sql, 100);
+			WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 			CharSequence formatted = f.getFormattedSql();
 			assertEquals("ALTER TABLE not correctly formatted", expected, formatted.toString().trim());
 		}
@@ -2071,12 +2071,12 @@ public class SqlFormatterTest
 		{
 			String sql = "SELECT a,b,c from mytable";
 			Settings.getInstance().setFormatterMaxColumnsInSelect(5);
-			SqlFormatter f = new SqlFormatter(sql, 100);
+			WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 			CharSequence formatted = f.getFormattedSql();
 			String expected = "SELECT a, b, c\nFROM mytable";
 
 			sql = "SELECT a,b,c,d,e,f,g,h,i from mytable";
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
 			expected = "SELECT a, b, c, d, e,\n       f, g, h, i\nFROM mytable";
 			assertEquals(expected, formatted);
@@ -2094,7 +2094,7 @@ public class SqlFormatterTest
 		try
 		{
 			String sql = "SELECT a,b,[MyCol] from mytable";
-			SqlFormatter f = new SqlFormatter(sql, 100);
+			WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 			Settings.getInstance().setFormatterMaxColumnsInSelect(1);
 			CharSequence formatted = f.getFormattedSql();
 			String expected = "SELECT a,\n       b,\n       [MyCol]\nFROM mytable";
@@ -2115,7 +2115,7 @@ public class SqlFormatterTest
 
 		String expected = "SELECT DECODE((MOD(INPUT-4,12)+1),\n" + "             1,'RAT',\n" + "             2,'OX',\n" + "             3,'TIGER',\n" + "             4,'RABBIT',\n" + "             5,'DRAGON',\n" + "             6,'SNAKE',\n" + "             7,'HORSE',\n" + "             8,'SHEEP/GOAT',\n" + "             9,'MONKEY',\n" + "             10,'ROOSTER',\n" + "             11,'DOG',\n" + "             12,'PIG'\n" + "       )  YR\n" + "FROM DUAL";
 
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		CharSequence formatted = f.getFormattedSql();
 
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
@@ -2123,7 +2123,7 @@ public class SqlFormatterTest
 
 
 		sql = "select decode(col1, 'a', 1, 'b', 2, 'c', 3, 99) from dual";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 		expected = "SELECT decode(col1,\n" + "              'a', 1,\n" + "              'b', 2,\n" + "              'c', 3,\n" + "              99\n" + "       ) \n" + "FROM dual";
 
@@ -2136,13 +2136,13 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "SELECT a,b,\"c d\" from mytable";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		CharSequence formatted = f.getFormattedSql();
 		String expected = "SELECT a,\n       b,\n       \"c d\"\nFROM mytable";
 		assertEquals(expected, formatted);
 
 		sql = "select x.\"Foo\", x.\"Bar\" from mytable x";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		formatted = f.getFormattedSql();
 		expected =
@@ -2153,7 +2153,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 		sql = "select x.Foo, x.Bar from mytable x";
-		f = new SqlFormatter(sql, 100);
+		f = new WbSqlFormatter(sql, 100);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		formatted = f.getFormattedSql();
 		expected =
@@ -2169,14 +2169,14 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "select a from b where c in (1,2,3);";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		f.setAddSpaceAfterCommInList(true);
 		CharSequence formatted = f.getFormattedSql();
 		String expected = "SELECT a\nFROM b\nWHERE c IN (1, 2, 3);";
 		assertEquals(expected, formatted);
 
 		sql = "select * from table1 join table2 on table1.col1 = table2.col1 and table1.col3 in (1,2,3,4,5)";
-		f = new SqlFormatter(sql);
+		f = new WbSqlFormatter(sql);
 		f.setAddSpaceAfterCommInList(true);
 		expected =
 			"SELECT *\n" +
@@ -2193,7 +2193,7 @@ public class SqlFormatterTest
 	public void testJoinWrapping()
 	{
 		String sql = "select * from foo join bar on foo.id = bar.fid";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		f.setJoinWrapping(JoinWrapStyle.none);
 
 		String formatted = f.getFormattedSql();
@@ -2221,7 +2221,7 @@ public class SqlFormatterTest
 //		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");
 		assertEquals(expected, formatted);
 
-		f = new SqlFormatter("select * from foo join bar on foo.id = bar.fid and foo.id2=bar.fid2", 100);
+		f = new WbSqlFormatter("select * from foo join bar on foo.id = bar.fid and foo.id2=bar.fid2", 100);
 		f.setJoinWrapping(JoinWrapStyle.onlyMultiple);
 		formatted = f.getFormattedSql();
 		expected =
@@ -2245,7 +2245,7 @@ public class SqlFormatterTest
 //		System.out.println("***************** result:\n" + formatted + "\n************* expected:\n" + expected + "\n------------------");
 		assertEquals(expected, formatted);
 
-		f = new SqlFormatter("select * from foo join bar on foo.id = bar.fid and foo.id2 = bar.id2 and foo.id3 = bar.id3", 100);
+		f = new WbSqlFormatter("select * from foo join bar on foo.id = bar.fid and foo.id2 = bar.id2 and foo.id3 = bar.id3", 100);
 		f.setJoinWrapping(JoinWrapStyle.onlyMultiple);
 		formatted = f.getFormattedSql();
 		expected =
@@ -2268,7 +2268,7 @@ public class SqlFormatterTest
 			String sql = "--comment\nselect * from blub;";
 			Settings.getInstance().setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
 
-			SqlFormatter f = new SqlFormatter(sql, 100);
+			WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 
 			CharSequence formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
@@ -2276,32 +2276,32 @@ public class SqlFormatterTest
 			assertEquals("Not correctly formatted", expected, formatted);
 
 			sql = "select x from y union all select y from x";
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
 			expected = "SELECT x\nFROM y\nUNION ALL\nSELECT y\nFROM x";
 			assertEquals(expected, formatted);
 
 			sql = "select x,y from y order by x\n--trailing comment";
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
 			expected = "SELECT x,\n       y\nFROM y\nORDER BY x\n--trailing comment";
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 			assertEquals(expected, formatted.toString().trim());
 
 			sql = "select x,y,z from y where a = 1 and b = 2";
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
 			expected = "SELECT x,\n       y,\n       z\nFROM y\nWHERE a = 1\nAND   b = 2";
 			assertEquals(expected, formatted);
 
 			sql = "select x,y,z from y where a = 1 and b = (select min(x) from y)";
-			f = new SqlFormatter(sql, 100);
+			f = new WbSqlFormatter(sql, 100);
 			formatted = f.getFormattedSql();
 			expected = "SELECT x,\n       y,\n       z\nFROM y\nWHERE a = 1\nAND   b = (SELECT MIN(x) FROM y)";
 			assertEquals(expected, formatted);
 
 			sql = "select x,y,z from y where a = 1 and b = (select min(x) from y)";
-			f = new SqlFormatter(sql, 10);
+			f = new WbSqlFormatter(sql, 10);
 			formatted = f.getFormattedSql();
 			expected = "SELECT x,\n       y,\n       z\nFROM y\nWHERE a = 1\nAND   b = (SELECT MIN(x)\n           FROM y)";
 			assertEquals(expected, formatted);
@@ -2318,21 +2318,21 @@ public class SqlFormatterTest
 				"                          WHEN 1 THEN 0\n" +
 				"                          ELSE 1\n" +
 				"                        END";
-			f = new SqlFormatter(sql, 10);
+			f = new WbSqlFormatter(sql, 10);
 
 			formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 			assertEquals(expected, formatted.toString().trim());
 
 			sql = "SELECT ber.nachname AS ber_nachname, \n" + "       ber.nummer AS ber_nummer \n" + "FROM table a WHERE (x in (select bla,bla,alkj,aldk,alkjd,dlaj,alkjdaf from blub 1, blub2, blub3 where x=1 and y=2 and z=3 and a=b and c=d) or y = 5)" + " and a *= b and b = c (+)";
-			f = new SqlFormatter(sql, 10);
+			f = new WbSqlFormatter(sql, 10);
 			formatted = f.getFormattedSql();
 			expected = "SELECT ber.nachname AS ber_nachname,\n" + "       ber.nummer AS ber_nummer\n" + "FROM TABLE a\n" + "WHERE (x IN (SELECT bla,\n" + "                    bla,\n" + "                    alkj,\n" + "                    aldk,\n" + "                    alkjd,\n" + "                    dlaj,\n" + "                    alkjdaf\n" + "             FROM blub 1,\n" + "                  blub2,\n" + "                  blub3\n" + "             WHERE x = 1\n" + "             AND   y = 2\n" + "             AND   z = 3\n" + "             AND   a = b\n" + "             AND   c = d) OR y = 5)\n" + "AND   a *= b\n" + "AND   b = c (+)";
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 			assertEquals(expected, formatted.toString().trim());
 
 			sql = "update x set (a,b) = (select x,y from k);";
-			f = new SqlFormatter(sql, 50);
+			f = new WbSqlFormatter(sql, 50);
 			formatted = f.getFormattedSql();
 			expected = "UPDATE x\n   SET (a,b) = (SELECT x, y FROM k);";
 			assertEquals(expected, formatted.toString().trim());
@@ -2352,7 +2352,7 @@ public class SqlFormatterTest
 		  "select * \n" +
 			"from foobar with (nolock) \n" +
 			"where (id is null or id in (select y from bar))";
-		SqlFormatter f = new SqlFormatter(sql, 100);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT *\n" +

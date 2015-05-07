@@ -32,7 +32,7 @@ import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.StatementContext;
 import workbench.gui.sql.EditorPanel;
 
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 
@@ -91,7 +91,7 @@ public class EditorDropHandler
       if (dbo instanceof TableIdentifier)
       {
         String text = "select * from " + dbo.getObjectExpression(conn);
-        SqlFormatter formatter = new SqlFormatter(text, conn.getDbId());
+        WbSqlFormatter formatter = new WbSqlFormatter(text, conn.getDbId());
         text = formatter.getFormattedSql();
         insertString(text, editorPos);
         return;

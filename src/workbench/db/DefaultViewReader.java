@@ -30,7 +30,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.WbSqlFormatter;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
@@ -301,7 +301,7 @@ public class DefaultViewReader
 				StringUtil.trimTrailingWhitespace(source);
 				if (this.connection.getDbSettings().getFormatViewSource())
 				{
-					SqlFormatter f = new SqlFormatter(source, connection.getDbId());
+					WbSqlFormatter f = new WbSqlFormatter(source, connection.getDbId());
 					source = new StringBuilder(f.getFormattedSql());
 				}
 

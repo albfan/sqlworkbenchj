@@ -174,7 +174,7 @@ public class TextFormatterTest
 			"   SET foo = 2;";
 
 		String formatted = editorText.trim();
-//		System.out.println("expected: \n" + expected + "\n------------- formatted: --------- \n" + formatted);
+		System.out.println("expected: \n" + expected + "\n------------- formatted: --------- \n" + formatted);
 		assertEquals(expected, formatted);
 
 		editorText = "update foo set bar = 1;\nupdate bar set foo = 2; ";
