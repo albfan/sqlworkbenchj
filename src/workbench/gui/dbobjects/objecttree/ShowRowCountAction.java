@@ -46,43 +46,43 @@ import workbench.util.WbThread;
  * @author Thomas Kellerer
  */
 public class ShowRowCountAction
-	extends WbAction
+  extends WbAction
   implements Interruptable
 {
-	private DbTreePanel source;
+  private DbTreePanel source;
   private StatusBar statusBar;
   private boolean cancelCount;
   private Statement currentStatement;
   private RowCountDisplay display;
 
-	public ShowRowCountAction(DbTreePanel client, RowCountDisplay countDisplay, StatusBar status)
-	{
-		super();
-		initMenuDefinition("MnuTxtShowRowCounts");
-		source = client;
+  public ShowRowCountAction(DbTreePanel client, RowCountDisplay countDisplay, StatusBar status)
+  {
+    super();
+    initMenuDefinition("MnuTxtShowRowCounts");
+    source = client;
     display = countDisplay;
     statusBar = status;
     setEnabled(source.getSelectedTables().size() > 0);
-	}
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		countRows();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    countRows();
+  }
 
-	private void countRows()
-	{
-		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection()))
-		{
-			return;
-		}
+  private void countRows()
+  {
+    if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection()))
+    {
+      return;
+    }
 
-		List<TableIdentifier> objects = source.getSelectedTables();
-		if (objects == null || objects.isEmpty())
-		{
-			return;
-		}
+    List<TableIdentifier> objects = source.getSelectedTables();
+    if (objects == null || objects.isEmpty())
+    {
+      return;
+    }
 
     WbThread counter = new WbThread("RowCount Thread")
     {
@@ -94,7 +94,7 @@ public class ShowRowCountAction
       }
     };
     counter.start();
-	}
+  }
 
   private void doCount()
   {
@@ -103,7 +103,7 @@ public class ShowRowCountAction
     WbConnection conn = source.getConnection();
 
     TableSelectBuilder builder = new TableSelectBuilder(conn, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
-  	boolean useSavepoint = conn.getDbSettings().useSavePointForDML();
+    boolean useSavepoint = conn.getDbSettings().useSavePointForDML();
 
     ResultSet rs = null;
 
@@ -111,66 +111,67 @@ public class ShowRowCountAction
     {
       conn.setBusy(true);
       WbSwingUtilities.showWaitCursor(source.getComponent());
-			currentStatement = conn.createStatementForQuery();
+      currentStatement = conn.createStatementForQuery();
 
       int count = tables.size();
-      for (int i=0; i < count; i++)
+      for (int i = 0; i < count; i++)
       {
         TableIdentifier table = tables.get(i);
 
-				if (statusBar != null)
-				{
+        if (statusBar != null)
+        {
           String msg = ResourceMgr.getFormattedString("MsgProcessing", table.getRawTableName(), i + 1, count);
-					statusBar.setStatusMessage(msg);
-				}
+          statusBar.setStatusMessage(msg);
+        }
 
-				String sql = builder.getSelectForCount(table);
+        String sql = builder.getSelectForCount(table);
 
-				rs = JdbcUtils.runStatement(conn, currentStatement, sql, true, useSavepoint);
+        rs = JdbcUtils.runStatement(conn, currentStatement, sql, true, useSavepoint);
 
-				if (rs != null && rs.next())
-				{
-					long rowCount = rs.getLong(1);
+        if (rs != null && rs.next())
+        {
+          long rowCount = rs.getLong(1);
           display.showRowCount(table, rowCount);
-				}
+        }
 
-				SqlUtil.closeResult(rs);
-				if (cancelCount) break;
+        SqlUtil.closeResult(rs);
+        if (cancelCount) break;
       }
     }
     catch (Exception ex)
     {
       LogMgr.logError("ShowRowCountAction.doCount()", "Error counting rows: ", ex);
     }
-		finally
-		{
-			SqlUtil.closeAll(rs, currentStatement);
-			currentStatement = null;
-			conn.setBusy(false);
+    finally
+    {
+      SqlUtil.closeAll(rs, currentStatement);
+      currentStatement = null;
+      conn.setBusy(false);
       if (statusBar != null)
       {
         statusBar.clearStatusMessage();
       }
       WbSwingUtilities.showDefaultCursor(source.getComponent());
-		}
+    }
 
   }
+
   @Override
   public void cancelExecution()
   {
     cancelCount = true;
-		if (currentStatement != null)
-		{
-			LogMgr.logDebug("ShowRowCountAction.cancel()", "Trying to cancel the current statement");
-			try
-			{
-				currentStatement.cancel();
-			}
-			catch (SQLException sql)
-			{
-				LogMgr.logWarning("ShowRowCountAction.cancel()", "Could not cancel statement", sql);
-			}
-		}
+    if (currentStatement != null)
+    {
+      LogMgr.logDebug("ShowRowCountAction.cancel()", "Trying to cancel the current statement");
+      try
+      {
+        currentStatement.cancel();
+      }
+      catch (SQLException sql)
+      {
+        LogMgr.logWarning("ShowRowCountAction.cancel()", "Could not cancel statement", sql);
+      }
+    }
 
   }
 
