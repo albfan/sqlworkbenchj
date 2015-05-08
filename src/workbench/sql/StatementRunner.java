@@ -103,8 +103,7 @@ public class StatementRunner
 	private int maxRows = -1;
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
-	private EndReadOnlyTrans endTransType;
-	private TransactionChecker transactionChecker;
+
 	private final Map<String, String> sessionAttributes = new TreeMap<>();
 	private final	RemoveEmptyResultsAnnotation removeAnnotation = new RemoveEmptyResultsAnnotation();
 
@@ -356,7 +355,6 @@ public class StatementRunner
 		setUseSavepoint(db == null ? false : db.useSavePointForDML());
 		statementHook = StatementHookFactory.getStatementHook(this);
 		sessionAttributes.clear();
-		initEndReadOnlyTransaction();
 	}
 
 	private boolean shouldEndTransactionForCommand(SqlCommand command)
@@ -374,9 +372,18 @@ public class StatementRunner
 	{
 		if (currentConnection == null) return;
 		if (currentConnection.getAutoCommit()) return;
+
+    EndReadOnlyTrans endTransType = currentConnection.getDbSettings().getAutoCloseReadOnlyTransactions();
 		if (endTransType == EndReadOnlyTrans.never) return;
 
 		if (!shouldEndTransactionForCommand(currentCommand)) return;
+
+    TransactionChecker transactionChecker = TransactionChecker.Factory.createChecker(currentConnection);
+
+    if (transactionChecker == TransactionChecker.NO_CHECK)
+    {
+      LogMgr.logWarning("StatementRunner.endReadOnlyTransaction()", "Ending read-only transactions has been configured, but there is no support for checking pending transactions for the current DBMS: " + currentConnection.getDatabaseProductName() + " (" + currentConnection.getDbId() + ")");
+    }
 
 		if (!transactionChecker.hasUncommittedChanges(currentConnection))
 		{
@@ -396,27 +403,6 @@ public class StatementRunner
 			{
 				LogMgr.logWarning("StatementRunner.endReadOnlyTransaction()", "Could not " + endTransType.name(), ex);
 			}
-		}
-	}
-
-	private void initEndReadOnlyTransaction()
-	{
-		if (this.currentConnection == null)
-		{
-			endTransType = EndReadOnlyTrans.never;
-		}
-		else
-		{
-			endTransType = currentConnection.getDbSettings().getAutoCloseReadOnlyTransactions();
-		}
-
-		if (endTransType ==  EndReadOnlyTrans.never)
-		{
-			transactionChecker = TransactionChecker.NO_CHECK;
-		}
-		else
-		{
-			transactionChecker = TransactionChecker.Factory.createChecker(currentConnection);
 		}
 	}
 
