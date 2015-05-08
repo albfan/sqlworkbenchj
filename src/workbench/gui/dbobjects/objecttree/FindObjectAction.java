@@ -22,6 +22,7 @@ package workbench.gui.dbobjects.objecttree;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
+import workbench.db.DbMetadata;
 import workbench.interfaces.TextContainer;
 
 import workbench.db.TableIdentifier;
@@ -65,9 +66,20 @@ public class FindObjectAction
     if (StringUtil.isBlank(text)) return;
 
     final TableIdentifier tbl = new TableIdentifier(text);
+
+    DbMetadata meta = finder.getConnection().getMetadata();
+
+    if (tbl.getCatalog() == null && !finder.getConnection().isBusy())
+    {
+      tbl.setCatalog(meta.getCurrentCatalog());
+    }
+    if (tbl.getSchema() == null && !finder.getConnection().isBusy())
+    {
+      tbl.setSchema(meta.getCurrentSchema());
+    }
+
     EventQueue.invokeLater(new Runnable()
     {
-
       @Override
       public void run()
       {
