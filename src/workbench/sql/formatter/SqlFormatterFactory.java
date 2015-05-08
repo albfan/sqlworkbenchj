@@ -52,12 +52,14 @@ public class SqlFormatterFactory
         String cmdLine  = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".cmdline", null);
         String inputEncoding  = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".inputencoding", null);
         String outputEncoding  = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".outputEncoding", null);
+        boolean supportsScripts  = Settings.getInstance().getBoolProperty("workbench.formatter." + dbId + ".supports.scripts", false);
 
         ExternalFormatter f = new ExternalFormatter();
         f.setCommandLine(cmdLine);
         f.setProgram(prg);
         f.setInputEncoding(inputEncoding);
         f.setOutputEncoding(outputEncoding);
+        f.setSupportsMultipleStatements(supportsScripts);
         return f;
       }
     }

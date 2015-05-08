@@ -39,6 +39,7 @@ import workbench.interfaces.WbSelectionModel;
 import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
+import workbench.db.DbSettings;
 import workbench.db.GenericObjectDropper;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -121,6 +122,19 @@ public class DropDbObjectAction
 		this.dropper = dropperToUse;
 	}
 
+  private boolean needAutoCommit(List<DbObject> objects)
+  {
+    DbSettings dbs = source.getConnection().getDbSettings();
+    for (DbObject dbo : objects)
+    {
+      if (!dbs.canDropInTransaction(dbo.getObjectType()))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
 	private void dropObjects()
 	{
 		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
@@ -140,6 +154,12 @@ public class DropDbObjectAction
       if (autoCommit && !source.getConnection().getProfile().getAutocommit())
       {
         source.getConnection().changeAutoCommit(false);
+        autoCommitChanged = true;
+      }
+
+      if (!autoCommit && needAutoCommit(objects))
+      {
+        source.getConnection().changeAutoCommit(true);
         autoCommitChanged = true;
       }
 

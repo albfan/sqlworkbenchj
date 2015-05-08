@@ -42,6 +42,7 @@ public class ExternalFormatter
   private String cmdLine;
   private String inputEncoding;
   private String outputEncoding;
+  private boolean supportsMultipleStatements;
 
   public ExternalFormatter()
   {
@@ -65,6 +66,17 @@ public class ExternalFormatter
   public void setOutputEncoding(String encoding)
   {
     outputEncoding = encoding;
+  }
+
+  @Override
+  public boolean supportsMultipleStatements()
+  {
+    return supportsMultipleStatements;
+  }
+
+  public void setSupportsMultipleStatements(boolean supportsMultipleStatements)
+  {
+    this.supportsMultipleStatements = supportsMultipleStatements;
   }
 
   @Override

@@ -26,6 +26,7 @@ import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import workbench.db.CatalogIdentifier;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
@@ -152,6 +153,10 @@ public class ObjectTreeNode
     {
       return nodeType;
     }
+    if (getDbObject() instanceof CatalogIdentifier)
+    {
+      return TreeLoader.TYPE_CATALOG;
+    }
     return getDbObject().getObjectType();
   }
 
@@ -235,7 +240,7 @@ public class ObjectTreeNode
   {
     return CollectionUtil.isNonEmpty(filteredNodes);
   }
-  
+
   public boolean applyFilter(ColumnExpression searchTerm)
   {
     resetFilter();

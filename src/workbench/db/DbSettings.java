@@ -966,6 +966,15 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "removenewlines", false);
 	}
 
+  public boolean canDropInTransaction(String type)
+  {
+    if (this.ddlNeedsCommit)
+    {
+      return Settings.getInstance().getBoolProperty(prefix + "drop." + type + ".in.transaction", true);
+    }
+    return true;
+  }
+
 	public boolean canDropType(String type)
 	{
 		if (StringUtil.isEmptyString(type)) return false;
@@ -1596,6 +1605,11 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "view.trigger.supported", false);
 	}
+
+  public boolean changeCatalogToRetrieveSchemas()
+  {
+    return Settings.getInstance().getBoolProperty(prefix + "schema.retrieve.change.catalog", false);
+  }
 
 	public boolean supportsCatalogs()
 	{

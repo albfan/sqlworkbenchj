@@ -17,62 +17,69 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench;
+package workbench.db;
 
 import java.sql.SQLException;
 import java.util.Objects;
 
-import workbench.db.DbObject;
-import workbench.db.WbConnection;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class SchemaIdentifier
+public class CatalogIdentifier
   implements DbObject
 {
-  private String catalog;
-  private String schemaName;
+  private String catalogName;
+  private String typeName = "CATALOG";
 
-  public SchemaIdentifier(String name)
+  public CatalogIdentifier(String name)
   {
-    schemaName = name;
+    catalogName = name;
   }
 
   public void setCatalog(String catalog)
   {
-    this.catalog = catalog;
+    this.catalogName = catalog;
+  }
+
+  public void setTypeName(String type)
+  {
+    if (StringUtil.isNonBlank(type))
+    {
+      typeName = type.trim().toUpperCase();
+    }
   }
 
   @Override
   public String getCatalog()
   {
-    return catalog;
+    return catalogName;
   }
 
   @Override
   public String getSchema()
   {
-    return this.getObjectName();
+    return null;
   }
 
   @Override
   public String getObjectType()
   {
-    return "SCHEMA";
+    return typeName;
   }
 
   @Override
   public String getObjectName()
   {
-    return schemaName;
+    return catalogName;
   }
 
   @Override
   public String getObjectName(WbConnection conn)
   {
-    return conn.getMetadata().quoteObjectname(schemaName);
+    return conn.getMetadata().quoteObjectname(catalogName);
   }
 
   @Override
@@ -115,11 +122,11 @@ public class SchemaIdentifier
   public String getDropStatement(WbConnection con, boolean cascade)
   {
     if (con == null) return null;
-    if (con.getMetadata().isSqlServer() && this.catalog != null)
+    if (con.getMetadata().isSqlServer() && this.catalogName != null)
     {
       return
-        "use " + con.getMetadata().quoteObjectname(this.catalog)  + ";\n" +
-        "drop schema " + con.getMetadata().quoteObjectname(this.schemaName) + ";";
+        "use master;\n" +
+        "drop schema " + con.getMetadata().quoteObjectname(catalogName) + ";";
     }
     return null;
   }
@@ -128,8 +135,7 @@ public class SchemaIdentifier
   public int hashCode()
   {
     int hash = 3;
-    hash = 53 * hash + Objects.hashCode(this.catalog);
-    hash = 53 * hash + Objects.hashCode(this.schemaName);
+    hash = 53 * hash + Objects.hashCode(this.catalogName);
     return hash;
   }
 
@@ -138,12 +144,8 @@ public class SchemaIdentifier
   {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    final SchemaIdentifier other = (SchemaIdentifier)obj;
-    if (this.catalog != null && other.catalog != null)
-    {
-      if (!Objects.equals(this.catalog, other.catalog)) return false;
-    }
-    if (!Objects.equals(this.schemaName, other.schemaName)) return false;
+    final CatalogIdentifier other = (CatalogIdentifier)obj;
+    if (!Objects.equals(this.catalogName, other.catalogName)) return false;
     return true;
   }
 

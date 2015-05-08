@@ -26,4 +26,5 @@ package workbench.sql.formatter;
 public interface SqlFormatter
 {
   String getFormattedSql(String sql);
+  boolean supportsMultipleStatements();
 }

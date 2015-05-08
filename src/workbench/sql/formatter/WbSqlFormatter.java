@@ -175,6 +175,12 @@ public class WbSqlFormatter
 		setDbId(dbId);
 	}
 
+  @Override
+  public boolean supportsMultipleStatements()
+  {
+    return false;
+  }
+
 	public void setIdentifierCase(GeneratedIdentifierCase idCase)
 	{
 		this.identifierCase = idCase;

@@ -24,12 +24,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import workbench.SchemaIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.CatalogChanger;
+import workbench.db.CatalogIdentifier;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -37,6 +37,7 @@ import workbench.db.DbSettings;
 import workbench.db.DependencyNode;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
+import workbench.db.SchemaIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
@@ -234,7 +235,7 @@ public class TreeLoader
       String currentCatalog = connection.getMetadata().getCurrentCatalog();
       try
       {
-        if (isCatalogChild && connection.getMetadata().isSqlServer())
+        if (isCatalogChild && connection.getDbSettings().changeCatalogToRetrieveSchemas())
         {
           changer.setCurrentCatalog(connection, parentNode.getName());
           catalogChanged = true;
@@ -278,6 +279,9 @@ public class TreeLoader
     {
       ObjectTreeNode node = new ObjectTreeNode(cat, TYPE_CATALOG);
       node.setAllowsChildren(true);
+      CatalogIdentifier id = new CatalogIdentifier(cat);
+      id.setTypeName(connection.getMetadata().getCatalogTerm());
+      node.setUserObject(id);
       parentNode.add(node);
       if (!connection.getDbSettings().supportsSchemas())
       {
