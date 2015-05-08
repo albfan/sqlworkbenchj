@@ -1722,6 +1722,7 @@ public class SqlPanel
 		if (this.clearCompletionCache != null) this.clearCompletionCache.setConnection(this.dbConnection);
 		if (this.autoCompletion != null) this.autoCompletion.setConnection(this.dbConnection);
 		if (showObjectInfoAction != null) showObjectInfoAction.checkEnabled();
+    if (findInDbTree != null) findInDbTree.setEditorConnection(this.dbConnection);
 
 		if (this.stmtRunner != null)
 		{

@@ -26,6 +26,7 @@ import workbench.db.DbMetadata;
 import workbench.interfaces.TextContainer;
 
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 
 import workbench.gui.actions.WbAction;
 
@@ -41,6 +42,7 @@ public class FindObjectAction
 {
   private ObjectFinder finder;
   private TextContainer textContainer;
+  private WbConnection editorConnection;
 
   public FindObjectAction(TextContainer container)
   {
@@ -56,26 +58,35 @@ public class FindObjectAction
     setEnabled(finder != null);
   }
 
+  public void setEditorConnection(WbConnection conn)
+  {
+    editorConnection = conn;
+    setEnabled(editorConnection != null);
+  }
+
   @Override
   public void executeAction(ActionEvent e)
   {
     if (textContainer == null) return;
     if (finder == null) return;
 
-    String text = SqlUtil.getIdentifierAtCursor(textContainer, finder.getConnection());
+    String text = SqlUtil.getIdentifierAtCursor(textContainer, editorConnection);
     if (StringUtil.isBlank(text)) return;
 
     final TableIdentifier tbl = new TableIdentifier(text);
 
-    DbMetadata meta = finder.getConnection().getMetadata();
+    if (editorConnection != null)
+    {
+      DbMetadata meta = editorConnection.getMetadata();
 
-    if (tbl.getCatalog() == null && !finder.getConnection().isBusy())
-    {
-      tbl.setCatalog(meta.getCurrentCatalog());
-    }
-    if (tbl.getSchema() == null && !finder.getConnection().isBusy())
-    {
-      tbl.setSchema(meta.getCurrentSchema());
+      if (tbl.getCatalog() == null && !finder.getConnection().isBusy())
+      {
+        tbl.setCatalog(meta.getCurrentCatalog());
+      }
+      if (tbl.getSchema() == null && !finder.getConnection().isBusy())
+      {
+        tbl.setSchema(meta.getCurrentSchema());
+      }
     }
 
     EventQueue.invokeLater(new Runnable()
