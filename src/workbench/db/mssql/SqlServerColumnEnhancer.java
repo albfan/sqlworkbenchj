@@ -65,7 +65,7 @@ public class SqlServerColumnEnhancer
 	@Override
 	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
 	{
-		if (SqlServerUtil.isSqlServer2005(conn))
+		if (SqlServerUtil.isSqlServer2000(conn))
 		{
 			updateComputedColumns(table, conn);
 		}
@@ -164,12 +164,12 @@ public class SqlServerColumnEnhancer
 			// so this else part means the server is a SQL Server 2000
 			sql =
 				"select c.name, t.[text], 0 as is_persisted \n" +
-				"from sys.sysobjects o with (nolock) \n" +
-				"  join sys.syscolumns c with (nolock) on o.id = c.id \n" +
-				"  join sys.syscomments t with (nolock) on  t.number = c.colid and t.id = c.id \n" +
+				"from sysobjects o with (nolock) \n" +
+				"  join syscolumns c with (nolock) on o.id = c.id \n" +
+				"  join syscomments t with (nolock) on t.number = c.colid and t.id = c.id \n" +
 				"where o.xtype = 'U' \n" +
-				" and c.iscomputed = 1 \n"+
-				" and o.name = ?";
+				"  and c.iscomputed = 1 \n"+
+				"  and o.name = ?";
 			tablename = table.getTable().getRawTableName();
 		}
 
@@ -272,12 +272,12 @@ public class SqlServerColumnEnhancer
 		HashMap<String, String> collations = new HashMap<>(table.getColumnCount());
 
 		String sql =
-			"SELECT COLUMN_NAME, \n" +
-			"       COLLATION_NAME \n" +
-			"FROM INFORMATION_SCHEMA.COLUMNS \n" +
-			"WHERE TABLE_NAME = ? \n" +
-			"  AND TABLE_SCHEMA = ? \n " +
-			"  AND TABLE_CATALOG = ?";
+			"select column_name, \n" +
+			"       collation_name \n" +
+			"from information_schema.columns \n" +
+			"where table_name = ? \n" +
+			"  and table_schema = ? \n " +
+			"  and table_catalog = ?";
 
 		String tableName = table.getTable().getRawTableName();
 		String schema = table.getTable().getRawSchema();
