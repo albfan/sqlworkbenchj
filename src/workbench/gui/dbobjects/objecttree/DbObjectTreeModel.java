@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 
 import workbench.resource.DbExplorerSettings;
 
@@ -76,6 +75,7 @@ public class DbObjectTreeModel
 
   public void removeObjects(List<DbObject> toRemove)
   {
+    resetFilter();
     removeObjects(toRemove, getRoot());
   }
 
@@ -84,20 +84,18 @@ public class DbObjectTreeModel
     if (node == null) return;
     if (node.getChildCount() == 0) return;
 
-    resetFilter();
-
     List<ObjectTreeNode> toDelete = new ArrayList<>();
     for (int i = 0; i < node.getChildCount(); i++)
     {
       ObjectTreeNode child = (ObjectTreeNode)node.getChildAt(i);
       DbObject dbo = child.getDbObject();
-      if (dbo == null)
-      {
-        removeObjects(toRemove, child);
-      }
-      else if (toRemove.contains(dbo))
+      if (dbo != null && toRemove.contains(dbo))
       {
         toDelete.add(child);
+      }
+      else if (child.canHaveChildren())
+      {
+        removeObjects(toRemove, child);
       }
     }
 
