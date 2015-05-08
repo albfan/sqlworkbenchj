@@ -24,10 +24,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import workbench.SchemaIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.CatalogChanger;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -207,6 +209,7 @@ public class TreeLoader
     }
   }
 
+
   public boolean loadSchemas(ObjectTreeNode parentNode)
     throws SQLException
   {
@@ -216,21 +219,50 @@ public class TreeLoader
       if (schema == null) return false;
 
       parentNode.setNameAndType(schema, TYPE_SCHEMA);
+      SchemaIdentifier id = new SchemaIdentifier(schema);
+      parentNode.setUserObject(id);
       parentNode.setAllowsChildren(true);
       parentNode.setChildrenLoaded(false);
       addTypeNodes(parentNode);
     }
     else
     {
-      List<String> schemas = connection.getMetadata().getSchemas(connection.getSchemaFilter());
-      if (CollectionUtil.isEmpty(schemas)) return false;
-
-      for (String schema : schemas)
+      boolean isCatalogChild = parentNode.getType().equals(TYPE_CATALOG);
+      CatalogChanger changer = new CatalogChanger();
+      changer.setFireEvents(false);
+      boolean catalogChanged = false;
+      String currentCatalog = connection.getMetadata().getCurrentCatalog();
+      try
       {
-        ObjectTreeNode node = new ObjectTreeNode(schema, TYPE_SCHEMA);
-        node.setAllowsChildren(true);
-        parentNode.add(node);
-        addTypeNodes(node);
+        if (isCatalogChild && connection.getMetadata().isSqlServer())
+        {
+          changer.setCurrentCatalog(connection, parentNode.getName());
+          catalogChanged = true;
+        }
+
+        List<String> schemas = connection.getMetadata().getSchemas(connection.getSchemaFilter());
+        if (CollectionUtil.isEmpty(schemas)) return false;
+
+        for (String schema : schemas)
+        {
+          ObjectTreeNode node = new ObjectTreeNode(schema, TYPE_SCHEMA);
+          node.setAllowsChildren(true);
+          SchemaIdentifier id = new SchemaIdentifier(schema);
+          if (isCatalogChild)
+          {
+            id.setCatalog(parentNode.getName());
+          }
+          node.setUserObject(id);
+          parentNode.add(node);
+          addTypeNodes(node);
+        }
+      }
+      finally
+      {
+        if (catalogChanged)
+        {
+          changer.setCurrentCatalog(connection, currentCatalog);
+        }
       }
       parentNode.setChildrenLoaded(true);
     }

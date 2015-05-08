@@ -42,6 +42,13 @@ import workbench.util.StringUtil;
  */
 public class CatalogChanger
 {
+  private boolean fireEvents = true;
+
+  public void setFireEvents(boolean flag)
+  {
+    this.fireEvents = flag;
+  }
+
 	/**
 	 * Changes the current catalog using Connection.setCatalog()
 	 * and notifies the connection object about the change.
@@ -97,7 +104,7 @@ public class CatalogChanger
 		}
 
 		String newCat = meta.getCurrentCatalog();
-		if (StringUtil.stringsAreNotEqual(old, newCat))
+		if (fireEvents && StringUtil.stringsAreNotEqual(old, newCat))
 		{
 			conn.catalogChanged(old, newCatalog);
 		}
