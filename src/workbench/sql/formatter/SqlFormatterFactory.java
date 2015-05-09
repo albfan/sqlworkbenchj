@@ -26,44 +26,59 @@ import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
 
+import workbench.util.StringUtil;
+
 /**
  *
  * @author Thomas Kellerer
  */
 public class SqlFormatterFactory
 {
+
   public static SqlFormatter createFormatter(WbConnection conn)
   {
-    return createFormatter(conn.getDbId());
+    return createFormatter(conn == null ? null : conn.getDbId());
   }
 
   public static SqlFormatter createFormatter(String dbId)
   {
-    String prg = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".program", null);
-    if (prg != null)
-    {
-      File prgFile = new File(prg);
-      if (!prgFile.exists())
-      {
-        LogMgr.logWarning("SqlFormatterFactory.createFormatter", "External formatter for DBID=" + dbId + ": " + prg + " does not exist!");
-      }
-      else
-      {
-        String cmdLine  = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".cmdline", null);
-        String inputEncoding  = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".inputencoding", null);
-        String outputEncoding  = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".outputEncoding", null);
-        boolean supportsScripts  = Settings.getInstance().getBoolProperty("workbench.formatter." + dbId + ".supports.scripts", false);
+    ExternalFormatter externalFormatter = getExternalFormatter(dbId);
+    if (externalFormatter != null) return externalFormatter;
 
-        ExternalFormatter f = new ExternalFormatter();
-        f.setCommandLine(cmdLine);
-        f.setProgram(prg);
-        f.setInputEncoding(inputEncoding);
-        f.setOutputEncoding(outputEncoding);
-        f.setSupportsMultipleStatements(supportsScripts);
-        return f;
-      }
-    }
     return new WbSqlFormatter(Settings.getInstance().getFormatterMaxSubselectLength(), dbId);
   }
 
+  public static ExternalFormatter getExternalFormatter(String dbId)
+  {
+    if (StringUtil.isEmptyString(dbId))
+    {
+      dbId = "default";
+    }
+
+    String prg = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".program", null);
+    boolean enabled = Settings.getInstance().getBoolProperty("workbench.formatter." + dbId + ".enabled", true);
+    if (prg == null || !enabled) return null;
+
+    File prgFile = new File(prg);
+    if (!prgFile.exists())
+    {
+      LogMgr.logWarning("SqlFormatterFactory.getExternalFormatter", "Formatter program: " + prgFile.getAbsolutePath() + " not found!", null);
+      return null;
+    }
+
+    LogMgr.logInfo("SqlFormatterFactory.getExternalFormatter", "Using external formatter: " + prgFile.getAbsolutePath() + " for DBID: " + dbId);
+
+    String cmdLine = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".cmdline", null);
+    String inputEncoding = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".inputencoding", null);
+    String outputEncoding = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".outputEncoding", null);
+    boolean supportsScripts = Settings.getInstance().getBoolProperty("workbench.formatter." + dbId + ".supports.scripts", false);
+
+    ExternalFormatter f = new ExternalFormatter();
+    f.setCommandLine(cmdLine);
+    f.setProgram(prg);
+    f.setInputEncoding(inputEncoding);
+    f.setOutputEncoding(outputEncoding);
+    f.setSupportsMultipleStatements(supportsScripts);
+    return f;
+  }
 }

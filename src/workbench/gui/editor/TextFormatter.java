@@ -44,7 +44,6 @@ import workbench.util.StringUtil;
  */
 public class TextFormatter
 {
-
 	private String dbId;
 
 	public TextFormatter(String id)
@@ -52,91 +51,30 @@ public class TextFormatter
 		this.dbId = id;
 	}
 
-	private boolean isEmpty(String sql)
-	{
-		SQLLexer lexer = SQLLexerFactory.createLexerForDbId(dbId, sql);
-		SQLToken token = lexer.getNextToken(false, false);
-		return token == null;
-	}
-
 	public void formatSql(final SqlTextContainer editor, DelimiterDefinition alternateDelimiter)
-	{
-		String sql = editor.getSelectedStatement();
-		ScriptParser parser = new ScriptParser(ParserType.getTypeFromDBID(dbId));
-		parser.setAlternateDelimiter(alternateDelimiter);
-		parser.setReturnStartingWhitespace(true);
-		parser.setScript(sql);
-
-		boolean isSelected = editor.isTextSelected();
-
-		int count = parser.getSize();
-		if (count < 1) return;
-
-		StringBuilder newSql = new StringBuilder(sql.length() + 100);
-		boolean needDelimiter = false;
-		boolean addNewLine = false;
+  {
+    String sql = editor.getSelectedStatement();
+    final boolean isSelected = editor.isTextSelected();
 
     SqlFormatter f = SqlFormatterFactory.createFormatter(dbId);
 
-		for (int i=0; i < count; i++)
-		{
-			String command = parser.getCommand(i);
+    final String text;
 
-			DelimiterDefinition delimiter = parser.getDelimiterUsed(i);
-			if (delimiter == null)
-			{
-				delimiter = parser.getDelimiter();
-			}
-
-			// no need to format "empty" strings
-			if (StringUtil.isBlank(command))
-			{
-				newSql.append(command);
-				continue;
-			}
-
-			boolean isEmpty = isEmpty(command);
-
-			needDelimiter = (count > 1) || (isSelected && delimiter.terminatesScript(sql, false));
-
-			addNewLine = (i < count);
-
-			try
-			{
-				String formattedSql = f.getFormattedSql(command);
-				newSql.append(formattedSql.trim());
-				if (needDelimiter && !isEmpty)
-				{
-					if (delimiter.isSingleLine())
-					{
-						newSql.append('\n');
-					}
-					newSql.append(delimiter.getDelimiter());
-				}
-				newSql.append('\n');
-
-				// add a blank line between the statements, but not for the last one
-				if (addNewLine)
-				{
-					newSql.append('\n');
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("EditorPanel.reformatSql()", "Error when formatting SQL", e);
-			}
-		}
-
-		if (newSql.length() == 0) return;
-
-		final String text = newSql.toString();
+    if (f.supportsMultipleStatements())
+    {
+      text = f.getFormattedSql(sql);
+    }
+    else
+    {
+      text = doFormat(sql, f, alternateDelimiter, isSelected);
+    }
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				if (editor.isTextSelected())
+				if (isSelected)
 				{
 					boolean editable = editor.isEditable();
 					try
@@ -163,5 +101,81 @@ public class TextFormatter
 				}
 			}
 		});
+  }
+
+  private String doFormat(String sql, SqlFormatter formatter, DelimiterDefinition alternateDelimiter, boolean isSelected)
+	{
+		ScriptParser parser = new ScriptParser(ParserType.getTypeFromDBID(dbId));
+		parser.setAlternateDelimiter(alternateDelimiter);
+		parser.setReturnStartingWhitespace(true);
+		parser.setScript(sql);
+
+		int count = parser.getSize();
+		if (count < 1) return null;
+
+		StringBuilder newSql = new StringBuilder(sql.length() + 100);
+		boolean needDelimiter = false;
+		boolean addNewLine = false;
+
+		for (int i=0; i < count; i++)
+		{
+			String command = parser.getCommand(i);
+
+			DelimiterDefinition delimiter = parser.getDelimiterUsed(i);
+			if (delimiter == null)
+			{
+				delimiter = parser.getDelimiter();
+			}
+
+			// no need to format "empty" strings
+			if (StringUtil.isBlank(command))
+			{
+				newSql.append(command);
+				continue;
+			}
+
+			boolean isEmpty = isEmpty(command);
+
+			needDelimiter = (count > 1) || (isSelected && delimiter.terminatesScript(sql, false));
+
+			addNewLine = (i < count);
+
+			try
+			{
+				String formattedSql = formatter.getFormattedSql(command);
+				newSql.append(formattedSql.trim());
+				if (needDelimiter && !isEmpty)
+				{
+					if (delimiter.isSingleLine())
+					{
+						newSql.append('\n');
+					}
+					newSql.append(delimiter.getDelimiter());
+				}
+				newSql.append('\n');
+
+				// add a blank line between the statements, but not for the last one
+				if (addNewLine)
+				{
+					newSql.append('\n');
+				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("EditorPanel.reformatSql()", "Error when formatting SQL", e);
+			}
+		}
+
+		if (newSql.length() == 0) return null;
+
+		return newSql.toString();
 	}
+
+	private boolean isEmpty(String sql)
+	{
+		SQLLexer lexer = SQLLexerFactory.createLexerForDbId(dbId, sql);
+		SQLToken token = lexer.getNextToken(false, false);
+		return token == null;
+	}
+
 }
