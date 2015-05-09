@@ -62,10 +62,11 @@ public class ObjectDropperUI
 	implements RowActionMonitor, WindowListener
 {
 
-	protected JDialog dialog;
-	protected boolean cancelled;
-	protected boolean running;
-	protected ObjectDropper dropper;
+	private JDialog dialog;
+	private boolean cancelled;
+	private boolean running;
+  private boolean success;
+	private ObjectDropper dropper;
 	private Thread checkThread;
 	private Thread dropThread;
 
@@ -106,6 +107,7 @@ public class ObjectDropperUI
 			return;
 		}
 
+    success = true;
 		try
 		{
 			setConnectionBusy(true);
@@ -116,6 +118,7 @@ public class ObjectDropperUI
 		catch (Throwable ex)
 		{
 			final String msg = ex.getMessage();
+      success = false;
 			WbSwingUtilities.showErrorMessage(dialog, msg);
 			LogMgr.logError("ObjectDropperUI.doDrop()", "Error when dropping objects", ex);
 		}
@@ -144,6 +147,11 @@ public class ObjectDropperUI
 			}
 		});
 	}
+
+  public boolean success()
+  {
+    return success;
+  }
 
 	public boolean dialogWasCancelled()
 	{

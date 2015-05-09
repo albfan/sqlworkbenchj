@@ -192,7 +192,7 @@ public class DropDbObjectAction
       }
     }
 
-		if (!dropperUI.dialogWasCancelled())
+		if (dropperUI.success() && !dropperUI.dialogWasCancelled())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
