@@ -54,11 +54,11 @@ public class TextFormatter
 	public void formatSql(final SqlTextContainer editor, DelimiterDefinition alternateDelimiter)
   {
     String sql = editor.getSelectedStatement();
-    final boolean isSelected = editor.isTextSelected();
+    boolean isSelected = editor.isTextSelected();
 
     SqlFormatter f = SqlFormatterFactory.createFormatter(dbId);
 
-    final String text;
+    String text = null;
 
     if (f.supportsMultipleStatements())
     {
@@ -69,40 +69,39 @@ public class TextFormatter
       text = doFormat(sql, f, alternateDelimiter, isSelected);
     }
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (isSelected)
-				{
-					boolean editable = editor.isEditable();
-					try
-					{
-						if (!editable)
-						{
-							// the editor will refuse to execute setSelectedText() if it's not editable
-							editor.setEditable(true);
-						}
-						editor.setSelectedText(text);
-					}
-					finally
-					{
-						if (!editable)
-						{
-							editor.setEditable(false);
-						}
-					}
-				}
-				else
-				{
-					// setText() is always allowed, even if the editor is not editable
-					editor.setText(text);
-				}
-			}
-		});
+    updateEditor(editor, text);
   }
 
+  private void updateEditor(final SqlTextContainer editor, final String text)
+  {
+    WbSwingUtilities.invoke(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (editor.isTextSelected())
+        {
+          boolean editable = editor.isEditable();
+          try
+          {
+            // the editor will refuse to execute setSelectedText() if it's not editable
+            editor.setEditable(true);
+            editor.setSelectedText(text);
+          }
+          finally
+          {
+            editor.setEditable(editable);
+          }
+        }
+        else
+        {
+          // setText() is always allowed, even if the editor is not editable
+          editor.setText(text);
+        }
+      }
+    });
+  }
+  
   private String doFormat(String sql, SqlFormatter formatter, DelimiterDefinition alternateDelimiter, boolean isSelected)
 	{
 		ScriptParser parser = new ScriptParser(ParserType.getTypeFromDBID(dbId));
