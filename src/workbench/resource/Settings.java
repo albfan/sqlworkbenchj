@@ -27,6 +27,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.awt.print.PageFormat;
@@ -3137,7 +3138,6 @@ public class Settings
 		return this.restoreWindowPosition(target, target.getClass().getName());
 	}
 
-
 	public boolean restoreWindowPosition(final Component target, final String id)
 	{
 		if (target == null) return false;
@@ -3148,17 +3148,16 @@ public class Settings
 		// nothing stored, nothing to do
 		if (x == Integer.MIN_VALUE || y == Integer.MIN_VALUE) return false;
 
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-
-		// do not move the window too far over the edges (either left/right or upper/lower)
-		if (WbSwingUtilities.isOutsideOfScreen(x, y, target.getSize()))
+    Rectangle screen = WbSwingUtilities.getVirtualBounds();
+    Rectangle toDisplay = new Rectangle(x, y, target.getWidth(), target.getHeight());
+		if (WbSwingUtilities.isOutsideOfScreen(toDisplay))
 		{
-			LogMgr.logInfo("Settings.restoreWindowPosition()", "Window position " + WbSwingUtilities.displayString(x,y) + " not restored because it is outside the current screen size: " + WbSwingUtilities.displayString(screen));
+			LogMgr.logInfo("Settings.restoreWindowPosition()", "Stored window position " + WbSwingUtilities.displayString(toDisplay) + " not restored because it is outside the current screen size: " + WbSwingUtilities.displayString(screen));
 			return false;
 		}
 
 		LogMgr.logDebug("Settings.restoreWindowPosition()", "Restoring window position for '" + id + "', " +
-			"current screen size: " + WbSwingUtilities.displayString(screen)  + ", requested position: " + WbSwingUtilities.displayString(x,y) + ", component size: " + WbSwingUtilities.displayString(target.getSize()));
+			"current screen size: " + WbSwingUtilities.displayString(screen)  + ", requested position: " + WbSwingUtilities.displayString(toDisplay));
 
 		WbSwingUtilities.invoke(new Runnable()
 		{

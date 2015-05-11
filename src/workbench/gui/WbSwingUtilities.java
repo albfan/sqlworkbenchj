@@ -30,9 +30,11 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.FocusListener;
@@ -216,35 +218,54 @@ public class WbSwingUtilities
 		return "[w:" + (int)d.getWidth() + ",h:" + (int)d.getHeight() + "]";
 	}
 
+	public static String displayString(Rectangle d)
+	{
+		if (d == null) return "";
+		return "[x: " + d.x + ", y: " + d.y + ", w:" + (int)d.getWidth() + ",h:" + (int)d.getHeight() + "]";
+	}
+
 	public static String displayString(int x, int y)
 	{
 		return "[x:" + x + ",y:" + y + "]";
 	}
 
-	public static boolean isOutsideOfScreen(int x, int y, Dimension size)
+	public static boolean isOutsideOfScreen(Rectangle toDisplay)
 	{
-		return !isFullyVisible(x, y, size);
+		return !isFullyVisible(toDisplay);
 	}
 
-	public static boolean isFullyVisible(Point pos, Dimension size)
-	{
-		return isFullyVisible(pos.x, pos.y, size);
-	}
+  public static Rectangle getVirtualBounds()
+  {
+    Rectangle virtualBounds = new Rectangle();
+    GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] devices = env.getScreenDevices();
+    for (GraphicsDevice gd : devices)
+    {
+      GraphicsConfiguration[] configs = gd.getConfigurations();
+      for (GraphicsConfiguration gc : configs)
+      {
+        virtualBounds = virtualBounds.union(gc.getBounds());
+      }
+    }
+    return virtualBounds;
+  }
 
 	public static boolean isFullyVisible(int x, int y, Dimension size)
+  {
+    return isFullyVisible(new Rectangle(x,y,size.width, size.height));
+  }
+
+	public static boolean isFullyVisible(Point p, Dimension size)
+  {
+    return isFullyVisible(new Rectangle(p, size));
+  }
+
+	public static boolean isFullyVisible(Rectangle toDisplay)
 	{
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+    Rectangle screen = getVirtualBounds();
 
-		int xp = (int)(screen.getWidth() * 0.05);
-		int yp = (int)(screen.getHeight() * 0.05);
-
-		// do not move the window too far over the edges (either left/right or upper/lower)
-		if ( (x + size.width < xp || y + size.height < yp) || (x > screen.width - xp || y > screen.height - yp))
-		{
-			return false;
-		}
-
-		return true;
+    // make sure at least something of the window is visible
+    return screen.intersects(toDisplay);
 	}
 
 	/**
