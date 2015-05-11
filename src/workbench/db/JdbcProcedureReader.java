@@ -66,6 +66,11 @@ public class JdbcProcedureReader
 		this.connection = conn;
 	}
 
+  @Override
+  public void clearCache()
+  {
+  }
+
 	@Override
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{

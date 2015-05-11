@@ -79,4 +79,6 @@ public interface ProcedureReader
 		throws SQLException;
 
 	ProcedureDefinition findProcedureDefinition(ProcedureDefinition def);
+
+  void clearCache();
 }

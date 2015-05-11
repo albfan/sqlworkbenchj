@@ -53,4 +53,9 @@ public class PGTypeLookup
 		}
 		return null;
 	}
+
+  public void clear()
+  {
+    oidToTypeMap.clear();
+  }
 }

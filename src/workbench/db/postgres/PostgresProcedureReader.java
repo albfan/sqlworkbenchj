@@ -79,6 +79,16 @@ public class PostgresProcedureReader
 		}
 	}
 
+  @Override
+  public void clearCache()
+  {
+    if (pgTypes != null)
+    {
+      pgTypes.clear();
+      pgTypes = null;
+    }
+  }
+
 	private Map<String, Integer> getJavaTypeMapping()
 	{
 		if (pgType2Java == null)
@@ -129,7 +139,10 @@ public class PostgresProcedureReader
 			Statement stmt = null;
 			ResultSet rs = null;
 			Savepoint sp = null;
-			String sql = "select oid, format_type(oid, null) from pg_type";
+			String sql =
+        "select t.oid, format_type(t.oid, null), t.typtype, ns.nspname as schema_name \n" +
+        "from pg_type t \n" +
+        "  join pg_namespace ns on ns.oid = t.typnamespace";
 
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
@@ -145,11 +158,15 @@ public class PostgresProcedureReader
 				{
 					long oid = rs.getLong(1);
 					String typeName = rs.getString(2);
+          String typType = rs.getString(3);
+          String schema = rs.getString(4);
+
 					if (typeName.equals("character varying"))
 					{
 						typeName = "varchar";
 					}
-					PGType typ = new PGType(StringUtil.trimQuotes(typeName), oid);
+          typeName = getFQName(typType, schema, StringUtil.trimQuotes(typeName));
+					PGType typ = new PGType(typeName, oid);
 					typeMap.put(Long.valueOf(oid), typ);
 				}
 				connection.releaseSavepoint(sp);
@@ -168,6 +185,23 @@ public class PostgresProcedureReader
 		}
 		return pgTypes;
 	}
+
+  private String getFQName(String type, String schema, String typName)
+  {
+    if ("c".equals(type))
+    {
+      if (typName.indexOf('.') > -1)
+      {
+        // already fully qualified
+        return typName;
+      }
+      if (!typName.startsWith(schema))
+      {
+        return schema + "." + typName;
+      }
+    }
+    return typName;
+  }
 
 	private String getTypeNameFromOid(long oid)
 	{

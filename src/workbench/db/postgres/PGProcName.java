@@ -28,8 +28,8 @@ import java.util.List;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ProcedureDefinition;
-import workbench.util.CollectionUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -53,6 +53,10 @@ public class PGProcName
 			{
 				String mode = col.getArgumentMode();
 				PGType typ = typeMap.getEntryByType(col.getDbmsType());
+        if (typ == null)
+        {
+          typ = new PGType(col.getDbmsType(), -1);
+        }
 				PGArg arg = new PGArg(typ, mode);
 				arguments.add(arg);
 			}
