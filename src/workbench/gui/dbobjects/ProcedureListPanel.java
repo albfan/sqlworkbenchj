@@ -457,6 +457,7 @@ public class ProcedureListPanel
 
 			levelChanger.changeIsolationLevel(dbConnection);
 			DbMetadata meta = dbConnection.getMetadata();
+      meta.getProcedureReader().clearCache();
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			procList.setOriginalOrder(ds);
 			dbConnection.getObjectCache().addProcedureList(ds, currentSchema);
