@@ -19,11 +19,8 @@
  */
 package workbench.sql.parser;
 
-
-
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.lexer.SQLToken;
-
 
 /**
  *
