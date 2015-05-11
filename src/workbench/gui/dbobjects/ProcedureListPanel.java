@@ -368,6 +368,11 @@ public class ProcedureListPanel
 			this.cache.clear();
 		}
 
+    if (dbConnection != null)
+    {
+      dbConnection.getMetadata().getProcedureReader().clearCache();
+    }
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
@@ -457,7 +462,6 @@ public class ProcedureListPanel
 
 			levelChanger.changeIsolationLevel(dbConnection);
 			DbMetadata meta = dbConnection.getMetadata();
-      meta.getProcedureReader().clearCache();
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			procList.setOriginalOrder(ds);
 			dbConnection.getObjectCache().addProcedureList(ds, currentSchema);
