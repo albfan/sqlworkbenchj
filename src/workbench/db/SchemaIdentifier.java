@@ -22,9 +22,6 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.Objects;
 
-import workbench.db.DbObject;
-import workbench.db.WbConnection;
-
 /**
  *
  * @author Thomas Kellerer
