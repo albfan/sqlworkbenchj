@@ -424,12 +424,12 @@ public class TreeLoader
       schema = parent.getName();
     }
 
-    if (connection.getDbSettings().supportsCatalogs() && connection.getDbSettings().supportsSchemas())
+    if (connection.getDbSettings().supportsCatalogs() && connection.getDbSettings().supportsSchemas() && catalog == null)
     {
       // if schemas and catalogs are supported, the current node must be a schema
       // and the parent of that must be a catalog
       ObjectTreeNode catNode = parent.getParent();
-      if (catNode != null && catNode.getType().equals(TYPE_CATALOG))
+      if (catNode != null && catNode.getType().equalsIgnoreCase(TYPE_CATALOG))
       {
         catalog = catNode.getName();
       }
