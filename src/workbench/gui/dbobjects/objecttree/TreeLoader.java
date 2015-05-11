@@ -408,12 +408,18 @@ public class TreeLoader
     String schema = null;
     String catalog = null;
 
-    if (parent.getType().equals(TYPE_CATALOG))
+    if (parent.getDbObject() != null)
+    {
+      // this is typically a CatalogIdentifier or SchemaIdentifier
+      DbObject dbo = parent.getDbObject();
+      schema = dbo.getSchema();
+      catalog = dbo.getCatalog();
+    }
+    else if (parent.getType().equalsIgnoreCase(TYPE_CATALOG))
     {
       catalog = parent.getName();
     }
-
-    if (parent.getType().equals(TYPE_SCHEMA))
+    else if (parent.getType().equalsIgnoreCase(TYPE_SCHEMA))
     {
       schema = parent.getName();
     }
