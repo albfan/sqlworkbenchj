@@ -38,6 +38,7 @@ import workbench.db.TriggerLevel;
 import workbench.storage.filter.ColumnExpression;
 
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -309,49 +310,48 @@ public class ObjectTreeNode
     return nodeType + ": " + getName();
   }
 
-  public String getParentTypename()
-  {
-    if (nodeType.equals(TreeLoader.TYPE_DBO_TYPE_NODE))
-    {
-      return getName();
-    }
-    ObjectTreeNode parentNode = getParent();
-    while (parentNode != null)
-    {
-      if (parentNode.getType().equals(TreeLoader.TYPE_DBO_TYPE_NODE))
-      {
-        return parentNode.getName();
-      }
-      parentNode = parentNode.getParent();
-    }
-    return null;
-  }
-
-  public ObjectTreeNode getNamespace()
+  public String getLocationInfo()
   {
     if (this.isSchemaNode())
     {
-      return this;
+      return getDbObject().toString();
     }
 
     if (this.isCatalogNode())
     {
-      return this;
+      return getName();
     }
 
+    String result = "";
+    if (getDbObject() != null && !isFkTable())
+    {
+      result = SqlUtil.removeObjectQuotes(getDbObject().getObjectName());
+    }
     ObjectTreeNode parentNode = getParent();
     while (parentNode != null)
     {
-      if (parentNode.isSchemaNode())
+      if (parentNode.getDbObject() != null)
       {
-        return parentNode;
-      }
-      if (parentNode.isCatalogNode())
-      {
-        return parentNode;
+        String name = SqlUtil.removeObjectQuotes(parentNode.getDbObject().getObjectName());
+        if (result.isEmpty())
+        {
+          result = name;
+        }
+        else
+        {
+          result = name + "." + result;
+        }
       }
       parentNode = parentNode.getParent();
     }
-    return null;
+    return result;
   }
+
+  private boolean isFkTable()
+  {
+    if (this.getParent() == null) return false;
+    String type = getParent().getType();
+    return (TreeLoader.TYPE_FK_DEF.equals(type) || TreeLoader.TYPE_FK_LIST.equals(type) || TreeLoader.TYPE_REF_LIST.equals(type));
+  }
+
 }

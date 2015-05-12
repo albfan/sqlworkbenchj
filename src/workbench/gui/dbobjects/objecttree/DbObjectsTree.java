@@ -687,15 +687,6 @@ public class DbObjectsTree
     if (path == null || path.getPathCount() == 0) return "";
     ObjectTreeNode node = (ObjectTreeNode)path.getLastPathComponent();
     if (node == null) return "";
-    ObjectTreeNode ns = node.getNamespace();
-    if (ns == null) return "";
-    String type = node.getParentTypename();
-
-    String result = ns.getDbObject().toString();
-    if (type != null)
-    {
-      result += " [" + type + "]";
-    }
-    return result;
+    return node.getLocationInfo();
   }
 }
