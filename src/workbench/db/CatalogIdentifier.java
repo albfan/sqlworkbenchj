@@ -149,5 +149,11 @@ public class CatalogIdentifier
     return true;
   }
 
+  @Override
+  public String toString()
+  {
+    return catalogName;
+  }
+
 
 }

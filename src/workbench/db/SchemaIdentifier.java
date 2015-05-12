@@ -144,5 +144,11 @@ public class SchemaIdentifier
     return true;
   }
 
+  @Override
+  public String toString()
+  {
+    if (catalog == null) return schemaName;
+    return catalog + "." + schemaName;
+  }
 
 }
