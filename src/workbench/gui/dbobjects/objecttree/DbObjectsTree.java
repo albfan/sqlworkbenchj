@@ -36,6 +36,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import workbench.db.SchemaIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
@@ -214,14 +215,58 @@ public class DbObjectsTree
   {
     if (tbl == null) return;
 
-    ObjectTreeNode node = findNodeByDbObject(getModel().getRoot(), tbl);
+    ObjectTreeNode schema = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
+    if (schema == null) return;
+    
+    if (!schema.childrenAreLoaded() && DbTreeSettings.autoLoadSchemasOnFind(loader.getConnection().getDbId()))
+    {
+      try
+      {
+        loader.loadSchemaObjects(schema);
+      }
+      catch (Exception ex)
+      {
+        LogMgr.logError("DbObjectsTree.selectObject()", "Could not load schema objects for: " + schema, ex);
+      }
+    }
+    ObjectTreeNode node = findNodeForTable(schema, tbl);
+
     if (node != null)
     {
       expandNode(node);
     }
   }
 
-  public ObjectTreeNode findNodeByDbObject(ObjectTreeNode parent, TableIdentifier table)
+  public ObjectTreeNode findSchemaNode(String catalog, String schema)
+  {
+    if (schema == null) return null;
+    SchemaIdentifier id = new SchemaIdentifier(schema);
+    id.setCatalog(catalog);
+    return findSchemaNode(getModel().getRoot(), id);
+  }
+
+  public ObjectTreeNode findSchemaNode(ObjectTreeNode parent, SchemaIdentifier schema)
+  {
+    if (parent == null) return null;
+    if (schema == null) return null;
+
+    if (parent.isSchemaNode() && schema.equals(parent.getDbObject())) return parent;
+
+    int childCount = parent.getChildCount();
+    for (int i=0; i < childCount; i++)
+    {
+      ObjectTreeNode child = parent.getChildAt(i);
+      if (schema.equals(child.getDbObject())) return child;
+      if (child.isCatalogNode())
+      {
+        ObjectTreeNode n2 = findSchemaNode(child, schema);
+        if (n2 != null) return n2;
+      }
+    }
+    return null;
+  }
+
+  public ObjectTreeNode findNodeForTable(ObjectTreeNode parent, TableIdentifier table)
   {
     if (parent == null) return null;
     if (table == null) return null;
@@ -229,7 +274,7 @@ public class DbObjectsTree
     int childCount = parent.getChildCount();
     for (int i = 0; i < childCount; i++)
     {
-      ObjectTreeNode child = (ObjectTreeNode)parent.getChildAt(i);
+      ObjectTreeNode child = parent.getChildAt(i);
       if (child != null && child.getDbObject() != null)
       {
         if (child.getDbObject() instanceof TableIdentifier)
@@ -241,7 +286,7 @@ public class DbObjectsTree
           }
         }
       }
-      ObjectTreeNode n2 = findNodeByDbObject(child, table);
+      ObjectTreeNode n2 = findNodeForTable(child, table);
       if (n2 != null) return n2;
     }
     return null;
@@ -358,7 +403,7 @@ public class DbObjectsTree
   {
     try
     {
-      loader.loadSchemaTypes(schemaNode);
+      loader.loadSchemaObjects(schemaNode);
     }
     catch (SQLException ex)
     {

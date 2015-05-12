@@ -344,10 +344,10 @@ public class TreeLoader
 
     schemaNode.removeAllChildren();
     addTypeNodes(schemaNode);
-    loadSchemaTypes(schemaNode);
+    loadSchemaObjects(schemaNode);
   }
 
-  public void loadSchemaTypes(ObjectTreeNode schemaNode)
+  public void loadSchemaObjects(ObjectTreeNode schemaNode)
     throws SQLException
   {
     if (schemaNode == null) return;

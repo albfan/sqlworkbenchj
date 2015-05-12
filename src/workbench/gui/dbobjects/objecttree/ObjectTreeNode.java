@@ -30,6 +30,7 @@ import workbench.db.CatalogIdentifier;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
+import workbench.db.SchemaIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerLevel;
@@ -80,6 +81,18 @@ public class ObjectTreeNode
   public void setChildrenLoaded(boolean flag)
   {
     isLoaded = flag;
+  }
+
+  public boolean isSchemaNode()
+  {
+    if (getDbObject() instanceof SchemaIdentifier) return true;
+    return getType().equalsIgnoreCase(TreeLoader.TYPE_SCHEMA);
+  }
+
+  public boolean isCatalogNode()
+  {
+    if (getDbObject() instanceof CatalogIdentifier) return true;
+    return getType().equalsIgnoreCase(TreeLoader.TYPE_CATALOG);
   }
 
   public boolean childrenAreLoaded()
@@ -294,11 +307,6 @@ public class ObjectTreeNode
   public String displayString()
   {
     return nodeType + ": " + getName();
-  }
-
-  public boolean isSchemaNode()
-  {
-    return nodeType.equals(TreeLoader.TYPE_SCHEMA);
   }
 
 }

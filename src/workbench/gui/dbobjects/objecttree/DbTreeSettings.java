@@ -103,4 +103,10 @@ public class DbTreeSettings
   {
     return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".filter.autoexpand", true);
   }
+
+  public static boolean autoLoadSchemasOnFind(String dbid)
+  {
+    boolean global = Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".findobject.autoload", true);
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "." + dbid + ".findobject.autoload", global);
+  }
 }
