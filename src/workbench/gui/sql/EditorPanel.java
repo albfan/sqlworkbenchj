@@ -503,7 +503,7 @@ public class EditorPanel
 	{
 		if (popup == null) return;
     if (anAction == null) return;
-    int count = getComponentCount();
+    int count = popup.getComponentCount();
     int removeIndex = -1;
     for (int i=0; i < count; i++)
     {
@@ -513,7 +513,7 @@ public class EditorPanel
         JMenuItem item = (JMenuItem)comp;
         if (item.getAction() == anAction)
         {
-          removeIndex = -1;
+          removeIndex = i;
           break;
         }
       }
@@ -638,7 +638,7 @@ public class EditorPanel
   {
 		if (this.saveInProgress) return false;
 		if (this.loadInProgress) return false;
-    
+
     try
     {
       loadInProgress = true;
