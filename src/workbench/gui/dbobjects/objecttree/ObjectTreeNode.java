@@ -309,6 +309,24 @@ public class ObjectTreeNode
     return nodeType + ": " + getName();
   }
 
+  public String getParentTypename()
+  {
+    if (nodeType.equals(TreeLoader.TYPE_DBO_TYPE_NODE))
+    {
+      return getName();
+    }
+    ObjectTreeNode parentNode = getParent();
+    while (parentNode != null)
+    {
+      if (parentNode.getType().equals(TreeLoader.TYPE_DBO_TYPE_NODE))
+      {
+        return parentNode.getName();
+      }
+      parentNode = parentNode.getParent();
+    }
+    return null;
+  }
+
   public ObjectTreeNode getNamespace()
   {
     if (this.isSchemaNode())

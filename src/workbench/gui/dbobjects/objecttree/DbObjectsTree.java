@@ -689,6 +689,13 @@ public class DbObjectsTree
     if (node == null) return "";
     ObjectTreeNode ns = node.getNamespace();
     if (ns == null) return "";
-    return ns.getDbObject().toString();
+    String type = node.getParentTypename();
+
+    String result = ns.getDbObject().toString();
+    if (type != null)
+    {
+      result += " [" + type + "]";
+    }
+    return result;
   }
 }
