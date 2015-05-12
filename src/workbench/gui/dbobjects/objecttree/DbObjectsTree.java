@@ -39,6 +39,7 @@ import javax.swing.tree.TreeSelectionModel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.DbSettings;
 import workbench.db.SchemaIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -215,12 +216,11 @@ public class DbObjectsTree
   {
     if (tbl == null) return;
 
-    final ObjectTreeNode schemaNode = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
+    ObjectTreeNode toSearch = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
 
-    if (schemaNode == null) return;
-
-    if (shouldLoadSearchNode(schemaNode))
+    if (shouldLoadSearchNode(toSearch))
     {
+      final ObjectTreeNode toLoad = toSearch;
       // if we need to load the schema first, this should be done in a background thread
       // to make sure the UI is not blocked - especially because this method is called
       // from an ActionListener even which means it's called on the EDT
@@ -229,9 +229,9 @@ public class DbObjectsTree
         @Override
         public void run()
         {
-          doLoad(schemaNode, true);
+          doLoad(toLoad, true);
 
-          final ObjectTreeNode node = findNodeForTable(schemaNode, tbl);
+          final ObjectTreeNode node = findNodeForTable(toLoad, tbl);
 
           if (node != null)
           {
@@ -250,7 +250,16 @@ public class DbObjectsTree
       return;
     }
 
-    ObjectTreeNode node = findNodeForTable(schemaNode, tbl);
+    if (toSearch == null)
+    {
+      // no schema or catalog node found --> start with the root node
+      // findNodeForTable() will not automatically load the content - which is good
+      // because we do not want to load everything just to find this table.
+      // when getting here, the table will only be searched in the already loaded nodes
+      toSearch = getModel().getRoot();
+    }
+
+    ObjectTreeNode node = findNodeForTable(toSearch, tbl);
 
     if (node != null)
     {
@@ -287,10 +296,22 @@ public class DbObjectsTree
 
   private ObjectTreeNode findSchemaNode(String catalog, String schema)
   {
-    ObjectTreeNode catNode = findCatalogNode(catalog);
+    DbSettings settings = loader.getConnection().getDbSettings();
+    if (!settings.supportsCatalogs() && !settings.supportsSchemas())
+    {
+      return getModel().getRoot();
+    }
+
+    ObjectTreeNode catNode = null;
+    if (settings.supportsCatalogs())
+    {
+      catNode = findCatalogNode(catalog);
+    }
 
     if (schema == null)
     {
+      // no schema supplied so the catNode needs to be searched
+      // if catNode is null, nothing will be searched
       if (shouldLoadSearchNode(catNode))
       {
         doLoad(catNode, true);
