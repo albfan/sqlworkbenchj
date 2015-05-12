@@ -36,7 +36,6 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import workbench.db.DbSearchPath;
 import workbench.db.SchemaIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -212,29 +211,59 @@ public class DbObjectsTree
 
   }
 
-  public void selectObject(TableIdentifier tbl)
+  public void selectObject(final TableIdentifier tbl)
   {
     if (tbl == null) return;
 
-    ObjectTreeNode schemaNode = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
+    final ObjectTreeNode schemaNode = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
+    if (schemaNode == null) return;
 
     if (!schemaNode.childrenAreLoaded() && DbTreeSettings.autoLoadSchemasOnFind(loader.getConnection().getDbId()))
     {
-      try
+      // if we need to load the schema first, this should be done in a background thread
+      // to make sure the UI is not blocked - especially because this method is called
+      // from an ActionListener even which means it's called on the EDT
+      WbThread th = new WbThread("SchemaLoader")
       {
-        loader.loadSchemaObjects(schemaNode);
-      }
-      catch (Exception ex)
-      {
-        LogMgr.logError("DbObjectsTree.selectObject()", "Could not load schema objects for: " + schemaNode, ex);
-      }
+        @Override
+        public void run()
+        {
+          try
+          {
+            loader.loadSchemaObjects(schemaNode);
+            final ObjectTreeNode node = findNodeForTable(schemaNode, tbl);
+
+            if (node != null)
+            {
+              EventQueue.invokeLater(new Runnable()
+              {
+                @Override
+                public void run()
+                {
+                  expandNode(node);
+                }
+              });
+            }
+            
+          }
+          catch (Exception ex)
+          {
+            LogMgr.logError("DbObjectsTree.selectObject()", "Could not load schema objects for: " + schemaNode, ex);
+          }
+        }
+      };
+      th.start();
+      return;
     }
+
     ObjectTreeNode node = findNodeForTable(schemaNode, tbl);
 
     if (node != null)
     {
+      // this method is already called on the EDT, so there is no need to do it here
       expandNode(node);
     }
+
   }
 
   public ObjectTreeNode findSchemaNode(String catalog, String schema)
