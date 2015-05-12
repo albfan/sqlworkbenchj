@@ -28,6 +28,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.gui.actions.WbAction;
+import workbench.log.LogMgr;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -74,7 +75,16 @@ public class FindObjectAction
 
     // make sure we have a fully qualified table name based on the search path of the current connection
     // the DBTree uses its own connection and therefore the search can't be done there
-    final TableIdentifier tbl = editorConnection.getMetadata().searchObjectOnPath(new TableIdentifier(text), null);
+    final TableIdentifier tbl;
+    if (editorConnection.isBusy())
+    {
+      LogMgr.logWarning("FindObjectAction.executAction()", "Can not create full qualified table because the connection is busy");
+      tbl = new TableIdentifier(text);
+    }
+    else
+    {
+      tbl = editorConnection.getMetadata().searchObjectOnPath(new TableIdentifier(text), null);
+    }
 
     EventQueue.invokeLater(new Runnable()
     {
