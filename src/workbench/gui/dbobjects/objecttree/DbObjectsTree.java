@@ -36,6 +36,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import workbench.db.DbSearchPath;
 import workbench.db.SchemaIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -215,21 +216,20 @@ public class DbObjectsTree
   {
     if (tbl == null) return;
 
-    ObjectTreeNode schema = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
-    if (schema == null) return;
-    
-    if (!schema.childrenAreLoaded() && DbTreeSettings.autoLoadSchemasOnFind(loader.getConnection().getDbId()))
+    ObjectTreeNode schemaNode = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
+
+    if (!schemaNode.childrenAreLoaded() && DbTreeSettings.autoLoadSchemasOnFind(loader.getConnection().getDbId()))
     {
       try
       {
-        loader.loadSchemaObjects(schema);
+        loader.loadSchemaObjects(schemaNode);
       }
       catch (Exception ex)
       {
-        LogMgr.logError("DbObjectsTree.selectObject()", "Could not load schema objects for: " + schema, ex);
+        LogMgr.logError("DbObjectsTree.selectObject()", "Could not load schema objects for: " + schemaNode, ex);
       }
     }
-    ObjectTreeNode node = findNodeForTable(schema, tbl);
+    ObjectTreeNode node = findNodeForTable(schemaNode, tbl);
 
     if (node != null)
     {

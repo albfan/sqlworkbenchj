@@ -22,7 +22,6 @@ package workbench.gui.dbobjects.objecttree;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
-import workbench.db.DbMetadata;
 import workbench.interfaces.TextContainer;
 
 import workbench.db.TableIdentifier;
@@ -73,21 +72,9 @@ public class FindObjectAction
     String text = SqlUtil.getIdentifierAtCursor(textContainer, editorConnection);
     if (StringUtil.isBlank(text)) return;
 
-    final TableIdentifier tbl = new TableIdentifier(text);
-
-    if (editorConnection != null)
-    {
-      DbMetadata meta = editorConnection.getMetadata();
-
-      if (tbl.getCatalog() == null && !finder.getConnection().isBusy())
-      {
-        tbl.setCatalog(meta.getCurrentCatalog());
-      }
-      if (tbl.getSchema() == null && !finder.getConnection().isBusy())
-      {
-        tbl.setSchema(meta.getCurrentSchema());
-      }
-    }
+    // make sure we have a fully qualified table name based on the search path of the current connection
+    // the DBTree uses its own connection and therefore the search can't be done there
+    final TableIdentifier tbl = editorConnection.getMetadata().searchObjectOnPath(new TableIdentifier(text), null);
 
     EventQueue.invokeLater(new Runnable()
     {
