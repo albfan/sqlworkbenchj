@@ -218,7 +218,7 @@ public class DbObjectsTree
     final ObjectTreeNode schemaNode = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
     if (schemaNode == null) return;
 
-    if (!schemaNode.childrenAreLoaded() && DbTreeSettings.autoLoadSchemasOnFind(loader.getConnection().getDbId()))
+    if (!schemaNode.childrenAreLoaded() && DbTreeSettings.autoLoadSchemasOnFind(loader.getConnection().getDbId()) && !loader.getConnection().isBusy())
     {
       // if we need to load the schema first, this should be done in a background thread
       // to make sure the UI is not blocked - especially because this method is called
@@ -228,27 +228,20 @@ public class DbObjectsTree
         @Override
         public void run()
         {
-          try
-          {
-            loader.loadSchemaObjects(schemaNode);
-            final ObjectTreeNode node = findNodeForTable(schemaNode, tbl);
+          doLoad(schemaNode, true);
+          
+          final ObjectTreeNode node = findNodeForTable(schemaNode, tbl);
 
-            if (node != null)
-            {
-              EventQueue.invokeLater(new Runnable()
-              {
-                @Override
-                public void run()
-                {
-                  expandNode(node);
-                }
-              });
-            }
-            
-          }
-          catch (Exception ex)
+          if (node != null)
           {
-            LogMgr.logError("DbObjectsTree.selectObject()", "Could not load schema objects for: " + schemaNode, ex);
+            EventQueue.invokeLater(new Runnable()
+            {
+              @Override
+              public void run()
+              {
+                expandNode(node);
+              }
+            });
           }
         }
       };
@@ -428,7 +421,7 @@ public class DbObjectsTree
     expandNode(node);
   }
 
-  private void loadSchemaTypes(ObjectTreeNode schemaNode)
+  private void loadSchemaObjects(ObjectTreeNode schemaNode)
   {
     try
     {
@@ -502,13 +495,13 @@ public class DbObjectsTree
       @Override
       public void run()
       {
-        doLoad(node);
+        doLoad(node, DbTreeSettings.autoloadSchemaObjects());
       }
     }, "DbTree Load Thread");
     load.start();
   }
 
-  private void doLoad(final ObjectTreeNode node)
+  private void doLoad(final ObjectTreeNode node, boolean loadSchemaObjects)
   {
     try
     {
@@ -518,9 +511,9 @@ public class DbObjectsTree
       {
         loader.loadChildren(node);
       }
-      if (DbTreeSettings.autoloadSchemaObjects())
+      if (loadSchemaObjects)
       {
-        loadSchemaTypes(node);
+        loadSchemaObjects(node);
       }
       Runnable postLoad = afterLoadProcess.get(node);
       if (postLoad != null)
@@ -569,7 +562,7 @@ public class DbObjectsTree
       {
         if (!child.isLoaded())
         {
-          doLoad(child);
+          doLoad(child, DbTreeSettings.autoloadSchemaObjects());
         }
         return child;
       }
