@@ -309,4 +309,31 @@ public class ObjectTreeNode
     return nodeType + ": " + getName();
   }
 
+  public ObjectTreeNode getNamespace()
+  {
+    if (this.isSchemaNode())
+    {
+      return this;
+    }
+
+    if (this.isCatalogNode())
+    {
+      return this;
+    }
+
+    ObjectTreeNode parentNode = getParent();
+    while (parentNode != null)
+    {
+      if (parentNode.isSchemaNode())
+      {
+        return parentNode;
+      }
+      if (parentNode.isCatalogNode())
+      {
+        return parentNode;
+      }
+      parentNode = parentNode.getParent();
+    }
+    return null;
+  }
 }

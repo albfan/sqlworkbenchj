@@ -218,7 +218,7 @@ public class DbObjectsTree
     final ObjectTreeNode schemaNode = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
     if (schemaNode == null) return;
 
-    if (!schemaNode.childrenAreLoaded() && DbTreeSettings.autoLoadSchemasOnFind(loader.getConnection().getDbId()) && !loader.getConnection().isBusy())
+    if (shouldLoadSearchNode(schemaNode))
     {
       // if we need to load the schema first, this should be done in a background thread
       // to make sure the UI is not blocked - especially because this method is called
@@ -229,7 +229,7 @@ public class DbObjectsTree
         public void run()
         {
           doLoad(schemaNode, true);
-          
+
           final ObjectTreeNode node = findNodeForTable(schemaNode, tbl);
 
           if (node != null)
@@ -256,18 +256,54 @@ public class DbObjectsTree
       // this method is already called on the EDT, so there is no need to do it here
       expandNode(node);
     }
-
   }
 
-  public ObjectTreeNode findSchemaNode(String catalog, String schema)
+  private boolean shouldLoadSearchNode(ObjectTreeNode node)
+  {
+    if (node == null) return false;
+    if (node.childrenAreLoaded()) return false;
+    return DbTreeSettings.autoLoadSchemasOnFind(loader.getConnection().getDbId()) && !loader.getConnection().isBusy();
+  }
+
+  private ObjectTreeNode findCatalogNode(String catalog)
+  {
+    if (catalog == null) return null;
+
+    ObjectTreeNode root = getModel().getRoot();
+
+    // catalogs must be first level children, no need for recursion here
+    int childCount = root.getChildCount();
+    for (int i=0; i < childCount; i++)
+    {
+      ObjectTreeNode child = root.getChildAt(i);
+      if (child.isCatalogNode() && child.getName().equalsIgnoreCase(catalog))
+      {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  private ObjectTreeNode findSchemaNode(String catalog, String schema)
   {
     if (schema == null) return null;
     SchemaIdentifier id = new SchemaIdentifier(schema);
     id.setCatalog(catalog);
-    return findSchemaNode(getModel().getRoot(), id);
+
+    ObjectTreeNode searchNode = getModel().getRoot();
+    ObjectTreeNode catNode = findCatalogNode(catalog);
+    if (catNode != null)
+    {
+      if (shouldLoadSearchNode(catNode))
+      {
+        doLoad(catNode, true);
+      }
+      searchNode = catNode;
+    }
+    return findSchemaNode(searchNode, id);
   }
 
-  public ObjectTreeNode findSchemaNode(ObjectTreeNode parent, SchemaIdentifier schema)
+  private ObjectTreeNode findSchemaNode(ObjectTreeNode parent, SchemaIdentifier schema)
   {
     if (parent == null) return null;
     if (schema == null) return null;
@@ -288,7 +324,7 @@ public class DbObjectsTree
     return null;
   }
 
-  public ObjectTreeNode findNodeForTable(ObjectTreeNode parent, TableIdentifier table)
+  private ObjectTreeNode findNodeForTable(ObjectTreeNode parent, TableIdentifier table)
   {
     if (parent == null) return null;
     if (table == null) return null;
@@ -645,4 +681,14 @@ public class DbObjectsTree
     return result;
   }
 
+  public String getSelectedNamespace()
+  {
+    TreePath path = getSelectionPath();
+    if (path == null || path.getPathCount() == 0) return "";
+    ObjectTreeNode node = (ObjectTreeNode)path.getLastPathComponent();
+    if (node == null) return "";
+    ObjectTreeNode ns = node.getNamespace();
+    if (ns == null) return "";
+    return ns.getDbObject().toString();
+  }
 }

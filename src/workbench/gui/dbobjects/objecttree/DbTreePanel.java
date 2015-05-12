@@ -47,7 +47,11 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import workbench.interfaces.ObjectDropListener;
@@ -73,7 +77,9 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.MultiSelectComboBox;
+import workbench.gui.components.WbLabelField;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbToolbar;
@@ -94,7 +100,7 @@ public class DbTreePanel
 	extends JPanel
   implements Reloadable, ActionListener, MouseListener, DbObjectList,
              ObjectDropListener, KeyListener, QuickFilter, RowCountDisplay,
-             ObjectFinder
+             ObjectFinder, TreeSelectionListener
 {
   public static final String PROP_DIVIDER = "divider.location";
   public static final String PROP_VISIBLE = "tree.visible";
@@ -105,6 +111,7 @@ public class DbTreePanel
   private int id;
   private WbConnection connection;
   private WbStatusLabel statusBar;
+  private WbLabelField currentSchemaLabel;
   private MultiSelectComboBox<String> typeFilter;
   private List<String> selectedTypes;
   private JPanel toolPanel;
@@ -121,9 +128,13 @@ public class DbTreePanel
 		super(new BorderLayout());
     id = ++instanceCount;
 
+    currentSchemaLabel = new WbLabelField();
+    Border b = new CompoundBorder(new DividerBorder(DividerBorder.TOP), new EmptyBorder(2,2,2,0));
+    currentSchemaLabel.setBorder(b);
     statusBar = new WbStatusLabel();
     tree = new DbObjectsTree(statusBar);
     tree.addMouseListener(this);
+    tree.addTreeSelectionListener(this);
     JScrollPane scroll = new JScrollPane(tree);
     createToolbar();
 
@@ -208,6 +219,10 @@ public class DbTreePanel
     gc.fill = GridBagConstraints.HORIZONTAL;
     gc.anchor = GridBagConstraints.LINE_START;
     toolPanel.add(filterPanel, gc);
+
+    gc.gridy ++;
+    gc.insets = new Insets(4, 0, 0, 0);
+    toolPanel.add(currentSchemaLabel, gc);
   }
 
   @Override
@@ -456,7 +471,7 @@ public class DbTreePanel
     boolean isFiltered = tree.getModel().getFilteredNodes().size() > 0;
 
     tree.getModel().removeObjects(objects);
-    
+
     if (isFiltered)
     {
       applyQuickFilter();
@@ -897,6 +912,12 @@ public class DbTreePanel
     }
   }
 
+  @Override
+  public void valueChanged(TreeSelectionEvent e)
+  {
+    currentSchemaLabel.setText(tree.getSelectedNamespace());
+  }
+
   private void resetExpanded()
   {
     if (expandedNodes != null)
@@ -950,6 +971,7 @@ public class DbTreePanel
 		}
 		tree.setSelectionRow(row);
 	}
+
 
 
 }
