@@ -344,27 +344,26 @@ public class TreeLoader
 
     schemaNode.removeAllChildren();
     addTypeNodes(schemaNode);
-    loadSchemaObjects(schemaNode);
+    loadNodeObjects(schemaNode);
   }
 
-  public void loadSchemaObjects(ObjectTreeNode schemaNode)
+  public void loadNodeObjects(ObjectTreeNode node)
     throws SQLException
   {
-    if (schemaNode == null) return;
-    if (!schemaNode.isSchemaNode()) return;
+    if (node == null) return;
 
-    int count = schemaNode.getChildCount();
+    int count = node.getChildCount();
     for (int i=0; i < count; i++)
     {
-      ObjectTreeNode child = (ObjectTreeNode)schemaNode.getChildAt(i);
+      ObjectTreeNode child = (ObjectTreeNode)node.getChildAt(i);
       if (!child.isLoaded())
       {
         loadObjectsForTypeNode(child);
       }
     }
-    schemaNode.setChildrenLoaded(true);
-    model.nodeStructureChanged(schemaNode);
-    model.nodeChanged(schemaNode);
+    node.setChildrenLoaded(true);
+    model.nodeStructureChanged(node);
+    model.nodeChanged(node);
   }
 
   public void reloadTableNode(ObjectTreeNode node)

@@ -23,12 +23,12 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
 import workbench.interfaces.TextContainer;
+import workbench.log.LogMgr;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.gui.actions.WbAction;
-import workbench.log.LogMgr;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -79,11 +79,11 @@ public class FindObjectAction
     if (editorConnection.isBusy())
     {
       LogMgr.logWarning("FindObjectAction.executAction()", "Can not create full qualified table because the connection is busy");
-      tbl = new TableIdentifier(text);
+      tbl = new TableIdentifier(text, editorConnection);
     }
     else
     {
-      tbl = editorConnection.getMetadata().searchObjectOnPath(new TableIdentifier(text), null);
+      tbl = editorConnection.getMetadata().searchObjectOnPath(new TableIdentifier(text, editorConnection), null);
     }
 
     EventQueue.invokeLater(new Runnable()

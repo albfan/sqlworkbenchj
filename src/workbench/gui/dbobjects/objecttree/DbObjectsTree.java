@@ -36,10 +36,10 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import workbench.db.SchemaIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.SchemaIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -216,6 +216,7 @@ public class DbObjectsTree
     if (tbl == null) return;
 
     final ObjectTreeNode schemaNode = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
+
     if (schemaNode == null) return;
 
     if (shouldLoadSearchNode(schemaNode))
@@ -286,12 +287,21 @@ public class DbObjectsTree
 
   private ObjectTreeNode findSchemaNode(String catalog, String schema)
   {
-    if (schema == null) return null;
+    ObjectTreeNode catNode = findCatalogNode(catalog);
+
+    if (schema == null)
+    {
+      if (shouldLoadSearchNode(catNode))
+      {
+        doLoad(catNode, true);
+      }
+      return catNode;
+    }
+
     SchemaIdentifier id = new SchemaIdentifier(schema);
     id.setCatalog(catalog);
 
     ObjectTreeNode searchNode = getModel().getRoot();
-    ObjectTreeNode catNode = findCatalogNode(catalog);
     if (catNode != null)
     {
       if (shouldLoadSearchNode(catNode))
@@ -457,11 +467,11 @@ public class DbObjectsTree
     expandNode(node);
   }
 
-  private void loadSchemaObjects(ObjectTreeNode schemaNode)
+  private void loadNodeObjects(ObjectTreeNode schemaNode)
   {
     try
     {
-      loader.loadSchemaObjects(schemaNode);
+      loader.loadNodeObjects(schemaNode);
     }
     catch (SQLException ex)
     {
@@ -549,7 +559,7 @@ public class DbObjectsTree
       }
       if (loadSchemaObjects)
       {
-        loadSchemaObjects(node);
+        loadNodeObjects(node);
       }
       Runnable postLoad = afterLoadProcess.get(node);
       if (postLoad != null)
