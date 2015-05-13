@@ -1030,6 +1030,7 @@ public class SqlUtil
 		boolean inComment = false;
 		boolean inQuotes = false;
 		boolean lineComment = false;
+    char quoteStart = 0;
 
 		StringBuilder newSql = new StringBuilder((int)(count * 0.8));
 
@@ -1043,7 +1044,16 @@ public class SqlUtil
 
 			if (c == '\'' || c == '"')
 			{
-				inQuotes = !inQuotes;
+        if (!inQuotes)
+        {
+          quoteStart = c;
+          inQuotes = true;
+        }
+        else if (c == quoteStart)
+        {
+          inQuotes = false;
+          quoteStart = 0;
+        }
 			}
 
 			if (inQuotes && (!inComment && !keepComments))

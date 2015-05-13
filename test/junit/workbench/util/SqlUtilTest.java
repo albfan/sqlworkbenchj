@@ -428,6 +428,14 @@ public class SqlUtilTest
 
 		sql = "    \"some /* comment */ in identifier\"\r\n";
 		assertEquals("\"some /* comment */ in identifier\"", SqlUtil.makeCleanSql(sql, false));
+
+    // check nested quotes
+    sql =
+        "wbcopy -sourceQuery=\"select firstname, nr, lastname, coalesce(some_data, '--- missing! ---') as some_data from source_data\" " +
+				"       -targetTable=target_data " +
+				"       -columns=tfirstname, tnr, tlastname, tsome_data";
+
+    assertEquals("wbcopy -sourceQuery=\"select firstname, nr, lastname, coalesce(some_data, '--- missing! ---') as some_data from source_data\"        -targetTable=target_data        -columns=tfirstname, tnr, tlastname, tsome_data", SqlUtil.makeCleanSql(sql, false, false));
 	}
 
 	@Test

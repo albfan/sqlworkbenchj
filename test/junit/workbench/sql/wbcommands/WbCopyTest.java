@@ -887,6 +887,46 @@ public class WbCopyTest
 	}
 
 	@Test
+	public void testQueryCopyWithComments()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("WbCopyTest_testExecute");
+		util.prepareEnvironment();
+
+		WbConnection con = util.getConnection("queryCopyTest");
+
+		try
+		{
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(con);
+
+      TestUtil.executeScript(con,
+        "create table source_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50), some_data varchar(20));\n" +
+        "insert into source_data (nr, lastname, firstname, some_data) values (1,'Dent', 'Arthur', '01');\n" +
+        "insert into source_data (nr, lastname, firstname, some_data) values (2,'Beeblebrox', 'Zaphod', null);\n" +
+        "insert into source_data (nr, lastname, firstname, some_data) values (3,'Moviestar', 'Mary', '03');\n" +
+        "insert into source_data (nr, lastname, firstname, some_data) values (4,'Perfect', 'Ford', null);\n" +
+        "create table target_data (tnr integer not null primary key, tlastname varchar(50), tfirstname varchar(50), tsome_data varchar(20));\n" +
+        "commit;\n");
+
+			String sql =
+        "wbcopy -sourceQuery=\"select firstname, nr, lastname, coalesce(some_data, '--- missing! ---') as some_data from source_data\" " +
+				"       -targetTable=target_data " +
+				"       -columns=tfirstname, tnr, tlastname, tsome_data";
+
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals("Copy not successful", true, result.isSuccess());
+
+      int count = TestUtil.getNumberValue(con, "select count(*) from target_data");
+  		assertEquals("Incorrect number of rows copied", 4, count);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().removeProfile(con.getProfile());
+		}
+	}
+
+	@Test
 	public void testQueryCopyNoColumns()
 		throws Exception
 	{
