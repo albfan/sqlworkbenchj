@@ -213,7 +213,7 @@ public class WbFileChooser
       return false;
     }
 
-    if (StringUtil.stringsAreNotEqual(fileEncodings.get(0), selectedEncoding))
+    if (StringUtil.equalStringIgnoreCase(fileEncodings.get(0), selectedEncoding) == false)
     {
       String msg = ResourceMgr.getFormattedString("MsgEncodingWrong", selectedEncoding,  fileEncodings.get(0));
       return WbSwingUtilities.getYesNo(this, msg);
