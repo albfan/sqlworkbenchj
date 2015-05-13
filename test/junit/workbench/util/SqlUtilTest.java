@@ -436,6 +436,21 @@ public class SqlUtilTest
 				"       -columns=tfirstname, tnr, tlastname, tsome_data";
 
     assertEquals("wbcopy -sourceQuery=\"select firstname, nr, lastname, coalesce(some_data, '--- missing! ---') as some_data from source_data\"        -targetTable=target_data        -columns=tfirstname, tnr, tlastname, tsome_data", SqlUtil.makeCleanSql(sql, false, false));
+
+    sql = "select /* 'doit' */ bla from foo";
+    assertEquals(sql, SqlUtil.makeCleanSql(sql, false, true));
+
+    sql = "select /* 'doit' */ bla from foo";
+    assertEquals("select  bla from foo", SqlUtil.makeCleanSql(sql, false, false));
+
+    sql = "select 'doit /* bla */ \"' bla from foo";
+    assertEquals(sql, SqlUtil.makeCleanSql(sql, false, false));
+
+    sql = "select \"some -- ' column\" from foo";
+    assertEquals(sql, SqlUtil.makeCleanSql(sql, false, false));
+
+    sql = "select  -- \"some -- ' column\"\n bar from foo";
+    assertEquals("select   bar from foo", SqlUtil.makeCleanSql(sql, false, false));
 	}
 
 	@Test
