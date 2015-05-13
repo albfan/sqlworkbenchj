@@ -81,6 +81,9 @@ public class WbOraShow
 
 	private Map<String, String> propertyUnits = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
+  public static final String SHOW_PDBS_QUERY = "select con_id, name, open_mode, restricted from gv$pdbs";
+
+
 	public WbOraShow()
 	{
 		propertyUnits.put("result_cache_max_size", "kb");
@@ -162,6 +165,18 @@ public class WbOraShow
 		{
 			return getErrors(lexer, sql);
 		}
+		else if (verb.equals("edition"))
+		{
+			return showUserEnv("SESSION_EDITION_NAME", "EDITION");
+		}
+		else if (verb.equals("pdbs") && JdbcUtils.hasMinimumServerVersion(currentConnection, "12.0"))
+		{
+			return showPdbs();
+		}
+    else if (verb.startsWith("con_") && JdbcUtils.hasMinimumServerVersion(currentConnection, "12.0"))
+    {
+      return showUserEnv(verb);
+    }
 		else
 		{
 			result.addMessage(ResourceMgr.getString("ErrOraShow"));
@@ -169,6 +184,40 @@ public class WbOraShow
 		}
 		return result;
 	}
+
+  private StatementRunnerResult showUserEnv(String attribute)
+  {
+    return showUserEnv(attribute, attribute);
+  }
+
+  private StatementRunnerResult showUserEnv(String attribute, String displayName)
+  {
+    String query = "select sys_context('userenv', '" + attribute.toUpperCase()+ "') as " + displayName + " from dual";
+
+    StatementRunnerResult result = new StatementRunnerResult("SHOW " + attribute);
+    DataStore ds = SqlUtil.getResult(currentConnection, query);
+    result.addDataStore(ds);
+
+    return result;
+  }
+
+  private StatementRunnerResult showPdbs()
+  {
+    StatementRunnerResult result = new StatementRunnerResult("SHOW pdbs");
+
+    try
+    {
+      DataStore ds = SqlUtil.getResultData(currentConnection, SHOW_PDBS_QUERY, false);
+      ds.setResultName("PDBS");
+      result.addDataStore(ds);
+    }
+    catch (SQLException ex)
+    {
+      result.setFailure();
+      result.addMessage(ex.getMessage());
+    }
+    return result;
+  }
 
 	private StatementRunnerResult showRecycleBin()
 	{
