@@ -1414,6 +1414,8 @@ public class StringUtil
 						switch (type)
 						{
 							case pgHex:
+								// 0x00 is valid Java Unicode but rejected by PostgreSQL
+								if (aChar == '\0') break;
 								outBuffer.append("\\x");
 								outBuffer.append(NumberStringCache.getHexString(aChar));
 								break;
