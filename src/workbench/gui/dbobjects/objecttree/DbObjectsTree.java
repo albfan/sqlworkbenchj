@@ -557,14 +557,14 @@ public class DbObjectsTree
     if (!shouldLoadNode(node)) return;
     if (!WbSwingUtilities.isConnectionIdle(this, loader.getConnection())) return;
 
-    WbThread load = new WbThread(new Runnable()
+    WbThread load = new WbThread("DbTree Load Thread")
     {
       @Override
       public void run()
       {
         doLoad(node, DbTreeSettings.autoloadSchemaObjects());
       }
-    }, "DbTree Load Thread");
+    };
     load.start();
   }
 

@@ -229,14 +229,14 @@ public class DbTreePanel
   public void reload()
   {
     resetExpanded();
-    WbThread th = new WbThread(new Runnable()
+    WbThread th = new WbThread("DbTree Load Thread")
     {
       @Override
       public void run()
       {
         tree.reload();
       }
-    }, "DbTree Load Thread");
+    };
     th.start();
   }
 
@@ -256,7 +256,7 @@ public class DbTreePanel
     // if a new connection profile is specified, we need to disconnect the old connection
     final boolean doDisconnect = connection != null;
 
-    WbThread th = new WbThread(new Runnable()
+    WbThread th = new WbThread("DbTree Connect Thread")
     {
       @Override
       public void run()
@@ -267,7 +267,7 @@ public class DbTreePanel
         }
         doConnect(profile);
       }
-    }, "DbTree Connect Thread");
+    };
     th.start();
   }
 

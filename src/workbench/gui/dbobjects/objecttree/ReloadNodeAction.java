@@ -46,7 +46,6 @@ public class ReloadNodeAction
     for (ObjectTreeNode node : nodes)
     {
       if (node.canHaveChildren())
-      //if (node.getDbObject() == null || node.getDbObject() instanceof TableIdentifier)
       {
         containerNodes ++;
       }
@@ -59,14 +58,14 @@ public class ReloadNodeAction
   {
     if (!WbSwingUtilities.isConnectionIdle(panel, panel.getConnection())) return;
 
-    WbThread load = new WbThread(new Runnable()
+    WbThread load = new WbThread("Node Reload Thread")
     {
       @Override
       public void run()
       {
         panel.reloadSelectedNodes();
       }
-    }, "Node Reload Thread");
+    };
     load.start();
   }
 

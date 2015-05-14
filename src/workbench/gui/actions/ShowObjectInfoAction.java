@@ -75,14 +75,14 @@ public class ShowObjectInfoAction
 		{
 			includeDependencies = false;
 		}
-		WbThread t = new WbThread(new Runnable()
+		WbThread t = new WbThread("ObjectInfoThread")
 		{
 			@Override
 			public void run()
 			{
 				showInfo(includeDependencies);
 			}
-		}, "ObjectInfoThread");
+		};
 		t.start();
 	}
 

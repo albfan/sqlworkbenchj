@@ -99,7 +99,7 @@ public class ConsoleRefresh
   {
     doRefresh = true;
 
-    inputThread = new WbThread(new Runnable()
+    inputThread = new WbThread("Console Refresh Input")
     {
       @Override
       public void run()
@@ -117,18 +117,17 @@ public class ConsoleRefresh
         }
         inputThread = null;
       }
-    }, "Console Refresh Input");
+    };
     inputThread.start();
 
-    refreshThread = new WbThread(new Runnable()
+    refreshThread = new WbThread("Console Refresh")
     {
-
       @Override
       public void run()
       {
         doRefresh(runner, sql, interval);
       }
-    }, "Console Refresh");
+    };
 
     try
     {

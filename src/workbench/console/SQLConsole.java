@@ -681,7 +681,7 @@ public class SQLConsole
 		}
 		else if (runner != null && runner.isBusy() && cancelThread == null)
 		{
-			cancelThread = new WbThread(new Runnable()
+			cancelThread = new WbThread("ConsoleStatementCancel")
 			{
 				@Override
 				public void run()
@@ -690,7 +690,7 @@ public class SQLConsole
 					printMessage(ResourceMgr.getString("MsgCancellingStmt"));
 					runner.cancel();
 				}
-			}, "ConsoleStatementCancel");
+			};
 
 			try
 			{
