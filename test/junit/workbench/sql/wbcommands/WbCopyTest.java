@@ -919,6 +919,9 @@ public class WbCopyTest
 
       int count = TestUtil.getNumberValue(con, "select count(*) from target_data");
   		assertEquals("Incorrect number of rows copied", 4, count);
+
+      String data = (String)TestUtil.getSingleQueryValue(con, "select tsome_data from target_data where tnr = 4");
+      assertEquals("--- missing! ---", data);
 		}
 		finally
 		{
