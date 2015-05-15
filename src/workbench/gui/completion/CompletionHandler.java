@@ -142,7 +142,7 @@ public class CompletionHandler
 		highlightNotNulls = false;
 		String script = this.editor.getText();
 		ScriptParser parser = new ScriptParser(script, ParserType.getTypeFromConnection(dbConnection));
-		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
+		parser.setCheckEscapedQuotes(Settings.getInstance().useNonStandardQuoteEscaping(dbConnection));
 		parser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 		parser.setAlternateDelimiter(dbConnection.getAlternateDelimiter());
 		int cursorPos = this.editor.getCaretPosition();

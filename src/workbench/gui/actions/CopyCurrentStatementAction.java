@@ -81,7 +81,7 @@ public class CopyCurrentStatementAction
 
 		ScriptParser parser = new ScriptParser(sql, ParserType.getTypeFromDBID(dbid));
 		parser.setAlternateDelimiter(alternateDelimiter);
-		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
+		parser.setCheckEscapedQuotes(Settings.getInstance().useNonStandardQuoteEscaping(dbid));
 		parser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 
 		int cursor = script.getCaretPosition();

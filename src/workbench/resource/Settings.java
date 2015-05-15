@@ -2762,16 +2762,21 @@ public class Settings
 	public boolean getIncludeDefaultContinue()
 	{
 		return getBoolProperty("workbench.include.continue.default", false);
+  }
+
+	public boolean useNonStandardQuoteEscaping(String dbId)
+	{
+    boolean value = getBoolProperty("workbench.sql.checkescapedquotes", false);
+    if (dbId != null)
+    {
+      return getBoolProperty("workbench.db." + dbId + ".sql.checkescapedquotes", value);
+    }
+    return value;
 	}
 
-	public boolean getCheckEscapedQuotes()
+	public boolean useNonStandardQuoteEscaping(WbConnection conn)
 	{
-		return getBoolProperty("workbench.sql.checkescapedquotes", false);
-	}
-
-	public void setCheckEscapedQuotes(boolean flag)
-	{
-		this.setProperty("workbench.sql.checkescapedquotes", flag);
+    return useNonStandardQuoteEscaping(conn == null ? null : conn.getDbId());
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Connections">

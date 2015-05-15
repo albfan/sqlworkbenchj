@@ -98,7 +98,7 @@ public class WbRun
 			return result;
 		}
 
-		boolean checkEscape = Settings.getInstance().getCheckEscapedQuotes();
+		boolean checkEscape = Settings.getInstance().useNonStandardQuoteEscaping(currentConnection);
 		boolean defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 		String encoding = Settings.getInstance().getDefaultEncoding();
 

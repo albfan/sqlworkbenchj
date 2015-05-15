@@ -202,7 +202,7 @@ public class WbInclude
 		}
 
 		boolean continueOnError = false;
-		boolean checkEscape = Settings.getInstance().getCheckEscapedQuotes();
+		boolean checkEscape = Settings.getInstance().useNonStandardQuoteEscaping(currentConnection);
 		boolean verbose = true;
 		boolean defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 		boolean ignoreDrop = defaultIgnore;
@@ -214,7 +214,7 @@ public class WbInclude
 		if (checkParms)
 		{
 			continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, Settings.getInstance().getIncludeDefaultContinue());
-			checkEscape = cmdLine.getBoolean(ARG_CHECK_ESCAPED_QUOTES, Settings.getInstance().getCheckEscapedQuotes());
+			checkEscape = cmdLine.getBoolean(ARG_CHECK_ESCAPED_QUOTES,checkEscape);
 			verbose = cmdLine.getBoolean(CommonArgs.ARG_VERBOSE, false);
 			defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 			ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);

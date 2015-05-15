@@ -3097,7 +3097,7 @@ public class SqlPanel
 	{
 		ScriptParser scriptParser = new ScriptParser(ParserType.getTypeFromConnection(this.dbConnection));
 		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(dbConnection, null));
-		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
+		scriptParser.setCheckEscapedQuotes(Settings.getInstance().useNonStandardQuoteEscaping(dbConnection));
 		scriptParser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 		return scriptParser;
 	}
