@@ -290,7 +290,6 @@ public class LookupValuePicker
 	{
 		JPanel result = new JPanel(new GridBagLayout());
 
-		Insets empty = new Insets(0,0,0,0);
 		Insets small = new Insets(0,2,0,2);
 		GridBagConstraints gc = new GridBagConstraints();
 
@@ -319,7 +318,7 @@ public class LookupValuePicker
 
 		maxRows = new NumberField(6);
 		WbSwingUtilities.setMinimumSize(maxRows, 6);
-		gc.insets = empty;
+		gc.insets = WbSwingUtilities.EMPTY_INSETS;
 		gc.gridx ++;
 		result.add(maxRows, gc);
 

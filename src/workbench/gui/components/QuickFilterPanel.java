@@ -222,7 +222,7 @@ public class QuickFilterPanel
 
 		toolbar.add(this.filterAction);
 		toolbar.add(resetFilterAction);
-		toolbar.setMargin(new Insets(0,0,0,0));
+		toolbar.setMargin(WbSwingUtilities.EMPTY_INSETS);
 		toolbar.setBorderPainted(true);
 
 		gridBagConstraints = new GridBagConstraints();

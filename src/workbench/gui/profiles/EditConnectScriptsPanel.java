@@ -29,7 +29,6 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -111,7 +110,7 @@ public class EditConnectScriptsPanel
 		this.add(p1, c);
 
 		c.gridy ++;
-		c.insets = new Insets(10,0,0,0);
+		c.insets = WbSwingUtilities.EMPTY_INSETS;
 		this.add(p2, c);
 
 		c.gridy ++;

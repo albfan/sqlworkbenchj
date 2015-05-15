@@ -313,7 +313,6 @@ public class BookmarkSelector
 		tabLbl.setBorder(new EmptyBorder(2, 0, 0, 0));
 
 		GridBagConstraints gc = new GridBagConstraints();
-		Insets empty = new Insets(0,0,0,0);
 		Insets topTwo = new Insets(2,0,0,0);
 
 		gc.gridx = 0;
@@ -340,7 +339,7 @@ public class BookmarkSelector
 		gc.gridwidth = 2;
 		gc.weightx = 1.0;
 		gc.anchor = GridBagConstraints.FIRST_LINE_START;
-		gc.insets = empty;
+    gc.insets = WbSwingUtilities.EMPTY_INSETS;
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		filterPanel.add(ddPanel, gc);
 

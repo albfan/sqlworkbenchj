@@ -161,7 +161,8 @@ public class DbTreePanel
     WbToolbar bar = new WbToolbar();
     bar.add(reload);
     gc.gridx ++;
-    gc.weightx = 1.0;
+    gc.weightx = 0.0;
+    gc.insets = new Insets(0, IconMgr.getInstance().getSizeForLabel(), 0, 0);
     gc.fill = GridBagConstraints.NONE;
     gc.anchor = GridBagConstraints.LINE_END;
     toolPanel.add(bar, gc);
@@ -186,7 +187,7 @@ public class DbTreePanel
     typeFilter.addActionListener(this);
 
     JPanel filterPanel = new JPanel(new BorderLayout(0, 1));
-    filterPanel.setBorder(new EmptyBorder(2,0,2,0));
+    filterPanel.setBorder(new EmptyBorder(2,0,2,4));
     filterValue = new JTextField();
 
     filterAction = new QuickFilterAction(this);
@@ -204,7 +205,7 @@ public class DbTreePanel
     WbToolbar filterBar = new WbToolbar();
     filterBar.add(filterAction);
     filterBar.add(resetFilter);
-		filterBar.setMargin(new Insets(0,0,0,0));
+		filterBar.setMargin(WbSwingUtilities.EMPTY_INSETS);
 		filterBar.setBorderPainted(true);
 
     filterPanel.add(filterBar, BorderLayout.LINE_START);
@@ -215,6 +216,7 @@ public class DbTreePanel
     gc.gridy = 1;
     gc.gridx = 0;
     gc.weightx = 1.0;
+    gc.insets = WbSwingUtilities.EMPTY_INSETS;
     gc.gridwidth = GridBagConstraints.REMAINDER;
     gc.fill = GridBagConstraints.HORIZONTAL;
     gc.anchor = GridBagConstraints.LINE_START;
