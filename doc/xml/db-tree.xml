@@ -7,8 +7,8 @@
   </para>
   <note>
     <para>
-      The DB Object tree always uses a separate connection regardless of the <link linkend="profile-separate-connection">configuration</link> of the
-      current connection profile.
+      The DB Object tree always uses a separate connection regardless of the configuration of the
+      <link linkend="profile-separate-connection">current connection profile</link>.
     </para>
   </note>
 
@@ -34,7 +34,7 @@
 				<itemizedlist>
 					<listitem><simpara>dropping the "Columns" node of the tree will insert a comma separated list of all columns</simpara></listitem>
 					<listitem><simpara>dropping a table into a SELECT statement's column list will insert a comma separated list of all columns</simpara></listitem>
-					<listitem><simpara>dropping a table into a position where not current SQL statement is located, a <literal>SELECT</literal> statement for the table will be inserted</simpara></listitem>
+					<listitem><simpara>dropping a table into a position where no current SQL statement is located, a <literal>SELECT</literal> statement for the table will be inserted</simpara></listitem>
           <listitem><simpara>in all other cases, the name of the dropped element will be inserted (e.g. the name of an index)</simpara></listitem>
         </itemizedlist>
       </para>
@@ -43,13 +43,23 @@
     <section id="db-tree-data-display">
       <title>Displaying a table's data</title>
       <para>
-        To display the data of a table, just drag the table node from the Database Object Tree to the result panel of the
+        To display the data of a table, drag the table node from the Database Object Tree to the result panel of the
         current SQL editor. &wb-productname; will then generate an approriate <literal>SELECT</literal> statement
         for the table and execute it immediately.
       </para>
     </section>
-
   </section>
+
+  <section id="db-tree-find-in-tree">
+    <title>Finding elements in the tree</title>
+    <para>
+      When the object tree is displayed, the context menu of the editor contains a new item <menuchoice><guimenuitem>Find in object tree</guimenuitem></menuchoice>.
+      This will try to find and select the identifier at the cursor location in the Object Tree. If the schema (or catalog) that contains the object
+      has not yet been loaded, it will be loaded in order to be able to display the current identifier.
+    </para>
+  </section>
+
+
   <section id="db-tree-context-menu">
     <title>Features available through the context menu</title>
     <para>
@@ -182,6 +192,5 @@
 				</para>
 			</blockquote>
 		</simplesect>
-
   </section>
 </section>

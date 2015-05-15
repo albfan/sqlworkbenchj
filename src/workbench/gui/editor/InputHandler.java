@@ -233,30 +233,48 @@ public class InputHandler
 		expandKey = GuiSettings.getExpansionKey();
 	}
 
-	@SuppressWarnings("unchecked")
 	public void addKeyBinding(WbAction action)
 	{
 		KeyStroke key = action.getAccelerator();
 		if (key != null)
 		{
-			this.bindings.put(action.getAccelerator(), action);
+			bindings.put(action.getAccelerator(), action);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public void addKeyBinding(KeyStroke key, ActionListener action)
 	{
-		this.bindings.put(key, action);
+		bindings.put(key, action);
 	}
 
 	/**
-	 * Removes a key binding from this input handler. This is not yet
-	 * implemented.
+	 * Removes a key binding from this input handler.
+   *
 	 * @param key The key binding
 	 */
 	public void removeKeyBinding(KeyStroke key)
 	{
 		bindings.remove(key);
+	}
+
+	/**
+	 * Removes the key binding for the given action from this input handler.
+   *
+	 * @param key The key binding
+	 */
+	public void removeKeyBinding(WbAction action)
+	{
+		KeyStroke key = action.getAccelerator();
+		if (key != null)
+		{
+			this.bindings.remove(key);
+		}
+    key = action.getAlternateAccelerator();
+    if (key != null)
+    {
+      bindings.remove(key);
+    }
 	}
 
 	/**

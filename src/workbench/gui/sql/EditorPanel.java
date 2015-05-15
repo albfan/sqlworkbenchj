@@ -503,8 +503,10 @@ public class EditorPanel
 	{
 		if (popup == null) return;
     if (anAction == null) return;
+    
     int count = popup.getComponentCount();
     int removeIndex = -1;
+
     for (int i=0; i < count; i++)
     {
       Component comp = popup.getComponent(i);
@@ -518,10 +520,12 @@ public class EditorPanel
         }
       }
     }
+
     if (removeIndex > -1)
     {
       popup.remove(removeIndex);
     }
+    removeKeyBinding(anAction);
 	}
 
 	public final void addPopupMenuItem(WbAction anAction, boolean withSeparator)
