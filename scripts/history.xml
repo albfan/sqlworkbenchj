@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-05-07">
+  <release build="-1" date="2015-05-15">
     <entry dev-build="5" type="enh">Added some basic support for SAP HANA.</entry>
     <entry dev-build="4" type="enh">For Excel imports, the option -stringDates=true retrieves Dates as formatted strings and converts them using the date/timestamp format specified in the WbImport command rathr then reading a converted value from the Excel file.</entry>
     <entry dev-build="4" type="enh">For Excel exports, the start location where the data should be written to in the excel file can now be specified using the -offset parameter</entry>
@@ -20,6 +20,7 @@
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
     <entry dev-build="2" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
+    <entry dev-build="5" type="fix">Compile errors for Oracle's PL/SQL where not always shown correctly</entry>
     <entry dev-build="5" type="fix">Parameters for SQL Workbench commands with nested single and double quotes that included SQL comments were not evaluated properly</entry>
     <entry dev-build="5" type="fix">Fixed restoring of the window position when using multiple monitors</entry>
     <entry dev-build="5" type="fix">Generating the SQL source for computed columns did not work for SQL Server 2000</entry>
