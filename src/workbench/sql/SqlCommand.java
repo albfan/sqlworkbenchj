@@ -992,14 +992,18 @@ public class SqlCommand
 	}
 
   /**
-   * Adds the failing SQL statement (or part of it) to the passed StatementRunnerResult.
+   * Adds the SQL statement (or part of it) to the passed StatementRunnerResult.
    *
-   * If errorLevel is none then no message is added
+   * If errorLevel is none then nothing is added
    * If errorLevel is limited, only the beginning of the SQL statement is added
    * If errorLevel is full, the complete SQL statement is added to the result
    *
    * @param result  the result to which the statement should be added
    * @param sql     the failing SQL statement
+   *
+   * @see #setErrorReportLevel(workbench.sql.ErrorReportLevel)
+   * @see Settings#getStatementErrorReportLevel()
+   * @see Settings#getMaxErrorStatementLength() 
    */
 	protected void addErrorStatement(StatementRunnerResult result, String sql)
 	{

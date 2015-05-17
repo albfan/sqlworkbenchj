@@ -184,11 +184,20 @@ public class DdlCommand
         result.setFailure();
         addErrorStatement(result, sql);
 
-        // if addExtendedErrorInfo() added something, then there is no need to add the error possition
-        // (assuming the more verbose error message already contains that information)
-        if (!addExtendErrorInfo(sql, info, result))
+        // if we have a warning and an exception we need to use the extended error info
+        if (result.hasWarning())
         {
-          addErrorPosition(result, sql, e);
+          // if addExtendedErrorInfo() added something, then there is no need to add the error possition
+          // (assuming the more verbose error message already contains that information)
+          if (!addExtendErrorInfo(sql, info, result))
+          {
+            addErrorPosition(result, sql, e);
+          }
+        }
+        else
+        {
+          // if the result did no have a warning, make sure the error message is displayed to the user
+          result.addMessage(e.getMessage());
         }
         LogMgr.logUserSqlError("DdlCommand.execute()", sql, e);
       }
