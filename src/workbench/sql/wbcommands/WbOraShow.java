@@ -111,7 +111,7 @@ public class WbOraShow
 		SQLToken token = lexer.getNextToken(false, false);
 		if (token == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrOraShow"));
+			result.addMessage(getErrorMessage());
 			result.setFailure();
 			return result;
 		}
@@ -179,11 +179,24 @@ public class WbOraShow
     }
 		else
 		{
-			result.addMessage(ResourceMgr.getString("ErrOraShow"));
+			result.addMessage(getErrorMessage());
 			result.setFailure();
 		}
 		return result;
 	}
+
+  private String getErrorMessage()
+  {
+    String msg = ResourceMgr.getString("ErrOraShow");
+    if (JdbcUtils.hasMinimumServerVersion(currentConnection, "12.1"))
+    {
+      msg += "\n" +
+        "- pdbs\n" +
+        "- con_name\n" +
+        "- con_id";
+    }
+    return msg;
+  }
 
   private StatementRunnerResult showUserEnv(String attribute)
   {

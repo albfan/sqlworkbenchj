@@ -104,8 +104,15 @@ public class DbmsOutput
 		}
 	}
 
+  public boolean isEnabled()
+  {
+    return enabled;
+  }
+
 	/**
 	 * Retrieve all server messages written with dbms_output.
+   *
+   * Nothing will be retrieved if enable() was never called or if disable() was called since then.
 	 *
 	 * @return all messages written with dbms_output.put_line()
 	 */
@@ -113,7 +120,17 @@ public class DbmsOutput
 		throws SQLException
 	{
     if (!this.enabled) return "";
+    return retrieveOutput();
+  }
 
+	/**
+	 * Retrieve all server messages written with dbms_output regardless if enable() has been called before.
+   *
+	 * @return all messages written with dbms_output.put_line()
+	 */
+  public String retrieveOutput()
+    throws SQLException
+  {
 		CallableStatement stmt = null;
 		StringBuilder result = new StringBuilder(1024);
 		try

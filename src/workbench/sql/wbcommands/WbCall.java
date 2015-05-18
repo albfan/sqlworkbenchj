@@ -42,10 +42,12 @@ import workbench.resource.ResourceMgr;
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
+import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleProcedureReader;
 import workbench.db.oracle.OracleUtils;
 
 import workbench.gui.preparedstatement.ParameterEditor;
+import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
 
@@ -331,6 +333,38 @@ public class WbCall
 
 		return result;
 	}
+
+  @Override
+  protected void appendOutput(StatementRunnerResult result)
+  {
+    super.appendOutput(result);
+
+    // when calling a stored procedure always retrieve DBMS_OUTPUT messages
+    // regardless if "set serveroutput" was called or not
+    if (retrieveDbmsOutput())
+    {
+      try
+      {
+        DbmsOutput output = new DbmsOutput(currentConnection.getSqlConnection());
+        String msg = output.retrieveOutput();
+        if (StringUtil.isNonEmpty(msg))
+        {
+          result.addMessage(msg);
+        }
+      }
+      catch (Exception ex)
+      {
+      }
+    }
+  }
+
+  private boolean retrieveDbmsOutput()
+  {
+    if (currentConnection == null) return false;
+    if (currentConnection.getMetadata().isOracle() == false) return false;
+    if (currentConnection.getMetadata().isDbmsOutputEnabled()) return false;
+    return Settings.getInstance().retrieveDbmsOutputAfterExec();
+  }
 
 	@Override
 	public void done()

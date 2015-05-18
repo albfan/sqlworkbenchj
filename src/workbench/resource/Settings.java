@@ -2227,6 +2227,11 @@ public class Settings
 		setProperty(PK_MAPPING_FILENAME_PROPERTY,file);
 	}
 
+  public boolean retrieveDbmsOutputAfterExec()
+  {
+    return getBoolProperty("workbench.db.oracle.dbmsoutput.automatic", true);
+  }
+  
 	public boolean getPreviewDml()
 	{
 		return getBoolProperty("workbench.db.previewsql", true);

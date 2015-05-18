@@ -2047,6 +2047,13 @@ public class DbMetadata
 		}
 	}
 
+  public boolean isDbmsOutputEnabled()
+  {
+    if (!this.isOracle) return false;
+    if (oraOutput == null) return false;
+    return oraOutput.isEnabled();
+  }
+  
 	/**
 	 * Disable Oracle's DBMS_OUTPUT package
 	 * @see workbench.db.oracle.DbmsOutput#disable()
