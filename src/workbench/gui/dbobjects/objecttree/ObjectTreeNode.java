@@ -84,6 +84,14 @@ public class ObjectTreeNode
     isLoaded = flag;
   }
 
+  public boolean isFKTable()
+  {
+    if (getDbObject() == null) return false;
+    ObjectTreeNode pNode = getParent();
+    if (pNode == null) return false;
+    return TreeLoader.TYPE_FK_LIST.equalsIgnoreCase(pNode.getType()) || TreeLoader.TYPE_REF_LIST.equals(pNode.getType());
+  }
+
   public boolean isSchemaNode()
   {
     if (getDbObject() instanceof SchemaIdentifier) return true;
@@ -269,7 +277,7 @@ public class ObjectTreeNode
       ObjectTreeNode child = getChildAt(i);
 
       if (child.isCatalogNode() || child.isSchemaNode()) continue;
-      
+
       DbObject dbo = child.getDbObject();
       if (dbo != null)
       {

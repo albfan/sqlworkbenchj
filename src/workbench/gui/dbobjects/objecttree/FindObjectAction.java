@@ -43,6 +43,7 @@ public class FindObjectAction
   private ObjectFinder finder;
   private TextContainer textContainer;
   private WbConnection editorConnection;
+  private TableIdentifier toShow;
 
   public FindObjectAction(TextContainer container)
   {
@@ -64,9 +65,21 @@ public class FindObjectAction
     setEnabled(editorConnection != null);
   }
 
+  public void setTargetTable(TableIdentifier tbl)
+  {
+    toShow = tbl;
+    setEnabled(toShow != null);
+  }
+
   @Override
   public void executeAction(ActionEvent e)
   {
+    if (toShow != null)
+    {
+      showTable(toShow);
+      return;
+    }
+
     if (textContainer == null) return;
     if (finder == null) return;
 
@@ -75,7 +88,7 @@ public class FindObjectAction
 
     // make sure we have a fully qualified table name based on the search path of the current connection
     // the DBTree uses its own connection and therefore the search can't be done there
-    final TableIdentifier tbl;
+    TableIdentifier tbl = null;
     if (editorConnection.isBusy())
     {
       LogMgr.logWarning("FindObjectAction.executAction()", "Can not create full qualified table because the connection is busy");
@@ -85,7 +98,11 @@ public class FindObjectAction
     {
       tbl = editorConnection.getMetadata().searchObjectOnPath(new TableIdentifier(text, editorConnection), null);
     }
+    showTable(tbl);
+  }
 
+  private void showTable(final TableIdentifier tbl)
+  {
     EventQueue.invokeLater(new Runnable()
     {
       @Override

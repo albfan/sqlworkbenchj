@@ -29,6 +29,8 @@ import javax.swing.event.PopupMenuListener;
 import workbench.interfaces.WbSelectionModel;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.TableIdentifier;
+
 import workbench.gui.MainWindow;
 import workbench.gui.actions.CountTableRowsAction;
 import workbench.gui.actions.CreateDropScriptAction;
@@ -99,6 +101,21 @@ class ContextMenuFactory
 		}
 
     menu.addSeparator();
+
+    int count = dbTree.getSelectionCount();
+    if (count == 1)
+    {
+      ObjectTreeNode selectedNode = dbTree.getSelectedNode();
+      if (selectedNode.isFKTable())
+      {
+        FindObjectAction find = new FindObjectAction(null);
+        find.setFinder(dbTree);
+        find.setTargetTable((TableIdentifier)selectedNode.getDbObject());
+        menu.add(find);
+      }
+      menu.addSeparator();
+    }
+
 
     menu.add(CreateDummySqlAction.createDummyInsertAction(dbTree, selection));
 		menu.add(CreateDummySqlAction.createDummyUpdateAction(dbTree, selection));

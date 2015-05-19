@@ -364,7 +364,7 @@ public class DbObjectsTree
     for (int i = 0; i < childCount; i++)
     {
       ObjectTreeNode child = parent.getChildAt(i);
-      if (child != null && child.getDbObject() != null)
+      if (child != null && child.getDbObject() != null && !child.isFKTable())
       {
         if (child.getDbObject() instanceof TableIdentifier)
         {
