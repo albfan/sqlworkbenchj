@@ -268,6 +268,8 @@ public class ObjectTreeNode
     {
       ObjectTreeNode child = getChildAt(i);
 
+      if (child.isCatalogNode() || child.isSchemaNode()) continue;
+      
       DbObject dbo = child.getDbObject();
       if (dbo != null)
       {
