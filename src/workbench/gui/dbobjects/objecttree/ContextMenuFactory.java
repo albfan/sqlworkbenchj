@@ -112,10 +112,9 @@ class ContextMenuFactory
         find.setFinder(dbTree);
         find.setTargetTable((TableIdentifier)selectedNode.getDbObject());
         menu.add(find);
+        menu.addSeparator();
       }
-      menu.addSeparator();
     }
-
 
     menu.add(CreateDummySqlAction.createDummyInsertAction(dbTree, selection));
 		menu.add(CreateDummySqlAction.createDummyUpdateAction(dbTree, selection));
