@@ -634,10 +634,8 @@ public class TableListPanel
 	 */
 	protected void showTablePanels()
 	{
-		int minCount = 3;
-		if (viewTriggersSupported()) minCount ++;
-
-		if (displayTab.getTabCount() > minCount) return; // nothing to do
+    // already showing the table definition?
+    if (displayTab.indexOfComponent(exportedKeys) > -1) return;
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
