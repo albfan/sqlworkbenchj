@@ -83,6 +83,8 @@ public class UpdatingCommand
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 		LobFileStatement lob = null;
 
+    result.ignoreUpdateCounts(currentConnection.getDbSettings().verbsWithoutUpdateCount().contains(verb));
+    
 		try
 		{
 			boolean isPrepared = false;
