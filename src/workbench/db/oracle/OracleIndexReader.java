@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -313,6 +314,14 @@ public class OracleIndexReader
 		return sql;
 	}
 
+  public static Set<String> getUseDbmsMetaForTypes()
+  {
+    List<String> types = Settings.getInstance().getListProperty("workbench.db.oracle.index.types.usedbmsmetadata", false, "DOMAIN");
+    Set<String> result = CollectionUtil.caseInsensitiveSet();
+    result.addAll(types);
+    return result;
+  }
+  
 	@Override
 	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition definition)
 	{
@@ -320,7 +329,9 @@ public class OracleIndexReader
 
 		boolean alwaysUseDbmsMeta = this.metaData.getDbSettings().getUseOracleDBMSMeta("index");
 
-		if (alwaysUseDbmsMeta || "DOMAIN".equals(definition.getIndexType()))
+    Set<String> typesForMeta = getUseDbmsMetaForTypes();
+
+		if (alwaysUseDbmsMeta || typesForMeta.contains(definition.getIndexType()))
 		{
 			try
 			{
@@ -420,7 +431,7 @@ public class OracleIndexReader
 
 		StringBuilder sql = new StringBuilder(300);
 		sql.append(base);
-		
+
 		boolean found = false;
 
 		sql.append(" AND (i.owner, i.index_name) IN (");
