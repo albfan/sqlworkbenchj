@@ -803,7 +803,7 @@ public class JdbcIndexReader
 
   private boolean isSameTable(TableIdentifier tbl, String cat, String schema, String name)
   {
-    if (tbl == null) return false;
+    if (tbl == null) return name == null;
     if (StringUtil.stringsAreNotEqual(name, tbl.getRawTableName())) return false;
     if (tbl.getCatalog() != null && cat != null)
     {
