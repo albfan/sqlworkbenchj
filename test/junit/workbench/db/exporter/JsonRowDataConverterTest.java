@@ -89,7 +89,7 @@ public class JsonRowDataConverterTest
 
 		data.setValue(0, new Integer(2));
 		data.setValue(1, "Ford");
-		data.setValue(2, "Prefect");
+		data.setValue(2, "\"Prefect\"");
 		data.setValue(3, null);
 		data.setValue(4, new BigDecimal("24.42"));
 
@@ -101,7 +101,7 @@ public class JsonRowDataConverterTest
 			"  \"person\":\n" +
 			"  [\n" +
 			"    {\"id\": \"1\", \"firstname\": \"Arthur\", \"lastname\": \"Dent\", \"last_login\": \"2013-01-12 14:56:12.000\", \"salary\": \"42.24\"},\n" +
-			"    {\"id\": \"2\", \"firstname\": \"Ford\", \"lastname\": \"Prefect\", \"last_login\": \"\", \"salary\": \"24.42\"}\n" +
+			"    {\"id\": \"2\", \"firstname\": \"Ford\", \"lastname\": \"\\\"Prefect\\\"\", \"last_login\": \"\", \"salary\": \"24.42\"}\n" +
 			"  ]\n" +
 			"}";
 		assertEquals(expected, result);

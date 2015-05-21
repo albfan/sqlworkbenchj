@@ -116,6 +116,10 @@ public class JsonRowDataConverter
 			if (SqlUtil.isCharacterType(colType) && !isNull)
 			{
 				value = StringUtil.escapeText(value, CharacterRange.RANGE_CONTROL, "");
+        if (value.indexOf('"') > -1)
+        {
+          value = value.replace("\"", "\\\"");
+        }
 			}
 
 			result.append("\"");
