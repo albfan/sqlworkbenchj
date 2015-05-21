@@ -578,7 +578,7 @@ public class DbObjectsTree
       {
         loader.loadChildren(node);
       }
-      if (loadSchemaObjects)
+      if (loadSchemaObjects && (node.isSchemaNode() || node.isCatalogNode()))
       {
         loadNodeObjects(node);
       }

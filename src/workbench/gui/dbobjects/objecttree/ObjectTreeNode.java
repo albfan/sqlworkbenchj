@@ -250,6 +250,10 @@ public class ObjectTreeNode
       }
       return tip;
     }
+    else if (dbo instanceof ColumnIdentifier)
+    {
+      return getColumnTooltip((ColumnIdentifier)dbo);
+    }
     String remarks = dbo.getComment();
     if (StringUtil.isEmptyString(remarks))
     {
@@ -258,6 +262,29 @@ public class ObjectTreeNode
     return remarks;
   }
 
+  private String getColumnTooltip(ColumnIdentifier col)
+  {
+    String tip;
+    if (col.isNullable())
+    {
+      tip = "NULLABLE";
+    }
+    else
+    {
+      tip = "NOT NULL";
+    }
+    if (StringUtil.isNonBlank(col.getDefaultValue()))
+    {
+      tip += " DEFAULT " + col.getDefaultValue();
+    }
+    String comment = col.getComment();
+    if (StringUtil.isNonEmpty(comment))
+    {
+      tip = "<html>" + tip + "<br>" + comment + "</html>";
+    }
+    return tip;
+  }
+  
   public boolean isFiltered()
   {
     return CollectionUtil.isNonEmpty(filteredNodes);
