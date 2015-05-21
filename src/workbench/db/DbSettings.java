@@ -224,52 +224,52 @@ public class DbSettings
 
 	public boolean supportsCreateArray()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "createarray.supported", true);
+		return getBoolProperty("createarray.supported", true);
 	}
 
 	public boolean handleArrayDisplay()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "array.adjust.display", false);
+		return getBoolProperty("array.adjust.display", false);
 	}
 
 	public boolean showArrayType()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "array.show.type", true);
+		return getBoolProperty("array.show.type", true);
 	}
 
 	public boolean useGetStringForBit()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "bit.use.getstring", false);
+		return getBoolProperty("bit.use.getstring", false);
 	}
 
 	public boolean useGetXML()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "xml.use.getsqlxml", false);
+		return getBoolProperty("xml.use.getsqlxml", false);
 	}
 
 	public boolean useGetStringForClobs()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", true);
+		return getBoolProperty("clob.use.getstring", true);
 	}
 
 	public boolean useSetStringForClobs()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "clob.use.setstring", false);
+		return getBoolProperty("clob.use.setstring", false);
 	}
 
 	public boolean useGetBytesForBlobs()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "blob.use.getbytes", false);
+		return getBoolProperty("blob.use.getbytes", false);
 	}
 
 	public boolean useSetBytesForBlobs()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "blob.use.setbytes", false);
+		return getBoolProperty("blob.use.setbytes", false);
 	}
 
 	public boolean longVarcharIsClob()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "clob.longvarchar", true);
+		return getBoolProperty("clob.longvarchar", true);
 	}
 
 	public boolean supportsResultSetsWithDML()
@@ -386,7 +386,7 @@ public class DbSettings
 
 	public boolean getDefaultBeforeNull()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "defaultbeforenull", false);
+		return getBoolProperty("defaultbeforenull", false);
 	}
 
 	public String getCascadeConstraintsVerb(String aType)
@@ -510,27 +510,27 @@ public class DbSettings
 
 	public boolean useSpecificNameForDropProcedure()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "drop.function.use.specificname", false);
+		return getBoolProperty("drop.function.use.specificname", false);
 	}
 
 	public boolean useSpecificNameForProcedureColumns()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "procedures.use.specificname", true);
+		return getBoolProperty("procedures.use.specificname", true);
 	}
 
 	public String getSpecificNameColumn()
 	{
-		return Settings.getInstance().getProperty(prefix + "procedures.specificname.colname", "SPECIFIC_NAME");
+		return getProperty("procedures.specificname.colname", "SPECIFIC_NAME");
 	}
 
 	public boolean needParametersToDropFunction()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "drop.function.includeparameters", false);
+		return getBoolProperty("drop.function.includeparameters", false);
 	}
 
 	public boolean includeOutParameterForDropFunction()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "drop.function.include.out.parameters", true);
+		return getBoolProperty("drop.function.include.out.parameters", true);
 	}
 
 	/**
@@ -650,7 +650,7 @@ public class DbSettings
 
 	public String getProcVersionDelimiter()
 	{
-		return Settings.getInstance().getProperty(prefix + "procversiondelimiter", null);
+		return getProperty("procversiondelimiter", null);
 	}
 
 	public boolean supportsCascadedTruncate()
@@ -878,7 +878,7 @@ public class DbSettings
 
 	public boolean needsExactClobLength()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "exactcloblength", false);
+		return getBoolProperty("exactcloblength", false);
 	}
 
 	/**
@@ -893,7 +893,7 @@ public class DbSettings
 	 */
 	public boolean getFormatViewSource()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "source.view.doformat", false);
+		return getBoolProperty("source.view.doformat", false);
 	}
 
 	/**
@@ -958,7 +958,7 @@ public class DbSettings
 
 	public boolean removeNewLinesInSQL()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + "removenewlines", false);
+		return getBoolProperty("removenewlines", false);
 	}
 
   public boolean canDropInTransaction(String type)
@@ -1855,20 +1855,30 @@ public class DbSettings
 
 	public boolean hideOracleIdentitySequences()
 	{
-		return getBoolProperty(prefix + "sequence.identity.hide", false);
+		return getBoolProperty("sequence.identity.hide", false);
 	}
 
 	public boolean useColumnNameForMetadata()
 	{
-		return getBoolProperty(prefix + "metadata.retrieval.columnnames", true);
+		return getBoolProperty("metadata.retrieval.columnnames", true);
 	}
 
 	// Currently only used for Postgres
 	public boolean returnAccessibleProceduresOnly()
 	{
-		return getBoolProperty(prefix + "procedurelist.only.accessible", true);
+		return getBoolProperty("procedurelist.only.accessible", true);
 	}
 
+  /**
+   * Return true if IndexReader should check the table an index belongs to.
+   *
+   * This is needed to workaround a bug in the Informix driver that
+   * returns indexes for tables other than just the specified one.
+   */
+	public boolean checkIndexTable()
+	{
+		return getBoolProperty("metadata.index.check.table", false);
+	}
 
 	public boolean getBoolProperty(String prop, boolean defaultValue)
 	{

@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -800,6 +801,21 @@ public class JdbcIndexReader
 		return result;
 	}
 
+  private boolean isSameTable(TableIdentifier tbl, String cat, String schema, String name)
+  {
+    if (tbl == null) return false;
+    if (StringUtil.stringsAreNotEqual(name, tbl.getRawTableName())) return false;
+    if (tbl.getCatalog() != null && cat != null)
+    {
+      if (StringUtil.stringsAreNotEqual(cat, tbl.getRawCatalog())) return false;
+    }
+    if (tbl.getSchema() != null && schema != null)
+    {
+      if (StringUtil.stringsAreNotEqual(schema, tbl.getRawSchema())) return false;
+    }
+    return true;
+  }
+
 	protected List<IndexDefinition> processIndexResult(ResultSet idxRs, PkDefinition pkIndex, TableIdentifier tbl)
 		throws SQLException
 	{
@@ -814,11 +830,31 @@ public class JdbcIndexReader
 		boolean isPartitioned = false;
 
 		boolean useColumnNames = metaData.getDbSettings().useColumnNameForMetadata();
+    boolean checkTable = metaData.getDbSettings().checkIndexTable();
+
+    Set<String> ignoredIndexes = CollectionUtil.caseInsensitiveSet();
 
 		while (idxRs != null && idxRs.next())
 		{
+      String tableCat = useColumnNames ? idxRs.getString("TABLE_CAT"): idxRs.getString(1);
+      String tableSchema = useColumnNames ? idxRs.getString("TABLE_SCHEM"): idxRs.getString(2);
+      String tableName = useColumnNames ? idxRs.getString("TABLE_NAME"): idxRs.getString(3);
+
 			boolean nonUniqueFlag = useColumnNames ? idxRs.getBoolean("NON_UNIQUE") : idxRs.getBoolean(4);
 			String indexName = useColumnNames ? idxRs.getString("INDEX_NAME"): idxRs.getString(6);
+
+      if (ignoredIndexes.contains(indexName))
+      {
+        continue;
+      }
+
+      if (checkTable && !isSameTable(tbl, tableCat, tableSchema, tableName))
+      {
+        ignoredIndexes.add(indexName);
+        TableIdentifier owner = new TableIdentifier(tableCat, tableSchema, tableName);
+        LogMgr.logInfo("JdbcIndexReader.processIndexResult()", "Ignoring index " + indexName + " because it belongs to " + owner.getFullyQualifiedName(metaData.getWbConnection()) + " and not to " + tbl.getFullyQualifiedName(metaData.getWbConnection()));
+        continue;
+      }
 
 			if (idxRs.wasNull() || indexName == null) continue;
 

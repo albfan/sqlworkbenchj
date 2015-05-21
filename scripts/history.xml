@@ -21,8 +21,10 @@
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
     <entry dev-build="2" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
-    <entry dev-build="5" type="fix">When switching between views and tables in the DbExplorer the foreign key tabs were no longer shown for SQL Server</entry>
-    <entry dev-build="5" type="fix">Compile errors for Oracle's PL/SQL where not always shown correctly</entry>
+    <entry dev-build="6" type="fix">Implemented a workaround for an Informix driver bug where index information for the wrong table was returned</entry>
+    <entry dev-build="6" type="fix">Double quotes in column values were not escaped properly when creating a JSON export</entry>
+    <entry dev-build="6" type="fix">When switching between views and tables in the DbExplorer the foreign key tabs were no longer shown for SQL Server</entry>
+    <entry dev-build="6" type="fix">Compile errors for Oracle's PL/SQL where not always shown correctly</entry>
     <entry dev-build="5" type="fix">Parameters for SQL Workbench commands with nested single and double quotes that included SQL comments were not evaluated properly</entry>
     <entry dev-build="5" type="fix">Fixed restoring of the window position when using multiple monitors</entry>
     <entry dev-build="5" type="fix">Generating the SQL source for computed columns did not work for SQL Server 2000</entry>
