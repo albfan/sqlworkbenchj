@@ -207,7 +207,7 @@ public class TextRowDataConverterTest
 
 		converter.setBlobFormatter(BlobFormatterFactory.createAnsiFormatter());
 		line = converter.convertRowData(data, 0);
-		assertEquals("42;0x01020304", line.toString().trim());
+		assertEquals("42;X'01020304'", line.toString().trim());
 
 		converter.setBlobFormatter(BlobFormatterFactory.createInstance(BlobLiteralType.octal));
 		line = converter.convertRowData(data, 0);

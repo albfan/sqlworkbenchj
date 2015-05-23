@@ -654,8 +654,9 @@ public class WbExportTest
 		lines = FileUtil.getLines(reader);
 		assertEquals(3, lines.size());
 		assertEquals("NR\tDATA", lines.get(0));
-		assertTrue(lines.get(1).startsWith("1\t0xffd8ffe00010"));
-		assertTrue(lines.get(2).startsWith("2\t0x"));
+		assertTrue(lines.get(1).startsWith("1\tX'ffd8ffe00010"));
+		System.out.println(lines.get(2));
+		assertTrue(lines.get(2).startsWith("2\tX'"));
 
 	}
 
