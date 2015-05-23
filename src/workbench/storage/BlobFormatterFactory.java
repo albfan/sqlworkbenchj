@@ -24,6 +24,7 @@ package workbench.storage;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -32,95 +33,81 @@ import workbench.util.StringUtil;
 public class BlobFormatterFactory
 {
 
-	public static BlobLiteralFormatter createAnsiFormatter()
-	{
-		// ANSI Syntax is 0xABCDEF...
-		// which is e.g. used by SQL Server
-		DefaultBlobFormatter f = new DefaultBlobFormatter();
-		f.setPrefix("0x");
+  public static BlobLiteralFormatter createAnsiFormatter()
+  {
+    // ANSI Syntax is X'FFF0'...
+    DefaultBlobFormatter f = new DefaultBlobFormatter();
+    f.setPrefix("X'");
+    f.setSuffix("'");
+    return f;
+  }
 
-		return f;
-	}
+  public static BlobLiteralFormatter createInstance(BlobLiteralType type)
+  {
+    if (type == BlobLiteralType.pgDecode || type == BlobLiteralType.pgEscape || type == BlobLiteralType.pgHex)
+    {
+      return new PostgresBlobFormatter(type);
+    }
+    DefaultBlobFormatter f = new DefaultBlobFormatter();
+    f.setLiteralType(type);
+    return f;
+  }
 
-	public static BlobLiteralFormatter createInstance(BlobLiteralType type)
-	{
-		if (type == BlobLiteralType.pgDecode || type == BlobLiteralType.pgEscape || type == BlobLiteralType.pgHex)
-		{
-			return new PostgresBlobFormatter(type);
-		}
-		DefaultBlobFormatter f = new DefaultBlobFormatter();
-		f.setLiteralType(type);
-		return f;
-	}
-
-	public static BlobLiteralFormatter createInstance(DbMetadata meta)
-	{
+  public static BlobLiteralFormatter createInstance(DbMetadata meta)
+  {
 		// Check for a user-defined formatter definition
-		// for the current DBMS
-		DbSettings s = meta.getDbSettings();
-		String prefix = s.getBlobLiteralPrefix();
-		String suffix = s.getBlobLiteralSuffix();
-		if (StringUtil.isNonBlank(prefix) && StringUtil.isNonBlank(suffix))
-		{
-			DefaultBlobFormatter f = new DefaultBlobFormatter();
-			String type = s.getBlobLiteralType();
+    // for the current DBMS
+    DbSettings s = meta.getDbSettings();
+    String prefix = s.getBlobLiteralPrefix();
+    String suffix = s.getBlobLiteralSuffix();
 
-			BlobLiteralType literalType = null;
-			try
-			{
-				literalType = BlobLiteralType.valueOf(type);
-			}
-			catch (Throwable e)
-			{
-				literalType = BlobLiteralType.hex;
-			}
+    if (StringUtil.isNonBlank(prefix) && StringUtil.isNonBlank(suffix))
+    {
+      DefaultBlobFormatter f = new DefaultBlobFormatter();
+      String type = s.getBlobLiteralType();
 
-			BlobLiteralType.valueOf(type);
-			f.setUseUpperCase(s.getBlobLiteralUpperCase());
-			f.setLiteralType(literalType);
-			f.setPrefix(prefix);
-			f.setSuffix(suffix);
-			return f;
-		}
+      BlobLiteralType literalType = null;
+      try
+      {
+        literalType = BlobLiteralType.valueOf(type);
+      }
+      catch (Throwable e)
+      {
+        literalType = BlobLiteralType.hex;
+      }
 
-		// No user-defined formatter definition found, use the built-in settings
-		if (meta.isPostgres())
-		{
-			return new PostgresBlobFormatter();
-		}
-		else if (meta.isOracle())
-		{
+      BlobLiteralType.valueOf(type);
+      f.setUseUpperCase(s.getBlobLiteralUpperCase());
+      f.setLiteralType(literalType);
+      f.setPrefix(prefix);
+      f.setSuffix(suffix);
+      return f;
+    }
+
+    // No user-defined formatter definition found, use the built-in settings
+    if (meta.isPostgres())
+    {
+      return new PostgresBlobFormatter();
+    }
+    else if (meta.isOracle())
+    {
 			// this might only work with Oracle 10g...
-			// and will probably fail on BLOBs > 4KB
-			DefaultBlobFormatter f = new DefaultBlobFormatter();
-			f.setUseUpperCase(true);
-			f.setPrefix("to_blob(utl_raw.cast_to_raw('");
-			f.setSuffix("'))");
-			return f;
-		}
-		else if (meta.getDbId().startsWith("db2") || meta.isH2())
-		{
-			// Although the DB2 Manuals says it supports
-			// binary string constants, it is very likely
-			// that this will be rejected by DB2 due to the
-			// max.length of 32K for binary strings.
-			DefaultBlobFormatter f = new DefaultBlobFormatter();
-			f.setUseUpperCase(true);
-			f.setPrefix("X'");
-			f.setSuffix("'");
-			return f;
-		}
-		else if (meta.isHsql())
-		{
-			DefaultBlobFormatter f = new DefaultBlobFormatter();
-			f.setUseUpperCase(false);
-			f.setPrefix("'");
-			f.setSuffix("'");
-			return f;
-		}
+      // and will probably fail on BLOBs > 4KB
+      DefaultBlobFormatter f = new DefaultBlobFormatter();
+      f.setUseUpperCase(true);
+      f.setPrefix("to_blob(utl_raw.cast_to_raw('");
+      f.setSuffix("'))");
+      return f;
+    }
+    else if (meta.isSqlServer())
+    {
+      DefaultBlobFormatter f = new DefaultBlobFormatter();
+      f.setPrefix("0x");
+      return f;
+    }
 
-		// Still no luck, use the ANSI format.
-		return createAnsiFormatter();
-	}
+    // Use the ANSI format for all others (e.g.: DB2, H2, HSQLDB
+    return createAnsiFormatter();
+  }
 
 }
