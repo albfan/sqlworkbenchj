@@ -126,6 +126,8 @@ public class BatchRunner
 	private final List<DataStore> queryResults = new ArrayList<>();
 	private Replacer replacer;
 	private boolean isBusy;
+  private ErrorDescriptor lastError;
+  private int errorStatementIndex;
 
 	public BatchRunner()
 	{
@@ -181,6 +183,21 @@ public class BatchRunner
 	{
 		this.printStatements = flag;
 	}
+
+  public void setErrorStatementLogging(ErrorReportLevel level)
+  {
+    stmtRunner.setErrorReportLevel(level);
+  }
+  
+  public ErrorDescriptor getLastError()
+  {
+    return lastError;
+  }
+
+  public int getLastErrorStatementIndex()
+  {
+    return errorStatementIndex;
+  }
 
 	public boolean isBusy()
 	{
@@ -808,8 +825,11 @@ public class BatchRunner
 		long totalRows = 0;
 		long errorCount = 0;
 
-		boolean logAllStatements = Settings.getInstance().getLogAllStatements();
+    lastError = null;
+    errorStatementIndex = -1;
 
+		boolean logAllStatements = Settings.getInstance().getLogAllStatements();
+    int commandIndex = 0;
 		String sql = null;
 		while ((sql = parser.getNextCommand()) != null)
 		{
@@ -849,6 +869,10 @@ public class BatchRunner
 				error = false;
 
 				StatementRunnerResult result = this.stmtRunner.getResult();
+        lastError = result.getErrorDescriptor();
+        errorStatementIndex = commandIndex;
+        commandIndex ++;
+
 				if (result != null)
 				{
 					result.setExecutionDuration(verbend - verbstart);

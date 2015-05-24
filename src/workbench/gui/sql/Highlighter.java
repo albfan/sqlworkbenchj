@@ -39,7 +39,7 @@ public class Highlighter
     this.editor = editorPanel;
   }
 
-	void highlightStatement(ScriptParser scriptParser, int command, int startOffset)
+	public void highlightStatement(ScriptParser scriptParser, int command, int startOffset)
 	{
 		if (this.editor == null) return;
 		final int startPos = scriptParser.getStartPosForCommand(command) + startOffset;
@@ -57,7 +57,7 @@ public class Highlighter
 		});
 	}
 
-	void highlightError(final boolean doHighlight, ScriptParser scriptParser, int commandWithError, int startOffset, ErrorDescriptor error)
+	public void highlightError(final boolean doHighlight, ScriptParser scriptParser, int commandWithError, int startOffset, ErrorDescriptor error)
 	{
 		if (this.editor == null) return;
 		if (!doHighlight && !GuiSettings.jumpToError()) return;

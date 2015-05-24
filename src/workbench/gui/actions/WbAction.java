@@ -102,11 +102,11 @@ public class WbAction
 	 * implemented with a subclass of WbAction, but with an ActionListener
 	 * instead.
 	 */
-	public WbAction(ActionListener l, String aName)
+	public WbAction(ActionListener l, String actionCommand)
 	{
 		super();
 		delegate = l;
-		actionName = aName;
+		actionName = actionCommand;
 		putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
 

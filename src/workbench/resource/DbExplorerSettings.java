@@ -37,6 +37,7 @@ public class DbExplorerSettings
 	public static final String PROP_USE_SQLSORT = "workbench.dbexplorer.datapanel.applysqlorder";
 	public static final String PROP_TABLE_HISTORY = "workbench.dbexplorer.tablelist.history";
 	public static final String PROP_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
+	public static final String PROP_ALLOW_SOURCE_EDITING = "workbench.dbexplorer.allow.source.edit";
 
 	public static final String PROP_INSTANT_FILTER = "workbench.dbexplorer.instantfilter";
 	public static final String PROP_ASSUME_WILDCARDS = "workbench.dbexplorer.assumewildcards";
@@ -54,6 +55,16 @@ public class DbExplorerSettings
 	public static void setShowSynonymTargetInDbExplorer(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.dbexplorer.synonyms.showtarget", flag);
+	}
+
+	public static boolean allowSourceEditing()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_ALLOW_SOURCE_EDITING, false);
+	}
+
+	public static void setAllowSourceEditing(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_ALLOW_SOURCE_EDITING, flag);
 	}
 
 	public static boolean allowAlterInDbExplorer()

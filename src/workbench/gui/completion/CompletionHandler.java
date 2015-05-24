@@ -38,13 +38,11 @@ import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
 
 import workbench.gui.editor.JEditTextArea;
 
-import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 
 import workbench.util.CollectionUtil;
@@ -140,11 +138,8 @@ public class CompletionHandler
 	{
 		boolean result = false;
 		highlightNotNulls = false;
-		String script = this.editor.getText();
-		ScriptParser parser = new ScriptParser(script, ParserType.getTypeFromConnection(dbConnection));
-		parser.setCheckEscapedQuotes(Settings.getInstance().useNonStandardQuoteEscaping(dbConnection));
-		parser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
-		parser.setAlternateDelimiter(dbConnection.getAlternateDelimiter());
+		ScriptParser parser = ScriptParser.createScriptParser(dbConnection);
+    parser.setScript(editor.getText());
 		int cursorPos = this.editor.getCaretPosition();
 
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);

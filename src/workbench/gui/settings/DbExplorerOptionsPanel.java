@@ -71,6 +71,7 @@ public class DbExplorerOptionsPanel
 		DbExplorerSettings.setDbExplorerShowTableHistory(showTableHistory.isSelected());
 		DbExplorerSettings.setGenerateColumnListInViews(generateViewColumns.isSelected());
 		DbExplorerSettings.setUseFilterForRetrieve(filterRetrieval.isSelected());
+    DbExplorerSettings.setAllowSourceEditing(allowEditing.isSelected());
 		((PlacementChooser)tabPlacement).saveSelection();
 	}
 
@@ -102,6 +103,7 @@ public class DbExplorerOptionsPanel
     retrieveDbExplorer.setSelected(DbExplorerSettings.getRetrieveDbExplorer());
     rememberObject.setSelected(DbExplorerSettings.getStoreExplorerObjectType());
     applySQLSort.setSelected(DbExplorerSettings.getRememberSortInDbExplorer());
+    allowEditing.setSelected(DbExplorerSettings.allowSourceEditing());
 	}
 
 	/** This method is called from within the constructor to
@@ -143,6 +145,7 @@ public class DbExplorerOptionsPanel
     generateTableGrants = new javax.swing.JCheckBox();
     generateDrop = new javax.swing.JCheckBox();
     generateViewColumns = new javax.swing.JCheckBox();
+    allowEditing = new javax.swing.JCheckBox();
     jPanel4 = new javax.swing.JPanel();
     rememberColOrder = new javax.swing.JCheckBox();
     rememberSort = new javax.swing.JCheckBox();
@@ -453,6 +456,17 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(6, 8, 3, 10);
     jPanel3.add(generateViewColumns, gridBagConstraints);
 
+    allowEditing.setText(ResourceMgr.getString("LblDbExpSrcEdit")); // NOI18N
+    allowEditing.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    allowEditing.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 8, 3, 10);
+    jPanel3.add(allowEditing, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
     jPanel6.add(jPanel3, gridBagConstraints);
@@ -529,6 +543,7 @@ public class DbExplorerOptionsPanel
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JCheckBox allowEditing;
   private javax.swing.JCheckBox allowTableAlter;
   private javax.swing.JCheckBox applySQLSort;
   private javax.swing.JCheckBox autogeneratePK;

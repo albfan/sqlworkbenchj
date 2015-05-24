@@ -22,6 +22,9 @@
  */
 package workbench.gui.components;
 
+import java.awt.Component;
+
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -98,4 +101,28 @@ public class WbToolbar
 		this.setBorderPainted(true);
 		this.setRollover(true);
 	}
+
+  public void removeAction(WbAction action)
+  {
+    if (action == null) return;
+    int indexToRemove = -1;
+
+    int count = getComponentCount();
+    for (int i=0; i < count; i++)
+    {
+      Component comp = getComponentAtIndex(i);
+      if (comp instanceof AbstractButton)
+      {
+        Action buttonAction = ((AbstractButton)comp).getAction();
+        if (buttonAction == action)
+        {
+          indexToRemove = i;
+          break;
+        }
+      }
+    }
+    invalidate();
+    remove(indexToRemove);
+    revalidate();
+  }
 }

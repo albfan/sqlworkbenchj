@@ -1003,7 +1003,7 @@ public class SqlCommand
    *
    * @see #setErrorReportLevel(workbench.sql.ErrorReportLevel)
    * @see Settings#getStatementErrorReportLevel()
-   * @see Settings#getMaxErrorStatementLength() 
+   * @see Settings#getMaxErrorStatementLength()
    */
 	protected void addErrorStatement(StatementRunnerResult result, String sql)
 	{

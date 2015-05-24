@@ -105,7 +105,7 @@ public class DefaultViewReader
 		// DB2 even returns the CREATE OR REPLACE if the view was created that way.
 		// Teradata returns a complete REPLACE VIEW ... statement
 		// therefor the verb is compared with startsWith() rather than equals()
-		if (verb.startsWith("CREATE") || verb.equals("REPLACE"))
+    if (verb.startsWith("CREATE") || verb.equals("REPLACE"))
 		{
 			if (includeDrop && !verb.equals("CREATE OR REPLACE") && !verb.equalsIgnoreCase("REPLACE"))
 			{
@@ -123,6 +123,13 @@ public class DefaultViewReader
 		}
 		else
 		{
+      if  (includeDrop && viewTable.getType().equalsIgnoreCase(DbMetadata.MVIEW_NAME))
+      {
+        result.append(builder.generateDrop(viewTable, false));
+        result.append(lineEnding);
+        result.append(lineEnding);
+      }
+
 			result.append(builder.generateCreateObject(false, viewTable, null));
 
 			if (connection.getDbSettings().generateColumnListInViews())

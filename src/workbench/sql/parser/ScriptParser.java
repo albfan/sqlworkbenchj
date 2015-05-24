@@ -30,6 +30,8 @@ import java.util.List;
 
 import workbench.resource.Settings;
 
+import workbench.db.WbConnection;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptCommandDefinition;
 
@@ -609,6 +611,36 @@ public class ScriptParser
 			}
 		}
 		return command;
+	}
+
+  /**
+   * Creates a configured ScriptParser for the passed connection.
+   *
+   * The following properties will be configured:
+   *
+   * <ul>
+   * <li>alternate delimiter</li>
+   * <li>checking for escaped quotes</li>
+   * <li>empty lines as delimiter</li>
+   * </ul>
+   * 
+   * @param dbConnection
+   * @return a ScriptParser configured with the current settings.
+   *
+   * @see #setAlternateDelimiter(workbench.sql.DelimiterDefinition)
+   * @see #setCheckEscapedQuotes(boolean)
+   * @see #setEmptyLineIsDelimiter(boolean)
+   * @see Settings#getAlternateDelimiter(workbench.db.WbConnection, workbench.sql.DelimiterDefinition)
+   * @see Settings#useNonStandardQuoteEscaping(workbench.db.WbConnection)
+   * @see Settings#getEmptyLineIsDelimiter()
+   */
+	public static ScriptParser createScriptParser(WbConnection dbConnection)
+	{
+		ScriptParser scriptParser = new ScriptParser(ParserType.getTypeFromConnection(dbConnection));
+		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(dbConnection, null));
+		scriptParser.setCheckEscapedQuotes(Settings.getInstance().useNonStandardQuoteEscaping(dbConnection));
+		scriptParser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
+		return scriptParser;
 	}
 
 }

@@ -196,9 +196,9 @@ public class DdlCommand
         }
         else
         {
-          // if the result did no have a warning, make sure the error message is displayed to the user
-          result.addMessage(e.getMessage());
+          addErrorPosition(result, sql, e);
         }
+
         LogMgr.logUserSqlError("DdlCommand.execute()", sql, e);
       }
 		}

@@ -27,6 +27,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.EventQueue;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,7 +86,7 @@ import workbench.util.WbWorkspace;
  */
 public class TriggerListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, DbObjectList, TableModelListener
+  implements ListSelectionListener, Reloadable, DbObjectList, TableModelListener, PropertyChangeListener
 {
 	private WbConnection dbConnection;
 	private TriggerReader reader;
@@ -151,6 +153,10 @@ public class TriggerListPanel
 		};
 
 		this.source = new DbObjectSourcePanel(parentWindow, sourceReload);
+    if (DbExplorerSettings.allowSourceEditing())
+    {
+      source.allowEditing(true);
+    }
 
 		JPanel listPanel = new JPanel();
 		this.triggerList = new WbTable(true, false, false);
@@ -219,7 +225,17 @@ public class TriggerListPanel
 			readSettings(workspaceProperties, workspaceProperties.getFilterPrefix());
 			workspaceProperties = null;
 		}
+    Settings.getInstance().addPropertyChangeListener(this, DbExplorerSettings.PROP_ALLOW_SOURCE_EDITING);
 	}
+
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+    if (source != null)
+    {
+      source.allowEditing(DbExplorerSettings.allowSourceEditing());
+    }
+  }
 
 	public void dispose()
 	{
@@ -231,6 +247,7 @@ public class TriggerListPanel
 		{
 			triggerList.dispose();
 		}
+    Settings.getInstance().removePropertyChangeListener(this);
 	}
 
 	public void disconnect()
@@ -506,7 +523,7 @@ public class TriggerListPanel
   {
     return triggerList.getSelectedRowCount();
   }
-  
+
   @Override
   public TableDefinition getCurrentTableDefinition()
   {

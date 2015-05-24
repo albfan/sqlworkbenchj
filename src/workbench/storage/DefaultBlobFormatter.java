@@ -28,6 +28,7 @@ import java.sql.Blob;
 import java.sql.SQLException;
 
 import javax.xml.bind.DatatypeConverter;
+
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;

@@ -295,6 +295,10 @@ public class TableListPanel
 
 		this.tableSource = new DbObjectSourcePanel(aParent, sourceReload);
 		this.tableSource.allowReformat();
+    if (DbExplorerSettings.allowSourceEditing())
+    {
+      tableSource.allowEditing(true);
+    }
 
 		this.tableData = new TableDataPanel();
 
@@ -329,7 +333,8 @@ public class TableListPanel
 			DbExplorerSettings.PROP_ASSUME_WILDCARDS,
 			PlacementChooser.PLACEMENT_PROPERTY,
 			DbExplorerSettings.PROP_TABLE_HISTORY,
-			DbExplorerSettings.PROP_USE_FILTER_RETRIEVE
+			DbExplorerSettings.PROP_USE_FILTER_RETRIEVE,
+      DbExplorerSettings.PROP_ALLOW_SOURCE_EDITING
 		);
 
 		reloadAction = new ReloadAction(this);
@@ -2520,6 +2525,10 @@ public class TableListPanel
 				}
 			});
 		}
+    else if (DbExplorerSettings.PROP_ALLOW_SOURCE_EDITING.equals(evt.getPropertyName()))
+    {
+      tableSource.allowEditing(DbExplorerSettings.allowSourceEditing());
+    }
 		else if (TableDefinitionPanel.INDEX_PROP.equals(evt.getPropertyName()))
 		{
 			this.shouldRetrieveIndexes = true;

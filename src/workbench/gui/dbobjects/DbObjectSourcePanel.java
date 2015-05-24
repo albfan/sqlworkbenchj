@@ -28,6 +28,7 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.Box;
 import javax.swing.JPanel;
 
 import workbench.interfaces.Reloadable;
@@ -35,6 +36,7 @@ import workbench.interfaces.Replaceable;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.SourceStatementsHelp;
@@ -43,12 +45,18 @@ import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.DropDownButton;
 import workbench.gui.components.FocusIndicator;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
+import workbench.gui.sql.Highlighter;
 import workbench.gui.sql.PanelContentSender;
 import workbench.gui.sql.PasteType;
+
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.ErrorDescriptor;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.StringUtil;
 
@@ -57,7 +65,7 @@ import workbench.util.StringUtil;
  */
 public class DbObjectSourcePanel
 	extends JPanel
-	implements ActionListener, Resettable
+  implements ActionListener, Resettable
 {
 	protected EditorPanel sourceEditor;
 	protected ReloadAction reloadSource;
@@ -67,6 +75,12 @@ public class DbObjectSourcePanel
 	private boolean initialized;
 	private boolean allowReformat;
 	private String objectName;
+  private WbToolbar toolbar;
+  private WbConnection connection;
+  private WbAction runScript;
+  private final String runScriptCommand = "run-script";
+
+  private boolean showRunScript;
 
 	public DbObjectSourcePanel(MainWindow window, Reloadable reloader)
 	{
@@ -83,6 +97,33 @@ public class DbObjectSourcePanel
 	{
 		return sourceEditor.getReplacer();
 	}
+
+  public void allowEditing(boolean flag)
+  {
+    if (initialized && showRunScript != flag)
+    {
+      showRunScript = flag;
+      toolbar.invalidate();
+
+      if (showRunScript)
+      {
+        enableSourceEditing();
+      }
+      else
+      {
+        disableSourceEditing();
+      }
+
+      WbSwingUtilities.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          toolbar.validate();
+        }
+      });
+    }
+  }
 
 	public void allowReformat()
 	{
@@ -117,7 +158,8 @@ public class DbObjectSourcePanel
 		}
 
 		this.setLayout(new BorderLayout());
-		WbToolbar toolbar = new WbToolbar();
+
+		toolbar = new WbToolbar();
 
 		if (reloadSource != null)
 		{
@@ -126,10 +168,7 @@ public class DbObjectSourcePanel
 		}
 
 		this.add(this.sourceEditor, BorderLayout.CENTER);
-		if (reloadSource != null)
-		{
-			this.add(toolbar, BorderLayout.NORTH);
-		}
+
 		if (parentWindow != null)
 		{
 			editButton = new DropDownButton(ResourceMgr.getString("LblEditScriptSource"));
@@ -138,12 +177,46 @@ public class DbObjectSourcePanel
 			editButton.setDropDownMenu(selectTabMenu.getPopupMenu());
 			toolbar.add(editButton);
 		}
+
+    if (showRunScript)
+    {
+      enableSourceEditing();
+    }
+
+    this.add(toolbar, BorderLayout.PAGE_START);
+
+
 		if (DbExplorerSettings.showFocusInDbExplorer())
 		{
 			new FocusIndicator(sourceEditor, sourceEditor);
 		}
+
 		initialized = true;
 	}
+
+  private void disableSourceEditing()
+  {
+    sourceEditor.setEditable(false);
+    if (runScript != null)
+    {
+      runScript.setEnabled(false);
+    }
+  }
+
+  private void enableSourceEditing()
+  {
+    if (runScript == null)
+    {
+      runScript = new WbAction(this, runScriptCommand);
+      runScript.setIcon("execute_sel");
+      toolbar.add(Box.createHorizontalStrut(IconMgr.getInstance().getSizeForLabel() / 3));
+      toolbar.addSeparator();
+      toolbar.add(Box.createHorizontalStrut(IconMgr.getInstance().getSizeForLabel() / 3));
+      toolbar.add(runScript);
+    }
+    runScript.setEnabled(true);
+    sourceEditor.setEditable(true);
+  }
 
 	@Override
 	public void setCursor(Cursor newCursor)
@@ -157,6 +230,10 @@ public class DbObjectSourcePanel
 	{
 		String command = e.getActionCommand();
 
+    if (runScriptCommand.equals(command))
+    {
+      runScript();
+    }
 		if (command.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX) && this.parentWindow != null)
 		{
 			try
@@ -249,6 +326,40 @@ public class DbObjectSourcePanel
 
 	}
 
+  public void appendText(final String text)
+  {
+    if (StringUtil.isEmptyString(text)) return;
+    WbSwingUtilities.invoke(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        sourceEditor.appendLine(text);
+        sourceEditor.invalidate();
+        sourceEditor.doLayout();
+      }
+    });
+  }
+
+  public void appendDelimiter(WbConnection dbConnection)
+  {
+    if (dbConnection == null) return;
+
+    if (dbConnection.getDbSettings().ddlNeedsCommit() && !dbConnection.getAutoCommit())
+    {
+      DelimiterDefinition delim = dbConnection.getAlternateDelimiter();
+      appendText("\nCOMMIT");
+      if (delim == null)
+      {
+        appendText(";\n");
+      }
+      else
+      {
+        appendText("\n" + delim.getDelimiter() + "\n");
+      }
+    }
+  }
+
 	public String getText()
 	{
 		if (sourceEditor == null) return null;
@@ -302,6 +413,11 @@ public class DbObjectSourcePanel
 	{
 		initGui();
 		sourceEditor.setDatabaseConnection(con);
+    connection = con;
+    if (runScript != null)
+    {
+      runScript.setEnabled(connection != null && !connection.getProfile().isReadOnly());
+    }
 	}
 
 	public void setEditable(boolean flag)
@@ -345,5 +461,34 @@ public class DbObjectSourcePanel
 			reloadSource.dispose();
 			reloadSource = null;
 		}
+    if (runScript != null)
+    {
+      runScript.dispose();
+      runScript = null;
+    }
 	}
+
+  private void runScript()
+  {
+    if (connection == null) return;
+    if (connection.getProfile().isReadOnly()) return;
+    
+    if (!WbSwingUtilities.isConnectionIdle(this, connection)) return;
+
+    if (WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgConfirmRunScript")) == false)
+    {
+      return;
+    }
+
+    ScriptExecutionFeedback feedback = new ScriptExecutionFeedback(connection, getText());
+    feedback.openWindow(this, objectName);
+    ErrorDescriptor error = feedback.getLastError();
+    if (error != null)
+    {
+      Highlighter highlighter = new Highlighter(sourceEditor);
+      ScriptParser parser = ScriptParser.createScriptParser(connection);
+      parser.setScript(getText());
+      highlighter.highlightError(false, parser, feedback.getLastErrorIndex(), 0, error);
+    }
+  }
 }

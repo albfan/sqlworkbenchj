@@ -194,6 +194,11 @@ public class ProcedureListPanel
 		};
 
 		source = new DbObjectSourcePanel(parentWindow, sourceReload);
+    if (DbExplorerSettings.allowSourceEditing())
+    {
+      source.allowEditing(true);
+    }
+
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), source);
 
 		JPanel p = new JPanel(new BorderLayout());
@@ -276,6 +281,8 @@ public class ProcedureListPanel
 			readSettings(workspaceSettings, workspaceSettings.getFilterPrefix());
 			workspaceSettings = null;
 		}
+
+    Settings.getInstance().addPropertyChangeListener(this, DbExplorerSettings.PROP_ALLOW_SOURCE_EDITING);
 	}
 
 	public void dispose()
@@ -289,6 +296,7 @@ public class ProcedureListPanel
 		if (source != null) source.dispose();
 		WbAction.dispose(compileAction, renameAction);
 		if (findPanel != null) findPanel.dispose();
+    Settings.getInstance().removePropertyChangeListener(this);
 	}
 
   private void configureFindPanel()
@@ -308,6 +316,10 @@ public class ProcedureListPanel
     else if (evt.getPropertyName().equals(DbExplorerSettings.PROP_INSTANT_FILTER) || evt.getPropertyName().equals(DbExplorerSettings.PROP_ASSUME_WILDCARDS))
     {
       configureFindPanel();
+    }
+    else if (DbExplorerSettings.PROP_ALLOW_SOURCE_EDITING.equals(evt.getPropertyName()))
+    {
+      if (source != null) source.allowEditing(DbExplorerSettings.allowSourceEditing());
     }
 	}
 
@@ -815,6 +827,8 @@ public class ProcedureListPanel
 			levelChanger.restoreIsolationLevel(dbConnection);
 			dbConnection.setBusy(false);
 		}
+
+    source.appendDelimiter(dbConnection);
 
 		final int pos = findOracleProcedureInPackage(sql, def);
 

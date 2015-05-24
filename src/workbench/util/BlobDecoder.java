@@ -31,7 +31,7 @@ import workbench.db.exporter.BlobMode;
 
 import workbench.storage.BlobLiteralType;
 
-import static workbench.db.exporter.BlobMode.AnsiLiteral;
+import static workbench.db.exporter.BlobMode.*;
 
 /**
  *
@@ -116,12 +116,19 @@ public class BlobDecoder
 	private byte[] decodeHex(String value)
 	{
 		int offset = 0;
-		if (value.startsWith("0x"))
+    int len = value.length();
+		if (value.toLowerCase().startsWith("0x"))
 		{
 			offset = 2;
 		}
+    else if (value.toLowerCase().startsWith("x'"))
+    {
+      // ANSI BLOB literal X'ff...00'
+      offset = 2;
+      len --;
+    }
 
-		byte[] result = new byte[(value.length() - offset) / 2];
+		byte[] result = new byte[(len - offset) / 2];
 
 		for (int i = 0; i < result.length; i++)
 		{

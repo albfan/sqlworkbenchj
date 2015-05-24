@@ -1195,7 +1195,7 @@ public class SqlPanel
 	@Override
 	public String getStatementAtCursor()
 	{
-		ScriptParser parser = createScriptParser();
+		ScriptParser parser = ScriptParser.createScriptParser(dbConnection);
 		parser.setScript(getEditor().getText());
 		int index = parser.getCommandIndexAtCursorPos(getEditor().getCaretPosition());
 		String currentStatement = parser.getCommand(index);
@@ -3093,15 +3093,6 @@ public class SqlPanel
 		}
 	}
 
-	public ScriptParser createScriptParser()
-	{
-		ScriptParser scriptParser = new ScriptParser(ParserType.getTypeFromConnection(this.dbConnection));
-		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(dbConnection, null));
-		scriptParser.setCheckEscapedQuotes(Settings.getInstance().useNonStandardQuoteEscaping(dbConnection));
-		scriptParser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
-		return scriptParser;
-	}
-
 	private boolean checkPrepared;
 
 	@Override
@@ -3174,7 +3165,7 @@ public class SqlPanel
 		executeAllStatements = false;
 		cancelAll = false;
 
-		ScriptParser scriptParser = createScriptParser();
+		ScriptParser scriptParser = ScriptParser.createScriptParser(dbConnection);
 
 		int oldSelectionStart = -1;
 		int oldSelectionEnd = -1;
