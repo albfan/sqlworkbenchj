@@ -1709,7 +1709,7 @@ public class TableListPanel
     {
       drop = dbo.getDropStatement(dbConnection, true);
     }
-    else
+    else if (selectedTable != null)
     {
       drop = selectedTable.getDropStatement(dbConnection, true);
     }
@@ -1723,7 +1723,7 @@ public class TableListPanel
     }
     return drop;
   }
-  
+
 	protected void retrieveTableSource()
 	{
 		if (selectedTable == null) return;

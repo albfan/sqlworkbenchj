@@ -188,7 +188,7 @@ public class BatchRunner
   {
     stmtRunner.setErrorReportLevel(level);
   }
-  
+
   public ErrorDescriptor getLastError()
   {
     return lastError;
@@ -869,9 +869,6 @@ public class BatchRunner
 				error = false;
 
 				StatementRunnerResult result = this.stmtRunner.getResult();
-        lastError = result.getErrorDescriptor();
-        errorStatementIndex = commandIndex;
-        commandIndex ++;
 
 				if (result != null)
 				{
@@ -886,7 +883,10 @@ public class BatchRunner
 
 					if (error)
 					{
-						LogMgr.logError("BatchRunner.execute()", feedback, null);
+            lastError = result.getErrorDescriptor();
+            errorStatementIndex = commandIndex;
+
+            LogMgr.logError("BatchRunner.execute()", feedback, null);
 						errorCount ++;
 						if (parser.getScriptFile() != null)
 						{
@@ -953,6 +953,7 @@ public class BatchRunner
 					break;
 				}
 
+        commandIndex++;
 			}
 			catch (Exception e)
 			{
