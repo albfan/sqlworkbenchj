@@ -87,7 +87,7 @@ public class DbExplorerOptionsPanel
 		rememberColOrder.setSelected(DbExplorerSettings.getRememberColumnOrder());
 		rememberSort.setSelected(DbExplorerSettings.getRememberSortInDbExplorer());
 		generateTableGrants.setSelected(DbExplorerSettings.getGenerateTableGrants());
-		generateDrop.setSelected(DbExplorerSettings.getDbExpGenerateDrop());
+		generateDrop.setSelected(DbExplorerSettings.getGenerateDrop());
 		useQuickFilterRegex.setSelected(GuiSettings.getUseRegexInQuickFilter());
 		filterWhileTyping.setSelected(DbExplorerSettings.getDbExpFilterDuringTyping());
 		selectSrcPanel.setSelected(DbExplorerSettings.getSelectSourcePanelAfterRetrieve());
@@ -457,6 +457,7 @@ public class DbExplorerOptionsPanel
     jPanel3.add(generateViewColumns, gridBagConstraints);
 
     allowEditing.setText(ResourceMgr.getString("LblDbExpSrcEdit")); // NOI18N
+    allowEditing.setToolTipText(ResourceMgr.getString("d_LblDbExpSrcEdit")); // NOI18N
     allowEditing.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
     allowEditing.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();

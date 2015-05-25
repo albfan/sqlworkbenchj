@@ -88,7 +88,8 @@ public class TriggerListPanel
 	extends JPanel
   implements ListSelectionListener, Reloadable, DbObjectList, TableModelListener, PropertyChangeListener
 {
-	private WbConnection dbConnection;
+  private static final String TRG_TYPE_NAME = "TRIGGER";
+  private WbConnection dbConnection;
 	private TriggerReader reader;
 	private QuickFilterPanel findPanel;
 	private WbTable triggerList;
@@ -267,7 +268,7 @@ public class TriggerListPanel
 			public void run()
 			{
 				triggerList.reset();
-				source.setText("", null);
+				source.reset();
 			}
 		});
 	}
@@ -486,12 +487,12 @@ public class TriggerListPanel
 				}
 
 				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName, tbl, comment, true);
-				source.setText(sql == null ? "" : sql, triggerName);
+				source.setText(sql == null ? "" : sql, triggerName, TRG_TYPE_NAME);
 			}
 			catch (Throwable ex)
 			{
 				LogMgr.logError("TriggerListPanel.retrieveTriggerSource() thread", "Could not read trigger source", ex);
-				source.setText(ExceptionUtil.getDisplay(ex), null);
+				source.setPlainText(ExceptionUtil.getDisplay(ex));
 			}
 		}
 		finally

@@ -392,7 +392,7 @@ public class ProcedureListPanel
 			{
 				procList.reset();
 				procColumns.reset();
-				source.setText("", null);
+				source.reset();
 			}
 		});
 	}
@@ -668,6 +668,13 @@ public class ProcedureListPanel
 		return def.getProcedureName();
 	}
 
+	private String getCurrentProcedureType()
+	{
+		ProcedureDefinition def = getCurrentProcedureDefinition();
+		if (def == null) return null;
+		return def.getObjectType();
+	}
+
 	private ProcedureDefinition getDefinition(int row)
 	{
 		ProcedureDefinition def = null;
@@ -806,19 +813,19 @@ public class ProcedureListPanel
 					sql = def.getSource();
 					putSourceToCache(def, sql);
 				}
-				source.setText(sql == null ? "" : sql.toString(), this.getCurrentProcedureName());
+				source.setText(sql == null ? "" : sql.toString(), this.getCurrentProcedureName(), getCurrentProcedureType());
 			}
 			catch (NoConfigException nce)
 			{
 				SourceStatementsHelp help = new SourceStatementsHelp(this.dbConnection.getMetadata().getMetaDataSQLMgr());
 				String msg = help.explainMissingProcSourceSql();
-				source.setText(msg, null);
+				source.setPlainText(msg);
 			}
 			catch (Throwable ex)
 			{
 				sql = null;
 				LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure source", ex);
-				source.setText(ex.getMessage(), null);
+				source.setPlainText(ex.getMessage());
 			}
 		}
 		finally

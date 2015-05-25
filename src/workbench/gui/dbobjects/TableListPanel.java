@@ -1556,6 +1556,21 @@ public class TableListPanel
 		return true;
 	}
 
+  private DbObject getSelectedUserObject()
+  {
+		int count = this.tableList.getSelectedRowCount();
+		int row = this.tableList.getSelectedRow();
+		if (count == 1 && row > -1)
+		{
+      Object uo = tableList.getDataStore().getRow(row).getUserObject();
+      if (uo instanceof DbObject)
+      {
+        return (DbObject)uo;
+      }
+    }
+    return null;
+  }
+
 	private void updateSelectedTable()
 	{
 		int count = this.tableList.getSelectedRowCount();
@@ -1686,6 +1701,29 @@ public class TableListPanel
 		return containsData;
 	}
 
+  private String getDropForCurrentObject()
+  {
+    String drop = null;
+    DbObject dbo = getSelectedUserObject();
+    if (dbo != null)
+    {
+      drop = dbo.getDropStatement(dbConnection, true);
+    }
+    else
+    {
+      drop = selectedTable.getDropStatement(dbConnection, true);
+    }
+    if (drop == null)
+    {
+      drop = "";
+    }
+    else
+    {
+      drop += "\n\n";
+    }
+    return drop;
+  }
+  
 	protected void retrieveTableSource()
 	{
 		if (selectedTable == null) return;
@@ -1709,7 +1747,12 @@ public class TableListPanel
 
 			if (meta.isExtendedObject(selectedTable))
 			{
-				sql = meta.getObjectSource(selectedTable);
+        String drop = "";
+        if (DbExplorerSettings.getGenerateDrop())
+        {
+          drop = getDropForCurrentObject();
+        }
+				sql = drop + meta.getObjectSource(selectedTable);
 			}
 			else if (dbs.isViewType(type))
 			{
@@ -1738,7 +1781,7 @@ public class TableListPanel
 			// isExtendedTableType() checks for regular tables and "extended tables"
 			else if (meta.isExtendedTableType(type))
 			{
-				sql = builder.getTableSource(selectedTable, DbExplorerSettings.getDbExpGenerateDrop(), true, DbExplorerSettings.getGenerateTableGrants());
+				sql = builder.getTableSource(selectedTable, DbExplorerSettings.getGenerateDrop(), true, DbExplorerSettings.getGenerateTableGrants());
 			}
 
 			if (sql != null && dbConnection.getDbSettings().ddlNeedsCommit())
@@ -1752,7 +1795,7 @@ public class TableListPanel
 				@Override
 				public void run()
 				{
-					tableSource.setText(s, selectedTable.getTableName());
+					tableSource.setText(s, selectedTable.getTableName(), selectedTable.getObjectType());
 					tableSource.setCaretPosition(0, false);
 					if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
 					{
@@ -1772,7 +1815,7 @@ public class TableListPanel
 				@Override
 				public void run()
 				{
-					tableSource.setText(msg, null);
+					tableSource.reset();
 				}
 			});
 		}

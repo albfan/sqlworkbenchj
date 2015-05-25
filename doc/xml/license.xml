@@ -4,8 +4,9 @@
   <para>Copyright 2002-2015, Thomas Kellerer</para>
 
   <para>
-    This software is licensed under the Apache License, Version 2.0
-    <ulink url="http://www.apache.org/licenses/LICENSE-2.0"/>
+    This software is licensed under a modified version the Apache License, Version 2.0
+    <ulink url="http://www.apache.org/licenses/LICENSE-2.0"/> that
+    <link linkend="license-restrictions">restricts the use of the software</link> for certain organizations.
   </para>
 
   <para>
@@ -82,7 +83,7 @@
   </section>
 
   <section id="license-restrictions">
-    <title>Restrictions</title>
+    <title>Restrictions (deviation of the Apache License)</title>
     <para>
       The right to use this software is explicitely <emphasis role="bold">NOT</emphasis> granted to the governments of the following countries or
       organizations directly related to them:

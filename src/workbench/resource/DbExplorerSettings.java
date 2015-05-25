@@ -22,7 +22,12 @@
  */
 package workbench.resource;
 
+import java.util.List;
+import java.util.Set;
+
 import workbench.db.WbConnection;
+
+import workbench.util.CollectionUtil;
 
 import static workbench.resource.Settings.*;
 
@@ -66,6 +71,18 @@ public class DbExplorerSettings
 	{
 		Settings.getInstance().setProperty(PROP_ALLOW_SOURCE_EDITING, flag);
 	}
+
+  /**
+   * Return a list of object types for which the DbExplorer should not confirm the execution from within the "Source" panel.
+   *
+   */
+  public static Set<String> objectTypesToRunWithoutConfirmation()
+  {
+    List<String> types = Settings.getInstance().getListProperty("workbench.dbexplorer.exec.noconfirm.types", false);
+    Set<String> result = CollectionUtil.caseInsensitiveSet();
+    result.addAll(types);
+    return result;
+  }
 
 	public static boolean allowAlterInDbExplorer()
 	{
@@ -147,7 +164,7 @@ public class DbExplorerSettings
 		Settings.getInstance().setProperty("workbench.db.generate.tablesource.include.grants", flag);
 	}
 
-	public static boolean getDbExpGenerateDrop()
+	public static boolean getGenerateDrop()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.generate.drop", true);
 	}

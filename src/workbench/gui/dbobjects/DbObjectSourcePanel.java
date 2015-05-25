@@ -79,7 +79,7 @@ public class DbObjectSourcePanel
   private WbConnection connection;
   private WbAction runScript;
   private final String runScriptCommand = "run-script";
-
+  private String objectType;
   private boolean showRunScript;
 
 	public DbObjectSourcePanel(MainWindow window, Reloadable reloader)
@@ -102,7 +102,7 @@ public class DbObjectSourcePanel
   {
     boolean old = showRunScript;
     showRunScript = flag;
-    
+
     if (initialized && showRunScript != old)
     {
       toolbar.invalidate();
@@ -269,10 +269,10 @@ public class DbObjectSourcePanel
 		}
 	}
 
-	public void setPlainText(final String sql)
+	public void setPlainText(final String message)
 	{
 		initGui();
-		setEditorText(sql, false);
+		setEditorText(message, false);
 	}
 
 	/**
@@ -281,11 +281,12 @@ public class DbObjectSourcePanel
 	 * if the SQL Queries have not been configured for e.g. stored procedures)
 	 * syntax highlighting will be disabled.
 	 */
-	public void setText(final String sql, String name)
+	public void setText(final String sql, String name, String type)
 	{
 		initGui();
 		boolean hasText = StringUtil.isNonEmpty(sql);
 		this.objectName = name;
+    this.objectType = type;
 		if (reloadSource != null) reloadSource.setEnabled(hasText);
 
 		if (editButton != null) editButton.setEnabled(hasText);
@@ -435,7 +436,7 @@ public class DbObjectSourcePanel
 	{
 		if (sourceEditor != null)
 		{
-			this.setText("", null);
+			this.setText("", null, null);
 		}
 	}
 
@@ -477,12 +478,19 @@ public class DbObjectSourcePanel
 
     if (!WbSwingUtilities.isConnectionIdle(this, connection)) return;
 
-    if (WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgConfirmRunScript")) == false)
+    String script = getText();
+    if (script.isEmpty()) return;
+
+    boolean confirmExec = !DbExplorerSettings.objectTypesToRunWithoutConfirmation().contains(objectType == null ? "always" : objectType);
+
+    String type = objectType == null ? "object" : objectType.toLowerCase();
+    String msg = ResourceMgr.getFormattedString("MsgConfirmRecreate", type, objectName);
+    if (confirmExec && WbSwingUtilities.getYesNo(this, msg) == false)
     {
       return;
     }
 
-    ScriptExecutionFeedback feedback = new ScriptExecutionFeedback(connection, getText());
+    ScriptExecutionFeedback feedback = new ScriptExecutionFeedback(connection, script);
     feedback.openWindow(this, objectName);
     ErrorDescriptor error = feedback.getLastError();
     if (error != null)

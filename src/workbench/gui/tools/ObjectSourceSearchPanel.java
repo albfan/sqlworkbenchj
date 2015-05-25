@@ -133,7 +133,7 @@ public class ObjectSourceSearchPanel
 
 	protected void clearSearch()
 	{
-		objectSource.setText("", null);
+		objectSource.reset();
 		setModel(new ObjectResultListDataStore());
 	}
 
@@ -645,12 +645,13 @@ public class ObjectSourceSearchPanel
 		// has to be retrieved directly from the underlying table model
 		final CharSequence source = (CharSequence)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_SOURCE);
 		final String name = (String)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_OBJECT_NAME);
+    final String type = (String)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_OBJECT_TYPE);
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				objectSource.setText(source == null ? "" : source.toString(), name);
+				objectSource.setText(source == null ? "" : source.toString(), name, type);
 				objectSource.setCaretPosition(0, false);
 				List<String> values = StringUtil.stringToList(searchValues.getText(), ",", true, true, false);
 				if (values.size() == 1)
