@@ -60,7 +60,7 @@ public class JumpToStatement
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		ScriptParser p = client.createScriptParser();
+		ScriptParser p = ScriptParser.createScriptParser(client.getConnection());
 		p.setScript(client.getText());
 		int count = p.getSize();
 
@@ -70,7 +70,7 @@ public class JumpToStatement
 		{
 			input.addItem(Integer.toString(i + 1));
 		}
-		
+
 		int current = p.getCommandIndexAtCursorPos(client.getEditor().getCaretPosition());
 		input.setSelectedItem(Integer.toString(current+1));
 

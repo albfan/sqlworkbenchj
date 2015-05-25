@@ -61,7 +61,7 @@ public class InsertTipProvider
 		if (editor.isModifiedAfter(lastParseTime) || currentPosition < lastCommandStart || currentPosition > lastCommandEnd)
 		{
 			lastParseTime = System.currentTimeMillis();
-			ScriptParser parser = sqlPanel.createScriptParser();
+			ScriptParser parser = ScriptParser.createScriptParser(sqlPanel.getConnection());
 			parser.setScript(editor.getText());
 			int index = parser.getCommandIndexAtCursorPos(editor.getCaretPosition());
 			if (index < 0)

@@ -39,8 +39,8 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 
-import workbench.sql.parser.ScriptParser;
 import workbench.sql.fksupport.JoinCreator;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -70,7 +70,7 @@ public class JoinCompletionAction
 		WbConnection conn = client.getConnection();
 		if (conn == null) return;
 
-		ScriptParser parser = client.createScriptParser();
+		ScriptParser parser = ScriptParser.createScriptParser(client.getConnection());
 
 		EditorPanel editor = client.getEditor();
 		parser.setScript(editor.getText());

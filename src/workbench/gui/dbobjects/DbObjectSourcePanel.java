@@ -100,9 +100,11 @@ public class DbObjectSourcePanel
 
   public void allowEditing(boolean flag)
   {
-    if (initialized && showRunScript != flag)
+    boolean old = showRunScript;
+    showRunScript = flag;
+    
+    if (initialized && showRunScript != old)
     {
-      showRunScript = flag;
       toolbar.invalidate();
 
       if (showRunScript)
@@ -472,7 +474,7 @@ public class DbObjectSourcePanel
   {
     if (connection == null) return;
     if (connection.getProfile().isReadOnly()) return;
-    
+
     if (!WbSwingUtilities.isConnectionIdle(this, connection)) return;
 
     if (WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgConfirmRunScript")) == false)
