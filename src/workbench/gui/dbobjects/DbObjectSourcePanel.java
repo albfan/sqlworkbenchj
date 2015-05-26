@@ -211,9 +211,8 @@ public class DbObjectSourcePanel
     {
       runScript = new WbAction(this, runScriptCommand);
       runScript.setIcon("execute_sel");
-      toolbar.add(Box.createHorizontalStrut(IconMgr.getInstance().getSizeForLabel() / 3));
+      toolbar.add(Box.createHorizontalStrut(IconMgr.getInstance().getSizeForLabel()));
       toolbar.addSeparator();
-      toolbar.add(Box.createHorizontalStrut(IconMgr.getInstance().getSizeForLabel() / 3));
       toolbar.add(runScript);
     }
     runScript.setEnabled(true);
