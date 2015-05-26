@@ -74,13 +74,12 @@
         </xsl:for-each>
       </ul>
 
-      <!--
-      <div id="nblink">
-        <a target="_blank" href="http://www.netbeans.org">
-          <img border="0" style="margin-top:50px;" src="created-with-nb-2.gif" alt="Created with NetBeans"/>
+      <div id="ttip">
+        <a target="_blank" href="https://www.campact.de/ttip-ebi/">
+          <img border="0" style="margin-top:50px;" src="ttip.jpg" alt="Stop TTIP"/>
         </a>
       </div>
-      -->
+
     </div>
 
   </xsl:template>
