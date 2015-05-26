@@ -98,6 +98,13 @@ public class DbObjectSourcePanel
 		return sourceEditor.getReplacer();
 	}
 
+  private void checkReadonly()
+  {
+    boolean readOnly = (connection == null || connection.getProfile().isReadOnly()) || runScript == null;
+    if (runScript != null) runScript.setEnabled(!readOnly);
+    sourceEditor.setEditable(!readOnly);
+  }
+
   public void allowEditing(boolean flag)
   {
     boolean old = showRunScript;
@@ -115,6 +122,8 @@ public class DbObjectSourcePanel
       {
         disableSourceEditing();
       }
+
+      checkReadonly();
 
       WbSwingUtilities.invokeLater(new Runnable()
       {
@@ -416,10 +425,7 @@ public class DbObjectSourcePanel
 		initGui();
 		sourceEditor.setDatabaseConnection(con);
     connection = con;
-    if (runScript != null)
-    {
-      runScript.setEnabled(connection != null && !connection.getProfile().isReadOnly());
-    }
+    checkReadonly();
 	}
 
 	public void setEditable(boolean flag)
