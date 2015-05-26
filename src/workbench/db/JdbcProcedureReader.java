@@ -39,6 +39,9 @@ import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
 
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
@@ -711,5 +714,30 @@ public class JdbcProcedureReader
     }
     return null;
   }
+
+  @Override
+  public boolean isRecreateStatement(CharSequence sql)
+  {
+    if (sql == null) return false;
+    if (sql.length() == 0) return false;
+
+    SQLLexer lexer = SQLLexerFactory.createLexer(connection);
+    lexer.setInput(sql);
+    SQLToken token = lexer.getNextToken(false, false);
+    if (token == null) return false;
+    if (token.getText().equalsIgnoreCase("create or replace")) return true;
+    if (token.getText().equalsIgnoreCase("recreate")) return true;
+    if (token.getText().equalsIgnoreCase("create"))
+    {
+      token = lexer.getNextToken(false, false);
+      if (token.getText().equalsIgnoreCase("or"))
+      {
+        token = lexer.getNextToken(false, false);
+        return token != null && token.getText().equalsIgnoreCase("replace");
+      }
+    }
+    return false;
+  }
+
 
 }

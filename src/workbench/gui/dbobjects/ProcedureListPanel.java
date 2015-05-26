@@ -60,6 +60,7 @@ import workbench.resource.Settings;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.GenericObjectDropper;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
@@ -94,6 +95,7 @@ import workbench.gui.renderer.RendererFactory;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
 import workbench.gui.sql.PasteType;
+import workbench.sql.DelimiterDefinition;
 
 import workbench.storage.DataStore;
 
@@ -813,7 +815,7 @@ public class ProcedureListPanel
 					sql = def.getSource();
 					putSourceToCache(def, sql);
 				}
-				source.setText(sql == null ? "" : sql.toString(), this.getCurrentProcedureName(), getCurrentProcedureType());
+				source.setText(addDropStatement(sql, def), this.getCurrentProcedureName(), getCurrentProcedureType());
 			}
 			catch (NoConfigException nce)
 			{
@@ -855,6 +857,36 @@ public class ProcedureListPanel
 			});
 		}
 	}
+
+  private String addDropStatement(CharSequence sql, ProcedureDefinition proc)
+  {
+    if (sql == null || proc == null) return "";
+    if (DbExplorerSettings.getGenerateDrop() == false) return sql.toString();
+    ProcedureReader reader = ReaderFactory.getProcedureReader(dbConnection.getMetadata());
+    if (reader.isRecreateStatement(sql))
+    {
+      return sql.toString();
+    }
+    String drop = proc.getDropStatement(dbConnection, true);
+    if (drop == null)
+    {
+      GenericObjectDropper dropper = new GenericObjectDropper();
+      dropper.setConnection(dbConnection);
+      CharSequence ddl = dropper.getDropForObject(proc);
+      if (ddl != null)
+      {
+        drop = ddl.toString();
+      }
+    }
+    if (drop == null) return sql.toString();
+
+    DelimiterDefinition delim = dbConnection.getAlternateDelimiter();
+    if (delim == null)
+    {
+      return drop + ";\n\n" + sql;
+    }
+    return drop + "\n" + delim.getDelimiter() + "\n\n" + sql;
+  }
 
 	private List<String> getParameterNames()
 	{

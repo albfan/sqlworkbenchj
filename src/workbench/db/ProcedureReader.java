@@ -80,5 +80,7 @@ public interface ProcedureReader
 
 	ProcedureDefinition findProcedureDefinition(ProcedureDefinition def);
 
+  boolean isRecreateStatement(CharSequence sql);
+
   void clearCache();
 }
