@@ -40,7 +40,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
 import workbench.db.datacopy.DataCopier;
-import workbench.db.datacopy.DropType;
+import workbench.db.DropType;
 import workbench.db.importer.DataReceiver;
 import workbench.db.importer.TableDependencySorter;
 

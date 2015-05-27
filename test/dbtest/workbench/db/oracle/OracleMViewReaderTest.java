@@ -25,6 +25,7 @@ package workbench.db.oracle;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.DropType;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
@@ -87,7 +88,7 @@ public class OracleMViewReaderTest
 		TestUtil.executeScript(con, sql);
 		TableIdentifier mview = con.getMetadata().findObject(new TableIdentifier("MV_PERSON"));
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-		String source = builder.getTableSource(mview, false, false);
+		String source = builder.getTableSource(mview, DropType.none, false);
 		assertNotNull(source);
 //		System.out.println(source);
 		String expected =
@@ -123,7 +124,7 @@ public class OracleMViewReaderTest
 		TestUtil.executeScript(con, sql);
 		TableIdentifier mview = con.getMetadata().findObject(new TableIdentifier("V_PERSON"));
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-		String source = builder.getTableSource(mview, false, false);
+		String source = builder.getTableSource(mview, DropType.none, false);
 		assertNotNull(source);
 		String expected =
 			"CREATE MATERIALIZED VIEW V_PERSON\n" +
@@ -143,7 +144,7 @@ public class OracleMViewReaderTest
 		expected += "\n\n" +
 			"COMMENT ON MATERIALIZED VIEW V_PERSON IS 'the mview';\n"+
 			"COMMENT ON COLUMN V_PERSON.ID IS 'the person PK';";
-		source = con.getMetadata().getViewReader().getExtendedViewSource(def, false, false).toString().trim();
+		source = con.getMetadata().getViewReader().getExtendedViewSource(def, DropType.none, false).toString().trim();
 		assertEquals(expected, source);
 	}
 
@@ -164,7 +165,7 @@ public class OracleMViewReaderTest
 		TestUtil.executeScript(con, sql);
 		TableIdentifier mview = con.getMetadata().findObject(new TableIdentifier("V_PERSON"));
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-		String source = builder.getTableSource(mview, false, false);
+		String source = builder.getTableSource(mview, DropType.none, false);
 		assertNotNull(source);
 		String expected =
 			"CREATE MATERIALIZED VIEW V_PERSON\n" +
@@ -196,7 +197,7 @@ public class OracleMViewReaderTest
 		TestUtil.executeScript(con, sql);
 		TableIdentifier mview = con.getMetadata().findObject(new TableIdentifier("MV_PERSON"));
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-		String source = builder.getTableSource(mview, false, false);
+		String source = builder.getTableSource(mview, DropType.none, false);
 		assertNotNull(source);
 		String expected =
 			"CREATE MATERIALIZED VIEW MV_PERSON\n" +

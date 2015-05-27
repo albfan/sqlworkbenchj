@@ -30,7 +30,7 @@ import workbench.interfaces.ProgressReporter;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-import workbench.db.datacopy.DropType;
+import workbench.db.DropType;
 import workbench.db.importer.DeleteType;
 
 import workbench.util.ArgumentParser;

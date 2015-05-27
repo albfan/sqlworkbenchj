@@ -917,7 +917,7 @@ public class TableIdentifier
 		}
 		else if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(type))
 		{
-			source = meta.getViewReader().getExtendedViewSource(new TableDefinition(this, null), false, false);
+			source = meta.getViewReader().getExtendedViewSource(new TableDefinition(this, null), DropType.none, false);
 		}
     else if (meta.isSynonym(this))
 		{
@@ -926,7 +926,7 @@ public class TableIdentifier
 		}
 		else if ("VIEW".equalsIgnoreCase(type))
 		{
-			source = meta.getViewReader().getExtendedViewSource(new TableDefinition(this, null), false, false);
+			source = meta.getViewReader().getExtendedViewSource(new TableDefinition(this, null), DropType.none, false);
 		}
 		else if (con.getMetadata().isSequenceType(type))
 		{
@@ -936,7 +936,7 @@ public class TableIdentifier
 		else
 		{
 			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-			source = builder.getTableSource(this, false, includeFk, includeGrants);
+			source = builder.getTableSource(this, DropType.none, includeFk, includeGrants);
 		}
 		return source;
 	}

@@ -37,6 +37,7 @@ import workbench.resource.DbExplorerSettings;
 import workbench.resource.Settings;
 
 import workbench.db.exporter.RowDataConverter;
+import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.gui.dbobjects.TableSearchPanel;
 
@@ -502,7 +503,7 @@ public class DbSettings
 			}
 			else
 			{
-				ddl = ddl.replace("%cascade%", "");
+        ddl = TemplateHandler.removePlaceholder(ddl, "%cascade%", true);
 			}
 		}
 		return ddl;

@@ -163,20 +163,26 @@ public class GenericObjectDropper
 	private CharSequence getDropStatement(int index)
 	{
 		DbObject toDrop = this.objects.get(index);
-		return getDropForObject(toDrop);
+		return getDropForObject(toDrop, cascadeConstraints);
 	}
 
 	@Override
 	public CharSequence getDropForObject(DbObject toDrop)
+  {
+    return getDropForObject(toDrop, cascadeConstraints);
+  }
+  
+	@Override
+	public CharSequence getDropForObject(DbObject toDrop, boolean cascade)
 	{
-		String drop = toDrop.getDropStatement(connection, cascadeConstraints);
+		String drop = toDrop.getDropStatement(connection, cascade);
 		if (drop != null) return drop;
 
 		String name = toDrop.getObjectNameForDrop(this.connection);
 		String type = toDrop.getObjectType();
 
 		StringBuilder sql = new StringBuilder(120);
-		String ddl = this.connection.getDbSettings().getDropDDL(type, cascadeConstraints);
+		String ddl = this.connection.getDbSettings().getDropDDL(type, cascade);
 
 		if (objectTable != null)
 		{

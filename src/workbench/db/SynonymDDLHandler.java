@@ -92,7 +92,7 @@ public class SynonymDDLHandler
 				{
 					TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);
 
-					String tableSql = builder.getTableSource(syn, false, true);
+					String tableSql = builder.getTableSource(syn, DropType.none, true);
 					if (StringUtil.isNonBlank(tableSql))
 					{
 						result.append("\n\n");

@@ -31,6 +31,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.DropType;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
@@ -55,7 +56,7 @@ public class OracleMViewReader
 	{
 	}
 
-	public CharSequence getMViewSource(WbConnection dbConnection, TableDefinition def, List<IndexDefinition> indexList, boolean includeDrop, boolean includeComments)
+	public CharSequence getMViewSource(WbConnection dbConnection, TableDefinition def, List<IndexDefinition> indexList, DropType dropType, boolean includeComments)
 	{
 		boolean alwaysUseDbmsMeta = dbConnection.getDbSettings().getUseOracleDBMSMeta("mview");
 
@@ -63,7 +64,7 @@ public class OracleMViewReader
 
 		StringBuilder result = new StringBuilder(250);
 
-		if (includeDrop)
+    if (dropType != DropType.none)
 		{
 			result.append("DROP MATERIALIZED VIEW ");
 			result.append(table.getTableExpression(dbConnection));

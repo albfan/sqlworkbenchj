@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import workbench.resource.Settings;
 
 import workbench.db.DefaultViewReader;
+import workbench.db.DropType;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 
@@ -44,10 +45,10 @@ public class PostgresViewReader
 	}
 
 	@Override
-	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
+  public CharSequence getExtendedViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
 		throws SQLException
 	{
-		CharSequence source = super.getExtendedViewSource(view, includeDrop, false);
+		CharSequence source = super.getExtendedViewSource(view, dropType, false);
 		PostgresRuleReader ruleReader = new PostgresRuleReader();
 
 		CharSequence rules = ruleReader.getTableRuleSource(this.connection, view.getTable());

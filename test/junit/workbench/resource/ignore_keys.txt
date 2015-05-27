@@ -5,6 +5,7 @@ MnuTxtCopyAsSqlInsert
 MnuTxtCopyAsSqlMerge
 MnuTxtCopyAsSqlUpdate
 MsgStmtSuccess.purge
+MsgConfirmRecreate
 LblMergeType
 TxtEdPrefix
 TxtZoom
@@ -19,6 +20,7 @@ LblConnTimeout
 LblDbURL
 LblDriverName
 LblDrop
+LblDropCascade
 LblExportEscapeHtml
 LblFilter
 LblFetchSize
@@ -82,3 +84,4 @@ LblSettingsWorkspace
 TxtPSParameterName
 TxtFileFilterJson
 LblBookPanel
+

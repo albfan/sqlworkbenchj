@@ -31,6 +31,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DropType;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
@@ -51,15 +52,15 @@ public class H2TableSourceBuilder
 	}
 
 	@Override
-	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk, boolean includeGrants)
+  public String getTableSource(TableIdentifier table, DropType drop, boolean includeFk, boolean includeGrants)
 		throws SQLException
 	{
 		if ("TABLE LINK".equals(table.getType()))
 		{
-			String sql = getLinkedTableSource(table, includeDrop);
+			String sql = getLinkedTableSource(table, drop != DropType.none);
 			if (sql != null) return sql;
 		}
-		return super.getTableSource(table, includeDrop, includeFk, includeGrants);
+		return super.getTableSource(table, drop, includeFk, includeGrants);
 	}
 
 	private String getLinkedTableSource(TableIdentifier table, boolean includeDrop)

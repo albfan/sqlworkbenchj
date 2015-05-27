@@ -76,7 +76,7 @@ import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
-import workbench.db.datacopy.DropType;
+import workbench.db.DropType;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.DeleteType;
 import workbench.db.importer.ImportOptions;

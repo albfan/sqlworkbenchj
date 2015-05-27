@@ -26,6 +26,7 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 
 import workbench.db.ConnectionMgr;
+import workbench.db.DropType;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -74,11 +75,11 @@ public class SqlServerTableSourceBuilderTest
 		TestUtil.executeScript(conn, sql);
 		TableIdentifier tbl = conn.getMetadata().findTable(new TableIdentifier("foo"));
 		SqlServerTableSourceBuilder builder = new SqlServerTableSourceBuilder(conn);
-		String source = builder.getTableSource(tbl, false, false);
+		String source = builder.getTableSource(tbl, DropType.none, false);
 		assertTrue(source.contains("PRIMARY KEY NONCLUSTERED (id)"));
 
 		tbl.setUseInlinePK(true);
-		source = builder.getTableSource(tbl, false, false);
+		source = builder.getTableSource(tbl, DropType.none, false);
 		assertTrue(source.contains("PRIMARY KEY NONCLUSTERED (id)"));
 	}
 

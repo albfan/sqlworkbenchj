@@ -25,6 +25,7 @@ package workbench.resource;
 import java.util.List;
 import java.util.Set;
 
+import workbench.db.DropType;
 import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
@@ -164,15 +165,34 @@ public class DbExplorerSettings
 		Settings.getInstance().setProperty("workbench.db.generate.tablesource.include.grants", flag);
 	}
 
-	public static boolean getGenerateDrop()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.generate.drop", true);
-	}
+  public static DropType getDropTypeToGenerate()
+  {
+    String type = Settings.getInstance().getProperty("workbench.dbexplorer.generate.drop", DropType.cascaded.name());
 
-	public static void setDbExpGenerateDrop(boolean flag)
-	{
-		Settings.getInstance().setProperty("workbench.dbexplorer.generate.drop", flag);
-	}
+    // migrate from the old setting (true/false)
+    if ("true".equals(type))
+    {
+      return DropType.cascaded;
+    }
+    if ("false".equals(type))
+    {
+      return DropType.none;
+    }
+
+    try
+    {
+      return DropType.valueOf(type);
+    }
+    catch (Exception ex)
+    {
+      return DropType.cascaded;
+    }
+  }
+
+  public static void setDropTypeToGenerate(DropType type)
+  {
+    Settings.getInstance().setProperty("workbench.dbexplorer.generate.drop", type.name());
+  }
 
 	public static boolean getDbExpUsePartialMatch()
 	{

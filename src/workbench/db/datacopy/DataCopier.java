@@ -22,6 +22,8 @@
  */
 package workbench.db.datacopy;
 
+import workbench.db.DropType;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;

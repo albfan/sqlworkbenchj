@@ -34,7 +34,7 @@ public interface ViewReader
 	CharSequence getExtendedViewSource(TableIdentifier tbl)
 		throws SQLException;
 
-	CharSequence getExtendedViewSource(TableIdentifier tbl, boolean includeDrop)
+	CharSequence getExtendedViewSource(TableIdentifier tbl, DropType dropType)
 		throws SQLException;
 
 	/**
@@ -51,7 +51,7 @@ public interface ViewReader
 	 *
 	 * @see #getViewSource(workbench.db.TableIdentifier)
 	 */
-	CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
+	CharSequence getExtendedViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
 		throws SQLException;
 
 	/**
@@ -66,7 +66,7 @@ public interface ViewReader
    * the grants, a commit or a drop statement.
 	 *
 	 * @param view The view for which thee source should be created
-   * 
+   *
 	 * @see #getExtendedViewSource(workbench.db.TableDefinition, boolean, boolean)
 	 */
 	CharSequence getFullViewSource(TableDefinition view)

@@ -61,24 +61,24 @@ public class DefaultViewReader
 	public CharSequence getExtendedViewSource(TableIdentifier tbl)
 		throws SQLException
 	{
-		return getExtendedViewSource(new TableDefinition(tbl), false, false);
+		return getExtendedViewSource(new TableDefinition(tbl), DropType.none, false);
 	}
 
 	@Override
-	public CharSequence getExtendedViewSource(TableIdentifier tbl, boolean includeDrop)
+	public CharSequence getExtendedViewSource(TableIdentifier tbl, DropType dropType)
 		throws SQLException
 	{
-		return getExtendedViewSource(new TableDefinition(tbl), includeDrop, false);
+		return getExtendedViewSource(new TableDefinition(tbl), dropType, false);
 	}
 
   @Override
 	public CharSequence getFullViewSource(TableDefinition view)
 		throws SQLException, NoConfigException
   {
-    return createFullViewSource(view, false, false);
+    return createFullViewSource(view, DropType.none, false);
   }
 
-	protected CharSequence createFullViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
+	protected CharSequence createFullViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
 		throws SQLException, NoConfigException
   {
 		TableIdentifier viewTable = view.getTable();
@@ -107,9 +107,9 @@ public class DefaultViewReader
 		// therefor the verb is compared with startsWith() rather than equals()
     if (verb.startsWith("CREATE") || verb.equals("REPLACE"))
 		{
-			if (includeDrop && !verb.equals("CREATE OR REPLACE") && !verb.equalsIgnoreCase("REPLACE"))
+			if (dropType != DropType.none && !verb.equals("CREATE OR REPLACE") && !verb.equalsIgnoreCase("REPLACE"))
 			{
-				result.append(builder.generateDrop(viewTable, false));
+				result.append(builder.generateDrop(viewTable, dropType));
 				result.append(lineEnding);
 				result.append(lineEnding);
 			}
@@ -123,14 +123,14 @@ public class DefaultViewReader
 		}
 		else
 		{
-      if  (includeDrop && viewTable.getType().equalsIgnoreCase(DbMetadata.MVIEW_NAME))
+      if  (dropType != DropType.none && viewTable.getType().equalsIgnoreCase(DbMetadata.MVIEW_NAME))
       {
-        result.append(builder.generateDrop(viewTable, false));
+        result.append(builder.generateDrop(viewTable, dropType));
         result.append(lineEnding);
         result.append(lineEnding);
       }
 
-			result.append(builder.generateCreateObject(false, viewTable, null));
+			result.append(builder.generateCreateObject(DropType.none, viewTable, null));
 
 			if (connection.getDbSettings().generateColumnListInViews())
 			{
@@ -175,7 +175,7 @@ public class DefaultViewReader
 	 * @see #getViewSource(workbench.db.TableIdentifier)
 	 */
 	@Override
-	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
+	public CharSequence getExtendedViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
 		throws SQLException
 	{
 		TableIdentifier viewTable = view.getTable();
@@ -183,7 +183,7 @@ public class DefaultViewReader
 		CharSequence source = null;
 		try
 		{
-			source = createFullViewSource(view, includeDrop, includeCommit);
+			source = createFullViewSource(view, dropType, includeCommit);
 		}
 		catch (NoConfigException no)
 		{

@@ -25,12 +25,14 @@ import java.sql.SQLException;
 
 import workbench.resource.ResourceMgr;
 
+import workbench.db.DropType;
 import workbench.db.TableIdentifier;
 import workbench.db.ViewReader;
 import workbench.db.ViewReaderFactory;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.StringUtil;
 
 /**
@@ -69,7 +71,7 @@ public class WbViewSource
 		if (tbl != null)
 		{
 			ViewReader reader = ViewReaderFactory.createViewReader(currentConnection);
-			source = reader.getExtendedViewSource(tbl, false);
+			source = reader.getExtendedViewSource(tbl, DropType.none);
 		}
 
 		if (StringUtil.isNonEmpty(source))

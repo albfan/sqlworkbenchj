@@ -24,12 +24,15 @@ package workbench.gui.settings;
 
 import java.awt.event.ActionListener;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 
 import workbench.interfaces.Restoreable;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.DropType;
 
 /**
  *
@@ -43,6 +46,9 @@ public class DbExplorerOptionsPanel
 	{
 		super();
 		initComponents();
+    String[] dropTypes = new String[] { ResourceMgr.getString("LblDropNone"), ResourceMgr.getString("LblDropPlain"), ResourceMgr.getString("LblDropCascade") };
+    DefaultComboBoxModel<String> model = new DefaultComboBoxModel(dropTypes);
+    dropTypesCombo.setModel(model);
 	}
 
 	@Override
@@ -62,7 +68,20 @@ public class DbExplorerOptionsPanel
 		DbExplorerSettings.setDbExpFilterDuringTyping(filterWhileTyping.isSelected());
 		DbExplorerSettings.setDbExpUsePartialMatch(partialMatchSearch.isSelected());
 		DbExplorerSettings.setGenerateTableGrants(generateTableGrants.isSelected());
-		DbExplorerSettings.setDbExpGenerateDrop(generateDrop.isSelected());
+    int index = dropTypesCombo.getSelectedIndex();
+    switch (index)
+    {
+      case 0:
+        DbExplorerSettings.setDropTypeToGenerate(DropType.none);
+        break;
+      case 1:
+        DbExplorerSettings.setDropTypeToGenerate(DropType.regular);
+        break;
+      case 2:
+        DbExplorerSettings.setDropTypeToGenerate(DropType.cascaded);
+        break;
+    }
+
 		GuiSettings.setUseRegexInQuickFilter(useQuickFilterRegex.isSelected());
 		DbExplorerSettings.setAllowAlterInDbExplorer(allowTableAlter.isSelected());
 		DbExplorerSettings.setAutoRetrieveFKTree(retrieveFKTree.isSelected());
@@ -78,6 +97,20 @@ public class DbExplorerOptionsPanel
 	@Override
 	public void restoreSettings()
 	{
+    DropType type = DbExplorerSettings.getDropTypeToGenerate();
+    switch (type)
+    {
+      case none:
+        dropTypesCombo.setSelectedIndex(0);
+        break;
+      case regular:
+        dropTypesCombo.setSelectedIndex(1);
+        break;
+      case cascaded:
+        dropTypesCombo.setSelectedIndex(2);
+        break;
+    }
+    
 		filterRetrieval.setSelected(DbExplorerSettings.getUseFilterForRetrieve());
 		autogeneratePK.setSelected(DbExplorerSettings.getAutoGeneratePKName());
 		partialMatchSearch.setSelected(DbExplorerSettings.getDbExpUsePartialMatch());
@@ -87,7 +120,6 @@ public class DbExplorerOptionsPanel
 		rememberColOrder.setSelected(DbExplorerSettings.getRememberColumnOrder());
 		rememberSort.setSelected(DbExplorerSettings.getRememberSortInDbExplorer());
 		generateTableGrants.setSelected(DbExplorerSettings.getGenerateTableGrants());
-		generateDrop.setSelected(DbExplorerSettings.getGenerateDrop());
 		useQuickFilterRegex.setSelected(GuiSettings.getUseRegexInQuickFilter());
 		filterWhileTyping.setSelected(DbExplorerSettings.getDbExpFilterDuringTyping());
 		selectSrcPanel.setSelected(DbExplorerSettings.getSelectSourcePanelAfterRetrieve());
@@ -143,9 +175,10 @@ public class DbExplorerOptionsPanel
     jPanel3 = new javax.swing.JPanel();
     autogeneratePK = new javax.swing.JCheckBox();
     generateTableGrants = new javax.swing.JCheckBox();
-    generateDrop = new javax.swing.JCheckBox();
     generateViewColumns = new javax.swing.JCheckBox();
     allowEditing = new javax.swing.JCheckBox();
+    dropLabel = new javax.swing.JLabel();
+    dropTypesCombo = new javax.swing.JComboBox();
     jPanel4 = new javax.swing.JPanel();
     rememberColOrder = new javax.swing.JCheckBox();
     rememberSort = new javax.swing.JCheckBox();
@@ -419,6 +452,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 8, 0, 10);
     jPanel3.add(autogeneratePK, gridBagConstraints);
@@ -429,28 +463,19 @@ public class DbExplorerOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 10);
     jPanel3.add(generateTableGrants, gridBagConstraints);
-
-    generateDrop.setText(ResourceMgr.getString("LblGenerateDrop")); // NOI18N
-    generateDrop.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    generateDrop.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 8, 3, 10);
-    jPanel3.add(generateDrop, gridBagConstraints);
 
     generateViewColumns.setText(ResourceMgr.getString("LblGenerateViewCols")); // NOI18N
     generateViewColumns.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
     generateViewColumns.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(6, 8, 3, 10);
@@ -462,11 +487,27 @@ public class DbExplorerOptionsPanel
     allowEditing.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(6, 8, 3, 10);
     jPanel3.add(allowEditing, gridBagConstraints);
+
+    dropLabel.setText(ResourceMgr.getString("LblGenerateDrop")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.insets = new java.awt.Insets(2, 9, 0, 0);
+    jPanel3.add(dropLabel, gridBagConstraints);
+
+    dropTypesCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Nothing", "Simple", "Cascade" }));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 5);
+    jPanel3.add(dropTypesCombo, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
@@ -551,9 +592,10 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox autoselectDataPanel;
   private javax.swing.JTextField defTableType;
   private javax.swing.JLabel defTableTypeLabel;
+  private javax.swing.JLabel dropLabel;
+  private javax.swing.JComboBox dropTypesCombo;
   private javax.swing.JCheckBox filterRetrieval;
   private javax.swing.JCheckBox filterWhileTyping;
-  private javax.swing.JCheckBox generateDrop;
   private javax.swing.JCheckBox generateTableGrants;
   private javax.swing.JCheckBox generateViewColumns;
   private javax.swing.JLabel jLabel1;

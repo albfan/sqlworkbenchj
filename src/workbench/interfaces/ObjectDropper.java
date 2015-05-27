@@ -56,6 +56,7 @@ public interface ObjectDropper
 	void setRowActionMonitor(RowActionMonitor monitor);
 
 	CharSequence getScript();
+	CharSequence getDropForObject(DbObject toDrop, boolean cascade);
 	CharSequence getDropForObject(DbObject toDrop);
   boolean supportsObject(DbObject object);
 }

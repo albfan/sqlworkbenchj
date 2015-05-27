@@ -36,7 +36,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
-import workbench.db.datacopy.DropType;
+import workbench.db.DropType;
 
 import workbench.storage.RowActionMonitor;
 

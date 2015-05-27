@@ -87,6 +87,8 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbSettings;
+import workbench.db.DropType;
+import workbench.db.GenericObjectDropper;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.SequenceReader;
@@ -1701,23 +1703,15 @@ public class TableListPanel
 		return containsData;
 	}
 
-  private String getDropForCurrentObject()
+  private String getDropForCurrentObject(DropType type)
   {
-    String drop = null;
     DbObject dbo = getSelectedUserObject();
-    if (dbo != null)
-    {
-      drop = dbo.getDropStatement(dbConnection, true);
-    }
-    else if (selectedTable != null)
-    {
-      drop = selectedTable.getDropStatement(dbConnection, true);
-    }
-    if (drop == null)
-    {
-      drop = "";
-    }
-    else
+
+    GenericObjectDropper dropper = new GenericObjectDropper();
+    dropper.setConnection(dbConnection);
+    String drop = dropper.getDropForObject(dbo == null ? selectedTable : dbo, type == DropType.cascaded).toString();
+
+    if (drop.length() > 0)
     {
       drop += "\n\n";
     }
@@ -1745,12 +1739,14 @@ public class TableListPanel
 
 			CharSequence sql = null;
 
+      DropType dropType = DbExplorerSettings.getDropTypeToGenerate();
+
 			if (meta.isExtendedObject(selectedTable))
 			{
         String drop = "";
-        if (DbExplorerSettings.getGenerateDrop())
+        if (dropType != DropType.none)
         {
-          drop = getDropForCurrentObject();
+          drop = getDropForCurrentObject(dropType);
         }
 				sql = drop + meta.getObjectSource(selectedTable);
 			}
@@ -1758,7 +1754,7 @@ public class TableListPanel
 			{
 				if (shouldRetrieveTable) retrieveTableDefinition();
 				TableDefinition def = new TableDefinition(this.selectedTable, TableColumnsDatastore.createColumnIdentifiers(meta, tableDefinition.getDataStore()));
-				sql = meta.getViewReader().getExtendedViewSource(def, true, false);
+				sql = meta.getViewReader().getExtendedViewSource(def, dropType, false);
 			}
 			else if (dbs.isSynonymType(type))
 			{
@@ -1781,7 +1777,7 @@ public class TableListPanel
 			// isExtendedTableType() checks for regular tables and "extended tables"
 			else if (meta.isExtendedTableType(type))
 			{
-				sql = builder.getTableSource(selectedTable, DbExplorerSettings.getGenerateDrop(), true, DbExplorerSettings.getGenerateTableGrants());
+				sql = builder.getTableSource(selectedTable, dropType, true, DbExplorerSettings.getGenerateTableGrants());
 			}
 
 			if (sql != null && dbConnection.getDbSettings().ddlNeedsCommit())

@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.db.DefaultViewReader;
+import workbench.db.DropType;
 import workbench.db.NoConfigException;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
@@ -47,12 +48,12 @@ public class MySQLViewReader
 	}
 
 	@Override
-	protected CharSequence createFullViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
+	protected CharSequence createFullViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
 		throws SQLException, NoConfigException
 	{
 		if (!this.connection.getDbSettings().getUseMySQLShowCreate("view"))
 		{
-			return super.createFullViewSource(view, includeDrop, includeCommit);
+			return super.createFullViewSource(view, dropType, includeCommit);
 		}
 
 		String source = null;
@@ -67,7 +68,7 @@ public class MySQLViewReader
 			{
 				source = rs.getString(2);
 			}
-			if (includeDrop && source != null)
+			if (dropType != DropType.none && source != null)
 			{
 				source  = "drop view " + viewName + ";\n\n" + source;
 			}

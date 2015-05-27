@@ -23,8 +23,10 @@
 package workbench.db.oracle;
 
 import java.sql.SQLException;
+
 import workbench.db.DbMetadata;
 import workbench.db.DefaultViewReader;
+import workbench.db.DropType;
 import workbench.db.NoConfigException;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -44,17 +46,17 @@ public class OracleViewReader
 	}
 
 	@Override
-	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
+	public CharSequence getExtendedViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
 		throws SQLException
 	{
 		String type = view.getTable().getType();
 		if (DbMetadata.MVIEW_NAME.equals(type))
 		{
 			OracleMViewReader reader = new OracleMViewReader();
-			CharSequence sql = reader.getMViewSource(this.connection, view, null, includeDrop, true);
+			CharSequence sql = reader.getMViewSource(this.connection, view, null, dropType, true);
 			return sql;
 		}
-		return super.getExtendedViewSource(view, includeDrop, includeCommit);
+		return super.getExtendedViewSource(view, dropType, includeCommit);
 	}
 
 	@Override
@@ -64,7 +66,7 @@ public class OracleViewReader
 		if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(viewId.getType()))
 		{
 			OracleMViewReader reader = new OracleMViewReader();
-			CharSequence sql = reader.getMViewSource(this.connection, new TableDefinition(viewId), null, false, false);
+			CharSequence sql = reader.getMViewSource(this.connection, new TableDefinition(viewId), null, DropType.none, false);
 			return sql;
 		}
 		return super.getViewSource(viewId);

@@ -36,6 +36,7 @@ import workbench.db.DbMetadata;
 import workbench.db.DbSearchPath;
 import workbench.db.DbSettings;
 import workbench.db.DependencyNode;
+import workbench.db.DropType;
 import workbench.db.FKHandler;
 import workbench.db.FKHandlerFactory;
 import workbench.db.IndexReader;
@@ -242,12 +243,12 @@ public class ObjectInfo
 
 		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
 		{
-			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
+			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, DropType.none);
 			displayName = synonymTarget.getTableExpression(connection);
 		}
 		else if (toDescribe != null && dbs.isViewType(toDescribe.getType()))
 		{
-			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
+			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(def, DropType.none, false);
 			displayName = showSchema ? def.getTable().getTableExpression() : def.getTable().getTableExpression(connection);
 		}
 		else if (isExtended)

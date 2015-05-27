@@ -217,6 +217,20 @@ public class ColumnDropper
 	 * Not implemented.
 	 *
 	 * @param toDrop
+   * @param cascade
+   * 
+	 * @return always null
+	 */
+	@Override
+	public CharSequence getDropForObject(DbObject toDrop, boolean cascade)
+	{
+		return null;
+	}
+
+	/**
+	 * Not implemented.
+	 *
+	 * @param toDrop
 	 * @return always null
 	 */
 	@Override

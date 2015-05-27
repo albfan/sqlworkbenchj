@@ -30,6 +30,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DropType;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
@@ -409,7 +410,7 @@ public class SqlRowDataConverter
 		}
 		boolean includePK = Settings.getInstance().getBoolProperty("workbench.sql.export.createtable.pk", true);
 
-		CharSequence create = builder.getCreateTable(toUse, cols, null, null, false, false, includePK, useSchema);
+		CharSequence create = builder.getCreateTable(toUse, cols, null, null, DropType.none, false, includePK, useSchema);
 		String source = create.toString();
 		StringBuilder createSql = new StringBuilder(source);
 		createSql.append(doubleLineTerminator);

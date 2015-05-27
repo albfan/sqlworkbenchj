@@ -100,18 +100,18 @@ public class TableSourceBuilder
 	 * @param includeFk if true, the foreign key constraints will be added after the CREATE TABLE
 	 * @throws SQLException
 	 */
-	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk)
+	public String getTableSource(TableIdentifier table,  DropType dropType, boolean includeFk)
 		throws SQLException
 	{
-		return getTableSource(table, includeDrop, includeFk, dbConnection.getDbSettings().getGenerateTableGrants());
+		return getTableSource(table, dropType, includeFk, dbConnection.getDbSettings().getGenerateTableGrants());
 	}
 
-	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk, boolean includeGrants)
+	public String getTableSource(TableIdentifier table, DropType dropType, boolean includeFk, boolean includeGrants)
 		throws SQLException
 	{
 		if (dbConnection.getDbSettings().isViewType(table.getType()))
 		{
-			CharSequence s = getViewReader().getExtendedViewSource(table, includeDrop);
+			CharSequence s = getViewReader().getExtendedViewSource(table, dropType);
 			if (s == null) return null;
 			return s.toString();
 		}
@@ -128,7 +128,7 @@ public class TableSourceBuilder
 		{
 			fkDef = getForeignKeys(def.getTable());
 		}
-		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, includeDrop, includeFk, includeGrants);
+		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, dropType, includeFk, includeGrants);
 
 		// copy the source to the original table so that they are available later as well
 		// and don't need to be re-retrieved
@@ -139,7 +139,7 @@ public class TableSourceBuilder
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		List<IndexDefinition> indexInfo = getIndexReader().getTableIndexList(table);
-		return getTableSource(table, columns, indexInfo, null, false, true);
+		return getTableSource(table, columns, indexInfo, null, DropType.none, true);
 	}
 
 	private boolean isFKName(String name,  List<DependencyNode> foreignKeys)
@@ -182,16 +182,16 @@ public class TableSourceBuilder
 	{
 	}
 
-	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkList, boolean includeDrop, boolean includeFk)
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkList, DropType dropType, boolean includeFk)
 	{
-		return getTableSource(table, columns, indexList, fkList, includeDrop, includeFk, dbConnection.getDbSettings().getGenerateTableGrants());
+		return getTableSource(table, columns, indexList, fkList, dropType, includeFk, dbConnection.getDbSettings().getGenerateTableGrants());
 	}
 
-	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkList, boolean includeDrop, boolean includeFk, boolean includeGrants)
+	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkList, DropType dropType, boolean includeFk, boolean includeGrants)
 	{
 		readTableOptions(table, columns);
 
-		CharSequence createSql = getCreateTable(table, columns, indexList, fkList, includeDrop, includeFk);
+		CharSequence createSql = getCreateTable(table, columns, indexList, fkList, dropType, includeFk);
 
 		StringBuilder result = new StringBuilder(createSql.length() + 50);
 		result.append(createSql);
@@ -291,21 +291,21 @@ public class TableSourceBuilder
 	 *
 	 * @return the CREATE TABLE statement for the table
 	 */
-	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, boolean includeDrop, boolean includeFk)
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, DropType dropType, boolean includeFk)
 	{
-		return getCreateTable(table, columns, indexList, fkDefinitions, includeDrop, includeFk, true);
+		return getCreateTable(table, columns, indexList, fkDefinitions, dropType, includeFk, true);
 	}
 
-	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, boolean includeDrop, boolean includeFk, boolean includePK)
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, DropType dropType, boolean includeFk, boolean includePK)
 	{
-		return getCreateTable(table, columns, indexList, fkDefinitions, includeDrop, includeFk, includePK, false);
+		return getCreateTable(table, columns, indexList, fkDefinitions, dropType, includeFk, includePK, false);
 	}
 
-	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, boolean includeDrop, boolean includeFk, boolean includePK, boolean useFQN)
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, DropType dropType, boolean includeFk, boolean includePK, boolean useFQN)
 	{
 		if (table == null) return StringUtil.EMPTY_STRING;
 
-		String nativeSql = getNativeTableSource(table, includeDrop);
+		String nativeSql = getNativeTableSource(table, dropType);
 		if (nativeSql != null) return nativeSql;
 
 		if (CollectionUtil.isEmpty(columns)) return StringUtil.EMPTY_STRING;
@@ -327,7 +327,7 @@ public class TableSourceBuilder
 		ObjectSourceOptions sourceOptions = table.getSourceOptions();
 		String typeOption = sourceOptions.getTypeModifier();
 
-		result.append(generateCreateObject(includeDrop, table, typeOption, useFQN));
+		result.append(generateCreateObject(dropType, table, typeOption, useFQN));
 		result.append("\n(\n");
 
 		appendColumnDefinitions(result, columns, meta, COL_INDENT);
@@ -438,14 +438,14 @@ public class TableSourceBuilder
 		}
 	}
 
-	public CharSequence generateDrop(DbObject toDrop, boolean cascadeConstraints)
+	public CharSequence generateDrop(DbObject toDrop, DropType dropType)
 	{
 		String type = toDrop.getObjectType();
 		type = type.replace("SYSTEM ", "");
 		String objectName = toDrop.getObjectNameForDrop(dbConnection);
 		StringBuilder result = new StringBuilder(type.length() + objectName.length() + 15);
 
-		String drop = dbConnection.getDbSettings().getDropDDL(type, cascadeConstraints);
+		String drop = dbConnection.getDbSettings().getDropDDL(type, dropType == DropType.cascaded);
 		if (drop == null)
 		{
 			// Fallback, just in case no DROP statement was configured
@@ -476,12 +476,12 @@ public class TableSourceBuilder
 	 * @param typeOption   an option for the CREATE statement. This is only
 	 * @return an approriate CREATE xxxx statement
 	 */
-	public StringBuilder generateCreateObject(boolean includeDrop, DbObject toCreate, String typeOption)
+	public StringBuilder generateCreateObject(DropType dropType, DbObject toCreate, String typeOption)
 	{
-		return generateCreateObject(includeDrop, toCreate, typeOption, false);
+		return generateCreateObject(dropType, toCreate, typeOption, false);
 	}
 
-	public StringBuilder generateCreateObject(boolean includeDrop, DbObject toCreate, String typeOption, boolean useFQN)
+	public StringBuilder generateCreateObject(DropType dropType, DbObject toCreate, String typeOption, boolean useFQN)
 	{
 		StringBuilder result = new StringBuilder();
 		boolean replaceAvailable = false;
@@ -501,9 +501,9 @@ public class TableSourceBuilder
 			replaceAvailable = true;
 		}
 
-		if (includeDrop && !replaceAvailable)
+		if (dropType != DropType.none && !replaceAvailable)
 		{
-			result.append(generateDrop(toCreate, true));
+			result.append(generateDrop(toCreate, dropType));
 			result.append('\n');
 			result.append('\n');
 		}
@@ -667,7 +667,7 @@ public class TableSourceBuilder
 		return TemplateHandler.replacePlaceholder(sql, placeHolder, value, false);
 	}
 
-	public String getNativeTableSource(TableIdentifier table, boolean includeDrop)
+	public String getNativeTableSource(TableIdentifier table, DropType dropType)
 	{
 		String sql = dbConnection.getDbSettings().getRetrieveTableSourceSql();
 		if (sql == null) return null;
@@ -676,9 +676,9 @@ public class TableSourceBuilder
 
 		int colIndex = dbConnection.getDbSettings().getRetrieveTableSourceCol();
 
-		if (includeDrop)
+		if (dropType != DropType.none)
 		{
-			CharSequence drop = generateDrop(table, true);
+			CharSequence drop = generateDrop(table, dropType);
 			result.append(drop);
 			result.append("\n\n");
 		}

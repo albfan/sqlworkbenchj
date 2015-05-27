@@ -60,6 +60,7 @@ import workbench.resource.Settings;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.DropType;
 import workbench.db.GenericObjectDropper;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.NoConfigException;
@@ -95,9 +96,10 @@ import workbench.gui.renderer.RendererFactory;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
 import workbench.gui.sql.PasteType;
-import workbench.sql.DelimiterDefinition;
 
 import workbench.storage.DataStore;
+
+import workbench.sql.DelimiterDefinition;
 
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
@@ -861,7 +863,7 @@ public class ProcedureListPanel
   private String addDropStatement(CharSequence sql, ProcedureDefinition proc)
   {
     if (sql == null || proc == null) return "";
-    if (DbExplorerSettings.getGenerateDrop() == false) return sql.toString();
+    if (DbExplorerSettings.getDropTypeToGenerate() == DropType.none) return sql.toString();
     ProcedureReader reader = ReaderFactory.getProcedureReader(dbConnection.getMetadata());
     if (reader.isRecreateStatement(sql))
     {
