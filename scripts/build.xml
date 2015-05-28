@@ -872,6 +872,46 @@
         <replacevalue>SqlServerLexer</replacevalue>
       </replacefilter>
       <replacefilter>
+        <replacetoken>"UPDATE"|</replacetoken>
+        <replacevalue>"UPDATE"|"UPDATE STATISTICS"|</replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(MATERIALIZED{wsp}VIEW)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(FLASHBACK{wsp}ARCHIVE)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(START{wsp}WITH)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(MATERIALIZED{wsp}VIEW{wsp}LOG)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(PACKAGE{wsp}BODY)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(TYPE{wsp}BODY)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(SNAPSHOT{wsp}LOG)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(DISTINCT{wsp}ON)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(CONNECT{wsp}BY)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(START{wsp}WITH)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(FOREIGN{wsp}DATA{wsp}WRAPPER)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(CREATE{wsp}OR{wsp}REPLACE)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
         <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")]]></replacetoken>
         <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(\[[^\r\n\t\f\[]*\]) ]]></replacevalue>
       </replacefilter>
@@ -893,6 +933,42 @@
       <replacefilter>
         <replacetoken>StandardLexer</replacetoken>
         <replacevalue>MySQLLexer</replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(MATERIALIZED{wsp}VIEW)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(FLASHBACK{wsp}ARCHIVE)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(START{wsp}WITH)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(MATERIALIZED{wsp}VIEW{wsp}LOG)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(PACKAGE{wsp}BODY)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(TYPE{wsp}BODY)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(SNAPSHOT{wsp}LOG)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(DISTINCT{wsp}ON)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(CONNECT{wsp}BY)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(START{wsp}WITH)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(FOREIGN{wsp}DATA{wsp}WRAPPER)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(CREATE{wsp}OR{wsp}REPLACE)|</replacetoken>
       </replacefilter>
       <replacefilter>
         <replacetoken>linecomment=("--"[^\r\n]*)</replacetoken>

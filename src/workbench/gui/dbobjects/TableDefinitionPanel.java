@@ -177,8 +177,8 @@ public class TableDefinitionPanel
 		// as the column list will be updated automatically when the model of the table changes
 		columnFilter.setColumnList(TableColumnsDatastore.TABLE_DEFINITION_COLS);
 
-		columnFilter.setFilterOnType(DbExplorerSettings.getDbExpFilterDuringTyping());
-		columnFilter.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
+		columnFilter.setFilterOnType(DbExplorerSettings.getFilterDuringTyping());
+		columnFilter.setAlwaysUseContainsFilter(DbExplorerSettings.getUsePartialMatch());
 
 
 		DbData db = new DbData()

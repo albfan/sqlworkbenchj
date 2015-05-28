@@ -306,8 +306,8 @@ public class ProcedureListPanel
   private void configureFindPanel()
   {
     if (findPanel == null) return;
-    findPanel.setFilterOnType(DbExplorerSettings.getDbExpFilterDuringTyping());
-    findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
+    findPanel.setFilterOnType(DbExplorerSettings.getFilterDuringTyping());
+    findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getUsePartialMatch());
   }
 
 	@Override

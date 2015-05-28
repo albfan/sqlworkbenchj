@@ -438,7 +438,7 @@ public class TableListPanel
 	private boolean getApplyFilterWhileTyping()
 	{
 		if (DbExplorerSettings.getUseFilterForRetrieve()) return false;
-		return DbExplorerSettings.getDbExpFilterDuringTyping();
+		return DbExplorerSettings.getFilterDuringTyping();
 	}
 
 	private void hideTableHistory()
@@ -1739,7 +1739,7 @@ public class TableListPanel
 
 			CharSequence sql = null;
 
-      DropType dropType = DbExplorerSettings.getDropTypeToGenerate();
+      DropType dropType = DbExplorerSettings.getDropTypeToGenerate(type);
 
 			if (meta.isExtendedObject(selectedTable))
 			{
@@ -2599,7 +2599,7 @@ public class TableListPanel
 	private void configureFindPanel()
 	{
 		findPanel.setFilterOnType(getApplyFilterWhileTyping());
-		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
+		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getUsePartialMatch());
 		if (DbExplorerSettings.getUseFilterForRetrieve())
 		{
 			findPanel.setActionsEnabled(false);

@@ -142,7 +142,7 @@ public class DbObjectTreeModel
     else
     {
       QuickFilterExpressionBuilder builder = new QuickFilterExpressionBuilder();
-      ColumnExpression expression = builder.buildExpression(text, DbExplorerSettings.getDbExpUsePartialMatch());
+      ColumnExpression expression = builder.buildExpression(text, DbExplorerSettings.getUsePartialMatch());
       applyFilter(getRoot(), expression);
     }
   }

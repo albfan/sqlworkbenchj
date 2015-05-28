@@ -101,18 +101,31 @@ public class DefaultViewReader
 
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
 
+
+    // a drop should be added if
+    //
+    // * the database does not support create or replace
+    // * a cascaded drop was requested (because "create or replace" works differently than a drop ... cascade)
+    boolean addDrop = dropType != DropType.none;
+
+    if (dropType == DropType.regular && !verb.equals("CREATE OR REPLACE") && !verb.equalsIgnoreCase("REPLACE"))
+    {
+      addDrop = true;
+    }
+
+    if (addDrop)
+    {
+      result.append(builder.generateDrop(viewTable, dropType));
+      result.append(lineEnding);
+      result.append(lineEnding);
+    }
 		// SQL Server and DB2 return the full CREATE VIEW statement
 		// DB2 even returns the CREATE OR REPLACE if the view was created that way.
 		// Teradata returns a complete REPLACE VIEW ... statement
 		// therefor the verb is compared with startsWith() rather than equals()
     if (verb.startsWith("CREATE") || verb.equals("REPLACE"))
 		{
-			if (dropType != DropType.none && !verb.equals("CREATE OR REPLACE") && !verb.equalsIgnoreCase("REPLACE"))
-			{
-				result.append(builder.generateDrop(viewTable, dropType));
-				result.append(lineEnding);
-				result.append(lineEnding);
-			}
+      // use the source as it is
 			result.append(source);
 			if (this.connection.getDbSettings().ddlNeedsCommit() && includeCommit)
 			{
@@ -123,13 +136,8 @@ public class DefaultViewReader
 		}
 		else
 		{
-      if  (dropType != DropType.none && viewTable.getType().equalsIgnoreCase(DbMetadata.MVIEW_NAME))
-      {
-        result.append(builder.generateDrop(viewTable, dropType));
-        result.append(lineEnding);
-        result.append(lineEnding);
-      }
-
+      // apprently only the SELECT statement was returned by the DBMS
+      // re-construct a valid CREATE VIEW statement
 			result.append(builder.generateCreateObject(DropType.none, viewTable, null));
 
 			if (connection.getDbSettings().generateColumnListInViews())

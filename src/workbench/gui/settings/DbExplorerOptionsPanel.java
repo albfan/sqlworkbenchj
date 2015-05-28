@@ -65,8 +65,8 @@ public class DbExplorerOptionsPanel
 		DbExplorerSettings.setRememberColumnOrder(rememberColOrder.isSelected());
 		DbExplorerSettings.setShowFocusInDbExplorer(showFocus.isSelected());
 		DbExplorerSettings.setDefaultExplorerObjectType(this.defTableType.getText());
-		DbExplorerSettings.setDbExpFilterDuringTyping(filterWhileTyping.isSelected());
-		DbExplorerSettings.setDbExpUsePartialMatch(partialMatchSearch.isSelected());
+		DbExplorerSettings.setFilterDuringTyping(filterWhileTyping.isSelected());
+		DbExplorerSettings.setUsePartialMatch(partialMatchSearch.isSelected());
 		DbExplorerSettings.setGenerateTableGrants(generateTableGrants.isSelected());
     int index = dropTypesCombo.getSelectedIndex();
     switch (index)
@@ -113,7 +113,7 @@ public class DbExplorerOptionsPanel
     
 		filterRetrieval.setSelected(DbExplorerSettings.getUseFilterForRetrieve());
 		autogeneratePK.setSelected(DbExplorerSettings.getAutoGeneratePKName());
-		partialMatchSearch.setSelected(DbExplorerSettings.getDbExpUsePartialMatch());
+		partialMatchSearch.setSelected(DbExplorerSettings.getUsePartialMatch());
 		retrieveFKTree.setSelected(DbExplorerSettings.getAutoRetrieveFKTree());
 		allowTableAlter.setSelected(DbExplorerSettings.allowAlterInDbExplorer());
 		defTableType.setText(DbExplorerSettings.getDefaultExplorerObjectType());
@@ -121,7 +121,7 @@ public class DbExplorerOptionsPanel
 		rememberSort.setSelected(DbExplorerSettings.getRememberSortInDbExplorer());
 		generateTableGrants.setSelected(DbExplorerSettings.getGenerateTableGrants());
 		useQuickFilterRegex.setSelected(GuiSettings.getUseRegexInQuickFilter());
-		filterWhileTyping.setSelected(DbExplorerSettings.getDbExpFilterDuringTyping());
+		filterWhileTyping.setSelected(DbExplorerSettings.getFilterDuringTyping());
 		selectSrcPanel.setSelected(DbExplorerSettings.getSelectSourcePanelAfterRetrieve());
 		((PlacementChooser)tabPlacement).showPlacement();
 		partialMatchSearch.setEnabled(!useQuickFilterRegex.isSelected());

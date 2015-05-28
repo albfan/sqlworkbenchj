@@ -223,7 +223,12 @@ public class SqlCommand
 		}
     else if ("ALTER".equals(verb) && info != null)
     {
-      return ResourceMgr.getFormattedString("MsgDMLSuccess", verb, info.getObjectType() + " " + info.getObjectName());
+      String display = info.getObjectType();
+      if (info.getObjectName() != null)
+      {
+        display += " " + info.getObjectName();
+      }
+      return ResourceMgr.getFormattedString("MsgDMLSuccess", verb, display);
     }
 		else if ("ANALYZE".equals(verb))
 		{

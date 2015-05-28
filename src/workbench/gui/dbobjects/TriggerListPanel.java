@@ -173,8 +173,8 @@ public class TriggerListPanel
 		triggerList.setReadOnly(true);
 
 		findPanel = new QuickFilterPanel(this.triggerList, false, "triggerlist");
-		findPanel.setFilterOnType(DbExplorerSettings.getDbExpFilterDuringTyping());
-		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getDbExpUsePartialMatch());
+		findPanel.setFilterOnType(DbExplorerSettings.getFilterDuringTyping());
+		findPanel.setAlwaysUseContainsFilter(DbExplorerSettings.getUsePartialMatch());
 
 		ReloadAction a = new ReloadAction(this);
     a.setUseLabelIconSize(true);

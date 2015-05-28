@@ -25,6 +25,7 @@ package workbench.resource;
 import java.util.List;
 import java.util.Set;
 
+import workbench.db.DbSettings;
 import workbench.db.DropType;
 import workbench.db.WbConnection;
 
@@ -167,14 +168,27 @@ public class DbExplorerSettings
 
   public static DropType getDropTypeToGenerate()
   {
-    String type = Settings.getInstance().getProperty("workbench.dbexplorer.generate.drop", DropType.cascaded.name());
+    return getDropTypeToGenerate(null);
+  }
+
+  public static DropType getDropTypeToGenerate(String objectType)
+  {
+    String baseKey = "workbench.dbexplorer.generate.drop";
+
+    String type = Settings.getInstance().getProperty(baseKey, DropType.cascaded.name());
+
+    if (objectType != null && !"default".equalsIgnoreCase(objectType))
+    {
+      type = Settings.getInstance().getProperty(baseKey + "." + DbSettings.getKeyValue(objectType), type);
+    }
 
     // migrate from the old setting (true/false)
-    if ("true".equals(type))
+    if ("true".equalsIgnoreCase(type))
     {
       return DropType.cascaded;
     }
-    if ("false".equals(type))
+
+    if ("false".equalsIgnoreCase(type))
     {
       return DropType.none;
     }
@@ -194,22 +208,27 @@ public class DbExplorerSettings
     Settings.getInstance().setProperty("workbench.dbexplorer.generate.drop", type.name());
   }
 
-	public static boolean getDbExpUsePartialMatch()
+  public static void setDropTypeToGenerate(DropType type, String objectType)
+  {
+    Settings.getInstance().setProperty("workbench.dbexplorer.generate.drop." + DbSettings.getKeyValue(objectType), type.name());
+  }
+
+	public static boolean getUsePartialMatch()
 	{
 		return Settings.getInstance().getBoolProperty(PROP_ASSUME_WILDCARDS, true);
 	}
 
-	public static void setDbExpUsePartialMatch(boolean flag)
+	public static void setUsePartialMatch(boolean flag)
 	{
 		Settings.getInstance().setProperty(PROP_ASSUME_WILDCARDS, flag);
 	}
 
-	public static boolean getDbExpFilterDuringTyping()
+	public static boolean getFilterDuringTyping()
 	{
 		return Settings.getInstance().getBoolProperty(PROP_INSTANT_FILTER, false);
 	}
 
-	public static void setDbExpFilterDuringTyping(boolean flag)
+	public static void setFilterDuringTyping(boolean flag)
 	{
 		Settings.getInstance().setProperty(PROP_INSTANT_FILTER, flag);
 	}

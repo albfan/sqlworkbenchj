@@ -102,7 +102,13 @@ public class DdlObjectInfoTest
 		assertTrue(info.isValid());
 		assertEquals(info.getObjectName(), "v_test");
 		assertEquals(info.getDisplayType(), "View");
-	}
+
+		sql = "alter system set pga_target = 8g scope=spfile;";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+    assertEquals("SYSTEM", info.getObjectType());
+    assertNull(info.getObjectName());
+  }
 
 	@Test
 	public void testPostgres()

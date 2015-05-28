@@ -153,7 +153,7 @@ wsp = [ \r\n\t\f]+
 
 keyword=(
 (ALTER{wsp}SESSION)|
-(CONNECT{wsp}BY)|
+
 (PRIMARY{wsp}KEY)|
 (FOREIGN{wsp}KEY)|
 (UNION{wsp}ALL)|
@@ -161,14 +161,14 @@ keyword=(
 (PARTITION{wsp}BY)|
 (GROUP{wsp}BY)|
 (ORDER{wsp}BY)|
-(PACKAGE{wsp}BODY)|
-(TYPE{wsp}BODY)|
-(CREATE{wsp}OR{wsp}REPLACE)|
+
+
+
 (IS{wsp}NOT{wsp}NULL)|
-(FLASHBACK{wsp}ARCHIVE)|
-(MATERIALIZED{wsp}VIEW)|
-(MATERIALIZED{wsp}VIEW{wsp}LOG)|
-(START{wsp}WITH)|
+
+
+
+
 (OUTER{wsp}JOIN)|
 (OUTER{wsp}APPLY)|
 (CROSS{wsp}JOIN)|
@@ -186,10 +186,10 @@ keyword=(
 (IS{wsp}NULL)|
 (IS{wsp}NOT{wsp}NULL)|
 (CHARACTER{wsp}VARYING)|
-(DISTINCT{wsp}ON)|
+
 (PRIMARY{wsp}KEY)|
-(SNAPSHOT{wsp}LOG)|
-(FOREIGN{wsp}DATA{wsp}WRAPPER)|
+
+
 (IF{wsp}EXISTS)|
 (IF{wsp}NOT{wsp}EXISTS)|
 "AFTER"|
@@ -421,7 +421,7 @@ keyword=(
 "UNION"|
 "UNIQUE"|
 "UNTIL"|
-"UPDATE"|
+"UPDATE"|"UPDATE STATISTICS"|
 "UPPER"|
 "USAGE"|
 "USER"|
