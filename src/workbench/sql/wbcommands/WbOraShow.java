@@ -483,16 +483,16 @@ public class WbOraShow
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		String sql =
-			"select destination \n" +
-			"from V$ARCHIVE_DEST \n "+
-			"where status = 'VALID'";
+			"SELECT destination \n" +
+			"FROM v$archive_dest \n "+
+			"WHERE status = 'VALID'";
 
 		Statement stmt = null;
 		ResultSet rs = null;
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("WbOraShow.getLogSource()", "Using SQL: " + sql);
+			LogMgr.logDebug("WbOraShow.getLogSource()", "Retrieving log source information using:\n" + sql);
 		}
 
 		try
@@ -511,7 +511,7 @@ public class WbOraShow
 				ds.setValue(row, 0, "LOGSOURCE");
 				ds.setValue(row, 1, dest);
 			}
-			ds.setGeneratingSql("show logsource");
+			ds.setGeneratingSql("-- show logsource\n" + sql);
 			ds.setResultName("LOGSOURCE");
 			ds.resetStatus();
 			result.addDataStore(ds);
@@ -519,7 +519,7 @@ public class WbOraShow
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("WbOraShow.getSGAInfo()", "Could not retrieve SGA info", ex);
+			LogMgr.logError("WbOraShow.getLogSource()", "Could not retrieve log information using: " + sql, ex);
 			result.setFailure();
 			result.addMessage(ex.getMessage());
 		}
@@ -538,37 +538,37 @@ public class WbOraShow
 		if (sqlPlusMode)
 		{
 			sql =
-				"select 'Total System Global Area' as \"Memory\", \n" +
-				"       sum(VALUE) as \"Value\", \n" +
+				"SELECT 'Total System Global Area' as \"Memory\", \n" +
+				"       sum(value) as \"Value\", \n" +
 				"       'bytes' as unit \n" +
-				"from V$SGA \n" +
-				"union all \n" +
-				"select NAME, \n" +
-				"       VALUE, \n" +
+				"FROM v$sga \n" +
+				"UNION ALL \n" +
+				"SELECT name, \n" +
+				"       value, \n" +
 				"       'bytes' \n" +
-				"from V$SGA";
+				"FROM v$sga";
 		}
 		else
 		{
-			sql = "select * from v$sgainfo";
+			sql = "SELECT *\nFROM v$sgainfo";
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("WbOraShow.getSGAInfo()", "Using SQL: " + sql);
+			LogMgr.logDebug("WbOraShow.getSGAInfo()", "Retrieving SGA Information using:\n" + sql);
 		}
 
 		try
 		{
 			DataStore ds = SqlUtil.getResultData(currentConnection, sql, false);
-			ds.setGeneratingSql(sqlPlusMode ? "show sga" : "show sgainfo");
+			ds.setGeneratingSql(sql);
 			ds.setResultName("SGA Size");
 			result.addDataStore(ds);
 			result.setSuccess();
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("WbOraShow.getSGAInfo()", "Could not retrieve SGA info", ex);
+			LogMgr.logError("WbOraShow.getSGAInfo()", "Could not retrieve SGA info using: " + sql, ex);
 			result.setFailure();
 			result.addMessage(ex.getMessage());
 		}
