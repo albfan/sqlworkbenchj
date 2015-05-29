@@ -161,6 +161,7 @@ public class OracleMViewReader
 		boolean supportsCompression = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.1");
 
 		String sql =
+      "-- SQL Workbench \n" +
 			"select mv.rewrite_enabled, \n" +
 			"       mv.refresh_mode, \n" +
 			"       mv.refresh_method, \n" +
@@ -252,7 +253,7 @@ public class OracleMViewReader
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logWarning("OracleMetadata.getMViewOptions()", "Error accessing all_mviews", e);
+			LogMgr.logWarning("OracleMetadata.getMViewOptions()", "Error accessing all_mviews using:\n" + sql, e);
 			result = new StringBuilder(ExceptionUtil.getDisplay(e));
 		}
 		finally
@@ -274,11 +275,16 @@ public class OracleMViewReader
 		String result = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		String sql = "SELECT query FROM all_mviews WHERE owner = ? and mview_name = ?";
+		String sql =
+      "-- SQL Workbench \n" +
+      "SELECT query \n" +
+      "FROM all_mviews \n" +
+      "WHERE owner = ? \n" +
+      "  and mview_name = ?";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleMViewReader.generateMViewSource()", SqlUtil.replaceParameters(sql, mview.getSchema(), mview.getTableName()));
+			LogMgr.logDebug("OracleMViewReader.retrieveMViewQuery()", SqlUtil.replaceParameters(sql, mview.getSchema(), mview.getTableName()));
 		}
 		try
 		{

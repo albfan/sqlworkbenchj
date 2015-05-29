@@ -83,6 +83,7 @@ public class OracleProcedureReader
 	public boolean packageExists(String owner, String packageName)
 	{
 		final String sql =
+      "-- SQL Workbench \n" +
 			"SELECT count(*) \n" +
 			"FROM all_objects \n" +
 			"WHERE object_name = ? \n" +
@@ -94,7 +95,7 @@ public class OracleProcedureReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleProcedureReader.packageExists()", "Using SQL to check package existence:\n" + SqlUtil.replaceParameters(sql, packageName, owner));
+			LogMgr.logDebug("OracleProcedureReader.packageExists()", "Checking package existence using:\n" + SqlUtil.replaceParameters(sql, packageName, owner));
 		}
 
 		int count = 0;
@@ -126,6 +127,7 @@ public class OracleProcedureReader
 	public CharSequence getPackageSource(String owner, String packageName)
 	{
 		final String sql =
+      "-- SQL Workbench \n" +
 			"SELECT text \n" +
 			"FROM all_source \n" +
 			"WHERE name = ? \n" +
@@ -364,16 +366,17 @@ public class OracleProcedureReader
 		// ALL_PROCEDURES does not return invalid procedures
 		// so an outer join against ALL_OBJECTS is necessary
 		String standardProcs =
-				"select null as package_name,   \n" +
-				"       ao.owner as procedure_owner,   \n" +
-				"       ao.object_name as procedure_name,  \n" +
-				"       null as overload_index,  \n" +
-				"       null as remarks,  \n" +
-				"       decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE,  \n" +
-				"       ao.status  \n" +
-				"from all_objects ao  \n" +
-				"  left join all_procedures ap on ao.object_name = ap.object_name and ao.owner = ap.owner   \n" +
-				"where ao.object_type in ('PROCEDURE', 'FUNCTION') ";
+      "-- SQL Workbench \n" +
+      "select /*+ result_cache */ null as package_name,   \n" +
+      "       ao.owner as procedure_owner,   \n" +
+      "       ao.object_name as procedure_name,  \n" +
+      "       null as overload_index,  \n" +
+      "       null as remarks,  \n" +
+      "       decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE,  \n" +
+      "       ao.status  \n" +
+      "from all_objects ao  \n" +
+      "  left join all_procedures ap on ao.object_name = ap.object_name and ao.owner = ap.owner   \n" +
+      "where ao.object_type in ('PROCEDURE', 'FUNCTION') ";
 
 		if (StringUtil.isNonBlank(schema))
 		{
@@ -388,7 +391,8 @@ public class OracleProcedureReader
 		standardProcs += " AND ao.object_name LIKE '" + name + "' ";
 
 		String pkgProcs =
-			"select aa.package_name,  \n" +
+      "-- SQL Workbench \n" +
+			"select /*+ result_cache */ aa.package_name,  \n" +
 			"       ao.owner as procedure_owner,  \n" +
 			"       aa.object_name as procedure_name,  \n" +
 			"       aa.overload as overload_index,  \n" +

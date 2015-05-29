@@ -97,14 +97,16 @@ public class OracleObjectListEnhancer
 		Map<String, String> result = new HashMap<>();
 
 		String sql =
-			"SELECT /* SQLWorkbench */ mv.owner, mv.mview_name, \n " +
+      "-- SQL Workbench \n" +
+			"SELECT mv.owner, mv.mview_name, \n " +
 			"      null as comments  \n" +
 			" FROM all_mviews mv \n";
 
 		if (OracleUtils.getRemarksReporting(connection))
 		{
 			sql =
-				"SELECT /* SQLWorkbench */ mv.owner, mv.mview_name, \n" +
+        "-- SQL Workbench \n" +
+				"SELECT mv.owner, mv.mview_name, \n" +
 				"       c.comments\n" +
 				"FROM all_mviews mv\n" +
 				"  left join all_mview_comments c on c.owner = mv.owner and c.mview_name = mv.mview_name \n";
@@ -140,7 +142,7 @@ public class OracleObjectListEnhancer
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logWarning("OracleObjectListEnhancer.getSnapshots()", "Error accessing all_mviews", e);
+			LogMgr.logWarning("OracleObjectListEnhancer.getSnapshots()", "Error retrieving mviews using:\n" + sql, e);
 			// When we get an exception, most probably we cannot access the ALL_MVIEWS view.
 			// To avoid further (unnecessary) calls, we are disabling the support
 			// for snapshots

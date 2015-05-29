@@ -82,7 +82,8 @@ public class OracleErrorInformationReader
 		}
 
 		String query =
-			"SELECT /* SQLWorkbench */ line, position, text, name, type \n" +
+      "-- SQL Workbench \n" +
+			"SELECT line, position, text, name, type \n" +
 			"FROM all_errors \n" +
 			"WHERE owner = ? \n";
 
@@ -138,7 +139,7 @@ public class OracleErrorInformationReader
 
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleErrorInformationReader.getErrorInfo()", "Using SQL: " + SqlUtil.replaceParameters(query, oschema, otype, oname));
+				LogMgr.logDebug("OracleErrorInformationReader.getErrorInfo()", "Retrieving error information using:\n" + SqlUtil.replaceParameters(query, oschema, otype, oname));
 			}
 
 			rs = stmt.executeQuery();

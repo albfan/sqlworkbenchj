@@ -34,6 +34,7 @@ import workbench.db.TableConstraint;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 
 import workbench.sql.parser.ParserType;
 import workbench.sql.lexer.SQLLexer;
@@ -52,7 +53,8 @@ public class OracleConstraintReader
 	extends AbstractConstraintReader
 {
 	private final String TABLE_SQL =
-		 "SELECT constraint_name, search_condition, status, validated \n" +
+    "-- SQL Workbench \n" +
+    "SELECT " + OracleUtils.getCacheHint() + " constraint_name, search_condition, status, validated \n" +
 		 "FROM all_constraints cons   \n" +
 		 "WHERE constraint_type = 'C' \n" +
 		 " and owner = ? \n" +
@@ -105,11 +107,16 @@ public class OracleConstraintReader
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("OracleConstraintReader.getTableConstraints", "Retrieving table constraints using:\n" + SqlUtil.replaceParameters(sql, table.getRawSchema(), table.getRawTableName()));
+    }
+
 		try
 		{
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, table.getSchema());
-			stmt.setString(2, table.getTableName());
+			stmt.setString(1, table.getRawSchema());
+			stmt.setString(2, table.getRawTableName());
 
 			rs = stmt.executeQuery();
 			while (rs.next())

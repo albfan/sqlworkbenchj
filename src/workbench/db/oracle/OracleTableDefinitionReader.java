@@ -300,7 +300,8 @@ public class OracleTableDefinitionReader
     // this statement fixes this problem and also removes the usage of LIKE
     // to speed up the retrieval.
 		final String sql1 =
-			"SELECT /* SQLWorkbench */ t.column_name AS column_name,  \n" +
+      "-- SQL Workbench \n" +
+			"SELECT " + OracleUtils.getCacheHint() + " t.column_name AS column_name,  \n" +
 			      getDecodeForDataType("t.data_type", fixNVARCHAR, OracleUtils.getMapDateToTimestamp(dbConnection)) + " AS data_type, \n" +
 			"     t.data_type AS type_name,  \n" +
 			"     decode(t.data_type, 'VARCHAR', t.char_length, \n" +

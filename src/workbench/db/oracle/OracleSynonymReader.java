@@ -65,23 +65,25 @@ public class OracleSynonymReader
 	{
 		boolean readComments = OracleUtils.getRemarksReporting(con);
 
-		StringBuilder sql = new StringBuilder(500);
-		sql.append("SELECT s.synonym_name, s.table_owner, s.table_name, s.db_link, o.object_type, s.owner");
+		String sql =
+      "-- SQL Workbench \n" +
+      "SELECT s.synonym_name, s.table_owner, s.table_name, s.db_link, o.object_type, s.owner";
+
 		if (readComments)
 		{
 			// the scalar sub-select seems to be way faster than an outer join
-			sql.append(", (select tc.comments from all_tab_comments tc where tc.table_name = o.object_name AND tc.owner = o.owner) as comments ");
+			sql += ", (select tc.comments from all_tab_comments tc where tc.table_name = o.object_name AND tc.owner = o.owner) as comments ";
 		}
 
 		// the outer join to all_objects is necessary to also see synonyms that point to no longer existing tables
-		sql.append(
+		sql +=
 			"\nFROM all_synonyms s \n" +
-			"  LEFT JOIN all_objects o ON s.table_name = o.object_name AND s.table_owner = o.owner  \n");
+			"  LEFT JOIN all_objects o ON s.table_name = o.object_name AND s.table_owner = o.owner  \n";
 
-		sql.append(
+		sql +=
 			"WHERE ((s.synonym_name = ? AND s.owner = ?)  \n" +
 			"    OR (s.synonym_name = ? AND s.owner = 'PUBLIC'))  \n" +
-			"ORDER BY decode(s.owner, 'PUBLIC',9,1)");
+			"ORDER BY decode(s.owner, 'PUBLIC',9,1)";
 
 		if (owner == null)
 		{
@@ -99,7 +101,7 @@ public class OracleSynonymReader
 		TableIdentifier result = null;
 		try
 		{
-			stmt = con.getSqlConnection().prepareStatement(sql.toString());
+			stmt = con.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, synonym);
 			stmt.setString(2, owner);
 			stmt.setString(3, synonym);

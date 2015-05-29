@@ -63,6 +63,17 @@ public class OracleDataTypeResolver
 		this.connection = conn;
 		alwaysShowCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.charsemantics.displayalways", true);
 
+    String sql =
+      "-- SQL Workbench \n" +
+      "SELECT value \n" +
+      "FROM v$nls_parameters \n" +
+      "WHERE parameter = 'NLS_LENGTH_SEMANTICS'";
+
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("OracleDataTypeResolver.<init>", "Retrieving nls length semantics using:\n" + sql);
+    }
+
 		if (!alwaysShowCharSemantics)
 		{
 			Statement stmt = null;
@@ -70,7 +81,7 @@ public class OracleDataTypeResolver
 			try
 			{
 				stmt = this.connection.createStatement();
-				String sql = "SELECT /* SQLWorkbench */ value FROM v$nls_parameters where parameter = 'NLS_LENGTH_SEMANTICS'";
+
 				rs = stmt.executeQuery(sql);
 				if (rs.next())
 				{
@@ -88,7 +99,7 @@ public class OracleDataTypeResolver
 			catch (Exception e)
 			{
 				defaultCharSemantics = BYTE_SEMANTICS;
-				LogMgr.logWarning("OracleDataTypeResolver.<init>", "Could not retrieve NLS_LENGTH_SEMANTICS from v$nls_parameters. Assuming byte semantics", e);
+				LogMgr.logWarning("OracleDataTypeResolver.<init>", "Could not retrieve NLS_LENGTH_SEMANTICS from v$nls_parameters. Assuming byte semantics. Using SQL:\n" + sql, e);
 			}
 			finally
 			{

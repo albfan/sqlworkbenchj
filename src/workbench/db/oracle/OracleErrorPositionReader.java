@@ -108,7 +108,7 @@ public class OracleErrorPositionReader
 		}
 
 		String getErrorSql =
-			"/* SQLWorkbench */ \n" +
+			"-- SQL Workbench \n" +
 			"DECLARE \n" +
 			"  l_cursor NUMBER; \n" +
 			"  l_result NUMBER; \n" +

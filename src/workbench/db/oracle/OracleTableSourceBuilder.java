@@ -124,7 +124,8 @@ public class OracleTableSourceBuilder
 		}
 
 		String sql =
-			"select /* SQLWorkbench */ coalesce(atb.tablespace_name, pt.def_tablespace_name) as tablespace_name, \n" +
+      "-- SQL Workbench \n" +
+			"select " + OracleUtils.getCacheHint() + " coalesce(atb.tablespace_name, pt.def_tablespace_name) as tablespace_name, \n" +
 			"       atb.degree, \n" +
 			"       atb.row_movement, \n" +
 			"       atb.temporary, \n" +
@@ -396,6 +397,7 @@ public class OracleTableSourceBuilder
 		ResultSet rs = null;
 
 		String sql =
+      "-- SQL Workbench \n" +
 			"select column_name, tablespace_name, chunk, retention, cache, logging, encrypt, compression, deduplication, in_row, securefile, retention_type, retention_value \n" +
 			"from all_lobs \n" +
 			"where table_name = '" +tbl.getRawTableName() + "' \n " +
@@ -536,6 +538,7 @@ public class OracleTableSourceBuilder
 		// but there isn't a way to retrieve that information as far as I can tell
 		// (not even SQL Developer displays the flashback archive information!)
 		String sql =
+      "-- SQL Workbench \n" +
 			"select fa.flashback_archive_name,   \n" +
 			"       fa.retention_in_days, \n" +
 			"       tbl.tablespace_name \n" +
@@ -643,7 +646,8 @@ public class OracleTableSourceBuilder
 		if (!hasUserType) return null;
 
 		String sql =
-			"SELECT /* SQLWorkbench */ 'NESTED TABLE '||parent_table_column||' STORE AS '||table_name \n" +
+      "-- SQL Workbench \n" +
+			"SELECT 'NESTED TABLE '||parent_table_column||' STORE AS '||table_name \n" +
 			"FROM all_nested_tables \n" +
 			"WHERE parent_table_name = ? \n" +
 			"  AND owner = ?";
@@ -791,6 +795,7 @@ public class OracleTableSourceBuilder
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql =
+      "-- SQL Workbench \n" +
 			"select column_name \n" +
 			"from all_tab_columns \n" +
 			"where column_name not in (select column_name \n" +
@@ -811,7 +816,7 @@ public class OracleTableSourceBuilder
 			pstmt.setString(4, owner);
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTableSourceBuilder.getIOTIncludedColumn()", "Using sql:\n" +
+				LogMgr.logDebug("OracleTableSourceBuilder.getIOTIncludedColumn()", "Retrieving IOT included columns using:\n" +
 					SqlUtil.replaceParameters(sql, pkIndexName, owner, tableName, owner));
 			}
 			rs = pstmt.executeQuery();
@@ -822,7 +827,7 @@ public class OracleTableSourceBuilder
 		}
 		catch (Exception ex)
 		{
-			LogMgr.logError("OracleTableSourceBuilder.getIOTIncludedColumn()", "Could not retrieve included columns", ex);
+			LogMgr.logError("OracleTableSourceBuilder.getIOTIncludedColumn()", "Could not retrieve IOT included columns using:\n" + sql, ex);
 			column = null;
 		}
 		finally

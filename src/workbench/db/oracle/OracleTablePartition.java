@@ -53,7 +53,8 @@ public class OracleTablePartition
 	protected String getRetrieveColumnsSql()
 	{
 		return
-			"select /* SQLWorkbench */ column_name, \n" +
+      "-- SQL Workbench \n" +
+			"select column_name, \n" +
 			"       column_position \n" +
 			"from all_part_key_columns \n" +
 			"where object_type = 'TABLE' \n" +
@@ -66,7 +67,8 @@ public class OracleTablePartition
 	protected String getRetrievePartitionDefinitionSql()
 	{
 		return
-			"select /* SQLWorkbench */ owner,  \n" +
+      "-- SQL Workbench \n" +
+			"select owner,  \n" +
 			"       table_name, \n" +
 			"       partitioning_type,  \n" +
 			"       partition_count, \n" +
@@ -87,18 +89,20 @@ public class OracleTablePartition
 		if (useCompression)
 		{
 			return
-					"SELECT /* SQLWorkbench */ partition_name,  \n" +
-					"       high_value,  \n" +
-					"       partition_position, \n" +
-					"       subpartition_count, \n" +
-					"       compression \n" +
-					"FROM all_tab_partitions \n" +
-					"WHERE table_owner = ?  \n" +
-					"  AND table_name = ? \n" +
-					"ORDER BY partition_position";
+        "-- SQL Workbench \n" +
+        "SELECT partition_name,  \n" +
+        "       high_value,  \n" +
+        "       partition_position, \n" +
+        "       subpartition_count, \n" +
+        "       compression \n" +
+        "FROM all_tab_partitions \n" +
+        "WHERE table_owner = ?  \n" +
+        "  AND table_name = ? \n" +
+        "ORDER BY partition_position";
 		}
 		return
-			"SELECT /* SQLWorkbench */ partition_name,  \n" +
+      "-- SQL Workbench \n" +
+			"SELECT partition_name,  \n" +
 			"       high_value,  \n" +
 			"       partition_position, \n" +
 		  "       subpartition_count \n" +
@@ -111,7 +115,8 @@ public class OracleTablePartition
 	protected String getRetrieveSubColumnsSql()
 	{
 		return
-		"select /* SQLWorkbench */ name, \n" +
+    "-- SQL Workbench \n" +
+		"select name, \n" +
 		"       object_type, \n" +
 		"       column_name, \n" +
 		"       column_position \n" +
@@ -127,7 +132,8 @@ public class OracleTablePartition
 		if (useCompression)
 		{
 			return
-				"select /* SQLWorkbench */ partition_name,  \n" +
+        "-- SQL Workbench \n" +
+				"select partition_name,  \n" +
 				"       subpartition_name,  \n" +
 				"       high_value, \n" +
 				"       subpartition_position, \n" +
@@ -138,7 +144,8 @@ public class OracleTablePartition
 				"order by subpartition_position";
 		}
 		return
-			"select /* SQLWorkbench */ partition_name,  \n" +
+      "-- SQL Workbench \n" +
+			"select partition_name,  \n" +
 			"       subpartition_name,  \n" +
 			"       high_value, \n" +
 			"       subpartition_position \n" +

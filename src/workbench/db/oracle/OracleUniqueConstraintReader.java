@@ -56,7 +56,8 @@ public class OracleUniqueConstraintReader
 
 		StringBuilder sql = new StringBuilder(500);
 		sql.append(
-			"select /* SQLWorkbench */ index_name, constraint_name, deferrable, deferred, status, validated \n" +
+      "-- SQL Workbench \n" +
+			"select " + OracleUtils.getCacheHint() + " index_name, constraint_name, deferrable, deferred, status, validated \n" +
 			"from all_constraints \n" +
 			"where constraint_type = 'U' \n" +
 			"  and ");
@@ -72,7 +73,7 @@ public class OracleUniqueConstraintReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleUniqueConstraintReader.processIndexList()", "Using:\n" + sql);
+			LogMgr.logDebug("OracleUniqueConstraintReader.processIndexList()", "Retrieving unique constraints using:\n" + sql);
 		}
 
 		Statement stmt = null;

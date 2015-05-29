@@ -31,6 +31,7 @@ import workbench.log.LogMgr;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -43,23 +44,31 @@ import workbench.util.StringUtil;
 public class OracleExternalTableReader
 {
 	private String baseSql =
-              "select et.owner,  \n" +
-              "       et.table_name,  \n" +
-              "       et.type_name,  \n" +
-              "       et.default_directory_name,  \n" +
-              "       et.reject_limit,  \n" +
-              "       et.access_parameters,  \n" +
-              "       el.location, \n" +
-              "       el.directory_name \n" +
-              "from all_external_tables et \n" +
-              "  join all_external_locations el on el.owner = et.owner and el.table_name = et.table_name " +
-							" where et.owner = ? and et.table_name = ?";
+      "-- SQL Workbench \n" +
+      "select et.owner,  \n" +
+      "       et.table_name,  \n" +
+      "       et.type_name,  \n" +
+      "       et.default_directory_name,  \n" +
+      "       et.reject_limit,  \n" +
+      "       et.access_parameters,  \n" +
+      "       el.location, \n" +
+      "       el.directory_name \n" +
+      "from all_external_tables et \n" +
+      "  join all_external_locations el on el.owner = et.owner and el.table_name = et.table_name " +
+      " where et.owner = ? \n" +
+      "   and et.table_name = ?";
 
 	public CharSequence getDefinition(TableIdentifier table, WbConnection conn)
 	{
 		StringBuilder options = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleExternalTableReader.getDefinition()", "Retrieving external table definition using :\n" + SqlUtil.replaceParameters(baseSql, table.getRawSchema(), table.getRawTableName()));
+		}
+
 		try
 		{
 			pstmt = conn.getSqlConnection().prepareStatement(baseSql);
@@ -100,7 +109,7 @@ public class OracleExternalTableReader
 		}
 		catch (SQLException sql)
 		{
-			LogMgr.logError("OracleExternalTableReader.getDefinition()","Error retrieving table options", sql);
+			LogMgr.logError("OracleExternalTableReader.getDefinition()","Error retrieving external table options using:\n" + baseSql, sql);
 		}
 		finally
 		{

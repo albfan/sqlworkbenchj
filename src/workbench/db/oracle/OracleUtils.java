@@ -155,24 +155,28 @@ public class OracleUtils
 
 	public static String getDefaultTablespace(WbConnection conn)
 	{
+    if (conn == null) return "";
 		readDefaultTableSpace(conn);
 		return conn.getSessionProperty(PROP_KEY_TBLSPACE);
 	}
 
-	public static synchronized void readDefaultTableSpace(final WbConnection conn)
+	private static synchronized void readDefaultTableSpace(final WbConnection conn)
 	{
 		if (conn.getSessionProperty(PROP_KEY_TBLSPACE) != null) return;
 
 		Statement stmt = null;
 		ResultSet rs = null;
-		String sql = "select /* SQLWorkbench */ default_tablespace from user_users";
+		String sql =
+      "-- SQL Workbench \n" +
+      "select default_tablespace \n" +
+      "from user_users";
 
 		try
 		{
 			stmt = conn.createStatementForQuery();
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTableSourceBuilder.readDefaultTableSpace()", "Using sql: " + sql);
+				LogMgr.logDebug("OracleUtils.readDefaultTableSpace()", "Retrieving default tablespace using:\n" + sql);
 			}
 
 			rs = stmt.executeQuery(sql);
@@ -183,13 +187,19 @@ public class OracleUtils
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("OracleTableSourceBuilder.readDefaultTableSpace()", "Error retrieving table options", e);
+			LogMgr.logError("OracleUtils.readDefaultTableSpace()", "Error retrieving table options using:\n" + sql, e);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
+
+  public static String getCacheHint()
+  {
+    boolean useResultCache = Settings.getInstance().getBoolProperty("workbench.db.oracle.metadata.result_cache", false);
+    return useResultCache ? "/*+ result_cache */" : StringUtil.EMPTY_STRING;
+  }
 
 	public static boolean checkDefaultTablespace()
 	{

@@ -161,7 +161,8 @@ public class OracleIndexReader
 		}
 
 		String sql =
-			"SELECT null as table_cat, \n" +
+      "-- SQL Workbench \n" +
+			"SELECT " + OracleUtils.getCacheHint() + " null as table_cat, \n" +
 			"       " + (useUserTables ? "user" : "i.owner") + " as table_schem, \n" +
 			"       i.table_name, \n" +
 			"       decode (i.uniqueness, 'UNIQUE', 0, 1) as non_unique, \n" +
@@ -321,7 +322,7 @@ public class OracleIndexReader
     result.addAll(types);
     return result;
   }
-  
+
 	@Override
 	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition definition)
 	{
@@ -420,7 +421,8 @@ public class OracleIndexReader
 		if (CollectionUtil.isEmpty(indexDefs)) return;
 
 		String base=
-			"SELECT i.index_name, e.column_expression, e.column_position \n" +
+      "-- SQL Workbench \n" +
+			"SELECT " + OracleUtils.getCacheHint() + " i.index_name, e.column_expression, e.column_position \n" +
 			"FROM all_indexes i \n" +
 			"  JOIN all_ind_expressions e \n" +
 			"    ON i.index_name = e.index_name \n" +
@@ -573,7 +575,8 @@ public class OracleIndexReader
 		}
 
 		String sql =
-			"select null as table_cat,  \n" +
+      "-- SQL Workbench \n" +
+			"select /*+ result_cache */ null as table_cat,  \n" +
 			"       cols.owner as table_schem,  \n" +
 			"       cols.table_name,  \n" +
 			"       cols.column_name,  \n" +

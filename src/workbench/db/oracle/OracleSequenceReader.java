@@ -88,7 +88,8 @@ public class OracleSequenceReader
   {
 		StringBuilder sql = new StringBuilder(100);
 		sql.append(
-			"select /* SQLWorkbench */ s.sequence_owner, \n" +
+			"-- SQL Workbench \n" +
+      "select /*+ result_cache */ s.sequence_owner, \n" +
 			"       s.sequence_name, \n" +
 			"       s.min_value, \n" +
 			"       s.max_value, \n" +
@@ -124,7 +125,7 @@ public class OracleSequenceReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("OracleSequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
+			LogMgr.logInfo("OracleSequenceReader.getRawSequenceDefinition()", "Retrieving sequence definition using:\n" + sql);
 		}
 
     Statement stmt = null;
@@ -138,7 +139,7 @@ public class OracleSequenceReader
     }
     catch (Exception e)
     {
-      LogMgr.logError("OracleMetaData.getSequenceDefinition()", "Error when retrieving sequence definition", e);
+      LogMgr.logError("OracleMetaData.getSequenceDefinition()", "Error when retrieving sequence definition using:\n" + sql, e);
     }
     finally
     {

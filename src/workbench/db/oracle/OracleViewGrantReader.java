@@ -35,12 +35,13 @@ public class OracleViewGrantReader
 	@Override
 	public String getViewGrantSql()
 	{
-		return "select grantee, privilege, grantable \n" +
-             "from ALL_TAB_PRIVS \n" +
-             "where table_name = ? \n" +
-             " and table_schema = ? ";
+		return
+      "-- SQL Workbench \n" +
+      "SELECT grantee, privilege, grantable \n" +
+      "FROM all_tab_privs \n" +
+      "WHERE table_name = ? \n" +
+      "  AND table_schema = ? ";
 	}
-
 
 	@Override
 	public int getIndexForTableNameParameter()

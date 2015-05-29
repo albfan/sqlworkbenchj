@@ -67,7 +67,8 @@ public class OracleFKHandler
 		// Otherwise foreign keys referencing unique constraints (rather than primary keys) would
 		// not be displayed (DbExplorer, WbSchemaReport) or correctly processed (TableDependency)
 		baseSql =
-			"SELECT /* SQLWorkbench */ NULL AS pktable_cat, \n" +
+      "-- SQLWorkbench \n" +
+			"SELECT " + OracleUtils.getCacheHint() + " NULL AS pktable_cat, \n" +
 			"       p.owner AS pktable_schem, \n" +
 			"       p.table_name AS pktable_name, \n" +
 			"       pc.column_name AS pkcolumn_name, \n" +
@@ -147,7 +148,7 @@ public class OracleFKHandler
 	 *
 	 * @param tbl the table for which the query should be generated
 	 * @return the query to use
-	 * @see OracleUtils#optimizeCatalogQueries() 
+	 * @see OracleUtils#optimizeCatalogQueries()
 	 */
 	private String getQuery(TableIdentifier tbl)
 	{
@@ -165,8 +166,8 @@ public class OracleFKHandler
 	private DataStore getExportedKeyList(TableIdentifier tbl)
 		throws SQLException
 	{
-		// I'm not adding an order by because the statement is terribly slow anyway
-		// and an order by makes it even slower for large results
+		// I'm not adding an ORDER BY because the statement is terribly slow anyway
+		// and an ORDER BY makes it even slower for large results
 		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
 		sql.append(getQuery(tbl));
 		sql.append("AND p.table_name = ? \n");
@@ -174,7 +175,7 @@ public class OracleFKHandler
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleFKHandler.getExportedKeyList()", "Using:\n " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
+			LogMgr.logDebug("OracleFKHandler.getExportedKeyList()", "Retrieving exported foreign keys using:\n " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
 		}
 
 		ResultSet rs;
@@ -208,8 +209,8 @@ public class OracleFKHandler
 	private DataStore getImportedKeyList(TableIdentifier tbl)
 		throws SQLException
 	{
-		// I'm not adding an order by because the statement is terribly slow anyway
-		// and an order by makes it even slower for large results
+		// I'm not adding an ORDER BY because the statement is terribly slow anyway
+		// and an ORDER BY makes it even slower for large results
 		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
 		sql.append(getQuery(tbl));
 		sql.append("AND f.table_name = ? \n");
@@ -217,7 +218,7 @@ public class OracleFKHandler
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleFKHandler.getImportedKeyList()", "Using:\n" + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
+			LogMgr.logDebug("OracleFKHandler.getImportedKeyList()", "Retrieving imported foreign keys using:\n" + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
 		}
 
 		ResultSet rs;
