@@ -38,6 +38,7 @@ import workbench.console.ConsolePrompter;
 import workbench.interfaces.StatementParameterPrompter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureDefinition;
@@ -47,7 +48,6 @@ import workbench.db.oracle.OracleProcedureReader;
 import workbench.db.oracle.OracleUtils;
 
 import workbench.gui.preparedstatement.ParameterEditor;
-import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
 
@@ -397,13 +397,13 @@ public class WbCall
 
 				ParameterDefinition def = new ParameterDefinition(i + 1, type);
 
-				if (mode == ParameterMetaData.parameterModeOut ||
-						mode == ParameterMetaData.parameterModeInOut)
+				if (mode == ParameterMetaData.parameterModeOut || mode == ParameterMetaData.parameterModeInOut)
 				{
 					cstmt.registerOutParameter(i + 1, type);
 					parameterNames.add(def);
 				}
-				else
+
+				if (mode == ParameterMetaData.parameterModeIn || mode == ParameterMetaData.parameterModeInOut)
 				{
 					inputParameters.add(def);
 				}
@@ -549,7 +549,7 @@ public class WbCall
 
 		int parameterIndexOffset = 0;
 		boolean needFuncCall = ProcedureDefinition.returnsRefCursor(currentConnection, params);
-		if (!needFuncCall && ProcedureDefinition.isFunction(procDef, params))
+		if (!needFuncCall && isFunction(procDef, params))
 		{
 			needFuncCall = true;
 			parameterIndexOffset = 1;
@@ -694,6 +694,31 @@ public class WbCall
 		}
 		return parameterNames;
 	}
+
+  private boolean isFunction(ProcedureDefinition def, DataStore params)
+  {
+    if (currentConnection.getMetadata().isPostgres())
+    {
+      // for Postgres only functions that do _really_ return something
+      // should be prepared with the "{? = call function_name(...)}" syntax
+      // in all other cases the return value has to be treated like an OUT parameter
+      for (int row=0; row < params.getRowCount(); row++)
+      {
+        // this check relies on PostgresProcedureReader using our own statement.
+        // see: PostgresProcedureReader.getColumns()
+        String paramType = params.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+        if ("RETURN".equalsIgnoreCase(paramType))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+    else
+    {
+      return ProcedureDefinition.isFunction(def, params);
+    }
+  }
 
 	private boolean hasPlaceHolder(List<String> params)
 	{

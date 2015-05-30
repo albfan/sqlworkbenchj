@@ -26,6 +26,7 @@ import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.interfaces.StatementParameterPrompter;
 
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
@@ -34,6 +35,7 @@ import workbench.storage.DataStore;
 
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.preparedstatement.StatementParameters;
 import workbench.sql.wbcommands.WbCall;
 
 import org.junit.AfterClass;
@@ -62,35 +64,44 @@ public class WbCallPostgresTest
 	{
 		PostgresTestUtil.initTestCase(TEST_ID);
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		TestUtil.executeScript(con,
-			"create table person (id integer, first_name varchar(50), last_name varchar(50));\n" +
-			"insert into person (id, first_name, last_name) values (1, 'Arthur', 'Dent');\n" +
-			"insert into person (id, first_name, last_name) values (2, 'Ford', 'Prefect');\n" +
-			"commit;\n"  +
-			"CREATE OR REPLACE FUNCTION refcursorfunc() \n" +
-			 "  RETURNS refcursor \n" +
-			 "  LANGUAGE plpgsql \n" +
-			 "AS \n" +
-			 "$body$ \n" +
-			 "DECLARE  \n" +
-			 "    mycurs refcursor;  \n" +
-			 " BEGIN  \n" +
-			 "    OPEN mycurs FOR SELECT * FROM person ORDER BY id;  \n" +
-			 "    RETURN mycurs;  \n" +
-			 " END \n" +
-			 "$body$;\n" +
-			"create or replace function get_answer() \n" +
-			" returns integer \n" +
-			 "  LANGUAGE plpgsql \n" +
-			 "AS \n" +
-			 "$body$ \n" +
-			 " BEGIN  \n" +
-			 "    RETURN 42;  \n" +
-			 " END \n" +
-			 "$body$\n" +
-			 ";");
+      "create table person (id integer, first_name varchar(50), last_name varchar(50));\n" +
+      "insert into person (id, first_name, last_name) values (1, 'Arthur', 'Dent');\n" +
+      "insert into person (id, first_name, last_name) values (2, 'Ford', 'Prefect');\n" +
+      "commit;\n"  +
+      "CREATE OR REPLACE FUNCTION refcursorfunc() \n" +
+       "  RETURNS refcursor \n" +
+       "  LANGUAGE plpgsql \n" +
+       "AS \n" +
+       "$body$ \n" +
+       "DECLARE  \n" +
+       "    mycurs refcursor;  \n" +
+       " BEGIN  \n" +
+       "    OPEN mycurs FOR SELECT * FROM person ORDER BY id;  \n" +
+       "    RETURN mycurs;  \n" +
+       " END \n" +
+       "$body$;\n" +
+      "create or replace function get_answer() \n" +
+      " returns integer \n" +
+       "  LANGUAGE plpgsql \n" +
+       "AS \n" +
+       "$body$ \n" +
+       " BEGIN  \n" +
+       "    RETURN 42;  \n" +
+       " END \n" +
+       "$body$\n" +
+       ";\n" +
+      "CREATE or replace FUNCTION sum_n_product(INOUT x int, y int, OUT sum int, OUT prod int) AS $$ \n" +
+      "BEGIN \n" +
+      "    sum := x + y; \n" +
+      "    prod := x * y; \n" +
+      "    x := 42; \n" +
+      "END; \n" +
+      "$$ LANGUAGE plpgsql;\n" +
+      "commit;"
+    );
 	}
 
 	@AfterClass
@@ -101,11 +112,53 @@ public class WbCallPostgresTest
 	}
 
 	@Test
+	public void testInOutParameter()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		assertNotNull(con);
+
+		WbCall call = new WbCall();
+		StatementRunner runner = new StatementRunner();
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+    StatementParameterPrompter prompter = new StatementParameterPrompter()
+    {
+      @Override
+      public boolean showParameterDialog(StatementParameters parms, boolean showNames)
+      {
+        parms.setParameterValue(0, "5");
+        parms.setParameterValue(1, "10");
+        return true;
+      }
+    };
+    call.setParameterPrompter(prompter);
+		String cmd = "WbCall sum_n_product(?,?,?,?)";
+    StatementRunnerResult result = call.execute(cmd);
+    assertTrue(result.isSuccess());
+    List<DataStore> data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(1, data.size());
+    DataStore store = data.get(0);
+    assertNotNull(store);
+//    DataStorePrinter printer = new DataStorePrinter(store);
+//    printer.printTo(System.out);
+    assertEquals(3, store.getRowCount());
+    assertEquals(42, store.getValueAsInt(0, 1, -1));
+    assertEquals("x", store.getValueAsString(0, 0));
+    assertEquals(15, store.getValueAsInt(1, 1, -1));
+    assertEquals("sum", store.getValueAsString(1, 0));
+    assertEquals(50, store.getValueAsInt(2, 1, -1));
+    assertEquals("prod", store.getValueAsString(2, 0));
+  }
+
+	@Test
 	public void testWbCall()
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		WbCall call = new WbCall();
 		StatementRunner runner = new StatementRunner();
@@ -141,7 +194,7 @@ public class WbCallPostgresTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		WbCall call = new WbCall();
 		StatementRunner runner = new StatementRunner();
