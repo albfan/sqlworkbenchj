@@ -22,6 +22,7 @@
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
     <entry dev-build="2" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
+    <entry dev-build="6" type="fix">No parameter prompt was shown for INOUT parameters when running procedures using WbCall</entry>
     <entry dev-build="6" type="fix">Implemented a workaround for an Informix driver bug where index information for the wrong table was returned</entry>
     <entry dev-build="6" type="fix">Double quotes in column values were not escaped properly when creating a JSON export</entry>
     <entry dev-build="6" type="fix">When switching between views and tables in the DbExplorer the foreign key tabs were no longer shown for SQL Server</entry>
