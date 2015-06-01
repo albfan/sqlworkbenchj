@@ -372,7 +372,6 @@ public class DataStore
 		if (source.getColumnCount() != this.getColumnCount()) return;
 
 		int rows = source.getRowCount();
-		this.data.ensureCapacity(this.getRowCount() + rows);
 		for (int i=0; i < rows; i++)
 		{
 			RowData row = source.getRow(i);
