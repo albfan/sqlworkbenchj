@@ -330,6 +330,7 @@ public class DbObjectSourcePanel
 			public void run()
 			{
 				sourceEditor.setText(text == null ? "" : text);
+        sourceEditor.clearUndoBuffer();
 				sourceEditor.invalidate();
 				sourceEditor.doLayout();
 			}
