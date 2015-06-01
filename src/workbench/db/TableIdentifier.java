@@ -614,47 +614,47 @@ public class TableIdentifier
 		tok.setSourceString(tableId);
 		List<String> elements = tok.getAllTokens();
 
-		if (elements.size() == 1)
-		{
-			// if only one element is found it could still be a two element identifier
-			// in case the catalog separator is different from the schema separator (e.g. DB2 for iSeries)
-			setCatalog(getCatalogPart(tableId, catalogSeparator));
-			setTablename(getNamePart(tableId, catalogSeparator));
-		}
-		else if (elements.size() == 2)
-		{
-			if (supportsSchemas && supportsCatalogs)
-			{
-				setCatalog(getCatalogPart(elements.get(0), catalogSeparator));
-				setSchema(getNamePart(elements.get(0), catalogSeparator));
-			}
-			if (supportsSchemas && !supportsCatalogs)
-			{
-				// no catalog supported, the first element must be the schema
-				setSchema(elements.get(0));
-			}
-			if (supportsCatalogs && !supportsSchemas)
-			{
-				// e.g. MySQL qualifier: database.tablename
-				setCatalog(elements.get(0));
-			}
-			setTablename(elements.get(1));
-		}
-		else if (elements.size() == 3)
-		{
-			// no ambiguity if three elements are used
-			setCatalog(elements.get(0));
-			setSchema(elements.get(1));
-			setTablename(elements.get(2));
-		}
-		else if (elements.size() == 4)
-		{
-			// support for SQL Server syntax with a linked server
-			setServerPart(elements.get(0));
-			setCatalog(elements.get(1));
-			setSchema(elements.get(2));
-			setTablename(elements.get(3));
-		}
+    switch (elements.size())
+    {
+      case 1:
+        // if only one element is found it could still be a two element identifier
+        // in case the catalog separator is different from the schema separator (e.g. DB2 for iSeries)
+        setCatalog(getCatalogPart(tableId, catalogSeparator));
+        setTablename(getNamePart(tableId, catalogSeparator));
+        break;
+      case 2:
+        if (supportsSchemas && supportsCatalogs)
+        {
+          setCatalog(getCatalogPart(elements.get(0), catalogSeparator));
+          setSchema(getNamePart(elements.get(0), catalogSeparator));
+        }
+        if (supportsSchemas && !supportsCatalogs)
+        {
+          // no catalog supported, the first element must be the schema
+          setSchema(elements.get(0));
+        }
+        if (supportsCatalogs && !supportsSchemas)
+        {
+          // e.g. MySQL qualifier: database.tablename
+  				setCatalog(elements.get(0));
+        }
+        setTablename(elements.get(1));
+        break;
+      case 3:
+        // no ambiguity if three elements are used
+        setCatalog(elements.get(0));
+        setSchema(elements.get(1));
+        setTablename(elements.get(2));
+        break;
+      case 4:
+        // support for SQL Server syntax with a linked server
+        setServerPart(elements.get(0));
+        setCatalog(elements.get(1));
+        setSchema(elements.get(2));
+        setTablename(elements.get(3));
+        break;
+      default:
+    }
 	}
 
 	protected static String getCatalogPart(String identifier, char catalogSeparator)
@@ -922,7 +922,7 @@ public class TableIdentifier
     else if (meta.isSynonym(this))
 		{
 			SynonymDDLHandler synHandler = new SynonymDDLHandler();
-			source = synHandler.getSynonymSource(con, this, false, false);
+			source = synHandler.getSynonymSource(con, this, false, DropType.none);
 		}
 		else if ("VIEW".equalsIgnoreCase(type))
 		{

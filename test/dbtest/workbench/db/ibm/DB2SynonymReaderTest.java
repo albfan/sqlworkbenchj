@@ -118,7 +118,7 @@ public class DB2SynonymReaderTest
 		String sql = reader.getSynonymSource(con, null, syn.getSchema(), syn.getTableName());
 
 		String schema = Db2TestUtil.getSchemaName();
-		String expected = "CREATE ALIAS " + schema + ".S_PERSON\n   FOR " + schema + ".PERSON;";
+		String expected = "CREATE OR REPLACE ALIAS " + schema + ".S_PERSON\n   FOR " + schema + ".PERSON;";
 		assertEquals(expected, sql.trim());
 	}
 

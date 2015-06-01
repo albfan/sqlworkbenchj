@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.db.JdbcUtils;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -138,7 +139,14 @@ public class OracleSynonymReader
 		TableIdentifier id = getSynonymTable(con, catalog, owner, synonym);
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		result.append("CREATE SYNONYM ");
+    if (supportsReplace(con))
+    {
+      result.append("CREATE OR REPLACE SYNONYM ");
+    }
+		else
+    {
+      result.append("CREATE SYNONYM ");
+    }
 		result.append(synonym);
 		result.append(nl + "   FOR ");
 		result.append(id.getTableExpression());
@@ -146,5 +154,12 @@ public class OracleSynonymReader
 		result.append(nl);
 		return result.toString();
 	}
+
+  @Override
+  public boolean supportsReplace(WbConnection con)
+  {
+    return JdbcUtils.hasMinimumServerVersion(con, "10.0");
+  }
+
 
 }

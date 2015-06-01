@@ -41,8 +41,10 @@ public interface SynonymReader
 {
 	String SYN_TYPE_NAME = "SYNONYM";
 
+  boolean supportsReplace(WbConnection con);
+  
 	String getSynonymTypeName();
-	
+
 	String getSynonymSource(WbConnection con, String catalog, String schema, String aSynonym)
 			throws SQLException;
 

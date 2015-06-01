@@ -171,4 +171,10 @@ public class DerbySynonymReader
 		return result.toString();
 	}
 
+  @Override
+  public boolean supportsReplace(WbConnection con)
+  {
+    return false;
+  }
+
 }

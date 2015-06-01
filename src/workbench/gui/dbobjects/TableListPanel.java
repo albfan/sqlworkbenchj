@@ -1759,7 +1759,7 @@ public class TableListPanel
 			else if (dbs.isSynonymType(type))
 			{
 				SynonymDDLHandler synHandler = new SynonymDDLHandler();
-				sql = synHandler.getSynonymSource(this.dbConnection, this.selectedTable, GuiSettings.showSynonymTargetInDbExplorer(), true);
+				sql = synHandler.getSynonymSource(this.dbConnection, this.selectedTable, GuiSettings.showSynonymTargetInDbExplorer(), dropType);
 			}
 			else if (meta.isSequenceType(type))
 			{

@@ -132,7 +132,7 @@ public class Db2SynonymReader
 		TableIdentifier id = getSynonymTable(con, catalog, synonymSchema, synonymName);
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		result.append("CREATE ALIAS ");
+		result.append("CREATE OR REPLACE ALIAS ");
 		result.append(SqlUtil.buildExpression(con, null, synonymSchema, synonymName));
 		result.append(nl).append("   FOR ");
 		result.append(id.getTableExpression());
@@ -142,4 +142,9 @@ public class Db2SynonymReader
 		return result.toString();
 	}
 
+  @Override
+  public boolean supportsReplace(WbConnection con)
+  {
+    return true;
+  }
 }

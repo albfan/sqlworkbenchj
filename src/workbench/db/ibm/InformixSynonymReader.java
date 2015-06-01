@@ -142,4 +142,11 @@ public class InformixSynonymReader
 		return result.toString();
 	}
 
+  @Override
+  public boolean supportsReplace(WbConnection con)
+  {
+    return false;
+  }
+
+
 }

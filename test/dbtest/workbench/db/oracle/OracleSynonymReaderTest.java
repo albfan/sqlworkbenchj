@@ -39,6 +39,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.db.DropType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -93,7 +95,7 @@ public class OracleSynonymReaderTest
 		assertEquals("PERSON", table.getTableName());
 		String sql = reader.getSynonymSource(con, null, syn.getSchema(), syn.getTableName());
 //		System.out.println(sql);
-		String expected = "CREATE SYNONYM S_PERSON\n   FOR WBJUNIT.PERSON;";
+		String expected = "CREATE OR REPLACE SYNONYM S_PERSON\n   FOR WBJUNIT.PERSON;";
 		assertEquals(expected, sql.trim());
 
 		TestUtil.executeScript(con, "drop table person purge;");
@@ -122,15 +124,15 @@ public class OracleSynonymReaderTest
 		assertEquals(1, objects.size());
 		TableIdentifier syn = objects.get(0);
 
-		String sql = handler.getSynonymSource(con, syn, true, false);
+		String sql = handler.getSynonymSource(con, syn, true, DropType.none);
 //		System.out.println(sql);
 
-		assertTrue(sql.contains("CREATE SYNONYM S_PERSON"));
+		assertTrue(sql.contains("CREATE OR REPLACE SYNONYM S_PERSON"));
 		assertTrue(sql.contains("CREATE TABLE PERSON"));
 
-		sql = handler.getSynonymSource(con, syn, false, false);
+		sql = handler.getSynonymSource(con, syn, false, DropType.none);
 //		System.out.println(sql);
-		assertTrue(sql.contains("CREATE SYNONYM S_PERSON"));
+		assertTrue(sql.contains("CREATE OR REPLACE SYNONYM S_PERSON"));
 		assertFalse(sql.contains("CREATE TABLE PERSON"));
 	}
 

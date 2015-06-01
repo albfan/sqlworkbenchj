@@ -163,7 +163,11 @@ public class IngresSynonymReader
 		return result.toString();
 	}
 
-
+  @Override
+  public boolean supportsReplace(WbConnection con)
+  {
+    return false;
+  }
 
 }
 

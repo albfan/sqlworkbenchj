@@ -208,4 +208,10 @@ public class SqlServerSynonymReader
 		return result.toString();
 	}
 
+  @Override
+  public boolean supportsReplace(WbConnection con)
+  {
+    return false;
+  }
+
 }

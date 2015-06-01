@@ -44,16 +44,23 @@ public class SynonymDDLHandler
 	 * @return the SQL to create the synonym.
 	 * @see SynonymReader#getSynonymSource(workbench.db.WbConnection, String, String, String)
 	 */
-	public String getSynonymSource(WbConnection dbConnection, TableIdentifier synonym, boolean includeTable, boolean includeDrop)
+	public String getSynonymSource(WbConnection dbConnection, TableIdentifier synonym, boolean includeTable, DropType dropType)
 	{
 		SynonymReader reader = dbConnection.getMetadata().getSynonymReader();
 		if (reader == null) return StringUtil.EMPTY_STRING;
 		StringBuilder result = new StringBuilder(100);
 
-		if (includeDrop)
+    if (dropType != DropType.none && reader.supportsReplace(dbConnection))
+    {
+      // no need to create a DROP statement if the DBMS supports CREATE OR REPLACE
+      dropType = DropType.none;
+    }
+
+		if (dropType != DropType.none)
 		{
 			GenericObjectDropper dropper = new GenericObjectDropper();
 			dropper.setConnection(dbConnection);
+      dropper.setCascade(dropType == DropType.cascaded);
 			result.append(dropper.getDropForObject(synonym));
 			result.append(";\n");
 		}
