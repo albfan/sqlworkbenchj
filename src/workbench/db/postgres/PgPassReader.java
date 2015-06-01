@@ -29,6 +29,7 @@ import workbench.log.LogMgr;
 import workbench.util.FileUtil;
 import workbench.util.PlatformHelper;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -131,7 +132,7 @@ public class PgPassReader
 		return null;
 	}
 
-	private static File getPgPassFile()
+	public static File getPgPassFile()
 	{
 		String passFile = System.getenv("PGPASSFILE");
 		File result = null;
@@ -140,17 +141,17 @@ public class PgPassReader
 			if (PlatformHelper.isWindows())
 			{
 				String home = System.getenv("APPDATA");
-				result = new File(home + "/postgresql/pgpass.conf");
+				result = new WbFile(home + "/postgresql/pgpass.conf");
 			}
 			else
 			{
 				String home = System.getenv("HOME");
-				result = new File(home + "/.pgpass");
+				result = new WbFile(home + "/.pgpass");
 			}
 		}
 		else
 		{
-			result = new File(passFile);
+			result = new WbFile(passFile);
 		}
 		return result;
 	}

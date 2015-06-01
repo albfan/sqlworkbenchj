@@ -37,6 +37,7 @@ import workbench.resource.Settings;
 import workbench.db.postgres.PgPassReader;
 
 import workbench.gui.profiles.ProfileKey;
+import workbench.log.LogMgr;
 
 import workbench.sql.DelimiterDefinition;
 
@@ -564,39 +565,39 @@ public class ConnectionProfile
 	 *	@see #getPassword()
 	 *	@see workbench.util.WbCipher#encryptString(String)
 	 */
-	public final void setPassword(String aPwd)
+	public final void setPassword(String pwd)
 	{
-		if (aPwd == null)
+		if (pwd == null)
 		{
 			if (this.password != null)
 			{
 				this.password = null;
-				this.changed = true;
+				if (this.storePassword) this.changed = true;
 			}
 			return;
 		}
 
-		aPwd = aPwd.trim();
+		pwd = pwd.trim();
 
 		// check encryption settings when reading the profiles...
 		if (Settings.getInstance().getUseEncryption())
 		{
-			if (!this.isEncrypted(aPwd))
+			if (!this.isEncrypted(pwd))
 			{
-				aPwd = this.encryptPassword(aPwd);
+				pwd = this.encryptPassword(pwd);
 			}
 		}
 		else
 		{
-			if (this.isEncrypted(aPwd))
+			if (this.isEncrypted(pwd))
 			{
-				aPwd = this.decryptPassword(aPwd);
+				pwd = this.decryptPassword(pwd);
 			}
 		}
 
-		if (!aPwd.equals(this.password))
+		if (!pwd.equals(this.password))
 		{
-			this.password = aPwd;
+			this.password = pwd;
 			if (this.storePassword) this.changed = true;
 		}
 	}
@@ -832,6 +833,7 @@ public class ConnectionProfile
 		if (usePgPass())
 		{
 			PgPassReader reader = new PgPassReader(url, getLoginUser());
+      LogMgr.logDebug("ConnectionProfile.getPgPassPassword()", "Using password from " + PgPassReader.getPgPassFile());
 			return reader.getPasswordFromFile();
 		}
 		return null;
@@ -844,7 +846,7 @@ public class ConnectionProfile
 			return this.decryptPassword(password);
 		}
 
-		if (usePgPass())
+		if (usePgPass() && !getStorePassword())
 		{
 			return getPgPassPassword();
 		}
@@ -1062,7 +1064,7 @@ public class ConnectionProfile
 		boolean wasDefined = (this.connectionProperties != null && this.connectionProperties.size() > 0);
 		if (props != null)
 		{
-			if (props.size() == 0)
+			if (props.isEmpty())
 			{
 				this.connectionProperties = null;
 				if (wasDefined) this.changed = true;
