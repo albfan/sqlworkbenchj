@@ -1896,7 +1896,7 @@ public class SqlUtil
 			int columns = meta.getColumnCount();
 			StringBuilder out = new StringBuilder(columns * 20);
 			out.append(methodName);
-			out.append(" returns: ");
+			out.append(" returned: ");
 			for (int col=1; col <= columns; col++)
 			{
 				if (col > 1) out.append(", ");

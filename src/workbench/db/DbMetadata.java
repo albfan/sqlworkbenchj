@@ -1553,7 +1553,7 @@ public class DbMetadata
 
 			if (tableRs != null && Settings.getInstance().getDebugMetadataSql())
 			{
-				SqlUtil.dumpResultSetInfo("DatabaseMetaData.getTables() returned:", tableRs.getMetaData());
+				SqlUtil.dumpResultSetInfo("DatabaseMetaData.getTables()", tableRs.getMetaData());
 			}
 
 			boolean useColumnNames = dbSettings.useColumnNameForMetadata();
@@ -2053,7 +2053,7 @@ public class DbMetadata
     if (oraOutput == null) return false;
     return oraOutput.isEnabled();
   }
-  
+
 	/**
 	 * Disable Oracle's DBMS_OUTPUT package
 	 * @see workbench.db.oracle.DbmsOutput#disable()
