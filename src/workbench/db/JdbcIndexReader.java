@@ -883,7 +883,7 @@ public class JdbcIndexReader
 			{
 				if (partitionedFlagColumn != null)
 				{
-					isPartitioned = StringUtil.stringToBool(idxRs.getString(partitionedFlagColumn));
+					isPartitioned = StringUtil.stringToBool(StringUtil.trim(idxRs.getString(partitionedFlagColumn)));
 				}
 				def = new IndexDefinition(tbl, indexName);
 				def.setUnique(!nonUniqueFlag);
