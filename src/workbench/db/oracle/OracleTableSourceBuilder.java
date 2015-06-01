@@ -96,6 +96,7 @@ public class OracleTableSourceBuilder
 
 		boolean supportsArchives = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.2");
 		boolean supportsCompression = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.1");
+		boolean supportsFlashCache = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.1");
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -129,12 +130,23 @@ public class OracleTableSourceBuilder
 			"       atb.degree, \n" +
 			"       atb.row_movement, \n" +
 			"       atb.temporary, \n" +
+			"       atb.degree, \n" +
+			"       atb.cache, \n" +
+			"       atb.buffer_pool, \n" +
+
+      (supportsFlashCache ?
+			"       atb.flash_cache, \n" +
+			"       atb.cell_flash_cache, \n" :
+			"       null as flash_cache, \n" +
+			"       null as cell_flash_cache, \n") +
+
 			"       atb.duration, \n" +
 			"       atb.pct_free, \n" +
 			"       atb.pct_used, \n" +
 			"       atb.pct_increase, \n" +
 			"       atb.logging, \n" +
 			"       atb.iot_type, \n" +
+			"       atb.partitioned, \n" +
 			"       iot.tablespace_name as iot_overflow, \n" +
 			"       iot.table_name as overflow_table, \n" +
 			"       ac.index_name as pk_index_name, \n" +
@@ -166,6 +178,8 @@ public class OracleTableSourceBuilder
 		}
 
 		String archive = null;
+    boolean isPartitioned = false;
+
 		try
 		{
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
@@ -195,8 +209,12 @@ public class OracleTableSourceBuilder
 				}
 
 				String iot = rs.getString("IOT_TYPE");
+
 				if (StringUtil.isNonBlank(iot))
 				{
+          String partitioned = StringUtil.trim(rs.getString("partitioned"));
+          isPartitioned = StringUtil.equalStringIgnoreCase("YES", partitioned);
+
 					String pkIndex = rs.getString("pk_index_name");
 					String overflow = rs.getString("IOT_OVERFLOW");
 					tbl.getSourceOptions().addConfigSetting("organization", "index");
@@ -257,8 +275,8 @@ public class OracleTableSourceBuilder
 						tbl.getSourceOptions().addConfigSetting("parallel", degree);
 					}
 				}
-				String movement = rs.getString("row_movement");
-				if (movement != null) movement = movement.trim();
+
+				String movement = StringUtil.trim(rs.getString("row_movement"));
 				if (StringUtil.equalString("ENABLED", movement))
 				{
 					if (options.length() > 0) options.append('\n');
@@ -301,6 +319,43 @@ public class OracleTableSourceBuilder
 					options.append("PCTUSED ");
 					options.append(used);
 				}
+
+        String bufferPool = StringUtil.trim(rs.getString("buffer_pool"));
+        String flashCache = StringUtil.trim(rs.getString("flash_cache"));
+        String cellFlashCache = StringUtil.trim(rs.getString("cell_flash_cache"));
+        String storage = null;
+
+        if (StringUtil.isNonEmpty(bufferPool))
+        {
+          tbl.getSourceOptions().addConfigSetting("buffer_pool", bufferPool);
+          if (StringUtil.stringsAreNotEqual("DEFAULT", bufferPool))
+          {
+            storage = "STORAGE (BUFFER_POOL " + bufferPool;
+          }
+        }
+        if (StringUtil.isNonEmpty(flashCache))
+        {
+          tbl.getSourceOptions().addConfigSetting("flash_cache", flashCache);
+          if (StringUtil.stringsAreNotEqual("DEFAULT", flashCache))
+          {
+            if (storage == null) storage = "STORAGE (";
+            storage += " FLASH_CACHE " + flashCache;
+          }
+        }
+        if (StringUtil.isNonEmpty(cellFlashCache))
+        {
+          tbl.getSourceOptions().addConfigSetting("cell_flash_cache", cellFlashCache);
+          if (StringUtil.stringsAreNotEqual("DEFAULT", cellFlashCache))
+          {
+            if (storage == null) storage = "STORAGE (";
+            storage += " CELL_FLASH_CACHE " + cellFlashCache;
+          }
+        }
+        if (storage != null)
+        {
+          if (options.length() > 0) options.append('\n');
+          options.append(storage + ")");
+        }
 
 				String logging = rs.getString("logging");
 				if (StringUtil.equalStringIgnoreCase("NO", logging) && !isTempTable)
@@ -354,7 +409,7 @@ public class OracleTableSourceBuilder
 			options.append(dbConnection.getMetadata().quoteObjectname(archive));
 		}
 
-		if (includePartitions)
+		if (includePartitions && isPartitioned)
 		{
 			StringBuilder partition = getPartitionSql(tbl, "", true);
 			if (partition != null && partition.length() > 0)
@@ -725,7 +780,7 @@ public class OracleTableSourceBuilder
 
 		try
 		{
-			if (pkIdx != null)
+			if (pkIdx != null && pkIdx.isPartitioned())
 			{
 				OracleIndexPartition partIndex =  new OracleIndexPartition(this.dbConnection);
 				isPartitioned = partIndex.hasPartitions(pkIdx, dbConnection);
