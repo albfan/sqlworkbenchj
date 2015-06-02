@@ -881,35 +881,35 @@ public class BatchRunner
 					boolean hasMessage = result.hasMessages();
 					String feedback = result.getMessageBuffer().toString();
 
-					if (error)
-					{
+          if (error)
+          {
             lastError = result.getErrorDescriptor();
             errorStatementIndex = commandIndex;
 
             LogMgr.logError("BatchRunner.execute()", feedback, null);
-						errorCount ++;
-						if (parser.getScriptFile() != null)
-						{
-							feedback += "\n" + ResourceMgr.getFormattedString("MsgInFile", parser.getScriptFile().getFullPath());
-						}
-						if (storeErrorMessages)
-						{
-							if (errors == null)
-							{
-								errors = new MessageBuffer();
-							}
-							errors.appendNewLine();
-							errors.append(feedback);
-						}
-					}
-					else
-					{
-						if (result.hasWarning() && StringUtil.isNonBlank(feedback))
-						{
-							LogMgr.logWarning("BatchRunner.execute()", feedback);
-						}
-						totalRows += result.getTotalUpdateCount();
-					}
+            errorCount++;
+            if (parser.getScriptFile() != null)
+            {
+              feedback += "\n" + ResourceMgr.getFormattedString("MsgInFile", parser.getScriptFile().getFullPath());
+            }
+            if (storeErrorMessages)
+            {
+              if (errors == null)
+              {
+                errors = new MessageBuffer();
+              }
+              errors.appendNewLine();
+              errors.append(feedback);
+            }
+          }
+          else
+          {
+            if (result.hasWarning() && StringUtil.isNonBlank(feedback))
+            {
+              LogMgr.logWarning("BatchRunner.execute()", feedback);
+            }
+            totalRows += result.getTotalUpdateCount();
+          }
 
 					printResults(sql, result);
 
@@ -928,11 +928,11 @@ public class BatchRunner
 						this.printMessage("\n" + msg);
 					}
 					executedCount ++;
-				}
 
-				if (this.showTiming && showStatementTiming && !consolidateMessages && result != null)
-				{
-					this.printMessage(result.getTimingMessage());
+          if (this.showTiming && showStatementTiming && !consolidateMessages)
+          {
+            this.printMessage(result.getTimingMessage());
+          }
 				}
 
 				if (this.rowMonitor != null && (executedCount % interval == 0) && !printStatements)
