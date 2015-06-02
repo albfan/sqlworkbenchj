@@ -363,14 +363,16 @@ public class EditorPanel
 			long currentFileTime = currentFile.lastModified();
 			int graceTime = Settings.getInstance().getIntProperty("workbench.gui.editor.reload.check.mindiff", 2000);
 
-			if (currentFileTime - fileModifiedTime > graceTime)
+			if (Math.abs(currentFileTime - fileModifiedTime) > graceTime)
 			{
 				String fname = getCurrentFileName();
 				FileReloadType reloadType = GuiSettings.getReloadType();
+        
 				if (reloadType != FileReloadType.none)
 				{
 					LogMgr.logDebug("EditorPanel", "File " + fname + " has been modified externally. currentFileTime=" + currentFileTime + ", saved lastModifiedTime=" + fileModifiedTime);
 				}
+
 				if (reloadType == FileReloadType.automatic)
 				{
 					reloadCurrentFile();
@@ -503,7 +505,7 @@ public class EditorPanel
 	{
 		if (popup == null) return;
     if (anAction == null) return;
-    
+
     int count = popup.getComponentCount();
     int removeIndex = -1;
 
