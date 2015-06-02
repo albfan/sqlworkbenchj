@@ -51,14 +51,12 @@ import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -1723,7 +1721,7 @@ public class TableListPanel
 		if (selectedTable == null) return;
 
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
-
+    tableSource.setEnabled(false);
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(this.dbConnection);
 
 		try
@@ -1811,13 +1809,14 @@ public class TableListPanel
 				@Override
 				public void run()
 				{
-					tableSource.reset();
+          tableSource.setPlainText(msg);
 				}
 			});
 		}
 		finally
 		{
 			setActivePanelIndex(null);
+      tableSource.setEnabled(true);
 			WbSwingUtilities.showDefaultCursor(tableSource);
 			WbSwingUtilities.showDefaultCursor(this);
 		}
@@ -1856,71 +1855,6 @@ public class TableListPanel
 		{
 			currentRetrievalPanel = currentIndex;
 			WbSwingUtilities.showDefaultCursor(this);
-		}
-	}
-
-	protected void showCancelMessage()
-	{
-		this.showPopupMessagePanel(ResourceMgr.getString("MsgTryCancelling"));
-	}
-
-	protected void showWaitMessage()
-	{
-		this.showPopupMessagePanel(ResourceMgr.getString("MsgWaitRetrieveEnded"));
-	}
-
-	protected void showPopupMessagePanel(final String aMsg)
-	{
-		synchronized (msgLock)
-		{
-			if (this.infoWindow != null && infoLabel != null)
-			{
-				WbSwingUtilities.setLabel(infoLabel, aMsg, null);
-				return;
-			}
-
-			JPanel p = new JPanel();
-			p.setBorder(WbSwingUtilities.getBevelBorderRaised());
-			p.setLayout(new BorderLayout());
-			this.infoLabel = new JLabel(aMsg);
-			this.infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-			p.add(this.infoLabel, BorderLayout.CENTER);
-			JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-			this.infoWindow = new JDialog(f, true);
-			this.infoWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			this.infoWindow.getContentPane().setLayout(new BorderLayout());
-			this.infoWindow.getContentPane().add(p, BorderLayout.CENTER);
-			this.infoWindow.setUndecorated(true);
-			this.infoWindow.setSize(260,50);
-			WbSwingUtilities.center(this.infoWindow, f);
-		}
-
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				infoWindow.setVisible(true);
-			}
-		});
-	}
-
-	private void closeInfoWindow()
-	{
-		if (this.infoWindow != null)
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					infoLabel = null;
-					infoWindow.getOwner().setEnabled(true);
-					infoWindow.setVisible(false);
-					infoWindow.dispose();
-					infoWindow = null;
-				}
-			});
 		}
 	}
 
@@ -2021,7 +1955,6 @@ public class TableListPanel
 			WbSwingUtilities.showDefaultCursor(this);
 			this.setBusy(false);
 			this.repaint();
-			closeInfoWindow();
 			levelChanger.restoreIsolationLevel(dbConnection);
 			endTransaction();
 		}

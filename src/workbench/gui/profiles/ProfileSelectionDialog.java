@@ -271,7 +271,7 @@ public class ProfileSelectionDialog
 			{
 				ok = promptUsername(this, selectedProfile);
 			}
-			else if (selectedProfile != null && !this.selectedProfile.getStorePassword())
+			else if (selectedProfile != null && this.selectedProfile.needsPasswordPrompt())
 			{
 				ok = promptPassword(this, selectedProfile);
 			}
@@ -297,7 +297,7 @@ public class ProfileSelectionDialog
 			return promptUsername(parent, profile);
 		}
 
-		if (!profile.getStorePassword())
+		if (profile.needsPasswordPrompt())
 		{
 			return promptPassword(parent, profile);
 		}
@@ -319,7 +319,6 @@ public class ProfileSelectionDialog
 	private static boolean promptPassword(Window parent, ConnectionProfile profile)
 	{
 		if (profile == null) return false;
-		if (profile.hasPassword()) return true;
 
 		String pwd = WbSwingUtilities.getUserInputHidden(parent, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
 		if (StringUtil.isEmptyString(pwd)) return false;

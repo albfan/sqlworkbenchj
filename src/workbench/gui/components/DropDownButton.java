@@ -23,6 +23,8 @@
 package workbench.gui.components;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -33,7 +35,7 @@ import javax.swing.border.Border;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import workbench.gui.WbSwingUtilities;
+import workbench.resource.IconMgr;
 
 /**
  * @author Thomas Kellerer
@@ -62,9 +64,15 @@ public class DropDownButton
 	{
 		setFocusable(false);
 		addActionListener(this);
-		setMargin(WbSwingUtilities.EMPTY_INSETS);
 		setBorderPainted(false);
 		enableToolbarRollover();
+
+    int iconSize = IconMgr.getInstance().getSizeForLabel();
+    Dimension bs = getPreferredSize();
+
+    int hmargin = (int)((bs.height - iconSize) / 2);
+    int vmargin = (int)((bs.height - iconSize) / 2);
+    setMargin(new Insets(vmargin, hmargin, vmargin, hmargin));
 	}
 
 	public void dispose()

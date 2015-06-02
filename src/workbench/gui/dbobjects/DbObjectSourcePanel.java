@@ -74,13 +74,13 @@ public class DbObjectSourcePanel
 	private MainWindow parentWindow;
 	private boolean initialized;
 	private boolean allowReformat;
+	private boolean allowEditAndExec;
 	private String objectName;
   private WbToolbar toolbar;
   private WbConnection connection;
   private WbAction runScript;
   private final String runScriptCommand = "run-script";
   private String objectType;
-  private boolean showRunScript;
 
 	public DbObjectSourcePanel(MainWindow window, Reloadable reloader)
 	{
@@ -107,14 +107,14 @@ public class DbObjectSourcePanel
 
   public void allowEditing(boolean flag)
   {
-    boolean old = showRunScript;
-    showRunScript = flag;
+    boolean old = allowEditAndExec;
+    allowEditAndExec = flag;
 
-    if (initialized && showRunScript != old)
+    if (initialized && allowEditAndExec != old)
     {
       toolbar.invalidate();
 
-      if (showRunScript)
+      if (allowEditAndExec)
       {
         enableSourceEditing();
       }
@@ -133,6 +133,32 @@ public class DbObjectSourcePanel
           toolbar.validate();
         }
       });
+    }
+  }
+
+  @Override
+  public void setEnabled(boolean enabled)
+  {
+    super.setEnabled(enabled);
+    sourceEditor.setEnabled(enabled);
+
+    if (editButton != null)
+    {
+      editButton.setEnabled(enabled);
+    }
+
+    if (enabled)
+    {
+      checkReadonly();
+    }
+    else if (runScript != null)
+    {
+      runScript.setEnabled(false);
+    }
+
+    if (reloadSource != null)
+    {
+      reloadSource.setEnabled(enabled);
     }
   }
 
@@ -189,7 +215,7 @@ public class DbObjectSourcePanel
 			toolbar.add(editButton);
 		}
 
-    if (showRunScript)
+    if (allowEditAndExec)
     {
       enableSourceEditing();
     }
@@ -224,7 +250,7 @@ public class DbObjectSourcePanel
       toolbar.addSeparator();
       toolbar.add(runScript);
     }
-    runScript.setEnabled(true);
+    runScript.setEnabled(sourceEditor.getDocumentLength() > 0);
     sourceEditor.setEditable(true);
   }
 
@@ -295,9 +321,22 @@ public class DbObjectSourcePanel
 		boolean hasText = StringUtil.isNonEmpty(sql);
 		this.objectName = name;
     this.objectType = type;
-		if (reloadSource != null) reloadSource.setEnabled(hasText);
 
-		if (editButton != null) editButton.setEnabled(hasText);
+    if (reloadSource != null)
+    {
+      reloadSource.setEnabled(hasText);
+    }
+
+    if (runScript != null)
+    {
+      runScript.setEnabled(allowEditAndExec && hasText);
+    }
+
+		if (editButton != null)
+    {
+      editButton.setEnabled(hasText);
+    }
+
 		if (hasText &&
 					(sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) ||
 					 sql.startsWith(SourceStatementsHelp.PROC_ERROR_START) ||
@@ -442,7 +481,7 @@ public class DbObjectSourcePanel
 	{
 		if (sourceEditor != null)
 		{
-			this.setText("", null, null);
+			setText("", null, null);
 		}
 	}
 
@@ -487,11 +526,13 @@ public class DbObjectSourcePanel
     String script = getText();
     if (script.isEmpty()) return;
 
-    boolean confirmExec = !DbExplorerSettings.objectTypesToRunWithoutConfirmation().contains(objectType == null ? "always" : objectType);
-
     String type = objectType == null ? "object" : objectType.toLowerCase();
+
+    boolean confirmExec = (false == DbExplorerSettings.objectTypesToRunWithoutConfirmation().contains(type));
+
     String msg = ResourceMgr.getFormattedString("MsgConfirmRecreate", type, objectName);
-    if (confirmExec && WbSwingUtilities.getYesNo(this, msg) == false)
+
+    if (confirmExec && false == WbSwingUtilities.getYesNo(this, msg))
     {
       return;
     }

@@ -125,7 +125,7 @@ public class PgPassReader
 		String[] elements = line.split(":");
 		if (elements.length != 5) return null;
 		boolean hostnameEquals = elements[0].equals("*") || elements[0].equals(host);
-		boolean portEquals = elements[1].equals("*") || elements[1].equals(port);
+		boolean portEquals = elements[1].equals("*") || elements[1].equals(getPort());
 		boolean dbEquals = elements[2].equals("*") || elements[2].equals(database);
 		boolean userEquals = elements[3].equals("*") || elements[3].equals(username);
 		if (hostnameEquals && portEquals && userEquals && dbEquals) return elements[4];

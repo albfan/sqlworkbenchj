@@ -819,15 +819,6 @@ public class ConnectionProfile
 		return this.username;
 	}
 
-	public boolean hasPassword()
-	{
-		if (usePgPass())
-		{
-			return getPgPassPassword() != null;
-		}
-		return StringUtil.isNonEmpty(password) || usePgPass();
-	}
-
 	private String getPgPassPassword()
 	{
 		if (usePgPass())
@@ -866,6 +857,11 @@ public class ConnectionProfile
 		}
 		return user;
 	}
+
+  public boolean needsPasswordPrompt()
+  {
+    return getLoginPassword() == null && getStorePassword() == false;
+  }
 
 	public void setTemporaryUsername(String tempName)
 	{
