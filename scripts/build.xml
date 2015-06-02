@@ -737,7 +737,7 @@
         <include name="sqlwbconsole64.exe"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}">
-        <include name="log4j.xml"/>
+        <include name="log4j-sample.xml"/>
         <include name="SQLWorkbench.vbs"/>
         <include name="sqlwbconsole.cmd"/>
         <include name="sqlworkbench.cmd"/>
@@ -776,7 +776,7 @@
         <include name="sqlwbconsole64.exe"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}">
-        <include name="log4j.xml"/>
+        <include name="log4j-sample.xml"/>
         <include name="SQLWorkbench.vbs"/>
         <include name="sqlwbconsole.cmd"/>
         <include name="sqlworkbench.sh"/>
@@ -818,7 +818,7 @@
 
       <zipfileset dir="${scriptsrc}" prefix="scripts">
         <include name="build.xml"/>
-        <include name="log4j.xml"/>
+        <include name="log4j-sample.xml"/>
         <include name="devbuild.number"/>
         <include name="build.number"/>
         <include name="release.property"/>
