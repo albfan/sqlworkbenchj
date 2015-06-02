@@ -506,7 +506,7 @@ public class DbSettings
         ddl = TemplateHandler.removePlaceholder(ddl, "%cascade%", true);
 			}
 		}
-		return ddl;
+		return ddl.trim();
 	}
 
 	public boolean useSpecificNameForDropProcedure()
@@ -1623,11 +1623,19 @@ public class DbSettings
 	}
 
 	/**
-	 * Return true if the driver for this DBMS is known to support CallableStatement.getParameterMetaData()
+	 * Return true if the driver for this DBMS is known to support PreparedStatement.getParameterMetaData()
 	 */
 	public boolean supportsParameterMetaData()
 	{
 		return getBoolProperty("parameter.metadata.supported", true);
+	}
+
+	/**
+	 * Return true if the driver for this DBMS is known to support CallableStatement.getParameterMetaData()
+	 */
+	public boolean supportsParameterMetaDataForCallableStatement()
+	{
+		return getBoolProperty("parameter.metadata.callablestatement.supported", true);
 	}
 
 	public boolean doEscapeSearchString()

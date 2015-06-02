@@ -153,7 +153,6 @@ public class GenericObjectDropper
 		{
 			CharSequence sql = getDropStatement(i);
 			result.append(sql);
-			if (!StringUtil.endsWith(sql, ';')) result.append(';');
 			result.append("\n\n");
 		}
 		if (needCommit) result.append("COMMIT;\n");
@@ -171,7 +170,7 @@ public class GenericObjectDropper
   {
     return getDropForObject(toDrop, cascadeConstraints);
   }
-  
+
 	@Override
 	public CharSequence getDropForObject(DbObject toDrop, boolean cascade)
 	{
@@ -192,6 +191,10 @@ public class GenericObjectDropper
 		ddl = ddl.replace("%name%", name);
 		sql.append(ddl);
 
+    if (!StringUtil.endsWith(sql, ';'))
+    {
+      sql.append(';');
+    }
 		return sql;
 	}
 
@@ -213,7 +216,7 @@ public class GenericObjectDropper
 			{
 				DbObject object = objects.get(i);
 
-				String sql = getDropStatement(i).toString();
+        String sql = SqlUtil.trimSemicolon(getDropStatement(i).toString());
 				LogMgr.logDebug("GenericObjectDropper.execute()", "Using SQL: " + sql);
 				if (monitor != null)
 				{

@@ -131,9 +131,10 @@ public class PostgresDomainReaderTest
 		dropper.setConnection(con);
 
 		String drop = dropper.getScript().toString().trim();
-		assertTrue(drop.contains("DROP DOMAIN " + TEST_SCHEMA + ".zz_int"));
-		assertTrue(drop.contains("DROP DOMAIN " + TEST_SCHEMA + ".salary"));
-		assertTrue(drop.contains("DROP DOMAIN other.positive_int"));
+//    System.out.println(drop);
+		assertTrue(drop.contains("DROP DOMAIN IF EXISTS " + TEST_SCHEMA + ".zz_int"));
+		assertTrue(drop.contains("DROP DOMAIN IF EXISTS " + TEST_SCHEMA + ".salary"));
+		assertTrue(drop.contains("DROP DOMAIN IF EXISTS other.positive_int"));
 
 		DataStore details = reader.getObjectDetails(con, salary);
 		assertNotNull(details);

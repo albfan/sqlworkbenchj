@@ -251,20 +251,23 @@ public class JdbcProcedureReader
     throws SQLException
   {
     DataStore ds = getProcedureColumns(def);
+    updateProcedureParameters(def, ds);
+  }
+
+  protected void updateProcedureParameters(ProcedureDefinition def, DataStore ds)
+  {
     List<ColumnIdentifier> parameters = new ArrayList<>(ds.getRowCount());
 
     for (int i = 0; i < ds.getRowCount(); i++)
     {
       String type = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-      if ("IN".equalsIgnoreCase(type) || "INOUT".equalsIgnoreCase(type))
-      {
-        String colName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
-        String typeName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
-        int jdbcType = ds.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
-        ColumnIdentifier col = new ColumnIdentifier(colName, jdbcType);
-        col.setDbmsType(typeName);
-        parameters.add(col);
-      }
+      String colName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+      String typeName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
+      int jdbcType = ds.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
+      ColumnIdentifier col = new ColumnIdentifier(colName, jdbcType);
+      col.setArgumentMode(type);
+      col.setDbmsType(typeName);
+      parameters.add(col);
     }
     def.setParameters(parameters);
   }
@@ -274,7 +277,9 @@ public class JdbcProcedureReader
 	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
-		return getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName(), def.getSpecificName());
+		DataStore ds = getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName(), def.getSpecificName());
+    updateProcedureParameters(def, ds);
+    return ds;
 	}
 
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname, String specificName)

@@ -31,6 +31,7 @@ import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.GenericObjectDropper;
+import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -160,12 +161,28 @@ public class Db2TestUtil
 			dropper.setCascade(true);
 			dropper.dropObjects();
 			con.commit();
-			con.getObjectCache().clear();
 		}
 		catch (Exception e)
 		{
 			con.rollbackSilently();
 		}
+
+    try
+    {
+      List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, getSchemaName(), "%");
+			GenericObjectDropper dropper = new GenericObjectDropper();
+			dropper.setConnection(con);
+			dropper.setObjects(procs);
+      dropper.setCascade(true);
+      dropper.dropObjects();
+      con.commit();
+    }
+		catch (Exception e)
+		{
+			con.rollbackSilently();
+		}
+    
+		con.getObjectCache().clear();
 	}
 
 }

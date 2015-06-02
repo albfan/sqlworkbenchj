@@ -237,7 +237,8 @@ public class PostgresProcedureReaderTest
 		GenericObjectDropper dropper = new GenericObjectDropper();
 		dropper.setConnection(con);
 		String drop = dropper.getDropForObject(def).toString();
-		assertEquals("DROP AGGREGATE array_accum(anyelement)", drop);
+    System.out.println(drop);
+		assertEquals("DROP AGGREGATE array_accum(anyelement);", drop);
 	}
 
 	@Test

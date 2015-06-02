@@ -469,7 +469,27 @@ public class TableSourceBuilder
 		return result;
 	}
 
-	/**
+  public String getReplaceDDL(String objectType)
+  {
+    return getDDL(objectType, "replace");
+  }
+
+  private String getCreateDDL(String objectType)
+  {
+    String create = getDDL(objectType, "create");
+    if (create != null) return create;
+
+    return "CREATE " + objectType.toUpperCase() + " %name%";
+  }
+
+  private String getDDL(String objectType, String operation)
+  {
+    String prefix = "workbench.db.";
+    String suffix = "." + DbSettings.getKeyValue(objectType) + ".sql." + dbConnection.getDbId();
+    return Settings.getInstance().getProperty(prefix + operation + suffix, null);
+  }
+
+  /**
 	 * Generate a CREATE statement for the given object type
 	 * @param includeDrop  if true, a DROP ... will be included in the SQL
 	 * @param toCreate     the definition of the object to create
@@ -484,55 +504,47 @@ public class TableSourceBuilder
 	public StringBuilder generateCreateObject(DropType dropType, DbObject toCreate, String typeOption, boolean useFQN)
 	{
 		StringBuilder result = new StringBuilder();
-		boolean replaceAvailable = false;
+    boolean addDrop = dropType != DropType.none;
 
 		String objectType = toCreate.getObjectType();
 		objectType = objectType.replace("SYSTEM ", "");
 
-		String prefix = "workbench.db.";
-		String suffix = "." + DbSettings.getKeyValue(objectType) + ".sql." + dbConnection.getDbId();
-
 		String name = useFQN ? toCreate.getFullyQualifiedName(dbConnection) : toCreate.getObjectExpression(dbConnection);
 
-		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
-		if (replace != null)
-		{
-			result.append(StringUtil.replace(replace, "%name%", name));
-			replaceAvailable = true;
-		}
+		String ddl = getReplaceDDL(objectType);
 
-		if (dropType != DropType.none && !replaceAvailable)
+    if (ddl == null)
+    {
+      ddl = getCreateDDL(objectType);
+    }
+    else
+    {
+      // if a cascaded drop was requested add it even when a replace is available
+      // because a cascaded drop might do more than a create or replace
+      // when "only" a regular drop was requested this should be the same as a CREATE OR REPLACE
+      // so there is no need to add the drop statement
+      addDrop = (dropType == DropType.cascaded);
+    }
+
+		if (addDrop)
 		{
 			result.append(generateDrop(toCreate, dropType));
 			result.append('\n');
 			result.append('\n');
 		}
 
-		if (!replaceAvailable)
-		{
-			String create = Settings.getInstance().getProperty(prefix + "create" + suffix, null);
-			if (create == null)
-			{
-				result.append("CREATE ");
-				result.append(objectType.toUpperCase());
-				result.append(' ');
-				result.append(name);
-			}
-			else
-			{
-				create = StringUtil.replace(create, "%name%", name);
-				create = StringUtil.replace(create, "%fq_name%", SqlUtil.fullyQualifiedName(dbConnection, toCreate));
-				if (StringUtil.isNonBlank(typeOption))
-				{
-					create = StringUtil.replace(create, "%typeoption%", typeOption);
-				}
-				else
-				{
-					create = StringUtil.replace(create, "%typeoption% ", "");
-				}
-				result.append(create);
-			}
-		}
+    ddl = StringUtil.replace(ddl, "%name%", name);
+    ddl = StringUtil.replace(ddl, "%fq_name%", SqlUtil.fullyQualifiedName(dbConnection, toCreate));
+    if (StringUtil.isNonBlank(typeOption))
+    {
+      ddl = StringUtil.replace(ddl, "%typeoption%", typeOption);
+    }
+    else
+    {
+      ddl = StringUtil.replace(ddl, "%typeoption% ", "");
+    }
+    result.append(ddl);
+
 		return result;
 	}
 

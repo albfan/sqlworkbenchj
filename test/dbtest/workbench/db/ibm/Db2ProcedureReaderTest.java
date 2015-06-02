@@ -60,7 +60,7 @@ public class Db2ProcedureReaderTest
 		WbConnection con = Db2TestUtil.getDb2Connection();
 		if (con == null) return;
 
-		String sql = "create or replace procedure wb_test () \n" +
+		String sql = "create or replace procedure " + Db2TestUtil.getSchemaName() + ".wb_test () \n" +
              "language SQL \n" +
              "begin \n" +
              "end \n" +
@@ -101,7 +101,7 @@ public class Db2ProcedureReaderTest
 		assertEquals(1, procs.size());
 		CharSequence source = procs.get(0).getSource(con);
 		String expected =
-			"create or replace procedure wb_test () \n" +
+			"create or replace procedure " + Db2TestUtil.getSchemaName() + ".wb_test () \n" +
 			"language SQL \n" +
 			"begin \n" +
 			"end\n" +

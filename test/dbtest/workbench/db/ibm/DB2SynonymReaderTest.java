@@ -103,7 +103,7 @@ public class DB2SynonymReaderTest
 		SynonymReader reader = con.getMetadata().getSynonymReader();
 		assertNotNull(reader);
 		Collection<String> types = con.getMetadata().getObjectTypes();
-		assertTrue(types.contains("SYNONYM"));
+		assertTrue(types.contains(reader.getSynonymTypeName()));
 
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] { "ALIAS"});
 		assertNotNull(objects);

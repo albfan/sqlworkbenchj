@@ -68,7 +68,7 @@ public class WbCallDb2Test
     assertNotNull(con);
 
 		TestUtil.executeScript(con,
-      "create or replace procedure some_proc(inout id integer, out some_text varchar(1000), out some_more_text varchar(2000)) \n" +
+      "create or replace procedure " + Db2TestUtil.getSchemaName() + ".some_proc(inout id integer, out some_text varchar(1000), out some_more_text varchar(2000)) \n" +
       " language SQL \n" +
       "begin  \n" +
       "  set some_text = 'foo'; \n" +
@@ -102,12 +102,12 @@ public class WbCallDb2Test
       @Override
       public boolean showParameterDialog(StatementParameters parms, boolean showNames)
       {
-        parms.setParameterValue(0, "24");
+        parms.setParameterValue(0, "21");
         return true;
       }
     };
     call.setParameterPrompter(prompter);
-		String cmd = "WbCall some_proc(?,?,?)";
+		String cmd = "WbCall " + Db2TestUtil.getSchemaName() + ".some_proc(?,?,?)";
     StatementRunnerResult result = call.execute(cmd);
     assertTrue(result.isSuccess());
     List<DataStore> data = result.getDataStores();

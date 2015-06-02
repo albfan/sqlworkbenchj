@@ -378,7 +378,7 @@ public class WbCall
 	private List<ParameterDefinition> checkParametersFromStatement(CallableStatement cstmt)
 		throws SQLException
 	{
-		if (!currentConnection.getDbSettings().supportsParameterMetaData())
+		if (!currentConnection.getDbSettings().supportsParameterMetaDataForCallableStatement())
 		{
 			return null;
 		}

@@ -1762,6 +1762,12 @@ public class TableListPanel
 			else if (meta.isSequenceType(type))
 			{
 				SequenceReader sequenceReader = meta.getSequenceReader();
+        String drop = "";
+        if (dropType != DropType.none)
+        {
+          drop = getDropForCurrentObject(dropType);
+        }
+
 				CharSequence seqSql = sequenceReader.getSequenceSource(selectedTable.getCatalog(), this.selectedTable.getSchema(), this.selectedTable.getTableName());
 				if (StringUtil.isEmptyString(seqSql))
 				{
@@ -1771,6 +1777,7 @@ public class TableListPanel
 				{
 					sql = seqSql.toString();
 				}
+        sql = drop + sql;
 			}
 			// isExtendedTableType() checks for regular tables and "extended tables"
 			else if (meta.isExtendedTableType(type))

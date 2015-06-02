@@ -113,20 +113,22 @@ public class DefaultViewReader
       addDrop = true;
     }
 
-    if (addDrop)
-    {
-      result.append(builder.generateDrop(viewTable, dropType));
-      result.append(lineEnding);
-      result.append(lineEnding);
-    }
 		// SQL Server and DB2 return the full CREATE VIEW statement
 		// DB2 even returns the CREATE OR REPLACE if the view was created that way.
 		// Teradata returns a complete REPLACE VIEW ... statement
 		// therefor the verb is compared with startsWith() rather than equals()
     if (verb.startsWith("CREATE") || verb.equals("REPLACE"))
 		{
+      if (addDrop)
+      {
+        result.append(builder.generateDrop(viewTable, dropType));
+        result.append(lineEnding);
+        result.append(lineEnding);
+      }
+
       // use the source as it is
 			result.append(source);
+
 			if (this.connection.getDbSettings().ddlNeedsCommit() && includeCommit)
 			{
 				result.append(lineEnding);

@@ -95,7 +95,7 @@ public class WbExportSqlServerTest
 			"         -delimiter=';'\n" +
 			"         -encoding='ISO-8859-1'\n" +
 			"         -header=true\n" +
-			"         -blobType=ansi\n" +
+			"         -blobType=dbms\n" +
 			"         -dateFormat='yyyy-MM-dd';" +
 			" select some_data, data_id from data order by data_id";
 
