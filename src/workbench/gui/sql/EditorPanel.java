@@ -367,7 +367,7 @@ public class EditorPanel
 			{
 				String fname = getCurrentFileName();
 				FileReloadType reloadType = GuiSettings.getReloadType();
-        
+
 				if (reloadType != FileReloadType.none)
 				{
 					LogMgr.logDebug("EditorPanel", "File " + fname + " has been modified externally. currentFileTime=" + currentFileTime + ", saved lastModifiedTime=" + fileModifiedTime);
@@ -844,7 +844,7 @@ public class EditorPanel
 		{
 			resetModified();
 			FileUtil.closeQuietely(reader);
-			fileModifiedTime = System.currentTimeMillis();
+			fileModifiedTime = currentFile.lastModified();
 		}
 
 		return result;
@@ -994,7 +994,7 @@ public class EditorPanel
 			}
 			this.currentFile = new WbFile(aFile);
 			this.fileEncoding = encoding;
-			this.fileModifiedTime = System.currentTimeMillis();
+			this.fileModifiedTime = currentFile.lastModified();
 			this.resetModified();
 		}
 		catch (IOException e)
