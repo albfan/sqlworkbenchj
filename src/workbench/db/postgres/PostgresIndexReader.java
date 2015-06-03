@@ -120,9 +120,9 @@ public class PostgresIndexReader
 				else
 				{
 					if (indexCount > 0) sql.append(',');
-					sql.append('(');
+					sql.append("('");
 					sql.append(schema);
-					sql.append(",'");
+					sql.append("','");
 					sql.append(idxName);
 					sql.append("')");
 					indexCount++;
