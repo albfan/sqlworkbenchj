@@ -261,7 +261,7 @@ public class SqlCommand
 	{
 		String s = this.currentConnection.getOutputMessages();
 		boolean hideLabel = WbEnableOraOutput.HIDE_HINT.equals(runner.getSessionAttribute(StatementRunner.SERVER_MSG_PROP));
-		if (!StringUtil.isBlank(s))
+		if (StringUtil.isNonBlank(s))
 		{
 			if (result.hasMessages())
 			{

@@ -94,12 +94,12 @@ public class WbEnableOraOutput extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult();
 		if (cmdLine.getBoolean(PARAM_QUIET))
 		{
-			this.runner.setSessionProperty(StatementRunner.SERVER_MSG_PROP, "hide");
+			runner.setSessionProperty(StatementRunner.SERVER_MSG_PROP, HIDE_HINT);
 			LogMgr.logDebug("WbEnableOraOutput.execute()", "Support for dbms_output enabled (limit=" + limit + ")");
 		}
 		else
 		{
-			this.runner.removeSessionProperty(StatementRunner.SERVER_MSG_PROP);
+			runner.removeSessionProperty(StatementRunner.SERVER_MSG_PROP);
 			result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
 		}
 		return result;

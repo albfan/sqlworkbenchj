@@ -262,9 +262,9 @@ public class OracleUtils
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.prefer_user_catalog_tables", true);
 	}
 
-	public static boolean showDbmsOutputFeedback()
+	public static boolean showSetServeroutputFeedback()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db.oracle.set_serveroutput.feedback", true);
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.set_serveroutput.feedback", false);
 	}
 
 	public static boolean is12_1_0_2(WbConnection conn)

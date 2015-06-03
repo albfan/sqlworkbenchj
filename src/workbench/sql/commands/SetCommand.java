@@ -36,10 +36,12 @@ import workbench.db.firebird.FirebirdStatementHook;
 import workbench.db.oracle.OracleUtils;
 
 import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
+import static workbench.sql.wbcommands.WbEnableOraOutput.HIDE_HINT;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
@@ -379,18 +381,28 @@ public class SetCommand
 		if ("off".equalsIgnoreCase(param))
 		{
 			connection.getMetadata().disableOutput();
-			if (OracleUtils.showDbmsOutputFeedback())
+			if (OracleUtils.showSetServeroutputFeedback())
 			{
 				result.addMessageByKey("MsgDbmsOutputDisabled");
 			}
+      else
+      {
+        runner.removeSessionProperty(StatementRunner.SERVER_MSG_PROP);
+      }
 		}
 		else if ("on".equalsIgnoreCase(param))
 		{
 			connection.getMetadata().enableOutput();
-			if (OracleUtils.showDbmsOutputFeedback())
+			if (OracleUtils.showSetServeroutputFeedback())
 			{
 				result.addMessageByKey("MsgDbmsOutputEnabled");
 			}
+      else
+      {
+        // if no feedback should be shown, behave like SQL*Plus and also don't show the
+        // "Server output" label when displaying the messages
+        runner.setSessionProperty(StatementRunner.SERVER_MSG_PROP, HIDE_HINT);
+      }
 		}
 		else
 		{
