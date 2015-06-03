@@ -89,7 +89,6 @@ public class TextCommenter
 			for (int line = startline; line <= endline; line ++)
 			{
 				String text = editor.getLineText(line);
-				if (StringUtil.isBlank(text)) continue;
 				int lineStart = editor.getLineStartOffset(line);
 				if (addComment)
 				{
@@ -131,7 +130,7 @@ public class TextCommenter
 		for (int line = startline; line <= endline; line ++)
 		{
 			String text = editor.getLineText(line);
-			if (StringUtil.isBlank(text)) continue;
+			if (StringUtil.isBlank(text)) return false;
 			if (!text.startsWith(commentChar)) return false;
 		}
 		return true;
