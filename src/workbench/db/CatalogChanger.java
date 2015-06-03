@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -53,8 +52,14 @@ public class CatalogChanger
 	 * Changes the current catalog using Connection.setCatalog()
 	 * and notifies the connection object about the change.
 	 *
+   * Not all JDBC drivers support <tt>Connection.setCatalog()</tt> so this can be turned off
+   * through {@link DbSettings#useSetCatalog()}. If that is disabled, a <tt>USE</tt> command
+   * is sent to the database.
+   *
 	 * @param newCatalog the name of the new catalog/database that should be selected
 	 * @see WbConnection#catalogChanged(String, String)
+   *
+   * @see DbSettings#useSetCatalog()
 	 */
 	public boolean setCurrentCatalog(WbConnection conn, String newCatalog)
 		throws SQLException
@@ -64,7 +69,7 @@ public class CatalogChanger
 
 		String old = conn.getMetadata().getCurrentCatalog();
 		boolean useSetCatalog = conn.getDbSettings().useSetCatalog();
-		boolean clearWarnings = Settings.getInstance().getBoolProperty("workbench.db." + conn.getMetadata().getDbId() + ".setcatalog.clearwarnings", true);
+		boolean clearWarnings = conn.getDbSettings().getBoolProperty("setcatalog.clearwarnings", true);
 
 		DbMetadata meta = conn.getMetadata();
 

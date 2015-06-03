@@ -369,6 +369,17 @@ public class StringUtil
 		return true;
 	}
 
+  public static String[] toUpperCase(String[] source)
+  {
+    if (source == null) return source;
+    String[] result = new String[source.length];
+    for (int i=0; i < source.length; i++)
+    {
+      result[i] = source[i] == null ? null : source[i].toUpperCase();
+    }
+    return result;
+  }
+  
 	public static boolean hasOpenQuotes(String data, char quoteChar, QuoteEscapeType escapeType)
 	{
 		if (isEmptyString(data)) return false;

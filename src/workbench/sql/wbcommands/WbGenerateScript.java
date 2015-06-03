@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import workbench.interfaces.ScriptGenerationMonitor;
@@ -96,7 +97,7 @@ public class WbGenerateScript
 		cmdLine.parse(args);
 
 		List<String> schemas = null;
-		List<String> types = null;
+		Collection<String> types = null;
 		String names = null;
 
 		if (!cmdLine.hasArguments())
@@ -123,7 +124,15 @@ public class WbGenerateScript
 		}
 
 		String excluded = cmdLine.getValue(ARG_EXCLUDE);
-		String[] typesArray = CollectionUtil.isEmpty(types) ? null : StringUtil.toArray(types, true, true);
+    if (CollectionUtil.isEmpty(types))
+    {
+      // SourceTableArgument defaults to "table like" types only
+      // but for WbGenerateScript we don't want to specify the needed types
+      // if e.g. generating the source for just a few objects
+      types = currentConnection.getMetadata().getObjectTypes();
+    }
+
+		String[] typesArray = StringUtil.toArray(types, true, true);
 
 		for (String schema : schemas)
 		{

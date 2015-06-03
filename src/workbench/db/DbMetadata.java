@@ -1415,6 +1415,13 @@ public class DbMetadata
 		return SqlUtil.removeObjectQuotes(StringUtil.replace(pattern, "*", "%"));
 	}
 
+  /**
+   * Remove any type from the array that is not a native object type as reported by the JDBC driver
+   *
+   * @param types  the types to cleanup
+   * @return an array containing only the native types of the JDBC driver
+   * @see #retrieveTableTypes()
+   */
 	private String[] cleanupTypes(String[] types)
 	{
 		if (types == null || types.length == 0) return types;
@@ -1518,7 +1525,9 @@ public class DbMetadata
 		ResultSet tableRs = null;
 		try
 		{
-			String[] typesToUse = types;
+			String[] typesToUse = StringUtil.toUpperCase(types);
+      // Some DBMS don't like it when invalid types are passed to getTables()
+      // so cleanupTypeList() will remove those that are handled by the extenders
 			if (getDbSettings().cleanupTypeList())
 			{
 				typesToUse = cleanupTypes(types);
@@ -2671,6 +2680,11 @@ public class DbMetadata
 		return (type.contains("INDEX"));
 	}
 
+  /**
+   * Retrieve the "native" object types supported by the JDBC driver.
+   *
+   * @see DatabaseMetaData#getTableTypes()
+   */
 	private synchronized Collection<String> retrieveTableTypes()
 	{
 		if (tableTypesFromDriver != null) return tableTypesFromDriver;
@@ -2712,8 +2726,16 @@ public class DbMetadata
 
 	/**
 	 * Return a list of object types available in the database.
+   *
+   * This includes the native types as reported by the JDBC driver and all
+   * types handled by a registered extender.
 	 *
 	 * e.g. TABLE, SYSTEM TABLE, ...
+   *
+   * @see #retrieveTableTypes()
+   * @see ObjectListExtender#supportedTypes()
+   * @see SynonymReader#getSynonymTypeName()
+   * @see SequenceReader#getSequenceTypeName() 
 	 */
 	public Collection<String> getObjectTypes()
 	{

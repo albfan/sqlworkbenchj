@@ -65,10 +65,10 @@ public class PostgresIndexReader
 	}
 
 	/**
-	 * Return the SQL for all indexes defined in indexDefinition.
+	 * Return the SQL for several indexes for one table.
 	 *
-	 * @param table the table for which to retrieve the indexes
-	 * @param indexList the indexes to retrieve
+	 * @param table      the table for which to retrieve the indexes
+	 * @param indexList  the indexes to retrieve
 	 *
 	 * @return The SQL statement for all indexes
 	 */
@@ -82,8 +82,8 @@ public class PostgresIndexReader
 		ResultSet rs = null;
 
 		// The full CREATE INDEX Statement is stored in pg_indexes for each
-		// index. So all we need to do, is retrieve the indexdef value
-		// from that table for all indexes defined for this table.
+		// index. So all we need to do, is retrieve the indexdef value from there for all passed indexes.
+    // For performance reasons I'm not calling getIndexSource(IndexDefinition) in a loop
 		int count = indexList.size();
 		String schema = "'" + table.getRawSchema() + "'";
 
@@ -107,7 +107,7 @@ public class PostgresIndexReader
 		{
 			for (IndexDefinition index : indexList)
 			{
-				String idxName = con.getMetadata().removeQuotes(index.getName());
+				String idxName = "'" + con.getMetadata().removeQuotes(index.getName()) + "'";
 
 				if (index.isPrimaryKeyIndex()) continue;
 
@@ -122,9 +122,9 @@ public class PostgresIndexReader
 					if (indexCount > 0) sql.append(',');
 					sql.append('(');
 					sql.append(schema);
-					sql.append(",'");
+					sql.append(',');
 					sql.append(idxName);
-					sql.append("')");
+					sql.append(')');
 					indexCount++;
 				}
 			}
@@ -292,6 +292,9 @@ public class PostgresIndexReader
 	{
 		if (indexDefinition == null) return null;
 		if (table == null) return null;
+
+    // This allows to use a statement configured through workbench.settings
+    // see getNativeIndexSource()
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.default.indexsource", false))
 		{
 			return super.getIndexSource(table, indexDefinition);
@@ -308,8 +311,7 @@ public class PostgresIndexReader
 		ResultSet rs = null;
 
 		// The full CREATE INDEX Statement is stored in pg_indexes for each
-		// index. So all we need to do, is retrieve the indexdef value
-		// from that table for all indexes defined for this table.
+		// index. So all we need to do, is retrieve the indexdef value from that view
 
 		String result = null;
 
