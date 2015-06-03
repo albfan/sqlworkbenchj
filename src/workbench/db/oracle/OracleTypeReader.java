@@ -39,6 +39,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.JdbcUtils;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
 
@@ -64,9 +65,12 @@ public class OracleTypeReader
 	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalogPattern, String schemaPattern, String namePattern, String[] requestedTypes)
 	{
-		// if no type has been requested, the Oracle driver does not include the object types
-		// if TYPE has specifically been requested, the objects are returned
-		if (requestedTypes != null || !DbMetadata.typeIncluded("TYPE", requestedTypes))
+
+    // for some strange reason the Oracle 12 driver does not return TYPES any more
+		// the previous drivers would include object types only if explicitely requested
+    boolean typesIncluded = !JdbcUtils.hasMiniumDriverVersion(con, "12.0");
+
+		if (typesIncluded && (requestedTypes != null || !DbMetadata.typeIncluded("TYPE", requestedTypes)))
 		{
 			updateTypes(result);
 			return false;
