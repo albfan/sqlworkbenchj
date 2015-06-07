@@ -212,10 +212,11 @@
         <link href="wb.css" rel="stylesheet" type="text/css"></link>
       </head>
       <body>
-
+        <!--
         <a target="new" href="http://www.mgm-tp.com/home/index.html" title="mgm technology partners GmbH">
           <span id="mgm"></span>
         </a>
+        -->
 
         <div id="top"></div>
 
