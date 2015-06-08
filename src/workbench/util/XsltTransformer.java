@@ -222,12 +222,7 @@ public class XsltTransformer
 	private String getSystemErr()
 	{
 		if (StringUtil.isBlank(sysErr)) return "";
-		int index = sysErr.indexOf("Compiler warnings:");
-		if (index > 0)
-		{
-			return sysErr.substring(0, index - 1).trim();
-		}
-		return sysErr.trim();
+		return sysErr.replace("Compiler warnings:", "").trim();
 	}
 
 	public String getAllOutputs(Exception e)
