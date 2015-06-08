@@ -21,6 +21,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import workbench.resource.ResourceMgr;
 
@@ -60,23 +61,42 @@ public class WbTableSource
 		StatementRunnerResult result = new StatementRunnerResult();
 		String args = getCommandLine(sql);
 
-		TableIdentifier object = new TableIdentifier(args, currentConnection);
+    SourceTableArgument tables = new SourceTableArgument(args, currentConnection);
 
-		TableDefinition tableDef = currentConnection.getMetadata().getTableDefinition(object);
-		if (tableDef == null || tableDef.getColumnCount() == 0)
-		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", object.getObjectExpression(currentConnection)));
-			result.setFailure();
-			return result;
-		}
+    List<TableIdentifier> tableList = tables.getTables();
+    List<String> missingTables = tables.getMissingTables();
+    if (tables.getMissingTables().size() > 0)
+    {
+      for (String tablename : missingTables)
+      {
+        result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", tablename));
+      }
 
-		TableSourceBuilder reader = TableSourceBuilderFactory.getBuilder(currentConnection);
-		String source = reader.getTableSource(tableDef.getTable(), tableDef.getColumns());
-		if (source != null)
-		{
-			result.addMessage(source);
-			result.setSuccess();
-		}
+      if (tableList.isEmpty())
+      {
+        result.setFailure();
+        return result;
+      }
+      else
+      {
+        result.setWarning(true);
+        result.addMessageNewLine();
+      }
+    }
+
+    for (TableIdentifier tbl : tableList)
+    {
+      TableDefinition tableDef = currentConnection.getMetadata().getTableDefinition(tbl);
+
+      TableSourceBuilder reader = TableSourceBuilderFactory.getBuilder(currentConnection);
+      String source = reader.getTableSource(tableDef.getTable(), tableDef.getColumns());
+      if (source != null)
+      {
+        result.addMessage(source);
+      }
+    }
+
+    result.setSuccess();
 		return result;
 	}
 
