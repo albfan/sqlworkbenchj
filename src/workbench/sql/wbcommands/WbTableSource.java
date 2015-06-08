@@ -61,11 +61,12 @@ public class WbTableSource
 		StatementRunnerResult result = new StatementRunnerResult();
 		String args = getCommandLine(sql);
 
-    SourceTableArgument tables = new SourceTableArgument(args, currentConnection);
+    SourceTableArgument tableArg = new SourceTableArgument(args, currentConnection);
 
-    List<TableIdentifier> tableList = tables.getTables();
-    List<String> missingTables = tables.getMissingTables();
-    if (tables.getMissingTables().size() > 0)
+    List<TableIdentifier> tableList = tableArg.getTables();
+    List<String> missingTables = tableArg.getMissingTables();
+
+    if (missingTables.size() > 0)
     {
       for (String tablename : missingTables)
       {

@@ -221,6 +221,11 @@ public class SourceTableArgument
 		return result;
 	}
 
+  /**
+   * If multiple tables have been specified, return those names that could not be found.
+   *
+   * @return  the list of names that could not be found. Never null.
+   */
 	public List<String> getMissingTables()
 	{
 		return missingTables;
