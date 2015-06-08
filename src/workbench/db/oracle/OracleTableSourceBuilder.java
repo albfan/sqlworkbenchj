@@ -208,13 +208,12 @@ public class OracleTableSourceBuilder
 					tbl.setTablespace(tablespace);
 				}
 
+        isPartitioned = StringUtil.equalStringIgnoreCase("YES", StringUtil.trim(rs.getString("partitioned")));
+
 				String iot = rs.getString("IOT_TYPE");
 
 				if (StringUtil.isNonBlank(iot))
 				{
-          String partitioned = StringUtil.trim(rs.getString("partitioned"));
-          isPartitioned = StringUtil.equalStringIgnoreCase("YES", partitioned);
-
 					String pkIndex = rs.getString("pk_index_name");
 					String overflow = rs.getString("IOT_OVERFLOW");
 					tbl.getSourceOptions().addConfigSetting("organization", "index");
