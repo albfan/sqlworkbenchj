@@ -1647,9 +1647,9 @@ WHERE id=42;</programlisting>
 							<entry>
                 <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
-                  By default <literal>WbGenerateDrop</literal> will also add the statements to re-create the table
-                  after a drop. By specifying <literal>-includeCreate=false</literal> only the statements to
-                  drop the foreign key and to drop the table(s) will be created.
+                  By default <literal>WbGenerateDrop</literal> will also add the statements to re-create the foreign keys of the table(s).
+                  By specifying <literal>-includeCreate=false</literal> only the statements to drop the foreign key and to drop the
+                  table(s) will be created.
 								</para>
 							</entry>
 						</row>
@@ -1660,7 +1660,7 @@ WHERE id=42;</programlisting>
 								<para>
                   When using <literal>-onlyForeignkeys=true</literal>, then only <literal>ALTER TABLE</literal>
                   statements will be generate that will drop the foreign keys of all selected tables. No <literal>DROP TABLE</literal>
-                  and no statements to re-created the foreign keys will be generated. Setting this paramter to <literal>true</literal>
+                  and no statements to re-create the foreign keys will be generated. Setting this paramter to <literal>true</literal>
                   implies <literal>-includeCreate=false</literal>.
 								</para>
 							</entry>
