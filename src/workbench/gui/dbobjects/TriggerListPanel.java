@@ -460,12 +460,16 @@ public class TriggerListPanel
   private String getDelimiterForDrop()
   {
     if (dbConnection == null) return ";";
+    
     ScriptParser parser = ScriptParser.createScriptParser(dbConnection);
     if (parser.supportsMixedDelimiter())
     {
       return ";";
     }
+
     DelimiterDefinition delim = dbConnection.getAlternateDelimiter();
+    if (delim == null) return ";";
+
     return "\n" + delim.getDelimiter() + "\n";
   }
 
@@ -512,7 +516,7 @@ public class TriggerListPanel
           String drop = trg.getDropStatement(dbConnection, dropType == DropType.cascaded);
           if (StringUtil.isNonBlank(drop))
           {
-            sql = drop + getDelimiterForDrop() + "\n" + sql;
+            sql = drop + getDelimiterForDrop() + "\n\n" + sql;
           }
         }
 
