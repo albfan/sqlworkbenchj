@@ -460,15 +460,15 @@ public class TriggerListPanel
   private String getDelimiterForDrop()
   {
     if (dbConnection == null) return ";";
-    
+
+    DelimiterDefinition delim = dbConnection.getAlternateDelimiter();
+    if (delim == null) return ";";
+
     ScriptParser parser = ScriptParser.createScriptParser(dbConnection);
     if (parser.supportsMixedDelimiter())
     {
       return ";";
     }
-
-    DelimiterDefinition delim = dbConnection.getAlternateDelimiter();
-    if (delim == null) return ";";
 
     return "\n" + delim.getDelimiter() + "\n";
   }
