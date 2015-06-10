@@ -2068,4 +2068,9 @@ public class DbSettings
   {
     return getBoolProperty("warning.retrieve.eachresult", false);
   }
+
+  public boolean supportsReplace(String type)
+  {
+    return getBoolProperty("ddl" + getKeyValue(type) + ".replace.supported", false);
+  }
 }

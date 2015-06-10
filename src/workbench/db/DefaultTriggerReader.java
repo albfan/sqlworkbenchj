@@ -78,30 +78,37 @@ public class DefaultTriggerReader
 		List<TriggerDefinition> result = new ArrayList<>(triggers.getRowCount());
 		for (int row = 0; row < triggers.getRowCount(); row ++)
 		{
-			String trgName = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
-			String trgType = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE);
-			String trgEvent = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT);
-			String tableName = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
-			String comment = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
-			String status = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_STATUS);
-			String level = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_LEVEL);
-
-			TriggerDefinition trg = new TriggerDefinition(catalog, schema, trgName);
-			trg.setTriggerType(trgType);
-			trg.setTriggerEvent(trgEvent);
-			trg.setComment(comment);
-			trg.setStatus(status);
-      trg.setLevel(TriggerLevel.parseLevel(level));
-
-			if (tableName != null)
-			{
-				TableIdentifier tbl = new TableIdentifier(tableName);
-				trg.setRelatedTable(tbl);
-			}
+      TriggerDefinition trg = (TriggerDefinition)triggers.getRow(row).getUserObject();
 			result.add(trg);
 		}
 		return result;
 	}
+
+  public TriggerDefinition createTriggerDefinition(DataStore triggers, int row, String catalog, String schema)
+  {
+    String trgName = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
+    String trgType = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE);
+    String trgEvent = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT);
+    String tableName = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
+    String comment = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
+    String status = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_STATUS);
+    String level = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_LEVEL);
+
+    TriggerDefinition trg = new TriggerDefinition(catalog, schema, trgName);
+    trg.setTriggerType(trgType);
+    trg.setTriggerEvent(trgEvent);
+    trg.setComment(comment);
+    trg.setStatus(status);
+    trg.setLevel(TriggerLevel.parseLevel(level));
+
+    if (tableName != null)
+    {
+      TableIdentifier tbl = new TableIdentifier(tableName);
+      trg.setRelatedTable(tbl);
+    }
+    return trg;
+  }
+
 	/**
 	 *	Return the list of defined triggers for the given table.
 	 */
@@ -201,6 +208,8 @@ public class DefaultTriggerReader
 					if (!rs.wasNull() && value != null) value = value.trim();
 					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_LEVEL, value);
 				}
+        TriggerDefinition trg = createTriggerDefinition(result, row, catalog, schema);
+        result.getRow(row).setUserObject(trg);
 			}
 			result.resetStatus();
 		}

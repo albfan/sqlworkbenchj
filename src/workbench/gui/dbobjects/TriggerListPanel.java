@@ -25,7 +25,6 @@ package workbench.gui.dbobjects;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -51,6 +50,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DbObject;
+import workbench.db.DropType;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
@@ -71,11 +71,16 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.storage.DataStore;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
 /**
@@ -441,35 +446,43 @@ public class TriggerListPanel
 
 		if (e.getSource() != this.triggerList.getSelectionModel()) return;
 		if (e.getValueIsAdjusting()) return;
-		retrieveCurrentTrigger();
+    WbThread retrieve = new WbThread("TriggerSourceRetrieve")
+    {
+      @Override
+      public void run()
+      {
+        retrieveCurrentTrigger();
+      }
+    };
+    retrieve.start();
 	}
+
+  private String getDelimiterForDrop()
+  {
+    if (dbConnection == null) return ";";
+    ScriptParser parser = ScriptParser.createScriptParser(dbConnection);
+    if (parser.supportsMixedDelimiter())
+    {
+      return ";";
+    }
+    DelimiterDefinition delim = dbConnection.getAlternateDelimiter();
+    return "\n" + delim.getDelimiter() + "\n";
+  }
 
 	protected void retrieveCurrentTrigger()
 	{
+		if (this.dbConnection == null || this.reader == null) return;
 		int row = this.triggerList.getSelectedRow();
+		if (!WbSwingUtilities.isConnectionIdle(this, this.dbConnection)) return;
 
 		if (row < 0) return;
 
-		final String trigger = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
-		final String table = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
+		final String triggerName = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
+		final String tableName = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
 		final String comment = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				retrieveTriggerSource(trigger, table, comment);
-			}
-		});
-	}
-
-	protected void retrieveTriggerSource(String triggerName, String tableName, String comment)
-	{
-		if (this.dbConnection == null || this.reader == null) return;
-		if (!WbSwingUtilities.isConnectionIdle(this, this.dbConnection)) return;
 
 		Container parent = this.getParent();
-		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    WbSwingUtilities.showWaitCursor(parent);
 
 		try
 		{
@@ -486,8 +499,33 @@ public class TriggerListPanel
 					if (tbl.getSchema() == null) tbl.setSchema(currentSchema);
 				}
 
+        DropType dropType = DbExplorerSettings.getDropTypeToGenerate(TriggerDefinition.TRIGGER_TYPE_NAME);
+
 				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName, tbl, comment, true);
-				source.setText(sql == null ? "" : sql, triggerName, TRG_TYPE_NAME);
+        Object obj = triggerList.getUserObject(row);
+
+        boolean isReplace = SqlUtil.isReplaceDDL(sql, dbConnection, dropType);
+
+        if (dropType != DropType.none && obj instanceof TriggerDefinition && sql != null && !isReplace)
+        {
+          TriggerDefinition trg = (TriggerDefinition)obj;
+          String drop = trg.getDropStatement(dbConnection, dropType == DropType.cascaded);
+          if (StringUtil.isNonBlank(drop))
+          {
+            sql = drop + getDelimiterForDrop() + "\n" + sql;
+          }
+        }
+
+        final String sourceSql = sql;
+        WbSwingUtilities.invoke(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            source.setText(sourceSql == null ? "" : sourceSql, triggerName, TRG_TYPE_NAME);
+          }
+        });
+
 			}
 			catch (Throwable ex)
 			{
@@ -497,7 +535,7 @@ public class TriggerListPanel
 		}
 		finally
 		{
-			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			WbSwingUtilities.showDefaultCursor(parent);
 			levelChanger.restoreIsolationLevel(dbConnection);
 			dbConnection.setBusy(false);
 		}

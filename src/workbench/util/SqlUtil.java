@@ -48,6 +48,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbSettings;
+import workbench.db.DropType;
 import workbench.db.QuoteHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -2206,5 +2207,21 @@ public class SqlUtil
       text = display.getWordAtCursor(wordChars);
     }
     return text;
+  }
+
+
+  public static boolean isReplaceDDL(String sql, WbConnection connection, DropType dropType)
+  {
+    if (sql == null) return false;
+    if (connection == null) return false;
+    String verb = connection.getParsingUtil().getSqlVerb(sql);
+    return isReplaceDDL(verb, dropType);
+  }
+
+  public static boolean isReplaceDDL(String verb, DropType dropType)
+  {
+    if (dropType == DropType.none) return false;
+    if (verb == null) return false;
+    return verb.equals("CREATE OR REPLACE") || verb.equalsIgnoreCase("REPLACE");
   }
 }

@@ -1604,6 +1604,12 @@ public class WbTable
 		return value.toString();
 	}
 
+  public Object getUserObject(int row)
+  {
+    if (dwModel == null) return null;
+    return dwModel.getDataStore().getRow(row).getUserObject();
+  }
+
 	public boolean getShowStatusColumn()
 	{
 		if (this.dwModel == null) return false;

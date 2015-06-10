@@ -34,6 +34,7 @@ import workbench.util.SqlUtil;
 public class TriggerDefinition
 	implements DbObject
 {
+  public static final String TRIGGER_TYPE_NAME = "TRIGGER";
 
 	public static final String PLACEHOLDER_TRIGGER_NAME = "%trigger_name%";
 	public static final String PLACEHOLDER_TRIGGER_SCHEMA = "%trigger_schema%";
@@ -225,7 +226,7 @@ public class TriggerDefinition
 	@Override
 	public String getObjectType()
 	{
-		return "TRIGGER";
+		return TRIGGER_TYPE_NAME;
 	}
 
 	@Override
