@@ -88,6 +88,8 @@ public class SchemaDiff
 	public static final String TAG_PK_INFO = "include-primary-key";
 	public static final String TAG_GRANT_INFO = "include-tablegrants";
 	public static final String TAG_CONSTRAINT_INFO = "include-constraints";
+	public static final String TAG_TRIGGER_INFO = "include-triggers";
+	public static final String TAG_TYPES = "included-types";
 	public static final String TAG_VIEW_INFO = "include-views";
 	public static final String TAG_PROC_INFO = "include-procs";
 	public static final String TAG_SEQUENCE_INFO = "include-sequences";
@@ -1340,11 +1342,25 @@ public class SchemaDiff
 		tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
 		tw.appendTag(info, indent2, TAG_PK_INFO, this.diffPrimaryKeys);
 		tw.appendTag(info, indent2, TAG_CONSTRAINT_INFO, Boolean.toString(this.diffConstraints), "compare-names", Boolean.toString(compareConstraintsByName));
+		tw.appendTag(info, indent2, TAG_TRIGGER_INFO, this.diffTriggers);
 		tw.appendTag(info, indent2, TAG_GRANT_INFO, this.diffGrants);
 		tw.appendTag(info, indent2, TAG_VIEW_INFO, this.diffViews);
+    if (additionalTypes != null)
+    {
+      StringBuilder indent3 = new StringBuilder(indent2);
+      indent3.append("  ");
+      tw.appendOpenTag(info, indent2, TAG_TYPES
+      );
+      info.append('\n');
+      for (String type : additionalTypes)
+      {
+        tw.appendTag(info, indent3, "type-name", type);
+      }
+      tw.appendCloseTag(info, indent2, TAG_TYPES);
+    }
+
 		tw.appendTag(info, indent2, TAG_VIEWS_AS_TABLE, this.treatViewAsTable);
 		tw.appendTag(info, indent2, TAG_FULL_SOURCE, useFullSource);
-
 
 		if (this.referenceSchema != null && this.targetSchema != null)
 		{
