@@ -2,8 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-06-07">
-    <entry dev-build="1" type="enh">For decimal values WbExport now supports the parameters -fixedDigits and -maxDigits.</entry>
-    <entry dev-build="6" type="enh">It's now possible to enable editing the generated SQL source code in the DbExplorer directly.</entry>
+    <entry dev-build="7" type="enh">For decimal values WbExport now supports the parameters -fixedDigits and -maxDigits.</entry>
+    <entry dev-build="7" type="enh">It's now possible to enable editing the generated SQL source code in the DbExplorer directly.</entry>
     <entry dev-build="6" type="enh">For Oracle, messages from dbms_output are now always shown if a procedure is started using EXECUTE regardless of the setting of "set serveroutput"</entry>
     <entry dev-build="5" type="enh">Added some basic support for SAP HANA.</entry>
     <entry dev-build="4" type="enh">For Excel imports, the option -stringDates=true retrieves Dates as formatted strings and converts them using the date/timestamp format specified in the WbImport command rathr then reading a converted value from the Excel file.</entry>
