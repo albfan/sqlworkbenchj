@@ -394,19 +394,27 @@ public class FileUtil
 	public static long getCharacterLength(File source, String encoding)
 		throws IOException
 	{
-		BufferedReader r = null;
 		long result = 0;
-		try
-		{
-			r = EncodingUtil.createBufferedReader(source, encoding, 512*1024);
+    if (EncodingUtil.isMultibyte(encoding))
+    {
+      BufferedReader r = null;
+      try
+      {
+        r = EncodingUtil.createBufferedReader(source, encoding, 512 * 1024);
 			// Not very efficient, but I can't think of a different solution
-			// to retrieve the number of characters
-			result = r.skip(Long.MAX_VALUE);
-		}
-		finally
-		{
-			closeQuietely(r);
-		}
+        // to retrieve the number of characters
+        result = r.skip(Long.MAX_VALUE);
+      }
+      finally
+      {
+        closeQuietely(r);
+      }
+    }
+    else
+    {
+      // if this is a single-byte encoding we can use the length of the file
+      result = source.length();
+    }
 
 		return result;
 	}

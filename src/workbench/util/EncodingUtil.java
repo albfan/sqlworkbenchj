@@ -174,6 +174,19 @@ public class EncodingUtil
 		return charsets;
 	}
 
+  public static boolean isMultibyte(String encoding)
+  {
+    try
+    {
+      Charset c = Charset.forName(encoding);
+      return c.newEncoder().maxBytesPerChar() > 1.0f;
+    }
+    catch (Throwable th)
+    {
+      return false;
+    }
+  }
+
 	private static String[] getSystemCharsets()
 	{
 		long start = System.currentTimeMillis();

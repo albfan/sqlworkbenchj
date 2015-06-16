@@ -358,14 +358,16 @@ public class BatchRunner
 	public void setShowProgress(boolean flag)
 	{
 		showProgress = flag;
-		if (showProgress)
+		if (!showProgress)
 		{
-			setRowMonitor(new GenericRowMonitor(new ConsoleStatusBar()));
+      setRowMonitor(null);
 		}
-		else
-		{
-			setRowMonitor(null);
-		}
+    else if (this.rowMonitor == null && !WbManager.getInstance().isGUIMode())
+    {
+      // make sure we have some row monitor available
+      // in case no row monitor is set later using setRowMonitor()
+      setRowMonitor(new GenericRowMonitor(new ConsoleStatusBar()));
+    }
 	}
 
 	@Override
