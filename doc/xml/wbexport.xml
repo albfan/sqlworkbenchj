@@ -853,13 +853,35 @@
 					</row>
 
 					<row>
-						<entry id="export-param-decimaldigits">-decimalDigits</entry>
+						<entry id="export-param-maxdigits">-maxDigits</entry>
 						<entry>
-              Defines a fixed number of decimal digits. If this parameter is not specified decimal values are exported
-              with as many digits as necessary. If this parameter is specified all decimal values are exported with
-              the defined number of digits. <literal>-decimalDigits=4</literal> will result in <literal>1.2</literal>
-              to be written as <literal>1.2000</literal>.
+              <para>
+              Defines a maximum number of decimal digits. If this parameter is not specified decimal values are exported
+              according to the <link linkend="options-decimal-digits">global formatting settings</link>
+              </para>
+              <para>
+                Specifying a value of 0 (zero) results in exporting as many digits as avialable.
+              </para>
 						</entry>
+					</row>
+
+					<row>
+						<entry id="export-param-fixed-digits">-fixedDigits</entry>
+						<entry>
+              <para>
+                Defines a fixed number of decimal digits. If this parameter is not specified decimal values are exported
+                according to the <literal>-maxDigits</literal> parameter (or the global default).
+              </para>
+              <para>
+                If this parameter is specified, all decimal values are exported with
+                the defined number of digits. If <literal>-fixedDigits=4</literal> is used, the value <literal>1.2</literal>
+                to be written as <literal>1.2000</literal>.
+              </para>
+              <para>
+                This parameter is ignored if <literal>-maxDigits</literal> is also provided.
+              </para>
+						</entry>
+
 					</row>
 
 					<row>

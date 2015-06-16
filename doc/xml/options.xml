@@ -1000,6 +1000,9 @@
 				displayed will contain the number as it was returned by the JDBC driver.
 				When exporting data or copying it to the clipboard, the real value will be used.
 			</para>
+      <para>
+        If this value is set to 0 (zero) values will be display with as many digits as available.
+      </para>
 		</blockquote></simplesect>
 
 	</section>

@@ -232,13 +232,48 @@ public class WbExportTest
 		assertEquals("1|3,14", content.trim());
 
 		result = exportCmd.execute(
-			"wbexport -sourceTable=products -delimiter='|' -header=false -type=text -decimal=',' -decimalDigits=4 -file='" + out.getFullPath() + "'");
+			"wbexport -sourceTable=products -delimiter='|' -header=false -type=text -decimal=',' -fixedDigits=4 -file='" + out.getFullPath() + "'");
 		msg = result.getMessageBuffer().toString();
 		assertTrue(msg, result.isSuccess());
 		assertTrue(out.exists());
 		content = FileUtil.readFile(out, null);
 		assertNotNull(content);
 		assertEquals("1|3,1400", content.trim());
+
+    String sql =
+      "create table readings (id integer, some_value decimal(34,14)); \n" +
+      " \n" +
+      "insert into readings  \n" +
+      "values \n" +
+      "(1, 1.12345678901234), \n" +
+      "(2, 12345678.1234567), \n" +
+      "(3, 12345678901234.1)";
+
+    TestUtil.executeScript(connection, sql);
+
+		result = exportCmd.execute("wbexport -sourceTable=readings -maxDigits=0 -delimiter='|' -header=false -type=text -decimal=',' -file='" + out.getFullPath() + "'");
+		msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+		assertTrue(out.exists());
+    List<String> lines = TestUtil.readLines(out, "ISO-8859-1");
+		assertNotNull(lines);
+    assertEquals(3, lines.size());
+    for (String line : lines)
+    {
+      String[] elements = line.split("|");
+      switch (elements[0])
+      {
+        case "1":
+          assertEquals("1,12345678901234", elements[1]);
+          break;
+        case "2":
+          assertEquals("12345678,1234567", elements[1]);
+          break;
+        case "3":
+          assertEquals("12345678901234,1", elements[1]);
+          break;
+      }
+    }
 	}
 
 	@Test

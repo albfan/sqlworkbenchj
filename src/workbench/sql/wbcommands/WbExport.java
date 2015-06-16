@@ -122,7 +122,8 @@ public class WbExport
 	public static final String ARG_CREATEFULL_HTML_PAGE = "createFullHTML";
 	public static final String ARG_DATEFORMAT = "dateFormat";
 	public static final String ARG_DECIMAL_SYMBOL = "decimal";
-	public static final String ARG_DECIMAL_DIGITS = "decimalDigits";
+	public static final String ARG_MAX_DIGITS = "maxDigits";
+	public static final String ARG_FIXED_DIGITS = "fixedDigits";
 	public static final String ARG_ESCAPETEXT = "escapeText";
 	public static final String ARG_ESCAPE_HTML = "escapeHTML";
 	public static final String ARG_INCLUDE_CREATETABLE = "createTable";
@@ -178,7 +179,8 @@ public class WbExport
 		cmdLine.addArgument(ARG_TIMESTAMP_FORMAT);
 		cmdLine.addArgument(ARG_TIMEFORMAT);
 		cmdLine.addArgument(ARG_DECIMAL_SYMBOL);
-		cmdLine.addArgument(ARG_DECIMAL_DIGITS);
+		cmdLine.addArgument(ARG_FIXED_DIGITS);
+		cmdLine.addArgument(ARG_MAX_DIGITS);
 		cmdLine.addArgument(ARG_CHARFUNC);
 		cmdLine.addArgument(ARG_CONCAT_OPERATOR);
 		cmdLine.addArgument(ARG_CONCAT_FUNCTION);
@@ -479,16 +481,19 @@ public class WbExport
 		if (format != null) exporter.setTimeFormat(format);
 
 		String decimal = cmdLine.getValue(ARG_DECIMAL_SYMBOL);
-		int digits = cmdLine.getIntValue(ARG_DECIMAL_DIGITS, -1);
+    int digits = cmdLine.getIntValue(ARG_MAX_DIGITS, Settings.getInstance().getMaxFractionDigits());
+    boolean fixedDigits = false;
+    if (cmdLine.isArgPresent(ARG_MAX_DIGITS))
+    {
+      fixedDigits = false;
+    }
+    else if (cmdLine.isArgPresent(ARG_FIXED_DIGITS))
+    {
+      digits = cmdLine.getIntValue(ARG_FIXED_DIGITS, -1);
+      fixedDigits = true;
+    }
 
-		if (digits > 0)
-		{
-			exporter.setFixedDigits(digits, decimal == null ? "." : decimal);
-		}
-		else if (decimal != null)
-		{
-			exporter.setDecimalSymbol(decimal);
-		}
+		exporter.setDecimalDigits(digits, decimal == null ? "." : decimal, fixedDigits);
 
 		exporter.setAppendInfoSheet(cmdLine.getBoolean(ARG_ADD_INFOSHEET, Settings.getInstance().getDefaultExportInfoSheet(type)));
 

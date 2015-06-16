@@ -1066,11 +1066,11 @@ public class DataExporter
 		}
 	}
 
-	public void setFixedDigits(int digits, String symbol)
+	public void setDecimalDigits(int digits, String symbol, boolean fixedLength)
 	{
 		if (StringUtil.isNonBlank(symbol))
 		{
-			this.numberFormatter = new WbNumberFormatter(digits, symbol.charAt(0), true);
+			this.numberFormatter = new WbNumberFormatter(digits, symbol.charAt(0), fixedLength);
 		}
 	}
 
