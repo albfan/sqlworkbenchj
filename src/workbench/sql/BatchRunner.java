@@ -794,6 +794,8 @@ public class BatchRunner
 		int length = parser.getScriptLength();
 		long totalStatements = parser.getStatementCount();
 
+    // totally arbitrary limits for using a "sensible" reporting interval
+    // the goal is not minimize the impact on performance and to keep the display sensible
 		if (totalStatements < 0)
 		{
 			if (length < 50000)
@@ -811,14 +813,18 @@ public class BatchRunner
 		}
 		else
 		{
-			if (totalStatements > 100)
-			{
-				interval = (int)(totalStatements / (totalStatements * 0.5));
-			}
-			else
-			{
-				interval = 1;
-			}
+      if (totalStatements < 100)
+      {
+        interval = 1;
+      }
+      else if (totalStatements < 1000)
+      {
+        interval = 10;
+      }
+      else
+      {
+        interval = 100;
+      }
 		}
 
 		start = System.currentTimeMillis();
