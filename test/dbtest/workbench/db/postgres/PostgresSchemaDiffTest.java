@@ -80,10 +80,7 @@ public class PostgresSchemaDiffTest
 		throws Exception
 	{
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
-		if (conn == null)
-		{
-			return;
-		}
+    assertNotNull(conn);
 
 		String schema =
 			"CREATE SCHEMA " + TARGET_SCHEMA + ";\n" +
@@ -137,10 +134,7 @@ public class PostgresSchemaDiffTest
 		throws Exception
 	{
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
-		if (conn == null)
-		{
-			return;
-		}
+    assertNotNull(conn);
 
 		String sql =
 			"CREATE SCHEMA " + TARGET_SCHEMA + ";\n" +
@@ -192,10 +186,7 @@ public class PostgresSchemaDiffTest
 		throws Exception
 	{
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
-		if (conn == null)
-		{
-			return;
-		}
+    assertNotNull(conn);
 
 		TestUtil.executeScript(conn,
 			"create schema " + TARGET_SCHEMA  + "\n;\n" +
@@ -247,6 +238,82 @@ public class PostgresSchemaDiffTest
 
 		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-procedure/proc-def/proc-full-name");
 		assertEquals("to_delete(integer)", value);
+
+		assertTrue("Could not delete output", outfile.delete());
+	}
+
+	@Test
+	public void testTriggerDiff()
+		throws Exception
+	{
+		WbConnection conn = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(conn);
+
+     String sql =
+			"create schema if not exists " + TARGET_SCHEMA  + ";\n" +
+			"create table " + REFERENCE_SCHEMA + ".some_table(id integer, last_updated timestamp);\n" +
+			"create table " + TARGET_SCHEMA + ".some_table(id integer, last_updated timestamp);\n" +
+      "CREATE OR REPLACE FUNCTION " + REFERENCE_SCHEMA + ".my_trigger_func()   \n" +
+      "RETURNS trigger AS   \n" +
+      "$body$  \n" +
+      "BEGIN  \n" +
+      "    new.last_updated = current_timestamp; \n" +
+      "    RETURN NEW; \n" +
+      "END \n" +
+      "$body$   \n" +
+      "LANGUAGE plpgsql;\n" +
+      "\n" +
+      "CREATE OR REPLACE FUNCTION " + TARGET_SCHEMA + ".my_trigger_func()   \n" +
+      "RETURNS trigger AS   \n" +
+      "$body$  \n" +
+      "BEGIN  \n" +
+      "    new.last_updated = current_timestamp - interval '1' hour; \n" +
+      "    RETURN NEW; \n" +
+      "END \n" +
+      "$body$   \n" +
+      "LANGUAGE plpgsql;\n" +
+      "CREATE TRIGGER person_trg BEFORE INSERT OR UPDATE ON " + REFERENCE_SCHEMA + ".some_table\n" +
+      "    FOR EACH ROW EXECUTE PROCEDURE " + REFERENCE_SCHEMA + ".my_trigger_func();\n" +
+          "\n"  +
+      "CREATE TRIGGER person_trg BEFORE INSERT ON " + TARGET_SCHEMA + ".some_table\n" +
+      "    FOR EACH ROW EXECUTE PROCEDURE " + TARGET_SCHEMA + ".my_trigger_func();\n" +
+          "\n"  +
+			"commit;\n";
+
+     System.out.println(sql);
+		TestUtil.executeScript(conn, sql);
+
+		SchemaDiff diff = new SchemaDiff(conn, conn);
+		diff.setIncludeViews(false);
+		diff.setIncludeIndex(false);
+		diff.setIncludeSequences(false);
+		diff.setIncludeProcedures(true);
+		diff.setIncludeTriggers(true);
+		diff.setSchemas(REFERENCE_SCHEMA, TARGET_SCHEMA);
+
+		TestUtil util = getTestUtil();
+
+		File outfile = new File(util.getBaseDir(), "pg_trg_diff.xml");
+		Writer out = new FileWriter(outfile);
+		diff.writeXml(out);
+		FileUtil.closeQuietely(out);
+
+		assertTrue(outfile.exists());
+		assertTrue(outfile.length() > 0);
+		Reader in = new FileReader(outfile);
+		String xml = FileUtil.readCharacters(in);
+		assertNotNull(xml);
+    
+//		System.out.println(xml);
+
+		String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='some_table']/update-trigger/trigger-def/trigger-name");
+		assertEquals("person_trg", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='some_table']/update-trigger/trigger-def/trigger-event");
+		assertEquals("INSERT, UPDATE", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='some_table']/update-trigger/trigger-def/trigger-type");
+		assertEquals("BEFORE", value);
 
 		assertTrue("Could not delete output", outfile.delete());
 	}
