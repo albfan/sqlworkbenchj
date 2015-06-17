@@ -167,6 +167,7 @@ public class EditorPanel
 	private DelimiterDefinition alternateDelimiter;
 	private String dbId;
 	private QuoteHandler quoteHandler = QuoteHandler.STANDARD_HANDLER;
+  private boolean allowFileLoading = true;
 
 	public static EditorPanel createSqlEditor()
 	{
@@ -242,6 +243,11 @@ public class EditorPanel
 		this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
+
+  public void setAllowFileLoading(boolean flag)
+  {
+    allowFileLoading = flag;
+  }
 
 	@Override
 	public void invalidate()
@@ -908,8 +914,11 @@ public class EditorPanel
 				{
 					encoding = FileUtil.detectFileEncoding(fc.getSelectedFile());
 				}
-				this.saveFile(fc.getSelectedFile(), encoding, Settings.getInstance().getExternalEditorLineEnding());
-	      this.fireFilenameChanged(this.getCurrentFileName());
+				saveFile(fc.getSelectedFile(), encoding, Settings.getInstance().getExternalEditorLineEnding());
+        if (allowFileLoading)
+        {
+          this.fireFilenameChanged(this.getCurrentFileName());
+        }
 				lastDir = fc.getCurrentDirectory().getAbsolutePath();
 				if (this.editorType == SQL_EDITOR)
 				{
@@ -992,10 +1001,14 @@ public class EditorPanel
 					writer.write(lineEnding);
 				}
 			}
-			this.currentFile = new WbFile(aFile);
-			this.fileEncoding = encoding;
-			this.fileModifiedTime = currentFile.lastModified();
-			this.resetModified();
+
+      if (allowFileLoading)
+      {
+        currentFile = new WbFile(aFile);
+        fileEncoding = encoding;
+        fileModifiedTime = currentFile.lastModified();
+        resetModified();
+      }
 		}
 		catch (IOException e)
 		{

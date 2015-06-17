@@ -188,6 +188,7 @@ public class DbObjectSourcePanel
 		this.sourceEditor = EditorPanel.createSqlEditor();
 		this.sourceEditor.showFindOnPopupMenu();
 		this.sourceEditor.setEditable(false);
+    this.sourceEditor.setAllowFileLoading(false);
 		this.sourceEditor.setAllowReformatOnReadonly(true);
 		if (allowReformat)
 		{

@@ -280,7 +280,7 @@ public class PostgresSchemaDiffTest
           "\n"  +
 			"commit;\n";
 
-     System.out.println(sql);
+//    System.out.println(sql);
 		TestUtil.executeScript(conn, sql);
 
 		SchemaDiff diff = new SchemaDiff(conn, conn);
@@ -303,7 +303,7 @@ public class PostgresSchemaDiffTest
 		Reader in = new FileReader(outfile);
 		String xml = FileUtil.readCharacters(in);
 		assertNotNull(xml);
-    
+
 //		System.out.println(xml);
 
 		String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='some_table']/update-trigger/trigger-def/trigger-name");
