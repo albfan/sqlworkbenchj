@@ -3,7 +3,7 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-06-07">
     <entry dev-build="7" type="enh">For decimal values WbExport now supports the parameters -fixedDigits and -maxDigits.</entry>
-    <entry dev-build="7" type="enh">It's now possible to enable editing the generated SQL source code in the DbExplorer directly.</entry>
+    <entry dev-build="7" type="enh">It's now possible to enable editing (and running) the generated SQL source code in the DbExplorer directly.</entry>
     <entry dev-build="6" type="enh">For Oracle, messages from dbms_output are now always shown if a procedure is started using EXECUTE regardless of the setting of "set serveroutput"</entry>
     <entry dev-build="5" type="enh">Added some basic support for SAP HANA.</entry>
     <entry dev-build="4" type="enh">For Excel imports, the option -stringDates=true retrieves Dates as formatted strings and converts them using the date/timestamp format specified in the WbImport command rathr then reading a converted value from the Excel file.</entry>
@@ -21,7 +21,9 @@
     <entry dev-build="1" type="enh">For Vertica tables and views from the schema "v_internal" are now show in the DbExplorer (contributed by Tatiana Saltykova)</entry>
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
-    <entry dev-build="2" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
+    <entry dev-build="7" type="fix">WbExport no longer uses the GUI defaults for decimal digits. The default is now to always export all digits, unless the new -maxDigits parameter is used</entry>
+    <entry dev-build="7" type="fix">For MySQL, when multiple tables with the same name in different databases had triggers defined, all triggers where visible for each table in the DbExplorer</entry>
+    <entry dev-build="7" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
     <entry dev-build="6" type="fix">WbConnect would prompt for a password for profiles with an empty password even if "Save password" was enabled</entry>
     <entry dev-build="6" type="fix">No parameter prompt was shown for INOUT parameters when running procedures using WbCall</entry>
     <entry dev-build="6" type="fix">Implemented a workaround for an Informix driver bug where index information for the wrong table was returned</entry>
