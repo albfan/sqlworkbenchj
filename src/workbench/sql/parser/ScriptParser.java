@@ -623,7 +623,7 @@ public class ScriptParser
    * <li>checking for escaped quotes</li>
    * <li>empty lines as delimiter</li>
    * </ul>
-   * 
+   *
    * @param dbConnection
    * @return a ScriptParser configured with the current settings.
    *

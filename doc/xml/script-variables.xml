@@ -17,10 +17,6 @@
         <literal>WbVarDelete myvar</literal> to remove a variable definition.
       </para>
 
-			<para>
-				Variables are case sensitive: <literal>WbVarDef foo=bar</literal> is different to <literal>WbVarDef FOO=bar</literal>.
-			</para>
-
       <para>
         Variable substitution is also done within <link linkend="macros">Macros</link>. If your macro definition
         contains a reference to a &wb-productname; variable, this will be treated the same way as in regular

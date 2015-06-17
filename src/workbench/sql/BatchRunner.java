@@ -790,42 +790,7 @@ public class BatchRunner
 		int executedCount = 0;
 		long start, end;
 
-		int interval;
-		int length = parser.getScriptLength();
-		long totalStatements = parser.getStatementCount();
-
-    // totally arbitrary limits for using a "sensible" reporting interval
-    // the goal is not minimize the impact on performance and to keep the display sensible
-		if (totalStatements < 0)
-		{
-			if (length < 50000)
-			{
-				interval = 1;
-			}
-			else if (length < 250000)
-			{
-				interval = 10;
-			}
-			else
-			{
-				interval = 100;
-			}
-		}
-		else
-		{
-      if (totalStatements < 100)
-      {
-        interval = 1;
-      }
-      else if (totalStatements < 1000)
-      {
-        interval = 10;
-      }
-      else
-      {
-        interval = 100;
-      }
-		}
+		int interval = 1;
 
 		start = System.currentTimeMillis();
 
@@ -945,7 +910,13 @@ public class BatchRunner
 
 				if (this.rowMonitor != null && (executedCount % interval == 0) && !printStatements)
 				{
-					this.rowMonitor.setCurrentRow(executedCount, totalStatements);
+					this.rowMonitor.setCurrentRow(executedCount, -1);
+          if (executedCount >= 100)
+          {
+            // for the first 100 statements show each one
+            // then update the progress only every 10th statement to improve performance for long scripts
+            interval = 10;
+          }
 				}
 
 				if (result != null && result.stopScript())

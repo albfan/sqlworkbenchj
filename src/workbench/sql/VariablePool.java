@@ -30,12 +30,12 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,6 +51,7 @@ import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.RowData;
+import workbench.util.CaseInsensitiveComparator;
 
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
@@ -73,7 +74,7 @@ public class VariablePool
 	implements PropertyChangeListener
 {
 	public static final String PROP_PREFIX = "wbp.";
-	private final Map<String, String> data = new LinkedHashMap<>();
+	private final Map<String, String> data = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 	private final Map<String, List<String>> lookups = new HashMap<>();
 
 	private final Object lock = new Object();
@@ -110,10 +111,10 @@ public class VariablePool
 			String pre = getPrefix();
 			String sfx = getSuffix();
 			String expr = StringUtil.quoteRegexMeta(pre) + "[\\?&][\\w\\.]+" + StringUtil.quoteRegexMeta(sfx);
-			this.promptPattern = Pattern.compile(expr);
+			promptPattern = Pattern.compile(expr, Pattern.CASE_INSENSITIVE);
 
 			expr = StringUtil.quoteRegexMeta(pre) + "[\\?&]{0,1}[\\w\\.]+" + StringUtil.quoteRegexMeta(sfx);
-			variablePattern = Pattern.compile(expr);
+			variablePattern = Pattern.compile(expr, Pattern.CASE_INSENSITIVE);
 		}
 	}
 
@@ -381,7 +382,7 @@ public class VariablePool
 	 */
 	private void replaceVarValue(StringBuilder original, String pattern, String replacement)
 	{
-		Pattern p = Pattern.compile(pattern);
+		Pattern p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(original);
 		while (m != null && m.find())
 		{
