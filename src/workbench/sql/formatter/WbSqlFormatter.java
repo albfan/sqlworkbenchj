@@ -560,7 +560,7 @@ public class WbSqlFormatter
 		boolean isLastOpenBracket = "(".equals(lastText);
 		boolean isLastCloseBracket = ")".equals(lastText);
 
-		if (lastChar == 'N' && currChar == '\'') return false; // handle N'foo' literals
+		if (lastText.equals("N") && currChar == '\'') return false; // handle N'foo' literals
 		if (last.isComment() && lastText.startsWith("--")) return false;
 		if (DATE_LITERALS.contains(lastText) && current.isLiteral()) return true;
 		if (lastText.endsWith("'") && currentText.equals("''")) return false;
