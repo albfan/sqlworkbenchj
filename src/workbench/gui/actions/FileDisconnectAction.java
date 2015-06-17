@@ -28,6 +28,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 
 /**
  * Disconnect the current window.

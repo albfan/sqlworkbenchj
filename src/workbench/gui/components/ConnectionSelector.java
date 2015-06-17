@@ -123,7 +123,11 @@ public class ConnectionSelector
 
 	public void connectTo(final ConnectionProfile aProfile, final boolean showDialogOnError, final boolean loadWorkspace)
 	{
-		if (this.isConnectInProgress()) return;
+		if (this.isConnectInProgress())
+    {
+      LogMgr.logWarning("ConnectionSelector.connectTo()", "connectTo() called while a connect is still in progress");
+      return;
+    }
 
 		Thread t = new WbThread("Connection thread")
 		{
@@ -192,7 +196,11 @@ public class ConnectionSelector
 
 	protected void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError, final boolean loadWorkspace)
 	{
-		if (isConnectInProgress()) return;
+		if (this.isConnectInProgress())
+    {
+      LogMgr.logWarning("ConnectionSelector.doConnect()", "doConnect() called while a connect is still in progress");
+      return;
+    }
 
 		List<File> iconFiles = ImageUtil.getIcons(aProfile.getIcon());
 		if (iconFiles.size() > 0)

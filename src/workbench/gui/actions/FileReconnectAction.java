@@ -25,6 +25,7 @@ import java.awt.event.ActionEvent;
 import workbench.db.ConnectionProfile;
 
 import workbench.gui.MainWindow;
+import workbench.log.LogMgr;
 
 /**
  * Re-Connect the current window.

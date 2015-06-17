@@ -1634,6 +1634,7 @@ public class MainWindow
 	{
 		if (!ProfileSelectionDialog.doPrompt(this, profile))
 		{
+      LogMgr.logWarning("MainWindow.connectTo()", "Can't directly connect to a profile that requires prompting for a password or username");
 			return;
 		}
 		getSelector().connectTo(profile, showDialog, loadWorkspace);
@@ -2120,7 +2121,11 @@ public class MainWindow
 
 	public void disconnect(final boolean background, final boolean closeWorkspace, final boolean saveWorkspace)
 	{
-		if (this.isConnectInProgress()) return;
+		if (this.isConnectInProgress())
+    {
+      LogMgr.logWarning("MainWindow.disconnect()", "Cannot disconnect because a disconnect is already in progress");
+      return;
+    }
 
 		setConnectIsInProgress();
 
