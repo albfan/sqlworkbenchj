@@ -571,7 +571,7 @@ WHERE trg.tgname not like 'RI_ConstraintTrigger%'
     <void property="objectNameField">
      <string>event_object_table</string>
     </void>
-    <void property="schemaField">
+    <void property="catalogField">
      <string>event_object_schema</string>
     </void>
     <void property="orderBy">

@@ -2231,7 +2231,7 @@ public class Settings
   {
     return getBoolProperty("workbench.db.oracle.dbmsoutput.automatic", true);
   }
-  
+
 	public boolean getPreviewDml()
 	{
 		return getBoolProperty("workbench.db.previewsql", true);
@@ -2391,13 +2391,6 @@ public class Settings
 		return del;
 
 	}
-	public void setDefaultTextDelimiter(String aDelimit)
-	{
-		if (aDelimit.equals("\t")) aDelimit = "\\t";
-
-		this.props.setProperty("workbench.export.text.fielddelimiter", aDelimit);
-	}
-
 	public String getLastImportDelimiter(boolean readable)
 	{
 		return getDelimiter("workbench.import.text.fielddelimiter", "\\t", readable);
@@ -2642,6 +2635,33 @@ public class Settings
 	public void setUsedFixedDigits(boolean flag)
 	{
 		setProperty(PROPERTY_FIXED_DIGITS, flag);
+	}
+
+	public void setDefaultExportTextDelimiter(String aDelimit)
+	{
+		if (aDelimit.equals("\t")) aDelimit = "\\t";
+
+		this.props.setProperty("workbench.export.text.fielddelimiter", aDelimit);
+	}
+
+  public void setLastExportDecimalSeparator(String decimal)
+  {
+    setProperty("workbench.export.text.decimal.last", decimal);
+  }
+
+  public String getLastExportDecimalSeparator()
+  {
+    return getProperty("workbench.export.text.decimal.last", getDecimalSymbol());
+  }
+
+	public int getLastExportMaxFractionDigits()
+	{
+		return getIntProperty("workbench.export.text.digits.last", getMaxFractionDigits());
+	}
+
+  public void setLastExportMaxFractionDigits(int digits)
+	{
+		setProperty("workbench.export.text.digits.last", digits);
 	}
 
 	public int getMaxFractionDigits()

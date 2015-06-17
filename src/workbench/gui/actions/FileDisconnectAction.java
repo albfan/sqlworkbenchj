@@ -51,6 +51,7 @@ public class FileDisconnectAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
+    LogMgr.logDebug("FileDisconnectAction.executeAction()", "Initiating disconnect.");
 		if (isCtrlPressed(e) && invokedByMouse(e))
 		{
 			boolean doIt = WbSwingUtilities.getYesNo(window, ResourceMgr.getString("MsgAbortWarning"));

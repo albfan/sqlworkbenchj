@@ -272,7 +272,7 @@ FROM pg_trigger trg
     <void property="objectNameField">
      <string>trigger_name</string>
     </void>
-    <void property="schemaField">
+    <void property="catalogField">
      <string>trigger_schema</string>
     </void>
    </object>

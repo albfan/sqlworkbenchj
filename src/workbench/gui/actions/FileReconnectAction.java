@@ -48,6 +48,7 @@ public class FileReconnectAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
+    LogMgr.logDebug("FileReconnectAction.executeAction()", "Initiating reconnect.");
 		ConnectionProfile profile = window.getCurrentProfile();
 		boolean reloadWorkspace = false;
 		window.disconnect(false, false, true);

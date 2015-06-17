@@ -481,7 +481,7 @@ public class WbExport
 		if (format != null) exporter.setTimeFormat(format);
 
 		String decimal = cmdLine.getValue(ARG_DECIMAL_SYMBOL);
-    int digits = cmdLine.getIntValue(ARG_MAX_DIGITS, Settings.getInstance().getMaxFractionDigits());
+    int digits = cmdLine.getIntValue(ARG_MAX_DIGITS, 0);
     boolean fixedDigits = false;
     if (cmdLine.isArgPresent(ARG_MAX_DIGITS))
     {

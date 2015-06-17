@@ -168,8 +168,8 @@ public class TextOptionsPanel
 		s.setProperty("workbench.export.text.quotealways", this.getQuoteAlways());
 		s.setProperty("workbench.export.text.escaperange", this.getEscapeRange().getId());
 		s.setProperty("workbench.export.text.lineending", (String)this.lineEnding.getSelectedItem());
-		s.setProperty("workbench.export.text.decimal", getDecimalSymbol());
-		s.setDefaultTextDelimiter(this.getTextDelimiter());
+		s.setLastExportDecimalSeparator(getDecimalSymbol());
+		s.setDefaultExportTextDelimiter(getTextDelimiter());
 		s.setQuoteChar(this.getTextQuoteChar());
 		s.setProperty("workbench.export.text.quote.escape", getQuoteEscaping().toString());
 		s.setProperty("workbench.export.text.formatfiles", controlFiles.getText());
@@ -189,7 +189,7 @@ public class TextOptionsPanel
 		this.setLineEnding(s.getProperty("workbench.export.text.lineending", "LF"));
 		this.setTextQuoteChar(s.getQuoteChar());
 		this.setTextDelimiter(s.getDefaultTextDelimiter(true));
-		setDecimalSymbol(s.getProperty("workbench.export.text.decimal", s.getDecimalSymbol()));
+		setDecimalSymbol(s.getLastExportDecimalSeparator());
 		String quote = s.getProperty("workbench.export.text.quote.escape", "none");
 		QuoteEscapeType escape = null;
 		try

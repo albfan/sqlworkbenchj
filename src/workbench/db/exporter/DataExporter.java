@@ -229,7 +229,7 @@ public class DataExporter
 		this.dbConn = con;
 		this.jobQueue = new LinkedList<>();
 		this.useSchemaInSql = Settings.getInstance().getIncludeOwnerInSqlExport();
-		this.numberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
+		this.numberFormatter = Settings.getInstance().createDefaultDecimalFormatter(0);
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
 		if (con != null)
 		{
