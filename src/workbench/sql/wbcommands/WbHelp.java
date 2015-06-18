@@ -25,10 +25,10 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.ResourceBundle;
 
-import workbench.WbManager;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.ResourcePath;
 import workbench.resource.Settings;
-
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -72,11 +72,6 @@ public class WbHelp
 		commands.remove("DISABLEOUT");
 		commands.remove("SHOW");
 
-		if (!WbManager.getInstance().isConsoleMode())
-		{
-			commands.remove("WbRun");
-		}
-
 		for (String verb : commands)
 		{
 			msg.append(verb);
@@ -88,8 +83,18 @@ public class WbHelp
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("WbHelp.execute()", "Error getting command short help from ResourceBundle", e);
-			}
+        String text = ResourceMgr.getString(ResourcePath.EXTENSION, verb, false);
+
+        if (text != null && !text.equals(verb))
+        {
+          msg.append(" - (extension) ");
+          msg.append(text);
+        }
+        else
+        {
+          LogMgr.logWarning("WbHelp.execute()", "Error getting command short help from ResourceBundle", e);
+        }
+      }
 			msg.append('\n');
 		}
 		result.addMessage(msg);

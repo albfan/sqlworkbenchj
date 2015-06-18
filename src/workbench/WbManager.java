@@ -41,16 +41,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.ToolWindow;
-import workbench.interfaces.ToolWindowManager;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
-
 import workbench.gui.DisconnectInfo;
 import workbench.gui.MainWindow;
 import workbench.gui.WbFocusManager;
@@ -63,13 +55,17 @@ import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.gui.tools.ObjectSourceSearchPanel;
-
+import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.ToolWindow;
+import workbench.interfaces.ToolWindowManager;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
 import workbench.sql.CommandRegistry;
 import workbench.sql.OutputPrinter;
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
-
 import workbench.util.DeadlockMonitor;
 import workbench.util.FileUtil;
 import workbench.util.MacOSHelper;
@@ -553,7 +549,7 @@ public final class WbManager
 	private void closeAllWindows()
 	{
     if (!this.isGUIMode()) return;
-    
+
 		LogMgr.logDebug("WbManager.closeAllWindows()", "Closing all open windows");
 		for (MainWindow w : mainWindows)
 		{
@@ -998,6 +994,7 @@ public final class WbManager
 		boolean pumper = cmdLine.isArgPresent(AppArguments.ARG_SHOW_PUMPER);
 		boolean explorer = cmdLine.isArgPresent(AppArguments.ARG_SHOW_DBEXP);
 		boolean searcher = cmdLine.isArgPresent(AppArguments.ARG_SHOW_SEARCHER);
+		String extension = cmdLine.getValue(AppArguments.ARG_EXTENSION);
 
 		if (pumper)
 		{
@@ -1010,6 +1007,21 @@ public final class WbManager
 		else if (searcher)
 		{
 			new ObjectSourceSearchPanel().showWindow();
+		}
+		else if (extension != null)
+		{
+			CommandRegistry registry = CommandRegistry.getInstance();
+			registry.scanForGuiExtensions();
+			ToolWindow gui = registry.getGuiExtension(extension);
+			if (gui != null)
+			{
+				gui.getWindow();
+			}
+			else
+			{
+				LogMgr.logWarning("WbManager.runGui", "could not find extension " + extension);
+				openNewWindow(true);
+			}
 		}
 		else
 		{
@@ -1116,6 +1128,7 @@ public final class WbManager
 		wb.cmdLine.removeArgument(AppArguments.ARG_WORKSPACE);
 		wb.cmdLine.removeArgument(AppArguments.ARG_CONSOLIDATE_LOG);
 		wb.cmdLine.removeArgument(AppArguments.ARG_PROFILE_STORAGE);
+		wb.cmdLine.removeArgument(AppArguments.ARG_EXTENSION);
 		wb.readParameters(args);
 		wb.runMode = RunMode.Console;
 		ConnectionMgr.getInstance().setReadTemplates(false);

@@ -106,6 +106,7 @@ public class AppArguments
 	public static final String ARG_CONSOLE_BUFFER_RESULTS = "bufferResults";
 	public static final String ARG_PROP = "prop";
 	public static final String ARG_LOG_ALL_STMT = "logAllStatements";
+	public static final String ARG_EXTENSION = "extension";
 
 	public AppArguments()
 	{
@@ -168,6 +169,7 @@ public class AppArguments
 		addArgument(ARG_PROP, ArgumentType.Repeatable);
 		addArgument(ARG_LOG_ALL_STMT, ArgumentType.BoolSwitch);
 		addArgument(ARG_CONN_DESCRIPTOR);
+		addArgument(ARG_EXTENSION);
 	}
 
 	@Override

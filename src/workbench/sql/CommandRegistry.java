@@ -23,11 +23,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
-
 import workbench.util.ClassFinder;
-
-
+import workbench.util.StringUtil;
 
 /**
  *
@@ -35,90 +34,145 @@ import workbench.util.ClassFinder;
  */
 public class CommandRegistry
 {
-	private static final String PACKAGE_NAME = "workbench.extensions";
-	private final List<Class> commands = new ArrayList<>();
-	private List<String> verbs;
+  private static final String PACKAGE_NAME = "workbench.extensions";
+  private final List<Class> commands = new ArrayList<>();
+  private final List<Class> guiExtensions = new ArrayList<>();
+  private List<String> verbs;
 
-	/**
-	 * Thread safe singleton-instance
-	 */
-	protected static class LazyInstanceHolder
-	{
-		protected static final CommandRegistry instance = new CommandRegistry();
-	}
+  /**
+   * Thread safe singleton-instance
+   */
+  protected static class LazyInstanceHolder
+  {
+    protected static final CommandRegistry instance = new CommandRegistry();
+  }
 
-	public static CommandRegistry getInstance()
-	{
-		return LazyInstanceHolder.instance;
-	}
+  public static CommandRegistry getInstance()
+  {
+    return LazyInstanceHolder.instance;
+  }
 
-	private CommandRegistry()
-	{
-	}
+  private CommandRegistry()
+  {
+  }
 
-	public synchronized List<String> getVerbs()
-	{
-		if (verbs == null)
-		{
-			initVerbs();
-		}
-		return Collections.unmodifiableList(verbs);
-	}
+  public synchronized List<String> getVerbs()
+  {
+    if (verbs == null)
+    {
+      initVerbs();
+    }
+    return Collections.unmodifiableList(verbs);
+  }
 
-	private void initVerbs()
-	{
-		List<SqlCommand> cmdList = getCommands();
-		verbs = new ArrayList<>(cmdList.size());
-		for (SqlCommand cmd : cmdList)
-		{
-			verbs.add(cmd.getVerb());
-			if (cmd.getAlternateVerb() != null)
-			{
-				verbs.add(cmd.getAlternateVerb());
-			}
-		}
-	}
+  private void initVerbs()
+  {
+    List<SqlCommand> cmdList = getCommands();
+    verbs = new ArrayList<>(cmdList.size());
+    for (SqlCommand cmd : cmdList)
+    {
+      verbs.add(cmd.getVerb());
+      if (cmd.getAlternateVerb() != null)
+      {
+        verbs.add(cmd.getAlternateVerb());
+      }
+    }
+  }
 
-	public List<SqlCommand> getCommands()
-	{
-		List<SqlCommand> result = new ArrayList<>(commands.size());
-		for (Class clz : commands)
-		{
-			try
-			{
-				SqlCommand cmd = (SqlCommand)clz.newInstance();
-				result.add(cmd);
-			}
-			catch (Throwable th)
-			{
-				LogMgr.logError("CommandRegistry.getCommands()", "Could not create instance of: " + clz.getCanonicalName(), th);
-			}
-		}
-		return result;
-	}
+  public List<SqlCommand> getCommands()
+  {
+    List<SqlCommand> result = new ArrayList<>(commands.size());
+    for (Class clz : commands)
+    {
+      try
+      {
+        SqlCommand cmd = (SqlCommand)clz.newInstance();
+        result.add(cmd);
+      }
+      catch (Throwable th)
+      {
+        LogMgr.logError("CommandRegistry.getCommands()", "Could not create instance of: " + clz.getCanonicalName(), th);
+      }
+    }
+    return result;
+  }
 
-	public synchronized void scanForExtensions()
-	{
-		long start = System.currentTimeMillis();
-		commands.clear();
-		try
-		{
-			List<Class> classes = ClassFinder.getClasses(PACKAGE_NAME);
-			for (Class cls : classes)
-			{
-				LogMgr.logDebug("CommandRegistry.scanForExtensions()", "Found class " + cls.getName());
-				if (SqlCommand.class.isAssignableFrom(cls))
-				{
-					commands.add(cls);
-				}
-			}
-			long duration = System.currentTimeMillis() - start;
-			LogMgr.logDebug("CommandRegistry.scanForExtensions()", "Found " + commands.size() + " commands in " + duration + "ms");
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logWarning("CommandRegistry.scanForExtensions", "Error when scanning for exentensions", ex);
-		}
-	}
+  public synchronized void scanForExtensions()
+  {
+    long start = System.currentTimeMillis();
+    commands.clear();
+    try
+    {
+      List<Class> classes = ClassFinder.getClasses(PACKAGE_NAME);
+      for (Class cls : classes)
+      {
+        LogMgr.logDebug("CommandRegistry.scanForExtensions()", "Found class " + cls.getName());
+        if (SqlCommand.class.isAssignableFrom(cls))
+        {
+          commands.add(cls);
+        }
+      }
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("CommandRegistry.scanForExtensions()", "Found " + commands.size() + " commands in " + duration + "ms");
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("CommandRegistry.scanForExtensions", "Error when scanning for exentensions", ex);
+    }
+  }
+
+  public ToolWindow getGuiExtension(String name)
+  {
+    if (StringUtil.isEmptyString(name))
+    {
+      return null;
+    }
+    else if (!name.startsWith(PACKAGE_NAME))
+    {
+      name = PACKAGE_NAME + "." + name;
+    }
+
+    ToolWindow gui = null;
+    for (Class clz : guiExtensions)
+    {
+      try
+      {
+        if (name.equals(clz.getCanonicalName()))
+        {
+          gui = (ToolWindow)clz.newInstance();
+          break;
+        }
+      }
+      catch (Throwable th)
+      {
+        LogMgr.logError("CommandRegistry.getGuiExtension()", "Could not create instance of: " + clz.getCanonicalName(), th);
+      }
+    }
+    return gui;
+  }
+
+  public synchronized void scanForGuiExtensions()
+  {
+    long start = System.currentTimeMillis();
+    guiExtensions.clear();
+    try
+    {
+      List<Class> classes = ClassFinder.getClasses(PACKAGE_NAME);
+      for (Class cls : classes)
+      {
+        LogMgr.logDebug("CommandRegistry.scanForGuiExtensions()", "Found class " + cls.getName());
+        if (ToolWindow.class.isAssignableFrom(cls))
+        {
+          guiExtensions.add(cls);
+        }
+      }
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("CommandRegistry.scanForGuiExtensions()", "Found " + guiExtensions.size() + " commands in " + duration + "ms");
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("CommandRegistry.scanForGuiExtensions", "Error when scanning for exentensions", ex);
+    }
+  }
 
 }
