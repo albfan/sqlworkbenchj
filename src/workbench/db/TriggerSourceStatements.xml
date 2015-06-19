@@ -197,7 +197,7 @@
    <object id="trg_src_mssql9" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
-  select /* SQLWorkbench */ definition
+  select definition
   from (
     select tr.name, sm.definition
     from sys.sql_modules sm with (nolock)
@@ -389,27 +389,33 @@ and  sysobjects.type = &apos;TR&apos;</string>
    <string>Firebird</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>select 'CREATE TRIGGER '||trim(rdb$trigger_name)||'\n  FOR '||rdb$relation_name||'\n  '||
-          trim(case
-            when mod(rdb$trigger_type, 2) = 0 then 'AFTER'
-          else 'BEFORE'
-          END) ||' '||
-          trim(case bin_and(rdb$trigger_type + 1, 254)
-             when  2 then 'INSERT'
-             when  4 THEN 'UPDATE'
-             when  6 then 'DELETE'
-             when  18 then 'INSERT OR UPDATE'
-             when  26 then 'INSERT OR DELETE'
-             when  12 then 'UPDATE OR INSERT'
-             when  28 then 'UPDATE OR DELETE'
-             when  14 then 'DELETE OR INSERT'
-             when  22 then 'DELETE OR UPDATE'
-             when  114 then 'INSERT OR UPDATE OR DELETE'
-             when  60 then 'UPDATE OR DELETE OR INSERT'
-             when  78 then 'DELETE OR INSERT OR UPDATE'
-             else ''
-          end)||' \n'||rdb$trigger_source
-          FROM rdb$triggers</string>
+     <string>
+select 'CREATE TRIGGER '||trim(rdb$trigger_name)||case when rdb$relation_name is not null then '\n  FOR '||rdb$relation_name||'\n  ' else '\n' end||
+        case
+          when rdb$relation_name is null then trim(case when mod(rdb$trigger_type, 2) = 1 then 'AFTER' else 'BEFORE' END)
+          else trim(case when mod(rdb$trigger_type, 2) = 0 then 'AFTER' else 'BEFORE' END)
+        end||' '||
+        trim(case when rdb$relation_name is null then 'DDL'
+             else
+               case bin_and(rdb$trigger_type + 1, 254)
+               when  2 then 'INSERT'
+               when  4 THEN 'UPDATE'
+               when  6 then 'DELETE'
+               when  18 then 'INSERT OR UPDATE'
+               when  26 then 'INSERT OR DELETE'
+               when  12 then 'UPDATE OR INSERT'
+               when  28 then 'UPDATE OR DELETE'
+               when  14 then 'DELETE OR INSERT'
+               when  22 then 'DELETE OR UPDATE'
+               when  114 then 'INSERT OR UPDATE OR DELETE'
+               when  60 then 'UPDATE OR DELETE OR INSERT'
+               when  78 then 'DELETE OR INSERT OR UPDATE'
+               else ''
+             end
+        end)||' \n'||rdb$trigger_source
+FROM rdb$triggers
+WHERE rdb$system_flag = 0
+     </string>
     </void>
     <void property="objectNameField">
      <string>rdb$trigger_name</string>

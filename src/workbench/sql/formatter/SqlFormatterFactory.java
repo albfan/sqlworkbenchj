@@ -19,14 +19,10 @@
  */
 package workbench.sql.formatter;
 
-import java.io.File;
-
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
-
-import workbench.util.StringUtil;
 
 /**
  *
@@ -42,43 +38,33 @@ public class SqlFormatterFactory
 
   public static SqlFormatter createFormatter(String dbId)
   {
-    ExternalFormatter externalFormatter = getExternalFormatter(dbId);
-    if (externalFormatter != null) return externalFormatter;
-
+    SqlFormatter ext = getExternalFormatter(dbId);
+    if (ext == null)
+    {
+      ext = getExternalFormatter(null);
+    }
+    if (ext != null)
+    {
+      return ext;
+    }
     return new WbSqlFormatter(Settings.getInstance().getFormatterMaxSubselectLength(), dbId);
   }
 
-  public static ExternalFormatter getExternalFormatter(String dbId)
+  private static SqlFormatter getExternalFormatter(String dbId)
   {
-    if (StringUtil.isEmptyString(dbId))
+    ExternalFormatter formatter = ExternalFormatter.getDefinition(dbId);
+    if (formatter != null && formatter.isEnabled())
     {
-      dbId = "default";
+      if (formatter.isUsable())
+      {
+        LogMgr.logInfo("SqlFormatterFactory.createFormatter", "Using external formatter: " + formatter.toString() + " for DBID: " + dbId);
+        return formatter;
+      }
+      else if (!formatter.programExists())
+      {
+        LogMgr.logInfo("SqlFormatterFactory.createFormatter", "External formatter executetable: " + formatter.getProgram() + " not found! Formatter for " + dbId + " not used.");
+      }
     }
-
-    String prg = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".program", null);
-    boolean enabled = Settings.getInstance().getBoolProperty("workbench.formatter." + dbId + ".enabled", true);
-    if (prg == null || !enabled) return null;
-
-    File prgFile = new File(prg);
-    if (!prgFile.exists())
-    {
-      LogMgr.logWarning("SqlFormatterFactory.getExternalFormatter", "Formatter program: " + prgFile.getAbsolutePath() + " not found!", null);
-      return null;
-    }
-
-    LogMgr.logInfo("SqlFormatterFactory.getExternalFormatter", "Using external formatter: " + prgFile.getAbsolutePath() + " for DBID: " + dbId);
-
-    String cmdLine = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".cmdline", null);
-    String inputEncoding = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".inputencoding", null);
-    String outputEncoding = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".outputEncoding", null);
-    boolean supportsScripts = Settings.getInstance().getBoolProperty("workbench.formatter." + dbId + ".supports.scripts", false);
-
-    ExternalFormatter f = new ExternalFormatter();
-    f.setCommandLine(cmdLine);
-    f.setProgram(prg);
-    f.setInputEncoding(inputEncoding);
-    f.setOutputEncoding(outputEncoding);
-    f.setSupportsMultipleStatements(supportsScripts);
-    return f;
+    return null;
   }
 }

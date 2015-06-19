@@ -23,9 +23,11 @@ import java.io.File;
 import java.io.IOException;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 
 /**
@@ -35,6 +37,7 @@ import workbench.util.StringUtil;
 public class ExternalFormatter
   implements SqlFormatter
 {
+  public static final String DEFAULT_DBID = "default";
   public static final String INPUT_FILE = "${wb_input}";
   public static final String OUTPUT_FILE = "${wb_output}";
 
@@ -43,14 +46,47 @@ public class ExternalFormatter
   private String inputEncoding;
   private String outputEncoding;
   private boolean supportsMultipleStatements;
+  private boolean enabled = true;
 
   public ExternalFormatter()
   {
   }
 
+  public void setEnabled(boolean flag)
+  {
+    enabled = flag;
+  }
+
+  public boolean isUsable()
+  {
+    return (enabled && programExists());
+  }
+
+  public boolean programExists()
+  {
+    if (StringUtil.isBlank(program)) return false;
+    WbFile f = new WbFile(program);
+    return f.exists();
+  }
+
+  public boolean isEnabled()
+  {
+    return enabled;
+  }
+
+  public String getProgram()
+  {
+    return program;
+  }
+
   public void setProgram(String executable)
   {
     program = executable;
+  }
+
+  public String getCommandLine()
+  {
+    return cmdLine;
   }
 
   public void setCommandLine(String command)
@@ -103,7 +139,7 @@ public class ExternalFormatter
     boolean useSystemIn = true;
     String args = "";
 
-    if (cmdLine.contains(INPUT_FILE))
+    if (cmdLine != null && cmdLine.contains(INPUT_FILE))
     {
       args = cmdLine.replace(INPUT_FILE, "\"" + infile.getAbsolutePath() + "\"");
       useSystemIn = false;
@@ -134,7 +170,10 @@ public class ExternalFormatter
     {
       FileUtil.writeString(infile, sql, inputEncoding, false);
 
+      WbFile exe = new WbFile(program);
+
       ProcessBuilder pb = new ProcessBuilder(program, args);
+      pb.directory(exe.getAbsoluteFile().getParentFile());
 
       if (useSystemIn)
       {
@@ -170,4 +209,48 @@ public class ExternalFormatter
     return sql;
   }
 
+  @Override
+  public String toString()
+  {
+    if (StringUtil.isEmptyString(program)) return "<empty>";
+    WbFile f = new WbFile(program);
+    return f.getAbsolutePath();
+  }
+
+  public static void saveDefinition(ExternalFormatter formatter, String dbId)
+  {
+    if (formatter == null) return;
+
+    Settings.getInstance().setProperty("workbench.formatter." + dbId + ".program", formatter.program == null ? "" : formatter.program);
+    Settings.getInstance().setProperty("workbench.formatter." + dbId + ".enabled", formatter.isEnabled());
+    Settings.getInstance().setProperty("workbench.formatter." + dbId + ".cmdline", formatter.cmdLine);
+    Settings.getInstance().setProperty("workbench.formatter." + dbId + ".inputencoding", formatter.inputEncoding);
+    Settings.getInstance().setProperty("workbench.formatter." + dbId + ".outputencoding", formatter.outputEncoding);
+    Settings.getInstance().setProperty("workbench.formatter." + dbId + ".supports.scripts", formatter.supportsMultipleStatements);
+  }
+
+  public static ExternalFormatter getDefinition(String dbId)
+  {
+    if (StringUtil.isEmptyString(dbId))
+    {
+      dbId = DEFAULT_DBID;
+    }
+
+    String prg = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".program", null);
+    boolean enabled = Settings.getInstance().getBoolProperty("workbench.formatter." + dbId + ".enabled", false);
+
+    String cmdLine = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".cmdline", null);
+    String inputEncoding = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".inputencoding", null);
+    String outputEncoding = Settings.getInstance().getProperty("workbench.formatter." + dbId + ".outputencoding", null);
+    boolean supportsScripts = Settings.getInstance().getBoolProperty("workbench.formatter." + dbId + ".supports.scripts", false);
+
+    ExternalFormatter f = new ExternalFormatter();
+    f.setCommandLine(cmdLine);
+    f.setProgram(prg);
+    f.setInputEncoding(inputEncoding);
+    f.setOutputEncoding(outputEncoding);
+    f.setSupportsMultipleStatements(supportsScripts);
+    f.setEnabled(enabled);
+    return f;
+  }
 }

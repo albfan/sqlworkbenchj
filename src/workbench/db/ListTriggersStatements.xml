@@ -651,41 +651,64 @@ WHERE trg.tgname not like 'RI_ConstraintTrigger%'
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
-       SELECT rdb$trigger_name AS TRIGGER_NAME,
-          case
-            when rdb$trigger_type = 0 then 'UNKNOWN'
-            when mod(rdb$trigger_type, 2) = 0 then 'AFTER'
-          else 'BEFORE'
-          END AS trigger_type,
-          case bin_and(rdb$trigger_type + 1, 254)
-             when  2 then 'INSERT'
-             when  4 THEN 'UPDATE'
-             when  6 then 'DELETE'
-             when  18 then 'INSERT OR UPDATE'
-             when  26 then 'INSERT OR DELETE'
-             when  12 then 'UPDATE OR INSERT'
-             when  28 then 'UPDATE OR DELETE'
-             when  14 then 'DELETE OR INSERT'
-             when  22 then 'DELETE OR UPDATE'
-             when  114 then 'INSERT OR UPDATE OR DELETE'
-             when  60 then 'UPDATE OR DELETE OR INSERT'
-             when  78 then 'DELETE OR INSERT OR UPDATE'
-          end as trigger_event,
-          trim(rdb$relation_name) as trigger_table,
-          null as remarks,
-          case rdb$trigger_inactive
-            when 1 then 'DISABLED'
-            else 'ENABLED'
-          end as status
-    FROM rdb$triggers
-    WHERE rdb$system_flag = 0
-</string>
+SELECT *
+FROM (
+  SELECT rdb$trigger_name AS TRIGGER_NAME,
+         case
+           when rdb$trigger_type = 0 then 'UNKNOWN'
+           when mod(rdb$trigger_type, 2) = 0 then 'AFTER'
+         else 'BEFORE'
+         END AS trigger_type,
+         case bin_and(rdb$trigger_type + 1, 254)
+            when  2 then 'INSERT'
+            when  4 THEN 'UPDATE'
+            when  6 then 'DELETE'
+            when  18 then 'INSERT OR UPDATE'
+            when  26 then 'INSERT OR DELETE'
+            when  12 then 'UPDATE OR INSERT'
+            when  28 then 'UPDATE OR DELETE'
+            when  14 then 'DELETE OR INSERT'
+            when  22 then 'DELETE OR UPDATE'
+            when  114 then 'INSERT OR UPDATE OR DELETE'
+            when  60 then 'UPDATE OR DELETE OR INSERT'
+            when  78 then 'DELETE OR INSERT OR UPDATE'
+         end as trigger_event,
+         trim(rdb$relation_name) as trigger_table,
+         null as remarks,
+         case rdb$trigger_inactive
+           when 1 then 'DISABLED'
+           else 'ENABLED'
+         end as status
+  FROM rdb$triggers
+  WHERE rdb$system_flag = 0
+    AND rdb$relation_name is not null
+
+  UNION ALL
+
+  SELECT rdb$trigger_name AS TRIGGER_NAME,
+         case
+           when rdb$trigger_type = 0 then 'UNKNOWN'
+           when mod(rdb$trigger_type, 2) = 1 then 'AFTER'
+         else 'BEFORE'
+         END AS trigger_type,
+         'DDL' as trigger_event,
+         null as trigger_table,
+         null as remarks,
+         case rdb$trigger_inactive
+           when 1 then 'DISABLED'
+           else 'ENABLED'
+         end as status
+  FROM rdb$triggers
+  WHERE rdb$system_flag = 0
+   AND rdb$relation_name IS NULL
+)
+      </string>
     </void>
     <void property="objectNameField">
-     <string>rdb$relation_name</string>
+     <string>trigger_table</string>
     </void>
-    <void property="schemaField">
-     <string>RDB$OWNER_NAME</string>
+    <void property="orderBy">
+     <string>ORDER BY trigger_name</string>
     </void>
    </object>
   </void>

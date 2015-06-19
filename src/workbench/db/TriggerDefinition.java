@@ -38,6 +38,7 @@ public class TriggerDefinition
 
 	public static final String PLACEHOLDER_TRIGGER_NAME = "%trigger_name%";
 	public static final String PLACEHOLDER_TRIGGER_SCHEMA = "%trigger_schema%";
+	public static final String PLACEHOLDER_TRIGGER_CATALOG = "%trigger_catalog%";
 	public static final String PLACEHOLDER_TRIGGER_TABLE = "%trigger_table%";
 
 	private String schema;
@@ -147,7 +148,16 @@ public class TriggerDefinition
 
 		// specialized statements have different placeholders
 		ddl = ddl.replace(PLACEHOLDER_TRIGGER_NAME, triggerName);
-		ddl = ddl.replace(PLACEHOLDER_TRIGGER_SCHEMA, schema);
+    if (schema != null)
+    {
+      ddl = ddl.replace(PLACEHOLDER_TRIGGER_SCHEMA, schema);
+    }
+    
+    if (catalog != null)
+    {
+      ddl = ddl.replace(PLACEHOLDER_TRIGGER_CATALOG, catalog);
+    }
+
 		if (table != null)
 		{
 			ddl = ddl.replace(PLACEHOLDER_TRIGGER_TABLE, table.getTableExpression(con));
