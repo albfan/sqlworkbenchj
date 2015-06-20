@@ -30,7 +30,12 @@ public class PostgresDelimiterTester
 	implements DelimiterTester
 {
 	private SQLToken firstToken;
+  private SQLToken lastToken;
+
 	private DelimiterDefinition defaultDelimiter = DelimiterDefinition.STANDARD_DELIMITER;
+  private DelimiterDefinition copyDelimiter = new DelimiterDefinition("\\.");
+  private boolean isCopy = false;
+  private boolean isCopyFromStdin = false;
 
 	public PostgresDelimiterTester()
 	{
@@ -45,7 +50,7 @@ public class PostgresDelimiterTester
 	@Override
 	public boolean supportsMixedDelimiters()
 	{
-		return false;
+		return true;
 	}
 
 	@Override
@@ -62,12 +67,21 @@ public class PostgresDelimiterTester
 		if (firstToken == null)
 		{
 			firstToken = token;
+      isCopy = token.getText().equalsIgnoreCase("copy");
 		}
+
+    if (isCopy && token.getText().equalsIgnoreCase("stdin") && lastToken != null && lastToken.getText().equalsIgnoreCase("from"))
+    {
+      isCopyFromStdin = true;
+    }
+
+    lastToken = token;
 	}
 
 	@Override
 	public DelimiterDefinition getCurrentDelimiter()
 	{
+    if (isCopyFromStdin) return copyDelimiter;
 		if (defaultDelimiter != null) return defaultDelimiter;
 		return DelimiterDefinition.STANDARD_DELIMITER;
 	}
@@ -76,6 +90,9 @@ public class PostgresDelimiterTester
 	public void statementFinished()
 	{
 		firstToken = null;
+    lastToken = null;
+    isCopy = false;
+    isCopyFromStdin = false;
 	}
 
 	@Override

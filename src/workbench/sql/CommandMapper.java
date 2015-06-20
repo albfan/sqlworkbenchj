@@ -45,6 +45,7 @@ import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.commands.UseCommand;
 import workbench.sql.wbcommands.MySQLShow;
+import workbench.sql.wbcommands.PgCopyCommand;
 import workbench.sql.wbcommands.WbCall;
 import workbench.sql.wbcommands.WbConfirm;
 import workbench.sql.wbcommands.WbConnInfo;
@@ -341,6 +342,9 @@ public class CommandMapper
 		else if (metaData.isPostgres())
 		{
 			mapPsql();
+      PgCopyCommand copy = new PgCopyCommand();
+      this.cmdDispatch.put(copy.getVerb(), copy);
+      this.dbSpecificCommands.add(copy.getVerb());
 		}
 
 		if (metaData.isMySql())

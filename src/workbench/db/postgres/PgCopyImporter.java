@@ -136,6 +136,12 @@ public class PgCopyImporter
 		}
 	}
 
+  public void copyFromStdin(String copyStatement, Reader stdin)
+  {
+    sql = copyStatement;
+    data = stdin;
+  }
+  
 	@Override
 	public void setup(TableIdentifier table, List<ColumnIdentifier> columns, Reader in, TextImportOptions options, String encoding)
 	{

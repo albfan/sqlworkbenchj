@@ -919,7 +919,7 @@ public class ScriptParserTest
 		File script = createScript(counter, "\n");
 		try
 		{
-			ScriptParser p = new ScriptParser();
+			ScriptParser p = new ScriptParser(ParserType.Postgres);
 			p.setFile(script);
 			p.startIterator();
 			int count = 0;
@@ -1364,6 +1364,26 @@ public class ScriptParserTest
 		assertEquals("1", p.getCommand(0));
 		assertEquals("-- some comment \n2", p.getCommand(1));
 	}
+
+  @Test
+  public void testPgCopy()
+  {
+    String script =
+      "truncate table foo;\n" +
+      "copy foo from stdin;\n" +
+      "1,foo\n" +
+      "2,bar\n" +
+      "\\.\n"+
+      "commit;";
+    ScriptParser parser = new ScriptParser(ParserType.Postgres);
+    parser.setScript(script);
+    int count = parser.getStatementCount();
+    assertEquals(3, count);
+    System.out.println(parser.getCommand(1));
+    assertEquals("truncate table foo", parser.getCommand(0));
+    assertEquals("commit", parser.getCommand(2));
+  }
+
 
 	@Test
 	public void testPgScript()
