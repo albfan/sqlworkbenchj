@@ -126,7 +126,7 @@ public class PgCopyImporterTest
 		options.setTextDelimiter("\t");
 		cols = CollectionUtil.arrayList(name, id);
 		sql = copy.createCopyStatement(tbl, cols, options, "ISO-8859-1");
-		assertEquals("COPY foo (name,id) FROM stdin WITH (format csv, header false, quote '\"', delimiter '	', NULL '')", sql);
+		assertEquals("COPY foo (name,id) FROM stdin WITH (format csv, header false, quote '\"', delimiter E'\\t', NULL '')", sql);
 	}
 
 	private TextImportOptions createOptions()

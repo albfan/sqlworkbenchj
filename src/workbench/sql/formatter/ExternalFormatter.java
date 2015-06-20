@@ -38,8 +38,8 @@ public class ExternalFormatter
   implements SqlFormatter
 {
   public static final String DEFAULT_DBID = "default";
-  public static final String INPUT_FILE = "${wb_input}";
-  public static final String OUTPUT_FILE = "${wb_output}";
+  public static final String INPUT_FILE = "${wbin}";
+  public static final String OUTPUT_FILE = "${wbout}";
 
   private String program;
   private String cmdLine;

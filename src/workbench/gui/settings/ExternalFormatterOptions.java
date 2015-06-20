@@ -48,6 +48,7 @@ public class ExternalFormatterOptions
   {
     initComponents();
     ((WbFilePicker)exePath).setLastDirProperty("workbench.gui.formatter.lastexe.dir");
+    lblHelp.setText(ResourceMgr.getFormattedString("MsgExtFmtHelp", ExternalFormatter.INPUT_FILE, ExternalFormatter.OUTPUT_FILE));
   }
 
   private void fillDropDown()
@@ -156,6 +157,7 @@ public class ExternalFormatterOptions
     cmdLine = new javax.swing.JTextField();
     cbxEnabled = new javax.swing.JCheckBox();
     supportsScripts = new javax.swing.JCheckBox();
+    lblHelp = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -239,9 +241,20 @@ public class ExternalFormatterOptions
     gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(10, 5, 0, 0);
     add(supportsScripts, gridBagConstraints);
+
+    lblHelp.setText("jLabel3");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LAST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 15, 5);
+    add(lblHelp, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
   private void cbxEnabledActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cbxEnabledActionPerformed
@@ -264,6 +277,7 @@ public class ExternalFormatterOptions
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JSeparator jSeparator1;
+  private javax.swing.JLabel lblHelp;
   private javax.swing.JCheckBox supportsScripts;
   // End of variables declaration//GEN-END:variables
 

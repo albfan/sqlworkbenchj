@@ -240,11 +240,18 @@ public class PgCopyImporter
 			}
 		}
 
-		copySql.append(", delimiter '");
+		copySql.append(", delimiter ");
 		String delim = options.getTextDelimiter();
-		if (delim.equals("\\t")) delim = "\t";
-		copySql.append(delim);
-		copySql.append('\'');
+		if (delim.equals("\t") || delim.equals("\\t"))
+    {
+      copySql.append("E'\\t'");
+    }
+    else
+    {
+      copySql.append('\'');
+      copySql.append(delim);
+      copySql.append('\'');
+    }
 
 		if (nullString == null) nullString = "";
 		copySql.append(", NULL '");
