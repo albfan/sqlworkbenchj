@@ -108,7 +108,10 @@ public class SqlServerProcedureReader
   {
     if (procname == null) return -1;
     int pos = procname.lastIndexOf(';');
-    if (pos < 1) return 0;
+
+    // the jTDS driver does not return a group number at all for the first procedure in a group
+    if (pos < 1) return 1;
+    
     return StringUtil.getIntValue(procname.substring(pos + 1), -1);
   }
 
