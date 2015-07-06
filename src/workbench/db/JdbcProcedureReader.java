@@ -169,7 +169,9 @@ public class JdbcProcedureReader
 				Integer procType = getProcedureType(rs);
 				int row = ds.addRow();
 
-				ProcedureDefinition def = new ProcedureDefinition(cat, schema, name, procType);
+        String displayName = stripProcGroupInfo(name);
+
+				ProcedureDefinition def = new ProcedureDefinition(cat, schema, displayName, procType);
 				def.setComment(remark);
 
 				if (useSpecificName)
@@ -179,8 +181,6 @@ public class JdbcProcedureReader
 					def.setSpecificName(specname);
 				}
 
-        String displayName = stripProcGroupInfo(name);
-        
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, displayName);
