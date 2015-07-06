@@ -649,7 +649,12 @@ public class DbSettings
 		return getBoolProperty("supports.transactions", true);
 	}
 
-	public String getProcVersionDelimiter()
+  public boolean getStripProcGroupNumber()
+  {
+    return getBoolProperty("strip.procgroup", false);
+  }
+
+	public String getProcGroupDelimiter()
 	{
 		return getProperty("procversiondelimiter", null);
 	}

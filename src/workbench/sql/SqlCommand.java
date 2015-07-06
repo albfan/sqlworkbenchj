@@ -472,8 +472,8 @@ public class SqlCommand
 		catch (Exception e)
 		{
 			runner.rollbackSavepoint();
-			appendOutput(result);
-			appendWarnings(result, true);
+      // SQL Server seems to return results (e.g. from a stored procedure) even if an error occurred.
+      processResults(result, false);
 			addErrorInfo(result, sql, e);
 			LogMgr.logUserSqlError("SqlCommand.execute()", sql, e);
 		}

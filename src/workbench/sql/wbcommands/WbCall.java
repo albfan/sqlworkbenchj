@@ -307,7 +307,8 @@ public class WbCall
 		}
 		catch (Exception e)
 		{
-			appendOutput(result);
+      // SQL Server seems to return results from a stored procedure even if an error occurred.
+      processResults(result, false);
 			LogMgr.logError("WbCall.execute()", "Error calling stored procedure using: " + sqlUsed, e);
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));

@@ -164,22 +164,12 @@ public class JdbcProcedureReader
 			{
 				String cat = rs.getString("PROCEDURE_CAT");
 				String schema = rs.getString("PROCEDURE_SCHEM");
-				String name = stripVersionInfo(rs.getString("PROCEDURE_NAME"));
+				String name = rs.getString("PROCEDURE_NAME");
 				String remark = rs.getString("REMARKS");
-				int type = rs.getInt("PROCEDURE_TYPE");
-				Integer iType;
-				if (rs.wasNull() || type == DatabaseMetaData.procedureResultUnknown)
-				{
-					// we can't really handle procedureResultUnknown, so it is treated as "no result"
-					iType = Integer.valueOf(DatabaseMetaData.procedureNoResult);
-				}
-				else
-				{
-					iType = Integer.valueOf(type);
-				}
+				Integer procType = getProcedureType(rs);
 				int row = ds.addRow();
 
-				ProcedureDefinition def = new ProcedureDefinition(cat, schema, name, iType);
+				ProcedureDefinition def = new ProcedureDefinition(cat, schema, name, procType);
 				def.setComment(remark);
 
 				if (useSpecificName)
@@ -188,10 +178,13 @@ public class JdbcProcedureReader
 					ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SPECIFIC_NAME, specname);
 					def.setSpecificName(specname);
 				}
+
+        String displayName = stripProcGroupInfo(name);
+        
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, name);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, iType);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, displayName);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, procType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
 				ds.getRow(row).setUserObject(def);
 			}
@@ -206,6 +199,23 @@ public class JdbcProcedureReader
 			SqlUtil.closeResult(rs);
 		}
 	}
+
+  protected Integer getProcedureType(ResultSet rs)
+    throws SQLException
+  {
+    int type = rs.getInt("PROCEDURE_TYPE");
+    Integer procType;
+    if (rs.wasNull() || type == DatabaseMetaData.procedureResultUnknown)
+    {
+      // we can't really handle procedureResultUnknown, so it is treated as "no result"
+      procType = Integer.valueOf(DatabaseMetaData.procedureNoResult);
+    }
+    else
+    {
+      procType = Integer.valueOf(type);
+    }
+    return procType;
+  }
 
 	/**
 	 * Convert the JDBC result type to either <tt>PROCEDURE</tt> or <tt>FUNCTION</tt>.
@@ -235,14 +245,30 @@ public class JdbcProcedureReader
 		return ds;
 	}
 
-	protected String stripVersionInfo(String procname)
+  /**
+   * Remove the procedure group information from a procedure name.
+   *
+   * This is mainly used for SQL Server (and sibling-DBs like Sybase) to remove the ;0 or ;1
+   * at the end of a procedure or function name.
+   *
+   * The "procedure group" will only be removed if a delimiter is defined AND the removal is configured.
+   *
+   * @see DbSettings#getProcGroupDelimiter()
+   * @see DbSettings#getStripProcGroupNumber()
+   */
+	protected String stripProcGroupInfo(String procname)
 	{
 		if (procname == null) return null;
-		DbSettings dbS = this.connection.getMetadata().getDbSettings();
-		String versionDelimiter = dbS.getProcVersionDelimiter();
+		DbSettings dbs = this.connection.getDbSettings();
+
+    if (dbs.getStripProcGroupNumber() == false) return procname;
+
+		String versionDelimiter = dbs.getProcGroupDelimiter();
 		if (StringUtil.isEmptyString(versionDelimiter)) return procname;
+
 		int pos = procname.lastIndexOf(versionDelimiter);
 		if (pos < 0) return procname;
+
 		return procname.substring(0,pos);
 	}
 
@@ -448,7 +474,7 @@ public class JdbcProcedureReader
 	{
 		if (def == null) return;
 
-		String procName = stripVersionInfo(def.getProcedureName());
+		String procName = stripProcGroupInfo(def.getProcedureName());
 
 		StringBuilder source = new StringBuilder(500);
 
@@ -533,7 +559,7 @@ public class JdbcProcedureReader
 			throw new NoConfigException("No sql configured to retrieve procedure source");
 		}
 
-		String procName = stripVersionInfo(def.getProcedureName());
+		String procName = stripProcGroupInfo(def.getProcedureName());
 
 		StringBuilder source = new StringBuilder(500);
 

@@ -3925,7 +3925,7 @@ public class SqlPanel
 		throws SQLException
 	{
 		if (result == null) return 0;
-		if (!result.isSuccess()) return 0;
+//		if (!result.isSuccess()) return 0;
 		final String sql = result.getSourceCommand();
 		final long time = result.getExecutionDuration();
 

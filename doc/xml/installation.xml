@@ -186,9 +186,10 @@
         If the launcher cannot find your installed Java runtime, you can specify the location of the JRE by creating a text file
         named <literal>SQLWorkbench.ini</literal> (or <literal>SQLWorkbench64.ini</literal> when using the 64bit version) with the following content:
       </para>
-      <programlisting>vm.location=c:\Program Files\Java\jdk16\jre\bin\client\jvm.dll</programlisting>
+      <programlisting>vm.location=c:\Program Files\Java\jdk7\jre\bin\client\jvm.dll</programlisting>
       <para>
-        Note that you need to specify the full path to the <literal>jvm.dll</literal>, not the directory where the Java runtime is installed.
+        You need to specify the <emphasis role="bold">full path</emphasis> to the <literal>jvm.dll</literal>,
+        not the directory where the Java runtime is installed.
       </para>
     </section>
   </section>
