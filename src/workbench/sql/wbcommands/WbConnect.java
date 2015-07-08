@@ -26,7 +26,6 @@ import java.sql.SQLException;
 
 import workbench.AppArguments;
 import workbench.WbManager;
-import workbench.interfaces.ExecutionController;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
