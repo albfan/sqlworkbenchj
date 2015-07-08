@@ -171,13 +171,13 @@ public class WbConnect
 			if (persistentChange)
 			{
 				if (current != null && current != newConn) current.disconnect();
-				this.runner.setConnection(newConn);
+				runner.setConnection(newConn);
 			}
 			else
 			{
 				// The runner will switch back to the original connection automatically once
 				// the current script has ended.
-				this.runner.changeConnection(newConn);
+				runner.changeConnection(newConn);
 			}
 			result.addMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", newConn.getDisplayString()));
 			String warn = (newConn != null ? newConn.getWarnings() : null);
@@ -185,7 +185,6 @@ public class WbConnect
 			{
 				result.addMessage(warn);
 			}
-
 			result.setSuccess();
 		}
 		catch (Exception e)
@@ -194,6 +193,14 @@ public class WbConnect
 			result.addMessage(err);
 			result.setFailure();
 		}
+    finally
+    {
+      if (!profile.getStorePassword())
+      {
+        // clear any password that was entered by the user during prompting
+        profile.setInputPassword(null);
+      }
+    }
 
 		return result;
 	}
