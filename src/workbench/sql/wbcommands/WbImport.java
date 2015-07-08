@@ -500,12 +500,13 @@ public class WbImport
 			textParser.setIgnoreMissingColumns(ignoreMissingCols);
 
 			String delimiter = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_DELIM));
-			if (cmdLine.isArgPresent(CommonArgs.ARG_DELIM) && StringUtil.isBlank(delimiter))
+			if (cmdLine.isArgPresent(CommonArgs.ARG_DELIM) && StringUtil.isEmptyString(delimiter))
 			{
 				result.addMessageByKey("ErrImpDelimEmpty");
 				result.setFailure();
 				return result;
 			}
+      
 			if (delimiter != null) textParser.setTextDelimiter(delimiter);
 
 			String quote = cmdLine.getValue(ARG_QUOTE);
