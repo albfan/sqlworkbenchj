@@ -528,15 +528,15 @@ public class BatchRunner
 	 */
 	public void setScriptToRun(String sql)
 	{
-		this.command = sql;
+		command = sql;
 	}
 
 	protected void runScript()
 	{
 		try
 		{
-			runScript(command);
-			this.success = true;
+			boolean error = runScript(command);
+			success = (error == false);
 		}
 		catch (Exception e)
 		{
@@ -766,12 +766,12 @@ public class BatchRunner
 		try
 		{
 			isBusy = true;
-			boolean result = executeScript(parser);
+			boolean error = executeScript(parser);
 			if (this.rowMonitor  != null)
 			{
 				this.rowMonitor.jobFinished();
 			}
-			return result;
+			return error;
 		}
 		finally
 		{

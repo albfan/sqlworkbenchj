@@ -1078,7 +1078,7 @@ public final class WbManager
 
 			try
 			{
-				// Do not check for runner.isConnected() as the in batch mode
+				// Do not check for runner.isConnected() as in batch mode
 				// the application might be started without a profile
 				// (e.g. for a single WbCopy command)
 				if (runner.isSuccess())
