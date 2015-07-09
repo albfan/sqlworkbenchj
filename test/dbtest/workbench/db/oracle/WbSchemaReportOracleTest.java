@@ -60,7 +60,7 @@ public class WbSchemaReportOracleTest
 	{
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		TestUtil.executeScript(con,
 			"CREATE SEQUENCE seq_one;"  +
@@ -99,7 +99,7 @@ public class WbSchemaReportOracleTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		WbSchemaReport reporter = new WbSchemaReport();
 		reporter.setConnection(con);
