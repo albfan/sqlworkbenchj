@@ -100,6 +100,15 @@ public class WbCallPostgresTest
       "    x := 42; \n" +
       "END; \n" +
       "$$ LANGUAGE plpgsql;\n" +
+      "CREATE OR REPLACE FUNCTION get_status(OUT p_status integer, OUT p_name text) \n" +
+      "  RETURNS record AS \n" +
+      "$BODY$ \n" +
+      "BEGIN \n" +
+      "   p_status := 42; \n" +
+      "   p_name := 'Arthur'; \n" +
+      "END; \n" +
+      "$BODY$ \n" +
+      "LANGUAGE plpgsql; \n" +
       "commit;"
     );
 	}
@@ -110,6 +119,42 @@ public class WbCallPostgresTest
 	{
 		PostgresTestUtil.cleanUpTestCase();
 	}
+
+	@Test
+	public void testOutParameter()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		assertNotNull(con);
+
+		WbCall call = new WbCall();
+		StatementRunner runner = new StatementRunner();
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+    StatementParameterPrompter prompter = new StatementParameterPrompter()
+    {
+      @Override
+      public boolean showParameterDialog(StatementParameters parms, boolean showNames)
+      {
+        return true;
+      }
+    };
+    call.setParameterPrompter(prompter);
+		String cmd = "WbCall get_status(?,?)";
+    StatementRunnerResult result = call.execute(cmd);
+    assertTrue(result.isSuccess());
+    List<DataStore> data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(1, data.size());
+    DataStore store = data.get(0);
+    assertNotNull(store);
+//    DataStorePrinter printer = new DataStorePrinter(store);
+//    printer.printTo(System.out);
+    assertEquals(2, store.getRowCount());
+    assertEquals(42, store.getValueAsInt(0, 1, -1));
+    assertEquals("Arthur", store.getValueAsString(1, 1));
+  }
 
 	@Test
 	public void testInOutParameter()
