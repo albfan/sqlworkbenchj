@@ -29,9 +29,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import workbench.log.LogMgr;
 
@@ -87,7 +87,7 @@ public class ReportTable
 	public static final String TAG_TABLE_TYPE = "table-type";
 
 	private TableIdentifier table;
-	private Map<String, ForeignKeyDefinition> foreignKeys = new HashMap<>();
+	private Map<String, ForeignKeyDefinition> foreignKeys = new TreeMap<>();
 	private List<ReportColumn> columns;
 	private IndexReporter reporter;
 	private String tableComment;

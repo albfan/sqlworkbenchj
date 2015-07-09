@@ -25,11 +25,11 @@ package workbench.db.report;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import workbench.log.LogMgr;
 
@@ -68,7 +68,7 @@ public class IndexReporter
 	private Collection<IndexDefinition> indexList;
 	private TagWriter tagWriter = new TagWriter();
 	private String mainTagToUse;
-	private Map<IndexDefinition, List<ObjectOption>> indexOptions = new HashMap<>();
+	private Map<IndexDefinition, List<ObjectOption>> indexOptions = new TreeMap<>(IndexDefinition.getNameSorter());
 
 	public IndexReporter(TableIdentifier tbl, WbConnection conn, boolean includePartitions)
 	{
