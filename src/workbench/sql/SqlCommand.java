@@ -1043,7 +1043,7 @@ public class SqlCommand
 			ErrorPositionReader reader = ErrorPositionReader.Factory.createPositionReader(currentConnection);
 			String sql = result.getSourceCommand() == null ? executedSql : result.getSourceCommand();
 			ErrorDescriptor error = reader.getErrorPosition(currentConnection, sql, e);
-			if (error != null)
+			if (error != null && error.getErrorMessage() != null)
 			{
 				String fullMsg = reader.enhanceErrorMessage(sql, e.getMessage(), error);
 				result.setFailure(error);
