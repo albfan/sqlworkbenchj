@@ -119,6 +119,14 @@
   <section id="profile-username">
     <title>Username</title>
     <para>This is the name of the DBMS user account</para>
+    <para>
+      You can use placeholders in the username property that get replaced with operating system
+      environment variables or Java properties. E.g. <literal>${user.name}</literal> will be replaced
+      with the current operating system user - this works on any operating system as the variable is supplied
+      by the Java runtime. <literal>${USERNAME}</literal> would be replaced with the current username
+      on Windows. you can combine this with fixed text, e.g. <literal>DEV_${user.name}</literal> or
+      <literal>TEST_${user.name}</literal>.
+    </para>
   </section>
 
   <section id="profile-password">

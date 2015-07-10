@@ -28,6 +28,17 @@
          by using the parameter <literal>-usePgCopy</literal>
        </para>
      </section>
+     <section id="postgres-pgpass">
+       <indexterm><primary>PostgreSQL</primary><secondary>.pgpass</secondary></indexterm>
+       <indexterm><primary>PostgreSQL</primary><secondary>pgpass.conf</secondary></indexterm>
+       <title>Using .pgpass</title>
+       <para>
+         If username, password or both are empty in a <link linkend="profile">connection profile</link>, &wb-productname; will
+         try to use the information stored in the <ulink url="http://www.postgresql.org/docs/current/static/libpq-pgpass.html">password file</ulink> file
+         or the <ulink url="http://www.postgresql.org/docs/current/static/libpq-envars.html">environment variables</ulink>
+         (<literal>PGPASS</literal>,  <literal>PGUSER</literal>) the same way as libpq uses them.
+       </para>
+     </section>
   </section>
 
   <section id="dbms-specific-oracle">

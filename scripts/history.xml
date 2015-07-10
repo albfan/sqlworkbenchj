@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-06-20">
+    <entry dev-build="8" type="enh">It's now possible to use OS environment variable or Java properties in the username of a connection profile.</entry>
     <entry dev-build="8" type="enh">For Postgres, "COPY .. FROM stdin" with the data after the statement is now supported</entry>
     <entry dev-build="7" type="enh">It's now possible to define external tools to format SQL</entry>
     <entry dev-build="7" type="enh">For decimal values WbExport now supports the parameters -fixedDigits and -maxDigits.</entry>
@@ -23,6 +24,7 @@
     <entry dev-build="1" type="enh">For Vertica tables and views from the schema "v_internal" are now show in the DbExplorer (contributed by Tatiana Saltykova)</entry>
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
+    <entry dev-build="8" type="fix">When running a single command in batch mode, the error status was not returned correctly to the operating system</entry>
     <entry dev-build="7" type="fix">WbExport no longer uses the GUI defaults for decimal digits. The default is now to always export all digits, unless the new -maxDigits parameter is used</entry>
     <entry dev-build="7" type="fix">For MySQL, when multiple tables with the same name in different databases had triggers defined, all triggers where visible for each table in the DbExplorer</entry>
     <entry dev-build="7" type="fix">When importing multiple files using -usePgCopy and one file generated an error, the previous import was not committed</entry>
