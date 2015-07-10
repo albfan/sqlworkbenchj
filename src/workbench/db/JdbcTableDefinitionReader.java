@@ -120,14 +120,23 @@ public class JdbcTableDefinitionReader
 
     try
     {
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()",
+          "Calling getColumns() using: catalog="+ catalog + ", schema=" + schema + ", table=" + tablename);
+			}
+
+      long start = System.currentTimeMillis();
       rs = dbmeta.getJdbcMetaData().getColumns(catalog, schema, tablename, "%");
+      long duration = System.currentTimeMillis() - start;
 
       ResultSetMetaData rsmeta = rs.getMetaData();
 
       if (Settings.getInstance().getDebugMetadataSql())
       {
+        LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()", "Calling getColumns() took: " + duration + "ms");
         String fqn = SqlUtil.fullyQualifiedName(dbConnection, table);
-        SqlUtil.dumpResultSetInfo("DatabaseMetaData.getColumns() for " + fqn, rsmeta);
+        SqlUtil.dumpResultSetInfo("JdbcTableDefinitionReader.getColumns() for " + fqn, rsmeta);
       }
 
       boolean jdbc4 = false;
@@ -182,7 +191,7 @@ public class JdbcTableDefinitionReader
         }
         catch (Exception e)
         {
-          LogMgr.logWarning("DbMetadata", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
+          LogMgr.logWarning("JdbcTableDefinitionReader.getTableColumns()", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
           position = -1;
         }
 
