@@ -855,6 +855,13 @@ public class ConnectionProfile
 				user = System.getProperty("user.name");
 			}
 		}
+
+    if (Settings.getInstance().replaceEnvVarsInProfile())
+    {
+      user = StringUtil.replaceProperties(user); // replace standard Java properties first
+      user = StringUtil.replaceProperties(System.getenv(), user); // now replace system environment variables
+    }
+
 		return user;
 	}
 

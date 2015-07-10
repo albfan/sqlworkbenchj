@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -379,7 +379,7 @@ public class StringUtil
     }
     return result;
   }
-  
+
 	public static boolean hasOpenQuotes(String data, char quoteChar, QuoteEscapeType escapeType)
 	{
 		if (isEmptyString(data)) return false;
@@ -1545,10 +1545,10 @@ public class StringUtil
 	 */
 	public static String replaceProperties(String input)
 	{
-		return replaceProperties(System.getProperties(), input);
+		return replaceProperties((Map)(System.getProperties()), input);
 	}
 
-	public static String replaceProperties(Properties props, String input)
+	public static String replaceProperties(Map<String, String> props, String input)
 	{
 		if (isEmptyString(input)) return input;
 
@@ -1560,11 +1560,11 @@ public class StringUtil
 
 		while (m.find())
 		{
-			final int start = m.start();
-			final int end = m.end();
-			final String var = input.substring(start, end);
-			final String propName = input.substring(start + 2, end - 1);
-			final String propValue = props.getProperty(propName, null);
+			int start = m.start();
+			int end = m.end();
+			String var = input.substring(start, end);
+			String propName = input.substring(start + 2, end - 1);
+			String propValue = props.get(propName);
 			if (propValue != null)
 			{
 				input = input.replace(var, propValue);

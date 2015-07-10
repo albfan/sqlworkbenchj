@@ -25,13 +25,11 @@ package workbench.db.report;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import workbench.log.LogMgr;
 
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
@@ -39,12 +37,10 @@ import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleIndexPartition;
-
+import workbench.log.LogMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-
-import static workbench.db.report.ReportTable.*;
 
 /**
  * Class to retrieve all index definitions for a table and
@@ -65,7 +61,7 @@ public class IndexReporter
 	public static final String TAG_INDEX_COLUMN_NAME = "column";
 	public static final String TAG_INDEX_OPTION = "index-option";
 
-	private Collection<IndexDefinition> indexList;
+	private List<IndexDefinition> indexList;
 	private TagWriter tagWriter = new TagWriter();
 	private String mainTagToUse;
 	private Map<IndexDefinition, List<ObjectOption>> indexOptions = new TreeMap<>(IndexDefinition.getNameSorter());
@@ -73,6 +69,7 @@ public class IndexReporter
 	public IndexReporter(TableIdentifier tbl, WbConnection conn, boolean includePartitions)
 	{
 		indexList  = conn.getMetadata().getIndexReader().getTableIndexList(tbl);
+    Collections.sort(indexList, IndexDefinition.getNameSorter());
     removeEmptyIndexes();
 		if (includePartitions)
 		{
@@ -83,8 +80,8 @@ public class IndexReporter
 
 	public IndexReporter(IndexDefinition index)
 	{
-		indexList  = new LinkedList<>();
-		indexList.add(index);
+    indexList = new ArrayList<>(1);
+    indexList.add(index);
 	}
 
 	public void setMainTagToUse(String tag)
@@ -136,7 +133,7 @@ public class IndexReporter
 			}
 			if (StringUtil.isNonBlank(index.getTablespace()))
 			{
-				tagWriter.appendTag(result, defIndent, TAG_TABLESPACE, index.getTablespace(), false);
+				tagWriter.appendTag(result, defIndent, ReportTable.TAG_TABLESPACE, index.getTablespace(), false);
 			}
 			writeDbmsOptions(result, defIndent, index);
 			tagWriter.appendCloseTag(result, indent, mainTagToUse == null ? TAG_INDEX : mainTagToUse);

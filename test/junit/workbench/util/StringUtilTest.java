@@ -943,4 +943,20 @@ public class StringUtilTest
 		result = StringUtil.coalesce("foo");
 		assertEquals("foo", result);
 	}
+
+  @Test
+  public void testReplaceProperties()
+  {
+    String input = "Username ${user.name}";
+    String replaced = StringUtil.replaceProperties(input);
+    assertEquals("Username " + System.getProperty("user.name"), replaced);
+
+    input = "Username {user.name}";
+    replaced = StringUtil.replaceProperties(input);
+    assertEquals(input, replaced);
+
+    input = "Username $USER";
+    replaced = StringUtil.replaceProperties(input);
+    assertEquals(input, replaced);
+  }
 }

@@ -511,7 +511,7 @@ public class Settings
 
 	public String replaceProperties(String input)
 	{
-		return StringUtil.replaceProperties(props, input);
+		return StringUtil.replaceProperties((Map)(props), input);
 	}
 
 	public void setUseSinglePageHelp(boolean flag)
@@ -523,6 +523,11 @@ public class Settings
 	{
 		return getBoolProperty("workbench.help.singlepage", false);
 	}
+
+  public boolean replaceEnvVarsInProfile()
+  {
+    return getBoolProperty("workbench.profiles.replace.env.vars", true);
+  }
 
 	public boolean usePgPassFile()
 	{
