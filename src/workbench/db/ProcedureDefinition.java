@@ -320,7 +320,7 @@ public class ProcedureDefinition
 			nameContainsParameters = specificName.indexOf('(') > -1;
 		}
 
-		if (!needParameters || nameContainsParameters)
+		if (!needParameters || (nameContainsParameters && includeOutParameters))
 		{
 			return buildObjectExpression(con, useSpecificName);
 		}
@@ -342,7 +342,7 @@ public class ProcedureDefinition
     if (paramCount == 0) return getObjectExpression(con) + "()";
 
 		StringBuilder result = new StringBuilder(procName.length() + paramCount * 5 + 5);
-		result.append(getObjectExpression(con));
+    result.append(SqlUtil.buildExpression(con, catalog, schema, getBasename()));
 		result.append('(');
 
     int colCount = 0;
@@ -380,14 +380,20 @@ public class ProcedureDefinition
 		return this.source;
 	}
 
-	@Override
-	public String getObjectName(WbConnection conn)
-	{
+  protected String getBasename()
+  {
 		String name = procName;
 		if (procName.indexOf('(') > -1)
 		{
 			name = procName.substring(0, name.indexOf('('));
 		}
+    return name;
+  }
+
+	@Override
+	public String getObjectName(WbConnection conn)
+	{
+		String name = getBasename();
 		return conn.getMetadata().quoteObjectname(name);
 	}
 

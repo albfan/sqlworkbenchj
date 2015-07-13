@@ -217,6 +217,9 @@ public class DbObjectChanger
 		// object_name placeholder is expected to be used where a fully qualified name is needed
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, oldname);
 
+    String fqn = oldDefinition.getObjectNameForDrop(this.dbConnection);
+		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, fqn);
+
 		// schema and table name placeholders are intended where those names are individual parameters
 		// this is mainly used for the kludgy and non-standard way SQL Server "supports" comments
 		sql = sql.replace(ColumnChanger.PARAM_TABLE_NAME, oldDefinition.getObjectName());
