@@ -559,7 +559,7 @@ public class PostgresProcedureReader
 				if (StringUtil.isNonBlank(comment))
 				{
 					source.append("\nCOMMENT ON FUNCTION ");
-					source.append(name.getFormattedName());
+					source.append(name.getSignature());
 					source.append(" IS '");
 					source.append(SqlUtil.escapeQuotes(def.getComment()));
 					source.append('\'');
@@ -586,7 +586,9 @@ public class PostgresProcedureReader
 			source.append(getAggregateSource(name, def.getSchema()));
 			if (StringUtil.isNonBlank(comment))
 			{
-				source.append("\n\nCOMMENT ON AGGREGATE IS '");
+				source.append("\n\nCOMMENT ON AGGREGATE ");
+        source.append(name.getSignature());
+        source.append(" IS '");
 				source.append(SqlUtil.escapeQuotes(def.getComment()));
 				source.append("';\n\n");
 			}
