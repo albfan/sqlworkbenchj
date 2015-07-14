@@ -224,12 +224,15 @@ public class DbExplorerPanel
 			schemaLabel = new JLabel(ResourceMgr.getString("LblSchema"));
 
 			this.schemaSelector = new JComboBox();
+      this.schemaSelector.setMaximumRowCount(15);
 
-			this.catalogSelector  = new JComboBox();
+			this.catalogSelector = new JComboBox();
+			this.catalogSelector.setMaximumRowCount(15);
 			this.catalogLabel = new JLabel("Catalog");
 			this.catalogSelector.setVisible(false);
 			this.catalogSelector.setEnabled(false);
 			this.catalogLabel.setVisible(false);
+      
 			reloadButton = new FlatButton(reloadSchemasAction);
 			reloadButton.setText(null);
 			reloadButton.setMargin(WbToolbarButton.MARGIN);

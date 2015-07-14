@@ -103,6 +103,7 @@ import workbench.sql.DelimiterDefinition;
 
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
@@ -887,6 +888,7 @@ public class ProcedureListPanel
     {
       return drop + ";\n\n" + sql;
     }
+    drop = SqlUtil.trimSemicolon(drop);
     return drop + "\n" + delim.getDelimiter() + "\n\n" + sql;
   }
 

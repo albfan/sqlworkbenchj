@@ -31,7 +31,7 @@ import workbench.util.SqlUtil;
 /**
  * @author Thomas Kellerer
  */
-public class PostgresDataTypeResolver
+public class PostgresDataTypeResolver 
 	implements DataTypeResolver
 {
 
