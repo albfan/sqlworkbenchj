@@ -24,6 +24,7 @@ package workbench.db;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -211,6 +212,12 @@ public class JdbcUtils
 		return xml;
 	}
 
+	public static SQLXML createXML(Clob content, WbConnection con)
+		throws SQLException
+	{
+		return createXML(content.getCharacterStream(), con);
+	}
+
 	public static SQLXML createXML(Reader in, WbConnection con)
 		throws SQLException
 	{
@@ -238,7 +245,7 @@ public class JdbcUtils
 			}
 
 			rs = statement.executeQuery(sql);
-      
+
 			if (useSeparateConnection)
 			{
 				if (dbConnection.selectStartsTransaction() && !dbConnection.getAutoCommit())

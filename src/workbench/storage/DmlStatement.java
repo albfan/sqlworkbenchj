@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.sql.Array;
+import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -197,9 +198,17 @@ public class DmlStatement
 						streamsToClose.add(in);
 					}
 				}
-				else if (useXmlApi && SqlUtil.isXMLType(type) && !builder.isDmlExpressionDefined(dbmsType) && (value instanceof String))
+				else if (useXmlApi && SqlUtil.isXMLType(type) && !builder.isDmlExpressionDefined(dbmsType) && (value instanceof String || value instanceof Clob))
 				{
-					SQLXML xml = JdbcUtils.createXML((String)value, connection);
+					SQLXML xml = null;
+          if (value instanceof Clob)
+          {
+            xml = JdbcUtils.createXML((Clob)value, connection);
+          }
+          else
+          {
+            xml = JdbcUtils.createXML((String)value, connection);
+          }
 					stmt.setSQLXML(i+ 1, xml);
 				}
 				else if (value instanceof File)
