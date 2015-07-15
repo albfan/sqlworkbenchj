@@ -195,7 +195,7 @@ public class PGProcName
 		int argCount = 0;
 		for (PGArg arg : arguments)
 		{
-			if (arg.argMode == PGArg.ArgMode.in)
+			if (arg.argMode == PGArg.ArgMode.in || arg.argMode == PGArg.ArgMode.inout)
 			{
 				if (argCount > 0) b.append(", ");
 				b.append(arg.argType.getTypeName());
