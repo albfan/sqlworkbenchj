@@ -588,23 +588,21 @@ public class WbTable
 		this.statusBar = bar;
 	}
 
-	/**
-	 * For some reason my Renderers do not display bigger
-	 * fonts properly. So I have to adjust the row height
-	 * when the font is defined
-	 */
 	@Override
 	public void setFont(Font f)
 	{
 		super.setFont(f);
+    
 		if (tableHeader != null)
 		{
 			tableHeader.setFont(f);
 		}
+
 		if (defaultEditor != null)
 		{
 			defaultEditor.setFont(f);
 		}
+
 		if (multiLineEditor != null)
 		{
 			multiLineEditor.setFont(f);
@@ -614,6 +612,15 @@ public class WbTable
 		{
 			defaultNumberEditor.setFont(f);
 		}
+
+    TableRowHeader rowHeader = TableRowHeader.getRowHeader(this);
+    if (rowHeader != null)
+    {
+      rowHeader.setFont(f);
+    }
+
+    // For some reason my Renderers do not display bigger fonts properly.
+    // So I have to adjust the row height when the font is changed
 		adjustRowsAndColumns();
 	}
 
