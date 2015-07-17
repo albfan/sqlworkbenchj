@@ -61,6 +61,18 @@ public class ExportJobEntry
 		appendWhere(where);
 	}
 
+  /**
+   * Create an export job for the given table.
+   *
+   *
+   * @param file   the output file
+   * @param table  the table
+   * @param where  an optional where clause
+   * @param con    the connection to use
+   *
+   * @throws SQLException
+   * @see TableSelectBuilder#getSelectForColumns(workbench.db.TableIdentifier, java.util.List, int) 
+   */
 	public ExportJobEntry(File file, TableIdentifier table, String where, WbConnection con)
 		throws SQLException
 	{

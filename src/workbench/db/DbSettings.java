@@ -882,6 +882,11 @@ public class DbSettings
 		return getBoolProperty("export.convert.date2ts", false);
 	}
 
+  public boolean useColumnListInExport()
+  {
+    return getBoolProperty("export.select.use.columns", true);
+  }
+
 	public boolean needsExactClobLength()
 	{
 		return getBoolProperty("exactcloblength", false);

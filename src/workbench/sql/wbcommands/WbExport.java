@@ -1040,6 +1040,14 @@ public class WbExport
 			}
 		}
 
+    boolean useColumnList = currentConnection.getDbSettings().useColumnListInExport();
+    if (useColumnList)
+    {
+      useColumnList = StringUtil.isBlank(prefix);
+    }
+
+    if (prefix == null) prefix = "";
+
 		for (TableIdentifier tbl : tableList)
 		{
 			String fname = StringUtil.makeFilename(ignoreOwner ? tbl.getTableName() : tbl.getTableExpression());
@@ -1052,10 +1060,14 @@ public class WbExport
 			{
 				f = new WbFile(outdir, fname + defaultExtension);
 			}
-			try
+
+    	try
 			{
-				if (StringUtil.isBlank(prefix))
+				if (useColumnList)
 				{
+          // by just passing the table name TableSelectBuilder will be used
+          // to generate the SELECT statement for the export which means
+          // that SQL statement will use the defined column expressions for selecting data
 					exporter.addTableExportJob(f, tbl, where);
 				}
 				else

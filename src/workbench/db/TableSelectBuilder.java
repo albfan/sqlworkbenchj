@@ -30,6 +30,7 @@ import workbench.log.LogMgr;
 import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.sql.ResultNameAnnotation;
+import workbench.util.CollectionUtil;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -172,7 +173,7 @@ public class TableSelectBuilder
 		select.append(';');
 		return select.toString();
   }
-  
+
 	/**
 	 * Create a SELECT statement for the columns of the the table.
 	 *
@@ -199,7 +200,7 @@ public class TableSelectBuilder
 
 		StringBuilder selectCols = new StringBuilder(columns.size() * 15);
 
-		if (columns.isEmpty())
+		if (CollectionUtil.isEmpty(columns))
 		{
 			String tbl = SqlUtil.fullyQualifiedName(dbConnection, table);
 			LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "No columns available for table " + tbl  + ". Using \"SELECT *\" instead");
