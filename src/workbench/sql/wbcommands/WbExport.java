@@ -139,6 +139,7 @@ public class WbExport
 	public static final String ARG_MERGE_TYPE = "mergeType";
 	public static final String ARG_NULL_STRING = "nullString";
 	public static final String ARG_TRIM_CHARDATA = "trimCharData";
+  public static final String ARG_RETRIEVE_COLUMN_INFO = "retrieveColumnInfo";
 
 	public static final String ARG_INCLUDE_IDENTITY = "includeAutoIncColumns";
 	public static final String ARG_INCLUDE_READONLY = "includeReadOnlyColumns";
@@ -217,6 +218,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_CREATE_OUTPUTDIR, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ROWNUM);
 		cmdLine.addArgument(ARG_TABLEWHERE);
+		cmdLine.addArgument(ARG_RETRIEVE_COLUMN_INFO, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ADD_INFOSHEET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_OPT_WIDTH, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_AUTOFILTER, ArgumentType.BoolArgument);
@@ -919,6 +921,8 @@ public class WbExport
 		else
 		{
 			boolean ignoreOwner = cmdLine.getBoolean(WbImport.ARG_IGNORE_OWNER, getIgnoreOwnerDefault());
+      boolean useColumnList = cmdLine.getBoolean(ARG_RETRIEVE_COLUMN_INFO, currentConnection.getDbSettings().useColumnListInExport());
+
 			String where = cmdLine.getValue(ARG_TABLEWHERE);
 			try
 			{
@@ -927,11 +931,11 @@ public class WbExport
 				exporter.setContinueOnError(this.continueOnError);
 				if (tablesToExport.size() > 1 || outputdir != null)
 				{
-					exportTableList(tablesToExport, result, outputdir, outputFile, cmdLine.getValue(ARG_TABLE_PREFIX), where, ignoreOwner, containerFileSupported);
+					exportTableList(tablesToExport, result, outputdir, outputFile, cmdLine.getValue(ARG_TABLE_PREFIX), where, ignoreOwner, containerFileSupported, useColumnList);
 				}
 				else
 				{
-					exportSingleTable(tablesToExport.get(0), result, outputFile, where);
+					exportSingleTable(tablesToExport.get(0), result, outputFile, where, useColumnList);
 				}
 				addMessages(result);
 			}
@@ -977,10 +981,18 @@ public class WbExport
 		exporter.setOutputType(type);
 	}
 
-	private void exportSingleTable(TableIdentifier table, StatementRunnerResult result, File outfile, String where)
+	private void exportSingleTable(TableIdentifier table, StatementRunnerResult result, WbFile outfile, String where, boolean useColumnList)
 		throws SQLException
 	{
-		exporter.addTableExportJob(outfile, table, where);
+    if (useColumnList)
+    {
+      exporter.addTableExportJob(outfile, table, where);
+    }
+    else
+    {
+      String sql = "SELECT * FROM " + table.getTableExpression(currentConnection);
+      exporter.addQueryJob(sql, outfile, where);
+    }
 		exporter.runJobs();
 		if (exporter.isSuccess())
 		{
@@ -997,7 +1009,7 @@ public class WbExport
 		}
 	}
 
-	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, File outfile, String prefix, String where, boolean ignoreOwner, boolean exporterSupportsContainers)
+	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, File outfile, String prefix, String where, boolean ignoreOwner, boolean exporterSupportsContainers, boolean useColumnList)
 		throws SQLException
 	{
 		result.setSuccess();
@@ -1040,7 +1052,6 @@ public class WbExport
 			}
 		}
 
-    boolean useColumnList = currentConnection.getDbSettings().useColumnListInExport();
     if (useColumnList)
     {
       useColumnList = StringUtil.isBlank(prefix);
