@@ -24,6 +24,7 @@ package workbench.gui.dbobjects.objecttree;
 
 
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 
 /**
@@ -87,11 +88,22 @@ public class DbTreeSettings
    * SQL will include all columns explicitely. This enables the use of the expression
    * replacement for certain data types.
    *
-   * @return
+   * This can be ovewritten on a per DBMS basis in order to work around JDBC drivers which
+   * are slow when retrieving column information.
+   *
+   * @param dbId the current DBID
+   *
+   * @return true if columns should be named explicitely
    */
-  public static boolean useColumnListForTableDataDisplay()
+  public static boolean useColumnListForTableDataDisplay(String dbId)
   {
-    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "tabledata.select.use.columns", true);
+    String prop = "tabledata.select.use.columns";
+    String dbValue = Settings.getInstance().getProperty(SETTINGS_PREFIX + dbId + "."+ prop, null);
+    if (dbValue != null)
+    {
+      return StringUtil.stringToBool(dbValue);
+    }
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + prop, true);
   }
 
   public static boolean autoloadSchemaObjects()

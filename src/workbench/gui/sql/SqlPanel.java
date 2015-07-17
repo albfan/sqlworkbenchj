@@ -2285,7 +2285,7 @@ public class SqlPanel
 
     String sql = null;
 
-    if (DbTreeSettings.useColumnListForTableDataDisplay())
+    if (DbTreeSettings.useColumnListForTableDataDisplay(dbConnection.getDbId()))
     {
       List<ColumnIdentifier> columns = dbConnection.getObjectCache().getColumns(table);
       TableSelectBuilder builder = new TableSelectBuilder(dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
