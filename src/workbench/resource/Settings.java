@@ -647,7 +647,30 @@ public class Settings
 		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
 		if (profiles == null)
 		{
-			return new File(getConfigDir(), "WbProfiles.xml").getAbsolutePath();
+      String xmlFile = "WbProfiles.xml";
+      String iniFile = "wb-profiles.ini";
+
+      List<String> toSearch = new ArrayList<>();
+      if (WbManager.getInstance().isConsoleMode())
+  		{
+        toSearch.add(iniFile);
+        toSearch.add(xmlFile);
+      }
+      else
+  		{
+        toSearch.add(xmlFile);
+        toSearch.add(iniFile);
+      }
+
+      for (String fname : toSearch)
+  		{
+        WbFile f = new WbFile(getConfigDir(), fname);
+        if (f.exists()) return f.getFullPath();
+      }
+
+      // no file exists, use the default
+      WbFile xml = new WbFile(getConfigDir(), xmlFile);
+			return xml.getFullPath();
 		}
 		String realFilename = FileDialogUtil.replaceConfigDir(profiles);
 
@@ -1460,22 +1483,31 @@ public class Settings
 
 	public Color getColor(String aColorKey, Color defaultColor)
 	{
-		String value = this.getProperty(aColorKey, null);
+		String value = getProperty(aColorKey, null);
 		if (value == null) return defaultColor;
-		String[] colors = value.split(",");
-		if (colors.length != 3) return defaultColor;
-		try
-		{
-			int r = StringUtil.getIntValue(colors[0]);
-			int g = StringUtil.getIntValue(colors[1]);
-			int b = StringUtil.getIntValue(colors[2]);
-			return new Color(r,g,b);
-		}
-		catch (Exception e)
-		{
-			return defaultColor;
-		}
+    Color result = stringToColor(value);
+    if (result == null) return defaultColor;
+    return result;
 	}
+
+  public static Color stringToColor(String value)
+  {
+    if (value == null) return null;
+    String[] colors = value.split(",");
+    if (colors.length != 3) return null;
+    try
+    {
+      int r = StringUtil.getIntValue(colors[0]);
+      int g = StringUtil.getIntValue(colors[1]);
+      int b = StringUtil.getIntValue(colors[2]);
+      return new Color(r, g, b);
+    }
+    catch (Exception e)
+    {
+      return null;
+    }
+
+  }
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Printing">
@@ -3031,16 +3063,21 @@ public class Settings
 
 	public void setColor(String key, Color c)
 	{
-		String value = null;
-		if (c != null)
-		{
-			int r = c.getRed();
-			int g = c.getGreen();
-			int b = c.getBlue();
-			value = Integer.toString(r) + "," + Integer.toString(g) + "," + Integer.toString(b);
-		}
-		this.setProperty(key, value);
+		this.setProperty(key, colorToString(c));
 	}
+
+  public static String colorToString(Color c)
+  {
+    String value = null;
+    if (c != null)
+    {
+      int r = c.getRed();
+      int g = c.getGreen();
+      int b = c.getBlue();
+      value = Integer.toString(r) + "," + Integer.toString(g) + "," + Integer.toString(b);
+    }
+    return value;
+  }
 
 	public int getWindowPosX(String windowClass)
 	{

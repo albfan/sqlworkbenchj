@@ -33,7 +33,6 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -854,9 +853,9 @@ public class ConnectionMgr
 	{
 		synchronized (profileLock)
 		{
-			if (this.profiles != null)
+			if (profiles != null)
 			{
-				this.profiles.clear();
+				profiles.clear();
 			}
 		}
 	}
@@ -869,54 +868,13 @@ public class ConnectionMgr
 	 */
 	private void readProfiles()
 	{
-		long start = System.currentTimeMillis();
-		LogMgr.logTrace("ConnectionMgr.readProfiles()", "readProfiles() called at " + start + " from " + Thread.currentThread().getName());
-
-		String filename = getFileName();
-		Object result = null;
-		try
+		synchronized (profileLock)
 		{
-			if (this.currentFilename != null)
-			{
-				LogMgr.logInfo("ConnectionMgr.readProfiles()", "Loading connection profiles from " + filename);
-			}
-			WbPersistence reader = new WbPersistence(filename);
-			result = reader.readObject();
-		}
-		catch (FileNotFoundException fne)
-		{
-			LogMgr.logDebug("ConnectionMgr.readProfiles()", filename + " not found. Creating new one.");
-			result = null;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ConnectionMgr.readProfiles()", "Error when reading connection profiles from " + filename, e);
-			result = null;
-		}
-
-		this.profiles = new ArrayList<>();
-
-		if (result instanceof Collection)
-		{
-			Collection c = (Collection)result;
-			this.profiles.addAll(c);
-		}
-		else if (result instanceof Object[])
-		{
-			// This is to support the very first version of the profile storage
-			// probably obsolete by know, but you never know...
-			Object[] l = (Object[])result;
-			for (Object prof : l)
-			{
-				this.profiles.add((ConnectionProfile)prof);
-			}
-		}
-		this.resetProfiles();
-		long end = System.currentTimeMillis();
-		long duration = end - start;
-		LogMgr.logTrace("ConnectionMgr.readProfiles()", "readProfiles() finished at " + end + " (" + duration + "ms) in " + Thread.currentThread().getName());
+      ProfileStorage reader = getStorageHandler();
+      profiles = reader.readProfiles(getFileName());
+      resetProfiles();
+    }
 	}
-
 
 	/**
 	 * Reset the changed status on the profiles.
@@ -939,10 +897,15 @@ public class ConnectionMgr
 	{
 		if (currentFilename == null)
 		{
-			return Settings.getInstance().getProfileStorage();
+			currentFilename = Settings.getInstance().getProfileStorage();
 		}
 		return currentFilename;
 	}
+
+  private ProfileStorage getStorageHandler()
+  {
+    return ProfileStorage.Factory.getStorageHandler(getFileName());
+  }
 
 	/**
 	 * Save the connectioin profiles to an external file.
@@ -952,6 +915,7 @@ public class ConnectionMgr
 	 * can be defined in the configuration properties.
 	 *
 	 * @see workbench.resource.Settings#getProfileStorage()
+   * @see #getFileName()
 	 * @see WbPersistence#writeObject(Object)
 	 */
 	public void saveProfiles()
@@ -960,22 +924,15 @@ public class ConnectionMgr
 		{
 			if (this.profiles != null)
 			{
+        String filename = getFileName();
 				if (Settings.getInstance().getCreateProfileBackup())
 				{
-					WbFile f = new WbFile(getFileName());
+					WbFile f = new WbFile(filename);
 					createBackup(f);
 				}
-
-				WbPersistence writer = new WbPersistence(getFileName());
-				try
-				{
-					writer.writeObject(this.profiles);
-					this.resetProfiles();
-				}
-				catch (IOException e)
-				{
-					LogMgr.logError("ConnectionMgr.saveProfiles()", "Error saving profiles", e);
-				}
+        ProfileStorage handler = getStorageHandler();
+        handler.saveProfiles(profiles, filename);
+        resetProfiles();
 			}
 		}
 	}

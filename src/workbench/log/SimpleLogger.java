@@ -27,7 +27,8 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.MissingFormatArgumentException;
 
-import workbench.util.*;
+import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -176,6 +177,7 @@ public class SimpleLogger
 
 	private CharSequence formatMessage(LogLevel logLevel, Object caller, CharSequence msg, Throwable th)
 	{
+    if (messageFormat == null) return msg;
 		try
 		{
 			if (th != null)

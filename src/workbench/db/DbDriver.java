@@ -69,6 +69,7 @@ public class DbDriver
 	private List<String> libraryList;
 	private boolean isInternal;
 	private String sampleUrl;
+  private boolean isDynamic;
 
 	public DbDriver()
 	{
@@ -93,6 +94,16 @@ public class DbDriver
 		this.setDriverClass(aClass);
 		this.setLibrary(aLibrary);
 	}
+
+  public boolean isDynamic()
+  {
+    return isDynamic;
+  }
+
+  public void setDynamic(boolean flag)
+  {
+    isDynamic = flag;
+  }
 
 	public boolean isInternal()
 	{
