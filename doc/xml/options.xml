@@ -1419,7 +1419,7 @@
 	<section id="options-sql-formatting">
 		<title>SQL Formatting</title>
       <para>
-        These options influence the behaviour of the SQL Formatter when
+        These options influence the behaviour of the internal SQL Formatter when
         <link linkend="editor-reformat-sql">reformatting</link> a SQL statement in the editor.
       </para>
 			<simplesect id="opt-sql-formatting-maxlength">
@@ -1642,6 +1642,51 @@ FROM person;</programlisting>
 				</para>
 			</blockquote></simplesect>
 	</section>
+
+	<section id="options-external-sql-formatter">
+		<title>External SQL Formatter</title>
+    <simplesect id="external-formatter-priority">
+      <title>Use of the external formatter</title>
+      <para>
+        When formatting a SQL statement, &wb-productname; first looks if a formatter for the current
+        DBMS is defined and active. If a formatter is found, that is used. If no formatter for the
+        current DBMS is found, and the "Default" external formatter is active, that is used.
+        If no active external formatter is found, the internal formatter is used.
+      </para>
+    </simplesect>
+    <simplesect id="external-formatter-exe">
+      <title>Executable</title>
+      <blockquote><para>
+        This is the full path to the formatter's program
+      </para></blockquote>
+    </simplesect>
+    <simplesect id="external-formatter-commandline">
+      <title>Command line</title>
+      <blockquote><para>
+        The command line configures the parameters passed to the formatter. The input file for the
+        formatter can be specified by using the placeholder <literal>${wbin}</literal>. If
+        no input file is specified on the command line, the SQL statement will be passed
+        through stdin. If the formatter writes the output to a file, the placeholder <literal>${wbout}</literal>
+        can be used in the command line. If no output file is specified the result will be read from stdout
+        of the process.
+      </para></blockquote>
+    </simplesect>
+    <simplesect id="external-formatter-scripts">
+      <title>Supports multiple statements</title>
+      <blockquote><para>
+        If this option is enabled, &wb-productname; send the selected text that
+        should be formatted as a single input to the formatter. If this option is disabled, &wb-productname;
+        will split up the text to be formatted and send each statement seperately to the formatter.
+      </para></blockquote>
+    </simplesect>
+    <simplesect id="external-formatter-enable">
+      <title>Enabled</title>
+      <blockquote><para>
+        This option can be used to turn of the usage of a formatter without deleting the definition.
+      </para></blockquote>
+    </simplesect>
+
+  </section>
 
 	<section id="options-sql-generation">
 		<title>SQL Generation</title>
