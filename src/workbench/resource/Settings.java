@@ -59,7 +59,9 @@ import workbench.interfaces.PropertyStorage;
 import workbench.log.LogMgr;
 
 import workbench.db.ConnectionProfile;
+import workbench.db.IniProfileStorage;
 import workbench.db.WbConnection;
+import workbench.db.XmlProfileStorage;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.lnf.FontScaler;
@@ -647,20 +649,12 @@ public class Settings
 		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
 		if (profiles == null)
 		{
-      String xmlFile = "WbProfiles.xml";
-      String iniFile = "wb-profiles.ini";
+      String xmlFile = XmlProfileStorage.DEFAULT_FILE_NAME;
+      String iniFile = IniProfileStorage.DEFAULT_FILE_NAME;
 
       List<String> toSearch = new ArrayList<>();
-      if (WbManager.getInstance().isConsoleMode())
-  		{
-        toSearch.add(iniFile);
-        toSearch.add(xmlFile);
-      }
-      else
-  		{
-        toSearch.add(xmlFile);
-        toSearch.add(iniFile);
-      }
+      toSearch.add(xmlFile);
+      toSearch.add(iniFile);
 
       for (String fname : toSearch)
   		{
@@ -672,6 +666,7 @@ public class Settings
       WbFile xml = new WbFile(getConfigDir(), xmlFile);
 			return xml.getFullPath();
 		}
+
 		String realFilename = FileDialogUtil.replaceConfigDir(profiles);
 
 		WbFile f = new WbFile(realFilename);

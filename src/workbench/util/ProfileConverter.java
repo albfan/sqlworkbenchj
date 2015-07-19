@@ -41,12 +41,17 @@ public class ProfileConverter
     IniProfileStorage ini = new IniProfileStorage();
     XmlProfileStorage xml = new XmlProfileStorage();
     WbFile in = new WbFile(args[0]);
+    if (!in.exists())
+    {
+      System.out.println("File " + in.getFullPath() + " not found!");
+      System.exit(2);
+    }
     WbFile out = new WbFile(args[1]);
 
     System.out.println("Converting " + in.getFullPath() + " to " + out.getFullPath());
 
     List<ConnectionProfile> profiles = null;
-    if (in.getExtension().equalsIgnoreCase("ini"))
+    if (in.getExtension().equalsIgnoreCase(IniProfileStorage.EXTENSION))
     {
       profiles = ini.readProfiles(in.getFullPath());
       xml.saveProfiles(profiles, out.getFullPath());

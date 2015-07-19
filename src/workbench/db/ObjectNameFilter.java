@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import workbench.log.LogMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -88,7 +89,7 @@ public class ObjectNameFilter
 	 *
 	 * @param expressions
 	 * @see #setExpressionList(java.lang.String)
-	 * @see #addExpression(java.lang.String) 
+	 * @see #addExpression(java.lang.String)
 	 */
 	public void setFilterExpressions(Collection<String> expressions)
 	{

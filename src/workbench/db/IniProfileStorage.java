@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -34,6 +35,7 @@ import java.util.TreeSet;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -46,8 +48,10 @@ import workbench.util.WbProperties;
 public class IniProfileStorage
   implements ProfileStorage
 {
-  private static final String PROP_PREFIX = "profile";
+  public static final String EXTENSION = "properties";
+  public static final String DEFAULT_FILE_NAME = "wb-profiles." + EXTENSION;
 
+  private static final String PROP_PREFIX = "profile";
   private static final String PROP_NAME = ".name";
   private static final String PROP_URL = ".url";
   private static final String PROP_PWD = ".pwd";
@@ -87,6 +91,8 @@ public class IniProfileStorage
   private static final String PROP_COPY_PROPS = ".copy.props";
   private static final String PROP_CONN_PROPS = ".connection.properties";
   private static final String PROP_INFO_COLOR = ".info.color";
+  private static final String PROP_SCHEMA_FILTER = ".schema.filter";
+  private static final String PROP_CATALOG_FILTER = ".catalog.filter";
 
   @Override
   public List<ConnectionProfile> readProfiles(String filename)
@@ -179,10 +185,9 @@ public class IniProfileStorage
       connectionTimeOut = Integer.valueOf(timeOut);
     }
 
-    /* TODO
-    ObjectNameFilter schemaFilter;
-    ObjectNameFilter catalogFilter;
-    */
+    ObjectNameFilter schemaFilter = getSchemaFilter(props, key);
+    ObjectNameFilter catalogFilter = getCatalogFilter(props, key);
+
     ConnectionProfile profile = new ConnectionProfile();
     profile.setName(name);
     profile.setUsername(user);
@@ -222,6 +227,8 @@ public class IniProfileStorage
     profile.setCopyExtendedPropsToSystem(copyProps);
     profile.setConnectionProperties(connProps);
     profile.setInfoDisplayColor(color);
+    profile.setSchemaFilter(schemaFilter);
+    profile.setCatalogFilter(catalogFilter);
 
     return profile;
   }
@@ -231,11 +238,13 @@ public class IniProfileStorage
   {
     LogMgr.logDebug("IniProfileStorage.saveProfiles()", "Saving profiles to: " + filename);
     WbProperties props = new WbProperties(2);
+
     for (int i=0; i < profiles.size(); i++)
     {
       String key = Integer.toString(i + 1);
       storeProfile(key, profiles.get(i), props);
     }
+
     try
     {
       props.saveToFile(new WbFile(filename));
@@ -265,7 +274,7 @@ public class IniProfileStorage
     props.setProperty(PROP_PREFIX + key + PROP_MACROFILE, profile.getMacroFilename());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_CONNECT, profile.getPostConnectScript());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_DISCONNECT, profile.getPreDisconnectScript());
-    props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_IDLE, profile.getIdString());
+    props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_IDLE, profile.getIdleScript());
     props.setProperty(PROP_PREFIX + key + PROP_AUTOCOMMMIT, profile.getAutocommit());
     props.setProperty(PROP_PREFIX + key + PROP_STORECACHE, profile.getStoreCacheLocally());
     props.setProperty(PROP_PREFIX + key + PROP_ROLLBACK_DISCONNECT, profile.getRollbackBeforeDisconnect());
@@ -300,6 +309,22 @@ public class IniProfileStorage
       props.setProperty(PROP_PREFIX + key + PROP_CONNECTION_TIMEOUT, timeout.intValue());
     }
 
+    ObjectNameFilter filter = profile.getSchemaFilter();
+    if (filter != null)
+    {
+      String expr = getFilterString(filter);
+      props.setProperty(PROP_PREFIX + key + PROP_SCHEMA_FILTER, expr);
+      props.setProperty(PROP_PREFIX + key + PROP_SCHEMA_FILTER + ".include", filter.isInclusionFilter());
+    }
+
+    filter = profile.getCatalogFilter();
+    if (filter != null)
+    {
+      String expr = getFilterString(filter);
+      props.setProperty(PROP_PREFIX + key + PROP_CATALOG_FILTER, expr);
+      props.setProperty(PROP_PREFIX + key + PROP_CATALOG_FILTER+ ".include", filter.isInclusionFilter());
+    }
+
     String xml = toXML(profile.getConnectionProperties());
     props.setProperty(PROP_PREFIX + key + PROP_CONN_PROPS, xml);
   }
@@ -315,8 +340,9 @@ public class IniProfileStorage
       String xml = out.toString("ISO-8859-1");
       return xml.replaceAll(StringUtil.REGEX_CRLF, "");
     }
-    catch (Exception ex)
+    catch (Throwable th)
     {
+      LogMgr.logError("IniProfileStorage.toXM()", "Could not convert connection properties to XML", th);
       return null;
     }
   }
@@ -332,8 +358,9 @@ public class IniProfileStorage
       props.loadFromXML(in);
       return props;
     }
-    catch (Exception ex)
+    catch (Throwable th)
     {
+      LogMgr.logError("IniProfileStorage.toProperties()", "Could not convert XML properties", th);
       return null;
     }
   }
@@ -351,5 +378,48 @@ public class IniProfileStorage
       }
     }
     return uniqueKeys;
+  }
+
+  private ObjectNameFilter getSchemaFilter(WbProperties props, String key)
+  {
+    return getFilter(props, key, PROP_SCHEMA_FILTER);
+  }
+
+  private ObjectNameFilter getCatalogFilter(WbProperties props, String key)
+  {
+    return getFilter(props, key, PROP_CATALOG_FILTER);
+  }
+
+  private ObjectNameFilter getFilter(WbProperties props, String key, String prop)
+  {
+    String filterList = props.getProperty(PROP_PREFIX + key + prop);
+    if (StringUtil.isBlank(filterList)) return null;
+    boolean inclusion = props.getBoolProperty(PROP_PREFIX + key + prop + ".include", false);
+    ObjectNameFilter filter = new ObjectNameFilter();
+    filter.setExpressionList(filterList);
+    filter.setInclusionFilter(inclusion);
+    return filter;
+  }
+
+  private String getFilterString(ObjectNameFilter filter)
+  {
+    if (filter == null) return null;
+    Collection<String> expressions = filter.getFilterExpressions();
+    if (CollectionUtil.isEmpty(expressions)) return null;
+    String result = "";
+    for (String exp : expressions)
+    {
+      if (result.length() > 0) result += ";";
+
+      if (exp.indexOf(';') > -1)
+      {
+        result += "\"" + exp + "\"";
+      }
+      else
+      {
+        result += exp;
+      }
+    }
+    return result;
   }
 }

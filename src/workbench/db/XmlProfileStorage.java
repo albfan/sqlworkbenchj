@@ -19,7 +19,6 @@
  */
 package workbench.db;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,24 +35,17 @@ import workbench.util.WbPersistence;
 public class XmlProfileStorage
   implements ProfileStorage
 {
+  public static final String DEFAULT_FILE_NAME = "WbProfiles.xml";
 
   @Override
   public List<ConnectionProfile> readProfiles(String filename)
   {
-    long start = System.currentTimeMillis();
-    LogMgr.logTrace("XmlProfileStorage.readProfiles()", "readProfiles() called at " + start + " from " + Thread.currentThread().getName());
-
     Object result = null;
     try
     {
       LogMgr.logInfo("XmlProfileStorage.readProfiles()", "Loading connection profiles from " + filename);
       WbPersistence reader = new WbPersistence(filename);
       result = reader.readObject();
-    }
-    catch (FileNotFoundException fne)
-    {
-      LogMgr.logDebug("XmlProfileStorage.readProfiles()", filename + " not found. Creating new one.");
-      result = null;
     }
     catch (Exception e)
     {
@@ -78,9 +70,6 @@ public class XmlProfileStorage
         profiles.add((ConnectionProfile)prof);
       }
     }
-    long end = System.currentTimeMillis();
-    long duration = end - start;
-    LogMgr.logTrace("XmlProfileStorage.readProfiles()", "readProfiles() finished at " + end + " (" + duration + "ms) in " + Thread.currentThread().getName());
     return profiles;
   }
 

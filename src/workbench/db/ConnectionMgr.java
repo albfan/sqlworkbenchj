@@ -871,7 +871,31 @@ public class ConnectionMgr
 		synchronized (profileLock)
 		{
       ProfileStorage reader = getStorageHandler();
-      profiles = reader.readProfiles(getFileName());
+      String fname = getFileName();
+      WbFile f = new WbFile(fname);
+
+      if (f.exists())
+      {
+        long start = System.currentTimeMillis();
+        LogMgr.logTrace("ConnectionMgr.readProfiles()", "readProfiles() called at " + start + " from " + Thread.currentThread().getName());
+
+        profiles = reader.readProfiles(fname);
+
+        long end = System.currentTimeMillis();
+        long duration = end - start;
+        LogMgr.logTrace("XmlProfileStorage.readProfiles()", "readProfiles() finished at " + end + " (" + duration + "ms) in " + Thread.currentThread().getName());
+      }
+      else
+      {
+        LogMgr.logDebug("ConnectionMgr.readProfiles", fname + " not found. Creating new one.");
+      }
+
+      if (profiles == null)
+      {
+        // first time start, or empty config dir
+        profiles = new ArrayList<>();
+      }
+
       resetProfiles();
     }
 	}

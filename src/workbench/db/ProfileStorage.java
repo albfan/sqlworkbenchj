@@ -39,7 +39,7 @@ public interface ProfileStorage
       WbFile storage = new WbFile(filename);
       ProfileStorage reader = null;
       String extension = storage.getExtension();
-      if ("ini".equalsIgnoreCase(extension) || "properties".equalsIgnoreCase(extension))
+      if (IniProfileStorage.EXTENSION.equalsIgnoreCase(extension))
       {
         reader = new IniProfileStorage();
       }
