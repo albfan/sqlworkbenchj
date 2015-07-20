@@ -38,6 +38,8 @@ import workbench.util.StringUtil;
  */
 public class ObjectLister
 {
+  private String schemaUsed = null;
+  private String catalogUsed = null;
 
 	public DataStore getSelectableObjects(ArgumentParser cmdLine, String userInput, WbConnection connection)
 		throws SQLException
@@ -107,6 +109,9 @@ public class ObjectLister
 
 		List<String> objectFilters = StringUtil.stringToList(objects, ",", true, true, false, true);
 
+    schemaUsed = schema;
+    catalogUsed = catalog;
+
 		for (String filter : objectFilters)
 		{
 			// Create a tableidentifier for parsing e.g. parameters
@@ -125,6 +130,15 @@ public class ObjectLister
 			}
 			tcatalog = connection.getMetadata().adjustObjectnameCase(tcatalog);
 
+      if (schemaUsed != null && StringUtil.stringsAreNotEqual(schemaUsed, tschema))
+      {
+        schemaUsed = null;
+      }
+      if (catalogUsed != null && StringUtil.stringsAreNotEqual(catalogUsed, tcatalog))
+      {
+        catalogUsed = null;
+      }
+
 			String tname = tbl.getTableName();
 
 			DataStore ds = connection.getMetadata().getObjects(tcatalog, tschema, tname, types);
@@ -141,4 +155,15 @@ public class ObjectLister
 		}
 		return resultList;
 	}
+
+  public String getSchemaUsed()
+  {
+    return schemaUsed;
+  }
+
+  public String getCatalogUsed()
+  {
+    return catalogUsed;
+  }
+
 }

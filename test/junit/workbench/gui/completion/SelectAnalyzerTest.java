@@ -317,6 +317,7 @@ public class SelectAnalyzerTest
 		assertEquals("#some_schema", analyzer.getSchemaForTableList());
 	}
 
+  @Test
 	public void testOrderBy()
 	{
 		String sql =
@@ -335,4 +336,19 @@ public class SelectAnalyzerTest
 		analyzer.checkContext();
 		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
 	}
+
+  @Test
+  public void testJoinColumns()
+  {
+    String sql =
+      "select * \n" +
+      "from orders as o\n" +
+      "  join orderentries as oe on oe. = o.pk";
+    int pos = sql.indexOf("on oe.") + 6;
+    SelectAnalyzer analyzer = new SelectAnalyzer(null, sql, pos);
+    analyzer.checkContext();
+    assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
+    assertNotNull(analyzer.getTableForColumnList());
+    assertEquals("orderentries", analyzer.getTableForColumnList().getTableName().toLowerCase());
+  }
 }

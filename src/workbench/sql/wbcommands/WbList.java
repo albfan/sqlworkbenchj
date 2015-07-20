@@ -93,6 +93,15 @@ public class WbList
 			resultList.setGeneratingSql(sql);
 			resultList.sort(DbMetadata.getTableListSort());
 			result.addDataStore(resultList);
+
+      if (currentConnection.getDbSettings().supportsSchemas() && lister.getSchemaUsed() != null)
+      {
+        currentConnection.getObjectCache().addTableList(resultList, lister.getSchemaUsed());
+      }
+      else if (currentConnection.getDbSettings().supportsCatalogs()&& lister.getCatalogUsed() != null)
+      {
+        currentConnection.getObjectCache().addTableList(resultList, lister.getCatalogUsed());
+      }
 		}
 		return result;
 	}

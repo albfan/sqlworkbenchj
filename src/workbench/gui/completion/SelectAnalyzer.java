@@ -138,7 +138,7 @@ public class SelectAnalyzer
 
 		if (joinPos > 0 && inTableList)
 		{
-			int joinState = inJoinONPart();
+			int joinState = inJoinONPart(tables);
 			if (joinState == JOIN_ON_COLUMN_LIST)
 			{
 				inTableList = false;
@@ -198,7 +198,6 @@ public class SelectAnalyzer
 			}
 
 			this.addAllMarker = !afterWhere;
-			char catalogSep = SqlUtil.getCatalogSeparator(dbConnection);
 			char schemaSep = SqlUtil.getSchemaSeparator(dbConnection);
 
 			// check if the current qualifier is either one of the
@@ -208,7 +207,7 @@ public class SelectAnalyzer
 			String table = null;
 			if (currentWord != null)
 			{
-				int pos = currentWord.indexOf(catalogSep);
+				int pos = currentWord.indexOf(catalogSeparator);
 				if (pos == -1)
 				{
 					pos = currentWord.indexOf(schemaSep);
@@ -222,7 +221,7 @@ public class SelectAnalyzer
 
 			if (table != null)
 			{
-				currentAlias = findAlias(table, tables, catalogSep, schemaSep);
+				currentAlias = findAlias(table, tables, catalogSeparator, schemaSep);
 
 				if (currentAlias != null)
 				{
@@ -238,7 +237,7 @@ public class SelectAnalyzer
 					{
 						for (TableAlias outer : outerTables)
 						{
-							if (outer.isTableOrAlias(table, catalogSep, schemaSep))
+							if (outer.isTableOrAlias(table, catalogSeparator, schemaSep))
 							{
 								tableForColumnList = outer.getTable();
 								currentAlias = outer;
@@ -249,7 +248,7 @@ public class SelectAnalyzer
 			}
 			else if (count == 1)
 			{
-				TableAlias tbl = new TableAlias(tables.get(0).getObjectName(), null, catalogSep, schemaSep);
+				TableAlias tbl = new TableAlias(tables.get(0).getObjectName(), null, catalogSeparator, schemaSep);
 				tableForColumnList = tbl.getTable();
 			}
 
@@ -260,7 +259,7 @@ public class SelectAnalyzer
 				this.elements = new ArrayList();
 				for (Alias entry : tables)
 				{
-					TableAlias tbl = new TableAlias(entry.getObjectName(), entry.getAlias(), catalogSep, schemaSep);
+					TableAlias tbl = new TableAlias(entry.getObjectName(), entry.getAlias(), catalogSeparator, schemaSep);
 					this.elements.add(tbl);
 					setAppendDot(true);
 				}
@@ -281,14 +280,14 @@ public class SelectAnalyzer
 		}
 	}
 
-	private TableAlias findAlias(String toSearch, List<Alias> possibleTables, char catalogSeparator, char schemaSeparator)
+	private TableAlias findAlias(String toSearch, List<Alias> possibleTables, char catalogSep, char schemaSeparator)
 	{
 		for (Alias element : possibleTables)
 		{
-			TableAlias tbl = new TableAlias(element.getObjectName(), element.getAlias(), catalogSeparator, schemaSeparator);
+			TableAlias tbl = new TableAlias(element.getObjectName(), element.getAlias(), catalogSep, schemaSeparator);
 			tbl.setAlias(element.getAlias());
 
-			if (tbl.isTableOrAlias(toSearch, catalogSeparator, schemaSeparator))
+			if (tbl.isTableOrAlias(toSearch, catalogSep, schemaSeparator))
 			{
 				return tbl;
 			}
@@ -296,7 +295,7 @@ public class SelectAnalyzer
 		return null;
 	}
 
-	private int inJoinONPart()
+	private int inJoinONPart(List<Alias> tablesInSelect)
 	{
 		int result = NO_JOIN_ON;
 		try
@@ -315,6 +314,22 @@ public class SelectAnalyzer
 					{
 						if (cursorPos >= token.getCharEnd()) result = JOIN_ON_COLUMN_LIST;
 					}
+          else if (result == JOIN_ON_COLUMN_LIST && cursorPos <= token.getCharBegin())
+          {
+            String word = getCurrentWord();
+            if (word != null && word.endsWith(".") && word.length() > 1)
+            {
+              word = word.substring(0, word.length() - 1);
+              char schemaSep = SqlUtil.getSchemaSeparator(dbConnection);
+              TableAlias tbl = findAlias(word, tablesInSelect, catalogSeparator, schemaSep);
+              if (tbl != null)
+              {
+                tableForColumnList = tbl.getTable();
+                break;
+              }
+            }
+            break;
+          }
 					else if (SqlUtil.getJoinKeyWords().contains(t))
 					{
 						if (lastToken != null && cursorPos > lastToken.getCharEnd() && cursorPos <= token.getCharBegin() &&
