@@ -917,6 +917,12 @@ public class ConnectionMgr
 		}
 	}
 
+  public String getProfilesPath()
+  {
+    WbFile f = new WbFile(getFileName());
+    return f.getFullPath();
+  }
+  
 	private String getFileName()
 	{
 		if (currentFilename == null)

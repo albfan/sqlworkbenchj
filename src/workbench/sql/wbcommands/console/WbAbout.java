@@ -29,6 +29,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ConnectionInfoBuilder;
+import workbench.db.ConnectionMgr;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -73,6 +74,9 @@ public class WbAbout
 
 		WbFile f = Settings.getInstance().getConfigFile();
 		String s = ResourceMgr.getFormattedString("LblSettingsLocation", f.getFullPath());
+		result.addMessage(s);
+
+		s = ResourceMgr.getFormattedString("LblProfilesLocation", ConnectionMgr.getInstance().getProfilesPath());
 		result.addMessage(s);
 
 		f = LogMgr.getLogfile();
