@@ -189,6 +189,14 @@ public class SelectAnalyzer
 				return;
 			}
 
+			if (afterOrder)
+			{
+				this.elements = getColumnsForOrderBy();
+				this.addAllMarker = true;
+				this.title = ResourceMgr.getString("TxtTitleColumns");
+				return;
+			}
+
 			if (afterHaving)
 			{
 				this.elements = getColumnsForHaving();
@@ -370,6 +378,11 @@ public class SelectAnalyzer
 			LogMgr.logError("SelectAnalyzer.inJoinONPart()", "Error parsing SQL Statement!", e);
 		}
 		return result;
+	}
+
+	private List getColumnsForOrderBy()
+	{
+		return SqlUtil.getSelectColumns(this.sql, false, dbConnection);
 	}
 
 	private List getColumnsForHaving()
