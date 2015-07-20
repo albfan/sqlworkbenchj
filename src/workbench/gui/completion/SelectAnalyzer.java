@@ -330,7 +330,12 @@ public class SelectAnalyzer
               word = word.substring(0, word.length() - 1);
               char schemaSep = SqlUtil.getSchemaSeparator(dbConnection);
               TableAlias tbl = findAlias(word, tablesInSelect, catalogSeparator, schemaSep);
-              if (tbl != null)
+              if (tbl == null)
+              {
+                // no alias found, assume the current word is a schema name
+                result = JOIN_ON_TABLE_LIST;
+              }
+              else
               {
                 tableForColumnList = tbl.getTable();
                 break;

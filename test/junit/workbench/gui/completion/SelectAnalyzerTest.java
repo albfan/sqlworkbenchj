@@ -351,4 +351,24 @@ public class SelectAnalyzerTest
     assertNotNull(analyzer.getTableForColumnList());
     assertEquals("orderentries", analyzer.getTableForColumnList().getTableName().toLowerCase());
   }
+
+  @Test
+  public void testJoinTables()
+  {
+    String sql =
+      "select * \n" +
+      "from orders as o\n" +
+      "  join orderentries as oe on  = o.pk";
+    int pos = sql.indexOf("on ") + 3;
+    SelectAnalyzer analyzer = new SelectAnalyzer(null, sql, pos);
+    analyzer.checkContext();
+    assertEquals(BaseAnalyzer.CONTEXT_FROM_LIST, analyzer.getContext());
+    List data = analyzer.getData();
+    assertNotNull(data);
+    assertEquals(2, data.size());
+    TableAlias t = (TableAlias)data.get(0);
+    assertEquals("orders", t.getObjectName());
+    t = (TableAlias)data.get(1);
+    assertEquals("orderentries", t.getObjectName());
+  }
 }
