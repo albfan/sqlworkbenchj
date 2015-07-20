@@ -106,11 +106,9 @@ public class RegexErrorPositionReader
       result.setErrorMessage(msg);
 			return result;
 		}
-		if (lineInfoPattern != null || columnInfoPattern != null)
+    else if (lineInfoPattern != null || columnInfoPattern != null)
 		{
-      ErrorDescriptor result = getPositionFromLineAndColumn(msg, sql);
-      result.setErrorMessage(msg);
-			return result;
+      return getPositionFromLineAndColumn(msg, sql);
 		}
 		return null;
 	}
@@ -144,6 +142,8 @@ public class RegexErrorPositionReader
 	private ErrorDescriptor getPositionFromLineAndColumn(String msg, String sql)
 	{
 		ErrorDescriptor result = new ErrorDescriptor();
+    result.setErrorMessage(msg);
+
 		int line = getValueFromRegex(msg, lineInfoPattern);
 		int column = getValueFromRegex(msg, columnInfoPattern);
 
