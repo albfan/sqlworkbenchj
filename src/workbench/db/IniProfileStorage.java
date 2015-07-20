@@ -240,9 +240,8 @@ public class IniProfileStorage
     LogMgr.logDebug("IniProfileStorage.saveProfiles()", "Saving profiles to: " + filename);
     WbProperties props = new WbProperties(2);
 
-    // A comparator that sorts the "name" attribute at the first place
-    // inside the keys for one profile
-    // this is just for convenience, so that it's easier to read the properties file
+    // This comparator sorts the "name" attribute at the first place inside the keys for one profile
+    // This is just for convenience, so that it's easier to read the properties file
     Comparator<String> comp = new Comparator<String>()
     {
       @Override
@@ -267,7 +266,7 @@ public class IniProfileStorage
 
     for (int i=0; i < profiles.size(); i++)
     {
-      String key = Integer.toString(i + 1);
+      String key = StringUtil.formatInt(i + 1, 4).toString();
       storeProfile(key, profiles.get(i), props);
     }
 
@@ -288,29 +287,26 @@ public class IniProfileStorage
     key = "." + key;
     props.setProperty(PROP_PREFIX + key + PROP_URL, profile.getUrl());
     props.setProperty(PROP_PREFIX + key + PROP_NAME, profile.getName());
-//    props.setComment(PROP_PREFIX + key + PROP_NAME, "# The connection profile " + profile.getName());
     props.setProperty(PROP_PREFIX + key + PROP_DRIVERCLASS, profile.getDriverclass());
     props.setProperty(PROP_PREFIX + key + PROP_DRIVERNAME, profile.getDriverName());
-    if (StringUtil.stringsAreNotEqual(profile.getGroup(), defaultValues.getGroup()))
-    {
-      props.setProperty(PROP_PREFIX + key + PROP_GROUP, profile.getGroup());
-    }
     props.setProperty(PROP_PREFIX + key + PROP_USERNAME, profile.getUsername());
+    props.setProperty(PROP_PREFIX + key + PROP_AUTOCOMMMIT, profile.getAutocommit());
+
     if (profile.getStorePassword())
     {
       props.setProperty(PROP_PREFIX + key + PROP_PWD, profile.getPassword());
+      props.setProperty(PROP_PREFIX + key + PROP_STORE_PWD, profile.getStorePassword());
     }
+
     props.setProperty(PROP_PREFIX + key + PROP_ICON, profile.getIcon());
     props.setProperty(PROP_PREFIX + key + PROP_WORKSPACE, profile.getWorkspaceFile());
     props.setProperty(PROP_PREFIX + key + PROP_ALT_DELIMITER, profile.getAlternateDelimiterString());
     props.setProperty(PROP_PREFIX + key + PROP_MACROFILE, profile.getMacroFilename());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_CONNECT, profile.getPostConnectScript());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_DISCONNECT, profile.getPreDisconnectScript());
-    props.setProperty(PROP_PREFIX + key + PROP_AUTOCOMMMIT, profile.getAutocommit());
 
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_STORECACHE, profile.getStoreCacheLocally(), defaultValues.getStoreCacheLocally());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_ROLLBACK_DISCONNECT, profile.getRollbackBeforeDisconnect(), defaultValues.getRollbackBeforeDisconnect());
-
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_SEPARATECONNECTION, profile.getUseSeparateConnectionPerTab(), defaultValues.getUseSeparateConnectionPerTab());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_IGNOREDROPERRORS, profile.getIgnoreDropErrors(), defaultValues.getIgnoreDropErrors());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_TRIMCHARDATA, profile.getTrimCharData(), defaultValues.getTrimCharData());
@@ -325,6 +321,11 @@ public class IniProfileStorage
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_REMOVE_COMMENTS, profile.getRemoveComments(), defaultValues.getRemoveComments());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_REMEMEMBER_SCHEMA, profile.getStoreExplorerSchema(), defaultValues.getStoreExplorerSchema());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_HIDE_WARNINGS, profile.isHideWarnings(), defaultValues.isHideWarnings());
+
+    if (StringUtil.stringsAreNotEqual(profile.getGroup(), defaultValues.getGroup()))
+    {
+      props.setProperty(PROP_PREFIX + key + PROP_GROUP, profile.getGroup());
+    }
 
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_IDLE, profile.getIdleScript());
     if (profile.getIdleTime() != defaultValues.getIdleTime())
