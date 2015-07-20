@@ -27,6 +27,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -54,7 +55,7 @@ public class IniProfileStorage
   private static final String PROP_PREFIX = "profile";
   private static final String PROP_NAME = ".name";
   private static final String PROP_URL = ".url";
-  private static final String PROP_PWD = ".pwd";
+  private static final String PROP_PWD = ".password";
   private static final String PROP_USERNAME = ".username";
   private static final String PROP_DRIVERNAME = ".drivername";
   private static final String PROP_DRIVERCLASS = ".driverclass";
@@ -239,6 +240,31 @@ public class IniProfileStorage
     LogMgr.logDebug("IniProfileStorage.saveProfiles()", "Saving profiles to: " + filename);
     WbProperties props = new WbProperties(2);
 
+    // A comparator that sorts the "name" attribute at the first place
+    // inside the keys for one profile
+    // this is just for convenience, so that it's easier to read the properties file
+    Comparator<String> comp = new Comparator<String>()
+    {
+      @Override
+      public int compare(String o1, String o2)
+      {
+        int pos1 = o1.indexOf('.', o1.indexOf('.') + 1);
+        int pos2 = o2.indexOf('.', o2.indexOf('.') + 1);
+
+        String base1 = o1.substring(0, pos1);
+        String base2 = o2.substring(0, pos2);
+
+        if (base1.equals(base2))
+        {
+          if (o1.endsWith(PROP_NAME) && !o2.endsWith(PROP_NAME)) return -1;
+          if (!o1.endsWith(PROP_NAME) && o2.endsWith(PROP_NAME)) return 1;
+        }
+        return o1.compareTo(o2);
+      }
+    };
+
+    props.setSortComparator(comp);
+
     for (int i=0; i < profiles.size(); i++)
     {
       String key = Integer.toString(i + 1);
@@ -257,12 +283,18 @@ public class IniProfileStorage
 
   private void storeProfile(String key, ConnectionProfile profile, WbProperties props)
   {
+    ConnectionProfile defaultValues = new ConnectionProfile();
+
     key = "." + key;
     props.setProperty(PROP_PREFIX + key + PROP_URL, profile.getUrl());
     props.setProperty(PROP_PREFIX + key + PROP_NAME, profile.getName());
+//    props.setComment(PROP_PREFIX + key + PROP_NAME, "# The connection profile " + profile.getName());
     props.setProperty(PROP_PREFIX + key + PROP_DRIVERCLASS, profile.getDriverclass());
     props.setProperty(PROP_PREFIX + key + PROP_DRIVERNAME, profile.getDriverName());
-    props.setProperty(PROP_PREFIX + key + PROP_GROUP, profile.getGroup());
+    if (StringUtil.stringsAreNotEqual(profile.getGroup(), defaultValues.getGroup()))
+    {
+      props.setProperty(PROP_PREFIX + key + PROP_GROUP, profile.getGroup());
+    }
     props.setProperty(PROP_PREFIX + key + PROP_USERNAME, profile.getUsername());
     if (profile.getStorePassword())
     {
@@ -274,28 +306,31 @@ public class IniProfileStorage
     props.setProperty(PROP_PREFIX + key + PROP_MACROFILE, profile.getMacroFilename());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_CONNECT, profile.getPostConnectScript());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_DISCONNECT, profile.getPreDisconnectScript());
-    props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_IDLE, profile.getIdleScript());
     props.setProperty(PROP_PREFIX + key + PROP_AUTOCOMMMIT, profile.getAutocommit());
-    props.setProperty(PROP_PREFIX + key + PROP_STORECACHE, profile.getStoreCacheLocally());
-    props.setProperty(PROP_PREFIX + key + PROP_ROLLBACK_DISCONNECT, profile.getRollbackBeforeDisconnect());
-    props.setProperty(PROP_PREFIX + key + PROP_SEPARATECONNECTION, profile.getUseSeparateConnectionPerTab());
-    props.setProperty(PROP_PREFIX + key + PROP_IGNOREDROPERRORS, profile.getIgnoreDropErrors());
-    props.setProperty(PROP_PREFIX + key + PROP_TRIMCHARDATA, profile.getTrimCharData());
-    if (profile.getOracleSysDBA())
+
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_STORECACHE, profile.getStoreCacheLocally(), defaultValues.getStoreCacheLocally());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_ROLLBACK_DISCONNECT, profile.getRollbackBeforeDisconnect(), defaultValues.getRollbackBeforeDisconnect());
+
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_SEPARATECONNECTION, profile.getUseSeparateConnectionPerTab(), defaultValues.getUseSeparateConnectionPerTab());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_IGNOREDROPERRORS, profile.getIgnoreDropErrors(), defaultValues.getIgnoreDropErrors());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_TRIMCHARDATA, profile.getTrimCharData(), defaultValues.getTrimCharData());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_ORACLESYSDBA, profile.getOracleSysDBA(), defaultValues.getOracleSysDBA());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_DETECTOPENTRANSACTION, profile.getDetectOpenTransaction(), defaultValues.getDetectOpenTransaction());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_READONLY, profile.isReadOnly(), defaultValues.isReadOnly());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_PREVENT_NO_WHERE, profile.getPreventDMLWithoutWhere(), defaultValues.getPreventDMLWithoutWhere());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_CONFIRM_UPDATES, profile.getConfirmUpdates(), defaultValues.getConfirmUpdates());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_PROMPTUSERNAME, profile.getPromptForUsername(), defaultValues.getPromptForUsername());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_EMPTY_STRING_IS_NULL, profile.getEmptyStringIsNull(), defaultValues.getEmptyStringIsNull());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_INCLUDE_NULL_ON_INSERT, profile.getIncludeNullInInsert(), defaultValues.getIncludeNullInInsert());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_REMOVE_COMMENTS, profile.getRemoveComments(), defaultValues.getRemoveComments());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_REMEMEMBER_SCHEMA, profile.getStoreExplorerSchema(), defaultValues.getStoreExplorerSchema());
+    setNonDefaultProperty(props, PROP_PREFIX + key + PROP_HIDE_WARNINGS, profile.isHideWarnings(), defaultValues.isHideWarnings());
+
+    props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_IDLE, profile.getIdleScript());
+    if (profile.getIdleTime() != defaultValues.getIdleTime())
     {
-      props.setProperty(PROP_PREFIX + key + PROP_ORACLESYSDBA, profile.getOracleSysDBA());
+      props.setProperty(PROP_PREFIX + key + PROP_IDLE_TIME, Long.toString(profile.getIdleTime()));
     }
-    props.setProperty(PROP_PREFIX + key + PROP_DETECTOPENTRANSACTION, profile.getDetectOpenTransaction());
-    props.setProperty(PROP_PREFIX + key + PROP_READONLY, profile.isReadOnly());
-    props.setProperty(PROP_PREFIX + key + PROP_PREVENT_NO_WHERE, profile.getPreventDMLWithoutWhere());
-    props.setProperty(PROP_PREFIX + key + PROP_CONFIRM_UPDATES, profile.getConfirmUpdates());
-    props.setProperty(PROP_PREFIX + key + PROP_PROMPTUSERNAME, profile.getPromptForUsername());
-    props.setProperty(PROP_PREFIX + key + PROP_EMPTY_STRING_IS_NULL, profile.getEmptyStringIsNull());
-    props.setProperty(PROP_PREFIX + key + PROP_INCLUDE_NULL_ON_INSERT, profile.getEmptyStringIsNull());
-    props.setProperty(PROP_PREFIX + key + PROP_REMOVE_COMMENTS, profile.getRemoveComments());
-    props.setProperty(PROP_PREFIX + key + PROP_REMEMEMBER_SCHEMA, profile.getStoreExplorerSchema());
-    props.setProperty(PROP_PREFIX + key + PROP_HIDE_WARNINGS, profile.isHideWarnings());
-    props.setProperty(PROP_PREFIX + key + PROP_IDLE_TIME, Long.toString(profile.getIdleTime()));
     props.setProperty(PROP_PREFIX + key + PROP_INFO_COLOR, Settings.colorToString(profile.getInfoDisplayColor()));
 
     Integer fetchSize = profile.getDefaultFetchSize();
@@ -310,23 +345,31 @@ public class IniProfileStorage
     }
 
     ObjectNameFilter filter = profile.getSchemaFilter();
-    if (filter != null)
+    String expr = getFilterString(filter);
+    if (expr != null && filter != null)
     {
-      String expr = getFilterString(filter);
       props.setProperty(PROP_PREFIX + key + PROP_SCHEMA_FILTER, expr);
       props.setProperty(PROP_PREFIX + key + PROP_SCHEMA_FILTER + ".include", filter.isInclusionFilter());
     }
 
     filter = profile.getCatalogFilter();
-    if (filter != null)
+    expr = getFilterString(filter);
+    if (expr != null && filter != null)
     {
-      String expr = getFilterString(filter);
       props.setProperty(PROP_PREFIX + key + PROP_CATALOG_FILTER, expr);
       props.setProperty(PROP_PREFIX + key + PROP_CATALOG_FILTER+ ".include", filter.isInclusionFilter());
     }
 
     String xml = toXML(profile.getConnectionProperties());
     props.setProperty(PROP_PREFIX + key + PROP_CONN_PROPS, xml);
+  }
+
+  private void setNonDefaultProperty(WbProperties props, String key, boolean value, boolean defaultValue)
+  {
+    if (value != defaultValue)
+    {
+      props.setProperty(key, value);
+    }
   }
 
   private String toXML(Properties props)
@@ -404,6 +447,7 @@ public class IniProfileStorage
   private String getFilterString(ObjectNameFilter filter)
   {
     if (filter == null) return null;
+
     Collection<String> expressions = filter.getFilterExpressions();
     if (CollectionUtil.isEmpty(expressions)) return null;
     String result = "";

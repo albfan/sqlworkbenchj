@@ -34,7 +34,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,8 @@ public class WbProperties
 
 	private Object changeNotificationSource = null;
 	private boolean changed = false;
+
+  private Comparator<String> sortComparator = null;
 
 	protected WbProperties()
 	{
@@ -111,11 +114,23 @@ public class WbProperties
 		save(out, (WbProperties)null);
 	}
 
+  public void setSortComparator(Comparator<String> comp)
+  {
+    this.sortComparator = comp;
+  }
+
 	public synchronized void save(OutputStream out, WbProperties reference)
 		throws IOException
 	{
-		Object[] keys = this.keySet().toArray();
-		Arrays.sort(keys);
+		List<String> keys = new ArrayList<>(getKeys());
+    if (sortComparator == null)
+    {
+      Collections.sort(keys);
+    }
+    else
+    {
+      Collections.sort(keys, sortComparator);
+    }
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
 		String lastKey = null;
 		String key = null;
@@ -383,6 +398,11 @@ public class WbProperties
 	{
 		return comments.get(key);
 	}
+
+  public void setComment(String key, String comment)
+  {
+    comments.put(key, comment);
+  }
 
 	public void addPropertyDefinition(String line)
 	{
