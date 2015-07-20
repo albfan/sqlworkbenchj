@@ -94,4 +94,25 @@ public class RegexErrorPositionReaderTest
 		assertNotNull(error);
 		assertEquals(22, error.getErrorPosition());
 	}
+
+	@Test
+	public void testHana()
+	{
+//		RegexErrorPositionReader reader = new RegexErrorPositionReader("(?i)\\sline\\s[0-9]+", "(?i)\\scol\\s[0-9]+");
+		RegexErrorPositionReader reader = new RegexErrorPositionReader("(?i)\\(at pos [0-9]+\\)");
+		reader.setNumbersAreOneBased(false);
+		String msg = "SAP DBTech JDBC: [257] (at 63): sql syntax error: incorrect syntax near \"1\": line 3 col 45 (at pos 63)";
+
+		String sql =
+      "select *\n" +
+      "from foo\n" +
+      "where order_date >= current_date - interval '1' day\n" +
+      "and active = 1;";
+
+		ErrorDescriptor error = reader.getErrorPosition(sql, msg);
+		assertNotNull(error);
+//    assertEquals(3, error.getErrorLine());
+//    assertEquals(45, error.getErrorColumn());
+    System.out.println(error.getErrorPosition());
+	}
 }

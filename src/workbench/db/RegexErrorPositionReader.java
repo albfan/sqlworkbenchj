@@ -103,11 +103,14 @@ public class RegexErrorPositionReader
 		{
 			ErrorDescriptor result = new ErrorDescriptor();
 			result.setErrorOffset(getValueFromRegex(msg, positionPattern));
+      result.setErrorMessage(msg);
 			return result;
 		}
 		if (lineInfoPattern != null || columnInfoPattern != null)
 		{
-			return getPositionFromLineAndColumn(msg, sql);
+      ErrorDescriptor result = getPositionFromLineAndColumn(msg, sql);
+      result.setErrorMessage(msg);
+			return result;
 		}
 		return null;
 	}
