@@ -50,6 +50,7 @@ import workbench.db.firebird.FirebirdDomainReader;
 import workbench.db.h2database.H2ConstantReader;
 import workbench.db.h2database.H2DomainReader;
 import workbench.db.hana.HanaSequenceReader;
+import workbench.db.hana.HanaTableDefinitionReader;
 import workbench.db.hsqldb.HsqlTypeReader;
 import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ProcedureReader;
@@ -359,6 +360,7 @@ public class DbMetadata
     else if (productLower.equals("hdb"))
     {
       sequenceReader = new HanaSequenceReader(aConnection);
+      definitionReader = new HanaTableDefinitionReader(aConnection);
     }
 
 		if (schemaInfoReader == null)
@@ -2735,7 +2737,7 @@ public class DbMetadata
    * @see #retrieveTableTypes()
    * @see ObjectListExtender#supportedTypes()
    * @see SynonymReader#getSynonymTypeName()
-   * @see SequenceReader#getSequenceTypeName() 
+   * @see SequenceReader#getSequenceTypeName()
 	 */
 	public Collection<String> getObjectTypes()
 	{

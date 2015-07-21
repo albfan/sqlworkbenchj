@@ -127,7 +127,7 @@ public class JdbcTableDefinitionReader
 			}
 
       long start = System.currentTimeMillis();
-      rs = dbmeta.getJdbcMetaData().getColumns(catalog, schema, tablename, "%");
+      rs = getColumns(catalog, schema, tablename, "%");
       long duration = System.currentTimeMillis() - start;
 
       ResultSetMetaData rsmeta = rs.getMetaData();
@@ -232,6 +232,8 @@ public class JdbcTableDefinitionReader
         col.setDecimalDigits(digits);
         col.setPosition(position);
         columns.add(col);
+
+        processColumnsResultRow(rs, col);
       }
     }
     finally
@@ -244,6 +246,18 @@ public class JdbcTableDefinitionReader
     ColumnIdentifier.sortByPosition(columns);
 
     return columns;
+  }
+
+  protected void processColumnsResultRow(ResultSet rs, ColumnIdentifier col)
+    throws SQLException
+  {
+    // nothing done here
+  }
+  
+  protected ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
+    throws SQLException
+  {
+    return dbConnection.getSqlConnection().getMetaData().getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
   }
 
   private String getString(ResultSet rs, String colName, int colIndex, boolean useColumnNames)

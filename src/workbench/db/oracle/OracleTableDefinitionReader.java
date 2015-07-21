@@ -406,7 +406,7 @@ public class OracleTableDefinitionReader
 		stmt.setString(2, table);
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleMetadata.prepareColumnsStatement()", "Using: " + sql);
+			LogMgr.logDebug("OracleTableDefinitionReader.prepareColumnsStatement()", "Using: " + sql);
 		}
 		return stmt;
 	}
@@ -451,7 +451,7 @@ public class OracleTableDefinitionReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("OracleMetadata.getDblinkSchema()", "Error retrieving target schema for DBLINK " + dblink, e);
+			LogMgr.logError("OracleTableDefinitionReader.getDblinkSchema()", "Error retrieving target schema for DBLINK " + dblink, e);
 		}
 		finally
 		{
