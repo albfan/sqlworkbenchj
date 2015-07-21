@@ -64,13 +64,21 @@ public class FirebirdProcedureReaderTest
 
 		con.setAutoCommit(true);
 		String sql =
-			"CREATE PROCEDURE answer(a integer) \n" +
-			"RETURNS (the_answer   integer)  \n" +
+			"CREATE PROCEDURE aaa_answer(a integer) \n" +
+			"RETURNS (the_answer integer)  \n" +
 			"AS\n" +
 			"BEGIN \n" +
 			"  the_answer = 42; \n" +
 			"END;  \n" +
-			"/\n";
+			"/\n" +
+      "create procedure bbb_multiple(x integer, y integer) returns (a integer, b integer) \n" +
+      "as\n" +
+      "begin \n" +
+      "  a = x * 42;\n" +
+      "  b = y * 24;\n" +
+      "end; \n" +
+      "/\n" +
+      "";
 
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		con.setAutoCommit(false);
@@ -85,7 +93,9 @@ public class FirebirdProcedureReaderTest
 		if (con == null) return;
 
 		con.setAutoCommit(true);
-		TestUtil.executeScript(con, "drop procedure answer;");
+		TestUtil.executeScript(con,
+      "drop procedure aaa_answer;\n" +
+      "drop procedure bbb_multiple;");
 	}
 
 	@Test
@@ -99,9 +109,9 @@ public class FirebirdProcedureReaderTest
 		assertTrue(reader instanceof FirebirdProcedureReader);
 
 		List<ProcedureDefinition> procs = reader.getProcedureList(null, null, null);
-		assertEquals(1, procs.size());
+		assertEquals(2, procs.size());
 		ProcedureDefinition proc = procs.get(0);
-		assertEquals("ANSWER", proc.getProcedureName());
+		assertEquals("AAA_ANSWER", proc.getProcedureName());
 		DataStore cols = reader.getProcedureColumns(proc);
 
 		assertEquals(2, cols.getRowCount()); // one input parameter, one output parameter
@@ -117,9 +127,40 @@ public class FirebirdProcedureReaderTest
 		assertEquals("IN", type);
 
 		String sql = proc.getSource(con).toString();
-		System.out.println(sql);
-		assertTrue(sql.startsWith("CREATE PROCEDURE ANSWER (A INTEGER)"));
+//		System.out.println(sql);
+		assertTrue(sql.startsWith("CREATE PROCEDURE AAA_ANSWER (A INTEGER)"));
 		assertTrue(sql.contains("THE_ANSWER INTEGER"));
 		assertTrue(sql.contains("the_answer = 42;"));
+  }
+
+	@Test
+	public void testMultipleOut()
+		throws Exception
+	{
+		WbConnection con = FirebirdTestUtil.getFirebirdConnection();
+		assertNotNull("No connection available", con);
+
+		ProcedureReader reader = con.getMetadata().getProcedureReader();
+		assertTrue(reader instanceof FirebirdProcedureReader);
+
+		List<ProcedureDefinition> procs = reader.getProcedureList(null, null, null);
+		assertEquals(2, procs.size());
+		ProcedureDefinition proc = procs.get(1);
+		assertEquals("BBB_MULTIPLE", proc.getProcedureName());
+		DataStore cols = reader.getProcedureColumns(proc);
+
+		assertEquals(4, cols.getRowCount()); // two input parameter, two output parameter
+
+		String colName = cols.getValueAsString(0, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+		assertEquals("A", colName);
+
+		colName = cols.getValueAsString(1, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+		assertEquals("B", colName);
+
+		String sql = proc.getSource(con).toString();
+//    System.out.println(sql);
+		assertTrue(sql.startsWith(
+      "CREATE PROCEDURE BBB_MULTIPLE (X INTEGER, Y INTEGER)\n" +
+      "  RETURNS (A INTEGER, B INTEGER)"));
 	}
 }

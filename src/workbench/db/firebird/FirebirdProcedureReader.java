@@ -80,13 +80,20 @@ public class FirebirdProcedureReader
 				String ret = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
 				if ("OUT".equals(ret))
 				{
-					retType = "(" + name + " " + vartype + ")";
+          if (retType == null)
+          {
+            retType = "(" + name + " " + vartype;
+          }
+          else
+          {
+            retType += ", " + name + " " + vartype;
+          }
 				}
 				else
 				{
 					if (added > 0)
 					{
-						source.append(',');
+						source.append(", ");
 					}
 					else
 					{
@@ -101,8 +108,9 @@ public class FirebirdProcedureReader
 			if (added > 0) source.append(')');
 			if (retType != null)
 			{
-				source.append("\nRETURNS ");
+				source.append("\n  RETURNS ");
 				source.append(retType);
+        source.append(")");
 			}
 			source.append("\nAS\n");
 		}
