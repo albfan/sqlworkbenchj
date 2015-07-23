@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-                xmlns:wb-name-util="workbench.sql.NameUtil" 
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:wb-name-util="workbench.sql.NameUtil"
                 xmlns:wb-string-util="workbench.util.StringUtil"
                 xmlns:wb-sql-util="workbench.util.SqlUtil">
 <!--
@@ -268,7 +268,7 @@ Supported parameters:
       <xsl:variable name="unique">
         <xsl:if test="unique='true'">UNIQUE </xsl:if>
       </xsl:variable>
-      
+
       <xsl:variable name="prefix">
         <xsl:choose>
           <xsl:when test="$prefixIndexNames = 'false' or contains(name, $real-tablename)">
@@ -279,7 +279,7 @@ Supported parameters:
           </xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
-      
+
       <xsl:variable name="idx-name">
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname">
@@ -288,7 +288,7 @@ Supported parameters:
                 <xsl:value-of select="concat($prefix, 'index')"/>
               </xsl:when>
               <xsl:when test="name = $real-tablename">
-                <!-- 
+                <!--
                   Tables, indexes, views and other "relation" like objects share the same namespace
                   If for some reason the index name is the same as the table name, add the "_index" suffix
                   to avoid a name clash (this can happen if the XML report was generated from a different DBMS)
@@ -302,7 +302,7 @@ Supported parameters:
           </xsl:with-param>
         </xsl:call-template>
       </xsl:variable>
-      
+
       <xsl:text>CREATE </xsl:text>
       <xsl:value-of select="$unique"/>
       <xsl:text>INDEX </xsl:text>
@@ -611,11 +611,13 @@ Supported parameters:
           </xsl:if>
         </xsl:if>
       </xsl:when>
-      <xsl:when test="$type-id = 12">
-        <xsl:text>varchar(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
-      </xsl:when>
-      <xsl:when test="$type-id = -9"> <!-- NVARCHAR -->
-        <xsl:text>varchar(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
+      <xsl:when test="$type-id = 12 or $type-id = -9"> <!-- -9 is NVARCHAR -->
+        <xsl:if test="$precision &lt;= 10485760">
+          <xsl:text>varchar(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
+        </xsl:if>
+        <xsl:if test="$precision &gt; 10485760">
+          <xsl:text>text</xsl:text>
+        </xsl:if>
       </xsl:when>
       <xsl:otherwise>
           <xsl:value-of select="$dbms-type"/>
@@ -630,10 +632,10 @@ Supported parameters:
     </xsl:variable>
     <xsl:value-of select="wb-sql-util:escapeQuotes($trimmed)"/>
   </xsl:template>
-  
+
   <xsl:template name="write-object-name">
     <xsl:param name="objectname"/>
-    
+
     <xsl:variable name="lcletters">abcdefghijklmnopqrstuvwxyz</xsl:variable>
     <xsl:variable name="ucletters">ABCDEFGHIJKLMNOPQRSTUVWXYZ</xsl:variable>
 
@@ -675,7 +677,7 @@ Supported parameters:
         <xsl:value-of select="$clean-name"/>
       </xsl:otherwise>
     </xsl:choose>
-   
+
   </xsl:template>
 
 </xsl:stylesheet>
