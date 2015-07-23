@@ -873,47 +873,21 @@
       </replacefilter>
       <replacefilter>
         <replacetoken>"UPDATE"|</replacetoken>
-        <replacevalue>"UPDATE"|"UPDATE STATISTICS"|</replacevalue>
+        <replacevalue>"UPDATE"|"(UPDATE{wsp}STATISTICS)"|</replacevalue>
       </replacefilter>
-      <replacefilter>
-        <replacetoken>(MATERIALIZED{wsp}VIEW)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(FLASHBACK{wsp}ARCHIVE)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(START{wsp}WITH)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(MATERIALIZED{wsp}VIEW{wsp}LOG)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(PACKAGE{wsp}BODY)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(TYPE{wsp}BODY)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(SNAPSHOT{wsp}LOG)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(DISTINCT{wsp}ON)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(CONNECT{wsp}BY)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(START{wsp}WITH)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(FOREIGN{wsp}DATA{wsp}WRAPPER)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(CREATE{wsp}OR{wsp}REPLACE)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(CREATE{wsp}OR{wsp}ALTER)|</replacetoken>
-      </replacefilter>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW)|"/>
+      <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
+      <replacefilter token="(START{wsp}WITH)|"/>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
+      <replacefilter token="(PACKAGE{wsp}BODY)|"/>
+      <replacefilter token="(TYPE{wsp}BODY)|"/>
+      <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
+      <replacefilter token="(DISTINCT{wsp}ON)|"/>
+      <replacefilter token="(CONNECT{wsp}BY)|"/>
+      <replacefilter token="(START{wsp}WITH)|"/>
+      <replacefilter token="(FOREIGN{wsp}DATA{wsp}WRAPPER)|"/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}REPLACE)|"/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
       <replacefilter>
         <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")]]></replacetoken>
         <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(\[[^\r\n\t\f\[]*\]) ]]></replacevalue>
@@ -937,51 +911,21 @@
         <replacetoken>StandardLexer</replacetoken>
         <replacevalue>MySQLLexer</replacevalue>
       </replacefilter>
-      <replacefilter>
-        <replacetoken>(MATERIALIZED{wsp}VIEW)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(FLASHBACK{wsp}ARCHIVE)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(START{wsp}WITH)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(MATERIALIZED{wsp}VIEW{wsp}LOG)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(PACKAGE{wsp}BODY)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(TYPE{wsp}BODY)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(SNAPSHOT{wsp}LOG)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(DISTINCT{wsp}ON)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(CONNECT{wsp}BY)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(START{wsp}WITH)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(FOREIGN{wsp}DATA{wsp}WRAPPER)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(CREATE{wsp}OR{wsp}ALTER)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(CREATE{wsp}OR{wsp}REPLACE)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(FULL{wsp}JOIN)|</replacetoken>
-      </replacefilter>
-      <replacefilter>
-        <replacetoken>(FULL{wsp}OUTER{wsp}JOIN)|</replacetoken>
-      </replacefilter>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW)|"/>
+      <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
+      <replacefilter token="(START{wsp}WITH)|"/>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
+      <replacefilter token="(PACKAGE{wsp}BODY)|"/>
+      <replacefilter token="(TYPE{wsp}BODY)|"/>
+      <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
+      <replacefilter token="(DISTINCT{wsp}ON)|"/>
+      <replacefilter token="(CONNECT{wsp}BY)|"/>
+      <replacefilter token="(START{wsp}WITH)|"/>
+      <replacefilter token="(FOREIGN{wsp}DATA{wsp}WRAPPER)|"/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}REPLACE)|"/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
+      <replacefilter token="(FULL{wsp}JOIN)|"/>
+      <replacefilter token="(FULL{wsp}OUTER{wsp}JOIN)|"/>
       <replacefilter>
         <replacetoken>linecomment=("--"[^\r\n]*)</replacetoken>
         <replacevalue>linecomment=("--"[ \t]+[^\r\n]*)|("#"[^\r\n]*)</replacevalue>
