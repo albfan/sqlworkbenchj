@@ -39,6 +39,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -146,11 +147,11 @@ public class UpdateTableDetector
 
 				for (ColumnIdentifier column : columns)
 				{
-					int index = resultInfo.findColumn(column.getColumnName(), conn.getMetadata());
+					int index = findColumn(column.getColumnName(), resultInfo);
 					if (index > -1)
 					{
-						syncResultColumn(index, column, resultInfo);
-						realColumns++;
+            syncResultColumn(index, column, resultInfo);
+            realColumns++;
 					}
 					else if (column.isPkColumn())
 					{
@@ -179,6 +180,60 @@ public class UpdateTableDetector
 
 		resultInfo.setUpdateTable(updateTable);
 	}
+
+  private int findColumn(String columnName, ResultInfo info)
+  {
+    if (info.isColumnTableDetected() && updateTable != null)
+    {
+      for (int i=0; i < info.getColumnCount(); i++)
+      {
+        String resultCol = info.getColumn(i).getColumnName();
+        if (columnBelongsToUpdateTable(info.getColumn(i), info) && columNamesAreEqual(columnName, resultCol))
+        {
+          return i;
+        }
+      }
+    }
+    int index = info.findColumn(columnName, conn.getMetadata());
+    if (index > -1 && !isUniqueColumnName(columnName, info))
+    {
+      LogMgr.logWarning("UpdateTableDetector.findColumn()", "Column " + columnName + " is not unique. Ignoring column!");
+      return -1;
+    }
+    return index;
+  }
+
+  private boolean isUniqueColumnName(String column, ResultInfo info)
+  {
+    int count = 0;
+    for (int col=0; col < info.getColumnCount(); col++)
+    {
+      String name = SqlUtil.removeObjectQuotes(info.getColumnName(col));
+      if (columNamesAreEqual(name, column))
+      {
+        count ++;
+      }
+    }
+    return count == 1;
+  }
+
+  private boolean columnBelongsToUpdateTable(ColumnIdentifier column, ResultInfo info)
+  {
+    if (this.updateTable == null) return false;
+    if (!info.isColumnTableDetected()) return false;
+
+    if (column.getSourceTableName() == null) return false;
+
+    TableIdentifier tbl = new TableIdentifier(column.getSourceTableName());
+    return updateTable.compareNames(tbl);
+  }
+
+  private boolean columNamesAreEqual(String col1, String col2)
+  {
+    col1 = conn.getMetadata().removeQuotes(col1);
+    col2 = conn.getMetadata().removeQuotes(col2);
+    return col1.equalsIgnoreCase(col2);
+  }
 
 	private List<ColumnIdentifier> getColumns(TableIdentifier table)
 		throws SQLException

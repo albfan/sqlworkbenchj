@@ -706,15 +706,15 @@ public class DataStore
 
 		if (tbl == null) return;
 
+		SourceTableDetector checkTable = new SourceTableDetector();
+		checkTable.checkColumnTables(this.sql, resultInfo, conn);
+
 		UpdateTableDetector detector = new UpdateTableDetector(conn);
 		detector.setCheckPKOnly(conn.getDbSettings().getUpdateTableCheckPkOnly());
 
 		detector.checkUpdateTable(tbl, resultInfo);
 		updateTable = detector.getUpdateTable();
 		missingPkcolumns = detector.getMissingPkColumns();
-
-		SourceTableDetector checkTable = new SourceTableDetector();
-		checkTable.checkColumnTables(this.sql, resultInfo, conn);
 
 		checkForGeneratedKeys();
 		restoreModifiedNotUpdateableColumns();
