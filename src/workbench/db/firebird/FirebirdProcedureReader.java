@@ -67,15 +67,7 @@ public class FirebirdProcedureReader
 		try
 		{
 			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname, null);
-      boolean useAlter = connection.getDbSettings().getBoolProperty("procedure.source.use.alter", false);
-      if (useAlter)
-      {
-        source.append("ALTER PROCEDURE ");
-      }
-      else
-      {
-        source.append("CREATE PROCEDURE ");
-      }
+      source.append("CREATE OR ALTER PROCEDURE ");
 
 			source.append(aProcname);
 			String retType = null;

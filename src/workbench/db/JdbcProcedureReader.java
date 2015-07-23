@@ -31,6 +31,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -758,14 +759,14 @@ public class JdbcProcedureReader
     if (token == null) return false;
     if (token.getText().equalsIgnoreCase("create or replace")) return true;
     if (token.getText().equalsIgnoreCase("recreate")) return true;
-    if (token.getText().equalsIgnoreCase("alter")) return true; // Firebird, SQL Server
     if (token.getText().equalsIgnoreCase("create"))
     {
       token = lexer.getNextToken(false, false);
       if (token.getText().equalsIgnoreCase("or"))
       {
+        Set<String> tokens = CollectionUtil.caseInsensitiveSet("replace", "alter");
         token = lexer.getNextToken(false, false);
-        return token != null && token.getText().equalsIgnoreCase("replace");
+        return token != null && tokens.contains(token.getText());
       }
     }
     return false;
