@@ -164,6 +164,7 @@ keyword=(
 (PACKAGE{wsp}BODY)|
 (TYPE{wsp}BODY)|
 (CREATE{wsp}OR{wsp}REPLACE)|
+(CREATE{wsp}OR{wsp}ALTER)|
 (IS{wsp}NOT{wsp}NULL)|
 (FLASHBACK{wsp}ARCHIVE)|
 (MATERIALIZED{wsp}VIEW)|

@@ -758,6 +758,7 @@ public class JdbcProcedureReader
     SQLToken token = lexer.getNextToken(false, false);
     if (token == null) return false;
     if (token.getText().equalsIgnoreCase("create or replace")) return true;
+    if (token.getText().equalsIgnoreCase("create or alter")) return true;
     if (token.getText().equalsIgnoreCase("recreate")) return true;
     if (token.getText().equalsIgnoreCase("create"))
     {

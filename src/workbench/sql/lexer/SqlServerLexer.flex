@@ -164,6 +164,7 @@ keyword=(
 
 
 
+
 (IS{wsp}NOT{wsp}NULL)|
 
 

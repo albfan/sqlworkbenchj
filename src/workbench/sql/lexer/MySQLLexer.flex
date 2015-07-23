@@ -164,6 +164,7 @@ keyword=(
 
 
 
+
 (IS{wsp}NOT{wsp}NULL)|
 
 
@@ -173,8 +174,8 @@ keyword=(
 (OUTER{wsp}APPLY)|
 (CROSS{wsp}JOIN)|
 (CROSS{wsp}APPLY)|
-(FULL{wsp}JOIN)|
-(FULL{wsp}OUTER{wsp}JOIN)|
+
+
 (INNER{wsp}JOIN)|
 (LEFT{wsp}JOIN)|
 (LEFT{wsp}OUTER{wsp}JOIN)|
