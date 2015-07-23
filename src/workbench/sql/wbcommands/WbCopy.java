@@ -236,7 +236,8 @@ public class WbCopy
 		try
 		{
 			String excluded = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
-			sourceTables = new SourceTableArgument(sourcetable, excluded, sourceSchema, sourceCon);
+      String[] types = sourceCon.getMetadata().getTableTypesArray();
+			sourceTables = new SourceTableArgument(sourcetable, excluded, sourceSchema, types, sourceCon);
 			tablesToExport = sourceTables.getTables();
 			if (tablesToExport.isEmpty() && sourceTables.wasWildcardArgument())
 			{
