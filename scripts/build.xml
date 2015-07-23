@@ -912,6 +912,9 @@
         <replacetoken>(CREATE{wsp}OR{wsp}REPLACE)|</replacetoken>
       </replacefilter>
       <replacefilter>
+        <replacetoken>(CREATE{wsp}OR{wsp}ALTER)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
         <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")]]></replacetoken>
         <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(\[[^\r\n\t\f\[]*\]) ]]></replacevalue>
       </replacefilter>
@@ -968,7 +971,16 @@
         <replacetoken>(FOREIGN{wsp}DATA{wsp}WRAPPER)|</replacetoken>
       </replacefilter>
       <replacefilter>
+        <replacetoken>(CREATE{wsp}OR{wsp}ALTER)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
         <replacetoken>(CREATE{wsp}OR{wsp}REPLACE)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(FULL{wsp}JOIN)|</replacetoken>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>(FULL{wsp}OUTER{wsp}JOIN)|</replacetoken>
       </replacefilter>
       <replacefilter>
         <replacetoken>linecomment=("--"[^\r\n]*)</replacetoken>
