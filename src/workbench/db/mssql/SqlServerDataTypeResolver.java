@@ -26,7 +26,6 @@ import java.sql.Types;
 
 import workbench.db.DefaultDataTypeResolver;
 import workbench.resource.Settings;
-import workbench.util.SqlUtil;
 
 /**
  *

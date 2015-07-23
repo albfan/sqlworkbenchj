@@ -111,13 +111,13 @@ public class SqlServerProcedureReader
 
     // the jTDS driver does not return a group number at all for the first procedure in a group
     if (pos < 1) return 1;
-    
+
     return StringUtil.getIntValue(procname.substring(pos + 1), -1);
   }
 
 	protected void updateRemarks(DataStore ds, String owner)
 	{
-		if (!Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.procedure.retrieve", false)) return;
+		if (!connection.getDbSettings().getBoolProperty("remarks.procedure.retrieve", false)) return;
 
 		if (ds == null || ds.getRowCount() == 0) return;
 

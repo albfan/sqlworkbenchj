@@ -555,6 +555,7 @@ public class SqlUtil
 	 */
 	public static String trimSemicolon(String sql)
 	{
+    if (StringUtil.isEmptyString(sql)) return sql;
 		int index = findSemicolonFromEnd(sql);
 
 		if (index > -1)

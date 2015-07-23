@@ -758,6 +758,7 @@ public class JdbcProcedureReader
     if (token == null) return false;
     if (token.getText().equalsIgnoreCase("create or replace")) return true;
     if (token.getText().equalsIgnoreCase("recreate")) return true;
+    if (token.getText().equalsIgnoreCase("alter")) return true; // Firebird, SQL Server
     if (token.getText().equalsIgnoreCase("create"))
     {
       token = lexer.getNextToken(false, false);

@@ -881,15 +881,19 @@ public class ProcedureListPanel
         drop = ddl.toString();
       }
     }
-    if (drop == null) return sql.toString();
+    drop = StringUtil.trim(SqlUtil.trimSemicolon(drop));
 
-    DelimiterDefinition delim = dbConnection.getAlternateDelimiter();
-    if (delim == null)
+    if (StringUtil.isEmptyString(drop)) return sql.toString();
+
+    DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(dbConnection, DelimiterDefinition.STANDARD_DELIMITER);
+
+    if (delim.isSingleLine())
     {
-      return drop + ";\n\n" + sql;
+      drop += "\n";
     }
-    drop = SqlUtil.trimSemicolon(drop);
-    return drop + "\n" + delim.getDelimiter() + "\n\n" + sql;
+    drop += delim.getDelimiter() + "\n";
+
+    return drop + "\n" + sql;
   }
 
 	private List<String> getParameterNames()

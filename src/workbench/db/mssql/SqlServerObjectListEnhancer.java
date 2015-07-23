@@ -48,10 +48,13 @@ public class SqlServerObjectListEnhancer
 	implements ObjectListEnhancer
 {
 
+  static final String REMARKS_PROP_NAME = "remarks.propertyname";
+  static final String REMARKS_PROP_DEFAULT = "MS_DESCRIPTION";
+
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)
 	{
-		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.object.retrieve", true))
+		if (con.getDbSettings().getBoolProperty("remarks.object.retrieve", true))
 		{
 			updateObjectRemarks(con, result, aCatalog, aSchema, objects, requestedTypes);
 		}
@@ -87,7 +90,7 @@ public class SqlServerObjectListEnhancer
 
 	public Map<String, String> readRemarks(WbConnection con, String schema, String object, String[] requestedTypes)
 	{
-		String propName = Settings.getInstance().getSqlServerRemarksProperty();
+		String propName = con.getDbSettings().getProperty(REMARKS_PROP_NAME, REMARKS_PROP_DEFAULT);
 		String sql = null;
 
 		if (SqlServerUtil.isSqlServer2005(con))

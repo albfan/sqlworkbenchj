@@ -70,7 +70,7 @@ public class SqlServerColumnEnhancer
 			updateComputedColumns(table, conn);
 		}
 
-		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.column.retrieve", true))
+		if (conn.getDbSettings().getBoolProperty("remarks.column.retrieve", true))
 		{
 			updateColumnRemarks(table, conn);
 		}
@@ -89,7 +89,7 @@ public class SqlServerColumnEnhancer
 		String tablename = SqlUtil.removeObjectQuotes(table.getTable().getTableName());
 		String schema = SqlUtil.removeObjectQuotes(table.getTable().getSchema());
 
-		String propName = Settings.getInstance().getSqlServerRemarksProperty();
+		String propName = conn.getDbSettings().getProperty(SqlServerObjectListEnhancer.REMARKS_PROP_NAME, SqlServerObjectListEnhancer.REMARKS_PROP_DEFAULT);
 
 		// I have to cast to a length specified varchar value otherwise
 		// the remarks will be truncated at 31 characters for some strange reason

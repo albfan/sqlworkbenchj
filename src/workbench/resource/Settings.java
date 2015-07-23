@@ -2732,11 +2732,6 @@ public class Settings
 	// </editor-fold>
 
 
-  public String getSqlServerRemarksProperty()
-	{
-		return getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
-	}
-
 	public int getMaxErrorStatementLength()
 	{
 		return getIntProperty("workbench.gui.log.error.sql.maxlength", 150);
