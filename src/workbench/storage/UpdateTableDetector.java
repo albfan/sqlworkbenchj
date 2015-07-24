@@ -39,7 +39,6 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
-import workbench.util.SqlUtil;
 
 /**
  *
@@ -124,8 +123,7 @@ public class UpdateTableDetector
 				}
 				else
 				{
-					// using the table identifier returned ensures
-					// that the table name is fully qualified with schema and catalog
+					// using the table identifier returned ensures that the table name is fully qualified with schema and catalog
 					updateTable = def.getTable();
 				}
 			}
@@ -188,12 +186,13 @@ public class UpdateTableDetector
       for (int i=0; i < info.getColumnCount(); i++)
       {
         String resultCol = info.getColumn(i).getColumnName();
-        if (columnBelongsToUpdateTable(info.getColumn(i), info) && columNamesAreEqual(columnName, resultCol))
+        if (columNamesAreEqual(columnName, resultCol) && columnBelongsToUpdateTable(info.getColumn(i), info))
         {
           return i;
         }
       }
     }
+
     int index = info.findColumn(columnName, conn.getMetadata());
     if (index > -1 && !isUniqueColumnName(columnName, info))
     {
@@ -208,20 +207,17 @@ public class UpdateTableDetector
     int count = 0;
     for (int col=0; col < info.getColumnCount(); col++)
     {
-      String name = SqlUtil.removeObjectQuotes(info.getColumnName(col));
-      if (columNamesAreEqual(name, column))
+      if (columNamesAreEqual(info.getColumnName(col), column))
       {
         count ++;
       }
+      if (count > 1) break;
     }
     return count == 1;
   }
 
   private boolean columnBelongsToUpdateTable(ColumnIdentifier column, ResultInfo info)
   {
-    if (this.updateTable == null) return false;
-    if (!info.isColumnTableDetected()) return false;
-
     if (column.getSourceTableName() == null) return false;
 
     TableIdentifier tbl = new TableIdentifier(column.getSourceTableName());
