@@ -76,8 +76,15 @@ Supported parameters:
 
     <!-- alternatively: use the Workbench utility class:
          Using this, the XSLT can only be executed from within SQL Workbench
+
+    cleanupIdentifier() will remove any special characters from the name so that it doesn't require quoting
+
     <xsl:variable name="tablename" select="wb-name-util:cleanupIdentifier(table-name, 'true')"/>
     <xsl:variable name="tablename" select="wb-name-util:cleanupIdentifier(table-name, $makeLowerCase)"/>
+
+    The utility functions camelCaseToSnakeLower() or camelCaseToSnakeUpper() can be used
+    to convert names from a case-preserving DBMS (e.g. SQL Server). OrderEntry would be converted to order_entry
+    <xsl:variable name="tablename" select="wb-name-util:camelCaseToSnakeLower(table-name)"/>
     -->
 
     <xsl:text>DROP TABLE IF EXISTS </xsl:text>
