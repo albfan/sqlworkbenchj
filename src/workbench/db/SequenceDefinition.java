@@ -213,6 +213,8 @@ public class SequenceDefinition
 		if (other instanceof SequenceDefinition)
 		{
 			SequenceDefinition od = (SequenceDefinition)other;
+      if (!SqlUtil.objectNamesAreEqual(this, od)) return false;
+
 			if (od.properties.size() != this.properties.size()) return false;
 
 			for (Map.Entry<String, Object> entry : properties.entrySet())

@@ -316,6 +316,35 @@ public class SqlUtil
 		return null;
 	}
 
+  public static boolean objectNamesAreEqual(DbObject dbo1, DbObject dbo2)
+  {
+    if (dbo1 == null || dbo2 == null) return false;
+
+    // only compare names of objects of the same type
+    String type1 = dbo1.getObjectType();
+    String type2 = dbo2.getObjectType();
+    if (type1 == null || type2 == null) return false;
+    if (StringUtil.compareStrings(type1, type2, true) != 0) return false;
+
+    // only compare the catalog if both objects have one
+    String cat1 = removeObjectQuotes(dbo1.getCatalog());
+    String cat2 = removeObjectQuotes(dbo2.getCatalog());
+    if (StringUtil.isNonEmpty(cat1) && StringUtil.isNonEmpty(cat2))
+    {
+      if (!cat1.equalsIgnoreCase(cat2)) return false;
+    }
+
+    String schema1 = removeObjectQuotes(dbo1.getSchema());
+    String schema2 = removeObjectQuotes(dbo2.getSchema());
+    if (StringUtil.isNonEmpty(schema1) && StringUtil.isNonEmpty(schema2))
+    {
+      if (!schema1.equalsIgnoreCase(schema2)) return false;
+    }
+
+    String name1 = removeObjectQuotes(dbo1.getObjectName());
+    String name2 = removeObjectQuotes(dbo2.getObjectName());
+    return StringUtil.equalStringIgnoreCase(name1, name2);
+  }
 
 	/**
 	 * Escapes any underscore in the passed name with the escape character defined by the connection.

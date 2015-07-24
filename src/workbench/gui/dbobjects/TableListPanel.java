@@ -2309,9 +2309,8 @@ public class TableListPanel
     for (int row=count - 1; row >= 0; row--)
     {
       int viewRow = tableList.convertRowIndexToView(row);
-      Object uo = createTableIdentifier(viewRow);
-      DbObject dbo = (DbObject)uo;
-      if (objects.contains(dbo))
+      DbObject uo = getDbObject(viewRow);
+      if (uo != null && objects.contains(uo))
       {
         ds.deleteRow(row);
       }
@@ -2370,6 +2369,21 @@ public class TableListPanel
 		return this;
 	}
 
+  private DbObject getDbObject(int row)
+  {
+    Object uo = tableList.getDataStore().getRow(row).getUserObject();
+    if (uo instanceof DbObject)
+    {
+      return (DbObject)uo;
+    }
+    else
+    {
+      TableIdentifier table = createTableIdentifier(row);
+      table.checkQuotesNeeded(dbConnection);
+      return table;
+    }
+  }
+
 	@Override
 	public List<DbObject> getSelectedObjects()
 	{
@@ -2380,17 +2394,8 @@ public class TableListPanel
 		List<DbObject> result = new ArrayList<>(count);
 		for (int i=0; i < count; i++)
 		{
-			DbObject db = (DbObject)tableList.getDataStore().getRow(rows[i]).getUserObject();
-			if (db == null)
-			{
-				TableIdentifier table = createTableIdentifier(rows[i]);
-				table.checkQuotesNeeded(dbConnection);
-				result.add(table);
-			}
-			else
-			{
-				result.add(db);
-			}
+      DbObject dbo = getDbObject(rows[i]);
+      result.add(dbo);
 		}
 		return result;
 	}
