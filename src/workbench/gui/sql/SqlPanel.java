@@ -123,6 +123,7 @@ import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.DisplayDataFormAction;
 import workbench.gui.actions.ExecuteAllAction;
 import workbench.gui.actions.ExecuteCurrentAction;
+import workbench.gui.actions.ExecuteFromCursorAction;
 import workbench.gui.actions.ExecuteSelAction;
 import workbench.gui.actions.ExpandEditorAction;
 import workbench.gui.actions.ExpandResultAction;
@@ -262,6 +263,7 @@ public class SqlPanel
 	protected StopAction stopAction;
 	protected ExecuteAllAction executeAll;
 	protected ExecuteCurrentAction executeCurrent;
+  protected ExecuteFromCursorAction executeFromCurrent;
 	protected ExecuteSelAction executeSelected;
 
 	private static int instanceCount = 0;
@@ -746,6 +748,7 @@ public class SqlPanel
 		this.executeAll = new ExecuteAllAction(this);
 		this.executeSelected = new ExecuteSelAction(this);
 		this.executeCurrent = new ExecuteCurrentAction(this);
+		this.executeFromCurrent = new ExecuteFromCursorAction(this);
 
 		MakeLowerCaseAction makeLower = new MakeLowerCaseAction(this.editor);
 		MakeUpperCaseAction makeUpper = new MakeUpperCaseAction(this.editor);
@@ -756,6 +759,7 @@ public class SqlPanel
 		this.editor.addPopupMenuItem(this.executeSelected, true);
 		this.editor.addPopupMenuItem(this.executeAll, false);
 		this.editor.addPopupMenuItem(this.executeCurrent, false);
+		this.editor.addPopupMenuItem(this.executeFromCurrent, false);
 
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
@@ -915,6 +919,7 @@ public class SqlPanel
 		this.actions.add(this.executeAll);
 		this.actions.add(this.executeSelected);
 		this.actions.add(this.executeCurrent);
+		this.actions.add(this.executeFromCurrent);
 
 		this.spoolData = new SpoolDataAction(this, "MnuTxtSpoolSql");
 		this.spoolData.setCreateMenuSeparator(true);
@@ -944,9 +949,6 @@ public class SqlPanel
 
 		actions.add(new JumpToStatement(this));
 		actions.add(editor.getJumpToLineAction());
-
-//		this.executeAll.setEnabled(false);
-//		this.executeSelected.setEnabled(false);
 
 		this.toolbarActions.add(this.executeSelected);
 		this.toolbarActions.add(this.executeCurrent);
@@ -2056,7 +2058,14 @@ public class SqlPanel
 	{
 		String sql = this.editor.getText();
 		int caret = this.editor.getCaretPosition();
-		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults);
+		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, false);
+	}
+
+	public void runFromCursor()
+	{
+		String sql = this.editor.getText();
+		int caret = this.editor.getCaretPosition();
+		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, true);
 	}
 
 	public void runSelectedStatement()
@@ -2069,28 +2078,28 @@ public class SqlPanel
 			offset = this.editor.getSelectionStart();
 			highlight = false;
 		}
-		this.startExecution(sql, offset, -1, highlight, this.appendResults);
+		this.startExecution(sql, offset, -1, highlight, this.appendResults, false);
 	}
 
 	@Override
 	public void commit()
 	{
-		this.startExecution(SingleVerbCommand.COMMIT_VERB, 0, -1, false, this.appendResults);
+		this.startExecution(SingleVerbCommand.COMMIT_VERB, 0, -1, false, this.appendResults, false);
 	}
 
 	@Override
 	public void rollback()
 	{
-		this.startExecution(SingleVerbCommand.ROLLBACK_VERB, 0, -1, false, this.appendResults);
+		this.startExecution(SingleVerbCommand.ROLLBACK_VERB, 0, -1, false, this.appendResults, false);
 	}
 
 	public void runAll()
 	{
 		String sql = this.editor.getText();
-		this.startExecution(sql, 0, -1, GuiSettings.getHighlightErrorStatement(), this.appendResults);
+		this.startExecution(sql, 0, -1, GuiSettings.getHighlightErrorStatement(), this.appendResults, false);
 	}
 
-	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlightError, final boolean appendResult)
+	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlightError, final boolean appendResult, final boolean runFromCursor)
 	{
 		if (this.isBusy()) return;
 
@@ -2112,7 +2121,7 @@ public class SqlPanel
 				@Override
 				public void run()
 				{
-					runStatement(sql, offset, commandAtIndex, highlightError, appendResult);
+					runStatement(sql, offset, commandAtIndex, highlightError, appendResult, runFromCursor);
 				}
 			};
 			this.executionThread.start();
@@ -2138,7 +2147,7 @@ public class SqlPanel
 	 * This is only public to allow a direct call during
 	 * GUI testing (to avoid multi-threading)
 	 */
-	protected void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult)
+	protected void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult, boolean runFromCursor)
 	{
 		this.setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
@@ -2161,7 +2170,7 @@ public class SqlPanel
 
 		try
 		{
-			this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError, appendResult);
+			this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError, appendResult, runFromCursor);
 		}
 		finally
 		{
@@ -2295,7 +2304,7 @@ public class SqlPanel
     {
       sql = "select * from " + table.getTableExpression(dbConnection);
     }
-    this.startExecution(sql, 0, -1, false, true);
+    this.startExecution(sql, 0, -1, false, true, false);
   }
 
 	@Override
@@ -2314,7 +2323,7 @@ public class SqlPanel
 		{
 			this.macroExecution = true;
 		}
-		this.startExecution(sql, 0, -1, false, this.appendResults || appendData);
+		this.startExecution(sql, 0, -1, false, this.appendResults || appendData, false);
 	}
 
 	@Override
@@ -3142,7 +3151,7 @@ public class SqlPanel
 		return goOn;
 	}
 
-	private void displayResult(String script, int selectionOffset, int cursorPos, boolean highlightOnError, boolean appendResult)
+	private void displayResult(String script, int selectionOffset, int cursorPos, boolean highlightOnError, boolean appendResult, boolean runFromCursor)
 	{
 		if (script == null) return;
 
@@ -3250,14 +3259,19 @@ public class SqlPanel
 			if (cursorPos > -1)
 			{
 				// cursorPos > -1 means that the statement at the cursor position should be executed
-				count = 1;
 				int realPos = cursorPos;
 				if (GuiSettings.getUseStatementInCurrentLine())
 				{
 					realPos = editor.getLineStartOffset(editor.getCaretLine());
 				}
 				startIndex = scriptParser.getCommandIndexAtCursorPos(realPos);
-				endIndex = startIndex + 1;
+        
+        if (!runFromCursor)
+        {
+          count = 1;
+  				endIndex = startIndex + 1;
+        }
+
 				if (startIndex == -1)
 				{
 					// no statement found at the cursor position
@@ -3808,7 +3822,7 @@ public class SqlPanel
 			this.editor.setCaretPosition(pos);
 			this.editor.scrollToCaret();
 		}
-		startExecution(comment + "\n" + sql, 0, -1, false, true);
+		startExecution(comment + "\n" + sql, 0, -1, false, true, false);
 	}
 
 	public void showData(DataStore ds)
@@ -4084,6 +4098,7 @@ public class SqlPanel
         executeAll.setEnabled(flag);
         executeCurrent.setEnabled(flag);
         executeSelected.setEnabled(flag);
+        executeFromCurrent.setEnabled(flag);
 			}
 		});
 	}

@@ -68,15 +68,12 @@ public class Highlighter
 		final int line;
 		final int newCaret;
 
-		boolean jumpToError = false;
-
 		if (error != null && error.getErrorPosition() > -1)
 		{
 			int startOfCommand = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
 			line = this.editor.getLineOfOffset(startOfCommand + error.getErrorPosition());
 			startPos = editor.getLineStartOffset(line);
 			endPos = editor.getLineEndOffset(line) - 1;
-			jumpToError = true;
 			if (error.getErrorColumn() > -1)
 			{
 				newCaret = startPos + error.getErrorColumn();
@@ -94,8 +91,6 @@ public class Highlighter
 			newCaret = -1;
 		}
 
-		if (!doHighlight && !jumpToError) return;
-
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
@@ -109,7 +104,7 @@ public class Highlighter
 				{
 					editor.selectError(startPos, endPos);
 				}
-				else
+        else if (newCaret > -1)
 				{
 					editor.setCaretPosition(newCaret);
 				}
