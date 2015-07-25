@@ -250,4 +250,49 @@ public class UpdateTableDetectorTest
 		}
 	}
 
+  @Test
+  public void testDuplicateNames()
+    throws Exception
+  {
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+
+    String sql =
+      "CREATE TABLE one (ident int, refid int, PRIMARY KEY(ident));\n" +
+      "CREATE TABLE two (ident int, refid int, PRIMARY KEY(ident));\n" +
+      "commit;";
+
+		TestUtil.executeScript(con, sql);
+
+    String query =
+      "SELECT one.ident, two.ident \n" +
+      "FROM one, two \n" +
+      "WHERE one.refid = two.refid;";
+
+		ResultInfo info = null;
+		try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(query))
+		{
+			info = new ResultInfo(rs.getMetaData(), con);
+		}
+
+    SourceTableDetector std = new SourceTableDetector();
+    std.checkColumnTables(query, info, con);
+
+		UpdateTableDetector utd = new UpdateTableDetector(con);
+		utd.setCheckPKOnly(false);
+
+		TableIdentifier toCheck = new TableIdentifier("TWO");
+    utd.checkUpdateTable(toCheck, info);
+
+		TableIdentifier tbl = utd.getUpdateTable();
+		assertEquals("TWO", tbl.getTableName());
+		assertEquals("PUBLIC", tbl.getSchema());
+
+    assertEquals("one", info.getColumn(0).getSourceTableName());
+    assertEquals("two", info.getColumn(1).getSourceTableName());
+    assertTrue(info.getColumn(1).isUpdateable());
+    assertTrue(info.getColumn(1).isPkColumn());
+
+		assertTrue(CollectionUtil.isEmpty(utd.getMissingPkColumns()));
+  }
 }

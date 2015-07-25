@@ -25,6 +25,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.util.Alias;
@@ -89,6 +90,18 @@ public class SourceTableDetector
 		for (Alias tbl : tables)
 		{
 			if (tbl.getNameToUse().equalsIgnoreCase(alias)) return tbl.getObjectName();
+
+      // take fully qualified names without an alias into account
+      // e.g. select foo.id from public.foo join ...
+      if (tbl.getAlias() == null)
+      {
+        TableIdentifier fqn = new TableIdentifier(tbl.getObjectName());
+        TableIdentifier other = new TableIdentifier(alias);
+        if (fqn.compareNames(other))
+        {
+          return tbl.getObjectName();
+        }
+      }
 		}
 		return null;
 	}

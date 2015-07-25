@@ -614,4 +614,91 @@ public class DataStoreTest
 
 		assertEquals("AAA", ds.getValueAsString(0, 0));
 	}
+
+ @Test
+  public void testDuplicateNames()
+    throws Exception
+  {
+		WbConnection con = util.getConnection();
+
+    String sql =
+      "CREATE TABLE one (ident int, refid int, PRIMARY KEY(ident));\n" +
+      "CREATE TABLE two (ident int, refid int, PRIMARY KEY(ident));\n" +
+      "INSERT INTO one VALUES (1, 10), (2, 11), (3, 12);\n" +
+      "INSERT INTO two VALUES (3, 10), (4, 11), (5, 12);\n" +
+      "commit;";
+
+		TestUtil.executeScript(con, sql);
+
+    // Test 1 with outdated joins and without table aliases
+    String query =
+      "SELECT one.ident, two.ident \n" +
+      "FROM one, two \n" +
+      "WHERE one.refid = two.refid \n" +
+      "ORDER BY 1";
+
+    DataStore ds = null;
+		try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(query))
+		{
+      ds = new DataStore(rs, con, true);
+		}
+    ds.setGeneratingSql(query);
+
+//    DataStorePrinter printer = new DataStorePrinter(ds);
+//    printer.printTo(System.out);
+
+    assertEquals(3, ds.getRowCount());
+    ds.deleteRow(1);
+    ds.setUpdateTable("two", con);
+    List<DmlStatement> updateStatements = ds.getUpdateStatements(con);
+    assertEquals(1, updateStatements.size());
+    SqlLiteralFormatter formatter = new SqlLiteralFormatter(con);
+
+    updateStatements.get(0).setFormatSql(false);
+    String delete = updateStatements.get(0).getExecutableStatement(formatter).toString();
+    assertEquals("DELETE FROM TWO WHERE IDENT = 4", delete.toUpperCase());
+
+    // Test2 with proper JOINs and table aliases
+    query =
+      "SELECT o.ident, t.ident \n" +
+      "FROM one o \n" +
+      "  JOIN two t ON o.refid = t.refid \n" +
+      "ORDER BY 1";
+
+    // no need to re-run the query.
+    // when checking the update table, only the generating SQL is used to detect the tables for the columns
+    // the deleted row is still marked as deleted
+    ds.setGeneratingSql(query);
+
+    ds.setUpdateTable("two", con);
+    updateStatements = ds.getUpdateStatements(con);
+    assertEquals(1, updateStatements.size());
+
+    updateStatements.get(0).setFormatSql(false);
+    delete = updateStatements.get(0).getExecutableStatement(formatter).toString();
+    assertEquals("DELETE FROM TWO WHERE IDENT = 4", delete.toUpperCase());
+
+    // Test 3 with using a fully qualified table without alias
+    query =
+      "SELECT o.ident, two.ident \n" +
+      "FROM one o \n" +
+      "  JOIN public.two ON o.refid = two.refid \n" +
+      "ORDER BY 1";
+
+		try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery(query))
+		{
+      ds = new DataStore(rs, con, true);
+		}
+    ds.setGeneratingSql(query);
+    assertEquals(3, ds.getRowCount());
+
+    ds.deleteRow(1);
+    ds.setUpdateTable("public.two", con);
+    updateStatements = ds.getUpdateStatements(con);
+    assertEquals(1, updateStatements.size());
+
+    updateStatements.get(0).setFormatSql(false);
+    delete = updateStatements.get(0).getExecutableStatement(formatter).toString();
+    assertEquals("DELETE FROM TWO WHERE IDENT = 4", delete.toUpperCase());
+  }
 }

@@ -64,6 +64,7 @@ import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
+import workbench.resource.DataTooltipType;
 import workbench.resource.GuiSettings;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
@@ -94,7 +95,6 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
 import workbench.gui.renderer.RendererSetup;
-import workbench.resource.DataTooltipType;
 
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
@@ -574,8 +574,8 @@ public class DwPanel
 	}
 
 	/**
-	 * Pass the full table definition to be used for future updates to the underlying
-	 * DataStore.
+	 * Pass the full table definition to be used for future updates to the underlying DataStore.
+   *
 	 * This will also reset the internal cache of the ReferenceTableNavigator.
 	 *
 	 * @see workbench.gui.sql.ReferenceTableNavigator#reset()
@@ -595,8 +595,8 @@ public class DwPanel
 	}
 
 	/**
-	 * Pass the table to be used for future updates to the underlying
-	 * DataStore.
+	 * Pass the table to be used for future updates to the underlying DataStore.
+   *
 	 * This will also reset the internal cache of the ReferenceTableNavigator.
 	 *
 	 * @see workbench.gui.sql.ReferenceTableNavigator#reset()
@@ -684,9 +684,9 @@ public class DwPanel
 		{
 			DataStore ds = this.dataTable.getDataStore();
 			if (ds == null) return TableCheck.noTable;
-			boolean result = ds.checkUpdateTable(this.dbConnection);
+			boolean updateTableFound = ds.checkUpdateTable(this.dbConnection);
 
-			if (!result)
+			if (!updateTableFound)
 			{
 				UpdateTableSelector selector = new UpdateTableSelector(dataTable);
 				TableIdentifier tbl = selector.selectUpdateTable();

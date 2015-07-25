@@ -89,4 +89,22 @@ public class SourceTableDetectorTest
 		assertEquals("bar", result.getColumn(3).getSourceTableName());
 	}
 
+  @Test
+  public void testFQN()
+  {
+		String sql =
+			"select foo.fid, b.bdata \n" +
+			"from public.foo \n" +
+			"  join bar b on b.fid = f.fid";
+
+		ColumnIdentifier[] columns = new ColumnIdentifier[] { new ColumnIdentifier("fid"), new ColumnIdentifier("bdata") };
+
+		ResultInfo result = new ResultInfo(columns);
+		SourceTableDetector detector = new SourceTableDetector();
+		detector.checkColumnTables(sql, result, null);
+
+		assertTrue(result.isColumnTableDetected());
+		assertEquals("public.foo", result.getColumn(0).getSourceTableName());
+		assertEquals("bar", result.getColumn(1).getSourceTableName());
+  }
 }
