@@ -3265,11 +3265,15 @@ public class SqlPanel
 					realPos = editor.getLineStartOffset(editor.getCaretLine());
 				}
 				startIndex = scriptParser.getCommandIndexAtCursorPos(realPos);
-        
-        if (!runFromCursor)
+
+        if (runFromCursor)
+        {
+          count = count - startIndex;
+        }
+        else
         {
           count = 1;
-  				endIndex = startIndex + 1;
+          endIndex = startIndex + 1;
         }
 
 				if (startIndex == -1)
@@ -3498,7 +3502,7 @@ public class SqlPanel
 
 						if (!macroRun && !editor.isModifiedAfter(scriptStart))
 						{
-							highlighter.highlightError(highlightOnError, scriptParser, commandWithError, selectionOffset, null);
+							highlighter.markError(highlightOnError, scriptParser, commandWithError, selectionOffset, null);
 						}
 
 						// force a refresh in order to display the selection
@@ -3545,7 +3549,7 @@ public class SqlPanel
 			if (commandWithError > -1 && !macroRun)
 			{
 				restoreSelection = false;
-				highlighter.highlightError(highlightOnError, scriptParser, commandWithError, selectionOffset, errorDetails);
+				highlighter.markError(highlightOnError, scriptParser, commandWithError, selectionOffset, errorDetails);
 			}
 
 			if (failuresIgnored > 0)

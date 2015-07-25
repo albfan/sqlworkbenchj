@@ -546,7 +546,7 @@ public class DbObjectSourcePanel
       Highlighter highlighter = new Highlighter(sourceEditor);
       ScriptParser parser = ScriptParser.createScriptParser(connection);
       parser.setScript(getText());
-      highlighter.highlightError(false, parser, feedback.getLastErrorIndex(), 0, error);
+      highlighter.markError(false, parser, feedback.getLastErrorIndex(), 0, error);
     }
   }
 }

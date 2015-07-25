@@ -57,11 +57,11 @@ public class Highlighter
 		});
 	}
 
-	public void highlightError(final boolean doHighlight, ScriptParser scriptParser, int commandWithError, int startOffset, ErrorDescriptor error)
+	public void markError(final boolean doHighlight, ScriptParser scriptParser, int commandWithError, int startOffset, ErrorDescriptor error)
 	{
-		if (this.editor == null) return;
-		if (!doHighlight && !GuiSettings.jumpToError()) return;
+		if (editor == null) return;
 		if (scriptParser == null) return;
+		if (!doHighlight && !GuiSettings.jumpToError()) return;
 
 		final int startPos;
 		final int endPos;
@@ -71,7 +71,7 @@ public class Highlighter
 		if (error != null && error.getErrorPosition() > -1)
 		{
 			int startOfCommand = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
-			line = this.editor.getLineOfOffset(startOfCommand + error.getErrorPosition());
+			line = editor.getLineOfOffset(startOfCommand + error.getErrorPosition());
 			startPos = editor.getLineStartOffset(line);
 			endPos = editor.getLineEndOffset(line) - 1;
 			if (error.getErrorColumn() > -1)
@@ -87,8 +87,8 @@ public class Highlighter
 		{
 			startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
 			endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
-			line = this.editor.getLineOfOffset(startPos);
-			newCaret = -1;
+			line = editor.getLineOfOffset(startPos);
+      newCaret = editor.getLineStartOffset(line);
 		}
 
 		WbSwingUtilities.invoke(new Runnable()
@@ -96,17 +96,12 @@ public class Highlighter
 			@Override
 			public void run()
 			{
-				if (!editor.isLineVisible(line))
-				{
-					editor.scrollTo(line, 0);
-				}
+        editor.centerLine(line);
+  			editor.setCaretPosition(newCaret);
+
 				if (doHighlight)
 				{
 					editor.selectError(startPos, endPos);
-				}
-        else if (newCaret > -1)
-				{
-					editor.setCaretPosition(newCaret);
 				}
 			}
 		});
