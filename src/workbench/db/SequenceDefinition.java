@@ -207,24 +207,27 @@ public class SequenceDefinition
 		return this.properties.keySet();
 	}
 
+  public boolean propertiesAreEqual(SequenceDefinition other)
+  {
+    if (other.properties.size() != this.properties.size()) return false;
+
+    for (Map.Entry<String, Object> entry : properties.entrySet())
+    {
+      Object ov = other.properties.get(entry.getKey());
+      if (ov == null && entry.getValue() != null) return false;
+      if (ov != null && entry.getValue() == null) return false;
+      if (ov != null && entry.getValue() != null && !ov.equals(entry.getValue())) return false;
+    }
+    return true;
+  }
+
 	@Override
 	public boolean equals(Object other)
 	{
 		if (other instanceof SequenceDefinition)
 		{
 			SequenceDefinition od = (SequenceDefinition)other;
-      if (!SqlUtil.objectNamesAreEqual(this, od)) return false;
-
-			if (od.properties.size() != this.properties.size()) return false;
-
-			for (Map.Entry<String, Object> entry : properties.entrySet())
-			{
-				Object ov = od.properties.get(entry.getKey());
-				if (ov == null && entry.getValue() != null) return false;
-				if (ov != null && entry.getValue() == null) return false;
-				if (ov != null && entry.getValue() != null && !ov.equals(entry.getValue())) return false;
-			}
-			return true;
+      return SqlUtil.objectNamesAreEqual(this, od);
 		}
 		return false;
 	}

@@ -22,8 +22,9 @@
  */
 package workbench.db;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
@@ -38,9 +39,9 @@ public class SequenceDefinitionTest
 		def1.setSequenceProperty("INCREMENT", new Integer(1));
 		SequenceDefinition def2 = new SequenceDefinition("public", "seq_two");
 		def2.setSequenceProperty("INCREMENT", new Integer(1));
-		assertEquals(def1.equals(def2), true);
-		
+		assertEquals(def1.propertiesAreEqual(def2), true);
+
 		def2.setSequenceProperty("CACHE", new Integer(50));
-		assertEquals(def1.equals(def2), false);
+		assertEquals(def1.propertiesAreEqual(def2), false);
 	}
 }

@@ -67,7 +67,7 @@ public class SequenceDiff
 		StringBuilder myindent = new StringBuilder(indent);
 		myindent.append("  ");
 		boolean createSequence = (target == null);
-		boolean different = (target == null || !reference.getSequence().equals(target.getSequence()));
+		boolean different = (target == null || !reference.getSequence().propertiesAreEqual(target.getSequence()));
 		if (!different) return result;
 
 		writer.appendOpenTag(result, this.indent, (createSequence ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
