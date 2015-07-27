@@ -24,6 +24,7 @@ package workbench;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -41,6 +42,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import workbench.console.SQLConsole;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.gui.DisconnectInfo;
@@ -1115,6 +1117,7 @@ public final class WbManager
 
 	public static void initConsoleMode(String[] args)
 	{
+    System.setProperty("workbench.log.console", "false");
 		wb = new WbManager(false);
 		wb.cmdLine.removeArgument(AppArguments.ARG_ABORT);
 		wb.cmdLine.removeArgument(AppArguments.ARG_SUCCESS_SCRIPT);
@@ -1208,28 +1211,44 @@ public final class WbManager
 
 	public static void main(String[] args)
 	{
-		wb = new WbManager();
-
-		wb.cmdLine.parse(args);
-		boolean showHelp = wb.cmdLine.isArgPresent("help");
-		boolean showVersion = wb.cmdLine.isArgPresent("version");
-		if (showHelp)
-		{
-			System.out.println(wb.cmdLine.getHelp());
-			Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
-			System.exit(0);
-		}
-		else if (showVersion)
-		{
-			System.out.println(ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildInfo());
-			Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
-			System.exit(0);
-		}
+    boolean runConsole = false;
+    
+    if (GraphicsEnvironment.isHeadless())
+    {
+      // no gui available --> default to console mode
+      initConsoleMode(args);
+      runConsole = true;
+    }
 		else
-		{
-			wb.readParameters(args);
-			wb.startApplication();
-		}
+    {
+      wb = new WbManager();
+      wb.cmdLine.parse(args);
+    }
+
+    boolean showHelp = wb.cmdLine.isArgPresent("help");
+    boolean showVersion = wb.cmdLine.isArgPresent("version");
+    if (showHelp)
+    {
+      System.out.println(wb.cmdLine.getHelp());
+      Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
+      System.exit(0);
+    }
+    else if (showVersion)
+    {
+      System.out.println(ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildInfo());
+      Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
+      System.exit(0);
+    }
+
+    if (runConsole)
+    {
+      SQLConsole.runConsole();
+    }
+    else
+    {
+      wb.readParameters(args);
+      wb.startApplication();
+    }
 	}
 
 	/**

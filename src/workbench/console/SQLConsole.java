@@ -639,13 +639,17 @@ public class SQLConsole
 		}
 		else
 		{
-			System.setProperty("workbench.log.console", "false");
-			WbManager.initConsoleMode(args);
-			SQLConsole console = new SQLConsole();
-			console.setTerminalTitle(null, false);
-			console.startConsole();
+      WbManager.initConsoleMode(args);
+      runConsole();
 		}
 	}
+
+  public static void runConsole()
+  {
+    SQLConsole console = new SQLConsole();
+    console.setTerminalTitle(null, false);
+    console.startConsole();
+  }
 
 	public void abortStatement()
 	{
