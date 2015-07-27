@@ -19,6 +19,7 @@
  */
 package workbench.sql.wbcommands;
 
+import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
@@ -55,7 +56,8 @@ public class CommandLineConnectionHandler
 
 	public WbConnection getConnection(StatementRunnerResult result, WbConnection currentConnection, String baseDir, String id)
 	{
-		String desc = cmdLine.getValue(connectionArgument, null);
+    String globalValue = WbManager.getInstance().getCommandLine().getValue(connectionArgument, null);
+		String desc = cmdLine.getValue(connectionArgument, globalValue);
 		if (StringUtil.isNonBlank(desc))
 		{
 			try
@@ -125,8 +127,8 @@ public class CommandLineConnectionHandler
 
 	public ProfileKey getProfileKey()
 	{
-		String sourceProfile = cmdLine.getValue(profileNameArgument);
-		String sourceGroup = cmdLine.getValue(profileGroupArgument);
+		String sourceProfile = cmdLine.getValue(profileNameArgument, WbManager.getInstance().getCommandLine().getValue(profileNameArgument));
+		String sourceGroup = cmdLine.getValue(profileGroupArgument, WbManager.getInstance().getCommandLine().getValue(profileGroupArgument));
 		ProfileKey key = null;
 		if (sourceProfile != null)
 		{

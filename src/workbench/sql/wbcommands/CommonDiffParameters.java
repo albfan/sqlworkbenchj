@@ -52,9 +52,9 @@ public class CommonDiffParameters
 	public static final String PARAM_SOURCEPROFILE_GROUP = "referenceGroup";
 	public static final String PARAM_SOURCE_CONN = "referenceConnection";
 
-	public static final String PARAM_TARGETPROFILE = "targetProfile";
-	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
-	public static final String PARAM_TARGET_CONN = "targetConnection";
+	public static final String PARAM_TARGETPROFILE = WbCopy.PARAM_TARGETPROFILE;
+	public static final String PARAM_TARGETPROFILE_GROUP = WbCopy.PARAM_TARGETPROFILE_GROUP;
+	public static final String PARAM_TARGET_CONN = WbCopy.PARAM_TARGET_CONN;
 
 	public static final String PARAM_REFERENCETABLES = "referenceTables";
 	public static final String PARAM_TARGETTABLES = "targetTables";

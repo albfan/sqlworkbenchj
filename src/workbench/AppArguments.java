@@ -27,6 +27,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.sql.wbcommands.CommonDiffParameters;
+import workbench.sql.wbcommands.WbCopy;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.EncodingUtil;
@@ -169,6 +172,16 @@ public class AppArguments
     addArgument(ARG_LOG_ALL_STMT, ArgumentType.BoolSwitch);
     addArgument(ARG_CONN_DESCRIPTOR);
     addArgument(ARG_EXTENSION);
+    addArgument(WbCopy.PARAM_SOURCE_CONN);
+    addArgument(WbCopy.PARAM_TARGET_CONN);
+    addArgument(WbCopy.PARAM_SOURCEPROFILE);
+    addArgument(WbCopy.PARAM_SOURCEPROFILE_GROUP);
+    addArgument(WbCopy.PARAM_TARGETPROFILE);
+    addArgument(WbCopy.PARAM_TARGETPROFILE_GROUP);
+
+    addArgument(CommonDiffParameters.PARAM_SOURCE_CONN);
+    addArgument(CommonDiffParameters.PARAM_SOURCEPROFILE);
+    addArgument(CommonDiffParameters.PARAM_SOURCEPROFILE_GROUP);
   }
 
   @Override

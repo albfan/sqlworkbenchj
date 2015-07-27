@@ -374,6 +374,7 @@ public class ScriptParser
 	public String getCommand(int index, boolean rightTrimCommand)
 	{
 		ScriptCommandDefinition c = getCommandDefinition(index);
+    if (c == null) return null;
 		if (c.getSQL() != null) return c.getSQL();
 
 		String s = originalScript.substring(c.getStartPositionInScript(), c.getEndPositionInScript());
