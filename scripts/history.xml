@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-07-13">
+    <entry dev-build="9" type="enh">The source and target connection for WbCopy, WbSchemaDiff and WbDataDiff can now be specified on the command line when starting the application. In that case it's not necessary to provide them to the respective commands</entry>
     <entry dev-build="9" type="enh">A new action to run all SQL statements in the editor starting from the cursor position is available</entry>
     <entry dev-build="8" type="enh">It's now possible to use OS environment variable or Java properties in the username of a connection profile.</entry>
     <entry dev-build="8" type="enh">For Postgres, "COPY .. FROM stdin" with the data after the statement is now supported</entry>
