@@ -3258,7 +3258,7 @@ public class SqlPanel
 
 			if (cursorPos > -1)
 			{
-				// cursorPos > -1 means that the statement at the cursor position should be executed
+				// cursorPos > -1 means that the statement at (or from) the cursor position should be executed
 				int realPos = cursorPos;
 				if (GuiSettings.getUseStatementInCurrentLine())
 				{
@@ -3331,15 +3331,8 @@ public class SqlPanel
 				logWasCompressed = !this.stmtRunner.getVerboseLogging();
 			}
 
-			StringBuilder finishedMsg1 = new StringBuilder(ResourceMgr.getString("TxtScriptStatementFinished1"));
-			finishedMsg1.append(' ');
-			StringBuilder finishedMsg2 = new StringBuilder(20);
-			finishedMsg2.append(' ');
-			String msg = ResourceMgr.getString("TxtScriptStatementFinished2");
-			msg = StringUtil.replace(msg, "%total%", NumberStringCache.getNumberString(count));
-			finishedMsg2.append(msg);
-
-			final int finishedSize = finishedMsg1.length() + finishedMsg2.length() + 5;
+			String finishedMsg1 = ResourceMgr.getString("TxtScriptStatementFinished1") + " ";
+			String finishedMsg2 = " " + ResourceMgr.getFormattedString("TxtScriptStatementFinished2", NumberStringCache.getNumberString(count));
 
 			boolean onErrorAsk = !Settings.getInstance().getIgnoreErrors();
 
@@ -3355,8 +3348,6 @@ public class SqlPanel
 			statusBar.executionStart();
 			long stmtTotal = 0;
 			int executedCount = 0;
-			String currentSql = null;
-
 			int resultSets = 0;
 
 			macroExecution = false;
@@ -3370,7 +3361,7 @@ public class SqlPanel
 
 			for (int i=startIndex; i < endIndex; i++)
 			{
-				currentSql = scriptParser.getCommand(i);
+				String currentSql = scriptParser.getCommand(i);
 				historyStatements.add(currentSql);
 
 				if (fixNLPattern != null)
@@ -3433,11 +3424,8 @@ public class SqlPanel
 				// so it needs to be checked each time.
 				if (count > 1) logWasCompressed = logWasCompressed || !this.stmtRunner.getVerboseLogging();
 
-				StringBuilder finishedMsg = new StringBuilder(finishedSize);
-				finishedMsg.append(finishedMsg1);
-				finishedMsg.append(NumberStringCache.getNumberString(i + 1));
-				finishedMsg.append(finishedMsg2);
-				String currentMsg = finishedMsg.toString();
+        // Concatenating Strings is faster than using String.format() (or ResourceMgr.getFormattedString()) for each statement
+				final String currentMsg = finishedMsg1 + NumberStringCache.getNumberString( (i + 1) - startIndex) + finishedMsg2;
 
         if (!logWasCompressed)
         {
@@ -3492,9 +3480,14 @@ public class SqlPanel
 					// error messages should always be shown in the log
 					// panel, even if compressLog is enabled (if it is not enabled
 					// the messages have been appended to the log already)
-					if (logWasCompressed) this.appendToLog(statementResult.getMessageBuffer().toString());
+					if (logWasCompressed)
+          {
+            appendToLog(statementResult.getMessageBuffer().toString());
+            appendToLog("\n");
+          }
 
-					if (count > 1 && onErrorAsk && (i < (count - 1)))
+          // only prompt if more than one statement is executed and if that is not the last statement in teh script
+					if (count > 1 && onErrorAsk && ( (i - startIndex) < (count - 1)))
 					{
 						// the animated gif needs to be turned off when a
 						// dialog is displayed, otherwise Swing uses too much CPU
@@ -3554,15 +3547,13 @@ public class SqlPanel
 
 			if (failuresIgnored > 0)
 			{
-				this.appendToLog("\n" + ResourceMgr.getFormattedString("MsgTotalStatementsFailed", failuresIgnored)+ "\n");
+				this.appendToLog(ResourceMgr.getFormattedString("MsgTotalStatementsFailed", failuresIgnored)+ "\n");
 			}
 
 			if (logWasCompressed)
 			{
-				msg = ResourceMgr.getFormattedString("MsgTotalStatementsExecuted", executedCount) + "\n";
-				this.appendToLog(msg);
-				msg = ResourceMgr.getFormattedString("MsgRowsAffected", totalRows) + "\n\n";
-				this.appendToLog(msg);
+				this.appendToLog(ResourceMgr.getFormattedString("MsgTotalStatementsExecuted", executedCount) + "\n");
+				this.appendToLog(ResourceMgr.getFormattedString("MsgRowsAffected", totalRows) + "\n\n");
 			}
 
 			ignoreStateChange = false;
