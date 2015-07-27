@@ -82,6 +82,8 @@ public class WbAboutDialog
 		jeditLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		licenseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+    jdkVersion.setToolTipText(System.getProperty("java.home"));
+
 		getRootPane().setDefaultButton(closeButton);
 		escAction = new EscAction(this, this);
 		WbFile f = Settings.getInstance().getConfigFile();

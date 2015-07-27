@@ -895,8 +895,8 @@ public final class WbManager
 			Settings.getInstance().setMacroStorage(value);
 
 			LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
-			LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") + ", name=" + System.getProperty("java.vm.name"));
-			LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
+			LogMgr.logInfo("WbManager.init()", ResourceMgr.getFullJavaInfo());
+			LogMgr.logInfo("WbManager.init()", ResourceMgr.getOSInfo());
 
 			long maxMem = MemoryWatcher.MAX_MEMORY / (1024*1024);
 			LogMgr.logInfo("WbManager.init()", "Available memory: " + maxMem + "MB");

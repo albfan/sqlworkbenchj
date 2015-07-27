@@ -83,9 +83,19 @@ public class ResourceMgr
 		return getString("TxtBuild") + " " + getBuildNumber().toString() + " (" + getString("TxtBuildDate") + ")";
 	}
 
+  public static String getFullJavaInfo()
+  {
+    return "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") + ", name=" + System.getProperty("java.vm.name");
+  }
+
+  public static String getOSInfo()
+  {
+    return "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch");
+  }
+  
 	public static String getJavaInfo()
 	{
-		String jdk = getString("TxtJavaVersion") + " " + System.getProperty("java.runtime.version");
+		String jdk = getString("TxtJavaVersion") + ": " + System.getProperty("java.runtime.version");
 		String bits = System.getProperty("sun.arch.data.model", null);
 		if (bits != null)
 		{

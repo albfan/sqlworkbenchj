@@ -71,6 +71,7 @@ public class WbAbout
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.addMessage(ResourceMgr.getBuildInfo());
 		result.addMessage(ResourceMgr.getJavaInfo());
+    result.addMessage("Java Home: " +  System.getProperty("java.home"));
 
 		WbFile f = Settings.getInstance().getConfigFile();
 		String s = ResourceMgr.getFormattedString("LblSettingsLocation", f.getFullPath());

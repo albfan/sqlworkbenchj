@@ -53,6 +53,9 @@ public class BrowserLauncher
 					{
 						String subject = urlEncode("SQL Workbench/J (Build " + ResourceMgr.getBuildNumber()+ ") - feedback");
 						String body = ResourceMgr.getFormattedString("TxtFeedbackMail", LogMgr.getLogfile().getFullPath());
+            body += "\n\n" + ResourceMgr.getFullJavaInfo();
+            body += "\n" + ResourceMgr.getOSInfo();
+
 						if (currentConnection != null)
 						{
 							ConnectionInfoBuilder builder = new ConnectionInfoBuilder();
