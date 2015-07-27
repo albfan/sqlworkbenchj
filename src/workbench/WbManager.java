@@ -1212,12 +1212,14 @@ public final class WbManager
 	public static void main(String[] args)
 	{
     boolean runConsole = false;
-    
+    boolean hasScripts = false;
+
     if (GraphicsEnvironment.isHeadless())
     {
       // no gui available --> default to console mode
       initConsoleMode(args);
       runConsole = true;
+      hasScripts = wb.cmdLine.isArgPresent(AppArguments.ARG_SCRIPT) || wb.cmdLine.isArgPresent(AppArguments.ARG_COMMAND);
     }
 		else
     {
@@ -1227,20 +1229,22 @@ public final class WbManager
 
     boolean showHelp = wb.cmdLine.isArgPresent("help");
     boolean showVersion = wb.cmdLine.isArgPresent("version");
+    
     if (showHelp)
     {
       System.out.println(wb.cmdLine.getHelp());
       Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
       System.exit(0);
     }
-    else if (showVersion)
+
+    if (showVersion)
     {
       System.out.println(ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildInfo());
       Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
       System.exit(0);
     }
 
-    if (runConsole)
+    if (runConsole && !hasScripts)
     {
       SQLConsole.runConsole();
     }
