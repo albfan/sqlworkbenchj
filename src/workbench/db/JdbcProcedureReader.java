@@ -96,12 +96,33 @@ public class JdbcProcedureReader
 			{
 				sp = this.connection.setSavepoint();
 			}
+
 			ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(catalog, schema, name);
 			if (Settings.getInstance().getBoolProperty("workbench.db.procreader.debug", false))
 			{
 				SqlUtil.dumpResultSetInfo("getProcedures()", rs.getMetaData());
 			}
+
 			DataStore ds = fillProcedureListDataStore(rs);
+
+      if (connection.getDbSettings().useGetFunctions())
+      {
+        LogMgr.logDebug("JdbcProcedureReader.getProcedures()", "Calling getFunctions() to get additional functions");
+
+        rs = this.connection.getSqlConnection().getMetaData().getProcedures(catalog, schema, name);
+        if (Settings.getInstance().getBoolProperty("workbench.db.procreader.debug", false))
+        {
+          SqlUtil.dumpResultSetInfo("getFunctions()", rs.getMetaData());
+        }
+
+        boolean useSpecificName = JdbcUtils.getColumnIndex(rs, "SPECIFIC_NAME") > -1;
+        fillProcedureListDataStore(rs, ds, useSpecificName);
+
+        // sort the complete combined result according to the JDBC API
+        SortDefinition sort = new SortDefinition(new int[] {0,1,2}, new boolean[] {true, true, true});
+        ds.sort(sort);
+      }
+
 			this.connection.releaseSavepoint(sp);
 			ds.resetStatus();
 			return ds;
@@ -304,12 +325,19 @@ public class JdbcProcedureReader
 	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
-		DataStore ds = getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName(), def.getSpecificName());
+    boolean retrieveFunctionColumns = def.isFunction() && connection.getDbSettings().useGetFunctions();
+    DataStore ds = getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName(), def.getSpecificName(), retrieveFunctionColumns);
     updateProcedureParameters(def, ds);
     return ds;
 	}
 
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname, String specificName)
+		throws SQLException
+	{
+    return getProcedureColumns(aCatalog, aSchema, aProcname, specificName, false);
+  }
+
+	private DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname, String specificName, boolean isFunction)
 		throws SQLException
 	{
 		DataStore ds = createProcColsDataStore();
@@ -322,7 +350,14 @@ public class JdbcProcedureReader
 				sp = this.connection.setSavepoint();
 			}
 
-			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(aCatalog, aSchema, aProcname, "%");
+      if (isFunction)
+      {
+        rs = this.connection.getSqlConnection().getMetaData().getFunctionColumns(aCatalog, aSchema, aProcname, "%");
+      }
+      else
+      {
+        rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(aCatalog, aSchema, aProcname, "%");
+      }
 
 			if (Settings.getInstance().getBoolProperty("workbench.db.procreader.debug", false))
 			{

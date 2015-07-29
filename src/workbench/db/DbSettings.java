@@ -2083,4 +2083,9 @@ public class DbSettings
   {
     return getBoolProperty("ddl" + getKeyValue(type) + ".replace.supported", false);
   }
+
+  public boolean useGetFunctions()
+  {
+    return getBoolProperty("procedurereader.use.getfunctions", false);
+  }
 }

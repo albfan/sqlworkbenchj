@@ -59,6 +59,7 @@ public class IniProfileStorage
   private static final String PROP_USERNAME = ".username";
   private static final String PROP_DRIVERNAME = ".drivername";
   private static final String PROP_DRIVERCLASS = ".driverclass";
+  private static final String PROP_DRIVERJAR = ".driver";
   private static final String PROP_AUTOCOMMMIT = ".autocommmit";
   private static final String PROP_FETCHSIZE = ".fetchsize";
   private static final String PROP_ALT_DELIMITER = ".alternate.delimiter";

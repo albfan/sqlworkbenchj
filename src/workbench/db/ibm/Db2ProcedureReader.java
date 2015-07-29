@@ -54,21 +54,17 @@ import workbench.util.StringUtil;
 public class Db2ProcedureReader
 	extends JdbcProcedureReader
 {
-	private boolean useJDBC;
-	private boolean retrieveFunctionParameters;
 
 	public Db2ProcedureReader(WbConnection conn, String dbID)
 	{
 		super(conn);
-		useJDBC = dbID.equals("db2i");
-		retrieveFunctionParameters = Settings.getInstance().getBoolProperty("workbench.db." + dbID + ".functionparams.fixretrieval", true);
 	}
 
 	@Override
 	public DataStore getProcedures(String catalog, String schemaPattern, String namePattern)
 		throws SQLException
 	{
-		if (useJDBC)
+		if (useJDBC())
 		{
 			return super.getProcedures(catalog, schemaPattern, namePattern);
 		}
@@ -98,7 +94,6 @@ public class Db2ProcedureReader
 		catch (Exception e)
 		{
 			LogMgr.logError("Db2ProcedureReader.getProcedures()", "Error retrieving procedures using query:\n" + sql, e);
-			useJDBC = true;
 			return super.getProcedures(catalog, schemaPattern, namePattern);
 		}
 		finally
@@ -135,21 +130,6 @@ public class Db2ProcedureReader
 	private String getSQL(String schemaPattern, String namePattern)
 	{
 		StringBuilder sql = new StringBuilder(100);
-//		if (this.connection.getMetadata().getDbId().equals("db2i"))
-//		{
-//			sql.append("SELECT '' as PROCEDURE_CAT,  \n" +
-//             "       ROUTINE_SCHEMA  as PROCEDURE_SCHEM, \n" +
-//             "       ROUTINE_NAME as PROCEDURE_NAME, \n" +
-//             "       LONG_COMMENT AS REMARKS, \n" +
-//             "       CASE  \n" +
-//             "         WHEN RESULT_SETS > 0 THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
-//             "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
-//             "       END as PROCEDURE_TYPE \n" +
-//             "FROM qsys2.sysprocs ");
-//
-//			SqlUtil.appendAndCondition(sql, "ROUTINE_SCHEMA", schemaPattern);
-//			SqlUtil.appendAndCondition(sql, "ROUTINE_NAME", namePattern);
-//		}
 
 		if (this.connection.getMetadata().getDbId().equals("db2h"))
 		{
@@ -204,7 +184,7 @@ public class Db2ProcedureReader
   public DataStore getProcedureColumns(ProcedureDefinition def)
     throws SQLException
   {
-    if (def.isFunction() && retrieveFunctionParameters)
+    if (def.isFunction() && retrieveFunctionParameters())
     {
       return getFunctionParameters(def);
     }
@@ -230,8 +210,8 @@ public class Db2ProcedureReader
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		String procSchema = Settings.getInstance().getProperty("workbench.db." + connection.getDbId() + ".functionparams.procschema", "SYSIBM");
-		String options = Settings.getInstance().getProperty("workbench.db." + connection.getDbId() + ".functionparams.options", "UNDERSCORE=0");
+		String procSchema = connection.getDbSettings().getProperty("functionparams.procschema", "SYSIBM");
+		String options = connection.getDbSettings().getProperty("functionparams.options", "UNDERSCORE=0");
 
 		String sql = "call " + procSchema + ".SQLFUNCTIONCOLS(?, ?, ?, '%', '" +  options + "')";
 
@@ -276,4 +256,13 @@ public class Db2ProcedureReader
 
 	}
 
+  private boolean useJDBC()
+  {
+    return connection.getDbSettings().getBoolProperty("procedurereader.use.jdbc", false);
+  }
+
+  private boolean retrieveFunctionParameters()
+  {
+    return connection.getDbSettings().getBoolProperty("functionparams.fixretrieval", true);
+  }
 }
