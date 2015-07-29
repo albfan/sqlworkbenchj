@@ -35,7 +35,7 @@ public class ProfileConverter
   {
     if (args.length != 2)
     {
-      System.err.println("Usage: StorageConverter inputfile outputfile");
+      System.err.println("Usage: ProfileConverter inputfile outputfile");
       System.exit(1);
     }
     IniProfileStorage ini = new IniProfileStorage();

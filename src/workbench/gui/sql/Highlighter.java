@@ -96,7 +96,7 @@ public class Highlighter
 			@Override
 			public void run()
 			{
-        editor.centerLine(line);
+        editor.scrollTo(line, 0);
   			editor.setCaretPosition(newCaret);
 
 				if (doHighlight)
