@@ -101,14 +101,16 @@ import workbench.util.VersionNumber;
  */
 public class DbMetadata
 	implements QuoteHandler
-{
+{ 
 	public static final String DBID_ORA = "oracle";
 	public static final String DBID_PG = "postgresql";
 	public static final String DBID_MS = "microsoft_sql_server";
 	public static final String DBID_VERTICA = "vertica_database";
 	public static final String DBID_MYSQL = "mysql";
 	public static final String DBID_FIREBIRD = "firebird";
-	public static final String DBID_DB2_LUW = "db2";
+	public static final String DBID_DB2_LUW = "db2";  // Linux, Unix, Windows
+	public static final String DBID_DB2_ISERIES = "db2i";  // AS/400 iSeries
+	public static final String DBID_DB2_HOST = "db2h";  // z/OS
 	public static final String DBID_TERADATA = "teradata";
 	public static final String DBID_H2 = "h2";
 	public static final String DBID_OPENEDGE = "openedge";

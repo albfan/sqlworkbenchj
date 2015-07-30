@@ -131,21 +131,43 @@ public class Db2ProcedureReader
 	{
 		StringBuilder sql = new StringBuilder(100);
 
-		if (this.connection.getMetadata().getDbId().equals("db2h"))
+//		if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ISERIES))
+//		{
+//      // DB2 iSeries, AS/400
+//			sql.append(
+//        "SELECT '' as PROCEDURE_CAT,  \n" +
+//         "       ROUTINE_SCHEMA  as PROCEDURE_SCHEM, \n" +
+//         "       ROUTINE_NAME as PROCEDURE_NAME, \n" +
+//         "       LONG_COMMENT AS REMARKS, \n" +
+//         "       CASE  \n" +
+//         "         WHEN ROUTINE_TYPE = 'FUNCTION' 0 THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
+//         "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
+//         "       END as PROCEDURE_TYPE, \n" +
+//         "       specific_name \n" +
+//         "FROM qsys2.sysroutines \n" +
+//         "WHERE function_origin  in ('E', 'U')"
+//      );
+//
+//			SqlUtil.appendAndCondition(sql, "ROUTINE_SCHEMA", schemaPattern, connection);
+//			SqlUtil.appendAndCondition(sql, "ROUTINE_NAME", namePattern, connection);
+//		}
+    
+    if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_HOST))
 		{
-			// DB Host
-			sql.append("SELECT '' as PROCEDURE_CAT,  \n" +
-             "       schema  as PROCEDURE_SCHEM, \n" +
-             "       name as PROCEDURE_NAME, \n" +
-             "       remarks, \n" +
-             "       CASE  \n" +
-             "         WHEN routinetype = 'F' THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
-             "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
-             "       END as PROCEDURE_TYPE, \n" +
-						 "       NULL as SPECIFIC_NAME \n" +
-             "FROM SYSIBM.SYSROUTINES \n" +
-             "WHERE routinetype in ('F', 'P') \n" +
-             "AND origin in ('Q', 'U') \n");
+			// DB Host, Z/OS
+			sql.append(
+        "SELECT '' as PROCEDURE_CAT,  \n" +
+        "       schema  as PROCEDURE_SCHEM, \n" +
+        "       name as PROCEDURE_NAME, \n" +
+        "       remarks, \n" +
+        "       CASE  \n" +
+        "         WHEN routinetype = 'F' THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
+        "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
+        "       END as PROCEDURE_TYPE, \n" +
+        "       NULL as SPECIFIC_NAME \n" +
+        "FROM SYSIBM.SYSROUTINES \n" +
+        "WHERE routinetype in ('F', 'P') \n" +
+        "AND origin in ('Q', 'U') \n");
 
 			SqlUtil.appendAndCondition(sql, "schema", schemaPattern, this.connection);
 			SqlUtil.appendAndCondition(sql, "name", namePattern, this.connection);
@@ -153,18 +175,19 @@ public class Db2ProcedureReader
 		else
 		{
 			// DB LUW
-			sql.append("SELECT '' as PROCEDURE_CAT,  \n" +
-					 "       routineschema as PROCEDURE_SCHEM, \n" +
-					 "       routinename as PROCEDURE_NAME, \n" +
-					 "       remarks, \n" +
-					 "       CASE  \n" +
-					 "         WHEN routinetype = 'F' THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
-					 "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
-					 "       END as PROCEDURE_TYPE, \n" +
-					 "       SPECIFICNAME as SPECIFIC_NAME \n" +
-					 "FROM syscat.routines \n" +
-					 "WHERE routinetype in ('F', 'P') \n" +
-					 "AND origin in ('Q', 'U') \n");
+			sql.append(
+        "SELECT '' as PROCEDURE_CAT,  \n" +
+        "       routineschema as PROCEDURE_SCHEM, \n" +
+        "       routinename as PROCEDURE_NAME, \n" +
+        "       remarks, \n" +
+        "       CASE  \n" +
+        "         WHEN routinetype = 'F' THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
+        "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
+        "       END as PROCEDURE_TYPE, \n" +
+        "       SPECIFICNAME as SPECIFIC_NAME \n" +
+        "FROM syscat.routines \n" +
+        "WHERE routinetype in ('F', 'P') \n" +
+        "AND origin in ('Q', 'U') \n");
 
 			SqlUtil.appendAndCondition(sql, "routineschema", schemaPattern, this.connection);
 			SqlUtil.appendAndCondition(sql, "routinename", namePattern, this.connection);
