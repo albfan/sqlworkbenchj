@@ -24,17 +24,19 @@ package workbench.gui;
 
 import java.awt.Component;
 import java.awt.event.KeyEvent;
+
 import javax.swing.DefaultFocusManager;
 import javax.swing.KeyStroke;
+
 import workbench.gui.actions.WbAction;
 
 /**
  * A focus manager which can grab focus traversal keys before they
- * are processed by the actual compontents. This is necessary to
- * allow Ctrl-Tab to switch tabs in the MainWindow. If no FocusManager
- * is installed, Ctrl-Tab will jump inside the current tabt to the next
- * focusable component, even if an action is registered with the Ctrl-Tab
- * keystroke.
+ * are processed by the actual compontents.
+ *
+ * This is necessary to allow Ctrl-Tab to switch tabs in the MainWindow. If no FocusManager
+ * is installed, Ctrl-Tab will jump inside the current tabt to the next focusable component,
+ * even if an action is registered with the Ctrl-Tab keystroke.
  * <br>
  * WbFocusManager can grab two actions (see grabActions()). If the shortcuts
  * for those actions are pressed, the action is called directly, otherwise the
@@ -55,7 +57,7 @@ public class WbFocusManager
 	{
 		protected static final WbFocusManager instance = new WbFocusManager();
 	}
-	
+
 	public static WbFocusManager getInstance()
 	{
 		return LazyInstanceHolder.instance;
@@ -97,6 +99,7 @@ public class WbFocusManager
 	 * @param focusedComponent
 	 * @param anEvent
 	 */
+  @Override
 	public void processKeyEvent(Component focusedComponent, KeyEvent anEvent)
 	{
 		KeyStroke key = KeyStroke.getKeyStrokeForEvent(anEvent);

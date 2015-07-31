@@ -443,11 +443,7 @@ public class InputHandler
 	public List<KeyStroke> getKeys(JComponent c)
 	{
 		if (c == null) return Collections.emptyList();
-		int types[] = new int[] {
-			JComponent.WHEN_FOCUSED,
-			JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT,
-			JComponent.WHEN_IN_FOCUSED_WINDOW
-		};
+		int types[] = new int[] {JComponent.WHEN_FOCUSED, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, JComponent.WHEN_IN_FOCUSED_WINDOW};
 
 		List<KeyStroke> allKeys = new ArrayList<>();
 		for (int when : types)

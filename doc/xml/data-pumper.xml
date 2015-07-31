@@ -27,8 +27,6 @@
 
 		<note><para>The DataPumper can also be started as a stand-alone application - without the
 			main window - by specifying -datapumper=true in the command line when starting &wb-productname;.
-			You can also use the supplied Windows executable <literal>DataPumper.exe</literal> or
-			the Linux/Unix shell script <literal>datapumper</literal>
 		</para></note>
 		<para>When opening the DatPumper from the main window, the main window's current connection
 			will be used as the initial source connection. You can disable the automatic connection upon
