@@ -55,6 +55,8 @@ public class Db2ProcedureReader
 	extends JdbcProcedureReader
 {
 
+  private boolean forceJDBC = false;
+
 	public Db2ProcedureReader(WbConnection conn, String dbID)
 	{
 		super(conn);
@@ -93,6 +95,7 @@ public class Db2ProcedureReader
 		}
 		catch (Exception e)
 		{
+      forceJDBC = true;
 			LogMgr.logError("Db2ProcedureReader.getProcedures()", "Error retrieving procedures using query:\n" + sql, e);
 			return super.getProcedures(catalog, schemaPattern, namePattern);
 		}
@@ -131,28 +134,27 @@ public class Db2ProcedureReader
 	{
 		StringBuilder sql = new StringBuilder(100);
 
-//		if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ISERIES))
-//		{
-//      // DB2 iSeries, AS/400
-//			sql.append(
-//        "SELECT '' as PROCEDURE_CAT,  \n" +
-//         "       ROUTINE_SCHEMA  as PROCEDURE_SCHEM, \n" +
-//         "       ROUTINE_NAME as PROCEDURE_NAME, \n" +
-//         "       LONG_COMMENT AS REMARKS, \n" +
-//         "       CASE  \n" +
-//         "         WHEN ROUTINE_TYPE = 'FUNCTION' 0 THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
-//         "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
-//         "       END as PROCEDURE_TYPE, \n" +
-//         "       specific_name \n" +
-//         "FROM qsys2.sysroutines \n" +
-//         "WHERE function_origin  in ('E', 'U')"
-//      );
-//
-//			SqlUtil.appendAndCondition(sql, "ROUTINE_SCHEMA", schemaPattern, connection);
-//			SqlUtil.appendAndCondition(sql, "ROUTINE_NAME", namePattern, connection);
-//		}
-    
-    if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_HOST))
+		if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ISERIES))
+		{
+      // DB2 iSeries, AS/400
+			sql.append(
+        "SELECT '' as PROCEDURE_CAT,  \n" +
+         "       ROUTINE_SCHEMA  as PROCEDURE_SCHEM, \n" +
+         "       ROUTINE_NAME as PROCEDURE_NAME, \n" +
+         "       LONG_COMMENT AS REMARKS, \n" +
+         "       CASE  \n" +
+         "         WHEN ROUTINE_TYPE = 'FUNCTION' THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
+         "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
+         "       END as PROCEDURE_TYPE, \n" +
+         "       specific_name \n" +
+         "FROM qsys2.sysroutines \n" +
+         "WHERE function_origin <> ('B')"
+      );
+
+			SqlUtil.appendAndCondition(sql, "ROUTINE_SCHEMA", schemaPattern, connection);
+			SqlUtil.appendAndCondition(sql, "ROUTINE_NAME", namePattern, connection);
+		}
+    else if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_HOST))
 		{
 			// DB Host, Z/OS
 			sql.append(
@@ -281,7 +283,7 @@ public class Db2ProcedureReader
 
   private boolean useJDBC()
   {
-    return connection.getDbSettings().getBoolProperty("procedurereader.use.jdbc", false);
+    return forceJDBC || connection.getDbSettings().getBoolProperty("procedurereader.use.jdbc", false);
   }
 
   private boolean retrieveFunctionParameters()
