@@ -89,7 +89,7 @@ public class Db2ProcedureReader
 			DataStore ds = fillProcedureListDataStore(rs);
       if (connection.getDbSettings().showProcedureParameters())
       {
-        updateDisplayName(ds);
+        updateDisplayNames(ds);
       }
 			return ds;
 		}
@@ -106,7 +106,7 @@ public class Db2ProcedureReader
 		}
 	}
 
-  private void updateDisplayName(DataStore procs)
+  private void updateDisplayNames(DataStore procs)
   {
     for (int row=0; row < procs.getRowCount(); row ++)
     {
@@ -139,14 +139,15 @@ public class Db2ProcedureReader
       // DB2 iSeries, AS/400
 			sql.append(
         "SELECT '' as PROCEDURE_CAT,  \n" +
-         "       ROUTINE_SCHEMA  as PROCEDURE_SCHEM, \n" +
-         "       ROUTINE_NAME as PROCEDURE_NAME, \n" +
-         "       LONG_COMMENT AS REMARKS, \n" +
-         "       CASE  \n" +
-         "         WHEN ROUTINE_TYPE = 'FUNCTION' THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
-         "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
-         "       END as PROCEDURE_TYPE, \n" +
-         "       specific_name \n" +
+         "      ROUTINE_SCHEMA  as PROCEDURE_SCHEM, \n" +
+         "      ROUTINE_NAME as PROCEDURE_NAME, \n" +
+         "      LONG_COMMENT AS REMARKS, \n" +
+         "      CASE  \n" +
+         "        WHEN ROUTINE_TYPE = 'FUNCTION' THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
+         "        WHEN ROUTINE_TYPE = 'PROCEDURE' THEN " + DatabaseMetaData.procedureNoResult + "  \n" +
+         "        ELSE " + DatabaseMetaData.procedureResultUnknown + "  \n" +
+         "      END as PROCEDURE_TYPE, \n" +
+         "      specific_name \n" +
          "FROM qsys2.sysroutines \n" +
          "WHERE function_origin <> ('B')"
       );
@@ -156,10 +157,10 @@ public class Db2ProcedureReader
 		}
     else if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_HOST))
 		{
-			// DB Host, Z/OS
+			// DB Host, z/OS
 			sql.append(
         "SELECT '' as PROCEDURE_CAT,  \n" +
-        "       schema  as PROCEDURE_SCHEM, \n" +
+        "       schema as PROCEDURE_SCHEM, \n" +
         "       name as PROCEDURE_NAME, \n" +
         "       remarks, \n" +
         "       CASE  \n" +
@@ -169,7 +170,7 @@ public class Db2ProcedureReader
         "       NULL as SPECIFIC_NAME \n" +
         "FROM SYSIBM.SYSROUTINES \n" +
         "WHERE routinetype in ('F', 'P') \n" +
-        "AND origin in ('Q', 'U') \n");
+        "  AND origin in ('Q', 'U') \n");
 
 			SqlUtil.appendAndCondition(sql, "schema", schemaPattern, this.connection);
 			SqlUtil.appendAndCondition(sql, "name", namePattern, this.connection);
@@ -189,7 +190,7 @@ public class Db2ProcedureReader
         "       SPECIFICNAME as SPECIFIC_NAME \n" +
         "FROM syscat.routines \n" +
         "WHERE routinetype in ('F', 'P') \n" +
-        "AND origin in ('Q', 'U') \n");
+        "  AND origin in ('Q', 'U') \n");
 
 			SqlUtil.appendAndCondition(sql, "routineschema", schemaPattern, this.connection);
 			SqlUtil.appendAndCondition(sql, "routinename", namePattern, this.connection);
@@ -209,7 +210,7 @@ public class Db2ProcedureReader
   public DataStore getProcedureColumns(ProcedureDefinition def)
     throws SQLException
   {
-    if (def.isFunction() && retrieveFunctionParameters())
+    if (def.isFunction() && useSQLFunctionsProc())
     {
       return getFunctionParameters(def);
     }
@@ -286,7 +287,7 @@ public class Db2ProcedureReader
     return forceJDBC || connection.getDbSettings().getBoolProperty("procedurereader.use.jdbc", false);
   }
 
-  private boolean retrieveFunctionParameters()
+  private boolean useSQLFunctionsProc()
   {
     return connection.getDbSettings().getBoolProperty("functionparams.fixretrieval", true);
   }
