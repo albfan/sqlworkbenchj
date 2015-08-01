@@ -275,26 +275,7 @@ public class RowDataReader
 					}
 					else
 					{
-						// Convert the BLOB data to a byte array
-						InputStream in;
-						try
-						{
-							in = rs.getBinaryStream(i+1);
-							if (in == null || rs.wasNull())
-							{
-								value = null;
-							}
-							else
-							{
-								// readBytes will closeStreams the InputStream
-								value = FileUtil.readBytes(in);
-							}
-						}
-						catch (IOException e)
-						{
-							LogMgr.logError("RowDataReader.read()", "Error retrieving binary data for column '" + resultInfo.getColumnName(i) + "'", e);
-							value = rs.getObject(i+1);
-						}
+            value = readBinaryStream(rs, i + 1);
 					}
 				}
 				else if (type == Types.SQLXML)
@@ -328,16 +309,9 @@ public class RowDataReader
 				else if (type == Types.CHAR || type == Types.NCHAR)
 				{
 					value = rs.getString(i+1);
-					if (trimCharData && value != null)
+					if (trimCharData)
 					{
-						try
-						{
-							value = StringUtil.rtrim((String)value);
-						}
-						catch (Throwable th)
-						{
-							LogMgr.logError("RowDataReader.read()", "Error trimming CHAR data", th);
-						}
+            value = StringUtil.rtrim((String)value);
 					}
 				}
 				else
@@ -451,6 +425,32 @@ public class RowDataReader
 		return value;
 	}
 
+  private Object readBinaryStream(ResultSet rs, int column)
+    throws SQLException
+  {
+    Object value;
+    InputStream in;
+    try
+    {
+      in = rs.getBinaryStream(column);
+      if (in == null || rs.wasNull())
+      {
+        value = null;
+      }
+      else
+      {
+        // readBytes will close the InputStream
+        value = FileUtil.readBytes(in);
+      }
+    }
+    catch (IOException e)
+    {
+      LogMgr.logError("RowDataReader.readBinaryStream()", "Error retrieving binary data for column #" + resultInfo.getColumnName(column), e);
+      value = rs.getObject(column);
+    }
+    return value;
+  }
+
 	private Object readCharacterStream(ResultSet rs, int column)
 		throws SQLException
 	{
@@ -461,7 +461,7 @@ public class RowDataReader
 			in = rs.getCharacterStream(column);
 			if (in != null && !rs.wasNull())
 			{
-				// readCharacters will closeStreams the Reader
+				// readCharacters will close the Reader
 				value = FileUtil.readCharacters(in);
 			}
 			else
@@ -471,7 +471,7 @@ public class RowDataReader
 		}
 		catch (IOException e)
 		{
-			LogMgr.logWarning("RowDataReader.read()", "Error retrieving clob data for column #" + column, e);
+			LogMgr.logWarning("RowDataReader.readCharacterStream()", "Error retrieving clob data for column #" + column, e);
 			value = rs.getObject(column);
 		}
 		return value;

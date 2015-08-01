@@ -538,6 +538,9 @@ public class StringUtilTest
 		s = "bla \t\n";
 		assertEquals("bla", StringUtil.rtrim(s));
 
+		s = "  bla \t\n";
+		assertEquals("  bla", StringUtil.rtrim(s));
+
 		s = "bla \t\nbla";
 		assertEquals(s, StringUtil.rtrim(s));
 
@@ -546,6 +549,12 @@ public class StringUtilTest
 
 		s = "";
 		assertEquals(s, StringUtil.rtrim(s));
+
+		s = " ";
+		assertEquals("", StringUtil.rtrim(s));
+
+    s = null;
+    assertNull(StringUtil.rtrim(s));
 	}
 
 	@Test
