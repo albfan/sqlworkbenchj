@@ -34,9 +34,9 @@ import workbench.WbTestCase;
 
 import workbench.db.WbConnection;
 
-import workbench.sql.parser.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
@@ -214,13 +214,13 @@ public class WbDataDiffTest
 			String sql = "WbDataDiff -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -includeDelete=true -checkDependencies=true -file=sync.sql -encoding=UTF8";
 			runner.runStatement(sql);
 
-			StatementRunnerResult result = runner.getResult();
+//			StatementRunnerResult result = runner.getResult();
 //			System.out.println(result.getMessageBuffer());
 			WbFile main = new WbFile(util.getBaseDir(), "sync.sql");
 			assertTrue(main.exists());
 
 			Reader r = EncodingUtil.createReader(main, "UTF-8");
-			String sync = FileUtil.readCharacters(r);
+//			String sync = FileUtil.readCharacters(r);
 			//System.out.println(sync);
 		}
 		finally

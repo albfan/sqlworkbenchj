@@ -41,6 +41,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.XmlRowDataConverter;
@@ -80,10 +81,10 @@ import workbench.util.StringUtil;
 public class TableDeleteSync
 	implements ProgressReporter
 {
-	private WbConnection toDelete;
-	private WbConnection reference;
-	private TableIdentifier checkTable;
-	private TableIdentifier deleteTable;
+	private WbConnection targetConnection;
+	private WbConnection referenceConnection;
+	private TableIdentifier referenceTable;
+	private TableDefinition tableToDeleteFrom;
 	private BatchedStatement deleteStatement;
 	private int chunkSize = 50;
 	private int batchSize = 50;
@@ -105,9 +106,9 @@ public class TableDeleteSync
 	public TableDeleteSync(WbConnection deleteFrom, WbConnection compareTo)
 		throws SQLException
 	{
-		toDelete = deleteFrom;
-		reference = compareTo;
-		formatter = new SqlLiteralFormatter(toDelete);
+		targetConnection = deleteFrom;
+		referenceConnection = compareTo;
+		formatter = new SqlLiteralFormatter(targetConnection);
 		chunkSize = Settings.getInstance().getSyncChunkSize();
 	}
 
@@ -123,7 +124,7 @@ public class TableDeleteSync
 		xmlConverter.setUseVerboseFormat(false);
 		xmlConverter.setWriteClobToFile(false);
 		xmlConverter.setUseCDATA(useCDATA);
-		xmlConverter.setOriginalConnection(toDelete);
+		xmlConverter.setOriginalConnection(targetConnection);
 		xmlConverter.setWriteBlobToFile(false);
 	}
 
@@ -203,17 +204,19 @@ public class TableDeleteSync
 		if (tableToCheck == null) throw new IllegalArgumentException("Source table may not be null!");
 		if (tableToDelete == null) throw new IllegalArgumentException("Target table (for source: " + tableToCheck.getTableName() + ") may not be null!");
 
-		this.checkTable = this.reference.getMetadata().findSelectableObject(tableToCheck);
-		this.deleteTable = this.toDelete.getMetadata().findTable(tableToDelete, false);
+		this.referenceTable = this.referenceConnection.getMetadata().findSelectableObject(tableToCheck);
+    TableIdentifier toDelete = this.targetConnection.getMetadata().findTable(tableToDelete);
+    this.tableToDeleteFrom = this.targetConnection.getMetadata().getTableDefinition(toDelete, true);
 
-		if (deleteTable == null) throw new SQLException("Table " + tableToDelete.getTableName() + " not found in target database");
+		if (tableToDeleteFrom == null) throw new SQLException("Table " + tableToDelete.getTableName() + " not found in target database");
 		firstDelete = true;
 		this.columnMap.clear();
 
 		this.alternatePKColumns = (alternatePK == null ? new HashSet<String>(0) : alternatePK);
 
-		List<ColumnIdentifier> columns = this.toDelete.getMetadata().getTableColumns(deleteTable);
-		if (columns == null || columns.isEmpty()) throw new SQLException("Table " + deleteTable.getTableName() + " not found in target database");
+		List<ColumnIdentifier> columns = tableToDeleteFrom.getColumns();
+		if (columns == null || columns.isEmpty()) throw new SQLException("Table " + tableToDeleteFrom.getTable().getTableName() + " not found in target database");
+
 		String where = " WHERE ";
 		int colIndex = 1;
 
@@ -225,7 +228,7 @@ public class TableDeleteSync
 				{
 					where += " AND ";
 				}
-				String colname = this.toDelete.getMetadata().quoteObjectname(col.getColumnName());
+				String colname = this.targetConnection.getMetadata().quoteObjectname(col.getColumnName());
 				where += colname + " = ?";
 				columnMap.put(col, colIndex);
 				colIndex ++;
@@ -241,10 +244,10 @@ public class TableDeleteSync
 		if (outputWriter == null)
 		{
 			// Directly delete the rows, without an intermediate script file...
-			String deleteSql = "DELETE FROM " + this.deleteTable.getFullyQualifiedName(this.toDelete) + where;
-			PreparedStatement deleteStmt = toDelete.getSqlConnection().prepareStatement(deleteSql);
-			this.deleteStatement = new BatchedStatement(deleteStmt, toDelete, batchSize);
-			LogMgr.logDebug("SyncDeleter.setTable()", "Using " + deleteSql + " to delete rows from target database");
+			String deleteSql = "DELETE FROM " + this.tableToDeleteFrom.getTable().getFullyQualifiedName(this.targetConnection) + where;
+			PreparedStatement deleteStmt = targetConnection.getSqlConnection().prepareStatement(deleteSql);
+			this.deleteStatement = new BatchedStatement(deleteStmt, targetConnection, batchSize);
+			LogMgr.logInfo("TableDeleteSync.setTable()", "Using " + deleteSql + " to delete rows from target database");
 		}
 		return TableDiffStatus.OK;
 	}
@@ -252,38 +255,34 @@ public class TableDeleteSync
 	public void doSync()
 		throws SQLException, IOException
 	{
-		List<ColumnIdentifier> columns = this.toDelete.getMetadata().getTableColumns(this.deleteTable);
-		boolean first = true;
+		List<ColumnIdentifier> columns = this.tableToDeleteFrom.getColumns();
 		String selectColumns = "";
-		for (ColumnIdentifier col : columns)
-		{
-			if ((alternatePKColumns.isEmpty() && col.isPkColumn()) || alternatePKColumns.contains(col.getColumnName()))
-			{
-				if (!first)
-				{
-					selectColumns += ", ";
-				}
-				else first = false;
-				selectColumns += " " + this.toDelete.getMetadata().quoteObjectname(col.getColumnName());
-			}
-		}
-		String retrieve = "SELECT " + selectColumns + " FROM " + this.deleteTable.getTableExpression(this.toDelete);
+    for (ColumnIdentifier col : columns)
+    {
+      if ((alternatePKColumns.isEmpty() && col.isPkColumn()) || alternatePKColumns.contains(col.getColumnName()))
+      {
+        if (selectColumns.length() > 0) selectColumns += ", ";
+        selectColumns += this.targetConnection.getMetadata().quoteObjectname(col.getColumnName());
+      }
+    }
+    TableIdentifier deleteTable = this.tableToDeleteFrom.getTable();
+		String retrieve = "SELECT " + selectColumns + " FROM " + deleteTable.getFullyQualifiedName(this.targetConnection);
 
-		LogMgr.logDebug("SyncDeleter.deleteTarget()", "Using " + retrieve + " to retrieve rows from reference database");
+		LogMgr.logDebug("TableDeleteSync.doSync()", "Using " + retrieve + " to retrieve rows from the reference table" );
 
 		deletedRows = 0;
 		cancelExecution = false;
 
-		checkStatement = reference.createStatement();
+		checkStatement = referenceConnection.createStatement();
 
 		ResultSet rs = null;
 		Statement stmt = null;
 		try
 		{
 			// Process all rows from the table to be synchronized
-			stmt = this.toDelete.createStatementForQuery();
+			stmt = this.targetConnection.createStatementForQuery();
 			rs = stmt.executeQuery(retrieve);
-			ResultInfo info = new ResultInfo(rs.getMetaData(), this.toDelete);
+			ResultInfo info = new ResultInfo(rs.getMetaData(), this.targetConnection);
 			if (xmlConverter != null)
 			{
 				for (int i=0; i < info.getColumnCount(); i++)
@@ -300,18 +299,19 @@ public class TableDeleteSync
 				{
 					// If output writer is null, we are executing the statements directly.
 					this.monitor.setMonitorType(RowActionMonitor.MONITOR_DELETE);
-					this.monitor.setCurrentObject(this.deleteTable.getTableName(), -1, -1);
+					this.monitor.setCurrentObject(deleteTable.getTableName(), -1, -1);
 				}
 				else
 				{
 					this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-					String msg = ResourceMgr.getFormattedString("MsgDeleteSyncProcess", this.deleteTable.getTableName());
+					String msg = ResourceMgr.getFormattedString("MsgDeleteSyncProcess",deleteTable.getTableName());
 					this.monitor.setCurrentObject(msg, -1, -1);
 				}
 			}
 			List<RowData> packetRows = new ArrayList<>(chunkSize);
 
-			RowDataReader reader = RowDataReaderFactory.createReader(info, toDelete);
+			RowDataReader reader = RowDataReaderFactory.createReader(info, targetConnection);
+
 			while (rs.next())
 			{
 				if (cancelExecution) break;
@@ -341,9 +341,9 @@ public class TableDeleteSync
 			{
 				this.deletedRows += this.deleteStatement.flush();
 
-				if (!toDelete.getAutoCommit())
+				if (!targetConnection.getAutoCommit())
 				{
-					toDelete.commit();
+					targetConnection.commit();
 				}
 			}
 			else
@@ -353,9 +353,9 @@ public class TableDeleteSync
 		}
 		catch (SQLException e)
 		{
-			if (!toDelete.getAutoCommit())
+			if (!targetConnection.getAutoCommit())
 			{
-				try { toDelete.rollback(); } catch (Throwable th) {}
+				try { targetConnection.rollback(); } catch (Throwable th) {}
 			}
 			throw e;
 		}
@@ -376,8 +376,8 @@ public class TableDeleteSync
 		{
 			rs = checkStatement.executeQuery(sql);
 			List<RowData> checkRows = new ArrayList<>(referenceRows.size());
-			ResultInfo ri = new ResultInfo(rs.getMetaData(), reference);
-			RowDataReader reader = RowDataReaderFactory.createReader(ri, reference);
+			ResultInfo ri = new ResultInfo(rs.getMetaData(), referenceConnection);
+			RowDataReader reader = RowDataReaderFactory.createReader(ri, referenceConnection);
 			while (rs.next())
 			{
 				if (cancelExecution) break;
@@ -394,13 +394,14 @@ public class TableDeleteSync
 			{
 				if (!checkRows.contains(doomed))
 				{
-					deleteRow(doomed, ri);
+					processRowToDelete(doomed, ri);
 				}
+        if (cancelExecution) return;
 			}
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("TableSync.checkRows()", "Error when running check SQL " + sql, e);
+			LogMgr.logError("TableDeleteSync.checkRows()", "Error when running check SQL " + sql, e);
 			throw e;
 		}
 		finally
@@ -409,11 +410,21 @@ public class TableDeleteSync
 		}
 	}
 
-	private void deleteRow(RowData row, ResultInfo info)
+  /**
+   * This will either delete the row directly in the target database,
+   * or write the approriate delete statement to the output file.
+   *
+   * @param row   the row to be deleted
+   * @param info  the result set info from the select statement
+   *
+   * @throws SQLException
+   */
+	private void processRowToDelete(RowData row, ResultInfo info)
 		throws SQLException
 	{
 		if (this.outputWriter == null)
 		{
+      // delete the rows directly
 			for (int i=0; i < row.getColumnCount(); i++)
 			{
 				Integer index = this.columnMap.get(info.getColumn(i));
@@ -431,9 +442,10 @@ public class TableDeleteSync
 					firstDelete = false;
 					writeHeader(outputWriter);
 				}
+
 				if (xmlConverter == null)
 				{
-					this.outputWriter.write("DELETE FROM " + deleteTable.getTableExpression(toDelete) + " WHERE ") ;
+					this.outputWriter.write("DELETE FROM " + tableToDeleteFrom.getTable().getTableExpression(targetConnection) + " WHERE ") ;
 					for (int i=0; i < row.getColumnCount(); i++)
 					{
 						Object value = row.getValue(i);
@@ -459,11 +471,19 @@ public class TableDeleteSync
 			}
 			catch (IOException e)
 			{
-				LogMgr.logError("TableSync.deleteRow()", "Error writing DELETE statement", e);
+				LogMgr.logError("TableDeleteSync.deleteRow()", "Error writing DELETE statement", e);
 			}
 		}
 	}
 
+  /**
+   * Create a SELECT statement to retrieve the (potentially) corresponding rows
+   * from the reference table based on the passed rows from the target table.
+   *
+   * @param rows  the rows from the target table
+   * @param info  the result set information from the target table
+   * @return the SELECT statement to use
+   */
 	private String buildCheckSql(List<RowData> rows, ResultInfo info)
 	{
 		StringBuilder sql = new StringBuilder(150);
@@ -471,10 +491,10 @@ public class TableDeleteSync
 		for (int i=0; i < info.getColumnCount(); i++)
 		{
 			if (i > 0) sql.append(',');
-			sql.append(reference.getMetadata().quoteObjectname(info.getColumnName(i)));
+			sql.append(referenceConnection.getMetadata().quoteObjectname(info.getColumnName(i)));
 		}
 		sql.append(" FROM ");
-		sql.append(this.checkTable.getTableExpression(reference));
+		sql.append(this.referenceTable.getTableExpression(referenceConnection));
 		sql.append(" WHERE ");
 
 		for (int row=0; row < rows.size(); row++)
@@ -484,7 +504,7 @@ public class TableDeleteSync
 			for (int c=0; c < info.getColumnCount(); c++)
 			{
 				if (c > 0) sql.append(" AND ");
-				sql.append(reference.getMetadata().quoteObjectname(info.getColumnName(c)));
+				sql.append(referenceConnection.getMetadata().quoteObjectname(info.getColumnName(c)));
 				sql.append(" = ");
 				Object value = rows.get(row).getValue(c);
 				ColumnIdentifier col = info.getColumn(c);
@@ -519,7 +539,7 @@ public class TableDeleteSync
 			out.write(" -->");
 			out.write(lineEnding);
 			out.write("<table-data-diff name=\"");
-			out.write(deleteTable.getTableExpression(toDelete));
+			out.write(tableToDeleteFrom.getTable().getTableExpression(targetConnection));
 			out.write("\">");
 			out.write(lineEnding);
 		}
