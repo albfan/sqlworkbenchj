@@ -19,6 +19,7 @@
   </void>
 
   <void method="put">
+   <!-- SAP HANA -->
    <string>HDB</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
@@ -105,7 +106,7 @@ from sys.functions fct
 
   <!-- DB2 for z/OS identifies itself as DB2 -->
 	<void method="put">
-   <string>DB2</string>
+   <string>$dbid:db2h</string>
    <object id="db2_host_proc_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT text FROM sysibm.sysroutines</string>
@@ -120,7 +121,7 @@ from sys.functions fct
   </void>
 
 	<void method="put">
-   <string>DB2 UDB for AS/400</string>
+   <string>$dbid:db2i</string>
    <object id="db2_as400_proc_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>select routine_definition FROM qsys2.sysroutines</string>
@@ -134,19 +135,9 @@ from sys.functions fct
    </object>
 	</void>
 
-	<void method="put">
-   <string>DB2 for DB2 UDB for z/OS</string>
-   <object idref="db2_as400_proc_source"/>
-	</void>
-
-	<void method="put">
-   <string>db2i</string>
-   <object idref="db2_as400_proc_source"/>
-	</void>
-
   <!-- DB2 for LUW -->
 	<void method="put">
-   <string>DB2/NT</string>
+   <string>$dbid:db2</string>
    <object id="db2_proc_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT text FROM syscat.routines</string>
@@ -162,26 +153,6 @@ from sys.functions fct
     </void>
    </object>
   </void>
-
-	<void method="put">
-   <string>DB2/LINUXX8664</string>
-   <object idref="db2_proc_source"/>
-	</void>
-
-	<void method="put">
-   <string>DB2/LINUX</string>
-   <object idref="db2_proc_source"/>
-	</void>
-
-	<void method="put">
-   <string>DB2/NT64</string>
-   <object idref="db2_proc_source"/>
-	</void>
-
-	<void method="put">
-   <string>DB2/AIX64</string>
-   <object idref="db2_proc_source"/>
-	</void>
 
   <void method="put">
    <string>NuoDB</string>
@@ -283,7 +254,7 @@ from sys.functions fct
 
 
   <void method="put">
-   <string>firebird-3</string>
+   <string>$dbid:firebird-3</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
@@ -302,7 +273,7 @@ from rdb$procedures p
   </void>
 
   <void method="put">
-   <string>firebird</string>
+   <string>$dbid:firebird</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>

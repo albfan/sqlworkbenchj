@@ -67,7 +67,7 @@ public class MetaDataSqlManager
 	public static final String CONS_VALIDATED = "%validated%";
 
 	private final String productName;
-  private final String dbid;
+  private final String dbIdKey;
 	private int majorVersion = -1;
 	private int minorVersion = -1;
 
@@ -79,9 +79,9 @@ public class MetaDataSqlManager
 
 	private final Object LOCK = new Object();
 
-	public MetaDataSqlManager(String product, String id, VersionNumber version)
+	public MetaDataSqlManager(String product, String dbId, VersionNumber version)
 	{
-    this.dbid = id;
+    this.dbIdKey = "$dbid:" + dbId;
 		if (product.toLowerCase().startsWith("firebird"))
 		{
 			// Jaybird 2.x reports the Firebird version in the productname.
@@ -172,10 +172,10 @@ public class MetaDataSqlManager
 
 	private GetMetaDataSql getEntry(Map<String, GetMetaDataSql> statements, String sourceType)
   {
-    GetMetaDataSql metaSql = getEntryByKey(dbid, statements);
+    GetMetaDataSql metaSql = getEntryByKey(dbIdKey, statements);
     if (metaSql != null)
     {
-      LogMgr.logInfo("DbMetadata.getEntry()", "Using template for " + sourceType + " based on DBID: [" + dbid + "] instead of product name: " + productName);
+      LogMgr.logInfo("DbMetadata.getEntry()", "Using template for " + sourceType + " based on DBID: [" + dbIdKey + "] instead of product name: " + productName);
       return metaSql;
     }
     return getEntryByKey(productName, statements);

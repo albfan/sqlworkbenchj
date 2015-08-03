@@ -156,7 +156,7 @@ where type = 'VIEW'
   </void>
 
   <void method="put">
-   <string>DB2/NT</string>
+   <string>$dbid:db2</string>
    <object id="db2_view_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT text from syscat.views</string>
@@ -191,7 +191,7 @@ where type = 'VIEW'
 	</void>
 
 	<void method="put">
-		<string>DB2 UDB for AS/400</string>
+		<string>$dbid:db2i</string>
 		<object id="db2_iseries" class="workbench.db.GetMetaDataSql">
 			<void property="baseSql">
 				<string>SELECT VIEW_DEFINITION from qsys2.sysviews</string>
@@ -206,7 +206,7 @@ where type = 'VIEW'
 	</void>
 
   <void method="put">
-    <string>DB2-10</string>
+    <string>$dbid:db2h-10</string>
     <object id="db2_host_10" class="workbench.db.GetMetaDataSql">
       <void property="baseSql">
         <string>SELECT statement FROM SYSIBM.SYSVIEWS</string>
@@ -221,12 +221,12 @@ where type = 'VIEW'
   </void>
 
 	<void method="put">
-   <string>DB2-11</string>
+   <string>$dbid:db2h-11</string>
    <object idref="db2_host_10"/>
 	</void>
 
   <void method="put">
-    <string>DB2</string>
+    <string>$dbid:db2h</string>
     <object id="db2_host" class="workbench.db.GetMetaDataSql">
       <void property="baseSql">
         <string>SELECT text from SYSIBM.SYSVIEWS</string>

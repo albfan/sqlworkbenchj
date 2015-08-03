@@ -246,7 +246,7 @@ from DBC.Triggers
 
   <!-- DB2 for z/OS identifies itself as DB2 -->
   <void method="put">
-   <string>DB2</string>
+   <string>$dbid:db2h</string>
    <object id="db2_host_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT name as trigger_name,
@@ -275,7 +275,7 @@ from DBC.Triggers
   </void>
 
   <void method="put">
-   <string>DB2 UDB for AS/400</string>
+   <string>$dbid:db2i</string>
    <object id="db2_as400_lsttrg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
@@ -297,7 +297,7 @@ from DBC.Triggers
 	</void>
 
   <void method="put">
-   <string>DB2/NT</string>
+   <string>$dbid:db2</string>
    <object id="db2_lst_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>select trigname as trigger_name,
@@ -325,28 +325,8 @@ from syscat.triggers</string>
    </object>
   </void>
 
-	<void method="put">
-   <string>DB2/AIX64</string>
-   <object idref="db2_lst_trg"/>
-	</void>
-
-	<void method="put">
-   <string>DB2/NT64</string>
-   <object idref="db2_lst_trg"/>
-	</void>
-
-	<void method="put">
-   <string>DB2/LINUX</string>
-   <object idref="db2_lst_trg"/>
-	</void>
-
-	<void method="put">
-   <string>DB2/LINUXX8664</string>
-   <object idref="db2_lst_trg"/>
-	</void>
-
   <void method="put">
-   <string>Oracle</string>
+   <string>$dbid:oracle</string>
    <object id="list_oracle_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
@@ -378,11 +358,6 @@ from syscat.triggers</string>
      <string>owner</string>
     </void>
    </object>
-  </void>
-
-  <void method="put">
-   <string>Oracle8</string>
-   <object idref="list_oracle_trg"/>
   </void>
 
   <void method="put">
