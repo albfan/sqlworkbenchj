@@ -101,7 +101,7 @@ import workbench.util.VersionNumber;
  */
 public class DbMetadata
 	implements QuoteHandler
-{ 
+{
 	public static final String DBID_ORA = "oracle";
 	public static final String DBID_PG = "postgresql";
 	public static final String DBID_MS = "microsoft_sql_server";
@@ -556,7 +556,7 @@ public class DbMetadata
 	{
 		if (this.metaSqlMgr == null)
 		{
-			this.metaSqlMgr = new MetaDataSqlManager(productName, this.dbConnection.getDatabaseVersion());
+			this.metaSqlMgr = new MetaDataSqlManager(productName, getDbId(), this.dbConnection.getDatabaseVersion());
 		}
 		return this.metaSqlMgr;
 	}

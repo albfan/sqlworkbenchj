@@ -66,7 +66,8 @@ public class MetaDataSqlManager
 	public static final String CONS_ENABLED = "%enabled%";
 	public static final String CONS_VALIDATED = "%validated%";
 
-	private String productName;
+	private final String productName;
+  private final String dbid;
 	private int majorVersion = -1;
 	private int minorVersion = -1;
 
@@ -78,16 +79,19 @@ public class MetaDataSqlManager
 
 	private final Object LOCK = new Object();
 
-	public MetaDataSqlManager(String product, VersionNumber version)
+	public MetaDataSqlManager(String product, String id, VersionNumber version)
 	{
-		this.productName = product;
-		if (productName.toLowerCase().startsWith("firebird"))
+    this.dbid = id;
+		if (product.toLowerCase().startsWith("firebird"))
 		{
 			// Jaybird 2.x reports the Firebird version in the productname.
-			// so the productname might look something like
 			// To ease the DBMS handling we'll simply use Firebird as the product name here
 			productName = "Firebird";
 		}
+    else
+    {
+      productName = product;
+    }
 		if (version != null)
 		{
 			this.majorVersion = version.getMajorVersion();
@@ -107,7 +111,7 @@ public class MetaDataSqlManager
 			if (this.listIndexes == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ListIndexStatements.xml");
-				this.listIndexes = getEntry(sql);
+				this.listIndexes = getEntry(sql, "index list");
 			}
 			return this.listIndexes;
 		}
@@ -120,7 +124,7 @@ public class MetaDataSqlManager
 			if (this.procedureSource == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ProcSourceStatements.xml");
-				this.procedureSource = getEntry(sql);
+				this.procedureSource = getEntry(sql, "procedure source");
 			}
 			return this.procedureSource;
 		}
@@ -133,7 +137,7 @@ public class MetaDataSqlManager
 			if (this.viewSource == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ViewSourceStatements.xml");
-				this.viewSource = getEntry(sql);
+				this.viewSource = getEntry(sql, "view source");
 			}
 			return this.viewSource;
 		}
@@ -147,7 +151,7 @@ public class MetaDataSqlManager
 			if (this.listTrigger == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ListTriggersStatements.xml");
-				this.listTrigger = getEntry(sql);
+				this.listTrigger = getEntry(sql, "trigger list");
 			}
 			return this.listTrigger;
 		}
@@ -160,20 +164,31 @@ public class MetaDataSqlManager
 			if (this.triggerSource == null)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("TriggerSourceStatements.xml");
-				this.triggerSource = getEntry(sql);
+				this.triggerSource = getEntry(sql, "trigger source");
 			}
 			return this.triggerSource;
 		}
 	}
 
-	private GetMetaDataSql getEntry(Map<String, GetMetaDataSql> statements)
+	private GetMetaDataSql getEntry(Map<String, GetMetaDataSql> statements, String sourceType)
+  {
+    GetMetaDataSql metaSql = getEntryByKey(dbid, statements);
+    if (metaSql != null)
+    {
+      LogMgr.logInfo("DbMetadata.getEntry()", "Using template for " + sourceType + " based on DBID: [" + dbid + "] instead of product name: " + productName);
+      return metaSql;
+    }
+    return getEntryByKey(productName, statements);
+  }
+
+	private GetMetaDataSql getEntryByKey(String baseKey, Map<String, GetMetaDataSql> statements)
 	{
 		String key = null;
 		GetMetaDataSql sql = null;
 
 		if (majorVersion != -1 && minorVersion != -1)
 		{
-			key = productName + "-" + NumberStringCache.getNumberString(majorVersion) + "." + NumberStringCache.getNumberString(minorVersion);
+			key = baseKey + "-" + NumberStringCache.getNumberString(majorVersion) + "." + NumberStringCache.getNumberString(minorVersion);
 			sql = statements.get(key);
 		}
 
@@ -183,15 +198,15 @@ public class MetaDataSqlManager
 		// second try: only major version
 		if (majorVersion != -1)
 		{
-			key = productName + "-" + NumberStringCache.getNumberString(majorVersion);
+			key = baseKey + "-" + NumberStringCache.getNumberString(majorVersion);
 			sql = statements.get(key);
 		}
-		
+
 		// found something, use that
 		if (sql != null) return sql;
 
-		// last try: only productname
-		return statements.get(productName);
+		// last try: only the key
+		return statements.get(baseKey);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -237,7 +252,7 @@ public class MetaDataSqlManager
 			{
 				WbPersistence reader = new WbPersistence(f.getAbsolutePath());
 				value = reader.readObject();
-				LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Retrieved user defined template file " + f.getAbsolutePath());
+				LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Using SQL queries from user defined file " + f.getAbsolutePath());
 			}
 			catch (Throwable e)
 			{
@@ -263,5 +278,10 @@ public class MetaDataSqlManager
 		}
 		return result;
 	}
+
+  private void getEntry(String productName, Map<String, GetMetaDataSql> statements)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
 
 }
