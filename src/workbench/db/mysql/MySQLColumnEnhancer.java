@@ -73,9 +73,9 @@ public class MySQLColumnEnhancer
       "select column_name, extra, generation_expression \n" +
       "from information_schema.columns \n" +
       "where table_schema = ? \n" +
-      "and table_name = ? \n " +
-      "and extra is not null and extra <> '' \n" +
-      "and generation_expression is not null and generation_expression <> ''";
+      "  and table_name = ? \n " +
+      "  and coalesce(extra) <> '' \n" +
+      "  and coalesce(generation_expression) <> ''";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
