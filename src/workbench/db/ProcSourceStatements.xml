@@ -132,6 +132,9 @@ from sys.functions fct
     <void property="schemaField">
      <string>routine_schema </string>
     </void>
+    <void property="specificNameColumn">
+     <string>specific_name</string>
+    </void>
    </object>
 	</void>
 

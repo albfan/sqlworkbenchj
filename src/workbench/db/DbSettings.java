@@ -509,9 +509,9 @@ public class DbSettings
 		return ddl.trim();
 	}
 
-	public boolean useSpecificNameForDropProcedure()
+	public boolean useSpecificNameForDropFunction()
 	{
-		return getBoolProperty("drop.function.use.specificname", false);
+		return getBoolProperty("drop.procedure.use.specificname", false);
 	}
 
 	public boolean useSpecificNameForProcedureColumns()

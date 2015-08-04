@@ -27,11 +27,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -69,12 +72,16 @@ public class MySQLColumnCollationReader
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("MySQLColumnEnhancer.readCollations()", "Could not read default collation", e);
+			LogMgr.logError("MySQLColumnCollationReader.readCollations()", "Could not read default collation", e);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, info);
 		}
+
+    // In MySQL 5.7 show variables is no longer available to regular users
+    // in that case both defaults will be null --> don't check anything
+    if (defaultCharacterSet == null && defaultCollation == null) return;
 
 		PreparedStatement stmt = null;
 
@@ -90,9 +97,8 @@ public class MySQLColumnCollationReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("MySQLColumnEnhancer.readCollations()", "Using SQL=\n" + sql);
+			LogMgr.logDebug("MySQLColumnCollationReader.readCollations()", "Retrieving column collation information using:\n" + sql);
 		}
-
 
 		try
 		{
@@ -131,7 +137,7 @@ public class MySQLColumnCollationReader
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("MySQLColumnEnhancer.readCollations()", "Could not read column collations", ex);
+			LogMgr.logError("MySQLColumnCollationReader.readCollations()", "Could not read column collations", ex);
 		}
 		finally
 		{
@@ -155,6 +161,7 @@ public class MySQLColumnCollationReader
 
 	private boolean isNonDefault(String value, String defaultValue)
 	{
+    if (defaultValue == null) return false;
 		if (StringUtil.isEmptyString(value)) return false;
 		return !value.equals(defaultValue);
 	}

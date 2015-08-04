@@ -303,7 +303,7 @@ public class ProcedureDefinition
   {
 		boolean needParameters = con == null ? false : con.getDbSettings().needParametersToDropFunction();
 		boolean includeOutParameters = con == null ? false : con.getDbSettings().includeOutParameterForDropFunction();
-		boolean useSpecificName = con == null ? false : con.getDbSettings().useSpecificNameForDropProcedure();
+		boolean useSpecificName = con == null ? false : con.getDbSettings().useSpecificNameForDropFunction();
     return getObjectNameForDrop(con, needParameters, includeOutParameters, useSpecificName);
   }
 
@@ -342,7 +342,7 @@ public class ProcedureDefinition
     if (paramCount == 0) return getObjectExpression(con) + "()";
 
 		StringBuilder result = new StringBuilder(procName.length() + paramCount * 5 + 5);
-    result.append(SqlUtil.buildExpression(con, catalog, schema, getBasename()));
+    result.append(SqlUtil.buildExpression(con, catalog, schema, getBasename(useSpecificName)));
 		result.append('(');
 
     int colCount = 0;
@@ -380,8 +380,9 @@ public class ProcedureDefinition
 		return this.source;
 	}
 
-  protected String getBasename()
+  protected String getBasename(boolean useSpecificName)
   {
+    if (useSpecificName && specificName != null) return specificName;
 		String name = procName;
 		if (procName.indexOf('(') > -1)
 		{
@@ -393,7 +394,7 @@ public class ProcedureDefinition
 	@Override
 	public String getObjectName(WbConnection conn)
 	{
-		String name = getBasename();
+		String name = getBasename(false);
 		return conn.getMetadata().quoteObjectname(name);
 	}
 

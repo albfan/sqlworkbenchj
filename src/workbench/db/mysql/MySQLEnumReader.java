@@ -26,10 +26,13 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
+
+import workbench.log.LogMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -48,7 +51,7 @@ public class MySQLEnumReader
 	 *
 	 * For each ColumnIdentier in the table that is defined as an enum the dbms type is updated
 	 * with the enum name.
-	 * 
+	 *
 	 * @param tbl  the table definition to check
 	 * @param connection the connection to use
 	 */
@@ -58,7 +61,7 @@ public class MySQLEnumReader
 
 		Statement stmt = null;
 		ResultSet rs = null;
-		HashMap<String, String> defs = new HashMap<String, String>(17);
+		HashMap<String, String> defs = new HashMap<>(17);
 
 		try
 		{
@@ -92,7 +95,7 @@ public class MySQLEnumReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("EnumReader.updateEnumDefinition()", "Could not read enum definition", e);
+			LogMgr.logError("MySQLEnumReader.updateEnumDefinition()", "Could not read enum definition", e);
 		}
 		finally
 		{

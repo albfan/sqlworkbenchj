@@ -22,9 +22,20 @@
  */
 package workbench.db.mysql;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnDefinitionEnhancer;
+import workbench.db.ColumnIdentifier;
+import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
+
+import workbench.util.SqlUtil;
 
 /**
  * A class to retrieve enum and collation definitions for the columns of a MySQL table.
@@ -46,6 +57,58 @@ public class MySQLColumnEnhancer
 
 		MySQLEnumReader enumReader = new MySQLEnumReader();
 		enumReader.readEnums(tbl, connection);
+
+    if (JdbcUtils.hasMinimumServerVersion(connection, "5.7"))
+    {
+      updateComputedColumns(tbl, connection);
+    }
 	}
 
+  private void updateComputedColumns(TableDefinition tbl, WbConnection connection)
+  {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+    String sql =
+      "select column_name, extra, generation_expression \n" +
+      "from information_schema.columns \n" +
+      "where table_schema = ? \n" +
+      "and table_name = ? \n " +
+      "and extra is not null and extra <> '' \n" +
+      "and generation_expression is not null and generation_expression <> ''";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+      LogMgr.logDebug("MySQLColumnEnhancer.updateComputedColumns()", "Retrieving computed column definitions using:\n" + SqlUtil.replaceParameters(sql, tbl.getTable().getRawCatalog(), tbl.getTable().getRawTableName()));
+		}
+
+    try
+    {
+      stmt = connection.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, tbl.getTable().getRawCatalog());
+      stmt.setString(2, tbl.getTable().getRawTableName());
+      rs = stmt.executeQuery();
+      List<ColumnIdentifier> columns = tbl.getColumns();
+      while (rs.next())
+      {
+        String colname = rs.getString(1);
+        String genType = rs.getString(2);
+        String expression = rs.getString(3);
+        ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
+        if (col != null)
+        {
+          String genSql = " GENERATED ALWAYS AS (" + expression + ") " + genType.replace("GENERATED", "").trim();
+          col.setComputedColumnExpression(genSql);
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 }
