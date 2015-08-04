@@ -59,14 +59,14 @@ public class ConnectionDescriptorTest
 		throws Exception
 	{
 		ConnectionDescriptor def = new ConnectionDescriptor(null);
-		ConnectionProfile profile = def.parseDefinition("username=\"thomas\", url=jdbc:postgresql://localhost/thomas, password='secret'");
+		ConnectionProfile profile = def.parseDefinition("username=\"thomas\", url=jdbc:postgresql://localhost/thomas, password='secret'", null);
 		assertNotNull(profile);
 		assertEquals("thomas", profile.getUsername());
 		assertEquals("secret", profile.getLoginPassword());
 		assertEquals("jdbc:postgresql://localhost/thomas", profile.getUrl());
 		assertEquals("org.postgresql.Driver", profile.getDriverclass());
 
-		profile = def.parseDefinition("username=Arthur, url=jdbc:somedb:someparameter, password=MyPassword, driverjar=xyz.jar, driver=com.foobar.Driver");
+		profile = def.parseDefinition("username=Arthur, url=jdbc:somedb:someparameter, password=MyPassword, driverjar=xyz.jar, driver=com.foobar.Driver", null);
 		assertNotNull(profile);
 		assertEquals("Arthur", profile.getUsername());
 		assertEquals("MyPassword", profile.getLoginPassword());

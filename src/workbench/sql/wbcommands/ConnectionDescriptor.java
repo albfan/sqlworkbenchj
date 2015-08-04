@@ -28,6 +28,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
+import workbench.db.WbConnection;
 
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -59,9 +60,10 @@ public class ConnectionDescriptor
 	 *
 	 * @param connectionString  the connection string to parse
 	 * @param driverString      the driver string to parse {@link #parseDriver(java.lang.String) }
+   * @param defaultUrl        if no URL is specified, use this URL
 	 * @return a connection profile to be used
 	 */
-	public ConnectionProfile parseDefinition(String connectionString)
+	public ConnectionProfile parseDefinition(String connectionString, WbConnection currentConnection)
 		throws InvalidConnectionDescriptor
 	{
 		if (StringUtil.isBlank(connectionString)) return null;
@@ -72,7 +74,8 @@ public class ConnectionDescriptor
 		String pwd = null;
 		String driverClass = null;
 		jarfile = null;
-		
+    boolean useCurrentDriver = false;
+
 		for (String element : elements)
 		{
 			String lower = element.toLowerCase();
@@ -98,6 +101,12 @@ public class ConnectionDescriptor
 			}
 		}
 
+    if (url == null && currentConnection != null)
+    {
+      url = currentConnection.getUrl();
+      useCurrentDriver = true;
+    }
+
 		if (StringUtil.isBlank(url))
 		{
 			throw new InvalidConnectionDescriptor("No JDBC URL specified in connection specification", ResourceMgr.getString("ErrConnectURLMissing"));
@@ -113,7 +122,16 @@ public class ConnectionDescriptor
 			throw new InvalidConnectionDescriptor("No JDBC URL specified in connection specification", ResourceMgr.getFormattedString("ErrConnectDrvNotFound", url));
 		}
 
-		DbDriver driver = getDriver(driverClass, jarfile);
+		DbDriver driver = null;
+    if (useCurrentDriver)
+    {
+      String drvName = currentConnection.getProfile().getDriverName();
+      driver = ConnectionMgr.getInstance().findDriverByName(driverClass, drvName);
+    }
+    else
+    {
+      driver = getDriver(driverClass, jarfile);
+    }
 
 		ConnectionProfile result = new ConnectionProfile();
 		result.setTemporaryProfile(true);

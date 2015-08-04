@@ -1106,6 +1106,11 @@ public class BatchRunner
 	}
 
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
+  {
+    return createCmdLineProfile(cmdLine, null);
+  }
+
+	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, WbConnection currentConnection)
 	{
 		if (!hasConnectionArgument(cmdLine)) return null;
 
@@ -1168,7 +1173,7 @@ public class BatchRunner
 			try
 			{
 				ConnectionDescriptor parser = new ConnectionDescriptor();
-				result = parser.parseDefinition(descriptor);
+				result = parser.parseDefinition(descriptor, currentConnection);
 			}
 			catch (InvalidConnectionDescriptor icd)
 			{

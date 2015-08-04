@@ -112,7 +112,7 @@ public class WbCreateProfile
 		if (StringUtil.isNonBlank(descriptor))
 		{
 			ConnectionDescriptor parser = new ConnectionDescriptor();
-			profile = parser.parseDefinition(descriptor);
+			profile = parser.parseDefinition(descriptor, null);
 		}
 
 		if (profile == null)
@@ -129,7 +129,7 @@ public class WbCreateProfile
 			String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
 			profile.setUrl(url);
 			profile.setUsername(user);
-			
+
 			if (StringUtil.isNonBlank(pwd))
 			{
 				profile.setPassword(pwd);

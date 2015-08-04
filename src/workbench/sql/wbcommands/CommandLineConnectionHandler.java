@@ -63,7 +63,7 @@ public class CommandLineConnectionHandler
 			try
 			{
 				ConnectionDescriptor parser = new ConnectionDescriptor(baseDir);
-				ConnectionProfile profile = parser.parseDefinition(desc);
+				ConnectionProfile profile = parser.parseDefinition(desc, currentConnection);
 				if (profile != null)
 				{
 					return ConnectionMgr.getInstance().getConnection(profile, id);
