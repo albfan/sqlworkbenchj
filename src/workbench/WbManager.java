@@ -1048,9 +1048,7 @@ public final class WbManager
 	{
 		exitCode = 0;
 
-		// Make sure batch mode is always using English
-		// System.setProperty("workbench.gui.language", "en");
-
+    boolean saveCaches = Settings.getInstance().getBoolProperty("workbench.batch.objectcache.save", false);
 		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine);
 
 		if (runner != null)
@@ -1105,7 +1103,7 @@ public final class WbManager
 			finally
 			{
 				ConnectionMgr mgr = ConnectionMgr.getInstance();
-				if (mgr != null) mgr.disconnectAll();
+				if (mgr != null) mgr.disconnectAll(saveCaches);
 			}
 		}
 		else
@@ -1229,7 +1227,7 @@ public final class WbManager
 
     boolean showHelp = wb.cmdLine.isArgPresent("help");
     boolean showVersion = wb.cmdLine.isArgPresent("version");
-    
+
     if (showHelp)
     {
       System.out.println(wb.cmdLine.getHelp());

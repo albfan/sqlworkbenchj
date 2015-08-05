@@ -114,6 +114,20 @@ public class DbObjectCacheFactory
 		}
 	}
 
+	public void saveCache(WbConnection connection)
+  {
+    if (connection == null) return;
+    String key = makeKey(connection);
+
+    synchronized (lock)
+    {
+			ObjectCache cache = caches.get(key);
+			if (cache == null) return;
+      LogMgr.logDebug("DbObjectCacheFactory.saveCache()", "Saving cache for key: " + key);
+      saveCache(cache, connection);
+    }
+  }
+
 	public DbObjectCache getCache(WbConnection connection)
 	{
 		if (connection == null) return null;

@@ -554,9 +554,18 @@ public class ConnectionMgr
 	 * @see #closeConnection(workbench.db.WbConnection)
 	 */
 	public void disconnectAll()
+  {
+    disconnectAll(false);
+  }
+  
+	public void disconnectAll(boolean saveCaches)
 	{
 		for (WbConnection con : this.activeConnections.values())
 		{
+      if (saveCaches)
+      {
+        DbObjectCacheFactory.getInstance().saveCache(con);
+      }
 			this.closeConnection(con);
 		}
 		this.activeConnections.clear();
@@ -922,7 +931,7 @@ public class ConnectionMgr
     WbFile f = new WbFile(getFileName());
     return f.getFullPath();
   }
-  
+
 	private String getFileName()
 	{
 		if (currentFilename == null)

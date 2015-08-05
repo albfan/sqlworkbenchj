@@ -877,7 +877,7 @@ public class WbConnection
 			}
 			catch (Throwable e)
 			{
-				LogMgr.logWarning("WbConnection.close()", "Error when calling rollback before disconnect", e);
+				LogMgr.logWarning("WbConnection.shutdown()", "Error when calling rollback before disconnect", e);
 			}
 		}
 
@@ -887,7 +887,7 @@ public class WbConnection
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logWarning("WbConnection.close()", "Error when releasing metadata", th);
+			LogMgr.logWarning("WbConnection.shutdown()", "Error when releasing metadata", th);
 		}
 		finally
 		{
@@ -900,7 +900,7 @@ public class WbConnection
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logWarning("WbConnection.close()", "Error when closing connection", th);
+			LogMgr.logWarning("WbConnection.shutdown()", "Error when closing connection", th);
 		}
 		finally
 		{
