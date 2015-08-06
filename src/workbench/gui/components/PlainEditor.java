@@ -64,6 +64,11 @@ public class PlainEditor
 	private JScrollPane scroll;
 
 	public PlainEditor()
+  {
+    this(true);
+  }
+
+	public PlainEditor(boolean enableWrapping)
 	{
 		super();
 		editor = new JTextArea();
@@ -72,18 +77,27 @@ public class PlainEditor
 		TextComponentMouseListener l = new TextComponentMouseListener(this.editor);
 
 		scroll = new JScrollPane(editor);
-		editor.setLineWrap(true);
-		editor.setWrapStyleWord(true);
 		editor.setFont(Settings.getInstance().getEditorFont());
 		this.setLayout(new BorderLayout());
-		toolPanel = new JPanel();
-		toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
-		wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
-		wordWrap.setSelected(true);
-		wordWrap.addActionListener(this);
-		toolPanel.add(wordWrap);
+    
+    if (enableWrapping)
+    {
+      editor.setLineWrap(true);
+      editor.setWrapStyleWord(true);
+      toolPanel = new JPanel();
+      toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
+      wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
+      wordWrap.setSelected(true);
+      wordWrap.addActionListener(this);
+      toolPanel.add(wordWrap);
+    }
+    else
+    {
+      editor.setLineWrap(false);
+      editor.setWrapStyleWord(false);
+    }
 
-		this.add(toolPanel, BorderLayout.NORTH);
+		if (toolPanel != null) this.add(toolPanel, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		this.setFocusable(false);
 		Document d = editor.getDocument();
@@ -102,7 +116,7 @@ public class PlainEditor
 	{
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		editor.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		toolPanel.setBorder(DividerBorder.BOTTOM_DIVIDER);
+		if (toolPanel != null) toolPanel.setBorder(DividerBorder.BOTTOM_DIVIDER);
 	}
 
 	@Override
@@ -131,7 +145,7 @@ public class PlainEditor
 
 	public void setInfoText(String text)
 	{
-		if (this.infoText == null)
+		if (this.infoText == null && toolPanel != null)
 		{
 			this.infoText = new JLabel();
 			this.toolPanel.add(Box.createHorizontalStrut(10));
@@ -227,4 +241,8 @@ public class PlainEditor
     return null;
   }
 
+  public int getLineCount()
+  {
+    return editor.getLineCount();
+  }
 }

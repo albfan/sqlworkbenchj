@@ -3486,7 +3486,7 @@ public class SqlPanel
             appendToLog("\n");
           }
 
-          // only prompt if more than one statement is executed and if that is not the last statement in teh script
+          // only prompt if more than one statement is executed and if that is not the last statement in the script
 					if (count > 1 && onErrorAsk && ( (i - startIndex) < (count - 1)))
 					{
 						// the animated gif needs to be turned off when a
@@ -3505,7 +3505,14 @@ public class SqlPanel
 						String question = ResourceMgr.getFormattedString("MsgScriptStatementError",
 							NumberStringCache.getNumberString(i+1),
 							NumberStringCache.getNumberString(count));
-						int choice = WbSwingUtilities.getYesNoIgnoreAll(this, question);
+
+            Object display = question;
+            if (GuiSettings.showErrorMessageInConfirmDialog() && errorDetails != null && errorDetails.getErrorMessage() != null)
+            {
+              display = WbSwingUtilities.buildErrorQuestion(question, errorDetails.getErrorMessage());
+            }
+
+						int choice = WbSwingUtilities.getYesNoIgnoreAll(this, display);
 						iconHandler.showBusyIcon(true);
 
 						if (choice == JOptionPane.NO_OPTION)

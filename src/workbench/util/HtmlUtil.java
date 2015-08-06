@@ -210,5 +210,9 @@ public class HtmlUtil
 		return input.replaceAll("\\<.*?\\>", "");
 	}
 
+  public static String convertToMultiline(String orig)
+  {
+    return orig.replaceAll(StringUtil.REGEX_CRLF, "<br>");
+  }
 
 }

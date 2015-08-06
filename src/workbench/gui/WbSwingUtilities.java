@@ -22,6 +22,7 @@
  */
 package workbench.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -32,6 +33,7 @@ import java.awt.FontMetrics;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -46,6 +48,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.InputMap;
@@ -55,6 +58,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -560,25 +564,55 @@ public class WbSwingUtilities
 			realCaller = getWindowAncestor(caller);
 		}
 
-		final PlainEditor msg = new PlainEditor();
-		msg.removeBorders();
-		msg.setText(message);
-		msg.setEditable(false);
-		msg.setFont(Settings.getInstance().getEditorFont());
-		msg.setBorder(new EmptyBorder(0,0,0,0));
-
-		final JScrollPane pane = new JScrollPane(msg);
-		pane.setMaximumSize(new Dimension(640, 480));
-		pane.setPreferredSize(new Dimension(400, 250));
 		invoke(new Runnable()
 		{
 			@Override
 			public void run()
 			{
+        final JComponent pane = createErrorMessagePanel(message, true);
 				JOptionPane.showMessageDialog(realCaller, pane, title, JOptionPane.ERROR_MESSAGE);
 			}
 		});
 	}
+
+  public static JComponent createErrorMessagePanel(String message, boolean allowWordWrap)
+  {
+    final PlainEditor msg = new PlainEditor(allowWordWrap);
+    msg.removeBorders();
+    msg.setText(message);
+    msg.setEditable(false);
+    msg.setFont(Settings.getInstance().getEditorFont());
+    msg.setBorder(new EmptyBorder(0, 0, 0, 0));
+
+    JScrollPane pane = new JScrollPane(msg)
+    {
+      @Override
+      public Dimension getPreferredSize()
+      {
+        FontMetrics fm = msg.getFontMetrics(msg.getFont());
+        int charSize = fm.getMaxAdvance();
+        int lineHeight = fm.getHeight();
+        int minLineCount = 6;
+        int prefHeight = lineHeight * minLineCount;
+        int lineCount = msg.getLineCount() + 2;
+        if (lineCount > 0)
+        {
+          prefHeight = lineHeight * Math.min(lineCount, 15);
+        }
+        System.out.println("LineCount: " + lineCount);
+        return new Dimension(charSize * 60, prefHeight);
+      }
+    };
+
+    FontMetrics fm = msg.getFontMetrics(msg.getFont());
+    int charSize = fm.getMaxAdvance();
+    int lineHeight = fm.getHeight();
+    int maxWidth = charSize * 80;
+    int maxHeight = lineHeight * 15;
+
+    pane.setMaximumSize(new Dimension(maxWidth, maxHeight));
+    return pane;
+  }
 
 	public static void showMessage(final Component aCaller, final Object aMessage)
 	{
@@ -677,14 +711,52 @@ public class WbSwingUtilities
 		return result.equals(options[0]);
 	}
 
-	public static int getYesNoIgnoreAll(Component aCaller, String aMessage)
+  public static JComponent buildErrorQuestion(String message, String errorMessage)
+  {
+    List<String> lines = StringUtil.getLines(message);
+    JPanel messagePanel = new JPanel(new GridLayout(lines.size(), 1, 0, 2));
+    Color color = UIManager.getColor("OptionPane.messageForeground");
+    Font messageFont = UIManager.getFont("OptionPane.messageFont");
+    for (String line : lines)
+    {
+      JLabel label = new JLabel(line, JLabel.LEFT);
+      if (color != null)
+      {
+        label.setForeground(color);
+      }
+      if (messageFont != null)
+      {
+        label.setFont(messageFont);
+      }
+      messagePanel.add(label);
+    }
+
+    int vgap = 16;
+
+    if (messageFont != null)
+    {
+      FontMetrics fm = messagePanel.getFontMetrics(messageFont);
+      if (fm != null)
+      {
+        vgap = fm.getHeight();
+      }
+    }
+    JPanel panel = new JPanel(new BorderLayout(0, vgap));
+    panel.add(messagePanel, BorderLayout.PAGE_START);
+    JComponent errorPanel = createErrorMessagePanel(errorMessage, false);
+//    errorPanel.setPreferredSize(null);
+    panel.add(errorPanel, BorderLayout.CENTER);
+    return panel;
+  }
+
+	public static int getYesNoIgnoreAll(Component aCaller, Object message)
 	{
 		String[] options = new String[]
 		{
 			ResourceMgr.getString("LblYes"), ResourceMgr.getString("LblNo"), ResourceMgr.getString("LblIgnoreAll")
 		};
 
-		JOptionPane ignorePane = new WbOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+		JOptionPane ignorePane = new WbOptionPane(message, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 
 		JDialog dialog = ignorePane.createDialog(getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);

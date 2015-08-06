@@ -1156,6 +1156,11 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.cancel.stops", true);
 	}
 
+  public static boolean showErrorMessageInConfirmDialog()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.sql.error.prompt.show.error", false);
+  }
+  
 	public static DataTooltipType showSQLAsDataTooltip()
 	{
     String value = Settings.getInstance().getProperty("workbench.gui.data.sql.tooltip", DataTooltipType.full.name());
