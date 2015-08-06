@@ -3557,7 +3557,8 @@ public class SqlPanel
 			}
 
 			ignoreStateChange = false;
-			if (resultSets > 0)
+      // only show the result sets if no error occurred
+			if (resultSets > 0 && commandWithError == -1)
 			{
 				if (resultTab.getTabCount() - 1 == currentResultCount)
 				{
