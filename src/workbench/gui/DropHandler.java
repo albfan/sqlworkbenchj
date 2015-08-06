@@ -33,7 +33,10 @@ import java.util.List;
 
 import workbench.log.LogMgr;
 
+import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.sql.SqlPanel;
+
+import workbench.util.WbFile;
 
 
 /**
@@ -86,7 +89,12 @@ class DropHandler
 			{
 				dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
 				List fileList = (List)tr.getTransferData(DataFlavor.javaFileListFlavor);
-				if (fileList != null)
+        if (isWorkspaceFile(fileList))
+        {
+          WbFile f = new WbFile((File)fileList.get(0));
+          client.loadWorkspace(f.getFullPath(), true);
+        }
+        else if (fileList != null)
 				{
 					openFiles(fileList);
 				}
@@ -108,6 +116,14 @@ class DropHandler
 	{
 	}
 
+  private boolean isWorkspaceFile(final List fileList)
+  {
+    if (fileList == null) return false;
+    if (fileList.size() != 1) return false;
+    WbFile f = new WbFile((File)fileList.get(0));
+    return (f.getExtension().equalsIgnoreCase(ExtensionFileFilter.WORKSPACE_EXT));
+ }
+
 	private void openFiles(final List fileList)
 	{
 		WbSwingUtilities.invokeLater(new Runnable()
@@ -116,6 +132,7 @@ class DropHandler
 			public void run()
 			{
 				int count = fileList.size();
+
 				for (int i=0; i < count; i++)
 				{
 					File file = (File)fileList.get(i);

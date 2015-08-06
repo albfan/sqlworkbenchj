@@ -23,7 +23,6 @@
 package workbench.gui.components;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +31,9 @@ import java.util.Map;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.resource.ResourceMgr;
+
 import workbench.db.exporter.ExportType;
+
 import workbench.util.CollectionUtil;
 import workbench.util.WbFile;
 
@@ -46,7 +47,7 @@ public class ExtensionFileFilter
 	// The created FileFilters are stored in variables
 	// as in some cases it is necessary to access the
 	// instance (e.g. for JFileChooser.setFileFilter()
-	private static Map<String, ExtensionFileFilter> filters = new HashMap<String, ExtensionFileFilter>();
+	private static Map<String, ExtensionFileFilter> filters = new HashMap<>();
 	private static FileFilter jarFileFilter;
 
 	private List<String> extensions;

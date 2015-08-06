@@ -744,7 +744,6 @@ public class WbSwingUtilities
     JPanel panel = new JPanel(new BorderLayout(0, vgap));
     panel.add(messagePanel, BorderLayout.PAGE_START);
     JComponent errorPanel = createErrorMessagePanel(errorMessage, false);
-//    errorPanel.setPreferredSize(null);
     panel.add(errorPanel, BorderLayout.CENTER);
     return panel;
   }
