@@ -107,6 +107,7 @@ import workbench.util.WbThread;
 
 public class WbSwingUtilities
 {
+  public static final String PROP_ERROR_MSG_WRAP = "workbench.sql.error.wordwrap";
 	public static final Insets EMPTY_INSETS = new Insets(0, 0, 0, 0);
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	public static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder();
@@ -763,7 +764,7 @@ public class WbSwingUtilities
     messagePanel.add(Box.createVerticalStrut((int)(vgap/2)));
 
     JPanel panel = new JPanel(new BorderLayout(0, 0));
-    JComponent errorPanel = createErrorMessagePanel(errorMessage, "workbench.sql.error.wordwrap");
+    JComponent errorPanel = createErrorMessagePanel(errorMessage, PROP_ERROR_MSG_WRAP);
     panel.add(messagePanel, BorderLayout.PAGE_START);
     panel.add(errorPanel, BorderLayout.CENTER);
     return panel;
