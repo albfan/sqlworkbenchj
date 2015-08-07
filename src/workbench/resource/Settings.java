@@ -168,6 +168,8 @@ public class Settings
 	public static final String PROP_JOIN_COMPLETION_PREFER_USING = "workbench.gui.sql.join.completion.prefer.using";
 	public static final String PROP_EDITOR_TRIM = "workbench.file.save.trim.trailing";
 
+  public static final String PROP_PLAIN_EDITOR_WRAP = "workbench.editor.plain.wordwrap";
+
 	public static final String PROP_LIBDIR = "workbench.libdir";
 
   public static final String PROP_LOGFILE_VIEWER = "workbench.logfile.viewer.program";
@@ -187,6 +189,7 @@ public class Settings
 	private static final String TOOLS_NAME = ".name";
 	private static final String TOOLS_PARAM = ".parameter";
 	private static final String TOOLS_PREFIX = "workbench.tools.";
+
 
 	private WbProperties props;
 	private WbFile configfile;
@@ -1571,16 +1574,6 @@ public class Settings
 	public void setConsolidateLogMsg(boolean aFlag)
 	{
 		this.setProperty(PROPERTY_CONSOLIDATE_LOG_MESSAGES, aFlag);
-	}
-
-	public boolean getPlainEditorWordWrap()
-	{
-		return getBoolProperty("workbench.editor.plain.wordwrap", true);
-	}
-
-	public void setPlainEditorWordWrap(boolean flag)
-	{
-		setProperty("workbench.editor.plain.wordwrap", flag);
 	}
 
 	public boolean getUsePlainEditorForData()

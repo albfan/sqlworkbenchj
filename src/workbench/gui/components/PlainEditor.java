@@ -24,6 +24,7 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,8 +33,10 @@ import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.border.LineBorder;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
@@ -63,19 +66,21 @@ public class PlainEditor
 	private JPanel toolPanel;
 	private JScrollPane scroll;
   private String wrapSettingsKey;
+  private TextComponentMouseListener editMenu;
+
 
 	public PlainEditor()
   {
-    this(null);
+    this(Settings.PROP_PLAIN_EDITOR_WRAP, true);
   }
 
-	public PlainEditor(String settingsKey)
+	public PlainEditor(String settingsKey, boolean allowEdit)
 	{
 		super();
 		editor = new JTextArea();
-		this.enabledBackground = editor.getBackground();
+		enabledBackground = editor.getBackground();
 		editor.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
-		TextComponentMouseListener l = new TextComponentMouseListener(this.editor);
+		editMenu = new TextComponentMouseListener(editor);
 
 		scroll = new JScrollPane(editor);
 		editor.setFont(Settings.getInstance().getEditorFont());
@@ -88,29 +93,42 @@ public class PlainEditor
     toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
     wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
     wordWrap.setSelected(true);
+    wordWrap.setFocusable(false);
     wordWrap.addActionListener(this);
     toolPanel.add(wordWrap);
 
-		if (toolPanel != null) this.add(toolPanel, BorderLayout.NORTH);
+		this.add(toolPanel, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		this.setFocusable(false);
+    
 		Document d = editor.getDocument();
 		if (d != null)
 		{
 			int tabSize = Settings.getInstance().getEditorTabWidth();
 			d.putProperty(PlainDocument.tabSizeAttribute, Integer.valueOf(tabSize));
 		}
-		SearchAndReplace replacer = new SearchAndReplace(this, this);
-		l.addAction(replacer.getFindAction());
-		l.addAction(replacer.getFindNextAction());
-		l.addAction(replacer.getReplaceAction());
+
+    if (allowEdit)
+    {
+      SearchAndReplace replacer = new SearchAndReplace(this, this);
+      editMenu.addAction(replacer.getFindAction());
+      editMenu.addAction(replacer.getFindNextAction());
+      editMenu.addAction(replacer.getReplaceAction());
+    }
+    setEditable(allowEdit);
 	}
+
+  @Override
+  public void removeNotify()
+  {
+    super.removeNotify();
+    editMenu.dispose();
+  }
 
 	public void removeBorders()
 	{
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		editor.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		if (toolPanel != null) toolPanel.setBorder(DividerBorder.BOTTOM_DIVIDER);
+    toolPanel.setBorder(DividerBorder.BOTTOM_DIVIDER);
 	}
 
 	@Override
@@ -148,6 +166,25 @@ public class PlainEditor
 		this.infoText.setText(text);
 	}
 
+  public int getScrollbarHeight()
+  {
+    int height = 0;
+    JScrollBar bar = scroll.getHorizontalScrollBar();
+    if (bar != null)
+    {
+      Dimension prefSize = bar.getPreferredSize();
+      if (prefSize != null)
+      {
+        height = (int)prefSize.getHeight();
+      }
+      else
+      {
+        height = bar.getHeight();
+      }
+    }
+    return height;
+  }
+
 	@Override
 	public void requestFocus()
 	{
@@ -163,15 +200,7 @@ public class PlainEditor
 	@Override
 	public void restoreSettings()
 	{
-    boolean wrap = false;
-    if (wrapSettingsKey == null)
-    {
-      wrap = Settings.getInstance().getPlainEditorWordWrap();
-    }
-    else
-    {
-      wrap = Settings.getInstance().getBoolProperty(wrapSettingsKey);
-    }
+    boolean wrap = Settings.getInstance().getBoolProperty(wrapSettingsKey);
 		wordWrap.setSelected(wrap);
 		editor.setLineWrap(wrap);
 	}
@@ -179,14 +208,7 @@ public class PlainEditor
 	@Override
 	public void saveSettings()
 	{
-    if (wrapSettingsKey == null)
-    {
-      Settings.getInstance().setPlainEditorWordWrap(wordWrap.isSelected());
-    }
-    else
-    {
-      Settings.getInstance().setProperty(wrapSettingsKey, wordWrap.isSelected());
-    }
+    Settings.getInstance().setProperty(wrapSettingsKey, wordWrap.isSelected());
 	}
 
 	@Override

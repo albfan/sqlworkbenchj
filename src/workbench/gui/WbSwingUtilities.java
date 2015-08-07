@@ -51,6 +51,7 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -60,7 +61,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
 import javax.swing.KeyStroke;
@@ -74,6 +74,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -579,9 +580,10 @@ public class WbSwingUtilities
   {
     final String longestLine = StringUtil.getLongestLine(message, 15);
 
-    final PlainEditor msg = new PlainEditor(settingsKey)
+    final PlainEditor msg = new PlainEditor(settingsKey, false)
     {
       private final int minLineCount = 8;
+      private final int maxVisibleLines = 15;
       private final int maxLineLength = longestLine.length();
 
       @Override
@@ -589,45 +591,45 @@ public class WbSwingUtilities
       {
         FontMetrics fm = getFontMetrics(getFont());
         int charSize = fm.getMaxAdvance();
-        int prefCols = (charSize <= 0 ? 16 : charSize) * Math.min(maxLineLength, 60);
+        int prefWidth = (charSize <= 0 ? 16 : charSize) * Math.min(maxLineLength, 60);
         int lineHeight = fm.getHeight();
-        int prefHeight = (lineHeight <= 0 ? 16 : lineHeight) * minLineCount;
+        int prefHeight = ((lineHeight <= 0 ? 16 : lineHeight) * minLineCount) + getScrollbarHeight();
         int lineCount = getLineCount();
-        if (lineCount > minLineCount)
+        if (lineCount >= minLineCount)
         {
-          prefHeight = lineHeight * Math.min(lineCount, 15);
+          prefHeight = lineHeight * Math.min(lineCount, maxVisibleLines);
         }
-        return new Dimension(prefCols, prefHeight);
+        return new Dimension(prefWidth, (int)(prefHeight * 1.2));
       }
 
       @Override
       public Dimension getMinimumSize()
       {
         FontMetrics fm = getFontMetrics(getFont());
-        int minCols = fm.getMaxAdvance() * 40;
+        int minWidth = fm.getMaxAdvance() * 40;
         int lineHeight = fm.getHeight();
-        int minHeight = (lineHeight <= 0 ? 16 : lineHeight) * minLineCount;
-        return new Dimension(minCols, minHeight);
+        int minHeight = ((lineHeight <= 0 ? 18 : lineHeight) * minLineCount) + getScrollbarHeight();
+        return new Dimension(minWidth, (int)(minHeight * 1.2));
+      }
+
+      @Override
+      public Dimension getMaximumSize()
+      {
+        FontMetrics fm = getFontMetrics(getFont());
+        int maxWidth = fm.getMaxAdvance() * 60;
+        int lineHeight = fm.getHeight();
+        int maxHeight = ((lineHeight <= 0 ? 18 : lineHeight) * 40);
+        return new Dimension(maxWidth, maxHeight);
       }
     };
 
     msg.removeBorders();
     msg.setText(message);
-    msg.setEditable(false);
-    msg.setFont(Settings.getInstance().getEditorFont());
-    msg.setBorder(new EmptyBorder(0, 0, 0, 0));
+    msg.setCaretPosition(0);
+    msg.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
     msg.restoreSettings();
 
-    JScrollPane pane = new JScrollPane(msg);
-
-    FontMetrics fm = msg.getFontMetrics(msg.getFont());
-    int charSize = fm.getMaxAdvance();
-    int lineHeight = fm.getHeight();
-    int maxWidth = charSize * 80;
-    int maxHeight = lineHeight * 15;
-
-    pane.setMaximumSize(new Dimension(maxWidth, maxHeight));
-    return pane;
+    return msg;
   }
 
 	public static void showMessage(final Component aCaller, final Object aMessage)
@@ -730,7 +732,7 @@ public class WbSwingUtilities
   public static JComponent buildErrorQuestion(String message, String errorMessage)
   {
     List<String> lines = StringUtil.getLines(message);
-    JPanel messagePanel = new JPanel(new GridLayout(lines.size(), 1, 0, 2));
+    JPanel messagePanel = new JPanel(new GridLayout(0, 1, 0, 0));
     Color color = UIManager.getColor("OptionPane.messageForeground");
     Font messageFont = UIManager.getFont("OptionPane.messageFont");
     for (String line : lines)
@@ -757,9 +759,12 @@ public class WbSwingUtilities
         vgap = fm.getHeight();
       }
     }
-    JPanel panel = new JPanel(new BorderLayout(0, vgap));
-    panel.add(messagePanel, BorderLayout.PAGE_START);
+
+    messagePanel.add(Box.createVerticalStrut((int)(vgap/2)));
+
+    JPanel panel = new JPanel(new BorderLayout(0, 0));
     JComponent errorPanel = createErrorMessagePanel(errorMessage, "workbench.sql.error.wordwrap");
+    panel.add(messagePanel, BorderLayout.PAGE_START);
     panel.add(errorPanel, BorderLayout.CENTER);
     return panel;
   }

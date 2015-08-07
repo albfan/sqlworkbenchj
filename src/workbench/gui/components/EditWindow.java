@@ -128,7 +128,6 @@ public class EditWindow
 			if (Settings.getInstance().getUsePlainEditorForData())
 			{
 				PlainEditor ed = new PlainEditor();
-				ed.restoreSettings();
 				this.componentSettings = ed;
 				this.textContainer = ed;
 				this.editor = ed;
