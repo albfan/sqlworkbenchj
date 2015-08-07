@@ -30,7 +30,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +52,7 @@ import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
 import workbench.storage.RowDataReaderFactory;
 import workbench.storage.SqlLiteralFormatter;
+import workbench.util.CollectionUtil;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -90,7 +90,7 @@ public class TableDeleteSync
 	private int batchSize = 50;
 
 	private Statement checkStatement;
-	private Map<ColumnIdentifier, Integer> columnMap = new HashMap<>();
+	private final Map<ColumnIdentifier, Integer> columnMap = new HashMap<>();
 	private RowActionMonitor monitor;
 	private Writer outputWriter;
 	private String lineEnding = "\n";
@@ -101,7 +101,7 @@ public class TableDeleteSync
 	private XmlRowDataConverter xmlConverter;
 	private boolean cancelExecution;
 	private int progressInterval = 10;
-	private Set<String> alternatePKColumns;
+	final private Set<String> alternatePKColumns = CollectionUtil.caseInsensitiveSet();;
 
 	public TableDeleteSync(WbConnection deleteFrom, WbConnection compareTo)
 		throws SQLException
@@ -184,10 +184,10 @@ public class TableDeleteSync
 	 * @param tableToDelete the table from which obsolete rows should be deleted
 	 * @throws java.sql.SQLException
 	 */
-	public void setTableName(TableIdentifier tableToCheck, TableIdentifier tableToDelete)
+	public TableDiffStatus setTableName(TableIdentifier tableToCheck, TableIdentifier tableToDelete)
 		throws SQLException
 	{
-		setTableName(tableToCheck, tableToDelete, new HashSet<String>(0));
+		return setTableName(tableToCheck, tableToDelete, null);
 	}
 
 	/**
@@ -210,9 +210,13 @@ public class TableDeleteSync
 
 		if (tableToDeleteFrom == null) throw new SQLException("Table " + tableToDelete.getTableName() + " not found in target database");
 		firstDelete = true;
-		this.columnMap.clear();
+		columnMap.clear();
+    alternatePKColumns.clear();
 
-		this.alternatePKColumns = (alternatePK == null ? new HashSet<String>(0) : alternatePK);
+    if (alternatePK != null)
+    {
+      alternatePKColumns.addAll(alternatePK);
+    }
 
 		List<ColumnIdentifier> columns = tableToDeleteFrom.getColumns();
 		if (columns == null || columns.isEmpty()) throw new SQLException("Table " + tableToDeleteFrom.getTable().getTableName() + " not found in target database");
@@ -222,7 +226,7 @@ public class TableDeleteSync
 
 		for (ColumnIdentifier col : columns)
 		{
-			if ((alternatePKColumns.isEmpty() && col.isPkColumn()) || alternatePKColumns.contains(col.getColumnName()))
+			if (isPkColumn(col))
 			{
 				if (colIndex > 1)
 				{
@@ -252,23 +256,33 @@ public class TableDeleteSync
 		return TableDiffStatus.OK;
 	}
 
+  private boolean isPkColumn(ColumnIdentifier col)
+  {
+    if (col == null) return false;
+    if (alternatePKColumns.isEmpty()) return col.isPkColumn();
+    return alternatePKColumns.contains(col.getColumnName());
+  }
+
 	public void doSync()
 		throws SQLException, IOException
 	{
 		List<ColumnIdentifier> columns = this.tableToDeleteFrom.getColumns();
 		String selectColumns = "";
+    int columnsInSelect = 0;
+
     for (ColumnIdentifier col : columns)
     {
-      if ((alternatePKColumns.isEmpty() && col.isPkColumn()) || alternatePKColumns.contains(col.getColumnName()))
+      if (isPkColumn(col))
       {
-        if (selectColumns.length() > 0) selectColumns += ", ";
+        if (columnsInSelect > 0) selectColumns += ", ";
         selectColumns += this.targetConnection.getMetadata().quoteObjectname(col.getColumnName());
+        columnsInSelect ++;
       }
     }
     TableIdentifier deleteTable = this.tableToDeleteFrom.getTable();
-		String retrieve = "SELECT " + selectColumns + " FROM " + deleteTable.getFullyQualifiedName(this.targetConnection);
+		String retrieve = "SELECT " + selectColumns + " FROM " + deleteTable.getFullyQualifiedName(targetConnection);
 
-		LogMgr.logDebug("TableDeleteSync.doSync()", "Using " + retrieve + " to retrieve rows from the reference table" );
+		LogMgr.logInfo("TableDeleteSync.doSync()", "Using " + retrieve + " to retrieve rows from the reference table" );
 
 		deletedRows = 0;
 		cancelExecution = false;

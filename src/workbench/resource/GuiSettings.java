@@ -1156,11 +1156,16 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.cancel.stops", true);
 	}
 
-  public static boolean showErrorMessageInConfirmDialog()
+  public static boolean showMessageInErrorContinueDialog()
   {
-    return Settings.getInstance().getBoolProperty("workbench.sql.error.prompt.show.error", false);
+    return Settings.getInstance().getBoolProperty("workbench.sql.error.prompt.show.error", true);
   }
-  
+
+  public static void setShowMessageInErrorContinueDialog(boolean flag)
+  {
+    Settings.getInstance().setProperty("workbench.sql.error.prompt.show.error", flag);
+  }
+
 	public static DataTooltipType showSQLAsDataTooltip()
 	{
     String value = Settings.getInstance().getProperty("workbench.gui.data.sql.tooltip", DataTooltipType.full.name());

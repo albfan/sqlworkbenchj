@@ -91,8 +91,10 @@ import workbench.db.importer.DefaultImportOptions;
 import workbench.db.importer.DefaultTextImportOptions;
 import workbench.db.importer.ImportOptions;
 import workbench.db.importer.TextImportOptions;
+import workbench.gui.DialogInvoker;
 
 import workbench.gui.MainWindow;
+import workbench.gui.MessageCreator;
 import workbench.gui.PanelReloader;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.WindowTitleBuilder;
@@ -3464,8 +3466,9 @@ public class SqlPanel
           this.statusBar.setStatusMessage(currentMsg);
         }
 
-				// this will be set by confirmExecution() if
-				// Cancel was selected
+				this.stmtRunner.statementDone();
+
+				// this will be set by confirmExecution() if "Cancel" was selected
         if (cancelAll) break;
 
         if (statementResult.isSuccess())
@@ -3492,33 +3495,18 @@ public class SqlPanel
           // only prompt if more than one statement is executed and if that is not the last statement in the script
 					if (count > 1 && onErrorAsk && ( (i - startIndex) < (count - 1)))
 					{
-						// the animated gif needs to be turned off when a
-						// dialog is displayed, otherwise Swing uses too much CPU
-						iconHandler.showBusyIcon(false);
-
-						if (!macroRun && !editor.isModifiedAfter(scriptStart))
-						{
-							highlighter.markError(highlightOnError, scriptParser, commandWithError, selectionOffset, null);
-						}
-
-						// force a refresh in order to display the selection
-						WbSwingUtilities.repaintLater(this);
-						Thread.yield();
-
-						String question = ResourceMgr.getFormattedString("MsgScriptStatementError",
-							NumberStringCache.getNumberString(i+1),
-							NumberStringCache.getNumberString(count));
-
-            Object display = question;
-            if (GuiSettings.showErrorMessageInConfirmDialog() && errorDetails != null && errorDetails.getErrorMessage() != null)
+            // we can't highlight the statement if this is a macro or if the user changed the editor content
+            if (!macroRun && !editor.isModifiedAfter(scriptStart))
             {
-              display = WbSwingUtilities.buildErrorQuestion(question, errorDetails.getErrorMessage());
+              highlighter.markError(highlightOnError, scriptParser, commandWithError, selectionOffset, null);
             }
 
-						int choice = WbSwingUtilities.getYesNoIgnoreAll(this, display);
-						iconHandler.showBusyIcon(true);
+            int startOfStatement = scriptParser.getStartPosForCommand(i) + selectionOffset;
+            int endOfStatement = scriptParser.getEndPosForCommand(i) + selectionOffset;
 
-						if (choice == JOptionPane.NO_OPTION)
+            int choice = askContinue(i + 1, count, errorDetails, startOfStatement, endOfStatement);
+
+    				if (choice == JOptionPane.NO_OPTION)
 						{
 							break;
 						}
@@ -3529,10 +3517,12 @@ public class SqlPanel
 					}
 					failuresIgnored ++;
 				}
+
 				executedCount ++;
-				this.stmtRunner.statementDone();
+
 				if (this.cancelExecution) break;
 
+        // this is for an automatic execution of the SELECT statement when doing an "Execute current" with a WbExport
 				if (cursorPos > -1 && shouldRunNextStatement(scriptParser, startIndex))
 				{
 					endIndex ++;
@@ -3638,6 +3628,41 @@ public class SqlPanel
 			ignoreStateChange = false;
 		}
 	}
+
+  private int askContinue(final int statementNumber, final int totalStatements, final ErrorDescriptor errorDetails, int editorStart, int editorEnd)
+  {
+    // the animated gif needs to be turned off when a
+    // dialog is displayed, otherwise Swing uses too much CPU
+    // this might be obsolete with Java 7 but it does not do any harm either
+    iconHandler.showBusyIcon(false);
+
+    MessageCreator creator = new MessageCreator()
+    {
+      @Override
+      public Object getMessage()
+      {
+        String question = ResourceMgr.getFormattedString("MsgScriptStatementError",
+          NumberStringCache.getNumberString(statementNumber),
+          NumberStringCache.getNumberString(totalStatements));
+
+        if (GuiSettings.showMessageInErrorContinueDialog() && errorDetails != null && errorDetails.getErrorMessage() != null)
+        {
+          return WbSwingUtilities.buildErrorQuestion(question, errorDetails.getErrorMessage());
+        }
+        else
+        {
+          return question;
+        }
+      }
+    };
+
+    // using the DialogInvoker makes sure that all components of the dialog are created and displayed on the EDT
+    DialogInvoker invoker = new DialogInvoker();
+    int choice = invoker.getYesNoIgnoreAll(creator, this);
+
+    iconHandler.showBusyIcon(true);
+    return choice;
+  }
 
 	private boolean shouldRunNextStatement(ScriptParser parser, int statementIndex)
 	{

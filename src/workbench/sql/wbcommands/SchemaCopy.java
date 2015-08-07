@@ -41,6 +41,7 @@ import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.DropType;
+import workbench.db.compare.TableDiffStatus;
 import workbench.db.importer.DataReceiver;
 import workbench.db.importer.TableDependencySorter;
 
@@ -328,7 +329,6 @@ class SchemaCopy
 
 			if (cancel)
 			{
-				System.out.println("#### Cancelling!");
 				break;
 			}
 		}
@@ -358,13 +358,25 @@ class SchemaCopy
 			if (sourceTable == null) continue;
 
 			TableDeleteSync sync = new TableDeleteSync(targetConnection, sourceConnection);
-			sync.setTableName(sourceTable, targetTable);
-			sync.setBatchSize(copier.getBatchSize());
-			sync.doSync();
-			long rows = sync.getDeletedRows();
-			String msg = ResourceMgr.getFormattedString("MsgCopyNumRowsDeleted", rows, targetTable.getTableName());
-			this.messages.append(msg);
-			this.messages.appendNewLine();
+			TableDiffStatus status = sync.setTableName(sourceTable, targetTable);
+      if (status == TableDiffStatus.OK)
+      {
+        sync.setBatchSize(copier.getBatchSize());
+        sync.doSync();
+        long rows = sync.getDeletedRows();
+        String msg = ResourceMgr.getFormattedString("MsgCopyNumRowsDeleted", rows, targetTable.getTableName());
+        this.messages.append(msg);
+        this.messages.appendNewLine();
+      }
+      else
+      {
+        messages.append(ResourceMgr.getFormattedString("ErrDataDiffNoPK", targetTable.getTableName()));
+        messages.appendNewLine();
+        if (!copier.getContinueOnError())
+        {
+          break;
+        }
+      }
 		}
 	}
 

@@ -62,13 +62,14 @@ public class PlainEditor
 	private JLabel infoText;
 	private JPanel toolPanel;
 	private JScrollPane scroll;
+  private String wrapSettingsKey;
 
 	public PlainEditor()
   {
-    this(true);
+    this(null);
   }
 
-	public PlainEditor(boolean enableWrapping)
+	public PlainEditor(String settingsKey)
 	{
 		super();
 		editor = new JTextArea();
@@ -79,23 +80,16 @@ public class PlainEditor
 		scroll = new JScrollPane(editor);
 		editor.setFont(Settings.getInstance().getEditorFont());
 		this.setLayout(new BorderLayout());
-    
-    if (enableWrapping)
-    {
-      editor.setLineWrap(true);
-      editor.setWrapStyleWord(true);
-      toolPanel = new JPanel();
-      toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
-      wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
-      wordWrap.setSelected(true);
-      wordWrap.addActionListener(this);
-      toolPanel.add(wordWrap);
-    }
-    else
-    {
-      editor.setLineWrap(false);
-      editor.setWrapStyleWord(false);
-    }
+
+    wrapSettingsKey = settingsKey;
+    editor.setLineWrap(true);
+    editor.setWrapStyleWord(true);
+    toolPanel = new JPanel();
+    toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
+    wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
+    wordWrap.setSelected(true);
+    wordWrap.addActionListener(this);
+    toolPanel.add(wordWrap);
 
 		if (toolPanel != null) this.add(toolPanel, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
@@ -169,15 +163,30 @@ public class PlainEditor
 	@Override
 	public void restoreSettings()
 	{
-		boolean wrap = Settings.getInstance().getPlainEditorWordWrap();
+    boolean wrap = false;
+    if (wrapSettingsKey == null)
+    {
+      wrap = Settings.getInstance().getPlainEditorWordWrap();
+    }
+    else
+    {
+      wrap = Settings.getInstance().getBoolProperty(wrapSettingsKey);
+    }
 		wordWrap.setSelected(wrap);
-		this.editor.setLineWrap(wrap);
+		editor.setLineWrap(wrap);
 	}
 
 	@Override
 	public void saveSettings()
 	{
-		Settings.getInstance().setPlainEditorWordWrap(wordWrap.isSelected());
+    if (wrapSettingsKey == null)
+    {
+      Settings.getInstance().setPlainEditorWordWrap(wordWrap.isSelected());
+    }
+    else
+    {
+      Settings.getInstance().setProperty(wrapSettingsKey, wordWrap.isSelected());
+    }
 	}
 
 	@Override
@@ -214,6 +223,10 @@ public class PlainEditor
 	public void actionPerformed(ActionEvent e)
 	{
 		this.editor.setLineWrap(this.wordWrap.isSelected());
+    if (wrapSettingsKey != null)
+    {
+      Settings.getInstance().setProperty(wrapSettingsKey, wordWrap.isSelected());
+    }
 	}
 
 	@Override

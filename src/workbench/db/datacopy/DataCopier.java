@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ObjectDropper;
@@ -48,6 +49,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
+import workbench.db.compare.TableDiffStatus;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.DataReceiver;
 import workbench.db.importer.DeleteType;
@@ -55,6 +57,7 @@ import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.TableStatements;
 
 import workbench.storage.RowActionMonitor;
+import workbench.util.CollectionUtil;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
@@ -581,14 +584,27 @@ public class DataCopier
 			if (this.doSyncDelete)
 			{
 				TableDeleteSync sync = new TableDeleteSync(this.targetConnection, this.sourceConnection);
-				sync.setTableName(this.sourceTable, this.targetTable);
-				sync.setRowMonitor(this.importer.getRowActionMonitor());
-				sync.setBatchSize(this.getBatchSize());
-				sync.setReportInterval(this.importer.getReportInterval());
-				sync.doSync();
-				long rows = sync.getDeletedRows();
-				String msg = ResourceMgr.getFormattedString("MsgCopyNumRowsDeleted", rows, targetTable.getTableName());
-				this.addMessage(msg);
+
+        Set<String> keys = CollectionUtil.caseInsensitiveSet();
+        for (ColumnIdentifier col : importer.getKeyColumns())
+        {
+          keys.add(col.getColumnName());
+        }
+        TableDiffStatus status = sync.setTableName(this.sourceTable, this.targetTable, keys);
+        if (status == TableDiffStatus.OK)
+        {
+          sync.setRowMonitor(this.importer.getRowActionMonitor());
+          sync.setBatchSize(this.getBatchSize());
+          sync.setReportInterval(this.importer.getReportInterval());
+          sync.doSync();
+          long rows = sync.getDeletedRows();
+          String msg = ResourceMgr.getFormattedString("MsgCopyNumRowsDeleted", rows, targetTable.getTableName());
+          addMessage(msg);
+        }
+        else
+        {
+          addError(ResourceMgr.getFormattedString("ErrDataDiffNoPK", targetTable.getTableName()));
+        }
 			}
 		}
 		catch (Exception e)

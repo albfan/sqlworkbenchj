@@ -569,40 +569,56 @@ public class WbSwingUtilities
 			@Override
 			public void run()
 			{
-        final JComponent pane = createErrorMessagePanel(message, true);
+        final JComponent pane = createErrorMessagePanel(message, null);
 				JOptionPane.showMessageDialog(realCaller, pane, title, JOptionPane.ERROR_MESSAGE);
 			}
 		});
 	}
 
-  public static JComponent createErrorMessagePanel(String message, boolean allowWordWrap)
+  public static JComponent createErrorMessagePanel(String message, String settingsKey)
   {
-    final PlainEditor msg = new PlainEditor(allowWordWrap);
+    final String longestLine = StringUtil.getLongestLine(message, 15);
+
+    final PlainEditor msg = new PlainEditor(settingsKey)
+    {
+      private final int minLineCount = 8;
+      private final int maxLineLength = longestLine.length();
+
+      @Override
+      public Dimension getPreferredSize()
+      {
+        FontMetrics fm = getFontMetrics(getFont());
+        int charSize = fm.getMaxAdvance();
+        int prefCols = (charSize <= 0 ? 16 : charSize) * Math.min(maxLineLength, 60);
+        int lineHeight = fm.getHeight();
+        int prefHeight = (lineHeight <= 0 ? 16 : lineHeight) * minLineCount;
+        int lineCount = getLineCount();
+        if (lineCount > minLineCount)
+        {
+          prefHeight = lineHeight * Math.min(lineCount, 15);
+        }
+        return new Dimension(prefCols, prefHeight);
+      }
+
+      @Override
+      public Dimension getMinimumSize()
+      {
+        FontMetrics fm = getFontMetrics(getFont());
+        int minCols = fm.getMaxAdvance() * 40;
+        int lineHeight = fm.getHeight();
+        int minHeight = (lineHeight <= 0 ? 16 : lineHeight) * minLineCount;
+        return new Dimension(minCols, minHeight);
+      }
+    };
+
     msg.removeBorders();
     msg.setText(message);
     msg.setEditable(false);
     msg.setFont(Settings.getInstance().getEditorFont());
     msg.setBorder(new EmptyBorder(0, 0, 0, 0));
+    msg.restoreSettings();
 
-    JScrollPane pane = new JScrollPane(msg)
-    {
-      @Override
-      public Dimension getPreferredSize()
-      {
-        FontMetrics fm = msg.getFontMetrics(msg.getFont());
-        int charSize = fm.getMaxAdvance();
-        int lineHeight = fm.getHeight();
-        int minLineCount = 6;
-        int prefHeight = lineHeight * minLineCount;
-        int lineCount = msg.getLineCount() + 2;
-        if (lineCount > 0)
-        {
-          prefHeight = lineHeight * Math.min(lineCount, 15);
-        }
-        System.out.println("LineCount: " + lineCount);
-        return new Dimension(charSize * 60, prefHeight);
-      }
-    };
+    JScrollPane pane = new JScrollPane(msg);
 
     FontMetrics fm = msg.getFontMetrics(msg.getFont());
     int charSize = fm.getMaxAdvance();
@@ -743,12 +759,12 @@ public class WbSwingUtilities
     }
     JPanel panel = new JPanel(new BorderLayout(0, vgap));
     panel.add(messagePanel, BorderLayout.PAGE_START);
-    JComponent errorPanel = createErrorMessagePanel(errorMessage, false);
+    JComponent errorPanel = createErrorMessagePanel(errorMessage, "workbench.sql.error.wordwrap");
     panel.add(errorPanel, BorderLayout.CENTER);
     return panel;
   }
 
-	public static int getYesNoIgnoreAll(Component aCaller, Object message)
+	public static int getYesNoIgnoreAll(Component caller, Object message)
 	{
 		String[] options = new String[]
 		{
@@ -757,7 +773,7 @@ public class WbSwingUtilities
 
 		JOptionPane ignorePane = new WbOptionPane(message, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 
-		JDialog dialog = ignorePane.createDialog(getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
+		JDialog dialog = ignorePane.createDialog(getWindowAncestor(caller), ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		int rvalue = -1;
 		try
