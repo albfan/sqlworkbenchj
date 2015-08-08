@@ -2158,6 +2158,30 @@ public class JEditTextArea
 		}
 	}
 
+  public void replaceText(int startPos, int endPos, String newText)
+  {
+		try
+		{
+			document.beginCompoundEdit();
+      document.remove(startPos, (endPos - startPos));
+      document.insertString(startPos, fixLinefeed(newText), null);
+    }
+		catch (BadLocationException bl)
+		{
+			LogMgr.logError("JEditTextArea.setSelectedText()", "Error setting text", bl);
+			throw new InternalError("Cannot replace selection");
+		}
+		finally
+		{
+			document.endCompoundEdit();
+		}
+		updateScrollBars();
+    setCaretPosition(startPos);
+		int startLine = getLineOfOffset(selectionStart);
+		int endLine = getLineOfOffset(selectionStart + newText.length());
+		painter.invalidateLineRange(startLine, endLine);
+  }
+
 	/**
 	 * Replaces the selection with the specified text.
 	 * @param selectedText The replacement text for the selection

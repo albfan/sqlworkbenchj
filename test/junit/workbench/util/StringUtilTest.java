@@ -177,6 +177,13 @@ public class StringUtilTest
 		s = "no line feeds";
 		line = StringUtil.getLongestLine(s, 10);
 		assertEquals(s, line);
+
+    s =
+      "ERROR: syntax error at or near \"1\"\n" +
+      "  Position: 74";
+		line = StringUtil.getLongestLine(s, 10);
+		assertEquals("ERROR: syntax error at or near \"1\"", line);
+
 	}
 
 	@Test

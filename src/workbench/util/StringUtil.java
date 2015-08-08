@@ -584,7 +584,7 @@ public class StringUtil
 				lineend = text.length();
 			}
 		}
-		if (linestart > 0 && lineend <= text.length())
+		if (linestart >= 0 && lineend <= text.length())
 		{
 			return text.substring(linestart, lineend);
 		}

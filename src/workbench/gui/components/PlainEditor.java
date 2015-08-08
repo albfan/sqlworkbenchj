@@ -36,7 +36,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.border.LineBorder;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
@@ -71,10 +70,10 @@ public class PlainEditor
 
 	public PlainEditor()
   {
-    this(Settings.PROP_PLAIN_EDITOR_WRAP, true);
+    this(Settings.PROP_PLAIN_EDITOR_WRAP, true, true);
   }
 
-	public PlainEditor(String settingsKey, boolean allowEdit)
+	public PlainEditor(String settingsKey, boolean allowEdit, boolean enableWordWrap)
 	{
 		super();
 		editor = new JTextArea();
@@ -87,20 +86,23 @@ public class PlainEditor
 		this.setLayout(new BorderLayout());
 
     wrapSettingsKey = settingsKey;
-    editor.setLineWrap(true);
-    editor.setWrapStyleWord(true);
-    toolPanel = new JPanel();
-    toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
-    wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
-    wordWrap.setSelected(true);
-    wordWrap.setFocusable(false);
-    wordWrap.addActionListener(this);
-    toolPanel.add(wordWrap);
+    if (enableWordWrap)
+    {
+      editor.setLineWrap(true);
+      editor.setWrapStyleWord(true);
+      toolPanel = new JPanel();
+      toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
+      wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
+      wordWrap.setSelected(true);
+      wordWrap.setFocusable(false);
+      wordWrap.addActionListener(this);
+      toolPanel.add(wordWrap);
+      this.add(toolPanel, BorderLayout.NORTH);
+    }
 
-		this.add(toolPanel, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		this.setFocusable(false);
-    
+
 		Document d = editor.getDocument();
 		if (d != null)
 		{
@@ -128,7 +130,7 @@ public class PlainEditor
 	public void removeBorders()
 	{
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
-    toolPanel.setBorder(DividerBorder.BOTTOM_DIVIDER);
+    if (toolPanel != null) toolPanel.setBorder(DividerBorder.BOTTOM_DIVIDER);
 	}
 
 	@Override
@@ -200,15 +202,21 @@ public class PlainEditor
 	@Override
 	public void restoreSettings()
 	{
-    boolean wrap = Settings.getInstance().getBoolProperty(wrapSettingsKey);
-		wordWrap.setSelected(wrap);
-		editor.setLineWrap(wrap);
+    if (wordWrap != null)
+    {
+      boolean wrap = Settings.getInstance().getBoolProperty(wrapSettingsKey);
+      wordWrap.setSelected(wrap);
+      editor.setLineWrap(wrap);
+    }
 	}
 
 	@Override
 	public void saveSettings()
 	{
-    Settings.getInstance().setProperty(wrapSettingsKey, wordWrap.isSelected());
+    if (wordWrap != null)
+    {
+      Settings.getInstance().setProperty(wrapSettingsKey, wordWrap.isSelected());
+    }
 	}
 
 	@Override

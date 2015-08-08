@@ -1156,9 +1156,14 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.cancel.stops", true);
 	}
 
+  public static boolean enableRetryErrorDialog()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.sql.error.enable.retry", false);
+  }
+
   public static boolean showMessageInErrorContinueDialog()
   {
-    return Settings.getInstance().getBoolProperty("workbench.sql.error.prompt.show.error", true);
+    return Settings.getInstance().getBoolProperty("workbench.sql.error.prompt.show.message", true);
   }
 
   public static void setShowMessageInErrorContinueDialog(boolean flag)

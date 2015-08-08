@@ -24,6 +24,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -91,8 +92,8 @@ import workbench.db.importer.DefaultImportOptions;
 import workbench.db.importer.DefaultTextImportOptions;
 import workbench.db.importer.ImportOptions;
 import workbench.db.importer.TextImportOptions;
-import workbench.gui.DialogInvoker;
 
+import workbench.gui.DialogInvoker;
 import workbench.gui.MainWindow;
 import workbench.gui.MessageCreator;
 import workbench.gui.PanelReloader;
@@ -3501,10 +3502,7 @@ public class SqlPanel
               highlighter.markError(highlightOnError, scriptParser, commandWithError, selectionOffset, null);
             }
 
-            int startOfStatement = scriptParser.getStartPosForCommand(i) + selectionOffset;
-            int endOfStatement = scriptParser.getEndPosForCommand(i) + selectionOffset;
-
-            int choice = askContinue(i + 1, count, errorDetails, startOfStatement, endOfStatement);
+            int choice = handleScriptError(i, count, errorDetails, scriptParser, selectionOffset);
 
     				if (choice == JOptionPane.NO_OPTION)
 						{
@@ -3629,22 +3627,85 @@ public class SqlPanel
 		}
 	}
 
-  private int askContinue(final int statementNumber, final int totalStatements, final ErrorDescriptor errorDetails, int editorStart, int editorEnd)
+  private int handleScriptError(int cmdIndex, int totalStatements, ErrorDescriptor errorDetails, ScriptParser parser, int selectionOffset)
   {
+
     // the animated gif needs to be turned off when a
     // dialog is displayed, otherwise Swing uses too much CPU
     // this might be obsolete with Java 7 but it does not do any harm either
     iconHandler.showBusyIcon(false);
 
+    int choice = -1;
+    try
+    {
+      if (GuiSettings.enableRetryErrorDialog())
+      {
+        choice = handleRetry(cmdIndex, errorDetails, parser, selectionOffset);
+      }
+      else
+      {
+        String question = ResourceMgr.getFormattedString("MsgScriptStatementError",
+          NumberStringCache.getNumberString(cmdIndex + 1),
+          NumberStringCache.getNumberString(totalStatements));
+        choice = askContinue(errorDetails, question);
+      }
+    }
+    finally
+    {
+      iconHandler.showBusyIcon(true);
+    }
+    return choice;
+  }
+
+
+  private int handleRetry(final int cmdIndex, final ErrorDescriptor errorDetails, final ScriptParser parser, int selectionOffset)
+  {
+    final ErrorRetryPanel retry = new ErrorRetryPanel(errorDetails, stmtRunner);
+    WbSwingUtilities.invoke(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        boolean busy = getConnection().isBusy();
+        try
+        {
+          getConnection().setBusy(false);
+          retry.setStatement(parser, cmdIndex);
+          retry.showDialog((Frame)SwingUtilities.getWindowAncestor(SqlPanel.this));
+        }
+        finally
+        {
+          getConnection().setBusy(busy);
+        }
+      }
+    });
+
+    if (retry.getChoice() == WbSwingUtilities.CONTINUE_OPTION)
+    {
+      int startOfStatement = parser.getStartPosForCommand(cmdIndex) + selectionOffset;
+      int endOfStatement = parser.getEndPosForCommand(cmdIndex) + selectionOffset;
+      editor.replaceText(startOfStatement, endOfStatement, retry.getStatement());
+      return JOptionPane.YES_OPTION;
+    }
+    if (retry.getChoice() == JOptionPane.CANCEL_OPTION)
+    {
+      return JOptionPane.NO_OPTION;
+    }
+    if (retry.getChoice() == WbSwingUtilities.IGNORE_ONE)
+    {
+      return JOptionPane.YES_OPTION;
+    }
+    return retry.getChoice();
+  }
+
+  private int askContinue(final ErrorDescriptor errorDetails, final String question)
+  {
+    // using the DialogInvoker makes sure that all components of the dialog are created and displayed on the EDT
     MessageCreator creator = new MessageCreator()
     {
       @Override
       public Object getMessage()
       {
-        String question = ResourceMgr.getFormattedString("MsgScriptStatementError",
-          NumberStringCache.getNumberString(statementNumber),
-          NumberStringCache.getNumberString(totalStatements));
-
         if (GuiSettings.showMessageInErrorContinueDialog() && errorDetails != null && errorDetails.getErrorMessage() != null)
         {
           return WbSwingUtilities.buildErrorQuestion(question, errorDetails.getErrorMessage());
@@ -3656,11 +3717,8 @@ public class SqlPanel
       }
     };
 
-    // using the DialogInvoker makes sure that all components of the dialog are created and displayed on the EDT
     DialogInvoker invoker = new DialogInvoker();
     int choice = invoker.getYesNoIgnoreAll(creator, this);
-
-    iconHandler.showBusyIcon(true);
     return choice;
   }
 

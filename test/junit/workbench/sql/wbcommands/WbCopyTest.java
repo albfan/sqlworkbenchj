@@ -431,6 +431,65 @@ public class WbCopyTest
 		ConnectionMgr.getInstance().removeProfile(con.getProfile());
 	}
 
+
+	@Test
+	public void testSyncDeleteWithAlternateKey()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("WbCopyTest_testExecute");
+		util.prepareEnvironment();
+
+		StatementRunner runner = util.createConnectedStatementRunner();
+		WbConnection con = runner.getConnection();
+
+		Statement stmt = con.createStatement();
+
+		stmt.executeUpdate("create table source_data (nr integer not null, lastname varchar(50), firstname varchar(50))");
+		stmt.executeUpdate("create table target_data (nr integer not null, lastname varchar(50), firstname varchar(50))");
+
+		for (int i=0; i < 50; i++)
+		{
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname) values (" +  i + ",'Lastname" + i + "', 'Arthur" + i + ",')");
+		}
+
+		for (int i=0; i < 37; i++)
+		{
+			stmt.executeUpdate("insert into target_data (nr, lastname, firstname) values (" +  (i + 1000) + ",'Lastname" + i + "', 'Arthur" + i + ",')");
+		}
+
+		con.commit();
+
+		String sql = "wbcopy -sourceTable=source_data " +
+								 "       -targettable=target_data " +
+								 "       -createTarget=false " +
+								 "       -keyColumns=nr " +
+								 "       -syncDelete=true " +
+								 "       -batchSize=10";
+
+		runner.runStatement(sql);
+		StatementRunnerResult result = runner.getResult();
+		assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+		ResultSet rs = stmt.executeQuery("select count(*) from target_data");
+		int count = -1;
+		if (rs.next())
+		{
+			count = rs.getInt(1);
+		}
+		SqlUtil.closeResult(rs);
+		assertEquals("Wrong rowcount", 50, count);
+
+		rs = stmt.executeQuery("select count(*) from target_data where nr >= 1000");
+		count = -1;
+		if (rs.next())
+		{
+			count = rs.getInt(1);
+		}
+		SqlUtil.closeResult(rs);
+		assertEquals("Rows not deleted", 0, count);
+		ConnectionMgr.getInstance().removeProfile(con.getProfile());
+	}
+
 	@Test
 	public void testCopy() throws Exception
 	{

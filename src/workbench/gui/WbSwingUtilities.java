@@ -119,6 +119,11 @@ public class WbSwingUtilities
 	public static final KeyStroke CTRL_ENTER = KeyStroke.getKeyStroke("control ENTER");
 	public static final KeyStroke ALT_ENTER = KeyStroke.getKeyStroke("alt ENTER");
 
+	public static final int CONTINUE_OPTION = 1042;
+	public static final int IGNORE_ALL = 2042;
+	public static final int IGNORE_ONE = 3042;
+	public static final int EXECUTE_ALL = 4042;
+
 	public static Border getBevelBorder()
 	{
 		return createBevelBorder(BevelBorder.LOWERED);
@@ -577,11 +582,11 @@ public class WbSwingUtilities
 		});
 	}
 
-  public static JComponent createErrorMessagePanel(String message, String settingsKey)
+  public static PlainEditor createErrorMessagePanel(String message, String settingsKey)
   {
     final String longestLine = StringUtil.getLongestLine(message, 15);
 
-    final PlainEditor msg = new PlainEditor(settingsKey, false)
+    final PlainEditor msg = new PlainEditor(settingsKey, false, true)
     {
       private final int minLineCount = 8;
       private final int maxVisibleLines = 15;
@@ -591,8 +596,8 @@ public class WbSwingUtilities
       public Dimension getPreferredSize()
       {
         FontMetrics fm = getFontMetrics(getFont());
-        int charSize = fm.getMaxAdvance();
-        int prefWidth = (charSize <= 0 ? 16 : charSize) * Math.min(maxLineLength, 60);
+        int maxlen = fm.stringWidth(longestLine);
+        int prefWidth = maxlen + (fm.charWidth('M') * 5);
         int lineHeight = fm.getHeight();
         int prefHeight = ((lineHeight <= 0 ? 16 : lineHeight) * minLineCount) + getScrollbarHeight();
         int lineCount = getLineCount();
@@ -600,14 +605,15 @@ public class WbSwingUtilities
         {
           prefHeight = lineHeight * Math.min(lineCount, maxVisibleLines);
         }
-        return new Dimension(prefWidth, (int)(prefHeight * 1.2));
+        Dimension pref = new Dimension(prefWidth, (int)(prefHeight * 1.2));
+        return pref;
       }
 
       @Override
       public Dimension getMinimumSize()
       {
         FontMetrics fm = getFontMetrics(getFont());
-        int minWidth = fm.getMaxAdvance() * 40;
+        int minWidth = fm.getMaxAdvance() * 25;
         int lineHeight = fm.getHeight();
         int minHeight = ((lineHeight <= 0 ? 18 : lineHeight) * minLineCount) + getScrollbarHeight();
         return new Dimension(minWidth, (int)(minHeight * 1.2));
@@ -617,9 +623,9 @@ public class WbSwingUtilities
       public Dimension getMaximumSize()
       {
         FontMetrics fm = getFontMetrics(getFont());
-        int maxWidth = fm.getMaxAdvance() * 60;
+        int maxWidth = fm.getMaxAdvance() * 50;
         int lineHeight = fm.getHeight();
-        int maxHeight = ((lineHeight <= 0 ? 18 : lineHeight) * 40);
+        int maxHeight = ((lineHeight <= 0 ? 18 : lineHeight) * 20);
         return new Dimension(maxWidth, maxHeight);
       }
     };
@@ -693,9 +699,6 @@ public class WbSwingUtilities
 		return result;
 	}
 
-	public static final int IGNORE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 1;
-	public static final int EXECUTE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 2;
-
 	public static boolean getProceedCancel(Component aCaller, String resourceKey, Object ... params)
 	{
 		String[] options = new String[]
@@ -730,7 +733,7 @@ public class WbSwingUtilities
 		return result.equals(options[0]);
 	}
 
-  public static JComponent buildErrorQuestion(String message, String errorMessage)
+  public static JPanel getMultilineLabel(String message)
   {
     List<String> lines = StringUtil.getLines(message);
     JPanel messagePanel = new JPanel(new GridLayout(0, 1, 0, 0));
@@ -749,6 +752,13 @@ public class WbSwingUtilities
       }
       messagePanel.add(label);
     }
+    return messagePanel;
+  }
+
+  public static JComponent buildErrorQuestion(String message, String errorMessage)
+  {
+    JPanel messagePanel = getMultilineLabel(message);
+    Font messageFont = UIManager.getFont("OptionPane.messageFont");
 
     int vgap = 16;
 
