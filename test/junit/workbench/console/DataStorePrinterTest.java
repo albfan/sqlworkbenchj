@@ -36,7 +36,7 @@ import workbench.util.StringUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -107,12 +107,12 @@ public class DataStorePrinterTest
 		int linecount = lines.length;
 		assertEquals(10, linecount);
 
-		assertEquals("DESCRIPTION           | QUANTITY", lines[0]);
-		assertEquals("----------------------+---------", lines[1]);
-		assertEquals("Very long test value  |        1", lines[2]);
-		assertEquals("Multi-line            |        2", lines[3]);
-		assertEquals("test value"                      , lines[4]);
-		assertEquals("My comment            |        3", lines[5]);
+		assertEquals("DESCRIPTION          | QUANTITY", lines[0]);
+		assertEquals("---------------------+---------", lines[1]);
+		assertEquals("Very long test value |        1", lines[2]);
+		assertEquals("Multi-line           |        2", lines[3]);
+		assertEquals("test value"                     , lines[4]);
+		assertEquals("My comment           |        3", lines[5]);
 	}
 
 	@Test
@@ -131,13 +131,13 @@ public class DataStorePrinterTest
 		int linecount = lines.length;
 		assertEquals(11, linecount);
 
-		assertEquals("DESCRIPTION           | QUANTITY | LASTNAME      ", lines[0]);
-		assertEquals("----------------------+----------+---------------", lines[1]);
-		assertEquals("Very long test value  |        1 | Beeblebrox    ", lines[2]);
-		assertEquals("Multi-line            |        2 | Dent on       ", lines[3]);
-		assertEquals("test value                       : two lines",      lines[4]);
-		assertEquals("My comment            |        3 | lastname      ", lines[5]);
-		assertEquals("                                 : with two lines", lines[6]);
+		assertEquals("DESCRIPTION          | QUANTITY | LASTNAME      ", lines[0]);
+		assertEquals("---------------------+----------+---------------", lines[1]);
+		assertEquals("Very long test value |        1 | Beeblebrox    ", lines[2]);
+		assertEquals("Multi-line           |        2 | Dent on       ", lines[3]);
+		assertEquals("test value                      : two lines",      lines[4]);
+		assertEquals("My comment           |        3 | lastname      ", lines[5]);
+		assertEquals("                                : with two lines", lines[6]);
 
 		// Test the unformatted output
 		ba = new ByteArrayOutputStream(500);

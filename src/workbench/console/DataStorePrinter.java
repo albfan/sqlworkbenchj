@@ -46,7 +46,6 @@ public class DataStorePrinter
 	extends ConsolePrinter
 {
 	private DataStore data;
-	private static final int MAX_WIDTH = 80;
 
 	public DataStorePrinter(DataStore source)
 	{
@@ -87,7 +86,7 @@ public class DataStorePrinter
 		for (int i=0; i < data.getColumnCount(); i++)
 		{
 			int dataWidth = getMaxDataWidth(i);
-			int width = Math.min(dataWidth, MAX_WIDTH);
+			int width = Math.min(dataWidth, ConsoleSettings.getMaxColumnDataWidth());
 			widths.put(Integer.valueOf(i), Integer.valueOf(width));
 		}
 		return widths;

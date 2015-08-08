@@ -169,4 +169,9 @@ public class ConsoleSettings
 		return Settings.getInstance().getBoolProperty(PROP_CLEAR_SCREEN, false);
 	}
 
+  public static int getMaxColumnDataWidth()
+  {
+    return Settings.getInstance().getIntProperty("workbench.console.dataprinter.max.colwidth", 120);
+  }
+
 }
