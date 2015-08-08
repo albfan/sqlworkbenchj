@@ -178,12 +178,9 @@ public class StringUtilTest
 		line = StringUtil.getLongestLine(s, 10);
 		assertEquals(s, line);
 
-    s =
-      "ERROR: syntax error at or near \"1\"\n" +
-      "  Position: 74";
+    s = "long line at the start\nshort";
 		line = StringUtil.getLongestLine(s, 10);
-		assertEquals("ERROR: syntax error at or near \"1\"", line);
-
+		assertEquals("long line at the start", line);
 	}
 
 	@Test
