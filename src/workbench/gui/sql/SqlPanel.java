@@ -3494,7 +3494,9 @@ public class SqlPanel
           }
 
           // only prompt if more than one statement is executed and if that is not the last statement in the script
-					if (count > 1 && onErrorAsk && ( (i - startIndex) < (count - 1)))
+          // when cancelling a statement some JDBC drivers throw an exception as well.
+          // In that case we also don't want to display the error dialog
+					if (onErrorAsk && isNotLastStatement(i - startIndex, count) && !cancelExecution)
 					{
             // we can't highlight the statement if this is a macro or if the user changed the editor content
             if (!macroRun && !editor.isModifiedAfter(scriptStart))
@@ -3627,6 +3629,11 @@ public class SqlPanel
 		}
 	}
 
+  private boolean isNotLastStatement(int cmdIndex, int count)
+  {
+    return (cmdIndex) < (count - 1);
+  }
+
   private int handleScriptError(int cmdIndex, int totalStatements, ErrorDescriptor errorDetails, ScriptParser parser, int selectionOffset)
   {
 
@@ -3638,7 +3645,7 @@ public class SqlPanel
     int choice = -1;
     try
     {
-      if (GuiSettings.enableRetryErrorDialog())
+      if (GuiSettings.enableRetrySqlErrorDialog())
       {
         choice = handleRetry(cmdIndex, errorDetails, parser, selectionOffset);
       }
@@ -3706,9 +3713,9 @@ public class SqlPanel
       @Override
       public Object getMessage()
       {
-        if (GuiSettings.showMessageInErrorContinueDialog() && errorDetails != null && errorDetails.getErrorMessage() != null)
+        if (GuiSettings.showSqlErrorInContinueDialog() && errorDetails != null && errorDetails.getErrorMessage() != null)
         {
-          return WbSwingUtilities.buildErrorQuestion(question, errorDetails.getErrorMessage());
+          return WbSwingUtilities.buildErrorContinueMessage(question, errorDetails.getErrorMessage());
         }
         else
         {

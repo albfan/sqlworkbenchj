@@ -51,7 +51,6 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -85,6 +84,7 @@ import javax.swing.text.DocumentFilter;
 import workbench.WbManager;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -513,7 +513,7 @@ public class WbSwingUtilities
 	public static void showFriendlyErrorMessage(Component caller, final String title, final String error)
 	{
 		int maxLen = Settings.getInstance().getIntProperty("workbench.gui.message.maxlength", 100);
-		if (error.indexOf('\n') > 0 || error.indexOf('\r') > 0 || error.length() > maxLen)
+		if (error.length() > maxLen || error.indexOf('\n') > 0 || error.indexOf('\r') > 0)
 		{
 			showMultiLineError(caller, title, error);
 		}
@@ -576,30 +576,45 @@ public class WbSwingUtilities
 			@Override
 			public void run()
 			{
-        final JComponent pane = createErrorMessagePanel(message, null);
-				JOptionPane.showMessageDialog(realCaller, pane, title, JOptionPane.ERROR_MESSAGE);
+        JComponent pane = createErrorMessagePanel(message, GuiSettings.PROP_PLAIN_EDITOR_WRAP, true);
+        JOptionPane errorPane = new WbOptionPane(pane, JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION);
+    		JDialog dialog = errorPane.createDialog(getWindowAncestor(realCaller), title);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setResizable(true);
+        dialog.pack();
+        dialog.setVisible(true);
 			}
 		});
 	}
 
-  public static PlainEditor createErrorMessagePanel(String message, String settingsKey)
+  public static PlainEditor createErrorMessagePanel(String message, String settingsKey, boolean allowWordWrap)
   {
-    final String longestLine = StringUtil.getLongestLine(message, 15);
+    final int maxChars = 80;
+    final String longestLine = StringUtil.getMaxSubstring(StringUtil.getLongestLine(message, 15), maxChars);
 
-    final PlainEditor msg = new PlainEditor(settingsKey, false, true)
+    final PlainEditor msg = new PlainEditor(settingsKey, false, allowWordWrap)
     {
-      private final int minLineCount = 8;
+      private final int minLineCount = 6;
       private final int maxVisibleLines = 15;
-      private final int maxLineLength = longestLine.length();
 
+      private int getCharWidth(FontMetrics fm)
+      {
+        int advance = fm.getMaxAdvance();
+        if (advance <= 0)
+        {
+          System.out.println("maxAdvance: " + advance + ", fm: " + fm);
+          advance = fm.stringWidth("M");
+        }
+        return advance;
+      }
       @Override
       public Dimension getPreferredSize()
       {
         FontMetrics fm = getFontMetrics(getFont());
         int maxlen = fm.stringWidth(longestLine);
-        int prefWidth = maxlen + (fm.charWidth('M') * 5);
+        int prefWidth = maxlen + (getCharWidth(fm) * 4) + getScrollbarWidth();
         int lineHeight = fm.getHeight();
-        int prefHeight = ((lineHeight <= 0 ? 16 : lineHeight) * minLineCount) + getScrollbarHeight();
+        int prefHeight = (lineHeight * minLineCount) + getScrollbarHeight();
         int lineCount = getLineCount();
         if (lineCount >= minLineCount)
         {
@@ -613,9 +628,9 @@ public class WbSwingUtilities
       public Dimension getMinimumSize()
       {
         FontMetrics fm = getFontMetrics(getFont());
-        int minWidth = fm.getMaxAdvance() * 25;
+        int minWidth = getCharWidth(fm) * 25;
         int lineHeight = fm.getHeight();
-        int minHeight = ((lineHeight <= 0 ? 18 : lineHeight) * minLineCount) + getScrollbarHeight();
+        int minHeight = (lineHeight * minLineCount) + getScrollbarHeight();
         return new Dimension(minWidth, (int)(minHeight * 1.2));
       }
 
@@ -623,9 +638,9 @@ public class WbSwingUtilities
       public Dimension getMaximumSize()
       {
         FontMetrics fm = getFontMetrics(getFont());
-        int maxWidth = fm.getMaxAdvance() * 50;
+        int maxWidth = getCharWidth(fm) * maxChars;
         int lineHeight = fm.getHeight();
-        int maxHeight = ((lineHeight <= 0 ? 18 : lineHeight) * 20);
+        int maxHeight = lineHeight * 25;
         return new Dimension(maxWidth, maxHeight);
       }
     };
@@ -635,6 +650,7 @@ public class WbSwingUtilities
     msg.setCaretPosition(0);
     msg.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
     msg.restoreSettings();
+    msg.setFocusable(false);
 
     return msg;
   }
@@ -733,50 +749,53 @@ public class WbSwingUtilities
 		return result.equals(options[0]);
 	}
 
+  private static JLabel createMessageLabel(String message)
+  {
+    Color color = UIManager.getColor("OptionPane.messageForeground");
+    Font messageFont = UIManager.getFont("OptionPane.messageFont");
+    JLabel label = new JLabel(message, JLabel.LEADING);
+    if (color != null)
+    {
+      label.setForeground(color);
+    }
+    if (messageFont != null)
+    {
+      label.setFont(messageFont);
+    }
+    return new JLabel(message, JLabel.LEFT);
+  }
+
   public static JPanel getMultilineLabel(String message)
   {
     List<String> lines = StringUtil.getLines(message);
     JPanel messagePanel = new JPanel(new GridLayout(0, 1, 0, 0));
-    Color color = UIManager.getColor("OptionPane.messageForeground");
-    Font messageFont = UIManager.getFont("OptionPane.messageFont");
     for (String line : lines)
     {
-      JLabel label = new JLabel(line, JLabel.LEFT);
-      if (color != null)
-      {
-        label.setForeground(color);
-      }
-      if (messageFont != null)
-      {
-        label.setFont(messageFont);
-      }
-      messagePanel.add(label);
+      messagePanel.add(createMessageLabel(line));
     }
     return messagePanel;
   }
 
-  public static JComponent buildErrorQuestion(String message, String errorMessage)
+  public static JComponent buildErrorContinueMessage(String message, String errorMessage)
   {
     JPanel messagePanel = getMultilineLabel(message);
+
     Font messageFont = UIManager.getFont("OptionPane.messageFont");
+    FontMetrics fm = messagePanel.getFontMetrics(messageFont);
+    int vgap = fm.getHeight();
 
-    int vgap = 16;
-
-    if (messageFont != null)
-    {
-      FontMetrics fm = messagePanel.getFontMetrics(messageFont);
-      if (fm != null)
-      {
-        vgap = fm.getHeight();
-      }
-    }
-
-    messagePanel.add(Box.createVerticalStrut((int)(vgap/2)));
+    messagePanel.setBorder(new EmptyBorder(0, 0, vgap/4, 0));
 
     JPanel panel = new JPanel(new BorderLayout(0, 0));
-    JComponent errorPanel = createErrorMessagePanel(errorMessage, PROP_ERROR_MSG_WRAP);
+    JComponent errorPanel = createErrorMessagePanel(errorMessage, PROP_ERROR_MSG_WRAP, GuiSettings.allowWordWrapForErrorMessage());
+
+    JLabel question = createMessageLabel(ResourceMgr.getString("MsgConfirmContinue"));
+    question.setBorder(new EmptyBorder(vgap/3, 0, vgap/3, 0));
+
     panel.add(messagePanel, BorderLayout.PAGE_START);
     panel.add(errorPanel, BorderLayout.CENTER);
+    panel.add(question, BorderLayout.PAGE_END);
+
     return panel;
   }
 

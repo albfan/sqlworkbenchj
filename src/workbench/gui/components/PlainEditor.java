@@ -41,6 +41,7 @@ import javax.swing.text.PlainDocument;
 
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.TextContainer;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -67,10 +68,9 @@ public class PlainEditor
   private String wrapSettingsKey;
   private TextComponentMouseListener editMenu;
 
-
 	public PlainEditor()
   {
-    this(Settings.PROP_PLAIN_EDITOR_WRAP, true, true);
+    this(GuiSettings.PROP_PLAIN_EDITOR_WRAP, true, true);
   }
 
 	public PlainEditor(String settingsKey, boolean allowEdit, boolean enableWordWrap)
@@ -168,6 +168,25 @@ public class PlainEditor
 		this.infoText.setText(text);
 	}
 
+  public int getScrollbarWidth()
+  {
+    int width = 0;
+    JScrollBar bar = scroll.getVerticalScrollBar();
+    if (bar != null)
+    {
+      Dimension prefSize = bar.getPreferredSize();
+      if (prefSize != null)
+      {
+        width = (int)prefSize.getHeight();
+      }
+      else
+      {
+        width = bar.getHeight();
+      }
+    }
+    return width;
+  }
+
   public int getScrollbarHeight()
   {
     int height = 0;
@@ -202,7 +221,7 @@ public class PlainEditor
 	@Override
 	public void restoreSettings()
 	{
-    if (wordWrap != null)
+    if (wordWrap != null && wrapSettingsKey != null)
     {
       boolean wrap = Settings.getInstance().getBoolProperty(wrapSettingsKey);
       wordWrap.setSelected(wrap);

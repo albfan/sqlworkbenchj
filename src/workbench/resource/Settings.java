@@ -168,8 +168,6 @@ public class Settings
 	public static final String PROP_JOIN_COMPLETION_PREFER_USING = "workbench.gui.sql.join.completion.prefer.using";
 	public static final String PROP_EDITOR_TRIM = "workbench.file.save.trim.trailing";
 
-  public static final String PROP_PLAIN_EDITOR_WRAP = "workbench.editor.plain.wordwrap";
-
 	public static final String PROP_LIBDIR = "workbench.libdir";
 
   public static final String PROP_LOGFILE_VIEWER = "workbench.logfile.viewer.program";

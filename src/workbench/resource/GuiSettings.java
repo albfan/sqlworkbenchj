@@ -101,6 +101,10 @@ public class GuiSettings
 	public static final String PROP_BOOKMARKS_SAVE_WIDTHS = PROP_BOOKMARK_PREFIX + "colwidths.save";
 	public static final String PROP_BOOKMARKS_SAVE_SORT = PROP_BOOKMARK_PREFIX + "sort.save";
 
+  public static final String PROP_ENABLE_SQL_ERROR_RETRY = "workbench.gui.sql.error.retry";
+  public static final String PROP_PLAIN_EDITOR_WRAP = "workbench.editor.plain.wordwrap";
+
+
 	public static boolean showApplyDDLHint()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.apply.ddl.hint", true);
@@ -1156,14 +1160,19 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.cancel.stops", true);
 	}
 
-  public static boolean enableRetryErrorDialog()
+  public static boolean enableRetrySqlErrorDialog()
   {
-    return Settings.getInstance().getBoolProperty("workbench.sql.error.enable.retry", false);
+    return Settings.getInstance().getBoolProperty(PROP_ENABLE_SQL_ERROR_RETRY, false);
   }
 
-  public static boolean showMessageInErrorContinueDialog()
+  public static boolean showSqlErrorInContinueDialog()
   {
-    return Settings.getInstance().getBoolProperty("workbench.sql.error.prompt.show.message", true);
+    return Settings.getInstance().getBoolProperty("workbench.gui.sql.error.prompt.show.message", true);
+  }
+
+  public static boolean allowWordWrapForErrorMessage()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.gui.sql.error.prompt.wordwrap", false);
   }
 
   public static void setShowMessageInErrorContinueDialog(boolean flag)
