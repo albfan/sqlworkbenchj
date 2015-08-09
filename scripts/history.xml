@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-07-13">
+  <release build="-1" date="2015-08-09">
     <entry dev-build="9" type="enh">Added support to include computed columns for MySQL 5.7 in the generated CREATE TABLE source</entry>
     <entry dev-build="9" type="enh">The source and target connection for WbCopy, WbSchemaDiff and WbDataDiff can now be specified on the command line when starting the application. In that case it's not necessary to provide them to the respective commands</entry>
     <entry dev-build="9" type="enh">A new action to run all SQL statements in the editor starting from the cursor position is available</entry>
@@ -27,6 +27,7 @@
     <entry dev-build="1" type="enh">For Vertica tables and views from the schema "v_internal" are now show in the DbExplorer (contributed by Tatiana Saltykova)</entry>
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
+    <entry dev-build="9" type="fix">-syncDelete with WbCopy did not work if alternate key columns were specified using -keyColumns</entry>
     <entry dev-build="9" type="fix">Fixed retrieval of stored procedures for DB2 on AS/400 (thanks to Francesco)</entry>
     <entry dev-build="9" type="fix">Fixed detection of update columns for multi-table result sets when the name of the PK columns is not uniuqe in the result set</entry>
     <entry dev-build="9" type="fix">For Firebird the source code for procedures with multiple out parameters was not generated correctly.</entry>
