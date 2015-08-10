@@ -36,6 +36,7 @@ import workbench.util.StringUtil;
 
 /**
  * A class to print the contents of a {@link DataStore} to a PrintStream.
+ *
  * The column widths are optimized against the content of the DataStore
  * if column formatting {@link ConsolePrinter#setFormatColumns(boolean) }
  * is enabled
@@ -45,13 +46,21 @@ import workbench.util.StringUtil;
 public class DataStorePrinter
 	extends ConsolePrinter
 {
+  private final String longValueSuffix = " (...)";
 	private DataStore data;
+  private int maxDataLength;
 
 	public DataStorePrinter(DataStore source)
 	{
 		super();
 		this.data = source;
+    this.maxDataLength = ConsoleSettings.getMaxColumnDataWidth();
 	}
+
+  public void setMaxDataLength(int maxLength)
+  {
+    this.maxDataLength = maxLength;
+  }
 
 	@Override
 	protected String getResultName()
@@ -86,7 +95,7 @@ public class DataStorePrinter
 		for (int i=0; i < data.getColumnCount(); i++)
 		{
 			int dataWidth = getMaxDataWidth(i);
-			int width = Math.min(dataWidth, ConsoleSettings.getMaxColumnDataWidth());
+			int width = Math.min(dataWidth, maxDataLength);
 			widths.put(Integer.valueOf(i), Integer.valueOf(width));
 		}
 		return widths;
@@ -110,20 +119,48 @@ public class DataStorePrinter
 				if (len > width) width = len;
 			}
 		}
-		return width;
+		return Math.min(width, maxDataLength);
 	}
 
+  @Override
+  protected String getDisplayValue(RowData row, int col)
+  {
+    String value = super.getDisplayValue(row, col);
+    return StringUtil.getMaxSubstring(value, maxDataLength - longValueSuffix.length(), longValueSuffix);
+  }
+
+  /**
+   * Print all rows to the specified stream.
+   *
+   * @param out    the print stream to use
+   *
+   * @see #printTo(java.io.PrintWriter)
+   * @see #printTo(java.io.PrintWriter, int[])
+   */
 	public void printTo(PrintStream out)
 	{
 		PrintWriter pw = new PrintWriter(out);
 		printTo(pw, null);
 	}
 
+  /**
+   * Print all rows to the specified PrintWriter.
+   *
+   * @param pw    the PrintWriter to use
+   * @see #printTo(java.io.PrintWriter, int[])
+   */
 	public void printTo(PrintWriter pw)
 	{
 		printTo(pw, null);
 	}
 
+  /**
+   * Print rows to the specified PrintWriter.
+   *
+   * @param pw    the PrintWriter to use
+   * @param rows  if <b>null</b> all rows are printed<br/>
+   *              if <b>not null</b> only the selected rows are printed
+   */
 	public void printTo(PrintWriter pw, int[] rows)
 	{
 		int count = rows == null ? data.getRowCount() : rows.length;

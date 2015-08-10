@@ -1048,8 +1048,8 @@ public class StringUtil
 
 	public static String getMaxSubstring(String s, int maxLen, String add)
 	{
-		if (maxLen < 1) return s;
 		if (s == null) return EMPTY_STRING;
+		if (maxLen < 1) return s;
 		if (s.length() < maxLen) return s;
 		if (add == null)
 		{
@@ -1333,15 +1333,31 @@ public class StringUtil
 				}
 				else
 				{
-					// The character after the backslash was not a 'u'
-					// so we are not dealing with a uXXXX value
-					// This applies popular "encodings" for non-printable characters
-					if (ch == '\\') ch = '\\';
-					else if (ch == 't') ch = '\t';
-					else if (ch == 'r') ch = '\r';
-					else if (ch == 'n') ch = '\n';
-					else if (ch == 'f') ch = '\f';
-					else outBuffer.append('\\');
+          // The character after the backslash was not a 'u'
+          // so we are not dealing with a uXXXX value
+          // The following code applies popular "encodings" for non-printable characters
+          // e.g. \n for a newline or \t for a tab character
+          switch (ch)
+          {
+            case '\\':
+              ch = '\\';
+              break;
+            case 't':
+              ch = '\t';
+              break;
+            case 'r':
+              ch = '\r';
+              break;
+            case 'n':
+              ch = '\n';
+              break;
+            case 'f':
+              ch = '\f';
+              break;
+            default:
+              outBuffer.append('\\');
+              break;
+          }
 					outBuffer.append(ch);
 				}
 			}
