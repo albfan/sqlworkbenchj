@@ -26,9 +26,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.FlowLayout;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -140,7 +138,7 @@ public class DbExplorerPanel
   private JComponent currentFocus;
   private ReloadAction reloadSchemasAction;
   private Reloadable schemaReloader;
-  private FlatButton reloadButton;
+  private JButton reloadButton;
   private boolean locked;
   protected String tabName;
 
@@ -198,7 +196,6 @@ public class DbExplorerPanel
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			this.setLayout(new BorderLayout());
 
-			this.selectorPanel = new JPanel();
 			schemaReloader = new Reloadable()
 			{
 				@Override
@@ -216,7 +213,7 @@ public class DbExplorerPanel
 					}
 				}
 			};
-			reloadSchemasAction =new ReloadAction(schemaReloader);
+			reloadSchemasAction = new ReloadAction(schemaReloader);
 			reloadSchemasAction.setEnabled(false);
 			reloadSchemasAction.setTooltip(ResourceMgr.getString("TxtReload"));
       reloadSchemasAction.setUseLabelIconSize(true);
@@ -232,35 +229,19 @@ public class DbExplorerPanel
 			this.catalogSelector.setVisible(false);
 			this.catalogSelector.setEnabled(false);
 			this.catalogLabel.setVisible(false);
-      
+
 			reloadButton = new FlatButton(reloadSchemasAction);
 			reloadButton.setText(null);
 			reloadButton.setMargin(WbToolbarButton.MARGIN);
 
-			this.selectorPanel.setLayout(new GridBagLayout());
-			GridBagConstraints gc = new GridBagConstraints();
-			gc.gridx = 0;
-			gc.gridy = 0;
-			gc.anchor = GridBagConstraints.WEST;
-			gc.insets = new Insets(0, 5, 0, 0);
-			gc.fill = GridBagConstraints.NONE;
-			this.selectorPanel.add(schemaLabel, gc);
+			selectorPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
+			selectorPanel.add(schemaLabel);
+			selectorPanel.add(schemaSelector);
+			selectorPanel.add(catalogLabel);
+			selectorPanel.add(catalogSelector);
+			selectorPanel.add(reloadButton);
 
-			gc.gridx ++;
-			gc.insets = new Insets(0, 8, 0, 0);
-			this.selectorPanel.add(schemaSelector, gc);
-
-			gc.gridx ++;
-			this.selectorPanel.add(catalogLabel, gc);
-
-			gc.gridx ++;
-			this.selectorPanel.add(catalogSelector, gc);
-
-			gc.gridx ++;
-			gc.weightx = 1.0;
-			this.selectorPanel.add(reloadButton, gc);
-
-			this.add(this.selectorPanel, BorderLayout.NORTH);
+			this.add(selectorPanel, BorderLayout.NORTH);
 			this.add(tabPane, BorderLayout.CENTER);
 
 			this.toolbar = new WbToolbar();
@@ -277,6 +258,9 @@ public class DbExplorerPanel
       cd.height = d.height;
       connectionInfo.setMinimumSize(cd);
       connectionInfo.setPreferredSize(cd);
+      
+      reloadButton.setPreferredSize(d);
+      reloadButton.setMaximumSize(d);
 
 			if (mainWindow != null) mainWindow.addExecutionListener(this);
 
