@@ -30,6 +30,7 @@ import workbench.db.CatalogIdentifier;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
+import workbench.db.ProcedureDefinition;
 import workbench.db.SchemaIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
@@ -50,7 +51,7 @@ public class ObjectTreeNode
   implements Serializable
 {
   private Set<String> typesWithChildren = CollectionUtil.caseInsensitiveSet(
-    "database", "catalog", "schema", "table", "view", "materialized view", "type", "package", "enum", "index");
+    "database", "catalog", "schema", "table", "view", "materialized view", "type", "package", "enum", "index", "procedure");
   private String nodeType;
   private String nodeName;
   private boolean isLoaded;
@@ -217,6 +218,11 @@ public class ObjectTreeNode
         return idx.getName() + " (UNIQUE)";
       }
     }
+    if (dbo instanceof ProcedureDefinition)
+    {
+      ProcedureDefinition proc = (ProcedureDefinition)dbo;
+      return proc.getDisplayName();
+    }
     if (dbo instanceof TableIdentifier && rowCount != null)
     {
       return dbo.getObjectName() + " (" + rowCount.toString() + ")";
@@ -252,6 +258,10 @@ public class ObjectTreeNode
     }
     else if (dbo instanceof ColumnIdentifier)
     {
+      if (TreeLoader.TYPE_PROC_PARAMETER.equals(nodeType))
+      {
+        return ((ColumnIdentifier)dbo).getArgumentMode();
+      }
       return getColumnTooltip((ColumnIdentifier)dbo);
     }
     String remarks = dbo.getComment();
@@ -284,7 +294,7 @@ public class ObjectTreeNode
     }
     return tip;
   }
-  
+
   public boolean isFiltered()
   {
     return CollectionUtil.isNonEmpty(filteredNodes);

@@ -869,7 +869,7 @@ public class WbConnection
 			this.preparedStatementPool.done();
 		}
 
-		if (withRollback && this.profile != null && this.profile.getRollbackBeforeDisconnect() && this.sqlConnection != null)
+		if (withRollback && this.profile != null && this.profile.getRollbackBeforeDisconnect() && this.sqlConnection != null && getAutoCommit() == false)
 		{
 			try
 			{

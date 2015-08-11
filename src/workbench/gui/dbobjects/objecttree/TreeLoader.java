@@ -37,6 +37,9 @@ import workbench.db.DbSettings;
 import workbench.db.DependencyNode;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
+import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
+import workbench.db.ReaderFactory;
 import workbench.db.SchemaIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
@@ -118,6 +121,10 @@ public class TreeLoader
   public static final String TYPE_FK_DEF = "fk-definition";
 
   public static final String TYPE_TRIGGERS = "table-trigger";
+
+  public static final String TYPE_FUNCTION = "function";
+  public static final String TYPE_PROCEDURES_NODE = "procedures";
+  public static final String TYPE_PROC_PARAMETER = "parameter";
 
   private WbConnection connection;
   private DbObjectTreeModel model;
@@ -297,7 +304,7 @@ public class TreeLoader
     if (parentNode == null) return;
     for (String type : availableTypes)
     {
-      if (type.equalsIgnoreCase("TRIGGER")) continue;
+      if (type.equalsIgnoreCase("TRIGGER") || type.equalsIgnoreCase(TYPE_PROCEDURES_NODE)) continue;
       if (typesToShow.isEmpty() || typesToShow.contains(type))
       {
         ObjectTreeNode node = new ObjectTreeNode(type, TYPE_DBO_TYPE_NODE);
@@ -305,13 +312,24 @@ public class TreeLoader
         parentNode.add(node);
       }
     }
+
+    if (typesToShow.isEmpty() || typesToShow.contains("PROCEDURE"))
+    {
+      ObjectTreeNode node = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerProcs"), TYPE_PROCEDURES_NODE);
+      node.setAllowsChildren(true);
+      node.setChildrenLoaded(false);
+      parentNode.add(node);
+    }
+
     // always add triggers at the end
     if (typesToShow.isEmpty() || typesToShow.contains("TRIGGER"))
     {
-      ObjectTreeNode node = new ObjectTreeNode("TRIGGER", TYPE_DBO_TYPE_NODE);
+      ObjectTreeNode node = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_DBO_TYPE_NODE);
       node.setAllowsChildren(true);
       parentNode.add(node);
     }
+
+
     parentNode.setChildrenLoaded(true);
   }
 
@@ -446,6 +464,12 @@ public class TreeLoader
       return;
     }
 
+    if (typeNode.getType().equalsIgnoreCase(TYPE_PROCEDURES_NODE))
+    {
+      loadProcedures(typeNode);
+      return;
+    }
+
     TableIdentifier info = getParentInfo(typeNode);
     String schema = info.getRawSchema();
     String catalog = info.getRawCatalog();
@@ -548,6 +572,61 @@ public class TreeLoader
     trg.setAllowsChildren(true);
     node.add(trg);
   }
+
+  public void loadProcedures(ObjectTreeNode procNode)
+    throws SQLException
+  {
+    if (procNode == null) return;
+    ProcedureReader procReader = ReaderFactory.getProcedureReader(connection.getMetadata());
+    ObjectTreeNode schemaNode = procNode.getParent();
+    ObjectTreeNode catalogNode = schemaNode.getParent();
+    String catalogName = null;
+    if (catalogNode != null && catalogNode.getType().equals(TYPE_CATALOG))
+    {
+      catalogName = catalogNode.getName();
+    }
+    String schemaName = schemaNode.getName();
+    List<ProcedureDefinition> procedures = procReader.getProcedureList(catalogName, schemaName, null);
+    for (ProcedureDefinition proc : procedures)
+    {
+      ObjectTreeNode node = new ObjectTreeNode(proc);
+      node.setAllowsChildren(true); // can have parameters
+      node.setChildrenLoaded(false);
+      procNode.add(node);
+    }
+    model.nodeStructureChanged(procNode);
+    procNode.setChildrenLoaded(true);
+  }
+
+  public void loadProcedureParameters(ObjectTreeNode node)
+  {
+    if (node == null) return;
+    ProcedureDefinition proc = (ProcedureDefinition)node.getDbObject();
+    if (proc == null) return;
+    List<ColumnIdentifier> parameters = proc.getParameters(connection);
+    // insert the "return" parameter as the first one
+
+    for (ColumnIdentifier col : parameters)
+    {
+      String mode = col.getArgumentMode();
+      ObjectTreeNode p = null;
+      if (mode.equals("RETURN"))
+      {
+        p = new ObjectTreeNode("RETURNS " + col.getDbmsType(), TYPE_PROC_PARAMETER);
+      }
+      else
+      {
+        p = new ObjectTreeNode(col);
+        p.setNameAndType(col.getColumnName(), TYPE_PROC_PARAMETER);
+      }
+      p.setAllowsChildren(false);
+      p.setChildrenLoaded(true);
+      node.add(p);
+    }
+    model.nodeStructureChanged(node);
+    node.setChildrenLoaded(true);
+  }
+
 
   public void loadTriggers(ObjectTreeNode trgNode)
     throws SQLException
@@ -787,6 +866,10 @@ public class TreeLoader
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
+      }
+      else if (node.getDbObject() instanceof ProcedureDefinition)
+      {
+        loadProcedureParameters(node);
       }
       else if (connection.getMetadata().isExtendedTableType(type) || connection.getMetadata().isViewType(type))
       {

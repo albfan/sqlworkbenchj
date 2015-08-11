@@ -310,6 +310,7 @@ public class JdbcProcedureReader
     {
       String type = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
       String colName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+      if (colName == null) colName = ""; // this happens for the virtual "RETURN" parameter
       String typeName = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
       int jdbcType = ds.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
       ColumnIdentifier col = new ColumnIdentifier(colName, jdbcType);
@@ -655,13 +656,12 @@ public class JdbcProcedureReader
 	public List<ProcedureDefinition> getProcedureList(String catalogPattern, String schemaPattern, String namePattern)
 		throws SQLException
 	{
-		List<ProcedureDefinition> result = new LinkedList<>();
-
 		catalogPattern = DbMetadata.cleanupWildcards(catalogPattern);
 		schemaPattern = DbMetadata.cleanupWildcards(schemaPattern);
 		namePattern = DbMetadata.cleanupWildcards(namePattern);
 
 		DataStore procs = getProcedures(catalogPattern, schemaPattern, namePattern);
+		List<ProcedureDefinition> result = new ArrayList<>(procs.getRowCount());
 
 		if (procs == null || procs.getRowCount() == 0) return result;
 		procs.sortByColumn(ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, true);

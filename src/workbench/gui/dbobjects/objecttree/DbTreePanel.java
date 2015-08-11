@@ -306,6 +306,7 @@ public class DbTreePanel
     {
       typeFilter.removeActionListener(this);
       List<String> types = new ArrayList<>(connection.getMetadata().getObjectTypes());
+      types.add("PROCEDURE");
       if (DbExplorerSettings.getShowTriggerPanel())
       {
         types.add("TRIGGER");
