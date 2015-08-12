@@ -54,11 +54,25 @@ public class OracleUniqueConstraintReader
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;
 
+    boolean hasMultipleSchemas = hasMultipleOwners(indexList);
+
+    String consView = "all_constraints";
+    if (!hasMultipleSchemas)
+    {
+      if (OracleUtils.optimizeCatalogQueries())
+      {
+        String schema = indexList.get(0).getSchema();
+        if (StringUtil.isEmptyString(schema) || schema.equalsIgnoreCase(con.getCurrentUser()))
+        {
+          consView = "user_constraints";
+        }
+      }
+    }
 		StringBuilder sql = new StringBuilder(500);
 		sql.append(
       "-- SQL Workbench \n" +
 			"select " + OracleUtils.getCacheHint() + " index_name, constraint_name, deferrable, deferred, status, validated \n" +
-			"from all_constraints \n" +
+			"from " + consView + " \n" +
 			"where constraint_type = 'U' \n" +
 			"  and ");
 
@@ -76,6 +90,7 @@ public class OracleUniqueConstraintReader
 			LogMgr.logDebug("OracleUniqueConstraintReader.processIndexList()", "Retrieving unique constraints using:\n" + sql);
 		}
 
+    long start = System.currentTimeMillis();
 		Statement stmt = null;
 		ResultSet rs = null;
 		try
@@ -118,6 +133,8 @@ public class OracleUniqueConstraintReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("OracleUniqueConstraintReader.processIndexList()", "Retrievung unique constraints took: " + duration + "ms");
 	}
 
   private boolean hasMultipleOwners(List<IndexDefinition> indexList)

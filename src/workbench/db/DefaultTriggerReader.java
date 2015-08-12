@@ -154,7 +154,7 @@ public class DefaultTriggerReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("DefaultTriggerReader.getTableTriggers()", "Using query=\n" + query);
+			LogMgr.logInfo("DefaultTriggerReader.getTableTriggers()", "Retrieving triggers using:\n" + query);
 		}
 
 		ResultSet rs = stmt.executeQuery(query);
@@ -278,7 +278,7 @@ public class DefaultTriggerReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("DefaultTriggerReader.getTriggerSource()", "Using query=\n" + query);
+			LogMgr.logInfo("DefaultTriggerReader.getTriggerSource()", "Retrieving trigger source using:\n" + query);
 		}
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();

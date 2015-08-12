@@ -180,6 +180,8 @@ public class OracleTableSourceBuilder
 		String archive = null;
     boolean isPartitioned = false;
 
+    long start = System.currentTimeMillis();
+
 		try
 		{
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
@@ -190,7 +192,7 @@ public class OracleTableSourceBuilder
 			}
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Using sql:\n" +
+				LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving table source options using:\n" +
 					SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema()));
 			}
 
@@ -390,6 +392,9 @@ public class OracleTableSourceBuilder
 			SqlUtil.closeAll(rs, pstmt);
 		}
 
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving table options took " + duration + "ms");
+
 		String tablespace = tbl.getTablespace();
 		if (OracleUtils.shouldAppendTablespace(tablespace, defaultTablespace, tbl.getRawSchema(), dbConnection.getCurrentUser()))
 		{
@@ -458,7 +463,8 @@ public class OracleTableSourceBuilder
 			"  and owner = '" + tbl.getRawSchema() + "' ";
 
 		StringBuilder result = new StringBuilder(100);
-
+    long start = System.currentTimeMillis();
+    
 		try
 		{
 			boolean first = true;
@@ -568,6 +574,10 @@ public class OracleTableSourceBuilder
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving LOB options took " + duration + "ms");
+
 		return result;
 	}
 

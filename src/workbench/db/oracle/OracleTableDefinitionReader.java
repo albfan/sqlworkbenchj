@@ -129,6 +129,8 @@ public class OracleTableDefinitionReader
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 
+    long start = System.currentTimeMillis();
+
 		try
 		{
 			pstmt = prepareColumnsStatement(schema, tablename);
@@ -224,6 +226,11 @@ public class OracleTableDefinitionReader
 		if (columns.size() > 0 && table.getType() == null)
 		{
 			table.setType("TABLE");
+		}
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("OracleTableDefinitionReader.getTableColumns()", "Retrieving table columns for " + table.getTableExpression() + " took " + duration + "ms");
 		}
 		return columns;
 	}
@@ -406,7 +413,7 @@ public class OracleTableDefinitionReader
 		stmt.setString(2, table);
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleTableDefinitionReader.prepareColumnsStatement()", "Using: " + sql);
+			LogMgr.logDebug("OracleTableDefinitionReader.prepareColumnsStatement()", "Retrieving table columns for " + table + " using:\n" + sql);
 		}
 		return stmt;
 	}

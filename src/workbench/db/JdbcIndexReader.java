@@ -168,6 +168,9 @@ public class JdbcIndexReader
 
 			ResultSet keysRs = null;
 			String pkStatus = null;
+
+      long start = System.currentTimeMillis();
+
 			try
 			{
 				keysRs = getPrimaryKeyInfo(catalog, schema, tbl.getTableName());
@@ -206,7 +209,8 @@ public class JdbcIndexReader
 				primaryKeysResultDone();
 			}
 
-			LogMgr.logDebug("JdbcIndexreader.getPrimaryKey()", "PK Information for " + tbl.getTableName() + ", PK Name=" + pkName + ", PK Index=" + pkIndexName + ", columns=" + cols);
+      long duration = System.currentTimeMillis() - start;
+			LogMgr.logDebug("JdbcIndexreader.getPrimaryKey()", "PK Information for " + tbl.getTableName() + ", PK Name=" + pkName + ", PK Index=" + pkIndexName + ", columns=" + cols + " (" + duration + "ms)");
 
 			if (cols.size() > 0)
 			{
@@ -780,8 +784,11 @@ public class JdbcIndexReader
 				pk = getPrimaryKey(tbl);
 			}
 
+      long start = System.currentTimeMillis();
 			idxRs = getIndexInfo(tbl, uniqueOnly);
 			result = processIndexResult(idxRs, pk, tbl);
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("JdbcIndexReader.getTableIndexList()", "Retrieving index information for table " + table.getTableExpression() + " took: " + duration + "ms");
 		}
 		catch (Exception e)
 		{

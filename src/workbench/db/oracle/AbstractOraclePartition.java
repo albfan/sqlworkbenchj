@@ -238,12 +238,14 @@ public abstract class AbstractOraclePartition
 
 		String retrievePartitionDefinitionSql = getRetrievePartitionDefinitionSql();
 
+    long start = System.currentTimeMillis();
+
 		try
-		{
+    {
 			pstmt = conn.getSqlConnection().prepareStatement(retrievePartitionDefinitionSql);
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug(getClassName() + ".retrieveDefinition()", "Using SQL=\n" +
+				LogMgr.logDebug(getClassName() + ".retrieveDefinition()", "Retrieving partition information using:\n" +
 					SqlUtil.replaceParameters(retrievePartitionDefinitionSql, dbObject.getSchema(), dbObject.getObjectName()));
 			}
 
@@ -278,6 +280,8 @@ public abstract class AbstractOraclePartition
 		{
 			retrieveSubColumns(dbObject, conn);
 		}
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("AbstractOraclePartition.retrieveDefinition()", "Retrieving partition information for " + dbObject.getObjectName() + " took: " + duration + "ms");
 		return type != null;
 	}
 
@@ -289,12 +293,13 @@ public abstract class AbstractOraclePartition
 		ResultSet rs = null;
 		String retrieveColumnsSql = getRetrieveColumnsSql();
 
+    long start = System.currentTimeMillis();
 		try
 		{
 			pstmt = conn.getSqlConnection().prepareStatement(retrieveColumnsSql);
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug(getClassName() + ".retrieveColumns()", "Using SQL=\n" +
+				LogMgr.logDebug(getClassName() + ".retrieveColumns()", "Retrieving partition columns using:\n" +
 					SqlUtil.replaceParameters(retrieveColumnsSql, table.getSchema(), table.getObjectName()));
 			}
 
@@ -312,6 +317,8 @@ public abstract class AbstractOraclePartition
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("AbstractOraclePartition.retrieveColumns()", "Retrieving partition columns for " + table.getObjectName() + " took: " + duration + "ms");
 	}
 
 	private void retrieveSubColumns(DbObject dbObject, WbConnection conn)
@@ -320,6 +327,7 @@ public abstract class AbstractOraclePartition
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String retrieveSubColumns = getRetrieveSubColumnsSql();
+    long start = System.currentTimeMillis();
 		try
 		{
 			pstmt = conn.getSqlConnection().prepareStatement(retrieveSubColumns);
@@ -343,6 +351,8 @@ public abstract class AbstractOraclePartition
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("AbstractOraclePartition.retrieveSubColumns()", "Retrieving sub partition columns for " + dbObject.getObjectName() + " took: " + duration + "ms");
 	}
 
 	private OraclePartitionDefinition findPartition(String name)
@@ -365,6 +375,7 @@ public abstract class AbstractOraclePartition
 		ResultSet rs = null;
 		String retrieveSubPartitions = getRetrieveSubPartitionsSql();
 
+    long start = System.currentTimeMillis();
 		try
 		{
 			pstmt = conn.getSqlConnection().prepareStatement(retrieveSubPartitions);
@@ -405,6 +416,8 @@ public abstract class AbstractOraclePartition
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("AbstractOraclePartition.retrieveSubPartitions()", "Retrieving sub partitions " + object.getObjectName() + " took: " + duration + "ms");
 	}
 
 
@@ -422,6 +435,7 @@ public abstract class AbstractOraclePartition
 		ResultSet rs = null;
 		String retrievePartitionSQL = getRetrievePartitionsSql();
 
+    long start = System.currentTimeMillis();
 		try
 		{
 			pstmt = conn.getSqlConnection().prepareStatement(retrievePartitionSQL);
@@ -457,6 +471,10 @@ public abstract class AbstractOraclePartition
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
+
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("AbstractOraclePartition.retrievePartitions()", "Retrieving partitions " + object.getObjectName() + " took: " + duration + "ms");
+
 		if (defaultSubpartitionCount <= 1 && subColumns != null)
 		{
 			retrieveSubPartitions(object, conn);
