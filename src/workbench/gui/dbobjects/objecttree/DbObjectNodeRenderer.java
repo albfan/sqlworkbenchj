@@ -33,6 +33,7 @@ import workbench.resource.IconMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.ProcedureDefinition;
 import workbench.db.SynonymReader;
 
 import workbench.util.CaseInsensitiveComparator;
@@ -65,6 +66,7 @@ public class DbObjectNodeRenderer
     iconMap.put(TreeLoader.TYPE_CATALOG, "folder-db");
     iconMap.put(TreeLoader.TYPE_DBO_TYPE_NODE, "db_type");
     iconMap.put(TreeLoader.TYPE_PROCEDURES_NODE, "db_type");
+    iconMap.put("procedure", "sproc");
     iconMap.put("index", "index");
     iconMap.put("type", "type");
 
@@ -131,6 +133,18 @@ public class DbObjectNodeRenderer
         else
         {
           setIcon(IconMgr.getInstance().getLabelIcon("bullet_black"));
+        }
+      }
+      else if (dbo instanceof ProcedureDefinition)
+      {
+        ProcedureDefinition def = (ProcedureDefinition)dbo;
+        if (def.isFunction())
+        {
+          setIcon(IconMgr.getInstance().getLabelIcon("sfunc"));
+        }
+        else
+        {
+          setIcon(IconMgr.getInstance().getLabelIcon("sproc"));
         }
       }
       else
