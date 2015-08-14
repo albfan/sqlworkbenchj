@@ -27,6 +27,7 @@
     <entry dev-build="1" type="enh">For Vertica tables and views from the schema "v_internal" are now show in the DbExplorer (contributed by Tatiana Saltykova)</entry>
     <entry dev-build="1" type="enh">It's now possible to define the terminator string for "Copy Code Snippet" through the config property "workbench.clipcreate.codeend"</entry>
     <entry dev-build="1" type="enh">Macros and macro groups can now be excluded from the popup window</entry>
+    <entry dev-build="10" type="fix">The menu to select data from referenced/referencing tables in a result set was disabled when switching to the DbExplorer and back to the SQL panel</entry>
     <entry dev-build="9" type="fix">-syncDelete with WbCopy did not work if alternate key columns were specified using -keyColumns</entry>
     <entry dev-build="9" type="fix">Fixed retrieval of stored procedures for DB2 on AS/400 (thanks to Francesco)</entry>
     <entry dev-build="9" type="fix">Fixed detection of update columns for multi-table result sets when the name of the PK columns is not uniuqe in the result set</entry>
