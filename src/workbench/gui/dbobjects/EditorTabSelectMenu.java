@@ -185,8 +185,11 @@ public class EditorTabSelectMenu
 			this.add(item);
 		}
 
-    List<TableIdentifier> tables = DbObjectList.Util.getSelectedTableObjects(objectList);
-    setEnabled(tables.size() > 0);
+    if (objectList != null)
+    {
+      List<TableIdentifier> tables = DbObjectList.Util.getSelectedTableObjects(objectList);
+      setEnabled(tables.size() > 0);
+    }
 	}
 
 	/**

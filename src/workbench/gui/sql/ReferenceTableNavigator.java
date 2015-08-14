@@ -138,6 +138,7 @@ public class ReferenceTableNavigator
 	@Override
 	public void valueChanged(ListSelectionEvent evt)
 	{
+    if (evt.getValueIsAdjusting()) return;
 		boolean selected = this.source.getSelectedRowCount() > 0;
 		selectParentTables.setEnabled(selected);
 		selectChildTables.setEnabled(selected);

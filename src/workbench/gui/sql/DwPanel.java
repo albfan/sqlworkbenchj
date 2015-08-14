@@ -267,6 +267,10 @@ public class DwPanel
 
 	public void initTableNavigation(MainWindow container)
 	{
+    if (this.referenceNavigator != null)
+    {
+      this.referenceNavigator.dispose();
+    }
 		this.referenceNavigator = new ReferenceTableNavigator(this, container);
 	}
 
