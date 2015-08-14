@@ -244,11 +244,13 @@ public class ConnectionMgr
 		}
 		catch (Throwable th)
 		{
-			// some drivers do not support this, so
-			// we just ignore the error :-)
+			// some drivers do not support this, so we just ignore the error
 			LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
 		}
+
 		WbConnection conn = new WbConnection(anId, sql, profile);
+    conn.syncReadOnlyState();
+
 		return conn;
 	}
 
@@ -557,7 +559,7 @@ public class ConnectionMgr
   {
     disconnectAll(false);
   }
-  
+
 	public void disconnectAll(boolean saveCaches)
 	{
 		for (WbConnection con : this.activeConnections.values())

@@ -234,6 +234,7 @@ public class WbConnection
 		{
 			sessionReadOnly = null;
 			fireConnectionStateChanged(PROP_READONLY, null, null);
+      syncReadOnlyState();
 		}
 	}
 
@@ -245,6 +246,7 @@ public class WbConnection
 		if (wasSet)
 		{
 			fireConnectionStateChanged(PROP_READONLY, null, null);
+      syncReadOnlyState();
 		}
 	}
 
@@ -261,8 +263,37 @@ public class WbConnection
 		if (!wasSet || oldValue != flag)
 		{
 			fireConnectionStateChanged(PROP_READONLY, Boolean.toString(oldValue), Boolean.toString(flag));
-		}
+      syncReadOnlyState();
+    }
 	}
+
+  /**
+   * Synchronises the current state of the read only flag with the readOnly property of the SQL connection.
+   *
+   * @see #isSessionReadOnly()
+   * @see #setSessionReadOnly(boolean)
+   * @see Connection#setReadOnly(boolean)
+   * @see DbSettings#syncConnectionReadOnlyState()
+   */
+  public void syncReadOnlyState()
+  {
+    if (!getDbSettings().syncConnectionReadOnlyState()) return;
+
+    try
+    {
+      if (sqlConnection.isReadOnly() == isSessionReadOnly()) return;
+
+      // this property can not be changed while a transaction is running
+      // so we have to end any pending transaction
+      rollbackSilently();
+
+      sqlConnection.setReadOnly(isSessionReadOnly());
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("" ,"Could not change read only flag", th);
+    }
+  }
 
 	public boolean isSessionReadOnly()
 	{
@@ -276,6 +307,7 @@ public class WbConnection
 		if (flag)
 		{
 			sessionReadOnly = Boolean.valueOf(!flag);
+      syncReadOnlyState();
 		}
 	}
 

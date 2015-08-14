@@ -2088,4 +2088,9 @@ public class DbSettings
   {
     return getBoolProperty("procedurereader.use.getfunctions", false);
   }
+
+  public boolean syncConnectionReadOnlyState()
+  {
+    return getBoolProperty("change.connection.readonly.state", true);
+  }
 }
