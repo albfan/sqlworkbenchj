@@ -93,6 +93,7 @@ import workbench.gui.actions.FileExitAction;
 import workbench.gui.actions.FileNewWindowAction;
 import workbench.gui.actions.FileReconnectAction;
 import workbench.gui.actions.FileSaveProfiles;
+import workbench.gui.actions.HelpConnectionInfoAction;
 import workbench.gui.actions.HelpContactAction;
 import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.LoadMacrosAction;
@@ -196,6 +197,7 @@ public class MainWindow
 	private ConnectionProfile currentProfile;
 	protected ConnectionSelector connectionSelector;
 
+  private HelpConnectionInfoAction connectionInfoAction;
 	private ShowDbmsManualAction showDbmsManual;
 	private FileDisconnectAction disconnectAction;
 	private FileReconnectAction reconnectAction;
@@ -1704,6 +1706,7 @@ public class MainWindow
 		}
 		VersionNumber version = conn.getDatabaseVersion();
 		showDbmsManual.setDbms(conn.getDbId(), version);
+    connectionInfoAction.setEnabled(true);
 		showConnectionWarnings(conn, panel);
 		selectCurrentEditor();
 
@@ -2221,6 +2224,7 @@ public class MainWindow
 		this.disconnectAction.setEnabled(false);
 		this.reconnectAction.setEnabled(false);
 		showDbmsManual.setDbms(null, -1, -1);
+    connectionInfoAction.setEnabled(false);
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();
 		this.dbExplorerAction.setEnabled(false);
@@ -2801,7 +2805,14 @@ public class MainWindow
 		{
 			showDbmsManual = new ShowDbmsManualAction();
 		}
+    if (connectionInfoAction == null)
+    {
+      connectionInfoAction = new HelpConnectionInfoAction(this);
+      connectionInfoAction.setEnabled(false);
+    }
 		result.add(showDbmsManual);
+    result.add(connectionInfoAction);
+    result.addSeparator();
 		result.add(new HelpContactAction(this));
 		result.add(WhatsNewAction.getInstance());
 		result.addSeparator();
