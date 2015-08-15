@@ -42,9 +42,8 @@ public class UpdateCheck
 	private static final String TYPE_WB_VERSION = "version_check";
 	private static final String TYPE_JAVA_VERSION = "java_check";
 	public static final boolean DEBUG = Boolean.getBoolean("workbench.debug.versioncheck");
-	
+
 	private WbVersionReader versionReader;
-	private final boolean checkJava8 = false;
 
 	public void startUpdateCheck()
 	{
@@ -69,7 +68,7 @@ public class UpdateCheck
 
 	private void checkJavaVersion()
 	{
-		if (!checkJava8) return;
+		if (!Settings.getInstance().checkJavaVersion()) return;
 		if (ResourceMgr.getBuildNumber().getMajorVersion() == 999) return; // don't check if started from IDE
 
 		VersionNumber minVersion = new VersionNumber(1,8);

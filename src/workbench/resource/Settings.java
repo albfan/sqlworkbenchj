@@ -776,6 +776,11 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Update Check">
+  public boolean checkJavaVersion()
+  {
+    return getBoolProperty("workbench.gui.check.java.version", true);
+  }
+
 	public Date getLastUpdateCheck()
 	{
 		String dt = getProperty("workbench.gui.updatecheck.lastcheck", null);
