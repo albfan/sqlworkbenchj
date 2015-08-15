@@ -68,7 +68,7 @@
   </Program_Info>
   <Program_Descriptions>
     <German>
-      <Keywords>sql query tool analyzer jdbc database viewer frontend java dbms oracle postgres firebirdsql hsql hsqldb sqlserver sqlplus replacement import export convert insert xml etl migrate compare diff</Keywords>
+      <Keywords>sql query tool analyzer jdbc datenbank frontend java dbms oracle postgres firebirdsql sqlplus ersatz import export konvertierung insert xml etl migration vergleich</Keywords>
       <Char_Desc_45>DBMS unabh&#228;ngiges SQL Abfragetool</Char_Desc_45>
       <Char_Desc_80></Char_Desc_80>
       <Char_Desc_250></Char_Desc_250>
@@ -76,7 +76,7 @@
       <Char_Desc_2000></Char_Desc_2000>
     </German>
     <English>
-      <Keywords>sql query tool analyzer jdbc datenbank frontend java dbms oracle postgres firebirdsql hsql hsqldb sqlserver sqlplus ersatz import export konvertierung insert xml etl migration vergleich</Keywords>
+      <Keywords>sql query tool analyzer jdbc database viewer frontend java dbms oracle postgres firebirdsql sqlplus replacement import export convert insert xml etl migrate compare diff</Keywords>
       <Char_Desc_45>DBMS independent SQL query tool</Char_Desc_45>
       <Char_Desc_80></Char_Desc_80>
       <Char_Desc_250></Char_Desc_250>
@@ -109,4 +109,3 @@
     <ASP_Member_Number></ASP_Member_Number>
   </ASP>
 </XML_DIZ_INFO>
-

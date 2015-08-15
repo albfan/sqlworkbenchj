@@ -164,7 +164,10 @@ WHERE id=42;</p>
       <h3>Prerequisites</h3>
       <p>
         SQL Workbench/J needs a <a target="_blank" href="http://www.java.com/en/">Java runtime</a>.<br/>
-        You have to install <b>Java 7</b> or higher before you can run SQL Workbench/J.
+        You have to install Java 7 or higher before you can run SQL Workbench/J. <b>Java</b> 8 is highly recommended.
+      </p>
+      <p>
+        Java 7 has been deprecated by Oracle and is no longer supported. Build 118 is the last build to support Java 7.
       </p>
 
       <h3 style="padding-top:10px">Installation</h3>
@@ -328,15 +331,15 @@ WHERE id=42;</p>
         <content>
         <not-mysql/>
           <p style="margin-top:15px;text-align:center;font-weight:bold;margin-bottom:0px">
-                SQL Workbench/J requires Java <b>7</b> or later.
-            </p>
+              SQL Workbench/J requires Java 7 or later, Java 8 is recommended.
+          </p>
         <h3 style="margin-top:25px">Stable release</h3>
         <p>
           Current stable release: Build <build-number/>, <build-date/> (<a href="history.html">Release History</a>)
         </p>
         <p>
-          The generic package contains the jar file, the manual (HTML and PDF) and the shell scripts for Linux
-          to start the application. It also contains the Windows<SUP>&reg;</SUP> <a href="manual/install.html#launcher-using">launcher</a>
+          The generic package contains the jar file, the manual (HTML and PDF), shell scripts for Linux/Unix
+          systems to start the application as well as a Windows<SUP>&reg;</SUP> <a href="manual/install.html#launcher-using">launcher</a>
           and sample <a href="xslt.html">XSLT</a> scripts.
         </p>
         <p>
@@ -345,7 +348,7 @@ WHERE id=42;</p>
         </p>
         <p>
           The Mac package is suitable to be extracted on the Mac desktop and contains the jar file, a launcher
-          for MacOS, the manual and the sample XSLT scripts. No shell scripts are included in the Mac package (approx. 4MB).
+          for MacOS, the manual and the sample XSLT scripts. No shell scripts are included in the Mac package.
         </p>
 
         <ul>
@@ -376,7 +379,6 @@ WHERE id=42;</p>
             You can subscribe to the <a href="wb_news.xml">RSS Feed</a> to receive information about new releases
         </p>
         <p>If you are having problems unzipping the distribution archive with WinZip, please read <a href="winzip.html">this</a>.</p>
-        <!-- <p><a style="color:red" href="vista.html">A note to Windows Vista users</a>.</p> -->
         <p><a href="macos.html">A note to Mac OS X users</a></p>
         <dev-build-info/>
     </content>
@@ -657,19 +659,6 @@ WHERE id=42;</p>
           <li>Windows&reg;&nbsp;XP built-in ZIP support</li>
           </ul>
         </content>
-  </page>
-
-  <page name="vista" title="Windows Vista" toc="false">
-    <title>Using SQL Workbench/J under Windows Vista</title>
-    <content>
-        <p>With Windows Vista, Microsoft changed the way needed DLLs are searched when an executable
-        is loaded.</p>
-        <p>This affects the launcher for SQL Workbench/J launcher due to the (new?) Microsoft C runtime distribution model</p>
-        <p>If you want to run SQL Workbench/J under Windows Vista, please copy the file <tt>msvcr71.dll</tt>
-        into the directory where <tt>SQLWorkbench.exe</tt> is located.</p>
-        <p>This file can be found under <tt>%SystemRoot%\System32\msvcr71.dll</tt> (usually this is <tt>c:\Windows\System32\msvcr71.dll</tt>).</p>
-        <p style="margin-top:35px">Thanks to Jon for this tip!</p>
-   </content>
   </page>
 
   <page name="build-from-source" title="Building from Source" toc="main">
