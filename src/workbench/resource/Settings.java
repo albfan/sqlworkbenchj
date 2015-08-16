@@ -2385,6 +2385,11 @@ public class Settings
 		return getDelimiter("workbench.export.text.fielddelimiter", "\\t", readable);
 	}
 
+  public boolean copyToClipboardAsHtml()
+  {
+    return getBoolProperty("workbench.copy.clipboard.html", true);
+  }
+  
 	public void setClipboardDelimiter(String delim)
 	{
 		setDelimiter("workbench.import.clipboard.fielddelimiter", delim);

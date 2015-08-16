@@ -139,9 +139,12 @@ public class ClipBoardCopier
 				count = rows == null ? 0 : rows.length;
 			}
 
+      boolean includeHtml = Settings.getInstance().copyToClipboardAsHtml();
 			StringWriter out = new StringWriter(count * 250);
 			if (doTextFormat)
 			{
+        // never support HTML for "formatted text"
+        includeHtml = false;
 				DataStorePrinter printer = new DataStorePrinter(this.data);
 				printer.setFormatColumns(true);
 				printer.setPrintRowCount(false);
@@ -175,7 +178,8 @@ public class ClipBoardCopier
 
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this.client);
-			StringSelection sel = new StringSelection(out.toString());
+//      StringSelection sel = new StringSelection(out.toString());
+      StringSelectionAdapter sel = new StringSelectionAdapter(out.toString(), includeHtml);
 			clp.setContents(sel, sel);
 		}
 		catch (Throwable ex)
