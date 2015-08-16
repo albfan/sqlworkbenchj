@@ -156,12 +156,20 @@ public class PgPassReader
 		return result;
 	}
 
+  public static boolean isPgUrl(String url)
+  {
+    if (url == null) return false;
+    return url.startsWith("jdbc:postgresql:") || url.startsWith("jdbc:pgsql:");
+  }
+
 	private void parseUrl(String url)
 	{
-		String prefix = "jdbc:postgresql:";
-		if (!url.startsWith(prefix)) return;
+		if (!isPgUrl(url)) return;
 
-		url = url.substring(prefix.length());
+    // look at the url after the prefix
+    int pos = url.indexOf(':', 5);
+
+    url = url.substring(pos+1);
 
 		if (!url.startsWith("//"))
 		{

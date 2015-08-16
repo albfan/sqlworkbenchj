@@ -31,13 +31,13 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.postgres.PgPassReader;
 
 import workbench.gui.profiles.ProfileKey;
-import workbench.log.LogMgr;
 
 import workbench.sql.DelimiterDefinition;
 
@@ -773,7 +773,7 @@ public class ConnectionProfile
 		if (newUrl != null) newUrl = newUrl.trim();
 		if (StringUtil.stringsAreNotEqual(newUrl, url)) changed = true;
 		url = newUrl;
-		usePgPass = (url != null && url.startsWith("jdbc:postgresql") && Settings.getInstance().usePgPassFile());
+    usePgPass = PgPassReader.isPgUrl(url) && Settings.getInstance().usePgPassFile();
 	}
 
 	public String getDriverName()
