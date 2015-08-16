@@ -31,17 +31,19 @@ then
   JAVACMD="$JAVA_HOME/bin/java"
 fi
 
-# When running in batch mode on a system with no X11 installed, the option
-#   -Djava.awt.headless=true
-# might be needed for some combinations of OS and JDK
-
 cp=$scriptpath/sqlworkbench.jar
 cp=$cp:$scriptpath/dom4j-1.6.1.jar
 cp=$cp:$scriptpath/poi-ooxml-schemas.jar
 cp=$cp:$scriptpath/poi-ooxml.jar
 cp=$cp:$scriptpath/poi.jar
 cp=$cp:$scriptpath/stax-api-1.0.1.jar
-cp=$cp:$scriptpath/xmlbeans-2.3.0.jar
+cp=$cp:$scriptpath/resolver.jar
+cp=$cp:$scriptpath/serializer.jar
+cp=$cp:$scriptpath/simple-odf.jar
 cp=$cp:$scriptpath/ext/*
+
+# When running in batch mode on a system with no X11 installed, the option
+#   -Djava.awt.headless=true
+# might be needed for some combinations of OS and JDK
 
 exec $JAVACMD -Dvisualvm.display.name=SQLWorkbench -Xmx512m -cp $cp workbench.WbStarter $@

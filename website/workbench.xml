@@ -423,6 +423,14 @@ WHERE id=42;</p>
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 117<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build117.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build117-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/Workbench-Build117-MacJava7.tgz">Mac Package for Java7</a></li>
+            <li><a href="archive/WorkbenchSrc-Build117.zip">Source Code</a></li>
+          </ul>
+        </li>
         <li>Build 116<br/>
           <ul>
             <li><a href="archive/Workbench-Build116.zip">All Platforms</a></li>
