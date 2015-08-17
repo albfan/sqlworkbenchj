@@ -38,8 +38,6 @@ import workbench.db.DependencyNode;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.ProcedureDefinition;
-import workbench.db.ProcedureReader;
-import workbench.db.ReaderFactory;
 import workbench.db.SchemaIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
@@ -125,11 +123,13 @@ public class TreeLoader
   public static final String TYPE_FUNCTION = "function";
   public static final String TYPE_PROCEDURES_NODE = "procedures";
   public static final String TYPE_PROC_PARAMETER = "parameter";
+  public static final String TYPE_PACKAGE_NODE = "package";
 
   private WbConnection connection;
   private DbObjectTreeModel model;
   private ObjectTreeNode root;
   private Collection<String> availableTypes;
+  private ProcedureTreeLoader procLoader;
   private final Set<String> typesToShow = CollectionUtil.caseInsensitiveSet();
 
   public TreeLoader()
@@ -149,6 +149,14 @@ public class TreeLoader
     if (DbExplorerSettings.getShowTriggerPanel())
     {
       availableTypes.add("TRIGGER");
+    }
+    if (connection.getMetadata().isOracle())
+    {
+      procLoader = new OracleProcedureTreeLoader();
+    }
+    else
+    {
+      procLoader = new JdbcProcedureTreeLoader();
     }
   }
 
@@ -576,26 +584,7 @@ public class TreeLoader
   public void loadProcedures(ObjectTreeNode procNode)
     throws SQLException
   {
-    if (procNode == null) return;
-    ProcedureReader procReader = ReaderFactory.getProcedureReader(connection.getMetadata());
-    ObjectTreeNode schemaNode = procNode.getParent();
-    ObjectTreeNode catalogNode = schemaNode.getParent();
-    String catalogName = null;
-    if (catalogNode != null && catalogNode.getType().equals(TYPE_CATALOG))
-    {
-      catalogName = catalogNode.getName();
-    }
-    String schemaName = schemaNode.getName();
-    List<ProcedureDefinition> procedures = procReader.getProcedureList(catalogName, schemaName, null);
-    for (ProcedureDefinition proc : procedures)
-    {
-      ObjectTreeNode node = new ObjectTreeNode(proc);
-      node.setAllowsChildren(true); // can have parameters
-      node.setChildrenLoaded(false);
-      procNode.add(node);
-    }
-    model.nodeStructureChanged(procNode);
-    procNode.setChildrenLoaded(true);
+    procLoader.loadProcedures(procNode, model, connection);
   }
 
   public void loadProcedureParameters(ObjectTreeNode node)

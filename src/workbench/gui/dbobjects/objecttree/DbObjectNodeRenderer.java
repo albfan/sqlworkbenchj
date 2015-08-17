@@ -69,6 +69,7 @@ public class DbObjectNodeRenderer
     iconMap.put("procedure", "sproc");
     iconMap.put("index", "index");
     iconMap.put("type", "type");
+    iconMap.put(TreeLoader.TYPE_PACKAGE_NODE, "package");
 
     iconMapOpen.put(TreeLoader.TYPE_SCHEMA, "folder-open");
     iconMapOpen.put(TreeLoader.TYPE_CATALOG, "folder-open-db");

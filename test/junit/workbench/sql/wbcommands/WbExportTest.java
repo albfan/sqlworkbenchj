@@ -260,7 +260,7 @@ public class WbExportTest
     assertEquals(3, lines.size());
     for (String line : lines)
     {
-      String[] elements = line.split("|");
+      String[] elements = line.split("\\|");
       switch (elements[0])
       {
         case "1":
