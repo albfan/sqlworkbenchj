@@ -192,8 +192,8 @@
            debuglevel="source,lines"
            destdir="${build}"
            srcdir="${src}"
-           target="1.7"
-           source="1.7"
+           target="1.8"
+           source="1.8"
            includeantruntime="false"
            encoding="ISO-8859-1">
       <compilerarg value="-Xlint:none"/>
