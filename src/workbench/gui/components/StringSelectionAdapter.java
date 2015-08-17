@@ -30,6 +30,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.*;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 
 /**
@@ -64,11 +65,13 @@ public class StringSelectionAdapter
   {
     try
     {
-      String css =
+      String defaultCss =
         "table, th, td { border: 1px solid black; border-collapse: collapse; } " +
         "th, td { padding: 5px; text-align: left; } " +
         "table tr:nth-child(even) { background-color: #eee; } table tr:nth-child(odd) { background-color:#fff; } " +
         "table th { background-color: black; color: white; }";
+
+      String css = Settings.getInstance().getCssForClipboardHtml(defaultCss);
       String preHtml = "<html><head><style>" + css + "</style></head><body><table>";
       String postHtml = "</table></body></html>";
       String trOpen = "<tr>";
