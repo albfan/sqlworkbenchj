@@ -247,7 +247,8 @@ public class WbExportTest
       "values \n" +
       "(1, 1.12345678901234), \n" +
       "(2, 12345678.1234567), \n" +
-      "(3, 12345678901234.1)";
+      "(3, 12345678901234.1); \n" +
+      "commit;";
 
     TestUtil.executeScript(connection, sql);
 
@@ -267,10 +268,10 @@ public class WbExportTest
           assertEquals("1,12345678901234", elements[1]);
           break;
         case "2":
-          assertEquals("12345678,1234567", elements[1]);
+          assertEquals("12345678,12345670000000", elements[1]);
           break;
         case "3":
-          assertEquals("12345678901234,1", elements[1]);
+          assertEquals("12345678901234,10000000000000", elements[1]);
           break;
       }
     }
