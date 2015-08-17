@@ -712,14 +712,7 @@ public class DbTreePanel
     if (frame instanceof MainWindow)
     {
       final MainWindow mainWin = (MainWindow) frame;
-      EventQueue.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          mainWin.closeDbTree();
-        }
-      });
+      EventQueue.invokeLater(mainWin::closeDbTree);
     }
   }
 
@@ -802,14 +795,7 @@ public class DbTreePanel
 
     if (DbTreeSettings.getFilterWhileTyping())
     {
-      EventQueue.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          applyQuickFilter();
-        }
-      });
+      EventQueue.invokeLater(this::applyQuickFilter);
     }
 	}
 

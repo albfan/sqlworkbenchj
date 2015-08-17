@@ -774,7 +774,7 @@ public class DataExporter
 
   public void setXsltParameters(Map<String, String> params)
   {
-    this.xsltParameters = params == null ? new HashMap<String, String>(0) : params;
+    this.xsltParameters = params == null ? new HashMap<>(0) : params;
   }
 
   public Map<String, String> getXsltParameters()
