@@ -150,14 +150,7 @@ public class TreeLoader
     {
       availableTypes.add("TRIGGER");
     }
-    if (connection.getMetadata().isOracle() || connection.getMetadata().isFirebird())
-    {
-      procLoader = new ProcsAndPackageTreeLoader();
-    }
-    else
-    {
-      procLoader = new JdbcProcedureTreeLoader();
-    }
+    procLoader = new ProcedureTreeLoader();
   }
 
   private void setRootName(String name)
@@ -323,7 +316,12 @@ public class TreeLoader
 
     if (typesToShow.isEmpty() || typesToShow.contains("PROCEDURE"))
     {
-      ObjectTreeNode node = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerProcs"), TYPE_PROCEDURES_NODE);
+      String label = ResourceMgr.getString("TxtDbExplorerProcs");
+      if (connection.getMetadata().isPostgres())
+      {
+        label = ResourceMgr.getString("TxtDbExplorerFuncs");
+      }
+      ObjectTreeNode node = new ObjectTreeNode(label, TYPE_PROCEDURES_NODE);
       node.setAllowsChildren(true);
       node.setChildrenLoaded(false);
       parentNode.add(node);

@@ -483,7 +483,7 @@ public class ProcedureDefinition
 	 */
 	public String getPackageName()
 	{
-		if (isPackageProcedure()) return catalog;
+		if (isPackageProcedure() || isOracleObjectType()) return catalog;
 		return null;
 	}
 
