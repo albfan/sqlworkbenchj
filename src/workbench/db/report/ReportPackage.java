@@ -23,9 +23,9 @@
 package workbench.db.report;
 
 import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
 import workbench.db.ReaderFactory;
 import workbench.db.WbConnection;
-import workbench.db.oracle.OracleProcedureReader;
 
 /**
  * A class to represent an Oracle package for SchemaDiff and SchemaReport
@@ -90,11 +90,8 @@ public class ReportPackage
 
 	public void readSource(WbConnection conn)
 	{
-		if (conn.getMetadata().isOracle())
-		{
-			OracleProcedureReader reader = (OracleProcedureReader)ReaderFactory.getProcedureReader(conn.getMetadata());
-			source = reader.getPackageSource(owner, name);
-		}
+    ProcedureReader reader = ReaderFactory.getProcedureReader(conn.getMetadata());
+    source = reader.getPackageSource(null, owner, name);
 	}
 
 	public void setIndent(StringBuilder ind)

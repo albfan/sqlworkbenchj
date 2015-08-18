@@ -124,7 +124,8 @@ public class OracleProcedureReader
 		return count > 0;
 	}
 
-	public CharSequence getPackageSource(String owner, String packageName)
+  @Override
+	public CharSequence getPackageSource(String catalog, String owner, String packageName)
 	{
 		final String sql =
       "-- SQL Workbench \n" +
@@ -505,7 +506,7 @@ public class OracleProcedureReader
 	{
 		if (def.getPackageName() != null)
 		{
-			CharSequence source = getPackageSource(def.getSchema(), def.getPackageName());
+			CharSequence source = getPackageSource(null, def.getSchema(), def.getPackageName());
 			if (StringUtil.isBlank(source))
 			{
 				// Fallback if the ProcedureDefinition was not initialized correctly.

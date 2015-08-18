@@ -32,7 +32,6 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 import workbench.db.oracle.OraclePackageParser;
-import workbench.db.oracle.OracleProcedureReader;
 
 import workbench.storage.DataStore;
 
@@ -104,18 +103,15 @@ public class WbProcSource
 		}
 		else
 		{
-			if (reader instanceof OracleProcedureReader)
-			{
-				// maybe this is just the package name
-				String user = currentConnection.getMetadata().adjustObjectnameCase(currentConnection.getCurrentUser());
-				CharSequence source = ((OracleProcedureReader)reader).getPackageSource(user, object.getObjectName());
-				if (source != null)
-				{
-					result.addMessage(source);
-					result.addMessageNewLine();
-					return result;
-				}
-			}
+      // maybe this is just the package name
+      String user = currentConnection.getMetadata().adjustObjectnameCase(currentConnection.getCurrentUser());
+      CharSequence source = reader.getPackageSource(null, user, object.getObjectName());
+      if (source != null)
+      {
+        result.addMessage(source);
+        result.addMessageNewLine();
+        return result;
+      }
 			result.addMessage(ResourceMgr.getFormattedString("ErrProcNotFound", args));
 			result.setFailure();
 		}

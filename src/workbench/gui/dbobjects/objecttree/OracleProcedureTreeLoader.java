@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import workbench.db.PackageDefinition;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.ReaderFactory;
@@ -34,7 +35,9 @@ public class OracleProcedureTreeLoader
     Map<String, List<ProcedureDefinition>> procs = getPackageProcedures(procedures);
     for (Map.Entry<String, List<ProcedureDefinition>> entry : procs.entrySet())
     {
-      ObjectTreeNode pkgNode = new ObjectTreeNode(entry.getKey(), TreeLoader.TYPE_PACKAGE_NODE);
+      PackageDefinition pkg = new PackageDefinition(schemaName, entry.getKey());
+      ObjectTreeNode pkgNode = new ObjectTreeNode(pkg);
+      pkgNode.setNodeType(TreeLoader.TYPE_PACKAGE_NODE);
       pkgNode.setAllowsChildren(true);
       for (ProcedureDefinition proc : entry.getValue())
       {

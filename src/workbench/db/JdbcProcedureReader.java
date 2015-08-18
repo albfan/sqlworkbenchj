@@ -29,7 +29,6 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -808,5 +807,10 @@ public class JdbcProcedureReader
     return false;
   }
 
+  @Override
+  public CharSequence getPackageSource(String catalog, String schema, String packageName)
+  {
+    return null;
+  }
 
 }

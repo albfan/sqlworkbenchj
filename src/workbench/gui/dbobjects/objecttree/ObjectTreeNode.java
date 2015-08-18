@@ -74,6 +74,11 @@ public class ObjectTreeNode
     nodeName = name;
   }
 
+  public void setNodeType(String type)
+  {
+    this.nodeType = type;
+  }
+
   public void setNameAndType(String name, String type)
   {
     nodeType = type;

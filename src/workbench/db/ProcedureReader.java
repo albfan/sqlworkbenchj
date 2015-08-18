@@ -82,5 +82,7 @@ public interface ProcedureReader
 
   boolean isRecreateStatement(CharSequence sql);
 
+  CharSequence getPackageSource(String catalog, String schema, String packageName);
+
   void clearCache();
 }
