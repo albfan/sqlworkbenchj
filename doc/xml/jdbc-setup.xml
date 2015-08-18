@@ -34,13 +34,16 @@
 			will be prompted to select one. In that case, please refer to the manual of your driver or database to choose the correct one.
 		</para>
 
-		<caution>
-      <para>
-        If you enter the class name of the driver manually, remember that it's case-sensitive:
-        <literal>org.postgresql.driver</literal> is different to <literal>org.postgresql.Driver</literal>
-        (note the capital D for Driver)
-      </para>
-    </caution>
+		<note><para>
+			&wb-productname; is <emphasis role="bold">not</emphasis> using the system's <literal>CLASSPATH</literal> definition
+      (i.e. the environment variable named <literal>CLASSPATH</literal>) to load the driver classes.
+      Changing the <literal>CLASSPATH</literal> environment variable to include your driver's library will have no effect.
+		</para></note>
+
+    <para>
+      If you enter the class name of the driver manually, remember that it's case-sensitive:
+      <literal>org.postgresql.driver</literal> is something different than <literal>org.postgresql.Driver</literal>
+    </para>
 
 		<para>
       Files that are not found are displayed in red and italics.
@@ -65,20 +68,6 @@
       (e.g: <literal>"c:\etc\TheDriver\jdbcDriver.jar;c:\etc\TheDriver"</literal>).
 		</para>
 
-		<note><para>
-			&wb-productname; is <emphasis role="bold">not</emphasis> using
-			the system CLASSPATH definition (i.e. environment variable) to load the
-			driver classes. Changing the CLASSPATH environment variable to include
-			your driver's library will not work. Using the <literal>-cp</literal> switch
-			to add a driver to the classpath when starting the application through a batch file
-			will also not work.
-		</para></note>
-
-		<para>
-			You do not need to specify a library for the JDBC-ODBC bridge, as
-			the necessary drivers are already part of the Java runtime.
-		</para>
-
 		<para>
       <indexterm><primary>JDBC driver</primary><secondary>sample URL</secondary></indexterm>
       You can assign a sample URL to each driver, which will be put into
@@ -93,39 +82,11 @@
 			actual value.
 		</para>
 
-	</section>
-
-  <section id="odbc-connection">
-    <title>Connecting through ODBC</title>
-    <indexterm><primary>ODBC</primary><secondary>driver</secondary></indexterm>
-    <indexterm><primary>ODBC</primary><secondary>datasource</secondary></indexterm>
-    <indexterm><primary>ODBC</primary><secondary>jdbc url</secondary></indexterm>
-
-		<caution>
-      <para>
-        The JDBC/ODBC bridge is very unreliable, slow and considered a workaround. It also <emphasis roloe="bold">no longer available in Java 8</emphasis>.
-        A real JDBC driver should always be preferred over using the JDBC/ODBC bridge.
-      </para>
+    <caution>
+    <para id="odbc-bridge">
+      The JDBC/ODBC bridge is no longer available in <emphasis role="bold">Java 8</emphasis> and therefor it is not possible to connect through an ODBC data source when using &wb-productname;.
+    </para>
     </caution>
-
-    <para>
-      To connect to a database using an ODBC driver, you must first setup an ODBC datasource
-      with the tools of your operating system (e.g. the control panel in Windows&reg;)
-    </para>
-    <para>
-      Once you have set up the ODBC datasource, select the ODBC Bridge as the driver
-      in the connection dialog. The JDBC URL for the datasource connection then is
-      <literal>jdbc:odbc:name_of_your_datasource</literal>.
-    </para>
-    <para>
-      If you named your ODBC datasource <literal>ProductDB</literal>, then the JDBC url for &wb-productname; would be
-      <literal>jdbc:odbc:ProductDB</literal>
-    </para>
-    <para>
-      The ODBC driver's architecture <emphasis role="bold">must</emphasis> match the architecture of the Java version you are
-      using. If you are using a 64bit Java runtime, the ODBC drivers must be 64bit as well. If you are using
-      a 32bit Java runtime, the ODBC driver must be 32bit as well.
-    </para>
 
   </section>
 
@@ -173,8 +134,9 @@
 					<row>
 						<entry>PostgreSQL</entry>
 						<entry><literal>org.postgresql.Driver</literal></entry>
-						<entry> <simplelist columns="1">
-							<member><literal>postgresql-9.2-1002.jdbc4.jar</literal> (exact name depends on PostgreSQL version)</member>
+						<entry>
+              <simplelist columns="1">
+							<member><literal>postgresql-9.4-1201.jdbc4.jar</literal> (exact name depends on PostgreSQL version)</member>
 							<member><ulink url="http://jdbc.postgresql.org"/></member>
 						</simplelist>
 						</entry>
@@ -196,9 +158,7 @@
 						<entry><literal>oracle.jdbc.OracleDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-                <member>
-                  <literal>ojdbc6.jar</literal>, <literal>ojdbc7.jar</literal>
-                </member>
+                <member><literal>ojdbc7.jar</literal></member>
 								<member><ulink url="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html"/></member>
 							</simplelist>
 						</entry>
@@ -282,17 +242,6 @@
 					</row>
 
 					<row>
-						<entry>MySQL</entry>
-						<entry><literal>com.mysql.jdbc.Driver</literal></entry>
-						<entry>
-							<simplelist columns="1">
-								<member><literal>mysql-connector-java-5.1.5-bin.jar</literal> (exact name depends on version)</member>
-								<member><ulink url="http://www.mysql.com/downloads/connector/j/"/></member>
-							</simplelist>
-						</entry>
-					</row>
-
-					<row>
 						<entry>SQL Server (Microsoft driver)</entry>
 						<entry><literal>com.microsoft.sqlserver.jdbc.SQLServerDriver</literal></entry>
 						<entry>
@@ -314,16 +263,17 @@
 						</entry>
 					</row>
 
-          <!--
 					<row>
-						<entry>ODBC Bridge (not recommended!)</entry>
-						<entry><literal>sun.jdbc.odbc.JdbcOdbcDriver</literal></entry>
-						<entry><simplelist columns="1">
-							<member>Included in the JDK</member>
-						</simplelist>
+						<entry>MySQL</entry>
+						<entry><literal>com.mysql.jdbc.Driver</literal></entry>
+						<entry>
+							<simplelist columns="1">
+								<member><literal>mysql-connector-java-5.1.36-bin.jar</literal> (exact name depends on the driver version)</member>
+								<member><ulink url="http://www.mysql.com/downloads/connector/j/"/></member>
+							</simplelist>
 						</entry>
 					</row>
-          -->
+
 				</tbody>
 			</tgroup>
 		</informaltable>
