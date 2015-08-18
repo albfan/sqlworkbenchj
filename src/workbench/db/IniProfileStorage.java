@@ -293,10 +293,10 @@ public class IniProfileStorage
     props.setProperty(PROP_PREFIX + key + PROP_USERNAME, profile.getUsername());
     props.setProperty(PROP_PREFIX + key + PROP_AUTOCOMMMIT, profile.getAutocommit());
 
+    props.setProperty(PROP_PREFIX + key + PROP_STORE_PWD, profile.getStorePassword());
     if (profile.getStorePassword())
     {
       props.setProperty(PROP_PREFIX + key + PROP_PWD, profile.getPassword());
-      props.setProperty(PROP_PREFIX + key + PROP_STORE_PWD, profile.getStorePassword());
     }
 
     props.setProperty(PROP_PREFIX + key + PROP_ICON, profile.getIcon());
@@ -376,7 +376,7 @@ public class IniProfileStorage
 
   private String toXML(Properties props)
   {
-    if (props == null || props.size() == 0) return null;
+    if (props == null || props.isEmpty()) return null;
 
     try
     {
