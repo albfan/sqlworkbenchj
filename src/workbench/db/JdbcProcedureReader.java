@@ -118,8 +118,7 @@ public class JdbcProcedureReader
         fillProcedureListDataStore(rs, ds, useSpecificName);
 
         // sort the complete combined result according to the JDBC API
-        SortDefinition sort = new SortDefinition(new int[] {0,1,2}, new boolean[] {true, true, true});
-        ds.sort(sort);
+        ds.sort(getProcedureListSort());
       }
 
 			this.connection.releaseSavepoint(sp);
@@ -492,11 +491,6 @@ public class JdbcProcedureReader
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, comments);
 	}
 
-	public boolean needsHeader(CharSequence procedureBody)
-	{
-		return true;
-	}
-
 	@Override
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
@@ -517,7 +511,7 @@ public class JdbcProcedureReader
 		CharSequence body = retrieveProcedureSource(def);
 		StringBuilder header = getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType());
 
-		if (needsHeader(body))
+		if (header != null && header.length() > 0)
 		{
 			source.append(header);
 		}

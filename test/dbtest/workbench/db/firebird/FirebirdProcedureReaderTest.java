@@ -128,7 +128,7 @@ public class FirebirdProcedureReaderTest
 
 		String sql = proc.getSource(con).toString();
 //		System.out.println(sql);
-		assertTrue(sql.startsWith("CREATE PROCEDURE AAA_ANSWER (A INTEGER)"));
+		assertTrue(sql.startsWith("CREATE OR ALTER PROCEDURE AAA_ANSWER (A INTEGER)"));
 		assertTrue(sql.contains("THE_ANSWER INTEGER"));
 		assertTrue(sql.contains("the_answer = 42;"));
   }
@@ -160,7 +160,7 @@ public class FirebirdProcedureReaderTest
 		String sql = proc.getSource(con).toString();
 //    System.out.println(sql);
 		assertTrue(sql.startsWith(
-      "CREATE PROCEDURE BBB_MULTIPLE (X INTEGER, Y INTEGER)\n" +
+      "CREATE OR ALTER PROCEDURE BBB_MULTIPLE (X INTEGER, Y INTEGER)\n" +
       "  RETURNS (A INTEGER, B INTEGER)"));
 	}
 }

@@ -361,7 +361,7 @@ public class ObjectSourceSearcher
 		if (def instanceof ProcedureDefinition)
 		{
 			ProcedureDefinition proc = (ProcedureDefinition)def;
-			if (proc.isOraclePackage())
+			if (proc.isPackageProcedure())
 			{
 				return proc.getSchema() + "." + proc.getPackageName();
 			}

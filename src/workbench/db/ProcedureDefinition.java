@@ -71,7 +71,7 @@ public class ProcedureDefinition
 	 */
 	private int resultType;
 
-	private OracleType oracleType;
+	private ProcType procType;
 	private String oracleOverloadIndex;
 
 	private CharSequence source;
@@ -125,11 +125,11 @@ public class ProcedureDefinition
 		{
 			if ("OBJECT TYPE".equals(remarks))
 			{
-				def.oracleType = OracleType.objectType;
+				def.procType = ProcType.objectType;
 			}
 			else
 			{
-				def.oracleType = OracleType.packageType;
+				def.procType = ProcType.packageType;
 			}
 		}
 		return def;
@@ -281,7 +281,7 @@ public class ProcedureDefinition
 	public String getDropStatement(WbConnection con, boolean cascade)
 	{
 		DbMetadata meta = con.getMetadata();
-		if (isOraclePackage())
+		if (isPackageProcedure())
 		{
 			return "DROP PACKAGE "  + meta.quoteObjectname(schema) + "." + meta.quoteObjectname(catalog);
 		}
@@ -309,7 +309,7 @@ public class ProcedureDefinition
 
 	public String getObjectNameForDrop(WbConnection con, boolean needParameters, boolean includeOutParameters, boolean useSpecificName)
 	{
-		if (oracleType != null)
+		if (procType != null)
 		{
 			return catalog;
 		}
@@ -458,23 +458,32 @@ public class ProcedureDefinition
 		return this.source;
 	}
 
-	public boolean isOraclePackage()
+  public void setPackageName(String packageName)
+  {
+    if (StringUtil.isNonEmpty(packageName))
+    {
+      procType = ProcType.packageType;
+      catalog = packageName;
+    }
+  }
+
+	public boolean isPackageProcedure()
 	{
-		return oracleType == OracleType.packageType;
+		return procType == ProcType.packageType;
 	}
 
 	public boolean isOracleObjectType()
 	{
-		return oracleType == OracleType.objectType;
+		return procType == ProcType.objectType;
 	}
 
 	/**
 	 * Returns the package or object type name of this definition
-	 * This will return null if isOraclePackage() == false or isOracleObjectType() == false
+ This will return null if isPackageProcedure() == false or isOracleObjectType() == false
 	 */
 	public String getPackageName()
 	{
-		if (oracleType != null) return catalog;
+		if (isPackageProcedure()) return catalog;
 		return null;
 	}
 
@@ -507,7 +516,7 @@ public class ProcedureDefinition
 		{
 			return this.dbmsProcType;
 		}
-		if (this.isOraclePackage())
+		if (this.isPackageProcedure())
 		{
 			return "PACKAGE";
 		}
@@ -526,7 +535,7 @@ public class ProcedureDefinition
 	@Override
 	public String toString()
 	{
-		String name = oracleType != null ? catalog + "." + procName : procName;
+		String name = procType != null ? catalog + "." + procName : procName;
 		if (CollectionUtil.isNonEmpty(parameters))
 		{
 			return name + "( " + StringUtil.listToString(getParameterNames(), ", ", false) + " )";
@@ -590,7 +599,7 @@ public class ProcedureDefinition
 
 		call.append(c.formatVerb(WbCall.VERB));
 		call.append(' ');
-		call.append(oracleType != null ? catalog + "." + procName : procName);
+		call.append(procType != null ? catalog + "." + procName : procName);
 		call.append("(");
 
 		int numParams = 0;
@@ -644,7 +653,7 @@ public class ProcedureDefinition
 		}
 
 		StringBuilder call = new StringBuilder(150);
-		call.append(oracleType != null ? catalog + "." + procName : procName);
+		call.append(procType != null ? catalog + "." + procName : procName);
 		call.append("(");
 
 		int rows = params.getRowCount();
@@ -741,7 +750,7 @@ public class ProcedureDefinition
 		return false;
 	}
 
-	private static enum OracleType
+	private static enum ProcType
 		implements Serializable
 	{
 		packageType,

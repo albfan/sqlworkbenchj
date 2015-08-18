@@ -487,7 +487,7 @@ public class SchemaReporter
 				// Object types are reported with the "normal" objects
 				if (def.isOracleObjectType()) continue;
 
-				if (def.isOraclePackage())
+				if (def.isPackageProcedure())
 				{
 					// Make sure Oracle packages are only reported once
 					// getProcedureList() will return a procedure definition for each procedure/function of a package

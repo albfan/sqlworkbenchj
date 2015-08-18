@@ -47,7 +47,7 @@ public class ReportPackage
 
 	public ReportPackage(ProcedureDefinition proc)
 	{
-		if (proc.isOraclePackage())
+		if (proc.isPackageProcedure())
 		{
 			this.owner = proc.getSchema();
 			this.name = proc.getPackageName();

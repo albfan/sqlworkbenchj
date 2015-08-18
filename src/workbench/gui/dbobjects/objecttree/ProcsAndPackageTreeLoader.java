@@ -17,8 +17,14 @@ import workbench.db.ProcedureReader;
 import workbench.db.ReaderFactory;
 import workbench.db.WbConnection;
 
-
-public class OracleProcedureTreeLoader
+/**
+ * A ProcedureTreeLoader that can handle regular procedures and packages.
+ *
+ * Used for Oracle and Firebird 3.0
+ * 
+ * @author Thomas Kellerer
+ */
+public class ProcsAndPackageTreeLoader
   implements ProcedureTreeLoader
 {
 
@@ -68,7 +74,7 @@ public class OracleProcedureTreeLoader
 
     for (ProcedureDefinition proc : procedures)
     {
-      if (!proc.isOraclePackage() && !proc.isOracleObjectType())
+      if (!proc.isPackageProcedure() && !proc.isOracleObjectType())
       {
         ObjectTreeNode node = new ObjectTreeNode(proc);
         node.setAllowsChildren(true); // can have parameters
@@ -104,7 +110,7 @@ public class OracleProcedureTreeLoader
      Map<String, List<ProcedureDefinition>> packages = new TreeMap<>();
      for (ProcedureDefinition def : allProcs)
      {
-       if (def.isOraclePackage())
+       if (def.isPackageProcedure())
        {
          List<ProcedureDefinition> procList = packages.get(def.getPackageName());
          if (procList == null)

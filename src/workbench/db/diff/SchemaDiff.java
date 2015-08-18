@@ -808,7 +808,7 @@ public class SchemaDiff
 				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadProcInfo", refProc.getProcedureName()), -1, -1);
 			}
 
-			if (refProc.isOraclePackage())
+			if (refProc.isPackageProcedure())
 			{
 				// Handle packages differently than procedures to avoid
 				// comparing them multiple times for each procedure or function
@@ -859,7 +859,7 @@ public class SchemaDiff
 		for (ProcedureDefinition tProc : targetProcs)
 		{
 			if (tProc.isOracleObjectType()) continue;
-			if (tProc.isOraclePackage()) continue;
+			if (tProc.isPackageProcedure()) continue;
 
 			if (this.cancel)
 			{
@@ -879,7 +879,7 @@ public class SchemaDiff
 			Set<ReportPackage> deleted = new HashSet<>();
 			for (ProcedureDefinition tProc : targetProcs)
 			{
-				if (!tProc.isOraclePackage()) continue;
+				if (!tProc.isPackageProcedure()) continue;
 
 				if (this.cancel)
 				{

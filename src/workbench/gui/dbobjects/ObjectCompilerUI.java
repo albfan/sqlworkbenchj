@@ -94,7 +94,7 @@ public class ObjectCompilerUI
 					appendLog("\n");
 				}
 
-				if (o instanceof ProcedureDefinition && ((ProcedureDefinition)o).isOraclePackage())
+				if (o instanceof ProcedureDefinition && ((ProcedureDefinition)o).isPackageProcedure())
 				{
 					appendLog(msg + " " + o.getCatalog() + "... ");
 				}

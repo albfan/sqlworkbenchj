@@ -255,26 +255,6 @@ from sys.functions fct
    </object>
   </void>
 
-
-  <void method="put">
-   <string>$dbid:firebird-3</string>
-   <object class="workbench.db.GetMetaDataSql">
-    <void property="baseSql">
-     <string>
-select coalesce(p.rdb$procedure_source, 'CREATE PACKAGE BODY '|| pkg.rdb$package_name ||ASCII_CHAR(10)||pkg.rdb$package_body_source)
-from rdb$procedures p
-  left join rdb$packages pkg on p.rdb$package_name = p.rdb$package_name
-     </string>
-    </void>
-    <void property="objectNameField">
-     <string>RDB$PROCEDURE_NAME</string>
-    </void>
-    <void property="schemaField">
-     <string>RDB$OWNER_NAME</string>
-    </void>
-   </object>
-  </void>
-
   <void method="put">
    <string>$dbid:firebird</string>
    <object class="workbench.db.GetMetaDataSql">

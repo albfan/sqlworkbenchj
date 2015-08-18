@@ -80,7 +80,7 @@ public class ObjectResultListDataStore
 			if (object instanceof ProcedureDefinition)
 			{
 				ProcedureDefinition def = (ProcedureDefinition)object;
-				if (def.isOraclePackage())
+				if (def.isPackageProcedure())
 				{
 					name = def.getPackageName();
 					type = "PACKAGE";

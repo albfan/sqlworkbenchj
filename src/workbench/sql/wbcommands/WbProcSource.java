@@ -78,7 +78,7 @@ public class WbProcSource
 		if (def != null)
 		{
 			CharSequence source = def.getSource(currentConnection);
-			if (def.isOraclePackage())
+			if (def.isPackageProcedure())
 			{
 				DataStore cols = reader.getProcedureColumns(def);
 				CharSequence procSrc = OraclePackageParser.getProcedureSource(source, def, getParameterNames(cols));

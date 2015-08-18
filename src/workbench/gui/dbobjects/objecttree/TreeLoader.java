@@ -150,9 +150,9 @@ public class TreeLoader
     {
       availableTypes.add("TRIGGER");
     }
-    if (connection.getMetadata().isOracle())
+    if (connection.getMetadata().isOracle() || connection.getMetadata().isFirebird())
     {
-      procLoader = new OracleProcedureTreeLoader();
+      procLoader = new ProcsAndPackageTreeLoader();
     }
     else
     {
@@ -855,6 +855,10 @@ public class TreeLoader
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
+      }
+      else if (TYPE_PROCEDURES_NODE.equals(type))
+      {
+        loadProcedures(node);
       }
       else if (node.getDbObject() instanceof ProcedureDefinition)
       {

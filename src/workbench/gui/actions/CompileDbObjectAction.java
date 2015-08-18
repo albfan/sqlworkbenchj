@@ -141,7 +141,7 @@ public class CompileDbObjectAction
 			if (dbo instanceof ProcedureDefinition)
 			{
 				ProcedureDefinition pd = (ProcedureDefinition) dbo;
-				if (pd.isOraclePackage())
+				if (pd.isPackageProcedure())
 				{
 					// keep only one package-procedure per catalog
 					if (!catalogs.contains(pd.getCatalog()))

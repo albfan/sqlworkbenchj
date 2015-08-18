@@ -743,7 +743,7 @@ public class ProcedureListPanel
 
 	private String getCacheKey(ProcedureDefinition def)
 	{
-		if (def.isOraclePackage())
+		if (def.isPackageProcedure())
 		{
 			return def.getSchema() + "." + def.getPackageName();
 		}

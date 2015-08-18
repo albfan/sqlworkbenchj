@@ -133,11 +133,11 @@ public class ReportProcedure
 		tagWriter.appendOpenTag(result, indent, TAG_PROC_DEF);
 
 		result.append('\n');
-		if (!procDef.isOraclePackage() && procDef.getCatalog() != null)
+		if (!procDef.isPackageProcedure() && procDef.getCatalog() != null)
 		{
 			tagWriter.appendTag(result, indent2, TAG_PROC_CATALOG, procDef.getCatalog());
 		}
-		else if (procDef.isOraclePackage())
+		else if (procDef.isPackageProcedure())
 		{
 			objectName = procDef.getPackageName();
 		}
