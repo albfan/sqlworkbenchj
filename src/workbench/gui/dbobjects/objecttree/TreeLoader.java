@@ -118,7 +118,7 @@ public class TreeLoader
 
   public static final String TYPE_FK_DEF = "fk-definition";
 
-  public static final String TYPE_TRIGGERS = "table-trigger";
+  public static final String TYPE_TRIGGERS_NODE = "table-trigger";
 
   public static final String TYPE_FUNCTION = "function";
   public static final String TYPE_PROCEDURES_NODE = "procedures";
@@ -312,7 +312,7 @@ public class TreeLoader
     if (parentNode == null) return;
     for (String type : availableTypes)
     {
-      if (type.equalsIgnoreCase("TRIGGER") || type.equalsIgnoreCase(TYPE_PROCEDURES_NODE)) continue;
+      if (type.equalsIgnoreCase(TYPE_TRIGGERS_NODE) || type.equalsIgnoreCase(TYPE_PROCEDURES_NODE)) continue;
       if (typesToShow.isEmpty() || typesToShow.contains(type))
       {
         ObjectTreeNode node = new ObjectTreeNode(type, TYPE_DBO_TYPE_NODE);
@@ -332,7 +332,7 @@ public class TreeLoader
     // always add triggers at the end
     if (typesToShow.isEmpty() || typesToShow.contains("TRIGGER"))
     {
-      ObjectTreeNode node = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_DBO_TYPE_NODE);
+      ObjectTreeNode node = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS_NODE);
       node.setAllowsChildren(true);
       parentNode.add(node);
     }
@@ -466,7 +466,7 @@ public class TreeLoader
     throws SQLException
   {
     if (typeNode == null) return;
-    if (typeNode.getName().equalsIgnoreCase("TRIGGER"))
+    if (typeNode.getType().equalsIgnoreCase(TYPE_TRIGGERS_NODE))
     {
       loadTriggers(typeNode);
       return;
@@ -545,7 +545,7 @@ public class TreeLoader
 		if (reader == null) return;
 		if (reader.supportsTriggersOnViews())
     {
-      ObjectTreeNode trg = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS);
+      ObjectTreeNode trg = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS_NODE);
       trg.setAllowsChildren(true);
       node.add(trg);
     }
@@ -576,7 +576,7 @@ public class TreeLoader
     ref.setAllowsChildren(true);
     node.add(ref);
 
-    ObjectTreeNode trg = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS);
+    ObjectTreeNode trg = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS_NODE);
     trg.setAllowsChildren(true);
     node.add(trg);
   }
@@ -850,7 +850,7 @@ public class TreeLoader
         DbObject dbo = parent.getDbObject();
         loadForeignKeys(dbo, node, true);
       }
-      else if (TYPE_TRIGGERS.equals(type))
+      else if (TYPE_TRIGGERS_NODE.equals(type))
       {
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();

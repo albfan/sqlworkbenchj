@@ -66,6 +66,7 @@ public class DbObjectNodeRenderer
     iconMap.put(TreeLoader.TYPE_CATALOG, "folder-db");
     iconMap.put(TreeLoader.TYPE_DBO_TYPE_NODE, "db_type");
     iconMap.put(TreeLoader.TYPE_PROCEDURES_NODE, "db_type");
+    iconMap.put(TreeLoader.TYPE_TRIGGERS_NODE, "db_type");
     iconMap.put("procedure", "sproc");
     iconMap.put("index", "index");
     iconMap.put("type", "type");
