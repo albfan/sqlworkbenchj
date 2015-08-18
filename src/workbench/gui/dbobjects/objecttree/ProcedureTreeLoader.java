@@ -77,8 +77,8 @@ public class ProcedureTreeLoader
         procNode.add(node);
       }
     }
-    model.nodeStructureChanged(procNode);
     procNode.setChildrenLoaded(true);
+    model.nodeStructureChanged(procNode);
   }
 
   private Map<String, List<ProcedureDefinition>> getTypeMethods(List<ProcedureDefinition> allProcs)
