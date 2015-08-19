@@ -29,7 +29,6 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -76,7 +75,7 @@ public class JdbcProcedureReader
   }
 
 	@Override
-	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
+	public StringBuilder getProcedureHeader(ProcedureDefinition def)
 	{
 		return StringUtil.emptyBuilder();
 	}
@@ -405,17 +404,9 @@ public class JdbcProcedureReader
 		processProcedureColumnResultRow(ds, rs, false);
 	}
 
-	protected void processProcedureColumnResultRow(DataStore ds, ResultSet rs, boolean useColIndex)
-		throws SQLException
-	{
-
-		int row = ds.addRow();
-
-		String colName = useColIndex ? rs.getString(4) : rs.getString("COLUMN_NAME");
-		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, colName);
-		int colType = useColIndex ? rs.getInt(5) : rs.getInt("COLUMN_TYPE");
-		String stype;
-
+  protected String convertArgModeToString(int colType)
+  {
+    String stype;
 		switch (colType)
 		{
 			case DatabaseMetaData.procedureColumnUnknown:
@@ -439,6 +430,20 @@ public class JdbcProcedureReader
 			default:
 				stype = NumberStringCache.getNumberString(colType);
 		}
+    return stype;
+  }
+
+	protected void processProcedureColumnResultRow(DataStore ds, ResultSet rs, boolean useColIndex)
+		throws SQLException
+	{
+
+		int row = ds.addRow();
+
+		String colName = useColIndex ? rs.getString(4) : rs.getString("COLUMN_NAME");
+		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, colName);
+		int colType = useColIndex ? rs.getInt(5) : rs.getInt("COLUMN_TYPE");
+    String stype = convertArgModeToString(colType);
+
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, stype);
 
 		int sqlType = useColIndex ? rs.getInt(6) : rs.getInt("DATA_TYPE");
@@ -505,12 +510,10 @@ public class JdbcProcedureReader
 	{
 		if (def == null) return;
 
-		String procName = stripProcGroupInfo(def.getProcedureName());
-
 		StringBuilder source = new StringBuilder(500);
 
 		CharSequence body = retrieveProcedureSource(def);
-		StringBuilder header = getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType());
+		StringBuilder header = getProcedureHeader(def);
 
 		if (header != null && header.length() > 0)
 		{
@@ -809,29 +812,15 @@ public class JdbcProcedureReader
   }
 
   @Override
-	public List<String> getParameterNames(ProcedureDefinition def)
-	{
-    try
-    {
-      DataStore procColumns = getProcedureColumns(def);
-      if (procColumns == null) return Collections.emptyList();
+  public boolean supportsPackages()
+  {
+    return false;
+  }
 
-      int rows = procColumns.getRowCount();
-      List<String> names = new ArrayList<>(rows);
-      for (int row = 0; row < rows; row ++)
-      {
-        String name = procColumns.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
-        if (name != null)
-        {
-          names.add(name);
-        }
-      }
-      return names;
-    }
-    catch (SQLException ex)
-    {
-      LogMgr.logError("JdbcProcedureReader.getParameterNames()", "Could not read procedure parameter names", ex);
-      return Collections.emptyList();
-    }
-	}
+  @Override
+  public CharSequence getPackageProcedureSource(ProcedureDefinition def)
+  {
+    return null;
+  }
+
 }

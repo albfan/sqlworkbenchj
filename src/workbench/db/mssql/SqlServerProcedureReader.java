@@ -27,8 +27,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
-import workbench.resource.Settings;
-
 import workbench.db.JdbcProcedureReader;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
@@ -47,17 +45,10 @@ import workbench.util.StringUtil;
 public class SqlServerProcedureReader
 	extends JdbcProcedureReader
 {
-	private final StringBuilder header = StringUtil.emptyBuilder();
-
+  
 	public SqlServerProcedureReader(WbConnection db)
 	{
 		super(db);
-	}
-
-	@Override
-	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
-	{
-		return header;
 	}
 
 	/**

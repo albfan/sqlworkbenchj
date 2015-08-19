@@ -256,6 +256,34 @@ from sys.functions fct
   </void>
 
   <void method="put">
+   <string>$dbid:firebird-3</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select source
+from (
+select trim(rdb$procedure_name) as procedure_name,
+       trim(rdb$owner_name) as owner,
+       rdb$procedure_source as source
+from rdb$procedures
+union all
+select trim(rdb$function_name),
+       trim(rdb$owner_name),
+       rdb$function_source
+from rdb$functions
+) t
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>PROCEDURE_NAME</string>
+    </void>
+    <void property="schemaField">
+     <string>OWNER</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>$dbid:firebird</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

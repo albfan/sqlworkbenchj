@@ -29,8 +29,6 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
-import workbench.db.oracle.OraclePackageParser;
-
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -77,7 +75,7 @@ public class WbProcSource
 			CharSequence source = def.getSource(currentConnection);
 			if (def.isPackageProcedure())
 			{
-				CharSequence procSrc = OraclePackageParser.getProcedureSource(source, def, reader.getParameterNames(def));
+        CharSequence procSrc = reader.getPackageProcedureSource(def);
 				if (procSrc != null)
 				{
 					String msg = "Package: " + def.getPackageName();

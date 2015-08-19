@@ -55,13 +55,11 @@ public interface ProcedureReader
 	String PROC_RESULT_YES = "RESULT";
 	String PROC_RESULT_NO = "NO RESULT";
 
-	StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType);
+	StringBuilder getProcedureHeader(ProcedureDefinition def);
 
 	DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException;
 
-  List<String> getParameterNames(ProcedureDefinition def);
-  
 	DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException;
 
@@ -85,6 +83,17 @@ public interface ProcedureReader
   boolean isRecreateStatement(CharSequence sql);
 
   CharSequence getPackageSource(String catalog, String schema, String packageName);
+
+  /**
+   * Retrieve the source for a single procedure from a package.
+   *
+   * @param procedureName  the procedure to get the source for
+   *
+   * @return the source code, null if no such procedure exists or the DBMS does not support packages
+   */
+  CharSequence getPackageProcedureSource(ProcedureDefinition def);
+
+  boolean supportsPackages();
 
   void clearCache();
 }

@@ -158,7 +158,7 @@ public class FirebirdProcedureReaderTest
 		assertEquals("B", colName);
 
 		String sql = proc.getSource(con).toString();
-//    System.out.println(sql);
+    System.out.println(sql);
 		assertTrue(sql.startsWith(
       "CREATE OR ALTER PROCEDURE BBB_MULTIPLE (X INTEGER, Y INTEGER)\n" +
       "  RETURNS (A INTEGER, B INTEGER)"));

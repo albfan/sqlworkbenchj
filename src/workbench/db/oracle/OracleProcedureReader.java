@@ -28,6 +28,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -75,7 +78,7 @@ public class OracleProcedureReader
 	}
 
 	@Override
-	public StringBuilder getProcedureHeader(String catalog, String schema, String procname, int procType)
+	public StringBuilder getProcedureHeader(ProcedureDefinition def)
 	{
 		return procHeader;
 	}
@@ -570,5 +573,64 @@ public class OracleProcedureReader
 
 		return null;
 	}
+
+  @Override
+  public boolean supportsPackages()
+  {
+    return true;
+  }
+
+	public List<String> getParameterNames(ProcedureDefinition def)
+	{
+    try
+    {
+      DataStore procColumns = getProcedureColumns(def);
+      if (procColumns == null) return Collections.emptyList();
+
+      int rows = procColumns.getRowCount();
+      List<String> names = new ArrayList<>(rows);
+      for (int row = 0; row < rows; row ++)
+      {
+        String name = procColumns.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+        if (name != null)
+        {
+          names.add(name);
+        }
+      }
+      return names;
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("JdbcProcedureReader.getParameterNames()", "Could not read procedure parameter names", ex);
+      return Collections.emptyList();
+    }
+	}
+
+  @Override
+  public CharSequence getPackageProcedureSource(ProcedureDefinition def)
+  {
+    if (!supportsPackages()) return null;
+    if (def == null) return null;
+    if (!def.isPackageProcedure()) return null;
+
+    CharSequence procSrc = null;
+
+    try
+    {
+      if (def.getSource() == null)
+      {
+        readProcedureSource(def, null, null);
+      }
+      if (def.getSource() != null)
+      {
+        procSrc = OraclePackageParser.getProcedureSource(def.getSource(), def, getParameterNames(def));
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("OracleProcedureReader.getPackageProcedureSource", "Could not read procedure source", ex);
+    }
+    return procSrc;
+  }
 
 }

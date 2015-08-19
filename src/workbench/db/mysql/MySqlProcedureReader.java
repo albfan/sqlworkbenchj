@@ -29,6 +29,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.JdbcProcedureReader;
+import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 
@@ -53,7 +54,7 @@ public class MySqlProcedureReader
 	}
 
 	@Override
-	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
+	public StringBuilder getProcedureHeader(ProcedureDefinition def)
 	{
 		StringBuilder source = new StringBuilder(150);
 
@@ -66,7 +67,7 @@ public class MySqlProcedureReader
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("MySqlProcedureReader.getProcedureHeader()", "Using query=\n" +
-				SqlUtil.replaceParameters(sql, aSchema, aProcname));
+				SqlUtil.replaceParameters(sql, def.getCatalog(), def.getProcedureName()));
 		}
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
@@ -75,8 +76,8 @@ public class MySqlProcedureReader
 		try
 		{
 			stmt = this.connection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, aSchema);
-			stmt.setString(2, aProcname);
+			stmt.setString(1, def.getCatalog());
+			stmt.setString(2, def.getProcedureName());
 			rs = stmt.executeQuery();
 			String proctype = "PROCEDURE";
 			String returntype = "";
@@ -88,7 +89,7 @@ public class MySqlProcedureReader
 			source.append("DROP ");
 			source.append(proctype);
 			source.append(' ');
-			source.append(aProcname);
+			source.append(def.getProcedureName());
 			DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(connection, DelimiterDefinition.STANDARD_DELIMITER);
 			if (delim != null)
 			{
@@ -100,10 +101,10 @@ public class MySqlProcedureReader
 			source.append("CREATE ");
 			source.append(proctype);
 			source.append(' ');
-			source.append(aProcname);
+			source.append(def.getProcedureName());
 			source.append(" (");
 
-			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname, null);
+			DataStore ds = this.getProcedureColumns(def);
 			int count = ds.getRowCount();
 			int added = 0;
 			for (int i=0; i < count; i++)

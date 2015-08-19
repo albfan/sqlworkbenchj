@@ -160,14 +160,7 @@ public class ProcedureListPanel
 	{
 		if (initialized) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_initGui();
-			}
-		});
+		WbSwingUtilities.invoke(this::_initGui);
 	}
 
 	private void _initGui()
@@ -532,14 +525,7 @@ public class ProcedureListPanel
 		if (aFlag && this.shouldRetrieve)
 		{
 			initGui();
-			WbSwingUtilities.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					startRetrieve();
-				}
-			});
+			WbSwingUtilities.invokeLater(this::startRetrieve);
 		}
 	}
 

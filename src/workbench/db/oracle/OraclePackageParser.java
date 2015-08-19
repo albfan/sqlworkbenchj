@@ -227,24 +227,33 @@ public class OraclePackageParser
 			if (lastKeywordPos > -1 && text.equalsIgnoreCase(def.getProcedureName()))
 			{
 				procPos = lastKeywordPos;
-				t = lexer.getNextToken(false, false);
-				if (t != null && t.getContents().equals("("))
-				{
-					List<String> params = getParameters(lexer);
-					if (compareArguments(params, parameters))
-					{
-						break;
-					}
-				}
-				else if (CollectionUtil.isEmpty(parameters))
-				{
-					break;
-				}
-				else
-				{
-					lastKeywordPos = -1;
-					continue;
-				}
+        if (parameters == null)
+        {
+          break;
+        }
+        else
+        {
+          // need to check the parameters of the current procedure/function
+          // to support overloaded functions/procedures in Oracle
+          t = lexer.getNextToken(false, false);
+          if (t != null && t.getContents().equals("("))
+          {
+            List<String> params = getParameters(lexer);
+            if (compareArguments(params, parameters))
+            {
+              break;
+            }
+          }
+          else if (CollectionUtil.isEmpty(parameters))
+          {
+            break;
+          }
+          else
+          {
+            lastKeywordPos = -1;
+            continue;
+          }
+        }
 			}
 
 			if (text.equals(procType))

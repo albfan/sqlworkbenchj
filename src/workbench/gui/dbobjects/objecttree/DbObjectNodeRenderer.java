@@ -57,7 +57,9 @@ public class DbObjectNodeRenderer
 	{
 		super();
     iconMap.put(TreeLoader.TYPE_TABLE, "table");
+    iconMap.put("system table", "table");
     iconMap.put(TreeLoader.TYPE_VIEW, "view");
+    iconMap.put("system view", "view");
     iconMap.put(SynonymReader.SYN_TYPE_NAME, "synonym");
     iconMap.put("sequence", "sequence");
     iconMap.put(DbMetadata.MVIEW_NAME, "mview");

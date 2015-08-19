@@ -26,12 +26,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import workbench.db.oracle.OraclePackageParser;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.sql.DelimiterDefinition;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
@@ -190,7 +191,9 @@ public class ObjectScripter
 		}
 		if (appendCommit && this.dbConnection.getDbSettings().ddlNeedsCommit())
 		{
-			script.append("\nCOMMIT;\n");
+			script.append("\nCOMMIT");
+      DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(dbConnection, DelimiterDefinition.STANDARD_DELIMITER);
+      delim.appendTo(script);
 		}
 	}
 
@@ -258,15 +261,6 @@ public class ObjectScripter
       // only process unknown types if filter is null
       if (knownTypes.contains(type)) return false;
     }
-
-    // if this is a a packaged procedure only process it if we should show single procedures
-    // from a package (controlled through the extracPackageProcedureFlag)
-    if (dbo instanceof ProcedureDefinition && extractPackageProcedure)
-    {
-      ProcedureDefinition proc = (ProcedureDefinition)dbo;
-      return (proc.isPackageProcedure() && TYPE_PROC.equalsIgnoreCase(typeToShow));
-    }
-
     return type.equalsIgnoreCase(typeToShow);
   }
 
@@ -290,6 +284,7 @@ public class ObjectScripter
 				this.progressMonitor.setCurrentObject(dbo.getObjectName(), current++, count);
 			}
 
+      boolean isPackageProc = false;
 			try
 			{
 				if (dbo instanceof TableIdentifier)
@@ -305,18 +300,23 @@ public class ObjectScripter
             ProcedureDefinition def = (ProcedureDefinition)dbo;
             if (def.isPackageProcedure())
             {
-              List<String> parameters = ReaderFactory.getProcedureReader(dbConnection.getMetadata()).getParameterNames(def);
-              CharSequence procSrc = OraclePackageParser.getProcedureSource(source, def, parameters);
+              ProcedureReader reader = ReaderFactory.getProcedureReader(dbConnection.getMetadata());
+              CharSequence procSrc = reader.getPackageProcedureSource(def);
               if (procSrc != null)
               {
                 source = procSrc;
+                isPackageProc = true;
               }
             }
           }
 				}
-				if (!appendCommit)
+
+        // if this is a procedure that is part of a package
+        // and only the procedure is shown, the script isn't usefull anyway
+        // so it makes no sense to append a commit
+				if (!isPackageProc)
 				{
-					appendCommit = commitTypes.contains(type.toLowerCase());
+					appendCommit = appendCommit || commitTypes.contains(type.toLowerCase());
 				}
 			}
 			catch (Exception e)
@@ -341,7 +341,8 @@ public class ObjectScripter
 					if (drop != null && drop.length() > 0)
 					{
 						this.script.append(drop);
-						this.script.append(';');
+            DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(dbConnection, DelimiterDefinition.STANDARD_DELIMITER);
+            delim.appendTo(script);
 						this.script.append(nl);
 					}
 				}
@@ -360,4 +361,5 @@ public class ObjectScripter
 			}
 		}
 	}
+
 }
