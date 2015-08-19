@@ -65,7 +65,7 @@ public class PgCopyImporterTest
 	{
 		PostgresTestUtil.initTestCase("copy_importer");
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
-		if (conn == null) return;
+    assertNotNull(conn);
 
 		TestUtil.executeScript(conn,
 			"create table foo (id integer, firstname varchar(6), lastname text);\n" +

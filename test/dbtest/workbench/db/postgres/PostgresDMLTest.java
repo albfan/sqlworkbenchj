@@ -68,6 +68,7 @@ public class PostgresDMLTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
 
 		Statement stmt = con.createStatement();
 		TestUtil.executeScript(con,
@@ -111,6 +112,8 @@ public class PostgresDMLTest
 		try
 		{
 			WbConnection conn = PostgresTestUtil.getPostgresConnection();
+      assertNotNull(conn);
+
 			TestUtil.executeScript(conn,
 				"create type rating_range as (min_value integer, max_value integer);\n" +
 				"create table ratings (id integer not null primary key, rating rating_range);\n" +
@@ -145,6 +148,8 @@ public class PostgresDMLTest
 		throws Exception
 	{
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(conn);
+
 		try
 		{
 			TestUtil.executeScript(conn,

@@ -95,7 +95,7 @@ public class PostgresTriggerReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		TriggerReader reader = TriggerReaderFactory.createReader(con);
 		assertTrue(reader instanceof PostgresTriggerReader);

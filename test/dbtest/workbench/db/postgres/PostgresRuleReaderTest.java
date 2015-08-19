@@ -74,10 +74,8 @@ public class PostgresRuleReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null)
-		{
-			return;
-		}
+    assertNotNull(con);
+
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(TEST_ID, new String[] { "RULE" });
 		assertEquals(1, objects.size());
 		TableIdentifier tbl = objects.get(0);

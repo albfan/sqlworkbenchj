@@ -29,6 +29,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -807,4 +808,30 @@ public class JdbcProcedureReader
     return null;
   }
 
+  @Override
+	public List<String> getParameterNames(ProcedureDefinition def)
+	{
+    try
+    {
+      DataStore procColumns = getProcedureColumns(def);
+      if (procColumns == null) return Collections.emptyList();
+
+      int rows = procColumns.getRowCount();
+      List<String> names = new ArrayList<>(rows);
+      for (int row = 0; row < rows; row ++)
+      {
+        String name = procColumns.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+        if (name != null)
+        {
+          names.add(name);
+        }
+      }
+      return names;
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("JdbcProcedureReader.getParameterNames()", "Could not read procedure parameter names", ex);
+      return Collections.emptyList();
+    }
+	}
 }

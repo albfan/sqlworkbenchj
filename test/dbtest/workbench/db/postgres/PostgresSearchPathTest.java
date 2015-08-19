@@ -92,7 +92,7 @@ public class PostgresSearchPathTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		TestUtil.executeScript(con, "set search_path=path_2,path_1");
 		Statement stmt = null;
@@ -134,7 +134,7 @@ public class PostgresSearchPathTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		TestUtil.executeScript(con, "set search_path=path_2,path3,path_1");
 		Statement stmt = null;
@@ -169,7 +169,7 @@ public class PostgresSearchPathTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		TestUtil.executeScript(con, "set search_path=path_2,path_1");
 		List<ColumnIdentifier> columns = con.getObjectCache().getColumns(new TableIdentifier("t1"));
@@ -195,7 +195,7 @@ public class PostgresSearchPathTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		TestUtil.executeScript(con, "set search_path=path_2,path_1");
 

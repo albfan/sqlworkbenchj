@@ -79,11 +79,7 @@ public class PostgresIndexReaderTest
 		throws Exception
 	{
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
-		if (conn == null)
-		{
-			System.out.println("No local postgres connection. Skipping test...");
-			return;
-		}
+    assertNotNull(conn);
 
 		String sql =
 			"CREATE TABLE foo \n" +
@@ -135,10 +131,6 @@ public class PostgresIndexReaderTest
 
 		TableIdentifier table = meta.findTable(new TableIdentifier("person"));
 		List<IndexDefinition> indexes = reader.getTableIndexList(table);
-		if (indexes.isEmpty())
-		{
-			System.err.println("No indexes returned. If you are running PostgreSQL 9.0.0 please upgrade to 9.0.1");
-		}
 		assertFalse(indexes.isEmpty());
 
 		IndexDefinition index = indexes.get(0);
@@ -158,7 +150,7 @@ public class PostgresIndexReaderTest
 	}
 
 	@Test
-	public void testGetIndexSource2()
+	public void testTableSourceWithIndexes()
 		throws Exception
 	{
 		String sql =
@@ -180,11 +172,7 @@ public class PostgresIndexReaderTest
 			"COMMIT;";
 
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
-		if (conn == null)
-		{
-			System.out.println("No local postgres connection. Skipping test...");
-			return;
-		}
+    assertNotNull(conn);
 
 		DbMetadata meta = conn.getMetadata();
 		IndexReader reader = meta.getIndexReader();

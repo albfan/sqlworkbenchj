@@ -23,8 +23,6 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import workbench.resource.ResourceMgr;
 
@@ -33,7 +31,6 @@ import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 import workbench.db.oracle.OraclePackageParser;
 
-import workbench.storage.DataStore;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -80,8 +77,7 @@ public class WbProcSource
 			CharSequence source = def.getSource(currentConnection);
 			if (def.isPackageProcedure())
 			{
-				DataStore cols = reader.getProcedureColumns(def);
-				CharSequence procSrc = OraclePackageParser.getProcedureSource(source, def, getParameterNames(cols));
+				CharSequence procSrc = OraclePackageParser.getProcedureSource(source, def, reader.getParameterNames(def));
 				if (procSrc != null)
 				{
 					String msg = "Package: " + def.getPackageName();
@@ -124,18 +120,4 @@ public class WbProcSource
 		return true;
 	}
 
-	private List<String> getParameterNames(DataStore procColumns)
-	{
-		int rows = procColumns.getRowCount();
-		List<String> names = new ArrayList<>(rows);
-		for (int row = 0; row < rows; row ++)
-		{
-			String name = procColumns.getValueAsString(row, 0);
-			if (name != null)
-			{
-				names.add(name);
-			}
-		}
-		return names;
-	}
 }

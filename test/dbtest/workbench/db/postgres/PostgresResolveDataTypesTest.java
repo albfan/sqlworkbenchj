@@ -83,7 +83,7 @@ public class PostgresResolveDataTypesTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier(TEST_SCHEMA, "some_table"));
 		assertNotNull(tbl);

@@ -81,7 +81,7 @@ public class PostgresCompletionTest
 		throws SQLException
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		String sql = "select  from  ";
 		StatementContext context = new StatementContext(con, sql, sql.indexOf("from") + "from".length() + 1);

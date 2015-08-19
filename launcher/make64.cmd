@@ -1,8 +1,10 @@
 @echo off
 
+pushd "%~dp0"
+
 echo [ErrorMessages]>err.ini
-echo java.not.found=No suitable Java version could found. Please make sure you have a 64-bit Java 7 installed>>err.ini
-echo java.failed=Java failed to startup successfully. Please make sure you have 64-bit Java 7 installed>>err.ini
+echo java.not.found=No suitable Java version could found. Please make sure you have a 64-bit Java 8 installed>>err.ini
+echo java.failed=Java failed to startup successfully. Please make sure you have 64-bit Java 8 installed>>err.ini
 
 echo main.class=workbench.WbStarter>t.ini
 echo vm.heapsize.max.percent=50>>t.ini
@@ -14,7 +16,6 @@ rcedit64 /I SQLWorkbench64.exe workbench.ico
 rcedit64 /N SQLWorkbench64.exe sqlworkbench.ini
 
 echo main.class=workbench.console.SQLConsole>t.ini
-
 echo show.popup=false>>err.ini
 copy t.ini+workbench.ini+err.ini sqlwbconsole.ini > nul
 

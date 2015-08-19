@@ -96,10 +96,8 @@ public class PostgresEnumReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null)
-		{
-			return;
-		}
+    assertNotNull(con);
+
 		PostgresEnumReader reader = new PostgresEnumReader();
 		Collection<EnumIdentifier> enums = reader.getDefinedEnums(con, TEST_ID, null);
 		assertEquals(1, enums.size());
@@ -108,7 +106,7 @@ public class PostgresEnumReaderTest
 		assertEquals("my enum", enumId.getComment());
 
 		String sql = enumId.getSource(con).toString();
-		ScriptParser parser = new ScriptParser(sql.toString(), ParserType.Postgres);
+		ScriptParser parser = new ScriptParser(sql, ParserType.Postgres);
 		assertEquals(2, parser.getSize());
 		String create = parser.getCommand(0);
 		assertEquals(create, "CREATE TYPE stimmung_enum AS ENUM ('sad','ok','happy')");

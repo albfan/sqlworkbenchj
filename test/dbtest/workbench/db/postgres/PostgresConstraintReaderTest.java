@@ -86,7 +86,7 @@ public class PostgresConstraintReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("check_test"));
 		ConstraintReader reader = ReaderFactory.getConstraintReader(con.getMetadata());

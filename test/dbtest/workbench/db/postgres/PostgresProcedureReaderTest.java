@@ -163,6 +163,8 @@ public class PostgresProcedureReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
+
 		PostgresProcedureReader reader = new PostgresProcedureReader(con);
 		List<ProcedureDefinition> procs = reader.getProcedureList(null, TEST_ID, "fn_get_data");
 		assertEquals(1, procs.size());
@@ -189,7 +191,9 @@ public class PostgresProcedureReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		PostgresProcedureReader reader = new PostgresProcedureReader(con);
+    assertNotNull(con);
+
+    PostgresProcedureReader reader = new PostgresProcedureReader(con);
 		List<ProcedureDefinition> procs = reader.getProcedureList(null, TEST_ID, "table_func");
 		assertEquals(1, procs.size());
 		ProcedureDefinition def = procs.get(0);
@@ -218,7 +222,9 @@ public class PostgresProcedureReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		PostgresProcedureReader reader = new PostgresProcedureReader(con);
+    assertNotNull(con);
+
+    PostgresProcedureReader reader = new PostgresProcedureReader(con);
 		List<ProcedureDefinition> procs = reader.getProcedureList(null, TEST_ID, "array%");
 		assertEquals(1, procs.size());
 		ProcedureDefinition def = procs.get(0);
@@ -246,7 +252,9 @@ public class PostgresProcedureReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		PostgresProcedureReader reader = new PostgresProcedureReader(con);
+    assertNotNull(con);
+
+    PostgresProcedureReader reader = new PostgresProcedureReader(con);
 		List<ProcedureDefinition> procs = reader.getProcedureList(null, TEST_ID, "fn_answer%");
 		assertEquals(2, procs.size());
 
@@ -275,6 +283,8 @@ public class PostgresProcedureReaderTest
     throws Exception
   {
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
+
 		PostgresProcedureReader reader = new PostgresProcedureReader(con);
     TestUtil.executeScript(con,
 			"CREATE FUNCTION fn_answer(p1 varchar, p2 varchar)  \n" +
@@ -311,7 +321,9 @@ public class PostgresProcedureReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		PostgresProcedureReader reader = new PostgresProcedureReader(con);
+    assertNotNull(con);
+
+    PostgresProcedureReader reader = new PostgresProcedureReader(con);
 		List<ProcedureDefinition> procs = reader.getProcedureList(null, "public", "fullname%");
 		assertEquals(2, procs.size());
 
@@ -329,6 +341,8 @@ public class PostgresProcedureReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
+
 		TestUtil.executeScript(con,
 			"create schema foo;\n" +
 			"create function foo.bar(p_in integer) returns integer as $$ select 42; $$ language sql;\n" +

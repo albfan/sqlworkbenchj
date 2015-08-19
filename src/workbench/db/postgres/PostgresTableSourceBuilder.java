@@ -549,7 +549,7 @@ public class PostgresTableSourceBuilder
 			"    join pg_class bt on i.inhrelid = bt.oid \n" +
 			"    join pg_namespace bns on bt.relnamespace = bns.oid";
 
-		// Recursive version for 8.4+ based Craig Rigner's statement from here: http://stackoverflow.com/a/12139506/330315
+		// Recursive version for 8.4+ based Craig Ringer's statement from here: http://stackoverflow.com/a/12139506/330315
 		final String sql84 =
 			"with recursive inh as ( \n" +
 			"\n" +
@@ -572,15 +572,10 @@ public class PostgresTableSourceBuilder
 			"	 join pg_catalog.pg_namespace on (pg_class.relnamespace = pg_namespace.oid) \n" +
 			"order by path";
 
-		final boolean isRecursive;
-		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4"))
-		{
-			isRecursive = true;
-		}
-		else
-		{
-			isRecursive = false;
-		}
+		final boolean is84 = JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4");
+
+    // wenn putting the "?" expression directly into the prepareStatement() call, this generates an error with Java 8
+    final String sqlToUse = is84 ? sql84 : sql83;
 
 		Savepoint sp = null;
 		try
@@ -588,7 +583,7 @@ public class PostgresTableSourceBuilder
 			// Retrieve direct child table(s) for this table
 			// this does not handle multiple inheritance
 			sp = dbConnection.setSavepoint();
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(isRecursive ? sql84 : sql83);
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sqlToUse);
 			pstmt.setString(1, table.getSchema());
 			pstmt.setString(2, table.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
@@ -602,7 +597,7 @@ public class PostgresTableSourceBuilder
 				if (count == 0)
 				{
 					result = new StringBuilder(50);
-					if (isRecursive)
+					if (is84)
 					{
 						result.append("\n/* Inheritance tree:\n\n");
 						result.append(table.getSchema());
@@ -617,7 +612,7 @@ public class PostgresTableSourceBuilder
 				String tableName = rs.getString(1);
 				String schemaName = rs.getString(2);
 				int level = rs.getInt(3);
-				if (isRecursive)
+				if (is84)
 				{
 					result.append('\n');
 					result.append(StringUtil.padRight(" ", level * 2));
@@ -631,7 +626,7 @@ public class PostgresTableSourceBuilder
 				result.append(tableName);
 				count ++;
 			}
-			if (isRecursive && result != null)
+			if (is84 && result != null)
 			{
 				result.append("\n*/");
 			}

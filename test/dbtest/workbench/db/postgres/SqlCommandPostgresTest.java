@@ -104,7 +104,7 @@ public class SqlCommandPostgresTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		String sql = "select * from person order by id;";
 		StatementRunner runner = getTestUtil().createConnectedStatementRunner(con);
@@ -133,7 +133,7 @@ public class SqlCommandPostgresTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		String sql = "delete from person where id = 1 returning *;";
 

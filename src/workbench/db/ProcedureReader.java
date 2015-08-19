@@ -60,6 +60,8 @@ public interface ProcedureReader
 	DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException;
 
+  List<String> getParameterNames(ProcedureDefinition def);
+  
 	DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException;
 

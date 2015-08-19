@@ -69,6 +69,7 @@ public class PostgresSequenceAdjusterTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
 
 		TestUtil.executeScript(con,
 			"insert into table_one (id) values (1), (2), (7), (41);\n" +

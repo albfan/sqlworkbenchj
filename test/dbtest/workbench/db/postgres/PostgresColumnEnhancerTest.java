@@ -63,11 +63,8 @@ public class PostgresColumnEnhancerTest
 		throws Exception
 	{
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
-		if (conn == null)
-		{
-			System.out.println("No local postgres connection. Skipping test...");
-			return;
-		}
+    assertNotNull(conn);
+    
 		String sql =
 			"create table foo (pk_value integer not null, id1 integer[], id2 integer[][], id3 integer[][][], foo text[], bar varchar);\n" +
 			"commit;\n";

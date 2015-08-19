@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import workbench.db.oracle.OraclePackageParser;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.DbExplorerSettings;
@@ -52,14 +53,14 @@ public class ObjectScripter
 	public static final String TYPE_UPDATE = "update";
 	public static final String TYPE_SELECT = "select";
 	public static final String TYPE_PROC = "procedure";
-	public static final String TYPE_PKG = "package";
+	public static final String TYPE_PACKAGE = "package";
 	public static final String TYPE_FUNC = "function";
 	public static final String TYPE_TRG = "trigger";
 	public static final String TYPE_DOMAIN = "domain";
 	public static final String TYPE_ENUM = "enum";
 	public static final String TYPE_MVIEW = DbMetadata.MVIEW_NAME.toLowerCase();
 
-	private Set<String> knownTypes = CollectionUtil.caseInsensitiveSet(TYPE_DOMAIN, TYPE_ENUM, TYPE_FUNC, TYPE_INSERT, TYPE_MVIEW, TYPE_MVIEW, TYPE_PKG, TYPE_PROC, TYPE_RULE, TYPE_SELECT, TYPE_SYNONYM, TYPE_TABLE, TYPE_TRG, TYPE_TYPE, TYPE_UPDATE, TYPE_VIEW);
+	private Set<String> knownTypes = CollectionUtil.caseInsensitiveSet(TYPE_DOMAIN, TYPE_ENUM, TYPE_FUNC, TYPE_INSERT, TYPE_MVIEW, TYPE_MVIEW, TYPE_PACKAGE, TYPE_PROC, TYPE_RULE, TYPE_SELECT, TYPE_SYNONYM, TYPE_TABLE, TYPE_TRG, TYPE_TYPE, TYPE_UPDATE, TYPE_VIEW);
 	private List<? extends DbObject> objectList;
 	private StringBuilder script;
 	private ScriptGenerationMonitor progressMonitor;
@@ -75,6 +76,7 @@ public class ObjectScripter
 	private String sequenceType;
 	private String synonymType = TYPE_SYNONYM;
 	private GenericObjectDropper dropper;
+  private boolean extractPackageProcedure;
 
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
@@ -93,7 +95,7 @@ public class ObjectScripter
       synonymType = synReader.getSynonymTypeName();
     }
 
-		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM, TYPE_TYPE, TYPE_RULE);
+		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_PACKAGE, TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM, TYPE_TYPE, TYPE_RULE);
 
 		if (sequenceType != null)
 		{
@@ -177,7 +179,7 @@ public class ObjectScripter
 			if (!cancel) this.appendObjectType(TYPE_SELECT);
 			if (!cancel) this.appendObjectType(TYPE_FUNC);
 			if (!cancel) this.appendObjectType(TYPE_PROC);
-			if (!cancel) this.appendObjectType(TYPE_PKG);
+			if (!cancel) this.appendObjectType(TYPE_PACKAGE);
 			if (!cancel) this.appendObjectType(TYPE_TRG);
 			if (!cancel) this.appendObjectType(TYPE_RULE);
 			if (!cancel) this.appendObjectType(null); // everything else
@@ -192,11 +194,17 @@ public class ObjectScripter
 		}
 	}
 
+  public void setShowPackageProcedureOnly(boolean flag)
+  {
+    this.extractPackageProcedure = flag;
+  }
+
 	@Override
 	public void cancel()
 	{
 		this.cancel = true;
 	}
+
 
 	private void appendForeignKeys()
 	{
@@ -242,7 +250,27 @@ public class ObjectScripter
 		}
 	}
 
-	private void appendObjectType(String typeFilter)
+  private boolean shouldProcessObject(DbObject dbo, String typeToShow)
+  {
+    String type = dbo.getObjectType();
+    if (typeToShow == null)
+    {
+      // only process unknown types if filter is null
+      if (knownTypes.contains(type)) return false;
+    }
+
+    // if this is a a packaged procedure only process it if we should show single procedures
+    // from a package (controlled through the extracPackageProcedureFlag)
+    if (dbo instanceof ProcedureDefinition && extractPackageProcedure)
+    {
+      ProcedureDefinition proc = (ProcedureDefinition)dbo;
+      return (proc.isPackageProcedure() && TYPE_PROC.equalsIgnoreCase(typeToShow));
+    }
+
+    return type.equalsIgnoreCase(typeToShow);
+  }
+
+	private void appendObjectType(String typeToShow)
 	{
 		int current = 1;
 		int count = objectList.size();
@@ -250,17 +278,10 @@ public class ObjectScripter
 		for (DbObject dbo : objectList)
 		{
 			if (cancel) break;
-			String type = dbo.getObjectType();
 
-			if (typeFilter == null)
-			{
-				// only process unknown types if filter is null
-				if (knownTypes.contains(type)) continue;
-			}
-			else
-			{
-				if (!type.equalsIgnoreCase(typeFilter)) continue;
-			}
+      if (!shouldProcessObject(dbo, typeToShow)) continue;
+
+      String type = dbo.getObjectType();
 
 			CharSequence source = null;
 
@@ -279,6 +300,19 @@ public class ObjectScripter
 				else
 				{
 					source = dbo.getSource(dbConnection);
+          if (dbo instanceof ProcedureDefinition && extractPackageProcedure)
+          {
+            ProcedureDefinition def = (ProcedureDefinition)dbo;
+            if (def.isPackageProcedure())
+            {
+              List<String> parameters = ReaderFactory.getProcedureReader(dbConnection.getMetadata()).getParameterNames(def);
+              CharSequence procSrc = OraclePackageParser.getProcedureSource(source, def, parameters);
+              if (procSrc != null)
+              {
+                source = procSrc;
+              }
+            }
+          }
 				}
 				if (!appendCommit)
 				{

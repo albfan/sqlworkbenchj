@@ -80,7 +80,8 @@ public class PostgresUniqueConstraintReaderTest
 	public void testProcessIndexList()
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
+
 		TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("PARENT"));
 		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent);
 		boolean foundConstraint = false;

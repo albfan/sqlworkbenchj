@@ -35,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static junit.framework.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  *
@@ -74,7 +75,7 @@ public class PostgresTransactionCheckerTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		try
 		{

@@ -46,11 +46,17 @@ public class ScriptDbObjectAction
 {
 	private DbObjectList source;
 	private WbSelectionModel selection;
+  private boolean showSinglePackageProcedure;
 
 	public ScriptDbObjectAction(DbObjectList client, WbSelectionModel list)
 	{
+    this(client, list, "MnuTxtCreateScript");
+	}
+
+	public ScriptDbObjectAction(DbObjectList client, WbSelectionModel list, String labelKey)
+	{
 		super();
-		this.initMenuDefinition("MnuTxtCreateScript");
+		this.initMenuDefinition(labelKey);
 		this.source = client;
 		this.selection = list;
 		setEnabled(source.getSelectionCount() > 0);
@@ -62,7 +68,17 @@ public class ScriptDbObjectAction
   public void dispose()
   {
     super.dispose();
-    selection.removeSelectionListener(this);
+    if (selection != null) selection.removeSelectionListener(this);
+  }
+
+  /**
+   * Controls if just the source of package procedure should be shown/generated or the complete package.
+   *
+   * @param showPackageProcOnly
+   */
+  public void setShowSinglePackageProcedure(boolean showPackageProcOnly)
+  {
+    this.showSinglePackageProcedure = showPackageProcOnly;
   }
 
 	@Override
@@ -74,6 +90,7 @@ public class ScriptDbObjectAction
 		if (objects == null || objects.isEmpty()) return;
 
 		ObjectScripter s = new ObjectScripter(objects, source.getConnection());
+    s.setShowPackageProcedureOnly(showSinglePackageProcedure);
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
 		scripterUI.setDbConnection(source.getConnection());
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));

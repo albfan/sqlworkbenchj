@@ -77,7 +77,7 @@ public class TableCreatorPostgresTest
 		try
 		{
 			WbConnection con = PostgresTestUtil.getPostgresConnection();
-			if (con == null) return;
+      assertNotNull(con);
 
 			Statement stmt = con.createStatement();
 
@@ -133,7 +133,7 @@ public class TableCreatorPostgresTest
 			PostgresTestUtil.cleanUpTestCase();
 
 			WbConnection con = PostgresTestUtil.getPostgresConnection();
-			if (con == null) return;
+      assertNotNull(con);
 
 			TestUtil.executeScript(con,
 				"create schema other;\n" +

@@ -62,7 +62,7 @@ public class WbStarter
 		}
 
 		boolean versionIsOk = false;
-		final int minMinorVersion = 7;
+		final int minMinorVersion = 8;
 
 		int minorversion = -1;
 
@@ -79,8 +79,9 @@ public class WbStarter
 
 		if (!versionIsOk)
 		{
-			String error = "SQL Workbench/J requires Java 7, but only " + version + " was found\n\n" +
-				"If you do have Java 7 installed, please point JAVA_HOME to the location of your Java 7 installation.\n" +
+			String error =
+        "SQL Workbench/J requires Java 8, but only " + version + " was found\n\n" +
+				"If you do have Java 8 installed, please point JAVA_HOME to the location of your Java 8 installation.\n" +
 				"or refer to the manual for details on how to specify the Java runtime to be used.";
 
 			System.err.println("*** Cannot run this application ***");

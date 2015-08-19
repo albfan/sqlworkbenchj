@@ -77,7 +77,7 @@ public class PostgresTypeReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		List<TableIdentifier> types = con.getMetadata().getObjectList(TEST_ID, new String[] { "TYPE" });
 		assertNotNull(types);

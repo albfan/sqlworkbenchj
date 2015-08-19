@@ -41,13 +41,13 @@ public class PostgresSchemaReaderTest
 	{
 		super("PostgresSchemaReaderTest");
 	}
-	
+
 	@Test
 	public void testReadSchema()
 		throws Exception
 	{
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
-		if (conn == null) return;
+    assertNotNull(conn);
 
 		try
 		{

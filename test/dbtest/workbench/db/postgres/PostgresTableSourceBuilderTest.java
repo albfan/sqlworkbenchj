@@ -130,7 +130,7 @@ public class PostgresTableSourceBuilderTest
 		TestUtil.executeScript(con, "create unlogged table no_crash_safe (id integer, some_data varchar(100));");
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("no_crash_safe"));
 		String source = tbl.getSource(con).toString();
-		assertTrue(source.indexOf("CREATE UNLOGGED TABLE") > -1);
+		assertTrue(source.contains("CREATE UNLOGGED TABLE"));
 	}
 
 	@Test

@@ -75,7 +75,7 @@ public class ExplainPostgresTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		String sql = "explain analyze select  from person";
 		StatementContext context = new StatementContext(con, sql, sql.indexOf("select") + 7);

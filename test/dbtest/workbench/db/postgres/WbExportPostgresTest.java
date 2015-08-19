@@ -79,8 +79,8 @@ public class WbExportPostgresTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
-
+    assertNotNull(con);
+    
 		StatementRunner runner = getTestUtil().createConnectedStatementRunner(con);
 
 		WbFile output = new WbFile(getTestUtil().getBaseDir(), "ranges.txt");

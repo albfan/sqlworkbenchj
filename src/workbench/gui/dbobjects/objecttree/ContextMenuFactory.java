@@ -120,7 +120,8 @@ class ContextMenuFactory
 		menu.add(CreateDummySqlAction.createDummyUpdateAction(dbTree, selection));
 		menu.add(CreateDummySqlAction.createDummySelectAction(dbTree, selection));
 
-    ScriptDbObjectAction script = new ScriptDbObjectAction(dbTree, selection);
+    ScriptDbObjectAction script = new ScriptDbObjectAction(dbTree, selection, "MnuTxtShowSource");
+    script.setShowSinglePackageProcedure(true);
     menu.add(script);
 
     menu.addSeparator();

@@ -87,11 +87,8 @@ public class PostgresDomainReaderTest
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null)
-		{
-			System.out.println("No PostgreSQL connection available. Skipping test...");
-			return;
-		}
+    assertNotNull(con);
+    
 		Collection<String> types = con.getMetadata().getObjectTypes();
 		assertTrue(types.contains("DOMAIN"));
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(TEST_SCHEMA, new String[] { "DOMAIN" });

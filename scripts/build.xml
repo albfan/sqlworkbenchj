@@ -25,6 +25,7 @@
   <property name="html-stylesheet" value="html-publish.css"/>
   <property name="html-outdir" value="${distdir}/manual"/>
   <property name="html-resource-dir" value="./images"/>
+  <property name="target.version" value="1.8"/>
 
   <!-- location of the docbook installation and the FOP installation -->
   <property name="docbook.root" value="../etc/docbook"/>
@@ -175,29 +176,29 @@
 
   <target name="compile" depends="prepare">
 
-    <!-- compile the starter class with target=1.2 so that it can be loaded by
+    <!-- compile the starter class with target=1.3 so that it can be loaded by
          older JVMs as well and is able to display the error message -->
     <javac debug="on"
-          debuglevel="source,lines"
-          destdir="${build}"
-          srcdir="${src}"
-          target="1.2"
-          source="1.2"
-          encoding="ISO-8859-1"
-          includeantruntime="false"
-          includes="workbench/WbStarter.java"/>
+           debuglevel="source,lines"
+           destdir="${build}"
+           srcdir="${src}"
+           target="1.2"
+           source="1.2"
+           encoding="ISO-8859-1"
+           includeantruntime="false"
+           includes="workbench/WbStarter.java"/>
 
     <!-- the rest of the application is compiled to the needed class file version -->
     <javac debug="on"
            debuglevel="source,lines"
            destdir="${build}"
            srcdir="${src}"
-           target="1.8"
-           source="1.8"
+           target="${target.version}"
+           source="${target.version}"
            includeantruntime="false"
            encoding="ISO-8859-1">
       <compilerarg value="-Xlint:none"/>
-      <exclude name="workbench/WbStarter.java"/>
+      <!-- <exclude name="workbench/WbStarter.java"/> -->
       <classpath>
           <fileset dir="../libs/odf" includes="*.jar"/>
           <fileset dir="../libs/poi" includes="*.jar"/>
@@ -489,7 +490,7 @@
 
   <target name="make-jar" depends="prepare,compile">
 
-    <jar compress="true" level="6" jarfile="${distdir}/${jarfile}">
+    <jar compress="true" level="9" jarfile="${distdir}/${jarfile}">
       <manifest>
         <attribute name="Main-Class" value="workbench.WbStarter"/>
         <attribute name="Class-Path" value=". log4j.jar dbunit-2.3.0.jar slf4j-api-1.5.10.jar slf4j-log4j12-1.5.6.jar mail.jar poi.jar poi-ooxml.jar dom4j-1.6.1.jar stax-api-1.0.1.jar poi-ooxml-schemas.jar xmlbeans-2.3.0.jar odfdom-java.jar resolver.jar serializer.jar simple-odf.jar xercesImpl.jar xml-apis.jar ext/"/>
@@ -975,7 +976,14 @@
   </path>
 
   <target name="compile-tests" depends="prepare-test, compile">
-    <javac debug="on" includeantruntime="false" destdir="${build.test}" optimize="off" srcdir="${unittest}" target="1.7" source="1.7" encoding="ISO-8859-1">
+    <javac debug="on"
+           includeantruntime="false"
+           destdir="${build.test}"
+           optimize="off"
+           srcdir="${unittest}"
+           target="${target.version}"
+           source="${target.version}"
+           encoding="ISO-8859-1">
       <classpath>
         <pathelement location="${build}"/>
         <path refid="junit.path"/>
@@ -984,7 +992,14 @@
   </target>
 
   <target name="compile-gui-tests" depends="prepare-test, compile-tests">
-    <javac debug="on" includeantruntime="false" destdir="${build.test}" optimize="off" srcdir="${guitest}" target="1.7" source="1.7" encoding="ISO-8859-1">
+    <javac debug="on"
+           includeantruntime="false"
+           destdir="${build.test}"
+           optimize="off"
+           srcdir="${guitest}"
+           target="${target.version}"
+           source="${target.version}"
+           encoding="ISO-8859-1">
       <classpath>
         <pathelement location="${build}"/>
         <path refid="junit.path"/>
@@ -993,7 +1008,14 @@
   </target>
 
   <target name="compile-db-tests" depends="prepare-test, compile-tests">
-    <javac debug="on" includeantruntime="false" destdir="${build.test}" optimize="off" srcdir="${dbtest}" target="1.7" source="1.7" encoding="ISO-8859-1">
+    <javac debug="on"
+           includeantruntime="false"
+           destdir="${build.test}"
+           optimize="off"
+           srcdir="${dbtest}"
+           target="${target.version}"
+           source="${target.version}"
+           encoding="ISO-8859-1">
       <classpath>
         <pathelement location="${build}"/>
         <path refid="junit.path"/>

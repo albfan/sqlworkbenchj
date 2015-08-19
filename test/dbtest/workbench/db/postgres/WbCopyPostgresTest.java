@@ -64,7 +64,7 @@ public class WbCopyPostgresTest
 	{
 		PostgresTestUtil.initTestCase(TEST_ID);
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    assertNotNull(con);
 
 		TestUtil.executeScript(con,
 			"create table person (id integer primary key, first_name varchar(50), last_name varchar(50));\n" +
@@ -91,14 +91,13 @@ public class WbCopyPostgresTest
 	public void testTempTarget()
 		throws Exception
 	{
-		Statement stmt = null;
-		ResultSet rs = null;
-		WbConnection con = null;
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
+
+    Statement stmt = null;
+    ResultSet rs = null;
 		try
 		{
-			con = PostgresTestUtil.getPostgresConnection();
-			if (con == null) return;
-
 			con.getMetadata().resetSchemasToIgnores();
 
 			Settings.getInstance().setProperty("workbench.sql.ignoreschema.postgresql", "public," + TEST_ID);
@@ -137,16 +136,16 @@ public class WbCopyPostgresTest
 	public void testDifferentSchemaCopy()
 		throws Exception
 	{
-		WbConnection pgCon = PostgresTestUtil.getPostgresConnection();
-		if (pgCon == null) return;
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
 
 		TestUtil util = getTestUtil();
 		WbConnection source = util.getConnection("copySourceSchema"); // H2
 
 		WbCopy copyCmd = new WbCopy();
-		copyCmd.setConnection(pgCon);
+		copyCmd.setConnection(con);
 
-		TestUtil.executeScript(pgCon,
+		TestUtil.executeScript(con,
 			"create table public.person (id integer, first_name varchar(50), last_name varchar(50));\n " +
 			"create table public.data_ (id integer, some_info varchar(50));\n " +
 			"commit;\n");
@@ -170,10 +169,10 @@ public class WbCopyPostgresTest
 //    System.out.println(msg);
 		assertEquals(msg, true, result.isSuccess());
 
-		Integer id = (Integer)TestUtil.getSingleQueryValue(pgCon, "select id from public.person where last_name = 'Dent'");
+		Integer id = (Integer)TestUtil.getSingleQueryValue(con, "select id from public.person where last_name = 'Dent'");
 		assertEquals(42, id.intValue());
 
-		id = (Integer)TestUtil.getSingleQueryValue(pgCon, "select id from public.data_ where some_info = 'foo'");
+		id = (Integer)TestUtil.getSingleQueryValue(con, "select id from public.data_ where some_info = 'foo'");
 		assertEquals(24, id.intValue());
 
 	}
