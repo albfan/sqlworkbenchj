@@ -74,12 +74,24 @@ public class OraclePackageParser
 		return this.packageName;
 	}
 
+  /**
+   * Get the source of the specified procedure from the package source.
+   *
+   * @param source      the complete package source
+   * @param def         the procedure to extract
+   * @param parameters  the parameters of the procedure
+   *                    if null parameters are not checked at all
+   *                    to search for an overloaded procedure without parameters, pass an empty List
+   *
+   * @return the code of the procedure
+   */
 	public static CharSequence getProcedureSource(CharSequence source, ProcedureDefinition def, List<String> parameters)
 	{
 		CodeArea bounds = findProcedureArea(source, def, parameters);
 		if (bounds.startPos > -1 && bounds.endPos > -1)
 		{
-			return source.subSequence(bounds.startPos, bounds.endPos);
+      int lineStart = StringUtil.getLineStart(source, bounds.startPos);
+			return source.subSequence(lineStart > 0 ? lineStart : bounds.startPos, bounds.endPos);
 		}
 		return null;
 	}

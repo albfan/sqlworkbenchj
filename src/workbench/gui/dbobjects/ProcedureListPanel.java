@@ -173,23 +173,19 @@ public class ProcedureListPanel
 
 		this.procColumns = new DbObjectTable();
 
-		Reloadable sourceReload = new Reloadable()
-		{
-			@Override
-			public void reload()
-			{
-				if (dbConnection.isBusy()) return;
-				try
-				{
-					dbConnection.setBusy(true);
-					retrieveCurrentProcedure(false);
-				}
-				finally
-				{
-					dbConnection.setBusy(false);
-				}
-			}
-		};
+		Reloadable sourceReload = () ->
+    {
+      if (dbConnection.isBusy()) return;
+      try
+      {
+        dbConnection.setBusy(true);
+        retrieveCurrentProcedure(false);
+      }
+      finally
+      {
+        dbConnection.setBusy(false);
+      }
+    };
 
 		source = new DbObjectSourcePanel(parentWindow, sourceReload);
     if (DbExplorerSettings.allowSourceEditing())
@@ -323,22 +319,18 @@ public class ProcedureListPanel
 
 	protected void checkAlterButton()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (renameAction.isEnabled() && !WbSwingUtilities.containsComponent(statusPanel, alterButton))
-				{
-					statusPanel.add(alterButton, BorderLayout.EAST);
-					statusPanel.validate();
-				}
-				else
-				{
-					statusPanel.remove(alterButton);
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      if (renameAction.isEnabled() && !WbSwingUtilities.containsComponent(statusPanel, alterButton))
+      {
+        statusPanel.add(alterButton, BorderLayout.EAST);
+        statusPanel.validate();
+      }
+      else
+      {
+        statusPanel.remove(alterButton);
+      }
+    });
 	}
 
 	private void extendPopupMenu()
@@ -383,16 +375,12 @@ public class ProcedureListPanel
       dbConnection.getMetadata().getProcedureReader().clearCache();
     }
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				procList.reset();
-				procColumns.reset();
-				source.reset();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      procList.reset();
+      procColumns.reset();
+      source.reset();
+    });
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -461,14 +449,10 @@ public class ProcedureListPanel
 			this.dbConnection.setBusy(true);
 			WbSwingUtilities.showWaitCursor(parent);
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					infoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        infoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
+      });
 
 			levelChanger.changeIsolationLevel(dbConnection);
 			DbMetadata meta = dbConnection.getMetadata();
@@ -480,15 +464,11 @@ public class ProcedureListPanel
 
 			model.setValidator(validator);
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					infoLabel.showObjectListInfo(model);
-					procList.setModel(model, true);
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        infoLabel.showObjectListInfo(model);
+        procList.setModel(model, true);
+      });
 			shouldRetrieve = false;
 		}
 		catch (LowMemoryException mem)
@@ -625,14 +605,10 @@ public class ProcedureListPanel
 		final ProcedureDefinition def = getCurrentProcedureDefinition();
 		if (def == null) return;
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				retrieveProcDefinition(def, useCache);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      retrieveProcDefinition(def, useCache);
+    });
 	}
 
    /**
@@ -832,18 +808,14 @@ public class ProcedureListPanel
 
 		if (procList.getSelectedRowCount() == 1)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					source.setCaretPosition(pos,(pos > 0));
-					if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
-					{
-						source.requestFocusInWindow();
-					}
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        source.setCaretPosition(pos,(pos > 0));
+        if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
+        {
+          source.requestFocusInWindow();
+        }
+      });
 		}
 	}
 
@@ -1000,14 +972,10 @@ public class ProcedureListPanel
 
 				// Allow the selection change to finish so that
 				// we have the correct table name in the instance variables
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						showProcedureCallData(panelIndex, type);
-					}
-				});
+				EventQueue.invokeLater(() ->
+        {
+          showProcedureCallData(panelIndex, type);
+        });
 			}
 			catch (Exception ex)
 			{

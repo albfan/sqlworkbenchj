@@ -1798,7 +1798,7 @@ public class StringUtil
 	 * @param position  the position inside the text
 	 * @return the start offset of the line where position is located in
 	 */
-	public static int getLineStart(String text, int position)
+	public static int getLineStart(CharSequence text, int position)
 	{
 		if (StringUtil.isEmptyString(text)) return 0;
 		if (position >= text.length()) return 0;

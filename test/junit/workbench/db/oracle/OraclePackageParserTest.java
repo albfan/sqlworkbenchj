@@ -22,13 +22,15 @@
  */
 package workbench.db.oracle;
 
-import org.junit.Test;
-
 import java.sql.DatabaseMetaData;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.db.ProcedureDefinition;
+
 import workbench.util.CollectionUtil;
+
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -151,7 +153,7 @@ public class OraclePackageParserTest
 
 		pos = script.indexOf("PROCEDURE fire_employee IS");
 		proc = new ProcedureDefinition("fire_employee", DatabaseMetaData.procedureNoResult);
-		procPos = OraclePackageParser.findProcedurePosition(script, proc, null);
+		procPos = OraclePackageParser.findProcedurePosition(script, proc, Collections.emptyList());
 		assertEquals(pos, procPos);
 	}
 
