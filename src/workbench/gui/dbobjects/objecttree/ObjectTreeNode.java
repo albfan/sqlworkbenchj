@@ -148,8 +148,7 @@ public class ObjectTreeNode
   public boolean canHaveChildren()
   {
     if (getAllowsChildren()) return true;
-    if (getType() != null && typesWithChildren.contains(getType())) return true;
-    return false;
+    return getType() != null && typesWithChildren.contains(getType());
   }
 
   @Override
@@ -209,7 +208,19 @@ public class ObjectTreeNode
     if (dbo instanceof ColumnIdentifier)
     {
       ColumnIdentifier col = (ColumnIdentifier)dbo;
-      return "<html>" + col.getColumnName() + " - <tt>" + col.getDbmsType() + "</tt></html>";
+      String name = null;
+      String type = null;
+      if (col.isNullable())
+      {
+        name = col.getColumnName();
+        type = col.getDbmsType();
+      }
+      else
+      {
+        name = "<b>" + col.getColumnName() + "</b>";
+        type = col.getDbmsType() + " NOT NULL";
+      }
+      return "<html>" + name + " - <tt>" + type + "</tt></html>";
     }
     if (dbo instanceof IndexDefinition)
     {

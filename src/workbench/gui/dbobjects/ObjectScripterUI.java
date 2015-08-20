@@ -61,6 +61,7 @@ public class ObjectScripterUI
 	protected JFrame window;
 	private boolean isRunning;
 	private final Object runMonitor = new Object();
+  private String lastObject;
 
 	public ObjectScripterUI(Scripter script)
 	{
@@ -116,6 +117,7 @@ public class ObjectScripterUI
 				try
 				{
 					setRunning(true);
+          lastObject = null;
 					window.setTitle(RunningJobIndicator.TITLE_PREFIX + baseTitle);
 					scripter.generateScript();
 					if (!scripter.isCancelled())
@@ -133,7 +135,7 @@ public class ObjectScripterUI
 				}
 				finally
 				{
-					window.setTitle(baseTitle);
+          window.setTitle(lastObject == null ? baseTitle : lastObject);
 					setRunning(false);
 					EventQueue.invokeLater(new Runnable()
 					{
@@ -147,15 +149,19 @@ public class ObjectScripterUI
 	}
 
 	@Override
-	public void setCurrentObject(String aTableName, int current, int total)
+	public void setCurrentObject(String currentObject, int current, int total)
 	{
 		if (current > 0 && total > 0)
 		{
-			this.statusMessage.setText(aTableName + " (" + current + "/" + total + ")");
+			this.statusMessage.setText(currentObject + " (" + current + "/" + total + ")");
+      if (current == total && total == 1)
+      {
+        lastObject = currentObject;
+      }
 		}
 		else
 		{
-			this.statusMessage.setText(aTableName);
+			this.statusMessage.setText(currentObject);
 		}
 		this.statusMessage.repaint();
 	}
