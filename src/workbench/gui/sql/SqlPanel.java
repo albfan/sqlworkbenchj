@@ -1330,7 +1330,7 @@ public class SqlPanel
 	@Override
 	public List getMenuItems()
 	{
-		return this.actions;
+		return Collections.unmodifiableList(this.actions);
 	}
 
 	/**
