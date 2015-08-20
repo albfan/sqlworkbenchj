@@ -283,7 +283,7 @@ public class DdlCommand
 		ErrorInformationReader reader = ReaderFactory.getErrorInformationReader(currentConnection);
 		if (reader == null) return false;
 
-		ErrorDescriptor error = reader.getErrorInfo(null, info.getObjectName(), info.getObjectType(), true);
+		ErrorDescriptor error = reader.getErrorInfo(sql, null, info.getObjectName(), info.getObjectType(), true);
 		if (error == null) return false;
 
 		if (error.getErrorPosition() == -1 && error.getErrorColumn() > -1 && error.getErrorLine() > -1)

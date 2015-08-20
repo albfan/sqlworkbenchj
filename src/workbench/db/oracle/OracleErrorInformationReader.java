@@ -38,6 +38,7 @@ import workbench.db.WbConnection;
 import workbench.sql.ErrorDescriptor;
 
 import workbench.util.CollectionUtil;
+import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -69,7 +70,7 @@ public class OracleErrorInformationReader
 	 *	@return extended error information if available
 	 */
 	@Override
-	public ErrorDescriptor getErrorInfo(String schema, String objectName, String objectType, boolean showObjectHeaders)
+	public ErrorDescriptor getErrorInfo(String originalSql, String schema, String objectName, String objectType, boolean showObjectHeaders)
 	{
 		if (StringUtil.isEmptyString(objectName))
 		{
@@ -177,6 +178,7 @@ public class OracleErrorInformationReader
 					// only report the first error position
 					// normalize to zero based values
 					result.setErrorPosition(line - 1, pos - 1);
+          result.setInStatementOffset(getRealStart(type, originalSql));
 				}
 
 				if (showObjectHeaders && (currentName == null || !currentName.equals(name)))
@@ -217,4 +219,14 @@ public class OracleErrorInformationReader
 		return result;
 	}
 
+  private int getRealStart(String type, String sql)
+  {
+    if (sql == null) return 0;
+    if (!"trigger".equalsIgnoreCase(type)) return 0;
+
+    SqlParsingUtil util = SqlParsingUtil.getInstance(connection);
+    int pos = util.getKeywordPosition("BEGIN", sql);
+    if (pos > 0) return pos;
+    return 0;
+  }
 }

@@ -40,6 +40,7 @@ public class ErrorDescriptor
 	private DdlObjectInfo object;
 	private String errorMessage;
 	private boolean messageIncludesPosition;
+  private int inStatementOffset = 0;
 
 	public ErrorDescriptor()
 	{
@@ -84,9 +85,14 @@ public class ErrorDescriptor
 
 	public int getErrorPosition()
 	{
-		return errorPosition;
+		return errorPosition + inStatementOffset;
 	}
 
+  public void setInStatementOffset(int offset)
+  {
+    inStatementOffset = offset;
+  }
+  
 	/**
 	 * Sets the position of the error as an offset to the start of the SQL statement.
 	 *

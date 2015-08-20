@@ -88,13 +88,13 @@ public class OracleObjectCompiler
         // an "alter package .. compile"  will report errors for the package body, not the package
         type = "PACKAGE BODY";
       }
-      
+
       if ("PACKAGE BODY".equals(type))
       {
         // the errors will be reported for the package name, not the procedure name
         name = object.getCatalog();
       }
-      ErrorDescriptor error = errorReader.getErrorInfo(null, name, type, false);
+      ErrorDescriptor error = errorReader.getErrorInfo(null, null, name, type, false);
 			if (error == null)
 			{
 				return null;

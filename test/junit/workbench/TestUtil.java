@@ -514,7 +514,7 @@ public class TestUtil
 					String msg = null;
 					if (reader != null)
 					{
-						reader.getErrorInfo(null, info.getObjectName(), info.getObjectType(), true);
+						reader.getErrorInfo(null, null, info.getObjectName(), info.getObjectType(), true);
 					}
 					if (StringUtil.isNonBlank(msg))
 					{

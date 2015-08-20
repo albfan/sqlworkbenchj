@@ -81,7 +81,7 @@ public class OracleErrorInformationReaderTest
 		{
 			con.setBusy(true);
 			OracleErrorInformationReader reader = new OracleErrorInformationReader(con);
-			ErrorDescriptor errorInfo = reader.getErrorInfo(null, "nocando", "procedure", true);
+			ErrorDescriptor errorInfo = reader.getErrorInfo(null, null, "nocando", "procedure", true);
 			con.setBusy(false);
 			assertNotNull(errorInfo);
 
@@ -90,7 +90,7 @@ public class OracleErrorInformationReaderTest
 			assertEquals(4, errorInfo.getErrorLine());
 			assertEquals(4, errorInfo.getErrorColumn());
 
-			errorInfo = reader.getErrorInfo(null, "nocando", "procedure", false);
+			errorInfo = reader.getErrorInfo(null, null, "nocando", "procedure", false);
 			assertNotNull(errorInfo);
 			String msg = errorInfo.getErrorMessage();
 			assertFalse(msg.contains("Errors for PROCEDURE NOCANDO"));

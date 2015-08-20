@@ -319,7 +319,7 @@ public class WbOraShow
 		if (object != null)
 		{
 			OracleErrorInformationReader reader = new OracleErrorInformationReader(currentConnection);
-			errors  = reader.getErrorInfo(schema, object, type, true);
+			errors  = reader.getErrorInfo(null, schema, object, type, true);
 		}
 
 		if (errors != null)

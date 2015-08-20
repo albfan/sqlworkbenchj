@@ -40,5 +40,5 @@ import workbench.sql.ErrorDescriptor;
  */
 public interface ErrorInformationReader
 {
-	ErrorDescriptor getErrorInfo(String schema, String object, String type, boolean formatMessage);
+	ErrorDescriptor getErrorInfo(String originalSql, String schema, String object, String type, boolean formatMessage);
 }
