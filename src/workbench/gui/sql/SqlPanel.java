@@ -487,16 +487,12 @@ public class SqlPanel
 		int position = bookmark.getOffset();
 		final int line = this.editor.getLineOfOffset(position);
 		final int offset = editor.getLineStartOffset(line);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				editor.setCaretPosition(offset);
-        editor.centerLine(line);
-				editor.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      editor.setCaretPosition(offset);
+      editor.centerLine(line);
+      editor.requestFocusInWindow();
+    });
 	}
 
   @Override
@@ -526,19 +522,15 @@ public class SqlPanel
 	{
 		if (flag == locked) return;
 		this.locked = flag;
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				updateTabTitle();
-				Component c = getParent();
-				if (c instanceof WbTabbedPane)
-				{
-					((WbTabbedPane)c).setCloseButtonEnabled(SqlPanel.this, !flag);
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      updateTabTitle();
+      Component c = getParent();
+      if (c instanceof WbTabbedPane)
+      {
+        ((WbTabbedPane)c).setCloseButtonEnabled(SqlPanel.this, !flag);
+      }
+    });
 	}
 
 	@Override
@@ -1134,23 +1126,14 @@ public class SqlPanel
 		editor.getActionMap().setParent(am);
 	}
 
-	private final Runnable selector = new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_selectEditor();
-			}
-		};
-
 	public void selectEditorLater()
 	{
-		EventQueue.invokeLater(selector);
+		EventQueue.invokeLater(this::_selectEditor);
 	}
 
 	public void selectEditor()
 	{
-		WbSwingUtilities.invoke(selector);
+		WbSwingUtilities.invoke(this::_selectEditor);
 	}
 
 	protected void _selectEditor()
@@ -1228,17 +1211,13 @@ public class SqlPanel
 		if (this.isVisible() && this.isCurrentTab())
 		{
 			showResultPanel();
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-          if (currentData != null)
-          {
-            currentData.getTable().requestFocusInWindow();
-          }
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        if (currentData != null)
+        {
+          currentData.getTable().requestFocusInWindow();
+        }
+      });
 		}
 	}
 
@@ -1296,14 +1275,10 @@ public class SqlPanel
 		{
 			setLogText(ExceptionUtil.getDisplay(mem));
 			iconHandler.showBusyIcon(false);
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					WbSwingUtilities.showErrorMessageKey(SqlPanel.this, "MsgOutOfMemoryError");
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        WbSwingUtilities.showErrorMessageKey(SqlPanel.this, "MsgOutOfMemoryError");
+      });
 		}
 		catch (Exception e)
 		{
@@ -1355,14 +1330,10 @@ public class SqlPanel
 
 	protected void setLogText(final String msg)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				log.setText(msg);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      log.setText(msg);
+    });
 	}
 
 	/**
@@ -1371,15 +1342,11 @@ public class SqlPanel
 	@Override
 	public void showLogPanel()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				int index = resultTab.getTabCount() - 1;
-				resultTab.setSelectedIndex(index);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      int index = resultTab.getTabCount() - 1;
+      resultTab.setSelectedIndex(index);
+    });
 	}
 
 	@Override
@@ -1393,14 +1360,10 @@ public class SqlPanel
 	 */
 	public void showResultPanel(final int index)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				resultTab.setSelectedIndex(index);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      resultTab.setSelectedIndex(index);
+    });
 	}
 
 	public StatusBar getStatusBar()
@@ -1808,26 +1771,22 @@ public class SqlPanel
 	 */
 	protected void checkCommitAction()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (dbConnection != null)
-				{
-					// if autocommit is enabled, then rollback and commit will
-					// be disabled
-					boolean flag = dbConnection.getAutoCommit();
-					commitAction.setEnabled(!flag);
-					rollbackAction.setEnabled(!flag);
-				}
-				else
-				{
-					commitAction.setEnabled(false);
-					rollbackAction.setEnabled(false);
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (dbConnection != null)
+      {
+        // if autocommit is enabled, then rollback and commit will
+        // be disabled
+        boolean flag = dbConnection.getAutoCommit();
+        commitAction.setEnabled(!flag);
+        rollbackAction.setEnabled(!flag);
+      }
+      else
+      {
+        commitAction.setEnabled(false);
+        rollbackAction.setEnabled(false);
+      }
+    });
 	}
 
 	@Override
@@ -2044,17 +2003,13 @@ public class SqlPanel
 
 	public void setActionState(final Action[] anActionList, final boolean aFlag)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				for (Action action : anActionList)
-				{
-					if (action != null) action.setEnabled(aFlag);
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      for (Action action : anActionList)
+      {
+        if (action != null) action.setEnabled(aFlag);
+      }
+    });
 	}
 
 	public void runCurrentStatement()
@@ -2619,22 +2574,18 @@ public class SqlPanel
 
 	private void appendMessage(final String logMessage, final String ... moreMessages)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				log.append(logMessage);
-				if (moreMessages != null)
-				{
-					for (String msg : moreMessages)
-					{
-						log.append(msg);
-					}
-				}
-				log.setCaretPosition(log.getDocument().getLength());
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      log.append(logMessage);
+      if (moreMessages != null)
+      {
+        for (String msg : moreMessages)
+        {
+          log.append(msg);
+        }
+      }
+      log.setCaretPosition(log.getDocument().getLength());
+    });
 	}
 
 	@Override
@@ -2859,33 +2810,29 @@ public class SqlPanel
 		try
 		{
 			ignoreStateChange = true;
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					int index = 0;
-					while (index < resultTab.getTabCount() - 1)
-					{
-						Component c = resultTab.getComponentAt(index);
-						DwPanel panel = (DwPanel)c;
-						if (filter.shouldClose(panel, index) && confirmDiscardChanges(index, true))
-						{
-							panel.removePropertyChangeListener(SqlPanel.this);
-							panel.dispose();
-							resultTab.removeTabAt(index);
-						}
-						else
-						{
-							index ++;
-						}
-					}
-					resultTab.setSelectedIndex(0);
-					currentData = getCurrentResult();
-					updateProxiedActions();
-					updateResultInfos();
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        int index = 0;
+        while (index < resultTab.getTabCount() - 1)
+        {
+          Component c = resultTab.getComponentAt(index);
+          DwPanel panel = (DwPanel)c;
+          if (filter.shouldClose(panel, index) && confirmDiscardChanges(index, true))
+          {
+            panel.removePropertyChangeListener(SqlPanel.this);
+            panel.dispose();
+            resultTab.removeTabAt(index);
+          }
+          else
+          {
+            index ++;
+          }
+        }
+        resultTab.setSelectedIndex(0);
+        currentData = getCurrentResult();
+        updateProxiedActions();
+        updateResultInfos();
+      });
 		}
 		finally
 		{
@@ -2926,14 +2873,7 @@ public class SqlPanel
 			// now active
 			if (index == resultTab.getSelectedIndex())
 			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						resultTab.fireStateChanged();
-					}
-				});
+				EventQueue.invokeLater(resultTab::fireStateChanged);
 			}
 		}
 		catch (Exception e)
@@ -2986,33 +2926,29 @@ public class SqlPanel
 		try
 		{
 			ignoreStateChange = true;
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					while (resultTab.getTabCount() > 1)
-					{
-						Component c = resultTab.getComponentAt(0);
-						if (c instanceof DwPanel)
-						{
-							DwPanel panel = (DwPanel)c;
-              refreshMgr.removeRefresh(panel);
-							panel.removePropertyChangeListener(SqlPanel.this);
-							panel.dispose();
-						}
-						resultTab.removeTabAt(0);
-					}
-					resultTab.setSelectedIndex(0);
-					boolean wasNull = currentData == null;
-					currentData = null;
-					if (!wasNull)
-					{
-						updateProxiedActions();
-					}
-					checkResultSetActions();
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        while (resultTab.getTabCount() > 1)
+        {
+          Component c = resultTab.getComponentAt(0);
+          if (c instanceof DwPanel)
+          {
+            DwPanel panel = (DwPanel)c;
+            refreshMgr.removeRefresh(panel);
+            panel.removePropertyChangeListener(SqlPanel.this);
+            panel.dispose();
+          }
+          resultTab.removeTabAt(0);
+        }
+        resultTab.setSelectedIndex(0);
+        boolean wasNull = currentData == null;
+        currentData = null;
+        if (!wasNull)
+        {
+          updateProxiedActions();
+        }
+        checkResultSetActions();
+      });
 		}
 		finally
 		{
@@ -3025,14 +2961,7 @@ public class SqlPanel
 	 */
 	protected void updateProxiedActions()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_updateProxiedActions();
-			}
-		});
+		WbSwingUtilities.invoke(this::_updateProxiedActions);
 	}
 
 	private void _updateProxiedActions()
@@ -3668,22 +3597,18 @@ public class SqlPanel
   private int handleRetry(final int cmdIndex, final ErrorDescriptor errorDetails, final ScriptParser parser, int selectionOffset)
   {
     final ErrorRetryPanel retry = new ErrorRetryPanel(errorDetails, stmtRunner);
-    WbSwingUtilities.invoke(new Runnable()
+    WbSwingUtilities.invoke(() ->
     {
-      @Override
-      public void run()
+      boolean busy = getConnection().isBusy();
+      try
       {
-        boolean busy = getConnection().isBusy();
-        try
-        {
-          getConnection().setBusy(false);
-          retry.setStatement(parser, cmdIndex);
-          retry.showDialog((Frame)SwingUtilities.getWindowAncestor(SqlPanel.this));
-        }
-        finally
-        {
-          getConnection().setBusy(busy);
-        }
+        getConnection().setBusy(false);
+        retry.setStatement(parser, cmdIndex);
+        retry.showDialog((Frame)SwingUtilities.getWindowAncestor(SqlPanel.this));
+      }
+      finally
+      {
+        getConnection().setBusy(busy);
       }
     });
 
@@ -3750,14 +3675,10 @@ public class SqlPanel
 	private void restoreSelection(final boolean highlightCurrent, final boolean jumpToNext, final boolean restoreSelection, final int currentCursor, final int oldSelectionStart, final int oldSelectionEnd, final int commandWithError, final int startIndex, final int endIndex, final ScriptParser scriptParser)
 	{
 		// changing the selection and the caret should be done on the EDT
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_restoreSelection(highlightCurrent, jumpToNext, restoreSelection, currentCursor, oldSelectionStart, oldSelectionEnd, commandWithError, startIndex, endIndex, scriptParser);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      _restoreSelection(highlightCurrent, jumpToNext, restoreSelection, currentCursor, oldSelectionStart, oldSelectionEnd, commandWithError, startIndex, endIndex, scriptParser);
+    });
 	}
 
 	private void _restoreSelection(boolean highlightCurrent, boolean jumpToNext, boolean restoreSelection, int currentCursor, int oldSelectionStart, int oldSelectionEnd, int commandWithError, int startIndex, int endIndex, ScriptParser scriptParser)
@@ -3824,25 +3745,21 @@ public class SqlPanel
 			System.gc(); // as we have just freed some memory the gc() does make sense here.
 			WbManager.getInstance().setOutOfMemoryOcurred();
 			final boolean success = result.isSuccess();
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if (success)
-					{
-						log.append(ResourceMgr.getString("ErrLogNoMemSuccess"));
-					}
-					else
-					{
-						log.append(ResourceMgr.getString("ErrLogNoMemError"));
-					}
-					log.append("\n");
-					log.append(ResourceMgr.getString("ErrLogNoMemCheckLog"));
-					log.append("\n");
-					log.setCaretPosition(log.getDocument().getLength());
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        if (success)
+        {
+          log.append(ResourceMgr.getString("ErrLogNoMemSuccess"));
+        }
+        else
+        {
+          log.append(ResourceMgr.getString("ErrLogNoMemError"));
+        }
+        log.append("\n");
+        log.append(ResourceMgr.getString("ErrLogNoMemCheckLog"));
+        log.append("\n");
+        log.setCaretPosition(log.getDocument().getLength());
+      });
 		}
 		catch (Throwable th)
 		{
@@ -3930,14 +3847,10 @@ public class SqlPanel
 		final int newIndex = addResultTab(p);
 		if (newIndex > 0)
 		{
-			WbSwingUtilities.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					resultTab.setSelectedIndex(newIndex);
-				}
-			});
+			WbSwingUtilities.invokeLater(() ->
+      {
+        resultTab.setSelectedIndex(newIndex);
+      });
 		}
 	}
 
@@ -4046,48 +3959,41 @@ public class SqlPanel
 			final List<DataStore> results = result.getDataStores();
 			count += results.size();
 			final List<DwPanel> panels = new ArrayList<>(results.size());
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					try
-					{
-						UseTabAnnotation useTab = new UseTabAnnotation();
-						for (DataStore ds : results)
-						{
-							String gen = StringUtil.isNonBlank(sql) ? sql : ds.getGeneratingSql();
-							String tabName = useTab.getResultName(sql);
-
-							DwPanel p = null;
-							if (StringUtil.isNonEmpty(tabName))
-							{
-								ds.setResultName(tabName);
-								p = findResultPanelByName(tabName);
-							}
-
-							if (p != null)
-							{
-								p.showData(ds, gen, time);
-								panels.add(p);
-								p.setReUsed(true);
-								p.showGeneratingSQLAsTooltip();
-							}
-							else
-							{
-								p = createDwPanel(true);
-								p.showData(ds, gen, time);
-								addResultTab(p);
-								panels.add(p);
-							}
-						}
-					}
-					catch (Exception e)
-					{
-						LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel with DataStore", e);
-					}
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        try
+        {
+          UseTabAnnotation useTab = new UseTabAnnotation();
+          for (DataStore ds : results)
+          {
+            String gen = StringUtil.isNonBlank(sql) ? sql : ds.getGeneratingSql();
+            String tabName1 = useTab.getResultName(sql);
+            DwPanel p = null;
+            if (StringUtil.isNonEmpty(tabName1))
+            {
+              ds.setResultName(tabName1);
+              p = findResultPanelByName(tabName1);
+            }
+            if (p != null)
+            {
+              p.showData(ds, gen, time);
+              panels.add(p);
+              p.setReUsed(true);
+              p.showGeneratingSQLAsTooltip();
+            }
+            else
+            {
+              p = createDwPanel(true);
+              p.showData(ds, gen, time);
+              addResultTab(p);
+              panels.add(p);
+            }
+          }
+        }catch (Exception e)
+        {
+          LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel with DataStore", e);
+        }
+      });
 
 			// The retrieval of column comments should not be done on the AWT Thread
 			if (GuiSettings.getRetrieveQueryComments())
@@ -4168,58 +4074,45 @@ public class SqlPanel
 						};
 		setActionState(actionList, hasResult);
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				importFileAction.setEnabled(mayEdit);
-				importClipAction.setEnabled(mayEdit);
-
-				findDataAgainAction.setEnabled(findNext);
-				copySelectedMenu.setEnabled(hasResult);
-				reloadAction.checkEnabled();
-				showFormAction.setEnabled(hasRows);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      importFileAction.setEnabled(mayEdit);
+      importClipAction.setEnabled(mayEdit);
+      findDataAgainAction.setEnabled(findNext);
+      copySelectedMenu.setEnabled(hasResult);
+      reloadAction.checkEnabled();
+      showFormAction.setEnabled(hasRows);
+    });
   }
 
 	private void setExecActionsState(final boolean flag)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-        executeAll.setEnabled(flag);
-        executeCurrent.setEnabled(flag);
-        executeSelected.setEnabled(flag);
-        executeFromCurrent.setEnabled(flag);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      executeAll.setEnabled(flag);
+      executeCurrent.setEnabled(flag);
+      executeSelected.setEnabled(flag);
+      executeFromCurrent.setEnabled(flag);
+    });
 	}
 
 	private void setConnActionsState(final boolean flag)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (flag)
-				{
-					checkCommitAction();
-				}
-				else
-				{
-					commitAction.setEnabled(flag);
-					rollbackAction.setEnabled(flag);
-				}
-				spoolData.canExport(flag);
-				appendResultsAction.setEnabled(flag);
-				joinCompletion.setEnabled(flag);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (flag)
+      {
+        checkCommitAction();
+      }
+      else
+      {
+        commitAction.setEnabled(flag);
+        rollbackAction.setEnabled(flag);
+      }
+      spoolData.canExport(flag);
+      appendResultsAction.setEnabled(flag);
+      joinCompletion.setEnabled(flag);
+    });
 	}
 
 	/**
