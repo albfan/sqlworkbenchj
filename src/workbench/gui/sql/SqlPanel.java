@@ -3612,22 +3612,32 @@ public class SqlPanel
       }
     });
 
-    if (retry.getChoice() == WbSwingUtilities.CONTINUE_OPTION)
+    int result = retry.getChoice();
+
+    try
     {
-      int startOfStatement = parser.getStartPosForCommand(cmdIndex) + selectionOffset;
-      int endOfStatement = parser.getEndPosForCommand(cmdIndex) + selectionOffset;
-      editor.replaceText(startOfStatement, endOfStatement, retry.getStatement());
-      return JOptionPane.YES_OPTION;
+      switch (retry.getChoice())
+      {
+        case WbSwingUtilities.CONTINUE_OPTION:
+          int startOfStatement = parser.getStartPosForCommand(cmdIndex) + selectionOffset;
+          int endOfStatement = parser.getEndPosForCommand(cmdIndex) + selectionOffset;
+          editor.replaceText(startOfStatement, endOfStatement, retry.getStatement());
+          result = JOptionPane.YES_OPTION;
+          break;
+        case JOptionPane.CANCEL_OPTION:
+          result = JOptionPane.NO_OPTION;
+          break;
+        case WbSwingUtilities.IGNORE_ONE:
+          result = JOptionPane.YES_OPTION;
+          break;
+        default:
+      }
     }
-    if (retry.getChoice() == JOptionPane.CANCEL_OPTION)
+    finally
     {
-      return JOptionPane.NO_OPTION;
+      retry.dispose();
     }
-    if (retry.getChoice() == WbSwingUtilities.IGNORE_ONE)
-    {
-      return JOptionPane.YES_OPTION;
-    }
-    return retry.getChoice();
+    return result;
   }
 
   private int askContinue(final ErrorDescriptor errorDetails, final String question)

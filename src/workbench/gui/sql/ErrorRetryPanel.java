@@ -203,19 +203,14 @@ public class ErrorRetryPanel
     choice = value;
     if (window == null) return;
 
-    EventQueue.invokeLater(new Runnable()
+    EventQueue.invokeLater(() ->
     {
-      @Override
-      public void run()
-      {
-        window.setVisible(false);
-        dispose();
-        window.dispose();
-      }
+      window.setVisible(false);
+      window.dispose();
     });
   }
 
-  private void dispose()
+  public void dispose()
   {
     if (autoComplete != null) autoComplete.dispose();
     sqlEditor.dispose();
@@ -270,21 +265,17 @@ public class ErrorRetryPanel
       }
       else
       {
-        EventQueue.invokeLater(new Runnable()
+        EventQueue.invokeLater(() ->
         {
-          @Override
-          public void run()
+          if (descriptor != null && descriptor.getErrorMessage() != null)
           {
-            if (descriptor != null && descriptor.getErrorMessage() != null)
+            errorDisplay.setText(descriptor.getErrorMessage());
+            if (descriptor.getErrorPosition() > -1)
             {
-              errorDisplay.setText(descriptor.getErrorMessage());
-              if (descriptor.getErrorPosition() > -1)
-              {
-                sqlEditor.setCaretPosition(descriptor.getErrorPosition());
-              }
+              sqlEditor.setCaretPosition(descriptor.getErrorPosition());
             }
-            sqlEditor.requestFocusInWindow();
           }
+          sqlEditor.requestFocusInWindow();
         });
       }
     }
