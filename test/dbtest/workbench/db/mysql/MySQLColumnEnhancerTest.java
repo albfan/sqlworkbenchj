@@ -35,7 +35,6 @@ import workbench.db.WbConnection;
 
 import org.junit.AfterClass;
 import org.junit.Assume;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -53,33 +52,45 @@ public class MySQLColumnEnhancerTest
 		super("MySqlEnumReaderTest");
 	}
 
-	@BeforeClass
-	public static void setUpClass()
-		throws Exception
-	{
-		MySQLTestUtil.initTestcase("MySqlEnumReaderTest");
-
-		WbConnection con = MySQLTestUtil.getMySQLConnection();
-		Assume.assumeNotNull("No connection available", con);
-
-		String sql = "CREATE TABLE enum_test \n" +
-								 "( \n" +
-								 "   nr     INT, \n" +
-								 "   color  enum('red','green','blue') \n" +
-								 ");";
-		TestUtil.executeScript(con, sql);
-	}
-
 	@AfterClass
 	public static void tearDownClass()
 		throws Exception
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
 		Assume.assumeNotNull("No connection available", con);
-		String sql = "DROP TABLE enum_test;";
+		String sql =
+      "DROP TABLE if exists enum_test;" +
+      "DROP TABLE if exists ts_test;";
 		TestUtil.executeScript(con, sql);
 		MySQLTestUtil.cleanUpTestCase();
 	}
+
+  @Test
+  public void testOnUpdateDefault()
+    throws Exception
+  {
+    WbConnection con = MySQLTestUtil.getMySQLConnection();
+    assertNotNull("No connection available", con);
+
+    String sql = "CREATE TABLE ts_test \n" +
+      "( \n" +
+      "   nr     INT, \n" +
+      "   modified_at timestamp default current_timestamp on update current_timestamp \n" +
+      ");";
+    TestUtil.executeScript(con, sql);
+
+    TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("ts_test"));
+    assertNotNull(def);
+
+    List<ColumnIdentifier> cols = def.getColumns();
+    assertNotNull(cols);
+    assertEquals(2, cols.size());
+    String type = cols.get(1).getDbmsType();
+    assertEquals("TIMESTAMP", type);
+    String defaultValue = cols.get(1).getDefaultValue();
+    assertNotNull(defaultValue);
+    assertEquals("current_timestamp on update current_timestamp", defaultValue.toLowerCase());
+  }
 
 	@Test
 	public void testUpdateColumnDefinition()
@@ -87,6 +98,13 @@ public class MySQLColumnEnhancerTest
 	{
 		WbConnection con = MySQLTestUtil.getMySQLConnection();
 		assertNotNull("No connection available", con);
+
+		String sql = "CREATE TABLE enum_test \n" +
+								 "( \n" +
+								 "   nr     INT, \n" +
+								 "   color  enum('red','green','blue') \n" +
+								 ");";
+		TestUtil.executeScript(con, sql);
 
 		TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("enum_test"));
 		assertNotNull(def);

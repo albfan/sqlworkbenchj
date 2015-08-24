@@ -1330,7 +1330,8 @@
         This property defines the SQL query that should be executed. It must be a statement that
         returns a result set. The statement may contain three placeholders: <literal>%catalog%</literal>,
         <literal>%schema%</literal> and <literal>%table_name%</literal> that are replaced with the values of
-        the actual table before running the statement.
+        the actual table before running the statement. The placeholder <literal>%fq_table_name%</literal> can
+        be used to denote the fully qualified table name including the catalog and the schema (if available).
 			</para>
     </simplesect>
 
@@ -1339,7 +1340,7 @@
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.sourcecol</literal></para>
 			<para>
         By default the source code is assumed to be in the first column of the result. If that is not the case
-        this property can be used to define the column index in which the table's source is available.
+        this property can be used to define the column index of the result in which the table's source is available.
         The first column has the index 1.
 			</para>
     </simplesect>
@@ -1348,9 +1349,8 @@
       The following example configures a SQL statement to retrieve the table source using MySQL's
       <literal>SHOW CREATE TABLE</literal>:
     </para>
-    <programlisting>workbench.db.mysql.retrieve.create.table.query=show create table %catalog%.%table_name%
+    <programlisting>workbench.db.mysql.retrieve.create.table.query=show create table %fq_table_name%
 workbench.db.mysql.retrieve.create.table.sourcecol=2</programlisting>
-
     <para>
       The following example configures a SQL statement to retrieve the table source using Oracle's
       <ulink url="http://docs.oracle.com/cd/E11882_01/appdev.112/e25788/d_metada.htm">DBMS_METADATA</ulink> package:

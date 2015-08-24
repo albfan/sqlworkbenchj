@@ -58,10 +58,7 @@ public class MySQLColumnEnhancer
 		MySQLEnumReader enumReader = new MySQLEnumReader();
 		enumReader.readEnums(tbl, connection);
 
-    if (JdbcUtils.hasMinimumServerVersion(connection, "5.7"))
-    {
-      updateComputedColumns(tbl, connection);
-    }
+    updateComputedColumns(tbl, connection);
 	}
 
   private void updateComputedColumns(TableDefinition tbl, WbConnection connection)
@@ -69,13 +66,18 @@ public class MySQLColumnEnhancer
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
+    boolean is57 = JdbcUtils.hasMinimumServerVersion(connection, "5.7");
+
     String sql =
-      "select column_name, extra, generation_expression \n" +
+      "select column_name, extra, " + (is57 ? "generation_expression " : "null as generation_expression ") + " \n" +
       "from information_schema.columns \n" +
       "where table_schema = ? \n" +
       "  and table_name = ? \n " +
-      "  and coalesce(extra) <> '' \n" +
-      "  and coalesce(generation_expression) <> ''";
+      "  and coalesce(extra) <> '' \n";
+    if (is57)
+    {
+      sql += "  and coalesce(generation_expression) <> ''";
+    }
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -92,19 +94,35 @@ public class MySQLColumnEnhancer
       while (rs.next())
       {
         String colname = rs.getString(1);
-        String genType = rs.getString(2);
+        String extra = rs.getString(2);
         String expression = rs.getString(3);
         ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
         if (col != null)
         {
-          String genSql = " GENERATED ALWAYS AS (" + expression + ") " + genType.replace("GENERATED", "").trim();
-          col.setComputedColumnExpression(genSql);
+          if (expression != null)
+          {
+            String genSql = " GENERATED ALWAYS AS (" + expression + ") " + extra.replace("GENERATED", "").trim();
+            col.setComputedColumnExpression(genSql);
+          }
+          else if (extra != null && extra.toLowerCase().startsWith("on update"))
+          {
+            String defaultValue = col.getDefaultValue();
+            if (defaultValue == null)
+            {
+              col.setDefaultValue(extra);
+            }
+            else
+            {
+              defaultValue += " " + extra;
+              col.setDefaultValue(defaultValue);
+            }
+          }
         }
       }
     }
     catch (Exception ex)
     {
-
+      LogMgr.logError("MySQLColumnEnhancer.updateComputedColumns()", "Could not retrieve computed column definition using SQL:\n" + sql, ex);
     }
     finally
     {
