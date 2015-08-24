@@ -91,10 +91,10 @@ class ContextMenuFactory
     ShowRowCountAction showCount = new ShowRowCountAction(dbTree, dbTree, dbTree.getStatusBar());
     menu.add(showCount);
 
-    Window w = SwingUtilities.getWindowAncestor(dbTree);
-    if (w instanceof MainWindow)
+    Window window = SwingUtilities.getWindowAncestor(dbTree);
+    if (window instanceof MainWindow)
     {
-      MainWindow mw = (MainWindow)w;
+      MainWindow mw = (MainWindow)window;
       EditorTabSelectMenu showSelect = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblDbTreePutSelectInto", mw, true);
       showSelect.setPasteType(PasteType.insert);
       showSelect.setObjectList(dbTree);
@@ -120,6 +120,13 @@ class ContextMenuFactory
     menu.add(CreateDummySqlAction.createDummyInsertAction(dbTree, selection));
 		menu.add(CreateDummySqlAction.createDummyUpdateAction(dbTree, selection));
 		menu.add(CreateDummySqlAction.createDummySelectAction(dbTree, selection));
+
+
+    if (window instanceof MainWindow)
+    {
+      EditorTabSelectMenu editMenu = new EditorTabSelectMenu(ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", (MainWindow)window, true);
+      menu.add(editMenu);
+    }
 
     ScriptDbObjectAction script = new ScriptDbObjectAction(dbTree, selection, "MnuTxtShowSource");
     script.setShowSinglePackageProcedure(true);
