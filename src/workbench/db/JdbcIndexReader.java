@@ -36,10 +36,6 @@ import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.ibm.DB2UniqueConstraintReader;
-import workbench.db.mssql.SqlServerUniqueConstraintReader;
-import workbench.db.oracle.OracleUniqueConstraintReader;
-import workbench.db.postgres.PostgresUniqueConstraintReader;
 import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.storage.DataStore;
@@ -397,9 +393,10 @@ public class JdbcIndexReader
 		sql = TableSourceBuilder.replacePlaceHolder(sql, TableSourceBuilder.SCHEMA_PLACEHOLDER, index.getSchema(), needQuotes, metaData);
 		sql = TableSourceBuilder.replacePlaceHolder(sql, TableSourceBuilder.CATALOG_PLACEHOLDER, index.getCatalog(), needQuotes, metaData);
 		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, index.getName(), needQuotes, metaData);
-		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.FQ_INDEX_NAME_PLACEHOLDER, index.getFullyQualifiedName(conn), needQuotes, metaData);
-		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn), needQuotes, metaData);
+		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.FQ_INDEX_NAME_PLACEHOLDER, index.getFullyQualifiedName(conn), false, metaData);
+		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn), false, metaData);
 		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.TABLE_NAME_ONLY_PLACEHOLDER, table.getTableName(), needQuotes, metaData);
+    sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(conn), false, metaData);
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

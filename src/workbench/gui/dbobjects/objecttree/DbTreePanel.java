@@ -428,15 +428,11 @@ public class DbTreePanel
       tree.setConnection(null);
     }
 
-    Runnable runner = new Runnable()
+    Runnable runner = () ->
     {
-      @Override
-      public void run()
-      {
-        WbConnection old = connection;
-        connection = null;
-        ConnectionMgr.getInstance().disconnect(old);
-      }
+      WbConnection old = connection;
+      connection = null;
+      ConnectionMgr.getInstance().disconnect(old);
     };
 
     if (wait)

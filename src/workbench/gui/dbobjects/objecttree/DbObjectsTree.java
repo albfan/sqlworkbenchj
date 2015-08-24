@@ -195,18 +195,14 @@ public class DbObjectsTree
 
     final ObjectTreeNode toSelect = expandAndLoad(selection);
 
-    EventQueue.invokeLater(new Runnable()
+    EventQueue.invokeLater(() ->
     {
-      @Override
-      public void run()
+      if (toSelect != null)
       {
-        if (toSelect != null)
-        {
-          TreeNode[] nodes = getTreeModel().getPathToRoot(toSelect);
-          TreePath path = new TreePath(nodes);
-          setSelectionPath(path);
-          scrollPathToVisible(path);
-        }
+        TreeNode[] nodes = getTreeModel().getPathToRoot(toSelect);
+        TreePath path = new TreePath(nodes);
+        setSelectionPath(path);
+        scrollPathToVisible(path);
       }
     });
 
@@ -235,13 +231,9 @@ public class DbObjectsTree
 
           if (node != null)
           {
-            EventQueue.invokeLater(new Runnable()
+            EventQueue.invokeLater(() ->
             {
-              @Override
-              public void run()
-              {
-                expandNode(node);
-              }
+              expandNode(node);
             });
           }
         }
@@ -642,7 +634,7 @@ public class DbObjectsTree
   {
     if (node == null) return;
 
-    if (TreeLoader.TYPE_SCHEMA.equals(node.getType()))
+    if (node.isSchemaNode())
     {
       loader.reloadSchema(node);
     }

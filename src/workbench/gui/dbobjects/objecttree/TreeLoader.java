@@ -342,7 +342,7 @@ public class TreeLoader
   public void loadTypesForSchema(ObjectTreeNode schemaNode)
   {
     if (schemaNode == null) return;
-    if (!schemaNode.getType().equals(TYPE_SCHEMA)) return;
+    if (!schemaNode.isSchemaNode()) return;
 
     int count = schemaNode.getChildCount();
     for (int i=0; i < count; i++)
@@ -438,11 +438,11 @@ public class TreeLoader
       schema = dbo.getSchema();
       catalog = dbo.getCatalog();
     }
-    else if (parent.getType().equalsIgnoreCase(TYPE_CATALOG))
+    else if (parent.isCatalogNode())
     {
       catalog = parent.getName();
     }
-    else if (parent.getType().equalsIgnoreCase(TYPE_SCHEMA))
+    else if (parent.isSchemaNode())
     {
       schema = parent.getName();
     }
@@ -812,11 +812,11 @@ public class TreeLoader
       this.connection.setBusy(true);
       String type = node.getType();
 
-      if (TYPE_CATALOG.equals(type) && connection.getDbSettings().supportsSchemas())
+      if (node.isCatalogNode() && connection.getDbSettings().supportsSchemas())
       {
         loadSchemas(node);
       }
-      else if (TYPE_SCHEMA.equals(type))
+      else if (node.isSchemaNode())
       {
         loadTypesForSchema(node);
       }

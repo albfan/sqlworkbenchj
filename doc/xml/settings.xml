@@ -1311,12 +1311,15 @@
 
   <section id="settings-table-source-retrieval">
     <title>Customize table source retrieval</title>
+    <indexterm><primary>Customize</primary><secondary>DbExplorer DDL generation</secondary></indexterm>
+    <indexterm><primary>DbExplorer</primary><secondary>customize DDL generation</secondary></indexterm>
+
     <para>
       &wb-productname; re-generates the source of a table based on the information
       about the table's metadata returned by the driver. In some cases the driver might
       not return the correct information, or not all the information that is necessary
       to build the correct syntax for the DBMS. In those cases, a SQL query can be configured
-      that can use the built-in functionality of the DBMS to return a table's definition.
+      that can use the built-in functionality of the DBMS to return a DDL statement to re-create the table.
     </para>
     <para>
       This DBMS specific retrieval of the table source is defined by two properties in
@@ -1327,12 +1330,22 @@
 			<title>Defining the SQL statement</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.query</literal></para>
 			<para>
-        This property defines the SQL query that should be executed. It must be a statement that
-        returns a result set. The statement may contain three placeholders: <literal>%catalog%</literal>,
-        <literal>%schema%</literal> and <literal>%table_name%</literal> that are replaced with the values of
-        the actual table before running the statement. The placeholder <literal>%fq_table_name%</literal> can
-        be used to denote the fully qualified table name including the catalog and the schema (if available).
+        This property defines the SQL query that retrieves the DDL for the table. It must be a statement that
+        returns a result set. The statement may contain the following placeholders:
+
+        <simplelist columns="1">
+          <member><literal>%catalog%</literal> the catalog in which the table is defined</member>
+          <member><literal>%schema%</literal> the schema in which the table is defined</member>
+          <member><literal>%table_name%</literal> the name of table</member>
+          <member><literal>%fq_index_name%</literal> the fully qualified name of the table (including catalog and schema)</member>
+        </simplelist>
 			</para>
+
+      <para>
+        If the SQL returned by the DBMS includes the indexes defined for the table, the property:
+        <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.index_included</literal> has to
+        be set to <literal>true</literal>.
+      </para>
     </simplesect>
 
     <simplesect id="settings-table-source-colindex">
@@ -1350,12 +1363,65 @@
       <literal>SHOW CREATE TABLE</literal>:
     </para>
     <programlisting>workbench.db.mysql.retrieve.create.table.query=show create table %fq_table_name%
-workbench.db.mysql.retrieve.create.table.sourcecol=2</programlisting>
+workbench.db.mysql.retrieve.create.table.sourcecol=2
+workbench.db.mysql.retrieve.create.table.index_included=true</programlisting>
+    <para>
+      The following example configures a SQL statement to retrieve the table source using Oracle's
+      <ulink url="http://docs.oracle.com/cd/E11882_01/appdev.112/e40758/d_metada.htm">DBMS_METADATA</ulink> package:
+    </para>
+    <programlisting>workbench.db.oracle.retrieve.create.table.query=select dbms_metadata.get_ddl('TABLE', '%table_name%' ,'%schema%') from dual</programlisting>
+    <para>
+      If an error occurs during retrieval, &wb-productname; will revert to the built-in table
+      source generation.
+    </para>
+  </section>
+
+  <section id="settings-index-source-retrieval">
+    <title>Customize index source retrieval</title>
+    <para>
+      &wb-productname; re-generates the source of an index based on the information
+      about the table's metadata returned by the driver. In some cases the driver might
+      not return the correct information, or not all the information that is necessary
+      to build the correct syntax for the DBMS. In those cases, a SQL query can be configured
+      that can use the built-in functionality of the DBMS to return the DDL to recreate the index.
+    </para>
+    <para>
+      This DBMS specific retrieval of the index source is defined by two properties in
+      <literal>workbench.settings</literal>.
+    </para>
+
+    <simplesect id="settings-index-source-query">
+			<title>Defining the SQL statement</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.index.query</literal></para>
+			<para>
+        This property defines the SQL query that should be executed to retrieve the DDL to re-create the index.
+        It must be a statement that returns a result set. The statement may contain the following placeholders:
+        <simplelist columns="1">
+          <member><literal>%catalog%</literal> the catalog in which the index is defined</member>
+          <member><literal>%schema%</literal> the schema in which the index is defined</member>
+          <member><literal>%indexname%</literal> the name of the index</member>
+          <member><literal>%fq_index_name%</literal> the fully qualified name of the index (including catalog and schema)</member>
+          <member><literal>%table_name%</literal> the name of table on which the index is defined, including the catalog or schema if necessary</member>
+          <member><literal>%simple_table_name%</literal> the name of table on which the index is defined without the catalog or schema.</member>
+        </simplelist>
+			</para>
+    </simplesect>
+
+    <simplesect id="settings-table-source-colindex">
+			<title>Defining the result column</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.sourcecol</literal></para>
+			<para>
+        By default the source code is assumed to be in the first column of the result. If that is not the case
+        this property can be used to define the column index of the result in which the table's source is available.
+        The first column has the index 1.
+			</para>
+    </simplesect>
+
     <para>
       The following example configures a SQL statement to retrieve the table source using Oracle's
       <ulink url="http://docs.oracle.com/cd/E11882_01/appdev.112/e25788/d_metada.htm">DBMS_METADATA</ulink> package:
     </para>
-    <programlisting>workbench.db.oracle.retrieve.create.table.query=select dbms_metadata.get_ddl('TABLE', '%table_name%' ,'%schema%') from dual</programlisting>
+    <programlisting>workbench.db.oracle.retrieve.create.table.query=select dbms_metadata.get_ddl('INDEX', '%indexname%' ,'%schema%') from dual</programlisting>
     <para>
       If an error occurs during retrieval, &wb-productname; will revert to the built-in table
       source generation.

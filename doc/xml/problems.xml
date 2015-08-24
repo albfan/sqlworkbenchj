@@ -34,6 +34,27 @@
     </para>
   </section>
 
+  <section id="sql-source-incorred">
+    <title>The SQL source code for tables or indexes is incorrect</title>
+    <indexterm><primary>Problems</primary><secondary>wrong DDL</secondary></indexterm>
+    <indexterm><primary>Problems</primary><secondary>wrong table source</secondary></indexterm>
+    <indexterm><primary>Problems</primary><secondary>wrong index source</secondary></indexterm>
+
+    <para>
+      &wb-productname; re-creates the source code for tables and indexes based on
+      the information returned by the JDBC driver. This does not alway match the original DDL used to
+      create the table or index due to the limited information available by the JDBC API.
+    </para>
+    <para>
+      If the DBMS supports a SQL query to retrieve the real (native) source of a table or index, the
+      query can be configured to be used instead of the generic reverse engineering built into &wb-productname;
+    </para>
+    <para>
+      Please see the chapter <link linkend="settings-table-source-retrieval">Customize table source retrieval</link> for
+      details on how to configure the query.
+    </para>
+  </section>
+
   <section id="wrong-tz-display">
     <title>Timestamps with timezone information are not displayed correctly</title>
     <indexterm><primary>Problems</primary><secondary>timezone</secondary></indexterm>
