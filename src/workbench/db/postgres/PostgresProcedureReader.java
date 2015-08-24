@@ -47,8 +47,6 @@ import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
 
-import workbench.sql.DelimiterDefinition;
-
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -121,7 +119,7 @@ public class PostgresProcedureReader
 			pgType2Java.put("timestamp", Integer.valueOf(Types.TIMESTAMP));
 			pgType2Java.put("timestamptz", Integer.valueOf(Types.TIMESTAMP));
     }
-		return pgType2Java;
+		return Collections.unmodifiableMap(pgType2Java);
 	}
 
 	private Integer getJavaType(String pgType)
@@ -433,7 +431,6 @@ public class PostgresProcedureReader
 
 		StringBuilder source = new StringBuilder(500);
 
-		DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(connection, DelimiterDefinition.STANDARD_DELIMITER);
 		ResultSet rs = null;
 		Savepoint sp = null;
 		Statement stmt = null;
@@ -553,19 +550,14 @@ public class PostgresProcedureReader
 					source.append("\n ROWS ");
 					source.append(rows.longValue());
 				}
-				if (delim.isSingleLine()) source.append('\n');
-				source.append(delim.getDelimiter());
-				source.append('\n');
+				source.append(";\n");
 				if (StringUtil.isNonBlank(comment))
 				{
 					source.append("\nCOMMENT ON FUNCTION ");
 					source.append(name.getSignature());
 					source.append(" IS '");
 					source.append(SqlUtil.escapeQuotes(def.getComment()));
-					source.append('\'');
-					if (delim.isSingleLine()) source.append("\n" );
-					source.append(delim.getDelimiter());
-					source.append('\n');
+          source.append("';\n\n");
 				}
 			}
 			connection.releaseSavepoint(sp);
@@ -661,12 +653,7 @@ public class PostgresProcedureReader
 					source.append(s);
 					if (!s.endsWith("\n"))	source.append('\n');
 
-					DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(connection, DelimiterDefinition.STANDARD_DELIMITER);
-					if (delim != null)
-					{
-						source.append(delim.getDelimiter());
-					}
-					source.append('\n');
+					source.append(";\n");
 
 					if (StringUtil.isNonBlank(def.getComment()))
 					{
@@ -674,14 +661,8 @@ public class PostgresProcedureReader
 						source.append(name.getFormattedName());
 						source.append(" IS '");
 						source.append(SqlUtil.escapeQuotes(def.getComment()));
-						source.append("'\n" );
-						if (delim != null)
-						{
-							source.append(delim.getDelimiter());
-							source.append('\n');
-						}
+						source.append("'\n;\n" );
 					}
-
 				}
 			}
 		}

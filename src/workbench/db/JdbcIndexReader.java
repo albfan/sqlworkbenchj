@@ -704,27 +704,6 @@ public class JdbcIndexReader
 		return idxData;
 	}
 
-	public UniqueConstraintReader getUniqueConstraintReader()
-	{
-		if (this.metaData.isPostgres())
-		{
-			return new PostgresUniqueConstraintReader();
-		}
-		if (this.metaData.isOracle())
-		{
-			return new OracleUniqueConstraintReader();
-		}
-		if (this.metaData.getDbId().equals("db2") || this.metaData.getDbId().equals("db2h"))
-		{
-			return new DB2UniqueConstraintReader();
-		}
-		if (this.metaData.isSqlServer())
-		{
-			return new SqlServerUniqueConstraintReader();
-		}
-		return null;
-	}
-
 	/**
 	 * Returns a list of indexes defined for the given table.
 	 *
@@ -799,11 +778,6 @@ public class JdbcIndexReader
 		{
 			SqlUtil.closeResult(idxRs);
 			indexInfoProcessed();
-		}
-		UniqueConstraintReader reader = getUniqueConstraintReader();
-		if (reader != null && CollectionUtil.isNonEmpty(result))
-		{
-			reader.processIndexList(result, this.metaData.getWbConnection());
 		}
 		return result;
 	}

@@ -80,6 +80,13 @@ public class OracleTableSourceBuilder
 
 		StringBuilder options = new StringBuilder(100);
 
+    if (!Settings.getInstance().getBoolProperty("workbench.db.oracle.table_options.retrieve", true))
+    {
+      LogMgr.logInfo("OracleTableSourceBuilder.readTableOptions()", "Not retrieving table options for " + tbl.getTableExpression());
+      tbl.getSourceOptions().setInitialized();
+      return;
+    }
+
 		CharSequence externalDef;
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))
 		{
@@ -190,10 +197,10 @@ public class OracleTableSourceBuilder
 			{
 				pstmt.setString(2, tbl.getRawSchema());
 			}
+
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving table source options using:\n" +
-					SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema()));
+				LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving table source options using:\n" + SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema()));
 			}
 
 			rs = pstmt.executeQuery();
@@ -385,7 +392,7 @@ public class OracleTableSourceBuilder
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("OracleTableSourceBuilder.readTableOptions()", "Error retrieving table options using SQL: \n" + sql, e);
+			LogMgr.logError("OracleTableSourceBuilder.readTableOptions()", "Error retrieving table options for " + tbl.getTableName() + " using SQL: \n" + sql, e);
 		}
 		finally
 		{
@@ -393,7 +400,7 @@ public class OracleTableSourceBuilder
 		}
 
     long duration = System.currentTimeMillis() - start;
-    LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving table options took " + duration + "ms");
+    LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving table options for " + tbl.getTableName() + " took " + duration + "ms");
 
 		String tablespace = tbl.getTablespace();
 		if (OracleUtils.shouldAppendTablespace(tablespace, defaultTablespace, tbl.getRawSchema(), dbConnection.getCurrentUser()))
@@ -452,6 +459,12 @@ public class OracleTableSourceBuilder
 	{
 		if (!hasLobColumns(columns)) return null;
 
+    if (!Settings.getInstance().getBoolProperty("workbench.db.oracle.lob_options.retrieve", true))
+    {
+      LogMgr.logWarning("OracleTableSourceBuilder.readTableOptions()", "Not retrieving table LOB options for " + tbl.getTableExpression() + " even though table has LOB columns. To retrieve LOB options, set workbench.db.oracle.lob_options.retrieve to true");
+      return null;
+    }
+
 		Statement stmt = null;
 		ResultSet rs = null;
 
@@ -464,7 +477,7 @@ public class OracleTableSourceBuilder
 
 		StringBuilder result = new StringBuilder(100);
     long start = System.currentTimeMillis();
-    
+
 		try
 		{
 			boolean first = true;
@@ -576,7 +589,7 @@ public class OracleTableSourceBuilder
 		}
 
     long duration = System.currentTimeMillis() - start;
-    LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving LOB options took " + duration + "ms");
+    LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving LOB options for " + tbl.getTableExpression() + " took " + duration + "ms");
 
 		return result;
 	}

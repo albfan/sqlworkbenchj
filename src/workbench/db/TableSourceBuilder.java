@@ -123,6 +123,13 @@ public class TableSourceBuilder
 		TableDefinition def = meta.getTableDefinition(tbl);
 		List<ColumnIdentifier> cols = def.getColumns();
 		List<IndexDefinition> indexDef = getIndexReader().getTableIndexList(def.getTable());
+
+		UniqueConstraintReader reader = ReaderFactory.getUniqueConstraintReader(dbConnection);
+		if (reader != null && CollectionUtil.isNonEmpty(indexDef))
+		{
+			reader.readUniqueConstraints(indexDef, dbConnection);
+		}
+
 		List<DependencyNode> fkDef = null;
 		if (includeFk)
 		{

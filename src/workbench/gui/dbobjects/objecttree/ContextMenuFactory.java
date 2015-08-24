@@ -79,6 +79,7 @@ class ContextMenuFactory
 
     if (DbTreeSettings.showCountRowsAction())
     {
+      // this is the action that displays the row counts in a new window as the DbExplorer does
       CountTableRowsAction countAction = new CountTableRowsAction(dbTree, selection);
       countAction.setConnection(dbTree.getConnection());
       if (countAction.isEnabled())

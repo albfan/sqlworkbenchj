@@ -44,6 +44,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.db.ReaderFactory;
+import workbench.db.UniqueConstraintReader;
 import workbench.sql.parser.ParserType;
 
 /**
@@ -111,11 +113,7 @@ public class PostgresIndexReaderTest
 		throws SQLException
 	{
 		WbConnection conn = PostgresTestUtil.getPostgresConnection();
-		if (conn == null)
-		{
-			System.out.println("No local postgres connection. Skipping test...");
-			return;
-		}
+		assertNotNull(conn);
 
 		DbMetadata meta = conn.getMetadata();
 		IndexReader reader = meta.getIndexReader();
@@ -131,6 +129,9 @@ public class PostgresIndexReaderTest
 
 		TableIdentifier table = meta.findTable(new TableIdentifier("person"));
 		List<IndexDefinition> indexes = reader.getTableIndexList(table);
+    UniqueConstraintReader uniqueReader = ReaderFactory.getUniqueConstraintReader(conn);
+    uniqueReader.readUniqueConstraints(indexes, conn);
+
 		assertFalse(indexes.isEmpty());
 
 		IndexDefinition index = indexes.get(0);

@@ -45,7 +45,7 @@ public class SqlServerUniqueConstraintReader
 {
 
 	@Override
-	public void processIndexList(List<IndexDefinition> indexList, WbConnection con)
+	public void readUniqueConstraints(List<IndexDefinition> indexList, WbConnection con)
 	{
 		if (!SqlServerUtil.isSqlServer2005(con)) return;
 

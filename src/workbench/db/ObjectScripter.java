@@ -78,6 +78,7 @@ public class ObjectScripter
 	private String synonymType = TYPE_SYNONYM;
 	private GenericObjectDropper dropper;
   private boolean extractPackageProcedure;
+  private boolean needsAlternateDelimiter;
 
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
@@ -116,6 +117,21 @@ public class ObjectScripter
 		dropper = new GenericObjectDropper();
 		dropper.setConnection(dbConnection);
 		dropper.setCascade(true);
+
+    Set<String> types = CollectionUtil.caseInsensitiveSet();
+    for (DbObject dbo : objects)
+    {
+      types.add(dbo.getObjectType());
+    }
+    Set<String> altDelimTypes = aConnection.getDbSettings().getTypesRequiringAlternateDelimiter();
+    for (String type : altDelimTypes)
+    {
+      if (types.contains(type))
+      {
+        needsAlternateDelimiter = true;
+        break;
+      }
+    }
 	}
 
 	@Override
@@ -192,10 +208,19 @@ public class ObjectScripter
 		if (appendCommit && this.dbConnection.getDbSettings().ddlNeedsCommit())
 		{
 			script.append("\nCOMMIT");
-      DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(dbConnection, DelimiterDefinition.STANDARD_DELIMITER);
+      DelimiterDefinition delim = getDelimiter();
       delim.appendTo(script);
 		}
 	}
+
+  private DelimiterDefinition getDelimiter()
+  {
+    if (needsAlternateDelimiter)
+    {
+      return Settings.getInstance().getAlternateDelimiter(dbConnection, DelimiterDefinition.STANDARD_DELIMITER);
+    }
+    return DelimiterDefinition.STANDARD_DELIMITER;
+  }
 
   public void setShowPackageProcedureOnly(boolean flag)
   {
@@ -341,7 +366,7 @@ public class ObjectScripter
 					if (drop != null && drop.length() > 0)
 					{
 						this.script.append(drop);
-            DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(dbConnection, DelimiterDefinition.STANDARD_DELIMITER);
+            DelimiterDefinition delim = getDelimiter();
             delim.appendTo(script);
 						this.script.append(nl);
 					}

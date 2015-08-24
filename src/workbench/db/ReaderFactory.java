@@ -38,6 +38,7 @@ import workbench.db.h2database.H2SequenceReader;
 import workbench.db.hana.HanaProcedureReader;
 import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
+import workbench.db.ibm.DB2UniqueConstraintReader;
 import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.ibm.Db2IndexReader;
 import workbench.db.ibm.Db2SequenceReader;
@@ -51,6 +52,7 @@ import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerIndexReader;
 import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mssql.SqlServerSequenceReader;
+import workbench.db.mssql.SqlServerUniqueConstraintReader;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.mysql.MySQLIndexReader;
 import workbench.db.mysql.MySqlProcedureReader;
@@ -60,10 +62,12 @@ import workbench.db.oracle.OracleErrorInformationReader;
 import workbench.db.oracle.OracleIndexReader;
 import workbench.db.oracle.OracleProcedureReader;
 import workbench.db.oracle.OracleSequenceReader;
+import workbench.db.oracle.OracleUniqueConstraintReader;
 import workbench.db.postgres.PostgresConstraintReader;
 import workbench.db.postgres.PostgresIndexReader;
 import workbench.db.postgres.PostgresProcedureReader;
 import workbench.db.postgres.PostgresSequenceReader;
+import workbench.db.postgres.PostgresUniqueConstraintReader;
 import workbench.db.teradata.TeradataIndexReader;
 import workbench.db.teradata.TeradataProcedureReader;
 import workbench.db.vertica.VerticaSequenceReader;
@@ -268,6 +272,31 @@ public class ReaderFactory
 		}
 		return ConstraintReader.NULL_READER;
 	}
+
+
+  public static UniqueConstraintReader getUniqueConstraintReader(WbConnection connection)
+  {
+    if (connection == null) return null;
+    if (connection.getMetadata() == null) return null;
+    
+    if (connection.getMetadata().isPostgres())
+    {
+      return new PostgresUniqueConstraintReader();
+    }
+    if (connection.getMetadata().isOracle())
+    {
+      return new OracleUniqueConstraintReader();
+    }
+    if (connection.getMetadata().getDbId().equals("db2") || connection.getMetadata().getDbId().equals("db2h"))
+    {
+      return new DB2UniqueConstraintReader();
+    }
+    if (connection.getMetadata().isSqlServer())
+    {
+      return new SqlServerUniqueConstraintReader();
+    }
+    return null;
+  }
 
 	public static ErrorInformationReader getErrorInformationReader(WbConnection conn)
 	{

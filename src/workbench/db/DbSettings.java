@@ -2093,4 +2093,13 @@ public class DbSettings
   {
     return getBoolProperty("change.connection.readonly.state", true);
   }
+
+  public Set<String> getTypesRequiringAlternateDelimiter()
+  {
+    Set<String> types = CollectionUtil.caseInsensitiveSet();
+    String typeList = getProperty("types.alternatedelimiter", "procedure,function,trigger");
+    types.addAll(StringUtil.stringToList(typeList,",", true, true));
+    return types;
+  }
+  
 }

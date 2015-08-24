@@ -47,7 +47,7 @@ public class DB2UniqueConstraintReader
 {
 
 	@Override
-	public void processIndexList(List<IndexDefinition> indexList, WbConnection con)
+	public void readUniqueConstraints(List<IndexDefinition> indexList, WbConnection con)
 	{
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;

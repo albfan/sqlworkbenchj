@@ -49,7 +49,7 @@ public class OracleUniqueConstraintReader
 {
 
 	@Override
-	public void processIndexList(List<IndexDefinition> indexList, WbConnection con)
+	public void readUniqueConstraints(List<IndexDefinition> indexList, WbConnection con)
 	{
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;
@@ -134,7 +134,7 @@ public class OracleUniqueConstraintReader
 			SqlUtil.closeAll(rs, stmt);
 		}
     long duration = System.currentTimeMillis() - start;
-    LogMgr.logDebug("OracleUniqueConstraintReader.processIndexList()", "Retrievung unique constraints took: " + duration + "ms");
+    LogMgr.logDebug("OracleUniqueConstraintReader.processIndexList()", "Retrieving unique constraints took: " + duration + "ms");
 	}
 
   private boolean hasMultipleOwners(List<IndexDefinition> indexList)

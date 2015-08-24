@@ -30,5 +30,5 @@ import java.util.List;
  */
 public interface UniqueConstraintReader
 {
-	void processIndexList(List<IndexDefinition> indexList, WbConnection con);
+	void readUniqueConstraints(List<IndexDefinition> indexList, WbConnection con);
 }

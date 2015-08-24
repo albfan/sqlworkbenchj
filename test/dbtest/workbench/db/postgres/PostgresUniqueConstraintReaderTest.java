@@ -26,10 +26,16 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import workbench.WbTestCase;
-import static org.junit.Assert.*;import workbench.TestUtil;
+
+import static org.junit.Assert.*;
+
+import workbench.TestUtil;
 import workbench.db.IndexDefinition;
+import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
+import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
 
 
@@ -84,6 +90,9 @@ public class PostgresUniqueConstraintReaderTest
 
 		TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("PARENT"));
 		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent);
+    UniqueConstraintReader uniqueReader = ReaderFactory.getUniqueConstraintReader(con);
+    uniqueReader.readUniqueConstraints(indexList, con);
+
 		boolean foundConstraint = false;
 		for (IndexDefinition idx : indexList)
 		{
