@@ -40,9 +40,9 @@ import workbench.db.WbConnection;
 import workbench.db.importer.SpreadsheetReader;
 
 import workbench.sql.CommandMapper;
-import workbench.sql.parser.ParserType;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
+import workbench.sql.parser.ParserType;
 import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbExport;
@@ -50,6 +50,7 @@ import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbRunLB;
 import workbench.sql.wbcommands.WbTableSource;
+import workbench.sql.wbcommands.WbViewSource;
 import workbench.sql.wbcommands.WbXslt;
 
 import workbench.util.ArgumentParser;
@@ -63,7 +64,6 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 import static workbench.gui.completion.BaseAnalyzer.*;
-import workbench.sql.wbcommands.WbViewSource;
 
 
 /**
@@ -207,7 +207,15 @@ public class WbCommandAnalyzer
 			}
 			else if (type == ArgumentType.SchemaArgument)
 			{
-				this.elements  = new ArrayList<>(dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter()));
+        if (dbConnection.getDbSettings().supportsSchemas())
+        {
+          this.elements  = new ArrayList<>(dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter()));
+        }
+				else
+        {
+          // this is essentially for MySQL which doesn't distinguish properly between catalogs and schemas
+          this.elements  = new ArrayList<>(dbConnection.getMetadata().getCatalogInformation(dbConnection.getSchemaFilter()));
+        }
 			}
 			else if (type == ArgumentType.CatalogArgument)
 			{
