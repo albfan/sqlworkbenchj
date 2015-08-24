@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import workbench.db.BaseObjectType;
 import workbench.db.PackageDefinition;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -54,7 +55,8 @@ public class ProcedureTreeLoader
     Map<String, List<ProcedureDefinition>> types = getTypeMethods(procedures);
     for (Map.Entry<String, List<ProcedureDefinition>> entry : types.entrySet())
     {
-      ObjectTreeNode pkgNode = new ObjectTreeNode(entry.getKey(), "type");
+      BaseObjectType typeDbo = new BaseObjectType(schemaName, entry.getKey());
+      ObjectTreeNode pkgNode = new ObjectTreeNode(typeDbo);
       pkgNode.setAllowsChildren(true);
       for (ProcedureDefinition proc : entry.getValue())
       {
