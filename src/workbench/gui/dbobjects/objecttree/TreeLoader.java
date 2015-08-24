@@ -812,9 +812,17 @@ public class TreeLoader
       this.connection.setBusy(true);
       String type = node.getType();
 
-      if (node.isCatalogNode() && connection.getDbSettings().supportsSchemas())
+      if (node.isCatalogNode())
       {
-        loadSchemas(node);
+        if (connection.getDbSettings().supportsSchemas())
+        {
+          loadSchemas(node);
+        }
+        else if (!node.childrenAreLoaded())
+        {
+          addTypeNodes(node);
+          loadNodeObjects(node);
+        }
       }
       else if (node.isSchemaNode())
       {

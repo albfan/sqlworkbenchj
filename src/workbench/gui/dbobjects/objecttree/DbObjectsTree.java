@@ -624,37 +624,37 @@ public class DbObjectsTree
   {
     if (node == null) return;
 
+    Set<String> expandedTypes = CollectionUtil.caseInsensitiveSet();
+    for (int i=0; i < node.getChildCount(); i++)
+    {
+      ObjectTreeNode child = node.getChildAt(i);
+      TreePath path = new TreePath(getTreeModel().getPathToRoot(child));
+      if (isExpanded(path))
+      {
+        expandedTypes.add(child.getType());
+      }
+    }
+
     if (node.isSchemaNode())
     {
       loader.reloadSchema(node);
     }
     else
     {
-      Set<String> expandedTypes = CollectionUtil.caseInsensitiveSet();
-      for (int i=0; i < node.getChildCount(); i++)
-      {
-        ObjectTreeNode child = node.getChildAt(i);
-        TreePath path = new TreePath(getTreeModel().getPathToRoot(child));
-        if (isExpanded(path))
-        {
-          expandedTypes.add(child.getType());
-        }
-      }
       node.removeAllChildren();
       loader.loadChildren(node);
-      if (node.getDbObject() instanceof TableIdentifier)
+    }
+
+    for (int i=0; i < node.getChildCount(); i++)
+    {
+      ObjectTreeNode child = node.getChildAt(i);
+      String type = child.getType();
+      if (expandedTypes.contains(type))
       {
-        for (int i=0; i < node.getChildCount(); i++)
-        {
-          ObjectTreeNode child = node.getChildAt(i);
-          String type = child.getType();
-          if (expandedTypes.contains(type))
-          {
-            setExpandedState(new TreePath(getTreeModel().getPathToRoot(child)), true);
-          }
-        }
+        setExpandedState(new TreePath(getTreeModel().getPathToRoot(child)), true);
       }
     }
+
   }
 
   public void expandNodes(List<TreePath> nodes)
