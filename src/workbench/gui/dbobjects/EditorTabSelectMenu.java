@@ -218,14 +218,7 @@ public class EditorTabSelectMenu
 		// removed (thus implicitely changing the index)
 		// but the changeEvent occurs before the actual
 		// panel is removed from the control.
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				updateMenu();
-			}
-		});
+		EventQueue.invokeLater(this::updateMenu);
 	}
 
 	@Override

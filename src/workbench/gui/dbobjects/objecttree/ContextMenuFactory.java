@@ -94,8 +94,7 @@ class ContextMenuFactory
     Window window = SwingUtilities.getWindowAncestor(dbTree);
     if (window instanceof MainWindow)
     {
-      MainWindow mw = (MainWindow)window;
-      EditorTabSelectMenu showSelect = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblDbTreePutSelectInto", mw, true);
+      EditorTabSelectMenu showSelect = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblDbTreePutSelectInto", (MainWindow)window, true);
       showSelect.setPasteType(PasteType.insert);
       showSelect.setObjectList(dbTree);
       menu.add(showSelect);
@@ -124,7 +123,10 @@ class ContextMenuFactory
 
     if (window instanceof MainWindow)
     {
-      EditorTabSelectMenu editMenu = new EditorTabSelectMenu(ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", (MainWindow)window, true);
+      EditorTabSelectMenu editMenu = new EditorTabSelectMenu(ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", (MainWindow)window, false);
+      editMenu.setEnabled(selection.getSelectionCount() == 1);
+      EditAction edit = new EditAction(dbTree);
+      editMenu.setActionListener(edit);
       menu.add(editMenu);
     }
 

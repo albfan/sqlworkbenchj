@@ -64,7 +64,7 @@ public interface DbObjectList
         DbMetadata meta = objectList.getConnection().getMetadata();
         for (DbObject dbo : objects)
         {
-          if (dbo instanceof TableIdentifier && meta.isTableType(dbo.getObjectType()))
+          if (dbo instanceof TableIdentifier && meta.objectTypeCanContainData(dbo.getObjectType()))
           {
             tables.add((TableIdentifier)dbo);
           }
