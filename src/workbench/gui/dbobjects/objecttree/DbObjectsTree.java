@@ -396,20 +396,14 @@ public class DbObjectsTree
 
     load(false);
     final ObjectTreeNode toSelect = expandAndLoad(selection);
+    if (toSelect == null) return;
 
-    EventQueue.invokeLater(new Runnable()
+    EventQueue.invokeLater(() ->
     {
-      @Override
-      public void run()
-      {
-        if (toSelect != null)
-        {
-          TreeNode[] nodes = getTreeModel().getPathToRoot(toSelect);
-          TreePath path = new TreePath(nodes);
-          setSelectionPath(path);
-          scrollPathToVisible(path);
-        }
-      }
+      TreeNode[] nodes = getTreeModel().getPathToRoot(toSelect);
+      TreePath path = new TreePath(nodes);
+      setSelectionPath(path);
+      scrollPathToVisible(path);
     });
   }
 
@@ -429,20 +423,16 @@ public class DbObjectsTree
       if (selectDefaultNamespace)
       {
         final boolean useCatalog = loader.getConnection().getDbSettings().supportsCatalogs();
-        EventQueue.invokeLater(new Runnable()
+        EventQueue.invokeLater(() ->
         {
-          @Override
-          public void run()
+          boolean selected = false;
+          if (useCatalog)
           {
-            boolean selected = false;
-            if (useCatalog)
-            {
-              selected = selectCurrentCatalog();
-            }
-            if (!selected)
-            {
-              selectCurrentSchema();
-            }
+            selected = selectCurrentCatalog();
+          }
+          if (!selected)
+          {
+            selectCurrentSchema();
           }
         });
       }

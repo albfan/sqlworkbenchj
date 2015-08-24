@@ -885,13 +885,9 @@ public class DbTreePanel
       if (table.equals(node.getDbObject()))
       {
         node.setRowCount(Long.valueOf(rows));
-        EventQueue.invokeLater(new Runnable()
+        EventQueue.invokeLater(() ->
         {
-          @Override
-          public void run()
-          {
-            tree.getModel().nodeChanged(node);
-          }
+          tree.getModel().nodeChanged(node);
         });
       }
     }
