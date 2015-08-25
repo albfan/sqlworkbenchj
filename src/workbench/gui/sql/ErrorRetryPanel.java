@@ -18,6 +18,7 @@ import java.awt.event.WindowListener;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -35,6 +36,7 @@ import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.PlainEditor;
 import workbench.gui.components.WbButton;
+import workbench.gui.components.WbCheckBox;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbStatusLabel;
 
@@ -55,6 +57,8 @@ public class ErrorRetryPanel
   extends JPanel
   implements ActionListener, WindowListener
 {
+  public static final String PROP_REPLACE_ERROR_STATEMENT = "workbench.gui.retry_error.replace.statement";
+
   private JDialog window;
   private PlainEditor errorDisplay;
   private EditorPanel sqlEditor;
@@ -69,6 +73,7 @@ public class ErrorRetryPanel
   private AutoCompletionAction autoComplete;
   private int choice = JOptionPane.NO_OPTION;
   private WbStatusLabel statusBar;
+  private JCheckBox replaceStatement;
 
   public ErrorRetryPanel(ErrorDescriptor errorDescriptor, StatementRunner runner)
   {
@@ -170,6 +175,12 @@ public class ErrorRetryPanel
     JPanel bottomPanel = new JPanel(new BorderLayout());
     bottomPanel.setBorder(new EmptyBorder(borderWith/4, borderWith, 0, borderWith));
 
+    JPanel toolPanel = new JPanel(new BorderLayout(0,0));
+    replaceStatement = new WbCheckBox(ResourceMgr.getString("LblReplaceOrgSql"));
+    replaceStatement.setToolTipText(ResourceMgr.getDescription("LblReplaceOrgSql"));
+    replaceStatement.setSelected(Settings.getInstance().getBoolProperty(PROP_REPLACE_ERROR_STATEMENT, false));
+    toolPanel.add(replaceStatement, BorderLayout.LINE_START);
+
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
     buttonPanel.setBorder(new EmptyBorder(borderWith, 0, borderWith, 0));
     retryButton = new WbButton(ResourceMgr.getString("LblRetry"));
@@ -190,13 +201,16 @@ public class ErrorRetryPanel
     cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
     cancelButton.addActionListener(this);
     buttonPanel.add(cancelButton);
-    bottomPanel.add(buttonPanel, BorderLayout.PAGE_END);
+    toolPanel.add(buttonPanel, BorderLayout.CENTER);
+    bottomPanel.add(toolPanel, BorderLayout.PAGE_END);
     bottomPanel.add(statusBar, BorderLayout.PAGE_START);
 
     add(lbl, BorderLayout.PAGE_START);
     add(splitPane, BorderLayout.CENTER);
     add(bottomPanel, BorderLayout.PAGE_END);
+
   }
+
 
   private void closeDialog(int value)
   {
@@ -208,6 +222,11 @@ public class ErrorRetryPanel
       window.setVisible(false);
       window.dispose();
     });
+  }
+
+  public boolean shouldReplaceOriginalStatement()
+  {
+    return replaceStatement.isSelected();
   }
 
   public void dispose()
@@ -368,13 +387,12 @@ public class ErrorRetryPanel
       window.setSize(640, 480);
     }
 
-    System.out.println("window: " + window.getSize());
-
     WbSwingUtilities.center(window, owner);
     WbSwingUtilities.requestComponentFocus(window, sqlEditor);
     window.addWindowListener(this);
     window.setVisible(true);
 
     Settings.getInstance().storeWindowSize(window, "workbench.gui.sql.retrywindow");
+    Settings.getInstance().setProperty(PROP_REPLACE_ERROR_STATEMENT, shouldReplaceOriginalStatement());
   }
 }

@@ -3619,9 +3619,12 @@ public class SqlPanel
       switch (retry.getChoice())
       {
         case WbSwingUtilities.CONTINUE_OPTION:
-          int startOfStatement = parser.getStartPosForCommand(cmdIndex) + selectionOffset;
-          int endOfStatement = parser.getEndPosForCommand(cmdIndex) + selectionOffset;
-          editor.replaceText(startOfStatement, endOfStatement, retry.getStatement());
+          if (retry.shouldReplaceOriginalStatement())
+          {
+            int startOfStatement = parser.getStartPosForCommand(cmdIndex) + selectionOffset;
+            int endOfStatement = parser.getEndPosForCommand(cmdIndex) + selectionOffset;
+            editor.replaceText(startOfStatement, endOfStatement, retry.getStatement());
+          }
           result = JOptionPane.YES_OPTION;
           break;
         case JOptionPane.CANCEL_OPTION:

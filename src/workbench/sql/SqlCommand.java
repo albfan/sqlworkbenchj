@@ -1046,14 +1046,16 @@ public class SqlCommand
 			if (error != null && error.getErrorMessage() != null)
 			{
 				String fullMsg = reader.enhanceErrorMessage(sql, e.getMessage(), error);
-				result.setFailure(error);
 				result.addMessage(fullMsg);
 			}
 			else
 			{
-				result.addMessage(ExceptionUtil.getDisplay(e));
-				result.setFailure();
+        error = new ErrorDescriptor();
+        String err = ExceptionUtil.getDisplay(e);
+        error.setErrorMessage(err);
+				result.addMessage(err);
 			}
+      result.setFailure(error);
 		}
 		catch (Throwable th)
 		{
