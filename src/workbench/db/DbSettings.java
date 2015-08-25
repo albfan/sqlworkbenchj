@@ -1450,6 +1450,18 @@ public class DbSettings
 	}
 
 	/**
+	 * Returns the SQL to drop a foreign key constraint from a data object
+   * 
+	 * @param type the type of the object. e.g. table, materialized view
+	 */
+	public String getDropFKConstraint(String type)
+	{
+		if (StringUtil.isBlank(type)) return null;
+    String dropConstraint = getDropConstraint(type);
+		return getProperty("alter." + getKeyValue(type) + ".drop.fk_constraint", dropConstraint);
+	}
+
+	/**
 	 * Returns the SQL to add a primary key to an object
 	 *
 	 * @param type the type of the object. e.g. table, materialized view
@@ -2101,5 +2113,5 @@ public class DbSettings
     types.addAll(StringUtil.stringToList(typeList,",", true, true));
     return types;
   }
-  
+
 }

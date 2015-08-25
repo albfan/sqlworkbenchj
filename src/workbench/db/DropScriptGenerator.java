@@ -65,7 +65,7 @@ public class DropScriptGenerator
 	public DropScriptGenerator(WbConnection aConnection)
 	{
 		this.connection = aConnection;
-		dropTemplate = connection.getDbSettings().getDropConstraint("table");
+		dropTemplate = connection.getDbSettings().getDropFKConstraint("table");
 	}
 
 	@Override
@@ -202,7 +202,7 @@ public class DropScriptGenerator
 		for (int i=0; i < count; i++)
 		{
 			String stmt = p.getCommand(i);
-			if (stmt.indexOf(node.getFkName()) > -1)
+			if (stmt.contains(node.getFkName()))
 			{
 				restore.add(SqlUtil.addSemicolon(stmt));
 			}
