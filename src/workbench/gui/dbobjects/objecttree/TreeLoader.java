@@ -305,7 +305,7 @@ public class TreeLoader
     if (parentNode == null) return;
     for (String type : availableTypes)
     {
-      if (type.equalsIgnoreCase(TYPE_TRIGGERS_NODE) || type.equalsIgnoreCase(TYPE_PROCEDURES_NODE)) continue;
+      if (type.equalsIgnoreCase("TRIGGER") || type.equalsIgnoreCase("PROCEDURE")) continue;
       if (typesToShow.isEmpty() || typesToShow.contains(type))
       {
         ObjectTreeNode node = new ObjectTreeNode(type, TYPE_DBO_TYPE_NODE);
