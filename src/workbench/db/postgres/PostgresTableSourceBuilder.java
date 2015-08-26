@@ -328,8 +328,12 @@ public class PostgresTableSourceBuilder
 						{
 							result.append(", ");
 						}
-						result.append(options[i]);
-					}
+            String[] optValues = options[i].split("=");
+            if (optValues.length == 2)
+            {
+              result.append(optValues[0] + " '" + optValues[1] + "'");
+            }
+          }
 					result.append(')');
 				}
 				option.setTableOption(result.toString());
