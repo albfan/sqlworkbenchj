@@ -132,8 +132,24 @@
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
 								If this parameter is set to true, all rows are deleted from the
-								target table before copying the data.
+                target table using a <literal>DELETE</literal> statement before copying the data.
 							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-truncate-target">-truncateTable</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								If this parameter is set to true, all rows are remove from the
+                target table using a <literal>TRUNCATE</literal> statement before copying the data.
+							</para>
+              <para>
+                Not all DBMS support the <literal>TRUNCATE</literal> command. If this option is used for a DBMS
+                that does not support <literal>TRUNCATE</literal> or where the target table(s) cannot be
+                truncated due to other restrictions, an error will occur.
+              </para>
 						</entry>
 					</row>
 

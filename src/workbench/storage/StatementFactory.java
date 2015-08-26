@@ -536,6 +536,7 @@ public class StatementFactory
 		}
 		return name;
 	}
+  
 	private void appendKeyword(StringBuilder text, String toAppend)
 	{
 		GeneratedIdentifierCase style = Settings.getInstance().getFormatterKeywordsCase();
@@ -553,8 +554,7 @@ public class StatementFactory
 	{
 		if (value == null) return true;
 		String s = value.toString();
-		if (emptyStringIsNull && s.isEmpty()) return true;
-		return false;
+		return emptyStringIsNull && s.isEmpty();
 	}
 
 }

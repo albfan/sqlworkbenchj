@@ -22,6 +22,7 @@
  */
 package workbench.db;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,6 @@ import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 
-import workbench.util.SqlUtil;
 
 /**
  * @author Thomas Kellerer
@@ -176,11 +176,20 @@ public class DummyDML
 			{
 				int type = info.getColumnType(i);
 				StringBuilder dummy = new StringBuilder();
-				if (SqlUtil.isCharacterType(type)) dummy.append('\'');
-				dummy.append(info.getColumnName(i));
-				dummy.append("_value");
-				if (SqlUtil.isCharacterType(type)) dummy.append('\'');
-				dummyData.setValue(i, dummy);
+        switch (type)
+        {
+          case Types.BIT:
+            dummy.append("0");
+            break;
+          case Types.BOOLEAN:
+            dummy.append("false");
+            break;
+          default:
+            dummy.append(info.getColumnName(i));
+            dummy.append("_value");
+            break;
+        }
+				dummyData.setValue(i, dummy.toString());
 				if (createUpdateStatement && info.getColumn(i).isPkColumn())
 				{
 					dummyData.resetStatusForColumn(i);

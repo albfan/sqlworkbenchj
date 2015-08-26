@@ -372,9 +372,17 @@ public class SqlLiteralFormatter
 			// e.g. Postgres only accepts the literals true/false for boolean columns
 			// which are reported as Types.BIT as well.
 			// that's why I compare to the DBMS data type bit (hoping that
-			// other DBMS's that are also using 'bit' work the same way
-			boolean flag = ((java.lang.Boolean)value).booleanValue();
-			return (flag ? "1" : "0");
+			// other DBMS's that are also using 'bit' work the same way)
+      try
+      {
+        boolean flag = ((java.lang.Boolean)value).booleanValue();
+        return (flag ? "1" : "0");
+      }
+      catch (Exception ex)
+      {
+        // no boolean value -> don't know what to do with this
+        return value.toString();
+      }
 		}
 		else if (SqlUtil.isBlobType(type))
 		{

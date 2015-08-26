@@ -442,7 +442,14 @@ public class DataImporter
 	@Override
 	public void setTableList(List<TableIdentifier> targetTables)
 	{
-		this.tablesToBeProcessed = targetTables;
+    if (targetTables == null)
+    {
+      this.tablesToBeProcessed = null;
+    }
+		else
+    {
+      this.tablesToBeProcessed = new ArrayList<>(targetTables);
+    }
 	}
 
 	@Override
@@ -696,7 +703,14 @@ public class DataImporter
 	 */
 	public void setKeyColumns(List<ColumnIdentifier> cols)
 	{
-		this.keyColumns = cols;
+    if (cols == null)
+    {
+      this.keyColumns = null;
+    }
+		else
+    {
+      this.keyColumns = new ArrayList<>(cols);
+    }
 	}
 
 	private boolean hasKeyColumns()
