@@ -396,6 +396,10 @@ WHERE id=42;</p>
         Bugfixes will show up in these builds first.
         <br/>
       </p>
+      <p style="margin:10px">
+        <img style="vertical-align:middle;" src="images/warning.png"/>The development build now requires <b>Java 8</b>!
+      </p>
+
       <dev-build/>
     </content>
   </page>

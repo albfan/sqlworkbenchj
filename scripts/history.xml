@@ -4,6 +4,7 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-08-16">
     <entry dev-build="1" type="enh">Improved display of packages in the DbTree for Oracle and Firebird</entry>
+    <entry dev-build="1" type="fix">For SQL Server, generating "dummy DML" for tables with "bit" columns did not work</entry>
     <entry dev-build="1" type="fix">For MySQL the option "on update" for a default value was not shown in the generated SQL source for a table</entry>
   </release>
   <release build="118" date="2015-08-16">

@@ -253,15 +253,24 @@
           <entry id="schema-diff-includeviews">-includeViews</entry>
           <entry>
             <para>
-              Select whether views should also be compared. When comparing
-              views, the source as it is stored in the DBMS is compared. This comparison
-              is case-sensitiv, which means <literal>SELECT * FROM foo;</literal> will be
-              reported as a difference to <literal>select * from foo;</literal> even
-              if they are logically the same. A comparison across different DBMS will also not
-              work properly!
+              Select whether views should also be compared.
             </para>
             <para>
-              The default is <literal>true</literal>
+              Note that this comparison is very unreliable, because this compares
+              the source code, not the logical representation of the view definition.
+            </para>
+            <para>
+              The source code is compared the way it is returned by the DBMS is compared.
+              This comparison is case-sensitiv, which means <literal>SELECT * FROM foo;</literal>
+              will be reported as a difference to <literal>select * from foo;</literal> even
+              if they are logically the same. Aslo different indention or empty lines
+              will result in the views being reported as "different".
+            </para>
+            <para>
+              A comparison across different DBMS will not work.
+            </para>
+            <para>
+              The default is <literal>false</literal>
               Valid values are <literal>true</literal> or <literal>false</literal>.
             </para>
           </entry>
