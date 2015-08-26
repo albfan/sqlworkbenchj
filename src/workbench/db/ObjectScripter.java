@@ -79,6 +79,8 @@ public class ObjectScripter
 	private GenericObjectDropper dropper;
   private boolean extractPackageProcedure;
   private boolean needsAlternateDelimiter;
+  private List<String> additionalTableTypes;
+  private List<String> additionalViewTypes;
 
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
@@ -97,7 +99,16 @@ public class ObjectScripter
       synonymType = synReader.getSynonymTypeName();
     }
 
+    additionalTableTypes = dbConnection.getMetadata().getTableTypes();
+    additionalViewTypes = dbConnection.getMetadata().getViewTypes();
+    additionalViewTypes.remove(TYPE_VIEW);
+    knownTypes.addAll(additionalViewTypes);
+
+    additionalTableTypes.remove(TYPE_TABLE);
+    knownTypes.addAll(additionalTableTypes);
+
 		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_PACKAGE, TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM, TYPE_TYPE, TYPE_RULE);
+    commitTypes.addAll(additionalTableTypes);
 
 		if (sequenceType != null)
 		{
@@ -187,8 +198,18 @@ public class ObjectScripter
 			if (!cancel) this.appendObjectType(TYPE_TYPE);
 			if (!cancel) this.appendObjectType(TYPE_DOMAIN);
 			if (!cancel) this.appendObjectType(TYPE_TABLE);
+      for (String type : additionalTableTypes)
+      {
+        if (cancel) break;
+        this.appendObjectType(type);
+      }
 			if (!cancel) this.appendForeignKeys();
 			if (!cancel) this.appendObjectType(TYPE_VIEW);
+      for (String type : additionalViewTypes)
+      {
+        if (cancel) break;
+        this.appendObjectType(type);
+      }
 			if (!cancel && synonymType != null) this.appendObjectType(synonymType);
 			if (!cancel) this.appendObjectType(TYPE_MVIEW);
 			if (!cancel) this.appendObjectType(TYPE_INSERT);
