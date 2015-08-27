@@ -286,14 +286,14 @@ public class FirebirdProcedureReader
         result.append(connection.getMetadata().quoteObjectname(packageName));
         result.append("\nAS\n");
         result.append(header);
-        delim.appendTo(result);
+        result.append(delim.getScriptText());
         result.append('\n');
         String body = rs.getString(2);
         result.append("RECREATE PACKAGE BODY ");
         result.append(connection.getMetadata().quoteObjectname(packageName));
         result.append("\nAS\n");
         result.append(body);
-        delim.appendTo(result);
+        result.append(delim.getScriptText());
       }
     }
     catch (SQLException ex)

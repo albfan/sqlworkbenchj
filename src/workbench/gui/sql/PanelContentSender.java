@@ -112,27 +112,25 @@ public class PanelContentSender
 		final SqlPanel panel = selectPanel(panelIndex);
 		if (panel == null) return;
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-        if (type == PasteType.append)
-				{
-					panel.appendStatementText(text);
-				}
-        else if (type == PasteType.overwrite)
-				{
-					panel.setStatementText(text);
-				}
-        else if (type == PasteType.insert)
+		EventQueue.invokeLater(() ->
+    {
+      if (null != type)
+        switch (type)
         {
-          panel.addStatement(text);
+          case append:
+            panel.appendStatementText(text);
+            break;
+          case overwrite:
+            panel.setStatementText(text);
+            break;
+          case insert:
+            panel.addStatement(text);
+            break;
+          default:
         }
-				target.requestFocus();
-				panel.selectEditor();
-			}
-		});
+      target.requestFocus();
+      panel.selectEditor();
+    });
 	}
 
 	private SqlPanel selectPanel(int index)

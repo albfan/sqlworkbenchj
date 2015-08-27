@@ -52,6 +52,7 @@ import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.StringBuilderOutput;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -181,6 +182,9 @@ public class WbGenerateScript
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);
 		}
 		scripter.setProgressMonitor(this);
+
+    StringBuilderOutput script = new StringBuilderOutput(objects.size() * 250);
+    scripter.setTextOutput(script);
 		try
 		{
 			scripter.generateScript();
@@ -209,7 +213,7 @@ public class WbGenerateScript
 			try
 			{
 				writer = EncodingUtil.createWriter(output, encoding, false);
-				writer.write(scripter.getScript());
+				writer.write(script.toString());
 				result.addMessage(ResourceMgr.getFormattedString("MsgScriptWritten", output.getAbsolutePath()));
 			}
 			catch (IOException io)
@@ -225,7 +229,7 @@ public class WbGenerateScript
 		}
 		else
 		{
-			result.addMessage(scripter.getScript());
+			result.addMessage(script.toString());
 		}
 		return result;
 	}

@@ -32,6 +32,7 @@ public interface Scripter
 {
 	CharSequence getScript();
 	void generateScript();
+  void setTextOutput(TextOutput output);
 	void setProgressMonitor(ScriptGenerationMonitor monitor);
 	void cancel();
 	boolean isCancelled();

@@ -25,9 +25,12 @@ package workbench.db;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
+import workbench.interfaces.TextOutput;
+import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -36,6 +39,7 @@ import workbench.sql.DelimiterDefinition;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.StringBuilderOutput;
 import workbench.util.StringUtil;
 
 /**
@@ -61,9 +65,7 @@ public class ObjectScripter
 	public static final String TYPE_ENUM = "enum";
 	public static final String TYPE_MVIEW = DbMetadata.MVIEW_NAME.toLowerCase();
 
-	private Set<String> knownTypes = CollectionUtil.caseInsensitiveSet(TYPE_DOMAIN, TYPE_ENUM, TYPE_FUNC, TYPE_INSERT, TYPE_MVIEW, TYPE_MVIEW, TYPE_PACKAGE, TYPE_PROC, TYPE_RULE, TYPE_SELECT, TYPE_SYNONYM, TYPE_TABLE, TYPE_TRG, TYPE_TYPE, TYPE_UPDATE, TYPE_VIEW);
 	private List<? extends DbObject> objectList;
-	private StringBuilder script;
 	private ScriptGenerationMonitor progressMonitor;
 	private WbConnection dbConnection;
 	private boolean cancel;
@@ -79,13 +81,18 @@ public class ObjectScripter
 	private GenericObjectDropper dropper;
   private boolean extractPackageProcedure;
   private boolean needsAlternateDelimiter;
-  private List<String> additionalTableTypes;
-  private List<String> additionalViewTypes;
+  private Set<String> additionalTableTypes = CollectionUtil.caseInsensitiveSet();
+  private Set<String> additionalViewTypes = CollectionUtil.caseInsensitiveSet();
+  private Set<String> typesToGenerate = CollectionUtil.caseInsensitiveSet();
+  private int currentObject;
+  private int totalObjects;
+  private TextOutput output;
 
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
 		this.objectList = objects;
 		this.dbConnection = aConnection;
+    totalObjects = objectList.size();
 
 		SequenceReader reader = aConnection.getMetadata().getSequenceReader();
 		if (reader != null)
@@ -99,13 +106,11 @@ public class ObjectScripter
       synonymType = synReader.getSynonymTypeName();
     }
 
-    additionalTableTypes = dbConnection.getMetadata().getTableTypes();
-    additionalViewTypes = dbConnection.getMetadata().getViewTypes();
-    additionalViewTypes.remove(TYPE_VIEW);
-    knownTypes.addAll(additionalViewTypes);
+    additionalTableTypes.addAll(dbConnection.getMetadata().getTableTypes());
+    additionalViewTypes.addAll(dbConnection.getMetadata().getViewTypes());
 
+    additionalViewTypes.remove(TYPE_VIEW);
     additionalTableTypes.remove(TYPE_TABLE);
-    knownTypes.addAll(additionalTableTypes);
 
 		commitTypes = CollectionUtil.caseInsensitiveSet(TYPE_TABLE, TYPE_VIEW, TYPE_PACKAGE, TYPE_PROC, TYPE_FUNC, TYPE_TRG, TYPE_DOMAIN, TYPE_ENUM, TYPE_TYPE, TYPE_RULE);
     commitTypes.addAll(additionalTableTypes);
@@ -113,13 +118,11 @@ public class ObjectScripter
 		if (sequenceType != null)
 		{
 			commitTypes.add(sequenceType.toLowerCase());
-      knownTypes.add(sequenceType);
 		}
 
     if (synonymType != null)
 		{
 			commitTypes.add(synonymType.toLowerCase());
-      knownTypes.add(synonymType);
 		}
 
     useSeparator = DbExplorerSettings.getGenerateScriptSeparator();
@@ -129,15 +132,15 @@ public class ObjectScripter
 		dropper.setConnection(dbConnection);
 		dropper.setCascade(true);
 
-    Set<String> types = CollectionUtil.caseInsensitiveSet();
     for (DbObject dbo : objects)
     {
-      types.add(dbo.getObjectType());
+      typesToGenerate.add(dbo.getObjectType());
     }
+
     Set<String> altDelimTypes = aConnection.getDbSettings().getTypesRequiringAlternateDelimiter();
     for (String type : altDelimTypes)
     {
-      if (types.contains(type))
+      if (typesToGenerate.contains(type))
       {
         needsAlternateDelimiter = true;
         break;
@@ -175,9 +178,16 @@ public class ObjectScripter
 	@Override
 	public String getScript()
 	{
-		if (this.script == null) this.generateScript();
-		return this.script.toString();
+    output = new StringBuilderOutput(totalObjects * 50);
+		generateScript();
+		return output.toString();
 	}
+
+  @Override
+  public void setTextOutput(TextOutput out)
+  {
+    output = out;
+  }
 
 	@Override
 	public boolean isCancelled()
@@ -190,47 +200,100 @@ public class ObjectScripter
 	{
 		try
 		{
+      currentObject = 1;
+
 			this.dbConnection.setBusy(true);
 			this.cancel = false;
-			this.script = new StringBuilder(this.objectList.size() * 500);
-			if (!cancel && sequenceType != null) this.appendObjectType(sequenceType);
+
+			if (!cancel && sequenceType != null)
+      {
+        appendObjectType(sequenceType);
+        typesToGenerate.remove(sequenceType);
+      }
+
 			if (!cancel) this.appendObjectType(TYPE_ENUM);
+      typesToGenerate.remove(TYPE_ENUM);
+
 			if (!cancel) this.appendObjectType(TYPE_TYPE);
+      typesToGenerate.remove(TYPE_TYPE);
+
 			if (!cancel) this.appendObjectType(TYPE_DOMAIN);
+			typesToGenerate.remove(TYPE_DOMAIN);
+
 			if (!cancel) this.appendObjectType(TYPE_TABLE);
+      typesToGenerate.remove(TYPE_TABLE);
+
       for (String type : additionalTableTypes)
       {
         if (cancel) break;
-        this.appendObjectType(type);
+        appendObjectType(type);
+        typesToGenerate.remove(type);
       }
+
 			if (!cancel) this.appendForeignKeys();
+
 			if (!cancel) this.appendObjectType(TYPE_VIEW);
+      typesToGenerate.remove(TYPE_VIEW);
+
       for (String type : additionalViewTypes)
       {
         if (cancel) break;
         this.appendObjectType(type);
+        typesToGenerate.remove(type);
       }
-			if (!cancel && synonymType != null) this.appendObjectType(synonymType);
+
+			if (!cancel && synonymType != null)
+      {
+        appendObjectType(synonymType);
+        typesToGenerate.remove(synonymType);
+      }
+
 			if (!cancel) this.appendObjectType(TYPE_MVIEW);
+      typesToGenerate.remove(TYPE_MVIEW);
+
 			if (!cancel) this.appendObjectType(TYPE_INSERT);
+      typesToGenerate.remove(TYPE_INSERT);
+
 			if (!cancel) this.appendObjectType(TYPE_UPDATE);
+      typesToGenerate.remove(TYPE_UPDATE);
+
 			if (!cancel) this.appendObjectType(TYPE_SELECT);
+      typesToGenerate.remove(TYPE_SELECT);
+
 			if (!cancel) this.appendObjectType(TYPE_FUNC);
+      typesToGenerate.remove(TYPE_FUNC);
+
 			if (!cancel) this.appendObjectType(TYPE_PROC);
+      typesToGenerate.remove(TYPE_PROC);
+
 			if (!cancel) this.appendObjectType(TYPE_PACKAGE);
+      typesToGenerate.remove(TYPE_PACKAGE);
+
 			if (!cancel) this.appendObjectType(TYPE_TRG);
+      typesToGenerate.remove(TYPE_TRG);
+
 			if (!cancel) this.appendObjectType(TYPE_RULE);
-			if (!cancel) this.appendObjectType(null); // everything else
+      typesToGenerate.remove(TYPE_RULE);
+
+      // everything else
+      for (String type : typesToGenerate)
+      {
+        this.appendObjectType(type);
+      }
 		}
+    catch (Exception ex)
+    {
+      LogMgr.logError("ObjectScript.generateScript()", "Could not generate script", ex);
+    }
 		finally
 		{
 			this.dbConnection.setBusy(false);
 		}
 		if (appendCommit && this.dbConnection.getDbSettings().ddlNeedsCommit())
 		{
-			script.append("\nCOMMIT");
+			output.append("\nCOMMIT");
       DelimiterDefinition delim = getDelimiter();
-      delim.appendTo(script);
+      output.append(delim.getScriptText());
 		}
 	}
 
@@ -254,72 +317,58 @@ public class ObjectScripter
 		this.cancel = true;
 	}
 
+  private boolean isTable(DbObject dbo)
+  {
+    return dbo.getObjectType().equalsIgnoreCase(TYPE_TABLE) || additionalTableTypes.contains(dbo.getObjectType());
+  }
 
 	private void appendForeignKeys()
 	{
+
+    List<DbObject> toProcess = objectList.stream().filter(dbo -> isTable(dbo)).collect(Collectors.toList());
+
+    if (toProcess.isEmpty()) return;
+
 		if (this.progressMonitor != null)
 		{
 			this.progressMonitor.setCurrentObject(ResourceMgr.getString("TxtScriptProcessFk"), -1, -1);
 		}
-		boolean first = true;
-		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);
 
-		for (DbObject dbo : objectList)
+    if (useSeparator)
+    {
+      output.append("-- BEGIN FOREIGN KEYS --");
+    }
+
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);
+		for (DbObject dbo : toProcess)
 		{
 			if (cancel) break;
-			String type = dbo.getObjectType();
-			if (!type.equalsIgnoreCase(TYPE_TABLE)) continue;
 
 			TableIdentifier tbl = (TableIdentifier)dbo;
 			tbl.adjustCase(this.dbConnection);
 			StringBuilder source = builder.getFkSource(tbl);
 			if (source != null && source.length() > 0)
 			{
-				if (first)
-				{
-					if (useSeparator)
-					{
-						this.script.append("-- BEGIN FOREIGN KEYS --");
-					}
-					first = false;
-				}
-				script.append(nl);
-				script.append(source);
+				output.append(nl);
+				output.append(source);
 			}
 		}
-		if (!first)
-		{
-			// no table was found, so no FK was added --> do not add separator
-			if (useSeparator)
-			{
-				this.script.append("-- END FOREIGN KEYS --");
-				this.script.append(nl);
-			}
-			this.script.append(nl);
-		}
-	}
 
-  private boolean shouldProcessObject(DbObject dbo, String typeToShow)
-  {
-    String type = dbo.getObjectType();
-    if (typeToShow == null)
+    if (useSeparator)
     {
-      // only process unknown types if filter is null
-      if (knownTypes.contains(type)) return false;
+      output.append("-- END FOREIGN KEYS --");
+      output.append(nl);
     }
-    return type.equalsIgnoreCase(typeToShow);
-  }
+    output.append(nl);
+	}
 
 	private void appendObjectType(String typeToShow)
 	{
-		int current = 1;
-		int count = objectList.size();
+    List<DbObject> toProcess = objectList.stream().filter(dbo -> dbo.getObjectType().equalsIgnoreCase(typeToShow)).collect(Collectors.toList());
 
-		for (DbObject dbo : objectList)
+		for (DbObject dbo : toProcess)
 		{
 			if (cancel) break;
-
-      if (!shouldProcessObject(dbo, typeToShow)) continue;
 
       String type = dbo.getObjectType();
 
@@ -327,10 +376,10 @@ public class ObjectScripter
 
 			if (this.progressMonitor != null)
 			{
-				this.progressMonitor.setCurrentObject(dbo.getObjectName(), current++, count);
+				this.progressMonitor.setCurrentObject(dbo.getObjectName(), currentObject++, totalObjects);
 			}
 
-      boolean isPackageProc = false;
+      boolean isCompleteProcedure = true;
 			try
 			{
 				if (dbo instanceof TableIdentifier)
@@ -351,26 +400,26 @@ public class ObjectScripter
               if (procSrc != null)
               {
                 source = procSrc;
-                isPackageProc = true;
+                isCompleteProcedure = false;
               }
             }
           }
 				}
 
         // if this is a procedure that is part of a package
-        // and only the procedure is shown, the script isn't usefull anyway
+        // and only the procedure is shown, the script isn't useful anyway
         // so it makes no sense to append a commit
-				if (!isPackageProc)
+				if (isCompleteProcedure)
 				{
 					appendCommit = appendCommit || commitTypes.contains(type.toLowerCase());
 				}
 			}
 			catch (Exception e)
 			{
-				this.script.append("\nError creating script for ");
-				this.script.append(dbo.getObjectName());
-				this.script.append(' ');
-				this.script.append(ExceptionUtil.getDisplay(e));
+				output.append("\nError creating script for ");
+				output.append(dbo.getObjectName());
+				output.append(" ");
+				output.append(ExceptionUtil.getDisplay(e));
 			}
 
 			if (source != null && source.length() > 0)
@@ -378,7 +427,7 @@ public class ObjectScripter
 				boolean writeSeparator = useSeparator && !typesWithoutSeparator.contains(type) && this.objectList.size() > 1;
 				if (writeSeparator)
 				{
-					this.script.append("-- BEGIN ").append(type).append(' ').append(dbo.getObjectName()).append(nl);
+					output.append("-- BEGIN " + type + " " + dbo.getObjectName() + nl);
 				}
 
 				if (includeDrop)
@@ -386,24 +435,24 @@ public class ObjectScripter
 					CharSequence drop = dropper.getDropForObject(dbo);
 					if (drop != null && drop.length() > 0)
 					{
-						this.script.append(drop);
+						output.append(drop);
             DelimiterDefinition delim = getDelimiter();
-            delim.appendTo(script);
-						this.script.append(nl);
+            output.append(delim.getScriptText());
+						output.append(nl);
 					}
 				}
-				this.script.append(source);
+				output.append(source);
 
 				if (!StringUtil.endsWith(source, nl))
 				{
-					script.append(nl);
+					output.append(nl);
 				}
 
 				if (writeSeparator)
 				{
-					this.script.append("-- END ").append(type).append(' ').append(dbo.getObjectName()).append(nl);
+					output.append("-- END " + type + " " + dbo.getObjectName() + nl);
 				}
-				this.script.append(nl);
+				output.append(nl);
 			}
 		}
 	}

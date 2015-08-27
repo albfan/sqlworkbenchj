@@ -30,6 +30,7 @@ import java.util.Map;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
+import workbench.interfaces.TextOutput;
 
 import workbench.storage.RowActionMonitor;
 
@@ -67,6 +68,11 @@ public class DropScriptGenerator
 		this.connection = aConnection;
 		dropTemplate = connection.getDbSettings().getDropFKConstraint("table");
 	}
+
+  @Override
+  public void setTextOutput(TextOutput output)
+  {
+  }
 
 	@Override
 	public WbConnection getCurrentConnection()

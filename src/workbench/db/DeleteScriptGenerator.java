@@ -40,6 +40,7 @@ import java.util.TreeMap;
 import workbench.WbManager;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
+import workbench.interfaces.TextOutput;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -86,16 +87,12 @@ public class DeleteScriptGenerator
 	private boolean showFkNames;
 	private List<TableIdentifier> excludeTables = new ArrayList<>();
 
-	private final Comparator<Integer> descComparator = new Comparator<Integer>()
-		{
-			@Override
-			public int compare(Integer i1, Integer i2)
-			{
-				int val1 = i1.intValue();
-				int val2 = i2.intValue();
-				return (val1 < val2 ? 1 : (val1==val2 ? 0 : -1));
-			}
-		};
+	private final Comparator<Integer> descComparator = (Integer i1, Integer i2) ->
+  {
+    int val1 = i1.intValue();
+    int val2 = i2.intValue();
+    return (val1 < val2 ? 1 : (val1==val2 ? 0 : -1));
+  };
 
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
@@ -104,6 +101,11 @@ public class DeleteScriptGenerator
 		this.meta = this.connection.getMetadata();
 		this.formatter = new SqlLiteralFormatter(this.connection);
 	}
+
+  @Override
+  public void setTextOutput(TextOutput output)
+  {
+  }
 
 	@Override
 	public WbConnection getCurrentConnection()

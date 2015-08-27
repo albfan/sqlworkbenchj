@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
+import workbench.interfaces.TextOutput;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -53,7 +54,7 @@ import workbench.util.WbThread;
  */
 public class ObjectScripterUI
 	extends JPanel
-	implements WindowListener, ScriptGenerationMonitor
+	implements WindowListener, ScriptGenerationMonitor, TextOutput
 {
 	protected Scripter scripter;
 	protected JLabel statusMessage;
@@ -65,17 +66,17 @@ public class ObjectScripterUI
 
 	public ObjectScripterUI(Scripter script)
 	{
-		super();
-		this.scripter = script;
-		this.scripter.setProgressMonitor(this);
+		super(new BorderLayout());
+		scripter = script;
+		scripter.setProgressMonitor(this);
+    scripter.setTextOutput(this);
 
-		this.statusMessage = new WbStatusLabel();
-		this.setLayout(new BorderLayout());
-		this.add(this.statusMessage, BorderLayout.SOUTH);
-		this.editor = EditorPanel.createSqlEditor();
+		statusMessage = new WbStatusLabel();
+		add(this.statusMessage, BorderLayout.SOUTH);
+		editor = EditorPanel.createSqlEditor();
 		CreateSnippetAction create = new CreateSnippetAction(this.editor);
-		this.editor.addPopupMenuItem(create, true);
-		this.add(this.editor, BorderLayout.CENTER);
+		editor.addPopupMenuItem(create, true);
+		add(editor, BorderLayout.CENTER);
 	}
 
 	public void setDbConnection(WbConnection con)
@@ -99,6 +100,17 @@ public class ObjectScripterUI
 		}
 	}
 
+  @Override
+  public void append(final CharSequence text)
+  {
+    if (text == null) return;
+
+    WbSwingUtilities.invoke(() ->
+    {
+      editor.appendLine(text.toString());
+    });
+  }
+
 	private void startScripting()
 	{
 		if (this.isRunning()) return;
@@ -120,28 +132,16 @@ public class ObjectScripterUI
           lastObject = null;
 					window.setTitle(RunningJobIndicator.TITLE_PREFIX + baseTitle);
 					scripter.generateScript();
-					if (!scripter.isCancelled())
-					{
-						WbSwingUtilities.invoke(new Runnable()
-						{
-							@Override
-							public void run()
-							{
-								editor.setText(scripter.getScript().toString());
-								editor.setCaretPosition(0);
-							}
-						});
-					}
 				}
 				finally
 				{
           window.setTitle(lastObject == null ? baseTitle : lastObject);
 					setRunning(false);
-					EventQueue.invokeLater(new Runnable()
-					{
-						@Override
-						public void run() { statusMessage.setText(StringUtil.EMPTY_STRING); }
-					});
+					EventQueue.invokeLater(() ->
+          {
+            statusMessage.setText(StringUtil.EMPTY_STRING);
+            editor.setCaretPosition(0);
+          });
 				}
 			}
 		};

@@ -288,17 +288,13 @@ public class DelimiterDefinition
 		return sql;
 	}
 
-  public void appendTo(StringBuilder sql)
+  public String getScriptText()
   {
     if (this.isNonStandard())
     {
-      sql.append('\n');
+      return "\n" + delimiter + "\n";
     }
-    sql.append(this.delimiter);
-    if (this.isNonStandard())
-    {
-      sql.append('\n');
-    }
+    return delimiter;
   }
 
 }

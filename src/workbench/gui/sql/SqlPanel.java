@@ -1619,6 +1619,8 @@ public class SqlPanel
 		if (this.editor.getCurrentFile() != null) this.editor.saveCurrentFile();
 		this.editor.closeFile(true);
 		this.editor.setText(text);
+    this.editor.setCaretPosition(0);
+    this.editor.scrollToCaret();
 	}
 
 	public void addStatement(String text)
