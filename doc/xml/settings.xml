@@ -1407,7 +1407,7 @@ workbench.db.mysql.retrieve.create.table.index_included=true</programlisting>
 			</para>
     </simplesect>
 
-    <simplesect id="settings-table-source-colindex">
+    <simplesect id="settings-index-source-colindex">
 			<title>Defining the result column</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.sourcecol</literal></para>
 			<para>

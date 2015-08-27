@@ -44,6 +44,7 @@ public class DummyDML
   public static final String PROP_CONFIG_MAKE_PREPARED = PROP_CONFIG_PREFIX + "prepared";
   public static final String PROP_CONFIG_GENERATE_LITERAL = PROP_CONFIG_PREFIX + "literal";
   public static final String PLACEHOLDER_COL_NAME = "${column_name}";
+  public static final String PLACEHOLDER_TABLE_NAME = "${table_name}";
 
   protected boolean doFormat;
 	protected final TableIdentifier table;
@@ -172,10 +173,14 @@ public class DummyDML
     String baseTemplate = Settings.getInstance().getProperty(getTemplateConfigKey(), PLACEHOLDER_COL_NAME + "_value");
 
     String template = Settings.getInstance().getProperty(getTemplateConfigKeyForType(col.getDataType()), baseTemplate);
-    String name = SqlUtil.removeObjectQuotes(col.getColumnName());
+    String name = FormatterUtil.getIdentifier(SqlUtil.removeObjectQuotes(col.getColumnName()));
     boolean makeLiteral = Settings.getInstance().getBoolProperty(PROP_CONFIG_GENERATE_LITERAL, true);
 
     String value = template.replace(PLACEHOLDER_COL_NAME, name);
+    if (table != null)
+    {
+      value = value.replace(PLACEHOLDER_TABLE_NAME, FormatterUtil.getIdentifier(table.getRawTableName()));
+    }
 
     if (makeLiteral)
     {
