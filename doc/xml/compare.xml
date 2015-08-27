@@ -270,7 +270,7 @@
               A comparison across different DBMS will not work.
             </para>
             <para>
-              The default is <literal>false</literal>
+              The default is <literal>true</literal>
               Valid values are <literal>true</literal> or <literal>false</literal>.
             </para>
           </entry>
