@@ -22,11 +22,12 @@
  */
 package workbench.db;
 
-import java.sql.Statement;
+
 import workbench.TestUtil;
-import workbench.util.SqlUtil;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -44,28 +45,62 @@ public class DummyUpdateTest
 
 		try
 		{
-			Statement stmt = con.createStatement();
-			stmt.executeUpdate("create table person (nr integer not null primary key, firstname varchar(20), lastname varchar(20))");
-			con.commit();
+      TestUtil.executeScript(con,
+        "create table person (nr integer not null primary key, firstname varchar(20), lastname varchar(20));\n" +
+        "commit;");
 			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("PERSON"));
-			DummyUpdate insert = new DummyUpdate(person);
-			assertEquals("UPDATE", insert.getObjectType());
-			String sql = insert.getSource(con).toString();
+			DummyUpdate update = new DummyUpdate(person);
+      update.setDoFormatSql(false);
 
-			String verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("UPDATE", verb);
-			assertTrue(sql.indexOf("FIRSTNAME = 'FIRSTNAME_value'") > -1);
-			assertTrue(sql.indexOf("WHERE NR = NR_value") > -1);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			assertEquals("UPDATE", update.getObjectType());
+			String sql = update.getSource(con).toString();
+
+      String expected =
+        "UPDATE PERSON\n" +
+        "   SET FIRSTNAME = 'FIRSTNAME_value',\n" +
+        "       LASTNAME = 'LASTNAME_value'\n" +
+        "WHERE NR = NR_value;";
+//      System.out.println("Got: \n" + sql + "\n------Expected\n" + expected);
+      assertEquals(expected, sql);
 		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
+
+	@Test
+	public void testMultiColumnPK()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("DummyUpdateGen1");
+		WbConnection con = util.getConnection();
+
+		try
+		{
+			TestUtil.executeScript(con,
+        "create table link_table (id1 integer not null, id2 integer not null, some_data varchar(20), primary key (id1, id2));\n" +
+        "commit;");
+
+			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("LINK_TABLE"));
+			DummyUpdate update = new DummyUpdate(person);
+      update.setDoFormatSql(false);
+			assertEquals("UPDATE", update.getObjectType());
+			String sql = update.getSource(con).toString();
+
+      String expected =
+        "UPDATE LINK_TABLE\n" +
+        "   SET SOME_DATA = 'SOME_DATA_value'\n" +
+        "WHERE ID1 = ID1_value\n" +
+        "  AND ID2 = ID2_value;";
+//      System.out.println("Got: \n" + sql + "\n------Expected\n" + expected);
+      assertEquals(expected, sql);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 
 }

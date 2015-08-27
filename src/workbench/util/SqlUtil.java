@@ -1326,6 +1326,12 @@ public class SqlUtil
 		closeStatement(stmt);
 	}
 
+  /**
+   * Returns the name of the java.sql.Types constant for the given type value.
+   *
+   * @param sqlType  the data type corresponding to the java.sql.Types constants
+   * @return the name of the type
+   */
 	public static String getTypeName(int sqlType)
 	{
 		switch (sqlType)
@@ -1439,7 +1445,7 @@ public class SqlUtil
 				return "ROWID";
 
 			default:
-				return "UNKNOWN";
+				return "OTHER";
 		}
 	}
 

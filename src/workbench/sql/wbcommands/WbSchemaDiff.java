@@ -165,7 +165,7 @@ public class WbSchemaDiff
 		diff.setIncludeIndex(cmdLine.getBoolean(ARG_INCLUDE_INDEX, true));
 		diff.setIncludePrimaryKeys(cmdLine.getBoolean(ARG_INCLUDE_PK, true));
 		diff.setIncludeTableConstraints(cmdLine.getBoolean(ARG_INCLUDE_CONSTRAINTS, true));
-		diff.setIncludeViews(cmdLine.getBoolean(ARG_INCLUDE_VIEWS, false));
+		diff.setIncludeViews(cmdLine.getBoolean(ARG_INCLUDE_VIEWS, true));
 		diff.setCompareJdbcTypes(cmdLine.getBoolean(ARG_DIFF_JDBC_TYPES, false));
 		diff.setIncludeProcedures(cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_PROCS, false));
 		diff.setIncludeTableGrants(cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_GRANTS, false));

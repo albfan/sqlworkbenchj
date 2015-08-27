@@ -141,9 +141,9 @@ public class WbGenInsert
 				if (fullInsert)
 				{
 					DummyInsert insert = new DummyInsert(table);
-					insert.setFormatSql(false);
+					insert.setDoFormatSql(false);
 					String source = insert.getSource(currentConnection).toString();
-					result.addMessage(SqlUtil.makeCleanSql(source,false) + ";");
+					result.addMessage(SqlUtil.makeCleanSql(source,false));
 				}
 				else
 				{

@@ -106,7 +106,7 @@ public class WbSchemaDiffTest
 		WbSchemaDiff diff = new WbSchemaDiff();
 		File output = new File(util.getBaseDir(), "diffTest.xml");
 		output.delete();
-		StatementRunnerResult result = diff.execute("WbSchemaDiff -file='" + output.getAbsolutePath() + "' -excludeTables=TO_* -includeForeignKeys=false -includePrimaryKeys=false -includeIndex=false -includeSequences=true -referenceProfile=source -targetProfile=target");
+		StatementRunnerResult result = diff.execute("WbSchemaDiff -file='" + output.getAbsolutePath() + "' -excludeTables=TO_* -includeForeignKeys=false -includePrimaryKeys=false -includeViews=true -includeIndex=false -includeSequences=true -referenceProfile=source -targetProfile=target");
 		assertTrue(result.isSuccess());
 		assertTrue("File not created", output.exists());
 

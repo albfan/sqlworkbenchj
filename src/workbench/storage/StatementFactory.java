@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.log.LogMgr;
-import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
@@ -36,6 +35,8 @@ import workbench.db.DefaultExpressionBuilder;
 import workbench.db.DmlExpressionBuilder;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import workbench.sql.formatter.FormatterUtil;
 
 import workbench.util.SqlUtil;
 
@@ -57,8 +58,6 @@ public class StatementFactory
 	private boolean includeReadOnlyColumns;
 	private boolean includeIdentityColumns;
 	private DmlExpressionBuilder expressionBuilder;
-	private GeneratedIdentifierCase keywordStyle;
-	private GeneratedIdentifierCase identifierStyle;
 
 	/**
 	 * @param metaData the description of the resultSet for which the statements are generated
@@ -70,20 +69,7 @@ public class StatementFactory
 		this.setCurrentConnection(conn);
 		expressionBuilder = DmlExpressionBuilder.Factory.getBuilder(conn);
 		includeIdentityColumns = !Settings.getInstance().getGenerateInsertIgnoreIdentity();
-		keywordStyle = Settings.getInstance().getFormatterKeywordsCase();
-		identifierStyle = Settings.getInstance().getFormatterIdentifierCase();
 	}
-
-	public void setKeywordStyle(GeneratedIdentifierCase style)
-	{
-		this.keywordStyle = style;
-	}
-
-	public void setIdentifierStyle(GeneratedIdentifierCase style)
-	{
-		this.identifierStyle = style;
-	}
-
 
 	public void setIncludeIdentiyColumns(boolean flag)
 	{
@@ -476,7 +462,7 @@ public class StatementFactory
 		{
 			name = dbConnection.getMetadata().quoteObjectname(colName);
 		}
-		return formatIdentifier(name);
+		return FormatterUtil.getIdentifier(name);
 	}
 
 	private TableIdentifier getUpdateTable()
@@ -509,45 +495,12 @@ public class StatementFactory
 				tname = dbConnection.getMetadata().quoteObjectname(toUse.getTableName());
 			}
 		}
-		return formatIdentifier(tname);
-	}
-
-	private boolean isQuoted(String name)
-	{
-		if (dbConnection == null)
-		{
-			return SqlUtil.isQuotedIdentifier(name);
-		}
-		return dbConnection.getMetadata().isQuoted(name);
-	}
-
-	private String formatIdentifier(String name)
-	{
-		if (name == null) return name;
-
-		if (isQuoted(name)) return name;
-
-		switch (identifierStyle)
-		{
-			case lower:
-				return name.toLowerCase();
-			case upper:
-				return name.toUpperCase();
-		}
-		return name;
+		return FormatterUtil.getIdentifier(tname);
 	}
 
 	private void appendKeyword(StringBuilder text, String toAppend)
 	{
-		GeneratedIdentifierCase style = Settings.getInstance().getFormatterKeywordsCase();
-		if (style == GeneratedIdentifierCase.lower)
-		{
-			text.append(toAppend.toLowerCase());
-		}
-		else
-		{
-			text.append(toAppend);
-		}
+    text.append(FormatterUtil.getKeyword(toAppend));
 	}
 
 	private boolean isNull(Object value)

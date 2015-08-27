@@ -22,13 +22,11 @@
  */
 package workbench.db;
 
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import workbench.TestUtil;
-
-import workbench.util.SqlUtil;
+import workbench.resource.Settings;
 
 import org.junit.Test;
 
@@ -50,23 +48,19 @@ public class DummyInsertTest
 
 		try
 		{
-			Statement stmt = con.createStatement();
-			stmt.executeUpdate("create table person (nr integer, firstname varchar(20), lastname varchar(20))");
-			con.commit();
+      TestUtil.executeScript(con,
+        "create table person (nr integer, firstname varchar(20), lastname varchar(20));\n" +
+        "commit;");
 			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("PERSON"));
 			DummyInsert insert = new DummyInsert(person);
-			assertEquals("INSERT", insert.getObjectType());
+      insert.setDoFormatSql(false);
+      assertEquals("INSERT", insert.getObjectType());
 
 			String sql = insert.getSource(con).toString();
 
-			String verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("INSERT", verb);
-			assertTrue(sql.indexOf("(\n  NR_value,\n  'FIRSTNAME_value',\n  'LASTNAME_value'") > -1);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
+      String expected = "INSERT INTO PERSON\n  (NR, FIRSTNAME, LASTNAME)\nVALUES\n  (NR_value, 'FIRSTNAME_value', 'LASTNAME_value');";
+//      System.out.println(sql + "\n----\n"+ expected);
+			assertEquals(expected, sql);
 		}
 		finally
 		{
@@ -75,24 +69,61 @@ public class DummyInsertTest
 	}
 
 	@Test
+	public void testValueTemplate()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("dummyInsertGen2");
+		WbConnection con = util.getConnection();
+
+    DummyInsert insert = null;
+		try
+		{
+      TestUtil.executeScript(con,
+        "create table person (nr integer, firstname varchar(20), lastname varchar(20));\n" +
+        "commit;");
+			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("PERSON"));
+
+			insert = new DummyInsert(person);
+      insert.setDoFormatSql(false);
+
+      Settings.getInstance().setProperty(insert.getTemplateConfigKey(), "@" + DummyDML.PLACEHOLDER_COL_NAME);
+      Settings.getInstance().setProperty(DummyDML.PROP_CONFIG_GENERATE_LITERAL, false);
+
+			String sql = insert.getSource(con).toString();
+      String expected = "INSERT INTO PERSON\n  (NR, FIRSTNAME, LASTNAME)\nVALUES\n  (@NR, @FIRSTNAME, @LASTNAME);";
+      System.out.println(sql + "\n---\n" + expected);
+			assertEquals(expected, sql);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+      Settings.getInstance().setProperty(insert.getTemplateConfigKey(), null);
+      Settings.getInstance().setProperty(DummyDML.PROP_CONFIG_GENERATE_LITERAL, null);
+		}
+	}
+
+	@Test
 	public void testSelectedColumns()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("dummyInsertGen1");
+		TestUtil util = new TestUtil("dummyInsertGen3");
 		WbConnection con = util.getConnection();
 
 		try
 		{
-			Statement stmt = con.createStatement();
-			stmt.executeUpdate("create table person (nr integer, firstname varchar(20), lastname varchar(20))");
-			con.commit();
+      TestUtil.executeScript(con,
+        "create table person (nr integer, firstname varchar(20), lastname varchar(20));\n" +
+        "commit;");
 			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("PERSON"));
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			List<ColumnIdentifier> cols = new ArrayList<>();
 			cols.add(new ColumnIdentifier("NR"));
 
 			DummyInsert insert = new DummyInsert(person, cols);
+      insert.setDoFormatSql(false);
 			String sql = insert.getSource(con).toString();
-			assertTrue(sql.trim().equals("INSERT INTO PERSON\n(\n  NR\n)\nVALUES\n(\n  NR_value\n);"));
+      String expected = "INSERT INTO PERSON\n  (NR)\nVALUES\n  (NR_value);";
+//      System.out.println(sql + "\n---\n" + expected);
+			assertEquals(expected, sql);
 		}
 		finally
 		{

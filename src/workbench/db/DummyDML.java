@@ -22,18 +22,17 @@
  */
 package workbench.db;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 import workbench.resource.Settings;
 
-import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
-import workbench.storage.RowData;
-import workbench.storage.SqlLiteralFormatter;
-import workbench.storage.StatementFactory;
 
+import workbench.sql.formatter.FormatterUtil;
+import workbench.sql.formatter.WbSqlFormatter;
+
+import workbench.util.SqlUtil;
 
 /**
  * @author Thomas Kellerer
@@ -41,30 +40,30 @@ import workbench.storage.StatementFactory;
 public class DummyDML
 	implements DbObject
 {
-	private final TableIdentifier table;
+  public static final String PROP_CONFIG_PREFIX = "workbench.sql.generate.dummydml.";
+  public static final String PROP_CONFIG_MAKE_PREPARED = PROP_CONFIG_PREFIX + "prepared";
+  public static final String PROP_CONFIG_GENERATE_LITERAL = PROP_CONFIG_PREFIX + "literal";
+  public static final String PLACEHOLDER_COL_NAME = "${column_name}";
+
+  protected boolean doFormat;
+	protected final TableIdentifier table;
 	private List<ColumnIdentifier> columns;
 
-	// if false, an INSERT will be created, otherwise an UPDATE
-	private final boolean createUpdateStatement;
-	private boolean formatSql = true;
-
-	protected DummyDML(TableIdentifier tbl, boolean buildUpdate)
+	protected DummyDML(TableIdentifier tbl)
 	{
 		this.table = tbl;
-		this.createUpdateStatement = buildUpdate;
 	}
 
-	public DummyDML(TableIdentifier tbl, List<ColumnIdentifier> cols, boolean buildUpdate)
+	public DummyDML(TableIdentifier tbl, List<ColumnIdentifier> cols)
 	{
 		this.table = tbl;
 		this.columns = new ArrayList<>(cols);
-		this.createUpdateStatement = buildUpdate;
 	}
 
-	public void setFormatSql(boolean formatSql)
-	{
-		this.formatSql = formatSql;
-	}
+  public void setDoFormatSql(boolean flag)
+  {
+    doFormat = flag;
+  }
 
 	@Override
 	public String getComment()
@@ -131,85 +130,81 @@ public class DummyDML
 		return null;
 	}
 
-	@Override
-	public CharSequence getSource(WbConnection con)
-		throws SQLException
-	{
-    boolean makePrepared = Settings.getInstance().getBoolProperty("workbench.sql.generate.dummydml.prepared", false);
-		ResultInfo info = null;
-		if (this.columns == null)
-		{
-			info = new ResultInfo(table, con);
-		}
-		else
-		{
-			ColumnIdentifier[] cols = new ColumnIdentifier[columns.size()];
-			columns.toArray(cols);
-			info = new ResultInfo(cols);
-		}
-		info.setUpdateTable(table);
-		StatementFactory factory = new StatementFactory(info, con);
+  @Override
+  public CharSequence getSource(WbConnection con)
+    throws SQLException
+  {
+		throw new UnsupportedOperationException("Must be implemented in a descendant");
+  }
 
-		SqlLiteralFormatter f = new SqlLiteralFormatter(con);
+  protected List<ColumnIdentifier> getColumns(WbConnection con)
+    throws SQLException
+  {
+    if (columns != null) return columns;
 
-		RowData dummyData = new RowData(info.getColumnCount());
-		if (createUpdateStatement)
+    ResultInfo info = new ResultInfo(table, con);
+    return info.getColumnList();
+  }
+
+  public String getTemplateConfigKey()
+  {
+    return PROP_CONFIG_PREFIX + getObjectType().toLowerCase() + ".value.template";
+  }
+
+  public String getTemplateConfigKeyForType(int jdbcType)
+  {
+    return getTemplateConfigKeyForType(SqlUtil.getTypeName(jdbcType).toLowerCase());
+  }
+
+  public String getTemplateConfigKeyForType(String type)
+  {
+    return PROP_CONFIG_PREFIX + getObjectType().toLowerCase() + ".value.template." + type;
+  }
+
+  protected String getValueString(ColumnIdentifier col)
+  {
+    boolean makePrepared = Settings.getInstance().getBoolProperty(PROP_CONFIG_MAKE_PREPARED, false);
+    if (makePrepared)
+    {
+      return "?";
+    }
+
+    String baseTemplate = Settings.getInstance().getProperty(getTemplateConfigKey(), PLACEHOLDER_COL_NAME + "_value");
+
+    String template = Settings.getInstance().getProperty(getTemplateConfigKeyForType(col.getDataType()), baseTemplate);
+    String name = SqlUtil.removeObjectQuotes(col.getColumnName());
+    boolean makeLiteral = Settings.getInstance().getBoolProperty(PROP_CONFIG_GENERATE_LITERAL, true);
+
+    String value = template.replace(PLACEHOLDER_COL_NAME, name);
+
+    if (makeLiteral)
+    {
+      int type = col.getDataType();
+      if (SqlUtil.isCharacterType(type))
+      {
+        value = "'" + value + "'";
+      }
+    }
+    return value;
+  }
+
+  protected String getColumnName(ColumnIdentifier col, WbConnection dbConnection)
+  {
+		String name = dbConnection.getMetadata().quoteObjectname(col.getColumnName());
+    return FormatterUtil.getIdentifier(name);
+  }
+
+  protected String formatSql(String sql, WbConnection con)
+  {
+		if (doFormat)
 		{
-			// clear the "isNew" status
-			dummyData.resetStatus();
-		}
-
-		// This is a "trick" to fool the StatementFactory which will
-		// check the type of the Data. In case it does not "know" the
-		// class, it calls toString() to get the value of the column
-		// this way we get a question mark for each value
-		StringBuilder marker = new StringBuilder("?");
-
-		for (int i=0; i < info.getColumnCount(); i++)
-		{
-			if (makePrepared)
+			WbSqlFormatter f = new WbSqlFormatter(sql, con == null ? null : con.getDbId());
+			if (con != null)
 			{
-				dummyData.setValue(i, marker);
+				f.setCatalogSeparator(con.getMetadata().getCatalogSeparator());
 			}
-			else
-			{
-				int type = info.getColumnType(i);
-				StringBuilder dummy = new StringBuilder();
-        switch (type)
-        {
-          case Types.BIT:
-            dummy.append("0");
-            break;
-          case Types.BOOLEAN:
-            dummy.append("false");
-            break;
-          default:
-            dummy.append(info.getColumnName(i));
-            dummy.append("_value");
-            break;
-        }
-				dummyData.setValue(i, dummy.toString());
-				if (createUpdateStatement && info.getColumn(i).isPkColumn())
-				{
-					dummyData.resetStatusForColumn(i);
-				}
-			}
+			return f.getFormattedSql();
 		}
-
-		String le = Settings.getInstance().getInternalEditorLineEnding();
-		DmlStatement stmt = null;
-		if (createUpdateStatement)
-		{
-			stmt = factory.createUpdateStatement(dummyData, true, le);
-		}
-		else
-		{
-			stmt = factory.createInsertStatement(dummyData, true, le);
-		}
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		stmt.setFormatSql(formatSql);
-		String sql = stmt.getExecutableStatement(f, con) + ";" + nl;
-		return sql;
-	}
-
+    return sql;
+  }
 }

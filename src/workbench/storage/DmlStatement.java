@@ -124,7 +124,7 @@ public class DmlStatement
 	private void initFormattingFlags()
 	{
 		formatInserts = Settings.getInstance().getDoFormatInserts();
-		formatUpdates = Settings.getInstance().getDoFormatInserts();
+		formatUpdates = Settings.getInstance().getDoFormatUpdates();
 		formatDeletes = Settings.getInstance().getDoFormatDeletes();
 	}
 

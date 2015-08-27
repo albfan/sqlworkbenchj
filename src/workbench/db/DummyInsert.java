@@ -22,7 +22,13 @@
  */
 package workbench.db;
 
+import java.sql.SQLException;
 import java.util.List;
+
+import workbench.resource.Settings;
+
+import workbench.sql.formatter.FormatterUtil;
+
 
 /**
  * @author Thomas Kellerer
@@ -33,12 +39,14 @@ public class DummyInsert
 {
 	public DummyInsert(TableIdentifier tbl)
 	{
-		super(tbl, false);
+		super(tbl);
+    doFormat = Settings.getInstance().getDoFormatInserts();
 	}
 
 	public DummyInsert(TableIdentifier tbl, List<ColumnIdentifier> cols)
 	{
-		super(tbl, cols, false);
+		super(tbl, cols);
+    doFormat = Settings.getInstance().getDoFormatInserts();
 	}
 
 	@Override
@@ -46,5 +54,39 @@ public class DummyInsert
 	{
 		return "INSERT";
 	}
+
+  @Override
+  public CharSequence getSource(WbConnection con)
+    throws SQLException
+  {
+    List<ColumnIdentifier> columns = getColumns(con);
+
+    String lineEnd = Settings.getInstance().getInternalEditorLineEnding();
+    StringBuilder sql = new StringBuilder(columns.size() * 20 + 100);
+    sql.append(FormatterUtil.getKeyword("insert into"));
+    sql.append(' ');
+    sql.append(FormatterUtil.getIdentifier(table.getTableExpression(con)));
+    sql.append(lineEnd);
+    sql.append("  (");
+    for (int i=0; i < columns.size(); i++)
+    {
+      if (i > 0) sql.append(", ");
+
+      sql.append(getColumnName(columns.get(i), con));
+    }
+    sql.append(')');
+    sql.append(lineEnd);
+    sql.append(FormatterUtil.getKeyword("VALUES"));
+    sql.append(lineEnd);
+    sql.append("  (");
+    for (int i=0; i < columns.size(); i++)
+    {
+      ColumnIdentifier col = columns.get(i);
+      if (i > 0) sql.append(", ");
+      sql.append(getValueString(col));
+    }
+    sql.append(");");
+    return formatSql(sql.toString(), con);
+  }
 
 }
