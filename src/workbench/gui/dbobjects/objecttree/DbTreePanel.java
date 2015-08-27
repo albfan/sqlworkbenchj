@@ -68,6 +68,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbObject;
+import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -85,9 +86,9 @@ import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.dbobjects.DbObjectList;
-import workbench.gui.dbobjects.IsolationLevelChanger;
 
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
@@ -121,7 +122,6 @@ public class DbTreePanel
   private QuickFilterAction filterAction;
   private WbAction resetFilter;
   private List<TreePath> expandedNodes;
-  private IsolationLevelChanger changer = new IsolationLevelChanger();
 
 	public DbTreePanel()
 	{
@@ -284,8 +284,7 @@ public class DbTreePanel
 		try
 		{
 			connection = mgr.getConnection(profile, cid);
-      connection.setAutoCommit(true);
-      changer.changeIsolationLevel(connection);
+      JdbcUtils.initDbExplorerConnection(connection);
       tree.setConnection(connection);
       loadTypes();
       tree.load(true);
@@ -342,6 +341,7 @@ public class DbTreePanel
         }
         catch (SQLException ex)
         {
+          WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
           LogMgr.logError("DbTreePanel.reloadSelectedNodes()", "Could not load node " + node.getType() + " - " + node.getName(), ex);
         }
       }
@@ -952,7 +952,5 @@ public class DbTreePanel
 		}
 		tree.setSelectionRow(row);
 	}
-
-
 
 }

@@ -70,18 +70,18 @@ import workbench.util.StringUtil;
 public class OracleTableDefinitionReader
 	extends JdbcTableDefinitionReader
 {
-	private boolean useOwnSql = true;
 	private final OracleDataTypeResolver oraTypes;
 	private final boolean is12c;
+  private final boolean isOracle8;
+  private String currentUser;
 
 	public OracleTableDefinitionReader(WbConnection conn)
 	{
 		super(conn);
-		boolean fixNVARCHAR = fixNVARCHARSemantics();
-		boolean checkCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
 
+    currentUser = conn.getCurrentUser();
 		is12c = JdbcUtils.hasMinimumServerVersion(dbConnection, "12.1");
-		useOwnSql = (JdbcUtils.hasMinimumServerVersion(conn, "8.0") && (checkCharSemantics || fixNVARCHAR));
+		isOracle8 = JdbcUtils.hasMinimumServerVersion(dbConnection, "8.0");
 
 		// The incorrectly reported search string escape bug was fixed with 11.2
 		// The 11.1 and earlier drivers do not report the correct escape character and thus
@@ -97,16 +97,21 @@ public class OracleTableDefinitionReader
 		oraTypes = new OracleDataTypeResolver(conn);
 	}
 
-	protected final boolean fixNVARCHARSemantics()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.db.oracle.fixnvarchartype", true);
-	}
+  private boolean useOwnSql()
+  {
+    boolean fixNVarchar = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixnvarchartype", true);
+		boolean checkCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
+
+    // new property that controls using our own SQL
+    boolean useOwnSQL = Settings.getInstance().getBoolProperty("workbench.db.oracle.tablecolumns.custom_sql", fixNVarchar || checkCharSemantics);
+    return isOracle8 && useOwnSQL;
+  }
 
 	@Override
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, DataTypeResolver typeResolver)
 		throws SQLException
 	{
-		if (!useOwnSql)
+		if (!useOwnSql())
 		{
 			return super.getTableColumns(table, typeResolver);
 		}
@@ -271,14 +276,14 @@ public class OracleTableDefinitionReader
 		return result.trim();
 	}
 
-	public static String getDecodeForDataType(String colname, boolean fixNVARCHAR, boolean mapDateToTimestamp)
+	public static String getDecodeForDataType(String colname, boolean mapDateToTimestamp)
 	{
 			return
 			"     DECODE(" + colname + ", \n" +
 			"            'CHAR', " + Types.CHAR + ", \n" +
 			"            'VARCHAR2', " + Types.VARCHAR + ", \n" +
-			"            'NVARCHAR2', " + (fixNVARCHAR ? Types.NVARCHAR : Types.OTHER) + ", \n" +
-			"            'NCHAR', " + (fixNVARCHAR ? Types.NCHAR : Types.OTHER) + ", \n" +
+			"            'NVARCHAR2', " + Types.NVARCHAR + ", \n" +
+			"            'NCHAR', " + Types.NCHAR + ", \n" +
 			"            'NUMBER', " + Types.DECIMAL + ", \n" +
 			"            'LONG', " + Types.LONGVARCHAR + ", \n" +
 			"            'DATE', " + (mapDateToTimestamp ? Types.TIMESTAMP : Types.DATE) + ", \n" +
@@ -286,7 +291,8 @@ public class OracleTableDefinitionReader
 			"            'LONG RAW', " + Types.LONGVARBINARY + ", \n" +
 			"            'BLOB', " + Types.BLOB + ", \n" +
 			"            'CLOB', " + Types.CLOB + ", \n" +
-			"            'NCLOB', " + (fixNVARCHAR ? Types.NCLOB : Types.OTHER) + ", \n" +
+			"            'NCLOB', " + Types.NCLOB + ", \n" +
+			"            'ROWID', " + Types.ROWID + ", \n" +
 			"            'BFILE', -13, \n" +
 			"            'FLOAT', " + Types.FLOAT + ", \n" +
 			"            'TIMESTAMP(6)', " + Types.TIMESTAMP + ", \n" +
@@ -301,7 +307,8 @@ public class OracleTableDefinitionReader
 	private PreparedStatement prepareColumnsStatement(String schema, String table)
 		throws SQLException
 	{
-		boolean fixNVARCHAR = fixNVARCHARSemantics();
+
+    boolean useUserTables = OracleUtils.optimizeCatalogQueries() && currentUser.equalsIgnoreCase(schema);
 
 		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
     // this statement fixes this problem and also removes the usage of LIKE
@@ -309,7 +316,7 @@ public class OracleTableDefinitionReader
 		final String sql1 =
       "-- SQL Workbench \n" +
 			"SELECT " + OracleUtils.getCacheHint() + " t.column_name AS column_name,  \n" +
-			      getDecodeForDataType("t.data_type", fixNVARCHAR, OracleUtils.getMapDateToTimestamp(dbConnection)) + " AS data_type, \n" +
+			      getDecodeForDataType("t.data_type", OracleUtils.getMapDateToTimestamp(dbConnection)) + " AS data_type, \n" +
 			"     t.data_type AS type_name,  \n" +
 			"     decode(t.data_type, 'VARCHAR', t.char_length, \n" +
 			"                         'VARCHAR2', t.char_length, \n" +
@@ -361,22 +368,33 @@ public class OracleTableDefinitionReader
 
 		if (includeVirtualColumns)
 		{
-			sql2 += "\nFROM all_tab_cols t";
+			sql2 += (useUserTables ? "\nFROM user_tab_cols t" : "\nFROM all_tab_cols t");
 		}
 		else
 		{
-			sql2 += "\nFROM all_tab_columns t";
+			sql2 += (useUserTables ? "\nFROM user_tab_columns t" : "\nFROM all_tab_columns t");
 		}
 		if (is12c)
 		{
-			sql2 += "\n  LEFT JOIN all_tab_identity_cols ic ON ic.owner = t.owner and ic.table_name = t.table_Name and ic.column_name = t.column_name ";
+			sql2 +=
+        (useUserTables ?
+          "\n  LEFT JOIN user_tab_identity_cols ic ON ic.table_name = t.table_Name and ic.column_name = t.column_name " :
+          "\n  LEFT JOIN all_tab_identity_cols ic ON ic.owner = t.owner and ic.table_name = t.table_Name and ic.column_name = t.column_name ");
 		}
-		String where = "\nWHERE t.owner = ? AND t.table_name = ? \n";
+
+		String where = "\nWHERE t.table_name = ? \n";
+    if (!useUserTables)
+    {
+      where += "  AND t.owner = ? \n";
+    }
+
 		if (includeVirtualColumns)
 		{
 			where += "  AND t.hidden_column = 'NO' ";
 		}
-		final String comment_join = "\n  LEFT JOIN all_col_comments c ON t.owner = c.owner AND t.table_name = c.table_name AND t.column_name = c.column_name";
+		final String comment_join = (useUserTables ?
+        "\n  LEFT JOIN user_col_comments c ON t.table_name = c.table_name AND t.column_name = c.column_name" :
+        "\n  LEFT JOIN all_col_comments c ON t.owner = c.owner AND t.table_name = c.table_name AND t.column_name = c.column_name");
 		final String order = "\nORDER BY t.column_id";
 
 		final String sql_comment = sql1 + "     c.comments AS remarks, \n" + sql2 + comment_join + where + order;
@@ -393,6 +411,8 @@ public class OracleTableDefinitionReader
 			sql = sql_no_comment;
 		}
 
+    // if the table name refers to a DBLink, we need to query the
+    // catalog tables from the DBLink, not from the current connection
 		int pos = table != null ? table.indexOf('@') : -1;
 
 		if (pos > 0)
@@ -409,8 +429,8 @@ public class OracleTableDefinitionReader
 		}
 
 		PreparedStatement stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-		stmt.setString(1, schema);
-		stmt.setString(2, table);
+		stmt.setString(1, table);
+		if (!useUserTables) stmt.setString(2, schema);
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleTableDefinitionReader.prepareColumnsStatement()", "Retrieving table columns for " + table + " using:\n" + sql);

@@ -46,6 +46,7 @@ import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+import workbench.gui.dbobjects.IsolationLevelChanger;
 
 import workbench.util.CollectionUtil;
 
@@ -131,6 +132,7 @@ public class TreeLoader
   private Collection<String> availableTypes;
   private ProcedureTreeLoader procLoader;
   private final Set<String> typesToShow = CollectionUtil.caseInsensitiveSet();
+  private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
 
   public TreeLoader()
   {
@@ -237,15 +239,16 @@ public class TreeLoader
     else
     {
       boolean isCatalogChild = parentNode.getType().equals(TYPE_CATALOG);
-      CatalogChanger changer = new CatalogChanger();
-      changer.setFireEvents(false);
+      CatalogChanger catalogChanger = new CatalogChanger();
+      catalogChanger.setFireEvents(false);
       boolean catalogChanged = false;
       String currentCatalog = connection.getMetadata().getCurrentCatalog();
       try
       {
+        levelChanger.changeIsolationLevel(connection);
         if (isCatalogChild && connection.getDbSettings().changeCatalogToRetrieveSchemas())
         {
-          changer.setCurrentCatalog(connection, parentNode.getName());
+          catalogChanger.setCurrentCatalog(connection, parentNode.getName());
           catalogChanged = true;
         }
 
@@ -268,9 +271,10 @@ public class TreeLoader
       }
       finally
       {
+        levelChanger.restoreIsolationLevel(connection);
         if (catalogChanged)
         {
-          changer.setCurrentCatalog(connection, currentCatalog);
+          catalogChanger.setCurrentCatalog(connection, currentCatalog);
         }
       }
       parentNode.setChildrenLoaded(true);
@@ -282,22 +286,30 @@ public class TreeLoader
   public boolean loadCatalogs(ObjectTreeNode parentNode)
     throws SQLException
   {
-    List<String> catalogs = connection.getMetadata().getCatalogInformation(connection.getCatalogFilter());
-    for (String cat : catalogs)
+    try
     {
-      ObjectTreeNode node = new ObjectTreeNode(cat, TYPE_CATALOG);
-      node.setAllowsChildren(true);
-      CatalogIdentifier id = new CatalogIdentifier(cat);
-      id.setTypeName(connection.getMetadata().getCatalogTerm());
-      node.setUserObject(id);
-      parentNode.add(node);
-      if (!connection.getDbSettings().supportsSchemas())
+      levelChanger.changeIsolationLevel(connection);
+      List<String> catalogs = connection.getMetadata().getCatalogInformation(connection.getCatalogFilter());
+      for (String cat : catalogs)
       {
-        addTypeNodes(node);
+        ObjectTreeNode node = new ObjectTreeNode(cat, TYPE_CATALOG);
+        node.setAllowsChildren(true);
+        CatalogIdentifier id = new CatalogIdentifier(cat);
+        id.setTypeName(connection.getMetadata().getCatalogTerm());
+        node.setUserObject(id);
+        parentNode.add(node);
+        if (!connection.getDbSettings().supportsSchemas())
+        {
+          addTypeNodes(node);
+        }
       }
+      model.nodeStructureChanged(parentNode);
+      return catalogs.size() > 0;
     }
-    model.nodeStructureChanged(parentNode);
-    return catalogs.size() > 0;
+    finally
+    {
+      levelChanger.restoreIsolationLevel(connection);
+    }
   }
 
   private void addTypeNodes(ObjectTreeNode parentNode)
@@ -809,6 +821,7 @@ public class TreeLoader
 
     try
     {
+      levelChanger.changeIsolationLevel(connection);
       this.connection.setBusy(true);
       String type = node.getType();
 
@@ -882,6 +895,7 @@ public class TreeLoader
     finally
     {
       this.connection.setBusy(false);
+      levelChanger.restoreIsolationLevel(connection);
     }
   }
 }

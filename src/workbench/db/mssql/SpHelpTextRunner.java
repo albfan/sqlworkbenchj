@@ -52,7 +52,16 @@ public class SpHelpTextRunner
 		Statement stmt = null;
 		ResultSet rs = null;
 
-		String query = "sp_helptext [" + schemaName + "." + objectName + "]";
+    String query;
+    
+    if (StringUtil.isBlank(schemaName))
+    {
+      query = "sp_helptext [" + objectName + "]";
+    }
+    else
+    {
+      query = "sp_helptext [" + schemaName + "." + objectName + "]";
+    }
 
 		try
 		{
@@ -64,7 +73,7 @@ public class SpHelpTextRunner
 
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logInfo("SpHelpTextRunner.getSource()", "Using query: " + query);
+				LogMgr.logInfo("SpHelpTextRunner.getSource()", "Retrieving view definition using query: " + query);
 			}
 
 			boolean hasResult = stmt.execute(query);
@@ -87,7 +96,7 @@ public class SpHelpTextRunner
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("SpHelpTextRunner.getSource()", "Could not run: " + query, ex);
+			LogMgr.logError("SpHelpTextRunner.getSource()", "Could not retrieve view definition using: " + query, ex);
 			sql = ex.getMessage();
 		}
 		finally

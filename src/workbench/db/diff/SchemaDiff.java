@@ -627,6 +627,18 @@ public class SchemaDiff
 		}
 	}
 
+  private String getSchemaForTargetTable(TableIdentifier refTable, List<TableIdentifier> targetTables)
+  {
+    if (targetSchema != null) return targetSchema;
+
+    TableIdentifier targetTable = TableIdentifier.findTableByNameAndSchema(targetTables, refTable);
+    if (targetTable != null) return targetTable.getRawSchema();
+    targetTable = TableIdentifier.findTableByName(targetTables, refTable);
+    if (targetTable != null) return targetTable.getRawSchema();
+    
+    return null;
+  }
+
 	private void processTableList(List<TableIdentifier> refTables, List<TableIdentifier> targetTables)
 		throws SQLException
 	{
@@ -660,7 +672,7 @@ public class SchemaDiff
 			}
 
 			TableIdentifier tid = rid.createCopy();
-			tid.setSchema(targetSchema);
+			tid.setSchema(getSchemaForTargetTable(rid, targetTables));
 			tid.setCatalog(null);
 
 			if (!targetDb.getMetadata().needsQuotes(tname))
@@ -1483,6 +1495,7 @@ public class SchemaDiff
 		out.write(">\n");
 	}
 }
+
 class SequenceDiffEntry
 {
 	SequenceDefinition reference;

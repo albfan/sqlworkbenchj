@@ -159,7 +159,6 @@ public class DummyDML
 			dummyData.resetStatus();
 		}
 
-
 		// This is a "trick" to fool the StatementFactory which will
 		// check the type of the Data. In case it does not "know" the
 		// class, it calls toString() to get the value of the column
@@ -196,6 +195,7 @@ public class DummyDML
 				}
 			}
 		}
+
 		String le = Settings.getInstance().getInternalEditorLineEnding();
 		DmlStatement stmt = null;
 		if (createUpdateStatement)

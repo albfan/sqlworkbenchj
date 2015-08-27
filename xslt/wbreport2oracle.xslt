@@ -183,19 +183,15 @@
     <xsl:text>CREATE </xsl:text><xsl:value-of select="$unique"/>
     <xsl:text>INDEX </xsl:text><xsl:value-of select="name"/>
     <xsl:text> ON </xsl:text><xsl:value-of select="$tablename"/>
-    <xsl:value-of select="$newline"/>
     <xsl:text>(</xsl:text>
-    <xsl:value-of select="$newline"/>
     <xsl:for-each select="column-list/column">
-        <xsl:text>  </xsl:text><xsl:value-of select="@name"/>
+        <xsl:value-of select="@name"/>
         <xsl:if test="position() &lt; last()">
-          <xsl:text>,</xsl:text><xsl:value-of select="$newline"/>
+          <xsl:text>, </xsl:text>
         </xsl:if>
     </xsl:for-each>
-    <xsl:value-of select="$newline"/>
-      <xsl:text>);</xsl:text>
-      <xsl:value-of select="$newline"/>
-    </xsl:if>
+    <xsl:text>);</xsl:text>
+  </xsl:if>
 </xsl:template>
 
 <xsl:template name="process-fk">

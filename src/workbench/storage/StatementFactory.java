@@ -117,7 +117,7 @@ public class StatementFactory
 	 *	@param lineEnd				the character sequence to be used as the line ending
 	 *	@param columns				a list of columns to be included. If this is null all columns are included
 	 */
-	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd, List columns)
+	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd, List<ColumnIdentifier> columns)
 	{
 		if (aRow == null) return null;
 		boolean first = true;
@@ -536,7 +536,7 @@ public class StatementFactory
 		}
 		return name;
 	}
-  
+
 	private void appendKeyword(StringBuilder text, String toAppend)
 	{
 		GeneratedIdentifierCase style = Settings.getInstance().getFormatterKeywordsCase();

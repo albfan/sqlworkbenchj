@@ -63,8 +63,8 @@ import workbench.resource.Settings;
 import workbench.db.CatalogChanger;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
-import workbench.db.mssql.SqlServerUtil;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -117,7 +117,6 @@ public class DbExplorerPanel
   private JLabel schemaLabel;
   private JLabel catalogLabel;
   private JPanel selectorPanel;
-  boolean connected;
   private WbConnection dbConnection;
   private DbExplorerWindow window;
   private WbToolbar toolbar;
@@ -258,7 +257,7 @@ public class DbExplorerPanel
       cd.height = d.height;
       connectionInfo.setMinimumSize(cd);
       connectionInfo.setPreferredSize(cd);
-      
+
       reloadButton.setPreferredSize(d);
       reloadButton.setMaximumSize(d);
 
@@ -629,22 +628,9 @@ public class DbExplorerPanel
 			{
 				boolean separateConnection = aConnection.getProfile().getUseSeparateConnectionPerTab();
 				setSwitchCatalog(separateConnection);
-				// when dealing with tables that have LONG or LONG RAW columns
-				// and DBMS_OUTPUT was enabled, then retrieval of those columns
-				// does not work. If we have separate connections for each tab
-				// we can safely disable the DBMS_OUTPUT on this connection
-				// as there won't be a way to view the output anyway
 				if (separateConnection)
 				{
-					aConnection.getMetadata().disableOutput();
-					if (aConnection.getMetadata().isSqlServer())
-					{
-						int timeout =  aConnection.getDbSettings().getLockTimoutForSqlServer();
-						if (timeout > 0)
-						{
-							SqlServerUtil.setLockTimeout(aConnection, timeout);
-						}
-					}
+          JdbcUtils.initDbExplorerConnection(dbConnection);
 				}
 			}
 

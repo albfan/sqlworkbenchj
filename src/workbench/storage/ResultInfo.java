@@ -25,6 +25,8 @@ package workbench.storage;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -387,7 +389,7 @@ public class ResultInfo
 	{
 		return showArrayType;
 	}
-	
+
 	public boolean getConvertArrays()
 	{
 		return convertArrays;
@@ -426,6 +428,13 @@ public class ResultInfo
 	public ColumnIdentifier[] getColumns()
 	{
 		return this.columns;
+	}
+
+	public List<ColumnIdentifier> getColumnList()
+	{
+    if (this.columns == null) return Collections.emptyList();
+
+		return Arrays.asList(this.columns);
 	}
 
 	public boolean isNullable(int col)

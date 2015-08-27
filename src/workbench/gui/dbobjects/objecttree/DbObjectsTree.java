@@ -48,6 +48,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbStatusLabel;
 
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -170,6 +171,7 @@ public class DbObjectsTree
     }
     catch (Exception ex)
     {
+      WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
       LogMgr.logError("DbObjectsTree.loadNodesForPath()", "Could not load nodes", ex);
     }
     return null;
@@ -187,6 +189,11 @@ public class DbObjectsTree
       {
         reloadSchema(schema);
       }
+    }
+    catch (Exception ex)
+    {
+      WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
+      LogMgr.logError("DbObjectsTree.reloadSchemas()", "Could not load schemas", ex);
     }
     finally
     {
@@ -386,6 +393,7 @@ public class DbObjectsTree
     }
     catch (Exception ex)
     {
+      WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
       LogMgr.logError("DbObjectsTree.reloadSchema", "Could not load schema", ex);
     }
   }
@@ -439,6 +447,7 @@ public class DbObjectsTree
     }
     catch (SQLException ex)
     {
+      WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
       LogMgr.logError("DbObjectsTree.<init>", "Could not load tree", ex);
     }
   }
@@ -573,6 +582,7 @@ public class DbObjectsTree
     }
     catch (SQLException ex)
     {
+      WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
       LogMgr.logError("DbObjectsTree.doLoad()", "Could not load node: " + node, ex);
     }
     finally
@@ -654,7 +664,6 @@ public class DbObjectsTree
         setExpandedState(new TreePath(getTreeModel().getPathToRoot(child)), true);
       }
     }
-
   }
 
   public void expandNodes(List<TreePath> nodes)

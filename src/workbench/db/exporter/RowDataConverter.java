@@ -31,6 +31,7 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public abstract class RowDataConverter
 	private String baseFilename;
 	private String pageTitle;
 	private boolean[] columnsToExport;
-	protected List exportColumns;
+	protected List<ColumnIdentifier> exportColumns;
 	protected ErrorReporter errorReporter;
 	protected String nullString;
 
@@ -351,7 +352,7 @@ public abstract class RowDataConverter
 
 	void setBlobIdColumns(List<String> cols)
 	{
-		blobIdColumns = cols;
+		blobIdColumns = cols == null ? null : new ArrayList<>(cols);
 	}
 
 	public void setOutputFile(WbFile f)
@@ -759,12 +760,14 @@ public abstract class RowDataConverter
 	 */
 	public void setColumnsToExport(List<ColumnIdentifier> columns)
 	{
-		this.exportColumns = columns;
-		if (columns == null)
-		{
-			this.columnsToExport = null;
-			return;
-		}
+    if (columns == null)
+    {
+      this.columnsToExport = null;
+      this.exportColumns = null;
+      return;
+    }
+
+		this.exportColumns = new ArrayList<>(columns);
 
 		if (metaData == null)
 		{
