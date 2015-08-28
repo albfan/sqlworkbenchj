@@ -410,7 +410,7 @@ public class TreeLoader
 
     node.removeAllChildren();
     addColumnsNode(node);
-    addTableNodes(node);
+    addTableSubNodes(node);
 
     int count = node.getChildCount();
 
@@ -431,6 +431,7 @@ public class TreeLoader
     node.removeAllChildren();
     loadChildren(node);
     node.setChildrenLoaded(true);
+    model.nodeStructureChanged(node);
   }
 
   private TableIdentifier getParentInfo(ObjectTreeNode node)
@@ -513,7 +514,7 @@ public class TreeLoader
 
       if (isTable(tbl))
       {
-        addTableNodes(node);
+        addTableSubNodes(node);
         connection.getObjectCache().addTable(new TableDefinition(tbl));
       }
       else if (hasIndexes(node))
@@ -574,7 +575,7 @@ public class TreeLoader
     node.add(idx);
   }
 
-  private void addTableNodes(ObjectTreeNode node)
+  private void addTableSubNodes(ObjectTreeNode node)
   {
     addIndexNode(node);
 

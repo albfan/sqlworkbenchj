@@ -482,14 +482,7 @@ public class WbConnection
 		runConnectScript(sql, "connect");
 	}
 
-	public boolean hasPostConnectScript()
-	{
-		if (this.profile == null) return false;
-		if (this.sqlConnection == null) return false;
-		return StringUtil.isNonEmpty(profile.getPostConnectScript());
-	}
-
-	private void runConnectScript(String sql, String type)
+	private synchronized void runConnectScript(String sql, String type)
 	{
 		if (StringUtil.isBlank(sql)) return;
 		LogMgr.logInfo("WbConnection.runConnectScript()", "Executing " + type + " script for connection [" + getDbId() + "]: "+ getDisplayString(true) + " ..." );

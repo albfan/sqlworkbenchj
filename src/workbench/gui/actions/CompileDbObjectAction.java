@@ -27,6 +27,7 @@ import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
@@ -43,6 +44,7 @@ import workbench.db.oracle.OracleObjectCompiler;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectCompilerUI;
+import workbench.util.CollectionUtil;
 
 /**
  * @author Thomas Kellerer
@@ -62,7 +64,7 @@ public class CompileDbObjectAction
 		this.source = client;
 		this.selection = list;
 		setVisible(false);
-		setEnabled(list.hasSelection());
+    checkState();
 	}
 
 	public void setVisible(boolean flag)
@@ -98,16 +100,10 @@ public class CompileDbObjectAction
 
 	private void compileObjects()
 	{
-		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection()))
-		{
-			return;
-		}
+		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
 
 		List<DbObject> objects = getSelectedObjects();
-		if (objects == null || objects.isEmpty())
-		{
-			return;
-		}
+		if (CollectionUtil.isEmpty(objects)) return;
 
 		try
 		{
@@ -123,34 +119,25 @@ public class CompileDbObjectAction
 	private List<DbObject> getSelectedObjects()
 	{
 		List<? extends DbObject> selected = this.source.getSelectedObjects();
-		if (selected == null || selected.isEmpty())
-		{
-			return null;
-		}
+		if (CollectionUtil.isEmpty(selected)) return null;
 
-		List<String> catalogs = new ArrayList<>();
+		Set<String> packageNames = CollectionUtil.caseInsensitiveSet();
 		List<DbObject> objects = new ArrayList<>();
+
 		for (DbObject dbo : selected)
 		{
-			if (!OracleObjectCompiler.canCompile(dbo))
-			{
-				// next selected element
-				continue;
-			}
+			if (!OracleObjectCompiler.canCompile(dbo)) continue;
 
 			if (dbo instanceof ProcedureDefinition)
 			{
 				ProcedureDefinition pd = (ProcedureDefinition) dbo;
 				if (pd.isPackageProcedure())
 				{
-					// keep only one package-procedure per catalog
-					if (!catalogs.contains(pd.getCatalog()))
+          boolean added = packageNames.add(pd.getPackageName());
+          if (!added)
 					{
-						catalogs.add(pd.getCatalog());
-					}
-					else
-					{
-						// a stored procedure was already added for the catalog
+            // the package was already processed and at least one
+            // procedure is therefor part of the list of objects
 						continue;
 					}
 				}
@@ -164,19 +151,12 @@ public class CompileDbObjectAction
 	private void checkState()
 	{
 		List<DbObject> selected = getSelectedObjects();
-		this.setEnabled(selected != null && selected.size() > 0);
+		this.setEnabled(CollectionUtil.isNonEmpty(selected));
 	}
 
   @Override
   public void selectionChanged(WbSelectionModel source)
   {
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				checkState();
-			}
-		});
+		EventQueue.invokeLater(this::checkState);
   }
 }

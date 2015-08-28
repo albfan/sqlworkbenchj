@@ -30,6 +30,8 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -124,14 +126,7 @@ public class TableSearchPanel
 	{
 		if (initialized) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_initGui();
-			}
-		});
+		WbSwingUtilities.invoke(this::_initGui);
 	}
 
 	private void _initGui()
@@ -161,10 +156,10 @@ public class TableSearchPanel
 
 		startButton = new JButton();
 		startButton.setText(ResourceMgr.getString("LblStartSearch"));
-		startButton.addActionListener(new java.awt.event.ActionListener()
+		startButton.addActionListener(new ActionListener()
 		{
 			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt)
+			public void actionPerformed(ActionEvent evt)
 			{
 				startSearch();
 			}
@@ -329,15 +324,11 @@ public class TableSearchPanel
 	@Override
 	public void error(final String msg)
 	{
-		EventQueue.invokeLater(new Runnable() {
-
-			@Override
-			public void run()
-			{
-				sqlDisplay.appendLine(msg);
-				sqlDisplay.appendLine("\n\n");
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      sqlDisplay.appendLine(msg);
+      sqlDisplay.appendLine("\n\n");
+    });
 	}
 
 	/**
@@ -346,32 +337,28 @@ public class TableSearchPanel
 	@Override
 	public synchronized void setCurrentTable(final String table, final String sql, final long currentObject, final long totalObjects)
 	{
-		EventQueue.invokeLater(new Runnable() {
-
-			@Override
-			public void run()
-			{
-				if (sql == null)
-				{
-					String msg = ResourceMgr.getFormattedString("MsgNoCharCols", table);
-					sqlDisplay.appendLine("-- " + msg);
-				}
-				else
-				{
-					StringBuilder info = new StringBuilder(fixedStatusText.length() + 25);
-					info.append(fixedStatusText); // the text already contains a trailing space
-					info.append(table);
-					info.append(" (");
-					info.append(NumberStringCache.getNumberString(currentObject));
-					info.append('/');
-					info.append(NumberStringCache.getNumberString(totalObjects));
-					info.append(')');
-					statusInfo.setText(info.toString());
-					sqlDisplay.appendLine(sql + ";");
-				}
-				sqlDisplay.appendLine("\n\n");
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (sql == null)
+      {
+        String msg = ResourceMgr.getFormattedString("MsgNoCharCols", table);
+        sqlDisplay.appendLine("-- " + msg);
+      }
+      else
+      {
+        StringBuilder info = new StringBuilder(fixedStatusText.length() + 25);
+        info.append(fixedStatusText); // the text already contains a trailing space
+        info.append(table);
+        info.append(" (");
+        info.append(NumberStringCache.getNumberString(currentObject));
+        info.append('/');
+        info.append(NumberStringCache.getNumberString(totalObjects));
+        info.append(')');
+        statusInfo.setText(info.toString());
+        sqlDisplay.appendLine(sql + ";");
+      }
+      sqlDisplay.appendLine("\n\n");
+    });
 	}
 
 	@Override
@@ -410,19 +397,14 @@ public class TableSearchPanel
 		if (!initialized) return;
 
     // resultPanel.removeAll() does not work properly for some reason
-    // the old tables just stay in there
-    // so I re-create the actual result panel
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				resultPanel = new JPanel(new GridBagLayout());
-				resultScrollPane.setViewportView(resultPanel);
-				sqlDisplay.setText("");
-				setStatusText("");
-			}
-		});
+    // the old tables just stay in there so I re-create the actual result panel
+		WbSwingUtilities.invoke(() ->
+    {
+      resultPanel = new JPanel(new GridBagLayout());
+      resultScrollPane.setViewportView(resultPanel);
+      sqlDisplay.setText("");
+      setStatusText("");
+    });
 	}
 
 	public void searchData()
@@ -552,20 +534,16 @@ public class TableSearchPanel
 	{
 		fireDbExecEnd();
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				resultPanel.doLayout();
-				getCriteriaPanel().enableControls();
-				serverSideSearch.setEnabled(true);
-				startButton.setText(ResourceMgr.getString("LblStartSearch"));
-				statusInfo.setText("");
-				startButton.setEnabled(tableNames.getSelectedRowCount() > 0);
-				statusInfo.setText(ResourceMgr.getFormattedString("MsgTablesFound", tableCount));
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      resultPanel.doLayout();
+      getCriteriaPanel().enableControls();
+      serverSideSearch.setEnabled(true);
+      startButton.setText(ResourceMgr.getString("LblStartSearch"));
+      statusInfo.setText("");
+      startButton.setEnabled(tableNames.getSelectedRowCount() > 0);
+      statusInfo.setText(ResourceMgr.getFormattedString("MsgTablesFound", tableCount));
+    });
 	}
 
 	@Override
@@ -591,15 +569,7 @@ public class TableSearchPanel
 	{
 		if (e.getKeyCode() == KeyEvent.VK_ENTER)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					searchData();
-				}
-			}
-			);
+			EventQueue.invokeLater(this::searchData);
 		}
 	}
 

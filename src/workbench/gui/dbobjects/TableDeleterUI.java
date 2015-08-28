@@ -375,21 +375,17 @@ public class TableDeleterUI
 	protected void fkCheckFinished(final List<TableIdentifier> newlist)
 	{
 		this.checkThread = null;
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				statusLabel.setText("");
-				if (newlist != null)
-				{
-					setObjects(newlist);
-				}
-				deleteButton.setEnabled(true);
-				showScript.setEnabled(true);
-				WbSwingUtilities.showDefaultCursor(dialog);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      statusLabel.setText("");
+      if (newlist != null)
+      {
+        setObjects(newlist);
+      }
+      deleteButton.setEnabled(true);
+      showScript.setEnabled(true);
+      WbSwingUtilities.showDefaultCursor(dialog);
+    });
 	}
 
 	@Override
@@ -528,14 +524,10 @@ public class TableDeleterUI
 		}
 		finally
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					deleteButton.setEnabled(true);
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        deleteButton.setEnabled(true);
+      });
 		}
 
 		this.fireTableDeleted(deletedTables);

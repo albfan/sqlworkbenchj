@@ -655,13 +655,16 @@ public class DbObjectsTree
       loader.loadChildren(node);
     }
 
-    for (int i=0; i < node.getChildCount(); i++)
+    if (node.isCatalogNode() || node.isSchemaNode())
     {
-      ObjectTreeNode child = node.getChildAt(i);
-      String type = child.getType();
-      if (expandedTypes.contains(type))
+      for (int i=0; i < node.getChildCount(); i++)
       {
-        setExpandedState(new TreePath(getTreeModel().getPathToRoot(child)), true);
+        ObjectTreeNode child = node.getChildAt(i);
+        String type = child.getType();
+        if (expandedTypes.contains(type))
+        {
+          setExpandedState(new TreePath(getTreeModel().getPathToRoot(child)), true);
+        }
       }
     }
   }

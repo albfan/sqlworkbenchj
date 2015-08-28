@@ -729,6 +729,8 @@ public class DbTreePanel
   @Override
   public void mouseClicked(MouseEvent e)
   {
+    if (this.getConnection() == null) return;
+    
 		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
 		{
 			TreePath p = tree.getClosestPathForLocation(e.getX(), e.getY());

@@ -188,7 +188,6 @@ public class Settings
 	private static final String TOOLS_PARAM = ".parameter";
 	private static final String TOOLS_PREFIX = "workbench.tools.";
 
-
 	private WbProperties props;
 	private WbFile configfile;
 
@@ -201,7 +200,7 @@ public class Settings
 	/**
 	 * Thread safe singleton-instance
 	 */
-	protected static class LazyInstanceHolder
+	private static class LazyInstanceHolder
 	{
 		protected static final Settings instance = new Settings();
 	}

@@ -131,39 +131,31 @@ public class RunScriptPanel
 
 	public void openWindow(final Frame owner, final String title, final String highlight)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				window = new JDialog(owner, title, true);
-				ResourceMgr.setWindowIcons(window, "script");
-				escAction = new EscAction(window, RunScriptPanel.this);
+		WbSwingUtilities.invoke(() ->
+    {
+      window = new JDialog(owner, title, true);
+      ResourceMgr.setWindowIcons(window, "script");
+      escAction = new EscAction(window, RunScriptPanel.this);
 
-				window.getContentPane().add(RunScriptPanel.this);
-				if (!Settings.getInstance().restoreWindowSize(window, "workbench.gui.runscript.window"))
-				{
-					window.setSize(600, 400);
-				}
-				WbSwingUtilities.center(window, owner);
-				window.addWindowListener(RunScriptPanel.this);
-				editor.setText(sqlScript);
-				editor.setCaretPosition(0);
+      window.getContentPane().add(RunScriptPanel.this);
+      if (!Settings.getInstance().restoreWindowSize(window, "workbench.gui.runscript.window"))
+      {
+        window.setSize(600, 400);
+      }
+      WbSwingUtilities.center(window, owner);
+      window.addWindowListener(RunScriptPanel.this);
+      editor.setText(sqlScript);
+      editor.setCaretPosition(0);
 
-				if (highlight != null)
-				{
-					EventQueue.invokeLater(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							highlightText(highlight);
-						}
-					});
-				}
-				window.setVisible(true);
-			}
-		});
+      if (highlight != null)
+      {
+        EventQueue.invokeLater(() ->
+        {
+          highlightText(highlight);
+        });
+      }
+      window.setVisible(true);
+    });
 	}
 
 	private void highlightText(String text)
@@ -269,14 +261,10 @@ public class RunScriptPanel
 				statusMsg = ResourceMgr.getString("MsgBatchStatementError");
 			}
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					statusbar.setText(statusMsg);
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        statusbar.setText(statusMsg);
+      });
 
 			if (!success)
 			{
@@ -291,14 +279,10 @@ public class RunScriptPanel
 		{
 			LogMgr.logError("RunScriptPanel.runScript()", "Error when running script", e);
 			final String error = ExceptionUtil.getDisplay(e);
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					statusbar.setText(error);
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        statusbar.setText(error);
+      });
 			WbSwingUtilities.showMessage(this, error);
 		}
 		finally

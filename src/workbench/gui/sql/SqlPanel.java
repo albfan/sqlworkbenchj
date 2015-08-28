@@ -3292,6 +3292,7 @@ public class SqlPanel
 
 			ignoreStateChange = true;
 			ErrorDescriptor errorDetails = null;
+      boolean ignoreUpdateCounts = true;
 
 			for (int i=startIndex; i < endIndex; i++)
 			{
@@ -3327,6 +3328,7 @@ public class SqlPanel
 				statementResult = this.stmtRunner.getResult();
 
 				if (statementResult == null) continue;
+        ignoreUpdateCounts = ignoreUpdateCounts && statementResult.isIgnoreUpdateCount();
 
 				if (statementResult.stopScript())
 				{
@@ -3424,10 +3426,9 @@ public class SqlPanel
             appendToLog("\n");
           }
 
-          // only prompt if more than one statement is executed and if that is not the last statement in the script
-          // when cancelling a statement some JDBC drivers throw an exception as well.
+          // When cancelling a statement some JDBC drivers throw an exception as well.
           // In that case we also don't want to display the error dialog
-					if (onErrorAsk && isNotLastStatement(i - startIndex, count) && !cancelExecution)
+					if (onErrorAsk && shouldAsk(i - startIndex, count) && !cancelExecution)
 					{
             // we can't highlight the statement if this is a macro or if the user changed the editor content
             if (!macroRun && !editor.isModifiedAfter(scriptStart))
@@ -3484,7 +3485,13 @@ public class SqlPanel
 			if (logWasCompressed)
 			{
 				this.appendToLog(ResourceMgr.getFormattedString("MsgTotalStatementsExecuted", executedCount) + "\n");
-				this.appendToLog(ResourceMgr.getFormattedString("MsgRowsAffected", totalRows) + "\n\n");
+        // ignoreUpdateCounts will only be true if ALL statement results signaled that the update counts
+        // should be ignored
+        if (!ignoreUpdateCounts)
+        {
+          this.appendToLog(ResourceMgr.getFormattedString("MsgRowsAffected", totalRows) + "\n");
+        }
+        this.appendToLog("\n");
 			}
 
 			ignoreStateChange = false;
@@ -3560,14 +3567,17 @@ public class SqlPanel
 		}
 	}
 
-  private boolean isNotLastStatement(int cmdIndex, int count)
+  private boolean shouldAsk(int cmdIndex, int count)
   {
+    // The retry dialog should be shown for all statements that are executed
+    if (GuiSettings.enableRetrySqlErrorDialog()) return true;
+
+    // only show the "Ignore/Cancel" prompt if the failed statement is not the last one in the script
     return (cmdIndex) < (count - 1);
   }
 
   private int handleScriptError(int cmdIndex, int totalStatements, ErrorDescriptor errorDetails, ScriptParser parser, int selectionOffset)
   {
-
     // the animated gif needs to be turned off when a
     // dialog is displayed, otherwise Swing uses too much CPU
     // this might be obsolete with Java 7 but it does not do any harm either

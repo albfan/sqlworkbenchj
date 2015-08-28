@@ -32,6 +32,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.TableIdentifier;
 
 import workbench.gui.MainWindow;
+import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CountTableRowsAction;
 import workbench.gui.actions.CreateDropScriptAction;
 import workbench.gui.actions.CreateDummySqlAction;
@@ -133,6 +134,12 @@ class ContextMenuFactory
     ScriptDbObjectAction script = new ScriptDbObjectAction(dbTree, selection, "MnuTxtShowSource");
     script.setShowSinglePackageProcedure(true);
     menu.add(script);
+
+    if (dbTree.getConnection().getMetadata().isOracle())
+    {
+      CompileDbObjectAction compile = new CompileDbObjectAction(dbTree, selection);
+      menu.add(compile);
+    }
 
     menu.addSeparator();
 

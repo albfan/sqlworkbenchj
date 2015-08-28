@@ -103,13 +103,9 @@ public class FindObjectAction
 
   private void showTable(final TableIdentifier tbl)
   {
-    EventQueue.invokeLater(new Runnable()
+    EventQueue.invokeLater(() ->
     {
-      @Override
-      public void run()
-      {
-        finder.selectObject(tbl);
-      }
+      finder.selectObject(tbl);
     });
   }
 

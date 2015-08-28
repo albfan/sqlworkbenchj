@@ -76,6 +76,11 @@ public class StatementRunnerResult
 		this.sourceCommand = aCmd;
 	}
 
+  public boolean isIgnoreUpdateCount()
+  {
+    return ignoreUpdateCount;
+  }
+  
 	public void ignoreUpdateCounts(boolean flag)
 	{
 		ignoreUpdateCount = flag;

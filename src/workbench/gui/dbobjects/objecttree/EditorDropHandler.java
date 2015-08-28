@@ -31,6 +31,7 @@ import workbench.db.WbConnection;
 import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.StatementContext;
 import workbench.gui.sql.EditorPanel;
+import workbench.sql.formatter.FormatterUtil;
 
 import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.parser.ParserType;
@@ -145,13 +146,13 @@ public class EditorDropHandler
         for (int i=0; i < count; i++)
         {
           if (i > 0) result.append(", ");
-          result.append(columns.get(i).getColumnName());
+          result.append(FormatterUtil.getIdentifier(columns.get(i).getColumnName()));
         }
         return result.toString();
       }
     }
 
-    return dbo.getObjectExpression(conn);
+    return FormatterUtil.getIdentifier(dbo.getObjectExpression(conn));
   }
 
   private String getColumnList(ObjectTreeNode columns)
@@ -173,6 +174,6 @@ public class EditorDropHandler
         }
       }
     }
-    return result.toString();
+    return FormatterUtil.getIdentifier(result.toString());
   }
 }

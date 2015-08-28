@@ -101,14 +101,7 @@ public class VerticaProjectionPanel
 	{
 		if (initialized) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_initGui();
-			}
-		});
+		WbSwingUtilities.invoke(this::_initGui);
 	}
 
 	private void _initGui()
@@ -211,17 +204,13 @@ public class VerticaProjectionPanel
 			isRetrieving = true;
 
 			final DataStoreTableModel model = new DataStoreTableModel(getProjectionDataStore(table));
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					projectionList.setModel(model, true);
-					projectionList.adjustRowsAndColumns();
-					projectionBuddies.reset();
-					projectionColumns.reset();
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        projectionList.setModel(model, true);
+        projectionList.adjustRowsAndColumns();
+        projectionBuddies.reset();
+        projectionColumns.reset();
+      });
 		}
 		finally
 		{
@@ -364,15 +353,7 @@ public class VerticaProjectionPanel
 		if (e.getSource() != this.reloadProjections) return;
 
 		LogMgr.logDebug("VerticaProjectionPanel.actionPerformed()", "Trying to select projection copies");
-		WbSwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				reload();
-			}
-
-		});
+		WbSwingUtilities.invokeLater(this::reload);
 	}
 
 	/**
@@ -389,15 +370,7 @@ public class VerticaProjectionPanel
 			projectionBuddies.reset();
 			projectionColumns.reset();
 			LogMgr.logDebug("VerticaProjectionPanel.actionPerformed()", "Trying to select projection copies");
-			WbSwingUtilities.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					reloadDetails();
-				}
-
-			});
+			WbSwingUtilities.invokeLater(this::reloadDetails);
 		}
 	}
 
@@ -411,15 +384,7 @@ public class VerticaProjectionPanel
 
 		if (e.getSource() == this.displayTab)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					reloadDetails();
-				}
-
-			});
+			EventQueue.invokeLater(this::reloadDetails);
 		}
 	}
 

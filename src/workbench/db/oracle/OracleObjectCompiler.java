@@ -30,13 +30,14 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DbObject;
+import workbench.db.PackageDefinition;
+import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 
 import workbench.sql.ErrorDescriptor;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  * A class to re-compile Oracle objects like stored procedures, packages.
@@ -49,8 +50,7 @@ public class OracleObjectCompiler
 	private OracleErrorInformationReader errorReader;
 
 	private static final Set<String> COMPILABLE_TYPES = CollectionUtil.caseInsensitiveSet(
-		"VIEW", "PROCEDURE", "MATERIALIZED VIEW", "FUNCTION", "PACKAGE", "TRIGGER", "TYPE"
-	);
+		"VIEW", "MATERIALIZED VIEW", "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER", "TYPE");
 
 	public OracleObjectCompiler(WbConnection conn)
 		throws SQLException
@@ -83,16 +83,17 @@ public class OracleObjectCompiler
 			stmt.executeUpdate(sql);
       String type = object.getObjectType();
       String name = object.getObjectName();
-      if ("PACKAGE".equals(type))
+
+      if (object instanceof ProcedureDefinition && ((ProcedureDefinition)object).isPackageProcedure())
       {
         // an "alter package .. compile"  will report errors for the package body, not the package
+        // and the errors will be reported for the package name, not the procedure name
         type = "PACKAGE BODY";
+        name = object.getCatalog(); // the Oracle driver reports the package name as the "catalog"
       }
-
-      if ("PACKAGE BODY".equals(type))
+      else if (object instanceof PackageDefinition)
       {
-        // the errors will be reported for the package name, not the procedure name
-        name = object.getCatalog();
+        type = "PACKAGE BODY";
       }
       ErrorDescriptor error = errorReader.getErrorInfo(null, null, name, type, false);
 			if (error == null)
@@ -117,14 +118,21 @@ public class OracleObjectCompiler
 		StringBuilder sql = new StringBuilder(50);
 		sql.append("ALTER ");
 
-		if (StringUtil.isNonBlank(object.getCatalog()))
+		if (object instanceof ProcedureDefinition && ((ProcedureDefinition)object).isPackageProcedure())
 		{
 			// If it's a package, compile the whole package.
-			sql.append("PACKAGE ");
-			sql.append(object.getSchema());
-			sql.append('.');
-			sql.append(object.getCatalog());
+      ProcedureDefinition proc = (ProcedureDefinition)object;
+      sql.append("PACKAGE ");
+      sql.append(dbConnection.getMetadata().quoteObjectname(proc.getSchema()));
+      sql.append('.');
+      sql.append(dbConnection.getMetadata().quoteObjectname(proc.getPackageName()));
 		}
+    else if (object instanceof PackageDefinition)
+    {
+      PackageDefinition pkg = (PackageDefinition)object;
+      sql.append("PACKAGE ");
+      sql.append(pkg.getFullyQualifiedName(dbConnection));
+    }
 		else
 		{
 			sql.append(object.getObjectType());

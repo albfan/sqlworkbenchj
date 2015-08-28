@@ -253,13 +253,9 @@ public class EditorTabSelectMenu
     {
       final String sql = builder.getSelectForTableData(selectedTable.getTable(), selectedTable.getColumns(), true);
       if (sql == null) return;
-      EventQueue.invokeLater(new Runnable()
+      EventQueue.invokeLater(() ->
       {
-        @Override
-        public void run()
-        {
-          sender.sendContent(sql, panelIndex, type);
-        }
+        sender.sendContent(sql, panelIndex, type);
       });
     }
     catch (Exception ex)

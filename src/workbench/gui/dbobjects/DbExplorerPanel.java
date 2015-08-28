@@ -754,14 +754,7 @@ public class DbExplorerPanel
 				// retrievePending will be true, if the connection has
 				// been set already, the DbExplorer should be retrieved automatically
 				// and the panel was not visible when the connection was provided
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						retrieve();
-					}
-				});
+				EventQueue.invokeLater(this::retrieve);
 			}
 			if (currentFocus != null)
 			{

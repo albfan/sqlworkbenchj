@@ -41,6 +41,7 @@ import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CreateSnippetAction;
+import workbench.gui.actions.OpenFileAction;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.WbStatusLabel;
 import workbench.gui.sql.EditorPanel;
@@ -74,6 +75,9 @@ public class ObjectScripterUI
 		statusMessage = new WbStatusLabel();
 		add(this.statusMessage, BorderLayout.SOUTH);
 		editor = EditorPanel.createSqlEditor();
+    OpenFileAction openFile = editor.getOpenFileAction();
+    editor.removePopupMenuItem(openFile);
+    openFile.setEnabled(false);
 		CreateSnippetAction create = new CreateSnippetAction(this.editor);
 		editor.addPopupMenuItem(create, true);
 		add(editor, BorderLayout.CENTER);

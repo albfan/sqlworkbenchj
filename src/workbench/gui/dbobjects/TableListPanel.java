@@ -264,15 +264,11 @@ public class TableListPanel
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.DEFINITION_PROP, this);
 
-		Reloadable indexReload = new Reloadable()
-		{
-			@Override
-			public void reload()
-			{
-				shouldRetrieveIndexes = true;
-				startRetrieveCurrentPanel();
-			}
-		};
+		Reloadable indexReload = () ->
+    {
+      shouldRetrieveIndexes = true;
+      startRetrieveCurrentPanel();
+    };
 
 		this.indexes = new WbTable();
 		this.indexes.setRendererSetup(RendererSetup.getBaseSetup());
@@ -281,17 +277,13 @@ public class TableListPanel
 		this.indexes.setSelectOnRightButtonClick(true);
 		this.indexPanel = new TableIndexPanel(this.indexes, indexReload);
 
-		Reloadable sourceReload = new Reloadable()
-		{
-			@Override
-			public void reload()
-			{
-				shouldRetrieveTable = true;
-				shouldRetrieveIndexes = true;
-				shouldRetrieveTableSource = true;
-				startRetrieveCurrentPanel();
-			}
-		};
+		Reloadable sourceReload = () ->
+    {
+      shouldRetrieveTable = true;
+      shouldRetrieveIndexes = true;
+      shouldRetrieveTableSource = true;
+      startRetrieveCurrentPanel();
+    };
 
 		this.tableSource = new DbObjectSourcePanel(aParent, sourceReload);
 		this.tableSource.allowReformat();
@@ -415,15 +407,11 @@ public class TableListPanel
 
 		if (DbExplorerSettings.showFocusInDbExplorer())
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					indexes.showFocusBorder();
-					tableList.showFocusBorder();
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        indexes.showFocusBorder();
+        tableList.showFocusBorder();
+      });
 		}
 
 		projections = new VerticaProjectionPanel();
@@ -642,37 +630,33 @@ public class TableListPanel
     // already showing the table definition?
     if (displayTab.indexOfComponent(exportedKeys) > -1) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					ignoreStateChanged = true;
-					int index = displayTab.getSelectedIndex();
-					displayTab.removeAll();
-					addBaseObjectPanels();
-					addDataPanel();
-					if (dbConnection.getDbId().equals(DbMetadata.DBID_VERTICA))
-					{
-						displayTab.add(ResourceMgr.getString("TxtDbExplorerProjections"), projections);
-					}
-					else
-					{
-						addIndexPanel();
-					}
-					displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedKeys);
-					displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedKeys);
-					addTriggerPanel();
-					restoreIndex(index);
-				}
-				finally
-				{
-					ignoreStateChanged = false;
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      try
+      {
+        ignoreStateChanged = true;
+        int index = displayTab.getSelectedIndex();
+        displayTab.removeAll();
+        addBaseObjectPanels();
+        addDataPanel();
+        if (dbConnection.getDbId().equals(DbMetadata.DBID_VERTICA))
+        {
+          displayTab.add(ResourceMgr.getString("TxtDbExplorerProjections"), projections);
+        }
+        else
+        {
+          addIndexPanel();
+        }
+        displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedKeys);
+        displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedKeys);
+        addTriggerPanel();
+        restoreIndex(index);
+      }
+      finally
+      {
+        ignoreStateChanged = false;
+      }
+    });
 	}
 
 	private void restoreIndex(int index)
@@ -700,37 +684,33 @@ public class TableListPanel
 		if (includeDataPanel && count == 3) return; // nothing to do
 		if (!includeDataPanel && count == 2) return; // nothing to do
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					int index = displayTab.getSelectedIndex();
-					ignoreStateChanged = true;
-					displayTab.removeAll();
+		WbSwingUtilities.invoke(() ->
+    {
+      try
+      {
+        int index = displayTab.getSelectedIndex();
+        ignoreStateChanged = true;
+        displayTab.removeAll();
 
-					addBaseObjectPanels();
-					if (includeDataPanel) addDataPanel();
-          showIndexesIfSupported();
-					showTriggerIfSupported();
+        addBaseObjectPanels();
+        if (includeDataPanel) addDataPanel();
+        showIndexesIfSupported();
+        showTriggerIfSupported();
 
-					exportedKeys.reset();
-					indexes.reset();
-					triggers.reset();
-					importedKeys.reset();
-					projections.reset();
+        exportedKeys.reset();
+        indexes.reset();
+        triggers.reset();
+        importedKeys.reset();
+        projections.reset();
 
-					if (!includeDataPanel) tableData.reset();
-					restoreIndex(index);
-				}
-				finally
-				{
-					ignoreStateChanged = false;
-				}
-			}
-		});
+        if (!includeDataPanel) tableData.reset();
+        restoreIndex(index);
+      }
+      finally
+      {
+        ignoreStateChanged = false;
+      }
+    });
 	}
 
 	private boolean viewTriggersSupported()
@@ -846,52 +826,44 @@ public class TableListPanel
 
 		tableList.saveColumnOrder();
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				tableList.cancelEditing();
-				if (displayTab.getTabCount() > 0)
-				{
-					try
-					{
-						ignoreStateChanged = true;
-						displayTab.setSelectedIndex(0);
-					}
-					finally
-					{
-						ignoreStateChanged = false;
-					}
-				}
-				tableDefinition.reset();
-				importedKeys.reset();
-				exportedKeys.reset();
-				if (projections != null) projections.reset();
-				indexes.reset();
-				triggers.reset();
-				tableSource.reset();
-				tableData.reset();
-				tableList.reset();
-				resetTableHistory();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      tableList.cancelEditing();
+      if (displayTab.getTabCount() > 0)
+      {
+        try
+        {
+          ignoreStateChanged = true;
+          displayTab.setSelectedIndex(0);
+        }
+        finally
+        {
+          ignoreStateChanged = false;
+        }
+      }
+      tableDefinition.reset();
+      importedKeys.reset();
+      exportedKeys.reset();
+      if (projections != null) projections.reset();
+      indexes.reset();
+      triggers.reset();
+      tableSource.reset();
+      tableData.reset();
+      tableList.reset();
+      resetTableHistory();
+    });
 	}
 
 	protected void resetCurrentPanel()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				Resettable panel = (Resettable)displayTab.getSelectedComponent();
-				if (panel != null)
-				{
-					panel.reset();
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      Resettable panel = (Resettable)displayTab.getSelectedComponent();
+      if (panel != null)
+      {
+        panel.reset();
+      }
+    });
 	}
 
 	protected void invalidateData()
@@ -1096,35 +1068,27 @@ public class TableListPanel
 
 	protected void checkAlterButton()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (renameAction.isEnabled() && !WbSwingUtilities.containsComponent(statusPanel, alterButton))
-				{
-					statusPanel.add(alterButton, BorderLayout.EAST);
-					statusPanel.validate();
-				}
-				else
-				{
-					statusPanel.remove(alterButton);
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      if (renameAction.isEnabled() && !WbSwingUtilities.containsComponent(statusPanel, alterButton))
+      {
+        statusPanel.add(alterButton, BorderLayout.EAST);
+        statusPanel.validate();
+      }
+      else
+      {
+        statusPanel.remove(alterButton);
+      }
+    });
 	}
 
 	protected void setFocusToTableList()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				listPanel.requestFocus();
-				tableList.requestFocus();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      listPanel.requestFocus();
+      tableList.requestFocus();
+    });
 	}
 
 	private String[] getSelectedTypes()
@@ -1235,17 +1199,13 @@ public class TableListPanel
 			// by editing this list
 			model.setValidator(validator);
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					tableList.setModel(model, true);
-					tableList.getExportAction().setEnabled(true);
-					tableList.adjustColumns();
-					updateDisplayClients();
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        tableList.setModel(model, true);
+        tableList.getExportAction().setEnabled(true);
+        tableList.adjustColumns();
+        updateDisplayClients();
+      });
 
 			setDirty(false);
 		}
@@ -1791,19 +1751,15 @@ public class TableListPanel
 			}
 
 			final String s = (sql == null ? "" : sql.toString());
-			WbSwingUtilities.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					tableSource.setText(s, selectedTable.getTableName(), selectedTable.getObjectType());
-					tableSource.setCaretPosition(0, false);
-					if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
-					{
-						tableSource.requestFocusInWindow();
-					}
-				}
-			});
+			WbSwingUtilities.invokeLater(() ->
+      {
+        tableSource.setText(s, selectedTable.getTableName(), selectedTable.getObjectType());
+        tableSource.setCaretPosition(0, false);
+        if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
+        {
+          tableSource.requestFocusInWindow();
+        }
+      });
 
 			shouldRetrieveTableSource = false;
 		}
@@ -1811,14 +1767,10 @@ public class TableListPanel
 		{
 			LogMgr.logError("TableListPanel.retrieveTableSource()", "Error retrieving table source", e);
 			final String msg = ExceptionUtil.getDisplay(e);
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-          tableSource.setPlainText(msg);
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        tableSource.setPlainText(msg);
+      });
 		}
 		finally
 		{
@@ -2069,15 +2021,11 @@ public class TableListPanel
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStore ds = meta.getIndexReader().getTableIndexInformation(getObjectTable());
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					indexes.setModel(model, true);
-					indexes.adjustRowsAndColumns();
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        indexes.setModel(model, true);
+        indexes.adjustRowsAndColumns();
+      });
 			this.shouldRetrieveIndexes = false;
 		}
 		catch (Throwable th)
@@ -2465,14 +2413,7 @@ public class TableListPanel
 				return;
 			}
 
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					startRetrieveCurrentPanel();
-				}
-			});
+			EventQueue.invokeLater(this::startRetrieveCurrentPanel);
 		}
 	}
 
@@ -2493,21 +2434,17 @@ public class TableListPanel
 		}
 		else if (DbExplorerSettings.PROP_TABLE_HISTORY.equals(evt.getPropertyName()))
 		{
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if (DbExplorerSettings.getDbExplorerShowTableHistory())
-					{
-						showTableHistory();
-					}
-					else
-					{
-						hideTableHistory();
-					}
-				}
-			});
+			WbSwingUtilities.invokeLater(() ->
+      {
+        if (DbExplorerSettings.getDbExplorerShowTableHistory())
+        {
+          showTableHistory();
+        }
+        else
+        {
+          hideTableHistory();
+        }
+      });
 		}
     else if (DbExplorerSettings.PROP_ALLOW_SOURCE_EDITING.equals(evt.getPropertyName()))
     {
@@ -2528,16 +2465,12 @@ public class TableListPanel
 		}
 		else if (PlacementChooser.PLACEMENT_PROPERTY.equals(evt.getPropertyName()))
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					int location = PlacementChooser.getPlacementLocation();
-					displayTab.setTabPlacement(location);
-					displayTab.validate();
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        int location = PlacementChooser.getPlacementLocation();
+        displayTab.setTabPlacement(location);
+        displayTab.validate();
+      });
 		}
 	}
 
