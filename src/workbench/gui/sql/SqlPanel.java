@@ -1360,9 +1360,13 @@ public class SqlPanel
 	 */
 	public void showResultPanel(final int index)
 	{
+    if (index < 0 || index > resultTab.getTabCount() - 1) return;
+
 		WbSwingUtilities.invoke(() ->
     {
       resultTab.setSelectedIndex(index);
+      Component comp = resultTab.getComponentAt(index);
+      WbSwingUtilities.requestFocus((JComponent)comp);
     });
 	}
 
@@ -3658,19 +3662,15 @@ public class SqlPanel
   private int askContinue(final ErrorDescriptor errorDetails, final String question)
   {
     // using the DialogInvoker makes sure that all components of the dialog are created and displayed on the EDT
-    MessageCreator creator = new MessageCreator()
+    MessageCreator creator = () ->
     {
-      @Override
-      public Object getMessage()
+      if (GuiSettings.showSqlErrorInContinueDialog() && errorDetails != null && errorDetails.getErrorMessage() != null)
       {
-        if (GuiSettings.showSqlErrorInContinueDialog() && errorDetails != null && errorDetails.getErrorMessage() != null)
-        {
-          return WbSwingUtilities.buildErrorContinueMessage(question, errorDetails.getErrorMessage());
-        }
-        else
-        {
-          return question;
-        }
+        return WbSwingUtilities.buildErrorContinueMessage(question, errorDetails.getErrorMessage());
+      }
+      else
+      {
+        return question;
       }
     };
 
@@ -4034,26 +4034,22 @@ public class SqlPanel
 		{
 			final List<ResultSet> results = result.getResultSets();
 			count += results.size();
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					try
-					{
-						for (ResultSet rs : results)
-						{
-							DwPanel p = createDwPanel(true);
-							p.showData(rs, sql, time);
-							addResultTab(p);
-						}
-					}
-					catch (Exception e)
-					{
-						LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel with ResultSet", e);
-					}
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        try
+        {
+          for (ResultSet rs : results)
+          {
+            DwPanel p = createDwPanel(true);
+            p.showData(rs, sql, time);
+            addResultTab(p);
+          }
+        }
+        catch (Exception e)
+        {
+          LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel with ResultSet", e);
+        }
+      });
 		}
 
 		return count;

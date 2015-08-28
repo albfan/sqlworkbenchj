@@ -43,8 +43,16 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import workbench.console.SQLConsole;
+import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.ToolWindow;
+import workbench.interfaces.ToolWindowManager;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+
 import workbench.gui.DisconnectInfo;
 import workbench.gui.MainWindow;
 import workbench.gui.WbFocusManager;
@@ -57,17 +65,13 @@ import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.gui.tools.ObjectSourceSearchPanel;
-import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.ToolWindow;
-import workbench.interfaces.ToolWindowManager;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.CommandRegistry;
 import workbench.sql.OutputPrinter;
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.DeadlockMonitor;
 import workbench.util.FileUtil;
 import workbench.util.MacOSHelper;
@@ -345,14 +349,10 @@ public final class WbManager
 		Settings.getInstance().addFontChangedListener(this);
 		if (Settings.getInstance().getBoolProperty("workbench.gui.install.focusmgr", true))
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					FocusManager.setCurrentManager(WbFocusManager.getInstance());
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        FocusManager.setCurrentManager(WbFocusManager.getInstance());
+      });
 		}
 	}
 
@@ -470,15 +470,11 @@ public final class WbManager
 		// that the disconnect takes place, and the actual disconnect is
 		// carried out in a different thread to not block the AWT thread.
 		// If it takes too long the user can still abort the JVM ...
-		WbSwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				createCloseMessageWindow(window);
-				if (closeMessage != null) closeMessage.setVisible(true);
-			}
-		});
+		WbSwingUtilities.invokeLater(() ->
+    {
+      createCloseMessageWindow(window);
+      if (closeMessage != null) closeMessage.setVisible(true);
+    });
 
 		MacroManager.getInstance().save();
 		Thread t = new WbThread("WbManager disconnect")
@@ -711,14 +707,10 @@ public final class WbManager
 	 */
 	public void openNewWindow()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				openNewWindow(false);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      openNewWindow(false);
+    });
 	}
 
 	private void openNewWindow(boolean checkCmdLine)
@@ -766,14 +758,10 @@ public final class WbManager
 		{
 			// Should be done later, so that the main window
 			// has enough time to initialize
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					main.selectConnection(exitOnCancel);
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        main.selectConnection(exitOnCancel);
+      });
 		}
 	}
 
@@ -941,14 +929,7 @@ public final class WbManager
 			MacOSHelper m = new MacOSHelper();
 			m.installApplicationHandler();
 
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					runGui();
-				}
-			});
+			EventQueue.invokeLater(this::runGui);
 		}
 	}
 
@@ -1066,7 +1047,6 @@ public final class WbManager
 
 			OutputPrinter printer = new OutputPrinter()
 			{
-
 				@Override
 				public void printMessage(String message)
 				{

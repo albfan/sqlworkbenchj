@@ -33,6 +33,8 @@ import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
 import workbench.sql.parser.ParserType;
 
+import workbench.util.StringUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -64,6 +66,7 @@ public class PgCopyCommand
         if (fromStdin && token.getText().equals(";"))
         {
           dataStart = token.getCharEnd();
+          dataStart = StringUtil.findNextLineStart(sql, dataStart);
           break;
         }
         if (token.getText().equalsIgnoreCase("stdin") && lastToken != null && lastToken.getText().equalsIgnoreCase("FROM"))
@@ -87,7 +90,7 @@ public class PgCopyCommand
     {
       runner.setSavepoint();
       StringReader reader = new StringReader(sql);
-      reader.skip(dataStart+1);
+      reader.skip(dataStart);
 
       PgCopyImporter pgCopy = new PgCopyImporter(currentConnection);
       pgCopy.copyFromStdin(copy, reader);

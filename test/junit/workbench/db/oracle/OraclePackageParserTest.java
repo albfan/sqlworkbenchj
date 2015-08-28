@@ -64,8 +64,9 @@ public class OraclePackageParserTest
              "      job    VARCHAR2, \n" +
              "      mgr    NUMBER, \n" +
              "      sal    NUMBER, \n" +
-             "      comm   NUMBER, \n" +
-             "      deptno NUMBER) IS \n" +
+             "      comm   NUMBER DEFAULT 0, \n" +
+             "      deptno NUMBER DEFAULT 42) \n" +
+             "IS \n" +
              "   BEGIN \n" +
              "      INSERT INTO emp VALUES (empno_seq.NEXTVAL, ename, job, \n" +
              "         mgr, SYSDATE, sal, comm, deptno) \n" +
@@ -93,7 +94,7 @@ public class OraclePackageParserTest
              " \n" +
              " \n" +
              "---------------------------------------------------- \n" +
-             "   PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE) IS \n" +
+             "   PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE DEFAULT SYSDATE) IS \n" +
              "   BEGIN \n" +
              "      DELETE FROM emp WHERE empno = emp_id; \n" +
              "   END fire_employee; \n" +
@@ -141,7 +142,7 @@ public class OraclePackageParserTest
 		int procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id"));
 		assertEquals(pos, procPos);
 
-		pos = script.indexOf("PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE)");
+		pos = script.indexOf("PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE DEFAULT SYSDATE)");
 		proc = new ProcedureDefinition("fire_employee", DatabaseMetaData.procedureNoResult);
 		procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id", "fire_date"));
 		assertEquals(pos, procPos);

@@ -252,6 +252,8 @@ public class TableDependency
 		visitedRelations.clear();
 		visitedParents.clear();
 
+    long start = System.currentTimeMillis();
+
 		boolean resetBusy = false;
 		try
 		{
@@ -276,7 +278,8 @@ public class TableDependency
 				connection.setBusy(false);
 			}
 		}
-
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("TableDependency.readDependencyTree()", "Retrieving " + (exportedKeys ? "referencing" : "referenced") + " tables for " + tableRoot.getTable().toString() + " took: " + duration + "ms");
 	}
 
 	/**
@@ -428,7 +431,7 @@ public class TableDependency
 				// into the next child. This is a safetey net, just in case the cycle
 				// is not detected. Better display the user incorrect data, than
 				// ending up in an endless loop.
-				// A circular dependency with more than 10 levels is an ugly design anyway :)
+				// A circular dependency with more than 25 levels is an ugly design anyway :)
 				LogMgr.logError("TableDependency.readTree()", "Endless reference cycle detected for root=" + this.tableRoot + ", parent=" + parent, null);
 				this.readAborted = true;
 				return;
@@ -462,7 +465,7 @@ public class TableDependency
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("TableDependencyTree.readTree()", "Error when reading FK definition", e);
+			LogMgr.logError("TableDependencyTree.readTree()", "Error when reading FK definition for " + tableRoot, e);
 		}
 	}
 

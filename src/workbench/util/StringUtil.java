@@ -1845,6 +1845,22 @@ public class StringUtil
 		return end;
 	}
 
+  public static int findNextLineStart(String text, int position)
+  {
+    int pos = getLineEnd(text, position);
+    if (pos <= 0) return 0;
+
+    char c = text.charAt(pos);
+    int count = text.length();
+
+    while (pos < count - 1 && (c == '\r' || c == '\n'))
+    {
+      pos ++;
+      c = text.charAt(pos);
+    }
+    return pos;
+  }
+
 	public static String arrayToString(String[] values)
 	{
 		if (values == null || values.length == 0) return "";

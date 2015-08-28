@@ -341,14 +341,7 @@ public class MainWindow
 		boolean macroVisible = Settings.getInstance().getBoolProperty(this.getClass().getName() + ".macropopup.visible", false);
 		if (macroVisible)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					showMacroPopup.showPopup();
-				}
-			});
+			EventQueue.invokeLater(showMacroPopup::showPopup);
 		}
 	}
 
@@ -848,16 +841,12 @@ public class MainWindow
 
 	public void forceRedraw()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				JComponent content = (JComponent)getContentPane();
-        sqlTab.validate();
-				content.validate();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      JComponent content = (JComponent)getContentPane();
+      sqlTab.validate();
+      content.validate();
+    });
 		WbSwingUtilities.repaintLater(this);
 	}
 
@@ -1186,15 +1175,11 @@ public class MainWindow
 			if (!inProgress) clearConnectIsInProgress();
 		}
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				createNewConnection.checkState();
-				disconnectTab.checkState();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      createNewConnection.checkState();
+      disconnectTab.checkState();
+    });
 	}
 
 	public boolean canUseSeparateConnection()
@@ -1216,15 +1201,11 @@ public class MainWindow
 	{
 		final MainPanel panel = getCurrentPanel();
 		createNewConnectionForPanel(panel);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				int index = getIndexForPanel(panel);
-				sqlTab.setForegroundAt(index, Color.BLUE);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      int index = getIndexForPanel(panel);
+      sqlTab.setForegroundAt(index, Color.BLUE);
+    });
 	}
 
 	protected void createNewConnectionForPanel(final MainPanel aPanel)
@@ -1299,14 +1280,10 @@ public class MainWindow
 		this.closeConnectingInfo();
 		panel.setConnection(conn);
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				updateGuiForTab(anIndex);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      updateGuiForTab(anIndex);
+    });
 	}
 
 	private void updateGuiForTab(final int index)
@@ -1336,14 +1313,7 @@ public class MainWindow
 		checkMacroMenuForPanel(index);
 		forceRedraw();
 
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				current.panelSelected();
-			}
-		});
+		SwingUtilities.invokeLater(current::panelSelected);
 	}
 
 	public void currentTabChanged()
@@ -1358,14 +1328,10 @@ public class MainWindow
 		if (index >= sqlTab.getTabCount()) return;
 
 		// Make sure this is executed on the EDT
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				updateCurrentTab(index);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      updateCurrentTab(index);
+    });
 
 		int lastIndex = sqlTab.getPreviousTabIndex();
 		if (lastIndex > -1 && lastIndex < sqlTab.getTabCount())
@@ -1506,21 +1472,17 @@ public class MainWindow
 
 		final StatusBar status = (StatusBar)current;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (StringUtil.isEmptyString(aMsg))
-				{
-					status.clearStatusMessage();
-				}
-				else
-				{
-					status.setStatusMessage(aMsg);
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      if (StringUtil.isEmptyString(aMsg))
+      {
+        status.clearStatusMessage();
+      }
+      else
+      {
+        status.setStatusMessage(aMsg);
+      }
+    });
 	}
 
 	public void showLogMessage(String aMsg)
@@ -1919,14 +1881,7 @@ public class MainWindow
 		if (updateRecent)
 		{
 			RecentFileManager.getInstance().workspaceLoaded(f);
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					updateRecentWorkspaces();
-				}
-			});
+			EventQueue.invokeLater(this::updateRecentWorkspaces);
 		}
 
     shouldShowTree = getToolProperties(DB_TREE_PROPS).getBoolProperty(DbTreePanel.PROP_VISIBLE, false);
@@ -2081,14 +2036,10 @@ public class MainWindow
 			closeConnectingInfo();
 			// this must be called on the AWT thread
 			// and it must be called synchronously!
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					disconnected(true);
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        disconnected(true);
+      });
 		}
 	}
 
@@ -2199,14 +2150,10 @@ public class MainWindow
 		{
 			// this must be called on the AWT thread
 			// and it must be called synchronously!
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					disconnected(false);
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        disconnected(false);
+      });
 		}
 	}
 
@@ -2303,17 +2250,13 @@ public class MainWindow
 
 	protected void updateWindowTitle()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
-				String title = titleBuilder.getWindowTitle(currentProfile, currentWorkspaceFile, getCurrentEditorFile());
-				setTitle(title);
-				getJobIndicator().baseTitleChanged();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
+      String title1 = titleBuilder.getWindowTitle(currentProfile, currentWorkspaceFile, getCurrentEditorFile());
+      setTitle(title1);
+      getJobIndicator().baseTitleChanged();
+    });
 	}
 
 	protected void closeConnectingInfo()
@@ -2975,23 +2918,19 @@ public class MainWindow
 			}
 		}
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-        try
-        {
-					removeAllPanels(true);
-        }
-        catch (Exception e)
-        {
-          LogMgr.logError("MainWindow.closeWorkspace()", "Error when resetting workspace", e);
-        }
-        updateWindowTitle();
-        checkWorkspaceActions();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      try
+      {
+        removeAllPanels(true);
+      }
+      catch (Exception e)
+      {
+        LogMgr.logError("MainWindow.closeWorkspace()", "Error when resetting workspace", e);
+      }
+      updateWindowTitle();
+      checkWorkspaceActions();
+    });
 	}
 
 	/**
@@ -3274,19 +3213,15 @@ public class MainWindow
 		}
 		final MainPanel p = getSqlPanel(index);
 		final boolean selectTab = index != sqlTab.getSelectedIndex();
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (selectTab)
-				{
-					selectTab(index);
-					invalidate();
-				}
-				p.jumpToBookmark(bookmark);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (selectTab)
+      {
+        selectTab(index);
+        invalidate();
+      }
+      p.jumpToBookmark(bookmark);
+    });
 	}
 
 	/**

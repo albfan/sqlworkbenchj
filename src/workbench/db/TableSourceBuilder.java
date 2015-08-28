@@ -526,7 +526,7 @@ public class TableSourceBuilder
     }
     else
     {
-      // if a cascaded drop was requested add it even when a replace is available
+      // if a cascaded drop was requested add it, even when a REPLACE is available
       // because a cascaded drop might do more than a create or replace
       // when "only" a regular drop was requested this should be the same as a CREATE OR REPLACE
       // so there is no need to add the drop statement

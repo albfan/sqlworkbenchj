@@ -36,6 +36,30 @@ import static org.junit.Assert.*;
 public class StringUtilTest
 {
 
+  @Test
+  public void testGetLineEnd()
+  {
+    String text = "first line\nsecond line";
+    int end = StringUtil.getLineEnd(text, 2);
+    assertEquals(text.indexOf("second") - 1, end);
+  }
+
+  @Test
+  public void testFindNextLineStart()
+  {
+    String text = "first line\nsecond line";
+    int end = StringUtil.findNextLineStart(text, 2);
+    assertEquals(text.indexOf("second"), end);
+
+    text = "first line\r\nsecond line";
+    end = StringUtil.findNextLineStart(text, 2);
+    assertEquals(text.indexOf("second"), end);
+
+    text = "first line\r\n\n\nsecond line";
+    end = StringUtil.findNextLineStart(text, 2);
+    assertEquals(text.indexOf("second"), end);
+  }
+
 	@Test
 	public void testGetFirstWord()
 	{

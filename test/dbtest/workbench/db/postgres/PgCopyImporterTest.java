@@ -38,6 +38,10 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.TextImportOptions;
 
+import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
+import workbench.sql.parser.ScriptParser;
+
 import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.QuoteEscapeType;
@@ -109,6 +113,42 @@ public class PgCopyImporterTest
 			PostgresTestUtil.cleanUpTestCase();
 		}
 	}
+
+  @Test
+  public void testSqlCopy()
+    throws Exception
+  {
+		PostgresTestUtil.initTestCase("copy_importer");
+		WbConnection conn = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(conn);
+
+		TestUtil.executeScript(conn,
+			"create table person (id integer, firstname text, lastname text);\n" +
+			"commit;\n");
+
+    StatementRunner runner = new StatementRunner();
+    runner.setConnection(conn);
+
+    ScriptParser parser = ScriptParser.createScriptParser(conn);
+    String sql =
+      "copy person (id, firstname, lastname) from stdin WITH (format csv, header false, delimiter ',');   \n" +
+      "1,Arthur,Dent\n" +
+      "2,Ford,Prefect\n" +
+      "\\.\n" +
+      "commit;\n";
+
+    parser.setScript(sql);
+    int size = parser.getSize();
+    assertEquals(2, size);
+    runner.runStatement(parser.getCommand(0));
+    StatementRunnerResult result = runner.getResult();
+    assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+    assertEquals(2, result.getTotalUpdateCount());
+    runner.runStatement(parser.getCommand(1));
+
+    int count = TestUtil.getNumberValue(conn, "select count(*) from person");
+    assertEquals(2,count);
+  }
 
 	@Test
 	public void testCreateSql()
