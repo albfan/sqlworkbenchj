@@ -22,8 +22,6 @@
  */
 package workbench.db.datacopy;
 
-import workbench.db.DropType;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,6 +40,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
+import workbench.db.DropType;
 import workbench.db.GenericObjectDropper;
 import workbench.db.TableCreator;
 import workbench.db.TableDefinition;
@@ -57,8 +56,8 @@ import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.TableStatements;
 
 import workbench.storage.RowActionMonitor;
-import workbench.util.CollectionUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.StringUtil;
@@ -677,7 +676,6 @@ public class DataCopier
 		TableSelectBuilder builder = new TableSelectBuilder(sourceConnection, "export", TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
 
 		StringBuilder sql = new StringBuilder(count * 25 + 30);
-
 
 		for (Map.Entry<ColumnIdentifier, ColumnIdentifier> entry : this.columnMap.entrySet())
 		{

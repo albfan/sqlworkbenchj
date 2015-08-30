@@ -41,12 +41,23 @@ public class ErrorDescriptor
 	private String errorMessage;
 	private boolean messageIncludesPosition;
   private int inStatementOffset = 0;
+  private String originalStatement;
 
 	public ErrorDescriptor()
 	{
 	}
 
-	/**
+  public String getOriginalStatement()
+  {
+    return originalStatement;
+  }
+
+  public void setOriginalStatement(String statement)
+  {
+    this.originalStatement = statement;
+  }
+
+  /**
 	 * Indicates if the original error messages already includes the position of the error.
 	 *
 	 * This can be used when enhancing the error message to display it to the user
@@ -92,7 +103,7 @@ public class ErrorDescriptor
   {
     inStatementOffset = offset;
   }
-  
+
 	/**
 	 * Sets the position of the error as an offset to the start of the SQL statement.
 	 *

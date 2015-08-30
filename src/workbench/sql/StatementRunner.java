@@ -63,6 +63,8 @@ import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
+import workbench.interfaces.ScriptErrorHandler;
+
 /**
  *
  * @author  Thomas Kellerer
@@ -107,6 +109,8 @@ public class StatementRunner
 	private final Map<String, String> sessionAttributes = new TreeMap<>();
 	private final	RemoveEmptyResultsAnnotation removeAnnotation = new RemoveEmptyResultsAnnotation();
 
+  private ScriptErrorHandler retryHandler;
+
 	// The history provider is here to give SqlCommands access to the command history.
 	// Currently this is only used in WbHistory to show a list of executed statements.
 	private SqlHistoryProvider history;
@@ -119,6 +123,16 @@ public class StatementRunner
 		logAllStatements = Settings.getInstance().getLogAllStatements();
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_CONSOLIDATE_LOG_MESSAGES, Settings.PROPERTY_LOG_ALL_SQL, Settings.PROPERTY_ERROR_STATEMENT_LOG_LEVEL);
 	}
+
+  public ScriptErrorHandler getRetryHandler()
+  {
+    return retryHandler;
+  }
+
+  public void setRetryHandler(ScriptErrorHandler handler)
+  {
+    this.retryHandler = handler;
+  }
 
 	public void setHistoryProvider(SqlHistoryProvider provider)
 	{

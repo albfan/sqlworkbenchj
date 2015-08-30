@@ -1160,6 +1160,11 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.sql.parameter.prompt.cancel.stops", true);
 	}
 
+  public static boolean enableErrorPromptForWbInclude()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.gui.sql.error.include.prompt", true);
+  }
+  
   public static boolean enableRetrySqlErrorDialog()
   {
     return Settings.getInstance().getBoolProperty(PROP_ENABLE_SQL_ERROR_RETRY, false);

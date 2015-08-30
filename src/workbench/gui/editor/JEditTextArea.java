@@ -73,6 +73,7 @@ import workbench.resource.Settings;
 
 import workbench.db.QuoteHandler;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CutAction;
 import workbench.gui.actions.PasteAction;
@@ -2568,7 +2569,7 @@ public class JEditTextArea
 
 			String selection = getSelectedText();
 
-			clipboard.setContents(new StringSelection(selection),null);
+			clipboard.setContents(new StringSelection(selection), null);
 		}
 	}
 
@@ -2586,30 +2587,16 @@ public class JEditTextArea
 				return;
 			}
 
-			Clipboard clipboard = getToolkit().getSystemClipboard();
 			try
 			{
+        Clipboard clipboard = getToolkit().getSystemClipboard();
 				Transferable content = clipboard.getContents(this);
-				if (content.isDataFlavorSupported(DataFlavor.stringFlavor))
-				{
-					Object data = content.getTransferData(DataFlavor.stringFlavor);
-					if (data instanceof String)
-					{
-						setSelectedText((String)data);
-					}
-				}
-				else
-				{
-					DataFlavor[] flavors = content.getTransferDataFlavors();
-					String info = "";
-					int count = 0;
-					for (DataFlavor f : flavors)
-					{
-						if (count > 0) info += ", ";
-						info += f.getHumanPresentableName();
-					}
-					LogMgr.logWarning("JEditTextArea.paste()", "Clipboard doesn't contain a String value. Current flavors: " + info);
-				}
+        LogMgr.logTrace("JEditTextArea.paste()", "Received flavors: " + WbSwingUtilities.getFlavors(content));
+        Object data = content.getTransferData(DataFlavor.stringFlavor);
+        if (data != null)
+        {
+          setSelectedText(data.toString());
+        }
 			}
 			catch(Throwable th)
 			{

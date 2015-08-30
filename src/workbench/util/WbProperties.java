@@ -43,7 +43,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import workbench.interfaces.PropertyStorage;
-import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
@@ -145,7 +144,7 @@ public class WbProperties
 				String referenceValue = reference.getProperty(key);
 				if (StringUtil.equalStringOrEmpty(currentValue, referenceValue))
 				{
-					LogMgr.logTrace("WbProperties.save()", "Property: [" + key1 + "] has its default value. Property will not be saved");
+					// LogMgr.logTrace("WbProperties.save()", "Property: [" + key1 + "] has its default value. Property will not be saved");
 					continue;
 				}
 			}

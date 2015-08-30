@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.swing.JOptionPane;
+
 import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.console.ConsolePrompter;
@@ -46,6 +48,7 @@ import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ResultSetConsumer;
+import workbench.interfaces.ScriptErrorHandler;
 import workbench.interfaces.SqlHistoryProvider;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -55,6 +58,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.profiles.ProfileKey;
 
@@ -128,6 +132,7 @@ public class BatchRunner
 	private boolean isBusy;
   private ErrorDescriptor lastError;
   private int errorStatementIndex;
+  private ScriptErrorHandler retryHandler;
 
 	public BatchRunner()
 	{
@@ -163,6 +168,11 @@ public class BatchRunner
 		if (errors != null) errors.clear();
 		queryResults.clear();
 	}
+
+  public void setRetryHandler(ScriptErrorHandler handler)
+  {
+    this.retryHandler = handler;
+  }
 
 	public void setTraceOutput(OutputPrinter tracer)
 	{
@@ -354,6 +364,11 @@ public class BatchRunner
 	{
 		return this.connection != null;
 	}
+
+  public boolean wasCancelled()
+  {
+    return cancelExecution;
+  }
 
 	public void setShowProgress(boolean flag)
 	{
@@ -800,12 +815,15 @@ public class BatchRunner
 
     lastError = null;
     errorStatementIndex = -1;
+    boolean ignoreAllErrors = false;
 
 		boolean logAllStatements = Settings.getInstance().getLogAllStatements();
     int commandIndex = 0;
 		String sql = null;
 		while ((sql = parser.getNextCommand()) != null)
 		{
+
+      boolean ignoreThisError = false;
 
 			if (sql.isEmpty())
 			{
@@ -865,6 +883,26 @@ public class BatchRunner
             {
               feedback += "\n" + ResourceMgr.getFormattedString("MsgInFile", parser.getScriptFile().getFullPath());
             }
+
+            if (retryHandler != null && !ignoreAllErrors)
+            {
+              lastError.setOriginalStatement(sql);
+              int choice = retryHandler.scriptErrorPrompt(commandIndex, lastError, null, 0);
+              switch (choice)
+              {
+                case WbSwingUtilities.IGNORE_ALL:
+                  ignoreAllErrors = true;
+                  break;
+                case WbSwingUtilities.IGNORE_ONE:
+                  ignoreThisError = true;
+                  break;
+                case JOptionPane.CANCEL_OPTION:
+                  ignoreAllErrors = false;
+                  ignoreThisError = false;
+                  cancelExecution = true;
+              }
+            }
+
             if (storeErrorMessages)
             {
               if (errors == null)
@@ -874,6 +912,12 @@ public class BatchRunner
               errors.appendNewLine();
               errors.append(feedback);
             }
+
+            if (ignoreAllErrors)
+            {
+              ignoreThisError = true;
+            }
+
           }
           else
           {
@@ -941,7 +985,8 @@ public class BatchRunner
 				error = true;
 				break;
 			}
-			if (error && abortOnError) break;
+
+			if (error && abortOnError && !ignoreThisError) break;
 		}
 
 		end = System.currentTimeMillis();

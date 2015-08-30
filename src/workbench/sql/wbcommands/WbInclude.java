@@ -28,6 +28,7 @@ import java.util.List;
 
 import workbench.AppArguments;
 import workbench.WbManager;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -260,6 +261,11 @@ public class WbInclude
 			batchRunner.setEncoding(encoding);
 			batchRunner.setParameterPrompter(this.prompter);
 			batchRunner.setExecutionController(runner.getExecutionController());
+
+      if ((cmdLine.isArgNotPresent(CommonArgs.ARG_CONTINUE) || !continueOnError) && GuiSettings.enableErrorPromptForWbInclude())
+      {
+        batchRunner.setRetryHandler(runner.getRetryHandler());
+      }
 			batchRunner.setIgnoreDropErrors(ignoreDrop);
 			boolean showResults = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, false);
 			batchRunner.showResultSets(showResults);
@@ -289,8 +295,14 @@ public class WbInclude
 			{
 				result.setSuccess();
 			}
+      else if (batchRunner.wasCancelled())
+      {
+        result.setSuccess();
+        result.setWarning(true);
+        result.addMessageByKey("MsgScriptCancelled");
+      }
 			else
-			{
+      {
 				result.setFailure();
 			}
 

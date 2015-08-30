@@ -39,6 +39,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -1689,4 +1691,16 @@ public class WbSwingUtilities
 		size.height = (int)(size.height * factorHeight);
 		toScale.setSize(size);
 	}
+
+  public static String getFlavors(Transferable content)
+  {
+    DataFlavor[] flavors = content.getTransferDataFlavors();
+    String info = "";
+    for (int i=0; i < flavors.length; i++)
+    {
+      if (i > 0) info += ", ";
+      info += flavors[i].getHumanPresentableName();
+    }
+    return info;
+  }
 }

@@ -72,6 +72,7 @@ import workbench.interfaces.Moveable;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ResultReceiver;
+import workbench.interfaces.ScriptErrorHandler;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.interfaces.ToolWindowManager;
@@ -244,7 +245,8 @@ public class SqlPanel
 	implements FontChangedListener, PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar, ToolWindowManager, OutputPrinter, PanelReloader
+		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser, StatusBar, ToolWindowManager, OutputPrinter, PanelReloader,
+    ScriptErrorHandler
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -447,6 +449,7 @@ public class SqlPanel
     stmtRunner = new StatementRunner();
     stmtRunner.setRowMonitor(this.rowMonitor);
     stmtRunner.setMessagePrinter(this);
+    stmtRunner.setRetryHandler(this);
 
     tabDropHandler = new ResultTabDropHandler(this, resultTab, log);
 	}
@@ -3442,7 +3445,7 @@ public class SqlPanel
 
             int choice = handleScriptError(i, count, errorDetails, scriptParser, selectionOffset);
 
-    				if (choice == JOptionPane.NO_OPTION)
+    				if (choice == JOptionPane.CANCEL_OPTION)
 						{
 							break;
 						}
@@ -3609,17 +3612,27 @@ public class SqlPanel
     return choice;
   }
 
+  @Override
+  public int scriptErrorPrompt(int cmdIndex, ErrorDescriptor errorDetails, ScriptParser parser, int selectionOffset)
+  {
+    return handleScriptError(cmdIndex, -1, errorDetails, parser, selectionOffset);
+  }
 
   private int handleRetry(final int cmdIndex, final ErrorDescriptor errorDetails, final ScriptParser parser, int selectionOffset)
   {
     final ErrorRetryPanel retry = new ErrorRetryPanel(errorDetails, stmtRunner);
+    retry.setEnableReplace(parser != null);
+
     WbSwingUtilities.invoke(() ->
     {
       boolean busy = getConnection().isBusy();
       try
       {
         getConnection().setBusy(false);
-        retry.setStatement(parser, cmdIndex);
+        if (parser != null)
+        {
+          retry.setStatement(parser, cmdIndex);
+        }
         retry.showDialog((Frame)SwingUtilities.getWindowAncestor(SqlPanel.this));
       }
       finally
@@ -3632,24 +3645,15 @@ public class SqlPanel
 
     try
     {
-      switch (retry.getChoice())
+      if (retry.getChoice() == WbSwingUtilities.CONTINUE_OPTION)
       {
-        case WbSwingUtilities.CONTINUE_OPTION:
-          if (retry.shouldReplaceOriginalStatement())
-          {
-            int startOfStatement = parser.getStartPosForCommand(cmdIndex) + selectionOffset;
-            int endOfStatement = parser.getEndPosForCommand(cmdIndex) + selectionOffset;
-            editor.replaceText(startOfStatement, endOfStatement, retry.getStatement());
-          }
-          result = JOptionPane.YES_OPTION;
-          break;
-        case JOptionPane.CANCEL_OPTION:
-          result = JOptionPane.NO_OPTION;
-          break;
-        case WbSwingUtilities.IGNORE_ONE:
-          result = JOptionPane.YES_OPTION;
-          break;
-        default:
+        if (parser != null && retry.shouldReplaceOriginalStatement())
+        {
+          int startOfStatement = parser.getStartPosForCommand(cmdIndex) + selectionOffset;
+          int endOfStatement = parser.getEndPosForCommand(cmdIndex) + selectionOffset;
+          editor.replaceText(startOfStatement, endOfStatement, retry.getStatement());
+        }
+        result = WbSwingUtilities.IGNORE_ONE;
       }
     }
     finally
@@ -3676,6 +3680,10 @@ public class SqlPanel
 
     DialogInvoker invoker = new DialogInvoker();
     int choice = invoker.getYesNoIgnoreAll(creator, this);
+    if (choice == JOptionPane.NO_OPTION)
+    {
+      choice = JOptionPane.CANCEL_OPTION;
+    }
     return choice;
   }
 

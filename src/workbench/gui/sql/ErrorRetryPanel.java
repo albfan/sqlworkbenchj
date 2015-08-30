@@ -74,12 +74,18 @@ public class ErrorRetryPanel
   private int choice = JOptionPane.NO_OPTION;
   private WbStatusLabel statusBar;
   private JCheckBox replaceStatement;
+  private boolean enableReplace = true;
 
   public ErrorRetryPanel(ErrorDescriptor errorDescriptor, StatementRunner runner)
   {
     super(new BorderLayout(5,0));
     stmtRunner = runner;
     error = errorDescriptor;
+  }
+
+  public void setEnableReplace(boolean flag)
+  {
+    enableReplace = flag;
   }
 
   public void setStatement(ScriptParser parser, int cmdIndex)
@@ -99,6 +105,11 @@ public class ErrorRetryPanel
     }
 
     sqlEditor.setText(sql);
+    setCaretToError();
+  }
+
+  private void setCaretToError()
+  {
     int caret = 0;
     if (error != null && error.getErrorPosition() > -1)
     {
@@ -145,6 +156,12 @@ public class ErrorRetryPanel
     {
       sqlEditor.setDatabaseConnection(stmtRunner.getConnection());
     }
+    
+    if (error != null && error.getOriginalStatement() != null)
+    {
+      sqlEditor.setText(error.getOriginalStatement());
+      setCaretToError();
+    }
 
     statusBar = new WbStatusLabel();
 
@@ -178,7 +195,17 @@ public class ErrorRetryPanel
     JPanel toolPanel = new JPanel(new BorderLayout(0,0));
     replaceStatement = new WbCheckBox(ResourceMgr.getString("LblReplaceOrgSql"));
     replaceStatement.setToolTipText(ResourceMgr.getDescription("LblReplaceOrgSql"));
-    replaceStatement.setSelected(Settings.getInstance().getBoolProperty(PROP_REPLACE_ERROR_STATEMENT, false));
+
+    if (enableReplace)
+    {
+      replaceStatement.setEnabled(true);
+      replaceStatement.setSelected(Settings.getInstance().getBoolProperty(PROP_REPLACE_ERROR_STATEMENT, false));
+    }
+    else
+    {
+      replaceStatement.setEnabled(false);
+    }
+
     toolPanel.add(replaceStatement, BorderLayout.LINE_START);
 
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
@@ -208,7 +235,6 @@ public class ErrorRetryPanel
     add(lbl, BorderLayout.PAGE_START);
     add(splitPane, BorderLayout.CENTER);
     add(bottomPanel, BorderLayout.PAGE_END);
-
   }
 
 
@@ -376,6 +402,9 @@ public class ErrorRetryPanel
   {
     window = new JDialog(owner, true);
     window.setTitle(ResourceMgr.getString("TxtWindowTitleErrorRetry"));
+
+    initUI();
+
 		// creating the action will add it to the input map of the dialog
 		// which will enable the key
 		escAction = new EscAction(window, this);
@@ -393,6 +422,9 @@ public class ErrorRetryPanel
     window.setVisible(true);
 
     Settings.getInstance().storeWindowSize(window, "workbench.gui.sql.retrywindow");
-    Settings.getInstance().setProperty(PROP_REPLACE_ERROR_STATEMENT, shouldReplaceOriginalStatement());
+    if (enableReplace)
+    {
+      Settings.getInstance().setProperty(PROP_REPLACE_ERROR_STATEMENT, shouldReplaceOriginalStatement());
+    }
   }
 }
