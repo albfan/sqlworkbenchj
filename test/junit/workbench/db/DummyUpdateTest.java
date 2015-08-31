@@ -79,7 +79,7 @@ public class DummyUpdateTest
 		try
 		{
 			TestUtil.executeScript(con,
-        "create table link_table (id1 integer not null, id2 integer not null, some_data varchar(20), primary key (id1, id2));\n" +
+        "create table link_table (some_data varchar(20), id1 integer not null, id2 integer not null, primary key (id1, id2));\n" +
         "commit;");
 
 			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("LINK_TABLE"));

@@ -322,16 +322,17 @@ public class SqlCommand
 	protected void setUnknownMessage(StatementRunnerResult result, ArgumentParser cmdline, String help)
 	{
 		if (!cmdLine.hasUnknownArguments()) return;
+    
 		StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
 		msg.append(' ');
 		msg.append(cmdLine.getUnknownArguments());
-		result.addMessage(msg.toString());
+
+		result.addErrorMessage(msg.toString());
 		if (!WbManager.getInstance().isBatchMode() && help != null)
 		{
 			result.addMessageNewLine();
 			result.addMessage(help);
 		}
-		result.setFailure();
 	}
 
 	/**

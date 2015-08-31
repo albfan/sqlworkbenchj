@@ -127,8 +127,7 @@ public class WbSchemaReport
 
 		if (output == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
-			result.setFailure();
+			result.addErrorMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
 			return result;
 		}
 
@@ -273,12 +272,12 @@ public class WbSchemaReport
 		{
 			if (currentConnection.getMetadata().isOracle() && !OracleUtils.remarksEnabled(currentConnection))
 			{
-				result.addMessage(ResourceMgr.getString("MsgSchemaReporterOracleRemarksWarning"));
+				result.addMessageByKey("MsgSchemaReporterOracleRemarksWarning");
 				result.addMessage("");
 			}
 			if (currentConnection.getMetadata().isMySql() && !OracleUtils.remarksEnabledMySQL(currentConnection))
 			{
-				result.addMessage(ResourceMgr.getString("MsgSchemaReporterMySQLRemarksWarning"));
+				result.addMessageByKey("MsgSchemaReporterMySQLRemarksWarning");
 				result.addMessage("");
 			}
 		}
@@ -287,8 +286,7 @@ public class WbSchemaReport
 
 		if (reporter.getObjectCount() == 0)
 		{
-			result.setFailure();
-			result.addMessageByKey("ErrNoTablesFound");
+			result.addErrorMessageByKey("ErrNoTablesFound");
 			return result;
 		}
 
@@ -304,8 +302,7 @@ public class WbSchemaReport
 		}
 		catch (IOException e)
 		{
-			result.setFailure();
-			result.addMessage(e.getMessage());
+			result.addErrorMessage(e.getMessage());
 		}
 
 		WbFile xslt = evaluateFileArgument(cmdLine.getValue(WbXslt.ARG_STYLESHEET));
@@ -339,16 +336,14 @@ public class WbSchemaReport
 			catch (FileNotFoundException fnf)
 			{
 				LogMgr.logError("WbSchemaReport.execute()", "Stylesheet " + xslt + " not found!", fnf);
-				result.addMessage(ResourceMgr.getFormattedString("ErrXsltNotFound", xslt));
-				result.setFailure();
+				result.addErrorMessageByKey("ErrXsltNotFound", xslt.toString());
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("WbSchemaReport.execute()", "Error when transforming '" + output.getFullPath() + "' to '" + xsltOutput + "' using " + xslt, e);
 				String msg = transformer.getAllOutputs(e);
+				LogMgr.logError("WbSchemaReport.execute()", "Error when transforming '" + output.getFullPath() + "' to '" + xsltOutput + "' using " + xslt, e);
 				LogMgr.logError("WbSchemaReport.execute()", msg, null);
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessage(msg);
 			}
 		}
 		return result;

@@ -80,7 +80,7 @@ public class StatementRunnerResult
   {
     return ignoreUpdateCount;
   }
-  
+
 	public void ignoreUpdateCounts(boolean flag)
 	{
 		ignoreUpdateCount = flag;
@@ -239,10 +239,59 @@ public class StatementRunnerResult
 		addMessage(ResourceMgr.getFormattedString("MsgRowsAffected", count));
 	}
 
+  /**
+   * Adds an error message identified by the resource key.
+   *
+   * This will also create an ErrorDescriptor and the status of this result will be set to failure.
+   *
+   * @param key
+   *
+   * @see ErrorDescriptor
+   * @see #setFailure(workbench.sql.ErrorDescriptor)
+   */
+	public void addErrorMessageByKey(String key)
+	{
+    String msg = ResourceMgr.getString(key);
+    addErrorMessage(msg);
+	}
+
+	public void addErrorMessageByKey(String key, String ... arguments)
+	{
+    String msg = null;
+    if (arguments != null)
+    {
+      msg = ResourceMgr.getFormattedString(key, (Object[])arguments);
+    }
+    else
+    {
+      msg = ResourceMgr.getString(key);
+    }
+    addErrorMessage(msg);
+	}
+
+  /**
+   * Adds an error message and creates an ErrorDescriptor with this message
+   *
+   * This will also create an ErrorDescriptor and the status of this result will be set to failure.
+   *
+   * @param key
+   *
+   * @see ErrorDescriptor
+   * @see #setFailure(workbench.sql.ErrorDescriptor)
+   */
+	public void addErrorMessage(String msg)
+	{
+		addMessage(msg);
+    ErrorDescriptor error = new ErrorDescriptor();
+    error.setErrorMessage(msg);
+    setFailure(error);
+	}
+
 	public void addMessageByKey(String key)
 	{
 		addMessage(ResourceMgr.getString(key));
 	}
+
 	public void addMessage(MessageBuffer buffer)
 	{
 		if (buffer == null) return;

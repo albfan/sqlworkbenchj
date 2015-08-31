@@ -311,8 +311,7 @@ public class WbCall
       processResults(result, false);
 			LogMgr.logError("WbCall.execute()", "Error calling stored procedure using: " + sqlUsed, e);
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
-			result.addMessage(ExceptionUtil.getDisplay(e));
-			result.setFailure();
+			result.addErrorMessage(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{

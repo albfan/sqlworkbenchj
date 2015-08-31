@@ -98,7 +98,8 @@ public class DummyDML
 	@Override
 	public String getObjectName()
 	{
-		return null;
+    if (table == null) return getObjectType(); // make sure something is returned to avoid "null" labels in the UI
+		return table.getTableName();
 	}
 
 	@Override

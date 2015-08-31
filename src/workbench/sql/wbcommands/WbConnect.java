@@ -189,8 +189,7 @@ public class WbConnect
 		catch (Exception e)
 		{
 			String err = ExceptionUtil.getDisplay(e);
-			result.addMessage(err);
-			result.setFailure();
+			result.addErrorMessage(err);
 		}
     finally
     {

@@ -72,7 +72,7 @@ public class CommandLineConnectionHandler
 			catch (InvalidConnectionDescriptor icd)
 			{
 				LogMgr.logError("CommandLineConnectionHandler.getConnection()", "Error connecting to database", icd);
-				result.addMessage(icd.getLocalizedMessage());
+				result.addErrorMessage(icd.getLocalizedMessage());
 				result.setFailure();
 				return null;
 			}
@@ -80,8 +80,7 @@ public class CommandLineConnectionHandler
 			{
 				LogMgr.logError("CommandLineConnectionHandler.getConnection()", "Error connecting to database", e);
 				result.addMessage(ResourceMgr.getFormattedString("ErrConnectDescriptor", desc));
-				result.addMessage(ExceptionUtil.getDisplay(e));
-				result.setFailure();
+				result.addErrorMessage(ExceptionUtil.getDisplay(e));
 				return null;
 			}
 		}

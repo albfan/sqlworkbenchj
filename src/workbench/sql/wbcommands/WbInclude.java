@@ -303,7 +303,7 @@ public class WbInclude
       }
 			else
       {
-				result.setFailure();
+				result.setFailure(batchRunner.getLastError());
 			}
 
 			List<DataStore> results = batchRunner.getQueryResults();
@@ -319,8 +319,7 @@ public class WbInclude
 		}
 		catch (Exception th)
 		{
-			result.setFailure();
-			result.addMessage(ExceptionUtil.getDisplay(th));
+			result.addErrorMessage(ExceptionUtil.getDisplay(th));
 		}
 		return result;
 	}

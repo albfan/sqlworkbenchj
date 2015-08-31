@@ -199,8 +199,7 @@ public class WbDataDiff
 		WbFile mainScript = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 		if (mainScript == null)
 		{
-			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrDataDiffNoFile"));
+			result.addErrorMessage(ResourceMgr.getString("ErrDataDiffNoFile"));
 			result.addMessage(getWrongArgumentsMessage());
 			return result;
 		}
@@ -226,16 +225,15 @@ public class WbDataDiff
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getFormattedString("ErrCreateDir", outputDir.getFullPath()));
-				result.setFailure();
-				LogMgr.logError("WbDataDiff.execute()", "Could not create output directory!", null);
+				result.addErrorMessageByKey("ErrCreateDir", outputDir.getFullPath());
+				LogMgr.logError("WbDataDiff.execute()", "Could not create output directory: " + outputDir.getFullPath(), null);
 				return result;
 			}
 		}
 
 		if (!outputDir.exists())
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrOutputDirNotFound", outputDir.getFullPath()));
+			result.addErrorMessageByKey("ErrOutputDirNotFound", outputDir.getFullPath());
 			result.setFailure();
 			return result;
 		}
@@ -314,8 +312,7 @@ public class WbDataDiff
 		}
 		else
 		{
-			result.addMessage("Illegal output type: " + outputType);
-			result.setFailure();
+			result.addErrorMessage("Illegal output type: " + outputType);
 			close(targetCon);
 			close(sourceCon);
 			return result;
@@ -432,8 +429,7 @@ public class WbDataDiff
 		catch (Exception e)
 		{
 			LogMgr.logError("WbDataDiff.execute()", "Error during diff", e);
-			result.addMessage(ExceptionUtil.getDisplay(e));
-			result.setFailure();
+			result.addErrorMessage(ExceptionUtil.getDisplay(e));
 		}
 
 		try
@@ -469,6 +465,7 @@ public class WbDataDiff
 		Writer out = null;
 		String nl = Settings.getInstance().getExternalEditorLineEnding();
 		int tableCount = mapping.referenceTables.size();
+    
 		try
 		{
 			out = EncodingUtil.createWriter(mainScript, encoding, false);

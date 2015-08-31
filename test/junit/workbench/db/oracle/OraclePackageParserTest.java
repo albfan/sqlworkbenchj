@@ -94,7 +94,7 @@ public class OraclePackageParserTest
              " \n" +
              " \n" +
              "---------------------------------------------------- \n" +
-             "   PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE DEFAULT SYSDATE) IS \n" +
+             "   PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE DEFAULT TRUNC(SYSDATE) - 1) IS \n" +
              "   BEGIN \n" +
              "      DELETE FROM emp WHERE empno = emp_id; \n" +
              "   END fire_employee; \n" +
@@ -142,7 +142,7 @@ public class OraclePackageParserTest
 		int procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id"));
 		assertEquals(pos, procPos);
 
-		pos = script.indexOf("PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE DEFAULT SYSDATE)");
+    pos = script.indexOf("PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE DEFAULT TRUNC(SYSDATE) - 1");
 		proc = new ProcedureDefinition("fire_employee", DatabaseMetaData.procedureNoResult);
 		procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id", "fire_date"));
 		assertEquals(pos, procPos);

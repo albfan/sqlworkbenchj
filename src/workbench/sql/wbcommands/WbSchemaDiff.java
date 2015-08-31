@@ -123,8 +123,7 @@ public class WbSchemaDiff
 
 		if (cmdLine.getArgumentCount() == 0)
 		{
-			result.addMessage(ResourceMgr.getString("ErrDiffWrongParameters"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrDiffWrongParameters");
 			return result;
 		}
 
@@ -198,8 +197,7 @@ public class WbSchemaDiff
 			{
 				if (referenceConnection == targetCon)
 				{
-					result.addMessage(ResourceMgr.getString("ErrDiffSameConnectionNoTableSelection"));
-					result.setFailure();
+					result.addErrorMessageByKey("ErrDiffSameConnectionNoTableSelection");
 					if (targetCon.getId().startsWith("Wb-Diff"))
 					{
 						try { targetCon.disconnect(); } catch (Exception th) {}
@@ -333,14 +331,12 @@ public class WbSchemaDiff
 					catch (FileNotFoundException fnf)
 					{
 						LogMgr.logError("WbSchemaDiff.execute()", "Stylesheet " + xslt + " not found!", fnf);
-						result.addMessage(ResourceMgr.getFormattedString("ErrXsltNotFound", xslt));
-						result.setFailure();
+						result.addErrorMessageByKey("ErrXsltNotFound", xslt.getAbsolutePath());
 					}
 					catch (Exception e)
 					{
 						LogMgr.logError("WbSchemaReport.execute()", "Error when transforming '" + output.getFullPath() + "' to '" + xsltOutput + "' using " + xslt, e);
-						result.addMessage(transformer.getAllOutputs(e));
-						result.setFailure();
+						result.addErrorMessage(transformer.getAllOutputs(e));
 					}
 				}
 			}

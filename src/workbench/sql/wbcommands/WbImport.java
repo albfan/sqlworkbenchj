@@ -23,7 +23,6 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +59,6 @@ import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ArgumentValue;
 import workbench.util.CollectionUtil;
-import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
@@ -210,7 +208,13 @@ public class WbImport
 		String msg = getWrongParamsMessage();
 		result.addMessageNewLine();
 		result.addMessage(msg);
-		result.setFailure();
+    
+    // only set the failure indicator if it's not already set
+    // to avoid overwriting an ErrorDescriptor that is already set
+    if (result.isSuccess() || result.getErrorDescriptor() == null)
+    {
+      result.setFailure();
+    }
 	}
 
 	private String getWrongParamsMessage()
@@ -282,7 +286,7 @@ public class WbImport
 
 		if (inputFile == null && dir == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrImportFileMissing"));
+			result.addErrorMessageByKey("ErrImportFileMissing");
 			addWrongParamsMessage(result);
 			return result;
 		}
@@ -294,7 +298,7 @@ public class WbImport
 
 		if (type == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrImportTypeMissing"));
+			result.addErrorMessageByKey("ErrImportTypeMissing");
 			addWrongParamsMessage(result);
 			return result;
 		}
@@ -309,7 +313,7 @@ public class WbImport
 
 		if (!validTypes.contains(type))
 		{
-			result.addMessage(ResourceMgr.getString("ErrImportInvalidType"));
+			result.addErrorMessageByKey("ErrImportInvalidType");
 			result.setFailure();
 			return result;
 		}
@@ -321,8 +325,7 @@ public class WbImport
 			File bf = new File(badFile);
 			if (multiFileImport && !bf.isDirectory())
 			{
-				result.addMessage(ResourceMgr.getString("ErrImportBadFileNoDir"));
-				result.setFailure();
+				result.addErrorMessageByKey("ErrImportBadFileNoDir");
 				return result;
 			}
 		}
@@ -403,20 +406,16 @@ public class WbImport
 			WbFile d = evaluateFileArgument(dir);
 			if (!d.exists())
 			{
-				String msg = ResourceMgr.getString("ErrImportSourceDirNotFound");
-				msg = StringUtil.replace(msg, "%dir%", dir);
+				String msg = ResourceMgr.getFormattedString("ErrImportSourceDirNotFound", dir);
 				LogMgr.logError("WbImport.execute()", msg, null);
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessage(msg);
 				return result;
 			}
 			if (!d.isDirectory())
 			{
-				String msg = ResourceMgr.getString("ErrImportNoDir");
-				msg = StringUtil.replace(msg, "%dir%", dir);
+				String msg = ResourceMgr.getFormattedString("ErrImportNoDir", dir);
 				LogMgr.logError("WbImport.execute()", msg, null);
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessage(msg);
 				return result;
 			}
 		}
@@ -462,8 +461,7 @@ public class WbImport
 			{
 				String msg = ResourceMgr.getString("ErrTextImportRequiresTableName");
 				LogMgr.logError("WbImport.execute()", msg, null);
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessage(msg);
 				return result;
 			}
 
@@ -471,8 +469,7 @@ public class WbImport
 			{
 				String msg = ResourceMgr.getString("ErrQuoteAlwaysEscape");
 				LogMgr.logError("WbImport.execute()", msg, null);
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessage(msg);
 				return result;
 			}
 
@@ -502,11 +499,10 @@ public class WbImport
 			String delimiter = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_DELIM));
 			if (cmdLine.isArgPresent(CommonArgs.ARG_DELIM) && StringUtil.isEmptyString(delimiter))
 			{
-				result.addMessageByKey("ErrImpDelimEmpty");
-				result.setFailure();
+				result.addErrorMessageByKey("ErrImpDelimEmpty");
 				return result;
 			}
-      
+
 			if (delimiter != null) textParser.setTextDelimiter(delimiter);
 
 			String quote = cmdLine.getValue(ARG_QUOTE);
@@ -563,8 +559,7 @@ public class WbImport
 				catch (MissingWidthDefinition e)
 				{
 					textParser.done();
-					result.addMessage(ResourceMgr.getFormattedString("ErrImpWrongWidth", e.getColumnName()));
-					result.setFailure();
+					result.addErrorMessageByKey("ErrImpWrongWidth", e.getColumnName());
 					return result;
 				}
 			}
@@ -573,8 +568,7 @@ public class WbImport
 			{
 				if (!imp.isModeInsert())
 				{
-					result.addMessage("COPY only possible with -mode=insert");
-					result.setFailure();
+					result.addErrorMessage("COPY only possible with -mode=insert");
 					return result;
 				}
 				PgCopyImporter pg = new PgCopyImporter(currentConnection);
@@ -618,10 +612,9 @@ public class WbImport
 					}
 					catch (Exception e)
 					{
-						result.setFailure();
 						String col = xmlParser.getMissingColumn();
 						String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", col, table);
-						result.addMessage(msg);
+						result.addErrorMessage(msg);
 						LogMgr.logError("WbImport.execute()", msg, null);
 						return result;
 					}
@@ -637,21 +630,19 @@ public class WbImport
 
 			if (type.startsWith("xls") && !PoiHelper.isPoiAvailable())
 			{
-				result.addMessage(ResourceMgr.getString("ErrNoXLS"));
-				result.setFailure();
+				result.addErrorMessageByKey("ErrNoXLS");
 				return result;
 			}
 
 			if ( (type.equals("xlsx") || (inputFile != null && inputFile.getExtension().equalsIgnoreCase("xlsx"))) && !PoiHelper.isXLSXAvailable())
 			{
-				result.addMessage(ResourceMgr.getString("ErrNoXLSX"));
+				result.addErrorMessageByKey("ErrNoXLSX");
 				return result;
 			}
 
 			if (type.equals("ods") && !OdfHelper.isSimpleODFAvailable())
 			{
-				result.addMessage(ResourceMgr.getString("ErrNoODS"));
-				result.setFailure();
+				result.addErrorMessageByKey("ErrNoODS");
 				return result;
 			}
 
@@ -659,8 +650,7 @@ public class WbImport
 			{
 				String msg = ResourceMgr.getString("ErrTextImportRequiresTableName");
 				LogMgr.logError("WbImport.execute()", msg, null);
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessage(msg);
 				return result;
 			}
 
@@ -738,8 +728,7 @@ public class WbImport
 		catch (Exception e)
 		{
 			LogMgr.logError("WbImport.execute()", "Error creating ValueConverter", e);
-			result.setFailure();
-			result.addMessage(e.getMessage());
+			result.addErrorMessage(e.getMessage());
 			return result;
 		}
 
@@ -763,8 +752,7 @@ public class WbImport
 		}
 		catch (NumberFormatException e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrImportWrongLimit"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrImportWrongLimit");
 			return result;
 		}
 
@@ -786,8 +774,7 @@ public class WbImport
 			catch (Exception e)
 			{
 				LogMgr.logError("WbImport.execute()", "Column constants could no be parsed", e);
-				result.setFailure();
-				result.addMessage(e.getMessage());
+				result.addErrorMessage(e.getMessage());
 				return result;
 			}
 		}
@@ -840,14 +827,9 @@ public class WbImport
 			// Logging already done.
 			result.setFailure();
 		}
-		catch (IOException | SQLException | ConverterException e)
-		{
-			LogMgr.logError("WbImport.execute()", "Error importing " + (inputFile == null ? dir : inputFile), e);
-			result.setFailure();
-		}
 		catch (Exception e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + inputFile +"': " + e.getMessage(), e);
+			LogMgr.logError("WbImport.execute()", "Error importing " + (inputFile == null ? dir : inputFile), e);
 			result.setFailure();
 			addErrorInfo(result, sqlCommand, e);
 		}

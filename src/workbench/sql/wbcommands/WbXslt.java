@@ -85,43 +85,37 @@ public class WbXslt
 
 		if (!cmdLine.hasArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrXsltWrongParameter"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrXsltWrongParameter");
 			return result;
 		}
 
 		if (inputFile == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrXsltMissingInputFile"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrXsltMissingInputFile");
 			return result;
 		}
 
 		if (!inputFile.exists())
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrFileNotFound", cmdLine.getValue(ARG_INPUT)));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrFileNotFound", cmdLine.getValue(ARG_INPUT));
 			return result;
 		}
 
 		if (outputFile == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrXsltMissingOutputFile"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrXsltMissingOutputFile");
 			return result;
 		}
 
 		if (xsltFile == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrXsltMissingStylesheet"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrXsltMissingStylesheet");
 			return result;
 		}
 
 		if (!xsltFile.exists())
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrFileNotFound", cmdLine.getValue(ARG_STYLESHEET)));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrFileNotFound", cmdLine.getValue(ARG_STYLESHEET));
 			return result;
 		}
 
@@ -158,7 +152,7 @@ public class WbXslt
 			LogMgr.logError("WbXslt.execute()", "Error when transforming '" + inputFile + "' to '" + outputFile + "' using " + xsltFile, e);
 			String msg = transformer.getAllOutputs(e);
 			LogMgr.logError("WbXslt.execute()", msg, null);
-			result.addMessage(msg);
+			result.addErrorMessage(msg);
 		}
 		return result;
 	}

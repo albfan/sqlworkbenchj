@@ -311,11 +311,21 @@ public class OraclePackageParser
 		List<String> params = new ArrayList<>();
 		SQLToken t = lexer.getNextToken(false, false);
 		boolean nextIsName = true;
+    int bracketCount = 0;
 		while (t != null)
 		{
+      if (t.getText().equals("("))
+      {
+        bracketCount ++;
+      }
+
 			if (t.getText().equals(")"))
 			{
-				break;
+        if (bracketCount == 0)
+        {
+          break;
+        }
+				bracketCount--;
 			}
 
 			if (nextIsName)

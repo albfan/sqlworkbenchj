@@ -166,7 +166,6 @@ public class WbCopy
 		{
 			result.addMessageNewLine();
 			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
-			result.setFailure();
 		}
 	}
 
@@ -203,15 +202,14 @@ public class WbCopy
 
 		if (StringUtil.isBlank(sourcetable) && StringUtil.isBlank(sourcequery) && StringUtil.isBlank(sourceSchema))
 		{
-			result.addMessageByKey("ErrCopyNoSourceSpecified");
+			result.addErrorMessageByKey("ErrCopyNoSourceSpecified");
 			addWrongParams(result);
 			return result;
 		}
 
 		if (StringUtil.isNonBlank(sourcetable) && StringUtil.isNonBlank(sourcequery))
 		{
-			result.addMessageByKey("ErrCopyTargetAndQuery");
-			result.setFailure();
+			result.addErrorMessageByKey("ErrCopyTargetAndQuery");
 			return result;
 		}
 
@@ -241,16 +239,14 @@ public class WbCopy
 			tablesToExport = sourceTables.getTables();
 			if (tablesToExport.isEmpty() && sourceTables.wasWildcardArgument())
 			{
-				result.addMessage(ResourceMgr.getFormattedString("ErrExportNoTablesFound", sourcetable));
-				result.setFailure();
+				result.addErrorMessageByKey("ErrExportNoTablesFound", sourcetable);
 				return result;
 			}
 		}
 		catch (SQLException e)
 		{
 			LogMgr.logError("WbExport.runTableExports()", "Could not retrieve table list", e);
-			result.addMessage(ExceptionUtil.getDisplay(e));
-			result.setFailure();
+			result.addErrorMessage(ExceptionUtil.getDisplay(e));
 			return result;
 		}
 
@@ -274,8 +270,7 @@ public class WbCopy
 		{
 			if (!copier.init(sourceCon, targetCon, result, cmdLine, rowMonitor))
 			{
-				result.addMessage(copier.getMessages());
-				result.setFailure();
+				result.addErrorMessage(copier.getMessages().toString());
 				return result;
 			}
 
@@ -296,8 +291,7 @@ public class WbCopy
 		catch (TableNotFoundException tnf)
 		{
 			String err = ResourceMgr.getFormattedString("ErrTargetTableNotFound", tnf.getTableName());
-			result.addMessage(err);
-			result.setFailure();
+			result.addErrorMessage(err);
 		}
 		catch (SQLException e)
 		{
@@ -306,13 +300,12 @@ public class WbCopy
 			if (msg.length() == 0)
 			{
 				String err = ResourceMgr.getFormattedString("ErrCopy", ExceptionUtil.getDisplay(e, false));
-				result.addMessage(err);
+				result.addErrorMessage(err);
 			}
 			else
 			{
-				result.addMessage(msg);
+				result.addErrorMessage(msg.toString());
 			}
-			result.setFailure();
 		}
 		catch (Exception e)
 		{

@@ -355,9 +355,8 @@ public class WbExport
 
 		if (type == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrExportTypeRequired"));
+			result.addErrorMessageByKey("ErrExportTypeRequired");
 			addWrongArgumentsMessage(result);
-			result.setFailure();
 			return result;
 		}
 
@@ -367,35 +366,31 @@ public class WbExport
 			boolean mergeAvailable = MergeGenerator.Factory.createGenerator(currentConnection) != null;
 			if (!mergeAvailable)
 			{
-				result.addMessage("MERGE not supported for: " + currentConnection.getMetadata().getProductName());
-				result.setFailure();
+				result.addErrorMessage("MERGE not supported for: " + currentConnection.getMetadata().getProductName());
 				return result;
 			}
 		}
 
 		if ((type.equals("xls") || type.equals("xlsx")) && !PoiHelper.isPoiAvailable())
 		{
-			result.addMessage(ResourceMgr.getString("ErrNoXLS"));
+			result.addErrorMessage(ResourceMgr.getString("ErrNoXLS"));
 			result.addMessage("");
 			result.addMessage(ResourceMgr.getString("ErrExportUseXLSM"));
-			result.setFailure();
 			return result;
 		}
 
 		if (type.equals("xlsx") && !PoiHelper.isXLSXAvailable())
 		{
-			result.addMessage(ResourceMgr.getString("ErrNoXLSX"));
+			result.addErrorMessage(ResourceMgr.getString("ErrNoXLSX"));
 			result.addMessage("");
 			result.addMessage(ResourceMgr.getString("ErrExportUseXLSM"));
-			result.setFailure();
 			return result;
 		}
 
 		if (!isTypeValid(type))
 		{
-			result.addMessage(ResourceMgr.getString("ErrExportWrongType"));
+			result.addErrorMessage(ResourceMgr.getString("ErrExportWrongType"));
 			addWrongArgumentsMessage(result);
-			result.setFailure();
 			return result;
 		}
 
@@ -421,16 +416,14 @@ public class WbExport
 
 		if (outputFile == null && outputdir == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrExportFileRequired"));
+			result.addErrorMessage(ResourceMgr.getString("ErrExportFileRequired"));
 			addWrongArgumentsMessage(result);
-			result.setFailure();
 			return result;
 		}
 
 		if (outputFile == null && outputdir != null && tables == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrExportNoTablesDef"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrExportNoTablesDef");
 			return result;
 		}
 
@@ -438,8 +431,7 @@ public class WbExport
 		boolean appendToFile = cmdLine.getBoolean(ARG_APPEND, false);
 		if (appendToFile && noAppendTypes.contains(type))
 		{
-			result.setFailure();
-			result.addMessage(ResourceMgr.getFormattedString("ErrNoAppend", type));
+			result.addErrorMessageByKey("ErrNoAppend", type);
 			return result;
 		}
 
@@ -551,8 +543,7 @@ public class WbExport
 			}
 			catch (WrongFormatFileException wf)
 			{
-				result.addMessage(ResourceMgr.getFormattedString("ErrExpWrongCtl", wf.getFormat()));
-				result.setFailure();
+				result.addErrorMessageByKey("ErrExpWrongCtl", wf.getFormat());
 				return result;
 			}
 
@@ -605,8 +596,7 @@ public class WbExport
 			QuoteEscapeType quoteEscaping = CommonArgs.getQuoteEscaping(cmdLine);
 			if (quoteEscaping != QuoteEscapeType.none && StringUtil.isBlank(quote))
 			{
-				result.addMessageByKey("ErrExpQuoteRequired");
-				result.setFailure();
+				result.addErrorMessageByKey("ErrExpQuoteRequired");
 				return result;
 			}
 			exporter.setQuoteEscaping(quoteEscaping);
@@ -770,8 +760,7 @@ public class WbExport
 				{
 					key = "ErrExportNoTablesFound";
 				}
-				result.addMessage(ResourceMgr.getFormattedString(key, tables));
-				result.setFailure();
+				result.addErrorMessageByKey(key, tables);
 				return result;
 			}
 			if (cmdLine.isArgPresent(ARG_SOURCETABLE))
@@ -792,8 +781,7 @@ public class WbExport
 		catch (SQLException e)
 		{
 			LogMgr.logError("WbExport.runTableExports()", "Could not retrieve table list", e);
-			result.addMessage(ExceptionUtil.getDisplay(e));
-			result.setFailure();
+			result.addErrorMessage(ExceptionUtil.getDisplay(e));
 			return result;
 		}
 
@@ -829,8 +817,7 @@ public class WbExport
 			{
 				if (!dir.mkdirs())
 				{
-					result.addMessage(ResourceMgr.getFormattedString("ErrCreateDir", dir.getFullPath()));
-					result.setFailure();
+					result.addErrorMessageByKey("ErrCreateDir", dir.getFullPath());
 					return result;
 				}
 				else
@@ -842,8 +829,7 @@ public class WbExport
 
 		if (outputdir != null && !outputdir.exists())
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrOutputDirNotFound", outputdir.getFullPath()));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrOutputDirNotFound", outputdir.getFullPath());
 			return result;
 		}
 
@@ -883,8 +869,7 @@ public class WbExport
 
 			if (!canWrite)
 			{
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessage(msg);
 				return result;
 			}
 		}
@@ -941,9 +926,9 @@ public class WbExport
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("WbExport.execute()", "Error when running table export", e);
-				addErrorInfo(result, sql, e);
 				result.setFailure();
+        LogMgr.logError("WbExport.execute()", "Error when running table export", e);
+				addErrorInfo(result, sql, e);
 			}
 		}
 		return result;
