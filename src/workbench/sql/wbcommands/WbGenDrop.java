@@ -89,13 +89,11 @@ public class WbGenDrop
 		if (cmdLine.hasUnknownArguments())
 		{
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrGenDropWrongParam"));
-			result.setFailure();
 			return result;
 		}
 		if (!cmdLine.hasArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrGenDropWrongParam"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrGenDropWrongParam");
 			return result;
 		}
 
@@ -104,8 +102,7 @@ public class WbGenDrop
 
 		if (tables.isEmpty())
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrExportNoTablesFound", cmdLine.getValue(PARAM_TABLES)));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrExportNoTablesFound", cmdLine.getValue(PARAM_TABLES));
 			return result;
 		}
 
@@ -139,8 +136,7 @@ public class WbGenDrop
 			WbFile dirFile = new WbFile(dir);
 			if (!dirFile.isDirectory())
 			{
-				result.addMessage(ResourceMgr.getFormattedString("ErrExportOutputDirNotDir", dir));
-				result.setFailure();
+				result.addErrorMessageByKey("ErrExportOutputDirNotDir", dir);
 				return result;
 			}
 
@@ -156,8 +152,7 @@ public class WbGenDrop
 				catch (IOException io)
 				{
 					result.addMessageByKey("ErrFileCreate");
-					result.addMessage(ExceptionUtil.getDisplay(io));
-					result.setFailure();
+					result.addErrorMessage(ExceptionUtil.getDisplay(io));
 					return result;
 				}
 			}
@@ -176,8 +171,7 @@ public class WbGenDrop
 			catch (IOException io)
 			{
 				result.addMessageByKey("ErrFileCreate");
-				result.addMessage(ExceptionUtil.getDisplay(io));
-				result.setFailure();
+				result.addErrorMessage(ExceptionUtil.getDisplay(io));
 			}
 		}
 		else

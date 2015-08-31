@@ -97,9 +97,8 @@ public class WbGrepSource
 		List<String> values = cmdLine.getListValue(PARAM_SEARCH_EXP);
 		if (CollectionUtil.isEmpty(values))
 		{
-			result.addMessage(ResourceMgr.getString("ErrScrSearchValueReq"));
-			result.addMessage(ResourceMgr.getString("ErrSrcSearchWrongParameters"));
-			result.setFailure();
+			result.addMessageByKey("ErrScrSearchValueReq");
+			result.addErrorMessageByKey("ErrSrcSearchWrongParameters");
 			return result;
 		}
 

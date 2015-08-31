@@ -79,14 +79,12 @@ public class WbGenInsert
 		if (cmdLine.hasUnknownArguments())
 		{
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrGenInsertWrongParam"));
-			result.setFailure();
 			return result;
 		}
 
 		if (!cmdLine.hasArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrGenInsertWrongParam"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrGenInsertWrongParam");
 			return result;
 		}
 
@@ -98,8 +96,7 @@ public class WbGenInsert
 
 		if (CollectionUtil.isEmpty(tables))
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", names));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrTableNotFound", names);
 			return result;
 		}
 

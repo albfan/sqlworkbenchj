@@ -32,11 +32,11 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
+import workbench.db.DropType;
 import workbench.db.TableIdentifier;
 import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
-import workbench.db.DropType;
 
 import workbench.storage.RowActionMonitor;
 
@@ -95,8 +95,7 @@ class TableCopy
 		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (!this.copier.setMode(mode))
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrImpInvalidMode", mode));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrImpInvalidMode", mode);
 			return false;
 		}
 
@@ -144,8 +143,7 @@ class TableCopy
 			{
 				if (queryCols.size() != cols.size())
 				{
-					result.addMessage("Columns in query does not match number of columns in -columns parameter");
-					result.setFailure();
+					result.addErrorMessage("Columns in query does not match number of columns in -columns parameter");
 					return false;
 				}
 				// when -columns=... is specified this can be used to rename the columns from the query

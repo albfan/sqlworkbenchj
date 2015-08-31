@@ -127,8 +127,7 @@ public class CommonDiffParameters
 		}
 		catch (Exception e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrDiffCouldNotConnect" + connType));
-			result.setFailure();
+			result.addErrorMessage(ResourceMgr.getString("ErrDiffCouldNotConnect" + connType));
 		}
 
 		return connection;

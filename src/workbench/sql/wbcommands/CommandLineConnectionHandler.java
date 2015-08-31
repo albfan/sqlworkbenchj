@@ -73,7 +73,6 @@ public class CommandLineConnectionHandler
 			{
 				LogMgr.logError("CommandLineConnectionHandler.getConnection()", "Error connecting to database", icd);
 				result.addErrorMessage(icd.getLocalizedMessage());
-				result.setFailure();
 				return null;
 			}
 			catch (Exception e)
@@ -103,9 +102,7 @@ public class CommandLineConnectionHandler
 			ConnectionProfile tprof = ConnectionMgr.getInstance().getProfile(profileKey);
 			if (tprof == null)
 			{
-				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", profileKey.toString());
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessageByKey("ErrProfileNotFound", profileKey.toString());
 				return null;
 			}
 
@@ -117,8 +114,7 @@ public class CommandLineConnectionHandler
 			{
 				LogMgr.logError("CommandLineConnectionHandler.getConnectionFromKey()", "Error connecting to database", e);
 				result.addMessage(ResourceMgr.getFormattedString("ErrConnectProfile", profileKey.toString()));
-				result.addMessage(ExceptionUtil.getDisplay(e));
-				result.setFailure();
+				result.addErrorMessage(ExceptionUtil.getDisplay(e));
 				return null;
 			}
 		}

@@ -130,8 +130,7 @@ public class WbDefineVar
 
 		if (file != null && contentFile != null)
 		{
-			result.addMessageByKey("ErrVarFileWrong");
-			result.setFailure();
+			result.addErrorMessageByKey("ErrVarFileWrong");
 			return result;
 		}
 
@@ -191,8 +190,7 @@ public class WbDefineVar
 
 		if (CollectionUtil.isEmpty(varNames))
 		{
-			result.addMessageByKey("ErrVarDefWrongParameter");
-			result.setFailure();
+			result.addErrorMessageByKey("ErrVarDefWrongParameter");
 			return result;
 		}
 
@@ -293,8 +291,7 @@ public class WbDefineVar
 			String err = ResourceMgr.getString("ErrReadingVarSql");
 			err = StringUtil.replace(err, "%sql%", valueSql);
 			err = err + "\n\n" + ExceptionUtil.getDisplay(e);
-			result.addMessage(err);
-			result.setFailure();
+			result.addErrorMessage(err);
 		}
 	}
 
@@ -316,8 +313,7 @@ public class WbDefineVar
 			else
 			{
 				String msg = ResourceMgr.getFormattedString("ErrFileNotFound", file.getFullPath());
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessage(msg);
 			}
 		}
 		catch (Exception e)
@@ -326,8 +322,7 @@ public class WbDefineVar
 			String msg = ResourceMgr.getString("ErrReadingVarDefFile");
 			msg = StringUtil.replace(msg, "%file%", file.getAbsolutePath());
 			msg = msg + " " + ExceptionUtil.getDisplay(e);
-			result.addMessage(msg);
-			result.setFailure();
+			result.addErrorMessage(msg);
 		}
 	}
 
@@ -339,8 +334,7 @@ public class WbDefineVar
 		}
 		catch (IllegalArgumentException e)
 		{
-			result.addMessageByKey("ErrVarDefWrongName");
-			result.setFailure();
+			result.addErrorMessageByKey("ErrVarDefWrongName");
 		}
 	}
 
@@ -435,13 +429,11 @@ public class WbDefineVar
 		catch (FileNotFoundException fnf)
 		{
 			LogMgr.logError("WbDefineVar.execute()", "Content file " + contentFile.getFullPath() + " not found!", fnf);
-			result.addMessage(ResourceMgr.getFormattedString("ErrFileNotFound", contentFile.getFullPath()));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrFileNotFound", contentFile.getFullPath());
 		}
 		catch (IOException io)
 		{
-			result.addMessage(ExceptionUtil.getDisplay(io));
-			result.setFailure();
+			result.addErrorMessage(ExceptionUtil.getDisplay(io));
 		}
 	}
 

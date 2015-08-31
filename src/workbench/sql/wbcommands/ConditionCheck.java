@@ -84,8 +84,7 @@ public class ConditionCheck
 		if (count <= 1) return true;
 
 		// more than one argument specified, this is not allowed
-		result.addMessage(ResourceMgr.getFormattedString("ErrCondTooMany", StringUtil.listToString(arguments, ',')));
-		result.setFailure();
+		result.addErrorMessageByKey("ErrCondTooMany", StringUtil.listToString(arguments, ','));
 		return false;
 	}
 

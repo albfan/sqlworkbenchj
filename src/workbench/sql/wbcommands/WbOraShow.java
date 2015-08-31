@@ -111,8 +111,7 @@ public class WbOraShow
 		SQLToken token = lexer.getNextToken(false, false);
 		if (token == null)
 		{
-			result.addMessage(getErrorMessage());
-			result.setFailure();
+			result.addErrorMessage(getErrorMessage());
 			return result;
 		}
 		String verb = token.getText().toLowerCase();
@@ -226,8 +225,7 @@ public class WbOraShow
     }
     catch (SQLException ex)
     {
-      result.setFailure();
-      result.addMessage(ex.getMessage());
+      result.addErrorMessage(ex.getMessage());
     }
     return result;
   }
@@ -262,8 +260,7 @@ public class WbOraShow
 		}
 		catch (SQLException ex)
 		{
-			result.setFailure();
-			result.addMessage(ex.getMessage());
+			result.addErrorMessage(ex.getMessage());
 		}
 		finally
 		{
@@ -359,8 +356,7 @@ public class WbOraShow
 		}
 		catch (SQLException ex)
 		{
-			result.setFailure();
-			result.addMessage(ex.getMessage());
+			result.addErrorMessage(ex.getMessage());
 		}
 		finally
 		{
@@ -438,8 +434,7 @@ public class WbOraShow
 		}
 		catch (SQLException ex)
 		{
-			result.setFailure();
-			result.addMessage(ex.getMessage());
+			result.addErrorMessage(ex.getMessage());
 		}
 		finally
 		{
@@ -520,8 +515,7 @@ public class WbOraShow
 		catch (SQLException ex)
 		{
 			LogMgr.logError("WbOraShow.getLogSource()", "Could not retrieve log information using: " + sql, ex);
-			result.setFailure();
-			result.addMessage(ex.getMessage());
+			result.addErrorMessage(ex.getMessage());
 		}
 		finally
 		{
@@ -569,8 +563,7 @@ public class WbOraShow
 		catch (SQLException ex)
 		{
 			LogMgr.logError("WbOraShow.getSGAInfo()", "Could not retrieve SGA info using: " + sql, ex);
-			result.setFailure();
-			result.addMessage(ex.getMessage());
+			result.addErrorMessage(ex.getMessage());
 		}
 		return result;
 	}

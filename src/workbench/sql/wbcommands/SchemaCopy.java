@@ -36,12 +36,12 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DbSettings;
+import workbench.db.DropType;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
-import workbench.db.datacopy.DataCopier;
-import workbench.db.DropType;
 import workbench.db.compare.TableDiffStatus;
+import workbench.db.datacopy.DataCopier;
 import workbench.db.importer.DataReceiver;
 import workbench.db.importer.TableDependencySorter;
 
@@ -453,8 +453,7 @@ class SchemaCopy
 		cmdLineMode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (!this.copier.setMode(cmdLineMode))
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrImpInvalidMode", cmdLineMode));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrImpInvalidMode", cmdLineMode);
 			return false;
 		}
 

@@ -322,7 +322,7 @@ public class SqlCommand
 	protected void setUnknownMessage(StatementRunnerResult result, ArgumentParser cmdline, String help)
 	{
 		if (!cmdLine.hasUnknownArguments()) return;
-    
+
 		StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
 		msg.append(' ');
 		msg.append(cmdLine.getUnknownArguments());
@@ -1061,8 +1061,7 @@ public class SqlCommand
 		catch (Throwable th)
 		{
 			LogMgr.logError("SqlCommand.addErrorPosition()", "Could not retrieve error position!", th);
-			result.addMessage(ExceptionUtil.getAllExceptions(e));
-			result.setFailure();
+			result.addErrorMessage(ExceptionUtil.getAllExceptions(e).toString());
 		}
 	}
 

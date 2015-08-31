@@ -25,7 +25,6 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -122,8 +121,7 @@ public class WbFeedback
 		}
 		else if (cmdLine.hasUnknownArguments())
 		{
-			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
+			result.addErrorMessageByKey("ErrFeedbackWrongParameter");
 		}
 		else
 		{

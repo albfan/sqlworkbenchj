@@ -127,8 +127,7 @@ public class WbDescribeObject
 		{
 			LogMgr.logError("WbDescribeObject.execute()", "Error getting object details", e);
 			StatementRunnerResult result = new StatementRunnerResult(sql);
-			result.setFailure();
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.addErrorMessage(ExceptionUtil.getDisplay(e));
 			return result;
 		}
 	}

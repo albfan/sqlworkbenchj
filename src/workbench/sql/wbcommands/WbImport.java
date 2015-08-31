@@ -208,7 +208,7 @@ public class WbImport
 		String msg = getWrongParamsMessage();
 		result.addMessageNewLine();
 		result.addMessage(msg);
-    
+
     // only set the failure indicator if it's not already set
     // to avoid overwriting an ErrorDescriptor that is already set
     if (result.isSuccess() || result.getErrorDescriptor() == null)
@@ -314,7 +314,6 @@ public class WbImport
 		if (!validTypes.contains(type))
 		{
 			result.addErrorMessageByKey("ErrImportInvalidType");
-			result.setFailure();
 			return result;
 		}
 
@@ -357,8 +356,7 @@ public class WbImport
 			String emptyValue = cmdLine.getValue(ARG_EMPTY_FILE);
 			LogMgr.logError("WbImport.execute()", "Invalid value '" + emptyValue + "' specified for parameter: " + ARG_EMPTY_FILE, iae);
 			String msg = ResourceMgr.getFormattedString("ErrInvalidArgValue", emptyValue, ARG_EMPTY_FILE);
-			result.addMessage(msg);
-			result.setFailure();
+			result.addErrorMessage(msg);
 			return result;
 		}
 

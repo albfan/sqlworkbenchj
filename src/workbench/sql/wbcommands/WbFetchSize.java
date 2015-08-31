@@ -70,8 +70,7 @@ public class WbFetchSize
 		}
 		catch (Exception e)
 		{
-			result.setFailure();
-			result.addMessage(ResourceMgr.getFormattedString("ErrInvalidNumber", value));
+			result.addErrorMessageByKey("ErrInvalidNumber", value);
 			return result;
 		}
 

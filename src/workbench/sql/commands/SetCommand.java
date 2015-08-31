@@ -41,11 +41,12 @@ import workbench.sql.StatementRunnerResult;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
-import static workbench.sql.wbcommands.WbEnableOraOutput.HIDE_HINT;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
+
+import static workbench.sql.wbcommands.WbEnableOraOutput.*;
 
 /**
  * This class implements a wrapper for the SET command.
@@ -102,8 +103,7 @@ public class SetCommand
 		catch (Exception e)
 		{
 			LogMgr.logError("SetCommand.execute()", "Could not parse statement", e);
-			result.setFailure();
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.addErrorMessage(ExceptionUtil.getDisplay(e));
 			return result;
 		}
 
@@ -134,8 +134,7 @@ public class SetCommand
 				}
 				catch (Exception e)
 				{
-					result.setFailure();
-					result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
+					result.addErrorMessageByKey("MsgSetFailure", param, command);
 				}
 			}
 			else if (command.equalsIgnoreCase("timeout"))
@@ -151,8 +150,7 @@ public class SetCommand
 				}
 				catch (Exception e)
 				{
-					result.setFailure();
-					result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
+					result.addErrorMessageByKey("MsgSetFailure", param, command);
 				}
 			}
 			else if ((command.equalsIgnoreCase("schema") || command.equalsIgnoreCase("search_path")) && canChangeSchema())
@@ -248,8 +246,7 @@ public class SetCommand
 			else
 			{
 				// for other DBMS this is an error
-				result.setFailure();
-				result.addMessage(e.getMessage());
+				result.addErrorMessage(e.getMessage());
 			}
 		}
 		finally
@@ -367,8 +364,7 @@ public class SetCommand
 		}
 		else
 		{
-			result.addMessageByKey("MsgAutoTraceUsage");
-			result.setFailure();
+			result.addErrorMessageByKey("MsgAutoTraceUsage");
 		}
 		return result;
 	}
@@ -406,8 +402,7 @@ public class SetCommand
 		}
 		else
 		{
-			result.setFailure();
-			result.addMessageByKey("ErrServeroutputWrongParameter");
+			result.addErrorMessageByKey("ErrServeroutputWrongParameter");
 		}
 		return result;
 	}
@@ -418,8 +413,7 @@ public class SetCommand
 
 		if (StringUtil.isEmptyString(param))
 		{
-			result.setFailure();
-			result.addMessageByKey("ErrAutocommitWrongParameter");
+			result.addErrorMessageByKey("ErrAutocommitWrongParameter");
 			return result;
 		}
 
@@ -442,14 +436,12 @@ public class SetCommand
 			}
 			else
 			{
-				result.addMessageByKey("ErrAutocommitWrongParameter");
-				result.setFailure();
+				result.addErrorMessageByKey("ErrAutocommitWrongParameter");
 			}
 		}
 		catch (SQLException e)
 		{
-			result.setFailure();
-			result.addMessage(e.getMessage());
+			result.addErrorMessage(e.getMessage());
 		}
 		return result;
 	}
@@ -459,8 +451,7 @@ public class SetCommand
 		StatementRunnerResult result = new StatementRunnerResult();
 		if (StringUtil.isEmptyString(param))
 		{
-			result.setFailure();
-			result.addMessageByKey("ErrFeedbackWrongParameter");
+			result.addErrorMessageByKey("ErrFeedbackWrongParameter");
 			return result;
 		}
 
@@ -481,8 +472,7 @@ public class SetCommand
 		}
 		else
 		{
-			result.addMessageByKey("ErrFeedbackWrongParameter");
-			result.setFailure();
+			result.addErrorMessageByKey("ErrFeedbackWrongParameter");
 		}
 
 		return result;

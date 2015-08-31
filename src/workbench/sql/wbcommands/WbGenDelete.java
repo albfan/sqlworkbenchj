@@ -95,14 +95,12 @@ public class WbGenDelete
 		if (cmdLine.hasUnknownArguments())
 		{
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrGenDeleteWrongParam"));
-			result.setFailure();
 			return result;
 		}
 
 		if (!cmdLine.hasArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrGenDropWrongParam"));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrGenDropWrongParam");
 			return result;
 		}
 
@@ -111,8 +109,7 @@ public class WbGenDelete
 
 		if (table == null)
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", tname));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrTableNotFound", tname);
 			return result;
 		}
 
@@ -130,8 +127,7 @@ public class WbGenDelete
 			}
 			else
 			{
-				result.addMessage("Illegal column specification: " + def);
-				result.setFailure();
+				result.addErrorMessage("Illegal column specification: " + def);
 				return result;
 			}
 		}
@@ -173,8 +169,7 @@ public class WbGenDelete
 			catch (IOException io)
 			{
 				result.addMessageByKey("ErrFileCreate");
-				result.addMessage(ExceptionUtil.getDisplay(io));
-				result.setFailure();
+				result.addErrorMessage(ExceptionUtil.getDisplay(io).toString());
 			}
 		}
 		else

@@ -82,8 +82,7 @@ public class UseCommand
 		catch (Exception e)
 		{
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
-			result.addMessage(ExceptionUtil.getAllExceptions(e));
-			result.setFailure();
+			result.addErrorMessage(ExceptionUtil.getAllExceptions(e).toString());
 		}
 		finally
 		{

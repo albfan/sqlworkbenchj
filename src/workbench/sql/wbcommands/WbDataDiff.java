@@ -185,8 +185,7 @@ public class WbDataDiff
 
 		if (cmdLine.getArgumentCount() == 0)
 		{
-			result.addMessage(getWrongArgumentsMessage());
-			result.setFailure();
+			result.addErrorMessage(getWrongArgumentsMessage());
 			return result;
 		}
 
@@ -234,7 +233,6 @@ public class WbDataDiff
 		if (!outputDir.exists())
 		{
 			result.addErrorMessageByKey("ErrOutputDirNotFound", outputDir.getFullPath());
-			result.setFailure();
 			return result;
 		}
 
@@ -465,7 +463,7 @@ public class WbDataDiff
 		Writer out = null;
 		String nl = Settings.getInstance().getExternalEditorLineEnding();
 		int tableCount = mapping.referenceTables.size();
-    
+
 		try
 		{
 			out = EncodingUtil.createWriter(mainScript, encoding, false);

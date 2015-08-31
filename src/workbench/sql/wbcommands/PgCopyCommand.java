@@ -104,7 +104,6 @@ public class PgCopyCommand
     {
       runner.rollbackSavepoint();
       addErrorInfo(result, copy, ex);
-      result.setFailure();
       LogMgr.logUserSqlError("UpdatingCommnad.execute()", copy, ex);
     }
     return result;

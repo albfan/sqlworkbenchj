@@ -222,8 +222,7 @@ public class WbCall
 				boolean ok = parameterPrompter.showParameterDialog(input, namesAvailable);
 				if (!ok)
 				{
-					result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
-					result.setFailure();
+					result.addErrorMessageByKey("MsgStatementCancelled");
 					return result;
 				}
 

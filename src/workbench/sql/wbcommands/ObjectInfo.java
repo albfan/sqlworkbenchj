@@ -215,9 +215,8 @@ public class ObjectInfo
 		if (toDescribe == null)
 		{
 			// No table, view, procedure, trigger or something similar found
-			result.setFailure();
 			String msg = ResourceMgr.getFormattedString("ErrTableOrViewNotFound", objectName);
-			result.addMessage(msg);
+			result.addErrorMessage(msg);
 			return result;
 		}
 

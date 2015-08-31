@@ -84,7 +84,7 @@ public class UpdatingCommand
 		LobFileStatement lob = null;
 
     result.ignoreUpdateCounts(currentConnection.getDbSettings().verbsWithoutUpdateCount().contains(verb));
-    
+
 		try
 		{
 			boolean isPrepared = false;
@@ -97,8 +97,7 @@ public class UpdatingCommand
 				}
 				catch (FileNotFoundException e)
 				{
-					result.addMessage(e.getMessage());
-					result.setFailure();
+					result.addErrorMessage(e.getMessage());
 					return result;
 				}
 			}

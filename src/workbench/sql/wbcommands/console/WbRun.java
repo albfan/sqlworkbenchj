@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.WbManager;
-import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
@@ -78,8 +77,7 @@ public class WbRun
 		String clean = getCommandLine(sql);
 		if (StringUtil.isBlank(clean))
 		{
-			result.setFailure();
-			result.addMessageByKey("ErrFileNameRqd");
+			result.addErrorMessageByKey("ErrFileNameRqd");
 			return result;
 		}
 
@@ -92,9 +90,7 @@ public class WbRun
 
 		if (StringUtil.isEmptyString(clean) || !file.exists())
 		{
-			result.setFailure();
-			String msg = ResourceMgr.getFormattedString("ErrFileNotFound", file.getFullPath());
-			result.addMessage(msg);
+			result.addErrorMessageByKey("ErrFileNotFound", file.getFullPath());
 			return result;
 		}
 
@@ -137,7 +133,7 @@ public class WbRun
 			}
 			else
 			{
-				result.setFailure();
+				result.setFailure(batchRunner.getLastError());
 			}
 
 			List<DataStore> queryResults = batchRunner.getQueryResults();
@@ -153,8 +149,7 @@ public class WbRun
 		}
 		catch (Exception th)
 		{
-			result.setFailure();
-			result.addMessage(ExceptionUtil.getDisplay(th));
+			result.addErrorMessage(ExceptionUtil.getDisplay(th));
 		}
 		return result;
 	}

@@ -516,8 +516,7 @@ public class WbExport
 		{
 			String types = StringUtil.listToString(BlobMode.getTypes(), ',');
 			String msg = ResourceMgr.getFormattedString("ErrExportInvalidBlobType", bmode, types);
-			result.addMessage(msg);
-			result.setFailure();
+			result.addErrorMessage(msg);
 			return result;
 		}
 
@@ -926,7 +925,6 @@ public class WbExport
 			}
 			catch (Exception e)
 			{
-				result.setFailure();
         LogMgr.logError("WbExport.execute()", "Error when running table export", e);
 				addErrorInfo(result, sql, e);
 			}
@@ -1015,24 +1013,19 @@ public class WbExport
 			// when more than one table is selected or no outputfile is specified then we require an output directory
 			if (outdir == null)
 			{
-				result.setFailure();
-				result.addMessage(ResourceMgr.getString("ErrExportOutputDirRequired"));
+				result.addErrorMessageByKey("ErrExportOutputDirRequired");
 				return;
 			}
 
 			if (outdir == null || !outdir.exists())
 			{
-				String msg = ResourceMgr.getFormattedString("ErrOutputDirNotFound", outdir.getAbsolutePath());
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessageByKey("ErrOutputDirNotFound", outdir.getAbsolutePath());
 				return;
 			}
 
 			if (!outdir.isDirectory())
 			{
-				String msg = ResourceMgr.getFormattedString("ErrExportOutputDirNotDir", outdir.getAbsolutePath());
-				result.addMessage(msg);
-				result.setFailure();
+				result.addErrorMessageByKey("ErrExportOutputDirNotDir", outdir.getAbsolutePath());
 				return;
 			}
 		}
@@ -1166,9 +1159,8 @@ public class WbExport
 		}
 		catch (Exception e)
 		{
-			toConsume.setFailure();
 			toConsume.addMessage(ResourceMgr.getString("ErrExportExecute"));
-			toConsume.addMessage(ExceptionUtil.getAllExceptions(e));
+			toConsume.addErrorMessage(ExceptionUtil.getAllExceptions(e).toString());
 			LogMgr.logError("WbExportCommand.consumeResult()", "Error exporting data", e);
 		}
 		finally

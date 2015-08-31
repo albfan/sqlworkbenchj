@@ -121,7 +121,6 @@ public class WbGrepData
 		if (cmdLine.hasUnknownArguments())
 		{
 			setUnknownMessage(searchResult, cmdLine, ResourceMgr.getString("ErrDataSearchWrongParms"));
-			searchResult.setFailure();
 			return searchResult;
 		}
 
@@ -198,9 +197,8 @@ public class WbGrepData
 
 		if (needSearchValue && StringUtil.isBlank(searchValue))
 		{
-			searchResult.addMessage(ResourceMgr.getString("ErrDataSearchValueReq"));
-			searchResult.addMessage(ResourceMgr.getString("ErrDataSearchWrongParms"));
-			searchResult.setFailure();
+			searchResult.addMessageByKey("ErrDataSearchValueReq");
+			searchResult.addErrorMessageByKey("ErrDataSearchWrongParms");
 			return searchResult;
 		}
 
@@ -216,8 +214,7 @@ public class WbGrepData
 			boolean goOn = controller.confirmExecution(ResourceMgr.getString("MsgTableSearchBuffered"), null, null);
 			if (!goOn)
 			{
-				searchResult.setFailure();
-				searchResult.addMessageByKey("MsgStatementCancelled");
+				searchResult.addErrorMessageByKey("MsgStatementCancelled");
 				return searchResult;
 			}
 		}

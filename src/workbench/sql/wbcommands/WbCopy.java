@@ -195,8 +195,7 @@ public class WbCopy
 		boolean doSyncDelete = cmdLine.getBoolean(PARAM_DELETE_SYNC, false);
 		if (doSyncDelete && StringUtil.isNonBlank(sourcequery))
 		{
-			result.addMessageByKey("ErrCopySyncNoQuery");
-			result.setFailure();
+			result.addErrorMessageByKey("ErrCopySyncNoQuery");
 			return result;
 		}
 

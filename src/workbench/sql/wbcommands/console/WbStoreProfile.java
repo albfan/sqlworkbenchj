@@ -86,15 +86,13 @@ public class WbStoreProfile
 
 		if (this.currentConnection == null)
 		{
-			result.addMessageByKey("TxtNotConnected");
-			result.setFailure();
+			result.addErrorMessageByKey("TxtNotConnected");
 			return result;
 		}
 
 		if (StringUtil.isBlank(name))
 		{
-			result.addMessageByKey("ErrNoProfile");
-			result.setFailure();
+			result.addErrorMessageByKey("ErrNoProfile");
 			return result;
 		}
 
