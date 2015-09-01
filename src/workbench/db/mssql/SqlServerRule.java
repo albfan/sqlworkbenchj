@@ -146,4 +146,10 @@ public class SqlServerRule
 		remarks = cmt;
 	}
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

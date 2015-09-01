@@ -195,4 +195,10 @@ public class BaseObjectType
 		return false;
 	}
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

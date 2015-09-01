@@ -239,4 +239,10 @@ public class DomainIdentifier
 		return false;
 	}
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

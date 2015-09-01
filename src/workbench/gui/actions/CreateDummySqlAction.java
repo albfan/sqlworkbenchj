@@ -93,11 +93,11 @@ public class CreateDummySqlAction
 	{
 		super();
 		isConfigurable = false;
-		this.initMenuDefinition(key);
-		this.source = client;
-		this.scriptType = type;
+		initMenuDefinition(key);
+		source = client;
+		scriptType = type;
     selection = list;
-		setEnabled(client.getSelectionCount() > 0);
+		checkEnabled();
 		selection.addSelectionListener(this);
 	}
 
@@ -163,7 +163,28 @@ public class CreateDummySqlAction
   @Override
   public void selectionChanged(WbSelectionModel source)
   {
-		setEnabled(source.getSelectionCount() > 0);
+		checkEnabled();
+  }
+
+  private void checkEnabled()
+  {
+    if (selection.hasSelection())
+    {
+      List<? extends DbObject> objects = source.getSelectedObjects();
+      for (DbObject dbo : objects)
+      {
+        if (!(dbo instanceof TableIdentifier))
+        {
+          setEnabled(false);
+          return;
+        }
+      }
+      setEnabled(true);
+    }
+    else
+    {
+      setEnabled(false);
+    }
   }
 
 }

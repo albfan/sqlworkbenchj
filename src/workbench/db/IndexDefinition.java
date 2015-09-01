@@ -503,4 +503,10 @@ public class IndexDefinition
     return true;
   }
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

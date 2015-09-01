@@ -1002,5 +1002,10 @@ public class ColumnIdentifier
 		Collections.sort(columnList, c);
 	}
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
 
 }

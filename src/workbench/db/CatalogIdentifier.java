@@ -155,5 +155,10 @@ public class CatalogIdentifier
     return catalogName;
   }
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return false;
+  }
 
 }

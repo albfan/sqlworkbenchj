@@ -300,4 +300,10 @@ public class SequenceDefinition
 		return getSequenceName();
 	}
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

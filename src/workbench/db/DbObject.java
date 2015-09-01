@@ -52,7 +52,7 @@ public interface DbObject
 
 	/**
 	 * Return the name of the object to be used in SQL Statements.
-   * 
+   *
 	 * This will consider quoting of special characters if necessary.
 	 *
 	 * @param conn The connection for which the correct name should be returned
@@ -118,4 +118,6 @@ public interface DbObject
 	void setComment(String cmt);
 
 	String getDropStatement(WbConnection con, boolean cascade);
+
+  boolean supportsGetSource();
 }

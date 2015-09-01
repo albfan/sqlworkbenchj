@@ -59,16 +59,14 @@ public class ScriptDbObjectAction
 		this.initMenuDefinition(labelKey);
 		this.source = client;
 		this.selection = list;
-		setEnabled(source.getSelectionCount() > 0);
+		checkEnabled();
 		setIcon("script");
-		list.addSelectionListener(this);
 	}
 
   @Override
   public void dispose()
   {
     super.dispose();
-    if (selection != null) selection.removeSelectionListener(this);
   }
 
   /**
@@ -96,10 +94,30 @@ public class ScriptDbObjectAction
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}
 
+  private void checkEnabled()
+  {
+    if (selection.hasSelection())
+    {
+      List<? extends DbObject> objects = source.getSelectedObjects();
+      for (DbObject dbo : objects)
+      {
+        if (!dbo.supportsGetSource())
+        {
+          setEnabled(false);
+          return;
+        }
+      }
+      setEnabled(true);
+    }
+    else
+    {
+      setEnabled(false);
+    }
+  }
+
   @Override
   public void selectionChanged(WbSelectionModel source)
   {
-    setEnabled(source.getSelectionCount() > 0);
+    checkEnabled();
   }
-
 }

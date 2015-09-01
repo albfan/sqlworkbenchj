@@ -171,14 +171,7 @@ public class DbObjectSourcePanel
 	{
 		if (initialized) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_initGui();
-			}
-		});
+		WbSwingUtilities.invoke(this::_initGui);
 	}
 
 	private void _initGui()
@@ -279,14 +272,10 @@ public class DbObjectSourcePanel
 
 				// Allow the selection change to finish so that
 				// we have the correct table name in the instance variables
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						editText(panelIndex);
-					}
-				});
+				EventQueue.invokeLater(() ->
+        {
+          editText(panelIndex);
+        });
 			}
 			catch (Exception ex)
 			{

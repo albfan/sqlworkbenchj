@@ -166,4 +166,11 @@ public class DummySelect
 			return sql.toString();
 		}
 	}
+
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

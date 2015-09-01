@@ -152,7 +152,7 @@ public class TriggerDefinition
     {
       ddl = ddl.replace(PLACEHOLDER_TRIGGER_SCHEMA, schema);
     }
-    
+
     if (catalog != null)
     {
       ddl = ddl.replace(PLACEHOLDER_TRIGGER_CATALOG, catalog);
@@ -244,5 +244,11 @@ public class TriggerDefinition
 	{
 		return triggerName;
 	}
+
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
 
 }

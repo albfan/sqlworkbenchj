@@ -129,4 +129,11 @@ public class DerbyTypeDefinition
 	{
 		return null;
 	}
+
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

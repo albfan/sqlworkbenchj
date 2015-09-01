@@ -154,4 +154,11 @@ public class EnumIdentifier
 		}
 		return false;
 	}
+
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

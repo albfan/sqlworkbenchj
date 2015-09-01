@@ -20,12 +20,14 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.awt.Window;
+import java.util.List;
 
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import workbench.db.DbObject;
 import workbench.interfaces.WbSelectionModel;
 import workbench.resource.ResourceMgr;
 
@@ -125,8 +127,16 @@ class ContextMenuFactory
     if (window instanceof MainWindow)
     {
       EditorTabSelectMenu editMenu = new EditorTabSelectMenu(ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", (MainWindow)window, false);
-      editMenu.setEnabled(selection.getSelectionCount() == 1);
       EditAction edit = new EditAction(dbTree);
+      List<DbObject> selectedObjects = dbTree.getSelectedObjects();
+      if (selectedObjects.size() == 1)
+      {
+        editMenu.setEnabled(selectedObjects.get(0).supportsGetSource());
+      }
+      else
+      {
+        editMenu.setEnabled(false);
+      }
       editMenu.setActionListener(edit);
       menu.add(editMenu);
     }

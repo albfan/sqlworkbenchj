@@ -1023,4 +1023,11 @@ public class TableIdentifier
 		String expr2 = tbl2.getTableExpression(con);
 		return expr1.equalsIgnoreCase(expr2);
 	}
+
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

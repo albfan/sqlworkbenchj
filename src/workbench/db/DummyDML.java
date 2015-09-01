@@ -213,4 +213,11 @@ public class DummyDML
 		}
     return sql;
   }
+
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

@@ -107,4 +107,11 @@ public class PackageDefinition
   {
     return Collections.emptyList();
   }
+
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

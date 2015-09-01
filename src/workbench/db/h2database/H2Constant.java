@@ -151,4 +151,10 @@ public class H2Constant
 		remarks = cmt;
 	}
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }

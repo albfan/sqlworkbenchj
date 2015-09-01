@@ -198,6 +198,12 @@ public class ProcedureDefinition
 		comment = cmt;
 	}
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 	public void setParameters(List<ColumnIdentifier> procParams)
 	{
 		synchronized (this)
@@ -751,7 +757,6 @@ public class ProcedureDefinition
 		}
 		return false;
 	}
-
 	private static enum ProcType
 		implements Serializable
 	{

@@ -179,4 +179,10 @@ public class PostgresRule
 		remarks = cmt;
 	}
 
+  @Override
+  public boolean supportsGetSource()
+  {
+    return true;
+  }
+
 }
