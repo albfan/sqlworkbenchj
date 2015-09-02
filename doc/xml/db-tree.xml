@@ -50,15 +50,16 @@
     </section>
   </section>
 
-  <section id="db-tree-find-in-tree">
+  <section id="dbtree-find-in-tree">
     <title>Finding elements in the tree</title>
     <para>
       When the object tree is displayed, the context menu of the editor contains a new item <menuchoice><guimenuitem>Find in object tree</guimenuitem></menuchoice>.
-      This will try to find and select the identifier at the cursor location in the Object Tree. If the schema (or catalog) that contains the object
-      has not yet been loaded, it will be loaded in order to be able to display the current identifier.
+      This will try to find and select the identifier at the cursor location in the Object Tree.
+    </para>
+    <para>
+      If the schema (or catalog) that contains the object has not yet been loaded, it will be loaded in order to be able to display the current identifier.
     </para>
   </section>
-
 
   <section id="db-tree-context-menu">
     <title>Features available through the context menu</title>
@@ -71,6 +72,16 @@
 				<para>
           This exports the data from the selected table(s). This is identical to the function <link linkend="dbexplorer-spool">in the DbExplorer</link>.
 				</para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-find-reference">
+			<title>Find in object tree</title>
+			<blockquote>
+				<para>
+          This menu choice is only available when right clicking on a table in the "References" or "Referenced by" nodes. It will then
+          find and select the referenced (or referencing) table in the DbTree.
+        </para>
 			</blockquote>
 		</simplesect>
 

@@ -357,7 +357,7 @@ public class Log4JLogger
 	}
 
 	@Override
-	public void setOutputFile(File logfile, int maxFilesize)
+	public void setOutputFile(File logfile, int maxFilesize, int maxBackups)
 	{
 		Logger log = getLogger(getClass());
 		log.info("=================== Log started ===================");

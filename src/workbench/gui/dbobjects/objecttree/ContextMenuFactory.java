@@ -77,6 +77,20 @@ class ContextMenuFactory
     menu.add(reload);
     menu.addSeparator();
 
+    int count = dbTree.getSelectionCount();
+    if (count == 1)
+    {
+      ObjectTreeNode selectedNode = dbTree.getSelectedNode();
+      if (selectedNode.isFKTable())
+      {
+        FindObjectAction find = new FindObjectAction(null);
+        find.setFinder(dbTree);
+        find.setTargetTable((TableIdentifier)selectedNode.getDbObject());
+        menu.add(find);
+        menu.addSeparator();
+      }
+    }
+
     SpoolDataAction export = new SpoolDataAction(dbTree);
     menu.add(export);
 
@@ -94,6 +108,8 @@ class ContextMenuFactory
     ShowRowCountAction showCount = new ShowRowCountAction(dbTree, dbTree, dbTree.getStatusBar());
     menu.add(showCount);
 
+    menu.addSeparator();
+
     Window window = SwingUtilities.getWindowAncestor(dbTree);
     if (window instanceof MainWindow)
     {
@@ -103,26 +119,10 @@ class ContextMenuFactory
       menu.add(showSelect);
 		}
 
-    menu.addSeparator();
-
-    int count = dbTree.getSelectionCount();
-    if (count == 1)
-    {
-      ObjectTreeNode selectedNode = dbTree.getSelectedNode();
-      if (selectedNode.isFKTable())
-      {
-        FindObjectAction find = new FindObjectAction(null);
-        find.setFinder(dbTree);
-        find.setTargetTable((TableIdentifier)selectedNode.getDbObject());
-        menu.add(find);
-        menu.addSeparator();
-      }
-    }
-
     menu.add(CreateDummySqlAction.createDummyInsertAction(dbTree, selection));
 		menu.add(CreateDummySqlAction.createDummyUpdateAction(dbTree, selection));
 		menu.add(CreateDummySqlAction.createDummySelectAction(dbTree, selection));
-
+    menu.addSeparator();
 
     if (window instanceof MainWindow)
     {

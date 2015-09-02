@@ -423,7 +423,9 @@ public class Settings
 			}
 
 			int maxSize = this.getMaxLogfileSize();
-			LogMgr.setOutputFile(logfile, maxSize);
+      int backups = getLogfileBackupCount();
+			LogMgr.setOutputFile(logfile, maxSize, backups);
+
 			if (configuredFile != null)
 			{
 				LogMgr.logWarning("Settings.initLogging()", "Could not write requested logfile '" + configuredFile + "'");
@@ -2805,12 +2807,17 @@ public class Settings
 	 * Return the maximum size of the log file (when using the built-in logging)
 	 * If this size is exceeded a new log file is created
 	 * <br/>
-	 * The default max. size is 10MB
+	 * The default max. size is 2MB
 	 * @see workbench.log.SimpleLogger#setOutputFile(java.io.File, int)
 	 */
 	public int getMaxLogfileSize()
 	{
-		return this.getIntProperty("workbench.log.maxfilesize", 10 * 1024 * 1024);
+		return this.getIntProperty("workbench.log.maxfilesize", 2 * 1024 * 1024);
+	}
+
+	public int getLogfileBackupCount()
+	{
+		return this.getIntProperty("workbench.log.backup.count", 5);
 	}
 
 	public boolean getDelimiterDefaultSingleLine()

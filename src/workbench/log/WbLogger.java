@@ -41,7 +41,7 @@ public interface WbLogger
 
 	void logToSystemError(boolean flag);
 
-	void setOutputFile(File logfile, int maxFilesize);
+	void setOutputFile(File logfile, int maxFilesize, int maxBackups);
 
 	File getCurrentFile();
 

@@ -28,6 +28,7 @@ import java.io.PrintStream;
 import java.util.MissingFormatArgumentException;
 
 import workbench.util.ExceptionUtil;
+import workbench.util.FileVersioner;
 import workbench.util.StringUtil;
 
 /**
@@ -84,7 +85,7 @@ public class SimpleLogger
 	}
 
 	@Override
-	public void setOutputFile(File logfile, int maxFilesize)
+	public void setOutputFile(File logfile, int maxFilesize, int maxBackups)
 	{
 		if (logfile == null)
 		{
@@ -107,12 +108,8 @@ public class SimpleLogger
 
 			if (logfile.exists() && logfile.length() > maxFilesize)
 			{
-				File last = new File(logfile.getAbsolutePath() + ".last");
-				if (last.exists())
-				{
-					last.delete();
-				}
-				logfile.renameTo(last);
+        FileVersioner fv = new FileVersioner(maxBackups);
+        fv.createBackup(logfile);
 			}
 			logOut = new PrintStream(new FileOutputStream(logfile, true), true, LogMgr.DEFAULT_ENCODING);
 			currentFile = logfile;

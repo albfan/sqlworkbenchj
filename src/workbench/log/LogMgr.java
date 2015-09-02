@@ -97,9 +97,9 @@ public class LogMgr
 		getLogger().shutdownWbLog();
 	}
 
-	public static void setOutputFile(File logfile, int maxFilesize)
+	public static void setOutputFile(File logfile, int maxFilesize, int maxBackups)
 	{
-		getLogger().setOutputFile(logfile, maxFilesize);
+		getLogger().setOutputFile(logfile, maxFilesize, maxBackups);
 	}
 
 	public static boolean isInfoEnabled()
