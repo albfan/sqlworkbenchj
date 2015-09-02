@@ -860,14 +860,20 @@ public class TableIdentifier
 		}
 		else
 		{
-			result = this.getTableName().equalsIgnoreCase(other.getTableName());
+      // if both identifiers have neverAdjustCase set this means
+      // the names were retrieved directly through the JDBC driver
+      // in that case the comparison should be done in case-senstive
+      // to deal with situations where there is e.g. a table "PERSON" and a table "Person".
+      boolean ignoreCase = !(this.neverAdjustCase && other.neverAdjustCase);
+
+      result = StringUtil.equalStringOrEmpty(tablename, other.tablename, ignoreCase);
 			if (result && this.schema != null && other.schema != null)
 			{
-				result = this.schema.equalsIgnoreCase(other.schema);
+				result = StringUtil.equalStringOrEmpty(schema, other.schema, ignoreCase);
 			}
 			if (result && this.catalog != null && other.catalog != null)
 			{
-				result = this.catalog.equalsIgnoreCase(other.catalog);
+				result = StringUtil.equalStringOrEmpty(this.catalog, other.catalog, ignoreCase);
 			}
 		}
 		return result;
