@@ -281,32 +281,30 @@ public class ObjectTreeNode
       return getColumnTooltip((ColumnIdentifier)dbo);
     }
     String remarks = dbo.getComment();
-    if (StringUtil.isEmptyString(remarks))
+    if (StringUtil.isNonBlank(remarks))
     {
-      return dbo.getObjectType();
+      return remarks;
     }
-    return remarks;
+    return null;
   }
 
   private String getColumnTooltip(ColumnIdentifier col)
   {
-    String tip;
-    if (col.isNullable())
+    String defaultValue = null;
+    if (StringUtil.isNonBlank(col.getDefaultValue()))
     {
-      tip = "NULLABLE";
+      defaultValue = "DEFAULT " + col.getDefaultValue();
+    }
+    String comment = col.getComment();
+    String tip = null;
+
+    if (StringUtil.isNonEmpty(comment))
+    {
+      tip = "<html>" + (defaultValue == null ? "" : defaultValue + "<br>") + comment + "</html>";
     }
     else
     {
-      tip = "NOT NULL";
-    }
-    if (StringUtil.isNonBlank(col.getDefaultValue()))
-    {
-      tip += " DEFAULT " + col.getDefaultValue();
-    }
-    String comment = col.getComment();
-    if (StringUtil.isNonEmpty(comment))
-    {
-      tip = "<html>" + tip + "<br>" + comment + "</html>";
+      tip = defaultValue;
     }
     return tip;
   }
