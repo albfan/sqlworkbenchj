@@ -82,6 +82,7 @@ public class SettingsPanel
 		// when changing the order of pages
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
+		pages.add(new OptionPanelPage("SqlExecOptionsPanel", "LblSqlExecOptions"));
 		pages.add(new OptionPanelPage("MacroOptionsPanel", "LblMacros"));
 		pages.add(new OptionPanelPage("BookmarkOptionsPanel", "LblBookmarkOptions"));
 		pages.add(new OptionPanelPage("EditorColorsPanel", "LblEditorColors"));
@@ -222,7 +223,7 @@ public class SettingsPanel
 		{
 			// if no page is displayed, pack() will not work properly
 			// so we need to instantiate and display the two largest pages
-			
+
 			// the editor page is the highest page
 			pageList.setSelectedIndex(1);
 			this.dialog.pack();

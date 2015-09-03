@@ -202,6 +202,7 @@ import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
+import workbench.resource.ErrorPromptType;
 
 import workbench.storage.DataStore;
 
@@ -3577,7 +3578,7 @@ public class SqlPanel
   private boolean shouldAsk(int cmdIndex, int count)
   {
     // The retry dialog should be shown for all statements that are executed
-    if (GuiSettings.enableRetrySqlErrorDialog()) return true;
+    if (GuiSettings.getErrorPromptType() == ErrorPromptType.PromptWithRetry) return true;
 
     // only show the "Ignore/Cancel" prompt if the failed statement is not the last one in the script
     return (cmdIndex) < (count - 1);
@@ -3593,7 +3594,7 @@ public class SqlPanel
     int choice = -1;
     try
     {
-      if (GuiSettings.enableRetrySqlErrorDialog())
+      if (GuiSettings.getErrorPromptType() == ErrorPromptType.PromptWithRetry)
       {
         choice = handleRetry(cmdIndex, errorDetails, parser, selectionOffset);
       }
@@ -3668,7 +3669,7 @@ public class SqlPanel
     // using the DialogInvoker makes sure that all components of the dialog are created and displayed on the EDT
     MessageCreator creator = () ->
     {
-      if (GuiSettings.showSqlErrorInContinueDialog() && errorDetails != null && errorDetails.getErrorMessage() != null)
+      if (GuiSettings.getErrorPromptType() == ErrorPromptType.PromptWithErroressage && errorDetails != null && errorDetails.getErrorMessage() != null)
       {
         return WbSwingUtilities.buildErrorContinueMessage(question, errorDetails.getErrorMessage());
       }
