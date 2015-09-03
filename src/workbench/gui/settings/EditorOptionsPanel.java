@@ -28,8 +28,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 
 import javax.swing.DefaultComboBoxModel;
@@ -61,7 +59,7 @@ import workbench.util.StringUtil;
  */
 public class EditorOptionsPanel
 	extends JPanel
-	implements Restoreable, ActionListener, ValidatingComponent, ItemListener
+	implements Restoreable, ActionListener, ValidatingComponent
 {
 
 	public EditorOptionsPanel()
@@ -83,15 +81,8 @@ public class EditorOptionsPanel
 			ResourceMgr.getString("LblLTUnix")
 		};
 
-		DbDelimiter[] names = DbDelimiter.getMapping();
-		cbxDbName.setModel(new DefaultComboBoxModel(names));
-
-		DbDelimiter def = (DbDelimiter)cbxDbName.getSelectedItem();
-		alternateDelimiter.setText(def.getDelimiter());
-
 		internalLineEnding.setModel(new DefaultComboBoxModel(items));
 		externalLineEnding.setModel(new DefaultComboBoxModel(items));
-		useCurrentLineStmt.setSelected(GuiSettings.getUseStatementInCurrentLine());
 
 		reloadType.setModel(new DefaultComboBoxModel(FileReloadType.values()));
 		reloadType.doLayout();
@@ -115,15 +106,9 @@ public class EditorOptionsPanel
 			defaultDir.setFilename(dir.getAbsolutePath());
 		}
 		defaultDir.setEnabled(followCurrentDir.isSelected());
-		keepHilite.setSelected(GuiSettings.getKeepCurrentSqlHighlight());
 		historySizeField.setText(Integer.toString(Settings.getInstance().getMaxHistorySize()));
 		electricScroll.setText(Integer.toString(Settings.getInstance().getElectricScroll()));
 		tabSize.setText(Settings.getInstance().getProperty("workbench.editor.tabwidth", "2"));
-		hiliteCurrent.setSelected(Settings.getInstance().getHighlightCurrentStatement());
-		alwaysAllowExecSel.setSelected(!GuiSettings.getExecuteOnlySelected());
-		allowEditDuringExec.setSelected(!GuiSettings.getDisableEditorDuringExecution());
-		emptyLineDelimiter.setSelected(Settings.getInstance().getEmptyLineIsDelimiter());
-		hiliteError.setSelected(GuiSettings.getHighlightErrorStatement());
 		autoCloseBrackets.setText(Settings.getInstance().getProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, ""));
 		int lines = GuiSettings.getWheelScrollLines();
 		if (lines <= 0)
@@ -163,21 +148,7 @@ public class EditorOptionsPanel
 		Settings set = Settings.getInstance();
 		set.setMaxHistorySize(((NumberField)this.historySizeField).getValue());
 
-		// Synchronize current text with the corresponding item in the dropdown
-		DbDelimiter delim = (DbDelimiter)cbxDbName.getSelectedItem();
-		delim.setDelimiter(alternateDelimiter.getText());
-
-		DbDelimiter defDelim = (DbDelimiter)cbxDbName.getItemAt(0);
-		set.setAlternateDelimiter(defDelim.getDelimiter());
-
-		for (int i=1; i < cbxDbName.getItemCount(); i++)
-		{
-			DbDelimiter dbDelim = (DbDelimiter)cbxDbName.getItemAt(i);
-			set.setDbDelimiter(dbDelim.getDbid(), dbDelim.getDelimiter());
-		}
-
 		set.setRightClickMovesCursor(rightClickMovesCursor.isSelected());
-		set.setAutoJumpNextStatement(this.autoAdvance.isSelected());
 		set.setEditorTabWidth(StringUtil.getIntValue(this.tabSize.getText(), 2));
 		set.setElectricScroll(StringUtil.getIntValue(electricScroll.getText(),-1));
 		set.setEditorNoWordSep(noWordSep.getText());
@@ -186,17 +157,10 @@ public class EditorOptionsPanel
 		value = indexToLineEndingValue(externalLineEnding.getSelectedIndex());
 		set.setExternalEditorLineEnding(value);
 		set.setEditorUseTabCharacter(useTabs.isSelected());
-		set.setProperty(Settings.PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, hiliteCurrent.isSelected());
-		set.setEmptyLineIsDelimiter(emptyLineDelimiter.isSelected());
 		set.setStoreScriptDirInWksp(storeDirInWksp.isSelected());
 		GuiSettings.setDefaultFileDir(defaultDir.getFilename());
 		GuiSettings.setFollowFileDirectory(followCurrentDir.isSelected());
-		GuiSettings.setKeepCurrentSqlHighlight(keepHilite.isSelected());
-		GuiSettings.setExecuteOnlySelected(!alwaysAllowExecSel.isSelected());
-		GuiSettings.setDisableEditorDuringExecution(!allowEditDuringExec.isSelected());
-		GuiSettings.setHighlightErrorStatement(hiliteError.isSelected());
 		set.setProperty(GuiSettings.PROPERTY_COMPLETE_CHARS, autoCloseBrackets.getText());
-		GuiSettings.setUseStatementInCurrentLine(useCurrentLineStmt.isSelected());
 
 		if (StringUtil.isNumber(wheelScrollLines.getText()))
 		{
@@ -244,7 +208,6 @@ public class EditorOptionsPanel
 
     editorTabSizeLabel = new JLabel();
     tabSize = new NumberField();
-    altDelimLabel = new JLabel();
     historySizeLabel = new JLabel();
     historySizeField = new NumberField();
     electricScrollLabel = new JLabel();
@@ -257,16 +220,6 @@ public class EditorOptionsPanel
     noWordSepLabel = new JLabel();
     useTabs = new JCheckBox();
     noWordSep = new JTextField();
-    jPanel2 = new JPanel();
-    hiliteCurrent = new JCheckBox();
-    keepHilite = new JCheckBox();
-    allowEditDuringExec = new JCheckBox();
-    rightClickMovesCursor = new JCheckBox();
-    alwaysAllowExecSel = new JCheckBox();
-    autoAdvance = new JCheckBox();
-    emptyLineDelimiter = new JCheckBox();
-    hiliteError = new JCheckBox();
-    useCurrentLineStmt = new JCheckBox();
     jPanel1 = new JPanel();
     followCurrentDir = new JCheckBox();
     jLabel1 = new JLabel();
@@ -278,9 +231,7 @@ public class EditorOptionsPanel
     wheelScrollLines = new NumberField();
     reloadLabel = new JLabel();
     reloadType = new JComboBox();
-    jPanel3 = new JPanel();
-    alternateDelimiter = new JTextField();
-    cbxDbName = new JComboBox();
+    rightClickMovesCursor = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -303,15 +254,6 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 11, 0, 15);
     add(tabSize, gridBagConstraints);
-
-    altDelimLabel.setText(ResourceMgr.getString("LblAltDelimit")); // NOI18N
-    altDelimLabel.setToolTipText(ResourceMgr.getString("d_LblAltDelimit")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(8, 12, 0, 0);
-    add(altDelimLabel, gridBagConstraints);
 
     historySizeLabel.setText(ResourceMgr.getString("LblHistorySize")); // NOI18N
     historySizeLabel.setToolTipText(ResourceMgr.getString("d_LblHistorySize")); // NOI18N
@@ -433,115 +375,6 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(noWordSep, gridBagConstraints);
 
-    jPanel2.setLayout(new GridBagLayout());
-
-    hiliteCurrent.setText(ResourceMgr.getString("MnuTxtHighlightCurrent")); // NOI18N
-    hiliteCurrent.setToolTipText(ResourceMgr.getString("d_MnuTxtHighlightCurrent")); // NOI18N
-    hiliteCurrent.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    jPanel2.add(hiliteCurrent, gridBagConstraints);
-
-    keepHilite.setText(ResourceMgr.getString("LblKeepHilite")); // NOI18N
-    keepHilite.setToolTipText(ResourceMgr.getString("d_LblKeepHilite")); // NOI18N
-    keepHilite.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 15, 0, 0);
-    jPanel2.add(keepHilite, gridBagConstraints);
-
-    allowEditDuringExec.setText(ResourceMgr.getString("LblAllowEditExecSQL")); // NOI18N
-    allowEditDuringExec.setToolTipText(ResourceMgr.getString("d_LblAllowEditExecSQL")); // NOI18N
-    allowEditDuringExec.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
-    jPanel2.add(allowEditDuringExec, gridBagConstraints);
-
-    rightClickMovesCursor.setSelected(Settings.getInstance().getRightClickMovesCursor());
-    rightClickMovesCursor.setText(ResourceMgr.getString("LblRightClickMove")); // NOI18N
-    rightClickMovesCursor.setToolTipText(ResourceMgr.getString("d_LblRightClickMove")); // NOI18N
-    rightClickMovesCursor.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new Insets(7, 15, 0, 0);
-    jPanel2.add(rightClickMovesCursor, gridBagConstraints);
-
-    alwaysAllowExecSel.setText(ResourceMgr.getString("LblExecSelOnly")); // NOI18N
-    alwaysAllowExecSel.setToolTipText(ResourceMgr.getString("d_LblExecSelOnly")); // NOI18N
-    alwaysAllowExecSel.setBorder(null);
-    alwaysAllowExecSel.setHorizontalAlignment(SwingConstants.LEFT);
-    alwaysAllowExecSel.setHorizontalTextPosition(SwingConstants.RIGHT);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
-    jPanel2.add(alwaysAllowExecSel, gridBagConstraints);
-
-    autoAdvance.setSelected(Settings.getInstance().getAutoJumpNextStatement());
-    autoAdvance.setText(ResourceMgr.getString("LblAutoAdvance")); // NOI18N
-    autoAdvance.setToolTipText(ResourceMgr.getString("d_LblAutoAdvance")); // NOI18N
-    autoAdvance.setBorder(null);
-    autoAdvance.setHorizontalAlignment(SwingConstants.LEFT);
-    autoAdvance.setHorizontalTextPosition(SwingConstants.RIGHT);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 15, 0, 0);
-    jPanel2.add(autoAdvance, gridBagConstraints);
-
-    emptyLineDelimiter.setText(ResourceMgr.getString("LblEmptyLineDelimiter")); // NOI18N
-    emptyLineDelimiter.setToolTipText(ResourceMgr.getString("d_LblEmptyLineDelimiter")); // NOI18N
-    emptyLineDelimiter.setBorder(null);
-    emptyLineDelimiter.setHorizontalAlignment(SwingConstants.LEFT);
-    emptyLineDelimiter.setHorizontalTextPosition(SwingConstants.RIGHT);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 15, 0, 0);
-    jPanel2.add(emptyLineDelimiter, gridBagConstraints);
-
-    hiliteError.setText(ResourceMgr.getString("LblHiliteErr")); // NOI18N
-    hiliteError.setToolTipText(ResourceMgr.getString("d_LblHiliteErr")); // NOI18N
-    hiliteError.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
-    jPanel2.add(hiliteError, gridBagConstraints);
-
-    useCurrentLineStmt.setText(ResourceMgr.getString("LblUseStmtInCurLine")); // NOI18N
-    useCurrentLineStmt.setToolTipText(ResourceMgr.getString("d_LblUseStmtInCurLine")); // NOI18N
-    useCurrentLineStmt.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
-    jPanel2.add(useCurrentLineStmt, gridBagConstraints);
-
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
-    gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(9, 13, 0, 0);
-    add(jPanel2, gridBagConstraints);
-
     jPanel1.setLayout(new GridBagLayout());
 
     followCurrentDir.setText(ResourceMgr.getString("LblEditorFollowDir")); // NOI18N
@@ -592,7 +425,7 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(12, 13, 0, 15);
+    gridBagConstraints.insets = new Insets(12, 12, 0, 15);
     add(jPanel1, gridBagConstraints);
 
     jLabel2.setLabelFor(autoCloseBrackets);
@@ -654,35 +487,17 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(reloadType, gridBagConstraints);
 
-    jPanel3.setLayout(new GridBagLayout());
-
-    alternateDelimiter.setColumns(10);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(0, 7, 0, 15);
-    jPanel3.add(alternateDelimiter, gridBagConstraints);
-
-    cbxDbName.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-    cbxDbName.addItemListener(this);
-    cbxDbName.addActionListener(this);
+    rightClickMovesCursor.setSelected(Settings.getInstance().getRightClickMovesCursor());
+    rightClickMovesCursor.setText(ResourceMgr.getString("LblRightClickMove")); // NOI18N
+    rightClickMovesCursor.setToolTipText(ResourceMgr.getString("d_LblRightClickMove")); // NOI18N
+    rightClickMovesCursor.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    jPanel3.add(cbxDbName, gridBagConstraints);
-
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(6, 11, 0, 0);
-    add(jPanel3, gridBagConstraints);
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    add(rightClickMovesCursor, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -693,18 +508,6 @@ public class EditorOptionsPanel
     {
       EditorOptionsPanel.this.followCurrentDirActionPerformed(evt);
     }
-    else if (evt.getSource() == cbxDbName)
-    {
-      EditorOptionsPanel.this.cbxDbNameActionPerformed(evt);
-    }
-  }
-
-  public void itemStateChanged(ItemEvent evt)
-  {
-    if (evt.getSource() == cbxDbName)
-    {
-      EditorOptionsPanel.this.cbxDbNameItemStateChanged(evt);
-    }
   }// </editor-fold>//GEN-END:initComponents
 
 	private void followCurrentDirActionPerformed(ActionEvent evt)//GEN-FIRST:event_followCurrentDirActionPerformed
@@ -712,39 +515,15 @@ public class EditorOptionsPanel
 		defaultDir.setEnabled(followCurrentDir.isSelected());
 	}//GEN-LAST:event_followCurrentDirActionPerformed
 
-  private void cbxDbNameActionPerformed(ActionEvent evt)//GEN-FIRST:event_cbxDbNameActionPerformed
-  {//GEN-HEADEREND:event_cbxDbNameActionPerformed
-		DbDelimiter delim = (DbDelimiter)cbxDbName.getSelectedItem();
-		alternateDelimiter.setText(delim.getDelimiter());
-  }//GEN-LAST:event_cbxDbNameActionPerformed
-
-  private void cbxDbNameItemStateChanged(ItemEvent evt)//GEN-FIRST:event_cbxDbNameItemStateChanged
-  {//GEN-HEADEREND:event_cbxDbNameItemStateChanged
-		if (evt.getStateChange() == ItemEvent.DESELECTED)
-		{
-			DbDelimiter def = (DbDelimiter)evt.getItem();
-			def.setDelimiter(alternateDelimiter.getText());
-		}
-  }//GEN-LAST:event_cbxDbNameItemStateChanged
-
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private JCheckBox allowEditDuringExec;
-  private JLabel altDelimLabel;
-  private JTextField alternateDelimiter;
-  private JCheckBox alwaysAllowExecSel;
-  private JCheckBox autoAdvance;
   private JTextField autoCloseBrackets;
-  private JComboBox cbxDbName;
   private WbFilePicker defaultDir;
   private JLabel editorTabSizeLabel;
   private JTextField electricScroll;
   private JLabel electricScrollLabel;
-  private JCheckBox emptyLineDelimiter;
   private JComboBox externalLineEnding;
   private JLabel externalLineEndingLabel;
   private JCheckBox followCurrentDir;
-  private JCheckBox hiliteCurrent;
-  private JCheckBox hiliteError;
   private JTextField historySizeField;
   private JLabel historySizeLabel;
   private JCheckBox includeFilesInHistory;
@@ -753,9 +532,6 @@ public class EditorOptionsPanel
   private JLabel jLabel1;
   private JLabel jLabel2;
   private JPanel jPanel1;
-  private JPanel jPanel2;
-  private JPanel jPanel3;
-  private JCheckBox keepHilite;
   private JTextField noWordSep;
   private JLabel noWordSepLabel;
   private JLabel reloadLabel;
@@ -763,7 +539,6 @@ public class EditorOptionsPanel
   private JCheckBox rightClickMovesCursor;
   private JCheckBox storeDirInWksp;
   private JTextField tabSize;
-  private JCheckBox useCurrentLineStmt;
   private JCheckBox useTabs;
   private JLabel wheelScrollLabel;
   private JTextField wheelScrollLines;

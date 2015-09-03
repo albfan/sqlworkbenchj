@@ -39,12 +39,12 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import workbench.interfaces.Restoreable;
+import workbench.resource.ErrorPromptType;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.components.TextFieldWidthAdjuster;
-import workbench.resource.ErrorPromptType;
 
 
 /**
@@ -297,7 +297,7 @@ public class SqlExecOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(9, 13, 0, 0);
+    gridBagConstraints.insets = new Insets(13, 13, 0, 0);
     add(jPanel2, gridBagConstraints);
 
     jPanel3.setLayout(new GridBagLayout());
@@ -330,7 +330,8 @@ public class SqlExecOptionsPanel
     gridBagConstraints.insets = new Insets(6, 11, 0, 0);
     add(jPanel3, gridBagConstraints);
 
-    jLabel1.setText("Error prompt");
+    jLabel1.setText(ResourceMgr.getString("LblErrPromptType")); // NOI18N
+    jLabel1.setToolTipText(ResourceMgr.getString("d_LblErrPromptType")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(8, 12, 0, 0);

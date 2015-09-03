@@ -33,7 +33,7 @@
     <Container class="javax.swing.JPanel" name="jPanel2">
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-          <GridBagConstraints gridX="0" gridY="3" gridWidth="4" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="9" insetsLeft="13" insetsBottom="0" insetsRight="0" anchor="18" weightX="1.0" weightY="1.0"/>
+          <GridBagConstraints gridX="0" gridY="3" gridWidth="4" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="13" insetsLeft="13" insetsBottom="0" insetsRight="0" anchor="18" weightX="1.0" weightY="1.0"/>
         </Constraint>
       </Constraints>
 
@@ -238,7 +238,12 @@
     </Container>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Error prompt"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="LblErrPromptType" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
+        </Property>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="d_LblErrPromptType" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
