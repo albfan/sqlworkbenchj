@@ -488,7 +488,7 @@
 
   </target>
 
-  <target name="make-jar" depends="prepare,compile">
+  <target name="-make-jar" depends="prepare,compile">
 
     <jar compress="true" level="9" jarfile="${distdir}/${jarfile}">
       <manifest>
@@ -582,7 +582,7 @@
   </target>
 
   <!-- build a full release -->
-  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, set-history-release-number, set-history-build-date, make-jar, pdf, publish, publish-single, release-src-zip, release-package, mac-package7">
+  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, set-history-release-number, set-history-build-date, -make-jar, pdf, publish, publish-single, release-src-zip, release-package, mac-package7">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -613,12 +613,12 @@
     <property name="dev-jar" value="1"/>
   </target>
 
-  <target name="jar-only" depends="set-dev-prop, copy-resources, compile, get-dev-build, replace-build-number, make-jar"/>
+  <target name="jar-only" depends="set-dev-prop, copy-resources, compile, get-dev-build, replace-build-number, -make-jar"/>
 
-  <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, replace-build-number, make-jar"/>
+  <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, replace-build-number, -make-jar"/>
 
   <!-- build a development release -->
-  <target name="dev-release" depends="clean, compile, test, set-dev-build, set-history-build-date, make-jar, pdf, publish, publish-single, release-package, release-src-zip">
+  <target name="dev-release" depends="clean, compile, test, set-dev-build, set-history-build-date, -make-jar, pdf, publish, publish-single, release-package, release-src-zip">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
