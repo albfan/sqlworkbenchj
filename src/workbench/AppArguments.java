@@ -157,7 +157,7 @@ public class AppArguments
     addArgument(ARG_CONSOLE_BUFFER_RESULTS, ArgumentType.BoolArgument);
     addArgument(ARG_WORKSPACE);
     addArgument(ARG_NOSETTNGS, ArgumentType.BoolArgument);
-    addArgument(ARG_NOTEMPLATES, ArgumentType.BoolArgument);
+    addArgument(ARG_NOTEMPLATES, ArgumentType.BoolSwitch);
     addArgument(ARG_HIDE_WARNINGS, ArgumentType.BoolArgument);
     addArgument(ARG_ALT_DELIMITER);
     addArgument(ARG_DELIMITER);

@@ -2260,9 +2260,13 @@ WHERE id=42;</programlisting>
 							<entry>
 								<para>
                   Defines how the resulting table should be sorted. By default it will be sorted
-                  alphabetically by table name. To sort by rowcount descending, the following can be used:
-                  <literal>-orderBy="rowcount,desc"</literal>. If you want to sort by multiple columns, separate
-                  the definitions with a comma: <literal>-orderBy="rowcount;desc,name;asc"</literal>.
+                  alphabetically by table name. The <literal>-orderBy</literal> parameter specifies the columns to sort the result by.
+                  By default, sorting is done ascending, if you want a descending sort, append <literal>:desc</literal>
+                  to the column name, e.g.: <literal>-orderBy="rowcount:desc"</literal>.
+                </para>
+                <para>
+                  So sort by multiple columns separate the column names with a comma: <literal>-orderBy="rowcount:desc,name:desc"</literal>
+                  or <literal>-orderBy="rowcount,name:desc"</literal>
 								</para>
 							</entry>
 						</row>

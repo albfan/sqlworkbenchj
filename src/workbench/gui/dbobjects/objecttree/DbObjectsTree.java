@@ -633,6 +633,11 @@ public class DbObjectsTree
     throws SQLException
   {
     if (node == null) return;
+    if (node.isRoot())
+    {
+      reload();
+      return;
+    }
 
     Set<String> expandedTypes = CollectionUtil.caseInsensitiveSet();
     for (int i=0; i < node.getChildCount(); i++)
