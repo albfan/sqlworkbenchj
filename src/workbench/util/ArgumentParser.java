@@ -193,7 +193,9 @@ public class ArgumentParser
 	public void parse(String[] args)
 	{
 		reset();
-		StringBuilder line = new StringBuilder(200);
+    if (args == null) return;
+
+		StringBuilder line = new StringBuilder(args.length * 20);
 		for (String arg : args)
 		{
 			line.append(arg);
@@ -202,9 +204,11 @@ public class ArgumentParser
 		parse(line.toString());
 	}
 
-	public void parse(String aCmdLine)
+	public void parse(String cmdLine)
 	{
 		reset();
+    if (cmdLine == null) return;
+
 		WbStringTokenizer tok;
 		if (needSwitch)
 		{
@@ -216,7 +220,7 @@ public class ArgumentParser
 			tok = new WbStringTokenizer(' ', "\"'", true);
 			tok.setDelimiterNeedsWhitspace(false);
 		}
-		tok.setSourceString(aCmdLine.trim());
+		tok.setSourceString(cmdLine.trim());
 		List<String> entries = tok.getAllTokens();
 		parse(entries);
 	}

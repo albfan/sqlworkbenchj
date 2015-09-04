@@ -2240,6 +2240,12 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Database">
+
+  public boolean hideIgnoreWarnings()
+  {
+    return getBoolProperty("workbench.db.warnings.ignored.hide", true);
+  }
+  
 	public boolean getUseGenericExecuteForSelect()
 	{
 		return getBoolProperty("workbench.db.select.genericexecute", false);

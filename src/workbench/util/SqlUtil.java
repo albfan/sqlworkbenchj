@@ -1535,20 +1535,19 @@ public class SqlUtil
 		return display;
 	}
 
-	public static boolean isRealWarning(WbConnection con, SQLWarning warning)
+	public static boolean ignoreWarning(WbConnection con, SQLWarning warning)
 	{
-		if (warning == null || con == null) return false;
+		if (warning == null || con == null) return true;
 		DbSettings dbs = con.getDbSettings();
-		if (dbs == null) return true;
+		if (dbs == null) return false;
 		Set<Integer> codes = dbs.getInformationalWarningCodes();
-		if (codes.contains(warning.getErrorCode())) return false;
+		if (codes.contains(warning.getErrorCode())) return true;
 
 		Set<String> states = dbs.getInformationalWarningStates();
-		if (states.contains(warning.getSQLState())) return false;
-		return true;
+		return states.contains(warning.getSQLState());
 	}
 
-	public static WarningContent getWarnings(WbConnection con, Statement stmt)
+	public static CharSequence getWarnings(WbConnection con, Statement stmt)
 	{
 		if (con == null) return null;
 
@@ -1567,74 +1566,70 @@ public class SqlUtil
 			String s = null;
 
 			int count = 0;
-      int statementCount = 0;
-      int connectionCount = 0;
 			int maxLoops = con.getDbSettings().getMaxWarnings();
-			boolean isRealWarning = true;
 
 			SQLWarning warn = (stmt == null ? null : stmt.getWarnings());
-			boolean hasWarnings = warn != null;
+
 			while (warn != null)
 			{
-				isRealWarning = isRealWarning && isRealWarning(con, warn);
-				count ++;
-				s = warn.getMessage();
-				if (s != null && s.length() > 0)
-				{
-					msg = append(msg, s);
-					if (s.charAt(s.length() - 1) != '\n') msg.append('\n');
-					added.add(s);
-          statementCount ++;
-				}
+        if (ignoreWarning(con, warn) == false)
+        {
+          count ++;
+          s = warn.getMessage();
+          if (s != null && s.length() > 0)
+          {
+            msg = append(msg, s);
+            if (!StringUtil.endsWith(s,'\n')) msg.append('\n');
+            added.add(s);
+          }
+        }
 
-				 // prevent endless loop
-				if (maxLoops > 0 && count > maxLoops)
-				{
-					LogMgr.logWarning("SqlUtil.getWarnings()", "Breaking out of loop because" + maxLoops + " iterations reached!");
-					break;
-				}
+        // prevent endless loop
+        if (count > maxLoops)
+        {
+          LogMgr.logWarning("SqlUtil.getWarnings()", "Breaking out of loop because" + maxLoops + " iterations reached!");
+          break;
+        }
 
-				 // prevent endless loop
+        // prevent endless loop
 				if (warn == warn.getNextWarning()) break;
 				warn = warn.getNextWarning();
 			}
 
+      // now process warnings on the connection object
 			warn = con.getSqlConnection().getWarnings();
-			hasWarnings = hasWarnings || (warn != null);
+
 			count = 0;
 			while (warn != null)
 			{
-				s = warn.getMessage();
-        connectionCount ++;
-				// Some JDBC drivers duplicate the warnings between
-				// the statement and the connection.
-				// This is to prevent adding them twice
-				if (!added.contains(s))
-				{
-					msg = append(msg, s);
-					if (!s.endsWith("\n")) msg.append('\n');
-				}
-				// prevent endless loop
-				if (maxLoops > 0 && count > maxLoops)
-				{
-					LogMgr.logWarning("SqlUtil.getWarnings()", "Breaking out of loop because" + maxLoops + " iterations reached!");
-					break;
-				}
+        if (ignoreWarning(con, warn) == false)
+        {
+          s = warn.getMessage();
 
-				 // prevent endless loop
+          // Some JDBC drivers duplicate the warnings between
+          // the statement and the connection.
+          // This check is here to prevent adding them twice
+          if (!added.contains(s))
+          {
+            msg = append(msg, s);
+            if (!StringUtil.endsWith(s,'\n')) msg.append('\n');
+          }
+        }
+        // prevent endless loop
+        if (count > maxLoops)
+        {
+          LogMgr.logWarning("SqlUtil.getWarnings()", "Breaking out of loop because" + maxLoops + " iterations reached!");
+          break;
+        }
+				// prevent endless loop
 				if (warn == warn.getNextWarning()) break;
 				warn = warn.getNextWarning();
 			}
 
-      if (statementCount > 0 || connectionCount > 0)
-      {
-        LogMgr.logTrace("SqlUtil.getWarnings()", "Got "  + statementCount + " warning(s) from the Statement object and " + connectionCount + " warning(s) from the Connection");
-      }
 			// make sure the warnings are cleared from both objects!
 			clearWarnings(con, stmt);
 			StringUtil.trimTrailingWhitespace(msg);
-			WarningContent content = new WarningContent(msg, isRealWarning);
-			return content;
+			return msg;
 		}
 		catch (Exception e)
 		{

@@ -106,9 +106,10 @@ public class DbTreeSettings
     return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + prop, true);
   }
 
-  public static boolean autoloadSchemaObjects()
+  public static boolean autoloadSchemaObjects(String dbId)
   {
-    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".autoload.types", true);
+    boolean global = Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".autoload.types", true);
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + dbId + ".autoload.types", global);
   }
 
   public static boolean autoExpandFilteredNodes()

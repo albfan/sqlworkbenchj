@@ -305,12 +305,29 @@ public class DbSettings
 
 	public int getMaxWarnings()
 	{
-		return Settings.getInstance().getIntProperty(prefix + "maxwarnings", 5000);
+    int defaultMax = 5000;
+		int max = Settings.getInstance().getIntProperty(prefix + "maxwarnings", defaultMax);
+    if (max <= 0)
+    {
+      max = defaultMax;
+    }
+    return max;
 	}
 
+  /**
+   * Return the maximum number of result sets that should be considered.
+   *
+   * @see SqlCommand#processResults
+   */
 	public int getMaxResults()
 	{
-		return Settings.getInstance().getIntProperty(prefix + "maxresults", 50000);
+    int defaultMax = 50000;
+		int max = Settings.getInstance().getIntProperty(prefix + "maxresults", defaultMax);
+    if (max <= 0)
+    {
+      max = defaultMax;
+    }
+    return max;
 	}
 
 	/**
@@ -393,7 +410,7 @@ public class DbSettings
 	public String getCascadeConstraintsVerb(String aType)
 	{
 		if (aType == null) return null;
-		String verb = Settings.getInstance().getProperty("workbench.db.drop." + getKeyValue(aType) + ".cascade." + getDbId(), null);
+		String verb = Settings.getInstance().getProperty(prefix + "drop." + getKeyValue(aType) + ".cascade", null);
 		return verb;
 	}
 
@@ -1451,7 +1468,7 @@ public class DbSettings
 
 	/**
 	 * Returns the SQL to drop a foreign key constraint from a data object
-   * 
+   *
 	 * @param type the type of the object. e.g. table, materialized view
 	 */
 	public String getDropFKConstraint(String type)

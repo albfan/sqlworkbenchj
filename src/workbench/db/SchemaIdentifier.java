@@ -118,10 +118,6 @@ public class SchemaIdentifier
         "use " + con.getMetadata().quoteObjectname(this.catalog)  + ";\n" +
         "drop schema " + con.getMetadata().quoteObjectname(this.schemaName) + ";";
     }
-    if (con.getMetadata().isOracle() && this.schemaName != null)
-    {
-      return "DROP USER " + this.schemaName + ";";
-    }
     return null;
   }
 

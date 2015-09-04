@@ -302,7 +302,7 @@ public class DefaultTriggerReader
 				}
 			}
 
-			CharSequence warn = SqlUtil.getWarnings(this.dbConnection, stmt).allWarnings;
+			CharSequence warn = SqlUtil.getWarnings(this.dbConnection, stmt);
 			if (warn != null)
 			{
 				if (result.length() > 0)

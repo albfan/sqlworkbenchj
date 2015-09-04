@@ -530,7 +530,7 @@ public class DbObjectsTree
 
     if (node.isSchemaNode())
     {
-      return DbTreeSettings.autoloadSchemaObjects() && !node.childrenAreLoaded();
+      return DbTreeSettings.autoloadSchemaObjects(getDbId()) && !node.childrenAreLoaded();
     }
     return false;
   }
@@ -553,7 +553,7 @@ public class DbObjectsTree
       @Override
       public void run()
       {
-        doLoad(node, DbTreeSettings.autoloadSchemaObjects());
+        doLoad(node, DbTreeSettings.autoloadSchemaObjects(getDbId()));
       }
     };
     load.start();
@@ -603,6 +603,13 @@ public class DbObjectsTree
     loader = null;
   }
 
+  private String getDbId()
+  {
+    if (loader == null) return "";
+    if (loader.getConnection() == null) return "";
+    return loader.getConnection().getDbId();
+  }
+
   private DbObjectTreeModel getTreeModel()
   {
     return (DbObjectTreeModel)getModel();
@@ -621,7 +628,7 @@ public class DbObjectsTree
       {
         if (!child.isLoaded())
         {
-          doLoad(child, DbTreeSettings.autoloadSchemaObjects());
+          doLoad(child, DbTreeSettings.autoloadSchemaObjects(getDbId()));
         }
         return child;
       }
