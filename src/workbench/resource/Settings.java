@@ -2245,7 +2245,7 @@ public class Settings
   {
     return getBoolProperty("workbench.db.warnings.ignored.hide", true);
   }
-  
+
 	public boolean getUseGenericExecuteForSelect()
 	{
 		return getBoolProperty("workbench.db.select.genericexecute", false);
@@ -2818,7 +2818,7 @@ public class Settings
 	 */
 	public int getMaxLogfileSize()
 	{
-		return this.getIntProperty("workbench.log.maxfilesize", 2 * 1024 * 1024);
+		return this.getIntProperty("workbench.log.maxfilesize", 5 * 1024 * 1024);
 	}
 
 	public int getLogfileBackupCount()
