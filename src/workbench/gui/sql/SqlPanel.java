@@ -77,6 +77,7 @@ import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.interfaces.ToolWindowManager;
 import workbench.log.LogMgr;
+import workbench.resource.ErrorPromptType;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -129,6 +130,7 @@ import workbench.gui.actions.ExecuteAllAction;
 import workbench.gui.actions.ExecuteCurrentAction;
 import workbench.gui.actions.ExecuteFromCursorAction;
 import workbench.gui.actions.ExecuteSelAction;
+import workbench.gui.actions.ExecuteUpToCursorAction;
 import workbench.gui.actions.ExpandEditorAction;
 import workbench.gui.actions.ExpandResultAction;
 import workbench.gui.actions.FileDiscardAction;
@@ -202,7 +204,6 @@ import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
-import workbench.resource.ErrorPromptType;
 
 import workbench.storage.DataStore;
 
@@ -270,6 +271,7 @@ public class SqlPanel
 	protected ExecuteAllAction executeAll;
 	protected ExecuteCurrentAction executeCurrent;
   protected ExecuteFromCursorAction executeFromCurrent;
+  protected ExecuteUpToCursorAction executeToCursor;
 	protected ExecuteSelAction executeSelected;
 
 	private static int instanceCount = 0;
@@ -359,7 +361,6 @@ public class SqlPanel
   private final AutomaticRefreshMgr refreshMgr;
   private final Highlighter highlighter;
   private ResultTabDropHandler tabDropHandler;
-  private ResultTabDropHandler logDropHandler;
 
 //</editor-fold>
 
@@ -748,6 +749,7 @@ public class SqlPanel
 		this.executeSelected = new ExecuteSelAction(this);
 		this.executeCurrent = new ExecuteCurrentAction(this);
 		this.executeFromCurrent = new ExecuteFromCursorAction(this);
+    this.executeToCursor = new ExecuteUpToCursorAction(this);
 
 		MakeLowerCaseAction makeLower = new MakeLowerCaseAction(this.editor);
 		MakeUpperCaseAction makeUpper = new MakeUpperCaseAction(this.editor);
@@ -759,6 +761,7 @@ public class SqlPanel
 		this.editor.addPopupMenuItem(this.executeAll, false);
 		this.editor.addPopupMenuItem(this.executeCurrent, false);
 		this.editor.addPopupMenuItem(this.executeFromCurrent, false);
+		this.editor.addPopupMenuItem(this.executeToCursor, false);
 
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
@@ -919,6 +922,7 @@ public class SqlPanel
 		this.actions.add(this.executeSelected);
 		this.actions.add(this.executeCurrent);
 		this.actions.add(this.executeFromCurrent);
+		this.actions.add(this.executeToCursor);
 
 		this.spoolData = new SpoolDataAction(this, "MnuTxtSpoolSql");
 		this.spoolData.setCreateMenuSeparator(true);
@@ -2026,14 +2030,21 @@ public class SqlPanel
 	{
 		String sql = this.editor.getText();
 		int caret = this.editor.getCaretPosition();
-		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, false);
+		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunCurrent);
 	}
 
 	public void runFromCursor()
 	{
 		String sql = this.editor.getText();
 		int caret = this.editor.getCaretPosition();
-		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, true);
+		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunFromCursor);
+	}
+
+	public void runToCursor()
+	{
+		String sql = this.editor.getText();
+		int caret = this.editor.getCaretPosition();
+		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunToCursor);
 	}
 
 	public void runSelectedStatement()
@@ -2046,28 +2057,28 @@ public class SqlPanel
 			offset = this.editor.getSelectionStart();
 			highlight = false;
 		}
-		this.startExecution(sql, offset, -1, highlight, this.appendResults, false);
+		this.startExecution(sql, offset, -1, highlight, this.appendResults, RunType.RunAll);
 	}
 
 	@Override
 	public void commit()
 	{
-		this.startExecution(SingleVerbCommand.COMMIT_VERB, 0, -1, false, this.appendResults, false);
+		this.startExecution(SingleVerbCommand.COMMIT_VERB, 0, -1, false, this.appendResults, RunType.RunAll);
 	}
 
 	@Override
 	public void rollback()
 	{
-		this.startExecution(SingleVerbCommand.ROLLBACK_VERB, 0, -1, false, this.appendResults, false);
+		this.startExecution(SingleVerbCommand.ROLLBACK_VERB, 0, -1, false, this.appendResults, RunType.RunAll);
 	}
 
 	public void runAll()
 	{
 		String sql = this.editor.getText();
-		this.startExecution(sql, 0, -1, GuiSettings.getHighlightErrorStatement(), this.appendResults, false);
+		this.startExecution(sql, 0, -1, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunAll);
 	}
 
-	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlightError, final boolean appendResult, final boolean runFromCursor)
+	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlightError, final boolean appendResult, final RunType runType)
 	{
 		if (this.isBusy()) return;
 
@@ -2089,7 +2100,7 @@ public class SqlPanel
 				@Override
 				public void run()
 				{
-					runStatement(sql, offset, commandAtIndex, highlightError, appendResult, runFromCursor);
+					runStatement(sql, offset, commandAtIndex, highlightError, appendResult, runType);
 				}
 			};
 			this.executionThread.start();
@@ -2115,7 +2126,7 @@ public class SqlPanel
 	 * This is only public to allow a direct call during
 	 * GUI testing (to avoid multi-threading)
 	 */
-	protected void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult, boolean runFromCursor)
+	protected void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult, RunType runType)
 	{
 		this.setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
@@ -2138,7 +2149,7 @@ public class SqlPanel
 
 		try
 		{
-			this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError, appendResult, runFromCursor);
+			this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError, appendResult, runType);
 		}
 		finally
 		{
@@ -2272,7 +2283,7 @@ public class SqlPanel
     {
       sql = "select * from " + table.getTableExpression(dbConnection);
     }
-    this.startExecution(sql, 0, -1, false, true, false);
+    this.startExecution(sql, 0, -1, false, true, RunType.RunAll);
   }
 
 	@Override
@@ -2291,7 +2302,7 @@ public class SqlPanel
 		{
 			this.macroExecution = true;
 		}
-		this.startExecution(sql, 0, -1, false, this.appendResults || appendData, false);
+		this.startExecution(sql, 0, -1, false, this.appendResults || appendData, RunType.RunAll);
 	}
 
 	@Override
@@ -3093,12 +3104,12 @@ public class SqlPanel
 		return goOn;
 	}
 
-	private void displayResult(String script, int selectionOffset, int cursorPos, boolean highlightOnError, boolean appendResult, boolean runFromCursor)
+	private void displayResult(String script, int selectionOffset, int cursorPos, boolean highlightOnError, boolean appendResult, RunType runType)
 	{
 		if (script == null) return;
 
 		boolean logWasCompressed = false;
-		boolean jumpToNext = (cursorPos > -1 && Settings.getInstance().getAutoJumpNextStatement());
+    boolean jumpToNext = (runType == RunType.RunCurrent && Settings.getInstance().getAutoJumpNextStatement());
 		boolean highlightCurrent = false;
 		boolean restoreSelection = false;
 		boolean shouldRestoreSelection = Settings.getInstance().getBoolProperty("workbench.gui.sql.restoreselection", true);
@@ -3198,7 +3209,7 @@ public class SqlPanel
 				return;
 			}
 
-			if (cursorPos > -1)
+      if (cursorPos > -1 && runType != RunType.RunAll)
 			{
 				// cursorPos > -1 means that the statement at (or from) the cursor position should be executed
 				int realPos = cursorPos;
@@ -3206,14 +3217,22 @@ public class SqlPanel
 				{
 					realPos = editor.getLineStartOffset(editor.getCaretLine());
 				}
-				startIndex = scriptParser.getCommandIndexAtCursorPos(realPos);
 
-        if (runFromCursor)
+
+        if (runType == RunType.RunFromCursor)
         {
+          startIndex = scriptParser.getCommandIndexAtCursorPos(realPos);
           count = count - startIndex;
         }
-        else
+        else if (runType == RunType.RunToCursor)
         {
+          startIndex = 0;
+          endIndex = scriptParser.getCommandIndexAtCursorPos(realPos) + 1;
+          count = endIndex;
+        }
+        else if (runType == RunType.RunCurrent)
+        {
+          startIndex = scriptParser.getCommandIndexAtCursorPos(realPos);
           count = 1;
           endIndex = startIndex + 1;
         }
@@ -3869,7 +3888,7 @@ public class SqlPanel
 			this.editor.setCaretPosition(pos);
 			this.editor.scrollToCaret();
 		}
-		startExecution(comment + "\n" + sql, 0, -1, false, true, false);
+		startExecution(comment + "\n" + sql, 0, -1, false, true, RunType.RunAll);
 	}
 
 	public void showData(DataStore ds)
@@ -4123,6 +4142,7 @@ public class SqlPanel
       executeCurrent.setEnabled(flag);
       executeSelected.setEnabled(flag);
       executeFromCurrent.setEnabled(flag);
+      executeToCursor.setEnabled(flag);
     });
 	}
 

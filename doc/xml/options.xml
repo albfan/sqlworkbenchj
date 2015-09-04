@@ -219,16 +219,6 @@
       </blockquote>
 		</simplesect>
 
-		<simplesect id="options-alternate-delimiter" xreflabel="alternate delimiter">
-			<title>Alternate Delimiter</title><blockquote>
-			<para>
-				This options defines the default alternate delimiter. You can override this default in the connection profile,
-        to use different delimiters for different DBMS.
-        For details see <link linkend="understand-alternate-delim">using the alternate delimiter</link>
-			</para>
-      </blockquote>
-		</simplesect>
-
 		<simplesect id="options-history-size">
 			<title>History size</title><blockquote>
 			<para>The number of statements per tab which should be stored in the
@@ -298,6 +288,58 @@
       </para>
 		</blockquote></simplesect>
 
+		<simplesect id="settings-right-clickmove">
+			<title>Right click moves cursor</title><blockquote>
+			<para>
+				Normally a right click in the SQL editor does not change the location
+				of the cursor (caret). If this option is checked, then a right
+				click will also change the caret's location (to where the mouse cursor
+				is located)
+			</para>
+		</blockquote></simplesect>
+
+    <simplesect id="store-last-dir-workspace">
+      <title>Store last directory in workspace</title><blockquote>
+      <para>
+        If this option is enabled, the directory from the last opened file is stored
+        in the workspace of the current profile, not globally. If this option
+        is unchecked, the last directory will be stored globally and will
+        be used for all connections.
+      </para>
+    </blockquote></simplesect>
+
+    <simplesect id="editor-follow-current-dir">
+      <title>Current directory follows active file</title><blockquote>
+      <para>
+        If this option is enabled, the file open dialog will default to the
+        directory of the current file in the editor. If no file is
+        loaded in the editor, the directory that is defined  through the
+        "Default directory" option will be selected.
+      </para>
+    </blockquote></simplesect>
+	</section>
+
+	<section id="options-sql-exec">
+		<title>SQL Excecution options</title>
+
+		<simplesect id="options-error-dialog">
+			<title>Error prompt for scripts</title><blockquote>
+			<para>
+				This options defines what kind of dialog is shown when an error occurs during script execution.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-alternate-delimiter" xreflabel="alternate delimiter">
+			<title>Alternate Delimiter</title><blockquote>
+			<para>
+				This options defines the default alternate delimiter. You can override this default in the connection profile,
+        to use different delimiters for different DBMS.
+        For details see <link linkend="understand-alternate-delim">using the alternate delimiter</link>
+			</para>
+      </blockquote>
+		</simplesect>
+
 		<simplesect id="options-hilite-current">
 			<title>Highlight current statement</title><blockquote>
 			<para>
@@ -318,16 +360,6 @@
 			<title>Highlight errors</title><blockquote>
 			<para>
         If "Highlight errors" is enabled then the statement that generated an error is highlighted after execution.
-			</para>
-		</blockquote></simplesect>
-
-		<simplesect id="settings-right-clickmove">
-			<title>Right click moves cursor</title><blockquote>
-			<para>
-				Normally a right click in the SQL editor does not change the location
-				of the cursor (caret). If this option is checked, then a right
-				click will also change the caret's location (to where the mouse cursor
-				is located)
 			</para>
 		</blockquote></simplesect>
 
@@ -382,17 +414,7 @@
         the cursor position itself when using <link linkend="execute-current"><guimenuitem>Execute current</guimenuitem></link>.
 			</para>
 		</blockquote></simplesect>
-
-    <simplesect id="editor-follow-current-dir">
-      <title>Current directory follows active file</title><blockquote>
-      <para>
-        If this option is enabled, the file open dialog will default to the
-        directory of the current file in the editor. If no file is
-        loaded in the editor, the directory that is defined  through the
-        "Default directory" option will be selected.
-      </para>
-    </blockquote></simplesect>
-	</section>
+  </section>
 
   <section id="macro-options">
     <title>Macro options</title>

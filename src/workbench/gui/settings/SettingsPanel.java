@@ -224,13 +224,12 @@ public class SettingsPanel
 			// if no page is displayed, pack() will not work properly
 			// so we need to instantiate and display the two largest pages
 
-			// the editor page is the highest page
-			pageList.setSelectedIndex(1);
+			pageList.setSelectedIndex(15);
 			this.dialog.pack();
 			int h = dialog.getSize().height;
 
 			// the editor colors page is the widest page
-			pageList.setSelectedIndex(4);
+			pageList.setSelectedIndex(5);
 			this.dialog.pack();
 			int w = dialog.getSize().width;
 
