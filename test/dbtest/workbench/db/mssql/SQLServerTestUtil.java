@@ -41,7 +41,6 @@ import workbench.util.ArgumentParser;
  */
 public class SQLServerTestUtil
 {
-
 	public static final String TEST_USER = "wbjunit";
 	public static final String TEST_PWD = "wbjunit";
 	public static final String PROFILE_NAME = "WBJUnitMSSQL";

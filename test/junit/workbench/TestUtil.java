@@ -138,7 +138,7 @@ public class TestUtil
 
 	public String[] getArgs(boolean noTemplates)
 	{
-		String cmdline = "-nosettings -configdir='" + basedir + "' ";
+		String cmdline = "-nosettings -configdir='" + basedir + "' -Dworkbench.log.console=false ";
 
 		if (noTemplates)
 		{

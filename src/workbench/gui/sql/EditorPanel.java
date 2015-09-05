@@ -282,9 +282,8 @@ public class EditorPanel
 
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
 
+    // can happen for plain (non SQL) editor
 		if (token == null) return;
-
-		token.initKeywordMap(); // reset keywords, to get rid of old DBMS specific ones
 
 		if (aConnection != null)
 		{
@@ -312,10 +311,7 @@ public class EditorPanel
 		dbFunctions.addAll(helper.getSqlFunctions());
 		dbDatatypes.addAll(helper.getDataTypes());
 
-		token.addSqlFunctions(dbFunctions);
-		token.addDatatypes(dbDatatypes);
-		token.addSqlKeyWords(helper.getKeywords());
-		token.addOperators(helper.getOperators());
+    token.initKeywordMap(helper.getKeywords(), dbDatatypes, helper.getOperators(), dbFunctions);
 	}
 
 	@Override
@@ -346,14 +342,7 @@ public class EditorPanel
 	public void focusGained(FocusEvent e)
 	{
 		super.focusGained(e);
-    WbSwingUtilities.invokeLater(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        checkFileChange();
-      }
-    });
+    WbSwingUtilities.invokeLater(this::checkFileChange);
 	}
 
 	protected void checkFileChange()

@@ -249,7 +249,7 @@ keyword=(
 "CURSOR_NAME"|
 "CYCLE"|
 "DATABASE"|
-"DATABASE LINK"|
+"DATABASE{wsp}LINK"|
 "DATE"|
 "DAY"|
 "DECIMAL"|
@@ -402,6 +402,7 @@ keyword=(
 "SET"|
 "SHARE"|
 "SIMILAR"|
+"SIMILAR{wsp}TO"|
 "SMALLINT"|
 "SNAPSHOT"|
 "SUBSTRING"|

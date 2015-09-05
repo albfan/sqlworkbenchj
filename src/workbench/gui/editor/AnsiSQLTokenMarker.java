@@ -28,26 +28,6 @@ public class AnsiSQLTokenMarker
 		initKeywordMap();
 	}
 
-	public void addOperators(Collection<String> operators)
-	{
-		this.addKeywordList(operators, Token.KEYWORD1);
-	}
-
-	public void addDatatypes(Collection<String> types)
-	{
-		this.addKeywordList(types, Token.DATATYPE);
-	}
-
-	public void addSqlKeyWords(Collection<String> keywords)
-	{
-		this.addKeywordList(keywords, Token.KEYWORD1);
-	}
-
-	public void addSqlFunctions(Collection<String> functions)
-	{
-		this.addKeywordList(functions, Token.KEYWORD3);
-	}
-
 	private void addKeywordList(Collection<String> words, byte anId)
 	{
 		if (words == null) return;
@@ -73,23 +53,36 @@ public class AnsiSQLTokenMarker
 
 	public void initKeywordMap()
 	{
-		keywords = new KeywordMap(true, 80);
+		keywords = new KeywordMap(true, 150);
 		addKeywords();
 		addDataTypes();
 		addSystemFunctions();
 		addOperators();
 	}
 
+	public void initKeywordMap(Collection<String> keyWords, Collection<String> dataTypes, Collection<String> operators, Collection<String> functions)
+	{
+		keywords = new KeywordMap(true, 150);
+		addKeywordList(keyWords, Token.KEYWORD1);
+    addWbCommands();
+    addKeywordList(dataTypes, Token.DATATYPE);
+    addKeywordList(functions, Token.KEYWORD3);
+    addKeywordList(operators, Token.KEYWORD1);
+	}
+
+  private void addWbCommands()
+  {
+    CommandTester tester = new CommandTester();
+    for (String verb : tester.getCommands())
+    {
+      keywords.add(verb, Token.KEYWORD2);
+    }
+  }
+
 	private void addKeywords()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
 		addKeywordList(helper.getKeywords(), Token.KEYWORD1);
-
-		CommandTester tester = new CommandTester();
-		for (String verb : tester.getCommands())
-		{
-			keywords.add(verb, Token.KEYWORD2);
-		}
 	}
 
 	private void addDataTypes()

@@ -14,7 +14,7 @@ import javax.swing.text.Segment;
 
 /**
  * A <code>KeywordMap</code> is similar to a hashtable in that it maps keys
- * to values. However, the `keys' are Swing segments. This allows lookups of
+ * to values. However, the keys are Swing segments. This allows lookups of
  * text substrings without the overhead of creating a new string object.
  * <p>
  * This class is used by <code>CTokenMarker</code> to map keywords to ids.

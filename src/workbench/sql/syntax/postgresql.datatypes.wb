@@ -20,6 +20,7 @@ path
 point
 polygon
 serial
+smallserial
 text
 tsquery
 tsrange
@@ -27,3 +28,6 @@ tstzrange
 tsvector
 uuid
 xml
+json
+jsonb
+-binary

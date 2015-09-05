@@ -44,11 +44,11 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class SqlServerDMLTest
+public class SqlServerDDLTest
 	extends WbTestCase
 {
 
-	public SqlServerDMLTest()
+	public SqlServerDDLTest()
 	{
 		super("SqlServerDMLTest");
 	}

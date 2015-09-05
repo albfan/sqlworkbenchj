@@ -74,6 +74,7 @@ public class DummyInsertTest
 	{
 		TestUtil util = new TestUtil("dummyInsertGen2");
 		WbConnection con = util.getConnection();
+    assertNotNull(con);
 
     DummyInsert insert = null;
 		try
@@ -108,6 +109,7 @@ public class DummyInsertTest
 	{
 		TestUtil util = new TestUtil("dummyInsertGen3");
 		WbConnection con = util.getConnection();
+    assertNotNull(con);
 
 		try
 		{

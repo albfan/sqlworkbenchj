@@ -326,7 +326,17 @@
 			<title>Error prompt for scripts</title><blockquote>
 			<para>
 				This options defines what kind of dialog is shown when an error occurs during script execution.
+        The dialog always offers the choice to ignore the error, ignore all subsequent errors or to
+        cancel the script execution.
 			</para>
+      <para>
+        The following options are available:
+        <itemizedlist>
+          <listitem><simpara>Simple prompt - it shows only the statement number that failed.</simpara></listitem>
+          <listitem><simpara>Include error message - this includes the actual error message from the DBMS (this is the default)</simpara></listitem>
+          <listitem><simpara>Show statement and allow retry - this includes the error message and the complete SQL statement that failed. It allows to edit and re-submit the statement.</simpara></listitem>
+        </itemizedlist>
+      </para>
       </blockquote>
 		</simplesect>
 
