@@ -381,6 +381,11 @@ from syscat.triggers</string>
   </void>
 
   <void method="put">
+   <string>SQL Anywhere</string>
+   <object idref="list_asa_trg"/>
+  </void>
+
+  <void method="put">
    <string>FirstSQL/J</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

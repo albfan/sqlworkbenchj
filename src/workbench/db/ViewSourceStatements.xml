@@ -443,7 +443,7 @@ FROM _SYSTEM.SYS_TABLES
 
   <void method="put">
    <string>Adaptive Server Anywhere</string>
-   <object class="workbench.db.GetMetaDataSql">
+   <object id="asa_view_source"  class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>select viewtext from sysviews</string>
     </void>
@@ -454,6 +454,16 @@ FROM _SYSTEM.SYS_TABLES
      <string>vcreator</string>
     </void>
    </object>
+  </void>
+
+  <void method="put">
+   <string>Adaptive Server Enterprise</string>
+		<object idref="ase_proc_source"/>
+  </void>
+
+  <void method="put">
+   <string>SQL Anywhere</string>
+		<object idref="asa_view_source"/>
   </void>
 
   <void method="put">

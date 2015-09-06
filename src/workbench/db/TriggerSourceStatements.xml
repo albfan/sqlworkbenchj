@@ -386,6 +386,11 @@ and  sysobjects.type = &apos;TR&apos;</string>
   </void>
 
   <void method="put">
+    <string>SQL Anywhere</string>
+    <object idref="ase_trg_source"/>
+  </void>
+
+  <void method="put">
    <string>Firebird</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

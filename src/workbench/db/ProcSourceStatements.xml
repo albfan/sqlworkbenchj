@@ -325,6 +325,11 @@ and  sysobjects.type = &apos;P&apos;</string>
   </void>
 
   <void method="put">
+   <string>SQL Anywhere</string>
+		<object idref="ase_proc_source"/>
+  </void>
+
+  <void method="put">
    <string>INGRES</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
