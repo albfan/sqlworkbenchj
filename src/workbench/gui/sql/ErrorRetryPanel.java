@@ -45,6 +45,7 @@ import workbench.sql.ErrorDescriptor;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.parser.ScriptParser;
+import workbench.util.SqlUtil;
 
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -64,6 +65,7 @@ public class ErrorRetryPanel
   private EditorPanel sqlEditor;
   private StatementRunner stmtRunner;
   private ErrorDescriptor error;
+  private JPanel buttonPanel;
   private JButton retryButton;
   private JButton cancelButton;
   private JButton ignoreOneButton;
@@ -104,8 +106,21 @@ public class ErrorRetryPanel
       sql += "\n" + delimiterUsed.getDelimiter();
     }
 
+    String verb = SqlUtil.getSqlVerb(sql);
+    if ("select".equalsIgnoreCase(verb) || "with".equalsIgnoreCase(verb))
+    {
+      showSelectHint();
+    }
+
     sqlEditor.setText(sql);
     setCaretToError();
+  }
+
+  private void showSelectHint()
+  {
+    JLabel lbl = new JLabel("<html>Query results will <b>not</b> be displayed!</html>");
+    lbl.setBorder(new EmptyBorder(0,0,0,10));
+    buttonPanel.add(lbl, 0);
   }
 
   private void setCaretToError()
@@ -156,7 +171,7 @@ public class ErrorRetryPanel
     {
       sqlEditor.setDatabaseConnection(stmtRunner.getConnection());
     }
-    
+
     if (error != null && error.getOriginalStatement() != null)
     {
       sqlEditor.setText(error.getOriginalStatement());
@@ -208,7 +223,7 @@ public class ErrorRetryPanel
 
     toolPanel.add(replaceStatement, BorderLayout.LINE_START);
 
-    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+    buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
     buttonPanel.setBorder(new EmptyBorder(borderWith, 0, borderWith, 0));
     retryButton = new WbButton(ResourceMgr.getString("LblRetry"));
     retryButton.addActionListener(this);
@@ -408,7 +423,10 @@ public class ErrorRetryPanel
 		// creating the action will add it to the input map of the dialog
 		// which will enable the key
 		escAction = new EscAction(window, this);
-    escAction.addToInputMap(sqlEditor);
+
+    // the editor is using its own shortcut handling, so the ESC action
+    // also needs to be registered there
+    sqlEditor.addKeyBinding(escAction);
 
     window.getContentPane().add(this);
     if (!Settings.getInstance().restoreWindowSize(window, "workbench.gui.sql.retrywindow"))
