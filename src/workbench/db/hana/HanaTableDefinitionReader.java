@@ -41,7 +41,7 @@ import workbench.util.SqlUtil;
  *
  * The current JDBC drivers take up to 5 minutes(!) to retrieve the columns for a single table,
  * by using our own statement, we are avoiding this bug.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class HanaTableDefinitionReader
@@ -75,74 +75,83 @@ public class HanaTableDefinitionReader
   protected void processColumnsResultRow(ResultSet rs, ColumnIdentifier col)
     throws SQLException
   {
-    String generate = rs.getString("GENERATION_TYPE");
-    if (generate != null)
+    if (useJDBC())
     {
-      col.setDefaultValue(null);
-      col.setComputedColumnExpression("GENERATED " + generate);
-      col.setIsAutoincrement(true);
+      String generate = rs.getString("GENERATION_TYPE");
+      if (generate != null)
+      {
+        col.setDefaultValue(null);
+        col.setComputedColumnExpression("GENERATED " + generate);
+        col.setIsAutoincrement(true);
+      }
     }
   }
 
+  private boolean useJDBC()
+  {
+    if (dbConnection == null) return false;
+    return dbConnection.getDbSettings().getBoolProperty(PROP_USE_JDBC_GETCOLUMNS, false);
+  }
 
   @Override
   protected ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
     throws SQLException
   {
-		if (dbConnection.getDbSettings().getBoolProperty(PROP_USE_JDBC_GETCOLUMNS, false))
+		if (useJDBC())
 		{
 			return super.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
 		}
 
     String sql =
-              "select null as table_cat,  \n" +
-              "       schema_name as table_schem,  \n" +
-              "       table_name,  \n" +
-              "       column_name,  \n" +
-              "       case data_type_id \n" +
-              "         when -10 then 2011 \n" +
-              "         else data_type_id \n" +
-              "       end as data_type, \n" +
-              "       data_type_name as type_name,  \n" +
-              "       length as column_size, \n" +
-              "       null as buffer_length, \n" +
-              "       case data_type_name \n" +
-              "         when 'DECIMAL' then scale \n" +
-              "         else null \n" +
-              "       end as decimal_digits, \n" +
-              "       case is_nullable \n" +
-              "         when 'TRUE' then 1 \n" +
-              "         else 0 \n" +
-              "       end as nullable, \n" +
-              "       comments as remarks, \n" +
-              "       default_value as column_def, \n" +
-              "       null as sql_data_type, \n" +
-              "       null as sql_datetime_sub, \n" +
-              "       case data_type_name \n" +
-              "         when 'CHAR' then length \n" +
-              "         when 'NCHAR' then length \n" +
-              "         when 'VARCHAR' then length \n" +
-              "         when 'NVARCHAR' then length \n" +
-              "         else null \n" +
-              "       end as char_octet_length, \n" +
-              "       position as ordinal_position, \n" +
-              "       case is_nullable \n" +
-              "         when 'TRUE' then 'YES' \n" +
-              "         else 'NO' \n" +
-              "       end as is_nullable, \n" +
-              "       case  \n" +
-              "         when generation_type is not null then 'YES' \n" +
-              "         else 'NO' \n" +
-              "       end as is_generatedcolumn, \n" +
-              "       case  \n" +
-              "         when generation_type LIKE '%AS IDENTITY' then 'YES' \n" +
-              "         else 'NO' \n" +
-              "       end as is_autoincrement, \n" +
-              "       generation_type \n" +
-              "from sys.table_columns tc \n" +
-              "where table_name LIKE ? ESCAPE '\\' \n" +
-              "  and schema_name LIKE ? ESCAPE '\\' \n" +
-              "order by position";
+      "select null as table_cat,  \n" +
+      "       schema_name as table_schem,  \n" +
+      "       table_name,  \n" +
+      "       column_name,  \n" +
+      "       case data_type_id \n" +
+      "         when -10 then 2011 \n" +
+      "         else data_type_id \n" +
+      "       end as data_type, \n" +
+      "       data_type_name as type_name,  \n" +
+      "       length as column_size, \n" +
+      "       null as buffer_length, \n" +
+      "       case data_type_name \n" +
+      "         when 'DECIMAL' then scale \n" +
+      "         else null \n" +
+      "       end as decimal_digits, \n" +
+      "       case is_nullable \n" +
+      "         when 'TRUE' then 1 \n" +
+      "         else 0 \n" +
+      "       end as nullable, \n" +
+      "       comments as remarks, \n" +
+      "       default_value as column_def, \n" +
+      "       null as sql_data_type, \n" +
+      "       null as sql_datetime_sub, \n" +
+      "       case data_type_name \n" +
+      "         when 'CHAR' then length \n" +
+      "         when 'NCHAR' then length \n" +
+      "         when 'VARCHAR' then length \n" +
+      "         when 'NVARCHAR' then length \n" +
+      "         else null \n" +
+      "       end as char_octet_length, \n" +
+      "       position as ordinal_position, \n" +
+      "       case is_nullable \n" +
+      "         when 'TRUE' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_nullable, \n" +
+      "       case  \n" +
+      "         when generation_type is not null then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_generatedcolumn, \n" +
+      "       case  \n" +
+      "         when generation_type LIKE '%AS IDENTITY' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_autoincrement, \n" +
+      "       generation_type \n" +
+      "from sys.table_columns tc \n" +
+      "where table_name LIKE ? ESCAPE '\\' \n" +
+      "  and schema_name LIKE ? ESCAPE '\\' \n" +
+      "order by position";
+
     columnsStatement = dbConnection.getSqlConnection().prepareStatement(sql);
     columnsStatement.setString(1, tableNamePattern);
     columnsStatement.setString(2, schemaPattern);
