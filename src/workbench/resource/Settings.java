@@ -2818,7 +2818,7 @@ public class Settings
 	 */
 	public int getMaxLogfileSize()
 	{
-		return this.getIntProperty("workbench.log.maxfilesize", 5 * 1024 * 1024);
+		return this.getIntProperty("workbench.log.maxfilesize", 10 * 1024 * 1024);
 	}
 
 	public int getLogfileBackupCount()

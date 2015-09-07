@@ -22,7 +22,6 @@
  */
 package workbench.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -776,29 +775,6 @@ public class WbSwingUtilities
       messagePanel.add(createMessageLabel(line));
     }
     return messagePanel;
-  }
-
-  public static JComponent buildErrorContinueMessage(String message, String errorMessage)
-  {
-    JPanel messagePanel = getMultilineLabel(message);
-
-    Font messageFont = UIManager.getFont("OptionPane.messageFont");
-    FontMetrics fm = messagePanel.getFontMetrics(messageFont);
-    int vgap = fm.getHeight();
-
-    messagePanel.setBorder(new EmptyBorder(0, 0, vgap/4, 0));
-
-    JPanel panel = new JPanel(new BorderLayout(0, 0));
-    JComponent errorPanel = createErrorMessagePanel(errorMessage, PROP_ERROR_MSG_WRAP, GuiSettings.allowWordWrapForErrorMessage());
-
-    JLabel question = createMessageLabel(ResourceMgr.getString("MsgConfirmContinue"));
-    question.setBorder(new EmptyBorder(vgap/3, 0, vgap/3, 0));
-
-    panel.add(messagePanel, BorderLayout.PAGE_START);
-    panel.add(errorPanel, BorderLayout.CENTER);
-    panel.add(question, BorderLayout.PAGE_END);
-
-    return panel;
   }
 
 	public static int getYesNoIgnoreAll(Component caller, Object message)

@@ -95,7 +95,7 @@ import workbench.db.importer.DefaultTextImportOptions;
 import workbench.db.importer.ImportOptions;
 import workbench.db.importer.TextImportOptions;
 
-import workbench.gui.DialogInvoker;
+import workbench.gui.ErrorContinueDialog;
 import workbench.gui.MainWindow;
 import workbench.gui.MessageCreator;
 import workbench.gui.PanelReloader;
@@ -3685,25 +3685,8 @@ public class SqlPanel
 
   private int askContinue(final ErrorDescriptor errorDetails, final String question)
   {
-    // using the DialogInvoker makes sure that all components of the dialog are created and displayed on the EDT
-    MessageCreator creator = () ->
-    {
-      if (GuiSettings.getErrorPromptType() == ErrorPromptType.PromptWithErroressage && errorDetails != null && errorDetails.getErrorMessage() != null)
-      {
-        return WbSwingUtilities.buildErrorContinueMessage(question, errorDetails.getErrorMessage());
-      }
-      else
-      {
-        return question;
-      }
-    };
-
-    DialogInvoker invoker = new DialogInvoker();
-    int choice = invoker.getYesNoIgnoreAll(creator, this);
-    if (choice == JOptionPane.NO_OPTION)
-    {
-      choice = JOptionPane.CANCEL_OPTION;
-    }
+    ErrorContinueDialog invoker = new ErrorContinueDialog(errorDetails, question);
+    int choice = invoker.askContinue(this);
     return choice;
   }
 

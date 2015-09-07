@@ -119,7 +119,7 @@ public class ErrorRetryPanel
   private void showSelectHint()
   {
     JLabel lbl = new JLabel("<html>Query results will <b>not</b> be displayed!</html>");
-    lbl.setBorder(new EmptyBorder(0,0,0,10));
+    lbl.setBorder(new EmptyBorder(0,0,0,IconMgr.getInstance().getSizeForLabel() / 3));
     buttonPanel.add(lbl, 0);
   }
 
