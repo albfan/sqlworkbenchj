@@ -143,11 +143,7 @@ public class ValidatingDialog
 		JRootPane root = this.getRootPane();
 		root.setDefaultButton(optionButtons[0]);
 
-		if (addCancelButton)
-		{
-			esc = new EscAction(this, this);
-			//esc.addToInputMap(editor);
-		}
+    esc = new EscAction(this, this);
 
 		JPanel content = new JPanel();
 		content.setLayout(new BorderLayout());
@@ -156,7 +152,7 @@ public class ValidatingDialog
 		content.add(editor, BorderLayout.CENTER);
 		buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 0));
-		
+
 		int length = optionButtons.length + (cancelButton == null ? 0 : 1);
 		JComponent[] allButtons = new JComponent[length];
 		for (int i=0; i < optionButtons.length; i++)
