@@ -2184,7 +2184,7 @@ public class Settings
 
 	public boolean getCreateProfileBackup()
 	{
-		return getBoolProperty("workbench.profiles.createbackup", false);
+		return getBoolProperty("workbench.profiles.createbackup", true);
 	}
 
 	public void setCreateProfileBackup(boolean flag)
