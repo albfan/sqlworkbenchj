@@ -108,9 +108,9 @@ public class JsonRowDataConverter
 			String value = this.getValueAsFormattedString(row, c);
 
 			boolean isNull = (value == null);
-			if (value == null)
+			if (isNull)
 			{
-				value = getNullDisplay();
+				value = "null";
 			}
 
 			if (SqlUtil.isCharacterType(colType) && !isNull)
@@ -124,9 +124,10 @@ public class JsonRowDataConverter
 
 			result.append("\"");
 			result.append(this.metaData.getColumnName(c));
-			result.append("\": \"");
+			result.append("\": ");
+      if (!isNull) result.append('"');
 			result.append(value);
-			result.append('"');
+			if (!isNull) result.append('"');
 
 			currentColIndex ++;
 		}
