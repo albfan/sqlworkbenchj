@@ -130,10 +130,10 @@ public class ConnectionDescriptor
 		DbDriver driver = null;
     if (useCurrentDriver)
     {
-      String drvName = currentConnection.getProfile().getDriverName();
-      driver = ConnectionMgr.getInstance().findDriverByName(driverClass, drvName);
+      driverName = currentConnection.getProfile().getDriverName();
     }
-    else if (StringUtil.isNonEmpty(driverName))
+
+    if (StringUtil.isNonEmpty(driverName))
     {
       driver = ConnectionMgr.getInstance().findDriverByName(driverClass, driverName);
     }
