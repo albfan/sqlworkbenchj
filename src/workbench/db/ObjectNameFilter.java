@@ -245,4 +245,9 @@ public class ObjectNameFilter
 		return hash;
 	}
 
+  public void applyFilter(Collection<String> elements)
+  {
+    if (elements == null) return;
+    elements.removeIf(element -> isExcluded(element));
+  }
 }

@@ -2575,12 +2575,10 @@ public class DbMetadata
 			while (rs.next())
 			{
 				String cat = useColumnNames ? rs.getString("TABLE_CAT") : rs.getString(1);
-				if (cat == null) continue;
-
-				if (filter == null || !filter.isExcluded(cat))
-				{
-					result.add(cat);
-				}
+				if (StringUtil.isNonEmpty(cat))
+        {
+          result.add(cat);
+        }
 			}
 		}
 		catch (Exception e)
@@ -2601,6 +2599,12 @@ public class DbMetadata
 		{
 			result.clear();
 		}
+
+    if (filter != null)
+    {
+      filter.applyFilter(result);
+    }
+
 		Collections.sort(result);
 		return result;
 	}
@@ -2625,26 +2629,26 @@ public class DbMetadata
 	 * @param filter the ObjectNameFilter to apply
 	 * @return a list of available schemas if supported by the database
 	 * @see ObjectNameFilter#isExcluded(java.lang.String)
+   * @see ObjectNameFilter#applyFilter(java.util.Collection)
 	 */
 	public List<String> getSchemas(ObjectNameFilter filter)
 	{
-		ArrayList<String> result = new ArrayList<>();
+		List<String> result = new ArrayList<>();
 		ResultSet rs = null;
 
 		boolean useColumnNames = dbSettings.useColumnNameForMetadata();
-		try
-		{
-			rs = this.metaData.getSchemas();
-			while (rs.next())
-			{
-				String schema = useColumnNames ? rs.getString("TABLE_SCHEM") : rs.getString(1);
-				if (schema == null)	continue;
-				if (filter == null || !filter.isExcluded(schema))
-				{
-					result.add(schema);
-				}
-			}
-		}
+    try
+    {
+      rs = this.metaData.getSchemas();
+      while (rs.next())
+      {
+        String schema = useColumnNames ? rs.getString("TABLE_SCHEM") : rs.getString(1);
+        if (StringUtil.isNonEmpty(schema))
+        {
+          result.add(schema);
+        }
+      }
+    }
 		catch (Exception e)
 		{
 			LogMgr.logError("DbMetadata.getSchemas()", "Error retrieving schemas: " + e.getMessage(), null);
@@ -2661,8 +2665,14 @@ public class DbMetadata
 		if (additionalSchemas != null)
 		{
 			result.addAll(additionalSchemas);
-			Collections.sort(result);
 		}
+
+    if (filter != null)
+    {
+      filter.applyFilter(result);
+    }
+
+    Collections.sort(result);
 		return result;
 	}
 
