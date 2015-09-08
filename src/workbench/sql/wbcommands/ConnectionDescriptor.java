@@ -73,6 +73,7 @@ public class ConnectionDescriptor
 		String user = null;
 		String pwd = null;
 		String driverClass = null;
+    String driverName = null;
 		jarfile = null;
     boolean useCurrentDriver = false;
 
@@ -94,6 +95,10 @@ public class ConnectionDescriptor
 			if (lower.startsWith(AppArguments.ARG_CONN_DRIVER + "=") || lower.startsWith(AppArguments.ARG_CONN_DRIVER_CLASS + "="))
 			{
 				driverClass = getValue(element);
+			}
+			if (lower.startsWith(AppArguments.ARG_CONN_DRIVER_NAME + "="))
+			{
+				driverName = getValue(element);
 			}
 			if (lower.startsWith("jar") || lower.startsWith(AppArguments.ARG_CONN_JAR + "="))
 			{
@@ -127,6 +132,10 @@ public class ConnectionDescriptor
     {
       String drvName = currentConnection.getProfile().getDriverName();
       driver = ConnectionMgr.getInstance().findDriverByName(driverClass, drvName);
+    }
+    else if (StringUtil.isNonEmpty(driverName))
+    {
+      driver = ConnectionMgr.getInstance().findDriverByName(driverClass, driverName);
     }
     else
     {

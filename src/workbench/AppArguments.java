@@ -56,6 +56,7 @@ public class AppArguments
   public static final String ARG_PROFILE_GROUP = "profilegroup";
   public static final String ARG_CONN_URL = "url";
   public static final String ARG_CONN_DRIVER = "driver";
+  public static final String ARG_CONN_DRIVER_NAME = "driverName";
   public static final String ARG_CONN_DRIVER_CLASS = "driverclass";
   public static final String ARG_CONN_JAR = "driverjar";
   public static final String ARG_CONN_USER = "username";
