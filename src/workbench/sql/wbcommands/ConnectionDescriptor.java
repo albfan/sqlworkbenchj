@@ -106,9 +106,13 @@ public class ConnectionDescriptor
 			}
 		}
 
-    if (url == null && currentConnection != null)
+    if ((url == null && currentConnection != null))
     {
       url = currentConnection.getUrl();
+      useCurrentDriver = true;
+    }
+    else if (isSameDBMS(currentConnection, url))
+    {
       useCurrentDriver = true;
     }
 
@@ -117,22 +121,25 @@ public class ConnectionDescriptor
 			throw new InvalidConnectionDescriptor("No JDBC URL specified in connection specification", ResourceMgr.getString("ErrConnectURLMissing"));
 		}
 
-		if (StringUtil.isEmptyString(driverClass))
-		{
-			driverClass = findDriverClassFromUrl(url);
-		}
-
-		if (StringUtil.isEmptyString(driverClass))
-		{
-			throw new InvalidConnectionDescriptor("No JDBC URL specified in connection specification", ResourceMgr.getFormattedString("ErrConnectDrvNotFound", url));
-		}
-
-		DbDriver driver = null;
     if (useCurrentDriver)
     {
       driverName = currentConnection.getProfile().getDriverName();
+      driverClass = currentConnection.getProfile().getDriverclass();
+    }
+    else
+    {
+      if (StringUtil.isEmptyString(driverClass))
+      {
+        driverClass = findDriverClassFromUrl(url);
+      }
+
+      if (StringUtil.isEmptyString(driverClass) )
+      {
+        throw new InvalidConnectionDescriptor("No JDBC URL specified in connection specification", ResourceMgr.getFormattedString("ErrConnectDrvNotFound", url));
+      }
     }
 
+		DbDriver driver = null;
     if (StringUtil.isNonEmpty(driverName))
     {
       driver = ConnectionMgr.getInstance().findDriverByName(driverClass, driverName);
@@ -233,4 +240,12 @@ public class ConnectionDescriptor
 		}
 		return drv;
 	}
+
+  private boolean isSameDBMS(WbConnection connection, String url)
+  {
+    if (StringUtil.isEmptyString(url)) return false;
+    if (connection == null) return false;
+    String conPrefix = getUrlPrefix(connection.getUrl());
+    return conPrefix.equals(getUrlPrefix(url));
+  }
 }
