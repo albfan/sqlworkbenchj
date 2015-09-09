@@ -152,6 +152,10 @@ public class EditConnectScriptsPanel
 	{
 		EditConnectScriptsPanel p = new EditConnectScriptsPanel(profile);
 		ValidatingDialog d = new ValidatingDialog(owner, ResourceMgr.getString("LblEditConnScripts"), p);
+    p.keepAliveScriptEditor.addKeyBinding(d.getESCAction());
+    p.postConnectEditor.addKeyBinding(d.getESCAction());
+    p.preDisconnectEditor.addKeyBinding(d.getESCAction());
+
 		boolean hasSize = Settings.getInstance().restoreWindowSize(d,"workbench.gui.connectscripts.window");
 		if (!hasSize)
 		{

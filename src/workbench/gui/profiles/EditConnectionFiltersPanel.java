@@ -209,6 +209,8 @@ public class EditConnectionFiltersPanel
 	{
 		final EditConnectionFiltersPanel p = new EditConnectionFiltersPanel(profile);
 		ValidatingDialog d = new ValidatingDialog(owner, ResourceMgr.getString("LblSchemaFilterBtn"), p);
+    p.catalogFilterEditor.addKeyBinding(d.getESCAction());
+    p.schemaFilterEditor.addKeyBinding(d.getESCAction());
 		boolean hasSize = Settings.getInstance().restoreWindowSize(d, "workbench.gui.connectionfilter.window");
 		if (!hasSize)
 		{
