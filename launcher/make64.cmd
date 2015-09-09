@@ -7,7 +7,7 @@ echo java.not.found=No suitable Java version could found. Please make sure you h
 echo java.failed=Java failed to startup successfully. Please make sure you have 64-bit Java 8 installed>>err.ini
 
 echo main.class=workbench.WbStarter>t.ini
-echo vm.heapsize.max.percent=50>>t.ini
+echo vm.heapsize.min.percent=50>>t.ini
 
 copy /b t.ini+workbench.ini+err.ini sqlworkbench.ini > nul
 
