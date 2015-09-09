@@ -48,6 +48,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
+import workbench.gui.actions.WbAction;
 
 
 /**
@@ -178,6 +179,11 @@ public class ValidatingDialog
 		this.addWindowListener(this);
 	}
 
+  public WbAction getESCAction()
+  {
+    return esc;
+  }
+  
 	public int getSelectedOption()
 	{
 		return this.selectedOption;
