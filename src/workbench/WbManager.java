@@ -792,7 +792,7 @@ public final class WbManager
 			value = cmdLine.getValue(AppArguments.ARG_LIBDIR);
 			if (!StringUtil.isEmptyString(value))
 			{
-				System.setProperty("workbench.libdir", value);
+				System.setProperty(Settings.PROP_LIBDIR, value);
 			}
 
 			value = cmdLine.getValue(AppArguments.ARG_LOGFILE);

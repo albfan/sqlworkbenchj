@@ -65,6 +65,7 @@ public class RunMacroAction
 		super();
 		this.macro = def;
 		this.client = aClient;
+
 		if (def == null)
 		{
 			String title = ResourceMgr.getPlainString("LblRunMacro");
@@ -80,10 +81,9 @@ public class RunMacroAction
 			{
 				menuTitle = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
 			}
-			this.setMenuText(menuTitle);
-			String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
-			desc = StringUtil.replace(desc, "%macro%", "'" + macro.getName() + "'");
-			this.putValue(Action.SHORT_DESCRIPTION, desc);
+			setMenuText(menuTitle);
+      initTooltip();
+
 			StoreableKeyStroke key = macro.getShortcut();
 			if (key != null)
 			{
@@ -121,10 +121,22 @@ public class RunMacroAction
 		}
 	}
 
+  private void initTooltip()
+  {
+    if (macro == null) return;
+    String desc = macro.getTooltip();
+    if (desc == null)
+    {
+      desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
+      desc = StringUtil.replace(desc, "%macro%", "'" + macro.getName() + "'");
+    }
+    putValue(Action.SHORT_DESCRIPTION, desc);
+  }
 
 	public void setMacro(MacroDefinition def)
 	{
 		this.macro = def;
+    initTooltip();
 	}
 
 	private void executeStandardMacro(ActionEvent e)
@@ -188,7 +200,7 @@ public class RunMacroAction
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		
+
 		if (dataTable == null)
 		{
 			setEnabled(false);

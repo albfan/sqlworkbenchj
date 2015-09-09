@@ -43,6 +43,7 @@ public class MacroDefinition
 {
 	private String name;
 	private String text;
+  private String tooltip;
 	private int sortOrder;
 	private boolean modified;
 	private StoreableKeyStroke shortcut;
@@ -61,6 +62,17 @@ public class MacroDefinition
 		this.name = macroName;
 		this.text = macroText;
 	}
+
+  public String getTooltip()
+  {
+    return tooltip;
+  }
+
+  public void setTooltip(String tip)
+  {
+    modified = modified || StringUtil.stringsAreNotEqual(tooltip, tip);
+    this.tooltip = tip;
+  }
 
 	public void setExpandWhileTyping(boolean flag)
 	{
@@ -126,7 +138,7 @@ public class MacroDefinition
 
 	public void setName(String macroName)
 	{
-		modified = modified || !StringUtil.equalStringOrEmpty(macroName, name);
+		modified = modified || StringUtil.stringsAreNotEqual(this.name, macroName);
 		this.name = macroName;
 	}
 
@@ -137,13 +149,14 @@ public class MacroDefinition
 
 	public void setText(String macroText)
 	{
-		modified = modified || !StringUtil.equalStringOrEmpty(text, macroText);
+		modified = modified || StringUtil.stringsAreNotEqual(this.text, macroText);
 		this.text = macroText;
 	}
 
 	public void copyTo(MacroDefinition def)
 	{
 		def.setName(this.name);
+    def.setTooltip(this.tooltip);
 		def.setText(this.text);
 		def.setSortOrder(this.sortOrder);
 		def.setVisibleInMenu(this.showInMenu);
@@ -155,10 +168,10 @@ public class MacroDefinition
 
 	public MacroDefinition createCopy()
 	{
-		MacroDefinition def = new MacroDefinition(this.name, this.text);
-		this.copyTo(def);
-		def.modified = false;
-		return def;
+		MacroDefinition newMacro = new MacroDefinition();
+		this.copyTo(newMacro);
+		newMacro.modified = false;
+		return newMacro;
 	}
 
 	@Override

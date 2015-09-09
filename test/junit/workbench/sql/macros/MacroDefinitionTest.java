@@ -52,6 +52,7 @@ public class MacroDefinitionTest
 		macro.setAppendResult(true);
 		StoreableKeyStroke key = new StoreableKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
 		macro.setShortcut(key);
+    macro.setTooltip("This is a tooltip");
 
 		MacroDefinition copy = macro.createCopy();
 		assertTrue(copy.getExpandWhileTyping());
@@ -64,6 +65,7 @@ public class MacroDefinitionTest
 		assertEquals(5, copy.getSortOrder());
 		assertEquals(macro.getName(), copy.getName());
 		assertEquals(macro.getText(), copy.getText());
+    assertEquals(macro.getTooltip(), copy.getTooltip());
 	}
 
 	@Test
@@ -89,5 +91,8 @@ public class MacroDefinitionTest
 		macro.resetModified();
 		macro.setVisibleInPopup(false);
 		assertTrue(macro.isModified());
+
+    macro.setTooltip("Some witty comment");
+    assertTrue(macro.isModified());
 	}
 }

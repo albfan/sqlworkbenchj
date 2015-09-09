@@ -58,9 +58,9 @@ public class ConnectionDescriptor
 	/**
 	 * Parses a compact connection string in the format username=foo,pwd=bar,url=...,driver=com...,jar=
 	 *
-	 * @param connectionString  the connection string to parse
-	 * @param driverString      the driver string to parse {@link #parseDriver(java.lang.String) }
-   * @param defaultUrl        if no URL is specified, use this URL
+	 * @param connectionString    the connection string to parse
+	 * @param currentConnection   the current connection, may be null
+   *
 	 * @return a connection profile to be used
 	 */
 	public ConnectionProfile parseDefinition(String connectionString, WbConnection currentConnection)
@@ -106,7 +106,7 @@ public class ConnectionDescriptor
 			}
 		}
 
-    if ((url == null && currentConnection != null))
+    if (url == null && currentConnection != null)
     {
       url = currentConnection.getUrl();
       useCurrentDriver = true;
@@ -151,7 +151,7 @@ public class ConnectionDescriptor
 
 		ConnectionProfile result = new ConnectionProfile();
 		result.setTemporaryProfile(true);
-		result.setName("temp-profile-"+instance);
+		result.setName("$temp-profile-"+instance);
 		result.setDriver(driver);
 		result.setStoreExplorerSchema(false);
 		result.setUrl(url);

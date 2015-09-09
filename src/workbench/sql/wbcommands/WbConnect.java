@@ -123,7 +123,7 @@ public class WbConnect
 
 		if (StringUtil.isEmptyString(profName))
 		{
-			profile = BatchRunner.createCmdLineProfile(cmdLine, currentConnection);
+			profile = BatchRunner.createCmdLineProfile(cmdLine, currentConnection, getBaseDir());
 		}
 		else
 		{

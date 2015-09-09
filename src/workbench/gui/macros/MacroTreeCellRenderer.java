@@ -87,7 +87,14 @@ public class MacroTreeCellRenderer
 				{
 					setIcon(IconMgr.getInstance().getLabelIcon("macro"));
 				}
-				setToolTipText("<html><pre>" + HtmlUtil.escapeXML(StringUtil.getMaxSubstring(macro.getText(), 500)) + "</pre></html>");
+        if (macro.getTooltip() == null)
+        {
+          setToolTipText("<html><pre>" + HtmlUtil.escapeXML(StringUtil.getMaxSubstring(macro.getText(), 500)) + "</pre></html>");
+        }
+        else
+        {
+          setToolTipText(macro.getTooltip());
+        }
 			}
 			else
 			{

@@ -89,7 +89,7 @@ public class MacroDefinitionPanel
 		macroEditor.showFormatSql();
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = 4;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.fill = GridBagConstraints.BOTH;
@@ -154,6 +154,10 @@ public class MacroDefinitionPanel
 		StringPropertyEditor name = (StringPropertyEditor) tfName;
 		name.setSourceObject(macro, "name");
 		name.setImmediateUpdate(true);
+
+		StringPropertyEditor tip = (StringPropertyEditor) tfTooltip;
+		tip.setSourceObject(macro, "tooltip");
+		tip.setImmediateUpdate(true);
 
 		updateShortcutDisplay();
 		appendResults.setEnabled(!doExpansion.isSelected());
@@ -272,6 +276,8 @@ public class MacroDefinitionPanel
 
     jLabel1 = new JLabel();
     tfName = new StringPropertyEditor();
+    jLabel2 = new JLabel();
+    tfTooltip = new StringPropertyEditor();
     optionsPanel = new JPanel();
     visibleInMenu = new BooleanPropertyEditor();
     jSeparator1 = new JSeparator();
@@ -299,6 +305,23 @@ public class MacroDefinitionPanel
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(5, 4, 0, 5);
     add(tfName, gridBagConstraints);
+
+    jLabel2.setText(ResourceMgr.getString("LblMacroToolTip")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 0);
+    add(jLabel2, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 9;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(5, 4, 0, 5);
+    add(tfTooltip, gridBagConstraints);
 
     optionsPanel.setBorder(BorderFactory.createEtchedBorder());
     optionsPanel.setLayout(new GridBagLayout());
@@ -364,7 +387,7 @@ public class MacroDefinitionPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
@@ -403,7 +426,7 @@ public class MacroDefinitionPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
@@ -476,6 +499,7 @@ public class MacroDefinitionPanel
   private JButton clearShortcutButton;
   private JCheckBox doExpansion;
   private JLabel jLabel1;
+  private JLabel jLabel2;
   private JSeparator jSeparator1;
   private JSeparator jSeparator2;
   private JSeparator jSeparator3;
@@ -483,6 +507,7 @@ public class MacroDefinitionPanel
   private JLabel shortcutLabel;
   private JPanel shortcutPanel;
   private JTextField tfName;
+  private JTextField tfTooltip;
   private JCheckBox visibleInMenu;
   private JCheckBox visibleInPopup;
   // End of variables declaration//GEN-END:variables

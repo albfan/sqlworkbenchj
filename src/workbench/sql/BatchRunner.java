@@ -1152,10 +1152,10 @@ public class BatchRunner
 
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
   {
-    return createCmdLineProfile(cmdLine, null);
+    return createCmdLineProfile(cmdLine, null, null);
   }
 
-	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, WbConnection currentConnection)
+	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, WbConnection currentConnection, String baseDir)
 	{
 		if (!hasConnectionArgument(cmdLine)) return null;
 
