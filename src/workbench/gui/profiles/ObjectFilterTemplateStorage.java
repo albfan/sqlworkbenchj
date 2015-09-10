@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.event.ListDataListener;
+
 import workbench.resource.Settings;
 
 import workbench.db.ObjectNameFilter;
@@ -31,17 +34,14 @@ import workbench.db.ObjectNameFilter;
  *
  * @author Thomas Kellerer
  */
-public class ObjectFilterTemplateMgr
+public class ObjectFilterTemplateStorage
+  implements ComboBoxModel<ObjectFilterTemplate>
 {
   private final String prefix = "workbench.gui.sql.filter.template.";
-  private List<ObjectFilterTemplate> templates;
+  private final List<ObjectFilterTemplate> templates;
+  private ObjectFilterTemplate selectedItem;
 
-  public ObjectFilterTemplateMgr()
-  {
-    readTemplates();
-  }
-
-  private void readTemplates()
+  public ObjectFilterTemplateStorage()
   {
     List<String> keys = Settings.getInstance().getKeysLike(prefix + "name");
     templates = new ArrayList<>(keys.size());
@@ -74,7 +74,7 @@ public class ObjectFilterTemplateMgr
       Settings.getInstance().setProperty(defKey, template.getFilter().getFilterString());
     }
   }
-  
+
   public void addTemplate(String name, String definition)
   {
     ObjectNameFilter filter = new ObjectNameFilter();
@@ -93,6 +93,40 @@ public class ObjectFilterTemplateMgr
     if (key == null) return null;
     int pos = key.lastIndexOf('.');
     return key.substring(pos + 1);
+  }
+
+  @Override
+  public void setSelectedItem(Object anItem)
+  {
+    selectedItem = (ObjectFilterTemplate)anItem;
+  }
+
+  @Override
+  public Object getSelectedItem()
+  {
+    return selectedItem;
+  }
+
+  @Override
+  public int getSize()
+  {
+    return templates.size();
+  }
+
+  @Override
+  public ObjectFilterTemplate getElementAt(int index)
+  {
+    return templates.get(index);
+  }
+
+  @Override
+  public void addListDataListener(ListDataListener l)
+  {
+  }
+
+  @Override
+  public void removeListDataListener(ListDataListener l)
+  {
   }
 
 }
