@@ -26,7 +26,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
@@ -36,7 +35,6 @@ import java.util.TreeSet;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -347,7 +345,7 @@ public class IniProfileStorage
     }
 
     ObjectNameFilter filter = profile.getSchemaFilter();
-    String expr = getFilterString(filter);
+    String expr = (filter != null ? filter.getFilterString() : null);
     if (expr != null && filter != null)
     {
       props.setProperty(PROP_PREFIX + key + PROP_SCHEMA_FILTER, expr);
@@ -355,7 +353,7 @@ public class IniProfileStorage
     }
 
     filter = profile.getCatalogFilter();
-    expr = getFilterString(filter);
+    expr = (filter != null ? filter.getFilterString() : null);
     if (expr != null && filter != null)
     {
       props.setProperty(PROP_PREFIX + key + PROP_CATALOG_FILTER, expr);
@@ -446,26 +444,5 @@ public class IniProfileStorage
     return filter;
   }
 
-  private String getFilterString(ObjectNameFilter filter)
-  {
-    if (filter == null) return null;
 
-    Collection<String> expressions = filter.getFilterExpressions();
-    if (CollectionUtil.isEmpty(expressions)) return null;
-    String result = "";
-    for (String exp : expressions)
-    {
-      if (result.length() > 0) result += ";";
-
-      if (exp.indexOf(';') > -1)
-      {
-        result += "\"" + exp + "\"";
-      }
-      else
-      {
-        result += exp;
-      }
-    }
-    return result;
-  }
 }

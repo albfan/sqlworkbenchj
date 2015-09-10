@@ -250,4 +250,25 @@ public class ObjectNameFilter
     if (elements == null) return;
     elements.removeIf(element -> isExcluded(element));
   }
+
+  public String getFilterString()
+  {
+    Collection<String> expressions = getFilterExpressions();
+    if (CollectionUtil.isEmpty(expressions)) return null;
+    String result = "";
+    for (String exp : expressions)
+    {
+      if (result.length() > 0) result += ";";
+
+      if (exp.indexOf(';') > -1)
+      {
+        result += "\"" + exp + "\"";
+      }
+      else
+      {
+        result += exp;
+      }
+    }
+    return result;
+  }
 }

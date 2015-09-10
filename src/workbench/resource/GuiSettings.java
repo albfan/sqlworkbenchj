@@ -1192,7 +1192,11 @@ public class GuiSettings
     Settings.getInstance().setProperty("workbench.sql.error.prompt.show.error", flag);
   }
 
-	public static DataTooltipType showSQLAsDataTooltip()
+	public static void setDataTooltipType(DataTooltipType type)
+  {
+    Settings.getInstance().setProperty("workbench.gui.data.sql.tooltip", type.name());
+  }
+	public static DataTooltipType getDataTooltipType()
 	{
     String value = Settings.getInstance().getProperty("workbench.gui.data.sql.tooltip", DataTooltipType.full.name());
     try

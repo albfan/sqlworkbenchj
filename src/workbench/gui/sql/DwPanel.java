@@ -1040,12 +1040,12 @@ public class DwPanel
 
 	public void showGeneratingSQLAsTooltip()
 	{
-		showGeneratingSQLAsTooltip(maxRowsReached(), GuiSettings.showSQLAsDataTooltip());
+		showGeneratingSQLAsTooltip(maxRowsReached(), GuiSettings.getDataTooltipType());
 	}
 
   public void showGeneratingSQLAsTooltip(boolean includeMaxRowsWarning)
   {
-    showGeneratingSQLAsTooltip(includeMaxRowsWarning, GuiSettings.showSQLAsDataTooltip());
+    showGeneratingSQLAsTooltip(includeMaxRowsWarning, GuiSettings.getDataTooltipType());
   }
 
   public void showGeneratingSQLAsTooltip(DataTooltipType tooltipType)
