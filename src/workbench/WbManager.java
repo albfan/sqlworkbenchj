@@ -893,7 +893,7 @@ public final class WbManager
 
 			if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
 			{
-				LogMgr.logInfo("WbManager.init()", "The '" + AppArguments.ARG_NOSETTNGS + "' option was specified on the commandline. Global settings will not be saved!");
+				LogMgr.logInfo("WbManager.init()", "The '" + AppArguments.ARG_NOSETTNGS + "' option was specified on the commandline. Global settings will not be saved.");
 			}
 		}
 		catch (Exception e)
