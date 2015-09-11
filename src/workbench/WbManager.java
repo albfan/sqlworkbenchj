@@ -1190,14 +1190,12 @@ public final class WbManager
 	public static void main(String[] args)
 	{
     boolean runConsole = false;
-    boolean hasScripts = false;
 
     if (GraphicsEnvironment.isHeadless())
     {
       // no gui available --> default to console mode
       initConsoleMode(args);
       runConsole = true;
-      hasScripts = wb.cmdLine.isArgPresent(AppArguments.ARG_SCRIPT) || wb.cmdLine.isArgPresent(AppArguments.ARG_COMMAND);
     }
 		else
     {
@@ -1205,6 +1203,7 @@ public final class WbManager
       wb.cmdLine.parse(args);
     }
 
+    boolean hasScripts = wb.cmdLine.isArgPresent(AppArguments.ARG_SCRIPT) || wb.cmdLine.isArgPresent(AppArguments.ARG_COMMAND);
     boolean showHelp = wb.cmdLine.isArgPresent("help");
     boolean showVersion = wb.cmdLine.isArgPresent("version");
 
