@@ -1097,19 +1097,11 @@ public final class WbManager
 	{
     System.setProperty("workbench.log.console", "false");
 		wb = new WbManager(false);
-		wb.cmdLine.removeArgument(AppArguments.ARG_ABORT);
-		wb.cmdLine.removeArgument(AppArguments.ARG_SUCCESS_SCRIPT);
-		wb.cmdLine.removeArgument(AppArguments.ARG_ERROR_SCRIPT);
 		wb.cmdLine.removeArgument(AppArguments.ARG_SHOW_PUMPER);
 		wb.cmdLine.removeArgument(AppArguments.ARG_SHOW_DBEXP);
 		wb.cmdLine.removeArgument(AppArguments.ARG_SHOW_SEARCHER);
-		wb.cmdLine.removeArgument(AppArguments.ARG_SCRIPT_ENCODING);
 		wb.cmdLine.removeArgument(AppArguments.ARG_CONN_SEPARATE);
-		wb.cmdLine.removeArgument(AppArguments.ARG_SCRIPT);
 		wb.cmdLine.removeArgument(AppArguments.ARG_WORKSPACE);
-		wb.cmdLine.removeArgument(AppArguments.ARG_CONSOLIDATE_LOG);
-		wb.cmdLine.removeArgument(AppArguments.ARG_PROFILE_STORAGE);
-		wb.cmdLine.removeArgument(AppArguments.ARG_EXTENSION);
 		wb.readParameters(args);
 		wb.runMode = RunMode.Console;
 		ConnectionMgr.getInstance().setReadTemplates(false);
