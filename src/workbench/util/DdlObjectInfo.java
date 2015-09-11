@@ -150,7 +150,14 @@ public class DdlObjectInfo
         }
 				else
         {
-          this.objectName = SqlUtil.removeObjectQuotes(name.getContents());
+          if (next != null && name.getContents().endsWith("."))
+          {
+            this.objectName = SqlUtil.removeObjectQuotes(name.getContents()) + SqlUtil.removeObjectQuotes(next.getContents());
+          }
+          else
+          {
+            this.objectName = SqlUtil.removeObjectQuotes(name.getContents());
+          }
         }
 			}
 		}

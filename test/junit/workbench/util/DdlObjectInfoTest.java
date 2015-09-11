@@ -108,6 +108,12 @@ public class DdlObjectInfoTest
 		assertTrue(info.isValid());
     assertEquals("SYSTEM", info.getObjectType());
     assertNull(info.getObjectName());
+
+		sql = "alter index FOO.\"BAR_IDX\" rebuild tablespace users;";
+		info = new DdlObjectInfo(sql, ParserType.Oracle);
+		assertTrue(info.isValid());
+    assertEquals("INDEX", info.getObjectType());
+    assertEquals("FOO.BAR_IDX", info.getObjectName());
   }
 
 	@Test

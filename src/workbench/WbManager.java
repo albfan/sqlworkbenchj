@@ -362,7 +362,7 @@ public final class WbManager
 	 * @return true if the preferences were saved successfully
 	 *         false if at least on MainWindow "refused" to close
 	 */
-	private boolean saveWindowSettings()
+	private boolean storeWindowSettings()
 	{
 		// no settings should be saved, pretend everything was done.
 		if (!this.writeSettings) return true;
@@ -425,7 +425,7 @@ public final class WbManager
 
 	public boolean canExit()
 	{
-		if (this.saveWindowSettings())
+		if (this.storeWindowSettings())
 		{
 			if (Settings.getInstance().wasExternallyModified())
 			{
