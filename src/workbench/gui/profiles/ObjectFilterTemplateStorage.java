@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.ComboBoxModel;
+import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import workbench.resource.Settings;
@@ -37,12 +38,14 @@ import workbench.db.ObjectNameFilter;
 public class ObjectFilterTemplateStorage
   implements ComboBoxModel<ObjectFilterTemplate>
 {
-  private final String prefix = "workbench.gui.sql.filter.template.";
+  private final String prefix;
   private final List<ObjectFilterTemplate> templates;
   private ObjectFilterTemplate selectedItem;
+  private List<ListDataListener> listener = new ArrayList<>(1);
 
-  public ObjectFilterTemplateStorage()
+  public ObjectFilterTemplateStorage(TemplateType type)
   {
+    prefix = "workbench.gui.object.filter.template."  + type.name().toLowerCase() + ".";
     List<String> keys = Settings.getInstance().getKeysLike(prefix + "name");
     templates = new ArrayList<>(keys.size());
     for (String key : keys)
@@ -52,9 +55,12 @@ public class ObjectFilterTemplateStorage
       if (idx != null && name != null)
       {
         String defKey = prefix + idx + ".definition";
+        String inclKey = prefix + idx + ".include";
         String def = Settings.getInstance().getProperty(defKey, null);
+        boolean include = Settings.getInstance().getBoolProperty(inclKey, true);
         ObjectNameFilter filter = new ObjectNameFilter();
         filter.setExpressionList(def);
+        filter.setInclusionFilter(include);
         ObjectFilterTemplate template = new ObjectFilterTemplate(name, filter);
         templates.add(template);
       }
@@ -68,19 +74,20 @@ public class ObjectFilterTemplateStorage
     for (int i=0; i < templates.size(); i++)
     {
       String nameKey = prefix + "name." + Integer.toString(i);
-      String defKey = prefix + "." + Integer.toString(i) + ".definition";
+      String defKey = prefix + Integer.toString(i) + ".definition";
+      String inclKey = prefix + Integer.toString(i) + ".include";
       ObjectFilterTemplate template = templates.get(i);
       Settings.getInstance().setProperty(nameKey, template.getName());
       Settings.getInstance().setProperty(defKey, template.getFilter().getFilterString());
+      Settings.getInstance().setProperty(inclKey, template.getFilter().isInclusionFilter());
     }
   }
 
-  public void addTemplate(String name, String definition)
+  public void addTemplate(String name, ObjectNameFilter filter)
   {
-    ObjectNameFilter filter = new ObjectNameFilter();
-    filter.setExpressionList(definition);
     ObjectFilterTemplate template = new ObjectFilterTemplate(name, filter);
     templates.add(template);
+    fireItemAdded();
   }
 
   public List<ObjectFilterTemplate> getTemplates()
@@ -102,7 +109,7 @@ public class ObjectFilterTemplateStorage
   }
 
   @Override
-  public Object getSelectedItem()
+  public ObjectFilterTemplate getSelectedItem()
   {
     return selectedItem;
   }
@@ -122,11 +129,22 @@ public class ObjectFilterTemplateStorage
   @Override
   public void addListDataListener(ListDataListener l)
   {
+    listener.add(l);
   }
 
   @Override
   public void removeListDataListener(ListDataListener l)
   {
+    listener.remove(l);
   }
 
+  private void fireItemAdded()
+  {
+    if (listener.isEmpty()) return;
+    ListDataEvent evt = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, templates.size() - 1, templates.size() - 1);
+    for (ListDataListener l : listener)
+    {
+      l.contentsChanged(evt);
+    }
+  }
 }
