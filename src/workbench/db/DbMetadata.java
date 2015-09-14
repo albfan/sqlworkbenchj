@@ -158,6 +158,7 @@ public class DbMetadata
 	private final Set<String> reservedWords = CollectionUtil.caseInsensitiveSet();
 
 	private String baseTableTypeName;
+  private String mviewTypeName;
 
 	private Set<String> tableTypesList;
   private Set<String> viewTypesList;
@@ -225,7 +226,7 @@ public class DbMetadata
 		{
 			this.isPostgres = true;
 			this.dataTypeResolver = new PostgresDataTypeResolver();
-
+      mviewTypeName = MVIEW_NAME;
 			extenders.add(new PostgresDomainReader());
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.3"))
 			{
@@ -243,6 +244,7 @@ public class DbMetadata
 		else if (productLower.contains("oracle") && !productLower.contains("lite ordbms"))
 		{
 			isOracle = true;
+      mviewTypeName = MVIEW_NAME;
 			dataTypeResolver = new OracleDataTypeResolver(aConnection);
 			definitionReader = new OracleTableDefinitionReader(aConnection);
 			extenders.add(new OracleTypeReader());
@@ -622,9 +624,15 @@ public class DbMetadata
 		return new ArrayList<>(tableTypesList);
 	}
 
+  public boolean supportsMaterializedViews()
+  {
+    return mviewTypeName != null;
+  }
+  
 	public String getMViewTypeName()
 	{
-		return MVIEW_NAME;
+    if (mviewTypeName == null) return "";
+		return mviewTypeName;
 	}
 
 	public String getViewTypeName()

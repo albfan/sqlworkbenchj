@@ -31,6 +31,7 @@ import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -96,6 +97,7 @@ public class DdlAnalyzer
 			this.schemaForTableList = getSchemaFromCurrentWord();
 		}
 
+    String mviewType = dbConnection.getMetadata().getMViewTypeName();
 		if ("DROP".equals(sqlVerb))
 		{
 			if (type == null || between(cursorPos,verbToken.getCharEnd(), typeToken.getCharBegin()))
@@ -132,6 +134,11 @@ public class DdlAnalyzer
 			{
 				context = CONTEXT_TABLE_LIST;
 				setTableTypeFilter(dbConnection.getMetadata().getViewTypes());
+			}
+			else if (type.equalsIgnoreCase(mviewType) && showObjectList )
+			{
+				context = CONTEXT_TABLE_LIST;
+        setTableTypeFilter(CollectionUtil.arrayList(mviewType));
 			}
 			else if (isDropSchema(type))
 			{

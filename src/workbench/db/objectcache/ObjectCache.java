@@ -96,7 +96,17 @@ class ObjectCache
 		String dbId = conn.getDbId();
 		List<String> typeList = Settings.getInstance().getListProperty("workbench.db." + dbId + ".completion.types", true, null);
 
-		if (CollectionUtil.isEmpty(typeList)) return conn.getMetadata().getSelectableTypes();
+		if (CollectionUtil.isEmpty(typeList))
+    {
+      typeList = new ArrayList<>();
+      typeList.addAll(conn.getMetadata().getTableTypes());
+      typeList.addAll(conn.getMetadata().getViewTypes());
+      if (conn.getMetadata().supportsMaterializedViews())
+      {
+        typeList.add(conn.getMetadata().getMViewTypeName());
+      }
+    }
+    
 		return StringUtil.toArray(typeList, true);
 	}
 
@@ -328,7 +338,7 @@ class ObjectCache
 		{
 			String ttype = tbl.getType();
 			String tSchema = tbl.getSchema();
-			if ( (requestedTypes.contains(ttype) && schemas.contains(tSchema)) || tSchema == null || "public".equalsIgnoreCase(tSchema) )
+			if ( requestedTypes.contains(ttype) && (tSchema == null || schemas.contains(tSchema)) )
 			{
 				TableIdentifier copy = tbl.createCopy();
 				adjustSchemaAndCatalog(conn, copy, currentSchema, alwaysUseSchema);

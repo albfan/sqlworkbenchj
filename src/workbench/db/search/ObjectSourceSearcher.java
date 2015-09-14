@@ -30,7 +30,6 @@ import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
-import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -71,7 +70,11 @@ public class ObjectSourceSearcher
 		connection = con;
 		schemas = CollectionUtil.arrayList();
 		names = CollectionUtil.arrayList();
-		types = CollectionUtil.caseInsensitiveSet("trigger", "procedure", "function", "view", DbMetadata.MVIEW_NAME);
+		types = CollectionUtil.caseInsensitiveSet("trigger", "procedure", "function", "view");
+    if (con.getMetadata().supportsMaterializedViews())
+    {
+      types.add(con.getMetadata().getMViewTypeName().toLowerCase());
+    }
 		searchedObjects = CollectionUtil.caseInsensitiveSet();
 	}
 
