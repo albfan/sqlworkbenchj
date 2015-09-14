@@ -85,7 +85,7 @@ public class ErrorContinueDialog
 
     JOptionPane ignorePane = new WbOptionPane(message, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 
-    JDialog dialog = ignorePane.createDialog(caller, ResourceMgr.TXT_PRODUCT_NAME);
+    JDialog dialog = ignorePane.createDialog(WbSwingUtilities.getWindowAncestor(caller), ResourceMgr.TXT_PRODUCT_NAME);
     dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     int rvalue = JOptionPane.CANCEL_OPTION;
 

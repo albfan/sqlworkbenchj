@@ -24,7 +24,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -97,7 +96,6 @@ import workbench.db.importer.TextImportOptions;
 
 import workbench.gui.ErrorContinueDialog;
 import workbench.gui.MainWindow;
-import workbench.gui.MessageCreator;
 import workbench.gui.PanelReloader;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.WindowTitleBuilder;
@@ -3653,7 +3651,7 @@ public class SqlPanel
         {
           retry.setStatement(parser, cmdIndex);
         }
-        retry.showDialog((Frame)SwingUtilities.getWindowAncestor(SqlPanel.this));
+        retry.showDialog(WbSwingUtilities.getWindowAncestor(SqlPanel.this));
       }
       finally
       {

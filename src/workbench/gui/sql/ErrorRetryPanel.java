@@ -6,11 +6,12 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -413,10 +414,9 @@ public class ErrorRetryPanel
   }
 
 
-  public void showDialog(Frame owner)
+  public void showDialog(Window owner)
   {
-    window = new JDialog(owner, true);
-    window.setTitle(ResourceMgr.getString("TxtWindowTitleErrorRetry"));
+    window = new JDialog(owner, ResourceMgr.getString("TxtWindowTitleErrorRetry"), Dialog.ModalityType.APPLICATION_MODAL);
 
     initUI();
 
