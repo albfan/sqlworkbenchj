@@ -1670,12 +1670,13 @@ public class MainWindow
 		showDbmsManual.setDbms(conn.getDbId(), version);
     connectionInfoAction.setEnabled(true);
 		showConnectionWarnings(conn, panel);
-		selectCurrentEditor();
 
     if (isDbTreeVisible())
     {
       treePanel.connect(currentProfile);
     }
+
+		selectCurrentEditor();
 	}
 
 	@Override
@@ -2207,21 +2208,19 @@ public class MainWindow
 
 	public void requestEditorFocus()
 	{
-		MainPanel p = this.getCurrentPanel();
-		if (p instanceof SqlPanel)
+		SqlPanel sql = this.getCurrentSqlPanel();
+		if (sql != null)
 		{
-			SqlPanel sql = (SqlPanel)p;
 			sql.requestEditorFocus();
 		}
 	}
 
-	public void selectCurrentEditor()
+	private void selectCurrentEditor()
 	{
-		MainPanel p = this.getCurrentPanel();
-		if (p instanceof SqlPanel)
+		SqlPanel sql = this.getCurrentSqlPanel();
+		if (sql != null)
 		{
-			SqlPanel sql = (SqlPanel)p;
-			sql.selectEditor();
+			sql.selectEditorLater();
 		}
 	}
 
@@ -2229,10 +2228,9 @@ public class MainWindow
 	{
 		String filename = null;
 
-		MainPanel p  = this.getCurrentPanel();
-		if (p instanceof SqlPanel)
+		SqlPanel sql = this.getCurrentSqlPanel();
+		if (sql != null)
 		{
-			SqlPanel sql = (SqlPanel)p;
 			filename = sql.getCurrentFileName();
 		}
 		return filename;
