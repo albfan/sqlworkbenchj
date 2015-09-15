@@ -1164,6 +1164,11 @@ public class GuiSettings
     return Settings.getInstance().getBoolProperty("workbench.gui.sql.error.include.prompt", true);
   }
 
+  public static boolean retryForSingleStatement()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.gui.sql.error.retry.single", false);
+  }
+
   public static void setErrorPromptType(ErrorPromptType type)
   {
     Settings.getInstance().setProperty("workbench.gui.sql.error.prompt", type.name());

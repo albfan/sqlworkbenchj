@@ -3595,7 +3595,11 @@ public class SqlPanel
   private boolean shouldAsk(int cmdIndex, int count)
   {
     // The retry dialog should be shown for all statements that are executed
-    if (GuiSettings.getErrorPromptType() == ErrorPromptType.PromptWithRetry) return true;
+    if (GuiSettings.getErrorPromptType() == ErrorPromptType.PromptWithRetry)
+    {
+      if (count > 1) return true;
+      return GuiSettings.retryForSingleStatement();
+    }
 
     // only show the "Ignore/Cancel" prompt if the failed statement is not the last one in the script
     return (cmdIndex) < (count - 1);
@@ -3617,10 +3621,7 @@ public class SqlPanel
       }
       else
       {
-        String question = ResourceMgr.getFormattedString("MsgScriptStatementError",
-          NumberStringCache.getNumberString(cmdIndex + 1),
-          NumberStringCache.getNumberString(totalStatements));
-        choice = askContinue(errorDetails, question);
+        choice = askContinue(errorDetails, ResourceMgr.getFormattedString("MsgScriptStatementError", cmdIndex + 1, totalStatements));
       }
     }
     finally

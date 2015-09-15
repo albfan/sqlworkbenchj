@@ -28,6 +28,9 @@ package workbench.console;
  */
 public enum RowDisplay
 {
+  /** Display each data row in a single line */
 	SingleLine,
+
+  /** Display each data row as multiple lines. One line for each column */
 	Form;
 }

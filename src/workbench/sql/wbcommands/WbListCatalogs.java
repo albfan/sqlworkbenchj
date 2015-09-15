@@ -34,6 +34,8 @@ import workbench.storage.DataStore;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -52,6 +54,8 @@ public class WbListCatalogs
 	public WbListCatalogs()
 	{
 		super();
+		cmdLine = new ArgumentParser();
+    cmdLine.addArgument(CommonArgs.ARG_VERBOSE, ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -77,12 +81,12 @@ public class WbListCatalogs
 
 		if (currentConnection.getMetadata().isPostgres())
 		{
-			ds = listPgDatabases();
+      cmdLine.parse(getCommandLine(sql));
+      boolean verbose = cmdLine.getBoolean(CommonArgs.ARG_VERBOSE, false);
+			ds = listPgDatabases(verbose);
 		}
 		else
 		{
-			ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
-
 			List<String> cats = currentConnection.getMetadata().getCatalogs();
 			String[] cols = {catName};
 			int[] types = {Types.VARCHAR};
@@ -98,15 +102,22 @@ public class WbListCatalogs
 			ds.setGeneratingSql(sql);
 		}
 
+    ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
+
 		ds.resetStatus();
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;
 	}
 
-	private DataStore listPgDatabases()
+	private DataStore listPgDatabases(boolean verbose)
 	{
 		String name = StringUtil.capitalize(currentConnection.getMetadata().getCatalogTerm());
+    String size = verbose ?
+      "       CASE WHEN pg_catalog.has_database_privilege(d.datname, 'CONNECT')\n" +
+      "            THEN pg_catalog.pg_size_pretty(pg_catalog.pg_database_size(d.datname))\n" +
+      "            ELSE 'No Access'\n" +
+      "       END as \"Size\", \n" : "";
 		String sql =
 			"SELECT d.datname as \"" + name + "\",\n" +
 			"       pg_catalog.pg_get_userbyid(d.datdba) as \"Owner\",\n" +
@@ -114,6 +125,7 @@ public class WbListCatalogs
 			"       d.datcollate as \"Collate\",\n" +
 			"       d.datctype as \"Ctype\",\n" +
 			"       pg_catalog.array_to_string(d.datacl, E'\\n') AS \"Access privileges\", \n" +
+      size +
 			"       pg_catalog.shobj_description(d.oid, 'pg_database') as \"Description\" \n" +
 			"FROM pg_catalog.pg_database d\n" +
 			"ORDER BY 1";
