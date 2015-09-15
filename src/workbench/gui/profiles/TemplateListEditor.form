@@ -28,7 +28,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JList" name="libList">
+        <Component class="javax.swing.JList" name="templateList">
           <Properties>
             <Property name="verifyInputWhenFocusTarget" type="boolean" value="false"/>
             <Property name="visibleRowCount" type="int" value="5"/>

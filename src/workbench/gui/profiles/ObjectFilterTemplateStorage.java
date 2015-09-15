@@ -74,10 +74,27 @@ public class ObjectFilterTemplateStorage
     fireItemAdded(0, templates.size() - 1);
   }
 
+  public void deleteTemplates()
+  {
+    List<String> keys = Settings.getInstance().getKeysLike(prefix + "name");
+    for (String key : keys)
+    {
+      String idx = getTemplateIndex(key);
+      if (idx != null)
+      {
+        String defKey = prefix + idx + ".definition";
+        String inclKey = prefix + idx + ".include";
+        Settings.getInstance().removeProperty(defKey);
+        Settings.getInstance().removeProperty(inclKey);
+      }
+      Settings.getInstance().removeProperty(key);
+    }
+  }
+
   public synchronized void saveTemplates()
   {
     if (templates == null) return;
-
+    deleteTemplates();
     for (int i=0; i < templates.size(); i++)
     {
       String nameKey = prefix + "name." + Integer.toString(i);

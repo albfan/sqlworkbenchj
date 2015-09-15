@@ -46,7 +46,7 @@ class TemplateListEditor
 	TemplateListEditor()
 	{
 		initComponents();
-		libList.getSelectionModel().addListSelectionListener(this);
+		templateList.getSelectionModel().addListSelectionListener(this);
 		btnUp.addActionListener(this);
 		btnDown.addActionListener(this);
 		btnRemove.addActionListener(this);
@@ -59,18 +59,18 @@ class TemplateListEditor
 		{
 			model.addElement(templ);
 		}
-		libList.setModel(model);
-		libList.getSelectionModel().clearSelection();
+		templateList.setModel(model);
+		templateList.getSelectionModel().clearSelection();
 		checkButtons();
 	}
 
 	public List<ObjectFilterTemplate> getTemplates()
 	{
-		int size = libList.getModel().getSize();
+		int size = templateList.getModel().getSize();
 		List<ObjectFilterTemplate> result = new ArrayList<>(size);
 		for (int i=0; i < size; i++)
 		{
-      ObjectFilterTemplate template = (ObjectFilterTemplate)libList.getModel().getElementAt(i);
+      ObjectFilterTemplate template = (ObjectFilterTemplate)templateList.getModel().getElementAt(i);
 			result.add(template);
 		}
 		return result;
@@ -79,7 +79,7 @@ class TemplateListEditor
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		int[] indexes = libList.getSelectedIndices();
+		int[] indexes = templateList.getSelectedIndices();
 
 		int selectedIndex = -1;
 		if (indexes.length == 1)
@@ -87,7 +87,7 @@ class TemplateListEditor
 			selectedIndex = indexes[0];
 		}
 
-		DefaultListModel model = (DefaultListModel)libList.getModel();
+		DefaultListModel model = (DefaultListModel)templateList.getModel();
 		int count = model.getSize();
 
 		if (e.getSource() == btnRemove && indexes.length > 0)
@@ -106,11 +106,11 @@ class TemplateListEditor
 
 	private void removeSelected()
 	{
-		int[] indexes = libList.getSelectedIndices();
+		int[] indexes = templateList.getSelectedIndices();
 		if (indexes.length == 0) return;
 
 		Arrays.sort(indexes);
-		DefaultListModel model = (DefaultListModel)libList.getModel();
+		DefaultListModel model = (DefaultListModel)templateList.getModel();
 		for (int i=indexes.length - 1; i >= 0; i --)
 		{
 			model.remove(indexes[i]);
@@ -119,12 +119,12 @@ class TemplateListEditor
 
 	private void swap(int firstIndex, int secondIndex)
 	{
-		DefaultListModel model = (DefaultListModel)libList.getModel();
+		DefaultListModel model = (DefaultListModel)templateList.getModel();
 		Object first = model.get(firstIndex);
 		Object second = model.get(secondIndex);
 		model.set(firstIndex, second);
 		model.set(secondIndex, first);
-		libList.setSelectedIndex(secondIndex);
+		templateList.setSelectedIndex(secondIndex);
 	}
 
 	@Override
@@ -135,8 +135,8 @@ class TemplateListEditor
 
 	private void checkButtons()
 	{
-		int selectedIndex = libList.getSelectedIndex();
-		int count = libList.getModel().getSize();
+		int selectedIndex = templateList.getSelectedIndex();
+		int count = templateList.getModel().getSize();
 		btnRemove.setEnabled(selectedIndex > -1);
 		btnUp.setEnabled(selectedIndex > 0);
 		btnDown.setEnabled(selectedIndex > -1 && selectedIndex < count - 1);
@@ -154,16 +154,16 @@ class TemplateListEditor
     java.awt.GridBagConstraints gridBagConstraints;
 
     jScrollPane1 = new javax.swing.JScrollPane();
-    libList = new javax.swing.JList();
+    templateList = new javax.swing.JList();
     btnRemove = new javax.swing.JButton();
     btnUp = new javax.swing.JButton();
     btnDown = new javax.swing.JButton();
 
     setLayout(new java.awt.GridBagLayout());
 
-    libList.setVerifyInputWhenFocusTarget(false);
-    libList.setVisibleRowCount(5);
-    jScrollPane1.setViewportView(libList);
+    templateList.setVerifyInputWhenFocusTarget(false);
+    templateList.setVisibleRowCount(5);
+    jScrollPane1.setViewportView(templateList);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridheight = 4;
@@ -207,6 +207,6 @@ class TemplateListEditor
   private javax.swing.JButton btnRemove;
   private javax.swing.JButton btnUp;
   private javax.swing.JScrollPane jScrollPane1;
-  private javax.swing.JList libList;
+  private javax.swing.JList templateList;
   // End of variables declaration//GEN-END:variables
 }
