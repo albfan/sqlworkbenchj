@@ -30,6 +30,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -69,7 +70,8 @@ public class EditConnectionFiltersPanel
 	private JComboBox schemaTemplates;
   private JButton addSchemaTemplate;
   private JButton addCatalogTemplate;
-
+  private JButton editSchemaTemplates;
+  private JButton editCatalogTemplates;
 
 	public EditConnectionFiltersPanel(ConnectionProfile profile)
 	{
@@ -87,12 +89,20 @@ public class EditConnectionFiltersPanel
     schemaTemplates.setModel(schemas);
     schemaTemplates.addActionListener(this);
     schemaHeader.add(schemaTemplates, BorderLayout.CENTER);
+
+    JPanel buttonPanel1 = new JPanel(new BorderLayout());
     addSchemaTemplate = new JButton();
     addSchemaTemplate.setIcon(IconMgr.getInstance().getLabelIcon("add"));
     addSchemaTemplate.addActionListener(this);
     int iconSize = IconMgr.getInstance().getSizeForLabel();
     WbSwingUtilities.adjustButtonWidth(addSchemaTemplate, iconSize + 6, iconSize + 6);
-    schemaHeader.add(addSchemaTemplate, BorderLayout.LINE_END);
+    buttonPanel1.add(addSchemaTemplate, BorderLayout.LINE_START);
+    editSchemaTemplates = new JButton();
+    editSchemaTemplates.setIcon(IconMgr.getInstance().getLabelIcon("edit"));
+    editSchemaTemplates.addActionListener(this);
+    WbSwingUtilities.adjustButtonWidth(editSchemaTemplates, iconSize + 6, iconSize + 6);
+    buttonPanel1.add(editSchemaTemplates, BorderLayout.LINE_END);
+    schemaHeader.add(buttonPanel1, BorderLayout.LINE_END);
 
 		schemaFilterEditor = EditorPanel.createTextEditor();
 		schemaInclusionFlag = new JCheckBox(ResourceMgr.getString("LblInclFilter"));
@@ -111,18 +121,26 @@ public class EditConnectionFiltersPanel
     ObjectFilterTemplateStorage catalogs = new ObjectFilterTemplateStorage(TemplateType.catalog);
     catalogTemplates.setModel(catalogs);
 
+    JPanel buttonPanel2 = new JPanel(new BorderLayout());
     addCatalogTemplate = new JButton();
     addCatalogTemplate.setIcon(IconMgr.getInstance().getLabelIcon("add"));
     WbSwingUtilities.adjustButtonWidth(addCatalogTemplate, iconSize + 6, iconSize + 6);
+    buttonPanel2.add(addCatalogTemplate, BorderLayout.LINE_START);
+
+    editCatalogTemplates = new JButton();
+    editCatalogTemplates.setIcon(IconMgr.getInstance().getLabelIcon("edit"));
+    WbSwingUtilities.adjustButtonWidth(editCatalogTemplates, iconSize + 6, iconSize + 6);
+    buttonPanel2.add(editCatalogTemplates, BorderLayout.LINE_END);
+
     catalogHeader.add(catalogTemplates, BorderLayout.CENTER);
-    catalogHeader.add(addCatalogTemplate, BorderLayout.LINE_END);
+    catalogHeader.add(buttonPanel2, BorderLayout.LINE_END);
 
 		catalogFilterEditor = EditorPanel.createTextEditor();
 		catalogFilterEditor.setCaretVisible(false);
 		catalogInclusionFlag = new JCheckBox(ResourceMgr.getString("LblInclFilter"));
 		catalogInclusionFlag.setToolTipText(ResourceMgr.getDescription("LblInclFilter"));
 		catalogInclusionFlag.setSelected(catalogFilter != null ? catalogFilter.isInclusionFilter() : false);
-    
+
 		p2.add(catalogHeader, BorderLayout.NORTH);
 		p2.add(catalogFilterEditor, BorderLayout.CENTER);
 		p2.add(catalogInclusionFlag, BorderLayout.SOUTH);
@@ -275,12 +293,34 @@ public class EditConnectionFiltersPanel
     {
       addCatalogTemplate();
     }
+    if (e.getSource() == editSchemaTemplates)
+    {
+      editTemplates((ObjectFilterTemplateStorage)schemaTemplates.getModel());
+    }
+    if (e.getSource() == editCatalogTemplates)
+    {
+      editTemplates((ObjectFilterTemplateStorage)catalogTemplates.getModel());
+    }
+  }
+
+  private void editTemplates(ObjectFilterTemplateStorage model)
+  {
+    List<ObjectFilterTemplate> templates = model.getTemplates();
+    TemplateListEditor editor = new TemplateListEditor();
+    editor.setTemplates(templates);
+    boolean ok = WbSwingUtilities.getOKCancel("Manage templates", this, editor);
+    if (ok)
+    {
+      model.setTemplates(editor.getTemplates());
+    }
   }
 
   private void applySchemaTemplate()
   {
     ObjectFilterTemplateStorage model = (ObjectFilterTemplateStorage)schemaTemplates.getModel();
     ObjectFilterTemplate template = model.getSelectedItem();
+    if (template == null) return;
+
     showSchemaFilter(template.getFilter().createCopy());
   }
 
@@ -288,12 +328,16 @@ public class EditConnectionFiltersPanel
   {
     ObjectFilterTemplateStorage model = (ObjectFilterTemplateStorage)catalogTemplates.getModel();
     ObjectFilterTemplate template = model.getSelectedItem();
+    if (template == null) return;
+
     showCatalogFilter(template.getFilter().createCopy());
   }
 
   private void addSchemaTemplate()
   {
     ObjectNameFilter filter = getSchemaFilter();
+    if (filter == null) return;
+
     ObjectFilterTemplateStorage model = (ObjectFilterTemplateStorage)schemaTemplates.getModel();
     String name = WbSwingUtilities.getUserInput(this, "Enter a name", "Schema Filter Template");
     if (StringUtil.isNonBlank(name))
@@ -305,19 +349,24 @@ public class EditConnectionFiltersPanel
   private void addCatalogTemplate()
   {
     ObjectNameFilter filter = getCatalogFilter();
+    if (filter == null) return;
+
     ObjectFilterTemplateStorage model = (ObjectFilterTemplateStorage)schemaTemplates.getModel();
-    model.addTemplate("New template", filter.createCopy());
+    String name = WbSwingUtilities.getUserInput(this, "Enter a name", "Catalog Filter Template");
+    if (StringUtil.isNonBlank(name))
+    {
+      model.addTemplate(name, filter.createCopy());
+    }
   }
 
   private void saveTemplates()
   {
     ObjectFilterTemplateStorage model = (ObjectFilterTemplateStorage)schemaTemplates.getModel();
     model.saveTemplates();
-
     model = (ObjectFilterTemplateStorage)catalogTemplates.getModel();
     model.saveTemplates();
-
   }
+
 	public static boolean editFilter(Dialog owner, ConnectionProfile profile)
 	{
 		final EditConnectionFiltersPanel p = new EditConnectionFiltersPanel(profile);

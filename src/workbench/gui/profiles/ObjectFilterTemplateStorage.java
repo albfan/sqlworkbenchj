@@ -67,6 +67,13 @@ public class ObjectFilterTemplateStorage
     }
   }
 
+  public void setTemplates(List<ObjectFilterTemplate> templateList)
+  {
+    templates.clear();
+    templates.addAll(templateList);
+    fireItemAdded(0, templates.size() - 1);
+  }
+
   public synchronized void saveTemplates()
   {
     if (templates == null) return;
@@ -140,8 +147,13 @@ public class ObjectFilterTemplateStorage
 
   private void fireItemAdded()
   {
+    fireItemAdded(templates.size() - 1, templates.size() - 1);
+  }
+
+  private void fireItemAdded(int start, int end)
+  {
     if (listener.isEmpty()) return;
-    ListDataEvent evt = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, templates.size() - 1, templates.size() - 1);
+    ListDataEvent evt = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, start, end);
     for (ListDataListener l : listener)
     {
       l.contentsChanged(evt);

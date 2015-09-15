@@ -102,14 +102,10 @@ public class LnFDefinitionPanel
 		infoText.setWrapStyleWord(true);
 		infoText.setLineWrap(true);
 		infoText.setBackground(this.getBackground());
-		classpathEditor.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				selectClass();
-			}
-		});
+		classpathEditor.addActionListener((ActionEvent e) ->
+    {
+      selectClass();
+    });
 	}
 
 	public void setPropertyListener(PropertyChangeListener l)
