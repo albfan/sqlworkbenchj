@@ -31,8 +31,8 @@ import workbench.db.WbConnection;
 import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.completion.StatementContext;
 import workbench.gui.sql.EditorPanel;
-import workbench.sql.formatter.FormatterUtil;
 
+import workbench.sql.formatter.FormatterUtil;
 import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
@@ -65,7 +65,7 @@ public class EditorDropHandler
     ScriptParser parser = new ScriptParser(ParserType.getTypeFromConnection(conn));
     parser.setScript(editor.getSelectedStatement());
 
-    int editorPos = editor.xyToOffset((int)location.getX(), (int)location.getY());
+    int editorPos = editor.xyToOffset((int)location.getX() - editor.getPainter().getGutterWidth(), (int)location.getY());
     int context = BaseAnalyzer.NO_CONTEXT;
     int index = parser.getCommandIndexAtCursorPos(editorPos);
 
