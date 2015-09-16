@@ -27,8 +27,6 @@ import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
-import workbench.gui.completion.BaseAnalyzer;
-import workbench.gui.completion.StatementContext;
 import workbench.gui.sql.EditorPanel;
 
 import workbench.sql.formatter.FormatterUtil;
@@ -64,21 +62,9 @@ public class EditorDropHandler
     parser.setScript(editor.getSelectedStatement());
 
     int editorPos = editor.xyToOffset((int)location.getX() - editor.getPainter().getGutterWidth(), (int)location.getY());
-    int context = BaseAnalyzer.NO_CONTEXT;
     int index = parser.getCommandIndexAtCursorPos(editorPos);
 
-    String sql = null;
-
-    if (index > -1)
-    {
-      sql = parser.getCommand(index, false);
-      StatementContext ctx = new StatementContext(conn, sql, editorPos - parser.getStartPosForCommand(index));
-
-			if (ctx.isStatementSupported())
-			{
-        context = ctx.getAnalyzer().getContext();
-      }
-    }
+    String sql = sql = parser.getCommand(index, false);
 
     // handle the case where a single table is dragged
     // into an "empty" area of the editor. In that case
@@ -97,12 +83,17 @@ public class EditorDropHandler
       }
     }
 
+    int line = editor.getLineOfOffset(editorPos);
+    int column = editor.getColumnOfOffset(editorPos);
+    boolean isStringLiteral = editor.getTokenMarker().isStringLiteralAt(line, column);
+
     StringBuilder text = new StringBuilder(nodes.length * 20);
     for (int i=0; i < nodes.length; i++)
     {
       if (i > 0) text.append(", ");
-      text.append(getDisplayString(conn, nodes[i], context));
+      text.append(getDisplayString(conn, nodes[i], !isStringLiteral));
     }
+
     insertString(text.toString(), editorPos);
   }
 
@@ -121,24 +112,29 @@ public class EditorDropHandler
     }
   }
 
-  private String getDisplayString(WbConnection conn, ObjectTreeNode node, int context)
+  private String getDisplayString(WbConnection conn, ObjectTreeNode node, boolean applyFormat)
   {
     if (node == null) return "";
-    
+
     DbObject dbo = node.getDbObject();
     if (dbo == null)
     {
       if (TreeLoader.TYPE_COLUMN_LIST.equals(node.getType()))
       {
-        return getColumnList(node);
+        return getColumnList(node, applyFormat);
       }
       return node.getName();
     }
 
-    return FormatterUtil.getIdentifier(dbo.getObjectExpression(conn));
+    String name = dbo.getObjectExpression(conn);
+    if (applyFormat)
+    {
+      return FormatterUtil.getIdentifier(name);
+    }
+    return name;
   }
 
-  private String getColumnList(ObjectTreeNode columns)
+  private String getColumnList(ObjectTreeNode columns, boolean applyFormat)
   {
     int count = columns.getChildCount();
     StringBuilder result = new StringBuilder(count * 10);
@@ -157,6 +153,11 @@ public class EditorDropHandler
         }
       }
     }
-    return FormatterUtil.getIdentifier(result.toString());
+    String name = result.toString();
+    if (applyFormat)
+    {
+      return FormatterUtil.getIdentifier(name);
+    }
+    return name;
   }
 }

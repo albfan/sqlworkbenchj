@@ -42,11 +42,10 @@ import workbench.util.WbFile;
 
 
 /**
- * A class to parse a SQL script and return the individual commands
- * in the script. The actual parsing is done by using an instance
- * of {@link IteratingScriptParser} or {@link LexerBasedParser}
+ * A class to parse a SQL script and return the individual commands in the script.
  *
- * @see IteratingScriptParser
+ * The actual parsing is done by using an instance of {@link LexerBasedParser}
+ *
  * @see LexerBasedParser
  * @see ScriptIterator
  *
@@ -270,8 +269,11 @@ public class ScriptParser
 	 */
 	public int getIndexInCommand(int commandIndex, int cursorPos)
 	{
+    if (commandIndex < 0) return -1;
+
 		if (this.commands == null) this.parseCommands();
-		if (commandIndex < 0 || commandIndex >= this.commands.size()) return -1;
+
+		if (commandIndex >= this.commands.size()) return -1;
 		ScriptCommandDefinition b = this.commands.get(commandIndex);
 		int start = b.getStartPositionInScript();
 		int end = b.getEndPositionInScript();
@@ -291,8 +293,9 @@ public class ScriptParser
 	 */
 	public int getCommandIndexAtCursorPos(int cursorPos)
 	{
-		if (this.commands == null) this.parseCommands();
 		if (cursorPos < 0) return -1;
+
+		if (this.commands == null) this.parseCommands();
 		int count = this.commands.size();
 		if (count == 1) return 0;
 		if (count == 0) return -1;
@@ -314,8 +317,10 @@ public class ScriptParser
 	 */
 	public int getStartPosForCommand(int index)
 	{
+    if (index < 0) return -1;
+
 		if (this.commands == null) this.parseCommands();
-		if (index < 0 || index >= this.commands.size()) return -1;
+		if (index >= this.commands.size()) return -1;
 		ScriptCommandDefinition b = this.commands.get(index);
 		int start = b.getStartPositionInScript();
 		return start;
@@ -326,8 +331,9 @@ public class ScriptParser
 	 */
 	public int getEndPosForCommand(int index)
 	{
+    if (index < 0) return -1;
 		if (this.commands == null) this.parseCommands();
-		if (index < 0 || index >= this.commands.size()) return -1;
+		if (index >= this.commands.size()) return -1;
 		ScriptCommandDefinition b = this.commands.get(index);
 		return b.getEndPositionInScript();
 	}
@@ -391,9 +397,9 @@ public class ScriptParser
 
 	private ScriptCommandDefinition getCommandDefinition(int index)
 	{
+    if (index < 0) return null;
 		if (this.commands == null) this.parseCommands();
-		if (index < 0 || index >= this.commands.size()) return null;
-
+		if (index >= this.commands.size()) return null;
 		return this.commands.get(index);
 	}
 
@@ -499,18 +505,18 @@ public class ScriptParser
 	 */
 	private void parseCommands()
 	{
-		ScriptIterator p = null;
+		ScriptIterator itr = null;
 		boolean storeStatement = false;
 		if (scriptIterator == null)
 		{
-			p = getParserInstance();
-			p.setScript(this.originalScript);
-			p.setStoreStatementText(false); // no need to store the statements twice
+			itr = getParserInstance();
+			itr.setScript(this.originalScript);
+			itr.setStoreStatementText(false); // no need to store the statements twice
 		}
 		else
 		{
-			p = scriptIterator;
-			p.setStoreStatementText(true);
+			itr = scriptIterator;
+			itr.setStoreStatementText(true);
 			storeStatement = true;
 		}
 		commands = new ArrayList<>();
@@ -518,7 +524,7 @@ public class ScriptParser
 		ScriptCommandDefinition c = null;
 		int index = 0;
 
-		while ((c = p.getNextCommand()) != null)
+		while ((c = itr.getNextCommand()) != null)
 		{
 			if (storeStatement)
 			{

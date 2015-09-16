@@ -1329,11 +1329,26 @@ public class JEditTextArea
 
 	/**
 	 * Returns the line containing the specified offset.
+   *
 	 * @param offset The offset
+   * @see #getColumnOfOffset(int)
 	 */
 	public final int getLineOfOffset(int offset)
 	{
 		return document.getDefaultRootElement().getElementIndex(offset);
+	}
+
+	/**
+	 * Returns the column in the line of the specified offset.
+   *
+	 * @param offset The offset
+   * @see #getLineOfOffset(int)
+	 */
+	public final int getColumnOfOffset(int offset)
+	{
+    int line = getLineOfOffset(offset);
+    int lineStart = getLineStartOffset(line);
+    return offset - lineStart;
 	}
 
 	public int getCaretPositionInLine(int line)
