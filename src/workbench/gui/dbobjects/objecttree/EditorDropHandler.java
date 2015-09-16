@@ -20,7 +20,6 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.awt.Point;
-import java.util.List;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
@@ -37,7 +36,6 @@ import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 
-import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -126,6 +124,7 @@ public class EditorDropHandler
   private String getDisplayString(WbConnection conn, ObjectTreeNode node, int context)
   {
     if (node == null) return "";
+    
     DbObject dbo = node.getDbObject();
     if (dbo == null)
     {
@@ -134,22 +133,6 @@ public class EditorDropHandler
         return getColumnList(node);
       }
       return node.getName();
-    }
-
-    if (context == BaseAnalyzer.CONTEXT_COLUMN_LIST && dbo instanceof TableIdentifier)
-    {
-      List<ColumnIdentifier> columns = conn.getObjectCache().getColumns((TableIdentifier)dbo);
-      if (CollectionUtil.isNonEmpty(columns))
-      {
-        int count = columns.size();
-        StringBuilder result = new StringBuilder(count * 10);
-        for (int i=0; i < count; i++)
-        {
-          if (i > 0) result.append(", ");
-          result.append(FormatterUtil.getIdentifier(columns.get(i).getColumnName()));
-        }
-        return result.toString();
-      }
     }
 
     return FormatterUtil.getIdentifier(dbo.getObjectExpression(conn));
