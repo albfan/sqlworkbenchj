@@ -110,6 +110,7 @@ public class SimpleLogger
 			{
         FileVersioner fv = new FileVersioner(maxBackups);
         fv.createBackup(logfile);
+        logfile.delete();
 			}
 			logOut = new PrintStream(new FileOutputStream(logfile, true), true, LogMgr.DEFAULT_ENCODING);
 			currentFile = logfile;
