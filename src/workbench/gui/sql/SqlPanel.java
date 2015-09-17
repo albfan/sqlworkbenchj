@@ -3466,6 +3466,7 @@ public class SqlPanel
 
     				if (choice == JOptionPane.CANCEL_OPTION)
 						{
+              statementResult.setStopScript(true);
 							break;
 						}
 						else if (choice == WbSwingUtilities.IGNORE_ALL)

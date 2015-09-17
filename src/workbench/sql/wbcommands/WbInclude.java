@@ -300,6 +300,7 @@ public class WbInclude
         result.setSuccess();
         result.setWarning(true);
         result.addMessageByKey("MsgScriptCancelled");
+        result.setStopScript(true);
       }
 			else
       {
