@@ -158,7 +158,8 @@ public class ErrorDescriptor
 		{
 			return msg + "\n\nat line: " + errorLine + ", column: " + errorColumn;
 		}
-		return "no error";
+
+		return errorMessage != null ? errorMessage : "no error";
 	}
 
 }

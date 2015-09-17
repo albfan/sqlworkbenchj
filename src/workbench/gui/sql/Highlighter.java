@@ -87,6 +87,10 @@ public class Highlighter
 		{
 			startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
 			endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
+
+      // don't change the cursor location if it's already inside the statement
+      if (editor.getCaretPosition() >= startPos && editor.getCaretPosition() <= endPos) return;
+      
 			line = editor.getLineOfOffset(startPos);
       newCaret = editor.getLineStartOffset(line);
 		}
