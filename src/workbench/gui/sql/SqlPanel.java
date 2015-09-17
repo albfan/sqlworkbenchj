@@ -2027,22 +2027,19 @@ public class SqlPanel
 	public void runCurrentStatement()
 	{
 		String sql = this.editor.getText();
-		int caret = this.editor.getCaretPosition();
-		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunCurrent);
+		startExecution(sql, 0, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunCurrent);
 	}
 
 	public void runFromCursor()
 	{
 		String sql = this.editor.getText();
-		int caret = this.editor.getCaretPosition();
-		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunFromCursor);
+		startExecution(sql, 0, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunFromCursor);
 	}
 
 	public void runToCursor()
 	{
 		String sql = this.editor.getText();
-		int caret = this.editor.getCaretPosition();
-		startExecution(sql, 0, caret, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunToCursor);
+		startExecution(sql, 0, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunToCursor);
 	}
 
 	public void runSelectedStatement()
@@ -2055,28 +2052,28 @@ public class SqlPanel
 			offset = this.editor.getSelectionStart();
 			highlight = false;
 		}
-		this.startExecution(sql, offset, -1, highlight, this.appendResults, RunType.RunAll);
+		this.startExecution(sql, offset, highlight, this.appendResults, RunType.RunAll);
 	}
 
 	@Override
 	public void commit()
 	{
-		this.startExecution(SingleVerbCommand.COMMIT_VERB, 0, -1, false, this.appendResults, RunType.RunAll);
+		this.startExecution(SingleVerbCommand.COMMIT_VERB, 0, false, this.appendResults, RunType.RunAll);
 	}
 
 	@Override
 	public void rollback()
 	{
-		this.startExecution(SingleVerbCommand.ROLLBACK_VERB, 0, -1, false, this.appendResults, RunType.RunAll);
+		this.startExecution(SingleVerbCommand.ROLLBACK_VERB, 0, false, this.appendResults, RunType.RunAll);
 	}
 
 	public void runAll()
 	{
 		String sql = this.editor.getText();
-		this.startExecution(sql, 0, -1, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunAll);
+		this.startExecution(sql, 0, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunAll);
 	}
 
-	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlightError, final boolean appendResult, final RunType runType)
+	private void startExecution(final String sql, final int offset, final boolean highlightError, final boolean appendResult, final RunType runType)
 	{
 		if (this.isBusy()) return;
 
@@ -2098,7 +2095,7 @@ public class SqlPanel
 				@Override
 				public void run()
 				{
-					runStatement(sql, offset, commandAtIndex, highlightError, appendResult, runType);
+					runStatement(sql, offset, highlightError, appendResult, runType);
 				}
 			};
 			this.executionThread.start();
@@ -2124,7 +2121,7 @@ public class SqlPanel
 	 * This is only public to allow a direct call during
 	 * GUI testing (to avoid multi-threading)
 	 */
-	protected void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError, boolean appendResult, RunType runType)
+	protected void runStatement(String sql, int selectionOffset, boolean highlightOnError, boolean appendResult, RunType runType)
 	{
 		this.setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
@@ -2147,7 +2144,7 @@ public class SqlPanel
 
 		try
 		{
-			this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError, appendResult, runType);
+			this.displayResult(sql, selectionOffset, highlightOnError, appendResult, runType);
 		}
 		finally
 		{
@@ -2281,7 +2278,7 @@ public class SqlPanel
     {
       sql = "select * from " + table.getTableExpression(dbConnection);
     }
-    this.startExecution(sql, 0, -1, false, true, RunType.RunAll);
+    this.startExecution(sql, 0, false, true, RunType.RunAll);
   }
 
 	@Override
@@ -2300,7 +2297,7 @@ public class SqlPanel
 		{
 			this.macroExecution = true;
 		}
-		this.startExecution(sql, 0, -1, false, this.appendResults || appendData, RunType.RunAll);
+		this.startExecution(sql, 0, false, this.appendResults || appendData, RunType.RunAll);
 	}
 
 	@Override
@@ -3102,7 +3099,21 @@ public class SqlPanel
 		return goOn;
 	}
 
-	private void displayResult(String script, int selectionOffset, int cursorPos, boolean highlightOnError, boolean appendResult, RunType runType)
+  /**
+   * Display the result of running a statement.
+   *
+   * The SQL is being passed to enable running statements other than the ones in the editor.
+   *
+   * For run types RunCurrent, RunFromCursor and RunToCursor the current cursor location of the editor is used.
+   * So passing a SQL statement that is not in the editor together anything other RunType.RunAll is not supported
+   *
+   * @param script           the SQL to run
+   * @param selectionOffset  the caret offset inside the script
+   * @param highlightOnError if true, errors are highlighted (rather than just jumpeed to)
+   * @param appendResult     if true and result is appended to the result tab
+   * @param runType          how to run the SQL.
+   */
+	private void displayResult(String script, int selectionOffset, boolean highlightOnError, boolean appendResult, RunType runType)
 	{
 		if (script == null) return;
 
@@ -3207,7 +3218,9 @@ public class SqlPanel
 				return;
 			}
 
-      if (cursorPos > -1 && runType != RunType.RunAll)
+      int cursorPos = editor.getCaretPosition();
+
+      if (runType != RunType.RunAll)
 			{
 				// cursorPos > -1 means that the statement at (or from) the cursor position should be executed
 				int realPos = cursorPos;
@@ -3319,10 +3332,17 @@ public class SqlPanel
 			ErrorDescriptor errorDetails = null;
       boolean ignoreUpdateCounts = true;
 
+      LogMgr.logTrace("SqlPanel.displayResults()", "Running " + count + " of " + scriptParser.getSize() + " statement(s). Start: " + startIndex + " end: " + (endIndex - 1));
+
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				String currentSql = scriptParser.getCommand(i);
         if (StringUtil.isEmptyString(currentSql)) continue;
+
+        if (LogMgr.isTraceEnabled())
+        {
+          LogMgr.logTrace("SqlPanel.displayResults()", "Statement " + i + ": " + SqlUtil.makeCleanSql(StringUtil.getMaxSubstring(currentSql, 60), false));
+        }
 
 				historyStatements.add(currentSql);
 
@@ -3872,7 +3892,7 @@ public class SqlPanel
 			this.editor.setCaretPosition(pos);
 			this.editor.scrollToCaret();
 		}
-		startExecution(comment + "\n" + sql, 0, -1, false, true, RunType.RunAll);
+		startExecution(comment + "\n" + sql, 0, false, true, RunType.RunAll);
 	}
 
 	public void showData(DataStore ds)
