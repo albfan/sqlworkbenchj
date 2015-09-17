@@ -3322,13 +3322,14 @@ public class SqlPanel
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				String currentSql = scriptParser.getCommand(i);
+        if (StringUtil.isEmptyString(currentSql)) continue;
+
 				historyStatements.add(currentSql);
 
 				if (fixNLPattern != null)
 				{
 					currentSql = fixNLPattern.matcher(currentSql).replaceAll(nl);
 				}
-				if (currentSql.length() == 0) continue;
 
 				String macro = MacroManager.getInstance().getMacroText(macroClientId, currentSql);
 				if (macro != null)
