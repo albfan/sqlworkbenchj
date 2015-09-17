@@ -103,7 +103,7 @@ public class SelectCommand
 
 			try
 			{
-				LogMgr.logTrace("SelectCommand.execute()", "Setting maxrows to: " + maxRows);
+//				LogMgr.logTrace("SelectCommand.execute()", "Setting maxrows to: " + maxRows);
 				this.currentStatement.setMaxRows(this.maxRows);
 			}
 			catch (Exception e)

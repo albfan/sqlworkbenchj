@@ -3332,7 +3332,12 @@ public class SqlPanel
 			ErrorDescriptor errorDetails = null;
       boolean ignoreUpdateCounts = true;
 
-      LogMgr.logTrace("SqlPanel.displayResults()", "Running " + count + " of " + scriptParser.getSize() + " statement(s). Start: " + startIndex + " end: " + (endIndex - 1));
+      if (LogMgr.isTraceEnabled())
+      {
+        LogMgr.logTrace("SqlPanel.displayResults()",
+          runType.toString() + ": " + count + " of " + scriptParser.getSize() + " statement(s): start=" + startIndex + ", end=" + (endIndex - 1) +
+          " Cursor: line=" + (editor.getCaretLine() + 1) + ", column=" + (editor.getCaretPositionInLine(editor.getCaretLine()) + 1) + " (" + cursorPos + ")");
+      }
 
 			for (int i=startIndex; i < endIndex; i++)
 			{

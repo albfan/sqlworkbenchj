@@ -377,9 +377,6 @@ public class SqlCommand
 		{
 			if (currentStatement != null)
 			{
-				String info = getVerb() + " (" + getClass().getSimpleName() + ")";
-				LogMgr.logTrace("SqlCommand.done()", "Cleaning up SqlCommand " + info + ")");
-
 				try { currentStatement.clearBatch(); } catch (Throwable th) {}
 				try { currentStatement.clearWarnings(); } catch (Throwable th) {}
 				try { currentConnection.clearWarnings(); } catch (Throwable e) {}
@@ -390,7 +387,7 @@ public class SqlCommand
 				}
 				catch (Throwable th)
 				{
-					LogMgr.logError("SqlCommand.done()", "Error when closing the current statement for: " + info + ")", th);
+					LogMgr.logError("SqlCommand.done()", "Error when closing the current statement for: " + getClass().getSimpleName(), th);
 				}
 			}
 			currentStatement = null;
