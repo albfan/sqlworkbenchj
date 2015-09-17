@@ -89,8 +89,8 @@ public class Highlighter
 			endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
 
       // don't change the cursor location if it's already inside the statement
-      if (editor.getCaretPosition() >= startPos && editor.getCaretPosition() <= endPos) return;
-      
+      if (editor.getCaretPosition() >= startPos && editor.getCaretPosition() <= endPos && !doHighlight) return;
+
 			line = editor.getLineOfOffset(startPos);
       newCaret = editor.getLineStartOffset(line);
 		}
@@ -101,12 +101,15 @@ public class Highlighter
 			public void run()
 			{
         editor.scrollTo(line, 0);
-  			editor.setCaretPosition(newCaret);
 
 				if (doHighlight)
 				{
 					editor.selectError(startPos, endPos);
 				}
+        else
+        {
+          editor.setCaretPosition(newCaret);
+        }
 			}
 		});
 	}
