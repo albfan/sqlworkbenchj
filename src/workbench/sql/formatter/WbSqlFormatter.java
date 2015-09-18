@@ -436,6 +436,22 @@ public class WbSqlFormatter
     appendText(getTokenText(t));
   }
 
+	private void appendIdentifier(String text)
+	{
+    if (identifierCase == asIs || isQuotedIdentifier(text))
+    {
+      appendText(text);
+    }
+    else if (identifierCase == lower)
+    {
+      appendText(text.toLowerCase());
+    }
+    else if (identifierCase == upper)
+    {
+      appendText(text.toLowerCase());
+    }
+  }
+
 	private String getTokenText(SQLToken t)
 	{
 		if (t == null) return null;
@@ -2452,7 +2468,7 @@ public class WbSqlFormatter
 			name = t.getContents();
 		}
 
-		this.appendText(name);
+		this.appendIdentifier(name);
 
 		if (isQuotedIdentifier(name))
 		{
@@ -2462,7 +2478,7 @@ public class WbSqlFormatter
 				appendText('.');
 				// the following token must be another identifier, otherwise the syntax is not correct
 				t = this.skipComments();
-				appendTokenText(t);
+				appendIdentifier(t.getContents());
 				appendText(' ');
 				t = this.skipComments();
 			}

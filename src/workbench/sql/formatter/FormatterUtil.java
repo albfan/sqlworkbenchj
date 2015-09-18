@@ -48,18 +48,22 @@ public class FormatterUtil
 		return adjustCase(input, Settings.getInstance().getFormatterKeywordsCase());
 	}
 
+	public static String getDataType(String input)
+	{
+		return adjustCase(input, Settings.getInstance().getFormatterDatatypeCase());
+	}
+
 	private static String adjustCase(String input, GeneratedIdentifierCase keywordCase)
 	{
 		if (input == null) return null;
 		switch (keywordCase)
 		{
-			case asIs:
-				return input;
 			case lower:
 				return input.toLowerCase();
 			case upper:
 				return input.toUpperCase();
 		}
+    // asIs:
 		return input;
 	}
 
