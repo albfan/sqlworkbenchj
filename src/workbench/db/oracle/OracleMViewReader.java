@@ -58,7 +58,7 @@ public class OracleMViewReader
 
 	public CharSequence getMViewSource(WbConnection dbConnection, TableDefinition def, List<IndexDefinition> indexList, DropType dropType, boolean includeComments)
 	{
-		boolean alwaysUseDbmsMeta = dbConnection.getDbSettings().getUseOracleDBMSMeta("mview");
+		boolean useDbmsMeta = OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.mview);
 
 		TableIdentifier table = def.getTable();
 
@@ -73,11 +73,11 @@ public class OracleMViewReader
 
 		boolean retrieved = false;
 		pkIndex = null;
-		if (alwaysUseDbmsMeta)
+		if (useDbmsMeta)
 		{
 			try
 			{
-				String sql = getSourceFromDBMSMeta(dbConnection, table);
+        String sql = OracleUtils.getDDL(dbConnection, "MATERIALIZED_VIEW", table.getObjectName(), table.getSchema());
 				result.append(sql);
 				retrieved = true;
 			}
@@ -141,7 +141,12 @@ public class OracleMViewReader
 
 		StringBuilder indexSource = dbConnection.getMetadata().getIndexReader().getIndexSource(table, indexList);
 
-		if (indexSource != null) result.append(indexSource);
+		if (indexSource != null)
+    {
+      result.append("\n\n");
+      result.append(indexSource);
+    }
+    
 		return result.toString();
 	}
 
@@ -320,57 +325,5 @@ public class OracleMViewReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
-	}
-
-	/**
-	 * Retrieve the full source of materialized view using the DBMS_METADATA package.
-	 *
-	 * @param dbConnection the connection to use
-	 * @param mview the materialized view to retrieve
-	 * @return the source as obtained from the database
-	 * @throws SQLException
-	 */
-	private String getSourceFromDBMSMeta(WbConnection dbConnection, TableIdentifier mview)
-		throws SQLException
-	{
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		String source = null;
-
-		String sql = "select dbms_metadata.get_ddl('MATERIALIZED_VIEW', ?, ?) from dual";
-
-		try
-		{
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("OracleMViewReader.getSourceFromDBMSMeta()", "Retrieving MVIEW options using: \n"  + SqlUtil.replaceParameters(sql, mview.getSchema(), mview.getTableName()));
-			}
-
-			stmt = dbConnection.getMetadata().getSqlConnection().prepareStatement(sql);
-
-			stmt.setString(1, mview.getObjectName());
-			stmt.setString(2, mview.getSchema());
-
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				source = rs.getString(1);
-				if (source != null)
-				{
-					source = OracleDDLCleaner.cleanupQuotedIdentifiers(source);
-				}
-				source += ";\n";
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("OracleMViewReader.getSourceFromDBMSMeta()", "Error retrieving mview via DBMS_METADATA", e);
-			throw e;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return source;
 	}
 }

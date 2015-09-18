@@ -328,11 +328,11 @@ public class OracleIndexReader
 	{
 		if (definition == null) return null;
 
-		boolean alwaysUseDbmsMeta = this.metaData.getDbSettings().getUseOracleDBMSMeta("index");
+		boolean useDbmsMeta = OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.index);
 
     Set<String> typesForMeta = getUseDbmsMetaForTypes();
 
-		if (alwaysUseDbmsMeta || typesForMeta.contains(definition.getIndexType()))
+		if (useDbmsMeta || typesForMeta.contains(definition.getIndexType()))
 		{
 			try
 			{
@@ -340,50 +340,17 @@ public class OracleIndexReader
 			}
 			catch (SQLException e)
 			{
-				LogMgr.logWarning("OracleIndexReader.getIndexSource()", "Could not retrieve source using dbms_meta", e);
-				return super.getIndexSource(table, definition);
+				// already logged
 			}
 		}
+
 		return super.getIndexSource(table, definition);
 	}
 
 	private String getSourceFromDBMSMeta(IndexDefinition definition)
 		throws SQLException
 	{
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		String source = null;
-
-		String sql = "select dbms_metadata.get_ddl('INDEX', ?, ?) from dual";
-
-		try
-		{
-			stmt = this.metaData.getSqlConnection().prepareStatement(sql);
-
-			stmt.setString(1, definition.getObjectName());
-			stmt.setString(2, definition.getSchema());
-
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				source = rs.getString(1);
-				if (source != null)
-				{
-					source = OracleDDLCleaner.cleanupQuotedIdentifiers(source.trim());
-					source += ";\n";
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("OracleIndexReader", "Error retrieving index via DBMS_METADATA", e);
-			throw e;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return source;
+    return OracleUtils.getDDL(metaData.getWbConnection(), "INDEX", definition.getObjectName(), definition.getSchema());
 	}
 
 	@Override

@@ -28,10 +28,10 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
-import workbench.db.JdbcUtils;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.JdbcUtils;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -136,6 +136,18 @@ public class OracleSynonymReader
 	public String getSynonymSource(WbConnection con, String catalog, String owner, String synonym)
 		throws SQLException
 	{
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.synonym))
+    {
+      try
+      {
+        return OracleUtils.getDDL(con, "SYNONYM", synonym, owner);
+      }
+      catch (SQLException sql)
+      {
+        // logging already done
+      }
+    }
+
 		TableIdentifier id = getSynonymTable(con, catalog, owner, synonym);
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();

@@ -109,6 +109,7 @@ public class WbSqlFormatter
 	private GeneratedIdentifierCase keywordCase = GeneratedIdentifierCase.upper;
 	private GeneratedIdentifierCase identifierCase = GeneratedIdentifierCase.asIs;
 	private GeneratedIdentifierCase functionCase = GeneratedIdentifierCase.lower;
+	private GeneratedIdentifierCase dataTypeCase = GeneratedIdentifierCase.lower;
   private boolean indentWhereConditions;
 	private boolean addSpaceAfterComma;
 	private boolean commaAfterLineBreak;
@@ -162,6 +163,7 @@ public class WbSqlFormatter
 		maxSubselectLength = maxLength;
 		dbFunctions = CollectionUtil.caseInsensitiveSet();
 		functionCase = Settings.getInstance().getFormatterFunctionCase();
+		dataTypeCase = Settings.getInstance().getFormatterDatatypeCase();
 		newLineForSubSelects = Settings.getInstance().getFormatterSubselectInNewLine();
 		addColumnCommentForInsert = Settings.getInstance().getFormatterAddColumnNameComment();
 		keywordCase = Settings.getInstance().getFormatterKeywordsCase();
@@ -439,7 +441,7 @@ public class WbSqlFormatter
 		if (t == null) return null;
 		String text = t.getText();
 
-		if (this.dbFunctions.contains(text))
+    if (isDbFunction(t))
 		{
 			if (functionCase == GeneratedIdentifierCase.lower)
 			{
@@ -450,7 +452,18 @@ public class WbSqlFormatter
 				text = text.toUpperCase();
 			}
 		}
-		else if (this.isKeyword(text))
+    else if (isDatatype(text))
+    {
+      if (dataTypeCase == GeneratedIdentifierCase.upper)
+      {
+        text = text.toUpperCase();
+      }
+      else if (dataTypeCase == GeneratedIdentifierCase.lower)
+      {
+        text = text.toLowerCase();
+      }
+    }
+		else if (isKeyword(text))
 		{
 			if (keywordCase == GeneratedIdentifierCase.upper)
 			{
@@ -2308,7 +2321,7 @@ public class WbSqlFormatter
 				line.append(' ');
 			}
 
-			line.append(w);
+      line.append(getTokenText(t));
 
 			if (isColname)
 			{

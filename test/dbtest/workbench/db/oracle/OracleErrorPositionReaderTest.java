@@ -54,12 +54,13 @@ public class OracleErrorPositionReaderTest
 		WbConnection conn = OracleTestUtil.getOracleConnection();
 		assertNotNull(conn);
 
+    Exception ex = new Exception("Test message");
 		OracleErrorPositionReader reader = new OracleErrorPositionReader();
-		ErrorDescriptor error = reader.getErrorPosition(conn, "select 42 from dualx", null);
+		ErrorDescriptor error = reader.getErrorPosition(conn, "select 42 from dualx", ex);
 		assertNotNull(error);
 		assertEquals(15, error.getErrorPosition());
 
-		error = reader.getErrorPosition(conn, "select 42 from dual", null);
+		error = reader.getErrorPosition(conn, "select 42 from dual", ex);
 		assertNull(error);
 	}
 
@@ -70,20 +71,21 @@ public class OracleErrorPositionReaderTest
 		WbConnection conn = OracleTestUtil.getOracleConnection();
 		assertNotNull("Oracle not available", conn);
 
+    Exception ex = new Exception("Test message");
 		OracleErrorPositionReader reader = new OracleErrorPositionReader(true, true);
-		ErrorDescriptor error = reader.getErrorPosition(conn, "create table foo (id integr)", null);
+		ErrorDescriptor error = reader.getErrorPosition(conn, "create table foo (id integr)", ex);
 		assertNotNull(error);
 		assertEquals(21, error.getErrorPosition());
 
-		error = reader.getErrorPosition(conn, "drop tablex foo", null);
+		error = reader.getErrorPosition(conn, "drop tablex foo", ex);
 		assertNotNull(error);
 		assertEquals(5, error.getErrorPosition());
 
-		error = reader.getErrorPosition(conn, "drop table foo cascade", null);
+		error = reader.getErrorPosition(conn, "drop table foo cascade", ex);
 		assertNotNull(error);
 		assertEquals(22, error.getErrorPosition());
 
-		error = reader.getErrorPosition(conn, "drop function foo()", null);
+		error = reader.getErrorPosition(conn, "drop function foo()", ex);
 		assertNotNull(error);
 		assertEquals(17, error.getErrorPosition());
 	}
@@ -117,7 +119,6 @@ public class OracleErrorPositionReaderTest
 			}
 			catch (SQLException ex)
 			{
-//				System.out.println("*** " + ex.getMessage());
 				error = ex;
 			}
 			ErrorDescriptor errorInfo = reader.getErrorPosition(conn, sql, error);

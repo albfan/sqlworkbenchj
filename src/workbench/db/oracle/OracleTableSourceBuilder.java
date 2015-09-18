@@ -33,6 +33,7 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
+import workbench.db.DropType;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcUtils;
 import workbench.db.PkDefinition;
@@ -936,5 +937,23 @@ public class OracleTableSourceBuilder
 		}
 		return template;
 	}
+
+  @Override
+  public String getNativeTableSource(TableIdentifier table, DropType dropType)
+  {
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.table))
+    {
+      try
+      {
+        return OracleUtils.getDDL(dbConnection, "TABLE", table.getTableName(), table.getSchema());
+      }
+      catch (SQLException ex)
+      {
+        // alredy logged
+      }
+    }
+    return super.getNativeTableSource(table, dropType);
+  }
+
 
 }

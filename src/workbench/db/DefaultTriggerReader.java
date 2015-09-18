@@ -157,6 +157,8 @@ public class DefaultTriggerReader
 			LogMgr.logInfo("DefaultTriggerReader.getTableTriggers()", "Retrieving triggers using:\n" + query);
 		}
 
+    boolean trimNames = dbMeta.getDbSettings().trimObjectNames("trigger");
+
 		ResultSet rs = stmt.executeQuery(query);
 		try
 		{
@@ -170,43 +172,40 @@ public class DefaultTriggerReader
 			{
 				int row = result.addRow();
 				String value = rs.getString(1);
-				if (!rs.wasNull() && value != null) value = value.trim();
+        if (trimNames) value = StringUtil.trim(value);
 				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, value);
 
 				value = rs.getString(2);
-				if (!rs.wasNull() && value != null) value = value.trim();
+        if (trimNames) value = StringUtil.trim(value);
 				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, value);
 
 				value = rs.getString(3);
-				if (!rs.wasNull() && value != null) value = value.trim();
+        if (trimNames) value = StringUtil.trim(value);
 				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, value);
 
 				if (hasTableName)
 				{
 					value = rs.getString(4);
-					if (!rs.wasNull() && value != null) value = value.trim();
+          if (trimNames) value = StringUtil.trim(value);
 					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE, value);
 				}
 
 				if (hasComment)
 				{
 					value = rs.getString(5);
-					if (!rs.wasNull() && value != null) value = value.trim();
-					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT, value);
+          result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT, StringUtil.trim(value));
 				}
 
 				if (hasStatus)
 				{
 					value = rs.getString(6);
-					if (!rs.wasNull() && value != null) value = value.trim();
-					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_STATUS, value);
+					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_STATUS, StringUtil.trim(value));
 				}
 
 				if (hasLevel)
 				{
 					value = rs.getString(7);
-					if (!rs.wasNull() && value != null) value = value.trim();
-					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_LEVEL, value);
+					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_LEVEL, StringUtil.trim(value));
 				}
         TriggerDefinition trg = createTriggerDefinition(result, row, catalog, schema);
         result.getRow(row).setUserObject(trg);

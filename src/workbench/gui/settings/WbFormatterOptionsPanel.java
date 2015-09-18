@@ -59,6 +59,8 @@ public class WbFormatterOptionsPanel
 		identifierCase.setModel(idModel);
 		ComboBoxModel funcModel = new DefaultComboBoxModel(GeneratedIdentifierCase.values());
 		functionCase.setModel(funcModel);
+		ComboBoxModel typeModel = new DefaultComboBoxModel(GeneratedIdentifierCase.values());
+		dataTypeCase.setModel(typeModel);
 		String mnu = ResourceMgr.getPlainString("MnuTxtMakeCharInList");
 		String lbl = ResourceMgr.getFormattedString("LblMaxElements", mnu);
 		jLabel1.setText(lbl);
@@ -75,6 +77,7 @@ public class WbFormatterOptionsPanel
 	{
 
 		functionCase.setSelectedItem(Settings.getInstance().getFormatterFunctionCase());
+    dataTypeCase.setSelectedItem(Settings.getInstance().getFormatterDatatypeCase());
 		insertColumns.setText(Integer.toString(Settings.getInstance().getFormatterMaxColumnsInInsert()));
 		updateColumns.setText(Integer.toString(Settings.getInstance().getFormatterMaxColumnsInUpdate()));
 		keywordCase.setSelectedItem(Settings.getInstance().getFormatterKeywordsCase());
@@ -105,6 +108,7 @@ public class WbFormatterOptionsPanel
 		set.setFormatterMaxColumnsInUpdate(StringUtil.getIntValue(updateColumns.getText(),1));
 		set.setFormatterKeywordsCase((GeneratedIdentifierCase)keywordCase.getSelectedItem());
 		set.setFormatterIdentifierCase((GeneratedIdentifierCase)identifierCase.getSelectedItem());
+		set.setFormatterDatatypeCase((GeneratedIdentifierCase)dataTypeCase.getSelectedItem());
 		set.setFormatterAddSpaceAfterComma(spaceAfterComma.isSelected());
 		set.setFormatterCommaAfterLineBreak(commaAfterLineBreak.isSelected());
 		set.setFormatterAddSpaceAfterLineBreakComma(addSpaceAfterLineBreakComma.isSelected());
@@ -158,6 +162,8 @@ public class WbFormatterOptionsPanel
     functionCaseLabel = new javax.swing.JLabel();
     identifierCaseLabel = new javax.swing.JLabel();
     identifierCase = new javax.swing.JComboBox();
+    dataTypeCaseLabel = new javax.swing.JLabel();
+    dataTypeCase = new javax.swing.JComboBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -465,6 +471,21 @@ public class WbFormatterOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
     jPanel3.add(identifierCase, gridBagConstraints);
 
+    dataTypeCaseLabel.setLabelFor(identifierCase);
+    dataTypeCaseLabel.setText(ResourceMgr.getString("LblFmtDataType")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(8, 24, 0, 0);
+    jPanel3.add(dataTypeCaseLabel, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
+    jPanel3.add(dataTypeCase, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
@@ -494,6 +515,8 @@ public class WbFormatterOptionsPanel
   private javax.swing.JCheckBox addSpaceAfterLineBreakComma;
   private javax.swing.JPanel colsPerLinePanel;
   private javax.swing.JCheckBox commaAfterLineBreak;
+  private javax.swing.JComboBox dataTypeCase;
+  private javax.swing.JLabel dataTypeCaseLabel;
   private javax.swing.JComboBox functionCase;
   private javax.swing.JLabel functionCaseLabel;
   private javax.swing.JComboBox identifierCase;

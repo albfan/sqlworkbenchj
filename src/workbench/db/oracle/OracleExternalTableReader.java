@@ -28,10 +28,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -66,7 +66,7 @@ public class OracleExternalTableReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleExternalTableReader.getDefinition()", "Retrieving external table definition using :\n" + SqlUtil.replaceParameters(baseSql, table.getRawSchema(), table.getRawTableName()));
+			LogMgr.logDebug("OracleExternalTableReader.getDefinition()", "Retrieving external table definition using:\n" + SqlUtil.replaceParameters(baseSql, table.getRawSchema(), table.getRawTableName()));
 		}
 
 		try

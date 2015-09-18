@@ -928,6 +928,16 @@ public class Settings
 		setProperty("workbench.sql.formatter.select.columnsperline", value);
 	}
 
+	public GeneratedIdentifierCase getFormatterDatatypeCase()
+	{
+		return getIdentifierCase("workbench.sql.formatter.datatype.case", GeneratedIdentifierCase.upper);
+  }
+
+	public void setFormatterDatatypeCase(GeneratedIdentifierCase typeCase)
+	{
+		setIdentifierCase("workbench.sql.formatter.datatype.case", typeCase);
+  }
+
 	public GeneratedIdentifierCase getFormatterFunctionCase()
 	{
 		String value = getProperty("workbench.sql.formatter.functions.lowercase", null);

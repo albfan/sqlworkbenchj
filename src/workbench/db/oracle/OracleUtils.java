@@ -23,6 +23,7 @@
 package workbench.db.oracle;
 
 import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -62,7 +63,13 @@ public class OracleUtils
   public static enum DbmsMetadataTypes
   {
     procedure,
-    trigger;
+    trigger,
+    index,
+    table,
+    mview,
+    view,
+    sequence,
+    synonym;
   };
 
 	private OracleUtils()
@@ -317,18 +324,39 @@ public class OracleUtils
 		}
 	}
 
-  public static boolean useDBMSMetaData(DbmsMetadataTypes type)
+  public static boolean cleanupDDLQuotedIdentifiers()
   {
-    if (type == null) return false;
-    return Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve." + type.toString() + ".dbms_metadata", false);
+    return Settings.getInstance().getBoolProperty("workbench.db.oracle.dbmsmeta.cleanup.quotes", true);
   }
 
+	public static boolean getUseOracleDBMSMeta(DbmsMetadataTypes type)
+	{
+    boolean global = Settings.getInstance().getBoolProperty("workbench.db.oracle.use.dbmsmeta", false);
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.use.dbmsmeta." + type.name(), global);
+	}
+
+	public static void setUseOracleDBMSMeta(DbmsMetadataTypes type, boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.db.oracle.use.dbmsmeta." + type.name(), flag);
+	}
+
+  private static final String CALL_SET_TRANSFORM = "{call dbms_metadata.set_transform_param(dbms_metadata.session_transform, ?, true)}";
+
+  /**
+   * Calls dbms_metadata.set_transform_param to turn on the use of a SQLTERMINATOR
+   *
+   * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#BGBJBFGE
+   *
+   * Use {@link #resetDBMSMetadata(workbench.db.WbConnection)} to reset the dbms_metadata configuration.
+   *
+   * @param con  the connection on which to invoke the procedure.
+   */
   public static void initDBMSMetadata(WbConnection con)
   {
     CallableStatement stmt = null;
     try
     {
-      stmt = con.getSqlConnection().prepareCall("{call DBMS_METADATA.SET_TRANSFORM_PARAM(dbms_metadata.session_transform, ?, true)}");
+      stmt = con.getSqlConnection().prepareCall(CALL_SET_TRANSFORM);
       stmt.setString(1, "SQLTERMINATOR");
       stmt.execute();
 
@@ -342,12 +370,19 @@ public class OracleUtils
     }
   }
 
+  /**
+   * Calls dbms_metadata.set_transform_param to reset the transformations to the default.
+   *
+   * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#BGBJBFGE
+   *
+   * @param con  the connection on which to invoke the procedure.
+   */
   public static void resetDBMSMetadata(WbConnection con)
   {
     CallableStatement stmt = null;
     try
     {
-      stmt = con.getSqlConnection().prepareCall("{call DBMS_METADATA.SET_TRANSFORM_PARAM(dbms_metadata.session_transform, ?, true)}");
+      stmt = con.getSqlConnection().prepareCall(CALL_SET_TRANSFORM);
       stmt.setString(1, "DEFAULT");
     }
     catch (Throwable th)
@@ -355,7 +390,75 @@ public class OracleUtils
       SqlUtil.closeStatement(stmt);
       LogMgr.logDebug("OracleUtils.initDBMSMetadata()", "Could not reset transform parameters", th);
     }
-
   }
+
+  /**
+   * Utility function to call Oracle's dbms_metadata.get_ddl function.
+   * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#ARPLS66885
+   *
+   * Before calling the function, set_transform_param is called so that the SQLTERMINATOR is added
+   * to the generated source (see: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#ARPLS66910)
+   *
+   * @param conn   the connection on which to call GET_DDL
+   * @param type   the object type for which to retrieve the DDL
+   * @param name   the name of the object
+   * @param owner  the owner of the object
+   *
+   * @return the source code as returned by GET_DDL (trimmed)
+   *
+   * @throws SQLException
+   * @see #initDBMSMetadata(workbench.db.WbConnection)
+   * @see #resetDBMSMetadata(workbench.db.WbConnection)
+   */
+  public static String getDDL(WbConnection conn, String type, String name, String owner)
+    throws SQLException
+  {
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
+    String source = null;
+
+    long start = System.currentTimeMillis();
+
+    String sql = "select dbms_metadata.get_ddl(?, ?, ?) from dual";
+    try
+    {
+      initDBMSMetadata(conn);
+
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("OracleUtils.getDDL()", "Calling dbms_metadata using:\n" + SqlUtil.replaceParameters(sql, type, name, owner));
+      }
+      stmt = conn.getSqlConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setString(1, type);
+      stmt.setString(2, SqlUtil.removeObjectQuotes(name));
+      stmt.setString(3, SqlUtil.removeObjectQuotes(owner));
+
+      rs = stmt.executeQuery();
+      if (rs.next())
+      {
+        source = StringUtil.trim(rs.getString(1));
+      }
+
+      if (cleanupDDLQuotedIdentifiers())
+      {
+        source = OracleDDLCleaner.cleanupQuotedIdentifiers(source);
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("OracleUtils.getDDL()", "Could not procedure source using:\n" + SqlUtil.replaceParameters(sql, type, name, owner), ex);
+      throw ex;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+      resetDBMSMetadata(conn);
+    }
+
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("OracleUtils.getDDL()", "Retrieving DDL using dbms_metadata for " + type + " " + owner + "." + name + " took: " + duration + "ms");
+    return source;
+  }
+
 
 }

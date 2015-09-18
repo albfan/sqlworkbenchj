@@ -149,7 +149,7 @@ public class OracleIndexReaderTest
 			Collections.sort(indexes, new DbObjectComparator());
 
 			// Make sure the built-in templates are used
-			con.getMetadata().getDbSettings().setUseOracleDBMSMeta("index", false);
+			OracleUtils.setUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.index, false);
 
 			assertEquals(2, indexes.size());
 			IndexDefinition upper = indexes.get(0);
@@ -164,7 +164,7 @@ public class OracleIndexReaderTest
 			assertTrue(sql.contains("REVERSE"));
 
 			// Now use dbms_meta
-			con.getMetadata().getDbSettings().setUseOracleDBMSMeta("index", true);
+			OracleUtils.setUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.index, true);
 
 			sql = upper.getSource(con).toString();
 			assertNotNull(sql);
@@ -180,7 +180,7 @@ public class OracleIndexReaderTest
 		finally
 		{
 			// Reset the index retrieval
-			con.getMetadata().getDbSettings().setUseOracleDBMSMeta("index", false);
+			OracleUtils.setUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.index, false);
 		}
 	}
 

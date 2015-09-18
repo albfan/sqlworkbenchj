@@ -88,6 +88,7 @@ public class SqlExecOptionsPanel
 		allowEditDuringExec.setSelected(!GuiSettings.getDisableEditorDuringExecution());
 		emptyLineDelimiter.setSelected(Settings.getInstance().getEmptyLineIsDelimiter());
 		hiliteError.setSelected(GuiSettings.getHighlightErrorStatement());
+    jumpToError.setSelected(GuiSettings.jumpToError());
 
     ErrorPromptType type = GuiSettings.getErrorPromptType();
     promptType.setSelectedIndex(promptTypeToIndex(type));
@@ -122,6 +123,7 @@ public class SqlExecOptionsPanel
 		GuiSettings.setUseStatementInCurrentLine(useCurrentLineStmt.isSelected());
     int index = promptType.getSelectedIndex();
     GuiSettings.setErrorPromptType(indexToPromptType(index));
+    GuiSettings.setJumpToError(jumpToError.isSelected());
 	}
 
   private void setTypeTooltip()
@@ -181,6 +183,7 @@ public class SqlExecOptionsPanel
     emptyLineDelimiter = new JCheckBox();
     hiliteError = new JCheckBox();
     useCurrentLineStmt = new JCheckBox();
+    jumpToError = new JCheckBox();
     jPanel3 = new JPanel();
     alternateDelimiter = new JTextField();
     cbxDbName = new JComboBox();
@@ -225,7 +228,7 @@ public class SqlExecOptionsPanel
     allowEditDuringExec.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     jPanel2.add(allowEditDuringExec, gridBagConstraints);
@@ -237,7 +240,7 @@ public class SqlExecOptionsPanel
     alwaysAllowExecSel.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     jPanel2.add(alwaysAllowExecSel, gridBagConstraints);
@@ -286,6 +289,15 @@ public class SqlExecOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.insets = new Insets(7, 15, 0, 0);
     jPanel2.add(useCurrentLineStmt, gridBagConstraints);
+
+    jumpToError.setText(ResourceMgr.getString("LblJumpToError")); // NOI18N
+    jumpToError.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    jPanel2.add(jumpToError, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -398,6 +410,7 @@ public class SqlExecOptionsPanel
   private JLabel jLabel1;
   private JPanel jPanel2;
   private JPanel jPanel3;
+  private JCheckBox jumpToError;
   private JCheckBox keepHilite;
   private JComboBox promptType;
   private JCheckBox useCurrentLineStmt;

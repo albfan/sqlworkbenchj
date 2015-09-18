@@ -23,6 +23,7 @@
 package workbench.db.oracle;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -197,6 +198,20 @@ public class OracleSequenceReader
 		if (def == null) return;
 		if (def.getSource() != null) return;
 
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.sequence))
+    {
+      try
+      {
+        String source = OracleUtils.getDDL(connection, "SEQUENCE", def.getObjectName(), def.getSchema());
+        def.setSource(source);
+        return;
+      }
+      catch (SQLException sql)
+      {
+        // logging already done
+      }
+    }
+    
 		StringBuilder result = new StringBuilder(100);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 

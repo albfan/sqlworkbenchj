@@ -211,19 +211,7 @@ public class DbSettings
 		return dbmsNames;
 	}
 
-	public boolean getUseOracleDBMSMeta(String type)
-	{
-		if (type == null) return false;
-		return Settings.getInstance().getBoolProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), false);
-	}
-
-	public void setUseOracleDBMSMeta(String type, boolean flag)
-	{
-		if (type == null) return;
-		Settings.getInstance().setProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), flag);
-	}
-
-	public boolean supportsCreateArray()
+  public boolean supportsCreateArray()
 	{
 		return getBoolProperty("createarray.supported", true);
 	}
@@ -2129,6 +2117,12 @@ public class DbSettings
     String typeList = getProperty("types.alternatedelimiter", "procedure,function,trigger");
     types.addAll(StringUtil.stringToList(typeList,",", true, true));
     return types;
+  }
+
+  public boolean trimObjectNames(String type)
+  {
+    boolean globalDefault = getBoolProperty("trim.names", true);
+    return getBoolProperty(type + ".trim.names", globalDefault);
   }
 
 }

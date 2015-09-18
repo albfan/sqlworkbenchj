@@ -130,7 +130,7 @@ public class OracleProcedureReader
   @Override
 	public CharSequence getPackageSource(String catalog, String owner, String packageName)
 	{
-    if (OracleUtils.useDBMSMetaData(OracleUtils.DbmsMetadataTypes.procedure))
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.procedure))
     {
       try
       {
@@ -521,53 +521,21 @@ public class OracleProcedureReader
   {
     if (def == null) return null;
 
-    ResultSet rs = null;
-    Statement stmt = null;
-    String source = null;
-
-    String sql = null;
     if (def.isPackageProcedure())
     {
-      sql = "select dbms_metadata.get_ddl('PACKAGE', '" + def.getCatalog() + "', '" + def.getSchema() + "') from dual";
+      return OracleUtils.getDDL(connection, "PACKAGE", def.getPackageName(), def.getSchema());
     }
     else
     {
-      sql = "select dbms_metadata.get_ddl('PROCEDURE', '" + def.getProcedureName() + "', '" + def.getSchema() + "') from dual";
+      return OracleUtils.getDDL(connection, "PROCEDURE", def.getProcedureName(), def.getSchema());
     }
-
-    try
-    {
-      OracleUtils.initDBMSMetadata(connection);
-
-      if (Settings.getInstance().getDebugMetadataSql())
-      {
-        LogMgr.logDebug("OracleProcedureReader.retrieveUsingDbmsMetadata()", "Reading procedure source using:\n" + sql);
-      }
-      stmt = connection.createStatementForQuery();
-      rs = stmt.executeQuery(sql);
-      if (rs.next())
-      {
-        source = rs.getString(1);
-      }
-    }
-    catch (SQLException ex)
-    {
-      LogMgr.logError("OracleProcedureReader.retrieveUsingDbmsMetadata", "Could not retrieve procedure source using:\n" + sql, ex);
-      throw ex;
-    }
-    finally
-    {
-      SqlUtil.closeAll(rs, stmt);
-      OracleUtils.resetDBMSMetadata(connection);
-    }
-    return source;
   }
 
   @Override
 	protected CharSequence retrieveProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
   {
-    if (OracleUtils.useDBMSMetaData(OracleUtils.DbmsMetadataTypes.procedure))
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.procedure))
     {
       try
       {

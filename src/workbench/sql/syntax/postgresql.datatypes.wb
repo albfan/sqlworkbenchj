@@ -3,7 +3,9 @@ box
 bytea
 cidr
 circle
+float8
 daterange
+double8
 inet
 int2
 int4

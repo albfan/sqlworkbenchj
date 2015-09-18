@@ -69,6 +69,19 @@ public class OracleViewReader
 			CharSequence sql = reader.getMViewSource(this.connection, new TableDefinition(viewId), null, DropType.none, false);
 			return sql;
 		}
+
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.view))
+    {
+      try
+      {
+        return OracleUtils.getDDL(connection, "VIEW", viewId.getRawTableName(), viewId.getRawSchema());
+      }
+      catch (SQLException ex)
+      {
+        // ignore
+      }
+    }
+    
 		return super.getViewSource(viewId);
 	}
 
