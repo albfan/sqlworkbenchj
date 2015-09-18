@@ -339,7 +339,7 @@ public class OracleTypeReader
 		return type;
 	}
 
-	private String retrieveSource(WbConnection con, DbObject object, String schemaForSource)
+	private String retrieveSource(WbConnection con, DbObject object)
 	{
 		if (object == null) return null;
 
@@ -358,10 +358,7 @@ public class OracleTypeReader
 
 		try
 		{
-      if (StringUtil.isNonEmpty(schemaForSource))
-      {
-        // TODO: remap schema names
-      }
+      OracleUtils.initDBMSMetadata(con);
 
 			stmt = con.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, object.getObjectName());
@@ -413,6 +410,7 @@ public class OracleTypeReader
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
+      OracleUtils.resetDBMSMetadata(con);
 		}
 		return source;
 	}
@@ -420,11 +418,6 @@ public class OracleTypeReader
 	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
   {
-    return getObjectSource(con, object, null);
-  }
-
-	public String getObjectSource(WbConnection con, DbObject object, String schemaForSource)
-	{
 		if (object == null) return null;
 		if (!handlesType(object.getObjectType())) return null;
 		OracleObjectType type = getObjectDefinition(con, object);
@@ -434,7 +427,7 @@ public class OracleTypeReader
 
 		if (StringUtil.isBlank(source))
 		{
-			source = retrieveSource(con, object, schemaForSource);
+			source = retrieveSource(con, object);
 			type.setSource(source);
 		}
 		return source;

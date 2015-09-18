@@ -111,16 +111,16 @@ public class ProcedureDefinition
 	/**
 	 * Creates a new ProcedureDefinition.
 	 *
-	 * @param schema the schema of the procedure
-	 * @param name the name of the procedure
-	 * @param packageName the name of the Oracle package, may be null
-	 * @param type the return type of the procedure (DatabaseMetaData.procedureNoResult or DatabaseMetaData.procedureReturnsResult)
-	 * @param remarks the comment for this procedure
+	 * @param schema         the schema of the procedure
+	 * @param procedureName  the name of the procedure
+	 * @param packageName    the name of the Oracle package, may be null
+	 * @param type           the return type of the procedure (DatabaseMetaData.procedureNoResult or DatabaseMetaData.procedureReturnsResult)
+	 * @param remarks        the comment for this procedure
 	 * @return the new ProcedureDefinition
 	 */
-	public static ProcedureDefinition createOracleDefinition(String schema, String name, String packageName, int type, String remarks)
+	public static ProcedureDefinition createOracleDefinition(String schema, String procedureName, String packageName, int type, String remarks)
 	{
-		ProcedureDefinition def = new ProcedureDefinition(packageName, schema, name, type);
+		ProcedureDefinition def = new ProcedureDefinition(packageName, schema, procedureName, type);
 		if (StringUtil.isNonBlank(packageName))
 		{
 			if ("OBJECT TYPE".equals(remarks))

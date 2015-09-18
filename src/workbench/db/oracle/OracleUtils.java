@@ -22,6 +22,7 @@
  */
 package workbench.db.oracle;
 
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -57,6 +58,12 @@ public class OracleUtils
 		 "NUMBER", "NUMBER", "NUMBER", "LONG RAW", "RAW", "LONG", "CHAR", "NUMBER", "NUMBER", "NUMBER",
 		 "FLOAT", "REAL", "VARCHAR2", "DATE", "DATE", "TIMESTAMP", "STRUCT", "ARRAY", "BLOB", "CLOB", "ROWID",
 		 "XMLType", "SDO_GEOMETRY", "SDO_TOPO_GEOMETRY", "SDO_GEORASTER", "ANYTYPE", "ANYDATA");
+
+  public static enum DbmsMetadataTypes
+  {
+    procedure,
+    trigger;
+  };
 
 	private OracleUtils()
 	{
@@ -309,4 +316,46 @@ public class OracleUtils
 			return false;
 		}
 	}
+
+  public static boolean useDBMSMetaData(DbmsMetadataTypes type)
+  {
+    if (type == null) return false;
+    return Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve." + type.toString() + ".dbms_metadata", false);
+  }
+
+  public static void initDBMSMetadata(WbConnection con)
+  {
+    CallableStatement stmt = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareCall("{call DBMS_METADATA.SET_TRANSFORM_PARAM(dbms_metadata.session_transform, ?, true)}");
+      stmt.setString(1, "SQLTERMINATOR");
+      stmt.execute();
+
+      stmt.setString(1, "PRETTY");
+      stmt.execute();
+    }
+    catch (Throwable th)
+    {
+      SqlUtil.closeStatement(stmt);
+      LogMgr.logDebug("OracleUtils.initDBMSMetadata()", "Could not set transform parameter", th);
+    }
+  }
+
+  public static void resetDBMSMetadata(WbConnection con)
+  {
+    CallableStatement stmt = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareCall("{call DBMS_METADATA.SET_TRANSFORM_PARAM(dbms_metadata.session_transform, ?, true)}");
+      stmt.setString(1, "DEFAULT");
+    }
+    catch (Throwable th)
+    {
+      SqlUtil.closeStatement(stmt);
+      LogMgr.logDebug("OracleUtils.initDBMSMetadata()", "Could not reset transform parameters", th);
+    }
+
+  }
+
 }

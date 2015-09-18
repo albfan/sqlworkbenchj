@@ -1094,6 +1094,11 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.editor.errorjump", true);
 	}
 
+	public static void setJumpToError(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.editor.errorjump", flag);
+	}
+
 	public static boolean enableProfileQuickFilter()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.profiles.quickfilter", true);

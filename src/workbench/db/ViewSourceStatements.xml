@@ -458,7 +458,7 @@ FROM _SYSTEM.SYS_TABLES
 
   <void method="put">
    <string>Adaptive Server Enterprise</string>
-		<object idref="ase_proc_source"/>
+		<object idref="asa_view_source"/>
   </void>
 
   <void method="put">

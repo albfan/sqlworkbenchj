@@ -125,14 +125,7 @@ public class TriggerListPanel
 	{
 		if (initialized) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_initGui();
-			}
-		});
+		WbSwingUtilities.invoke(this::_initGui);
 	}
 
 	private void _initGui()
@@ -146,15 +139,7 @@ public class TriggerListPanel
 			{
 				if (dbConnection == null) return;
 				if (dbConnection.isBusy()) return;
-				try
-				{
-					dbConnection.setBusy(true);
-					retrieveCurrentTrigger();
-				}
-				finally
-				{
-					dbConnection.setBusy(false);
-				}
+        retrieveCurrentTrigger();
 			}
 		};
 

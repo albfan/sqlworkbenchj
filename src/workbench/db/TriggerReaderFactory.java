@@ -23,6 +23,7 @@
 package workbench.db;
 
 import workbench.db.mssql.SqlServerTriggerReader;
+import workbench.db.oracle.OracleTriggerReader;
 import workbench.db.postgres.PostgresTriggerReader;
 
 /**
@@ -43,6 +44,10 @@ public class TriggerReaderFactory
 		if (con.getMetadata().isPostgres())
 		{
 			return new PostgresTriggerReader(con);
+		}
+		if (con.getMetadata().isOracle())
+		{
+			return new OracleTriggerReader(con);
 		}
 		if (con.getMetadata().isSqlServer())
 		{

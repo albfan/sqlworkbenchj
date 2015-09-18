@@ -130,6 +130,19 @@ public class OracleProcedureReader
   @Override
 	public CharSequence getPackageSource(String catalog, String owner, String packageName)
 	{
+    if (OracleUtils.useDBMSMetaData(OracleUtils.DbmsMetadataTypes.procedure))
+    {
+      try
+      {
+        ProcedureDefinition def = ProcedureDefinition.createOracleDefinition(owner, null, packageName, DatabaseMetaData.procedureResultUnknown, null);
+        return retrieveUsingDbmsMetadata(def);
+      }
+      catch (SQLException sql)
+      {
+        // already logged
+      }
+    }
+
 		final String sql =
       "-- SQL Workbench \n" +
 			"SELECT text \n" +
@@ -503,6 +516,71 @@ public class OracleProcedureReader
 		return ds;
 	}
 
+  private CharSequence retrieveUsingDbmsMetadata(ProcedureDefinition def)
+    throws SQLException
+  {
+    if (def == null) return null;
+
+    ResultSet rs = null;
+    Statement stmt = null;
+    String source = null;
+
+    String sql = null;
+    if (def.isPackageProcedure())
+    {
+      sql = "select dbms_metadata.get_ddl('PACKAGE', '" + def.getCatalog() + "', '" + def.getSchema() + "') from dual";
+    }
+    else
+    {
+      sql = "select dbms_metadata.get_ddl('PROCEDURE', '" + def.getProcedureName() + "', '" + def.getSchema() + "') from dual";
+    }
+
+    try
+    {
+      OracleUtils.initDBMSMetadata(connection);
+
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("OracleProcedureReader.retrieveUsingDbmsMetadata()", "Reading procedure source using:\n" + sql);
+      }
+      stmt = connection.createStatementForQuery();
+      rs = stmt.executeQuery(sql);
+      if (rs.next())
+      {
+        source = rs.getString(1);
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("OracleProcedureReader.retrieveUsingDbmsMetadata", "Could not retrieve procedure source using:\n" + sql, ex);
+      throw ex;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+      OracleUtils.resetDBMSMetadata(connection);
+    }
+    return source;
+  }
+
+  @Override
+	protected CharSequence retrieveProcedureSource(ProcedureDefinition def)
+		throws NoConfigException
+  {
+    if (OracleUtils.useDBMSMetaData(OracleUtils.DbmsMetadataTypes.procedure))
+    {
+      try
+      {
+        return retrieveUsingDbmsMetadata(def);
+      }
+      catch (SQLException ex)
+      {
+        // ignore, logging already done
+      }
+    }
+    return super.retrieveProcedureSource(def);
+  }
+
 	@Override
 	public void readProcedureSource(ProcedureDefinition def, String catalogForSource, String schemaForSource)
 		throws NoConfigException
@@ -522,7 +600,7 @@ public class OracleProcedureReader
     else if (def.isOracleObjectType())
 		{
 			OracleObjectType type = new OracleObjectType(def.getSchema(), def.getPackageName());
-			CharSequence source = typeReader.getObjectSource(connection, type, schemaForSource);
+			CharSequence source = typeReader.getObjectSource(connection, type);
 			def.setSource(source);
 		}
 		else
