@@ -121,7 +121,7 @@ public class FontOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 12, 5, 0);
+    gridBagConstraints.insets = new Insets(0, 1, 5, 0);
     add(dataFontLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -149,7 +149,7 @@ public class FontOptionsPanel
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 12, 5, 0);
+    gridBagConstraints.insets = new Insets(0, 1, 5, 0);
     add(standardFontLabel, gridBagConstraints);
 
     msgFontLabel.setText(ResourceMgr.getString("LblMsgLogFont")); // NOI18N
@@ -159,7 +159,7 @@ public class FontOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 12, 5, 0);
+    gridBagConstraints.insets = new Insets(0, 1, 5, 0);
     add(msgFontLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -175,7 +175,7 @@ public class FontOptionsPanel
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(10, 8, 5, 15);
+    gridBagConstraints.insets = new Insets(3, 8, 5, 15);
     add(editorFont, gridBagConstraints);
 
     editorFontLabel.setText(ResourceMgr.getString("LblEditorFont")); // NOI18N
@@ -185,7 +185,7 @@ public class FontOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 12, 5, 0);
+    gridBagConstraints.insets = new Insets(3, 1, 5, 0);
     add(editorFontLabel, gridBagConstraints);
 
     scaleFonts.setText(ResourceMgr.getString("LblScaleFont")); // NOI18N
@@ -196,7 +196,7 @@ public class FontOptionsPanel
     gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(7, 12, 5, 0);
+    gridBagConstraints.insets = new Insets(7, 1, 5, 0);
     add(scaleFonts, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -211,7 +211,7 @@ public class FontOptionsPanel
     gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(7, 12, 5, 0);
+    gridBagConstraints.insets = new Insets(7, 1, 5, 0);
     add(wheelZoom, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables

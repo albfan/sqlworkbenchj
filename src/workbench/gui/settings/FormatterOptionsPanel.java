@@ -42,7 +42,9 @@ public class FormatterOptionsPanel
   {
     initComponents();
     wbOptions = new WbFormatterOptionsPanel();
+    wbOptions.setBorder(OptionPanelPage.PAGE_BORDER);
     extOptions = new ExternalFormatterOptions();
+    extOptions.setBorder(OptionPanelPage.PAGE_BORDER);
     tabbedPane.add("Built-in", wbOptions);
     tabbedPane.add("External", extOptions);
   }

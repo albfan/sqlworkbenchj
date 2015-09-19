@@ -198,7 +198,7 @@ public class SqlExecOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(8, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(8, 0, 0, 0);
     add(altDelimLabel, gridBagConstraints);
 
     jPanel2.setLayout(new GridBagLayout());
@@ -307,7 +307,7 @@ public class SqlExecOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(13, 13, 0, 0);
+    gridBagConstraints.insets = new Insets(13, 0, 0, 0);
     add(jPanel2, gridBagConstraints);
 
     jPanel3.setLayout(new GridBagLayout());
@@ -344,14 +344,14 @@ public class SqlExecOptionsPanel
     jLabel1.setToolTipText(ResourceMgr.getString("d_LblErrPromptType")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(8, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
     add(jLabel1, gridBagConstraints);
 
     promptType.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
     promptType.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.insets = new Insets(6, 11, 0, 0);
+    gridBagConstraints.insets = new Insets(1, 11, 0, 0);
     add(promptType, gridBagConstraints);
   }
 

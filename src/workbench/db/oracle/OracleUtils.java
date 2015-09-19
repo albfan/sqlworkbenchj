@@ -69,7 +69,8 @@ public class OracleUtils
     mview,
     view,
     sequence,
-    synonym;
+    synonym,
+    grant;
   };
 
 	private OracleUtils()
@@ -392,6 +393,19 @@ public class OracleUtils
     }
   }
 
+  public static String getDependentDDL(WbConnection conn, String dependentType, String name, String owner)
+  {
+    try
+    {
+      return getDDL(conn, dependentType, name, owner, true);
+    }
+    catch (SQLException ex)
+    {
+      // ignore. This simply means that the dependent DDL is not valid
+      return null;
+    }
+  }
+
   /**
    * Utility function to call Oracle's dbms_metadata.get_ddl function.
    * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#ARPLS66885
@@ -413,13 +427,27 @@ public class OracleUtils
   public static String getDDL(WbConnection conn, String type, String name, String owner)
     throws SQLException
   {
+    return getDDL(conn, type, name, owner, false);
+  }
+
+  private static String getDDL(WbConnection conn, String type, String name, String owner, boolean dependent)
+    throws SQLException
+  {
     ResultSet rs = null;
     PreparedStatement stmt = null;
     String source = null;
 
     long start = System.currentTimeMillis();
 
-    String sql = "select dbms_metadata.get_ddl(?, ?, ?) from dual";
+    String sql = null;
+    if (dependent)
+    {
+      sql = "select dbms_metadata.get_dependent_ddl(?, ?, ?) from dual";
+    }
+    else
+    {
+      sql = "select dbms_metadata.get_ddl(?, ?, ?) from dual";
+    }
     try
     {
       initDBMSMetadata(conn);

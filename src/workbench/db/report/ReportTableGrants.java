@@ -47,7 +47,7 @@ public class ReportTableGrants
 
 	public ReportTableGrants(WbConnection con, TableIdentifier tbl)
 	{
-		TableGrantReader reader = new TableGrantReader();
+    TableGrantReader reader = TableGrantReader.createReader(con);
 		grants = reader.getTableGrants(con, tbl);
 	}
 

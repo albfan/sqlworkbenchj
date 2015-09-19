@@ -22,10 +22,9 @@
  */
 package workbench.db;
 
-import java.sql.SQLException;
-import workbench.db.postgres.PostgresViewGrantReader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,13 +34,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.derby.DerbyViewGrantReader;
 import workbench.db.firebird.FirebirdViewGrantReader;
 import workbench.db.hsqldb.HsqlViewGrantReader;
 import workbench.db.ibm.Db2ViewGrantReader;
 import workbench.db.oracle.OracleViewGrantReader;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+import workbench.db.postgres.PostgresViewGrantReader;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -53,7 +56,6 @@ public abstract class ViewGrantReader
 
 	public static ViewGrantReader createViewGrantReader(WbConnection conn)
 	{
-
 		DbMetadata meta = conn.getMetadata();
 		String dbid = meta.getDbId();
 

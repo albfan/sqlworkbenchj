@@ -35,6 +35,8 @@ import java.util.Set;
 
 import workbench.log.LogMgr;
 
+import workbench.db.oracle.OracleTableGrantReader;
+
 import workbench.util.StringUtil;
 
 /**
@@ -42,6 +44,18 @@ import workbench.util.StringUtil;
  */
 public class TableGrantReader
 {
+
+	public static TableGrantReader createReader(WbConnection conn)
+	{
+		DbMetadata meta = conn.getMetadata();
+
+		if (meta.isOracle())
+		{
+			return new OracleTableGrantReader();
+		}
+    return new TableGrantReader();
+  }
+
 	/**
 	 *	Return the GRANTs for the given table
 	 *

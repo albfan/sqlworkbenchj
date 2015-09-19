@@ -1374,6 +1374,10 @@ workbench.db.mysql.retrieve.create.table.index_included=true</programlisting>
       If an error occurs during retrieval, &wb-productname; will revert to the built-in table
       source generation.
     </para>
+    <para>
+      You can also control the use of <literal>DBMS_METADATA</literal> can also be controlled directly
+      for each object type through a <link linkend="oracle-source-dbms-metadata">configuration property</link>.
+    </para>
   </section>
 
   <section id="settings-index-source-retrieval">
@@ -1426,6 +1430,11 @@ workbench.db.mysql.retrieve.create.table.index_included=true</programlisting>
       If an error occurs during retrieval, &wb-productname; will revert to the built-in table
       source generation.
     </para>
+    <para>
+      You can also control the use of <literal>DBMS_METADATA</literal> can also be controlled directly
+      for each object type through a <link linkend="oracle-source-dbms-metadata">configuration property</link>.
+    </para>
+
   </section>
 
 	<section id="filter-settings">

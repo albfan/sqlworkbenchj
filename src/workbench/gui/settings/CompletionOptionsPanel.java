@@ -170,7 +170,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(11, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(2, 0, 0, 0);
     add(pasteLabel, gridBagConstraints);
 
     completionPasteCase.setModel(new DefaultComboBoxModel(new String[] { "Lowercase", "Uppercase", "As is" }));
@@ -179,7 +179,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(0, 11, 0, 15);
     add(completionPasteCase, gridBagConstraints);
 
     closePopup.setText(ResourceMgr.getString("TxtCloseCompletion")); // NOI18N
@@ -193,7 +193,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(11, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(11, 0, 0, 0);
     add(closePopup, gridBagConstraints);
 
     completionColumnSort.setToolTipText(ResourceMgr.getDescription("LblPasteSort"));
@@ -211,7 +211,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     add(pasterOrderLabel, gridBagConstraints);
 
     sortColumns.setText(ResourceMgr.getString("LblCompletionSortCols")); // NOI18N
@@ -222,7 +222,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(11, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(11, 0, 0, 0);
     add(sortColumns, gridBagConstraints);
 
     partialMatch.setText(ResourceMgr.getString("LblCompletionPartialMatch")); // NOI18N
@@ -233,7 +233,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     add(partialMatch, gridBagConstraints);
 
     filterSearch.setText(ResourceMgr.getString("LblCompletionFilterSearch")); // NOI18N
@@ -244,7 +244,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     add(filterSearch, gridBagConstraints);
 
     cyleEntries.setText(ResourceMgr.getString("LblCompletionCycle")); // NOI18N
@@ -255,7 +255,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     add(cyleEntries, gridBagConstraints);
 
     localStorageLabel.setText(ResourceMgr.getString("LblLocalStorageType")); // NOI18N
@@ -264,7 +264,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     add(localStorageLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -278,7 +278,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     add(maxAgeLabel, gridBagConstraints);
 
     maxAgeField.setColumns(6);
@@ -316,7 +316,7 @@ public class CompletionOptionsPanel
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(12, 10, 0, 10);
+    gridBagConstraints.insets = new Insets(12, 0, 0, 10);
     add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables

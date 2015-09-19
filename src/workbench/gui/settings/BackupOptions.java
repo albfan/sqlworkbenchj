@@ -121,7 +121,6 @@ public class BackupOptions
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(11, 8, 0, 0);
     add(createWkspBackup, gridBagConstraints);
 
     backupSettingsFile.setText(ResourceMgr.getString("LblBckSettings")); // NOI18N
@@ -134,7 +133,7 @@ public class BackupOptions
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 8, 3, 0);
+    gridBagConstraints.insets = new Insets(7, 0, 3, 0);
     add(backupSettingsFile, gridBagConstraints);
 
     backupMacros.setText(ResourceMgr.getString("LblBckMacros")); // NOI18N
@@ -147,7 +146,7 @@ public class BackupOptions
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 8, 3, 0);
+    gridBagConstraints.insets = new Insets(7, 0, 3, 0);
     add(backupMacros, gridBagConstraints);
 
     backupProfiles.setText(ResourceMgr.getString("LblBckProfiles")); // NOI18N
@@ -160,7 +159,7 @@ public class BackupOptions
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 8, 3, 0);
+    gridBagConstraints.insets = new Insets(7, 0, 3, 0);
     add(backupProfiles, gridBagConstraints);
 
     backupDrivers.setText(ResourceMgr.getString("LblBckDrivers")); // NOI18N
@@ -173,7 +172,7 @@ public class BackupOptions
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 8, 3, 0);
+    gridBagConstraints.insets = new Insets(7, 0, 3, 0);
     add(backupDrivers, gridBagConstraints);
 
     jLabel1.setLabelFor(backupCount);
@@ -183,7 +182,7 @@ public class BackupOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 9, 1, 7);
+    gridBagConstraints.insets = new Insets(7, 0, 1, 7);
     add(jLabel1, gridBagConstraints);
 
     jLabel2.setText(ResourceMgr.getString("LblBckDir")); // NOI18N
@@ -193,7 +192,7 @@ public class BackupOptions
     gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(6, 9, 4, 5);
+    gridBagConstraints.insets = new Insets(6, 0, 4, 5);
     add(jLabel2, gridBagConstraints);
 
     backupCount.setColumns(3);

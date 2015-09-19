@@ -323,12 +323,12 @@ public class EditorColorsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(0, 9, 0, 9);
+    gridBagConstraints.insets = new Insets(0, 0, 0, 9);
     add(syntaxColors, gridBagConstraints);
 
     editorColors.setBorder(BorderFactory.createTitledBorder(ResourceMgr.getString("LblEditorColors"))); // NOI18N
@@ -436,9 +436,9 @@ public class EditorColorsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(7, 9, 7, 9);
+    gridBagConstraints.insets = new Insets(0, 0, 7, 9);
     add(editorColors, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables

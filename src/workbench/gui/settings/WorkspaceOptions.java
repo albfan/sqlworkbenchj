@@ -129,7 +129,7 @@ public class WorkspaceOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 12, 3, 0);
+    gridBagConstraints.insets = new Insets(0, 0, 3, 0);
     add(autoSaveWorkspace, gridBagConstraints);
 
     jPanel1.setLayout(new GridBagLayout());
@@ -159,7 +159,7 @@ public class WorkspaceOptions
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(3, 10, 0, 0);
+    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
     add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

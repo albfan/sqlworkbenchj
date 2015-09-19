@@ -121,7 +121,7 @@ public class SqlGenerationOptionsPanel
     diffLiteralsLabel = new JLabel();
     diffLiteralsType = new JComboBox();
     jPanel3 = new JPanel();
-    jPanel5 = new JPanel();
+    jPanel4 = new JPanel();
 
     setLayout(new GridBagLayout());
 
@@ -137,7 +137,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 12, 0, 11);
+    gridBagConstraints.insets = new Insets(0, 0, 0, 11);
     add(formatUpdates, gridBagConstraints);
 
     formatInserts.setSelected(Settings.getInstance().getDoFormatInserts());
@@ -153,7 +153,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(10, 12, 0, 11);
+    gridBagConstraints.insets = new Insets(10, 0, 0, 11);
     add(formatInserts, gridBagConstraints);
 
     formatDeletes.setSelected(Settings.getInstance().getDoFormatDeletes());
@@ -169,7 +169,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(10, 12, 0, 11);
+    gridBagConstraints.insets = new Insets(0, 12, 0, 11);
     add(formatDeletes, gridBagConstraints);
 
     ignoreIdentity.setText(ResourceMgr.getString("LblInsIgnoreId")); // NOI18N
@@ -184,7 +184,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(10, 12, 0, 11);
+    gridBagConstraints.insets = new Insets(10, 0, 0, 11);
     add(ignoreIdentity, gridBagConstraints);
 
     tableNameCaseLabel.setLabelFor(tableNameCase);
@@ -195,7 +195,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(11, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(11, 0, 0, 0);
     add(tableNameCaseLabel, gridBagConstraints);
 
     tableNameCase.setModel(new DefaultComboBoxModel(new String[] { "As is", "Lowercase", "Uppercase" }));
@@ -247,7 +247,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(10, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 0, 0, 0);
     add(jPanel1, gridBagConstraints);
 
     jPanel2.setBorder(BorderFactory.createTitledBorder(ResourceMgr.getString("LblDefDateLiterals"))); // NOI18N
@@ -320,14 +320,15 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(11, 10, 3, 14);
+    gridBagConstraints.insets = new Insets(11, 0, 3, 14);
     add(jPanel2, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    add(jPanel5, gridBagConstraints);
+    add(jPanel4, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -346,7 +347,7 @@ public class SqlGenerationOptionsPanel
   private JPanel jPanel1;
   private JPanel jPanel2;
   private JPanel jPanel3;
-  private JPanel jPanel5;
+  private JPanel jPanel4;
   private JComboBox literalTypes;
   private JComboBox tableNameCase;
   private JLabel tableNameCaseLabel;

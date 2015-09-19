@@ -185,7 +185,7 @@ public class DataColorOptions
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
     add(alternateColorLabel, gridBagConstraints);
 
     alternateColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -215,7 +215,7 @@ public class DataColorOptions
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
     add(jLabel2, gridBagConstraints);
 
     stdBackground.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -235,7 +235,7 @@ public class DataColorOptions
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
     add(stdBackgroundLabel, gridBagConstraints);
 
     textColorLabel.setText(ResourceMgr.getString("LblTableTextColor")); // NOI18N
@@ -245,7 +245,6 @@ public class DataColorOptions
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 0);
     add(textColorLabel, gridBagConstraints);
 
     textColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -255,7 +254,6 @@ public class DataColorOptions
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
     add(textColor, gridBagConstraints);
 
     selectionColorLabel.setText(ResourceMgr.getString("LblTableSelBckColor")); // NOI18N
@@ -265,7 +263,7 @@ public class DataColorOptions
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
     add(selectionColorLabel, gridBagConstraints);
 
     selectionColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -285,7 +283,7 @@ public class DataColorOptions
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
     add(selectedTextColorLabel, gridBagConstraints);
 
     selectedTextColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -305,7 +303,7 @@ public class DataColorOptions
     gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
     add(jLabel7, gridBagConstraints);
 
     modifiedColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -363,7 +361,7 @@ public class DataColorOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 10, 0, 20);
+    gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 20);
     add(jPanel7, gridBagConstraints);
 
     jLabel10.setText(ResourceMgr.getString("LblDataHiliteColor")); // NOI18N
@@ -373,7 +371,7 @@ public class DataColorOptions
     gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
     add(jLabel10, gridBagConstraints);
 
     searchHilite.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));

@@ -176,7 +176,6 @@ public class ExternalFormatterOptions
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(9, 5, 0, 0);
     add(dbList, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -191,14 +190,14 @@ public class ExternalFormatterOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(2, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
     add(jLabel1, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(8, 5, 6, 5);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 6, 0);
     add(jSeparator1, gridBagConstraints);
 
     jLabel2.setText(ResourceMgr.getString("LblExtFmtArg")); // NOI18N
@@ -206,7 +205,7 @@ public class ExternalFormatterOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(7, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
     add(jLabel2, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -231,7 +230,7 @@ public class ExternalFormatterOptions
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 7, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 7, 0);
     add(cbxEnabled, gridBagConstraints);
 
     supportsScripts.setText(ResourceMgr.getString("LblExtFmtScript")); // NOI18N
@@ -241,7 +240,7 @@ public class ExternalFormatterOptions
     gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(10, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
     add(supportsScripts, gridBagConstraints);
 
     lblHelp.setText("jLabel3");
@@ -253,7 +252,7 @@ public class ExternalFormatterOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LAST_LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 15, 5);
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 15, 5);
     add(lblHelp, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

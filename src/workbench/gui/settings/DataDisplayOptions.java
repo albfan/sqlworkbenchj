@@ -315,7 +315,6 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(1, 0, 0, 0);
     generalPanel.add(selectSummary, gridBagConstraints);
 
     retrieveComments.setText(ResourceMgr.getString("LblRetrieveColComments")); // NOI18N
@@ -448,7 +447,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 16, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 7);
     generalPanel.add(useTableName, gridBagConstraints);
 
     alignLabel.setText(ResourceMgr.getString("LblAlignNum")); // NOI18N
@@ -514,7 +513,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 12, 2, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
     add(generalPanel, gridBagConstraints);
 
     colWidthPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("TxtColWidthSettings"))); // NOI18N
@@ -610,7 +609,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 8, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 7);
     add(colWidthPanel, gridBagConstraints);
 
     rowHeightPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("TxtRowHeightSettings"))); // NOI18N
@@ -675,7 +674,7 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(4, 8, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 7);
     add(rowHeightPanel, gridBagConstraints);
 
     multiLinePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblMultiLineCols"))); // NOI18N
@@ -723,7 +722,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 8, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 7);
     add(multiLinePanel, gridBagConstraints);
   }
 

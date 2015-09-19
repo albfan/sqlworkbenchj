@@ -110,7 +110,7 @@ public class DbExplorerOptionsPanel
         dropTypesCombo.setSelectedIndex(2);
         break;
     }
-    
+
 		filterRetrieval.setSelected(DbExplorerSettings.getUseFilterForRetrieve());
 		autogeneratePK.setSelected(DbExplorerSettings.getAutoGeneratePKName());
 		partialMatchSearch.setSelected(DbExplorerSettings.getUsePartialMatch());
@@ -197,7 +197,6 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 0);
     add(showDbExplorer, gridBagConstraints);
 
     showTriggerPanel.setText(ResourceMgr.getString("LblShowTriggerPanel")); // NOI18N
@@ -209,7 +208,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
     add(showTriggerPanel, gridBagConstraints);
 
     autoselectDataPanel.setText(ResourceMgr.getString("LblSelectDataPanel")); // NOI18N
@@ -221,7 +220,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
     add(autoselectDataPanel, gridBagConstraints);
 
     showFocus.setText(ResourceMgr.getString("LblShowFocus")); // NOI18N
@@ -267,7 +266,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 20);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 20);
     add(jPanel2, gridBagConstraints);
 
     retrieveFKTree.setText(ResourceMgr.getString("LblRetrieveFkTree")); // NOI18N
@@ -303,7 +302,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
     add(showSynDetails, gridBagConstraints);
 
     showTableHistory.setText(ResourceMgr.getString("LblShowTableHist")); // NOI18N
@@ -315,7 +314,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
     add(showTableHistory, gridBagConstraints);
 
     jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblDbExpObjListOpts"))); // NOI18N
@@ -437,7 +436,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(9, 4, 0, 8);
+    gridBagConstraints.insets = new java.awt.Insets(9, 0, 0, 8);
     add(jPanel5, gridBagConstraints);
 
     jPanel6.setLayout(new java.awt.GridBagLayout());
@@ -564,7 +563,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 4, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
     add(jPanel6, gridBagConstraints);
   }
 

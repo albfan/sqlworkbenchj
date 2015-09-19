@@ -22,7 +22,9 @@
  */
 package workbench.db.oracle;
 
+import workbench.db.TableIdentifier;
 import workbench.db.ViewGrantReader;
+import workbench.db.WbConnection;
 
 /**
  *
@@ -54,5 +56,18 @@ public class OracleViewGrantReader
 	{
 		return 2;
 	}
+
+  @Override
+  public StringBuilder getViewGrantSource(WbConnection dbConnection, TableIdentifier view)
+  {
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.grant))
+    {
+      String grants = OracleUtils.getDependentDDL(dbConnection, "OBJECT_GRANT", view.getTableName(), view.getSchema());
+      StringBuilder result = new StringBuilder(grants == null ? 0 : grants.length());
+      result.append(grants);
+      return result;
+    }
+    return super.getViewGrantSource(dbConnection, view); //To change body of generated methods, choose Tools | Templates.
+  }
 
 }

@@ -242,7 +242,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(5, 0, 0, 0);
     add(editorTabSizeLabel, gridBagConstraints);
 
     tabSize.setColumns(4);
@@ -261,7 +261,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(5, 0, 0, 0);
     add(historySizeLabel, gridBagConstraints);
 
     historySizeField.setColumns(4);
@@ -298,7 +298,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(10, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
     add(internalLineEndingLabel, gridBagConstraints);
 
     internalLineEnding.setToolTipText(ResourceMgr.getDescription("LblIntLineEnding"));
@@ -307,7 +307,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(0, 11, 0, 15);
     add(internalLineEnding, gridBagConstraints);
 
     externalLineEndingLabel.setText(ResourceMgr.getString("LblExtLineEnding")); // NOI18N
@@ -317,7 +317,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     add(externalLineEndingLabel, gridBagConstraints);
 
     externalLineEnding.setToolTipText(ResourceMgr.getDescription("LblExtLineEnding"));
@@ -350,7 +350,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(3, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
     add(noWordSepLabel, gridBagConstraints);
 
     useTabs.setText(ResourceMgr.getString("LblEditorUseTabs")); // NOI18N
@@ -425,7 +425,7 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(12, 12, 0, 15);
+    gridBagConstraints.insets = new Insets(12, 0, 0, 15);
     add(jPanel1, gridBagConstraints);
 
     jLabel2.setLabelFor(autoCloseBrackets);
@@ -454,7 +454,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(5, 0, 0, 0);
     add(wheelScrollLabel, gridBagConstraints);
 
     wheelScrollLines.setColumns(4);
@@ -474,7 +474,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 8;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(3, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
     add(reloadLabel, gridBagConstraints);
 
     reloadType.setModel(new DefaultComboBoxModel(new String[] { "Never", "Prompt", "Automatic" }));
@@ -496,7 +496,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     add(rightClickMovesCursor, gridBagConstraints);
   }
 

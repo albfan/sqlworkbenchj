@@ -25,16 +25,23 @@ package workbench.gui.settings;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Set;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import workbench.gui.components.DividerBorder;
+
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.DividerBorder;
+
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 
 /**
@@ -42,15 +49,20 @@ import workbench.util.ExceptionUtil;
  */
 public class OptionPanelPage
 {
+  public static final Border PAGE_BORDER = new EmptyBorder(8, 8, 8, 8);
+  private static final Set<String> NO_BORDER_PANELS = CollectionUtil.treeSet("LnFOptionsPanel", "ExternalToolsPanel", "FormatterOptionsPanel");
+
 	private String label;
 	private String pageClass;
 	private JPanel panel;
 	private Restoreable options;
+  private boolean addBorder;
 
 	public OptionPanelPage(String clz, String key)
 	{
 		this.label = ResourceMgr.getString(key);
 		this.pageClass = "workbench.gui.settings." + clz;
+    addBorder = !NO_BORDER_PANELS.contains(clz);
 	}
 
 	@Override
@@ -85,6 +97,10 @@ public class OptionPanelPage
 				title.setBorder(new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(4,6,4,6)));
 				title.setFont(f2);
 				panel = new JPanel(new BorderLayout());
+        if (addBorder)
+        {
+          optionPanel.setBorder(PAGE_BORDER);
+        }
 				panel.setBorder(BorderFactory.createEtchedBorder());
 				panel.add(title, BorderLayout.NORTH);
 				panel.add(optionPanel, BorderLayout.CENTER);

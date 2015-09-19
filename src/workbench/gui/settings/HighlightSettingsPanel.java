@@ -134,7 +134,7 @@ public class HighlightSettingsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 8, 5, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
     add(enableHilite, gridBagConstraints);
 
     jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -168,7 +168,7 @@ public class HighlightSettingsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(6, 12, 5, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 5, 0);
     add(jPanel1, gridBagConstraints);
 
     jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -241,14 +241,14 @@ public class HighlightSettingsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
     add(jPanel3, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(11, 3, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(11, 0, 0, 0);
     add(jSeparator1, gridBagConstraints);
 
     jPanel4.setLayout(new java.awt.GridBagLayout());
@@ -268,7 +268,7 @@ public class HighlightSettingsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(10, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
     jPanel4.add(jLabel1, gridBagConstraints);
 
     selMinLength.setColumns(5);
@@ -302,7 +302,7 @@ public class HighlightSettingsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     jPanel4.add(ignoreCase, gridBagConstraints);
 
     noWhitespace.setText(ResourceMgr.getString("LblHiliteNoSpc")); // NOI18N
@@ -312,7 +312,7 @@ public class HighlightSettingsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     jPanel4.add(noWhitespace, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -323,7 +323,7 @@ public class HighlightSettingsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
     add(jPanel4, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

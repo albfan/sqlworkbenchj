@@ -114,7 +114,6 @@ public class MacroOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(10, 11, 0, 0);
     add(jLabel3, gridBagConstraints);
 
     cbExpansionKey.setModel(new DefaultComboBoxModel(new String[] { "Space", "Shift-Space", "Tab" }));
@@ -123,7 +122,7 @@ public class MacroOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new Insets(10, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(0, 11, 0, 15);
     add(cbExpansionKey, gridBagConstraints);
 
     jPanel1.setBorder(BorderFactory.createTitledBorder(ResourceMgr.getString("LblMacroPopup"))); // NOI18N
@@ -164,7 +163,7 @@ public class MacroOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(10, 7, 0, 8);
+    gridBagConstraints.insets = new Insets(10, 0, 0, 0);
     add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

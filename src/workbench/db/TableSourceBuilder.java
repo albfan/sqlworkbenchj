@@ -232,7 +232,7 @@ public class TableSourceBuilder
 
 		if (includeGrants)
 		{
-			TableGrantReader grantReader = new TableGrantReader();
+      TableGrantReader grantReader = TableGrantReader.createReader(dbConnection);
 			StringBuilder grants = grantReader.getTableGrantSource(this.dbConnection, table);
 			if (grants.length() > 0)
 			{

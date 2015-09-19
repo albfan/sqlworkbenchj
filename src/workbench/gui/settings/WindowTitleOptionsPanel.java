@@ -22,9 +22,10 @@
  */
 package workbench.gui.settings;
 
-import workbench.gui.components.WbTraversalPolicy;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.WbTraversalPolicy;
 
 /**
  *
@@ -156,7 +157,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 12, 2, 11);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 2, 11);
     add(productAtEnd, gridBagConstraints);
 
     showProfileGroup.setText(ResourceMgr.getString("LblShowProfileGroup")); // NOI18N
@@ -177,7 +178,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 11);
     add(showProfileGroup, gridBagConstraints);
 
     showWorkspace.setText(ResourceMgr.getString("LblShowWorkspace")); // NOI18N
@@ -191,7 +192,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 1);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 1);
     add(showWorkspace, gridBagConstraints);
 
     windowTitleLabel.setLabelFor(windowTitleComboBox);
@@ -201,7 +202,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(16, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(16, 0, 0, 0);
     add(windowTitleLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -218,7 +219,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 2, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 0, 2, 0);
     add(encloseCharLabel, gridBagConstraints);
 
     encloseChar.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "( )", "{ }", "[ ]", "< >" }));
@@ -269,7 +270,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 2, 11);
+    gridBagConstraints.insets = new java.awt.Insets(1, 0, 2, 11);
     add(showUrl, gridBagConstraints);
 
     includeUser.setText(ResourceMgr.getString("LblUrlWithUser")); // NOI18N
@@ -280,7 +281,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 30, 2, 11);
+    gridBagConstraints.insets = new java.awt.Insets(6, 21, 2, 11);
     add(includeUser, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

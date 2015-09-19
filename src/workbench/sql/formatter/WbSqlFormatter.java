@@ -109,7 +109,7 @@ public class WbSqlFormatter
 	private GeneratedIdentifierCase keywordCase = GeneratedIdentifierCase.upper;
 	private GeneratedIdentifierCase identifierCase = GeneratedIdentifierCase.asIs;
 	private GeneratedIdentifierCase functionCase = GeneratedIdentifierCase.lower;
-	private GeneratedIdentifierCase dataTypeCase = GeneratedIdentifierCase.lower;
+	private GeneratedIdentifierCase dataTypeCase = GeneratedIdentifierCase.upper;
   private boolean indentWhereConditions;
 	private boolean addSpaceAfterComma;
 	private boolean commaAfterLineBreak;

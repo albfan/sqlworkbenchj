@@ -91,50 +91,54 @@ public class BookmarkOptionsPanel
 
     useResultForBookmark.setText(ResourceMgr.getString("LblBookmarkResultName")); // NOI18N
     useResultForBookmark.setToolTipText(ResourceMgr.getString("d_LblBookmarkResultName")); // NOI18N
+    useResultForBookmark.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(7, 3, 0, 0);
     add(useResultForBookmark, gridBagConstraints);
 
     rememberColWidths.setText(ResourceMgr.getString("MnuTxtBookmarksSaveWidths")); // NOI18N
     rememberColWidths.setToolTipText(ResourceMgr.getString("d_MnuTxtBookmarksSaveWidths")); // NOI18N
+    rememberColWidths.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 3, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 0, 0, 0);
     add(rememberColWidths, gridBagConstraints);
 
     rememberSort.setText(ResourceMgr.getString("MnuTxtRememberSort")); // NOI18N
     rememberSort.setToolTipText(ResourceMgr.getString("d_MnuTxtRememberSort")); // NOI18N
+    rememberSort.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(0, 3, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 0, 0, 0);
     add(rememberSort, gridBagConstraints);
 
     useProcs.setText(ResourceMgr.getString("LblBookmarkProcs")); // NOI18N
     useProcs.setToolTipText(ResourceMgr.getString("d_MnuTxtRememberSort")); // NOI18N
+    useProcs.setBorder(null);
     useProcs.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new Insets(0, 3, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 0, 0, 0);
     add(useProcs, gridBagConstraints);
 
     useParamNames.setText(ResourceMgr.getString("LblBookmarkProcsParams")); // NOI18N
+    useParamNames.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new Insets(0, 20, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 18, 0, 0);
     add(useParamNames, gridBagConstraints);
   }
 
