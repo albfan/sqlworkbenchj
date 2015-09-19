@@ -62,12 +62,12 @@ public class OracleViewGrantReader
   {
     if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.grant))
     {
-      String grants = OracleUtils.getDependentDDL(dbConnection, "OBJECT_GRANT", view.getTableName(), view.getSchema());
+      String grants = DbmsMetadata.getDependentDDL(dbConnection, "OBJECT_GRANT", view.getTableName(), view.getSchema());
       StringBuilder result = new StringBuilder(grants == null ? 0 : grants.length());
       result.append(grants);
       return result;
     }
-    return super.getViewGrantSource(dbConnection, view); //To change body of generated methods, choose Tools | Templates.
+    return super.getViewGrantSource(dbConnection, view);
   }
 
 }

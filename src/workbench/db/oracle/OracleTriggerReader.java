@@ -32,7 +32,7 @@ public class OracleTriggerReader
     {
       try
       {
-        return OracleUtils.getDDL(dbConnection, "TRIGGER", triggerName, triggerSchema);
+        return DbmsMetadata.getDDL(dbConnection, "TRIGGER", triggerName, triggerSchema);
       }
       catch (SQLException ex)
       {

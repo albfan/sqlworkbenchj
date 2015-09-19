@@ -341,45 +341,15 @@ public class OracleTypeReader
 	{
 		if (object == null) return null;
 
-
-		String sql = "select dbms_metadata.get_ddl('TYPE', ?, ?) from dual";
-
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("OracleTypeReader.retrieveSource()", "Using SQL: " + SqlUtil.replaceParameters(sql, object.getObjectName(), object.getSchema()));
-		}
-
-
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
 		String source = null;
 
 		try
 		{
-      OracleUtils.initDBMSMetadata(con);
-
-			stmt = con.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, object.getObjectName());
-			stmt.setString(2, object.getSchema());
-
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				source = rs.getString(1);
-				if (source != null)
-				{
-					source = source.trim();
-				}
-			}
+      source = DbmsMetadata.getDDL(con, "TYPE", object.getObjectName(), object.getSchema());
 		}
 		catch (SQLException e)
 		{
 			LogMgr.logError("OracleTypeReader.retrieveSource()", "Error retrieving source", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-      OracleUtils.resetDBMSMetadata(con);
 		}
 		return source;
 	}

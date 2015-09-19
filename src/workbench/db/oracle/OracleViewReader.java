@@ -74,14 +74,14 @@ public class OracleViewReader
     {
       try
       {
-        return OracleUtils.getDDL(connection, "VIEW", viewId.getRawTableName(), viewId.getRawSchema());
+        return DbmsMetadata.getDDL(connection, "VIEW", viewId.getRawTableName(), viewId.getRawSchema());
       }
       catch (SQLException ex)
       {
         // ignore
       }
     }
-    
+
 		return super.getViewSource(viewId);
 	}
 

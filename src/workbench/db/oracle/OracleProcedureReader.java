@@ -523,11 +523,11 @@ public class OracleProcedureReader
 
     if (def.isPackageProcedure())
     {
-      return OracleUtils.getDDL(connection, "PACKAGE", def.getPackageName(), def.getSchema());
+      return DbmsMetadata.getDDL(connection, "PACKAGE", def.getPackageName(), def.getSchema());
     }
     else
     {
-      return OracleUtils.getDDL(connection, "PROCEDURE", def.getProcedureName(), def.getSchema());
+      return DbmsMetadata.getDDL(connection, "PROCEDURE", def.getProcedureName(), def.getSchema());
     }
   }
 

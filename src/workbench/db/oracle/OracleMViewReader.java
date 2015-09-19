@@ -77,7 +77,7 @@ public class OracleMViewReader
 		{
 			try
 			{
-        String sql = OracleUtils.getDDL(dbConnection, "MATERIALIZED_VIEW", table.getObjectName(), table.getSchema());
+        String sql = DbmsMetadata.getDDL(dbConnection, "MATERIALIZED_VIEW", table.getObjectName(), table.getSchema());
 				result.append(sql);
 				retrieved = true;
 			}
@@ -146,7 +146,7 @@ public class OracleMViewReader
       result.append("\n\n");
       result.append(indexSource);
     }
-    
+
 		return result.toString();
 	}
 

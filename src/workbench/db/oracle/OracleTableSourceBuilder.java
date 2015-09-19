@@ -945,7 +945,7 @@ public class OracleTableSourceBuilder
     {
       try
       {
-        return OracleUtils.getDDL(dbConnection, "TABLE", table.getTableName(), table.getSchema());
+        return DbmsMetadata.getDDL(dbConnection, "TABLE", table.getTableName(), table.getSchema());
       }
       catch (SQLException ex)
       {

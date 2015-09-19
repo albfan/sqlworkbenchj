@@ -350,7 +350,7 @@ public class OracleIndexReader
 	private String getSourceFromDBMSMeta(IndexDefinition definition)
 		throws SQLException
 	{
-    return OracleUtils.getDDL(metaData.getWbConnection(), "INDEX", definition.getObjectName(), definition.getSchema());
+    return DbmsMetadata.getDDL(metaData.getWbConnection(), "INDEX", definition.getObjectName(), definition.getSchema());
 	}
 
 	@Override

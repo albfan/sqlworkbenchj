@@ -202,7 +202,7 @@ public class OracleSequenceReader
     {
       try
       {
-        String source = OracleUtils.getDDL(connection, "SEQUENCE", def.getObjectName(), def.getSchema());
+        String source = DbmsMetadata.getDDL(connection, "SEQUENCE", def.getObjectName(), def.getSchema());
         def.setSource(source);
         return;
       }
@@ -211,7 +211,7 @@ public class OracleSequenceReader
         // logging already done
       }
     }
-    
+
 		StringBuilder result = new StringBuilder(100);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 

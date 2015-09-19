@@ -140,7 +140,7 @@ public class OracleSynonymReader
     {
       try
       {
-        return OracleUtils.getDDL(con, "SYNONYM", synonym, owner);
+        return DbmsMetadata.getDDL(con, "SYNONYM", synonym, owner);
       }
       catch (SQLException sql)
       {
