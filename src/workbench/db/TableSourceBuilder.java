@@ -171,6 +171,7 @@ public class TableSourceBuilder
 	private List<IndexDefinition> getIndexesToCreate(List<IndexDefinition> indexList, List<DependencyNode> foreignKeys)
 	{
 		if (!dbConnection.getDbSettings().supportsAutomaticFkIndexes()) return indexList;
+
 		if (CollectionUtil.isEmpty(indexList)) return indexList;
 		if (CollectionUtil.isEmpty(foreignKeys)) return indexList;
 

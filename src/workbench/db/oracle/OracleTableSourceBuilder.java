@@ -783,6 +783,23 @@ public class OracleTableSourceBuilder
 	@Override
 	public CharSequence getPkSource(TableIdentifier table, PkDefinition def, boolean forInlineUse)
 	{
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.constraint))
+    {
+      try
+      {
+        String pk = DbmsMetadata.getDDL(dbConnection, "CONSTRAINT", def.getPkName(), table.getSchema());
+        if (pk != null)
+        {
+          pk += "\n";
+        }
+        return pk;
+      }
+      catch (Exception ex)
+      {
+        // already logged, fall back to built-in retrieval
+      }
+    }
+
 		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
 		String sql = super.getPkSource(table, def, forInlineUse).toString();
 		if (StringUtil.isEmptyString(sql)) return sql;
@@ -945,15 +962,100 @@ public class OracleTableSourceBuilder
     {
       try
       {
-        return DbmsMetadata.getDDL(dbConnection, "TABLE", table.getTableName(), table.getSchema());
+        boolean inlineFK = dbConnection.getDbSettings().createInlineFKConstraints();
+        boolean inlinePK = dbConnection.getDbSettings().createInlinePKConstraints();
+        String ddl = DbmsMetadata.getTableDDL(dbConnection, table.getTableName(), table.getSchema(), inlinePK, inlineFK) + "\n";
+        if (!inlinePK && table.getPrimaryKeyName() != null)
+        {
+          String pk = DbmsMetadata.getDDL(dbConnection, "CONSTRAINT", table.getPrimaryKeyName(), table.getSchema());
+          if (StringUtil.isNonEmpty(pk))
+          {
+            ddl += "\n\n" + pk + "\n";
+          }
+        }
+        return ddl;
       }
       catch (SQLException ex)
       {
-        // alredy logged
+        // already logged, fall back to built-in retrieval
       }
     }
     return super.getNativeTableSource(table, dropType);
   }
 
+  @Override
+  public StringBuilder getFkSource(TableIdentifier table)
+  {
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.constraint))
+    {
+      String fk = DbmsMetadata.getDependentDDL(dbConnection, "REF_CONSTRAINT", table.getTableName(), table.getSchema());
+      if (fk != null)
+      {
+        StringBuilder result = new StringBuilder(fk.length());
+        result.append(fk);
+        result.append('\n');
+        return result;
+      }
+      return null;
+    }
+
+    return super.getFkSource(table);
+  }
+
+  @Override
+  public StringBuilder getFkSource(TableIdentifier table, List<DependencyNode> fkList, boolean forInlineUse)
+  {
+    if (!forInlineUse && OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.constraint))
+    {
+      return getFkSource(table);
+    }
+    return super.getFkSource(table, fkList, forInlineUse);
+  }
+
+	public String getCompleteTableSource(TableIdentifier table, DropType dropType)
+		throws SQLException
+  {
+    String result = "";
+    if (dropType != DropType.none)
+    {
+      result = generateDrop(table, dropType).toString() + "\n\n";
+    }
+
+    result += DbmsMetadata.getTableDDL(dbConnection, table.getTableName(), table.getSchema(), false, false);
+
+    if (table.getPrimaryKeyName() != null)
+    {
+      String pk = DbmsMetadata.getDDL(dbConnection, "CONSTRAINT", table.getPrimaryKeyName(), table.getSchema());
+      if (StringUtil.isNonEmpty(pk))
+      {
+        result += "\n\n" + pk;
+      }
+    }
+
+    String fk = DbmsMetadata.getDependentDDL(dbConnection, "REF_CONSTRAINT", table.getTableName(), table.getSchema());
+    if (StringUtil.isNonEmpty(fk))
+    {
+      result += "\n\n" + fk;
+    }
+
+    String indexDDL = DbmsMetadata.getDependentDDL(dbConnection, "INDEX", table.getTableName(), table.getSchema());
+    if (StringUtil.isNonEmpty(indexDDL))
+    {
+      result += "\n\n" + indexDDL;
+    }
+
+    String comments = DbmsMetadata.getDependentDDL(dbConnection, "COMMENT", table.getTableName(), table.getSchema());
+    if (StringUtil.isNonEmpty(comments))
+    {
+      result += "\n\n" + comments;
+    }
+
+    String grants = DbmsMetadata.getDependentDDL(dbConnection, "GRANT", table.getTableName(), table.getSchema());
+    if (StringUtil.isNonEmpty(grants))
+    {
+      result += "\n\n" + grants;
+    }
+    return result;
+  }
 
 }

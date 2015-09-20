@@ -136,7 +136,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(0, 0, 0, 11);
     add(formatUpdates, gridBagConstraints);
 

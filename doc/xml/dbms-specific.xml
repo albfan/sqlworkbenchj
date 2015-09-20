@@ -236,6 +236,7 @@
            <listitem><literal>workbench.db.oracle.use.dbmsmeta.synonynm</literal></listitem>
            <listitem><literal>workbench.db.oracle.use.dbmsmeta.procedure</literal> (includes packages)</listitem>
            <listitem><literal>workbench.db.oracle.use.dbmsmeta.trigger</literal></listitem>
+           <listitem><literal>workbench.db.oracle.use.dbmsmeta.constraint</literal> (for FK and PK constraints)</listitem>
          </itemizedlist>
          The value of a specific object type overrides the global setting.
        </para>

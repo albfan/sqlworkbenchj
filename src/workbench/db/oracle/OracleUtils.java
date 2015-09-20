@@ -68,7 +68,8 @@ public class OracleUtils
     view,
     sequence,
     synonym,
-    grant;
+    grant,
+    constraint;
   };
 
 	private OracleUtils()

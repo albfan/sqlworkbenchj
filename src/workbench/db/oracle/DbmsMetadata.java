@@ -40,58 +40,18 @@ import static workbench.db.oracle.OracleUtils.*;
  */
 public class DbmsMetadata
 {
-  private static final String CALL_SET_TRANSFORM = "{call dbms_metadata.set_transform_param(dbms_metadata.session_transform, ?, true)}";
-
-  /**
-   * Calls dbms_metadata.set_transform_param to turn on the use of a SQLTERMINATOR
-   *
-   * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#BGBJBFGE
-   *
-   * Use {@link #resetDBMSMetadata(workbench.db.WbConnection)} to reset the dbms_metadata configuration.
-   *
-   * @param con  the connection on which to invoke the procedure.
-   */
-  public static void initDBMSMetadata(WbConnection con)
-  {
-    CallableStatement stmt = null;
-    try
-    {
-      stmt = con.getSqlConnection().prepareCall(CALL_SET_TRANSFORM);
-      stmt.setString(1, "SQLTERMINATOR");
-      stmt.execute();
-
-      stmt.setString(1, "PRETTY");
-      stmt.execute();
-    }
-    catch (Throwable th)
-    {
-      SqlUtil.closeStatement(stmt);
-      LogMgr.logDebug("OracleUtils.initDBMSMetadata()", "Could not set transform parameter", th);
-    }
-  }
+  private static final String ENABLE_TRANSFORM = "{call dbms_metadata.set_transform_param(dbms_metadata.session_transform, ?, true)}";
+  private static final String DISABLE_TRANSFORM = "{call dbms_metadata.set_transform_param(dbms_metadata.session_transform, ?, false)}";
 
   /**
    * Calls dbms_metadata.set_transform_param to reset the transformations to the default.
    *
-   * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#BGBJBFGE
+   * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#ARPLS66885
    *
    * @param con  the connection on which to invoke the procedure.
+   *
+   * @see #getDDL(WbConnection, String, String, String, boolean)
    */
-  public static void resetDBMSMetadata(WbConnection con)
-  {
-    CallableStatement stmt = null;
-    try
-    {
-      stmt = con.getSqlConnection().prepareCall(CALL_SET_TRANSFORM);
-      stmt.setString(1, "DEFAULT");
-    }
-    catch (Throwable th)
-    {
-      SqlUtil.closeStatement(stmt);
-      LogMgr.logDebug("OracleUtils.initDBMSMetadata()", "Could not reset transform parameters", th);
-    }
-  }
-
   public static String getDependentDDL(WbConnection conn, String dependentType, String name, String owner)
   {
     try
@@ -100,13 +60,14 @@ public class DbmsMetadata
     }
     catch (SQLException ex)
     {
-      // ignore. This simply means that the dependent DDL is not valid
+      // ignore. This simply means that there is no dependent DDL
       return null;
     }
   }
 
   /**
    * Utility function to call Oracle's dbms_metadata.get_ddl function.
+   *
    * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#ARPLS66885
    *
    * Before calling the function, set_transform_param is called so that the SQLTERMINATOR is added
@@ -120,13 +81,29 @@ public class DbmsMetadata
    * @return the source code as returned by GET_DDL (trimmed)
    *
    * @throws SQLException
-   * @see #initDBMSMetadata(workbench.db.WbConnection)
-   * @see #resetDBMSMetadata(workbench.db.WbConnection)
+   *
+   * @see #initTransforms(WbConnection)
+   * @see #resetSessionTransforms(WbConnection)
+   * @see #getDependentDDL(WbConnection, String, String, String)
    */
   public static String getDDL(WbConnection conn, String type, String name, String owner)
     throws SQLException
   {
     return getDDL(conn, type, name, owner, false);
+  }
+
+  public static String getTableDDL(WbConnection conn, String name, String owner, boolean inlinePK, boolean inlineFK)
+    throws SQLException
+  {
+    if (!inlineFK)
+    {
+      disableTransformParam(conn, "REF_CONSTRAINTS");
+    }
+    if (!inlinePK)
+    {
+      disableTransformParam(conn, "CONSTRAINTS");
+    }
+    return getDDL(conn, "TABLE", name, owner, false);
   }
 
   private static String getDDL(WbConnection conn, String type, String name, String owner, boolean dependent)
@@ -149,7 +126,7 @@ public class DbmsMetadata
     }
     try
     {
-      initDBMSMetadata(conn);
+      initTransforms(conn);
 
       if (Settings.getInstance().getDebugMetadataSql())
       {
@@ -173,17 +150,86 @@ public class DbmsMetadata
     }
     catch (SQLException ex)
     {
-      LogMgr.logError("OracleUtils.getDDL()", "Could not procedure source using:\n" + SqlUtil.replaceParameters(sql, type, name, owner), ex);
+      LogMgr.logError("OracleUtils.getDDL()", "Could not read source using:\n" + SqlUtil.replaceParameters(sql, type, name, owner), ex);
       throw ex;
     }
     finally
     {
       SqlUtil.closeAll(rs, stmt);
-      resetDBMSMetadata(conn);
+      resetSessionTransforms(conn);
     }
 
     long duration = System.currentTimeMillis() - start;
     LogMgr.logDebug("OracleUtils.getDDL()", "Retrieving DDL using dbms_metadata for " + type + " " + owner + "." + name + " took: " + duration + "ms");
     return source;
   }
+
+  /**
+   * Calls dbms_metadata.set_transform_param to turn on the use of a SQLTERMINATOR
+   *
+   * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#BGBJBFGE
+   *
+   * Use {@link #resetSessionTransforms(WbConnection)} to reset the dbms_metadata configuration.
+   *
+   * @param con  the connection on which to invoke the procedure.
+   */
+  private static void initTransforms(WbConnection con)
+  {
+    CallableStatement stmt = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareCall(ENABLE_TRANSFORM);
+      stmt.setString(1, "SQLTERMINATOR");
+      stmt.execute();
+
+      stmt.setString(1, "PRETTY");
+      stmt.execute();
+    }
+    catch (Throwable th)
+    {
+      SqlUtil.closeStatement(stmt);
+      LogMgr.logDebug("OracleUtils.initDBMSMetadata()", "Could not set transform parameter", th);
+    }
+  }
+
+  /**
+   * Calls dbms_metadata.set_transform_param to reset the transformations to the default.
+   *
+   * See: http://docs.oracle.com/database/121/ARPLS/d_metada.htm#BGBJBFGE
+   *
+   * @param con  the connection on which to invoke the procedure.
+   *
+   * @see #initTransforms(WbConnection)
+   */
+  private static void resetSessionTransforms(WbConnection con)
+  {
+    CallableStatement stmt = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareCall(ENABLE_TRANSFORM);
+      stmt.setString(1, "DEFAULT");
+    }
+    catch (Throwable th)
+    {
+      SqlUtil.closeStatement(stmt);
+      LogMgr.logDebug("OracleUtils.initDBMSMetadata()", "Could not reset transform parameters", th);
+    }
+  }
+
+  private static void disableTransformParam(WbConnection con, String transform)
+  {
+    CallableStatement stmt = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareCall(DISABLE_TRANSFORM);
+      stmt.setString(1, transform);
+      stmt.execute();
+    }
+    catch (Throwable th)
+    {
+      SqlUtil.closeStatement(stmt);
+      LogMgr.logDebug("OracleUtils.disableTransformParam()", "Could not disable transform parameter: " + transform, th);
+    }
+  }
+
 }
