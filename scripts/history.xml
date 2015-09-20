@@ -3,6 +3,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-08-16">
+    <entry dev-build="1" type="enh">It's now possible to enbable the use of Oracle's DBMS_METADATA for source code retrieval for different types of objects</entry>
     <entry dev-build="1" type="enh">The tooltip shown for result tabs can now be configured (Options -&gt; Data display)</entry>
     <entry dev-build="1" type="enh">For the internal SQL formatter, it's now possible to configure the case in which data type names are written</entry>
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
