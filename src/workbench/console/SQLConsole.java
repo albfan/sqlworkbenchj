@@ -275,14 +275,13 @@ public class SQLConsole
 		{
 			Runtime.getRuntime().removeShutdownHook(shutdownHook);
 			saveHistory();
-
-			WbConsoleFactory.getConsole().shutdown();
-			ConnectionMgr.getInstance().disconnectAll();
-
 			if (Settings.getInstance().isModified())
 			{
 				Settings.getInstance().saveSettings(false);
 			}
+			WbConsoleFactory.getConsole().shutdown();
+      
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 
 		try

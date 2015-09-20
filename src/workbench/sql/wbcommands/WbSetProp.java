@@ -88,7 +88,6 @@ public class WbSetProp
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-
 		String verb = getParsingUtil().getSqlVerb(sql);
 		boolean isConfig = verb.equalsIgnoreCase(ALTERNATE_VERB);
 		String args = getCommandLine(sql);
@@ -196,7 +195,6 @@ public class WbSetProp
 	{
 		return ALTERNATE_VERB;
 	}
-
 
 	@Override
 	protected boolean isConnectionRequired()

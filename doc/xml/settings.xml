@@ -1404,7 +1404,7 @@ workbench.db.mysql.retrieve.create.table.index_included=true</programlisting>
 
     <simplesect id="settings-index-source-colindex">
 			<title>Defining the result column</title>
-			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.sourcecol</literal></para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.index.sourcecol</literal></para>
 			<para>
         By default the source code is assumed to be in the first column of the result. If that is not the case
         this property can be used to define the column index of the result in which the table's source is available.
@@ -1416,6 +1416,13 @@ workbench.db.mysql.retrieve.create.table.index_included=true</programlisting>
       If an error occurs during retrieval, &wb-productname; will revert to the built-in table
       source generation.
     </para>
+    <para>
+      The following example configures the use of the function <literal>pg_get_indexdef()</literal> to be used
+    </para>
+    <programlisting>workbench.db.postgresql.retrieve.create.index.query=select pg_get_indexdef('%fq_index_name%'::regclass)
+</programlisting>
+    <para>
+
     <para>
       Using Oracle's <literal>DBMS_METADATA</literal> to retrieve the index source, is controlled through an
       Oracle specific <link linkend="oracle-source-dbms-metadata">configuration property</link>.

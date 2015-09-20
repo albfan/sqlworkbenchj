@@ -99,7 +99,7 @@ public final class WbManager
 	private boolean writeSettings = true;
 	private boolean overWriteGlobalSettingsFile = true;
 	private boolean outOfMemoryOcurred;
-	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
+	private WbThread shutdownHook;
 	private DeadlockMonitor deadlockMonitor;
 
 	private final AppArguments cmdLine = new AppArguments();
@@ -108,15 +108,6 @@ public final class WbManager
 
 	private WbManager()
 	{
-		this(true);
-	}
-
-	private WbManager(boolean forGUI)
-	{
-		if (forGUI)
-		{
-			Runtime.getRuntime().addShutdownHook(this.shutdownHook);
-		}
 		Thread.setDefaultUncaughtExceptionHandler(this);
 	}
 
@@ -589,6 +580,12 @@ public final class WbManager
 			LogMgr.logDebug("WbManager.saveConfigSettings()", "Settings not saved. writeSettings=" + writeSettings + ", runMode=" + runMode);
 		}
 	}
+
+  private void installShutdownHook()
+  {
+    shutdownHook = new WbThread(this, "ShutdownHook");
+    Runtime.getRuntime().addShutdownHook(shutdownHook);
+  }
 
 	public void removeShutdownHook()
 	{
@@ -1096,7 +1093,7 @@ public final class WbManager
 	public static void initConsoleMode(String[] args)
 	{
     System.setProperty("workbench.log.console", "false");
-		wb = new WbManager(false);
+		wb = new WbManager();
 		wb.cmdLine.removeArgument(AppArguments.ARG_SHOW_PUMPER);
 		wb.cmdLine.removeArgument(AppArguments.ARG_SHOW_DBEXP);
 		wb.cmdLine.removeArgument(AppArguments.ARG_SHOW_SEARCHER);
@@ -1105,7 +1102,7 @@ public final class WbManager
 		wb.readParameters(args);
 		wb.runMode = RunMode.Console;
 		ConnectionMgr.getInstance().setReadTemplates(false);
-		wb.writeSettings = false;
+		wb.writeSettings = false; // SQLConsole will save the settings explicitely
 	}
 
 	/**
@@ -1130,8 +1127,6 @@ public final class WbManager
 	private static void runEmbedded(String[] args, boolean doStart)
 	{
 		wb = new WbManager();
-		// Avoid saving the settings
-		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
 		String[] realArgs = null;
 		String embeddedArgs = "-notemplates -nosettings";
 		if (args == null)
@@ -1160,10 +1155,7 @@ public final class WbManager
 
 	public static void prepareForTest(String[] args)
 	{
-
 		wb = new WbManager();
-		// Avoid saving the settings
-		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
 
 		// The test mode is used by DbDriver to skip the test if a driver library
 		// is accessible because in test mode the drivers are not loaded
@@ -1199,17 +1191,11 @@ public final class WbManager
     boolean showHelp = wb.cmdLine.isArgPresent("help");
     boolean showVersion = wb.cmdLine.isArgPresent("version");
 
-    if (showHelp)
+    if (showHelp || showVersion)
     {
-      System.out.println(wb.cmdLine.getHelp());
-      Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
-      System.exit(0);
-    }
+      if (showHelp) System.out.println(wb.cmdLine.getHelp());
+      if (showVersion) System.out.println(ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildInfo());
 
-    if (showVersion)
-    {
-      System.out.println(ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildInfo());
-      Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
       System.exit(0);
     }
 
@@ -1219,6 +1205,7 @@ public final class WbManager
     }
     else
     {
+      wb.installShutdownHook();
       wb.readParameters(args);
       wb.startApplication();
     }
