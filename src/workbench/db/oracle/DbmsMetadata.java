@@ -32,8 +32,6 @@ import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
-import static workbench.db.oracle.OracleUtils.*;
-
 /**
  *
  * @author Thomas Kellerer
@@ -143,7 +141,7 @@ public class DbmsMetadata
         source = StringUtil.trim(rs.getString(1));
       }
 
-      if (cleanupDDLQuotedIdentifiers())
+      if (OracleUtils.cleanupDDLQuotedIdentifiers())
       {
         source = OracleDDLCleaner.cleanupQuotedIdentifiers(source);
       }
