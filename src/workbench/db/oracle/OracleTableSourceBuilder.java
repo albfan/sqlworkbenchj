@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -37,6 +38,7 @@ import workbench.db.DropType;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcUtils;
 import workbench.db.PkDefinition;
+import workbench.db.TableGrantReader;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
@@ -595,7 +597,6 @@ public class OracleTableSourceBuilder
 		return result;
 	}
 
-
 	private boolean hasLobColumns(List<ColumnIdentifier> columns)
 	{
 		if (CollectionUtil.isEmpty(columns)) return false;
@@ -1012,7 +1013,18 @@ public class OracleTableSourceBuilder
     return super.getFkSource(table, fkList, forInlineUse);
   }
 
-	public String getCompleteTableSource(TableIdentifier table, DropType dropType)
+  @Override
+	public String getTableSource(TableIdentifier table, DropType dropType, boolean includeFk, boolean includeGrants)
+		throws SQLException
+  {
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.table))
+    {
+      return getCompleteTableSource(table, dropType, includeFk, includeGrants);
+    }
+    return super.getTableSource(table, dropType, includeFk, includeGrants);
+  }
+
+	public String getCompleteTableSource(TableIdentifier table, DropType dropType, boolean includeFk, boolean includeGrants)
 		throws SQLException
   {
     String result = "";
@@ -1021,7 +1033,16 @@ public class OracleTableSourceBuilder
       result = generateDrop(table, dropType).toString() + "\n\n";
     }
 
-    result += DbmsMetadata.getTableDDL(dbConnection, table.getTableName(), table.getSchema(), false, false);
+    boolean inlinePK = dbConnection.getDbSettings().createInlinePKConstraints();
+    boolean inlineFK = dbConnection.getDbSettings().createInlineFKConstraints();
+
+    if (!inlinePK && table.getPrimaryKey() == null)
+    {
+      PkDefinition pk = getIndexReader().getPrimaryKey(table);
+      table.setPrimaryKey(pk);
+    }
+
+    result += DbmsMetadata.getTableDDL(dbConnection, table.getTableName(), table.getSchema(), dbConnection.getDbSettings().createInlinePKConstraints(), inlineFK);
 
     if (table.getPrimaryKeyName() != null)
     {
@@ -1032,13 +1053,27 @@ public class OracleTableSourceBuilder
       }
     }
 
-    String fk = DbmsMetadata.getDependentDDL(dbConnection, "REF_CONSTRAINT", table.getTableName(), table.getSchema());
-    if (StringUtil.isNonEmpty(fk))
+    if (includeFk && !inlineFK)
     {
-      result += "\n\n" + fk;
+      CharSequence fk = getFkSource(table);
+      if (StringUtil.isNonEmpty(fk))
+      {
+        result += "\n\n" + fk;
+      }
     }
 
-    String indexDDL = DbmsMetadata.getDependentDDL(dbConnection, "INDEX", table.getTableName(), table.getSchema());
+    CharSequence indexDDL = null;
+    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.index))
+    {
+      indexDDL = DbmsMetadata.getDependentDDL(dbConnection, "INDEX", table.getTableName(), table.getSchema());
+    }
+    else
+    {
+      List<IndexDefinition> indexDef = getIndexReader().getTableIndexList(table);
+      List<IndexDefinition> toCreate = indexDef.stream().filter(idx -> !idx.isPrimaryKeyIndex()).collect(Collectors.toList());
+      indexDDL = getIndexReader().getIndexSource(table, toCreate);
+    }
+
     if (StringUtil.isNonEmpty(indexDDL))
     {
       result += "\n\n" + indexDDL;
@@ -1050,10 +1085,14 @@ public class OracleTableSourceBuilder
       result += "\n\n" + comments;
     }
 
-    String grants = DbmsMetadata.getDependentDDL(dbConnection, "GRANT", table.getTableName(), table.getSchema());
-    if (StringUtil.isNonEmpty(grants))
+    if (includeGrants)
     {
-      result += "\n\n" + grants;
+      TableGrantReader reader = new OracleTableGrantReader();
+      StringBuilder grants = reader.getTableGrantSource(dbConnection, table);
+      if (StringUtil.isNonEmpty(grants))
+      {
+        result += "\n\n" + grants;
+      }
     }
     return result;
   }

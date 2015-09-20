@@ -326,7 +326,7 @@ public class OracleUtils
 
   public static boolean cleanupDDLQuotedIdentifiers()
   {
-    return Settings.getInstance().getBoolProperty("workbench.db.oracle.dbmsmeta.cleanup.quotes", true);
+    return Settings.getInstance().getBoolProperty("workbench.db.oracle.dbmsmeta.cleanup.quotes", false);
   }
 
 	public static boolean getUseOracleDBMSMeta(DbmsMetadataTypes type)
