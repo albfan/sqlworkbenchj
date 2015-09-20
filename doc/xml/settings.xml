@@ -1422,8 +1422,6 @@ workbench.db.mysql.retrieve.create.table.index_included=true</programlisting>
     <programlisting>workbench.db.postgresql.retrieve.create.index.query=select pg_get_indexdef('%fq_index_name%'::regclass)
 </programlisting>
     <para>
-
-    <para>
       Using Oracle's <literal>DBMS_METADATA</literal> to retrieve the index source, is controlled through an
       Oracle specific <link linkend="oracle-source-dbms-metadata">configuration property</link>.
     </para>
