@@ -164,6 +164,10 @@ public class WbOraShow
 		{
 			return getErrors(lexer, sql);
 		}
+		else if (verb.equals("release") || verb.equals("version"))
+		{
+			return showVersion();
+		}
 		else if (verb.equals("edition"))
 		{
 			return showUserEnv("SESSION_EDITION_NAME", "EDITION");
@@ -200,6 +204,22 @@ public class WbOraShow
   private StatementRunnerResult showUserEnv(String attribute)
   {
     return showUserEnv(attribute, attribute);
+  }
+
+  private StatementRunnerResult showVersion()
+  {
+    String query = "select version from product_component_version where upper(product) like 'ORACLE%'";
+    StatementRunnerResult result = new StatementRunnerResult("SHOW release");
+    DataStore ds = SqlUtil.getResult(currentConnection, query);
+    if (ds != null)
+    {
+      result.addMessage("Release " + ds.getValueAsString(0, 0));
+    }
+    else
+    {
+      result.addMessage(currentConnection.getDatabaseProductVersion());
+    }
+    return result;
   }
 
   private StatementRunnerResult showUserEnv(String attribute, String displayName)

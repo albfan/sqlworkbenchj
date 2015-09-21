@@ -894,7 +894,7 @@ public class ConnectionMgr
 
         long end = System.currentTimeMillis();
         long duration = end - start;
-        LogMgr.logTrace("XmlProfileStorage.readProfiles()", "readProfiles() finished at " + end + " (" + duration + "ms) in " + Thread.currentThread().getName());
+        LogMgr.logDebug("ConnectionMgr.readProfiles()", profiles.size() + " profiles loaded in " + duration + "ms");
       }
       else
       {

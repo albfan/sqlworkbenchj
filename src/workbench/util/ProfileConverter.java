@@ -23,6 +23,7 @@ import java.util.List;
 
 import workbench.db.ConnectionProfile;
 import workbench.db.IniProfileStorage;
+import workbench.db.ProfileStorage;
 import workbench.db.XmlProfileStorage;
 
 /**
@@ -33,33 +34,46 @@ public class ProfileConverter
 {
   public static void main(String[] args)
   {
-    if (args.length != 2)
+    if (args.length != 1)
     {
-      System.err.println("Usage: ProfileConverter inputfile outputfile");
+      System.err.println("Usage: ProfileConverter inputfile");
       System.exit(1);
     }
-    IniProfileStorage ini = new IniProfileStorage();
-    XmlProfileStorage xml = new XmlProfileStorage();
+
     WbFile in = new WbFile(args[0]);
+
     if (!in.exists())
     {
       System.out.println("File " + in.getFullPath() + " not found!");
       System.exit(2);
     }
-    WbFile out = new WbFile(args[1]);
 
-    System.out.println("Converting " + in.getFullPath() + " to " + out.getFullPath());
+    WbFile out = null;
+    ProfileStorage reader = null;
+    ProfileStorage writer = null;
 
-    List<ConnectionProfile> profiles = null;
     if (in.getExtension().equalsIgnoreCase(IniProfileStorage.EXTENSION))
     {
-      profiles = ini.readProfiles(in.getFullPath());
-      xml.saveProfiles(profiles, out.getFullPath());
+      out = new WbFile(in.getParentFile(), XmlProfileStorage.DEFAULT_FILE_NAME);
+      reader = new IniProfileStorage();
+      writer = new XmlProfileStorage();
     }
     else
     {
-      profiles = xml.readProfiles(in.getFullPath());
-      ini.saveProfiles(profiles, out.getFullPath());
+      out = new WbFile(in.getParentFile(), IniProfileStorage.DEFAULT_FILE_NAME);
+      reader = new XmlProfileStorage();
+      writer = new IniProfileStorage();
     }
+
+    if (out.exists())
+    {
+      out.makeBackup();
+    }
+
+    System.out.println("Converting " + in.getFullPath() + " to " + out.getFullPath());
+
+    List<ConnectionProfile> profiles = reader.readProfiles(in.getFullPath());
+    writer.saveProfiles(profiles, out.getFullPath());
   }
+
 }
