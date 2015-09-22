@@ -27,6 +27,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -113,7 +114,7 @@ public class TagSearchPopup
 
 		searchField = new CompletionSearchField(this, null);
     int height = (int)searchField.getPreferredSize().getHeight();
-    final int h = (height / 4) + 1;
+    final int h = (height / 4);
     final Insets insets = new Insets(h, h, h, h);
     JPanel header = new JPanel(new BorderLayout())
     {
@@ -156,6 +157,14 @@ public class TagSearchPopup
 		{
       final Point p = inputField.getLocationOnScreen();
       p.y += inputField.getHeight();
+      Border border = inputField.getBorder();
+      if (border != null)
+      {
+        Insets insets = border.getBorderInsets(inputField);
+        p.y -= insets.top;
+      }
+      Rectangle r = inputField.modelToView(inputField.getCaretPosition());
+      p.x += r.x;
 
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -167,8 +176,12 @@ public class TagSearchPopup
 						window.setLocation(p);
 						window.pack();
             Dimension size = window.getSize();
-            size.width = (int)inputField.getWidth() / 2;
-            window.setSize(size);
+            int width = (int)inputField.getWidth() / 3;
+            if (width > size.width)
+            {
+              size.width = width;
+              window.setSize(size);
+            }
 						window.setVisible(true);
             searchField.requestFocusInWindow();
 					}
@@ -185,6 +198,12 @@ public class TagSearchPopup
 	{
     data.clear();
     window.removeWindowListener(this);
+    if (inputField instanceof StringPropertyEditor)
+    {
+      // make sure the new text is not automatically selected
+      // in the profile editor
+      ((StringPropertyEditor)inputField).ignoreNextFocus();
+    }
     window.setVisible(false);
     window.dispose();
     window = null;
@@ -237,7 +256,7 @@ public class TagSearchPopup
 
 		for (String o : selected)
 		{
-      if (value.length() > 0)
+      if (value.length() > 0 && !value.endsWith(","))
       {
         value += ",";
       }
@@ -250,13 +269,6 @@ public class TagSearchPopup
       int len = value.length();
       inputField.setCaretPosition(len);
       inputField.select(len, len);
-      if (inputField instanceof StringPropertyEditor)
-      {
-        // make sure the new text is not automatically selected
-        // in the profile editor
-        ((StringPropertyEditor)inputField).ignoreNextFocus();
-      }
-
       if (filter != null)
       {
         EventQueue.invokeLater(filter::applyQuickFilter);
