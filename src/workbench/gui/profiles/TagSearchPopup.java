@@ -23,7 +23,9 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -43,6 +45,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JWindow;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -71,7 +74,6 @@ public class TagSearchPopup
   private CompletionSearchField searchField;
 	private JTextComponent inputField;
 	private JScrollPane scroll;
-	private JPanel content;
 	private JList<String> elementList;
 	private DefaultListModel<String> data;
   private JWindow window;
@@ -101,46 +103,59 @@ public class TagSearchPopup
 		elementList.addFocusListener(this);
 		elementList.addMouseListener(this);
 
-		content = new DummyPanel();
-
-		content.setLayout(new BorderLayout());
+    JPanel content = new JPanel(new BorderLayout());
 		scroll = new JScrollPane(this.elementList);
-		scroll.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
-		elementList.setVisibleRowCount(10);
-		content.add(scroll);
+    scroll.setBorder(new EmptyBorder(0, 0, 0, 0));
+		elementList.setVisibleRowCount(12);
 		elementList.addKeyListener(this);
+    content.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
+    content.add(scroll, BorderLayout.CENTER);
 
 		searchField = new CompletionSearchField(this, null);
-		scroll.setColumnHeaderView(this.searchField);
+    int height = (int)searchField.getPreferredSize().getHeight();
+    final int h = (height / 4) + 1;
+    final Insets insets = new Insets(h, h, h, h);
+    JPanel header = new JPanel(new BorderLayout())
+    {
+      @Override
+      public Insets getInsets()
+      {
+        return insets;
+      }
+    };
+
+    header.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
+    header.setBackground(UIManager.getColor("Label.background"));
+    searchField.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
+    header.add(searchField, BorderLayout.CENTER);
+    scroll.setColumnHeaderView(header);
+
+    int count = data.getSize();
+    elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
+
+    window = new JWindow(SwingUtilities.getWindowAncestor(inputField));
+
+    WbTraversalPolicy pol = new WbTraversalPolicy();
+    pol.addComponent(searchField);
+    pol.addComponent(elementList);
+    pol.setDefaultComponent(elementList);
+
+    elementList.setFocusable(true);
+    elementList.setFocusTraversalKeysEnabled(false);
+    window.setFocusCycleRoot(true);
+    window.setFocusTraversalPolicy(pol);
+
+    window.getContentPane().add(content);
+    window.addKeyListener(this);
+    window.addWindowListener(this);
 	}
 
 	public void showPopup()
 	{
 		try
 		{
-			final Point p = inputField.getLocationOnScreen();
+      final Point p = inputField.getLocationOnScreen();
       p.y += inputField.getHeight();
-
-			int count = data.getSize();
-			elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
-
-      window = new JWindow(SwingUtilities.getWindowAncestor(inputField));
-
-			elementList.validate();
-
-			WbTraversalPolicy pol = new WbTraversalPolicy();
-      pol.addComponent(searchField);
-			pol.addComponent(elementList);
-			pol.setDefaultComponent(elementList);
-
-			elementList.setFocusable(true);
-			elementList.setFocusTraversalKeysEnabled(false);
-			window.setFocusCycleRoot(true);
-			window.setFocusTraversalPolicy(pol);
-
-			window.setContentPane(content);
-			window.addKeyListener(this);
-			window.addWindowListener(this);
 
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -151,6 +166,9 @@ public class TagSearchPopup
 					{
 						window.setLocation(p);
 						window.pack();
+            Dimension size = window.getSize();
+            size.width = (int)inputField.getWidth() / 2;
+            window.setSize(size);
 						window.setVisible(true);
             searchField.requestFocusInWindow();
 					}
@@ -511,22 +529,5 @@ public class TagSearchPopup
     // This is called from the search field when the user hits the ESC key
     closePopup(false);
   }
-
-	static class DummyPanel
-		extends JPanel
-	{
-		@SuppressWarnings("deprecation")
-		@Override
-		public boolean isManagingFocus()
-		{
-			return false;
-		}
-
-		@Override
-		public boolean getFocusTraversalKeysEnabled()
-		{
-			return false;
-		}
-	}
 
 }
