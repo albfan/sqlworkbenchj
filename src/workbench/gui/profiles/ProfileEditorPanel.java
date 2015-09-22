@@ -27,6 +27,8 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -34,6 +36,7 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -43,17 +46,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import workbench.interfaces.FileActions;
+import workbench.interfaces.QuickFilter;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
@@ -70,14 +74,18 @@ import workbench.gui.actions.CopyProfileAction;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.NewListEntryAction;
+import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.SaveListFileAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.DividerBorder;
+import workbench.gui.components.HistoryTextField;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbLabel;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -86,7 +94,7 @@ import workbench.util.StringUtil;
  */
 public class ProfileEditorPanel
 	extends JPanel
-	implements FileActions, ValidatingComponent, PropertyChangeListener, KeyListener
+	implements FileActions, ValidatingComponent, PropertyChangeListener, KeyListener, ActionListener, QuickFilter
 {
 	private ProfileListModel model;
 	private WbToolbar toolbar;
@@ -95,10 +103,13 @@ public class ProfileEditorPanel
 	private NewListEntryAction newItem;
 	private CopyProfileAction copyItem;
 	private DeleteListEntryAction deleteItem;
-	private JTextField filterValue;
+  private HistoryTextField filterValue;
 	protected boolean dummyAdded;
 	private List<String> orgExpandedGroups;
 	private ConnectionProfile initialProfile;
+  private boolean ignoreFilterEvent;
+  private WbAction resetFilter;
+  private QuickFilterAction applyFilter;
 
 	public ProfileEditorPanel(String lastProfileKey)
 	{
@@ -120,7 +131,7 @@ public class ProfileEditorPanel
 
 		copyItem = new CopyProfileAction(this);
 		copyItem.setEnabled(false);
-		this.toolbar.add(copyItem);
+		toolbar.add(copyItem);
 		ProfileTree tree = (ProfileTree)profileTree;
 		tree.setBorder(null);
 
@@ -142,19 +153,35 @@ public class ProfileEditorPanel
 
 		if (GuiSettings.enableProfileQuickFilter())
 		{
+      applyFilter = new QuickFilterAction(this);
+      resetFilter = new WbAction()
+      {
+        @Override
+        public void executeAction(ActionEvent e)
+        {
+          resetFilter();
+        }
+      };
+      resetFilter.setIcon("resetfilter");
+      resetFilter.setEnabled(true);
+
 			JPanel filterPanel = new JPanel(new BorderLayout(0, 1));
 			filterPanel.setBorder(new DividerBorder(DividerBorder.TOP));
-			filterValue = new JTextField();
+      filterValue = new HistoryTextField("profiles");
 			WbLabel lbl = new WbLabel();
 			lbl.setTextByKey("LblFilter");
 			lbl.setLabelFor(filterValue);
 			lbl.setBorder(new EmptyBorder(0, 5, 0, 5));
 			filterPanel.add(lbl, BorderLayout.LINE_START);
 			filterPanel.add(filterValue, BorderLayout.CENTER);
+      WbToolbar filterBar = new WbToolbar();
+      filterBar.add(applyFilter);
+      filterBar.add(resetFilter);
+      filterBar.setMargin(WbSwingUtilities.EMPTY_INSETS);
+      filterBar.setBorderPainted(true);
+      filterPanel.add(filterBar, BorderLayout.LINE_END);
 			p.add(filterPanel, BorderLayout.PAGE_END);
-
 			filterValue.setToolTipText(lbl.getToolTipText());
-			filterValue.addKeyListener(this);
 		}
 
 		this.listPanel.add(p, BorderLayout.NORTH);
@@ -174,6 +201,12 @@ public class ProfileEditorPanel
 		final ProfileKey last = Settings.getInstance().getLastConnection(lastProfileKey);
 		((ProfileTree)profileTree).selectProfile(last);
 		ConnectionMgr.getInstance().addDriverChangeListener(this);
+
+    if (filterValue != null)
+    {
+      filterValue.addActionListener(this);
+      filterValue.getEditor().getEditorComponent().addKeyListener(this);
+    }
 	}
 
 	private int getSelectedRow()
@@ -236,7 +269,24 @@ public class ProfileEditorPanel
 		{
 			tree.expandPath(tree.getSelectionPath());
 		}
-	}
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e)
+  {
+    if (ignoreFilterEvent) return;
+
+    if (e.getSource() != filterValue) return;
+
+    // when typing in the editor, the combobox sends an actionPerformed event with "comboBoxEdited" followed by a "comboBoxChanged"
+    // We only want to respond to the actionPerformed event if the user selected an entry from the dropdown
+    // everything else related to typing is handled in the keyTyped() method.
+    // The only way to distinguish between a dropdown selection and "typing" seems to be to check if the dropdown is visible
+    if (filterValue.isPopupVisible() && "comboBoxChanged".equals(e.getActionCommand()))
+    {
+      applyQuickFilter();
+    }
+  }
 
 	@Override
 	public void keyTyped(final KeyEvent e)
@@ -246,7 +296,7 @@ public class ProfileEditorPanel
       @Override
       public void run()
       {
-        applyFilter();
+        applyQuickFilter();
       }
     });
 	}
@@ -254,7 +304,15 @@ public class ProfileEditorPanel
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
-		if (e.getSource() != this.filterValue || e.getModifiers() != 0) return;
+    if (e.getKeyCode() == KeyEvent.VK_SPACE && WbAction.isCtrlPressed(e.getModifiers()))
+    {
+      e.consume();
+      TagSearchPopup search = new TagSearchPopup((JTextComponent)filterValue.getEditor().getEditorComponent(), model.getAllTags(), this);
+      search.showPopup();
+      return;
+    }
+
+		if (e.getModifiers() != 0) return;
 
 		switch (e.getKeyCode())
 		{
@@ -278,8 +336,7 @@ public class ProfileEditorPanel
 				if (StringUtil.isNonBlank(filterValue.getText()))
 				{
 					e.consume();
-					filterValue.setText("");
-					applyFilter();
+          resetFilter();
 				}
 		}
 	}
@@ -289,39 +346,97 @@ public class ProfileEditorPanel
 	{
 	}
 
-	private void applyFilter()
-	{
-		if (orgExpandedGroups == null)
-		{
-			// save the groups that were expanded the first time the filter is applied
-			// in order to be able to restore this once the filter is reset
-			// or the settings are stored.
-			orgExpandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
-		}
-		ProfileTree tree = (ProfileTree) profileTree;
-		ConnectionProfile profile = tree.getSelectedProfile();
-		if (initialProfile == null)
-		{
-			initialProfile = profile;
-		}
+  @Override
+  public void resetFilter()
+  {
+    try
+    {
+      ignoreFilterEvent = true;
+      filterValue.setText(null);
+    }
+    finally
+    {
+      ignoreFilterEvent = false;
+    }
 
-		model.applyFilter(filterValue.getText());
-		if (model.isFiltered())
-		{
-			tree.expandAll();
-			if (profile != null)
-			{
-				tree.selectProfile(profile.getKey());
-			}
-		}
-		else if (orgExpandedGroups != null)
-		{
-			tree.expandGroups(orgExpandedGroups);
-			if (initialProfile != null)
-			{
-				tree.selectProfile(initialProfile.getKey());
-			}
-		}
+    model.resetFilter();
+
+    if (orgExpandedGroups != null)
+    {
+      ProfileTree tree = (ProfileTree)profileTree;
+      tree.expandGroups(orgExpandedGroups);
+      if (initialProfile != null)
+      {
+        tree.selectProfile(initialProfile.getKey());
+      }
+    }
+  }
+
+  @Override
+	public void applyQuickFilter()
+	{
+    ignoreFilterEvent = true;
+    try
+    {
+      if (orgExpandedGroups == null)
+      {
+        // save the groups that were expanded the first time the filter is applied
+        // in order to be able to restore this once the filter is reset
+        // or the settings are stored.
+        orgExpandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
+      }
+      ProfileTree tree = (ProfileTree) profileTree;
+      ConnectionProfile profile = tree.getSelectedProfile();
+      if (initialProfile == null)
+      {
+        initialProfile = profile;
+      }
+
+      String text = filterValue.getText().trim();
+
+      if (text.isEmpty())
+      {
+        resetFilter();
+      }
+      else
+      {
+        // first try to filter on tags
+        Set<String> tags = CollectionUtil.caseInsensitiveSet();
+        tags.addAll(StringUtil.stringToList(filterValue.getText(), ",", true, true, false, false));
+        Set<String> allTags = model.getAllTags();
+        if (CollectionUtil.containsAny(allTags, tags))
+        {
+          model.applyTagFilter(tags);
+        }
+
+        // apparently not a tag --> filter on the name
+        if (!model.isFiltered())
+        {
+          model.applyNameFilter(text);
+        }
+
+        if (model.isFiltered())
+        {
+          tree.expandAll();
+          if (profile != null)
+          {
+            tree.selectProfile(profile.getKey());
+          }
+        }
+        else if (orgExpandedGroups != null)
+        {
+          tree.expandGroups(orgExpandedGroups);
+          if (initialProfile != null)
+          {
+            tree.selectProfile(initialProfile.getKey());
+          }
+        }
+      }
+    }
+    finally
+    {
+      ignoreFilterEvent = false;
+    }
 	}
 
 	@Override
@@ -384,6 +499,10 @@ public class ProfileEditorPanel
 		String groups = Settings.getInstance().getProperty("workbench.profiles.expandedgroups", null);
 		List<String> l = StringUtil.stringToList(groups, ",", true, true);
 		((ProfileTree)profileTree).expandGroups(l);
+    if (filterValue != null)
+    {
+      filterValue.restoreSettings();
+    }
 	}
 
 	public boolean profilesChanged()
@@ -417,6 +536,10 @@ public class ProfileEditorPanel
 			expandedGroups = ((ProfileTree)profileTree).getExpandedGroupNames();
 		}
 		Settings.getInstance().setProperty("workbench.profiles.expandedgroups", StringUtil.listToString(expandedGroups, ',', true));
+    if (filterValue != null)
+    {
+      filterValue.saveSettings();
+    }
 	}
 
 	private void buildTree()
@@ -739,6 +862,7 @@ public class ProfileEditorPanel
 						this.connectionEditor.setVisible(true);
 					}
 					this.connectionEditor.setProfile(newProfile);
+          this.connectionEditor.setAllTags(model.getAllTags());
 					this.deleteItem.setEnabled(true);
 					this.copyItem.setEnabled(true);
 				}

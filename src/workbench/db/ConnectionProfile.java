@@ -24,10 +24,13 @@ package workbench.db;
 
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +44,7 @@ import workbench.gui.profiles.ProfileKey;
 
 import workbench.sql.DelimiterDefinition;
 
+import workbench.util.CollectionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
@@ -109,6 +113,7 @@ public class ConnectionProfile
 	private ObjectNameFilter catalogFilter;
 	private String lastSettingsKey;
 	private String macroFileName;
+  private final Set<String> tags = CollectionUtil.caseInsensitiveSet();
 
 	public ConnectionProfile()
 	{
@@ -186,6 +191,38 @@ public class ConnectionProfile
 			this.changed = true;
 		}
 	}
+
+  public Set<String> getTags()
+  {
+    return Collections.unmodifiableSet(tags);
+  }
+  
+  public String getTagList()
+  {
+    return StringUtil.listToString(tags, ',', false);
+  }
+
+  public void setTagList(String list)
+  {
+    List<String> tagList = StringUtil.stringToList(list, ",", true, true, false, false);
+    changed = !tags.equals(tagList);
+    tags.clear();
+    tags.addAll(tagList);
+  }
+
+  public boolean containsTag(String tag)
+  {
+    return tags.contains(tag);
+  }
+
+  public boolean containsAnyTag(Set<String> toCheck)
+  {
+    for (String tag : toCheck)
+    {
+      if (tags.contains(tag)) return true;
+    }
+    return false;
+  }
 
 	public boolean getStoreCacheLocally()
 	{
@@ -992,6 +1029,7 @@ public class ConnectionProfile
 		result.setPromptForUsername(this.promptForUsername);
 		result.setStoreCacheLocally(this.storeCacheLocally);
 		result.setMacroFilename(this.macroFileName);
+    result.setTagList(getTagList());
 		result.lastSettingsKey = this.lastSettingsKey;
 		result.temporaryUsername = null;
 		if (connectionProperties != null)

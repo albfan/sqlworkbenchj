@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -39,6 +40,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.ProfileGroupMap;
 
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -113,7 +115,49 @@ class ProfileListModel
 		return filtered.size() > 0;
 	}
 
-	public void applyFilter(String value)
+  public Set<String> getAllTags()
+  {
+    Set<String> allTags = CollectionUtil.caseInsensitiveSet();
+    profiles.stream().forEach((prof) -> {
+      allTags.addAll(prof.getTags());
+    });
+
+    filtered.stream().forEach((prof) ->
+    {
+      allTags.addAll(prof.getTags());
+    });
+
+    return allTags;
+  }
+
+  public void resetFilter()
+  {
+		profiles.addAll(filtered);
+		filtered.clear();
+		buildTree();
+  }
+  
+	public void applyTagFilter(Set<String> tags)
+	{
+		profiles.addAll(filtered);
+		filtered.clear();
+    if (CollectionUtil.isNonEmpty(tags))
+		{
+			Iterator<ConnectionProfile> itr = profiles.iterator();
+			while (itr.hasNext())
+			{
+				ConnectionProfile profile = itr.next();
+        if (!profile.containsAnyTag(tags))
+				{
+					filtered.add(profile);
+					itr.remove();
+				}
+			}
+		}
+		buildTree();
+	}
+
+	public void applyNameFilter(String value)
 	{
 		profiles.addAll(filtered);
 		filtered.clear();
@@ -140,39 +184,17 @@ class ProfileListModel
 	 */
 	public boolean profilesAreModified()
 	{
-		for (ConnectionProfile profile : this.profiles)
-		{
-			if (profile.isChanged())
-			{
-				return true;
-			}
-		}
-		for (ConnectionProfile profile : this.filtered)
-		{
-			if (profile.isChanged())
-			{
-				return true;
-			}
-		}
+    if (this.profiles.stream().anyMatch((profile) -> (profile.isChanged()))) return true;
+    if (this.filtered.stream().anyMatch((profile) -> (profile.isChanged()))) return true;
+
 		return false;
 	}
 
 	public boolean groupsChanged()
 	{
-		for (ConnectionProfile profile : profiles)
-		{
-			if (profile.isGroupChanged())
-			{
-				return true;
-			}
-		}
-		for (ConnectionProfile profile : filtered)
-		{
-			if (profile.isGroupChanged())
-			{
-				return true;
-			}
-		}
+    if (profiles.stream().anyMatch((profile) -> (profile.isGroupChanged()))) return true;
+    if (filtered.stream().anyMatch((profile) -> (profile.isGroupChanged()))) return true;
+
 		return false;
 	}
 

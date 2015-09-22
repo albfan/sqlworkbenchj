@@ -33,6 +33,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -41,6 +43,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
@@ -68,6 +71,7 @@ import workbench.db.ObjectNameFilter;
 import workbench.db.TransactionChecker;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.BooleanPropertyEditor;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.ExtensionFileFilter;
@@ -95,17 +99,19 @@ import workbench.util.WbFile;
  */
 public class ConnectionEditorPanel
 	extends JPanel
-	implements PropertyChangeListener, ActionListener, ValidatingComponent
+	implements PropertyChangeListener, ActionListener, ValidatingComponent, KeyListener
 {
 	private ConnectionProfile currentProfile;
 	private ProfileListModel sourceModel;
 	private boolean init;
-	private List<SimplePropertyEditor> editors = new LinkedList<>();;
+	private List<SimplePropertyEditor> editors = new LinkedList<>();
+  private Set<String> allTags;
 
 	public ConnectionEditorPanel()
 	{
 		super();
 		this.initComponents();
+    tagList.addKeyListener(this);
 		groupNameLabel.setBorder(new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(3,6,3,6)));
 
 		WbTraversalPolicy policy = new WbTraversalPolicy();
@@ -143,6 +149,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(selectIconButton);
 		policy.addComponent(macroFile);
 		policy.addComponent(selectMacroFileButton);
+		policy.addComponent(tagList);
 		policy.addComponent(editConnectionScriptsButton);
 		policy.addComponent(editFilterButton);
 
@@ -212,6 +219,33 @@ public class ConnectionEditorPanel
 		}
 	}
 
+
+  public void setAllTags(Set<String> tags)
+  {
+    allTags = CollectionUtil.caseInsensitiveSet(tags);
+  }
+
+  @Override
+  public void keyTyped(KeyEvent e)
+  {
+  }
+
+  @Override
+  public void keyPressed(KeyEvent e)
+  {
+    if (e.getKeyCode() == KeyEvent.VK_SPACE && WbAction.isCtrlPressed(e.getModifiers()))
+    {
+      e.consume();
+      TagSearchPopup search = new TagSearchPopup(tagList, allTags);
+      search.showPopup();
+    }
+  }
+
+  @Override
+  public void keyReleased(KeyEvent e)
+  {
+  }
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -276,6 +310,8 @@ public class ConnectionEditorPanel
     macroFile = new StringPropertyEditor();
     selectMacroFileButton = new FlatButton();
     altDelimiter = new StringPropertyEditor();
+    jLabel2 = new javax.swing.JLabel();
+    tagList = new StringPropertyEditor();
     jSeparator3 = new javax.swing.JSeparator();
     timeoutpanel = new javax.swing.JPanel();
     jPanel6 = new javax.swing.JPanel();
@@ -691,7 +727,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     jPanel3.add(workspaceFileLabel, gridBagConstraints);
 
@@ -797,8 +832,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
     jPanel3.add(jPanel4, gridBagConstraints);
 
@@ -842,8 +875,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
     jPanel3.add(jPanel5, gridBagConstraints);
 
@@ -853,6 +884,28 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     jPanel3.add(altDelimiter, gridBagConstraints);
+
+    jLabel2.setText("Tags");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    jPanel3.add(jLabel2, gridBagConstraints);
+
+    tagList.setName("tagList"); // NOI18N
+    tagList.setVerifyInputWhenFocusTarget(false);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
+    jPanel3.add(tagList, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -913,7 +966,7 @@ public class ConnectionEditorPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 16;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
@@ -1111,6 +1164,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JLabel infoColorLabel;
   protected javax.swing.JCheckBox jCheckBox1;
   protected javax.swing.JLabel jLabel1;
+  protected javax.swing.JLabel jLabel2;
   protected javax.swing.JLabel jLabel3;
   protected javax.swing.JLabel jLabel4;
   protected javax.swing.JPanel jPanel1;
@@ -1135,6 +1189,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JButton selectMacroFileButton;
   protected javax.swing.JButton selectWkspButton;
   protected javax.swing.JButton showPassword;
+  protected javax.swing.JTextField tagList;
   protected javax.swing.JTextField tfFetchSize;
   protected javax.swing.JTextField tfProfileName;
   protected javax.swing.JPasswordField tfPwd;
@@ -1391,17 +1446,6 @@ public class ConnectionEditorPanel
 		{
 			editConnectionScriptsButton.setIcon(IconMgr.getInstance().getLabelIcon("tick"));
 		}
-
-//		if (!hasFilter && !hasScript) return;
-//
-//		if (hasFilter && !hasScript)
-//		{
-//			WbSwingUtilities.makeEqualHeight(editFilterButton, editConnectionScriptsButton);
-//		}
-//		else
-//		{
-//			WbSwingUtilities.makeEqualHeight(editConnectionScriptsButton, editFilterButton);
-//		}
 	}
 
 	private void checkExtendedProps()

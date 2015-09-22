@@ -96,6 +96,16 @@ public class CollectionUtil
 		return result;
 	}
 
+	public static Set<String> caseInsensitiveSet(Set<String> elements)
+	{
+		Set<String> result = caseInsensitiveSet();
+    if (elements != null)
+    {
+      result.addAll(elements);
+    }
+		return result;
+	}
+
 	public static Set<String> caseInsensitiveSet(Set<String> base, String... a)
 	{
 		Set<String> result = caseInsensitiveSet();
@@ -158,4 +168,10 @@ public class CollectionUtil
 		}
 		return elements.toArray(new String[0]);
 	}
+
+  public static boolean containsAny(Set<String> haystack, Set<String> needles)
+  {
+    if (needles.stream().anyMatch((needle) -> (haystack.contains(needle)))) return true;
+    return false;
+  }
 }

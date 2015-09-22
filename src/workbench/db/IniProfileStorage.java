@@ -65,6 +65,7 @@ public class IniProfileStorage
   private static final String PROP_ROLLBACK_DISCONNECT = ".rollback.disconnect";
 
   private static final String PROP_GROUP = ".group";
+  private static final String PROP_TAGS = ".tags";
   private static final String PROP_WORKSPACE = ".workspace";
   private static final String PROP_ICON = ".icon";
   private static final String PROP_CONNECTION_TIMEOUT = ".connection.timeout";
@@ -131,6 +132,7 @@ public class IniProfileStorage
   {
     key = "." + key;
     String url = props.getProperty(PROP_PREFIX + key + PROP_URL, null);
+    String tags = props.getProperty(PROP_PREFIX + key + PROP_TAGS, null);
     String name = props.getProperty(PROP_PREFIX + key + PROP_NAME, null);
     String driverClass = props.getProperty(PROP_PREFIX + key + PROP_DRIVERCLASS, null);
     String driverName = props.getProperty(PROP_PREFIX + key + PROP_DRIVERNAME, null);
@@ -196,6 +198,7 @@ public class IniProfileStorage
     profile.setDriverclass(driverClass);
     profile.setDriverName(driverName);
     profile.setGroup(group);
+    profile.setTagList(tags);
     profile.setDefaultFetchSize(fetchSize);
     profile.setOracleSysDBA(sysDBA);
     profile.setReadOnly(readonly);
@@ -290,6 +293,7 @@ public class IniProfileStorage
     props.setProperty(PROP_PREFIX + key + PROP_DRIVERNAME, profile.getDriverName());
     props.setProperty(PROP_PREFIX + key + PROP_USERNAME, profile.getUsername());
     props.setProperty(PROP_PREFIX + key + PROP_AUTOCOMMMIT, profile.getAutocommit());
+    props.setProperty(PROP_PREFIX + key + PROP_TAGS, profile.getTagList());
 
     props.setProperty(PROP_PREFIX + key + PROP_STORE_PWD, profile.getStorePassword());
     if (profile.getStorePassword())

@@ -25,6 +25,7 @@ package workbench.gui.completion;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
 import javax.swing.BorderFactory;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
@@ -39,9 +40,9 @@ public class CompletionSearchField
 	extends JTextField
 	implements KeyListener, DocumentListener
 {
-	private CompletionPopup parent;
+	private QuickSearchList parent;
 
-	public CompletionSearchField(CompletionPopup popup, String text)
+	public CompletionSearchField(QuickSearchList popup, String text)
 	{
 		super(text);
 		this.parent = popup;

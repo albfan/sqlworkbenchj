@@ -51,7 +51,6 @@ import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -221,14 +220,12 @@ public class TableListPanel
 	private NamedSortDefinition savedSort;
 
 	protected JDialog infoWindow;
-	private JLabel infoLabel;
 	private final JPanel statusPanel;
 	private final FlatButton alterButton;
 	private final SummaryLabel summaryStatusBarLabel;
 	private String tableTypeToSelect;
 
 	private final Object connectionLock = new Object();
-	private final Object msgLock = new Object();
 
 	private TableChangeValidator validator = new TableChangeValidator();
 	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();

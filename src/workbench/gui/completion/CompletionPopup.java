@@ -82,7 +82,7 @@ import static workbench.resource.GeneratedIdentifierCase.*;
  * @author  Thomas Kellerer
  */
 public class CompletionPopup
-	implements FocusListener, MouseListener, KeyListener, WindowListener
+	implements FocusListener, MouseListener, KeyListener, WindowListener, QuickSearchList
 {
 	protected JEditTextArea editor;
 	private JScrollPane scroll;
@@ -497,7 +497,7 @@ public class CompletionPopup
 
 	protected void doPaste()
 	{
-		Object[] selected = this.elementList.getSelectedValues();
+		List selected = this.elementList.getSelectedValuesList();
 		if (selected == null)
 		{
 			return;

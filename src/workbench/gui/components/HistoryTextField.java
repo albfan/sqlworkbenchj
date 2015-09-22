@@ -117,9 +117,18 @@ public class HistoryTextField
 	public String getText()
 	{
 		Object item = getSelectedItem();
-		if (item == null) item = getEditor().getItem();
-		if (item == null) return null;
-		return (String)item;
+    if (item != null) return (String)item;
+
+    item = getEditor().getItem();
+    if (item != null) return (String)item;
+
+    Component comp = getEditor().getEditorComponent();
+    if (comp instanceof JTextField)
+    {
+      JTextField tf = (JTextField)comp;
+      return tf.getText();
+    }
+    return null;
 	}
 
 	public void setText(String s)
@@ -127,6 +136,7 @@ public class HistoryTextField
     if (!StringUtil.equalString(s, getText()))
     {
       setSelectedItem(s);
+      getEditor().setItem("");
     }
 	}
 

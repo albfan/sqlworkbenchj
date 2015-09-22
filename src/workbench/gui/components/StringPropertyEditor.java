@@ -26,9 +26,11 @@ import java.awt.EventQueue;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.lang.reflect.Method;
+
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 
@@ -49,6 +51,7 @@ public class StringPropertyEditor
 	// has not been updated to reflect the state of this editor
 	private boolean changed;
 
+  private boolean ignoreNextFocusGained;
 	private boolean immediateUpdate;
 	private String propName;
 
@@ -171,6 +174,11 @@ public class StringPropertyEditor
 		});
 	}
 
+  public void ignoreNextFocus()
+  {
+    this.ignoreNextFocusGained = true;
+  }
+
 	@Override
 	public void setImmediateUpdate(boolean aFlag)
 	{
@@ -191,6 +199,12 @@ public class StringPropertyEditor
 	@Override
 	public void focusGained(FocusEvent e)
 	{
+    if (ignoreNextFocusGained)
+    {
+      ignoreNextFocusGained = false;
+      return;
+    }
+
 		// When the popup menu for copy & paste is used, the oppositeComponent()
 		// is the RootPane. In this case we don't want to chage the selection
 		if (!(e.getOppositeComponent() instanceof javax.swing.JRootPane))
