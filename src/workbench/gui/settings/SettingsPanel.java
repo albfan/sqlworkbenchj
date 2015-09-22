@@ -40,6 +40,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -151,13 +152,14 @@ public class SettingsPanel
 		};
 
 		pageList = new JList(model);
-		pageList.setBorder(new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(2, 2, 2, 2)));
 		pageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		pageList.addListSelectionListener(this);
+    JScrollPane scroll = new JScrollPane(pageList);
+		scroll.setBorder(new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(2, 2, 2, 2)));
 
 		content = new JPanel(new BorderLayout());
 		content.setBorder(new EmptyBorder(2,2,2,2));
-		content.add(pageList, BorderLayout.WEST);
+		content.add(scroll, BorderLayout.WEST);
 
 		okButton = new WbButton(ResourceMgr.getString("LblOK"));
 		cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
