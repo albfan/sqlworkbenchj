@@ -114,6 +114,32 @@ public class HistoryTextField
 		this.setPrototypeDisplayValue(b);
 	}
 
+//
+//	public void setText(String s)
+//	{
+//    if (!StringUtil.equalString(s, getText()))
+//    {
+//      setSelectedItem(s);
+//      getEditor().setItem("");
+//    }
+//	}
+
+	public void setText(String s)
+	{
+    if (!StringUtil.equalString(s, getText()))
+    {
+      setSelectedItem(s);
+    }
+	}
+
+//	public String getText()
+//	{
+//		Object item = getSelectedItem();
+//		if (item == null) item = getEditor().getItem();
+//		if (item == null) return null;
+//		return (String)item;
+//	}
+
 	public String getText()
 	{
 		Object item = getSelectedItem();
@@ -129,15 +155,6 @@ public class HistoryTextField
       return tf.getText();
     }
     return null;
-	}
-
-	public void setText(String s)
-	{
-    if (!StringUtil.equalString(s, getText()))
-    {
-      setSelectedItem(s);
-      getEditor().setItem("");
-    }
 	}
 
 	public void saveSettings(PropertyStorage props, String prefix)

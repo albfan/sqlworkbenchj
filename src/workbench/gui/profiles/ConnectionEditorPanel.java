@@ -1212,6 +1212,7 @@ public class ConnectionEditorPanel
 			Object currentDriver = this.cbDrivers.getSelectedItem();
 			try
 			{
+        // The default DbDriver.compareTo()
 				Comparator<DbDriver> comparator = new Comparator<DbDriver>()
 				{
 					@Override
@@ -1220,6 +1221,7 @@ public class ConnectionEditorPanel
 						return StringUtil.compareStrings(o1.getName(), o2.getName(), true);
 					}
 				};
+
 				Collections.sort(aDriverList, comparator);
 				this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
 				if (currentDriver != null)

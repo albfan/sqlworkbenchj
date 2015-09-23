@@ -46,11 +46,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JWindow;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.text.JTextComponent;
 
 import workbench.interfaces.QuickFilter;
@@ -91,30 +88,29 @@ public class TagSearchPopup
     inputField = input;
     filter = quickFilter;
 		elementList = new JList<>();
+
     data = new DefaultListModel<>();
     for (String tag : allTags)
     {
       data.addElement(tag);
     }
 		elementList.setModel(data);
-		elementList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		Border b = new CompoundBorder(elementList.getBorder(), new EmptyBorder(0,2,0,2));
-		this.elementList.setBorder(b);
 
+		elementList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		elementList.addFocusListener(this);
 		elementList.addMouseListener(this);
+		elementList.addKeyListener(this);
+    int count = data.getSize();
+    elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
 
     JPanel content = new JPanel(new BorderLayout());
-		scroll = new JScrollPane(this.elementList);
-    scroll.setBorder(new EmptyBorder(0, 0, 0, 0));
-		elementList.setVisibleRowCount(12);
-		elementList.addKeyListener(this);
-    content.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
-    content.add(scroll, BorderLayout.CENTER);
+    content.setBorder(new EmptyBorder(0,0,0,0));
 
 		searchField = new CompletionSearchField(this, null);
+    searchField.addFocusListener(this);
+
     int height = (int)searchField.getPreferredSize().getHeight();
-    final int h = (height / 4);
+    int h = (height / 6);
     final Insets insets = new Insets(h, h, h, h);
     JPanel header = new JPanel(new BorderLayout())
     {
@@ -125,21 +121,18 @@ public class TagSearchPopup
       }
     };
 
-    header.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
-    header.setBackground(UIManager.getColor("Label.background"));
-    searchField.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
     header.add(searchField, BorderLayout.CENTER);
-    scroll.setColumnHeaderView(header);
 
-    int count = data.getSize();
-    elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
+    scroll = new JScrollPane(this.elementList);
+    content.add(scroll, BorderLayout.CENTER);
+    scroll.setColumnHeaderView(header);
 
     window = new JWindow(SwingUtilities.getWindowAncestor(inputField));
 
     WbTraversalPolicy pol = new WbTraversalPolicy();
     pol.addComponent(searchField);
     pol.addComponent(elementList);
-    pol.setDefaultComponent(elementList);
+    pol.setDefaultComponent(searchField);
 
     elementList.setFocusable(true);
     elementList.setFocusTraversalKeysEnabled(false);
@@ -176,7 +169,7 @@ public class TagSearchPopup
 						window.setLocation(p);
 						window.pack();
             Dimension size = window.getSize();
-            int width = (int)inputField.getWidth() / 3;
+            int width = (int)inputField.getWidth() / 4;
             if (width > size.width)
             {
               size.width = width;
@@ -194,16 +187,23 @@ public class TagSearchPopup
 		}
 	}
 
-	private void cleanup()
+	private void dispose()
 	{
     data.clear();
-    window.removeWindowListener(this);
+
+    elementList.removeKeyListener(this);
+		elementList.removeFocusListener(this);
+		elementList.removeMouseListener(this);
+    searchField.removeFocusListener(this);
+
     if (inputField instanceof StringPropertyEditor)
     {
-      // make sure the new text is not automatically selected
-      // in the profile editor
+      // make sure the new text is not automatically selected in the profile editor
       ((StringPropertyEditor)inputField).ignoreNextFocus();
     }
+
+    window.removeKeyListener(this);
+    window.removeWindowListener(this);
     window.setVisible(false);
     window.dispose();
     window = null;
@@ -216,12 +216,6 @@ public class TagSearchPopup
 	public void quickSearchValueSelected()
 	{
 		closePopup(true);
-	}
-
-	public void cancelPopup()
-	{
-		if (this.window == null) return;
-    cleanup();
 	}
 
 	private void closePopup(boolean doPaste)
@@ -240,11 +234,11 @@ public class TagSearchPopup
 		}
 		finally
 		{
-      cleanup();
+      dispose();
 		}
 	}
 
-	protected void doPaste()
+	private void doPaste()
 	{
 		List<String> selected = this.elementList.getSelectedValuesList();
     if (CollectionUtil.isEmpty(selected))
@@ -269,6 +263,7 @@ public class TagSearchPopup
       int len = value.length();
       inputField.setCaretPosition(len);
       inputField.select(len, len);
+
       if (filter != null)
       {
         EventQueue.invokeLater(filter::applyQuickFilter);
@@ -322,7 +317,7 @@ public class TagSearchPopup
 	@Override
 	public void focusLost(FocusEvent focusEvent)
 	{
-		if (this.inputField == null) closePopup(false);
+		closePopup(false);
 	}
 
 	/**
@@ -455,43 +450,9 @@ public class TagSearchPopup
 		}
 	}
 
-	protected void setSearchFieldCursor()
-	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (searchField != null)
-				{
-					int len = searchField.getText().length();
-					searchField.setCaretPosition(len);
-					searchField.select(len, len);
-				}
-			}
-		});
-	}
-
 	@Override
 	public void keyTyped(KeyEvent evt)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (searchField != null)
-				{
-					searchField.requestFocusInWindow();
-				}
-			}
-		});
-		// The JGoodies look and feel automatically selects
-		// the content of the text field when a focusGained event
-		// occurs. The moving of the caret has to come later
-		// than the focusGained that's why the requestFocus()
-		// and the moving of the caret are done in two steps
-		setSearchFieldCursor();
 	}
 
 	@Override
@@ -512,7 +473,7 @@ public class TagSearchPopup
 	@Override
 	public void windowClosed(WindowEvent e)
 	{
-		cleanup();
+		dispose();
 	}
 
 	@Override

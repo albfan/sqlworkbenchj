@@ -136,7 +136,7 @@ class ProfileListModel
 		filtered.clear();
 		buildTree();
   }
-  
+
 	public void applyTagFilter(Set<String> tags)
 	{
 		profiles.addAll(filtered);
@@ -147,8 +147,8 @@ class ProfileListModel
 			while (itr.hasNext())
 			{
 				ConnectionProfile profile = itr.next();
-        if (!profile.containsAnyTag(tags))
-				{
+        if (!profile.getTags().containsAll(tags))
+        {
 					filtered.add(profile);
 					itr.remove();
 				}

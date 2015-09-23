@@ -1100,6 +1100,11 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.editor.errorjump", flag);
 	}
 
+  public static int getMinTagLength()
+  {
+    return Settings.getInstance().getIntProperty("workbench.gui.profiles.tagfilter.minlength", 2);
+  }
+
 	public static boolean enableProfileQuickFilter()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.profiles.quickfilter", true);
