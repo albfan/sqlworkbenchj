@@ -23,6 +23,9 @@
 package workbench.util;
 
 import java.sql.Timestamp;
+import java.text.AttributedCharacterIterator;
+import java.text.CharacterIterator;
+import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.FieldPosition;
 import java.text.ParseException;
@@ -53,19 +56,19 @@ public class WbDateFormatter
 	public WbDateFormatter(String pattern, DateFormatSymbols formatSymbols)
 	{
 		super(pattern, formatSymbols);
-    checkMicroSeconds(pattern);
+    checkMicroSeconds();
 	}
 
 	public WbDateFormatter(String pattern, Locale locale)
 	{
 		super(pattern, locale);
-    checkMicroSeconds(pattern);
+    checkMicroSeconds();
 	}
 
 	public WbDateFormatter(String pattern)
 	{
 		super(pattern);
-    checkMicroSeconds(pattern);
+    checkMicroSeconds();
 	}
 
 	public WbDateFormatter()
@@ -76,14 +79,14 @@ public class WbDateFormatter
   public void applyLocalizedPattern(String pattern)
   {
     super.applyLocalizedPattern(pattern);
-    checkMicroSeconds(pattern);
+    checkMicroSeconds();
   }
 
   @Override
   public void applyPattern(String pattern)
   {
     super.applyPattern(pattern);
-    checkMicroSeconds(pattern);
+    checkMicroSeconds();
   }
 
 	public void setInfinityLiterals(InfinityLiterals literals)
@@ -168,26 +171,38 @@ public class WbDateFormatter
 	}
 
 
-  private void checkMicroSeconds(String pattern)
+  /**
+   * Find the start and the length of the milliseconds pattern.
+   *
+   */
+  private void checkMicroSeconds()
   {
+    millisStart = -1;
     millisLength = 0;
-    millisStart = pattern.indexOf('S');
-    if (millisStart < 0)
+
+    // using formatToCharacterIterator() is the only safe way to get the positions
+    // as that will take all valid formatting options into account including
+    // string literals enclosed in single quotes and other things.
+    AttributedCharacterIterator itr = formatToCharacterIterator(Timestamp.valueOf("2001-01-01 00:00:00.123456"));
+    int pos = 0;
+    
+    for (char c = itr.first(); c != CharacterIterator.DONE; c = itr.next())
     {
-      return;
-    }
-    millisLength = 0;
-    for (int i=millisStart; i < pattern.length(); i++)
-    {
-      if (pattern.charAt(i) == 'S')
+      Object attribute = itr.getAttribute(DateFormat.Field.MILLISECOND);
+      if (attribute != null)
       {
-        millisLength++;
+        if (millisStart == -1)
+        {
+          millisStart = pos;
+          millisLength = 1;
+        }
+        else if (millisStart > -1)
+        {
+          millisLength ++;
+        }
       }
-      else
-      {
-        break;
-      }
-    }
+      pos ++;
+		}
   }
 
 	public static String getDisplayValue(Object value)

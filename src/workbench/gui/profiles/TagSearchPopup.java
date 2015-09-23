@@ -53,7 +53,6 @@ import javax.swing.text.JTextComponent;
 import workbench.interfaces.QuickFilter;
 import workbench.log.LogMgr;
 
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.completion.CompletionSearchField;
 import workbench.gui.completion.QuickSearchList;
@@ -246,29 +245,81 @@ public class TagSearchPopup
 			return;
 		}
 
-		String value = inputField.getText().trim();
+    String pasteValue = "";
 
-		for (String o : selected)
+		for (String tag : selected)
 		{
-      if (value.length() > 0 && !value.endsWith(","))
+      if (pasteValue.length() > 0)
       {
-        value += ",";
+        pasteValue += ",";
       }
-      value += o;
+      pasteValue += tag;
 		}
 
-		if (StringUtil.isNonBlank(value))
-		{
-      inputField.setText(value);
-      int len = value.length();
-      inputField.setCaretPosition(len);
-      inputField.select(len, len);
 
-      if (filter != null)
+		if (StringUtil.isBlank(pasteValue)) return;
+
+    String value = inputField.getText().trim();
+    int len = value.length();
+
+    String newValue = null;
+    int position = inputField.getCaretPosition();
+    int newPos = position;
+    boolean isSelected = inputField.getSelectionEnd() > inputField.getSelectionStart();
+
+    if (isSelected)
+    {
+      inputField.replaceSelection(pasteValue);
+    }
+    else if (len == 0)
+    {
+      // empty input field, just use everything
+      newValue = pasteValue;
+    }
+    else if (position >= len)
+    {
+      // cursor is at the end of the text
+      // if the text ends with a comma, just append the new text
+      // otherwise append a comma first
+      if (value.endsWith(","))
       {
-        EventQueue.invokeLater(filter::applyQuickFilter);
+        newValue = value + pasteValue;
       }
-		}
+      else
+      {
+        newValue = value + "," + pasteValue;
+      }
+      // and put the cursor at the end of the text
+      newPos = newValue.length();
+    }
+    else
+    {
+      // insert the text at the cursor position
+      StringBuilder tmp = new StringBuilder(value.length() + pasteValue.length() + 1);
+      tmp.append(value);
+
+      // and put the cursor at the end of the inserted value
+      newPos = position + pasteValue.length();
+
+      if (position + 1 < tmp.length() && tmp.charAt(position + 1) != ',')
+      {
+        pasteValue += ",";
+        newPos ++;
+      }
+      tmp.insert(position, pasteValue);
+      newValue = tmp.toString();
+    }
+
+    if (newValue != null)
+    {
+      inputField.setText(newValue);
+      inputField.select(newPos, newPos);
+    }
+
+    if (filter != null)
+    {
+      EventQueue.invokeLater(filter::applyQuickFilter);
+    }
 	}
 
   @Override
