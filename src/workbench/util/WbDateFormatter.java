@@ -183,9 +183,9 @@ public class WbDateFormatter
     // using formatToCharacterIterator() is the only safe way to get the positions
     // as that will take all valid formatting options into account including
     // string literals enclosed in single quotes and other things.
-    AttributedCharacterIterator itr = formatToCharacterIterator(Timestamp.valueOf("2001-01-01 00:00:00.123456"));
+    AttributedCharacterIterator itr = formatToCharacterIterator(Timestamp.valueOf("2001-01-01 00:00:00.123456789"));
     int pos = 0;
-    
+
     for (char c = itr.first(); c != CharacterIterator.DONE; c = itr.next())
     {
       Object attribute = itr.getAttribute(DateFormat.Field.MILLISECOND);
