@@ -62,12 +62,14 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
+
 /**
  * @author  Thomas Kellerer
  */
 public class TagSearchPopup
 	implements FocusListener, MouseListener, KeyListener, WindowListener, QuickSearchList
 {
+  private final String wordBoundaries = ", ";
   private CompletionSearchField searchField;
 	private JTextComponent inputField;
 	private JScrollPane scroll;
@@ -147,6 +149,25 @@ public class TagSearchPopup
 	{
 		try
 		{
+      String text = inputField.getText();
+      String selected = inputField.getSelectedText();
+      String word = selected;
+
+      if (StringUtil.isEmptyString(word))
+      {
+        word = StringUtil.getWordLeftOfCursor(text, inputField.getCaretPosition(), wordBoundaries);
+      }
+
+      final int index = findEntry(word);
+      if (index > -1 && StringUtil.isEmptyString(inputField.getSelectedText()))
+      {
+        int end = inputField.getCaretPosition();
+        int start = StringUtil.findWordBoundary(text, inputField.getCaretPosition(), wordBoundaries) + 1;
+        if (end > start)
+        {
+          inputField.select(start, end);
+        }
+      }
       final Point p = inputField.getLocationOnScreen();
       p.y += inputField.getHeight();
       Border border = inputField.getBorder();
@@ -176,6 +197,10 @@ public class TagSearchPopup
             }
 						window.setVisible(true);
             searchField.requestFocusInWindow();
+            if (index > -1)
+            {
+              elementList.setSelectedIndex(index);
+            }
 					}
 				}
 			});

@@ -63,6 +63,8 @@ public class ColumnDefinitionTemplate
 
 	public static final String PARAM_GENERATED = "%generated%";
 
+	public static final String PARAM_OPTION = "%column_option%";
+
 	private String dbid;
 	private String template;
 	private boolean fixDefaultExpression;
@@ -148,6 +150,15 @@ public class ColumnDefinitionTemplate
 		{
 			sql = replaceArg(sql, PARAM_COL_CONSTRAINTS, colConstraint);
 		}
+
+    if (StringUtil.isEmptyString(column.getSQLOption()))
+    {
+      sql = replaceArg(sql, PARAM_OPTION, "");
+    }
+    else
+    {
+      sql = replaceArg(sql, PARAM_OPTION, column.getSQLOption());
+    }
 		sql = replaceArg(sql, PARAM_EXPRESSION, expr);
 		sql = replaceArg(sql, PARAM_COLLATION_NAME, column.getCollationExpression());
 		sql = replaceArg(sql, PARAM_GENERATED, column.getGeneratorExpression());

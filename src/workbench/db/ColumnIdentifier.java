@@ -103,6 +103,12 @@ public class ColumnIdentifier
 	private int digits; // for DECIMAL types
 	private int hashCode;
 
+  /**
+   * An additional SQL expression which needs to be appended to the
+   * column definition in the generated CREATE TABLE statement
+   */
+  private String sqlOption;
+
 	public ColumnIdentifier()
 	{
 	}
@@ -134,6 +140,16 @@ public class ColumnIdentifier
 	{
 		return pgStorage;
 	}
+
+  public void setSQLOption(String option)
+  {
+    this.sqlOption = option;
+  }
+
+  public String getSQLOption()
+  {
+    return sqlOption;
+  }
 
   public boolean isInherited()
   {
@@ -580,6 +596,7 @@ public class ColumnIdentifier
 		result.collationExpression = this.collationExpression;
 		result.generatorExpression = this.generatorExpression;
 		result.isGenerated = this.isGenerated;
+		result.sqlOption = this.sqlOption;
 		return result;
 	}
 

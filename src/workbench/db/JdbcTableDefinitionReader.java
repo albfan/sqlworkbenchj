@@ -253,7 +253,7 @@ public class JdbcTableDefinitionReader
   {
     // nothing done here
   }
-  
+
   protected ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
     throws SQLException
   {
@@ -372,7 +372,7 @@ public class JdbcTableDefinitionReader
     {
       return new MySQLColumnEnhancer();
     }
-    if (con.getDbId().equals("db2"))
+    if (con.getDbId().equals(DbMetadata.DBID_DB2_LUW))
     {
       return new Db2ColumnEnhancer();
     }

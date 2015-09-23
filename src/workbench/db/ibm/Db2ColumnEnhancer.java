@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -37,6 +38,7 @@ import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -63,6 +65,7 @@ public class Db2ColumnEnhancer
 		String schema = table.getTable().getSchema();
 
 		String columns = "SELECT c.colname, \n" +
+								 "       c.hidden, \n" +
 								 "       c.generated, \n" +
 								 "       c.text, \n" +
 								 "       a.start, \n" +
@@ -71,13 +74,14 @@ public class Db2ColumnEnhancer
 								 "       a.maxvalue, \n" +
 								 "       a.cycle, \n" +
 								 "       a.cache, \n" +
-								 "       a.order \n";
+								 "       a.order";
 
-		String from = "FROM syscat.columns c  \n" +
-								 "     LEFT JOIN syscat.colidentattributes a ON c.tabname = a.tabname AND c.tabschema = a.tabschema AND c.colname = a.colname \n" +
-								 "WHERE c.generated <> ' ' \n" +
-								 "AND   c.tabname = ? \n" +
-								 "AND   c.tabschema = ? ";
+		String from =
+      "\nFROM syscat.columns c  \n" +
+      "     LEFT JOIN syscat.colidentattributes a ON c.tabname = a.tabname AND c.tabschema = a.tabschema AND c.colname = a.colname \n" +
+      "WHERE (c.generated <> ' ' or c.hidden <> ' ') \n" +
+      "AND   c.tabname = ? \n" +
+      "AND   c.tabschema = ? ";
 
 		boolean checkHistory = false;
 
@@ -86,7 +90,7 @@ public class Db2ColumnEnhancer
 				columns += ", \n" +
 					"       c.rowbegin, \n" +
 					"       c.rowend, \n" +
-					"       c.transactionstartid \n";
+					"       c.transactionstartid";
 				checkHistory = true;
 		}
 
@@ -94,10 +98,12 @@ public class Db2ColumnEnhancer
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column details:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+			LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column details:\n" + SqlUtil.replaceParameters(sql, tablename, schema));
 		}
 
 		Map<String, String> expressions = new HashMap<>();
+    Set<String> hiddenCols = CollectionUtil.caseInsensitiveSet();
+
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
@@ -107,64 +113,73 @@ public class Db2ColumnEnhancer
 			while (rs.next())
 			{
 				String colname = rs.getString(1);
-				String gentype = rs.getString(2);
-				String computedCol = rs.getString(3);
-				BigDecimal start = rs.getBigDecimal(4);
-				BigDecimal inc = rs.getBigDecimal(5);
-				BigDecimal min = rs.getBigDecimal(6);
-				BigDecimal max = rs.getBigDecimal(7);
-				boolean cycle = StringUtil.stringToBool(rs.getString(8));
-				Integer cache = rs.getInt(9);
-				boolean order = StringUtil.stringToBool(rs.getString(10));
+				String hidden = rs.getString(2);
+				String gentype = rs.getString(3);
+				String computedCol = rs.getString(4);
+				BigDecimal start = rs.getBigDecimal(5);
+				BigDecimal inc = rs.getBigDecimal(6);
+				BigDecimal min = rs.getBigDecimal(7);
+				BigDecimal max = rs.getBigDecimal(8);
+				boolean cycle = StringUtil.stringToBool(rs.getString(9));
+				Integer cache = rs.getInt(10);
+				boolean order = StringUtil.stringToBool(rs.getString(11));
 
 				String rowbegin = "N";
 				String rowend = "N";
 				String transid = "N";
 				if (checkHistory)
 				{
-					rowbegin = rs.getString(11);
-					rowend = rs.getString(12);
-					transid = rs.getString(13);
+					rowbegin = rs.getString(12);
+					rowend = rs.getString(13);
+					transid = rs.getString(14);
 				}
 
-				boolean isHistoryTCol= "Y".equals(rowbegin) || "Y".equals(rowend) || "Y".equals(transid);
+        if (!gentype.equals(" "))
+        {
+          boolean isHistoryTCol= "Y".equals(rowbegin) || "Y".equals(rowend) || "Y".equals(transid);
 
-				String expr = "GENERATED";
+          String expr = "GENERATED";
 
-				if ("A".equals(gentype))
-				{
-					expr += " ALWAYS";
-				}
-				else
-				{
-					expr += " BY DEFAULT";
-				}
+          if ("A".equals(gentype))
+          {
+            expr += " ALWAYS";
+          }
+          else
+          {
+            expr += " BY DEFAULT";
+          }
 
-				if (computedCol == null && !isHistoryTCol)
-				{
-					// IDENTITY column
-					expr += " AS IDENTITY (" + Db2SequenceReader.buildSequenceDetails(false, start, min, max, inc, cycle, order, cache) + ")";
-				}
-				else if (isHistoryTCol)
-				{
-					if ("Y".equals(rowbegin))
-					{
-						expr += " AS ROW BEGIN";
-					}
-					else if ("Y".equals(rowend))
-					{
-						expr += " AS ROW END";
-					}
-					else if ("Y".equals(transid))
-					{
-						expr += " AS TRANSACTION START ID";
-					}
-				}
-				else
-				{
-					expr += " " + computedCol;
-				}
-				expressions.put(colname, expr);
+          if (computedCol == null && !isHistoryTCol)
+          {
+            // IDENTITY column
+            expr += " AS IDENTITY (" + Db2SequenceReader.buildSequenceDetails(false, start, min, max, inc, cycle, order, cache) + ")";
+          }
+          else if (isHistoryTCol)
+          {
+            if ("Y".equals(rowbegin))
+            {
+              expr += " AS ROW BEGIN";
+            }
+            else if ("Y".equals(rowend))
+            {
+              expr += " AS ROW END";
+            }
+            else if ("Y".equals(transid))
+            {
+              expr += " AS TRANSACTION START ID";
+            }
+          }
+          else
+          {
+            expr += " " + computedCol;
+          }
+          expressions.put(colname, expr);
+        }
+
+        if ("I".equals(hidden))
+        {
+          hiddenCols.add(colname);
+        }
 			}
 		}
 		catch (Exception e)
@@ -195,6 +210,10 @@ public class Db2ColumnEnhancer
 					col.setIsAutoincrement(true);
 				}
 			}
+      if (hiddenCols.contains(col.getColumnName()))
+      {
+        col.setSQLOption("IMPLICITLY HIDDEN");
+      }
 		}
 	}
 
