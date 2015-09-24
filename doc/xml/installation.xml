@@ -5,11 +5,8 @@
     <title>Pre-requisites</title>
 
     <para>
-      To run &wb-productname; a <ulink url="http://www.java.com/">Java 7 runtime environment</ulink>
+      To run &wb-productname; a <ulink url="http://www.java.com/">Java 8 runtime environment</ulink>
       or higher is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to run &wb-productname;.
-    </para>
-    <para>
-      A Java 6 runtime will work as well, but because Java 6 is no longer supported it is not recommended to use it.
     </para>
 
     <para>
@@ -25,14 +22,14 @@
     </para>
 
     <para>
-      If you cannot (or do not want to) do a regular installation of a Java 7 runtime, you can download
+      If you cannot (or do not want to) do a regular installation of a Java 8 runtime, you can download
       a ZIP distribution from <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle's homepage</ulink>
-      Under <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html">"JRE Download"</ulink>
+      Under <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">"JRE Download"</ulink>
       you can download <literal>tar.gz</literal> archives for Windows&reg; and Linux (32bit and 64bit versions are available).
     </para>
     <para>
       The archive just needs to be unpacked. Inside the archive the actual JRE is stored in a directory named e.g.
-      <literal>jre1.7.0_xx</literal> where <literal>xx</literal> is the build number of the Java runtime.
+      <literal>jre1.8.0_xx</literal> where <literal>xx</literal> is the build number of the Java runtime.
       When moving this directory to the installation directory of &wb-productname; you have to rename it to <literal>jre</literal>
       in order for the Windows&reg; launcher or the batch files to recognize it.
     </para>
@@ -161,15 +158,16 @@
     </para>
 
     <para>
-      If you cannot (or don't want to) do a regular installation of a Java 7 runtime, you can download
+      If you cannot (or don't want to) do a regular installation of a Java 8 runtime, you can download
       a ZIP distribution for Windows&reg; from Oracle's homepage: <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html"/>.
-      Under <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html">"JRE Download"</ulink> there is also
-      an option to download a no-installer version. These downloads are offered as <literal>tar.gz</literal> archives and they only need to
-      be unpacked with a packer being able to handle the Unix <literal>tar</literal> format (e.g. 7-Zip or TotalCommander).
+      Under <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">"JRE Download"</ulink> there is also
+      an option to download a no-installer version. These downloads are offered as <literal>tar.gz</literal> archives, so a tool
+      that can handle Unix/Linux that format is needed for unpacking the archive (e.g.
+      <ulink url="http://www.ghisler.com/">TotalCommander</ulink> or <unlink url="http://www.7-zip.org/">7-Zip</unlink>).
     </para>
 
     <para>
-      By default memory available to &wb-productname; is determined by the Java runtime.
+      By default, the memory available to &wb-productname; is determined by the Java runtime.
       If you need more heap memory (e.g. because you have to load large result sets), you need to pass the appropriate JVM parameter to the launcher.
       Please refer to <link linkend="install-increase-memory">Increasing the memory</link> for details
       on how to increase the memory that is available to &wb-productname;
@@ -186,10 +184,11 @@
         If the launcher cannot find your installed Java runtime, you can specify the location of the JRE by creating a text file
         named <literal>SQLWorkbench.ini</literal> (or <literal>SQLWorkbench64.ini</literal> when using the 64bit version) with the following content:
       </para>
-      <programlisting>vm.location=c:\Program Files\Java\jdk7\jre\bin\client\jvm.dll</programlisting>
+      <programlisting>vm.location=c:\Program Files\Java\jdk8\jre\bin\client\jvm.dll</programlisting>
       <para>
         You need to specify the <emphasis role="bold">full path</emphasis> to the <literal>jvm.dll</literal>,
-        not the directory where the Java runtime is installed.
+        not the directory where the Java runtime is installed. Note that the 64bit JRE does not have the <literal>client</literal>
+        subdirectory, only <literal>jre\bin\server\jvm.dll</literal>
       </para>
     </section>
   </section>
@@ -638,6 +637,16 @@ another_variable=24</programlisting>
                   <para>
                     The individual parameters controlling the connection <emphasis>behaviour</emphasis>
                     can be used together with <literal>-connection</literal>, e.g. <literal>-autocommit</literal> or <literal>-fetchSize</literal>
+                  </para>
+                  <para>
+                    In addition to <literal>-connection></literal> the following parameters are also supported to specify
+                    connections for <link linkend="command-copy"><literal>WbCopy</literal></link>,
+                    <link linkend="command-copy"><literal>WbDataDiff</literal></link> or <link linkend="command-copy"><literal>WbSchemaDiff</literal></link>:
+                    <itemizedlist>
+                      <listitem><simpara>-sourceConnection</simpara></listitem>
+                      <listitem><simpara>-targetConnection</simpara></listitem>
+                      <listitem><simpara>-referenceConnection</simpara></listitem>
+                    </itemizedlist>
                   </para>
                 </entry>
               </row>

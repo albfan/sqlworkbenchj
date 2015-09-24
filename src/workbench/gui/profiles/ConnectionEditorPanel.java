@@ -35,8 +35,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -892,6 +890,7 @@ public class ConnectionEditorPanel
     jPanel3.add(altDelimiter, gridBagConstraints);
 
     jLabel2.setText("Tags");
+    jLabel2.setToolTipText(ResourceMgr.getString("d_LblConnTags")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -900,9 +899,9 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
     jPanel3.add(jLabel2, gridBagConstraints);
 
+    tagList.setToolTipText(ResourceMgr.getDescription("LblConnTagsInput", true)); // NOI18N
     tagList.setName("tagList"); // NOI18N
     tagList.setVerifyInputWhenFocusTarget(false);
-    tagList.addMouseListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
@@ -1050,10 +1049,6 @@ public class ConnectionEditorPanel
       {
         ConnectionEditorPanel.this.extendedPropsMouseClicked(evt);
       }
-      else if (evt.getSource() == tagList)
-      {
-        ConnectionEditorPanel.this.tagListMouseClicked(evt);
-      }
     }
 
     public void mouseEntered(java.awt.event.MouseEvent evt)
@@ -1147,15 +1142,6 @@ public class ConnectionEditorPanel
   {//GEN-HEADEREND:event_tfURLFocusLost
     checkOracle();
   }//GEN-LAST:event_tfURLFocusLost
-
-  private void tagListMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_tagListMouseClicked
-  {//GEN-HEADEREND:event_tagListMouseClicked
-    if (evt.getClickCount() == 2)
-    {
-      evt.consume();
-      showTagSearch();
-    }
-  }//GEN-LAST:event_tagListMouseClicked
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JLabel altDelimLabel;

@@ -874,11 +874,31 @@ public final class WbManager
 			ConnectionMgr.getInstance().setReadTemplates(readDriverTemplates);
 
 			// Setting the profile storage should be done after initializing
-			// the configuration stuff correctly!
+			// the configuration stuff correctly.
 			value = cmdLine.getValue(AppArguments.ARG_PROFILE_STORAGE);
+      if (value != null)
+      {
+        // evaluate relative filenames right now
+        // to prevent Settings to use the config directory
+        // if the user specified a file on the command line
+        // this should follow the usual file search path
+        WbFile prof = new WbFile(value);
+        if (prof.exists())
+        {
+          value = prof.getFullPath();
+        }
+      }
 			Settings.getInstance().setProfileStorage(value);
 
 			value = cmdLine.getValue(AppArguments.ARG_MACRO_STORAGE);
+      if (value != null)
+      {
+        WbFile prof = new WbFile(value);
+        if (prof.exists())
+        {
+          value = prof.getFullPath();
+        }
+      }
 			Settings.getInstance().setMacroStorage(value);
 
 			LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());

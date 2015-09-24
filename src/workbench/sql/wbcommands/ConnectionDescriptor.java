@@ -76,6 +76,7 @@ public class ConnectionDescriptor
     String driverName = null;
 		jarfile = null;
     boolean useCurrentDriver = false;
+    String autoCommit = null;
 
 		for (String element : elements)
 		{
@@ -99,6 +100,10 @@ public class ConnectionDescriptor
 			if (lower.startsWith(AppArguments.ARG_CONN_DRIVER_NAME + "="))
 			{
 				driverName = getValue(element);
+			}
+			if (lower.startsWith(AppArguments.ARG_CONN_AUTOCOMMIT + "="))
+			{
+				autoCommit = getValue(element);
 			}
 			if (lower.startsWith("jar") || lower.startsWith(AppArguments.ARG_CONN_JAR + "="))
 			{
@@ -155,6 +160,10 @@ public class ConnectionDescriptor
 		result.setDriver(driver);
 		result.setStoreExplorerSchema(false);
 		result.setUrl(url);
+    if (autoCommit != null)
+    {
+      result.setAutocommit(StringUtil.stringToBool(autoCommit));
+    }
 
 		result.setPassword(pwd);
 		result.setStorePassword(true);

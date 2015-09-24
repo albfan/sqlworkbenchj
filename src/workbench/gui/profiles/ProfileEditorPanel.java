@@ -30,7 +30,6 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
@@ -168,7 +167,7 @@ public class ProfileEditorPanel
 			filterPanel.setBorder(new DividerBorder(DividerBorder.TOP));
       filterValue = new JTextField();
 			WbLabel lbl = new WbLabel();
-			lbl.setTextByKey("LblFilter");
+			lbl.setTextByKey("LblConnFilter");
 			lbl.setLabelFor(filterValue);
 			lbl.setBorder(new EmptyBorder(0, 5, 0, 5));
 			filterPanel.add(lbl, BorderLayout.LINE_START);
@@ -180,7 +179,7 @@ public class ProfileEditorPanel
       filterBar.setBorderPainted(true);
       filterPanel.add(filterBar, BorderLayout.LINE_END);
 			p.add(filterPanel, BorderLayout.PAGE_END);
-			filterValue.setToolTipText(lbl.getToolTipText());
+      filterValue.setToolTipText(ResourceMgr.getDescription("LblConnTagFilter", true));
 		}
 
 		this.listPanel.add(p, BorderLayout.NORTH);
@@ -204,18 +203,18 @@ public class ProfileEditorPanel
     if (filterValue != null)
     {
       filterValue.addKeyListener(this);
-      filterValue.addMouseListener(new MouseAdapter()
-      {
-        @Override
-        public void mouseClicked(MouseEvent e)
-        {
-          if (e.getClickCount() == 2)
-          {
-            e.consume();
-            showTagPopup();
-          }
-        }
-      });
+//      filterValue.addMouseListener(new MouseAdapter()
+//      {
+//        @Override
+//        public void mouseClicked(MouseEvent e)
+//        {
+//          if (e.getClickCount() == 2)
+//          {
+//            e.consume();
+//            showTagPopup();
+//          }
+//        }
+//      });
     }
 	}
 

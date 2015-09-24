@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,14 +104,17 @@ public class IniProfileStorage
     BufferedReader reader = null;
     List<ConnectionProfile> profiles = new ArrayList<>(25);
 
+    WbFile inifile = new WbFile(filename);
+
     try
     {
+      File fileDir = inifile.getCanonicalFile().getParentFile();
       reader = new BufferedReader(new FileReader(filename));
       props.loadFromReader(reader);
       Set<String> keys = getProfileKeys(props);
       for (String key : keys)
       {
-        ConnectionProfile profile = readProfile(key, props);
+        ConnectionProfile profile = readProfile(fileDir, key, props);
         if (profile != null)
         {
           profiles.add(profile);
@@ -128,7 +132,7 @@ public class IniProfileStorage
     return profiles;
   }
 
-  private ConnectionProfile readProfile(String key, WbProperties props)
+  private ConnectionProfile readProfile(File baseDir, String key, WbProperties props)
   {
     key = "." + key;
     String url = props.getProperty(PROP_PREFIX + key + PROP_URL, null);
@@ -188,11 +192,22 @@ public class IniProfileStorage
       connectionTimeOut = Integer.valueOf(timeOut);
     }
 
-
-    if (StringUtil.isEmptyString(driverName) && StringUtil.isNonEmpty(driverJar))
+    // if a driver jar was explicitely specified, that jar should be used
+    // regardless of any registered driver that might be referenced through driverName
+    if (StringUtil.isNonEmpty(driverJar))
     {
-      DbDriver drv = new DbDriver(name, driverClass, driverJar);
-      ConnectionMgr.getInstance().registerDriver(driverClass, driverJar);
+      WbFile drvFile = new WbFile(driverJar);
+      if (drvFile.getParentFile() == null)
+      {
+        drvFile = new WbFile(baseDir, driverJar);
+        LogMgr.logDebug("IniProfileStorage.readProfile()", "Using full path: " + drvFile.getFullPath() + " for driver jar " + driverJar + " from profile " + name);
+        driverJar = drvFile.getFullPath();
+      }
+      else
+      {
+        driverJar = drvFile.getFullPath();
+      }
+      DbDriver drv = ConnectionMgr.getInstance().registerDriver(driverClass, driverJar);
       driverName = drv.getName();
     }
 
@@ -298,6 +313,7 @@ public class IniProfileStorage
     key = "." + key;
     props.setProperty(PROP_PREFIX + key + PROP_URL, profile.getUrl());
     props.setProperty(PROP_PREFIX + key + PROP_NAME, profile.getName());
+    props.setProperty(PROP_PREFIX + key + PROP_DRIVERNAME, profile.getDriverName());
     props.setProperty(PROP_PREFIX + key + PROP_DRIVERCLASS, profile.getDriverclass());
     props.setProperty(PROP_PREFIX + key + PROP_USERNAME, profile.getUsername());
     props.setProperty(PROP_PREFIX + key + PROP_AUTOCOMMMIT, profile.getAutocommit());
@@ -332,21 +348,6 @@ public class IniProfileStorage
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_REMOVE_COMMENTS, profile.getRemoveComments(), defaultValues.getRemoveComments());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_REMEMEMBER_SCHEMA, profile.getStoreExplorerSchema(), defaultValues.getStoreExplorerSchema());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_HIDE_WARNINGS, profile.isHideWarnings(), defaultValues.isHideWarnings());
-
-    String driverName = profile.getDriverName();
-    DbDriver dbDriver = ConnectionMgr.getInstance().findDriverByName(profile.getDriverclass(), driverName);
-    if (dbDriver.isTemporaryDriver())
-    {
-      // if the used driver is a dynamically registered driver, it won't be saved
-      // in this case we just store the driver's classpath in the INI file
-      String jars = StringUtil.listToString(dbDriver.getLibraryList(), DbDriver.LIB_SEPARATOR, false);
-      props.setProperty(PROP_PREFIX + key + PROP_DRIVERJAR, jars);
-    }
-    else
-    {
-      // the driver name should only be stored if the driver is also saved in WbDrivers.xml
-      props.setProperty(PROP_PREFIX + key + PROP_DRIVERNAME, profile.getDriverName());
-    }
 
     if (StringUtil.stringsAreNotEqual(profile.getGroup(), defaultValues.getGroup()))
     {

@@ -196,7 +196,7 @@ public class ConnectionProfile
   {
     return Collections.unmodifiableSet(tags);
   }
-  
+
   public String getTagList()
   {
     return StringUtil.listToString(tags, ',', false);
@@ -208,20 +208,6 @@ public class ConnectionProfile
     changed = !tags.equals(tagList);
     tags.clear();
     tags.addAll(tagList);
-  }
-
-  public boolean containsTag(String tag)
-  {
-    return tags.contains(tag);
-  }
-
-  public boolean containsAnyTag(Set<String> toCheck)
-  {
-    for (String tag : toCheck)
-    {
-      if (tags.contains(tag)) return true;
-    }
-    return false;
   }
 
 	public boolean getStoreCacheLocally()

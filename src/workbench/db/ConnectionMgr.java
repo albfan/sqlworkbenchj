@@ -403,7 +403,7 @@ public class ConnectionMgr
 	{
 		if (this.drivers == null) this.readDrivers();
 
-		DbDriver drv = new DbDriver("JdbcDriver-" + Integer.toString(drivers.size() + 1), drvClassName, jarFile);
+		DbDriver drv = new DbDriver("$JdbcDriver$-" + Integer.toString(drivers.size() + 1), drvClassName, jarFile);
 		drv.setTemporary();
 
 		// this method is called from BatchRunner.createCmdLineProfile() when
