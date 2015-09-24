@@ -22,7 +22,7 @@ LblDriverName
 LblDrop
 LblDropCascade
 LblExportEscapeHtml
-LblFilter
+LblConnFilter
 LblFetchSize
 LblFileEncoding
 LblKeyDefDefaultCol
