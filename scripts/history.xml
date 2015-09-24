@@ -2,6 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-09-20">
+    <entry dev-build="2" type="enh">It's now possible to provide tags for each connection profile. The quickfilter will then use the defined tags for filtering the displayed profiles.</entry>
+    <entry dev-build="2" type="enh">Connection parameters specified on the command line now have precendence over the properties defined through a Liquibase defaults file (specified through -lbDefaults)</entry>
     <entry dev-build="1" type="enh">It's now possible to enbable the use of Oracle's DBMS_METADATA for source code retrieval for different types of objects</entry>
     <entry dev-build="1" type="enh">The tooltip shown for result tabs can now be configured (Options -&gt; Data display)</entry>
     <entry dev-build="1" type="enh">For the internal SQL formatter, it's now possible to configure the case in which data type names are written</entry>
