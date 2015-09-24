@@ -61,15 +61,16 @@ import workbench.util.WbFile;
 public class DbDriver
 	implements Comparable<DbDriver>
 {
+  public static final String LIB_SEPARATOR = "|";
+
 	private Driver driverClassInstance;
 	private URLClassLoader classLoader;
 
 	protected String name;
 	private String driverClass;
 	private List<String> libraryList;
-	private boolean isInternal;
+	private boolean isTemporary;
 	private String sampleUrl;
-  private boolean isDynamic;
 
 	public DbDriver()
 	{
@@ -95,25 +96,19 @@ public class DbDriver
 		this.setLibrary(aLibrary);
 	}
 
-  public boolean isDynamic()
+  public boolean isTemporaryDriver()
   {
-    return isDynamic;
+    return isTemporary;
   }
 
-  public void setDynamic(boolean flag)
-  {
-    isDynamic = flag;
+  /**
+   * Marks this driver as a temporary driver that should not be saved.
+   *
+   */
+	public void setTemporary()
+	{
+		isTemporary = true;
   }
-
-	public boolean isInternal()
-	{
-		return this.isInternal;
-	}
-
-	void setInternal(boolean flag)
-	{
-		isInternal = flag;
-	}
 
 	public String getName()
 	{
@@ -233,9 +228,9 @@ public class DbDriver
 	{
 		if (libList == null) return null;
 
-		if (libList.indexOf('|') > -1)
+		if (libList.indexOf(LIB_SEPARATOR) > -1)
 		{
-			return StringUtil.stringToList(libList, "|", true, true, false);
+			return StringUtil.stringToList(libList, LIB_SEPARATOR, true, true, false);
 		}
 		else if (!StringUtil.isEmptyString(libList))
 		{
@@ -257,7 +252,7 @@ public class DbDriver
 		// the classpath already, so there is no need to check them here.
 		if (Settings.getInstance().isTestMode()) return true;
 
-		if (this.isInternal()) return true;
+		if (isTemporary) return true;
 
 		if ("sun.jdbc.odbc.JdbcOdbcDriver".equals(driverClass)) return true;
 

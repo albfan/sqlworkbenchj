@@ -34,7 +34,6 @@ import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
-import workbench.util.StringUtil;
 
 /**
  * A class to define and parse the arguments that are available when the application is started.
@@ -210,36 +209,31 @@ public class AppArguments
       {
         File f = new File(lb);
         BufferedReader in = EncodingUtil.createBufferedReader(f, null);
-        List<String> lines = FileUtil.getLines(in, true);
+        List<String> lines = FileUtil.getLines(in, true, true);
         List<String> translated = new ArrayList<>(lines.size());
         for (String line : lines)
         {
-          if (StringUtil.isBlank(line)) continue;
-
-          String wbLine = line.trim();
-          if (wbLine.startsWith("#")) continue;
-
-          if (wbLine.startsWith("classpath:"))
+          if (line.startsWith("classpath:") && isArgNotPresent(ARG_CONN_JAR))
           {
-            String filename = wbLine.substring("classpath:".length()).trim();
+            String filename = line.substring("classpath:".length()).trim();
             File lib = new File(filename);
             if (lib.getParent() == null)
             {
 							// If no directory is given, Liquibase assumes the current directory
-              // WbDriver on the other hand will search the jar file in the config directory, if no directory
-              // is specified, which is most probably not correct.
+              // DbDriver on the other hand will search the jar file in the config directory, if no directory is specified.
+              // By appending "./" to the filename we force the use of the current directory
               filename = "./" + lib.getName();
             }
-            wbLine = ARG_CONN_JAR + "=" + filename;
+            line = ARG_CONN_JAR + "=" + filename;
+            translated.add(line);
           }
           else
           {
-            wbLine = wbLine.replace("driver:", ARG_CONN_DRIVER + "=");
-            wbLine = wbLine.replace("url:", ARG_CONN_URL + "=");
-            wbLine = wbLine.replace("username:", ARG_CONN_USER + "=");
-            wbLine = wbLine.replace("password:", ARG_CONN_PWD + "=");
+            processParameter(line, "driver:", ARG_CONN_DRIVER, translated);
+            processParameter(line, "url:", ARG_CONN_URL, translated);
+            processParameter(line, "username:", ARG_CONN_USER, translated);
+            processParameter(line, "password:", ARG_CONN_PWD, translated);
           }
-          translated.add(wbLine);
         }
         parse(translated);
       }
@@ -248,6 +242,15 @@ public class AppArguments
         System.err.println("Could not read liquibase properties!");
         e.printStackTrace();
       }
+    }
+  }
+
+  private void processParameter(String lbLine, String lbKeyword, String arg, List<String> translated)
+  {
+    if (lbLine.startsWith(lbKeyword) && isArgNotPresent(arg))
+    {
+      String l = lbLine.replace(lbKeyword, arg + "=");
+      translated.add(l);
     }
   }
 

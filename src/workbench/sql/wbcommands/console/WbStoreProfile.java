@@ -119,8 +119,8 @@ public class WbStoreProfile
 		DbDriver drv = ConnectionMgr.getInstance().findDriver(profile.getDriverclass());
 
 		// if a profile was created from the commandline, this will implicitely also create
-		// a new driver entry if no matching driver was found. In that case it is marked as "internal"
-		if (drv.isInternal())
+		// a new driver entry if no matching driver was found. In that case it is marked as "temporary"
+		if (drv.isTemporaryDriver())
 		{
 			DbDriver newDrv = drv.createCopy();
 			String drvName = currentConnection.getSqlConnection().getMetaData().getDriverName();

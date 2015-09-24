@@ -153,6 +153,14 @@ public class TagSearchPopup
       String selected = inputField.getSelectedText();
       String word = selected;
 
+      if (",".equals(selected) && text.endsWith(","))
+      {
+        // this happens when the text ends with a , and a double click is used to open the popup
+        int start = inputField.getSelectionStart();
+        inputField.select(start + 1, start + 1);
+        word = "";
+      }
+
       if (StringUtil.isEmptyString(word))
       {
         word = StringUtil.getWordLeftOfCursor(text, inputField.getCaretPosition(), wordBoundaries);
@@ -189,7 +197,7 @@ public class TagSearchPopup
 						window.setLocation(p);
 						window.pack();
             Dimension size = window.getSize();
-            int width = (int)inputField.getWidth() / 4;
+            int width = elementList.getWidth() * 3;
             if (width > size.width)
             {
               size.width = width;
@@ -366,7 +374,7 @@ public class TagSearchPopup
 
 	private int findEntry(String s)
 	{
-		if (s == null) return -1;
+		if (StringUtil.isBlank(s)) return -1;
 		int count = this.data.getSize();
 		if (count == 0) return -1;
 
@@ -393,19 +401,23 @@ public class TagSearchPopup
 	@Override
 	public void focusLost(FocusEvent focusEvent)
 	{
-		closePopup(false);
+    if (focusEvent.getOppositeComponent() != elementList)
+    {
+      closePopup(false);
+    }
 	}
 
 	/**
 	 * Implementation of the MouseListener interface
 	 */
 	@Override
-	public void mouseClicked(java.awt.event.MouseEvent mouseEvent)
+	public void mouseClicked(MouseEvent mouseEvent)
 	{
 		int clicks = mouseEvent.getClickCount();
-		if (clicks == 2)
-		{
-			closePopup(true);
+    boolean ctrlPressed = WbAction.isCtrlPressed(mouseEvent.getModifiers());
+    if (clicks == 2 || (clicks == 1 && !ctrlPressed))
+    {
+      closePopup(true);
 		}
 	}
 

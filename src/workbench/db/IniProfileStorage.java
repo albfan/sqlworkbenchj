@@ -57,7 +57,7 @@ public class IniProfileStorage
   private static final String PROP_USERNAME = ".username";
   private static final String PROP_DRIVERNAME = ".drivername";
   private static final String PROP_DRIVERCLASS = ".driverclass";
-  private static final String PROP_DRIVERJAR = ".driver";
+  private static final String PROP_DRIVERJAR = ".driverjar";
   private static final String PROP_AUTOCOMMMIT = ".autocommmit";
   private static final String PROP_FETCHSIZE = ".fetchsize";
   private static final String PROP_ALT_DELIMITER = ".alternate.delimiter";
@@ -135,6 +135,7 @@ public class IniProfileStorage
     String tags = props.getProperty(PROP_PREFIX + key + PROP_TAGS, null);
     String name = props.getProperty(PROP_PREFIX + key + PROP_NAME, null);
     String driverClass = props.getProperty(PROP_PREFIX + key + PROP_DRIVERCLASS, null);
+    String driverJar = props.getProperty(PROP_PREFIX + key + PROP_DRIVERJAR, null);
     String driverName = props.getProperty(PROP_PREFIX + key + PROP_DRIVERNAME, null);
     String group = props.getProperty(PROP_PREFIX + key + PROP_GROUP, null);
     String user = props.getProperty(PROP_PREFIX + key + PROP_USERNAME, null);
@@ -185,6 +186,14 @@ public class IniProfileStorage
     if (timeOut > 0)
     {
       connectionTimeOut = Integer.valueOf(timeOut);
+    }
+
+
+    if (StringUtil.isEmptyString(driverName) && StringUtil.isNonEmpty(driverJar))
+    {
+      DbDriver drv = new DbDriver(name, driverClass, driverJar);
+      ConnectionMgr.getInstance().registerDriver(driverClass, driverJar);
+      driverName = drv.getName();
     }
 
     ObjectNameFilter schemaFilter = getSchemaFilter(props, key);
@@ -290,7 +299,6 @@ public class IniProfileStorage
     props.setProperty(PROP_PREFIX + key + PROP_URL, profile.getUrl());
     props.setProperty(PROP_PREFIX + key + PROP_NAME, profile.getName());
     props.setProperty(PROP_PREFIX + key + PROP_DRIVERCLASS, profile.getDriverclass());
-    props.setProperty(PROP_PREFIX + key + PROP_DRIVERNAME, profile.getDriverName());
     props.setProperty(PROP_PREFIX + key + PROP_USERNAME, profile.getUsername());
     props.setProperty(PROP_PREFIX + key + PROP_AUTOCOMMMIT, profile.getAutocommit());
     props.setProperty(PROP_PREFIX + key + PROP_TAGS, profile.getTagList());
@@ -324,6 +332,21 @@ public class IniProfileStorage
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_REMOVE_COMMENTS, profile.getRemoveComments(), defaultValues.getRemoveComments());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_REMEMEMBER_SCHEMA, profile.getStoreExplorerSchema(), defaultValues.getStoreExplorerSchema());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_HIDE_WARNINGS, profile.isHideWarnings(), defaultValues.isHideWarnings());
+
+    String driverName = profile.getDriverName();
+    DbDriver dbDriver = ConnectionMgr.getInstance().findDriverByName(profile.getDriverclass(), driverName);
+    if (dbDriver.isTemporaryDriver())
+    {
+      // if the used driver is a dynamically registered driver, it won't be saved
+      // in this case we just store the driver's classpath in the INI file
+      String jars = StringUtil.listToString(dbDriver.getLibraryList(), DbDriver.LIB_SEPARATOR, false);
+      props.setProperty(PROP_PREFIX + key + PROP_DRIVERJAR, jars);
+    }
+    else
+    {
+      // the driver name should only be stored if the driver is also saved in WbDrivers.xml
+      props.setProperty(PROP_PREFIX + key + PROP_DRIVERNAME, profile.getDriverName());
+    }
 
     if (StringUtil.stringsAreNotEqual(profile.getGroup(), defaultValues.getGroup()))
     {

@@ -31,7 +31,6 @@ import javax.swing.SwingConstants;
 
 import workbench.db.objectcache.ObjectCacheStorage;
 
-import workbench.gui.settings.ProfileFilterType;
 import workbench.gui.sql.FileReloadType;
 
 import workbench.util.CollectionUtil;
@@ -1105,6 +1104,11 @@ public class GuiSettings
     return Settings.getInstance().getIntProperty("workbench.gui.profiles.tagfilter.minlength", 2);
   }
 
+	public static boolean focusToProfileQuickFilter()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.profiles.quickfilter.initialfocus", true);
+	}
+
 	public static boolean enableProfileQuickFilter()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.profiles.quickfilter", true);
@@ -1113,24 +1117,6 @@ public class GuiSettings
 	public static void setEnableProfileQuickFilter(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.profiles.quickfilter", flag);
-	}
-
-	public static ProfileFilterType getProfileFilterType()
-	{
-		String type = Settings.getInstance().getProperty("workbench.gui.profiles.filter.type", ProfileFilterType.name.name());
-    try
-    {
-      return ProfileFilterType.valueOf(type);
-    }
-    catch (Exception ex)
-    {
-      return ProfileFilterType.name;
-    }
-	}
-
-	public static void setFilterType(ProfileFilterType type)
-	{
-		Settings.getInstance().setProperty("workbench.gui.profiles.quickfilter", type.name());
 	}
 
 	public static boolean getZoomFontWithMouseWheel()

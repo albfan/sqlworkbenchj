@@ -35,10 +35,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import workbench.WbManager;
 import workbench.log.LogMgr;
@@ -389,7 +389,9 @@ public class ConnectionMgr
 	/**
 	 * Add a new, dynamically defined driver to the list of available drivers.
 	 *
-	 * This is used if a driver definition is passed on the commandline
+	 * This is used if a driver definition is passed on the commandline.
+   *
+   * Drivers registered through this, won't be persisted into WbDrivers.xml
 	 *
 	 * @param drvClassName  the classname of the driver
 	 * @param jarFile       the jarfile in which the driver is located
@@ -402,7 +404,7 @@ public class ConnectionMgr
 		if (this.drivers == null) this.readDrivers();
 
 		DbDriver drv = new DbDriver("JdbcDriver-" + Integer.toString(drivers.size() + 1), drvClassName, jarFile);
-		drv.setInternal(true);
+		drv.setTemporary();
 
 		// this method is called from BatchRunner.createCmdLineProfile() when
 		// the user passed all driver information on the command line.
@@ -735,16 +737,7 @@ public class ConnectionMgr
 		// As drivers and profiles can be saved in console mode, we need to make
 		// sure, that the "internal" drivers that are created "on-the-fly" when connecting
 		// from the commandline are not stored in the configuration file.
-		List<DbDriver> allDrivers = new ArrayList<>(this.drivers);
-		Iterator<DbDriver> itr = allDrivers.iterator();
-		while (itr.hasNext())
-		{
-			if (itr.next().isInternal())
-			{
-				itr.remove();
-			}
-		}
-
+    List<DbDriver> allDrivers = drivers.stream().filter(drv -> !drv.isTemporaryDriver()).collect(Collectors.toList());
 		try
 		{
 			writer.writeObject(allDrivers);

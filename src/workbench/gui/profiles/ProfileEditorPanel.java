@@ -28,9 +28,9 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
@@ -52,7 +52,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
@@ -80,7 +79,6 @@ import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.HistoryTextField;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbLabel;
 import workbench.gui.components.WbSplitPane;
@@ -206,6 +204,18 @@ public class ProfileEditorPanel
     if (filterValue != null)
     {
       filterValue.addKeyListener(this);
+      filterValue.addMouseListener(new MouseAdapter()
+      {
+        @Override
+        public void mouseClicked(MouseEvent e)
+        {
+          if (e.getClickCount() == 2)
+          {
+            e.consume();
+            showTagPopup();
+          }
+        }
+      });
     }
 	}
 
@@ -262,13 +272,19 @@ public class ProfileEditorPanel
 		}
 	}
 
-	private void expandCurrentGroup()
-	{
-		ProfileTree tree = (ProfileTree)profileTree;
-		if (tree.isGroup(tree.getSelectionPath()))
-		{
-			tree.expandPath(tree.getSelectionPath());
-		}
+//	private void expandCurrentGroup()
+//	{
+//		ProfileTree tree = (ProfileTree)profileTree;
+//		if (tree.isGroup(tree.getSelectionPath()))
+//		{
+//			tree.expandPath(tree.getSelectionPath());
+//		}
+//  }
+
+  private void showTagPopup()
+  {
+    TagSearchPopup search = new TagSearchPopup(filterValue, model.getAllTags(), this);
+    search.showPopup();
   }
 
 	@Override
@@ -283,8 +299,7 @@ public class ProfileEditorPanel
     if (e.getKeyCode() == KeyEvent.VK_SPACE && WbAction.isCtrlPressed(e.getModifiers()))
     {
       e.consume();
-      TagSearchPopup search = new TagSearchPopup(filterValue, model.getAllTags(), this);
-      search.showPopup();
+      EventQueue.invokeLater(this::showTagPopup);
       return;
     }
 
@@ -300,14 +315,14 @@ public class ProfileEditorPanel
 				selectNextItem();
 				e.consume();
 				break;
-			case KeyEvent.VK_RIGHT:
-				expandCurrentGroup();
-				e.consume();
-				break;
-			case KeyEvent.VK_LEFT:
-				collapseCurrentGroup();
-				e.consume();
-				break;
+//			case KeyEvent.VK_RIGHT:
+//				expandCurrentGroup();
+//				e.consume();
+//				break;
+//			case KeyEvent.VK_LEFT:
+//				collapseCurrentGroup();
+//				e.consume();
+//				break;
 			case KeyEvent.VK_ESCAPE:
 				if (StringUtil.isNonBlank(filterValue.getText()))
 				{
@@ -416,6 +431,10 @@ public class ProfileEditorPanel
 		{
 			return connectionEditor.getInitialFocusComponent();
 		}
+    else if (filterValue != null && GuiSettings.focusToProfileQuickFilter())
+    {
+      return filterValue;
+    }
 		else
 		{
 			return profileTree;
