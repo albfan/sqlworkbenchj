@@ -10,6 +10,7 @@
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
     <entry dev-build="1" type="enh">The error dialog that is displayed when running a script can now be configured to also include the error message or the statement that failed</entry>
     <entry dev-build="1" type="enh">Improved display of packages in the DbTree for Oracle and Firebird</entry>
+    <entry dev-build="2" type="fix">When a variable value contained the prefix and the suffix of the variable pattern, using such a variable would result in SQL Workbench/J locking up</entry>
     <entry dev-build="1" type="fix">Reloading a trigger source in the DbExplorer's trigger panel did not work</entry>
     <entry dev-build="1" type="fix">For Oracle the source of a trigger that had a trailing space in the name was not retrieved</entry>
     <entry dev-build="1" type="fix">For Oracle the position of errors in regular (non-PL/SQL) DDL statements was not shown</entry>

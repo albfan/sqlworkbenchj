@@ -51,8 +51,8 @@ import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.RowData;
-import workbench.util.CaseInsensitiveComparator;
 
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 
@@ -152,7 +152,7 @@ public class VariablePool
 			this.suffix = null;
 			initPromptPattern();
 		}
-		LogMgr.logDebug("VariablePool.propertyChange()", "Update prompter patter because " + evt.getPropertyName() + " changed.");
+		LogMgr.logDebug("VariablePool.propertyChange()", "Updated prompt pattern because " + evt.getPropertyName() + " changed.");
 	}
 
 	/**
@@ -384,12 +384,15 @@ public class VariablePool
 	{
 		Pattern p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(original);
-		while (m != null && m.find())
+    int searchStart = 0;
+		while (m != null && m.find(searchStart))
 		{
 			int start = m.start();
 			int end = m.end();
 			original.replace(start, end, replacement);
 			m = p.matcher(original.toString());
+      searchStart = end;
+      if (searchStart >= original.length()) break;
 		}
 	}
 

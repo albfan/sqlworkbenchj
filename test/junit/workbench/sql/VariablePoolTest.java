@@ -23,8 +23,6 @@
 package workbench.sql;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.util.Set;
 
 import workbench.AppArguments;
@@ -39,8 +37,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -123,11 +120,9 @@ public class VariablePoolTest
 
 		File f = new File(util.getBaseDir(), "vars.properties");
 
-		FileWriter out = new FileWriter(f);
-		out.write("exportfile=/user/home/export.txt\n");
-		out.write("exporttable=person\n");
-		out.close();
-
+    TestUtil.writeFile(f,
+      "exportfile=/user/home/export.txt\n" +
+      "exporttable=person\n");
 		pool.clear();
 		p.parse("-" + AppArguments.ARG_VARDEF + "='" + f.getAbsolutePath() + "'");
 		pool.readDefinition(p.getValue(AppArguments.ARG_VARDEF));
@@ -182,10 +177,9 @@ public class VariablePoolTest
 
 		File f = new File(util.getBaseDir(), "vardef.props");
 
-		PrintWriter pw = new PrintWriter(new FileWriter(f));
-		pw.println("lastname=Dent");
-		pw.println("firstname=Arthur");
-		pw.close();
+    TestUtil.writeFile(f,
+      "lastname=Dent\n" +
+       "firstname=Arthur");
 		pool.readFromFile(f.getAbsolutePath(), null);
 
 		value = pool.getParameterValue("lastname");
