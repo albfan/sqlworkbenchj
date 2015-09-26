@@ -61,29 +61,6 @@
       </blockquote>
 		</simplesect>
 
-		<simplesect id="options-exit-connect">
-			<title>Exit on first connect cancel</title>
-      <blockquote>
-			<para>
-				If this option is enabled, then the application is closed completely if the
-				initial connect dialog is cancelled.
-			</para>
-			<para>
-				This option is only valid if "Show connect dialog" is selected.
-			</para>
-      </blockquote>
-		</simplesect>
-
-		<simplesect id="options-single-page-help">
-			<title>Single page HTML help</title>
-      <blockquote>
-			<para>
-				If this option is enabled, the HTML help will be shown as a single
-				page in the browser instead of one page per chapter.
-			</para>
-      </blockquote>
-		</simplesect>
-
 		<simplesect id="options-encrypt-password">
 			<title>Encrypt passwords</title><blockquote>
 			<para>If this option is enabled, the password stored within a connection
@@ -100,6 +77,19 @@
       </blockquote>
 		</simplesect>
 
+    <simplesect id="options-exit-connect">
+			<title>Exit on first connect cancel</title>
+      <blockquote>
+			<para>
+				If this option is enabled, then the application is closed completely if the
+				initial connect dialog is cancelled.
+			</para>
+			<para>
+				This option is only valid if "Show connect dialog" is selected.
+			</para>
+      </blockquote>
+		</simplesect>
+
 		<simplesect id="options-consolidate-log">
 			<title>Consolidate script log</title><blockquote>
 			<para>
@@ -110,6 +100,40 @@
 				a summary of the execution is printed once the script has finished.
 				You can turn off the log during script execution by using
 				the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-auto-save-profiles">
+			<title>Auto-save connection profiles</title>
+      <blockquote>
+			<para>
+				If this option is enabled, the connection profiles are automatically saved
+        when closing the connection dialog using the <guibutton>OK</guibutton> button.
+			</para>
+			<para>
+				If this option is disabled, the connection profiles are saved when closing
+        the application.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-single-page-help">
+			<title>Single page HTML help</title>
+      <blockquote>
+			<para>
+				If this option is enabled, the HTML help will be shown as a single
+				page in the browser instead of one page per chapter.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-profile-filter">
+			<title>Quick filter for profiles</title>
+      <blockquote>
+			<para>
+        If this option is enabled, an input field to <link linkend="connection-profile-quickfilter">filter the profiles</link> is displayed
+        above the list of profiles.
 			</para>
       </blockquote>
 		</simplesect>

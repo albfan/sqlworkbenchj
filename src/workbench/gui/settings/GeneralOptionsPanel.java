@@ -170,7 +170,7 @@ public class GeneralOptionsPanel
 		logAllStatements.setSelected(Settings.getInstance().getLogAllStatements());
 		autoSaveProfiles.setSelected(Settings.getInstance().getSaveProfilesImmediately());
 		enableQuickFilter.setSelected(GuiSettings.enableProfileQuickFilter());
-
+    focusToQuickFilter.setSelected(GuiSettings.focusToProfileQuickFilter());
 		String iconName = Settings.getInstance().getProperty(IconHandler.PROP_LOADING_IMAGE, IconHandler.DEFAULT_BUSY_IMAGE);
 		LoadingImage img = new LoadingImage();
 		img.setName(iconName);
@@ -195,6 +195,7 @@ public class GeneralOptionsPanel
 		GuiSettings.setShowTabIndex(showTabIndex.isSelected());
 		GuiSettings.setConfirmTabClose(confirmTabClose.isSelected());
 		GuiSettings.setEnableProfileQuickFilter(enableQuickFilter.isSelected());
+		GuiSettings.setFocusToProfileQuickFilter(focusToQuickFilter.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
 		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
@@ -285,6 +286,7 @@ public class GeneralOptionsPanel
     brushedMetal = new JCheckBox();
     autoSaveProfiles = new JCheckBox();
     enableQuickFilter = new JCheckBox();
+    focusToQuickFilter = new JCheckBox();
     settingsfilename = new WbLabelField();
     jPanel1 = new JPanel();
     showTabIndex = new JCheckBox();
@@ -395,11 +397,9 @@ public class GeneralOptionsPanel
     brushedMetal.setToolTipText(ResourceMgr.getString("d_LblBrushedMetal")); // NOI18N
     brushedMetal.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 10, 4, 0);
     jPanel2.add(brushedMetal, gridBagConstraints);
 
     autoSaveProfiles.setSelected(Settings.getInstance().getConsolidateLogMsg());
@@ -427,7 +427,23 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 0, 4, 0);
     jPanel2.add(enableQuickFilter, gridBagConstraints);
+
+    focusToQuickFilter.setText(ResourceMgr.getString("LblProfileQuickFilterFocus")); // NOI18N
+    focusToQuickFilter.setToolTipText(ResourceMgr.getString("d_LblProfileQuickFilterFocus")); // NOI18N
+    focusToQuickFilter.setBorder(null);
+    focusToQuickFilter.setHorizontalAlignment(SwingConstants.LEFT);
+    focusToQuickFilter.setHorizontalTextPosition(SwingConstants.RIGHT);
+    focusToQuickFilter.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 10, 4, 0);
+    jPanel2.add(focusToQuickFilter, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -481,7 +497,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(4, 4, 1, 0);
+    gridBagConstraints.insets = new Insets(4, 0, 1, 0);
     jPanel1.add(confirmTabClose, gridBagConstraints);
 
     showTabCloseButton.setText(ResourceMgr.getString("LblShowTabClose")); // NOI18N
@@ -494,7 +510,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 4, 2, 0);
+    gridBagConstraints.insets = new Insets(0, 0, 2, 0);
     jPanel1.add(showTabCloseButton, gridBagConstraints);
 
     showResultTabClose.setText(ResourceMgr.getString("LblShowResultClose")); // NOI18N
@@ -518,7 +534,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(3, 4, 5, 0);
+    gridBagConstraints.insets = new Insets(3, 0, 5, 0);
     jPanel1.add(onlyActiveTab, gridBagConstraints);
 
     closeButtonRightSide.setText(ResourceMgr.getString("LblCloseOnRight")); // NOI18N
@@ -537,7 +553,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(2, 3, 3, 0);
+    gridBagConstraints.insets = new Insets(2, 0, 3, 0);
     jPanel1.add(jSeparator1, gridBagConstraints);
 
     tabLRUclose.setText(ResourceMgr.getString("LblTabOrderLRU")); // NOI18N
@@ -547,7 +563,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(4, 4, 0, 0);
+    gridBagConstraints.insets = new Insets(4, 0, 0, 0);
     jPanel1.add(tabLRUclose, gridBagConstraints);
 
     imagePanel.setLayout(new GridBagLayout());
@@ -660,7 +676,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 10, 0, 0);
     jPanel4.add(showFinishAlert, gridBagConstraints);
 
     jLabel2.setText(ResourceMgr.getString("LblScriptEndAlertDuration")); // NOI18N
@@ -668,7 +683,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(7, 11, 0, 0);
+    gridBagConstraints.insets = new Insets(4, 19, 0, 0);
     jPanel4.add(jLabel2, gridBagConstraints);
 
     alertDuration.setColumns(8);
@@ -677,7 +692,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(5, 8, 0, 0);
+    gridBagConstraints.insets = new Insets(4, 8, 0, 0);
     jPanel4.add(alertDuration, gridBagConstraints);
 
     useSystemTray.setText(ResourceMgr.getString("LblAlertSysTray")); // NOI18N
@@ -805,6 +820,7 @@ public class GeneralOptionsPanel
   private JCheckBox consolidateLog;
   private JCheckBox enableQuickFilter;
   private JCheckBox exitOnConnectCancel;
+  private JCheckBox focusToQuickFilter;
   private JComboBox iconCombobox;
   private JPanel imagePanel;
   private JLabel jLabel2;

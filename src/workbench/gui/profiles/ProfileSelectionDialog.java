@@ -78,7 +78,7 @@ public class ProfileSelectionDialog
 	private JButton cancelButton;
 	private WbButton helpButton;
 	private WbButton manageDriversButton;
-	private ProfileEditorPanel profiles;
+	private ProfileSelectionPanel profiles;
 	private ConnectionProfile selectedProfile;
 	private boolean cancelled;
 	private String escActionCommand;
@@ -116,7 +116,7 @@ public class ProfileSelectionDialog
 
 	private void initComponents(String lastProfileKey)
 	{
-		profiles = new ProfileEditorPanel(lastProfileKey);
+		profiles = new ProfileSelectionPanel(lastProfileKey);
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BorderLayout(0, 0));

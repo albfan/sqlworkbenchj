@@ -1,5 +1,5 @@
 /*
- * ProfileEditorPanel.java
+ * ProfileSelectionPanel.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -91,7 +91,7 @@ import workbench.util.StringUtil;
  *
  * @author  Thomas Kellerer
  */
-public class ProfileEditorPanel
+public class ProfileSelectionPanel
 	extends JPanel
 	implements FileActions, ValidatingComponent, PropertyChangeListener, KeyListener, QuickFilter
 {
@@ -109,7 +109,7 @@ public class ProfileEditorPanel
   private WbAction resetFilter;
   private QuickFilterAction applyFilter;
 
-	public ProfileEditorPanel(String lastProfileKey)
+	public ProfileSelectionPanel(String lastProfileKey)
 	{
 		super();
 		initComponents(); // will initialize the model!
@@ -203,82 +203,8 @@ public class ProfileEditorPanel
     if (filterValue != null)
     {
       filterValue.addKeyListener(this);
-//      filterValue.addMouseListener(new MouseAdapter()
-//      {
-//        @Override
-//        public void mouseClicked(MouseEvent e)
-//        {
-//          if (e.getClickCount() == 2)
-//          {
-//            e.consume();
-//            showTagPopup();
-//          }
-//        }
-//      });
     }
 	}
-
-	private int getSelectedRow()
-	{
-		if (profileTree.getSelectionCount() != 1) return -1;
-		return profileTree.getSelectionRows()[0];
-	}
-
-	private void selectPreviousItem()
-	{
-		int row = getSelectedRow();
-		if (row < 0)
-		{
-			row = 0;
-		}
-		else if (row > 0)
-		{
-			row --;
-		}
-		profileTree.setSelectionRow(row);
-	}
-
-	private void selectNextItem()
-	{
-		int row = getSelectedRow();
-		int count = profileTree.getRowCount();
-		if (row < 0)
-		{
-			row = 0;
-		}
-		else if (row < count - 1)
-		{
-			row ++;
-		}
-		profileTree.setSelectionRow(row);
-	}
-
-	private void collapseCurrentGroup()
-	{
-		ProfileTree tree = (ProfileTree)profileTree;
-		TreePath path = tree.getSelectionPath();
-		if (tree.isGroup(path))
-		{
-			tree.collapsePath(path);
-		}
-		else
-		{
-			TreePath parent = path.getParentPath();
-			if (parent != null)
-			{
-				tree.selectPath(parent);
-			}
-		}
-	}
-
-//	private void expandCurrentGroup()
-//	{
-//		ProfileTree tree = (ProfileTree)profileTree;
-//		if (tree.isGroup(tree.getSelectionPath()))
-//		{
-//			tree.expandPath(tree.getSelectionPath());
-//		}
-//  }
 
   private void showTagPopup()
   {
@@ -307,21 +233,13 @@ public class ProfileEditorPanel
 		switch (e.getKeyCode())
 		{
 			case KeyEvent.VK_UP:
-				selectPreviousItem();
-				e.consume();
-				break;
 			case KeyEvent.VK_DOWN:
-				selectNextItem();
-				e.consume();
+			case KeyEvent.VK_HOME:
+			case KeyEvent.VK_END:
+      case KeyEvent.VK_PAGE_DOWN:
+      case KeyEvent.VK_PAGE_UP:
+        profileTree.dispatchEvent(e);
 				break;
-//			case KeyEvent.VK_RIGHT:
-//				expandCurrentGroup();
-//				e.consume();
-//				break;
-//			case KeyEvent.VK_LEFT:
-//				collapseCurrentGroup();
-//				e.consume();
-//				break;
 			case KeyEvent.VK_ESCAPE:
 				if (StringUtil.isNonBlank(filterValue.getText()))
 				{
@@ -781,7 +699,7 @@ public class ProfileEditorPanel
     {
       if (evt.getSource() == profileTree)
       {
-        ProfileEditorPanel.this.profileTreeMouseClicked(evt);
+        ProfileSelectionPanel.this.profileTreeMouseClicked(evt);
       }
     }
 
@@ -805,7 +723,7 @@ public class ProfileEditorPanel
     {
       if (evt.getSource() == profileTree)
       {
-        ProfileEditorPanel.this.profileTreeValueChanged(evt);
+        ProfileSelectionPanel.this.profileTreeValueChanged(evt);
       }
     }
   }// </editor-fold>//GEN-END:initComponents

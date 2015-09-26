@@ -1015,7 +1015,10 @@ public class ConnectionProfile
 		result.setPromptForUsername(this.promptForUsername);
 		result.setStoreCacheLocally(this.storeCacheLocally);
 		result.setMacroFilename(this.macroFileName);
-    result.setTagList(getTagList());
+    if (this.tags != null)
+    {
+      result.tags.addAll(this.tags);
+    }
 		result.lastSettingsKey = this.lastSettingsKey;
 		result.temporaryUsername = null;
 		if (connectionProperties != null)
@@ -1157,9 +1160,10 @@ public class ConnectionProfile
 
 	public boolean hasConnectScript()
 	{
-		return StringUtil.isNonBlank(postConnectScript) ||
-			StringUtil.isNonBlank(preDisconnectScript) ||
-			(StringUtil.isNonBlank(idleScript) && idleTime > 0);
+		return
+      StringUtil.isNonEmpty(postConnectScript) ||
+			StringUtil.isNonEmpty(preDisconnectScript) ||
+			(StringUtil.isNonEmpty(idleScript) && idleTime > 0);
 	}
 
 	public String getPostConnectScript()
@@ -1172,14 +1176,7 @@ public class ConnectionProfile
 	{
 		if (!StringUtil.equalStringOrEmpty(script, this.postConnectScript))
 		{
-			if (StringUtil.isBlank(script))
-			{
-				this.postConnectScript = null;
-			}
-			else
-			{
-				this.postConnectScript = script.trim();
-			}
+      this.postConnectScript = StringUtil.trimToNull(script);
 			this.changed = true;
 		}
 	}
@@ -1193,14 +1190,7 @@ public class ConnectionProfile
 	{
 		if (!StringUtil.equalStringOrEmpty(script, this.preDisconnectScript))
 		{
-			if (StringUtil.isBlank(script))
-			{
-				this.preDisconnectScript = null;
-			}
-			else
-			{
-				this.preDisconnectScript = script.trim();
-			}
+      this.preDisconnectScript = StringUtil.trimToNull(script);
 			this.changed = true;
 		}
 	}
@@ -1228,14 +1218,7 @@ public class ConnectionProfile
 	{
 		if (!StringUtil.equalStringOrEmpty(script, this.idleScript))
 		{
-			if (StringUtil.isBlank(script))
-			{
-				this.idleScript = null;
-			}
-			else
-			{
-				this.idleScript = script.trim();
-			}
+      idleScript = StringUtil.trimToNull(script);
 			this.changed = true;
 		}
 	}

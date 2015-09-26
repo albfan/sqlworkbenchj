@@ -805,12 +805,10 @@ public class DbTreePanel
 		switch (e.getKeyCode())
 		{
 			case KeyEvent.VK_UP:
-				selectPreviousItem();
-				e.consume();
-				break;
 			case KeyEvent.VK_DOWN:
-				selectNextItem();
-				e.consume();
+			case KeyEvent.VK_PAGE_DOWN:
+			case KeyEvent.VK_PAGE_UP:
+        tree.dispatchEvent(e);
 				break;
 			case KeyEvent.VK_ENTER:
         e.consume();
@@ -919,40 +917,5 @@ public class DbTreePanel
     }
     return split.getDividerLocation();
   }
-
-	private int getSelectedRow()
-	{
-		if (tree.getSelectionCount() != 1) return -1;
-		return tree.getSelectionRows()[0];
-	}
-
-	private void selectPreviousItem()
-	{
-		int row = getSelectedRow();
-		if (row < 0)
-		{
-			row = 0;
-		}
-		else if (row > 0)
-		{
-			row --;
-		}
-		tree.setSelectionRow(row);
-	}
-
-	private void selectNextItem()
-	{
-		int row = getSelectedRow();
-		int count = tree.getRowCount();
-		if (row < 0)
-		{
-			row = 0;
-		}
-		else if (row < count - 1)
-		{
-			row ++;
-		}
-		tree.setSelectionRow(row);
-	}
-
+  
 }

@@ -40,51 +40,12 @@ public class SelectionHandler
 		switch (e.getKeyCode())
 		{
 			case KeyEvent.VK_UP:
-				selectPreviousRow();
-				e.consume();
-				break;
-			case KeyEvent.VK_DOWN:
-				selectNextRow();
-				e.consume();
-				break;
 			case KeyEvent.VK_PAGE_UP:
-				pageUp();
-				e.consume();
-				break;
+			case KeyEvent.VK_DOWN:
 			case KeyEvent.VK_PAGE_DOWN:
-				pageDown();
-				e.consume();
+        dataList.dispatchEvent(e);
 				break;
 		}
-	}
-
-	private int visibleRows()
-	{
-		return dataList.getLastVisibleRow() - dataList.getFirstVisibleRow();
-	}
-
-	private void pageDown()
-	{
-		int row = dataList.getSelectedRow();
-		selectRow(row + visibleRows());
-	}
-
-	private void pageUp()
-	{
-		int row = dataList.getSelectedRow();
-		selectRow(row - visibleRows());
-	}
-
-	private void selectNextRow()
-	{
-		int row = dataList.getSelectedRow();
-		selectRow(row + 1);
-	}
-
-	private void selectPreviousRow()
-	{
-		int row = dataList.getSelectedRow();
-		selectRow(row - 1);
 	}
 
 	public void selectRow(int row)

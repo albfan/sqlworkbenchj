@@ -256,6 +256,13 @@ public class StringUtil
 		return toTrim.trim();
 	}
 
+  public static String trimToNull(String toTrim)
+  {
+    String result = trim(toTrim);
+    if (isEmptyString(result)) return null;
+    return result;
+  }
+
 	public static String rtrim(String s)
 	{
 		if (s == null) return s;

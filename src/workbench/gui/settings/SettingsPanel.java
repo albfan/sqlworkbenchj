@@ -23,7 +23,6 @@
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -78,7 +77,7 @@ public class SettingsPanel
 
 	public SettingsPanel()
 	{
-		super();
+		super(new BorderLayout());
 		// Remember to adjust the calculation of the width and height for the dialog
 		// when changing the order of pages
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
@@ -171,8 +170,6 @@ public class SettingsPanel
 		cancelButton.addActionListener(this);
 		helpButton.addActionListener(this);
 
-		setLayout(new BorderLayout());
-
 		JPanel buttonPanel = new JPanel(new GridBagLayout());
 
 		GridBagConstraints constraints;
@@ -207,14 +204,20 @@ public class SettingsPanel
 		}
 	}
 
+  /**
+   * Display the Options dialog.
+   *
+   * This method has to be called on the EDT!
+   *
+   */
 	public void showSettingsDialog(JFrame aReference)
 	{
-		this.dialog = new JDialog(aReference, true);
-		this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		this.dialog.setTitle(ResourceMgr.getString("TxtSettingsDialogTitle"));
-		this.dialog.getContentPane().add(this);
+		dialog = new JDialog(aReference, true);
+		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		dialog.setTitle(ResourceMgr.getString("TxtSettingsDialogTitle"));
+		dialog.getContentPane().add(this);
 		dialog.addWindowListener(this);
-		int width = Settings.getInstance().getWindowWidth(this.getClass().getName());
+		int width = 0;//Settings.getInstance().getWindowWidth(this.getClass().getName());
 		int height = Settings.getInstance().getWindowHeight(this.getClass().getName());
 
 		if (width > 0 && height > 0)
@@ -223,16 +226,18 @@ public class SettingsPanel
 		}
 		else
 		{
-			// if no page is displayed, pack() will not work properly
-			// so we need to instantiate and display the two largest pages
+			// if no page is displayed, pack() will not work properly (because only the first
+      // displayed page is taken into account, but other pages are bigger than the "General" page)
+			// So we need to instantiate and display the two largest pages
 
-			pageList.setSelectedIndex(15);
-			this.dialog.pack();
+      // data display options
+			pageList.setSelectedIndex(11);
+			dialog.pack();
 			int h = dialog.getSize().height;
 
 			// the editor colors page is the widest page
 			pageList.setSelectedIndex(5);
-			this.dialog.pack();
+			dialog.pack();
 			int w = dialog.getSize().width;
 
 			dialog.setSize(w,h);
@@ -242,22 +247,15 @@ public class SettingsPanel
 			WbSwingUtilities.scale(dialog, 1.02, 1.02);
 		}
 
-		this.dialog.getRootPane().setDefaultButton(this.okButton);
+		dialog.getRootPane().setDefaultButton(this.okButton);
 
 		escAction = new EscAction(dialog, this);
 
 		WbSwingUtilities.center(this.dialog, aReference);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				pageList.setSelectedIndex(0);
-				pageList.requestFocusInWindow();
-				dialog.setVisible(true);
-			}
-		});
 
+    pageList.setSelectedIndex(0);
+    WbSwingUtilities.requestFocus(pageList);
+    dialog.setVisible(true);
 	}
 
 	private void closeWindow()

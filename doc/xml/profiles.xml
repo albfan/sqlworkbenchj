@@ -78,7 +78,7 @@
 	</para>
 
 	<para>
-		To rename a group, select the node in the tree, then press the <guibutton>F2</guibutton> key.
+		To rename a group, select the node in the tree, then press the <keycap>F2</keycap> key.
 		You can now edit the group name.
 	</para>
 
@@ -564,7 +564,7 @@
 			<title>Alternate delimiter</title>
 			<para>
 				If an alternate delimiter is defined, and the statement that is executed ends with the
-				defined delimiter, this one will be used instead of the standard semicolon. The profile
+  			defined delimiter, this one will be used instead of the standard semicolon. The profile
 				setting will overwrite the global setting for this connection. This way you can
 				define the <literal>GO</literal> keyword for SQL Server connections, and use
 				the forward slash in Oracle connections.
@@ -609,6 +609,19 @@
 				workspace for each connection profile.
 			</para></note>
 		</section>
+
+  <section id="profile-tags">
+    <title>Tagging connection profiles</title>
+    <para>
+      To organize a large number of profiles it is possible to supply tags for each profile. These tags are
+      then used by the <link linkend="connection-profile-quickfilter">profile filter</link> to quickly show only certain profiles.
+    </para>
+    <para>
+      The tags for a profile are entered as a comma separated list. To see a list of already defined tags,
+      press <keycap>Ctrl-Space</keycap> in the input field.
+    </para>
+  </section>
+
 
 		<section id="profile-connect-scripts">
 			<title>Connect scripts</title>
@@ -726,5 +739,27 @@
       when using this option, you have to use an Oracle user account that is allowed to connect as SYSDBA (e.g. SYS).
 		</para>
 	</section>
+
+  <section id="connection-profile-quickfilter">
+    <title>Using the quick filter</title>
+    <para>
+      The behaviour of the quick filter depends on whether <link linkend="">tags</link> are defined or not.
+    </para>
+    <para>
+      If no tags are defined at all, the quick filter will only search in the profile name. The search
+      is done case-insensitive. Search for <literal>prod</literal> will match any profile that has
+      <literal>PROD</literal> or <literal>prod</literal> anywhere in the profile's name
+    </para>
+    <para>
+      If tags are defined, the input is first checked if its one or more tags. If that is the case,
+      the profiles are only filtered based on the tags defined. If there is a tag named <link>prod</link>,
+      and the filter value is <literal>prod</literal>, only profiles with that tag are displayed. The profile
+      name is not taken into account then. If the value in the filter field is not a tag,
+      then the profiles are filtered based on name.
+    </para>
+    <para>
+      Multiple tags are separated by a comma. To see a list of defined tags, press the <keycap>Ctrl-Space</keycap> key.
+    </para>
+  </section>
 
 </section>

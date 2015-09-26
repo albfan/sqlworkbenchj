@@ -391,7 +391,7 @@ public class VariablePool
 			int end = m.end();
 			original.replace(start, end, replacement);
 			m = p.matcher(original.toString());
-      searchStart = end;
+      searchStart = start + replacement.length();
       if (searchStart >= original.length()) break;
 		}
 	}
