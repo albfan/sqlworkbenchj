@@ -55,6 +55,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.DmlExpressionBuilder;
+import workbench.db.PkDefinition;
 import workbench.db.SequenceAdjuster;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
@@ -2099,24 +2100,18 @@ public class DataImporter
 	 */
 	private void retrieveKeyColumns()
 	{
-		try
-		{
-			List<ColumnIdentifier> cols = this.dbConn.getMetadata().getTableColumns(this.targetTable);
-			this.keyColumns = new LinkedList<>();
-			for (ColumnIdentifier col : cols)
-			{
-				if (col.isPkColumn())
-				{
-					this.keyColumns.add(col);
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("DataImporter.retrieveKeyColumns()", "Error when retrieving key columns", e);
-			this.columnMap = null;
-			this.keyColumns = null;
-		}
+    PkDefinition pk = this.dbConn.getMetadata().getIndexReader().getPrimaryKey(targetTable);
+    keyColumns = new ArrayList<>();
+    if (pk == null) return;
+    
+    for (String colname : pk.getColumns())
+    {
+      ColumnIdentifier col = ColumnIdentifier.findColumnInList(targetColumns, colname);
+      if (col != null)
+      {
+        keyColumns.add(col);
+      }
+    }
 	}
 
 	private void finishTable()
