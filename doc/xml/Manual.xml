@@ -36,6 +36,7 @@
   <!ENTITY dbms-specific SYSTEM "dbms-specific.xml">
 	<!ENTITY progress-parameter SYSTEM "progress.xml">
 	<!ENTITY common-connect-args SYSTEM "common-connect-args.xml">
+	<!ENTITY command-line SYSTEM "command-line.xml">
 	<!ENTITY common-xslt-args SYSTEM "common-xslt-args.xml">
 	<!ENTITY conditionals SYSTEM "conditionals.xml">
   <!ENTITY table-statements SYSTEM "table-statements.xml">
@@ -51,6 +52,7 @@
 &license;
 &release-history;
 &install;
+&command-line;
 &jdbc-setup;
 &profiles;
 &editor;

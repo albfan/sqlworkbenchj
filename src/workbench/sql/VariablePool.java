@@ -505,23 +505,28 @@ public class VariablePool
 		}
 	}
 
+  public void parseSingleDefinition(String parameter)
+  {
+    int pos = parameter.indexOf('=');
+    if (pos == -1) return;
+    String key = parameter.substring(0, pos);
+    String value = parameter.substring(pos + 1);
+    try
+    {
+      setParameterValue(key, value);
+    }
+    catch (IllegalArgumentException e)
+    {
+      LogMgr.logWarning("SqlParameterPool.parseSingleDefinition()", "Ignoring definition: " + parameter);
+    }
+  }
+
 	private void readNameList(String list)
 	{
 		List<String> defs = StringUtil.stringToList(list, ",");
 		for (String line : defs)
 		{
-			int pos = line.indexOf('=');
-			if (pos == -1) return;
-			String key = line.substring(0, pos);
-			String value = line.substring(pos + 1);
-			try
-			{
-				this.setParameterValue(key, value);
-			}
-			catch (IllegalArgumentException e)
-			{
-				LogMgr.logWarning("SqlParameterPool.readNameList()", "Ignoring definition: "+ line);
-			}
+      parseSingleDefinition(line);
 		}
 	}
 

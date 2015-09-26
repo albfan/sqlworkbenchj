@@ -101,6 +101,8 @@ public class AppArguments
   public static final String ARG_LOGLEVEL = "logLevel";
   public static final String ARG_LOGFILE = "logfile";
   public static final String ARG_VARDEF = "varDef";
+  public static final String ARG_VARIABLE = "variable";
+  public static final String ARG_VAR_FILE = "varFile";
   public static final String ARG_LANG = "language";
   public static final String ARG_NOSETTNGS = "noSettings";
   public static final String ARG_NOTEMPLATES = "noTemplates";
@@ -131,6 +133,8 @@ public class AppArguments
     addArgument(ARG_SUCCESS_SCRIPT);
     addArgument(ARG_ERROR_SCRIPT);
     addArgument(ARG_VARDEF, ArgumentType.RepeatableValue);
+    addArgument(ARG_VARIABLE, ArgumentType.RepeatableValue);
+    addArgument(ARG_VAR_FILE, ArgumentType.RepeatableValue);
     addArgument(ARG_CONN_URL);
     addArgument(ARG_CONN_PROPS, ArgumentType.RepeatableValue);
     addArgument(ARG_CONN_DRIVER);

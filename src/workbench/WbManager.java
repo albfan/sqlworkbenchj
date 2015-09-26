@@ -853,18 +853,7 @@ public final class WbManager
 				this.runMode = RunMode.Batch;
 			}
 
-			List<String> vars = cmdLine.getList(AppArguments.ARG_VARDEF);
-			for (String var : vars)
-			{
-				try
-				{
-					VariablePool.getInstance().readDefinition(StringUtil.trimQuotes(var));
-				}
-				catch (IOException e)
-				{
-					LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + var, e);
-				}
-			}
+      readVariablesFromCommandline();
 
 			if (cmdLine.isArgPresent(AppArguments.ARG_NOTEMPLATES))
 			{
@@ -919,6 +908,55 @@ public final class WbManager
 		}
 	}
 
+  private void readVariablesFromCommandline()
+  {
+    if (cmdLine.isArgPresent(AppArguments.ARG_VARDEF))
+    {
+      String msg = "Using " + AppArguments.ARG_VARDEF + " is deprecated. Please use " + AppArguments.ARG_VARIABLE + " and " + AppArguments.ARG_VAR_FILE + "instead!";
+      LogMgr.logWarning("WbManager.readParameters", msg);
+      System.err.println(msg);
+    }
+
+    List<String> vars = cmdLine.getList(AppArguments.ARG_VARDEF);
+    for (String var : vars)
+    {
+      try
+      {
+        VariablePool.getInstance().readDefinition(StringUtil.trimQuotes(var));
+      }
+      catch (Exception e)
+      {
+        LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + var, e);
+      }
+    }
+
+    String varFile = cmdLine.getValue(AppArguments.ARG_VAR_FILE, null);
+    if (StringUtil.isNonBlank(varFile))
+    {
+      try
+      {
+        VariablePool.getInstance().readFromFile(StringUtil.trimQuotes(varFile), null);
+      }
+      catch (IOException e)
+      {
+        LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + varFile, e);
+      }
+    }
+
+    vars = cmdLine.getList(AppArguments.ARG_VARIABLE);
+    for (String var : vars)
+    {
+      try
+      {
+        VariablePool.getInstance().parseSingleDefinition(var);
+      }
+      catch (Exception e)
+      {
+        LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + var, e);
+      }
+    }
+
+  }
 	public void startApplication()
 	{
 		// batchMode flag is set by readParameters()

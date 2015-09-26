@@ -8,18 +8,25 @@
     editing the XML format is tedious. Therefor it is possible to store the profiles in a "plain" properties file.
   </para>
 
+  <important>
   <para>
-    The properties file can contain multiple profiles, each properties key has to start with the prefix
+    The properties file <emphasis role="bold">must</emphasis> have the extension <literal>.properties</literal>,
+    otherwise it will not treated as a properties file by &wb-productname;
+  </para>
+  </important>
+
+  <para>
+    The properties file can contain multiple profiles, each property key has to start with the prefix
     <literal>profile</literal>. The second element of the key is a unique identifier for the profile
     that is used to combine the keys for one profile together. This identifier can be any combination
-    of digits and characters. The identifier <emphasis role="bold">is</emphasis> case sensitive.
+    of digits and characters. The identifier is <emphasis role="bold">case sensitive</emphasis>.
   </para>
   <para>
     The last element of the key is the actual profile property.
   </para>
   <para>
     A minimial definition of a profile in a properties file, could look like this:
-    <programlisting>profile.042.name=Postgres test
+    <programlisting>profile.042.name=Local Postgres
 profile.042.driverclass=org.postgresql.Driver
 profile.042.url=jdbc:postgresql://localhost/postgres
 profile.042.username=arthur
