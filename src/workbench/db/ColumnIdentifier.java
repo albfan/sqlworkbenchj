@@ -868,12 +868,24 @@ public class ColumnIdentifier
 		this.isUpdateable = update;
 	}
 
+  /**
+   * Adjust the quoting of the column name from the source DB to the target DB.
+   *
+   * If the column name is quoted according to the rule of the source,
+   * the quotes are removed and the name is quoted according to the rules
+   * of the target.
+   *
+   * If the column name is not quoted in the source, the column name is not changed.
+   *
+   * @see QuoteHandler#removeQuotes(String)
+   * @see QuoteHandler#quoteObjectname(String)
+   */
 	public void adjustQuotes(QuoteHandler source, QuoteHandler target)
 	{
 		if (source.isQuoted(this.name))
 		{
 			String newName = source.removeQuotes(name);
-			this.name = target.quoteObjectname(newName);
+			name = target.quoteObjectname(newName);
 		}
 	}
 

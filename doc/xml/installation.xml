@@ -163,7 +163,7 @@
       Under <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">"JRE Download"</ulink> there is also
       an option to download a no-installer version. These downloads are offered as <literal>tar.gz</literal> archives, so a tool
       that can handle Unix/Linux that format is needed for unpacking the archive (e.g.
-      <ulink url="http://www.ghisler.com/">TotalCommander</ulink> or <unlink url="http://www.7-zip.org/">7-Zip</unlink>).
+      <ulink url="http://www.ghisler.com/">TotalCommander</ulink> or <ulink url="http://www.7-zip.org/">7-Zip</ulink>).
     </para>
 
     <para>

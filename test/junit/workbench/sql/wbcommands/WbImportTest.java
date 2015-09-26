@@ -272,6 +272,69 @@ public class WbImportTest
 	}
 
 	@Test
+	public void testH2Upsert()
+		throws Exception
+	{
+		File input = new File(util.getBaseDir(), "id_data.txt");
+
+		TestUtil.writeFile(input,
+			"id\tfirstname\tlastname\n" +
+			"1\tArthur\tDent\n" +
+			"2\tFord\tPrefect\n" +
+			"3\tZaphod\tBeeblebrox\n",
+			"ISO-8859-1");
+
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=text " +
+			"-header=true " +
+			"-continueonerror=false " +
+			"-table=person");
+
+		assertTrue(input.delete());
+
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+
+		String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
+		assertEquals("Dent", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=2");
+		assertEquals("Prefect", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=3");
+		assertEquals("Beeblebrox", name);
+
+		TestUtil.writeFile(input,
+			"id\tfirstname\tlastname\n" +
+			"1\tArthur\tDENT\n" +
+			"2\tFord\tPrefect\n", 
+			"ISO-8859-1");
+
+		result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=text " +
+			"-mode=insert,update " +
+			"-header=true " +
+			"-continueonerror=false " +
+			"-table=person");
+
+		assertTrue(input.delete());
+
+		msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
+		assertEquals("DENT", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=2");
+		assertEquals("Prefect", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=3");
+		assertEquals("Beeblebrox", name);
+	}
+
+	@Test
 	public void testIdentityInsert()
 		throws Exception
 	{

@@ -85,13 +85,8 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class DataImporter
-	implements Interruptable, DataReceiver, ProgressReporter, BatchCommitter
+	implements Interruptable, DataReceiver, ProgressReporter, BatchCommitter, ColumnFilter
 {
-	public static final int MODE_INSERT = 0;
-	public static final int MODE_UPDATE = 1;
-	public static final int MODE_INSERT_UPDATE = 2;
-	public static final int MODE_UPDATE_INSERT = 3;
-
 	private WbConnection dbConn;
 
 	private RowDataProducer source;
@@ -113,7 +108,7 @@ public class DataImporter
 	private long updatedRows = 0;
 	private long insertedRows = 0;
 	private long currentImportRow = 0;
-	private int mode = MODE_INSERT;
+  private ImportMode mode = ImportMode.insert;
 	private boolean useBatch;
 	private int batchSize = -1;
 	private boolean commitBatch;
@@ -123,7 +118,6 @@ public class DataImporter
 	private int reportInterval = 10;
 	private MessageBuffer messages;
 
-	private int colCount;
 	private int totalTables = -1;
 	private int currentTable = -1;
 	private boolean transactionControl = true;
@@ -185,7 +179,6 @@ public class DataImporter
 
 	private int errorCount;
 	private boolean errorLimitAdded;
-	private DmlExpressionBuilder builder;
 
 	public DataImporter()
 	{
@@ -210,7 +203,6 @@ public class DataImporter
 		}
 
 		this.useSetObjectWithType = this.dbConn.getDbSettings().getUseTypeWithSetObject();
-		this.builder = DmlExpressionBuilder.Factory.getBuilder(dbConn);
 	}
 
 	public void setUseSavepoint(boolean flag)
@@ -519,30 +511,30 @@ public class DataImporter
 
 	public void setModeInsert()
 	{
-		this.mode = MODE_INSERT;
+    this.mode = ImportMode.insert;
 	}
 
 	public void setModeUpdate()
 	{
-		this.mode = MODE_UPDATE;
+    this.mode = ImportMode.update;
 	}
 
 	public void setModeInsertUpdate()
 	{
-		this.mode = MODE_INSERT_UPDATE;
+    this.mode = ImportMode.insertUpdate;
 		this.useBatch = false;
 	}
 
 	public void setModeUpdateInsert()
 	{
-		this.mode = MODE_UPDATE_INSERT;
+    this.mode = ImportMode.updateInsert;
 		this.useBatch = false;
 	}
 
-	public boolean isModeInsert() { return (this.mode == MODE_INSERT); }
-	public boolean isModeUpdate() { return (this.mode == MODE_UPDATE); }
-	public boolean isModeInsertUpdate() { return (this.mode == MODE_INSERT_UPDATE); }
-	public boolean isModeUpdateInsert() { return (this.mode == MODE_UPDATE_INSERT); }
+  public boolean isModeInsert() { return (this.mode == ImportMode.insert); }
+  public boolean isModeUpdate() { return (this.mode == ImportMode.update); }
+  public boolean isModeInsertUpdate() { return (this.mode == ImportMode.insertUpdate); }
+  public boolean isModeUpdateInsert() { return (this.mode == ImportMode.updateInsert); }
 
 	public static int estimateReportIntervalFromFileSize(File file)
 	{
@@ -573,55 +565,53 @@ public class DataImporter
 		}
 	}
 
-	public void setMode(int mode)
+	public void setMode(ImportMode importMode)
 	{
-		if (mode == MODE_INSERT)
-			this.setModeInsert();
-		else if (mode == MODE_UPDATE)
-			this.setModeUpdate();
-		else if (mode == MODE_INSERT_UPDATE)
-			this.setModeInsertUpdate();
-		else if (mode == MODE_UPDATE_INSERT)
-			this.setModeUpdateInsert();
+    switch (importMode)
+    {
+      case insert:
+        this.setModeInsert();
+        break;
+      case update:
+        this.setModeUpdate();
+        break;
+      case insertUpdate:
+        setModeInsertUpdate();
+        break;
+      case updateInsert:
+        setModeUpdateInsert();
+    }
 	}
 
 	/**
-	 *	Return the numeric mode value based on keywords.
+	 *	Return the mode value based on keywords.
 	 *
-	 *	Valid mode definitions are:
-	 *	<ul>
-	 *	<li>insert</li>
-	 *	<li>update</li>
-	 *	<li>insert,update</li>
-	 *	<li>update,insert</li>
-	 *  </ul>
 	 * The mode string is not case sensitive (INSERT is the same as insert)
-	 * @return -1 if the value is not valid
+   *
+	 * @return null if the value is not valid
 	 *
 	 * @see #getModeValue(String)
-	 * @see #MODE_INSERT
-	 * @see #MODE_UPDATE
-	 * @see #MODE_INSERT_UPDATE
-	 * @see #MODE_UPDATE_INSERT
+	 * @see ImportMode
 	 */
-	public static int getModeValue(String mode)
+	public static ImportMode getModeValue(String mode)
 	{
-		if (mode == null) return -1;
+		if (mode == null) return null;
+
 		mode = mode.trim().toLowerCase();
 		if (mode.indexOf(',') == -1)
 		{
 			// only one keyword supplied
 			if ("insert".equals(mode))
 			{
-				return MODE_INSERT;
+        return ImportMode.insert;
 			}
 			else if ("update".equals(mode))
 			{
-				return MODE_UPDATE;
+        return ImportMode.update;
 			}
 			else
 			{
-				return -1;
+				return null;
 			}
 		}
 		else
@@ -631,15 +621,15 @@ public class DataImporter
 			String second = (String)l.get(1);
 			if ("insert".equals(first) && "update".equals(second))
 			{
-				return MODE_INSERT_UPDATE;
+        return ImportMode.insertUpdate;
 			}
 			else if ("update".equals(first) && "insert".equals(second))
 			{
-				return MODE_UPDATE_INSERT;
+        return ImportMode.updateInsert;
 			}
 			else
 			{
-				return -1;
+				return null;
 			}
 		}
 
@@ -654,9 +644,9 @@ public class DataImporter
 	public boolean setMode(String mode)
 	{
 		if (mode == null) return true;
-		int modevalue = getModeValue(mode);
-		if (modevalue == -1) return false;
-		setMode(modevalue);
+    ImportMode modeValue = getModeValue(mode);
+		if (modeValue == null) return false;
+		setMode(modeValue);
 		return true;
 	}
 
@@ -713,12 +703,19 @@ public class DataImporter
     }
 	}
 
+  private int getColCount()
+  {
+    if (targetColumns == null) return 0;
+    return targetColumns.size();
+  }
+
 	private boolean hasKeyColumns()
 	{
 		return (this.keyColumns != null && keyColumns.size() > 0);
 	}
 
-	private boolean ignoreColumn(ColumnIdentifier col)
+  @Override
+	public boolean ignoreColumn(ColumnIdentifier col)
 	{
 		if (col == null) return true;
 		if (!ignoreIdentityColumns) return false;
@@ -781,9 +778,9 @@ public class DataImporter
 		}
 	}
 
-	public static boolean isDeleteTableAllowed(int mode)
+	public static boolean isDeleteTableAllowed(ImportMode importMode)
 	{
-		return mode == MODE_INSERT;
+    return importMode == ImportMode.insert;
 	}
 
 	/**
@@ -1005,7 +1002,7 @@ public class DataImporter
 		throws SQLException
 	{
 		if (row == null) return;
-		if (row.length != this.colCount)
+		if (row.length != this.getColCount())
 		{
 			throw new SQLException("Invalid row data received. Size of row array does not match column count");
 		}
@@ -1047,11 +1044,12 @@ public class DataImporter
 		{
 			switch (this.mode)
 			{
-				case MODE_INSERT:
+				case insert:
+        case upsert:
 					rows = this.insertRow(row, useSavepoint && continueOnError);
 					break;
 
-				case MODE_INSERT_UPDATE:
+				case insertUpdate:
 					boolean inserted = false;
 					// in case of an Exception we are retrying the row
 					// with an update. Theoretically the only expected
@@ -1067,7 +1065,7 @@ public class DataImporter
 					}
 					catch (SQLException sql)
 					{
-						if (ignoreInsertError(sql))
+						if (shouldIgnoreInsertError(sql))
 						{
 							inserted = false;
 						}
@@ -1092,7 +1090,7 @@ public class DataImporter
 					}
 					break;
 
-				case MODE_UPDATE_INSERT:
+				case updateInsert:
 					// an exception is not expected when updating the row
 					// if the row does not exist, the update counter should be
 					// zero. If the update violates any constraints, then the
@@ -1113,7 +1111,7 @@ public class DataImporter
 					}
 					break;
 
-				case MODE_UPDATE:
+				case update:
 					rows = this.updateRow(row, useSavepoint && continueOnError);
 					break;
 			}
@@ -1175,15 +1173,17 @@ public class DataImporter
 
 	/**
 	 * Check if the given SQL Exception identifies a primary (unique) key violation.
+   *
 	 * If an error code or SQLState is configured for the current DBMS this is checked.
 	 * Otherwise this returns true.
 	 *
 	 * @param sql the exception
 	 * @return true if the error should be ignored in insert/update mode
+   *
 	 * @see DbSettings#getUniqueKeyViolationErrorCode()
 	 * @see DbSettings#getUniqueKeyViolationErrorState()
 	 */
-	private boolean ignoreInsertError(SQLException sql)
+	private boolean shouldIgnoreInsertError(SQLException sql)
 	{
 		String state = dbConn.getDbSettings().getUniqueKeyViolationErrorState();
 		int error = dbConn.getDbSettings().getUniqueKeyViolationErrorCode();
@@ -1645,8 +1645,6 @@ public class DataImporter
 				this.keyColumns = null;
 			}
 
-			this.colCount = this.targetColumns.size();
-
 			if (this.parser != null)
 			{
 				String msg = ResourceMgr.getFormattedString("MsgImportingFile", this.parser.getSourceFilename(), this.targetTable.getTableName());
@@ -1697,12 +1695,12 @@ public class DataImporter
 			this.currentImportRow = 0;
 			this.totalRows = 0;
 
-			if (this.mode != MODE_UPDATE)
+      if (this.mode != ImportMode.update)
 			{
 				this.prepareInsertStatement();
 			}
 
-			if (this.mode != MODE_INSERT)
+      if (this.mode != ImportMode.insert && mode != ImportMode.upsert)
 			{
 				this.prepareUpdateStatement();
 			}
@@ -1847,72 +1845,33 @@ public class DataImporter
 	private void prepareInsertStatement()
 		throws SQLException
 	{
-		StringBuilder text = new StringBuilder(this.targetColumns.size() * 50);
-		StringBuilder parms = new StringBuilder(targetColumns.size() * 20);
+    ImportDMLStatementBuilder builder = new ImportDMLStatementBuilder(dbConn, targetTable, targetColumns, this);
 
-		String sql = (insertSqlStart != null ? insertSqlStart : dbConn.getDbSettings().getInsertForImport());
-		if (StringUtil.isNonBlank(sql))
-		{
-			text.append(sql);
-			text.append(' ');
-		}
-		else
-		{
-			text.append("INSERT INTO ");
-		}
-		text.append(targetTable.getFullyQualifiedName(this.dbConn));
-		text.append(" (");
+    // if the target table was not verified, we need to make
+    // sure the default case for column names is used
+    boolean adjustColumnNames = !verifyTargetTable;
 
-		DbMetadata meta = dbConn.getMetadata();
+    String insertSql = null;
+    if (dbConn.getDbSettings().useUpsert() && builder.supportsUpsert() && this.mode == ImportMode.insertUpdate)
+    {
+      if (!hasKeyColumns())
+      {
+        retrieveKeyColumns();
+      }
 
-		int colIndex = 0;
-		for (int i=0; i < this.colCount; i++)
-		{
-			ColumnIdentifier col = this.targetColumns.get(i);
-			if (ignoreColumn(col)) continue;
-			if (colIndex > 0)
-			{
-				text.append(',');
-				parms.append(',');
-			}
+      insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart, keyColumns, adjustColumnNames);
+      if (insertSql != null)
+      {
+        mode = ImportMode.upsert;
+        LogMgr.logInfo("DataImporter.prepareInsertStatement", "Database supports native UPSERT functionality. Using only one statement for insert/update.");
+      }
+    }
 
-			String colname = col.getDisplayName();
-			if (!verifyTargetTable)
-			{
-				// if the target table was not verified, we need to make
-				// sure the default case for column names is used
-				colname = meta.adjustObjectnameCase(meta.removeQuotes(colname));
-			}
-			colname = meta.quoteObjectname(colname);
-			text.append(colname);
+    if (insertSql == null)
+    {
+      insertSql = builder.createInsertStatement(columnConstants, insertSqlStart, adjustColumnNames);
+    }
 
-			parms.append(getDmlExpression(col));
-			colIndex ++;
-		}
-
-		if (this.columnConstants != null)
-		{
-			int cols = columnConstants.getColumnCount();
-			for (int i=0; i < cols; i++)
-			{
-				text.append(',');
-				text.append(columnConstants.getColumn(i).getColumnName());
-				parms.append(',');
-				if (columnConstants.isFunctionCall(i))
-				{
-					parms.append(columnConstants.getFunctionLiteral(i));
-				}
-				else
-				{
-					parms.append('?');
-				}
-			}
-		}
-		text.append(") VALUES (");
-		text.append(parms);
-		text.append(')');
-
-		String insertSql = text.toString();
 		try
 		{
 			PreparedStatement stmt = this.dbConn.getSqlConnection().prepareStatement(insertSql);
@@ -1930,11 +1889,6 @@ public class DataImporter
 			this.hasErrors = true;
 			throw e;
 		}
-	}
-
-	private String getDmlExpression(ColumnIdentifier column)
-	{
-		return builder.getDmlExpression(column);
 	}
 
 	/**
@@ -1956,12 +1910,13 @@ public class DataImporter
 		}
 
 		DbMetadata meta = dbConn.getMetadata();
+    DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(dbConn);
 
-		this.columnMap = new int[this.colCount];
-		int pkIndex = this.colCount - this.keyColumns.size();
+		this.columnMap = new int[getColCount()];
+		int pkIndex = getColCount() - this.keyColumns.size();
 		int pkCount = 0;
 		int colIndex = 0;
-		StringBuilder sql = new StringBuilder(this.colCount * 20 + 80);
+		StringBuilder sql = new StringBuilder(getColCount() * 20 + 80);
 		StringBuilder where = new StringBuilder(this.keyColumns.size() * 10);
 		sql.append("UPDATE ");
 		sql.append(this.targetTable.getFullyQualifiedName(this.dbConn));
@@ -2020,7 +1975,7 @@ public class DataImporter
 			}
 		}
 
-		for (int i=0; i < this.colCount; i++)
+		for (int i=0; i < getColCount(); i++)
 		{
 			ColumnIdentifier col = this.targetColumns.get(i);
 			if (ignoreColumn(col)) continue;
@@ -2039,7 +1994,7 @@ public class DataImporter
 				else pkAdded = true;
 				where.append(colname);
 				where.append(" = ");
-				where.append(getDmlExpression(col));
+				where.append(builder.getDmlExpression(col));
 				pkIndex ++;
 				pkCount ++;
 			}
@@ -2056,7 +2011,7 @@ public class DataImporter
 				}
 				sql.append(colname);
 				sql.append(" = ");
-				sql.append(getDmlExpression(col));
+				sql.append(builder.getDmlExpression(col));
 				colIndex ++;
 			}
 		}
@@ -2221,13 +2176,6 @@ public class DataImporter
 			}
 
 			LogMgr.logInfo("DataImporter.finishTable()", msg);
-
-//			MessageBuffer msgBuffer = this.source.getMessages();
-//			if (msgBuffer != null)
-//			{
-//				messages.append(msgBuffer);
-//				msgBuffer.clear();
-//			}
 
 			if (this.insertedRows > -1)
 			{

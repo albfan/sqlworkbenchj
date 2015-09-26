@@ -73,12 +73,13 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
+import workbench.db.DropType;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
-import workbench.db.DropType;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.DeleteType;
+import workbench.db.importer.ImportMode;
 import workbench.db.importer.ImportOptions;
 import workbench.db.importer.ProducerFactory;
 import workbench.db.importer.TableStatements;
@@ -90,9 +91,9 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.RunningJobIndicator;
-import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbStatusLabel;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.gui.help.HelpManager;
 import workbench.gui.profiles.ProfileSelectionDialog;
@@ -1116,7 +1117,7 @@ public class DataPumper
 	private void modeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modeComboBoxActionPerformed
 		String mode = (String)modeComboBox.getSelectedItem();
 		if (mode == null) return;
-		int modevalue = DataImporter.getModeValue(mode);
+		ImportMode modevalue = DataImporter.getModeValue(mode);
 		if (DataImporter.isDeleteTableAllowed(modevalue))
 		{
 			this.deleteTargetCbx.setEnabled(true);

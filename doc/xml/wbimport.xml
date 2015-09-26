@@ -1583,6 +1583,32 @@
 			To use insert/update or update/insert with PostgreSQL, make sure you have
 			<link linkend="pg-statement-savepoint">enabled savepoints</link> for the import (which is enabled by default).
 		</para>
+  </section>
+	<section id="import-upsert-mode">
+		<title>UPSERT mode</title>
+
+    <para>
+      When using <literal>-mode=insert,update</literal> and the DBMS supports a native "UPSERT" functionality,
+      &wb-productname; will only use a single "UPSERT" statement instead of two statements as described in the previous chapter.
+    </para>
+    <para>
+      For the following database systems, native UPSERT is currently used:
+			<itemizedlist>
+        <listitem>
+          <para>PostgreSQL 9.5, using <literal>INSERT ... ON CONFLICT</literal>: <ulink url="http://www.postgresql.org/docs/9.5/static/sql-insert.html"/></para>
+        </listitem>
+        <listitem>
+          <para>Firebird 2.1, using <literal>UPDATE OR INSERT</literal>: <ulink url="http://www.firebirdfaq.org/faq220/"/></para>
+        </listitem>
+        <listitem>
+          <para>H2 Database, using <literal>MERGE INTO</literal>: <ulink url="http://www.h2database.com/html/grammar.html#merge"/></para>
+        </listitem>
+        <listitem>
+          <para>MySQL, using <literal>INSERT ... ON DUPLICATE</literal>: <ulink url="http://dev.mysql.com/doc/refman/5.1/en/insert-on-duplicate.html"/></para>
+        </listitem>
+			</itemizedlist>
+    </para>
+
 	</section>
 
 </section>

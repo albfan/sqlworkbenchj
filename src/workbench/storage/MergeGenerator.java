@@ -29,6 +29,7 @@ import java.util.TreeMap;
 import workbench.resource.Settings;
 
 import workbench.db.AnsiSQLMergeGenerator;
+import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.db.firebird.Firebird20MergeGenerator;
 import workbench.db.firebird.Firebird21MergeGenerator;
@@ -38,6 +39,7 @@ import workbench.db.ibm.Db2MergeGenerator;
 import workbench.db.mssql.SqlServerMergeGenerator;
 import workbench.db.mysql.MySQLMergeGenerator;
 import workbench.db.oracle.OracleMergeGenerator;
+import workbench.db.postgres.Postgres95MergeGenerator;
 import workbench.db.postgres.PostgresMergeGenerator;
 
 import workbench.util.CaseInsensitiveComparator;
@@ -122,6 +124,10 @@ public interface MergeGenerator
 		public static MergeGenerator createGenerator(WbConnection conn)
 		{
 			if (conn == null) return new AnsiSQLMergeGenerator();
+      if (conn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(conn, "9.5"))
+      {
+        return new Postgres95MergeGenerator();
+      }
 			return createGenerator(conn.getDbId());
 		}
 
@@ -140,7 +146,12 @@ public interface MergeGenerator
 				return new OracleMergeGenerator();
 			}
 
-			if (type.startsWith("postgres"))
+			if (type.equals("postgres-9.5"))
+			{
+				return new PostgresMergeGenerator();
+			}
+
+			if (type.equals("postgres") || type.equals("postgresql"))
 			{
 				return new PostgresMergeGenerator();
 			}
@@ -184,7 +195,7 @@ public interface MergeGenerator
 
 		public static List<String> getSupportedTypes()
 		{
-			return CollectionUtil.arrayList("ansi", "db2", "firebird", "h2", "hsqldb", "mysql", "oracle", "postgres", "sqlserver");
+			return CollectionUtil.arrayList("ansi", "db2", "firebird", "h2", "hsqldb", "mysql", "oracle", "postgres", "postgres-9.5", "sqlserver");
 		}
 
 		public static String getTypeForDBID(String dbid)
