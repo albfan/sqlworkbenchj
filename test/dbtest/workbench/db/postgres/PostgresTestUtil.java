@@ -46,6 +46,8 @@ public class PostgresTestUtil
 
 	public static final String TEST_USER = "wbjunit";
 	public static final String TEST_PWD = "wbjunit";
+	public static final String TEST_PORT = "5432";
+	public static final String TEST_DB = "wbjunit";
 	public static final String PROFILE_NAME = "WBJUnitPostgres";
 
 	/**
@@ -53,9 +55,10 @@ public class PostgresTestUtil
 	 */
 	public static WbConnection getPostgresConnection()
 	{
-		return getPostgresConnection("wbjunit", TEST_USER, TEST_PWD, PROFILE_NAME);
+		return getPostgresConnection(TEST_DB, TEST_USER, TEST_PWD, TEST_PORT, PROFILE_NAME);
 	}
-	public static WbConnection getPostgresConnection(String dbName, String username, String password, String profileName)
+
+	public static WbConnection getPostgresConnection(String dbName, String username, String password, String port, String profileName)
 	{
 		try
 		{
@@ -63,7 +66,7 @@ public class PostgresTestUtil
 			if (con != null) return con;
 
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:postgresql://localhost/" + dbName + "' -username=" + username + " -password=" + password + " -driver=org.postgresql.Driver");
+			parser.parse("-url='jdbc:postgresql://localhost:" + port + "/" + dbName + "' -username=" + username + " -password=" + password + " -driver=org.postgresql.Driver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName(profileName);
 			ConnectionMgr.getInstance().addProfile(prof);

@@ -30,6 +30,7 @@ import java.sql.Statement;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 
 import workbench.sql.StatementRunner;
@@ -170,7 +171,7 @@ public class WbImportPostgresTest
 
 //		String msg = result.getMessageBuffer().toString();
 //		System.out.println(msg);
-    
+
 		assertTrue(result.isSuccess());
 
 		int rows = TestUtil.getNumberValue(con, "select count(*) from foo");
@@ -217,6 +218,91 @@ public class WbImportPostgresTest
 			SqlUtil.closeAll(rs, stmt);
 		}
 
+	}
+
+	@Test
+	public void testUpsert()
+		throws Exception
+	{
+		File input = new File(getTestUtil().getBaseDir(), "id_data.txt");
+
+    WbConnection connection = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(connection);
+    boolean useSavepoint = true;
+
+    if (JdbcUtils.hasMinimumServerVersion(connection, "9.5"))
+    {
+      // with 9.5 then new "on duplicate" clause is used which has to work without savepoints
+      useSavepoint = false;
+    }
+
+  	WbImport importCmd = new WbImport();
+    importCmd.setConnection(connection);
+
+    TestUtil.executeScript(connection,
+      "CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50));\n" +
+      "commit;\n");
+
+		TestUtil.writeFile(input,
+			"id\tfirstname\tlastname\n" +
+			"1\tArthur\tDent\n" +
+			"2\tFord\tPrefect\n" +
+			"3\tZaphod\tBeeblebrox\n",
+			"ISO-8859-1");
+
+		StatementRunnerResult result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=text " +
+			"-header=true " +
+			"-continueonerror=false " +
+			"-table=person");
+
+		assertTrue(input.delete());
+
+		String msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+
+		String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
+		assertEquals("Dent", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=2");
+		assertEquals("Prefect", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=3");
+		assertEquals("Beeblebrox", name);
+
+		TestUtil.writeFile(input,
+			"id\tfirstname\tlastname\n" +
+			"1\tArthur\tDENT\n" +
+			"2\tFord\tPrefect\n" +
+			"4\tTricia\tMcMillan\n",
+			"ISO-8859-1");
+
+		result = importCmd.execute(
+			"wbimport -file='" + input.getAbsolutePath() + "' " +
+			"-type=text " +
+			"-mode=insert,update " +
+			"-header=true " +
+      "-useSavepoint=" + useSavepoint + " " +
+			"-continueonerror=false " +
+			"-table=person");
+
+		assertTrue(input.delete());
+
+		msg = result.getMessageBuffer().toString();
+		assertTrue(msg, result.isSuccess());
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
+		assertEquals("DENT", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=2");
+		assertEquals("Prefect", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=3");
+		assertEquals("Beeblebrox", name);
+
+		name = (String)TestUtil.getSingleQueryValue(connection, "select firstname from person where id=4");
+		assertEquals("Tricia", name);
 	}
 
 }
