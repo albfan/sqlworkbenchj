@@ -293,6 +293,7 @@ public class WbTabbedPane
 		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_CLOSE_ACTIVE_TAB);
 		addChangeListener(this);
+    setDoubleBuffered(true);
 	}
 
 	@Override

@@ -367,6 +367,8 @@ public class SqlPanel
 		super(new BorderLayout());
 		internalId = ++instanceCount;
 
+    setDoubleBuffered(true);
+
     refreshMgr = new AutomaticRefreshMgr();
 		macroClientId = clientId;
 		setName("sqlpanel-" + internalId);

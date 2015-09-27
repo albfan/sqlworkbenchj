@@ -124,6 +124,7 @@ public class WbSplitPane
 		this.setDividerSize(divSize);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setContinuousLayout(true);
+    setDoubleBuffered(true);
     expander = new SplitPaneExpander(this);
 	}
 

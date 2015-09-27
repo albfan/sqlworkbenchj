@@ -9,6 +9,7 @@
 package workbench.gui.editor;
 
 import java.awt.AWTEvent;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -207,7 +208,8 @@ public class JEditTextArea
 
 		painter = new TextAreaPainter(this);
 		setBackground(Color.WHITE);
-
+    setDoubleBuffered(true);
+    
 		documentHandler = new DocumentHandler();
 		listeners = new EventListenerList();
 		caretEvent = new MutableCaretEvent();
@@ -217,10 +219,27 @@ public class JEditTextArea
 		lastModified = 0;
 		blink = true;
 
-		setLayout(new ScrollLayout());
-		add(CENTER, painter);
+//		setLayout(new ScrollLayout());
+//		add(CENTER, painter);
+    setLayout(new BorderLayout()
+    {
+      @Override
+      public void layoutContainer(Container target)
+      {
+        updateScrollBars();
+        super.layoutContainer(target);
+      }
+    });
+    add(painter, BorderLayout.CENTER);
+
 		vertical = new JScrollBar(JScrollBar.VERTICAL);
+    add(vertical, BorderLayout.EAST);
+    vertical.setVisible(false);
+
+
 		horizontal = new JScrollBar(JScrollBar.HORIZONTAL);
+    add(horizontal, BorderLayout.SOUTH);
+    horizontal.setVisible(false);
 
 		// Add some event listeners
 		vertical.addAdjustmentListener(new AdjustHandler());
@@ -740,43 +759,56 @@ public class JEditTextArea
 
 //		boolean changed = false;
 
-		int lineCount = getLineCount();
-		if (vertical != null && visibleLines != 0)
+		if (visibleLines > 0)
 		{
-			vertical.setValues(firstLine, visibleLines, 0, lineCount);
-			vertical.setUnitIncrement(1);
-			vertical.setBlockIncrement(visibleLines);
+      int lineCount = getLineCount();
+      vertical.setValues(firstLine, visibleLines, 0, lineCount);
+      vertical.setUnitIncrement(1);
+      vertical.setBlockIncrement(visibleLines);
+
 			if (visibleLines > lineCount)
 			{
+//        changed = vertical.isVisible();
 				setFirstLine(0);
-				remove(vertical);
-//				changed = true;
+        vertical.setVisible(false);
+//				remove(vertical);
 			}
 			else
 			{
-				add(RIGHT, vertical);
+//        changed = !vertical.isVisible();
+//				add(RIGHT, vertical);
+//        add(vertical, BorderLayout.EAST);
+        vertical.setVisible(true);
 			}
 		}
 
-		int charWidth = painter.getFontMetrics().charWidth('M');
-		int maxLineLength = getDocument().getMaxLineLength();
-		int maxLineWidth = (charWidth * maxLineLength) + this.painter.getGutterWidth() + charWidth;
-		int width = painter.getWidth();
-		if (horizontal != null && width != 0)
+    int width = painter.getWidth();
+
+		if (width > 0)
 		{
-			horizontal.setValues(-horizontalOffset, width, 0, maxLineWidth);
-			horizontal.setUnitIncrement(charWidth);
-			horizontal.setBlockIncrement(width / 3);
+      int charWidth = painter.getFontMetrics().getMaxAdvance();
+      int maxLineLength = getDocument().getMaxLineLength();
+      int maxLineWidth = (charWidth * maxLineLength) + this.painter.getGutterWidth() + charWidth;
+
+      horizontal.setValues(-horizontalOffset, width, 0, maxLineWidth);
+      horizontal.setUnitIncrement(charWidth);
+      horizontal.setBlockIncrement(width / 3);
+
 			if (maxLineWidth < width)
 			{
-				remove(horizontal);
-//				changed = true;
+//        changed = vertical.isVisible();
+        horizontal.setVisible(false);
+//				remove(horizontal);
 			}
 			else
 			{
-				add(BOTTOM, horizontal);
+//				add(BOTTOM, horizontal);
+//        add(horizontal, BorderLayout.SOUTH);
+//        changed = !vertical.isVisible();
+        horizontal.setVisible(true);
 			}
 		}
+
 //		if (changed)
 //		{
 //			invalidate();
@@ -886,11 +918,11 @@ public class JEditTextArea
 		setHorizontalOffset(horizontalOffset, true);
 	}
 
-	protected void setHorizontalOffset(int horizontalOffset, boolean updateScrollbar)
+	protected void setHorizontalOffset(int offset, boolean updateScrollbar)
 	{
-		if (horizontalOffset == this.horizontalOffset) return;
-		this.horizontalOffset = horizontalOffset;
-		if (updateScrollbar && horizontal != null && horizontalOffset != horizontal.getValue())
+		if (offset == this.horizontalOffset) return;
+		this.horizontalOffset = offset;
+		if (updateScrollbar && offset != horizontal.getValue())
 		{
 			updateScrollBars();
 		}
@@ -2666,7 +2698,6 @@ public class JEditTextArea
 			forwardKeyEvent(keyEventInterceptor, evt);
 			return;
 		}
-
 
 		int oldcount = NumberStringCache.getNumberString(this.getLineCount()).length();
 		switch (evt.getID())

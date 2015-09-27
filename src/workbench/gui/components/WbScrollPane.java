@@ -35,11 +35,11 @@ import workbench.gui.WbSwingUtilities;
  *
  * @author  Thomas Kellerer
  */
-public class WbScrollPane 
+public class WbScrollPane
 	extends JScrollPane
 {
 	private static boolean useCustomizedBorder = true;
-	
+
 	public WbScrollPane()
 	{
 		super();
@@ -51,13 +51,13 @@ public class WbScrollPane
 		super(view);
 		this.initDefaults();
 	}
-	
+
 	public WbScrollPane(Component view, int vsbPolicy, int hsbPolicy)
 	{
 		super(view, vsbPolicy, hsbPolicy);
 		this.initDefaults();
 	}
-	
+
 	public WbScrollPane(int vsbPolicy, int hsbPolicy)
 	{
 		super(vsbPolicy, hsbPolicy);
@@ -66,6 +66,7 @@ public class WbScrollPane
 
 	private void initDefaults()
 	{
+    setDoubleBuffered(true);
 		if (useCustomizedBorder)
 		{
 			try
@@ -74,10 +75,10 @@ public class WbScrollPane
 				// initialization fails. So if we can't create our own border
 				// we simply skip this for the future
 				Border myBorder = new CompoundBorder(WbSwingUtilities.getBevelBorder(), new EmptyBorder(0,1,0,0));
-				if (myBorder == null) 
+				if (myBorder == null)
 				{
 					useCustomizedBorder = false;
-				}		
+				}
 				else
 				{
 					this.setBorder(myBorder);
@@ -89,5 +90,5 @@ public class WbScrollPane
 			}
 		}
 	}
-	
+
 }

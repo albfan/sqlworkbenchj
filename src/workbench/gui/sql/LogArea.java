@@ -44,6 +44,7 @@ public class LogArea
 	public LogArea()
 	{
 		super();
+    setDoubleBuffered(true);
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
 		setFont(Settings.getInstance().getMsgLogFont());
 		setEditable(false);
@@ -55,9 +56,7 @@ public class LogArea
 		contextMenu = new TextComponentMouseListener();
 		addMouseListener(contextMenu);
 
-		Settings.getInstance().addPropertyChangeListener(this,
-			Settings.PROPERTY_EDITOR_FG_COLOR,
-			Settings.PROPERTY_EDITOR_BG_COLOR);
+		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_FG_COLOR, Settings.PROPERTY_EDITOR_BG_COLOR);
 	}
 
 	public void dispose()

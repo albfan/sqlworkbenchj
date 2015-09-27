@@ -422,7 +422,7 @@ public class TextAreaPainter
       {
         this.gutterCharWidth = cfm.charWidth('9');
       }
-      
+
 			int lastLine = textArea.getLineCount();
 			int chars = StringUtil.numDigits(lastLine);
 			this.gutterWidth = (chars * gutterCharWidth) + (GUTTER_MARGIN * 2);
