@@ -39,7 +39,7 @@ import workbench.util.StringUtil;
  * an INSERT/UPDATE and the underlying DBMS supports an "UPSERT", the insert
  * statement will exploit this functionality.
  *
- * Currently only implemented for Postgres 9.5 and MySQL
+ * Currently implemented for Postgres 9.5, Firebird, H2 and MySQL.
  *
  * @author Thomas Kellerer
  */
