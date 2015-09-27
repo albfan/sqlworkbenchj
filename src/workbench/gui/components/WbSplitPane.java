@@ -31,9 +31,10 @@ import javax.swing.plaf.SplitPaneUI;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
+import workbench.resource.IconMgr;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.SplitPaneExpander;
-import workbench.resource.IconMgr;
 
 /**
  * A JSplitPane which restores the divider size after a UI Change

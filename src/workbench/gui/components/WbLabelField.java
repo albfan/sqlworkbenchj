@@ -22,6 +22,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.Color;
 import java.awt.Font;
 
 import javax.swing.JTextField;
@@ -62,10 +63,24 @@ public class WbLabelField
     mouseListener = new TextComponentMouseListener();
     addMouseListener(mouseListener);
     setBorder(new EmptyBorder(2, 5, 2, 2));
+
     Font f = UIManager.getFont("Label.font");
-    setFont(f);
-    setBackground(UIManager.getColor("Label.background"));
-    setForeground(UIManager.getColor("Label.foreground"));
+    if (f != null)
+    {
+      setFont(f);
+    }
+
+    Color bg = UIManager.getColor("Label.background");
+    if (bg != null)
+    {
+      setBackground(bg);
+    }
+
+    Color fg = UIManager.getColor("Label.foreground");
+    if (fg != null)
+    {
+      setForeground(fg);
+    }
   }
 
   @Override

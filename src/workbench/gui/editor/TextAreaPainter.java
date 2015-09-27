@@ -411,17 +411,18 @@ public class TextAreaPainter
 
 	private void calculateGutterWidth()
 	{
-		FontMetrics cfm = getFontMetrics();
-		if (cfm == null)
-		{
-			this.gutterCharWidth = 18;
-		}
-		else
-		{
-			this.gutterCharWidth = cfm.charWidth('9');
-		}
 		if (this.showLineNumbers)
 		{
+      FontMetrics cfm = getFontMetrics();
+      if (cfm == null)
+      {
+        this.gutterCharWidth = 18;
+      }
+      else
+      {
+        this.gutterCharWidth = cfm.charWidth('9');
+      }
+      
 			int lastLine = textArea.getLineCount();
 			int chars = StringUtil.numDigits(lastLine);
 			this.gutterWidth = (chars * gutterCharWidth) + (GUTTER_MARGIN * 2);

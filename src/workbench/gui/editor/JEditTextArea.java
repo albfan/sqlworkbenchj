@@ -738,7 +738,8 @@ public class JEditTextArea
 			LogMgr.logDebug("JEditTextArea.updateScrollbars()", "updateScrollbars() not called from within the EDT!", new Exception());
 		}
 
-		boolean changed = false;
+//		boolean changed = false;
+
 		int lineCount = getLineCount();
 		if (vertical != null && visibleLines != 0)
 		{
@@ -749,7 +750,7 @@ public class JEditTextArea
 			{
 				setFirstLine(0);
 				remove(vertical);
-				changed = true;
+//				changed = true;
 			}
 			else
 			{
@@ -769,17 +770,17 @@ public class JEditTextArea
 			if (maxLineWidth < width)
 			{
 				remove(horizontal);
-				changed = true;
+//				changed = true;
 			}
 			else
 			{
 				add(BOTTOM, horizontal);
 			}
 		}
-		if (changed)
-		{
-			invalidate();
-		}
+//		if (changed)
+//		{
+//			invalidate();
+//		}
 	}
 
   public void centerLine(final int line)
@@ -3027,6 +3028,8 @@ public class JEditTextArea
 		@Override
 		public void layoutContainer(Container parent)
 		{
+      updateScrollBars();
+
 			Dimension size = parent.getSize();
 			Insets insets = parent.getInsets();
 			int itop = insets.top;
