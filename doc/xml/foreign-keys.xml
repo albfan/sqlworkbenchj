@@ -112,7 +112,7 @@ FROM orders ord
       <para>
         After starting to edit a cell, the context menu contains an item <guimenuitem>Select FK value</guimenuitem>. Once this
         item is selected &wb-productname; will detect the table that the current column references. If a foreign
-        key is detected a dialog window will be shown containing the data from the rerenced table. For performance reasons
+        key is detected a dialog window will be shown containing the data from the referenced table. For performance reasons
         the check if the current column is referencing another table is only done <emphasis>after</emphasis> the menu item has been invoked.
         If no foreign key could be found, a message is displayed in the status bar.
       </para>
@@ -168,7 +168,7 @@ FROM orders ord
       </para>
       <para>
         When that menu item is selected, the statement is analyzed and if the column of the current expression is
-        a foreign key to a different table, the lookup dialog will appear and will let you select the approriate PK
+        a foreign key to a different table, the lookup dialog will appear and will let you select the appropriate PK
         value from the referenced table.
       </para>
       <para>

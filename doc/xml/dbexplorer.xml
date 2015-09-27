@@ -15,9 +15,9 @@
 	</para>
 
 	<para>
-		At the top of the window, the current schema and/or catalog can be selected. Whether both dropdowns
+		At the top of the window, the current schema and/or catalog can be selected. Whether both drop downs
 		are available depends on the current DBMS. For Microsoft SQL Server, both the schema and the database
-		can be changed. The labels next to the dropdown are retrieved from the JDBC driver and should reflect
+		can be changed. The labels next to the drop down are retrieved from the JDBC driver and should reflect
 		the terms used for the current DBMS (Schema for PostgreSQL and Oracle, Owner and Database for SQL Server,
 		Database for MySQL).
 	</para>
@@ -27,7 +27,7 @@
 		the list by the object name, simply enter the criteria in the filter field, and
 		press <literal>ENTER</literal> or click the filter icon
 		<guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/filter16.png" format="PNG"/></guiicon></guibutton>.
-		The criteria field will list the last 25 values that were entered in the dropdown.
+		The criteria field will list the last 25 values that were entered in the drop down.
 		If you want to filter based on a different column of the list, right-click on the
 		criteria field, and select the desired column from the <literal>Filtercolumn</literal>
 		menu item of the popup menu. The same filter can be applied on the <literal>Procedures</literal>
@@ -91,7 +91,7 @@
 					for details.
 				</para>
 				<para>
-					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for datatypes</link>
+					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for data types</link>
 					is <emphasis role="bold">not</emphasis> applied to the generated <literal>SELECT</literal> statement.
 				</para>
 			</blockquote>
@@ -121,7 +121,7 @@
 					selecting the item <guimenuitem>New tab</guimenuitem>
 				</para>
 				<para>
-					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for datatypes</link>
+					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for data types</link>
 					<emphasis role="bold">will be</emphasis> applied to the generated <literal>SELECT</literal> statement.
 				</para>
 			</blockquote>
@@ -165,7 +165,7 @@
 					editor, please use the <link linkend="dbexplorer-select-data">Put SELECT into</link> option.
 				</para>
 				<para>
-					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for datatypes</link>
+					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for data types</link>
 					is <emphasis role="bold">not</emphasis> applied to the generated <literal>SELECT</literal> statement.
 				</para>
 			</blockquote>
@@ -182,7 +182,7 @@
 				</para>
 				<para>
 					When this command is selected, a new window will be shown. The window
-					contains a statusbar which indicates the object that is currently processed. The
+					contains a status bar which indicates the object that is currently processed. The
 					complete script will be shown as soon as all objects have been processed.
 					The objects will be processed in the order: <literal>SEQUENCES</literal>, <literal>TABLES</literal>,
 					<literal>VIEWS</literal>, <literal>SYNONYMS</literal>.
@@ -258,7 +258,7 @@
 					<literal>DELETE FROM table_name;</literal> to the server for each
 					selected table. If the DBMS supports <literal>TRUNCATE</literal>
 					then this can be done with <literal>TRUNCATE</literal> as well. Using
-					<literal>TRUNCATE</literal> is usually faster as no transation
+					<literal>TRUNCATE</literal> is usually faster as no transaction
 					state is maintained.
 				</para>
 				<para>
@@ -268,7 +268,7 @@
 					clicking on the <guibutton>Check foreign keys</guibutton> button.
 				</para>
 				<para>
-					If the checkbox "Add missing tables" is selected, any table that should be deleted
+					If the check box "Add missing tables" is selected, any table that should be deleted
 					before any of the selected tables (because of foreign key constraints) will be added
 					to the list of tables.
 				</para>
@@ -375,8 +375,8 @@
 		<para>
 			The data tab will also display a total row count of the table. As this
 			display can take a while, the automatic retrieval of the row count can be disabled.
-			To disable the automatic calculation of the table's rowcount, click on the <guibutton>Settings</guibutton>
-			button and deselect the checkbox <literal>Autoload table row count</literal>. To calculate
+			To disable the automatic calculation of the table's row count, click on the <guibutton>Settings</guibutton>
+			button and deselect the check box <literal>Autoload table row count</literal>. To calculate
 			the table's row count when this is not done automatically, click on the <literal>Rows</literal>
 			label. You can cancel the row count retrieval while it's running by clicking on the label again.
 		</para>
@@ -472,7 +472,7 @@
 			instead of <literal>number(10,2)</literal>
 		</para>
 		<para>
-			To convert e.g. the <literal>geometry</literal> datatype of postgres to a readable format,
+			To convert e.g. the <literal>geometry</literal> datatype of Postgres to a readable format,
 			one would use the following expression <literal>astext(transform(geo_column,4326))</literal>.
 		</para>
 		<para>
@@ -574,7 +574,7 @@ FROM geo_table
 		<para>
 			To display the procedure's source code &wb-productname; uses its
 			own SQL queries. For most popular DBMS systems the necessary
-			queries are built into the application. If the procedure sourc
+			queries are built into the application. If the procedure source
 			is not displayed for your DBMS, please contact the author.
 		</para>
 
@@ -612,7 +612,7 @@ FROM geo_table
       <title>Server side search</title>
 
       <para>
-        To server side search is enabled by selecting the checkbox labelled
+        To server side search is enabled by selecting the check box labeled
         "<literal>Server side search</literal>".
       </para>
 
@@ -649,7 +649,7 @@ FROM geo_table
         In the resulting tables, &wb-productname; tries to highlight those columns
         which match the criteria. This might not always work, if you apply a function to the
         column itself such as <literal>to_upper()</literal> &wb-productname; does not know
-        that this will result in a case-insesitive search on the database. &wb-productname; tries to
+        that this will result in a case-insensitive search on the database. &wb-productname; tries to
         guess if the given function/value combination might result in a case insensitive search (especially
         on a DBMS which does a case sensitive search by default) but this might not work
         in all the cases and for all DBMS.
@@ -676,7 +676,7 @@ FROM geo_table
     <section id="table-search-client">
       <title>Client side search</title>
       <para>
-        To client side search is enabled by un-checking the checkbox labelled
+        To client side search is enabled by un-checking the check box labeled
         "<literal>Server side search</literal>".
       </para>
       <para>
@@ -700,7 +700,7 @@ FROM geo_table
         result set. For every column, its value will be converted to a character representation. The resulting
         string value will then be compared according to the defined comparator and the entered
         search value. If at least one column's value matches, the row will be displayed.
-        The comparison is always done in a case-insesitively. The contents of BLOB columns will never be searched.
+        The comparison is always done in a case-insensitively. The contents of BLOB columns will never be searched.
       </para>
 
       <para>

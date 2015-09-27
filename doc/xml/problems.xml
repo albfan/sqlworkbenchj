@@ -25,7 +25,7 @@
 
     <para>
       When creating a stored procedure (trigger, function) it is necessary to use a delimiter other than
-      the normal semicolon because &wb-productname; does not know if a semicolon inisde the stored procedure
+      the normal semicolon because &wb-productname; does not know if a semicolon inside the stored procedure
       ends the procedure or simply a single statement inside the procedure.
     </para>
     <para>
@@ -68,12 +68,12 @@
       This is caused by the handling of time data in Java and is usually <emphasis>not</emphasis> caused by the database, the driver or &wb-productname;
     </para>
     <para>
-      If your time data is not displayed correctly, you might try to explicitely specify the timezone when starting the application.
+      If your time data is not displayed correctly, you might try to explicitely specify the time zone when starting the application.
       This is done by passing the system property <literal>-Duser.timezone=XYZ</literal> to the application, where XYZ
-      is the timezone where the computer is located that runs &wb-productname;
+      is the time zone where the computer is located that runs &wb-productname;
     </para>
     <para>
-      The timezone should be specified relativ to GMT and not with a logical name. If you are in Germany and DST is active, you need
+      The time zone should be specified relativ to GMT and not with a logical name. If you are in Germany and DST is active, you need
       to use <literal>-Duser.timezone=GMT+2</literal>. Specifying <literal>-Duser.timezone=Europe/Berlin</literal> does usually
       <emphasis role="bold">not</emphasis> work.
     </para>

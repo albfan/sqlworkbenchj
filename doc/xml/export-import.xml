@@ -150,7 +150,7 @@
 		<title>Import a file into the current result set</title>
 		<para>
 			&wb-productname; can import tab separated text files into the current
-			result set. This means, that you need to issue the approriate <literal>SELECT</literal>
+			result set. This means, that you need to issue the appropriate <literal>SELECT</literal>
 			statement first. The structure of the file has to match the structure of the result set,
 			otherwise an error will occur. To initiate the import select
 			<menuchoice><guimenu>Data</guimenu><guimenuitem>Import file</guimenuitem></menuchoice>

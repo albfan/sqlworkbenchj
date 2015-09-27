@@ -282,7 +282,7 @@
             <para>
               Select whether stored procedures should also be compared. When comparing
               procedures the source as it is stored in the DBMS is compared. This comparison
-              is case-sensitiv. A comparison across different DBMS will also not work!
+              is case-sensitive. A comparison across different DBMS will also not work!
             </para>
             <para>
               The default is <literal>false</literal>
@@ -318,9 +318,9 @@
               <literal>-useJdbcType=true</literal> as this will make the
               comparison a bit more DBMS-independent. When comparing e.g.
               Oracle vs. PostgreSQL a column defined as
-              <literal>VARCHAR2(100)</literal> in Oracle would be reported as beeing different
+              <literal>VARCHAR2(100)</literal> in Oracle would be reported as being different
               to a <literal>VARCHAR(100)</literal> column in PostgreSQL which is not really true
-              As both drivers ropert the column as java.sql.Types.VARCHAR,
+              As both drivers report the column as java.sql.Types.VARCHAR,
               they would be considered as identical when using <literal>-useJdbcType=true</literal>.
             </para>
             <para>
@@ -337,7 +337,7 @@
                 rather than on attribute level.
               </para>
               <para>
-                Valid values are object type names as shown in the "Type" dropdown in the DbExplorer.
+                Valid values are object type names as shown in the "Type" drop down in the DbExplorer.
               </para>
           </entry>
         </row>
@@ -362,7 +362,7 @@
       <para>
         Compare a list of matching tables between two databases and write the output to the
         file <literal>migrate_staging.xml</literal> ignoring all tables that start with <literal>TMP_</literal>
-        and exclude any index definition from the comparsion. Convert the output to a SQL script for Oracle
+        and exclude any index definition from the comparison. Convert the output to a SQL script for Oracle
       </para>
 
 <programlisting>WbSchemaDiff -referenceProfile="Development"
@@ -414,7 +414,7 @@
       problems with long SQL statements when processing tables that have
       a PK with multiple columns. If you know that your primary keys
       consist only of a single column and the values won't be too long, you
-      can increase the chunk size, possibly increasing the performace when
+      can increase the chunk size, possibly increasing the performance when
       generating the SQL statements. As most DBMS have a limit on the length
       of a single SQL statement, be careful when setting the chunksize too high.
       The same chunk size is applied when generating <literal>DELETE</literal>

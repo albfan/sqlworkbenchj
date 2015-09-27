@@ -11,7 +11,7 @@
 
   <note>
     <para>
-      When quoting parameters on the commandline (especially in a Windows&reg; environment) you have
+      When quoting parameters on the command line (especially in a Windows&reg; environment) you have
       to use single quotes, as the double quotes won't be passed to the application.
     </para>
   </note>
@@ -53,7 +53,7 @@
     <para>
       The <literal>-libdir</literal> parameter defines the base directory for your JDBC drivers. The value of
       this parameter can be referenced when <link linkend="jdbc-lib-dir">defining a driver library</link>
-      using the placholder <literal>%LibDir%</literal>
+      using the placeholder <literal>%LibDir%</literal>
       The value for this parameter can also be set in the file <link linkend="settings-libdir"><literal>workbench.settings</literal></link>.
     </para>
   </section>
@@ -87,7 +87,7 @@
   </section>
 
   <section id="cmdline-vardef">
-    <indexterm><primary>Variables</primary><secondary>define on commandline</secondary></indexterm>
+    <indexterm><primary>Variables</primary><secondary>define on command line</secondary></indexterm>
 
     <title>Defining variables</title>
 
@@ -122,7 +122,7 @@ another_variable=24</programlisting>
 
       <para>
         If the above file was saved under the name <literal>vars.txt</literal>, you can use those
-        variables by starting &wb-productname; using the following commandline:
+        variables by starting &wb-productname; using the following command line:
       </para>
       <programlisting>java -jar sqlworkbench.jar -varFile=vars.txt</programlisting>
     </simplesect>
@@ -164,9 +164,9 @@ another_variable=24</programlisting>
 
     <para>
       You can specify the name of an already created <link linkend="profiles">connection
-      profile</link> on the commandline with the <literal>-profile=&#60;profile name&#62;</literal>
+      profile</link> on the command line with the <literal>-profile=&#60;profile name&#62;</literal>
       parameter. The name has to be passed exactly like it appears in the profile dialog
-      (case sensitiv!). If the name contains spaces or dashes, it has to be enclosed in
+      (case sensitive!). If the name contains spaces or dashes, it has to be enclosed in
       quotations marks. If you have more than one profile with the same name but in different
       profile groups, you have to specify the desired profile group using the <literal>-profilegroup</literal>
       parameter, otherwise the first profile matching the passed name will be selected.
@@ -196,7 +196,7 @@ another_variable=24</programlisting>
       You can also store the connection profiles in a <link linkend="plain-profile-file">properties file</link>
       and specify this file using the <link linkend="cmdline-parameter-profilestorage"><literal>-profileStorage</literal></link> parameter.
     </para>
-    
+
   </section>
 
   <section id="commandline-connect-noprofile">
@@ -204,7 +204,7 @@ another_variable=24</programlisting>
     <indexterm><primary>Command line</primary><secondary>JDBC connection</secondary></indexterm>
 
     <para>
-      You can also specify the full connection parameters on the commandline, if
+      You can also specify the full connection parameters on the command line, if
       you don&apos;t want to create a profile only for executing a batch file.
       The advantage of this method is, that &wb-productname; does not need the files
       <filename>WbProfiles.xml</filename>, <filename>WbDrivers.xml</filename> to be

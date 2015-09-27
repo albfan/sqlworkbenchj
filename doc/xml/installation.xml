@@ -12,7 +12,7 @@
     <para>
       &wb-productname; does not need a "fully installed" runtime environment, you can also copy
       the <literal>jre</literal> directory from an existing Java installation or use the no-installer
-      packages from the Oracle homepage
+      packages from the Oracle home page
     </para>
 
     <para>
@@ -23,7 +23,7 @@
 
     <para>
       If you cannot (or do not want to) do a regular installation of a Java 8 runtime, you can download
-      a ZIP distribution from <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle's homepage</ulink>
+      a ZIP distribution from <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle's home page</ulink>
       Under <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">"JRE Download"</ulink>
       you can download <literal>tar.gz</literal> archives for Windows&reg; and Linux (32bit and 64bit versions are available).
     </para>
@@ -243,7 +243,7 @@
 
     <para>
       If you want to use a different file for the connection profile than WbProfiles.xml then you can specify the
-      location of the profiles with the <literal>-profilestorage</literal> parameter on the commandline.
+      location of the profiles with the <literal>-profileStorage</literal> parameter on the command line.
       Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
       The different shortcuts can still use the same main configuration file.
     </para>

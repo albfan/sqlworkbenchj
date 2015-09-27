@@ -405,8 +405,8 @@
     <title>Search data in multiple tables - WbGrepData</title>
     <para>
       The command <literal>WbGrepData</literal> can be used to search
-      for occurances of a certain value in all columns of multiple tables.
-      It is the commandline version of the (client side) <link linkend="table-search-client">Search Table Data</link> tab
+      for occurrences of a certain value in all columns of multiple tables.
+      It is the command line version of the (client side) <link linkend="table-search-client">Search Table Data</link> tab
       in the DbExplorer. A more detailed description on how the searching is performed is available that chapter.
     </para>
 
@@ -451,7 +451,7 @@
             <entry>
 						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
               <para>
-                When set to true, the comparison is be done case-insesitive ("ARTHUR" will
+                When set to true, the comparison is be done case-insensitive ("ARTHUR" will
                 match "Arthur" or "arthur").
               </para>
               <para>
@@ -531,7 +531,7 @@
                 If this parameter is set to <literal>false</literal>, CLOB columns will not be retrieved.
               </para>
               <para>
-                If the search value is not expected in columns of that type, exluding them from the search
+                If the search value is not expected in columns of that type, excluding them from the search
                 will speed up data retrieval (and thus the searching).
               </para>
               <para>
@@ -589,7 +589,7 @@
         </para>
         <programlisting>WbGrepData -searchValue=foo -tables=person -ignoreCase=true</programlisting>
         <para>
-          <literal>-ignoreCase=true</literal> is the default behaviour and can be omitted.
+          <literal>-ignoreCase=true</literal> is the default behavior and can be omitted.
         </para>
       </section>
       <section id="grep-data-example-alltables">
@@ -938,7 +938,7 @@ $$ LANGUAGE plpgsql;
           <row>
             <entry>-continueOnError</entry>
             <entry>
-              Defines the behaviour if an error occurs in one of the statements.
+              Defines the behavior if an error occurs in one of the statements.
               If this is set to <literal>true</literal> then script execution will continue
               even if one statement fails. If set to <literal>false</literal> script execution
       	      will be halted on the first error. The default value is <literal>false</literal>
@@ -1346,7 +1346,7 @@ WHERE id=42;</programlisting>
     <para>
       Even if you specify more then one column in the column list, &wb-productname; will only
       use the first column. If the SELECT returns more then one row, then one
-      outputfile will be created for each row. Additional files will be created with
+      output file will be created for each row. Additional files will be created with
       a counter indicating the row number from the result. In the above
       example, image.bmp, image_1.bmp, image_3.bmp and so on, would be created.
     </para>
@@ -1398,7 +1398,7 @@ WHERE id=42;</programlisting>
     </para>
 
     <section id="command-set-feedback">
-      <title>FEEEDBACK</title>
+      <title>FEEDBACK</title>
       <para>
 				<literal>SET feedback ON/OFF</literal> is equivalent to the <link linkend="command-wbfeedback">WbFeedback</link>
 				command, but mimics the syntax of Oracle's SQL*Plus utility.
@@ -1432,7 +1432,7 @@ WHERE id=42;</programlisting>
   </section>
 
   <section id="set-oracle">
-    <title>Changing Oracle session behaviour - SET</title>
+    <title>Changing Oracle session behavior - SET</title>
     <para>
       The following options for the SET command are only available when being connected to an Oracle database.
     </para>
@@ -1491,7 +1491,7 @@ WHERE id=42;</programlisting>
                   <para>
                     This is an extension to the SQL*Plus <literal>EXPLAIN</literal> mode. Using <literal>EXPLAIN</literal>, &wb-productname; will
                     simply run an <literal>EXPLAIN PLAN</literal> for the statement (and the statement will not be executed) - this is the same
-                    behaviour as SQL*Plus' <literal>EXPLAIN</literal> mode.
+                    behavior as SQL*Plus' <literal>EXPLAIN</literal> mode.
                   </para>
                   <para>
                     Using <literal>REALPLAN</literal>, &wb-productname; will run the statement and then retrieve the execution plan
@@ -1529,7 +1529,7 @@ WHERE id=42;</programlisting>
     <title>Changing read only mode - WbMode</title>
     <para>
       In the <link linkend="profile-confirm-updates">connection profile</link> two options can be specified
-      to define the behaviour when running commands that might change or update the database: a "read only" mode
+      to define the behavior when running commands that might change or update the database: a "read only" mode
       that ignores such commands and a "confirm all" mode, where you need to confirm any statement that might change
       the database.
     </para>
@@ -1660,7 +1660,7 @@ WHERE id=42;</programlisting>
 								<para>
                   When using <literal>-onlyForeignkeys=true</literal>, then only <literal>ALTER TABLE</literal>
                   statements will be generate that will drop the foreign keys of all selected tables. No <literal>DROP TABLE</literal>
-                  and no statements to re-create the foreign keys will be generated. Setting this paramter to <literal>true</literal>
+                  and no statements to re-create the foreign keys will be generated. Setting this parameter to <literal>true</literal>
                   implies <literal>-includeCreate=false</literal>.
 								</para>
 							</entry>
@@ -1670,7 +1670,7 @@ WHERE id=42;</programlisting>
 							<entry>
                 <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
-                  Usually the generated SQL script will be ordered by the type of statemens. So first all statements
+                  Usually the generated SQL script will be ordered by the type of statements. So first all statements
                   to drop constraints will be listed, then the drop table statements, then the statements to re-create all foreign keys.
                   When specifying <literal>-sortByType=false</literal>, then the script will be ordered by table: first
                   all statements for the first table, then all statements for the second table and so on.
@@ -1715,7 +1715,7 @@ WHERE id=42;</programlisting>
       that should be deleted including all rows from referencing tables (if foreign key constraints are defined)
     </para>
     <para>
-      This is also available throug the menu item <menuchoice><guimenu>Data</guimenu><guimenuitem>Generate delete script</guimenuitem></menuchoice>
+      This is also available through the menu item <menuchoice><guimenu>Data</guimenu><guimenuitem>Generate delete script</guimenuitem></menuchoice>
       which will generate the delete for the selected row(s) in the current result.
     </para>
     <para>
@@ -1827,7 +1827,7 @@ WHERE id=42;</programlisting>
     <title>Generate SQL script for database objects - WbGenerateScript</title>
     <para>
       <literal>WbGenerateScript</literal> re-creates the SQL for objects in the database.
-      It is the commandline version of the <link linkend="dbexplorer-create-ddl">Generate Script</link> option in the
+      It is the command line version of the <link linkend="dbexplorer-create-ddl">Generate Script</link> option in the
       DbExplorer
     </para>
     <para>
@@ -1882,7 +1882,7 @@ WHERE id=42;</programlisting>
 								<para>
 									A comma separated list of object types e.g. <literal>-types=VIEW,TABLE</literal>. This parameter
                   is ignored if <literal>-objects</literal> is specified. The possible values for this parameter
-                  are the types listed in the dropdown of the "Objects" tab in the DbExplorer.
+                  are the types listed in the drop down of the "Objects" tab in the DbExplorer.
 								</para>
                 <para>
                   The parameter supports auto-completion and will show a list of the available object types for the current DBMS.
@@ -2116,7 +2116,7 @@ WHERE id=42;</programlisting>
 
     <para>
       Lists the available catalogs (or databases). It is the same information
-      that is shown in the DbExplorer's "Database" dropdown.
+      that is shown in the DbExplorer's "Database" drop down.
     </para>
     <para>
       The output of this command depends on the underlying JDBC driver and DBMS.
@@ -2150,7 +2150,7 @@ WHERE id=42;</programlisting>
     <para>
       Lists the available schemas from the current connection. The output of this
       command depends on the underlying JDBC driver and DBMS. It is the same information
-      that is shown in the DbExplorer's "Schema" dropdown.
+      that is shown in the DbExplorer's "Schema" drop down.
     </para>
 
     <para>
@@ -2307,8 +2307,7 @@ WHERE id=42;</programlisting>
     <title>Change the connection for a script - WbConnect</title>
 
     <para>
-			With the <literal>WbConnect</literal> command, the connection for the script that is
-			currently be exected can be changed.
+			With the <literal>WbConnect</literal> command, the connection for the currently running script can be changed.
 		</para>
 
 		<para>
@@ -2324,10 +2323,10 @@ WHERE id=42;</programlisting>
 		</para>
 
 		<para>
-			When this command is entered directly in the commandline of the
+			When this command is entered directly in the command line of the
 			<link linkend="console-mode">console mode</link>, the current connection is closed and the
 			new connection is kept open until the application ends, or a new connection is established
-			using <literal>WbConnect</literal> on the commandline again.
+			using <literal>WbConnect</literal> on the command line again.
 		</para>
 
 	  <para>
@@ -2386,10 +2385,10 @@ WHERE id=42;</programlisting>
               <entry>
                 &connect-descriptor;
                 <para>
-                  If an approriate driver is already configured the driver's classname or the JAR file don't have to be specified.
+                  If an appropriate driver is already configured the driver's classname or the JAR file don't have to be specified.
                 </para>
                 <para>
-                  If an approriate driver is not configured, the driver's jar file must be specified:
+                  If an appropriate driver is not configured, the driver's jar file must be specified:
                   <simpara>
                   <literal>"username=foo,password=bar,url=jdbc:postgresql://localhost/mydb,driverjar=/etc/drivers/postgresql.jar"</literal>
                   </simpara>
@@ -2399,7 +2398,7 @@ WHERE id=42;</programlisting>
                   If this parameter is specified, <literal>-profile</literal> is ignored.
                 </para>
                 <para>
-                  The individual parameters controlling the connection <emphasis>behaviour</emphasis>
+                  The individual parameters controlling the connection <emphasis>behavior</emphasis>
                   can be used together with <literal>-connection</literal>, e.g. <literal>-autocommit</literal> or <literal>-fetchSize</literal>
                 </para>
               </entry>
@@ -2509,7 +2508,7 @@ WHERE id=42;</programlisting>
       <programlisting>WbSysExec cmd /c dir /n</programlisting>
     </para>
     <para>
-      If you need to specify a working directory for the program, or want to specify the commandline arguments
+      If you need to specify a working directory for the program, or want to specify the command line arguments
       individually, a second format is available using the standard &wb-productname; parameter handling:
     </para>
 
@@ -2593,7 +2592,7 @@ WbSysOpen c:/temp/person.txt;</programlisting>
 	Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with
 	the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal>
 	package is enabled.
-	In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
+	In order to be able to display these columns, support for <literal>DBMS_OUTPUT</literal> has
 	to be switched off.
     </para></note>
 
@@ -2605,7 +2604,7 @@ WbSysOpen c:/temp/person.txt;</programlisting>
 
     <para>
       <literal>ENABLEOUT</literal> and <literal>DISABLEOUT</literal> support an additional parameter <literal>quiet</literal>
-      to supress the feedback message that the suport for <literal>DBMS_OUTPUT</literal> has been enabled or disabled.
+      to supress the feedback message that the support for <literal>DBMS_OUTPUT</literal> has been enabled or disabled.
     </para>
 
   </section>
@@ -2691,7 +2690,7 @@ WbSysOpen c:/temp/person.txt;</programlisting>
   </section>
 
   <section id="command-setconfig">
-    <title>Change an internal configuration paramter - WbSetConfig</title>
+    <title>Change an internal configuration parameter - WbSetConfig</title>
     <indexterm><primary>Configuration</primary><secondary>change advanced configuration properties</secondary></indexterm>
     <para>
       Not all configuration parameters are available through the <link linkend="options">Options Dialog</link> and have

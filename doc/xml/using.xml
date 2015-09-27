@@ -290,7 +290,7 @@ COMMIT;
 			<para>
 				Data from <literal>VARCHAR</literal> or <literal>CHAR</literal> columns is
 				displayed as a single-line if the column's max. size is below 250 characters.
-				If you have data in smaller columns that contains newlines (linebreaks) and you want
+				If you have data in smaller columns that contains newlines (line breaks) and you want
 				to display directly in the result set, please adjust the limit to match your needs.
 				The limit can be changed in the <link linkend="options-multiline">Data Display Options</link>.
 			</para>
@@ -366,7 +366,7 @@ WHERE id=24;</programlisting>
 				supply a value for the blob column during an insert. In this case you need to
 				first insert the row without the blob column, then use an <literal>UPDATE</literal>
 				to send the blob data. You should make sure to update only one row by specifying an
-				approriate <literal>WHERE</literal> clause.
+				appropriate <literal>WHERE</literal> clause.
 			</para>
 
 			<programlisting>INSERT INTO theTable
@@ -442,11 +442,11 @@ WHERE id=42;</programlisting>
 			<para>
 				The window will also let you open the contents of the BLOB data with a predefined
 				<link linkend="options-external-tools">external tool</link>. The tools that
-				are defined in the options dialog can be selected from a dropdown. To open
-				the BLOB content with one of the tools, select the tool from the dropdown list,
+				are defined in the options dialog can be selected from a drop down. To open
+				the BLOB content with one of the tools, select the tool from the drop down list,
 				then click on the button <guibutton>Open with</guibutton> next to the external
-				tools dropdown. &wb-productname; will then retrieve the BLOB data from the server,
-				store it in a temporary file on your harddisk, and run the selected application,
+				tools drop down. &wb-productname; will then retrieve the BLOB data from the server,
+				store it in a temporary file on your hard disk, and run the selected application,
 				passing the temporary file as a parameter.
 			</para>
 			<para>
@@ -859,7 +859,7 @@ Done.</programlisting>
 				in the toolbar or select <menuchoice><guimenu>Data</guimenu><guimenuitem>Filter data</guimenuitem></menuchoice>.
 				A dialog will appear where you can define a filter for the current result set. Each line
 				in the filter dialog defines an expression that will be applied to the column selected
-				in the first dropdown. If you select <literal>*</literal> for the column, the filter
+				in the first drop down. If you select <literal>*</literal> for the column, the filter
 				condition will be applied to all columns of the result set.
 			</para>
 

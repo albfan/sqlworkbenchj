@@ -94,7 +94,7 @@
 
   <section id="profile-driver">
     <title>Driver</title>
-    <para>This is the classname for the JDBC driver. The exact
+    <para>This is the class name for the JDBC driver. The exact
       name depends on the DBMS and driver combination. The documentation
       for your driver should contain this information. &wb-productname; has some
       drivers pre-configured. See <xref linkend="jdbc-setup"/> for details on
@@ -141,7 +141,7 @@
     <indexterm><primary>Connection profile</primary><secondary>autocommit</secondary></indexterm>
     <title>Autocommit</title>
     <para>
-      This checkbox enables/disables the "auto commit" property for the connection.
+      This check box enables/disables the "auto commit" property for the connection.
       If autocommit is enabled, then each SQL statement
       is automatically committed on the DBMS. If this is disabled, any DML
       statement (<literal>UPDATE, INSERT, DELETE, ...</literal>) has to be
@@ -222,14 +222,14 @@
 
 	<para>
 		JDBC drivers support additional connection properties where
-		you can fine tune the behaviour of the driver or enable special features
+		you can fine tune the behavior of the driver or enable special features
 		that are not switched on by default. Most drivers support passing properties
     as part of the URL, but sometimes they need to be passed to the driver using
     a different method called extended properties.
 	</para>
 
 	<para>
-		If you need to pass an additional paramter to your driver you can do that
+		If you need to pass an additional parameter to your driver you can do that
 		with the <guibutton>Extended Properties</guibutton> button. After clicking that
 		button, a dialog will appear with a table that has two columns. The first column
 		is the name of the property, the second column the value that you want to pass to
@@ -239,7 +239,7 @@
 	<para>
 		To create a new property click on the new button. A new row will be inserted
 		into the table, where you can define the property. To edit an existing property,
-		simply doubleclick in the table cell that you want to edit. To delete an existing property
+		simply double click in the table cell that you want to edit. To delete an existing property
 		click on the <literal>Delete</literal> button
 		(<guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/delete16.png" format="PNG"/></guiicon></guibutton>).
 	</para>
@@ -425,7 +425,7 @@
 			&wb-productname; cannot detect all possible statements that may change the
 			database. Especially when calling stored procedures &wb-productname; cannot
 			know if they will change the database. But they might be needed to retrieve data,
-			this cannot be disabled alltogether.
+			this cannot be disabled altogether.
 		</para>
 		<para>
 			You can extend the list of keywords known to update the data in the
@@ -705,7 +705,7 @@
         occur at the beginning of the value.
       </para>
       <para>
-        The regular expression must match completely in order to exlude the value from the dropdown.
+        The regular expression must match completely in order to exclude the value from the drop down.
       </para>
       <para>
         If you want to learn more about regular expressions, please have a look at <ulink url="http://www.regular-expressions.info/"/>

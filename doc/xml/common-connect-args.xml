@@ -16,7 +16,7 @@
     <para>
       If this parameter is not specified (but <literal>-url</literal> and <literal>-username</literal>) then
       you will be prompted to enter the password. To supply an empty password use <literal>-password=</literal>
-      in the commandline when starting &wb-productname;
+      in the command line when starting &wb-productname;
     </para>
   </entry>
 </row>

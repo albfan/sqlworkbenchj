@@ -13,7 +13,7 @@
     </itemizedlist>
 
     Executable macros are intended for complete SQL statements that are executed once you select the macro.
-    They can also be used as an abbriviated SQL statement, by typing the macro's name and executing this
+    They can also be used as an abbreviated SQL statement, by typing the macro's name and executing this
     as a SQL statement.
   </para>
   <para>
@@ -25,7 +25,7 @@
     <title>Loading and saving macro sets</title>
     <para>
       By default &wb-productname; will use a file with the name <literal>WbMacros.xml</literal>
-      stored in the <link linkend="config-dir">confguration directory</link> to save and load the macros.
+      stored in the <link linkend="config-dir">configuration directory</link> to save and load the macros.
     </para>
     <para>
       To create a copy of the currently loaded macros, use
@@ -33,7 +33,7 @@
       To load previously saved macros, use <menuchoice><guimenu>Macros</guimenu><guimenuitem>Load Macros...</guimenuitem></menuchoice>.
     </para>
     <para>
-      The currently loaded file is displayed as a tooltip of the <guimenuitem>Save Macros as...</guimenuitem> menu item and
+      The currently loaded file is displayed as a tool tip of the <guimenuitem>Save Macros as...</guimenuitem> menu item and
       and the bottom of the <guimenuitem>Manage Macros</guimenuitem> dialog.
     </para>
 
@@ -168,13 +168,13 @@
 
     <para>
       The SQL statement that is eventually executed will be logged into the message panel
-      when invoking the macro from the menu. Macros that use the above paramters
+      when invoking the macro from the menu. Macros that use the above parameters
       cannot correctly be executed by entering the macro alias in the SQL editor (and
       then executing the "statement").
     </para>
 
     <note><para>
-      The parameter keywords are case sensitiv, i.e.
+      The parameter keywords are case sensitive, i.e.
       the text <literal>${SELECTION}$</literal> will not be replaced!
     </para></note>
 
@@ -241,7 +241,7 @@ ${current_statement}$
     </para>
 
     <para>
-      For expandable macros, two special placeholders in the macro text are supported. Both placeholders
+      For expandable macros, two special place holders in the macro text are supported. Both place holders
       are deleting when the macro text is inserted.
       <informaltable frame="all">
 

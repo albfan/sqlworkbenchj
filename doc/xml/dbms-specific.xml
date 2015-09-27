@@ -80,7 +80,7 @@
 
        <para>
          As an extension to the Oracle syntax, &wb-productname; supports the keyword <literal>realplan</literal> as a
-         substiture for <literal>explain</literal>. In that case the execution plan is also displayed but not by
+         substitute for <literal>explain</literal>. In that case the execution plan is also displayed but not by
          using <literal>EXPLAIN PLAN</literal> but by retrieving the actual execution plan that is available
          via <literal>dbms_xplan.display_cursor()</literal>. In order to use that package, the execute SQL
          will be changed by &wb-productname;. It will prepend it with a unique identifier so that the SQL can be

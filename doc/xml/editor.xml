@@ -48,7 +48,7 @@ FROM person p
 			in the <literal>PERSON</literal> table (because the cursor is located after the <literal>p.</literal>
 			alias). If you put the cursor after the <literal>a.city</literal> column and press the
 			<keycap>Ctrl-Space</keycap> the popup window will list the two tables that are referenced
-			in the <literal>FROM</literal> part of the statement. The behaviour when editing the
+			in the <literal>FROM</literal> part of the statement. The behavior when editing the
 			<literal>WHERE</literal> part of an statement is similar.
 		</para>
 
@@ -92,7 +92,7 @@ FROM person p
     <para>
       When writing (long) <literal>INSERT</literal> statements it is often helpful to check if a specific value
       is actually written into the intended column. To check the column a value corresponds to (or the vice versa),
-      press <keycap>Ctrl-#</keycap> while in the column or values list. A tooltip will appear to show the corresponding
+      press <keycap>Ctrl-#</keycap> while in the column or values list. A tool tip will appear to show the corresponding
       element from the "other" part of the statement. Consider the following statement:
     </para>
     <programlisting>
@@ -101,15 +101,15 @@ VALUES
 ('hello', 'world', 42, 'foobar');
 </programlisting>
     <para>
-      When the cursor is located at <literal>column1</literal>, pressing <keycap>Ctrl-#</keycap> will show a tooltip containing the text
+      When the cursor is located at <literal>column1</literal>, pressing <keycap>Ctrl-#</keycap> will show a tool tip containing the text
       <literal>'hello'</literal> as that is the value that corresponds to column1. When the cursor is located at the number <literal>42</literal>
-      pressing <keycap>Ctrl-#</keycap> will show the text <literal>column3</literal> in the tooltip.
+      pressing <keycap>Ctrl-#</keycap> will show the text <literal>column3</literal> in the tool tip.
     </para>
     <para>
-      When no matching column or value can be found, the tooltip will contain a hint that the "other" element is missing.
+      When no matching column or value can be found, the tool tip will contain a hint that the "other" element is missing.
     </para>
     <para>
-      If the values inserted are the result of a <literal>SELECT</literal> statement, the tooltip in the
+      If the values inserted are the result of a <literal>SELECT</literal> statement, the tool tip in the
       insert column list will show the corresponding column name from the SELECT statement.
     </para>
   </section>
@@ -123,7 +123,7 @@ VALUES
 		</para>
 		<para>
 			&wb-productname; reads four different types of keywords: regular keywords (e.g. SELECT),
-			datatypes (e.g. VARCHAR), functions (e.g. upper()) and operators (e.g. JOIN). Each keyword type
+			data types (e.g. VARCHAR), functions (e.g. upper()) and operators (e.g. JOIN). Each keyword type
 			is read from a separate file: <literal>keywords.wb</literal>, <literal>datatypes.wb</literal>,
 			<literal>functions.wb</literal> and <literal>operators.wb</literal>.
 		</para>
@@ -351,7 +351,7 @@ WHERE p.person_id = a.person_id;</programlisting>
 				parameter. The dialog will list all parameters of the statement together with their type as returned
 				by the JDBC driver. Once you have entered a value for each parameter, clicking OK
 				will execute the statement using those values. When you execute the SQL statement
-				the next time, the old values will be presevered, and you can either use them again
+				the next time, the old values will be preserved, and you can either use them again
 				or modify them before running the statement.
 			</para>
 			<para>Once you are satisfied with your SQL statement, you can <link linkend="editor-copy-java-code-snippet">copy</link>

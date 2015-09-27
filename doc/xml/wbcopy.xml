@@ -4,7 +4,7 @@
 	<para>
 		The <literal>WbCopy</literal> is essentially the command line version of the
 		the <link linkend="data-pumper">DataPumper</link>. For a more detailed explanation
-    of the copy process, please refer to that section. It bascially chains a
+    of the copy process, please refer to that section. It basically chains a
     <link linkend="command-export"><literal>WbExport</literal></link> and a <link linkend="command-import"><literal>WbImport</literal></link>
     statement without the need of an intermediate data file. The <literal>WbCopy</literal> command requires
     that a connection to the source and target database can be made at the same time from the computer
@@ -83,7 +83,7 @@
 						<entry>
 							<para>
 								The name of the connection profile to use as the target connection. If
-								<literal>-targetprofile</literal> is not specified, the current connection is used as the target.
+								<literal>-targetProfile</literal> is not specified, the current connection is used as the target.
 							</para>
 							<para>
 								If the profile name contains spaces or dashes, it has to be quoted.
@@ -245,7 +245,7 @@
 						<entry id="copy-commit-batch">-commitBatch</entry>
 						<entry>
 							<para>Valid values: <literal>true</literal>, <literal>false</literal></para>
-							<para>When using the <literal>-batchSiez</literal> parameter, the
+							<para>When using the <literal>-batchSize</literal> parameter, the
 								<literal>-commitEvery</literal> is ignored (as not all JDBC drivers
 								support a <literal>COMMIT</literal> inside a JDBC batch operation. When
 								using <literal>-commitBatch=true</literal> &wb-productname; will send a
@@ -429,7 +429,7 @@
               </important>
 							<para>
 								When using this option with different source and target DBMS, the information
-								about the datatypes to be used in the target database are retrieved from
+								about the data types to be used in the target database are retrieved from
 								the JDBC driver. In some cases this information might not be accurate
 								or complete. You can enhance the information from the driver by configuring
 								your own mappings in workbench.settings. Please see the section

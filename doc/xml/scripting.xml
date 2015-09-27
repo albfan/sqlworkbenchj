@@ -11,7 +11,7 @@
 		To start &wb-productname; in batch mode, either the
 		<link linkend="scripting-scriptfile">-script</link> or
 		<link linkend="scripting-command">-command</link> must be passed as an argument on
-		the commandline.
+		the command line.
 	</para>
 	<para>
 		If neither of these parameters is present, &wb-productname; will run in GUI mode.
@@ -54,8 +54,8 @@
 &lt;/java&gt;</programlisting>
 
 	<para>
-		The parameters to specifiy the connection and the SQL script to be executed have
-		to be passed on the commandline.
+		The parameters to specify the connection and the SQL script to be executed have
+		to be passed on the command line.
 	</para>
 
 	<section id="scripting-connecting">
@@ -144,7 +144,7 @@ SQLCMD</screen>
 		<para>
 			In case your script files are not using the default encoding, you can specify the
 			encoding of your script files with the <literal>-encoding</literal> parameter. Note that this will set for all
-			script files passed on the commandline. If you need to run several scriptfiles with different encodings,
+			script files passed on the command line. If you need to run several script files with different encodings,
 			you have to create one "master" file, which calls the individual files using the <link linkend="command-wbinclude">WbInclude</link>
 			command together with its <literal>-encoding</literal> parameter.
 		</para>
@@ -187,7 +187,7 @@ SQLCMD</screen>
 		<para>
 			You can also specify whether errors from <literal>DROP</literal> commands
 			should be ignored. To enable this, pass the parameter <literal>-ignoreDropErrors=true</literal>
-			on the commandline. This works when connecting through a profile or through a full
+			on the command line. This works when connecting through a profile or through a full
 			connection specification. If this parameter is set to <literal>true</literal>
 			only a warning will be issued, but any error reported from the DBMS when
 			executing a DROP command will be ignored.
@@ -314,7 +314,7 @@ SQLCMD</screen>
 			<title>Controlling statement progress information</title>
 			<para>
 				Several commands (like <literal>WbExport</literal>) show progress information in the statusbar.
-				When running in batch mode, this information is usually not shown. When you specifiy <literal>-showProgress=true</literal>
+				When running in batch mode, this information is usually not shown. When you specify <literal>-showProgress=true</literal>
 				these messages will also be displayed on the console.
 			</para>
 		</section>
@@ -339,7 +339,7 @@ SQLCMD</screen>
       <para>
         The definition of variables can be read from a properties file, either by specifying
         <literal>-file=filename</literal> for the <literal>WbVarDef</literal> command,
-        or by passing the <literal>-vardef</literal> parameter when starting &wb-productname;.
+        or by passing the <literal>-varFile</literal> or <literal>-variable</literal> parameter when starting &wb-productname;.
         Please see the description for the <link linkend="cmdline-vardef">command line parameters</link> for details.
       </para>
   </section>
@@ -362,7 +362,7 @@ SQLCMD</screen>
 		<note>
 		<para>
 			For readability the examples in this section are displayed on several lines. If
-			you enter them manually on the commandline you will need to put everything
+			you enter them manually on the command line you will need to put everything
 			in one line, or use the escape character for your operating system to
 			extend a single command over more then one input line.
 		</para>

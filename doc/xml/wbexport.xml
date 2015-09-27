@@ -44,7 +44,7 @@
 
 	<para>
 		You can also export the result of a <literal>SELECT</literal> statement, by
-		selecting the statment in the editor, and then choose
+		selecting the statement in the editor, and then choose
 		<menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>.
 	</para>
 
@@ -56,7 +56,7 @@
 		The only other application that I know of, that can handle this type of imports is Oracle's
 		<literal>SQL*Loader</literal> utility. If you run the text export together with the
 		parameter <literal>-formatFile=oracle</literal> a control file will be created that contains the
-		approriate definitions to read the BLOB data from the external file.
+		appropriate definitions to read the BLOB data from the external file.
 	</para>
 
   <para>
@@ -162,7 +162,7 @@
     </para>
 
     <para id="download-poi-addon">
-      You can download all required POI libraries as a single archive from the &wb-productname; homepage:
+      You can download all required POI libraries as a single archive from the &wb-productname; home page:
       <ulink url="http://www.sql-workbench.net/poi-add-on2.zip"/>. After downloading the archive, unzip it
       into the directory where <literal>sqlworkbench.jar</literal> is located.
     </para>
@@ -170,7 +170,7 @@
     <important>
       <para>
         To write the file formats XLS and XLSX the entire file needs to be built in memory. When exporting
-        results with a large number of rows this will require a substiantal amount of memory.
+        results with a large number of rows this will require a substantial amount of memory.
       </para>
     </important>
 
@@ -240,15 +240,15 @@
 							</para>
 							<para>
 								<literal>xlsm</literal> will generate a spreadsheet file in the Microsoft Excel 2003 XML format ("XML Spreadsheet").
-                 When using Microsof Office 2010, this export format should should be saved with a file extension
+                 When using Microsoft Office 2010, this export format should should be saved with a file extension
                  of <literal>.xml</literal> in order to be identified correctly.
               </para>
 							<para>
-								<literal>xls</literal> will generate a spreadsheet file in the propriatary (binary) format
+								<literal>xls</literal> will generate a spreadsheet file in the proprietary (binary) format
 								for Microsoft Excel (97-2003). The file <literal>poi.jar</literal> is required.
 							</para>
               <para>
-                <literal>xlsx</literal> will generate a spreadsheet file in the default format introduced with Microsof Office 2007.
+                <literal>xlsx</literal> will generate a spreadsheet file in the default format introduced with Microsoft Office 2007.
                 Additional external libraries are required in order to be able to use this format. Please read the note at the beginning of
                 this section.
 							</para>
@@ -465,7 +465,7 @@
 						<entry>
 							<para>
 								Selects whether the output file should be compressed
-								and put into a ZIP archive. An archive will be created with the name of the specified outputfile
+								and put into a ZIP archive. An archive will be created with the name of the specified output file
 								but with the extension <literal>zip</literal>. The archive will then contain the specified file
 								(e.g. if you specify <literal>data.txt</literal>, an archive <literal>data.zip</literal>
 								will be created containing exactly one entry with the name <literal>data.txt</literal>).
@@ -692,7 +692,7 @@
 								The parameter value <literal>dbms</literal>, will create a DBMS
 								specific "binary string". MySQL, HSQLDB, H2 and PostgreSQL
 								are known to support literals for binary data. For other DBMS
-								using this option will still create an ansi literal but this
+								using this option will still create an ANSI literal but this
 								might result in an invalid SQL statement.
 							</para>
               <para>
@@ -773,7 +773,7 @@
 						<entry>-rowNumberColumn</entry>
 						<entry>
 							If this parameter is specified with a value, the value defines the name
-							of an additional column that will contain the rownumber. The row number will always be
+							of an additional column that will contain the row number. The row number will always be
 							exported as the first column. If the text file is not created with
 							a header (<literal>-header=false</literal>) a value must still be provided to enable
 							the creation of the additional column.
@@ -1180,7 +1180,7 @@
 								the number of <literal>INSERT</literal> or <literal>UPDATE</literal> statements
 								after which a <literal>COMMIT</literal> is put into the generated SQL script.
 							</para>
-							<para>-commitevery=100</para>
+							<para>-commitEvery=100</para>
 							<para>will create a <literal>COMMIT;</literal> after every 100th statement.</para>
 							<para>
 								If this is not specified one <literal>COMMIT;</literal> will be added at the
@@ -1214,7 +1214,7 @@
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
                 If this parameter is set to <literal>true</literal>, all table names
-                are prefixed with the approriate schema. The default is taken from
+                are prefixed with the appropriate schema. The default is taken from
                 the global option <link linkend="opt-sql-export-include-owner">Include owner in export</link>
 							</para>
 						</entry>
@@ -1245,7 +1245,7 @@
               <para>Default value: defined by <link linkend="opt-sql-include-identity">global option</link></para>
               <para>
                 With this parameter you can override the <link linkend="opt-sql-include-identity">global option</link>
-                to include identity and auto-increment columnfor <literal>INSERT</literal> statements.
+                to include identity and auto-increment column for <literal>INSERT</literal> statements.
               </para>
 						</entry>
 					</row>
@@ -1510,7 +1510,7 @@
 			is an archive and will extract the information "on the fly". Assume the following export
 			command:
 		</para>
-		<programlisting>WbExport -type=text -file=/home/data/person.txt -compress=true -sourcetable=person;</programlisting>
+		<programlisting>WbExport -type=text -file=/home/data/person.txt -compress=true -sourceTable=person;</programlisting>
 		<para>
 			This command will create the file <literal>/home/data/person.zip</literal> that will contain the
 			specified <literal>person.txt</literal>. To import this export into the table employee, you can

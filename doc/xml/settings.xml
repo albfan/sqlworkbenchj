@@ -21,7 +21,7 @@
 
   <note>
     <para>
-      Every property can also be specified on the commandline when starting &wb-productname; by setting a system
+      Every property can also be specified on the command line when starting &wb-productname; by setting a system
       property with that name using the <literal>-Dworkbench.property=value</literal> switch when starting
       the application using the <literal>java</literal> command directly.
     </para>
@@ -253,7 +253,7 @@
           <member><literal>.postgresql=view,table,system view,system table,sequence</literal></member>
           <member><literal>.rdb=view,table,system,system view</literal></member>
         </simplelist>
-        The values in this property are not case-sensitiv (<literal>TABLE</literal> is the same as <literal>table</literal>)
+        The values in this property are not case-sensitive (<literal>TABLE</literal> is the same as <literal>table</literal>)
       </para>
     </simplesect>
 
@@ -324,7 +324,7 @@
         A directory that contains the .jar files for the <link linkend="jdbc-lib-dir">JDBC drivers</link>.
         The value of this property can be referenced using <literal>%LibDir%</literal>
         in the driver's definition. The value for this can also be specified
-        <link linkend="cmdline-parameter-libdir">on the commandline</link>.
+        <link linkend="cmdline-parameter-libdir">on the command line</link>.
       </para>
       <para>No default</para>
     </simplesect>
@@ -462,7 +462,7 @@
       <title>Databases supporting the check for uncommitted changes</title>
       <para>Property: <literal>workbench.db.drivers.opentransaction.check</literal></para>
       <para>
-        A list of JDBC driver classnames that map to databases that support checking for uncommitted changes.
+        A list of JDBC driver class names that map to databases that support checking for uncommitted changes.
         If one of these drivers is selected in a connection profile, the option <link linkend="profile-open-trans">Check for uncomitted changes</link>
         will be visible in the connection dialog.
       </para>
@@ -634,7 +634,7 @@
 				<link linkend="command-copy">WbCopy</link>, the type mapping from the JDBC driver might
 				not be sufficient or correct. With this setting you can define your own type mapping
 				for a specific dbms. The entry is a list of mappings that map the numeric value
-				of a JDBC datatype (as defined in <ulink url="http://java.sun.com/javase/7/docs/api/java/sql/Types.html">java.sql.Types</ulink>)
+				of a JDBC datatype (as defined in <ulink url="http://docs.oracle.com/javase/8/docs/api/java/sql/Types.html">java.sql.Types</ulink>)
         to a real data type name for the <emphasis>target</emphasis> DBMS. The numeric JDBC datatype value
         and the DBMS specific datatype name are separated with a colon. Each pair is separated by a semicolon.
 			</para>
@@ -839,7 +839,7 @@
         <para>
           As an alternative, the DbExplorer can be configured to change the isolation
           level to <link linkend="dbexplorer-read-uncommmitted"><literal>READ UNCOMMITTED</literal></link>
-          to avoid the locks alltogether (but display pontially wrong information).
+          to avoid the locks alltogether (but display potentially wrong information).
         </para>
         <para>Default value: 2500</para>
       </simplesect>
@@ -976,7 +976,7 @@
 			<para>
 				This property controls whether XML exports are done using verbose XML or
 				short tags and only basic formatting. This property sets the default
-				value of the <literal>-verbosexml</literal> parameter for the <link linkend="command-export">WbExport</link> command.
+				value of the <literal>-verboseXML</literal> parameter for the <link linkend="command-export">WbExport</link> command.
 			</para>
 			<para>Default: <literal>true</literal></para>
 		</simplesect>
@@ -1112,7 +1112,7 @@
         </para>
         <para>
           This can be used to debug customized SQL statements
-          for DBMS's which are not (yet) preconfigured.
+          for DBMS's which are not (yet) pre-configured.
         </para>
         <para>Default: <literal>false</literal></para>
       </simplesect>
@@ -1205,7 +1205,8 @@
       <itemizedlist spacing="compact">
         <listitem><literal>internal</literal> - this is the default and uses the built-in logviewer</listitem>
         <listitem><literal>system</literal> - this will use the tool registered in the operating system to open files with the extension <literal>.log</literal></listitem>
-        <listitem>a path to an existing application - if the value denotes an existing filename, it is assumed that this is an application and accpets a filename as a command line parameter</listitem>
+        <listitem>a path to an existing application - if the value denotes an existing filename, it is assumed that this is an application and accepts
+          a filename as a command line parameter</listitem>
       </itemizedlist>
     </para>
   </section>
@@ -1223,7 +1224,7 @@
 				be used to qualify the table. To ignore all schemas use a *, e.g.
 				<literal>workbench.sql.ignoreschema.rdb=*</literal>. In this case, table names
 				will never be prefixed with the schema name reported by the JDBC driver.
-				The values specified in this property are case sensitiv.
+				The values specified in this property are case sensitive.
 			</para>
 			<para>
 				Note that for Oracle, tables that are owned by the current user will never
@@ -1260,7 +1261,7 @@
       <para>
         The placeholder <literal>%pk_definition%</literal> can be used if the DBMS does not support defining a primary
         key using an ALTER TABLE on the created table. If this placeholder is present in the template and the table
-        has a primary key, the placeholder will replaced with an approriate <literal>PRIMARY KEY (col1, ...)</literal>
+        has a primary key, the placeholder will replaced with an appropriate <literal>PRIMARY KEY (col1, ...)</literal>
         expression. Note that the template must <emphasis role="bold">not</emphasis> contain the needed
         comma for the <literal>PRIMARY KEY</literal>. The comma will be added by &wb-productname; if a primary key
         is defined. If the table has no primary key, the placeholder will automatically be removed.
@@ -1282,7 +1283,7 @@
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.constraints.systemname</literal></para>
 			<para>
 				Defines a regular expression to identify system generated constraint names.
-				If a constraint name is identified as beeing system generated, it is treated
+				If a constraint name is identified as being system generated, it is treated
 				as if no name was defined, when e.g. creating the SQL for a table.
 				Whether or not &wb-productname; then generates a name for the constraint can
 				be controlled in the options for the <link linkend="dbexp-options-gen-pk">DbExplorer</link>.
@@ -1436,7 +1437,7 @@ workbench.db.mysql.retrieve.create.table.index_included=true</programlisting>
 			<para>
 				When saving a filter to an external file, the pick list next to the filter
 				icon will offer a drop down that contains the most recently used filter definitions.
-				This setting will control the maximum size of that dropdown.
+				This setting will control the maximum size of that drop down.
 			</para>
 			<para>Default value: <literal>15</literal></para>
 		</simplesect>

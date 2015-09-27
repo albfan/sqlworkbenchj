@@ -151,7 +151,7 @@ $[my_select];</programlisting>
     <para>As you can see the variable substitution is also done inside quoted literals.</para>
 
     <para>
-      If you are using values in your regualar statements that actually need the prefix (<literal>$[</literal> or
+      If you are using values in your regular statements that actually need the prefix (<literal>$[</literal> or
       suffix (<literal>]</literal>) characters, please make sure that you have no variables defined.
       Otherwise you will unpredictable results. If you want to use variables but need to use
       the default prefix for marking variables in your statements, you can configure a different
@@ -186,7 +186,7 @@ workbench.sql.parameter.suffix=#</programlisting>
       If you execute this statement, &wb-productname; will prompt you for the value
       of the variable <literal>search_name</literal>. If the variable is already defined
       you will see the current value of the variable. If the variable is not yet defined
-      it will be implicitely defined with an empty value.
+      it will be implicitly defined with an empty value.
     </para>
 
     <para>
@@ -205,7 +205,7 @@ workbench.sql.parameter.suffix=#</programlisting>
 
     <para>
       The first time you execute this statement (and no value has been assigned to <literal>search_name</literal>
-      before using <literal>WBVARDEF</literal> or on the commandline) you will be prompted for a value for
+      before using <literal>WBVARDEF</literal> or on the command line) you will be prompted for a value for
       <literal>search_name</literal>. Any subsequent execution of the statement (or any other
       statement referencing <literal>$[&amp;search_name]</literal>) will re-use the value
       you entered.
@@ -219,7 +219,7 @@ workbench.sql.parameter.suffix=#</programlisting>
   <section id="sort-var-prompt">
     <title>Controlling the order of variables during prompting</title>
     <para>
-      By default the variables shown in the prompt dialog are sorted alphabetically. This behaviour can be
+      By default the variables shown in the prompt dialog are sorted alphabetically. This behavior can be
       changed by setting the configuration property <literal>workbench.sql.parameter.prompt.sort</literal> to true,
       e.g. using <link linkend="command-setconfig">WbSetConfig</link>
       <programlisting>WbSetConfig workbench.sql.parameter.prompt.sort=false</programlisting>

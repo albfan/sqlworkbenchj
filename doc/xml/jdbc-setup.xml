@@ -30,7 +30,7 @@
 		<para>
 			After you have selected the .jar file(s) for a driver (by clicking on the <guibutton><guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/open16.png" format="PNG"/></guiicon></guibutton>
       button), &wb-productname; will scan the jar file looking for a JDBC driver. If only a single driver is found,
-      the classname is automatically put into the entry field for the classname. If more than one JDBC driver implementation is found, you
+      the class name is automatically put into the entry field for the class name. If more than one JDBC driver implementation is found, you
 			will be prompted to select one. In that case, please refer to the manual of your driver or database to choose the correct one.
 		</para>
 
@@ -82,11 +82,12 @@
 			actual value.
 		</para>
 
-    <caution>
+    <important>
     <para id="odbc-bridge">
-      The JDBC/ODBC bridge is no longer available in <emphasis role="bold">Java 8</emphasis> and therefor it is not possible to connect through an ODBC data source when using &wb-productname;.
+      The JDBC/ODBC bridge is no longer available in <emphasis role="bold">Java 8</emphasis> and therefor it is not possible to connect
+      through an ODBC data source when using &wb-productname;.
     </para>
-    </caution>
+    </important>
 
   </section>
 
@@ -106,7 +107,7 @@
 		<title>Popular JDBC drivers</title>
 
 		<para>
-			Here is an overview of common JDBC drivers, and the classname that need
+			Here is an overview of common JDBC drivers, and the class name that need
 			to be used. &wb-productname; contains predefined JDBC drivers with sample URLs
       for connecting to the database.
 		</para>
@@ -136,7 +137,7 @@
 						<entry><literal>org.postgresql.Driver</literal></entry>
 						<entry>
               <simplelist columns="1">
-							<member><literal>postgresql-9.4-1201.jdbc4.jar</literal> (exact name depends on PostgreSQL version)</member>
+							<member><literal>postgresql-9.4-1203.jdbc4.jar</literal> (exact name depends on PostgreSQL version)</member>
 							<member><ulink url="http://jdbc.postgresql.org"/></member>
 						</simplelist>
 						</entry>

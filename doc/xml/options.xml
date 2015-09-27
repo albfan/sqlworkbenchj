@@ -2,7 +2,7 @@
 	<title>Options dialog</title>
 
 	<para>
-		The options dialog enables you to influence the behaviour and
+		The options dialog enables you to influence the behavior and
 		look of &wb-productname; to meet your needs. To open the options
 		dialog choose
 		<menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>.
@@ -28,9 +28,9 @@
 				With this option you can enable an automatic update check when
 				&wb-productname; is started. You can define the interval in days
 				after which the application should check for updates on the
-				homepage. If a newer version is found on the website this will
+				home page. If a newer version is found on the web site this will
 				be indicated with a little globe in the statusbar. Clicking on the
-				icon will open your default internet browser with the application's homepage.
+				icon will open your default internet browser with the application's home page.
 			</para>
 			<para>
 				If you disable this option, you can manually check
@@ -82,7 +82,7 @@
       <blockquote>
 			<para>
 				If this option is enabled, then the application is closed completely if the
-				initial connect dialog is cancelled.
+				initial connect dialog is canceled.
 			</para>
 			<para>
 				This option is only valid if "Show connect dialog" is selected.
@@ -94,7 +94,7 @@
 			<title>Consolidate script log</title><blockquote>
 			<para>
 				Usually &wb-productname; reports the success and timings
-				for each statement that is beeing executed in the message tab
+				for each statement that is being executed in the message tab
 				of the current SQL panel. For large scripts this can slow down
 				script execution dramatically. If this option is enabled, only
 				a summary of the execution is printed once the script has finished.
@@ -150,7 +150,7 @@
 		<simplesect id="options-scroll-tabs">
 			<title>Scroll tabs</title><blockquote>
 			<para>
-				This option controls the behaviour of the tab display, if more tabs
+				This option controls the behavior of the tab display, if more tabs
 				are opened than can be displayed in the current width of the window.
 			</para>
 			<para>
@@ -178,7 +178,7 @@
 			<title>Enable animated icons</title><blockquote>
 			<para>Enable or disable the use of an animated icons in the SQL editor to
 				indicate a running SQL statement. It has been reported, that the animated
-				icon does have a severe (negativ) impact on the performance on some computers
+				icon does have a severe (negative) impact on the performance on some computers
 				(depending on JDK/OS/Graphics driver).
 				If you experience a high CPU usage during the execution of SQL statements, or
 				if you find your SQL statements are running very slow, try
@@ -437,7 +437,7 @@
         using <guimenuitem>Execute current</guimenuitem> inside the editor.
 			</para>
 			<note><para>
-				This does not influence the behaviour when running scripts in batch mode or when using the <literal>WbInclude</literal> command.
+				This does not influence the behavior when running scripts in batch mode or when using the <literal>WbInclude</literal> command.
 			</para></note>
 		</blockquote></simplesect>
 
@@ -506,7 +506,7 @@
 		<simplesect id="options-bookmark-proc-params">
 			<title>Include parameter names for procedures and functions</title><blockquote>
 			<para>
-        When including procudure and function names in the bookmarks, only the datatype of the parameters
+        When including procedure and function names in the bookmarks, only the datatype of the parameters
         are shown in the bookmark list. If this option is enabled the parameter names (if available) are also shown.
 			</para>
 		</blockquote></simplesect>
@@ -630,7 +630,7 @@
 			<title>Close completion with search</title><blockquote>
 			<para>
 				When using the quicksearch feature in the <link linkend="command-completion">code completion</link>
-				this option controls the behaviour when hitting the ESC key. If this option
+				this option controls the behavior when hitting the ESC key. If this option
 				is enabled, the ESC key will also close the popup window with the available
 				choices. If this option is disabled, the ESC key will only close the quicksearch
 				<emphasis>input</emphasis> field.
@@ -649,7 +649,7 @@
 			<title>Quick search matches anywhere</title><blockquote>
 			<para>
         If this option is enabled, the typed characters match anywhere in the object name.
-        If this optioin is disabled, the object name must start with the entered search value.
+        If this option is disabled, the object name must start with the entered search value.
 			</para>
 		</blockquote></simplesect>
 
@@ -778,7 +778,7 @@
 		<simplesect id="option-sort-collator">
       <title>Sort Locale</title><blockquote>
       <para>
-      	When you sort the result set, characters values will be sorted case-sensitiv by default.
+      	When you sort the result set, characters values will be sorted case-sensitive by default.
       	This is caused by the <literal>compareTo()</literal> method available in the Java
       	environment which puts lower case characters in front of upper case characters when sorting.
 				With the "Sort Locale" option you can select which language rules should be applied
@@ -794,7 +794,7 @@
       </para>
 			<para>
 				If you have a single numeric column selected (by holding down the <keycap>Alt</keycap> key
-				while selecting with the mouse), the statusbar will display the sum of the selected values.
+				while selecting with the mouse), the status bar will display the sum of the selected values.
 			</para>
     </blockquote></simplesect>
 
@@ -828,12 +828,12 @@
 			</para>
 			<para>
 				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
-				will be displayed with the multiline renderer. A <literal>VARCHAR(210)</literal>
+				will be displayed with the multi line renderer. A <literal>VARCHAR(210)</literal>
         will be displayed in a single line. Note that this limit refers to the <emphasis>defined</emphasis>
         length of the column, not the actual length of the data.
 			</para>
 			<para>
-				Displaying data using the multiline component is slower than using the standard (single line) component.
+				Displaying data using the multi line component is slower than using the standard (single line) component.
 			</para>
 			<para>
 				The feature <link linkend="options-auto-optimize-row-height">Adjust row height</link> only works with multi-line columns.
@@ -843,7 +843,7 @@
 		<simplesect id="options-retrieve-column-remarks">
 			<title>Retrieve column remarks for queries</title><blockquote>
 			<para>
-				If this option is enabled, the remarks defined for table columns in a result set are retrieved and shown as a tooltip.
+				If this option is enabled, the remarks defined for table columns in a result set are retrieved and shown as a tool tip.
         As this requires additional overhead after processing a query, it can be disabled for performance reasons.
 			</para>
 		</blockquote></simplesect>
@@ -948,9 +948,9 @@
 				</para>
 				<para>
 					Not every (character) column is displayed in a manner that multiple lines will be displayed.
-					The default setting is to always display <literal>CLOB</literal> columns as multiline.
+					The default setting is to always display <literal>CLOB</literal> columns as multi line.
 					<literal>VARCHAR</literal> (and <literal>CHAR</literal>) columns will only be displayed in
-					multiline mode if they can hold more than 250 characters. This limit
+					multi line mode if they can hold more than 250 characters. This limit
 					can be <link linkend="options-multiline">changed</link>.
 				</para>
 			</blockquote></simplesect>
@@ -966,7 +966,7 @@
 			<simplesect id="options-rowheight-max-lines">
 				<title>Max. number of lines</title><blockquote>
 				<para>
-					When calculating the optimimal height for each row, the number of lines defined
+					When calculating the optimal height for each row, the number of lines defined
 					with this option will never be exceeded.
 				</para>
 			</blockquote></simplesect>
@@ -982,7 +982,7 @@
 			<title>Date, timestamp and time formats</title><blockquote>
 			<para>Define the format for displaying date, date/time (timestamp) and time columns in the result
 				set. For details on the format of this option, please refer to the
-				documentation of the <ulink url="http://java.sun.com/javase/7/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
+				documentation of the <ulink url="http://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
 				This format is also used when parsing input for date or timestamp fields, so if you
 				enter a date while <link linkend="edit-data">editing</link> the data,
 				make sure you enter it the same way as defined with this option.
@@ -1052,7 +1052,7 @@
 			<para>Define the maximum number of digits which will be displayed for
 				numeric columns. This only affects the display of the number, not the storage or retrieval.
         Internally they are still stored as the DBMS returned them. To see the internal
-				value, leave the mouse cursor over the cell. The tooltip which is
+				value, leave the mouse cursor over the cell. The tool tip which is
 				displayed will contain the number as it was returned by the JDBC driver.
 				When exporting data or copying it to the clipboard, the real value will be used.
 			</para>
@@ -1225,7 +1225,7 @@
           <para>
             When this option is selected, a rectangle indicating the currently
             focused panel will be displayed, to indicate the component that
-            will received keystrokes e.g. shortcuts such as <literal>Ctrl-R</literal>.
+            will received keystrokes e.g. shortcuts such as <keycap>Ctrl-R</keycap>.
           </para>
         </blockquote>
       </simplesect>
@@ -1234,7 +1234,7 @@
         <title>Object details tabs</title>
         <blockquote>
           <para>
-            With this dropdown you can select the position of the details tabs
+            With this drop down you can select the position of the details tabs
             (Columns, Source, Data etc).
           </para>
         </blockquote>
@@ -1269,7 +1269,7 @@
         <title>Remember object type</title>
         <blockquote>
         <para>
-          The list of objects can be filtered with the dropdown. If the
+          The list of objects can be filtered with the drop down. If the
           option "Remember object type" is selected, the current object type
           will be stored in the workspace of the current connection, and will
           be restored the next time.
@@ -1318,8 +1318,7 @@
         <blockquote>
           <para>
             If "Remember object type" is not enabled, you can define a default object
-            type that is selected in the dropdown when the DbExplorer is displayed
-            initially.
+            type that is selected in the drop down when the DbExplorer is displayed initially.
           </para>
         </blockquote>
       </simplesect>
@@ -1355,7 +1354,7 @@
         <blockquote>
         <para>
           If the table data was sorted by clicking on one of the columns, reloading the data
-          will use an approriate <literal>ORDER BY</literal> clause for the data retrieval.
+          will use an appropriate <literal>ORDER BY</literal> clause for the data retrieval.
           This is useful if not all rows were displayed in the data panel due to a max. row limit
           and you want the first rows displayed based on the current column sort.
         </para>
@@ -1399,7 +1398,7 @@
         <blockquote>
         <para>
           If this option is enabled the generated table source will start with
-          the approriate <literal>DROP</literal> statement.
+          the appropriate <literal>DROP</literal> statement.
         </para>
         </blockquote>
       </simplesect>
@@ -1475,7 +1474,7 @@
 	<section id="options-sql-formatting">
 		<title>SQL Formatting</title>
       <para>
-        These options influence the behaviour of the internal SQL Formatter when
+        These options influence the behavior of the internal SQL Formatter when
         <link linkend="editor-reformat-sql">reformatting</link> a SQL statement in the editor.
       </para>
 			<simplesect id="opt-sql-formatting-maxlength">
@@ -1683,7 +1682,7 @@ FROM person;</programlisting>
 			<simplesect id="opt-sql-formatting-quoted-elements">
 				<title>Quoted elements per line</title><blockquote>
 				<para>
-					This optioin is used when changing the selected text into elements suitable for an <literal>IN</literal> list
+					This option is used when changing the selected text into elements suitable for an <literal>IN</literal> list
 					using <link linkend="editor-make-in-list"><menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice></link>.
 					The number of values that are kept on a single line is controlled with this option.
 				</para>

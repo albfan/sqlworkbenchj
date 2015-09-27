@@ -2,7 +2,7 @@
 	<title>Using &wb-productname; in console mode</title>
 
 	<para>
-		&wb-productname; can also be used from the commandline without starting the GUI, e.g. when
+		&wb-productname; can also be used from the command line without starting the GUI, e.g. when
 		you only have a console window (Putty, SSH) to access the database. In that case you can either
 		run scripts using the <link linkend="using-scripting">batch mode</link>, or start &wb-productname;
 		in console mode, where you can run statements interactively, similar to the GUI mode (but of course with
@@ -85,7 +85,7 @@ SQL&gt;</screen>
 		<title>Setting or changing the connection</title>
 
 		<para>
-			If you did not specify a connection on the commandline when starting the console, you can set or
+			If you did not specify a connection on the command line when starting the console, you can set or
 			change the current connection in console mode using the
 			<link linkend="command-connect"><literal>WbConnect</literal></link> command.
 			Using <literal>WbConnect</literal> in console mode will automatically close the current
@@ -108,7 +108,7 @@ SQL&gt;</screen>
 		</para>
 
 		<para>
-			You can disable the buffering of the results using the commandline parameter <literal>bufferResults=false</literal>.
+			You can disable the buffering of the results using the command line parameter <literal>bufferResults=false</literal>.
 			In that case, the width of the displayed columns will not be adjusted properly. The column widths are
 			taken from the information returned by the driver which typically results is a much larger display
 			than needed.
@@ -320,7 +320,7 @@ SQL> </screen>
     <title>PostgreSQL psql commands</title>
     <para>
       Some of the &wb-productname; specific commands can be abbreviated using the command syntax from PostgreSQL's
-      commandline client <literal>psql</literal>. This is only implemented for very few commands and
+      command line client <literal>psql</literal>. This is only implemented for very few commands and
       most of them don't work exactly the same way as the PostgreSQL command.
     </para>
     <para>

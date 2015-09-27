@@ -19,7 +19,7 @@
   <section id="db-tree-filter">
     <title>Filtering the elements in the tree</title>
     <para>
-      The quickfilter above the object tree can be used to quickly search for objects with a specific name.
+      The quick filter above the object tree can be used to quickly search for objects with a specific name.
       The filtering will only be done on <emphasis role="bold">already loaded</emphasis> elements of the tree.
     </para>
   </section>
@@ -34,7 +34,7 @@
 				<itemizedlist>
 					<listitem><simpara>dropping the "Columns" node of the tree will insert a comma separated list of all columns</simpara></listitem>
 					<listitem><simpara>dropping a table into a position where no current SQL statement is located, a <literal>SELECT</literal> statement for the table will be inserted</simpara></listitem>
-          <listitem><simpara>in all other cases, the name of the dropped element will be inserted (e.g. the name of the tabl, column or index)</simpara></listitem>
+          <listitem><simpara>in all other cases, the name of the dropped element will be inserted (e.g. the name of the table, column or index)</simpara></listitem>
         </itemizedlist>
       </para>
     </section>
@@ -43,7 +43,7 @@
       <title>Displaying a table's data</title>
       <para>
         To display the data of a table, drag the table node from the Database Object Tree to the result panel of the
-        current SQL editor. &wb-productname; will then generate an approriate <literal>SELECT</literal> statement
+        current SQL editor. &wb-productname; will then generate an appropriate <literal>SELECT</literal> statement
         for the table and execute it immediately.
       </para>
     </section>
@@ -88,7 +88,7 @@
 			<title>Count rows</title>
 			<blockquote>
 				<para>
-					This will count the rows for each selected table object. The rowcounts will be shown in parentheses next to the table name.
+					This will count the rows for each selected table object. The row counts will be shown in parentheses next to the table name.
           This is the same functionality as the <link linkend="command-rowcount"><literal>WbRowCount</literal></link>
           command.
         </para>

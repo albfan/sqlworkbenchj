@@ -23,7 +23,7 @@
   <section id="credits">
     <title>Credits and thanks</title>
     <para>
-      Thanks to Christian (and his team) for his thorough testing, his patience and his continous
+      Thanks to Christian (and his team) for his thorough testing, his patience and his continuous
       ideas to improve this tool. His input has influenced and driven a lot of
       features and has helped reduce the number of bugs drastically!
     </para>
@@ -37,7 +37,7 @@
       <para>
         &wb-productname; includes the <ulink url="http://jline.sourceforge.net/">JLine</ulink> library to support
         command line editing for the <link linkend="console-mode">console mode</link> on Unix style operating systems.
-        The JDK on Windows supports full editing of the commandline including the usual Windows hotkeys to show the
+        The JDK on Windows supports full editing of the command line including the usual Windows keyboard shortcuts to show the
         list of commands, so JLine is not used when &wb-productname; is running under Windows.
       </para>
       <para>

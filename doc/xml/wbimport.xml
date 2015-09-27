@@ -19,7 +19,7 @@
 
 	<para>
 		The <literal>WbImport</literal> command can be used like any other SQL command
-		(such as <literal>UPDATE</literal> or <literal>INSERT</literal>), inlcuding scripts
+		(such as <literal>UPDATE</literal> or <literal>INSERT</literal>), including scripts
 		that are run in <link linkend="using-scripting">batch mode</link>.
 	</para>
 
@@ -30,7 +30,7 @@
 
 	<para>
 		<literal>WbImport</literal> recognizes certain "literals" to identify the current date or time
-		when converting values from text files to the approriate data type of the DBMS.
+		when converting values from text files to the appropriate data type of the DBMS.
 		Thus, input values like <literal>now</literal>, or <literal>current_timestamp</literal>
 		for date or timestamp columns are converted correctly. For details on which "literals" are
 		supported, please see the description about <link linkend="editing-date-keywords">editing data</link>.
@@ -69,7 +69,7 @@
 
     <para>
       You can tell if the needed libraries are installed if you invoke the <link linkend="command-completion">auto-completion</link>
-      after typing the <literal>-type=</literal> parameter. If the types XLS or ODS are presented in the dropdown, the libraries installed.
+      after typing the <literal>-type=</literal> parameter. If the types XLS or ODS are presented in the drop down, the libraries installed.
     </para>
 
     <para>
@@ -79,7 +79,7 @@
     <important>
       <para>
         To import XLS or XLSX files, the entire file needs to be read into memory. When importing
-        large files this will require a substiantal amount of memory.
+        large files this will require a substantial amount of memory.
       </para>
     </important>
 
@@ -168,7 +168,7 @@
 								When using the <literal>-sourcedir</literal> switch, the
 								extension for the files can be defined. All files ending with the supplied
 								value will be processed. (e.g. <literal>-extension=csv</literal>).
-								The extension given is case-sensitiv (i.e. <literal>TXT</literal> is something
+								The extension given is case-sensitive (i.e. <literal>TXT</literal> is something
 								different than <literal>txt</literal>
 							</para>
 						</entry>
@@ -268,7 +268,7 @@
 						<entry>-continueOnError</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>This parameter controls the behaviour when errors occur during
+							<para>This parameter controls the behavior when errors occur during
 								the import. The default is <literal>true</literal>, meaning that the import
 								will continue even if an error occurs during file parsing or updating the database.
 								Set this parameter to <literal>false</literal> if you want to stop the import as soon as an error occurs.
@@ -289,9 +289,9 @@
 						<entry>
 							<para>Possible values: <literal>ignore</literal>, <literal>warning</literal>, <literal>fail</literal></para>
 							<para>
-                This parameter controls the behaviour when an empty file (i.e. with a length of zero bytes) is used
+                This parameter controls the behavior when an empty file (i.e. with a length of zero bytes) is used
                 for the input file. <literal>ignore</literal> means the file is ignored, no warning will be shown
-                or written to the logfile. <literal>warning</literal> means the file is ignored, but a warning
+                or written to the log file. <literal>warning</literal> means the file is ignored, but a warning
                 will be shown and logged. With <literal>fail</literal> an empty file will be treated as an error
                 unless <literal>-continueOnError=true</literal> is specified.
 						</para>
@@ -466,7 +466,7 @@
                 A numeric value to define the first row to be imported. Any row before the
                 specified row will be ignored. The header row is not counted
                 to determine the row number. For a text file with a header
-                row, the pysical line 2 is row 1 (one) for this parameter.
+                row, the physical line 2 is row 1 (one) for this parameter.
               </para>
               <para>
                 When importing text files, empty lines in the input file are silently ignored
@@ -740,14 +740,14 @@
 						<entry>
 							<para>
 								A comma separated list of the table columns in the import file
-								Each column from the file should be listed with the approriate column
+								Each column from the file should be listed with the appropriate column
 								name from the target table. This parameter also defines
 								the order in which those columns appear in the file.
 								If the file does not contain a header line or the header line does not
 								contain the names of the columns in the database (or has different names),
 								this parameter has to be supplied. If a column from the input
 								file has no match in the target table, then it should be specified with
-								the name $wb_skip$. You can also specify the $wb_skip$ flag for
+                the name <literal>$wb_skip$</literal>. You can also specify the <literal>$wb_skip$</literal> flag for
 								columns which are present but that you want to exclude from the
 								import.
 							</para>
@@ -1051,7 +1051,7 @@
 								into text files, each BLOB will be written into a separate file. The actual column
 								data of the text file will contain the file name of the external file.
 								When importing text files that do not reference external files
-								into tables with BLOB columns setting this paramter to false, will send the content
+								into tables with BLOB columns setting this parameter to false, will send the content
 								of the BLOB column "as is" to the DBMS. This will of course only work
 								if the JDBC driver can handle the data that in the BLOB columns of the
 								text file. The default for this parameter is <literal>true</literal>
@@ -1156,7 +1156,7 @@
       <para>
         This imports a file with three columns into a table named person. The
         first column in the file is <literal>lastname</literal>, the second column
-        is <literal>firstname</literal> and the third column is <literal>birhtday</literal>.
+        is <literal>firstname</literal> and the third column is <literal>birthday</literal>.
         Values in date columns are formated as yyyy-MM-dd
       </para>
 
@@ -1205,7 +1205,7 @@
 
      <para>
        This will import a file with three columns. The first column named <literal>custnr</literal> is taken
-       from the characters 1-10, the second column namend <literal>accountid</literal> ist taken from
+       from the characters 1-10, the second column named <literal>accountid</literal> is taken from
        the characters 21-30 and the third the column <literal>region_code</literal> is taken from
        characters 31 and 32
      </para>
@@ -1421,7 +1421,7 @@
 								<para>
 									Defines the columns that should be imported. If all
 									columns from the input file should be imported (the default), then
-									this parameter can be ommited. When specified, the columns have to match
+									this parameter can be omited. When specified, the columns have to match
 									the column names available in the XML file.
 								</para>
 							</entry>
@@ -1482,7 +1482,7 @@
               <entry>-sheetNumber</entry>
               <entry>
                 <para>
-                  Selects the spreedsheet inside the file to be imported. If this is not specified the first
+                  Selects the spread sheet inside the file to be imported. If this is not specified the first
                   sheet is used. The first sheet has the number 1.
                 </para>
                 <para>
@@ -1544,7 +1544,7 @@
 			statement fails, the second will be executed. For <literal>-mode=insert,update</literal> to
 			work properly a primary or unique key has to be defined on the table. &wb-productname;
 			will catch any exception (=error) when inserting a record, then it will try updating
-			the record, based on the specified keycolumns.
+			the record, based on the specified key columns.
 			The <literal>-mode=update,insert</literal> works the other way. First &wb-productname;
 			will try to update the record based on the primary keys. If the DBMS signals that no rows
 			have been updated, it is assumed that the row does not exist and the record will be inserted

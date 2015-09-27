@@ -52,7 +52,7 @@
 				package is enabled.
 				In order to be able to display these columns, the support for <literal>DBMS_OUTPUT</literal>
 				has to be switched off using the <link linkend="command-dbms-output">DISABLEOUT</link> command
-				before runnnig a <literal>SELECT</literal> statement that returns <literal>LONG</literal>
+				before running a <literal>SELECT</literal> statement that returns <literal>LONG</literal>
 				or <literal>LONG RAW</literal> columns.
 			</para>
 		</section>
@@ -178,7 +178,7 @@ SELECT 42 FROM dual;</programlisting>
 			<para>
 				MySQL allows the user to store invalid dates in the database (0000-00-00). Since
 				version 3.1 of the JDBC driver, the driver will throw an exception when trying to retrieve
-				such an invalid date. This behaviour can be controlled by adding an <link linkend="profile-extended-properties">extended property</link>
+				such an invalid date. This behavior can be controlled by adding an <link linkend="profile-extended-properties">extended property</link>
 				to the connection profile. The property should be named <literal>zeroDateTimeBehavior</literal>. You can
 				set this value to either <literal>convertToNull</literal> or to <literal>round</literal>. For details
 				see <ulink url="http://dev.mysql.com/doc/connector-j/en/connector-j-reference-configuration-properties.html"/>
@@ -191,7 +191,7 @@ SELECT 42 FROM dual;</programlisting>
 		<section id="mysql-no-view-source">
 			<title>The SQL source for views is not displayed</title>
 			<para>
-				&wb-productname; retrieves the view definitioin from <literal>INFORMATION_SCHEMA.VIEWS</literal>.
+				&wb-productname; retrieves the view definition from <literal>INFORMATION_SCHEMA.VIEWS</literal>.
         For some unknown reason, the column <literal>VIEW_DEFINITION</literal> sometimes does not contain the view definition
         and the source is not displayed in the DbExplorer.
 			</para>
@@ -229,7 +229,7 @@ SELECT 42 FROM dual;</programlisting>
         with a wrong value (two days less than expected).
 		  </para>
 		  <para>
-        Version 4.0 of the Micrsoft driver does not show this behaviour. If you see wrong values for <literal>DATE</literal> columns
+        Version 4.0 of the Microsoft driver does not show this behavior. If you see wrong values for <literal>DATE</literal> columns
         and are using version 3.0, please upgrade your driver.
 		  </para>
 		</section>
@@ -336,7 +336,7 @@ SELECT 42 FROM dual;</programlisting>
         For large exports this us usually not wanted.
       </para>
       <para>
-        This behaviour of the drivers can be changed by adding an additional parameter to the
+        This behavior of the drivers can be changed by adding an additional parameter to the
         JDBC URL that is used to connect to the database. For the jTDS driver append
         <literal>useCursors=true</literal> to the URL, e.g.
         <literal>jdbc:jtds:sqlserver://localhost:2068;useCursors=true</literal>
@@ -468,7 +468,7 @@ SELECT 42 FROM dual;</programlisting>
         For large exports this us usually not wanted.
       </para>
       <para>
-        This behaviour of the driver can be changed so that the driver uses cursor based retrieval.
+        This behavior of the driver can be changed so that the driver uses cursor based retrieval.
         To do this, the connection profile must disable the "Autocommit" option, and must define
         a default fetch size that is greater than zero. A recommended value is e.g. 10, it might be
         that higher numbers give a better performance. The number defined for the fetch size,

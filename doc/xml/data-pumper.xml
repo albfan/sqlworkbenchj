@@ -56,7 +56,7 @@
 			be used as a replacement of the <link linkend="command-import">WbImport</link> command.
 		</para>
 
-		<para>The dropdown for the target table includes an entry labelled "(Create new table)". For details
+		<para>The drop down for the target table includes an entry labeled "(Create new table)". For details
 		on how to create a new table during the copy process please refer to the
 		<link linkend="data-pumper-advanced-tasks">advanced tasks</link> section.</para>
 
@@ -135,7 +135,7 @@
 		<section id="data-pumper-batchupdate">
 			<title>Batch execution</title>
 			<para>If the JDBC driver supports batch updates, you can enable the use of batch updates with
-				this checkbox. The checkbox will be disabled, if the JDBC driver does not support batch updates,
+				this check box. The check box will be disabled, if the JDBC driver does not support batch updates,
 				or if a combined update mode (insert,update, update,insert) is selected.
 			</para>
 			<para>Batch execution is only available if either INSERT or UPDATE mode is selected.</para>
@@ -156,7 +156,7 @@
 				update.
 			</para>
 			<para>
-				For maximum performance, choose the update strategy that will result in a succssful
+				For maximum performance, choose the update strategy that will result in a successful
 				first statement more often. As a rule of thumb:
 				<itemizedlist>
 					<listitem><simpara>Use <literal>-mode=insert,update</literal>, if you expect more rows to be inserted then updated.</simpara></listitem>

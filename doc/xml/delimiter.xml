@@ -30,7 +30,7 @@
     <title>Oracle PL/SQL</title>
     <para>
       This is an example of a <literal>CREATE PROCEDURE</literal> which will
-      <emphasis role="bold">not</emphasis> work due to the embedded semicolon in
+      <emphasis role="bold">NOT</emphasis> work due to the embedded semicolon in
       the procedure source itself.
     </para>
     <programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
@@ -73,8 +73,8 @@ END;
       The standard delimiter (the semicolon) and the alternate delimiter
       can be mixed in a single script. Whenever a PL/SQL block (either a stored procedure or
       an anonymous block) is encountered, &wb-productname; expects the alternated delimiter to
-      terminate that block. This follows essentially the same
-      rules <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_four.htm#i1039663">as used in SQL*Plus</ulink>.
+      terminate that block. This follows the same rules
+      <ulink url="http://docs.oracle.com/cd/E11882_01/server.112/e16604/ch_four.htm#i1039663">as used in SQL*Plus</ulink>.
     </para>
 
     <para>
@@ -99,11 +99,14 @@ end;
   </section>
 
   <section id="delimiter-other">
-    <title id="alternate-delimiter-usage">Other DBMS</title>
-    <para><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
+    <title>Other DBMS</title>
+    <para id="alternate-delimiter-usage"><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
 
     <para>
-      For all other DBMS, the use of the alternate delimiter is defined by the last delimiter used in the script.
+      For all other DBMS, the use of the alternate delimiter is defined by the <emphasis role="bold">last delimiter</emphasis>
+      used in the script.
+    </para>
+    <para>
       As soon as the statement (or script) that you execute ends with the alternate delimiter, the alternate delimiter
       is used to separate all SQL statements. When you execute selected text from the editor, be sure to select the
       alternate delimiter as well, otherwise it will not be recognized (if the alternate delimiter is not selected,

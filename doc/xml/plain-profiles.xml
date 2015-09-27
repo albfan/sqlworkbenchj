@@ -25,7 +25,7 @@
     The last element of the key is the actual profile property.
   </para>
   <para>
-    A minimial definition of a profile in a properties file, could look like this:
+    A minimal definition of a profile in a properties file, could look like this:
     <programlisting>profile.042.name=Local Postgres
 profile.042.driverclass=org.postgresql.Driver
 profile.042.url=jdbc:postgresql://localhost/postgres
@@ -140,7 +140,7 @@ profile.042.driverjar=postgresql-9.4-1203.jdbc41.jar
               Either this parameter or <literal>drivername</literal> is mandatory.
             </para>
             <para>
-              Definining the driver jar in this way is not supported when running in GUI mode. Drivers managed
+              Defining the driver jar in this way is not supported when running in GUI mode. Drivers managed
               through the GUI will always be saved in <literal>WbDrivers.xml</literal>
             </para>
           </entry>
