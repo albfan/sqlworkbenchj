@@ -1493,21 +1493,21 @@ public class WbSwingUtilities
 		int itemHeight = 16;
 		int barHeight = 24;
 
-		FontMetrics fm = window.getFontMetrics(itemFont);
+		FontMetrics fm = itemFont == null ? null : window.getFontMetrics(itemFont);
 		if (fm != null)
 		{
 			itemHeight = fm.getHeight();
 		}
-		else
+    else if (itemFont != null)
 		{
 			itemHeight = convertPointSizeToPixel(itemFont.getSize());
 		}
-		FontMetrics barMetrics = window.getFontMetrics(barFont);
+		FontMetrics barMetrics = barFont == null ? null : window.getFontMetrics(barFont);
 		if (barMetrics != null)
 		{
 			barHeight = fm.getHeight();
 		}
-		else
+    else if (barFont != null)
 		{
 			barHeight = convertPointSizeToPixel(barFont.getSize());
 		}
