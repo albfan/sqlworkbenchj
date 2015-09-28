@@ -3348,7 +3348,7 @@ public class SqlPanel
 
         if (LogMgr.isTraceEnabled())
         {
-          LogMgr.logTrace("SqlPanel.displayResults()", "Statement " + i + ": " + SqlUtil.makeCleanSql(StringUtil.getMaxSubstring(currentSql, 60), false));
+          LogMgr.logTrace("SqlPanel.displayResults()", "Statement " + i + ": " + SqlUtil.makeCleanSql(StringUtil.getMaxSubstring(currentSql, 150), false));
         }
 
 				historyStatements.add(currentSql);
