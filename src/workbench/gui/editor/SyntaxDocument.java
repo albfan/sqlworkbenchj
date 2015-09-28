@@ -182,6 +182,8 @@ public class SyntaxDocument
 
 		len += start;
 
+    maxLineLength = 0;
+
 		try
 		{
 			for (int i = start; i < len; i++)
@@ -190,6 +192,10 @@ public class SyntaxDocument
 				if (lineElement == null) break;
 				int lineStart = lineElement.getStartOffset();
 				getText(lineStart, lineElement.getEndOffset() - lineStart - 1, lineSegment);
+				if (lineSegment.count > this.maxLineLength)
+        {
+          maxLineLength = lineSegment.count;
+        }
 				tokenMarker.markTokens(lineSegment, i);
 			}
 		}
@@ -215,7 +221,10 @@ public class SyntaxDocument
 				Element lineElement = map.getElement(i);
 				int lineStart = lineElement.getStartOffset();
 				getText(lineStart, lineElement.getEndOffset() - lineStart - 1, lineSegment);
-				if (lineSegment.count > this.maxLineLength) this.maxLineLength = lineSegment.count;
+				if (lineSegment.count > this.maxLineLength)
+        {
+          this.maxLineLength = lineSegment.count;
+        }
 			}
 		}
 		catch (BadLocationException bl)
@@ -226,6 +235,10 @@ public class SyntaxDocument
 
 	public int getMaxLineLength()
 	{
+    if (maxLineLength <= 0 && getLength() > 0)
+    {
+      calcMaxLineLength();
+    }
 		return this.maxLineLength;
 	}
 
@@ -256,7 +269,6 @@ public class SyntaxDocument
 	 */
 	public synchronized void endCompoundEdit()
 	{
-		this.calcMaxLineLength();
 		if (undoSuspended) return;
 
 		long duration = undoItem.getDurationSinceLastEdit();

@@ -752,8 +752,6 @@ public class JEditTextArea
 			LogMgr.logDebug("JEditTextArea.updateScrollbars()", "updateScrollbars() not called from within the EDT!", new Exception());
 		}
 
-//		boolean changed = false;
-
 		if (visibleLines > 0)
 		{
       int lineCount = getLineCount();
@@ -763,16 +761,11 @@ public class JEditTextArea
 
 			if (visibleLines > lineCount)
 			{
-//        changed = vertical.isVisible();
 				setFirstLine(0);
         vertical.setVisible(false);
-//				remove(vertical);
 			}
 			else
 			{
-//        changed = !vertical.isVisible();
-//				add(RIGHT, vertical);
-//        add(vertical, BorderLayout.EAST);
         vertical.setVisible(true);
 			}
 		}
@@ -781,7 +774,7 @@ public class JEditTextArea
 
 		if (width > 0)
 		{
-      int charWidth = painter.getFontMetrics().getMaxAdvance();
+      int charWidth = painter.getFontMetrics().charWidth('M');
       int maxLineLength = getDocument().getMaxLineLength();
       int maxLineWidth = (charWidth * maxLineLength) + this.painter.getGutterWidth() + charWidth;
 
@@ -791,23 +784,13 @@ public class JEditTextArea
 
 			if (maxLineWidth < width)
 			{
-//        changed = vertical.isVisible();
         horizontal.setVisible(false);
-//				remove(horizontal);
 			}
 			else
 			{
-//				add(BOTTOM, horizontal);
-//        add(horizontal, BorderLayout.SOUTH);
-//        changed = !vertical.isVisible();
         horizontal.setVisible(true);
 			}
 		}
-
-//		if (changed)
-//		{
-//			invalidate();
-//		}
 	}
 
   public void centerLine(final int line)
@@ -886,13 +869,7 @@ public class JEditTextArea
 		int lineHeight = painter.getFontMetrics().getHeight();
 		if (lineHeight == 0) return;
 
-    int lines = visibleLines;
 		visibleLines = height / lineHeight;
-
-    if (lines != visibleLines)
-    {
-      updateScrollBars();
-    }
 	}
 
 	/**
@@ -1272,6 +1249,7 @@ public class JEditTextArea
 		clearCurrentDocument();
 
 		document = newDocument;
+    document.tokenizeLines();
 
 		select(0,0,null);
 
@@ -1292,7 +1270,6 @@ public class JEditTextArea
 				public void run()
 				{
 					updateScrollBars();
-					invalidate();
 					validate();
 					painter.repaint();
 				}
@@ -3002,8 +2979,13 @@ public class JEditTextArea
 		@Override
 		public void componentResized(ComponentEvent evt)
 		{
-			recalculateVisibleLines();
-			scrollBarsInitialized = true;
+      if (evt.getID() == ComponentEvent.COMPONENT_RESIZED)
+      {
+        recalculateVisibleLines();
+        updateScrollBars();
+        invalidate();
+        scrollBarsInitialized = true;
+      }
 		}
 	}
 
