@@ -14,12 +14,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Insets;
-import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -43,8 +40,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -209,7 +204,7 @@ public class JEditTextArea
 		painter = new TextAreaPainter(this);
 		setBackground(Color.WHITE);
     setDoubleBuffered(true);
-    
+
 		documentHandler = new DocumentHandler();
 		listeners = new EventListenerList();
 		caretEvent = new MutableCaretEvent();
@@ -2959,140 +2954,6 @@ public class JEditTextArea
 			units = e.getUnitsToScroll();
 		}
 		vertical.setValue(vertical.getValue() + units);
-	}
-
-	class ScrollLayout implements LayoutManager
-	{
-		// private members
-		private Component center;
-		private Component right;
-		private Component bottom;
-		private final List<Component> leftOfScrollBar = new ArrayList<>();
-
-		@Override
-		public void addLayoutComponent(String name, Component comp)
-		{
-			if (name.equals(CENTER))
-			{
-				center = comp;
-			}
-			else if (name.equals(RIGHT))
-			{
-				right = comp;
-			}
-			else if (name.equals(BOTTOM))
-			{
-				bottom = comp;
-			}
-		}
-
-		@Override
-		public void removeLayoutComponent(Component comp)
-		{
-			if (center == comp)
-			{
-				center = null;
-			}
-			if (right == comp)
-			{
-				right = null;
-			}
-			if (bottom == comp)
-			{
-				bottom = null;
-			}
-			else
-			{
-				leftOfScrollBar.remove(comp);
-			}
-		}
-
-		@Override
-		public Dimension preferredLayoutSize(Container parent)
-		{
-			Dimension dim = new Dimension();
-			Insets insets = getInsets();
-			dim.width = insets.left + insets.right;
-			dim.height = insets.top + insets.bottom;
-
-			Dimension centerPref = center.getPreferredSize();
-			dim.width += centerPref.width;
-			dim.height += centerPref.height;
-			if (right != null)
-			{
-				Dimension rightPref = right.getPreferredSize();
-				dim.width += rightPref.width;
-			}
-			if (bottom != null)
-			{
-				Dimension bottomPref = bottom.getPreferredSize();
-				dim.height += bottomPref.height;
-			}
-			return dim;
-		}
-
-		@Override
-		public Dimension minimumLayoutSize(Container parent)
-		{
-			Dimension dim = new Dimension();
-			Insets insets = getInsets();
-			dim.width = insets.left + insets.right;
-			dim.height = insets.top + insets.bottom;
-
-			Dimension centerPref = center.getMinimumSize();
-			dim.width += centerPref.width;
-			dim.height += centerPref.height;
-			if (right != null)
-			{
-				Dimension rightPref = right.getMinimumSize();
-				dim.width += rightPref.width;
-			}
-
-			if (bottom != null)
-			{
-				Dimension bottomPref = bottom.getMinimumSize();
-				dim.height += bottomPref.height;
-			}
-			return dim;
-		}
-
-		@Override
-		public void layoutContainer(Container parent)
-		{
-      updateScrollBars();
-
-			Dimension size = parent.getSize();
-			Insets insets = parent.getInsets();
-			int itop = insets.top;
-			int ileft = insets.left;
-			int ibottom = insets.bottom;
-			int iright = insets.right;
-
-			int rightWidth = right != null ? right.getPreferredSize().width : 0;
-			int bottomHeight = bottom != null ? bottom.getPreferredSize().height : 0;
-			int centerWidth = size.width - rightWidth - ileft - iright;
-			int centerHeight = size.height - bottomHeight - itop - ibottom;
-
-			center.setBounds(ileft, itop, centerWidth, centerHeight);
-
-			if (right != null)
-			{
-				right.setBounds(ileft + centerWidth, itop, rightWidth, centerHeight);
-			}
-
-			// Lay out all status components, in order
-			for (Component comp : leftOfScrollBar)
-			{
-				Dimension dim = comp.getPreferredSize();
-				comp.setBounds(ileft, itop + centerHeight, dim.width, bottomHeight);
-				ileft += dim.width;
-			}
-
-			if (bottom != null)
-			{
-				bottom.setBounds(ileft, itop + centerHeight, size.width - rightWidth - ileft - iright, bottomHeight);
-			}
-		}
 	}
 
 	class MutableCaretEvent extends CaretEvent

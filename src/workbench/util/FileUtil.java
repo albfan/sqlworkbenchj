@@ -113,6 +113,11 @@ public class FileUtil
 	 * @return a Collection with all the lines in the file
 	 */
 	public static List<String> getLines(BufferedReader input, boolean trim, boolean checkComments)
+  {
+    return getLines(input, trim, checkComments, Integer.MAX_VALUE);
+  }
+
+	public static List<String> getLines(BufferedReader input, boolean trim, boolean checkComments, int numLines)
 	{
 		List<String> result = new ArrayList<>();
 
@@ -129,6 +134,7 @@ public class FileUtil
 					}
 					result.add(trim ? line.trim() : line);
 				}
+        if (result.size() > numLines) break;
 			}
 		}
 		catch (Exception e)

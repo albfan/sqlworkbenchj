@@ -305,7 +305,7 @@ public class ValueConverter
 		return null;
 	}
 
-	private Number getLong(String value)
+	public Number getLong(String value)
 		throws ConverterException
 	{
 		if (value.length() == 0) return null;
@@ -345,7 +345,7 @@ public class ValueConverter
 		}
 	}
 
-	private Number getInt(String value, int type)
+	public Number getInt(String value, int type)
 		throws ConverterException
 	{
 		if (value.length() == 0) return null;
@@ -382,7 +382,7 @@ public class ValueConverter
 		}
 	}
 
-	private Number getBigDecimal(String value, int type)
+	public BigDecimal getBigDecimal(String value, int type)
 		throws ConverterException
 	{
 		if (value.length() == 0) return null;

@@ -382,8 +382,11 @@ public class MainWindow
       treePanel.restoreSettings(getToolProperties(DB_TREE_PROPS));
 
       getContentPane().add(split, BorderLayout.CENTER);
-      doLayout();
-      validate();
+      
+      invalidate();
+      sqlTab.invalidate();
+
+      EventQueue.invokeLater(this::validate);
     }
 
     if (treePanel.getConnection() == null)
@@ -433,18 +436,22 @@ public class MainWindow
       treePanel.saveSettings(getToolProperties(DB_TREE_PROPS));
 
       JSplitPane split = (JSplitPane)treePanel.getParent();
+      split.remove(sqlTab);
       getContentPane().remove(split);
       getContentPane().add(sqlTab, BorderLayout.CENTER);
-      doLayout();
-      validate();
-      treePanel.disconnectInBackground(); // this will be done in the background
+      sqlTab.invalidate();
+      invalidate();
+
+      treePanel.disconnectInBackground();
       treePanel = null;
+
       int count = getTabCount();
       for (int i=0; i < count - 1; i++)
       {
         MainPanel sqlPanel = getSqlPanel(i);
         sqlPanel.registerObjectFinder(null);
       }
+      EventQueue.invokeLater(this::validate);
     }
   }
 
