@@ -167,28 +167,50 @@
     </para>
 
     <para>
-      By default, the memory available to &wb-productname; is determined by the Java runtime.
-      If you need more heap memory (e.g. because you have to load large result sets), you need to pass the appropriate JVM parameter to the launcher.
-      Please refer to <link linkend="install-increase-memory">Increasing the memory</link> for details
-      on how to increase the memory that is available to &wb-productname;
+      When using a 32bit Java runtime the default memory available to the application is set to 1GB. When using a 64bit Java runtime
+      the default is set to 65% of the available physical memory.
     </para>
 
     <section id="launcher-parameters">
       <title>Parameters for the Windows&reg; launcher</title>
 
-      <para>
-        The launcher executables are based on <ulink url="http://winrun4j.sourceforge.net/">WinRun4J</ulink>, further documentation on
-        the format of the configuration file and parameters can also be found there.
+      <para id="launcher-ini-file">
+        Additional parameters to the Windows&reg; launcher can be defined in a <literal>INI</literal> file that needs to be created
+        in the directory where the <literal>.exe</literal> is located. The name of the <literal>INI</literal> has to match the
+        name of the used executable. To specify parameters for the 64bit executable, use <literal>SQLWorkbench64.ini</literal>.
+        To specify parameters for the 32bit executable, use <literal>SQLWorkbench.ini</literal>
       </para>
+
+      <section id="launcher-jvm-location">
+        <title>Specifying the Java location</title>
+        <para>
+          The launcher executables are based on <ulink url="http://winrun4j.sourceforge.net/">WinRun4J</ulink>, further documentation on
+          the format of the configuration file and parameters can also be found there.
+        </para>
+        <para>
+          If the launcher cannot find your installed Java runtime, you can specify the location of the JRE in the <link linkend="">INI</link> file
+          with the following parameter:
+        </para>
+
+        <programlisting>vm.location=c:\Program Files\Java\jdk8\jre\bin\client\jvm.dll</programlisting>
+        <para>
+          You need to specify the <emphasis role="bold">full path</emphasis> to the <literal>jvm.dll</literal>,
+          not the directory where the Java runtime is installed. Note that the 64bit JRE does not have the <literal>client</literal>
+          subdirectory, only <literal>jre\bin\server\jvm.dll</literal>
+        </para>
+      </section>
+
+      <section id="launcher-memory-parameter">
+        <title>Defining the memory for the application</title>
+      </section>
       <para>
-        If the launcher cannot find your installed Java runtime, you can specify the location of the JRE by creating a text file
-        named <literal>SQLWorkbench.ini</literal> (or <literal>SQLWorkbench64.ini</literal> when using the 64bit version) with the following content:
+        The memory that is available to the Java runtime is defined through the parameter <literal>vm.heapsize.preferred</literal>
+        in the <literal>INI</literal> file. The unit is bytes. To start &wb-productname; with 12GB of available memory (which is only possible
+        on a 64bit system!) add the following line to the <literal>INI</literal> file:
       </para>
-      <programlisting>vm.location=c:\Program Files\Java\jdk8\jre\bin\client\jvm.dll</programlisting>
+      <programlisting>vm.heapsize.preferred=12000</programlisting>
       <para>
-        You need to specify the <emphasis role="bold">full path</emphasis> to the <literal>jvm.dll</literal>,
-        not the directory where the Java runtime is installed. Note that the 64bit JRE does not have the <literal>client</literal>
-        subdirectory, only <literal>jre\bin\server\jvm.dll</literal>
+        You can verify the available memory in the about dialog: <menuchoice><guimenu>Help</guimenu><guimenuitem>About</guimenuitem></menuchoice>
       </para>
     </section>
   </section>
@@ -294,36 +316,29 @@
     </para>
 
     <para>
-      When using a 32bit Java runtime the default maximum memory is set to 1GB. When using a 64bit Java runtime
-      the default is set to 50% of the available physical memory.
+      When using the Windows launcher (e.g. <literal>SQLWorkbench64.exe</literal>), the available memory is defined
+      in the <link linkend="launcher-memory-parameter">INI</link> file.
     </para>
 
     <para>
-      To increase the memory that is available to the application, you can pass the parameter <literal>-Xmx</literal>
-      to the Windows&reg; launcher, specifying the maximum memory the application is allowed to use. To increase the memory
-      to 1.4GB, you can use: <literal>-Xmx1400m</literal>. This can e.g. be added to the shortcut you use to
-      start &wb-productname;
+      When using the shell or batch scripts, the available memory is defined through the <literal>-Xmx</literal>
+      parameter for the <literal>java</literal> command. In the following example, the parameter <literal>-Xmx4g</literal>
+      sets the available memory to 4GB
     </para>
-
-    <para>
-      <note>
-        With a 32bit Java runtime, you can't assign more than approx. 1.5GB for the application. If you really need
-        to process results that require that much memory you will have to use a 64bit Java runtime.
-      </note>
-    </para>
-
-   <para>
-      If you are running &wb-productname; on a non-Windows&reg; operating system or do not
-      want to use the launcher, then you need to pass this parameter directly to the JVM.
-      If you are running a 64bit Java runtime you can increase the memory to 2GB using
-      the following command line:
-    </para>
-    <para><programlisting>java -Xmx2048m -jar sqlworkbench.jar</programlisting></para>
+    <para><programlisting>java -Xmx4g -jar sqlworkbench.jar</programlisting></para>
 
     <para>
       If you are using the supplied shell scripts to start &wb-productname;, you can
       edit the scripts and change the value for the -Xmx parameter in there.
     </para>
+
+    <para>
+      <note>
+        With a 32bit Java runtime, you can not use (or assign) more than approx. 1.5GB for the application. If you need
+        to process results that require more memory that that, you will have to use a 64bit Java runtime.
+      </note>
+    </para>
+
 
   </section>
 
