@@ -551,7 +551,9 @@ public class WbDataDiff
 
 				if (xmlOutput)
 				{
-					out.write("    <table name=\"" + table.getFullyQualifiedName(targetCon) + "\">" + nl);
+					out.write("    ");
+          TableDataDiff.writeTableNameTag(out, "table", table);
+          out.write(nl);
 					if (ins.exists())
 					{
 						if (ins.length() > 0)
@@ -663,7 +665,9 @@ public class WbDataDiff
 									out.write(nl + "    <!-- DELETE migrations are sorted according to their foreign key relationship --> " + nl);
 								}
 							}
-							out.write("    <table name=\"" + table.getTableExpression(targetCon) + "\">" + nl);
+              out.write("    ");
+              TableDataDiff.writeTableNameTag(out, "table", table);
+              out.write(nl);
 							out.write("      <file-name type=\"delete\">" + f.getName() + "</file-name>" + nl);
 							out.write("    </table>" + nl);
 						}

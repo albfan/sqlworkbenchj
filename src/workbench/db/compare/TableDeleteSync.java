@@ -552,9 +552,7 @@ public class TableDeleteSync
 			out.write(genInfo);
 			out.write(" -->");
 			out.write(lineEnding);
-			out.write("<table-data-diff name=\"");
-			out.write(tableToDeleteFrom.getTable().getTableExpression(targetConnection));
-			out.write("\">");
+      TableDataDiff.writeTableNameTag(out, "table-data-diff", tableToDeleteFrom.getTable());
 			out.write(lineEnding);
 		}
 		else

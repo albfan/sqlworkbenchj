@@ -28,7 +28,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -912,9 +911,8 @@ public final class WbManager
   {
     if (cmdLine.isArgPresent(AppArguments.ARG_VARDEF))
     {
-      String msg = "Using " + AppArguments.ARG_VARDEF + " is deprecated. Please use " + AppArguments.ARG_VARIABLE + " and " + AppArguments.ARG_VAR_FILE + "instead!";
-      LogMgr.logWarning("WbManager.readParameters", msg);
-      System.err.println(msg);
+      String msg = "Using " + AppArguments.ARG_VARDEF + " is deprecated. Please use " + AppArguments.ARG_VARIABLE + " or " + AppArguments.ARG_VAR_FILE + "instead";
+      LogMgr.logWarning("WbManager.readVariablesFromCommandline()", msg);
     }
 
     List<String> vars = cmdLine.getList(AppArguments.ARG_VARDEF);
@@ -926,7 +924,7 @@ public final class WbManager
       }
       catch (Exception e)
       {
-        LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + var, e);
+        LogMgr.logError("WbManager.readVariablesFromCommandline()", "Error reading variable definition from file: " + var, e);
       }
     }
 
@@ -937,9 +935,9 @@ public final class WbManager
       {
         VariablePool.getInstance().readFromFile(StringUtil.trimQuotes(varFile), null);
       }
-      catch (IOException e)
+      catch (Exception e)
       {
-        LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + varFile, e);
+        LogMgr.logError("WbManager.readVariablesFromCommandline()", "Error reading variable definition from file: " + varFile, e);
       }
     }
 
@@ -952,7 +950,7 @@ public final class WbManager
       }
       catch (Exception e)
       {
-        LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + var, e);
+        LogMgr.logError("WbManager.readVariablesFromCommandline()", "Error parsing variable definition: " + var, e);
       }
     }
 

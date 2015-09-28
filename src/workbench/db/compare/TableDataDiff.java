@@ -651,9 +651,8 @@ public class TableDataDiff
 			out.write(genInfo);
 			out.write(" -->");
 			out.write(lineEnding);
-			out.write("<table-data-diff name=\"");
-			out.write(tableToSync.getTableExpression(toSync));
-			out.write("\">");
+      writeTableNameTag(out, "table-data-diff", tableToSync);
+			out.write(">");
 			out.write(lineEnding);
 		}
 		else
@@ -667,6 +666,28 @@ public class TableDataDiff
 			out.write(lineEnding);
 		}
 	}
+
+  public static void writeTableNameTag(Writer out, String tag, TableIdentifier table)
+    throws IOException
+  {
+    out.write("<" + tag);
+    out.write(" name=\"");
+    out.write(table.getRawTableName());
+    out.write("\"");
+    if (StringUtil.isNonEmpty(table.getRawSchema()))
+    {
+      out.write(" schema=\"");
+      out.write(table.getRawSchema());
+      out.write("\"");
+    }
+    if (StringUtil.isNonEmpty(table.getRawCatalog()))
+    {
+      out.write(" catalog=\"");
+      out.write(table.getRawCatalog());
+      out.write("\"");
+    }
+    out.write(">");
+  }
 
 	private void writeEnd(Writer out)
 		throws IOException

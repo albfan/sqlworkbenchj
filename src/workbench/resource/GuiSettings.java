@@ -1235,4 +1235,10 @@ public class GuiSettings
     }
     return DataTooltipType.full;
 	}
+
+	public static boolean getTagCompletionUseContainsFilter()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.tags.dropdown.containsfilter", true);
+	}
+
 }

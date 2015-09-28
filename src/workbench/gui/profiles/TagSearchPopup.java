@@ -39,7 +39,6 @@ import java.awt.event.WindowListener;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -74,7 +73,7 @@ public class TagSearchPopup
 	private JTextComponent inputField;
 	private JScrollPane scroll;
 	private JList<String> elementList;
-	private DefaultListModel<String> data;
+	private TagListModel data;
   private JWindow window;
   private QuickFilter filter;
 
@@ -84,17 +83,14 @@ public class TagSearchPopup
   {
     this(input, allTags, null);
   }
+
 	public TagSearchPopup(JTextComponent input, Set<String> allTags, QuickFilter quickFilter)
 	{
     inputField = input;
     filter = quickFilter;
 		elementList = new JList<>();
 
-    data = new DefaultListModel<>();
-    for (String tag : allTags)
-    {
-      data.addElement(tag);
-    }
+    data = new TagListModel(allTags);
 		elementList.setModel(data);
 
 		elementList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -166,7 +162,7 @@ public class TagSearchPopup
         word = StringUtil.getWordLeftOfCursor(text, inputField.getCaretPosition(), wordBoundaries);
       }
 
-      final int index = findEntry(word);
+      final int index = filterListByEntry(word);
       if (index > -1 && StringUtil.isEmptyString(inputField.getSelectedText()))
       {
         int end = inputField.getCaretPosition();
@@ -252,10 +248,7 @@ public class TagSearchPopup
 
 	private void closePopup(boolean doPaste)
 	{
-		if (this.window == null)
-		{
-			return;
-		}
+		if (this.window == null) return;
 
 		try
 		{
@@ -360,30 +353,18 @@ public class TagSearchPopup
 	{
 		if (ignoreSearchChange) return;
 
-		int index = this.findEntry(s);
-		if (index >= 0)
-		{
-			elementList.setSelectedIndex(index);
-			elementList.ensureIndexIsVisible(index);
-		}
-		else
-		{
-			elementList.clearSelection();
-		}
+    data.applyFilter(s);
+    if (data.getSize() > 0)
+    {
+      elementList.setSelectedIndex(0);
+      elementList.ensureIndexIsVisible(0);
+    }
 	}
 
-	private int findEntry(String s)
+	private int filterListByEntry(String s)
 	{
-		if (StringUtil.isBlank(s)) return -1;
-		int count = this.data.getSize();
-		if (count == 0) return -1;
-
-    String search = s.toLowerCase();
-    for (int i=0; i < count; i++)
-    {
-      String entry = this.data.getElementAt(i);
-      if (entry.toLowerCase().startsWith(search)) return i;
-    }
+    data.applyFilter(s);
+    if (data.getSize() > 0) return 0;
 		return -1;
 	}
 

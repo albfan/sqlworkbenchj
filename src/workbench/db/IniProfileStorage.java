@@ -197,7 +197,7 @@ public class IniProfileStorage
     if (StringUtil.isNonEmpty(driverJar))
     {
       WbFile drvFile = new WbFile(driverJar);
-      if (drvFile.getParentFile() == null)
+      if (!drvFile.isAbsolute())
       {
         drvFile = new WbFile(baseDir, driverJar);
         LogMgr.logDebug("IniProfileStorage.readProfile()", "Using full path: " + drvFile.getFullPath() + " for driver jar " + driverJar + " from profile " + name);
