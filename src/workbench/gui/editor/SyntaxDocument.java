@@ -162,6 +162,8 @@ public class SyntaxDocument
 	 */
 	public void tokenizeLines()
 	{
+		if (tokenMarker == null) return;
+    maxLineLength = 0;
 		tokenizeLines(0, getDefaultRootElement().getElementCount());
 	}
 
@@ -181,8 +183,6 @@ public class SyntaxDocument
 		Element map = getDefaultRootElement();
 
 		len += start;
-
-    maxLineLength = 0;
 
 		try
 		{

@@ -12,7 +12,6 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -214,17 +213,7 @@ public class JEditTextArea
 		lastModified = 0;
 		blink = true;
 
-//		setLayout(new ScrollLayout());
-//		add(CENTER, painter);
-    setLayout(new BorderLayout()
-    {
-      @Override
-      public void layoutContainer(Container target)
-      {
-        updateScrollBars();
-        super.layoutContainer(target);
-      }
-    });
+    setLayout(new BorderLayout());
     add(painter, BorderLayout.CENTER);
 
 		vertical = new JScrollBar(JScrollBar.VERTICAL);
@@ -2983,7 +2972,6 @@ public class JEditTextArea
       {
         recalculateVisibleLines();
         updateScrollBars();
-        invalidate();
         scrollBarsInitialized = true;
       }
 		}

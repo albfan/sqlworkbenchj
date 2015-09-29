@@ -21,12 +21,13 @@
       in the system (i.e. the Windows&reg; registry)
     </para>
 
-    <para>
+    <para id="download-jre-zip">
       If you cannot (or do not want to) do a regular installation of a Java 8 runtime, you can download
-      a ZIP distribution from <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle's home page</ulink>
+      a ZIP distribution from <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle's home page</ulink>.
       Under <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">"JRE Download"</ulink>
       you can download <literal>tar.gz</literal> archives for Windows&reg; and Linux (32bit and 64bit versions are available).
     </para>
+
     <para>
       The archive just needs to be unpacked. Inside the archive the actual JRE is stored in a directory named e.g.
       <literal>jre1.8.0_xx</literal> where <literal>xx</literal> is the build number of the Java runtime.
@@ -34,6 +35,9 @@
       in order for the Windows&reg; launcher or the batch files to recognize it.
     </para>
 
+    <para>
+      Maven central also offers ZIP archives of the Java runtime: <ulink url="http://maven.nuiton.org/nexus/content/repositories/jvm/com/oracle/jre/"/>
+    </para>
   </section>
 
   <section id="first-time-install">
