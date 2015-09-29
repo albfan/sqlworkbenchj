@@ -38,11 +38,13 @@ cp=$cp:$scriptpath/poi-ooxml-schemas.jar
 cp=$cp:$scriptpath/poi-ooxml.jar
 cp=$cp:$scriptpath/poi.jar
 cp=$cp:$scriptpath/stax-api-1.0.1.jar
-cp=$cp:$scriptpath/xmlbeans-2.3.0.jar
+cp=$cp:$scriptpath/resolver.jar
+cp=$cp:$scriptpath/serializer.jar
+cp=$cp:$scriptpath/simple-odf.jar
 cp=$cp:$scriptpath/ext/*
 
 $JAVACMD -Djava.awt.headless=true \
-         -Xmx512m \
+         -Xmx1024m \
          -Dvisualvm.display.name=SQLWorkbench \
          -cp $cp workbench.console.SQLConsole $@
 

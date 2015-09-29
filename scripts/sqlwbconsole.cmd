@@ -20,7 +20,7 @@ if exist "%~dp0jre\bin\java.exe" (
 
 set wbdir=%~dp0
 
-set cp=%wbdir%sqlworkbench.jar;
+set cp=%wbdir%sqlworkbench.jar
 set cp=%cp%;%wbdir%poi*.jar
 set cp=%cp%;%wbdir%dom4j*.jar
 set cp=%cp%;%wbdir%stax*.jar

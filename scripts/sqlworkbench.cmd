@@ -20,7 +20,7 @@ if exist "%~dp0jre\bin\java.exe" (
 
 set wbdir=%~dp0
 
-set cp=%wbdir%sqlworkbench.jar;
+set cp=%wbdir%sqlworkbench.jar
 set cp=%cp%;%wbdir%poi*.jar
 set cp=%cp%;%wbdir%dom4j*.jar
 set cp=%cp%;%wbdir%stax*.jar
@@ -32,11 +32,14 @@ set cp=%cp%;%wbdir%log4j.jar
 set cp=%cp%;%wbdir%mail.jar
 set cp=%cp%;%wbdir%ext\*
 
+call :get_memory
+set /a max_mem=%free_memory% / 2
+
 if "%1"=="console" goto console_mode
 
 :gui
 start "SQL Workbench/J" "%JAVA_BINPATH%javaw.exe"^
-      -Xmx512m ^
+      -Xmx%max_mem%m ^
       -Dvisualvm.display.name=SQLWorkbench ^
       -Dsun.awt.keepWorkingSetOnMinimize=true ^
       -Dsun.java2d.dpiaware=true ^
@@ -51,4 +54,12 @@ title SQL Workbench/J
                          -Xmx512m -cp %cp% workbench.console.SQLConsole %*
 
 goto :eof
+
+:get_memory
+
+  for /f "skip=1" %%p in ('wmic os get FreePhysicalMemory') do ( 
+    set /a free_memory=%%p/1024
+    goto :eof
+  )
+  goto :eof
 

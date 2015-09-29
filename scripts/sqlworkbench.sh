@@ -1,4 +1,5 @@
 #!/bin/sh
+# Start SQL Workbench/J in GUI mode
 
 # resolve links - $0 may be a softlink
 PRG="$0"
@@ -46,4 +47,4 @@ cp=$cp:$scriptpath/ext/*
 #   -Djava.awt.headless=true
 # might be needed for some combinations of OS and JDK
 
-exec $JAVACMD -Dvisualvm.display.name=SQLWorkbench -Xmx512m -cp $cp workbench.WbStarter $@
+exec $JAVACMD -Dvisualvm.display.name=SQLWorkbench -Xmx1024m -cp $cp workbench.WbStarter $@
