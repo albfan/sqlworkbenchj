@@ -38,11 +38,11 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class TableDetectorTest
+public class TextFileTableDetectorTest
   extends WbTestCase
 {
 
-  public TableDetectorTest()
+  public TextFileTableDetectorTest()
   {
     super("TableDetectorTest");
   }
@@ -70,7 +70,7 @@ public class TableDetectorTest
       "1,Arthur,Dent,1980-01-01,2015-07-06 14:15:16,42\n",
       "UTF-8");
 
-    TableDetector detector = new TableDetector(data, ",", "\"", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", true, 100, "UTF-8");
+    TextFileTableDetector detector = new TextFileTableDetector(data, ",", "\"", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", true, 100, "UTF-8");
     detector.analyzeFile();
     List<ColumnIdentifier> columns = detector.getDBColumns();
     assertNotNull(columns);
@@ -107,9 +107,21 @@ public class TableDetectorTest
           assertEquals(Types.DECIMAL, col.getDataType());
           assertEquals(3, col.getDecimalDigits());
           break;
-
       }
     }
+    String create = detector.getCreateTable(null, "csv_table");
+    assertNotNull(create);
+    String expected =
+      "CREATE TABLE csv_table\n" +
+      "(\n" +
+      "  id integer,\n" +
+      "  firstname varchar(6),\n" +
+      "  lastname varchar(8),\n" +
+      "  dob date,\n" +
+      "  last_login timestamp,\n" +
+      "  salary decimal(8,3)\n" +
+      ")";
+    assertEquals(expected, create.trim());
   }
 
 }

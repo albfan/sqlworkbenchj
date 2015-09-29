@@ -64,6 +64,7 @@ import workbench.sql.wbcommands.WbFeedback;
 import workbench.sql.wbcommands.WbFetchSize;
 import workbench.sql.wbcommands.WbGenDelete;
 import workbench.sql.wbcommands.WbGenDrop;
+import workbench.sql.wbcommands.WbGenImpTable;
 import workbench.sql.wbcommands.WbGenInsert;
 import workbench.sql.wbcommands.WbGenerateScript;
 import workbench.sql.wbcommands.WbGrepData;
@@ -194,6 +195,7 @@ public class CommandMapper
 		addCommand(new WbGenerateScript());
 		addCommand(new WbGenDelete());
 		addCommand(new WbGenInsert());
+    addCommand(new WbGenImpTable());
 		addCommand(new WbEcho());
 		addCommand(new WbShowEncoding());
 		addCommand(new WbRowCount());

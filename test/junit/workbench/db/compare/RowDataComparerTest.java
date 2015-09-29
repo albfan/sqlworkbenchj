@@ -24,6 +24,7 @@ package workbench.db.compare;
 
 import java.sql.Types;
 
+import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
 
@@ -250,8 +251,14 @@ public class RowDataComparerTest
 		instance.setConnection(null);
 		instance.setResultInfo(info2);
 		instance.setRows(reference, target);
-//		String xml = instance.getMigration(1);
-//		System.out.println(xml);
+		String xml = instance.getMigration(1);
+		System.out.println(xml);
+    // <update><col name="ID" pk="true">1</col><col name="SOME_DATA" modified="true"><![CDATA[one]]></col><col name="SOME_MORE"><![CDATA[more]]></col></update>
+    String value = TestUtil.getXPathValue(xml, "/update/col[@name='SOME_DATA']/@modified");
+    assertEquals("true", value);
+    value = TestUtil.getXPathValue(xml, "/update/col[@name='SOME_MORE']/@modified");
+    System.out.println("value: " + value);
+    assertEquals("", value);
 	}
 
 }

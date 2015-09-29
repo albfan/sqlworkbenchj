@@ -86,7 +86,6 @@ public class XmlRowDataConverter
 	private boolean writeClobFiles;
 	private boolean addColName;
 	private String xmlVersion = Settings.getInstance().getDefaultXmlVersion();
-	private boolean modifiedColumnsOnly;
 	private boolean useDiffFormat;
 	private boolean writeBlobFiles = true;
 
@@ -112,11 +111,6 @@ public class XmlRowDataConverter
 			// re-initialize the tags
 			this.setUseVerboseFormat(this.verboseFormat);
 		}
-	}
-
-	public void convertModifiedColumnsOnly(boolean flag)
-	{
-		modifiedColumnsOnly = flag;
 	}
 
 	public void setTableNameToUse(String name)
@@ -246,10 +240,6 @@ public class XmlRowDataConverter
 		for (int c=0; c < colCount; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
-			if (modifiedColumnsOnly)
-			{
-				if (!metaData.isPkColumn(c) && !row.isColumnModified(c)) continue;
-			}
 
 			Object data = row.getValue(c);
 			int type = this.metaData.getColumnType(c);
@@ -272,9 +262,16 @@ public class XmlRowDataConverter
 				xml.append(" name=\"" + metaData.getColumnName(c) + "\"");
 			}
 
-			if (useDiffFormat && metaData.getColumn(c).isPkColumn())
+			if (useDiffFormat)
 			{
-				xml.append(" pk=\"true\"");
+        if (metaData.getColumn(c).isPkColumn())
+        {
+          xml.append(" pk=\"true\"");
+        }
+        if (row.isColumnModified(c))
+        {
+          xml.append(" modified=\"true\"");
+        }
 			}
 
 			if (isNull)

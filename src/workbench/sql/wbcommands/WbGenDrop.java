@@ -57,7 +57,6 @@ public class WbGenDrop
 	public static final String VERB = "WbGenerateDrop";
 
 	public static final String PARAM_TABLES = "tables";
-	public static final String PARAM_FILE = "outputFile";
 	public static final String PARAM_DIR = "outputDir";
 	public static final String PARAM_INCLUDE_CREATE = "includeCreate";
 	public static final String PARAM_DROP_FK_ONLY = "onlyForeignkeys";
@@ -70,7 +69,7 @@ public class WbGenDrop
 		this.isUpdatingCommand = true;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_DIR, ArgumentType.DirName);
-		cmdLine.addArgument(PARAM_FILE, ArgumentType.Filename);
+		cmdLine.addArgument(CommonArgs.ARG_OUTPUT_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_CREATE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DROP_FK_ONLY, ArgumentType.BoolArgument);
@@ -125,7 +124,7 @@ public class WbGenDrop
 		gen.setSortByType(sortByType);
 		gen.setRowMonitor(this.rowMonitor);
 		String dir = cmdLine.getValue(PARAM_DIR, null);
-		String file = cmdLine.getValue(PARAM_FILE, null);
+		String file = cmdLine.getValue(CommonArgs.ARG_OUTPUT_FILE, null);
 
 		gen.generateScript();
 

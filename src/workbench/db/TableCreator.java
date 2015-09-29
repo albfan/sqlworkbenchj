@@ -32,6 +32,8 @@ import workbench.log.LogMgr;
 
 import workbench.db.sqltemplates.ColumnDefinitionTemplate;
 
+import workbench.sql.syntax.SqlKeywordHelper;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -45,7 +47,7 @@ import workbench.util.SqlUtil;
 public class TableCreator
 {
 	private WbConnection connection;
-	private List<ColumnIdentifier> columnDefinition;
+	private List<ColumnIdentifier> columnList;
 	private TableIdentifier tablename;
 	private TypeMapper mapper;
 	private boolean useDbmsDataType;
@@ -55,6 +57,12 @@ public class TableCreator
 	private ColumnDefinitionTemplate columnTemplate;
 	private boolean storeSQL;
 	private List<String> generatedSQL;
+
+	public TableCreator(TableIdentifier newTable, Collection<ColumnIdentifier> columns)
+		throws SQLException
+	{
+    this(null, null, newTable, columns);
+  }
 
 	/**
 	 * Create a new TableCreator.
@@ -75,15 +83,24 @@ public class TableCreator
 
 		// As we are sorting the columns we have to create a copy of the array
 		// to ensure that the caller does not see a different ordering
-		this.columnDefinition = new ArrayList<>(columns);
+		columnList = new ArrayList<>(columns);
 
 		// Now sort the columns according to their DBMS position
-		ColumnIdentifier.sortByPosition(columnDefinition);
+		ColumnIdentifier.sortByPosition(columnList);
 
-		this.mapper = new TypeMapper(this.connection);
+    if (connection != null)
+    {
+      mapper = new TypeMapper(this.connection);
+      columnTemplate = new ColumnDefinitionTemplate(connection.getMetadata().getDbId());
+      columnTemplate.setFixDefaultValues(!connection.getDbSettings().returnsValidDefaultExpressions());
+    }
+    else
+    {
+      mapper = new TypeMapper();
+      columnTemplate = new ColumnDefinitionTemplate();
+      columnTemplate.setFixDefaultValues(false);
+    }
 		creationType = type;
-		columnTemplate = new ColumnDefinitionTemplate(connection.getMetadata().getDbId());
-		columnTemplate.setFixDefaultValues(!connection.getDbSettings().returnsValidDefaultExpressions());
 	}
 
 	/**
@@ -125,6 +142,107 @@ public class TableCreator
 		return this.tablename;
 	}
 
+  public String getCreateTableSQL()
+    throws SQLException
+  {
+    StringBuilder columns = new StringBuilder(100);
+    String template = null;
+    if (connection != null)
+    {
+      template = connection.getDbSettings().getCreateTableTemplate(creationType);
+    }
+    else
+    {
+      template = DbSettings.DEFAULT_CREATE_TABLE_TEMPLATE;
+    }
+
+    String name = tablename.getTableExpression(this.connection);
+
+    int numCols = 0;
+    List<String> pkCols = getPKColumns();
+
+    columns.append("  ");
+    for (ColumnIdentifier col : columnList)
+    {
+      String def = getColumnDefintionString(col);
+      if (def == null) continue;
+
+      if (numCols > 0) columns.append(",\n  ");
+      columns.append(def);
+      numCols++;
+    }
+
+    String sql = template.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, name);
+    sql = sql.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, columns);
+
+    int pos = sql.indexOf(MetaDataSqlManager.PK_INLINE_DEFINITION);
+
+    if (pkCols.size() > 0 && pos > -1)
+    {
+      StringBuilder inlinePK = new StringBuilder(pkCols.size() * 10);
+      inlinePK.append(",\n  ");
+      String pkKeyword = "PRIMARY KEY";
+      if (connection != null)
+      {
+        pkKeyword = connection.getDbSettings().getInlinePKKeyword();
+      }
+      inlinePK.append(pkKeyword);
+      inlinePK.append(" (");
+      for (int i = 0; i < pkCols.size(); i++)
+      {
+        if (i > 0) inlinePK.append(',');
+        inlinePK.append(getQuoteHandler().quoteObjectname(pkCols.get(i)));
+      }
+      inlinePK.append(')');
+      sql = sql.replace(MetaDataSqlManager.PK_INLINE_DEFINITION, inlinePK.toString());
+    }
+    else if (pos > -1)
+    {
+      // make sure the placeholder is removed if no PK is defined.
+      sql = sql.replace(MetaDataSqlManager.PK_INLINE_DEFINITION, "");
+    }
+
+    return sql;
+  }
+
+  public String getAddPKSQL()
+  {
+    if (connection == null) return null;
+
+    List<String> colNames = getPKColumns();
+    if (colNames.size() > 0)
+    {
+      TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
+      PkDefinition pk = new PkDefinition(colNames);
+      CharSequence pkSql = builder.getPkSource(this.tablename, pk, false);
+      if (pkSql.length() > 0)
+      {
+        return pkSql.toString();
+      }
+    }
+    return null;
+  }
+
+  private boolean addPKNeeded()
+  {
+    String template = connection.getDbSettings().getCreateTableTemplate(creationType);
+    return !template.contains(MetaDataSqlManager.PK_INLINE_DEFINITION);
+  }
+
+  private List<String> getPKColumns()
+  {
+    List<String> pkCols = new ArrayList<>();
+    for (ColumnIdentifier col : columnList)
+    {
+      if (col.isPkColumn())
+      {
+        pkCols.add(col.getColumnName());
+      }
+    }
+    return pkCols;
+  }
+
+
 	/**
 	 * Generate the necessary SQL and create the table in the database defined by the current connection.
 	 *
@@ -138,83 +256,32 @@ public class TableCreator
 	public void createTable()
 		throws SQLException
 	{
-		StringBuilder columns = new StringBuilder(100);
-		String template = connection.getDbSettings().getCreateTableTemplate(creationType);
-		String name = this.tablename.getTableExpression(this.connection);
-
-		int numCols = 0;
-		List<String> pkCols = new ArrayList<>();
-
-		columns.append("  ");
-		for (ColumnIdentifier col : columnDefinition)
-		{
-			if (col.isPkColumn()) pkCols.add(col.getColumnName());
-			String def = getColumnDefintionString(col);
-			if (def == null) continue;
-
-			if (numCols > 0) columns.append(",\n  ");
-			columns.append(def);
-			numCols++;
-		}
-
-		String sql = template.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, name);
-		sql = sql.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, columns);
-
-		int pos = sql.indexOf(MetaDataSqlManager.PK_INLINE_DEFINITION);
-		boolean useAlterPK = true;
-
-		if (pkCols.size() > 0 && pos > -1)
-		{
-			useAlterPK = false;
-			StringBuilder inlinePK = new StringBuilder(pkCols.size() * 10);
-			inlinePK.append(",\n  ");
-			String pkKeyword = connection.getDbSettings().getInlinePKKeyword();
-			inlinePK.append(pkKeyword);
-			inlinePK.append(" (");
-			for (int i=0; i < pkCols.size(); i++)
-			{
-				if (i > 0) inlinePK.append(',');
-				inlinePK.append(connection.getMetadata().quoteObjectname(pkCols.get(i)));
-			}
-			inlinePK.append(')');
-			sql = sql.replace(MetaDataSqlManager.PK_INLINE_DEFINITION, inlinePK.toString());
-		}
-		else if (pos > -1)
-		{
-			// make sure the placeholder is removed if no PK is defined.
-			sql = sql.replace(MetaDataSqlManager.PK_INLINE_DEFINITION, "");
-		}
-
+    String sql = getCreateTableSQL();
 		if (storeSQL)
 		{
 			generatedSQL = new ArrayList<>(2);
 			generatedSQL.add(sql);
 		}
 
-		LogMgr.logInfo("TableCreator.createTable()", "Creating table using sql: " + sql);
 		Statement stmt = this.connection.createStatement();
 
 		boolean commitRequired = needsCommit();
 
 		try
 		{
+      LogMgr.logInfo("TableCreator.createTable()", "Creating table using sql: " + sql);
 			stmt.executeUpdate(sql);
-
-			if (pkCols.size() > 0 && useAlterPK)
-			{
-				TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
-				PkDefinition pk = new PkDefinition(pkCols);
-				CharSequence pkSql = builder.getPkSource(this.tablename, pk, false);
-				if (pkSql.length() > 0)
-				{
-					String alterTable = pkSql.toString();
+      if (addPKNeeded())
+      {
+        String alterTable = getAddPKSQL();
+        if (alterTable != null)
+        {
 					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + alterTable);
 					stmt.executeUpdate(alterTable);
 				}
-
 				if (storeSQL)
 				{
-					generatedSQL.add(pkSql.toString());
+					generatedSQL.add(alterTable);
 				}
 			}
 
@@ -273,8 +340,18 @@ public class TableCreator
 		// just use "simple" quoting rules for the target database (instead of checking
 		// the case of the column name by using DbMetadata.quoteObjectName()
 		// This is to ensure that the columns are created with the default case of the target DBMS
-		boolean isKeyword = connection.getMetadata().isReservedWord(name);
-		name = SqlUtil.quoteObjectname(name, isKeyword, false, connection.getMetadata().getQuoteCharacter().charAt(0));
+		boolean isKeyword;
+    if (connection != null)
+    {
+      isKeyword = connection.getMetadata().isReservedWord(name);
+    }
+    else
+    {
+      SqlKeywordHelper helper = new SqlKeywordHelper();
+      isKeyword = helper.getKeywords().contains(name);
+    }
+
+		name = SqlUtil.quoteObjectname(name, isKeyword, false, getQuoteHandler().getIdentifierQuoteCharacter().charAt(0));
 		result.append(name);
 		result.append(' ');
 
@@ -293,6 +370,15 @@ public class TableCreator
 
 		return result.toString();
 	}
+
+  private QuoteHandler getQuoteHandler()
+  {
+    if (connection != null)
+    {
+      return connection.getMetadata();
+    }
+    return QuoteHandler.STANDARD_HANDLER;
+  }
 
 	/**
 	 * Return the generated SQL statement(s) if any.

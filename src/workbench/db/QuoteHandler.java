@@ -60,7 +60,12 @@ public interface QuoteHandler
 	 */
 	boolean needsQuotes(String name);
 
-	/**
+  default String getIdentifierQuoteCharacter()
+  {
+    return "\"";
+  }
+
+  /**
 	 * A QuoteHandler implementing ANSI quoting.
 	 *
 	 * @see SqlUtil#SQL_IDENTIFIER

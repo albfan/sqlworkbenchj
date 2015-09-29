@@ -89,6 +89,7 @@ public class CommonArgs
 	public static final String ARG_HELP = "help";
 	public static final String ARG_VERBOSE = "verbose";
 	public static final String ARG_FILE = "file";
+	public static final String ARG_OUTPUT_FILE = "outputFile";
 
 
 	private static List<String> getDelimiterArguments()

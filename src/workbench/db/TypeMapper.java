@@ -56,8 +56,9 @@ public class TypeMapper
 	 */
 	TypeMapper()
 	{
-
+    createAnsiMap();
 	}
+
 	/**
 	 * Create a TypeMapper for the DBMS specified through the target connection.
 	 * @param targetConnection
@@ -65,7 +66,14 @@ public class TypeMapper
 	public TypeMapper(WbConnection targetConnection)
 	{
 		this.targetDb = targetConnection;
-		this.createTypeMap();
+    if (targetDb == null)
+    {
+      createAnsiMap();
+    }
+    else
+    {
+      this.createTypeMap();
+    }
 	}
 
 	private String findAlternateBlobType(int type)
@@ -177,6 +185,11 @@ public class TypeMapper
 			return SqlUtil.getTypeName(type);
 		}
 
+    if (this.targetDb == null)
+    {
+      return SqlUtil.getSqlTypeDisplay(name, type, size, digits);
+    }
+
 		return this.targetDb.getMetadata().getDataTypeResolver().getSqlTypeDisplay(name, type, size, digits);
 	}
 
@@ -286,5 +299,23 @@ public class TypeMapper
 		parseUserTypeMap(targetDb.getDbSettings().getJDBCTypeMapping());
 	}
 
+  private void createAnsiMap()
+  {
+    typeInfo = new HashMap<>();
+    typeInfo.put(Types.INTEGER, "integer");
+    typeInfo.put(Types.VARCHAR, "varchar");
+    typeInfo.put(Types.BIGINT, "bigint");
+    typeInfo.put(Types.DECIMAL, "decimal");
+    typeInfo.put(Types.BOOLEAN, "boolean");
+    typeInfo.put(Types.CLOB, "clob");
+    typeInfo.put(Types.BLOB, "blob");
+    typeInfo.put(Types.NVARCHAR, "nvarchar");
+    typeInfo.put(Types.NUMERIC, "decimal");
+    typeInfo.put(Types.DATE, "date");
+    typeInfo.put(Types.TIMESTAMP, "timestamp");
+    typeInfo.put(Types.TIME, "time");
+    typeInfo.put(Types.CHAR, "char");
+
+  }
 }
 

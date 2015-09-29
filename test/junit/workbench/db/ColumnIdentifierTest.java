@@ -25,8 +25,11 @@ package workbench.db;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
+
 import workbench.util.StringUtil;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 

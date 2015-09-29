@@ -235,7 +235,6 @@ public class RowDataComparer
 		{
 			if (targetWasNull)
 			{
-				xmlConverter.convertModifiedColumnsOnly(false);
 				CharSequence row = xmlConverter.convertRowData(migrationData, rowNumber);
 				result = new StringBuilder(row.length() + 20);
 				result.append("<insert>");
@@ -244,7 +243,6 @@ public class RowDataComparer
 			}
 			else if (migrationData.isModified())
 			{
-				xmlConverter.convertModifiedColumnsOnly(true);
 				StringBuilder row = xmlConverter.convertRowData(migrationData, rowNumber);
 				result = new StringBuilder(row.length() + 20);
 				result.append("<update>");

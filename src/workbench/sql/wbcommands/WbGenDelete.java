@@ -59,7 +59,6 @@ public class WbGenDelete
 	public static final String VERB = "WbGenerateDelete";
 
 	public static final String PARAM_TABLE = "table";
-	public static final String PARAM_FILE = "outputFile";
 	public static final String PARAM_COLUMN_VAL = "columnValue";
 	public static final String PARAM_DO_FORMAT = "formatSql";
 	public static final String PARAM_INCLUDE_COMMIT = "includeCommit";
@@ -74,7 +73,7 @@ public class WbGenDelete
 		super();
 		this.isUpdatingCommand = true;
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_FILE, ArgumentType.Filename);
+		cmdLine.addArgument(CommonArgs.ARG_OUTPUT_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(PARAM_DO_FORMAT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_TABLE, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_COLUMN_VAL, ArgumentType.Repeatable);
@@ -152,7 +151,7 @@ public class WbGenDelete
 			rowMonitor.jobFinished();
 		}
 
-		WbFile output = evaluateFileArgument(cmdLine.getValue(PARAM_FILE));
+		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_OUTPUT_FILE));
 		if (output != null)
 		{
 			boolean append = cmdLine.getBoolean(PARAM_APPEND, false);

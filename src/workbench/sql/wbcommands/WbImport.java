@@ -134,19 +134,7 @@ public class WbImport
 		CommonArgs.addImportModeParameter(cmdLine);
 
 		List<String> types = CollectionUtil.arrayList("text", "xml");
-		if (PoiHelper.isPoiAvailable())
-		{
-			types.add("xls");
-		}
-		if (PoiHelper.isXLSXAvailable())
-		{
-			types.add("xlsx");
-		}
-
-		if (OdfHelper.isSimpleODFAvailable())
-		{
-			types.add("ods");
-		}
+    types.addAll(getSupportedSpreadSheetTypes());
 
 		cmdLine.addArgument(ARG_TYPE, types);
 		cmdLine.addArgument(ARG_IGNORE_MISSING_COLS, ArgumentType.BoolArgument);
@@ -195,6 +183,25 @@ public class WbImport
 		cmdLine.addArgument(WbCopy.PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolSwitch);
 		ModifierArguments.addArguments(cmdLine);
 	}
+
+  public static List<String> getSupportedSpreadSheetTypes()
+  {
+    List<String> types = new ArrayList<>(3);
+    if (PoiHelper.isPoiAvailable())
+    {
+      types.add("xls");
+    }
+    if (PoiHelper.isXLSXAvailable())
+    {
+      types.add("xlsx");
+    }
+
+    if (OdfHelper.isSimpleODFAvailable())
+    {
+      types.add("ods");
+    }
+    return types;
+  }
 
 	@Override
 	public String getVerb()
@@ -979,7 +986,7 @@ public class WbImport
 		}
 	}
 
-	protected String findTypeFromFilename(String fname)
+	public static String findTypeFromFilename(String fname)
 	{
 		if (fname == null) return null;
 		String name = fname.toLowerCase();

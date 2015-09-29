@@ -587,7 +587,8 @@ public class DbMetadata
 		}
 	}
 
-	public String getQuoteCharacter()
+  @Override
+	public String getIdentifierQuoteCharacter()
 	{
 		return this.quoteCharacter;
 	}
@@ -628,7 +629,7 @@ public class DbMetadata
   {
     return mviewTypeName != null;
   }
-  
+
 	public String getMViewTypeName()
 	{
     if (mviewTypeName == null) return "";
@@ -1156,7 +1157,7 @@ public class DbMetadata
 	 * in default case as the database uses.
 	 *
 	 * @see #needsQuotes(java.lang.String)
-	 * @see #getQuoteCharacter()
+	 * @see #getIdentifierQuoteCharacter()
 	 */
 	public String quoteObjectname(String name, boolean quoteAlways)
 	{

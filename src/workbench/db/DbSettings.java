@@ -1303,6 +1303,12 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(key, true);
 	}
 
+  public static String DEFAULT_CREATE_TABLE_TEMPLATE =
+    "CREATE TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER +
+    "\n(\n" +
+    MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER +
+    "\n)";
+
 	/**
 	 * The SQL template that is used to create a table of the specified type
 	 *
@@ -1310,15 +1316,9 @@ public class DbSettings
 	 */
 	public String getCreateTableTemplate(String type)
 	{
-		final String defaultSql =
-			"CREATE TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER +
-			"\n(\n" +
-			MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER +
-			"\n)";
-
 		if (StringUtil.isBlank(type)) type = DEFAULT_CREATE_TABLE_TYPE;
 
-		return getProperty("create.table." + getKeyValue(type), defaultSql);
+		return getProperty("create.table." + getKeyValue(type), DEFAULT_CREATE_TABLE_TEMPLATE);
 	}
 
 	public Set<String> getViewTypes()

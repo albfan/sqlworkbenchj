@@ -24,25 +24,11 @@ package workbench.sql.wbcommands;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import workbench.sql.CommandMapper;
 import workbench.sql.CommandRegistry;
-import workbench.sql.wbcommands.console.WbAbout;
-import workbench.sql.wbcommands.console.WbCreateProfile;
-import workbench.sql.wbcommands.console.WbDefineDriver;
-import workbench.sql.wbcommands.console.WbDefineMacro;
-import workbench.sql.wbcommands.console.WbDeleteMacro;
-import workbench.sql.wbcommands.console.WbDeleteProfile;
-import workbench.sql.wbcommands.console.WbDisconnect;
-import workbench.sql.wbcommands.console.WbDisplay;
-import workbench.sql.wbcommands.console.WbListDrivers;
-import workbench.sql.wbcommands.console.WbListMacros;
-import workbench.sql.wbcommands.console.WbListProfiles;
-import workbench.sql.wbcommands.console.WbRun;
-import workbench.sql.wbcommands.console.WbStoreProfile;
-import workbench.sql.wbcommands.console.WbToggleDisplay;
 
 import workbench.util.CaseInsensitiveComparator;
 
@@ -67,85 +53,14 @@ public class CommandTester
 	public CommandTester()
 	{
 		commands = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
-		putVerb(WbCall.VERB);
-		putVerb(WbConfirm.VERB);
-		putVerb(WbCopy.VERB);
-		putVerb(WbDataDiff.VERB);
-		putVerb(WbDefinePk.VERB);
-		putVerb(WbDeleteProfile.VERB);
-		putVerb(WbCreateProfile.VERB);
-		putVerb(WbStoreProfile.VERB);
-		putVerb(WbDescribeObject.VERB);
-		putVerb(WbDescribeObject.VERB_LONG);
-		putVerb(WbDisableOraOutput.VERB);
-		putVerb(WbDisplay.VERB);
-		putVerb(WbEnableOraOutput.VERB);
-		putVerb(WbEndBatch.VERB);
-		putVerb(WbExport.VERB);
-		putVerb(WbFeedback.VERB);
-		putVerb(WbImport.VERB);
-		putVerb(WbInclude.VERB);
-		putVerb(WbListPkDef.VERB);
-		putVerb(WbListVars.VERB);
-		putVerb(WbListVars.VERB_ALTERNATE);
-		putVerb(WbList.VERB);
-		putVerb(WbListProcedures.VERB);
-		putVerb(WbListProcedures.ALTERNATE_VERB);
-		putVerb(WbListCatalogs.VERB);
-		putVerb(WbListCatalogs.VERB_ALTERNATE);
-		putVerb(WbListSchemas.VERB);
-		putVerb(WbListMacros.VERB);
-		putVerb(WbListIndexes.VERB);
-		putVerb(WbListDrivers.VERB);
-		putVerb(WbListProfiles.VERB);
-		putVerb(WbLoadPkMapping.VERB);
-		putVerb(WbSavePkMapping.VERB);
-		putVerb(WbDefineVar.VERB);
-		putVerb(WbRemoveVar.VERB);
-		putVerb(WbSchemaDiff.VERB);
-		putVerb(WbSchemaReport.VERB);
-		putVerb(WbSelectBlob.VERB);
-		putVerb(WbStartBatch.VERB);
-		putVerb(WbXslt.VERB);
-		putVerb(WbConnect.VERB);
-		putVerb(WbDisconnect.VERB);
-		putVerb(WbHideWarnings.VERB);
-		putVerb(WbHelp.VERB);
-		putVerb(WbRun.VERB);
-		putVerb(WbRunLB.VERB);
-		putVerb(WbListTriggers.VERB);
-		putVerb(WbTriggerSource.VERB);
-		putVerb(WbTableSource.VERB);
-		putVerb(WbProcSource.VERB);
-		putVerb(WbViewSource.VERB);
-		putVerb(WbGrepSource.VERB);
-		putVerb(WbGrepData.VERB);
-		putVerb(WbMode.VERB);
-		putVerb(WbFetchSize.VERB);
-		putVerb(WbAbout.VERB);
-		putVerb(WbIsolationLevel.VERB);
-		putVerb(WbConnInfo.VERB);
-		putVerb(WbSysExec.VERB);
-		putVerb(WbShowProps.VERB);
-		putVerb(WbShowProps.ALTERNATE_VERB);
-		putVerb(WbOraShow.VERB);
-		putVerb(WbGenDrop.VERB);
-		putVerb(WbSetProp.VERB);
-		putVerb(WbSetProp.ALTERNATE_VERB);
-		putVerb(WbGenerateScript.VERB);
-		putVerb(WbSysOpen.VERB);
-		putVerb(WbGenDelete.VERB);
-		putVerb(WbGenInsert.VERB);
-		putVerb(WbEcho.VERB);
-		putVerb(WbHistory.VERB);
-		putVerb(WbDefineMacro.VERB);
-		putVerb(WbDeleteMacro.VERB);
-		putVerb(WbRowCount.VERB);
-		putVerb(WbDefineDriver.VERB);
-		putVerb(WbShowEncoding.VERB);
-    putVerb(WbToggleDisplay.VERB);
+    CommandMapper mapper = new CommandMapper();
+    Collection<String> verbs = mapper.getAllWbCommands();
+    for (String verb : verbs)
+    {
+      putVerb(verb);
+    }
 
-		List<String> verbs = CommandRegistry.getInstance().getVerbs();
+		verbs = CommandRegistry.getInstance().getVerbs();
 		for (String verb : verbs)
 		{
 			putVerb(verb);

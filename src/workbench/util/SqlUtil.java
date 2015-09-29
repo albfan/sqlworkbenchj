@@ -2227,7 +2227,7 @@ public class SqlUtil
       }
 
       // now add the quote character used by the DBMS
-      wordChars += conn.getMetadata().getQuoteCharacter();
+      wordChars += conn.getMetadata().getIdentifierQuoteCharacter();
 
       if (conn.getMetadata().isSqlServer())
       {

@@ -19,58 +19,59 @@
  */
 package workbench.db.importer.detector;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableCreator;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 
-import workbench.util.EncodingUtil;
-import workbench.util.FileUtil;
+import workbench.util.CollectionUtil;
 import workbench.util.ValueConverter;
-import workbench.util.WbStringTokenizer;
 
 /**
  * A class to detect a table structure from a CSV file.
  *
  * @author Thomas Kellerer
  */
-public class TableDetector
+public abstract class TableDetector
 {
-  private List<ColumnStatistics> columns;
-  private File inputFile;
-  private String delimiter;
-  private String quoteChar;
-  private boolean withHeader;
-  private int sampleSize;
-  private String encoding;
-  private ValueConverter converter;
-  private WbStringTokenizer tokenizer;
-  private boolean success;
-
-  public TableDetector(File csvFile, String delim, String quote, String dateFmt, String timestampFmt, boolean containsHeader, int numLines, String fileEncoding)
-  {
-    this.inputFile = csvFile;
-    this.delimiter = delim;
-    this.quoteChar = quote;
-    this.withHeader = containsHeader;
-    this.sampleSize = numLines;
-    converter = new ValueConverter(dateFmt, timestampFmt);
-		tokenizer = new WbStringTokenizer(delimiter, this.quoteChar, false);
-		tokenizer.setDelimiterNeedsWhitspace(false);
-  }
+  protected List<ColumnStatistics> columns;
+  protected File inputFile;
+  protected boolean withHeader;
+  protected int sampleSize;
+  protected boolean success;
+  protected ValueConverter converter;
 
   public boolean isSuccess()
   {
     return success;
   }
 
+  public String getCreateTable(WbConnection conn, String tableName)
+    throws SQLException
+
+  {
+    if (CollectionUtil.isEmpty(columns)) return null;
+
+    TableIdentifier tbl = new TableIdentifier(tableName);
+    TableCreator creator = new TableCreator(conn, null, tbl, getDBColumns());
+    creator.setStoreSQL(true);
+    creator.useDbmsDataType(false);
+    return creator.getCreateTableSQL();
+  }
+
   public List<ColumnIdentifier> getDBColumns()
   {
+    if (CollectionUtil.isEmpty(columns)) return Collections.emptyList();
+
     List<ColumnIdentifier> result = new ArrayList<>(columns.size());
     for (ColumnStatistics colStat : columns)
     {
@@ -91,54 +92,18 @@ public class TableDetector
     return result;
   }
 
-  public void analyzeFile()
-    throws IOException
+  public abstract void analyzeFile()
+    throws IOException;
+
+  protected void analyzeValues(List<? extends Object> values)
   {
-    success = false;
-    BufferedReader reader = EncodingUtil.createBufferedReader(inputFile, encoding);
-    List<String> lines = FileUtil.getLines(reader, false, false, sampleSize);
-
-    int minSize = withHeader ? 2 : 1;
-    int line = 0;
-
-    if (lines.size() < minSize) return;
-
-    initColumns(lines.get(line));
-
-    if (columns.isEmpty()) return;
-
-    if (withHeader)
-    {
-      line++;
-    }
-
-    String firstDataLine = lines.get(line);
-
-    // try to find the data type of each column from the first line
-    // the type detected there will be the first type to be tested for the subsequent lines
-    initTypes(firstDataLine);
-
-    line ++;
-
-    for (int ln=line; ln < lines.size(); ln++)
-    {
-      parseLine(lines.get(ln));
-    }
-  }
-
-
-  private void parseLine(String line)
-  {
-    tokenizer.setSourceString(line);
-    List<String> values = tokenizer.getAllTokens();
-
     if (values.size() != columns.size()) return;
 
     for (int i=0; i < values.size(); i ++)
     {
       if (values.get(i) == null) continue;
 
-      String value = values.get(i);
+      Object value = values.get(i);
 
       ColumnStatistics stats = columns.get(i);
       ColType currentType = stats.getMostFrequentType();
@@ -148,6 +113,8 @@ public class TableDetector
         checkOneValue(value, stats);
         continue;
       }
+
+      int len = value.toString().length();
 
       boolean typeMatched = false;
       // by first validating the "previous" type we avoid the exceptions
@@ -173,19 +140,19 @@ public class TableDetector
         case Integer:
           if (isInteger(value))
           {
-            stats.addValidType(currentType, value.length(), 0);
+            stats.addValidType(currentType, len, 0);
             typeMatched = true;
           }
           break;
         case Decimal:
           if (isDecimal(value))
           {
-            stats.addValidType(currentType, value.length(), 0);
+            stats.addValidType(currentType, len, 0);
             typeMatched = true;
           }
           break;
         case String:
-          stats.addValidType(currentType, value.length(), 0);
+          stats.addValidType(currentType, len, 0);
           typeMatched = true;
           break;
       }
@@ -196,7 +163,7 @@ public class TableDetector
     }
   }
 
-  private void checkOneValue(String value, ColumnStatistics stats)
+  protected void checkOneValue(Object value, ColumnStatistics stats)
   {
     if (value == null) return;
 
@@ -206,26 +173,19 @@ public class TableDetector
     {
       digits = getDigits(value);
     }
-    stats.addValidType(type, value.length(), digits);
+    stats.addValidType(type, value.toString().length(), digits);
   }
 
-  private void initTypes(String firstLine)
+  protected int getDigits(Object value)
   {
-    tokenizer.setSourceString(firstLine);
-    List<String> values = tokenizer.getAllTokens();
-    if (values.size() != columns.size()) return;
-
-    for (int i=0; i < values.size(); i ++)
+    if (value instanceof BigDecimal)
     {
-      checkOneValue(values.get(i), columns.get(i));
+      BigDecimal nr = (BigDecimal)value;
+      return nr.scale();
     }
-  }
-
-  private int getDigits(String value)
-  {
     try
     {
-      BigDecimal nr = converter.getBigDecimal(value, Types.DECIMAL);
+      BigDecimal nr = converter.getBigDecimal(value.toString(), Types.DECIMAL);
       return nr.scale();
     }
     catch (Exception ex)
@@ -234,28 +194,7 @@ public class TableDetector
     }
   }
 
-	private void initColumns(String headerLine)
-	{
-    tokenizer.setSourceString(headerLine);
-    List<String> values = tokenizer.getAllTokens();
-    columns = new ArrayList<>(values.size());
-
-    for (int i=0; i < values.size(); i++)
-    {
-      String colName;
-      if (withHeader)
-      {
-        colName = values.get(i);
-      }
-      else
-      {
-        colName = "column_" + Integer.valueOf(i+1);
-      }
-      columns.add(new ColumnStatistics(colName));
-    }
-	}
-
-  private ColType getType(String value)
+  protected ColType getType(Object value)
   {
     if (isInteger(value))
     {
@@ -276,11 +215,13 @@ public class TableDetector
     return ColType.String;
   }
 
-  private boolean isTimestamp(String value)
+  private boolean isTimestamp(Object value)
   {
+    if (value instanceof java.sql.Timestamp) return true;
+    if (value instanceof java.util.Date) return true;
     try
     {
-      converter.parseTimestamp(value);
+      converter.parseTimestamp(value.toString());
       return true;
     }
     catch (Exception ex)
@@ -289,11 +230,32 @@ public class TableDetector
     }
   }
 
-  private boolean isDate(String value)
+  private boolean isDate(Object value)
   {
+    if (value == null) return false;
+    if (value instanceof java.util.Date) return true;
+    if (value instanceof java.sql.Date) return true;
+
     try
     {
-      converter.parseDate(value);
+      converter.parseDate(value.toString());
+      return true;
+    }
+    catch (Throwable ex)
+    {
+      return false;
+    }
+  }
+
+  private boolean isDecimal(Object value)
+  {
+    if (value == null) return false;
+    if (value instanceof BigDecimal) return true;
+    if (value instanceof Number) return true;
+
+    try
+    {
+      converter.getBigDecimal(value.toString(), java.sql.Types.DECIMAL);
       return true;
     }
     catch (Exception ex)
@@ -302,24 +264,15 @@ public class TableDetector
     }
   }
 
-  private boolean isDecimal(String value)
+  private boolean isInteger(Object value)
   {
-    try
-    {
-      converter.getBigDecimal(value, java.sql.Types.DECIMAL);
-      return true;
-    }
-    catch (Exception ex)
-    {
-      return false;
-    }
-  }
+    if (value == null) return false;
+    if (value instanceof Integer) return true;
+    if (value instanceof Long) return true;
 
-  private boolean isInteger(String value)
-  {
     try
     {
-      converter.getLong(value);
+      converter.getLong(value.toString());
       return true;
     }
     catch (Exception ex)
