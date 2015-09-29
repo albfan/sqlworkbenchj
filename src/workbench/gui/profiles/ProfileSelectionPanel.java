@@ -232,14 +232,27 @@ public class ProfileSelectionPanel
 
 		switch (e.getKeyCode())
 		{
+      // vertical cursor movement can always be forwared to the tree
 			case KeyEvent.VK_UP:
 			case KeyEvent.VK_DOWN:
-			case KeyEvent.VK_HOME:
-			case KeyEvent.VK_END:
       case KeyEvent.VK_PAGE_DOWN:
       case KeyEvent.VK_PAGE_UP:
         profileTree.dispatchEvent(e);
 				break;
+
+      // horizontal cursor movement should only be forwarded to the tree
+      // if no filter value has been entered by the user
+      // otherwise it's not possible to move the cursor in the filterValue field in order to change the text
+      case KeyEvent.VK_HOME:
+      case KeyEvent.VK_END:
+      case KeyEvent.VK_LEFT:
+      case KeyEvent.VK_RIGHT:
+        if (StringUtil.isBlank(filterValue.getText()))
+        {
+          profileTree.dispatchEvent(e);
+        }
+				break;
+
 			case KeyEvent.VK_ESCAPE:
 				if (StringUtil.isNonBlank(filterValue.getText()))
 				{

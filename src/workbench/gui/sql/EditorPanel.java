@@ -249,15 +249,15 @@ public class EditorPanel
     allowFileLoading = flag;
   }
 
-	@Override
-	public void invalidate()
-	{
-		super.invalidate();
-		if (this.painter != null)
-		{
-			this.painter.invalidate();
-		}
-	}
+//	@Override
+//	public void invalidate()
+//	{
+//		super.invalidate();
+//		if (this.painter != null)
+//		{
+//			this.painter.invalidate();
+//		}
+//	}
 
 	public void disableSqlHighlight()
 	{

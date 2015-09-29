@@ -576,7 +576,7 @@ public class TextAreaPainter
 	 */
 	public final void invalidateLine(int line)
 	{
-		repaint(0,textArea.lineToY(line) + fm.getMaxDescent() + fm.getLeading(),getWidth(),fm.getHeight());
+		repaint(0, textArea.lineToY(line) + fm.getMaxDescent() + fm.getLeading(), getWidth(), fm.getHeight());
 	}
 
 	public int getGutterWidth()

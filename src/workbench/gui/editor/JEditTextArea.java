@@ -159,7 +159,6 @@ public class JEditTextArea
 
 	protected JScrollBar vertical;
 	protected JScrollBar horizontal;
-	protected boolean scrollBarsInitialized;
 
 	protected InputHandler inputHandler;
 	protected SyntaxDocument document;
@@ -402,6 +401,16 @@ public class JEditTextArea
 		{
 			// ignore
 		}
+	}
+
+	public boolean isRightClickMovesCursor()
+	{
+		return rightClickMovesCursor;
+	}
+
+	public void setRightClickMovesCursor(boolean flag)
+	{
+		this.rightClickMovesCursor = flag;
 	}
 
 	public JScrollBar getVerticalScrollBar()
@@ -1267,12 +1276,12 @@ public class JEditTextArea
 		}
 	}
 
-	@Override
-	public void validate()
-	{
-		painter.invalidateLineRange(0, getLineCount());
-		super.validate();
-	}
+//	@Override
+//	public void validate()
+//	{
+//		painter.invalidateLineRange(0, getLineCount());
+//		super.validate();
+//	}
 
 	@Override
 	public void setFont(Font aNewFont)
@@ -2947,11 +2956,6 @@ public class JEditTextArea
 		@Override
 		public void adjustmentValueChanged(final AdjustmentEvent evt)
 		{
-			if (!scrollBarsInitialized)
-			{
-				return;
-			}
-
 			if (evt.getAdjustable() == vertical)
 			{
 				setFirstLine(vertical.getValue(), false);
@@ -2972,7 +2976,7 @@ public class JEditTextArea
       {
         recalculateVisibleLines();
         updateScrollBars();
-        scrollBarsInitialized = true;
+        invalidate();
       }
 		}
 	}
@@ -3164,7 +3168,7 @@ public class JEditTextArea
 					return;
 				}
 			}
-			catch(BadLocationException bl)
+			catch (BadLocationException bl)
 			{
 				LogMgr.logError("JEditTextArea.doDoubleClick()", "Error", bl);
 			}
@@ -3213,13 +3217,4 @@ public class JEditTextArea
 		}
 	}
 
-	public boolean isRightClickMovesCursor()
-	{
-		return rightClickMovesCursor;
-	}
-
-	public void setRightClickMovesCursor(boolean rightClickMovesCursor)
-	{
-		this.rightClickMovesCursor = rightClickMovesCursor;
-	}
 }
