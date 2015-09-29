@@ -72,7 +72,10 @@ public class CommandTesterTest
 			if (clsName.startsWith("Wb") && !cls.isInterface() && !clsName.endsWith("Test"))
 			{
 				SqlCommand cmd = (SqlCommand)cls.newInstance();
-				assertTrue(clsName + " is not registered!", tester.isWbCommand(cmd.getVerb()));
+        if (!(cmd instanceof WbOraShow))
+        {
+          assertTrue(clsName + " is not registered!", tester.isWbCommand(cmd.getVerb()));
+        }
 			}
 		}
 	}
