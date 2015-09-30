@@ -20,7 +20,6 @@
 package workbench.db.importer.detector;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -32,8 +31,10 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.sql.formatter.FormatterUtil;
 
 import workbench.util.CollectionUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.ValueConverter;
 
 /**
@@ -49,6 +50,7 @@ public abstract class TableDetector
   protected int sampleSize;
   protected boolean success;
   protected ValueConverter converter;
+  private MessageBuffer messages = new MessageBuffer();
 
   public boolean isSuccess()
   {
@@ -63,8 +65,9 @@ public abstract class TableDetector
 
     TableIdentifier tbl = new TableIdentifier(tableName);
     TableCreator creator = new TableCreator(conn, null, tbl, getDBColumns());
-    creator.setStoreSQL(true);
+    creator.setUseFormatterSettings(true);
     creator.useDbmsDataType(false);
+
     return creator.getCreateTableSQL();
   }
 
@@ -76,24 +79,27 @@ public abstract class TableDetector
     for (ColumnStatistics colStat : columns)
     {
       ColType type = colStat.getBestType();
-      ColumnIdentifier col = new ColumnIdentifier(colStat.getName(), type.getJDBCType());
-      if (type == ColType.Integer && colStat.getMaxLength() > 14)
+      String name = FormatterUtil.getIdentifier(colStat.getName());
+      ColumnIdentifier col = new ColumnIdentifier(name, type.getJDBCType());
+
+      if (type == ColType.Integer && colStat.getMaxLength() > 9)
       {
         col.setDataType(Types.BIGINT);
       }
 
       col.setColumnSize(colStat.getMaxLength());
+
       if (type == ColType.Decimal)
       {
         col.setDecimalDigits(colStat.getMaxDigits());
       }
+
       result.add(col);
     }
     return result;
   }
 
-  public abstract void analyzeFile()
-    throws IOException;
+  public abstract void analyzeFile();
 
   protected void analyzeValues(List<? extends Object> values)
   {

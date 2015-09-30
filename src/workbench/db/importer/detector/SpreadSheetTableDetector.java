@@ -44,7 +44,6 @@ public class SpreadSheetTableDetector
 
   @Override
   public void analyzeFile()
-    throws IOException
   {
     analyzeSpreadSheet();
   }
@@ -64,7 +63,7 @@ public class SpreadSheetTableDetector
       }
 
       int numLines = Math.min(reader.getRowCount(), sampleSize);
-      
+
       for (int row=1; row < numLines; row++)
       {
         List<Object> values = reader.getRowValues(row);

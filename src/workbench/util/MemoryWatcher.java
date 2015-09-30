@@ -30,7 +30,7 @@ import workbench.resource.Settings;
  */
 public class MemoryWatcher
 {
-	private static final long MIN_FREE_MEMORY = Settings.getInstance().getIntProperty("workbench.memorywatcher.minmemory", 10) * 1024 * 1024;
+	private static final long MIN_FREE_MEMORY = Settings.getInstance().getIntProperty("workbench.memorywatcher.minmemory", 32) * 1024 * 1024;
 
 	// the maxMemory() will not change during the lifetime of the JVM
 	// so I can spare some CPU cycles by not calling maxMemory() constantly

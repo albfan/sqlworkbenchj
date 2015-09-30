@@ -60,22 +60,22 @@ public class OracleDataTypeResolver
 
 	public OracleDataTypeResolver(WbConnection conn)
 	{
-		this.connection = conn;
+		connection = conn;
 		alwaysShowCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.charsemantics.displayalways", true);
-
-    String sql =
-      "-- SQL Workbench \n" +
-      "SELECT value \n" +
-      "FROM v$nls_parameters \n" +
-      "WHERE parameter = 'NLS_LENGTH_SEMANTICS'";
-
-    if (Settings.getInstance().getDebugMetadataSql())
-    {
-      LogMgr.logDebug("OracleDataTypeResolver.<init>", "Retrieving nls length semantics using:\n" + sql);
-    }
 
 		if (!alwaysShowCharSemantics)
 		{
+      String sql
+        = "-- SQL Workbench \n" +
+        "SELECT value \n" +
+        "FROM v$nls_parameters \n" +
+        "WHERE parameter = 'NLS_LENGTH_SEMANTICS'";
+
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("OracleDataTypeResolver.<init>", "Retrieving nls length semantics using:\n" + sql);
+      }
+
 			Statement stmt = null;
 			ResultSet rs = null;
 			try
@@ -94,6 +94,7 @@ public class OracleDataTypeResolver
 					{
 						defaultCharSemantics = CHAR_SEMANTICS;
 					}
+          LogMgr.logInfo("OracleDataTypeResolver.<init>", "Default length semantics is: " + v);
 				}
 			}
 			catch (Exception e)
@@ -131,7 +132,7 @@ public class OracleDataTypeResolver
 	@Override
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
-		return getSqlTypeDisplay(dbmsName, sqlType, size, digits, -1);
+		return getSqlTypeDisplay(dbmsName, sqlType, size, digits, defaultCharSemantics);
 	}
 
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int byteOrChar)
@@ -142,14 +143,12 @@ public class OracleDataTypeResolver
 		{
 			// Hack to get Oracle's VARCHAR2(xx Byte) or VARCHAR2(xxx Char) display correct
 			// My own statement to retrieve column information in OracleMetaData
-			// will return the byte/char semantics in the field WB_SQL_DATA_TYPE
-			// Oracle's JDBC driver does not supply this information (because
-			// the JDBC standard does not define a column for this)
+			// will pass the correct byte/char semantics to this method
 			display = getVarcharType(dbmsName, size, byteOrChar);
 		}
 		else if ("NUMBER".equalsIgnoreCase(dbmsName))
 		{
-			if (digits < 0)
+			if (digits < 0 || size == 0)
 			{
 				return "NUMBER";
 			}

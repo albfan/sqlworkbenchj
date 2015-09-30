@@ -71,7 +71,10 @@ import workbench.sql.syntax.SqlKeywordHelper;
  */
 public class SqlUtil
 {
-	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_#@][\\w\\$#@]*");
+  /**
+   * The RegEx Pattern to validate a String as a legal ANSI-SQL identifier.
+   */
+	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$]*");
 
 	private static class JoinKeywordsHolder
 	{

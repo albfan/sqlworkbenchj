@@ -31,6 +31,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 
 import workbench.db.sqltemplates.ColumnDefinitionTemplate;
+import workbench.sql.formatter.FormatterUtil;
 
 import workbench.sql.syntax.SqlKeywordHelper;
 
@@ -57,6 +58,8 @@ public class TableCreator
 	private ColumnDefinitionTemplate columnTemplate;
 	private boolean storeSQL;
 	private List<String> generatedSQL;
+
+  private boolean useFormatterSettings;
 
 	public TableCreator(TableIdentifier newTable, Collection<ColumnIdentifier> columns)
 		throws SQLException
@@ -137,6 +140,11 @@ public class TableCreator
 		this.removeDefaults = flag;
 	}
 
+  public void setUseFormatterSettings(boolean flag)
+  {
+    this.useFormatterSettings = flag;
+  }
+
 	public TableIdentifier getTable()
 	{
 		return this.tablename;
@@ -156,7 +164,7 @@ public class TableCreator
       template = DbSettings.DEFAULT_CREATE_TABLE_TEMPLATE;
     }
 
-    String name = tablename.getTableExpression(this.connection);
+    String name = getIdentifier(tablename.getTableExpression(this.connection));
 
     int numCols = 0;
     List<String> pkCols = getPKColumns();
@@ -191,7 +199,7 @@ public class TableCreator
       for (int i = 0; i < pkCols.size(); i++)
       {
         if (i > 0) inlinePK.append(',');
-        inlinePK.append(getQuoteHandler().quoteObjectname(pkCols.get(i)));
+        inlinePK.append(getIdentifier(getQuoteHandler().quoteObjectname(pkCols.get(i))));
       }
       inlinePK.append(')');
       sql = sql.replace(MetaDataSqlManager.PK_INLINE_DEFINITION, inlinePK.toString());
@@ -337,22 +345,30 @@ public class TableCreator
 
 		StringBuilder result = new StringBuilder(30);
 
-		// just use "simple" quoting rules for the target database (instead of checking
-		// the case of the column name by using DbMetadata.quoteObjectName()
-		// This is to ensure that the columns are created with the default case of the target DBMS
-		boolean isKeyword;
-    if (connection != null)
+    if (!getQuoteHandler().isQuoted(name))
     {
-      isKeyword = connection.getMetadata().isReservedWord(name);
-    }
-    else
-    {
-      SqlKeywordHelper helper = new SqlKeywordHelper();
-      isKeyword = helper.getKeywords().contains(name);
+      // just use "simple" quoting rules for the target database (instead of checking
+      // the case of the column name by using DbMetadata.quoteObjectName()
+      // This is to ensure that the columns are created with the default case of the target DBMS
+      boolean isReservedWord;
+
+      if (connection != null)
+      {
+        isReservedWord = connection.getMetadata().isReservedWord(name);
+      }
+      else
+      {
+        SqlKeywordHelper helper = new SqlKeywordHelper();
+        isReservedWord = helper.getReservedWords().contains(name);
+      }
+
+      if (isReservedWord || getQuoteHandler().isLegalIdentifier(name) == false)
+      {
+        name = getQuoteHandler().getIdentifierQuoteCharacter() + name + getQuoteHandler().getIdentifierQuoteCharacter();
+      }
     }
 
-		name = SqlUtil.quoteObjectname(name, isKeyword, false, getQuoteHandler().getIdentifierQuoteCharacter().charAt(0));
-		result.append(name);
+		result.append(getIdentifier(name));
 		result.append(' ');
 
 		String typeName = null;
@@ -360,6 +376,11 @@ public class TableCreator
 		{
 			typeName = this.mapper.getTypeName(type, size, digits);
 		}
+
+    if (useFormatterSettings)
+    {
+      typeName = FormatterUtil.getDataType(typeName);
+    }
 
 		if (removeDefaults)
 		{
@@ -370,6 +391,15 @@ public class TableCreator
 
 		return result.toString();
 	}
+
+  private String getIdentifier(String name)
+  {
+    if (useFormatterSettings)
+    {
+      return FormatterUtil.getIdentifier(name);
+    }
+    return name;
+  }
 
   private QuoteHandler getQuoteHandler()
   {

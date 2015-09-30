@@ -56,6 +56,11 @@ public class ColumnStatistics
 
   public ColType getBestType()
   {
+    if (typeCounts.isEmpty())
+    {
+      return ColType.String;
+    }
+
     if (typeCounts.size() == 1)
     {
       return typeCounts.firstKey();
@@ -66,7 +71,7 @@ public class ColumnStatistics
     ColType firstType = typeCounts.firstKey();
 
     // if the first type is also the most frequent one
-    // then this is OK (e.g. 
+    // then this is OK (e.g.
     if (type == firstType)
     {
       return type;
@@ -122,6 +127,12 @@ public class ColumnStatistics
   }
 
   public String getName()
+  {
+    return name;
+  }
+
+  @Override
+  public String toString()
   {
     return name;
   }

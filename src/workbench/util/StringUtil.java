@@ -1937,4 +1937,18 @@ public class StringUtil
 		return null;
 	}
 
+  public static String readContinuationLines(BufferedReader reader, String currentLine, char quoteChar, QuoteEscapeType escapeType, String lineEnd)
+    throws IOException
+  {
+    String result = currentLine == null ? "" : currentLine;
+    String line;
+    while (hasOpenQuotes(result, quoteChar, escapeType) && (line = reader.readLine()) != null)
+    {
+      if (line != null)
+      {
+        result += lineEnd + line;
+      }
+    }
+    return result.trim();
+  }
 }

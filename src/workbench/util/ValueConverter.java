@@ -112,6 +112,7 @@ public class ValueConverter
 	private boolean useFirstMatching = true;
 	private boolean illegalDateIsNull;
 	private boolean cleanupNumbers = false;
+  private boolean logWarnings = true;
 
 	public ValueConverter()
 	{
@@ -121,6 +122,11 @@ public class ValueConverter
 		cleanupNumbers = Settings.getInstance().getBoolProperty("workbench.converter.cleanupdecimals", false);
 		readConfiguredBooleanValues();
 	}
+
+  public void setLogWarnings(boolean flag)
+  {
+    logWarnings = flag;
+  }
 
 	private void readConfiguredBooleanValues()
 	{
@@ -642,7 +648,7 @@ public class ValueConverter
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("ValueConverter.parseTimestamp()", "Could not parse '" + timestampInput + "' using default format " + this.timestampFormatter.toPattern() + ". Trying to recognize the format...", null);
+				if (logWarnings) LogMgr.logWarning("ValueConverter.parseTimestamp()", "Could not parse '" + timestampInput + "' using default format " + this.timestampFormatter.toPattern() + ". Trying to recognize the format...", null);
 				result = null;
 			}
 		}
@@ -717,7 +723,7 @@ public class ValueConverter
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse [" + dateInput + "] using: " + this.dateFormatter.toPattern(), null);
+				if (logWarnings) LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse [" + dateInput + "] using: " + this.dateFormatter.toPattern(), null);
 				result = null;
 			}
 		}
@@ -731,7 +737,7 @@ public class ValueConverter
 			}
 			catch (ParseException e)
 			{
-				LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse [" + dateInput + "] using: " + this.timestampFormatter.toPattern() + ". Trying to recognize the format...", null);
+        if (logWarnings) LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse [" + dateInput + "] using: " + this.timestampFormatter.toPattern() + ". Trying to recognize the format...", null);
 			}
 		}
 
@@ -754,7 +760,7 @@ public class ValueConverter
 					{
 						this.defaultDateFormat = format;
 					}
-					LogMgr.logDebug("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + format);
+					if (logWarnings) LogMgr.logDebug("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + format);
 					break;
 				}
 			}
@@ -772,7 +778,7 @@ public class ValueConverter
 						{
 							this.defaultDateFormat = format;
 						}
-						LogMgr.logDebug("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + format);
+						if (logWarnings) LogMgr.logDebug("ValueConverter.parseDate()", "Succeeded parsing [" + dateInput + "] using the format: " + format);
 						break;
 					}
 				}

@@ -21,14 +21,17 @@ package workbench.db.importer.detector;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.util.CsvLineParser;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.MemoryWatcher;
+import workbench.util.QuoteEscapeType;
+import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
-import workbench.util.WbStringTokenizer;
 
 /**
  * A class to detect a table structure from a CSV file.
@@ -38,32 +41,46 @@ import workbench.util.WbStringTokenizer;
 public class TextFileTableDetector
   extends TableDetector
 {
-  private String delimiter;
-  private String quoteChar;
-  private boolean withHeader;
   private String encoding;
-  private WbStringTokenizer tokenizer;
+  private boolean enableMultiline;
 
-  public TextFileTableDetector(File importFile, String delim, String quote, String dateFmt, String timestampFmt, boolean containsHeader, int numLines, String fileEncoding)
+  private CsvLineParser parser;
+
+  public TextFileTableDetector(File importFile, String delimiter, String quoteChar, String dateFmt, String timestampFmt, boolean containsHeader, int numLines, String fileEncoding)
   {
-    this.inputFile = importFile;
-    this.delimiter = delim;
-    this.quoteChar = quote;
-    this.withHeader = containsHeader;
-    this.sampleSize = numLines;
+    inputFile = importFile;
+    withHeader = containsHeader;
+    sampleSize = numLines;
     encoding = fileEncoding;
+
     converter = new ValueConverter(dateFmt, timestampFmt);
-		tokenizer = new WbStringTokenizer(delimiter, this.quoteChar, false);
-		tokenizer.setDelimiterNeedsWhitspace(false);
+    converter.setLogWarnings(false);
+
+    char quote = 0;
+    if (StringUtil.isNonEmpty(quoteChar))
+    {
+      quote = quoteChar.charAt(0);
+    }
+    parser = new CsvLineParser(delimiter, quote);
+    parser.setReturnEmptyStrings(true);
+    parser.setTrimValues(true);
+  }
+
+  public void setEnableMultiline(boolean flag)
+  {
+    this.enableMultiline = flag;
+  }
+
+  public void setQuoteEscape(QuoteEscapeType type)
+  {
+    parser.setQuoteEscaping(type);
   }
 
   @Override
   public void analyzeFile()
-    throws IOException
   {
     success = false;
-    BufferedReader reader = EncodingUtil.createBufferedReader(inputFile, encoding);
-    List<String> lines = FileUtil.getLines(reader, false, false, sampleSize);
+    List<String> lines = readLines();
 
     int minSize = withHeader ? 2 : 1;
     int line = 0;
@@ -89,22 +106,14 @@ public class TextFileTableDetector
 
     for (int ln=line; ln < lines.size(); ln++)
     {
-      parseLine(lines.get(ln));
+      List<String> values = parseLine(lines.get(ln));
+      analyzeValues(values);
     }
-  }
-
-
-  private void parseLine(String line)
-  {
-    tokenizer.setSourceString(line);
-    List<String> values = tokenizer.getAllTokens();
-    analyzeValues(values);
   }
 
   private void initTypes(String firstLine)
   {
-    tokenizer.setSourceString(firstLine);
-    List<String> values = tokenizer.getAllTokens();
+    List<String> values = parseLine(firstLine);
     if (values.size() != columns.size()) return;
 
     for (int i=0; i < values.size(); i ++)
@@ -115,8 +124,7 @@ public class TextFileTableDetector
 
 	private void initColumns(String headerLine)
 	{
-    tokenizer.setSourceString(headerLine);
-    List<String> values = tokenizer.getAllTokens();
+    List<String> values = parseLine(headerLine);
     columns = new ArrayList<>(values.size());
 
     for (int i=0; i < values.size(); i++)
@@ -133,5 +141,65 @@ public class TextFileTableDetector
       columns.add(new ColumnStatistics(colName));
     }
 	}
+
+  private List<String> parseLine(String line)
+  {
+		List<String> values= new ArrayList<>();
+		parser.setLine(line);
+		while (parser.hasNext())
+		{
+			values.add(parser.getNext());
+		}
+    return values;
+  }
+
+  private List<String> readLines()
+  {
+    String lineEnd = StringUtil.LINE_TERMINATOR;
+    if (enableMultiline)
+    {
+      lineEnd = FileUtil.getLineEnding(inputFile, encoding);
+    }
+
+    List<String> lines = new ArrayList<>(sampleSize);
+    BufferedReader reader = null;
+    try
+    {
+      reader = EncodingUtil.createBufferedReader(inputFile, encoding);
+
+			String line;
+			while ( (line = reader.readLine()) != null)
+			{
+        if (StringUtil.isBlank(line)) continue;
+
+        if (MemoryWatcher.isMemoryLow(false))
+        {
+          LogMgr.logError("TextFileTableDetector.readLines()", "Memory is running low, aborting text file sampling after " + lines.size() + " lines", null);
+          break;
+        }
+
+        if (enableMultiline && StringUtil.hasOpenQuotes(line, parser.getQuoteChar(), parser.getEscapeType()))
+        {
+          line = StringUtil.readContinuationLines(reader, line, parser.getQuoteChar(), parser.getEscapeType(), lineEnd);
+        }
+        else
+        {
+          line = line.trim();
+        }
+        lines.add(line);
+
+        if (lines.size() >= sampleSize) break;
+			}
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("TextFileTableDetector.readLines()", "Could not read file " + inputFile.getAbsolutePath(), ex);
+    }
+    finally
+    {
+      FileUtil.closeQuietely(reader);
+    }
+    return lines;
+  }
 
 }

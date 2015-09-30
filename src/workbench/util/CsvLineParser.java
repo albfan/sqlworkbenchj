@@ -71,6 +71,16 @@ public class CsvLineParser
 		delimiterLength = delimiter.length();
 	}
 
+  public QuoteEscapeType getEscapeType()
+  {
+    return escapeType;
+  }
+
+  public char getQuoteChar()
+  {
+    return quoteChar;
+  }
+
 	@Override
 	public void setLine(String line)
 	{
@@ -78,6 +88,7 @@ public class CsvLineParser
 		this.len = this.lineData.length();
 		this.current = 0;
 	}
+
 
 	/**
 	 * Controls if an unquoted empty string is treated as a null value

@@ -112,7 +112,7 @@ public class TextFileTableDetectorTest
     String create = detector.getCreateTable(null, "csv_table");
     assertNotNull(create);
     String expected =
-      "CREATE TABLE csv_table\n" +
+      "create table csv_table\n" +
       "(\n" +
       "  id integer,\n" +
       "  firstname varchar(6),\n" +
@@ -121,7 +121,7 @@ public class TextFileTableDetectorTest
       "  last_login timestamp,\n" +
       "  salary decimal(8,3)\n" +
       ")";
-    assertEquals(expected, create.trim());
+    assertEquals(expected, create.trim().toLowerCase());
   }
 
 }

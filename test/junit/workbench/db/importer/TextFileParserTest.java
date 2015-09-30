@@ -24,7 +24,6 @@ package workbench.db.importer;
 
 
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +36,7 @@ import static org.junit.Assert.*;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 
 /**
@@ -46,13 +46,11 @@ import workbench.db.WbConnection;
 public class TextFileParserTest
 	extends WbTestCase
 {
-	private TestUtil util;
 	private WbConnection connection;
 
 	public TextFileParserTest()
 	{
 		super("TextFileParserTest");
-		util = getTestUtil();
 	}
 
 	@Before
@@ -66,7 +64,7 @@ public class TextFileParserTest
 	public void tearDown()
 		throws Exception
 	{
-		this.connection.disconnect();
+		ConnectionMgr.getInstance().disconnectAll();
 	}
 
 	@Test
@@ -75,7 +73,7 @@ public class TextFileParserTest
 	{
 		TextFileParser parser = new TextFileParser();
 		parser.setConnection(connection);
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> cols = new ArrayList<>();
 		cols.add(new ColumnIdentifier("lastname"));
 		cols.add(new ColumnIdentifier("firstname"));
 		cols.add(new ColumnIdentifier("nr"));
@@ -91,7 +89,7 @@ public class TextFileParserTest
 
 		parser = new TextFileParser();
 		parser.setConnection(connection);
-		cols =new ArrayList<ColumnIdentifier>();
+		cols =new ArrayList<>();
 		cols.add(new ColumnIdentifier("lastname"));
 		cols.add(new ColumnIdentifier(RowDataProducer.SKIP_INDICATOR));
 		cols.add(new ColumnIdentifier("firstname"));
@@ -110,14 +108,13 @@ public class TextFileParserTest
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{
-		util.emptyBaseDirectory();
-		WbConnection wb = util.getConnection();
+		getTestUtil().emptyBaseDirectory();
+		WbConnection conn = getTestUtil().getConnection();
 
-		Statement stmt = wb.createStatement();
-		stmt.executeUpdate("CREATE TABLE person (nr integer, firstname varchar(100), lastname varchar(100))");
-		wb.commit();
-		stmt.close();
+    TestUtil.executeScript(conn,
+      "CREATE TABLE person (nr integer, firstname varchar(100), lastname varchar(100));\n" +
+      "commit");
 
-		return wb;
+		return conn;
 	}
 }

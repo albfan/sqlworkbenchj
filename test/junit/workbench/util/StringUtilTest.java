@@ -22,6 +22,8 @@
  */
 package workbench.util;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,12 +31,42 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.TestUtil;
+
 /**
  *
  * @author Thomas Kellerer
  */
 public class StringUtilTest
 {
+
+  @Test
+  public void testReadContinuationLines()
+    throws Exception
+  {
+    TestUtil util = new TestUtil("tesxtContinuationLines");
+    File f = new File(util.getBaseDir(), "data.csv");
+
+    TestUtil.writeFile(f,
+      "42,\"this is a \nlong\nline\",foo\n" +
+      "43,\"second row\",bar\n", "UTF-8");
+
+    BufferedReader reader = null;
+    try
+    {
+      reader = EncodingUtil.createBufferedReader(f, "UTF-8");
+      String line = reader.readLine();
+      String completeLine = StringUtil.readContinuationLines(reader, line, '"', QuoteEscapeType.none, "\n");
+      assertEquals("42,\"this is a \nlong\nline\",foo", completeLine);
+      String secondLine = reader.readLine();
+      assertNotNull(secondLine);
+      assertEquals("43,\"second row\",bar", secondLine);
+    }
+    finally
+    {
+      FileUtil.closeQuietely(reader);
+    }
+  }
 
   @Test
   public void testGetLineEnd()

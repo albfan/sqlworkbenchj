@@ -607,27 +607,14 @@ public class TextFileParser
 
 				if (enableMultiLineMode && StringUtil.hasOpenQuotes(currentLine, quoteCharToUse, quoteEscape))
 				{
-					try
-					{
-						StringBuilder b = new StringBuilder(currentLine.length() * 2);
-						b.append(currentLine);
-						b.append(lineEnding);
-						String nextLine = in.readLine();
-
-						// if the next line is null, the file is finished
-						// in that case we must not "continue" in order to
-						// catch the EOF situation correctly!
-						if (nextLine != null)
-						{
-							b.append(nextLine);
-							currentLine = b.toString();
-							continue;
-						}
-					}
-					catch (IOException e)
-					{
-						LogMgr.logError("TextFileParser.processOneFile()", "Could not read next line for multi-line record", e);
-					}
+          try
+          {
+            currentLine = StringUtil.readContinuationLines(in, currentLine, quoteCharToUse, quoteEscape, lineEnding);
+          }
+          catch (IOException io)
+          {
+            LogMgr.logError("TextFileParser.processOneFile()", "Could not read next line for multi-line record", io);
+          }
 				}
 
 				boolean processRow = receiver.shouldProcessNextRow();

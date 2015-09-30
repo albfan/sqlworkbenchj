@@ -75,7 +75,7 @@ public class OracleTableDefinitionReader
   private final boolean isOracle8;
   private String currentUser;
 
-	public OracleTableDefinitionReader(WbConnection conn)
+	public OracleTableDefinitionReader(WbConnection conn, OracleDataTypeResolver resolver)
 	{
 		super(conn);
 
@@ -94,7 +94,7 @@ public class OracleTableDefinitionReader
 			System.setProperty("workbench.db.oracle.metadata.retrieval.wildcards", "false");
 			System.setProperty("workbench.db.oracle.escape.searchstrings", "false");
 		}
-		oraTypes = new OracleDataTypeResolver(conn);
+		oraTypes = resolver;
 	}
 
   private boolean useOwnSql()

@@ -175,6 +175,7 @@ public class DbMetadata
 	private int maxTableNameLength;
 
 	private boolean supportsGetSchema;
+  private Pattern identifierPattern;
 
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -246,7 +247,7 @@ public class DbMetadata
 			isOracle = true;
       mviewTypeName = MVIEW_NAME;
 			dataTypeResolver = new OracleDataTypeResolver(aConnection);
-			definitionReader = new OracleTableDefinitionReader(aConnection);
+			definitionReader = new OracleTableDefinitionReader(aConnection, (OracleDataTypeResolver)dataTypeResolver);
 			extenders.add(new OracleTypeReader());
 			objectListEnhancer = new OracleObjectListEnhancer(); // to cleanup MVIEW type information
 		}
@@ -503,9 +504,27 @@ public class DbMetadata
 		}
 
 		supportsGetSchema = dbSettings.supportsGetSchemaCall();
+    initIdentifierPattern();
 
 		LogMgr.logInfo("DbMetadata.<init>", "Using catalog separator: " + catalogSeparator);
 	}
+
+  private void initIdentifierPattern()
+  {
+    String pattern = getDbSettings().getProperty("identifier.pattern", null);
+    if (pattern != null)
+    {
+      try
+      {
+        identifierPattern = Pattern.compile(pattern);
+        LogMgr.logInfo("DbMetadata.initIdentifierPattern()", "Using regular expression for valid identifiers: " + pattern);
+      }
+      catch (Exception ex)
+      {
+        LogMgr.logWarning("DbMetadata.initIdentifierPattern()", "Could not compile pattern: " + pattern, ex);
+      }
+    }
+  }
 
 	public int getMaxTableNameLength()
 	{
@@ -1181,6 +1200,23 @@ public class DbMetadata
 		return name;
 	}
 
+  @Override
+  public boolean isLegalIdentifier(String name)
+  {
+    Matcher matcher = null;
+
+    if (identifierPattern == null)
+    {
+      matcher = SqlUtil.SQL_IDENTIFIER.matcher(name);
+    }
+    else
+    {
+      matcher = identifierPattern.matcher(name);
+    }
+    return matcher.matches();
+  }
+
+
 	/**
 	 * Check if the given object name needs quoting for this DBMS.
 	 *
@@ -1201,36 +1237,24 @@ public class DbMetadata
 		// already quoted?
 		if (isQuoted(name)) return false;
 
+    // avoid using a regex for this simple case
 		boolean needQuote = name.indexOf(' ') > -1;
 
-		// Excel does not support the standard rules for SQL identifiers
-		// Basically anything that does not contain only characters needs to
-		// be quoted.
-		if (this.isExcel)
-		{
-			Pattern chars = Pattern.compile("[A-Za-z0-9]+");
-			Matcher m = chars.matcher(name);
-			needQuote = !m.matches();
-		}
-		else if (!needQuote)
-		{
-			Matcher matcher = SqlUtil.SQL_IDENTIFIER.matcher(name);
-			needQuote = !matcher.matches();
-		}
+		needQuote = !isLegalIdentifier(name);
 
-		if (!needQuote && !this.storesMixedCaseIdentifiers())
-		{
-			if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(name))
-			{
-				needQuote = true;
-			}
-			else if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(name))
-			{
-				needQuote = true;
-			}
-		}
+    if (!needQuote && !this.storesMixedCaseIdentifiers())
+    {
+      if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(name))
+      {
+        needQuote = true;
+      }
+      else if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(name))
+      {
+        needQuote = true;
+      }
+    }
 
-		if (!needQuote)
+    if (!needQuote)
 		{
 			needQuote = isReservedWord(name);
 		}

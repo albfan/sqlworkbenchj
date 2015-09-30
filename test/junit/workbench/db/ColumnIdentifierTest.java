@@ -25,12 +25,15 @@ package workbench.db;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import workbench.util.StringUtil;
 
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+
+import workbench.util.SqlUtil;
 
 
 public class ColumnIdentifierTest
@@ -63,6 +66,13 @@ public class ColumnIdentifierTest
 				if (isQuoted(name)) return name;
 				return "`" + name + "`";
 			}
+      
+      @Override
+      public boolean isLegalIdentifier(String name)
+      {
+        Matcher m = SqlUtil.SQL_IDENTIFIER.matcher(name);
+        return m.matches();
+      }
 
 			@Override
 			public boolean needsQuotes(String name)
@@ -102,6 +112,13 @@ public class ColumnIdentifierTest
 			{
 				return name.indexOf(' ') > -1;
 			}
+
+      @Override
+      public boolean isLegalIdentifier(String name)
+      {
+        Matcher m = SqlUtil.SQL_IDENTIFIER.matcher(name);
+        return m.matches();
+      }
 
 		};
 

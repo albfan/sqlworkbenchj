@@ -60,10 +60,13 @@ public interface QuoteHandler
 	 */
 	boolean needsQuotes(String name);
 
+  boolean isLegalIdentifier(String name);
+
   default String getIdentifierQuoteCharacter()
   {
     return "\"";
   }
+
 
   /**
 	 * A QuoteHandler implementing ANSI quoting.
@@ -95,11 +98,17 @@ public interface QuoteHandler
 			return SqlUtil.quoteObjectname(name, false, true, '"');
 		}
 
+    @Override
+    public boolean isLegalIdentifier(String name)
+    {
+			Matcher m = SqlUtil.SQL_IDENTIFIER.matcher(name);
+			return m.matches();
+    }
+
 		@Override
 		public boolean needsQuotes(String name)
 		{
-			Matcher m = SqlUtil.SQL_IDENTIFIER.matcher(name);
-			return !m.matches();
+			return !isLegalIdentifier(name);
 		}
 	};
 }

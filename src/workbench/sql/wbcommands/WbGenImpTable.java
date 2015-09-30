@@ -33,6 +33,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
+import workbench.util.QuoteEscapeType;
 import workbench.util.WbFile;
 
 
@@ -49,7 +50,7 @@ public class WbGenImpTable
   public static final String VERB = "WbGenerateImpTable";
 
   public static final String ARG_SAMPLE_SIZE = "lines";
-  public static final String ARG_TABLE = "tableName";
+
   private List<String> supportedTypes = new ArrayList<>(4);
   public WbGenImpTable()
   {
@@ -64,14 +65,16 @@ public class WbGenImpTable
 		cmdLine.addArgument(WbImport.ARG_QUOTE);
 		cmdLine.addArgument(CommonArgs.ARG_DELIM);
 		cmdLine.addArgument(WbImport.ARG_CONTAINSHEADER, ArgumentType.BoolSwitch);
-		cmdLine.addArgument(WbImport.ARG_SHEET_NR, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(WbImport.ARG_SHEET_NR);
 		CommonArgs.addDelimiterParameter(cmdLine);
 		CommonArgs.addEncodingParameter(cmdLine);
     cmdLine.addArgument(CommonArgs.ARG_DATE_FORMAT);
     cmdLine.addArgument(CommonArgs.ARG_TIMESTAMP_FORMAT);
-    cmdLine.addArgument(ARG_TABLE);
+    cmdLine.addArgument(WbImport.ARG_TARGETTABLE);
     cmdLine.addArgument(ARG_SAMPLE_SIZE);
+    cmdLine.addArgument(WbImport.ARG_MULTI_LINE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_OUTPUT_FILE, ArgumentType.Filename);
+		CommonArgs.addQuoteEscaping(cmdLine);
   }
 
 	@Override
@@ -96,7 +99,7 @@ public class WbGenImpTable
       return result;
     }
 
-    String tableName = cmdLine.getValue(ARG_TABLE);
+    String tableName = cmdLine.getValue(WbImport.ARG_TARGETTABLE);
     if (tableName == null)
     {
       result.addErrorMessage("Table name required!");
@@ -116,15 +119,23 @@ public class WbGenImpTable
     }
 
     int lines = cmdLine.getIntValue(ARG_SAMPLE_SIZE, 100);
+
     TableDetector detector = null;
+
     if (type.equals("text"))
     {
-      String delim = cmdLine.getValue(CommonArgs.ARG_DELIM, "\t");
-      String quote = cmdLine.getValue(WbImport.ARG_QUOTE, "\"");
+      String delim = cmdLine.getValue(CommonArgs.ARG_DELIM);
+      String quote = cmdLine.getValue(WbImport.ARG_QUOTE);
       String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
       String tsFormat = cmdLine.getValue(CommonArgs.ARG_TIMESTAMP_FORMAT);
       String dateFormat = cmdLine.getValue(CommonArgs.ARG_DATE_FORMAT);
-      detector = new TextFileTableDetector(file, delim, quote, dateFormat, tsFormat, header, lines, encoding);
+      QuoteEscapeType escaping = CommonArgs.getQuoteEscaping(cmdLine);
+      TextFileTableDetector tfd = new TextFileTableDetector(file, delim, quote, dateFormat, tsFormat, header, lines, encoding);
+
+			boolean multi = cmdLine.getBoolean(WbImport.ARG_MULTI_LINE, WbImport.getMultiDefault());
+			tfd.setEnableMultiline(multi);
+      tfd.setQuoteEscape(escaping);
+      detector = tfd;
     }
     else
     {
@@ -138,7 +149,7 @@ public class WbGenImpTable
       String ddl = detector.getCreateTable(currentConnection, tableName);
       if (ddl != null)
       {
-        result.addMessage(ddl);
+        result.addMessage(ddl + ";");
         result.setSuccess();
       }
     }

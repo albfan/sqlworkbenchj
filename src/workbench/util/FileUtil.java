@@ -175,6 +175,30 @@ public class FileUtil
 		return lines;
 	}
 
+	public static String getLineEnding(File input, String encoding)
+  {
+    String lineEnd = null;
+    BufferedReader reader = null;
+    try
+    {
+      reader = EncodingUtil.createBufferedReader(input, encoding);
+      lineEnd = getLineEnding(reader);
+      if (lineEnd == null)
+      {
+        lineEnd = StringUtil.LINE_TERMINATOR;
+      }
+    }
+    catch (IOException io)
+    {
+      lineEnd = StringUtil.LINE_TERMINATOR;
+    }
+    finally
+    {
+      FileUtil.closeQuietely(reader);
+    }
+    return lineEnd;
+  }
+
 	/**
 	 * Try to detect the type of line ending used by the passed Reader.
 	 *
