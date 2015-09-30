@@ -51,6 +51,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import workbench.console.DataStorePrinter;
 import workbench.resource.Settings;
 
 import workbench.db.ConnectionMgr;
@@ -58,6 +59,8 @@ import workbench.db.ConnectionProfile;
 import workbench.db.ErrorInformationReader;
 import workbench.db.ReaderFactory;
 import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
@@ -760,5 +763,20 @@ public class TestUtil
     throws IOException
   {
     return FileUtil.getLines(EncodingUtil.createBufferedReader(input, encoding));
+  }
+
+  public static void dumpTableContent(WbConnection conn, String tableName)
+  {
+    try (Statement stmt = conn.createStatementForQuery();
+         ResultSet rs = stmt.executeQuery("select * from " + tableName))
+    {
+      DataStore ds = new DataStore(rs, true);
+      DataStorePrinter printer = new DataStorePrinter(ds);
+      printer.printTo(System.out);
+    }
+    catch (Exception ex)
+    {
+      // ignore
+    }
   }
 }

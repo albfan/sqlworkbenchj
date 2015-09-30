@@ -21,14 +21,16 @@ package workbench.db.importer.detector;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import workbench.log.LogMgr;
+
 import workbench.util.CsvLineParser;
+import workbench.util.CsvLineReader;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
-import workbench.util.MemoryWatcher;
 import workbench.util.QuoteEscapeType;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
@@ -80,35 +82,54 @@ public class TextFileTableDetector
   public void analyzeFile()
   {
     success = false;
-    List<String> lines = readLines();
+    int lineNr = 0;
+    BufferedReader in = null;
 
-    int minSize = withHeader ? 2 : 1;
-    int line = 0;
-
-    if (lines.size() < minSize) return;
-
-    initColumns(lines.get(line));
-
-    if (columns.isEmpty()) return;
-
-    if (withHeader)
+    String lineEnd = StringUtil.LINE_TERMINATOR;
+    if (enableMultiline)
     {
-      line++;
+      lineEnd = FileUtil.getLineEnding(inputFile, encoding);
     }
 
-    String firstDataLine = lines.get(line);
-
-    // try to find the data type of each column from the first line
-    // the type detected there will be the first type to be tested for the subsequent lines
-    initTypes(firstDataLine);
-
-    line ++;
-
-    for (int ln=line; ln < lines.size(); ln++)
+    try
     {
-      List<String> values = parseLine(lines.get(ln));
-      analyzeValues(values);
+      in = EncodingUtil.createBufferedReader(inputFile, encoding);
+      CsvLineReader reader = new CsvLineReader(in, parser.getQuoteChar(), parser.getEscapeType(), enableMultiline, lineEnd);
+
+      String firstLine = reader.readLine();
+      if (firstLine == null) return;
+
+      lineNr ++;
+
+      initColumns(firstLine);
+
+      String firstDataLine = reader.readLine();
+      if (firstDataLine == null) return;
+
+      lineNr ++;
+
+      // try to find the data type of each column from the first line
+      // the type detected there will be the first type to be tested for the subsequent lines
+      initTypes(firstDataLine);
+
+      String line = reader.readLine();
+      while (line != null && lineNr < sampleSize)
+      {
+        List<String> values = parseLine(line);
+        analyzeValues(values);
+        line = reader.readLine();
+        lineNr ++;
+      }
     }
+    catch (IOException io)
+    {
+      LogMgr.logError("TextFileTableDetector.readLines()", "Could not read file " + inputFile.getAbsolutePath(), io);
+    }
+    finally
+    {
+      FileUtil.closeQuietely(in);
+    }
+    success = true;
   }
 
   private void initTypes(String firstLine)
@@ -145,61 +166,14 @@ public class TextFileTableDetector
   private List<String> parseLine(String line)
   {
 		List<String> values= new ArrayList<>();
+    if (StringUtil.isEmptyString(line)) return values;
+
 		parser.setLine(line);
 		while (parser.hasNext())
 		{
 			values.add(parser.getNext());
 		}
     return values;
-  }
-
-  private List<String> readLines()
-  {
-    String lineEnd = StringUtil.LINE_TERMINATOR;
-    if (enableMultiline)
-    {
-      lineEnd = FileUtil.getLineEnding(inputFile, encoding);
-    }
-
-    List<String> lines = new ArrayList<>(sampleSize);
-    BufferedReader reader = null;
-    try
-    {
-      reader = EncodingUtil.createBufferedReader(inputFile, encoding);
-
-			String line;
-			while ( (line = reader.readLine()) != null)
-			{
-        if (StringUtil.isBlank(line)) continue;
-
-        if (MemoryWatcher.isMemoryLow(false))
-        {
-          LogMgr.logError("TextFileTableDetector.readLines()", "Memory is running low, aborting text file sampling after " + lines.size() + " lines", null);
-          break;
-        }
-
-        if (enableMultiline && StringUtil.hasOpenQuotes(line, parser.getQuoteChar(), parser.getEscapeType()))
-        {
-          line = StringUtil.readContinuationLines(reader, line, parser.getQuoteChar(), parser.getEscapeType(), lineEnd);
-        }
-        else
-        {
-          line = line.trim();
-        }
-        lines.add(line);
-
-        if (lines.size() >= sampleSize) break;
-			}
-    }
-    catch (Exception ex)
-    {
-      LogMgr.logError("TextFileTableDetector.readLines()", "Could not read file " + inputFile.getAbsolutePath(), ex);
-    }
-    finally
-    {
-      FileUtil.closeQuietely(reader);
-    }
-    return lines;
   }
 
 }

@@ -31,6 +31,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.sql.formatter.FormatterUtil;
 
 import workbench.util.CollectionUtil;
@@ -55,6 +56,11 @@ public abstract class TableDetector
   public boolean isSuccess()
   {
     return success;
+  }
+
+  public MessageBuffer getMessages()
+  {
+    return messages;
   }
 
   public String getCreateTable(WbConnection conn, String tableName)

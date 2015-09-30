@@ -52,6 +52,7 @@ import workbench.db.exporter.BlobMode;
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.CsvLineParser;
+import workbench.util.CsvLineReader;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.FixedLengthLineParser;
@@ -493,12 +494,16 @@ public class TextFileParser
 			in = this.fileHandler.getMainFileReader();
 		}
 
+		char quoteCharToUse = (quoteChar == null ? 0 : quoteChar.charAt(0));
+    CsvLineReader reader = new CsvLineReader(in, quoteCharToUse, quoteEscape, enableMultiLineMode, lineEnding);
+    reader.setIgnoreEmptyLines(true);
+
 		currentLine = null;
 		long lineNumber = 0;
 
     try
     {
-      currentLine = in.readLine();
+      currentLine = reader.readLine();
       lineNumber++;
       if (this.withHeader)
       {
@@ -511,7 +516,7 @@ public class TextFileParser
           throw new IOException("Could not read header line from " + getSourceFilename());
         }
 				if (this.importColumns == null) this.readColumns(currentLine);
-				currentLine = in.readLine();
+				currentLine = reader.readLine();
 			}
 		}
     catch (EOFException eof)
@@ -560,7 +565,6 @@ public class TextFileParser
 
 		int importRow = 0;
 
-		char quoteCharToUse = (quoteChar == null ? 0 : quoteChar.charAt(0));
 		LineParser tok = null;
 
 		if (fixedWidthImport)
@@ -589,33 +593,6 @@ public class TextFileParser
 			while (currentLine != null)
 			{
 				if (cancelImport) break;
-
-				// silently ignore empty lines...
-				if (StringUtil.isEmptyString(currentLine))
-				{
-					try
-					{
-						currentLine = in.readLine();
-					}
-					catch (IOException e)
-					{
-						LogMgr.logError("TextFileParser.processOneFile()", "Error reading source file", e);
-						currentLine = null;
-					}
-					continue;
-				}
-
-				if (enableMultiLineMode && StringUtil.hasOpenQuotes(currentLine, quoteCharToUse, quoteEscape))
-				{
-          try
-          {
-            currentLine = StringUtil.readContinuationLines(in, currentLine, quoteCharToUse, quoteEscape, lineEnding);
-          }
-          catch (IOException io)
-          {
-            LogMgr.logError("TextFileParser.processOneFile()", "Could not read next line for multi-line record", io);
-          }
-				}
 
 				boolean processRow = receiver.shouldProcessNextRow();
 				if (!processRow) receiver.nextRowSkipped();
@@ -774,7 +751,7 @@ public class TextFileParser
 
 				try
 				{
-					currentLine = in.readLine();
+					currentLine = reader.readLine();
 				}
 				catch (IOException e)
 				{

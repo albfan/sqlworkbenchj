@@ -308,7 +308,7 @@ public class WbImportTest
 		TestUtil.writeFile(input,
 			"id\tfirstname\tlastname\n" +
 			"1\tArthur\tDENT\n" +
-			"2\tFord\tPrefect\n", 
+			"2\tFord\tPrefect\n",
 			"ISO-8859-1");
 
 		result = importCmd.execute(
@@ -1835,7 +1835,8 @@ public class WbImportTest
     throws Exception
 	{
     File importFile  = new File(this.basedir, "multi.txt");
-    String content = "firstname\tlastname\tnr\n" +
+    String content =
+      "firstname\tlastname\tnr\n" +
       "First\t\"Last\nname\"\t1\n" +
       "first2\tlast2\t2\n" +
       "first3\t\"last3\nlast3last3\"\t3\n" +
@@ -1846,44 +1847,22 @@ public class WbImportTest
     StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
     assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-    try (Statement stmt = this.connection.createStatementForQuery();
-         ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
-    {
-      int count = 0;
-      while (rs.next())
-      {
-        count ++;
-        int nr = rs.getInt(1);
-        String first = rs.getString(2);
-        String last = rs.getString(3);
-        assertEquals("Wrong nr imported", count, nr);
-        if (count == 1)
-        {
-          assertEquals("Wrong firstname imported", "First", first);
-          assertEquals("Wrong firstname imported", "Last\nname", last);
-        }
-        else if (count == 2)
-        {
-          assertEquals("Wrong firstname imported", "first2", first);
-          assertEquals("Wrong firstname imported", "last2", last);
-        }
-        else if (count == 3)
-        {
-          assertEquals("Wrong firstname imported", "first3", first);
-          assertEquals("Wrong firstname imported", "last3\nlast3last3", last);
-        }
-        else if (count == 4)
-        {
-          assertEquals("Wrong firstname imported", "first4", first);
-          assertEquals("Wrong firstname imported", "last4\tlast4", last);
-        }
-      }
-      assertEquals("Wrong number of rows imported", 4, count);
-    }
-    if (!importFile.delete())
-    {
-      fail("Could not delete input file: " + importFile.getCanonicalPath());
-    }
+//    TestUtil.dumpTableContent(connection, "junit_test");
+
+    int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
+    assertEquals(4, count);
+
+    String value = (String)TestUtil.getSingleQueryValue(connection, "select firstname from junit_test where nr = 1");
+    assertEquals("First", value);
+
+    value = (String)TestUtil.getSingleQueryValue(connection, "select firstname from junit_test where nr = 2");
+    assertEquals("first2", value);
+
+    value = (String)TestUtil.getSingleQueryValue(connection, "select firstname from junit_test where nr = 3");
+    assertEquals("first3", value);
+
+    value = (String)TestUtil.getSingleQueryValue(connection, "select firstname from junit_test where nr = 4");
+    assertEquals("first4", value);
 	}
 
 	@Test
@@ -1905,25 +1884,15 @@ public class WbImportTest
     StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
     assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-    try (Statement stmt = this.connection.createStatementForQuery();
-         ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
-    {
-      if (rs.next())
-      {
-        int nr = rs.getInt(1);
-        assertEquals("Wrong nr imported", 1, nr);
+    int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
+    assertEquals(1, count);
 
-        String first = rs.getString(2);
-        assertEquals("Wrong firstname imported", "First", first);
+    String value = (String)TestUtil.getSingleQueryValue(connection, "select firstname from junit_test where nr = 1");
+    assertEquals("First", value);
 
-        String last = rs.getString(3);
-        assertEquals("Wrong firstname imported", "Last\nname", last);
-      }
-      else
-      {
-        fail("No data imported");
-      }
-    }
+    value = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr = 1");
+    assertEquals("Last\nname", value);
+
     if (!archive.delete())
     {
       fail("Could not delete archive! " + archive.getAbsolutePath());
