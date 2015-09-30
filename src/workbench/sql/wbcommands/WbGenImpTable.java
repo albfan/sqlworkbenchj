@@ -152,7 +152,10 @@ public class WbGenImpTable
 
     try
     {
+      result.setSuccess();
+
       detector.analyzeFile();
+
       if (detector.hasMessages())
       {
         result.addMessage(detector.getMessages());
@@ -190,12 +193,11 @@ public class WbGenImpTable
         if (!createResult.isSuccess())
         {
           result.setFailure();
-          result.addMessage(createResult.getMessageBuffer());
-          result.clear();
+          result.setFailure(createResult.getErrorDescriptor());
         }
+        result.addMessage(createResult.getMessageBuffer());
+        createResult.clear();
       }
-
-      result.setSuccess();
     }
     catch (Exception ex)
     {
@@ -209,6 +211,7 @@ public class WbGenImpTable
   {
     DdlCommand create = DdlCommand.getCreateCommand();
     create.setConnection(currentConnection);
+    create.setStatementRunner(runner);
     StatementRunnerResult  result = null;
     try
     {
