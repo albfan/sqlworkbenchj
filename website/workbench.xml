@@ -617,7 +617,7 @@ WHERE id=42;</p>
     </content>
   </page>
 
-  <page link="manual/information.html#license" title="License" toc="small"/>
+  <page link="manual/license.html" title="License" toc="small"/>
   <page link="dbms_comparison.html" title="DBMS feature comparison" toc="small"/>
 
   <!-- ======================== About the author ========================== -->
