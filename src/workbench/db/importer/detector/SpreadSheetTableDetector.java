@@ -20,7 +20,6 @@
 package workbench.db.importer.detector;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +32,8 @@ import workbench.db.importer.SpreadsheetReader;
 public class SpreadSheetTableDetector
   extends TableDetector
 {
-
   private int sheetIndex;
+  
   public SpreadSheetTableDetector(File spreadSheet, boolean containsHeader, int sheet)
   {
     inputFile = spreadSheet;
@@ -43,7 +42,7 @@ public class SpreadSheetTableDetector
   }
 
   @Override
-  public void analyzeFile()
+  protected void processFile()
   {
     analyzeSpreadSheet();
   }

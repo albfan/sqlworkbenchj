@@ -167,8 +167,7 @@ public class WbGenDelete
 			}
 			catch (IOException io)
 			{
-				result.addMessageByKey("ErrFileCreate");
-				result.addErrorMessage(ExceptionUtil.getDisplay(io).toString());
+				result.addErrorMessageByKey("ErrFileCreate", ExceptionUtil.getDisplay(io));
 			}
 		}
 		else

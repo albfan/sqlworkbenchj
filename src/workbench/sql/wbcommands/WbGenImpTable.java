@@ -19,9 +19,12 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.resource.ResourceMgr;
 
 import workbench.db.importer.detector.SpreadSheetTableDetector;
 import workbench.db.importer.detector.TableDetector;
@@ -29,11 +32,15 @@ import workbench.db.importer.detector.TextFileTableDetector;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.commands.DdlCommand;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
 import workbench.util.QuoteEscapeType;
+import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 
 
@@ -48,8 +55,10 @@ public class WbGenImpTable
   extends SqlCommand
 {
   public static final String VERB = "WbGenerateImpTable";
+  public static final String VERB_SHORT = "WbGenImpTable";
 
   public static final String ARG_SAMPLE_SIZE = "lines";
+  public static final String ARG_CREATE_TABLE = "createTable";
 
   private List<String> supportedTypes = new ArrayList<>(4);
   public WbGenImpTable()
@@ -72,6 +81,7 @@ public class WbGenImpTable
     cmdLine.addArgument(CommonArgs.ARG_TIMESTAMP_FORMAT);
     cmdLine.addArgument(WbImport.ARG_TARGETTABLE);
     cmdLine.addArgument(ARG_SAMPLE_SIZE);
+    cmdLine.addArgument(ARG_CREATE_TABLE, ArgumentType.BoolArgument);
     cmdLine.addArgument(WbImport.ARG_MULTI_LINE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_OUTPUT_FILE, ArgumentType.Filename);
 		CommonArgs.addQuoteEscaping(cmdLine);
@@ -89,7 +99,7 @@ public class WbGenImpTable
 
     if (file == null)
     {
-      result.addErrorMessage("Input file required!");
+      result.addErrorMessageByKey("ErrInputFileRqd");
       return result;
     }
 
@@ -102,19 +112,17 @@ public class WbGenImpTable
     String tableName = cmdLine.getValue(WbImport.ARG_TARGETTABLE);
     if (tableName == null)
     {
-      result.addErrorMessage("Table name required!");
-      return result;
+      tableName = SqlUtil.cleanupIdentifier(file.getFileName());
     }
 
     boolean header = cmdLine.getBoolean(WbImport.ARG_CONTAINSHEADER, WbImport.getHeaderDefault());
-
 
     String typeFromFile = WbImport.findTypeFromFilename(file.getFullPath());
     String type = cmdLine.getValue(WbImport.ARG_TYPE, typeFromFile);
 
     if (!supportedTypes.contains(type))
     {
-      result.addErrorMessage("Type " + type + " not supported!");
+			result.addErrorMessageByKey("ErrImportInvalidType");
       return result;
     }
 
@@ -145,13 +153,49 @@ public class WbGenImpTable
     try
     {
       detector.analyzeFile();
+      if (detector.hasMessages())
+      {
+        result.addMessage(detector.getMessages());
+      }
 
       String ddl = detector.getCreateTable(currentConnection, tableName);
-      if (ddl != null)
+      if (ddl == null) return result;
+
+      boolean createTable = cmdLine.getBoolean(ARG_CREATE_TABLE, false);
+
+      WbFile outFile = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_OUTPUT_FILE));
+      if (outFile != null)
+      {
+        try
+        {
+          FileUtil.writeString(outFile, ddl + ";", false);
+          String msg = ResourceMgr.getFormattedString("MsgScriptWritten", outFile.getFullPath());
+          result.addMessage(msg);
+          result.setSuccess();
+        }
+        catch (IOException io)
+        {
+          result.setFailure();
+          result.addErrorMessageByKey("ErrFileCreate", ExceptionUtil.getDisplay(io));
+        }
+      }
+      else
       {
         result.addMessage(ddl + ";");
-        result.setSuccess();
       }
+
+      if (createTable)
+      {
+        StatementRunnerResult createResult = runDDL(ddl);
+        if (!createResult.isSuccess())
+        {
+          result.setFailure();
+          result.addMessage(createResult.getMessageBuffer());
+          result.clear();
+        }
+      }
+
+      result.setSuccess();
     }
     catch (Exception ex)
     {
@@ -161,10 +205,32 @@ public class WbGenImpTable
     return result;
   }
 
+  private StatementRunnerResult runDDL(String ddl)
+  {
+    DdlCommand create = DdlCommand.getCreateCommand();
+    create.setConnection(currentConnection);
+    StatementRunnerResult  result = null;
+    try
+    {
+      result = create.execute(ddl);
+    }
+    catch (SQLException sql)
+    {
+      // already handled
+    }
+    return result;
+  }
+
   @Override
   public String getVerb()
   {
     return VERB;
+  }
+
+  @Override
+  public String getAlternateVerb()
+  {
+    return VERB_SHORT;
   }
 
   @Override

@@ -224,7 +224,7 @@ public class TypeMapper
 				{
 					Integer typeValue = Integer.parseInt(def[0]);
 					String old = this.userMapping.put(typeValue, def[1]);
-					LogMgr.logInfo("TypeMapp.parseUserTypeMap()", "Mapping java.sql.Types." + SqlUtil.getTypeName(typeValue) + " to usertype: [" + def[1] + "] overwriting mapping to [" + old == null ? "" : old + "]");
+					LogMgr.logInfo("TypeMapp.parseUserTypeMap()", "Mapping java.sql.Types." + SqlUtil.getTypeName(typeValue) + " to usertype: " + def[1]) ;
 				}
 				catch (Exception e)
 				{
@@ -262,7 +262,7 @@ public class TypeMapper
 				int type = rs.getInt(2);
 
 				// we can't handle arrays anyway
-				if (type == java.sql.Types.ARRAY || type == java.sql.Types.OTHER) continue;
+				if (type == java.sql.Types.ARRAY || type == java.sql.Types.OTHER || type == java.sql.Types.STRUCT) continue;
 
 				if (cleanup)
 				{
@@ -278,11 +278,11 @@ public class TypeMapper
 				Integer key = Integer.valueOf(type);
 				if (this.typeInfo.containsKey(key))
 				{
-					LogMgr.logWarning("TypeMapper.createTypeMap()", "The mapping from java.sql.Types."  + SqlUtil.getTypeName(type) + " to  DBMS type [" + name + "] will be ignored. A mapping is already present.");
+					LogMgr.logWarning("TypeMapper.createTypeMap()", "The mapping from java.sql.Types."  + SqlUtil.getTypeName(type) + " to  DBMS type " + name + " will be ignored. A mapping is already present.");
 				}
 				else
 				{
-					LogMgr.logInfo("TypeMapper.createTypeMap()", "Mapping java.sql.Types."  + SqlUtil.getTypeName(type) + " to DBMS type [" + name + "] ");
+					LogMgr.logInfo("TypeMapper.createTypeMap()", "Mapping java.sql.Types."  + SqlUtil.getTypeName(type) + " to DBMS type " + name);
 					this.typeInfo.put(key, name);
 				}
 			}

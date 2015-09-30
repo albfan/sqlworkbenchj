@@ -150,8 +150,7 @@ public class WbGenDrop
 				}
 				catch (IOException io)
 				{
-					result.addMessageByKey("ErrFileCreate");
-					result.addErrorMessage(ExceptionUtil.getDisplay(io));
+					result.addErrorMessageByKey("ErrFileCreate", ExceptionUtil.getDisplay(io));
 					return result;
 				}
 			}
@@ -169,8 +168,7 @@ public class WbGenDrop
 			}
 			catch (IOException io)
 			{
-				result.addMessageByKey("ErrFileCreate");
-				result.addErrorMessage(ExceptionUtil.getDisplay(io));
+				result.addErrorMessageByKey("ErrFileCreate", ExceptionUtil.getDisplay(io));
 			}
 		}
 		else

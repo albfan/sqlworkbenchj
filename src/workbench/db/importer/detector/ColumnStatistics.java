@@ -19,6 +19,8 @@
  */
 package workbench.db.importer.detector;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -82,6 +84,11 @@ public class ColumnStatistics
       return firstType;
     }
     return ColType.String;
+  }
+
+  public List<ColType> getDetectedTypes()
+  {
+    return new ArrayList<>(typeCounts.keySet());
   }
 
   public boolean sameBaseType(ColType one, ColType other)

@@ -79,9 +79,8 @@ public class TextFileTableDetector
   }
 
   @Override
-  public void analyzeFile()
+  protected void processFile()
   {
-    success = false;
     int lineNr = 0;
     BufferedReader in = null;
 
@@ -98,19 +97,9 @@ public class TextFileTableDetector
 
       String firstLine = reader.readLine();
       if (firstLine == null) return;
-
       lineNr ++;
 
       initColumns(firstLine);
-
-      String firstDataLine = reader.readLine();
-      if (firstDataLine == null) return;
-
-      lineNr ++;
-
-      // try to find the data type of each column from the first line
-      // the type detected there will be the first type to be tested for the subsequent lines
-      initTypes(firstDataLine);
 
       String line = reader.readLine();
       while (line != null && lineNr < sampleSize)
@@ -123,23 +112,12 @@ public class TextFileTableDetector
     }
     catch (IOException io)
     {
+      messages.append(io.getLocalizedMessage());
       LogMgr.logError("TextFileTableDetector.readLines()", "Could not read file " + inputFile.getAbsolutePath(), io);
     }
     finally
     {
       FileUtil.closeQuietely(in);
-    }
-    success = true;
-  }
-
-  private void initTypes(String firstLine)
-  {
-    List<String> values = parseLine(firstLine);
-    if (values.size() != columns.size()) return;
-
-    for (int i=0; i < values.size(); i ++)
-    {
-      checkOneValue(values.get(i), columns.get(i));
     }
   }
 

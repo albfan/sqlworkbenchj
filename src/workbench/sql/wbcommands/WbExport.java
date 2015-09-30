@@ -863,7 +863,7 @@ public class WbExport
 			catch (IOException e)
 			{
 				canWrite = false;
-				msg = ResourceMgr.getString("ErrFileCreate") + " " + e.getMessage();
+				msg = ResourceMgr.getFormattedString("ErrFileCreate", e.getMessage());
 			}
 
 			if (!canWrite)

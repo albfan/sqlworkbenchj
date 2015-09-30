@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
@@ -39,7 +41,10 @@ import workbench.util.MessageBuffer;
 import workbench.util.ValueConverter;
 
 /**
- * A class to detect a table structure from a CSV file.
+ * A class to detect a table structure from an import file.
+ *
+ * @see TextFileTableDetector
+ * @see SpreadSheetTableDetector
  *
  * @author Thomas Kellerer
  */
@@ -49,18 +54,17 @@ public abstract class TableDetector
   protected File inputFile;
   protected boolean withHeader;
   protected int sampleSize;
-  protected boolean success;
   protected ValueConverter converter;
-  private MessageBuffer messages = new MessageBuffer();
-
-  public boolean isSuccess()
-  {
-    return success;
-  }
+  protected MessageBuffer messages = new MessageBuffer();
 
   public MessageBuffer getMessages()
   {
     return messages;
+  }
+
+  public boolean hasMessages()
+  {
+    return messages.getLength() > 0;
   }
 
   public String getCreateTable(WbConnection conn, String tableName)
@@ -105,7 +109,37 @@ public abstract class TableDetector
     return result;
   }
 
-  public abstract void analyzeFile();
+  protected void checkResults()
+  {
+    for (ColumnStatistics col : columns)
+    {
+      List<ColType> types = col.getDetectedTypes();
+      if (types.isEmpty())
+      {
+        messages.append(ResourceMgr.getFormattedString("MsgImpTblNoType", col.getName()));
+        messages.appendNewLine();
+      }
+      else if (col.getDetectedTypes().size() > 1)
+      {
+        String typeNames = "";
+        for (int i=0; i < types.size(); i++)
+        {
+          if (i > 0) typeNames += ", ";
+          typeNames += types.get(i).toString();
+        }
+        messages.append(ResourceMgr.getFormattedString("MsgImpTblMultipleTypes", col.getName(), typeNames));
+        messages.appendNewLine();
+      }
+    }
+  }
+
+  public void analyzeFile()
+  {
+    processFile();
+    checkResults();
+  }
+
+  protected abstract void processFile();
 
   protected void analyzeValues(List<? extends Object> values)
   {
