@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-09-27">
+  <release build="-1" date="2015-10-01">
+    <entry dev-build="3" type="enh">An new command WbGenerateImpTable is available to infer the structure of a table from an import file</entry>
     <entry dev-build="2" type="enh">The command line parameter -vardef has been deprecated and replaced with -variable and -varFile</entry>
     <entry dev-build="2" type="enh">For DBMS that support it, WbImport mode=insert,update will now use the native "UPSERT" syntax instead of two statements (Postgres 9.5, Firebird, H2, MySQL</entry>
     <entry dev-build="2" type="enh">It's now possible to provide tags for each connection profile. The quickfilter will then use the defined tags for filtering the displayed profiles.</entry>
