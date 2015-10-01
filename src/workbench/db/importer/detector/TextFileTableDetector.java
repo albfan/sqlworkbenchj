@@ -45,14 +45,13 @@ public class TextFileTableDetector
 {
   private String encoding;
   private boolean enableMultiline;
-
+  
   private CsvLineParser parser;
 
-  public TextFileTableDetector(File importFile, String delimiter, String quoteChar, String dateFmt, String timestampFmt, boolean containsHeader, int numLines, String fileEncoding)
+  public TextFileTableDetector(File importFile, String delimiter, String quoteChar, String dateFmt, String timestampFmt, boolean containsHeader, String fileEncoding)
   {
     inputFile = importFile;
     withHeader = containsHeader;
-    sampleSize = numLines;
     encoding = fileEncoding;
 
     converter = new ValueConverter(dateFmt, timestampFmt);
@@ -66,6 +65,11 @@ public class TextFileTableDetector
     parser = new CsvLineParser(delimiter, quote);
     parser.setReturnEmptyStrings(true);
     parser.setTrimValues(true);
+  }
+
+  public void setDecimalChar(char decimal)
+  {
+    converter.setDecimalCharacter(decimal);
   }
 
   public void setEnableMultiline(boolean flag)

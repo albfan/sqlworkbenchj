@@ -102,10 +102,13 @@
 				</thead>
 				<tbody valign="top">
 					<row>
-						<entry>-type</entry>
+						<entry id="import-type">-type</entry>
 						<entry>
 							<para>Possible values: <literal>xml</literal>, <literal>text</literal>, <literal>ods</literal>, <literal>xls</literal></para>
-							<para>Defines the type of the input file</para>
+							<para>
+                  Defines the type of the input file. This is only needed if the input file has a non-standard file extensions.
+                  If this parameter is not specified, the import type is derived from the input file's extension.
+              </para>
 						</entry>
 					</row>
 
@@ -360,7 +363,7 @@
 					</row>
 
 					<row>
-						<entry>-encoding</entry>
+						<entry id="import-encoding">-encoding</entry>
 						<entry>
               <para>Defines the encoding of the input file (and possible CLOB files)</para>
               <para>
@@ -783,7 +786,7 @@
 					</row>
 
 					<row>
-						<entry>-delimiter</entry>
+						<entry id="import-text-delimiter">-delimiter</entry>
 						<entry>
 							<para>
 								Define the character which separates columns in one line.
@@ -821,20 +824,20 @@
 					</row>
 
 					<row>
-						<entry>-dateFormat</entry>
+						<entry id="import-date-format">-dateFormat</entry>
 						<entry>
 							<para>The <link linkend="options-date-format">format</link> for date columns.</para>
 						</entry>
 					</row>
-
 					<row>
-						<entry>-timestampFormat</entry>
+						<entry id="import-timestamp-format">-timestampFormat</entry>
 						<entry>
 							<para>
 								The <link linkend="options-date-format">format</link> for datetime (or timestamp) columns in the input file.
 							</para>
 						</entry>
 					</row>
+
 					<row>
 						<entry>-illegalDateIsNull</entry>
 						<entry>
@@ -846,7 +849,7 @@
 					</row>
 
 					<row>
-						<entry>-quoteChar</entry>
+						<entry id="import-quotechar">-quoteChar</entry>
 						<entry>
 							<para>
 								The character which was used to quote values where the delimiter is contained.
@@ -906,7 +909,7 @@
 					</row>
 
 					<row>
-						<entry>-multiLine</entry>
+						<entry id="text-import-multiline">-multiLine</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -927,12 +930,12 @@
 					</row>
 
 					<row>
-						<entry>-decimal</entry>
+						<entry id="text-import-decimal">-decimal</entry>
 						<entry>The decimal symbol to be used for numbers. The default is a dot</entry>
 					</row>
 
 					<row>
-						<entry>-header</entry>
+						<entry id="text-import-header">-header</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -1479,7 +1482,7 @@
 					</thead>
           <tbody valign="top">
             <row>
-              <entry>-sheetNumber</entry>
+              <entry id="import-sheetnumber">-sheetNumber</entry>
               <entry>
                 <para>
                   Selects the spread sheet inside the file to be imported. If this is not specified the first

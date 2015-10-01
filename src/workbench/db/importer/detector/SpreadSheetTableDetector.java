@@ -33,7 +33,7 @@ public class SpreadSheetTableDetector
   extends TableDetector
 {
   private int sheetIndex;
-  
+
   public SpreadSheetTableDetector(File spreadSheet, boolean containsHeader, int sheet)
   {
     inputFile = spreadSheet;

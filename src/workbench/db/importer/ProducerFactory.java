@@ -296,7 +296,7 @@ public class ProducerFactory
 		CommonArgs.appendArgument(command, CommonArgs.ARG_TIMESTAMP_FORMAT, generalOptions.getTimestampFormat(), indent);
 		CommonArgs.appendArgument(command, CommonArgs.ARG_DELIM, "'" + delim + "'", indent);
 		CommonArgs.appendArgument(command, WbImport.ARG_QUOTE, textOptions.getTextQuoteChar(), indent);
-		CommonArgs.appendArgument(command, CommonArgs.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
+		CommonArgs.appendArgument(command, CommonArgs.ARG_DECIMAL_CHAR, textOptions.getDecimalChar(), indent);
 		CommonArgs.appendArgument(command, WbImport.ARG_FILECOLUMNS, this.fileParser.getColumns(), indent);
 		CommonArgs.appendArgument(command, CommonArgs.ARG_QUOTE_ESCAPE, textOptions.getQuoteEscaping().toString(), indent);
 	}

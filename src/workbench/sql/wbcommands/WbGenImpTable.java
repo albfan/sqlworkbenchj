@@ -43,6 +43,8 @@ import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 
+import static workbench.sql.wbcommands.CommonArgs.*;
+
 
 
 
@@ -59,6 +61,7 @@ public class WbGenImpTable
 
   public static final String ARG_SAMPLE_SIZE = "lines";
   public static final String ARG_CREATE_TABLE = "createTable";
+  public static final String ARG_ALL_VARCHAR = "useVarchar";
 
   private List<String> supportedTypes = new ArrayList<>(4);
   public WbGenImpTable()
@@ -74,12 +77,14 @@ public class WbGenImpTable
 		cmdLine.addArgument(WbImport.ARG_QUOTE);
 		cmdLine.addArgument(CommonArgs.ARG_DELIM);
 		cmdLine.addArgument(WbImport.ARG_CONTAINSHEADER, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_ALL_VARCHAR, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbImport.ARG_SHEET_NR);
 		CommonArgs.addDelimiterParameter(cmdLine);
 		CommonArgs.addEncodingParameter(cmdLine);
     cmdLine.addArgument(CommonArgs.ARG_DATE_FORMAT);
     cmdLine.addArgument(CommonArgs.ARG_TIMESTAMP_FORMAT);
     cmdLine.addArgument(WbImport.ARG_TARGETTABLE);
+    cmdLine.addArgument(CommonArgs.ARG_DECIMAL_CHAR);
     cmdLine.addArgument(ARG_SAMPLE_SIZE);
     cmdLine.addArgument(ARG_CREATE_TABLE, ArgumentType.BoolArgument);
     cmdLine.addArgument(WbImport.ARG_MULTI_LINE, ArgumentType.BoolArgument);
@@ -126,8 +131,6 @@ public class WbGenImpTable
       return result;
     }
 
-    int lines = cmdLine.getIntValue(ARG_SAMPLE_SIZE, 100);
-
     TableDetector detector = null;
 
     if (type.equals("text"))
@@ -138,17 +141,25 @@ public class WbGenImpTable
       String tsFormat = cmdLine.getValue(CommonArgs.ARG_TIMESTAMP_FORMAT);
       String dateFormat = cmdLine.getValue(CommonArgs.ARG_DATE_FORMAT);
       QuoteEscapeType escaping = CommonArgs.getQuoteEscaping(cmdLine);
-      TextFileTableDetector tfd = new TextFileTableDetector(file, delim, quote, dateFormat, tsFormat, header, lines, encoding);
+      TextFileTableDetector tfd = new TextFileTableDetector(file, delim, quote, dateFormat, tsFormat, header, encoding);
 
 			boolean multi = cmdLine.getBoolean(WbImport.ARG_MULTI_LINE, WbImport.getMultiDefault());
 			tfd.setEnableMultiline(multi);
       tfd.setQuoteEscape(escaping);
+
+      String decimal = cmdLine.getValue(ARG_DECIMAL_CHAR);
+      if (decimal != null) tfd.setDecimalChar(decimal.charAt(0));
+
       detector = tfd;
     }
     else
     {
-      detector = new SpreadSheetTableDetector(file, header, lines);
+      int sheetNr = cmdLine.getIntValue(WbImport.ARG_SHEET_NR, 0);
+      detector = new SpreadSheetTableDetector(file, header, sheetNr);
     }
+
+    detector.setAlwaysUseVarchar(cmdLine.getBoolean(ARG_ALL_VARCHAR, false));
+    detector.setSampleSize(cmdLine.getIntValue(ARG_SAMPLE_SIZE, TableDetector.DEFAULT_SAMPLE_SIZE));
 
     try
     {

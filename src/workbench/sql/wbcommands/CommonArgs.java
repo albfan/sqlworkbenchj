@@ -65,7 +65,7 @@ public class CommonArgs
 	public static final String ARG_AUTO_BOOLEAN = "booleanToNumber";
 	public static final String ARG_DATE_FORMAT = "dateFormat";
 	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
-	public static final String ARG_DECCHAR = "decimal";
+	public static final String ARG_DECIMAL_CHAR = "decimal";
 	public static final String ARG_NUMERIC_TRUE = "numericTrue";
 	public static final String ARG_NUMERIC_FALSE = "numericFalse";
 	public static final String ARG_FALSE_LITERALS = "literalsFalse";
@@ -290,7 +290,7 @@ public class CommonArgs
 	public static void addConverterOptions(ArgumentParser cmdLine, boolean includeDateFormats)
 	{
 		cmdLine.addArgument(ARG_AUTO_BOOLEAN, ArgumentType.BoolArgument);
-		cmdLine.addArgument(ARG_DECCHAR);
+		cmdLine.addArgument(ARG_DECIMAL_CHAR);
 		if (includeDateFormats)
 		{
 			cmdLine.addArgument(ARG_DATE_FORMAT);
@@ -323,7 +323,7 @@ public class CommonArgs
 			throw new IllegalArgumentException(msg, e);
 		}
 
-		String decimal = cmdLine.getValue(ARG_DECCHAR);
+		String decimal = cmdLine.getValue(ARG_DECIMAL_CHAR);
 		if (decimal != null) converter.setDecimalCharacter(decimal.charAt(0));
 
 		List<String> falseValues = cmdLine.getListValue(ARG_FALSE_LITERALS);

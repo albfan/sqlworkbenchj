@@ -54,13 +54,15 @@ import workbench.util.ValueConverter;
  */
 public abstract class TableDetector
 {
+  public static final int DEFAULT_SAMPLE_SIZE = 1000;
   protected List<ColumnStatistics> columns;
   protected File inputFile;
   protected boolean withHeader;
-  protected int sampleSize;
+  protected int sampleSize = DEFAULT_SAMPLE_SIZE;
   protected ValueConverter converter;
   protected MessageBuffer messages = new MessageBuffer();
   private SqlKeywordHelper helper;
+  private boolean alwaysUseVarchar;
 
   public MessageBuffer getMessages()
   {
@@ -70,6 +72,23 @@ public abstract class TableDetector
   public boolean hasMessages()
   {
     return messages.getLength() > 0;
+  }
+
+  public void setAlwaysUseVarchar(boolean flag)
+  {
+    this.alwaysUseVarchar = flag;
+  }
+
+  public void setSampleSize(int lines)
+  {
+    if (lines <= 0)
+    {
+      sampleSize = Integer.MAX_VALUE;
+    }
+    else
+    {
+      sampleSize = lines;
+    }
   }
 
   public String getCreateTable(WbConnection conn, String tableName)
@@ -100,7 +119,7 @@ public abstract class TableDetector
     {
       ColumnIdentifier col = dbColumns.get(i);
       int size = col.getColumnSize();
-      int type = col.getDataType();
+      int type = alwaysUseVarchar ? Types.VARCHAR : col.getDataType();
 
       if (SqlUtil.isCharacterType(type))
       {
@@ -207,13 +226,19 @@ public abstract class TableDetector
       ColumnStatistics stats = columns.get(i);
       ColType currentType = stats.getMostFrequentType();
 
+      int len = value.toString().length();
+      if (alwaysUseVarchar)
+      {
+        stats.addValidType(ColType.String, len, 0);
+        continue;
+      }
+
       if (currentType == null)
       {
         checkOneValue(value, stats);
         continue;
       }
 
-      int len = value.toString().length();
 
       boolean typeMatched = false;
       // by first validating the "previous" type we avoid the exceptions
@@ -266,11 +291,19 @@ public abstract class TableDetector
   {
     if (value == null) return;
 
-    ColType type = getType(value);
     int digits = 0;
-    if (type == ColType.Decimal)
+    ColType type = null;
+    if (alwaysUseVarchar)
     {
-      digits = getDigits(value);
+      type = ColType.String;
+    }
+    else
+    {
+      type = getType(value);
+      if (type == ColType.Decimal)
+      {
+        digits = getDigits(value);
+      }
     }
     stats.addValidType(type, value.toString().length(), digits);
   }

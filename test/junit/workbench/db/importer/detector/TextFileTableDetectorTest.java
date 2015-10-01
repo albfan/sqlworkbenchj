@@ -70,7 +70,8 @@ public class TextFileTableDetectorTest
       "1,Arthur,Dent,1980-01-01,2015-07-06 14:15:16,42\n",
       "UTF-8");
 
-    TextFileTableDetector detector = new TextFileTableDetector(data, ",", "\"", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", true, 100, "UTF-8");
+    TextFileTableDetector detector = new TextFileTableDetector(data, ",", "\"", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", true, "UTF-8");
+    detector.setSampleSize(100);
     detector.analyzeFile();
     List<ColumnIdentifier> columns = detector.getDBColumns();
     assertNotNull(columns);
@@ -120,6 +121,21 @@ public class TextFileTableDetectorTest
       "  dob          date,\n" +
       "  last_login   timestamp,\n" +
       "  salary       decimal(8,3)\n" +
+      ")";
+    assertEquals(expected, create.trim().toLowerCase());
+    detector.setAlwaysUseVarchar(true);
+    detector.analyzeFile();
+    create = detector.getCreateTable(null, "csv_table");
+    assertNotNull(create);
+    expected =
+      "create table csv_table\n" +
+      "(\n" +
+      "  id           varchar(32767),\n" +
+      "  firstname    varchar(32767),\n" +
+      "  lastname     varchar(32767),\n" +
+      "  dob          varchar(32767),\n" +
+      "  last_login   varchar(32767),\n" +
+      "  salary       varchar(32767)\n" +
       ")";
     assertEquals(expected, create.trim().toLowerCase());
   }
