@@ -114,12 +114,12 @@ public class TextFileTableDetectorTest
     String expected =
       "create table csv_table\n" +
       "(\n" +
-      "  id integer,\n" +
-      "  firstname varchar(6),\n" +
-      "  lastname varchar(8),\n" +
-      "  dob date,\n" +
-      "  last_login timestamp,\n" +
-      "  salary decimal(8,3)\n" +
+      "  id           integer,\n" +
+      "  firstname    varchar(32767),\n" +
+      "  lastname     varchar(32767),\n" +
+      "  dob          date,\n" +
+      "  last_login   timestamp,\n" +
+      "  salary       decimal(8,3)\n" +
       ")";
     assertEquals(expected, create.trim().toLowerCase());
   }

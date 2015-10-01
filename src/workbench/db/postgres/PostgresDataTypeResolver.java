@@ -31,7 +31,7 @@ import workbench.util.SqlUtil;
 /**
  * @author Thomas Kellerer
  */
-public class PostgresDataTypeResolver 
+public class PostgresDataTypeResolver
 	implements DataTypeResolver
 {
 
@@ -79,7 +79,8 @@ public class PostgresDataTypeResolver
 			if ("_int8".equals(dbmsName)) return "bigint[]";
 		}
 		if ("_varchar".equals(dbmsName)) return "varchar[]";
-
+    if ("varchar".equals(dbmsName) && size < 0) return "varchar";
+    
 		return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 	}
 

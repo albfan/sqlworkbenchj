@@ -2130,4 +2130,13 @@ public class DbSettings
     return getBoolProperty(type + ".trim.names", globalDefault);
   }
 
+  public String getUnboundedVarcharType()
+  {
+    return getProperty("varchar.type.unlimited", null);
+  }
+
+  public int getMaxVarcharLength()
+  {
+    return getIntProperty("varchar.max.length", 32762);
+  }
 }

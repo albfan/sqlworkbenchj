@@ -30,14 +30,18 @@ import java.util.List;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
-import workbench.db.TableCreator;
+import workbench.db.QuoteHandler;
 import workbench.db.TableIdentifier;
+import workbench.db.TypeMapper;
 import workbench.db.WbConnection;
 
 import workbench.sql.formatter.FormatterUtil;
+import workbench.sql.syntax.SqlKeywordHelper;
 
 import workbench.util.CollectionUtil;
 import workbench.util.MessageBuffer;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 
 /**
@@ -56,6 +60,7 @@ public abstract class TableDetector
   protected int sampleSize;
   protected ValueConverter converter;
   protected MessageBuffer messages = new MessageBuffer();
+  private SqlKeywordHelper helper;
 
   public MessageBuffer getMessages()
   {
@@ -69,16 +74,63 @@ public abstract class TableDetector
 
   public String getCreateTable(WbConnection conn, String tableName)
     throws SQLException
-
   {
     if (CollectionUtil.isEmpty(columns)) return null;
 
     TableIdentifier tbl = new TableIdentifier(tableName);
-    TableCreator creator = new TableCreator(conn, null, tbl, getDBColumns());
-    creator.setUseFormatterSettings(true);
-    creator.useDbmsDataType(false);
 
-    return creator.getCreateTableSQL();
+    List<ColumnIdentifier> dbColumns = getDBColumns();
+
+    String result = FormatterUtil.getKeyword("CREATE TABLE ");
+    result += FormatterUtil.getIdentifier(tbl.getTableExpression(conn));
+    result += "\n(\n";
+
+    TypeMapper mapper = new TypeMapper(conn);
+
+    String unbounded = conn == null ? null : conn.getDbSettings().getUnboundedVarcharType();
+
+    int defaultMaxLength = 32767;
+    int maxLength = conn == null ? defaultMaxLength : conn.getDbSettings().getMaxVarcharLength();
+
+    if (maxLength < 0) maxLength = defaultMaxLength;
+
+    int maxColNameLength = getMaxColumNameLength(conn, dbColumns) + 3;
+
+    for (int i=0; i < dbColumns.size(); i++)
+    {
+      ColumnIdentifier col = dbColumns.get(i);
+      int size = col.getColumnSize();
+      int type = col.getDataType();
+
+      if (SqlUtil.isCharacterType(type))
+      {
+        if (size <= maxLength)
+        {
+          size = maxLength;
+        }
+        else
+        {
+          type = Types.CLOB;
+        }
+      }
+
+      if (i > 0) result +=",\n";
+      result += "  " + StringUtil.padRight(getColumnName(conn, col), maxColNameLength);
+
+      String typeName = null;
+      if (SqlUtil.isCharacterType(type) && unbounded != null)
+      {
+        typeName = unbounded;
+      }
+      else
+      {
+        typeName = mapper.getTypeName(type, size, col.getDecimalDigits());
+      }
+      result += FormatterUtil.getDataType(typeName);
+    }
+
+    result += "\n)";
+    return result;
   }
 
   public List<ColumnIdentifier> getDBColumns()
@@ -86,12 +138,13 @@ public abstract class TableDetector
     if (CollectionUtil.isEmpty(columns)) return Collections.emptyList();
 
     List<ColumnIdentifier> result = new ArrayList<>(columns.size());
+    int pos = 0;
     for (ColumnStatistics colStat : columns)
     {
       ColType type = colStat.getBestType();
       String name = FormatterUtil.getIdentifier(colStat.getName());
       ColumnIdentifier col = new ColumnIdentifier(name, type.getJDBCType());
-
+      col.setPosition(pos);
       if (type == ColType.Integer && colStat.getMaxLength() > 9)
       {
         col.setDataType(Types.BIGINT);
@@ -103,8 +156,8 @@ public abstract class TableDetector
       {
         col.setDecimalDigits(colStat.getMaxDigits());
       }
-
       result.add(col);
+      pos ++;
     }
     return result;
   }
@@ -325,5 +378,50 @@ public abstract class TableDetector
     {
       return false;
     }
+  }
+
+
+  private String getColumnName(WbConnection conn, ColumnIdentifier col)
+  {
+    QuoteHandler quoter = conn == null ? QuoteHandler.STANDARD_HANDLER : conn.getMetadata();
+
+    String name = col.getColumnName();
+    if (!quoter.isLegalIdentifier(name) || isReservedWord(conn, name))
+    {
+      name = quoter.getIdentifierQuoteCharacter() + name + quoter.getIdentifierQuoteCharacter();
+    }
+    return FormatterUtil.getIdentifier(name);
+  }
+
+  private boolean isReservedWord(WbConnection conn, String name)
+  {
+    if (conn == null)
+    {
+      return getKeyWordHelper().getReservedWords().contains(name);
+    }
+    return conn.getMetadata().isReservedWord(name);
+  }
+
+  private SqlKeywordHelper getKeyWordHelper()
+  {
+    if (helper == null)
+    {
+      helper = new SqlKeywordHelper();
+    }
+    return helper;
+  }
+
+  private int getMaxColumNameLength(WbConnection conn, List<ColumnIdentifier> columns)
+  {
+    int maxlen = 0;
+    for (ColumnIdentifier col : columns)
+    {
+      String name = getColumnName(conn, col);
+      if (name.length() > maxlen)
+      {
+        maxlen = name.length();
+      }
+    }
+    return maxlen;
   }
 }

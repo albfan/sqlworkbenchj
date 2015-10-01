@@ -31,8 +31,8 @@ import java.util.List;
 import workbench.log.LogMgr;
 
 import workbench.db.sqltemplates.ColumnDefinitionTemplate;
-import workbench.sql.formatter.FormatterUtil;
 
+import workbench.sql.formatter.FormatterUtil;
 import workbench.sql.syntax.SqlKeywordHelper;
 
 import workbench.util.SqlUtil;
