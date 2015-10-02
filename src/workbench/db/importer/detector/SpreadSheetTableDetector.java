@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.db.importer.SpreadsheetReader;
+import workbench.log.LogMgr;
+import workbench.util.ExceptionUtil;
 
 /**
  *
@@ -54,6 +56,7 @@ public class SpreadSheetTableDetector
 
     try
     {
+      reader.load();
       List<String> cols = reader.getHeaderColumns();
       columns = new ArrayList<>(cols.size());
       for (String col : cols)
@@ -68,6 +71,11 @@ public class SpreadSheetTableDetector
         List<Object> values = reader.getRowValues(row);
         analyzeValues(values);
       }
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("SpreadSheetTableDetector.analyzeSpreadSheet()", "Error reading spreadsheet", th);
+      messages.append(ExceptionUtil.getDisplay(th));
     }
     finally
     {
