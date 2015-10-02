@@ -2055,6 +2055,7 @@ WHERE id=42;</programlisting>
 							<entry>-sheetNumber</entry>
 							<entry>
                 <para>If the input file is a spreadsheet, this parameter defines the <link linkend="import-sheetnumber">sheet number</link> to be analyzed.</para>
+                <para>Providing a wildcard is not supported.</para>
               </entry>
 						</row>
 						<row>

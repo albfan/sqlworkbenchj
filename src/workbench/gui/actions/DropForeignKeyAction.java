@@ -74,14 +74,7 @@ public class DropForeignKeyAction
 
 		if (panel.wasRun())
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					fkDisplay.reloadTable();
-				}
-			});
+			EventQueue.invokeLater(fkDisplay::reloadTable);
 		}
 	}
 

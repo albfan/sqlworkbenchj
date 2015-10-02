@@ -55,6 +55,7 @@ import workbench.gui.components.WbStatusLabel;
 import workbench.gui.sql.SqlEditor;
 
 import workbench.sql.BatchRunner;
+import workbench.sql.ErrorDescriptor;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -76,6 +77,8 @@ public class RunScriptPanel
 	private EscAction escAction;
 	private boolean wasRun;
 	private boolean success;
+  private ErrorDescriptor error;
+  private String messages;
 
 	public RunScriptPanel(WbConnection con, String script)
 	{
@@ -90,6 +93,16 @@ public class RunScriptPanel
 		saveAsButton.setAction(editor.getFileSaveAsAction());
 		saveAsButton.setEnabled(true);
 	}
+
+  public String getMessages()
+  {
+    return messages;
+  }
+
+  public ErrorDescriptor getError()
+  {
+    return error;
+  }
 
 	public boolean wasRun()
 	{
@@ -129,33 +142,47 @@ public class RunScriptPanel
 		openWindow(parent, title, highlight);
 	}
 
+  /**
+   * Opens a window with this panel.
+   *
+   * This is run on the EDT.
+   *
+   * @param owner       the owner of the dialog
+   * @param title       the title of the dialog
+   * @param highlight   a string to be highlighted in the editor
+   */
 	public void openWindow(final Frame owner, final String title, final String highlight)
-	{
+  {
 		WbSwingUtilities.invoke(() ->
     {
-      window = new JDialog(owner, title, true);
-      ResourceMgr.setWindowIcons(window, "script");
-      escAction = new EscAction(window, RunScriptPanel.this);
-
-      window.getContentPane().add(RunScriptPanel.this);
-      if (!Settings.getInstance().restoreWindowSize(window, "workbench.gui.runscript.window"))
-      {
-        window.setSize(600, 400);
-      }
-      WbSwingUtilities.center(window, owner);
-      window.addWindowListener(RunScriptPanel.this);
-      editor.setText(sqlScript);
-      editor.setCaretPosition(0);
-
-      if (highlight != null)
-      {
-        EventQueue.invokeLater(() ->
-        {
-          highlightText(highlight);
-        });
-      }
-      window.setVisible(true);
+      _openWindow(owner, title, highlight);
     });
+  }
+
+	private void _openWindow(final Frame owner, final String title, final String highlight)
+	{
+    window = new JDialog(owner, title, true);
+    ResourceMgr.setWindowIcons(window, "script");
+    escAction = new EscAction(window, RunScriptPanel.this);
+
+    window.getContentPane().add(RunScriptPanel.this);
+    if (!Settings.getInstance().restoreWindowSize(window, "workbench.gui.runscript.window"))
+    {
+      window.setSize(600, 400);
+    }
+    WbSwingUtilities.center(window, owner);
+    window.addWindowListener(RunScriptPanel.this);
+    editor.setText(sqlScript);
+    editor.setCaretPosition(0);
+
+    if (highlight != null)
+    {
+      EventQueue.invokeLater(() ->
+      {
+        highlightText(highlight);
+      });
+    }
+    window.setVisible(true);
 	}
 
 	private void highlightText(String text)
@@ -251,6 +278,9 @@ public class RunScriptPanel
 
 			success = !runner.runScript(editor.getText());
 
+      error = runner.getLastError();
+      messages = runner.getMessages();
+
 			final String statusMsg;
 			if (success)
 			{
@@ -268,22 +298,21 @@ public class RunScriptPanel
 
 			if (!success)
 			{
-				String errors = runner.getMessages();
-				if (errors != null)
+				if (messages != null)
 				{
-					WbSwingUtilities.showMultiLineError(this, ResourceMgr.TXT_PRODUCT_NAME, errors);
+					WbSwingUtilities.showMultiLineError(this, ResourceMgr.TXT_PRODUCT_NAME, messages);
 				}
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("RunScriptPanel.runScript()", "Error when running script", e);
-			final String error = ExceptionUtil.getDisplay(e);
+			final String msg = ExceptionUtil.getDisplay(e);
 			WbSwingUtilities.invoke(() ->
       {
-        statusbar.setText(error);
+        statusbar.setText(msg);
       });
-			WbSwingUtilities.showMessage(this, error);
+			WbSwingUtilities.showMessage(this, msg);
 		}
 		finally
 		{

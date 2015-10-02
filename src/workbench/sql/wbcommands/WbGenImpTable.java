@@ -19,16 +19,23 @@
  */
 package workbench.sql.wbcommands;
 
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.WbManager;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.importer.detector.SpreadSheetTableDetector;
 import workbench.db.importer.detector.TableDetector;
 import workbench.db.importer.detector.TextFileTableDetector;
+import workbench.gui.dbobjects.RunScriptPanel;
+import workbench.log.LogMgr;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -45,10 +52,6 @@ import workbench.util.WbFile;
 
 import static workbench.sql.wbcommands.CommonArgs.*;
 
-
-
-
-
 /**
  *
  * @author Thomas Kellerer
@@ -61,6 +64,8 @@ public class WbGenImpTable
 
   public static final String ARG_SAMPLE_SIZE = "lines";
   public static final String ARG_CREATE_TABLE = "createTable";
+  public static final String ARG_DO_PROMPT = "doPrompt";
+  public static final String ARG_CLIPBOARD = "clipboard";
   public static final String ARG_ALL_VARCHAR = "useVarchar";
 
   private List<String> supportedTypes = new ArrayList<>(4);
@@ -87,6 +92,8 @@ public class WbGenImpTable
     cmdLine.addArgument(CommonArgs.ARG_DECIMAL_CHAR);
     cmdLine.addArgument(ARG_SAMPLE_SIZE);
     cmdLine.addArgument(ARG_CREATE_TABLE, ArgumentType.BoolArgument);
+    cmdLine.addArgument(ARG_DO_PROMPT, ArgumentType.BoolArgument);
+    cmdLine.addArgument(ARG_CLIPBOARD, ArgumentType.BoolSwitch);
     cmdLine.addArgument(WbImport.ARG_MULTI_LINE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_OUTPUT_FILE, ArgumentType.Filename);
 		CommonArgs.addQuoteEscaping(cmdLine);
@@ -154,8 +161,9 @@ public class WbGenImpTable
     }
     else
     {
-      int sheetNr = cmdLine.getIntValue(WbImport.ARG_SHEET_NR, 0);
-      detector = new SpreadSheetTableDetector(file, header, sheetNr);
+      // the index is zero-based, but the user supplies a one-based index
+      int sheetNr = cmdLine.getIntValue(WbImport.ARG_SHEET_NR, 1);
+      detector = new SpreadSheetTableDetector(file, header, sheetNr - 1);
     }
 
     detector.setAlwaysUseVarchar(cmdLine.getBoolean(ARG_ALL_VARCHAR, false));
@@ -176,6 +184,7 @@ public class WbGenImpTable
       if (ddl == null) return result;
 
       boolean createTable = cmdLine.getBoolean(ARG_CREATE_TABLE, false);
+      boolean showSQL = true;
 
       WbFile outFile = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_OUTPUT_FILE));
       if (outFile != null)
@@ -186,6 +195,7 @@ public class WbGenImpTable
           String msg = ResourceMgr.getFormattedString("MsgScriptWritten", outFile.getFullPath());
           result.addMessage(msg);
           result.setSuccess();
+          showSQL = false;
         }
         catch (IOException io)
         {
@@ -193,14 +203,22 @@ public class WbGenImpTable
           result.addErrorMessageByKey("ErrFileCreate", ExceptionUtil.getDisplay(io));
         }
       }
-      else
-      {
-        result.addMessage(ddl + ";");
-      }
 
       if (createTable)
       {
-        StatementRunnerResult createResult = runDDL(ddl);
+        boolean doPrompt = cmdLine.getBoolean(ARG_DO_PROMPT, true);
+
+        StatementRunnerResult createResult = null;
+
+        if (WbManager.getInstance().isGUIMode() && doPrompt)
+        {
+          createResult = runDDLWithPrompt(ddl);
+          showSQL = false;
+        }
+        else
+        {
+          createResult = runDDL(ddl);
+        }
         if (!createResult.isSuccess())
         {
           result.setFailure();
@@ -209,6 +227,16 @@ public class WbGenImpTable
         result.addMessage(createResult.getMessageBuffer());
         createResult.clear();
       }
+
+      if (showSQL)
+      {
+        result.addMessage(ddl + ";");
+      }
+
+      if (cmdLine.getBoolean(ARG_CLIPBOARD, false))
+      {
+        putToClipboard(ddl+ ";");
+      }
     }
     catch (Exception ex)
     {
@@ -216,6 +244,22 @@ public class WbGenImpTable
       result.addMessage(ex.getMessage());
     }
     return result;
+  }
+
+  private void putToClipboard(String ddl)
+  {
+    if (GraphicsEnvironment.isHeadless()) return;
+
+    try
+    {
+			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+      StringSelection sel = new StringSelection(ddl);
+			clp.setContents(sel, sel);
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("WbGenImpTable.putToClipboard()", "Could not copy SQL to clipboard", th);
+    }
   }
 
   private StatementRunnerResult runDDL(String ddl)
@@ -234,6 +278,32 @@ public class WbGenImpTable
     }
     return result;
   }
+
+  private StatementRunnerResult runDDLWithPrompt(String ddl)
+  {
+    StatementRunnerResult result = new StatementRunnerResult(ddl);
+    result.setSuccess();
+    try
+    {
+      // The panel will refuse to start the script if the connection is marked as busy
+      currentConnection.setBusy(false);
+
+      RunScriptPanel panel = new RunScriptPanel(currentConnection, ddl + ";");
+      panel.openWindow(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("TxtWindowTitleGeneratedScript"));
+
+      if (panel.wasRun())
+      {
+        result.addMessage(panel.getMessages());
+        result.setFailure(panel.getError());
+      }
+    }
+    finally
+    {
+      currentConnection.setBusy(true);
+    }
+    return result;
+  }
+
 
   @Override
   public String getVerb()

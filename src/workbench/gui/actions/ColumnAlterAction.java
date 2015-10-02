@@ -137,14 +137,7 @@ public class ColumnAlterAction
 
 		if (panel.wasRun() && panel.isSuccess() && client != null)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					client.reload();
-				}
-			});
+			EventQueue.invokeLater(client::reload);
 		}
 	}
 

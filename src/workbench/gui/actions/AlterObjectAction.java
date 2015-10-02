@@ -95,7 +95,7 @@ public class AlterObjectAction
 		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
 		if (ds == null) return false;
 
-		Map<DbObject, DbObject> changed = new HashMap<DbObject, DbObject>();
+		Map<DbObject, DbObject> changed = new HashMap<>();
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
 			if (ds.isRowModified(row))
@@ -124,14 +124,7 @@ public class AlterObjectAction
 
 		if (panel.wasRun() && client != null)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					client.reload();
-				}
-			});
+			EventQueue.invokeLater(client::reload);
 		}
 	}
 
@@ -140,7 +133,7 @@ public class AlterObjectAction
 		DataStore ds = tableList.getDataStore();
 		DbObjectChanger renamer = new DbObjectChanger(dbConnection);
 
-		Map<DbObject, DbObject> changed = new HashMap<DbObject, DbObject>();
+		Map<DbObject, DbObject> changed = new HashMap<>();
 
 		for (int row = 0; row < ds.getRowCount(); row++)
 		{

@@ -55,22 +55,22 @@ public class CreatePKAction
 	public void executeAction(ActionEvent e)
 	{
 		List<? extends DbObject> selected = columns.getSelectedObjects();
-		if (selected == null) return;
-		if (selected.size() == 0) return;
+		if (CollectionUtil.isEmpty(selected)) return;
+
 		List<ColumnIdentifier> cols = CollectionUtil.arrayList();
 		for (DbObject dbo : selected)
 		{
 			cols.add((ColumnIdentifier)dbo);
 		}
-		
+
 		TableIdentifier table = columns.getObjectTable();
-		
+
 		DbObjectChanger changer = new DbObjectChanger(columns.getConnection());
 		String sql = changer.getAddPKScript(table, cols);
 		if (StringUtil.isBlank(sql)) return;
 
 		RunScriptPanel panel = new RunScriptPanel(columns.getConnection(), sql);
-		
+
 		panel.openWindow(columns.getComponent(), ResourceMgr.getString("TxtCreatePK"));
 
 		if (panel.wasRun() && columns != null)

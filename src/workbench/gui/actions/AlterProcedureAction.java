@@ -94,7 +94,7 @@ public class AlterProcedureAction
 		DataStore ds = (procList != null ? procList.getDataStore() : null);
 		if (ds == null) return false;
 
-		Map<DbObject, DbObject> changed = new HashMap<DbObject, DbObject>();
+		Map<DbObject, DbObject> changed = new HashMap<>();
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
 			if (ds.isRowModified(row))
@@ -123,14 +123,7 @@ public class AlterProcedureAction
 
 		if (panel.wasRun() && client != null)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					client.reload();
-				}
-			});
+			EventQueue.invokeLater(client::reload);
 		}
 	}
 
@@ -139,7 +132,7 @@ public class AlterProcedureAction
 		DataStore ds = procList.getDataStore();
 		DbObjectChanger renamer = new DbObjectChanger(dbConnection);
 
-		Map<DbObject, DbObject> changed = new HashMap<DbObject, DbObject>();
+		Map<DbObject, DbObject> changed = new HashMap<>();
 
 		for (int row = 0; row < ds.getRowCount(); row++)
 		{

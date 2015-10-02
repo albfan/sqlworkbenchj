@@ -62,14 +62,7 @@ public class DropPKAction
 
 		if (panel.wasRun() && columns != null)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					columns.reload();
-				}
-			});
+			EventQueue.invokeLater(columns::reload);
 		}
 	}
 
