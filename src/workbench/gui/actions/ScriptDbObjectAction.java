@@ -45,7 +45,7 @@ public class ScriptDbObjectAction
   implements WbSelectionListener
 {
 	private DbObjectList source;
-	private WbSelectionModel selection;
+	private final WbSelectionModel selection;
   private boolean showSinglePackageProcedure;
 
 	public ScriptDbObjectAction(DbObjectList client, WbSelectionModel list)
@@ -61,12 +61,14 @@ public class ScriptDbObjectAction
 		this.selection = list;
 		checkEnabled();
 		setIcon("script");
+    selection.addSelectionListener(this);
 	}
 
   @Override
   public void dispose()
   {
     super.dispose();
+    if (selection != null) selection.removeSelectionListener(this);
   }
 
   /**
