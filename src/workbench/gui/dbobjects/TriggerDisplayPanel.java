@@ -30,10 +30,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import workbench.interfaces.Resettable;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbScrollPane;
@@ -41,9 +46,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.sql.EditorPanel;
-import workbench.interfaces.Resettable;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
 
 /**

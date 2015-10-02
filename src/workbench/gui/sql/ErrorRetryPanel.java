@@ -6,84 +6,56 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 
-import workbench.log.LogMgr;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.AutoCompletionAction;
-import workbench.gui.actions.EscAction;
-import workbench.gui.components.PlainEditor;
+import workbench.gui.components.ExecuteSqlPanel;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBox;
-import workbench.gui.components.WbSplitPane;
-import workbench.gui.components.WbStatusLabel;
 
-import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.StatementRunner;
-import workbench.sql.StatementRunnerResult;
 import workbench.sql.parser.ScriptParser;
-import workbench.util.SqlUtil;
 
-import workbench.util.StringUtil;
-import workbench.util.WbThread;
+import workbench.util.SqlUtil;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ErrorRetryPanel
-  extends JPanel
+  extends ExecuteSqlPanel
   implements ActionListener, WindowListener
 {
   public static final String PROP_REPLACE_ERROR_STATEMENT = "workbench.gui.retry_error.replace.statement";
 
-  private JDialog window;
-  private PlainEditor errorDisplay;
-  private EditorPanel sqlEditor;
-  private StatementRunner stmtRunner;
-  private ErrorDescriptor error;
   private JPanel buttonPanel;
   private JButton retryButton;
   private JButton cancelButton;
   private JButton ignoreOneButton;
   private JButton ignoreAllButton;
-  private EscAction escAction;
-  private JSplitPane splitPane;
-  private AutoCompletionAction autoComplete;
-  private int choice = JOptionPane.NO_OPTION;
-  private WbStatusLabel statusBar;
   private JCheckBox replaceStatement;
   private boolean enableReplace = true;
 
   public ErrorRetryPanel(ErrorDescriptor errorDescriptor, StatementRunner runner)
   {
-    super(new BorderLayout(5,0));
-    stmtRunner = runner;
-    error = errorDescriptor;
+    super(errorDescriptor, runner);
   }
 
   public void setEnableReplace(boolean flag)
@@ -93,121 +65,19 @@ public class ErrorRetryPanel
 
   public void setStatement(ScriptParser parser, int cmdIndex)
   {
-    initUI();
+    super.setStatement(parser, cmdIndex);
     if (parser == null) return;
 
-    String sql = parser.getCommand(cmdIndex);
-
-    // if the alternate delimiter was used when parsing the script
-    // we need to add this again otherwise "Retry" might not work
-    // if that e.g. is a PL/SQL statement
-    DelimiterDefinition delimiterUsed = parser.getDelimiterUsed(cmdIndex);
-    if (delimiterUsed.isNonStandard())
-    {
-      sql += "\n" + delimiterUsed.getDelimiter();
-    }
-
-    String verb = SqlUtil.getSqlVerb(sql);
+    String verb = SqlUtil.getSqlVerb(sqlEditor.getText());
     if ("select".equalsIgnoreCase(verb) || "with".equalsIgnoreCase(verb))
     {
       showSelectHint();
     }
-
-    sqlEditor.setText(sql);
-    setCaretToError();
   }
 
-  private void showSelectHint()
+  @Override
+  protected JPanel getToolPanel()
   {
-    JLabel lbl = new JLabel("<html>Query results will <b>not</b> be displayed!</html>");
-    lbl.setBorder(new EmptyBorder(0,0,0,IconMgr.getInstance().getSizeForLabel() / 3));
-    buttonPanel.add(lbl, 0);
-  }
-
-  private void setCaretToError()
-  {
-    int caret = 0;
-    if (error != null && error.getErrorPosition() > -1)
-    {
-      caret = error.getErrorPosition();
-    }
-    sqlEditor.setCaretPosition(caret);
-  }
-
-  public int getChoice()
-  {
-    return choice;
-  }
-
-  public String getStatement()
-  {
-    initUI();
-    ScriptParser parser = ScriptParser.createScriptParser(stmtRunner.getConnection());
-    parser.setScript(sqlEditor.getText());
-    if (parser.getSize() < 1)
-    {
-      return "";
-    }
-    return parser.getCommand(0);
-  }
-
-  private void initUI()
-  {
-    if (errorDisplay != null) return;
-
-    String msg = null;
-    if (error != null && error.getErrorMessage() != null)
-    {
-      msg = error.getErrorMessage();
-    }
-    errorDisplay = new PlainEditor(WbSwingUtilities.PROP_ERROR_MSG_WRAP, false, false);
-    errorDisplay.setText(msg);
-
-    splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
-    splitPane.setContinuousLayout(true);
-    splitPane.setOneTouchExpandable(true);
-
-    sqlEditor = EditorPanel.createSqlEditor();
-    if (stmtRunner != null)
-    {
-      sqlEditor.setDatabaseConnection(stmtRunner.getConnection());
-    }
-
-    if (error != null && error.getOriginalStatement() != null)
-    {
-      sqlEditor.setText(error.getOriginalStatement());
-      setCaretToError();
-    }
-
-    statusBar = new WbStatusLabel();
-
-    autoComplete = new AutoCompletionAction(sqlEditor, statusBar);
-    autoComplete.setConnection(stmtRunner.getConnection());
-
-    splitPane.setTopComponent(sqlEditor);
-    splitPane.setBottomComponent(errorDisplay);
-
-    JLabel lbl = new JLabel(ResourceMgr.getString("MsgExecuteError"));
-
-    Font font = lbl.getFont();
-    int borderWith = 8;
-    if (font != null)
-    {
-      FontMetrics fm = lbl.getFontMetrics(font);
-      if (fm != null)
-      {
-        borderWith = (int)(fm.getHeight() / 2);
-      }
-    }
-    EmptyBorder border = new EmptyBorder(borderWith, borderWith, 0, borderWith);
-    lbl.setBorder(border);
-    splitPane.setBorder(border);
-
-    int gap = IconMgr.getInstance().getSizeForLabel();
-
-    JPanel bottomPanel = new JPanel(new BorderLayout());
-    bottomPanel.setBorder(new EmptyBorder(borderWith/4, borderWith, 0, borderWith));
-
     JPanel toolPanel = new JPanel(new BorderLayout(0,0));
     replaceStatement = new WbCheckBox(ResourceMgr.getString("LblReplaceOrgSql"));
     replaceStatement.setToolTipText(ResourceMgr.getDescription("LblReplaceOrgSql"));
@@ -222,10 +92,11 @@ public class ErrorRetryPanel
       replaceStatement.setEnabled(false);
     }
 
+    int gap = IconMgr.getInstance().getSizeForLabel();
+
     toolPanel.add(replaceStatement, BorderLayout.LINE_START);
 
     buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-    buttonPanel.setBorder(new EmptyBorder(borderWith, 0, borderWith, 0));
     retryButton = new WbButton(ResourceMgr.getString("LblRetry"));
     retryButton.addActionListener(this);
     buttonPanel.add(retryButton);
@@ -245,25 +116,26 @@ public class ErrorRetryPanel
     cancelButton.addActionListener(this);
     buttonPanel.add(cancelButton);
     toolPanel.add(buttonPanel, BorderLayout.CENTER);
-    bottomPanel.add(toolPanel, BorderLayout.PAGE_END);
-    bottomPanel.add(statusBar, BorderLayout.PAGE_START);
 
-    add(lbl, BorderLayout.PAGE_START);
-    add(splitPane, BorderLayout.CENTER);
-    add(bottomPanel, BorderLayout.PAGE_END);
+    return toolPanel;
   }
 
-
-  private void closeDialog(int value)
+  @Override
+  protected JLabel getLabel()
   {
-    choice = value;
-    if (window == null) return;
+    return new JLabel(ResourceMgr.getString("MsgExecuteError"));
+  }
 
-    EventQueue.invokeLater(() ->
-    {
-      window.setVisible(false);
-      window.dispose();
-    });
+  private void showSelectHint()
+  {
+    JLabel lbl = new JLabel("<html>Query results will <b>not</b> be displayed!</html>");
+    lbl.setBorder(new EmptyBorder(0,0,0,IconMgr.getInstance().getSizeForLabel() / 3));
+    buttonPanel.add(lbl, 0);
+  }
+
+  protected void statementFinished()
+  {
+    closeDialog(WbSwingUtilities.CONTINUE_OPTION);
   }
 
   public boolean shouldReplaceOriginalStatement()
@@ -271,95 +143,20 @@ public class ErrorRetryPanel
     return replaceStatement.isSelected();
   }
 
-  public void dispose()
+  protected void setButtonsEnabled(boolean flag)
   {
-    if (autoComplete != null) autoComplete.dispose();
-    sqlEditor.dispose();
-  }
-
-  private void setButtonsEnabled(boolean flag)
-  {
-    autoComplete.setEnabled(flag);
+    super.setButtonsEnabled(flag);
     cancelButton.setEnabled(flag);
     retryButton.setEnabled(flag);
     ignoreAllButton.setEnabled(flag);
     ignoreOneButton.setEnabled(flag);
   }
 
-  private void startSQL()
-  {
-    WbThread sqlThread = new WbThread("SqlRetryThread")
-    {
-
-      @Override
-      public void run()
-      {
-        runSQL();
-      }
-    };
-    sqlThread.start();
-  }
-
-  private void runSQL()
-  {
-    final String command = getStatement();
-    if (StringUtil.isEmptyString(command))
-    {
-      LogMgr.logWarning("ErrorRetryPanel.runSQL", "No SQL statement!");
-      return;
-    }
-
-    StatementRunnerResult result = null;
-    try
-    {
-      setButtonsEnabled(false);
-      statusBar.setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
-
-      stmtRunner.getConnection().setBusy(true);
-      stmtRunner.runStatement(command);
-      result = stmtRunner.getResult();
-      final ErrorDescriptor descriptor = result.getErrorDescriptor();
-
-      if (result.isSuccess())
-      {
-        closeDialog(WbSwingUtilities.CONTINUE_OPTION);
-      }
-      else
-      {
-        EventQueue.invokeLater(() ->
-        {
-          if (descriptor != null && descriptor.getErrorMessage() != null)
-          {
-            errorDisplay.setText(descriptor.getErrorMessage());
-            if (descriptor.getErrorPosition() > -1)
-            {
-              sqlEditor.setCaretPosition(descriptor.getErrorPosition());
-            }
-          }
-          sqlEditor.requestFocusInWindow();
-        });
-      }
-    }
-    catch (Exception ex)
-    {
-      LogMgr.logUserSqlError("ErrorRetryPanel.runSQL", command, ex);
-      WbSwingUtilities.showErrorMessage(ex.getMessage());
-    }
-    finally
-    {
-      result.clear();
-      result.clearResultData();
-      stmtRunner.getConnection().setBusy(false);
-      statusBar.clearStatusMessage();
-      stmtRunner.statementDone();
-      setButtonsEnabled(true);
-    }
-  }
-
   @Override
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == cancelButton || e.getSource() == escAction)
+    super.actionPerformed(e);
+    if (e.getSource() == cancelButton)
     {
       closeDialog(JOptionPane.CANCEL_OPTION);
     }
@@ -378,71 +175,23 @@ public class ErrorRetryPanel
   }
 
   @Override
-  public void windowOpened(WindowEvent e)
+  protected String getWindowSettingsKey()
   {
-    splitPane.setDividerLocation(0.8);
+    return "workbench.gui.sql.retrywindow";
   }
 
   @Override
-  public void windowClosing(WindowEvent e)
+  protected void saveSettings()
   {
-  }
-
-  @Override
-  public void windowClosed(WindowEvent e)
-  {
-  }
-
-  @Override
-  public void windowIconified(WindowEvent e)
-  {
-  }
-
-  @Override
-  public void windowDeiconified(WindowEvent e)
-  {
-  }
-
-  @Override
-  public void windowActivated(WindowEvent e)
-  {
-  }
-
-  @Override
-  public void windowDeactivated(WindowEvent e)
-  {
-  }
-
-
-  public void showDialog(Window owner)
-  {
-    window = new JDialog(owner, ResourceMgr.getString("TxtWindowTitleErrorRetry"), Dialog.ModalityType.APPLICATION_MODAL);
-
-    initUI();
-
-		// creating the action will add it to the input map of the dialog
-		// which will enable the key
-		escAction = new EscAction(window, this);
-
-    // the editor is using its own shortcut handling, so the ESC action
-    // also needs to be registered there
-    sqlEditor.addKeyBinding(escAction);
-
-    window.getContentPane().add(this);
-    if (!Settings.getInstance().restoreWindowSize(window, "workbench.gui.sql.retrywindow"))
-    {
-      window.setSize(640, 480);
-    }
-
-    WbSwingUtilities.center(window, owner);
-    WbSwingUtilities.requestComponentFocus(window, sqlEditor);
-    window.addWindowListener(this);
-    window.setVisible(true);
-
-    Settings.getInstance().storeWindowSize(window, "workbench.gui.sql.retrywindow");
+    super.saveSettings();
     if (enableReplace)
     {
       Settings.getInstance().setProperty(PROP_REPLACE_ERROR_STATEMENT, shouldReplaceOriginalStatement());
     }
+  }
+
+  public void showDialog(Window owner)
+  {
+    super.showDialog(owner, ResourceMgr.getString("TxtWindowTitleErrorRetry"));
   }
 }

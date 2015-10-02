@@ -91,7 +91,6 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyAction;
@@ -149,7 +148,6 @@ import workbench.gui.sql.DwStatusBar;
 
 import workbench.storage.DataConverter;
 import workbench.storage.DataStore;
-import workbench.storage.MergeGenerator;
 import workbench.storage.NamedSortDefinition;
 import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
@@ -592,7 +590,7 @@ public class WbTable
 	public void setFont(Font f)
 	{
 		super.setFont(f);
-    
+
 		if (tableHeader != null)
 		{
 			tableHeader.setFont(f);
@@ -1058,7 +1056,7 @@ public class WbTable
 			this.copySelectedAsInsertAction.setEnabled(selected);
 		}
 
-		if (this.copySelectedAsMergeAction != null && this.supportsMerge())
+		if (this.copySelectedAsMergeAction != null)
 		{
 			this.copySelectedAsMergeAction.setEnabled(selected);
 		}
@@ -2461,16 +2459,6 @@ public class WbTable
 		return ds.hasPkColumns();
 	}
 
-	private boolean supportsMerge()
-	{
-		if (this.getRowCount() <= 0) return false;
-		DataStore ds = this.getDataStore();
-		if (ds == null) return false;
-		WbConnection conn = ds.getOriginalConnection();
-		if (conn == null) return false;
-		return MergeGenerator.Factory.createGenerator(conn) != null;
-	}
-
 	/**
 	 * Enables the actions related to copying data to the clipboard
 	 * if this table contains rows.
@@ -2491,7 +2479,7 @@ public class WbTable
 			this.copyAsTextAction.setEnabled(hasRows);
 		}
 
-		if (this.copyMergeAction != null && supportsMerge())
+		if (this.copyMergeAction != null)
 		{
 			this.copyMergeAction.setEnabled(hasRows);
 		}

@@ -45,7 +45,7 @@ public class TextFileTableDetector
 {
   private String encoding;
   private boolean enableMultiline;
-  
+
   private CsvLineParser parser;
 
   public TextFileTableDetector(File importFile, String delimiter, String quoteChar, String dateFmt, String timestampFmt, boolean containsHeader, String fileEncoding)
@@ -125,12 +125,12 @@ public class TextFileTableDetector
     }
   }
 
-	private void initColumns(String headerLine)
-	{
+  private void initColumns(String headerLine)
+  {
     List<String> values = parseLine(headerLine);
     columns = new ArrayList<>(values.size());
 
-    for (int i=0; i < values.size(); i++)
+    for (int i = 0; i < values.size(); i++)
     {
       String colName;
       if (withHeader)
@@ -139,22 +139,22 @@ public class TextFileTableDetector
       }
       else
       {
-        colName = "column_" + Integer.valueOf(i+1);
+        colName = "column_" + Integer.valueOf(i + 1);
       }
       columns.add(new ColumnStatistics(colName));
     }
-	}
+  }
 
   private List<String> parseLine(String line)
   {
-		List<String> values= new ArrayList<>();
+    List<String> values = new ArrayList<>();
     if (StringUtil.isEmptyString(line)) return values;
 
-		parser.setLine(line);
-		while (parser.hasNext())
-		{
-			values.add(parser.getNext());
-		}
+    parser.setLine(line);
+    while (parser.hasNext())
+    {
+      values.add(parser.getNext());
+    }
     return values;
   }
 

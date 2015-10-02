@@ -370,14 +370,14 @@ public class TextAreaPainter
 	/**
 	 * Returns the font metrics used by this component.
 	 */
-	public FontMetrics getFontMetrics()
-	{
-		if (fm == null)
-		{
-			this.fm = getFontMetrics(getFont());
-		}
-		return fm;
-	}
+  public FontMetrics getFontMetrics()
+  {
+    if (fm == null)
+    {
+      this.fm = getFontMetrics(getFont());
+    }
+    return fm;
+  }
 
 	/**
 	 * Sets the font for this component.
@@ -386,33 +386,33 @@ public class TextAreaPainter
 	 *
 	 * @param font The font
 	 */
-	@Override
-	public void setFont(Font font)
-	{
-		super.setFont(font);
-		currentLineTokens = null;
-		this.fm = getFontMetrics(getFont());
-		synchronized (stylesLockMonitor)
-		{
-			if (styles != null)
-			{
-				for (SyntaxStyle style : styles)
-				{
-					if (style != null)
-					{
-						style.clearFontCache();
-					}
-				}
-			}
-		}
-		calculateTabSize();
-		calculateGutterWidth();
-	}
+  @Override
+  public void setFont(Font font)
+  {
+    super.setFont(font);
+    currentLineTokens = null;
+    this.fm = getFontMetrics(getFont());
+    synchronized (stylesLockMonitor)
+    {
+      if (styles != null)
+      {
+        for (SyntaxStyle style : styles)
+        {
+          if (style != null)
+          {
+            style.clearFontCache();
+          }
+        }
+      }
+    }
+    calculateTabSize();
+    calculateGutterWidth();
+  }
 
-	private void calculateGutterWidth()
-	{
-		if (this.showLineNumbers)
-		{
+  private void calculateGutterWidth()
+  {
+    if (this.showLineNumbers)
+    {
       FontMetrics cfm = getFontMetrics();
       if (cfm == null)
       {
@@ -423,37 +423,37 @@ public class TextAreaPainter
         this.gutterCharWidth = cfm.charWidth('9');
       }
 
-			int lastLine = textArea.getLineCount();
-			int chars = StringUtil.numDigits(lastLine);
-			this.gutterWidth = (chars * gutterCharWidth) + (GUTTER_MARGIN * 2);
-		}
-		else
-		{
-			this.gutterWidth = 0;
-		}
-	}
+      int lastLine = textArea.getLineCount();
+      int chars = StringUtil.numDigits(lastLine);
+      this.gutterWidth = (chars * gutterCharWidth) + (GUTTER_MARGIN * 2);
+    }
+    else
+    {
+      this.gutterWidth = 0;
+    }
+  }
 
-	public void calculateTabSize()
-	{
-		this.tabSize = -1;
-		if (this.textArea == null) return;
-		if (this.textArea.getDocument() == null) return;
-		FontMetrics cfm = getFontMetrics();
-		if (cfm == null) return;
+  public void calculateTabSize()
+  {
+    this.tabSize = -1;
+    if (this.textArea == null) return;
+    if (this.textArea.getDocument() == null) return;
+    FontMetrics cfm = getFontMetrics();
+    if (cfm == null) return;
 
-		Object tab = textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute);
-		int t = -1;
-		if (tab == null)
-		{
-			t = Settings.getInstance().getEditorTabWidth();
-		}
-		else
-		{
-			Integer tsize = (Integer)tab;
-			t = tsize.intValue();
-		}
-		this.tabSize = cfm.charWidth(' ') * t;
-	}
+    Object tab = textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute);
+    int t = -1;
+    if (tab == null)
+    {
+      t = Settings.getInstance().getEditorTabWidth();
+    }
+    else
+    {
+      Integer tsize = (Integer)tab;
+      t = tsize.intValue();
+    }
+    this.tabSize = cfm.charWidth(' ') * t;
+  }
 
 	@Override
 	public void paint(Graphics gfx)
