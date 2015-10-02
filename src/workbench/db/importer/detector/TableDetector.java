@@ -219,9 +219,11 @@ public abstract class TableDetector
 
     for (int i=0; i < values.size(); i ++)
     {
-      if (values.get(i) == null) continue;
-
       Object value = values.get(i);
+
+      // can't check the type for a null value
+      if (value == null) continue;
+      if (value.toString().isEmpty()) continue;
 
       ColumnStatistics stats = columns.get(i);
       ColType currentType = stats.getMostFrequentType();
@@ -239,11 +241,11 @@ public abstract class TableDetector
         continue;
       }
 
-
       boolean typeMatched = false;
+
       // by first validating the "previous" type we avoid the exceptions
       // that the isXXX() functions will generate for the wrong types
-      // because usually all rows have the same type of values and thus
+      // because usually all rows have the same type of values and
       // avoiding the exceptions makes the parsing faster (or so I hope)
       switch (currentType)
       {
@@ -412,7 +414,6 @@ public abstract class TableDetector
       return false;
     }
   }
-
 
   private String getColumnName(WbConnection conn, ColumnIdentifier col)
   {
