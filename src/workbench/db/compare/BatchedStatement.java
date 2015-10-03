@@ -32,8 +32,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+
+import workbench.db.WbConnection;
+
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 
@@ -329,5 +331,11 @@ public class BatchedStatement
 		closeStreams();
 	}
 
+  @Override
+  public String toString()
+  {
+    if (statement != null) return statement.toString();
+    return "";
+  }
 
 }

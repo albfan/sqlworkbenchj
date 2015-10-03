@@ -472,7 +472,7 @@ public class DbObjectSourcePanel
 		if (sourceEditor != null)
 		{
 			setText("", null, null);
-      hideErrorLog();
+      WbSwingUtilities.invoke(this::hideErrorLog);
 		}
 	}
 

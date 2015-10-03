@@ -55,7 +55,6 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.DmlExpressionBuilder;
-import workbench.db.PkDefinition;
 import workbench.db.SequenceAdjuster;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
@@ -1604,7 +1603,7 @@ public class DataImporter
 	 *	Callback function from the RowDataProducer
 	 */
 	@Override
-	public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)
+	public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columnsToImport)
 		throws SQLException
 	{
 		// be prepared to import more then one table...
@@ -1635,7 +1634,7 @@ public class DataImporter
 		try
 		{
 			this.targetTable = table.createCopy();
-			this.targetColumns = new ArrayList<>(columns);
+			this.targetColumns = new ArrayList<>(columnsToImport);
 
 			// Key columns might have been externally defined if
 			// a single table import is run which is not possible
@@ -2100,18 +2099,24 @@ public class DataImporter
 	 */
 	private void retrieveKeyColumns()
 	{
-    PkDefinition pk = this.dbConn.getMetadata().getIndexReader().getPrimaryKey(targetTable);
-    keyColumns = new ArrayList<>();
-    if (pk == null) return;
-    
-    for (String colname : pk.getColumns())
-    {
-      ColumnIdentifier col = ColumnIdentifier.findColumnInList(targetColumns, colname);
-      if (col != null)
-      {
-        keyColumns.add(col);
-      }
-    }
+		try
+		{
+			List<ColumnIdentifier> cols = this.dbConn.getMetadata().getTableColumns(this.targetTable);
+			this.keyColumns = new ArrayList<>(4);
+			for (ColumnIdentifier col : cols)
+			{
+				if (col.isPkColumn())
+				{
+					this.keyColumns.add(col);
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("DataImporter.retrieveKeyColumns()", "Error when retrieving key columns", e);
+			this.columnMap = null;
+			this.keyColumns = null;
+		}
 	}
 
 	private void finishTable()
