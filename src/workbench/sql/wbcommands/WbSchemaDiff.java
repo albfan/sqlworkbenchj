@@ -151,8 +151,7 @@ public class WbSchemaDiff
 
 		if (isCancelled)
 		{
-			result.setWarning(true);
-			result.addMessage(ResourceMgr.getString("MsgDiffCancelled"));
+			result.addWarning(ResourceMgr.getString("MsgDiffCancelled"));
 			return result;
 		}
 
@@ -246,8 +245,7 @@ public class WbSchemaDiff
 
 		if (isCancelled || diff.isCancelled())
 		{
-			result.setWarning(true);
-			result.addMessage(ResourceMgr.getString("MsgDiffCancelled"));
+			result.addWarning(ResourceMgr.getString("MsgDiffCancelled"));
 			return result;
 		}
 

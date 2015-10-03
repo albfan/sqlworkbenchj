@@ -297,9 +297,7 @@ public class WbInclude
 			}
       else if (batchRunner.wasCancelled())
       {
-        result.setSuccess();
-        result.setWarning(true);
-        result.addMessageByKey("MsgScriptCancelled");
+        result.addWarningByKey("MsgScriptCancelled");
         result.setStopScript(true);
       }
 			else

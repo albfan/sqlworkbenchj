@@ -54,8 +54,8 @@ public class StatementRunnerResult
 	private List<DataStore> datastores;
 	private String sourceCommand;
 
-	private boolean success = true;
-	private boolean hasWarning;
+  private ExecutionStatus status = ExecutionStatus.Success;
+  private boolean hasWarnings;
 	private boolean wasCancelled;
 	private boolean stopScriptExecution;
 	private boolean showRowCount = true;
@@ -90,6 +90,12 @@ public class StatementRunnerResult
 	{
 		this.totalRowsProcessed = rows;
 	}
+
+  public ExecutionStatus getStatus()
+  {
+    if (status == null) return ExecutionStatus.Success;
+    return status;
+  }
 
 	public long getRowsProcessed()
 	{
@@ -162,7 +168,7 @@ public class StatementRunnerResult
 
 	public void setSuccess()
 	{
-		this.success = true;
+    this.status = ExecutionStatus.Success;
 		this.errorDetails = null;
 	}
 
@@ -173,18 +179,18 @@ public class StatementRunnerResult
 
 	public void setFailure(ErrorDescriptor error)
 	{
-		this.success = false;
+    this.status = ExecutionStatus.Error;
 		this.errorDetails = error;
 	}
 
-	public void setWarning(boolean flag)
+	public void setWarning()
 	{
-		this.hasWarning = flag;
+    hasWarnings = true;
 	}
 
 	public boolean hasWarning()
 	{
-		return this.hasWarning;
+    return hasWarnings;
 	}
 
 	public ErrorDescriptor getErrorDescriptor()
@@ -194,7 +200,7 @@ public class StatementRunnerResult
 
 	public boolean isSuccess()
 	{
-		return this.success;
+    return status == ExecutionStatus.Success;
 	}
 
 	/**
@@ -301,6 +307,24 @@ public class StatementRunnerResult
 	public void addMessageNewLine()
 	{
 		this.messages.appendNewLine();
+	}
+
+	public void addWarning(CharSequence msg)
+	{
+    addMessage(msg);
+    hasWarnings = true;
+	}
+
+	public void addWarning(MessageBuffer messages)
+	{
+    addMessage(messages);
+    hasWarnings = true;
+	}
+
+	public void addWarningByKey(String msgKey)
+	{
+    addMessageByKey(msgKey);
+    hasWarnings = true;
 	}
 
 	public void addMessage(CharSequence msgBuffer)
@@ -417,9 +441,9 @@ public class StatementRunnerResult
 		clearMessageBuffer();
 		this.totalUpdateCount = 0;
 		this.sourceCommand = null;
-		this.hasWarning = false;
 		this.executionTime = -1;
 		this.errorDetails = null;
+    this.status = ExecutionStatus.Success;
 	}
 
 }

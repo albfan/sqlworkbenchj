@@ -298,8 +298,7 @@ public class SqlCommand
     {
       result.addMessage(ResourceMgr.getString("TxtWarnings"));
     }
-    result.addMessage(warn);
-    result.setWarning(true);
+    result.addWarning(warn);
     result.addMessageNewLine();
 
     return true;
@@ -670,9 +669,8 @@ public class SqlCommand
 						// data that was retrieved until now. We only add a warning
 						if (this.currentRetrievalData != null && this.currentRetrievalData.isCancelled())
 						{
-							result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
+							result.addWarningByKey("MsgErrorDuringRetrieve");
 							result.addMessage(ExceptionUtil.getAllExceptions(e));
-							result.setWarning(true);
 						}
 						else
 						{
@@ -708,8 +706,7 @@ public class SqlCommand
 			{
 				// SQL Exceptions should be shown to the user
 				LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", sql);
-				result.setWarning(true);
-				result.addMessage("\n" + sql.getMessage().trim() + "\n");
+				result.addWarning("\n" + sql.getMessage().trim() + "\n");
 				break;
 			}
 			catch (Throwable th)

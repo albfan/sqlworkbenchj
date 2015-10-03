@@ -193,8 +193,7 @@ public class OracleStatementHook
 		{
 			if (!statisticViewsAvailable)
 			{
-				result.addMessageByKey("ErrNoAutoTrace");
-				result.setWarning(true);
+				result.addWarningByKey("ErrNoAutoTrace");
 			}
 			else
 			{

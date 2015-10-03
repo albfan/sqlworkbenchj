@@ -380,8 +380,7 @@ public class WbDefineVar
 
 			if (rs.next())
 			{
-				stmtResult.setWarning(true);
-				stmtResult.addMessageByKey("ErrVarDefRows");
+				stmtResult.addWarningByKey("ErrVarDefRows");
 			}
 
 			if (stmtResult.hasWarning())

@@ -29,13 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.WbManager;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.importer.detector.SpreadSheetTableDetector;
 import workbench.db.importer.detector.TableDetector;
 import workbench.db.importer.detector.TextFileTableDetector;
+
 import workbench.gui.dbobjects.RunScriptPanel;
-import workbench.log.LogMgr;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -69,6 +70,7 @@ public class WbGenImpTable
   public static final String ARG_ALL_VARCHAR = "useVarchar";
 
   private List<String> supportedTypes = new ArrayList<>(4);
+
   public WbGenImpTable()
   {
     super();
@@ -213,12 +215,13 @@ public class WbGenImpTable
         if (WbManager.getInstance().isGUIMode() && doPrompt)
         {
           createResult = runDDLWithPrompt(ddl);
-          showSQL = false;
+          showSQL = createResult.promptingWasCancelled();
         }
         else
         {
           createResult = runDDL(ddl);
         }
+
         if (!createResult.isSuccess())
         {
           result.setFailure();
@@ -289,11 +292,14 @@ public class WbGenImpTable
       currentConnection.setBusy(false);
 
       RunScriptPanel panel = new RunScriptPanel(currentConnection, ddl + ";");
-      panel.openWindow(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("TxtWindowTitleGeneratedScript"));
+      panel.openWindow(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("TxtWindowTitleGeneratedScript"), null);
 
-      if (panel.wasRun())
+      if (!panel.wasRun())
       {
-        result.addMessage(panel.getMessages());
+        result.setPromptingWasCancelled();
+      }
+      else if (!panel.isSuccess())
+      {
         result.setFailure(panel.getError());
       }
     }

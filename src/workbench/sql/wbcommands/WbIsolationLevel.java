@@ -102,8 +102,7 @@ public class WbIsolationLevel
 				result.addMessage(ResourceMgr.getFormattedString("MsgLevelChanged", currentConnection.getIsolationLevelName()));
 				if (!supported)
 				{
-					result.addMessage(ResourceMgr.getFormattedString("MsgLevelNotSupported", SqlUtil.getIsolationLevelName(level)));
-					result.setWarning(true);
+					result.addWarning(ResourceMgr.getFormattedString("MsgLevelNotSupported", SqlUtil.getIsolationLevelName(level)));
 				}
 			}
 			catch (SQLException e)

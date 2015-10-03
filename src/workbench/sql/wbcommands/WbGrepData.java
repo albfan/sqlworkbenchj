@@ -146,8 +146,7 @@ public class WbGrepData
 		{
 			searcher.setRetrieveLobColumns(!cmdLine.getBoolean(ARG_EXCLUDE_LOBS, false));
 			String msg = ResourceMgr.getFormattedString("ErrDataSearchExclDeprecated", "-" + ARG_EXCLUDE_LOBS, "-" + ARG_RETRIEVE_CLOBS, "-" + ARG_RETRIEVE_BLOBS);
-			searchResult.addMessage(msg);
-			searchResult.setWarning(true);
+			searchResult.addWarning(msg);
 		}
 		else
 		{

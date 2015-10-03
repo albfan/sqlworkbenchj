@@ -32,9 +32,9 @@ import workbench.resource.ResourceMgr;
 
 import workbench.storage.RowActionMonitor;
 
-import workbench.sql.parser.ParserType;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.parser.ParserType;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -174,8 +174,7 @@ public class WbRunLB
 
 			if (messages.getLength() > 0)
 			{
-				result.addMessage(messages);
-				result.setWarning(true);
+				result.addWarning(messages);
 			}
 		}
 		catch (Exception th)

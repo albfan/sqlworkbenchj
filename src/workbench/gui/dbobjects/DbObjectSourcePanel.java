@@ -27,13 +27,16 @@ import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.CancellationException;
 
 import javax.swing.Box;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Replaceable;
 import workbench.interfaces.Resettable;
+import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
 import workbench.resource.IconMgr;
@@ -48,6 +51,8 @@ import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DropDownButton;
 import workbench.gui.components.FocusIndicator;
+import workbench.gui.components.PlainEditor;
+import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.Highlighter;
@@ -56,6 +61,7 @@ import workbench.gui.sql.PasteType;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorDescriptor;
+import workbench.sql.ExecutionStatus;
 import workbench.sql.parser.ScriptParser;
 
 import workbench.util.StringUtil;
@@ -65,9 +71,11 @@ import workbench.util.StringUtil;
  */
 public class DbObjectSourcePanel
 	extends JPanel
-  implements ActionListener, Resettable
+  implements ActionListener, Resettable, ResultLogger
 {
 	protected EditorPanel sourceEditor;
+  protected PlainEditor errorLog;
+  private JSplitPane splitPane;
 	protected ReloadAction reloadSource;
 	protected DropDownButton editButton;
 	private EditorTabSelectMenu selectTabMenu;
@@ -84,7 +92,7 @@ public class DbObjectSourcePanel
 
 	public DbObjectSourcePanel(MainWindow window, Reloadable reloader)
 	{
-		super();
+		super(new BorderLayout());
 		parentWindow = window;
 		if (reloader != null)
 		{
@@ -125,14 +133,7 @@ public class DbObjectSourcePanel
 
       checkReadonly();
 
-      WbSwingUtilities.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          toolbar.validate();
-        }
-      });
+      WbSwingUtilities.invokeLater(toolbar::validate);
     }
   }
 
@@ -187,8 +188,6 @@ public class DbObjectSourcePanel
 		{
 			this.sourceEditor.showFormatSql();
 		}
-
-		this.setLayout(new BorderLayout());
 
 		toolbar = new WbToolbar();
 
@@ -358,6 +357,7 @@ public class DbObjectSourcePanel
 			@Override
 			public void run()
 			{
+        hideErrorLog();
 				sourceEditor.setText(text == null ? "" : text);
         sourceEditor.clearUndoBuffer();
 				sourceEditor.invalidate();
@@ -472,6 +472,7 @@ public class DbObjectSourcePanel
 		if (sourceEditor != null)
 		{
 			setText("", null, null);
+      hideErrorLog();
 		}
 	}
 
@@ -504,14 +505,90 @@ public class DbObjectSourcePanel
       runScript.dispose();
       runScript = null;
     }
+    if (errorLog != null)
+    {
+      errorLog.setText("");
+      errorLog = null;
+    }
 	}
+
+
+
+  private void showErrorLog()
+  {
+    if (errorLog != null) return;
+    remove(sourceEditor);
+    errorLog = new PlainEditor(WbSwingUtilities.PROP_ERROR_MSG_WRAP, false, false);
+    splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, sourceEditor, errorLog);
+    add(splitPane, BorderLayout.CENTER);
+    invalidate();
+    doLayout();
+    splitPane.setDividerLocation(0.8);
+  }
+
+  private void hideErrorLog()
+  {
+    if (errorLog == null) return;
+    splitPane.remove(sourceEditor);
+    splitPane.remove(errorLog);
+    remove(splitPane);
+    add(sourceEditor, BorderLayout.CENTER);
+    splitPane = null;
+    errorLog.setText("");
+    errorLog = null;
+    invalidate();
+    doLayout();
+  }
+
+  @Override
+  public void clearLog()
+  {
+    if (errorLog != null)
+    {
+      WbSwingUtilities.invoke(errorLog::clear);
+    }
+  }
+
+  @Override
+  public void appendToLog(final String msg)
+  {
+    if (errorLog != null)
+    {
+      if (StringUtil.isBlank(errorLog.getText()) && StringUtil.isBlank(msg)) return;
+
+      WbSwingUtilities.invoke(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          errorLog.append(msg);
+        }
+      });
+    }
+  }
+
+  @Override
+  public void showLogMessage(String msg)
+  {
+    if (errorLog != null)
+    {
+      WbSwingUtilities.invoke(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          errorLog.setText(msg);
+        }
+      });
+    }
+  }
 
   private void runScript()
   {
     if (connection == null) return;
     if (connection.getProfile().isReadOnly()) return;
 
-    if (!WbSwingUtilities.isConnectionIdle(this, connection)) return;
+    if (WbSwingUtilities.isConnectionIdle(this, connection) == false) return;
 
     String script = getText();
     if (script.isEmpty()) return;
@@ -521,21 +598,45 @@ public class DbObjectSourcePanel
     boolean confirmExec = (false == DbExplorerSettings.objectTypesToRunWithoutConfirmation().contains(type));
 
     String msg = ResourceMgr.getFormattedString("MsgConfirmRecreate", type, objectName);
-
     if (confirmExec && false == WbSwingUtilities.getYesNo(this, msg))
     {
       return;
     }
 
-    ScriptExecutionFeedback feedback = new ScriptExecutionFeedback(connection, script);
-    feedback.openWindow(this, objectName);
-    ErrorDescriptor error = feedback.getLastError();
-    if (error != null)
+    showErrorLog();
+    try
     {
-      Highlighter highlighter = new Highlighter(sourceEditor);
-      ScriptParser parser = ScriptParser.createScriptParser(connection);
-      parser.setScript(getText());
-      highlighter.markError(false, parser, feedback.getLastErrorIndex(), 0, error);
+      runScript.setEnabled(false);
+
+      ScriptExecutionFeedback feedback = new ScriptExecutionFeedback(connection, script, this);
+      feedback.runScript(objectName, parentWindow);
+
+      ExecutionStatus status = feedback.get();
+
+      if (status == ExecutionStatus.Error)
+      {
+        ErrorDescriptor error = feedback.getLastError();
+        if (error != null)
+        {
+          Highlighter highlighter = new Highlighter(sourceEditor);
+          ScriptParser parser = ScriptParser.createScriptParser(connection);
+          parser.setScript(script);
+          highlighter.markError(false, parser, feedback.getLastErrorIndex(), 0, error);
+        }
+      }
+    }
+    catch (CancellationException ex)
+    {
+      // ignore
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("DbObjectSourcePanel.runScript()", "Error when running script", ex);
+    }
+    finally
+    {
+      runScript.setEnabled(true);
+      WbSwingUtilities.requestFocus(sourceEditor);
     }
   }
 }

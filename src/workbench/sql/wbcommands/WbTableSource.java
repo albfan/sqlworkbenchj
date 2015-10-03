@@ -70,18 +70,14 @@ public class WbTableSource
     {
       for (String tablename : missingTables)
       {
-        result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", tablename));
+        result.addWarning(ResourceMgr.getFormattedString("ErrTableNotFound", tablename));
       }
+      result.addMessageNewLine();
 
       if (tableList.isEmpty())
       {
         result.setFailure();
         return result;
-      }
-      else
-      {
-        result.setWarning(true);
-        result.addMessageNewLine();
       }
     }
 

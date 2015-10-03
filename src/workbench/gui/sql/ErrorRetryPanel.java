@@ -1,7 +1,22 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2015, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
 package workbench.gui.sql;
 
@@ -24,13 +39,15 @@ import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExecuteSqlPanel;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBox;
 
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorDescriptor;
-import workbench.sql.StatementRunner;
 import workbench.sql.parser.ScriptParser;
 
 import workbench.util.SqlUtil;
@@ -53,9 +70,9 @@ public class ErrorRetryPanel
   private JCheckBox replaceStatement;
   private boolean enableReplace = true;
 
-  public ErrorRetryPanel(ErrorDescriptor errorDescriptor, StatementRunner runner)
+  public ErrorRetryPanel(WbConnection conn)
   {
-    super(errorDescriptor, runner);
+    super(conn);
   }
 
   public void setEnableReplace(boolean flag)
@@ -63,16 +80,45 @@ public class ErrorRetryPanel
     enableReplace = flag;
   }
 
-  public void setStatement(ScriptParser parser, int cmdIndex)
+  public void setStatement(ScriptParser parser, int cmdIndex, ErrorDescriptor error)
   {
-    super.setStatement(parser, cmdIndex);
+    initUI();
     if (parser == null) return;
 
-    String verb = SqlUtil.getSqlVerb(sqlEditor.getText());
+    String sql = parser.getCommand(cmdIndex);
+
+    // if the alternate delimiter was used when parsing the script
+    // we need to add this again otherwise "Retry" might not work
+    // if that e.g. is a PL/SQL statement
+    DelimiterDefinition delimiterUsed = parser.getDelimiterUsed(cmdIndex);
+    if (delimiterUsed.isNonStandard())
+    {
+      sql += "\n" + delimiterUsed.getDelimiter();
+    }
+
+    sqlEditor.setText(sql);
+
+    String verb = SqlUtil.getSqlVerb(sql);
+
     if ("select".equalsIgnoreCase(verb) || "with".equalsIgnoreCase(verb))
     {
       showSelectHint();
     }
+
+    showError(error);
+  }
+
+  public String getStatement()
+  {
+    if (sqlEditor == null) return "";
+
+    ScriptParser parser = ScriptParser.createScriptParser(runner.getConnection());
+    parser.setScript(sqlEditor.getText());
+    if (parser.getSize() < 1)
+    {
+      return "";
+    }
+    return parser.getCommand(0);
   }
 
   @Override
@@ -133,8 +179,10 @@ public class ErrorRetryPanel
     buttonPanel.add(lbl, 0);
   }
 
-  protected void statementFinished()
+  @Override
+  protected void scriptSuccess()
   {
+    super.scriptSuccess();
     closeDialog(WbSwingUtilities.CONTINUE_OPTION);
   }
 
@@ -143,6 +191,7 @@ public class ErrorRetryPanel
     return replaceStatement.isSelected();
   }
 
+  @Override
   protected void setButtonsEnabled(boolean flag)
   {
     super.setButtonsEnabled(flag);

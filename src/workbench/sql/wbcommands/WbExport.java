@@ -401,8 +401,7 @@ public class WbExport
 		{
 			String msg = ResourceMgr.getString("WarnQuoteAlwaysEscape") + "\n";
 			LogMgr.logWarning("WbExport.execute()", msg, null);
-			result.addMessage(msg);
-			result.setWarning(true);
+			result.addWarning(msg);
 		}
 
 		this.exporter = new DataExporter(this.currentConnection);
@@ -444,8 +443,7 @@ public class WbExport
 			}
 			else
 			{
-				result.addMessage("Illegal infinity definition ignored");
-				result.setWarning(true);
+				result.addWarning("Illegal infinity definition ignored");
 			}
 		}
 
@@ -726,8 +724,7 @@ public class WbExport
 			cols = cmdLine.getValue("blobidcols");
 			if (cols != null)
 			{
-				result.addMessage("The blobIdCols parameter is deprecated, please use lobIdCols");
-				result.setWarning(true);
+				result.addWarning("The blobIdCols parameter is deprecated, please use lobIdCols");
 			}
 		}
 
@@ -771,10 +768,9 @@ public class WbExport
 			{
 				String tableList = StringUtil.listToString(notFound, ',');
 				String msg = ResourceMgr.getString("MsgTablesNotFound") + " " + tableList;
-				result.addMessage(msg);
+				result.addWarning(msg);
 				result.addMessageNewLine();
-				result.setWarning(true);
-				LogMgr.logWarning("WbExport.execute()", "The following tables were not found: " + tableList);
+        LogMgr.logWarning("WbExport.execute()", "The following tables were not found: " + tableList);
 			}
 		}
 		catch (SQLException e)
@@ -788,8 +784,7 @@ public class WbExport
 		// The exported isn't actually running until now, so the cancel request was essentially ignored
 		if (this.isCancelled)
 		{
-			result.setWarning(true);
-			result.addMessageByKey("MsgExportCancelled");
+			result.addWarningByKey("MsgExportCancelled");
 			return result;
 		}
 
@@ -1069,8 +1064,7 @@ public class WbExport
 			{
 				if (continueOnError)
 				{
-					result.addMessage(ResourceMgr.getString("TxtWarning") + ": " + e.getMessage());
-					result.setWarning(true);
+					result.addWarning(ResourceMgr.getString("TxtWarning") + ": " + e.getMessage());
 				}
 				else
 				{

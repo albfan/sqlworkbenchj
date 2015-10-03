@@ -36,9 +36,9 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.WbConnection;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExecuteSqlPanel;
-
-import workbench.sql.ErrorDescriptor;
+import workbench.gui.editor.SearchAndReplace;
 
 import workbench.util.StringUtil;
 
@@ -54,9 +54,6 @@ public class RunScriptPanel
   private JButton saveAsButton;
   private JButton startButton;
 	private boolean wasRun;
-	private boolean success;
-  private ErrorDescriptor error;
-  private String messages;
   private String textToHighlight;
 
   public RunScriptPanel(WbConnection connection, String sql)
@@ -117,40 +114,10 @@ public class RunScriptPanel
     super.runSQL();
   }
 
-  private void cancel()
-  {
-    showStatusMessage(ResourceMgr.getString("MsgCancellingStmt"));
-
-    if (stmtRunner != null)
-    {
-      stmtRunner.cancel();
-    }
-
-    try
-    {
-      if (runThread != null)
-      {
-        runThread.interrupt();
-      }
-      runThread = null;
-    }
-    catch (Exception e)
-    {
-      // ignore
-    }
-    showStatusMessage("");
-  }
-
   @Override
   protected JLabel getLabel()
   {
     return null;
-  }
-
-  @Override
-  protected void statementFinished()
-  {
-    success = true;
   }
 
   @Override
@@ -159,25 +126,10 @@ public class RunScriptPanel
     return "workbench.gui.runscript.window";
   }
 
-  public String getMessages()
-  {
-    return messages;
-  }
-
-  public ErrorDescriptor getError()
-  {
-    return error;
-  }
-
 	public boolean wasRun()
 	{
 		return wasRun;
 	}
-
-  public boolean isSuccess()
-  {
-    return success;
-  }
 
   @Override
   protected void setButtonsEnabled(boolean flag)
@@ -191,7 +143,11 @@ public class RunScriptPanel
 	private void highlightText(String text)
 	{
 		if (StringUtil.isBlank(text)) return;
-		int start = sqlEditor.getReplacer().findFirst(text, true, true, false);
+
+    SearchAndReplace replacer = sqlEditor.getReplacer();
+    replacer.setShowNotifications(false);
+
+		int start = replacer.findFirst(text, true, true, false);
 		int end = start + text.length();
 		if (start > -1)
 		{
@@ -208,11 +164,28 @@ public class RunScriptPanel
     highlightText(textToHighlight);
   }
 
+  /**
+   * Opens a dialog showing this panel.
+   *
+   * This is run on the EDT.
+   *
+   * @param owner       the owner of the dialog
+   * @param title       the title of the dialog
+   */
 	public void openWindow(Component comp, String title)
 	{
 		openWindow(comp, title, null);
 	}
 
+  /**
+   * Opens a dialog showing this panel.
+   *
+   * This is run on the EDT.
+   *
+   * @param owner       the owner of the dialog
+   * @param title       the title of the dialog
+   * @param highlight   a string to be highlighted in the editor
+   */
 	public void openWindow(Component comp, String title, String highlight)
 	{
 		Frame parent = null;
@@ -225,7 +198,7 @@ public class RunScriptPanel
 	}
 
   /**
-   * Opens a window with this panel.
+   * Opens a dialog showing this panel.
    *
    * This is run on the EDT.
    *
@@ -233,10 +206,17 @@ public class RunScriptPanel
    * @param title       the title of the dialog
    * @param highlight   a string to be highlighted in the editor
    */
-	public void openWindow(Frame owner, String title, String highlight)
+	public void openWindow(final Frame owner, final String title, final String highlight)
   {
     textToHighlight = highlight;
-    super.showDialog(owner, title);
+    WbSwingUtilities.invoke(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        showDialog(owner, title);
+      }
+    });
   }
 
 }

@@ -3668,7 +3668,7 @@ public class SqlPanel
 
   private int handleRetry(final int cmdIndex, final ErrorDescriptor errorDetails, final ScriptParser parser, int selectionOffset)
   {
-    final ErrorRetryPanel retry = new ErrorRetryPanel(errorDetails, stmtRunner);
+    final ErrorRetryPanel retry = new ErrorRetryPanel(getConnection());
     retry.setEnableReplace(parser != null);
 
     WbSwingUtilities.invoke(() ->
@@ -3679,7 +3679,7 @@ public class SqlPanel
         getConnection().setBusy(false);
         if (parser != null)
         {
-          retry.setStatement(parser, cmdIndex);
+          retry.setStatement(parser, cmdIndex, errorDetails);
         }
         retry.showDialog(WbSwingUtilities.getWindowAncestor(SqlPanel.this));
       }

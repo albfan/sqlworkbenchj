@@ -377,8 +377,7 @@ public class WbImport
 				if (continueOnError)
 				{
 					LogMgr.logWarning("WbImport.execute()", msg, null);
-					result.setWarning(true);
-					result.setSuccess();
+					result.setWarning();
 				}
 				else
 				{
@@ -395,8 +394,7 @@ public class WbImport
 				if (continueOnError || emptyHandling == EmptyImportFileHandling.warning)
 				{
 					LogMgr.logWarning("WbImport.execute()", msg, null);
-					result.setWarning(true);
-					result.setSuccess();
+					result.setWarning();
 				}
 				else
 				{
@@ -584,8 +582,7 @@ public class WbImport
 				}
 				else
 				{
-					result.addMessage("PostgreSQL copy API not supported!");
-					result.setWarning(true);
+					result.addWarning("PostgreSQL copy API not supported!");
 				}
 			}
 		}
@@ -825,7 +822,10 @@ public class WbImport
 			{
 				result.setFailure();
 			}
-			result.setWarning(imp.hasWarnings());
+      if (imp.hasWarnings())
+      {
+        result.setWarning();
+      }
 		}
 		catch (CycleErrorException | ParsingInterruptedException e)
 		{

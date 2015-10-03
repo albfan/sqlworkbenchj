@@ -160,8 +160,7 @@ public class WbSelectBlob
 				{
 					//result.setFailure();
 					String msg = ResourceMgr.getString("ErrSelectBlobNoStream");
-					result.addMessage(StringUtil.replace(msg, "%row%", Integer.toString(row)));
-					result.setWarning(true);
+					result.addWarning(StringUtil.replace(msg, "%row%", Integer.toString(row)));
 					continue;
 				}
 

@@ -165,7 +165,7 @@ public class WbGenerateScript
 
 		if (isCancelled)
 		{
-			result.setWarning(true);
+			result.setWarning();
 			return result;
 		}
 
@@ -200,7 +200,7 @@ public class WbGenerateScript
 
 		if (isCancelled)
 		{
-			result.setWarning(true);
+			result.setWarning();
 			return result;
 		}
 

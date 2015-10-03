@@ -106,7 +106,7 @@ public class BatchRunner
 	private DelimiterDefinition delimiter;
 	private boolean showResultSets;
 	private boolean showTiming = true;
-	private boolean success = true;
+  private ExecutionStatus status = ExecutionStatus.Success;
 	private ConnectionProfile profile;
 	private ResultLogger resultDisplay;
 	private boolean cancelExecution;
@@ -432,7 +432,7 @@ public class BatchRunner
 		{
 			// Allow batch runs without a profile for e.g. running a single WbCopy
 			LogMgr.logWarning("BatchRunner.connect()", "No profile defined, proceeding without a connection.");
-			success = true;
+      status = ExecutionStatus.Success;
 			return;
 		}
 
@@ -456,7 +456,7 @@ public class BatchRunner
 					LogMgr.logWarning("BatchRunner.connect()", "Connection returned warnings: " + warn);
 				}
 			}
-			success = true;
+			status = ExecutionStatus.Success;
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -464,12 +464,12 @@ public class BatchRunner
 			error = StringUtil.replace(error, "%class%", profile.getDriverclass());
 			LogMgr.logError("BatchRunner.connect()", error, null);
 			printMessage(error);
-			success = false;
+			status = ExecutionStatus.Error;
 			throw e;
 		}
 		catch (SQLException e)
 		{
-			success = false;
+			status = ExecutionStatus.Error;
 			LogMgr.logError("BatchRunner.connect()", "Connection failed", e);
 			printMessage(ResourceMgr.getString("ErrConnectFailed"));
 			printMessage(ExceptionUtil.getDisplay(e));
@@ -498,7 +498,7 @@ public class BatchRunner
 
 	public boolean isSuccess()
 	{
-		return this.success;
+    return status != ExecutionStatus.Error;
 	}
 
 	public void setSuccessScript(String aFilename)
@@ -550,8 +550,7 @@ public class BatchRunner
 	{
 		try
 		{
-			boolean error = runScript(command);
-			success = (error == false);
+			status = runScript(command);
 		}
 		catch (Exception e)
 		{
@@ -559,7 +558,7 @@ public class BatchRunner
 			String msg = ExceptionUtil.getDisplay(e);
 			if (showProgress) printMessage(""); // force newline in case progress reporting was turned on
 			printMessage(ResourceMgr.getString("TxtError") + ": " + msg);
-			this.success = false;
+      status = ExecutionStatus.Error;
 		}
 	}
 
@@ -578,7 +577,6 @@ public class BatchRunner
 
 	protected void runFiles()
 	{
-		boolean error = false;
 		int count = this.filenames.size();
 
 		String typeKey = "batchRunnerFileLoop";
@@ -615,11 +613,11 @@ public class BatchRunner
 				String dir = fo.getCanonicalFile().getParent();
 				this.setBaseDir(dir);
 
-				error = this.executeScript(fo);
+				status = this.executeScript(fo);
 			}
 			catch (Exception e)
 			{
-				error = true;
+        status = ExecutionStatus.Error;
 				LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchScriptFileError") + " " + file, e);
 				String msg = null;
 
@@ -634,7 +632,7 @@ public class BatchRunner
 				if (showProgress) printMessage(""); // force newline in case progress reporting was turned on
 				printMessage(ResourceMgr.getString("TxtError") + ": " + msg);
 			}
-			if (error && abortOnError)
+			if (status == ExecutionStatus.Error && abortOnError)
 			{
 				break;
 			}
@@ -645,9 +643,8 @@ public class BatchRunner
 			this.rowMonitor.jobFinished();
 		}
 
-		if (abortOnError && error)
+		if (abortOnError && status == ExecutionStatus.Error)
 		{
-			this.success = false;
 			try
 			{
 				if (this.errorScript != null)
@@ -664,7 +661,6 @@ public class BatchRunner
 		}
 		else
 		{
-			this.success = true;
 			try
 			{
 				if (this.successScript != null)
@@ -751,7 +747,7 @@ public class BatchRunner
 		return parser;
 	}
 
-	private boolean executeScript(WbFile scriptFile)
+	private ExecutionStatus executeScript(WbFile scriptFile)
 		throws IOException
 	{
 		try
@@ -773,7 +769,7 @@ public class BatchRunner
 	 * @return true if an error occurred
 	 * @throws IOException
 	 */
-	public boolean runScript(String script)
+	public ExecutionStatus runScript(String script)
 		throws IOException
 	{
 		ScriptParser parser = createParser();
@@ -781,12 +777,12 @@ public class BatchRunner
 		try
 		{
 			isBusy = true;
-			boolean error = executeScript(parser);
+			status = executeScript(parser);
 			if (this.rowMonitor  != null)
 			{
 				this.rowMonitor.jobFinished();
 			}
-			return error;
+			return status;
 		}
 		finally
 		{
@@ -794,10 +790,10 @@ public class BatchRunner
 		}
 	}
 
-	private boolean executeScript(ScriptParser parser)
+	private ExecutionStatus executeScript(ScriptParser parser)
 		throws IOException
 	{
-		boolean error = false;
+    status = ExecutionStatus.Success;
 		errors = null;
 
 		this.cancelExecution = false;
@@ -822,7 +818,6 @@ public class BatchRunner
 		String sql = null;
 		while ((sql = parser.getNextCommand()) != null)
 		{
-
       boolean ignoreThisError = false;
 
 			if (sql.isEmpty())
@@ -857,14 +852,14 @@ public class BatchRunner
 				long verbend = System.currentTimeMillis();
 				this.stmtRunner.statementDone();
 
-				error = false;
+				status = ExecutionStatus.Success;
 
 				StatementRunnerResult result = this.stmtRunner.getResult();
 
 				if (result != null)
 				{
 					result.setExecutionDuration(verbend - verbstart);
-					error = !result.isSuccess();
+					status = result.getStatus();
 
 					// We have to store the result of hasMessages()
 					// as the getMessageBuffer() will clear the buffer
@@ -872,7 +867,7 @@ public class BatchRunner
 					boolean hasMessage = result.hasMessages();
 					String feedback = result.getMessageBuffer().toString();
 
-          if (error)
+          if (status == ExecutionStatus.Error)
           {
             lastError = result.getErrorDescriptor();
             errorStatementIndex = commandIndex;
@@ -930,7 +925,7 @@ public class BatchRunner
 
 					printResults(sql, result);
 
-					if (hasMessage && (this.stmtRunner.getVerboseLogging() || error))
+          if (hasMessage && (this.stmtRunner.getVerboseLogging() || status == ExecutionStatus.Error))
 					{
 						if (!this.consolidateMessages)
 						{
@@ -982,11 +977,11 @@ public class BatchRunner
 			{
 				LogMgr.logError("BatchRunner", ResourceMgr.getString("MsgBatchStatementError") + " "  + sql, e);
 				printMessage(ExceptionUtil.getDisplay(e));
-				error = true;
+        status = ExecutionStatus.Error;
 				break;
 			}
 
-			if (error && abortOnError && !ignoreThisError) break;
+			if (status == ExecutionStatus.Error && abortOnError && !ignoreThisError) break;
 		}
 
 		end = System.currentTimeMillis();
@@ -1026,7 +1021,7 @@ public class BatchRunner
 			this.printMessage(m);
 		}
 
-		return error;
+		return status;
 	}
 
 	private void printResults(String sql, StatementRunnerResult result)

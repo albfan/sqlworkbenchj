@@ -1,7 +1,22 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2015, Thomas Kellerer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
 package workbench.gui.components;
 
@@ -25,6 +40,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 
+import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
@@ -37,13 +53,11 @@ import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.actions.EscAction;
 import workbench.gui.sql.*;
 
-import workbench.sql.DelimiterDefinition;
+import workbench.sql.BatchRunner;
 import workbench.sql.ErrorDescriptor;
-import workbench.sql.StatementRunner;
-import workbench.sql.StatementRunnerResult;
-import workbench.sql.parser.ScriptParser;
+import workbench.sql.ErrorReportLevel;
+import workbench.sql.ExecutionStatus;
 
-import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -57,8 +71,8 @@ public abstract class ExecuteSqlPanel
   private JDialog window;
   private PlainEditor errorDisplay;
   protected EditorPanel sqlEditor;
-  protected StatementRunner stmtRunner;
-  private ErrorDescriptor error;
+  protected BatchRunner runner;
+  protected ErrorDescriptor lastError;
   private EscAction escAction;
   private JSplitPane splitPane;
   private AutoCompletionAction autoComplete;
@@ -66,45 +80,25 @@ public abstract class ExecuteSqlPanel
   private WbStatusLabel statusBar;
   private String sqlToUse;
   private boolean initialized;
-  protected WbThread runThread;
+  private WbThread runThread;
+  private ExecutionStatus execStatus;
 
-  protected ExecuteSqlPanel(WbConnection connection, String sql)
+  protected ExecuteSqlPanel(WbConnection conn)
+  {
+    this(conn, null);
+  }
+
+  protected ExecuteSqlPanel(WbConnection con, String sql)
   {
     super(new GridBagLayout());
-    stmtRunner = new StatementRunner();
-    stmtRunner.setConnection(connection);
     sqlToUse = sql;
+    runner = new BatchRunner();
+    runner.setConnection(con);
   }
 
-  protected ExecuteSqlPanel(ErrorDescriptor errorDescriptor, StatementRunner runner)
+  protected void showLastError()
   {
-    super(new GridBagLayout());
-    stmtRunner = runner;
-    error = errorDescriptor;
-  }
-
-  public void setStatement(ScriptParser parser, int cmdIndex)
-  {
-    initUI();
-    if (parser == null) return;
-
-    String sql = parser.getCommand(cmdIndex);
-    // if the alternate delimiter was used when parsing the script
-    // we need to add this again otherwise "Retry" might not work
-    // if that e.g. is a PL/SQL statement
-    DelimiterDefinition delimiterUsed = parser.getDelimiterUsed(cmdIndex);
-    if (delimiterUsed.isNonStandard())
-    {
-      sql += "\n" + delimiterUsed.getDelimiter();
-    }
-    setStatement(sql);
-    showError(error);
-  }
-
-  public void setStatement(String sql)
-  {
-    initUI();
-    sqlEditor.setText(sql);
+    showError(lastError);
   }
 
   public void showError(ErrorDescriptor descriptor)
@@ -119,18 +113,6 @@ public abstract class ExecuteSqlPanel
       }
     }
     sqlEditor.setCaretPosition(caret);
-  }
-
-  public String getStatement()
-  {
-    initUI();
-    ScriptParser parser = ScriptParser.createScriptParser(stmtRunner.getConnection());
-    parser.setScript(sqlEditor.getText());
-    if (parser.getSize() < 1)
-    {
-      return "";
-    }
-    return parser.getCommand(0);
   }
 
   protected abstract JPanel getToolPanel();
@@ -157,32 +139,29 @@ public abstract class ExecuteSqlPanel
     return choice;
   }
 
-  private void initUI()
+  public ErrorDescriptor getError()
+  {
+    return lastError;
+  }
+
+  protected void initUI()
   {
     if (initialized) return;
 
     errorDisplay = new PlainEditor(WbSwingUtilities.PROP_ERROR_MSG_WRAP, false, false);
     sqlEditor = EditorPanel.createSqlEditor();
-    if (stmtRunner != null)
-    {
-      sqlEditor.setDatabaseConnection(stmtRunner.getConnection());
-    }
+    statusBar = new WbStatusLabel();
+    splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, sqlEditor, errorDisplay);
 
-    if (error != null && error.getOriginalStatement() != null)
-    {
-      sqlEditor.setText(error.getOriginalStatement());
-    }
-    else if (sqlToUse != null)
+    autoComplete = new AutoCompletionAction(sqlEditor, statusBar);
+
+    sqlEditor.setDatabaseConnection(runner.getConnection());
+    autoComplete.setConnection(runner.getConnection());
+
+    if (sqlToUse != null)
     {
       sqlEditor.setText(sqlToUse);
     }
-
-    statusBar = new WbStatusLabel();
-
-    autoComplete = new AutoCompletionAction(sqlEditor, statusBar);
-    autoComplete.setConnection(stmtRunner.getConnection());
-
-    splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, sqlEditor, errorDisplay);
 
     JLabel lbl = getLabel();
     int borderWidth = 8;
@@ -244,6 +223,11 @@ public abstract class ExecuteSqlPanel
     initialized = true;
   }
 
+  public boolean isSuccess()
+  {
+    return execStatus == ExecutionStatus.Success;
+  }
+
   public void dispose()
   {
     if (autoComplete != null) autoComplete.dispose();
@@ -270,52 +254,80 @@ public abstract class ExecuteSqlPanel
 
   protected void runSQL()
   {
-    final String command = getStatement();
-    if (StringUtil.isEmptyString(command))
-    {
-      LogMgr.logWarning("ExecuteSqlPanel.runSQL()", "No SQL statement!");
-      return;
-    }
+    if (runner.getConnection() == null) return;
+    if (runner.isBusy()) return;
 
-    StatementRunnerResult result = null;
     try
     {
+			runner.setRowMonitor(statusBar.getMonitor());
+			runner.setAbortOnError(true);
+			runner.setStoreErrors(false);
+      runner.setPrintStatements(false);
+      runner.setShowProgress(false);
+      runner.setShowTiming(false);
+      runner.setStoreErrors(false);
+      runner.setShowStatementWithResult(false);
+      runner.setShowStatementSummary(false);
+      runner.setErrorStatementLogging(ErrorReportLevel.none);
+
+			// Make sure nothing is written to system.out
+			runner.setResultLogger(ResultLogger.DEV_NULL_LOGGER);
+      runner.getConnection().setBusy(true);
+
       setButtonsEnabled(false);
       statusBar.setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
-      stmtRunner.getConnection().setBusy(true);
-      stmtRunner.runStatement(command);
-      result = stmtRunner.getResult();
-      final ErrorDescriptor descriptor = result.getErrorDescriptor();
+      execStatus = runner.runScript(sqlEditor.getText());
 
-      if (result.isSuccess())
+      lastError = runner.getLastError();
+
+      if (isSuccess())
       {
-        statementFinished();
+        scriptSuccess();
       }
       else
       {
-        EventQueue.invokeLater(() ->
-        {
-          showError(descriptor);
-          sqlEditor.requestFocusInWindow();
-        });
+        scriptError();
       }
     }
     catch (Exception ex)
     {
-      LogMgr.logUserSqlError("ExecuteSqlPanel.runSQL()", command, ex);
+      // this should not happen
+      LogMgr.logUserSqlError("ExecuteSqlPanel.runSQL()", "Could not run SQL script", ex);
       WbSwingUtilities.showErrorMessage(ex.getMessage());
     }
     finally
     {
-      result.clear();
-      result.clearResultData();
-      stmtRunner.getConnection().setBusy(false);
+      runner.getConnection().setBusy(false);
       statusBar.clearStatusMessage();
-      stmtRunner.statementDone();
+      runner.done();
       setButtonsEnabled(true);
       runThread = null;
     }
+  }
+
+  protected void cancel()
+  {
+    showStatusMessage(ResourceMgr.getString("MsgCancellingStmt"));
+
+    if (runner != null)
+    {
+      runner.cancel();
+    }
+
+    try
+    {
+      if (runThread != null)
+      {
+        runThread.interrupt();
+      }
+      runThread = null;
+    }
+    catch (Exception e)
+    {
+      // ignore
+    }
+    showStatusMessage("");
   }
 
   protected void showStatusMessage(String msg)
@@ -323,7 +335,24 @@ public abstract class ExecuteSqlPanel
     statusBar.setStatusMessage(msg);
   }
 
-  protected abstract void statementFinished();
+  protected void scriptError()
+  {
+    EventQueue.invokeLater(() ->
+    {
+      showLastError();
+      sqlEditor.requestFocusInWindow();
+    });
+  }
+
+  protected void scriptSuccess()
+  {
+    WbSwingUtilities.invoke(this::clearError);
+  }
+
+  protected void clearError()
+  {
+    errorDisplay.setText("");
+  }
 
   @Override
   public void actionPerformed(ActionEvent e)

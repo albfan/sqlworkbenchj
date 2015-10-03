@@ -240,8 +240,7 @@ public class SetCommand
 			{
 				// for oracle we'll simply ignore the error as the SET command is a SQL*Plus command
 				result.setSuccess();
-				result.setWarning(true);
-				result.addMessage(ResourceMgr.getString("MsgSetErrorIgnored") + ": " + e.getMessage());
+				result.addWarning(ResourceMgr.getString("MsgSetErrorIgnored") + ": " + e.getMessage());
 			}
 			else
 			{

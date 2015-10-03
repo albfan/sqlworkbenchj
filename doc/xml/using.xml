@@ -241,7 +241,7 @@ COMMIT;
 			When you run SQL statements that produce a result (such as a <literal>SELECT</literal>
 			statement) these results will be displayed in the lower pane of the window, next to
 			the message panel. For each result that is returned from the server, one tab
-			(labelled "Result") will be created. If you select and execute three <literal>SELECT</literal>
+			(labeled "Result") will be created. If you select and execute three <literal>SELECT</literal>
 			statements, the lower pane will show three result tabs and the message tab. If your
 			statement(s) did not produce any result, only the messages tab will be displayed.
 		</para>
@@ -257,16 +257,18 @@ COMMIT;
 		<para id="append-results">
 			When you run a SQL statement, the current results will be cleared and
 			replaced by the new results. You can turn this off by selecting
-			<menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice>.
+			<menuchoice><guimenu>SQL</guimenu><guimenuitem>Settings</guimenuitem><guimenuitem>Append new results</guimenuitem></menuchoice>.
 			Every result that is retrieved while this option is turned on, will be added to the
 			set of result tabs, until you de-select this option. This can also be
-			toggled using the button on the toolbar. Additional result tabs can be closed using
-			<menuchoice><guimenu>Data</guimenu><guimenuitem>Close result</guimenuitem></menuchoice>
+			toggled using the button (<guibutton><guiicon><inlinegraphic valign="bottom" fileref="@IMAGE_DIR@/append_result16.png" format="PNG"/></guiicon></guibutton>)
+      on the toolbar. Additional result tabs can be closed using
+			<menuchoice><guimenu>Data</guimenu><guimenuitem>Close result</guimenuitem></menuchoice>.
+      You can configure the default behavior for new editor tabs in the <link linkend="options-append-results-default">options dialog</link>.
 		</para>
 
 		<para>
 			You can also run stored procedures that return result sets. These result will be
-			displayed in the same way. For DBMS's that support mulitple result sets from
+			displayed in the same way. For DBMS's that support multiple result sets from
 			a single stored procedure (e.g. Microsoft SQL Server), one result tab will be displayed
 			for each result returned.
 		</para>

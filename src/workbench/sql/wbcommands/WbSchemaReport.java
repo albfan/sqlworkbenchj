@@ -239,16 +239,14 @@ public class WbSchemaReport
 				}
 				else
 				{
-					result.addMessage(ResourceMgr.getFormattedString("ErrIgnoringArg", filter, ARG_OBJECT_TYPE_NAMES));
-					result.setWarning(true);
+					result.addWarning(ResourceMgr.getFormattedString("ErrIgnoringArg", filter, ARG_OBJECT_TYPE_NAMES));
 				}
 			}
 		}
 
     if (isCancelled)
     {
-      result.setWarning(true);
-      result.addMessageByKey("MsgStatementCancelled");
+      result.addWarningByKey("MsgStatementCancelled");
       return result;
     }
 

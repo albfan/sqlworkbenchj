@@ -775,17 +775,6 @@
 	<section id="options-data-display">
 		<title>Options for displaying data</title>
 
-		<simplesect id="option-sort-collator">
-      <title>Sort Locale</title><blockquote>
-      <para>
-      	When you sort the result set, characters values will be sorted case-sensitive by default.
-      	This is caused by the <literal>compareTo()</literal> method available in the Java
-      	environment which puts lower case characters in front of upper case characters when sorting.
-				With the "Sort Locale" option you can select which language rules should be applied
-				while sorting. Note that sorting with a locale is slower than using the "Default" setting.
-      </para>
-    </blockquote></simplesect>
-
 		<simplesect id="option-selection-summary">
       <title>Show selection summary in statusbar</title><blockquote>
       <para>
@@ -811,40 +800,43 @@
       </para>
     </blockquote></simplesect>
 
-		<simplesect id="options-multiline">
-			<title>Displaying multi-line values</title><blockquote>
-			<para>
-				&wb-productname; uses a special display component for the contents
-				of <literal>CLOB</literal> columns that is capable of displaying
-				multiple lines. This component honors newlines and linefeeds in the data retrieved from the database and
-        is capable of using word wrapping for long lines (even if no newlines are embedded).
-			</para>
-			<para>
-        By default only <literal>CLOB</literal> are considered to be able to contain multiple lines, so
-        <literal>VARCHAR</literal> columns are usually not treated as multi-line columns.
-        If your database stores text in VARCHAR columns that contains line breaks, you can define a threshold
-				for the length of the column. Any column that is defined with a higher value will be displayed with the
-        multiline component.
-			</para>
-			<para>
-				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
-				will be displayed with the multi line renderer. A <literal>VARCHAR(210)</literal>
-        will be displayed in a single line. Note that this limit refers to the <emphasis>defined</emphasis>
-        length of the column, not the actual length of the data.
-			</para>
-			<para>
-				Displaying data using the multi line component is slower than using the standard (single line) component.
-			</para>
-			<para>
-				The feature <link linkend="options-auto-optimize-row-height">Adjust row height</link> only works with multi-line columns.
-			</para>
-		</blockquote></simplesect>
-
 		<simplesect id="options-retrieve-column-remarks">
 			<title>Retrieve column remarks for queries</title><blockquote>
 			<para>
 				If this option is enabled, the remarks defined for table columns in a result set are retrieved and shown as a tool tip.
         As this requires additional overhead after processing a query, it can be disabled for performance reasons.
+			</para>
+		</blockquote></simplesect>
+
+    <simplesect id="options-max-rows-warning">
+      <title>Show max. rows warning</title>
+      <blockquote>
+        <para>
+          If this option is enabled the result tab will show a warning sign if the limit defined
+          by the <link linkend="max-rows-display">max. rows</link> setting is reached, indicating that the result
+          might be incomplete.
+        </para>
+      </blockquote>
+    </simplesect>
+
+		<simplesect id="options-row-numbers">
+			<title>Show row numbers</title><blockquote>
+			<para>
+        If this option is enabled the row numbers for result sets are shown at the left hand side of the result.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-show-maxrow-tooltip-warn">
+			<title>Show tooltip warning </title><blockquote>
+			<para>
+        If this option is enabled, a tooltip indicating that the maximum number of rows has been reached is shown for the result tab.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bold-headers">
+			<title>Bold header</title><blockquote>
+			<para>
+        If this option is enabled, the name of the columns in the result is shown with a bold font, instead of the regular data font.
 			</para>
 		</blockquote></simplesect>
 
@@ -856,27 +848,10 @@
 			</para>
 		</blockquote></simplesect>
 
-		<simplesect id="options-max-rows-warning">
-			<title>Show max. rows warning</title><blockquote>
+		<simplesect id="options-display-generating-sql">
+			<title>Default SQL query</title><blockquote>
 			<para>
-        If this option is enabled the result tab will show a warning sign if the limit defined
-        by the <link linkend="max-rows-display">max. rows</link> setting is reached, indicating that the result
-        might be incomplete.
-			</para>
-		</blockquote></simplesect>
-
-		<simplesect id="options-row-numbers">
-			<title>Show row numbers</title><blockquote>
-			<para>
-        If this option is enabled the row numbers for result sets are shown at the left hand side of the result.
-			</para>
-		</blockquote></simplesect>
-
-		<simplesect id="options-show-generating-sql">
-			<title>Show row numbers</title><blockquote>
-			<para>
-        If this option is enabled, the SQL that produced a result set is shown directly above the data inside
-        each result tab.
+        If this option is enabled, the query that generated a result is shown right above the result grid.
 			</para>
 		</blockquote></simplesect>
 
@@ -886,6 +861,38 @@
 				The specified value will be displayed instead of <literal>NULL</literal> values in the result of a SQL statement.
 			</para>
 		</blockquote></simplesect>
+
+		<simplesect id="options-append-results-default">
+			<title>Append results</title><blockquote>
+			<para>
+        This option defines the default behavior for <link linkend="append-results">appending results</link> when a new editor tab is opened.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-number-alignment">
+			<title>Number alignment</title><blockquote>
+			<para>
+        This controls the alignment of numbers in the result grid.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-number-alignment">
+			<title>Result tab tooltip</title><blockquote>
+			<para>
+        This options configures the tooltip that is shown when the mouse is hovering over a result tab.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="option-sort-collator">
+      <title>Sort Locale</title><blockquote>
+      <para>
+      	When you sort the result set, characters values will be sorted case-sensitive by default.
+      	This is caused by the <literal>compareTo()</literal> method available in the Java
+      	environment which puts lower case characters in front of upper case characters when sorting.
+				With the "Sort Locale" option you can select which language rules should be applied
+				while sorting. Note that sorting with a locale is slower than using the "Default" setting.
+      </para>
+    </blockquote></simplesect>
 
 		<section id="column-width-settings">
 			<title>Column width settings</title>
@@ -935,6 +942,35 @@
 			</blockquote>
       </simplesect>
 		</section>
+
+		<simplesect id="options-multiline">
+			<title>Displaying multi-line values</title><blockquote>
+			<para>
+				&wb-productname; uses a special display component for the contents
+				of <literal>CLOB</literal> columns that is capable of displaying
+				multiple lines. This component honors newlines and linefeeds in the data retrieved from the database and
+        is capable of using word wrapping for long lines (even if no newlines are embedded).
+			</para>
+			<para>
+        By default only <literal>CLOB</literal> are considered to be able to contain multiple lines, so
+        <literal>VARCHAR</literal> columns are usually not treated as multi-line columns.
+        If your database stores text in VARCHAR columns that contains line breaks, you can define a threshold
+				for the length of the column. Any column that is defined with a higher value will be displayed with the
+        multiline component.
+			</para>
+			<para>
+				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
+				will be displayed with the multi line renderer. A <literal>VARCHAR(210)</literal>
+        will be displayed in a single line. Note that this limit refers to the <emphasis>defined</emphasis>
+        length of the column, not the actual length of the data.
+			</para>
+			<para>
+				Displaying data using the multi line component is slower than using the standard (single line) component.
+			</para>
+			<para>
+				The feature <link linkend="options-auto-optimize-row-height">Adjust row height</link> only works with multi-line columns.
+			</para>
+		</blockquote></simplesect>
 
 		<section id="row-height-settings">
 			<title>Row height settings</title>

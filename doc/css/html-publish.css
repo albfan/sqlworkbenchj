@@ -145,7 +145,7 @@ span.guiicon {
   padding-left:2px;
   padding-right:2px;
   /* border: 1px solid gray; */
-  vertical-align:sub;
+  vertical-align:-5;
 }
 
 div.note,

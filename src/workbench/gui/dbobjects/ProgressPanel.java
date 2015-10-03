@@ -167,7 +167,7 @@ public class ProgressPanel
 				else
 				{
 					setInfoText(object);
-					rowInfo.setText(info);
+					if (number >= 0 && totalObjects > 0) rowInfo.setText(info);
 				}
 			}
 		});

@@ -30,4 +30,23 @@ public interface ResultLogger
 	void clearLog();
 	void appendToLog(String msg);
 	void showLogMessage(String msg);
+
+  public static final ResultLogger DEV_NULL_LOGGER = new ResultLogger()
+  {
+    @Override
+    public void clearLog()
+    {
+    }
+
+    @Override
+    public void appendToLog(String msg)
+    {
+    }
+
+    @Override
+    public void showLogMessage(String msg)
+    {
+    }
+  };
+
 }

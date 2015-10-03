@@ -38,6 +38,7 @@ import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ResultSetConsumer;
+import workbench.interfaces.ScriptErrorHandler;
 import workbench.interfaces.SqlHistoryProvider;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -62,8 +63,6 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-
-import workbench.interfaces.ScriptErrorHandler;
 
 /**
  *
@@ -521,8 +520,7 @@ public class StatementRunner
 			String verb = SqlParsingUtil.getInstance(currentConnection).getSqlVerb(aSql);
 			String msg = ResourceMgr.getFormattedString("MsgReadOnlyMode", profileName, verb);
 			LogMgr.logWarning("DefaultStatementRunner.runStatement()", "Statement " + verb + " ignored because connection is set to read only!");
-			this.result.addMessage(msg);
-			this.result.setWarning(true);
+			this.result.addWarning(msg);
 			this.result.setSuccess();
 			return;
 		}
@@ -534,9 +532,8 @@ public class StatementRunner
 			{
 				this.result = new StatementRunnerResult();
 				String msg = ResourceMgr.getString("MsgStatementCancelled");
-				this.result.addMessage(msg);
-				this.result.setWarning(true);
-				this.result.setSuccess();
+				this.result.addWarning(msg);
+        this.result.setSuccess();
 				return;
 			}
 		}

@@ -66,7 +66,6 @@ public class SelectCommand
 		this.isCancelled = false;
 
 		StatementRunnerResult result = new StatementRunnerResult(sql);
-		result.setWarning(false);
 
 		try
 		{

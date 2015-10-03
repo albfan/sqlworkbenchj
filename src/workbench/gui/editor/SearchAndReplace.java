@@ -68,6 +68,7 @@ public class SearchAndReplace
 	private ReplaceAction replaceAction;
 
 	private boolean wrapSearch;
+  private boolean showNotifications = true;
 
 	/**
 	 * Create a new SearchAndReplace support.
@@ -88,6 +89,11 @@ public class SearchAndReplace
 		this.replaceAction = new ReplaceAction(this);
 		this.replaceAction.setEnabled(true);
 	}
+
+  public void setShowNotifications(boolean flag)
+  {
+    this.showNotifications = flag;
+  }
 
 	public boolean getWrapSearch()
 	{
@@ -234,14 +240,14 @@ public class SearchAndReplace
 		{
 			found = m.find(0);
 		}
-		
+
 		if (found)
 		{
 			this.lastSearchPos = m.start();
 			int end = m.end();
 			this.editor.select(this.lastSearchPos, end);
 		}
-		else
+    else if (showNotifications)
 		{
 			this.lastSearchPos = -1;
 			Toolkit.getDefaultToolkit().beep();
@@ -487,7 +493,7 @@ public class SearchAndReplace
 			{
 				pos = findNext();
 			}
-			if (pos < 0)
+			if (pos < 0 && showNotifications)
 			{
 				Toolkit.getDefaultToolkit().beep();
 				String msg = ResourceMgr.getString("MsgEditorCriteriaNotFound");

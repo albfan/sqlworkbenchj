@@ -168,8 +168,7 @@ public class WbDataDiff
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getFormattedString("ErrIgnoringArg", def, PARAM_ALTERNATE_KEYS));
-				result.setWarning(true);
+				result.addWarning(ResourceMgr.getFormattedString("ErrIgnoringArg", def, PARAM_ALTERNATE_KEYS));
 			}
 		}
 		return map;
@@ -264,8 +263,7 @@ public class WbDataDiff
 			for (String table : missing)
 			{
 				String msg = ResourceMgr.getFormattedString("ErrRefTableNotFound", table);
-				result.addMessage(msg);
-				result.setWarning(true);
+				result.addWarning(msg);
 			}
 			result.addMessageNewLine();
 		}
@@ -276,8 +274,7 @@ public class WbDataDiff
 			for (String table : missing)
 			{
 				String msg = ResourceMgr.getFormattedString("ErrTargetTableNotFound", table);
-				result.addMessage(msg);
-				result.setWarning(true);
+				result.addWarning(msg);
 			}
 			result.addMessageNewLine();
 		}
@@ -285,9 +282,7 @@ public class WbDataDiff
 		if (tableCount == 0)
 		{
 			LogMgr.logWarning("WbDataDiff.execute()", "No tables found.");
-			result.addMessageByKey("ErrNoTablesFound");
-			result.setWarning(true);
-			result.setSuccess();
+			result.addWarningByKey("ErrNoTablesFound");
 			close(targetCon);
 			close(sourceCon);
 			return result;
@@ -362,20 +357,16 @@ public class WbDataDiff
 							dataDiff.doSync();
 							break;
 						case ReferenceNotFound:
-							result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", refTable.getTableName()));
-							result.setWarning(true);
+							result.addWarning(ResourceMgr.getFormattedString("ErrTableNotFound", refTable.getTableName()));
 							break;
 						case TargetNotFound:
-							result.addMessage(ResourceMgr.getFormattedString("ErrTableNotFound", targetTable.getTableName()));
-							result.setWarning(true);
+							result.addWarning(ResourceMgr.getFormattedString("ErrTableNotFound", targetTable.getTableName()));
 							break;
 						case NoPK:
-							result.addMessage(ResourceMgr.getFormattedString("ErrDataDiffNoPK", refTable.getTableName()));
-							result.setWarning(true);
+							result.addWarning(ResourceMgr.getFormattedString("ErrDataDiffNoPK", refTable.getTableName()));
 							break;
 						case ColumnMismatch:
-							result.addMessage(ResourceMgr.getFormattedString("ErrDataDiffNoTableMatch", refTable.getTableName(), targetTable.getTableName()));
-							result.setWarning(true);
+							result.addWarning(ResourceMgr.getFormattedString("ErrDataDiffNoTableMatch", refTable.getTableName(), targetTable.getTableName()));
 							break;
 					}
 				}

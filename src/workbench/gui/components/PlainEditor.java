@@ -229,6 +229,16 @@ public class PlainEditor
     }
 	}
 
+  public void append(String text)
+  {
+    editor.append(text);
+  }
+
+  public void clear()
+  {
+    editor.setText("");
+  }
+
 	@Override
 	public void saveSettings()
 	{

@@ -28,6 +28,7 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.sql.AutomaticRefreshMgr;
 
 import workbench.sql.BatchRunner;
+import workbench.sql.ExecutionStatus;
 import workbench.sql.RefreshAnnotation;
 import workbench.sql.StatementHistory;
 import workbench.sql.WbAnnotation;
@@ -167,9 +168,9 @@ public class ConsoleRefresh
           WbConsoleFactory.getConsole().clearScreen();
         }
 
-        boolean hasError = runner.runScript(sql);
+        ExecutionStatus status = runner.runScript(sql);
 
-        if (hasError)
+        if (status == ExecutionStatus.Error)
         {
           break;
         }
