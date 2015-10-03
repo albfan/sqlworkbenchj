@@ -176,7 +176,7 @@
 
   <target name="compile" depends="prepare">
 
-    <!-- compile the starter class with target=1.3 so that it can be loaded by
+    <!-- compile the starter class with target=1.2 so that it can be loaded by
          older JVMs as well and is able to display the error message -->
     <javac debug="on"
            debuglevel="source,lines"
@@ -198,7 +198,7 @@
            includeantruntime="false"
            encoding="ISO-8859-1">
       <compilerarg value="-Xlint:none"/>
-      <!-- <exclude name="workbench/WbStarter.java"/> -->
+      <exclude name="workbench/WbStarter.java"/>
       <classpath>
           <fileset dir="../libs/odf" includes="*.jar"/>
           <fileset dir="../libs/poi" includes="*.jar"/>
@@ -314,6 +314,7 @@
         <include name="delete16.png"/>
         <include name="filter16.png"/>
         <include name="new-profile16.png"/>
+        <include name="append_result16.png"/>
         <include name="folder_new16.png"/>
         <include name="copy-profile16.png"/>
         <include name="open16.png"/>
