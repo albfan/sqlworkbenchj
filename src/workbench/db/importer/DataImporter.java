@@ -404,6 +404,21 @@ public class DataImporter
 		this.continueOnError = flag;
 	}
 
+  private int getRealBatchSize()
+  {
+    if (!useBatch || batchSize < 1) return 1;
+
+    switch (mode)
+    {
+      case insert:
+      case update:
+      case upsert:
+        return batchSize;
+      default:
+        // can't use batching in the other modes
+        return 1;
+    }
+  }
 	@Override
 	public int getBatchSize()
 	{
@@ -416,7 +431,13 @@ public class DataImporter
 		this.batchSize = size;
 	}
 
-	public void setBadfileName(String fname)
+  @Override
+  public void setUseBatch(boolean flag)
+  {
+    this.useBatch = flag;
+  }
+
+  public void setBadfileName(String fname)
 	{
 		this.badfileName = fname;
 	}
@@ -501,44 +522,8 @@ public class DataImporter
 		this.deleteTarget = deleteTarget;
 	}
 
-	/**
-	 * 	Use batch updates if the driver supportsExtendedMode this
-	 */
-	@Override
-	public void setUseBatch(boolean flag)
-	{
-		if (this.isModeInsertUpdate() || this.isModeUpdateInsert()) return;
-		this.useBatch = flag;
-	}
-
-	public void setModeInsert()
-	{
-    this.mode = ImportMode.insert;
-	}
-
-	public void setModeInsertIgnore()
-	{
-    this.mode = ImportMode.insertIgnore;
-	}
-
-	public void setModeUpdate()
-	{
-    this.mode = ImportMode.update;
-	}
-
-	public void setModeInsertUpdate()
-	{
-    this.mode = ImportMode.insertUpdate;
-		this.useBatch = false;
-	}
-
-	public void setModeUpdateInsert()
-	{
-    this.mode = ImportMode.updateInsert;
-		this.useBatch = false;
-	}
-
   public boolean isModeInsert() { return (this.mode == ImportMode.insert); }
+  public boolean isModeUpsert() { return (this.mode == ImportMode.upsert); }
   public boolean isModeInsertIgnore() { return (this.mode == ImportMode.insertIgnore); }
   public boolean isModeUpdate() { return (this.mode == ImportMode.update); }
   public boolean isModeInsertUpdate() { return (this.mode == ImportMode.insertUpdate); }
@@ -575,23 +560,7 @@ public class DataImporter
 
 	public void setMode(ImportMode importMode)
 	{
-    switch (importMode)
-    {
-      case insert:
-        this.setModeInsert();
-        break;
-      case insertIgnore:
-        this.setModeInsertIgnore();
-        break;
-      case update:
-        this.setModeUpdate();
-        break;
-      case insertUpdate:
-        setModeInsertUpdate();
-        break;
-      case updateInsert:
-        setModeUpdateInsert();
-    }
+    this.mode = importMode;
 	}
 
 	/**
@@ -620,9 +589,17 @@ public class DataImporter
 			{
         return ImportMode.insertIgnore;
 			}
-			if ("insertUdate".equals(mode))
+			if ("insertupdate".equals(mode))
 			{
         return ImportMode.insertUpdate;
+			}
+			if ("updateinsert".equals(mode))
+			{
+        return ImportMode.insertUpdate;
+			}
+			if ("upsert".equals(mode))
+			{
+        return ImportMode.upsert;
 			}
 			else if ("update".equals(mode))
 			{
@@ -775,8 +752,8 @@ public class DataImporter
 				// we cannot use batch mode as we immediately need
 				// the result of the first statement to decide
 				// whether we have to send another one
-				this.useBatch = false;
-				this.messages.appendMessageKey("ErrImportNoBatchMode");
+				useBatch = false;
+				messages.appendMessageKey("ErrImportNoBatchMode");
 			}
 		}
 
@@ -1073,6 +1050,7 @@ public class DataImporter
 			switch (this.mode)
 			{
 				case insert:
+				case insertIgnore:
         case upsert:
 					rows = this.insertRow(row, useSavepoint && continueOnError);
 					break;
@@ -1728,7 +1706,7 @@ public class DataImporter
 				this.prepareInsertStatement();
 			}
 
-      if (this.mode != ImportMode.insert && mode != ImportMode.upsert)
+      if (this.mode == ImportMode.update || mode == ImportMode.insertUpdate || mode == ImportMode.updateInsert)
 			{
 				this.prepareUpdateStatement();
 			}
@@ -1846,6 +1824,8 @@ public class DataImporter
 	private String getModeString()
 	{
 		if (this.isModeInsert()) return "insert";
+		if (this.isModeInsertIgnore()) return "insertIgnore";
+		if (this.isModeUpsert()) return "upsert";
 		if (this.isModeUpdate()) return "update";
 		if (this.isModeInsertUpdate()) return "insert/update";
 		if (this.isModeUpdateInsert()) return "update/insert";
@@ -1881,35 +1861,48 @@ public class DataImporter
 
     String insertSql = null;
 
-    if (dbConn.getDbSettings().useUpsert() && builder.supportsExtendedMode(mode))
+    if (builder.supportsExtendedMode(mode))
     {
       verifyKeyColumns();
 
-      if (this.mode == ImportMode.insertIgnore)
+      switch (this.mode)
       {
-        insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart, keyColumns);
-      }
-      else
-      {
-        insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart, keyColumns);
-      }
-      if (insertSql != null)
-      {
-        mode = ImportMode.upsert;
-        LogMgr.logInfo("DataImporter.prepareInsertStatement", "Database supports native UPSERT functionality. Using only one statement for insert/update.");
+        case insertIgnore:
+          insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart, keyColumns);
+          break;
+          
+        case insertUpdate:
+        case updateInsert:
+        case upsert:
+          insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart, keyColumns);
+          if (insertSql != null)
+          {
+            if (mode != ImportMode.upsert)
+            {
+              LogMgr.logInfo("DataImporter.prepareInsertStatement", "Database supports native UPSERT functionality. Using only one statement for insert/update.");
+            }
+            // It's necessary to set the mode to upsert (if it was insertUpdate or updateInsert) to avoid creating and running the UPDATE statement.
+            // it's also necessary to allow batching
+            mode = ImportMode.upsert;
+          }
+          break;
       }
     }
 
     if (insertSql == null)
     {
+      if (mode == ImportMode.upsert)
+      {
+        mode = ImportMode.insertUpdate;
+        LogMgr.logInfo("DataImporter.prepareInsertStatement", "Database does not support native UPSERT. Reverting to insert/update.");
+      }
       insertSql = builder.createInsertStatement(columnConstants, insertSqlStart);
     }
 
 		try
 		{
 			PreparedStatement stmt = this.dbConn.getSqlConnection().prepareStatement(insertSql);
-			int batch = (this.isModeInsert() ? batchSize : 1);
-			this.insertStatement = new BatchedStatement(stmt, dbConn, batch);
+			this.insertStatement = new BatchedStatement(stmt, dbConn, getRealBatchSize());
 			this.insertStatement.setCommitBatch(this.commitBatch);
 			LogMgr.logInfo("DataImporter.prepareInsertStatement()", "Statement for insert: " + insertSql);
 		}
@@ -2114,8 +2107,7 @@ public class DataImporter
 		{
 			LogMgr.logInfo("DataImporter.prepareUpdateStatement()", "Statement for update: " + updateSql);
 			PreparedStatement stmt = this.dbConn.getSqlConnection().prepareStatement(updateSql);
-			int batch = (this.isModeUpdate() ? batchSize : 1);
-			this.updateStatement = new BatchedStatement(stmt, dbConn, batch);
+			this.updateStatement = new BatchedStatement(stmt, dbConn, getRealBatchSize());
 			this.updateStatement.setCommitBatch(this.commitBatch);
 		}
 		catch (SQLException e)

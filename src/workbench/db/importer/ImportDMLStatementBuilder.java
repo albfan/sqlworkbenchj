@@ -339,7 +339,7 @@ public class ImportDMLStatementBuilder
 		{
 			ColumnIdentifier col = this.targetColumns.get(i);
       if (col.isPkColumn()) continue;
-      
+
       String colname = targetColumns.get(i).getDisplayName();
       colname = meta.quoteObjectname(colname);
 
@@ -409,6 +409,7 @@ public class ImportDMLStatementBuilder
       case insertIgnore:
         return supportsInsertIgnore(dbConn);
       case insertUpdate:
+      case updateInsert:
       case upsert:
         return supportsUpsert();
     }

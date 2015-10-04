@@ -25,6 +25,7 @@ package workbench.sql.wbcommands;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -43,6 +44,7 @@ import workbench.db.importer.ConstantColumnValues;
 import workbench.db.importer.CycleErrorException;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.DeleteType;
+import workbench.db.importer.ImportDMLStatementBuilder;
 import workbench.db.importer.ImportFileLister;
 import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.RowDataProducer;
@@ -60,6 +62,7 @@ import workbench.util.ArgumentType;
 import workbench.util.ArgumentValue;
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.StringArgumentValue;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbFile;
@@ -181,6 +184,15 @@ public class WbImport
 		cmdLine.addArgument(ARG_ADJUST_SEQ, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbCopy.PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolSwitch);
 		ModifierArguments.addArguments(cmdLine);
+    Collection<ArgumentValue> values = cmdLine.getAllowedValues(CommonArgs.ARG_IMPORT_MODE);
+    if (ImportDMLStatementBuilder.supportsInsertIgnore(currentConnection))
+    {
+      values.add(new StringArgumentValue("insertIgnore"));
+    }
+    if (ImportDMLStatementBuilder.supportsUpsert(currentConnection))
+    {
+      values.add(new StringArgumentValue("upsert"));
+    }
 	}
 
   public static List<String> getSupportedSpreadSheetTypes()
