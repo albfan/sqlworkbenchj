@@ -516,6 +516,11 @@ public class DataImporter
     this.mode = ImportMode.insert;
 	}
 
+	public void setModeInsertIgnore()
+	{
+    this.mode = ImportMode.insertIgnore;
+	}
+
 	public void setModeUpdate()
 	{
     this.mode = ImportMode.update;
@@ -534,6 +539,7 @@ public class DataImporter
 	}
 
   public boolean isModeInsert() { return (this.mode == ImportMode.insert); }
+  public boolean isModeInsertIgnore() { return (this.mode == ImportMode.insertIgnore); }
   public boolean isModeUpdate() { return (this.mode == ImportMode.update); }
   public boolean isModeInsertUpdate() { return (this.mode == ImportMode.insertUpdate); }
   public boolean isModeUpdateInsert() { return (this.mode == ImportMode.updateInsert); }
@@ -574,6 +580,9 @@ public class DataImporter
       case insert:
         this.setModeInsert();
         break;
+      case insertIgnore:
+        this.setModeInsertIgnore();
+        break;
       case update:
         this.setModeUpdate();
         break;
@@ -607,6 +616,14 @@ public class DataImporter
 			{
         return ImportMode.insert;
 			}
+			if ("insertignore".equals(mode))
+			{
+        return ImportMode.insertIgnore;
+			}
+			if ("insertUdate".equals(mode))
+			{
+        return ImportMode.insertUpdate;
+			}
 			else if ("update".equals(mode))
 			{
         return ImportMode.update;
@@ -618,9 +635,9 @@ public class DataImporter
 		}
 		else
 		{
-			List l = StringUtil.stringToList(mode, ",");
-			String first = (String)l.get(0);
-			String second = (String)l.get(1);
+			List<String> l = StringUtil.stringToList(mode, ",", true, true);
+			String first = l.get(0);
+			String second = l.get(1);
 			if ("insert".equals(first) && "update".equals(second))
 			{
         return ImportMode.insertUpdate;
@@ -639,15 +656,24 @@ public class DataImporter
 
 	/**
 	 * Define the mode by supplying keywords.
+   *
 	 * A null value means "keep the current (default)" and is a valid mode
+   *
 	 * @return true if the passed string is valid, false otherwise
+   *
 	 * @see #getModeValue(String)
 	 */
 	public boolean setMode(String mode)
 	{
 		if (mode == null) return true;
+
     ImportMode modeValue = getModeValue(mode);
 		if (modeValue == null) return false;
+
+    if (modeValue == ImportMode.insertIgnore && !ImportDMLStatementBuilder.supportsInsertIgnore(dbConn))
+    {
+      return false;
+    }
 		setMode(modeValue);
 		return true;
 	}
@@ -1854,11 +1880,19 @@ public class DataImporter
     boolean adjustColumnNames = !verifyTargetTable;
 
     String insertSql = null;
-    if (dbConn.getDbSettings().useUpsert() && builder.supportsUpsert() && this.mode == ImportMode.insertUpdate)
+
+    if (dbConn.getDbSettings().useUpsert() && builder.supports(mode) && (this.mode == ImportMode.insertUpdate || this.mode == ImportMode.insertIgnore))
     {
       verifyKeyColumns();
 
-      insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart, keyColumns, adjustColumnNames);
+      if (this.mode == ImportMode.insertIgnore)
+      {
+        insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart, keyColumns, adjustColumnNames);
+      }
+      else
+      {
+        insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart, keyColumns, adjustColumnNames);
+      }
       if (insertSql != null)
       {
         mode = ImportMode.upsert;

@@ -2051,8 +2051,8 @@ public class WbSqlFormatterTest
 	{
 		try
 		{
-			String sql = "alter table epg_value add constraint fk_value_attr foreign key (id_attribute) references attribute(id);";
-			String expected = "ALTER TABLE epg_value ADD CONSTRAINT fk_value_attr FOREIGN KEY (id_attribute) REFERENCES attribute (id);";
+			String sql = "alter table foo_bar add constraint fk_value_attr foreign key (id_attribute) references attribute(id);";
+			String expected = "ALTER TABLE foo_bar ADD CONSTRAINT fk_value_attr FOREIGN KEY (id_attribute) REFERENCES attribute (id);";
 			WbSqlFormatter f = new WbSqlFormatter(sql, 100);
 			CharSequence formatted = f.getFormattedSql();
 			assertEquals("ALTER TABLE not correctly formatted", expected, formatted.toString().trim());

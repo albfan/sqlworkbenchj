@@ -26,6 +26,7 @@ package workbench.db.importer;
 public enum ImportMode
 {
   insert,
+  insertIgnore,
   update,
   insertUpdate,
   updateInsert,

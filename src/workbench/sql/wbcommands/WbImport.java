@@ -79,7 +79,6 @@ public class WbImport
   public static final String ARG_QUOTE = "quotechar";
   public static final String ARG_CONTAINSHEADER = "header";
   public static final String ARG_FILECOLUMNS = "fileColumns";
-  public static final String ARG_MODE = "mode";
   public static final String ARG_KEYCOLUMNS = "keyColumns";
   public static final String ARG_EMPTY_STRING_IS_NULL = "emptyStringIsNull";
   public static final String ARG_DECODE = "decode";
@@ -781,7 +780,7 @@ public class WbImport
 			}
 		}
 
-		String mode = cmdLine.getValue(ARG_MODE);
+		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (mode != null)
 		{
 			if (!imp.setMode(mode))
