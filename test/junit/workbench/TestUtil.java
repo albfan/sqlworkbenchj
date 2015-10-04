@@ -767,8 +767,13 @@ public class TestUtil
 
   public static void dumpTableContent(WbConnection conn, String tableName)
   {
+    dumpQuery(conn, "select * from " + tableName);
+  }
+
+  public static void dumpQuery(WbConnection conn, String query)
+  {
     try (Statement stmt = conn.createStatementForQuery();
-         ResultSet rs = stmt.executeQuery("select * from " + tableName))
+         ResultSet rs = stmt.executeQuery(query))
     {
       DataStore ds = new DataStore(rs, true);
       DataStorePrinter printer = new DataStorePrinter(ds);

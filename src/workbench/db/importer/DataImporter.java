@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.Committer;
@@ -65,6 +66,7 @@ import workbench.storage.ColumnData;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
 
+import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
@@ -711,7 +713,7 @@ public class DataImporter
 
 	private boolean hasKeyColumns()
 	{
-		return (this.keyColumns != null && keyColumns.size() > 0);
+    return CollectionUtil.isNonEmpty(this.keyColumns);
 	}
 
   @Override
@@ -1854,10 +1856,7 @@ public class DataImporter
     String insertSql = null;
     if (dbConn.getDbSettings().useUpsert() && builder.supportsUpsert() && this.mode == ImportMode.insertUpdate)
     {
-      if (!hasKeyColumns())
-      {
-        retrieveKeyColumns();
-      }
+      verifyKeyColumns();
 
       insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart, keyColumns, adjustColumnNames);
       if (insertSql != null)
@@ -1891,6 +1890,19 @@ public class DataImporter
 		}
 	}
 
+  private void verifyKeyColumns()
+    throws SQLException
+  {
+    if (this.hasKeyColumns()) return;
+
+    this.retrieveKeyColumns();
+    if (!this.hasKeyColumns())
+    {
+      if (messages.getLength() > 0) this.messages.appendNewLine();
+      this.messages.append(ResourceMgr.getFormattedString("ErrImportNoKeyForUpdate", this.targetTable.getTableExpression()));
+      throw new SQLException("No key columns defined for update mode");
+    }
+  }
 	/**
 	 * 	Prepare the statement to be used for updates
 	 * 	targetTable and targetColumns have to be initialized before calling this!
@@ -1898,17 +1910,7 @@ public class DataImporter
 	private void prepareUpdateStatement()
 		throws SQLException, ModeNotPossibleException
 	{
-		if (!this.hasKeyColumns())
-		{
-			this.retrieveKeyColumns();
-			if (!this.hasKeyColumns())
-			{
-				if (messages.getLength() > 0) this.messages.appendNewLine();
-				this.messages.append(ResourceMgr.getFormattedString("ErrImportNoKeyForUpdate", this.targetTable.getTableExpression()));
-				throw new SQLException("No key columns defined for update mode");
-			}
-		}
-
+    verifyKeyColumns();
 		DbMetadata meta = dbConn.getMetadata();
     DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(dbConn);
 
@@ -2102,14 +2104,7 @@ public class DataImporter
 		try
 		{
 			List<ColumnIdentifier> cols = this.dbConn.getMetadata().getTableColumns(this.targetTable);
-			this.keyColumns = new ArrayList<>(4);
-			for (ColumnIdentifier col : cols)
-			{
-				if (col.isPkColumn())
-				{
-					this.keyColumns.add(col);
-				}
-			}
+      this.keyColumns = cols.stream().filter( col -> col.isPkColumn()).collect(Collectors.toList());
 		}
 		catch (SQLException e)
 		{

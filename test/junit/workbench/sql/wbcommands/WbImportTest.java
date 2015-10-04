@@ -108,7 +108,7 @@ public class WbImportTest
 	public void tearDown()
 		throws Exception
 	{
-		this.connection.disconnect();
+		connection.disconnect();
 	}
 
 	@Test
@@ -4257,6 +4257,69 @@ public class WbImportTest
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
+
+  @Test
+  public void testPKConstant()
+    throws Exception
+  {
+    WbConnection hsql = util.getHSQLConnection("pk_constant");
+
+    try
+    {
+      TestUtil.executeScript(hsql,
+          "create table booking  \n" +
+          "( \n" +
+          "  cust_id            integer not null, \n" +
+          "  reservation_date   date not null, \n" +
+          "  start_time         time not null, \n" +
+          "  end_time           time, \n" +
+          "); \n" +
+          " \n" +
+          "alter table booking \n" +
+          "  add constraint hours_pkey  \n" +
+          "  primary key (cust_id, reservation_date, start_time);\n" +
+          "commit;");
+
+      String sql =
+        "insert into booking (cust_id,reservation_date,start_time,end_time) values (1, DATE '2015-01-09',TIME '18:30:00', TIME '19:00:00'); \n" +
+        "insert into booking (cust_id,reservation_date,start_time,end_time) values (1, DATE '2015-01-20',TIME '18:30:00', TIME '19:00:00'); \n" +
+        "insert into booking (cust_id,reservation_date,start_time,end_time) values (2, DATE '2015-01-09',TIME '18:30:00', TIME '19:00:00'); \n" +
+        "insert into booking (cust_id,reservation_date,start_time,end_time) values (2, DATE '2015-01-26',TIME '18:30:00', TIME '19:00:00'); \n" +
+        "commit;";
+
+      TestUtil.executeScript(hsql, sql);
+
+      File c1 = new File(util.getBaseDir(), "c1.txt");
+      TestUtil.writeFile(c1,
+        "reservation_date,start_time,end_time\n" +
+        "2015-01-09,18:30,19:00\n" +
+        "2015-01-20,18:30,19:00\n" +
+        "2015-01-21,18:30,19:00\n");
+
+      importCmd.setConnection(hsql);
+
+      StatementRunnerResult result = importCmd.execute(
+          "wbimport -header=true -continueonerror=false -table=booking -file='" + c1.getAbsolutePath() + "' -type=text " +
+          "-mode=insert,update " +
+          "-fileColumns=reservation_date,start_time,end_time " +
+          "-delimiter=',' " +
+          "-header=true " +
+          "-constantValues='cust_id=1'");
+      String msg = result.getMessageBuffer().toString();
+      assertTrue(msg, result.isSuccess());
+      int count = TestUtil.getNumberValue(hsql, "select count(*) from booking where cust_id = 1");
+      assertEquals(3, count);
+
+  //    TestUtil.dumpQuery(connection, "select * from orders where customer_id = 1 order by order_id, product_id");
+
+  //    count = TestUtil.getNumberValue(connection, "select sum(amount) from orders where customer_id = 1");
+  //    assertEquals(7, count);
+    }
+    finally
+    {
+      hsql.disconnect();
+    }
+  }
 
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
