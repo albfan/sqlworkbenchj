@@ -197,7 +197,8 @@ public class ScriptParser
 		this.originalScript = script;
 		this.commands = null;
 		this.scriptIterator = null;
-		this.source = null;
+    this.source = null;
+		this.currentIteratorIndex = 0;
 	}
 
 	public void setDelimiter(DelimiterDefinition delim)

@@ -1751,7 +1751,7 @@ public class Settings
 		if (delim == null && con != null)
 		{
 			String text = getDbDelimiter(con.getDbId());
-			if (text != null)
+			if (StringUtil.isNonBlank(text))
 			{
 				delim = new DelimiterDefinition(text);
 			}
@@ -3667,7 +3667,14 @@ public class Settings
 
 	public void setDbDelimiter(String dbId, String delimiterText)
 	{
-		setProperty("workbench.db." + dbId + ".alternatedelimiter", delimiterText);
+    if (StringUtil.isBlank(delimiterText))
+    {
+      setProperty("workbench.db." + dbId + ".alternatedelimiter", null);
+    }
+		else
+    {
+      setProperty("workbench.db." + dbId + ".alternatedelimiter", delimiterText);
+    }
 	}
 
 	public Map<String, String> getDbIdMapping()

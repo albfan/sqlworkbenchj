@@ -485,8 +485,11 @@ public class LexerBasedParser
 
 	private void cleanup()
 	{
+    lexer = null;
 		calledOnce = false;
 		currentStatementIndex = 0;
+    scriptLength = 0;
+    realScriptLength = 0;
 		lastStatementUsedTerminator = false;
 		if (delimiterTester != null)
 		{

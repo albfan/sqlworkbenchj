@@ -849,7 +849,7 @@
 					</row>
 
 					<row>
-						<entry id="import-quotechar">-quoteChar</entry>
+						<entry id="import-quote-char">-quoteChar</entry>
 						<entry>
 							<para>
 								The character which was used to quote values where the delimiter is contained.

@@ -876,7 +876,7 @@
 			</para>
 		</blockquote></simplesect>
 
-		<simplesect id="options-number-alignment">
+		<simplesect id="options-result-tooltip">
 			<title>Result tab tooltip</title><blockquote>
 			<para>
         This options configures the tooltip that is shown when the mouse is hovering over a result tab.
