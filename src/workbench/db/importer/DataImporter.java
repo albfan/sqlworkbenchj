@@ -502,7 +502,7 @@ public class DataImporter
 	}
 
 	/**
-	 * 	Use batch updates if the driver supports this
+	 * 	Use batch updates if the driver supportsExtendedMode this
 	 */
 	@Override
 	public void setUseBatch(boolean flag)
@@ -1873,25 +1873,25 @@ public class DataImporter
 	private void prepareInsertStatement()
 		throws SQLException
 	{
-    ImportDMLStatementBuilder builder = new ImportDMLStatementBuilder(dbConn, targetTable, targetColumns, this);
-
     // if the target table was not verified, we need to make
     // sure the default case for column names is used
     boolean adjustColumnNames = !verifyTargetTable;
 
+    ImportDMLStatementBuilder builder = new ImportDMLStatementBuilder(dbConn, targetTable, targetColumns, this, adjustColumnNames);
+
     String insertSql = null;
 
-    if (dbConn.getDbSettings().useUpsert() && builder.supports(mode) && (this.mode == ImportMode.insertUpdate || this.mode == ImportMode.insertIgnore))
+    if (dbConn.getDbSettings().useUpsert() && builder.supportsExtendedMode(mode))
     {
       verifyKeyColumns();
 
       if (this.mode == ImportMode.insertIgnore)
       {
-        insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart, keyColumns, adjustColumnNames);
+        insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart, keyColumns);
       }
       else
       {
-        insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart, keyColumns, adjustColumnNames);
+        insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart, keyColumns);
       }
       if (insertSql != null)
       {
@@ -1902,7 +1902,7 @@ public class DataImporter
 
     if (insertSql == null)
     {
-      insertSql = builder.createInsertStatement(columnConstants, insertSqlStart, adjustColumnNames);
+      insertSql = builder.createInsertStatement(columnConstants, insertSqlStart);
     }
 
 		try

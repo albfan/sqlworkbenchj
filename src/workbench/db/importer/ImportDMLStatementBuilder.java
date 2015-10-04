@@ -19,7 +19,7 @@
  */
 package workbench.db.importer;
 
-
+import java.util.ArrayList;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
@@ -36,10 +36,10 @@ import workbench.util.StringUtil;
  * A class to build the INSERT statement for a DataImporter.
  *
  * By default this is a plain INSERT statement, if the DataImporter should do
- * an INSERT/UPDATE and the underlying DBMS supports an "UPSERT", the insert
- * statement will exploit this functionality.
- *
- * Currently implemented for Postgres 9.5, Firebird, H2 and MySQL.
+ an INSERT/UPDATE and the underlying DBMS supportsExtendedMode an "UPSERT", the insert
+ statement will exploit this functionality.
+
+ Currently implemented for Postgres 9.5, Firebird, H2 and MySQL.
  *
  * @author Thomas Kellerer
  */
@@ -48,17 +48,34 @@ public class ImportDMLStatementBuilder
   private final WbConnection dbConn;
   private final TableIdentifier targetTable;
 	private final List<ColumnIdentifier> targetColumns;
-  private final ColumnFilter colFilter;
 
-  public ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter)
+  public ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustColumnNameCase)
   {
     dbConn = connection;
     targetTable = target;
-    targetColumns = columns;
-    colFilter = filter;
+    targetColumns = createColumnList(columns, filter, adjustColumnNameCase);
   }
 
-	public String createInsertStatement(ConstantColumnValues columnConstants, String insertSqlStart, boolean adjustColumnNameCase)
+  private List<ColumnIdentifier> createColumnList(List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustCase)
+  {
+    DbMetadata meta = dbConn.getMetadata();
+
+    List<ColumnIdentifier> newCols = new ArrayList<>(columns.size());
+    for (ColumnIdentifier col : columns)
+    {
+      if (filter.ignoreColumn(col)) continue;
+      ColumnIdentifier copy = col.createCopy();
+      if (adjustCase)
+      {
+        String colname = meta.adjustObjectnameCase(meta.removeQuotes(copy.getColumnName()));
+        copy.setColumnName(colname);
+      }
+      newCols.add(copy);
+    }
+    return newCols;
+  }
+
+	public String createInsertStatement(ConstantColumnValues columnConstants, String insertSqlStart)
   {
     DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(dbConn);
 		StringBuilder text = new StringBuilder(targetColumns.size() * 50);
@@ -83,7 +100,6 @@ public class ImportDMLStatementBuilder
 		for (int i=0; i < getColCount(); i++)
 		{
 			ColumnIdentifier col = this.targetColumns.get(i);
-			if (colFilter.ignoreColumn(col)) continue;
 
 			if (colIndex > 0)
 			{
@@ -92,10 +108,6 @@ public class ImportDMLStatementBuilder
 			}
 
 			String colname = col.getDisplayName();
-			if (adjustColumnNameCase)
-			{
-				colname = meta.adjustObjectnameCase(meta.removeQuotes(colname));
-			}
 			colname = meta.quoteObjectname(colname);
 			text.append(colname);
 
@@ -128,25 +140,29 @@ public class ImportDMLStatementBuilder
 		return text.toString();
   }
 
-  public String createInsertIgnore(ConstantColumnValues columnConstants, String insertSqlStart, List<ColumnIdentifier> keyColumns, boolean adjustColumnNameCase)
+  public String createInsertIgnore(ConstantColumnValues columnConstants, String insertSqlStart, List<ColumnIdentifier> keyColumns)
   {
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5"))
     {
-      return createPostgresUpsert(columnConstants, insertSqlStart, keyColumns, adjustColumnNameCase, true);
+      return createPostgresUpsert(columnConstants, insertSqlStart, keyColumns, true);
     }
     if (dbConn.getMetadata().isMySql())
     {
-      return createMySQLUpsert(columnConstants, insertSqlStart, adjustColumnNameCase, true);
+      return createMySQLUpsert(columnConstants, insertSqlStart, true);
     }
     if (dbConn.getMetadata().isOracle())
     {
-      return createOracleInsertIgnore(columnConstants, keyColumns, adjustColumnNameCase);
+      return createOracleInsertIgnore(columnConstants, keyColumns);
+    }
+    if (dbConn.getMetadata().isHsql())
+    {
+      return createHSQLUpsert(columnConstants, keyColumns, true);
     }
 
     return null;
   }
 
-  public String createOracleInsertIgnore(ConstantColumnValues columnConstants, List<ColumnIdentifier> keyColumns, boolean adjustColumnNameCase)
+  public String createOracleInsertIgnore(ConstantColumnValues columnConstants, List<ColumnIdentifier> keyColumns)
   {
     String start = "INSERT /*+ IGNORE_ROW_ON_DUPKEY_INDEX (";
     start += targetTable.getRawTableName() + " (";
@@ -157,35 +173,39 @@ public class ImportDMLStatementBuilder
       start += colname;
     }
     start += ")) */ INTO ";
-    return createInsertStatement(columnConstants, start, adjustColumnNameCase);
+    return createInsertStatement(columnConstants, start);
   }
 
-  public String createUpsertStatement(ConstantColumnValues columnConstants, String insertSqlStart, List<ColumnIdentifier> keyColumns, boolean adjustColumnNameCase)
+  public String createUpsertStatement(ConstantColumnValues columnConstants, String insertSqlStart, List<ColumnIdentifier> keyColumns)
   {
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5"))
     {
-      return createPostgresUpsert(columnConstants, insertSqlStart, keyColumns, adjustColumnNameCase, false);
+      return createPostgresUpsert(columnConstants, insertSqlStart, keyColumns, false);
     }
     if (dbConn.getMetadata().isMySql())
     {
-      return createMySQLUpsert(columnConstants, insertSqlStart, adjustColumnNameCase, false);
+      return createMySQLUpsert(columnConstants, insertSqlStart, false);
     }
     if (dbConn.getMetadata().isH2())
     {
-      return createH2Upsert(columnConstants, adjustColumnNameCase);
+      return createH2Upsert(columnConstants);
+    }
+    if (dbConn.getMetadata().isHsql())
+    {
+      return createHSQLUpsert(columnConstants, keyColumns, false);
     }
     if (dbConn.getMetadata().isFirebird())
     {
-      return createFirebirdUpsert(columnConstants, keyColumns, adjustColumnNameCase);
+      return createFirebirdUpsert(columnConstants, keyColumns);
     }
     return null;
   }
 
-  private String createPostgresUpsert(ConstantColumnValues columnConstants, String insertSqlStart, List<ColumnIdentifier> keyColumns, boolean adjustColumnNameCase, boolean useIgnore)
+  private String createPostgresUpsert(ConstantColumnValues columnConstants, String insertSqlStart, List<ColumnIdentifier> keyColumns, boolean useIgnore)
   {
     if (CollectionUtil.isEmpty(keyColumns)) return null;
 
-    String insert = createInsertStatement(columnConstants, insertSqlStart, adjustColumnNameCase);
+    String insert = createInsertStatement(columnConstants, insertSqlStart);
     insert += "\nON CONFLICT (";
 		DbMetadata meta = dbConn.getMetadata();
     for (int i=0; i < keyColumns.size(); i++)
@@ -213,16 +233,16 @@ public class ImportDMLStatementBuilder
     return insert;
   }
 
-  private String createH2Upsert(ConstantColumnValues columnConstants, boolean adjustColumnNameCase)
+  private String createH2Upsert(ConstantColumnValues columnConstants)
   {
-    String insert = createInsertStatement(columnConstants, null, adjustColumnNameCase);
+    String insert = createInsertStatement(columnConstants, null);
     insert = insert.replace("INSERT INTO", "MERGE INTO");
     return insert;
   }
 
-  private String createFirebirdUpsert(ConstantColumnValues columnConstants, List<ColumnIdentifier> keyColumns, boolean adjustColumnNameCase)
+  private String createFirebirdUpsert(ConstantColumnValues columnConstants, List<ColumnIdentifier> keyColumns)
   {
-    String insert = createInsertStatement(columnConstants, null, adjustColumnNameCase);
+    String insert = createInsertStatement(columnConstants, null);
     insert = insert.replace("INSERT INTO", "UPDATE OR INSERT INTO");
 
 		DbMetadata meta = dbConn.getMetadata();
@@ -241,9 +261,111 @@ public class ImportDMLStatementBuilder
     return insert;
   }
 
-  private String createMySQLUpsert(ConstantColumnValues columnConstants, String insertSqlStart, boolean adjustColumnNameCase, boolean useIgnore)
+  private String createHSQLUpsert(ConstantColumnValues columnConstants, List<ColumnIdentifier> keyColumns, boolean insertOnly)
   {
-    String insert = createInsertStatement(columnConstants, insertSqlStart, adjustColumnNameCase);
+		StringBuilder text = new StringBuilder(targetColumns.size() * 50);
+
+  	text.append("MERGE INTO ");
+		text.append(targetTable.getFullyQualifiedName(dbConn));
+		text.append(" AS tg\nUSING (\n  VALUES (");
+
+		DbMetadata meta = dbConn.getMetadata();
+
+		int colIndex = 0;
+		for (int i=0; i < getColCount(); i++)
+		{
+			if (colIndex > 0) text.append(',');
+
+      if (columnConstants != null && columnConstants.isFunctionCall(i))
+      {
+        text.append(columnConstants.getFunctionLiteral(i));
+      }
+      else
+      {
+        text.append('?');
+      }
+			colIndex ++;
+		}
+    text.append(")\n) AS vals (");
+		colIndex = 0;
+		for (int i=0; i < getColCount(); i++)
+		{
+			if (colIndex > 0) text.append(',');
+      String colname = targetColumns.get(i).getDisplayName();
+      colname = meta.quoteObjectname(colname);
+      text.append(colname);
+      colIndex ++;
+		}
+    text.append(")\n  ON ");
+    colIndex = 0;
+
+    for (int i=0; i < keyColumns.size(); i++)
+    {
+      if (colIndex > 0) text.append(" AND ");
+      String colname = keyColumns.get(i).getDisplayName();
+      colname = meta.quoteObjectname(colname);
+      text.append("tg.");
+      text.append(colname);
+      text.append(" = vals.");
+      text.append(colname);
+    }
+
+    if (!insertOnly)
+    {
+      text.append("\nWHEN MATCHED THEN UPDATE\n  SET ");
+      colIndex = 0;
+      for (int i=0; i < getColCount(); i++)
+      {
+        ColumnIdentifier col = this.targetColumns.get(i);
+        if (col.isPkColumn()) continue;
+
+        String colname = targetColumns.get(i).getDisplayName();
+        colname = meta.quoteObjectname(colname);
+
+        if (colIndex > 0) text.append(",\n      ");
+        text.append("tg.");
+        text.append(colname);
+        text.append(" = vals.");
+        text.append(colname);
+        colIndex ++;
+      }
+    }
+
+    StringBuilder insertCols = new StringBuilder(targetColumns.size() * 20);
+    StringBuilder valueCols = new StringBuilder(targetColumns.size() * 20);
+
+		colIndex = 0;
+		for (int i=0; i < getColCount(); i++)
+		{
+			ColumnIdentifier col = this.targetColumns.get(i);
+      if (col.isPkColumn()) continue;
+      
+      String colname = targetColumns.get(i).getDisplayName();
+      colname = meta.quoteObjectname(colname);
+
+			if (colIndex > 0)
+      {
+        insertCols.append(", ");
+        valueCols.append(", ");
+      }
+      insertCols.append(colname);
+      valueCols.append("vals.");
+      valueCols.append(colname);
+			colIndex ++;
+		}
+    text.append("\nWHEN NOT MATCHED THEN INSERT\n  (");
+    text.append(insertCols);
+    text.append(")\nVALUES\n  (");
+    text.append(valueCols);
+    text.append(")");
+
+		return text.toString();
+
+  }
+
+  private String createMySQLUpsert(ConstantColumnValues columnConstants, String insertSqlStart, boolean useIgnore)
+  {
+    String insert = createInsertStatement(columnConstants, insertSqlStart);
 		DbMetadata meta = dbConn.getMetadata();
 
     insert += "\nON DUPLICATE KEY UPDATE \n  ";
@@ -272,19 +394,22 @@ public class ImportDMLStatementBuilder
   {
     if (dbConn == null) return false;
 
-    if (dbConn.getMetadata().isMySql()) return true;
-    if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
+    if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
+    if (dbConn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(dbConn, "2.0")) return true;
+    if (dbConn.getMetadata().isMySql()) return true;
+
     return false;
   }
 
-  public boolean supports(ImportMode mode)
+  public boolean supportsExtendedMode(ImportMode mode)
   {
     switch (mode)
     {
       case insertIgnore:
         return supportsInsertIgnore(dbConn);
       case insertUpdate:
+      case upsert:
         return supportsUpsert();
     }
     return false;
@@ -299,10 +424,11 @@ public class ImportDMLStatementBuilder
   {
     if (connection == null) return false;
 
-    if (connection.getMetadata().isMySql()) return true;
-    if (connection.getMetadata().isH2()) return true;
-    if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;
     if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "9.5")) return true;
+    if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;
+    if (connection.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(connection, "2.0")) return true;
+    if (connection.getMetadata().isH2()) return true;
+    if (connection.getMetadata().isMySql()) return true;
 
     return false;
   }

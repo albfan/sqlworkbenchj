@@ -554,6 +554,11 @@ public class DbSettings
 		return getBoolProperty("import.use.upsert", true);
 	}
 
+  public void setUseUpsert(boolean flag)
+	{
+		Settings.getInstance().setProperty(prefix + "import.use.upsert", flag);
+	}
+
 	/**
 	 * Returns if the DataImporter should use savepoints for the pre and post tables statements.
 	 * <br/>

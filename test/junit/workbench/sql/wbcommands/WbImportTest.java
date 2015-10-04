@@ -4263,16 +4263,19 @@ public class WbImportTest
     throws Exception
   {
     WbConnection hsql = util.getHSQLConnection("pk_constant");
+    boolean useUpsert = hsql.getDbSettings().useUpsert();
 
     try
     {
+      // disable the use of the upsert functionality
+      hsql.getDbSettings().setUseUpsert(false);
       TestUtil.executeScript(hsql,
           "create table booking  \n" +
           "( \n" +
           "  cust_id            integer not null, \n" +
           "  reservation_date   date not null, \n" +
           "  start_time         time not null, \n" +
-          "  end_time           time, \n" +
+          "  end_time           time \n" +
           "); \n" +
           " \n" +
           "alter table booking \n" +
@@ -4317,6 +4320,7 @@ public class WbImportTest
     }
     finally
     {
+      hsql.getDbSettings().setUseUpsert(useUpsert);
       hsql.disconnect();
     }
   }
