@@ -49,7 +49,7 @@ public class RecentFileManager
 	private final String WKSP_PROP_NAME = "workspace.recent";
 	private final String MACROS_PROP_NAME = "macros.recent";
 
-	private Map<String, FixedSizeList<WbFile>> recentFiles = new HashMap<String, FixedSizeList<WbFile>>();
+	private Map<String, FixedSizeList<WbFile>> recentFiles = new HashMap<>();
 
 	/**
 	 * Thread safe singleton-instance
@@ -68,8 +68,8 @@ public class RecentFileManager
 	{
 		Settings.getInstance().addSaveListener(this);
 
-		FixedSizeList<WbFile> wksp = new FixedSizeList<WbFile>(Settings.getInstance().getIntProperty("workbench.workspace.recent.maxcount", 15));
-		FixedSizeList<WbFile> macros = new FixedSizeList<WbFile>(Settings.getInstance().getIntProperty("workbench.macros.recent.maxcount", 15));
+		FixedSizeList<WbFile> wksp = new FixedSizeList<>(Settings.getInstance().getIntProperty("workbench.workspace.recent.maxcount", 15));
+		FixedSizeList<WbFile> macros = new FixedSizeList<>(Settings.getInstance().getIntProperty("workbench.macros.recent.maxcount", 15));
 		recentFiles.put(WKSP_PROP_NAME, wksp);
 		recentFiles.put(MACROS_PROP_NAME, macros);
 		readSettings(WKSP_PROP_NAME);
