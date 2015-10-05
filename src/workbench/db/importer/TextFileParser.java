@@ -70,8 +70,9 @@ public class TextFileParser
 	extends AbstractImportFileParser
 	implements TextImportOptions, TabularDataParser
 {
+  public static final String DEFAULT_DELIMITER = "\t";
 	private File baseDir;
-	private String delimiter = "\t";
+	private String delimiter = DEFAULT_DELIMITER;
 	private String quoteChar;
 	private boolean decodeUnicode;
 	private boolean enableMultiLineMode;

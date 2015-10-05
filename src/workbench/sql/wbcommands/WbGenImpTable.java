@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.WbManager;
+import workbench.db.importer.TextFileParser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
@@ -144,7 +145,7 @@ public class WbGenImpTable
 
     if (type.equals("text"))
     {
-      String delim = cmdLine.getValue(CommonArgs.ARG_DELIM);
+      String delim = cmdLine.getValue(CommonArgs.ARG_DELIM, TextFileParser.DEFAULT_DELIMITER);
       String quote = cmdLine.getValue(WbImport.ARG_QUOTE);
       String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
       String tsFormat = cmdLine.getValue(CommonArgs.ARG_TIMESTAMP_FORMAT);

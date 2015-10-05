@@ -66,9 +66,12 @@ public class CsvLineParser
 
 	public CsvLineParser(String delimit, char quote)
 	{
-		delimiter = delimit;
+    if (delimit != null)
+    {
+      delimiter = delimit;
+      delimiterLength = delimiter.length();
+    }
 		quoteChar = quote;
-		delimiterLength = delimiter.length();
 	}
 
   public QuoteEscapeType getEscapeType()
