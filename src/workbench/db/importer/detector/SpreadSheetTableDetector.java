@@ -20,11 +20,17 @@
 package workbench.db.importer.detector;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import workbench.db.importer.SpreadsheetReader;
 import workbench.log.LogMgr;
+
+import workbench.db.WbConnection;
+import workbench.db.importer.SpreadsheetReader;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -39,12 +45,13 @@ public class SpreadSheetTableDetector
 {
   private int sheetIndex;
   private String sheetName;
+  private Map<String, List<ColumnStatistics>> sheetMap = new HashMap<>();
 
   public SpreadSheetTableDetector(File spreadSheet, boolean containsHeader, int sheet)
   {
     inputFile = new WbFile(spreadSheet);
     withHeader = containsHeader;
-    sheetIndex = sheet > -1 ? sheet : 0;
+    sheetIndex = sheet < 0 ? -1 : sheet;
   }
 
   @Override
@@ -54,13 +61,41 @@ public class SpreadSheetTableDetector
   }
 
   @Override
-  protected String getDefaultTableName()
+  protected void checkResults()
+  {
+    for (List<ColumnStatistics> cols : sheetMap.values())
+    {
+      super.checkResults(cols);
+    }
+  }
+
+  @Override
+  public String getCreateTable(WbConnection conn)
+    throws SQLException
+  {
+    if (sheetMap.size() == 1)
+    {
+      return super.getCreateTable(conn, sheetMap.values().iterator().next());
+    }
+
+    StringBuilder sql = new StringBuilder(sheetMap.size() * 100);
+    for (Map.Entry<String, List<ColumnStatistics>> entry : sheetMap.entrySet())
+    {
+      String table = super.getCreateTable(conn, entry.getValue(), entry.getKey());
+      sql.append(table);
+      sql.append(";\n\n");
+    }
+    return sql.toString();
+  }
+
+  @Override
+  protected String getTableNameToUse()
   {
     if (StringUtil.isNonBlank(sheetName))
     {
       return SqlUtil.cleanupIdentifier(sheetName);
     }
-    return super.getDefaultTableName();
+    return super.getTableNameToUse();
   }
 
   private void analyzeSpreadSheet()
@@ -72,21 +107,45 @@ public class SpreadSheetTableDetector
     {
       reader.load();
       List<String> sheets = reader.getSheets();
-      sheetName = sheets.get(sheetIndex);
+      int start = -1;
+      int end = -1;
 
-      List<String> cols = reader.getHeaderColumns();
-      columns = new ArrayList<>(cols.size());
-      for (String col : cols)
+      if (sheetIndex == -1)
       {
-        columns.add(new ColumnStatistics(col));
+        start = 0;
+        end = sheets.size() - 1;
+      }
+      else
+      {
+        start = sheetIndex;
+        end = sheetIndex;
       }
 
-      int numLines = Math.min(reader.getRowCount(), sampleSize);
-
-      for (int row=1; row < numLines; row++)
+      for (int i=start; i <= end; i++)
       {
-        List<Object> values = reader.getRowValues(row);
-        analyzeValues(values);
+        String name = sheets.get(i);
+        reader.setActiveWorksheet(i);
+
+        List<String> cols = reader.getHeaderColumns();
+        List<ColumnStatistics> sheetColumns = new ArrayList<>(cols.size());
+        for (String col : cols)
+        {
+          sheetColumns.add(new ColumnStatistics(col));
+        }
+
+        int numLines = Math.min(reader.getRowCount(), sampleSize);
+
+        for (int row=1; row < numLines; row++)
+        {
+          List<Object> values = reader.getRowValues(row);
+          analyzeValues(values, sheetColumns);
+        }
+        sheetMap.put(name, sheetColumns);
+      }
+
+      if (sheetMap.size() == 1)
+      {
+        this.columns = sheetMap.values().iterator().next();
       }
     }
     catch (Throwable th)

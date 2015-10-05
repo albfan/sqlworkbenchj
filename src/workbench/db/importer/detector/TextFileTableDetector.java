@@ -110,7 +110,7 @@ public class TextFileTableDetector
       while (line != null && lineNr < sampleSize)
       {
         List<String> values = parseLine(line);
-        analyzeValues(values);
+        analyzeValues(values, columns);
         line = reader.readLine();
         lineNr ++;
       }

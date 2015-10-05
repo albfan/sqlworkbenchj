@@ -837,6 +837,7 @@ public class DbMetadata
 	public boolean isSqlServer() { return this.isSqlServer; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 	public boolean isH2() { return this.isH2; }
+	public boolean isDB2LuW() { return this.getDbId().equals(DBID_DB2_LUW); }
 
 	/**
 	 * Clears the cached list of catalogs to ignore.
@@ -1879,6 +1880,20 @@ public class DbMetadata
 			}
 		}
 		return null;
+	}
+
+	public TableDefinition findTableDefinition(TableIdentifier tbl)
+	{
+		TableIdentifier realTable = findTable(tbl, tableTypesArray, false);
+    if (realTable == null) return null;
+    try
+    {
+      return getTableDefinition(realTable, true);
+    }
+    catch (SQLException ex)
+    {
+      return null;
+    }
 	}
 
 	public TableIdentifier findTable(TableIdentifier tbl, boolean searchAllSchemas)

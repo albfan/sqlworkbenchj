@@ -110,7 +110,8 @@ public class TextFileTableDetectorTest
           break;
       }
     }
-    String create = detector.getCreateTable(null, "csv_table");
+    detector.setTableName("csv_table");
+    String create = detector.getCreateTable(null);
     assertNotNull(create);
     String expected =
       "create table csv_table\n" +
@@ -125,7 +126,7 @@ public class TextFileTableDetectorTest
     assertEquals(expected, create.trim().toLowerCase());
     detector.setAlwaysUseVarchar(true);
     detector.analyzeFile();
-    create = detector.getCreateTable(null, "csv_table");
+    create = detector.getCreateTable(null);
     assertNotNull(create);
     expected =
       "create table csv_table\n" +

@@ -2054,8 +2054,14 @@ WHERE id=42;</programlisting>
 						<row>
 							<entry>-sheetNumber</entry>
 							<entry>
-                <para>If the input file is a spreadsheet, this parameter defines the <link linkend="import-sheetnumber">sheet number</link> to be analyzed.</para>
-                <para>Providing a wildcard is not supported.</para>
+                <para>
+                  If the input file is a spreadsheet, this parameter defines the <link linkend="import-sheetnumber">sheet number</link> to be analyzed.
+                  The first sheet has the number <literal>1</literal>.
+                </para>
+                <para>
+                  When specifying <literal>*</literal> for the sheet number a <literal>CREATE TABLE</literal> statement for every
+                  sheet will be created.
+                </para>
               </entry>
 						</row>
 						<row>

@@ -29,16 +29,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.WbManager;
-import workbench.db.importer.TextFileParser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.importer.TextFileParser;
 import workbench.db.importer.detector.SpreadSheetTableDetector;
 import workbench.db.importer.detector.TableDetector;
 import workbench.db.importer.detector.TextFileTableDetector;
 
 import workbench.gui.dbobjects.RunScriptPanel;
 
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.commands.DdlCommand;
@@ -49,10 +50,10 @@ import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.QuoteEscapeType;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 import static workbench.sql.wbcommands.CommonArgs.*;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -124,7 +125,6 @@ public class WbGenImpTable
       return result;
     }
 
-    String tableName = cmdLine.getValue(WbImport.ARG_TARGETTABLE);
     boolean header = cmdLine.getBoolean(WbImport.ARG_CONTAINSHEADER, WbImport.getHeaderDefault());
 
     String typeFromFile = WbImport.findTypeFromFilename(file.getFullPath());
@@ -166,13 +166,23 @@ public class WbGenImpTable
     }
     else
     {
+      String index = cmdLine.getValue(WbImport.ARG_SHEET_NR, null);
+      int sheetNr = 1;
+      if ("*".equals(index))
+      {
+        sheetNr = 0;
+      }
+      else
+      {
+        sheetNr = cmdLine.getIntValue(WbImport.ARG_SHEET_NR, 1);
+      }
       // the index is zero-based, but the user supplies a one-based index
-      int sheetNr = cmdLine.getIntValue(WbImport.ARG_SHEET_NR, 1);
       detector = new SpreadSheetTableDetector(file, header, sheetNr - 1);
     }
 
     detector.setAlwaysUseVarchar(cmdLine.getBoolean(ARG_ALL_VARCHAR, false));
     detector.setSampleSize(cmdLine.getIntValue(ARG_SAMPLE_SIZE, TableDetector.DEFAULT_SAMPLE_SIZE));
+    detector.setTableName(cmdLine.getValue(WbImport.ARG_TARGETTABLE));
 
     try
     {
@@ -185,7 +195,7 @@ public class WbGenImpTable
         result.addMessage(detector.getMessages());
       }
 
-      String ddl = detector.getCreateTable(currentConnection, tableName);
+      String ddl = detector.getCreateTable(currentConnection);
       if (ddl == null) return result;
 
       boolean createTable = cmdLine.getBoolean(ARG_CREATE_TABLE, false);
@@ -234,14 +244,20 @@ public class WbGenImpTable
         createResult.clear();
       }
 
+
+      if (DelimiterDefinition.STANDARD_DELIMITER.terminatesScript(ddl, false) == false)
+      {
+        ddl += ";";
+      }
+
       if (showSQL)
       {
-        result.addMessage(ddl + ";");
+        result.addMessage(ddl);
       }
 
       if (cmdLine.getBoolean(ARG_CLIPBOARD, false))
       {
-        putToClipboard(ddl+ ";");
+        putToClipboard(ddl);
       }
     }
     catch (Exception ex)

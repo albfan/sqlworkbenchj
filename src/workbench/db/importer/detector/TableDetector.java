@@ -55,7 +55,7 @@ import workbench.util.WbFile;
 public abstract class TableDetector
 {
   public static final int DEFAULT_SAMPLE_SIZE = 1000;
-  
+
   protected List<ColumnStatistics> columns;
   protected WbFile inputFile;
   protected boolean withHeader;
@@ -64,10 +64,19 @@ public abstract class TableDetector
   protected MessageBuffer messages = new MessageBuffer();
   private SqlKeywordHelper helper;
   private boolean alwaysUseVarchar;
+  private String tableName;
 
   public MessageBuffer getMessages()
   {
     return messages;
+  }
+
+  public void setTableName(String name)
+  {
+    if (StringUtil.isNonBlank(name))
+    {
+      this.tableName = name.trim();
+    }
   }
 
   public boolean hasMessages()
@@ -92,24 +101,33 @@ public abstract class TableDetector
     }
   }
 
-  protected String getDefaultTableName()
+  protected String getTableNameToUse()
   {
+    if (StringUtil.isNonBlank(tableName)) return tableName.trim();
     if (inputFile == null) return "import_table";
     return SqlUtil.cleanupIdentifier(inputFile.getFileName());
   }
 
-  public String getCreateTable(WbConnection conn, String tableName)
+  public String getCreateTable(WbConnection conn)
     throws SQLException
   {
-    if (CollectionUtil.isEmpty(columns)) return null;
+    return getCreateTable(conn, columns);
+  }
 
-    if (StringUtil.isBlank(tableName))
-    {
-      tableName = getDefaultTableName();
-    }
-    TableIdentifier tbl = new TableIdentifier(tableName);
+  public String getCreateTable(WbConnection conn, List<ColumnStatistics> colStats)
+    throws SQLException
+  {
+    return getCreateTable(conn, colStats, getTableNameToUse());
+  }
 
-    List<ColumnIdentifier> dbColumns = getDBColumns();
+  public String getCreateTable(WbConnection conn, List<ColumnStatistics> colStats, String table)
+    throws SQLException
+  {
+    if (CollectionUtil.isEmpty(colStats)) return null;
+
+    TableIdentifier tbl = new TableIdentifier(table);
+
+    List<ColumnIdentifier> dbColumns = getDBColumns(colStats);
 
     String result = FormatterUtil.getKeyword("CREATE TABLE ");
     result += FormatterUtil.getIdentifier(tbl.getTableExpression(conn));
@@ -165,11 +183,16 @@ public abstract class TableDetector
 
   public List<ColumnIdentifier> getDBColumns()
   {
-    if (CollectionUtil.isEmpty(columns)) return Collections.emptyList();
+    return getDBColumns(columns);
+  }
 
-    List<ColumnIdentifier> result = new ArrayList<>(columns.size());
+  public List<ColumnIdentifier> getDBColumns(List<ColumnStatistics> colStats)
+  {
+    if (CollectionUtil.isEmpty(colStats)) return Collections.emptyList();
+
+    List<ColumnIdentifier> result = new ArrayList<>(colStats.size());
     int pos = 0;
-    for (ColumnStatistics colStat : columns)
+    for (ColumnStatistics colStat : colStats)
     {
       ColType type = colStat.getBestType();
       String name = FormatterUtil.getIdentifier(colStat.getName());
@@ -192,9 +215,9 @@ public abstract class TableDetector
     return result;
   }
 
-  protected void checkResults()
+  protected void checkResults(List<ColumnStatistics> colStats)
   {
-    for (ColumnStatistics col : columns)
+    for (ColumnStatistics col : colStats)
     {
       List<ColType> types = col.getDetectedTypes();
       if (types.isEmpty())
@@ -216,6 +239,11 @@ public abstract class TableDetector
     }
   }
 
+  protected void checkResults()
+  {
+    checkResults(columns);
+  }
+  
   public void analyzeFile()
   {
     processFile();
@@ -224,9 +252,9 @@ public abstract class TableDetector
 
   protected abstract void processFile();
 
-  protected void analyzeValues(List<? extends Object> values)
+  protected void analyzeValues(List<? extends Object> values, List<ColumnStatistics> colStats)
   {
-    if (values.size() != columns.size()) return;
+    if (values.size() != colStats.size()) return;
 
     for (int i=0; i < values.size(); i ++)
     {
@@ -236,7 +264,7 @@ public abstract class TableDetector
       if (value == null) continue;
       if (value.toString().isEmpty()) continue;
 
-      ColumnStatistics stats = columns.get(i);
+      ColumnStatistics stats = colStats.get(i);
       ColType currentType = stats.getMostFrequentType();
 
       int len = value.toString().length();

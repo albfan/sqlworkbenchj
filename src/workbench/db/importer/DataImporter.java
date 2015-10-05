@@ -651,7 +651,7 @@ public class DataImporter
     {
       return false;
     }
-    
+
     if (modeValue == ImportMode.upsert && !ImportDMLStatementBuilder.supportsUpsert(dbConn))
     {
       return false;
@@ -744,25 +744,6 @@ public class DataImporter
 
     this.source.setMessageBuffer(messages);
 
-		if (this.useBatch)
-		{
-			if (!supportsBatch())
-			{
-				LogMgr.logWarning("DataImporter.setUseBatch()", "JDBC driver does not support batch updates. Ignoring request to use batch updates");
-				messages.append(ResourceMgr.getString("MsgJDBCDriverNoBatch") + "\n");
-				useBatch = false;
-			}
-			else if (this.isModeInsertUpdate() || this.isModeUpdateInsert())
-			{
-				// When using UPDATE/INSERT or INSERT/UPDATE
-				// we cannot use batch mode as we immediately need
-				// the result of the first statement to decide
-				// whether we have to send another one
-				useBatch = false;
-				messages.appendMessageKey("ErrImportNoBatchMode");
-			}
-		}
-
 		try
 		{
 			this.source.start();
@@ -814,11 +795,11 @@ public class DataImporter
 
 		if (this.deleteTarget == DeleteType.truncate)
 		{
-			deleteSql = "TRUNCATE TABLE " + this.targetTable.getTableExpression(this.dbConn);
+			deleteSql = "TRUNCATE TABLE " + targetTable.getTableExpression(this.dbConn);
 		}
 		else
 		{
-			deleteSql = "DELETE FROM " + this.targetTable.getTableExpression(this.dbConn);
+			deleteSql = "DELETE FROM " + targetTable.getTableExpression(this.dbConn);
 		}
 
 		Statement stmt = null;
@@ -829,13 +810,13 @@ public class DataImporter
 			int rows = stmt.executeUpdate(deleteSql);
 			if (this.deleteTarget == DeleteType.truncate)
 			{
-				String msg = ResourceMgr.getString("MsgImportTableTruncated").replace("%table%", this.targetTable.getTableExpression(this.dbConn));
+				String msg = ResourceMgr.getString("MsgImportTableTruncated").replace("%table%", targetTable.getTableExpression(this.dbConn));
 				this.messages.append(msg);
 				this.messages.appendNewLine();
 			}
 			else
 			{
-				this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable.getTableExpression(this.dbConn) + "\n");
+				this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + targetTable.getTableExpression(this.dbConn) + "\n");
 			}
 		}
 		finally
@@ -1035,8 +1016,8 @@ public class DataImporter
 		{
 			if (this.totalTables > 0)
 			{
-				StringBuilder msg = new StringBuilder(this.targetTable.getTableName().length() + 20);
-				msg.append(this.targetTable.getTableName());
+				StringBuilder msg = new StringBuilder(targetTable.getTableName().length() + 20);
+				msg.append(targetTable.getTableName());
 				msg.append(" [");
 				msg.append(this.currentTable);
 				msg.append('/');
@@ -1046,7 +1027,7 @@ public class DataImporter
 			}
 			else
 			{
-				progressMonitor.setCurrentObject(this.targetTable.getTableName(), currentImportRow, -1);
+				progressMonitor.setCurrentObject(targetTable.getTableName(), currentImportRow, -1);
 			}
 		}
 
@@ -1689,7 +1670,7 @@ public class DataImporter
 				}
 				catch (SQLException e)
 				{
-					this.messages.append(ResourceMgr.getFormattedString("ErrTargetTableNotFound", this.targetTable.getTableExpression()));
+					this.messages.append(ResourceMgr.getFormattedString("ErrTargetTableNotFound", targetTable.getTableExpression()));
 					if (parser != null)
 					{
 						this.messages.appendNewLine();
@@ -1723,7 +1704,7 @@ public class DataImporter
 				{
 					this.progressMonitor.saveCurrentType("importDelete");
 					this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-					String msg = ResourceMgr.getFormattedString("TxtDeletingTable", this.targetTable.getObjectName());
+					String msg = ResourceMgr.getFormattedString("TxtDeletingTable", targetTable.getObjectName());
 					this.progressMonitor.setCurrentObject(msg,-1,-1);
 				}
 
@@ -1740,7 +1721,7 @@ public class DataImporter
 					this.messages.append(msg);
 					this.messages.appendNewLine();
 
-					LogMgr.logError("DataImporter.setTargetTable()", "Could not delete contents of table " + this.targetTable, e);
+					LogMgr.logError("DataImporter.setTargetTable()", "Could not delete contents of table " + targetTable, e);
 					if (!this.continueOnError)
 					{
 						throw e;
@@ -1753,17 +1734,17 @@ public class DataImporter
 			if (this.reportInterval == 0 && this.progressMonitor != null)
 			{
 				this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-				this.progressMonitor.setCurrentObject(ResourceMgr.getString("MsgImportingTableData") + " " + this.targetTable + " (" + this.getModeString() + ")",-1,-1);
+				this.progressMonitor.setCurrentObject(ResourceMgr.getString("MsgImportingTableData") + " " + targetTable + " (" + this.getModeString() + ")",-1,-1);
 			}
 
 			if (LogMgr.isInfoEnabled())
 			{
-				LogMgr.logInfo("DataImporter.setTargetTable()", "Starting import for table " + this.targetTable.getTableExpression());
+				LogMgr.logInfo("DataImporter.setTargetTable()", "Starting import for table " + targetTable.getTableExpression());
 			}
 
 			if (this.badfileName != null)
 			{
-				this.badWriter = new BadfileWriter(this.badfileName, this.targetTable, "UTF8");
+				this.badWriter = new BadfileWriter(this.badfileName, targetTable, "UTF8");
 			}
 			else
 			{
@@ -1773,7 +1754,7 @@ public class DataImporter
 		}
 		catch (Exception th)
 		{
-			String tname = targetTable == null ? "null" : this.targetTable.getTableExpression();
+			String tname = targetTable == null ? "null" : targetTable.getTableExpression();
 			String msg = "Error initializing import for table " + tname;
 			if (this.continueOnError)
 			{
@@ -1845,12 +1826,34 @@ public class DataImporter
 		if (this.targetTable == null) return;
 
 		DbMetadata meta = this.dbConn.getMetadata();
-		boolean exists = meta.objectExists(this.targetTable, meta.getTablesAndViewTypes());
+		boolean exists = meta.objectExists(targetTable, meta.getTablesAndViewTypes());
 		if (!exists)
 		{
-			throw new SQLException("Table " + this.targetTable.getTableExpression(this.dbConn) + " not found!");
+			throw new SQLException("Table " +targetTable.getTableExpression(this.dbConn) + " not found!");
 		}
 	}
+
+  private void checkBatchMode()
+  {
+    if (this.useBatch)
+    {
+      if (!supportsBatch())
+      {
+        LogMgr.logWarning("DataImporter.setUseBatch()", "JDBC driver does not support batch updates. Ignoring request to use batch updates");
+        messages.append(ResourceMgr.getString("MsgJDBCDriverNoBatch") + "\n");
+        useBatch = false;
+      }
+      else if (this.isModeInsertUpdate() || this.isModeUpdateInsert())
+      {
+        // When using UPDATE/INSERT or INSERT/UPDATE
+        // we cannot use batch mode as we immediately need
+        // the result of the first statement to decide
+        // whether we have to send another one
+        useBatch = false;
+        messages.appendMessageKey("ErrImportNoBatchMode");
+      }
+    }
+  }
 
 	/**
 	 * 	Prepare the statement to be used for inserts.
@@ -1909,6 +1912,8 @@ public class DataImporter
       insertSql = builder.createInsertStatement(columnConstants, insertSqlStart);
     }
 
+    checkBatchMode();
+
 		try
 		{
 			PreparedStatement stmt = this.dbConn.getSqlConnection().prepareStatement(insertSql);
@@ -1936,7 +1941,7 @@ public class DataImporter
     if (!this.hasKeyColumns())
     {
       if (messages.getLength() > 0) this.messages.appendNewLine();
-      this.messages.append(ResourceMgr.getFormattedString("ErrImportNoKeyForUpdate", this.targetTable.getTableExpression()));
+      this.messages.append(ResourceMgr.getFormattedString("ErrImportNoKeyForUpdate", targetTable.getTableExpression()));
       throw new SQLException("No key columns defined for update mode");
     }
   }
@@ -1958,7 +1963,7 @@ public class DataImporter
 		StringBuilder sql = new StringBuilder(getColCount() * 20 + 80);
 		StringBuilder where = new StringBuilder(this.keyColumns.size() * 10);
 		sql.append("UPDATE ");
-		sql.append(this.targetTable.getFullyQualifiedName(this.dbConn));
+		sql.append(targetTable.getFullyQualifiedName(this.dbConn));
 		sql.append(" SET ");
 		where.append(" WHERE ");
 		boolean pkAdded = false;
@@ -2139,7 +2144,7 @@ public class DataImporter
 	{
 		try
 		{
-			List<ColumnIdentifier> cols = this.dbConn.getMetadata().getTableColumns(this.targetTable);
+			List<ColumnIdentifier> cols = this.dbConn.getMetadata().getTableColumns(targetTable);
       this.keyColumns = cols.stream().filter( col -> col.isPkColumn()).collect(Collectors.toList());
 		}
 		catch (SQLException e)
@@ -2181,7 +2186,7 @@ public class DataImporter
 
 			runPostTableStatement();
 
-			String msg = this.targetTable.getTableName() + ": " + this.getInsertedRows() + " row(s) inserted. " + this.getUpdatedRows() + " row(s) updated.";
+			String msg = targetTable.getTableName() + ": " + this.getInsertedRows() + " row(s) inserted. " + this.getUpdatedRows() + " row(s) updated.";
 			if (!transactionControl)
 			{
 				msg += " Transaction control disabled. No commit sent to server.";

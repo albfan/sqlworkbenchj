@@ -172,7 +172,10 @@ public class ImportDMLStatementBuilder
     {
       return createHSQLUpsert(columnConstants, true);
     }
-
+    if (dbConn.getMetadata().isDB2LuW())
+    {
+      return createDB2Upsert(columnConstants, true);
+    }
     return null;
   }
 
@@ -211,6 +214,10 @@ public class ImportDMLStatementBuilder
     if (dbConn.getMetadata().isFirebird())
     {
       return createFirebirdUpsert(columnConstants);
+    }
+    if (dbConn.getMetadata().isDB2LuW())
+    {
+      return createDB2Upsert(columnConstants, false);
     }
     return null;
   }
@@ -277,11 +284,21 @@ public class ImportDMLStatementBuilder
 
   private String createHSQLUpsert(ConstantColumnValues columnConstants, boolean insertOnly)
   {
+    return createStandardMerge(columnConstants, insertOnly, "USING ");
+  }
+
+  private String createDB2Upsert(ConstantColumnValues columnConstants, boolean insertOnly)
+  {
+    return createStandardMerge(columnConstants, insertOnly, "USING TABLE");
+  }
+
+  private String createStandardMerge(ConstantColumnValues columnConstants, boolean insertOnly, String usingKeyword)
+  {
 		StringBuilder text = new StringBuilder(targetColumns.size() * 50);
 
   	text.append("MERGE INTO ");
 		text.append(targetTable.getFullyQualifiedName(dbConn));
-		text.append(" AS tg\nUSING (\n  VALUES (");
+		text.append(" AS tg\n" + usingKeyword + "(\n  VALUES (");
 
 		DbMetadata meta = dbConn.getMetadata();
 
@@ -411,6 +428,7 @@ public class ImportDMLStatementBuilder
 
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
     if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
+    if (dbConn.getMetadata().isDB2LuW()) return true;
     if (dbConn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(dbConn, "2.0")) return true;
     if (dbConn.getMetadata().isMySql()) return true;
 
@@ -459,6 +477,7 @@ public class ImportDMLStatementBuilder
 
     if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "9.5")) return true;
     if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;
+    if (connection.getMetadata().isDB2LuW()) return true;
     if (connection.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(connection, "2.0")) return true;
     if (connection.getMetadata().isH2()) return true;
     if (connection.getMetadata().isMySql()) return true;
