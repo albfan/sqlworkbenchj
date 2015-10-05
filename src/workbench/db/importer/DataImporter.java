@@ -1879,7 +1879,7 @@ public class DataImporter
 
     boolean useAutoUpsert = dbConn.getDbSettings().useUpsert() && (mode == ImportMode.insertUpdate || mode == ImportMode.updateInsert);
 
-    if (useAutoUpsert || mode == ImportMode.upsert)
+    if ((useAutoUpsert || mode == ImportMode.upsert) && builder.isModeSupported(mode))
     {
       if (mode == ImportMode.insertIgnore)
       {
@@ -1953,7 +1953,7 @@ public class DataImporter
 		throws SQLException, ModeNotPossibleException
 	{
     verifyKeyColumns();
-    
+
 		DbMetadata meta = dbConn.getMetadata();
     DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(dbConn);
 

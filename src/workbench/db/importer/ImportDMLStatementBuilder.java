@@ -36,7 +36,7 @@ import workbench.util.StringUtil;
  * A class to build the INSERT statement for a DataImporter.
  *
  * By default this is a plain INSERT statement, if the DataImporter should do
- an INSERT/UPDATE and the underlying DBMS supportsExtendedMode an "UPSERT", the insert
+ an INSERT/UPDATE and the underlying DBMS isModeSupported an "UPSERT", the insert
  statement will exploit this functionality.
 
  Currently implemented for Postgres 9.5, Firebird, H2 and MySQL.
@@ -435,11 +435,16 @@ public class ImportDMLStatementBuilder
     return false;
   }
 
-  public boolean supportsExtendedMode(ImportMode mode)
+  public boolean isModeSupported(ImportMode mode)
   {
     switch (mode)
     {
       case insertIgnore:
+        if (dbConn.getMetadata().isMySql())
+        {
+          // MySQL supports an upsert if there is a real PK defined on the table
+          return hasRealPK();
+        }
         return supportsInsertIgnore(dbConn);
       case insertUpdate:
       case updateInsert:
