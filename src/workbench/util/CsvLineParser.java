@@ -22,6 +22,8 @@
  */
 package workbench.util;
 
+import workbench.db.importer.TextFileParser;
+
 /**
  * A class to efficiently parse a delimited line of data.
  *
@@ -36,7 +38,7 @@ public class CsvLineParser
 	private String lineData = null;
 	private int len = 0;
 	private int current = 0;
-	private String delimiter;
+	private String delimiter = TextFileParser.DEFAULT_DELIMITER;
 	private int delimiterLength;
 	private char quoteChar = 0;
 	private boolean returnEmptyStrings = false;

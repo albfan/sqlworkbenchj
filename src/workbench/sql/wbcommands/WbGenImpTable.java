@@ -53,6 +53,7 @@ import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 
 import static workbench.sql.wbcommands.CommonArgs.*;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -146,6 +147,13 @@ public class WbGenImpTable
     if (type.equals("text"))
     {
       String delim = cmdLine.getValue(CommonArgs.ARG_DELIM, TextFileParser.DEFAULT_DELIMITER);
+
+      if (cmdLine.isArgPresent(CommonArgs.ARG_DELIM) && StringUtil.isEmptyString(delim))
+      {
+        result.addErrorMessageByKey("ErrImpDelimEmpty");
+        return result;
+      }
+
       String quote = cmdLine.getValue(WbImport.ARG_QUOTE);
       String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
       String tsFormat = cmdLine.getValue(CommonArgs.ARG_TIMESTAMP_FORMAT);
