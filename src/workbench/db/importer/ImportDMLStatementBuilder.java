@@ -48,12 +48,26 @@ public class ImportDMLStatementBuilder
   private final WbConnection dbConn;
   private final TableIdentifier targetTable;
 	private final List<ColumnIdentifier> targetColumns;
+  private List<ColumnIdentifier> keyColumns;
 
-  public ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustColumnNameCase)
+  ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustColumnNameCase)
   {
     dbConn = connection;
     targetTable = target;
     targetColumns = createColumnList(columns, filter, adjustColumnNameCase);
+  }
+
+  public void setKeyColumns(List<ColumnIdentifier> keys)
+  {
+    keyColumns = new ArrayList<>(2);
+    if (keys == null)
+    {
+      return;
+    }
+    for (ColumnIdentifier col : keys)
+    {
+      keyColumns.add(col.createCopy());
+    }
   }
 
   private List<ColumnIdentifier> createColumnList(List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustCase)
@@ -140,11 +154,11 @@ public class ImportDMLStatementBuilder
 		return text.toString();
   }
 
-  public String createInsertIgnore(ConstantColumnValues columnConstants, String insertSqlStart, List<ColumnIdentifier> keyColumns)
+  public String createInsertIgnore(ConstantColumnValues columnConstants, String insertSqlStart)
   {
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5"))
     {
-      return createPostgresUpsert(columnConstants, insertSqlStart, keyColumns, true);
+      return createPostgresUpsert(columnConstants, insertSqlStart, true);
     }
     if (dbConn.getMetadata().isMySql())
     {
@@ -152,17 +166,17 @@ public class ImportDMLStatementBuilder
     }
     if (dbConn.getMetadata().isOracle())
     {
-      return createOracleInsertIgnore(columnConstants, keyColumns);
+      return createOracleInsertIgnore(columnConstants);
     }
     if (dbConn.getMetadata().isHsql())
     {
-      return createHSQLUpsert(columnConstants, keyColumns, true);
+      return createHSQLUpsert(columnConstants, true);
     }
 
     return null;
   }
 
-  public String createOracleInsertIgnore(ConstantColumnValues columnConstants, List<ColumnIdentifier> keyColumns)
+  public String createOracleInsertIgnore(ConstantColumnValues columnConstants)
   {
     String start = "INSERT /*+ IGNORE_ROW_ON_DUPKEY_INDEX (";
     start += targetTable.getRawTableName() + " (";
@@ -176,11 +190,11 @@ public class ImportDMLStatementBuilder
     return createInsertStatement(columnConstants, start);
   }
 
-  public String createUpsertStatement(ConstantColumnValues columnConstants, String insertSqlStart, List<ColumnIdentifier> keyColumns)
+  public String createUpsertStatement(ConstantColumnValues columnConstants, String insertSqlStart)
   {
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5"))
     {
-      return createPostgresUpsert(columnConstants, insertSqlStart, keyColumns, false);
+      return createPostgresUpsert(columnConstants, insertSqlStart, false);
     }
     if (dbConn.getMetadata().isMySql())
     {
@@ -192,16 +206,16 @@ public class ImportDMLStatementBuilder
     }
     if (dbConn.getMetadata().isHsql())
     {
-      return createHSQLUpsert(columnConstants, keyColumns, false);
+      return createHSQLUpsert(columnConstants, false);
     }
     if (dbConn.getMetadata().isFirebird())
     {
-      return createFirebirdUpsert(columnConstants, keyColumns);
+      return createFirebirdUpsert(columnConstants);
     }
     return null;
   }
 
-  private String createPostgresUpsert(ConstantColumnValues columnConstants, String insertSqlStart, List<ColumnIdentifier> keyColumns, boolean useIgnore)
+  private String createPostgresUpsert(ConstantColumnValues columnConstants, String insertSqlStart, boolean useIgnore)
   {
     if (CollectionUtil.isEmpty(keyColumns)) return null;
 
@@ -240,7 +254,7 @@ public class ImportDMLStatementBuilder
     return insert;
   }
 
-  private String createFirebirdUpsert(ConstantColumnValues columnConstants, List<ColumnIdentifier> keyColumns)
+  private String createFirebirdUpsert(ConstantColumnValues columnConstants)
   {
     String insert = createInsertStatement(columnConstants, null);
     insert = insert.replace("INSERT INTO", "UPDATE OR INSERT INTO");
@@ -261,7 +275,7 @@ public class ImportDMLStatementBuilder
     return insert;
   }
 
-  private String createHSQLUpsert(ConstantColumnValues columnConstants, List<ColumnIdentifier> keyColumns, boolean insertOnly)
+  private String createHSQLUpsert(ConstantColumnValues columnConstants, boolean insertOnly)
   {
 		StringBuilder text = new StringBuilder(targetColumns.size() * 50);
 
@@ -393,6 +407,7 @@ public class ImportDMLStatementBuilder
   public static boolean supportsInsertIgnore(WbConnection dbConn)
   {
     if (dbConn == null) return false;
+    if (dbConn.getDbSettings().useUpsert() == false) return false;
 
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
     if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
@@ -416,14 +431,31 @@ public class ImportDMLStatementBuilder
     return false;
   }
 
+  public boolean hasRealPK()
+  {
+    if (CollectionUtil.isEmpty(keyColumns)) return false;
+    for (ColumnIdentifier col : keyColumns)
+    {
+      if (!col.isPkColumn()) return false;
+    }
+    return true;
+  }
+
   public boolean supportsUpsert()
   {
+    if (dbConn.getMetadata().isH2() || dbConn.getMetadata().isMySql())
+    {
+      // MySQL and H2 only support an upsert if there is a PK defined on the table
+      // the key columns to be used cannot be specified dynamically
+      return hasRealPK();
+    }
     return supportsUpsert(this.dbConn);
   }
 
   public static boolean supportsUpsert(WbConnection connection)
   {
     if (connection == null) return false;
+    if (connection.getDbSettings().useUpsert() == false) return false;
 
     if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "9.5")) return true;
     if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;

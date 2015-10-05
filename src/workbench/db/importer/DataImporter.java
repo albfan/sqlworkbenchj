@@ -651,6 +651,12 @@ public class DataImporter
     {
       return false;
     }
+    
+    if (modeValue == ImportMode.upsert && !ImportDMLStatementBuilder.supportsUpsert(dbConn))
+    {
+      return false;
+    }
+
 		setMode(modeValue);
 		return true;
 	}
@@ -1859,22 +1865,26 @@ public class DataImporter
 
     ImportDMLStatementBuilder builder = new ImportDMLStatementBuilder(dbConn, targetTable, targetColumns, this, adjustColumnNames);
 
+    if (mode != ImportMode.insert)
+    {
+      verifyKeyColumns();
+      builder.setKeyColumns(keyColumns);
+    }
+
     String insertSql = null;
 
     if (builder.supportsExtendedMode(mode))
     {
-      verifyKeyColumns();
-
       switch (this.mode)
       {
         case insertIgnore:
-          insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart, keyColumns);
+          insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart);
           break;
-          
+
         case insertUpdate:
         case updateInsert:
         case upsert:
-          insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart, keyColumns);
+          insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart);
           if (insertSql != null)
           {
             if (mode != ImportMode.upsert)

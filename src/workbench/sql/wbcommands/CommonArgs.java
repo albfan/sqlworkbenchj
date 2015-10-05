@@ -137,7 +137,7 @@ public class CommonArgs
 
 	public static void addImportModeParameter(ArgumentParser cmdLine)
 	{
-		cmdLine.addArgument(ARG_IMPORT_MODE, StringUtil.stringToList("insert,update,\"update,insert\",\"insert,update\""));
+		cmdLine.addArgument(ARG_IMPORT_MODE, StringUtil.stringToList("insert,update,\"update,insert\",\"insert,update\",upsert,insertIgnore"));
 	}
 
 	public static void addSqlDateLiteralParameter(ArgumentParser cmdLine)
