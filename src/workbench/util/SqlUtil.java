@@ -74,7 +74,7 @@ public class SqlUtil
   /**
    * The RegEx Pattern to validate a String as a legal ANSI-SQL identifier.
    */
-	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$]*");
+	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z][\\w\\$]*");
 
 	private static class JoinKeywordsHolder
 	{
