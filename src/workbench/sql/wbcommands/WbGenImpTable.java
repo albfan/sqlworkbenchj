@@ -49,7 +49,6 @@ import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.QuoteEscapeType;
-import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 
 import static workbench.sql.wbcommands.CommonArgs.*;
@@ -126,11 +125,6 @@ public class WbGenImpTable
     }
 
     String tableName = cmdLine.getValue(WbImport.ARG_TARGETTABLE);
-    if (tableName == null)
-    {
-      tableName = SqlUtil.cleanupIdentifier(file.getFileName());
-    }
-
     boolean header = cmdLine.getBoolean(WbImport.ARG_CONTAINSHEADER, WbImport.getHeaderDefault());
 
     String typeFromFile = WbImport.findTypeFromFilename(file.getFullPath());

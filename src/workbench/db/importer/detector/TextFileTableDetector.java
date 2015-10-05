@@ -34,6 +34,7 @@ import workbench.util.FileUtil;
 import workbench.util.QuoteEscapeType;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
+import workbench.util.WbFile;
 
 /**
  * A class to detect a table structure from a CSV file.
@@ -50,7 +51,7 @@ public class TextFileTableDetector
 
   public TextFileTableDetector(File importFile, String delimiter, String quoteChar, String dateFmt, String timestampFmt, boolean containsHeader, String fileEncoding)
   {
-    inputFile = importFile;
+    inputFile = new WbFile(importFile);
     withHeader = containsHeader;
     encoding = fileEncoding;
 

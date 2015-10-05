@@ -19,7 +19,6 @@
  */
 package workbench.db.importer.detector;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -43,6 +42,7 @@ import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
+import workbench.util.WbFile;
 
 /**
  * A class to detect a table structure from an import file.
@@ -55,8 +55,9 @@ import workbench.util.ValueConverter;
 public abstract class TableDetector
 {
   public static final int DEFAULT_SAMPLE_SIZE = 1000;
+  
   protected List<ColumnStatistics> columns;
-  protected File inputFile;
+  protected WbFile inputFile;
   protected boolean withHeader;
   protected int sampleSize = DEFAULT_SAMPLE_SIZE;
   protected ValueConverter converter;
@@ -91,11 +92,21 @@ public abstract class TableDetector
     }
   }
 
+  protected String getDefaultTableName()
+  {
+    if (inputFile == null) return "import_table";
+    return SqlUtil.cleanupIdentifier(inputFile.getFileName());
+  }
+
   public String getCreateTable(WbConnection conn, String tableName)
     throws SQLException
   {
     if (CollectionUtil.isEmpty(columns)) return null;
 
+    if (StringUtil.isBlank(tableName))
+    {
+      tableName = getDefaultTableName();
+    }
     TableIdentifier tbl = new TableIdentifier(tableName);
 
     List<ColumnIdentifier> dbColumns = getDBColumns();

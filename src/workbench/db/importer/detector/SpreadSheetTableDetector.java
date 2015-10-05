@@ -26,6 +26,9 @@ import java.util.List;
 import workbench.db.importer.SpreadsheetReader;
 import workbench.log.LogMgr;
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -35,10 +38,11 @@ public class SpreadSheetTableDetector
   extends TableDetector
 {
   private int sheetIndex;
+  private String sheetName;
 
   public SpreadSheetTableDetector(File spreadSheet, boolean containsHeader, int sheet)
   {
-    inputFile = spreadSheet;
+    inputFile = new WbFile(spreadSheet);
     withHeader = containsHeader;
     sheetIndex = sheet > -1 ? sheet : 0;
   }
@@ -49,6 +53,16 @@ public class SpreadSheetTableDetector
     analyzeSpreadSheet();
   }
 
+  @Override
+  protected String getDefaultTableName()
+  {
+    if (StringUtil.isNonBlank(sheetName))
+    {
+      return SqlUtil.cleanupIdentifier(sheetName);
+    }
+    return super.getDefaultTableName();
+  }
+
   private void analyzeSpreadSheet()
   {
     SpreadsheetReader reader = SpreadsheetReader.Factory.createReader(inputFile, sheetIndex, null);
@@ -57,6 +71,9 @@ public class SpreadSheetTableDetector
     try
     {
       reader.load();
+      List<String> sheets = reader.getSheets();
+      sheetName = sheets.get(sheetIndex);
+
       List<String> cols = reader.getHeaderColumns();
       columns = new ArrayList<>(cols.size());
       for (String col : cols)
