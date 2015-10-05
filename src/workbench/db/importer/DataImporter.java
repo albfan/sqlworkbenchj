@@ -1868,6 +1868,7 @@ public class DataImporter
 
     ImportDMLStatementBuilder builder = new ImportDMLStatementBuilder(dbConn, targetTable, targetColumns, this, adjustColumnNames);
 
+    // for anything other than a plain insert we need key columns
     if (mode != ImportMode.insert)
     {
       verifyKeyColumns();
@@ -1876,29 +1877,27 @@ public class DataImporter
 
     String insertSql = null;
 
-    if (builder.supportsExtendedMode(mode))
-    {
-      switch (this.mode)
-      {
-        case insertIgnore:
-          insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart);
-          break;
+    boolean useAutoUpsert = dbConn.getDbSettings().useUpsert() && (mode == ImportMode.insertUpdate || mode == ImportMode.updateInsert);
 
-        case insertUpdate:
-        case updateInsert:
-        case upsert:
-          insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart);
-          if (insertSql != null)
+    if (useAutoUpsert || mode == ImportMode.upsert)
+    {
+      if (mode == ImportMode.insertIgnore)
+      {
+        insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart);
+      }
+      else
+      {
+        insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart);
+        if (insertSql != null)
+        {
+          if (mode != ImportMode.upsert)
           {
-            if (mode != ImportMode.upsert)
-            {
-              LogMgr.logInfo("DataImporter.prepareInsertStatement", "Database supports native UPSERT functionality. Using only one statement for insert/update.");
-            }
-            // It's necessary to set the mode to upsert (if it was insertUpdate or updateInsert) to avoid creating and running the UPDATE statement.
-            // it's also necessary to allow batching
-            mode = ImportMode.upsert;
+            LogMgr.logInfo("DataImporter.prepareInsertStatement", "Database supports native UPSERT functionality. Using only one statement for insert/update.");
           }
-          break;
+          // It's necessary to set the mode to upsert (if it was insertUpdate or updateInsert) to avoid creating and running the UPDATE statement.
+          // it's also necessary to allow batching
+          mode = ImportMode.upsert;
+        }
       }
     }
 
@@ -1938,6 +1937,7 @@ public class DataImporter
     if (this.hasKeyColumns()) return;
 
     this.retrieveKeyColumns();
+
     if (!this.hasKeyColumns())
     {
       if (messages.getLength() > 0) this.messages.appendNewLine();
@@ -1953,6 +1953,7 @@ public class DataImporter
 		throws SQLException, ModeNotPossibleException
 	{
     verifyKeyColumns();
+    
 		DbMetadata meta = dbConn.getMetadata();
     DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(dbConn);
 
