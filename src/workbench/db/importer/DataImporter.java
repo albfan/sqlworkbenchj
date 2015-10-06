@@ -1877,9 +1877,9 @@ public class DataImporter
 
     String insertSql = null;
 
-    boolean useAutoUpsert = dbConn.getDbSettings().useUpsert() && (mode == ImportMode.insertUpdate || mode == ImportMode.updateInsert);
+    boolean useUpsert = dbConn.getDbSettings().useUpsert() && (mode == ImportMode.insertUpdate || mode == ImportMode.updateInsert);
 
-    if ((useAutoUpsert || mode == ImportMode.upsert) && builder.isModeSupported(mode))
+    if ((useUpsert || mode == ImportMode.upsert || mode == ImportMode.insertIgnore) && builder.isModeSupported(mode))
     {
       if (mode == ImportMode.insertIgnore)
       {

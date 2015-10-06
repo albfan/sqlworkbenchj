@@ -551,7 +551,7 @@ public class DbSettings
 
   public boolean useUpsert()
 	{
-		return getBoolProperty("import.use.upsert", true);
+		return getBoolProperty("import.use.upsert", false);
 	}
 
   public void setUseUpsert(boolean flag)

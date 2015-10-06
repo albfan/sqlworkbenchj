@@ -112,29 +112,34 @@
 						</entry>
 					</row>
 
-					<row>
-						<entry>-mode</entry>
-						<entry>
-								<para>
-									Defines how the data should be sent to the database. Possible
-									values are '<literal>INSERT</literal>', '<literal>UPDATE</literal>',
-									'<literal>INSERT,UPDATE</literal>' and '<literal>UPDATE,INSERT</literal>'
-									For details please refer to the <link linkend="import-update-mode">update mode</link>
-									explanation.
-							</para>
-						</entry>
-					</row>
+          <row>
+            <entry>-mode</entry>
+            <entry>
+              <para>
+                Defines how the data should be sent to the database. Possible
+                values are '<literal>insert</literal>', '<literal>update</literal>',
+                '<literal>insert,update</literal>' and '<literal>update,insert</literal>'
+                For details please refer to the <link linkend="import-update-mode">update mode</link>
+                explanation.
+              </para>
+              <para>
+                For some DBMS, the additional modes: '<literal>upsert</literal>' and '<literal>insertIgnore</literal>'
+                are supported. For details please refer to the <link linkend="import-native-upsert">native upsert</link>
+                and <link linkend="native-insert-ignore">native insertIgnore</link> explanation.
+              </para>
+            </entry>
+          </row>
 
-					<row>
-						<entry>-file</entry>
-						<entry>
-							<para>
-								Defines the full name of the input file. Alternatively
-								you can also specify a directory (using <literal>-sourcedir</literal>)
-								from which all files are imported.
-							</para>
-						</entry>
-					</row>
+          <row>
+            <entry>-file</entry>
+            <entry>
+              <para>
+                Defines the full name of the input file. Alternatively
+                you can also specify a directory (using <literal>-sourcedir</literal>)
+                from which all files are imported.
+              </para>
+            </entry>
+          </row>
 
 					<row>
 						<entry>-table</entry>
@@ -1587,16 +1592,19 @@
 			<link linkend="pg-statement-savepoint">enabled savepoints</link> for the import (which is enabled by default).
 		</para>
   </section>
-	<section id="import-upsert-mode">
-		<title>UPSERT mode</title>
+
+	<section id="import-native-upsert">
+		<title>Native UPSERT mode</title>
 
     <para>
-      When using <literal>-mode=insert,update</literal> and the DBMS supports a native "UPSERT" functionality,
-      &wb-productname; will only use a single "UPSERT" statement instead of two statements as described in the previous chapter.
+      When using a DBMS that supports an "update or insert" functionality directly, this can be selected using <literal>-mode=upsert</literal>. In this case
+      &wb-productname; will only use a single statement instead of two statements as described in the previous chapter. The advantage of using this mode
+      over e.g. <literal>insert,update</literal> is that fewer statements are sent to the database, and that this mode supports the use of batching, which
+      is not possible when using <literal>insert,update</literal>.
     </para>
     <para>
-      For the following database systems, native UPSERT is currently used:
-			<itemizedlist>
+      For the following database systems, native UPSERT is available:
+      <itemizedlist>
         <listitem>
           <para>PostgreSQL 9.5, using <literal>INSERT ... ON CONFLICT</literal>: <ulink url="http://www.postgresql.org/docs/9.5/static/sql-insert.html"/></para>
         </listitem>
@@ -1607,7 +1615,47 @@
           <para>H2 Database, using <literal>MERGE INTO</literal>: <ulink url="http://www.h2database.com/html/grammar.html#merge"/></para>
         </listitem>
         <listitem>
-          <para>MySQL, using <literal>INSERT ... ON DUPLICATE</literal>: <ulink url="http://dev.mysql.com/doc/refman/5.1/en/insert-on-duplicate.html"/></para>
+          <para>Oracle, Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and Z/OS) and using a <literal>MERGE</literal> statement</para>
+        </listitem>
+        <listitem>
+          <para>SAP HANA using a <literal>UPSERT</literal> statement</para>
+        </listitem>
+        <listitem>
+          <para>
+            MySQL using <literal>INSERT ... ON DUPLICATE</literal>: <ulink url="http://dev.mysql.com/doc/refman/5.1/en/insert-on-duplicate.html"/>
+            As MySQL does not allow to specify the key columns for the "ON DUPLICATE" part, this is only supported when the table has a primary key.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+
+	</section>
+
+	<section id="import-native-insert-ignore">
+		<title>Native insertIgnore mode</title>
+
+    <para>
+      The <literal>-mode=insertIgnore</literal> will use the built in feature of the DBMS to (silently) ignore inserts that would
+      result in a violation of a unique key constraint but not update existing rows.
+    </para>
+    <para>
+      This mode is supported for the following DBMS:
+			<itemizedlist>
+        <listitem>
+          <para>PostgreSQL 9.5, using <literal>INSERT ... ON CONFLICT</literal>: <ulink url="http://www.postgresql.org/docs/9.5/static/sql-insert.html"/></para>
+        </listitem>
+        <listitem>
+          <para>
+            Oracle, Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and Z/OS) using a <literal>MERGE</literal> statement
+            without a <literal>WHEN NOT MATCHED</literal> clause.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            MySQL using <literal>INSERT ... ON DUPLICATE</literal>: <ulink url="http://dev.mysql.com/doc/refman/5.1/en/insert-on-duplicate.html"/>
+            with a dummy update setting one column to its current value. As MySQL does not allow to specify the key columns
+            for the "ON DUPLICATE" part, this is only supported when the table has a primary key.
+          </para>
         </listitem>
 			</itemizedlist>
     </para>
