@@ -58,7 +58,7 @@ public class CommentSqlManager
 
 		objectType = objectType.toLowerCase().replace(" ", "_");
 
-		String key = key = "workbench.db." + dbid + ".sql.comment." + objectType;
+		String key = "workbench.db." + dbid + ".sql.comment." + objectType;
 		String sql = null;
 
 		if (action != null)

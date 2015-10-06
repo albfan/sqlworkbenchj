@@ -201,7 +201,7 @@ public class DbObjectChanger
 		String schema = oldDefinition.getSchema();
 		if (schema == null) schema = "";
 
-		if (StringUtil.equalStringOrEmpty(oldComment, newComment, true)) return null; // no change
+		if (StringUtil.equalStringOrEmpty(oldComment, newComment, false)) return null; // no change
 
 		String action = CommentSqlManager.getAction(oldComment, newComment);
 
