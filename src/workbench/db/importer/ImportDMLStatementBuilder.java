@@ -29,6 +29,7 @@ import workbench.db.DmlExpressionBuilder;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.mssql.SqlServerUtil;
 import workbench.log.LogMgr;
 
 import workbench.util.CollectionUtil;
@@ -186,6 +187,10 @@ public class ImportDMLStatementBuilder
     {
       return createDB2zOSUpsert(columnConstants, true);
     }
+    if (dbConn.getMetadata().isSqlServer())
+    {
+      return createSqlServerUpsert(columnConstants, true);
+    }
     return null;
   }
 
@@ -240,6 +245,10 @@ public class ImportDMLStatementBuilder
     if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID))
     {
       return createMySQLUpsert(columnConstants, null, false);
+    }
+    if (dbConn.getMetadata().isSqlServer())
+    {
+      return createSqlServerUpsert(columnConstants, false);
     }
     return null;
   }
@@ -326,6 +335,11 @@ public class ImportDMLStatementBuilder
   private String createDB2zOSUpsert(ConstantColumnValues columnConstants, boolean insertOnly)
   {
     return createStandardMerge(columnConstants, insertOnly, "USING ");
+  }
+
+  private String createSqlServerUpsert(ConstantColumnValues columnConstants, boolean insertOnly)
+  {
+    return createStandardMerge(columnConstants, insertOnly, "USING ") + ";";
   }
 
   private String createStandardMerge(ConstantColumnValues columnConstants, boolean insertOnly, String usingKeyword)
@@ -465,6 +479,7 @@ public class ImportDMLStatementBuilder
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
     if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
     if (dbConn.getMetadata().isDB2LuW()) return true;
+    if (dbConn.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(dbConn)) return true;
     if (dbConn.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
     if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
     if (dbConn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(dbConn, "2.0")) return true;
@@ -532,6 +547,7 @@ public class ImportDMLStatementBuilder
     if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "9.5")) return true;
     if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;
     if (connection.getMetadata().isDB2LuW()) return true;
+    if (connection.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(connection)) return true;
     if (connection.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
     if (connection.getDbId().equals(DbMetadata.DBID_HANA)) return true;
     if (connection.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
