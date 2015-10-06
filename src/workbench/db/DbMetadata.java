@@ -110,11 +110,12 @@ public class DbMetadata
 	public static final String DBID_FIREBIRD = "firebird";
 	public static final String DBID_DB2_LUW = "db2";  // Linux, Unix, Windows
 	public static final String DBID_DB2_ISERIES = "db2i";  // AS/400 iSeries
-	public static final String DBID_DB2_HOST = "db2h";  // z/OS
+	public static final String DBID_DB2_ZOS = "db2h";  // z/OS
 	public static final String DBID_TERADATA = "teradata";
 	public static final String DBID_H2 = "h2";
 	public static final String DBID_OPENEDGE = "openedge";
 	public static final String DBID_HANA = "hdb";
+	public static final String DBID_CUBRID = "cubrid";
 
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};

@@ -155,7 +155,7 @@ public class Db2ProcedureReader
 			SqlUtil.appendAndCondition(sql, "ROUTINE_SCHEMA", schemaPattern, connection);
 			SqlUtil.appendAndCondition(sql, "ROUTINE_NAME", namePattern, connection);
 		}
-    else if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_HOST))
+    else if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ZOS))
 		{
 			// DB Host, z/OS
 			sql.append(

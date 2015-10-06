@@ -65,6 +65,7 @@ public class HanaTableSourceBuilder
 			"where table_name = ? \n" +
 			"and schema_name = ?";
 
+    long start = System.currentTimeMillis();
 		try
 		{
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
@@ -83,6 +84,8 @@ public class HanaTableSourceBuilder
           tbl.getSourceOptions().setTypeModifier(type);
         }
 			}
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("HanaTableSourceBuilder.readTableConfigOptions()", "Retrieving table type took: " + duration + "ms");
 		}
 		catch (SQLException e)
 		{

@@ -2165,6 +2165,7 @@ public class JEditTextArea
 			int newEndline = getLineOfOffset(newCaret);
 			painter.invalidateLineRange(line, newEndline);
 			setCaretPosition(newCaret);
+      updateScrollBars();
 		}
 		catch (BadLocationException bl)
 		{
@@ -2267,7 +2268,7 @@ public class JEditTextArea
 			{
 				document.remove(selectionStart, selectionEnd - selectionStart);
 
-				if(selectedText != null)
+				if (selectedText != null)
 				{
 					document.insertString(selectionStart, selectedText, null);
 				}
@@ -2296,7 +2297,6 @@ public class JEditTextArea
 			document.endCompoundEdit();
 		}
 
-		updateScrollBars();
 		if (rectSelect)
 		{
 			if (StringUtil.isNonEmpty(selectedText))
@@ -2316,9 +2316,14 @@ public class JEditTextArea
 		{
 			setCaretPosition(selectionEnd);
 		}
+
 		int startLine = getLineOfOffset(selectionStart);
 		int endLine = getLineOfOffset(selectionStart + selectedText.length());
+
+    // tokenizeLines() will also update the max. line length which is important when calling updateScrollbars()
+    document.tokenizeLines(startLine, endLine);
 		painter.invalidateLineRange(startLine, endLine);
+		updateScrollBars();
 	}
 
 	public void insertText(String text)
@@ -2328,6 +2333,8 @@ public class JEditTextArea
 
 	public void insertText(int position, String text)
 	{
+    if (text == null) text = "";
+
 		if (MemoryWatcher.isMemoryLow(true))
 		{
 			WbManager.getInstance().showLowMemoryError();

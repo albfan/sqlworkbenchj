@@ -21,6 +21,7 @@ package workbench.db.importer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -28,6 +29,7 @@ import workbench.db.DmlExpressionBuilder;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -164,6 +166,10 @@ public class ImportDMLStatementBuilder
     {
       return createMySQLUpsert(columnConstants, insertSqlStart, true);
     }
+    if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID))
+    {
+      return createMySQLUpsert(columnConstants, insertSqlStart, true);
+    }
     if (dbConn.getMetadata().isOracle())
     {
       return createOracleInsertIgnore(columnConstants);
@@ -174,7 +180,11 @@ public class ImportDMLStatementBuilder
     }
     if (dbConn.getMetadata().isDB2LuW())
     {
-      return createDB2Upsert(columnConstants, true);
+      return createDB2LuWUpsert(columnConstants, true);
+    }
+    if (dbConn.getDbId().equals(DbMetadata.DBID_DB2_ZOS))
+    {
+      return createDB2zOSUpsert(columnConstants, true);
     }
     return null;
   }
@@ -217,9 +227,30 @@ public class ImportDMLStatementBuilder
     }
     if (dbConn.getMetadata().isDB2LuW())
     {
-      return createDB2Upsert(columnConstants, false);
+      return createDB2LuWUpsert(columnConstants, false);
+    }
+    if (dbConn.getDbId().equals(DbMetadata.DBID_DB2_ZOS))
+    {
+      return createDB2zOSUpsert(columnConstants, false);
+    }
+    if (dbConn.getDbId().equals(DbMetadata.DBID_HANA))
+    {
+      return createHanaUpsert(columnConstants);
+    }
+    if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID))
+    {
+      return createMySQLUpsert(columnConstants, null, false);
     }
     return null;
+  }
+
+  private String createHanaUpsert(ConstantColumnValues columnConstants)
+  {
+    if (CollectionUtil.isEmpty(keyColumns)) return null;
+
+    String insert = createInsertStatement(columnConstants, "UPSERT ");
+    insert += " WITH PRIMARY KEY";
+    return insert;
   }
 
   private String createPostgresUpsert(ConstantColumnValues columnConstants, String insertSqlStart, boolean useIgnore)
@@ -287,9 +318,14 @@ public class ImportDMLStatementBuilder
     return createStandardMerge(columnConstants, insertOnly, "USING ");
   }
 
-  private String createDB2Upsert(ConstantColumnValues columnConstants, boolean insertOnly)
+  private String createDB2LuWUpsert(ConstantColumnValues columnConstants, boolean insertOnly)
   {
     return createStandardMerge(columnConstants, insertOnly, "USING TABLE");
+  }
+
+  private String createDB2zOSUpsert(ConstantColumnValues columnConstants, boolean insertOnly)
+  {
+    return createStandardMerge(columnConstants, insertOnly, "USING ");
   }
 
   private String createStandardMerge(ConstantColumnValues columnConstants, boolean insertOnly, String usingKeyword)
@@ -429,6 +465,8 @@ public class ImportDMLStatementBuilder
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
     if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
     if (dbConn.getMetadata().isDB2LuW()) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
     if (dbConn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(dbConn, "2.0")) return true;
     if (dbConn.getMetadata().isMySql()) return true;
 
@@ -440,10 +478,15 @@ public class ImportDMLStatementBuilder
     switch (mode)
     {
       case insertIgnore:
-        if (dbConn.getMetadata().isMySql())
+        if (dbConn.getMetadata().isMySql() || dbConn.getDbId().equals(DbMetadata.DBID_CUBRID))
         {
-          // MySQL supports an upsert if there is a real PK defined on the table
-          return hasRealPK();
+          // MySQL and Cubrid only support an upsert if there is a real PK defined on the table
+          boolean hasPK = hasRealPK();
+          if (!hasPK)
+          {
+            LogMgr.logInfo("ImportDMLStatementBuilder.isModeSupported()", "Cannot use insertIgnore without a primary key.");
+          }
+          return hasPK;
         }
         return supportsInsertIgnore(dbConn);
       case insertUpdate:
@@ -466,11 +509,17 @@ public class ImportDMLStatementBuilder
 
   public boolean supportsUpsert()
   {
-    if (dbConn.getMetadata().isH2() || dbConn.getMetadata().isMySql())
+    Set<String> requiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_HANA, DbMetadata.DBID_H2);
+    if (requiresPK.contains(dbConn.getDbId()))
     {
       // MySQL and H2 only support an upsert if there is a PK defined on the table
       // the key columns to be used cannot be specified dynamically
-      return hasRealPK();
+      boolean hasPK = hasRealPK();
+      if (!hasPK)
+      {
+        LogMgr.logInfo("ImportDMLStatementBuilder.supportsUpsert()", "Cannot use upsert without a primary key.");
+      }
+      return hasPK;
     }
     return supportsUpsert(this.dbConn);
   }
@@ -483,6 +532,9 @@ public class ImportDMLStatementBuilder
     if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "9.5")) return true;
     if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;
     if (connection.getMetadata().isDB2LuW()) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_HANA)) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
     if (connection.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(connection, "2.0")) return true;
     if (connection.getMetadata().isH2()) return true;
     if (connection.getMetadata().isMySql()) return true;

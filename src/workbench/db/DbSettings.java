@@ -1164,10 +1164,14 @@ public class DbSettings
 	}
 
 	/**
-	 * Returns if the table grants are already included in the generated table source.
+	 * Returns true if the table grants should be generated for the table source.
 	 *
-	 * @see #getUseCustomizedCreateTableRetrieval()
+   * If table source retrieval is customized, the property retrieve.create.table.grants_included decides
+   * if the grants need to be retrieve seperately.
+   *
 	 * @see workbench.db.TableSourceBuilder#getTableSource(workbench.db.TableIdentifier, java.util.List)
+   * @see #isTableSourceRetrievalCustomized()
+   * @see DbExplorerSettings#getGenerateTableGrants()
 	 *
 	 * @return true if table grants should be generated even if the table source is retrieved by a customized statement
 	 */
@@ -1308,7 +1312,7 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(key, true);
 	}
 
-  public static String DEFAULT_CREATE_TABLE_TEMPLATE =
+  public static final String DEFAULT_CREATE_TABLE_TEMPLATE =
     "CREATE TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER +
     "\n(\n" +
     MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER +

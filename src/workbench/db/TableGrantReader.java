@@ -36,6 +36,7 @@ import java.util.Set;
 import workbench.log.LogMgr;
 
 import workbench.db.oracle.OracleTableGrantReader;
+import workbench.resource.Settings;
 
 import workbench.util.StringUtil;
 
@@ -71,10 +72,15 @@ public class TableGrantReader
 		Set<String> ignoreGrantors = dbConnection.getDbSettings().getGrantorsToIgnore();
 		Set<String> ignoreGrantees = dbConnection.getDbSettings().getGranteesToIgnore();
 
+    long start = System.currentTimeMillis();
 		try
 		{
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(dbConnection);
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("TableGrantReader.getTableGrants()", "Calling DatabaseMetaData.getTablePrivileges() using: " + tbl.getRawCatalog() + ", " + tbl.getRawSchema() + ", " + tbl.getRawTableName());
+      }
 			rs = dbConnection.getSqlConnection().getMetaData().getTablePrivileges(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
 			boolean useColumnNames = dbConnection.getDbSettings().useColumnNameForMetadata();
 			while (rs.next())
@@ -99,6 +105,8 @@ public class TableGrantReader
 		{
 			try { rs.close(); } catch (Throwable th) {}
 		}
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("TableGrantReader.getTableGrants()", "Calling DatabaseMetaData.getTablePrivileges() took: " + duration + "ms");
 		return result;
 	}
 

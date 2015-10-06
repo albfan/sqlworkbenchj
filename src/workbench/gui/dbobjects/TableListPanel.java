@@ -1739,7 +1739,7 @@ public class TableListPanel
 			// isExtendedTableType() checks for regular tables and "extended tables"
 			else if (meta.isExtendedTableType(type))
 			{
-				sql = builder.getTableSource(selectedTable, dropType, true, DbExplorerSettings.getGenerateTableGrants());
+				sql = builder.getTableSource(selectedTable, dropType, true, dbConnection.getDbSettings().getGenerateTableGrants());
 			}
 
 			if (sql != null && dbConnection.getDbSettings().ddlNeedsCommit())

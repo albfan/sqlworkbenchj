@@ -155,7 +155,7 @@ public class ReaderFactory
 		{
 			return new Db2SequenceReader(con, meta.getDbId());
 		}
-		if (meta.getDbId().equals("cubrid"))
+		if (meta.getDbId().equals(DbMetadata.DBID_CUBRID))
 		{
 			return new CubridSequenceReader(con);
 		}
@@ -278,7 +278,7 @@ public class ReaderFactory
   {
     if (connection == null) return null;
     if (connection.getMetadata() == null) return null;
-    
+
     if (connection.getMetadata().isPostgres())
     {
       return new PostgresUniqueConstraintReader();
