@@ -314,7 +314,7 @@ public class WbImportTest
 		result = importCmd.execute(
 			"wbimport -file='" + input.getAbsolutePath() + "' " +
 			"-type=text " +
-			"-mode=insert,update " +
+			"-mode=upsert " +
 			"-header=true " +
 			"-continueonerror=false " +
 			"-table=person");

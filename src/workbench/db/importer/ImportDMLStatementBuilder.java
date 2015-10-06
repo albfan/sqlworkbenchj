@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DmlExpressionBuilder;
@@ -30,7 +32,6 @@ import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerUtil;
-import workbench.log.LogMgr;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -603,7 +604,6 @@ public class ImportDMLStatementBuilder
   public static boolean supportsUpsert(WbConnection connection)
   {
     if (connection == null) return false;
-    if (connection.getDbSettings().useUpsert() == false) return false;
 
     if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "9.5")) return true;
     if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;
