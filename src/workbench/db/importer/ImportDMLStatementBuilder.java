@@ -250,6 +250,10 @@ public class ImportDMLStatementBuilder
     {
       return createSqlServerUpsert(columnConstants, false);
     }
+    if (dbConn.getMetadata().isOracle())
+    {
+      return createOracleMerge(columnConstants);
+    }
     return null;
   }
 
@@ -390,15 +394,22 @@ public class ImportDMLStatementBuilder
       text.append(" = vals.");
       text.append(colname);
     }
+    appendMergeMatchSection(text, insertOnly);
+    return text.toString();
+  }
+
+  private void appendMergeMatchSection(StringBuilder text, boolean insertOnly)
+  {
+    DbMetadata meta = dbConn.getMetadata();
+    int colIndex = 0;
 
     if (!insertOnly)
     {
       text.append("\nWHEN MATCHED THEN UPDATE\n  SET ");
-      colIndex = 0;
       for (int i=0; i < getColCount(); i++)
       {
         ColumnIdentifier col = this.targetColumns.get(i);
-        if (col.isPkColumn()) continue;
+        if (isKeyColumn(col)) continue;
 
         String colname = targetColumns.get(i).getDisplayName();
         colname = meta.quoteObjectname(colname);
@@ -418,9 +429,6 @@ public class ImportDMLStatementBuilder
 		colIndex = 0;
 		for (int i=0; i < getColCount(); i++)
 		{
-			ColumnIdentifier col = this.targetColumns.get(i);
-      if (col.isPkColumn()) continue;
-
       String colname = targetColumns.get(i).getDisplayName();
       colname = meta.quoteObjectname(colname);
 
@@ -439,9 +447,62 @@ public class ImportDMLStatementBuilder
     text.append(")\nVALUES\n  (");
     text.append(valueCols);
     text.append(")");
+  }
 
+  private String createOracleMerge(ConstantColumnValues columnConstants)
+  {
+		StringBuilder text = new StringBuilder(targetColumns.size() * 50);
+
+  	text.append("MERGE INTO ");
+		text.append(targetTable.getFullyQualifiedName(dbConn));
+		text.append(" tg\n USING (\n  SELECT ");
+
+		DbMetadata meta = dbConn.getMetadata();
+
+		int colIndex = 0;
+		for (int i=0; i < getColCount(); i++)
+		{
+			if (colIndex > 0) text.append(',');
+
+      if (columnConstants != null && columnConstants.isFunctionCall(i))
+      {
+        text.append(columnConstants.getFunctionLiteral(i));
+      }
+      else
+      {
+        text.append('?');
+      }
+      String colname = targetColumns.get(i).getDisplayName();
+      text.append(" AS ");
+      text.append(meta.quoteObjectname(colname));
+			colIndex ++;
+		}
+    text.append(" FROM DUAL\n) vals ON (");
+
+    colIndex = 0;
+    for (int i=0; i < keyColumns.size(); i++)
+    {
+      if (colIndex > 0) text.append(" AND ");
+      String colname = keyColumns.get(i).getDisplayName();
+      colname = meta.quoteObjectname(colname);
+      text.append("tg.");
+      text.append(colname);
+      text.append(" = vals.");
+      text.append(colname);
+    }
+    text.append(')');
+    appendMergeMatchSection(text, false);
 		return text.toString();
+  }
 
+  private boolean isKeyColumn(ColumnIdentifier col)
+  {
+    if (col.isPkColumn()) return true;
+    if (this.keyColumns != null)
+    {
+      return keyColumns.contains(col);
+    }
+    return false;
   }
 
   private String createMySQLUpsert(ConstantColumnValues columnConstants, String insertSqlStart, boolean useIgnore)
@@ -546,6 +607,7 @@ public class ImportDMLStatementBuilder
 
     if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "9.5")) return true;
     if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;
+    if (connection.getMetadata().isOracle()) return true;
     if (connection.getMetadata().isDB2LuW()) return true;
     if (connection.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(connection)) return true;
     if (connection.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
