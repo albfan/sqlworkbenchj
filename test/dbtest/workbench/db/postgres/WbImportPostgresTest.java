@@ -224,17 +224,17 @@ public class WbImportPostgresTest
 	public void testUpsert()
 		throws Exception
 	{
-		File input = new File(getTestUtil().getBaseDir(), "id_data.txt");
 
     WbConnection connection = PostgresTestUtil.getPostgresConnection();
     assertNotNull(connection);
-    boolean useSavepoint = true;
 
-    if (JdbcUtils.hasMinimumServerVersion(connection, "9.5"))
+    if (!JdbcUtils.hasMinimumServerVersion(connection, "9.5"))
     {
-      // with 9.5 then new "on duplicate" clause is used which has to work without savepoints
-      useSavepoint = false;
+      // can't test native upsert without 9.5
+      return;
     }
+
+		File input = new File(getTestUtil().getBaseDir(), "id_data.txt");
 
   	WbImport importCmd = new WbImport();
     importCmd.setConnection(connection);
@@ -281,9 +281,9 @@ public class WbImportPostgresTest
 		result = importCmd.execute(
 			"wbimport -file='" + input.getAbsolutePath() + "' " +
 			"-type=text " +
-			"-mode=insert,update " +
+			"-mode=upsert " +
 			"-header=true " +
-      "-useSavepoint=" + useSavepoint + " " +
+      "-useSavepoint=false " +
 			"-continueonerror=false " +
 			"-table=person");
 
