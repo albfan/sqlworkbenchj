@@ -105,7 +105,7 @@ public class DbObjectsTree
   {
     if (conn != null)
     {
-      loader.setConnection(conn, conn.getProfile().getName());
+      loader.setConnection(conn);
       setModel(loader.getModel());
       if (conn.getMetadata().getSynonymReader() != null)
       {

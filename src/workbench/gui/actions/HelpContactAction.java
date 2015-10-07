@@ -24,9 +24,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.JFrame;
-
-import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -41,7 +38,7 @@ public class HelpContactAction
 	extends WbAction
 {
 	private MainWindow mainWindow;
-	
+
 	public HelpContactAction(MainWindow parent)
 	{
 		super();

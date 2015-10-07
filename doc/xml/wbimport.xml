@@ -1615,7 +1615,7 @@
           <para>H2 Database, using <literal>MERGE INTO</literal>: <ulink url="http://www.h2database.com/html/grammar.html#merge"/></para>
         </listitem>
         <listitem>
-          <para>Oracle, Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and Z/OS) and using a <literal>MERGE</literal> statement</para>
+          <para>Oracle, Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and z/OS) using a <literal>MERGE</literal> statement</para>
         </listitem>
         <listitem>
           <para>SAP HANA using a <literal>UPSERT</literal> statement</para>
@@ -1646,7 +1646,7 @@
         </listitem>
         <listitem>
           <para>
-            Oracle, Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and Z/OS) using a <literal>MERGE</literal> statement
+            Oracle, Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and z/OS) using a <literal>MERGE</literal> statement
             without a <literal>WHEN NOT MATCHED</literal> clause.
           </para>
         </listitem>

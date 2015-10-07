@@ -22,7 +22,14 @@
  */
 package workbench.gui.actions;
 import java.awt.event.ActionEvent;
+
 import workbench.WbManager;
+import workbench.db.ConnectionMgr;
+import workbench.db.DbDriver;
+import workbench.db.WbConnection;
+import workbench.gui.MainWindow;
+import workbench.gui.profiles.DriverEditorDialog;
+import workbench.interfaces.MainPanel;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -40,7 +47,25 @@ public class ManageDriversAction extends WbAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		WbManager.getInstance().showDialog("workbench.gui.profiles.DriverEditorDialog");
-	}
+    WbConnection currentConnection = null;
+    DbDriver currentDrv = null;
+
+    MainWindow mainWin = (MainWindow)WbManager.getInstance().getCurrentWindow();
+    if (mainWin != null)
+    {
+      MainPanel panel = mainWin.getCurrentPanel();
+      if (panel != null)
+      {
+        currentConnection = panel.getConnection();
+      }
+      if (currentConnection != null)
+      {
+        String drvName = currentConnection.getProfile().getDriverName();
+        currentDrv = ConnectionMgr.getInstance().findDriverByName(currentConnection.getProfile().getDriverclass(), drvName);
+      }
+    }
+
+    DriverEditorDialog.showDriverDialog(mainWin, currentDrv);
+  }
 
 }

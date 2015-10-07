@@ -22,15 +22,20 @@ package workbench.gui.settings;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 
+import workbench.WbManager;
+import workbench.db.WbConnection;
+import workbench.gui.MainWindow;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.components.WbFilePicker;
+import workbench.interfaces.MainPanel;
 
 import workbench.sql.formatter.ExternalFormatter;
 
@@ -81,6 +86,37 @@ public class ExternalFormatterOptions
   public void restoreSettings()
   {
     fillDropDown();
+
+    MainWindow mainWin = (MainWindow)WbManager.getInstance().getCurrentWindow();
+    if (mainWin == null) return;
+
+		WbConnection currentConnection = null;
+
+    MainPanel panel = mainWin.getCurrentPanel();
+    if (panel != null)
+    {
+      currentConnection = panel.getConnection();
+    }
+
+    if (currentConnection != null)
+    {
+      ComboBoxModel model = dbList.getModel();
+      int index = -1;
+      int count = model.getSize();
+      for (int i=0; i < count; i++)
+      {
+        FormatterEntry entry = (FormatterEntry)model.getElementAt(i);
+        if (entry.dbid.equals(currentConnection.getDbId()))
+        {
+          index = i;
+          break;
+        }
+      }
+      if (index != -1)
+      {
+        dbList.setSelectedIndex(index);
+      }
+    }
   }
 
   @Override

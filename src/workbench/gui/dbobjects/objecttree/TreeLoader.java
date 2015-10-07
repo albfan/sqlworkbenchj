@@ -140,10 +140,10 @@ public class TreeLoader
     model = new DbObjectTreeModel(root);
   }
 
-  public void setConnection(WbConnection conn, String name)
+  public void setConnection(WbConnection conn)
   {
-    setRootName(name);
     connection = conn;
+    clear();
     if (connection != null)
     {
       availableTypes = connection.getMetadata().getObjectTypes();
@@ -153,13 +153,6 @@ public class TreeLoader
       availableTypes.add("TRIGGER");
     }
     procLoader = new ProcedureTreeLoader();
-  }
-
-  private void setRootName(String name)
-  {
-    removeAllChildren(root);
-    root = new RootNode(name);
-    model = new DbObjectTreeModel(root);
   }
 
   private void removeAllChildren(ObjectTreeNode node)
@@ -183,10 +176,34 @@ public class TreeLoader
     }
   }
 
+  private String getRootName()
+  {
+    if (this.connection == null || connection.isClosed() || connection.getDbSettings() == null)
+    {
+      return ResourceMgr.getString("TxtDbExplorerTables");
+    }
+
+    if (connection.getDbSettings().supportsCatalogs())
+    {
+      if (connection.getMetadata().getCatalogTerm().toLowerCase().equals("database"))
+      {
+        return ResourceMgr.getString("LblDatabases");
+      }
+      return ResourceMgr.getString("LblCatalogs");
+    }
+
+    if (connection.getDbSettings().supportsSchemas())
+    {
+      return ResourceMgr.getString("LblSchemas");
+    }
+
+    return ResourceMgr.getString("TxtDbExplorerTables");
+  }
+
   public void clear()
   {
     removeAllChildren(root);
-    root.setNameAndType(ResourceMgr.getString("TxtDbExplorerTables"), TYPE_ROOT);
+    root.setNameAndType(getRootName(), TYPE_ROOT);
     model.nodeStructureChanged(root);
   }
 
