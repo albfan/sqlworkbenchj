@@ -270,18 +270,30 @@ public class ProfileSelectionPanel
   @Override
   public void resetFilter()
   {
+    ConnectionProfile selectedProfile = null;
+    if (GuiSettings.restoreProfileSelectionBeforeFilter())
+    {
+      selectedProfile = initialProfile;
+    }
+    else
+    {
+      selectedProfile = getSelectedProfile();
+    }
+
     filterValue.setText("");
 
     model.resetFilter();
 
+    ProfileTree tree = (ProfileTree)profileTree;
+
     if (orgExpandedGroups != null)
     {
-      ProfileTree tree = (ProfileTree)profileTree;
       tree.expandGroups(orgExpandedGroups);
-      if (initialProfile != null)
-      {
-        tree.selectProfile(initialProfile.getKey());
-      }
+    }
+    
+    if (selectedProfile != null)
+    {
+      tree.selectProfile(selectedProfile.getKey());
     }
   }
 

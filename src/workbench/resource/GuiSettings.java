@@ -1114,6 +1114,16 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.profiles.quickfilter.initialfocus", flag);
 	}
 
+  public static boolean restoreProfileSelectionBeforeFilter()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.gui.profiles.filter.reset.restore.oldprofile", true);
+  }
+
+  public static void setRestoreProfileSelectionBeforeFilter(boolean flag)
+  {
+    Settings.getInstance().setProperty("workbench.gui.profiles.filter.reset.restore.oldprofile", flag);
+  }
+
 	public static boolean enableProfileQuickFilter()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.profiles.quickfilter", true);
