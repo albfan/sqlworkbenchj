@@ -1,4 +1,8 @@
-DOMAIN
-GENERATOR
-SEQUENCE
-COMPUTED
+domain
+generator
+sequence
+computed
+recreate
+external
+file
+recursive

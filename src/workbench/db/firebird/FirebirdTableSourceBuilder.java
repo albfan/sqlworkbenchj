@@ -60,7 +60,7 @@ public class FirebirdTableSourceBuilder
 		if (tbl.getSourceOptions().isInitialized()) return;
 
 		String sql =
-			"select trim(t.rdb$type_name) \n" +
+			"select trim(t.rdb$type_name), rdb$external_file \n" +
 			"from rdb$relations r \n" +
 			"  join rdb$types t on r.rdb$relation_type = t.rdb$type and t.rdb$field_name = 'RDB$RELATION_TYPE' \n" +
 			"where coalesce (r.rdb$system_flag, 0) = 0 \n" +
@@ -90,6 +90,11 @@ public class FirebirdTableSourceBuilder
 					options.append("ON COMMIT DELETE ROWS");
 					tbl.getSourceOptions().addConfigSetting("on_commit", "delete");
 				}
+        if ("EXTERNAL".equals(type))
+        {
+          String fileName = rs.getString(2);
+          tbl.getSourceOptions().addConfigSetting("external_file", fileName);
+        }
 			}
 			tbl.getSourceOptions().setTableOption(options.toString());
 			tbl.getSourceOptions().setInitialized();
@@ -102,6 +107,19 @@ public class FirebirdTableSourceBuilder
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-
 	}
+
+  @Override
+  protected String getCreateDDL(String objectType, TableIdentifier tbl)
+  {
+    String ddl = super.getCreateDDL(objectType, tbl);
+    String file = tbl.getSourceOptions().getConfigSettings().get("external_file");
+    if (StringUtil.isNonBlank(file))
+    {
+      ddl += "\nEXTERNAL FILE '" + file + "'";
+    }
+    return ddl;
+  }
+
+
 }

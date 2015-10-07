@@ -57,6 +57,8 @@ public class TableSourceBuilder
 	public static final String COL_INDENT = "   ";
 	public static final String SCHEMA_PLACEHOLDER = "%schema%";
 	public static final String CATALOG_PLACEHOLDER = "%catalog%";
+	public static final String NAME_PLACEHOLDER = "%name%";
+
 	protected WbConnection dbConnection;
 	private ConstraintNameTester nameTester;
 	protected boolean includePartitions = true;
@@ -482,15 +484,15 @@ public class TableSourceBuilder
     return getDDL(objectType, "replace");
   }
 
-  private String getCreateDDL(String objectType)
+  protected String getCreateDDL(String objectType, TableIdentifier tbl)
   {
     String create = getDDL(objectType, "create");
     if (create != null) return create;
 
-    return "CREATE " + objectType.toUpperCase() + " %name%";
+    return "CREATE " + objectType.toUpperCase() + " " + NAME_PLACEHOLDER;
   }
 
-  private String getDDL(String objectType, String operation)
+  protected String getDDL(String objectType, String operation)
   {
     String prefix = "workbench.db.";
     String suffix = "." + DbSettings.getKeyValue(objectType) + ".sql." + dbConnection.getDbId();
@@ -504,12 +506,12 @@ public class TableSourceBuilder
 	 * @param typeOption   an option for the CREATE statement. This is only
 	 * @return an approriate CREATE xxxx statement
 	 */
-	public StringBuilder generateCreateObject(DropType dropType, DbObject toCreate, String typeOption)
+	public StringBuilder generateCreateObject(DropType dropType, TableIdentifier toCreate, String typeOption)
 	{
 		return generateCreateObject(dropType, toCreate, typeOption, false);
 	}
 
-	public StringBuilder generateCreateObject(DropType dropType, DbObject toCreate, String typeOption, boolean useFQN)
+	public StringBuilder generateCreateObject(DropType dropType, TableIdentifier toCreate, String typeOption, boolean useFQN)
 	{
 		StringBuilder result = new StringBuilder();
     boolean addDrop = dropType != DropType.none;
@@ -523,15 +525,18 @@ public class TableSourceBuilder
 
     if (ddl == null)
     {
-      ddl = getCreateDDL(objectType);
+      ddl = getCreateDDL(objectType, toCreate);
     }
     else
     {
+      String cascadeVerb = dbConnection.getDbSettings().getCascadeConstraintsVerb(objectType);
+      boolean cascadeSupported = StringUtil.isNonEmpty(cascadeVerb);
+      
       // if a cascaded drop was requested add it, even when a REPLACE is available
       // because a cascaded drop might do more than a create or replace
       // when "only" a regular drop was requested this should be the same as a CREATE OR REPLACE
       // so there is no need to add the drop statement
-      addDrop = (dropType == DropType.cascaded);
+      addDrop = (dropType == DropType.cascaded) && cascadeSupported;
     }
 
 		if (addDrop)

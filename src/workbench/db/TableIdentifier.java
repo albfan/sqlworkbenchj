@@ -188,19 +188,6 @@ public class TableIdentifier
 	}
 
 	/**
-	 * Return DBMS specific configuration options for this table.
-	 */
-	public String getAdditionalSql()
-	{
-		return sourceOptions.getAdditionalSql();
-	}
-
-	public void setAdditionalSql(String options)
-	{
-		this.sourceOptions.setAdditionalSql(options);
-	}
-
-	/**
 	 * Define the source options to be used.
 	 *
 	 * @param options  the new options. If null, the call is ignored
