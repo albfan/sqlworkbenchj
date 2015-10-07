@@ -1636,7 +1636,10 @@
 
     <para>
       The <literal>-mode=insertIgnore</literal> will use the built in feature of the DBMS to (silently) ignore inserts that would
-      result in a violation of a unique key constraint but not update existing rows.
+      result in a violation of a unique key constraint but not update existing rows. Using <literal>-mode=insertIgnore</literal> has
+      the same effect as using <literal>-mode=insert -continueOnError=true</literal> but will perform better (especially when
+      <emphasis>many</emphasis> collisions are expected) because this can be combined with batching and it does not require the
+      use of savepoints (e.g. for Postgres)
     </para>
     <para>
       This mode is supported for the following DBMS:
