@@ -1648,8 +1648,12 @@
           <para>PostgreSQL 9.5, using <literal>INSERT ... ON CONFLICT</literal>: <ulink url="http://www.postgresql.org/docs/9.5/static/sql-insert.html"/></para>
         </listitem>
         <listitem>
+          <para>Oracle, using the <literal>IGNORE_ROW_ON_DUPKEY_INDEX</literal> hint: <ulink url="https://docs.oracle.com/cd/E11882_01/server.112/e41084/sql_elements006.htm#CHDEGDDG"/>
+          </para>
+        </listitem>
+        <listitem>
           <para>
-            Oracle, Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and z/OS) using a <literal>MERGE</literal> statement
+            Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and z/OS) using a <literal>MERGE</literal> statement
             without a <literal>WHEN NOT MATCHED</literal> clause.
           </para>
         </listitem>
