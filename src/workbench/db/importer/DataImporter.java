@@ -634,7 +634,7 @@ public class DataImporter
 	/**
 	 * Define the mode by supplying keywords.
    *
-	 * A null value means "keep the current (default)" and is a valid mode
+	 * A null value or an empty string means "keep the current (default)" and is a valid mode.
    *
 	 * @return true if the passed string is valid, false otherwise
    *
@@ -642,7 +642,7 @@ public class DataImporter
 	 */
 	public boolean setMode(String mode)
 	{
-		if (mode == null) return true;
+    if (StringUtil.isEmptyString(mode)) return true;
 
     ImportMode modeValue = getModeValue(mode);
 		if (modeValue == null) return false;

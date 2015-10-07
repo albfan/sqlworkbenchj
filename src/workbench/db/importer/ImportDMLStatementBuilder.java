@@ -53,6 +53,8 @@ public class ImportDMLStatementBuilder
   private final TableIdentifier targetTable;
 	private final List<ColumnIdentifier> targetColumns;
   private List<ColumnIdentifier> keyColumns;
+  private final Set<String> upsertRequiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_HANA, DbMetadata.DBID_H2, DbMetadata.DBID_SQL_ANYWHERE, DbMetadata.DBID_SQLITE);
+  private final Set<String> ignoreRequiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_SQL_ANYWHERE, DbMetadata.DBID_SQLITE);
 
   ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustColumnNameCase)
   {
@@ -192,21 +194,15 @@ public class ImportDMLStatementBuilder
     {
       return createSqlServerUpsert(columnConstants, true);
     }
-    return null;
-  }
-
-  public String createOracleInsertIgnore(ConstantColumnValues columnConstants)
-  {
-    String start = "INSERT /*+ IGNORE_ROW_ON_DUPKEY_INDEX (";
-    start += targetTable.getRawTableName() + " (";
-    for (int i=0; i < keyColumns.size(); i++)
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE))
     {
-      if (i > 0) start += ",";
-      String colname = keyColumns.get(i).getDisplayName();
-      start += colname;
+      return createInsertStatement(columnConstants, "INSERT OR IGNORE ");
     }
-    start += ")) */ INTO ";
-    return createInsertStatement(columnConstants, start);
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE))
+    {
+      return createSQLAnywhereStatement(columnConstants, true);
+    }
+    return null;
   }
 
   public String createUpsertStatement(ConstantColumnValues columnConstants, String insertSqlStart)
@@ -255,7 +251,43 @@ public class ImportDMLStatementBuilder
     {
       return createOracleMerge(columnConstants);
     }
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE))
+    {
+      return createInsertStatement(columnConstants, "INSERT OR REPLACE ");
+    }
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE))
+    {
+      return createSQLAnywhereStatement(columnConstants, false);
+    }
     return null;
+  }
+
+  public String createSQLAnywhereStatement(ConstantColumnValues columnConstants, boolean useIgnore)
+  {
+    String insert = createInsertStatement(columnConstants, null);
+    if (useIgnore)
+    {
+      insert = insert.replace(") VALUES (", ") ON EXISTING SKIP VALUES (");
+    }
+    else
+    {
+      insert = insert.replace(") VALUES (", ") ON EXISTING UPDATE VALUES (");
+    }
+    return insert;
+  }
+
+  public String createOracleInsertIgnore(ConstantColumnValues columnConstants)
+  {
+    String start = "INSERT /*+ IGNORE_ROW_ON_DUPKEY_INDEX (";
+    start += targetTable.getRawTableName() + " (";
+    for (int i=0; i < keyColumns.size(); i++)
+    {
+      if (i > 0) start += ",";
+      String colname = keyColumns.get(i).getDisplayName();
+      start += colname;
+    }
+    start += ")) */ INTO ";
+    return createInsertStatement(columnConstants, start);
   }
 
   private String createHanaUpsert(ConstantColumnValues columnConstants)
@@ -536,7 +568,6 @@ public class ImportDMLStatementBuilder
   public static boolean supportsInsertIgnore(WbConnection dbConn)
   {
     if (dbConn == null) return false;
-    if (dbConn.getDbSettings().useUpsert() == false) return false;
 
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
     if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
@@ -546,6 +577,8 @@ public class ImportDMLStatementBuilder
     if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
     if (dbConn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(dbConn, "2.0")) return true;
     if (dbConn.getMetadata().isMySql()) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
 
     return false;
   }
@@ -555,9 +588,8 @@ public class ImportDMLStatementBuilder
     switch (mode)
     {
       case insertIgnore:
-        if (dbConn.getMetadata().isMySql() || dbConn.getDbId().equals(DbMetadata.DBID_CUBRID))
+        if (ignoreRequiresPK.contains(dbConn.getDbId()))
         {
-          // MySQL and Cubrid only support an upsert if there is a real PK defined on the table
           boolean hasPK = hasRealPK();
           if (!hasPK)
           {
@@ -586,11 +618,8 @@ public class ImportDMLStatementBuilder
 
   public boolean supportsUpsert()
   {
-    Set<String> requiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_HANA, DbMetadata.DBID_H2);
-    if (requiresPK.contains(dbConn.getDbId()))
+    if (upsertRequiresPK.contains(dbConn.getDbId()))
     {
-      // MySQL and H2 only support an upsert if there is a PK defined on the table
-      // the key columns to be used cannot be specified dynamically
       boolean hasPK = hasRealPK();
       if (!hasPK)
       {
@@ -616,6 +645,8 @@ public class ImportDMLStatementBuilder
     if (connection.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(connection, "2.0")) return true;
     if (connection.getMetadata().isH2()) return true;
     if (connection.getMetadata().isMySql()) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
 
     return false;
   }

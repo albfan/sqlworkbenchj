@@ -1618,6 +1618,12 @@
           <para>Oracle, Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and z/OS) using a <literal>MERGE</literal> statement</para>
         </listitem>
         <listitem>
+          <para>SQL Anyhwere using <literal>INSERT ... ON EXISTING UPDATE</literal> (this requires a primary key)</para>
+        </listitem>
+        <listitem>
+          <para>SQLite using <literal>INSERT OR REPLACE ...</literal> (this requires a primary key)</para>
+        </listitem>
+        <listitem>
           <para>SAP HANA using a <literal>UPSERT</literal> statement</para>
         </listitem>
         <listitem>
@@ -1656,6 +1662,12 @@
             Microsoft SQL Server, HSQLDB 2.x and DB2 (LUW and z/OS) using a <literal>MERGE</literal> statement
             without a <literal>WHEN NOT MATCHED</literal> clause.
           </para>
+        </listitem>
+        <listitem>
+          <para>SQLite using <literal>INSERT OR IGNORE ...</literal> (this requires a primary key)</para>
+        </listitem>
+        <listitem>
+          <para>SQL Anyhwere using <literal>INSERT ... ON EXISTING SKIP</literal> (this requires a primary key)</para>
         </listitem>
         <listitem>
           <para>

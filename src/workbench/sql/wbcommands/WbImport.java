@@ -457,6 +457,8 @@ public class WbImport
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		ImportFileParser parser = null;
 
+		String importMode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
+
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			if (table == null && dir == null)
@@ -568,7 +570,7 @@ public class WbImport
 
 			if (cmdLine.isArgPresent(ARG_PG_COPY) && currentConnection.getMetadata().isPostgres())
 			{
-				if (!imp.isModeInsert())
+				if ("insert".equalsIgnoreCase(importMode) == false)
 				{
 					result.addErrorMessage("COPY only possible with -mode=insert");
 					return result;
@@ -780,14 +782,10 @@ public class WbImport
 			}
 		}
 
-		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
-		if (mode != null)
-		{
-			if (!imp.setMode(mode))
-			{
-				result.addMessage(ResourceMgr.getFormattedString("ErrInvalidModeIgnored", mode));
-			}
-		}
+    if (!imp.setMode(importMode))
+    {
+      result.addMessage(ResourceMgr.getFormattedString("ErrInvalidModeIgnored", importMode));
+    }
 
 		String where = cmdLine.getValue(ARG_UPDATE_WHERE);
 		imp.setWhereClauseForUpdate(where);

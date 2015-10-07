@@ -111,6 +111,8 @@ public class DbMetadata
 	public static final String DBID_DB2_LUW = "db2";  // Linux, Unix, Windows
 	public static final String DBID_DB2_ISERIES = "db2i";  // AS/400 iSeries
 	public static final String DBID_DB2_ZOS = "db2h";  // z/OS
+	public static final String DBID_SQLITE = "sqlite";
+	public static final String DBID_SQL_ANYWHERE = "sql_anywhere";
 	public static final String DBID_TERADATA = "teradata";
 	public static final String DBID_H2 = "h2";
 	public static final String DBID_OPENEDGE = "openedge";
