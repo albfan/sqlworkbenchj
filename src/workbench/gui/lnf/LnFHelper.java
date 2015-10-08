@@ -218,6 +218,8 @@ public class LnFHelper
 			{
 				// JGoodies Looks settings
 				UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
+				UIManager.put("jgoodies.embeddedTabs", Boolean.TRUE);
+				UIManager.put("jgoodies.tabIconsEnabled", Boolean.FALSE);
 				UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 
 				// I hate the bold menu font in the Metal LnF

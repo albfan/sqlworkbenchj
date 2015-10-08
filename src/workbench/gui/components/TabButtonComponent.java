@@ -57,7 +57,9 @@ public class TabButtonComponent
 	private final WbTabbedPane pane;
 	private final JLabel label;
 	private final WbButton closeButton;
-	private static final Insets INSETS = new Insets(0, 0, 1, 4);
+	private static final Insets BUTTON_INSETS = new Insets(0, 0, 1, 4);
+	private static final Insets JGOODIES_INSETS = new Insets(2, 0, 0, 0);
+  private final Insets insets;
 
 	public TabButtonComponent(String title, final WbTabbedPane tabPane, boolean showButton)
 	{
@@ -69,20 +71,43 @@ public class TabButtonComponent
 		boolean jGoodies = LnFHelper.isJGoodies();
 		if (jGoodies)
 		{
-			String tabStyle = System.getProperty("Plastic.tabStyle","Default");
-			if (!"Metal".equalsIgnoreCase(tabStyle))
-			{
-				opaque = true;
-			}
+      insets = JGOODIES_INSETS;
+      opaque = true;
+//			String tabStyle = System.getProperty("Plastic.tabStyle","default");
+//			if (!"Metal".equalsIgnoreCase(tabStyle))
+//			{
+//				opaque = true;
+//			}
 		}
+    else
+    {
+      insets = WbSwingUtilities.EMPTY_INSETS;
+    }
 
 		label = new JLabel(title);
 
+    //label.setOpaque(false);
+
+//    Color c = UIManager.getColor("TabbedPane.selected");
+//    if (c == null)
+//    {
+//      c = UIManager.getColor("TabbedPane.background");
+//    }
+//    if (c == null)
+//    {
+//      c = getBackground();
+//    }
+
+//    System.out.println("default color: " + c + ", background: " + getBackground());
 		int imgSize = IconMgr.getInstance().getSizeForComponentFont(label);
 		ImageIcon img = IconMgr.getInstance().getPngIcon("close-panel", imgSize);
-		closeButton = new WbButton(img);
+    closeButton = new WbButton(img);
 		closeButton.setBackground(getBackground());
-		Dimension d = new Dimension(img.getIconWidth() + 4, img.getIconHeight() + 4);
+//    closeButton.setOpaque(false);
+
+//    setBackground(c);
+
+		Dimension d = new Dimension((int)(img.getIconWidth() * 1.5), (int)(img.getIconHeight() * 1.5));
 		closeButton.setPreferredSize(d);
 		closeButton.setMinimumSize(d);
 		closeButton.enableBasicRollover();
@@ -95,6 +120,33 @@ public class TabButtonComponent
 
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT);
 	}
+
+//  @Override
+//  public Color getBackground()
+//  {
+//    if (pane == null)
+//    {
+//      return UIManager.getColor("TabbedPane.background");
+//    }
+//
+//    if (pane.getTabComponentAt(pane.getSelectedIndex()) == this)
+//    {
+//      return UIManager.getColor("TabbedPane.selected");
+//    }
+//    return UIManager.getColor("TabbedPane.background");
+//  }
+//
+  @Override
+  public Insets getInsets(Insets insets)
+  {
+    return this.insets;
+  }
+
+  @Override
+  public Insets getInsets()
+  {
+    return this.insets;
+  }
 
 	@Override
 	public void removeNotify()
@@ -182,11 +234,11 @@ public class TabButtonComponent
 		c.gridheight = 1;
 		c.gridy = 0;
 		c.gridx = 0;
+    c.weightx = 1.0;
+		c.fill = GridBagConstraints.BOTH;
 
 		c.anchor = GridBagConstraints.LINE_START;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1.0;
-		c.insets = INSETS;
+		c.insets = BUTTON_INSETS;
 		if (buttonOnRight)
 		{
 			add(label, c);
@@ -198,8 +250,6 @@ public class TabButtonComponent
 
 		c.gridx ++;
 		c.anchor = GridBagConstraints.LINE_END;
-		c.fill = GridBagConstraints.NONE;
-		c.weightx = 0;
 		c.insets = WbSwingUtilities.EMPTY_INSETS;
 		if (buttonOnRight)
 		{
@@ -219,5 +269,3 @@ public class TabButtonComponent
 	}
 
 }
-
-

@@ -276,8 +276,9 @@ public class WbTabbedPane
 	{
 		// For use with the jGoodies Plastic look & feel
 		putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
-		putClientProperty("jgoodies.embeddedTabs", Boolean.valueOf(System.getProperty("jgoodies.embeddedTabs", "false")));
-		alwaysUseCustomComponent = !LnFHelper.isJGoodies() && !MacOSHelper.isMacOS();
+		putClientProperty("jgoodies.embeddedTabs", Boolean.FALSE);
+		putClientProperty("jgoodies.tabIconsEnabled", Boolean.FALSE);
+		alwaysUseCustomComponent = false;//!LnFHelper.isJGoodies() && !MacOSHelper.isMacOS();
 		try
 		{
 			TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
