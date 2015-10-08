@@ -59,7 +59,7 @@ public class WbLabelField
   {
     setUI(new BasicTextFieldUI());
     setEditable(false);
-    setOpaque(true);
+    setOpaque(false);
     mouseListener = new TextComponentMouseListener();
     addMouseListener(mouseListener);
     setBorder(new EmptyBorder(2, 5, 2, 2));
@@ -110,4 +110,9 @@ public class WbLabelField
     }
   }
 
+  @Override
+  public boolean isFocusable()
+  {
+    return false;
+  }
 }

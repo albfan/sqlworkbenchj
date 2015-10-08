@@ -248,6 +248,8 @@ public class LnFDefinitionPanel
     infoText.setText("Please click on the \"Make current\" button to switch the current Look and Feel");
     infoText.setWrapStyleWord(true);
     infoText.setDisabledTextColor(infoText.getForeground());
+    infoText.setEnabled(false);
+    infoText.setFocusable(false);
     infoText.setOpaque(false);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;

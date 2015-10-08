@@ -365,7 +365,6 @@ public class MainWindow
 
       WbSplitPane split = new WbSplitPane();
       split.setOneTouchExpandable(true);
-      split.setContinuousLayout(true);
 
       TreePosition position = DbTreeSettings.getDbTreePosition();
       if (position == TreePosition.left)
@@ -382,7 +381,7 @@ public class MainWindow
       treePanel.restoreSettings(getToolProperties(DB_TREE_PROPS));
 
       getContentPane().add(split, BorderLayout.CENTER);
-      
+
       invalidate();
       sqlTab.invalidate();
 

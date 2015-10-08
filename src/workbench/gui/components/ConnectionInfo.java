@@ -22,10 +22,8 @@
  */
 package workbench.gui.components;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -66,7 +64,7 @@ public class ConnectionInfo
 
 	public ConnectionInfo(Color aBackground)
 	{
-		super(new GridBagLayout());
+		super(new BorderLayout());
 		infoText = new WbLabelField();
 		infoText.setOpaque(false);
 
@@ -86,13 +84,7 @@ public class ConnectionInfo
 		showInfoAction.setEnabled(false);
 		infoText.addPopupAction(showInfoAction);
 		infoText.setText(ResourceMgr.getString("TxtNotConnected"));
-		GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 1.0;
-		c.gridx = 1;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
-		add(infoText, c);
+		add(infoText, BorderLayout.CENTER);
 		updater = new Runnable()
 		{
 			@Override
@@ -258,16 +250,9 @@ public class ConnectionInfo
 			iconLabel.addMouseListener(this);
 			iconLabel.setBackground(getBackground());
 		}
-		GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 0;
-		c.gridx = 0;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
-    c.insets = new Insets(0, 4, 0, 0);
 		ImageIcon png = IconMgr.getInstance().getPngIcon(name, IconMgr.getInstance().getToolbarIconSize());
 		iconLabel.setIcon(png);
-		add(iconLabel, c);
+		add(iconLabel, BorderLayout.LINE_START);
 	}
 
 	@Override
