@@ -371,11 +371,6 @@ public class DbMetadata
       definitionReader = new HanaTableDefinitionReader(aConnection);
     }
 
-		if (schemaInfoReader == null)
-		{
-			this.schemaInfoReader = new GenericSchemaInfoReader(this.dbConnection, this.getDbId());
-		}
-
 		if (this.dataTypeResolver == null)
 		{
 			this.dataTypeResolver = new DefaultDataTypeResolver();
@@ -508,6 +503,11 @@ public class DbMetadata
 
 		supportsGetSchema = dbSettings.supportsGetSchemaCall();
     initIdentifierPattern();
+
+		if (schemaInfoReader == null)
+		{
+			this.schemaInfoReader = new GenericSchemaInfoReader(this.dbConnection, dbSettings);
+		}
 
 		LogMgr.logInfo("DbMetadata.<init>", "Using catalog separator: " + catalogSeparator);
 	}

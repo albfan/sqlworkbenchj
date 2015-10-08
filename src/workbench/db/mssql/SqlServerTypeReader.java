@@ -55,7 +55,7 @@ import workbench.util.StringUtil;
 public class SqlServerTypeReader
 	implements ObjectListExtender
 {
-	final String baseSql =
+	private final String baseSql =
 		"select db_name() as type_catalog, \n" +
 		"       s.name as type_schema, \n" +
 		"       t.name as type_name,  \n" +
@@ -69,6 +69,20 @@ public class SqlServerTypeReader
 		"  join sys.schemas s with (nolock) on t.schema_id = s.schema_id \n" +
 		"where t.is_user_defined = 1";
 
+	private final String sqlServer2000Query =
+		"select db_name() as type_catalog, \n" +
+		"       o.name as type_schema, \n" +
+		"       t.name as type_name,  \n" +
+		"       type_name(t.xtype) as data_type, \n" +
+		"       t.allownulls as is_nullable,  \n" +
+		"       t.length as max_length,  \n" +
+		"       t.scale,  \n" +
+		"       t.prec as [precision],  \n" +
+		"       t.collation as collation_name \n" +
+		"from systypes t with (nolock) \n" +
+    "  join sysusers o on t.uid = o.uid \n" +
+		"where xusertype > 256";
+
 	// the data types for which the max_length information are valid
 	private Set<String> maxLengthTypes = CollectionUtil.treeSet("varchar", "nvarchar", "char", "text", "ntext", "varbinary");
 
@@ -77,7 +91,7 @@ public class SqlServerTypeReader
 
 	public static boolean versionSupportsTypes(WbConnection con)
 	{
-		return SqlServerUtil.isSqlServer2005(con);
+		return SqlServerUtil.isSqlServer2000(con);
 	}
 
 	@Override
@@ -224,15 +238,27 @@ public class SqlServerTypeReader
 	private String getSql(WbConnection con, String owner, String typeName)
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 20);
-		sql.append(baseSql);
-		if (StringUtil.isNonBlank(typeName))
-		{
-			SqlUtil.appendAndCondition(sql, "t.name", typeName, con);
-		}
-		if (StringUtil.isNonBlank(owner))
-		{
-			SqlUtil.appendAndCondition(sql, "s.name", owner, con);
-		}
+    if (SqlServerUtil.isSqlServer2000(con))
+    {
+      sql.append(sqlServer2000Query);
+      if (StringUtil.isNonBlank(typeName))
+      {
+        SqlUtil.appendAndCondition(sql, "t.name", typeName, con);
+      }
+    }
+    else
+    {
+      sql.append(baseSql);
+      if (StringUtil.isNonBlank(typeName))
+      {
+        SqlUtil.appendAndCondition(sql, "t.name", typeName, con);
+      }
+      if (StringUtil.isNonBlank(owner))
+      {
+        SqlUtil.appendAndCondition(sql, "s.name", owner, con);
+      }
+    }
+
 		sql.append("\n ORDER BY 1, 2");
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

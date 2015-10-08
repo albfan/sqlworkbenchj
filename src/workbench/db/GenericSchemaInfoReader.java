@@ -51,25 +51,17 @@ public class GenericSchemaInfoReader
 	private PreparedStatement query;
 	private String cachedSchema;
 
-	private final String reuseProp;
-	private final String queryProp;
-	private final String cacheProp;
-	private final String timeoutProp;
+	private final String reuseProp = "currentschema.reuse.stmt";
+	private final String queryProp = "currentschema.query";
+	private final String cacheProp = "currentschema.cacheable";
+	private final String timeoutProp = "currentschema.timeout";
 
-	public GenericSchemaInfoReader(WbConnection conn, String dbid)
+	public GenericSchemaInfoReader(WbConnection conn, DbSettings settings)
 	{
 		connection = conn;
-		useSavepoint = Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".currentschema.query.usesavepoint", false);
-
-		queryProp = "workbench.db." + dbid + ".currentschema.query";
-		cacheProp = "workbench.db." + dbid + ".currentschema.cacheable";
-		reuseProp = "workbench.db." + dbid + ".currentschema.reuse.stmt";
-		timeoutProp = "workbench.db." + dbid + ".currentschema.timeout";
-
-		schemaQuery = Settings.getInstance().getProperty(queryProp, null);
-		reuseStmt = Settings.getInstance().getBoolProperty(reuseProp, false);
-		Settings.getInstance().addPropertyChangeListener(this, queryProp, reuseProp);
-
+		useSavepoint = settings.getBoolProperty("currentschema.query.usesavepoint", false);
+		schemaQuery = settings.getProperty(queryProp, null);
+		reuseStmt = settings.getBoolProperty(reuseProp, false);
 		connection.addChangeListener(this);
 		logSettings();
 	}
@@ -110,34 +102,12 @@ public class GenericSchemaInfoReader
 			{
 				this.cachedSchema = null;
 			}
-			return;
 		}
-
-		if (evt.getPropertyName().equals(queryProp))
-		{
-			SqlUtil.closeStatement(query);
-			this.query = null;
-			this.schemaQuery = Settings.getInstance().getProperty(queryProp, null);
-		}
-		if (evt.getPropertyName().equals(cacheProp))
-		{
-			cachedSchema = null;
-		}
-		if (evt.getPropertyName().equals(reuseProp))
-		{
-			reuseStmt = Settings.getInstance().getBoolProperty(reuseProp, false);
-			if (!reuseStmt)
-			{
-				SqlUtil.closeStatement(query);
-				query = null;
-			}
-		}
-		logSettings();
 	}
 
 	private int getQueryTimeout()
 	{
-		int timeout = Settings.getInstance().getIntProperty(timeoutProp, 0);
+		int timeout = connection.getDbSettings().getIntProperty(timeoutProp, 0);
 		if (timeout < 0) return 0;
 		return timeout;
 	}
