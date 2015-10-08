@@ -453,6 +453,7 @@ public class TableSourceBuilder
 		String type = toDrop.getObjectType();
 		type = type.replace("SYSTEM ", "");
 		String objectName = toDrop.getObjectNameForDrop(dbConnection);
+		String fqName = toDrop.getFullyQualifiedName(dbConnection);
 		StringBuilder result = new StringBuilder(type.length() + objectName.length() + 15);
 
 		String drop = dbConnection.getDbSettings().getDropDDL(type, dropType == DropType.cascaded);
@@ -473,7 +474,8 @@ public class TableSourceBuilder
 		}
 		else
 		{
-			drop = StringUtil.replace(drop, "%name%", objectName);
+      drop = TemplateHandler.replacePlaceholder(drop, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqName, false);
+      drop = TemplateHandler.replacePlaceholder(drop, NAME_PLACEHOLDER, objectName, false);
 			result.append(SqlUtil.addSemicolon(drop));
 		}
 		return result;
@@ -531,7 +533,7 @@ public class TableSourceBuilder
     {
       String cascadeVerb = dbConnection.getDbSettings().getCascadeConstraintsVerb(objectType);
       boolean cascadeSupported = StringUtil.isNonEmpty(cascadeVerb);
-      
+
       // if a cascaded drop was requested add it, even when a REPLACE is available
       // because a cascaded drop might do more than a create or replace
       // when "only" a regular drop was requested this should be the same as a CREATE OR REPLACE
