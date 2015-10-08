@@ -22,9 +22,9 @@
  */
 package workbench.gui.components;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,6 +35,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 
 import workbench.resource.GuiSettings;
 import workbench.resource.IconMgr;
@@ -57,57 +58,47 @@ public class TabButtonComponent
 	private final WbTabbedPane pane;
 	private final JLabel label;
 	private final WbButton closeButton;
-	private static final Insets BUTTON_INSETS = new Insets(0, 0, 1, 4);
 	private static final Insets JGOODIES_INSETS = new Insets(2, 0, 0, 0);
   private final Insets insets;
 
 	public TabButtonComponent(String title, final WbTabbedPane tabPane, boolean showButton)
 	{
-		super(new GridBagLayout());
+    super(new BorderLayout(4,0));
 		pane = tabPane;
-
-		boolean opaque = Settings.getInstance().getBoolProperty("workbench.gui.closebutton.opaque", false);
 
 		boolean jGoodies = LnFHelper.isJGoodies();
 		if (jGoodies)
 		{
       insets = JGOODIES_INSETS;
-      opaque = true;
-//			String tabStyle = System.getProperty("Plastic.tabStyle","default");
-//			if (!"Metal".equalsIgnoreCase(tabStyle))
-//			{
-//				opaque = true;
-//			}
 		}
     else
     {
       insets = WbSwingUtilities.EMPTY_INSETS;
     }
 
-		label = new JLabel(title);
+    label = new JLabel(title)
+    {
+      @Override
+      public Color getBackground()
+      {
+        return TabButtonComponent.this.getBackground();
+      }
+    };
+    label.setOpaque(true);
 
-    //label.setOpaque(false);
-
-//    Color c = UIManager.getColor("TabbedPane.selected");
-//    if (c == null)
-//    {
-//      c = UIManager.getColor("TabbedPane.background");
-//    }
-//    if (c == null)
-//    {
-//      c = getBackground();
-//    }
-
-//    System.out.println("default color: " + c + ", background: " + getBackground());
 		int imgSize = IconMgr.getInstance().getSizeForComponentFont(label);
 		ImageIcon img = IconMgr.getInstance().getPngIcon("close-panel", imgSize);
-    closeButton = new WbButton(img);
-		closeButton.setBackground(getBackground());
-//    closeButton.setOpaque(false);
+    closeButton = new WbButton(img)
+    {
+      @Override
+      public Color getBackground()
+      {
+        return TabButtonComponent.this.getBackground();
+      }
+    };
+    closeButton.setOpaque(true);
 
-//    setBackground(c);
-
-		Dimension d = new Dimension((int)(img.getIconWidth() * 1.5), (int)(img.getIconHeight() * 1.5));
+		Dimension d = new Dimension(imgSize,imgSize);
 		closeButton.setPreferredSize(d);
 		closeButton.setMinimumSize(d);
 		closeButton.enableBasicRollover();
@@ -115,27 +106,36 @@ public class TabButtonComponent
 		closeButton.addActionListener(this);
 
 		setupComponents();
-		if (!showButton) closeButton.setVisible(showButton);
-		setOpaque(opaque);
+		if (!showButton)
+    {
+      closeButton.setVisible(showButton);
+    }
+
+		setOpaque(jGoodies);
 
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT);
 	}
 
-//  @Override
-//  public Color getBackground()
-//  {
-//    if (pane == null)
-//    {
-//      return UIManager.getColor("TabbedPane.background");
-//    }
-//
-//    if (pane.getTabComponentAt(pane.getSelectedIndex()) == this)
-//    {
-//      return UIManager.getColor("TabbedPane.selected");
-//    }
-//    return UIManager.getColor("TabbedPane.background");
-//  }
-//
+  @Override
+  public Color getBackground()
+  {
+    Color c = null;
+    if (pane != null && pane.getTabComponentAt(pane.getSelectedIndex()) == this)
+    {
+      c = UIManager.getColor("TabbedPane.selected");
+    }
+    else
+    {
+      c = UIManager.getColor("TabbedPane.background");
+    }
+
+    if (c == null)
+    {
+      c = super.getBackground();
+    }
+    return c;
+  }
+
   @Override
   public Insets getInsets(Insets insets)
   {
@@ -229,35 +229,15 @@ public class TabButtonComponent
 		remove(label);
 		remove(closeButton);
 
-		GridBagConstraints c = new GridBagConstraints();
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.gridy = 0;
-		c.gridx = 0;
-    c.weightx = 1.0;
-		c.fill = GridBagConstraints.BOTH;
+  	add(label, BorderLayout.CENTER);
 
-		c.anchor = GridBagConstraints.LINE_START;
-		c.insets = BUTTON_INSETS;
 		if (buttonOnRight)
 		{
-			add(label, c);
+      add(closeButton, BorderLayout.LINE_END);
 		}
 		else
 		{
-			add(closeButton, c);
-		}
-
-		c.gridx ++;
-		c.anchor = GridBagConstraints.LINE_END;
-		c.insets = WbSwingUtilities.EMPTY_INSETS;
-		if (buttonOnRight)
-		{
-			add(closeButton, c);
-		}
-		else
-		{
-			add(label, c);
+      add(closeButton, BorderLayout.LINE_START);
 		}
 		validate();
 	}

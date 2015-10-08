@@ -4053,7 +4053,8 @@ public class SqlPanel
               panels.add(p);
             }
           }
-        }catch (Exception e)
+        }
+        catch (Exception e)
         {
           LogMgr.logError("SqlPanel.addResult()", "Error when adding new DwPanel with DataStore", e);
         }

@@ -53,8 +53,6 @@ import workbench.resource.Settings;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.lnf.LnFHelper;
 
-import workbench.util.MacOSHelper;
-
 /**
  * A JTabbedPane that allows re-ordering of the tabs using drag & drop.
  * <br/>
@@ -74,7 +72,6 @@ public class WbTabbedPane
 	private int draggedTabIndex;
 	private TabCloser tabCloser;
 	private boolean hideDisabledButtons;
-	private boolean alwaysUseCustomComponent;
 	private boolean onlyCloseActive;
 	private Point dragStart;
 	private Rectangle tabBounds;
@@ -198,18 +195,15 @@ public class WbTabbedPane
 	{
 		for (int i=0; i < getTabCount(); i++)
 		{
-			if (alwaysUseCustomComponent)
-			{
-				TabButtonComponent comp = getTabButton(i);
-				if (comp != null)
-				{
-					comp.setButtonVisible(false);
-				}
-			}
-			else
-			{
-				setTabComponentAt(i, null);
-			}
+      TabButtonComponent comp = getTabButton(i);
+      if (comp != null)
+      {
+        comp.setButtonVisible(false);
+      }
+      else
+      {
+        setTabComponentAt(i, null);
+      }
 		}
 	}
 
@@ -278,19 +272,22 @@ public class WbTabbedPane
 		putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 		putClientProperty("jgoodies.embeddedTabs", Boolean.FALSE);
 		putClientProperty("jgoodies.tabIconsEnabled", Boolean.FALSE);
-		alwaysUseCustomComponent = false;//!LnFHelper.isJGoodies() && !MacOSHelper.isMacOS();
-		try
-		{
-			TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
-			if (tui != null)
-			{
-				this.setUI(tui);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbTabbedPane.init()", "Error during init", e);
-		}
+
+    if (!LnFHelper.isJGoodies())
+    {
+      try
+      {
+        TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
+        if (tui != null)
+        {
+          this.setUI(tui);
+        }
+      }
+      catch (Exception e)
+      {
+        LogMgr.logError("WbTabbedPane.init()", "Error during init", e);
+      }
+    }
 		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_CLOSE_ACTIVE_TAB);
 		addChangeListener(this);
@@ -324,16 +321,11 @@ public class WbTabbedPane
 	@Override
 	public void insertTab(String title, Icon icon, Component component, String tip, int index)
 	{
-		super.insertTab(title, icon, component, tip, index);
-		if (alwaysUseCustomComponent || tabCloser != null)
-		{
-			// Always insert our own tab component to work around a bug with HTML rendering
-			// in newer JDKs, see: http://bugs.sun.com/view_bug.do?bug_id=6670274
-			setTabComponentAt(index, new TabButtonComponent(title, this, tabCloser != null));
-		}
+    super.insertTab(title, icon, component, tip, index);
 		if (tabCloser != null)
 		{
-			updateButtons();
+			setTabComponentAt(index, new TabButtonComponent(title, this, tabCloser != null));
+      updateButtons();
 		}
 	}
 

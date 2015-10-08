@@ -30,8 +30,6 @@ import java.util.Set;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-import javax.swing.plaf.metal.MetalTheme;
 
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
@@ -216,10 +214,6 @@ public class LnFHelper
 			}
 			else
 			{
-				// JGoodies Looks settings
-				UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
-				UIManager.put("jgoodies.embeddedTabs", Boolean.TRUE);
-				UIManager.put("jgoodies.tabIconsEnabled", Boolean.FALSE);
 				UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 
 				// I hate the bold menu font in the Metal LnF
@@ -235,12 +229,6 @@ public class LnFHelper
 				LnFLoader loader = new LnFLoader(def);
 				LookAndFeel lnf = loader.getLookAndFeel();
 
-				if (className.startsWith("com.jgoodies.looks.plastic"))
-				{
-					String theme = Settings.getInstance().getProperty("workbench.gui.lnf.jgoodies.theme", "Silver");
-					setJGoodiesTheme(loader, theme);
-				}
-
 				UIManager.setLookAndFeel(lnf);
 				PlatformHelper.installGtkPopupBugWorkaround();
 			}
@@ -252,39 +240,6 @@ public class LnFHelper
 		}
 
 		checkWindowsClassic(UIManager.getLookAndFeel().getClass().getName());
-	}
-
-	private void setJGoodiesTheme(LnFLoader loader, String themeName)
-	{
-		if (StringUtil.isBlank(themeName)) return;
-		try
-		{
-			String className = "com.jgoodies.looks.plastic.theme." + themeName;
-			LogMgr.logDebug("LnFHelper.setJGoodiesTheme()", "Trying to set theme: " + className);
-
-			Class themeClass = loader.loadClass(className);
-			Object themeInstance = themeClass.newInstance();
-
-			/*
-			  for some reason using reflection does not work any longer with
-			  newer JGoodies versions. But using MetalLookAndFeel.setCurrentTheme() seems
-			  to work just as good
-			Class lnf = loader.loadClass("com.jgoodies.looks.plastic.PlasticLookAndFeel");
-			Class baseThemeClass = loader.loadClass("com.jgoodies.looks.plastic.PlasticTheme");
-			Method setTheme = lnf.getDeclaredMethod("setPlasticTheme", baseThemeClass);
-			setTheme.invoke(null, themeInstance);
-			*/
-
-			if (themeInstance instanceof MetalTheme)
-			{
-				// PlasticLookAndFeel.setPlasticTheme() simply calls MetalLookAndFeel.setCurrentTheme()
-				MetalLookAndFeel.setCurrentTheme((MetalTheme)themeInstance);
-			}
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("LnFHelper.setJGoodiesTheme()", "Could not set theme", th);
-		}
 	}
 
 	private void setSystemLnF()
