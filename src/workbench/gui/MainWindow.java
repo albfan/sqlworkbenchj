@@ -3184,10 +3184,6 @@ public class MainWindow
 
 		if (checkConnection) this.checkConnectionForPanel(sql);
 
-		// setTabTitle needs to be called after adding the panel!
-		// this will set the correct title with Mnemonics
-		// this.setTabTitle(index, ResourceMgr.getDefaultTabLabel());
-
 		this.setMacroMenuEnabled(sql.isConnected());
 
 		if (renumber) this.renumberTabs();

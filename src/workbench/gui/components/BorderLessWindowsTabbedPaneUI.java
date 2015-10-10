@@ -29,6 +29,8 @@ import java.awt.Insets;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 
+import workbench.gui.WbSwingUtilities;
+
 import com.sun.java.swing.plaf.windows.WindowsTabbedPaneUI;
 
 /**
@@ -38,6 +40,11 @@ import com.sun.java.swing.plaf.windows.WindowsTabbedPaneUI;
 public class BorderLessWindowsTabbedPaneUI
 	extends WindowsTabbedPaneUI
 {
+  private static final Insets TOP_INSETS = new Insets(3,1,1,1);
+  private static final Insets BOTTOM_INSETS = new Insets(1,1,3,1);
+  private static final Insets RIGHT_INSETS = new Insets(0,0,0,5);
+  private static final Insets LEFT_INSETS = new Insets(1,3,1,1);
+
 	private Color selColor;
 
 	@Override
@@ -46,15 +53,15 @@ public class BorderLessWindowsTabbedPaneUI
 		switch (tabPlacement)
 		{
 			case JTabbedPane.TOP:
-				return new Insets(3,1,1,1);
+				return TOP_INSETS;
 			case JTabbedPane.BOTTOM:
-				return new Insets(1,1,3,1);
+				return BOTTOM_INSETS;
 			case JTabbedPane.LEFT:
-				return new Insets(1,3,1,1);
+				return LEFT_INSETS;
 			case JTabbedPane.RIGHT:
-				return new Insets(0,0,0,5);
+				return RIGHT_INSETS;
 			default:
-				return new Insets(0,0,0,0);
+        return WbSwingUtilities.EMPTY_INSETS;
 		}
 	}
 

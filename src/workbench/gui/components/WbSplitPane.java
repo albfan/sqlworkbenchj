@@ -82,11 +82,7 @@ public class WbSplitPane
 	{
 		int divider = this.getDividerSize();
 		this.setDividerSize(divider);
-		//super.updateUI();
-		if (this.getUI() == null)
-		{
-			super.setUI(new WbSplitPaneUI());
-		}
+		super.setUI(new WbSplitPaneUI());
 		revalidate();
 	}
 
@@ -106,6 +102,7 @@ public class WbSplitPane
 			((WbSplitPaneUI)currentUI).setOneTouchTooltip(tip);
 		}
 	}
+
 	private void initDefaults()
 	{
     int divSize;
@@ -131,22 +128,6 @@ public class WbSplitPane
   {
     return expander;
   }
-
-	public Border getDividerBorder()
-	{
-		Border result = null;
-		try
-		{
-			BasicSplitPaneUI currentUI = (BasicSplitPaneUI)this.getUI();
-			BasicSplitPaneDivider div = currentUI.getDivider();
-			result = div.getBorder();
-		}
-		catch (Exception e)
-		{
-			result = null;
-		}
-		return result;
-	}
 
 	public void setDividerBorder(Border newBorder)
 	{

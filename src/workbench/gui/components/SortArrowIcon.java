@@ -50,8 +50,8 @@ public class SortArrowIcon
 	private final int width;
 	private final int height;
 
-	private static final HashMap<Integer, SortArrowIcon> sharedUpArrows = new HashMap<Integer, SortArrowIcon>();
-	private static final HashMap<Integer, SortArrowIcon> sharedDownArrows = new HashMap<Integer, SortArrowIcon>();
+	private static final HashMap<Integer, SortArrowIcon> sharedUpArrows = new HashMap<>();
+	private static final HashMap<Integer, SortArrowIcon> sharedDownArrows = new HashMap<>();
 	private final int blendValue;
 
 	public static synchronized SortArrowIcon getIcon(Direction dir, int size)

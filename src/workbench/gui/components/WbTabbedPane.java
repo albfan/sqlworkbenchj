@@ -51,7 +51,6 @@ import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.lnf.LnFHelper;
 
 /**
  * A JTabbedPane that allows re-ordering of the tabs using drag & drop.
@@ -273,20 +272,17 @@ public class WbTabbedPane
 		putClientProperty("jgoodies.embeddedTabs", Boolean.FALSE);
 		putClientProperty("jgoodies.tabIconsEnabled", Boolean.FALSE);
 
-    if (!LnFHelper.isJGoodies())
+    try
     {
-      try
+      TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
+      if (tui != null)
       {
-        TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
-        if (tui != null)
-        {
-          this.setUI(tui);
-        }
+        this.setUI(tui);
       }
-      catch (Exception e)
-      {
-        LogMgr.logError("WbTabbedPane.init()", "Error during init", e);
-      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("WbTabbedPane.init()", "Error during init", e);
     }
 		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_CLOSE_ACTIVE_TAB);

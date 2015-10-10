@@ -35,7 +35,7 @@ import java.util.List;
 public class WbTraversalPolicy
 	extends FocusTraversalPolicy
 {
-	final private List<Component> components = new ArrayList<Component>();
+	final private List<Component> components = new ArrayList<>();
 	private Component defaultComponent = null;
 
 	public void setDefaultComponent(Component aComp)

@@ -169,10 +169,10 @@ public class WbImportPostgresTest
 		runner.runStatement("WbImport -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='|' -usePgCopy");
 		StatementRunnerResult result = runner.getResult();
 
-//		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessageBuffer().toString();
 //		System.out.println(msg);
 
-		assertTrue(result.isSuccess());
+		assertTrue(msg, result.isSuccess());
 
 		int rows = TestUtil.getNumberValue(con, "select count(*) from foo");
   	assertEquals(2, rows);

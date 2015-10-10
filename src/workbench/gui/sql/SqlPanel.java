@@ -406,9 +406,8 @@ public class SqlPanel
 		JScrollPane scroll = new WbScrollPane(log);
 		resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
 
-		contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
+		contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, editor, resultTab);
 		contentPanel.setOneTouchExpandable(true);
-		contentPanel.setContinuousLayout(true);
 
 		appendResults = GuiSettings.getDefaultAppendResults();
 

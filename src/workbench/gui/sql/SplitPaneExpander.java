@@ -36,7 +36,6 @@ public class SplitPaneExpander
 	private boolean upperPartExpanded;
 	private boolean lowerPartExpanded;
 
-
 	public SplitPaneExpander(JSplitPane client)
 	{
 		this.contentPanel = client;
@@ -74,7 +73,7 @@ public class SplitPaneExpander
 			upperPartExpanded = true;
 		}
 		this.lowerPartExpanded = false;
-		repaintClient();
+    contentPanel.invalidate();
 	}
 
 	public void toggleLowerComponentExpand()
@@ -94,19 +93,17 @@ public class SplitPaneExpander
 			this.lowerPartExpanded = true;
 		}
 		this.upperPartExpanded = false;
-		repaintClient();
+    contentPanel.invalidate();
 	}
 
 	private void repaintClient()
 	{
-		WbSwingUtilities.invoke(new Runnable()
+		WbSwingUtilities.invokeLater(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				WbSwingUtilities.callRepaint(contentPanel);
-				WbSwingUtilities.callRepaint(contentPanel.getTopComponent());
-				WbSwingUtilities.callRepaint(contentPanel.getBottomComponent());
+				contentPanel.validate();
 			}
 		});
 	}

@@ -44,6 +44,7 @@ import workbench.db.importer.CycleErrorException;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.DeleteType;
 import workbench.db.importer.ImportFileLister;
+import workbench.db.importer.ImportMode;
 import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.SpreadsheetFileParser;
@@ -457,7 +458,7 @@ public class WbImport
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		ImportFileParser parser = null;
 
-		String importMode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
+		String importMode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE, ImportMode.insert.name());
 
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{

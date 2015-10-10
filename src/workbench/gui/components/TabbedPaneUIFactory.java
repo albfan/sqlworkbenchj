@@ -28,7 +28,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.plaf.TabbedPaneUI;
+
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -36,26 +39,25 @@ import workbench.resource.Settings;
  */
 public class TabbedPaneUIFactory
 {
-	private static Insets topInsets = new Insets(2,1,1,1);
-	private static Insets bottomInsets = new Insets(1,1,2,1);
-	private static Insets leftInsets = new Insets(1,3,1,1);
-	private static Insets rightInsets = new Insets(1,1,1,3);
-	private static Insets defaultInsets = new Insets(1,1,1,1);
+	private static final Insets TOP_INSETS = new Insets(2,1,1,1);
+	private static final Insets BOTTOM_INSETS = new Insets(1,1,2,1);
+	private static final Insets LEFT_INSETS = new Insets(1,3,1,1);
+	private static final Insets RIGHT_INSETS = new Insets(1,1,1,3);
 
 	static Insets getBorderLessInsets(int tabPlacement)
 	{
 		switch (tabPlacement)
 		{
 			case JTabbedPane.TOP:
-				return topInsets;
+				return TOP_INSETS;
 			case JTabbedPane.BOTTOM:
-				return bottomInsets;
+				return BOTTOM_INSETS;
 			case JTabbedPane.LEFT:
-				return leftInsets;
+				return LEFT_INSETS;
 			case JTabbedPane.RIGHT:
-				return rightInsets;
+				return RIGHT_INSETS;
 			default:
-				return defaultInsets;
+        return WbSwingUtilities.EMPTY_INSETS;
 		}
 	}
 
@@ -68,7 +70,7 @@ public class TabbedPaneUIFactory
 
 		LookAndFeel lnf = UIManager.getLookAndFeel();
 		String lnfClass = lnf.getClass().getName();
-		
+
 		if (lnfClass.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
 		{
 			return "workbench.gui.components.BorderLessMetalTabbedPaneUI";
@@ -84,14 +86,13 @@ public class TabbedPaneUIFactory
 
 		return null;
 	}
-	
+
 	public static TabbedPaneUI getBorderLessUI()
 	{
 		String uiClass = getTabbedPaneUIClass();
 		if (uiClass == null) return null;
 		return getClassInstance(uiClass);
 	}
-	
 
 	private static TabbedPaneUI getClassInstance(String className)
 	{
