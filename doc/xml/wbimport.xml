@@ -125,7 +125,7 @@
               <para>
                 For some DBMS, the additional modes: '<literal>upsert</literal>' and '<literal>insertIgnore</literal>'
                 are supported. For details please refer to the <link linkend="import-native-upsert">native upsert</link>
-                and <link linkend="native-insert-ignore">native insertIgnore</link> explanation.
+                and <link linkend="import-native-insert-ignore">native insertIgnore</link> explanation.
               </para>
             </entry>
           </row>

@@ -579,6 +579,18 @@
         <exclude name="*.png"/>
       </zipfileset>
 
+      <!--
+      <zipfileset dir="../libs" prefix="libs">
+        <include name="**/*.*"/>
+        <exclude name="junit/cobertura/*.*"/>
+        <exclude name="junit/jemmy.jar"/>
+        <exclude name="junit/db2jcc4.jar"/>
+        <exclude name="junit/ojdbc6-11.2.0.1.0.jar"/>
+        <exclude name="junit/jaybird-full-2.1.6-java6.jar"/>
+        <exclude name="junit/sqljdbc4.jar"/>
+      </zipfileset>
+      -->
+      
     </zip>
   </target>
 

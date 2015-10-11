@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-10-04">
+  <release build="-1" date="2015-10-11">
+    <entry dev-build="3" type="enh">For DBMS that support it, two new modes have been added to WbImport: -upsert and -insertIgnore using native "UPSERT" functionality if available</entry>
     <entry dev-build="3" type="enh">For Firebird the SQL source of external tables is now generated correctly.</entry>
     <entry dev-build="3" type="enh">An new command WbGenerateImpTable is available to infer the structure of a table from an import file</entry>
     <entry dev-build="2" type="enh">The command line parameter -vardef has been deprecated and replaced with -variable and -varFile</entry>
-    <entry dev-build="2" type="enh">For DBMS that support it, two new modes have been added to WbImport upsert and insertIgnore using native "UPSERT" functionality if available</entry>
     <entry dev-build="2" type="enh">It's now possible to provide tags for each connection profile. The quickfilter will then use the defined tags for filtering the displayed profiles.</entry>
     <entry dev-build="2" type="enh">Connection parameters specified on the command line now have precedence over the properties defined through a Liquibase defaults file (specified through -lbDefaults)</entry>
-    <entry dev-build="1" type="enh">It's now possible to enbable the use of Oracle's DBMS_METADATA for source code retrieval for different types of objects</entry>
+    <entry dev-build="1" type="enh">It's now possible to enable the use of Oracle's DBMS_METADATA for source code retrieval for different types of objects</entry>
     <entry dev-build="1" type="enh">The tooltip shown for result tabs can now be configured (Options -&gt; Data display)</entry>
     <entry dev-build="1" type="enh">For the internal SQL formatter, it's now possible to configure the case in which data type names are written</entry>
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
