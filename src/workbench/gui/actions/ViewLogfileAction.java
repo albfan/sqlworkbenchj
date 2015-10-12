@@ -29,10 +29,9 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
 
-import javax.swing.JFrame;
-
 import workbench.WbManager;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
@@ -51,7 +50,7 @@ public class ViewLogfileAction
   implements WindowListener
 {
 	private static ViewLogfileAction instance = new ViewLogfileAction();
-	private JFrame viewer = null;
+	private LogFileViewer viewer = null;
 
 	public static ViewLogfileAction getInstance()
 	{
@@ -144,12 +143,11 @@ public class ViewLogfileAction
 				{
 					try
 					{
-						LogFileViewer lview = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
-						viewer = lview;
+						viewer = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
             viewer.addWindowListener(ViewLogfileAction.this);
 						viewer.setVisible(true);
-						lview.setText("Loading...");
-						lview.showFile(logfile);
+						viewer.setText(ResourceMgr.getString("LblLoadingProgress"));
+						viewer.showFile(logfile);
 					}
 					catch (Exception e)
 					{
@@ -159,7 +157,6 @@ public class ViewLogfileAction
 				}
 				else
 				{
-					viewer.setVisible(true);
 					viewer.toFront();
 				}
 			}

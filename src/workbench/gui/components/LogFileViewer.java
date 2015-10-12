@@ -30,8 +30,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.Iterator;
 
 import javax.swing.JFrame;
@@ -48,6 +46,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.LogArea;
 
 import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.FixedSizeList;
 import workbench.util.MemoryWatcher;
@@ -70,11 +69,10 @@ public class LogFileViewer
 		super();
 		ResourceMgr.setWindowIcons(this, "logfile");
 		display = new LogArea(owner);
-    display.setMaxLineCount(Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 5000));
+    display.setMaxLineCount(getMaxLines());
 		display.setFont(Settings.getInstance().getEditorFont());
 		display.setEditable(false);
 		display.setBackground(Color.WHITE);
-		display.setFont(Settings.getInstance().getEditorFont());
 		display.setWrapStyleWord(false);
     display.setLineWrap(false);
 		scroll = new JScrollPane(display);
@@ -105,9 +103,14 @@ public class LogFileViewer
 		});
 	}
 
+  private int getMaxLines()
+  {
+    return Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 10000);
+  }
+
 	public void setText(String text)
 	{
-		this.display.setText(text);
+		display.setText(text);
 	}
 
 	public void append(String msg)
@@ -117,40 +120,18 @@ public class LogFileViewer
 
 	public void load()
 	{
-		Reader in = null;
-		try
-		{
-  		int maxLines = Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 5000);
-			final String lines = readLastLines(sourceFile, maxLines);
-      EventQueue.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          display.setText(lines);
-          scrollToEnd();
-          LogMgr.addLogListener(LogFileViewer.this);
-        }
-      });
-		}
-		catch (Exception e)
-		{
-			display.setText(e.toString());
-		}
-		finally
-		{
-			FileUtil.closeQuietely(in);
-		}
-	}
+		final String text = readLastLines(sourceFile, getMaxLines());
 
-	@Override
-	public void setVisible(boolean b)
-	{
-		super.setVisible(b);
-		if (b && sourceFile != null)
-		{
-			load();
-		}
+    EventQueue.invokeLater(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        display.setText(text);
+        scrollToEnd();
+        LogMgr.addLogListener(LogFileViewer.this);
+      }
+    });
 	}
 
 	protected Runnable _scroller = new Runnable()
@@ -199,8 +180,7 @@ public class LogFileViewer
 		Settings.getInstance().storeWindowSize(this);
 	}
 
-	public String readLastLines(File src, int maxLines)
-		throws IOException
+	private String readLastLines(File src, int maxLines)
 	{
 		final int maxBuff = (int)(MemoryWatcher.getFreeMemory() * 0.1); // never use more than 10 percent of the free memory for the buffer
 		int logfileSize = Settings.getInstance().getMaxLogfileSize();
@@ -209,9 +189,11 @@ public class LogFileViewer
 		{
 			buffSize = maxBuff;
 		}
-		BufferedReader reader = EncodingUtil.createBufferedReader(src, LogMgr.DEFAULT_ENCODING, buffSize);
+
+    BufferedReader reader = null;
 		try
 		{
+      reader = EncodingUtil.createBufferedReader(src, LogMgr.DEFAULT_ENCODING, buffSize);
 			FixedSizeList<String> lines = new FixedSizeList<>(maxLines);
 			lines.doAppend(true);
 			lines.setAllowDuplicates(true);
@@ -229,6 +211,10 @@ public class LogFileViewer
 			}
 			return result.toString();
 		}
+    catch (Exception io)
+    {
+      return ExceptionUtil.getDisplay(io);
+    }
 		finally
 		{
 			FileUtil.closeQuietely(reader);
