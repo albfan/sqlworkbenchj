@@ -33,48 +33,50 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.text.BadLocationException;
 
+import workbench.log.LogListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.sql.LogArea;
 
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.FixedSizeList;
 import workbench.util.MemoryWatcher;
 import workbench.util.WbFile;
+import workbench.util.WbThread;
 
 /**
  * @author Thomas Kellerer
  */
 public class LogFileViewer
 	extends JFrame
+  implements LogListener
 {
-	protected SearchableTextPane display;
+	protected LogArea display;
 	protected JScrollPane scroll;
 	private WbFile sourceFile;
-	private long lastFileTime;
-	private long lastSize;
-	private Timer watcher;
 
 	public LogFileViewer(Frame owner)
 	{
 		super();
 		ResourceMgr.setWindowIcons(this, "logfile");
-		display = new SearchableTextPane(this);
+		display = new LogArea(owner);
+    display.setMaxLineCount(Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 5000));
 		display.setFont(Settings.getInstance().getEditorFont());
 		display.setEditable(false);
 		display.setBackground(Color.WHITE);
 		display.setFont(Settings.getInstance().getEditorFont());
 		display.setWrapStyleWord(false);
+    display.setLineWrap(false);
 		scroll = new JScrollPane(display);
 
 		getContentPane().setLayout(new BorderLayout());
@@ -95,15 +97,11 @@ public class LogFileViewer
 			@Override
 			public void windowClosing(WindowEvent evt)
 			{
-				if (watcher != null)
-				{
-					watcher.cancel();
-				}
+        LogMgr.removeLogListener(LogFileViewer.this);
 				saveSettings();
 				setVisible(false);
 				dispose();
 			}
-
 		});
 	}
 
@@ -112,44 +110,28 @@ public class LogFileViewer
 		this.display.setText(text);
 	}
 
-	private void initWatcher()
-	{
-		watcher = new Timer(true);
-		TimerTask task = new TimerTask()
-		{
-			@Override
-			public void run()
-			{
-				long currentTime = sourceFile.lastModified();
-				long currentSize = sourceFile.length();
-				if (currentTime != lastFileTime || currentSize != lastSize)
-				{
-					load();
-				}
-			}
-		};
-		int refreshTime = Settings.getInstance().getIntProperty("workbench.logviewer.refresh", 1000);
-		watcher.schedule(task, (long)(refreshTime * 1.5), refreshTime);
-	}
-
 	public void append(String msg)
 	{
-		this.display.append(msg);
-		scrollToEnd();
+    display.addLine(msg);
 	}
 
-	public synchronized void load()
+	public void load()
 	{
 		Reader in = null;
 		try
 		{
-			WbSwingUtilities.showWaitCursor(this);
-			lastFileTime = sourceFile.lastModified();
-			lastSize = sourceFile.length();
-			int maxLines = Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 5000);
-			String lines = readLastLines(sourceFile, maxLines);
-			display.setText(lines);
-			scrollToEnd();
+  		int maxLines = Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 5000);
+			final String lines = readLastLines(sourceFile, maxLines);
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          display.setText(lines);
+          scrollToEnd();
+          LogMgr.addLogListener(LogFileViewer.this);
+        }
+      });
 		}
 		catch (Exception e)
 		{
@@ -158,7 +140,6 @@ public class LogFileViewer
 		finally
 		{
 			FileUtil.closeQuietely(in);
-			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
 
@@ -177,15 +158,23 @@ public class LogFileViewer
 		@Override
 		public void run()
 		{
-			JScrollBar b = scroll.getVerticalScrollBar();
-			int max = b.getMaximum();
-			b.setValue(max);
+      try
+      {
+        int start = display.getLineStartOffset(display.getLineCount() - 1);
+        display.setCaretPosition(start);
+      }
+      catch (BadLocationException ble)
+      {
+        JScrollBar b = scroll.getVerticalScrollBar();
+        int max = b.getMaximum();
+        b.setValue(max);
+      }
 		}
 
 	};
 
 	protected void scrollToEnd()
-	{
+  {
 		EventQueue.invokeLater(_scroller);
 	}
 
@@ -193,15 +182,15 @@ public class LogFileViewer
 	{
 		sourceFile = new WbFile(f);
 		setTitle(sourceFile.getFullPath());
-		initWatcher();
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				load();
-			}
-		});
+    WbThread loader = new WbThread("LogFileLoader")
+    {
+      @Override
+      public void run()
+      {
+        load();
+      }
+    };
+    loader.start();
 	}
 
 	protected void saveSettings()
@@ -245,5 +234,20 @@ public class LogFileViewer
 			FileUtil.closeQuietely(reader);
 		}
 	}
+
+  @Override
+  public void messageLogged(final CharSequence msg)
+  {
+    if (msg == null) return;
+
+    EventQueue.invokeLater(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        append(msg.toString());
+      }
+    });
+  }
 
 }

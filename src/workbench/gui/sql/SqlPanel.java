@@ -390,7 +390,7 @@ public class SqlPanel
 		// The name of the component is used for the Jemmy GUI Tests
 		editor.setName("sqleditor" + internalId);
 
-		log = new LogArea();
+		log = new LogArea(this);
 		// The name of the component is used for the Jemmy GUI Tests
 		log.setName("msg" + internalId);
 

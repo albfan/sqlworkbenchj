@@ -187,6 +187,16 @@ public class LogMgr
 		}
 	}
 
+  public static void addLogListener(LogListener listener)
+  {
+    getLogger().addLogListener(listener);
+  }
+
+  public static void removeLogListener(LogListener listener)
+  {
+    getLogger().removeLogListener(listener);
+  }
+
 	private synchronized static WbLogger getLogger()
 	{
 		if (useLog4J)

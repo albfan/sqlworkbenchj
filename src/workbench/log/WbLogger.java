@@ -48,4 +48,8 @@ public interface WbLogger
 	void shutdownWbLog();
 
 	boolean levelEnabled(LogLevel tolog);
+
+  void addLogListener(LogListener listener);
+  void removeLogListener(LogListener listener);
+
 }

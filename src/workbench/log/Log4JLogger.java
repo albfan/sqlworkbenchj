@@ -23,7 +23,9 @@
 package workbench.log;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import workbench.WbManager;
 
@@ -52,6 +54,7 @@ public class Log4JLogger
 	// Creates some debug-messages on system.out (without the use of Log4J to avoid confusion)
 	static boolean debug = false;
 	static boolean useReflectionClass = true;
+  private List<LogListener> listenerList = new ArrayList<>(1);
 
 	/**
 	 * Create a Logger for name and geht the FQCN of the LoggerController-class from the
@@ -310,6 +313,10 @@ public class Log4JLogger
 			default:
 				error(msg, th);
 		}
+    if (levelEnabled(level))
+    {
+      notifyListener(msg);
+    }
 	}
 
 	@Override
@@ -395,4 +402,28 @@ public class Log4JLogger
 		}
 		return true;
 	}
+
+  private void notifyListener(CharSequence msg)
+  {
+    for (LogListener listener : listenerList)
+    {
+      if (listener != null)
+      {
+        listener.messageLogged(msg);
+      }
+    }
+  }
+
+  @Override
+  public void addLogListener(LogListener listener)
+  {
+    listenerList.add(listener);
+  }
+
+  @Override
+  public void removeLogListener(LogListener listener)
+  {
+    listenerList.remove(listener);
+  }
+
 }

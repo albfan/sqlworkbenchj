@@ -25,6 +25,8 @@ package workbench.log;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.MissingFormatArgumentException;
 
 import workbench.util.ExceptionUtil;
@@ -43,6 +45,7 @@ public class SimpleLogger
 	private boolean logSystemErr = false;
 	private String messageFormat;
 	private File currentFile;
+  private List<LogListener> listenerList = new ArrayList<>(1);
 
 	public SimpleLogger()
 	{
@@ -171,6 +174,7 @@ public class SimpleLogger
 		{
 			System.err.println(s);
 		}
+    notifyListener(s);
 	}
 
 	private CharSequence formatMessage(LogLevel logLevel, Object caller, CharSequence msg, Throwable th)
@@ -197,5 +201,31 @@ public class SimpleLogger
 		}
 		return msg;
 	}
+
+  private void notifyListener(CharSequence msg)
+  {
+    for (LogListener listener : listenerList)
+    {
+      if (listener != null)
+      {
+        listener.messageLogged(msg);
+      }
+    }
+  }
+
+  @Override
+  public void addLogListener(LogListener listener)
+  {
+    if (listener != null)
+    {
+      listenerList.add(listener);
+    }
+  }
+
+  @Override
+  public void removeLogListener(LogListener listener)
+  {
+    listenerList.remove(listener);
+  }
 
 }

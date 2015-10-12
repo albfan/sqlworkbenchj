@@ -22,26 +22,36 @@
  */
 package workbench.gui.sql;
 
+import java.awt.Container;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JTextArea;
+import javax.swing.text.BadLocationException;
 
+import workbench.interfaces.TextContainer;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.editor.SearchAndReplace;
 
 /**
  * @author Thomas Kellerer
  */
 public class LogArea
 	extends JTextArea
-	implements PropertyChangeListener
+	implements PropertyChangeListener, TextContainer
 {
 	private TextComponentMouseListener contextMenu;
+  private int maxLines = Integer.MAX_VALUE;
 
 	public LogArea()
+  {
+    this(null);
+  }
+
+	public LogArea(Container owner)
 	{
 		super();
     setDoubleBuffered(true);
@@ -56,8 +66,34 @@ public class LogArea
 		contextMenu = new TextComponentMouseListener();
 		addMouseListener(contextMenu);
 
+    if (owner != null)
+    {
+      SearchAndReplace searcher = new SearchAndReplace(owner, this);
+      contextMenu.addAction(searcher.getFindAction());
+      contextMenu.addAction(searcher.getFindNextAction());
+    }
+
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_FG_COLOR, Settings.PROPERTY_EDITOR_BG_COLOR);
 	}
+
+  @Override
+  public void setSelectedText(String text)
+  {
+    super.replaceSelection(text);
+  }
+
+  @Override
+  public boolean isTextSelected()
+  {
+    return getSelectionEnd() > getSelectionStart();
+  }
+
+  @Override
+  public String getWordAtCursor(String wordChars)
+  {
+    return null;
+  }
+
 
 	public void dispose()
 	{
@@ -80,4 +116,47 @@ public class LogArea
 		setBackground(Settings.getInstance().getEditorBackgroundColor());
 		setForeground(Settings.getInstance().getEditorTextColor());
 	}
+
+  public void setMaxLineCount(int count)
+  {
+    this.maxLines = count;
+  }
+
+  public void deleteLine(int lineNumber)
+  {
+    try
+    {
+      int start = getLineStartOffset(lineNumber);
+      int end = getLineEndOffset(lineNumber);
+      getDocument().remove(start, (end - start));
+    }
+    catch (BadLocationException ble)
+    {
+      // ignoreO
+    }
+  }
+  
+  public void addLine(String line)
+  {
+    if (line == null) return;
+
+    if (getLineCount() >= maxLines)
+    {
+      System.out.println("*** Current line count: " + getLineCount() + " exceeds limit of: " + maxLines);
+      deleteLine(0);
+    }
+    append(line + "\n");
+    int start;
+    try
+    {
+      start = getLineStartOffset(getLineCount() - 1);
+      setCaretPosition(start);
+    }
+    catch (BadLocationException ex)
+    {
+      // ignore
+    }
+
+  }
+
 }
