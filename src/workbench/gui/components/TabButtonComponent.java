@@ -25,6 +25,7 @@ package workbench.gui.components;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -58,10 +59,11 @@ public class TabButtonComponent
 	private final WbTabbedPane pane;
 	private final JLabel label;
 	private final WbButton closeButton;
+  private boolean isJGoodies;
 
 	public TabButtonComponent(String title, final WbTabbedPane tabPane, boolean showButton)
 	{
-    super(new BorderLayout(4,0));
+    super(new BorderLayout(2,0));
 		pane = tabPane;
 
     label = new JLabel(title)
@@ -131,7 +133,7 @@ public class TabButtonComponent
       closeButton.setVisible(showButton);
     }
 
-		boolean isJGoodies = LnFHelper.isJGoodies();
+		isJGoodies = LnFHelper.isJGoodies();
     setOpaque(isJGoodies);
 
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT);
@@ -140,7 +142,13 @@ public class TabButtonComponent
   @Override
   public Color getBackground()
   {
+    if (!isJGoodies && super.getBackground() != null)
+    {
+      return super.getBackground();
+    }
+
     Color c = null;
+
     if (pane != null)
     {
       if (pane.getTabComponentAt(pane.getSelectedIndex()) == this)
@@ -165,29 +173,44 @@ public class TabButtonComponent
 
     if (c == null)
     {
-      c = super.getBackground();
+      super.getBackground();
     }
     return c;
   }
 
+
   @Override
   public Color getForeground()
   {
+    if (!isJGoodies && super.getForeground() != null)
+    {
+      return super.getForeground();
+    }
+
     Color c = null;
     if (pane != null)
     {
-      return pane.getForeground();
+      c = pane.getForeground();
     }
-    else
+    if (c == null)
     {
       c = UIManager.getColor("TabbedPane.foreground");
     }
-
     if (c == null)
     {
       c = super.getForeground();
     }
     return c;
+  }
+
+  @Override
+  public void setFont(Font font)
+  {
+    super.setFont(font);
+    if (label != null)
+    {
+      label.setFont(font);
+    }
   }
 
 	@Override

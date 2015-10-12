@@ -22,6 +22,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -152,6 +153,42 @@ public class WbTabbedPane
 		}
 	}
 
+  @Override
+  public void setFont(Font font)
+  {
+    super.setFont(font);
+    for (int i=0; i < getTabCount(); i++)
+    {
+      TabButtonComponent comp = getTabButton(i);
+      if (comp != null)
+      {
+        comp.setFont(font);
+      }
+    }
+  }
+
+  @Override
+  public void setForegroundAt(int index, Color fg)
+  {
+    super.setForegroundAt(index, fg);
+    TabButtonComponent comp = getTabButton(index);
+    if (comp != null)
+    {
+      comp.setForeground(fg);
+    }
+  }
+
+  @Override
+  public void setBackgroundAt(int index, Color bg)
+  {
+    super.setBackgroundAt(index, bg);
+    TabButtonComponent comp = getTabButton(index);
+    if (comp != null)
+    {
+      comp.setForeground(bg);
+    }
+  }
+
 	/**
 	 * Enable/Disable the close button.
 	 *
@@ -186,6 +223,9 @@ public class WbTabbedPane
 			Icon icon = getIconAt(i);
 			TabButtonComponent comp = new TabButtonComponent(title, this, true);
 			comp.setIcon(icon);
+      comp.setFont(getFont());
+      comp.setBackground(getBackgroundAt(i));
+      comp.setForeground(getForegroundAt(i));
 			setTabComponentAt(i, comp);
 		}
 	}
