@@ -46,11 +46,6 @@ public class LogArea
 	private TextComponentMouseListener contextMenu;
   private int maxLines = Integer.MAX_VALUE;
 
-	public LogArea()
-  {
-    this(null);
-  }
-
 	public LogArea(Container owner)
 	{
 		super();
@@ -135,7 +130,7 @@ public class LogArea
       // ignoreO
     }
   }
-  
+
   public void addLine(String line)
   {
     if (line == null) return;
