@@ -35,7 +35,7 @@ import java.util.ListIterator;
 public class FixedSizeList<T>
 	implements List<T>
 {
-	protected LinkedList<T> entries;
+	protected final LinkedList<T> entries = new LinkedList<>();
 	private int maxSize;
 	private boolean appendEntries;
 	private boolean allowDuplicates = false;
@@ -48,7 +48,6 @@ public class FixedSizeList<T>
 	public FixedSizeList(int max)
 	{
 		this.maxSize = max;
-		this.entries = new LinkedList<>();
 	}
 
 	public void doAppend(boolean flag)
@@ -119,6 +118,11 @@ public class FixedSizeList<T>
 		}
 		return entries.size();
 	}
+
+  public T removeFirst()
+  {
+    return entries.removeFirst();
+  }
 
 	@Override
 	public synchronized int size()

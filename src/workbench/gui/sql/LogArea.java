@@ -66,6 +66,8 @@ public class LogArea
       SearchAndReplace searcher = new SearchAndReplace(owner, this);
       contextMenu.addAction(searcher.getFindAction());
       contextMenu.addAction(searcher.getFindNextAction());
+      searcher.getFindAction().addToInputMap(this);
+      searcher.getFindNextAction().addToInputMap(this);
     }
 
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_FG_COLOR, Settings.PROPERTY_EDITOR_BG_COLOR);
@@ -127,7 +129,7 @@ public class LogArea
     }
     catch (BadLocationException ble)
     {
-      // ignoreO
+      // ignore
     }
   }
 
@@ -137,21 +139,9 @@ public class LogArea
 
     if (getLineCount() >= maxLines)
     {
-      System.out.println("*** Current line count: " + getLineCount() + " exceeds limit of: " + maxLines);
       deleteLine(0);
     }
     append(line + "\n");
-    int start;
-    try
-    {
-      start = getLineStartOffset(getLineCount() - 1);
-      setCaretPosition(start);
-    }
-    catch (BadLocationException ex)
-    {
-      // ignore
-    }
-
   }
 
 }

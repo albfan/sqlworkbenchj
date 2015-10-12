@@ -145,8 +145,8 @@ public class ViewLogfileAction
 					{
 						viewer = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
             viewer.addWindowListener(ViewLogfileAction.this);
-						viewer.setVisible(true);
 						viewer.setText(ResourceMgr.getString("LblLoadingProgress"));
+						viewer.setVisible(true);
 						viewer.showFile(logfile);
 					}
 					catch (Exception e)
