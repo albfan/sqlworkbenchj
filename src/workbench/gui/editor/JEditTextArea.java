@@ -748,6 +748,8 @@ public class JEditTextArea
 		if (!EventQueue.isDispatchThread())
 		{
 			LogMgr.logDebug("JEditTextArea.updateScrollbars()", "updateScrollbars() not called from within the EDT!", new Exception());
+      EventQueue.invokeLater(this::updateScrollBars);
+      return;
 		}
 
 		if (visibleLines > 0)
@@ -2320,8 +2322,6 @@ public class JEditTextArea
 		int startLine = getLineOfOffset(selectionStart);
 		int endLine = getLineOfOffset(selectionStart + selectedText.length());
 
-    // tokenizeLines() will also update the max. line length which is important when calling updateScrollbars()
-    document.tokenizeLines(startLine, endLine);
 		painter.invalidateLineRange(startLine, endLine);
 		updateScrollBars();
 	}

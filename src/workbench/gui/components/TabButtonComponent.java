@@ -58,23 +58,11 @@ public class TabButtonComponent
 	private final WbTabbedPane pane;
 	private final JLabel label;
 	private final WbButton closeButton;
-	private static final Insets JGOODIES_INSETS = new Insets(2, 0, 0, 0);
-  private final Insets insets;
 
 	public TabButtonComponent(String title, final WbTabbedPane tabPane, boolean showButton)
 	{
     super(new BorderLayout(4,0));
 		pane = tabPane;
-
-		boolean jGoodies = LnFHelper.isJGoodies();
-		if (jGoodies)
-		{
-      insets = JGOODIES_INSETS;
-		}
-    else
-    {
-      insets = WbSwingUtilities.EMPTY_INSETS;
-    }
 
     label = new JLabel(title)
     {
@@ -83,8 +71,24 @@ public class TabButtonComponent
       {
         return TabButtonComponent.this.getBackground();
       }
+      @Override
+      public Color getForeground()
+      {
+        return TabButtonComponent.this.getForeground();
+      }
+      @Override
+      public Insets getInsets(Insets insets)
+      {
+        return WbSwingUtilities.EMPTY_INSETS;
+      }
+      @Override
+      public Insets getInsets()
+      {
+        return WbSwingUtilities.EMPTY_INSETS;
+      }
     };
     label.setOpaque(true);
+    label.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		int imgSize = IconMgr.getInstance().getSizeForComponentFont(label);
 		ImageIcon img = IconMgr.getInstance().getPngIcon("close-panel", imgSize);
@@ -95,12 +99,28 @@ public class TabButtonComponent
       {
         return TabButtonComponent.this.getBackground();
       }
+      @Override
+      public Color getForeground()
+      {
+        return TabButtonComponent.this.getForeground();
+      }
+      @Override
+      public Insets getInsets(Insets insets)
+      {
+        return WbSwingUtilities.EMPTY_INSETS;
+      }
+      @Override
+      public Insets getInsets()
+      {
+        return WbSwingUtilities.EMPTY_INSETS;
+      }
     };
     closeButton.setOpaque(true);
 
 		Dimension d = new Dimension(imgSize,imgSize);
 		closeButton.setPreferredSize(d);
 		closeButton.setMinimumSize(d);
+		closeButton.setMaximumSize(d);
 		closeButton.enableBasicRollover();
 		closeButton.setFocusable(false);
 		closeButton.addActionListener(this);
@@ -111,7 +131,8 @@ public class TabButtonComponent
       closeButton.setVisible(showButton);
     }
 
-		setOpaque(jGoodies);
+		boolean isJGoodies = LnFHelper.isJGoodies();
+    setOpaque(isJGoodies);
 
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT);
 	}
@@ -120,11 +141,24 @@ public class TabButtonComponent
   public Color getBackground()
   {
     Color c = null;
-    if (pane != null && pane.getTabComponentAt(pane.getSelectedIndex()) == this)
+    if (pane != null)
     {
-      c = UIManager.getColor("TabbedPane.selected");
+      if (pane.getTabComponentAt(pane.getSelectedIndex()) == this)
+      {
+        c = UIManager.getColor("TabbedPane.selected");
+      }
+      else
+      {
+        c = UIManager.getColor("TabbedPane.unselectedBackground");
+      }
     }
-    else
+
+    if (c == null)
+    {
+      c = UIManager.getColor("TabbedPane.tabAreaBackground");
+    }
+
+    if (c == null)
     {
       c = UIManager.getColor("TabbedPane.background");
     }
@@ -137,15 +171,23 @@ public class TabButtonComponent
   }
 
   @Override
-  public Insets getInsets(Insets insets)
+  public Color getForeground()
   {
-    return this.insets;
-  }
+    Color c = null;
+    if (pane != null)
+    {
+      return pane.getForeground();
+    }
+    else
+    {
+      c = UIManager.getColor("TabbedPane.foreground");
+    }
 
-  @Override
-  public Insets getInsets()
-  {
-    return this.insets;
+    if (c == null)
+    {
+      c = super.getForeground();
+    }
+    return c;
   }
 
 	@Override
