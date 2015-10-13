@@ -119,7 +119,7 @@ public class ProfileTree
 		setCellRenderer(new ProfileTreeCellRenderer());
     new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 		setAutoscrolls(true);
-		
+
 		// setting the row height to 0 makes it dynamic
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
