@@ -174,6 +174,7 @@ public class WbExport
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_TABLE_PREFIX);
 		cmdLine.addArgument(ARG_PAGE_TITLE);
+		cmdLine.addArgument(WbImport.ARG_SHEET_NAME);
 		cmdLine.addArgument(ARG_TABLE);
 		cmdLine.addArgument(ARG_QUOTECHAR);
 		cmdLine.addArgument(ARG_DATEFORMAT);
@@ -499,7 +500,8 @@ public class WbExport
 		exporter.setOptimizeSpreadsheetColumns(cmdLine.getBoolean(ARG_OPT_WIDTH, doFormatting));
 
 		exporter.setExportHeaders(cmdLine.getBoolean(ARG_HEADER, getHeaderDefault(type)));
-		exporter.setPageTitle(cmdLine.getValue(ARG_PAGE_TITLE));
+    String title = cmdLine.getValue(ARG_PAGE_TITLE, cmdLine.getValue(WbImport.ARG_SHEET_NAME));
+		exporter.setPageTitle(title);
 		exporter.setIncludeColumnComments(cmdLine.getBoolean(ARG_COL_COMMENTS, false));
     exporter.setSpreadSheetOffset(parseOffset(cmdLine.getValue(ARG_DATA_OFFSET)));
 
