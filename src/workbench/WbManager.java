@@ -1064,7 +1064,7 @@ public final class WbManager
 			openNewWindow(true);
 		}
 
-		if (Settings.getInstance().getBoolProperty("workbench.gui.debug.deadlockmonitor.enabled", true))
+		if (Settings.getInstance().getBoolProperty("workbench.gui.debug.deadlockmonitor.enabled", false))
 		{
 			LogMgr.logInfo("WbManager.runGui()", "Starting DeadlockMonitor");
 			deadlockMonitor = new DeadlockMonitor();
