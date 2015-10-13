@@ -51,8 +51,6 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
-import workbench.gui.WbSwingUtilities;
-
 /**
  * A JTabbedPane that allows re-ordering of the tabs using drag & drop.
  * <br/>
@@ -340,7 +338,7 @@ public class WbTabbedPane
 	@Override
 	public Insets getInsets()
 	{
-		return WbSwingUtilities.EMPTY_INSETS;
+		return new Insets(0,0,0,0);
 	}
 
 	@Override
