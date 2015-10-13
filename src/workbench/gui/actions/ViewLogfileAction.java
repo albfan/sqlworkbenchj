@@ -61,6 +61,8 @@ public class ViewLogfileAction
 	{
 		super();
 		this.initMenuDefinition("MnuTxtViewLogfile");
+    String tip = ResourceMgr.getFormattedString("d_MnuTxtViewLogfile", Integer.toString(LogFileViewer.getMaxLines()));
+    setTooltip(tip);
 		this.removeIcon();
 		WbFile logFile = LogMgr.getLogfile();
 		this.setEnabled(logFile != null);

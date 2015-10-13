@@ -253,6 +253,12 @@ public class TextAreaPainter
 		return false;
 	}
 
+  @Override
+  public boolean isFocusable()
+  {
+    return false;
+  }
+
 	public FontMetrics getStyleFontMetrics(byte tokenId)
 	{
 		if (tokenId == Token.NULL || styles == null || tokenId < 0 || tokenId >= styles.length)

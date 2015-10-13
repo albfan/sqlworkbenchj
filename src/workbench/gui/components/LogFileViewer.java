@@ -223,7 +223,7 @@ public class LogFileViewer
     return null;
 	}
 
-  private int getMaxLines()
+  public static int getMaxLines()
   {
     return Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 1000);
   }
