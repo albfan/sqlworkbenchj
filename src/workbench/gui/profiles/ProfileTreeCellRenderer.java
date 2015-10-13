@@ -43,12 +43,14 @@ public class ProfileTreeCellRenderer
 {
 	private Object dropTargetItem;
 	private Border dropBorder;
+	private Border defaultBorder;
 
 	public ProfileTreeCellRenderer()
 	{
 		super();
 		Color c = getBackgroundSelectionColor();
 		dropBorder = new LineBorder(c, 1);
+    defaultBorder = super.getBorder();
 		setLeafIcon(IconMgr.getInstance().getLabelIcon("profile"));
 		setOpenIcon(IconMgr.getInstance().getLabelIcon("folder-open"));
 		setClosedIcon(IconMgr.getInstance().getLabelIcon("folder"));
@@ -60,13 +62,7 @@ public class ProfileTreeCellRenderer
 	}
 
 	@Override
-	public Component getTreeCellRendererComponent(JTree tree,
-	                                              Object value,
-	                                              boolean sel,
-	                                              boolean expanded,
-	                                              boolean leaf,
-	                                              int row,
-	                                              boolean hasFocus)
+	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)
 	{
 		if (this.dropTargetItem != null && dropTargetItem == value)
 		{
@@ -74,9 +70,9 @@ public class ProfileTreeCellRenderer
 		}
 		else
 		{
-			setBorder(null);
+			setBorder(defaultBorder);
 		}
-		return super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+		return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 	}
 
 }

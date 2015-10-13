@@ -67,7 +67,7 @@ public class LogFileViewer
 		super();
 		ResourceMgr.setWindowIcons(this, "logfile");
 		display = new LogArea(this);
-    display.setMaxLineCount(getMaxLines());
+    display.setMaxLineCount(getMaxLines() + 5);
 		display.setFont(Settings.getInstance().getEditorFont());
 		display.setEditable(false);
 		display.setBackground(Color.WHITE);
@@ -134,6 +134,7 @@ public class LogFileViewer
       @Override
       public void run()
       {
+        display.setText("");
         while (lines.size() > 0)
         {
           display.addLine(lines.removeFirst());
@@ -224,7 +225,7 @@ public class LogFileViewer
 
   private int getMaxLines()
   {
-    return Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 10000);
+    return Settings.getInstance().getIntProperty("workbench.logviewer.numlines", 1000);
   }
 
 }
