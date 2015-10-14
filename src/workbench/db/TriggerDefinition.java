@@ -144,7 +144,7 @@ public class TriggerDefinition
 		// getDropDDL can also return a generic DROP statement that only
 		// includes the %name% placeholder (because it's not based on a configured
 		// property, but is created dynamically)
-		ddl = ddl.replace("%name%", triggerName);
+    ddl = ddl.replace("%name%", getObjectNameForDrop(con));
 
 		// specialized statements have different placeholders
 		ddl = ddl.replace(PLACEHOLDER_TRIGGER_NAME, triggerName);
