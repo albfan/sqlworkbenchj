@@ -98,6 +98,7 @@ public class LogArea
 		Settings.getInstance().removePropertyChangeListener(this);
 		if (contextMenu != null)
 		{
+      removeMouseListener(contextMenu);
 			contextMenu.dispose();
 		}
 	}
