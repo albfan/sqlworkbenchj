@@ -215,14 +215,19 @@ public abstract class TableDetector
     return result;
   }
 
-  protected void checkResults(List<ColumnStatistics> colStats)
+  protected void checkResults(List<ColumnStatistics> colStats, String tableName)
   {
     for (ColumnStatistics col : colStats)
     {
       List<ColType> types = col.getDetectedTypes();
       if (types.isEmpty())
       {
-        messages.append(ResourceMgr.getFormattedString("MsgImpTblNoType", col.getName()));
+        String colname = col.getName();
+        if (tableName != null)
+        {
+          colname = tableName + "." + colname;
+        }
+        messages.append(ResourceMgr.getFormattedString("MsgImpTblNoType", colname));
         messages.appendNewLine();
       }
       else if (col.getDetectedTypes().size() > 1)
@@ -241,9 +246,9 @@ public abstract class TableDetector
 
   protected void checkResults()
   {
-    checkResults(columns);
+    checkResults(columns, null);
   }
-  
+
   public void analyzeFile()
   {
     processFile();

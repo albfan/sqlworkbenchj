@@ -63,9 +63,9 @@ public class SpreadSheetTableDetector
   @Override
   protected void checkResults()
   {
-    for (List<ColumnStatistics> cols : sheetMap.values())
+    for (Map.Entry<String, List<ColumnStatistics>> entry : sheetMap.entrySet())
     {
-      super.checkResults(cols);
+      super.checkResults(entry.getValue(), entry.getKey());
     }
   }
 
