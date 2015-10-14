@@ -166,6 +166,12 @@ public class LnFHelper
 		return lnf.contains("plaf.windows");
 	}
 
+  public static boolean isNonStandardLookAndFeel()
+  {
+    String lnf = UIManager.getLookAndFeel().getClass().getName();
+    return (lnf.startsWith("com.sun.java") == false && lnf.startsWith("javax.swing.plaf") == false);
+  }
+
 	private void scaleDefaultFonts()
 	{
 		FontScaler scaler = new FontScaler();

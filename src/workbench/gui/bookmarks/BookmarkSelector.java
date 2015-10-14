@@ -339,7 +339,7 @@ public class BookmarkSelector
 		gc.gridwidth = 2;
 		gc.weightx = 1.0;
 		gc.anchor = GridBagConstraints.FIRST_LINE_START;
-    gc.insets = WbSwingUtilities.EMPTY_INSETS;
+    gc.insets = WbSwingUtilities.getEmptyInsets();
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		filterPanel.add(ddPanel, gc);
 

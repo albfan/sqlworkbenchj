@@ -326,6 +326,7 @@ public class WbTabbedPane
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_CLOSE_ACTIVE_TAB);
 		addChangeListener(this);
     setDoubleBuffered(true);
+    setOpaque(true);
 	}
 
 	@Override

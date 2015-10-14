@@ -24,13 +24,17 @@ package workbench.gui.renderer;
 
 import java.awt.Component;
 import java.awt.Insets;
+
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
-import workbench.gui.WbSwingUtilities;
+
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+
 import workbench.util.StringUtil;
 
 /**
@@ -46,7 +50,6 @@ public class TextAreaRenderer
 	extends ToolTipRenderer
 	implements TableCellRenderer, WbRenderer
 {
-	public static final Insets AREA_INSETS = new Insets(1,0,0,0);
 	protected JTextArea textDisplay;
 
 	public TextAreaRenderer()
@@ -57,13 +60,13 @@ public class TextAreaRenderer
 			@Override
 			public Insets getInsets()
 			{
-				return AREA_INSETS;
+				return getAreaInsets();
 			}
 
 			@Override
 			public Insets getMargin()
 			{
-				return WbSwingUtilities.EMPTY_INSETS;
+				return WbSwingUtilities.getEmptyInsets();
 			}
 
 		};
@@ -133,5 +136,10 @@ public class TextAreaRenderer
 			}
 		}
 	}
+
+	public static final Insets getAreaInsets()
+  {
+    return new Insets(1,0,0,0);
+  }
 
 }

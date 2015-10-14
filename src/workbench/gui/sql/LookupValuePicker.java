@@ -318,7 +318,7 @@ public class LookupValuePicker
 
 		maxRows = new NumberField(6);
 		WbSwingUtilities.setMinimumSize(maxRows, 6);
-		gc.insets = WbSwingUtilities.EMPTY_INSETS;
+		gc.insets = WbSwingUtilities.getEmptyInsets();
 		gc.gridx ++;
 		result.add(maxRows, gc);
 

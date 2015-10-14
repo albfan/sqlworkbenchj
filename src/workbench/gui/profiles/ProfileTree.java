@@ -116,7 +116,8 @@ public class ProfileTree
 		RenameGroupAction renameGroup = new RenameGroupAction(this);
 		popup.addAction(renameGroup, false);
 
-		setCellRenderer(new ProfileTreeCellRenderer());
+		setCellRenderer(new ProfileTreeCellRenderer(getCellRenderer()));
+//    System.out.println(getCellRenderer().getClass());
     new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 		setAutoscrolls(true);
 

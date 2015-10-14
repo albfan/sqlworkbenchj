@@ -338,7 +338,7 @@ public class WbCellEditor
 		@Override
 		public Insets getInsets()
 		{
-			return TextAreaRenderer.AREA_INSETS;
+			return TextAreaRenderer.getAreaInsets();
 		}
 
 		@Override

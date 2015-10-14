@@ -109,7 +109,6 @@ import workbench.util.WbThread;
 public class WbSwingUtilities
 {
   public static final String PROP_ERROR_MSG_WRAP = "workbench.sql.error.wordwrap";
-	public static final Insets EMPTY_INSETS = new Insets(0, 0, 0, 0);
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	public static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder();
 	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(1, 6, 1, 6));
@@ -125,6 +124,11 @@ public class WbSwingUtilities
 	public static final int IGNORE_ONE = 3042;
 	public static final int EXECUTE_ALL = 4042;
 
+  public static Insets getEmptyInsets()
+  {
+    return new Insets(0, 0, 0, 0);
+  }
+  
 	public static Border getBevelBorder()
 	{
 		return createBevelBorder(BevelBorder.LOWERED);

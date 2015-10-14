@@ -205,7 +205,7 @@ public class DbTreePanel
     WbToolbar filterBar = new WbToolbar();
     filterBar.add(filterAction);
     filterBar.add(resetFilter);
-		filterBar.setMargin(WbSwingUtilities.EMPTY_INSETS);
+		filterBar.setMargin(WbSwingUtilities.getEmptyInsets());
 		filterBar.setBorderPainted(true);
 
     filterPanel.add(filterBar, BorderLayout.LINE_START);
@@ -216,7 +216,7 @@ public class DbTreePanel
     gc.gridy = 1;
     gc.gridx = 0;
     gc.weightx = 1.0;
-    gc.insets = WbSwingUtilities.EMPTY_INSETS;
+    gc.insets = WbSwingUtilities.getEmptyInsets();
     gc.gridwidth = GridBagConstraints.REMAINDER;
     gc.fill = GridBagConstraints.HORIZONTAL;
     gc.anchor = GridBagConstraints.LINE_START;

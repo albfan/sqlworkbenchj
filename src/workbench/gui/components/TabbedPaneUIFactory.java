@@ -49,15 +49,15 @@ public class TabbedPaneUIFactory
 		switch (tabPlacement)
 		{
 			case JTabbedPane.TOP:
-				return TOP_INSETS;
+				return (Insets)TOP_INSETS.clone();
 			case JTabbedPane.BOTTOM:
-				return BOTTOM_INSETS;
+				return (Insets)BOTTOM_INSETS.clone();
 			case JTabbedPane.LEFT:
-				return LEFT_INSETS;
+				return (Insets)LEFT_INSETS.clone();
 			case JTabbedPane.RIGHT:
-				return RIGHT_INSETS;
+				return (Insets)RIGHT_INSETS.clone();
 			default:
-        return WbSwingUtilities.EMPTY_INSETS;
+        return WbSwingUtilities.getEmptyInsets();
 		}
 	}
 

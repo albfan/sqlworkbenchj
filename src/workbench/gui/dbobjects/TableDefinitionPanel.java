@@ -245,7 +245,7 @@ public class TableDefinitionPanel
 		cc.fill = GridBagConstraints.HORIZONTAL;
 		cc.gridx ++;
 		cc.weightx = 1.0;
-		cc.insets = WbSwingUtilities.EMPTY_INSETS;
+		cc.insets = WbSwingUtilities.getEmptyInsets();
 		toolbar.add(tableNameLabel, cc);
 
 		cc.fill = GridBagConstraints.HORIZONTAL;

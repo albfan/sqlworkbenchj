@@ -110,7 +110,7 @@ public class EditConnectScriptsPanel
 		this.add(p1, c);
 
 		c.gridy ++;
-		c.insets = WbSwingUtilities.EMPTY_INSETS;
+		c.insets = WbSwingUtilities.getEmptyInsets();
 		this.add(p2, c);
 
 		c.gridy ++;

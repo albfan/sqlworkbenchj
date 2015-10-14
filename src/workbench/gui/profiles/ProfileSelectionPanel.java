@@ -175,7 +175,7 @@ public class ProfileSelectionPanel
       WbToolbar filterBar = new WbToolbar();
       filterBar.add(applyFilter);
       filterBar.add(resetFilter);
-      filterBar.setMargin(WbSwingUtilities.EMPTY_INSETS);
+      filterBar.setMargin(WbSwingUtilities.getEmptyInsets());
       filterBar.setBorderPainted(true);
       filterPanel.add(filterBar, BorderLayout.LINE_END);
 			p.add(filterPanel, BorderLayout.PAGE_END);

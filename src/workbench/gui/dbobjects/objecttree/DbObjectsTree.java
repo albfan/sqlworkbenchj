@@ -82,11 +82,11 @@ public class DbObjectsTree
 		// setting the row height to 0 makes it dynamic
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
+    
     ToolTipManager.sharedInstance().registerComponent(this);
     dragSource = new ObjectTreeDragSource(this);
     loader = new TreeLoader();
     statusBar = status;
-    setRowHeight(0);
   }
 
   @Override

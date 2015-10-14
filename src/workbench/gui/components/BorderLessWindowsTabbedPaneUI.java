@@ -61,7 +61,7 @@ public class BorderLessWindowsTabbedPaneUI
 			case JTabbedPane.RIGHT:
 				return RIGHT_INSETS;
 			default:
-        return WbSwingUtilities.EMPTY_INSETS;
+        return WbSwingUtilities.getEmptyInsets();
 		}
 	}
 

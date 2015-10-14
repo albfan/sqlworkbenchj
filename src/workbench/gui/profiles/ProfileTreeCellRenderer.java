@@ -25,13 +25,20 @@ package workbench.gui.profiles;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.lang.reflect.Method;
 
+import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JTree;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeCellRenderer;
 
 import workbench.resource.IconMgr;
+
+import workbench.gui.lnf.LnFHelper;
 
 /**
  * A tree cell renderer that can indicate a drop target.
@@ -41,19 +48,35 @@ import workbench.resource.IconMgr;
 public class ProfileTreeCellRenderer
 	extends DefaultTreeCellRenderer
 {
+  private TreeCellRenderer delegate;
 	private Object dropTargetItem;
 	private Border dropBorder;
 	private Border defaultBorder;
 
-	public ProfileTreeCellRenderer()
+	public ProfileTreeCellRenderer(TreeCellRenderer original)
 	{
 		super();
-		Color c = getBackgroundSelectionColor();
+    boolean iconsSet = false;
+
+    if (LnFHelper.isNonStandardLookAndFeel())
+    {
+      delegate = original;
+      iconsSet = setupDelegateIcons();
+    }
+    else
+    {
+      defaultBorder = super.getBorder();
+    }
+
+    Color c = UIManager.getDefaults().getColor("Tree.textForeground");
 		dropBorder = new LineBorder(c, 1);
-    defaultBorder = super.getBorder();
-		setLeafIcon(IconMgr.getInstance().getLabelIcon("profile"));
-		setOpenIcon(IconMgr.getInstance().getLabelIcon("folder-open"));
-		setClosedIcon(IconMgr.getInstance().getLabelIcon("folder"));
+    
+    if (!iconsSet)
+    {
+      setLeafIcon(IconMgr.getInstance().getLabelIcon("profile"));
+      setOpenIcon(IconMgr.getInstance().getLabelIcon("folder-open"));
+      setClosedIcon(IconMgr.getInstance().getLabelIcon("folder"));
+    }
 	}
 
 	public void setDropTargetItem(Object target)
@@ -64,15 +87,58 @@ public class ProfileTreeCellRenderer
 	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)
 	{
+    JComponent result = null;
+    if (delegate != null)
+    {
+      result = (JComponent)delegate.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+      if (defaultBorder == null)
+      {
+        defaultBorder = result.getBorder();
+      }
+    }
+    else
+    {
+      result = (JComponent)super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+    }
+
 		if (this.dropTargetItem != null && dropTargetItem == value)
 		{
-			setBorder(dropBorder);
+			result.setBorder(dropBorder);
 		}
 		else
 		{
-			setBorder(defaultBorder);
+			result.setBorder(defaultBorder);
 		}
-		return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+
+		return result;
 	}
+
+  private boolean setupDelegateIcons()
+  {
+    if (delegate == null) return false;
+
+    boolean isSet = false;
+    isSet = setIcon("setLeafIcon", IconMgr.getInstance().getLabelIcon("profile"));
+    isSet = isSet && setIcon("setOpenIcon", IconMgr.getInstance().getLabelIcon("folder-open"));
+    isSet = isSet && setIcon("setClosedIcon", IconMgr.getInstance().getLabelIcon("folder"));
+    return isSet;
+  }
+
+  private boolean setIcon(String setter, Icon toSet)
+  {
+    try
+    {
+      Method setIcon = delegate.getClass().getMethod(setter, Icon.class);
+      if (setIcon != null)
+      {
+        setIcon.invoke(delegate, toSet);
+      }
+      return true;
+    }
+    catch (Throwable th)
+    {
+    }
+    return false;
+  }
 
 }

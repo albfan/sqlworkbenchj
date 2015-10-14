@@ -81,12 +81,12 @@ public class TabButtonComponent
       @Override
       public Insets getInsets(Insets insets)
       {
-        return WbSwingUtilities.EMPTY_INSETS;
+        return WbSwingUtilities.getEmptyInsets();
       }
       @Override
       public Insets getInsets()
       {
-        return WbSwingUtilities.EMPTY_INSETS;
+        return WbSwingUtilities.getEmptyInsets();
       }
     };
     label.setOpaque(true);
@@ -109,12 +109,12 @@ public class TabButtonComponent
       @Override
       public Insets getInsets(Insets insets)
       {
-        return WbSwingUtilities.EMPTY_INSETS;
+        return WbSwingUtilities.getEmptyInsets();
       }
       @Override
       public Insets getInsets()
       {
-        return WbSwingUtilities.EMPTY_INSETS;
+        return WbSwingUtilities.getEmptyInsets();
       }
     };
     closeButton.setOpaque(true);
