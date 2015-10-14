@@ -251,6 +251,13 @@ public class WbCopy
 
 		if (tablesToExport.size() > 1 || sourceTables.wasWildcardArgument())
 		{
+      String targetTable = cmdLine.getValue(PARAM_TARGETTABLE);
+      if (StringUtil.isNonBlank(targetTable))
+      {
+        result.addErrorMessageByKey("ErrCopyMultiSrcNoTarget");
+        return result;
+      }
+
       SchemaCopy schemaCopy = new SchemaCopy(tablesToExport);
       if (cmdLine.isArgPresent(PARAM_ADJUST_NAMES))
       {
