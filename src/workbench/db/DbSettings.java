@@ -494,7 +494,7 @@ public class DbSettings
 		String ddl = getProperty("drop." + getKeyValue(type), null);
 		if (ddl == null)
 		{
-			ddl = "DROP " + type.toUpperCase() + " %name%";
+      ddl = "DROP " + type.toUpperCase() + " "+ MetaDataSqlManager.NAME_PLACEHOLDER;
 			if (cascade != null && includeCascade)
 			{
 				ddl += " " + cascade;

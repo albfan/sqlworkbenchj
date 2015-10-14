@@ -41,6 +41,8 @@ import workbench.util.WbPersistence;
 public class MetaDataSqlManager
 {
 	public static final String FQ_TABLE_NAME_PLACEHOLDER = "%fq_table_name%";
+	public static final String FQ_NAME_PLACEHOLDER = "%fq_name%";
+	public static final String NAME_PLACEHOLDER = "%name%";
 	public static final String SCHEMA_NAME_PLACEHOLDER = "%schema_name%";
 	public static final String CATALOG_NAME_PLACEHOLDER = "%catalog_name%";
 	public static final String TABLE_NAME_ONLY_PLACEHOLDER = "%simple_table_name%";
