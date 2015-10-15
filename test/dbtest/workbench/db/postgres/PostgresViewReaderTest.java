@@ -25,6 +25,7 @@ package workbench.db.postgres;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -77,6 +78,9 @@ public class PostgresViewReaderTest
 		assertNotNull(con);
 
 		TableIdentifier view = con.getMetadata().findObject(new TableIdentifier(TEST_SCHEMA, "v_view"));
+    TableDefinition def = con.getMetadata().getTableDefinition(view, false);
+    assertNotNull(def);
+    assertEquals(2, def.getColumnCount());
 		String sql = con.getMetadata().getViewReader().getExtendedViewSource(view).toString();
 		assertTrue(sql.contains("CREATE RULE insert_view AS\n    ON INSERT TO v_view DO"));
 	}
