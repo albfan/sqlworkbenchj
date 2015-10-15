@@ -1511,6 +1511,7 @@ public class DataExporter
 		this.setKeyColumnsToUse(sqlOptions.getKeyColumns());
 		this.setDateLiteralType(sqlOptions.getDateLiteralType());
 		this.setBlobMode(sqlOptions.getBlobMode());
+    this.setIncludeIdentityCols(!sqlOptions.ignoreIdentityColumns());
 		this.exportWriter.configureConverter();
 	}
 
@@ -1607,7 +1608,8 @@ public class DataExporter
 	 */
 	public List<String> getKeyColumnsToUse()
 	{
-		return keyColumnsToUse;
+    if (keyColumnsToUse == null) return null;
+		return Collections.unmodifiableList(keyColumnsToUse);
 	}
 
 	/**
@@ -1616,7 +1618,14 @@ public class DataExporter
 	 */
 	public void setKeyColumnsToUse(List<String> keyCols)
 	{
-		this.keyColumnsToUse = keyCols;
+    if (keyCols == null)
+    {
+      this.keyColumnsToUse = null;
+    }
+    else
+    {
+      this.keyColumnsToUse = new ArrayList<>(keyCols);
+    }
 	}
 
 	/**

@@ -135,6 +135,7 @@ public class SqlOptionsPanel
 		Settings s = Settings.getInstance();
 		s.setProperty("workbench.export.sql.commitevery", this.getCommitEvery());
 		s.setProperty("workbench.export.sql.createtable", this.getCreateTable());
+		s.setProperty("workbench.export.sql.ignoreidentity", this.ignoreIdentityColumns());
 		s.setProperty("workbench.export.sql.saveas.dateliterals", this.getDateLiteralType());
 		s.setProperty("workbench.export.sql.saveas.blobliterals", this.getBlobMode().getTypeString());
 	}
@@ -150,7 +151,16 @@ public class SqlOptionsPanel
 
 		type = s.getProperty("workbench.export.sql.saveas.blobliterals", BlobMode.SaveToFile.getTypeString());
 		this.blobTypes.setSelectedItem(type);
+
+    boolean ignore = s.getBoolProperty("workbench.export.sql.ignoreidentity", Settings.getInstance().getGenerateInsertIgnoreIdentity());
+    ignoreIdentity.setSelected(ignore);
 	}
+
+  @Override
+  public boolean ignoreIdentityColumns()
+  {
+    return ignoreIdentity.isSelected();
+  }
 
 	@Override
 	public String getMergeType()
@@ -441,6 +451,7 @@ public class SqlOptionsPanel
     blobTypes = new JComboBox();
     commitLabel = new JLabel();
     commitCount = new JTextField();
+    ignoreIdentity = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -449,9 +460,9 @@ public class SqlOptionsPanel
     selectKeys.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 4, 6, 0);
+    gridBagConstraints.insets = new Insets(7, 4, 6, 0);
     add(selectKeys, gridBagConstraints);
 
     jPanel2.setLayout(new BorderLayout(10, 0));
@@ -524,7 +535,7 @@ public class SqlOptionsPanel
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(3, 4, 8, 6);
+    gridBagConstraints.insets = new Insets(3, 4, 0, 6);
     add(jPanel4, gridBagConstraints);
 
     extOptionsPanel.setLayout(new GridBagLayout());
@@ -594,13 +605,21 @@ public class SqlOptionsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(0, 4, 0, 2);
     add(extOptionsPanel, gridBagConstraints);
+
+    ignoreIdentity.setText(ResourceMgr.getString("LblIgnoreIdentity")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    add(ignoreIdentity, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -625,6 +644,7 @@ private void selectKeysActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
   public JLabel commitLabel;
   public JCheckBox createTable;
   public JPanel extOptionsPanel;
+  public JCheckBox ignoreIdentity;
   public JLabel jLabel1;
   public JLabel jLabel2;
   public JPanel jPanel2;

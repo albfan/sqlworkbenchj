@@ -34,6 +34,7 @@ import workbench.db.exporter.ExportType;
 public interface SqlOptions
 {
 	boolean getCreateTable();
+  boolean ignoreIdentityColumns();
 	void setCreateTable(boolean flag);
 	void setCommitEvery(int value);
 	int getCommitEvery();

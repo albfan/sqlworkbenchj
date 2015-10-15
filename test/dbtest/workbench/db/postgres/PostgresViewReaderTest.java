@@ -46,7 +46,7 @@ public class PostgresViewReaderTest
 
 	public PostgresViewReaderTest()
 	{
-		super("PostgresViewReaderTeEst");
+		super("PostgresViewReaderTest");
 	}
 
 	@BeforeClass

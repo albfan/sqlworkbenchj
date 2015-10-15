@@ -212,7 +212,7 @@ public class DataExporterTest
 			{
 				return CharacterEscapeType.unicode;
 			}
-			
+
 			@Override
 			public QuoteEscapeType getQuoteEscaping()
 			{
@@ -266,6 +266,12 @@ public class DataExporterTest
 			{
 				return CollectionUtil.arrayList("ID");
 			}
+
+      @Override
+      public boolean ignoreIdentityColumns()
+      {
+        return false;
+      }
 
 			@Override
 			public String getDateLiteralType()

@@ -22,6 +22,7 @@
  */
 package workbench.db.exporter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import workbench.interfaces.Committer;
@@ -507,10 +508,17 @@ public class SqlRowDataConverter
 	 * Setter for property keyColumnsToUse.
 	 * @param cols New value of property keyColumnsToUse.
 	 */
-	public void setKeyColumnsToUse(List<String> cols)
+	public void setKeyColumnsToUse(List<String> keyCols)
 	{
-		this.keyColumnsToUse = cols;
-	}
+    if (keyCols == null)
+    {
+      this.keyColumnsToUse = null;
+    }
+    else
+    {
+      this.keyColumnsToUse = new ArrayList<>(keyCols);
+    }
+  }
 
 	public void setIncludeTableOwner(boolean flag)
 	{
