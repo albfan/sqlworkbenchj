@@ -30,13 +30,16 @@ import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -259,6 +262,31 @@ public class PostgresSequenceReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+
+    if (result.getRowCount() > 1)
+    {
+      // this can happen if a sequence is owned by more than one column
+      // so collect all the "owned_by" values and then delete all but the
+      // first row
+      int colIndex = result.getColumnIndex("owned_by");
+      String cols = "";
+      for (int i=0; i < result.getRowCount(); i++)
+      {
+        String owned = result.getValueAsString(i, colIndex);
+        if (StringUtil.isNonEmpty(owned))
+        {
+          if (cols.length() > 0) cols += ", ";
+          cols += owned;
+        }
+      }
+      for (int i=result.getRowCount() - 1; i > 0; i--)
+      {
+        result.deleteRow(i);
+      }
+      result.setValue(0, colIndex, cols);
+    }
+
+    result.resetStatus();
 		return result;
 	}
 
