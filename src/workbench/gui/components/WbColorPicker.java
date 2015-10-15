@@ -87,6 +87,7 @@ public class WbColorPicker
 		d.height--;
 		d.width--;
 		this.sampleColor.setPreferredSize(d);
+    this.sampleColor.setOpaque(true);
 		this.sampleBorder = new BevelBorder(BevelBorder.LOWERED);
 		WbSwingUtilities.adjustButtonWidth(selectColor,iconSize + 6, iconSize + 6);
 	}
