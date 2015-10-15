@@ -881,7 +881,12 @@ public class BatchRunner
 
             if (retryHandler != null && !ignoreAllErrors)
             {
-              lastError.setOriginalStatement(sql);
+              if (lastError == null)
+              {
+                // can happen when having multiple levels of WbInclude calls
+                lastError = new ErrorDescriptor();
+                lastError.setErrorMessage(feedback);
+              }
               int choice = retryHandler.scriptErrorPrompt(commandIndex, lastError, null, 0);
               switch (choice)
               {
