@@ -2721,7 +2721,7 @@ public class Settings
 
 	public int getMaxFractionDigits()
 	{
-		return getIntProperty(PROPERTY_DECIMAL_DIGITS, 2);
+		return getIntProperty(PROPERTY_DECIMAL_DIGITS, 0);
 	}
 
 	public void setMaxFractionDigits(int aValue)
