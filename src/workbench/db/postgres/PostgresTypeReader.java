@@ -22,8 +22,8 @@
  */
 package workbench.db.postgres;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ import workbench.resource.Settings;
 import workbench.db.BaseObjectType;
 import workbench.db.ColumnIdentifier;
 import workbench.db.CommentSqlManager;
+import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.JdbcUtils;
@@ -52,9 +53,13 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
+
 /**
- * An ObjectlistEnhancer to work around a bug in the Postgres JDBC driver
- * to return a proper value in the TABLE_TYPE column.
+ * A class to read information about "structure" Types in Postgres.
+ *
+ * This class will read information about types, created using e.g.:
+ *
+ * <tt>CREATE TYPE foo AS (id integer, some_data text);</tt>
  *
  * @author Thomas Kellerer
  */
@@ -145,7 +150,7 @@ public class PostgresTypeReader
     StringBuilder select = new StringBuilder(100);
 
 		String baseSelect =
-			"SELECT null as table_cat, \n" +
+		"SELECT null as table_cat, \n" +
 		 "        n.nspname as table_schem, \n" +
 		 "        t.typname as table_name, \n" +
 		 "        'TYPE' as table_type, \n" +
@@ -238,8 +243,9 @@ public class PostgresTypeReader
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
 		try
-		{
-			TableDefinition tdef = con.getMetadata().getTableDefinition(createTableIdentifier(object));
+    {
+      List<ColumnIdentifier> columns = getColumns(con, object);
+			TableDefinition tdef = new TableDefinition(createTableIdentifier(object), columns);
 			DataStore result = new TableColumnsDatastore(tdef);
 			return result;
 		}
@@ -284,19 +290,85 @@ public class PostgresTypeReader
     if (object == null) return null;
     if (con == null) return null;
 
+    // Starting with build 1204 the Postgres JDBC driver does not return column
+    // information for types any longer
+    // this is a copy of the statement and code used by the driver, adjusted for type columns only
+    String sql =
+      "selECT a.attname as column_name, \n" +
+      "       a.attnum as column_position,  \n" +
+      "       dsc.description as remarks, \n" +
+      "       a.atttypid, \n" +
+      "       a.atttypmod, \n" +
+      "       pg_catalog.format_type(a.atttypid, null) as data_type \n" +
+      "FROM pg_catalog.pg_namespace n  \n" +
+      "   JOIN pg_catalog.pg_class c ON c.relnamespace = n.oid \n" +
+      "   JOIN pg_catalog.pg_attribute a ON a.attrelid = c.oid \n" +
+      "   LEFT JOIN pg_catalog.pg_description dsc ON c.oid=dsc.objoid AND a.attnum = dsc.objsubid \n" +
+      "   LEFT JOIN pg_catalog.pg_class dc ON dc.oid=dsc.classoid AND dc.relname='pg_class' \n" +
+      "   LEFT JOIN pg_catalog.pg_namespace dn ON dc.relnamespace=dn.oid AND dn.nspname='pg_catalog' \n" +
+      "WHERE a.attnum > 0 AND NOT a.attisdropped  \n" +
+      "  AND c.relkind = 'c' \n" +
+      "  AND n.nspname = ? \n " +
+      "  AND c.relname = ? \n " +
+      "ORDER BY column_position";
+
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    Savepoint sp = null;
+    List<ColumnIdentifier> result = new ArrayList<>();
+
+    PgTypeInfo typeInfo = new PgTypeInfo(con);
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+      LogMgr.logInfo("PostgresTypeReader.retrieveColumns()", "Retrieving type columns using: " + SqlUtil.replaceParameters(sql, object.getSchema(), object.getObjectName()));
+		}
+
     try
     {
-      TableDefinition tdef = con.getMetadata().getTableDefinition(createTableIdentifier(object));
-      if (tdef != null)
+      DataTypeResolver resolver = con.getMetadata().getDataTypeResolver();
+      sp = con.setSavepoint();
+      stmt = con.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, object.getSchema());
+      stmt.setString(2, object.getObjectName());
+
+      rs = stmt.executeQuery();
+
+      while (rs.next())
       {
-        return tdef.getColumns();
+        String colName = rs.getString(1);
+        int pos = rs.getInt(2);
+        String remarks = rs.getString(3);
+        int typeOid = rs.getInt(4);
+        int typeMod = rs.getInt(5);
+        String pgType = rs.getString(6);
+
+        ColumnIdentifier col = new ColumnIdentifier(colName);
+        int jdbcType = typeInfo.getSQLType(typeOid);
+        int decimalDigits = typeInfo.getScale(typeOid, typeMod);
+        int columnSize = typeInfo.getPrecision(typeOid, typeMod);
+        if (columnSize == 0) {
+            columnSize = typeInfo.getDisplaySize(typeOid, typeMod);
+        }
+        col.setDataType(jdbcType);
+        col.setDecimalDigits(decimalDigits);
+        col.setColumnSize(columnSize);
+        col.setComment(remarks);
+        col.setDbmsType(resolver.getSqlTypeDisplay(pgType, jdbcType, columnSize, decimalDigits));
+        col.setPosition(pos);
+        result.add(col);
       }
     }
-    catch (SQLException ex)
+    catch (Exception ex)
     {
       LogMgr.logWarning("PostgresTypeReader.getColumns()", "Could not read colums for type: " + object.getFullyQualifiedName(con), ex);
     }
-    return null;
+    finally
+    {
+      con.releaseSavepoint(sp);
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return result;
   }
 
 	private TableIdentifier createTableIdentifier(DbObject object)

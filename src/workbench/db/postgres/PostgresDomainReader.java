@@ -57,21 +57,22 @@ import workbench.util.StringUtil;
 public class PostgresDomainReader
 	implements ObjectListExtender
 {
-	final String baseSql = "SELECT null::text as domain_catalog,  \n" +
-             "       n.nspname as domain_schema, \n" +
-             "       t.typname as domain_name, \n" +
-             "       pg_catalog.format_type(t.typbasetype, t.typtypmod) as data_type, \n" +
-             "       not t.typnotnull as nullable, \n" +
-             "       t.typdefault as default_value, \n" +
-             "       c.conname as constraint_name, \n" +
-             "       pg_catalog.pg_get_constraintdef(c.oid, true) as constraint_definition, \n" +
-						 "       obj_description(t.oid) as remarks \n" +
-             "FROM pg_catalog.pg_type t \n" +
-             "  LEFT JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace \n" +
-             "  LEFT JOIN pg_catalog.pg_constraint c ON t.oid = c.contypid \n" +
-             "WHERE t.typtype = 'd' \n" +
-             "  AND n.nspname <> 'pg_catalog' \n" +
-             "  AND n.nspname <> 'information_schema' \n";
+	final String baseSql =
+    "SELECT null::text as domain_catalog,  \n" +
+    "       n.nspname as domain_schema, \n" +
+    "       t.typname as domain_name, \n" +
+    "       pg_catalog.format_type(t.typbasetype, t.typtypmod) as data_type, \n" +
+    "       not t.typnotnull as nullable, \n" +
+    "       t.typdefault as default_value, \n" +
+    "       c.conname as constraint_name, \n" +
+    "       pg_catalog.pg_get_constraintdef(c.oid, true) as constraint_definition, \n" +
+    "       obj_description(t.oid) as remarks \n" +
+    "FROM pg_catalog.pg_type t \n" +
+    "  LEFT JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace \n" +
+    "  LEFT JOIN pg_catalog.pg_constraint c ON t.oid = c.contypid \n" +
+    "WHERE t.typtype = 'd' \n" +
+    "  AND n.nspname <> 'pg_catalog' \n" +
+    "  AND n.nspname <> 'information_schema' \n";
 
 
 	public Map<String, DomainIdentifier> getDomainInfo(WbConnection connection, String schema)

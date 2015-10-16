@@ -22,16 +22,20 @@
  */
 package workbench.db.postgres;
 
-import workbench.db.ColumnIdentifier;
-import workbench.db.BaseObjectType;
-import workbench.TestUtil;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.BaseObjectType;
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.WbTestCase;
-import workbench.db.WbConnection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -113,6 +117,5 @@ public class PostgresTypeReaderTest
 		assertTrue(sql.contains("COMMENT ON TYPE address_type IS 'a single address'"));
 		assertTrue(sql.contains("COMMENT ON COLUMN address_type.city IS 'the city'"));
 	}
-
 
 }

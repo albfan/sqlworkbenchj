@@ -39,6 +39,10 @@ public class PostgresDataTypeResolver
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
 		if (sqlType == Types.VARCHAR && "text".equals(dbmsName)) return "text";
+		if (sqlType == Types.VARCHAR && "character varying".equals(dbmsName))
+    {
+      dbmsName = "varchar";
+    }
 		if (sqlType == Types.SMALLINT && "int2".equals(dbmsName)) return "smallint";
 		if (sqlType == Types.INTEGER && "int4".equals(dbmsName)) return "integer";
 		if (sqlType == Types.BIGINT && "int8".equals(dbmsName)) return "bigint";
@@ -80,7 +84,7 @@ public class PostgresDataTypeResolver
 		}
 		if ("_varchar".equals(dbmsName)) return "varchar[]";
     if ("varchar".equals(dbmsName) && size < 0) return "varchar";
-    
+
 		return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 	}
 
