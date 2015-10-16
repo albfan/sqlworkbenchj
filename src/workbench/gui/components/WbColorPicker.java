@@ -38,8 +38,6 @@ import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
@@ -51,10 +49,9 @@ import workbench.gui.WbSwingUtilities;
  * @author Thomas Kellerer
  */
 public class WbColorPicker
-	extends javax.swing.JPanel
+	extends JPanel
 	implements Serializable
 {
-	private Border sampleBorder;
 	private ActionListener actionListener;
 
 	public WbColorPicker()
@@ -75,21 +72,13 @@ public class WbColorPicker
 			WbSwingUtilities.adjustButtonWidth(resetButton, iconSize + 6, iconSize + 6);
 		}
 		this.defaultLabel.setVisible(false);
-		Dimension d;
-		if (showReset)
-		{
-			d = resetButton.getPreferredSize();
-		}
-		else
-		{
-			d = selectColor.getPreferredSize();
-		}
+    WbSwingUtilities.adjustButtonWidth(selectColor, iconSize + 6, iconSize + 6);
+		Dimension d = selectColor.getPreferredSize();
 		d.height--;
 		d.width--;
-		this.sampleColor.setPreferredSize(d);
-    this.sampleColor.setOpaque(true);
-		this.sampleBorder = new BevelBorder(BevelBorder.LOWERED);
-		WbSwingUtilities.adjustButtonWidth(selectColor,iconSize + 6, iconSize + 6);
+		sampleColor.setPreferredSize(d);
+    sampleColor.setOpaque(true);
+    sampleColor.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 	}
 
 	/**
@@ -102,6 +91,7 @@ public class WbColorPicker
 	{
 		defaultLabel.setText(ResourceMgr.getString(key));
 	}
+  
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -112,7 +102,7 @@ public class WbColorPicker
   {
 
     infoPanel = new JPanel();
-    sampleColor = new WbLabelField();
+    sampleColor = new JLabel();
     resetButton = new FlatButton();
     selectColor = new FlatButton();
     defaultLabel = new JLabel();
@@ -121,8 +111,8 @@ public class WbColorPicker
 
     infoPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
 
-    sampleColor.setMinimumSize(new Dimension(18, 18));
-    sampleColor.setPreferredSize(new Dimension(18, 18));
+    sampleColor.setMinimumSize(new Dimension(16, 16));
+    sampleColor.setPreferredSize(new Dimension(16, 16));
     infoPanel.add(sampleColor);
 
     resetButton.setToolTipText(ResourceMgr.getDescription("LblResetColor"));
@@ -189,10 +179,9 @@ public class WbColorPicker
 
 	private void resetColor()
 	{
-		this.resetButton.setEnabled(false);
-		this.sampleColor.setBackground(this.getBackground());
-		this.sampleColor.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-		this.defaultLabel.setVisible(true);
+		resetButton.setEnabled(false);
+		sampleColor.setBackground(this.getBackground());
+		defaultLabel.setVisible(true);
 	}
 
 	public void setSelectedColor(Color c)
@@ -203,10 +192,9 @@ public class WbColorPicker
 		}
 		else
 		{
-			this.resetButton.setEnabled(true);
+			resetButton.setEnabled(true);
 			defaultLabel.setVisible(false);
 			sampleColor.setBackground(c);
-			sampleColor.setBorder(sampleBorder);
 		}
 	}
 
@@ -225,7 +213,7 @@ public class WbColorPicker
   private JLabel defaultLabel;
   private JPanel infoPanel;
   private JButton resetButton;
-  private WbLabelField sampleColor;
+  private JLabel sampleColor;
   private JButton selectColor;
   // End of variables declaration//GEN-END:variables
 }

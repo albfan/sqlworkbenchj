@@ -24,13 +24,13 @@
         <Property name="verticalGap" type="int" value="0"/>
       </Layout>
       <SubComponents>
-        <Component class="workbench.gui.components.WbLabelField" name="sampleColor">
+        <Component class="javax.swing.JLabel" name="sampleColor">
           <Properties>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[18, 18]"/>
+              <Dimension value="[16, 16]"/>
             </Property>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[18, 18]"/>
+              <Dimension value="[16, 16]"/>
             </Property>
           </Properties>
         </Component>
