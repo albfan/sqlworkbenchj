@@ -1653,11 +1653,6 @@ public class DbSettings
 		return getBoolProperty("catalogs.supported", true);
 	}
 
-	public boolean supportsGetSchemaCall()
-	{
-		return getBoolProperty("jdbc.getschame.supported", true);
-	}
-
 	public boolean supportsSchemas()
 	{
 		return getBoolProperty("schemas.supported", true);

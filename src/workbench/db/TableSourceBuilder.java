@@ -424,7 +424,7 @@ public class TableSourceBuilder
 
 		if (includePK && !inlinePK && pk != null)
 		{
-			CharSequence pkSource = getPkSource(table, pk, false);
+			CharSequence pkSource = getPkSource(table, pk, false, useFQN);
 			result.append('\n');
 			result.append(pkSource);
 		}
@@ -521,8 +521,6 @@ public class TableSourceBuilder
 		String objectType = toCreate.getObjectType();
 		objectType = objectType.replace("SYSTEM ", "");
 
-		String name = useFQN ? toCreate.getFullyQualifiedName(dbConnection) : toCreate.getObjectExpression(dbConnection);
-
 		String ddl = getReplaceDDL(objectType);
 
     if (ddl == null)
@@ -548,8 +546,11 @@ public class TableSourceBuilder
 			result.append('\n');
 		}
 
-    ddl = StringUtil.replace(ddl, "%name%", name);
-    ddl = StringUtil.replace(ddl, "%fq_name%", SqlUtil.fullyQualifiedName(dbConnection, toCreate));
+    String name = toCreate.getObjectExpression(dbConnection);
+    String fqName = toCreate.getFullyQualifiedName(dbConnection);
+
+    ddl = StringUtil.replace(ddl, MetaDataSqlManager.NAME_PLACEHOLDER, useFQN ? fqName : name);
+    ddl = StringUtil.replace(ddl, MetaDataSqlManager.FQ_NAME_PLACEHOLDER, fqName);
     if (StringUtil.isNonBlank(typeOption))
     {
       ddl = StringUtil.replace(ddl, "%typeoption%", typeOption);
@@ -758,9 +759,15 @@ public class TableSourceBuilder
 	 * @param table         the table for which the PK statement should be created.
 	 * @param pk            the PK definition, if null the PK from the table is used
 	 * @param forInlineUse  if true, the SQL is useable "inline" for a CREATE TABLE statement.
+   *
 	 * @return an SQL statement to add a PK constraint on the given table.
 	 */
 	public CharSequence getPkSource(TableIdentifier table, PkDefinition pk, boolean forInlineUse)
+  {
+    return getPkSource(table, pk, forInlineUse, false);
+  }
+
+	public CharSequence getPkSource(TableIdentifier table, PkDefinition pk, boolean forInlineUse, boolean useFQN)
 	{
 		if (pk == null) return StringUtil.EMPTY_STRING;
 
@@ -772,12 +779,14 @@ public class TableSourceBuilder
 		if (StringUtil.isEmptyString(template)) return StringUtil.EMPTY_STRING;
 
 		StringBuilder result = new StringBuilder(100);
-		String tablename = table.getTableExpression(this.dbConnection);
+    String fqName = table.getFullyQualifiedName(dbConnection);
+    String tablename = table.getTableExpression(this.dbConnection);
 
 		List<String> pkCols = pk.getColumns();
 		String pkName = pk.getPkName();
 
-		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
+		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, useFQN ? fqName : tablename);
+    template = StringUtil.replace(template, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqName);
 		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, StringUtil.listToString(pkCols, ", ", false));
 
 		if (nameTester.isSystemConstraintName(pkName))
@@ -794,10 +803,15 @@ public class TableSourceBuilder
 				pkName = pkName.substring(0, maxLen - 1);
 			}
 		}
-		else
-		{
-			pkName = meta.quoteObjectname(pkName);
-		}
+
+    if (dbConnection.getDbSettings().useFQConstraintName())
+    {
+      pkName = SqlUtil.buildExpression(dbConnection, table.getCatalog(), table.getSchema(), pkName);
+    }
+    else if (pkName != null && !meta.isLegalIdentifier(pkName))
+    {
+      pkName = meta.quoteObjectname(pkName);
+    }
 
 		if (StringUtil.isEmptyString(pkName))
 		{

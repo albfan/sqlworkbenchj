@@ -30,8 +30,8 @@ import workbench.log.LogMgr;
 import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.sql.ResultNameAnnotation;
-import workbench.util.CollectionUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -289,7 +289,7 @@ public class TableSelectBuilder
 
 		if (table.getSchema() == null)
 		{
-			select = TemplateHandler.removeSchemaOrCatalog(select, MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, SqlUtil.getSchemaSeparator(dbConnection));
+			select = TemplateHandler.removeSchemaPlaceholder(select, SqlUtil.getSchemaSeparator(dbConnection));
 		}
 		else
 		{
@@ -298,7 +298,7 @@ public class TableSelectBuilder
 
 		if (table.getCatalog() == null)
 		{
-			select = TemplateHandler.removeSchemaOrCatalog(select, MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, SqlUtil.getCatalogSeparator(dbConnection));
+			select = TemplateHandler.removeCatalogPlaceholder(select, SqlUtil.getCatalogSeparator(dbConnection));
 		}
 		else
 		{

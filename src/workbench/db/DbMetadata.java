@@ -177,7 +177,8 @@ public class DbMetadata
 	private Set<String> tableTypesFromDriver;
 	private int maxTableNameLength;
 
-	private boolean supportsGetSchema;
+	private boolean supportsGetSchema = true;
+	private boolean supportsGetCatalog = true;
   private Pattern identifierPattern;
 
 	public DbMetadata(WbConnection aConnection)
@@ -501,7 +502,6 @@ public class DbMetadata
 			this.maxTableNameLength = 0;
 		}
 
-		supportsGetSchema = dbSettings.supportsGetSchemaCall();
     initIdentifierPattern();
 
 		if (schemaInfoReader == null)
@@ -2560,6 +2560,9 @@ public class DbMetadata
 				stmt = this.dbConnection.createStatementForQuery();
 				rs = stmt.executeQuery(query);
 				if (rs.next()) catalog = rs.getString(1);
+
+        // if a query was configured, and this was successful don't try to use getCatalog()
+        return catalog;
 			}
 			catch (Exception e)
 			{
@@ -2572,7 +2575,7 @@ public class DbMetadata
 			}
 		}
 
-		if (catalog == null)
+		if (catalog == null && supportsGetCatalog)
 		{
 			try
 			{
@@ -2582,6 +2585,7 @@ public class DbMetadata
 			{
 				LogMgr.logWarning("DbMetadata.getCurrentCatalog", "Could not retrieve catalog using getCatalog()", e);
 				catalog = null;
+        supportsGetCatalog = false;
 			}
 		}
 

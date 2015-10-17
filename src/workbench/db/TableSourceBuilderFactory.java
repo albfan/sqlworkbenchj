@@ -72,7 +72,7 @@ public class TableSourceBuilderFactory
 		{
 			return new HsqlTableSourceBuilder(con);
 		}
-		else if (con.getDbId().equals("db2"))
+		else if (con.getDbId().equals(DbMetadata.DBID_DB2_LUW))
 		{
 			return new Db2TableSourceBuilder(con);
 		}

@@ -23,8 +23,12 @@
 package workbench.db.sqltemplates;
 
 import java.io.IOException;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.MetaDataSqlManager;
+
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -70,20 +74,6 @@ public abstract class TemplateHandler
 	}
 
 	/**
-	 * Remove the a schema or catalog placeholder completely from the template SQL.
-	 *
-	 * @param sql          the sql template
-	 * @param placeholder  the placeholder
-	 * @param delimiter    if this character follows the placeholder, it is removed as well
-	 *
-	 * @return the template with the placeholder removed
-	 */
-	public static String removeSchemaOrCatalog(String sql, String placeholder, char delimiter)
-	{
-		return sql.replace(placeholder + delimiter, StringUtil.EMPTY_STRING);
-	}
-
-	/**
 	 * Remove the placeholder completely from the template SQL.
 	 *
 	 * @param sql          the sql template
@@ -111,6 +101,35 @@ public abstract class TemplateHandler
 		return sql.replaceAll(s, StringUtil.EMPTY_STRING);
 	}
 
+  public static String removeSchemaPlaceholder(String sql, char schemaSeparator)
+  {
+    return removeNamespacePlaceholder(sql, MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, schemaSeparator);
+  }
+
+  public static String removeCatalogPlaceholder(String sql, char schemaSeparator)
+  {
+    return removeNamespacePlaceholder(sql, MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, schemaSeparator);
+  }
+
+	/**
+	 * Remove the a schema or catalog placeholder completely from the template SQL.
+	 *
+	 * @param sql                the sql template
+	 * @param placeholder        the placeholder
+	 * @param namespaceSeparator if this character follows the placeholder, it is removed as well
+	 *
+	 * @return the template with the placeholder removed
+   *
+   * @see #removeSchemaPlaceholder(java.lang.String, java.lang.String)
+   * @see #removeCatalogPlaceholder(java.lang.String, java.lang.String)
+	 */
+  public static String removeNamespacePlaceholder(String sql, String placeholder, char namespaceSeparator)
+  {
+    String clean = removePlaceholder(sql, placeholder, false);
+    clean = removePlaceholder(sql, placeholder + namespaceSeparator, false);
+    return clean;
+  }
+
 	/**
 	 * Replace the placeholder in the given SQL template.
 	 *
@@ -121,6 +140,8 @@ public abstract class TemplateHandler
 	 * @param sql           the SQL template
 	 * @param placeholder   the placeholder
 	 * @param replacement   the replacement
+   * @param addWhitespace if true a space will be added after the replacement
+   *
 	 * @return the template with the placeholder replaced
 	 * @see #removePlaceholder(String, String, boolean)
 	 */

@@ -1738,6 +1738,8 @@ public class SqlUtil
 	 */
 	public static String buildExpression(WbConnection conn, String catalog, String schema, String name)
 	{
+    if (StringUtil.isEmptyString(name)) return null;
+    
 		StringBuilder result = new StringBuilder(30);
 		DbMetadata meta = (conn != null ? conn.getMetadata() : null);
 		if (meta == null)
