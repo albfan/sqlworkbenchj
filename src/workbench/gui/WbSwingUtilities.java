@@ -128,7 +128,7 @@ public class WbSwingUtilities
   {
     return new Insets(0, 0, 0, 0);
   }
-  
+
 	public static Border getBevelBorder()
 	{
 		return createBevelBorder(BevelBorder.LOWERED);
@@ -1548,9 +1548,10 @@ public class WbSwingUtilities
 				int width = (int)bounds.getWidth() + 2;
 				int height = Math.max((int)bounds.getHeight(), minHeight);
 				Dimension pref = button.getPreferredSize();
-				Dimension dim = new Dimension(Math.max(width,minWidth), Math.max(height, pref.height));
+				Dimension dim = new Dimension(Math.max(width, minWidth), Math.max(height, minHeight));
 				button.setPreferredSize(dim);
 				button.setMinimumSize(dim);
+        button.setMaximumSize(dim);
 			}
 		}
 	}

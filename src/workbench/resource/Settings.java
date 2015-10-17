@@ -51,8 +51,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.swing.UIManager;
-
 import workbench.WbManager;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.PropertyStorage;
@@ -147,6 +145,7 @@ public class Settings
 	public static final String PROPERTY_EDITOR_BG_COLOR = "workbench.editor.color.background";
 	public static final String PROPERTY_EDITOR_FG_COLOR = "workbench.editor.color.foreground";
 	public static final String PROPERTY_EDITOR_CURSOR_COLOR = "workbench.editor.color.cursor";
+	public static final String PROPERTY_EDITOR_SELECTION_COLOR = "workbench.editor.color.selection";
 	public static final String PROPERTY_EDITOR_DATATYPE_COLOR = "workbench.editor.color.datatype";
 
 	public static final String PROPERTY_CONSOLIDATE_LOG_MESSAGES = "workbench.gui.log.consolidate";
@@ -1829,9 +1828,7 @@ public class Settings
 
 	public Color getEditorBackgroundColor()
 	{
-		Color std = UIManager.getColor("TextArea.background");
-		if (std == null) std = Color.WHITE;
-		return getColor(PROPERTY_EDITOR_BG_COLOR, std);
+		return getColor(PROPERTY_EDITOR_BG_COLOR, null);
 	}
 
 	public void setEditorBackgroundColor(Color c)
@@ -1853,9 +1850,7 @@ public class Settings
 
 	public Color getEditorTextColor()
 	{
-		Color std = UIManager.getColor("TextArea.foreground");
-		if (std == null) std = Color.BLACK;
-		return getColor(PROPERTY_EDITOR_FG_COLOR, std);
+		return getColor(PROPERTY_EDITOR_FG_COLOR, null);
 	}
 
 	public void setEditorTextColor(Color c)
@@ -1875,12 +1870,12 @@ public class Settings
 
 	public void setEditorSelectionColor(Color c)
 	{
-		setColor("workbench.editor.color.selection", c);
+		setColor(PROPERTY_EDITOR_SELECTION_COLOR, c);
 	}
 
 	public Color getEditorSelectionColor()
 	{
-		return getColor("workbench.editor.color.selection", new Color(0xccccff));
+		return getColor(PROPERTY_EDITOR_SELECTION_COLOR, null);
 	}
 
 	public void setEditorErrorColor(Color c)

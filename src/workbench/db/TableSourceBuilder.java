@@ -380,7 +380,7 @@ public class TableSourceBuilder
 		if (includePK && inlinePK && pk != null)
 		{
 			result.append(",\n").append(COL_INDENT);
-			CharSequence pkSql = getPkSource(table, pk, true);
+			CharSequence pkSql = getPkSource(table, pk, true, false);
 			result.append(pkSql);
 		}
 
@@ -762,11 +762,6 @@ public class TableSourceBuilder
    *
 	 * @return an SQL statement to add a PK constraint on the given table.
 	 */
-	public CharSequence getPkSource(TableIdentifier table, PkDefinition pk, boolean forInlineUse)
-  {
-    return getPkSource(table, pk, forInlineUse, false);
-  }
-
 	public CharSequence getPkSource(TableIdentifier table, PkDefinition pk, boolean forInlineUse, boolean useFQN)
 	{
 		if (pk == null) return StringUtil.EMPTY_STRING;

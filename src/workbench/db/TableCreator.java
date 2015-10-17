@@ -222,7 +222,7 @@ public class TableCreator
     {
       TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
       PkDefinition pk = new PkDefinition(colNames);
-      CharSequence pkSql = builder.getPkSource(this.tablename, pk, false);
+      CharSequence pkSql = builder.getPkSource(this.tablename, pk, false, false);
       if (pkSql.length() > 0)
       {
         return pkSql.toString();

@@ -103,7 +103,6 @@ import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.SearchAndReplace;
 import workbench.gui.editor.SyntaxDocument;
-import workbench.gui.editor.SyntaxUtilities;
 import workbench.gui.editor.TextFormatter;
 import workbench.gui.editor.TokenMarker;
 
@@ -191,8 +190,6 @@ public class EditorPanel
     this.setDoubleBuffered(true);
     this.setBorder(DEFAULT_BORDER);
 
-    this.getPainter().setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
-
     this.setTabSize(Settings.getInstance().getEditorTabWidth());
     this.setCaretBlinkEnabled(true);
     this.fileSave = new FileSaveAction(this);
@@ -235,12 +232,9 @@ public class EditorPanel
 
     Settings.getInstance().addFontChangedListener(this);
     Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL);
-    String[] props = SyntaxUtilities.getColorProperties();
-    for (String prop : props)
-    {
-      Settings.getInstance().addPropertyChangeListener(this, prop);
-    }
+
     this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
+    
     new DropTarget(this, DnDConstants.ACTION_COPY, this);
   }
 
@@ -1053,10 +1047,6 @@ public class EditorPanel
     else if (Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL.equals(evt.getPropertyName()))
     {
       this.setElectricScroll(Settings.getInstance().getElectricScroll());
-    }
-    else if (evt.getPropertyName().startsWith("workbench.editor.color."))
-    {
-      this.getPainter().setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
     }
     if (this.isReallyVisible())
     {

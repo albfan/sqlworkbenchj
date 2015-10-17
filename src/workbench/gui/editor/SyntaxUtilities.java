@@ -105,23 +105,6 @@ public class SyntaxUtilities
 		return true;
 	}
 
-	public static String[] getColorProperties()
-	{
-		return new String[]
-			{
-				"workbench.editor.color.comment1",
-				"workbench.editor.color.comment2",
-				"workbench.editor.color.keyword1",
-				"workbench.editor.color.keyword2",
-				"workbench.editor.color.keyword3",
-				"workbench.editor.color.literal1",
-				"workbench.editor.color.literal2",
-				"workbench.editor.color.label",
-				"workbench.editor.color.operator",
-				"workbench.editor.color.invalid",
-				"workbench.editor.color.datatype"
-			};
-	}
 	/**
 	 * Returns the default style table. This can be passed to the
 	 * <code>setStyles()</code> method of <code>SyntaxDocument</code>

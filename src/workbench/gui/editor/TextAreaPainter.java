@@ -19,9 +19,9 @@ import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.JComponent;
+import javax.swing.UIManager;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
@@ -32,9 +32,9 @@ import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 
-import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
+
 
 /**
  * The text area repaint manager. It performs double buffering and paints
@@ -73,19 +73,11 @@ public class TextAreaPainter
 
 	protected static final int GUTTER_MARGIN = 2;
 	public static final Color GUTTER_BACKGROUND = new Color(238,240,238);
+  public static final Color DEFAULT_SELECTION_COLOR = new Color(204,204,255);
 	public static final Color GUTTER_COLOR = Color.DARK_GRAY;
 
 	private final Object stylesLockMonitor = new Object();
 	private String highlighText;
-
-	private static final Set<String> COLOR_PROPS = CollectionUtil.treeSet(
-		Settings.PROPERTY_EDITOR_FG_COLOR,
-		Settings.PROPERTY_EDITOR_BG_COLOR,
-		Settings.PROPERTY_EDITOR_CURSOR_COLOR,
-		Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
-		Settings.PROPERTY_EDITOR_BRACKET_HILITE_COLOR,
-		Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR,
-		Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE);
 
 	private Map renderingHints;
 
@@ -104,15 +96,9 @@ public class TextAreaPainter
 		super.setCursor(DEFAULT_CURSOR);
 		super.setFont(Settings.getInstance().getEditorFont());
 
-		setForeground(Settings.getInstance().getEditorTextColor());
-		setBackground(Settings.getInstance().getEditorBackgroundColor());
-
 		readBracketSettings();
 
-		caretColor = Settings.getInstance().getEditorCursorColor();
-		selectionColor = Settings.getInstance().getEditorSelectionColor();
-		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
-		occuranceHighlightColor = Settings.getInstance().geSelectionHighlightColor();
+    setColors();
 		selectionHighlightIgnoreCase = Settings.getInstance().getSelectionHighlightIgnoreCase();
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
 
@@ -123,6 +109,7 @@ public class TextAreaPainter
 			Settings.PROPERTY_EDITOR_CURSOR_COLOR,
 			Settings.PROPERTY_EDITOR_DATATYPE_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
+			Settings.PROPERTY_EDITOR_SELECTION_COLOR,
 			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_COLOR,
 			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_IGNORE_CASE,
 			Settings.PROPERTY_EDITOR_BRACKET_HILITE,
@@ -146,6 +133,7 @@ public class TextAreaPainter
 			Toolkit tk = Toolkit.getDefaultToolkit();
 			renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
 		}
+
 	}
 
   @Override
@@ -207,9 +195,9 @@ public class TextAreaPainter
 		{
 			selectionHighlightIgnoreCase = Settings.getInstance().getSelectionHighlightIgnoreCase();
 		}
-		else if (COLOR_PROPS.contains(evt.getPropertyName()))
+		else
 		{
-			setColors();
+			WbSwingUtilities.invoke(this::setColors);
 			invalidate();
 			WbSwingUtilities.repaintLater(this);
 		}
@@ -224,23 +212,33 @@ public class TextAreaPainter
 		bracketHighlightBoth = bracketHighlight && Settings.getInstance().getBracketHighlightBoth();
 	}
 
-	private void setColors()
-	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				setForeground(Settings.getInstance().getEditorTextColor());
-				setBackground(Settings.getInstance().getEditorBackgroundColor());
-				setCaretColor(Settings.getInstance().getEditorCursorColor());
-				setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
-				currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
-				bracketHighlightColor = Settings.getInstance().getEditorBracketHighlightColor();
-				occuranceHighlightColor = Settings.getInstance().geSelectionHighlightColor();
-			}
-		});
-	}
+  private Color getDefaultColor(String key, Color fallback)
+  {
+    Color c = UIManager.getColor(key);
+    return c == null ? fallback : c;
+  }
+
+  private void setColors()
+   {
+    Color textColor = Settings.getInstance().getEditorTextColor();
+    if (textColor == null) textColor = getDefaultColor("TextArea.foreground", Color.BLACK);
+    setForeground(textColor);
+
+    Color bg = Settings.getInstance().getEditorBackgroundColor();
+    if (bg == null) bg = getDefaultColor("TextArea.background", Color.WHITE);
+    setBackground(bg);
+
+    setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
+    caretColor = Settings.getInstance().getEditorCursorColor();
+    currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
+    bracketHighlightColor = Settings.getInstance().getEditorBracketHighlightColor();
+    occuranceHighlightColor = Settings.getInstance().geSelectionHighlightColor();
+    selectionColor = Settings.getInstance().getEditorSelectionColor();
+    if (selectionColor == null)
+    {
+      selectionColor = getDefaultColor("TextArea.selectionBackground", DEFAULT_SELECTION_COLOR);
+    }
+  }
 
 	/**
 	 * Returns if this component can be traversed by pressing the

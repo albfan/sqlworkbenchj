@@ -22,6 +22,7 @@
  */
 package workbench.gui.sql;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -111,8 +112,11 @@ public class LogArea
 
 	private void initColors()
 	{
-		setBackground(Settings.getInstance().getEditorBackgroundColor());
-		setForeground(Settings.getInstance().getEditorTextColor());
+    Color bg = Settings.getInstance().getEditorBackgroundColor();
+		if (bg != null) setBackground(bg);
+
+    Color fg = Settings.getInstance().getEditorTextColor();
+		if (fg != null) setForeground(fg);
 	}
 
   public void setMaxLineCount(int count)

@@ -601,6 +601,7 @@ public class MainWindow
 		for (int i=0; i < count; i++)
 		{
 			JMenu menu = bar.getMenu(i);
+      if (menu == null) continue;
 			int items = menu.getItemCount();
 			if (items > maxItems)
 			{

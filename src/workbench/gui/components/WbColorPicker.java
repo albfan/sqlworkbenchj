@@ -35,6 +35,7 @@ import java.io.Serializable;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -43,6 +44,7 @@ import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
+
 
 /**
  *
@@ -66,20 +68,28 @@ public class WbColorPicker
 		this.resetButton.setEnabled(showReset);
 		this.resetButton.setVisible(showReset);
 		int iconSize = IconMgr.getInstance().getSizeForLabel();
+    int buttonSize = (int)(iconSize * 1.5);
+
 		if (showReset)
 		{
 	    resetButton.setIcon(IconMgr.getInstance().getLabelIcon("delete"));
-			WbSwingUtilities.adjustButtonWidth(resetButton, iconSize + 6, iconSize + 6);
+			WbSwingUtilities.adjustButtonWidth(resetButton, buttonSize, buttonSize);
 		}
 		this.defaultLabel.setVisible(false);
-    WbSwingUtilities.adjustButtonWidth(selectColor, iconSize + 6, iconSize + 6);
-		Dimension d = selectColor.getPreferredSize();
-		d.height--;
-		d.width--;
-		sampleColor.setPreferredSize(d);
+    WbSwingUtilities.adjustButtonWidth(selectColor, buttonSize, buttonSize);
+
+    Dimension d = new Dimension((int)(buttonSize * 0.9), (int)(buttonSize * 0.9));
+    setButtonSize(sampleColor, d);
     sampleColor.setOpaque(true);
     sampleColor.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 	}
+
+  private void setButtonSize(JComponent button, Dimension d)
+  {
+    button.setPreferredSize(d);
+    button.setMaximumSize(d);
+    button.setMinimumSize(d);
+  }
 
 	/**
 	 * Define the displayed label when no color is selected by supplying
@@ -91,7 +101,7 @@ public class WbColorPicker
 	{
 		defaultLabel.setText(ResourceMgr.getString(key));
 	}
-  
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

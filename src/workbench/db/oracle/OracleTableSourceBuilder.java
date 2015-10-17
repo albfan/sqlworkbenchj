@@ -782,7 +782,7 @@ public class OracleTableSourceBuilder
 	 * @return the SQL to re-create the primary key
 	 */
 	@Override
-	public CharSequence getPkSource(TableIdentifier table, PkDefinition def, boolean forInlineUse)
+	public CharSequence getPkSource(TableIdentifier table, PkDefinition def, boolean forInlineUse, boolean useFQN)
 	{
     if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.constraint))
     {
@@ -802,7 +802,7 @@ public class OracleTableSourceBuilder
     }
 
 		OracleIndexReader reader = (OracleIndexReader)dbConnection.getMetadata().getIndexReader();
-		String sql = super.getPkSource(table, def, forInlineUse).toString();
+		String sql = super.getPkSource(table, def, forInlineUse, useFQN).toString();
 		if (StringUtil.isEmptyString(sql)) return sql;
 
 		PkDefinition pk = def == null ? table.getPrimaryKey() : def;

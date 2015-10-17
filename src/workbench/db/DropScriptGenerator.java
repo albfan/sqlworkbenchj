@@ -156,7 +156,7 @@ public class DropScriptGenerator
 		{
 			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
 			PkDefinition pk = connection.getMetadata().getIndexReader().getPrimaryKey(table);
-			CharSequence pkSource = builder.getPkSource(table, pk, false);
+			CharSequence pkSource = builder.getPkSource(table, pk, false, false);
 			if (pkSource != null)
 			{
 				restore.add(pkSource.toString().trim());
