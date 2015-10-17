@@ -246,6 +246,13 @@ public class ExportFileDialog
 		return this.selectOutput(null);
 	}
 
+  /**
+   * Show a FileChooser with an accessory to select the export type.
+   *
+   * @param title  the title for the filechooser
+   *
+   * @return true if the user clicked OK, false if the dialog was cancelled
+   */
 	public boolean selectOutput(String title)
 	{
 		this.exportType = null;

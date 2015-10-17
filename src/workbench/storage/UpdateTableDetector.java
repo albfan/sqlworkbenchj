@@ -88,6 +88,8 @@ public class UpdateTableDetector
 		if (meta == null) return;
 
 		TableIdentifier tbl = getFullyQualifiedTable(table);
+    if (tbl == null) return;
+    
 		tbl.adjustCase(conn);
 
 		if (checkPkOnly)
