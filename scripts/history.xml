@@ -14,6 +14,8 @@
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
     <entry dev-build="1" type="enh">The error dialog that is displayed when running a script can now be configured to also include the error message or the statement that failed</entry>
     <entry dev-build="1" type="enh">Improved display of packages in the DbTree for Oracle and Firebird</entry>
+    <entry dev-build="4" type="fix">WbCopy now stops with an error if -targetTable is specified and -sourceTable is used to specify multiple tables</entry>
+    <entry dev-build="4" type="fix">For DB2 the names of PK constraints where not properly qualified with a schema if needed</entry>
     <entry dev-build="3" type="fix">Sometimes using "Execute current" would not correctly identify the current statement and run the first statement from the editor</entry>
     <entry dev-build="3" type="fix">WbImport using -insert,update did not work for multi-column primary keys when not all PK columns where part of the input file</entry>
     <entry dev-build="2" type="fix">When a variable value contained the prefix and the suffix of the variable pattern, using such a variable would result in SQL Workbench/J locking up</entry>
