@@ -47,6 +47,8 @@ import workbench.util.WbThread;
 public class HelpManager
 {
 
+  public static final String TOPIC_ALTERNATE_DELIMITER = "understand-alternate-delim";
+  
 	public static WbFile getDefaultPdf()
 	{
 		String pdfManual = Settings.getInstance().getProperty("workbench.manual.pdf.file", "SQLWorkbench-Manual.pdf");

@@ -35,6 +35,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -83,6 +85,7 @@ import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbColorPicker;
 import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.help.HelpManager;
 
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.macros.MacroFileSelector;
@@ -111,6 +114,19 @@ public class ConnectionEditorPanel
 	{
 		super();
 		this.initComponents();
+
+    String text = altDelimLabel.getText();
+    altDelimLabel.setText("<html><u>" + text + "</u></html>");
+
+    altDelimLabel.addMouseListener(new MouseAdapter()
+    {
+      @Override
+      public void mouseClicked(MouseEvent e)
+      {
+        HelpManager.showHelpFile(HelpManager.TOPIC_ALTERNATE_DELIMITER);
+      }
+    });
+    
     tagList.addKeyListener(this);
 		groupNameLabel.setBorder(new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(3,6,3,6)));
 
@@ -755,6 +771,7 @@ public class ConnectionEditorPanel
 
     altDelimLabel.setText(ResourceMgr.getString("LblAltDelimit")); // NOI18N
     altDelimLabel.setToolTipText(ResourceMgr.getString("d_LblAltDelimit")); // NOI18N
+    altDelimLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;

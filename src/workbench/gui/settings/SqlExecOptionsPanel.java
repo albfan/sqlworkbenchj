@@ -20,6 +20,7 @@
  */
 package workbench.gui.settings;
 
+import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -27,6 +28,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
@@ -43,6 +46,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.components.TextFieldWidthAdjuster;
+import workbench.gui.help.HelpManager;
 
 
 /**
@@ -79,6 +83,17 @@ public class SqlExecOptionsPanel
 
 		DbDelimiter def = (DbDelimiter)cbxDbName.getSelectedItem();
 		alternateDelimiter.setText(def.getDelimiter());
+
+    String text = altDelimLabel.getText();
+    altDelimLabel.setText("<html><u>" + text + "</u></html>");
+    altDelimLabel.addMouseListener(new MouseAdapter()
+    {
+      @Override
+      public void mouseClicked(MouseEvent e)
+      {
+        HelpManager.showHelpFile(HelpManager.TOPIC_ALTERNATE_DELIMITER);
+      }
+    });
 
 		useCurrentLineStmt.setSelected(GuiSettings.getUseStatementInCurrentLine());
 
@@ -194,6 +209,7 @@ public class SqlExecOptionsPanel
 
     altDelimLabel.setText(ResourceMgr.getString("LblAltDelimit")); // NOI18N
     altDelimLabel.setToolTipText(ResourceMgr.getString("d_LblAltDelimit")); // NOI18N
+    altDelimLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;

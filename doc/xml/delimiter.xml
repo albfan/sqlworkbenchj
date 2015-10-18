@@ -7,22 +7,25 @@
   <indexterm><primary>Statement delimiter</primary><secondary>change the statement delimiter</secondary></indexterm>
 
   <para>
-    &wb-productname; will send the contents of the editor unaltered to the DBMS, so
-    executing DDL statements (<literal>CREATE TABLE</literal>, ...) is possible.
+    &wb-productname; will split statements based on the SQL terminator <literal>;</literal> and send each statement unaltered to the DBMS.
   </para>
 
   <para>
-    However when executing statements such as <literal>CREATE PROCEDURE</literal> which
-    in turn contain valid SQL statement, delimited with a ; the &wb-productname;
-    will send everything up to the first semicolon to the  backend. In case of a <literal>CREATE PROCEDURE</literal> statement this will obviously
-    result in an error as the statement is not complete.
+    When executing statements such as <literal>CREATE PROCEDURE</literal> which in turn contain valid SQL statements, delimited with a <literal>;</literal>
+    the &wb-productname; will send everything up to the first semicolon to the  backend (because the <literal>;</literal> terminates the SQL statement)
+    In case of a <literal>CREATE PROCEDURE</literal> statement this will obviously result in an error as the statement is not complete.
+  </para>
+  <para>
+    To be able to run DDL statements with embedded <literal>;</literal> characters, &wb-productname; needs to
+    know where a statements ends. To specify the end of a statement with embedded <literal>;</literal> the so called
+    "alternate delimiter" is used. This chapter describes how the alternate delimiter is used by &wb-productname;
   </para>
 
   <section id="delimiter-postgres">
     <title>PostgreSQL</title>
     <para>
       The body of a function in Postgres is a character literal. Because a delimiter inside
-      a character literal does not delimit the statement, no special treatment is needed for Postgres.
+      a character literal does not define the end of the statement, no special treatment is needed for Postgres.
     </para>
   </section>
 
