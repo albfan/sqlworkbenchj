@@ -114,7 +114,7 @@ public class InformixSynonymReader
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("InformixSynonymReader.getSynonymTable()", "Could not retrieve synonym table using SQL:\n + sql", ex);
+			LogMgr.logError("InformixSynonymReader.getSynonymTable()", "Could not retrieve synonym table using:\n + sql", ex);
 			throw ex;
 		}
 		finally

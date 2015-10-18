@@ -25,7 +25,10 @@ package workbench.gui.settings;
 import java.awt.event.ActionListener;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 
 import workbench.interfaces.Restoreable;
 import workbench.resource.DbExplorerSettings;
@@ -33,6 +36,8 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DropType;
+
+import workbench.gui.components.WbTabbedPane;
 
 /**
  *
@@ -46,6 +51,12 @@ public class DbExplorerOptionsPanel
 	{
 		super();
 		initComponents();
+    Border b = new EmptyBorder(5, 5, 5, 5);
+    for (int i=0; i < optionsPane.getTabCount(); i++)
+    {
+      JComponent panel = (JComponent)optionsPane.getComponentAt(i);
+      panel.setBorder(b);
+    }
     String[] dropTypes = new String[] { ResourceMgr.getString("LblDropNone"), ResourceMgr.getString("LblDropPlain"), ResourceMgr.getString("LblDropCascade") };
     DefaultComboBoxModel<String> model = new DefaultComboBoxModel(dropTypes);
     dropTypesCombo.setModel(model);
@@ -148,19 +159,19 @@ public class DbExplorerOptionsPanel
   {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    showDbExplorer = new javax.swing.JCheckBox();
-    showTriggerPanel = new javax.swing.JCheckBox();
-    autoselectDataPanel = new javax.swing.JCheckBox();
+    optionsPane = new WbTabbedPane();
+    generalPanel = new javax.swing.JPanel();
+    selectSrcPanel = new javax.swing.JCheckBox();
+    retrieveFKTree = new javax.swing.JCheckBox();
+    showTableHistory = new javax.swing.JCheckBox();
     showFocus = new javax.swing.JCheckBox();
-    jPanel1 = new javax.swing.JPanel();
+    showTriggerPanel = new javax.swing.JCheckBox();
+    showDbExplorer = new javax.swing.JCheckBox();
+    autoselectDataPanel = new javax.swing.JCheckBox();
     jPanel2 = new javax.swing.JPanel();
     tabPlacement = new PlacementChooser();
     jLabel1 = new javax.swing.JLabel();
-    retrieveFKTree = new javax.swing.JCheckBox();
-    selectSrcPanel = new javax.swing.JCheckBox();
-    showSynDetails = new javax.swing.JCheckBox();
-    showTableHistory = new javax.swing.JCheckBox();
-    jPanel5 = new javax.swing.JPanel();
+    objectList = new javax.swing.JPanel();
     rememberObject = new javax.swing.JCheckBox();
     partialMatchSearch = new javax.swing.JCheckBox();
     useQuickFilterRegex = new javax.swing.JCheckBox();
@@ -171,20 +182,86 @@ public class DbExplorerOptionsPanel
     defTableTypeLabel = new javax.swing.JLabel();
     defTableType = new javax.swing.JTextField();
     filterRetrieval = new javax.swing.JCheckBox();
-    jPanel6 = new javax.swing.JPanel();
-    jPanel3 = new javax.swing.JPanel();
+    jPanel1 = new javax.swing.JPanel();
+    sqlSourcePanel = new javax.swing.JPanel();
     autogeneratePK = new javax.swing.JCheckBox();
     generateTableGrants = new javax.swing.JCheckBox();
     generateViewColumns = new javax.swing.JCheckBox();
     allowEditing = new javax.swing.JCheckBox();
     dropLabel = new javax.swing.JLabel();
     dropTypesCombo = new javax.swing.JComboBox();
-    jPanel4 = new javax.swing.JPanel();
+    showSynDetails = new javax.swing.JCheckBox();
+    dataPanel = new javax.swing.JPanel();
     rememberColOrder = new javax.swing.JCheckBox();
     rememberSort = new javax.swing.JCheckBox();
     applySQLSort = new javax.swing.JCheckBox();
 
-    setLayout(new java.awt.GridBagLayout());
+    setLayout(new java.awt.BorderLayout());
+
+    generalPanel.setLayout(new java.awt.GridBagLayout());
+
+    selectSrcPanel.setText(ResourceMgr.getString("LblSelectSourcePanel")); // NOI18N
+    selectSrcPanel.setToolTipText(ResourceMgr.getString("d_LblSelectSourcePanel")); // NOI18N
+    selectSrcPanel.setBorder(null);
+    selectSrcPanel.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 40, 0, 10);
+    generalPanel.add(selectSrcPanel, gridBagConstraints);
+
+    retrieveFKTree.setText(ResourceMgr.getString("LblRetrieveFkTree")); // NOI18N
+    retrieveFKTree.setToolTipText(ResourceMgr.getString("d_LblRetrieveFkTree")); // NOI18N
+    retrieveFKTree.setBorder(null);
+    retrieveFKTree.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    retrieveFKTree.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    retrieveFKTree.setIconTextGap(5);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    generalPanel.add(retrieveFKTree, gridBagConstraints);
+
+    showTableHistory.setText(ResourceMgr.getString("LblShowTableHist")); // NOI18N
+    showTableHistory.setToolTipText(ResourceMgr.getString("d_LblShowTableHist")); // NOI18N
+    showTableHistory.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    showTableHistory.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    generalPanel.add(showTableHistory, gridBagConstraints);
+
+    showFocus.setText(ResourceMgr.getString("LblShowFocus")); // NOI18N
+    showFocus.setToolTipText(ResourceMgr.getString("d_LblShowFocus")); // NOI18N
+    showFocus.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    showFocus.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 40, 0, 10);
+    generalPanel.add(showFocus, gridBagConstraints);
+
+    showTriggerPanel.setText(ResourceMgr.getString("LblShowTriggerPanel")); // NOI18N
+    showTriggerPanel.setToolTipText(ResourceMgr.getString("d_LblShowTriggerPanel")); // NOI18N
+    showTriggerPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    showTriggerPanel.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    generalPanel.add(showTriggerPanel, gridBagConstraints);
 
     showDbExplorer.setText(ResourceMgr.getString("LblDbExplorerCheckBox")); // NOI18N
     showDbExplorer.setToolTipText(ResourceMgr.getString("d_LblDbExplorerCheckBox")); // NOI18N
@@ -197,19 +274,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    add(showDbExplorer, gridBagConstraints);
-
-    showTriggerPanel.setText(ResourceMgr.getString("LblShowTriggerPanel")); // NOI18N
-    showTriggerPanel.setToolTipText(ResourceMgr.getString("d_LblShowTriggerPanel")); // NOI18N
-    showTriggerPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    showTriggerPanel.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-    add(showTriggerPanel, gridBagConstraints);
+    generalPanel.add(showDbExplorer, gridBagConstraints);
 
     autoselectDataPanel.setText(ResourceMgr.getString("LblSelectDataPanel")); // NOI18N
     autoselectDataPanel.setToolTipText(ResourceMgr.getString("d_LblSelectDataPanel")); // NOI18N
@@ -220,25 +285,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
-    add(autoselectDataPanel, gridBagConstraints);
-
-    showFocus.setText(ResourceMgr.getString("LblShowFocus")); // NOI18N
-    showFocus.setToolTipText(ResourceMgr.getString("d_LblShowFocus")); // NOI18N
-    showFocus.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    showFocus.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
-    add(showFocus, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 16;
-    gridBagConstraints.weighty = 1.0;
-    add(jPanel1, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 40, 0, 10);
+    generalPanel.add(autoselectDataPanel, gridBagConstraints);
 
     jPanel2.setLayout(new java.awt.GridBagLayout());
 
@@ -265,60 +313,15 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 20);
-    add(jPanel2, gridBagConstraints);
+    generalPanel.add(jPanel2, gridBagConstraints);
 
-    retrieveFKTree.setText(ResourceMgr.getString("LblRetrieveFkTree")); // NOI18N
-    retrieveFKTree.setToolTipText(ResourceMgr.getString("d_LblRetrieveFkTree")); // NOI18N
-    retrieveFKTree.setBorder(null);
-    retrieveFKTree.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    retrieveFKTree.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-    retrieveFKTree.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
-    add(retrieveFKTree, gridBagConstraints);
+    optionsPane.addTab(ResourceMgr.getString("LblSettingsGeneral"), generalPanel); // NOI18N
 
-    selectSrcPanel.setText(ResourceMgr.getString("LblSelectSourcePanel")); // NOI18N
-    selectSrcPanel.setToolTipText(ResourceMgr.getString("d_LblSelectSourcePanel")); // NOI18N
-    selectSrcPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-    selectSrcPanel.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
-    add(selectSrcPanel, gridBagConstraints);
-
-    showSynDetails.setText(ResourceMgr.getString("LblShowSynTarget")); // NOI18N
-    showSynDetails.setToolTipText(ResourceMgr.getString("d_LblShowSynTarget")); // NOI18N
-    showSynDetails.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-    add(showSynDetails, gridBagConstraints);
-
-    showTableHistory.setText(ResourceMgr.getString("LblShowTableHist")); // NOI18N
-    showTableHistory.setToolTipText(ResourceMgr.getString("d_LblShowTableHist")); // NOI18N
-    showTableHistory.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    showTableHistory.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-    add(showTableHistory, gridBagConstraints);
-
-    jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblDbExpObjListOpts"))); // NOI18N
-    jPanel5.setLayout(new java.awt.GridBagLayout());
+    objectList.setLayout(new java.awt.GridBagLayout());
 
     rememberObject.setText(ResourceMgr.getString("LblRememberObjectType")); // NOI18N
     rememberObject.setToolTipText(ResourceMgr.getString("d_LblRememberObjectType")); // NOI18N
@@ -329,8 +332,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 1, 10);
-    jPanel5.add(rememberObject, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 1, 10);
+    objectList.add(rememberObject, gridBagConstraints);
 
     partialMatchSearch.setText(ResourceMgr.getString("LblPartialMatch")); // NOI18N
     partialMatchSearch.setBorder(null);
@@ -340,7 +343,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 10);
-    jPanel5.add(partialMatchSearch, gridBagConstraints);
+    objectList.add(partialMatchSearch, gridBagConstraints);
 
     useQuickFilterRegex.setText(ResourceMgr.getString("LblQuickFilterRegex")); // NOI18N
     useQuickFilterRegex.setToolTipText(ResourceMgr.getString("d_LblQuickFilterRegex")); // NOI18N
@@ -351,8 +354,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 8, 0, 10);
-    jPanel5.add(useQuickFilterRegex, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 10);
+    objectList.add(useQuickFilterRegex, gridBagConstraints);
 
     allowTableAlter.setText(ResourceMgr.getString("LblAllowTblAlter")); // NOI18N
     allowTableAlter.setToolTipText(ResourceMgr.getString("d_LblAllowTblAlter")); // NOI18N
@@ -362,8 +365,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 5, 0, 10);
-    jPanel5.add(allowTableAlter, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 10);
+    objectList.add(allowTableAlter, gridBagConstraints);
 
     filterWhileTyping.setText(ResourceMgr.getString("LblFilterWhileType")); // NOI18N
     filterWhileTyping.setToolTipText(ResourceMgr.getString("d_LblFilterWhileType")); // NOI18N
@@ -373,10 +376,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 10);
-    jPanel5.add(filterWhileTyping, gridBagConstraints);
+    objectList.add(filterWhileTyping, gridBagConstraints);
 
     retrieveDbExplorer.setText(ResourceMgr.getString("LblRetrieveDbExplorer")); // NOI18N
     retrieveDbExplorer.setToolTipText(ResourceMgr.getString("d_LblRetrieveDbExplorer")); // NOI18N
@@ -389,8 +390,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 10);
-    jPanel5.add(retrieveDbExplorer, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+    objectList.add(retrieveDbExplorer, gridBagConstraints);
 
     jPanel7.setLayout(new java.awt.GridBagLayout());
 
@@ -418,7 +419,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 8, 0, 6);
-    jPanel5.add(jPanel7, gridBagConstraints);
+    objectList.add(jPanel7, gridBagConstraints);
 
     filterRetrieval.setText(ResourceMgr.getString("LblDbExpUseRetrievalFilter")); // NOI18N
     filterRetrieval.setToolTipText(ResourceMgr.getString("d_LblDbExpUseRetrievalFilter")); // NOI18N
@@ -427,22 +428,18 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 5, 0, 10);
-    jPanel5.add(filterRetrieval, gridBagConstraints);
-
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 10);
+    objectList.add(filterRetrieval, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(9, 0, 0, 8);
-    add(jPanel5, gridBagConstraints);
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    objectList.add(jPanel1, gridBagConstraints);
 
-    jPanel6.setLayout(new java.awt.GridBagLayout());
+    optionsPane.addTab(ResourceMgr.getString("LblDbExpObjListOpts"), objectList); // NOI18N
 
-    jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblDbExpGenOpts"))); // NOI18N
-    jPanel3.setLayout(new java.awt.GridBagLayout());
+    sqlSourcePanel.setLayout(new java.awt.GridBagLayout());
 
     autogeneratePK.setText(ResourceMgr.getString("LblGeneratePkName")); // NOI18N
     autogeneratePK.setToolTipText(ResourceMgr.getString("d_LblGeneratePkName")); // NOI18N
@@ -453,8 +450,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 10);
-    jPanel3.add(autogeneratePK, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+    sqlSourcePanel.add(autogeneratePK, gridBagConstraints);
 
     generateTableGrants.setText(ResourceMgr.getString("LblGenerateTblGrants")); // NOI18N
     generateTableGrants.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -465,8 +462,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 5, 0, 10);
-    jPanel3.add(generateTableGrants, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 10);
+    sqlSourcePanel.add(generateTableGrants, gridBagConstraints);
 
     generateViewColumns.setText(ResourceMgr.getString("LblGenerateViewCols")); // NOI18N
     generateViewColumns.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -476,9 +473,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 5, 3, 10);
-    jPanel3.add(generateViewColumns, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 3, 10);
+    sqlSourcePanel.add(generateViewColumns, gridBagConstraints);
 
     allowEditing.setText(ResourceMgr.getString("LblDbExpSrcEdit")); // NOI18N
     allowEditing.setToolTipText(ResourceMgr.getString("d_LblDbExpSrcEdit")); // NOI18N
@@ -486,34 +482,45 @@ public class DbExplorerOptionsPanel
     allowEditing.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 5, 3, 10);
-    jPanel3.add(allowEditing, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 3, 10);
+    sqlSourcePanel.add(allowEditing, gridBagConstraints);
 
     dropLabel.setText(ResourceMgr.getString("LblGenerateDrop")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.insets = new java.awt.Insets(2, 6, 0, 0);
-    jPanel3.add(dropLabel, gridBagConstraints);
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
+    sqlSourcePanel.add(dropLabel, gridBagConstraints);
 
     dropTypesCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Nothing", "Simple", "Cascade" }));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 5);
-    jPanel3.add(dropTypesCombo, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-    jPanel6.add(jPanel3, gridBagConstraints);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(7, 8, 0, 5);
+    sqlSourcePanel.add(dropTypesCombo, gridBagConstraints);
 
-    jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblDbExpDataOpts"))); // NOI18N
-    jPanel4.setLayout(new java.awt.GridBagLayout());
+    showSynDetails.setText(ResourceMgr.getString("LblShowSynTarget")); // NOI18N
+    showSynDetails.setToolTipText(ResourceMgr.getString("d_LblShowSynTarget")); // NOI18N
+    showSynDetails.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 3, 10);
+    sqlSourcePanel.add(showSynDetails, gridBagConstraints);
+
+    optionsPane.addTab(ResourceMgr.getString("LblDbExpGenOpts"), sqlSourcePanel); // NOI18N
+
+    dataPanel.setLayout(new java.awt.GridBagLayout());
 
     rememberColOrder.setText(ResourceMgr.getString("LblRememberDbExpColOrder")); // NOI18N
     rememberColOrder.setToolTipText(ResourceMgr.getString("d_LblRememberDbExpColOrder")); // NOI18N
@@ -522,8 +529,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 9, 0, 10);
-    jPanel4.add(rememberColOrder, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+    dataPanel.add(rememberColOrder, gridBagConstraints);
 
     rememberSort.setText(ResourceMgr.getString("LblRememberDbExpSort")); // NOI18N
     rememberSort.setToolTipText(ResourceMgr.getString("d_LblRememberDbExpSort")); // NOI18N
@@ -533,8 +540,8 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
-    jPanel4.add(rememberSort, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 10);
+    dataPanel.add(rememberSort, gridBagConstraints);
 
     applySQLSort.setText(ResourceMgr.getString("LblApplySQLSort")); // NOI18N
     applySQLSort.setToolTipText(ResourceMgr.getString("d_LblApplySQLSort")); // NOI18N
@@ -546,25 +553,12 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 9, 3, 10);
-    jPanel4.add(applySQLSort, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 3, 10);
+    dataPanel.add(applySQLSort, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
-    jPanel6.add(jPanel4, gridBagConstraints);
+    optionsPane.addTab(ResourceMgr.getString("LblDbExpDataOpts"), dataPanel); // NOI18N
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-    add(jPanel6, gridBagConstraints);
+    add(optionsPane, java.awt.BorderLayout.CENTER);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -589,22 +583,22 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox applySQLSort;
   private javax.swing.JCheckBox autogeneratePK;
   private javax.swing.JCheckBox autoselectDataPanel;
+  private javax.swing.JPanel dataPanel;
   private javax.swing.JTextField defTableType;
   private javax.swing.JLabel defTableTypeLabel;
   private javax.swing.JLabel dropLabel;
   private javax.swing.JComboBox dropTypesCombo;
   private javax.swing.JCheckBox filterRetrieval;
   private javax.swing.JCheckBox filterWhileTyping;
+  private javax.swing.JPanel generalPanel;
   private javax.swing.JCheckBox generateTableGrants;
   private javax.swing.JCheckBox generateViewColumns;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
-  private javax.swing.JPanel jPanel3;
-  private javax.swing.JPanel jPanel4;
-  private javax.swing.JPanel jPanel5;
-  private javax.swing.JPanel jPanel6;
   private javax.swing.JPanel jPanel7;
+  private javax.swing.JPanel objectList;
+  private javax.swing.JTabbedPane optionsPane;
   private javax.swing.JCheckBox partialMatchSearch;
   private javax.swing.JCheckBox rememberColOrder;
   private javax.swing.JCheckBox rememberObject;
@@ -617,6 +611,7 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox showSynDetails;
   private javax.swing.JCheckBox showTableHistory;
   private javax.swing.JCheckBox showTriggerPanel;
+  private javax.swing.JPanel sqlSourcePanel;
   private javax.swing.JComboBox tabPlacement;
   private javax.swing.JCheckBox useQuickFilterRegex;
   // End of variables declaration//GEN-END:variables

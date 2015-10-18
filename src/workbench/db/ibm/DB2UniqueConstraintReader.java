@@ -31,6 +31,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ConstraintDefinition;
+import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
@@ -54,10 +55,10 @@ public class DB2UniqueConstraintReader
 
 		String dbid = con.getDbId();
 		// Not supported for db2 iSeries
-		if (dbid.equals("db2i")) return;
+    if (dbid.equals(DbMetadata.DBID_DB2_ISERIES)) return;
 
 		StringBuilder sql = new StringBuilder(500);
-		if (dbid.equals("db2"))
+		if (dbid.equals(DbMetadata.DBID_DB2_LUW))
 		{
 			// DB2 LUW
 			sql.append(
@@ -73,7 +74,7 @@ public class DB2UniqueConstraintReader
 			  ") t \n " +
 				"where (");
 		}
-		else if (dbid.equals("db2h"))
+		else if (dbid.equals(DbMetadata.DBID_DB2_ZOS))
 		{
 			// DB2 host
 			sql.append(
@@ -150,7 +151,7 @@ public class DB2UniqueConstraintReader
 		}
 		catch (SQLException se)
 		{
-			LogMgr.logError("DB2UniqueConstraintReader.processIndexList()", "Could not retrieve definition", se);
+			LogMgr.logError("DB2UniqueConstraintReader.processIndexList()", "Could not retrieve index definition using:\n" + sql, se);
 		}
 		finally
 		{

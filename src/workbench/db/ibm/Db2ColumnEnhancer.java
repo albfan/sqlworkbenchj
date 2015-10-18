@@ -64,17 +64,18 @@ public class Db2ColumnEnhancer
 		String tablename = table.getTable().getTableName();
 		String schema = table.getTable().getSchema();
 
-		String columns = "SELECT c.colname, \n" +
-								 "       c.hidden, \n" +
-								 "       c.generated, \n" +
-								 "       c.text, \n" +
-								 "       a.start, \n" +
-								 "       a.increment, \n" +
-								 "       a.minvalue, \n" +
-								 "       a.maxvalue, \n" +
-								 "       a.cycle, \n" +
-								 "       a.cache, \n" +
-								 "       a.order";
+		String columns =
+      "SELECT c.colname, \n" +
+      "       c.hidden, \n" +
+      "       c.generated, \n" +
+      "       c.text, \n" +
+      "       a.start, \n" +
+      "       a.increment, \n" +
+      "       a.minvalue, \n" +
+      "       a.maxvalue, \n" +
+      "       a.cycle, \n" +
+      "       a.cache, \n" +
+      "       a.order";
 
 		String from =
       "\nFROM syscat.columns c  \n" +
@@ -184,7 +185,7 @@ public class Db2ColumnEnhancer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("Db2ColumnEnhancer.updateComputedColumns()", "Error retrieving generated column info", e);
+			LogMgr.logError("Db2ColumnEnhancer.updateComputedColumns()", "Error retrieving generated column info using:\n" + SqlUtil.replaceParameters(sql, tablename, schema), e);
 		}
 		finally
 		{

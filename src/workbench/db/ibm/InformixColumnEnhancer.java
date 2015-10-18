@@ -177,7 +177,8 @@ public class InformixColumnEnhancer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("InformixColumnEnhancer.updateDateColumns()", "Error retrieving datetime qualifiers", e);
+			LogMgr.logError("InformixColumnEnhancer.updateDateColumns()", "Error retrieving datetime qualifiers using:\n" +
+        SqlUtil.replaceParameters(sql, tablename, schema), e);
 		}
 		finally
 		{

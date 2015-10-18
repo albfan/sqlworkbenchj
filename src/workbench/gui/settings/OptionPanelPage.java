@@ -50,7 +50,7 @@ import workbench.util.ExceptionUtil;
 public class OptionPanelPage
 {
   public static final Border PAGE_BORDER = new EmptyBorder(8, 8, 8, 8);
-  private static final Set<String> NO_BORDER_PANELS = CollectionUtil.treeSet("LnFOptionsPanel", "ExternalToolsPanel", "FormatterOptionsPanel");
+  private static final Set<String> NO_BORDER_PANELS = CollectionUtil.treeSet("LnFOptionsPanel", "ExternalToolsPanel", "FormatterOptionsPanel", "DbExplorerOptionsPanel");
 
 	private String label;
 	private String pageClass;

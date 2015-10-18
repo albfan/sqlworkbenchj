@@ -123,7 +123,8 @@ public class Db2IndexReader
 		}
 		catch (Exception ex)
 		{
-			LogMgr.logError("Db2IndexReader.readIndexOptions()", "Could not read index options using:\n" + sql, ex);
+			LogMgr.logError("Db2IndexReader.readIndexOptions()", "Could not read index options using:\n" +
+        SqlUtil.replaceParameters(sql, index.getSchema(), index.getName(), table.getRawTableName(), table.getRawSchema()), ex);
 		}
 		finally
 		{

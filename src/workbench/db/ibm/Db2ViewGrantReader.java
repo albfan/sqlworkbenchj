@@ -22,6 +22,7 @@
  */
 package workbench.db.ibm;
 
+import workbench.db.DbMetadata;
 import workbench.db.ViewGrantReader;
 
 /**
@@ -35,9 +36,9 @@ public class Db2ViewGrantReader
 
 	public Db2ViewGrantReader(String dbid)
 	{
-		isHostDB2 = dbid.equals("db2h");
+    isHostDB2 = dbid.equals(DbMetadata.DBID_DB2_ZOS);
 	}
-	
+
 	@Override
 	public String getViewGrantSql()
 	{
@@ -50,106 +51,107 @@ public class Db2ViewGrantReader
 
 	private String getHostSQL()
 	{
-		String sql = "select rtrim(grantee) as grantee, privilege, is_grantable  \n" +
-             "from ( \n" +
-             "select grantee,  \n" +
-             "       'SELECT' as privilege,  \n" +
-             "       case selectauth \n" +
-             "         when 'G' then 'YES' \n" +
-             "         else 'NO' \n" +
-             "       end as is_grantable, \n" +
-             "       ttname,  \n" +
-             "       tcreator \n" +
-             "from  sysibm.systabauth \n" +
-             "where selectauth in ('Y', 'G') \n" +
-             "UNION ALL \n" +
-             "select grantee,  \n" +
-             "       'UPDATE' as privilege,  \n" +
-             "       case updateauth \n" +
-             "         when 'G' then 'YES' \n" +
-             "         else 'NO' \n" +
-             "       end as is_grantable, \n" +
-             "       ttname,  \n" +
-             "       tcreator \n" +
-             "from  sysibm.systabauth \n" +
-             "where updateauth in ('Y', 'G') \n" +
-             "UNION ALL \n" +
-             "select grantee,  \n" +
-             "       'DELETE' as privilege,  \n" +
-             "       case deleteauth \n" +
-             "         when 'G' then 'YES' \n" +
-             "         else 'NO' \n" +
-             "       end as is_grantable, \n" +
-             "       ttname,  \n" +
-             "       tcreator \n" +
-             "from sysibm.systabauth \n" +
-             "where deleteauth in ('Y', 'G') \n" +
-             "UNION ALL \n" +
-             "select grantee,  \n" +
-             "       'INSERT' as privilege,  \n" +
-             "       case insertauth \n" +
-             "         when 'G' then 'YES' \n" +
-             "         else 'NO' \n" +
-             "       end as is_grantable, \n" +
-             "       ttname,  \n" +
-             "       tcreator \n" +
-             "from sysibm.systabauth \n" +
-             "where insertauth in ('Y', 'G') \n" +
-             ") t \n" +
-						 "where ttname = ? and tcreator = ? ";
-		return sql;
+		return
+      "select rtrim(grantee) as grantee, privilege, is_grantable  \n" +
+      "from ( \n" +
+      "select grantee,  \n" +
+      "       'SELECT' as privilege,  \n" +
+      "       case selectauth \n" +
+      "         when 'G' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_grantable, \n" +
+      "       ttname,  \n" +
+      "       tcreator \n" +
+      "from  sysibm.systabauth \n" +
+      "where selectauth in ('Y', 'G') \n" +
+      "UNION ALL \n" +
+      "select grantee,  \n" +
+      "       'UPDATE' as privilege,  \n" +
+      "       case updateauth \n" +
+      "         when 'G' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_grantable, \n" +
+      "       ttname,  \n" +
+      "       tcreator \n" +
+      "from  sysibm.systabauth \n" +
+      "where updateauth in ('Y', 'G') \n" +
+      "UNION ALL \n" +
+      "select grantee,  \n" +
+      "       'DELETE' as privilege,  \n" +
+      "       case deleteauth \n" +
+      "         when 'G' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_grantable, \n" +
+      "       ttname,  \n" +
+      "       tcreator \n" +
+      "from sysibm.systabauth \n" +
+      "where deleteauth in ('Y', 'G') \n" +
+      "UNION ALL \n" +
+      "select grantee,  \n" +
+      "       'INSERT' as privilege,  \n" +
+      "       case insertauth \n" +
+      "         when 'G' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_grantable, \n" +
+      "       ttname,  \n" +
+      "       tcreator \n" +
+      "from sysibm.systabauth \n" +
+      "where insertauth in ('Y', 'G') \n" +
+      ") t \n" +
+      "where ttname = ? and tcreator = ? ";
 	}
-	
+
 	private String getLUWSql()
 	{
-		String sql = "select trim(grantee) as grantee, privilege, is_grantable  \n" +
-             "from ( \n" +
-             "select grantee,  \n" +
-             "       'SELECT' as privilege,  \n" +
-             "       case controlauth \n" +
-             "         when 'Y' then 'YES' \n" +
-             "         else 'NO' \n" +
-             "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
-             "from syscat.tabauth \n" +
-             "where selectauth = 'Y' \n" +
-             "UNION ALL \n" +
-             "select grantee,  \n" +
-             "       'UPDATE' as privilege,  \n" +
-             "       case controlauth \n" +
-             "         when 'Y' then 'YES' \n" +
-             "         else 'NO' \n" +
-             "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
-             "from syscat.tabauth \n" +
-             "where updateauth = 'Y' \n" +
-             "UNION ALL \n" +
-             "select grantee,  \n" +
-             "       'DELETE' as privilege,  \n" +
-             "       case controlauth \n" +
-             "         when 'Y' then 'YES' \n" +
-             "         else 'NO' \n" +
-             "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
-             "from syscat.tabauth \n" +
-             "where deleteauth = 'Y' \n" +
-             "UNION ALL \n" +
-             "select grantee,  \n" +
-             "       'INSERT' as privilege,  \n" +
-             "       case controlauth \n" +
-             "         when 'Y' then 'YES' \n" +
-             "         else 'NO' \n" +
-             "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
-             "from syscat.tabauth \n" +
-             "where insertauth = 'Y' \n" +
-             ") t \n" +
-						 "where tabname = ? and tabschema = ? ";
-		return sql;
+
+    return
+      "select trim(grantee) as grantee, privilege, is_grantable  \n" +
+      "from ( \n" +
+      "select grantee,  \n" +
+      "       'SELECT' as privilege,  \n" +
+      "       case controlauth \n" +
+      "         when 'Y' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_grantable, \n" +
+      "       tabname,  \n" +
+      "       tabschema \n" +
+      "from syscat.tabauth \n" +
+      "where selectauth = 'Y' \n" +
+      "UNION ALL \n" +
+      "select grantee,  \n" +
+      "       'UPDATE' as privilege,  \n" +
+      "       case controlauth \n" +
+      "         when 'Y' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_grantable, \n" +
+      "       tabname,  \n" +
+      "       tabschema \n" +
+      "from syscat.tabauth \n" +
+      "where updateauth = 'Y' \n" +
+      "UNION ALL \n" +
+      "select grantee,  \n" +
+      "       'DELETE' as privilege,  \n" +
+      "       case controlauth \n" +
+      "         when 'Y' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_grantable, \n" +
+      "       tabname,  \n" +
+      "       tabschema \n" +
+      "from syscat.tabauth \n" +
+      "where deleteauth = 'Y' \n" +
+      "UNION ALL \n" +
+      "select grantee,  \n" +
+      "       'INSERT' as privilege,  \n" +
+      "       case controlauth \n" +
+      "         when 'Y' then 'YES' \n" +
+      "         else 'NO' \n" +
+      "       end as is_grantable, \n" +
+      "       tabname,  \n" +
+      "       tabschema \n" +
+      "from syscat.tabauth \n" +
+      "where insertauth = 'Y' \n" +
+      ") t \n" +
+      "where tabname = ? and tabschema = ? ";
 	}
 
 	@Override

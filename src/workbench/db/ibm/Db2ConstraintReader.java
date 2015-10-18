@@ -24,7 +24,9 @@ package workbench.db.ibm;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.db.AbstractConstraintReader;
+import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 
 /**
@@ -64,11 +66,10 @@ public class Db2ConstraintReader
 	{
 		super(conn.getDbId());
 		String dbid = conn.getDbId();
-		isHostDB2 = dbid.equals("db2h");
-		isAS400 = dbid.equals("db2i");
+    isHostDB2 = dbid.equals(DbMetadata.DBID_DB2_ZOS);
+		isAS400 = dbid.equals(DbMetadata.DBID_DB2_ISERIES);
 		catalogSeparator = conn.getMetadata().getCatalogSeparator();
 	}
-
 
 	@Override
 	public boolean isSystemConstraintName(String name)

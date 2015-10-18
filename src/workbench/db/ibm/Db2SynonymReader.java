@@ -31,6 +31,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.DbMetadata;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -69,35 +70,45 @@ public class Db2SynonymReader
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schemaPattern, String namePattern)
 		throws SQLException
 	{
-		StringBuilder sql = new StringBuilder(200);
+		String sql = "";
 
-		boolean isHostDB2 = con.getMetadata().getDbId().equals("db2h");
-		boolean isAS400 = con.getMetadata().getDbId().equals("db2i");
+		boolean isHostDB2 = con.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ZOS);
+    boolean isISeries = con.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ISERIES);
 
-		if (isAS400)
+		if (isISeries)
 		{
 			char catalogSeparator = con.getMetadata().getCatalogSeparator();
-			sql.append("SELECT base_table_schema, base_table_name FROM qsys2").append(catalogSeparator).append("systables");
-			sql.append(" WHERE table_type = 'A' AND table_name = ? AND table_owner = ?");
+      sql =
+        "SELECT base_table_schema, base_table_name \n" +
+        "FROM qsys2" + catalogSeparator + "systables \n" +
+        " WHERE table_type = 'A' \n" +
+        "   AND table_name = ? \n" +
+        "   AND table_owner = ?";
 		}
 		else if (isHostDB2)
 		{
-			sql.append("SELECT tbcreator, tbname FROM sysibm.syssynonyms ");
-			sql.append(" WHERE name = ? and creator = ?");
-
+      sql =
+        "SELECT tbcreator, tbname \n" +
+        "FROM sysibm.syssynonyms \n" +
+        "WHERE name = ? \n" +
+        "  AND creator = ?";
 		}
 		else
 		{
-			sql.append("SELECT base_tabschema, base_tabname FROM syscat.tables ");
-			sql.append(" WHERE type = 'A' and tabname = ? and tabschema = ?");
+      sql =
+        "SELECT base_tabschema, base_tabname \n" +
+        "FROM syscat.tables \n" +
+        "WHERE type = 'A' \n" +
+        "  and tabname = ? \n" +
+        "  and tabschema = ?";
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("Db2SynonymReader.getSynonymTable()", "Query to retrieve synonyms:\n" + sql);
+      LogMgr.logInfo("Db2SynonymReader.getSynonymTable()", "Query to retrieve synonyms:\n" + SqlUtil.replaceParameters(sql, namePattern, schemaPattern));
 		}
 
-		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql.toString());
+		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
 		stmt.setString(1, namePattern);
 		stmt.setString(2, schemaPattern);
 

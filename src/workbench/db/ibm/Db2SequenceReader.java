@@ -31,6 +31,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.DbMetadata;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
@@ -133,18 +134,17 @@ public class Db2SequenceReader
 	@Override
 	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
-		StringBuilder query = new StringBuilder(100);
-
 		int schemaIndex = -1;
 		int nameIndex = -1;
 
 		String nameCol;
 		String schemaCol;
+    String baseSql;
 
-		if (dbid.equals("db2i"))
+    if (dbid.equals(DbMetadata.DBID_DB2_ISERIES))
 		{
 			// Host system on AS/400
-			query.append(
+			baseSql =
 			"SELECT SEQUENCE_NAME, \n" +
 			"       SEQUENCE_SCHEMA \n, " +
 			"       0 as START, \n" +
@@ -156,15 +156,14 @@ public class Db2SequenceReader
 			"       CACHE, \n" +
 			"       data_type, \n" +
 			"       long_comment as remarks \n" +
-			"FROM   qsys2" + catalogSeparator + "syssequences \n");
-
+			"FROM   qsys2" + catalogSeparator + "syssequences \n";
 			nameCol = "sequence_name";
 			schemaCol = "sequence_schema";
 		}
-		else if (dbid.equals("db2h"))
+		else if (dbid.equals(DbMetadata.DBID_DB2_ZOS))
 		{
 			// Host system on z/OS
-			query.append(
+			baseSql =
 			"SELECT NAME AS SEQNAME, \n" +
 			"       SCHEMA AS SEQUENCE_SCHEMA, \n" +
 			"       START, \n" +
@@ -176,7 +175,7 @@ public class Db2SequenceReader
 			"       CACHE, \n" +
 			"       DATATYPEID, \n" +
 			"       REMARKS \n" +
-			"FROM   SYSIBM.SYSSEQUENCES \n");
+			"FROM   SYSIBM.SYSSEQUENCES \n";
 
 			nameCol = "name";
 			schemaCol = "schema";
@@ -184,7 +183,7 @@ public class Db2SequenceReader
 		else
 		{
 			// LUW Version
-			query.append(
+			baseSql =
 			"SELECT SEQNAME AS SEQUENCE_NAME, \n" +
 			"       SEQSCHEMA as SEQUENCE_SCHEMA, \n" +
 			"       START, \n" +
@@ -196,13 +195,15 @@ public class Db2SequenceReader
 			"       CACHE, \n" +
 			"       DATATYPEID, \n" +
 		  "       REMARKS  \n" +
-			"FROM   syscat.sequences \n");
+			"FROM   syscat.sequences \n";
 
 			nameCol = "seqname";
 			schemaCol = "seqschema";
 		}
 
 		boolean whereAdded = false;
+		StringBuilder query = new StringBuilder(baseSql.length() + 50);
+    query.append(baseSql);
 
 		if (StringUtil.isNonBlank(schema))
 		{
@@ -262,7 +263,8 @@ public class Db2SequenceReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("OracleMetaData.getSequenceDefinition()", "Error when retrieving sequence definition", e);
+			LogMgr.logError("OracleMetaData.getSequenceDefinition()",
+        "Error when retrieving sequence definition using: " + SqlUtil.replaceParameters(sql, schema, namePattern), e);
 		}
 		finally
 		{

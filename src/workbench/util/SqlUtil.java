@@ -397,16 +397,23 @@ public class SqlUtil
 
 	public static void appendEscapeClause(StringBuilder sql, WbConnection con, String searchValue)
 	{
-		if (searchValue == null) return;
-		if (searchValue.indexOf('_') < 0) return;
-		if (searchValue.indexOf('%') < 0) return; // no LIKE will be used then anyway
-		if (con == null) return;
-		if (!con.getDbSettings().doEscapeSearchString()) return;
+    String escape = getEscapeClause(con, searchValue);
+    if (escape.length() > 0)
+    {
+      sql.append(escape);
+    }
+	}
+
+	public static String getEscapeClause(WbConnection con, String searchValue)
+	{
+		if (searchValue == null) return "";
+		if (searchValue.indexOf('_') < 0) return "";
+		if (searchValue.indexOf('%') < 0) return ""; // no LIKE will be used then anyway
+		if (con == null) return "";
+		if (!con.getDbSettings().doEscapeSearchString()) return "";
 		String escape = con.getSearchStringEscape();
-		if (StringUtil.isEmptyString(escape)) return;
-		sql.append(" ESCAPE '");
-		sql.append(escape);
-		sql.append('\'');
+		if (StringUtil.isEmptyString(escape)) return "";
+		return " ESCAPE '" + escape + "'";
 	}
 
 	/**
@@ -1739,7 +1746,7 @@ public class SqlUtil
 	public static String buildExpression(WbConnection conn, String catalog, String schema, String name)
 	{
     if (StringUtil.isEmptyString(name)) return null;
-    
+
 		StringBuilder result = new StringBuilder(30);
 		DbMetadata meta = (conn != null ? conn.getMetadata() : null);
 		if (meta == null)

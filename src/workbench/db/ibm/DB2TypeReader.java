@@ -192,7 +192,7 @@ public class DB2TypeReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DB2TypeReader.getTypes()", "Error retrieving object types", e);
+			LogMgr.logError("DB2TypeReader.getTypes()", "Error retrieving object types using:\n" + select, e);
 		}
 		finally
 		{

@@ -60,7 +60,7 @@ public class InformixTableSourceBuilder
 	 * @param table    the table to process
 	 * @param columns  the columns (not used)
 	 *
-	 * @see ObjectSourceOptions#getAdditionalSql() 
+	 * @see ObjectSourceOptions#getAdditionalSql()
 	 */
 	@Override
 	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
@@ -87,10 +87,12 @@ public class InformixTableSourceBuilder
 
 		if (showExtents)
 		{
-			sql += ",\n" +
+			sql +=
+        ",\n" +
 				"       fextsize, \n" +
 				"       nextsize \n";
 		}
+
 		sql +=
 			"from " + systables + " \n" +
 			"where tabname = ? \n" +
@@ -98,7 +100,8 @@ public class InformixTableSourceBuilder
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("InformixTableSourceBuilder.readLockMode()", "Query to retrieve lock mode:\n" + SqlUtil.replaceParameters(sql, table.getTableName(), table.getSchema()));
+			LogMgr.logInfo("InformixTableSourceBuilder.readLockMode()",
+        "Query to retrieve lock mode:\n" + SqlUtil.replaceParameters(sql, table.getTableName(), table.getSchema()));
 		}
 
 		PreparedStatement pstmt = null;
@@ -156,7 +159,8 @@ public class InformixTableSourceBuilder
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("InformixTableSourceBuilder.readLockMode()", "Error when retrieving lock mode using SQL:\n" + sql, e);
+			LogMgr.logError("InformixTableSourceBuilder.readLockMode()", "Error when retrieving lock mode using:\n" +
+        SqlUtil.replaceParameters(sql, table.getTableName(), table.getSchema()), e);
 		}
 		finally
 		{
