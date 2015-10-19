@@ -2946,7 +2946,7 @@ public class JEditTextArea
 		vertical.setValue(vertical.getValue() + units);
 	}
 
-	class MutableCaretEvent extends CaretEvent
+	private class MutableCaretEvent extends CaretEvent
 	{
 		MutableCaretEvent()
 		{
@@ -2966,7 +2966,7 @@ public class JEditTextArea
 		}
 	}
 
-	class AdjustHandler implements AdjustmentListener
+	private class AdjustHandler implements AdjustmentListener
 	{
 		@Override
 		public void adjustmentValueChanged(final AdjustmentEvent evt)
@@ -2982,7 +2982,7 @@ public class JEditTextArea
 		}
 	}
 
-	class ComponentHandler extends ComponentAdapter
+	private class ComponentHandler extends ComponentAdapter
 	{
 		@Override
 		public void componentResized(ComponentEvent evt)
@@ -2996,7 +2996,7 @@ public class JEditTextArea
 		}
 	}
 
-	class DocumentHandler implements DocumentListener
+	private class DocumentHandler implements DocumentListener
 	{
 		@Override
 		public void insertUpdate(DocumentEvent evt)
@@ -3081,7 +3081,7 @@ public class JEditTextArea
 		}
 	}
 
-	class DragHandler implements MouseMotionListener
+	private class DragHandler implements MouseMotionListener
 	{
 		@Override
 		public void mouseDragged(MouseEvent evt)
@@ -3099,7 +3099,7 @@ public class JEditTextArea
 		public void mouseMoved(MouseEvent evt) {}
 	}
 
-	class MouseHandler extends MouseAdapter
+	private class MouseHandler extends MouseAdapter
 	{
 		@Override
 		public void mousePressed(MouseEvent evt)
