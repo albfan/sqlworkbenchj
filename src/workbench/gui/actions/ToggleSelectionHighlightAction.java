@@ -1,6 +1,4 @@
 /*
- * CheckPreparedStatementsAction.java
- *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2015, Thomas Kellerer
@@ -31,9 +29,9 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- * Action to toggle the detection of prepared statements during SQL execution
+ * Action to toggle the highlighting of the selected text for the current editor.
  *
- * @see workbench.resource.Settings#setCheckPreparedStatements(boolean)
+ * @see Settings#getHighlightCurrentSelection()
  *
  * @author  Thomas Kellerer
  */
@@ -48,7 +46,16 @@ public class ToggleSelectionHighlightAction
 		this.editor = panel;
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT);
+    checkSwitchedOn();
 	}
+
+  private void checkSwitchedOn()
+  {
+    if (editor.isGlobalSelectionHighlight())
+    {
+      setSwitchedOn(Settings.getInstance().getHighlightCurrentSelection());
+    }
+  }
 
 	@Override
 	public void executeAction(ActionEvent e)
@@ -60,10 +67,7 @@ public class ToggleSelectionHighlightAction
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (editor.isGlobalSelectionHighlight())
-		{
-			setSwitchedOn(Settings.getInstance().getHighlightCurrentSelection());
-		}
+    checkSwitchedOn();
 	}
 
 	@Override

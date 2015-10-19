@@ -142,7 +142,7 @@ public class SpoolDataAction
 	{
 		if (this.editor != null)
 		{
-			this.setEnabled(editor.isTextSelected() && canExport);
+			this.setEnabled(canExport && editor.isTextSelected());
 		}
 		else
 		{

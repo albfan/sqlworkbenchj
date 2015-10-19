@@ -152,7 +152,7 @@ public class TextAreaPainter
   public void setHighlightValue(String text)
   {
     boolean changed = false;
-    if (StringUtil.isNonEmpty(text))
+    if (text != null && text.length() > 0)
     {
       changed = StringUtil.stringsAreNotEqual(highlighText, text);
       highlighText = text;

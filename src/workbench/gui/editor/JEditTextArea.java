@@ -156,6 +156,9 @@ public class JEditTextArea
 	protected int electricScroll;
 
 	protected int horizontalOffset;
+  private int minHighlightLength;
+  private boolean highlightNoWhitespace;
+  private boolean highlightIgnoreCase;
 
 	protected JScrollBar vertical;
 	protected JScrollBar horizontal;
@@ -276,6 +279,10 @@ public class JEditTextArea
 			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_MINLEN,
 			Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_NO_WHITESPACE,
 			GuiSettings.PROP_FONT_ZOOM_WHEEL);
+
+    minHighlightLength = Settings.getInstance().getMinLengthForSelectionHighlight();
+    highlightNoWhitespace = Settings.getInstance().getSelectionHighlightNoWhitespace();
+    highlightIgnoreCase = Settings.getInstance().getSelectionHighlightIgnoreCase();
 	}
 
 	private void initWheelZoom()
@@ -299,6 +306,9 @@ public class JEditTextArea
 		}
 		else if (evt.getPropertyName().startsWith(Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT_BASE))
 		{
+      minHighlightLength = Settings.getInstance().getMinLengthForSelectionHighlight();
+      highlightNoWhitespace = Settings.getInstance().getSelectionHighlightNoWhitespace();
+      highlightIgnoreCase = Settings.getInstance().getSelectionHighlightIgnoreCase();
 			updateOccuranceHilite();
 		}
 		else if (evt.getPropertyName().startsWith(GuiSettings.PROP_FONT_ZOOM_WHEEL))
@@ -2030,12 +2040,10 @@ public class JEditTextArea
 		String text = null;
 		boolean enableHilite = isSelectionHighlightEnabled();
 
-		int minLength = Settings.getInstance().getMinLengthForSelectionHighlight();
-
-		if (enableHilite && (selectionStartLine == selectionEndLine) && (selectionEnd - selectionStart) >= minLength)
+		if (enableHilite && (selectionStartLine == selectionEndLine) && (selectionEnd - selectionStart) >= minHighlightLength)
 		{
 			text = getSelectedText();
-			if (Settings.getInstance().getSelectionHighlightNoWhitespace() && !getQuoteHandler().isQuoted(text))
+			if (highlightNoWhitespace && !getQuoteHandler().isQuoted(text))
 			{
 				int pos = StringUtil.findFirstWhiteSpace(text, (char)0);
 				if (pos > -1)

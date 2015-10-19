@@ -650,7 +650,7 @@ public class StringUtil
 	 */
 	public static boolean isNonEmpty(CharSequence value)
 	{
-		return !isEmptyString(value);
+		return value != null && value.length() > 0;
 	}
 
 	/**

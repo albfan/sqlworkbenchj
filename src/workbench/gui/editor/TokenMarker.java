@@ -253,13 +253,8 @@ public abstract class TokenMarker
 	 * @param length The length of the token
 	 * @param id The id of the token
 	 */
-	protected synchronized Token addToken(int lineIndex, int length, byte id)
+	protected Token addToken(int lineIndex, int length, byte id)
 	{
-		if (id >= Token.INTERNAL_FIRST && id <= Token.INTERNAL_LAST)
-		{
-			throw new InternalError("Invalid id: " + id);
-		}
-
 		if (length == 0) return null;
 
 		Token newToken = new Token(length, id);
