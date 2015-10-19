@@ -217,7 +217,7 @@ public class SettingsPanel
 		dialog.setTitle(ResourceMgr.getString("TxtSettingsDialogTitle"));
 		dialog.getContentPane().add(this);
 		dialog.addWindowListener(this);
-		int width = 0;//Settings.getInstance().getWindowWidth(this.getClass().getName());
+		int width = Settings.getInstance().getWindowWidth(this.getClass().getName());
 		int height = Settings.getInstance().getWindowHeight(this.getClass().getName());
 
 		if (width > 0 && height > 0)
