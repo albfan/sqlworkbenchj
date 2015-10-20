@@ -87,8 +87,8 @@ public class ClassFinderGUI
 		{
 			model.addElement(s);
 		}
-		JList list = new JList(model);
-		list.setVisibleRowCount(4);
+		JList<String> list = new JList<>(model);
+    list.setVisibleRowCount(Math.min(10, entries.size() + 1));
 		if (StringUtil.isNonBlank(className.getText()))
 		{
 			list.setSelectedValue(className.getText(), true);
@@ -100,7 +100,7 @@ public class ClassFinderGUI
 		String cls = null;
 		if (ok)
 		{
-			cls = (String) list.getSelectedValue();
+			cls = list.getSelectedValue();
 		}
 		return cls;
 	}
