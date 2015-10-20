@@ -33,6 +33,7 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.MainWindow;
 import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
+import workbench.log.LogMgr;
 
 /**
  *	@author  Thomas Kellerer
@@ -54,9 +55,16 @@ public class ManageMacroAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		SqlPanel sql = this.client.getCurrentSqlPanel();
-		MacroManagerDialog d = new MacroManagerDialog(client, sql, client.getMacroClientId());
-		d.setVisible(true);
+    try
+    {
+      SqlPanel sql = this.client.getCurrentSqlPanel();
+      MacroManagerDialog d = new MacroManagerDialog(client, sql, client.getMacroClientId());
+      d.setVisible(true);
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("ManageMacroAction.executeAction()", "Could not open MacroManagerDialog", th);
+    }
 	}
 
 }
