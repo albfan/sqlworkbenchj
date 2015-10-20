@@ -28,6 +28,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.MainWindow;
@@ -60,8 +61,15 @@ public class ShowMacroPopupAction
 
 	public void showPopup()
 	{
-		createPopup();
-		macroWindow.setVisible(true);
+    try
+    {
+      createPopup();
+      macroWindow.setVisible(true);
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("ShowMacroPopupAction.showPopup()", "Could not display macro popup", th);
+    }
 	}
 
 	public void saveWorkspaceSettings()
