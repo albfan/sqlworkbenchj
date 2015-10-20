@@ -846,6 +846,13 @@ public class ConnectionProfile
 	{
 		if (usePgPass())
 		{
+      String pwd = System.getenv("PGPASSWORD");
+      if (pwd != null)
+      {
+        LogMgr.logDebug("ConnectionProfile.getPgPassPassword()", "Using password from environment variable PGPASSWORD");
+        return pwd;
+      }
+
 			PgPassReader reader = new PgPassReader(url, getLoginUser());
       LogMgr.logDebug("ConnectionProfile.getPgPassPassword()", "Using password from " + PgPassReader.getPgPassFile());
 			return reader.getPasswordFromFile();

@@ -208,9 +208,11 @@
   <simplesect>
     <title>Password</title>
     <para>
-      If no password is specified, &wb-productname; will look for a
-      <ulink url="http://www.postgresql.org/docs/current/static/libpq-pgpass.html">Postgres password file</ulink>. If that is found
-      and the host, database, port and user are found in the password file, the stored password will be used.
+      If no password is specified and <link linkend="profile-save-password">the saving of the password is disabled</link>,
+      &wb-productname; will first check the
+      <ulink url="http://www.postgresql.org/docs/current/static/libpq-envars.html">environment variable <literal>PGPASSWORD</literal></ulink>.
+      If that is not defined, &wb-productname; will look for a <ulink url="http://www.postgresql.org/docs/current/static/libpq-pgpass.html">Postgres password file</ulink>.
+      If that exists and the host, database, port and user are matched in the password file, the stored password will be used.
     </para>
   </simplesect>
 </section>
@@ -283,6 +285,10 @@
 			If you choose not to store the password, you will be prompted for it each
 			time you connect using the profile.
 		</para>
+    <para>
+      To enable the <link linkend="profile-postgres">use of</link> PostgreSQL's <ulink url="http://www.postgresql.org/docs/current/static/libpq-pgpass.html">password file</ulink>
+      this option needs to be disabled.
+    </para>
 	</section>
 
 	<section id="profile-separate-connection">

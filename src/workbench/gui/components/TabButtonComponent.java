@@ -119,7 +119,7 @@ public class TabButtonComponent
     };
     closeButton.setOpaque(true);
 
-		Dimension d = new Dimension(imgSize,imgSize);
+		Dimension d = new Dimension(imgSize + 2, img.getIconHeight() + 2);
 		closeButton.setPreferredSize(d);
 		closeButton.setMinimumSize(d);
 		closeButton.setMaximumSize(d);
@@ -138,6 +138,19 @@ public class TabButtonComponent
 
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT);
 	}
+
+
+  @Override
+  public Insets getInsets()
+  {
+    return WbSwingUtilities.getEmptyInsets();
+  }
+
+  @Override
+  public Insets getInsets(Insets insets)
+  {
+    return WbSwingUtilities.getEmptyInsets();
+  }
 
   @Override
   public Color getBackground()
