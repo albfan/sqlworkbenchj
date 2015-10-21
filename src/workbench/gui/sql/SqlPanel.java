@@ -335,8 +335,6 @@ public class SqlPanel
 
 	protected WbConnection dbConnection;
 
-	private final Object connectionLock = new Object();
-
 	protected boolean importRunning;
 	protected boolean updateRunning;
 	protected String tabName;
@@ -1650,23 +1648,20 @@ public class SqlPanel
 	@Override
 	public void disconnect()
 	{
-		synchronized (this.connectionLock)
-		{
-			if (this.dbConnection != null)
-			{
-				this.setConnection(null);
-			}
-			if (this.currentData != null)
-			{
-				currentData.endEdit();
-			}
-			clearResultTabs();
-			for (ToolWindow window : resultWindows)
-			{
-				window.disconnect();
-			}
-			setLogText("");
-		}
+    if (this.dbConnection != null)
+    {
+      this.setConnection(null);
+    }
+    if (this.currentData != null)
+    {
+      currentData.endEdit();
+    }
+    clearResultTabs();
+    for (ToolWindow window : resultWindows)
+    {
+      window.disconnect();
+    }
+    setLogText("");
 	}
 
 	@Override
@@ -1688,15 +1683,12 @@ public class SqlPanel
 	@Override
 	public void setConnection(final WbConnection aConnection)
 	{
-		synchronized (this.connectionLock)
-		{
-			if (this.dbConnection != null)
-			{
-				this.dbConnection.removeChangeListener(this);
-			}
+    if (this.dbConnection != null)
+    {
+      this.dbConnection.removeChangeListener(this);
+    }
 
-			this.dbConnection = aConnection;
-		}
+    this.dbConnection = aConnection;
 
 		this.toggleAutoCommit.setConnection(this.dbConnection);
 
@@ -2083,32 +2075,30 @@ public class SqlPanel
       return;
     }
 
-		synchronized (this.connectionLock)
-		{
-			if (dbConnection != null && this.dbConnection.isBusy())
-			{
-				showLogMessage(ResourceMgr.getString("ErrConnectionBusy"));
-				return;
-			}
+    if (this.executionThread != null || (dbConnection != null && this.dbConnection.isBusy()))
+    {
+      showLogMessage(ResourceMgr.getString("ErrConnectionBusy"));
+      return;
+    }
 
-			this.executionThread = new WbThread("SQL Execution Thread " + getThreadId())
-			{
-				@Override
-				public void run()
-				{
-					runStatement(sql, offset, highlightError, appendResult, runType);
-				}
-			};
-			this.executionThread.start();
-		}
+			this.executionThread = new WbThread(getThreadId())
+    {
+      @Override
+      public void run()
+      {
+        runStatement(sql, offset, highlightError, appendResult, runType);
+      }
+    };
+
+    this.executionThread.start();
 	}
 
 	private String getThreadId()
 	{
-		String id = getId();
+		String id = "SQL Thread " + getRealTabTitle();
 		if (this.dbConnection != null)
 		{
-			id += "(" + dbConnection.getId() + ")";
+			id += " (" + dbConnection.getId() + ")";
 		}
 		return id;
 	}
@@ -2188,7 +2178,7 @@ public class SqlPanel
     int index = resultTab.indexOfComponent(panel);
     if (!confirmDiscardChanges(index, true)) return;
 
-		this.executionThread = new WbThread("SQL Execution Thread " + getThreadId())
+		this.executionThread = new WbThread(getThreadId())
 		{
 			@Override
 			public void run()
@@ -4188,18 +4178,15 @@ public class SqlPanel
 
 	public void setBusy(final boolean busy)
 	{
-		synchronized (this.connectionLock)
-		{
-			threadBusy = busy;
-			if (iconHandler != null) iconHandler.showBusyIcon(busy);
-			setConnActionsState(!busy);
-      setExecActionsState(!busy);
-			if (disableEditor())
-			{
-				if (editor != null) editor.setEditable(!busy);
-			}
-			if (sqlHistory != null) sqlHistory.setEnabled(!busy);
-		}
+    threadBusy = busy;
+    if (iconHandler != null) iconHandler.showBusyIcon(busy);
+    setConnActionsState(!busy);
+    setExecActionsState(!busy);
+    if (disableEditor())
+    {
+      if (editor != null) editor.setEditable(!busy);
+    }
+    if (sqlHistory != null) sqlHistory.setEnabled(!busy);
 	}
 
 	@Override
@@ -4233,41 +4220,34 @@ public class SqlPanel
 
 	public void fireDbExecStart()
 	{
-		synchronized (this.connectionLock)
-		{
-			if (this.execListener != null)
-			{
-				for (DbExecutionListener l : this.execListener)
-				{
-					if (l != null) l.executionStart(this.dbConnection, this);
-				}
-			}
-			if (this.dbConnection != null)
-			{
-				this.dbConnection.setBusy(true);
-			}
-
-		}
+    if (this.execListener != null)
+    {
+      for (DbExecutionListener l : this.execListener)
+      {
+        if (l != null) l.executionStart(this.dbConnection, this);
+      }
+    }
+    if (this.dbConnection != null)
+    {
+      this.dbConnection.setBusy(true);
+    }
 	}
 
 	public void fireDbExecEnd()
 	{
-		synchronized (this.connectionLock)
-		{
-			// It is important to first tell the connection that we are finished
-			// otherwise the connection still thinks it's "busy" although it is not
-			if (this.dbConnection != null)
-			{
-				this.dbConnection.setBusy(false);
-			}
-			if (this.execListener != null)
-			{
-				for (DbExecutionListener l : this.execListener)
-				{
-					if (l != null) l.executionEnd(this.dbConnection, this);
-				}
-			}
-		}
+    // It is important to first tell the connection that we are finished
+    // otherwise the connection still thinks it's "busy" although it is not
+    if (this.dbConnection != null)
+    {
+      this.dbConnection.setBusy(false);
+    }
+    if (this.execListener != null)
+    {
+      for (DbExecutionListener l : this.execListener)
+      {
+        if (l != null) l.executionEnd(this.dbConnection, this);
+      }
+    }
 	}
 
 	@Override
