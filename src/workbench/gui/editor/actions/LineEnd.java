@@ -51,7 +51,7 @@ public class LineEnd
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 
 		int line = textArea.getCaretLine();
 		int caret = textArea.getCaretPosition();

@@ -43,7 +43,7 @@ public class DeleteCurrentLine
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		if (textArea == null) return;
 
 		int line = textArea.getCaretLine();

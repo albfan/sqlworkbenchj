@@ -42,7 +42,7 @@ public class DocumentEnd
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		textArea.selectNone();
 		textArea.setCaretPosition(textArea.getDocumentLength());
 	}

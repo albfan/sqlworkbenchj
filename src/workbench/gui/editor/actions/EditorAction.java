@@ -22,11 +22,15 @@
  */
 package workbench.gui.editor.actions;
 
+import java.awt.event.ActionEvent;
+
 import javax.swing.KeyStroke;
 
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.actions.WbAction;
+import workbench.gui.editor.InputHandler;
+import workbench.gui.editor.JEditTextArea;
 
 /**
  *
@@ -35,11 +39,7 @@ import workbench.gui.actions.WbAction;
 public class EditorAction
 	extends WbAction
 {
-
-	protected EditorAction()
-	{
-		super();
-	}
+  private JEditTextArea editor;
 
 	protected EditorAction(String resourceKey, int key, int modifier)
 	{
@@ -62,4 +62,12 @@ public class EditorAction
 		initializeShortcut();
 	}
 
+  protected JEditTextArea getTextArea(ActionEvent evt)
+  {
+    if (editor == null)
+    {
+      editor = InputHandler.getTextArea(evt);
+    }
+    return editor;
+  }
 }

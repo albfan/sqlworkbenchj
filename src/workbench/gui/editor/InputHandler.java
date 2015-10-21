@@ -102,56 +102,56 @@ public class InputHandler
 	 */
 	public static final String SMART_HOME_END_PROPERTY = "InputHandler.homeEnd";
 
-	public static final ActionListener BACKSPACE = new backspace();
-	public static final ActionListener OVERWRITE = new overwrite();
+	private ActionListener BACKSPACE = new backspace();
+	private ActionListener OVERWRITE = new overwrite();
 
-	public static final EditorAction DELETE = new DeleteChar();
+	private final EditorAction DELETE = new DeleteChar();
 
-	public static final EditorAction DELETE_WORD = new DeleteWord();
-	public static final EditorAction DEL_PREV_WORD = new DelPrevWord();
+	private final EditorAction DELETE_WORD = new DeleteWord();
+	private final EditorAction DEL_PREV_WORD = new DelPrevWord();
 
-	public static final EditorAction DOCUMENT_END = new DocumentEnd();
-	public static final EditorAction SELECT_DOC_END = new SelectDocumentEnd();
+	private final EditorAction DOCUMENT_END = new DocumentEnd();
+	private final EditorAction SELECT_DOC_END = new SelectDocumentEnd();
 
-	public static final EditorAction LINE_END = new LineEnd();
-	public static final EditorAction SELECT_LINE_END = new SelectLineEnd();
+	private final EditorAction LINE_END = new LineEnd();
+	private final EditorAction SELECT_LINE_END = new SelectLineEnd();
 
-	public static final EditorAction LINE_START = new LineStart();
-	public static final EditorAction SELECT_LINE_START = new SelectLineStart();
+	private final EditorAction LINE_START = new LineStart();
+	private final EditorAction SELECT_LINE_START = new SelectLineStart();
 
-	public static final EditorAction DOCUMENT_HOME = new DocumentHome();
-	public static final EditorAction SELECT_DOC_HOME = new SelectDocumentHome();
+	private final EditorAction DOCUMENT_HOME = new DocumentHome();
+	private final EditorAction SELECT_DOC_HOME = new SelectDocumentHome();
 
-	public static final ActionListener INSERT_BREAK = new insert_break();
-	public static final ActionListener INSERT_TAB = new insert_tab();
-	public static final ActionListener SHIFT_TAB = new shift_tab();
+	private final ActionListener INSERT_BREAK = new insert_break();
+	private final ActionListener INSERT_TAB = new insert_tab();
+	private final ActionListener SHIFT_TAB = new shift_tab();
 
-	public static final EditorAction PREV_WORD = new PrevWord();
-	public static final EditorAction SELECT_PREV_WORD = new SelectPrevWord();
-	public static final EditorAction NEXT_WORD = new NextWord();
-	public static final EditorAction SELECT_NEXT_WORD = new SelectNextWord();
+	private final EditorAction PREV_WORD = new PrevWord();
+	private final EditorAction SELECT_PREV_WORD = new SelectPrevWord();
+	private final EditorAction NEXT_WORD = new NextWord();
+	private final EditorAction SELECT_NEXT_WORD = new SelectNextWord();
 
-	public static final EditorAction NEXT_CHAR = new NextChar();
-	public static final EditorAction SELECT_NEXT_CHAR = new SelectNextChar();
-	public static final EditorAction PREV_CHAR = new PreviousChar();
-	public static final EditorAction SELECT_PREV_CHAR = new SelectPreviousChar();
+	private final EditorAction NEXT_CHAR = new NextChar();
+	private final EditorAction SELECT_NEXT_CHAR = new SelectNextChar();
+	private final EditorAction PREV_CHAR = new PreviousChar();
+	private final EditorAction SELECT_PREV_CHAR = new SelectPreviousChar();
 
-	public static final EditorAction NEXT_PAGE = new NextPage();
-	public static final EditorAction PREV_PAGE = new PreviousPage();
-	public static final EditorAction SELECT_PREV_PAGE = new SelectPreviousPage();
-	public static final EditorAction SELECT_NEXT_PAGE = new SelectNextPage();
+	private final EditorAction NEXT_PAGE = new NextPage();
+	private final EditorAction PREV_PAGE = new PreviousPage();
+	private final EditorAction SELECT_PREV_PAGE = new SelectPreviousPage();
+	private final EditorAction SELECT_NEXT_PAGE = new SelectNextPage();
 
-	public static final EditorAction NEXT_LINE = new NextLine();
-	public static final EditorAction SELECT_NEXT_LINE = new SelectNextLine();
-	public static final EditorAction SELECT_PREV_LINE = new SelectPreviousLine();
-	public static final EditorAction PREV_LINE = new PreviousLine();
+	private final EditorAction NEXT_LINE = new NextLine();
+	private final EditorAction SELECT_NEXT_LINE = new SelectNextLine();
+	private final EditorAction SELECT_PREV_LINE = new SelectPreviousLine();
+	private final EditorAction PREV_LINE = new PreviousLine();
 
-	public static final WbAction INCREASE_FONT = new IncreaseFontSize();
-	public static final WbAction DECREASE_FONT = new DecreaseFontSize();
-	public static final WbAction RESET_FONT = new ResetFontSize();
+	private final WbAction INCREASE_FONT = new IncreaseFontSize();
+	private final WbAction DECREASE_FONT = new DecreaseFontSize();
+	private final WbAction RESET_FONT = new ResetFontSize();
 
 	// Default action
-	public static final ActionListener INSERT_CHAR = new insert_char();
+	private final ActionListener INSERT_CHAR = new insert_char();
 
 	private Map<KeyStroke, ActionListener> bindings;
 

@@ -42,7 +42,7 @@ public class SelectDocumentEnd
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		textArea.select(textArea.getMarkPosition(), textArea.getDocumentLength());
 	}
 }

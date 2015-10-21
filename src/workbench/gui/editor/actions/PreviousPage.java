@@ -50,7 +50,7 @@ public class PreviousPage
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		int firstLine = textArea.getFirstLine();
 		int visibleLines = textArea.getVisibleLines();
 		int line = textArea.getCaretLine();

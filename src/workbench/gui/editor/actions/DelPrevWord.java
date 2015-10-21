@@ -24,8 +24,9 @@ package workbench.gui.editor.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.text.BadLocationException;
-import workbench.gui.editor.InputHandler;
+
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.TextUtilities;
 
@@ -44,7 +45,7 @@ public class DelPrevWord
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		int start = textArea.getSelectionStart();
 		if (start != textArea.getSelectionEnd())
 		{

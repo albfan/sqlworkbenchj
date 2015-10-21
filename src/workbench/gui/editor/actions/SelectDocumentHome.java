@@ -43,7 +43,7 @@ public class SelectDocumentHome
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		textArea.select(textArea.getMarkPosition(), 0);
 	}
 }

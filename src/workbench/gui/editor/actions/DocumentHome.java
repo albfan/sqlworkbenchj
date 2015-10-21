@@ -44,7 +44,7 @@ public class DocumentHome
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		textArea.setCaretPosition(0);
 	}
 }

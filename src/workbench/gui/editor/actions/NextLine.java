@@ -50,7 +50,7 @@ public class NextLine
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		int caret = textArea.getCaretPosition();
 		int line = textArea.getCaretLine();
 

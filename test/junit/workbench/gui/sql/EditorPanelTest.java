@@ -23,6 +23,7 @@
 package workbench.gui.sql;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,11 +88,13 @@ public class EditorPanelTest
 			ActionEvent evt = new ActionEvent(p,1,"break");
 			p.setAutoIndent(false);
 			p.appendLine("Line1");
-			InputHandler.INSERT_BREAK.actionPerformed(evt);
+
+      ActionListener insert = new InputHandler.insert_break();
+			insert.actionPerformed(evt);
 			p.appendLine("Line2");
-			InputHandler.INSERT_BREAK.actionPerformed(evt);
+			insert.actionPerformed(evt);
 			p.appendLine("Line3");
-			InputHandler.INSERT_BREAK.actionPerformed(evt);
+			insert.actionPerformed(evt);
 
 			String content = p.getText();
 			int pos = content.indexOf("Line2\r\n");
@@ -115,11 +118,11 @@ public class EditorPanelTest
 			evt = new ActionEvent(p,1,"break");
 			p.setAutoIndent(false);
 			p.appendLine("Line1");
-			InputHandler.INSERT_BREAK.actionPerformed(evt);
+			insert.actionPerformed(evt);
 			p.appendLine("Line2");
-			InputHandler.INSERT_BREAK.actionPerformed(evt);
+			insert.actionPerformed(evt);
 			p.appendLine("Line3");
-			InputHandler.INSERT_BREAK.actionPerformed(evt);
+			insert.actionPerformed(evt);
 
 			content = p.getText();
 			System.out.println(StringUtil.escapeText(content, CharacterRange.RANGE_8BIT));

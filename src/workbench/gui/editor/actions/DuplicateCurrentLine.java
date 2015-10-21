@@ -46,7 +46,7 @@ public class DuplicateCurrentLine
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		if (textArea == null) return;
 
 

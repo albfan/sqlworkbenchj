@@ -55,7 +55,7 @@ public class NextWord
 	@Override
 	public void actionPerformed(ActionEvent evt)
 	{
-		JEditTextArea textArea = InputHandler.getTextArea(evt);
+		JEditTextArea textArea = getTextArea(evt);
 		jump(textArea, select);
 	}
 
