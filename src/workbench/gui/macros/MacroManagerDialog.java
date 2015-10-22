@@ -57,6 +57,7 @@ import workbench.gui.components.WbCheckBox;
 import workbench.gui.components.WbLabelField;
 import workbench.gui.editor.MacroExpander;
 import workbench.gui.sql.SqlPanel;
+import workbench.log.LogMgr;
 
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
@@ -357,6 +358,7 @@ public class MacroManagerDialog
 				macroPanel.restoreSettings();
 			}
 		});
+    LogMgr.logDebug("MacroManagerDialog.windowOpened()", "MacroManagerDialog displayed.");
 	}
 
 	@Override

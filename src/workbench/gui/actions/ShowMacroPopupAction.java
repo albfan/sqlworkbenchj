@@ -93,15 +93,9 @@ public class ShowMacroPopupAction
 		if (this.macroWindow == null)
 		{
 			macroWindow = new MacroPopup(client);
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					client.addWindowFocusListener(ShowMacroPopupAction.this);
-					macroWindow.addWindowListener(ShowMacroPopupAction.this);
-				}
-			});
+      client.addWindowFocusListener(ShowMacroPopupAction.this);
+      macroWindow.addWindowListener(ShowMacroPopupAction.this);
+      LogMgr.logDebug("ShowMacroPopupAction.createPopup()", "MacroPopup created.");
 		}
 	}
 
@@ -144,6 +138,7 @@ public class ShowMacroPopupAction
 	@Override
 	public void windowOpened(WindowEvent e)
 	{
+    LogMgr.logDebug("ShowMacroPopupAction.showPopup()", "MacroPopup displayed.");
 	}
 
 	@Override

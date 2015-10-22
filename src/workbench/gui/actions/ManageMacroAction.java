@@ -58,7 +58,9 @@ public class ManageMacroAction
     try
     {
       SqlPanel sql = this.client.getCurrentSqlPanel();
+      LogMgr.logDebug("ManageMacroAction.executeAction()", "Creating macro manager dialog for MainWindow: " + client.getTitle() + ", current panel: " + sql == null ? "<null>" : sql.getRealTabTitle());
       MacroManagerDialog d = new MacroManagerDialog(client, sql, client.getMacroClientId());
+      LogMgr.logTrace("ManageMacroAction.executeAction()", "Opening macro manager dialog...");
       d.setVisible(true);
     }
     catch (Throwable th)
