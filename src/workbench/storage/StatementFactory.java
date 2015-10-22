@@ -69,6 +69,7 @@ public class StatementFactory
 		this.setCurrentConnection(conn);
 		expressionBuilder = DmlExpressionBuilder.Factory.getBuilder(conn);
 		includeIdentityColumns = !Settings.getInstance().getGenerateInsertIgnoreIdentity();
+    includeReadOnlyColumns = !Settings.getInstance().getCheckEditableColumns();
 	}
 
 	public void setIncludeIdentiyColumns(boolean flag)
