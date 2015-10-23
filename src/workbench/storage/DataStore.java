@@ -1668,7 +1668,7 @@ public class DataStore
 		if (this.updateTable == null) throw new NullPointerException("No update table defined!");
 		this.updatePkInformation();
 
-		List<DmlStatement> stmtList = new LinkedList<>();
+		List<DmlStatement> stmtList = new ArrayList<>(getModifiedCount());
 		this.resetUpdateRowCounters();
 
 		DmlStatement dml;

@@ -37,13 +37,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to build the INSERT statement for a DataImporter.
- *
- * By default this is a plain INSERT statement, if the DataImporter should do
- an INSERT/UPDATE and the underlying DBMS isModeSupported an "UPSERT", the insert
- statement will exploit this functionality.
-
- Currently implemented for Postgres 9.5, Firebird, H2 and MySQL.
+ * A class to build the INSERT, UPSERT or Insert/Ignore statements for a DataImporter.
  *
  * @author Thomas Kellerer
  */
@@ -563,6 +557,27 @@ public class ImportDMLStatementBuilder
       }
     }
     return insert;
+  }
+
+  /**
+   * Returns true if a "native" insert ignore is supported.
+   *
+   * For some DBMS (e.g. DB2 or HSQLDB) we use a MERGE statement without the "WHEN MATCHED" part to
+   * simulate an insertIgnore mode.
+   *
+   * However when insert/update is used by the DataImporter it will try to use an insertIgnore statement
+   * followed by an UPDATE statement if available.
+   *
+   * @return if the DBMS has a native insertIgnore mode (rather than simulating one using a MERGE)
+   */
+  public boolean hasNativeInsertIgnore()
+  {
+    if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
+    if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
+    
+    return false;
   }
 
   public static boolean supportsInsertIgnore(WbConnection dbConn)

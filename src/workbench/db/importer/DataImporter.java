@@ -1054,7 +1054,10 @@ public class DataImporter
 					try
 					{
 						rows = this.insertRow(row, useSavepoint);
-						inserted = true;
+            // by checking the number of rows returned, Oracle IGNORE_ROW_ON_DUPKEY_INDEX could be used
+            // with the insert statement which is a bit faster than catching the exception
+            // this would also work with SQL Server's indexes that are defined as with IGNORE_DUP_KEY = ON
+						inserted = rows > 0;
 					}
 					catch (SQLException sql)
 					{
@@ -1877,28 +1880,18 @@ public class DataImporter
 
     String insertSql = null;
 
-    boolean useUpsert = dbConn.getDbSettings().useUpsert() && (mode == ImportMode.insertUpdate || mode == ImportMode.updateInsert);
-
-    if ((useUpsert || mode == ImportMode.upsert || mode == ImportMode.insertIgnore) && builder.isModeSupported(mode))
+    if (mode == ImportMode.upsert && builder.isModeSupported(mode))
     {
-      if (mode == ImportMode.insertIgnore)
-      {
-        insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart);
-      }
-      else
-      {
-        insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart);
-        if (insertSql != null)
-        {
-          if (mode != ImportMode.upsert)
-          {
-            LogMgr.logInfo("DataImporter.prepareInsertStatement", "Database supports native UPSERT functionality. Using only one statement for insert/update.");
-          }
-          // It's necessary to set the mode to upsert (if it was insertUpdate or updateInsert) to avoid creating and running the UPDATE statement.
-          // it's also necessary to allow batching
-          mode = ImportMode.upsert;
-        }
-      }
+      insertSql = builder.createUpsertStatement(columnConstants, insertSqlStart);
+    }
+    else if (mode == ImportMode.insertIgnore && builder.isModeSupported(mode))
+    {
+      insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart);
+    }
+    else if (mode == ImportMode.insertUpdate && builder.hasNativeInsertIgnore())
+    {
+      // using an "insert ignore" statement instead of catching an exception should be faster
+      insertSql = builder.createInsertIgnore(columnConstants, insertSqlStart);
     }
 
     if (insertSql == null)
