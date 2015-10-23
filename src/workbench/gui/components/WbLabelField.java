@@ -109,10 +109,4 @@ public class WbLabelField
       mouseListener.dispose();
     }
   }
-
-  @Override
-  public boolean isFocusable()
-  {
-    return false;
-  }
 }
