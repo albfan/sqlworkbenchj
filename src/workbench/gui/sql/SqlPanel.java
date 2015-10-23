@@ -3631,15 +3631,21 @@ public class SqlPanel
     iconHandler.showBusyIcon(false);
 
     int choice = -1;
+    ErrorPromptType promptType = GuiSettings.getErrorPromptType();
     try
     {
-      if (GuiSettings.getErrorPromptType() == ErrorPromptType.PromptWithRetry)
+      if (promptType == ErrorPromptType.PromptWithRetry)
       {
         choice = handleRetry(cmdIndex, errorDetails, parser, selectionOffset);
       }
       else
       {
-        choice = askContinue(errorDetails, ResourceMgr.getFormattedString("MsgScriptStatementError", cmdIndex + 1, totalStatements));
+        String msg = ResourceMgr.getFormattedString("MsgScriptStatementError", cmdIndex + 1, totalStatements);
+        if (promptType == ErrorPromptType.PromptWithErroressage)
+        {
+          msg += "\n" + ResourceMgr.getString("MsgScriptErrorLabel");
+        }
+        choice = askContinue(errorDetails, msg);
       }
     }
     finally
