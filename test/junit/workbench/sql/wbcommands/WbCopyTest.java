@@ -105,7 +105,7 @@ public class WbCopyTest
 				"       -targetProfile='viewCopyTarget'";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			int rows = TestUtil.getNumberValue(target, "select count(*) from v_foo");
 			assertEquals(2, rows);
@@ -127,7 +127,7 @@ public class WbCopyTest
 				"       -targetProfile='viewCopyTarget'";
 
 			result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			rows = TestUtil.getNumberValue(target, "select count(*) from v_foo");
 			assertEquals(2, rows);
@@ -171,7 +171,7 @@ public class WbCopyTest
 				"       -targetProfile='namedSchemaCopyTarget'";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 			String data = (String)TestUtil.getSingleQueryValue(target, "select some_data from test");
 			assertEquals("42   ", data);
 
@@ -185,7 +185,7 @@ public class WbCopyTest
 				"       -targetProfile='namedSchemaCopyTarget'";
 
 			 result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 			data = (String)TestUtil.getSingleQueryValue(target, "select some_data from test");
 			assertEquals("42", data);
 		}
@@ -256,7 +256,7 @@ public class WbCopyTest
 				"       -targetProfile='namedSchemaCopyTarget'";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			Statement ttstmt = target.createStatement();
 			ResultSet rs = ttstmt.executeQuery("select nr, lastname, firstname from tiger.person");
@@ -342,7 +342,7 @@ public class WbCopyTest
 				"       -targetProfile='namedSchemaCopyTarget'";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			Statement ttstmt = target.createStatement();
 			ResultSet rs = ttstmt.executeQuery("select nr, lastname, firstname from scott.person");
@@ -409,7 +409,7 @@ public class WbCopyTest
 
 		runner.runStatement(sql);
 		StatementRunnerResult result = runner.getResult();
-		assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+		assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 		ResultSet rs = stmt.executeQuery("select count(*) from target_data");
 		int count = -1;
@@ -468,7 +468,7 @@ public class WbCopyTest
 
 		runner.runStatement(sql);
 		StatementRunnerResult result = runner.getResult();
-		assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+		assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 		ResultSet rs = stmt.executeQuery("select count(*) from target_data");
 		int count = -1;
@@ -519,7 +519,7 @@ public class WbCopyTest
 
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			ResultSet rs = stmt.executeQuery("select count(*) from target_data");
 			if (rs.next())
@@ -597,7 +597,7 @@ public class WbCopyTest
 			String sql = "wbcopy -sourceTable=source_data -targettable=target_data -createTarget=true -removeDefaults=true";
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			Number count = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from target_data");
 			assertEquals(1, count.intValue());
@@ -642,7 +642,7 @@ public class WbCopyTest
 
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			try (ResultSet rs = stmt.executeQuery("select count(*) from target_data"))
 			{
@@ -774,7 +774,7 @@ public class WbCopyTest
 				"-targetTable=target_data -createTarget=true";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertEquals(msg, true, result.isSuccess());
 
 			ResultSet rs = stmt.executeQuery("select count(*) from target_data");
@@ -843,7 +843,7 @@ public class WbCopyTest
 				"-targetTable=target_data -createTarget=true -columns=tfirstname, tnr, tlastname";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertEquals(msg, true, result.isSuccess());
 
 			ResultSet rs = stmt.executeQuery("select count(*) from target_data");
@@ -1086,7 +1086,7 @@ public class WbCopyTest
 			StatementRunnerResult result = copyCmd.execute(sql);
 			if (!result.isSuccess())
 			{
-				String msg = result.getMessageBuffer().toString();
+				String msg = result.getMessages().toString();
 				System.out.println("***********");
 				System.out.println(msg);
 				System.out.println("***********");
@@ -1191,7 +1191,7 @@ public class WbCopyTest
 				"-syncDelete=true";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertEquals(msg, true, result.isSuccess());
 
 			ResultSet rs = tstmt.executeQuery("select nr, lastname, firstname from person");
@@ -1231,7 +1231,7 @@ public class WbCopyTest
 				"-targetProfile='schemaCopyTarget' ";
 
 			result = copyCmd.execute(sql);
-			msg = result.getMessageBuffer().toString();
+			msg = result.getMessages().toString();
 			assertEquals(msg, true, result.isSuccess());
 
 			rs = tstmt.executeQuery("select nr, lastname, firstname from person");
@@ -1290,7 +1290,7 @@ public class WbCopyTest
 
 			WbCopy copyCmd = new WbCopy();
 			StatementRunnerResult result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			Statement ttstmt = target.createStatement();
 			ResultSet rs = ttstmt.executeQuery("select person_id, \"Lastname\", firstname from participants");
@@ -1322,7 +1322,7 @@ public class WbCopyTest
 				"-targetProfile='copyCreateTestTarget' ";
 
 			result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			rs = ttstmt.executeQuery("select nr, \"Lastname\", firstname from participants");
 			while (rs.next())
@@ -1386,7 +1386,7 @@ public class WbCopyTest
 
 			WbCopy copyCmd = new WbCopy();
 			StatementRunnerResult result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			Statement targetStmt = target.createStatement();
 
@@ -1458,7 +1458,7 @@ public class WbCopyTest
 
 			StatementRunnerResult result = copyCmd.execute(sql);
 
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 			long participants = copyCmd.getAffectedRows();
 			assertEquals(4, participants);
 
@@ -1497,7 +1497,7 @@ public class WbCopyTest
 				"commit;\n");
 
 			result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			Object count = TestUtil.getSingleQueryValue(target, "select count(*) from person_2");
 			assertEquals(4, ((Number)count).intValue());
@@ -1518,7 +1518,7 @@ public class WbCopyTest
 				"-columns=person_id,last_name,first_name ";
 
 			result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			lastName = TestUtil.getSingleQueryValue(target, "select last_name from person_2 where person_id = 3");
 			assertNotNull(lastName);
@@ -1568,7 +1568,7 @@ public class WbCopyTest
 			String sql = "wbcopy -createTarget=true -sourceTable=person,address -sourceProfile='schemaCopyCreateSource' -targetProfile='schemaCopyCreateTarget'";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			Statement ttstmt = target.createStatement();
 			ResultSet rs = ttstmt.executeQuery("select nr, lastname, firstname from person");
@@ -1621,7 +1621,7 @@ public class WbCopyTest
 		copyCmd.setConnection(con);
 
 		StatementRunnerResult result = copyCmd.execute(sql);
-		assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+		assertEquals(result.getMessages().toString(), true, result.isSuccess());
 		try (Statement stmt = con.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT count(*) from target_table"))
 		{
@@ -1682,7 +1682,7 @@ public class WbCopyTest
 			StatementRunnerResult result = copyCmd.execute(sql);
 			assertTrue(result.isSuccess());
 			assertTrue(result.hasWarning());
-//			String msg = result.getMessageBuffer().toString();
+//			String msg = result.getMessages().toString();
 //			System.out.println(msg);
 			Number count = (Number)TestUtil.getSingleQueryValue(target, "select count(*) from test_2");
 			assertEquals(2, count.intValue());

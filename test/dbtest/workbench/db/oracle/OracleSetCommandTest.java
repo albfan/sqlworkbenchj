@@ -81,7 +81,7 @@ public class OracleSetCommandTest
 			"end;\n");
 
 		result = runner.getResult();
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertTrue(msg.contains("Hello, World"));
 	}
 

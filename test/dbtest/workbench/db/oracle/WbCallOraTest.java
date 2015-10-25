@@ -260,7 +260,7 @@ public class WbCallOraTest
 
 		String cmd = "WbCall overload_pkg.get_data(?,?,1,2,3,4,some_type_table(),?)";
 		StatementRunnerResult result = call.execute(cmd);
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> results = result.getDataStores();
@@ -302,7 +302,7 @@ public class WbCallOraTest
 
 		String cmd = "wbcall ref_cursor_example(?, ?, ?)";
 		StatementRunnerResult result = call.execute(cmd);
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> results = result.getDataStores();
 		assertEquals(2, results.size());
@@ -333,7 +333,7 @@ public class WbCallOraTest
 		assertEquals("-- Parameters: P_ID (IN)\nWbCall GET_STUFF(?);", sql);
 
 		result = call.execute("WbCall GET_STUFF(?)");
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 
 		results = result.getDataStores();
@@ -387,7 +387,7 @@ public class WbCallOraTest
 
 		String cmd = "wbcall get_status(?, ?, 42)";
 		StatementRunnerResult result = call.execute(cmd);
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> results = result.getDataStores();
 		assertEquals(1, results.size());
@@ -448,7 +448,7 @@ public class WbCallOraTest
 		String cmd = "wbcall PROC_PCKG.PROCESS_PKG_DATA(?, 21)";
 		StatementRunnerResult result = call.execute(cmd);
 		assertFalse(prompterCalled);
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> results = result.getDataStores();
 		assertEquals(1, results.size());
@@ -494,7 +494,7 @@ public class WbCallOraTest
 		String cmd = "wbcall process_data(?, 21)";
 		StatementRunnerResult result = call.execute(cmd);
 		assertFalse(prompterCalled);
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> results = result.getDataStores();
 		assertEquals(1, results.size());
@@ -538,7 +538,7 @@ public class WbCallOraTest
 		String cmd = "wbcall get_answer()";
 		StatementRunnerResult result = call.execute(cmd);
 		assertFalse(prompterCalled);
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> results = result.getDataStores();
 		assertEquals(1, results.size());
@@ -587,7 +587,7 @@ public class WbCallOraTest
 		String cmd = "wbcall dbms_utility.get_parameter_value('STATISTICS_LEVEL', ?, ?, 1)";
 		StatementRunnerResult result = call.execute(cmd);
 		assertTrue(prompterCalled);
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> results = result.getDataStores();
 		assertEquals(1, results.size());

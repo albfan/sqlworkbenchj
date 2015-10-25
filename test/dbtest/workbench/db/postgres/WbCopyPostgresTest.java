@@ -114,7 +114,7 @@ public class WbCopyPostgresTest
 				"       -targetTable=target_person -skipTargetCheck=true";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertEquals(msg, true, result.isSuccess());
 
 			stmt = con.createStatement();
@@ -165,7 +165,7 @@ public class WbCopyPostgresTest
 			"       -sourceProfile=" + source.getProfile().getName() + " \n ";
 
 		StatementRunnerResult result = copyCmd.execute(sql);
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 //    System.out.println(msg);
 		assertEquals(msg, true, result.isSuccess());
 
@@ -205,7 +205,7 @@ public class WbCopyPostgresTest
 				"       -sourceProfile=" + source.getProfile().getName() + " \n ";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertEquals(msg, true, result.isSuccess());
 
 			stmt = pgCon.createStatement();
@@ -256,7 +256,7 @@ public class WbCopyPostgresTest
 				"       -sourceProfile=" + source.getProfile().getName() + " \n ";
 
 			StatementRunnerResult result = copyCmd.execute(sql);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 
 			// has to fail because the FK exception should not be ignored!
 			assertEquals(msg, false, result.isSuccess());
@@ -273,7 +273,7 @@ public class WbCopyPostgresTest
 				"       -sourceProfile=" + source.getProfile().getName() + " \n ";
 
 			result = copyCmd.execute(sql);
-			msg = result.getMessageBuffer().toString();
+			msg = result.getMessages().toString();
 
 			assertEquals(msg, true, result.isSuccess());
 			stmt = pgCon.createStatement();

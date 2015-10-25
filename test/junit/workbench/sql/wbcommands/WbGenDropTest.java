@@ -85,7 +85,7 @@ public class WbGenDropTest
 		cmd.setConnection(conn);
 		StatementRunnerResult result = cmd.execute("WbGenerateDrop -tables=customer, orders");
 		assertTrue(result.isSuccess());
-		String script = result.getMessageBuffer().toString();
+		String script = result.getMessages().toString();
 		System.out.println(script);
 		ScriptParser p = new ScriptParser(script);
 

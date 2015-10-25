@@ -78,7 +78,7 @@ extends WbTestCase
 		runner.runStatement("show errors nocando");
 		result = runner.getResult();
 		assertTrue(result.isSuccess());
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 //		System.out.println(msg);
 		assertTrue(msg.startsWith("Errors for PROCEDURE NOCANDO"));
 		assertTrue(msg.contains("PLS-00103"));

@@ -24,9 +24,15 @@ package workbench.sql;
 
 
 import java.io.File;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import workbench.RunMode;
 import workbench.WbManager;
@@ -959,7 +965,9 @@ public class SqlCommand
 	 *
 	 * @param fileName
 	 * @return a File object pointing to the file indicated by the user.
+   *
 	 * @see workbench.sql.StatementRunner#getBaseDir()
+   * @see #evaluateWildardFileArgs(java.lang.String)
 	 */
 	public WbFile evaluateFileArgument(String fileName)
 	{
@@ -981,6 +989,45 @@ public class SqlCommand
 		}
 		return f;
 	}
+
+  /**
+   * Assumes the given parameter is a filename with wildcars supplied by the end user.
+   * <br/>
+   * If the filename does not contain a full path, the current baseDir of the
+   * StatementRunner is used to find all files matching the pattern.
+   *
+   * @param arg   the (wildcard) argument provided by the user
+   *
+   * @return a List of files, never null
+   *
+   * @see workbench.sql.StatementRunner#getBaseDir()
+   * @see #evaluateFileArgument(java.lang.String)
+   */
+  public List<WbFile> evaluateWildardFileArgs(String arg)
+  {
+    WbFile f = evaluateFileArgument(arg);
+    if (f == null) return Collections.emptyList();
+
+    File parent = f.getAbsoluteFile().getParentFile();
+    if (parent == null) return Collections.emptyList();
+
+    List<WbFile> result = new ArrayList<>(12);
+
+    try
+    {
+      DirectoryStream<Path> stream = Files.newDirectoryStream(parent.toPath(), f.getName());
+      for (Path file : stream)
+      {
+        result.add(new WbFile(file.toFile()));
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("SqlCommand.evaluateWildardFileArgs()", "Could not get file list", ex);
+    }
+    
+    return result;
+  }
 
   /**
    * Adds the SQL statement (or part of it) to the passed StatementRunnerResult.

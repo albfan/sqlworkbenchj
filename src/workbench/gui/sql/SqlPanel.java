@@ -3464,7 +3464,7 @@ public class SqlPanel
 					// the messages have been appended to the log already)
 					if (logWasCompressed)
           {
-            appendToLog(statementResult.getMessageBuffer().toString());
+            appendToLog(statementResult.getMessages().toString());
             appendToLog("\n");
           }
 
@@ -3595,7 +3595,7 @@ public class SqlPanel
 			LogMgr.logError("SqlPanel.displayResult()", "Error executing statement", e);
 			if (statementResult != null)
 			{
-				showLogMessage(statementResult.getMessageBuffer().toString());
+				showLogMessage(statementResult.getMessages().toString());
 				statementResult.clear();
 			}
       else

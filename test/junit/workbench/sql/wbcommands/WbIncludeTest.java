@@ -93,7 +93,7 @@ public class WbIncludeTest
 
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			Number cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
 			int count = cnt.intValue();
@@ -102,7 +102,7 @@ public class WbIncludeTest
 			VariablePool.getInstance().setParameterValue("foobar", "test");
 			runner.runStatement(sql);
 			result = runner.getResult();
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
 			count = cnt.intValue();
@@ -116,7 +116,7 @@ public class WbIncludeTest
 			sql = "WbInclude -ifEquals='debug=true' -file='" + scriptFile.getAbsolutePath() + "'";
 			runner.runStatement(sql);
 			result = runner.getResult();
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
 			count = cnt.intValue();
@@ -126,7 +126,7 @@ public class WbIncludeTest
 			sql = "WbInclude -ifEquals='debug=foobar' -file='" + scriptFile.getAbsolutePath() + "'";
 			runner.runStatement(sql);
 			result = runner.getResult();
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
 			count = cnt.intValue();
@@ -168,7 +168,7 @@ public class WbIncludeTest
 
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
 			Object o = TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
 			if (o instanceof Number)
@@ -240,7 +240,7 @@ public class WbIncludeTest
 			runner.runStatement("WbInclude -file=/this/will/not/be/there/i_hope.sql");
 			StatementRunnerResult result = runner.getResult();
 			assertFalse("Runner was successful", result.isSuccess());
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertTrue("Wrong error", msg.indexOf("not found") > -1);
 		}
 		finally

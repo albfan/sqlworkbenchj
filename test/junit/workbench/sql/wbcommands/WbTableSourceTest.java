@@ -56,7 +56,7 @@ public class WbTableSourceTest
 		stmt.setConnection(conn);
 		StatementRunnerResult result = stmt.execute("wbtablesource foo");
 		assertTrue(result.isSuccess());
-		String sql = result.getMessageBuffer().toString();
+		String sql = result.getMessages().toString();
 		assertTrue(sql.contains("CREATE TABLE FOO"));
 		assertTrue(sql.contains("PRIMARY KEY (ID);"));
 	}

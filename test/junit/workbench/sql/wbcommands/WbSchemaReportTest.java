@@ -87,7 +87,7 @@ public class WbSchemaReportTest
 				"         -objectTypeNames=sequence:s*"
 			);
 
-			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			assertTrue(result.getMessages().toString(), result.isSuccess());
 			assertTrue("File not created", output.exists());
 
 			String xml = FileUtil.readFile(output, "UTF-8");
@@ -162,7 +162,7 @@ public class WbSchemaReportTest
 			File output = util.getFile("report.xml");
 			output.delete();
 			StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -includeSequences=false -includeTableGrants=false -includeViews=false");
-			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			assertTrue(result.getMessages().toString(), result.isSuccess());
 			assertTrue("File not created", output.exists());
 
 			String xml = FileUtil.readFile(output, "UTF-8");
@@ -200,7 +200,7 @@ public class WbSchemaReportTest
 			File output = new File(util.getBaseDir(), "report.xml");
 			output.delete();
 			StatementRunnerResult result = report.execute("WbSchemaReport -file='" + output.getAbsolutePath() + "' -includeSequences=true -includeTableGrants=true");
-			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			assertTrue(result.getMessages().toString(), result.isSuccess());
 			assertTrue("File not created", output.exists());
 
 			String xml = FileUtil.readFile(output, "UTF-8");

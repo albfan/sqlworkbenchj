@@ -523,7 +523,7 @@ public class WbConnection
 						messages.append("\n  ");
 						messages.append(ResourceMgr.getString("TxtError"));
 						messages.append(": ");
-						messages.append(result.getMessageBuffer().toString());
+						messages.append(result.getMessages().toString());
 					}
 					messages.append("\n");
 				}

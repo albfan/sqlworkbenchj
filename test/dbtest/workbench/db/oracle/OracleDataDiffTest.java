@@ -154,7 +154,7 @@ public class OracleDataDiffTest
 				"           -singleFile=true";
 
 			StatementRunnerResult result = diff.execute(sql);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 //			System.out.println(msg);
 			assertTrue(msg, result.isSuccess());
 			assertTrue(msg, outFile1.exists());
@@ -169,7 +169,7 @@ public class OracleDataDiffTest
 				"           -singleFile=true";
 
 			result = diff.execute(sql);
-			msg = result.getMessageBuffer().toString();
+			msg = result.getMessages().toString();
 //			System.out.println(msg);
 			assertTrue(msg, result.isSuccess());
 			assertTrue(msg, outFile2.exists());

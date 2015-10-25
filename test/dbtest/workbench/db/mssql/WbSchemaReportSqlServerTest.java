@@ -99,7 +99,7 @@ extends WbTestCase
 		WbFile output = util.getFile("ms_diff.xml");
 		String sql = "WbSchemaReport -schemas=dbo -types=table -file='" + output.getFullPath() + "'";
 		StatementRunnerResult result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 
 		String xml = FileUtil.readFile(output, "UTF-8");
 
@@ -110,7 +110,7 @@ extends WbTestCase
 
 		sql = "WbSchemaReport -types=table,view -file='" + output.getFullPath() + "'";
 		result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 
 		xml = FileUtil.readFile(output, "UTF-8");
 
@@ -124,7 +124,7 @@ extends WbTestCase
 
 		sql = "WbSchemaReport -includeViews=true -file='" + output.getFullPath() + "'";
 		result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 
 		xml = FileUtil.readFile(output, "UTF-8");
 
@@ -137,7 +137,7 @@ extends WbTestCase
 
 		sql = "WbSchemaReport -objectTypeNames=table:f* -objectTypeNames=view:v* -file='" + output.getFullPath() + "'";
 		result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 
 		xml = FileUtil.readFile(output, "UTF-8");
 
@@ -156,7 +156,7 @@ extends WbTestCase
 
 		sql = "WbSchemaReport -objectTypeNames=table:dbo.f* -objectTypeNames=table:s2.f* -file='" + output.getFullPath() + "'";
 		result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 		xml = FileUtil.readFile(output, "UTF-8");
 
 		count = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='fx']/table-schema/text()");

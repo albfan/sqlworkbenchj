@@ -72,7 +72,7 @@ public class WbFeedbackTest
 		sql = "--this is a test\n\techo";
 		runner.runStatement(sql);
 		result = runner.getResult();
-		String msg = result.getMessageBuffer().toString().trim();
+		String msg = result.getMessages().toString().trim();
 		String expected = ResourceMgr.getString("MsgFeedbackEnabled");
 		assertEquals("Wrong message returned", expected, msg);
 		assertEquals("Echo command not successful", true, result.isSuccess());

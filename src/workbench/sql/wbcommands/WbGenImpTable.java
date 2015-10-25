@@ -39,10 +39,11 @@ import workbench.db.importer.detector.TextFileTableDetector;
 
 import workbench.gui.dbobjects.RunScriptPanel;
 
-import workbench.sql.DelimiterDefinition;
+import workbench.sql.BatchRunner;
+import workbench.sql.ErrorReportLevel;
+import workbench.sql.ExecutionStatus;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.commands.DdlCommand;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -66,8 +67,8 @@ public class WbGenImpTable
   public static final String VERB_SHORT = "WbGenImpTable";
 
   public static final String ARG_SAMPLE_SIZE = "lines";
-  public static final String ARG_CREATE_TABLE = "createTable";
-  public static final String ARG_DO_PROMPT = "doPrompt";
+  public static final String ARG_RUN_SCRIPT = "runScript";
+  public static final String ARG_DO_PROMPT = "prompt";
   public static final String ARG_CLIPBOARD = "clipboard";
   public static final String ARG_ALL_VARCHAR = "useVarchar";
 
@@ -95,7 +96,7 @@ public class WbGenImpTable
     cmdLine.addArgument(WbImport.ARG_TARGETTABLE);
     cmdLine.addArgument(CommonArgs.ARG_DECIMAL_CHAR);
     cmdLine.addArgument(ARG_SAMPLE_SIZE);
-    cmdLine.addArgument(ARG_CREATE_TABLE, ArgumentType.BoolArgument);
+    cmdLine.addArgument(ARG_RUN_SCRIPT, ArgumentType.BoolArgument);
     cmdLine.addArgument(ARG_DO_PROMPT, ArgumentType.BoolArgument);
     cmdLine.addArgument(ARG_CLIPBOARD, ArgumentType.BoolSwitch);
     cmdLine.addArgument(WbImport.ARG_MULTI_LINE, ArgumentType.BoolArgument);
@@ -111,43 +112,119 @@ public class WbGenImpTable
     result.setFailure();
 
     cmdLine.parse(getCommandLine(sql));
-    WbFile file = evaluateFileArgument(cmdLine.getValue(WbImport.ARG_FILE));
+    String fileName = cmdLine.getValue(WbImport.ARG_FILE);
 
-    if (file == null)
+    if (StringUtil.isBlank(fileName))
     {
       result.addErrorMessageByKey("ErrInputFileRqd");
       return result;
     }
 
-    if (!file.exists())
+    List<WbFile> files = evaluateWildardFileArgs(fileName);
+    if (files.isEmpty())
     {
       result.addErrorMessageByKey("ErrFileNotFound", cmdLine.getValue(WbImport.ARG_FILE));
       return result;
     }
 
+    String script = "";
+    try
+    {
+      result.setSuccess();
+      int statementCount = 0;
+
+      for (WbFile file : files)
+      {
+        String ddl = processOneFile(file, result);
+        if (ddl == null) continue;
+
+        if (statementCount > 0)
+        {
+          script += "\n\n";
+        }
+        script += ddl;
+        statementCount ++;
+      }
+
+      boolean createTable = cmdLine.getBoolean(ARG_RUN_SCRIPT, false);
+      boolean showSQL = true;
+
+      WbFile outFile = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_OUTPUT_FILE));
+      if (outFile != null)
+      {
+        try
+        {
+          FileUtil.writeString(outFile, script, false);
+          String msg = ResourceMgr.getFormattedString("MsgScriptWritten", outFile.getFullPath());
+          result.addMessage(msg);
+          result.setSuccess();
+          showSQL = false;
+        }
+        catch (IOException io)
+        {
+          result.setFailure();
+          result.addErrorMessageByKey("ErrFileCreate", ExceptionUtil.getDisplay(io));
+        }
+      }
+
+      StatementRunnerResult createResult = null;
+      if (createTable)
+      {
+        boolean doPrompt = cmdLine.getBoolean(ARG_DO_PROMPT, true);
+
+        if (WbManager.getInstance().isGUIMode() && doPrompt)
+        {
+          createResult = runDDLWithPrompt(script);
+          showSQL = createResult.promptingWasCancelled();
+        }
+        else
+        {
+          createResult = runDDL(script);
+        }
+
+        if (!createResult.isSuccess())
+        {
+          result.setFailure();
+          result.setFailure(createResult.getErrorDescriptor());
+        }
+      }
+
+      if (showSQL)
+      {
+        result.addMessage(script);
+      }
+
+      if (createResult != null)
+      {
+        result.addMessageNewLine();
+        result.addMessage(createResult.getMessageBuffer());
+        createResult.clear();
+      }
+
+      if (cmdLine.getBoolean(ARG_CLIPBOARD, false))
+      {
+        putToClipboard(script);
+      }
+    }
+    catch (Exception ex)
+    {
+      result.addErrorMessage(ex.getMessage());
+    }
+    return result;
+  }
+
+  private String processOneFile(WbFile file, StatementRunnerResult result)
+  {
     boolean header = cmdLine.getBoolean(WbImport.ARG_CONTAINSHEADER, WbImport.getHeaderDefault());
 
     String typeFromFile = WbImport.findTypeFromFilename(file.getFullPath());
     String type = cmdLine.getValue(WbImport.ARG_TYPE, typeFromFile);
-
-    if (!supportedTypes.contains(type))
-    {
-			result.addErrorMessageByKey("ErrImportInvalidType");
-      return result;
-    }
 
     TableDetector detector = null;
 
     if (type.equals("text"))
     {
       String delim = cmdLine.getValue(CommonArgs.ARG_DELIM, TextFileParser.DEFAULT_DELIMITER);
-
-      if (cmdLine.isArgPresent(CommonArgs.ARG_DELIM) && StringUtil.isEmptyString(delim))
-      {
-        result.addErrorMessageByKey("ErrImpDelimEmpty");
-        return result;
-      }
-
       String quote = cmdLine.getValue(WbImport.ARG_QUOTE);
       String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
       String tsFormat = cmdLine.getValue(CommonArgs.ARG_TIMESTAMP_FORMAT);
@@ -186,8 +263,6 @@ public class WbGenImpTable
 
     try
     {
-      result.setSuccess();
-
       detector.analyzeFile();
 
       if (detector.hasMessages())
@@ -195,77 +270,13 @@ public class WbGenImpTable
         result.addMessage(detector.getMessages());
       }
 
-      String ddl = detector.getCreateTable(currentConnection);
-      if (ddl == null) return result;
-
-      boolean createTable = cmdLine.getBoolean(ARG_CREATE_TABLE, false);
-      boolean showSQL = true;
-
-      WbFile outFile = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_OUTPUT_FILE));
-      if (outFile != null)
-      {
-        try
-        {
-          FileUtil.writeString(outFile, ddl + ";", false);
-          String msg = ResourceMgr.getFormattedString("MsgScriptWritten", outFile.getFullPath());
-          result.addMessage(msg);
-          result.setSuccess();
-          showSQL = false;
-        }
-        catch (IOException io)
-        {
-          result.setFailure();
-          result.addErrorMessageByKey("ErrFileCreate", ExceptionUtil.getDisplay(io));
-        }
-      }
-
-      if (createTable)
-      {
-        boolean doPrompt = cmdLine.getBoolean(ARG_DO_PROMPT, true);
-
-        StatementRunnerResult createResult = null;
-
-        if (WbManager.getInstance().isGUIMode() && doPrompt)
-        {
-          createResult = runDDLWithPrompt(ddl);
-          showSQL = createResult.promptingWasCancelled();
-        }
-        else
-        {
-          createResult = runDDL(ddl);
-        }
-
-        if (!createResult.isSuccess())
-        {
-          result.setFailure();
-          result.setFailure(createResult.getErrorDescriptor());
-        }
-        result.addMessage(createResult.getMessageBuffer());
-        createResult.clear();
-      }
-
-
-      if (DelimiterDefinition.STANDARD_DELIMITER.terminatesScript(ddl, false) == false)
-      {
-        ddl += ";";
-      }
-
-      if (showSQL)
-      {
-        result.addMessage(ddl);
-      }
-
-      if (cmdLine.getBoolean(ARG_CLIPBOARD, false))
-      {
-        putToClipboard(ddl);
-      }
+      return detector.getCreateTable(currentConnection);
     }
     catch (Exception ex)
     {
-      result.setFailure();
-      result.addMessage(ex.getMessage());
+      result.addErrorMessage(type);
     }
-    return result;
+    return null;
   }
 
   private void putToClipboard(String ddl)
@@ -286,15 +297,34 @@ public class WbGenImpTable
 
   private StatementRunnerResult runDDL(String ddl)
   {
-    DdlCommand create = DdlCommand.getCreateCommand();
-    create.setConnection(currentConnection);
-    create.setStatementRunner(runner);
-    StatementRunnerResult  result = null;
+    BatchRunner batchRunner = new BatchRunner();
+    batchRunner.setAbortOnError(true);
+    batchRunner.setStoreErrors(false);
+    batchRunner.setPrintStatements(false);
+    batchRunner.setShowProgress(false);
+    batchRunner.setShowTiming(false);
+    batchRunner.setStoreErrors(false);
+    batchRunner.setShowStatementWithResult(false);
+    batchRunner.setShowStatementSummary(false);
+    batchRunner.setErrorStatementLogging(ErrorReportLevel.none);
+    batchRunner.setRowMonitor(rowMonitor);
+
+    StringResultLogger logger = new StringResultLogger();
+    batchRunner.setResultLogger(logger);
+    batchRunner.setConnection(currentConnection);
+
+    StatementRunnerResult result = new StatementRunnerResult();
+    result.setSuccess();
     try
     {
-      result = create.execute(ddl);
+      ExecutionStatus status = batchRunner.runScript(ddl);
+      result.addMessage(logger.getMessages());
+      if (status == ExecutionStatus.Error)
+      {
+        result.setFailure(batchRunner.getLastError());
+      }
     }
-    catch (SQLException sql)
+    catch (Exception sql)
     {
       // already handled
     }
@@ -310,7 +340,7 @@ public class WbGenImpTable
       // The panel will refuse to start the script if the connection is marked as busy
       currentConnection.setBusy(false);
 
-      RunScriptPanel panel = new RunScriptPanel(currentConnection, ddl + ";");
+      RunScriptPanel panel = new RunScriptPanel(currentConnection, ddl);
       panel.openWindow(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("TxtWindowTitleGeneratedScript"), null);
 
       if (!panel.wasRun())

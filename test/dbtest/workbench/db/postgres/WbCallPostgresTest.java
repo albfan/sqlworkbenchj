@@ -212,7 +212,7 @@ public class WbCallPostgresTest
 		call.setConnection(con);
 		String cmd = "WbCall refcursorfunc()";
 		StatementRunnerResult result = call.execute(cmd);
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 		DataStore ds = result.getDataStores().get(0);
 		assertEquals(2, ds.getRowCount());
@@ -249,7 +249,7 @@ public class WbCallPostgresTest
 		String cmd = "WbCall get_answer()";
 		StatementRunnerResult result = call.execute(cmd);
 		assertEquals("{? =  call get_answer()}", call.getSqlUsed());
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(result.hasDataStores());
 		DataStore ds = result.getDataStores().get(0);
 		assertEquals(1, ds.getRowCount());

@@ -1977,7 +1977,13 @@ WHERE id=42;</programlisting>
 					<tbody valign="top">
 						<row>
 							<entry>-file</entry>
-							<entry><para>Specifies the input file to be analyzed.</para></entry>
+							<entry>
+                <para>
+                  Specifies the input file to be analyzed. The filename may contain wildcards. When specifying
+                  e.g.: <literal>-file=/temp/export/*.txt</literal> one table for each text file found in the directory
+                  <literal>/temp/export</literal> will be created.
+                </para>
+              </entry>
 						</row>
 						<row>
 							<entry>-lines</entry>
@@ -2047,7 +2053,7 @@ WHERE id=42;</programlisting>
 							<entry>
 								<para>
                   By default the generated SQL statement is shown in the message area. If <literal>-outputFile</literal>
-                  is specified the SQL statement will be written to that file.
+                  is specified, the generated SQL statement will be written to that file.
 								</para>
 							</entry>
 						</row>
@@ -2069,13 +2075,18 @@ WHERE id=42;</programlisting>
 							<entry><para>The table name to use (or create)</para></entry>
 						</row>
 						<row>
-							<entry>-createTable</entry>
+							<entry>-runScript</entry>
 							<entry>
   							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 								<para>
-                  By default, the <literal>CREATE TABLE</literal> statement is only generated and displayed. If <literal>-createTable</literal>
-                  is enabled, the generated SQL statement will be executed immediately.
+                  By default, the <literal>CREATE TABLE</literal> statement is only generated and displayed. If <literal>-runScript=true</literal>
+                  is specified, the generated SQL script will be executed immediately.
 								</para>
+                <para>
+                  By default, this will display a dialog to confirm the execution the <literal>CREATE TABLE</literal> statement.
+                  This confirmation can be suppressed using the parameter <literal>-prompt=false</literal>. In this case
+                  the generated statement will be run directly.
+                </para>
 							</entry>
 						</row>
 					</tbody>

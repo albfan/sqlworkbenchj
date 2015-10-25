@@ -50,7 +50,7 @@ public class ImportDMLStatementBuilder
   private final Set<String> upsertRequiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_HANA, DbMetadata.DBID_H2, DbMetadata.DBID_SQL_ANYWHERE, DbMetadata.DBID_SQLITE);
   private final Set<String> ignoreRequiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_SQL_ANYWHERE, DbMetadata.DBID_SQLITE);
 
-  ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustColumnNameCase)
+  public ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustColumnNameCase)
   {
     dbConn = connection;
     targetTable = target;
@@ -576,7 +576,7 @@ public class ImportDMLStatementBuilder
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
     if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
     if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
-    
+
     return false;
   }
 

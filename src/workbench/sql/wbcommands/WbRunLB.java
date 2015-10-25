@@ -157,7 +157,7 @@ public class WbRunLB
 				rowMonitor.setCurrentRow(i, statements.size());
 				runner.runStatement(sql);
 				StatementRunnerResult stmtResult = runner.getResult();
-				result.addMessage(stmtResult.getMessageBuffer());
+				result.addMessage(stmtResult.getMessages());
 				result.addMessageNewLine();
 
 				if (!stmtResult.isSuccess() && !continueOnError)

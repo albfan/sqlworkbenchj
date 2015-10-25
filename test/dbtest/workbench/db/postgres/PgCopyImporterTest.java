@@ -142,7 +142,7 @@ public class PgCopyImporterTest
     assertEquals(2, size);
     runner.runStatement(parser.getCommand(0));
     StatementRunnerResult result = runner.getResult();
-    assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+    assertTrue(result.getMessages().toString(), result.isSuccess());
     assertEquals(2, result.getTotalUpdateCount());
     runner.runStatement(parser.getCommand(1));
 

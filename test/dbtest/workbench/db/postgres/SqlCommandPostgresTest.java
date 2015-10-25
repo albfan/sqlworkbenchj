@@ -142,7 +142,7 @@ public class SqlCommandPostgresTest
 		runner.runStatement(sql);
 		StatementRunnerResult result = runner.getResult();
 
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 
 		assertTrue(result.hasDataStores());
 		List<DataStore> data = result.getDataStores();

@@ -122,7 +122,7 @@ public class TextFileTableDetectorTest
       "  dob          date,\n" +
       "  last_login   timestamp,\n" +
       "  salary       decimal(8,3)\n" +
-      ")";
+      ");";
     assertEquals(expected, create.trim().toLowerCase());
     detector.setAlwaysUseVarchar(true);
     detector.analyzeFile();
@@ -137,7 +137,7 @@ public class TextFileTableDetectorTest
       "  dob          varchar(32767),\n" +
       "  last_login   varchar(32767),\n" +
       "  salary       varchar(32767)\n" +
-      ")";
+      ");";
     assertEquals(expected, create.trim().toLowerCase());
   }
 

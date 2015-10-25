@@ -129,7 +129,7 @@ public class WbImportTest
 			WbImport cmd = new WbImport();
 			cmd.setConnection(con);
 			StatementRunnerResult result = cmd.execute("WbImport -file='" + data.getAbsolutePath() + "' -type=text -delimiter=',' -header=true -table=v_foo");
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertTrue(msg, result.isSuccess());
 
 			int rows = TestUtil.getNumberValue(con, "select count(*) from v_foo");
@@ -167,7 +167,7 @@ public class WbImportTest
 			"wbimport -file='" + input.getAbsolutePath() + "' -type=xlsx -sheetNumber=* -header=true -continueonerror=false -checkDependencies=true");
 
 		assertTrue(input.delete());
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 
 		int rows = ((Number)TestUtil.getSingleQueryValue(connection, "select count(*) from countries")).intValue();
@@ -190,7 +190,7 @@ public class WbImportTest
 			"wbimport -file='" + input.getAbsolutePath() + "' -type=ods -sheetNumber=* -header=true -continueonerror=false ");
 
 		assertTrue(input.delete());
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 
 		int rows = ((Number)TestUtil.getSingleQueryValue(connection, "select count(*) from person")).intValue();
@@ -223,7 +223,7 @@ public class WbImportTest
 
 		assertTrue(input.delete());
 
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 
 		String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr=1");
@@ -258,7 +258,7 @@ public class WbImportTest
 
 		assertTrue(input.delete());
 
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 
 		String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from junit_test where nr=1");
@@ -293,7 +293,7 @@ public class WbImportTest
 
 		assertTrue(input.delete());
 
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 
 		String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
@@ -321,7 +321,7 @@ public class WbImportTest
 
 		assertTrue(input.delete());
 
-		msg = result.getMessageBuffer().toString();
+		msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 
 		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
@@ -355,7 +355,7 @@ public class WbImportTest
 
 		assertTrue(input.delete());
 
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		Number id = (Number)TestUtil.getSingleQueryValue(connection, "select id from id_test where lastname = 'Dent'");
 		assertNotNull(id);
 		assertEquals(1, id.intValue());
@@ -381,7 +381,7 @@ public class WbImportTest
 			"-header=true " +
 			"-continueonerror=false ");
 
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertTrue(input.delete());
 
 		Number salary = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from orders");
@@ -406,7 +406,7 @@ public class WbImportTest
 
 		assertTrue(input.delete());
 
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		Number id = (Number)TestUtil.getSingleQueryValue(connection, "select id from person where lastname = 'Dent'");
 		assertNotNull(id);
 		assertEquals(1, id.intValue());
@@ -432,7 +432,7 @@ public class WbImportTest
 
 		assertTrue(input.delete());
 
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		Number count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
 		assertEquals(2, count.intValue());
 
@@ -448,7 +448,7 @@ public class WbImportTest
 
 //		assertTrue(input.delete());
 
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
 		assertEquals(2, count.intValue());
 
@@ -509,7 +509,7 @@ public class WbImportTest
 
 			assertTrue(importFile.delete());
 
-			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			assertTrue(result.getMessages().toString(), result.isSuccess());
 			Number count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
 			assertEquals(2, count.intValue());
 
@@ -529,7 +529,7 @@ public class WbImportTest
 
 			assertTrue(importFile.delete());
 
-			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			assertTrue(result.getMessages().toString(), result.isSuccess());
 			count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
 			assertEquals(5, count.intValue());
 
@@ -550,7 +550,7 @@ public class WbImportTest
 				"-extension=xls " +
 				"-header=true " +
 				"-continueonerror=false");
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertTrue(msg, result.isSuccess());
 			count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
 			assertEquals(2, count.intValue());
@@ -656,7 +656,7 @@ public class WbImportTest
 				"-table=junit_test_pk");
 
 			assertEquals("Import did not fail", result.isSuccess(), false);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertTrue(msg.indexOf("Error importing row 2") > -1);
 		}
 		finally
@@ -696,7 +696,7 @@ public class WbImportTest
 				"-continueonerror=false " +
 				"-table=junit_test_pk");
 
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 			rs = stmt.executeQuery("select nr, firstname, lastname from junit_test_pk order by nr");
 			while (rs.next())
@@ -747,7 +747,7 @@ public class WbImportTest
 			"commit;");
 
 		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"nr=${next value for seq_junit}\" -type=text -header=true -continueonerror=false -table=junit_test_pk");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		Number count = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test_pk");
 		assertEquals("Not enough values imported", 3, count.intValue());
@@ -819,7 +819,7 @@ public class WbImportTest
 			" -continueonerror=false " +
 			" -table=person2"
 		);
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		Statement stmt = connection.createStatement();
 		ResultSet rs = stmt.executeQuery("select count(*) from person2");
@@ -876,7 +876,7 @@ public class WbImportTest
 		"3\t\tBeeblebrox\t\tZaphod", "UTF-8");
 
 		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -delimiter='\\t\\t' -type=text -header=true -continueonerror=false -table=junit_test");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
 		assertEquals("Not enough values imported", 3, count);
@@ -921,7 +921,7 @@ public class WbImportTest
 			"-type=text " +
 			"-header=true " +
 			"-continueonerror=false -table=junit_test");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
 		assertEquals("Not enough values imported", 3, count);
@@ -969,7 +969,7 @@ public class WbImportTest
 			" -continueonerror=false " +
 			" -table=const_test"
 		);
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -1072,7 +1072,7 @@ public class WbImportTest
 
 		String cmd = "wbimport -importColumns=nr,lastname -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 		StatementRunnerResult result = importCmd.execute(cmd);
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		try (Statement stmt = this.connection.createStatementForQuery();
 				 ResultSet rs = stmt.executeQuery("select nr, lastname, firstname from junit_test"))
@@ -1129,7 +1129,7 @@ public class WbImportTest
 
 		String cmd = "wbimport -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=escape";
 		StatementRunnerResult result = importCmd.execute(cmd);
-		assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
+		assertEquals("Import did not succeed: " + result.getMessages(), result.isSuccess(), true);
 
 		ResultSet rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
 		String value = null;
@@ -1155,7 +1155,7 @@ public class WbImportTest
 
 		cmd = "wbimport  -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=duplicate";
 		result = importCmd.execute(cmd);
-		assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
+		assertEquals("Import did not succeed: " + result.getMessages(), result.isSuccess(), true);
 
 		rs = stmt.executeQuery("select testvalue from imp_test where nr = 2");
 		value = null;
@@ -1216,7 +1216,7 @@ public class WbImportTest
 
 			String cmd = "wbimport -continueOnError=false -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=qtest";
 			StatementRunnerResult result = importCmd.execute(cmd);
-			assertEquals("Import did not succeed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Import did not succeed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 			ResultSet rs = stmt.executeQuery("select count(*) from qtest");
 			int rows = 0;
@@ -1317,7 +1317,7 @@ public class WbImportTest
 
 			cmd = "wbimport -encoding='UTF-8' -continueOnError=true -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			result = importCmd.execute(cmd);
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals("Import failed: " + result.getMessages().toString(), true, result.isSuccess());
 
 			Number rows = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from junit_test");
 			assertEquals("Wrong number of rows imported", 3, rows.intValue());
@@ -1350,7 +1350,7 @@ public class WbImportTest
 		// Test importing correct true/false values
 		String cmd = "wbimport -literalsFalse='no,99' -literalsTrue='yes,5' -type=text -header=true  -table=bool_test -continueOnError=false -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
 		StatementRunnerResult result = importCmd.execute(cmd);
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertEquals(msg, true, result.isSuccess());
 
 		Number rows = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from bool_test where flag = false");
@@ -1367,7 +1367,7 @@ public class WbImportTest
 		// as -continueOnError=false is supplied no rows should make into the table
 		cmd = "wbimport -literalsFalse='no,false' -literalsTrue='yes,true' -type=text -header=true  -table=bool_test -continueOnError=false -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
 		result = importCmd.execute(cmd);
-		msg = result.getMessageBuffer().toString();
+		msg = result.getMessages().toString();
 		assertEquals(msg, false, result.isSuccess());
 
 		rows = (Number)TestUtil.getSingleQueryValue(connection, "select count(*) from bool_test");
@@ -1381,7 +1381,7 @@ public class WbImportTest
 		// as -continueOnError=true is supplied only 3 rows should make into the table
 		cmd = "wbimport -literalsFalse='no,false' -literalsTrue='yes,true' -type=text -header=true  -table=bool_test -continueOnError=true -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
 		result = importCmd.execute(cmd);
-		msg = result.getMessageBuffer().toString();
+		msg = result.getMessages().toString();
 		assertEquals(msg, true, result.isSuccess());
 		assertEquals(msg, true, result.hasWarning());
 
@@ -1437,7 +1437,7 @@ public class WbImportTest
 			// Test importing only correct true/false values
 			String cmd = "wbimport -continueOnError=false -startRow=1 -endRow=2 -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_int_test";
 			StatementRunnerResult result = importCmd.execute(cmd);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertEquals(msg, true, result.isSuccess());
 //			System.out.println("messages: " + msg);
 			Statement stmt = this.connection.createStatement();
@@ -1451,7 +1451,7 @@ public class WbImportTest
 
 			cmd = "wbimport -continueOnError=false -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_int_test";
 			result = importCmd.execute(cmd);
-			msg = result.getMessageBuffer().toString();
+			msg = result.getMessages().toString();
 			assertEquals("Import did not fail", false, result.isSuccess());
 
 			if (!xmlFile.delete())
@@ -1484,7 +1484,7 @@ public class WbImportTest
 		// Test importing correct true/false values
 		String cmd = "wbimport -literalsFalse='false,no,nein' -literalsTrue='true,ja,yes' -type=text -header=true  -table=bool_int_test -continueOnError=false -delimiter=',' -numericFalse='-24' -numericTrue='42' -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
 		StatementRunnerResult result = importCmd.execute(cmd);
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertEquals(msg, true, result.isSuccess());
 
     int rows = TestUtil.getNumberValue(connection, "select count(*) from bool_int_test where int_flag = -24");
@@ -1518,7 +1518,7 @@ public class WbImportTest
           "wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -clobIsFilename=true " +
           "         -type=text -header=true -continueonerror=false -table=clob_test"
       );
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 			Statement stmt = this.connection.createStatement();
 			ResultSet rs = stmt.executeQuery("select nr, text_data from clob_test order by nr");
@@ -1587,7 +1587,7 @@ public class WbImportTest
     }
 
     StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=false -table=junit_test");
-    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
     assertEquals("Not enough values imported", rowCount, count);
@@ -1614,7 +1614,7 @@ public class WbImportTest
       "x2\tZaphod\tBeeblebrox\n", "UTF-8");
 
 		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -colSubstring=nr=1:5 -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     try (Statement stmt = this.connection.createStatementForQuery();
          ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
@@ -1662,7 +1662,7 @@ public class WbImportTest
 			"-encoding=utf8 -file='" + importFile.getAbsolutePath() + "' " +
 			"-filecolumns=nr,$wb_skip$,lastname -type=text " +
 			"-header=true -continueonerror=false -table=junit_test");
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertEquals("Import failed: " + msg, result.isSuccess(), true);
 		String[] lines = msg.split(StringUtil.REGEX_CRLF);
 		assertEquals(3, lines.length);
@@ -1716,7 +1716,7 @@ public class WbImportTest
     }
 
     StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -type=text -header=true -continueonerror=false -startrow=10 -endrow=20 -table=junit_test");
-    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     try (Statement stmt = this.connection.createStatementForQuery();
          ResultSet rs = stmt.executeQuery("select min(nr), max(nr), count(*) from junit_test"))
@@ -1755,7 +1755,7 @@ public class WbImportTest
       "-header=false " +
       "-continueonerror=false " +
       "-table=junit_test");
-    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     try (Statement stmt = this.connection.createStatementForQuery();
          ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
@@ -1798,7 +1798,7 @@ public class WbImportTest
         "2\tZaphod\tBeeblebrox\n");
 
     StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -importcolumns=nr,lastname -type=text -header=true -continueonerror=false -table=junit_test");
-    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     try (Statement stmt = this.connection.createStatementForQuery();
          ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
@@ -1845,7 +1845,7 @@ public class WbImportTest
     TestUtil.writeFile(importFile, content);
 
     StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
-    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 //    TestUtil.dumpTableContent(connection, "junit_test");
 
@@ -1882,7 +1882,7 @@ public class WbImportTest
     zout.done();
 
     StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
-    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
     assertEquals(1, count);
@@ -1907,7 +1907,7 @@ public class WbImportTest
     TestUtil.writeFile(importFile, "1\tFirstname\t");
 
     StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=true -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
-    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Export failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     try (Statement stmt = this.connection.createStatementForQuery();
          ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr"))
@@ -1941,7 +1941,7 @@ public class WbImportTest
       "3\t3.3\tthird\n");
 
     StatementRunnerResult result = importCmd.execute("wbimport -decimal=. -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=numeric_test");
-    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Export failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     Statement stmt = null;
     ResultSet rs = null;
@@ -1990,17 +1990,17 @@ public class WbImportTest
     }
 
     StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -filecolumns=nr,firstname,lastname -header=false -table=not_there");
-    String msg = result.getMessageBuffer().toString();
+    String msg = result.getMessages().toString();
     assertEquals("Export did not fail", false, result.isSuccess());
     assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
 
     result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -table=not_there");
-    msg = result.getMessageBuffer().toString();
+    msg = result.getMessages().toString();
     assertEquals("Export did not fail", false, result.isSuccess());
     assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
 
     result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=not_there");
-    msg = result.getMessageBuffer().toString();
+    msg = result.getMessages().toString();
     assertEquals("Export did not fail", false, result.isSuccess());
     assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
 
@@ -2024,7 +2024,7 @@ public class WbImportTest
     }
 
     StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true  -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
-    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Export failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
     assertEquals("Not enough values imported", rowCount, count);
@@ -2053,7 +2053,7 @@ public class WbImportTest
 
     StatementRunnerResult result = importCmd.execute(
       "wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=false -table=junit_test");
-    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Export failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     int rows = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
     assertEquals("Not enough values imported", rowCount, rows);
@@ -2088,7 +2088,7 @@ public class WbImportTest
     out.close();
 
     StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text");
-    assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Export failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     Statement stmt = this.connection.createStatementForQuery();
     ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
@@ -2149,12 +2149,12 @@ public class WbImportTest
     this.connection.commit();
 
     StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=gaga -table=junit_test");
-    String msg = result.getMessageBuffer().toString();
+    String msg = result.getMessages().toString();
     assertFalse(result.isSuccess());
     assertTrue(msg.indexOf("No files with extension gaga found in directory") > -1);
 
     result = importCmd.execute("wbimport -header=false -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
-    assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
+    assertTrue("Export failed: " + result.getMessages().toString(), result.isSuccess());
 
     ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
     int count = -1;
@@ -2213,7 +2213,7 @@ public class WbImportTest
 			"commit;");
 
 		StatementRunnerResult result = importCmd.execute("wbimport -header=true -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
-		assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue("Export failed: " + result.getMessages().toString(), result.isSuccess());
 
 		int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
 		assertEquals("Not enough values in table junit_test", rowCount, count);
@@ -2249,7 +2249,7 @@ public class WbImportTest
 		}
 
 		StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -continueonerror=true -header=true -table=junit_test");
-		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Export failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
 
@@ -2272,7 +2272,7 @@ public class WbImportTest
 		}
 
 		StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=datatype_test -dateformat='yyyy-MM-dd' -timestampformat='yyyy-MM-dd HH:mm'");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		try (Statement stmt = this.connection.createStatementForQuery();
 				ResultSet rs = stmt.executeQuery("select int_col, double_col, char_col, date_col, time_col, ts_col from datatype_test"))
@@ -2346,7 +2346,7 @@ public class WbImportTest
 		zout.done();
 
 		StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -decimal='.' -multiline=true -encoding='UTF-8' -type=text -header=true -table=blob_test");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		try (Statement stmt = this.connection.createStatementForQuery();
 				ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test"))
@@ -2447,7 +2447,7 @@ public class WbImportTest
 		String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 //			System.out.println("cmd=" + cmd);
 		StatementRunnerResult result = importCmd.execute(cmd);
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		try (Statement stmt = this.connection.createStatementForQuery();
 				ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
@@ -2598,7 +2598,7 @@ public class WbImportTest
 			String cmd = "wbimport -encoding='UTF-8' -sourceDir='" + ta.getParent() + "' -type=xml -batchSize=10";
 
 			StatementRunnerResult result = importCmd.execute(cmd);
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertEquals("Import failed: " + msg, result.isSuccess(), true);
 			String[] lines = msg.split(StringUtil.REGEX_CRLF);
 			assertTrue(lines.length == 6);
@@ -2675,7 +2675,7 @@ public class WbImportTest
 		String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 		//System.out.println("cmd=" + cmd);
 		StatementRunnerResult result = importCmd.execute(cmd);
-    String msg = result.getMessageBuffer().toString();
+    String msg = result.getMessages().toString();
     System.out.println(msg);
 		assertEquals(true, result.isSuccess());
 
@@ -2781,7 +2781,7 @@ public class WbImportTest
 
 		String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=info";
 		StatementRunnerResult result = importCmd.execute(cmd);
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		int rowCount = TestUtil.getNumberValue(connection, "select count(*) from info");
 		assertEquals("Wrong number of rows", rowCount, 4);
@@ -2847,7 +2847,7 @@ public class WbImportTest
 		String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -createTarget=true";
 		//System.out.println("cmd=" + cmd);
 		StatementRunnerResult result = importCmd.execute(cmd);
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		try (Statement stmt = this.connection.createStatementForQuery();
 				ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from not_there_table"))
@@ -2951,7 +2951,7 @@ public class WbImportTest
 		String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -startRow = 15 -endrow = 24 -table=junit_test";
 		//System.out.println("cmd=" + cmd);
 		StatementRunnerResult result = importCmd.execute(cmd);
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		try (Statement stmt = this.connection.createStatementForQuery();
 				ResultSet rs = stmt.executeQuery("select min(nr), max(nr), count(*) from junit_test"))
@@ -2983,7 +2983,7 @@ public class WbImportTest
 		File xmlFile = util.copyResourceFile(this, "encoded_blob_input.xml");
 
 		StatementRunnerResult result = importCmd.execute("wbimport -encoding='ISO-8859-1' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=blob_test");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		int rowCount;
 		try (Statement stmt = this.connection.createStatementForQuery();
@@ -3085,7 +3085,7 @@ public class WbImportTest
       }
 
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=blob_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
       try (Statement stmt = this.connection.createStatementForQuery();
            ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test"))
@@ -3184,7 +3184,7 @@ public class WbImportTest
       TestUtil.writeFile(datafile, "This is a CLOB string to be put into row 1", "UTF-8");
 
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=clob_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
       try (Statement stmt = this.connection.createStatementForQuery();
            ResultSet rs = stmt.executeQuery("select nr, text_data from clob_test"))
@@ -3238,7 +3238,7 @@ public class WbImportTest
 
 			String cmd = "wbimport -file='" + dataFile.getAbsolutePath() + "' -type=text -delimiter=';' -table=junit_test -header=true";
 			StatementRunnerResult result = importCmd.execute(cmd);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 			wb.disconnect();
 
 			// Shutdown and restart the engine to make sure the data was committed
@@ -3311,7 +3311,7 @@ public class WbImportTest
 
 			String cmd = "wbimport -file='" + dataFile.getAbsolutePath() + "' -type=text -delimiter=';' -commitEvery=none -table=junit_test -header=true";
 			StatementRunnerResult result = importCmd.execute(cmd);
-			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			assertEquals(result.getMessages().toString(), true, result.isSuccess());
 			wb.disconnect();
 
 			// Shutdown and restart the engine to make sure the data was committed
@@ -3422,7 +3422,7 @@ public class WbImportTest
     zout.done();
 
     StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + archive.getAbsolutePath() + "' -type=xml -table=blob_test");
-    assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+    assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
     try (Statement stmt = this.connection.createStatementForQuery();
          ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test"))
@@ -3476,7 +3476,7 @@ public class WbImportTest
       }
 
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=blob_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
       try (Statement stmt = this.connection.createStatementForQuery();
            ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test"))
@@ -3534,7 +3534,7 @@ public class WbImportTest
 		}
 
 		StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=blob_test -blobType=base64");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		Statement stmt = this.connection.createStatementForQuery();
 		ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
@@ -3584,7 +3584,7 @@ public class WbImportTest
 				"-continueonerror=true " +
 				"-table=junit_test_pk -badFile='" + badFile.getCanonicalPath() + "'");
 
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		assertEquals("Bad file not created", true, badFile.exists());
 
@@ -3647,7 +3647,7 @@ public class WbImportTest
 			"-multiline=false -type=text -header=false " +
 			"-filecolumns=nr,firstname,lastname -importcolumns=nr,lastname -columnWidths='nr=3,firstname=10,lastname=15' " +
 			"-continueonerror=true -table=junit_test");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		try (Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test_pk order by nr");
@@ -3706,7 +3706,7 @@ public class WbImportTest
 				"-filecolumns=nr,firstname,lastname -columnWidths='nr=3,firstname=10,lastname=15' " +
 				"-continueonerror=true -table=junit_test");
 
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
@@ -3753,7 +3753,7 @@ public class WbImportTest
 				"-multiline=false -type=text -header=false " +
 				"-filecolumns=nr,firstname,lastname -importColumns=nr,lastname -columnWidths='nr=2,firstname=6,lastname=10' " +
 				"-continueonerror=true -table=junit_test");
-			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 			stmt = this.connection.createStatementForQuery();
 			rs = stmt.executeQuery("select nr, firstname, lastname from junit_test where nr > 5 order by nr");
@@ -3814,7 +3814,7 @@ public class WbImportTest
       "         -continueonerror=false -table=junit_test " +
       "         -deleteTarget=true");
 
-//		String msg = result.getMessageBuffer().toString();
+//		String msg = result.getMessages().toString();
 //		System.out.println(" ***** message=" + msg);
 		assertTrue(result.isSuccess());
     int rows = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
@@ -3830,7 +3830,7 @@ public class WbImportTest
       "         -columnFilter='nr=^[^3]*'" +
       "         -table=junit_test ");
 
-//		String msg = result.getMessageBuffer().toString();
+//		String msg = result.getMessages().toString();
 //		System.out.println(" ***** message=" + msg);
 
 		assertTrue(result.isSuccess());
@@ -3850,7 +3850,7 @@ public class WbImportTest
       "         -columnFilter='nr=^[^1]*'" +
       "         -table=junit_test ");
 
-//		String msg = result.getMessageBuffer().toString();
+//		String msg = result.getMessages().toString();
 //		System.out.println(" ***** message=" + msg);
 
 		assertTrue(result.isSuccess());
@@ -3883,7 +3883,7 @@ public class WbImportTest
 
 		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -continueonerror=false -table=parent_table -deleteTarget=true");
 		assertEquals("Import did not fail", false, result.isSuccess());
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 //			System.out.println(" ***** message=" + msg);
 		assertEquals("No error reported", true, msg.toLowerCase().indexOf("integrity constraint violation") > 0);
 
@@ -3904,7 +3904,7 @@ public class WbImportTest
 		importFile.createNewFile();
 
 		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -continueonerror=true -table=junit_test");
-		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Import failed: " + result.getMessages().toString(), result.isSuccess(), true);
 
 		if (!importFile.delete())
 		{
@@ -3920,7 +3920,7 @@ public class WbImportTest
 		importFile.createNewFile();
 
 		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -emptyFile=ignore -table=junit_test");
-		assertTrue("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue("Import failed: " + result.getMessages().toString(), result.isSuccess());
 
 		if (!importFile.delete())
 		{
@@ -3929,14 +3929,14 @@ public class WbImportTest
 
 		importFile.createNewFile();
 		result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -continueOnError=false -emptyFile=fail -table=junit_test");
-		String error = result.getMessageBuffer().toString();
+		String error = result.getMessages().toString();
 		String expected = ResourceMgr.getFormattedString("ErrImportFileEmpty", importFile.getFullPath());
 		assertFalse(result.isSuccess());
 		assertEquals(expected, error);
 
 		importFile.createNewFile();
 		result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -continueOnError=false -emptyFile=warning -table=junit_test");
-		error = result.getMessageBuffer().toString();
+		error = result.getMessages().toString();
 		expected = ResourceMgr.getFormattedString("ErrImportFileEmpty", importFile.getFullPath());
 		assertTrue(result.isSuccess());
 		assertTrue(result.hasWarning());
@@ -4078,7 +4078,7 @@ public class WbImportTest
 
 		WbFile f = new WbFile(basedir);
 		StatementRunnerResult result = importCmd.execute("wbimport -sourcedir='" + f.getFullPath() + "' -type=xml -checkDependencies=true");
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		if (!result.isSuccess())
 		{
 			System.out.println(msg);
@@ -4162,7 +4162,7 @@ public class WbImportTest
 				"-header=true " +
 				"-deleteTarget=true " +
 				"-checkDependencies=true");
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertEquals("Import failed: " + msg, result.isSuccess(), true);
 
 			ResultSet rs = stmt.executeQuery("select count(*) from zzbase");
@@ -4241,7 +4241,7 @@ public class WbImportTest
         "3\tZaphod\n", "UTF-8");
 
 			StatementRunnerResult result = importCmd.execute("wbimport -header=true -continueonerror=true -sourcedir='" + importFile.getParent() + "' -type=text");
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 //			System.out.println("**********\n" + msg);
 			assertTrue(result.isSuccess());
 
@@ -4306,7 +4306,7 @@ public class WbImportTest
           "-delimiter=',' " +
           "-header=true " +
           "-constantValues='cust_id=1'");
-      String msg = result.getMessageBuffer().toString();
+      String msg = result.getMessages().toString();
       assertTrue(msg, result.isSuccess());
       int count = TestUtil.getNumberValue(hsql, "select count(*) from booking where cust_id = 1");
       assertEquals(3, count);

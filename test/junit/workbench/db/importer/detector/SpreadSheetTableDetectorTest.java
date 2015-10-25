@@ -56,7 +56,7 @@ public class SpreadSheetTableDetectorTest
       "  hiredate     TIMESTAMP,\n" +
       "  salary       DECIMAL(7),\n" +
       "  last_login   TIMESTAMP\n" +
-      ")";
+      ");";
     assertEquals(expected.toLowerCase(), sql.trim().toLowerCase());
     assertTrue(input.delete());
   }
@@ -91,6 +91,7 @@ public class SpreadSheetTableDetectorTest
       "  product_id    DECIMAL(3),\n" +
       "  amount        DECIMAL(5)\n" +
       ");";
+    System.out.println("*****\n" + sql);
     assertEquals(expected.toLowerCase(), sql.trim().toLowerCase());
   }
 }

@@ -371,11 +371,16 @@ public class StatementRunnerResult
 	 *
 	 * @see workbench.util.MessageBuffer#getBuffer()
 	 */
-	public CharSequence getMessageBuffer()
+	public CharSequence getMessages()
 	{
 		if (this.messages == null) return null;
 		return messages.getBuffer();
 	}
+
+  public MessageBuffer getMessageBuffer()
+  {
+    return messages;
+  }
 
 	public long getTotalUpdateCount()
 	{

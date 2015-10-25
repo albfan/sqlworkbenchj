@@ -878,7 +878,7 @@ public class DwPanel
 				}
 				else
 				{
-					String err = result.getMessageBuffer().toString();
+					String err = result.getMessages().toString();
 					showError(err);
 					WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), err);
 				}

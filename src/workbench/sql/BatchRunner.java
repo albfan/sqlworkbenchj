@@ -862,10 +862,10 @@ public class BatchRunner
 					status = result.getStatus();
 
 					// We have to store the result of hasMessages()
-					// as the getMessageBuffer() will clear the buffer
+					// as the getMessages() will clear the buffer
 					// and a subsequent call to hasMessages() will return false;
 					boolean hasMessage = result.hasMessages();
-					String feedback = result.getMessageBuffer().toString();
+					String feedback = result.getMessages().toString();
 
           if (status == ExecutionStatus.Error)
           {

@@ -128,7 +128,7 @@ public class WbDataDiffTest
 			runner.runStatement(sql);
 
 			StatementRunnerResult result = runner.getResult();
-			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			assertTrue(result.getMessages().toString(), result.isSuccess());
 
 			WbFile main = new WbFile(util.getBaseDir(), "sync_ex.sql");
 			assertTrue(main.exists());
@@ -156,7 +156,7 @@ public class WbDataDiffTest
 			runner.runStatement(sql);
 
 			result = runner.getResult();
-			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			assertTrue(result.getMessages().toString(), result.isSuccess());
 			diffScript = FileUtil.readFile(main, "UTF-8");
 			parser = new ScriptParser(diffScript);
 			assertEquals(3, parser.getSize()); // 1 update, 1 insert plus a commit
@@ -215,7 +215,7 @@ public class WbDataDiffTest
 			runner.runStatement(sql);
 
 //			StatementRunnerResult result = runner.getResult();
-//			System.out.println(result.getMessageBuffer());
+//			System.out.println(result.getMessages());
 			WbFile main = new WbFile(util.getBaseDir(), "sync.sql");
 			assertTrue(main.exists());
 
@@ -491,7 +491,7 @@ public class WbDataDiffTest
 			StatementRunnerResult result = runner.getResult();
 			assertTrue(result.isSuccess());
 			assertTrue(result.hasWarning());
-			CharSequence msg = result.getMessageBuffer();
+			CharSequence msg = result.getMessages();
 			assertNotNull(msg);
 			assertTrue(msg.toString().indexOf("The columns from the table PERSON do not match the columns of the target table PERSON") > -1);
 
@@ -501,7 +501,7 @@ public class WbDataDiffTest
 			result = runner.getResult();
 			assertTrue(result.isSuccess());
 			assertFalse(result.hasWarning());
-			msg = result.getMessageBuffer();
+			msg = result.getMessages();
 			assertNotNull(msg);
 			assertTrue(msg.toString().indexOf("The columns from the table PERSON do not match the columns of the target table PERSON") == -1);
 
@@ -541,7 +541,7 @@ public class WbDataDiffTest
 			String sql = "WbDataDiff -alternateKey='person=\"NickName\"' -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -file=sync.sql -encoding=UTF8";
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertTrue(msg, result.isSuccess());
 
 			String[] expectedFiles = new String[]
@@ -640,7 +640,7 @@ public class WbDataDiffTest
 			String sql = "WbDataDiff -includeDelete=true -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -referenceSchema=difftest -targetSchema=difftest -referenceTables=person -file=sync.sql -encoding=UTF8";
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
-			assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+			assertTrue(result.getMessages().toString(), result.isSuccess());
 
 			String[] expectedFiles = new String[]
 			{

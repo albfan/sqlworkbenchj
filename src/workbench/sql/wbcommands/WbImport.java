@@ -992,6 +992,7 @@ public class WbImport
 		if (name.endsWith(".xml")) return "xml";
 		if (name.endsWith(".text")) return "text";
 		if (name.endsWith(".csv")) return "text";
+		if (name.endsWith(".tsv")) return "text";
 		if (name.endsWith(".xls")) return "xls";
 		if (name.endsWith(".xlsx")) return "xlsx";
 		if (name.endsWith(".ods")) return "ods";

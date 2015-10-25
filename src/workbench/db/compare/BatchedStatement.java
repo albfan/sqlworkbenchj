@@ -67,17 +67,6 @@ public class BatchedStatement
 	 *
 	 * @param pstmt the PreparedStatement to be batched
 	 * @param conn the statement that was used to create the statement
-	 */
-	public BatchedStatement(PreparedStatement pstmt, WbConnection conn)
-	{
-		this(pstmt, conn, 10);
-	}
-
-	/**
-	 * Creates a BatchedStatement with a batch size of 10.
-	 *
-	 * @param pstmt the PreparedStatement to be batched
-	 * @param conn the statement that was used to create the statement
 	 * @param size the batch size to use
 	 */
 	public BatchedStatement(PreparedStatement pstmt, WbConnection conn, int size)

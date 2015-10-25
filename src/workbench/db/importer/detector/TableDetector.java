@@ -101,6 +101,12 @@ public abstract class TableDetector
     }
   }
 
+  protected String getDisplayFilename()
+  {
+    if (inputFile == null) return "";
+    return inputFile.getName();
+  }
+
   protected String getTableNameToUse()
   {
     if (StringUtil.isNonBlank(tableName)) return tableName.trim();
@@ -177,7 +183,7 @@ public abstract class TableDetector
       result += FormatterUtil.getDataType(typeName);
     }
 
-    result += "\n)";
+    result += "\n);";
     return result;
   }
 
@@ -238,7 +244,7 @@ public abstract class TableDetector
           if (i > 0) typeNames += ", ";
           typeNames += types.get(i).toString();
         }
-        messages.append(ResourceMgr.getFormattedString("MsgImpTblMultipleTypes", col.getName(), typeNames));
+        messages.append(getDisplayFilename() + ": " + ResourceMgr.getFormattedString("MsgImpTblMultipleTypes", col.getName(), typeNames));
         messages.appendNewLine();
       }
     }

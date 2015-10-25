@@ -84,12 +84,12 @@ public class WbGenerateScriptTest
 			String script = null;
 
 			result = genScript.execute("WbGenerateScript -types=view");
-			script = result.getMessageBuffer().toString();
+			script = result.getMessages().toString();
 			assertNotNull(script);
 			assertTrue(script.toLowerCase().startsWith("create view v_order_items"));
 
 			result = genScript.execute("WbGenerateScript -objects=customer,orders");
-			script = result.getMessageBuffer().toString();
+			script = result.getMessages().toString();
 			assertTrue(script.contains("CREATE TABLE CUSTOMER"));
 			assertTrue(script.contains("ADD CONSTRAINT pk_customer"));
 
@@ -98,14 +98,14 @@ public class WbGenerateScriptTest
 			assertTrue(script.contains("ADD CONSTRAINT FK_ORDERS_CUST"));
 
 			result = genScript.execute("WbGenerateScript invoice");
-			script = result.getMessageBuffer().toString();
+			script = result.getMessages().toString();
 
 			assertTrue(script.contains("CREATE TABLE INVOICE"));
 			assertTrue(script.contains("ADD CONSTRAINT pk_invoice"));
 			assertTrue(script.contains("ADD CONSTRAINT FK_INV_ORDER"));
 
 			result = genScript.execute("WbGenerateScript -objects=o%");
-			script = result.getMessageBuffer().toString();
+			script = result.getMessages().toString();
 
 			assertTrue(script.contains("CREATE TABLE ORDERS"));
 			assertTrue(script.contains("CREATE TABLE ORDER_ITEM"));
@@ -114,7 +114,7 @@ public class WbGenerateScriptTest
 			assertFalse(script.contains("CREATE TABLE CURRENCY"));
 
 			result = genScript.execute("WbGenerateScript -types=table -objects=* -exclude=*ord*");
-			script = result.getMessageBuffer().toString();
+			script = result.getMessages().toString();
 			assertTrue(script.contains("CREATE TABLE CUSTOMER"));
 			assertTrue(script.contains("CREATE TABLE INVOICE"));
 			assertTrue(script.contains("CREATE TABLE CURRENCY"));

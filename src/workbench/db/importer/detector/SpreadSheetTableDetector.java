@@ -70,6 +70,17 @@ public class SpreadSheetTableDetector
   }
 
   @Override
+  protected String getDisplayFilename()
+  {
+    String name = super.getDisplayFilename();
+    if (StringUtil.isNonBlank(sheetName))
+    {
+      name += ":" + SqlUtil.cleanupIdentifier(sheetName);
+    }
+    return name;
+  }
+
+  @Override
   public String getCreateTable(WbConnection conn)
     throws SQLException
   {
@@ -83,7 +94,7 @@ public class SpreadSheetTableDetector
     {
       String table = super.getCreateTable(conn, entry.getValue(), entry.getKey());
       sql.append(table);
-      sql.append(";\n\n");
+      sql.append("\n\n");
     }
     return sql.toString();
   }
@@ -127,6 +138,15 @@ public class SpreadSheetTableDetector
         reader.setActiveWorksheet(i);
 
         List<String> cols = reader.getHeaderColumns();
+
+        if (withHeader == false)
+        {
+          for (int c=0; c < cols.size(); c++)
+          {
+            cols.set(c, "column_" + Integer.toString(i+1));
+          }
+        }
+
         List<ColumnStatistics> sheetColumns = new ArrayList<>(cols.size());
         for (String col : cols)
         {
@@ -135,7 +155,8 @@ public class SpreadSheetTableDetector
 
         int numLines = Math.min(reader.getRowCount(), sampleSize);
 
-        for (int row=1; row < numLines; row++)
+        int startRow = withHeader ? 1 : 0;
+        for (int row=startRow; row < numLines; row++)
         {
           List<Object> values = reader.getRowValues(row);
           analyzeValues(values, sheetColumns);

@@ -85,7 +85,7 @@ public class WbSchemaDiffTest
 		File output = new File(util.getBaseDir(), "view_table_test.xml");
 		output.delete();
 		StatementRunnerResult result = diff.execute("WbSchemaDiff -file='" + output.getAbsolutePath() + "' -viewAsTable=true -includeForeignKeys=false -includePrimaryKeys=false -includeIndex=false -includeSequences=false -referenceProfile=source -targetProfile=target");
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 		assertTrue("File not created", output.exists());
 

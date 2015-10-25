@@ -108,7 +108,7 @@ public class WbSchemaReportOracleTest
 		WbFile output = util.getFile("ora_rep.xml");
 		String sql = "WbSchemaReport -tables=* -types=table,sequence -file='" + output.getFullPath() + "'";
 		StatementRunnerResult result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 
 		String xml = FileUtil.readFile(output, "UTF-8");
 
@@ -122,7 +122,7 @@ public class WbSchemaReportOracleTest
 
 		sql = "WbSchemaReport -types=table,view -file='" + output.getFullPath() + "'";
 		result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 
 		xml = FileUtil.readFile(output, "UTF-8");
 
@@ -137,7 +137,7 @@ public class WbSchemaReportOracleTest
 
 		sql = "WbSchemaReport -includeSequences=true -includeViews=true -file='" + output.getFullPath() + "'";
 		result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 
 		xml = FileUtil.readFile(output, "UTF-8");
 
@@ -153,7 +153,7 @@ public class WbSchemaReportOracleTest
 
 		sql = "WbSchemaReport -types=table,view,sequence -tables=s* -file='" + output.getFullPath() + "'";
 		result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 
 		xml = FileUtil.readFile(output, "UTF-8");
 
@@ -165,7 +165,7 @@ public class WbSchemaReportOracleTest
 
 		sql = "WbSchemaReport -objectTypeNames=procedure:s* -file='" + output.getFullPath() + "'";
 		result = reporter.execute(sql);
-		assertTrue(result.getMessageBuffer().toString(), output.exists());
+		assertTrue(result.getMessages().toString(), output.exists());
 
 		xml = FileUtil.readFile(output, "UTF-8");
 		count = TestUtil.getXPathValue(xml, "count(/schema-report/proc-def)");

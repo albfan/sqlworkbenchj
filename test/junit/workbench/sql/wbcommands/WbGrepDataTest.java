@@ -144,7 +144,7 @@ public class WbGrepDataTest
 
 		sql = "WbGrepData -searchValue=arthur -tables=person -columns=lastname";
 		result = instance.execute(sql);
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		System.out.println(msg);
 		assertTrue(msg, result.isSuccess());
 		data = result.getDataStores();
@@ -152,7 +152,7 @@ public class WbGrepDataTest
 
 		sql = "WbGrepData -searchValue=arthur -tables=person -columns=firstname";
 		result = instance.execute(sql);
-		msg = result.getMessageBuffer().toString();
+		msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 		data = result.getDataStores();
 		assertNotNull(data);

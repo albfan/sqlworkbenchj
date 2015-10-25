@@ -70,7 +70,7 @@ public class WbListProfilesTest
 		result = list.execute(sql);
 		assertTrue(result.isSuccess());
 
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 //		System.out.println("****\n" + msg);
 		String[] lines = msg.split(StringUtil.REGEX_CRLF);
 		assertEquals(2, lines.length);

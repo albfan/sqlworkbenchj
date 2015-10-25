@@ -99,7 +99,7 @@ public class WbImportPostgresTest
 			"2|\n";
 		TestUtil.writeFile(data, content, "UTF-8");
 		StatementRunnerResult result = cmd.execute("WbImport -file='" + data.getAbsolutePath() + "' -emptyStringIsNull=true -table=xml_test -type=text -header=true -delimiter='|'");
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		Number count = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from xml_test");
 		assertEquals(2, count.intValue());
 
@@ -141,7 +141,7 @@ public class WbImportPostgresTest
     runner.runStatement("wbimport -usePgCopy -continueOnError=false -ignoreMissingColumns=true -sourceDir='" + util.getBaseDir() + "' -type=text -delimiter='|';");
 		StatementRunnerResult result = runner.getResult();
 
-//    System.out.println(result.getMessageBuffer().toString());
+//    System.out.println(result.getMessages().toString());
 
     assertFalse(result.isSuccess());
 
@@ -169,7 +169,7 @@ public class WbImportPostgresTest
 		runner.runStatement("WbImport -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='|' -usePgCopy");
 		StatementRunnerResult result = runner.getResult();
 
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 //		System.out.println(msg);
 
 		assertTrue(msg, result.isSuccess());
@@ -259,7 +259,7 @@ public class WbImportPostgresTest
 
 		assertTrue(input.delete());
 
-		String msg = result.getMessageBuffer().toString();
+		String msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 
 		String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
@@ -289,7 +289,7 @@ public class WbImportPostgresTest
 
 		assertTrue(input.delete());
 
-		msg = result.getMessageBuffer().toString();
+		msg = result.getMessages().toString();
 		assertTrue(msg, result.isSuccess());
 
 		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");

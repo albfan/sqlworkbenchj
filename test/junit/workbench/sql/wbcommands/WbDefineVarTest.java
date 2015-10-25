@@ -114,7 +114,7 @@ public class WbDefineVarTest
 			String someValue = VariablePool.getInstance().getParameterValue("value");
 			assertEquals("SQL Variable not set", "42", someValue);
 
-			String msg = result.getMessageBuffer().toString();
+			String msg = result.getMessages().toString();
 			assertTrue(msg.contains("Variable id defined with value '7'"));
 			assertTrue(msg.contains("Variable value defined with value '42'"));
 		}
@@ -167,7 +167,7 @@ public class WbDefineVarTest
 
 		result = cmd.execute("WbVardef var5=' a '");
 		varValue = VariablePool.getInstance().getParameterValue("var5");
-		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.getMessages().toString(), result.isSuccess());
 		assertEquals("Quoted spaces trimmed", " a ", varValue);
 
 		cmd.execute("WbVardef var5=");
