@@ -31,6 +31,7 @@ import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Locale;
 
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -72,6 +73,12 @@ public class GeneralOptionsPanel
 		super();
 		initComponents();
 
+    if (LogMgr.isTraceEnabled())
+    {
+      DefaultComboBoxModel model = (DefaultComboBoxModel)logLevel.getModel();
+      model.addElement("TRACE");
+    }
+    
 		brushedMetal.setVisible(MacOSHelper.isMacOS());
 		brushedMetal.setEnabled(MacOSHelper.isMacOS());
 		if (!brushedMetal.isVisible())

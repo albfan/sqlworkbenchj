@@ -55,30 +55,27 @@ import workbench.util.WbPersistence;
  */
 public class MacroStorage
 {
-	private final String storageId;
 	private final Object lock = new Object();
-	private final Map<String, MacroDefinition> allMacros;
-	private final List<MacroGroup> groups;
+	private final Map<String, MacroDefinition> allMacros = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+	private final List<MacroGroup> groups = new ArrayList<>();
 
 	private boolean modified = false;
-	private List<MacroChangeListener> changeListeners = null;
-	private File sourceFile;
+	private List<MacroChangeListener> changeListeners = new ArrayList<>(1);
+	private WbFile sourceFile;
 
-	public MacroStorage(String id)
+	public MacroStorage(WbFile toLoad)
 	{
-		storageId = id;
-		allMacros = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
-		groups = new ArrayList<>();
+    sourceFile = toLoad;
+    loadMacros();
 	}
+
+  MacroStorage()
+  {
+  }
 
 	public synchronized MacroDefinition getMacro(String key)
 	{
 		return allMacros.get(key);
-	}
-
-	public String getStorageId()
-	{
-		return storageId;
 	}
 
 	public File getCurrentFile()
@@ -89,14 +86,7 @@ public class MacroStorage
 	public String getCurrentMacroFilename()
 	{
 		if (sourceFile == null) return null;
-		try
-		{
-			return sourceFile.getCanonicalPath();
-		}
-		catch (IOException io)
-		{
-			return sourceFile.getAbsolutePath();
-		}
+    return sourceFile.getFullPath();
 	}
 
 	public void removeGroup(MacroGroup group)
@@ -117,16 +107,11 @@ public class MacroStorage
 
 	public void addChangeListener(MacroChangeListener aListener)
 	{
-		if (this.changeListeners == null)
-		{
-			this.changeListeners = new ArrayList<>();
-		}
 		this.changeListeners.add(aListener);
 	}
 
 	public void removeChangeListener(MacroChangeListener aListener)
 	{
-		if (this.changeListeners == null) return;
 		this.changeListeners.remove(aListener);
 	}
 
@@ -145,7 +130,7 @@ public class MacroStorage
 
 	public MacroStorage createCopy()
 	{
-		MacroStorage copy = new MacroStorage(storageId);
+		MacroStorage copy = new MacroStorage();
 		for (MacroGroup group : groups)
 		{
 			copy.groups.add(group.createCopy());
@@ -155,14 +140,10 @@ public class MacroStorage
 		return copy;
 	}
 
-	public void saveMacros()
-	{
-		this.saveMacros(this.sourceFile);
-	}
-
 	private void createBackup(WbFile f)
 	{
     if (!Settings.getInstance().getCreateMacroBackup()) return;
+
 		int maxVersions = Settings.getInstance().getMaxBackupFiles();
 		String dir = Settings.getInstance().getBackupDir();
 		String sep = Settings.getInstance().getFileVersionDelimiter();
@@ -177,42 +158,65 @@ public class MacroStorage
 		}
 	}
 
-	public void saveMacros(File file)
-	{
-		if (file == null) return;
+  /**
+   * Saves the macros to a new file.
+   *
+   * The contents of the file they were loaded from, will be unaffected
+   * (effectively creating a copy of the current file).
+   *
+   * After saving the macros to a new file, getCurrentFile() will return the new file name.
+   *
+   * @param file
+   * @see #saveMacros()
+   */
+	public void saveMacros(WbFile file)
+  {
+    sourceFile = file;
+    saveMacros();
+  }
 
-    createBackup(new WbFile(file));
+  /**
+   * Saves the macros to the file they were loaded from.
+   *
+   * This will also reset the modified flag.
+   *
+   * @see #isModified()
+   */
+	public void saveMacros()
+	{
+		if (sourceFile == null) return;
+
+    createBackup(sourceFile);
 
 		synchronized (lock)
 		{
 			if (this.getSize() == 0 && isModified())
 			{
-				if (file.exists())
+				if (sourceFile.exists())
 				{
-					file.delete();
-					LogMgr.logDebug("MacroStorage.saveMacros()", "All macros from " + file.getAbsolutePath() + " were removed. Macro file deleted.");
+					sourceFile.delete();
+					LogMgr.logDebug("MacroStorage.saveMacros()", "All macros from " + sourceFile.getFullPath()+ " were removed. Macro file deleted.");
 				}
 			}
 			else
 			{
-				WbPersistence writer = new WbPersistence(file.getAbsolutePath());
+				WbPersistence writer = new WbPersistence(sourceFile.getAbsolutePath());
 				try
 				{
 					writer.writeObject(this.groups);
+					LogMgr.logDebug("MacroStorage.saveMacros()", "Saved " + allMacros.size() + " macros to " + sourceFile.getFullPath());
 				}
 				catch (Exception th)
 				{
-					LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
+					LogMgr.logError("MacroManager.saveMacros()", "Error saving macros to " + sourceFile.getFullPath(), th);
 				}
 			}
-			this.sourceFile = file;
 			resetModified();
 		}
 	}
 
 	private void fireMacroListChanged()
 	{
-		if (this.changeListeners == null) return;
 		for (MacroChangeListener listener : this.changeListeners)
 		{
 			if (listener != null)
@@ -290,12 +294,17 @@ public class MacroStorage
 	 * @see workbench.util.WbPersistence#readObject()
 	 */
 	@SuppressWarnings("unchecked")
-	public void loadMacros(File source, boolean fireChangeEvent)
+	private void loadMacros()
 	{
-		if (!source.exists())
+		if (sourceFile == null)
 		{
-			LogMgr.logDebug("MacroManager.loadMacros()", "Macro file " + source.getAbsolutePath() + " not found. No Macros loaded");
-			this.sourceFile = source;
+			LogMgr.logDebug("MacroManager.loadMacros()", "No macro file specified. No Macros loaded");
+			return;
+		}
+
+		if (!sourceFile .exists())
+		{
+			LogMgr.logDebug("MacroManager.loadMacros()", "Macro file " + sourceFile + " not found. No Macros loaded");
 			return;
 		}
 
@@ -303,7 +312,7 @@ public class MacroStorage
 		{
 			synchronized (lock)
 			{
-				WbPersistence reader = new WbPersistence(source.getAbsolutePath());
+				WbPersistence reader = new WbPersistence(sourceFile.getAbsolutePath());
 				Object o = reader.readObject();
 				if (o instanceof List)
 				{
@@ -314,8 +323,8 @@ public class MacroStorage
 				else if (o instanceof HashMap)
 				{
 					// Upgrade from previous version
-					File backup = new File(source.getParentFile(), source.getName() + ".old");
-					FileUtil.copy(source, backup);
+					File backup = new File(sourceFile.getParentFile(), sourceFile.getName() + ".old");
+					FileUtil.copy(sourceFile, backup);
 					Map<String, String> oldMacros = (Map)o;
 					MacroGroup group = new MacroGroup(ResourceMgr.getString("LblDefGroup"));
 
@@ -340,11 +349,6 @@ public class MacroStorage
 			LogMgr.logError("MacroManager.loadMacros()", "Error loading macro file", e);
 		}
 		resetModified();
-		this.sourceFile = source;
-		if (fireChangeEvent)
-		{
-			fireMacroListChanged();
-		}
 	}
 
 	public synchronized void moveMacro(MacroDefinition macro, MacroGroup newGroup)
@@ -539,5 +543,11 @@ public class MacroStorage
 		}
 		this.fireMacroListChanged();
 	}
+
+  @Override
+  public String toString()
+  {
+    return allMacros.size() + " macros";
+  }
 
 }

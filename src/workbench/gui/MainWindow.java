@@ -2060,10 +2060,10 @@ public class MainWindow
     }
 		sqlTab.removeAll();
 		WbAction.dispose(
-			this.assignWorkspaceAction,this.closeWorkspaceAction,this.createMacro,this.createNewConnection,
-			this.dbExplorerAction,this.disconnectAction,this.reconnectAction,this.disconnectTab,this.loadWorkspaceAction,this.manageMacros,
-			this.newDbExplorerPanel,this.newDbExplorerWindow,this.showDbTree, this.nextTab,this.prevTab,this.saveAsWorkspaceAction,
-			this.saveWorkspaceAction,this.showDbmsManual,this.showMacroPopup, this.reloadWorkspace, this.loadMacros, this.saveMacros
+			this.assignWorkspaceAction, this.closeWorkspaceAction, this.reloadWorkspace, this.loadWorkspaceAction, this.saveAsWorkspaceAction, this.saveWorkspaceAction,
+			this.dbExplorerAction, this.disconnectAction, this.reconnectAction, this.disconnectTab, this.createNewConnection,
+			this.newDbExplorerPanel, this.newDbExplorerWindow, this.showDbTree, this.nextTab, this.prevTab, this.showDbmsManual,
+      this.manageMacros, this.showMacroPopup, this.createMacro, this.loadMacros, this.saveMacros
 		);
 		for (JMenuBar bar : panelMenus)
 		{

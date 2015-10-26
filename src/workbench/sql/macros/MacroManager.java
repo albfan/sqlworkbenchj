@@ -52,20 +52,20 @@ public class MacroManager
 	/**
 	 * Thread safe singleton instance.
 	 */
-	protected static class InstanceHolder
+	private static class InstanceHolder
 	{
 		protected static MacroManager instance = new MacroManager();
 	}
 
 	private MacroManager()
 	{
-		String defaultPath = getDefaultMacroFile().getFullPath();
+    WbFile file = getDefaultMacroFile();
 		long start = System.currentTimeMillis();
-		MacroStorage storage = new MacroStorage(defaultPath);
-		storage.loadMacros(getDefaultMacroFile(), false);
+		MacroStorage storage = new MacroStorage(file);
 		long duration = System.currentTimeMillis() - start;
-		allMacros.put(defaultPath, storage);
+		allMacros.put(file.getFullPath(), storage);
 		LogMgr.logDebug("MacroManager.init<>", "Loading default macros took " + duration + "ms");
+    dumpMacroInfo();
 	}
 
 	public static MacroManager getInstance()
@@ -75,8 +75,7 @@ public class MacroManager
 
 	public static WbFile getDefaultMacroFile()
 	{
-		WbFile f = new WbFile(Settings.getInstance().getMacroStorage());
-		return f;
+		return new WbFile(Settings.getInstance().getMacroStorage());
 	}
 
 	public synchronized void save()
@@ -108,7 +107,7 @@ public class MacroManager
 		MacroStorage storage = allMacros.get(fname);
 		if (storage != null)
 		{
-			storage.saveMacros(new File(fname));
+			storage.saveMacros(new WbFile(fname));
 		}
 	}
 
@@ -133,12 +132,12 @@ public class MacroManager
 		MacroStorage storage = allMacros.get(fname);
 		if (storage == null)
 		{
-			storage = new MacroStorage(fname);
-			storage.loadMacros(macroFile, true);
+			storage = new MacroStorage(macroFile);
 			allMacros.put(fname, storage);
+      LogMgr.logDebug("MacroManager.loadMacros()", "Loaded " + storage.getSize() + " macros from file " + macroFile.getFullPath() + " for clientId:  " + clientId);
 		}
 		macroClients.put(clientId, fname);
-		LogMgr.logDebug("MacroManager.loadMacros()", "Loaded macros from file " + macroFile.getFullPath() + " for clientId:  " + clientId);
+    dumpMacroInfo();
 	}
 
 	private MacroStorage getStorage(int macroClientId)
@@ -213,4 +212,12 @@ public class MacroManager
 		return result;
 	}
 
+  private void dumpMacroInfo()
+  {
+    if (LogMgr.isTraceEnabled())
+    {
+      LogMgr.logTrace("MacroManager.dumpMacroInfo()", "Current macro clients: " + macroClients);
+      LogMgr.logTrace("MacroManager.dumpMacroInfo()", "Current storages: " + allMacros);
+    }
+  }
 }

@@ -24,7 +24,6 @@ package workbench.sql.macros;
 
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,7 +56,7 @@ public class MacroStorageTest
 	@Test
 	public void testSave()
 	{
-		MacroStorage macros = new MacroStorage("test");
+		MacroStorage macros = new MacroStorage();
 		assertFalse(macros.isModified());
 
 		macros.addMacro("Default", "sessions", "select * from v$session");
@@ -69,10 +68,9 @@ public class MacroStorageTest
 		macro.setShortcut(key);
 
 		TestUtil util = new TestUtil("SaveMacros");
-		File f = new File(util.getBaseDir(), "macros.xml");
+		WbFile f = new WbFile(util.getBaseDir(), "macros.xml");
 		macros.saveMacros(f);
-		MacroStorage newStorage = new MacroStorage("test");
-		newStorage.loadMacros(f, false);
+		MacroStorage newStorage = new MacroStorage(f);
 		MacroDefinition m2 = newStorage.getMacro("sessions");
 		StoreableKeyStroke key2 = m2.getShortcut();
 		assertEquals(key, key2);
@@ -81,7 +79,7 @@ public class MacroStorageTest
 	@Test
 	public void testCopy()
 	{
-		MacroStorage macros = new MacroStorage("test");
+		MacroStorage macros = new MacroStorage();
 		assertFalse(macros.isModified());
 
 		macros.addMacro("Default", "sessions", "select * from v$session");
@@ -127,7 +125,7 @@ public class MacroStorageTest
 	@Test
 	public void testEmpty()
 	{
-		MacroStorage macros = new MacroStorage("test");
+		MacroStorage macros = new MacroStorage();
 		MacroGroup group1 = new MacroGroup("FirstGroup");
 		group1.setVisibleInMenu(true);
 		macros.addGroup(group1);
@@ -173,8 +171,7 @@ public class MacroStorageTest
 		WbPersistence writer = new WbPersistence(oldfile.getFullPath());
 		writer.writeObject(old);
 
-		MacroStorage newStorage = new MacroStorage("test");
-		newStorage.loadMacros(oldfile, false);
+		MacroStorage newStorage = new MacroStorage(oldfile);
 
 		MacroDefinition m1 = newStorage.getMacro("macro1");
 		assertEquals(old.get("macro1"), m1.getText());
@@ -182,8 +179,7 @@ public class MacroStorageTest
 		WbFile newfile = new WbFile(util.getBaseDir(), "WbMacros.xml");
 		newStorage.saveMacros(newfile);
 
-		MacroStorage new2 = new MacroStorage("test");
-		new2.loadMacros(newfile, false);
+		MacroStorage new2 = new MacroStorage(newfile);
 		assertEquals(m1, new2.getMacro("macro1"));
 	}
 }
