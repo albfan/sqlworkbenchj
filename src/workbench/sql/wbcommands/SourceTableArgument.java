@@ -138,7 +138,14 @@ public class SourceTableArgument
 		String schemaToUse;
 		if (StringUtil.isBlank(schema))
 		{
-			schemaToUse = dbConn.getMetadata().getCurrentSchema();
+      if (schemaAsCatalog)
+      {
+        schemaToUse = dbConn.getMetadata().getCurrentCatalog();
+      }
+      else
+      {
+        schemaToUse = dbConn.getMetadata().getCurrentSchema();
+      }
 		}
 		else if (schema.equals("*") || schema.equals("%"))
 		{
@@ -175,7 +182,14 @@ public class SourceTableArgument
 					TableIdentifier tbl = new TableIdentifier(t);
 					if (tbl.getSchema() == null && StringUtil.isNonEmpty(schemaToUse))
 					{
-						tbl.setSchema(schemaToUse);
+						if (schemaAsCatalog)
+            {
+              tbl.setCatalog(schemaToUse);
+            }
+            else
+            {
+              tbl.setSchema(schemaToUse);
+            }
 					}
 					tbl.adjustCase(dbConn);
 					List<TableIdentifier> l = null;

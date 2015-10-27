@@ -32,6 +32,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DeleteScriptGenerator;
+import workbench.db.TableDeleter;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -43,6 +44,7 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
@@ -67,6 +69,7 @@ public class WbGenDelete
 	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
 
 	private DeleteScriptGenerator generator;
+	private TableDeleter simpleGenerator;
 
 	public WbGenDelete()
 	{
@@ -103,12 +106,12 @@ public class WbGenDelete
 			return result;
 		}
 
-		String tname = cmdLine.getValue(PARAM_TABLE);
-		TableIdentifier table = currentConnection.getMetadata().findTable(new TableIdentifier(tname));
-
-		if (table == null)
+    String[] types = currentConnection.getMetadata().getTableTypesArray();
+    SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(PARAM_TABLE), cmdLine.getValue(PARAM_EXCLUDE_TABLES), null, types, currentConnection);
+    List<TableIdentifier> tables = tableArg.getTables();
+    if (CollectionUtil.isEmpty(tables))
 		{
-			result.addErrorMessageByKey("ErrTableNotFound", tname);
+			result.addErrorMessageByKey("ErrTableNotFound", cmdLine.getValue(PARAM_TABLE));
 			return result;
 		}
 
@@ -139,12 +142,21 @@ public class WbGenDelete
 			generator.setProgressMonitor(this);
 		}
 
-		SourceTableArgument exclude = new SourceTableArgument(cmdLine.getValue(PARAM_EXCLUDE_TABLES), currentConnection);
-		generator.setTable(table);
-		generator.setExcludedTables(exclude.getTables());
-		generator.setShowConstraintNames(cmdLine.getBoolean(PARAM_SHOW_FK_NAMES, false));
-		generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, false));
-		CharSequence script = generator.getScriptForValues(values);
+    CharSequence script = null;
+    if (tables.size() == 1)
+    {
+      SourceTableArgument exclude = new SourceTableArgument(cmdLine.getValue(PARAM_EXCLUDE_TABLES), currentConnection);
+      generator.setTable(tables.get(0));
+      generator.setExcludedTables(exclude.getTables());
+      generator.setShowConstraintNames(cmdLine.getBoolean(PARAM_SHOW_FK_NAMES, false));
+      generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, false));
+      script = generator.getScriptForValues(values);
+    }
+    else
+    {
+      simpleGenerator = new TableDeleter(currentConnection);
+      script = simpleGenerator.generateScript(tables, false, false, false);
+    }
 
 		if (this.rowMonitor != null)
 		{
@@ -188,6 +200,10 @@ public class WbGenDelete
 		{
 			generator.cancel();
 		}
+    if (simpleGenerator != null)
+    {
+      simpleGenerator.cancel();
+    }
 	}
 
 	@Override

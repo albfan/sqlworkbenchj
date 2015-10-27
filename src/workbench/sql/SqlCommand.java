@@ -90,7 +90,7 @@ public class SqlCommand
 	protected boolean includeStatementInError;
 	protected boolean showDataLoading = true;
 
-	public void setRowMonitor(RowActionMonitor monitor)
+  public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
 	}
@@ -991,7 +991,7 @@ public class SqlCommand
 	}
 
   /**
-   * Assumes the given parameter is a filename with wildcars supplied by the end user.
+   * Evaluates all files denoted by the argument (which can contain wildcards).
    * <br/>
    * If the filename does not contain a full path, the current baseDir of the
    * StatementRunner is used to find all files matching the pattern.
@@ -1025,7 +1025,7 @@ public class SqlCommand
     {
       LogMgr.logWarning("SqlCommand.evaluateWildardFileArgs()", "Could not get file list", ex);
     }
-    
+
     return result;
   }
 

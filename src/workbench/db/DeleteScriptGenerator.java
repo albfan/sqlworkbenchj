@@ -241,7 +241,7 @@ public class DeleteScriptGenerator
 		{
 			// additional iterations are necessary if a node was moved from one level to the next
 			// in that case the new level hierarchy could mean that a node from the target level now needs
-			// to be moved up in tur. But this can't be done in a single loop because otherwise adjustLevels
+			// to be moved up as well. But this can't be done in a single loop because otherwise adjustLevels
 			// would generate a ConcurrentModificationException
 			loops ++;
 			moved = adjustLevels(levels);
