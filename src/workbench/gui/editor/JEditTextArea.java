@@ -769,9 +769,9 @@ public class JEditTextArea
       vertical.setUnitIncrement(1);
       vertical.setBlockIncrement(visibleLines);
 
-			if (visibleLines > lineCount)
+			if (visibleLines >= lineCount)
 			{
-				setFirstLine(0);
+				setFirstLine(0, false);
         vertical.setVisible(false);
 			}
 			else
@@ -792,7 +792,7 @@ public class JEditTextArea
       horizontal.setUnitIncrement(charWidth);
       horizontal.setBlockIncrement(width / 3);
 
-			if (maxLineWidth < width)
+			if (width >= maxLineWidth)
 			{
         horizontal.setVisible(false);
 			}
@@ -874,10 +874,11 @@ public class JEditTextArea
 	{
 		if (painter == null) return;
 
-		int height = painter != null ? painter.getHeight() : this.getHeight();
+		int height = painter.getHeight();
     if (height <= 0) height = this.getHeight();
-		int lineHeight = painter.getFontMetrics().getHeight();
-		if (lineHeight == 0) return;
+    FontMetrics fm = painter.getFontMetrics();
+    if (fm == null) return;
+		int lineHeight = fm.getHeight();
 
 		visibleLines = height / lineHeight;
 	}
