@@ -429,11 +429,26 @@ SELECT 42 FROM dual;</programlisting>
       <para>
         The connection properties for the DB2 JDBC driver are documented here:
         <simplelist>
-          <member><ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/index.jsp?topic=/com.ibm.db2.luw.apdv.java.doc/doc/r0052038.html"/></member>
-          <member><ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.apdv.java.doc/doc/r0052607.html"/></member>
+          <member><ulink url="http://www-01.ibm.com/support/knowledgecenter/SSEPGG_10.5.0/com.ibm.db2.luw.apdv.java.doc/src/tpc/imjcc_rjvdsprp.html?lang=en"/></member>
+          <member><ulink url="http://www-01.ibm.com/support/knowledgecenter/ssw_ibm_i_72/rzahh/jdbcproperties.htm?lang=en"/></member>
         </simplelist>
-        The <ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.apdv.java.doc/doc/tjvjcerr.html">example</ulink>
-        claims that this property is only needed for z/OS, but it works as described for LUW as well.
+      </para>
+
+    </section>
+
+    <section id="db2-column-headers">
+      <title>Displaying column headers instead of column names in result sets.</title>
+      <para>
+        When running SQL statements in &wb-productname; you might want to use the long column headings (created via <literal>LABEL ON</literal>) as opposed to the column name.
+        To enable the retrieval of error messages by the driver you have to set the <link linkend="profile-extended-properties">extended
+        connection property</link> <literal>extended metadata</literal> to <literal>True</literal>.
+      </para>
+      <para>
+        The connection properties for the DB2 JDBC driver are documented here:
+        <simplelist>
+          <member><ulink url="http://www-01.ibm.com/support/knowledgecenter/SSEPGG_10.5.0/com.ibm.db2.luw.apdv.java.doc/src/tpc/imjcc_rjvdsprp.html?lang=en"/></member>
+          <member><ulink url="http://www-01.ibm.com/support/knowledgecenter/ssw_ibm_i_72/rzahh/jdbcproperties.htm?lang=en"/></member>
+        </simplelist>
       </para>
 
     </section>
