@@ -31,10 +31,12 @@ import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.CommitType;
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.TableDeleter;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.importer.TableDependencySorter;
 
 import workbench.storage.ColumnData;
 import workbench.storage.RowActionMonitor;
@@ -60,13 +62,14 @@ public class WbGenDelete
 {
 	public static final String VERB = "WbGenerateDelete";
 
-	public static final String PARAM_TABLE = "table";
-	public static final String PARAM_COLUMN_VAL = "columnValue";
-	public static final String PARAM_DO_FORMAT = "formatSql";
-	public static final String PARAM_INCLUDE_COMMIT = "includeCommit";
-	public static final String PARAM_APPEND = "appendFile";
-	public static final String PARAM_SHOW_FK_NAMES = "showConstraints";
-	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
+	public static final String ARG_TABLE = "table";
+	public static final String ARG_COLUMN_VAL = "columnValue";
+	public static final String ARG_DO_FORMAT = "formatSql";
+	public static final String ARG_INCLUDE_COMMIT = "includeCommit";
+	public static final String ARG_APPEND = "appendFile";
+	public static final String ARG_SHOW_FK_NAMES = "showConstraints";
+	public static final String ARG_EXCLUDE_TABLES = "excludeTables";
+	public static final String ARG_USE_TRUNCATE = "useTruncate";
 
 	private DeleteScriptGenerator generator;
 	private TableDeleter simpleGenerator;
@@ -77,13 +80,13 @@ public class WbGenDelete
 		this.isUpdatingCommand = true;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_OUTPUT_FILE, ArgumentType.Filename);
-		cmdLine.addArgument(PARAM_DO_FORMAT, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_TABLE, ArgumentType.TableArgument);
-		cmdLine.addArgument(PARAM_COLUMN_VAL, ArgumentType.Repeatable);
-		cmdLine.addArgument(PARAM_INCLUDE_COMMIT, ArgumentType.BoolSwitch);
-		cmdLine.addArgument(PARAM_APPEND, ArgumentType.BoolSwitch);
-		cmdLine.addArgument(PARAM_SHOW_FK_NAMES, ArgumentType.BoolSwitch);
-		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(ARG_DO_FORMAT, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_TABLE, ArgumentType.TableArgument);
+		cmdLine.addArgument(ARG_COLUMN_VAL, ArgumentType.Repeatable);
+		cmdLine.addArgument(ARG_INCLUDE_COMMIT, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_APPEND, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_SHOW_FK_NAMES, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
 	}
 
 	@Override
@@ -107,15 +110,15 @@ public class WbGenDelete
 		}
 
     String[] types = currentConnection.getMetadata().getTableTypesArray();
-    SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(PARAM_TABLE), cmdLine.getValue(PARAM_EXCLUDE_TABLES), null, types, currentConnection);
+    SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(ARG_TABLE), cmdLine.getValue(ARG_EXCLUDE_TABLES), null, types, currentConnection);
     List<TableIdentifier> tables = tableArg.getTables();
     if (CollectionUtil.isEmpty(tables))
 		{
-			result.addErrorMessageByKey("ErrTableNotFound", cmdLine.getValue(PARAM_TABLE));
+			result.addErrorMessageByKey("ErrTableNotFound", cmdLine.getValue(ARG_TABLE));
 			return result;
 		}
 
-		List<String> cols = cmdLine.getList(PARAM_COLUMN_VAL);
+		List<String> cols = cmdLine.getList(ARG_COLUMN_VAL);
 		List<ColumnData> values = new ArrayList<>();
 		for (String def : cols)
 		{
@@ -134,28 +137,53 @@ public class WbGenDelete
 			}
 		}
 
+    if (tables.size() > 1 && CollectionUtil.isNonEmpty(values))
+    {
+      result.addErrorMessage("Deletion based on column value not supported for multiple tables");
+      return result;
+    }
+
 		generator = new DeleteScriptGenerator(this.currentConnection);
 
-		if (this.rowMonitor != null)
-		{
-			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);
-			generator.setProgressMonitor(this);
-		}
-
-    CharSequence script = null;
-    if (tables.size() == 1)
+    String script = null;
+    CommitType commit = CommitType.never;
+    if (cmdLine.getBoolean(ARG_INCLUDE_COMMIT))
     {
-      SourceTableArgument exclude = new SourceTableArgument(cmdLine.getValue(PARAM_EXCLUDE_TABLES), currentConnection);
+      commit = CommitType.once;
+    }
+
+    if (tables.size() == 1 && CollectionUtil.isNonEmpty(values))
+    {
+      SourceTableArgument exclude = new SourceTableArgument(cmdLine.getValue(ARG_EXCLUDE_TABLES), currentConnection);
       generator.setTable(tables.get(0));
       generator.setExcludedTables(exclude.getTables());
-      generator.setShowConstraintNames(cmdLine.getBoolean(PARAM_SHOW_FK_NAMES, false));
-      generator.setFormatSql(cmdLine.getBoolean(PARAM_DO_FORMAT, false));
-      script = generator.getScriptForValues(values);
+      generator.setShowConstraintNames(cmdLine.getBoolean(ARG_SHOW_FK_NAMES, false));
+      generator.setFormatSql(cmdLine.getBoolean(ARG_DO_FORMAT, false));
+      script = generator.getScriptForValues(values, commit);
+
+      if (this.rowMonitor != null)
+      {
+        rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);
+        generator.setProgressMonitor(this);
+      }
     }
     else
     {
       simpleGenerator = new TableDeleter(currentConnection);
-      script = simpleGenerator.generateScript(tables, false, false, false);
+      if (this.rowMonitor != null)
+      {
+        rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);
+        simpleGenerator.setScriptMonitor(this);
+      }
+      script = simpleGenerator.generateSortedScript(tables, commit, cmdLine.getBoolean(ARG_USE_TRUNCATE, false), true);
+    }
+
+    result.setSuccess();
+
+    if (isCancelled)
+    {
+      result.addMessageByKey("MsgStatementCancelled");
+      result.setWarning();
     }
 
 		if (this.rowMonitor != null)
@@ -164,18 +192,13 @@ public class WbGenDelete
 		}
 
 		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_OUTPUT_FILE));
-		if (output != null)
+		if (output != null && script != null)
 		{
-			boolean append = cmdLine.getBoolean(PARAM_APPEND, false);
+			boolean append = cmdLine.getBoolean(ARG_APPEND, false);
 			try
 			{
-				FileUtil.writeString(output, script.toString(), append);
-				if (cmdLine.getBoolean(PARAM_INCLUDE_COMMIT))
-				{
-					FileUtil.writeString(output, "\ncommit;\n", true);
-				}
+				FileUtil.writeString(output, script, append);
 				result.addMessage(ResourceMgr.getFormattedString("MsgScriptWritten", output.getFullPath()));
-				result.setSuccess();
 			}
 			catch (IOException io)
 			{
@@ -185,7 +208,6 @@ public class WbGenDelete
 		else
 		{
 			result.addMessage(script);
-			result.setSuccess();
 		}
 		return result;
 	}

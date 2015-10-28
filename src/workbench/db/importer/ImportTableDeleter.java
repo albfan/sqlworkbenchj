@@ -40,7 +40,7 @@ import workbench.util.SqlUtil;
 /**
  * @author Thomas Kellerer
  */
-public class TableDeleter
+class ImportTableDeleter
 {
 	private RowActionMonitor rowMonitor;
 	private boolean checkDependencies = false;
@@ -48,7 +48,7 @@ public class TableDeleter
 	private boolean cancel = false;
 	private MessageBuffer messages = new MessageBuffer();
 
-	public TableDeleter(WbConnection conn, boolean checkOrder)
+	ImportTableDeleter(WbConnection conn, boolean checkOrder)
 	{
 		dbConn = conn;
 		checkDependencies = checkOrder;
@@ -72,17 +72,17 @@ public class TableDeleter
 		return sorted;
 	}
 
-	public MessageBuffer getMessages()
+	MessageBuffer getMessages()
 	{
 		return messages;
 	}
 
-	public void cancel()
+	void cancel()
 	{
 		this.cancel = true;
 	}
 
-	public void setRowMonitor(RowActionMonitor monitor)
+	void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
 	}
@@ -97,7 +97,7 @@ public class TableDeleter
 	 * @param commitEach
 	 * @throws java.sql.SQLException
 	 */
-	public void deleteRows(List<TableIdentifier> tables, boolean commitEach)
+	void deleteRows(List<TableIdentifier> tables, boolean commitEach)
 		throws SQLException
 	{
 		if (checkDependencies)

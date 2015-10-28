@@ -126,7 +126,7 @@ public class DataImporter
 	private boolean useSetNull;
 
 	private List<TableIdentifier> tablesToBeProcessed;
-	private TableDeleter tableDeleter;
+	private ImportTableDeleter tableDeleter;
 
 	// this array will map the columns for updating the target table
 	// the index into this array will be the index
@@ -484,7 +484,7 @@ public class DataImporter
 			// The instance of the tableDeleter is stored in an instance
 			// variable in order to allow for cancel() during the initial
 			// delete as well
-			tableDeleter = new TableDeleter(this.dbConn, true);
+			tableDeleter = new ImportTableDeleter(this.dbConn, true);
 			tableDeleter.setRowMonitor(this.progressMonitor);
 			tableDeleter.deleteRows(this.tablesToBeProcessed, true);
 			this.messages.append(tableDeleter.getMessages());

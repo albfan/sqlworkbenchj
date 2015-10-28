@@ -124,7 +124,7 @@ public class DeleteScriptGeneratorTest
 		List<ColumnData> pk = new ArrayList<>();
 		ColumnData id = new ColumnData(new Integer(1), new ColumnIdentifier("ID"));
 		pk.add(id);
-		CharSequence sql = generator.getScriptForValues(pk);
+		CharSequence sql = generator.getScriptForValues(pk, CommitType.never);
 		ScriptParser parser = new ScriptParser(sql.toString());
 		assertEquals(2, parser.getSize());
 		String addressDelete = parser.getCommand(0);
@@ -154,30 +154,30 @@ public class DeleteScriptGeneratorTest
 
 		assertEquals(4, statements.size());
 
-		Statement stmt = dbConnection.createStatement();
-		for (String sql : statements)
-		{
-			stmt.executeUpdate(sql);
-		}
-		dbConnection.commit();
+    try (Statement stmt = dbConnection.createStatement())
+    {
+      for (String sql : statements)
+      {
+        stmt.executeUpdate(sql);
+      }
+      dbConnection.commit();
 
-		String[] tables = new String[]
-		{
-			"BASE", "CHILD1", "CHILD2", "CHILD22"
-		};
+      String[] tables = new String[]
+      {
+        "BASE", "CHILD1", "CHILD2", "CHILD22"
+      };
 
-		for (String st : tables)
-		{
-			ResultSet rs = stmt.executeQuery("select count(*) from " + st);
-			int count = -1;
-			if (rs.next())
-			{
-				count = rs.getInt(1);
-			}
-			assertEquals("Wrong count in table: " + st, 1, count);
-		}
-
-		stmt.close();
+      for (String st : tables)
+      {
+        ResultSet rs = stmt.executeQuery("select count(*) from " + st);
+        int count = -1;
+        if (rs.next())
+        {
+          count = rs.getInt(1);
+        }
+        assertEquals("Wrong count in table: " + st, 1, count);
+      }
+    }
 
 		String sql = statements.get(3);
 		String t = SqlUtil.getDeleteTable(sql);

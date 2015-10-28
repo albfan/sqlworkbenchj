@@ -53,6 +53,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.ListSelectionModel;
 
+import workbench.db.CommitType;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.TableDeleteListener;
@@ -543,11 +544,15 @@ public class TableDeleterUI
 
 	protected void showScript()
 	{
-		boolean doCommitEach = this.commitEach.isSelected();
+    CommitType commit = CommitType.once;
+    if (this.commitEach.isSelected())
+    {
+      commit = CommitType.each;
+    }
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
 		boolean cascade = useTruncate && cascadeTruncate.isSelected();
 		TableDeleter tblDeleter = new TableDeleter(this.connection);
-		CharSequence script = tblDeleter.generateScript(objectNames, doCommitEach, useTruncate, cascade);
+		CharSequence script = tblDeleter.generateScript(objectNames, commit, useTruncate, cascade);
 		final EditWindow w = new EditWindow(this.dialog, ResourceMgr.getString("TxtWindowTitleGeneratedScript"), script.toString(), "workbench.tabledeleter.scriptwindow", true);
 		w.setVisible(true);
 		w.dispose();

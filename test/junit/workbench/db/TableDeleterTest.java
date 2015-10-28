@@ -68,7 +68,7 @@ public class TableDeleterTest
 		try
 		{
 			con = setupDatabase();
-			List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+			List<TableIdentifier> tables = new ArrayList<>();
 			tables.add(new TableIdentifier("person_company"));
 			tables.add(new TableIdentifier("person_address"));
 			tables.add(new TableIdentifier("person"));
@@ -126,13 +126,14 @@ public class TableDeleterTest
 
 			JobErrorHandler handler = new JobErrorHandler()
 			{
-
+        @Override
 				public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
 				{
 					errorCalled = true;
 					return errorAction;
 				}
 
+        @Override
 				public void fatalError(String msg)
 				{
 					System.out.println("Fatal error :" + msg);
@@ -203,20 +204,20 @@ public class TableDeleterTest
 		try
 		{
 			con = setupDatabase();
-			List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+			List<TableIdentifier> tables = new ArrayList<>();
 			tables.add(new TableIdentifier("person_company"));
 			tables.add(new TableIdentifier("person_address"));
 			tables.add(new TableIdentifier("person"));
 			tables.add(new TableIdentifier("company"));
 
 			TableDeleter deleter = new TableDeleter(con);
-			String sql = deleter.generateScript(tables, false, false, false).toString();
+			String sql = deleter.generateScript(tables, CommitType.once, false, false).toString();
 			ScriptParser p = new ScriptParser(sql);
 			assertEquals(5, p.getSize());
 			assertTrue(p.getCommand(0).startsWith("DELETE"));
 			assertTrue(p.getCommand(4).startsWith("COMMIT"));
 
-			sql = deleter.generateScript(tables, true, false, false).toString();
+			sql = deleter.generateScript(tables, CommitType.each, false, false).toString();
 			p = new ScriptParser(sql);
 			assertEquals(tables.size() * 2, p.getSize());
 			assertTrue(p.getCommand(0).startsWith("DELETE"));
@@ -224,7 +225,8 @@ public class TableDeleterTest
 			assertTrue(p.getCommand(2).startsWith("DELETE"));
 			assertTrue(p.getCommand(3).startsWith("COMMIT"));
 
-			sql = deleter.generateScript(tables, true, true, false).toString();
+			sql = deleter.generateScript(tables, CommitType.each, true, false).toString();
+      System.out.println("*****\n" + sql + "\n****");
 			p = new ScriptParser(sql);
 			assertEquals(tables.size(), p.getSize());
 			assertTrue(p.getCommand(0).startsWith("TRUNCATE"));

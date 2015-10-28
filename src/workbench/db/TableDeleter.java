@@ -34,6 +34,8 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.importer.TableDependencySorter;
+import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.sql.formatter.FormatterUtil;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -50,6 +52,8 @@ public class TableDeleter
 	private Statement currentStatement;
 	private JobErrorHandler errorHandler;
 	private StatusBar statusDisplay;
+  private TableDependencySorter sorter;
+  private ScriptGenerationMonitor scriptMonitor;
 
 	public TableDeleter(WbConnection con)
 	{
@@ -59,7 +63,21 @@ public class TableDeleter
 	public void cancel()
 	{
 		this.cancelExecution = true;
+    if (sorter != null)
+    {
+      sorter.cancel();
+    }
 	}
+
+  public boolean isCanelled()
+  {
+    return cancelExecution;
+  }
+
+  public void setScriptMonitor(ScriptGenerationMonitor monitor)
+  {
+    this.scriptMonitor = monitor;
+  }
 
 	/**
 	 * Define a status bar where the progress can be displayed.
@@ -327,34 +345,54 @@ public class TableDeleter
 		return deleteSql;
 	}
 
-	public CharSequence generateScript(List<TableIdentifier> objectNames, boolean commitEach, boolean useTruncate, boolean cascadedTruncate)
+  public String generateSortedScript(List<TableIdentifier> objectNames, CommitType commit, boolean useTruncate, boolean cascadedTruncate)
+  {
+    sorter = new TableDependencySorter(connection);
+    sorter.setValidateTables(false);
+    sorter.setProgressMonitor(scriptMonitor);
+    List<TableIdentifier> sorted = sorter.sortForDelete(objectNames, true);
+    if (sorter.isCancelled()) return "";
+    sorter = null;
+    CharSequence script = generateScript(sorted, commit, false, false);
+    return script == null ? "" : script.toString();
+  }
+
+	public CharSequence generateScript(List<TableIdentifier> objectNames, CommitType commit, boolean useTruncate, boolean cascadedTruncate)
 	{
-		boolean commitTruncate = connection.getDbSettings().truncateNeedsCommit();
-		if (commitEach && useTruncate)
-		{
-			commitEach = commitTruncate;
-		}
+    boolean commitTruncate = connection.getDbSettings().truncateNeedsCommit();
+    if (commit != CommitType.never && !commitTruncate)
+    {
+
+    }
 		StringBuilder script = new StringBuilder(objectNames.size() * 30);
-		for (TableIdentifier table : objectNames)
+    int count = objectNames.size();
+
+    String commitVerb = FormatterUtil.getKeyword("commit") + ";\n";
+
+		for (int i=0; i < count; i++)
 		{
+      if (cancelExecution) break;
+
+      TableIdentifier table = objectNames.get(i);
+      if (scriptMonitor != null)
+      {
+        scriptMonitor.setCurrentObject(table.getTableName(), i+1, count);
+      }
+
 			String sql = this.getDeleteStatement(table, useTruncate, cascadedTruncate);
 			script.append(sql);
 			script.append(";\n");
-			if (commitEach)
+			if (commit == CommitType.each)
 			{
-				script.append("COMMIT;\n\n");
+				script.append(commitVerb);
+        script.append('\n');
 			}
 		}
 
-		boolean commitNeeded = !commitEach;
-		if (commitNeeded && useTruncate)
+		if (commit == CommitType.once)
 		{
-			commitNeeded = commitTruncate;
-		}
-
-		if (commitNeeded)
-		{
-			script.append("\nCOMMIT;\n");
+      script.append('\n');
+			script.append(commitVerb);
 		}
 		return script;
 	}

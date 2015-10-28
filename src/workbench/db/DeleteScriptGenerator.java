@@ -49,6 +49,7 @@ import workbench.db.importer.TableDependencySorter;
 
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.ObjectScripterUI;
+import workbench.sql.formatter.FormatterUtil;
 
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
@@ -502,34 +503,49 @@ public class DeleteScriptGenerator
 
 	@Override
 	public String getScript()
+  {
+    return getScript(CommitType.never);
+  }
+
+	public String getScript(CommitType commit)
 	{
 		if (this.statements.isEmpty())
 		{
 			this.generateScript();
 		}
-		StringBuilder script = new StringBuilder();
+		StringBuilder script = new StringBuilder(statements.size() * 100);
 
 		String append = ";\n";
-		if (CollectionUtil.isNonEmpty(columnValues))
-		{
-			append += "\n";
-		}
-		for (String dml : statements)
+    boolean addNewLine = CollectionUtil.isNonEmpty(columnValues);
+    String commitVerb = "\n" + FormatterUtil.getKeyword("commit") + ";\n";
+
+  	for (String dml : statements)
 		{
 			script.append(dml);
 			script.append(append);
+      if (commit == CommitType.each)
+      {
+        script.append(commitVerb);
+      }
+      if (addNewLine)
+      {
+        script.append("\n");
+      }
 		}
-
+    if (commit == CommitType.once)
+    {
+      script.append(commitVerb);
+    }
 		return script.toString();
 	}
 
-	public CharSequence getScriptForValues(List<ColumnData> values)
+	public String getScriptForValues(List<ColumnData> values, CommitType commit)
 		throws SQLException
 	{
 		this.statements.clear();
 		this.setValues(values);
 		this.createStatements(true);
-		return getScript();
+		return getScript(commit);
 	}
 
 	public List<String> getStatementsForValues(List<ColumnData> values, boolean includeRoot)
