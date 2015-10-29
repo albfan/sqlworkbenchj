@@ -42,8 +42,10 @@ import workbench.resource.Settings;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTabbedPane;
+import workbench.gui.sql.DwPanel;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
+import workbench.util.DurationFormatter;
 
 import workbench.util.StringUtil;
 
@@ -99,7 +101,14 @@ public class ShowSourceQueryAction
 		}
 
 		String loadedAt = StringUtil.formatIsoTimestamp(panel.getLoadedAt());
-		String msg = ResourceMgr.getFormattedString("TxtLastExec", loadedAt);
+
+    DwPanel result = panel.getCurrentResult();
+    DurationFormatter formatter = new DurationFormatter();
+    long millis = result.getLastExecutionTime();
+		boolean includeFraction = (millis < DurationFormatter.ONE_MINUTE);
+		String duration = formatter.formatDuration(millis, includeFraction);
+
+		String msg = ResourceMgr.getFormattedString("TxtLastExec", loadedAt) + " (" + duration + ")";
 		JLabel lbl = new JLabel(msg);
 		Border etched = new EtchedBorder(EtchedBorder.LOWERED);
 		lbl.setBorder(new CompoundBorder(etched, new EmptyBorder(3, 2, 2, 0)));
@@ -107,7 +116,7 @@ public class ShowSourceQueryAction
 		display.add(editor, BorderLayout.CENTER);
 		display.add(lbl, BorderLayout.NORTH);
 
-		ResultSetInfoPanel resultInfo = new ResultSetInfoPanel(panel.getCurrentResult());
+		ResultSetInfoPanel resultInfo = new ResultSetInfoPanel(result);
 
 		tab.addTab("SQL", display);
 		tab.addTab(ResourceMgr.getString("LblResultMeta"), resultInfo);
