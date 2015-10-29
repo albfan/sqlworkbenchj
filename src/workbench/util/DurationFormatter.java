@@ -77,6 +77,11 @@ public class DurationFormatter
 		}
 	}
 
+	public String formatDuration(long millis)
+  {
+    return formatDuration(millis, (millis < ONE_MINUTE), true);
+  }
+
 	public String formatDuration(long millis, boolean includeFractionalSeconds)
   {
     return formatDuration(millis, includeFractionalSeconds, true);

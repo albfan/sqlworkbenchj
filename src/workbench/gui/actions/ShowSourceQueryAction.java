@@ -105,8 +105,7 @@ public class ShowSourceQueryAction
     DwPanel result = panel.getCurrentResult();
     DurationFormatter formatter = new DurationFormatter();
     long millis = result.getLastExecutionTime();
-		boolean includeFraction = (millis < DurationFormatter.ONE_MINUTE);
-		String duration = formatter.formatDuration(millis, includeFraction);
+		String duration = formatter.formatDuration(millis);
 
 		String msg = ResourceMgr.getFormattedString("TxtLastExec", loadedAt) + " (" + duration + ")";
 		JLabel lbl = new JLabel(msg);

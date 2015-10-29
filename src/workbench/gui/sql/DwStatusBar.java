@@ -287,8 +287,7 @@ public class DwStatusBar
 	public void setExecutionTime(long millis)
 	{
 		if (timerRunning) executionEnd();
-		boolean includeFraction = (millis < DurationFormatter.ONE_MINUTE);
-		setExecTimeText(durationFormatter.formatDuration(millis, includeFraction));
+		setExecTimeText(durationFormatter.formatDuration(millis));
 	}
 
 	private void setExecTimeText(final String text)
