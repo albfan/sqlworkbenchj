@@ -175,7 +175,10 @@ public class DummyDML
 
     String template = Settings.getInstance().getProperty(getTemplateConfigKeyForType(col.getDataType()), baseTemplate);
     String name = FormatterUtil.getIdentifier(SqlUtil.removeObjectQuotes(col.getColumnName()));
-    boolean makeLiteral = Settings.getInstance().getBoolProperty(PROP_CONFIG_GENERATE_LITERAL, true);
+    boolean makeLiteralDefault = Settings.getInstance().getBoolProperty(PROP_CONFIG_GENERATE_LITERAL, true);
+
+    String typeKey = PROP_CONFIG_GENERATE_LITERAL + "." + SqlUtil.getTypeName(col.getDataType()).toLowerCase();
+    boolean makeLiteral = Settings.getInstance().getBoolProperty(typeKey, makeLiteralDefault);
 
     String value = template.replace(PLACEHOLDER_COL_NAME, name);
     if (table != null)
