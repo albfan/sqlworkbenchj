@@ -30,17 +30,16 @@ import java.util.Collections;
 import java.util.List;
 
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.interfaces.JobErrorHandler;
 
 import workbench.sql.parser.ScriptParser;
 
 import workbench.util.SqlUtil;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -225,8 +224,8 @@ public class TableDeleterTest
 			assertTrue(p.getCommand(2).startsWith("DELETE"));
 			assertTrue(p.getCommand(3).startsWith("COMMIT"));
 
-			sql = deleter.generateScript(tables, CommitType.each, true, false).toString();
-      System.out.println("*****\n" + sql + "\n****");
+			sql = deleter.generateScript(tables, CommitType.never, true, false).toString();
+//      System.out.println("*****\n" + sql + "\n****");
 			p = new ScriptParser(sql);
 			assertEquals(tables.size(), p.getSize());
 			assertTrue(p.getCommand(0).startsWith("TRUNCATE"));

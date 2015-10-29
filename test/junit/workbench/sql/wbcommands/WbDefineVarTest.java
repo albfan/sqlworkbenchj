@@ -115,8 +115,9 @@ public class WbDefineVarTest
 			assertEquals("SQL Variable not set", "42", someValue);
 
 			String msg = result.getMessages().toString();
-			assertTrue(msg.contains("Variable id defined with value '7'"));
-			assertTrue(msg.contains("Variable value defined with value '42'"));
+      System.out.println(msg);
+			assertTrue(msg.contains("Variable id defined with the value: 7"));
+			assertTrue(msg.contains("Variable value defined with the value: 42"));
 		}
 		finally
 		{
