@@ -37,11 +37,11 @@ import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to build the INSERT, UPSERT or Insert/Ignore statements for a DataImporter.
+ * A class to build the INSERT, "Upsert" or Insert/Ignore statements for a DataImporter.
  *
  * @author Thomas Kellerer
  */
-public class ImportDMLStatementBuilder
+class ImportDMLStatementBuilder
 {
   private final WbConnection dbConn;
   private final TableIdentifier targetTable;
@@ -50,14 +50,162 @@ public class ImportDMLStatementBuilder
   private final Set<String> upsertRequiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_HANA, DbMetadata.DBID_H2, DbMetadata.DBID_SQL_ANYWHERE, DbMetadata.DBID_SQLITE);
   private final Set<String> ignoreRequiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_SQL_ANYWHERE, DbMetadata.DBID_SQLITE);
 
-  public ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustColumnNameCase)
+  ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustColumnNameCase)
   {
     dbConn = connection;
     targetTable = target;
     targetColumns = createColumnList(columns, filter, adjustColumnNameCase);
   }
 
-  public void setKeyColumns(List<ColumnIdentifier> keys)
+  /**
+   * Returns true if a "native" insert ignore is supported.
+   *
+   * For some DBMS (e.g. DB2 or HSQLDB) we use a MERGE statement without the "WHEN MATCHED" part to
+   * simulate an insertIgnore mode.
+   *
+   * However when insert/update is used by the DataImporter it will try to use an insertIgnore statement
+   * followed by an UPDATE statement if available.
+   *
+   * @return if the DBMS has a native insertIgnore mode (rather than simulating one using a MERGE)
+   */
+  boolean hasNativeInsertIgnore()
+  {
+    if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
+    if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
+
+    return false;
+  }
+
+  /**
+   * Returns true if the DBMS supports an "insert ignore" kind of statement.
+   *
+   * This is slightly different to {@link #hasNativeInsertIgnore()} which is a bit more restrictive.
+   * For SQL Server or DB2 {@link #createInsertIgnore()} will create a <tt>MERGE</tt> statement
+   * without an "WHEN MATCHED" clause, which might be less efficient than a "native" insert ignore statement.
+   *
+   * @param dbConn the DBMS to check
+   * @return true if the DBMS supports some kine of "Insert but ignore unique key violations" statement.
+   */
+  static boolean supportsInsertIgnore(WbConnection dbConn)
+  {
+    if (dbConn == null) return false;
+
+    if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
+    if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
+    if (dbConn.getMetadata().isDB2LuW()) return true;
+    if (dbConn.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(dbConn)) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
+    if (dbConn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(dbConn, "2.0")) return true;
+    if (dbConn.getMetadata().isMySql()) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
+    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
+
+    return false;
+  }
+
+
+  /**
+   * Returns true if the DBMS supports an "UPSERT" (insert, if exists, then update) kind of statement.
+   *
+   * Some DBMS have a native "upsert" statement, for other DMBS (e.g. Oracle or SQL Server) a MERGE statement will be used.
+   *
+   * @param dbConn the DBMS to check
+   * @return true if the DBMS supports some kine of "upsert" statement.
+   */
+  static boolean supportsUpsert(WbConnection connection)
+  {
+    if (connection == null) return false;
+
+    if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "9.5")) return true;
+    if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;
+    if (connection.getMetadata().isOracle()) return true;
+    if (connection.getMetadata().isDB2LuW()) return true;
+    if (connection.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(connection)) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_HANA)) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
+    if (connection.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(connection, "2.0")) return true;
+    if (connection.getMetadata().isH2()) return true;
+    if (connection.getMetadata().isMySql()) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
+    if (connection.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
+
+    return false;
+  }
+
+
+  /**
+   * Returns true if the current DBMS supports an "UPSERT" statement.
+   *
+   * If no key columns have been defined, false is returned.
+   *
+   * Some DBMS als require a primary key constraint to be defined (rather than just a unique constraint).
+   *
+   * @return
+   * @see #setKeyColumns(java.util.List)
+   * @see #supportsUpsert(workbench.db.WbConnection)
+   */
+  boolean supportsUpsert()
+  {
+    if (upsertRequiresPK.contains(dbConn.getDbId()))
+    {
+      boolean hasPK = hasRealPK();
+      if (!hasPK)
+      {
+        LogMgr.logInfo("ImportDMLStatementBuilder.supportsUpsert()", "Cannot use upsert without a primary key.");
+      }
+      return hasPK;
+    }
+    return CollectionUtil.isNonEmpty(keyColumns) && supportsUpsert(this.dbConn);
+  }
+
+
+  /**
+   * Verifies if the given ImportMode is supported by the current DBMS.
+   *
+   * Some modes require a real primary key constraint. Any mode involving updating rows
+   * will require the primary key (or unique) columns to be defined before calling this method.
+   *
+   * @param mode  the mode to check
+   * @return true if the mode is supported
+   *
+   * @see #setKeyColumns(java.util.List)
+   */
+  boolean isModeSupported(ImportMode mode)
+  {
+    switch (mode)
+    {
+      case insertIgnore:
+        if (ignoreRequiresPK.contains(dbConn.getDbId()))
+        {
+          boolean hasPK = hasRealPK();
+          if (!hasPK)
+          {
+            LogMgr.logInfo("ImportDMLStatementBuilder.isModeSupported()", "Cannot use insertIgnore without a primary key.");
+          }
+          return hasPK;
+        }
+        return supportsInsertIgnore(dbConn);
+      case insertUpdate:
+      case updateInsert:
+      case upsert:
+        return supportsUpsert();
+    }
+    return false;
+  }
+
+  /**
+   * Define the key columns to be used for updating rows.
+   *
+   * The columns do not have to match the primary key of the table, but for some DBMS and import modes this is required
+   * (e.g. MySQL can not do an InsertIgnore if no primary key is defined)
+   *
+   * @param keys   the columns to be used as a unique key
+   */
+  void setKeyColumns(List<ColumnIdentifier> keys)
   {
     keyColumns = new ArrayList<>(2);
     if (keys == null)
@@ -70,26 +218,17 @@ public class ImportDMLStatementBuilder
     }
   }
 
-  private List<ColumnIdentifier> createColumnList(List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustCase)
-  {
-    DbMetadata meta = dbConn.getMetadata();
-
-    List<ColumnIdentifier> newCols = new ArrayList<>(columns.size());
-    for (ColumnIdentifier col : columns)
-    {
-      if (filter.ignoreColumn(col)) continue;
-      ColumnIdentifier copy = col.createCopy();
-      if (adjustCase)
-      {
-        String colname = meta.adjustObjectnameCase(meta.removeQuotes(copy.getColumnName()));
-        copy.setColumnName(colname);
-      }
-      newCols.add(copy);
-    }
-    return newCols;
-  }
-
-	public String createInsertStatement(ConstantColumnValues columnConstants, String insertSqlStart)
+  /**
+   * Creates a plain INSERT statement.
+   *
+   * The alternate insert statement can be used to enable special DBMS features.
+   * e.g. enabling direct path inserts for Oracle using: <tt>INSERT /&#42;+ append &#42;/ INTO</tt>
+   *
+   * @param columnConstants  constant value definitions for some columns
+   * @param insertSqlStart   an alternate insert statement.
+   * @return a SQL statement suitable used for a PreparedStatement
+   */
+	String createInsertStatement(ConstantColumnValues columnConstants, String insertSqlStart)
   {
     DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(dbConn);
 		StringBuilder text = new StringBuilder(targetColumns.size() * 50);
@@ -154,7 +293,7 @@ public class ImportDMLStatementBuilder
 		return text.toString();
   }
 
-  public String createInsertIgnore(ConstantColumnValues columnConstants, String insertSqlStart)
+  String createInsertIgnore(ConstantColumnValues columnConstants, String insertSqlStart)
   {
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5"))
     {
@@ -199,7 +338,7 @@ public class ImportDMLStatementBuilder
     return null;
   }
 
-  public String createUpsertStatement(ConstantColumnValues columnConstants, String insertSqlStart)
+  String createUpsertStatement(ConstantColumnValues columnConstants, String insertSqlStart)
   {
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5"))
     {
@@ -256,7 +395,7 @@ public class ImportDMLStatementBuilder
     return null;
   }
 
-  public String createSQLAnywhereStatement(ConstantColumnValues columnConstants, boolean useIgnore)
+  private String createSQLAnywhereStatement(ConstantColumnValues columnConstants, boolean useIgnore)
   {
     String insert = createInsertStatement(columnConstants, null);
     if (useIgnore)
@@ -270,7 +409,7 @@ public class ImportDMLStatementBuilder
     return insert;
   }
 
-  public String createOracleInsertIgnore(ConstantColumnValues columnConstants)
+  private String createOracleInsertIgnore(ConstantColumnValues columnConstants)
   {
     String start = "INSERT /*+ IGNORE_ROW_ON_DUPKEY_INDEX (";
     start += targetTable.getRawTableName() + " (";
@@ -559,69 +698,7 @@ public class ImportDMLStatementBuilder
     return insert;
   }
 
-  /**
-   * Returns true if a "native" insert ignore is supported.
-   *
-   * For some DBMS (e.g. DB2 or HSQLDB) we use a MERGE statement without the "WHEN MATCHED" part to
-   * simulate an insertIgnore mode.
-   *
-   * However when insert/update is used by the DataImporter it will try to use an insertIgnore statement
-   * followed by an UPDATE statement if available.
-   *
-   * @return if the DBMS has a native insertIgnore mode (rather than simulating one using a MERGE)
-   */
-  public boolean hasNativeInsertIgnore()
-  {
-    if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
-    if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
-
-    return false;
-  }
-
-  public static boolean supportsInsertIgnore(WbConnection dbConn)
-  {
-    if (dbConn == null) return false;
-
-    if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
-    if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
-    if (dbConn.getMetadata().isDB2LuW()) return true;
-    if (dbConn.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(dbConn)) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
-    if (dbConn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(dbConn, "2.0")) return true;
-    if (dbConn.getMetadata().isMySql()) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
-
-    return false;
-  }
-
-  public boolean isModeSupported(ImportMode mode)
-  {
-    switch (mode)
-    {
-      case insertIgnore:
-        if (ignoreRequiresPK.contains(dbConn.getDbId()))
-        {
-          boolean hasPK = hasRealPK();
-          if (!hasPK)
-          {
-            LogMgr.logInfo("ImportDMLStatementBuilder.isModeSupported()", "Cannot use insertIgnore without a primary key.");
-          }
-          return hasPK;
-        }
-        return supportsInsertIgnore(dbConn);
-      case insertUpdate:
-      case updateInsert:
-      case upsert:
-        return supportsUpsert();
-    }
-    return false;
-  }
-
-  public boolean hasRealPK()
+  private boolean hasRealPK()
   {
     if (CollectionUtil.isEmpty(keyColumns)) return false;
     for (ColumnIdentifier col : keyColumns)
@@ -631,45 +708,29 @@ public class ImportDMLStatementBuilder
     return true;
   }
 
-  public boolean supportsUpsert()
-  {
-    if (upsertRequiresPK.contains(dbConn.getDbId()))
-    {
-      boolean hasPK = hasRealPK();
-      if (!hasPK)
-      {
-        LogMgr.logInfo("ImportDMLStatementBuilder.supportsUpsert()", "Cannot use upsert without a primary key.");
-      }
-      return hasPK;
-    }
-    return supportsUpsert(this.dbConn);
-  }
-
-  public static boolean supportsUpsert(WbConnection connection)
-  {
-    if (connection == null) return false;
-
-    if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "9.5")) return true;
-    if (connection.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(connection, "2.1")) return true;
-    if (connection.getMetadata().isOracle()) return true;
-    if (connection.getMetadata().isDB2LuW()) return true;
-    if (connection.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(connection)) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_HANA)) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
-    if (connection.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(connection, "2.0")) return true;
-    if (connection.getMetadata().isH2()) return true;
-    if (connection.getMetadata().isMySql()) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
-
-    return false;
-  }
-
   private int getColCount()
   {
     if (targetColumns == null) return 0;
     return targetColumns.size();
+  }
+
+  private List<ColumnIdentifier> createColumnList(List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustCase)
+  {
+    DbMetadata meta = dbConn.getMetadata();
+
+    List<ColumnIdentifier> newCols = new ArrayList<>(columns.size());
+    for (ColumnIdentifier col : columns)
+    {
+      if (filter.ignoreColumn(col)) continue;
+      ColumnIdentifier copy = col.createCopy();
+      if (adjustCase)
+      {
+        String colname = meta.adjustObjectnameCase(meta.removeQuotes(copy.getColumnName()));
+        copy.setColumnName(colname);
+      }
+      newCols.add(copy);
+    }
+    return newCols;
   }
 
 }
