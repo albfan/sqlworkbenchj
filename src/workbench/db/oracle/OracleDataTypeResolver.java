@@ -41,17 +41,20 @@ import workbench.util.SqlUtil;
 public class OracleDataTypeResolver
 	implements DataTypeResolver
 {
-	static final int BYTE_SEMANTICS = 1;
-	static final int CHAR_SEMANTICS = 2;
+  public static enum CharSemantics
+  {
+    Byte,
+    Char;
+  }
 
 	private final WbConnection connection;
-	private int defaultCharSemantics = -1;
+	private CharSemantics defaultCharSemantics = null;
 	private boolean alwaysShowCharSemantics = false;
 
 	/**
 	 * Only for testing purposes
 	 */
-	OracleDataTypeResolver(int defaultSemantics, boolean alwaysShowSemantics)
+	OracleDataTypeResolver(CharSemantics defaultSemantics, boolean alwaysShowSemantics)
 	{
 		connection = null;
 		defaultCharSemantics = defaultSemantics;
@@ -88,18 +91,18 @@ public class OracleDataTypeResolver
 					String v = rs.getString(1);
 					if ("BYTE".equalsIgnoreCase(v))
 					{
-						defaultCharSemantics = BYTE_SEMANTICS;
+            defaultCharSemantics = CharSemantics.Byte;
 					}
 					else if ("CHAR".equalsIgnoreCase(v))
 					{
-						defaultCharSemantics = CHAR_SEMANTICS;
+            defaultCharSemantics = CharSemantics.Char;
 					}
           LogMgr.logInfo("OracleDataTypeResolver.<init>", "Default length semantics is: " + v);
 				}
 			}
 			catch (Exception e)
 			{
-				defaultCharSemantics = BYTE_SEMANTICS;
+				defaultCharSemantics = CharSemantics.Byte;
 				LogMgr.logWarning("OracleDataTypeResolver.<init>", "Could not retrieve NLS_LENGTH_SEMANTICS from v$nls_parameters. Assuming byte semantics. Using SQL:\n" + sql, e);
 			}
 			finally
@@ -135,7 +138,7 @@ public class OracleDataTypeResolver
 		return getSqlTypeDisplay(dbmsName, sqlType, size, digits, defaultCharSemantics);
 	}
 
-	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int byteOrChar)
+	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, CharSemantics byteOrChar)
 	{
 		String display;
 
@@ -172,7 +175,7 @@ public class OracleDataTypeResolver
 		return display;
 	}
 
-	private String getVarcharType(String type, int size, int semantics)
+	private String getVarcharType(String type, int size, CharSemantics semantics)
 	{
 		StringBuilder result = new StringBuilder(25);
 
@@ -193,12 +196,12 @@ public class OracleDataTypeResolver
 		{
 			if (alwaysShowCharSemantics || semantics != defaultCharSemantics)
 			{
-				if (semantics < 0) semantics = defaultCharSemantics;
-				if (semantics == BYTE_SEMANTICS)
+				if (semantics == null) semantics = defaultCharSemantics;
+        if (semantics == CharSemantics.Byte)
 				{
 					result.append(" Byte");
 				}
-				else if (semantics == CHAR_SEMANTICS)
+        else if (semantics == CharSemantics.Char)
 				{
 					result.append(" Char");
 				}
@@ -208,7 +211,7 @@ public class OracleDataTypeResolver
 		return result.toString();
 	}
 
-	public int getDefaultCharSemantics()
+	public CharSemantics getDefaultCharSemantics()
 	{
 		return defaultCharSemantics;
 	}

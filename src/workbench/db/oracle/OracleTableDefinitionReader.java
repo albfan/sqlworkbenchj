@@ -164,19 +164,15 @@ public class OracleTableDefinitionReader
 				String nullable = rs.getString("IS_NULLABLE");
 				String byteOrChar = rs.getString("CHAR_USED");
 
-				int charSemantics = oraTypes.getDefaultCharSemantics();
+        OracleDataTypeResolver.CharSemantics charSemantics = oraTypes.getDefaultCharSemantics();
 
-				if (StringUtil.isEmptyString(byteOrChar))
+				if ("B".equals(byteOrChar.trim()))
 				{
-					charSemantics = oraTypes.getDefaultCharSemantics();
-				}
-				else if ("B".equals(byteOrChar.trim()))
-				{
-					charSemantics = OracleDataTypeResolver.BYTE_SEMANTICS;
+					charSemantics = OracleDataTypeResolver.CharSemantics.Byte;
 				}
 				else if ("C".equals(byteOrChar.trim()))
 				{
-					charSemantics = OracleDataTypeResolver.CHAR_SEMANTICS;
+					charSemantics = OracleDataTypeResolver.CharSemantics.Char;
 				}
 
 				String identity = rs.getString("IDENTITY_COLUMN");

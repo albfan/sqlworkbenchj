@@ -23,9 +23,12 @@
 package workbench.db.oracle;
 
 import java.sql.Types;
+
+import workbench.WbTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
-import workbench.WbTestCase;
+
 import static org.junit.Assert.*;
 
 /**
@@ -49,34 +52,34 @@ public class OracleDataTypeResolverTest
 	public void testGetSqlTypeDisplay()
 	{
 		// Test with BYTE as default semantics
-		OracleDataTypeResolver resolver = new OracleDataTypeResolver(OracleUtils.BYTE_SEMANTICS, false);
+		OracleDataTypeResolver resolver = new OracleDataTypeResolver(OracleDataTypeResolver.CharSemantics.Byte, false);
 
 		// Test non-Varchar types
-		assertEquals("CLOB", resolver.getSqlTypeDisplay("CLOB", Types.CLOB, -1, -1, 0));
-		assertEquals("NVARCHAR(300)", resolver.getSqlTypeDisplay("NVARCHAR", Types.VARCHAR, 300, -1, 0));
-		assertEquals("CHAR(5)", resolver.getSqlTypeDisplay("CHAR", Types.CHAR, 5, -1, 0));
-		assertEquals("NUMBER(10,2)", resolver.getSqlTypeDisplay("NUMBER", Types.NUMERIC, 10, 2, 0));
+		assertEquals("CLOB", resolver.getSqlTypeDisplay("CLOB", Types.CLOB, -1, -1));
+		assertEquals("NVARCHAR(300)", resolver.getSqlTypeDisplay("NVARCHAR", Types.VARCHAR, 300, -1, OracleDataTypeResolver.CharSemantics.Byte));
+		assertEquals("CHAR(5)", resolver.getSqlTypeDisplay("CHAR", Types.CHAR, 5, -1, OracleDataTypeResolver.CharSemantics.Byte));
+		assertEquals("NUMBER(10,2)", resolver.getSqlTypeDisplay("NUMBER", Types.NUMERIC, 10, 2));
 
-		String display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.BYTE_SEMANTICS);
+		String display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleDataTypeResolver.CharSemantics.Byte);
 		assertEquals("VARCHAR(200)", display);
 
-		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.CHAR_SEMANTICS);
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleDataTypeResolver.CharSemantics.Char);
 		assertEquals("VARCHAR(200 Char)", display);
 
-		resolver = new OracleDataTypeResolver(OracleUtils.CHAR_SEMANTICS, false);
+		resolver = new OracleDataTypeResolver(OracleDataTypeResolver.CharSemantics.Char, false);
 
-		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.BYTE_SEMANTICS);
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleDataTypeResolver.CharSemantics.Byte);
 		assertEquals("VARCHAR(200 Byte)", display);
 
-		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.CHAR_SEMANTICS);
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleDataTypeResolver.CharSemantics.Char);
 		assertEquals("VARCHAR(200)", display);
 
-		resolver = new OracleDataTypeResolver(OracleUtils.CHAR_SEMANTICS, true);
+		resolver = new OracleDataTypeResolver(OracleDataTypeResolver.CharSemantics.Char, true);
 
-		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.BYTE_SEMANTICS);
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleDataTypeResolver.CharSemantics.Byte);
 		assertEquals("VARCHAR(200 Byte)", display);
 
-		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleUtils.CHAR_SEMANTICS);
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0,OracleDataTypeResolver.CharSemantics.Char);
 		assertEquals("VARCHAR(200 Char)", display);
 	}
 
