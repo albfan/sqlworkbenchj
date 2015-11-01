@@ -718,8 +718,9 @@ WHERE id=42;</p>
       </p>
       <h3>Building the manual</h3>
       <p>
-        To build the manual you need to download <a href="http://sourceforge.net/projects/docbook/">Docbook XSL</a> package
-        (Version 1.72 or later) and <a href="http://xmlgraphics.apache.org/fop/">FOP</a> (Version 0.95 or later).
+        To build the manual you need to download the <a href="http://sourceforge.net/projects/docbook/">Docbook XSL</a> package
+        (e.g. <tt>docbook-xsl-1.78.1.zip</tt>) and <a href="http://xmlgraphics.apache.org/fop/">FOP</a> (Version 0.95, newer 
+        version don't work with Docbook XSL).
       </p>
       <ul>
         <li>Copy the Docbook distribution to <tt>${wbroot}/etc/docbook</tt></li>

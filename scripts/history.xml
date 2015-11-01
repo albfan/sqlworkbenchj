@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-10-11">
+  <release build="-1" date="2015-11-01">
     <entry dev-build="3" type="enh">For DBMS that support it, two new modes have been added to WbImport: -upsert and -insertIgnore using native "UPSERT" functionality if available</entry>
     <entry dev-build="3" type="enh">For Firebird the SQL source of external tables is now generated correctly.</entry>
     <entry dev-build="3" type="enh">An new command WbGenerateImpTable is available to infer the structure of a table from an import file</entry>

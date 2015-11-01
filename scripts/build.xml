@@ -57,11 +57,7 @@
 
   <path id="xalan.path">
     <fileset dir="${fop.root}/lib">
-      <include name="xalan*.jar"/>
-      <include name="serializer*.jar"/>
-    </fileset>
-    <fileset dir="${docbook.root}/extensions">
-      <include name="xalan*.jar"/>
+      <include name="*.jar"/>
     </fileset>
   </path>
 
@@ -214,13 +210,11 @@
   <!-- Create the FO file which will in turn be transformed
        into the PDF manual by the target "pdf" -->
   <target name="fop" depends="init, docbook-history">
+    
     <!-- fop seems to require absolute pathnames... -->
-    <dirname property="docdir" file="${docbook.root}/images/colorsvg/note.svg"/>
+    <dirname property="admondir" file="${docbook.root}/images/note.svg"/>
     <dirname property="imgdir" file="${src}/workbench/resource/images/filter16.png"/>
-    <!--
-    <echo message="${docdir}"/>
-    <echo message="${imgdir}"/>
-    -->
+
     <copy overwrite="true" todir="${pdfwork}">
       <fileset dir="${doc}/xml">
         <include name="*.xml"/>
@@ -252,9 +246,9 @@
       <param name="default.image.width" expression="16"/>
       <param name="ignore.image.scaling" expression="0"/>
       <param name="admon.graphics" expression="1"/>
-      <param name="admon.graphics.path" expression="${docdir}/"/>
+      <param name="admon.graphics.path" expression="${admondir}/"/>
       <param name="admon.graphics.extension" expression=".svg"/>
-      <param name="admon.graphic.width" expression="16p"/>
+      <param name="admon.graphic.width" expression="0"/>
       <param name="admon.textlabel" expression="0"/>
       <param name="body.font.master" expression="10"/>
       <param name="toc.indent.width" expression="24"/>
@@ -265,8 +259,8 @@
       <param name="section.autolabel" expression="1"/>
       <param name="section.autolabel.max.depth" expression="3"/>
       <param name="alignment" expression="left"/>
-      <param name="fop1.extensions" expression="1"/>
-      <param name="use.extensions" expression="1"/>
+      <param name="fop1.extensions" expression="0"/>
+      <param name="use.extensions" expression="0"/>
       <param name="tablecolumns.extension" expression="0"/>
       <param name="menuchoice.separator" expression=" &#187; "/>
       <param name="menuchoice.menu.separator" expression=" &#187; "/>
@@ -590,7 +584,7 @@
         <exclude name="junit/sqljdbc4.jar"/>
       </zipfileset>
       -->
-      
+
     </zip>
   </target>
 
