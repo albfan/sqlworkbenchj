@@ -448,6 +448,7 @@ public class SqlPanel
     stmtRunner = new StatementRunner();
     stmtRunner.setRowMonitor(this.rowMonitor);
     stmtRunner.setMessagePrinter(this);
+    stmtRunner.setResultLogger(this);
     stmtRunner.setRetryHandler(this);
 
     tabDropHandler = new ResultTabDropHandler(this, resultTab, log);

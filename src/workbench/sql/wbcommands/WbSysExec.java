@@ -187,7 +187,14 @@ public class WbSysExec
 			String out = stdIn.readLine();
 			while (out != null)
 			{
-				result.addMessage(out);
+        if (resultLogger != null)
+        {
+          resultLogger.appendToLog(out + "\n");
+        }
+				else
+        {
+          result.addMessage(out);
+        }
 				out = stdIn.readLine();
 			}
 
@@ -199,7 +206,7 @@ public class WbSysExec
 
 			while (err != null)
 			{
-				result.addMessage(err);
+				result.addErrorMessage(err);
 				err = stdError.readLine();
 			}
 			task.waitFor();
@@ -228,7 +235,7 @@ public class WbSysExec
 	private List<String> getShell(List<String> command)
 	{
 		if (CollectionUtil.isEmpty(command)) return command;
-		
+
 		String os = getOSID();
 		List<String> args = new ArrayList<>(command.size() + 2);
 
