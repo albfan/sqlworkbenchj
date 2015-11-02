@@ -166,7 +166,11 @@ public class OracleTableDefinitionReader
 
         OracleDataTypeResolver.CharSemantics charSemantics = oraTypes.getDefaultCharSemantics();
 
-				if ("B".equals(byteOrChar.trim()))
+        if (StringUtil.isEmptyString(byteOrChar))
+        {
+          charSemantics = oraTypes.getDefaultCharSemantics();
+        }
+        else if ("B".equals(byteOrChar.trim()))
 				{
 					charSemantics = OracleDataTypeResolver.CharSemantics.Byte;
 				}

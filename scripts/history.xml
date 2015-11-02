@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-11-01">
+  <release build="-1" date="2015-11-02">
     <entry dev-build="3" type="enh">For DBMS that support it, two new modes have been added to WbImport: -upsert and -insertIgnore using native "UPSERT" functionality if available</entry>
     <entry dev-build="3" type="enh">For Firebird the SQL source of external tables is now generated correctly.</entry>
     <entry dev-build="3" type="enh">An new command WbGenerateImpTable is available to infer the structure of a table from an import file</entry>
@@ -14,6 +14,7 @@
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
     <entry dev-build="1" type="enh">The error dialog that is displayed when running a script can now be configured to also include the error message or the statement that failed</entry>
     <entry dev-build="1" type="enh">Improved display of packages in the DbTree for Oracle and Firebird</entry>
+    <entry dev-build="5" type="fix">Table definitions for tables with VARCHAR columns were not displayed for Oracle</entry>
     <entry dev-build="4" type="fix">Disabling the check for read-only columns did not work for all JDBC drivers</entry>
     <entry dev-build="4" type="fix">WbCopy now stops with an error if -targetTable is specified and -sourceTable is used to specify multiple tables</entry>
     <entry dev-build="4" type="fix">For DB2 the names of PK constraints where not properly qualified with a schema if needed</entry>
