@@ -19,6 +19,8 @@ package workbench.sql.lexer;
 
 import java.util.regex.Pattern;
 
+import workbench.log.LogMgr;
+
 /**
  * A SQLToken is a token that is returned by a lexer that is lexing an SQL
  * source file.  It has several attributes describing the token:
@@ -127,37 +129,49 @@ public class SQLToken
 	private int state;
 
 	private static final Pattern WHITESPACE = Pattern.compile("[ \t\r\n]+");
+  
 	/**
 	 * Create a new token.
 	 * The constructor is typically called by the lexer
 	 *
-	 * @param ID the id number of the token
+	 * @param tokenId the id number of the token
 	 * @param contents A string representing the text of the token
 	 * @param charBegin the offset into the input in characters at which this token started
 	 * @param charEnd the offset into the input in characters at which this token ended
 	 */
-	public SQLToken(int ID, String contents, int charBegin, int charEnd)
+	public SQLToken(int tokenId, String contents, int charBegin, int charEnd)
 	{
-		this(ID, contents, charBegin, charEnd, UNDEFINED_STATE);
+		this(tokenId, contents, charBegin, charEnd, UNDEFINED_STATE);
 	}
 
 	/**
 	 * Create a new token.
 	 * The constructor is typically called by the lexer
 	 *
-	 * @param ID the id number of the token
+	 * @param tokenId the id number of the token
 	 * @param text A string representing the text of the token
-	 * @param charBegin the offset into the input in characters at which this token started
-	 * @param charEnd the offset into the input in characters at which this token ended
+	 * @param begin the offset into the input in characters at which this token started
+	 * @param end the offset into the input in characters at which this token ended
 	 * @param state the state the tokenizer is in after returning this token.
 	 */
-	public SQLToken(int ID, String text, int charBegin, int charEnd, int state)
+	public SQLToken(int tokenId, String text, int begin, int end, int state)
 	{
-		this.ID = ID;
+    // for some reasons this can happen if non-standard characters
+    // are part of the parsed string
+    if (text.length() == 0 && tokenId != WHITE_SPACE)
+    {
+      LogMgr.logDebug("SQLToken.<init>", "SQLToken with ID=" + Integer.toHexString(tokenId) + " but with length zero ");
+      this.ID = WHITE_SPACE;
+    }
+		else
+    {
+      this.ID = tokenId;
+    }
 		this.contents = text;
-		this.charBegin = charBegin;
-		this.charEnd = charEnd;
+		this.charBegin = begin;
+		this.charEnd = end;
 		this.state = state;
+
 	}
 
 	/**

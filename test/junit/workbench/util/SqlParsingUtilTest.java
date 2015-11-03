@@ -39,37 +39,46 @@ public class SqlParsingUtilTest
 	@Test
 	public void testGetSqlVerb()
 	{
-		SqlParsingUtil util = new SqlParsingUtil(ParserType.Standard);
-		String result = util.getSqlVerb("-- foobar\nselect 42");
-		assertEquals("SELECT", result);
+    for (ParserType type : ParserType.values())
+    {
+      SqlParsingUtil util = new SqlParsingUtil(type);
+      String result = util.getSqlVerb("-- foobar\nselect 42");
+      assertEquals("SELECT", result);
+    }
 	}
 
 	@Test
 	public void testStripVerb()
 	{
-		String sql = "-- foobar\nselect 42";
-		SqlParsingUtil util = new SqlParsingUtil(ParserType.Standard);
-		assertEquals("42", util.stripVerb(sql));
+    for (ParserType type : ParserType.values())
+    {
+      String sql = "-- foobar\nselect 42";
+      SqlParsingUtil util = new SqlParsingUtil(type);
+      assertEquals("42", util.stripVerb(sql));
 
-		sql = "-- foobar\n /* bla */ select 42";
-		assertEquals("42", util.stripVerb(sql));
+      sql = "-- foobar\n /* bla */ select 42";
+      assertEquals("42", util.stripVerb(sql));
+    }
 	}
 
 	@Test
 	public void testGetPos()
 	{
-		String sql = "select /* from */ some_column from some_table join other_table using (x)";
-		SqlParsingUtil util = new SqlParsingUtil(ParserType.Standard);
-		int pos = util.getKeywordPosition("FROM", sql);
-		assertEquals(30, pos);
-		String fromPart = util.getFromPart(sql);
-		assertEquals(" some_table join other_table using (x)", fromPart);
+    for (ParserType type : ParserType.values())
+    {
+      String sql = "select /* from */ some_column from some_table join other_table using (x)";
+      SqlParsingUtil util = new SqlParsingUtil(type);
+      int pos = util.getKeywordPosition("FROM", sql);
+      assertEquals(30, pos);
+      String fromPart = util.getFromPart(sql);
+      assertEquals(" some_table join other_table using (x)", fromPart);
 
-		sql = "select /* from */ \n" +
-			"some_column, \n" +
-			" -- from blabla \n" +
-			" from some_table join other_table using (x)";
-		fromPart = util.getFromPart(sql);
-		assertEquals(" some_table join other_table using (x)", fromPart);
+      sql = "select /* from */ \n" +
+        "some_column, \n" +
+        " -- from blabla \n" +
+        " from some_table join other_table using (x)";
+      fromPart = util.getFromPart(sql);
+      assertEquals(" some_table join other_table using (x)", fromPart);
+    }
 	}
 }

@@ -420,12 +420,14 @@ public class CommandMapper
 	}
 
 	/**
-	 * Check for a SELECT ... INTO syntax for Informix which actually
-	 * creates a table. In that case we will simply pretend it's a
-	 * CREATE statement.
-	 * In all other casese, the approriate SqlCommand from commandDispatch will be used
-	 * This is made public in order to be accessible from a JUnit test
-	 *
+   *
+   * Returns the SqlCommand to be used for the given SQL string.
+   *
+   * This also checks for "SELECT ... INTO ... " style statments that
+   * don't actually select something but create a new table.
+   * As those aren't "real" queries they need to be run and handled
+   * differently - for those statements SelectCommand will not be used.
+   *
 	 * @param sql the statement to be executed
 	 * @return the instance of SqlCommand to be used to run the sql, or null if the
 	 * given sql is empty or contains comments only
