@@ -421,6 +421,10 @@ select idx.relname as index_name,
            pg_get_indexdef(idx.oid, 10, true),
            pg_get_indexdef(idx.oid, 11, true),
            pg_get_indexdef(idx.oid, 12, true)
+           pg_get_indexdef(idx.oid, 13, true)
+           pg_get_indexdef(idx.oid, 14, true)
+           pg_get_indexdef(idx.oid, 15, true)
+           pg_get_indexdef(idx.oid, 16, true)
        ) as index_def,
        ts.spcname as index_tablespace
 from pg_index ind
