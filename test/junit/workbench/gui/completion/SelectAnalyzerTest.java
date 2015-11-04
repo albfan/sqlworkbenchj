@@ -317,25 +317,25 @@ public class SelectAnalyzerTest
 		assertEquals("#some_schema", analyzer.getSchemaForTableList());
 	}
 
-  @Test
-	public void testOrderBy()
-	{
-		String sql =
-				"select sum(f.c1) as c1_total, \n" +
-				"       sum(f.c2) as c2_total, \n" +
-				"       f.id, \n" +
-				"       b.foo \n" +
-				"from foo f \n" +
-				"  join bar b on f.id = b.fid \n" +
-				"where b.foo NOT IN (1,2,3) \n" +
-				"group by f.id, b.foo \n" +
-				"order by  ";
-
-		int pos = sql.indexOf("order by") + "order by".length() + 1;
-		SelectAnalyzer analyzer = new SelectAnalyzer(null, sql, pos);
-		analyzer.checkContext();
-		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
-	}
+//  @Test
+//	public void testOrderBy()
+//	{
+//		String sql =
+//				"select sum(f.c1) as c1_total, \n" +
+//				"       sum(f.c2) as c2_total, \n" +
+//				"       f.id, \n" +
+//				"       b.foo \n" +
+//				"from foo f \n" +
+//				"  join bar b on f.id = b.fid \n" +
+//				"where b.foo NOT IN (1,2,3) \n" +
+//				"group by f.id, b.foo \n" +
+//				"order by  ";
+//
+//		int pos = sql.indexOf("order by") + "order by".length() + 1;
+//		SelectAnalyzer analyzer = new SelectAnalyzer(null, sql, pos);
+//		analyzer.checkContext();
+//		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
+//	}
 
   @Test
   public void testJoinColumns()
