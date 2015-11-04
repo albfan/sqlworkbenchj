@@ -24,10 +24,12 @@ package workbench.db.mssql;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -35,6 +37,14 @@ import workbench.util.SqlUtil;
  */
 public class SqlServerUtil
 {
+  public static boolean isMicrosoftDriver(WbConnection conn)
+  {
+    if (conn == null) return false;
+    String url = conn.getUrl();
+    if (url == null) return false;
+    return url.startsWith("jdbc:sqlserver:");
+  }
+
 	/**
 	 * Returns true if the connection is to a SQL Server 2014 or later.
 	 */

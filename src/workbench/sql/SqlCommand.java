@@ -56,6 +56,7 @@ import workbench.sql.wbcommands.WbEnableOraOutput;
 import workbench.util.ArgumentParser;
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
 import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -1002,31 +1003,11 @@ public class SqlCommand
    *
    * @see workbench.sql.StatementRunner#getBaseDir()
    * @see #evaluateFileArgument(java.lang.String)
+   * @see FileUtil#listFiles(java.lang.String, java.lang.String) 
    */
   public List<WbFile> evaluateWildardFileArgs(String arg)
   {
-    WbFile f = evaluateFileArgument(arg);
-    if (f == null) return Collections.emptyList();
-
-    File parent = f.getAbsoluteFile().getParentFile();
-    if (parent == null) return Collections.emptyList();
-
-    List<WbFile> result = new ArrayList<>(12);
-
-    try
-    {
-      DirectoryStream<Path> stream = Files.newDirectoryStream(parent.toPath(), f.getName());
-      for (Path file : stream)
-      {
-        result.add(new WbFile(file.toFile()));
-      }
-    }
-    catch (Exception ex)
-    {
-      LogMgr.logWarning("SqlCommand.evaluateWildardFileArgs()", "Could not get file list", ex);
-    }
-
-    return result;
+    return FileUtil.listFiles(arg, getBaseDir());
   }
 
   /**

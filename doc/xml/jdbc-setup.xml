@@ -247,8 +247,8 @@
 						<entry><literal>com.microsoft.sqlserver.jdbc.SQLServerDriver</literal></entry>
 						<entry>
 							<simplelist columns="1">
-							  <member><literal>sqljdbc4.jar</literal></member>
-								<member><ulink url="http://msdn.microsoft.com/en-gb/data/aa937724%28en-us%29.aspx"/></member>
+							  <member><literal>sqljdbc42.jar</literal></member>
+								<member><ulink url="http://msdn.microsoft.com/data/jdbc"/></member>
 							</simplelist>
 						</entry>
 					</row>

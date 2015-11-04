@@ -153,7 +153,7 @@ public class BatchRunner
 		}
 	}
 
-	public BatchRunner(List<File> files)
+	public BatchRunner(List<WbFile> files)
 	{
 		this();
 		filenames = new ArrayList<>(files.size());
@@ -610,7 +610,7 @@ public class BatchRunner
 					this.resultDisplay.appendToLog(msg);
 					this.resultDisplay.appendToLog("\n");
 				}
-				String dir = fo.getCanonicalFile().getParent();
+				String dir = fo.getAbsoluteFile().getParent();
 				this.setBaseDir(dir);
 
 				status = this.executeScript(fo);

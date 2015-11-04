@@ -29,22 +29,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import workbench.log.LogMgr;
 
@@ -474,49 +472,54 @@ public class FileUtil
 	}
 	/**
 	 * List all files denoted by the file pattern.
-	 * The pattern is expected to contain a directory.
-	 *
+   *
 	 * Only the directory specfied in the argument is searched, no recursive search is done.
+   *
+   * The returned list is sorted by name (case insensitive).
 	 *
 	 * @param toSearch  the files to search, e.g. /temp/*.sql
 	 * @return a list of files found in the directory denoted by the search pattern
-	 *
-	 * @throws IllegalArgumentException  if the pattern is invalid
 	 */
-	public static List<File> listFiles(String toSearch)
-		throws IllegalArgumentException
+	public static List<WbFile> listFiles(String toSearch, String baseDir)
 	{
+    if (StringUtil.isEmptyString(toSearch)) return Collections.emptyList();
+
 		File f = new File(toSearch);
-		final File parentDir = f.getParentFile();
+		File parentDir = f.getParentFile();
+    if (parentDir == null || !f.isAbsolute())
+    {
+      if (baseDir == null)
+      {
+        parentDir = f.getAbsoluteFile().getParentFile();
+      }
+      else
+      {
+        if (f.getParent() != null)
+        {
+          parentDir = new File(baseDir, f.getParent());
+        }
+        else
+        {
+          parentDir = new File(baseDir);
+        }
+      }
+    }
 
-		String matchPattern = StringUtil.wildcardToRegex(f.getName(), false);
-		final Pattern pattern;
-		try
-		{
-			pattern = Pattern.compile(matchPattern);
-		}
-		catch (PatternSyntaxException e)
-		{
-			throw new IllegalArgumentException(toSearch +  " is not a valid wildcard pattern");
-		}
+    List<WbFile> result = new ArrayList<>();
 
-		FilenameFilter filter = new FilenameFilter()
-		{
-			@Override
-			public boolean accept(File dir, String name)
-			{
-				if (dir == null) return false;
+    try
+    {
+      DirectoryStream<Path> stream = Files.newDirectoryStream(parentDir.toPath(), f.getName());
+      for (Path file : stream)
+      {
+        result.add(new WbFile(file.toFile()));
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("FileUtil.listFiles()", "Could not get file list", ex);
+    }
 
-				Matcher matcher = pattern.matcher(name);
-				return matcher.matches();
-			}
-		};
-		File[] list = parentDir.listFiles(filter);
-		if (list == null)
-		{
-			return Collections.emptyList();
-		}
-		List<File> result = Arrays.asList(list);
 		Comparator<File> fnameSorter = new Comparator<File>()
 		{
 			@Override
@@ -528,6 +531,7 @@ public class FileUtil
 				return o1.getName().compareToIgnoreCase(o2.getName());
 			}
 		};
+
 		Collections.sort(result, fnameSorter);
 		return result;
 	}

@@ -34,10 +34,11 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -70,9 +71,9 @@ public class FileUtilTest
 
 		File f = new File(dir, "foobar.sqlscript");
 		f.createNewFile();
-		
+
 		String wildcard = testUtil.getBaseDir() + "/" + "*.sql";
-		List<File> files = FileUtil.listFiles(wildcard);
+		List<WbFile> files = FileUtil.listFiles(wildcard, null);
 		assertNotNull(files);
 		assertEquals(5, files.size());
 		for (File found : files)
@@ -82,7 +83,7 @@ public class FileUtilTest
 		}
 
 		wildcard = testUtil.getBaseDir() + "/" + "*.sql*";
-		files = FileUtil.listFiles(wildcard);
+		files = FileUtil.listFiles(wildcard, null);
 		assertEquals(6, files.size());
 	}
 
@@ -101,11 +102,12 @@ public class FileUtilTest
 
 		BufferedReader in = new BufferedReader(new FileReader(f));
 
-		Collection<String> lines = FileUtil.getLines(in);
+		List<String> lines = FileUtil.getLines(in);
 		assertEquals(100, lines.size());
 		for (int i=0; i < 100; i++)
 		{
-			assertTrue(lines.contains("line_" + i));
+      String line = lines.get(i);
+			assertEquals("line_" + i, line);
 		}
 	}
 

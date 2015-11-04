@@ -22,7 +22,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -41,9 +40,7 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
-import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
-import workbench.util.FileUtil;
 import workbench.util.Replacer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -120,35 +117,34 @@ public class WbInclude
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		result.setSuccess();
 
-		String clean = SqlUtil.makeCleanSql(aSql, false, false);
 		boolean checkParms = true;
 		boolean showProgress = true;
 
-		WbFile file = null;
+    String fileArg = null;
+    List<WbFile> allFiles = null;
 
-		if (clean.charAt(0) == '@')
+    // Support Oracle style includes
+		String plain = SqlUtil.makeCleanSql(aSql, false, false);
+		if (plain.length() > 0 && plain.charAt(0) == '@')
 		{
-			clean = clean.substring(1);
-			file = evaluateFileArgument(clean);
+			fileArg = plain.substring(1);
 			checkParms = false;
 			showProgress = false;
 		}
 		else
 		{
-			clean = getCommandLine(aSql);
-			cmdLine.parse(clean);
-			file = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
-			if (file == null)
-			{
-				// support a short version of WbInclude that simply specifies the filename
-				file = evaluateFileArgument(clean);
-				checkParms = false;
-			}
-		}
-
-		if (file != null && StringUtil.isEmptyString(file.getExtension()))
-		{
-			file = new WbFile(file.getFullPath() + ".sql");
+			String args = getCommandLine(aSql);
+			cmdLine.parse(args);
+      if (!cmdLine.hasArguments())
+      {
+        // support a short version of WbInclude that simply specifies the filename
+        fileArg = args;
+        checkParms = false;
+      }
+      else
+      {
+        fileArg = cmdLine.getValue(CommonArgs.ARG_FILE);
+      }
 		}
 
 		if (!ConditionCheck.isCommandLineOK(result, cmdLine))
@@ -161,46 +157,21 @@ public class WbInclude
 			return result;
 		}
 
-		if (file == null)
+		if (StringUtil.isBlank(fileArg))
 		{
 			String msg = ResourceMgr.getString("ErrIncludeWrongParameter").
 				replace("%default_encoding%", Settings.getInstance().getDefaultEncoding()).
 				replace("%default_continue%", Boolean.toString(Settings.getInstance().getIncludeDefaultContinue()));
-			result.addMessage(msg);
-			result.setFailure();
+			result.addErrorMessage(msg);
 			return result;
 		}
 
-		List<File> allFiles = null;
-		if (FileUtil.hasWildcard(cmdLine.getValue(CommonArgs.ARG_FILE)))
-		{
-			String search = StringUtil.trimQuotes(cmdLine.getValue(CommonArgs.ARG_FILE));
-			File f = new File(search);
-			if (f.getParentFile() == null && this.runner != null)
-			{
-				String dir = this.runner.getBaseDir();
-				if (StringUtil.isNonEmpty(dir))
-				{
-					f = new File(dir, search);
-					search = f.getPath();
-				}
-			}
-			allFiles = FileUtil.listFiles(search);
-			if (allFiles.isEmpty())
-			{
-				result.setFailure();
-				String msg = ResourceMgr.getFormattedString("ErrFileNotFound", search);
-				result.addMessage(msg);
-				return result;
-			}
-		}
-		else if (!file.exists())
-		{
-			result.setFailure();
-			String msg = ResourceMgr.getFormattedString("ErrFileNotFound", file.getFullPath());
-			result.addMessage(msg);
-			return result;
-		}
+    allFiles = evaluateWildardFileArgs(fileArg);
+    if (allFiles.isEmpty())
+    {
+      result.addErrorMessageByKey("ErrFileNotFound", fileArg);
+      return result;
+    }
 
 		boolean continueOnError = false;
 		boolean checkEscape = Settings.getInstance().useNonStandardQuoteEscaping(currentConnection);
@@ -234,17 +205,7 @@ public class WbInclude
 
 		try
 		{
-			if (CollectionUtil.isEmpty(allFiles))
-			{
-				batchRunner = new BatchRunner(file.getCanonicalPath());
-				String dir = file.getCanonicalFile().getParent();
-				batchRunner.setBaseDir(dir);
-			}
-			else
-			{
-				batchRunner = new BatchRunner(allFiles);
-			}
-
+      batchRunner = new BatchRunner(allFiles);
 			batchRunner.setConnection(currentConnection);
 			batchRunner.setDelimiter(delim);
 			batchRunner.setResultLogger(this.resultLogger);
