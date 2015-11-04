@@ -189,13 +189,13 @@ public class SelectAnalyzer
 				return;
 			}
 
-			if (afterOrder)
-			{
-				this.elements = getColumnsForOrderBy();
-				this.addAllMarker = true;
-				this.title = ResourceMgr.getString("TxtTitleColumns");
-				return;
-			}
+//			if (afterOrder)
+//			{
+//				this.elements = getColumnsForOrderBy();
+//				this.addAllMarker = true;
+//				this.title = ResourceMgr.getString("TxtTitleColumns");
+//				return;
+//			}
 
 			if (afterHaving)
 			{
@@ -385,9 +385,9 @@ public class SelectAnalyzer
 		return result;
 	}
 
-	private List getColumnsForOrderBy()
+	private List<String> getColumnsForOrderBy()
 	{
-		return SqlUtil.getSelectColumns(this.sql, false, dbConnection);
+    return SqlUtil.getSelectColumns(this.sql, false, dbConnection);
 	}
 
 	private List getColumnsForHaving()
