@@ -189,14 +189,6 @@ public class SelectAnalyzer
 				return;
 			}
 
-//			if (afterOrder)
-//			{
-//				this.elements = getColumnsForOrderBy();
-//				this.addAllMarker = true;
-//				this.title = ResourceMgr.getString("TxtTitleColumns");
-//				return;
-//			}
-
 			if (afterHaving)
 			{
 				this.elements = getColumnsForHaving();
@@ -259,6 +251,17 @@ public class SelectAnalyzer
 				TableAlias tbl = new TableAlias(tables.get(0).getObjectName(), null, catalogSeparator, schemaSep);
 				tableForColumnList = tbl.getTable();
 			}
+
+      // after an ORDER BY but without an alias at the current cursor position:
+      // --> display the columns from the select list
+			if (afterOrder && currentAlias == null)
+			{
+				this.elements = getColumnsForOrderBy();
+				this.addAllMarker = true;
+				this.title = ResourceMgr.getString("TxtTitleColumns");
+				return;
+			}
+
 
 			if (tableForColumnList == null)
 			{
