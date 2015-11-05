@@ -126,6 +126,11 @@ public class ClassFinder
 	{
 		List<Class> result = new ArrayList<>();
 
+    if (!ZipUtil.isZipFile(new File(archive)))
+    {
+      return result;
+    }
+
 		try (JarFile jarFile = new JarFile(archive))
 		{
 			Enumeration<JarEntry> entries = jarFile.entries();
@@ -205,7 +210,7 @@ public class ClassFinder
 	 *
 	 * @param packageName the base package
    * @param classLoader the class loader to use
-   * 
+   *
 	 * @return The classes
 	 * @throws ClassNotFoundException
 	 * @throws IOException
