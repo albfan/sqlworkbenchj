@@ -256,10 +256,16 @@ public class SelectAnalyzer
       // --> display the columns from the select list
 			if (afterOrder && currentAlias == null)
 			{
-				this.elements = getColumnsForOrderBy();
-				this.addAllMarker = true;
-				this.title = ResourceMgr.getString("TxtTitleColumns");
-				return;
+        List<String> columns = getColumnsForOrderBy();
+        // if the select list only has a single *
+        // don't display the columns, from the select, but display the regular list of choices
+        if (!isSelectStar(columns))
+        {
+          this.elements = columns;
+          this.addAllMarker = true;
+          this.title = ResourceMgr.getString("TxtTitleColumns");
+          return;
+        }
 			}
 
 
@@ -290,6 +296,12 @@ public class SelectAnalyzer
 			}
 		}
 	}
+
+  private boolean isSelectStar(List<String> columns)
+  {
+    if (columns.size() != 1) return false;
+    return columns.get(0).equals("*");
+  }
 
 	private TableAlias findAlias(String toSearch, List<Alias> possibleTables, char catalogSep, char schemaSeparator)
 	{

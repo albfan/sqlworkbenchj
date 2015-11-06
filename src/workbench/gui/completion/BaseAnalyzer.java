@@ -427,7 +427,7 @@ public abstract class BaseAnalyzer
 		}
 		else if (context == CONTEXT_COLUMN_LIST)
 		{
-			retrieveColumns();
+			if (this.elements == null) retrieveColumns();
 		}
 		else if (context == CONTEXT_FROM_LIST)
 		{
