@@ -610,7 +610,7 @@
       <fileset dir="${distdir}">
         <include name="WorkbenchSrc-Build${build.number}.zip"/>
         <include name="Workbench-Build${build.number}.zip"/>
-        <include name="Workbench-Build${build.number}-MacJava7.tgz"/>
+        <include name="Workbench-Build${build.number}-MacJava8.tgz"/>
       </fileset>
     </move>
 
@@ -683,7 +683,7 @@
       <option value="-Xdock:name=SQLWorkbench/J"/>
     </bundleapp>
 
-    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava7.tgz">
+    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava8.tgz">
       <tarfileset dir="${bundledir}">
         <include name="**/*"/>
         <exclude name="**/JavaAppLauncher"/>
@@ -703,7 +703,7 @@
       </tarfileset>
     </tar>
 
-    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava7-with-office-libs.tgz">
+    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava8-with-office-libs.tgz">
       <tarfileset dir="${bundledir}">
         <include name="**/*"/>
         <exclude name="**/JavaAppLauncher"/>
