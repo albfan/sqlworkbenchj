@@ -26,8 +26,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import workbench.log.LogMgr;
@@ -39,6 +42,7 @@ import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -61,6 +65,7 @@ import workbench.util.StringUtil;
 public class SqlServerColumnEnhancer
 	implements ColumnDefinitionEnhancer
 {
+  private Map<String, String> defaultCollations = new HashMap<>();
 
 	@Override
 	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
@@ -77,7 +82,7 @@ public class SqlServerColumnEnhancer
 
 		if (SqlServerUtil.isSqlServer2005(conn))
 		{
-			readCollations(table, conn);
+			updateColumnInformation(table, conn);
 		}
 	}
 
@@ -235,45 +240,58 @@ public class SqlServerColumnEnhancer
 		}
 	}
 
-	public void readCollations(TableDefinition table, WbConnection conn)
+  private String getDatabaseCollation(String database, WbConnection conn)
+  {
+    String collation = defaultCollations.get(database);
+    if (collation != null)
+    {
+      return collation;
+    }
+
+    Statement info = null;
+    ResultSet rs = null;
+
+    String sql = "select cast(databasepropertyex('" + database + "', 'Collation') as varchar(128))";
+    try
+    {
+
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logInfo("SqlServerColumnEnhancer.getDatabaseCollation()", "Retrieving database collation using: " + sql);
+      }
+
+      info = conn.createStatement();
+      rs = info.executeQuery(sql);
+      if (rs.next())
+      {
+        collation = rs.getString(1);
+      }
+    }
+    catch (SQLException e)
+    {
+      LogMgr.logError("SqlServerColumnEnhancer.getDatabaseCollation()", "Could not read database collation using: " + sql, e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, info);
+    }
+    defaultCollations.put(database, collation);
+    return collation;
+  }
+
+	public void updateColumnInformation(TableDefinition table, WbConnection conn)
 	{
-		String defaultCollation = null;
-		Statement info = null;
-		ResultSet rs = null;
+    String defaultCollation = getDatabaseCollation(table.getTable().getRawCatalog(), conn);
 
-		String defSql = "select cast(databasepropertyex('" + table.getTable().getRawCatalog() + "', 'Collation') as varchar(128))";
-		try
-		{
+    String types = conn.getDbSettings().getProperty("adjust.datatypes", "geometry,geography");
 
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logInfo("SqlServerColumnEnhancer.readCollations()", "Retrieving default collation using: " + defSql);
-			}
-
-			info = conn.createStatement();
-			rs = info.executeQuery(defSql);
-			if (rs.next())
-			{
-				defaultCollation = rs.getString(1);
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("SqlServerColumnEnhancer.readCollations()", "Could not read default collation using: " + defSql, e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, info);
-		}
-
-		PreparedStatement stmt = null;
-
-		HashMap<String, String> expressions = new HashMap<>(table.getColumnCount());
-		HashMap<String, String> collations = new HashMap<>(table.getColumnCount());
+    Set<String> nonJdbcTypes = CollectionUtil.caseInsensitiveSet();
+    nonJdbcTypes.addAll(StringUtil.stringToList(types, ",", true, true));
 
 		String sql =
 			"select column_name, \n" +
-			"       collation_name \n" +
+			"       collation_name, \n" +
+			"       data_type \n" +
 			"from information_schema.columns \n" +
 			"where table_name = ? \n" +
 			"  and table_schema = ? \n " +
@@ -285,9 +303,13 @@ public class SqlServerColumnEnhancer
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("SqlServerColumnEnhancer.readCollations()",
-				"Retrieving column collations using query:\n" + SqlUtil.replaceParameters(sql, tableName, schema, catalog));
+			LogMgr.logDebug("SqlServerColumnEnhancer.()",
+				"Retrieving additional column information using:\n" + SqlUtil.replaceParameters(sql, tableName, schema, catalog));
 		}
+
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    List<ColumnIdentifier> columns = table.getColumns();
 
 		try
 		{
@@ -303,31 +325,28 @@ public class SqlServerColumnEnhancer
 				String collation = rs.getString(2);
 				if (isNonDefault(collation, defaultCollation))
 				{
-					expressions.put(colname, "COLLATE " + collation);
-					collations.put(colname, collation);
+          ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
+  				String dataType = col.getDbmsType() + " COLLATE " + collation;
+          col.setDbmsType(dataType);
+          col.setCollation(collation);
 				}
+        String type = rs.getString(3);
+        if (nonJdbcTypes.contains(type))
+        {
+          ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
+          col.setDbmsType(type);
+          col.setDataType(Types.OTHER);
+        }
 			}
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("SqlServerColumnEnhancer.readCollations()", "Could not read column collations using:\n" + SqlUtil.replaceParameters(sql, tableName, schema, catalog), ex);
+			LogMgr.logError("SqlServerColumnEnhancer.updateColumnInformation()",
+        "Could not read column details using:\n" + SqlUtil.replaceParameters(sql, tableName, schema, catalog), ex);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
-		}
-
-		for (ColumnIdentifier col : table.getColumns())
-		{
-			String expression = expressions.get(col.getColumnName());
-			if (StringUtil.isNonEmpty(expression))
-			{
-				String dataType = col.getDbmsType() + " " + expression;
-				col.setDbmsType(dataType);
-
-				String collation = collations.get(col.getColumnName());
-				col.setCollation(collation);
-			}
 		}
 	}
 
