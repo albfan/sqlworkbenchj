@@ -1055,22 +1055,13 @@ public class Settings
 
 	public JoinWrapStyle getFormatterJoinWrapStyle()
 	{
-		String style = getProperty("workbench.sql.formatter.join.condition.wrapstyle", JoinWrapStyle.onlyMultiple.name());
-		try
-		{
-			return JoinWrapStyle.valueOf(style);
-		}
-		catch (Exception e)
-		{
-			return JoinWrapStyle.onlyMultiple;
-		}
+    return getEnumProperty("workbench.sql.formatter.join.condition.wrapstyle", JoinWrapStyle.onlyMultiple);
 	}
 
 	public void setFormatterWrapMultipleJoinConditions(boolean flag)
 	{
 	    setProperty("workbench.sql.formatter.join.condition.multiple.wrap", flag);
 	}
-
 
 	public boolean getFormatterAddSpaceAfterLineBreakComma()
 	{
@@ -2087,29 +2078,12 @@ public class Settings
 
 	private GeneratedIdentifierCase getIdentifierCase(String property, GeneratedIdentifierCase defaultValue)
 	{
-		String value = getProperty(property, null);
-		if (value == null) return defaultValue;
-		try
-		{
-			return GeneratedIdentifierCase.valueOf(value);
-		}
-		catch (Exception ex)
-		{
-			return GeneratedIdentifierCase.asIs;
-		}
+    return getEnumProperty(property, defaultValue);
 	}
 
 	public ColumnSortType getAutoCompletionColumnSortType()
 	{
-		String sort = getProperty("workbench.editor.autocompletion.paste.sort", "name");
-		try
-		{
-			return ColumnSortType.valueOf(sort);
-		}
-		catch (Exception e)
-		{
-			return ColumnSortType.name;
-		}
+		return getEnumProperty("workbench.editor.autocompletion.paste.sort", ColumnSortType.name);
 	}
 
 	public void setAutoCompletionColumnSort(ColumnSortType sort)
@@ -2757,15 +2731,7 @@ public class Settings
 
 	public ErrorReportLevel getStatementErrorReportLevel()
 	{
-		try
-		{
-			String lvl = getProperty(PROPERTY_ERROR_STATEMENT_LOG_LEVEL, ErrorReportLevel.limited.name());
-			return ErrorReportLevel.valueOf(lvl);
-		}
-		catch (Exception ex)
-		{
-			return ErrorReportLevel.limited;
-		}
+    return getEnumProperty(PROPERTY_ERROR_STATEMENT_LOG_LEVEL, ErrorReportLevel.limited);
 	}
 
 	public boolean getSaveProfilesImmediately()
@@ -3047,6 +3013,23 @@ public class Settings
 	{
 		return System.getProperty(property, this.props.getProperty(property, aDefault));
 	}
+
+  public <E extends Enum<E>> E getEnumProperty(String key, E defaultValue)
+  {
+    String value = getProperty(key, defaultValue.name());
+    if (value != null)
+    {
+      try
+      {
+       return (E)Enum.valueOf(defaultValue.getClass(), value);
+      }
+      catch (Throwable e)
+      {
+        LogMgr.logWarning("Settings.getEnumProperty()", "Invalid enum value '" + value + "' specified");
+      }
+    }
+    return defaultValue;
+  }
 
 	public List<String> getListProperty(String aProperty, boolean makeLowerCase)
 	{

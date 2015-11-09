@@ -158,7 +158,6 @@ public class JEditTextArea
 	protected int horizontalOffset;
   private int minHighlightLength;
   private boolean highlightNoWhitespace;
-  private boolean highlightIgnoreCase;
 
 	protected JScrollBar vertical;
 	protected JScrollBar horizontal;
@@ -282,7 +281,6 @@ public class JEditTextArea
 
     minHighlightLength = Settings.getInstance().getMinLengthForSelectionHighlight();
     highlightNoWhitespace = Settings.getInstance().getSelectionHighlightNoWhitespace();
-    highlightIgnoreCase = Settings.getInstance().getSelectionHighlightIgnoreCase();
 	}
 
 	private void initWheelZoom()
@@ -308,7 +306,6 @@ public class JEditTextArea
 		{
       minHighlightLength = Settings.getInstance().getMinLengthForSelectionHighlight();
       highlightNoWhitespace = Settings.getInstance().getSelectionHighlightNoWhitespace();
-      highlightIgnoreCase = Settings.getInstance().getSelectionHighlightIgnoreCase();
 			updateOccuranceHilite();
 		}
 		else if (evt.getPropertyName().startsWith(GuiSettings.PROP_FONT_ZOOM_WHEEL))
