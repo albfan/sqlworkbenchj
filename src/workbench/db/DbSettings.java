@@ -726,19 +726,8 @@ public class DbSettings
 	public IdentifierCase getSchemaNameCase()
 	{
 		// This allows overriding the default value returned by the JDBC driver
-		String nameCase = Settings.getInstance().getProperty(prefix + "schemaname.case", null);
-		if (nameCase != null)
-		{
-			try
-			{
-				return IdentifierCase.valueOf(nameCase);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("DbSettings.getSchemaNameCase()", "Invalid IdentifierCase value '" + nameCase + "' specified");
-			}
-		}
-		return IdentifierCase.unknown;
+		String nameCase = getProperty(prefix + "schemaname.case", null);
+    return Settings.getInstance().getEnumValue(nameCase, IdentifierCase.unknown);
 	}
 
 	public void setObjectNameCase(String oCase)
@@ -750,18 +739,7 @@ public class DbSettings
 	{
 		// This allows overriding the default value returned by the JDBC driver
 		String nameCase = getProperty("objectname.case", null);
-		if (nameCase != null)
-		{
-			try
-			{
-				return IdentifierCase.valueOf(nameCase);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("DbSettings.getObjectNameCase()", "Invalid IdentifierCase value '" + nameCase + "' specified");
-			}
-		}
-		return IdentifierCase.unknown;
+    return Settings.getInstance().getEnumValue(nameCase, IdentifierCase.unknown);
 	}
 
 	/**
@@ -1117,15 +1095,8 @@ public class DbSettings
 
 	public GenerateOwnerType getGenerateTableOwner()
 	{
-		String value = getProperty("generate.tablesource.include.owner", GenerateOwnerType.whenNeeded.name());
-		try
-		{
-			return GenerateOwnerType.valueOf(value);
-		}
-		catch (Exception ex)
-		{
-			return GenerateOwnerType.whenNeeded;
-		}
+		String value = getProperty("generate.tablesource.include.owner", null);
+    return Settings.getInstance().getEnumValue(value, GenerateOwnerType.whenNeeded);
 	}
 
 	/**
@@ -2007,18 +1978,7 @@ public class DbSettings
 	{
 		String defaultSetting = Settings.getInstance().getProperty("workbench.sql.transaction.readonly.end", EndReadOnlyTrans.never.name());
 		String value = getProperty("transaction.readonly.end", defaultSetting);
-		if (value != null)
-		{
-			try
-			{
-				return EndReadOnlyTrans.valueOf(value);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("DbSettings.getAutoCloseReadOnlyTransactions()", "Invalid end type '" + value + "' specified");
-			}
-		}
-		return EndReadOnlyTrans.never;
+    return Settings.getInstance().getEnumValue(value, EndReadOnlyTrans.never);
 	}
 
 	public Set<Integer> getInformationalWarningCodes()

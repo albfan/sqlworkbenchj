@@ -3016,7 +3016,12 @@ public class Settings
 
   public <E extends Enum<E>> E getEnumProperty(String key, E defaultValue)
   {
-    String value = getProperty(key, defaultValue.name());
+    String value = getProperty(key, null);
+    return getEnumValue(value, defaultValue);
+  }
+  
+  public <E extends Enum<E>> E getEnumValue(String value, E defaultValue)
+  {
     if (value != null)
     {
       try
