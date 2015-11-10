@@ -257,6 +257,7 @@ public class CompletionPopup
 		this.headerComponent.doLayout();
 	}
 
+  @Override
 	public void closeQuickSearch()
 	{
 		this.searchField = null;
@@ -283,6 +284,7 @@ public class CompletionPopup
 	/**
 	 * Callback from the SearchField when enter has been pressed in the search field
 	 */
+  @Override
 	public void quickSearchValueSelected()
 	{
 		this.closePopup(true);
@@ -650,6 +652,7 @@ public class CompletionPopup
 		this.selectCurrentWordInEditor = flag;
 	}
 
+  @Override
 	public void selectMatchingEntry(String s)
 	{
 		if (ignoreSearchChange) return;
@@ -972,7 +975,7 @@ public class CompletionPopup
 	{
 	}
 
-	static class DummyPanel
+	private static class DummyPanel
 		extends JPanel
 	{
 		@SuppressWarnings("deprecation")

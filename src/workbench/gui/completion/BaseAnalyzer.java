@@ -587,8 +587,19 @@ public abstract class BaseAnalyzer
 		if (tableForColumnList == null) return false;
 		if (this.dbConnection == null) return false;
 		DbObjectCache cache = this.dbConnection.getObjectCache();
-		TableIdentifier toCheck = cache.getSynonymTable(tableForColumnList);
-		List<ColumnIdentifier> cols = cache.getColumns(toCheck);
+
+    TableIdentifier toCheck = tableForColumnList.createCopy();
+
+    // first try the table directly, only if it isn't found, resolve synonyms.
+    // By doing this we avoid retrieving a synonym base table if the table is already in the cache
+    List<ColumnIdentifier> cols = cache.getColumns(toCheck);
+
+    if (cols == null)
+    {
+      toCheck = cache.getSynonymTable(tableForColumnList);
+      cols = cache.getColumns(toCheck);
+    }
+
 		if (cols != null && cols.size() > 0)
 		{
 			if (cache.supportsSearchPath())

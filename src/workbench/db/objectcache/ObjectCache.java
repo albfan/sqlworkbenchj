@@ -106,7 +106,7 @@ class ObjectCache
         typeList.add(conn.getMetadata().getMViewTypeName());
       }
     }
-    
+
 		return StringUtil.toArray(typeList, true);
 	}
 
@@ -448,14 +448,17 @@ class ObjectCache
 			baseTable = dbConn.getMetadata().resolveSynonym(toCheck);
 		}
 
+    TableIdentifier synKey = toCheck.createCopy();
+    synKey.adjustCase(dbConn);
+
 		if (baseTable == null || baseTable == toCheck)
 		{
 			// "negative caching". Avoid repeated lookup for non-synonyms
-			synonymMap.put(toCheck, dummyTable);
+			synonymMap.put(synKey, dummyTable);
 		}
 		else
 		{
-			synonymMap.put(toCheck, baseTable);
+			synonymMap.put(synKey, baseTable);
 		}
 
 		return baseTable == null ? toCheck : baseTable;
