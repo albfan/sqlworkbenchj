@@ -361,11 +361,22 @@ public class DmlStatement
 		if (StringUtil.isEmptyString(valueString))
 		{
 			stmt.setNull(index, Types.ARRAY);
+      return;
 		}
 
-		if (connection.getMetadata().isPostgres() && valueString.startsWith("{") && valueString.endsWith("}"))
+		if (connection.getMetadata().isPostgres())
 		{
-			valueString = valueString.substring(1,valueString.length() - 1);
+      // this is an array of a custom type created with "CREATE TYPE"
+      if (dbmsType.startsWith("_"))
+      {
+        // just assume the User entered a valid expression for this.
+        stmt.setObject(index, valueString, Types.OTHER);
+        return;
+      }
+      else if (valueString.startsWith("{") && valueString.endsWith("}"))
+      {
+        valueString = valueString.substring(1,valueString.length() - 1);
+      }
 		}
 
 		WbStringTokenizer tok = new WbStringTokenizer(",", true, "\"'", false);
@@ -378,11 +389,11 @@ public class DmlStatement
 			String s = tok.nextToken().trim();
 			arrayValues.add(s);
 		}
+
 		Object[] data = arrayValues.toArray();
 
 		try
 		{
-
 			if (connection.getDbSettings().supportsCreateArray())
 			{
 				String baseType = SqlUtil.getBaseTypeName(dbmsType);

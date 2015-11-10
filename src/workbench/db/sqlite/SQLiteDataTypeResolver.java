@@ -24,7 +24,9 @@ package workbench.db.sqlite;
 
 import java.sql.Types;
 import java.util.Set;
+
 import workbench.db.DataTypeResolver;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -42,7 +44,7 @@ public class SQLiteDataTypeResolver
 
 	private Set<String> BIG_INTEGER_TYPES = CollectionUtil.caseInsensitiveSet("BIGINT", "UNSIGNED BIG INT", "INT8");
 
-	private Set<String> CHARACTER_TYPES = CollectionUtil.caseInsensitiveSet("VARCHAR", "CHARACTER", "VARYING CHARACTER", "NCHAR", "NATIVE CHARACTER", "NVARCHAR");
+	private Set<String> CHARACTER_TYPES = CollectionUtil.caseInsensitiveSet("VARCHAR", "CHARACTER", "VARYING CHARACTER", "NCHAR", "NATIVE CHARACTER", "NVARCHAR", "STRING");
 
 	private Set<String> CLOB_TYPES = CollectionUtil.caseInsensitiveSet("TEXT", "CLOB");
 
