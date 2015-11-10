@@ -29,6 +29,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.StringUtil;
 
 /**
  * A SQL Statement to change the default fetch size for the current connection.
@@ -63,7 +64,20 @@ public class WbFetchSize
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		String value = getCommandLine(sql);
-    setFetchSize(value, result, currentConnection);
+    if (StringUtil.isNonBlank(value))
+    {
+      setFetchSize(value, result, currentConnection);
+    }
+    else
+    {
+      String currentValue = "(" + ResourceMgr.getString("TxtDefault").toLowerCase() + ")";
+      int size = currentConnection.getFetchSize();
+      if (size > -1)
+      {
+        currentValue = Integer.toString(size);
+      }
+      result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeCurrent", currentValue));
+    }
 		return result;
 	}
 
@@ -83,7 +97,6 @@ public class WbFetchSize
 
 		connection.setFetchSize(size);
 		result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeChanged", Integer.toString(connection.getFetchSize())));
-		result.setSuccess();
   }
 
 	@Override
