@@ -21,6 +21,7 @@ package workbench.gui.dbobjects.objecttree;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -42,10 +43,12 @@ import workbench.db.SchemaIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
+import workbench.db.TableNameSorter;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+
 import workbench.gui.dbobjects.IsolationLevelChanger;
 
 import workbench.util.CollectionUtil;
@@ -512,6 +515,8 @@ public class TreeLoader
 
     boolean loaded = true;
     List<TableIdentifier> objects = connection.getMetadata().getObjectList(null, catalog, schema, new String[] { typeNode.getName() });
+    Collections.sort(objects, new TableNameSorter());
+
     for (TableIdentifier tbl : objects)
     {
       ObjectTreeNode node = new ObjectTreeNode(tbl);
@@ -653,6 +658,7 @@ public class TreeLoader
     TableIdentifier info = getParentInfo(trgNode);
     TriggerReader reader = TriggerReaderFactory.createReader(connection);
     List<TriggerDefinition> triggers = reader.getTriggerList(info.getRawCatalog(), info.getRawSchema(), null);
+    Collections.sort(triggers, new DbObjectSorter());
 
     for (TriggerDefinition trg : triggers)
     {
@@ -679,6 +685,8 @@ public class TreeLoader
 
     TableIdentifier tbl = (TableIdentifier)dbo;
     List<TriggerDefinition> triggers = reader.getTriggerList(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
+    Collections.sort(triggers, new DbObjectSorter());
+
     for (TriggerDefinition trg : triggers)
     {
       ObjectTreeNode node = new ObjectTreeNode(trg);
@@ -704,6 +712,8 @@ public class TreeLoader
 
     TableIdentifier tbl = (TableIdentifier)dbo;
     List<IndexDefinition> indexes = meta.getIndexReader().getTableIndexList(tbl);
+    Collections.sort(indexes, new DbObjectSorter());
+
     for (IndexDefinition idx : indexes)
     {
       ObjectTreeNode node = new ObjectTreeNode(idx);
