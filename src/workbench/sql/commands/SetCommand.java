@@ -47,6 +47,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 import static workbench.sql.wbcommands.WbEnableOraOutput.*;
+import workbench.sql.wbcommands.WbFetchSize;
 
 /**
  * This class implements a wrapper for the SET command.
@@ -157,6 +158,13 @@ public class SetCommand
 			{
 				schemaChange = true;
 			}
+      else if (command.equalsIgnoreCase("fetchsize"))
+      {
+        String value = userSql.substring(commandEnd).trim();
+        result = new StatementRunnerResult(userSql);
+        WbFetchSize.setFetchSize(value, result, currentConnection);
+        execSql = false;
+      }
 			else if (currentConnection.getMetadata().isOracle())
 			{
 				Set<String> allowed = CollectionUtil.caseInsensitiveSet("constraints","constraint","transaction","role");

@@ -24,6 +24,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
+import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 
 import workbench.sql.SqlCommand;
@@ -62,6 +63,12 @@ public class WbFetchSize
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		String value = getCommandLine(sql);
+    setFetchSize(value, result, currentConnection);
+		return result;
+	}
+
+  public static void setFetchSize(String value, StatementRunnerResult result, WbConnection connection)
+  {
 		int size = -1;
 
 		try
@@ -71,15 +78,13 @@ public class WbFetchSize
 		catch (Exception e)
 		{
 			result.addErrorMessageByKey("ErrInvalidNumber", value);
-			return result;
+			return;
 		}
 
-		currentConnection.setFetchSize(size);
-		result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeChanged", Integer.toString(currentConnection.getFetchSize())));
+		connection.setFetchSize(size);
+		result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeChanged", Integer.toString(connection.getFetchSize())));
 		result.setSuccess();
-
-		return result;
-	}
+  }
 
 	@Override
 	public boolean isWbCommand()

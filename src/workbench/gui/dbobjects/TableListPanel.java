@@ -156,7 +156,7 @@ public class TableListPanel
 						 TableModelListener, DbObjectList, ListSelectionControl, TableLister,
              ObjectDropListener
 {
-	private static final String PROP_DO_SAVE_SORT = "workbench.gui.dbexplorer.tablelist.sort";
+	public static final String PROP_DO_SAVE_SORT = "workbench.gui.dbexplorer.tablelist.sort";
 
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected WbConnection dbConnection;
