@@ -469,7 +469,7 @@
       <para>
         To make this option work, a query that counts the number of uncommitted changes needs to be configured as well.
       </para>
-      <para>Default: <literal>oracle.jdbc.OracleDriver,org.postgresql.Driver</literal></para>
+      <para>Default: <literal>oracle.jdbc.driver.OracleDriver,oracle.jdbc.OracleDriver,org.postgresql.Driver,org.hsqldb.jdbc.JDBCDriver</literal></para>
     </simplesect>
 
 		<simplesect id="db-settings-check-trans-query">
@@ -480,7 +480,7 @@
         is expected to return a single row with a single numeric column. If the value is zero, no uncommitted
         changes are detected. Any number greater than zero means that there is an uncommitted change.
       </para>
-      <para>Default: For Oracle and PostgreSQL, the corresponding queries are configured</para>
+      <para>Default: For Oracle, PostgreSQL and HSQLDB, the corresponding queries are configured</para>
     </simplesect>
 
 		<simplesect id="db-settings-online-manual">
@@ -615,7 +615,7 @@
 
 		<simplesect id="db-check-read-only-columns">
 			<title>Check read only columns</title>
-			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>resultset.columns.check.readonly</literal></para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.resultset.columns.check.readonly</literal></para>
 			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				If this property is enabled, columns in result sets will be checked whether they are marked
@@ -915,7 +915,7 @@
 				If those commands are simply ignored and not send to the server, the scripts
 				can run without modification.
       </para>
-      <para>Default: <literal>workbench.db.ignore.oracle=prompt,exit,whenever</literal></para>
+      <para>Default: <literal>workbench.db.ignore.oracle=quit,exit,whenever,spool,rem,clear,break,btitle,column,change,repheader,repfooter,run,save,store,timing,ttitle</literal></para>
     </simplesect>
 
 		<simplesect id="options-enable-shortinclude">
@@ -1100,6 +1100,26 @@
           Defines whether &wb-productname; logs messages additionally to the standard error output
         </para>
         <para>Default: <literal>false</literal></para>
+      </simplesect>
+
+      <simplesect id="options-log-filesize">
+        <title>Maximum logfile size</title>
+        <para>Property: <literal>workbench.log.maxfilesize</literal></para>
+        <para>
+          Defines the maximum size of the logfile in bytes. If the size is exceeded a new logfile is created
+          during the next startup.
+        </para>
+        <para>Default: <literal>10485760</literal> (1MB)</para>
+      </simplesect>
+
+      <simplesect id="options-log-backups">
+        <title>Maximum number of logfiles to keep</title>
+        <para>Property: <literal>workbench.log.backup.count</literal></para>
+        <para>
+          Defines the maximum number of logfiles to be kept after a new logfile is created.
+          The old logfiles will be renamed with a number (<literal>workbench.log.1</literal> being the oldest logfile)
+        </para>
+        <para>Default: <literal>5</literal></para>
       </simplesect>
 
       <simplesect id="settings-log-metadata">
