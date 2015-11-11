@@ -1667,6 +1667,12 @@ public class DbSettings
 		return quote;
 	}
 
+  public boolean populateCacheInBackground()
+  {
+    boolean global = Settings.getInstance().getBoolProperty("workbench.db.objectcache.retrieve.background", true);
+    return Settings.getInstance().getBoolProperty(prefix + "objectcache.retrieve.background", global);
+  }
+  
 	public boolean useCacheForObjectInfo()
 	{
 		boolean global = Settings.getInstance().getBoolProperty("workbench.db.objectinfo.usecache", false);

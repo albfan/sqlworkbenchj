@@ -505,6 +505,8 @@ public class CompletionPopup
 			return;
 		}
 
+    List<TableIdentifier> tables = new ArrayList<>();
+
 		boolean needsComma = this.context.getAnalyzer().needsCommaForMultipleSelection();
 
 		String value = "";
@@ -580,6 +582,7 @@ public class CompletionPopup
 					name = getPasteValue(name);
 				}
 				value += name;
+        tables.add((TableIdentifier)o);
 			}
 			else
 			{
@@ -605,6 +608,12 @@ public class CompletionPopup
 				editor.selectWordAtCursor(" =-\t\n");
 			}
 		}
+
+    WbConnection connection = this.context.getAnalyzer().getConnection();
+    if (connection != null && connection.getDbSettings().populateCacheInBackground())
+    {
+      connection.getObjectCache().retrieveColumnsInBackground(tables);
+    }
 	}
 
 	private String getTableName(WbConnection conn, TableIdentifier tbl)

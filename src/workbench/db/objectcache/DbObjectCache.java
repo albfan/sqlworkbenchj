@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DependencyNode;
 import workbench.db.IndexDefinition;
@@ -34,8 +35,11 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
+import workbench.util.WbThread;
 
 
 /**
@@ -47,6 +51,7 @@ public class DbObjectCache
 {
 	private final ObjectCache objectCache;
 	private final WbConnection dbConnection;
+  private WbThread retrievalThread;
 
 	DbObjectCache(ObjectCache cache, WbConnection connection)
 	{
@@ -202,4 +207,42 @@ public class DbObjectCache
 		return realTable;
 	}
 
+  public void retrieveColumnsInBackground(final List<TableIdentifier> tables)
+  {
+    if (retrievalThread != null) return;
+    if (CollectionUtil.isEmpty(tables)) return;
+    
+    retrievalThread = new WbThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        _retrieveColumnsInBackground(tables);
+      }
+    }, "ObjectCache Background Retrieval");
+    retrievalThread.start();
+  }
+
+  private void _retrieveColumnsInBackground(List<TableIdentifier> tables)
+  {
+    WbConnection conn = null;
+    try
+    {
+      LogMgr.logDebug("DbObjectCache._retrieveColumnsInBackground()", "Retrieving columns for " + tables.size() + " tables");
+      conn = ConnectionMgr.getInstance().getConnection(dbConnection.getProfile(), "ObjectCache-Retrieval");
+      for (TableIdentifier tbl : tables)
+      {
+        objectCache.getColumns(conn, tbl);
+      }
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logWarning("DbObjectCache._retrieveColumnsInBackground()", "Could not retrieve table columns", th);
+    }
+    finally
+    {
+      if (conn != null) conn.disconnect();
+    }
+    retrievalThread = null;
+  }
 }
