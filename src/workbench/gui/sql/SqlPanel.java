@@ -3420,15 +3420,14 @@ public class SqlPanel
           logmsg.append('\n');
           if (count > 1)
           {
-            logmsg.append('(');
             logmsg.append(currentMsg);
-            logmsg.append(")\n\n");
           }
-          this.appendToLog(logmsg.toString());
           if (count > 1 && GuiSettings.showScriptStmtFinishTime())
           {
-            this.appendToLog("(" + StringUtil.getCurrentTimestamp() + ")\n");
+            logmsg.append(" (" + StringUtil.getCurrentTimestamp() + ")\n");
           }
+          logmsg.append("\n");
+          this.appendToLog(logmsg.toString());
         }
         else if (statementResult.hasWarning())
         {

@@ -104,7 +104,8 @@ public class SqlExecOptionsPanel
 		emptyLineDelimiter.setSelected(Settings.getInstance().getEmptyLineIsDelimiter());
 		hiliteError.setSelected(GuiSettings.getHighlightErrorStatement());
     jumpToError.setSelected(GuiSettings.jumpToError());
-
+    showStmtEndTime.setSelected(GuiSettings.showScriptStmtFinishTime());
+    showScriptEndTime.setSelected(GuiSettings.showScriptFinishTime());
     ErrorPromptType type = GuiSettings.getErrorPromptType();
     promptType.setSelectedIndex(promptTypeToIndex(type));
     setTypeTooltip();
@@ -139,6 +140,8 @@ public class SqlExecOptionsPanel
     int index = promptType.getSelectedIndex();
     GuiSettings.setErrorPromptType(indexToPromptType(index));
     GuiSettings.setJumpToError(jumpToError.isSelected());
+    GuiSettings.setShowScriptFinishTime(showScriptEndTime.isSelected());
+    GuiSettings.setShowScriptStmtFinishTime(showStmtEndTime.isSelected());
 	}
 
   private void setTypeTooltip()
@@ -199,6 +202,8 @@ public class SqlExecOptionsPanel
     hiliteError = new JCheckBox();
     useCurrentLineStmt = new JCheckBox();
     jumpToError = new JCheckBox();
+    showStmtEndTime = new JCheckBox();
+    showScriptEndTime = new JCheckBox();
     jPanel3 = new JPanel();
     alternateDelimiter = new JTextField();
     cbxDbName = new JComboBox();
@@ -243,10 +248,10 @@ public class SqlExecOptionsPanel
     allowEditDuringExec.setToolTipText(ResourceMgr.getString("d_LblAllowEditExecSQL")); // NOI18N
     allowEditDuringExec.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    gridBagConstraints.insets = new Insets(7, 15, 0, 0);
     jPanel2.add(allowEditDuringExec, gridBagConstraints);
 
     alwaysAllowExecSel.setText(ResourceMgr.getString("LblExecSelOnly")); // NOI18N
@@ -314,6 +319,24 @@ public class SqlExecOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     jPanel2.add(jumpToError, gridBagConstraints);
+
+    showStmtEndTime.setText(ResourceMgr.getString("LblShowStmtEndTime")); // NOI18N
+    showStmtEndTime.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    jPanel2.add(showStmtEndTime, gridBagConstraints);
+
+    showScriptEndTime.setText(ResourceMgr.getString("LblShowScriptEndTime")); // NOI18N
+    showScriptEndTime.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    jPanel2.add(showScriptEndTime, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -429,6 +452,8 @@ public class SqlExecOptionsPanel
   private JCheckBox jumpToError;
   private JCheckBox keepHilite;
   private JComboBox promptType;
+  private JCheckBox showScriptEndTime;
+  private JCheckBox showStmtEndTime;
   private JCheckBox useCurrentLineStmt;
   // End of variables declaration//GEN-END:variables
 

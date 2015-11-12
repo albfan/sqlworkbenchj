@@ -1154,9 +1154,19 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.sql.script.showtime", false);
 	}
 
+	public static void setShowScriptFinishTime(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.sql.script.showtime", flag);
+	}
+
 	public static boolean showScriptStmtFinishTime()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.sql.script.statement.showtime", showScriptFinishTime());
+	}
+
+	public static void setShowScriptStmtFinishTime(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.sql.script.statement.showtime", flag);
 	}
 
 	public static boolean getUseStatementInCurrentLine()
