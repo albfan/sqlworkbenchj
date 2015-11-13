@@ -90,7 +90,7 @@ public class VariablePool
 		return InstanceHolder.INSTANCE;
 	}
 
-	protected static class InstanceHolder
+	private static class InstanceHolder
 	{
 		protected static final VariablePool INSTANCE = new VariablePool();
 	}

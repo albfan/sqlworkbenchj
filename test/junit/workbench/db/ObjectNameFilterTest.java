@@ -91,7 +91,7 @@ public class ObjectNameFilterTest
 
 		filter = new ObjectNameFilter();
 		expr = filter.getFilterExpressions();
-		assertNull(expr);
+		assertTrue(expr.isEmpty());
 	}
 
 	public void testCopy()

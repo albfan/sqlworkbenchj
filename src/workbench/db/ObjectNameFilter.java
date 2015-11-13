@@ -23,8 +23,10 @@
 package workbench.db;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -40,7 +42,8 @@ import workbench.util.StringUtil;
  */
 public class ObjectNameFilter
 {
-	private Set<Pattern> filterExpressions;
+	private final Set<Pattern> filterPatterns = new HashSet<>();
+	private final Set<String> patternSource = CollectionUtil.caseInsensitiveSet();
 	private boolean modified;
 
 	/**
@@ -95,7 +98,10 @@ public class ObjectNameFilter
 	{
 		if (CollectionUtil.isEmpty(expressions)) return;
 
-		filterExpressions = new HashSet<>(expressions.size());
+    patternSource.clear();
+    patternSource.addAll(expressions);
+		filterPatterns.clear();
+
 		for (String exp : expressions)
 		{
 			if (StringUtil.isNonBlank(exp))
@@ -106,6 +112,30 @@ public class ObjectNameFilter
 		modified = false;
 	}
 
+  public void setReplacements(Map<String, String> variables)
+  {
+    if (CollectionUtil.isEmpty(variables)) return;
+    filterPatterns.clear();
+    
+		for (String exp : patternSource)
+		{
+			if (StringUtil.isNonBlank(exp))
+			{
+				addExpression(replaceAll(variables, exp));
+			}
+		}
+  }
+
+  private String replaceAll(Map<String, String> variables, String haystack)
+  {
+    String result = haystack;
+    for (Map.Entry<String, String> entry : variables.entrySet())
+    {
+      result = StringUtil.replace(result, entry.getKey(), entry.getValue());
+    }
+    return result;
+  }
+
 	/**
 	 * Returns the defined expression values.
 	 * <br/>
@@ -113,13 +143,7 @@ public class ObjectNameFilter
 	 */
 	public Collection<String> getFilterExpressions()
 	{
-		if (CollectionUtil.isEmpty(filterExpressions)) return null;
-		Set<String> result = CollectionUtil.caseInsensitiveSet();
-		for (Pattern p : filterExpressions)
-		{
-			result.add(p.pattern());
-		}
-		return result;
+    return Collections.unmodifiableCollection(patternSource);
 	}
 
 	public void resetModified()
@@ -129,11 +153,8 @@ public class ObjectNameFilter
 
 	public void removeExpressions()
 	{
-		if (CollectionUtil.isNonEmpty(filterExpressions))
-		{
-			filterExpressions.clear();
-			modified = true;
-		}
+		modified = CollectionUtil.isNonEmpty(filterPatterns);
+    filterPatterns.clear();
 	}
 
 	/**
@@ -157,14 +178,9 @@ public class ObjectNameFilter
 	{
 		if (StringUtil.isBlank(exp)) return;
 
-		if (filterExpressions == null)
-		{
-			filterExpressions = new HashSet<>();
-		}
-
 		try
 		{
-			filterExpressions.add(Pattern.compile(exp.trim(), Pattern.CASE_INSENSITIVE));
+			filterPatterns.add(Pattern.compile(exp.trim(), Pattern.CASE_INSENSITIVE));
 		}
 		catch (PatternSyntaxException p)
 		{
@@ -178,33 +194,30 @@ public class ObjectNameFilter
 		return modified;
 	}
 
-	public boolean isExcluded(String name)
-	{
-		if (name == null) return inclusionFilter;
+  public boolean isExcluded(String name)
+  {
+    if (name == null) return inclusionFilter;
 
-		if (CollectionUtil.isEmpty(filterExpressions)) return inclusionFilter;
+    if (CollectionUtil.isEmpty(filterPatterns)) return inclusionFilter;
 
-		for (Pattern p : filterExpressions)
-		{
-				if (p.matcher(name).matches()) return !inclusionFilter;
-		}
-		return inclusionFilter;
-	}
+    for (Pattern p : filterPatterns)
+    {
+      if (p.matcher(name).matches()) return !inclusionFilter;
+    }
+    return inclusionFilter;
+  }
 
 	public int getSize()
 	{
-		return (filterExpressions == null ? 0 : filterExpressions.size());
+		return (filterPatterns == null ? 0 : filterPatterns.size());
 	}
 
 	public ObjectNameFilter createCopy()
 	{
 		ObjectNameFilter copy = new ObjectNameFilter();
+    copy.setFilterExpressions(this.patternSource);
 		copy.modified = this.modified;
 		copy.inclusionFilter = this.inclusionFilter;
-		if (this.filterExpressions != null)
-		{
-			copy.filterExpressions = new HashSet<>(this.filterExpressions);
-		}
 		return copy;
 	}
 
@@ -220,8 +233,6 @@ public class ObjectNameFilter
 			return false;
 		}
 		ObjectNameFilter other = (ObjectNameFilter) obj;
-		if (this.filterExpressions == null && other.filterExpressions != null) return false;
-		if (this.filterExpressions != null && other.filterExpressions == null) return false;
 
 		Collection<String> myPatterns = getFilterExpressions();
 		Collection<String> otherPatterns = other.getFilterExpressions();
@@ -240,9 +251,7 @@ public class ObjectNameFilter
 	@Override
 	public int hashCode()
 	{
-		int hash = 7;
-		hash = 17 * hash + (this.filterExpressions != null ? this.filterExpressions.hashCode() : 0);
-		return hash;
+		return 7 + this.filterPatterns.hashCode();
 	}
 
   public void applyFilter(Collection<String> elements)

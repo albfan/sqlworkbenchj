@@ -103,4 +103,9 @@ public class SQLLexerFactory
 		return lexer;
 	}
 
+  public static void createLexer(String statement, ParserType parserType)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
 }
