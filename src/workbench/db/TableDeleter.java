@@ -29,12 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.importer.TableDependencySorter;
-import workbench.interfaces.ScriptGenerationMonitor;
+
 import workbench.sql.formatter.FormatterUtil;
 
 import workbench.util.ExceptionUtil;

@@ -152,7 +152,6 @@ public class VariablePool
 			this.suffix = null;
 			initPromptPattern();
 		}
-		LogMgr.logDebug("VariablePool.propertyChange()", "Updated prompt pattern because " + evt.getPropertyName() + " changed.");
 	}
 
 	/**

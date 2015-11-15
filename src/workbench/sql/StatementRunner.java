@@ -45,8 +45,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ConnectionProfile;
-import workbench.db.DbMetadata;
-import workbench.db.DbSettings;
 import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
 
@@ -55,7 +53,7 @@ import workbench.storage.RowActionMonitor;
 
 import workbench.sql.commands.AlterSessionCommand;
 import workbench.sql.commands.SetCommand;
-import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.commands.TransactionEndCommand;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
 
@@ -95,7 +93,7 @@ public class StatementRunner
 	private ParameterPrompter prompter;
 	private boolean ignoreDropErrors;
 	protected CommandMapper cmdMapper;
-	private boolean useSavepoint;
+  private SavepointStrategy useSavepoint = SavepointStrategy.whenConfigured;
 	private boolean logAllStatements;
 	private OutputPrinter messageOutput;
 	private boolean traceStatements;
@@ -363,9 +361,6 @@ public class StatementRunner
       this.hideWarnings = profile.isHideWarnings();
     }
 
-		DbMetadata meta = this.currentConnection.getMetadata();
-		DbSettings db = (meta != null ? meta.getDbSettings() : null);
-		setUseSavepoint(db == null ? false : db.useSavePointForDML());
 		statementHook = StatementHookFactory.getStatementHook(this);
 		sessionAttributes.clear();
 	}
@@ -374,7 +369,7 @@ public class StatementRunner
 	{
 		if (command == null) return false;
 		if (command.isUpdatingCommand()) return false;
-		if (command instanceof SingleVerbCommand) return false; // commit or rollback
+		if (command instanceof TransactionEndCommand) return false; // commit or rollback
 		if (command instanceof AlterSessionCommand) return false;
 		if (command instanceof SetCommand) return false;
 		if (command.isWbCommand()) return false;
@@ -730,15 +725,62 @@ public class StatementRunner
 		}
 	}
 
+  public SavepointStrategy getSavepointStrategy()
+  {
+    return useSavepoint;
+  }
+
+  public void setSavepointStrategy(SavepointStrategy newStrategy)
+  {
+    useSavepoint = newStrategy;
+  }
+
 	public void setUseSavepoint(boolean flag)
 	{
-		this.useSavepoint = flag;
+    if (flag)
+    {
+      this.useSavepoint = SavepointStrategy.always;
+    }
+    else
+    {
+      this.useSavepoint = SavepointStrategy.never;
+    }
+	}
+
+	public boolean useSavepointForDML()
+	{
+    if (currentConnection == null) return false;
+
+    switch (useSavepoint)
+    {
+      case always:
+        return true;
+      case never:
+        return false;
+      default:
+        return currentConnection.getDbSettings().useSavePointForDML();
+    }
+	}
+
+	public boolean useSavepointForDDL()
+	{
+    if (currentConnection == null) return false;
+
+    switch (useSavepoint)
+    {
+      case always:
+        return true;
+      case never:
+        return false;
+      default:
+        return currentConnection.getDbSettings().useSavePointForDDL();
+    }
 	}
 
 	public void setSavepoint()
 	{
-		if (!useSavepoint) return;
 		if (this.savepoint != null) return;
+
 		try
 		{
 			this.savepoint = this.currentConnection.setSavepoint();
@@ -752,7 +794,6 @@ public class StatementRunner
 		{
 			LogMgr.logError("DefaultStatementRunner.setSavepoint()", "Savepoints not supported!", th);
 			this.savepoint = null;
-			this.useSavepoint = false;
 		}
 	}
 

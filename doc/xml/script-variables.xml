@@ -130,7 +130,7 @@ $[my_select];</programlisting>
     <title>Using variables in SQL statements</title>
     <para>
       The defined variables can be used by enclosing them in special characters inside the SQL
-      statement. The default is set to $[ and ] thus you  can use a variable this way:
+      statement. The default is set to <literal>$[</literal> and <literal>]</literal>, you can use a variable this way:
     </para>
     <programlisting>SELECT firstname, lastname FROM person WHERE id=$[id_variable];</programlisting>
     <para>
@@ -148,11 +148,16 @@ $[my_select];</programlisting>
       or you put the quotes around the variable's placeholder, e.g.: <literal>WHERE name='$[name]';</literal>
     </para>
 
-    <para>As you can see the variable substitution is also done inside quoted literals.</para>
+    <important>
+      <para>
+        Variables will be replaced in string literals (e.g. <literal>'$[foo]'</literal>)
+        and comments (e.g. <literal>-- $[foo]</literal> or <literal>/* $[foo] */</literal>)
+      </para>
+    </important>
 
     <para>
       If you are using values in your regular statements that actually need the prefix (<literal>$[</literal> or
-      suffix (<literal>]</literal>) characters, please make sure that you have no variables defined.
+      suffix <literal>]</literal>) characters, please make sure that you have no variables defined.
       Otherwise you will unpredictable results. If you want to use variables but need to use
       the default prefix for marking variables in your statements, you can configure a different
       prefix and suffix for flagging variables. To change the the prefix e.g. to <literal>%#</literal> and

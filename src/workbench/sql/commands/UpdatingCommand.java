@@ -102,7 +102,11 @@ public class UpdatingCommand
 				}
 			}
 
-			runner.setSavepoint();
+			if (runner.useSavepointForDML())
+      {
+        runner.setSavepoint();
+      }
+
 			sql = getSqlToExecute(sql);
 
 			if (lob != null && lob.containsParameter())

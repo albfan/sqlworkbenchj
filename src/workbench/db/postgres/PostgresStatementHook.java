@@ -43,7 +43,7 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class PostgresStatementHook
-	implements StatementHook
+  implements StatementHook
 {
 	// The access to the PGConnection and PGNotification methods can only be done through reflection
 	// as the driver's classes are not available through the default classloader
@@ -52,7 +52,7 @@ public class PostgresStatementHook
 	private Method getPID;
 	private Method getParameter;
 
-	private static boolean available = true;
+	private volatile static boolean available = true;
 
 	public PostgresStatementHook(WbConnection connection)
 	{
@@ -68,13 +68,14 @@ public class PostgresStatementHook
 	@Override
 	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
 	{
-		if (!isAvailable()) return;
-
-		List<String> messages = getMessages(runner.getConnection());
-		for (String msg : messages)
-		{
-			result.addMessage(msg);
-		}
+		if (available)
+    {
+      List<String> messages = getMessages(runner.getConnection());
+      for (String msg : messages)
+      {
+        result.addMessage(msg);
+      }
+    }
 	}
 
 	@Override
@@ -103,7 +104,7 @@ public class PostgresStatementHook
 
 	private List<String> getMessages(WbConnection conn)
 	{
-		if (!isAvailable()|| conn == null) return Collections.emptyList();
+		if (!available || conn == null) return Collections.emptyList();
 
 		List<String> result = new ArrayList<>(1);
 		try
@@ -137,14 +138,14 @@ public class PostgresStatementHook
 		throws Exception
 	{
 		if (notification == null) return null;
-		if (!isAvailable()) return null;
+		if (!available) return null;
 
 		if (getName == null)
 		{
 			initGetters(notification);
 		}
 
-		if (!isAvailable()) return null;
+		if (!available) return null;
 
 		String name = (String)getName.invoke(notification, (Object[])null);
 		Object pid = getPID.invoke(notification, (Object[])null);
@@ -159,7 +160,7 @@ public class PostgresStatementHook
 
 	private synchronized void initialize(WbConnection conn)
 	{
-		if (!isAvailable()) return;
+		if (!available) return;
 		if (conn.getUrl().startsWith("jdbc:pgsql"))
 		{
 			// the PG/NG driver does not support the notification classes
@@ -192,11 +193,6 @@ public class PostgresStatementHook
 			LogMgr.logError("PostgresStatementHook.initGetters()", "Could not obtain methods from PGNotification interface", th);
 			setUnavailable();
 		}
-	}
-
-	private static synchronized boolean isAvailable()
-	{
-		return available;
 	}
 
 	private static synchronized void setUnavailable()

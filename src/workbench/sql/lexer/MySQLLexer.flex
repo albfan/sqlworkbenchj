@@ -193,6 +193,7 @@ keyword=(
 
 (IF{wsp}EXISTS)|
 (IF{wsp}NOT{wsp}EXISTS)|
+
 "AFTER"|
 "AGGREGATE"|
 "ALL"|
@@ -247,9 +248,8 @@ keyword=(
 "CURRENT_USER"|
 "CURSOR"|
 "CURSOR_NAME"|
-"CYCLE"|
+
 "DATABASE"|
-"DATABASE{wsp}LINK"|
 "DATE"|
 "DAY"|
 "DECIMAL"|
@@ -258,7 +258,7 @@ keyword=(
 "DEFERRABLE"|
 "DEFERRED"|
 "DELETE"|
-"DEPTH"|
+
 "DENSE_RANK"|
 "DESCRIBE"|
 "DISCONNECT"|
@@ -401,10 +401,11 @@ keyword=(
 "SESSION_USER"|
 "SET"|
 "SHARE"|
-"SIMILAR"|
-"SIMILAR{wsp}TO"|
+
+
 "SMALLINT"|
 "SNAPSHOT"|
+
 "SUBSTRING"|
 "SUM"|
 "SYNONYM"|
@@ -418,6 +419,7 @@ keyword=(
 "TRIGGER"|
 "TRIM"|
 "TRUNCATE"|
+"TRANSACTION"|
 "TRUE"|
 "TYPE"|
 "UNION"|

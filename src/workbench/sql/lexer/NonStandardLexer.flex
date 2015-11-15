@@ -193,6 +193,7 @@ keyword=(
 (FOREIGN{wsp}DATA{wsp}WRAPPER)|
 (IF{wsp}EXISTS)|
 (IF{wsp}NOT{wsp}EXISTS)|
+(DATABASE{wsp}LINK)|
 "AFTER"|
 "AGGREGATE"|
 "ALL"|
@@ -249,7 +250,6 @@ keyword=(
 "CURSOR_NAME"|
 "CYCLE"|
 "DATABASE"|
-"DATABASE{wsp}LINK"|
 "DATE"|
 "DAY"|
 "DECIMAL"|
@@ -402,9 +402,10 @@ keyword=(
 "SET"|
 "SHARE"|
 "SIMILAR"|
-"SIMILAR{wsp}TO"|
+(SIMILAR{wsp}TO)|
 "SMALLINT"|
 "SNAPSHOT"|
+(START{wsp}TRANSACTION)|
 "SUBSTRING"|
 "SUM"|
 "SYNONYM"|
@@ -418,6 +419,7 @@ keyword=(
 "TRIGGER"|
 "TRIM"|
 "TRUNCATE"|
+"TRANSACTION"|
 "TRUE"|
 "TYPE"|
 "UNION"|

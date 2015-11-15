@@ -124,6 +124,7 @@ public class EditConnectionFiltersPanel
     JPanel buttonPanel2 = new JPanel(new BorderLayout());
     addCatalogTemplate = new JButton();
     addCatalogTemplate.setIcon(IconMgr.getInstance().getLabelIcon("add"));
+    addCatalogTemplate.addActionListener(this);
     WbSwingUtilities.adjustButtonWidth(addCatalogTemplate, iconSize + 6, iconSize + 6);
     buttonPanel2.add(addCatalogTemplate, BorderLayout.LINE_START);
 

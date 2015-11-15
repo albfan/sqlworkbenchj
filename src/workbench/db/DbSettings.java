@@ -45,7 +45,7 @@ import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
 
 import workbench.sql.EndReadOnlyTrans;
-import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.commands.TransactionEndCommand;
 
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
@@ -370,7 +370,7 @@ public class DbSettings
 	 * as a String. They required to use Connection.commit() or Conneciton.rollback() instead.
 	 * <br/>
 	 * The related property is: workbench.db.[dbid].usejdbccommit
-	 * @see SingleVerbCommand#execute(java.lang.String)
+	 * @see TransactionEndCommand#execute(java.lang.String)
 	 */
 	public boolean useJdbcCommit()
 	{
@@ -1672,7 +1672,7 @@ public class DbSettings
     boolean global = Settings.getInstance().getBoolProperty("workbench.db.objectcache.retrieve.background", true);
     return Settings.getInstance().getBoolProperty(prefix + "objectcache.retrieve.background", global);
   }
-  
+
 	public boolean useCacheForObjectInfo()
 	{
 		boolean global = Settings.getInstance().getBoolProperty("workbench.db.objectinfo.usecache", false);

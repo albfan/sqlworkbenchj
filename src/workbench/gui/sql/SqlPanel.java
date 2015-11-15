@@ -213,7 +213,7 @@ import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.UseTabAnnotation;
 import workbench.sql.VariablePool;
-import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.commands.TransactionEndCommand;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
@@ -2052,13 +2052,13 @@ public class SqlPanel
 	@Override
 	public void commit()
 	{
-		this.startExecution(SingleVerbCommand.COMMIT_VERB, 0, false, this.appendResults, RunType.RunAll);
+		this.startExecution(TransactionEndCommand.COMMIT_VERB, 0, false, this.appendResults, RunType.RunAll);
 	}
 
 	@Override
 	public void rollback()
 	{
-		this.startExecution(SingleVerbCommand.ROLLBACK_VERB, 0, false, this.appendResults, RunType.RunAll);
+		this.startExecution(TransactionEndCommand.ROLLBACK_VERB, 0, false, this.appendResults, RunType.RunAll);
 	}
 
 	public void runAll()

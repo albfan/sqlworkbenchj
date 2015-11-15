@@ -116,7 +116,7 @@ public class ObjectNameFilter
   {
     if (CollectionUtil.isEmpty(variables)) return;
     filterPatterns.clear();
-    
+
 		for (String exp : patternSource)
 		{
 			if (StringUtil.isNonBlank(exp))
@@ -180,6 +180,7 @@ public class ObjectNameFilter
 
 		try
 		{
+      patternSource.add(exp);
 			filterPatterns.add(Pattern.compile(exp.trim(), Pattern.CASE_INSENSITIVE));
 		}
 		catch (PatternSyntaxException p)

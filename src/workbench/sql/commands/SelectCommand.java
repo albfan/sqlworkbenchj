@@ -71,7 +71,10 @@ public class SelectCommand
 		{
 			boolean isPrepared = false;
 
-			this.runner.setSavepoint();
+      if (runner.useSavepointForDML())
+      {
+        runner.setSavepoint();
+      }
 
 			if (Settings.getInstance().getCheckPreparedStatements() && currentConnection.getPreparedStatementPool().isRegistered(sql))
 			{

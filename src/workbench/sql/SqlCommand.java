@@ -24,14 +24,9 @@ package workbench.sql;
 
 
 import java.io.File;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import workbench.RunMode;
@@ -450,7 +445,11 @@ public class SqlCommand
 
 		result.ignoreUpdateCounts(currentConnection.getDbSettings().verbsWithoutUpdateCount().contains(verb));
 
-		runner.setSavepoint();
+    if (runner.useSavepointForDML())
+    {
+      runner.setSavepoint();
+    }
+
 		try
 		{
 			boolean hasResult = this.currentStatement.execute(sql);
@@ -1003,7 +1002,7 @@ public class SqlCommand
    *
    * @see workbench.sql.StatementRunner#getBaseDir()
    * @see #evaluateFileArgument(java.lang.String)
-   * @see FileUtil#listFiles(java.lang.String, java.lang.String) 
+   * @see FileUtil#listFiles(java.lang.String, java.lang.String)
    */
   public List<WbFile> evaluateWildardFileArgs(String arg)
   {

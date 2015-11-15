@@ -45,7 +45,7 @@ import workbench.sql.StatementHook;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.commands.SetCommand;
-import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.commands.TransactionEndCommand;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
@@ -103,7 +103,7 @@ public class OracleStatementHook
 	 * A list of SQL commands where no statistics should be shown.
 	 */
 	private final Set<String> noStatistics = CollectionUtil.caseInsensitiveSet(SetCommand.VERB,
-		SingleVerbCommand.COMMIT_VERB, SingleVerbCommand.ROLLBACK_VERB, "SET", "SHOW", "EXPLAIN");
+		TransactionEndCommand.COMMIT_VERB, TransactionEndCommand.ROLLBACK_VERB, "SET", "SHOW", "EXPLAIN");
 
 	/**
 	 * Stores the statistic values before the execution of the statement.

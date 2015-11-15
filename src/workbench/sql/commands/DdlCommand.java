@@ -97,7 +97,7 @@ public class DdlCommand
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 
-		boolean useSavepoint = currentConnection.getDbSettings().useSavePointForDDL() && !this.currentConnection.getAutoCommit();
+		boolean useSavepoint = runner.useSavepointForDDL();
 
 		if (useSavepoint && !this.currentConnection.supportsSavepoints())
 		{

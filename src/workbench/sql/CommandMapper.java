@@ -41,7 +41,8 @@ import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.IgnoredCommand;
 import workbench.sql.commands.SelectCommand;
 import workbench.sql.commands.SetCommand;
-import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.commands.TransactionEndCommand;
+import workbench.sql.commands.TransactionStartCommand;
 import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.commands.UseCommand;
 import workbench.sql.wbcommands.MySQLShow;
@@ -217,8 +218,8 @@ public class CommandMapper
 		addCommand(new WbListDrivers());
 
 		// Wrappers for standard SQL statements
-		addCommand(SingleVerbCommand.getCommit());
-		addCommand(SingleVerbCommand.getRollback());
+		addCommand(TransactionEndCommand.getCommit());
+		addCommand(TransactionEndCommand.getRollback());
 
 		addCommand(UpdatingCommand.getDeleteCommand());
 		addCommand(UpdatingCommand.getInsertCommand());
@@ -346,7 +347,18 @@ public class CommandMapper
 			mapPsql();
       PgCopyCommand copy = new PgCopyCommand();
       this.cmdDispatch.put(copy.getVerb(), copy);
-      this.dbSpecificCommands.add(copy.getVerb());
+
+      // support manual transactions in auto commit mode
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANS.getVerb(), TransactionStartCommand.BEGIN_TRANS);
+      this.cmdDispatch.put(TransactionStartCommand.START_TRANS.getVerb(), TransactionStartCommand.START_TRANS);
+      this.dbSpecificCommands.add(TransactionStartCommand.START_TRANS.getVerb());
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANS.getVerb());
+		}
+
+		if (metaData.isSqlServer())
+		{
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANS.getVerb(), TransactionStartCommand.BEGIN_TRANS);
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANS.getVerb());
 		}
 
 		if (metaData.isMySql())
