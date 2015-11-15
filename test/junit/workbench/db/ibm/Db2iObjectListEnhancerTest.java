@@ -22,11 +22,13 @@ package workbench.db.ibm;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.ConnectionMgr;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -43,6 +45,13 @@ public class Db2iObjectListEnhancerTest
   {
     super("Db2iObjectListEnhancerTest");
   }
+
+	@AfterClass
+	public static void tearDown()
+    throws Exception
+	{
+    ConnectionMgr.getInstance().disconnectAll();
+	}
 
   @Test
   public void testUpdateObjectList()
@@ -68,7 +77,7 @@ public class Db2iObjectListEnhancerTest
     tables.setValue(barRow, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, "CAT");
     tables.setValue(barRow, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, "BAR");
 
-    reader.updateObjectList(con, tables, null, "PUBLIC", null, new String[]{"TABLE"});
+    reader.updateObjectRemarks(con, tables, null, "PUBLIC", null, new String[]{"TABLE"});
     assertEquals("Foo comment", tables.getValueAsString(fooRow, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS));
     assertEquals("Bar comment", tables.getValueAsString(barRow, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS));
   }

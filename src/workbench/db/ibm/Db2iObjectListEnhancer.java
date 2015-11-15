@@ -54,7 +54,7 @@ public class Db2iObjectListEnhancer
 		}
 	}
 
-	protected void updateObjectRemarks(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
+	public void updateObjectRemarks(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (result == null) return;
 		if (result.getRowCount() == 0) return;
@@ -85,7 +85,7 @@ public class Db2iObjectListEnhancer
 		}
 	}
 
-	public Map<String, String> readRemarks(WbConnection con, String schema, String object, String[] requestedTypes)
+	private Map<String, String> readRemarks(WbConnection con, String schema, String object, String[] requestedTypes)
 	{
 		StringBuilder sql = new StringBuilder(50);
     sql.append(

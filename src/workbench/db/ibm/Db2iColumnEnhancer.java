@@ -51,7 +51,7 @@ public class Db2iColumnEnhancer
     }
 	}
 
-	private void readColumnComments(TableDefinition table, WbConnection conn)
+	public void readColumnComments(TableDefinition table, WbConnection conn)
 	{
 		PreparedStatement stmt = null;
 		ResultSet rs = null;

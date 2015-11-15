@@ -26,12 +26,14 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionMgr;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -49,6 +51,12 @@ public class Db2iColumnEnhancerTest
     super("Db2iColumnEnhancerTest");
   }
 
+	@AfterClass
+	public static void tearDown()
+    throws Exception
+	{
+    ConnectionMgr.getInstance().disconnectAll();
+	}
 
   @Test
   public void testUpdateColumnDefinition()
@@ -68,7 +76,7 @@ public class Db2iColumnEnhancerTest
     ColumnIdentifier name = new ColumnIdentifier("FIRSTNAME", Types.VARCHAR);
     List<ColumnIdentifier> cols = CollectionUtil.arrayList(id, name);
     TableDefinition def = new TableDefinition(tbl, cols);
-    reader.updateColumnDefinition(def, con);
+    reader.readColumnComments(def, con);
     assertEquals("The PK", id.getComment());
     assertEquals("The firstname", name.getComment());
   }
