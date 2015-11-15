@@ -54,6 +54,7 @@ import workbench.db.hana.HanaTableDefinitionReader;
 import workbench.db.hsqldb.HsqlTypeReader;
 import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ProcedureReader;
+import workbench.db.ibm.Db2iObjectListEnhancer;
 import workbench.db.ibm.InformixDataTypeResolver;
 import workbench.db.mssql.SqlServerDataTypeResolver;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
@@ -307,10 +308,15 @@ public class DbMetadata
 			procedureReader = new Db2ProcedureReader(dbConnection, getDbId());
 
 			// Generated columns are not available on the host version...
-			if (getDbId().equals("db2"))
+			if (getDbId().equals(DBID_DB2_LUW))
 			{
 				extenders.add(new DB2TypeReader());
 			}
+      
+      if (getDbId().equals(DBID_DB2_ISERIES))
+      {
+        objectListEnhancer = new Db2iObjectListEnhancer();
+      }
 		}
 		else if (productLower.contains("mysql"))
 		{

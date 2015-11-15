@@ -450,7 +450,23 @@ SELECT 42 FROM dual;</programlisting>
           <member><ulink url="http://www-01.ibm.com/support/knowledgecenter/ssw_ibm_i_72/rzahh/jdbcproperties.htm?lang=en"/></member>
         </simplelist>
       </para>
+    </section>
 
+    <section id="db2-comments">
+      <title>Column or table comments are not displayed</title>
+      <indexterm><primary>DB2</primary><secondary>Column comments not displayed</secondary></indexterm>
+      <indexterm><primary>DB2</primary><secondary>Table comments not displayed</secondary></indexterm>
+      <para>
+        The DB2 JDBC driver does not return the column description stored in SYSCOLUMNS.COLUMN_TEXT, or SYSTABLES.TABLE_TEXT. If you are using
+        these descriptions, you can enable retrieving them (and overwriting the comments returned by the driver) by setting the following two configuration
+        properties to <literal>true</literal> (e.g. using <link linkend="command-setconfig">WbSetConfig</link>)
+      </para>
+      <para>
+        <simplelist>
+          <member><literal>workbench.db.db2i.remarks.columns.use_columntext</literal> for column comments</member>
+          <member><literal>workbench.db.db2i.remarks.tables.use_tabletext</literal> for table comments</member>
+        </simplelist>
+      </para>
     </section>
 
     <section id="db2-run-command">

@@ -38,6 +38,7 @@ import workbench.db.h2database.H2ColumnEnhancer;
 import workbench.db.hana.HanaColumnEnhancer;
 import workbench.db.hsqldb.HsqlColumnEnhancer;
 import workbench.db.ibm.Db2ColumnEnhancer;
+import workbench.db.ibm.Db2iColumnEnhancer;
 import workbench.db.ibm.InformixColumnEnhancer;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerUtil;
@@ -375,6 +376,10 @@ public class JdbcTableDefinitionReader
     if (con.getDbId().equals(DbMetadata.DBID_DB2_LUW))
     {
       return new Db2ColumnEnhancer();
+    }
+    if (con.getDbId().equals(DbMetadata.DBID_DB2_ISERIES))
+    {
+      return new Db2iColumnEnhancer();
     }
     if (con.getDbId().equals("informix_dynamic_server"))
     {
