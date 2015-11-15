@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2015-11-02">
+    <entry dev-build="6" type="enh">For DB2/iSeries table and column comments can now be retrieved from the system catalogs instead of using the JDBC driver.</entry>
     <entry dev-build="6" type="enh">For Postgres it is now possible to manually control transactions using BEGIN .. COMMIT when the connection is set to autocommit</entry>
     <entry dev-build="6" type="enh">The list of tables in the DbTree is now sorted to work around bugs in JDBC driver that do not properly sort the list of tables</entry>
     <entry dev-build="3" type="enh">For DBMS that support it, two new modes have been added to WbImport: -upsert and -insertIgnore using native "UPSERT" functionality if available</entry>
