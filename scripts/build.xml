@@ -210,7 +210,7 @@
   <!-- Create the FO file which will in turn be transformed
        into the PDF manual by the target "pdf" -->
   <target name="fop" depends="init, docbook-history">
-    
+
     <!-- fop seems to require absolute pathnames... -->
     <dirname property="admondir" file="${docbook.root}/images/note.svg"/>
     <dirname property="imgdir" file="${src}/workbench/resource/images/filter16.png"/>
@@ -893,9 +893,13 @@
       <replacefilter token="(DISTINCT{wsp}ON)|"/>
       <replacefilter token="(CONNECT{wsp}BY)|"/>
       <replacefilter token="(START{wsp}WITH)|"/>
+      <replacefilter token='"SIMILAR"|'/>
+      <replacefilter token='"CYCLE"|'/>
+      <replacefilter token='"DEPTH"|'/>
       <replacefilter token="(FOREIGN{wsp}DATA{wsp}WRAPPER)|"/>
       <replacefilter token="(CREATE{wsp}OR{wsp}REPLACE)|"/>
       <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
+      <replacefilter token="(DATABASE{wsp}LINK)|"/>
       <replacefilter>
         <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")]]></replacetoken>
         <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(\[[^\r\n\t\f\[]*\]) ]]></replacevalue>
@@ -928,6 +932,12 @@
       <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
       <replacefilter token="(DISTINCT{wsp}ON)|"/>
       <replacefilter token="(CONNECT{wsp}BY)|"/>
+      <replacefilter token="(START{wsp}TRANSACTION)|"/>
+      <replacefilter token="(SIMILAR{wsp}TO)|"/>
+      <replacefilter token='"SIMILAR"|'/>
+      <replacefilter token='"CYCLE"|'/>
+      <replacefilter token='"DEPTH"|'/>
+      <replacefilter token='(DATABASE{wsp}LINK)|'/>
       <replacefilter token="(START{wsp}WITH)|"/>
       <replacefilter token="(FOREIGN{wsp}DATA{wsp}WRAPPER)|"/>
       <replacefilter token="(CREATE{wsp}OR{wsp}REPLACE)|"/>
