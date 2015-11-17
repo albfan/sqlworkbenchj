@@ -47,7 +47,6 @@ public class StringUtil
 {
 	public static final String REGEX_CRLF = "((\r\n)|(\n\r)|\r|\n)";
 	public static final Pattern PATTERN_CRLF = Pattern.compile(REGEX_CRLF);
-	public static final Pattern PATTERN_NON_LF = Pattern.compile("(\r\n)|(\n\r)|(\r)");
 
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
 	public static final String EMPTY_STRING = "";
@@ -61,7 +60,12 @@ public class StringUtil
 
 	private static final char[] hexDigit = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
-	public static StringBuilder emptyBuilder()
+  // the \u000b is used in Microsoft PowerPoint
+  // when doing copy & paste from there this yields an invalid character
+  // see makePlainLinefeed()
+	private static final Pattern PATTERN_NON_LF = Pattern.compile("(\r\n)|(\n\r)|(\r)|(\u000b)");
+
+  public static StringBuilder emptyBuilder()
 	{
 		return new StringBuilder(0);
 	}

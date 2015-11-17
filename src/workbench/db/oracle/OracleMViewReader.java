@@ -51,6 +51,7 @@ import workbench.util.StringUtil;
 public class OracleMViewReader
 {
 	private String pkIndex;
+  private String defaultTablespace = null;
 
 	public OracleMViewReader()
 	{
@@ -163,6 +164,11 @@ public class OracleMViewReader
 	 */
 	private String getMViewOptions(WbConnection dbConnection, TableIdentifier mview)
 	{
+    if (OracleUtils.checkDefaultTablespace() && defaultTablespace == null)
+    {
+      defaultTablespace = OracleUtils.getDefaultTablespace(dbConnection);
+    }
+
 		boolean supportsCompression = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.1");
 
 		String sql =
@@ -175,6 +181,7 @@ public class OracleMViewReader
 			"       cons.constraint_name, \n" +
 			"       cons.index_name, \n" +
 			"       rc.interval, \n" +
+			"       tb.tablespace_name, \n" +
 			(supportsCompression ?
 			"       tb.compression, \n "  +
 			"       tb.compress_for \n " :
@@ -204,6 +211,13 @@ public class OracleMViewReader
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{
+        String tsName = rs.getString("tablespace_name");
+        if (StringUtil.isNonEmpty(tsName) && OracleUtils.shouldAppendTablespace(tsName, defaultTablespace, mview.getRawSchema(), dbConnection.getCurrentUser()))
+        {
+          result.append("\n  TABLESPACE ");
+          result.append(tsName);
+        }
+
 				String compress = rs.getString("compression");
 				if (StringUtil.equalStringIgnoreCase("enabled", compress))
 				{

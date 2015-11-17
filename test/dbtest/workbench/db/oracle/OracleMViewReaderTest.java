@@ -126,8 +126,10 @@ public class OracleMViewReaderTest
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
 		String source = builder.getTableSource(mview, DropType.none, false);
 		assertNotNull(source);
+//    System.out.println(source);
 		String expected =
 			"CREATE MATERIALIZED VIEW V_PERSON\n" +
+      "  TABLESPACE USERS\n" +
 			"  BUILD IMMEDIATE\n" +
 			"  REFRESH COMPLETE ON DEMAND WITH ROWID\n" +
 			"  ENABLE QUERY REWRITE\n" +
@@ -167,13 +169,14 @@ public class OracleMViewReaderTest
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
 		String source = builder.getTableSource(mview, DropType.none, false);
 		assertNotNull(source);
-		String expected =
-			"CREATE MATERIALIZED VIEW V_PERSON\n" +
-			"  BUILD DEFERRED\n" +
-			"  REFRESH FORCE ON COMMIT WITH PRIMARY KEY\n" +
-			"  DISABLE QUERY REWRITE\n" +
-			"AS\n" +
-			"SELECT PERSON.ID ID,PERSON.NAME NAME FROM PERSON PERSON;";
+    String expected =
+      "CREATE MATERIALIZED VIEW V_PERSON\n" +
+      "  TABLESPACE USERS\n" +
+      "  BUILD DEFERRED\n" +
+      "  REFRESH FORCE ON COMMIT WITH PRIMARY KEY\n" +
+      "  DISABLE QUERY REWRITE\n" +
+      "AS\n" +
+      "SELECT PERSON.ID ID,PERSON.NAME NAME FROM PERSON PERSON;";
 		assertEquals(expected, source.trim());
 	}
 
@@ -181,7 +184,6 @@ public class OracleMViewReaderTest
 	public void testRefreshSource()
 		throws Exception
 	{
-
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 		String sql =
@@ -201,6 +203,7 @@ public class OracleMViewReaderTest
 		assertNotNull(source);
 		String expected =
 			"CREATE MATERIALIZED VIEW MV_PERSON\n" +
+      "  TABLESPACE USERS\n" +
 			"  BUILD IMMEDIATE\n" +
 			"  REFRESH COMPLETE ON DEMAND WITH ROWID\n" +
 			"  NEXT round(sysdate + 1) + 5/24\n" +

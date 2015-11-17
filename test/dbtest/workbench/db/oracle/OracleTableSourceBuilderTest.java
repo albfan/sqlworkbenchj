@@ -182,7 +182,7 @@ public class OracleTableSourceBuilderTest
 			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
       TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("SUBPART_TEST"));
       String source = builder.getTableSource(tbl.getTable(), tbl.getColumns());
-      System.out.println(source);
+//      System.out.println(source);
       assertTrue(source.contains("PARTITION BY LIST (PART_KEY)"));
       assertTrue(source.contains("PARTITION P_1 VALUES (1)"));
       assertTrue(source.contains("PARTITION P_2 VALUES (2)"));
