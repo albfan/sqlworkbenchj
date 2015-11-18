@@ -39,6 +39,108 @@
          (<literal>PGPASS</literal>,  <literal>PGUSER</literal>) the same way as libpq uses them.
        </para>
      </section>
+
+		<section id="pg-statement-savepoint">
+			<title>Using savepoints for single statements</title>
+			<para>
+				PostgreSQL marks a complete transaction as failed if a only single statement fails.
+        In such a case the transaction cannot be committed, e.g.
+				consider the following script:
+			</para>
+			<programlisting>INSERT INTO person (id, firstname, lastname) VALUES (1, 'Arthur', 'Dent');
+INSERT INTO person (id, firstname, lastname) VALUES (2, 'Zaphod', 'Beeblebrox');
+INSERT INTO person (id, firstname, lastname) VALUES (2, 'Ford', 'Prefect');
+COMMIT;</programlisting>
+			<para>
+				As the ID column is the primary key, the third insert will fail with a unique key violation.
+				In PostgreSQL you cannot commit anyway and thus persist the first two <literal>INSERT</literal>s.
+			</para>
+			<para>
+				This problem can only be solved by using a SAVEPOINT before and after each
+				statement. In case that statement fails, the transaction can be rolled back to the state
+				before the statement and the reminder of the script can execute.
+			</para>
+			<para>
+				Doing this manually is quite tedious, so you can tell &wb-productname; to do this
+				automatically for you by setting the properties:
+			</para>
+			<programlisting>workbench.db.postgresql.ddl.usesavepoint=true
+workbench.db.postgresql.sql.usesavepoint=true
+</programlisting>
+			<para>
+				in the file <link linkend="settings">workbench.settings</link>. If this is enabled,
+        &wb-productname; will issue a <literal>SET SAVEPOINT</literal> before running each statement
+        and will release the savepoint after the statement. If the statement failed, a rollback to the
+        savepoint will be issued that will mark the transaction as "clean" again. So in the above
+        example (with <literal>sql.usesavepoint</literal> set to <literal>true</literal>), the last
+        statement would be rolled back automatically but the first two <literal>INSERT</literal>s
+        can be committed (this will also required to turn on the "Ignore errors" option is enabled).
+      </para>
+
+      <para>
+        If you want to use the modes <link linkend="import-update-mode"><literal>update/insert</literal></link> or
+				<link linkend="import-update-mode"><literal>insert/update</literal></link>
+				for <link linkend="command-import">WbImport</link>, you should also add the
+				property:
+			</para>
+			<programlisting>workbench.db.postgresql.import.usesavepoint=true</programlisting>
+      <para>
+        to enable the usage of savepoints during imports. This setting also affects
+        the <literal>WbCopy</literal> command.
+      </para>
+      <para>
+        This is not necessary when the using the mode <link linkend="import-native-upsert"><literal>upsert</literal></link>
+        or <link linkend="import-native-insert-ignore"><literal>insertIgnore</literal></link> with Postgres 9.5
+      </para>
+      <para>
+        You can also use the parameter <literal>-useSavepoint</literal> for the
+        <literal>WbImport</literal> and <literal>WbCopy</literal> commands to control the use of
+        savepoints for each import.
+      </para>
+      <para>
+        <note>
+        Using savepoints can slow down the import substantially.
+        </note>
+      </para>
+		</section>
+
+    <section id="pg-idle-transaction">
+      <title>Preventing connections with "idle in transaction" state</title>
+      <para>
+        Postgres has a very strict transaction concept which means that even a simple <literal>SELECT</literal> statement
+        starts a transaction. This has some implications on concurrency, the most obvious one is that
+        tables that are "used" in a transaction (because a query has retrieved some values) cannot be modified
+        using DDL statements (<literal>ALTER TABLE</literal>). Connections to the server that do this have the status
+        <literal>idle in transaction</literal> as opposed to just "idle".
+      </para>
+      <para>
+        There are two ways to prevent this:
+         <itemizedlist>
+           <listitem>Working with auto-commit enabled, so that each query is automatically committed. This is how pgAdmin and psql work by default</listitem>
+           <listitem>If you don't want to work with auto-commit enabled, these transactions need to be ended properly by running
+             a <literal>rollback</literal> or <literal>commit</literal> when the query is finished</listitem>
+         </itemizedlist>
+      </para>
+      <para>
+        &wb-productname; can be configured to do the second approach automatically, by <link linkend="command-setconfig">setting the configuration property</link>
+        <literal>workbench.db.postgresql.transaction.readonly.end</literal> to one of the following values:
+      </para>
+      <para>
+         <itemizedlist>
+           <listitem>never</listitem>
+           <listitem>rollback</listitem>
+           <listitem>commit</listitem>
+         </itemizedlist>
+         The feature is disabled if the value <literal>never</literal> is configured. The other two values control how
+         the transaction is ended: either by running a <literal>rollback</literal> or a <literal>commit</literal>
+      </para>
+      <para>
+        The statement to end the transaction will <emphasis role="bold">only</emphasis> be sent to the server,
+        if the current transaction has not modified anything in the database. Once a real change has been done
+        by running an DML or DDL statement, nothing will be sent automatically.
+      </para>
+    </section>
+
   </section>
 
   <section id="dbms-specific-oracle">
