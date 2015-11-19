@@ -26,7 +26,6 @@ import javax.swing.text.BadLocationException;
 
 import workbench.log.LogMgr;
 
-import workbench.util.StringUtil;
 
 /**
  *
@@ -34,6 +33,13 @@ import workbench.util.StringUtil;
  */
 public class TextCommenter
 {
+  private static enum CommentType
+  {
+    comment,
+    uncomment,
+    toggle;
+  };
+
 	private JEditTextArea editor;
 
 	public TextCommenter(JEditTextArea client)
@@ -41,34 +47,38 @@ public class TextCommenter
 		this.editor = client;
 	}
 
+	public void toggleComment()
+	{
+		String commentChar = editor.getCommentChar();
+    doComment(commentChar, CommentType.toggle);
+	}
+
 	public void commentSelection()
 	{
 		String commentChar = editor.getCommentChar();
-		boolean isCommented = this.isSelectionCommented(commentChar);
-		// Comment Selection acts as a toggle.
-		// if the complete selection is already commented
-		// the comments will be removed.
-		doComment(commentChar, !isCommented);
+    doComment(commentChar, CommentType.comment);
 	}
 
 	public void unCommentSelection()
 	{
-		doComment(editor.getCommentChar(), false);
+		doComment(editor.getCommentChar(), CommentType.uncomment);
 	}
 
-	private void doComment(String commentChar, boolean addComment)
+	private void doComment(String commentChar, CommentType type)
 	{
 		int startline = editor.getSelectionStartLine();
-		int endline = getLastRelevantSelectionLine();
+    int endline = getLastRelevantSelectionLine();
 
 		if (commentChar == null) commentChar = "--";
+
+    String commentToUse = commentChar;
 
 		int cLength = commentChar.length();
 
 		int pos = editor.getSelectionEnd(endline) - editor.getLineStartOffset(endline);
 		SyntaxDocument document = editor.getDocument();
 
-		if (addComment && commentChar.equals("--"))
+    if (commentChar.equals("--"))
 		{
 			// workaround for an Oracle bug, where a comment like
 			//
@@ -78,7 +88,7 @@ public class TextCommenter
 			// Apparently Oracle requires a blank after the two dashes.
 			//
 			// Adding the blank shouldn't do any harm for other databases
-			commentChar = "-- ";
+			commentToUse = "-- ";
 		}
 
 		boolean ansiComment = "--".equals(commentChar);
@@ -89,10 +99,12 @@ public class TextCommenter
 			for (int line = startline; line <= endline; line ++)
 			{
 				String text = editor.getLineText(line);
+        boolean isCommented = text.trim().startsWith(commentChar);
+
 				int lineStart = editor.getLineStartOffset(line);
-				if (addComment)
+        if (type == CommentType.comment || (type == CommentType.toggle && isCommented == false))
 				{
-					document.insertString(lineStart, commentChar, null);
+					document.insertString(lineStart, commentToUse, null);
 				}
 				else
 				{
@@ -119,21 +131,6 @@ public class TextCommenter
 		{
 			document.endCompoundEdit();
 		}
-	}
-
-	protected boolean isSelectionCommented(String commentChar)
-	{
-		int startline = editor.getSelectionStartLine();
-		int endline = getLastRelevantSelectionLine();
-		if (commentChar == null) commentChar = "--";
-
-		for (int line = startline; line <= endline; line ++)
-		{
-			String text = editor.getLineText(line);
-			if (StringUtil.isBlank(text)) return false;
-			if (!text.startsWith(commentChar)) return false;
-		}
-		return true;
 	}
 
 	private int getLastRelevantSelectionLine()

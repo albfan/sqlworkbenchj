@@ -800,6 +800,7 @@ public class SqlPanel
 
 		this.actions.add(makeLower);
 		this.actions.add(makeUpper);
+		this.actions.add(this.editor.getToggleCommentAction());
 		this.actions.add(this.editor.getCommentAction());
 		this.actions.add(this.editor.getUnCommentAction());
 		this.actions.add(this.editor.getMatchBracketAction());

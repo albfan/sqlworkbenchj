@@ -91,6 +91,7 @@ import workbench.gui.actions.MatchBracketAction;
 import workbench.gui.actions.OpenFileAction;
 import workbench.gui.actions.RedoAction;
 import workbench.gui.actions.ReplaceAction;
+import workbench.gui.actions.ToggleCommentAction;
 import workbench.gui.actions.UnCommentAction;
 import workbench.gui.actions.UndoAction;
 import workbench.gui.actions.WbAction;
@@ -151,6 +152,7 @@ public class EditorPanel
 
   private final ColumnSelectionAction columnSelection;
   private final MatchBracketAction matchBracket;
+  private final ToggleCommentAction toggleCommentAction;
   private final CommentAction commentAction;
   private final UnCommentAction unCommentAction;
   private final JumpToLineAction jumpToLineAction;
@@ -220,8 +222,10 @@ public class EditorPanel
     this.matchBracket = new MatchBracketAction(this);
     this.addKeyBinding(this.matchBracket);
 
+    this.toggleCommentAction = new ToggleCommentAction(this);
     this.commentAction = new CommentAction(this);
     this.unCommentAction = new UnCommentAction(this);
+    this.addKeyBinding(this.toggleCommentAction);
     this.addKeyBinding(this.commentAction);
     this.addKeyBinding(this.unCommentAction);
 
@@ -234,7 +238,7 @@ public class EditorPanel
     Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL);
 
     this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
-    
+
     new DropTarget(this, DnDConstants.ACTION_COPY, this);
   }
 
@@ -547,8 +551,7 @@ public class EditorPanel
       inputHandler.dispose();
     }
 
-    WbAction.dispose(
-      columnSelection, commentAction, fileOpen, fileReloadAction, fileSave,
+    WbAction.dispose(columnSelection, toggleCommentAction, commentAction, fileOpen, fileReloadAction, fileSave,
       fileSaveAs, formatSql, jumpToLineAction, matchBracket, redo, unCommentAction, undo
     );
     replacer.dispose();
@@ -1023,9 +1026,14 @@ public class EditorPanel
     return this.currentFile.getFullPath();
   }
 
+  public ToggleCommentAction getToggleCommentAction()
+  {
+    return toggleCommentAction;
+  }
+
   public CommentAction getCommentAction()
   {
-    return this.commentAction;
+    return commentAction;
   }
 
   public UnCommentAction getUnCommentAction()

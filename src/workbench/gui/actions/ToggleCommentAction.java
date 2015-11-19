@@ -23,7 +23,12 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
+import javax.swing.KeyStroke;
+
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.editor.TextCommenter;
@@ -38,16 +43,16 @@ import workbench.gui.sql.EditorPanel;
  *
  * @author  Thomas Kellerer
  */
-public class CommentAction
+public class ToggleCommentAction
 	extends WbAction
 {
 	private EditorPanel client;
 
-	public CommentAction(EditorPanel aClient)
+	public ToggleCommentAction(EditorPanel aClient)
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtCommentSelection");
+		this.initMenuDefinition("MnuTxtToggleCommentSelection",KeyStroke.getKeyStroke(KeyEvent.VK_C, PlatformShortcuts.getDefaultModifier() + InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 
@@ -55,6 +60,6 @@ public class CommentAction
 	public void executeAction(ActionEvent e)
 	{
 		TextCommenter commenter = new TextCommenter(client);
-		commenter.commentSelection();
+		commenter.toggleComment();
 	}
 }
