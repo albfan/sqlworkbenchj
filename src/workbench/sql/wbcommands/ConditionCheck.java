@@ -146,7 +146,7 @@ public class ConditionCheck
 				{
 					return OK;
 				}
-				return new Result(PARAM_IF_EQUALS, var);
+				return new Result(PARAM_IF_EQUALS, elements[0], elements[1]);
 			}
 		}
 
@@ -161,7 +161,7 @@ public class ConditionCheck
 				{
 					return OK;
 				}
-				return new Result(PARAM_IF_NOTEQ, var);
+				return new Result(PARAM_IF_NOTEQ, elements[0], elements[1]);
 			}
 		}
 		return OK;
