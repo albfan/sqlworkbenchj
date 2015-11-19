@@ -162,7 +162,7 @@ public class ShortcutManager
 			KeyStroke key = anAction.getDefaultAccelerator();
 			if (key != null)
 			{
-				if (this.keyDebugMap == null) this.keyDebugMap = new HashMap<KeyStroke, WbAction>(100);
+				if (this.keyDebugMap == null) this.keyDebugMap = new HashMap<>(100);
 				WbAction a = this.keyDebugMap.get(key);
 				if (a != null && !a.equals(anAction))
 				{

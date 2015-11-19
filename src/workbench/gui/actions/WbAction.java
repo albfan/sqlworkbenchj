@@ -52,6 +52,7 @@ import workbench.resource.ShortcutManager;
 
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbarButton;
+import workbench.util.StringUtil;
 
 /**
  * Base class for Actions in SQL Workbench/J
@@ -75,6 +76,7 @@ public class WbAction
 	protected WbAction proxy;
 	private WbAction original;
 	private String iconKey;
+  private String baseTooltip;
 	private final List<WeakReference<JMenuItem>> createdItems = new LinkedList<>();
 	protected boolean isConfigurable = true;
 	private String descriptiveName;
@@ -175,22 +177,44 @@ public class WbAction
 
 	public void setTooltip(String aText)
 	{
-		putValue(Action.SHORT_DESCRIPTION, aText);
+    baseTooltip = aText;
+    initTooltip();
 	}
+
+  private void initTooltip()
+  {
+    if (StringUtil.isEmptyString(baseTooltip))
+    {
+      putValue(Action.SHORT_DESCRIPTION, null);
+    }
+    else
+    {
+      String shortCut = this.getAcceleratorDisplay();
+      if (shortCut == null)
+      {
+        putValue(Action.SHORT_DESCRIPTION, baseTooltip);
+      }
+      else
+      {
+        putValue(Action.SHORT_DESCRIPTION, baseTooltip + " (" + shortCut + ")");
+      }
+    }
+  }
 
 	public String getToolTipText()
 	{
-		return (String) getValue(Action.SHORT_DESCRIPTION);
+		return baseTooltip;
 	}
 
 	public String getTooltipTextWithKeys()
 	{
-		return getToolTipText() + " (" + this.getAcceleratorDisplay() + ")";
+		return (String)getValue(Action.SHORT_DESCRIPTION);
 	}
 
 	public void clearAccelerator()
 	{
 		putValue(Action.ACCELERATOR_KEY, null);
+    initTooltip();
 	}
 
 	public String getActionCommand()
@@ -344,6 +368,7 @@ public class WbAction
 				item.setAccelerator(key);
 			}
 		}
+    initTooltip();
 	}
 
 	public String getDescriptiveName()
@@ -641,12 +666,14 @@ public class WbAction
 
 	private String getAcceleratorDisplay()
 	{
+		KeyStroke key = getDefaultAccelerator();
+    if (key == null) return null;
+
 		String acceleratorDelimiter = UIManager.getString("MenuItem.acceleratorDelimiter");
 		if (acceleratorDelimiter == null)
 		{
 			acceleratorDelimiter = "-";
 		}
-		KeyStroke key = getDefaultAccelerator();
 		int mod = key.getModifiers();
 		int keycode = key.getKeyCode();
 
