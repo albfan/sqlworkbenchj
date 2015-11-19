@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-11-02">
+  <release build="-1" date="2015-11-18">
     <entry dev-build="6" type="enh">For DB2/iSeries table and column comments can now be retrieved from the system catalogs instead of using the JDBC driver.</entry>
     <entry dev-build="6" type="enh">For Postgres it is now possible to manually control transactions using BEGIN .. COMMIT when the connection is set to autocommit</entry>
     <entry dev-build="6" type="enh">The list of tables in the DbTree is now sorted to work around bugs in JDBC driver that do not properly sort the list of tables</entry>
@@ -17,6 +17,7 @@
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
     <entry dev-build="1" type="enh">The error dialog that is displayed when running a script can now be configured to also include the error message or the statement that failed</entry>
     <entry dev-build="1" type="enh">Improved display of packages in the DbTree for Oracle and Firebird</entry>
+    <entry dev-build="6" type="fix">Toggle comment did not toggle correctly when some lines were already commented and some not</entry>
     <entry dev-build="6" type="fix">The messages shown when using conditional execution with WbInclude did not properly include the variable name or value</entry>
     <entry dev-build="6" type="fix">For Oracle the tablespace of materialized views was not shown in the generated SQL (Fix contributed by Franz Mayer)</entry>
     <entry dev-build="6" type="fix">It was not possible to work with SAVEPOINTs correctly</entry>
