@@ -17,6 +17,7 @@
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
     <entry dev-build="1" type="enh">The error dialog that is displayed when running a script can now be configured to also include the error message or the statement that failed</entry>
     <entry dev-build="1" type="enh">Improved display of packages in the DbTree for Oracle and Firebird</entry>
+    <entry dev-build="6" type="fix">The messages shown when using conditional execution with WbInclude did not properly include the variable name or value</entry>
     <entry dev-build="6" type="fix">For Oracle the tablespace of materialized views was not shown in the generated SQL (Fix contributed by Franz Mayer)</entry>
     <entry dev-build="6" type="fix">It was not possible to work with SAVEPOINTs correctly</entry>
     <entry dev-build="5" type="fix">Table definitions for tables with VARCHAR columns were not displayed for Oracle</entry>
