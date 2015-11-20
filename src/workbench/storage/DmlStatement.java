@@ -151,6 +151,7 @@ public class DmlStatement
 		boolean useXmlApi = dbs.useXmlAPI();
 		boolean useClobSetString = dbs.useSetStringForClobs();
 		boolean useBlobSetBytes = dbs.useSetBytesForBlobs();
+    boolean padCharColumns = dbs.padCharColumns();
 
 		DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(connection);
 
@@ -235,6 +236,10 @@ public class DmlStatement
 						throw new SQLException("Input file (" + f.getAbsolutePath() + ") for LOB not found!");
 					}
 				}
+        else if (padCharColumns && (type == Types.CHAR || type == Types.NCHAR))
+        {
+          stmt.setString(i + 1, getCharValue(value, data.getIdentifier().getColumnSize()));
+        }
 				else if (type == Types.ARRAY)
 				{
 					handleArray(stmt, i+1, dbmsType, value, connection);
@@ -263,6 +268,16 @@ public class DmlStatement
 
 		return rows;
 	}
+
+  private String getCharValue(Object value, int length)
+  {
+    if (value == null) return null;
+    if (value instanceof String)
+    {
+      return StringUtil.padRight((String)value, length);
+    }
+    return value.toString();
+  }
 
 	private void retrieveKeys(PreparedStatement stmt)
 	{

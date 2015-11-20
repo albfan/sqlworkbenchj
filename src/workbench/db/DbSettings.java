@@ -256,6 +256,11 @@ public class DbSettings
 		return getBoolProperty("blob.use.setbytes", false);
 	}
 
+	public boolean padCharColumns()
+	{
+		return getBoolProperty("dml.char.pad", false);
+	}
+
 	public boolean longVarcharIsClob()
 	{
 		return getBoolProperty("clob.longvarchar", true);
