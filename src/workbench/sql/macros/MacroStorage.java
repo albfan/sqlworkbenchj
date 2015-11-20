@@ -186,20 +186,25 @@ public class MacroStorage
 	{
 		if (sourceFile == null) return;
 
-    createBackup(sourceFile);
-
 		synchronized (lock)
 		{
-			if (this.getSize() == 0 && isModified())
+			if (this.getSize() == 0)
 			{
-				if (sourceFile.exists())
+				if (sourceFile.exists() && isModified())
 				{
+          createBackup(sourceFile);
 					sourceFile.delete();
 					LogMgr.logDebug("MacroStorage.saveMacros()", "All macros from " + sourceFile.getFullPath()+ " were removed. Macro file deleted.");
 				}
+        else
+        {
+          LogMgr.logDebug("MacroStorage.saveMacros()", "No macros defined, nothing to save");
+        }
 			}
 			else
 			{
+        createBackup(sourceFile);
+
 				WbPersistence writer = new WbPersistence(sourceFile.getAbsolutePath());
 				try
 				{
