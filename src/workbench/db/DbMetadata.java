@@ -312,7 +312,7 @@ public class DbMetadata
 			{
 				extenders.add(new DB2TypeReader());
 			}
-      
+
       if (getDbId().equals(DBID_DB2_ISERIES))
       {
         objectListEnhancer = new Db2iObjectListEnhancer();
@@ -2235,6 +2235,10 @@ public class DbMetadata
 	{
 		TableDefinition def = definitionReader.getTableDefinition(table, readPkDefinition);
 		if (def == null) return Collections.emptyList();
+    if (!table.isPkInitialized() && readPkDefinition)
+    {
+      table.setPrimaryKey(def.getTable().getPrimaryKey());
+    }
 		return def.getColumns();
 	}
 

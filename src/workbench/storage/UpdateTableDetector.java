@@ -58,6 +58,16 @@ public class UpdateTableDetector
 		logDuration = Settings.getInstance().getBoolProperty("workbench.db.updatetable.check.logduration", false);
 	}
 
+  /**
+   * Control if only the primary key should be retrieved.
+   *
+   * If set to false (the default), checkUpdateTable() will also match the columns of the result with the
+   * columns of the update table.
+   *
+   * For performance reasons the column check can be disabled through this method.
+   *
+   * @param flag  if true, the columns of the table will not be matched against the result
+   */
 	public void setCheckPKOnly(boolean flag)
 	{
 		this.checkPkOnly = flag;
@@ -89,7 +99,7 @@ public class UpdateTableDetector
 
 		TableIdentifier tbl = getFullyQualifiedTable(table);
     if (tbl == null) return;
-    
+
 		tbl.adjustCase(conn);
 
 		if (checkPkOnly)

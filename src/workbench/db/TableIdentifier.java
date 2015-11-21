@@ -64,6 +64,7 @@ public class TableIdentifier
 	private boolean retrieveFkSource;
 	private boolean useInlinePK;
 	private boolean useTableNameOnlyInExpression;
+  private boolean pkInitialized;
 
 	// for Synonyms
 	private TableIdentifier realTable;
@@ -220,6 +221,16 @@ public class TableIdentifier
 		this.useInlinePK = flag;
 	}
 
+  public boolean isPkInitialized()
+  {
+    return pkInitialized;
+  }
+
+  public void setPkInitialized(boolean flag)
+  {
+    pkInitialized = flag;
+  }
+
 	@Override
 	public void setComment(String comment)
 	{
@@ -317,6 +328,7 @@ public class TableIdentifier
 	{
 		TableIdentifier copy = new TableIdentifier();
 		copy.isNewTable = this.isNewTable;
+		copy.pkInitialized = this.pkInitialized;
 		copy.primaryKey = this.primaryKey == null ? null : this.primaryKey.createCopy();
 		copy.schema = this.schema;
 		copy.tablename = this.tablename;
@@ -880,6 +892,7 @@ public class TableIdentifier
 	public void setPrimaryKey(PkDefinition pk)
 	{
 		this.primaryKey = pk;
+    this.pkInitialized = true;
 	}
 
 	public String getType()

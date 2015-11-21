@@ -222,6 +222,7 @@ public class JdbcIndexReader
 			pk = findPKFromIndexList(tbl);
 		}
 
+    tbl.setPkInitialized(true);
 		if (pk != null && tbl.getPrimaryKey() == null)
 		{
 			tbl.setPrimaryKey(pk);
@@ -755,7 +756,7 @@ public class JdbcIndexReader
 		try
 		{
 			PkDefinition pk = tbl.getPrimaryKey();
-			if (pk == null && checkPK)
+			if (pk == null && checkPK && !tbl.isPkInitialized())
 			{
 				pk = getPrimaryKey(tbl);
 			}
