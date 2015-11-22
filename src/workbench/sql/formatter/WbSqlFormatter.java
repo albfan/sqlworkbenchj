@@ -192,7 +192,7 @@ public class WbSqlFormatter
 
   public void setIndentWhereCondition(boolean flag)
   {
-    this.indentWhereConditions = true;
+    this.indentWhereConditions = flag;
   }
 
 	public void setColumnsPerInsert(int cols)
@@ -827,7 +827,7 @@ public class WbSqlFormatter
           {
             appendTokenText(t);
             appendText(' ');
-            t = processSubSelect(null, 0, false);
+            t = processSubSelect(null, bracketCount, false);
           }
 					else
           {
@@ -1166,6 +1166,7 @@ public class WbSqlFormatter
 		f.setAddColumnNameComment(this.addColumnCommentForInsert);
 		f.setAddSpaceAfterCommInList(this.addSpaceAfterComma);
 		f.setAddSpaceAfterLineBreakComma(this.addSpaceAfterLineBreakComma);
+    f.setIndentWhereCondition(this.indentWhereConditions);
 		f.setCommaAfterLineBreak(this.commaAfterLineBreak);
 		f.setJoinWrapping(this.joinWrapping);
 		f.setColumnsPerInsert(colsPerInsert);
@@ -2064,9 +2065,7 @@ public class WbSqlFormatter
 			}
 			else if (verb.equals("("))
 			{
-				String lastWord = lastToken.getContents();
-
-				if (!lastToken.isSeparator() && !isDbFunction(lastWord)) this.appendText(' ');
+				if (needsWhitespace(lastToken, t, false, true)) this.appendText(' ');
 				appendText(t.getContents());
 
 				SQLToken next = skipComments();

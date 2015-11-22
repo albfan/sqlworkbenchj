@@ -54,7 +54,7 @@ public class WbSqlFormatterTest
     String sql =
       "select *\n" +
       "from foo\n" +
-      "  join bar on ( bar.id in (select x from y where f1(x,y) = f2(a,b))\n";
+      "  join bar on ( bar.id in (select x from y where f1(x) = f2(y))\n";
 		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
@@ -63,10 +63,27 @@ public class WbSqlFormatterTest
     String expected =
       "SELECT *\n" +
       "FROM foo\n" +
-      "  JOIN bar ON (bar.id IN (SELECT x FROM y WHERE f1 (x,y) = f2 (a,b))";
+      "  JOIN bar ON (bar.id IN (SELECT x FROM y WHERE f1(x) = f2(y))";
 //		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
   }
+
+  @Test
+  public void testFunctionCall()
+  {
+    String sql = "select f3(x,y) from y where f1(x,y) = f2(a,b)";
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+    String expected =
+      "SELECT f3(x,y)\n" +
+      "FROM y\n" +
+      "WHERE f1(x,y) = f2(a,b)";
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+
   @Test
   public void testIndentWhere()
   {
@@ -1112,7 +1129,7 @@ public class WbSqlFormatterTest
 		f = new WbSqlFormatter(sql, 5);
 		f.setNewLineForSubselects(true);
 		formatted = f.getFormattedSql();
-		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 	}
 
@@ -2340,7 +2357,7 @@ public class WbSqlFormatterTest
 			f = new WbSqlFormatter(sql, 10);
 
 			formatted = f.getFormattedSql();
-//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+//			System.out.println("************** result:\n" + formatted + "\n********** expected:\n" + expected);
 			assertEquals(expected, formatted.toString().trim());
 
 			sql = "SELECT ber.nachname AS ber_nachname, \n" + "       ber.nummer AS ber_nummer \n" + "FROM table a WHERE (x in (select bla,bla,alkj,aldk,alkjd,dlaj,alkjdaf from blub 1, blub2, blub3 where x=1 and y=2 and z=3 and a=b and c=d) or y = 5)" + " and a *= b and b = c (+)";
