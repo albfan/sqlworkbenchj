@@ -1054,7 +1054,24 @@ public class SqlCommand
 		try
 		{
 			ErrorPositionReader reader = ErrorPositionReader.Factory.createPositionReader(currentConnection);
-			String sql = result.getSourceCommand() == null ? executedSql : result.getSourceCommand();
+
+      // the source SQL should be preferred over the executedSql
+      // because for e.g. WbInclude the executedSql will be WbInclude
+      // the sourceCommand() from the result will be the real SQL that generated the error
+
+      String sql = null;
+      if (result.getSourceCommand() == null)
+      {
+        sql = executedSql;
+      }
+      else
+      {
+        // the source SQL is not necessarily the one that got executed
+        // if "remove comments is enabled"
+        sql = getSqlToExecute(result.getSourceCommand());
+      }
+
+
 			ErrorDescriptor error = reader.getErrorPosition(currentConnection, sql, e);
 			if (error != null && error.getErrorMessage() != null)
 			{
