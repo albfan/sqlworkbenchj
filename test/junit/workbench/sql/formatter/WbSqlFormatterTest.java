@@ -49,6 +49,25 @@ public class WbSqlFormatterTest
 
 
   @Test
+  public void testLongJoin()
+  {
+    String sql =
+      "select *\n" +
+      "from foo\n" +
+      "  join bar on ( bar.id in (select x from y where f1(x,y) = f2(a,b))\n";
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setIndentWhereCondition(true);
+		String formatted = f.getFormattedSql();
+    String expected =
+      "SELECT *\n" +
+      "FROM foo\n" +
+      "  JOIN bar ON (bar.id IN (SELECT x FROM y WHERE f1 (x,y) = f2 (a,b))";
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+  @Test
   public void testIndentWhere()
   {
     String sql = "select * from foo where x = 1 and y = 2;";
@@ -1093,7 +1112,7 @@ public class WbSqlFormatterTest
 		f = new WbSqlFormatter(sql, 5);
 		f.setNewLineForSubselects(true);
 		formatted = f.getFormattedSql();
-//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 	}
 

@@ -91,6 +91,8 @@ public class WbSqlFormatter
 
 	public static final Set<String> SET_TERMINAL = CollectionUtil.unmodifiableSet("FROM", "WHERE");
 
+	public static final Set<String> QUERY_START = CollectionUtil.unmodifiableSet("SELECT", "WITH");
+
 	private CharSequence sql;
 	private SQLLexer lexer;
 	private StringBuilder result;
@@ -663,7 +665,7 @@ public class WbSqlFormatter
 			}
 			else if (word.equalsIgnoreCase("SELECT") && "(".equalsIgnoreCase(lastToken.getText()))
 			{
-				t = this.processSubSelect(true, 1, false);
+				t = this.processSubSelect(t, 1, false);
 				if (t == null) return t;
 				continue;
 			}
@@ -712,7 +714,7 @@ public class WbSqlFormatter
 
 			if (lastToken.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
 			{
-				t = this.processSubSelect(true, bracketCount, true);
+				t = this.processSubSelect(t, bracketCount, true);
 				continue;
 			}
 
@@ -821,17 +823,26 @@ public class WbSqlFormatter
 				if (last.getContents().equals("IN"))
 				{
 					t = this.lexer.getNextToken(true, false);
-					t = processInList(t);
+          if (t != null && QUERY_START.contains(t.getContents()))
+          {
+            appendTokenText(t);
+            appendText(' ');
+            t = processSubSelect(null, 0, false);
+          }
+					else
+          {
+            t = processInList(t);
+          }
 					this.appendTokenText(t);
 				}
 			}
-			else if (last.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
+			else if (last.getContents().equals("(") && QUERY_START.contains(text) )
 			{
 				StringBuilder old = indent;
 				indent = new StringBuilder(2);
 				if (old != null) indent.append(old);
 				indent.append("  ");
-				t = this.processSubSelect(true, bracketCount, true);
+				t = this.processSubSelect(t, bracketCount, true);
 				indent = old;
 				continue;
 			}
@@ -1052,9 +1063,9 @@ public class WbSqlFormatter
 	private SQLToken processBracketExpression()
 	{
 		SQLToken t = skipComments();
-		if (t.getContents().equalsIgnoreCase("SELECT"))
+		if (QUERY_START.contains(t.getContents()))
 		{
-			return processSubSelect(true, 1, false);
+			return processSubSelect(t, 1, false);
 		}
 		return t;
 	}
@@ -1081,17 +1092,17 @@ public class WbSqlFormatter
 		return columnsPerLine > -1 && currentColumnCount >= columnsPerLine;
 	}
 
-	private SQLToken processSubSelect(boolean addSelectKeyword)
+	private SQLToken processSubSelect(SQLToken firstToken)
 	{
-		return processSubSelect(addSelectKeyword, 1, true);
+		return processSubSelect(firstToken, 1, true);
 	}
 
-	private SQLToken processSubSelect(boolean addSelectKeyword, int currentBracketCount, boolean checkForList)
+	private SQLToken processSubSelect(SQLToken firstToken, int currentBracketCount, boolean checkForList)
 	{
-		return processSubSelect(addSelectKeyword, currentBracketCount, checkForList, this.maxSubselectLength);
+		return processSubSelect(firstToken, currentBracketCount, checkForList, this.maxSubselectLength);
 	}
 
-	private SQLToken processSubSelect(boolean addSelectKeyword, int currentBracketCount, boolean checkForList, int maxSubLength)
+	private SQLToken processSubSelect(SQLToken firstToken, int currentBracketCount, boolean checkForList, int maxSubLength)
 	{
 		SQLToken t = skipComments();
 		int bracketCount = currentBracketCount;
@@ -1100,14 +1111,15 @@ public class WbSqlFormatter
 		// this method gets called when then "parser" hits an
 		// IN ( situation. If no SELECT is coming, we assume
 		// its a list like IN ('x','Y')
-		if (checkForList && !"SELECT".equalsIgnoreCase(t.getContents()) && !addSelectKeyword)
+		if (checkForList && !"SELECT".equalsIgnoreCase(t.getContents()) && firstToken == null)
 		{
 			return this.processInList(t);
 		}
 
-		if (addSelectKeyword)
+		if (firstToken != null)
 		{
-			subSql.append("SELECT ");
+      subSql.append(getTokenText(firstToken));
+      subSql.append(' ');
 		}
 
 		int lastIndent = 0;
@@ -1248,7 +1260,7 @@ public class WbSqlFormatter
 
 			if ("SELECT".equals(text) && last.getContents().equals("("))
 			{
-				t = this.processSubSelect(true);
+				t = this.processSubSelect(t);
 				if (t == null) return null;
 				if (t.getContents().equals(")")) this.appendText(")");
 			}
@@ -1859,7 +1871,7 @@ public class WbSqlFormatter
 				this.appendText('(');
 				this.appendNewline();
 				this.indent("  ");
-				t = processSubSelect(false, 1, false, 0);
+				t = processSubSelect(null, 1, false, 0);
 				nextIsSelect = false;
 
 				if (t == null) return null;
@@ -1954,7 +1966,7 @@ public class WbSqlFormatter
 						StringBuilder oldIndent = this.indent;
 						this.indent = new StringBuilder(indent == null ? "" : indent).append("  ");
 						this.appendNewline();
-						t = processSubSelect(false, 1, false);
+						t = processSubSelect(null, 1, false);
 						this.indent = oldIndent;
 						this.appendNewline();
 						if (t == null) return t;
@@ -2060,9 +2072,9 @@ public class WbSqlFormatter
 				SQLToken next = skipComments();
 				if (next == null) return null;
 
-				if ("SELECT".equals(next.getContents()))
+				if (QUERY_START.contains(next.getContents()))
 				{
-					t = this.processSubSelect(true);
+					t = this.processSubSelect(next);
 					if (t == null) return null;
 					if (t.getContents().equals(")")) this.appendText(")");
 				}
@@ -2164,9 +2176,9 @@ public class WbSqlFormatter
 		int bracketCount = 1;
 		SQLToken t = this.lexer.getNextToken(true, false);
 
-		if (t != null && t.getContents().equals("SELECT"))
+		if (t != null && QUERY_START.contains(t.getContents()))
 		{
-			t = processSubSelect(true);
+			t = processSubSelect(t);
 			if (t == null) return null;
 			if (t.getContents().equals(")"))
 			{
