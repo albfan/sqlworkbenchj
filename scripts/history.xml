@@ -17,6 +17,7 @@
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
     <entry dev-build="1" type="enh">The error dialog that is displayed when running a script can now be configured to also include the error message or the statement that failed</entry>
     <entry dev-build="1" type="enh">Improved display of packages in the DbTree for Oracle and Firebird</entry>
+    <entry dev-build="6" type="fix">When using "Remove Comments" for a connection profile, the error position inside a statement was not shown correctly for some DBMS</entry>
     <entry dev-build="6" type="fix">For Oracle, when using "Trim CHAR data" and editing tables where the primary key column was defined as CHAR, updating the result did not work.</entry>
     <entry dev-build="6" type="fix">Toggle comment did not toggle correctly when some lines were already commented and some not</entry>
     <entry dev-build="6" type="fix">The messages shown when using conditional execution with WbInclude did not properly include the variable name or value</entry>
