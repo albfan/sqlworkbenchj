@@ -82,7 +82,7 @@ public class DbObjectsTree
 		// setting the row height to 0 makes it dynamic
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
-    
+
     ToolTipManager.sharedInstance().registerComponent(this);
     dragSource = new ObjectTreeDragSource(this);
     loader = new TreeLoader();
@@ -221,12 +221,32 @@ public class DbObjectsTree
 
     ObjectTreeNode toSearch = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
 
+    if (toSearch == null)
+    {
+      // no schema or catalog node found --> start with the root node
+      // findNodeForTable() will not automatically load the content - which is good
+      // because we do not want to load everything just to find this table.
+      // when getting here, the table will only be searched in the already loaded nodes
+      toSearch = getModel().getRoot();
+    }
+
+    ObjectTreeNode node = findNodeForTable(toSearch, tbl);
+
+    if (node != null)
+    {
+      // this method is already called on the EDT, so there is no need to do it here
+      expandNode(node);
+      return;
+    }
+
+    // nothing found, check if we need to load the children
+    // if yes, do so and then search again
     if (shouldLoadSearchNode(toSearch))
     {
       final ObjectTreeNode toLoad = toSearch;
       // if we need to load the schema first, this should be done in a background thread
       // to make sure the UI is not blocked - especially because this method is called
-      // from an ActionListener even which means it's called on the EDT
+      // from an ActionListener event which means it's called on the EDT
       WbThread th = new WbThread("SchemaLoader")
       {
         @Override
@@ -246,24 +266,6 @@ public class DbObjectsTree
         }
       };
       th.start();
-      return;
-    }
-
-    if (toSearch == null)
-    {
-      // no schema or catalog node found --> start with the root node
-      // findNodeForTable() will not automatically load the content - which is good
-      // because we do not want to load everything just to find this table.
-      // when getting here, the table will only be searched in the already loaded nodes
-      toSearch = getModel().getRoot();
-    }
-
-    ObjectTreeNode node = findNodeForTable(toSearch, tbl);
-
-    if (node != null)
-    {
-      // this method is already called on the EDT, so there is no need to do it here
-      expandNode(node);
     }
   }
 
