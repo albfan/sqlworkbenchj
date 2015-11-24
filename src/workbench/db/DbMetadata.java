@@ -2538,7 +2538,7 @@ public class DbMetadata
 	 * not return the correct database (=catalog) after the database has
 	 * been changed with the USE <db> command from within the Workbench.
 	 *
-	 * If no query has been configured for the current DBMS, DatabaseMetaData.getCatalog()
+	 * If no query has been configured for the current DBMS, Connection.getCatalog()
 	 * is used, otherwise the query that is configured with the property
 	 * workbench.db.[dbid].currentcatalog.query
 	 *

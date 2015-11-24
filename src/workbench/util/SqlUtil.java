@@ -1641,7 +1641,7 @@ public class SqlUtil
 			StringUtil.trimTrailingWhitespace(msg);
 			return msg;
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logWarning("SqlUtil.getWarnings()", "Error retrieving warnings", e);
 			return null;

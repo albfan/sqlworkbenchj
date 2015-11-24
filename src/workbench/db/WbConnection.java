@@ -324,7 +324,7 @@ public class WbConnection
 		{
 			return sqlConnection.getTransactionIsolation();
 		}
-		catch (SQLException sql)
+		catch (Throwable sql)
 		{
 			LogMgr.logWarning("WbConnection.getIsolationLevel()", "Could not retrieve isolation level", sql);
 			return Connection.TRANSACTION_NONE;
@@ -340,7 +340,7 @@ public class WbConnection
 		{
 			sqlConnection.setTransactionIsolation(newLevel);
 		}
-		catch (SQLException sql)
+		catch (Throwable sql)
 		{
 			LogMgr.logWarning("WbConnection.setIsolationLevel()", "Could not set isolation level", sql);
 		}
@@ -358,7 +358,7 @@ public class WbConnection
 		{
 			return SqlUtil.getIsolationLevelName(sqlConnection.getTransactionIsolation());
 		}
-		catch (SQLException e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("WbConnection.getIsolationLevel()", "Error retrieving isolation level", e);
 		}
@@ -420,6 +420,7 @@ public class WbConnection
 		}
 		catch (Throwable e)
 		{
+      LogMgr.logDebug("WbConnection.getCurrentUser()", "Could not retrieve current database user", e);
 			return StringUtil.EMPTY_STRING;
 		}
 	}
@@ -612,7 +613,7 @@ public class WbConnection
 			LogMgr.logWarning("WbConnection.getWarnings()", "getWarnings() not supported by the driver");
 			return null;
 		}
-		catch (SQLException e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("WbConnection.getWarnings()", "Error when retrieving SQL Warnings", e);
 			return null;
@@ -1403,14 +1404,7 @@ public class WbConnection
 	 */
 	public String getCurrentCatalog()
 	{
-		try
-		{
-			return this.sqlConnection.getCatalog();
-		}
-		catch (SQLException e)
-		{
-			return null;
-		}
+  	return this.metaData.getCurrentCatalog();
 	}
 
 	public String getDisplayCatalog()

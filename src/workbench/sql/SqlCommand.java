@@ -708,7 +708,7 @@ public class SqlCommand
 			{
 				moreResults = this.currentStatement.getMoreResults();
 			}
-			catch (SQLException sql)
+			catch (Exception sql)
 			{
 				// SQL Exceptions should be shown to the user
 				LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", sql);
