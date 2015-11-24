@@ -249,7 +249,10 @@ public class ConnectionMgr
 		}
 
 		WbConnection conn = new WbConnection(anId, sql, profile);
-    conn.syncReadOnlyState();
+    if (profile.isReadOnly())
+    {
+      conn.syncReadOnlyState();
+    }
 
 		return conn;
 	}
