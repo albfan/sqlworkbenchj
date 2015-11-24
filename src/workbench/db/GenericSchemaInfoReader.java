@@ -26,7 +26,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 
@@ -197,10 +196,9 @@ public class GenericSchemaInfoReader
 			if (timeout > 0)
 			{
 				stmt.setQueryTimeout(timeout);
-				LogMgr.logDebug("GenericSchemaInfoReader.setQueryTimeout", "Timeout set to " + timeout + "s");
 			}
 		}
-		catch (SQLException sql)
+		catch (Throwable sql)
 		{
 			LogMgr.logWarning("GenericSchemaInformationReader.setQueryTimeout()", "Could not set query timeout to " + timeout +
 				" Please adjust the value of the property: " + queryProp, sql);

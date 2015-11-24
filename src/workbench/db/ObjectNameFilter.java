@@ -154,6 +154,7 @@ public class ObjectNameFilter
 	public void removeExpressions()
 	{
 		modified = CollectionUtil.isNonEmpty(filterPatterns);
+    patternSource.clear();
     filterPatterns.clear();
 	}
 

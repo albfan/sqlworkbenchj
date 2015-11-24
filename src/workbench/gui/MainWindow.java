@@ -75,6 +75,7 @@ import workbench.resource.ShortcutManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.db.objectcache.DbObjectCacheFactory;
 
 import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.AddMacroAction;
@@ -2123,11 +2124,22 @@ public class MainWindow
 		}
 	}
 
+  private void saveCache()
+  {
+    MainPanel panel = getCurrentPanel();
+    if (panel == null) return;
+    WbConnection conn = panel.getConnection();
+    if (conn == null) return;
+    DbObjectCacheFactory.getInstance().saveCache(conn);
+  }
+
 	/**
 	 *	This does the real disconnect action.
 	 */
 	protected void doDisconnect()
 	{
+    saveCache();
+    
 		try
 		{
       if (treePanel != null)

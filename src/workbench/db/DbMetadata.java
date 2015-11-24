@@ -193,7 +193,7 @@ public class DbMetadata
 			this.schemaTerm = this.metaData.getSchemaTerm();
 			LogMgr.logDebug("DbMetadata.<init>", "Schema term: " + schemaTerm);
 		}
-		catch (SQLException e)
+		catch (Throwable e)
 		{
 			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Schema term: " + e.getMessage());
 			this.schemaTerm = "Schema";
@@ -204,7 +204,7 @@ public class DbMetadata
 			this.catalogTerm = this.metaData.getCatalogTerm();
 			LogMgr.logDebug("DbMetadata.<init>", "Catalog term: " + catalogTerm);
 		}
-		catch (SQLException e)
+		catch (Throwable e)
 		{
 			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Catalog term: " + e.getMessage());
 			this.catalogTerm = "Catalog";
@@ -220,7 +220,7 @@ public class DbMetadata
 		{
 			this.productName = this.metaData.getDatabaseProductName();
 		}
-		catch (SQLException e)
+		catch (Throwable e)
 		{
 			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Database Product name", e);
 			this.productName = aConnection.getProfile().getDriverclass();
@@ -393,7 +393,7 @@ public class DbMetadata
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
 			LogMgr.logDebug("DbMetadata.<init>", "Identifier quote character obtained from driver: " + quoteCharacter);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			this.quoteCharacter = null;
 			LogMgr.logError("DbMetadata.<init>", "Error when retrieving identifier quote character", e);
@@ -502,7 +502,7 @@ public class DbMetadata
 		{
 			this.maxTableNameLength = metaData.getMaxTableNameLength();
 		}
-		catch (SQLException sql)
+		catch (Throwable sql)
 		{
 			LogMgr.logWarning("DbMetadata.<init>", "Driver does not support getMaxTableNameLength()", sql);
 			this.maxTableNameLength = 0;

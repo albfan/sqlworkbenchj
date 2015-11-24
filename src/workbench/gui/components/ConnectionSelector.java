@@ -279,6 +279,7 @@ public class ConnectionSelector
 		}
 		catch (Throwable e)
 		{
+      LogMgr.logError("ConnectionSelector.doConnect()", "Error when connecting to the database", e);
 			conn = null;
 			error = ExceptionUtil.getDisplay(e);
 		}

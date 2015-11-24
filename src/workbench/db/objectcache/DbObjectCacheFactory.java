@@ -56,7 +56,7 @@ public class DbObjectCacheFactory
 	/**
 	 * Thread safe singleton-instance
 	 */
-	protected static class LazyInstanceHolder
+	private static class LazyInstanceHolder
 	{
 		protected static final DbObjectCacheFactory instance = new DbObjectCacheFactory();
 	}
