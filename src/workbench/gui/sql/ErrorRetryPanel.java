@@ -148,12 +148,12 @@ public class ErrorRetryPanel
     buttonPanel.add(retryButton);
     buttonPanel.add(Box.createHorizontalStrut(gap * 2));
 
-    ignoreOneButton = new WbButton(ResourceMgr.getString("LblIgnore"));
+    ignoreOneButton = new WbButton(ResourceMgr.getString("LblIgnoreThis"));
     ignoreOneButton.addActionListener(this);
     buttonPanel.add(ignoreOneButton);
     buttonPanel.add(Box.createHorizontalStrut(gap / 3));
 
-    ignoreAllButton = new WbButton(ResourceMgr.getString("LblIgnoreAll"));
+    ignoreAllButton = new WbButton(ResourceMgr.getString("LblIgnoreAllErr"));
     ignoreAllButton.addActionListener(this);
     buttonPanel.add(ignoreAllButton);
     buttonPanel.add(Box.createHorizontalStrut(gap / 3));

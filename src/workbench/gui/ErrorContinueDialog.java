@@ -34,14 +34,15 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
-import static workbench.gui.WbSwingUtilities.PROP_ERROR_MSG_WRAP;
-import static workbench.gui.WbSwingUtilities.createErrorMessagePanel;
-import static workbench.gui.WbSwingUtilities.getMultilineLabel;
-import workbench.gui.components.WbOptionPane;
 import workbench.resource.ErrorPromptType;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.WbOptionPane;
+
 import workbench.sql.ErrorDescriptor;
+
+import static workbench.gui.WbSwingUtilities.*;
 
 /**
  *
@@ -78,7 +79,7 @@ public class ErrorContinueDialog
   {
     String[] options = new String[]
     {
-      ResourceMgr.getString("LblIgnore"), ResourceMgr.getString("LblIgnoreAll"), ResourceMgr.getPlainString("LblCancel")
+      ResourceMgr.getString("LblIgnoreThis"), ResourceMgr.getString("LblIgnoreAllErr"), ResourceMgr.getPlainString("LblCancel")
     };
 
     final Object message = getMessage();
