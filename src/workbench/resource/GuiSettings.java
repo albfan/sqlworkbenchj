@@ -269,7 +269,7 @@ public class GuiSettings
 
 	public static boolean getHighlightErrorStatement()
 	{
-		return Settings.getInstance().getBoolProperty(PROPERTY_HILITE_ERROR_LINE, true);
+		return Settings.getInstance().getBoolProperty(PROPERTY_HILITE_ERROR_LINE, false);
 	}
 
 	public static void setHighlightErrorStatement(boolean flag)
