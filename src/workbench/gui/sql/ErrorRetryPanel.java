@@ -158,7 +158,7 @@ public class ErrorRetryPanel
     buttonPanel.add(ignoreAllButton);
     buttonPanel.add(Box.createHorizontalStrut(gap / 3));
 
-    cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
+    cancelButton = new WbButton(ResourceMgr.getString("LblStopScript"));
     cancelButton.addActionListener(this);
     buttonPanel.add(cancelButton);
     toolPanel.add(buttonPanel, BorderLayout.CENTER);

@@ -79,7 +79,7 @@ public class ErrorContinueDialog
   {
     String[] options = new String[]
     {
-      ResourceMgr.getString("LblIgnoreThis"), ResourceMgr.getString("LblIgnoreAllErr"), ResourceMgr.getPlainString("LblCancel")
+      ResourceMgr.getString("LblIgnoreThis"), ResourceMgr.getString("LblIgnoreAllErr"), ResourceMgr.getPlainString("LblStopScript")
     };
 
     final Object message = getMessage();
