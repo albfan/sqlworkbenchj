@@ -1223,7 +1223,7 @@ public class WbTable
 
 		ResultInfo info = this.getDataStore().getResultInfo();
 		int realColumn  = column;
-		if (this.dwModel.getShowStatusColumn())
+		if (this.dwModel.isStatusColumnVisible())
 		{
 			realColumn = column - 1;
 		}
@@ -1282,7 +1282,7 @@ public class WbTable
 		ResultInfo info = this.getDataStore().getResultInfo();
 		int offset = 0;
 		int tableCols = this.getColumnCount();
-		if (this.dwModel.getShowStatusColumn()) offset = 1;
+		if (this.dwModel.isStatusColumnVisible()) offset = 1;
 		boolean[] highlightCols = new boolean[tableCols];
 		for (int i=0; i < info.getColumnCount(); i++)
 		{
@@ -1615,10 +1615,10 @@ public class WbTable
     return dwModel.getDataStore().getRow(row).getUserObject();
   }
 
-	public boolean getShowStatusColumn()
+	public boolean isStatusColumnVisible()
 	{
 		if (this.dwModel == null) return false;
-		return this.dwModel.getShowStatusColumn();
+		return this.dwModel.isStatusColumnVisible();
 	}
 
 	public void setAdjustToColumnLabel(boolean aFlag)
@@ -1626,9 +1626,19 @@ public class WbTable
 		this.adjustToColumnLabel = aFlag;
 	}
 
-	public void setShowStatusColumn(final boolean flag)
+  public void showStatusColumn()
+  {
+    setStatusColumnVisible(true);
+  }
+
+  public void hideStatusColumn()
+  {
+    setStatusColumnVisible(false);
+  }
+
+  private void setStatusColumnVisible(final boolean flag)
 	{
-		if (flag == this.dwModel.getShowStatusColumn()) return;
+		if (flag == this.dwModel.isStatusColumnVisible()) return;
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -1640,7 +1650,7 @@ public class WbTable
 		});
 	}
 
-	protected void _setShowStatusColumn(boolean flag)
+	private void _setShowStatusColumn(boolean show)
 	{
 		if (this.dwModel == null) return;
 
@@ -1648,9 +1658,9 @@ public class WbTable
 		final int row = this.getSelectedRow();
 
 		this.saveColumnSizes();
-		this.dwModel.setShowStatusColumn(flag);
+		this.dwModel.setStatusColumnVisible(show);
 
-		if (flag)
+		if (show)
 		{
 			TableColumn col = this.getColumnModel().getColumn(0);
 			col.setCellRenderer(new RowStatusRenderer());
@@ -1668,19 +1678,15 @@ public class WbTable
 			}
 		}
 
-		this.initMultiLineRenderer();
-		this.initDefaultEditors();
-		this.restoreColumnSizes();
-		this.adjustRowHeight();
+		initMultiLineRenderer();
+		initDefaultEditors();
+		restoreColumnSizes();
+		adjustRowHeight();
+    updateSortRenderer();
 
 		if (row >= 0)
 		{
-			//this.getSelectionModel().setSelectionInterval(row, row);
-			final int newColumn;
-			if (flag)
-				newColumn = column + 1;
-			else
-				newColumn = column - 1;
+			final int newColumn = show ? column + 1 : column - 1;
 
 			if (newColumn >= 0)
 			{
@@ -1790,7 +1796,7 @@ public class WbTable
 		int count = colMod.getColumnCount();
 		this.savedColumnSizes = new HashMap<>();
 		int start = 0;
-		if (this.dwModel.getShowStatusColumn()) start = 1;
+		if (this.dwModel.isStatusColumnVisible()) start = 1;
 
 		for (int i=start; i < count; i++)
 		{
@@ -2013,7 +2019,7 @@ public class WbTable
 	{
 		if (this.dwModel == null) return false;
 
-		int offset = (this.dwModel.getShowStatusColumn() ? 1 : 0);
+		int offset = (this.dwModel.isStatusColumnVisible() ? 1 : 0);
 
 		// the first column is never a multiline if the status column is displayed.
 		if (col - offset < 0) return false;
@@ -2592,7 +2598,7 @@ public class WbTable
 		this.getSelectionModel().setSelectionInterval(newRow, newRow);
 		this.scrollToRow(newRow);
 		this.setEditingRow(newRow);
-		if (this.dwModel.getShowStatusColumn())
+		if (this.dwModel.isStatusColumnVisible())
 		{
 			this.setEditingColumn(1);
 			this.editCellAt(newRow, 1);

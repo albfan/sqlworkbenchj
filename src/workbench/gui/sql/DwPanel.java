@@ -1601,7 +1601,7 @@ public class DwPanel
 		if (!this.isEditingStarted()) return;
 
 		dataTable.stopEditing();
-		dataTable.setShowStatusColumn(false);
+		dataTable.hideStatusColumn();
 		checkResultSetActions();
 		updateAction.setEnabled(GuiSettings.getAlwaysEnableSaveButton());
 		dataTable.restoreOriginalValues();
@@ -1621,7 +1621,7 @@ public class DwPanel
 
 	public boolean isEditingStarted()
 	{
-		return this.dataTable.getShowStatusColumn();
+		return this.dataTable.isStatusColumnVisible();
 	}
 
 	/**
@@ -1649,7 +1649,7 @@ public class DwPanel
 
 		// The offset is necessary because if the status column is shown,
 		// the current editing column will change (but only if the status column is not already shown)
-		int offset = dataTable.getShowStatusColumn() ? 0 : 1;
+		int offset = dataTable.isStatusColumnVisible() ? 0 : 1;
 		int currentColumn = this.dataTable.getEditingColumn() + offset;
 
 		Window w = SwingUtilities.getWindowAncestor(this);
@@ -1686,7 +1686,7 @@ public class DwPanel
 				colOrder = ColumnOrderMgr.getInstance().getColumnOrder(dataTable);
 			}
 
-			this.dataTable.setShowStatusColumn(true);
+			this.dataTable.showStatusColumn();
 
 			if (colOrder != null)
 			{

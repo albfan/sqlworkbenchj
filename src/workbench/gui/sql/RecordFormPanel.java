@@ -499,7 +499,7 @@ public class RecordFormPanel
 
 	private int getTableColumn(int dataColumn)
 	{
-		int offset = data.getShowStatusColumn() ? 1 : 0;
+		int offset = data.isStatusColumnVisible() ? 1 : 0;
 		int colIndex = dataColumn + offset;
 		int viewIndex = data.convertColumnIndexToView(colIndex);
 		return viewIndex;

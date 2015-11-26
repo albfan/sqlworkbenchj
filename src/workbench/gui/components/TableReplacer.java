@@ -195,7 +195,7 @@ public class TableReplacer
 	{
 		final int row = pos.getRow();
 		int col = pos.getColumn();
-		final int realCol = (this.client.getShowStatusColumn() ? col + 1 : col);
+		final int realCol = (this.client.isStatusColumnVisible() ? col + 1 : col);
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
@@ -282,7 +282,7 @@ public class TableReplacer
 		try
 		{
 			tableChanging = true;
-			this.client.setShowStatusColumn(true);
+			this.client.showStatusColumn();
 			this.client.getDataStoreTableModel().fireTableDataChanged();
 		}
 		finally

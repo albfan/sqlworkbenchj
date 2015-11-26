@@ -69,7 +69,7 @@ public class DisplayDataFormAction
 		if (row < 0) row = 0;
 
 		int col = client.getEditingColumn();
-		if (client.getShowStatusColumn()) col --;
+		if (client.isStatusColumnVisible()) col --;
 		if (col < 0) col = 0;
 
 		RecordFormPanel panel = new RecordFormPanel(client, row, col);

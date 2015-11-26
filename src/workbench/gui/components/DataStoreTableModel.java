@@ -174,7 +174,7 @@ public class DataStoreTableModel
 	 *	The status column will display an indicator if the row has
 	 *  been modified or was inserted
 	 */
-	public void setShowStatusColumn(boolean aFlag)
+	public void setStatusColumnVisible(boolean aFlag)
 	{
 		if (aFlag == this.showStatusColumn) return;
 		synchronized(model_change_lock)
@@ -192,12 +192,7 @@ public class DataStoreTableModel
 		this.fireTableStructureChanged();
 	}
 
-	public void setReadOnlyColumns(Set<Integer> cols)
-	{
-		this.readOnlyColumns = cols;
-	}
-
-	public boolean getShowStatusColumn()
+	public boolean isStatusColumnVisible()
 	{
 		return this.showStatusColumn;
 	}

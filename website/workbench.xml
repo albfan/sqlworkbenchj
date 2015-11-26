@@ -133,8 +133,9 @@ WHERE id=42;</p>
     <content>
       <h3>Screenshots</h3>
       <ul style="margin-top:10px">
-      <li><image-link title="Main window" name="MainWindow.png" back="screenshots" next="multiple_results.png">Main Window</image-link><br/></li>
-      <li><image-link title="Multiple results" name="multiple_results.png" back="MainWindow.png" next="Profiles.png">Multiple Results</image-link><br/></li>
+      <li><image-link title="Main window" name="MainWindow.png" back="screenshots" next="mainwindow_dbtree.png">Main Window</image-link><br/></li>
+      <li><image-link title="Main window with database tree" name="mainwindow_dbtree.png" back="MainWindow.png" next="multiple_results.png">Main Window with database tree</image-link><br/></li>
+      <li><image-link title="Multiple results" name="multiple_results.png" back="mainwindow_dbtree.png" next="Profiles.png">Multiple Results</image-link><br/></li>
       <li><image-link title="Connection Profile" name="Profiles.png" back="multiple_results.png" next="SqlFormat.png">Connection Profile</image-link><br/></li>
       <li><image-link title="SQL Formatter" name="SqlFormat.png" back="Profiles.png" next="child_rows.png">SQL Formatter</image-link></li>
       <li><image-link title="Select related child rows" name="child_rows.png" back="SqlFormat.png" next="parent_rows.png">Select related child rows</image-link></li>

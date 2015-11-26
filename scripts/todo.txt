@@ -1,7 +1,6 @@
 Features:
 ---------
 - Expand environment variables in file names
-- Copy current statement to clipboard
 - WbExport -type=text -formatted=true to generate an export similar to a plain select in the console
 - search text in all editor tabs
 - support for named parameters from e.g. JPA Queries
@@ -21,7 +20,6 @@ Features:
 - Alternate quoting characters (Oracle's q'[ ]', or E'...')
 - DbExplorer panel showing all indexes
 - Treat Oracle's BFILE, Postgres' LargeObjects and SQL Server's FileStream as BLOBs
-- Support external SQL formatter
 - Convert DDL from one DBMS to another using "intelligent" search & replace (MySQL -> PG, PG -> Oracle)
   (alternatively use output of WbSchemaReport with built-in XSLT scripts)
 - Support N'..' strings for SQL generation
@@ -44,8 +42,6 @@ Features:
 - Workspace "Explorer"
 - Option panel to modify DB specific stuff (ddlneedscommit etc)
 - Scripting (Groovy, JavaScript, awk, ..)
-- automatic refresh of a result
-
 
 Bugs:
 -----

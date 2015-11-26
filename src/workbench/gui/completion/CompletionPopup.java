@@ -260,11 +260,16 @@ public class CompletionPopup
   @Override
 	public void closeQuickSearch()
 	{
+    closeQuickSearch(Settings.getInstance().getCloseAutoCompletionWithSearch());
+  }
+
+	public void closeQuickSearch(boolean closePopup)
+	{
 		this.searchField = null;
 		this.scroll.setColumnHeaderView(this.headerComponent);
 		this.headerComponent.doLayout();
 
-		if (Settings.getInstance().getCloseAutoCompletionWithSearch())
+		if (closePopup)
 		{
 			this.closePopup(false);
 		}
@@ -742,7 +747,7 @@ public class CompletionPopup
 		}
 		else if (clicks == 1 && this.searchField != null)
 		{
-			closeQuickSearch();
+			closeQuickSearch(false);
 		}
 	}
 

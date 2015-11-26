@@ -74,7 +74,7 @@ public class DbObjectsTree
     renderer = new DbObjectNodeRenderer();
 		setCellRenderer(renderer);
 		setAutoscrolls(true);
-
+    setScrollsOnExpand(true);
 		setEditable(false);
 		setExpandsSelectedPaths(true);
     getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
@@ -236,6 +236,10 @@ public class DbObjectsTree
     {
       // this method is already called on the EDT, so there is no need to do it here
       expandNode(node);
+      if (node.getDbObject() instanceof TableIdentifier)
+      {
+        expandColumns(node);
+      }
       return;
     }
 
@@ -451,6 +455,19 @@ public class DbObjectsTree
     {
       WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
       LogMgr.logError("DbObjectsTree.<init>", "Could not load tree", ex);
+    }
+  }
+
+  private void expandColumns(ObjectTreeNode node)
+  {
+    if (node == null) return;
+    if (node.getDbObject() instanceof TableIdentifier)
+    {
+      ObjectTreeNode columnNode = node.getChildAt(0);
+      TreeNode[] nodes = getTreeModel().getPathToRoot(columnNode);
+      TreePath path = new TreePath(nodes);
+      setExpandedState(path, true);
+      scrollPathToVisible(path);
     }
   }
 
