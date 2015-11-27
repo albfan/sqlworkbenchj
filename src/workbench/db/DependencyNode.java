@@ -204,11 +204,26 @@ public class DependencyNode
 		return result.toString();
 	}
 
+  public List<String> getSourceColumns()
+  {
+    return new ArrayList<>(columns.keySet());
+  }
+
 	public String getSourceColumnsList()
 	{
 		if (CollectionUtil.isEmpty(columns)) return "";
 		return StringUtil.listToString(columns.keySet(), ',');
 	}
+
+  public List<String> getTargetColumns()
+  {
+    List<String> result = new ArrayList<>(columns.size());
+		for (String col : columns.keySet())
+		{
+			result.add(columns.get(col));
+		}
+    return result;
+  }
 
 	public String getTargetColumnsList()
 	{

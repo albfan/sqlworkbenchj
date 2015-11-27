@@ -22,14 +22,12 @@
  */
 package workbench.db.mssql;
 
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -103,7 +101,7 @@ public class SqlServerUtil
 			LogMgr.logInfo("SqlServerUtil.setLockTimeout()", "Setting lock timeout: " + millis + "ms");
 			stmt.execute(sql);
 		}
-		catch (SQLException ex)
+		catch (Throwable ex)
 		{
 			LogMgr.logError("SqlServerUtil.setLockTimeout()", "Could not set lock timeout using: " + sql, ex);
 		}

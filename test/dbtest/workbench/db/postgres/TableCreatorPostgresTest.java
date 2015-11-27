@@ -145,7 +145,7 @@ public class TableCreatorPostgresTest
 			TableIdentifier tbl = new TableIdentifier("other.foo");
 			List<ColumnIdentifier> cols = new ArrayList<>();
 
-			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
+			ColumnIdentifier id = new ColumnIdentifier("id", Types.INTEGER);
 			id.setDbmsType("integer");
 			id.setIsPkColumn(true);
 			id.setIsNullable(false);

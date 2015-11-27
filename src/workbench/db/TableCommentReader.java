@@ -80,9 +80,9 @@ public class TableCommentReader
 			}
 			else
 			{
-				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
-				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.SCHEMA_PLACEHOLDER, table.getSchema());
-				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.CATALOG_PLACEHOLDER, table.getCatalog());
+				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getTableName()));
+				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.SCHEMA_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getSchema()));
+				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.CATALOG_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getCatalog()));
 			}
 			result = StringUtil.replace(result, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'", "''"));
 			result += ";";
@@ -102,7 +102,7 @@ public class TableCommentReader
 	 * Return the SQL that is needed to re-create the comment on the given columns.
 	 *
 	 * The syntax to be used, can be configured in the workbench.settings file.
-	 * 
+	 *
 	 * @see CommentSqlManager#getCommentSqlTemplate(java.lang.String, java.lang.String)
 	 */
 	public StringBuilder getTableColumnCommentsSql(WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)

@@ -782,7 +782,7 @@ public class TableSourceBuilder
 
 		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, useFQN ? fqName : tablename);
     template = StringUtil.replace(template, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqName);
-		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, StringUtil.listToString(pkCols, ", ", false));
+		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, getColumnList(pkCols));
 
 		if (nameTester.isSystemConstraintName(pkName))
 		{
@@ -798,12 +798,11 @@ public class TableSourceBuilder
 				pkName = pkName.substring(0, maxLen - 1);
 			}
 		}
-
-    if (dbConnection.getDbSettings().useFQConstraintName())
+    else if (pkName != null && dbConnection.getDbSettings().useFQConstraintName())
     {
       pkName = SqlUtil.buildExpression(dbConnection, table.getCatalog(), table.getSchema(), pkName);
     }
-    else if (pkName != null && !meta.isLegalIdentifier(pkName))
+    else if (pkName != null)
     {
       pkName = meta.quoteObjectname(pkName);
     }
@@ -829,6 +828,17 @@ public class TableSourceBuilder
 
 		return result;
 	}
+
+  private String getColumnList(List<String> pkCols)
+  {
+    StringBuilder result = new StringBuilder(pkCols.size() * 30);
+    for (int i=0; i < pkCols.size(); i++)
+    {
+      if (i > 0) result.append(", ");
+      result.append(dbConnection.getMetadata().quoteObjectname(pkCols.get(i)));
+    }
+    return result.toString();
+  }
 
 	private boolean getCreateInlinePKConstraints()
 	{
@@ -896,7 +906,7 @@ public class TableSourceBuilder
 				}
 			}
 
-			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, node.getTargetColumnsList(), true);
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, getColumnList(node.getTargetColumns()), true);
 
 			String rule = node.getUpdateAction();
 			if (dbConnection.getDbSettings().supportsFkOption("update", rule))
@@ -929,7 +939,7 @@ public class TableSourceBuilder
 			}
 
 			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, node.getTable().getTableExpression(dbConnection), true);
-			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, node.getSourceColumnsList(), true);
+			stmt = TemplateHandler.replacePlaceholder(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, getColumnList(node.getSourceColumns()), true);
 
 			String add = getAdditionalFkSql(table, node, stmt);
 			if (add != null)

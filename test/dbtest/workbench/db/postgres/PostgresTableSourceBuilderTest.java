@@ -38,6 +38,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.db.DropType;
+import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
+
 /**
  *
  * @author Thomas Kellerer
@@ -168,6 +172,44 @@ public class PostgresTableSourceBuilderTest
 		int size = p.getSize();
 		assertEquals(2, size);
 		assertEquals("ALTER TABLE foo_storage ALTER some_data SET STORAGE PLAIN", p.getCommand(1));
+	}
+
+	@Test
+	public void testQuotedIdentifiers()
+		throws Exception
+	{
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		assertNotNull(con);
+		TestUtil.executeScript(con,
+			"create table \"Base\"\n" +
+      "(\n" +
+      "   \"Id\" integer, \n" +
+      "   some_column integer, \n" +
+      "   constraint \"Base_PK\" primary key (\"Id\") \n " +
+      "); \n" +
+			"create table \"Foo_Bar\"\n" +
+      "(\n" +
+      "   \"PK_id\" integer, \n" +
+      "   \"Other_Value\" varchar(100), \n" +
+      "   some_column integer, \n" +
+      "   constraint \"Some_PK\" primary key (\"PK_id\", \"Other_Value\"), \n " +
+      "   constraint \"Some_FK\" foreign key (\"PK_id\") references \"Base\" \n " +
+      ");\n" +
+      "comment on table \"Foo_Bar\" is 'Some witty comment';\n" +
+			"commit;");
+
+		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("\"Foo_Bar\""));
+    TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+
+		String source = builder.getTableSource(tbl, DropType.none, true);
+//		System.out.println(source);
+    assertTrue(source.startsWith("CREATE TABLE \"Foo_Bar\""));
+    assertTrue(source.contains("ALTER TABLE \"Foo_Bar\""));
+    assertTrue(source.contains("ADD CONSTRAINT \"Some_PK\""));
+    assertTrue(source.contains("PRIMARY KEY (\"PK_id\", \"Other_Value\")"));
+    assertTrue(source.contains("COMMENT ON TABLE \"Foo_Bar\""));
+    assertTrue(source.contains("ADD CONSTRAINT \"Some_FK\" FOREIGN KEY (\"PK_id\")"));
+    assertTrue(source.contains("REFERENCES \"Base\" (\"Id\")"));
 	}
 
 }

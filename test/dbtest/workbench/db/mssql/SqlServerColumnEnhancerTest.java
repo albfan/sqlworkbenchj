@@ -72,7 +72,9 @@ public class SqlServerColumnEnhancerTest
 				"   pieces integer, \n" +
 				"   single_price numeric(19,2), \n" +
 				"   total_price as (pieces * single_price), \n" +
-				"   avg_price as (single_price / pieces) persisted \n" +
+				"   avg_price as (single_price / pieces) persisted, \n" +
+        "   some_text varchar(20) collate Latin1_General_BIN, \n" +
+        "   some_geo geometry \n" +
 				")";
 		TestUtil.executeScript(conn, sql);
 	}
@@ -96,7 +98,7 @@ public class SqlServerColumnEnhancerTest
 		TableDefinition def = conn.getMetadata().getTableDefinition(new TableIdentifier("sales"));
 		assertNotNull(def);
 		List<ColumnIdentifier> cols = def.getColumns();
-		assertEquals(4, cols.size());
+		assertEquals(6, cols.size());
 		ColumnIdentifier total = cols.get(2);
 		assertEquals("total_price", total.getColumnName());
 		assertEquals("AS ([pieces]*[single_price])", total.getComputedColumnExpression());
@@ -104,6 +106,14 @@ public class SqlServerColumnEnhancerTest
 		ColumnIdentifier avg = cols.get(3);
 		assertEquals("avg_price", avg.getColumnName());
 		assertEquals("AS ([single_price]/[pieces]) PERSISTED", avg.getComputedColumnExpression());
+
+    ColumnIdentifier text = cols.get(4);
+    assertEquals("some_text", text.getColumnName());
+    assertEquals("Latin1_General_BIN", text.getCollation());
+
+    ColumnIdentifier geo = cols.get(5);
+    assertEquals("some_geo", geo.getColumnName());
+    assertEquals("geometry", geo.getDbmsType());
 	}
 
 	@Test
@@ -141,6 +151,7 @@ public class SqlServerColumnEnhancerTest
 			SqlUtil.closeStatement(stmt);
 		}
 
+    // Now check if the column remark was defined correctly
 		def = conn.getMetadata().getTableDefinition(sales);
 		pieces = def.getColumns().get(0);
 		assertEquals("Total number ordered", pieces.getComment());

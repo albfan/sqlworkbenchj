@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -41,7 +40,6 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 
-import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -72,123 +70,65 @@ public class SqlServerColumnEnhancer
 	{
 		if (SqlServerUtil.isSqlServer2000(conn))
 		{
-			updateComputedColumns(table, conn);
+			updateColumnInformation(table, conn);
 		}
 
 		if (conn.getDbSettings().getBoolProperty("remarks.column.retrieve", true))
 		{
 			updateColumnRemarks(table, conn);
 		}
-
-		if (SqlServerUtil.isSqlServer2005(conn))
-		{
-			updateColumnInformation(table, conn);
-		}
 	}
 
-	private void updateColumnRemarks(TableDefinition table, WbConnection conn)
-	{
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-
-		String tablename = SqlUtil.removeObjectQuotes(table.getTable().getTableName());
-		String schema = SqlUtil.removeObjectQuotes(table.getTable().getSchema());
-
-		String propName = conn.getDbSettings().getProperty(SqlServerObjectListEnhancer.REMARKS_PROP_NAME, SqlServerObjectListEnhancer.REMARKS_PROP_DEFAULT);
-
-		// I have to cast to a length specified varchar value otherwise
-		// the remarks will be truncated at 31 characters for some strange reason
-		// varchar(8000) character should work on any sensible SQL Server version  (varchar(max) doesn't work on SQL Server 2000)
-		String sql = "SELECT objname, cast(value as varchar(8000)) as value \nFROM ";
-
-		if (SqlServerUtil.isSqlServer2005(conn))
-		{
-			sql += "fn_listextendedproperty ('" + propName + "','schema', ?, 'table', ?, 'column', null)";
-		}
-		else
-		{
-			// SQL Server 2000 (and probably before) uses a different function name and parameters
-			sql += "::fn_listextendedproperty ('" + propName + "','user', ?, 'table', ?, 'column', null)";
-		}
-
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnRemarks()",
-				"Retrieving column remarks using query:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
-		}
-
-		Map<String, String> remarks = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
-		try
-		{
-			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, schema);
-			stmt.setString(2, tablename);
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String col = rs.getString(1);
-				String remark = rs.getString(2);
-				if (col != null && remark != null)
-				{
-					remarks.put(col.trim(), remark);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlServerColumnEnhancer.updateColumnRemarks()", "Error retrieving remarks using:\n" + SqlUtil.replaceParameters(sql, schema, tablename), e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-
-		for (ColumnIdentifier col : table.getColumns())
-		{
-			String remark = remarks.get(col.getColumnName());
-			col.setComment(remark);
-		}
-	}
-
-	private void updateComputedColumns(TableDefinition table, WbConnection conn)
+	private void updateColumnInformation(TableDefinition table, WbConnection conn)
 	{
 		String tablename;
 		String sql;
 
 		if (SqlServerUtil.isSqlServer2005(conn))
 		{
-			sql =
-				"select name, definition, is_persisted \n" +
-				"from sys.computed_columns with (nolock) \n" +
-				"where object_id = object_id(?)";
+      sql =
+        "select c.name as column_name,  \n" +
+        "       cc.definition,  \n" +
+        "       cc.is_persisted,  \n" +
+        "       t.name as data_type,  \n" +
+        "       c.collation_name \n" +
+        "from sys.columns c \n" +
+        "  left join sys.types t on c.user_type_id = t.user_type_id \n" +
+        "  left join sys.computed_columns cc on cc.column_id = c.column_id and cc.object_id = c.object_id \n" +
+        "where c.object_id = object_id(?)";
+
 			tablename = table.getTable().getTableExpression(conn);
 		}
 		else
 		{
-			// this method is only called when the server version is 2000 or later
-			// so this else part means the server is a SQL Server 2000
+			// This is for Server 2000
 			sql =
-				"select c.name, t.[text], 0 as is_persisted \n" +
+				"select c.name, t.[text], 0 as is_persisted, null as data_type, c.collation \n" +
 				"from sysobjects o with (nolock) \n" +
 				"  join syscolumns c with (nolock) on o.id = c.id \n" +
-				"  join syscomments t with (nolock) on t.number = c.colid and t.id = c.id \n" +
+				"  left join syscomments t with (nolock) on t.number = c.colid and t.id = c.id \n" +
 				"where o.xtype = 'U' \n" +
-				"  and c.iscomputed = 1 \n"+
 				"  and o.name = ?";
 			tablename = table.getTable().getRawTableName();
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("SqlServerColumnEnhancer.updateComputedColumns()",
-				"Retrieving computed columns using query:\n" + SqlUtil.replaceParameters(sql, tablename));
+			LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnInformation()",
+				"Retrieving additional column information using:\n" + SqlUtil.replaceParameters(sql, tablename));
 		}
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		Map<String, String> expressions = new HashMap<>();
-		Map<String, Boolean> persisted = new HashMap<>();
+    String defaultCollation = getDatabaseCollation(table.getTable().getRawCatalog(), conn);
+
+    String types = conn.getDbSettings().getProperty("adjust.datatypes", "geometry,geography");
+
+    Set<String> nonJdbcTypes = CollectionUtil.caseInsensitiveSet();
+    nonJdbcTypes.addAll(StringUtil.stringToList(types, ",", true, true));
+
+    List<ColumnIdentifier> columns = table.getColumns();
 
 		try
 		{
@@ -198,45 +138,51 @@ public class SqlServerColumnEnhancer
 			while (rs.next())
 			{
 				String colname = rs.getString(1);
-				String def = rs.getString(2);
-				if (StringUtil.isEmptyString(def)) continue;
-
-				def = def.trim();
+				String def = StringUtil.trim(rs.getString(2));
 				boolean isPersisted = rs.getBoolean(3);
-				persisted.put(colname, Boolean.valueOf(isPersisted));
-				String exp1 = expressions.get(colname);
-				if (exp1 != null)
+        String dataType = rs.getString(4);
+        String collation = rs.getString(5);
+
+        ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
+        if (col == null) continue; // shouldn't happen
+
+        if (StringUtil.isNonEmpty(def))
+        {
+          if (!def.startsWith("("))
+          {
+            def += "(" + def + ")";
+          }
+          def = "AS " + def;
+          if (isPersisted)
+          {
+            def = def + " PERSISTED";
+          }
+          col.setComputedColumnExpression(def);
+        }
+
+				if (isNonDefault(collation, defaultCollation))
 				{
-					def = exp1 + def;
+  				String fullType = col.getDbmsType() + " COLLATE " + collation;
+          col.setDbmsType(fullType);
+          col.setCollation(collation);
 				}
-				expressions.put(colname, def);
+
+        // the JDBC driver returns geometry and geography as "VARBINAR"
+        // which is incorrect and breaks many things
+        if (nonJdbcTypes.contains(dataType))
+        {
+          col.setDbmsType(dataType);
+          col.setDataType(Types.OTHER);
+        }
 			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlServerColumnEnhancer.updateComputedColumns()", "Error retrieving computed columns using:\n" + SqlUtil.replaceParameters(sql, tablename), e);
+			LogMgr.logError("SqlServerColumnEnhancer.updateColumnInformation()", "Error retrieving computed columns using:\n" + SqlUtil.replaceParameters(sql, tablename), e);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
-		}
-
-		for (ColumnIdentifier col : table.getColumns())
-		{
-			String expr = expressions.get(col.getColumnName());
-			if (StringUtil.isBlank(expr)) continue;
-
-			if (!expr.startsWith("("))
-			{
-				expr += "(" + expr + ")";
-			}
-			expr = "AS " + expr;
-			Boolean isPersisted = persisted.get(col.getColumnName());
-			if (Boolean.TRUE.equals(isPersisted))
-			{
-				expr = expr + " PERSISTED";
-			}
-			col.setComputedColumnExpression(expr);
 		}
 	}
 
@@ -279,70 +225,63 @@ public class SqlServerColumnEnhancer
     return collation;
   }
 
-	public void updateColumnInformation(TableDefinition table, WbConnection conn)
+
+	private void updateColumnRemarks(TableDefinition table, WbConnection conn)
 	{
-    String defaultCollation = getDatabaseCollation(table.getTable().getRawCatalog(), conn);
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 
-    String types = conn.getDbSettings().getProperty("adjust.datatypes", "geometry,geography");
+		String tablename = SqlUtil.removeObjectQuotes(table.getTable().getTableName());
+		String schema = SqlUtil.removeObjectQuotes(table.getTable().getSchema());
 
-    Set<String> nonJdbcTypes = CollectionUtil.caseInsensitiveSet();
-    nonJdbcTypes.addAll(StringUtil.stringToList(types, ",", true, true));
+		String propName = conn.getDbSettings().getProperty(SqlServerObjectListEnhancer.REMARKS_PROP_NAME, SqlServerObjectListEnhancer.REMARKS_PROP_DEFAULT);
 
-		String sql =
-			"select column_name, \n" +
-			"       collation_name, \n" +
-			"       data_type \n" +
-			"from information_schema.columns \n" +
-			"where table_name = ? \n" +
-			"  and table_schema = ? \n " +
-			"  and table_catalog = ?";
+		// I have to cast to a varchar with a specified length otherwise
+		// the remarks will be truncated at 31 characters for some strange reason
+		// varchar(8000) character should work on any sensible SQL Server version  (varchar(max) wouldn't work on SQL Server 2000)
+		String sql = "SELECT objname, cast(value as varchar(8000)) as value \nFROM ";
 
-		String tableName = table.getTable().getRawTableName();
-		String schema = table.getTable().getRawSchema();
-		String catalog = table.getTable().getRawCatalog();
+		if (SqlServerUtil.isSqlServer2005(conn))
+		{
+			sql += "fn_listextendedproperty ('" + propName + "','schema', ?, 'table', ?, 'column', null)";
+		}
+		else
+		{
+			// SQL Server 2000 (and probably before) uses a different function name and parameters
+			sql += "::fn_listextendedproperty ('" + propName + "','user', ?, 'table', ?, 'column', null)";
+		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("SqlServerColumnEnhancer.()",
-				"Retrieving additional column information using:\n" + SqlUtil.replaceParameters(sql, tableName, schema, catalog));
+			LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnRemarks()",
+				"Retrieving column remarks using query:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
 		}
 
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
     List<ColumnIdentifier> columns = table.getColumns();
 
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, tableName);
-			stmt.setString(2, schema);
-			stmt.setString(3, catalog);
-
+			stmt.setString(1, schema);
+			stmt.setString(2, tablename);
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
-				String colname = rs.getString(1);
-				String collation = rs.getString(2);
-				if (isNonDefault(collation, defaultCollation))
+				String colname = StringUtil.trim(rs.getString(1));
+				String remark = rs.getString(2);
+				if (colname != null && remark != null)
 				{
           ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
-  				String dataType = col.getDbmsType() + " COLLATE " + collation;
-          col.setDbmsType(dataType);
-          col.setCollation(collation);
+          if (col != null)
+          {
+            col.setComment(remark);
+          }
 				}
-        String type = rs.getString(3);
-        if (nonJdbcTypes.contains(type))
-        {
-          ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
-          col.setDbmsType(type);
-          col.setDataType(Types.OTHER);
-        }
 			}
 		}
-		catch (SQLException ex)
+		catch (Exception e)
 		{
-			LogMgr.logError("SqlServerColumnEnhancer.updateColumnInformation()",
-        "Could not read column details using:\n" + SqlUtil.replaceParameters(sql, tableName, schema, catalog), ex);
+			LogMgr.logError("SqlServerColumnEnhancer.updateColumnRemarks()", "Error retrieving remarks using:\n" + SqlUtil.replaceParameters(sql, schema, tablename), e);
 		}
 		finally
 		{
