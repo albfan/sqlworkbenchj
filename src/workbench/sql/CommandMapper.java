@@ -78,6 +78,7 @@ import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbIsolationLevel;
 import workbench.sql.wbcommands.WbList;
 import workbench.sql.wbcommands.WbListCatalogs;
+import workbench.sql.wbcommands.WbListDependencies;
 import workbench.sql.wbcommands.WbListIndexes;
 import workbench.sql.wbcommands.WbListPkDef;
 import workbench.sql.wbcommands.WbListProcedures;
@@ -216,6 +217,7 @@ public class CommandMapper
 		addCommand(new WbDefineDriver());
 		addCommand(new WbListProfiles());
 		addCommand(new WbListDrivers());
+    addCommand(new WbListDependencies());
 
 		// Wrappers for standard SQL statements
 		addCommand(TransactionEndCommand.getCommit());
