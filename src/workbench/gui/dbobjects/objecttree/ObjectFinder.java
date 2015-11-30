@@ -19,7 +19,7 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
-import workbench.db.TableIdentifier;
+import workbench.db.DbObject;
 import workbench.db.WbConnection;
 
 /**
@@ -28,6 +28,6 @@ import workbench.db.WbConnection;
  */
 public interface ObjectFinder
 {
-  void selectObject(TableIdentifier object);
+  void selectObject(DbObject object);
   WbConnection getConnection();
 }

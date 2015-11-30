@@ -25,6 +25,7 @@ import java.awt.event.ActionEvent;
 import workbench.interfaces.TextContainer;
 import workbench.log.LogMgr;
 
+import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -43,7 +44,7 @@ public class FindObjectAction
   private ObjectFinder finder;
   private TextContainer textContainer;
   private WbConnection editorConnection;
-  private TableIdentifier toShow;
+  private DbObject toShow;
 
   public FindObjectAction(TextContainer container)
   {
@@ -65,7 +66,7 @@ public class FindObjectAction
     setEnabled(editorConnection != null);
   }
 
-  public void setTargetTable(TableIdentifier tbl)
+  public void setTargetTable(DbObject tbl)
   {
     toShow = tbl;
     setEnabled(toShow != null);
@@ -101,7 +102,7 @@ public class FindObjectAction
     showTable(tbl);
   }
 
-  private void showTable(final TableIdentifier tbl)
+  private void showTable(final DbObject tbl)
   {
     EventQueue.invokeLater(() ->
     {

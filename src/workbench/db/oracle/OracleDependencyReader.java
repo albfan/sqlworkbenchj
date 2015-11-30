@@ -46,53 +46,46 @@ import workbench.util.SqlUtil;
 public class OracleDependencyReader
   implements DependencyReader
 {
-  private final Set<String> types = CollectionUtil.caseInsensitiveSet("TABLE", "VIEW", "MATERIALIZED VIEW");
+  private final Set<String> types = CollectionUtil.caseInsensitiveSet("TABLE", "VIEW", "MATERIALIZED VIEW", "PROCEDURE", "TYPE", "FUNCTION", "TRIGGER", "PACKAGE");
+  private final Set<String> searchOwner = CollectionUtil.caseInsensitiveSet("PROCEDURE", "TYPE", "FUNCTION", "TRIGGER", "PACKAGE");
 
   @Override
-  public List<DbObject> getDependentObjects(WbConnection connection, DbObject base)
+  public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    String sql =
-        "select owner, name, type  \n" +
-        "from all_dependencies \n" +
-        "where referenced_owner = ? \n" +
-        "  and referenced_name = ? \n" +
-        "  and referenced_type = ? \n" +
-        " order by owner, name";
+    String sql = null;
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("OracleDependencyReader.getDependentObjects()", "Retrieving dependent objects using query:\n " + s);
-		}
-
-    List<DbObject> result = retrieveObjects(connection, base, sql);
-
-    return result;
-  }
-
-  @Override
-  public List<DbObject> getDependingObjects(WbConnection connection, DbObject base)
-  {
-    if (base == null || connection == null) return Collections.emptyList();
-
-    String sql =
+    if (searchOwner.contains(base.getObjectType()))
+    {
+      sql =
         "select referenced_owner, referenced_name, referenced_type \n" +
         "from all_dependencies \n" +
         "where owner = ? \n" +
         "  and name = ? \n" +
         "  and type = ? \n" +
+        "  and referenced_owner not in ('SYS', 'SYSTEM', 'PUBLIC') \n" +
         " order by owner, name";
+    }
+    else
+    {
+      sql =
+        "select owner, name, type  \n" +
+        "from all_dependencies \n" +
+        "where referenced_owner = ? \n" +
+        "  and referenced_name = ? \n" +
+        "  and referenced_type = ? \n" +
+        "  and owner not in ('SYS', 'SYSTEM', 'PUBLIC') \n" +
+        "order by owner, name";
+    }
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("OracleDependencyReader.getDependingObjects()", "Retrieving depending objects using query:\n " + s);
+			LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n " + s);
 		}
 
     List<DbObject> result = retrieveObjects(connection, base, sql);
-
     return result;
   }
 
@@ -128,6 +121,11 @@ public class OracleDependencyReader
         else if (type.equals("TRIGGER"))
         {
           result.add(new TriggerDefinition(null, owner, name));
+        }
+        else if (type.equals("TYPE BODY") || type.equals("TYPE"))
+        {
+          OracleObjectType obj = new OracleObjectType(owner, name);
+          result.add(obj);
         }
         else
         {

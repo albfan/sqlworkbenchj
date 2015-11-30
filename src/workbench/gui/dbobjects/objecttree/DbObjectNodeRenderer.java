@@ -70,6 +70,7 @@ public class DbObjectNodeRenderer
     iconMap.put(TreeLoader.TYPE_PROCEDURES_NODE, "db_type");
     iconMap.put(TreeLoader.TYPE_TRIGGERS_NODE, "db_type");
     iconMap.put("procedure", "sproc");
+    iconMap.put("trigger", "bullet_black");
     iconMap.put("index", "index");
     iconMap.put("type", "type");
     iconMap.put(TreeLoader.TYPE_PACKAGE_NODE, "package");

@@ -49,6 +49,8 @@ import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+import workbench.db.dependency.DependencyReader;
+import workbench.db.dependency.DependencyReaderFactory;
 
 import workbench.gui.dbobjects.IsolationLevelChanger;
 
@@ -97,6 +99,11 @@ public class TreeLoader
   public static final String TYPE_INDEX_LIST = "index-list";
 
   /**
+   * The node type for the "dependencies" node in a table or a view.
+   */
+  public static final String TYPE_DEPENDENCY_LIST = "dependency-list";
+
+  /**
    * The node type for the foreign key nodes in a table.
    * These are the "outgoing" foreign keys, i.e. columns from the "current" table
    * referencing other tables.
@@ -135,6 +142,7 @@ public class TreeLoader
   private ObjectTreeNode root;
   private Collection<String> availableTypes;
   private ProcedureTreeLoader procLoader;
+  private DependencyReader dependencyLoader;
   private final Set<String> typesToShow = CollectionUtil.caseInsensitiveSet();
   private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
 
@@ -157,6 +165,7 @@ public class TreeLoader
       availableTypes.add("TRIGGER");
     }
     procLoader = new ProcedureTreeLoader();
+    dependencyLoader = DependencyReaderFactory.getReader(connection);
   }
 
   private void removeAllChildren(ObjectTreeNode node)
@@ -545,6 +554,10 @@ public class TreeLoader
         node.setAllowsChildren(true);
         addIndexNode(node);
       }
+      else
+      {
+        addDependencyNode(node);
+      }
 
       if (connection.getMetadata().isViewType(typeNode.getName()))
       {
@@ -558,6 +571,14 @@ public class TreeLoader
     typeNode.setChildrenLoaded(true);
     model.nodeStructureChanged(typeNode);
     model.nodeChanged(typeNode);
+  }
+
+  private boolean supportsDependencies(ObjectTreeNode node)
+  {
+    if (dependencyLoader == null) return false;
+    if (node == null) return false;
+    if (node.getDbObject() == null) return false;
+    return dependencyLoader.supportsDependencies(node.getDbObject().getObjectType());
   }
 
   private boolean hasIndexes(ObjectTreeNode node)
@@ -584,11 +605,25 @@ public class TreeLoader
       node.add(trg);
     }
   }
+
   private void addColumnsNode(ObjectTreeNode node)
   {
     ObjectTreeNode cols = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTableDefinition"), TYPE_COLUMN_LIST);
     cols.setAllowsChildren(true);
     node.add(cols);
+  }
+
+  public boolean addDependencyNode(ObjectTreeNode node)
+  {
+    if (node == null) return false;
+    if (supportsDependencies(node))
+    {
+      ObjectTreeNode depNode = new ObjectTreeNode("Dependencies", TYPE_DEPENDENCY_LIST);
+      depNode.setAllowsChildren(true);
+      node.add(depNode);
+      return true;
+    }
+    return false;
   }
 
   private void addIndexNode(ObjectTreeNode node)
@@ -610,6 +645,8 @@ public class TreeLoader
     ref.setAllowsChildren(true);
     node.add(ref);
 
+    addDependencyNode(node);
+
     ObjectTreeNode trg = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS_NODE);
     trg.setAllowsChildren(true);
     node.add(trg);
@@ -618,7 +655,7 @@ public class TreeLoader
   public void loadProcedures(ObjectTreeNode procNode)
     throws SQLException
   {
-    procLoader.loadProcedures(procNode, model, connection);
+    procLoader.loadProcedures(procNode, model, connection, this);
   }
 
   public void loadProcedureParameters(ObjectTreeNode node)
@@ -627,8 +664,14 @@ public class TreeLoader
     ProcedureDefinition proc = (ProcedureDefinition)node.getDbObject();
     if (proc == null) return;
     List<ColumnIdentifier> parameters = proc.getParameters(connection);
-    // insert the "return" parameter as the first one
 
+    ObjectTreeNode deps = null;
+    if (supportsDependencies(node) && node.getChildCount() > 0 && node.getChildAt(0).getType().equals(TYPE_DEPENDENCY_LIST))
+    {
+      deps = node.getChildAt(0);
+      node.remove(deps);
+    }
+    
     for (ColumnIdentifier col : parameters)
     {
       String mode = col.getArgumentMode();
@@ -646,6 +689,7 @@ public class TreeLoader
       p.setChildrenLoaded(true);
       node.add(p);
     }
+    node.add(deps);
     model.nodeStructureChanged(node);
     node.setChildrenLoaded(true);
   }
@@ -664,8 +708,10 @@ public class TreeLoader
     for (TriggerDefinition trg : triggers)
     {
       ObjectTreeNode node = new ObjectTreeNode(trg);
-      node.setAllowsChildren(false);
-      node.setChildrenLoaded(true);
+      boolean supportsDeps = supportsDependencies(node);
+      node.setAllowsChildren(supportsDeps);
+      addDependencyNode(node);
+      node.setChildrenLoaded(!supportsDeps);
       trgNode.add(node);
     }
     model.nodeStructureChanged(trgNode);
@@ -731,6 +777,26 @@ public class TreeLoader
     }
     model.nodeStructureChanged(indexNode);
     indexNode.setChildrenLoaded(true);
+  }
+
+  public void loadDependencies(DbObject dbo, ObjectTreeNode depNode)
+  {
+    if (depNode == null) return;
+    if (dbo == null || dependencyLoader == null)
+    {
+      depNode.setAllowsChildren(false);
+      return;
+    }
+
+    List<DbObject> objects = dependencyLoader.getObjectDependencies(connection, dbo);
+    for (DbObject obj : objects)
+    {
+      ObjectTreeNode node = new ObjectTreeNode(obj);
+      node.setAllowsChildren(node.canHaveChildren());
+      depNode.add(node);
+    }
+    model.nodeStructureChanged(depNode);
+    depNode.setChildrenLoaded(true);
   }
 
   public void loadTableColumns(DbObject dbo, ObjectTreeNode columnsNode)
@@ -915,6 +981,12 @@ public class TreeLoader
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
+      }
+      else if (TYPE_DEPENDENCY_LIST.equals(type))
+      {
+        ObjectTreeNode parent = node.getParent();
+        DbObject dbo = parent.getDbObject();
+        loadDependencies(dbo, node);
       }
       else if (TYPE_PROCEDURES_NODE.equals(type))
       {

@@ -243,7 +243,7 @@ public class DbTreePanel
   }
 
   @Override
-  public void selectObject(TableIdentifier tbl)
+  public void selectObject(DbObject tbl)
   {
     tree.selectObject(tbl);
   }
@@ -917,5 +917,5 @@ public class DbTreePanel
     }
     return split.getDividerLocation();
   }
-  
+
 }

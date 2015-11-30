@@ -27,11 +27,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import workbench.db.DbObject;
 import workbench.interfaces.WbSelectionModel;
 import workbench.resource.ResourceMgr;
 
-import workbench.db.TableIdentifier;
+import workbench.db.DbObject;
 
 import workbench.gui.MainWindow;
 import workbench.gui.actions.CompileDbObjectAction;
@@ -81,11 +80,14 @@ class ContextMenuFactory
     if (count == 1)
     {
       ObjectTreeNode selectedNode = dbTree.getSelectedNode();
-      if (selectedNode.isFKTable())
+
+      boolean showFind = selectedNode.isFKTable() || selectedNode.getParent().getType().equals(TreeLoader.TYPE_DEPENDENCY_LIST);
+
+      if (showFind)
       {
         FindObjectAction find = new FindObjectAction(null);
         find.setFinder(dbTree);
-        find.setTargetTable((TableIdentifier)selectedNode.getDbObject());
+        find.setTargetTable(selectedNode.getDbObject());
         menu.add(find);
         menu.addSeparator();
       }

@@ -2314,9 +2314,10 @@ public class DbMetadata
   public boolean hasColumns(String objectType)
   {
     if (objectType == null) return false;
-    if (isTableType(objectType) || isExtendedTableType(objectType)) return true;
+    if (isExtendedTableType(objectType)) return true;
     if (isViewType(objectType)) return true;
-
+    if (objectType.equals(MVIEW_NAME)) return true;
+    
 		for (ObjectListExtender extender : extenders)
 		{
 			if (extender.handlesType(objectType))

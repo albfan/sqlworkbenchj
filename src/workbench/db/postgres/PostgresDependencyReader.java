@@ -45,7 +45,7 @@ public class PostgresDependencyReader
 {
 
   @Override
-  public List<DbObject> getDependentObjects(WbConnection connection, DbObject base)
+  public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
 
@@ -68,7 +68,8 @@ public class PostgresDependencyReader
       "  JOIN pg_class as dependent ON dep.refobjid = dependent.oid  \n" +
       "  JOIN pg_namespace nsp on dependent.relnamespace = nsp.oid \n" +
       "  JOIN pg_namespace nsp2 on dependee.relnamespace = nsp2.oid  \n" +
-      "WHERE dependent.relname = ? \n" +
+      "WHERE dependent.oid <> dependee.oid \n" +
+      "  AND dependent.relname = ? \n" +
       "  AND nsp.nspname = ? ";
 
     PreparedStatement pstmt = null;
@@ -121,12 +122,6 @@ public class PostgresDependencyReader
     }
     return result;
 
-  }
-
-  @Override
-  public List<DbObject> getDependingObjects(WbConnection connection, DbObject base)
-  {
-    return Collections.emptyList();
   }
 
   @Override

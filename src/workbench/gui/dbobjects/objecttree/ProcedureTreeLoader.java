@@ -25,7 +25,7 @@ import workbench.db.WbConnection;
 public class ProcedureTreeLoader
 {
 
-  public void loadProcedures(ObjectTreeNode procNode, DbObjectTreeModel model, WbConnection connection)
+  public void loadProcedures(ObjectTreeNode procNode, DbObjectTreeModel model, WbConnection connection, TreeLoader loader)
     throws SQLException
   {
     if (procNode == null) return;
@@ -49,6 +49,7 @@ public class ProcedureTreeLoader
         pkgNode.add(node);
       }
       pkgNode.setChildrenLoaded(true);
+      loader.addDependencyNode(pkgNode);
       procNode.add(pkgNode);
     }
 
@@ -66,6 +67,7 @@ public class ProcedureTreeLoader
         pkgNode.add(node);
       }
       pkgNode.setChildrenLoaded(true);
+      loader.addDependencyNode(pkgNode);
       procNode.add(pkgNode);
     }
 
@@ -75,6 +77,7 @@ public class ProcedureTreeLoader
       {
         ObjectTreeNode node = new ObjectTreeNode(proc);
         node.setAllowsChildren(true); // can have parameters
+        loader.addDependencyNode(node);
         node.setChildrenLoaded(false);
         procNode.add(node);
       }

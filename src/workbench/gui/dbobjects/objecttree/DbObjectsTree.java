@@ -39,6 +39,7 @@ import javax.swing.tree.TreeSelectionModel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.DbObject;
 import workbench.db.DbSettings;
 import workbench.db.SchemaIdentifier;
 import workbench.db.TableIdentifier;
@@ -215,11 +216,11 @@ public class DbObjectsTree
 
   }
 
-  public void selectObject(final TableIdentifier tbl)
+  public void selectObject(final DbObject dbo)
   {
-    if (tbl == null) return;
+    if (dbo == null) return;
 
-    ObjectTreeNode toSearch = findSchemaNode(tbl.getCatalog(), tbl.getSchema());
+    ObjectTreeNode toSearch = findSchemaNode(dbo.getCatalog(), dbo.getSchema());
 
     if (toSearch == null)
     {
@@ -230,7 +231,7 @@ public class DbObjectsTree
       toSearch = getModel().getRoot();
     }
 
-    ObjectTreeNode node = findNodeForTable(toSearch, tbl);
+    ObjectTreeNode node = findNodeForTable(toSearch, dbo);
 
     if (node != null)
     {
@@ -258,7 +259,7 @@ public class DbObjectsTree
         {
           doLoad(toLoad, true);
 
-          final ObjectTreeNode node = findNodeForTable(toLoad, tbl);
+          final ObjectTreeNode node = findNodeForTable(toLoad, dbo);
 
           if (node != null)
           {
@@ -360,24 +361,38 @@ public class DbObjectsTree
     return null;
   }
 
-  private ObjectTreeNode findNodeForTable(ObjectTreeNode parent, TableIdentifier table)
+  private boolean namesAreEqual(DbObject one, DbObject other)
+  {
+    if (one == null || other == null) return false;
+
+    boolean equals = one.getObjectName().equals(other.getObjectName());
+    
+    if (equals && one.getSchema() != null && other.getSchema() != null)
+    {
+      equals = one.getSchema().equals(other.getSchema());
+    }
+    if (equals && one.getCatalog() != null && other.getCatalog() != null)
+    {
+      equals = one.getCatalog().equals(other.getCatalog());
+    }
+    return equals;
+  }
+
+  private ObjectTreeNode findNodeForTable(ObjectTreeNode parent, DbObject table)
   {
     if (parent == null) return null;
     if (table == null) return null;
+    if (parent.getType().equals(TreeLoader.TYPE_DEPENDENCY_LIST)) return null;
 
     int childCount = parent.getChildCount();
     for (int i = 0; i < childCount; i++)
     {
       ObjectTreeNode child = parent.getChildAt(i);
-      if (child != null && child.getDbObject() != null && !child.isFKTable())
+      if (child != null && !child.isFKTable())
       {
-        if (child.getDbObject() instanceof TableIdentifier)
+        if (namesAreEqual(table, child.getDbObject()))
         {
-          TableIdentifier other = (TableIdentifier)child.getDbObject();
-          if (table.compareNames(other))
-          {
-            return child;
-          }
+          return child;
         }
       }
       ObjectTreeNode n2 = findNodeForTable(child, table);
@@ -461,13 +476,16 @@ public class DbObjectsTree
   private void expandColumns(ObjectTreeNode node)
   {
     if (node == null) return;
-    if (node.getDbObject() instanceof TableIdentifier)
+    if (node.getDbObject() instanceof TableIdentifier && node.getChildCount() > 0)
     {
       ObjectTreeNode columnNode = node.getChildAt(0);
-      TreeNode[] nodes = getTreeModel().getPathToRoot(columnNode);
-      TreePath path = new TreePath(nodes);
-      setExpandedState(path, true);
-      scrollPathToVisible(path);
+      if (columnNode.canHaveChildren())
+      {
+        TreeNode[] nodes = getTreeModel().getPathToRoot(columnNode);
+        TreePath path = new TreePath(nodes);
+        setExpandedState(path, true);
+        scrollPathToVisible(path);
+      }
     }
   }
 
