@@ -46,30 +46,7 @@ import workbench.util.SqlUtil;
 public class OracleDependencyReader
   implements DependencyReader
 {
-  private final Set<String> types = CollectionUtil.caseInsensitiveSet("TABLE", "VIEW", "MATERIALIZED VIEW", "PROCEDURE", "TYPE", "FUNCTION", "TRIGGER", "PACKAGE");
-  private final Set<String> searchOwner = CollectionUtil.caseInsensitiveSet("PROCEDURE", "TYPE", "FUNCTION", "TRIGGER", "PACKAGE");
-
-  @Override
-  public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
-  {
-    if (base == null || connection == null) return Collections.emptyList();
-
-    String sql = null;
-
-    if (searchOwner.contains(base.getObjectType()))
-    {
-      sql =
-        "select referenced_owner, referenced_name, referenced_type \n" +
-        "from all_dependencies \n" +
-        "where owner = ? \n" +
-        "  and name = ? \n" +
-        "  and type = ? \n" +
-        "  and referenced_owner not in ('SYS', 'SYSTEM', 'PUBLIC') \n" +
-        " order by owner, name";
-    }
-    else
-    {
-      sql =
+  private final String searchRef =
         "select owner, name, type  \n" +
         "from all_dependencies \n" +
         "where referenced_owner = ? \n" +
@@ -77,15 +54,50 @@ public class OracleDependencyReader
         "  and referenced_type = ? \n" +
         "  and owner not in ('SYS', 'SYSTEM', 'PUBLIC') \n" +
         "order by owner, name";
-    }
+
+  private final String searchOwner =
+        "select referenced_owner, referenced_name, referenced_type \n" +
+        "from all_dependencies \n" +
+        "where owner = ? \n" +
+        "  and name = ? \n" +
+        "  and type = ? \n" +
+        "  and referenced_owner not in ('SYS', 'SYSTEM', 'PUBLIC') \n" +
+        " order by owner, name";
+
+  private final Set<String> types = CollectionUtil.caseInsensitiveSet("TABLE", "VIEW", "MATERIALIZED VIEW", "PROCEDURE", "TYPE", "FUNCTION", "TRIGGER", "PACKAGE");
+  private final Set<String> searchBoth = CollectionUtil.caseInsensitiveSet();
+
+  public OracleDependencyReader()
+  {
+    List<String> typeList = Settings.getInstance().getListProperty("workbench.db.oracle.dependencies.full", true, "procedure,function,trigger,package,type");
+    searchBoth.addAll(typeList);
+  }
+
+  @Override
+  public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
+  {
+    if (base == null || connection == null) return Collections.emptyList();
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
+			String s = SqlUtil.replaceParameters(searchRef, base.getSchema(), base.getObjectName(), base.getObjectType());
 			LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n " + s);
 		}
 
-    List<DbObject> result = retrieveObjects(connection, base, sql);
+    List<DbObject> result = retrieveObjects(connection, base, searchRef);
+
+    if (searchBoth.contains(base.getObjectType()))
+    {
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        String s = SqlUtil.replaceParameters(searchOwner, base.getSchema(), base.getObjectName(), base.getObjectType());
+        LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n " + s);
+      }
+
+      List<DbObject> result2 = retrieveObjects(connection, base, searchOwner);
+      result.addAll(result2);
+    }
+
     return result;
   }
 

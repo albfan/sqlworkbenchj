@@ -671,7 +671,7 @@ public class TreeLoader
       deps = node.getChildAt(0);
       node.remove(deps);
     }
-    
+
     for (ColumnIdentifier col : parameters)
     {
       String mode = col.getArgumentMode();
@@ -689,7 +689,10 @@ public class TreeLoader
       p.setChildrenLoaded(true);
       node.add(p);
     }
-    node.add(deps);
+    if (deps != null)
+    {
+      node.add(deps);
+    }
     model.nodeStructureChanged(node);
     node.setChildrenLoaded(true);
   }
