@@ -40,6 +40,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DbObject;
+import workbench.db.DbObjectComparator;
 import workbench.db.DbSettings;
 import workbench.db.SchemaIdentifier;
 import workbench.db.TableIdentifier;
@@ -361,23 +362,6 @@ public class DbObjectsTree
     return null;
   }
 
-  private boolean namesAreEqual(DbObject one, DbObject other)
-  {
-    if (one == null || other == null) return false;
-
-    boolean equals = one.getObjectName().equals(other.getObjectName());
-    
-    if (equals && one.getSchema() != null && other.getSchema() != null)
-    {
-      equals = one.getSchema().equals(other.getSchema());
-    }
-    if (equals && one.getCatalog() != null && other.getCatalog() != null)
-    {
-      equals = one.getCatalog().equals(other.getCatalog());
-    }
-    return equals;
-  }
-
   private ObjectTreeNode findNodeForTable(ObjectTreeNode parent, DbObject table)
   {
     if (parent == null) return null;
@@ -390,7 +374,7 @@ public class DbObjectsTree
       ObjectTreeNode child = parent.getChildAt(i);
       if (child != null && !child.isFKTable())
       {
-        if (namesAreEqual(table, child.getDbObject()))
+        if (DbObjectComparator.namesAreEqual(table, child.getDbObject()))
         {
           return child;
         }

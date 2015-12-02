@@ -24,6 +24,8 @@ package workbench.db;
 
 import java.util.Comparator;
 
+import workbench.util.SqlUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -41,11 +43,43 @@ public class DbObjectComparator
 
 		String n1 = o1.getFullyQualifiedName(null);
 		String n2 = o2.getFullyQualifiedName(null);
-		if (n1.startsWith("\"") || n2.startsWith("\""))
-		{
-			return n1.compareTo(n2);
-		}
-		return n1.compareToIgnoreCase(n2);
+    return compareName(n1, n2);
 	}
 
+  /**
+   * Compare the names of the two objects.
+   *
+   * Catalog and Schema are only taken into account if both have them.
+   *
+   * @param one     the first object to compare
+   * @param other   the second object to compare
+   * @return true if all (defined) name elements of the objects are equal
+   */
+  public static boolean namesAreEqual(DbObject one, DbObject other)
+  {
+    if (one == null || other == null) return false;
+
+    if (one.getObjectType().equalsIgnoreCase(other.getObjectType()) == false) return false;
+
+    boolean equals = compareName(one.getObjectName(), other.getObjectName()) == 0;
+
+    if (equals && one.getSchema() != null && other.getSchema() != null)
+    {
+      equals = compareName(one.getSchema(), other.getSchema()) == 0;
+    }
+    if (equals && one.getCatalog() != null && other.getCatalog() != null)
+    {
+      equals = compareName(one.getCatalog(), other.getCatalog()) == 0;
+    }
+    return equals;
+  }
+
+  private static int compareName(String n1, String n2)
+  {
+    if (SqlUtil.isQuotedIdentifier(n1) || SqlUtil.isQuotedIdentifier(n2))
+    {
+      return n1.compareTo(n2);
+    }
+    return n1.compareToIgnoreCase(n2);
+  }
 }

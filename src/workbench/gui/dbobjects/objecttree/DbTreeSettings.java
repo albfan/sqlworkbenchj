@@ -122,4 +122,9 @@ public class DbTreeSettings
     boolean global = Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".findobject.autoload", true);
     return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "." + dbid + ".findobject.autoload", global);
   }
+
+  public static boolean useNaturalSort()
+  {
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".tablelist.naturalsort", true);
+  }
 }

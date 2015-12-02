@@ -36,6 +36,7 @@ import workbench.db.ObjectScripter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectScripterUI;
+import workbench.resource.DbExplorerSettings;
 
 /**
  * @author Thomas Kellerer
@@ -91,6 +92,7 @@ public class ScriptDbObjectAction
 
 		ObjectScripter s = new ObjectScripter(objects, source.getConnection());
     s.setShowPackageProcedureOnly(showSinglePackageProcedure);
+    s.setIncludeGrants(DbExplorerSettings.getGenerateTableGrants());
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
 		scripterUI.setDbConnection(source.getConnection());
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));

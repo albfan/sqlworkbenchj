@@ -30,6 +30,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DbObject;
+import workbench.db.DbObjectComparator;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
@@ -52,8 +53,7 @@ public class OracleDependencyReader
         "where referenced_owner = ? \n" +
         "  and referenced_name = ? \n" +
         "  and referenced_type = ? \n" +
-        "  and owner not in ('SYS', 'SYSTEM', 'PUBLIC') \n" +
-        "order by owner, name";
+        "  and owner not in ('SYS', 'SYSTEM', 'PUBLIC')";
 
   private final String searchOwner =
         "select referenced_owner, referenced_name, referenced_type \n" +
@@ -61,11 +61,12 @@ public class OracleDependencyReader
         "where owner = ? \n" +
         "  and name = ? \n" +
         "  and type = ? \n" +
-        "  and referenced_owner not in ('SYS', 'SYSTEM', 'PUBLIC') \n" +
-        " order by owner, name";
+        "  and referenced_owner not in ('SYS', 'SYSTEM', 'PUBLIC')";
 
   private final Set<String> types = CollectionUtil.caseInsensitiveSet("TABLE", "VIEW", "MATERIALIZED VIEW", "PROCEDURE", "TYPE", "FUNCTION", "TRIGGER", "PACKAGE");
   private final Set<String> searchBoth = CollectionUtil.caseInsensitiveSet();
+  private final Set<String> declarationTypes = CollectionUtil.caseInsensitiveSet("TYPE", "PACKAGE");
+  private final Set<String> implTypes = CollectionUtil.caseInsensitiveSet("TYPE BODY", "PACKAGE BODY");
 
   public OracleDependencyReader()
   {
@@ -81,7 +82,7 @@ public class OracleDependencyReader
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			String s = SqlUtil.replaceParameters(searchRef, base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n " + s);
+			LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n" + s);
 		}
 
     List<DbObject> result = retrieveObjects(connection, base, searchRef);
@@ -91,14 +92,49 @@ public class OracleDependencyReader
       if (Settings.getInstance().getDebugMetadataSql())
       {
         String s = SqlUtil.replaceParameters(searchOwner, base.getSchema(), base.getObjectName(), base.getObjectType());
-        LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n " + s);
+        LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n" + s);
       }
 
       List<DbObject> result2 = retrieveObjects(connection, base, searchOwner);
       result.addAll(result2);
     }
 
+    result = removeBodies(result);
+    Collections.sort(result, new DbObjectComparator());
+
     return result;
+  }
+
+  /**
+   * all_dependencies will return the "bodies" for types and packages.
+   *
+   * This method returns those objects where both elements are present (TYPE and TYPE BODY or PACKAGE and PACKAGE BODY)
+   */
+  private List<DbObject> removeBodies(List<DbObject> objects)
+  {
+    List<DbObject> result = new ArrayList<>(objects.size());
+    for (DbObject dbo : objects)
+    {
+      if (dbo.getObjectType().endsWith("BODY"))
+      {
+        // don't add the package/type body if we already have the declaration
+        if (containsDeclaration(objects, dbo)) continue;
+      }
+      result.add(dbo);
+    }
+    return result;
+  }
+
+  private boolean containsDeclaration(List<DbObject> objects, DbObject body)
+  {
+    String base = body.getObjectType().replace("BODY", "").trim();
+    for (DbObject dbo : objects)
+    {
+      if (dbo.getObjectType().equals(base) &&
+          dbo.getObjectName().equals(body.getObjectName()) &&
+          dbo.getSchema().equals(body.getSchema())) return true;
+    }
+    return false;
   }
 
   @Override
@@ -126,24 +162,28 @@ public class OracleDependencyReader
         String owner = rs.getString(1);
         String name = rs.getString(2);
         String type = rs.getString(3);
+        DbObject dbo = null;
         if (type.equals("PROCEDURE"))
         {
-          result.add(new ProcedureDefinition(null, owner, name));
+          dbo = new ProcedureDefinition(null, owner, name);
         }
         else if (type.equals("TRIGGER"))
         {
-          result.add(new TriggerDefinition(null, owner, name));
+          dbo = new TriggerDefinition(null, owner, name);
         }
         else if (type.equals("TYPE BODY") || type.equals("TYPE"))
         {
-          OracleObjectType obj = new OracleObjectType(owner, name);
-          result.add(obj);
+          dbo = new OracleObjectType(owner, name);
         }
         else
         {
           TableIdentifier tbl = new TableIdentifier(null, owner, name);
           tbl.setType(type);
-          result.add(tbl);
+          dbo = tbl;
+        }
+        if (!DbObjectComparator.namesAreEqual(base, dbo))
+        {
+          result.add(dbo);
         }
       }
     }

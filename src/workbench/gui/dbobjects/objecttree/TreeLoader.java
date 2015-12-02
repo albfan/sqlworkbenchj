@@ -525,7 +525,10 @@ public class TreeLoader
 
     boolean loaded = true;
     List<TableIdentifier> objects = connection.getMetadata().getObjectList(null, catalog, schema, new String[] { typeNode.getName() });
-    Collections.sort(objects, new TableNameSorter());
+
+    TableNameSorter sorter = new TableNameSorter();
+    sorter.setUseNaturalSort(DbTreeSettings.useNaturalSort());
+    Collections.sort(objects, sorter);
 
     for (TableIdentifier tbl : objects)
     {
