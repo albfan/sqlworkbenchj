@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -34,6 +35,9 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 
+import workbench.gui.dbobjects.objecttree.DbObjectSorter;
+
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -44,12 +48,24 @@ public class PostgresDependencyReader
   implements DependencyReader
 {
 
+  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view");
+
   @Override
   public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    String sql =
+
+    String viewSql =
+      "select table_schema, \n" +
+      "       table_name, \n" +
+      "       'VIEW' as type, \n" +
+      "       obj_description((table_schema||'.'||table_name)::regclass) as remarks\n" +
+      "from information_schema.view_table_usage \n" +
+      "where (view_schema, view_name) = (?, ?)" +
+      "order by view_schema, view_name";
+
+    String baseSql =
       "SELECT DISTINCT nsp2.nspname, dependee.relname,\n" +
       "       CASE dependee.relkind \n" +
       "          WHEN 'r' THEN 'TABLE'::text \n" +
@@ -69,9 +85,19 @@ public class PostgresDependencyReader
       "  JOIN pg_namespace nsp on dependent.relnamespace = nsp.oid \n" +
       "  JOIN pg_namespace nsp2 on dependee.relnamespace = nsp2.oid  \n" +
       "WHERE dependent.oid <> dependee.oid \n" +
-      "  AND dependent.relname = ? \n" +
-      "  AND nsp.nspname = ? ";
+      "  AND nsp.nspname = ? \n" +
+      "  AND dependent.relname = ?";
 
+    String sql = baseSql;
+    if (connection.getMetadata().isViewType(base.getObjectType()))
+    {
+      sql = viewSql;
+    }
+    return retrieveObjects(connection, base, sql);
+  }
+
+  private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql)
+  {
     PreparedStatement pstmt = null;
     ResultSet rs = null;
 
@@ -80,14 +106,14 @@ public class PostgresDependencyReader
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("PostgresDependencyReader.getDependentObjects()", "Retrieving dependent objects using query:\n " + s);
+			LogMgr.logDebug("PostgresDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
 		}
 
     try
     {
       pstmt = connection.getSqlConnection().prepareStatement(sql);
-      pstmt.setString(1, base.getObjectName());
-      pstmt.setString(2, base.getSchema());
+      pstmt.setString(1, base.getSchema());
+      pstmt.setString(2, base.getObjectName());
 
       rs = pstmt.executeQuery();
       while (rs.next())
@@ -120,14 +146,16 @@ public class PostgresDependencyReader
     {
       SqlUtil.closeAll(rs, pstmt);
     }
-    return result;
 
+    DbObjectSorter sorter = new DbObjectSorter(true);
+    Collections.sort(result, sorter);
+    return result;
   }
 
   @Override
   public boolean supportsDependencies(String objectType)
   {
-    return true;
+    return supportedTypes.contains(objectType);
   }
 
 }

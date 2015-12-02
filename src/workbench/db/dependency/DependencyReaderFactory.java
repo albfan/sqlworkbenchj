@@ -20,6 +20,8 @@
 package workbench.db.dependency;
 
 import workbench.db.WbConnection;
+import workbench.db.mssql.SqlServerDependencyReader;
+import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleDependencyReader;
 import workbench.db.postgres.PostgresDependencyReader;
 
@@ -32,14 +34,22 @@ public class DependencyReaderFactory
   public static DependencyReader getReader(WbConnection connection)
   {
     if (connection == null) return null;
+
     if (connection.getMetadata().isOracle())
     {
       return new OracleDependencyReader();
     }
+
     if (connection.getMetadata().isPostgres())
     {
       return new PostgresDependencyReader();
     }
+
+    if (connection.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(connection))
+    {
+      return new SqlServerDependencyReader();
+    }
+    
     return null;
   }
 }

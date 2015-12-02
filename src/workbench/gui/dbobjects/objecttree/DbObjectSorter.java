@@ -33,6 +33,23 @@ import workbench.util.StringUtil;
 public class DbObjectSorter
   implements Comparator<DbObject>
 {
+  private boolean useNaturalSort;
+  private boolean includeType;
+
+  public DbObjectSorter()
+  {
+  }
+
+  public DbObjectSorter(boolean naturalSort)
+  {
+    useNaturalSort = naturalSort;
+  }
+
+  public void setIncludeType(boolean flag)
+  {
+    this.includeType = flag;
+  }
+
   @Override
   public int compare(DbObject o1, DbObject o2)
   {
@@ -40,8 +57,23 @@ public class DbObjectSorter
     if (o1 != null && o2 == null) return -1;
     if (o1 == null && o2 == null) return 0;
 
+    if (includeType)
+    {
+      String t1 = o1.getObjectType();
+      String t2 = o2.getObjectType();
+      int compare = StringUtil.compareStrings(t1, t2, true);
+      if (compare != 0)
+      {
+        return compare;
+      }
+    }
+    // types are the same, so sort by name (and only by name
     String name1 = SqlUtil.removeObjectQuotes(o1.getObjectName());
     String name2 = SqlUtil.removeObjectQuotes(o2.getObjectName());
+    if (useNaturalSort)
+    {
+      return StringUtil.naturalCompare(name1, name2, true);
+    }
     return StringUtil.compareStrings(name1, name2, true);
   }
 
