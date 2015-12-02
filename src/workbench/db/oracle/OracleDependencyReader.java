@@ -65,12 +65,10 @@ public class OracleDependencyReader
 
   private final Set<String> types = CollectionUtil.caseInsensitiveSet("TABLE", "VIEW", "MATERIALIZED VIEW", "PROCEDURE", "TYPE", "FUNCTION", "TRIGGER", "PACKAGE");
   private final Set<String> searchBoth = CollectionUtil.caseInsensitiveSet();
-  private final Set<String> declarationTypes = CollectionUtil.caseInsensitiveSet("TYPE", "PACKAGE");
-  private final Set<String> implTypes = CollectionUtil.caseInsensitiveSet("TYPE BODY", "PACKAGE BODY");
 
   public OracleDependencyReader()
   {
-    List<String> typeList = Settings.getInstance().getListProperty("workbench.db.oracle.dependencies.full", true, "procedure,function,trigger,package,type");
+    List<String> typeList = Settings.getInstance().getListProperty("workbench.db.oracle.dependencies.full", true, "");
     searchBoth.addAll(typeList);
   }
 
@@ -81,21 +79,21 @@ public class OracleDependencyReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			String s = SqlUtil.replaceParameters(searchRef, base.getSchema(), base.getObjectName(), base.getObjectType());
+			String s = SqlUtil.replaceParameters(searchOwner, base.getSchema(), base.getObjectName(), base.getObjectType());
 			LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n" + s);
 		}
 
-    List<DbObject> result = retrieveObjects(connection, base, searchRef);
+    List<DbObject> result = retrieveObjects(connection, base, searchOwner);
 
     if (searchBoth.contains(base.getObjectType()))
     {
       if (Settings.getInstance().getDebugMetadataSql())
       {
-        String s = SqlUtil.replaceParameters(searchOwner, base.getSchema(), base.getObjectName(), base.getObjectType());
+        String s = SqlUtil.replaceParameters(searchRef, base.getSchema(), base.getObjectName(), base.getObjectType());
         LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n" + s);
       }
 
-      List<DbObject> result2 = retrieveObjects(connection, base, searchOwner);
+      List<DbObject> result2 = retrieveObjects(connection, base, searchRef);
       result.addAll(result2);
     }
 
