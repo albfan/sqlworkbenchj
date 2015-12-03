@@ -47,7 +47,7 @@ import workbench.util.SqlUtil;
 public class OracleDependencyReader
   implements DependencyReader
 {
-  private final String searchRef =
+  private final String searchRefSql =
         "select owner, name, type  \n" +
         "from all_dependencies \n" +
         "where referenced_owner = ? \n" +
@@ -55,7 +55,7 @@ public class OracleDependencyReader
         "  and referenced_type = ? \n" +
         "  and owner not in ('SYS', 'SYSTEM', 'PUBLIC')";
 
-  private final String searchOwner =
+  private final String searchOwnerSql =
         "select referenced_owner, referenced_name, referenced_type \n" +
         "from all_dependencies \n" +
         "where owner = ? \n" +
@@ -65,11 +65,15 @@ public class OracleDependencyReader
 
   private final Set<String> types = CollectionUtil.caseInsensitiveSet("TABLE", "VIEW", "MATERIALIZED VIEW", "PROCEDURE", "TYPE", "FUNCTION", "TRIGGER", "PACKAGE");
   private final Set<String> searchBoth = CollectionUtil.caseInsensitiveSet();
+  private final Set<String> searchRefTypes = CollectionUtil.caseInsensitiveSet();
 
   public OracleDependencyReader()
   {
     List<String> typeList = Settings.getInstance().getListProperty("workbench.db.oracle.dependencies.full", true, "");
     searchBoth.addAll(typeList);
+
+    typeList = Settings.getInstance().getListProperty("workbench.db.oracle.dependencies.ref", true, "table");
+    searchRefTypes.addAll(typeList);
   }
 
   @Override
@@ -77,23 +81,28 @@ public class OracleDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
+    boolean searchRef = searchRefTypes.contains(base.getObjectType());
+
+    String sql = searchRef ? searchRefSql : searchOwnerSql;
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			String s = SqlUtil.replaceParameters(searchOwner, base.getSchema(), base.getObjectName(), base.getObjectType());
+			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
 			LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n" + s);
 		}
 
-    List<DbObject> result = retrieveObjects(connection, base, searchOwner);
+    List<DbObject> result = retrieveObjects(connection, base, sql);
 
     if (searchBoth.contains(base.getObjectType()))
     {
+      sql = searchRef ? searchOwnerSql : searchRefSql;
       if (Settings.getInstance().getDebugMetadataSql())
       {
-        String s = SqlUtil.replaceParameters(searchRef, base.getSchema(), base.getObjectName(), base.getObjectType());
+        String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
         LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n" + s);
       }
 
-      List<DbObject> result2 = retrieveObjects(connection, base, searchRef);
+      List<DbObject> result2 = retrieveObjects(connection, base, sql);
       result.addAll(result2);
     }
 
