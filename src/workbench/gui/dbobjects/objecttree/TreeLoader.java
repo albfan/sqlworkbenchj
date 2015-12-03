@@ -383,7 +383,6 @@ public class TreeLoader
       parentNode.add(node);
     }
 
-
     parentNode.setChildrenLoaded(true);
   }
 
@@ -628,6 +627,7 @@ public class TreeLoader
     if (node == null) return false;
     if (supportsDependencies(node))
     {
+      node.setAllowsChildren(true);
       ObjectTreeNode usingNode = new ObjectTreeNode(ResourceMgr.getString("TxtDepsUses"), TYPE_DEPENDENCY_USING);
       usingNode.setAllowsChildren(true);
       node.add(usingNode);

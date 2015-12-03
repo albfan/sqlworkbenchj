@@ -48,7 +48,7 @@ import workbench.util.SqlUtil;
 public class PostgresDependencyReader
   implements DependencyReader
 {
-  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view");
+  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view", "sequence");
 
   private final String typeCase =
       "       CASE cl.relkind \n" +
@@ -92,6 +92,18 @@ public class PostgresDependencyReader
     "  and n.nspname = ? \n" +
     "  and t.relname = ?";
 
+  private final String sequenceUsageSql =
+    "select n.nspname as table_schema, cl.relname as table_name, " + typeCase + " obj_description(cl.oid) as remarks\n" +
+    "from pg_class s\n" +
+    "  join pg_depend d on d.objid=s.oid and d.classid='pg_class'::regclass and d.refclassid='pg_class'::regclass\n" +
+    "  join pg_class cl on cl.oid = d.refobjid\n" +
+    "  join pg_namespace n on n.oid = cl.relnamespace\n" +
+    "  join pg_attribute a on a.attrelid = cl.oid and a.attnum=d.refobjsubid\n" +
+    "where s.relkind='S' \n" +
+    "  and d.deptype='a' \n " +
+    "  and n.nspname = ? \n" +
+    "  and s.relname = ?";
+
   public PostgresDependencyReader()
   {
   }
@@ -123,6 +135,9 @@ public class PostgresDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
     List<DbObject> objects = retrieveObjects(connection, base, searchUsedBy);
+
+    List<DbObject> tables = retrieveObjects(connection, base, sequenceUsageSql);
+    objects.addAll(tables);
 
     PostgresInheritanceReader reader = new PostgresInheritanceReader();
     if (base instanceof TableIdentifier && base.getObjectType().equalsIgnoreCase("table"))
