@@ -24,6 +24,8 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.List;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
@@ -37,6 +39,7 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 
 /**
  * List dependent or depending objects in the database
@@ -52,13 +55,17 @@ public class WbListDependencies
 	public static final String VERB_SHORT = "WbListDeps";
 	public static final String ARG_OBJECT_NAME = "name";
 	public static final String ARG_OBJECT_TYPE = "objectType";
+	public static final String ARG_DEPENDENCE_TYPE = "type";
 
+  private static final String TYPE_USES = "uses";
+  private static final String TYPE_USED_BY = "using";
 	public WbListDependencies()
 	{
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 		cmdLine.addArgument(ARG_OBJECT_NAME, ArgumentType.TableArgument);
+    cmdLine.addArgument(ARG_DEPENDENCE_TYPE, CollectionUtil.arrayList(TYPE_USES, TYPE_USED_BY));
 	}
 
 	@Override
@@ -94,11 +101,13 @@ public class WbListDependencies
     String objectName = null;
 
     TableIdentifier base = null;
+    String type = TYPE_USES;
 		if (cmdLine.hasArguments())
 		{
 			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
       objectName = cmdLine.getValue(ARG_OBJECT_NAME);
+      type = cmdLine.getValue(ARG_DEPENDENCE_TYPE, TYPE_USES);
       base = new TableIdentifier(catalog, schema, objectName);
 		}
     else
@@ -109,9 +118,20 @@ public class WbListDependencies
 
     base = currentConnection.getMetadata().findObject(base);
 
-    List<DbObject> objects = reader.getUsedObjects(currentConnection, base);
+    String titleKey = null;
+    List<DbObject> objects = null;
+    if (type.equalsIgnoreCase(TYPE_USED_BY))
+    {
+      objects = reader.getUsedBy(currentConnection, base);
+      titleKey = "TxtDepsUsedByParm";
+    }
+    else
+    {
+      objects = reader.getUsedObjects(currentConnection, base);
+      titleKey = "TxtDepsUsesParm";
+    }
     DataStore ds = currentConnection.getMetadata().createTableListDataStore();
-    ds.setResultName("Dependencies for " + base.getTableExpression(currentConnection));
+    ds.setResultName(ResourceMgr.getFormattedString(titleKey, base.getTableExpression(currentConnection)));
     for (DbObject dbo : objects)
     {
       int row = ds.addRow();
