@@ -178,7 +178,7 @@ public class ObjectDependencyPanel
     try
     {
       isRetrieving = true;
-      final List<DbObject> using = reader.getUsedBy(dbConnection, currentObject);
+      final List<DbObject> using = reader.getUsedObjects(dbConnection, currentObject);
       EventQueue.invokeLater(new Runnable()
       {
         @Override
@@ -188,7 +188,7 @@ public class ObjectDependencyPanel
         }
       });
 
-      List<DbObject> used = reader.getUsedObjects(dbConnection, currentObject);
+      List<DbObject> used = reader.getUsedBy(dbConnection, currentObject);
 
       EventQueue.invokeLater(new Runnable()
       {

@@ -20,6 +20,7 @@
 package workbench.db.dependency;
 
 import workbench.db.WbConnection;
+import workbench.db.firebird.FirebirdDependencyReader;
 import workbench.db.mssql.SqlServerDependencyReader;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleDependencyReader;
@@ -48,6 +49,11 @@ public class DependencyReaderFactory
     if (connection.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(connection))
     {
       return new SqlServerDependencyReader();
+    }
+
+    if (connection.getMetadata().isFirebird())
+    {
+      return new FirebirdDependencyReader();
     }
 
     return null;
