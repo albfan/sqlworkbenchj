@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -34,6 +35,7 @@ import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
+import workbench.db.dependency.DependencyReaderFactory;
 
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
 
@@ -49,6 +51,11 @@ public class SqlServerDependencyReader
 {
 
   private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view");
+  private final Set<String> searchBoth = CollectionUtil.caseInsensitiveSet(DependencyReaderFactory.getSearchBothDirections(DbMetadata.DBID_MS, "view"));
+
+  public SqlServerDependencyReader()
+  {
+  }
 
   @Override
   public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
@@ -63,7 +70,7 @@ public class SqlServerDependencyReader
       "          else type_desc \n" +
       "        end as type \n";
 
-    String viewRefSql =
+    String searchViewNameSql =
       "SELECT vtu.TABLE_CATALOG, vtu.TABLE_SCHEMA, vtu.TABLE_NAME,\n" + typeDesc +
       "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
       "  JOIN sys.all_objects ao ON ao.name = vtu.TABLE_NAME and schema_name(ao.schema_id) = vtu.TABLE_SCHEMA\n" +
@@ -72,26 +79,24 @@ public class SqlServerDependencyReader
         "  AND VIEW_NAME = ? \n" +
         "ORDER BY vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME";
 
-    String tableRefSql =
+    String searchTableNameSql =
       "SELECT vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME,\n" + typeDesc +
       "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
-      "  JOIN sys.all_objects ao ON ao.name = vtu.VIEW_NAME and schema_name(ao.schema_id) = vtu.VIEW_SCHEMA \n" +
+      "  JOIN sys.all_objects ao ON ao.name = vtu.VIEW_NAME and schema_name(ao.schema_id) = vtu.VIEW_SCHEMA\n" +
         "WHERE TABLE_CATALOG = ? \n" +
         "  AND TABLE_SCHEMA = ? \n" +
         "  AND TABLE_NAME = ? \n" +
-        "ORDER BY vtu.VIEW_CATALOG_SCHEMA, vtu.VIEW_SCHEMA, vtu.VIEW__NAME";
+        "ORDER BY vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME";
 
-    if (connection.getMetadata().isViewType(base.getObjectType()))
+    List<DbObject> objects = retrieveObjects(connection, base, searchTableNameSql);
+
+    if (searchBoth.contains(base.getObjectType()))
     {
-      return retrieveObjects(connection, base, viewRefSql);
+      List<DbObject> dbos = retrieveObjects(connection, base, searchViewNameSql);
+      objects.addAll(dbos);
     }
 
-    if (base.getObjectType().equalsIgnoreCase("TABLE"))
-    {
-      return retrieveObjects(connection, base, tableRefSql);
-    }
-
-    return Collections.emptyList();
+    return objects;
   }
 
   private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql)
@@ -136,7 +141,7 @@ public class SqlServerDependencyReader
       SqlUtil.closeAll(rs, pstmt);
     }
 
-    DbObjectSorter sorter = new DbObjectSorter(true);
+    DbObjectSorter sorter = new DbObjectSorter();
     Collections.sort(result, sorter);
     return result;
   }

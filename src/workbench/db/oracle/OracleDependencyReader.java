@@ -19,6 +19,7 @@
  */
 package workbench.db.oracle;
 
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -36,6 +38,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
+import workbench.db.dependency.DependencyReaderFactory;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -69,11 +72,11 @@ public class OracleDependencyReader
 
   public OracleDependencyReader()
   {
-    List<String> typeList = Settings.getInstance().getListProperty("workbench.db.oracle.dependencies.full", true, "");
-    searchBoth.addAll(typeList);
+    List<String> bothTypes = DependencyReaderFactory.getSearchBothDirections(DbMetadata.DBID_ORA, "");
+    searchBoth.addAll(bothTypes);
 
-    typeList = Settings.getInstance().getListProperty("workbench.db.oracle.dependencies.ref", true, "table");
-    searchRefTypes.addAll(typeList);
+    List<String> refTypes = Settings.getInstance().getListProperty("workbench.db.oracle.dependencies.ref", true, "table, view");
+    searchRefTypes.addAll(refTypes);
   }
 
   @Override
@@ -173,6 +176,10 @@ public class OracleDependencyReader
         if (type.equals("PROCEDURE"))
         {
           dbo = new ProcedureDefinition(null, owner, name);
+        }
+        else if (type.equals("FUNCTION"))
+        {
+          dbo = new ProcedureDefinition(null, owner, name, DatabaseMetaData.procedureReturnsResult);
         }
         else if (type.equals("TRIGGER"))
         {

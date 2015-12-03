@@ -96,7 +96,7 @@ public class CollectionUtil
 		return result;
 	}
 
-	public static Set<String> caseInsensitiveSet(Set<String> elements)
+	public static Set<String> caseInsensitiveSet(Collection<String> elements)
 	{
 		Set<String> result = caseInsensitiveSet();
     if (elements != null)

@@ -19,11 +19,14 @@
  */
 package workbench.db.dependency;
 
+import java.util.List;
+
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerDependencyReader;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleDependencyReader;
 import workbench.db.postgres.PostgresDependencyReader;
+import workbench.resource.Settings;
 
 /**
  *
@@ -49,7 +52,13 @@ public class DependencyReaderFactory
     {
       return new SqlServerDependencyReader();
     }
-    
+
     return null;
   }
+
+  public static List<String> getSearchBothDirections(String dbid, String defaultList)
+  {
+    return Settings.getInstance().getListProperty("workbench.db." + dbid + ".dependencies.full", true, defaultList);
+  }
+
 }

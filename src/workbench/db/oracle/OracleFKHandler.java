@@ -91,21 +91,12 @@ public class OracleFKHandler
 			"       ) deferrability, \n" +
 			"       case when f.status = 'ENABLED' then 'YES' else 'NO' end as enabled, \n" +
 			"       case when f.validated = 'VALIDATED' then 'YES' else 'NO' end as validated \n " +
-			"FROM all_cons_columns pc, \n" +
-			"     all_constraints p, \n" +
-			"     all_cons_columns fc, \n" +
-			"     all_constraints f \n" +
-			"WHERE f.constraint_type = 'R'  \n" +
-			"AND p.owner = f.r_owner  \n" +
-			"AND p.constraint_name = f.r_constraint_name  \n" +
-			"AND p.constraint_type IN  ('P', 'U') \n" +  // this is the difference to the original statement from the Oracle driver (it uses = 'P')
-			"AND pc.owner = p.owner  \n" +
-			"AND pc.constraint_name = p.constraint_name  \n" +
-			"AND pc.table_name = p.table_name  \n" +
-			"AND fc.owner = f.owner  \n" +
-			"AND fc.constraint_name = f.constraint_name  \n" +
-			"AND fc.table_name = f.table_name  \n" +
-			"AND fc.position = pc.position \n";
+      "FROM all_constraints p\n" +
+      "  JOIN all_cons_columns pc ON pc.owner = p.owner AND pc.constraint_name = p.constraint_name AND pc.table_name = p.table_name \n" +
+      "  JOIN all_constraints f ON p.owner = f.r_owner AND p.constraint_name = f.r_constraint_name \n" +
+      "  JOIN all_cons_columns fc ON fc.owner = f.owner AND fc.constraint_name = f.constraint_name AND fc.table_name = f.table_name AND fc.position = pc.position \n" +
+      "WHERE p.constraint_type in ('P', 'U') \n" +
+      "  AND f.constraint_type = 'R' \n";
 
 	}
 

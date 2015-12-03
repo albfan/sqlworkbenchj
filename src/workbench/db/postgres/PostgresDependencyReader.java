@@ -21,11 +21,13 @@ package workbench.db.postgres;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -34,6 +36,7 @@ import workbench.db.SequenceDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
+import workbench.db.dependency.DependencyReaderFactory;
 
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
 
@@ -47,8 +50,12 @@ import workbench.util.SqlUtil;
 public class PostgresDependencyReader
   implements DependencyReader
 {
-
   private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view");
+  private final Set<String> searchBoth = CollectionUtil.caseInsensitiveSet(DependencyReaderFactory.getSearchBothDirections(DbMetadata.DBID_PG, "view"));
+
+  public PostgresDependencyReader()
+  {
+  }
 
   @Override
   public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
@@ -56,44 +63,51 @@ public class PostgresDependencyReader
     if (base == null || connection == null) return Collections.emptyList();
 
 
-    String viewSql =
-      "select table_schema, \n" +
-      "       table_name, \n" +
-      "       'VIEW' as type, \n" +
-      "       obj_description((table_schema||'.'||table_name)::regclass) as remarks\n" +
-      "from information_schema.view_table_usage \n" +
+    String typeCase =
+      "       CASE cl.relkind \n" +
+      "          WHEN 'r' THEN 'TABLE'\n" +
+      "          WHEN 'i' THEN 'INDEX'\n" +
+      "          WHEN 'S' THEN 'SEQUENCE'\n" +
+      "          WHEN 'v' THEN 'VIEW'\n" +
+      "          WHEN 'm' THEN 'MATERIALIZED VIEW'\n" +
+      "          WHEN 'c' THEN 'TYPE'\n" +
+      "          WHEN 't' THEN 'TOAST'\n" +
+      "          WHEN 'f' THEN 'FOREIGN TABLE'\n" +
+      "       END AS object_type, \n";
+
+    String searchViewNameSql =
+      "select vtu.table_schema, \n" +
+      "       vtu.table_name, \n" + typeCase +
+      "       obj_description(cl.oid) as remarks\n" +
+      "from information_schema.view_table_usage vtu \n" +
+      "  join pg_class cl on cl.oid = concat_ws('.', quote_ident(vtu.table_schema), quote_ident(vtu.table_name))::regclass \n" +
       "where (view_schema, view_name) = (?, ?)" +
       "order by view_schema, view_name";
 
-    String baseSql =
-      "SELECT DISTINCT nsp2.nspname, dependee.relname,\n" +
-      "       CASE dependee.relkind \n" +
-      "          WHEN 'r' THEN 'TABLE'::text \n" +
-      "          WHEN 'i' THEN 'INDEX'::text \n" +
-      "          WHEN 'S' THEN 'SEQUENCE'::text \n" +
-      "          WHEN 'v' THEN 'VIEW'::text \n" +
-      "          WHEN 'm' THEN 'MATERIALIZED VIEW'::text \n" +
-      "          WHEN 'c' THEN 'TYPE'::text      -- COMPOSITE type \n" +
-      "          WHEN 't' THEN 'TOAST'::text \n" +
-      "          WHEN 'f' THEN 'FOREIGN TABLE'::text \n" +
-      "       END AS object_type, \n" +
-      "       obj_description(dependee.oid) as remarks\n" +
-      "FROM pg_depend dep  \n" +
-      "  JOIN pg_rewrite ON dep.objid = pg_rewrite.oid  \n" +
-      "  JOIN pg_class as dependee ON pg_rewrite.ev_class = dependee.oid  \n" +
-      "  JOIN pg_class as dependent ON dep.refobjid = dependent.oid  \n" +
-      "  JOIN pg_namespace nsp on dependent.relnamespace = nsp.oid \n" +
-      "  JOIN pg_namespace nsp2 on dependee.relnamespace = nsp2.oid  \n" +
-      "WHERE dependent.oid <> dependee.oid \n" +
-      "  AND nsp.nspname = ? \n" +
-      "  AND dependent.relname = ?";
+    String searchTableNameSql =
+        "select vtu.view_schema, \n" +
+        "       vtu.view_name, \n" + typeCase +
+        "       obj_description(cl.oid) as remarks\n" +
+        "from information_schema.view_table_usage vtu \n" +
+        "  join pg_class cl on cl.oid = concat_ws('.', quote_ident(vtu.view_schema), quote_ident(vtu.view_name))::regclass \n" +
+        "where (table_schema, table_name) = (?, ?)" +
+        "order by view_schema, view_name";
 
-    String sql = baseSql;
+    String sql = searchTableNameSql;
     if (connection.getMetadata().isViewType(base.getObjectType()))
     {
-      sql = viewSql;
+      sql = searchViewNameSql;
     }
-    return retrieveObjects(connection, base, sql);
+
+    List<DbObject> objects = retrieveObjects(connection, base, sql);
+
+    if (searchBoth.contains(base.getObjectType()))
+    {
+      List<DbObject> tbl = retrieveObjects(connection, base, searchTableNameSql);
+      objects.addAll(tbl);
+    }
+
+    return objects;
   }
 
   private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql)
@@ -109,8 +123,10 @@ public class PostgresDependencyReader
 			LogMgr.logDebug("PostgresDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
 		}
 
+    Savepoint sp = null;
     try
     {
+      connection.setSavepoint();
       pstmt = connection.getSqlConnection().prepareStatement(sql);
       pstmt.setString(1, base.getSchema());
       pstmt.setString(2, base.getObjectName());
@@ -144,10 +160,11 @@ public class PostgresDependencyReader
     }
     finally
     {
+      connection.rollback(sp);
       SqlUtil.closeAll(rs, pstmt);
     }
 
-    DbObjectSorter sorter = new DbObjectSorter(true);
+    DbObjectSorter sorter = new DbObjectSorter();
     Collections.sort(result, sorter);
     return result;
   }
