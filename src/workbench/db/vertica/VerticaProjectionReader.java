@@ -110,7 +110,7 @@ public class VerticaProjectionReader
 	{
 		String sql =
 			"SELECT p.projection_name as name, \n" +
-			"       coalesce(p.node_name,ps.node_name) as node, \n" +
+			"       decode(p.node_name,null,ps.node_name,'',ps.node_name,p.node_name) as node, \n" +
 			"       p.created_epoch, \n" +
 			"       ps.projection_column_count as columns, \n" +
 			"       ps.ros_count as ROSes, \n" +
@@ -120,7 +120,7 @@ public class VerticaProjectionReader
 			"       round(ps.ros_used_bytes/1024/1024,2) as ros_mb \n" +
 			"FROM projections p \n" +
 			"  left outer join projection_storage ps using (projection_id) \n" +
-			"WHERE p.projection_basename = ? \n" +
+			"WHERE decode(p.node_name,null,ps.node_name,'',ps.node_name,p.node_name) = ps.node_name and p.projection_basename = ? \n" +
 			"ORDER BY p.projection_name, node ";
 
 		if (Settings.getInstance().getDebugMetadataSql())
