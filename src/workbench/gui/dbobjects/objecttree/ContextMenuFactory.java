@@ -81,7 +81,7 @@ class ContextMenuFactory
     {
       ObjectTreeNode selectedNode = dbTree.getSelectedNode();
 
-      boolean showFind = selectedNode.isFKTable() || selectedNode.getParent().getType().equals(TreeLoader.TYPE_DEPENDENCY_LIST);
+      boolean showFind = selectedNode.isFKTable() || dbTree.getLoader().isDependencyNode(selectedNode.getParent());
 
       if (showFind)
       {

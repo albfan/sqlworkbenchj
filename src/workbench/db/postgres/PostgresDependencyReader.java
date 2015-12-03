@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -36,7 +35,6 @@ import workbench.db.SequenceDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
-import workbench.db.dependency.DependencyReaderFactory;
 
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
 
@@ -51,19 +49,8 @@ public class PostgresDependencyReader
   implements DependencyReader
 {
   private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view");
-  private final Set<String> searchBoth = CollectionUtil.caseInsensitiveSet(DependencyReaderFactory.getSearchBothDirections(DbMetadata.DBID_PG, "view"));
 
-  public PostgresDependencyReader()
-  {
-  }
-
-  @Override
-  public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
-  {
-    if (base == null || connection == null) return Collections.emptyList();
-
-
-    String typeCase =
+  private final String typeCase =
       "       CASE cl.relkind \n" +
       "          WHEN 'r' THEN 'TABLE'\n" +
       "          WHEN 'i' THEN 'INDEX'\n" +
@@ -75,36 +62,76 @@ public class PostgresDependencyReader
       "          WHEN 'f' THEN 'FOREIGN TABLE'\n" +
       "       END AS object_type, \n";
 
-    String searchViewNameSql =
+  private final String searchUsed =
       "select vtu.table_schema, \n" +
       "       vtu.table_name, \n" + typeCase +
       "       obj_description(cl.oid) as remarks\n" +
       "from information_schema.view_table_usage vtu \n" +
       "  join pg_class cl on cl.oid = concat_ws('.', quote_ident(vtu.table_schema), quote_ident(vtu.table_name))::regclass \n" +
-      "where (view_schema, view_name) = (?, ?)" +
+      "where (view_schema, view_name) = (?, ?) \n" +
       "order by view_schema, view_name";
 
-    String searchTableNameSql =
+  private final String searchUsedBy =
         "select vtu.view_schema, \n" +
         "       vtu.view_name, \n" + typeCase +
         "       obj_description(cl.oid) as remarks\n" +
         "from information_schema.view_table_usage vtu \n" +
         "  join pg_class cl on cl.oid = concat_ws('.', quote_ident(vtu.view_schema), quote_ident(vtu.view_name))::regclass \n" +
-        "where (table_schema, table_name) = (?, ?)" +
+        "where (table_schema, table_name) = (?, ?) \n" +
         "order by view_schema, view_name";
 
-    String sql = searchTableNameSql;
-    if (connection.getMetadata().isViewType(base.getObjectType()))
+  private final String tableSequenceSql =
+    "select n.nspname as sequence_schema, s.relname as sequence_name, 'SEQUENCE', obj_description(s.oid) as remarks\n" +
+    "from pg_class s\n" +
+    "  join pg_depend d on d.objid=s.oid and d.classid='pg_class'::regclass and d.refclassid='pg_class'::regclass\n" +
+    "  join pg_class t on t.oid=d.refobjid\n" +
+    "  join pg_namespace n on n.oid=t.relnamespace\n" +
+    "  join pg_attribute a on a.attrelid=t.oid and a.attnum=d.refobjsubid\n" +
+    "where s.relkind='S' \n" +
+    "  and d.deptype='a' \n " +
+    "  and n.nspname = ? \n" +
+    "  and t.relname = ?";
+
+  public PostgresDependencyReader()
+  {
+  }
+
+  @Override
+  public List<DbObject> getUsedObjects(WbConnection connection, DbObject base)
+  {
+    if (base == null || connection == null) return Collections.emptyList();
+
+    List<DbObject> objects = retrieveObjects(connection, base, searchUsed);
+
+    List<DbObject> sequences = retrieveObjects(connection, base, tableSequenceSql);
+    objects.addAll(sequences);
+
+    PostgresInheritanceReader reader = new PostgresInheritanceReader();
+    if (base instanceof TableIdentifier && base.getObjectType().equalsIgnoreCase("table"))
     {
-      sql = searchViewNameSql;
+      List<TableIdentifier> parents = reader.getParents(connection, (TableIdentifier)base);
+      for (TableIdentifier tbl : parents)
+      {
+        objects.add(tbl);
+      }
     }
+    return objects;
+  }
 
-    List<DbObject> objects = retrieveObjects(connection, base, sql);
+  @Override
+  public List<DbObject> getUsedBy(WbConnection connection, DbObject base)
+  {
+    if (base == null || connection == null) return Collections.emptyList();
+    List<DbObject> objects = retrieveObjects(connection, base, searchUsedBy);
 
-    if (searchBoth.contains(base.getObjectType()))
+    PostgresInheritanceReader reader = new PostgresInheritanceReader();
+    if (base instanceof TableIdentifier && base.getObjectType().equalsIgnoreCase("table"))
     {
-      List<DbObject> tbl = retrieveObjects(connection, base, searchTableNameSql);
-      objects.addAll(tbl);
+      List<InheritanceEntry> children = reader.getChildren(connection, (TableIdentifier)base);
+      for (InheritanceEntry entry : children)
+      {
+        objects.add(entry.getTable());
+      }
     }
 
     return objects;

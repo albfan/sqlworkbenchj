@@ -248,6 +248,11 @@ public class DbTreePanel
     tree.selectObject(tbl);
   }
 
+  public TreeLoader getLoader()
+  {
+    return tree.getLoader();
+  }
+  
   public void connect(final ConnectionProfile profile)
   {
     if (profile == null) return;

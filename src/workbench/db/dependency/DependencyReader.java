@@ -31,13 +31,21 @@ import workbench.db.WbConnection;
 public interface DependencyReader
 {
   /**
-   * Return a list of objects that depend on the base object.
+   * Return a list of objects that the base object uses.
    *
    *
    * @param base  the base object to check for
    * @return a list of objects that depend on <tt>base</tt> or on which <tt>base</tt> depends on.
    */
-  List<DbObject> getObjectDependencies(WbConnection connection, DbObject base);
+  List<DbObject> getUsedObjects(WbConnection connection, DbObject base);
+
+  /**
+   * Return a list of objects that are using the base object.
+   *
+   * @param base  the base object to check for
+   * @return a list of objects that depend on <tt>base</tt> or on which <tt>base</tt> depends on.
+   */
+  List<DbObject> getUsedBy(WbConnection connection, DbObject base);
 
   boolean supportsDependencies(String objectType);
 }

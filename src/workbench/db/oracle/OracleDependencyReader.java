@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -38,7 +37,6 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
-import workbench.db.dependency.DependencyReaderFactory;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -50,7 +48,7 @@ import workbench.util.SqlUtil;
 public class OracleDependencyReader
   implements DependencyReader
 {
-  private final String searchRefSql =
+  private final String searchUsedBySql =
         "select owner, name, type  \n" +
         "from all_dependencies \n" +
         "where referenced_owner = ? \n" +
@@ -58,7 +56,7 @@ public class OracleDependencyReader
         "  and referenced_type = ? \n" +
         "  and owner not in ('SYS', 'SYSTEM', 'PUBLIC')";
 
-  private final String searchOwnerSql =
+  private final String searchUsedSql =
         "select referenced_owner, referenced_name, referenced_type \n" +
         "from all_dependencies \n" +
         "where owner = ? \n" +
@@ -67,58 +65,31 @@ public class OracleDependencyReader
         "  and referenced_owner not in ('SYS', 'SYSTEM', 'PUBLIC')";
 
   private final Set<String> types = CollectionUtil.caseInsensitiveSet("TABLE", "VIEW", "MATERIALIZED VIEW", "PROCEDURE", "TYPE", "FUNCTION", "TRIGGER", "PACKAGE");
-  private final Set<String> searchBoth = CollectionUtil.caseInsensitiveSet();
-  private final Set<String> searchRefTypes = CollectionUtil.caseInsensitiveSet();
 
   public OracleDependencyReader()
   {
-    List<String> bothTypes = DependencyReaderFactory.getSearchBothDirections(DbMetadata.DBID_ORA, "");
-    searchBoth.addAll(bothTypes);
-
-    List<String> refTypes = Settings.getInstance().getListProperty("workbench.db.oracle.dependencies.ref", true, "table, view");
-    searchRefTypes.addAll(refTypes);
   }
 
   @Override
-  public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
+  public List<DbObject> getUsedObjects(WbConnection connection, DbObject base)
+  {
+    if (base == null || connection == null) return Collections.emptyList();
+    return retrieveObjects(connection, base, searchUsedSql);
+  }
+
+  @Override
+  public List<DbObject> getUsedBy(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    boolean searchRef = searchRefTypes.contains(base.getObjectType());
-
-    String sql = searchRef ? searchRefSql : searchOwnerSql;
-
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n" + s);
-		}
-
-    List<DbObject> result = retrieveObjects(connection, base, sql);
-
-    if (searchBoth.contains(base.getObjectType()))
-    {
-      sql = searchRef ? searchOwnerSql : searchRefSql;
-      if (Settings.getInstance().getDebugMetadataSql())
-      {
-        String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
-        LogMgr.logDebug("OracleDependencyReader.getObjectDependencies()", "Retrieving object dependency using query:\n" + s);
-      }
-
-      List<DbObject> result2 = retrieveObjects(connection, base, sql);
-      result.addAll(result2);
-    }
-
-    result = removeBodies(result);
-    Collections.sort(result, new DbObjectComparator());
-
-    return result;
+    return retrieveObjects(connection, base, searchUsedBySql);
   }
 
   /**
    * all_dependencies will return the "bodies" for types and packages.
    *
-   * This method returns those objects where both elements are present (TYPE and TYPE BODY or PACKAGE and PACKAGE BODY)
+   * This method returns those objects elements with "XXX BODY"
+   * where both elements are present (TYPE and TYPE BODY or PACKAGE and PACKAGE BODY)
    */
   private List<DbObject> removeBodies(List<DbObject> objects)
   {
@@ -159,6 +130,12 @@ public class OracleDependencyReader
     ResultSet rs = null;
 
     List<DbObject> result = new ArrayList<>();
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
+			LogMgr.logDebug("OracleDependencyReader.retrieveObjects()", "Retrieving object dependency using query:\n" + s);
+		}
 
     try
     {
@@ -210,6 +187,6 @@ public class OracleDependencyReader
     {
       SqlUtil.closeAll(rs, pstmt);
     }
-    return result;
+    return removeBodies(result);
   }
 }

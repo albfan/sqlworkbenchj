@@ -99,6 +99,8 @@ import workbench.db.TableSourceBuilderFactory;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
+import workbench.db.dependency.DependencyReader;
+import workbench.db.dependency.DependencyReaderFactory;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -171,6 +173,7 @@ public class TableListPanel
 	protected ReloadAction reloadAction;
 
 	protected TableDataPanel tableData;
+  protected ObjectDependencyPanel dependencyPanel;
 
 	private TableIndexPanel indexPanel;
 	private final TriggerDisplayPanel triggers;
@@ -415,6 +418,7 @@ public class TableListPanel
 		tableList.setRememberColumnOrder(DbExplorerSettings.getRememberMetaColumnOrder("tablelist"));
 		tableList.setListSelectionControl(this);
 		tableList.setReadOnly(!DbExplorerSettings.allowAlterInDbExplorer());
+    dependencyPanel = new ObjectDependencyPanel();
 		showObjectDefinitionPanels(false);
 	}
 
@@ -647,6 +651,7 @@ public class TableListPanel
         displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedKeys);
         displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedKeys);
         addTriggerPanel();
+        addDependencyPanelIfSupported();
         restoreIndex(index);
       }
       finally
@@ -694,6 +699,9 @@ public class TableListPanel
         showIndexesIfSupported();
         showTriggerIfSupported();
 
+        addDependencyPanelIfSupported();
+
+        dependencyPanel.reset();
         exportedKeys.reset();
         indexes.reset();
         triggers.reset();
@@ -709,6 +717,16 @@ public class TableListPanel
       }
     });
 	}
+
+  private void addDependencyPanelIfSupported()
+  {
+    if (dbConnection == null) return;
+    DependencyReader reader = DependencyReaderFactory.getReader(dbConnection);
+    if (reader != null)
+    {
+      displayTab.add(ResourceMgr.getString("TxtDeps"), dependencyPanel);
+    }
+  }
 
 	private boolean viewTriggersSupported()
 	{
@@ -995,6 +1013,7 @@ public class TableListPanel
 		tableDefinition.setConnection(connection);
 		triggers.setConnection(connection);
 		tableSource.setDatabaseConnection(connection);
+    dependencyPanel.setConnection(connection);
 
 		renameAction.setConnection(dbConnection);
 		validator.setConnection(dbConnection);
@@ -1569,6 +1588,8 @@ public class TableListPanel
 
 		this.tableData.reset();
 		this.tableData.setTable(this.selectedTable);
+    dependencyPanel.reset();
+    dependencyPanel.setCurrentObject(selectedTable);
 
 		if (tableHistory != null)
 		{
@@ -1940,6 +1961,10 @@ public class TableListPanel
 		{
 			retrieveTriggers();
 		}
+    else if (panel == dependencyPanel && shouldRetrieveTriggers)
+    {
+      dependencyPanel.doLoad();
+    }
 	}
 
 	private void endTransaction()

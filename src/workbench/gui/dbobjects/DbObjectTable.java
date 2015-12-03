@@ -59,6 +59,7 @@ public class DbObjectTable
 	{
 		this(null);
 	}
+  
 	public DbObjectTable(String propName)
 	{
 		super(true, false, false);
@@ -91,7 +92,7 @@ public class DbObjectTable
 			CheckBoxAction rememberSort = new CheckBoxAction("MnuTxtRememberSort", saveSortProperty);
 			menu.insert(rememberSort.getMenuItem(), count - 1);
 		}
-		
+
 		if (isColumnOrderChanged() && originalColumnOrder != null)
 		{
 			ResetColOrderAction resetColOrder = new ResetColOrderAction(null)

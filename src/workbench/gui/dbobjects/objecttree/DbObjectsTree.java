@@ -91,6 +91,11 @@ public class DbObjectsTree
     statusBar = status;
   }
 
+  public TreeLoader getLoader()
+  {
+    return loader;
+  }
+  
   @Override
   public DbObjectTreeModel getModel()
   {
@@ -366,7 +371,10 @@ public class DbObjectsTree
   {
     if (parent == null) return null;
     if (table == null) return null;
-    if (parent.getType().equals(TreeLoader.TYPE_DEPENDENCY_LIST)) return null;
+    String type = parent.getType();
+    if (type == null) return null;
+
+    if (loader.isDependencyNode(parent)) return null;
 
     int childCount = parent.getChildCount();
     for (int i = 0; i < childCount; i++)

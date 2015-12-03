@@ -224,61 +224,23 @@ public class PostgresTableSourceBuilder
 		if (table == null) return null;
 
 		StringBuilder result = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+    PostgresInheritanceReader reader = new PostgresInheritanceReader();
 
-		String sql =
-			"select bt.relname as table_name, bns.nspname as table_schema \n" +
-			"from pg_class ct \n" +
-			"  join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
-			"  join pg_inherits i on i.inhrelid = ct.oid and ct.relname = ? \n" +
-			"  join pg_class bt on i.inhparent = bt.oid \n" +
-			"  join pg_namespace bns on bt.relnamespace = bns.oid";
+    List<TableIdentifier> parents = reader.getParents(dbConnection, table);
+    if (CollectionUtil.isEmpty(parents)) return null;
 
-		Savepoint sp = null;
-		try
-		{
-			// Retrieve parent table(s) for this table
-			sp = dbConnection.setSavepoint();
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, table.getSchema());
-			pstmt.setString(2, table.getTableName());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.readInherits()", "Reading parent tables using:\n" + pstmt);
-			}
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				result = new StringBuilder(50);
-				result.append("INHERITS (");
-				String tableName = rs.getString(1);
-				result.append(tableName);
-				table.getSourceOptions().addConfigSetting("inherits", tableName);
-				while (rs.next())
-				{
-					tableName = rs.getString(1);
-					result.append(',');
-					result.append(tableName);
-					table.getSourceOptions().addConfigSetting("inherits", tableName);
-				}
-				result.append(')');
-			}
+    result = new StringBuilder(parents.size() * 30);
+    result.append("INHERITS (");
 
-			// retrieve child tables for this table
-
-			dbConnection.releaseSavepoint(sp);
-		}
-		catch (SQLException e)
-		{
-			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.readInherits()", "Error retrieving table inheritance using:\n" + pstmt, e);
-			return null;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
+    for (int i=0; i < parents.size(); i++)
+    {
+      TableIdentifier tbl = parents.get(i);
+      table.getSourceOptions().addConfigSetting("inherits", tbl.getTableName());
+      result.append(tbl.getTableName());
+      if (i > 0) result.append(',');
+    }
+    result.append(')');
+    
 		return result;
 	}
 
@@ -542,110 +504,49 @@ public class PostgresTableSourceBuilder
 		if (table == null) return null;
 
 		StringBuilder result = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 
-		final String sql83 =
-			"select bt.relname as table_name, bns.nspname as table_schema, 0 as level \n" +
-			"from pg_class ct \n" +
-			"    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
-			"    join pg_inherits i on i.inhparent = ct.oid and ct.relname = ? \n" +
-			"    join pg_class bt on i.inhrelid = bt.oid \n" +
-			"    join pg_namespace bns on bt.relnamespace = bns.oid";
+    PostgresInheritanceReader reader = new PostgresInheritanceReader();
 
-		// Recursive version for 8.4+ based Craig Ringer's statement from here: http://stackoverflow.com/a/12139506/330315
-		final String sql84 =
-			"with recursive inh as ( \n" +
-			"\n" +
-			"  select i.inhrelid, 1 as level, array[inhrelid] as path \n" +
-			"  from pg_catalog.pg_inherits i  \n" +
-			"    join pg_catalog.pg_class cl on i.inhparent = cl.oid \n" +
-			"    join pg_catalog.pg_namespace nsp on cl.relnamespace = nsp.oid \n" +
-			"  where nsp.nspname = ? \n" +
-			"    and cl.relname = ? \n" +
-			"" +
-			"  union all \n" +
-			"\n" +
-			"  select i.inhrelid, inh.level + 1, inh.path||i.inhrelid \n" +
-			"  from inh \n" +
-			"    join pg_catalog.pg_inherits i on (inh.inhrelid = i.inhparent) \n" +
-			") \n" +
-			"select pg_class.relname as table_name, pg_namespace.nspname as table_schema, inh.level \n" +
-			"from inh \n" +
-			"  join pg_catalog.pg_class on (inh.inhrelid = pg_class.oid) \n" +
-			"	 join pg_catalog.pg_namespace on (pg_class.relnamespace = pg_namespace.oid) \n" +
-			"order by path";
-
+    List<InheritanceEntry> tables = reader.getChildren(dbConnection, table);
 		final boolean is84 = JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4");
 
-    // wenn putting the "?" expression directly into the prepareStatement() call, this generates an error with Java 8
-    final String sqlToUse = is84 ? sql84 : sql83;
-
-		Savepoint sp = null;
-		try
-		{
-			// Retrieve direct child table(s) for this table
-			// this does not handle multiple inheritance
-			sp = dbConnection.setSavepoint();
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sqlToUse);
-			pstmt.setString(1, table.getSchema());
-			pstmt.setString(2, table.getTableName());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.getChildTables()", "Retrieving child tables using:\n" + pstmt.toString());
-			}
-			rs = pstmt.executeQuery();
-			int count = 0;
-			while (rs.next())
-			{
-				if (count == 0)
-				{
-					result = new StringBuilder(50);
-					if (is84)
-					{
-						result.append("\n/* Inheritance tree:\n\n");
-						result.append(table.getSchema());
-						result.append('.');
-						result.append(table.getTableName());
-					}
-					else
-					{
-						result.append("\n-- Child tables:");
-					}
-				}
-				String tableName = rs.getString(1);
-				String schemaName = rs.getString(2);
-				int level = rs.getInt(3);
-				if (is84)
-				{
-					result.append('\n');
-					result.append(StringUtil.padRight(" ", level * 2));
-				}
-				else
-				{
-					result.append("\n--  ");
-				}
-				result.append(schemaName);
-				result.append('.');
-				result.append(tableName);
-				count ++;
-			}
-			if (is84 && result != null)
-			{
-				result.append("\n*/");
-			}
-			dbConnection.releaseSavepoint(sp);
-		}
-		catch (SQLException e)
-		{
-			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.getChildTables()", "Error retrieving table options", e);
-			return null;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
+    for (int i = 0; i < tables.size(); i++)
+    {
+      if (i == 0)
+      {
+        result = new StringBuilder(50);
+        if (is84)
+        {
+          result.append("\n/* Inheritance tree:\n\n");
+          result.append(table.getSchema());
+          result.append('.');
+          result.append(table.getTableName());
+        }
+        else
+        {
+          result.append("\n-- Child tables:");
+        }
+      }
+      String tableName = tables.get(i).getTable().getTableName();
+      String schemaName = tables.get(i).getTable().getSchema();
+      int level = tables.get(i).getLevel();
+      if (is84)
+      {
+        result.append('\n');
+        result.append(StringUtil.padRight(" ", level * 2));
+      }
+      else
+      {
+        result.append("\n--  ");
+      }
+      result.append(schemaName);
+      result.append('.');
+      result.append(tableName);
+    }
+    if (is84 && result != null)
+    {
+      result.append("\n*/");
+    }
 		return result;
 	}
 

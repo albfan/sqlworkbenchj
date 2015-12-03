@@ -20,6 +20,7 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -101,7 +102,12 @@ public class TreeLoader
   /**
    * The node type for the "dependencies" node in a table or a view.
    */
-  public static final String TYPE_DEPENDENCY_LIST = "dependency-list";
+  public static final String TYPE_DEPENDENCY_USED = "dep-used";
+
+  /**
+   * The node type for the "dependencies" node in a table or a view.
+   */
+  public static final String TYPE_DEPENDENCY_USING = "dep-using";
 
   /**
    * The node type for the foreign key nodes in a table.
@@ -556,11 +562,11 @@ public class TreeLoader
       {
         node.setAllowsChildren(true);
         addIndexNode(node);
-        addDependencyNode(node);
+        addDependencyNodes(node);
       }
       else
       {
-        addDependencyNode(node);
+        addDependencyNodes(node);
       }
 
       if (connection.getMetadata().isViewType(typeNode.getName()))
@@ -617,14 +623,18 @@ public class TreeLoader
     node.add(cols);
   }
 
-  public boolean addDependencyNode(ObjectTreeNode node)
+  public boolean addDependencyNodes(ObjectTreeNode node)
   {
     if (node == null) return false;
     if (supportsDependencies(node))
     {
-      ObjectTreeNode depNode = new ObjectTreeNode("Dependencies", TYPE_DEPENDENCY_LIST);
-      depNode.setAllowsChildren(true);
-      node.add(depNode);
+      ObjectTreeNode usingNode = new ObjectTreeNode(ResourceMgr.getString("TxtDepsUses"), TYPE_DEPENDENCY_USING);
+      usingNode.setAllowsChildren(true);
+      node.add(usingNode);
+
+      ObjectTreeNode usedNode = new ObjectTreeNode(ResourceMgr.getString("TxtDepsUsedBy"), TYPE_DEPENDENCY_USED);
+      usedNode.setAllowsChildren(true);
+      node.add(usedNode);
       return true;
     }
     return false;
@@ -649,7 +659,7 @@ public class TreeLoader
     ref.setAllowsChildren(true);
     node.add(ref);
 
-    addDependencyNode(node);
+    addDependencyNodes(node);
 
     ObjectTreeNode trg = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerTriggers"), TYPE_TRIGGERS_NODE);
     trg.setAllowsChildren(true);
@@ -662,19 +672,55 @@ public class TreeLoader
     procLoader.loadProcedures(procNode, model, connection, this);
   }
 
+  public boolean isDependencyNode(ObjectTreeNode node)
+  {
+    if (node == null) return false;
+    return (node.getType().equals(TYPE_DEPENDENCY_USED) || node.getType().equals(TYPE_DEPENDENCY_USING));
+  }
+
+  private void addNodes(ObjectTreeNode parent, List<ObjectTreeNode> nodes)
+  {
+    if (CollectionUtil.isEmpty(nodes)) return;
+    if (parent == null) return;
+    if (!parent.canHaveChildren()) return;
+
+    for (ObjectTreeNode node : nodes)
+    {
+      parent.add(node);
+    }
+  }
+
+  private List<ObjectTreeNode> removeDependencyNodes(ObjectTreeNode parent)
+  {
+    List<ObjectTreeNode> nodes = new ArrayList<>(2);
+    if (!supportsDependencies(parent)) return nodes;
+
+    for (int i=0; i < parent.getChildCount(); i++)
+    {
+      ObjectTreeNode child = parent.getChildAt(i);
+      if (isDependencyNode(child))
+      {
+        nodes.add(child);
+      }
+    }
+
+    for (ObjectTreeNode child : nodes)
+    {
+      parent.remove(child);
+    }
+
+    return nodes;
+  }
+
   public void loadProcedureParameters(ObjectTreeNode node)
   {
     if (node == null) return;
     ProcedureDefinition proc = (ProcedureDefinition)node.getDbObject();
     if (proc == null) return;
+
     List<ColumnIdentifier> parameters = proc.getParameters(connection);
 
-    ObjectTreeNode deps = null;
-    if (supportsDependencies(node) && node.getChildCount() > 0 && node.getChildAt(0).getType().equals(TYPE_DEPENDENCY_LIST))
-    {
-      deps = node.getChildAt(0);
-      node.remove(deps);
-    }
+    List<ObjectTreeNode> deps = removeDependencyNodes(node);
 
     for (ColumnIdentifier col : parameters)
     {
@@ -693,10 +739,7 @@ public class TreeLoader
       p.setChildrenLoaded(true);
       node.add(p);
     }
-    if (deps != null)
-    {
-      node.add(deps);
-    }
+    addNodes(node, deps);
     model.nodeStructureChanged(node);
     node.setChildrenLoaded(true);
   }
@@ -717,7 +760,7 @@ public class TreeLoader
       ObjectTreeNode node = new ObjectTreeNode(trg);
       boolean supportsDeps = supportsDependencies(node);
       node.setAllowsChildren(supportsDeps);
-      addDependencyNode(node);
+      addDependencyNodes(node);
       node.setChildrenLoaded(!supportsDeps);
       trgNode.add(node);
     }
@@ -795,7 +838,16 @@ public class TreeLoader
       return;
     }
 
-    List<DbObject> objects = dependencyLoader.getObjectDependencies(connection, dbo);
+    List<DbObject> objects = null;
+    if (depNode.getType().equals(TYPE_DEPENDENCY_USED))
+    {
+      objects = dependencyLoader.getUsedBy(connection, dbo);
+    }
+    else if (depNode.getType().equals(TYPE_DEPENDENCY_USING))
+    {
+      objects = dependencyLoader.getUsedObjects(connection, dbo);
+    }
+
     for (DbObject obj : objects)
     {
       ObjectTreeNode node = new ObjectTreeNode(obj);
@@ -822,17 +874,23 @@ public class TreeLoader
       return;
     }
 
+    List<ObjectTreeNode> deps = removeDependencyNodes(columnsNode);
+
     if (dbo instanceof TableIdentifier)
     {
       TableIdentifier tbl = (TableIdentifier)dbo;
       connection.getObjectCache().addTable(new TableDefinition(tbl, columns));
     }
+
     for (ColumnIdentifier col : columns)
     {
       ObjectTreeNode node = new ObjectTreeNode(col);
       node.setAllowsChildren(false);
       columnsNode.add(node);
     }
+
+    addNodes(columnsNode, deps);
+
     model.nodeStructureChanged(columnsNode);
     columnsNode.setChildrenLoaded(true);
   }
@@ -989,7 +1047,7 @@ public class TreeLoader
         DbObject dbo = parent.getDbObject();
         loadTableTriggers(dbo, node);
       }
-      else if (TYPE_DEPENDENCY_LIST.equals(type))
+      else if (TYPE_DEPENDENCY_USED.equals(type) || TYPE_DEPENDENCY_USING.equals(type))
       {
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();

@@ -17,39 +17,33 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.dependency;
+package workbench.db.postgres;
 
-import workbench.db.WbConnection;
-import workbench.db.mssql.SqlServerDependencyReader;
-import workbench.db.mssql.SqlServerUtil;
-import workbench.db.oracle.OracleDependencyReader;
-import workbench.db.postgres.PostgresDependencyReader;
+import workbench.db.TableIdentifier;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class DependencyReaderFactory
+public class InheritanceEntry
 {
-  public static DependencyReader getReader(WbConnection connection)
+  private final int level;
+  private final TableIdentifier table;
+
+  public InheritanceEntry(TableIdentifier table, int level)
   {
-    if (connection == null) return null;
-
-    if (connection.getMetadata().isOracle())
-    {
-      return new OracleDependencyReader();
-    }
-
-    if (connection.getMetadata().isPostgres())
-    {
-      return new PostgresDependencyReader();
-    }
-
-    if (connection.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(connection))
-    {
-      return new SqlServerDependencyReader();
-    }
-
-    return null;
+    this.level = level;
+    this.table = table;
   }
+
+  public int getLevel()
+  {
+    return level;
+  }
+
+  public TableIdentifier getTable()
+  {
+    return table;
+  }
+
 }

@@ -109,7 +109,7 @@ public class WbListDependencies
 
     base = currentConnection.getMetadata().findObject(base);
 
-    List<DbObject> objects = reader.getObjectDependencies(currentConnection, base);
+    List<DbObject> objects = reader.getUsedObjects(currentConnection, base);
     DataStore ds = currentConnection.getMetadata().createTableListDataStore();
     ds.setResultName("Dependencies for " + base.getTableExpression(currentConnection));
     for (DbObject dbo : objects)

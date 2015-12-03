@@ -49,7 +49,7 @@ public class ProcedureTreeLoader
         pkgNode.add(node);
       }
       pkgNode.setChildrenLoaded(true);
-      loader.addDependencyNode(pkgNode);
+      loader.addDependencyNodes(pkgNode);
       procNode.add(pkgNode);
     }
 
@@ -67,7 +67,7 @@ public class ProcedureTreeLoader
         pkgNode.add(node);
       }
       pkgNode.setChildrenLoaded(true);
-      loader.addDependencyNode(pkgNode);
+      loader.addDependencyNodes(pkgNode);
       procNode.add(pkgNode);
     }
 
@@ -77,7 +77,7 @@ public class ProcedureTreeLoader
       {
         ObjectTreeNode node = new ObjectTreeNode(proc);
         node.setAllowsChildren(true); // can have parameters
-        loader.addDependencyNode(node);
+        loader.addDependencyNodes(node);
         node.setChildrenLoaded(false);
         procNode.add(node);
       }

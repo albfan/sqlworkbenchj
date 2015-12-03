@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -35,7 +34,6 @@ import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
-import workbench.db.dependency.DependencyReaderFactory;
 
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
 
@@ -51,18 +49,8 @@ public class SqlServerDependencyReader
 {
 
   private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view");
-  private final Set<String> searchBoth = CollectionUtil.caseInsensitiveSet(DependencyReaderFactory.getSearchBothDirections(DbMetadata.DBID_MS, "view"));
 
-  public SqlServerDependencyReader()
-  {
-  }
-
-  @Override
-  public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
-  {
-    if (base == null || connection == null) return Collections.emptyList();
-
-    String typeDesc =
+  private final String typeDesc =
       "       case ao.type_desc \n" +
       "          when 'USER_TABLE' then 'TABLE'\n" +
       "          when 'SYSTEM_TABLE' then 'SYSTEM TABLE'\n" +
@@ -70,7 +58,7 @@ public class SqlServerDependencyReader
       "          else type_desc \n" +
       "        end as type \n";
 
-    String searchViewNameSql =
+  private final String searchUsedBy =
       "SELECT vtu.TABLE_CATALOG, vtu.TABLE_SCHEMA, vtu.TABLE_NAME,\n" + typeDesc +
       "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
       "  JOIN sys.all_objects ao ON ao.name = vtu.TABLE_NAME and schema_name(ao.schema_id) = vtu.TABLE_SCHEMA\n" +
@@ -79,7 +67,7 @@ public class SqlServerDependencyReader
         "  AND VIEW_NAME = ? \n" +
         "ORDER BY vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME";
 
-    String searchTableNameSql =
+   private final String searchUsedSql =
       "SELECT vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME,\n" + typeDesc +
       "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
       "  JOIN sys.all_objects ao ON ao.name = vtu.VIEW_NAME and schema_name(ao.schema_id) = vtu.VIEW_SCHEMA\n" +
@@ -88,15 +76,24 @@ public class SqlServerDependencyReader
         "  AND TABLE_NAME = ? \n" +
         "ORDER BY vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME";
 
-    List<DbObject> objects = retrieveObjects(connection, base, searchTableNameSql);
+  public SqlServerDependencyReader()
+  {
+  }
 
-    if (searchBoth.contains(base.getObjectType()))
-    {
-      List<DbObject> dbos = retrieveObjects(connection, base, searchViewNameSql);
-      objects.addAll(dbos);
-    }
+  @Override
+  public List<DbObject> getUsedObjects(WbConnection connection, DbObject base)
+  {
+    if (base == null || connection == null) return Collections.emptyList();
 
-    return objects;
+    return retrieveObjects(connection, base, searchUsedBy);
+  }
+
+  @Override
+  public List<DbObject> getUsedBy(WbConnection connection, DbObject base)
+  {
+    if (base == null || connection == null) return Collections.emptyList();
+
+    return retrieveObjects(connection, base, searchUsedSql);
   }
 
   private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql)
