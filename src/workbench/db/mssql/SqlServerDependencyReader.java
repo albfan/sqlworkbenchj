@@ -48,22 +48,54 @@ public class SqlServerDependencyReader
   implements DependencyReader
 {
 
-  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("view");
+  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view");
 
   @Override
   public List<DbObject> getObjectDependencies(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    String sql =
-    "SELECT vtu.table_catalog, vtu.table_schema, vtu.table_name, ao.type_desc as type \n" +
-    "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
-    "  JOIN sys.all_objects ao ON ao.name = vtu.table_name and schema_name(ao.schema_id) = vtu.table_schema \n" +
-      "WHERE VIEW_CATALOG = ? " +
-      "  and VIEW_SCHEMA = ? " +
-      "  AND VIEW_NAME = ? \n" +
-      "ORDER BY VIEW_SCHEMA, VIEW_NAME";
+    String typeDesc =
+      "       case ao.type_desc \n" +
+      "          when 'USER_TABLE' then 'TABLE'\n" +
+      "          when 'SYSTEM_TABLE' then 'SYSTEM TABLE'\n" +
+      "          when 'INTERNAL_TABLE' then 'SYSTEM TABLE'\n" +
+      "          else type_desc \n" +
+      "        end as type \n";
 
+    String viewRefSql =
+      "SELECT vtu.TABLE_CATALOG, vtu.TABLE_SCHEMA, vtu.TABLE_NAME,\n" + typeDesc +
+      "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
+      "  JOIN sys.all_objects ao ON ao.name = vtu.TABLE_NAME and schema_name(ao.schema_id) = vtu.TABLE_SCHEMA\n" +
+        "WHERE VIEW_CATALOG = ? \n" +
+        "  AND VIEW_SCHEMA = ? \n" +
+        "  AND VIEW_NAME = ? \n" +
+        "ORDER BY vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME";
+
+    String tableRefSql =
+      "SELECT vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME,\n" + typeDesc +
+      "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
+      "  JOIN sys.all_objects ao ON ao.name = vtu.VIEW_NAME and schema_name(ao.schema_id) = vtu.VIEW_SCHEMA \n" +
+        "WHERE TABLE_CATALOG = ? \n" +
+        "  AND TABLE_SCHEMA = ? \n" +
+        "  AND TABLE_NAME = ? \n" +
+        "ORDER BY vtu.VIEW_CATALOG_SCHEMA, vtu.VIEW_SCHEMA, vtu.VIEW__NAME";
+
+    if (connection.getMetadata().isViewType(base.getObjectType()))
+    {
+      return retrieveObjects(connection, base, viewRefSql);
+    }
+
+    if (base.getObjectType().equalsIgnoreCase("TABLE"))
+    {
+      return retrieveObjects(connection, base, tableRefSql);
+    }
+
+    return Collections.emptyList();
+  }
+
+  private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql)
+  {
     PreparedStatement pstmt = null;
     ResultSet rs = null;
 
@@ -72,7 +104,7 @@ public class SqlServerDependencyReader
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("SqlServerDependencyReader.getObjectDependencies()", "Retrieving dependent objects using query:\n" + s);
+			LogMgr.logDebug("SqlServerDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
 		}
 
     try
@@ -97,7 +129,7 @@ public class SqlServerDependencyReader
     catch (Exception ex)
     {
 			String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
-      LogMgr.logError("SqlServerDependencyReader.getObjectDependencies()", "Could not read object dependency using:\n" + s, ex);
+      LogMgr.logError("SqlServerDependencyReader.retrieveObjects()", "Could not read object dependency using:\n" + s, ex);
     }
     finally
     {
