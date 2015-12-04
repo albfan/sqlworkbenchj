@@ -1045,7 +1045,14 @@ public class TreeLoader
       {
         ObjectTreeNode parent = node.getParent();
         DbObject dbo = parent.getDbObject();
-        loadTableTriggers(dbo, node);
+        if (dbo instanceof TableIdentifier)
+        {
+          loadTableTriggers(dbo, node);
+        }
+        else
+        {
+          loadTriggers(node);
+        }
       }
       else if (TYPE_DEPENDENCY_USED.equals(type) || TYPE_DEPENDENCY_USING.equals(type))
       {
