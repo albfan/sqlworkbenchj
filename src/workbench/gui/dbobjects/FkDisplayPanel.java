@@ -58,6 +58,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.renderer.RendererSetup;
+import workbench.resource.IconMgr;
 
 import workbench.storage.DataStore;
 
@@ -98,7 +99,8 @@ public class FkDisplayPanel
 		WbScrollPane scroll = new WbScrollPane(this.keys);
 		this.splitPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
 		this.splitPanel.setDividerLocation(100);
-		this.splitPanel.setDividerSize(8);
+		this.splitPanel.setDividerSize((int)(IconMgr.getInstance().getSizeForLabel() / 2));
+    splitPanel.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.splitPanel.setTopComponent(scroll);
 		tables = lister;
 		this.dependencyTree = new TableDependencyTreeDisplay(lister);

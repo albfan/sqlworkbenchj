@@ -481,7 +481,19 @@ public class WbConnection
 		if (this.sqlConnection == null) return;
 		String sql = profile.getPostConnectScript();
 		runConnectScript(sql, "connect");
+    applyFilterReplacements(getSchemaFilter());
+    applyFilterReplacements(getCatalogFilter());
 	}
+
+  private void applyFilterReplacements(ObjectNameFilter filter)
+  {
+    if (filter == null) return;
+    Map<String, String> replacements = new HashMap<>();
+    replacements.put(ObjectNameFilter.PARAM_CURRENT_USER, getCurrentUser());
+    replacements.put(ObjectNameFilter.PARAM_CURRENT_SCHEMA, getCurrentSchema());
+    replacements.put(ObjectNameFilter.PARAM_CURRENT_CATALOG, getCurrentCatalog());
+    filter.setReplacements(replacements);
+  }
 
 	private synchronized void runConnectScript(String sql, String type)
 	{

@@ -67,7 +67,7 @@ public class PostgresDependencyReader
       "       vtu.table_name, \n" + typeCase +
       "       obj_description(cl.oid) as remarks\n" +
       "from information_schema.view_table_usage vtu \n" +
-      "  join pg_class cl on cl.oid = concat_ws('.', quote_ident(vtu.table_schema), quote_ident(vtu.table_name))::regclass \n" +
+      "  join pg_class cl on cl.oid = (quote_ident(vtu.table_schema)||'.'||quote_ident(vtu.table_name))::regclass \n" +
       "where (view_schema, view_name) = (?, ?) \n" +
       "order by view_schema, view_name";
 
@@ -76,7 +76,7 @@ public class PostgresDependencyReader
         "       vtu.view_name, \n" + typeCase +
         "       obj_description(cl.oid) as remarks\n" +
         "from information_schema.view_table_usage vtu \n" +
-        "  join pg_class cl on cl.oid = concat_ws('.', quote_ident(vtu.view_schema), quote_ident(vtu.view_name))::regclass \n" +
+        "  join pg_class cl on cl.oid = (quote_ident(vtu.view_schema)||'.'||quote_ident(vtu.view_name))::regclass \n" +
         "where (table_schema, table_name) = (?, ?) \n" +
         "order by view_schema, view_name";
 
@@ -96,7 +96,7 @@ public class PostgresDependencyReader
     "select n.nspname as table_schema, cl.relname as table_name, " + typeCase + " obj_description(cl.oid) as remarks\n" +
     "from pg_class s\n" +
     "  join pg_depend d on d.objid=s.oid and d.classid='pg_class'::regclass and d.refclassid='pg_class'::regclass\n" +
-    "  join pg_class cl on cl.oid = d.refobjid\n" +
+    "  join pg_class cl on cl.oid = d.refobjid \n" +
     "  join pg_namespace n on n.oid = cl.relnamespace\n" +
     "  join pg_attribute a on a.attrelid = cl.oid and a.attnum=d.refobjsubid\n" +
     "where s.relkind='S' \n" +
@@ -168,7 +168,8 @@ public class PostgresDependencyReader
     Savepoint sp = null;
     try
     {
-      connection.setSavepoint();
+      sp = connection.setSavepoint();
+
       pstmt = connection.getSqlConnection().prepareStatement(sql);
       pstmt.setString(1, base.getSchema());
       pstmt.setString(2, base.getObjectName());
@@ -194,15 +195,16 @@ public class PostgresDependencyReader
           result.add(tbl);
         }
       }
+      connection.releaseSavepoint(sp);
     }
     catch (Exception ex)
     {
+      connection.rollback(sp);
 			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
       LogMgr.logError("PostgresDependencyReader.retrieveObjects()", "Could not read object dependency using:\n" + s, ex);
     }
     finally
     {
-      connection.rollback(sp);
       SqlUtil.closeAll(rs, pstmt);
     }
 

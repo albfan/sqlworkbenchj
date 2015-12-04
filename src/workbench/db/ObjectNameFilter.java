@@ -42,6 +42,11 @@ import workbench.util.StringUtil;
  */
 public class ObjectNameFilter
 {
+  public static final String PARAM_CURRENT_USER = "${current_user}";
+  public static final String PARAM_CURRENT_SCHEMA = "${current_schema}";
+  public static final String PARAM_CURRENT_CATALOG = "${current_catalog}";
+
+  private final Set<String> parameters = CollectionUtil.caseInsensitiveSet(PARAM_CURRENT_USER, PARAM_CURRENT_SCHEMA, PARAM_CURRENT_CATALOG);
 	private final Set<Pattern> filterPatterns = new HashSet<>();
 	private final Set<String> patternSource = CollectionUtil.caseInsensitiveSet();
 	private boolean modified;
@@ -99,41 +104,61 @@ public class ObjectNameFilter
 		if (CollectionUtil.isEmpty(expressions)) return;
 
     patternSource.clear();
-    patternSource.addAll(expressions);
 		filterPatterns.clear();
+
+    for (String exp : expressions)
+    {
+      String s = StringUtil.trim(exp);
+      if (StringUtil.isNonBlank(s))
+      {
+        patternSource.add(s);
+      }
+    }
 
 		for (String exp : expressions)
 		{
-			if (StringUtil.isNonBlank(exp))
-			{
-				addExpression(exp);
-			}
+      addExpression(exp);
 		}
 		modified = false;
 	}
 
+  private boolean usesVariables()
+  {
+    if (CollectionUtil.isEmpty(patternSource)) return false;
+    for (String exp : patternSource)
+    {
+      if (parameters.contains(exp)) return true;
+    }
+    return false;
+  }
+  
   public void setReplacements(Map<String, String> variables)
   {
     if (CollectionUtil.isEmpty(variables)) return;
+    if (!usesVariables()) return;
+
     filterPatterns.clear();
 
 		for (String exp : patternSource)
 		{
-			if (StringUtil.isNonBlank(exp))
+			if (parameters.contains(exp))
 			{
-				addExpression(replaceAll(variables, exp));
+				addExpression(replaceVariable(variables, exp));
 			}
+      else
+      {
+        addExpression(exp);
+      }
 		}
   }
 
-  private String replaceAll(Map<String, String> variables, String haystack)
+  private String replaceVariable(Map<String, String> variables, String expression)
   {
-    String result = haystack;
     for (Map.Entry<String, String> entry : variables.entrySet())
     {
-      result = StringUtil.replace(result, entry.getKey(), entry.getValue());
+      if (expression.equals(entry.getKey())) return entry.getValue();
     }
-    return result;
+    return expression;
   }
 
 	/**
@@ -182,7 +207,11 @@ public class ObjectNameFilter
 		try
 		{
       patternSource.add(exp);
-			filterPatterns.add(Pattern.compile(exp.trim(), Pattern.CASE_INSENSITIVE));
+      if (!parameters.contains(exp))
+      {
+        // parameters can't be compile right now, we have to wait until the parameters are set
+        filterPatterns.add(Pattern.compile(exp.trim(), Pattern.CASE_INSENSITIVE));
+      }
 		}
 		catch (PatternSyntaxException p)
 		{
@@ -211,7 +240,7 @@ public class ObjectNameFilter
 
 	public int getSize()
 	{
-		return (filterPatterns == null ? 0 : filterPatterns.size());
+		return (patternSource == null ? 0 : patternSource.size());
 	}
 
 	public ObjectNameFilter createCopy()

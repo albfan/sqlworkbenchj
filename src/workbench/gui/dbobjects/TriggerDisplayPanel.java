@@ -46,6 +46,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.sql.EditorPanel;
+import workbench.resource.IconMgr;
 
 import workbench.storage.DataStore;
 
@@ -72,14 +73,15 @@ public class TriggerDisplayPanel
 		triggers.setRendererSetup(RendererSetup.getBaseSetup());
 		source = EditorPanel.createSqlEditor();
 		source.setEditable(false);
-		source.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		//source.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		JPanel list = new JPanel(new BorderLayout());
 		list.add(new WbScrollPane(this.triggers), BorderLayout.CENTER);
 
 		splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, list, this.source);
-		splitPane.setDividerSize(8);
+		splitPane.setDividerSize((int)(IconMgr.getInstance().getSizeForLabel() / 2));
+    splitPane.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		add(splitPane, BorderLayout.CENTER);
 		triggers.getSelectionModel().addListSelectionListener(this);
 		triggers.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

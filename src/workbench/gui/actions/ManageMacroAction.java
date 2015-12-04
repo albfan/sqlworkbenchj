@@ -53,8 +53,14 @@ public class ManageMacroAction
 	}
 
 	@Override
-	public void executeAction(ActionEvent e)
+	public void actionPerformed(final ActionEvent e)
 	{
+    LogMgr.logTrace("ManageMacroAction.actionPerformed()", "ationPerformed() called");
+		showDialog();
+	}
+
+  private void showDialog()
+  {
     try
     {
       SqlPanel sql = this.client.getCurrentSqlPanel();
@@ -67,6 +73,6 @@ public class ManageMacroAction
     {
       LogMgr.logError("ManageMacroAction.executeAction()", "Could not open MacroManagerDialog", th);
     }
-	}
+  }
 
 }

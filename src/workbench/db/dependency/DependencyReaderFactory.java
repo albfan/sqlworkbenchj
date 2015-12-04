@@ -19,6 +19,7 @@
  */
 package workbench.db.dependency;
 
+import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.db.firebird.FirebirdDependencyReader;
 import workbench.db.mssql.SqlServerDependencyReader;
@@ -41,7 +42,7 @@ public class DependencyReaderFactory
       return new OracleDependencyReader();
     }
 
-    if (connection.getMetadata().isPostgres())
+    if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
     {
       return new PostgresDependencyReader();
     }

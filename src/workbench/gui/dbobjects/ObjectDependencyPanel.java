@@ -24,6 +24,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -43,6 +44,7 @@ import workbench.db.DbObject;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 import workbench.db.dependency.DependencyReaderFactory;
+import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.StopAction;
@@ -50,6 +52,7 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
+import workbench.resource.IconMgr;
 
 import workbench.storage.DataStore;
 
@@ -66,7 +69,6 @@ public class ObjectDependencyPanel
   private DbObject currentObject;
   private JMenuItem selectTableItem;
   private ReloadAction reload;
-  private StopAction cancelAction;
 
 	private WbConnection dbConnection;
   private DependencyReader reader;
@@ -76,7 +78,6 @@ public class ObjectDependencyPanel
   private WbTable usedByObjects;
 
 	private boolean isRetrieving;
-  private int labelHeight;
   private WbSplitPane split;
 
   public ObjectDependencyPanel()
@@ -95,13 +96,13 @@ public class ObjectDependencyPanel
 
     JPanel usingPanel = new JPanel(new BorderLayout());
     JLabel lbl = createTitleLabel("TxtDepsUsedBy");
-    labelHeight = lbl.getPreferredSize().height;
 
     usingPanel.add(lbl, BorderLayout.PAGE_START);
     JScrollPane scroll2 = new JScrollPane(usedByObjects);
     usingPanel.add(scroll2, BorderLayout.CENTER);
     split.setBottomComponent(usingPanel);
     split.setDividerLocation(150);
+    split.setDividerSize((int)(IconMgr.getInstance().getSizeForLabel() / 2));
     split.setDividerBorder(new EmptyBorder(0, 0, 0, 0));
 
     add(split, BorderLayout.CENTER);
@@ -109,7 +110,6 @@ public class ObjectDependencyPanel
     reload = new ReloadAction(this);
     WbToolbar toolbar = new WbToolbar();
     toolbar.add(reload);
-//    toolbar.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
     add(toolbar, BorderLayout.PAGE_START);
   }
 
@@ -121,7 +121,12 @@ public class ObjectDependencyPanel
     Font f = title.getFont();
     Font f2 = f.deriveFont(Font.BOLD);
     //title.setBorder();
-    title.setBorder(new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(5, 2, 5, 6)));
+    FontMetrics fm = title.getFontMetrics(f2);
+    int fontHeight = fm.getHeight();
+
+    int top = (int)(fontHeight / 3);
+    int left = (int)(fontHeight / 5);
+    title.setBorder(new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(top, left, top, left)));
     title.setFont(f2);
     return title;
   }
@@ -159,6 +164,9 @@ public class ObjectDependencyPanel
   public void reload()
   {
     reset();
+
+    if (!WbSwingUtilities.isConnectionIdle(this, dbConnection)) return;
+
     WbThread loader = new WbThread(new Runnable()
     {
       @Override
