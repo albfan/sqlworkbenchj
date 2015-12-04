@@ -127,6 +127,10 @@ public class PostgresDependencyReader
         objects.add(tbl);
       }
     }
+
+    DbObjectSorter sorter = new DbObjectSorter();
+    Collections.sort(objects, sorter);
+    
     return objects;
   }
 
@@ -148,6 +152,9 @@ public class PostgresDependencyReader
         objects.add(entry.getTable());
       }
     }
+
+    DbObjectSorter sorter = new DbObjectSorter();
+    Collections.sort(objects, sorter);
 
     return objects;
   }
@@ -207,9 +214,6 @@ public class PostgresDependencyReader
     {
       SqlUtil.closeAll(rs, pstmt);
     }
-
-    DbObjectSorter sorter = new DbObjectSorter();
-    Collections.sort(result, sorter);
     return result;
   }
 

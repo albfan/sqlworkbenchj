@@ -37,6 +37,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
+import workbench.gui.dbobjects.objecttree.DbObjectSorter;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -74,7 +75,10 @@ public class OracleDependencyReader
   public List<DbObject> getUsedObjects(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
-    return retrieveObjects(connection, base, searchUsedSql);
+    List<DbObject> objects = retrieveObjects(connection, base, searchUsedSql);
+    DbObjectSorter sorter = new DbObjectSorter();
+    Collections.sort(objects, sorter);
+    return objects;
   }
 
   @Override
@@ -82,7 +86,10 @@ public class OracleDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    return retrieveObjects(connection, base, searchUsedBySql);
+    List<DbObject> objects = retrieveObjects(connection, base, searchUsedBySql);
+    DbObjectSorter sorter = new DbObjectSorter();
+    Collections.sort(objects, sorter);
+    return objects;
   }
 
   /**
