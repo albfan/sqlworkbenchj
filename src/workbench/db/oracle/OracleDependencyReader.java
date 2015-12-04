@@ -32,6 +32,7 @@ import workbench.resource.Settings;
 
 import workbench.db.DbObject;
 import workbench.db.DbObjectComparator;
+import workbench.db.PackageDefinition;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
@@ -172,6 +173,10 @@ public class OracleDependencyReader
         else if (type.equals("TYPE BODY") || type.equals("TYPE"))
         {
           dbo = new OracleObjectType(owner, name);
+        }
+        else if (type.equals("PACKAGE BODY") || type.equals("PACKAGE"))
+        {
+          dbo = new PackageDefinition(owner, name);
         }
         else
         {
