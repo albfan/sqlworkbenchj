@@ -38,6 +38,7 @@ public class ShowDbTreeAction
 		super();
 		mainWin = aWindow;
 		initMenuDefinition("MnuTxtNewDbTreeWindow");
+    setIcon("dbtree");
     setEnabled(false);
 	}
 

@@ -24,6 +24,7 @@ package workbench.gui.dbobjects.objecttree;
 
 
 import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 

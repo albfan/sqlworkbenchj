@@ -22,6 +22,7 @@ package workbench.db.dependency;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.db.firebird.FirebirdDependencyReader;
+import workbench.db.hsqldb.HsqlDependencyReader;
 import workbench.db.mssql.SqlServerDependencyReader;
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.oracle.OracleDependencyReader;
@@ -55,6 +56,11 @@ public class DependencyReaderFactory
     if (connection.getMetadata().isFirebird())
     {
       return new FirebirdDependencyReader();
+    }
+
+    if (connection.getMetadata().isHsql())
+    {
+      return new HsqlDependencyReader();
     }
 
     return null;

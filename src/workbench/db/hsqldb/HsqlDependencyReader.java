@@ -17,7 +17,7 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.mssql;
+package workbench.db.hsqldb;
 
 
 import java.sql.PreparedStatement;
@@ -44,37 +44,37 @@ import workbench.util.SqlUtil;
  *
  * @author Thomas Kellerer
  */
-public class SqlServerDependencyReader
+public class HsqlDependencyReader
   implements DependencyReader
 {
 
   private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view");
 
-  private final String typeDesc =
-      "       case ao.type_desc \n" +
-      "          when 'USER_TABLE' then 'TABLE'\n" +
-      "          when 'SYSTEM_TABLE' then 'SYSTEM TABLE'\n" +
-      "          when 'INTERNAL_TABLE' then 'SYSTEM TABLE'\n" +
-      "          else type_desc \n" +
-      "        end as type \n";
-
   private final String searchUsedBy =
-      "SELECT vtu.TABLE_CATALOG, vtu.TABLE_SCHEMA, vtu.TABLE_NAME,\n" + typeDesc +
-      "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
-      "  JOIN sys.all_objects ao ON ao.name = vtu.TABLE_NAME and schema_name(ao.schema_id) = vtu.TABLE_SCHEMA\n" +
-      "WHERE VIEW_CATALOG = ? \n" +
-      "  AND VIEW_SCHEMA = ? \n" +
-      "  AND VIEW_NAME = ?";
+      "select vtu.table_catalog, vtu.table_schema, vtu.table_name, \n" +
+      "       case when v.table_name is not null then 'VIEW' " +
+      "            when t.table_name is not null then 'TABLE' \n" +
+      "       end as type\n " +
+      "from information_schema.view_table_usage vtu \n" +
+      "  left join information_schema.views v on (v.table_catalog, v.table_schema, v.table_name) = (vtu.table_catalog, vtu.table_schema, vtu.table_name) \n" +
+      "  left join information_schema.tables t on (t.table_catalog, t.table_schema, t.table_name) = (vtu.table_catalog, vtu.table_schema, vtu.table_name) \n" +
+      "where vtu.view_catalog = ? \n" +
+      "  and vtu.view_schema = ? \n" +
+      "  and vtu.view_name = ? ";
 
    private final String searchUsedSql =
-      "SELECT vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME,\n" + typeDesc +
-      "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
-      "  JOIN sys.all_objects ao ON ao.name = vtu.VIEW_NAME and schema_name(ao.schema_id) = vtu.VIEW_SCHEMA\n" +
-      "WHERE TABLE_CATALOG = ? \n" +
-      "  AND TABLE_SCHEMA = ? \n" +
-      "  AND TABLE_NAME = ?";
+      "select vtu.view_catalog, vtu.view_schema, vtu.view_name, \n" +
+      "       case when v.table_name is not null then 'VIEW' " +
+      "            when t.table_name is not null then 'TABLE' \n" +
+      "       end as type\n " +
+      "from information_schema.view_table_usage vtu \n" +
+      "  left join information_schema.views v on (v.table_catalog, v.table_schema, v.table_name) = (vtu.table_catalog, vtu.table_schema, vtu.table_name) \n" +
+      "  left join information_schema.tables t on (t.table_catalog, t.table_schema, t.table_name) = (vtu.table_catalog, vtu.table_schema, vtu.table_name) \n" +
+      "where vtu.table_catalog = ? \n" +
+      "  and table_schema = ? \n" +
+      "  and table_name = ?";
 
-  public SqlServerDependencyReader()
+  public HsqlDependencyReader()
   {
   }
 
@@ -104,7 +104,7 @@ public class SqlServerDependencyReader
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("SqlServerDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
+			LogMgr.logDebug("HsqlDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
 		}
 
     try
@@ -129,7 +129,7 @@ public class SqlServerDependencyReader
     catch (Exception ex)
     {
 			String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
-      LogMgr.logError("SqlServerDependencyReader.retrieveObjects()", "Could not read object dependency using:\n" + s, ex);
+      LogMgr.logError("HsqlDependencyReader.retrieveObjects()", "Could not read object dependency using:\n" + s, ex);
     }
     finally
     {

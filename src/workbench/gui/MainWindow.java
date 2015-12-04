@@ -811,7 +811,8 @@ public class MainWindow
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());
 
-		panel.addToToolbar(this.dbExplorerAction, true);
+		panel.addToToolbar(dbExplorerAction, false);
+    panel.addToToolbar(showDbTree, true);
 		adjustMenuHeight(menuBar);
 		return menuBar;
 	}
@@ -2139,7 +2140,7 @@ public class MainWindow
 	protected void doDisconnect()
 	{
     saveCache();
-    
+
 		try
 		{
       if (treePanel != null)
