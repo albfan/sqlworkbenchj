@@ -2,7 +2,6 @@ Features:
 ---------
 - Expand environment variables in file names
 - WbExport -type=text -formatted=true to generate an export similar to a plain select in the console
-- search text in all editor tabs
 - support for named parameters from e.g. JPA Queries
   select * from foo where x = :id;
 - WbVarDef
@@ -36,7 +35,6 @@ Features:
   - show unique values per column as a dropdown in the dialog
   - autofilter dropdown directly in the result set
 - Paging for console mode
-- DbExplorer: dependencies between tables and views (tables used in views, views in which the table is used)
 - Show table data from the result of "Search table data" (or make the result editable)
 - Multi-Threaded WbImport
 - Workspace "Explorer"
