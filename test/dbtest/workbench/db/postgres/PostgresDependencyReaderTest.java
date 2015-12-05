@@ -34,6 +34,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import workbench.db.postgres.PostgresDependencyReader;
+import workbench.db.postgres.PostgresTestUtil;
+
 import static org.junit.Assert.*;
 
 /**

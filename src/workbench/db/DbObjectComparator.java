@@ -57,9 +57,17 @@ public class DbObjectComparator
    */
   public static boolean namesAreEqual(DbObject one, DbObject other)
   {
+    return namesAreEqual(one, other, true);
+  }
+
+  public static boolean namesAreEqual(DbObject one, DbObject other, boolean checkType)
+  {
     if (one == null || other == null) return false;
 
-    if (one.getObjectType().equalsIgnoreCase(other.getObjectType()) == false) return false;
+    if (checkType)
+    {
+      if (one.getObjectType().equalsIgnoreCase(other.getObjectType()) == false) return false;
+    }
 
     boolean equals = compareName(one.getObjectName(), other.getObjectName()) == 0;
 

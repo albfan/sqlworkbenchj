@@ -30,6 +30,7 @@ import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbObjectComparator;
 import workbench.db.PackageDefinition;
@@ -79,6 +80,12 @@ public class OracleDependencyReader
     if (base == null || connection == null) return Collections.emptyList();
     List<DbObject> objects = retrieveObjects(connection, base, searchUsedSql);
     DbObjectSorter.sort(objects);
+
+    // remove the entry with the the table that is created for the MVIEW
+    if (base.getObjectType().equals(DbMetadata.MVIEW_NAME))
+    {
+      objects.removeIf(dbo -> DbObjectComparator.namesAreEqual(base, dbo, false));
+    }
     return objects;
   }
 
