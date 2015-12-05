@@ -19,7 +19,9 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import workbench.db.DbObject;
 
@@ -33,6 +35,8 @@ import workbench.util.StringUtil;
 public class DbObjectSorter
   implements Comparator<DbObject>
 {
+  public static final DbObjectSorter INSTANCE = new DbObjectSorter();
+
   private boolean includeType;
 
   public DbObjectSorter()
@@ -67,4 +71,9 @@ public class DbObjectSorter
     return StringUtil.naturalCompare(name1, name2, true);
   }
 
+  public static void sort(List<? extends DbObject> objects)
+  {
+    if (objects == null) return;
+    Collections.sort(objects, INSTANCE);
+  }
 }

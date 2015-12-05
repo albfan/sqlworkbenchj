@@ -337,6 +337,14 @@ public class EditorPanel
   }
 
   @Override
+  public int getStartInLine(int offset)
+  {
+    int line = getLineOfOffset(offset);
+    int start = getLineStartOffset(line);
+    return offset - start;
+  }
+
+  @Override
   public void focusGained(FocusEvent e)
   {
     super.focusGained(e);
@@ -1143,7 +1151,6 @@ public class EditorPanel
       evt.rejectDrop();
     }
   }
-
 
   @Override
   public void dropActionChanged(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)

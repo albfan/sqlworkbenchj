@@ -24,6 +24,8 @@ package workbench.gui.editor;
 
 import java.awt.Container;
 import java.awt.Toolkit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -328,6 +330,28 @@ public class SearchAndReplace
 		fixed = fixed.replaceAll("\\\\t", "\t");
 		return fixed;
 	}
+
+  @Override
+  public List<SearchResult> findAll(String expression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
+  {
+    String regex = getSearchExpression(expression, ignoreCase, wholeWord, useRegex);
+    List<SearchResult> result = new ArrayList<>();
+		Pattern p = Pattern.compile(regex, Pattern.MULTILINE);
+		Matcher m = p.matcher(getText());
+    int pos = 0;
+    while (m.find(pos))
+    {
+      int start = m.start();
+      int end = m.end();
+      int line = editor.getLineOfOffset(start);
+      String text = editor.getLineText(line);
+
+      SearchResult searchResult = new SearchResult(text, start, end - start, line, -1);
+      result.add(searchResult);
+      pos = end;
+    }
+    return result;
+  }
 
 	@Override
 	public int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord, boolean useRegex)

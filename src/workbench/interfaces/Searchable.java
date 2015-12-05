@@ -22,6 +22,11 @@
  */
 package workbench.interfaces;
 
+import java.util.List;
+
+import workbench.gui.editor.SearchResult;
+
+
 /**
  *
  * @author  Thomas Kellerer
@@ -31,4 +36,5 @@ public interface Searchable
 	int find();
 	int findNext();
 	int findPrevious();
+  List<SearchResult> findAll(String expression, boolean ignoreCase, boolean wholeWord, boolean isRegex);
 }

@@ -149,4 +149,47 @@ public class LogArea
     append(line + "\n");
   }
 
+  @Override
+  public int getStartInLine(int offset)
+  {
+    try
+    {
+      int line = getLineOfOffset(offset);
+      int start = getLineStartOffset(line);
+      return offset - start;
+    }
+    catch (BadLocationException ex)
+    {
+      return -1;
+    }
+  }
+
+  @Override
+  public String getLineText(int line)
+  {
+    try
+    {
+      int start = getLineStartOffset(line);
+      int end = getLineEndOffset(line);
+      return getText(end, start - end);
+    }
+    catch (BadLocationException ble)
+    {
+      return null;
+    }
+  }
+
+  @Override
+  public int getLineOfOffset(int offset)
+  {
+    try
+    {
+      return super.getLineOfOffset(offset);
+    }
+    catch (BadLocationException ex)
+    {
+      return -1;
+    }
+  }
+
 }

@@ -24,6 +24,8 @@ package workbench.gui.components;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
@@ -39,6 +41,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.ReplaceDataAction;
+import workbench.gui.editor.SearchResult;
 
 import workbench.storage.DataStore;
 import workbench.storage.DataStoreReplacer;
@@ -345,5 +348,11 @@ public class TableReplacer
 			}
 		});
 	}
+
+  @Override
+  public List<SearchResult> findAll(String expression, boolean ignoreCase, boolean wholeWord, boolean isRegex)
+  {
+    return Collections.emptyList();
+  }
 
 }

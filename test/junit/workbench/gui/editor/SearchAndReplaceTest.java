@@ -92,7 +92,7 @@ public class SearchAndReplaceTest
 		assertEquals(10, index);
 	}
 
-
+  // <editor-fold desc="Editor Mock" defaultstate="collapsed">
 	private static class DummyContainer
 		implements TextContainer
 	{
@@ -169,10 +169,29 @@ public class SearchAndReplaceTest
 		}
 
     @Override
+    public int getLineOfOffset(int offset)
+    {
+      return -1;
+    }
+
+    @Override
+    public int getStartInLine(int offset)
+    {
+      return -1;
+    }
+
+    @Override
+    public String getLineText(int line)
+    {
+      return null;
+    }
+
+    @Override
     public String getWordAtCursor(String wordChars)
     {
       return null;
     }
 	}
+		// </editor-fold>
 }
 

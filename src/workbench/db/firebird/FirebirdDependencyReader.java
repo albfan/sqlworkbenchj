@@ -126,8 +126,7 @@ public class FirebirdDependencyReader
       SqlUtil.closeAll(rs, pstmt);
     }
 
-    DbObjectSorter sorter = new DbObjectSorter();
-    Collections.sort(result, sorter);
+    DbObjectSorter.sort(result);
     return result;
   }
 

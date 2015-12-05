@@ -157,6 +157,24 @@ public class TextFormatterTest
         return null;
       }
 
+      @Override
+      public int getLineOfOffset(int offset)
+      {
+        return -1;
+      }
+
+      @Override
+      public int getStartInLine(int offset)
+      {
+        return -1;
+      }
+
+      @Override
+      public String getLineText(int line)
+      {
+        return null;
+      }
+
 		};
 		// </editor-fold>
 

@@ -85,6 +85,12 @@ public class ValidatingDialog
 		init(editor, new String[] { ResourceMgr.getString("LblOK") }, addCancelButton);
 	}
 
+	public ValidatingDialog(Frame owner, String title, JComponent editor, String[] options, boolean modal)
+  {
+    super(owner, title, modal);
+    init(editor, options, true);
+  }
+
 	public ValidatingDialog(Dialog owner, String title, JComponent editor, boolean addCancelButton)
 	{
 		super(owner, title, true);
@@ -97,7 +103,7 @@ public class ValidatingDialog
 	}
 
 	public ValidatingDialog(Dialog owner, String title, JComponent editor, String[] options, boolean addCancelButton)
-	{
+  {
 		super(owner, title, true);
 		init(editor, options, addCancelButton);
 	}
@@ -183,7 +189,7 @@ public class ValidatingDialog
   {
     return esc;
   }
-  
+
 	public int getSelectedOption()
 	{
 		return this.selectedOption;
@@ -261,7 +267,7 @@ public class ValidatingDialog
 		return !dialog.isCancelled();
 	}
 
-	private void close()
+	public void close()
 	{
 		this.setVisible(false);
 		this.dispose();

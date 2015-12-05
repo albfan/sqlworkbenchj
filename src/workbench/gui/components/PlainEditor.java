@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
@@ -316,5 +317,49 @@ public class PlainEditor
   public int getLineCount()
   {
     return editor.getLineCount();
+  }
+
+  @Override
+  public int getStartInLine(int offset)
+  {
+    try
+    {
+      int line = getLineOfOffset(offset);
+      int start = editor.getLineStartOffset(line);
+      return offset - start;
+    }
+    catch (BadLocationException ex)
+    {
+      return -1;
+    }
+  }
+
+  @Override
+  public int getLineOfOffset(int offset)
+  {
+    try
+    {
+      return editor.getLineOfOffset(offset);
+    }
+    catch (BadLocationException ex)
+    {
+      return -1;
+    }
+  }
+
+  @Override
+  public String getLineText(int line)
+  {
+    try
+    {
+      int start = editor.getLineStartOffset(line);
+      int end = editor.getLineEndOffset(line);
+
+      return editor.getText(start, end - start);
+    }
+    catch (BadLocationException ex)
+    {
+      return null;
+    }
   }
 }

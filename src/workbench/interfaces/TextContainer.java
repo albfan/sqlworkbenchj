@@ -41,4 +41,7 @@ public interface TextContainer
 	boolean isEditable();
 	boolean isTextSelected();
   String getWordAtCursor(String wordChars);
+  int getLineOfOffset(int offset);
+  int getStartInLine(int offset);
+  String getLineText(int line);
 }

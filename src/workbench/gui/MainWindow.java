@@ -114,6 +114,7 @@ import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.SaveAsNewWorkspaceAction;
 import workbench.gui.actions.SaveMacrosAction;
 import workbench.gui.actions.SaveWorkspaceAction;
+import workbench.gui.actions.SearchAllEditorsAction;
 import workbench.gui.actions.SelectTabAction;
 import workbench.gui.actions.ShowDbExplorerAction;
 import workbench.gui.actions.ShowDbTreeAction;
@@ -2810,6 +2811,7 @@ public class MainWindow
 
 		result.addSeparator();
 		result.add(new BookmarksAction(this));
+    result.add(new SearchAllEditorsAction(this));
 
 		result.addSeparator();
 		new OptionsDialogAction().addToMenu(result);
