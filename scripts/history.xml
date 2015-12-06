@@ -19,8 +19,9 @@
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
     <entry dev-build="1" type="enh">The error dialog that is displayed when running a script can now be configured to also include the error message or the statement that failed</entry>
     <entry dev-build="1" type="enh">Improved display of packages in the DbTree for Oracle and Firebird</entry>
-    <entry dev-build="6" type="fix">Retrieving additional column information in the DbExplorer failed on SQL Server if a non-standard database collation was used</entry>
-    <entry dev-build="6" type="fix">The DDL for constraints or comments where identifiers required quoting was not correct</entry>
+    <entry dev-build="7" type="fix">For Postgres, rules defined on a table where shown twice in the generated DDL script</entry>
+    <entry dev-build="7" type="fix">Retrieving additional column information in the DbExplorer failed on SQL Server if a non-standard database collation was used</entry>
+    <entry dev-build="7" type="fix">The DDL for constraints or comments where identifiers required quoting was not correct</entry>
     <entry dev-build="6" type="fix">The formatter would not process statements correctly where a sub select using function calls in the WHERE clause was used in a JOIN condition</entry>
     <entry dev-build="6" type="fix">When using "Remove Comments" for a connection profile, the error position inside a statement was not shown correctly for some DBMS</entry>
     <entry dev-build="6" type="fix">For Oracle, when using "Trim CHAR data" and editing tables where the primary key column was defined as CHAR, updating the result did not work.</entry>
