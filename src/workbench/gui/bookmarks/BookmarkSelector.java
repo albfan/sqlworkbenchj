@@ -629,6 +629,11 @@ public class BookmarkSelector
 		return false;
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+  }
+
 	@Override
 	public void componentDisplayed()
 	{

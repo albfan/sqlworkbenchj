@@ -27,15 +27,16 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 
 import workbench.WbManager;
-import workbench.db.WbConnection;
-import workbench.gui.MainWindow;
+import workbench.interfaces.MainPanel;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.db.WbConnection;
+
+import workbench.gui.MainWindow;
 import workbench.gui.components.WbFilePicker;
-import workbench.interfaces.MainPanel;
 
 import workbench.sql.formatter.ExternalFormatter;
 
@@ -135,6 +136,12 @@ public class ExternalFormatterOptions
   public boolean validateInput()
   {
     return true;
+  }
+
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
   }
 
   @Override

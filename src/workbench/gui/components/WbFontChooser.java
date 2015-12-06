@@ -97,6 +97,12 @@ public class WbFontChooser
 		// nothing to do
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
+
 	public void setSelectedFont(Font aFont)
 	{
 		this.updateing = true;

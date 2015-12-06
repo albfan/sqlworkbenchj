@@ -21,6 +21,8 @@
  *
  */
 package workbench.gui.editor;
+import java.util.List;
+
 import workbench.WbTestCase;
 import workbench.interfaces.TextContainer;
 
@@ -90,6 +92,35 @@ public class SearchAndReplaceTest
 		assertEquals(3, index);
 		index = replace.findNext();
 		assertEquals(10, index);
+	}
+
+	@Test
+	public void testFindAll()
+	{
+		DummyContainer editor = new DummyContainer();
+		editor.setText("foobar1\nfoobar2\nbarman\nbar word\n");
+		SearchAndReplace replace = new SearchAndReplace(null, editor);
+    List<SearchResult> findAll = replace.findAll("foo", true, false, false, 0);
+    assertEquals(2, findAll.size());
+    assertEquals("foobar1", findAll.get(0).getLineText());
+    assertEquals("foobar2", findAll.get(1).getLineText());
+    assertEquals(0, findAll.get(0).getLineNumber());
+    assertEquals(1, findAll.get(1).getLineNumber());
+
+    List<SearchResult> result = replace.findAll("bar", true, true, false, 0);
+    assertEquals(1, result.size());
+    assertEquals("bar word", result.get(0).getLineText());
+    assertEquals(3, result.get(0).getLineNumber());
+
+    result = replace.findAll("bar", true, true, false, 1);
+    assertEquals(1, result.size());
+    assertEquals("barman\nbar word", result.get(0).getLineText());
+    assertEquals(3, result.get(0).getLineNumber());
+
+    result = replace.findAll("foobar2", true, true, false, 1);
+    assertEquals(1, result.size());
+    assertEquals("foobar1\nfoobar2\nbarman", result.get(0).getLineText());
+    assertEquals(1, result.get(0).getLineNumber());
 	}
 
   // <editor-fold desc="Editor Mock" defaultstate="collapsed">
@@ -171,6 +202,12 @@ public class SearchAndReplaceTest
     @Override
     public int getLineOfOffset(int offset)
     {
+      int line = 0;
+      for (int i=0; i < text.length(); i++)
+      {
+        if (offset == i) return line;
+        if (text.charAt(i) == '\n') line ++;
+      }
       return -1;
     }
 
@@ -183,13 +220,15 @@ public class SearchAndReplaceTest
     @Override
     public String getLineText(int line)
     {
-      return null;
+      String[] lines = text.split("\\n");
+      return lines[line];
     }
 
     @Override
     public int getLineCount()
     {
-      return 1;
+      String[] lines = text.split("\\n");
+      return lines.length;
     }
 
     @Override

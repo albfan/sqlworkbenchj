@@ -549,6 +549,12 @@ public class RecordFormPanel
 		}
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
+
 	@Override
 	public void componentDisplayed()
 	{

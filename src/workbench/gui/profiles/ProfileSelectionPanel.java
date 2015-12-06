@@ -290,7 +290,7 @@ public class ProfileSelectionPanel
     {
       tree.expandGroups(orgExpandedGroups);
     }
-    
+
     if (selectedProfile != null)
     {
       tree.selectProfile(selectedProfile.getKey());
@@ -648,6 +648,12 @@ public class ProfileSelectionPanel
 	{
 		return this.connectionEditor.validateInput();
 	}
+
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
 
 	@Override
 	public void componentDisplayed()

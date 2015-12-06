@@ -284,6 +284,11 @@ public class SearchCriteriaPanel
 		criteria.requestFocusInWindow();
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+  }
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{

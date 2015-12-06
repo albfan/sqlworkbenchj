@@ -36,5 +36,21 @@ public interface Searchable
 	int find();
 	int findNext();
 	int findPrevious();
-  List<SearchResult> findAll(String expression, boolean ignoreCase, boolean wholeWord, boolean isRegex);
+
+  /**
+   * Return all matches for the given search expression.
+   *
+   * contextLines controls the number of lines before and after a "hit" are returned. <br/>
+   * 
+   * If contextLines = 1, 3 lines will be returned for each occurance.<br/>
+   * If contextLines = 2, 5 lines will be returned for each occurance.<br/>
+   *
+   * @param expression     the expression to search for
+   * @param ignoreCase     if true search is case insensitive
+   * @param wholeWord      if false partial matches in a string are returned
+   * @param isRegex        if true, <tt>expression</tt> is assumed to be a RegEx
+   * @param contextLines   the number of lines before and after the search hit to return for each match.
+   * @return
+   */
+  List<SearchResult> findAll(String expression, boolean ignoreCase, boolean wholeWord, boolean isRegex, int contextLines);
 }

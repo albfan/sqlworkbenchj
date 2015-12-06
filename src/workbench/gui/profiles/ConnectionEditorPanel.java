@@ -126,7 +126,7 @@ public class ConnectionEditorPanel
         HelpManager.showHelpFile(HelpManager.TOPIC_ALTERNATE_DELIMITER);
       }
     });
-    
+
     tagList.addKeyListener(this);
 		groupNameLabel.setBorder(new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(3,6,3,6)));
 
@@ -1663,6 +1663,12 @@ public class ConnectionEditorPanel
 		}
 		return true;
 	}
+
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
 
 	@Override
 	public void componentDisplayed()

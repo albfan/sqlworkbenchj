@@ -22,13 +22,17 @@
  */
 package workbench.gui.dialogs.dataimport;
 
-import workbench.db.importer.ImportOptions;
 import javax.swing.JPanel;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.HistoryTextField;
+
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.importer.ImportOptions;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.HistoryTextField;
+
 import workbench.util.StringUtil;
 
 /**
@@ -202,6 +206,12 @@ public class GeneralImportOptionsPanel
 	{
 
 	}
+
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
 
 
 	/** This method is called from within the constructor to

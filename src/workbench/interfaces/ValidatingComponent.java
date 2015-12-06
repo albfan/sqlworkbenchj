@@ -35,4 +35,5 @@ public interface ValidatingComponent
 	 */
 	boolean validateInput();
 	void componentDisplayed();
+  void componentWillBeClosed();
 }

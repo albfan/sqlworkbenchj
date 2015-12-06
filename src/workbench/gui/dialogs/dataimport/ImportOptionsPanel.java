@@ -223,4 +223,10 @@ public class ImportOptionsPanel
 	{
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
+
 }

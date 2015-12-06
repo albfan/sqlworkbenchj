@@ -71,6 +71,12 @@ public class LoginPrompt
 		return (HistoryTextField)tfUsername;
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
+
 	@Override
 	public void componentDisplayed()
 	{

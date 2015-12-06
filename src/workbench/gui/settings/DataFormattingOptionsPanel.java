@@ -119,6 +119,12 @@ public class DataFormattingOptionsPanel
 		return true;
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
+
 	@Override
 	public void componentDisplayed()
 	{

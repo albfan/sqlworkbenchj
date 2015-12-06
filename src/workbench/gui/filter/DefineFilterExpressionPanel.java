@@ -505,6 +505,12 @@ public class DefineFilterExpressionPanel
 		if (entry == null || entry.expressionPanel == null) return;
 		entry.expressionPanel.setFocusToColumn();
 	}
+
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
 }
 
 class PanelEntry

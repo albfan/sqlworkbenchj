@@ -1261,8 +1261,8 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.tags.dropdown.containsfilter", true);
 	}
 
-  public static int getGlobalSearchLineContextSize()
+  public static boolean getSaveSearchAllColWidths()
   {
-    return Settings.getInstance().getIntProperty("workbench.gui.global.search.linecontext", 0);
+    return Settings.getInstance().getBoolProperty("workbench.gui.global.search.save.colwidths", true);
   }
 }

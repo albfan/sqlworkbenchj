@@ -350,8 +350,9 @@ public class TableReplacer
 	}
 
   @Override
-  public List<SearchResult> findAll(String expression, boolean ignoreCase, boolean wholeWord, boolean isRegex)
+  public List<SearchResult> findAll(String expression, boolean ignoreCase, boolean wholeWord, boolean isRegex, int contextLines)
   {
+    // not supported yet.
     return Collections.emptyList();
   }
 

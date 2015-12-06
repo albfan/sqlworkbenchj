@@ -57,7 +57,6 @@ import workbench.interfaces.ValueProvider;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.ValidatingDialog;
@@ -278,6 +277,12 @@ public class ListValuePicker
 		findCurrentValue();
 		lookupData.requestFocus();
 	}
+
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
 
 	public void selectValue()
 	{

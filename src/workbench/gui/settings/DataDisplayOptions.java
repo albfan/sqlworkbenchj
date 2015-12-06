@@ -188,6 +188,12 @@ public class DataDisplayOptions
     return 1;
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
+
 	@Override
 	public void componentDisplayed()
 	{

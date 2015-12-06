@@ -241,6 +241,7 @@ public class WbTable
 	private Color requiredColor;
 	private boolean allowColumnOrderSaving;
 
+  private boolean autoAdjustColumnWidths;
 	private boolean showFocusPending;
 	private FocusIndicator focusIndicator;
 	private ListSelectionControl selectionController;
@@ -266,6 +267,7 @@ public class WbTable
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
 
+    this.autoAdjustColumnWidths = GuiSettings.getAutomaticOptimalWidth();
 		this.rendererSetup = new RendererSetup();
 		this.sortAscending = new SortAscendingAction(this);
 		this.sortAscending.setEnabled(false);
@@ -394,6 +396,11 @@ public class WbTable
 		reset.addToInputMap(im, am);
 		fixCopyShortcut();
 	}
+
+  public void setAutoAdjustColumnWidths(boolean flag)
+  {
+    autoAdjustColumnWidths = flag;
+  }
 
 	private void configureEnterKey()
 	{
@@ -1995,7 +2002,7 @@ public class WbTable
       col.setCellRenderer(this.multiLineRenderer);
     }
   }
-  
+
 	private void initMultiLineRenderer()
 	{
 		if (this.dwModel != null)
@@ -2063,9 +2070,8 @@ public class WbTable
 	/**
 	 * Enhance the column width display.
 	 *
-	 * If the user chose to automatically optimize the column
-	 * width according to the content, this will
-	 * call {@link ColumnWidthOptimizer#optimizeAllColWidth()}
+	 * If the user choses to automatically optimize the column width according to the content,
+   * this will call {@link ColumnWidthOptimizer#optimizeAllColWidth()}
 	 * otherwise this will call {@link ColumnWidthOptimizer#adjustColumns(boolean)}
 	 *
 	 * @see ColumnWidthOptimizer#optimizeAllColWidth()
@@ -2081,7 +2087,7 @@ public class WbTable
 	{
 		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this);
 		boolean checkHeaders = GuiSettings.getIncludeHeaderInOptimalWidth();
-		if (GuiSettings.getAutomaticOptimalWidth())
+		if (autoAdjustColumnWidths)
 		{
 			optimizer.optimizeAllColWidth(checkHeaders);
 		}

@@ -94,6 +94,12 @@ public class DataColorOptions
 		Settings.getInstance().setProperty("workbench.gui.renderer.blend.alternate",alternateBlend.getText().trim());
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
+
 	@Override
 	public void componentDisplayed()
 	{

@@ -269,6 +269,10 @@ public class ValidatingDialog
 
 	public void close()
 	{
+    if (validator != null)
+    {
+      validator.componentWillBeClosed();
+    }
 		this.setVisible(false);
 		this.dispose();
 	}

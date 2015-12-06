@@ -33,7 +33,6 @@ import workbench.interfaces.Replaceable;
 import workbench.interfaces.Searchable;
 import workbench.interfaces.TextContainer;
 import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
@@ -332,15 +331,29 @@ public class SearchAndReplace
 		return fixed;
 	}
 
+  /**
+   * Return all matches for the given search expression.
+   *
+   * contextLines controls the number of lines before and after a "hit" are returned. <br/>
+   *
+   * If contextLines = 1, 3 lines will be returned for each occurance.<br/>
+   * If contextLines = 2, 5 lines will be returned for each occurance.<br/>
+   *
+   * @param expression     the expression to search for
+   * @param ignoreCase     if true search is case insensitive
+   * @param wholeWord      if false partial matches in a string are returned
+   * @param isRegex        if true, <tt>expression</tt> is assumed to be a RegEx
+   * @param contextLines   the number of lines before and after the search hit to return for each match.
+   * @return
+   */
   @Override
-  public List<SearchResult> findAll(String expression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
+  public List<SearchResult> findAll(String expression, boolean ignoreCase, boolean wholeWord, boolean useRegex, int contextLines)
   {
     String regex = getSearchExpression(expression, ignoreCase, wholeWord, useRegex);
     List<SearchResult> result = new ArrayList<>();
 		Pattern p = Pattern.compile(regex, Pattern.MULTILINE);
 		Matcher m = p.matcher(getText());
     int pos = 0;
-    int contextLines = GuiSettings.getGlobalSearchLineContextSize();
     while (m.find(pos))
     {
       int start = m.start();

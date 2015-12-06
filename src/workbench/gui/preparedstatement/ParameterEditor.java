@@ -25,8 +25,8 @@ package workbench.gui.preparedstatement;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-
 import java.awt.Frame;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,16 +38,19 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 
 import workbench.WbManager;
+import workbench.interfaces.StatementParameterPrompter;
+import workbench.interfaces.ValidatingComponent;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
 import workbench.gui.renderer.RendererSetup;
-import workbench.interfaces.StatementParameterPrompter;
-import workbench.interfaces.ValidatingComponent;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.preparedstatement.StatementParameters;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -106,6 +109,12 @@ public class ParameterEditor
 			this.parameters.setParameterValue(i, v);
 		}
 	}
+
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
 
 	@Override
 	public void componentDisplayed()

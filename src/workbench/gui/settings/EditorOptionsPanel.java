@@ -172,6 +172,12 @@ public class EditorOptionsPanel
 		GuiSettings.setReloadType(fileReloadType);
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+		// nothing to do
+  }
+
 	@Override
 	public void componentDisplayed()
 	{

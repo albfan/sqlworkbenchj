@@ -64,6 +64,11 @@ public class SelectTablePanel
 	{
 	}
 
+  @Override
+  public void componentWillBeClosed()
+  {
+  }
+
 	public String getSelectedTable()
 	{
 		return (String)tables.getSelectedItem();
@@ -115,7 +120,7 @@ public class SelectTablePanel
 
 	private void tablesActionPerformed(ActionEvent evt)//GEN-FIRST:event_tablesActionPerformed
 	{//GEN-HEADEREND:event_tablesActionPerformed
-		
+
 	}//GEN-LAST:event_tablesActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables

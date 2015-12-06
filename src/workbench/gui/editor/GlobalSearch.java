@@ -39,16 +39,20 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableColumnModel;
 
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.ValidatingComponent;
+import workbench.resource.GuiSettings;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -56,6 +60,7 @@ import workbench.resource.Settings;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.bookmarks.NamedScriptLocation;
+import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.HistoryTextField;
 import workbench.gui.components.SelectionHandler;
@@ -70,8 +75,6 @@ import workbench.storage.DataStore;
 
 import workbench.util.StringUtil;
 
-
-
 /**
  *
  * @author Thomas Kellerer
@@ -80,6 +83,13 @@ public class GlobalSearch
 	extends JPanel
 	implements MouseListener, ActionListener, ValidatingComponent, KeyListener
 {
+  private final String settingsKey = "workbench.gui.global.search.";
+	private final String caseProperty = settingsKey + "ignoreCase";
+	private final String wordProperty = settingsKey + "wholeWord";
+	private final String regexProperty = settingsKey + "useRegEx";
+	private final String contextLinesProperty = settingsKey + "contextlines";
+  private final String dialogProperty = settingsKey + "dialog";
+
 	private WbTable searchResult;
 	private WbScrollPane scroll;
 	private final MainWindow window;
@@ -89,12 +99,8 @@ public class GlobalSearch
 	private JCheckBox ignoreCase;
 	private JCheckBox wholeWord;
 	private JCheckBox useRegEx;
+  private JTextField contextLines;
 	private HistoryTextField criteria;
-	private JLabel criteriaLabel;
-  private final String settingsKey = "workbench.gui.global";
-	private String caseProperty;
-	private String wordProperty;
-	private String regexProperty;
 	private SelectionHandler keyHandler;
 
 	public GlobalSearch(MainWindow win)
@@ -102,12 +108,8 @@ public class GlobalSearch
 		super(new GridBagLayout());
 		window = win;
 
-		caseProperty = settingsKey + ".search.ignoreCase";
-		wordProperty = settingsKey + ".search.wholeWord";
-		regexProperty = settingsKey + ".search.useRegEx";
-
 		searchResult = new WbTable(false, false, false);
-
+    searchResult.setAutoAdjustColumnWidths(false);
 		searchResult.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		searchResult.setReadOnly(true);
 		searchResult.setRendererSetup(new RendererSetup(false));
@@ -167,9 +169,8 @@ public class GlobalSearch
 		this.useRegEx = new JCheckBox(ResourceMgr.getString("LblSearchRegEx"));
 		this.useRegEx.setToolTipText(ResourceMgr.getDescription("LblSearchRegEx"));
 
-		this.criteriaLabel = new JLabel(ResourceMgr.getString("LblSearchCriteria"));
+		JLabel criteriaLabel = new JLabel(ResourceMgr.getString("LblSearchCriteria"));
 		this.criteria = new HistoryTextField(".search");
-		this.criteria.setName("searchtext");
 
     int gap = (int)(IconMgr.getInstance().getSizeForLabel() / 2);
 
@@ -182,15 +183,16 @@ public class GlobalSearch
     input.add(criteriaLabel, BorderLayout.LINE_START);
     input.add(criteria, BorderLayout.CENTER);
 
-    Border cbxBorder = new EmptyBorder(0, 0, 0, gap);
-    ignoreCase.setBorder(cbxBorder);
-    wholeWord.setBorder(cbxBorder);
-    useRegEx.setBorder(cbxBorder);
-
     JPanel options = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
     options.add(ignoreCase);
     options.add(wholeWord);
     options.add(useRegEx);
+    options.add(Box.createHorizontalStrut(gap*2));
+    options.add(new JLabel("Context lines"));
+    options.add(Box.createHorizontalStrut(gap));
+
+    contextLines = new JTextField(4);
+    options.add(contextLines);
 
     JPanel result = new JPanel(new GridBagLayout());
     GridBagConstraints gc = new GridBagConstraints();
@@ -232,13 +234,63 @@ public class GlobalSearch
     return replacerList;
   }
 
+	private int[] getColumnWidths()
+	{
+		TableColumnModel colMod = searchResult.getColumnModel();
+		if (colMod == null) return null;
+
+		int count = colMod.getColumnCount();
+    if (count == 0) return null;
+
+		int[] result = new int[count];
+
+		for (int i=0; i<count; i++)
+		{
+			result[i] = colMod.getColumn(i).getWidth();
+		}
+		return result;
+	}
+
+	private void saveColumnWidths()
+	{
+    if (GuiSettings.getSaveSearchAllColWidths())
+    {
+      int[] widths = getColumnWidths();
+      if (widths == null) return;
+      Settings.getInstance().setProperty(settingsKey + ".search.colwidths", StringUtil.arrayToString(widths));
+    }
+	}
+
+	private int[] getSavedColumnWidths()
+	{
+		String widths = Settings.getInstance().getProperty(settingsKey  + ".search.colwidths", null);
+		return StringUtil.stringToArray(widths);
+	}
+
+  private int getContextLines()
+  {
+    return StringUtil.getIntValue(contextLines.getText(), 0);
+  }
+
   private void doSearch()
   {
+    int[] widths = getColumnWidths();
+    if (widths == null)
+    {
+      widths = getSavedColumnWidths();
+    }
+
     SortedMap<String, SearchAndReplace> searcherList = getSearcher();
     List<SearchResult> result = new ArrayList<>();
+    int lines = getContextLines();
+    String expr = criteria.getText();
+    boolean ignore = ignoreCase.isSelected();
+    boolean wordsOnly = wholeWord.isSelected();
+    boolean regex = useRegEx.isSelected();
+
     for (Map.Entry<String, SearchAndReplace> entry : searcherList.entrySet())
     {
-      List<SearchResult> hits = entry.getValue().findAll(criteria.getText(), ignoreCase.isSelected(), wholeWord.isSelected(), useRegEx.isSelected());
+      List<SearchResult> hits = entry.getValue().findAll(expr, ignore, wordsOnly, regex, lines);
       for (SearchResult sr : hits)
       {
         sr.setTabId(entry.getKey());
@@ -251,7 +303,7 @@ public class GlobalSearch
     {
       int row = ds.addRow();
       ds.setValue(row, 0, window.getTabTitleById(hit.getTabId()));
-      ds.setValue(row, 1, hit.getLineNumber());
+      ds.setValue(row, 1, hit.getLineNumber() + 1);
       ds.setValue(row, 2, hit.getLineText());
       ds.getRow(row).setUserObject(hit);
     }
@@ -259,13 +311,25 @@ public class GlobalSearch
     model.setAllowEditing(false);
     searchResult.setModel(model, true);
     searchResult.setMultiLine(2);
+    if (widths == null)
+    {
+      ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(searchResult);
+      optimizer.optimizeAllColWidth(true);
+    }
+    else
+    {
+      searchResult.applyColumnWidths(widths);
+    }
     searchResult.optimizeRowHeight();
     selectedResult = null;
   }
 
 	private DataStore createDataStore()
 	{
-		String[] columns = new String[] { ResourceMgr.getPlainString("LblGSTabName"), ResourceMgr.getPlainString("LblGSLineNr"), ResourceMgr.getPlainString("LblGSLineContent")};
+		String[] columns = new String[] { ResourceMgr.getPlainString("LblGSTabName"),
+                                      ResourceMgr.getPlainString("LblGSLineNr"),
+                                      ResourceMgr.getPlainString("LblGSLineContent")};
+
 		int[] types = new int[] { Types.VARCHAR, Types.INTEGER, Types.VARCHAR};
     int[] sizes = new int[] { 20, 5, 50 };
 		return new DataStore(columns, types, sizes);
@@ -285,7 +349,6 @@ public class GlobalSearch
   @Override
   public void keyTyped(final KeyEvent e)
   {
-
     if (e.getSource() == this.criteria.getEditor().getEditorComponent() && e.getKeyChar() == KeyEvent.VK_ENTER)
     {
       if ((searchResult.getRowCount() == 0 || searchResult.getSelectedRowCount() == 0) && StringUtil.isNonBlank(criteria.getText()))
@@ -322,13 +385,18 @@ public class GlobalSearch
       }
       if (dialog.getSelectedOption() == 1) // OK button
       {
-        saveSettings();
         jumpTo(selectedResult);
         return true;
       }
 		}
 		return false;
 	}
+
+  @Override
+  public void componentWillBeClosed()
+  {
+    saveSettings();
+  }
 
 	@Override
 	public void componentDisplayed()
@@ -346,7 +414,6 @@ public class GlobalSearch
 
 	public void selectValueAndClose()
 	{
-    saveSettings();
     selectedResult = getSelectedSearchLocation();
     jumpTo(selectedResult);
 		dialog.approveAndClose();
@@ -358,21 +425,21 @@ public class GlobalSearch
     ignoreCase.setSelected(Settings.getInstance().getBoolProperty(caseProperty));
     wholeWord.setSelected(Settings.getInstance().getBoolProperty(wordProperty));
     useRegEx.setSelected(Settings.getInstance().getBoolProperty(regexProperty));
+    int lines = Settings.getInstance().getIntProperty(contextLinesProperty, 0);
+    contextLines.setText(Integer.toString(lines));
   }
 
 	public void saveSettings()
 	{
+    saveColumnWidths();
 		criteria.addToHistory(criteria.getText());
 		criteria.saveSettings(Settings.getInstance(), settingsKey + ".search");
 		Settings.getInstance().setProperty(caseProperty, ignoreCase.isSelected());
 		Settings.getInstance().setProperty(wordProperty, wholeWord.isSelected());
 		Settings.getInstance().setProperty(regexProperty, useRegEx.isSelected());
-    if (dialog != null)
-    {
-      String prop = settingsKey + ".dialog";
-      Settings.getInstance().storeWindowSize(dialog, prop);
-      Settings.getInstance().storeWindowPosition(dialog, prop);
-    }
+		Settings.getInstance().setProperty(contextLinesProperty, getContextLines());
+    Settings.getInstance().storeWindowSize(dialog, dialogProperty);
+    Settings.getInstance().storeWindowPosition(dialog, dialogProperty);
 	}
 
 	@Override
@@ -423,13 +490,12 @@ public class GlobalSearch
 		dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWinGlobalSearch"), this, options, false);
 		ResourceMgr.setWindowIcons(dialog, "find-all");
 
-		String prop = settingsKey + ".dialog";
-		if (!Settings.getInstance().restoreWindowSize(dialog, prop))
+		if (!Settings.getInstance().restoreWindowSize(dialog, dialogProperty))
 		{
 			dialog.setSize(450,350);
 		}
 
-		if (!Settings.getInstance().restoreWindowPosition(dialog, prop))
+		if (!Settings.getInstance().restoreWindowPosition(dialog, dialogProperty))
 		{
 			WbSwingUtilities.center(dialog, window);
 		}
