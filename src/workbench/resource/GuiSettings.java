@@ -1261,4 +1261,8 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.tags.dropdown.containsfilter", true);
 	}
 
+  public static int getGlobalSearchLineContextSize()
+  {
+    return Settings.getInstance().getIntProperty("workbench.gui.global.search.linecontext", 0);
+  }
 }

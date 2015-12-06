@@ -258,6 +258,8 @@ public class GlobalSearch
     DataStoreTableModel model = new DataStoreTableModel(ds);
     model.setAllowEditing(false);
     searchResult.setModel(model, true);
+    searchResult.setMultiLine(2);
+    searchResult.optimizeRowHeight();
     selectedResult = null;
   }
 
@@ -286,7 +288,7 @@ public class GlobalSearch
 
     if (e.getSource() == this.criteria.getEditor().getEditorComponent() && e.getKeyChar() == KeyEvent.VK_ENTER)
     {
-      if (searchResult.getRowCount() == 0 && StringUtil.isNonBlank(criteria.getText()))
+      if ((searchResult.getRowCount() == 0 || searchResult.getSelectedRowCount() == 0) && StringUtil.isNonBlank(criteria.getText()))
       {
         doSearch();
       }

@@ -1834,8 +1834,6 @@ public class WbTable
 		this.savedColumnSizes = null;
 	}
 
-	private boolean useDefaultStringRenderer = true;
-
 	private void initDateRenderers()
 	{
 		Settings sett = Settings.getInstance();
@@ -1956,16 +1954,8 @@ public class WbTable
 		this.setDefaultRenderer(BigInteger.class, intRenderer);
 		this.setDefaultRenderer(Integer.class, intRenderer);
 
-		// If useDefaultStringRenderer is set to false
-		// a specialized renderer is already supplied for character
-		// columns. Currently this is only used in the "Search Tables"
-		// display to provide a renderer that highlights values where the
-		// search value was found
-		if (this.useDefaultStringRenderer)
-		{
-			this.setDefaultRenderer(String.class, new StringColumnRenderer());
-			initMultiLineRenderer();
-		}
+    this.setDefaultRenderer(String.class, new StringColumnRenderer());
+    initMultiLineRenderer();
 	}
 
 	public ResetHighlightAction getResetHighlightAction()
@@ -1996,10 +1986,18 @@ public class WbTable
 		WbSwingUtilities.repaintLater(this);
 	}
 
+  public void setMultiLine(int column)
+  {
+    if (dwModel != null)
+    {
+			TableColumnModel colMod = this.getColumnModel();
+  		TableColumn col = colMod.getColumn(column);
+      col.setCellRenderer(this.multiLineRenderer);
+    }
+  }
+  
 	private void initMultiLineRenderer()
 	{
-		if (!this.useDefaultStringRenderer) return;
-
 		if (this.dwModel != null)
 		{
 			TableColumnModel colMod = this.getColumnModel();

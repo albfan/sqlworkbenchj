@@ -170,6 +170,12 @@ public class TextFormatterTest
       }
 
       @Override
+      public int getLineCount()
+      {
+        return 1;
+      }
+
+      @Override
       public String getLineText(int line)
       {
         return null;

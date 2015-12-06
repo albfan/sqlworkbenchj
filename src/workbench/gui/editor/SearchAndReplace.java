@@ -33,6 +33,7 @@ import workbench.interfaces.Replaceable;
 import workbench.interfaces.Searchable;
 import workbench.interfaces.TextContainer;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
@@ -339,18 +340,35 @@ public class SearchAndReplace
 		Pattern p = Pattern.compile(regex, Pattern.MULTILINE);
 		Matcher m = p.matcher(getText());
     int pos = 0;
+    int contextLines = GuiSettings.getGlobalSearchLineContextSize();
     while (m.find(pos))
     {
       int start = m.start();
       int end = m.end();
       int line = editor.getLineOfOffset(start);
-      String text = editor.getLineText(line);
+      String text = getLineContext(line, contextLines);
 
       SearchResult searchResult = new SearchResult(text, start, end - start, line, -1);
       result.add(searchResult);
       pos = end;
     }
     return result;
+  }
+
+  private String getLineContext(int line, int around)
+  {
+    if (line < 0) return null;
+    if (around <= 0) return editor.getLineText(line);
+
+    int startLine = Math.max(0, line - around);
+    int endLine = Math.min(editor.getLineCount() - 1, line + around);
+    StringBuilder result = new StringBuilder(around * 80);
+    for (int l=startLine; l <= endLine; l++)
+    {
+      if (l > startLine) result.append('\n');
+      result.append(editor.getLineText(l));
+    }
+    return result.toString();
   }
 
 	@Override

@@ -44,4 +44,5 @@ public interface TextContainer
   int getLineOfOffset(int offset);
   int getStartInLine(int offset);
   String getLineText(int line);
+  int getLineCount();
 }

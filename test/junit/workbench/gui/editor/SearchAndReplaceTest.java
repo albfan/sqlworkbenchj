@@ -187,6 +187,12 @@ public class SearchAndReplaceTest
     }
 
     @Override
+    public int getLineCount()
+    {
+      return 1;
+    }
+
+    @Override
     public String getWordAtCursor(String wordChars)
     {
       return null;
