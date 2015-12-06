@@ -115,8 +115,8 @@ public class GlobalSearch
 		searchResult.setRendererSetup(new RendererSetup(false));
 		searchResult.addMouseListener(this);
 		searchResult.setColumnSelectionAllowed(false);
+    searchResult.setAutoscrolls(false);
 		searchResult.setRowSelectionAllowed(true);
-		searchResult.getHeaderRenderer().setShowPKIcon(false);
 		searchResult.setSortIgnoreCase(true);
 		searchResult.setShowPopupMenu(false);
 		keyHandler = new SelectionHandler(searchResult);
@@ -374,19 +374,25 @@ public class GlobalSearch
 	@Override
 	public boolean validateInput()
 	{
+    if (dialog.getSelectedOption() == 2)
+    {
+      // just close the dialog, don't select anything
+      return true;
+    }
+
     if (searchResult.getSelectedRowCount() == 1)
 		{
       selectedResult = getSelectedSearchLocation();
 
-      if (dialog.getSelectedOption() == 0) // jump to line button
+      if (dialog.getSelectedOption() == 0) // show line button
       {
         jumpTo(selectedResult);
         return false; // don't close the dialog
       }
-      if (dialog.getSelectedOption() == 1) // OK button
+      if (dialog.getSelectedOption() == 1) // jump to (select & close) button
       {
         jumpTo(selectedResult);
-        return true;
+        return true; // close dialog
       }
 		}
 		return false;
@@ -486,7 +492,7 @@ public class GlobalSearch
 
 	public void displaySearchDialog()
 	{
-    String[] options = new String[] { ResourceMgr.getString("LblGSJump"), ResourceMgr.getString("LblOK") };
+    String[] options = new String[] { ResourceMgr.getString("LblGSShowLine"), ResourceMgr.getString("LblGSJump"), ResourceMgr.getString("LblClose") };
 		dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWinGlobalSearch"), this, options, false);
 		ResourceMgr.setWindowIcons(dialog, "find-all");
 

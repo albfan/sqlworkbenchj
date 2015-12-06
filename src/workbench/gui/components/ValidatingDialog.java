@@ -88,7 +88,7 @@ public class ValidatingDialog
 	public ValidatingDialog(Frame owner, String title, JComponent editor, String[] options, boolean modal)
   {
     super(owner, title, modal);
-    init(editor, options, true);
+    init(editor, options, false);
   }
 
 	public ValidatingDialog(Dialog owner, String title, JComponent editor, boolean addCancelButton)

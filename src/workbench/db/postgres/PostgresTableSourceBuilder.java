@@ -94,10 +94,6 @@ public class PostgresTableSourceBuilder
 		StringBuilder inherit = readInherits(tbl);
 
 		StringBuilder tableSql = new StringBuilder();
-		if (option.getAdditionalSql() != null)
-		{
-			tableSql.append(option.getAdditionalSql());
-		}
 
 		if (inherit != null)
 		{
@@ -240,7 +236,7 @@ public class PostgresTableSourceBuilder
       if (i > 0) result.append(',');
     }
     result.append(')');
-    
+
 		return result;
 	}
 
