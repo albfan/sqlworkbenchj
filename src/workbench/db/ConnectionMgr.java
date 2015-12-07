@@ -68,7 +68,7 @@ import workbench.util.WbPersistence;
 public class ConnectionMgr
 	implements PropertyChangeListener
 {
-	private final Map<String, WbConnection> activeConnections = Collections.synchronizedMap(new HashMap<String, WbConnection>());
+	private final Map<String, WbConnection> activeConnections = Collections.synchronizedMap(new HashMap<>());
 
 	private List<ConnectionProfile> profiles;
 	private List<DbDriver> drivers;
@@ -762,7 +762,7 @@ public class ConnectionMgr
 				Object result = reader.readObject();
 				if (result == null)
 				{
-					this.drivers = Collections.synchronizedList(new ArrayList<DbDriver>());
+					this.drivers = Collections.synchronizedList(new ArrayList<>());
 				}
 				else if (result instanceof ArrayList)
 				{
@@ -782,7 +782,7 @@ public class ConnectionMgr
 
 			if (this.drivers == null)
 			{
-				this.drivers = Collections.synchronizedList(new ArrayList<DbDriver>());
+				this.drivers = Collections.synchronizedList(new ArrayList<>());
 			}
 		}
 		if (this.readTemplates)

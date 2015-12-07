@@ -44,6 +44,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import workbench.WbManager;
 import workbench.log.LogMgr;
 
 import org.mozilla.universalchardet.UniversalDetector;
@@ -651,4 +652,22 @@ public class FileUtil
 		return null;
 	}
 
+  public static boolean isDLLAvailable(String dllName)
+  {
+    String jarPath = WbManager.getInstance().getJarPath();
+    WbFile dll = new WbFile(jarPath, dllName);
+    if (dll.exists())
+    {
+      return true;
+    }
+    String libPath = System.getProperty("java.library.path");
+    String separator = StringUtil.quoteRegexMeta(File.pathSeparator);
+    String[] pathElements = libPath.split(separator);
+    for (String dir : pathElements)
+    {
+      File f = new File(dir, dllName);
+      if (f.exists()) return true;
+    }
+    return false;
+  }
 }

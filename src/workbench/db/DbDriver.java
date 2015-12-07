@@ -47,6 +47,7 @@ import workbench.resource.Settings;
 import workbench.db.postgres.PostgresUtil;
 
 import workbench.util.CollectionUtil;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -71,6 +72,7 @@ public class DbDriver
 	private List<String> libraryList;
 	private boolean isTemporary;
 	private String sampleUrl;
+  private static final String MS_AUTHDLL = "sqljdbc_auth.dll";
 
 	public DbDriver()
 	{
@@ -151,18 +153,69 @@ public class DbDriver
 
 	private boolean doAddLibraryPath()
 	{
+    // alway adjust the library path for SQL Server driver to make enabling Windows authentication easier.
+    if (driverClass.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver"))
+    {
+      // if the DLL is already available on the library.path, there is no need to change it
+      return FileUtil.isDLLAvailable(MS_AUTHDLL) == false;
+    }
+
 		return Settings.getInstance().getBoolProperty("workbench.dbdriver.fixlibrarypath", false);
 	}
 
+  private String findAuthDLLDir()
+  {
+    boolean is64Bit = System.getProperty("os.arch").equals("amd64");
+    if (CollectionUtil.isEmpty(libraryList)) return null;
+
+    // the Microsoft Driver is only a single jar file, no need to search more than one entry
+    WbFile f = buildFile(libraryList.get(0));
+    String jarDir = f.getAbsoluteFile().getParent();
+
+    WbFile authDir = null;
+    if (is64Bit)
+    {
+      authDir = new WbFile(jarDir, "auth\\x64");
+    }
+    else
+    {
+      authDir = new WbFile(jarDir, "auth\\x86");
+    }
+
+    File authDLL = new File(authDir, MS_AUTHDLL);
+    if (authDLL.exists())
+    {
+      return authDir.getFullPath();
+    }
+    return null;
+  }
+
 	private void addToLibraryPath()
 	{
-		if (this.libraryList == null) return;
-		Set<String> paths = new TreeSet<>();
-		for (String file : libraryList)
-		{
-			WbFile f = buildFile(file);
-			paths.add(f.getParentFile().getAbsolutePath());
-		}
+    if (CollectionUtil.isEmpty(libraryList)) return;
+
+    String addPath = null;
+
+    if (driverClass.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver"))
+    {
+      addPath = findAuthDLLDir();
+    }
+
+    if (addPath == null)
+    {
+      // By putting the directories into a Set, we make sure each directory is only added once
+      Set<String> paths = new TreeSet<>();
+      for (String file : libraryList)
+      {
+        WbFile f = buildFile(file);
+        paths.add(f.getParentFile().getAbsolutePath());
+      }
+      addPath = "";
+      for (String path : paths)
+      {
+        addPath += path + File.pathSeparator;
+      }
+    }
 
 		String current = System.getProperty("java.library.path");
 		String wbSaved = System.getProperty("workbench.original.library.path", null);
@@ -177,16 +230,12 @@ public class DbDriver
 			current = wbSaved;
 		}
 
-		StringBuilder newPath = new StringBuilder(current);
-		for (String path : paths)
-		{
-			newPath.append(File.pathSeparatorChar);
-			newPath.append(path);
-		}
+		String newPath = current + File.pathSeparator + addPath;
 
+    LogMgr.logInfo("DbDriver.addToLibraryPath()", "Adding " + addPath + " to java.library.path");
 		LogMgr.logDebug("DbDriver.addToLibraryPath()", "Setting java.library.path=" + newPath);
 
-		System.setProperty("java.library.path", newPath.toString());
+		System.setProperty("java.library.path", newPath);
 
 		// the following hack is taken from: http://blog.cedarsoft.com/2010/11/setting-java-library-path-programmatically/
 		// the explanation for this hack is:
@@ -298,7 +347,7 @@ public class DbDriver
 		return clz;
 	}
 
-	private void loadDriverClass()
+	private synchronized void loadDriverClass()
 		throws ClassNotFoundException, Exception, UnsupportedClassVersionError
 	{
 		if (this.driverClassInstance != null) return;
