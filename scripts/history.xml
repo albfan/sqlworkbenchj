@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-11-22">
+  <release build="-1" date="2015-12-06">
     <entry dev-build="7" type="enh">It's not possible to search text in all open editors (Tools -&gt; Search all tabs)</entry>
     <entry dev-build="7" type="enh">For some DBMS, the DbTree and DbExplorer now show the dependencies between objects</entry>
     <entry dev-build="6" type="enh">For DB2/iSeries table and column comments can now be retrieved from the system catalogs instead of using the JDBC driver.</entry>
