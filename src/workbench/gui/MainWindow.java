@@ -163,6 +163,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.FileUtil;
 import workbench.util.FileVersioner;
+import workbench.util.HtmlUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
@@ -3262,14 +3263,19 @@ public class MainWindow
 		return -1;
 	}
 
+  /**
+   * Returns the tab title as displayed to the user (including the index number).
+   *
+   * @param tabId  the ID of the panel
+   * @return the title as shown to the user
+   */
 	public String getTabTitleById(String tabId)
 	{
-		int count = sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
-		{
-			MainPanel p = getSqlPanel(i);
-			if (p.getId().equals(tabId)) return p.getTabTitle();
-		}
+		int index = getTabIndexById(tabId);
+    if (index > -1)
+    {
+      return HtmlUtil.cleanHTML(sqlTab.getTitleAt(index));
+    }
 		return null;
 	}
 
