@@ -185,6 +185,14 @@ public class ValidatingDialog
 		this.addWindowListener(this);
 	}
 
+  public void setButtonEnabled(int index, boolean flag)
+  {
+    if (index >= 0 && index < optionButtons.length)
+    {
+      optionButtons[index].setEnabled(flag);
+    }
+  }
+
   public WbAction getESCAction()
   {
     return esc;

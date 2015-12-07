@@ -34,6 +34,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -44,10 +45,13 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumnModel;
 
 import workbench.interfaces.MainPanel;
@@ -59,6 +63,7 @@ import workbench.resource.Settings;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CheckBoxAction;
 import workbench.gui.bookmarks.NamedScriptLocation;
 import workbench.gui.components.ColumnWidthOptimizer;
 import workbench.gui.components.DataStoreTableModel;
@@ -81,7 +86,7 @@ import workbench.util.StringUtil;
  */
 public class GlobalSearch
 	extends JPanel
-	implements MouseListener, ActionListener, ValidatingComponent, KeyListener
+	implements MouseListener, ActionListener, ValidatingComponent, KeyListener, ListSelectionListener
 {
   private final String settingsKey = "workbench.gui.global.search.";
 	private final String caseProperty = settingsKey + "ignoreCase";
@@ -91,7 +96,6 @@ public class GlobalSearch
   private final String dialogProperty = settingsKey + "dialog";
 
 	private WbTable searchResult;
-	private WbScrollPane scroll;
 	private final MainWindow window;
 	private ValidatingDialog dialog;
 	private SearchResult selectedResult;
@@ -102,13 +106,27 @@ public class GlobalSearch
   private JTextField contextLines;
 	private HistoryTextField criteria;
 	private SelectionHandler keyHandler;
+  private CheckBoxAction rememberColumnWidths;
 
 	public GlobalSearch(MainWindow win)
 	{
 		super(new GridBagLayout());
 		window = win;
 
-		searchResult = new WbTable(false, false, false);
+		rememberColumnWidths = new CheckBoxAction("MnuTxtBookmarksSaveWidths", GuiSettings.PROP_GLOBAL_SEARCH_SAVE_COLWIDTHS);
+
+		searchResult = new WbTable(false, false, false)
+		{
+			@Override
+			protected JPopupMenu getHeaderPopup()
+			{
+				JPopupMenu menu = createLimitedHeaderPopup();
+				menu.addSeparator();
+				menu.add(rememberColumnWidths.getMenuItem());
+				return menu;
+			}
+		};
+
     searchResult.setAutoAdjustColumnWidths(false);
 		searchResult.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		searchResult.setReadOnly(true);
@@ -119,12 +137,13 @@ public class GlobalSearch
 		searchResult.setRowSelectionAllowed(true);
 		searchResult.setSortIgnoreCase(true);
 		searchResult.setShowPopupMenu(false);
+    searchResult.getSelectionModel().addListSelectionListener(this);
 		keyHandler = new SelectionHandler(searchResult);
 
     startSearch = new JButton(ResourceMgr.getString("LblStartSearch"));
     startSearch.addActionListener(this);
 
-		scroll = new WbScrollPane(searchResult);
+		WbScrollPane scroll = new WbScrollPane(searchResult);
 
     JPanel searchPanel = createSearchPanel();
 
@@ -221,7 +240,18 @@ public class GlobalSearch
   private SortedMap<String, SearchAndReplace> getSearcher()
   {
     int count = window.getTabCount();
-    SortedMap<String, SearchAndReplace> replacerList = new TreeMap<>();
+
+    Comparator<String> naturalSort = new Comparator<String>()
+    {
+      @Override
+      public int compare(String o1, String o2)
+      {
+        return StringUtil.naturalCompare(o1, o2, true);
+      }
+    };
+
+    SortedMap<String, SearchAndReplace> replacerList = new TreeMap<>(naturalSort);
+
     for (int i = 0; i < count; i++)
     {
       MainPanel panel = window.getSqlPanel(i);
@@ -232,6 +262,13 @@ public class GlobalSearch
       }
     }
     return replacerList;
+  }
+
+  private void setButtonsEnabled(boolean flag)
+  {
+    if (dialog == null) return;
+    dialog.setButtonEnabled(0, flag);
+    dialog.setButtonEnabled(1, flag);
   }
 
 	private int[] getColumnWidths()
@@ -263,8 +300,12 @@ public class GlobalSearch
 
 	private int[] getSavedColumnWidths()
 	{
-		String widths = Settings.getInstance().getProperty(settingsKey  + ".search.colwidths", null);
-		return StringUtil.stringToArray(widths);
+    if (GuiSettings.getSaveSearchAllColWidths())
+    {
+      String widths = Settings.getInstance().getProperty(settingsKey  + ".search.colwidths", null);
+      return StringUtil.stringToArray(widths);
+    }
+    return null;
 	}
 
   private int getContextLines()
@@ -322,6 +363,13 @@ public class GlobalSearch
     }
     searchResult.optimizeRowHeight();
     selectedResult = null;
+    setButtonsEnabled(false);
+  }
+
+  @Override
+  public void valueChanged(ListSelectionEvent e)
+  {
+    setButtonsEnabled(searchResult.getSelectedRowCount() == 1);
   }
 
 	private DataStore createDataStore()
@@ -494,6 +542,7 @@ public class GlobalSearch
 	{
     String[] options = new String[] { ResourceMgr.getString("LblGSShowLine"), ResourceMgr.getString("LblGSJump"), ResourceMgr.getString("LblClose") };
 		dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWinGlobalSearch"), this, options, false);
+    setButtonsEnabled(false);
 		ResourceMgr.setWindowIcons(dialog, "find-all");
 
 		if (!Settings.getInstance().restoreWindowSize(dialog, dialogProperty))

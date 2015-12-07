@@ -102,6 +102,7 @@ public class GuiSettings
 	public static final String PROP_BOOKMARKS_SAVE_SORT = PROP_BOOKMARK_PREFIX + "sort.save";
 
   public static final String PROP_PLAIN_EDITOR_WRAP = "workbench.editor.plain.wordwrap";
+  public static final String PROP_GLOBAL_SEARCH_SAVE_COLWIDTHS = "workbench.gui.global.search.save.colwidths";
 
 
 	public static boolean showApplyDDLHint()
@@ -1263,6 +1264,6 @@ public class GuiSettings
 
   public static boolean getSaveSearchAllColWidths()
   {
-    return Settings.getInstance().getBoolProperty("workbench.gui.global.search.save.colwidths", true);
+    return Settings.getInstance().getBoolProperty(PROP_GLOBAL_SEARCH_SAVE_COLWIDTHS, true);
   }
 }
