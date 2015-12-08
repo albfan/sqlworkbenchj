@@ -339,6 +339,8 @@ public class SearchAndReplace
    * If contextLines = 1, 3 lines will be returned for each occurance.<br/>
    * If contextLines = 2, 5 lines will be returned for each occurance.<br/>
    *
+   * Only one SearchResult per editor line will returned.
+   * 
    * @param expression     the expression to search for
    * @param ignoreCase     if true search is case insensitive
    * @param wholeWord      if false partial matches in a string are returned
@@ -353,16 +355,25 @@ public class SearchAndReplace
     List<SearchResult> result = new ArrayList<>();
 		Pattern p = Pattern.compile(regex, Pattern.MULTILINE);
 		Matcher m = p.matcher(getText());
+
     int pos = 0;
+    int previousLine = -1;
+
     while (m.find(pos))
     {
       int start = m.start();
       int end = m.end();
       int line = editor.getLineOfOffset(start);
-      String text = getLineContext(line, contextLines);
 
-      SearchResult searchResult = new SearchResult(text, start, end - start, line, -1);
-      result.add(searchResult);
+      // don't return multiple hits in the same line
+      if (line != previousLine)
+      {
+        String text = getLineContext(line, contextLines);
+        SearchResult searchResult = new SearchResult(text, start, end - start, line, -1);
+        result.add(searchResult);
+      }
+
+      previousLine = line;
       pos = end;
     }
     return result;
