@@ -205,30 +205,32 @@ public class DbDriver
     {
       // By putting the directories into a Set, we make sure each directory is only added once
       Set<String> paths = new TreeSet<>();
+      
       for (String file : libraryList)
       {
         WbFile f = buildFile(file);
-        paths.add(f.getParentFile().getAbsolutePath());
+        File dir = f.getParentFile().getAbsoluteFile();
+
+        // only add the directory if it isn't already on the path
+        if (FileUtil.isDirectoryOnLibraryPath(dir) == false)
+        {
+          paths.add(dir.getAbsolutePath());
+        }
       }
-      addPath = "";
-      for (String path : paths)
+
+      if (CollectionUtil.isNonEmpty(paths))
       {
-        addPath += path + File.pathSeparator;
+        addPath = "";
+        for (String path : paths)
+        {
+          addPath += path + File.pathSeparator;
+        }
       }
     }
 
-		String current = System.getProperty("java.library.path");
-		String wbSaved = System.getProperty("workbench.original.library.path", null);
+    if (StringUtil.isBlank(addPath)) return;
 
-		// saving the original path is done to ensure that the new path is not growing each time the driver is loaded.
-		if (wbSaved == null)
-		{
-			System.setProperty("workbench.original.library.path", current);
-		}
-		else
-		{
-			current = wbSaved;
-		}
+		String current = System.getProperty("java.library.path");
 
 		String newPath = current + File.pathSeparator + addPath;
 

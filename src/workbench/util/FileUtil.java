@@ -670,4 +670,19 @@ public class FileUtil
     }
     return false;
   }
+
+  public static boolean isDirectoryOnLibraryPath(File toTest)
+  {
+    if (toTest == null) return false;
+
+    String libPath = System.getProperty("java.library.path");
+    String separator = StringUtil.quoteRegexMeta(File.pathSeparator);
+    String[] pathElements = libPath.split(separator);
+    for (String dir : pathElements)
+    {
+      File f = new File(dir);
+      if (f.equals(toTest)) return true;
+    }
+    return false;
+  }
 }
