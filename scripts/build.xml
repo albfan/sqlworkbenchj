@@ -885,14 +885,13 @@
       </replacefilter>
       <replacefilter token="(MATERIALIZED{wsp}VIEW)|"/>
       <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
-      <replacefilter token="(START{wsp}WITH)|"/>
       <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
       <replacefilter token="(PACKAGE{wsp}BODY)|"/>
       <replacefilter token="(TYPE{wsp}BODY)|"/>
       <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
       <replacefilter token="(DISTINCT{wsp}ON)|"/>
-      <replacefilter token="(CONNECT{wsp}BY)|"/>
-      <replacefilter token="(START{wsp}WITH)|"/>
+      <replacefilter token="(CONNECT{wsp}BY)|" value="(BEGIN{wsp}TRANSACTION)|"/>
+      <replacefilter token="(START{wsp}WITH)|" value="(BEGIN{wsp}TRANS)|"/>
       <replacefilter token='"SIMILAR"|'/>
       <replacefilter token='"CYCLE"|'/>
       <replacefilter token='"DEPTH"|'/>
