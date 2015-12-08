@@ -48,13 +48,14 @@ public class SqlServerDependencyReader
   implements DependencyReader
 {
 
-  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view");
+  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view", "procedure", "function", "trigger");
 
   private final String typeDesc =
       "       case ao.type_desc \n" +
       "          when 'USER_TABLE' then 'TABLE'\n" +
       "          when 'SYSTEM_TABLE' then 'SYSTEM TABLE'\n" +
       "          when 'INTERNAL_TABLE' then 'SYSTEM TABLE'\n" +
+      "          when 'SQL_STORED_PROCEDURE' then 'PROCEDURE'\n" +
       "          else type_desc \n" +
       "        end as type \n";
 
@@ -66,13 +67,27 @@ public class SqlServerDependencyReader
       "  AND VIEW_SCHEMA = ? \n" +
       "  AND VIEW_NAME = ?";
 
-   private final String searchUsedSql =
+  private final String searchUsedSql =
       "SELECT vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME,\n" + typeDesc +
       "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
       "  JOIN sys.all_objects ao ON ao.name = vtu.VIEW_NAME and schema_name(ao.schema_id) = vtu.VIEW_SCHEMA\n" +
       "WHERE TABLE_CATALOG = ? \n" +
       "  AND TABLE_SCHEMA = ? \n" +
       "  AND TABLE_NAME = ?";
+
+  private final String searchUsedBy2008 =
+      "SELECT distinct db_name() as catalog_name,  \n" +
+      "       coalesce(re.referenced_schema_name, schema_name()) as schema_name,  \n" +
+      "       re.referenced_entity_name,  \n" + typeDesc +
+      "FROM sys.dm_sql_referenced_entities(?, 'OBJECT') re \n" +
+      "  JOIN sys.all_objects ao on ao.object_id = re.referenced_id";
+
+  private final String searchUsedSql2008 =
+      "SELECT db_name() as catalog,  \n" +
+      "       coalesce(re.referencing_schema_name,schema_name()) as schema_name,  \n" +
+      "       re.referencing_entity_name, \n" + typeDesc +
+      "FROM sys.dm_sql_referencing_entities(?, 'OBJECT') re \n" +
+      "  JOIN sys.all_objects ao on ao.object_id = re.referencing_id";
 
   public SqlServerDependencyReader()
   {
