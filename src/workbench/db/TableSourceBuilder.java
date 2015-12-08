@@ -148,6 +148,11 @@ public class TableSourceBuilder
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		List<IndexDefinition> indexInfo = getIndexReader().getTableIndexList(table);
+		UniqueConstraintReader reader = ReaderFactory.getUniqueConstraintReader(dbConnection);
+		if (reader != null && CollectionUtil.isNonEmpty(indexInfo))
+		{
+      reader.readUniqueConstraints(indexInfo, dbConnection);
+		}
 		return getTableSource(table, columns, indexInfo, null, DropType.none, true);
 	}
 
