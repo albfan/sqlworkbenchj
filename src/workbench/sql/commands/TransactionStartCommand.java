@@ -40,6 +40,8 @@ public class TransactionStartCommand
 
   public static final TransactionStartCommand START_TRANS = new TransactionStartCommand("START TRANSACTION");
   public static final TransactionStartCommand BEGIN_TRANS = new TransactionStartCommand("BEGIN");
+  public static final TransactionStartCommand BEGIN_TRANS_MS = new TransactionStartCommand("BEGIN TRANSACTION");
+  public static final TransactionStartCommand BEGIN_TRANS_MS_SHORT = new TransactionStartCommand("BEGIN TRANS");
 
   private final String verb;
 

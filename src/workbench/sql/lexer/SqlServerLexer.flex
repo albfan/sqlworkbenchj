@@ -153,7 +153,7 @@ wsp = [ \r\n\t\f]+
 
 keyword=(
 (ALTER{wsp}SESSION)|
-
+(BEGIN{wsp}TRANSACTION)|
 (PRIMARY{wsp}KEY)|
 (FOREIGN{wsp}KEY)|
 (UNION{wsp}ALL)|
@@ -169,7 +169,7 @@ keyword=(
 
 
 
-
+(BEGIN{wsp}TRANS)|
 (OUTER{wsp}JOIN)|
 (OUTER{wsp}APPLY)|
 (CROSS{wsp}JOIN)|

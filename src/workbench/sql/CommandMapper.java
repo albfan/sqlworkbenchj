@@ -357,6 +357,14 @@ public class CommandMapper
       this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANS.getVerb());
 		}
 
+    if (metaData.isSqlServer())
+    {
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANS_MS.getVerb(), TransactionStartCommand.BEGIN_TRANS_MS);
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANS_MS_SHORT.getVerb(), TransactionStartCommand.BEGIN_TRANS_MS_SHORT);
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANS_MS.getVerb());
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANS_MS_SHORT.getVerb());
+    }
+
 		if (metaData.isMySql())
 		{
 			MySQLShow show = new MySQLShow();
