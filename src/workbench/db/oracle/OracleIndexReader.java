@@ -336,7 +336,7 @@ public class OracleIndexReader
 		{
 			try
 			{
-				return getSourceFromDBMSMeta(definition);
+				return getSourceFromDBMSMeta(table, definition);
 			}
 			catch (SQLException e)
 			{
@@ -347,10 +347,20 @@ public class OracleIndexReader
 		return super.getIndexSource(table, definition);
 	}
 
-	private String getSourceFromDBMSMeta(IndexDefinition definition)
+	private String getSourceFromDBMSMeta(TableIdentifier table, IndexDefinition definition)
 		throws SQLException
 	{
-    return DbmsMetadata.getDDL(metaData.getWbConnection(), "INDEX", definition.getObjectName(), definition.getSchema());
+    String indexDDL = DbmsMetadata.getDDL(metaData.getWbConnection(), "INDEX", definition.getObjectName(), definition.getSchema());
+    boolean inlinePK = metaData.getDbSettings().createInlinePKConstraints();
+    if (!inlinePK && definition.isUniqueConstraint())
+    {
+      String constraint = DbmsMetadata.getDependentDDL(metaData.getWbConnection(), "CONSTRAINT", table.getTableName(), table.getSchema());
+      if (StringUtil.isNonBlank(constraint))
+      {
+        indexDDL += "\n\n" + constraint;
+      }
+    }
+    return indexDDL;
 	}
 
 	@Override
