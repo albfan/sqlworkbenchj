@@ -20,6 +20,7 @@
 package workbench.db.mssql;
 
 
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -31,7 +32,9 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DbObject;
+import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.TriggerDefinition;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 
@@ -39,6 +42,7 @@ import workbench.gui.dbobjects.objecttree.DbObjectSorter;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -98,36 +102,61 @@ public class SqlServerDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    return retrieveObjects(connection, base, searchUsedBy);
+    if (SqlServerUtil.isSqlServer2008(connection))
+    {
+      return retrieveObjects(connection, base, searchUsedBy2008, true);
+    }
+    return retrieveObjects(connection, base, searchUsedBy, false);
   }
 
   @Override
   public List<DbObject> getUsedBy(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
-
-    return retrieveObjects(connection, base, searchUsedSql);
+    if (SqlServerUtil.isSqlServer2008(connection))
+    {
+      return retrieveObjects(connection, base, searchUsedSql2008, true);
+    }
+    return retrieveObjects(connection, base, searchUsedSql, false);
   }
 
-  private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql)
+  private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql, boolean useFQN)
   {
     PreparedStatement pstmt = null;
     ResultSet rs = null;
 
     List<DbObject> result = new ArrayList<>();
 
+    String fqName = buildFQName(connection, base);
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
+			String s;
+      if (useFQN)
+      {
+        s = SqlUtil.replaceParameters(sql, fqName);
+      }
+      else
+      {
+        s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
+      }
+
 			LogMgr.logDebug("SqlServerDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
 		}
 
     try
     {
       pstmt = connection.getSqlConnection().prepareStatement(sql);
-      pstmt.setString(1, base.getCatalog());
-      pstmt.setString(2, base.getSchema());
-      pstmt.setString(3, base.getObjectName());
+      if (useFQN)
+      {
+        pstmt.setString(1, fqName);
+      }
+      else
+      {
+        pstmt.setString(1, base.getCatalog());
+        pstmt.setString(2, base.getSchema());
+        pstmt.setString(3, base.getObjectName());
+      }
 
       rs = pstmt.executeQuery();
       while (rs.next())
@@ -136,14 +165,40 @@ public class SqlServerDependencyReader
         String schema = rs.getString(2);
         String name = rs.getString(3);
         String type = rs.getString(4);
-        TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
-        tbl.setType(type);
-        result.add(tbl);
+
+        DbObject dbo = null;
+        if (type.equals("PROCEDURE"))
+        {
+          dbo = new ProcedureDefinition(catalog, schema, name);
+        }
+        else if (type.equals("FUNCTION"))
+        {
+          dbo = new ProcedureDefinition(catalog, schema, name, DatabaseMetaData.procedureReturnsResult);
+        }
+        else if (type.equals("TRIGGER"))
+        {
+          dbo = new TriggerDefinition(catalog, schema, name);
+        }
+        else
+        {
+          TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+          tbl.setType(type);
+          dbo = tbl;
+        }
+        result.add(dbo);
       }
     }
     catch (Exception ex)
     {
-			String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
+      String s;
+      if (useFQN)
+      {
+        s = SqlUtil.replaceParameters(sql, fqName);
+      }
+      else
+      {
+        s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
+      }
       LogMgr.logError("SqlServerDependencyReader.retrieveObjects()", "Could not read object dependency using:\n" + s, ex);
     }
     finally
@@ -153,6 +208,18 @@ public class SqlServerDependencyReader
 
     DbObjectSorter.sort(result);
     return result;
+  }
+
+  private String buildFQName(WbConnection conn, DbObject dbo)
+  {
+    if (dbo == null) return null;
+    String schema = conn.getMetadata().quoteObjectname(dbo.getSchema());
+    String name = conn.getMetadata().quoteObjectname(dbo.getObjectName());
+    if (StringUtil.isEmptyString(schema))
+    {
+      schema = conn.getMetadata().quoteObjectname(conn.getCurrentSchema());
+    }
+    return schema + "." + name;
   }
 
   @Override
