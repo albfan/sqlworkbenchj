@@ -63,7 +63,7 @@ public class SqlServerDependencyReader
       "          else type_desc \n" +
       "        end as type \n";
 
-  private final String searchUsedBy =
+  private final String searchUsedByInfSchema =
       "SELECT vtu.TABLE_CATALOG, vtu.TABLE_SCHEMA, vtu.TABLE_NAME,\n" + typeDesc +
       "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
       "  JOIN sys.all_objects ao ON ao.name = vtu.TABLE_NAME and schema_name(ao.schema_id) = vtu.TABLE_SCHEMA\n" +
@@ -71,7 +71,7 @@ public class SqlServerDependencyReader
       "  AND VIEW_SCHEMA = ? \n" +
       "  AND VIEW_NAME = ?";
 
-  private final String searchUsedSql =
+  private final String searchUsedSqlInfSchema =
       "SELECT vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME,\n" + typeDesc +
       "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
       "  JOIN sys.all_objects ao ON ao.name = vtu.VIEW_NAME and schema_name(ao.schema_id) = vtu.VIEW_SCHEMA\n" +
@@ -79,14 +79,14 @@ public class SqlServerDependencyReader
       "  AND TABLE_SCHEMA = ? \n" +
       "  AND TABLE_NAME = ?";
 
-  private final String searchUsedBy2008 =
+  private final String searchUsedByDMView =
       "SELECT distinct db_name() as catalog_name,  \n" +
       "       coalesce(re.referenced_schema_name, schema_name()) as schema_name,  \n" +
       "       re.referenced_entity_name,  \n" + typeDesc +
       "FROM sys.dm_sql_referenced_entities(?, 'OBJECT') re \n" +
       "  JOIN sys.all_objects ao on ao.object_id = re.referenced_id";
 
-  private final String searchUsedSql2008 =
+  private final String searchUsedSqlDMView =
       "SELECT db_name() as catalog,  \n" +
       "       coalesce(re.referencing_schema_name,schema_name()) as schema_name,  \n" +
       "       re.referencing_entity_name, \n" + typeDesc +
@@ -102,22 +102,22 @@ public class SqlServerDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    if (SqlServerUtil.isSqlServer2008(connection))
+    if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
     {
-      return retrieveObjects(connection, base, searchUsedBy2008, true);
+      return retrieveObjects(connection, base, searchUsedByInfSchema, false);
     }
-    return retrieveObjects(connection, base, searchUsedBy, false);
+    return retrieveObjects(connection, base, searchUsedByDMView, true);
   }
 
   @Override
   public List<DbObject> getUsedBy(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
-    if (SqlServerUtil.isSqlServer2008(connection))
+    if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
     {
-      return retrieveObjects(connection, base, searchUsedSql2008, true);
+      return retrieveObjects(connection, base, searchUsedSqlInfSchema, false);
     }
-    return retrieveObjects(connection, base, searchUsedSql, false);
+    return retrieveObjects(connection, base, searchUsedSqlDMView, true);
   }
 
   private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql, boolean useFQN)
