@@ -783,7 +783,7 @@ public class JdbcIndexReader
       UniqueConstraintReader reader = ReaderFactory.getUniqueConstraintReader(metaData.getWbConnection());
       if (reader != null)
       {
-        reader.readUniqueConstraints(result, metaData.getWbConnection());
+        reader.readUniqueConstraints(tbl, result, metaData.getWbConnection());
       }
     }
 

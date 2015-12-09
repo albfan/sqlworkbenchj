@@ -25,10 +25,15 @@ package workbench.db.h2database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import workbench.db.DbMetadata;
-import workbench.db.JdbcIndexReader;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DbMetadata;
+import workbench.db.IndexDefinition;
+import workbench.db.JdbcIndexReader;
+import workbench.db.TableIdentifier;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -107,5 +112,18 @@ public class H2IndexReader
 		SqlUtil.closeStatement(primaryKeysStatement);
 		primaryKeysStatement = null;
 	}
+
+  @Override
+  public CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition)
+  {
+    if (indexDefinition == null) return null;
+    
+    if (indexDefinition.isUniqueConstraint())
+    {
+      return getUniqueConstraint(table, indexDefinition);
+    }
+    return super.getIndexSource(table, indexDefinition);
+  }
+
 
 }

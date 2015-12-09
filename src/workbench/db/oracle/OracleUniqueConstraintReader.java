@@ -33,6 +33,7 @@ import workbench.resource.Settings;
 
 import workbench.db.ConstraintDefinition;
 import workbench.db.IndexDefinition;
+import workbench.db.TableIdentifier;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
 
@@ -49,7 +50,7 @@ public class OracleUniqueConstraintReader
 {
 
 	@Override
-	public void readUniqueConstraints(List<IndexDefinition> indexList, WbConnection con)
+	public void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con)
 	{
 		if (CollectionUtil.isEmpty(indexList))  return;
 		if (con == null) return;

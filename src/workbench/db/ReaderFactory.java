@@ -35,9 +35,12 @@ import workbench.db.firstsql.FirstSqlConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
 import workbench.db.h2database.H2IndexReader;
 import workbench.db.h2database.H2SequenceReader;
+import workbench.db.h2database.H2UniqueConstraintReader;
 import workbench.db.hana.HanaProcedureReader;
 import workbench.db.hsqldb.HsqlConstraintReader;
+import workbench.db.hsqldb.HsqlIndexReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
+import workbench.db.hsqldb.HsqlUniqueConstraintReader;
 import workbench.db.ibm.DB2UniqueConstraintReader;
 import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.ibm.Db2IndexReader;
@@ -200,6 +203,10 @@ public class ReaderFactory
 		{
 			return new H2IndexReader(meta);
 		}
+		if (meta.isHsql())
+		{
+			return new HsqlIndexReader(meta);
+		}
 		if (meta.isFirebird() && JdbcUtils.hasMinimumServerVersion(meta.getWbConnection(), "2.5"))
 		{
 			return new FirebirdIndexReader(meta);
@@ -294,6 +301,14 @@ public class ReaderFactory
     if (connection.getMetadata().isSqlServer())
     {
       return new SqlServerUniqueConstraintReader();
+    }
+    if (connection.getMetadata().isHsql())
+    {
+      return new HsqlUniqueConstraintReader();
+    }
+    if (connection.getMetadata().isH2())
+    {
+      return new H2UniqueConstraintReader();
     }
     return null;
   }

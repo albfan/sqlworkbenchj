@@ -27,12 +27,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-import workbench.db.ConstraintDefinition;
-import workbench.db.IndexDefinition;
-import workbench.db.UniqueConstraintReader;
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ConstraintDefinition;
+import workbench.db.IndexDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.UniqueConstraintReader;
+import workbench.db.WbConnection;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -45,7 +48,7 @@ public class SqlServerUniqueConstraintReader
 {
 
 	@Override
-	public void readUniqueConstraints(List<IndexDefinition> indexList, WbConnection con)
+	public void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con)
 	{
 		if (!SqlServerUtil.isSqlServer2005(con)) return;
 

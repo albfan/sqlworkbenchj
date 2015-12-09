@@ -1,5 +1,5 @@
 /*
- * UniqueConstraintReader.java
+ * H2IndexReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -20,15 +20,32 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db;
+package workbench.db.hsqldb;
 
-import java.util.List;
+import workbench.db.DbMetadata;
+import workbench.db.IndexDefinition;
+import workbench.db.JdbcIndexReader;
+import workbench.db.TableIdentifier;
 
-/**
- *
- * @author Thomas Kellerer
- */
-public interface UniqueConstraintReader
+public class HsqlIndexReader
+	extends JdbcIndexReader
 {
-	void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con);
+  public HsqlIndexReader(DbMetadata meta)
+  {
+    super(meta);
+  }
+
+  @Override
+  public CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition)
+  {
+    if (indexDefinition == null) return null;
+
+    if (indexDefinition.isUniqueConstraint())
+    {
+      return getUniqueConstraint(table, indexDefinition);
+    }
+    return super.getIndexSource(table, indexDefinition);
+  }
+
+
 }
