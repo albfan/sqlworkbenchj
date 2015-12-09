@@ -281,7 +281,7 @@ public abstract class AbstractOraclePartition
 			retrieveSubColumns(dbObject, conn);
 		}
     long duration = System.currentTimeMillis() - start;
-    LogMgr.logDebug("AbstractOraclePartition.retrieveDefinition()", "Retrieving partition information for " + dbObject.getObjectName() + " took: " + duration + "ms");
+    LogMgr.logDebug("AbstractOraclePartition.retrieveDefinition()", "Retrieving partition definition for " + dbObject.getFullyQualifiedName(conn)+ " took: " + duration + "ms");
 		return type != null;
 	}
 

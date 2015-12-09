@@ -266,6 +266,9 @@ public class OracleIndexReader
 		index.setTablespace(tblSpace);
 		String status = rs.getString("INDEX_STATUS");
 		index.setStatus(status);
+
+    String isPartitioned = rs.getString("partitioned");
+    index.setPartitioned(StringUtil.equalString("YES", isPartitioned));
 	}
 
 	public IndexDefinition getIndexDefinition(TableIdentifier table, String indexName, String indexSchema)

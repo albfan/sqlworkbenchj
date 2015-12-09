@@ -58,6 +58,7 @@ public class OracleTableSourceBuilder
 	private static final String REV_IDX_TYPE = "NORMAL/REV";
 	private static final String INDEX_USAGE_PLACEHOLDER = "%pk_index_usage%";
   private static final String IOT_OPTIONS = "%IOT_DEFINITION%";
+  private static final String A_DEFAULT = "DEFAULT";
 	private String defaultTablespace;
 	private String currentUser;
 
@@ -82,8 +83,6 @@ public class OracleTableSourceBuilder
 	{
 		if (tbl.getSourceOptions().isInitialized()) return;
 
-		StringBuilder options = new StringBuilder(100);
-
     if (!Settings.getInstance().getBoolProperty("workbench.db.oracle.table_options.retrieve", true))
     {
       LogMgr.logInfo("OracleTableSourceBuilder.readTableOptions()", "Not retrieving table options for " + tbl.getTableExpression());
@@ -91,15 +90,13 @@ public class OracleTableSourceBuilder
       return;
     }
 
-		CharSequence externalDef;
 		if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_externaltables", true))
 		{
 			OracleExternalTableReader reader = new OracleExternalTableReader();
-			externalDef = reader.getDefinition(tbl, dbConnection);
+			CharSequence externalDef = reader.getDefinition(tbl, dbConnection);
 			if (externalDef != null)
 			{
-				options.append(externalDef);
-				tbl.getSourceOptions().setTableOption(options.toString());
+				tbl.getSourceOptions().setTableOption(externalDef.toString());
 				tbl.getSourceOptions().setInitialized();
 				return;
 			}
@@ -182,6 +179,8 @@ public class OracleTableSourceBuilder
     boolean isPartitioned = false;
     String iotType = null;
 
+		StringBuilder options = new StringBuilder(100);
+
     long start = System.currentTimeMillis();
 
 		try
@@ -195,7 +194,8 @@ public class OracleTableSourceBuilder
 
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving table source options using:\n" + SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema()));
+				LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()",
+          "Retrieving table source options using:\n" + SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema()));
 			}
 
 			rs = pstmt.executeQuery();
@@ -222,12 +222,11 @@ public class OracleTableSourceBuilder
 					options.append(IOT_OPTIONS);
 				}
 
-				String degree = rs.getString("degree");
-				if (degree != null) degree = degree.trim();
+        String degree = StringUtil.trim(rs.getString("degree"));
 				if (StringUtil.stringsAreNotEqual("1", degree))
 				{
 					if (options.length() > 0) options.append('\n');
-					if ("DEFAULT".equals(degree))
+					if (A_DEFAULT.equals(degree))
 					{
 						options.append("PARALLEL");
 						tbl.getSourceOptions().addConfigSetting("parallel", "default");  // make this show in the XML schema report
@@ -283,37 +282,31 @@ public class OracleTableSourceBuilder
 					options.append(used);
 				}
 
-        String bufferPool = StringUtil.trim(rs.getString("buffer_pool"));
-        String flashCache = StringUtil.trim(rs.getString("flash_cache"));
-        String cellFlashCache = StringUtil.trim(rs.getString("cell_flash_cache"));
+        String bufferPool = StringUtil.coalesce(StringUtil.trim(rs.getString("buffer_pool")), "DEFAULT");
+        String flashCache = StringUtil.coalesce(StringUtil.trim(rs.getString("flash_cache")), "DEFAULT");
+        String cellFlashCache = StringUtil.coalesce(StringUtil.trim(rs.getString("cell_flash_cache")), "DEFAULT");
         String storage = null;
 
-        if (StringUtil.isNonEmpty(bufferPool))
+        if (StringUtil.stringsAreNotEqual("DEFAULT", bufferPool))
         {
           tbl.getSourceOptions().addConfigSetting("buffer_pool", bufferPool);
-          if (StringUtil.stringsAreNotEqual("DEFAULT", bufferPool))
-          {
-            storage = "STORAGE (BUFFER_POOL " + bufferPool;
-          }
+          storage = "STORAGE (BUFFER_POOL " + bufferPool;
         }
-        if (StringUtil.isNonEmpty(flashCache))
+
+        if (StringUtil.stringsAreNotEqual("DEFAULT", flashCache))
         {
           tbl.getSourceOptions().addConfigSetting("flash_cache", flashCache);
-          if (StringUtil.stringsAreNotEqual("DEFAULT", flashCache))
-          {
-            if (storage == null) storage = "STORAGE (";
-            storage += " FLASH_CACHE " + flashCache;
-          }
+          if (storage == null) storage = "STORAGE (";
+          storage += " FLASH_CACHE " + flashCache;
         }
-        if (StringUtil.isNonEmpty(cellFlashCache))
+
+        if (StringUtil.stringsAreNotEqual("DEFAULT", cellFlashCache))
         {
           tbl.getSourceOptions().addConfigSetting("cell_flash_cache", cellFlashCache);
-          if (StringUtil.stringsAreNotEqual("DEFAULT", cellFlashCache))
-          {
-            if (storage == null) storage = "STORAGE (";
-            storage += " CELL_FLASH_CACHE " + cellFlashCache;
-          }
+          if (storage == null) storage = "STORAGE (";
+          storage += " CELL_FLASH_CACHE " + cellFlashCache;
         }
+
         if (storage != null)
         {
           if (options.length() > 0) options.append('\n');
@@ -420,7 +413,7 @@ public class OracleTableSourceBuilder
 
     if (!Settings.getInstance().getBoolProperty("workbench.db.oracle.lob_options.retrieve", true))
     {
-      LogMgr.logWarning("OracleTableSourceBuilder.readTableOptions()", "Not retrieving table LOB options for " + tbl.getTableExpression() + " even though table has LOB columns. To retrieve LOB options, set workbench.db.oracle.lob_options.retrieve to true");
+      LogMgr.logWarning("OracleTableSourceBuilder.retrieveLobOptions()", "Not retrieving table LOB options for " + tbl.getTableExpression() + " even though table has LOB columns. To retrieve LOB options, set workbench.db.oracle.lob_options.retrieve to true");
       return null;
     }
 
@@ -548,7 +541,7 @@ public class OracleTableSourceBuilder
 		}
 
     long duration = System.currentTimeMillis() - start;
-    LogMgr.logDebug("OracleTableSourceBuilder.readTableOptions()", "Retrieving LOB options for " + tbl.getTableExpression() + " took " + duration + "ms");
+    LogMgr.logDebug("OracleTableSourceBuilder.retrieveLobOptions()", "Retrieving LOB options for " + tbl.getTableExpression() + " took " + duration + "ms");
 
 		return result;
 	}
@@ -570,7 +563,7 @@ public class OracleTableSourceBuilder
 
 
 		// Using the table's tablespace for the flashback archive is not correct,
-		// but there isn't a way to retrieve that information as far as I can tell
+		// but there is no way to retrieve that information as far as I can tell
 		// (not even SQL Developer displays the flashback archive information!)
 		String sql =
       "-- SQL Workbench \n" +
@@ -593,7 +586,7 @@ public class OracleTableSourceBuilder
 			pstmt.setString(2, tbl.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("OracleTableSourceBuilder.retrieveFlashbackInfo()", "Using sql:\n" +
+				LogMgr.logDebug("OracleTableSourceBuilder.retrieveFlashbackInfo()", "Retrieving flashback archive information using sql:\n" +
 					SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
 			}
 
@@ -626,7 +619,7 @@ public class OracleTableSourceBuilder
 		}
 		catch (Exception ex)
 		{
-			LogMgr.logWarning("OracleTableSourceBuilder.retrieveFlashbackInfo()", "Could not retrieve flashback information", ex);
+			LogMgr.logWarning("OracleTableSourceBuilder.retrieveFlashbackInfo()", "Could not retrieve flashback information using:\n" + SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()), ex);
 		}
 		finally
 		{
@@ -651,7 +644,7 @@ public class OracleTableSourceBuilder
 			}
 			catch (SQLException sql)
 			{
-				LogMgr.logError("OracleTableSourceBuilder.getPartitionSql()", "Error retrieving partitions", sql);
+        LogMgr.logError("OracleTableSourceBuilder.getPartitionSql()", "Error retrieving partitions for " + table.getFullyQualifiedName(dbConnection), sql);
 			}
 		}
 		return result;
@@ -714,7 +707,7 @@ public class OracleTableSourceBuilder
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("OracleTableSourceBuilder.getNestedTableSql()", "Error retrieving table options", e);
+			LogMgr.logError("OracleTableSourceBuilder.getNestedTableSql()", "Error retrieving nested table information using:\n" + SqlUtil.replaceParameters(sql, tbl.getTableName(), tbl.getSchema()), e);
 		}
 		finally
 		{
@@ -768,24 +761,10 @@ public class OracleTableSourceBuilder
 
 		boolean pkEnabled = pk.isEnabled() != null ? pk.isEnabled().booleanValue() : true;
 		IndexDefinition pkIdx = null;
-		boolean isPartitioned = false;
 
 		if (pkEnabled)
 		{
 			pkIdx = getIndexDefinition(table, pkIndexName);
-		}
-
-		try
-		{
-			if (pkIdx != null && pkIdx.isPartitioned())
-			{
-				OracleIndexPartition partIndex =  new OracleIndexPartition(this.dbConnection);
-				isPartitioned = partIndex.hasPartitions(pkIdx, dbConnection);
-			}
-		}
-		catch (SQLException ex)
-		{
-			isPartitioned = false;
 		}
 
 		boolean pkIdxReverse = pkIdx != null && REV_IDX_TYPE.equals(pkIdx.getIndexType());
@@ -794,7 +773,7 @@ public class OracleTableSourceBuilder
 		{
 			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, " DISABLE");
 		}
-		else if (pkIndexName.equals(pk.getPkName()) && !isPartitioned)
+		else if (pkIndexName.equals(pk.getPkName()) && !pkIdx.isPartitioned())
 		{
 			if (OracleUtils.shouldAppendTablespace(pkIdx.getTablespace(), defaultTablespace, pkIdx.getSchema(), dbConnection.getCurrentUser()))
 			{
@@ -844,6 +823,7 @@ public class OracleTableSourceBuilder
 
   private void readIOTDefinition(TableIdentifier tbl, boolean useUserTables)
   {
+
 		String sql =
       "-- SQL Workbench \n" +
 			"select " + OracleUtils.getCacheHint() + " coalesce(atb.tablespace_name, pt.def_tablespace_name) as tablespace_name, \n" +
@@ -872,6 +852,8 @@ public class OracleTableSourceBuilder
 		StringBuilder options = new StringBuilder(100);
 
     String included = getIOTIncludedColumn(tbl.getSchema(), tbl.getTableName(), tbl.getPrimaryKey().getPkIndexName());
+
+    long start = System.currentTimeMillis();
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
@@ -940,6 +922,9 @@ public class OracleTableSourceBuilder
     String tableOptions = tbl.getSourceOptions().getTableOption();
     String newOptions = tableOptions.replace(IOT_OPTIONS, options.toString());
     tbl.getSourceOptions().setTableOption(newOptions);
+
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("OracleTableSourceBuilder.readIOTDefinition()", "Retrieving IOT information for " + tbl.getTableExpression() + " took " + duration + "ms");
   }
 
 	private String getIOTIncludedColumn(String owner, String tableName, String pkIndexName)
@@ -952,12 +937,13 @@ public class OracleTableSourceBuilder
 			"from all_tab_columns \n" +
 			"where column_name not in (select column_name \n" +
 			"                          from all_ind_columns  \n" +
-			"                          where index_name = ? " +
+			"                          where index_name = ? \n" +
 			"                            and index_owner = ?) \n" +
 			"  and table_name = ? \n" +
 			"  and owner = ? \n" +
 			"order by column_id \n";
 
+    long start = System.currentTimeMillis();
 		String column = null;
 		try
 		{
@@ -986,6 +972,8 @@ public class OracleTableSourceBuilder
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("OracleTableSourceBuilder.getIOTIncludedColumn()", "Retrieving included columns for IOT " + owner + "." + tableName + " took " + duration + "ms");
 		return column;
 	}
 

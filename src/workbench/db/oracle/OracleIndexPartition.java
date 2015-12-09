@@ -24,9 +24,10 @@ package workbench.db.oracle;
 
 import java.sql.SQLException;
 
+import workbench.resource.Settings;
+
 import workbench.db.IndexDefinition;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
 
 /**
  * A class to read information about a partitioned index in Oracle
@@ -60,7 +61,9 @@ public class OracleIndexPartition
 		try
 		{
 			retrieveDefinition(idx, conn);
-			return getPartitionType() != null;
+      boolean isPartitioned = getPartitionType() != null;
+      idx.setPartitioned(isPartitioned);
+      return isPartitioned;
 		}
 		catch (SQLException sql)
 		{
