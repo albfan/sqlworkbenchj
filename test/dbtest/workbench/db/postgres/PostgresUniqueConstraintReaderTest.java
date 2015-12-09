@@ -23,19 +23,21 @@
 package workbench.db.postgres;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import workbench.WbTestCase;
-
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
+import workbench.WbTestCase;
 
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.report.SchemaReporter;
+
+import workbench.util.CollectionUtil;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -87,7 +89,7 @@ public class PostgresUniqueConstraintReaderTest
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
     assertNotNull(con);
 
-		TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("PARENT"));
+		TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("parent"));
 		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent, true);
 
 		boolean foundConstraint = false;
@@ -102,4 +104,24 @@ public class PostgresUniqueConstraintReaderTest
 		}
 		assertTrue(foundConstraint);
 	}
+
+  @Test
+  public void testSchemaReport()
+    throws Exception
+  {
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
+    SchemaReporter reporter = new SchemaReporter(con);
+    TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("parent"));
+    reporter.setObjectList(CollectionUtil.arrayList(parent));
+    String xml = reporter.getXml();
+//    System.out.println(xml);
+
+    String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+    assertEquals("Incorrect table count", "1", count);
+    count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='parent']/index-def)");
+    assertEquals("2", count);
+    String constraint = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='parent']/index-def[name='uk_id']/constraint-name/text()");
+    assertEquals("uk_id", constraint);
+  }
 }

@@ -30,6 +30,9 @@ import workbench.WbTestCase;
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.report.SchemaReporter;
+
+import workbench.util.CollectionUtil;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -102,4 +105,27 @@ public class OracleUniqueConstraintReaderTest
 		}
 		assertTrue(foundConstraint);
 	}
+
+  @Test
+  public void testSchemaReport()
+    throws Exception
+  {
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		assertNotNull("Oracle not available", con);
+
+    SchemaReporter reporter = new SchemaReporter(con);
+    TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("PARENT"));
+    reporter.setObjectList(CollectionUtil.arrayList(parent));
+    String xml = reporter.getXml();
+    System.out.println(xml);
+
+    String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
+    assertEquals("Incorrect table count", "1", count);
+    count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PARENT']/index-def)");
+    assertEquals("2", count);
+    String constraint = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='PARENT']/index-def[name='UK_ID1_ID2']/constraint-name/text()");
+
+    assertEquals("UK_ID1_ID2", constraint);
+  }
+
 }
