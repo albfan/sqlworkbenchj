@@ -66,7 +66,7 @@ public class FirebirdIndexReaderTest
 
 			IndexReader reader = conn.getMetadata().getIndexReader();
 			assertTrue(reader instanceof FirebirdIndexReader);
-			List<IndexDefinition> indexList = reader.getTableIndexList(new TableIdentifier("PERSON"));
+			List<IndexDefinition> indexList = reader.getTableIndexList(new TableIdentifier("PERSON"), false);
 			assertEquals(1, indexList.size());
 			IndexDefinition index = indexList.get(0);
 			assertNotNull(index);

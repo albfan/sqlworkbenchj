@@ -118,7 +118,7 @@ public class OracleIndexReaderTest
 				"create index c2 on foo (id1, id2, id3) compress 2;\n"
 			);
 			TableIdentifier tbl = new TableIdentifier("FOO");
-			List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(tbl);
+			List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(tbl, false);
 			assertNotNull(indexList);
 			assertEquals(2, indexList.size());
 			IndexDefinition c1 = indexList.get(0);
@@ -143,7 +143,7 @@ public class OracleIndexReaderTest
 		try
 		{
 			TableIdentifier tbl = new TableIdentifier("SOME_TABLE");
-			List<IndexDefinition> indexes = con.getMetadata().getIndexReader().getTableIndexList(tbl);
+			List<IndexDefinition> indexes = con.getMetadata().getIndexReader().getTableIndexList(tbl, false);
 
 			// Make sure aaa_upper is the first index
 			Collections.sort(indexes, new DbObjectComparator());
@@ -198,7 +198,7 @@ public class OracleIndexReaderTest
 			TestUtil.executeScript(con, sql);
 
 			TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("INDEX_TEST"));
-			List<IndexDefinition> idx = con.getMetadata().getIndexReader().getTableIndexList(tbl.getTable());
+			List<IndexDefinition> idx = con.getMetadata().getIndexReader().getTableIndexList(tbl.getTable(), false);
 			assertEquals(1, idx.size());
 			IndexDefinition def = idx.get(0);
 			assertTrue(def.isPrimaryKeyIndex());

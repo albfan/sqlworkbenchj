@@ -115,7 +115,7 @@ public class WbListIndexes
 			indexes = new ArrayList<>();
 			for (TableIdentifier tbl : tables)
 			{
-        List<IndexDefinition> indexList = reader.getTableIndexList(tbl);
+        List<IndexDefinition> indexList = reader.getTableIndexList(tbl, false);
 				indexes.addAll(indexList);
 			}
 		}

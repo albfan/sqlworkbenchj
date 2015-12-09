@@ -37,8 +37,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import workbench.db.ReaderFactory;
-import workbench.db.UniqueConstraintReader;
 
 /**
  *
@@ -90,10 +88,7 @@ public class OracleUniqueConstraintReaderTest
 		assertNotNull("Oracle not available", con);
 
 		TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("PARENT"));
-		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent);
-
-    UniqueConstraintReader uniqueReader = ReaderFactory.getUniqueConstraintReader(con);
-    uniqueReader.readUniqueConstraints(indexList, con);
+		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent, true);
 
 		boolean foundConstraint = false;
 		for (IndexDefinition idx : indexList)

@@ -239,7 +239,7 @@ public class DefaultViewReader
 
 		// Oracle and MS SQL Server support materialized views. For those
 		// the index definitions are of interest as well.
-		List<IndexDefinition> indexInfo = connection.getMetadata().getIndexReader().getTableIndexList(viewTable);
+		List<IndexDefinition> indexInfo = connection.getMetadata().getIndexReader().getTableIndexList(viewTable, true);
 		if (indexInfo.size() > 0)
 		{
 			StringBuilder idx = this.connection.getMetadata().getIndexReader().getIndexSource(viewTable, indexInfo);

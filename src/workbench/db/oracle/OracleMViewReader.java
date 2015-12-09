@@ -120,7 +120,7 @@ public class OracleMViewReader
 
 		if (indexList == null)
 		{
-			indexList = dbConnection.getMetadata().getIndexReader().getTableIndexList(table);
+			indexList = dbConnection.getMetadata().getIndexReader().getTableIndexList(table, true);
 		}
 
 		// The source for the auto-generated index that is created when using the WITH PRIMARY KEY option

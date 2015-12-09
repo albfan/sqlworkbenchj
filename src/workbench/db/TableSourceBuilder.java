@@ -124,13 +124,7 @@ public class TableSourceBuilder
 
 		TableDefinition def = meta.getTableDefinition(tbl);
 		List<ColumnIdentifier> cols = def.getColumns();
-		List<IndexDefinition> indexDef = getIndexReader().getTableIndexList(def.getTable());
-
-		UniqueConstraintReader reader = ReaderFactory.getUniqueConstraintReader(dbConnection);
-		if (reader != null && CollectionUtil.isNonEmpty(indexDef))
-		{
-			reader.readUniqueConstraints(indexDef, dbConnection);
-		}
+		List<IndexDefinition> indexDef = getIndexReader().getTableIndexList(def.getTable(), true);
 
 		List<DependencyNode> fkDef = null;
 		if (includeFk)
@@ -147,12 +141,7 @@ public class TableSourceBuilder
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
-		List<IndexDefinition> indexInfo = getIndexReader().getTableIndexList(table);
-		UniqueConstraintReader reader = ReaderFactory.getUniqueConstraintReader(dbConnection);
-		if (reader != null && CollectionUtil.isNonEmpty(indexInfo))
-		{
-      reader.readUniqueConstraints(indexInfo, dbConnection);
-		}
+		List<IndexDefinition> indexInfo = getIndexReader().getTableIndexList(table, true);
 		return getTableSource(table, columns, indexInfo, null, DropType.none, true);
 	}
 

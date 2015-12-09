@@ -808,7 +808,7 @@ public class TreeLoader
     DbMetadata meta = connection.getMetadata();
 
     TableIdentifier tbl = (TableIdentifier)dbo;
-    List<IndexDefinition> indexes = meta.getIndexReader().getTableIndexList(tbl);
+    List<IndexDefinition> indexes = meta.getIndexReader().getTableIndexList(tbl, false);
     DbObjectSorter.sort(indexes);
 
     for (IndexDefinition idx : indexes)

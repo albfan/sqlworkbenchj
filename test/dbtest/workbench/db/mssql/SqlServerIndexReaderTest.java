@@ -87,7 +87,7 @@ public class SqlServerIndexReaderTest
 		TestUtil.executeScript(con, sql);
 		IndexReader reader = con.getMetadata().getIndexReader();
 		TableIdentifier tbl = new TableIdentifier("dbo.foo");
-		List<IndexDefinition> indexes = reader.getTableIndexList(tbl);
+		List<IndexDefinition> indexes = reader.getTableIndexList(tbl, false);
 		assertEquals(1, indexes.size());
 		IndexDefinition index = indexes.get(0);
 		assertEquals("ix_one", index.getName());
@@ -104,7 +104,7 @@ public class SqlServerIndexReaderTest
 			"create unique index ix_two on foo (id1, id2) with (ignore_dup_key = on);\n " +
 			"commit;\n");
 
-		indexes = reader.getTableIndexList(tbl);
+		indexes = reader.getTableIndexList(tbl, false);
 		assertEquals(1, indexes.size());
 		IndexDefinition idx2 = indexes.get(0);
 		assertEquals("ix_two", idx2.getName());
@@ -116,7 +116,7 @@ public class SqlServerIndexReaderTest
 			"create unique index ix_three on foo (id1) where id2 > 0 with (fillfactor = 80, PAD_INDEX = on);\n " +
 			"commit;\n");
 
-		indexes = reader.getTableIndexList(tbl);
+		indexes = reader.getTableIndexList(tbl, false);
 		assertEquals(1, indexes.size());
 		IndexDefinition idx3 = indexes.get(0);
 		assertEquals("ix_three", idx3.getName());

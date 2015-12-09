@@ -83,7 +83,7 @@ public class MySQLIndexReaderTest
 
 		IndexReader reader = con.getMetadata().getIndexReader();
 		assertTrue(reader instanceof MySQLIndexReader);
-		List<IndexDefinition> indexes = reader.getTableIndexList(new TableIdentifier("foo"));
+		List<IndexDefinition> indexes = reader.getTableIndexList(new TableIdentifier("foo"), false);
 		assertEquals(1, indexes.size());
 		IndexDefinition idx = indexes.get(0);
 		assertNotNull(idx);

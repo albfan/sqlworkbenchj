@@ -34,9 +34,6 @@ import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import workbench.db.ibm.Db2IndexReader;
-import workbench.db.ibm.Db2TestUtil;
-
 import static org.junit.Assert.*;
 
 /**
@@ -81,7 +78,7 @@ public class Db2IndexReaderTest
 			TableIdentifier table = conn.getMetadata().findTable(new TableIdentifier("JUNIT_T1"));
 			IndexReader reader = conn.getMetadata().getIndexReader();
 			assertTrue(reader instanceof Db2IndexReader);
-			List<IndexDefinition> indexes = reader.getTableIndexList(table);
+			List<IndexDefinition> indexes = reader.getTableIndexList(table, false);
 			assertNotNull(indexes);
 			assertEquals(1, indexes.size());
 
@@ -118,7 +115,7 @@ public class Db2IndexReaderTest
 
 			IndexReader reader = conn.getMetadata().getIndexReader();
 			assertTrue(reader instanceof Db2IndexReader);
-			List<IndexDefinition> indexes = reader.getTableIndexList(t1);
+			List<IndexDefinition> indexes = reader.getTableIndexList(t1, false);
 			assertNotNull(indexes);
 			assertEquals(1, indexes.size());
 
@@ -127,7 +124,7 @@ public class Db2IndexReaderTest
 //			System.out.println("--------- expected: \n" + expected + "\n-----------------\n" + result);
 
 
-			indexes = reader.getTableIndexList(t2);
+			indexes = reader.getTableIndexList(t2, false);
 			assertNotNull(indexes);
 			assertEquals(1, indexes.size());
 			expected = "CREATE UNIQUE INDEX JUNIT_I2\n   ON " + Db2TestUtil.getSchemaName() + ".JUNIT_T2 (C1 ASC, C2 ASC) INCLUDE (C3,C4);";

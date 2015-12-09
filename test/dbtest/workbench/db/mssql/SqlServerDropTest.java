@@ -35,6 +35,7 @@ import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 
 import org.junit.AfterClass;
@@ -43,8 +44,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.sql.parser.ParserType;
 
 /**
  *
@@ -120,7 +119,7 @@ public class SqlServerDropTest
 
 		TableIdentifier tbl = conn.getMetadata().findTable(new TableIdentifier("foo"));
 		assertNotNull(tbl);
-		List<IndexDefinition> indexes = conn.getMetadata().getIndexReader().getTableIndexList(tbl);
+		List<IndexDefinition> indexes = conn.getMetadata().getIndexReader().getTableIndexList(tbl, false);
 		assertNotNull(indexes);
 
 		assertEquals(2, indexes.size());

@@ -238,7 +238,7 @@ public class JdbcIndexReader
 
 	private PkDefinition findPKFromIndexList(TableIdentifier tbl)
 	{
-		List<IndexDefinition> unique = getTableIndexList(tbl, true, false);
+		List<IndexDefinition> unique = getTableIndexList(tbl, true, false, false);
 		if (CollectionUtil.isEmpty(unique)) return null;
 
 		// see DbSettings.pkIndexHasTableName()
@@ -664,7 +664,7 @@ public class JdbcIndexReader
 	@Override
 	public DataStore getTableIndexInformation(TableIdentifier table)
 	{
-		Collection<IndexDefinition> indexes = getTableIndexList(table);
+		Collection<IndexDefinition> indexes = getTableIndexList(table, false);
 		return fillDataStore(indexes, false);
 	}
 
@@ -709,9 +709,9 @@ public class JdbcIndexReader
 	 * @see #getTableIndexList(workbench.db.TableIdentifier, boolean, boolean)
 	 */
 	@Override
-	public List<IndexDefinition> getTableIndexList(TableIdentifier table)
+	public List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean includeUniqueConstraints)
 	{
-		return getTableIndexList(table, false, true);
+		return getTableIndexList(table, false, true, includeUniqueConstraints);
 	}
 
 	/**
@@ -723,7 +723,7 @@ public class JdbcIndexReader
 	@Override
 	public List<IndexDefinition> getUniqueIndexes(TableIdentifier table)
 	{
-		return getTableIndexList(table, true, true);
+		return getTableIndexList(table, true, true, false);
 	}
 
 	/**
@@ -743,7 +743,7 @@ public class JdbcIndexReader
 	 * @see #getPrimaryKey(workbench.db.TableIdentifier)
 	 * @see IndexDefinition#isPrimaryKeyIndex()
 	 */
-	public List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean uniqueOnly, boolean checkPK)
+	public List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean uniqueOnly, boolean checkPK, boolean includeUniqueConstraints)
 	{
 		if (table == null) return new ArrayList<>();
 
@@ -777,6 +777,16 @@ public class JdbcIndexReader
 			SqlUtil.closeResult(idxRs);
 			indexInfoProcessed();
 		}
+
+    if (includeUniqueConstraints)
+    {
+      UniqueConstraintReader reader = ReaderFactory.getUniqueConstraintReader(metaData.getWbConnection());
+      if (reader != null)
+      {
+        reader.readUniqueConstraints(result, metaData.getWbConnection());
+      }
+    }
+
 		return result;
 	}
 

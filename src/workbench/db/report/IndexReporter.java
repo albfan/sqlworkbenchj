@@ -31,13 +31,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import workbench.log.LogMgr;
+
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleIndexPartition;
-import workbench.log.LogMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -68,7 +70,7 @@ public class IndexReporter
 
 	public IndexReporter(TableIdentifier tbl, WbConnection conn, boolean includePartitions)
 	{
-		indexList  = conn.getMetadata().getIndexReader().getTableIndexList(tbl);
+		indexList  = conn.getMetadata().getIndexReader().getTableIndexList(tbl, true);
     Collections.sort(indexList, IndexDefinition.getNameSorter());
     removeEmptyIndexes();
 		if (includePartitions)

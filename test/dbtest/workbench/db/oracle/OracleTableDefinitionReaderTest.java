@@ -142,7 +142,7 @@ public class OracleTableDefinitionReaderTest
 		assertTrue(r instanceof OracleIndexReader);
 		OracleIndexReader reader = (OracleIndexReader)r;
 
-		List<IndexDefinition> indexes = reader.getTableIndexList(person);
+		List<IndexDefinition> indexes = reader.getTableIndexList(person, false);
 		assertEquals("Got wrong indexes: " + indexes, 3, indexes.size());
 
 		Collections.sort(indexes, new DbObjectComparator());

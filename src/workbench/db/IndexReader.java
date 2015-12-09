@@ -118,7 +118,7 @@ public interface IndexReader
 	 *
 	 * @param table the table to get the indexes for
 	 */
-	List<IndexDefinition> getTableIndexList(TableIdentifier table);
+	List<IndexDefinition> getTableIndexList(TableIdentifier table, boolean includeUniqueConstraints);
 
 	/**
 	 * Returns a list of unique indexes defined for the given table.

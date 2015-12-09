@@ -279,7 +279,7 @@ public class OracleTableSourceBuilderTest
 		assertEquals(2, p.getSize());
 		String indexSql = p.getCommand(1);
 		indexSql = indexSql.replaceAll("\\s+", " ");
-		System.out.println(indexSql);
+//		System.out.println(indexSql);
 		String expected = "ALTER TABLE INDEX_TEST ADD CONSTRAINT PK_INDEXES PRIMARY KEY (TEST_ID) USING INDEX ( CREATE INDEX IDX_PK_INDEX_TEST ON INDEX_TEST (TEST_ID ASC, TENANT_ID ASC) TABLESPACE USERS REVERSE )";
 		assertEquals(expected, indexSql);
 	}

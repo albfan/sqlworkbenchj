@@ -34,6 +34,7 @@ import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
+import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 
 import workbench.util.SqlUtil;
@@ -43,10 +44,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.db.ReaderFactory;
-import workbench.db.UniqueConstraintReader;
-import workbench.sql.parser.ParserType;
 
 /**
  *
@@ -128,9 +125,7 @@ public class PostgresIndexReaderTest
 			"commit;\n");
 
 		TableIdentifier table = meta.findTable(new TableIdentifier("person"));
-		List<IndexDefinition> indexes = reader.getTableIndexList(table);
-    UniqueConstraintReader uniqueReader = ReaderFactory.getUniqueConstraintReader(conn);
-    uniqueReader.readUniqueConstraints(indexes, conn);
+		List<IndexDefinition> indexes = reader.getTableIndexList(table, true);
 
 		assertFalse(indexes.isEmpty());
 
@@ -184,7 +179,7 @@ public class PostgresIndexReaderTest
 		TestUtil.executeScript(conn, sql);
 
 		TableIdentifier table = meta.findTable(new TableIdentifier("films"));
-		List<IndexDefinition> indexes = reader.getTableIndexList(table);
+		List<IndexDefinition> indexes = reader.getTableIndexList(table, false);
 		assertEquals(3, indexes.size());
 
 		String source = table.getSource(conn).toString();

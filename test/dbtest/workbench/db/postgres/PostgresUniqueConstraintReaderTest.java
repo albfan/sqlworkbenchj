@@ -32,10 +32,9 @@ import workbench.WbTestCase;
 import static org.junit.Assert.*;
 
 import workbench.TestUtil;
+
 import workbench.db.IndexDefinition;
-import workbench.db.ReaderFactory;
 import workbench.db.TableIdentifier;
-import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
 
 
@@ -89,9 +88,7 @@ public class PostgresUniqueConstraintReaderTest
     assertNotNull(con);
 
 		TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("PARENT"));
-		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent);
-    UniqueConstraintReader uniqueReader = ReaderFactory.getUniqueConstraintReader(con);
-    uniqueReader.readUniqueConstraints(indexList, con);
+		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent, true);
 
 		boolean foundConstraint = false;
 		for (IndexDefinition idx : indexList)

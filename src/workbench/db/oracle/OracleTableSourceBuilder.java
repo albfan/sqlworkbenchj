@@ -57,6 +57,7 @@ public class OracleTableSourceBuilder
 {
 	private static final String REV_IDX_TYPE = "NORMAL/REV";
 	private static final String INDEX_USAGE_PLACEHOLDER = "%pk_index_usage%";
+  private static final String IOT_OPTIONS = "%IOT_DEFINITION%";
 	private String defaultTablespace;
 	private String currentUser;
 
@@ -136,7 +137,7 @@ public class OracleTableSourceBuilder
 
 		String sql =
       "-- SQL Workbench \n" +
-			"select " + OracleUtils.getCacheHint() + " coalesce(atb.tablespace_name, pt.def_tablespace_name) as tablespace_name, \n" +
+			"select " + OracleUtils.getCacheHint() + " atb.tablespace_name, \n" +
 			"       atb.degree, \n" +
 			"       atb.row_movement, \n" +
 			"       atb.temporary, \n" +
@@ -157,12 +158,6 @@ public class OracleTableSourceBuilder
 			"       atb.logging, \n" +
 			"       atb.iot_type, \n" +
 			"       atb.partitioned, \n" +
-			"       iot.tablespace_name as iot_overflow, \n" +
-			"       iot.table_name as overflow_table, \n" +
-			"       ac.index_name as pk_index_name, \n" +
-			"       ai.compression as index_compression, \n" +
-			"       ai.prefix_length, \n" +
-			"       ai.tablespace_name as index_tablespace, \n" +
 			(supportsArchives ?
 			"       fat.flashback_archive_name, \n" :
 			"       null as flashback_archive_name, \n") +
@@ -171,11 +166,7 @@ public class OracleTableSourceBuilder
 			"       atb.compress_for \n " :
 			"       null as compression, \n       null as compress_for \n ") +
 			"from all_tables atb \n" +
-			"  left join all_tables iot on atb.table_name = iot.iot_name " + (useUserTables ? "\n" : " and atb.owner = iot.owner \n")  +
-			"  left join all_constraints ac on ac.table_name = atb.table_name and ac.constraint_type = 'P' " + (useUserTables ? "\n" : " and ac.owner = atb.owner \n") +
-			"  left join all_indexes ai on ai.table_name = ac.table_name and ai.index_name = ac.index_name " + (useUserTables ? "\n" : " and ai.owner = coalesce(ac.index_owner, ac.owner) \n") +
 			archiveJoin +
-			"  left join all_part_tables pt on pt.table_name = iot.table_name " + (useUserTables ? "\n" : " and pt.owner = iot.owner \n") +
 			"where atb.table_name = ? ";
 
 		if (useUserTables)
@@ -189,6 +180,7 @@ public class OracleTableSourceBuilder
 
 		String archive = null;
     boolean isPartitioned = false;
+    String iotType = null;
 
     long start = System.currentTimeMillis();
 
@@ -222,52 +214,12 @@ public class OracleTableSourceBuilder
 
         isPartitioned = StringUtil.equalStringIgnoreCase("YES", StringUtil.trim(rs.getString("partitioned")));
 
-				String iot = rs.getString("IOT_TYPE");
+				iotType = rs.getString("IOT_TYPE");
 
-				if (StringUtil.isNonBlank(iot))
+				if (StringUtil.isNonBlank(iotType))
 				{
-					String pkIndex = rs.getString("pk_index_name");
-					String overflow = rs.getString("IOT_OVERFLOW");
 					tbl.getSourceOptions().addConfigSetting("organization", "index");
-					options.append("ORGANIZATION INDEX");
-
-					String compression = rs.getString("index_compression");
-					if ("ENABLED".equalsIgnoreCase(compression))
-					{
-						String cols = rs.getString("prefix_length");
-						if (StringUtil.isNonBlank(cols))
-						{
-							options.append("\n  COMPRESS ");
-							options.append(cols);
-						}
-					}
-					String included = getIOTIncludedColumn(tbl.getSchema(), tbl.getTableName(), pkIndex);
-					if (included != null)
-					{
-						options.append("\n  INCLUDING ");
-						options.append(included);
-						if (StringUtil.isEmptyString(overflow))
-						{
-							options.append(" OVERFLOW");
-						}
-						tbl.getSourceOptions().addConfigSetting("iot_included_cols", included);
-					}
-
-					String idxTbs = rs.getString("INDEX_TABLESPACE");
-					if (StringUtil.isNonEmpty(idxTbs))
-					{
-						options.append("\n  TABLESPACE ").append(idxTbs);
-						tbl.getSourceOptions().addConfigSetting("index_tablespace", idxTbs);
-						tbl.setTablespace(null);
-					}
-
-					if (StringUtil.isNonBlank(overflow))
-					{
-						options.append("\n  OVERFLOW TABLESPACE ");
-						options.append(overflow);
-						tbl.getSourceOptions().addConfigSetting("overflow_tablespace", overflow);
-					}
-					tbl.setUseInlinePK(true); // you cannot define a IOT without a PK therefor the PK has to be inline!
+					options.append(IOT_OPTIONS);
 				}
 
 				String degree = rs.getString("degree");
@@ -314,7 +266,7 @@ public class OracleTableSourceBuilder
 				}
 
 				int free = rs.getInt("pct_free");
-				if (!rs.wasNull() && free != 10 && StringUtil.isEmptyString(iot))
+				if (!rs.wasNull() && free != 10 && StringUtil.isEmptyString(iotType))
 				{
 					tbl.getSourceOptions().addConfigSetting("pct_free", Integer.toString(free));
 					if (options.length() > 0) options.append('\n');
@@ -323,7 +275,7 @@ public class OracleTableSourceBuilder
 				}
 
 				int used = rs.getInt("pct_used");
-				if (!rs.wasNull() && used != 40 && StringUtil.isEmptyString(iot) && !isTempTable) // PCTUSED is not valid for IOTs
+				if (!rs.wasNull() && used != 40 && StringUtil.isEmptyString(iotType) && !isTempTable) // PCTUSED is not valid for IOTs
 				{
 					tbl.getSourceOptions().addConfigSetting("pct_used", Integer.toString(used));
 					if (options.length() > 0) options.append('\n');
@@ -455,6 +407,10 @@ public class OracleTableSourceBuilder
 		}
 
 		tbl.getSourceOptions().setTableOption(options.toString());
+    if (StringUtil.isNonEmpty(iotType))
+    {
+      readIOTDefinition(tbl, useUserTables);
+    }
 		tbl.getSourceOptions().setInitialized();
 	}
 
@@ -886,6 +842,106 @@ public class OracleTableSourceBuilder
 		return index;
 	}
 
+  private void readIOTDefinition(TableIdentifier tbl, boolean useUserTables)
+  {
+		String sql =
+      "-- SQL Workbench \n" +
+			"select " + OracleUtils.getCacheHint() + " coalesce(atb.tablespace_name, pt.def_tablespace_name) as tablespace_name, \n" +
+			"       iot.tablespace_name as iot_overflow, \n" +
+			"       iot.table_name as overflow_table, \n" +
+			"       ac.index_name as pk_index_name, \n" +
+			"       ai.compression as index_compression, \n" +
+			"       ai.prefix_length, \n" +
+			"       ai.tablespace_name as index_tablespace \n" +
+			"from all_tables atb \n" +
+			"  left join all_tables iot on atb.table_name = iot.iot_name " + (useUserTables ? "\n" : " and atb.owner = iot.owner \n")  +
+			"  left join all_constraints ac on ac.table_name = atb.table_name and ac.constraint_type = 'P' " + (useUserTables ? "\n" : " and ac.owner = atb.owner \n") +
+			"  left join all_indexes ai on ai.table_name = ac.table_name and ai.index_name = ac.index_name " + (useUserTables ? "\n" : " and ai.owner = coalesce(ac.index_owner, ac.owner) \n") +
+			"  left join all_part_tables pt on pt.table_name = iot.table_name " + (useUserTables ? "\n" : " and pt.owner = iot.owner \n") +
+			"where atb.table_name = ? ";
+
+		if (useUserTables)
+		{
+			sql = sql.replace(" all_", " user_");
+		}
+		else
+		{
+			sql += "\n and atb.owner = ?";
+		}
+
+		StringBuilder options = new StringBuilder(100);
+
+    String included = getIOTIncludedColumn(tbl.getSchema(), tbl.getTableName(), tbl.getPrimaryKey().getPkIndexName());
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
+    try
+    {
+      pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, tbl.getTableName());
+      if (!useUserTables)
+      {
+        pstmt.setString(2, tbl.getSchema());
+      }
+
+      rs = pstmt.executeQuery();
+      if (!rs.next()) return;
+
+      options.append("ORGANIZATION INDEX");
+      String overflow = rs.getString("IOT_OVERFLOW");
+      tbl.getSourceOptions().addConfigSetting("organization", "index");
+
+      String compression = rs.getString("index_compression");
+      if ("ENABLED".equalsIgnoreCase(compression))
+      {
+        String cols = rs.getString("prefix_length");
+        if (StringUtil.isNonBlank(cols))
+        {
+          options.append("\n  COMPRESS ");
+          options.append(cols);
+        }
+      }
+      if (included != null)
+      {
+        options.append("\n  INCLUDING ");
+        options.append(included);
+        if (StringUtil.isEmptyString(overflow))
+        {
+          options.append(" OVERFLOW");
+        }
+        tbl.getSourceOptions().addConfigSetting("iot_included_cols", included);
+      }
+
+      String idxTbs = rs.getString("INDEX_TABLESPACE");
+      if (StringUtil.isNonEmpty(idxTbs))
+      {
+        options.append("\n  TABLESPACE ").append(idxTbs);
+        tbl.getSourceOptions().addConfigSetting("index_tablespace", idxTbs);
+        tbl.setTablespace(null);
+      }
+
+      if (StringUtil.isNonBlank(overflow))
+      {
+        options.append("\n  OVERFLOW TABLESPACE ");
+        options.append(overflow);
+        tbl.getSourceOptions().addConfigSetting("overflow_tablespace", overflow);
+      }
+      tbl.setUseInlinePK(true); // you cannot define a IOT without a PK therefor the PK has to be inline!
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("OracleTableSourceBuilder.readIOTDefinition()", "Could not read IOT definition", ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    String tableOptions = tbl.getSourceOptions().getTableOption();
+    String newOptions = tableOptions.replace(IOT_OPTIONS, options.toString());
+    tbl.getSourceOptions().setTableOption(newOptions);
+  }
+
 	private String getIOTIncludedColumn(String owner, String tableName, String pkIndexName)
 	{
 		PreparedStatement pstmt = null;
@@ -1069,7 +1125,7 @@ public class OracleTableSourceBuilder
     }
     else
     {
-      List<IndexDefinition> indexDef = getIndexReader().getTableIndexList(table);
+      List<IndexDefinition> indexDef = getIndexReader().getTableIndexList(table, true);
       List<IndexDefinition> toCreate = indexDef.stream().filter(idx -> !idx.isPrimaryKeyIndex()).collect(Collectors.toList());
       indexDDL = getIndexReader().getIndexSource(table, toCreate);
     }
