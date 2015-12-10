@@ -79,7 +79,7 @@ public class OracleDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
     List<DbObject> objects = retrieveObjects(connection, base, searchUsedSql);
-    DbObjectSorter.sort(objects);
+    DbObjectSorter.sort(objects, true);
 
     // remove the entry with the the table that is created for the MVIEW
     if (base.getObjectType().equals(DbMetadata.MVIEW_NAME))
@@ -95,7 +95,7 @@ public class OracleDependencyReader
     if (base == null || connection == null) return Collections.emptyList();
 
     List<DbObject> objects = retrieveObjects(connection, base, searchUsedBySql);
-    DbObjectSorter.sort(objects);
+    DbObjectSorter.sort(objects, true);
     return objects;
   }
 

@@ -753,7 +753,7 @@ public class TreeLoader
     TableIdentifier info = getParentInfo(trgNode);
     TriggerReader reader = TriggerReaderFactory.createReader(connection);
     List<TriggerDefinition> triggers = reader.getTriggerList(info.getRawCatalog(), info.getRawSchema(), null);
-    DbObjectSorter.sort(triggers);
+    DbObjectSorter.sort(triggers, DbExplorerSettings.useNaturalSort());
 
     for (TriggerDefinition trg : triggers)
     {
@@ -782,7 +782,7 @@ public class TreeLoader
 
     TableIdentifier tbl = (TableIdentifier)dbo;
     List<TriggerDefinition> triggers = reader.getTriggerList(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
-    DbObjectSorter.sort(triggers);
+    DbObjectSorter.sort(triggers, DbExplorerSettings.useNaturalSort());
 
     for (TriggerDefinition trg : triggers)
     {
@@ -809,7 +809,7 @@ public class TreeLoader
 
     TableIdentifier tbl = (TableIdentifier)dbo;
     List<IndexDefinition> indexes = meta.getIndexReader().getTableIndexList(tbl, false);
-    DbObjectSorter.sort(indexes);
+    DbObjectSorter.sort(indexes, DbExplorerSettings.useNaturalSort());
 
     for (IndexDefinition idx : indexes)
     {

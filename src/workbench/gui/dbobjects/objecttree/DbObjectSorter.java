@@ -35,17 +35,22 @@ import workbench.util.StringUtil;
 public class DbObjectSorter
   implements Comparator<DbObject>
 {
-  public static final DbObjectSorter INSTANCE = new DbObjectSorter();
-
   private boolean includeType;
+  private boolean useNaturalSort;
 
-  public DbObjectSorter()
+  public DbObjectSorter(boolean naturalSort)
   {
+    useNaturalSort = naturalSort;
   }
 
   public void setIncludeType(boolean flag)
   {
     this.includeType = flag;
+  }
+
+  public void setUseNaturalSort(boolean flag)
+  {
+    this.useNaturalSort = flag;
   }
 
   @Override
@@ -68,12 +73,16 @@ public class DbObjectSorter
     // types are the same, so sort by name (and only by name
     String name1 = SqlUtil.removeObjectQuotes(o1.getObjectName());
     String name2 = SqlUtil.removeObjectQuotes(o2.getObjectName());
-    return StringUtil.naturalCompare(name1, name2, true);
+    if (useNaturalSort)
+    {
+      return StringUtil.naturalCompare(name1, name2, true);
+    }
+    return StringUtil.compareStrings(name1, name2, true);
   }
 
-  public static void sort(List<? extends DbObject> objects)
+  public static void sort(List<? extends DbObject> objects, boolean useNaturalSort)
   {
     if (objects == null) return;
-    Collections.sort(objects, INSTANCE);
+    Collections.sort(objects, new DbObjectSorter(useNaturalSort));
   }
 }

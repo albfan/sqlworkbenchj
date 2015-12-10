@@ -206,7 +206,7 @@ public class SqlServerDependencyReader
       SqlUtil.closeAll(rs, pstmt);
     }
 
-    DbObjectSorter.sort(result);
+    DbObjectSorter.sort(result, true);
     return result;
   }
 

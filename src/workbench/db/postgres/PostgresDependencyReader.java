@@ -128,8 +128,7 @@ public class PostgresDependencyReader
       }
     }
 
-    DbObjectSorter sorter = new DbObjectSorter();
-    Collections.sort(objects, sorter);
+    DbObjectSorter.sort(objects, true);
 
     return objects;
   }
@@ -153,7 +152,7 @@ public class PostgresDependencyReader
       }
     }
 
-    DbObjectSorter.sort(objects);
+    DbObjectSorter.sort(objects, true);
 
     return objects;
   }

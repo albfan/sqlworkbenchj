@@ -136,7 +136,7 @@ public class HsqlDependencyReader
       SqlUtil.closeAll(rs, pstmt);
     }
 
-    DbObjectSorter.sort(result);
+    DbObjectSorter.sort(result, true);
     return result;
   }
 
