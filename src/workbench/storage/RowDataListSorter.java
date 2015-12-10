@@ -28,6 +28,7 @@ import java.util.Locale;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  * A class to sort a RowDataList
@@ -39,6 +40,7 @@ public class RowDataListSorter
 	private SortDefinition definition;
 	private Collator defaultCollator;
 	private boolean ignoreCase;
+  private boolean naturalSort;
 
 	public RowDataListSorter(SortDefinition sortDef)
 	{
@@ -58,6 +60,11 @@ public class RowDataListSorter
 		this.definition = new SortDefinition(columns, order);
 		initCollator();
 	}
+
+  public void setUseNaturalSort(boolean flag)
+  {
+    this.naturalSort = flag;
+  }
 
 	public void setIgnoreCase(boolean flag)
 	{
@@ -107,18 +114,22 @@ public class RowDataListSorter
 		}
 
 		// Special handling for String columns
-		if (defaultCollator != null)
-		{
-			if (o1 instanceof String && o2 instanceof String)
-			{
-				return defaultCollator.compare(o1, o2);
-			}
-		}
 
-		if (ignoreCase && (o1 instanceof String && o2 instanceof String))
-		{
-			return ((String)o1).compareToIgnoreCase((String)o2);
-		}
+    if (o1 instanceof String && o2 instanceof String)
+    {
+      if (defaultCollator != null)
+      {
+        return defaultCollator.compare(o1, o2);
+      }
+      if (naturalSort)
+      {
+        return StringUtil.naturalCompare((String)o1, (String)o2, ignoreCase);
+      }
+      else
+      {
+        return StringUtil.compareStrings((String)o1, (String)o2, ignoreCase);
+  		}
+    }
 
 		int result = 0;
 		try

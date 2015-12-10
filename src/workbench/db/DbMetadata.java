@@ -1504,6 +1504,7 @@ public class DbMetadata
 			{
 				TableListSorter sorter = new TableListSorter(sort);
 				sorter.setSortMViewAsTable(sortMViewAsTable);
+        sorter.setUseNaturalSort(useNaturalSort);
 				return sorter;
 			}
 		};
@@ -1590,17 +1591,14 @@ public class DbMetadata
 
 			long start = System.currentTimeMillis();
 
-			// if the types are cleaned up, an empty array can be returned
-			// in that case this means that only non-native types are requested
-			// which are handled by one of the extenders. In that case there is no
-			// need to call getTables()
+			// getTables() only needs to be called if the types array is not empty after cleaning it up
+      // If it is empty, only non-native types are requested and they are handled by the extenders
 			if (typesToUse == null || typesToUse.length > 0)
 			{
 				tableRs = metaData.getTables(escapedCatalog, escapedSchema, escapedNamePattern, typesToUse);
 				if (tableRs == null)
 				{
 					LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
-					return result;
 				}
 			}
 
@@ -2317,7 +2315,7 @@ public class DbMetadata
     if (isExtendedTableType(objectType)) return true;
     if (isViewType(objectType)) return true;
     if (objectType.equals(MVIEW_NAME)) return true;
-    
+
 		for (ObjectListExtender extender : extenders)
 		{
 			if (extender.handlesType(objectType))

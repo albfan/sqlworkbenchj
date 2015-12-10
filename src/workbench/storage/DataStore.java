@@ -118,6 +118,7 @@ public class DataStore
 	private boolean hasGeneratedKeys;
 	private long loadedAt;
 
+  protected boolean useNaturalSort;
 	private SortDefinition lastSort;
 
 	/**
@@ -319,6 +320,11 @@ public class DataStore
 			}
 		}
 	}
+
+  public void setUseNaturalSort(boolean flag)
+  {
+    useNaturalSort = flag;
+  }
 
 	public void setColumnSizes(int[] sizes)
 	{
@@ -2037,6 +2043,7 @@ public class DataStore
 		synchronized (this)
 		{
 			lastSort = new SortDefinition(col, ascending);
+      lastSort.setUseNaturalSort(useNaturalSort);
 			RowDataListSorter sorter = createSorter(lastSort);
 			sorter.sort(this.data);
 		}

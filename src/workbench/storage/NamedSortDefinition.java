@@ -40,6 +40,7 @@ public class NamedSortDefinition
 	private String[] sortColumns;
 	private boolean[] sortAscending;
 	private boolean ignoreCase;
+  private boolean naturalSort;
 
 	public NamedSortDefinition(String[] columnNames, boolean[] ascending)
 	{
@@ -72,6 +73,7 @@ public class NamedSortDefinition
 				}
 			}
 			ignoreCase = sort.getIgnoreCase();
+      naturalSort = sort.useNaturalSort();
 		}
 	}
 
@@ -80,6 +82,16 @@ public class NamedSortDefinition
 		if (sortColumns == null) return 0;
 		return sortColumns.length;
 	}
+
+  public void setUseNaturalSort(boolean flag)
+  {
+    naturalSort = flag;
+  }
+  
+  public boolean useNaturalSort()
+  {
+    return naturalSort;
+  }
 
 	public boolean getIgnoreCase()
 	{
@@ -114,6 +126,7 @@ public class NamedSortDefinition
 
 		SortDefinition sort = new SortDefinition(columns, sortAscending);
 		sort.setIgnoreCase(ignoreCase);
+    sort.setUseNaturalSort(naturalSort);
 		return sort;
 	}
 

@@ -142,6 +142,7 @@ import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
 import static workbench.storage.NamedSortDefinition.*;
+import workbench.storage.SortDefinition;
 
 
 /**
@@ -1188,6 +1189,7 @@ public class TableListPanel
 			{
 				ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, types);
 			}
+      ds.setUseNaturalSort(DbExplorerSettings.useNaturalSort());
 			dbConnection.getObjectCache().addTableList(ds, currentSchema);
 			tableList.setOriginalOrder(ds);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
@@ -1207,7 +1209,9 @@ public class TableListPanel
 			}
 			else
 			{
-				model.setSortDefinition(DbMetadata.getTableListSort());
+        SortDefinition sort = DbMetadata.getTableListSort();
+        sort.setUseNaturalSort(DbExplorerSettings.useNaturalSort());
+				model.setSortDefinition(sort);
 			}
 
 			// Make sure some columns are not modified by the user
@@ -1478,6 +1482,7 @@ public class TableListPanel
 		if (sortString != null)
 		{
 			savedSort = parseDefinitionString(sortString);
+      savedSort.setUseNaturalSort(DbExplorerSettings.useNaturalSort());
 		}
 	}
 

@@ -756,22 +756,28 @@ public class OracleTableSourceBuilder
 
 		PkDefinition pk = def == null ? table.getPrimaryKey() : def;
 
+		IndexDefinition pkIdx = pk.getPkIndexDefinition();
+
 		// The name used by the index is not necessarily the same as the one used by the constraint.
 		String pkIndexName = pk.getPkIndexName();
 
-		boolean pkEnabled = pk.isEnabled() != null ? pk.isEnabled().booleanValue() : true;
-		IndexDefinition pkIdx = null;
-
-		if (pkEnabled)
+		if (pkIdx == null)
 		{
 			pkIdx = getIndexDefinition(table, pkIndexName);
+      pk.setPkIndexDefinition(pkIdx);
 		}
+
+    String pkStatusVerb = "";
+    if (pk.isDisabled())
+    {
+      pkStatusVerb = " DISABLE";
+    }
 
 		boolean pkIdxReverse = pkIdx != null && REV_IDX_TYPE.equals(pkIdx.getIndexType());
 
-		if (!pkEnabled || pkIdx == null )
+		if (pkIdx == null)
 		{
-			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, " DISABLE");
+			sql = sql.replace(" " + INDEX_USAGE_PLACEHOLDER, pkStatusVerb);
 		}
 		else if (pkIndexName.equals(pk.getPkName()) && !pkIdx.isPartitioned())
 		{
@@ -800,8 +806,10 @@ public class OracleTableSourceBuilder
 			using.append("\n   USING INDEX (\n     ");
 			using.append(SqlUtil.trimSemicolon(indexSql).trim().replace("\n", "\n  "));
 			using.append("\n   )");
+      using.append(pkStatusVerb);
 			sql = sql.replace(INDEX_USAGE_PLACEHOLDER, using);
 		}
+
 		return sql;
 	}
 

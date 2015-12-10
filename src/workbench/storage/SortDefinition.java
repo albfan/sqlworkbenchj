@@ -39,6 +39,7 @@ public class SortDefinition
 	private boolean[] sortAscending;
 	private int[] sortColumns;
 	private boolean ignoreCase;
+  private boolean naturalSort;
 
 	public SortDefinition()
 	{
@@ -57,6 +58,16 @@ public class SortDefinition
 		System.arraycopy(columns, 0, sortColumns, 0, columns.length);
 		System.arraycopy(ascending, 0, sortAscending, 0, ascending.length);
 	}
+
+  public boolean useNaturalSort()
+  {
+    return naturalSort;
+  }
+
+  public void setUseNaturalSort(boolean flag)
+  {
+    this.naturalSort = flag;
+  }
 
 	public void setIgnoreCase(boolean ignoreCase)
 	{

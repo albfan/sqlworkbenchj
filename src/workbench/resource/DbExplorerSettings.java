@@ -422,4 +422,9 @@ public class DbExplorerSettings
   {
     Settings.getInstance().setProperty("workbench.dbexplorer.sqlscript.separator", flag);
   }
+
+  public static boolean useNaturalSort()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.dbexplorer.sort.natural", true);
+  }
 }

@@ -204,6 +204,42 @@ public class OracleTableDefinitionReaderTest
 		assertEquals(Types.TIMESTAMP, columns.get(0).getDataType());
 	}
 
+  @Test
+  public void testIdentityColumns()
+    throws Exception
+  {
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+		if (!JdbcUtils.hasMinimumServerVersion(con, "12.1"))
+		{
+			System.out.println("No Oracle 12 detected. Skipping test for identity columns");
+			return;
+		}
+
+		try
+		{
+      String sql =
+        "create table id_test\n" +
+        "(\n" +
+        "  id integer generated always as identity \n" +
+        ");";
+
+			TestUtil.executeScript(con, sql);
+			TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("ID_TEST"));
+			assertNotNull(def);
+			List<ColumnIdentifier> columns = def.getColumns();
+			assertNotNull(columns);
+			assertEquals(1, columns.size());
+			ColumnIdentifier id = columns.get(0);
+			assertEquals("ID", id.getColumnName());
+			assertEquals("GENERATED ALWAYS AS IDENTITY", id.getComputedColumnExpression());
+		}
+		finally
+		{
+			TestUtil.executeScript(con, "drop table id_test");
+		}
+  }
+
 	@Test
 	public void testVirtualColumns()
 		throws Exception

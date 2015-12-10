@@ -330,22 +330,22 @@ from syscat.triggers</string>
    <object id="list_oracle_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
-       SELECT trigger_name,
-              case
-                when trigger_type like 'BEFORE%' then 'BEFORE'
-                when trigger_type like 'AFTER%' then 'AFTER'
-                else trigger_type
-              end as trigger_type,
-              triggering_event as trigger_event,
-              table_name,
-              '' as remarks,
-              status,
-              case
-                when trigger_type like '%ROW' then 'ROW'
-                when trigger_type like '%STATEMENT' then 'STATEMENT'
-              end as trigger_level
-      FROM all_triggers
-      WHERE trigger_name not like 'BIN$%'
+SELECT trigger_name,
+       case
+         when trigger_type like 'BEFORE%' then 'BEFORE'
+         when trigger_type like 'AFTER%' then 'AFTER'
+         else trigger_type
+       end as trigger_type,
+       triggering_event as trigger_event,
+       table_name,
+       '' as remarks,
+       status,
+       case
+         when trigger_type like '%ROW' then 'ROW'
+         when trigger_type like '%STATEMENT' then 'STATEMENT'
+       end as trigger_level
+FROM all_triggers
+WHERE trigger_name not like 'BIN$%'
     </string>
     </void>
     <void property="objectNameField">

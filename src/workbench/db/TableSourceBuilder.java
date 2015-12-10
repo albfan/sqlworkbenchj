@@ -435,9 +435,7 @@ public class TableSourceBuilder
 		{
 			if (index.isPrimaryKeyIndex())
 			{
-				pk.setIndexType(index.getIndexType());
-				pk.setEnabled(index.isEnabled());
-				pk.setValidated(index.isValidated());
+        pk.setPkIndexDefinition(index);
 			}
 		}
 	}

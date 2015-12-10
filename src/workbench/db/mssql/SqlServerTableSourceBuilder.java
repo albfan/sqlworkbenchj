@@ -56,7 +56,7 @@ public class SqlServerTableSourceBuilder
 		}
 		String sql = pkSource.toString();
 
-		String type = pk.getIndexType();
+		String type = pk.getPkIndexDefinition().getIndexType();
 		String clustered = "CLUSTERED";
 		if ("NORMAL".equals(type))
 		{

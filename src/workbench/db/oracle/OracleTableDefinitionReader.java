@@ -134,6 +134,8 @@ public class OracleTableDefinitionReader
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 
+    boolean hasIdentity = false;
+
     long start = System.currentTimeMillis();
 
 		try
@@ -181,6 +183,7 @@ public class OracleTableDefinitionReader
 
 				String identity = rs.getString("IDENTITY_COLUMN");
 				boolean isIdentity = "YES".equalsIgnoreCase(identity);
+        hasIdentity = hasIdentity || isIdentity;
 
 				String virtual = rs.getString("VIRTUAL_COLUMN");
 				boolean isVirtual = StringUtil.stringToBool(virtual);
@@ -193,18 +196,6 @@ public class OracleTableDefinitionReader
 				if (isVirtual && sqlType != Types.OTHER)
 				{
 					String exp = "GENERATED ALWAYS AS (" + defaultValue + ")";
-					col.setComputedColumnExpression(exp);
-				}
-				else if (isIdentity)
-				{
-					String type = rs.getString("GENERATION_TYPE");
-					String exp = "GENERATED " + type + " AS IDENTITY";
-					String options = rs.getString("IDENTITY_OPTIONS");
-					String addOptions = getIdentitySequenceOptions(options);
-					if (addOptions != null)
-					{
-						exp += " " + addOptions;
-					}
 					col.setComputedColumnExpression(exp);
 				}
 				else
@@ -237,8 +228,94 @@ public class OracleTableDefinitionReader
       long duration = System.currentTimeMillis() - start;
       LogMgr.logDebug("OracleTableDefinitionReader.getTableColumns()", "Retrieving table columns for " + table.getTableExpression() + " took " + duration + "ms");
 		}
+
+    if (hasIdentity)
+    {
+      retrieveIdentityColumns(columns, schema, tablename);
+    }
+
 		return columns;
 	}
+
+  private void retrieveIdentityColumns(List<ColumnIdentifier> columns, String owner, String table)
+  {
+    boolean useUserTables = OracleUtils.optimizeCatalogQueries() && currentUser.equalsIgnoreCase(owner);
+
+    String sql =
+      "-- SQL Workbench \n" +
+      "select column_name,  generation_type,  identity_options\n";
+
+    if (useUserTables)
+    {
+      sql +=
+        "from user_tab_identity_cols \n" +
+        "where table_name = ? ";
+    }
+    else
+    {
+      sql +=
+        "from all_tab_identity_cols \n" +
+        "where table_name = ? \n" +
+        "  and owner = ? ";
+    }
+
+		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleTableDefinitionReader.retrieveIdentityColumns()", "Retrieving identity columns for " + owner + "." + table + " using:\n" +
+        SqlUtil.replaceParameters(sql, table, owner));
+		}
+
+    long start = System.currentTimeMillis();
+
+    try
+		{
+      pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, table);
+      if (!useUserTables)
+      {
+        pstmt.setString(2, owner);
+      }
+			rs = pstmt.executeQuery();
+      while (rs.next())
+      {
+        String column = rs.getString("column_name");
+        ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, column);
+        if (col != null)
+        {
+          String type = rs.getString("GENERATION_TYPE");
+          String exp = "GENERATED " + type + " AS IDENTITY";
+          String options = rs.getString("IDENTITY_OPTIONS");
+          String addOptions = getIdentitySequenceOptions(options);
+          if (addOptions != null)
+          {
+            exp += " " + addOptions;
+          }
+          col.setComputedColumnExpression(exp);
+          col.setDefaultValue(null);
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("OracleTableDefinitionReader.retrieveIdentityColumns()", "Could not retrieve identity column information using: \n" +
+        SqlUtil.replaceParameters(sql, table, owner), ex);
+    }
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("OracleTableDefinitionReader.retrieveIdentityColumns()",
+        "Retrieving identity information for " + owner + "." + table + " took " + duration + "ms");
+		}
+
+  }
 
 	private String getIdentitySequenceOptions(String options)
 	{
@@ -353,12 +430,6 @@ public class OracleTableDefinitionReader
 				"          when data_type <> 'XMLTYPE' and DATA_TYPE_OWNER is null THEN t.virtual_column \n" +
 				"          else 'NO' \n" +
 				"      end as virtual_column ";
-			if (is12c)
-			{
-				sql2 += ",\n" +
-				"     ic.generation_type, \n" +
-				"     ic.identity_options ";
-			}
 		}
 		else
 		{
@@ -373,13 +444,6 @@ public class OracleTableDefinitionReader
 		else
 		{
 			sql2 += (useUserTables ? "\nFROM user_tab_columns t" : "\nFROM all_tab_columns t");
-		}
-		if (is12c)
-		{
-			sql2 +=
-        (useUserTables ?
-          "\n  LEFT JOIN user_tab_identity_cols ic ON ic.table_name = t.table_Name and ic.column_name = t.column_name " :
-          "\n  LEFT JOIN all_tab_identity_cols ic ON ic.owner = t.owner and ic.table_name = t.table_Name and ic.column_name = t.column_name ");
 		}
 
 		String where = "\nWHERE t.table_name = ? \n";
@@ -433,7 +497,8 @@ public class OracleTableDefinitionReader
 		if (!useUserTables) stmt.setString(2, schema);
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("OracleTableDefinitionReader.prepareColumnsStatement()", "Retrieving table columns for " + table + " using:\n" + sql);
+			LogMgr.logDebug("OracleTableDefinitionReader.prepareColumnsStatement()", "Retrieving table columns for " + table + " using:\n" +
+        SqlUtil.replaceParameters(sql, table, schema));
 		}
 		return stmt;
 	}

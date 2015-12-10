@@ -212,7 +212,10 @@ public class JdbcIndexReader
 			{
 				pk = new PkDefinition(getPkName(pkName, pkIndexName, tbl), cols);
 				pk.setPkIndexName(pkIndexName);
-				pk.setEnabled(isStatusEnabled(pkStatus));
+        if (pkStatus != null)
+        {
+          pk.setEnabled(isStatusEnabled(pkStatus));
+        }
 			}
 		}
 
@@ -249,7 +252,7 @@ public class JdbcIndexReader
 			{
 				LogMgr.logInfo("JdbcIndexreader.findPKFromIndexList()", "Using unique index " + idx.getObjectName() + " as a primary key");
 				PkDefinition pk = new PkDefinition(idx.getObjectName(), idx.getColumns());
-				pk.setIndexType(idx.getIndexType());
+				pk.setPkIndexDefinition(idx);
 				return pk;
 			}
 		}
@@ -953,7 +956,7 @@ public class JdbcIndexReader
 					index.setPrimaryKeyIndex(isPK);
 					if (isPK && pkIndex != null)
 					{
-						pkIndex.setIndexType(index.getIndexType());
+						pkIndex.setPkIndexDefinition(index);
 					}
 					if (isPK) break;
 				}
