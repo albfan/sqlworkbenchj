@@ -71,6 +71,8 @@ import workbench.db.SourceStatementsHelp;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.dependency.DependencyReader;
+import workbench.db.dependency.DependencyReaderFactory;
 import workbench.db.objectcache.SourceCache;
 import workbench.db.oracle.OraclePackageParser;
 
@@ -124,7 +126,8 @@ public class ProcedureListPanel
 	private QuickFilterPanel findPanel;
 	private DbObjectTable procList;
 	private WbTable procColumns;
-	protected DbObjectSourcePanel source;
+	private DbObjectSourcePanel source;
+  private ObjectDependencyPanel dependencyPanel;
 	private JTabbedPane displayTab;
 	private JPanel statusPanel;
 	private FlatButton alterButton;
@@ -276,6 +279,8 @@ public class ProcedureListPanel
 			workspaceSettings = null;
 		}
 
+    addDependencyPanelIfSupported();
+
     Settings.getInstance().addPropertyChangeListener(this, DbExplorerSettings.PROP_ALLOW_SOURCE_EDITING);
 	}
 
@@ -290,6 +295,10 @@ public class ProcedureListPanel
 		if (source != null) source.dispose();
 		WbAction.dispose(compileAction, renameAction);
 		if (findPanel != null) findPanel.dispose();
+    if (dependencyPanel != null)
+    {
+      dependencyPanel.dispose();
+    }
     Settings.getInstance().removePropertyChangeListener(this);
 	}
 
@@ -380,6 +389,10 @@ public class ProcedureListPanel
       procList.reset();
       procColumns.reset();
       source.reset();
+      if (dependencyPanel != null)
+      {
+        dependencyPanel.reset();
+      }
     });
 	}
 
@@ -395,7 +408,28 @@ public class ProcedureListPanel
 		}
 		if (validator != null) this.validator.setConnection(dbConnection);
 		if (renameAction != null) this.renameAction.setConnection(dbConnection);
+    addDependencyPanelIfSupported();
 	}
+
+  private void addDependencyPanelIfSupported()
+  {
+    if (dbConnection == null) return;
+    if (!initialized) return;
+
+    DependencyReader reader = DependencyReaderFactory.getReader(dbConnection);
+    if (reader != null)
+    {
+      WbSwingUtilities.invoke( () ->
+      {
+        if (dependencyPanel == null)
+        {
+          dependencyPanel = new ObjectDependencyPanel();
+        }
+        dependencyPanel.setConnection(dbConnection);
+        displayTab.add(ResourceMgr.getString("TxtDeps"), dependencyPanel);
+      });
+    }
+  }
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
 		throws Exception
@@ -469,6 +503,10 @@ public class ProcedureListPanel
         infoLabel.showObjectListInfo(model);
         procList.setModel(model, true);
       });
+      if (displayTab.getSelectedComponent() == dependencyPanel)
+      {
+        dependencyPanel.doLoad();
+      }
 			shouldRetrieve = false;
 		}
 		catch (LowMemoryException mem)
@@ -803,6 +841,11 @@ public class ProcedureListPanel
 		}
 
     source.appendDelimiter(dbConnection);
+
+    if (dependencyPanel != null)
+    {
+      dependencyPanel.setCurrentObject(def);
+    }
 
 		final int pos = findOracleProcedureInPackage(sql, def);
 

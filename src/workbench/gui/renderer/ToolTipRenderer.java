@@ -25,6 +25,7 @@ package workbench.gui.renderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -257,15 +258,22 @@ public class ToolTipRenderer
 	public Component getTableCellRendererComponent(JTable table, Object value,	boolean selected,	boolean focus, int row, int col)
 	{
 		initDisplay(table, value, selected, focus, row, col);
-		this.setFont(table.getFont());
+
+    Font f = table.getFont();
 
 		if (value != null)
 		{
+      setFont(f);
 			prepareDisplay(value);
 		}
 		else
 		{
-			this.displayValue = rendererSetup.nullString;
+      if (rendererSetup.nullFontStyle > 0 && rendererSetup.nullString != null)
+      {
+        f = f.deriveFont(rendererSetup.nullFontStyle);
+      }
+      setFont(f);
+			displayValue = rendererSetup.nullString;
 			setTooltip(null);
 		}
 
@@ -349,7 +357,8 @@ public class ToolTipRenderer
 		int w = this.getWidth();
 		int h = this.getHeight();
 
-		FontMetrics fm = getFontMetrics(getFont());
+    Font f = getFont();
+		FontMetrics fm = getFontMetrics(f);
 
 		Insets insets;
 
@@ -390,6 +399,7 @@ public class ToolTipRenderer
 			g2d.addRenderingHints(renderingHints);
 		}
 
+    g.setFont(f);
 		g.setColor(getBackgroundColor());
 		g.fillRect(0,0,w,h);
 		g.setColor(getForegroundColor());

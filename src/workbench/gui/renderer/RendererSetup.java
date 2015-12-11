@@ -39,6 +39,7 @@ public class RendererSetup
 	Color nullColor;
 	Color modifiedColor;
 	String nullString;
+  int nullFontStyle;
 
 	public RendererSetup()
 	{
@@ -54,6 +55,7 @@ public class RendererSetup
 			nullColor = GuiSettings.getNullColor();
 			modifiedColor = null;
 			nullString = GuiSettings.getDisplayNullString();
+      nullFontStyle = GuiSettings.getDisplayNullFontStyle();
 		}
 		else
 		{
@@ -62,6 +64,7 @@ public class RendererSetup
 			nullColor = null;
 			modifiedColor = null;
 			nullString = null;
+      nullFontStyle = 0;
 		}
 	}
 
@@ -70,6 +73,7 @@ public class RendererSetup
 		RendererSetup setup = new RendererSetup(true);
 		setup.nullColor = null;
 		setup.nullString = null;
+    setup.nullFontStyle = 0;
 		return setup;
 	}
 

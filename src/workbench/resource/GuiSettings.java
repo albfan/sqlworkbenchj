@@ -837,6 +837,29 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.savebutton.always.enabled", false);
 	}
 
+  /**
+   * Return the style transformation to be used to display the NULL string.
+   *
+   * Valid values are:
+   * 
+   * <ul>
+   * <li>0 = No style change</li>
+   * <li>1 = Font.ITALIC</li>
+   * <li>2 = Font.BOLD</li>
+   * <li>3 = Font.BOLD + Font.ITALIC</li>
+   * </ul>
+   * @return the style to be used for Font.deriveFont()
+   */
+	public static int getDisplayNullFontStyle()
+	{
+    // 1 = Font.ITALIC
+    // 2 = Font.BOLD
+    // 3 = Bold + Italic
+		int style = Settings.getInstance().getIntProperty("workbench.gui.renderer.null.fontstyle", 0);
+    if (style < 0 || style > 3) return 0;
+    return style;
+	}
+
 	public static String getDisplayNullString()
 	{
 		return Settings.getInstance().getProperty("workbench.gui.renderer.nullstring", null);

@@ -384,7 +384,7 @@ public class OracleProcedureReader
 		// so an outer join against ALL_OBJECTS is necessary
 		String standardProcs =
       "-- SQL Workbench \n" +
-      "select /*+ result_cache */ null as package_name,   \n" +
+      "select " + OracleUtils.getCacheHint() + "null as package_name,   \n" +
       "       ao.owner as procedure_owner,   \n" +
       "       ao.object_name as procedure_name,  \n" +
       "       null as overload_index,  \n" +
@@ -409,7 +409,7 @@ public class OracleProcedureReader
 
 		String pkgProcs =
       "-- SQL Workbench \n" +
-			"select /*+ result_cache */ aa.package_name,  \n" +
+			"select " + OracleUtils.getCacheHint() + "aa.package_name,  \n" +
 			"       ao.owner as procedure_owner,  \n" +
 			"       aa.object_name as procedure_name,  \n" +
 			"       aa.overload as overload_index,  \n" +

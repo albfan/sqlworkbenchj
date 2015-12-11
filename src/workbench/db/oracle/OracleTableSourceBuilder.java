@@ -134,7 +134,7 @@ public class OracleTableSourceBuilder
 
 		String sql =
       "-- SQL Workbench \n" +
-			"select " + OracleUtils.getCacheHint() + " atb.tablespace_name, \n" +
+			"select " + OracleUtils.getCacheHint() + "atb.tablespace_name, \n" +
 			"       atb.degree, \n" +
 			"       atb.row_movement, \n" +
 			"       atb.temporary, \n" +
@@ -159,9 +159,9 @@ public class OracleTableSourceBuilder
 			"       fat.flashback_archive_name, \n" :
 			"       null as flashback_archive_name, \n") +
 			(supportsCompression ?
-			"       atb.compression, \n " +
-			"       atb.compress_for \n " :
-			"       null as compression, \n       null as compress_for \n ") +
+			"       atb.compression, \n" +
+			"       atb.compress_for \n" :
+			"       null as compression,\n       null as compress_for \n") +
 			"from all_tables atb \n" +
 			archiveJoin +
 			"where atb.table_name = ? ";
@@ -366,6 +366,11 @@ public class OracleTableSourceBuilder
 			if (options.length() > 0) options.append('\n');
 			options.append("FLASHBACK ARCHIVE ");
 			options.append(dbConnection.getMetadata().quoteObjectname(archive));
+
+      if (Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_flashback", false))
+      {
+        retrieveFlashbackInfo(tbl);
+      }
 		}
 
 		if (includePartitions && isPartitioned)
@@ -386,11 +391,6 @@ public class OracleTableSourceBuilder
 		{
 			if (options.length() > 0) options.append('\n');
 			options.append(nested);
-		}
-
-		if (supportsArchives && Settings.getInstance().getBoolProperty("workbench.db.oracle.retrieve_flashback", false))
-		{
-			retrieveFlashbackInfo(tbl);
 		}
 
 		StringBuilder lobOptions = retrieveLobOptions(tbl, columns);
@@ -721,7 +721,7 @@ public class OracleTableSourceBuilder
 	 *
 	 * If the primary key is supported by an index that does not have the same name
 	 * as the primary key, it is assumed that the index is defined as an additional
-	 * option to the ADD CONSTRAINT SQL...
+	 * option to the "ADD CONSTRAINT" statement
 	 *
 	 * @param table        the table for which the PK source should be created
 	 * @param def          the definition of the primary key of the table
@@ -834,7 +834,7 @@ public class OracleTableSourceBuilder
 
 		String sql =
       "-- SQL Workbench \n" +
-			"select " + OracleUtils.getCacheHint() + " coalesce(atb.tablespace_name, pt.def_tablespace_name) as tablespace_name, \n" +
+			"select " + OracleUtils.getCacheHint() + "coalesce(atb.tablespace_name, pt.def_tablespace_name) as tablespace_name, \n" +
 			"       iot.tablespace_name as iot_overflow, \n" +
 			"       iot.table_name as overflow_table, \n" +
 			"       ac.index_name as pk_index_name, \n" +

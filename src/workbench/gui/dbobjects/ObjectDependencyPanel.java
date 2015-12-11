@@ -32,6 +32,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -41,13 +42,14 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.PackageDefinition;
+import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 import workbench.db.dependency.DependencyReaderFactory;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.actions.StopAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
@@ -79,6 +81,8 @@ public class ObjectDependencyPanel
 
 	private boolean isRetrieving;
   private WbSplitPane split;
+  private JLabel usingLabel;
+  private JLabel usedByLabel;
 
   public ObjectDependencyPanel()
   {
@@ -89,15 +93,16 @@ public class ObjectDependencyPanel
     split = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
 
     JPanel usesPanel = new JPanel(new BorderLayout());
-    usesPanel.add(createTitleLabel("TxtDepsUses"), BorderLayout.PAGE_START);
+    usingLabel = createTitleLabel("TxtDepsUses");
+    usesPanel.add(usingLabel, BorderLayout.PAGE_START);
     usedScroll = new JScrollPane(objectsUsed);
     usesPanel.add(usedScroll, BorderLayout.CENTER);
     split.setTopComponent(usesPanel);
 
     JPanel usingPanel = new JPanel(new BorderLayout());
-    JLabel lbl = createTitleLabel("TxtDepsUsedBy");
+    usedByLabel = createTitleLabel("TxtDepsUsedBy");
 
-    usingPanel.add(lbl, BorderLayout.PAGE_START);
+    usingPanel.add(usedByLabel, BorderLayout.PAGE_START);
     JScrollPane scroll2 = new JScrollPane(usedByObjects);
     usingPanel.add(scroll2, BorderLayout.CENTER);
     split.setBottomComponent(usingPanel);
@@ -108,6 +113,8 @@ public class ObjectDependencyPanel
     add(split, BorderLayout.CENTER);
 
     reload = new ReloadAction(this);
+    reload.setEnabled(false);
+
     WbToolbar toolbar = new WbToolbar();
     toolbar.add(reload);
     add(toolbar, BorderLayout.PAGE_START);
@@ -118,6 +125,8 @@ public class ObjectDependencyPanel
     JLabel title = new JLabel(ResourceMgr.getString(key));
     title.setOpaque(true);
     title.setBackground(Color.WHITE);
+    title.setIconTextGap((int)(IconMgr.getInstance().getSizeForLabel() / 2));
+    title.setHorizontalTextPosition(SwingConstants.LEADING);
     Font f = title.getFont();
     Font f2 = f.deriveFont(Font.BOLD);
     //title.setBorder();
@@ -141,6 +150,19 @@ public class ObjectDependencyPanel
   {
     currentObject = object;
     reset();
+    checkPackage();
+  }
+
+  private void checkPackage()
+  {
+    if (currentObject instanceof ProcedureDefinition)
+    {
+      ProcedureDefinition proc = (ProcedureDefinition)currentObject;
+      if (proc.isPackageProcedure())
+      {
+        currentObject = new PackageDefinition(proc.getSchema(), proc.getPackageName());
+      }
+    }
   }
 
   public void setConnection(WbConnection conn)
@@ -148,6 +170,7 @@ public class ObjectDependencyPanel
     reset();
     dbConnection = conn;
     reader = DependencyReaderFactory.getReader(dbConnection);
+    reload.setEnabled(true);
   }
 
   public void reset()
@@ -186,7 +209,10 @@ public class ObjectDependencyPanel
     try
     {
       isRetrieving = true;
+      reload.setEnabled(false);
+      WbSwingUtilities.showWaitCursor(this);
       final List<DbObject> using = reader.getUsedObjects(dbConnection, currentObject);
+
       EventQueue.invokeLater(new Runnable()
       {
         @Override
@@ -196,7 +222,7 @@ public class ObjectDependencyPanel
         }
       });
 
-      List<DbObject> used = reader.getUsedBy(dbConnection, currentObject);
+      final List<DbObject> used = reader.getUsedBy(dbConnection, currentObject);
 
       EventQueue.invokeLater(new Runnable()
       {
@@ -212,6 +238,8 @@ public class ObjectDependencyPanel
     }
     finally
     {
+      WbSwingUtilities.showDefaultCursor(this);
+      reload.setEnabled(true);
       isRetrieving = false;
     }
   }

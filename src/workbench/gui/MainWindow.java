@@ -2380,7 +2380,8 @@ public class MainWindow
 		for (int i=0; i < panelCount; i++)
 		{
 			JMenu view = this.getViewMenu(i);
-
+      if (view == null) continue;
+      
 			int count = view.getItemCount();
 			for (int k=0; k < count; k++)
 			{

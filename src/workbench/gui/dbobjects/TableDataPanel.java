@@ -124,7 +124,6 @@ public class TableDataPanel
 	private boolean autoloadRowCount = true;
 	private TableIdentifier table;
 	private TableDefinition tableDefinition;
-	private ImageIcon loadingIcon;
 	protected StopAction cancelRetrieve;
 	private List<DbExecutionListener> execListener;
 	private Savepoint currentSavepoint;
@@ -369,11 +368,7 @@ public class TableDataPanel
 
 	private ImageIcon getLoadingIndicator()
 	{
-		if (loadingIcon == null)
-		{
-			loadingIcon = IconMgr.getInstance().getLabelIcon("wait");
-		}
-		return loadingIcon;
+		return IconMgr.getInstance().getLabelIcon("wait");
 	}
 
 	public void dispose()

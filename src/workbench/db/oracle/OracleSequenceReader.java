@@ -90,7 +90,7 @@ public class OracleSequenceReader
 		StringBuilder sql = new StringBuilder(100);
 		sql.append(
 			"-- SQL Workbench \n" +
-      "select /*+ result_cache */ s.sequence_owner, \n" +
+      "select " + OracleUtils.getCacheHint() + "s.sequence_owner, \n" +
 			"       s.sequence_name, \n" +
 			"       s.min_value, \n" +
 			"       s.max_value, \n" +

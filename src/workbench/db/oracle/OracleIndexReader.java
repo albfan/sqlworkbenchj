@@ -402,7 +402,7 @@ public class OracleIndexReader
 
 		String base=
       "-- SQL Workbench \n" +
-			"SELECT " + OracleUtils.getCacheHint() + " i.index_name, e.column_expression, e.column_position \n" +
+			"SELECT " + OracleUtils.getCacheHint() + "i.index_name, e.column_expression, e.column_position \n" +
 			"FROM all_indexes i \n" +
 			"  JOIN all_ind_expressions e \n" +
 			"    ON i.index_name = e.index_name \n" +
@@ -556,7 +556,7 @@ public class OracleIndexReader
 
 		String sql =
       "-- SQL Workbench \n" +
-			"select /*+ result_cache */ null as table_cat,  \n" +
+			"select " + OracleUtils.getCacheHint() + "null as table_cat,  \n" +
 			"       cols.owner as table_schem,  \n" +
 			"       cols.table_name,  \n" +
 			"       cols.column_name,  \n" +

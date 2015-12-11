@@ -205,7 +205,7 @@ public class OracleUtils
   public static String getCacheHint()
   {
     boolean useResultCache = Settings.getInstance().getBoolProperty("workbench.db.oracle.metadata.result_cache", false);
-    return useResultCache ? "/*+ result_cache */" : StringUtil.EMPTY_STRING;
+    return useResultCache ? "/*+ result_cache */ " : StringUtil.EMPTY_STRING;
   }
 
 	public static boolean checkDefaultTablespace()

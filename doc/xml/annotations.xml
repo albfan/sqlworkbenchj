@@ -38,7 +38,7 @@ SELECT * FROM company;</programlisting>
     <section id="macro-menu-annotation">
       <title>Adding macros to the result's context menu</title>
       <para>
-        The annotation <literal>@WbMacro</literal> can be used to add macros to the context menu of the result.
+        The annotation <literal>@WbMacro</literal> can be used to add <link linkend="macros">macros</link> to the context menu of the result.
       </para>
       <para>
          When such a macro is executed, the values of all columns of the currently selected row will be defined
@@ -47,7 +47,7 @@ SELECT * FROM company;</programlisting>
       </para>
       <important>
         <para>
-          Variables which are defined through a macro menu will not be deleted after the macro has been executed.
+          Variables which are defined by invocation of a macro from this menu item will not be deleted after the macro has been executed.
         </para>
       </important>
       <para>

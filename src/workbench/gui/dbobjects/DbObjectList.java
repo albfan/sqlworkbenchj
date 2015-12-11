@@ -55,19 +55,22 @@ public interface DbObjectList
     public static List<TableIdentifier> getSelectedTableObjects(DbObjectList objectList)
     {
       if (objectList == null) return Collections.emptyList();
+
+      WbConnection conn = objectList.getConnection();
+      if (conn == null) return Collections.emptyList();
+
+      DbMetadata meta = conn.getMetadata();
+      if (meta == null) return Collections.emptyList();
+
       List<DbObject> objects = objectList.getSelectedObjects();
       if (CollectionUtil.isEmpty(objects)) return Collections.emptyList();
 
       List<TableIdentifier> tables = new ArrayList<>(objects.size());
-      if (objects != null)
+      for (DbObject dbo : objects)
       {
-        DbMetadata meta = objectList.getConnection().getMetadata();
-        for (DbObject dbo : objects)
+        if (dbo instanceof TableIdentifier && meta.objectTypeCanContainData(dbo.getObjectType()))
         {
-          if (dbo instanceof TableIdentifier && meta.objectTypeCanContainData(dbo.getObjectType()))
-          {
-            tables.add((TableIdentifier)dbo);
-          }
+          tables.add((TableIdentifier)dbo);
         }
       }
       return tables;
