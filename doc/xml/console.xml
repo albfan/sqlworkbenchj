@@ -247,8 +247,8 @@ SQL></screen>
 	<section id="console-manage-profiles">
 		<title>Managing connection profiles</title>
 		<para>
-			Connection profiles can be managed through several commands that are only available in console
-			mode.
+			Connection profiles can be managed through several &wb-productname; specific commands. They are primarily intended
+      to be used in console mode, but can also be used when running in GUI mode.
 		</para>
 
 		<section id="console-listprofiles">
@@ -313,6 +313,21 @@ SQL> </screen>
 					All profiles are automatically saved after executing <literal>WbStoreProfile</literal>.
 				</para>
 		</section>
+
+    <section id="console-createprofile">
+      <title>Create a new connection profile - WbCreateProfile</title>
+      <para>
+        <literal>WbCreateProfile</literal> can be used to create a new profile without an existing connection. It accepts
+        the same parameters as <link linkend="command-connect-descriptor-arg">WbConnect</link> plus an additional parameter to define
+        the name of the new profile.
+      </para>
+      <screen>SQL> WbCreateProfile -name="Postgres" -profileGroup=DBA -savePassword=true -username=postgres -password=secret
+..> -url=jdbc:postgresql://localhost/postgres
+..> -driver=org.postgresql.Driver
+..> -driverJar=c:/etc/libs/postgres/postgresql-9.4-1206-jdbc42.jar;
+Profile '{DBA}/Postgres' added
+SQL> </screen>
+    </section>
 
 	</section>
 

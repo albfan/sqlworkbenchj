@@ -264,6 +264,7 @@
         <listitem><simpara><link linkend="dbexp-options-remember-col-order">Saved column orders</link> from the DbExplorer(<filename>WbColumnOrder.xml</filename>)</simpara></listitem>
         <listitem><simpara>Log file (<filename>workbench.log</filename>)</simpara></listitem>
         <listitem><simpara>Workspace files (<filename>*.wksp</filename>)</simpara></listitem>
+        <listitem><simpara>The cache directory for the <link linkend="profile-local-completion-cache">code completion</link></simpara></listitem>
       </itemizedlist>
     </para>
 

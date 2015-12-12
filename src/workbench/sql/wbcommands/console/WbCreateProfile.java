@@ -60,6 +60,8 @@ public class WbCreateProfile
 		cmdLine.addArgument(WbStoreProfile.ARG_SAVE_PASSWORD, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_CONN_AUTOCOMMIT);
 		cmdLine.addArgument(AppArguments.ARG_CONN_DRIVER_CLASS);
+		cmdLine.addArgument(AppArguments.ARG_CONN_DRIVER);
+		cmdLine.addArgument(AppArguments.ARG_CONN_JAR);
 		cmdLine.addArgument(AppArguments.ARG_CONN_PWD);
 		cmdLine.addArgument(AppArguments.ARG_CONN_URL);
 		cmdLine.addArgument(AppArguments.ARG_CONN_USER);
@@ -80,18 +82,6 @@ public class WbCreateProfile
 	}
 
 	@Override
-	protected boolean isConnectionRequired()
-	{
-		return false;
-	}
-
-	@Override
-	public String getVerb()
-	{
-		return VERB;
-	}
-
-	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
 	{
@@ -101,8 +91,7 @@ public class WbCreateProfile
 		String name = cmdLine.getValue(WbStoreProfile.ARG_PROFILE_NAME);
 		if (StringUtil.isBlank(name))
 		{
-			result.addMessage("Profile name required");
-			result.setFailure();
+			result.addErrorMessageByKey("ErrNoProfile");
 			return result;
 		}
 
@@ -115,70 +104,26 @@ public class WbCreateProfile
 			profile = parser.parseDefinition(descriptor, null);
 		}
 
-		if (profile == null)
-		{
-			String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
-			String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
+    if (profile == null)
+    {
+      profile = ConnectionProfile.createEmptyProfile();
 
-			profile = ConnectionProfile.createEmptyProfile();
-			String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
-			if (StringUtil.isBlank(user))
-			{
-				user = cmdLine.getValue("user");
-			}
-			String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
-			profile.setUrl(url);
-			profile.setUsername(user);
+      String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
+      String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
+      String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
 
-			if (StringUtil.isNonBlank(pwd))
-			{
-				profile.setPassword(pwd);
-				profile.setStorePassword(true);
-			}
-			else
-			{
-				profile.setStorePassword(false);
-			}
+      if (StringUtil.isBlank(user))
+      {
+        user = cmdLine.getValue("user");
+      }
 
-			String drvName = cmdLine.getValue(ARG_DRV_NAME);
-			if (drvName != null)
-			{
-				List<DbDriver> drivers = ConnectionMgr.getInstance().getDrivers();
-				DbDriver drv = null;
-				for (DbDriver dbDriver : drivers)
-				{
-					if (dbDriver.getName().equalsIgnoreCase(drvName))
-					{
-						drv = dbDriver;
-						break;
-					}
-				}
-				if (drv != null)
-				{
-					profile.setDriver(drv);
-				}
-			}
-			else if (driverclass != null)
-			{
-				DbDriver drv = ConnectionMgr.getInstance().findDriver(driverclass);
-				if (drv != null)
-				{
-					profile.setDriver(drv);
-					profile.setDriverName(null);
-				}
-			}
-			else
-			{
-				driverclass = ConnectionDescriptor.findDriverClassFromUrl(url);
-				DbDriver drv = ConnectionMgr.getInstance().findDriver(driverclass);
-				if (drv != null)
-				{
-					profile.setDriver(drv);
-					profile.setDriverName(null);
-				}
-			}
+      profile.setUrl(url);
+      profile.setUsername(user);
+      profile.setPassword(pwd);
+    }
 
-		}
+    DbDriver drv = getDriverFromCommandline();
+    profile.setDriver(drv);
 
 		profile.setTemporaryProfile(false);
 
@@ -188,8 +133,8 @@ public class WbCreateProfile
 		boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_CONN_TRIM_CHAR, false);
 		boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
 		boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
-
 		boolean savePwd = cmdLine.getBoolean(WbStoreProfile.ARG_SAVE_PASSWORD, true);
+
 		profile.setStorePassword(savePwd);
 		profile.setAutocommit(commit);
 		profile.setStoreExplorerSchema(false);
@@ -213,14 +158,98 @@ public class WbCreateProfile
 
 		ConnectionMgr.getInstance().addProfile(profile);
 		ConnectionMgr.getInstance().saveProfiles();
+		ConnectionMgr.getInstance().saveDrivers();
+
 		result.addMessage(ResourceMgr.getFormattedString("MsgProfileAdded", profile.getKey().toString()));
 		return result;
 	}
+
+  private DbDriver getDriverFromCommandline()
+  {
+    DbDriver drv = null;
+    String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
+    String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
+    if (driverclass == null)
+    {
+      driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER_CLASS);
+    }
+
+    boolean driverFound = false;
+    String jar = cmdLine.getValue(AppArguments.ARG_CONN_JAR);
+
+    String drvName = cmdLine.getValue(ARG_DRV_NAME);
+
+    if (drvName != null)
+    {
+      List<DbDriver> drivers = ConnectionMgr.getInstance().getDrivers();
+      for (DbDriver dbDriver : drivers)
+      {
+        if (dbDriver.getName().equalsIgnoreCase(drvName))
+        {
+          drv = dbDriver;
+          driverFound = true;
+          break;
+        }
+      }
+    }
+    else if (driverclass != null)
+    {
+      // this might return a driver template without a valid classpath
+      drv = ConnectionMgr.getInstance().findDriverByClass(driverclass);
+
+      if (drv != null)
+      {
+        driverFound = true;
+        // if the jar file is not valid, replace it with the one provided by the user
+        if (!drv.canReadLibrary() && jar != null)
+        {
+          drv.setLibrary(jar);
+        }
+      }
+    }
+    else
+    {
+      driverclass = ConnectionDescriptor.findDriverClassFromUrl(url);
+      drv = ConnectionMgr.getInstance().findDriver(driverclass);
+      if (drv != null)
+      {
+        if (!drv.canReadLibrary() && jar != null)
+        {
+          drv.setLibrary(jar);
+        }
+      }
+    }
+
+    if (!driverFound && driverclass != null)
+    {
+      drv = new DbDriver(driverclass);
+      if (drvName != null)
+      {
+        drv.setName(drvName);
+      }
+      drv.setLibrary(jar);
+      ConnectionMgr.getInstance().getDrivers().add(drv);
+    }
+
+    return drv;
+  }
 
 	@Override
 	public boolean isWbCommand()
 	{
 		return true;
 	}
+
+  @Override
+  protected boolean isConnectionRequired()
+  {
+    return false;
+  }
+
+  @Override
+  public String getVerb()
+  {
+    return VERB;
+  }
 
 }

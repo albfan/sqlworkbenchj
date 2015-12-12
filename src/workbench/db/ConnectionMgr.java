@@ -340,6 +340,21 @@ public class ConnectionMgr
 		return firstMatch;
 	}
 
+	public DbDriver findDriverByClass(String drvClassName)
+	{
+		if (this.drivers == null)	this.readDrivers();
+
+		for (DbDriver driver : this.drivers)
+		{
+			if (driver.getDriverClass() == null) continue;
+			if (drvClassName.equals(driver.getDriverClass()))
+			{
+				return driver;
+			}
+		}
+		return null;
+	}
+
 	public DbDriver findRegisteredDriver(String drvClassName)
 	{
 		if (this.drivers == null)	this.readDrivers();
