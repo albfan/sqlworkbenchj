@@ -30,6 +30,7 @@ import java.util.List;
 
 import workbench.log.LogMgr;
 
+import workbench.db.DbSearchPath;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 
@@ -135,8 +136,15 @@ public class SourceTableArgument
 
 		if (args.size() <= 0 && StringUtil.isBlank(schema)) return result;
 
+    boolean useSearchPath = DbSearchPath.Factory.getSearchPathHandler(dbConn).isRealSearchPath() && StringUtil.isBlank(schema);
+
 		String schemaToUse;
-		if (StringUtil.isBlank(schema))
+
+    if (useSearchPath)
+    {
+      schemaToUse = null;
+    }
+    else if (StringUtil.isBlank(schema))
 		{
       if (schemaAsCatalog)
       {
@@ -160,6 +168,7 @@ public class SourceTableArgument
 
 		if (args.isEmpty() && schemaToUse != null)
 		{
+      // find all objects of the given schema
 			List<TableIdentifier> l = null;
 
 			if (schemaAsCatalog)
@@ -174,23 +183,14 @@ public class SourceTableArgument
 		}
 		else
 		{
-			for (String t : args)
+			for (String searchName : args)
 			{
-				if (t.indexOf('*') > -1 || t.indexOf('%') > -1)
+				if (searchName.indexOf('*') > -1 || searchName.indexOf('%') > -1)
 				{
 					if (checkWildcard) this.wildcardsPresent = true;
-					TableIdentifier tbl = new TableIdentifier(t);
-					if (tbl.getSchema() == null && StringUtil.isNonEmpty(schemaToUse))
-					{
-						if (schemaAsCatalog)
-            {
-              tbl.setCatalog(schemaToUse);
-            }
-            else
-            {
-              tbl.setSchema(schemaToUse);
-            }
-					}
+          
+					TableIdentifier tbl = new TableIdentifier(searchName);
+          adjustTableSchema(tbl, schemaToUse);
 					tbl.adjustCase(dbConn);
 					List<TableIdentifier> l = null;
 					if (schemaAsCatalog)
@@ -205,20 +205,9 @@ public class SourceTableArgument
 				}
 				else
 				{
-					TableIdentifier toSearch = new TableIdentifier(t, dbConn);
-					if (schemaToUse != null && toSearch.getSchema() == null)
-					{
-						if (schemaAsCatalog)
-						{
-							toSearch.setCatalog(schemaToUse);
-						}
-						else
-						{
-							toSearch.setSchema(schemaToUse);
-						}
-					}
-					toSearch.adjustCase(dbConn);
-					TableIdentifier tbl = dbConn.getMetadata().findTable(toSearch, types);
+					TableIdentifier toSearch = new TableIdentifier(searchName, dbConn);
+          adjustTableSchema(toSearch, schemaToUse);
+					TableIdentifier tbl = dbConn.getMetadata().searchObjectOnPath(toSearch, types);
 
 					if (tbl != null)
 					{
@@ -226,14 +215,29 @@ public class SourceTableArgument
 					}
 					else
 					{
-						missingTables.add(t);
-						LogMgr.logDebug("SourceTableArgument.retrieveObjects()", "Table " + t + " not found!");
+						missingTables.add(searchName);
+						LogMgr.logDebug("SourceTableArgument.retrieveObjects()", "Table " + searchName + " not found!");
 					}
 				}
 			}
 		}
 		return result;
 	}
+
+  private void adjustTableSchema(TableIdentifier tbl, String schemaToUse)
+  {
+    if (tbl.getSchema() == null && StringUtil.isNonEmpty(schemaToUse))
+    {
+      if (schemaAsCatalog)
+      {
+        tbl.setCatalog(schemaToUse);
+      }
+      else
+      {
+        tbl.setSchema(schemaToUse);
+      }
+    }
+  }
 
   /**
    * If multiple tables have been specified, return those names that could not be found.
