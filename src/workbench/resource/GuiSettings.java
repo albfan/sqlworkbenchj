@@ -23,6 +23,7 @@
 package workbench.resource;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.io.File;
 import java.util.Set;
 
@@ -841,7 +842,7 @@ public class GuiSettings
    * Return the style transformation to be used to display the NULL string.
    *
    * Valid values are:
-   * 
+   *
    * <ul>
    * <li>0 = No style change</li>
    * <li>1 = Font.ITALIC</li>
@@ -852,11 +853,18 @@ public class GuiSettings
    */
 	public static int getDisplayNullFontStyle()
 	{
+    String styleValue = Settings.getInstance().getProperty("workbench.gui.renderer.null.fontstyle", null);
+
+    if ("italic".equalsIgnoreCase(styleValue)) return Font.ITALIC;
+    if ("bold".equalsIgnoreCase(styleValue)) return Font.BOLD;
+    if ("bolditalic".equalsIgnoreCase(styleValue)) return Font.ITALIC + Font.BOLD;
+
     // 1 = Font.ITALIC
     // 2 = Font.BOLD
     // 3 = Bold + Italic
-		int style = Settings.getInstance().getIntProperty("workbench.gui.renderer.null.fontstyle", 0);
+    int style = StringUtil.getIntValue(styleValue, 0);
     if (style < 0 || style > 3) return 0;
+
     return style;
 	}
 
