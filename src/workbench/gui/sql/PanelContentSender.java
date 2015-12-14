@@ -49,13 +49,28 @@ public class PanelContentSender
 		newTabName = objectName;
 	}
 
-	public void showResult(final String sql, final String comment, final int panelIndex, final boolean logText)
+	public void showResult(String sql, String comment, int panelIndex, ResultReceiver.ShowType showHow)
 	{
 		if (sql == null) return;
 
 		// This should not be done in the background thread
 		// to make sure it's running on the EDT (otherwise the new panel will not be initialized correctly)
 		final SqlPanel panel = selectPanel(panelIndex);
+
+    if (panel == null) return;
+
+    final ResultReceiver.ShowType type;
+    if (panel.hasFileLoaded() && (showHow == ResultReceiver.ShowType.appendText || showHow == ResultReceiver.ShowType.replaceText))
+    {
+      // if there is a file loaded in the panel, never append or replace the editor's text
+      type = ResultReceiver.ShowType.logText;
+    }
+    else
+    {
+      type = showHow;
+    }
+
+    if (panel == null) return;
 
 		// When adding a new panel, a new connection
 		// might be initiated automatically. As that is done in a separate
@@ -66,43 +81,17 @@ public class PanelContentSender
 		// As this code might be execute on the EDT we have to make sure
 		// we are not blocking the current thread, so a new thread
 		// is created that will wait for the connection to succeed.
-		// then the actual showing of the data can be executed on the EDT
-		WbThread t = new WbThread("ShowThread")
-		{
-			@Override
-			public void run()
-			{
-				target.waitForConnection();
-
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						if (panel != null)
-						{
-							target.requestFocus();
-							panel.selectEditor();
-							ResultReceiver.ShowType type;
-							if (panelIndex == NEW_PANEL)
-							{
-								type = ResultReceiver.ShowType.replaceText;
-							}
-							else if (panel.hasFileLoaded())
-							{
-								type = ResultReceiver.ShowType.logText;
-							}
-							else
-							{
-								type = (logText ? ResultReceiver.ShowType.logText : ResultReceiver.ShowType.appendText);
-							}
-							panel.showResult(sql, comment, type);
-						}
-					}
-				});
-			}
-		};
-		t.start();
+		WbThread t = new WbThread("ShowFKThread")
+    {
+      @Override
+      public void run()
+      {
+        target.waitForConnection();
+        // the SqlPanel will start a new thread to run the SQL and will display the data on the EDT
+        panel.showResult(sql, comment, type);
+      }
+    };
+    t.start();
 	}
 
 	public void sendContent(final String text, final int panelIndex, final PasteType type)
@@ -136,6 +125,8 @@ public class PanelContentSender
 	private SqlPanel selectPanel(int index)
 	{
 		SqlPanel panel;
+
+    target.requestFocus();
 
 		if (index == NEW_PANEL)
 		{

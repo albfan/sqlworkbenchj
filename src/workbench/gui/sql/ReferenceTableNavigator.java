@@ -53,10 +53,11 @@ import workbench.db.WbConnection;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.EditorTabSelectMenu;
+import workbench.interfaces.ResultReceiver;
+import workbench.resource.GuiSettings;
 
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
@@ -452,6 +453,8 @@ public class ReferenceTableNavigator
 		String cmd = item.getActionCommand();
 		int containerIndex = -42;
 
+    ResultReceiver.ShowType showType = GuiSettings.getDefaultShowType();
+
 		if (cmd.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX))
 		{
 			containerIndex = StringUtil.getIntValue(cmd.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()), -1);
@@ -459,6 +462,11 @@ public class ReferenceTableNavigator
 			item = (JMenuItem)popup.getInvoker();
 			cmd = item.getActionCommand();
 		}
+    
+    if (containerIndex == PanelContentSender.NEW_PANEL)
+    {
+      showType = GuiSettings.getDefaultShowTypeNewTab();
+    }
 
 		TableIdentifier tbl = null;
 		String fkName = null;
@@ -524,12 +532,10 @@ public class ReferenceTableNavigator
 
 		String comment = ResourceMgr.getFormattedString("MsgLoadRelatedComment", tbl.getTableName(), getUpdateTable().getTableName(), fkName);
 
-		boolean logText = WbAction.isCtrlPressed(evt);
-
 		if (this.container != null)
 		{
 			PanelContentSender sender = new PanelContentSender(container, null);
-			sender.showResult(sql, comment, containerIndex, logText);
+			sender.showResult(sql, comment, containerIndex, showType);
 		}
 	}
 

@@ -33,6 +33,8 @@ import javax.swing.SwingConstants;
 import workbench.db.objectcache.ObjectCacheStorage;
 
 import workbench.gui.sql.FileReloadType;
+import workbench.interfaces.ResultReceiver;
+import workbench.log.LogMgr;
 
 import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
@@ -1296,5 +1298,41 @@ public class GuiSettings
   public static boolean getSaveSearchAllColWidths()
   {
     return Settings.getInstance().getBoolProperty(PROP_GLOBAL_SEARCH_SAVE_COLWIDTHS, true);
+  }
+
+  /**
+   * Returns the default ShowType to be used for the reference table navigaition.
+   *
+   */
+  public static ResultReceiver.ShowType getDefaultShowType()
+  {
+    String type = Settings.getInstance().getProperty("workbench.gui.refnavigator.showtype", ResultReceiver.ShowType.showNone.name());
+    try
+    {
+      return ResultReceiver.ShowType.valueOf(type);
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("GuiSettings.getDefaultShowType()", "Invalid type \"" + type + "\" specified!", th);
+      return ResultReceiver.ShowType.appendText;
+    }
+  }
+
+  /**
+   * Returns the default ShowType to be used for the reference table navigaition.
+   *
+   */
+  public static ResultReceiver.ShowType getDefaultShowTypeNewTab()
+  {
+    String type = Settings.getInstance().getProperty("workbench.gui.refnavigator.showtype.newtab", ResultReceiver.ShowType.replaceText.name());
+    try
+    {
+      return ResultReceiver.ShowType.valueOf(type);
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("GuiSettings.getDefaultShowType()", "Invalid type \"" + type + "\" specified!", th);
+      return ResultReceiver.ShowType.appendText;
+    }
   }
 }
