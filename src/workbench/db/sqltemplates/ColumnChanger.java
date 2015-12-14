@@ -340,8 +340,8 @@ public class ColumnChanger
 		String sql = commentMgr.getCommentSqlTemplate("column", action);
 		if (StringUtil.isBlank(sql)) return null;
 
-		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConn));
-		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
+		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
+		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConn));
 		sql = sql.replace(PARAM_TABLE_NAME, table.getTableName());
 		sql = sql.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, table.getSchema() == null ? "" : table.getSchema());
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(oldDefinition == null ? newDefinition : oldDefinition));
@@ -365,8 +365,8 @@ public class ColumnChanger
 
 		String sql = commentMgr.getCommentSqlTemplate("column", CommentSqlManager.COMMENT_ACTION_SET);
 
-		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConn));
-		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectName());
+		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
+		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConn));
 		sql = sql.replace(PARAM_TABLE_NAME, table.getObjectName());
 		sql = sql.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, table.getSchema() == null ? "" : table.getSchema());
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(column));
@@ -399,6 +399,7 @@ public class ColumnChanger
 			// drop default
 			if (dropDefault == null) return null;
 			sql = dropDefault.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
+			sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
 		}
 
 		// Cannot alter, need SET DEFAULT or DROP DEFAULT
@@ -407,11 +408,13 @@ public class ColumnChanger
 			if (setDefault != null)
 			{
 				sql = setDefault.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
+				sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
 				sql = sql.replace(PARAM_DEFAULT_VALUE, newDefault);
 			}
 			else if (alterDefault != null)
 			{
 				sql = alterDefault.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
+				sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
 				sql = sql.replace(PARAM_DEFAULT_VALUE, newDefault);
 			}
 		}
