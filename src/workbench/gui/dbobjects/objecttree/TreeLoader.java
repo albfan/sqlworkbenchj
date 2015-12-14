@@ -20,7 +20,6 @@
 package workbench.gui.dbobjects.objecttree;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -93,6 +92,11 @@ public class TreeLoader
    * The node type for the "columns" node in a table or a view.
    */
   public static final String TYPE_COLUMN_LIST = "column-list";
+
+  /**
+   * The node type for the "parameters" node for a procedure or function.
+   */
+  public static final String TYPE_PARAMETER_LIST = "parameter-list";
 
   /**
    * The node type for the "indexes" node in a table or a view.
@@ -542,14 +546,7 @@ public class TreeLoader
       if (hasColumns(tbl))
       {
         node.setAllowsChildren(true);
-        if (connection.getMetadata().isExtendedObject(tbl))
-        {
-          loaded = false;
-        }
-        else
-        {
-          addColumnsNode(node);
-        }
+        addColumnsNode(node);
       }
 
       if (isTable(tbl))
@@ -678,49 +675,14 @@ public class TreeLoader
     return (node.getType().equals(TYPE_DEPENDENCY_USED) || node.getType().equals(TYPE_DEPENDENCY_USING));
   }
 
-  private void addNodes(ObjectTreeNode parent, List<ObjectTreeNode> nodes)
+  public void loadProcedureParameters(ObjectTreeNode parameterListNode)
   {
-    if (CollectionUtil.isEmpty(nodes)) return;
-    if (parent == null) return;
-    if (!parent.canHaveChildren()) return;
-
-    for (ObjectTreeNode node : nodes)
-    {
-      parent.add(node);
-    }
-  }
-
-  private List<ObjectTreeNode> removeDependencyNodes(ObjectTreeNode parent)
-  {
-    List<ObjectTreeNode> nodes = new ArrayList<>(2);
-    if (!supportsDependencies(parent)) return nodes;
-
-    for (int i=0; i < parent.getChildCount(); i++)
-    {
-      ObjectTreeNode child = parent.getChildAt(i);
-      if (isDependencyNode(child))
-      {
-        nodes.add(child);
-      }
-    }
-
-    for (ObjectTreeNode child : nodes)
-    {
-      parent.remove(child);
-    }
-
-    return nodes;
-  }
-
-  public void loadProcedureParameters(ObjectTreeNode node)
-  {
-    if (node == null) return;
-    ProcedureDefinition proc = (ProcedureDefinition)node.getDbObject();
+    if (parameterListNode == null) return;
+    ObjectTreeNode procNode = parameterListNode.getParent();
+    ProcedureDefinition proc = (ProcedureDefinition)procNode.getDbObject();
     if (proc == null) return;
 
     List<ColumnIdentifier> parameters = proc.getParameters(connection);
-
-    List<ObjectTreeNode> deps = removeDependencyNodes(node);
 
     for (ColumnIdentifier col : parameters)
     {
@@ -737,13 +699,11 @@ public class TreeLoader
       }
       p.setAllowsChildren(false);
       p.setChildrenLoaded(true);
-      node.add(p);
+      parameterListNode.add(p);
     }
-    addNodes(node, deps);
-    model.nodeStructureChanged(node);
-    node.setChildrenLoaded(true);
+    parameterListNode.setChildrenLoaded(true);
+    model.nodeStructureChanged(parameterListNode);
   }
-
 
   public void loadTriggers(ObjectTreeNode trgNode)
     throws SQLException
@@ -874,8 +834,6 @@ public class TreeLoader
       return;
     }
 
-    List<ObjectTreeNode> deps = removeDependencyNodes(columnsNode);
-
     if (dbo instanceof TableIdentifier)
     {
       TableIdentifier tbl = (TableIdentifier)dbo;
@@ -888,8 +846,6 @@ public class TreeLoader
       node.setAllowsChildren(false);
       columnsNode.add(node);
     }
-
-    addNodes(columnsNode, deps);
 
     model.nodeStructureChanged(columnsNode);
     columnsNode.setChildrenLoaded(true);
@@ -1064,17 +1020,13 @@ public class TreeLoader
       {
         loadProcedures(node);
       }
-      else if (node.getDbObject() instanceof ProcedureDefinition)
+      else if (TYPE_PARAMETER_LIST.equals(type))
       {
         loadProcedureParameters(node);
       }
       else if (connection.getMetadata().isExtendedTableType(type) || connection.getMetadata().isViewType(type))
       {
         reloadTableNode(node);
-      }
-      else if (connection.getMetadata().hasColumns(type))
-      {
-        loadTableColumns(node.getDbObject(), node);
       }
     }
     finally

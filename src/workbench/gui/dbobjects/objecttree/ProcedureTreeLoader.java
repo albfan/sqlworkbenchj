@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.db.BaseObjectType;
 import workbench.db.PackageDefinition;
 import workbench.db.ProcedureDefinition;
@@ -25,12 +27,12 @@ import workbench.db.WbConnection;
 public class ProcedureTreeLoader
 {
 
-  public void loadProcedures(ObjectTreeNode procNode, DbObjectTreeModel model, WbConnection connection, TreeLoader loader)
+  public void loadProcedures(ObjectTreeNode procListNode, DbObjectTreeModel model, WbConnection connection, TreeLoader loader)
     throws SQLException
   {
-    if (procNode == null) return;
+    if (procListNode == null) return;
     ProcedureReader procReader = ReaderFactory.getProcedureReader(connection.getMetadata());
-    ObjectTreeNode schemaNode = procNode.getParent();
+    ObjectTreeNode schemaNode = procListNode.getParent();
     String schemaName = schemaNode.getName();
     List<ProcedureDefinition> procedures = procReader.getProcedureList(null, schemaName, null);
 
@@ -50,7 +52,7 @@ public class ProcedureTreeLoader
       }
       pkgNode.setChildrenLoaded(true);
       loader.addDependencyNodes(pkgNode);
-      procNode.add(pkgNode);
+      procListNode.add(pkgNode);
     }
 
     Map<String, List<ProcedureDefinition>> types = getTypeMethods(procedures);
@@ -61,14 +63,15 @@ public class ProcedureTreeLoader
       pkgNode.setAllowsChildren(true);
       for (ProcedureDefinition proc : entry.getValue())
       {
-        ObjectTreeNode node = new ObjectTreeNode(proc);
-        node.setAllowsChildren(true); // can have parameters
-        node.setChildrenLoaded(false);
-        pkgNode.add(node);
+        ObjectTreeNode procNode = new ObjectTreeNode(proc);
+        procNode.setAllowsChildren(true);
+        addParameterNode(procNode);
+        procNode.setChildrenLoaded(true);
+        pkgNode.add(procNode);
       }
       pkgNode.setChildrenLoaded(true);
       loader.addDependencyNodes(pkgNode);
-      procNode.add(pkgNode);
+      procListNode.add(pkgNode);
     }
 
     for (ProcedureDefinition proc : procedures)
@@ -76,14 +79,22 @@ public class ProcedureTreeLoader
       if (!proc.isPackageProcedure() && !proc.isOracleObjectType())
       {
         ObjectTreeNode node = new ObjectTreeNode(proc);
-        node.setAllowsChildren(true); // can have parameters
+        node.setAllowsChildren(true);
+        addParameterNode(node);
         loader.addDependencyNodes(node);
-        node.setChildrenLoaded(false);
-        procNode.add(node);
+        node.setChildrenLoaded(true);
+        procListNode.add(node);
       }
     }
-    procNode.setChildrenLoaded(true);
-    model.nodeStructureChanged(procNode);
+    procListNode.setChildrenLoaded(true);
+    model.nodeStructureChanged(procListNode);
+  }
+
+  private void addParameterNode(ObjectTreeNode procNode)
+  {
+    ObjectTreeNode node = new ObjectTreeNode(ResourceMgr.getString("TxtDbExpProcParams"), TreeLoader.TYPE_PARAMETER_LIST);
+    procNode.setAllowsChildren(true);
+    procNode.add(node);
   }
 
   private Map<String, List<ProcedureDefinition>> getTypeMethods(List<ProcedureDefinition> allProcs)
