@@ -95,8 +95,8 @@ public class DbObjectNodeRenderer
     {
       iconMap.put(type, "view");
     }
-    // just to be sure
     iconMap.put(TreeLoader.TYPE_VIEW, "view");
+    iconMap.put(DbMetadata.MVIEW_NAME, "mview");
   }
 
   public void setTableTypes(List<String> types)
@@ -111,8 +111,8 @@ public class DbObjectNodeRenderer
     {
       iconMap.put(type, "table");
     }
-    // just to be sure
     iconMap.put(TreeLoader.TYPE_TABLE, "table");
+    iconMap.put(DbMetadata.MVIEW_NAME, "mview");
   }
 
   public void setSynonymTypeName(String name)
