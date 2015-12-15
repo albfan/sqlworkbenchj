@@ -46,7 +46,7 @@ public class ProcedureTreeLoader
       for (ProcedureDefinition proc : entry.getValue())
       {
         ObjectTreeNode node = new ObjectTreeNode(proc);
-        node.setAllowsChildren(true); // can have parameters
+        addParameterNode(node);
         node.setChildrenLoaded(false);
         pkgNode.add(node);
       }
@@ -64,7 +64,6 @@ public class ProcedureTreeLoader
       for (ProcedureDefinition proc : entry.getValue())
       {
         ObjectTreeNode procNode = new ObjectTreeNode(proc);
-        procNode.setAllowsChildren(true);
         addParameterNode(procNode);
         procNode.setChildrenLoaded(true);
         pkgNode.add(procNode);
@@ -79,7 +78,6 @@ public class ProcedureTreeLoader
       if (!proc.isPackageProcedure() && !proc.isOracleObjectType())
       {
         ObjectTreeNode node = new ObjectTreeNode(proc);
-        node.setAllowsChildren(true);
         addParameterNode(node);
         loader.addDependencyNodes(node);
         node.setChildrenLoaded(true);
