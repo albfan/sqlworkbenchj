@@ -114,19 +114,11 @@ public class SqlServerDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    String oldCatalog = changeDatabase(connection, base.getCatalog());
-    try
+    if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
     {
-      if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
-      {
-        return retrieveObjects(connection, base, searchUsedByInfSchema, false);
-      }
-      return retrieveObjects(connection, base, searchUsedByDMView, true);
+      return retrieveObjects(connection, base, searchUsedByInfSchema, false);
     }
-    finally
-    {
-      changeDatabase(connection, oldCatalog);
-    }
+    return retrieveObjects(connection, base, searchUsedByDMView, true);
   }
 
   @Override
@@ -134,19 +126,11 @@ public class SqlServerDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    String oldCatalog = changeDatabase(connection, base.getCatalog());
-    try
+    if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
     {
-      if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
-      {
-        return retrieveObjects(connection, base, searchUsedSqlInfSchema, false);
-      }
-      return retrieveObjects(connection, base, searchUsedSqlDMView, true);
+      return retrieveObjects(connection, base, searchUsedSqlInfSchema, false);
     }
-    finally
-    {
-      changeDatabase(connection, oldCatalog);
-    }
+    return retrieveObjects(connection, base, searchUsedSqlDMView, true);
   }
 
   private String changeDatabase(WbConnection conn, String catalog)
@@ -191,6 +175,8 @@ public class SqlServerDependencyReader
 
 			LogMgr.logDebug("SqlServerDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
 		}
+
+    String oldCatalog = changeDatabase(connection, base.getCatalog());
 
     try
     {
@@ -252,6 +238,7 @@ public class SqlServerDependencyReader
     finally
     {
       SqlUtil.closeAll(rs, pstmt);
+      changeDatabase(connection, oldCatalog);
     }
 
     DbObjectSorter sorter = new DbObjectSorter(true);
