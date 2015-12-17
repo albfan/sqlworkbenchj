@@ -61,6 +61,14 @@ public class SqlServerDependencyReader
       "          when 'SYSTEM_TABLE' then 'SYSTEM TABLE'\n" +
       "          when 'INTERNAL_TABLE' then 'SYSTEM TABLE'\n" +
       "          when 'SQL_STORED_PROCEDURE' then 'PROCEDURE'\n" +
+      "          when 'CLR_STORED_PROCEDURE' then 'PROCEDURE'\n" +
+      "          when 'EXTENDED_STORED_PROCEDURE' then 'PROCEDURE'\n" +
+      "          when 'SQL_SCALAR_FUNCTION' then 'FUNCTION'\n" +
+      "          when 'CLR_SCALAR_FUNCTION' then 'FUNCTION'\n" +
+      "          when 'SQL_TABLE_VALUED_FUNCTION' then 'FUNCTION'\n" +
+      "          when 'SQL_INLINE_TABLE_VALUED_FUNCTION' then 'FUNCTION'\n" +
+      "          when 'SQL_TRIGGER' then 'TRIGGER'\n" +
+      "          when 'CLR_TRIGGER' then 'TRIGGER'\n" +
       "          else type_desc \n" +
       "        end as type \n";
 
@@ -246,7 +254,10 @@ public class SqlServerDependencyReader
       SqlUtil.closeAll(rs, pstmt);
     }
 
-    DbObjectSorter.sort(result, true);
+    DbObjectSorter sorter = new DbObjectSorter(true);
+    sorter.setIncludeType(true);
+    Collections.sort(result, sorter);
+
     return result;
   }
 

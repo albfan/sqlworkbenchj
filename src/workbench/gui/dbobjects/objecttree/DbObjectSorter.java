@@ -82,7 +82,14 @@ public class DbObjectSorter
 
   public static void sort(List<? extends DbObject> objects, boolean useNaturalSort)
   {
+    sort(objects, useNaturalSort, false);
+  }
+
+  public static void sort(List<? extends DbObject> objects, boolean useNaturalSort, boolean includeType)
+  {
     if (objects == null) return;
-    Collections.sort(objects, new DbObjectSorter(useNaturalSort));
+    DbObjectSorter sorter = new DbObjectSorter(useNaturalSort);
+    sorter.setIncludeType(includeType);
+    Collections.sort(objects, sorter);
   }
 }
