@@ -86,6 +86,7 @@ import workbench.sql.wbcommands.WbListSchemas;
 import workbench.sql.wbcommands.WbListTriggers;
 import workbench.sql.wbcommands.WbListVars;
 import workbench.sql.wbcommands.WbLoadPkMapping;
+import workbench.sql.wbcommands.WbMessage;
 import workbench.sql.wbcommands.WbMode;
 import workbench.sql.wbcommands.WbOraShow;
 import workbench.sql.wbcommands.WbProcSource;
@@ -166,6 +167,7 @@ public class CommandMapper
 		addCommand(new WbLoadPkMapping());
 		addCommand(new WbSavePkMapping());
 		addCommand(new WbConfirm());
+		addCommand(new WbMessage());
 		addCommand(new WbCall());
 		addCommand(new WbConnect());
 		addCommand(new WbInclude());
