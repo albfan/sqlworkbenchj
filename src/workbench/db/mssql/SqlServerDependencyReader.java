@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.db.CatalogChanger;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -93,8 +94,11 @@ public class SqlServerDependencyReader
       "FROM sys.dm_sql_referencing_entities(?, 'OBJECT') re \n" +
       "  JOIN sys.all_objects ao on ao.object_id = re.referencing_id";
 
+  private final CatalogChanger catalogChanger = new CatalogChanger();
+
   public SqlServerDependencyReader()
   {
+    catalogChanger.setFireEvents(false);
   }
 
   @Override
@@ -102,22 +106,58 @@ public class SqlServerDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
+    String oldCatalog = changeDatabase(connection, base.getCatalog());
+    try
     {
-      return retrieveObjects(connection, base, searchUsedByInfSchema, false);
+      if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
+      {
+        return retrieveObjects(connection, base, searchUsedByInfSchema, false);
+      }
+      return retrieveObjects(connection, base, searchUsedByDMView, true);
     }
-    return retrieveObjects(connection, base, searchUsedByDMView, true);
+    finally
+    {
+      changeDatabase(connection, oldCatalog);
+    }
   }
 
   @Override
   public List<DbObject> getUsedBy(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
-    if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
+
+    String oldCatalog = changeDatabase(connection, base.getCatalog());
+    try
     {
-      return retrieveObjects(connection, base, searchUsedSqlInfSchema, false);
+      if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
+      {
+        return retrieveObjects(connection, base, searchUsedSqlInfSchema, false);
+      }
+      return retrieveObjects(connection, base, searchUsedSqlDMView, true);
     }
-    return retrieveObjects(connection, base, searchUsedSqlDMView, true);
+    finally
+    {
+      changeDatabase(connection, oldCatalog);
+    }
+  }
+
+  private String changeDatabase(WbConnection conn, String catalog)
+  {
+    if (catalog == null || conn == null) return catalog;
+
+    String currentCatalog = conn.getCurrentCatalog();
+    try
+    {
+      if (StringUtil.stringsAreNotEqual(catalog, currentCatalog))
+      {
+        catalogChanger.setCurrentCatalog(conn, catalog);
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("SqlServerDependencyReader.changeDatabase()", "Could not change database", ex);
+    }
+    return currentCatalog;
   }
 
   private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql, boolean useFQN)
