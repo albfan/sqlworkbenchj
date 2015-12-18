@@ -779,6 +779,34 @@
     </para>
 
   </section>
+  <section id="command-wbmessage">
+    <title>Display a message - WbMessage</title>
+    <para>
+      The <literal>WbMessages</literal> command pauses the execution of the
+      current script and displays a message and waits until the dialog is closed.
+      Unlike <literal>WbConfirm</literal> the script will always continue once the message dialog is closed.
+    </para>
+    <para>
+      <literal>WbMessage</literal> can be called in two different ways:
+			<itemizedlist>
+        <listitem>
+          <para>With just a message text, e.g. <literal>WbMessage Done!</literal></para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Supplying parameters for the message and the dialog title:
+            <simpara>
+              <literal>WbConfirm -message="Script finished" -title="SQL Script"</literal>
+            </simpara>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      This command has no effect in batch or console mode.
+    </para>
+  </section>
 
   <section id="command-wbcall">
     <title>Run a stored procedure with OUT parameters - WbCall</title>
