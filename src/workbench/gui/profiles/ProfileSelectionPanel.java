@@ -262,6 +262,11 @@ public class ProfileSelectionPanel
 		}
 	}
 
+  public void initDivider()
+  {
+    this.jSplitPane.setDividerLocation(0.3);
+  }
+  
 	@Override
 	public void keyReleased(KeyEvent e)
 	{

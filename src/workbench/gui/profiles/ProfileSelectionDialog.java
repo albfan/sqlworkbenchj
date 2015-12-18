@@ -25,7 +25,6 @@ package workbench.gui.profiles;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Window;
@@ -247,10 +246,7 @@ public class ProfileSelectionDialog
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
 			this.pack();
-      Dimension d = getOwner().getSize();
-      int w = (int)(d.width * 0.75);
-      int h = (int)(d.height * 0.75);
-			setSize(w, h);
+      this.profiles.initDivider();
 		}
 	}
 
