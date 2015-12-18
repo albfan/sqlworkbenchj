@@ -22,6 +22,7 @@ package workbench.gui.profiles;
 import java.util.Objects;
 
 import workbench.db.ObjectNameFilter;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -69,8 +70,7 @@ public class ObjectFilterTemplate
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     final ObjectFilterTemplate other = (ObjectFilterTemplate)obj;
-    if (!Objects.equals(this.name, other.name)) return false;
-    return true;
+    return StringUtil.equalStringIgnoreCase(this.name, other.name);
   }
 
 }

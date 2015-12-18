@@ -39,10 +39,10 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.components.WbOptionPane;
+import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 
 import workbench.sql.ErrorDescriptor;
-
-import static workbench.gui.WbSwingUtilities.*;
 
 /**
  *
@@ -77,24 +77,26 @@ public class ErrorContinueDialog
 
   private int showDialog(final Component caller)
   {
-    String[] options = new String[]
+    final String[] options = new String[]
     {
       ResourceMgr.getString("LblIgnoreThis"), ResourceMgr.getString("LblIgnoreAllErr"), ResourceMgr.getPlainString("LblStopScript")
     };
 
-    final Object message = getMessage();
-
-    JOptionPane ignorePane = new WbOptionPane(message, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
-
-    JDialog dialog = ignorePane.createDialog(WbSwingUtilities.getWindowAncestor(caller), ResourceMgr.TXT_PRODUCT_NAME);
-    dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    JDialog dialog = null;
     int rvalue = JOptionPane.CANCEL_OPTION;
 
     try
     {
+      Object message = getMessage();
+
+      JOptionPane ignorePane = new WbOptionPane(message, JOptionPane.PLAIN_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+      dialog = ignorePane.createDialog(WbSwingUtilities.getWindowAncestor(caller), ResourceMgr.TXT_PRODUCT_NAME);
+      dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       dialog.setResizable(true);
       dialog.pack();
+
       dialog.setVisible(true);
+
       Object result = ignorePane.getValue();
       if (result == null)
       {
@@ -117,10 +119,15 @@ public class ErrorContinueDialog
         rvalue = JOptionPane.CANCEL_OPTION;
       }
     }
+    catch (Throwable th)
+    {
+      LogMgr.logError("ErrorContinueDialog.showDialog()", "Error displaying error dialog", th);
+    }
     finally
     {
-      dialog.dispose();
+      if (dialog != null) dialog.dispose();
     }
+
     return rvalue;
   }
 
@@ -128,34 +135,49 @@ public class ErrorContinueDialog
   {
     if (GuiSettings.getErrorPromptType() == ErrorPromptType.PromptWithErroressage && errorDetails != null && errorDetails.getErrorMessage() != null)
     {
-      return createMessagePanel();
+      try
+      {
+        return createMessagePanel();
+      }
+      catch (Throwable th)
+      {
+        LogMgr.logError("ErrorContinueDialog.getMessage()", "Could not create message panel", th);
+      }
     }
-    else
-    {
-      return question;
-    }
+
+    return question;
   }
 
   private JComponent createMessagePanel()
   {
-    JPanel messagePanel = getMultilineLabel(question);
+    JPanel messagePanel = WbSwingUtilities.getMultilineLabel(question);
 
     String errorMessage = errorDetails != null ? errorDetails.getErrorMessage() : "";
 
-    Font messageFont = UIManager.getFont("OptionPane.messageFont");
-    FontMetrics fm = messagePanel.getFontMetrics(messageFont);
-    int vgap = fm.getHeight();
+    int fontHeight = IconMgr.getInstance().getSizeForLabel();
 
-    messagePanel.setBorder(new EmptyBorder(0, 0, vgap/4, 0));
+    Font messageFont = UIManager.getFont("OptionPane.messageFont");
+    if (messageFont != null)
+    {
+      FontMetrics fm = messagePanel.getFontMetrics(messageFont);
+      if (fm != null)
+      {
+        fontHeight = fm.getHeight();
+      }
+    }
+    else
+    {
+      LogMgr.logWarning("ErrorContinueDialog.createMessagePanel()", "No font available for OptionPane.messageFont");
+    }
+
+    messagePanel.setBorder(new EmptyBorder(0, 0, fontHeight/4, 0));
 
     JPanel panel = new JPanel(new BorderLayout(0, 0));
-    JComponent errorPanel = createErrorMessagePanel(errorMessage, PROP_ERROR_MSG_WRAP, GuiSettings.allowWordWrapForErrorMessage());
+    JComponent errorPanel = WbSwingUtilities.createErrorMessagePanel(errorMessage, WbSwingUtilities.PROP_ERROR_MSG_WRAP, GuiSettings.allowWordWrapForErrorMessage());
 
     panel.add(messagePanel, BorderLayout.PAGE_START);
     panel.add(errorPanel, BorderLayout.CENTER);
 
     return panel;
   }
-
-
 }

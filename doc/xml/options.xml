@@ -1073,6 +1073,11 @@
 				enabled, &wb-productname; will treat Oracle's <literal>DATE</literal> columns
 				as <literal>TIMESTAMP</literal> columns, thus preserving the time information.
 			</para>
+      <para>
+        Note that the Oracle 12.x drivers don't allow to switch this <emphasis role="bold">off</emphasis>.
+        If if this parameter is unchecked the Oracle 12.x driver will return values from <literal>DATE</literal>
+        columns as timestamps.
+      </para>
       </blockquote>
 		</simplesect>
 

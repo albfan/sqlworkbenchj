@@ -211,6 +211,8 @@ public class WbSwingUtilities
 	 */
 	public static void invoke(Runnable r)
 	{
+    if (r == null) return;
+
 		if (EventQueue.isDispatchThread())
 		{
 			r.run();
@@ -607,7 +609,6 @@ public class WbSwingUtilities
         int advance = fm.getMaxAdvance();
         if (advance <= 0)
         {
-          System.out.println("maxAdvance: " + advance + ", fm: " + fm);
           advance = fm.stringWidth("M");
         }
         return advance;

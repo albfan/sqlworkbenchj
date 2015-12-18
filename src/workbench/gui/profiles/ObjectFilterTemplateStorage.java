@@ -71,7 +71,7 @@ public class ObjectFilterTemplateStorage
   {
     templates.clear();
     templates.addAll(templateList);
-    fireItemAdded(0, templates.size() - 1);
+    fireContentsChanged(0, templates.size() - 1);
   }
 
   public void deleteTemplates()
@@ -110,8 +110,17 @@ public class ObjectFilterTemplateStorage
   public void addTemplate(String name, ObjectNameFilter filter)
   {
     ObjectFilterTemplate template = new ObjectFilterTemplate(name, filter);
-    templates.add(template);
-    fireItemAdded();
+    int index = templates.indexOf(template);
+    if (index > -1)
+    {
+      templates.set(index, template);
+      fireContentsChanged(index, index);
+    }
+    else
+    {
+      templates.add(template);
+      fireItemAdded();
+    }
   }
 
   public List<ObjectFilterTemplate> getTemplates()
@@ -164,10 +173,10 @@ public class ObjectFilterTemplateStorage
 
   private void fireItemAdded()
   {
-    fireItemAdded(templates.size() - 1, templates.size() - 1);
+    fireContentsChanged(templates.size() - 1, templates.size() - 1);
   }
 
-  private void fireItemAdded(int start, int end)
+  private void fireContentsChanged(int start, int end)
   {
     if (listener.isEmpty()) return;
     ListDataEvent evt = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, start, end);
