@@ -42,6 +42,7 @@ import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.TableIdentifier;
@@ -130,7 +131,7 @@ public class VerticaProjectionPanel
 		displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		displayTab.setName("displaytab");
 		displayTab.add("Buddies", scrollDetail);
-		displayTab.add("Columns", scrollColumns);
+		displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scrollColumns);
 		displayTab.addChangeListener(this);
 
 		this.splitPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);

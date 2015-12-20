@@ -840,6 +840,7 @@ public class DbMetadata
 
 	public boolean isMySql() { return this.isMySql; }
 	public boolean isPostgres() { return this.isPostgres; }
+  public boolean isVertica() { return getDbId().equals(DBID_VERTICA); }
 	public boolean isOracle() { return this.isOracle; }
 	public boolean isHsql() { return this.isHsql; }
 	public boolean isFirebird() { return this.isFirebird; }

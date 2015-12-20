@@ -35,6 +35,7 @@ import workbench.db.SchemaIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerLevel;
+import workbench.db.WbConnection;
 
 import workbench.storage.filter.ColumnExpression;
 
@@ -415,4 +416,8 @@ public class ObjectTreeNode
     return (TreeLoader.TYPE_FK_DEF.equals(type) || TreeLoader.TYPE_FK_LIST.equals(type) || TreeLoader.TYPE_REF_LIST.equals(type));
   }
 
+  public boolean loadChildren(WbConnection connection)
+  {
+    return false;
+  }
 }

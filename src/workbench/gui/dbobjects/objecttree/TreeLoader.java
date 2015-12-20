@@ -53,6 +53,7 @@ import workbench.db.dependency.DependencyReader;
 import workbench.db.dependency.DependencyReaderFactory;
 
 import workbench.gui.dbobjects.IsolationLevelChanger;
+import workbench.gui.dbobjects.objecttree.vertica.ProjectionListNode;
 
 import workbench.util.CollectionUtil;
 
@@ -104,6 +105,21 @@ public class TreeLoader
   public static final String TYPE_INDEX_LIST = "index-list";
 
   /**
+   * The node type for the "Projections" node when connected to Vertica.
+   */
+  public static final String TYPE_PROJECTION_LIST = "projection-list";
+
+  /**
+   * The node type for the "Projections" node when connected to Vertica.
+   */
+  public static final String TYPE_PROJECTION_BUDDIES = "projection-buddies";
+
+  /**
+   * The node type for the "Projections" node when connected to Vertica.
+   */
+  public static final String TYPE_PROJECTION_COLUMNS = "projection-columns";
+
+  /**
    * The node type for the "dependencies" node in a table or a view.
    */
   public static final String TYPE_DEPENDENCY_USED = "dep-used";
@@ -146,6 +162,9 @@ public class TreeLoader
   public static final String TYPE_PROCEDURES_NODE = "procedures";
   public static final String TYPE_PROC_PARAMETER = "parameter";
   public static final String TYPE_PACKAGE_NODE = "package";
+  public static final String TYPE_PROJECTION_NODE = "projection";
+  public static final String TYPE_PROJECTION_COL_NODE = "projection-column";
+  public static final String TYPE_PROJECTION_BUDDY = "projection-buddy";
 
   private WbConnection connection;
   private DbObjectTreeModel model;
@@ -639,8 +658,16 @@ public class TreeLoader
 
   private void addIndexNode(ObjectTreeNode node)
   {
-    ObjectTreeNode idx = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerIndexes"), TYPE_INDEX_LIST);
-    idx.setAllowsChildren(true);
+    ObjectTreeNode idx = null;
+    if (connection.getMetadata().isVertica())
+    {
+      idx = new ProjectionListNode();
+    }
+    else
+    {
+      idx = new ObjectTreeNode(ResourceMgr.getString("TxtDbExplorerIndexes"), TYPE_INDEX_LIST);
+      idx.setAllowsChildren(true);
+    }
     node.add(idx);
   }
 
@@ -951,6 +978,13 @@ public class TreeLoader
     {
       levelChanger.changeIsolationLevel(connection);
       this.connection.setBusy(true);
+
+      if (node.loadChildren(connection))
+      {
+        model.nodeStructureChanged(node);
+        return;
+      }
+
       String type = node.getType();
 
       if (node.isCatalogNode())
