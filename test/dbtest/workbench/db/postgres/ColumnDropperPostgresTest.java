@@ -94,8 +94,8 @@ public class ColumnDropperPostgresTest
 		p.setReturnStartingWhitespace(false);
 		assertEquals(3, p.getSize());
 
-		assertEquals("ALTER TABLE person DROP COLUMN dummy1 CASCADE", p.getCommand(0).trim());
-		assertEquals("ALTER TABLE person DROP COLUMN dummy2 CASCADE", p.getCommand(1).trim());
+		assertEquals("ALTER TABLE "+ TEST_ID + ".person DROP COLUMN dummy1 CASCADE", p.getCommand(0).trim());
+		assertEquals("ALTER TABLE "+ TEST_ID + ".person DROP COLUMN dummy2 CASCADE", p.getCommand(1).trim());
 		assertEquals("COMMIT", p.getCommand(2).trim());
 
 		dropper.dropObjects();

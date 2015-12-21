@@ -96,6 +96,7 @@ public class DbObjectChangerTest
 		PkDefinition pk = new PkDefinition("pk_person_address", CollectionUtil.arrayList(new IndexColumn("person_id", 1)));
 		table.setPrimaryKey(pk);
 		sql = changer.getDropPK(table);
+    System.out.println(sql);
 		assertEquals("ALTER TABLE person_address DROP CONSTRAINT pk_person_address CASCADE", sql);
 
 		TableIdentifier renamedTable = new TableIdentifier("pers_addr");

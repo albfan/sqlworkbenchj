@@ -81,6 +81,8 @@ public class TableCommentReader
 			else
 			{
 				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getTableName()));
+				result = replaceObjectNamePlaceholder(result, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getTableName()));
+        result = replaceObjectNamePlaceholder(result, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConnection));
 				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.SCHEMA_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getSchema()));
 				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.CATALOG_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getCatalog()));
 			}

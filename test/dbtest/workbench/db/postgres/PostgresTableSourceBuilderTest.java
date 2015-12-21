@@ -25,8 +25,11 @@ package workbench.db.postgres;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.DropType;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
 
 import workbench.sql.parser.ParserType;
@@ -37,10 +40,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.db.DropType;
-import workbench.db.TableSourceBuilder;
-import workbench.db.TableSourceBuilderFactory;
 
 /**
  *
@@ -204,7 +203,7 @@ public class PostgresTableSourceBuilderTest
 		String source = builder.getTableSource(tbl, DropType.none, true);
 //		System.out.println(source);
     assertTrue(source.startsWith("CREATE TABLE \"Foo_Bar\""));
-    assertTrue(source.contains("ALTER TABLE \"Foo_Bar\""));
+    assertTrue(source.contains("ALTER TABLE " + TEST_SCHEMA + ".\"Foo_Bar\""));
     assertTrue(source.contains("ADD CONSTRAINT \"Some_PK\""));
     assertTrue(source.contains("PRIMARY KEY (\"PK_id\", \"Other_Value\")"));
     assertTrue(source.contains("COMMENT ON TABLE \"Foo_Bar\""));

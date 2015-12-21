@@ -50,9 +50,6 @@ import workbench.util.StringUtil;
  */
 public class ColumnChanger
 {
-	public static final String PARAM_TABLE_NAME = MetaDataSqlManager.TABLE_NAME_PLACEHOLDER;
-	public static final String PARAM_COL_NAME = MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER;
-
 	public static final String PARAM_NEW_COL_NAME = "%new_column_name%";
 	public static final String PARAM_DATATYPE = "%datatype%";
 	public static final String PARAM_NEW_DATATYPE = "%new_datatype%";
@@ -235,8 +232,8 @@ public class ColumnChanger
 	{
 		if (newDefinition == null) return null;
 		String sql = dbSettings.getAddColumnSql();
-		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
-		sql = sql.replace(PARAM_COL_NAME, getColumnExpression(newDefinition));
+    sql = TemplateHandler.replaceTablePlaceholder(sql, table, dbConn, false);
+		sql = sql.replace(MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, getColumnExpression(newDefinition));
 		sql = sql.replace(PARAM_DATATYPE, newDefinition.getDbmsType());
 		if (StringUtil.isBlank(newDefinition.getDefaultValue()))
 		{
@@ -264,8 +261,8 @@ public class ColumnChanger
 		if (StringUtil.isBlank(sql)) return null;
 
 		if (!dataTypeChanged(oldDefinition, newDefinition)) return null;
-		sql = sql.replace(PARAM_COL_NAME, getColumnExpression(oldDefinition));
-		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
+		sql = sql.replace(MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, getColumnExpression(oldDefinition));
+    sql = TemplateHandler.replaceTablePlaceholder(sql, table, dbConn, false);
 		sql = sql.replace(PARAM_DATATYPE, oldDefinition.getDbmsType());
 		sql = sql.replace(PARAM_NEW_DATATYPE, newDefinition.getDbmsType());
 
@@ -282,8 +279,8 @@ public class ColumnChanger
 		String newName = getColumnExpression(newDefinition);
 		if (oldName.trim().equalsIgnoreCase(newName.trim())) return null;
 
-		sql = sql.replace(PARAM_COL_NAME, getColumnExpression(oldDefinition));
-		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
+    sql = TemplateHandler.replaceTablePlaceholder(sql, table, dbConn, false);
+		sql = sql.replace(MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, getColumnExpression(oldDefinition));
 		sql = sql.replace(PARAM_NEW_COL_NAME, getColumnExpression(newDefinition));
 
 		// Some stubid DBMS require the full data type definition of the column even if it should only be renamed...
@@ -320,8 +317,8 @@ public class ColumnChanger
 		}
 		if (sql != null)
 		{
-			sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
-			sql = sql.replace(PARAM_COL_NAME, getColumnExpression(oldDefinition));
+      sql = TemplateHandler.replaceTablePlaceholder(sql, table, dbConn, false);
+			sql = sql.replace(MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, getColumnExpression(oldDefinition));
 			sql = sql.replace(PARAM_DATATYPE, oldDefinition.getDbmsType());
 			sql = sql.replace(PARAM_NEW_DATATYPE, newDefinition.getDbmsType());
 		}
@@ -342,7 +339,7 @@ public class ColumnChanger
 
 		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConn));
-		sql = sql.replace(PARAM_TABLE_NAME, table.getTableName());
+    sql = TemplateHandler.replaceTablePlaceholder(sql, table, dbConn, false);
 		sql = sql.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, table.getSchema() == null ? "" : table.getSchema());
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(oldDefinition == null ? newDefinition : oldDefinition));
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newRemarks.replace("'", "''"));
@@ -367,7 +364,7 @@ public class ColumnChanger
 
 		sql = sql.replace(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConn));
-		sql = sql.replace(PARAM_TABLE_NAME, table.getObjectName());
+    sql = TemplateHandler.replaceTablePlaceholder(sql, table, dbConn, false);
 		sql = sql.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, table.getSchema() == null ? "" : table.getSchema());
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(column));
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, remarks.replace("'", "''"));
@@ -398,8 +395,7 @@ public class ColumnChanger
 		{
 			// drop default
 			if (dropDefault == null) return null;
-			sql = dropDefault.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
-			sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
+      sql = TemplateHandler.replaceTablePlaceholder(dropDefault, table, dbConn, false);
 		}
 
 		// Cannot alter, need SET DEFAULT or DROP DEFAULT
@@ -407,20 +403,18 @@ public class ColumnChanger
 		{
 			if (setDefault != null)
 			{
-				sql = setDefault.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
-				sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
+        sql = TemplateHandler.replaceTablePlaceholder(setDefault, table, dbConn, false);
 				sql = sql.replace(PARAM_DEFAULT_VALUE, newDefault);
 			}
 			else if (alterDefault != null)
 			{
-				sql = alterDefault.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
-				sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConn));
+        sql = TemplateHandler.replaceTablePlaceholder(alterDefault, table, dbConn, false);
 				sql = sql.replace(PARAM_DEFAULT_VALUE, newDefault);
 			}
 		}
 		if (sql != null)
 		{
-			sql = sql.replace(PARAM_COL_NAME, getColumnExpression(oldDefinition));
+			sql = sql.replace(MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, getColumnExpression(oldDefinition));
 			sql = sql.replace(PARAM_DATATYPE, oldDefinition.getDbmsType());
 			sql = sql.replace(PARAM_NEW_DATATYPE, newDefinition.getDbmsType());
 		}

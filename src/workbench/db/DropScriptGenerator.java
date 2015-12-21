@@ -32,6 +32,8 @@ import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.interfaces.TextOutput;
 
+import workbench.db.sqltemplates.TemplateHandler;
+
 import workbench.storage.RowActionMonitor;
 
 import workbench.sql.parser.ParserType;
@@ -218,7 +220,7 @@ public class DropScriptGenerator
 	private String createDropFKStatement(DependencyNode node)
 	{
 		if (node == null) return null;
-		String drop = dropTemplate.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, node.getTable().getTableExpression(this.connection));
+    String drop = TemplateHandler.replaceTablePlaceholder(dropTemplate, node.getTable(), connection);
 		drop = drop.replace(MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, node.getFkName());
 
 		return SqlUtil.addSemicolon(drop);

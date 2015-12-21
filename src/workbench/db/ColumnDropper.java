@@ -30,6 +30,8 @@ import java.util.List;
 import workbench.interfaces.ObjectDropper;
 import workbench.log.LogMgr;
 
+import workbench.db.sqltemplates.TemplateHandler;
+
 import workbench.storage.RowActionMonitor;
 
 import workbench.util.SqlUtil;
@@ -218,7 +220,7 @@ public class ColumnDropper
 	 *
 	 * @param toDrop
    * @param cascade
-   * 
+   *
 	 * @return always null
 	 */
 	@Override
@@ -247,8 +249,7 @@ public class ColumnDropper
 
 		if (columns.size() == 1 || StringUtil.isEmptyString(multiSql))
 		{
-			singleSql = StringUtil.replace(singleSql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn));
-
+      singleSql = TemplateHandler.replaceTablePlaceholder(singleSql, table, conn);
 			for (ColumnIdentifier col : columns)
 			{
 				result.add(StringUtil.replace(singleSql, MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, col.getColumnName(conn)));
@@ -256,7 +257,7 @@ public class ColumnDropper
 		}
 		else
 		{
-			multiSql = StringUtil.replace(multiSql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn));
+			multiSql = TemplateHandler.replaceTablePlaceholder(multiSql, table, conn);
 
 			StringBuilder cols = new StringBuilder(columns.size());
 			int nr = 0;

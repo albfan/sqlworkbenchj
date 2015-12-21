@@ -35,6 +35,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.importer.TableDependencySorter;
+import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.sql.formatter.FormatterUtil;
 
@@ -330,18 +331,18 @@ public class TableDeleter
 	private String getDeleteStatement(final TableIdentifier table, final boolean useTruncate, boolean cascade)
 	{
 		String deleteSql = null;
-		String tableName = table.createCopy().getTableExpression(this.connection);
+		String tableExpression = table.createCopy().getTableExpression(this.connection);
 		if (useTruncate)
 		{
 			String sql = connection.getDbSettings().getTruncateCommand(cascade);
 			if (sql != null)
 			{
-				deleteSql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
+        deleteSql = TemplateHandler.replaceTablePlaceholder(sql, table, connection, false);
 			}
 		}
 		if (deleteSql == null)
 		{
-			deleteSql = "DELETE FROM " + tableName;
+			deleteSql = "DELETE FROM " + tableExpression;
 		}
 		return deleteSql;
 	}

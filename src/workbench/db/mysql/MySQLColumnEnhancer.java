@@ -36,6 +36,7 @@ import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to retrieve enum and collation definitions for the columns of a MySQL table.
@@ -71,13 +72,8 @@ public class MySQLColumnEnhancer
     String sql =
       "select column_name, extra, " + (is57 ? "generation_expression " : "null as generation_expression ") + " \n" +
       "from information_schema.columns \n" +
-      "where table_schema = ? \n" +
-      "  and table_name = ? \n " +
-      "  and coalesce(extra) <> '' \n";
-    if (is57)
-    {
-      sql += "  and coalesce(generation_expression) <> ''";
-    }
+      "where table_schema = ?\n" +
+      "  and table_name = ? \n ";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -99,7 +95,7 @@ public class MySQLColumnEnhancer
         ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
         if (col != null)
         {
-          if (expression != null)
+          if (StringUtil.isNonBlank(expression))
           {
             String genSql = " GENERATED ALWAYS AS (" + expression + ") " + extra.replace("GENERATED", "").trim();
             col.setComputedColumnExpression(genSql);

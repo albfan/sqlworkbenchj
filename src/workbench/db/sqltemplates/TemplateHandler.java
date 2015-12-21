@@ -27,7 +27,10 @@ import java.io.IOException;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.DbObject;
 import workbench.db.MetaDataSqlManager;
+import workbench.db.QuoteHandler;
+import workbench.db.WbConnection;
 
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -100,6 +103,33 @@ public abstract class TemplateHandler
 		}
 		return sql.replaceAll(s, StringUtil.EMPTY_STRING);
 	}
+
+  public static String replaceTablePlaceholder(String sql, DbObject table, WbConnection connection)
+  {
+    return replaceTablePlaceholder(sql, table, connection, false);
+  }
+
+  public static String replaceTablePlaceholder(String sql, DbObject table, WbConnection connection, boolean addWhitespace)
+  {
+    if (sql == null) return sql;
+    if (table == null) return sql;
+    QuoteHandler handler = connection == null ? QuoteHandler.STANDARD_HANDLER : connection.getMetadata();
+    sql = replacePlaceholder(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, handler.quoteObjectname(table.getObjectName()), addWhitespace);
+
+    // do not call getObjectExpression() or getFullyQualifiedName() if not necessary.
+    // this might trigger a SELECT to the database to get the current schema and/or catalog
+    // to avoid unnecessary calls, this is only done if really needed
+
+    if (sql.contains(MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER))
+    {
+      sql = replacePlaceholder(sql, MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER, table.getObjectExpression(connection), addWhitespace);
+    }
+    if (sql.contains(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER))
+    {
+      sql = replacePlaceholder(sql, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(connection), addWhitespace);
+    }
+    return sql;
+  }
 
   public static String removeSchemaPlaceholder(String sql, char schemaSeparator)
   {

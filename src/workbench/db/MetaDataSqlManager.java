@@ -45,8 +45,8 @@ public class MetaDataSqlManager
 	public static final String NAME_PLACEHOLDER = "%name%";
 	public static final String SCHEMA_NAME_PLACEHOLDER = "%schema_name%";
 	public static final String CATALOG_NAME_PLACEHOLDER = "%catalog_name%";
-	public static final String TABLE_NAME_ONLY_PLACEHOLDER = "%simple_table_name%";
 	public static final String TABLE_NAME_PLACEHOLDER = "%table_name%";
+	public static final String TABLE_EXPRESSION_PLACEHOLDER = "%table_expression%";
 	public static final String SPECIFIC_NAME_PLACEHOLDER = "%specific_name%";
 	public static final String INDEX_TYPE_PLACEHOLDER = "%indextype%";
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";

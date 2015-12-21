@@ -93,6 +93,11 @@ public class SqlServerObjectListEnhancer
 		String propName = con.getDbSettings().getProperty(REMARKS_PROP_NAME, REMARKS_PROP_DEFAULT);
 		String sql = null;
 
+    if ("*".equals(schema))
+    {
+      schema = null;
+    }
+    
 		if (SqlServerUtil.isSqlServer2005(con))
 		{
 			sql = "SELECT objtype, objname, cast(value as varchar(8000)) as value \n" +

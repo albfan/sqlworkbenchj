@@ -56,7 +56,7 @@ public class TableSelectBuilderTest
 			"create table foo.person (nr integer, firstname varchar(20), lastname varchar(20))");
 
 		TableSelectBuilder builder = new TableSelectBuilder(con);
-		builder.setTemplate("select %columnlist%\nfrom %catalog_name%.%schema_name%.%simple_table_name%");
+		builder.setTemplate("select %columnlist%\nfrom %catalog_name%.%schema_name%.%table_name%");
 		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("person"));
 
 		TableDefinition def = con.getMetadata().getTableDefinition(tbl);
@@ -69,7 +69,7 @@ public class TableSelectBuilderTest
 		String expected = "select NR,\n" +
 			"       FIRSTNAME,\n" +
 			"       LASTNAME\nfrom PERSON";
-//			System.out.println("----\n" + expected + "\n------\n" + sql);
+			System.out.println("----\n" + expected + "\n------\n" + sql);
 		assertEquals(expected, sql);
 
 		t1 = tbl.createCopy();

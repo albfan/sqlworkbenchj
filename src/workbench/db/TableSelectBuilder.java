@@ -85,7 +85,7 @@ public class TableSelectBuilder
 
 		if (StringUtil.isBlank(sqlTemplate))
 		{
-			sqlTemplate = "SELECT " + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + "\nFROM " + MetaDataSqlManager.TABLE_NAME_PLACEHOLDER;
+			sqlTemplate = "SELECT " + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + "\nFROM " + MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER;
 		}
 	}
 
@@ -280,12 +280,8 @@ public class TableSelectBuilder
 
 	private String replacePlaceholders(TableIdentifier table, CharSequence selectCols, int maxRows)
 	{
-		String fqTableName = SqlUtil.fullyQualifiedName(dbConnection, table);
-
 		String select = sqlTemplate.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, selectCols);
-		select = TemplateHandler.replacePlaceholder(select, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqTableName, true);
-
-		select = select.replace(MetaDataSqlManager.TABLE_NAME_ONLY_PLACEHOLDER, table.getTableName());
+		select = TemplateHandler.replaceTablePlaceholder(select, table, dbConnection, false);
 
 		if (table.getSchema() == null)
 		{
@@ -303,14 +299,6 @@ public class TableSelectBuilder
 		else
 		{
 			select = select.replace(MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, table.getCatalog());
-		}
-
-		if (sqlTemplate.contains(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER))
-		{
-			// do not call getTableExpression() if not necessary.
-			// this might trigger a SELECT to the database to get the current schema and/or catalog
-			// to avoid unnecessary calls, this is only done if really needed
-			select = TemplateHandler.replacePlaceholder(select, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.dbConnection), true);
 		}
 
 		select = applyLimit(select, maxRows);

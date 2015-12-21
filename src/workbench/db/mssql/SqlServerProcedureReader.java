@@ -45,7 +45,7 @@ import workbench.util.StringUtil;
 public class SqlServerProcedureReader
 	extends JdbcProcedureReader
 {
-  
+
 	public SqlServerProcedureReader(WbConnection db)
 	{
 		super(db);
@@ -123,8 +123,9 @@ public class SqlServerProcedureReader
 
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
+      String schema = ds.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
 			String name = ds.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-			String remark = remarks.get(name);
+			String remark = remarks.get(schema + "." + name);
 			if (remark != null)
 			{
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);

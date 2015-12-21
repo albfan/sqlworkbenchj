@@ -317,8 +317,7 @@ public class JdbcIndexReader
 	protected String getUniqueConstraint(TableIdentifier table, IndexDefinition indexDefinition)
 	{
 		String template = this.metaData.getDbSettings().getCreateUniqeConstraintSQL();
-		String tableName = table.getTableExpression(this.metaData.getWbConnection());
-		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
+    String sql = TemplateHandler.replaceTablePlaceholder(template, table, metaData.getWbConnection());
 		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, indexDefinition.getColumnList());
 		sql = StringUtil.replace(sql, MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, this.metaData.quoteObjectname(indexDefinition.getUniqueConstraintName()));
 
@@ -398,8 +397,8 @@ public class JdbcIndexReader
 		sql = TableSourceBuilder.replacePlaceHolder(sql, TableSourceBuilder.CATALOG_PLACEHOLDER, index.getCatalog(), needQuotes, metaData);
 		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, index.getName(), needQuotes, metaData);
 		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.FQ_INDEX_NAME_PLACEHOLDER, index.getFullyQualifiedName(conn), false, metaData);
-		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn), false, metaData);
-		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.TABLE_NAME_ONLY_PLACEHOLDER, table.getTableName(), needQuotes, metaData);
+		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER, table.getTableExpression(conn), false, metaData);
+		sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableName(), needQuotes, metaData);
     sql = TableSourceBuilder.replacePlaceHolder(sql, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(conn), false, metaData);
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -473,7 +472,8 @@ public class JdbcIndexReader
 		WbConnection conn = metaData.getWbConnection();
 		String sql = template;
 
-		sql = StringUtil.replace(sql, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn));
+    sql = StringUtil.replace(sql, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(conn));
+		sql = StringUtil.replace(sql, MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER, table.getTableExpression(conn));
 		sql = StringUtil.replace(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableName());
 
 		if (indexDefinition.isUnique())
@@ -578,7 +578,8 @@ public class JdbcIndexReader
 		}
 
 		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, aTable.getTableName());
-		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, aTable.getTableExpression(metaData.getWbConnection()));
+		sql = sql.replace(MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER, aTable.getTableExpression(metaData.getWbConnection()));
+    sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, aTable.getFullyQualifiedName(metaData.getWbConnection()));
 
 		sql = TemplateHandler.removePlaceholder(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, true);
 		if (unique)

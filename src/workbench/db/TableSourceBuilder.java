@@ -772,7 +772,8 @@ public class TableSourceBuilder
 		List<String> pkCols = pk.getColumns();
 		String pkName = pk.getPkName();
 
-		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, useFQN ? fqName : tablename);
+		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER, useFQN ? fqName : tablename);
+		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, useFQN ? fqName : table.getTableName());
     template = StringUtil.replace(template, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqName);
 		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, getColumnList(pkCols));
 
@@ -877,8 +878,7 @@ public class TableSourceBuilder
 		for (DependencyNode node : fkList)
 		{
 			String fkname = node.getFkName();
-			String stmt = template;
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
+      String stmt = TemplateHandler.replaceTablePlaceholder(template, table, dbConnection, false);
 
 			if (nameTester.isSystemConstraintName(fkname))
 			{

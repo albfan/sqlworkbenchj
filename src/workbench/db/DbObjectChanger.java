@@ -29,7 +29,7 @@ import java.util.Map;
 
 import workbench.log.LogMgr;
 
-import workbench.db.sqltemplates.ColumnChanger;
+import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -136,8 +136,7 @@ public class DbObjectChanger
 
 		sql = sql.replace(PARAM_OLD_SCHEMA_NAME, oldSchema.trim());
 		sql = sql.replace(PARAM_NEW_SCHEMA_NAME, newSchema.trim());
-		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(dbConnection, oldTable));
-		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, oldTable.getObjectName(dbConnection));
+    sql = TemplateHandler.replaceTablePlaceholder(sql, oldTable, dbConnection);
 		sql = sql.replace(PARAM_OLD_OBJECT_NAME, oldTable.getObjectName(dbConnection));
 
 		return sql;
@@ -158,8 +157,7 @@ public class DbObjectChanger
 
 		sql = sql.replace(PARAM_OLD_CATALOG_NAME, oldCat.trim());
 		sql = sql.replace(PARAM_NEW_CATALOG_NAME, newCat.trim());
-		sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, SqlUtil.fullyQualifiedName(dbConnection, oldTable));
-		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, oldTable.getObjectName());
+    sql = TemplateHandler.replaceTablePlaceholder(sql, oldTable, dbConnection);
 
 		return sql;
 	}
@@ -222,7 +220,7 @@ public class DbObjectChanger
 
 		// schema and table name placeholders are intended where those names are individual parameters
 		// this is mainly used for the kludgy and non-standard way SQL Server "supports" comments
-		sql = sql.replace(ColumnChanger.PARAM_TABLE_NAME, oldDefinition.getObjectName());
+		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, oldDefinition.getObjectName());
 		sql = sql.replace(TableSourceBuilder.SCHEMA_PLACEHOLDER, schema);
 
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newComment.replace("'", "''"));
@@ -295,7 +293,7 @@ public class DbObjectChanger
 
 		if (sql == null) return null;
 
-		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
+    sql = TemplateHandler.replaceTablePlaceholder(sql, table, dbConnection, false);
 		if (pkConstraint != null)
 		{
 			sql = sql.replace(MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkConstraint);
