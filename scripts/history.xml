@@ -20,6 +20,7 @@
     <entry dev-build="1" type="enh">A new action to run all SQL statements up to the cursor position is available</entry>
     <entry dev-build="1" type="enh">The error dialog that is displayed when running a script can now be configured to also include the error message or the statement that failed</entry>
     <entry dev-build="1" type="enh">Improved display of packages in the DbTree for Oracle and Firebird</entry>
+    <entry dev-build="8" type="fix">CREATE TABLE statements were not formatted correctly if the name consisted of quoted and unquoted parts (e.g. unquoted schema and quoted table name)</entry>
     <entry dev-build="8" type="fix">The error dialog when running running multiple statements was not displayed on Linux if the option "Include error message" was selected in the "SQL Execution" options</entry>
     <entry dev-build="8" type="fix">Improved the performance when retrieving table definitions and table source for Oracle</entry>
     <entry dev-build="7" type="fix">For Postgres, rules defined on a table where shown twice in the generated DDL script</entry>
