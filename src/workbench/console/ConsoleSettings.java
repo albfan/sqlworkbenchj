@@ -43,10 +43,11 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class ConsoleSettings
+  implements PropertyChangeListener
 {
   public static final String PROP_CLEAR_SCREEN = "workbench.console.refresh.clear.screen";
   public static final String PROP_NULL_STRING = "workbench.console.nullstring";
-
+  public static final String EVT_PROPERTY_ROW_DISPLAY = "display";
 	private RowDisplay rowDisplay = RowDisplay.SingleLine;
 	private RowDisplay nextRowDisplay;
 	private List<PropertyChangeListener> listener = new ArrayList<>();
@@ -58,6 +59,7 @@ public class ConsoleSettings
 
 	private ConsoleSettings()
 	{
+    Settings.getInstance().addPropertyChangeListener(this, PROP_NULL_STRING);
 	}
 
 	public static ConsoleSettings getInstance()
@@ -69,6 +71,20 @@ public class ConsoleSettings
 	{
 		return rowDisplay;
 	}
+
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+		if (listener.isEmpty()) return;
+
+    // this is only called when PROP_NULL_STRING is changed
+    // so just forward the change to any listener
+		for (PropertyChangeListener l : listener)
+		{
+			l.propertyChange(evt);
+		}
+  }
+
 
 	public void addChangeListener(PropertyChangeListener l)
 	{
@@ -83,7 +99,7 @@ public class ConsoleSettings
 	protected void firePropertyChange(RowDisplay oldDisplay, RowDisplay newDisplay)
 	{
 		if (listener.isEmpty()) return;
-		PropertyChangeEvent evt = new PropertyChangeEvent(this, "display", oldDisplay, newDisplay);
+		PropertyChangeEvent evt = new PropertyChangeEvent(this, EVT_PROPERTY_ROW_DISPLAY, oldDisplay, newDisplay);
 		for (PropertyChangeListener l : listener)
 		{
 			l.propertyChange(evt);

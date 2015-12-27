@@ -146,6 +146,7 @@ public class ClipBoardCopier
         // never support HTML for "formatted text"
         includeHtml = false;
 				DataStorePrinter printer = new DataStorePrinter(this.data);
+        printer.setNullString(GuiSettings.getDisplayNullString());
 				printer.setFormatColumns(true);
 				printer.setPrintRowCount(false);
 				if (columnsToCopy != null)

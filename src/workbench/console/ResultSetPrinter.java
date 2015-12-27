@@ -161,8 +161,15 @@ public class ResultSetPrinter
 	{
 		if (evt.getSource() != ConsoleSettings.getInstance()) return;
 
-		RowDisplay newDisplay = ConsoleSettings.getInstance().getNextRowDisplay();
-		setPrintRowsAsLine(newDisplay == RowDisplay.SingleLine);
+    if (evt.getPropertyName().equals(ConsoleSettings.EVT_PROPERTY_ROW_DISPLAY))
+    {
+      RowDisplay newDisplay = ConsoleSettings.getInstance().getNextRowDisplay();
+      setPrintRowsAsLine(newDisplay == RowDisplay.SingleLine);
+    }
+    else if (evt.getPropertyName().equals(ConsoleSettings.PROP_NULL_STRING))
+    {
+      nullString = ConsoleSettings.getNullString();
+    }
 	}
 
 }

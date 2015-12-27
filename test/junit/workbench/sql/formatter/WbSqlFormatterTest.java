@@ -680,7 +680,7 @@ public class WbSqlFormatterTest
 		WbSqlFormatter f = new WbSqlFormatter(sql, "microsoft_sql_server");
 		String formatted = f.getFormattedSql();
 		String expected =
-				"CREATE TABLE [DDD] \n" +
+				"CREATE TABLE [DDD]\n" +
 				"(\n" +
 				"  [Id]        [int] NOT NULL,\n" +
 				"  [DayId]     [int] NOT NULL,\n" +
@@ -701,7 +701,7 @@ public class WbSqlFormatterTest
 		f = new WbSqlFormatter(sql, "microsoft_sql_server");
 		formatted = f.getFormattedSql();
 		expected =
-				"CREATE TABLE [dbo].[DDD] \n" +
+				"CREATE TABLE [dbo].[DDD]\n" +
 				"(\n" +
 				"  [Id]        [int] NOT NULL,\n" +
 				"  [DayId]     [int] NOT NULL,\n" +
@@ -745,7 +745,7 @@ public class WbSqlFormatterTest
 			"  d   varchar(5) AS (LEFT(b,5)) persistent \n" +
 			")";
 		String expected =
-			"CREATE TABLE table1 \n" +
+			"CREATE TABLE table1\n" +
 			"(\n" +
 			"  a   INT NOT NULL,\n" +
 			"  b   VARCHAR(32),\n" +
@@ -1602,7 +1602,7 @@ public class WbSqlFormatterTest
 	{
 		String sql = "CREATE table cust as select * from customers where rownum <= 1000";
 		String expected =
-				"CREATE TABLE cust \n"+
+				"CREATE TABLE cust\n"+
 				"AS\n"+
 				"SELECT *\n" +
 				"FROM customers\n" +
@@ -1834,27 +1834,87 @@ public class WbSqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+  @Test
+  public void testDDLNonstandardSeparator()
+  {
+    String sql = "create table \"Foo\"/\"Bar\" (id integer, some_data varchar(100))";
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setIndentWhereCondition(true);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "CREATE TABLE \"Foo\"/\"Bar\"\n" +
+      "(\n" +
+      "  id          INTEGER,\n" +
+      "  some_data   VARCHAR(100)\n" +
+      ")";
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+    assertEquals(expected, formatted);
+
+    sql = "create table foo:bar (id integer, some_data varchar(100))";
+    f = new WbSqlFormatter(sql, 150);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.upper);
+    formatted = f.getFormattedSql();
+    expected =
+      "CREATE TABLE FOO:BAR\n" +
+      "(\n" +
+      "  ID          INTEGER,\n" +
+      "  SOME_DATA   VARCHAR(100)\n" +
+      ")";
+		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+    assertEquals(expected, formatted);
+  }
+
+  @Test
+  public void testPartialQuotedIdentifierDDL()
+  {
+    String sql = "create table foo.\"Bar\"(id integer, some_data varchar(100))";
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "CREATE TABLE foo.\"Bar\"\n" +
+      "(\n" +
+      "  id          INTEGER,\n" +
+      "  some_data   VARCHAR(100)\n" +
+      ")";
+		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+    assertEquals(expected, formatted);
+  }
+
 	@Test
-	public void testCreateTableQuoted()
+	public void testFQNQuotedDDL()
 		throws Exception
 	{
-		String sql = "create table \"public\".\"users\" ( \"id\" integer, \"firstname\" varchar(100), \"lastname\" varchar(100))";
+		String sql = "create table \"Public\".\"Users\" ( \"id\" integer, \"firstname\" varchar(100), \"lastname\" varchar(100))";
 		WbSqlFormatter f = new WbSqlFormatter(sql);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.upper);
 		String formatted = f.getFormattedSql();
 		String expected =
-			"CREATE TABLE \"public\".\"users\" \n" +
+			"CREATE TABLE \"Public\".\"Users\"\n" +
 			"(\n" +
 			"  \"id\"          INTEGER,\n" +
 			"  \"firstname\"   VARCHAR(100),\n" +
 			"  \"lastname\"    VARCHAR(100)\n" +
 			")";
-//		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
+		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
 		assertEquals(expected, formatted.trim());
-		sql = "create table \"users\" ( \"id\" integer, \"firstname\" varchar(100), \"lastname\" varchar(100))";
-		f = new WbSqlFormatter(sql);
-		formatted = f.getFormattedSql();
-		expected =
-			"CREATE TABLE \"users\" \n" +
+  }
+
+  @Test
+  public void testQuotedDDL()
+  {
+		String sql = "create table \"USERS\" ( \"id\" integer, \"firstname\" varchar(100), \"lastname\" varchar(100))";
+		WbSqlFormatter f = new WbSqlFormatter(sql);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"CREATE TABLE \"USERS\"\n" +
 			"(\n" +
 			"  \"id\"          INTEGER,\n" +
 			"  \"firstname\"   VARCHAR(100),\n" +
@@ -1872,7 +1932,7 @@ public class WbSqlFormatterTest
 		WbSqlFormatter f = null;
 
 		String expected =
-			"CREATE TABLE ##foo_tmp \n" +
+			"CREATE TABLE ##foo_tmp\n" +
 			"(\n" +
 			"  foo   INTEGER,\n" +
 			"  bar   INTEGER\n" +
@@ -1888,7 +1948,7 @@ public class WbSqlFormatterTest
 		f = new WbSqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 		expected =
-			"CREATE TABLE #foo_tmp \n" +
+			"CREATE TABLE #foo_tmp\n" +
 			"(\n" +
 			"  foo   INTEGER,\n" +
 			"  bar   INTEGER\n" +
@@ -1946,7 +2006,7 @@ public class WbSqlFormatterTest
 		f = new WbSqlFormatter(sql, "postgresql");
 		formatted = f.getFormattedSql();
 		String expected =
-				"CREATE TABLE person \n"+
+				"CREATE TABLE person\n"+
 				"(\n"+
 				"  id1   INTEGER NOT NULL,\n"+
 				"  CONSTRAINT xyz EXCLUDE (id1 WITH = )\n"+
@@ -1958,14 +2018,13 @@ public class WbSqlFormatterTest
 		formatted = f.getFormattedSql();
 //		System.out.println("++++\n" + formatted + "\n-----");
 		expected =
-				"CREATE TABLE person \n"+
+				"CREATE TABLE person\n"+
 				"(\n"+
 				"  id1         INTEGER NOT NULL PRIMARY KEY,\n"+
 				"  some_data   VARCHAR(100),\n"+
 				"  CONSTRAINT xyz EXCLUDE (some_data WITH = )\n"+
 				")";
 		assertEquals(expected, formatted.trim());
-
 	}
 
 	@Test

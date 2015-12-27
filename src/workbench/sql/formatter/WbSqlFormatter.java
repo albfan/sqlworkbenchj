@@ -123,6 +123,7 @@ public class WbSqlFormatter
 	private int colsPerInsert = -1;
 	private int colsPerUpdate = -1;
 	private int colsPerSelect = -1;
+  private String schemaSeparator = ".";
 
 	WbSqlFormatter(CharSequence aScript)
 	{
@@ -450,7 +451,7 @@ public class WbSqlFormatter
     }
     else if (identifierCase == upper)
     {
-      appendText(text.toLowerCase());
+      appendText(text.toUpperCase());
     }
   }
 
@@ -2455,6 +2456,31 @@ public class WbSqlFormatter
 		return SqlUtil.isQuotedIdentifier(name);
 	}
 
+  private SQLToken appendCreateTableName(SQLToken part, Set<String> nameTerminal)
+  {
+    if (part == null) return null;
+
+    String name = part.getContents();
+    appendIdentifier(name);
+
+    part = lexer.getNextToken(false, false);
+    if (part == null) return null;
+
+    while (!nameTerminal.contains(part.getContents()))
+    {
+      if (part.isIdentifier())
+      {
+        appendIdentifier(part.getContents());
+      }
+      else
+      {
+        appendText(part.getContents());
+      }
+      part = lexer.getNextToken(false, false);
+    }
+    return part;
+  }
+
 	/**
 	 * Process a CREATE TABLE statement.
 	 * The CREATE TABLE has already been added!
@@ -2479,31 +2505,7 @@ public class WbSqlFormatter
 			name = t.getContents();
 		}
 
-		this.appendIdentifier(name);
-
-		if (isQuotedIdentifier(name))
-		{
-			t = this.skipComments();
-			if (t.getContents().equals("."))
-			{
-				appendText('.');
-				// the following token must be another identifier, otherwise the syntax is not correct
-				t = this.skipComments();
-				appendIdentifier(t.getContents());
-				appendText(' ');
-				t = this.skipComments();
-			}
-			else
-			{
-				appendText(' ');
-			}
-		}
-		else
-		{
-			this.appendText(' ');
-			t = this.skipComments();
-		}
-
+    t = this.appendCreateTableName(t, CollectionUtil.caseInsensitiveSet("(", "AS"));
 		if (t == null) return t;
 
 		if (t.getContents().equals("AS"))

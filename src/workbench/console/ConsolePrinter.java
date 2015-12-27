@@ -34,9 +34,9 @@ import javax.swing.SwingConstants;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.db.exporter.TextRowDataConverter;
-import workbench.resource.Settings;
 
 import workbench.storage.RowData;
 
@@ -65,12 +65,19 @@ public abstract class ConsolePrinter
 	protected abstract int getColumnCount();
 	protected abstract String getColumnName(int col);
 	protected abstract int getColumnType(int col);
+  protected String nullString;
 
 	public ConsolePrinter()
 	{
 		converter.setNullString(ConsoleSettings.getNullString());
 		converter.setDefaultNumberFormatter(Settings.getInstance().createDefaultDecimalFormatter());
+    nullString = ConsoleSettings.getNullString();
 	}
+
+  public void setNullString(String displayValue)
+  {
+    nullString = displayValue;
+  }
 
 	/**
 	 * If set to true (the default) one row is printed per console line.
@@ -261,7 +268,7 @@ public abstract class ConsolePrinter
 
 		if (value == null)
 		{
-			value = ConsoleSettings.getNullString();
+			value = nullString;
 		}
 
 		return value;

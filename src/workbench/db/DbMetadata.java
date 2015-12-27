@@ -297,7 +297,7 @@ public class DbMetadata
 			objectListEnhancer = new SqlServerObjectListEnhancer();
 			dataTypeResolver = new SqlServerDataTypeResolver();
 			if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.use.schemareader", true)
-				  && SqlServerUtil.isSqlServer2008(dbConnection))
+				  && SqlServerUtil.isSqlServer2005(dbConnection))
 			{
 				// SqlServerSchemaInfoReader will cache the user's default schema
 				schemaInfoReader = new SqlServerSchemaInfoReader(dbConnection);

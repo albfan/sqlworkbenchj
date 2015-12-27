@@ -25,9 +25,9 @@ package workbench.db.mssql;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import workbench.db.JdbcUtils;
 import workbench.log.LogMgr;
 
+import workbench.db.JdbcUtils;
 import workbench.db.SchemaInformationReader;
 import workbench.db.WbConnection;
 
@@ -40,51 +40,57 @@ import workbench.util.SqlUtil;
 public class SqlServerSchemaInfoReader
 	implements SchemaInformationReader
 {
+  private final WbConnection dbConnection;
 	private String defaultSchema;
+  private boolean schemaRetrieved;
 
 	public SqlServerSchemaInfoReader(WbConnection con)
 	{
-		// As the default schema is a property of the user definition and nothing that can be changed at runtime
-		// I assume it's safe to cache the current schema.
-    if (JdbcUtils.hasMiniumDriverVersion(con, "4.0") && SqlServerUtil.isMicrosoftDriver(con))
-    {
-      defaultSchema = getSchema(con);
-    }
-    else
-    {
-      defaultSchema = retrieveSchema(con);
-    }
-    LogMgr.logDebug("SqlServerSchemaInfoReader.<init>", "Using current schema: " + defaultSchema);
+    dbConnection = con;
+    retrieveCurrentSchema();
 	}
 
-  private String getSchema(WbConnection con)
+  private void retrieveCurrentSchema()
   {
-    try
+    // As the default schema is a property of the user definition and nothing that can be changed at runtime
+    // I assume it's safe to cache the current schema.
+
+    schemaRetrieved = false;
+    if (JdbcUtils.hasMiniumDriverVersion(dbConnection, "4.0") && SqlServerUtil.isMicrosoftDriver(dbConnection))
     {
-      // not all driver versions support this properly
-      return con.getSqlConnection().getSchema();
+      try
+      {
+        // not all driver versions support this properly, so in case anything goes wrong
+        // use the default SQL query to retrieve the user's default schema
+        defaultSchema = dbConnection.getSqlConnection().getSchema();
+        schemaRetrieved = true;
+      }
+      catch (Throwable th)
+      {
+        LogMgr.logError("SqlServerSchemaInfoReader.<init>", "Error retrieving current schema using getSchema()", th);
+      }
     }
-    catch (Throwable th)
+
+    if (!schemaRetrieved)
     {
-      LogMgr.logError("SqlServerSchemaInfoReader.getSchema()", "Error retrieving current schema using getSchema()", th);
-      return null;
+      defaultSchema = retrieveSchema(dbConnection);
+      schemaRetrieved = true;
     }
+    LogMgr.logDebug("SqlServerSchemaInfoReader.<init>", "Using current schema: " + defaultSchema);
   }
 
-  private String  retrieveSchema(WbConnection con)
+  private String retrieveSchema(WbConnection con)
   {
     String schema = null;
-    String sql
-      = "SELECT default_schema_name\n" +
-      "FROM sys.database_principals with (nolock) \n" +
-      "WHERE type = 'S' \n" +
-      "AND name = current_user";
+    // this is what the Microsoft 4.x driver is using.
+    // The function is available starting with SQL Server 2005
+    String sql = "SELECT schema_name()";
 
     Statement stmt = null;
     ResultSet rs = null;
     try
     {
-      stmt = con.createStatement();
+      stmt = con.createStatementForQuery();
       rs = stmt.executeQuery(sql);
       if (rs.next())
       {
@@ -123,6 +129,13 @@ public class SqlServerSchemaInfoReader
 	@Override
 	public String getCurrentSchema()
 	{
+    if (!schemaRetrieved)
+    {
+      synchronized (dbConnection)
+      {
+        retrieveCurrentSchema();
+      }
+    }
 		return defaultSchema;
 	}
 
@@ -131,6 +144,5 @@ public class SqlServerSchemaInfoReader
 	{
 		// nothing to do
 	}
-
 
 }
