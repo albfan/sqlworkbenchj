@@ -1863,7 +1863,7 @@ public class WbSqlFormatterTest
       "  ID          INTEGER,\n" +
       "  SOME_DATA   VARCHAR(100)\n" +
       ")";
-		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
     assertEquals(expected, formatted);
   }
 
@@ -1881,7 +1881,7 @@ public class WbSqlFormatterTest
       "  id          INTEGER,\n" +
       "  some_data   VARCHAR(100)\n" +
       ")";
-		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
     assertEquals(expected, formatted);
   }
 
@@ -1901,7 +1901,7 @@ public class WbSqlFormatterTest
 			"  \"firstname\"   VARCHAR(100),\n" +
 			"  \"lastname\"    VARCHAR(100)\n" +
 			")";
-		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
+//		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
 		assertEquals(expected, formatted.trim());
   }
 
@@ -1923,6 +1923,35 @@ public class WbSqlFormatterTest
 //		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
 		assertEquals(expected, formatted.trim());
 	}
+
+	@Test
+	public void testQuotedIndexDDL()
+		throws Exception
+	{
+		String sql = "create index IX_FOO on \"Public\".\"Users\" ( \"id\")";
+		WbSqlFormatter f = new WbSqlFormatter(sql);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+		String expected = "CREATE INDEX ix_foo\n  ON \"Public\".\"Users\"(\"id\")";
+//		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
+		assertEquals(expected, formatted.trim());
+  }
+
+	@Test
+	public void testIndexOption()
+		throws Exception
+	{
+		String sql = "create bitmap index IX_FOO on \"Public\".\"Users\" ( \"id\")";
+		WbSqlFormatter f = new WbSqlFormatter(sql, "oracle");
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+		String expected = "CREATE BITMAP INDEX ix_foo\n  ON \"Public\".\"Users\"(\"id\")";
+//		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
+		assertEquals(expected, formatted.trim());
+  }
+
 
 	@Test
 	public void testCreateStupidTable()

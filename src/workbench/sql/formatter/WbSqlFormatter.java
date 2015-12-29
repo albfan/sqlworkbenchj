@@ -93,6 +93,10 @@ public class WbSqlFormatter
 
 	public static final Set<String> QUERY_START = CollectionUtil.unmodifiableSet("SELECT", "WITH");
 
+  private static final Set<String> INDEX_OPTIONS = CollectionUtil.unmodifiableSet(
+    "UNIQUE", "BITMAP", "HASH", "CLUSTERED", "NONCLUSTERED", "FULLTEXT", "SPATIAL",
+    "ONLINE", "OFFLINE");
+
 	private CharSequence sql;
 	private SQLLexer lexer;
 	private StringBuilder result;
@@ -2253,7 +2257,7 @@ public class WbSqlFormatter
 
 	private SQLToken processCreate()
 	{
-		SQLToken t = this.lexer.getNextToken(true, false);
+		SQLToken t = skipComments();
 		String verb = t.getContents();
 
 		if (verb.equals("TABLE"))
@@ -2271,12 +2275,32 @@ public class WbSqlFormatter
 			this.appendText(' ');
 			return this.processCreateView(t);
 		}
+    else if (INDEX_OPTIONS.contains(verb))
+    {
+      SQLToken opt = t;
+      String option = verb;
+      appendText(' ');
+      while (INDEX_OPTIONS.contains(option))
+      {
+        appendTokenText(opt);
+        appendText(' ');
+        opt = skipComments();
+        if (opt == null) return null;
+        option = opt.getContents();
+      }
+      if ("INDEX".equals(option))
+      {
+        this.appendTokenText(opt);
+        this.appendText(' ');
+        return processCreateIndex();
+      }
+    }
 		else if (verb.equals("INDEX"))
 		{
 			this.appendText(' ');
-			this.appendText(verb);
-			//this.appendText(' ');
-			return this.processCreateIndex(t);
+			this.appendTokenText(t);
+			this.appendText(' ');
+			return this.processCreateIndex();
 		}
 		else if (verb.equals("OR"))
 		{
@@ -2456,7 +2480,23 @@ public class WbSqlFormatter
 		return SqlUtil.isQuotedIdentifier(name);
 	}
 
-  private SQLToken appendCreateTableName(SQLToken part, Set<String> nameTerminal)
+  private boolean isEndOfIdentifier(SQLToken token, Set<String> nameTerminal)
+  {
+    if (token == null) return true;
+
+    boolean isTerminal;
+    if (nameTerminal != null)
+    {
+      isTerminal = nameTerminal.contains(token.getContents());
+    }
+    else
+    {
+      isTerminal = token.isReservedWord() || token.isOperator() || token.isSeparator() || token.isLiteral() || token.isNumberLiteral();
+    }
+    return isTerminal;
+  }
+
+  private SQLToken appendMultipartIdentifier(SQLToken part, Set<String> nameTerminal)
   {
     if (part == null) return null;
 
@@ -2466,7 +2506,7 @@ public class WbSqlFormatter
     part = lexer.getNextToken(false, false);
     if (part == null) return null;
 
-    while (!nameTerminal.contains(part.getContents()))
+    while (!isEndOfIdentifier(part, nameTerminal))
     {
       if (part.isIdentifier())
       {
@@ -2505,7 +2545,7 @@ public class WbSqlFormatter
 			name = t.getContents();
 		}
 
-    t = this.appendCreateTableName(t, CollectionUtil.caseInsensitiveSet("(", "AS"));
+    t = this.appendMultipartIdentifier(t, CollectionUtil.caseInsensitiveSet("(", "AS"));
 		if (t == null) return t;
 
 		if (t.getContents().equals("AS"))
@@ -2588,25 +2628,40 @@ public class WbSqlFormatter
 		return t;
 	}
 
-	private SQLToken processCreateIndex(SQLToken previous)
+	private SQLToken processCreateIndex()
 	{
-		SQLToken t = this.lexer.getNextToken(true, false);
-		SQLToken last = previous;
+		SQLToken t = skipComments();
+    if (t == null) return null;
+
+
+		SQLToken last = t;
+    if (t.getContents().equalsIgnoreCase("CONCURRENTLY"))
+    {
+      appendText(' ');
+      appendTokenText(t);
+      t = skipComments();
+      if (t == null) return null;
+    }
+
+    t = appendMultipartIdentifier(t, null);
+    if (t == null) return t;
+
+    appendNewline();
+    indent("  ");
+    appendTokenText(t);
+    appendText(' ');
+
+    t = skipComments();
+
+    t = appendMultipartIdentifier(t, null);
 
 		while (t != null)
 		{
-			String text = t.getContents();
 			if (t.getContents().equals("(") )
 			{
         appendText('(');
 				t = this.processCommaList(10, 4);
         appendTokenText(t);
-			}
-			else if ("ON".equalsIgnoreCase(text))
-			{
-				appendNewline();
-				indent("  ");
-				appendTokenText(t);
 			}
 			else
 			{
