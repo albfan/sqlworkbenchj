@@ -27,11 +27,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import workbench.log.LogMgr;
+
 import workbench.db.JdbcProcedureReader;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
