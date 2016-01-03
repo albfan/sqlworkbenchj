@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -53,7 +53,7 @@ public class SingleByteCharsetProber extends CharsetProber
     public static final int     NUMBER_OF_SEQ_CAT = 4;
     public static final int     POSITIVE_CAT = NUMBER_OF_SEQ_CAT-1;
     public static final int     NEGATIVE_CAT = 0;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // fields
@@ -61,18 +61,18 @@ public class SingleByteCharsetProber extends CharsetProber
     private ProbingState    state;
     private SequenceModel   model;
     private boolean         reversed;
-    
+
     private short           lastOrder;
 
     private int             totalSeqs;
     private int[]           seqCounters;
-    
+
     private int             totalChar;
     private int             freqChar;
-    
+
     private CharsetProber   nameProber;
-    
-    
+
+
     ////////////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ public class SingleByteCharsetProber extends CharsetProber
         this.seqCounters = new int[NUMBER_OF_SEQ_CAT];
         reset();
     }
-    
+
     public SingleByteCharsetProber(
             SequenceModel model,
             boolean reversed,
@@ -98,7 +98,7 @@ public class SingleByteCharsetProber extends CharsetProber
         this.seqCounters = new int[NUMBER_OF_SEQ_CAT];
         reset();
     }
-    
+
     boolean keepEnglishLetters()
     {
         return this.model.getKeepEnglishLetter();
@@ -139,11 +139,11 @@ public class SingleByteCharsetProber extends CharsetProber
     public ProbingState handleData(byte[] buf, int offset, int length)
     {
         short order;
-        
+
         int maxPos = offset + length;
         for (int i=offset; i<maxPos; ++i) {
             order = this.model.getOrder(buf[i]);
-            
+
             if (order < SYMBOL_CAT_ORDER) {
                 ++this.totalChar;
             }
@@ -160,7 +160,7 @@ public class SingleByteCharsetProber extends CharsetProber
             }
             this.lastOrder = order;
         }
-        
+
         if (this.state == ProbingState.DETECTING) {
             if (this.totalSeqs > SB_ENOUGH_REL_THRESHOLD) {
                 float cf = getConfidence();
@@ -171,7 +171,7 @@ public class SingleByteCharsetProber extends CharsetProber
                 }
             }
         }
-        
+
         return this.state;
     }
 

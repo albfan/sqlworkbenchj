@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -55,7 +55,7 @@ public abstract class CharsetProber
     public static final int     ASCII_GT = 0x3E; // '>'
     public static final int     ASCII_SP = 0x20; // ' '
 
-    
+
     ////////////////////////////////////////////////////////////////
     // inner types
     ////////////////////////////////////////////////////////////////
@@ -66,13 +66,13 @@ public abstract class CharsetProber
         NOT_ME
     }
 
-    
+
     ////////////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////////////
     public CharsetProber()
     {}
-    
+
     public abstract String getCharSetName();
     public abstract ProbingState handleData(final byte[] buf, int offset, int length);
     public abstract ProbingState getState();
@@ -84,14 +84,14 @@ public abstract class CharsetProber
     public ByteBuffer filterWithoutEnglishLetters(final byte[] buf, int offset, int length)
     {
         ByteBuffer out = ByteBuffer.allocate(length);
-        
+
         boolean meetMSB = false;
         byte c;
 
         int prevPtr = offset;
         int curPtr = offset;
         int maxPtr = offset + length;
-        
+
         for (; curPtr<maxPtr; ++curPtr) {
             c = buf[curPtr];
             if (!isAscii(c)) {
@@ -113,34 +113,34 @@ public abstract class CharsetProber
                 }
             }
         }
-        
+
         if (meetMSB && curPtr > prevPtr) {
             out.put(buf, prevPtr, (curPtr-prevPtr));
         }
-        
+
         return out;
     }
-    
+
     public ByteBuffer filterWithEnglishLetters(final byte[] buf, int offset, int length)
     {
         ByteBuffer out = ByteBuffer.allocate(length);
-        
+
         boolean isInTag = false;
         byte c;
 
         int prevPtr = offset;
         int curPtr = offset;
         int maxPtr = offset + length;
-        
+
         for (; curPtr < maxPtr; ++curPtr) {
             c = buf[curPtr];
-            
+
             if (c == ASCII_GT) {
                 isInTag = false;
             } else if (c == ASCII_LT) {
                 isInTag = true;
             }
-            
+
             if (isAscii(c) && isAsciiSymbol(c)) {
                 if (curPtr > prevPtr && !isInTag) {
                     // Current segment contains more than just a symbol
@@ -153,13 +153,13 @@ public abstract class CharsetProber
                 }
             }
         }
-        
-        // If the current segment contains more than just a symbol 
+
+        // If the current segment contains more than just a symbol
         // and it is not inside a tag then keep it.
         if (!isInTag && curPtr > prevPtr) {
             out.put(buf, prevPtr, (curPtr-prevPtr));
         }
-        
+
         return out;
     }
 
@@ -167,7 +167,7 @@ public abstract class CharsetProber
     {
         return ((b & 0x80) == 0);
     }
-    
+
     // b must be in ASCII code range (MSB can't be 1).
     private boolean isAsciiSymbol(byte b)
     {

@@ -5,11 +5,12 @@
  *
  * Copyright 2002-2016, Thomas Kellerer
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Licensed under a modified Apache License, Version 2.0
+ * that restricts the use for certain governments.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://sql-workbench.net/manual/license.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,7 +37,7 @@ import workbench.resource.Settings;
  *
  * @author  Thomas Kellerer
  */
-public class HtmlOptionsPanel 
+public class HtmlOptionsPanel
 	extends javax.swing.JPanel
 	implements HtmlOptions
 {
@@ -53,7 +54,7 @@ public class HtmlOptionsPanel
 		s.setProperty("workbench.export.html.escape", this.getEscapeHtml());
 		s.setProperty("workbench.export.html.pagetitle", this.getPageTitle());
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -61,7 +62,7 @@ public class HtmlOptionsPanel
 		this.setEscapeHtml(s.getBoolProperty("workbench.export.html.escape"));
 		this.setPageTitle(s.getProperty("workbench.export.html.pagetitle", ""));
 	}
-	
+
 	public boolean getCreateFullPage()
 	{
 		return this.fullPage.isSelected();
@@ -91,7 +92,7 @@ public class HtmlOptionsPanel
 	{
 		pageTitle.setText(title);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -145,13 +146,13 @@ public class HtmlOptionsPanel
     gridBagConstraints.insets = new Insets(4, 3, 0, 0);
     add(escapeHtml, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox escapeHtml;
   private JCheckBox fullPage;
   private JTextField pageTitle;
   private JLabel pageTitleLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

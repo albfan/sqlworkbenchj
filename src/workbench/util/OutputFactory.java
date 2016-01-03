@@ -5,11 +5,12 @@
  *
  * Copyright 2002-2016, Thomas Kellerer
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Licensed under a modified Apache License, Version 2.0
+ * that restricts the use for certain governments.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://sql-workbench.net/manual/license.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,20 +29,20 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 /**
- * 
+ *
  * @author Thomas Kellerer
  */
 public interface OutputFactory
 {
-	OutputStream createOutputStream(File output) 
+	OutputStream createOutputStream(File output)
 		throws IOException;
-	
-	Writer createWriter(File output, String encoding) 
+
+	Writer createWriter(File output, String encoding)
 		throws IOException;
-	
-	Writer createWriter(String filename, String encoding) 
+
+	Writer createWriter(String filename, String encoding)
 		throws IOException;
-	
+
 	void done() throws IOException;
 	boolean isArchive();
 }

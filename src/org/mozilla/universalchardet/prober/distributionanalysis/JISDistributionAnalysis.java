@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -54,8 +54,8 @@ public abstract class JISDistributionAnalysis extends CharDistributionAnalysis
         this.typicalDistributionRatio = JIS_TYPICAL_DISTRIBUTION_RATIO;
         this.charToFreqOrder = jisCharToFreqOrder;
     }
-    
-    
+
+
     ////////////////////////////////////////////////////////////////
     // constants continued
     ////////////////////////////////////////////////////////////////
@@ -334,7 +334,7 @@ public abstract class JISDistributionAnalysis extends CharDistributionAnalysis
         1444,1698,2385,2251,3729,1365,2281,2235,1717,6188, 864,3841,2515, 444, 527,2767, // 4352
         2922,3625, 544, 461,6189, 566, 209,2437,3398,2098,1065,2068,3331,3626,3257,2137, // 4368  //last 512
 
-        /*************************************************************************************** 
+        /***************************************************************************************
          *Everything below is of no interest for detection purpose                             *
          ***************************************************************************************
 

@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -50,7 +50,7 @@ public class EUCJPContextAnalysis extends JapaneseContextAnalysis
     public static final int SINGLE_SHIFT_3 = 0x8F;
     public static final int FIRSTPLANE_HIGHBYTE_BEGIN = 0xA1;
     public static final int FIRSTPLANE_HIGHBYTE_END = 0xFE;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // methods
@@ -65,7 +65,7 @@ public class EUCJPContextAnalysis extends JapaneseContextAnalysis
     {
         order.order = -1;
         order.charLength = 1;
-        
+
         int firstByte = buf[offset] & 0xFF;
         if (firstByte == SINGLE_SHIFT_2 ||
             (firstByte >= FIRSTPLANE_HIGHBYTE_BEGIN &&
@@ -74,7 +74,7 @@ public class EUCJPContextAnalysis extends JapaneseContextAnalysis
         } else if (firstByte == SINGLE_SHIFT_3) {
             order.charLength = 3;
         }
-        
+
         if (firstByte == HIRAGANA_HIGHBYTE) {
             int secondByte = buf[offset+1] & 0xFF;
             if (secondByte >= HIRAGANA_LOWBYTE_BEGIN &&
@@ -83,7 +83,7 @@ public class EUCJPContextAnalysis extends JapaneseContextAnalysis
             }
         }
     }
-    
+
     @Override
     protected int getOrder(final byte[] buf, int offset)
     {
@@ -95,7 +95,7 @@ public class EUCJPContextAnalysis extends JapaneseContextAnalysis
                 return (lowbyte - HIRAGANA_LOWBYTE_BEGIN);
             }
         }
-        
+
         return -1;
     }
 }

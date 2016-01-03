@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -48,7 +48,7 @@ public abstract class JapaneseContextAnalysis
     public static final int MINIMUM_DATA_THRESHOLD  = 4;
     public static final float DONT_KNOW             = -1f;
 
-    
+
     ////////////////////////////////////////////////////////////////
     // inner types
     ////////////////////////////////////////////////////////////////
@@ -56,14 +56,14 @@ public abstract class JapaneseContextAnalysis
     {
         public int order;
         public int charLength;
-        
+
         public Order()
         {
             this.order = -1;
             this.charLength = 0;
         }
     }
-    
+
     ////////////////////////////////////////////////////////////////
     // fields
     ////////////////////////////////////////////////////////////////
@@ -72,10 +72,10 @@ public abstract class JapaneseContextAnalysis
     private int     lastCharOrder;
     private int     needToSkipCharNum;
     private boolean done;
-    
+
     private Order   tmpOrder;
-    
-    
+
+
     ////////////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////////////
@@ -84,17 +84,17 @@ public abstract class JapaneseContextAnalysis
         tmpOrder = new Order();
         reset();
     }
-    
+
     public void handleData(final byte[] buf, int offset, int length)
     {
         if (this.done) {
             return;
         }
-        
+
         // The buffer we got is byte oriented, and a character may span in more than one
-        // buffers. In case the last one or two byte in last buffer is not complete, we 
+        // buffers. In case the last one or two byte in last buffer is not complete, we
         // record how many byte needed to complete that character and skip these bytes here.
-        // We can choose to record those bytes as well and analyse the character once it 
+        // We can choose to record those bytes as well and analyse the character once it
         // is complete, but since a character will not make much difference, by simply skipping
         // this character will simply our logic and improve performance.
         int maxPos = offset + length;
@@ -102,7 +102,7 @@ public abstract class JapaneseContextAnalysis
         for (int i=this.needToSkipCharNum+offset; i<maxPos; ) {
             getOrder(this.tmpOrder, buf, i);
             i += this.tmpOrder.charLength;
-            
+
             if (i > maxPos) {
                 this.needToSkipCharNum = i - maxPos;
                 this.lastCharOrder = -1;
@@ -118,7 +118,7 @@ public abstract class JapaneseContextAnalysis
             }
         }
     }
-    
+
     public void handleOneChar(final byte[] buf, int offset, int charLength)
     {
         if (this.totalRel > MAX_REL_THRESHOLD) {
@@ -128,7 +128,7 @@ public abstract class JapaneseContextAnalysis
             return;
         }
 
-        
+
         int orderNum = -1;
         if (charLength == 2) {
             orderNum = getOrder(buf, offset);
@@ -148,7 +148,7 @@ public abstract class JapaneseContextAnalysis
             return DONT_KNOW;
         }
     }
-    
+
     public void reset()
     {
         this.totalRel = 0;
@@ -159,15 +159,15 @@ public abstract class JapaneseContextAnalysis
         this.lastCharOrder = -1;
         this.done = false;
     }
-    
+
     public void setOption()
     {}
-    
+
     public boolean gotEnoughData()
     {
         return (this.totalRel > ENOUGH_REL_THRESHOLD);
     }
-    
+
     protected abstract void getOrder(Order order, final byte[] buf, int offset);
     protected abstract int getOrder(final byte[] buf, int offset);
 

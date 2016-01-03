@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -48,7 +48,7 @@ public abstract class SequenceModel
     protected float     typicalPositiveRatio;
     protected boolean   keepEnglishLetter;
     protected String    charsetName;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // methods
@@ -66,28 +66,28 @@ public abstract class SequenceModel
         this.keepEnglishLetter = keepEnglishLetter;
         this.charsetName = charsetName;
     }
-    
+
     public short getOrder(byte b)
     {
         int c = b & 0xFF;
         return this.charToOrderMap[c];
     }
-    
+
     public byte getPrecedence(int pos)
     {
         return this.precedenceMatrix[pos];
     }
-    
+
     public float getTypicalPositiveRatio()
     {
         return this.typicalPositiveRatio;
     }
-    
+
     public boolean getKeepEnglishLetter()
     {
         return this.keepEnglishLetter;
     }
-    
+
     public String getCharsetName()
     {
         return this.charsetName;

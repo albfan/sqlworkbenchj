@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -47,7 +47,7 @@ public class EUCKRDistributionAnalysis extends CharDistributionAnalysis
     public static final int     HIGHBYTE_END = 0xFE;
     public static final int     LOWBYTE_BEGIN = 0xA1;
     public static final int     LOWBYTE_END = 0xFE;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // methods
@@ -224,7 +224,7 @@ public class EUCKRDistributionAnalysis extends CharDistributionAnalysis
         2629,2630,2631, 924, 648, 863, 603,2632,2633, 934,1540, 864, 865,2634, 642,1042,
          670,1190,2635,2636,2637,2638, 168,2639, 652, 873, 542,1054,1541,2640,2641,2642,  //512, 256
 
-        /*************************************************************************************** 
+        /***************************************************************************************
          *Everything below is of no interest for detection purpose                             *
          ***************************************************************************************
 

@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -43,13 +43,13 @@ public class CodingStateMachine
     protected int        currentState;
     protected int        currentCharLen;
     protected int        currentBytePos;
-    
+
     public CodingStateMachine(SMModel model)
     {
         this.model = model;
         this.currentState = SMModel.START;
     }
-    
+
     public int nextState(byte c)
     {
         int byteCls = this.model.getClass(c);
@@ -57,23 +57,23 @@ public class CodingStateMachine
             this.currentBytePos = 0;
             this.currentCharLen = this.model.getCharLen(byteCls);
         }
-        
+
         this.currentState = this.model.getNextState(byteCls, this.currentState);
         ++this.currentBytePos;
-        
+
         return this.currentState;
     }
-    
+
     public int getCurrentCharLen()
     {
         return this.currentCharLen;
     }
-    
+
     public void reset()
     {
         this.currentState = SMModel.START;
     }
-    
+
     public String getCodingStateMachine()
     {
         return this.model.getName();

@@ -5,11 +5,12 @@
  *
  * Copyright 2002-2016, Thomas Kellerer
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Licensed under a modified Apache License, Version 2.0
+ * that restricts the use for certain governments.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://sql-workbench.net/manual/license.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,30 +58,30 @@ public class PlatformHelper
 	{
 		return MacOSHelper.isMacOS();
 	}
-	
+
 	/**
 	 * Swing menus are looking pretty bad on Linux when the GTK LaF is used (See bug #6925412). It will most likely never
 	 * be fixed anytime soon so this method provides a workaround for it. It uses reflection to change the GTK style
 	 * objects of Swing so popup menu borders have a minimum thickness of 1 and menu separators have a minimum vertical
 	 * thickness of 1.
-	 * 
+	 *
 	 * Taken from https://www.ailis.de/~k/archives/67-Workaround-for-borderless-Java-Swing-menus-on-Linux.html
 	 */
-	public static void installGtkPopupBugWorkaround() 
+	public static void installGtkPopupBugWorkaround()
 	{
 		// Get current look-and-feel implementation class
 		LookAndFeel laf = UIManager.getLookAndFeel();
 		Class<?> lafClass = laf.getClass();
 
 		// Do nothing when not using the problematic LaF
-		if (!lafClass.getName().equals("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")) 
+		if (!lafClass.getName().equals("com.sun.java.swing.plaf.gtk.GTKLookAndFeel"))
 		{
 			return;
 		}
 
 		// We do reflection from here on. Failure is silently ignored. The
 		// workaround is simply not installed when something goes wrong here
-		try 
+		try
 		{
 			// Access the GTK style factory
 			Field field = lafClass.getDeclaredField("styleFactory");
@@ -97,8 +98,8 @@ public class PlatformHelper
 			// Fix the vertical thickness of the popup menu separator style
 			style = getGtkStyle(styleFactory, new JSeparator(), "POPUP_MENU_SEPARATOR");
 			fixGtkThickness(style, "yThickness");
-		} 
-		catch (Exception e) 
+		}
+		catch (Exception e)
 		{
 			// Silently ignored. Workaround can't be applied.
 		}
@@ -113,7 +114,7 @@ public class PlatformHelper
 	 * @throws Exception When reflection fails.
 	 */
 	private static void fixGtkThickness(Object style, String fieldName)
-		throws Exception 
+		throws Exception
 	{
 		Field field = style.getClass().getDeclaredField(fieldName);
 		boolean accessible = field.isAccessible();
@@ -131,8 +132,8 @@ public class PlatformHelper
 	 * @return The GTK style.
 	 * @throws Exception When reflection fails.
 	 */
-	private static Object getGtkStyle(Object styleFactory, JComponent component, String regionName) 
-		throws Exception 
+	private static Object getGtkStyle(Object styleFactory, JComponent component, String regionName)
+		throws Exception
 	{
 		// Create the region object
 		Class<?> regionClass = Class.forName("javax.swing.plaf.synth.Region");

@@ -5,11 +5,12 @@
  *
  * Copyright 2002-2016, Thomas Kellerer
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Licensed under a modified Apache License, Version 2.0
+ * that restricts the use for certain governments.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://sql-workbench.net/manual/license.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,7 +49,7 @@ public class TabbedPaneHistory
 	{
 		history.clear();
 	}
-	
+
 	private void addComponent(Component comp)
 	{
 		if (history.contains(comp))
@@ -81,7 +82,7 @@ public class TabbedPaneHistory
 			history.remove(lastTab);
 		}
 	}
-	
+
 	private Component getLastUsedComponent()
 	{
 		if (history.size() == 0) return null;
@@ -91,7 +92,7 @@ public class TabbedPaneHistory
 		// so the last used index is at index 1
 		return history.get(1);
 	}
-	
+
 	@Override
 	public void stateChanged(ChangeEvent e)
 	{

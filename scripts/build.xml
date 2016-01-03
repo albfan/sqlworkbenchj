@@ -589,7 +589,7 @@
   </target>
 
   <!-- build a full release -->
-  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, set-history-release-number, set-history-build-date, -make-jar, pdf, publish, publish-single, release-src-zip, release-package, mac-package7">
+  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, set-history-release-number, set-history-build-date, -make-jar, pdf, publish, publish-single, release-src-zip, release-package, mac-package">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -653,7 +653,7 @@
     <ant antfile="../website/build.xml" inheritall="false" target="release"/>
   </target>
 
-  <target name="mac-package7" depends="init,publish">
+  <target name="mac-package" depends="init,publish">
 
     <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask" classpath="../libs/appbundler/appbundler-1.0.jar"/>
 

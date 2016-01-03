@@ -5,11 +5,12 @@
  *
  * Copyright 2002-2016, Thomas Kellerer
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Licensed under a modified Apache License, Version 2.0
+ * that restricts the use for certain governments.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://sql-workbench.net/manual/license.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +45,7 @@ import workbench.resource.Settings;
 
 /**
  * A dialog to display a {@link ImagePanel}
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ImageViewer
@@ -54,7 +55,7 @@ public class ImageViewer
 	private ImagePanel panel;
 	private JButton closeButton = new JButton(ResourceMgr.getString("LblClose"));
 	private final String settingsId = "workbench.gui.imageviewer";
-	
+
 	public ImageViewer(Frame parent, String title)
 	{
 		super(parent, title, true);
@@ -85,7 +86,7 @@ public class ImageViewer
 		{
 			setSize(640,480);
 		}
-		
+
 		getRootPane().setDefaultButton(closeButton);
 		new EscAction(this, this);
 	}
@@ -112,7 +113,7 @@ public class ImageViewer
 			LogMgr.logError("ImageViewer.setData()", "Error reading image", e);
 		}
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		this.setVisible(false);
@@ -147,5 +148,5 @@ public class ImageViewer
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
-	
+
 }

@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -57,12 +57,12 @@ public class SJISDistributionAnalysis extends JISDistributionAnalysis
     {
         super();
     }
-    
+
     @Override
     protected int getOrder(final byte[] buf, int offset)
     {
         int order = -1;
-        
+
         int highbyte = buf[offset] & 0xFF;
         if (highbyte >= HIGHBYTE_BEGIN_1 && highbyte <= HIGHBYTE_END_1) {
             order = 188 * (highbyte - HIGHBYTE_BEGIN_1);
@@ -76,7 +76,7 @@ public class SJISDistributionAnalysis extends JISDistributionAnalysis
         if (lowbyte >= LOWBYTE_BEGIN_2) {
             --order;
         }
-        
+
         return order;
     }
 }

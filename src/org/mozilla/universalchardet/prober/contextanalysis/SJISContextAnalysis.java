@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -49,7 +49,7 @@ public class SJISContextAnalysis extends JapaneseContextAnalysis
     public static final int HIGHBYTE_END_1 = 0x9F;
     public static final int HIGHBYTE_BEGIN_2 = 0xE0;
     public static final int HIGHBYTE_END_2 = 0xEF;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // methods
@@ -64,13 +64,13 @@ public class SJISContextAnalysis extends JapaneseContextAnalysis
     {
         order.order = -1;
         order.charLength = 1;
-        
+
         int highbyte = buf[offset] & 0xFF;
         if ((highbyte >= HIGHBYTE_BEGIN_1 && highbyte <= HIGHBYTE_END_1) ||
             (highbyte >= HIGHBYTE_BEGIN_2 && highbyte <= HIGHBYTE_END_2)) {
             order.charLength = 2;
         }
-        
+
         if (highbyte == HIRAGANA_HIGHBYTE) {
             int lowbyte = buf[offset+1] & 0xFF;
             if (lowbyte >= HIRAGANA_LOWBYTE_BEGIN &&
@@ -91,7 +91,7 @@ public class SJISContextAnalysis extends JapaneseContextAnalysis
                 return (lowbyte - HIRAGANA_LOWBYTE_BEGIN);
             }
         }
-        
+
         return -1;
     }
 }

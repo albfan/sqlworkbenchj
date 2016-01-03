@@ -5,11 +5,12 @@
  *
  * Copyright 2002-2016, Thomas Kellerer
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Licensed under a modified Apache License, Version 2.0
+ * that restricts the use for certain governments.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://sql-workbench.net/manual/license.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,7 +53,7 @@ public class MessageBufferTest
 		String expected = "(...)\nLine5\nLine6\nLine7\nLine8\nLine9\n";
 		assertEquals(expected, content);
 	}
-	
+
 	@Test
 	public void testAppendBuffer()
 	{
@@ -62,14 +63,14 @@ public class MessageBufferTest
 		MessageBuffer b2 = new MessageBuffer();
 		b2.append(b1);
 		assertEquals("Wrong length", b2.getLength(), l);
-		
+
 		b2 = new MessageBuffer();
 		b2.append("Some stuff");
 		int l2 = b2.getLength();
 		b2.append(b1);
 		assertEquals("Wrong length", b2.getLength(), l + l2);
 	}
-	
+
 	@Test
 	public void testBuffer()
 	{
@@ -81,5 +82,5 @@ public class MessageBufferTest
 		CharSequence s = b.getBuffer();
 		assertEquals("Hello, world\nhow are you?", s.toString());
 	}
-	
+
 }

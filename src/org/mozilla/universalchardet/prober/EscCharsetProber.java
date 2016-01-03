@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -54,7 +54,7 @@ public class EscCharsetProber extends CharsetProber
     private int                     activeSM;
     private ProbingState            state;
     private String                  detectedCharset;
-    
+
     private static final HZSMModel hzsModel = new HZSMModel();
     private static final ISO2022CNSMModel iso2022cnModel = new ISO2022CNSMModel();
     private static final ISO2022JPSMModel iso2022jpModel = new ISO2022JPSMModel();
@@ -76,7 +76,7 @@ public class EscCharsetProber extends CharsetProber
 
         reset();
     }
-    
+
     @Override
     public String getCharSetName()
     {
@@ -99,7 +99,7 @@ public class EscCharsetProber extends CharsetProber
     public ProbingState handleData(byte[] buf, int offset, int length)
     {
         int codingState;
-        
+
         int maxPos = offset + length;
         for (int i=offset; i<maxPos && this.state==ProbingState.DETECTING; ++i) {
             for (int j=this.activeSM-1; j>=0; --j) {
@@ -122,7 +122,7 @@ public class EscCharsetProber extends CharsetProber
                 }
             }
         }
-        
+
         return this.state;
     }
 

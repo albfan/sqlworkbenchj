@@ -5,11 +5,12 @@
  *
  * Copyright 2002-2016, Thomas Kellerer
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Licensed under a modified Apache License, Version 2.0
+ * that restricts the use for certain governments.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://sql-workbench.net/manual/license.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +34,7 @@ import workbench.util.WbFile;
 
 /**
  * A class to write rejected rows into a flat file.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class BadfileWriter
@@ -41,21 +42,21 @@ public class BadfileWriter
 	private WbFile badFile;
 	private int badRows = 0;
 	private String encoding = null;
-	
+
 	/**
-	 * Create a new BadFileWriter. 
-	 * 
-	 * If fname indicates a directory, the resulting bad file will be name after 
-	 * the name of the supplied table (@link TableIdentifier#getTableName()} with 
+	 * Create a new BadFileWriter.
+	 *
+	 * If fname indicates a directory, the resulting bad file will be name after
+	 * the name of the supplied table (@link TableIdentifier#getTableName()} with
 	 * the extendsion ".bad" and will be created in specified directory.
-	 * 
-	 * The file will be deleted upon creation of this BadFileWriter but will 
+	 *
+	 * The file will be deleted upon creation of this BadFileWriter but will
 	 * not be created unless at leas one rejected row is written.
-	 * 
+	 *
 	 * @param fname the name of the bad file to be created
 	 * @param table the table for which the import is currently running
 	 * @param enc the encoding for the output file
-	 * 
+	 *
 	 * @see #recordRejected(String)
 	 */
 	public BadfileWriter(String fname, TableIdentifier table, String enc)
@@ -93,12 +94,12 @@ public class BadfileWriter
 			FileUtil.closeQuietely(w);
 		}
 	}
-	
+
 	public synchronized int getRows()
 	{
 		return badRows;
 	}
-	
+
 	public CharSequence getMessage()
 	{
 		StringBuilder b = new StringBuilder(50);

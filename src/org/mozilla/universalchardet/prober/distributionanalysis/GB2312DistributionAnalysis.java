@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -47,7 +47,7 @@ public class GB2312DistributionAnalysis extends CharDistributionAnalysis
     public static final int     HIGHBYTE_END = 0xFE;
     public static final int     LOWBYTE_BEGIN = 0xA1;
     public static final int     LOWBYTE_END = 0xFE;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // methods
@@ -69,11 +69,11 @@ public class GB2312DistributionAnalysis extends CharDistributionAnalysis
                 return (94 * (highbyte - HIGHBYTE_BEGIN) + lowbyte - LOWBYTE_BEGIN);
             }
         }
-        
+
         return -1;
     }
 
-    
+
     ////////////////////////////////////////////////////////////////
     // constants continued
     ////////////////////////////////////////////////////////////////
@@ -314,7 +314,7 @@ public class GB2312DistributionAnalysis extends CharDistributionAnalysis
          381,1638,4592,1020, 516,3214, 458, 947,4575,1432, 211,1514,2926,1865,2142, 189,
          852,1221,1400,1486, 882,2299,4036, 351,  28,1122, 700,6479,6480,6481,6482,6483,  //last 512
 
-        /*************************************************************************************** 
+        /***************************************************************************************
          *Everything below is of no interest for detection purpose                             *
          ***************************************************************************************
 

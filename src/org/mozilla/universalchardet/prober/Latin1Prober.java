@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -57,7 +57,7 @@ public class Latin1Prober extends CharsetProber
     public static final byte ASO = 7;
     public static final int CLASS_NUM = 8;
     public static final int FREQ_CAT_NUM = 4;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // fields
@@ -65,7 +65,7 @@ public class Latin1Prober extends CharsetProber
     private ProbingState    state;
     private byte            lastCharClass;
     private int[]           freqCounter;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // methods
@@ -73,9 +73,9 @@ public class Latin1Prober extends CharsetProber
     public Latin1Prober()
     {
         super();
-        
+
         this.freqCounter = new int[FREQ_CAT_NUM];
-        
+
         reset();
     }
 
@@ -91,28 +91,28 @@ public class Latin1Prober extends CharsetProber
         if (this.state == ProbingState.NOT_ME) {
             return 0.01f;
         }
-        
+
         float confidence;
         int total = 0;
         for (int i=0; i<this.freqCounter.length; ++i) {
             total += this.freqCounter[i];
         }
-        
+
         if (total <= 0) {
             confidence = 0.0f;
         } else {
             confidence = this.freqCounter[3] * 1.0f / total;
             confidence -= this.freqCounter[1] * 20.0f / total;
         }
-        
+
         if (confidence < 0.0f) {
             confidence = 0.0f;
         }
-        
-        // lower the confidence of latin1 so that other more accurate detector 
+
+        // lower the confidence of latin1 so that other more accurate detector
         // can take priority.
         confidence *= 0.50f;
-        
+
         return confidence;
     }
 
@@ -129,7 +129,7 @@ public class Latin1Prober extends CharsetProber
 
         byte charClass;
         byte freq;
-        
+
         byte[] newBuf = newBufTmp.array();
         int newBufLen = newBufTmp.position();
 
@@ -162,7 +162,7 @@ public class Latin1Prober extends CharsetProber
     public void setOption()
     {}
 
-    
+
     ////////////////////////////////////////////////////////////////
     // constants continued
     ////////////////////////////////////////////////////////////////
@@ -200,16 +200,16 @@ public class Latin1Prober extends CharsetProber
           ASO, ASO, ASV, ASV, ASV, ASV, ASV, OTH,   // F0 - F7
           ASV, ASV, ASV, ASV, ASV, ASO, ASO, ASO,   // F8 - FF
     };
-    
+
     private static final byte[] latin1ClassModel = new byte[] {
         /*      UDF OTH ASC ASS ACV ACO ASV ASO  */
         /*UDF*/  0,  0,  0,  0,  0,  0,  0,  0,
         /*OTH*/  0,  3,  3,  3,  3,  3,  3,  3,
-        /*ASC*/  0,  3,  3,  3,  3,  3,  3,  3, 
+        /*ASC*/  0,  3,  3,  3,  3,  3,  3,  3,
         /*ASS*/  0,  3,  3,  3,  1,  1,  3,  3,
         /*ACV*/  0,  3,  3,  3,  1,  2,  1,  2,
-        /*ACO*/  0,  3,  3,  3,  3,  3,  3,  3, 
-        /*ASV*/  0,  3,  1,  3,  1,  1,  1,  3, 
+        /*ACO*/  0,  3,  3,  3,  3,  3,  3,  3,
+        /*ASV*/  0,  3,  1,  3,  1,  1,  1,  3,
         /*ASO*/  0,  3,  1,  3,  1,  1,  3,  3,
     };
 }

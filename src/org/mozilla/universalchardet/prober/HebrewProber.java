@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -55,12 +55,12 @@ public class HebrewProber extends CharsetProber
     public static final int NORMAL_PE   = 0xF4;
     public static final int FINAL_TSADI = 0xF5;
     public static final int NORMAL_TSADI= 0xF6;
-    
+
     public static final byte SPACE      = 0x20;
-    
+
     public static final int MIN_FINAL_CHAR_DISTANCE = 5;
     public static final float MIN_MODEL_DISTANCE = 0.01f;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // fields
@@ -69,7 +69,7 @@ public class HebrewProber extends CharsetProber
     private int     finalCharVisualScore;
     private byte    prev;
     private byte    beforePrev;
-    
+
     private CharsetProber logicalProber;
     private CharsetProber visualProber;
 
@@ -84,7 +84,7 @@ public class HebrewProber extends CharsetProber
         this.visualProber = null;
         reset();
     }
-    
+
     public void setModalProbers(CharsetProber logicalProber, CharsetProber visualProber)
     {
         this.logicalProber = logicalProber;
@@ -102,7 +102,7 @@ public class HebrewProber extends CharsetProber
         if (finalsub <= -MIN_FINAL_CHAR_DISTANCE) {
             return Constants.CHARSET_ISO_8859_8;
         }
-        
+
         // It's not dominant enough, try to rely on the model scores instead.
         float modelsub = this.logicalProber.getConfidence() - this.visualProber.getConfidence();
         if (modelsub > MIN_MODEL_DISTANCE) {
@@ -111,12 +111,12 @@ public class HebrewProber extends CharsetProber
         if (modelsub < -MIN_MODEL_DISTANCE) {
             return Constants.CHARSET_ISO_8859_8;
         }
-        
+
         // Still no good, back to final letter distance, maybe it'll save the day.
         if (finalsub < 0) {
             return Constants.CHARSET_ISO_8859_8;
         }
-        
+
         // (finalsub > 0 - Logical) or (don't know what to do) default to Logical.
         return Constants.CHARSET_WINDOWS_1255;
     }
@@ -145,7 +145,7 @@ public class HebrewProber extends CharsetProber
         if (getState() == ProbingState.NOT_ME) {
             return ProbingState.NOT_ME;
         }
-        
+
         byte c;
         int maxPos = offset + length;
         for (int i=offset; i<maxPos; ++i) {
@@ -168,7 +168,7 @@ public class HebrewProber extends CharsetProber
             this.beforePrev = this.prev;
             this.prev = c;
         }
-        
+
         return ProbingState.DETECTING;
     }
 
@@ -177,8 +177,8 @@ public class HebrewProber extends CharsetProber
     {
         this.finalCharLogicalScore = 0;
         this.finalCharVisualScore = 0;
-        
-        // mPrev and mBeforePrev are initialized to space in order to simulate a word 
+
+        // mPrev and mBeforePrev are initialized to space in order to simulate a word
         // delimiter at the beginning of the data
         this.prev = SPACE;
         this.beforePrev = SPACE;
@@ -187,7 +187,7 @@ public class HebrewProber extends CharsetProber
     @Override
     public void setOption()
     {}
-    
+
     protected static boolean isFinal(byte b)
     {
         int c = b & 0xFF;
@@ -199,7 +199,7 @@ public class HebrewProber extends CharsetProber
                 c == FINAL_TSADI
                 );
     }
-    
+
     protected static boolean isNonFinal(byte b)
     {
         int c = b & 0xFF;
@@ -209,15 +209,15 @@ public class HebrewProber extends CharsetProber
                 c == NORMAL_NUN ||
                 c == NORMAL_PE
                 );
-        // The normal Tsadi is not a good Non-Final letter due to words like 
-        // 'lechotet' (to chat) containing an apostrophe after the tsadi. This 
-        // apostrophe is converted to a space in FilterWithoutEnglishLetters causing 
-        // the Non-Final tsadi to appear at an end of a word even though this is not 
+        // The normal Tsadi is not a good Non-Final letter due to words like
+        // 'lechotet' (to chat) containing an apostrophe after the tsadi. This
+        // apostrophe is converted to a space in FilterWithoutEnglishLetters causing
+        // the Non-Final tsadi to appear at an end of a word even though this is not
         // the case in the original text.
-        // The letters Pe and Kaf rarely display a related behavior of not being a 
-        // good Non-Final letter. Words like 'Pop', 'Winamp' and 'Mubarak' for 
-        // example legally end with a Non-Final Pe or Kaf. However, the benefit of 
-        // these letters as Non-Final letters outweighs the damage since these words 
+        // The letters Pe and Kaf rarely display a related behavior of not being a
+        // good Non-Final letter. Words like 'Pop', 'Winamp' and 'Mubarak' for
+        // example legally end with a Non-Final Pe or Kaf. However, the benefit of
+        // these letters as Non-Final letters outweighs the damage since these words
         // are quite rare.
     }
 }

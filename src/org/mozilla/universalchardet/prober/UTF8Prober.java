@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -49,7 +49,7 @@ public class UTF8Prober extends CharsetProber
     // constants
     ////////////////////////////////////////////////////////////////
     public static final float ONE_CHAR_PROB = 0.50f;
-    
+
 
     ////////////////////////////////////////////////////////////////
     // fields
@@ -57,9 +57,9 @@ public class UTF8Prober extends CharsetProber
     private CodingStateMachine  codingSM;
     private ProbingState        state;
     private int                 numOfMBChar;
-    
+
     private static final SMModel smModel = new UTF8SMModel();
-    
+
 
     ////////////////////////////////////////////////////////////////
     // methods
@@ -99,13 +99,13 @@ public class UTF8Prober extends CharsetProber
                 }
             }
         }
-        
+
         if (this.state == ProbingState.DETECTING) {
             if (getConfidence() > SHORTCUT_THRESHOLD) {
                 this.state = ProbingState.FOUND_IT;
             }
         }
-        
+
         return this.state;
     }
 
@@ -124,7 +124,7 @@ public class UTF8Prober extends CharsetProber
     public float getConfidence()
     {
         float unlike = 0.99f;
-        
+
         if (this.numOfMBChar < 6) {
             for (int i=0; i<this.numOfMBChar; ++i) {
                 unlike *= ONE_CHAR_PROB;

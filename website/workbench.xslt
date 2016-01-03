@@ -385,7 +385,7 @@
   </xsl:template>
 
   <xsl:template match="mac-link">
-    <a href="Workbench-Build{$buildNumber}-MacJava7.tgz">Download package for MacOS</a>
+    <a href="Workbench-Build{$buildNumber}-MacJava8.tgz">Download package for MacOS</a>
   </xsl:template>
 
   <xsl:template match="mac-office-link">

@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -57,10 +57,10 @@ public class MBCSGroupProber extends CharsetProber
     public MBCSGroupProber()
     {
         super();
-        
+
         this.probers = new CharsetProber[7];
         this.isActive = new boolean[7];
-        
+
         this.probers[0] = new UTF8Prober();
         this.probers[1] = new SJISProber();
         this.probers[2] = new EUCJPProber();
@@ -68,7 +68,7 @@ public class MBCSGroupProber extends CharsetProber
         this.probers[4] = new EUCKRProber();
         this.probers[5] = new Big5Prober();
         this.probers[6] = new EUCTWProber();
-        
+
         reset();
     }
 
@@ -99,7 +99,7 @@ public class MBCSGroupProber extends CharsetProber
                 if (!this.isActive[i]) {
                     continue;
                 }
-                
+
                 cf = this.probers[i].getConfidence();
                 if (bestConf < cf) {
                     bestConf = cf;
@@ -121,7 +121,7 @@ public class MBCSGroupProber extends CharsetProber
     public ProbingState handleData(byte[] buf, int offset, int length)
     {
         ProbingState st;
-        
+
         boolean keepNext = true;
         byte[] highbyteBuf = new byte[length];
         int highpos = 0;
@@ -139,7 +139,7 @@ public class MBCSGroupProber extends CharsetProber
                 }
             }
         }
-        
+
         for (int i=0; i<this.probers.length; ++i) {
             if (!this.isActive[i]) {
                 continue;
@@ -158,7 +158,7 @@ public class MBCSGroupProber extends CharsetProber
                 }
             }
         }
-        
+
         return this.state;
     }
 

@@ -5,11 +5,12 @@
  *
  * Copyright 2002-2016, Thomas Kellerer
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Licensed under a modified Apache License, Version 2.0
+ * that restricts the use for certain governments.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://sql-workbench.net/manual/license.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,9 +51,9 @@ public class ZipUtil
 		if (f instanceof ClipboardFile) return false;
 
 		if (!f.exists()) return false;
-		
+
 		boolean isZip = false;
-		
+
 		InputStream in = null;
 		try
 		{
@@ -75,11 +76,11 @@ public class ZipUtil
 		}
 		return isZip;
 	}
-	
+
 	/**
-	 * Get the directory listing of a zip archive. 
+	 * Get the directory listing of a zip archive.
 	 * Sub-Directories are not scanned.
-	 * 
+	 *
 	 * @param archive
 	 * @return a list of filenames contained in the archive
 	 */
@@ -88,7 +89,7 @@ public class ZipUtil
 	{
 		ZipFile zip = new ZipFile(archive);
 		List<String> result = new ArrayList<>(zip.size());
-		
+
 		try
 		{
 			Enumeration<? extends ZipEntry> entries = zip.entries();

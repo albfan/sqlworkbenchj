@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the "License"); You may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -52,14 +52,14 @@ public class GB18030Prober extends CharsetProber
     ////////////////////////////////////////////////////////////////
     private CodingStateMachine          codingSM;
     private ProbingState                state;
-    
+
     private GB2312DistributionAnalysis  distributionAnalyzer;
-    
+
     private byte[]                      lastChar;
 
     private static final SMModel smModel = new GB18030SMModel();
 
-    
+
     ////////////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ public class GB18030Prober extends CharsetProber
         this.lastChar = new byte[2];
         reset();
     }
-    
+
     @Override
     public String getCharSetName()
     {
@@ -82,7 +82,7 @@ public class GB18030Prober extends CharsetProber
     public float getConfidence()
     {
         float distribCf = this.distributionAnalyzer.getConfidence();
-        
+
         return distribCf;
     }
 
@@ -96,7 +96,7 @@ public class GB18030Prober extends CharsetProber
     public ProbingState handleData(byte[] buf, int offset, int length)
     {
         int codingState;
-        
+
         int maxPos = offset + length;
         for (int i=offset; i<maxPos; ++i) {
             codingState = this.codingSM.nextState(buf[i]);
@@ -118,15 +118,15 @@ public class GB18030Prober extends CharsetProber
                 }
             }
         }
-        
+
         this.lastChar[0] = buf[maxPos-1];
-        
+
         if (this.state == ProbingState.DETECTING) {
             if (this.distributionAnalyzer.gotEnoughData() && getConfidence() > SHORTCUT_THRESHOLD) {
                 this.state = ProbingState.FOUND_IT;
             }
         }
-        
+
         return this.state;
     }
 

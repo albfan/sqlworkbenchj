@@ -5,11 +5,12 @@
  *
  * Copyright 2002-2016, Thomas Kellerer
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Licensed under a modified Apache License, Version 2.0
+ * that restricts the use for certain governments.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http://sql-workbench.net/manual/license.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,13 +37,13 @@ public interface ColumnComparator
 	 * Return a human redeable (localized) name of this operator
 	 */
 	String getDescription();
-	
+
 	/**
 	 * Evaluate this ColumnComparator.
 	 *
 	 * reference is the value entered by the user in the filter definition.
-	 * value is the actual value against which the reference should be 
-	 * compared. 
+	 * value is the actual value against which the reference should be
+	 * compared.
 	 * Comparators with needsValue() == false should ignore the reference
 	 * value
 	 *
@@ -51,12 +52,12 @@ public interface ColumnComparator
 	 * @param ignoreCase if true, comparison should be done case-insesitive it the filter supports it
 	 */
 	boolean evaluate(Object reference, Object value, boolean ignoreCase);
-	
+
 	/**
 	 * Check if this comparator can be applied to the given class
 	 */
 	boolean supportsType(Class valueClass);
-	
+
 	/**
 	 * Should return true if this comparator supports the ignoreCase
 	 * parameter in the {@link #evaluate(Object, Object, boolean)} method.
@@ -64,7 +65,7 @@ public interface ColumnComparator
 	 * for defining a filter.
 	 */
 	boolean supportsIgnoreCase();
-	
+
 	/**
 	 * If this filter does not need a reference value (e.g. for IS NULL)
 	 * this method should return true. In that case, the reference
@@ -72,14 +73,14 @@ public interface ColumnComparator
 	 * has to be ignored by the filter.
 	 */
 	boolean needsValue();
-	
+
 	String getValueExpression(Object value);
-	
+
 	/**
 	 *	Validate the input whether this comparator
 	 * can actually deal with the value
 	 */
 	boolean validateInput(Object input);
-	
+
 	boolean comparesEquality();
 }
