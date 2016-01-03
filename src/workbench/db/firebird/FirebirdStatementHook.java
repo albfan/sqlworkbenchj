@@ -1,7 +1,7 @@
 /*
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2015 Thomas Kellerer.
+ * Copyright 2002-2016, Thomas Kellerer.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public class FirebirdStatementHook
 	 * During unit testing the classloader in the ConnectionMgr is not initialized
 	 * because all drivers are alread on the classpath. Therefor this switch is needed
 	 *
-	 * @param flag if true, load the CopyManager from the system classpath, otherwise use the ConnectionMgr.
+	 * @param flag if true, load the FirebirdPreparedStatement class from the system classpath, otherwise use the ConnectionMgr.
 	 */
 	public void setUseDefaultClassloader(boolean flag)
 	{
