@@ -19,9 +19,10 @@
 
 	<important><para>
 		When running &wb-productname; on Windows, you either need to use <literal>sqlwbconsole</literal>
-    or start &wb-productname; using the Java command.
-		You <emphasis role="bold">cannot</emphasis> use the <link linkend="launcher-using">Windows launcher</link>
-    <literal>SQLWorkbench.exe</literal>, as it will run in the background without a console window, and thus
+    or start &wb-productname; using the <link linkend="starting"><literal>java</literal> command.</link>
+		You can <emphasis role="bold">not</emphasis> use the <link linkend="launcher-using">Windows launcher</link>
+    <literal>SQLWorkbench.exe</literal> (or <literal>SQLWorkbench64.exe)</literal>,
+    as it will run in the background without a console window, and thus
     you will not see any output from the batch run.
 	</para></important>
 
@@ -128,7 +129,8 @@ SQLCMD</screen>
 		<title>Specifying a delimiter</title>
 		<para>
 			If your script files use a non-standard delimiter for the statements, you can
-			specify an alternate delimiter through the profile or through the <literal>-altDelimiter</literal>
+			specify an <link linkend="understand-alternate-delim">alternate delimiter</link>
+      through the profile or through the <literal>-altDelimiter</literal>
 			parameter. The alternate delimiter should be used if you have several scripts that use
 			the regular semicolon and the alternate delimiter. If your scripts exceed a certain size,
 			they won't be processed in memory and detecting the alternate delimiter does not work in that case.

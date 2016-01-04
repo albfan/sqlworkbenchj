@@ -51,7 +51,7 @@
 			a delimiter is identified the statement(s) are sent to the database.
 		</para>
 
-		<screen>SQL&gt; SELECT *<keycap>&lt;ENTER&gt;</keycap>
+		<screen>SQL&gt; SELECT * [enter]
 ..&gt;FROM person;
 </screen>
 
@@ -76,7 +76,7 @@ SQL&gt;</screen>
 		<para>
 			To exit the application in console mode, enter <literal>exit</literal> when the default prompt is displayed.
 			If the "continuation prompt" (<literal>..&gt;</literal>) is displayed, this will not terminate the application.
-			The keyword <literal>exit</literal> may not be terminated with a semicolon.
+			The keyword <literal>exit</literal> must not be terminated with a semicolon.
 		</para>
 	</section>
 
