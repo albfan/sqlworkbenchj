@@ -175,5 +175,15 @@
     </para>
   </section>
 
+  <section id="gui-freeze">
+    <title>The GUI freezes when displaying menus or context menus</title>
+    <indexterm><primary>Problems</primary><secondary>GUI freezes</secondary></indexterm>
+    <indexterm><primary>Problems</primary><secondary>Context menu not displayed</secondary></indexterm>
+    <para>
+      With certain Linux Desktops combined with OpenJDK it has been observed that displaying context menus
+      (by using the right mouse button) freezes the GUI. Please use the Oracle JDK (or JRE) if this happens.
+    </para>
+  </section>
+
 </section>
 
