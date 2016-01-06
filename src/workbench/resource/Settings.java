@@ -2112,14 +2112,30 @@ public class Settings
 		setProperty("workbench.editor.sql.emptyline.delimiter", flag);
 	}
 
-	public boolean getAutoSaveExternalFiles()
+	public AutoFileSaveType getAutoSaveExternalFiles()
 	{
-		return getBoolProperty("workbench.editor.autosave", getAutoSaveWorkspace());
+    AutoFileSaveType defaultValue = AutoFileSaveType.never;
+    if (getAutoSaveWorkspace())
+    {
+      defaultValue = AutoFileSaveType.always;
+    }
+
+    String type = getProperty("workbench.editor.autosave", defaultValue.name());
+
+    try
+    {
+      return AutoFileSaveType.valueOf(type);
+    }
+    catch (Throwable ex)
+    {
+      return defaultValue;
+    }
 	}
 
-	public void setAutoSaveExternalFiles(boolean flag)
+	public void setAutoSaveExternalFiles(AutoFileSaveType type)
 	{
-		this.setProperty("workbench.editor.autosave", flag);
+    if (type == null) return;
+		setProperty("workbench.editor.autosave", type.name());
 	}
 
 	public boolean getAutoSaveWorkspace()

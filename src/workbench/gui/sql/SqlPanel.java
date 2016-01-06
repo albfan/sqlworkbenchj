@@ -77,6 +77,7 @@ import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.interfaces.ToolWindowManager;
 import workbench.log.LogMgr;
+import workbench.resource.AutoFileSaveType;
 import workbench.resource.ErrorPromptType;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
@@ -1477,10 +1478,10 @@ public class SqlPanel
 	 *  because of the check for unsaved changes in the current editor file
 	 */
 	@Override
-	public boolean canClosePanel(boolean checkTransAction)
+	public boolean canClosePanel(boolean checkTransaction)
 	{
 		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1, false);
-		if (checkTransAction)
+		if (checkTransaction)
 		{
 			fileOk = fileOk && confirmDiscardTransaction();
 		}
@@ -2106,6 +2107,22 @@ public class SqlPanel
 		return id;
 	}
 
+  private void doAutoSaveFile()
+  {
+    AutoFileSaveType saveType = Settings.getInstance().getAutoSaveExternalFiles();
+    if (saveType != AutoFileSaveType.never && editor.hasFileLoaded() && editor.isModified())
+    {
+      if (saveType == AutoFileSaveType.always)
+      {
+        editor.saveCurrentFile();
+      }
+      else
+      {
+        editor.checkAndSaveFile(false);
+      }
+    }
+  }
+
 	/**
 	 * Execute the given SQL string. This is invoked from the the run() and other
 	 * methods in order to execute the SQL command. It takes care of updating the
@@ -2129,11 +2146,8 @@ public class SqlPanel
 		// receives the execStart event
 		fireDbExecStart();
 
-		if (Settings.getInstance().getAutoSaveExternalFiles() && editor.hasFileLoaded() && editor.isModified())
-		{
-			editor.saveCurrentFile();
-		}
-
+    doAutoSaveFile();
+    
 		setCancelState(true);
 
 		try

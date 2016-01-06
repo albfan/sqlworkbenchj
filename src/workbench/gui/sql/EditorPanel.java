@@ -687,6 +687,11 @@ public class EditorPanel
 
   public int checkAndSaveFile()
   {
+    return checkAndSaveFile(true);
+  }
+  
+  public int checkAndSaveFile(boolean allowCancel)
+  {
     if (!this.hasFileLoaded()) return JOptionPane.YES_OPTION;
     int result = JOptionPane.YES_OPTION;
 
@@ -694,11 +699,28 @@ public class EditorPanel
     {
       String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile");
       msg = StringUtil.replace(msg, "%filename%", this.getCurrentFileName());
-      result = WbSwingUtilities.getYesNoCancel(this, msg);
+      if (allowCancel)
+      {
+        result = WbSwingUtilities.getYesNoCancel(this, msg);
+      }
+      else
+      {
+        boolean yesNo = WbSwingUtilities.getYesNo(this, msg);
+        if (yesNo)
+        {
+          result = JOptionPane.YES_OPTION;
+        }
+        else
+        {
+          result = JOptionPane.NO_OPTION;
+        }
+      }
+
       if (result == JOptionPane.YES_OPTION)
       {
         this.saveCurrentFile();
       }
+
       if (result == JOptionPane.CLOSED_OPTION)
       {
         result = JOptionPane.CANCEL_OPTION;

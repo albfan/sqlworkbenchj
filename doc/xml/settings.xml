@@ -129,7 +129,7 @@
 		</simplesect>
 
    <simplesect id="editor-rect-selection">
-      <title>Set the modifier key for rectangular selections in the edior</title>
+      <title>Set the modifier key for rectangular selections in the editor</title>
       <para>Property: <literal>workbench.editor.rectselection.modifier</literal></para>
       <para>
 				These properties control the modifier key that needs to be pressed to enable

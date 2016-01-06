@@ -41,6 +41,7 @@ import javax.swing.SwingConstants;
 
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
+import workbench.resource.AutoFileSaveType;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -84,6 +85,27 @@ public class EditorOptionsPanel
 
 		internalLineEnding.setModel(new DefaultComboBoxModel(items));
 		externalLineEnding.setModel(new DefaultComboBoxModel(items));
+
+
+		String[] editorSavetypes = new String[] {
+			ResourceMgr.getString("LblOptNever"),
+			ResourceMgr.getString("LblOptAuto"),
+			ResourceMgr.getString("LblOptPrompt")
+		};
+    autoFileSave.setModel(new DefaultComboBoxModel<>(editorSavetypes));
+
+    AutoFileSaveType autoSaveType = Settings.getInstance().getAutoSaveExternalFiles();
+    switch (autoSaveType)
+    {
+      case never:
+        autoFileSave.setSelectedIndex(0);
+        break;
+      case always:
+        autoFileSave.setSelectedIndex(1);
+        break;
+      default:
+        autoFileSave.setSelectedIndex(2);
+    }
 
 		reloadType.setModel(new DefaultComboBoxModel(FileReloadType.values()));
 		reloadType.doLayout();
@@ -171,6 +193,19 @@ public class EditorOptionsPanel
 
 		FileReloadType fileReloadType = (FileReloadType) this.reloadType.getSelectedItem();
 		GuiSettings.setReloadType(fileReloadType);
+
+    int index = autoFileSave.getSelectedIndex();
+    switch (index)
+    {
+      case 0:
+        set.setAutoSaveExternalFiles(AutoFileSaveType.never);
+        break;
+      case 1:
+        set.setAutoSaveExternalFiles(AutoFileSaveType.always);
+        break;
+      default:
+        set.setAutoSaveExternalFiles(AutoFileSaveType.ask);
+    }
 	}
 
   @Override
@@ -239,6 +274,8 @@ public class EditorOptionsPanel
     reloadLabel = new JLabel();
     reloadType = new JComboBox();
     rightClickMovesCursor = new JCheckBox();
+    jLabel3 = new JLabel();
+    autoFileSave = new JComboBox<>();
 
     setLayout(new GridBagLayout());
 
@@ -259,7 +296,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(5, 11, 0, 0);
     add(tabSize, gridBagConstraints);
 
     historySizeLabel.setText(ResourceMgr.getString("LblHistorySize")); // NOI18N
@@ -277,7 +314,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(5, 11, 0, 0);
     add(historySizeField, gridBagConstraints);
 
     electricScrollLabel.setText(ResourceMgr.getString("LblSettingElectricScroll")); // NOI18N
@@ -286,7 +323,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new Insets(5, 10, 0, 0);
     add(electricScrollLabel, gridBagConstraints);
 
     electricScroll.setColumns(4);
@@ -295,7 +332,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(5, 8, 0, 15);
     add(electricScroll, gridBagConstraints);
 
     internalLineEndingLabel.setText(ResourceMgr.getString("LblIntLineEnding")); // NOI18N
@@ -347,7 +384,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 0, 0, 11);
+    gridBagConstraints.insets = new Insets(5, 10, 0, 11);
     add(includeFilesInHistory, gridBagConstraints);
 
     noWordSepLabel.setLabelFor(noWordSep);
@@ -368,7 +405,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 0, 0, 10);
+    gridBagConstraints.insets = new Insets(5, 10, 0, 10);
     add(useTabs, gridBagConstraints);
 
     noWordSep.setColumns(8);
@@ -379,7 +416,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(3, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(3, 11, 0, 0);
     add(noWordSep, gridBagConstraints);
 
     jPanel1.setLayout(new GridBagLayout());
@@ -442,7 +479,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
+    gridBagConstraints.insets = new Insets(3, 10, 0, 0);
     add(jLabel2, gridBagConstraints);
 
     autoCloseBrackets.setColumns(8);
@@ -452,7 +489,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(3, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(3, 8, 0, 15);
     add(autoCloseBrackets, gridBagConstraints);
 
     wheelScrollLabel.setText(ResourceMgr.getString("LblWheelScrLines")); // NOI18N
@@ -471,7 +508,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(5, 11, 0, 0);
     add(wheelScrollLines, gridBagConstraints);
 
     reloadLabel.setLabelFor(reloadType);
@@ -489,9 +526,8 @@ public class EditorOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 8;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new Insets(3, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(3, 11, 0, 0);
     add(reloadType, gridBagConstraints);
 
     rightClickMovesCursor.setSelected(Settings.getInstance().getRightClickMovesCursor());
@@ -505,6 +541,23 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     add(rightClickMovesCursor, gridBagConstraints);
+
+    jLabel3.setText(ResourceMgr.getString("LblAutoSaveFiles")); // NOI18N
+    jLabel3.setToolTipText(ResourceMgr.getString("d_LblAutoSaveFiles")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(3, 10, 0, 0);
+    add(jLabel3, gridBagConstraints);
+
+    autoFileSave.setModel(new DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(3, 8, 0, 0);
+    add(autoFileSave, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -524,6 +577,7 @@ public class EditorOptionsPanel
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JTextField autoCloseBrackets;
+  private JComboBox<String> autoFileSave;
   private WbFilePicker defaultDir;
   private JLabel editorTabSizeLabel;
   private JTextField electricScroll;
@@ -538,6 +592,7 @@ public class EditorOptionsPanel
   private JLabel internalLineEndingLabel;
   private JLabel jLabel1;
   private JLabel jLabel2;
+  private JLabel jLabel3;
   private JPanel jPanel1;
   private JTextField noWordSep;
   private JLabel noWordSepLabel;
