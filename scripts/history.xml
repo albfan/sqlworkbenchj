@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2015-12-06">
+  <release build="-1" date="2016-01-06">
+    <entry dev-build="8" type="enh">It's now possible to configure auto-saving of external files independently from auto-saving the workspace.</entry>
     <entry dev-build="8" type="enh">A new command WbMessage to display a simple message is available.</entry>
     <entry dev-build="7" type="enh">It's not possible to search text in all open editors (Tools -&gt; Search all tabs)</entry>
     <entry dev-build="7" type="enh">For some DBMS, the DbTree and DbExplorer now show the dependencies between objects</entry>
