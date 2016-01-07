@@ -24,6 +24,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 import workbench.resource.ResourceMgr;
 
@@ -56,10 +57,11 @@ public class WbListDependencies
 	public static final String VERB_SHORT = "WbListDeps";
 	public static final String ARG_OBJECT_NAME = "name";
 	public static final String ARG_OBJECT_TYPE = "objectType";
-	public static final String ARG_DEPENDENCE_TYPE = "type";
+	public static final String ARG_DEPENDENCE_TYPE = "dependency";
 
   private static final String TYPE_USES = "uses";
   private static final String TYPE_USED_BY = "using";
+
 	public WbListDependencies()
 	{
 		cmdLine = new ArgumentParser();
@@ -67,6 +69,7 @@ public class WbListDependencies
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 		cmdLine.addArgument(ARG_OBJECT_NAME, ArgumentType.TableArgument);
     cmdLine.addArgument(ARG_DEPENDENCE_TYPE, CollectionUtil.arrayList(TYPE_USES, TYPE_USED_BY));
+    cmdLine.addArgument(ARG_OBJECT_TYPE);
 	}
 
 	@Override
@@ -100,15 +103,17 @@ public class WbListDependencies
 		String schema = null;
 		String catalog = null;
     String objectName = null;
+    String objectType = null;
 
     TableIdentifier base = null;
-    String type = TYPE_USES;
+    Set<String> types = CollectionUtil.caseInsensitiveSet(TYPE_USES);
 		if (cmdLine.hasArguments())
 		{
 			schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 			catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
       objectName = cmdLine.getValue(ARG_OBJECT_NAME);
-      type = cmdLine.getValue(ARG_DEPENDENCE_TYPE, TYPE_USES);
+      objectType = cmdLine.getValue(ARG_OBJECT_TYPE);
+      types.addAll(cmdLine.getListValue(ARG_DEPENDENCE_TYPE));
       base = new TableIdentifier(catalog, schema, objectName);
 		}
     else
@@ -117,33 +122,63 @@ public class WbListDependencies
       base = new TableIdentifier(options);
     }
 
-    base = currentConnection.getMetadata().findObject(base);
+    DbObject toUse = null;
 
-    String titleKey = null;
-    List<DbObject> objects = null;
-    if (type.equalsIgnoreCase(TYPE_USED_BY))
+    if ("procedure".equalsIgnoreCase(objectType))
     {
-      objects = reader.getUsedBy(currentConnection, base);
-      titleKey = "TxtDepsUsedByParm";
+      toUse = currentConnection.getMetadata().getProcedureReader().findProcedureByName(base);
     }
     else
     {
-      objects = reader.getUsedObjects(currentConnection, base);
-      titleKey = "TxtDepsUsesParm";
+      String[] typesToSearch = null;
+      if (objectType != null)
+      {
+        typesToSearch = new String[] { objectType };
+      }
+      toUse = currentConnection.getMetadata().searchObjectOnPath(base, typesToSearch);
     }
-    DataStore ds = currentConnection.getMetadata().createTableListDataStore();
-    ds.setResultName(ResourceMgr.getFormattedString(titleKey, base.getTableExpression(currentConnection)));
-    for (DbObject dbo : objects)
+
+    if (toUse == null)
     {
-      int row = ds.addRow();
-      ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, dbo.getCatalog());
-      ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, dbo.getSchema());
-      ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, dbo.getObjectName());
-      ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, dbo.getObjectType());
-      ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, dbo.getComment());
+      result.addErrorMessageByKey("ErrTableOrViewNotFound", base.getObjectExpression(currentConnection));
+      return result;
     }
-    ds.resetStatus();
-    result.addDataStore(ds);
+
+    if (types.contains("*"))
+    {
+      types = CollectionUtil.caseInsensitiveSet(TYPE_USES, TYPE_USED_BY);
+    }
+
+    for (String depType : types)
+    {
+      String titleKey = null;
+      List<DbObject> objects = null;
+
+      if (depType.equalsIgnoreCase(TYPE_USED_BY))
+      {
+        objects = reader.getUsedBy(currentConnection, toUse);
+        titleKey = "TxtDepsUsedByParm";
+      }
+      else if (depType.equalsIgnoreCase(TYPE_USES))
+      {
+        objects = reader.getUsedObjects(currentConnection, toUse);
+        titleKey = "TxtDepsUsesParm";
+      }
+      DataStore ds = currentConnection.getMetadata().createTableListDataStore();
+      ds.setResultName(ResourceMgr.getFormattedString(titleKey, toUse.getObjectExpression(currentConnection)));
+      for (DbObject dbo : objects)
+      {
+        int row = ds.addRow();
+        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, dbo.getCatalog());
+        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, dbo.getSchema());
+        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, dbo.getObjectName());
+        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, dbo.getObjectType());
+        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, dbo.getComment());
+      }
+      ds.resetStatus();
+      result.addDataStore(ds);
+    }
+
 		return result;
 	}
 
