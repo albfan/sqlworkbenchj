@@ -617,7 +617,12 @@ public class TableDefinitionPanel
 		for (int i=0; i < rows.length; i++)
 		{
 			String column = this.tableDefinition.getValueAsString(rows[i], TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			columns.add(new ColumnIdentifier(column));
+
+      // the column name can be empty if a new column has just been inserted in the definition display
+      if (StringUtil.isNonBlank(column))
+      {
+        columns.add(new ColumnIdentifier(column));
+      }
 		}
 		return columns;
 	}
