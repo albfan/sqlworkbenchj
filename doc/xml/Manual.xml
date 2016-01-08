@@ -43,6 +43,7 @@
 	<!ENTITY release-history SYSTEM "docbook-history.xml">
 	<!ENTITY connect-descriptor SYSTEM "connect-descriptor.xml">
 	<!ENTITY plain-profiles SYSTEM "plain-profiles.xml">
+	<!ENTITY workspaces SYSTEM "workspaces.xml">
 ]>
 
 <?xml-stylesheet href="html.css" type="text/css"?>
@@ -55,6 +56,7 @@
 &command-line;
 &jdbc-setup;
 &profiles;
+&workspaces;
 &editor;
 &bookmarks;
 &delimiter;
