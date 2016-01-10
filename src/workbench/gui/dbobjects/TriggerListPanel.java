@@ -72,10 +72,11 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
-import workbench.sql.DelimiterDefinition;
-import workbench.sql.parser.ScriptParser;
 
 import workbench.storage.DataStore;
+
+import workbench.sql.DelimiterDefinition;
+import workbench.sql.parser.ScriptParser;
 
 import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
@@ -476,8 +477,11 @@ public class TriggerListPanel
 
 		try
 		{
-			levelChanger.changeIsolationLevel(dbConnection);
-			dbConnection.setBusy(true);
+      if (dbConnection.getProfile().getUseSeparateConnectionPerTab())
+      {
+        levelChanger.changeIsolationLevel(dbConnection);
+      }
+      dbConnection.setBusy(true);
 
 			try
 			{

@@ -195,7 +195,9 @@ public class CommandMapper
 		addCommand(new WbSysExec());
 		addCommand(new WbSysOpen());
 		addCommand(new WbShowProps());
-		addCommand(new WbSetProp());
+    WbSetProp set = new WbSetProp();
+		addCommand(set);
+    cmdDispatch.put(WbSetProp.SET_DB_CONFIG_VERB, set);
 		addCommand(new WbGenDrop());
 		addCommand(new WbGenerateScript());
 		addCommand(new WbGenDelete());
@@ -262,11 +264,7 @@ public class CommandMapper
 		{
 			if (cmd.isWbCommand())
 			{
-				result.add(cmd.getVerb());
-        if (cmd.getAlternateVerb() != null)
-        {
-          result.add(cmd.getAlternateVerb());
-        }
+				result.addAll(cmd.getAllVerbs());
 			}
 		}
 		return result;
@@ -277,12 +275,10 @@ public class CommandMapper
 	 */
 	public final void addCommand(SqlCommand command)
 	{
-		cmdDispatch.put(command.getVerb(), command);
-		String alternate = command.getAlternateVerb();
-		if (alternate != null)
-		{
-			cmdDispatch.put(alternate.toUpperCase(), command);
-		}
+    for (String verb : command.getAllVerbs())
+    {
+      cmdDispatch.put(verb, command);
+    }
 	}
 
 	/**

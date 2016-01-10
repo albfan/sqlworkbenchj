@@ -24,6 +24,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -53,6 +54,7 @@ public class WbSetProp
 {
 	public static final String VERB = "WbSetProp";
 	public static final String ALTERNATE_VERB = "WbSetConfig";
+  public static final String SET_DB_CONFIG_VERB = "WbSetDbConfig";
 	public static final String ARG_TYPE = "type";
 	public static final String ARG_PROP = "property";
 	public static final String ARG_VALUE = "value";
@@ -91,6 +93,13 @@ public class WbSetProp
 
 		String verb = getParsingUtil().getSqlVerb(sql);
 		boolean isConfig = verb.equalsIgnoreCase(ALTERNATE_VERB);
+    boolean isDbConfig = verb.equalsIgnoreCase(SET_DB_CONFIG_VERB);
+
+    if (isDbConfig)
+    {
+      isConfig = true;
+    }
+
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);
 
@@ -141,6 +150,11 @@ public class WbSetProp
 			{
 				String prop	= getPropertyName(pair[0]);
 				String value = StringUtil.trimQuotes(pair[1]);
+
+        if (isDbConfig && !prop.startsWith("workbench") && currentConnection != null)
+        {
+          prop = "workbench.db." + currentConnection.getDbId() + "." + prop;
+        }
 
 				if (isConfig && prop.startsWith("workbench"))
 				{
@@ -196,6 +210,12 @@ public class WbSetProp
 	{
 		return ALTERNATE_VERB;
 	}
+
+  @Override
+  public Collection<String> getAllVerbs()
+  {
+    return CollectionUtil.arrayList(VERB, ALTERNATE_VERB, SET_DB_CONFIG_VERB);
+  }
 
 	@Override
 	protected boolean isConnectionRequired()

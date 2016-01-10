@@ -489,7 +489,10 @@ public class ProcedureListPanel
         infoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
       });
 
-			levelChanger.changeIsolationLevel(dbConnection);
+      if (dbConnection.getProfile().getUseSeparateConnectionPerTab())
+      {
+        levelChanger.changeIsolationLevel(dbConnection);
+      }
 			DbMetadata meta = dbConnection.getMetadata();
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			procList.setOriginalOrder(ds);
@@ -779,8 +782,11 @@ public class ProcedureListPanel
 
 		try
 		{
-			levelChanger.changeIsolationLevel(dbConnection);
-			dbConnection.setBusy(true);
+      if (dbConnection.getProfile().getUseSeparateConnectionPerTab())
+      {
+        levelChanger.changeIsolationLevel(dbConnection);
+      }
+      dbConnection.setBusy(true);
 			try
 			{
 				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureReader().getProcedureColumns(def));

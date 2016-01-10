@@ -133,6 +133,7 @@ import workbench.gui.settings.PlacementChooser;
 
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
+import workbench.storage.SortDefinition;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
@@ -143,7 +144,6 @@ import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
 import static workbench.storage.NamedSortDefinition.*;
-import workbench.storage.SortDefinition;
 
 
 /**
@@ -1177,8 +1177,11 @@ public class TableListPanel
 
 			String[] types = getSelectedTypes();
 
-			levelChanger.changeIsolationLevel(dbConnection);
-			DataStore ds = null;
+      if (dbConnection.getProfile().getUseSeparateConnectionPerTab())
+      {
+        levelChanger.changeIsolationLevel(dbConnection);
+      }
+      DataStore ds = null;
 			if (DbExplorerSettings.getUseFilterForRetrieve())
 			{
 				String filter = findPanel.getText();
@@ -1904,8 +1907,10 @@ public class TableListPanel
 		this.setBusy(true);
 		try
 		{
-			levelChanger.changeIsolationLevel(dbConnection);
-
+      if (dbConnection.getProfile().getUseSeparateConnectionPerTab())
+      {
+        levelChanger.changeIsolationLevel(dbConnection);
+      }
 			synchronized (this.connectionLock)
 			{
 				switch (index)

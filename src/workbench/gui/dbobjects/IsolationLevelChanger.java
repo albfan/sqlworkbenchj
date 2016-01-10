@@ -49,7 +49,7 @@ public class IsolationLevelChanger
 		oldLevel = Connection.TRANSACTION_NONE;
 		if (dbConnection == null) return;
 
-		if (dbConnection.getProfile().getUseSeparateConnectionPerTab() && dbConnection.getDbSettings().useReadUncommittedForDbExplorer())
+		if (dbConnection.getDbSettings().useReadUncommittedForDbExplorer())
 		{
 			oldLevel = dbConnection.getIsolationLevel();
 			dbConnection.setIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED);

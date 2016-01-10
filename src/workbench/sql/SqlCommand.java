@@ -28,6 +28,8 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import workbench.RunMode;
@@ -50,6 +52,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.sql.wbcommands.WbEnableOraOutput;
 
 import workbench.util.ArgumentParser;
+import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
@@ -816,6 +819,15 @@ public class SqlCommand
 	{
 		return null;
 	}
+
+  public Collection<String> getAllVerbs()
+  {
+    if (getAlternateVerb() == null)
+    {
+      return Collections.singleton(getVerb());
+    }
+    return CollectionUtil.arrayList(getVerb(), getAlternateVerb());
+  }
 
 	/**
 	 * Check if this verb for this statement is considered an updating command in

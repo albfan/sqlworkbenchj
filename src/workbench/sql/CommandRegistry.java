@@ -26,6 +26,7 @@ import java.util.List;
 
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
+
 import workbench.util.ClassFinder;
 import workbench.util.StringUtil;
 
@@ -72,11 +73,7 @@ public class CommandRegistry
     verbs = new ArrayList<>(cmdList.size());
     for (SqlCommand cmd : cmdList)
     {
-      verbs.add(cmd.getVerb());
-      if (cmd.getAlternateVerb() != null)
-      {
-        verbs.add(cmd.getAlternateVerb());
-      }
+      verbs.addAll(cmd.getAllVerbs());
     }
   }
 
