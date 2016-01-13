@@ -158,7 +158,7 @@ public class LnFHelper
 			def.put("Table.gridColor", c);
 		}
 
-		def.put("Button.showMnemonics", Boolean.valueOf(GuiSettings.getShowMnemonics()));
+    def.put("Button.showMnemonics", Boolean.valueOf(GuiSettings.getShowMnemonics()));
 	}
 
 	private boolean isWindowsLookAndFeel()

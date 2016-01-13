@@ -23,12 +23,15 @@
  */
 package workbench.gui;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -52,6 +55,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
@@ -1460,14 +1464,20 @@ public class MainWindow
 	@Override
 	public void windowDeactivated(WindowEvent windowEvent)
 	{
-		WbFocusManager.getInstance().grabActions(null, null);
+    if (GuiSettings.installFocusManager())
+    {
+      WbKeyDispatcher.getInstance().grabActions(null, null);
+    }
 	}
 
 	@Override
 	public void windowActivated(WindowEvent windowEvent)
 	{
-		WbFocusManager.getInstance().grabActions(nextTab, prevTab);
-	}
+    if (GuiSettings.installFocusManager())
+    {
+      WbKeyDispatcher.getInstance().grabActions(nextTab, prevTab);
+    }
+  }
 
 	@Override
 	public void windowIconified(WindowEvent windowEvent)

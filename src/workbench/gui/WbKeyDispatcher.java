@@ -23,49 +23,49 @@
  */
 package workbench.gui;
 
-import java.awt.Component;
+import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
 
-import javax.swing.DefaultFocusManager;
 import javax.swing.KeyStroke;
 
 import workbench.gui.actions.WbAction;
 
 /**
- * A focus manager which can grab focus traversal keys before they
- * are processed by the actual compontents.
+ * A KeyEventDispatcher which handle Ctrl-Tab and Ctrl-Shift-Tab to navigate in tabbed pane.
  *
- * This is necessary to allow Ctrl-Tab to switch tabs in the MainWindow. If no FocusManager
+ * This is necessary to allow Ctrl-Tab to switch tabs in the MainWindow. If no KeyEventDispatcher
  * is installed, Ctrl-Tab will jump inside the current tabt to the next focusable component,
  * even if an action is registered with the Ctrl-Tab keystroke.
  * <br>
  * WbFocusManager can grab two actions (see grabActions()). If the shortcuts
- * for those actions are pressed, the action is called directly, otherwise the
- * event is handed to the DefaultFocusManager.
- * <br>
- * Currently only two (named) actions are supported, but this can easily
- * be changed to support a variable number of actions by storing them
- * in a Map.
+ * for those actions are pressed, the action are processed in dispatchKeyEvent()
+ * and the focus manager is signalled to no longer process the key event.
+ *
  * @author Thomas Kellerer
+ * @see MainWindow#windowActivated(java.awt.event.WindowEvent)
+ * @see MainWindow#windowDeactivated(java.awt.event.WindowEvent)
+ * @see WbManager#initUI()
  */
-public class WbFocusManager
-	extends DefaultFocusManager
+public class WbKeyDispatcher
+	implements KeyEventDispatcher
 {
 	private WbAction nextTab;
 	private WbAction prevTab;
+  private boolean enabled;
 
-	protected static class LazyInstanceHolder
+	private static class LazyInstanceHolder
 	{
-		protected static final WbFocusManager instance = new WbFocusManager();
+		protected static final WbKeyDispatcher instance = new WbKeyDispatcher();
 	}
 
-	public static WbFocusManager getInstance()
+	public static WbKeyDispatcher getInstance()
 	{
 		return LazyInstanceHolder.instance;
 	}
 
-	private WbFocusManager()
+	private WbKeyDispatcher()
 	{
+    super();
 	}
 
 	/**
@@ -88,40 +88,35 @@ public class WbFocusManager
 		{
 			nextTab = next;
 			prevTab = prev;
+      enabled = nextTab != null && prevTab != null;
 		}
 	}
 
-	/**
-	 * Process the key event for focus traversal. If the keyStroke identified
-	 * by the passed event maps to one of the actions registered with grabActions()
-	 * the action is executed, and the event is marked as consumed.
-	 * <br>
-	 * The focusedComponent
-	 * @param focusedComponent
-	 * @param anEvent
-	 */
   @Override
-	public void processKeyEvent(Component focusedComponent, KeyEvent anEvent)
-	{
-		KeyStroke key = KeyStroke.getKeyStrokeForEvent(anEvent);
+  public boolean dispatchKeyEvent(KeyEvent evt)
+  {
+    if (!enabled) return false;
 
-		synchronized (LazyInstanceHolder.instance)
-		{
-			if (nextTab != null && nextTab.getAccelerator().equals(key))
-			{
-				anEvent.consume();
-				nextTab.actionPerformed(null);
-				return;
-			}
-			else if (prevTab != null && prevTab.getAccelerator().equals(key))
-			{
-				anEvent.consume();
-				prevTab.actionPerformed(null);
-				return;
-			}
-		}
-		// the call to super may not be synchronized, otherwise I have seen
-		// deadlocks when tabbing through the controls of a dialog
-		super.processKeyEvent(focusedComponent, anEvent);
-	}
+    KeyStroke key = KeyStroke.getKeyStrokeForEvent(evt);
+    boolean processed = false;
+
+    synchronized (LazyInstanceHolder.instance)
+    {
+      if (nextTab.getAccelerator().equals(key))
+      {
+        evt.consume();
+        nextTab.actionPerformed(null);
+        processed = true;
+      }
+      else if (prevTab.getAccelerator().equals(key))
+      {
+        evt.consume();
+        prevTab.actionPerformed(null);
+        processed = true;
+      }
+    }
+    return processed;
+  }
+
+
 }

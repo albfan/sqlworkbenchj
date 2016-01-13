@@ -55,7 +55,7 @@ import workbench.db.ConnectionProfile;
 
 import workbench.gui.DisconnectInfo;
 import workbench.gui.MainWindow;
-import workbench.gui.WbFocusManager;
+import workbench.gui.WbKeyDispatcher;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.bookmarks.BookmarkManager;
 import workbench.gui.components.ColumnOrderMgr;
@@ -65,6 +65,7 @@ import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.gui.tools.ObjectSourceSearchPanel;
+import workbench.resource.GuiSettings;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.CommandRegistry;
@@ -338,11 +339,11 @@ public final class WbManager
 		helper.initUI();
 		this.isWindowsClassic = helper.isWindowsClassic();
 		Settings.getInstance().addFontChangedListener(this);
-		if (Settings.getInstance().getBoolProperty("workbench.gui.install.focusmgr", true))
+		if (GuiSettings.installFocusManager())
 		{
 			EventQueue.invokeLater(() ->
       {
-        FocusManager.setCurrentManager(WbFocusManager.getInstance());
+        FocusManager.getCurrentManager().addKeyEventDispatcher(WbKeyDispatcher.getInstance());
       });
 		}
 	}

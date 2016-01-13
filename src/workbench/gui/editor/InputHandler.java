@@ -337,6 +337,7 @@ public class InputHandler
 					area.showContextMenu();
 				}
 			});
+      evt.consume();
 			return;
 		}
 
@@ -407,14 +408,13 @@ public class InputHandler
 			KeyStroke key = KeyStroke.getKeyStrokeForEvent(evt);
 			ActionListener l = bindings.get(key);
 
-			if (l != null)
+			if (l == null)
 			{
-				executeAction(l, evt.getSource(), String.valueOf(c));
-				evt.consume();
-				return;
+        // Nothing mapped --> insert a character
+        l = INSERT_CHAR;
 			}
-
-			executeAction(INSERT_CHAR, evt.getSource(), String.valueOf(c));
+      executeAction(l, evt.getSource(), String.valueOf(c));
+      evt.consume();
 		}
 	}
 

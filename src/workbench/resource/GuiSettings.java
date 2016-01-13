@@ -1336,4 +1336,9 @@ public class GuiSettings
       return ResultReceiver.ShowType.appendText;
     }
   }
+
+  public static boolean installFocusManager()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.gui.install.focusmgr", true);
+  }
 }
