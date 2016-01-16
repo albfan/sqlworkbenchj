@@ -47,7 +47,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.TabbedPaneUI;
 
-import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.Moveable;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
@@ -329,7 +328,6 @@ public class WbTabbedPane
 		addChangeListener(this);
     setDoubleBuffered(true);
     setOpaque(true);
-    WbSwingUtilities.dumpActionMap(this);
 	}
 
 	@Override
