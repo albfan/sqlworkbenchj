@@ -299,20 +299,33 @@ public class TreeLoader
     else
     {
       boolean isCatalogChild = parentNode.getType().equals(TYPE_CATALOG);
-      CatalogChanger catalogChanger = new CatalogChanger();
-      catalogChanger.setFireEvents(false);
+      CatalogChanger catalogChanger = null;
       boolean catalogChanged = false;
-      String currentCatalog = connection.getMetadata().getCurrentCatalog();
+      boolean supportsCatalogParameter = connection.getMetadata().supportsCatalogForGetSchemas();
+
+      String catalogToRetrieve = null;
+      String currentCatalog = null;
+
+      if (isCatalogChild)
+      {
+        catalogChanger = new CatalogChanger();
+        catalogChanger.setFireEvents(false);
+        currentCatalog = connection.getMetadata().getCurrentCatalog();
+        catalogToRetrieve = parentNode.getName();
+      }
+
       try
       {
         levelChanger.changeIsolationLevel(connection);
-        if (isCatalogChild && connection.getDbSettings().changeCatalogToRetrieveSchemas())
+
+        if (isCatalogChild && connection.getDbSettings().changeCatalogToRetrieveSchemas() && !supportsCatalogParameter)
         {
-          catalogChanger.setCurrentCatalog(connection, parentNode.getName());
+          catalogChanger.setCurrentCatalog(connection, catalogToRetrieve);
           catalogChanged = true;
         }
 
-        List<String> schemas = connection.getMetadata().getSchemas(connection.getSchemaFilter());
+        List<String> schemas = connection.getMetadata().getSchemas(connection.getSchemaFilter(), catalogToRetrieve);
+
         if (CollectionUtil.isEmpty(schemas)) return false;
 
         for (String schema : schemas)
@@ -322,7 +335,7 @@ public class TreeLoader
           SchemaIdentifier id = new SchemaIdentifier(schema);
           if (isCatalogChild)
           {
-            id.setCatalog(parentNode.getName());
+            id.setCatalog(catalogToRetrieve);
           }
           node.setUserObject(id);
           parentNode.add(node);

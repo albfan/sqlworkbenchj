@@ -1615,6 +1615,11 @@ public class DbSettings
     return getBoolProperty("schema.retrieve.change.catalog", false);
   }
 
+	public boolean supportsCatalogForGetSchemas()
+	{
+		return getBoolProperty("getschemas.per.catalog.supported", false);
+	}
+
 	public boolean supportsCatalogs()
 	{
 		return getBoolProperty("catalogs.supported", true);

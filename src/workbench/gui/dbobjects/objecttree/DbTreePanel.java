@@ -393,6 +393,10 @@ public class DbTreePanel
   {
     int location = props.getIntProperty(PROP_DIVIDER + "." + getCurrentPosition().name(), -1);
     String typeString = props.getProperty(PROP_TYPES);
+    if (StringUtil.isBlank(typeString))
+    {
+      typeString = DbExplorerSettings.getDefaultExplorerObjectType();
+    }
     selectedTypes = StringUtil.stringToList(typeString, ",", true, true, false);
     tree.setTypesToShow(selectedTypes);
 

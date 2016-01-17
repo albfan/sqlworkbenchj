@@ -2684,6 +2684,16 @@ public class DbMetadata
 		return getSchemas(null);
 	}
 
+  public boolean supportsCatalogForGetSchemas()
+  {
+    if (this.isSqlServer)
+    {
+      // the jTDS driver does not support getSchemas(String, String)
+      return SqlServerUtil.isMicrosoftDriver(dbConnection);
+    }
+    return getDbSettings().supportsCatalogForGetSchemas();
+  }
+
 	/**
 	 * Return a filtered list of schemas in the database.
 	 * <br/>
@@ -2692,12 +2702,20 @@ public class DbMetadata
 	 * If the filter is not null, all entries that are matched by the
 	 * filter are removed from the result.
 	 *
-	 * @param filter the ObjectNameFilter to apply
+	 * @param filter    the ObjectNameFilter to apply. May be null
+   * @param catalog   the catalog for which the schemas should be retrieved. May be null
+   *
 	 * @return a list of available schemas if supported by the database
 	 * @see ObjectNameFilter#isExcluded(java.lang.String)
    * @see ObjectNameFilter#applyFilter(java.util.Collection)
+   * @see #supportsCatalogForGetSchemas()
 	 */
 	public List<String> getSchemas(ObjectNameFilter filter)
+  {
+    return getSchemas(filter, null);
+  }
+
+	public List<String> getSchemas(ObjectNameFilter filter, String catalog)
 	{
 		List<String> result = new ArrayList<>();
 		ResultSet rs = null;
@@ -2705,7 +2723,20 @@ public class DbMetadata
 		boolean useColumnNames = dbSettings.useColumnNameForMetadata();
     try
     {
-      rs = this.metaData.getSchemas();
+      if (StringUtil.isNonEmpty(catalog) && supportsCatalogForGetSchemas())
+      {
+        rs = this.metaData.getSchemas(catalog, null);
+      }
+      else
+      {
+        if (StringUtil.isNonEmpty(catalog))
+        {
+          LogMgr.logDebug("DbMetadata.getSchemas()",
+            "DbMetadata.getSchemas() called with catalog parameter, but current connection is not configured to support that", new Exception("Backtrace"));
+        }
+        rs = this.metaData.getSchemas();
+      }
+
       while (rs.next())
       {
         String schema = useColumnNames ? rs.getString("TABLE_SCHEM") : rs.getString(1);
