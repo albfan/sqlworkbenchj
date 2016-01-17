@@ -31,6 +31,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.beans.PropertyChangeListener;
@@ -85,6 +86,7 @@ import workbench.util.WbFile;
 import workbench.util.WbLocale;
 import workbench.util.WbNumberFormatter;
 import workbench.util.WbProperties;
+
 
 /**
  * The singleton to manage configuration settings for SQL Workbench/J
@@ -1598,6 +1600,20 @@ public class Settings
 		}
 		return InputEvent.ALT_MASK;
 	}
+
+ 	/**
+	 *  Returns the key for rectangular selections in the editor
+	 */
+	public int getRectSelectionKey()
+	{
+    int modifier = getRectSelectionModifier();
+		if (modifier == InputEvent.CTRL_MASK)
+		{
+      return KeyEvent.VK_CONTROL;
+		}
+		return KeyEvent.VK_ALT;
+	}
+
 
 	public void setRectSelectionModifier(String mod)
 	{

@@ -47,6 +47,7 @@ import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
 import workbench.interfaces.ToolWindowManager;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -65,7 +66,6 @@ import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.gui.tools.ObjectSourceSearchPanel;
-import workbench.resource.GuiSettings;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.CommandRegistry;

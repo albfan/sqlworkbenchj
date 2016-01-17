@@ -1779,6 +1779,11 @@ public class DbSettings
 		return getProperty(keyname + ".select", globalDefault);
 	}
 
+	public String getSwitchCatalogStatement()
+	{
+		return getProperty("switchcatalog.sql", "USE " + TableSourceBuilder.CATALOG_PLACEHOLDER);
+	}
+
 	public boolean getSwitchCatalogInExplorer()
 	{
 		return getBoolProperty("dbexplorer.switchcatalog", DbExplorerSettings.getSwitchCatalogInExplorer());

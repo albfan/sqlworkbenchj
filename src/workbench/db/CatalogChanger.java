@@ -74,11 +74,12 @@ public class CatalogChanger
 
 		DbMetadata meta = conn.getMetadata();
 
+    String sql = conn.getDbSettings().getSwitchCatalogStatement();
+
 		// MySQL does not seem to like changing the current database by executing a USE command
-		// through Statement.execute(), so we'll use setCatalog() instead
-		// which seems to work with SQL Server as well.
+		// so we'll use setCatalog() instead which seems to work with SQL Server as well.
 		// If for some reason this does not work, it could be turned off
-		if (useSetCatalog)
+    if (useSetCatalog || StringUtil.isBlank(sql))
 		{
 			conn.getSqlConnection().setCatalog(conn.getMetadata().removeQuotes(newCatalog.trim()));
 		}
@@ -88,8 +89,9 @@ public class CatalogChanger
 			try
 			{
 				stmt = conn.createStatement();
-				String cat = meta.quoteObjectname(newCatalog.trim());
-				stmt.execute("USE " + cat);
+				sql = sql.replace(TableSourceBuilder.CATALOG_PLACEHOLDER, meta.quoteObjectname(newCatalog.trim()));
+        LogMgr.logDebug("CatalogChanger.setCurrentCatalog()", "Changing catalog using: " + sql);
+				stmt.execute(sql);
 				if (clearWarnings)
 				{
 					stmt.clearWarnings();

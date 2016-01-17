@@ -31,11 +31,12 @@ import java.util.Set;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
+import workbench.interfaces.ResultReceiver;
+import workbench.log.LogMgr;
+
 import workbench.db.objectcache.ObjectCacheStorage;
 
 import workbench.gui.sql.FileReloadType;
-import workbench.interfaces.ResultReceiver;
-import workbench.log.LogMgr;
 
 import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
