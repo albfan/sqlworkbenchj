@@ -44,10 +44,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
-import javax.swing.MenuElement;
-import javax.swing.MenuSelectionManager;
 import javax.swing.UIManager;
-import javax.swing.plaf.basic.ComboPopup;
 
 import workbench.resource.IconMgr;
 import workbench.resource.PlatformShortcuts;

@@ -95,6 +95,13 @@ public class WbKeyDispatcher
   @Override
   public boolean dispatchKeyEvent(KeyEvent evt)
   {
+    // intercept the Window Alt-Key handling
+    if (evt.getKeyCode() == KeyEvent.VK_ALT)
+    {
+      evt.consume();
+      return true;
+    }
+
     if (!enabled) return false;
 
     KeyStroke key = KeyStroke.getKeyStrokeForEvent(evt);

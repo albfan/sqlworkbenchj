@@ -34,15 +34,19 @@ import workbench.util.StringUtil;
 /**
  * A class to change the current catalog in the database.
  *
- * This class uses DatabaseMetaData.setCatalog() to change the current catalog (database) or runs the USE command
- * depending on the DB property <tt>usesetcatalog</tt>
+ * This class uses DatabaseMetaData.setCatalog() to change the current catalog (database) or runs a SQL command
+ * depending on the DB property <tt>usesetcatalog</tt>.
+ *
+ * The SQL statement to be used can be configured.
  *
  * @author Thomas Kellerer
- * @see workbench.db.DbSettings#useSetCatalog()
+ * @see DbSettings#useSetCatalog()
+ * @see DbSettings#getSwitchCatalogStatement()
  */
 public class CatalogChanger
 {
   private boolean fireEvents = true;
+  private final String quotedPlaceholder = "'" + TableSourceBuilder.CATALOG_PLACEHOLDER + "'";
 
   public void setFireEvents(boolean flag)
   {
@@ -57,10 +61,13 @@ public class CatalogChanger
    * through {@link DbSettings#useSetCatalog()}. If that is disabled, a <tt>USE</tt> command
    * is sent to the database.
    *
+   * @param conn       the connection to be used
 	 * @param newCatalog the name of the new catalog/database that should be selected
+   *
 	 * @see WbConnection#catalogChanged(String, String)
    *
    * @see DbSettings#useSetCatalog()
+   * @see DbSettings#getSwitchCatalogStatement()
 	 */
 	public boolean setCurrentCatalog(WbConnection conn, String newCatalog)
 		throws SQLException
@@ -75,28 +82,46 @@ public class CatalogChanger
 		DbMetadata meta = conn.getMetadata();
 
     String sql = conn.getDbSettings().getSwitchCatalogStatement();
+    String catalogName = conn.getMetadata().removeQuotes(newCatalog.trim());
+
+    boolean catalogChanged = true;
 
 		// MySQL does not seem to like changing the current database by executing a USE command
 		// so we'll use setCatalog() instead which seems to work with SQL Server as well.
 		// If for some reason this does not work, it could be turned off
     if (useSetCatalog || StringUtil.isBlank(sql))
 		{
-			conn.getSqlConnection().setCatalog(conn.getMetadata().removeQuotes(newCatalog.trim()));
+			conn.getSqlConnection().setCatalog(catalogName);
 		}
 		else
 		{
-			Statement stmt = null;
+      Statement stmt = null;
 			try
 			{
-				stmt = conn.createStatement();
-				sql = sql.replace(TableSourceBuilder.CATALOG_PLACEHOLDER, meta.quoteObjectname(newCatalog.trim()));
+        if (sql.contains(quotedPlaceholder))
+        {
+          // placeholder is quoted, don't quote it
+          sql = sql.replace(TableSourceBuilder.CATALOG_PLACEHOLDER, catalogName);
+        }
+        else
+        {
+          // not quoted, so we assume the name is used as an identifier which might need quoting
+          sql = sql.replace(TableSourceBuilder.CATALOG_PLACEHOLDER, meta.quoteObjectname(catalogName));
+        }
         LogMgr.logDebug("CatalogChanger.setCurrentCatalog()", "Changing catalog using: " + sql);
+
+				stmt = conn.createStatement();
 				stmt.execute(sql);
 				if (clearWarnings)
 				{
-					stmt.clearWarnings();
+					SqlUtil.clearWarnings(stmt);
 				}
 			}
+      catch (Exception ex)
+      {
+        LogMgr.logWarning("CatalogChanger.setCurrentCatalog()", "Could not change catalog using: " + sql, ex);
+        catalogChanged = false;
+      }
 			finally
 			{
 				SqlUtil.closeStatement(stmt);
@@ -108,16 +133,16 @@ public class CatalogChanger
 			// Some JDBC drivers report the success of changing the catalog through a warning
 			// as we are displaying our own message anyway in the USE command, there is no need
 			// to display the warning as well.
-			conn.clearWarnings();
+			SqlUtil.clearWarnings(conn);
 		}
 
 		String newCat = meta.getCurrentCatalog();
-		if (fireEvents && StringUtil.stringsAreNotEqual(old, newCat))
+		if (catalogChanged && fireEvents && StringUtil.stringsAreNotEqual(old, newCat))
 		{
 			conn.catalogChanged(old, newCatalog);
 		}
 		LogMgr.logDebug("CatalogChanger.setCurrentCatalog()", "Catalog changed to " + newCat);
 
-		return true;
+		return catalogChanged;
 	}
 }

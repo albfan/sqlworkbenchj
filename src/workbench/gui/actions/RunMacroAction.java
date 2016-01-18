@@ -186,7 +186,7 @@ public class RunMacroAction
 	public void executeAction(ActionEvent e)
 	{
 		if (this.client == null || this.macro == null) return;
-    
+
 		if (this.dataTable != null)
 		{
 			executeDataMacro();

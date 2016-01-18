@@ -78,7 +78,6 @@ import workbench.gui.fontzoom.DecreaseFontSize;
 import workbench.gui.fontzoom.IncreaseFontSize;
 import workbench.gui.fontzoom.ResetFontSize;
 
-import workbench.util.PlatformHelper;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -423,15 +422,6 @@ public class InputHandler
 	@Override
 	public void keyReleased(KeyEvent evt)
 	{
-    // prevent the Alt-Key from invoking the menu when doing a rectangular selection
-    if (PlatformHelper.isWindows() && evt.getKeyCode() == KeyEvent.VK_ALT && Settings.getInstance().getRectSelectionKey() == KeyEvent.VK_ALT)
-    {
-      JEditTextArea textArea = getTextArea(evt);
-      if (textArea.isSelectionRectangular())
-      {
-        evt.consume();
-      }
-    }
 	}
 
 	public List<KeyStroke> getKeys(JMenu menu)

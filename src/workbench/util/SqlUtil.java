@@ -1662,17 +1662,26 @@ public class SqlUtil
 
 	public static void clearWarnings(WbConnection con, Statement stmt)
 	{
+    clearWarnings(con);
+    clearWarnings(stmt);
+	}
+
+	public static void clearWarnings(WbConnection con)
+	{
 		try
 		{
 			if (con != null) con.clearWarnings();
 		}
 		catch (Throwable th)
 		{
-
 		}
+	}
+
+	public static void clearWarnings(Statement stmt)
+	{
 		try
 		{
-			if (stmt != null) con.clearWarnings();
+			if (stmt != null) stmt.clearWarnings();
 		}
 		catch (Throwable th)
 		{
