@@ -28,7 +28,12 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import workbench.WbManager;
+import workbench.resource.Settings;
+
 import workbench.gui.actions.WbAction;
+
+import workbench.util.PlatformHelper;
 
 /**
  * A KeyEventDispatcher which handle Ctrl-Tab and Ctrl-Shift-Tab to navigate in tabbed pane.
@@ -52,6 +57,7 @@ public class WbKeyDispatcher
 	private WbAction nextTab;
 	private WbAction prevTab;
   private boolean enabled;
+  private boolean disableAltKey;
 
 	private static class LazyInstanceHolder
 	{
@@ -66,6 +72,7 @@ public class WbKeyDispatcher
 	private WbKeyDispatcher()
 	{
     super();
+    disableAltKey = PlatformHelper.isWindows() && Settings.getInstance().getBoolProperty("workbench.gui.keydispatcher.disable.alt", true);
 	}
 
 	/**
@@ -96,7 +103,7 @@ public class WbKeyDispatcher
   public boolean dispatchKeyEvent(KeyEvent evt)
   {
     // intercept the Window Alt-Key handling
-    if (evt.getKeyCode() == KeyEvent.VK_ALT)
+    if (disableAltKey && evt.getKeyCode() == KeyEvent.VK_ALT)
     {
       evt.consume();
       return true;
