@@ -176,6 +176,8 @@ public class ExcelReader
 
 		initActiveSheet();
 
+    // TODO: find references to external files and update those as well
+    // see: https://poi.apache.org/spreadsheet/eval.html
 		try
 		{
 			if (useXLSX)
