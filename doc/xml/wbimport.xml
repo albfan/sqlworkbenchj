@@ -64,7 +64,7 @@
       In order to import Microsoft Excel (XSL, XSLT) or OpenOffice Calc (ODS) files, additional libraries are needed.
       For Excel <link linkend="download-poi-addon">the same libraries</link> are needed as for exporting those formats. For OpenOffice
       additional libraries are needed. All needed libraries are included in the download bundle named <literal>with-office-libs.zip</literal>
-      If you did not download that bundle, you can download the libraries needed for OpenOffice from here: <ulink url="http://www.sql-workbench.net/odf-add-on.zip"/>.
+      If you did not download that bundle, you can download the libraries needed for OpenOffice from here: <ulink url="http://www.sql-workbench.net/odf-add-on3.zip"/>.
     </para>
 
     <para>

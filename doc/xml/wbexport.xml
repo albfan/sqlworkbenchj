@@ -163,7 +163,7 @@
 
     <para id="download-poi-addon">
       You can download all required POI libraries as a single archive from the &wb-productname; home page:
-      <ulink url="http://www.sql-workbench.net/poi-add-on2.zip"/>. After downloading the archive, unzip it
+      <ulink url="http://www.sql-workbench.net/poi-add-on3.zip"/>. After downloading the archive, unzip it
       into the directory where <literal>sqlworkbench.jar</literal> is located.
     </para>
 
@@ -173,11 +173,6 @@
         results with a large number of rows this will require a substantial amount of memory.
       </para>
     </important>
-
-    <para>
-      If you have downloaded the add-on ZIP before build 112, you have to delete the file
-      <emphasis role="bold"><literal>ooxml-schemas-1.0.jar</literal></emphasis> as it has been replaced with <literal>poi-ooxml-schemas.jar</literal>.
-    </para>
 
   </section>
 
