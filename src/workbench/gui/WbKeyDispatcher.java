@@ -23,17 +23,18 @@
  */
 package workbench.gui;
 
+import java.awt.Component;
 import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
 
+import javax.swing.FocusManager;
 import javax.swing.KeyStroke;
 
 import workbench.WbManager;
 import workbench.resource.Settings;
 
 import workbench.gui.actions.WbAction;
-
-import workbench.util.PlatformHelper;
+import workbench.gui.sql.EditorPanel;
 
 /**
  * A KeyEventDispatcher which handle Ctrl-Tab and Ctrl-Shift-Tab to navigate in tabbed pane.
@@ -57,7 +58,6 @@ public class WbKeyDispatcher
 	private WbAction nextTab;
 	private WbAction prevTab;
   private boolean enabled;
-  private boolean disableAltKey;
 
 	private static class LazyInstanceHolder
 	{
@@ -72,7 +72,6 @@ public class WbKeyDispatcher
 	private WbKeyDispatcher()
 	{
     super();
-    disableAltKey = PlatformHelper.isWindows() && Settings.getInstance().getBoolProperty("workbench.gui.keydispatcher.disable.alt", true);
 	}
 
 	/**
@@ -102,11 +101,20 @@ public class WbKeyDispatcher
   @Override
   public boolean dispatchKeyEvent(KeyEvent evt)
   {
-    // intercept the Window Alt-Key handling
-    if (disableAltKey && evt.getKeyCode() == KeyEvent.VK_ALT)
+    // intercept the Window Alt-Key handling when the Alt-Key is used
+    // to prevent rectangular selections in the editor activating the menu
+    if (evt.getKeyCode() == Settings.getInstance().getRectSelectionKey() && evt.getID() == KeyEvent.KEY_RELEASED)
     {
-      evt.consume();
-      return true;
+      FocusManager mgr = FocusManager.getCurrentManager();
+      Component owner = mgr.getFocusOwner();
+      if (owner instanceof EditorPanel)
+      {
+        if ( ((EditorPanel)owner).isSelectionRectangular() )
+        {
+          evt.consume();
+          return true;
+        }
+      }
     }
 
     if (!enabled) return false;

@@ -60,12 +60,17 @@ public class RunMacroAction
 	private MacroDefinition macro;
 	private WbTable dataTable;
 	private Map<String, String> columnMap;
+  private static int internalId;
 
-	public RunMacroAction(MainWindow aClient, MacroDefinition def, int index)
+	public RunMacroAction(MainWindow macroClient, MacroDefinition def, int index)
 	{
 		super();
-		this.macro = def;
-		this.client = aClient;
+    internalId++;
+
+		macro = def;
+		client = macroClient;
+
+    putValue(ACTION_COMMAND_KEY, "run-macro-" + Integer.toString(internalId));
 
 		if (def == null)
 		{
@@ -73,16 +78,16 @@ public class RunMacroAction
 			setMenuText(title);
 			String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
 			desc = desc.replaceAll("[ ]*(%macro%)[ ]*", " ");
-			this.putValue(Action.SHORT_DESCRIPTION, desc);
+			putValue(Action.SHORT_DESCRIPTION, desc);
 		}
 		else
 		{
-			String menuTitle = def.getName();
+			String title = def.getName();
 			if (index < 10 && index > 0)
 			{
-				menuTitle = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
+				title = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
 			}
-			setMenuText(menuTitle);
+			setMenuText(title);
       initTooltip();
 
 			StoreableKeyStroke key = macro.getShortcut();
@@ -92,8 +97,9 @@ public class RunMacroAction
 				setAccelerator(stroke);
 			}
 		}
-		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
-		this.setIcon(null);
+
+		setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
+		setIcon(null);
 		setEnabled(macro != null && client != null);
 	}
 

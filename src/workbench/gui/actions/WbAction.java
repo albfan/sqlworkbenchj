@@ -28,10 +28,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.lang.ref.WeakReference;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -53,6 +49,7 @@ import workbench.resource.ShortcutManager;
 
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbarButton;
+
 import workbench.util.StringUtil;
 
 /**
@@ -78,7 +75,6 @@ public class WbAction
 	private WbAction original;
 	private String iconKey;
   private String baseTooltip;
-	private final List<WeakReference<JMenuItem>> createdItems = new LinkedList<>();
 	protected boolean isConfigurable = true;
 	private String descriptiveName;
   private boolean useLabelSizeAsLargeIcon;
@@ -86,7 +82,7 @@ public class WbAction
 	public WbAction()
 	{
 		super();
-		String c = this.getClass().getName();
+		String c = getClass().getName();
 		actionName = "wb-" + c.substring(c.lastIndexOf('.') + 1);
 		putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
@@ -349,26 +345,6 @@ public class WbAction
 	public void setAccelerator(KeyStroke key)
 	{
 		putValue(Action.ACCELERATOR_KEY, key);
-
-		Iterator<WeakReference<JMenuItem>> itr = this.createdItems.iterator();
-		while (itr.hasNext())
-		{
-			WeakReference<JMenuItem> ref = itr.next();
-			if (ref == null)
-			{
-				itr.remove();
-				continue;
-			}
-			JMenuItem item = ref.get();
-			if (item == null)
-			{
-				itr.remove();
-			}
-			else
-			{
-				item.setAccelerator(key);
-			}
-		}
     initTooltip();
 	}
 
@@ -435,7 +411,6 @@ public class WbAction
 		// multiple menu items need to be created.
 		JMenuItem item = new WbMenuItem();
 		item.setAction(this);
-		item.setAccelerator(getAccelerator());
 		item.setHorizontalTextPosition(JButton.TRAILING);
 		item.setVerticalTextPosition(JButton.CENTER);
 		Integer index = (Integer) getValue(WbAction.MNEMONIC_INDEX);
@@ -449,11 +424,6 @@ public class WbAction
 			{
 			}
 		}
-
-		// All MenuItems that are created are stored in the List in order to be able
-		// to update the shortcut if the shortcut for the action changes.
-		// for some reason, only changing the shortcut on the action does not seem to be enough
-		this.createdItems.add(new WeakReference(item));
 		return item;
 	}
 
@@ -742,17 +712,17 @@ public class WbAction
 
 	public void dispose()
 	{
-		for (WeakReference<JMenuItem> ref : createdItems)
-		{
-			JMenuItem item = ref.get();
-			if (item != null)
-			{
-				item.setAction(null);
-				item.setIcon(null);
-				item.removeAll();
-			}
-		}
-		createdItems.clear();
+//		for (WeakReference<JMenuItem> ref : createdItems)
+//		{
+//			JMenuItem item = ref.get();
+//			if (item != null)
+//			{
+//				item.setAction(null);
+//				item.setIcon(null);
+//				item.removeAll();
+//			}
+//		}
+//		createdItems.clear();
 		delegate = null;
 		original = null;
 		proxy = null;
