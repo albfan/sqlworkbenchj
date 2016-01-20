@@ -31,9 +31,9 @@ import javax.swing.FocusManager;
 import javax.swing.KeyStroke;
 
 import workbench.WbManager;
-import workbench.resource.Settings;
 
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.WbTable;
 import workbench.gui.sql.EditorPanel;
 
 /**
@@ -103,17 +103,15 @@ public class WbKeyDispatcher
   {
     // intercept the Window Alt-Key handling when the Alt-Key is used
     // to prevent rectangular selections in the editor activating the menu
-    if (evt.getKeyCode() == Settings.getInstance().getRectSelectionKey() && evt.getID() == KeyEvent.KEY_RELEASED)
+    if (evt.getKeyCode() == KeyEvent.VK_ALT && evt.getID() == KeyEvent.KEY_RELEASED)
     {
       FocusManager mgr = FocusManager.getCurrentManager();
       Component owner = mgr.getFocusOwner();
-      if (owner instanceof EditorPanel)
+      // Allow Alt-Click in the editor and result sets
+      if ( (owner instanceof EditorPanel) || (owner instanceof WbTable))
       {
-        if ( ((EditorPanel)owner).isSelectionRectangular() )
-        {
-          evt.consume();
-          return true;
-        }
+        evt.consume();
+        return true;
       }
     }
 
