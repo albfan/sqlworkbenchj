@@ -147,7 +147,10 @@ public class ObjectNameFilter
       {
         expression = replaceVariable(variables, exp);
       }
-      addPattern(expression);
+      if (StringUtil.isNonBlank(expression))
+      {
+        addPattern(expression);
+      }
     }
   }
 
