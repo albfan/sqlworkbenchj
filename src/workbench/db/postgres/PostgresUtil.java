@@ -58,35 +58,35 @@ public class PostgresUtil
 	 * @param con the connection
 	 * @param appName the name to set
 	 */
-	public static void setApplicationName(Connection con, String appName)
-	{
-		if (JdbcUtils.hasMinimumServerVersion(con, "9.0") && Settings.getInstance().getBoolProperty("workbench.db.postgresql.set.appname", true))
-		{
-				Statement stmt = null;
-				try
-				{
-					// SET application_name seems to require autocommit to be turned off
-					// as the autocommit setting that the user specified in the connection profile
-					// will be set after this call, setting it to false should not do any harm
-					con.setAutoCommit(false);
-					stmt = con.createStatement();
-					stmt.execute("SET application_name = '" + appName + "'");
-					// make sure the transaction is ended
-					// as this is absolutely the first thing we did, commit() should be safe
-					con.commit();
-				}
-				catch (Exception e)
-				{
-					// Make sure the transaction is ended properly
-					try { con.rollback(); } catch (Exception ex) {}
-					LogMgr.logWarning("DbDriver.setApplicationName()", "Could not set client info", e);
-				}
-				finally
-				{
-					SqlUtil.closeStatement(stmt);
-				}
-		}
-	}
+  public static void setApplicationName(Connection con, String appName)
+  {
+    if (JdbcUtils.hasMinimumServerVersion(con, "9.0") && Settings.getInstance().getBoolProperty("workbench.db.postgresql.set.appname", true))
+    {
+      Statement stmt = null;
+      try
+      {
+        // SET application_name seems to require autocommit to be turned off
+        // as the autocommit setting that the user specified in the connection profile
+        // will be set after this call, setting it to false should not do any harm
+        con.setAutoCommit(false);
+        stmt = con.createStatement();
+        stmt.execute("SET application_name = '" + appName + "'");
+        // make sure the transaction is ended
+        // as this is absolutely the first thing we did, commit() should be safe
+        con.commit();
+      }
+      catch (Exception e)
+      {
+        // Make sure the transaction is ended properly
+        try { con.rollback(); } catch (Exception ex) {}
+        LogMgr.logWarning("DbDriver.setApplicationName()", "Could not set client info", e);
+      }
+      finally
+      {
+        SqlUtil.closeStatement(stmt);
+      }
+    }
+  }
 
 	/**
 	 * Checks if the passed driver supports the ApplicationName property.

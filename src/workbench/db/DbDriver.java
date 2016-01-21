@@ -525,6 +525,15 @@ public class DbDriver
 			{
 				PostgresUtil.setApplicationName(conn, getProgramName() + " (" + id + ")");
 			}
+      else if (doSetAppName() && url.startsWith("jdbc:sap"))
+      {
+        conn.setClientInfo("APPLICATION", getProgramName() + " (" + id + ")");
+        String username = System.getProperty("user.name");
+        if (username != null)
+        {
+          conn.setClientInfo("APPLICATIONUSER", username);
+        }
+      }
 		}
 		catch (ClassNotFoundException | UnsupportedClassVersionError e)
 		{
