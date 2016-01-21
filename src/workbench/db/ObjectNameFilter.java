@@ -140,17 +140,15 @@ public class ObjectNameFilter
 
     filterPatterns.clear();
 
-		for (String exp : patternSource)
-		{
-			if (parameters.contains(exp))
-			{
-				addExpression(replaceVariable(variables, exp));
-			}
-      else
+    for (String exp : patternSource)
+    {
+      String expression = exp;
+      if (parameters.contains(exp))
       {
-        addExpression(exp);
+        expression = replaceVariable(variables, exp);
       }
-		}
+      addPattern(expression);
+    }
   }
 
   private String replaceVariable(Map<String, String> variables, String expression)
@@ -208,10 +206,10 @@ public class ObjectNameFilter
 		try
 		{
       patternSource.add(exp);
+    // parameters can't be compile right now, we have to wait until the parameters are set
       if (!parameters.contains(exp))
       {
-        // parameters can't be compile right now, we have to wait until the parameters are set
-        filterPatterns.add(Pattern.compile(exp.trim(), Pattern.CASE_INSENSITIVE));
+        addPattern(exp);
       }
 		}
 		catch (PatternSyntaxException p)
@@ -220,6 +218,11 @@ public class ObjectNameFilter
 		}
 		modified = true;
 	}
+
+  private void addPattern(String expression)
+  {
+    filterPatterns.add(Pattern.compile(expression.trim(), Pattern.CASE_INSENSITIVE));
+  }
 
 	public boolean isModified()
 	{

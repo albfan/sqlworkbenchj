@@ -241,7 +241,6 @@ public class WbSysExec
 		List<String> args = new ArrayList<>(command.size() + 2);
 
 		String first = StringUtil.getFirstWord(command.get(0)).toLowerCase();
-
 		String shell = System.getenv("SHELL");
 
 		if ("windows".equals(os))
@@ -250,8 +249,8 @@ public class WbSysExec
 			{
 				args.add("cmd");
 				args.add("/c");
-				args.addAll(command);
 			}
+      args.addAll(command);
 		}
 		else if (!first.startsWith(shell))
 		{
@@ -259,6 +258,10 @@ public class WbSysExec
 			args.add("-c");
 			args.add(StringUtil.listToString(command, ' '));
 		}
+    else
+    {
+      args.addAll(command);
+    }
 		return args;
 	}
 
@@ -270,20 +273,13 @@ public class WbSysExec
 
 		command = StringUtil.getFirstWord(command);
 
-		boolean caseSensitive = !PlatformHelper.isWindows();
+		boolean ignoreCase = PlatformHelper.isWindows() || PlatformHelper.isMacOS();
 
 		List<String> cmdlist = Settings.getInstance().getListProperty("workbench.exec." + os + ".useshell", false, "*");
 		if (cmdlist.contains("*")) return true;
 		for (String cmd : cmdlist)
 		{
-			if (caseSensitive)
-			{
-				if (cmd.equals(command)) return true;
-			}
-			else if (cmd.equalsIgnoreCase(command))
-			{
-				return true;
-			}
+      if (StringUtil.compareStrings(cmd, command, ignoreCase) == 0) return true;
 		}
 		return false;
 	}

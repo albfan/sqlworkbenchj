@@ -43,6 +43,8 @@ import workbench.util.SqlUtil;
  * The current JDBC drivers take up to 5 minutes(!) to retrieve the columns for a single table,
  * by using our own statement, we are avoiding this bug.
  *
+ * It seems this bug has been fixed with JDBC driver version 1.110
+ * 
  * @author Thomas Kellerer
  */
 public class HanaTableDefinitionReader
@@ -56,6 +58,7 @@ public class HanaTableDefinitionReader
   {
     super(conn);
   }
+
 	@Override
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, DataTypeResolver typeResolver)
 		throws SQLException
@@ -76,7 +79,7 @@ public class HanaTableDefinitionReader
   protected void processColumnsResultRow(ResultSet rs, ColumnIdentifier col)
     throws SQLException
   {
-    if (useJDBC())
+    if (!useJDBC())
     {
       String generate = rs.getString("GENERATION_TYPE");
       if (generate != null)
@@ -91,7 +94,7 @@ public class HanaTableDefinitionReader
   private boolean useJDBC()
   {
     if (dbConnection == null) return false;
-    return dbConnection.getDbSettings().getBoolProperty(PROP_USE_JDBC_GETCOLUMNS, false);
+    return dbConnection.getDbSettings().getBoolProperty(PROP_USE_JDBC_GETCOLUMNS, true);
   }
 
   @Override
