@@ -284,25 +284,30 @@ public class DbTreePanel
     String cid = "DbTree-" + Integer.toString(id);
 
     resetExpanded();
-  	statusBar.setStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + profile.getName() + " ...");
 
-		ConnectionMgr mgr = ConnectionMgr.getInstance();
-		try
-		{
-			connection = mgr.getConnection(profile, cid);
+    ConnectionMgr mgr = ConnectionMgr.getInstance();
+
+    statusBar.setStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + profile.getName() + " ...");
+
+    try
+    {
+      connection = mgr.getConnection(profile, cid);
       JdbcUtils.initDbExplorerConnection(connection);
       tree.setConnection(connection);
+
+      statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrieving"));
+
       loadTypes();
       tree.load(true);
-		}
+    }
     catch (Throwable th)
     {
       LogMgr.logError("DbTreePanel.connect()", "Could not connect", th);
     }
-		finally
-		{
-			statusBar.clearStatusMessage();
-		}
+    finally
+    {
+      statusBar.clearStatusMessage();
+    }
   }
 
   private void loadTypes()
