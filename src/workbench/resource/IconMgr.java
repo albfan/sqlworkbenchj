@@ -58,9 +58,9 @@ public class IconMgr
 	private final int toolbarIconSize;
 	private final boolean scaleMenuIcons;
 
- 	protected static class LazyInstanceHolder
+ 	private static class LazyInstanceHolder
 	{
-		protected static final IconMgr instance = new IconMgr();
+		private static final IconMgr instance = new IconMgr();
 	}
 
 	public static IconMgr getInstance()

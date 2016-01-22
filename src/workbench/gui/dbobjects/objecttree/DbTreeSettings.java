@@ -37,12 +37,6 @@ public class DbTreeSettings
 {
   public static final String SETTINGS_PREFIX = "workbench.gui.dbtree.";
 
-  public static boolean showOnlyCurrentSchema(String dbId)
-  {
-    boolean defaultValue = Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "only.currentschema", false);
-    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + dbId + ".only.currentschema", defaultValue);
-  }
-
   public static TreePosition getDbTreePosition()
   {
     String pos = Settings.getInstance().getProperty(SETTINGS_PREFIX + "position", TreePosition.left.name());
@@ -106,12 +100,6 @@ public class DbTreeSettings
       return StringUtil.stringToBool(dbValue);
     }
     return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + prop, true);
-  }
-
-  public static boolean autoloadSchemaObjects(String dbId)
-  {
-    boolean global = Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".autoload.types", true);
-    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + dbId + ".autoload.types", global);
   }
 
   public static boolean autoExpandFilteredNodes()

@@ -284,74 +284,59 @@ public class TreeLoader
   public boolean loadSchemas(ObjectTreeNode parentNode)
     throws SQLException
   {
-    if (DbTreeSettings.showOnlyCurrentSchema(connection.getDbId()))
+    boolean isCatalogChild = parentNode.getType().equals(TYPE_CATALOG);
+    CatalogChanger catalogChanger = null;
+    boolean catalogChanged = false;
+    boolean supportsCatalogParameter = connection.getMetadata().supportsCatalogForGetSchemas();
+
+    String catalogToRetrieve = null;
+    String currentCatalog = null;
+
+    if (isCatalogChild)
     {
-      String schema = connection.getCurrentSchema();
-      if (schema == null) return false;
-
-      parentNode.setNameAndType(schema, TYPE_SCHEMA);
-      SchemaIdentifier id = new SchemaIdentifier(schema);
-      parentNode.setUserObject(id);
-      parentNode.setAllowsChildren(true);
-      parentNode.setChildrenLoaded(false);
-      addTypeNodes(parentNode);
+      catalogChanger = new CatalogChanger();
+      catalogChanger.setFireEvents(false);
+      currentCatalog = connection.getMetadata().getCurrentCatalog();
+      catalogToRetrieve = parentNode.getName();
     }
-    else
+
+    try
     {
-      boolean isCatalogChild = parentNode.getType().equals(TYPE_CATALOG);
-      CatalogChanger catalogChanger = null;
-      boolean catalogChanged = false;
-      boolean supportsCatalogParameter = connection.getMetadata().supportsCatalogForGetSchemas();
+      levelChanger.changeIsolationLevel(connection);
 
-      String catalogToRetrieve = null;
-      String currentCatalog = null;
-
-      if (isCatalogChild)
+      if (isCatalogChild && connection.getDbSettings().changeCatalogToRetrieveSchemas() && !supportsCatalogParameter)
       {
-        catalogChanger = new CatalogChanger();
-        catalogChanger.setFireEvents(false);
-        currentCatalog = connection.getMetadata().getCurrentCatalog();
-        catalogToRetrieve = parentNode.getName();
+        catalogChanger.setCurrentCatalog(connection, catalogToRetrieve);
+        catalogChanged = true;
       }
 
-      try
+      List<String> schemas = connection.getMetadata().getSchemas(connection.getSchemaFilter(), catalogToRetrieve);
+
+      if (CollectionUtil.isEmpty(schemas)) return false;
+
+      for (String schema : schemas)
       {
-        levelChanger.changeIsolationLevel(connection);
-
-        if (isCatalogChild && connection.getDbSettings().changeCatalogToRetrieveSchemas() && !supportsCatalogParameter)
+        ObjectTreeNode node = new ObjectTreeNode(schema, TYPE_SCHEMA);
+        node.setAllowsChildren(true);
+        SchemaIdentifier id = new SchemaIdentifier(schema);
+        if (isCatalogChild)
         {
-          catalogChanger.setCurrentCatalog(connection, catalogToRetrieve);
-          catalogChanged = true;
+          id.setCatalog(catalogToRetrieve);
         }
-
-        List<String> schemas = connection.getMetadata().getSchemas(connection.getSchemaFilter(), catalogToRetrieve);
-
-        if (CollectionUtil.isEmpty(schemas)) return false;
-
-        for (String schema : schemas)
-        {
-          ObjectTreeNode node = new ObjectTreeNode(schema, TYPE_SCHEMA);
-          node.setAllowsChildren(true);
-          SchemaIdentifier id = new SchemaIdentifier(schema);
-          if (isCatalogChild)
-          {
-            id.setCatalog(catalogToRetrieve);
-          }
-          node.setUserObject(id);
-          parentNode.add(node);
-          addTypeNodes(node);
-        }
+        node.setUserObject(id);
+        parentNode.add(node);
+        addTypeNodes(node);
       }
-      finally
-      {
-        levelChanger.restoreIsolationLevel(connection);
-        if (catalogChanged)
-        {
-          catalogChanger.setCurrentCatalog(connection, currentCatalog);
-        }
-      }
-      parentNode.setChildrenLoaded(true);
     }
+    finally
+    {
+      levelChanger.restoreIsolationLevel(connection);
+      if (catalogChanged)
+      {
+        catalogChanger.setCurrentCatalog(connection, currentCatalog);
+      }
+    }
+    parentNode.setChildrenLoaded(true);
     model.nodeStructureChanged(parentNode);
     return true;
   }

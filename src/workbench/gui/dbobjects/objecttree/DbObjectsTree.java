@@ -68,6 +68,7 @@ public class DbObjectsTree
   private WbStatusLabel statusBar;
   private DbObjectNodeRenderer renderer;
   private Map<ObjectTreeNode, Runnable> afterLoadProcess = new ConcurrentHashMap<>();
+  private boolean ignoreEvents;
 
   public DbObjectsTree(WbStatusLabel status)
   {
@@ -417,16 +418,15 @@ public class DbObjectsTree
     TreePath selection = getSelectionPath();
 
     load(false);
-    final ObjectTreeNode toSelect = expandAndLoad(selection);
-    if (toSelect == null) return;
-
-    EventQueue.invokeLater(() ->
+    try
     {
-      TreeNode[] nodes = getTreeModel().getPathToRoot(toSelect);
-      TreePath path = new TreePath(nodes);
-      setSelectionPath(path);
-      scrollPathToVisible(path);
-    });
+      ignoreEvents = true;
+      expandAndLoad(selection);
+    }
+    finally
+    {
+      ignoreEvents = false;
+    }
   }
 
   public void load(boolean selectDefaultNamespace)
@@ -554,20 +554,11 @@ public class DbObjectsTree
     return catNode != null;
   }
 
-  private boolean shouldLoadNode(ObjectTreeNode node)
-  {
-    if (!node.isLoaded()) return true;
-
-    if (node.isSchemaNode())
-    {
-      return DbTreeSettings.autoloadSchemaObjects(getDbId()) && !node.childrenAreLoaded();
-    }
-    return false;
-  }
-
   @Override
   public void treeExpanded(TreeExpansionEvent event)
   {
+    if (ignoreEvents) return;
+
     if (loader == null) return;
 
     TreePath path = event.getPath();
@@ -575,7 +566,7 @@ public class DbObjectsTree
 
     final ObjectTreeNode node = (ObjectTreeNode)path.getLastPathComponent();
 
-    if (!shouldLoadNode(node)) return;
+    if (node.isLoaded()) return;
     if (!WbSwingUtilities.isConnectionIdle(this, loader.getConnection())) return;
 
     WbThread load = new WbThread("DbTree Load Thread")
@@ -583,13 +574,13 @@ public class DbObjectsTree
       @Override
       public void run()
       {
-        doLoad(node, DbTreeSettings.autoloadSchemaObjects(getDbId()));
+        doLoad(node, false);
       }
     };
     load.start();
   }
 
-  private void doLoad(final ObjectTreeNode node, boolean loadSchemaObjects)
+  private void doLoad(final ObjectTreeNode node, boolean loadNextLevel)
   {
     try
     {
@@ -599,7 +590,7 @@ public class DbObjectsTree
       {
         loader.loadChildren(node);
       }
-      if (loadSchemaObjects && (node.isSchemaNode() || node.isCatalogNode()))
+      if (loadNextLevel)
       {
         loadNodeObjects(node);
       }
@@ -658,7 +649,7 @@ public class DbObjectsTree
       {
         if (!child.isLoaded())
         {
-          doLoad(child, DbTreeSettings.autoloadSchemaObjects(getDbId()));
+          doLoad(child, parent.isNamespace());
         }
         return child;
       }

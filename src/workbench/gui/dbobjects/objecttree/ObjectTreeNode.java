@@ -100,6 +100,11 @@ public class ObjectTreeNode
     return TreeLoader.TYPE_FK_LIST.equalsIgnoreCase(pNode.getType()) || TreeLoader.TYPE_REF_LIST.equals(pNode.getType());
   }
 
+  public boolean isNamespace()
+  {
+    return isSchemaNode() || isCatalogNode();
+  }
+  
   public boolean isSchemaNode()
   {
     if (getDbObject() instanceof SchemaIdentifier) return true;

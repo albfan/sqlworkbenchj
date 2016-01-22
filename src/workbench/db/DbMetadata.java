@@ -2637,6 +2637,7 @@ public class DbMetadata
 		ResultSet rs = null;
 		try
 		{
+      long start = System.currentTimeMillis();
 			rs = this.metaData.getCatalogs();
 			while (rs.next())
 			{
@@ -2646,6 +2647,8 @@ public class DbMetadata
           result.add(cat);
         }
 			}
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("DbMetadata.getCatalogInformation()", "Retrieving catalogs using getCatalogs() took: " + duration + "ms");
 		}
 		catch (Exception e)
 		{
@@ -2723,6 +2726,8 @@ public class DbMetadata
 		boolean useColumnNames = dbSettings.useColumnNameForMetadata();
     try
     {
+      long start = System.currentTimeMillis();
+
       if (StringUtil.isNonEmpty(catalog) && supportsCatalogForGetSchemas())
       {
         rs = this.metaData.getSchemas(catalog, null);
@@ -2745,6 +2750,8 @@ public class DbMetadata
           result.add(schema);
         }
       }
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("DbMetadata.getSchemas()", "Retrieving schemas using getSchemas() took: " + duration + "ms");
     }
 		catch (Exception e)
 		{
