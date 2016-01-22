@@ -44,7 +44,7 @@ import workbench.util.SqlUtil;
  * by using our own statement, we are avoiding this bug.
  *
  * It seems this bug has been fixed with JDBC driver version 1.110
- * 
+ *
  * @author Thomas Kellerer
  */
 public class HanaTableDefinitionReader
@@ -98,18 +98,27 @@ public class HanaTableDefinitionReader
   }
 
   @Override
-  protected ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
+  protected ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern, String type)
     throws SQLException
   {
 		if (useJDBC())
 		{
-			return super.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
+			return super.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern, type);
 		}
+
+    String baseTable = "sys.table_columns";
+    String nameColumn = "table_name";
+
+    if (dbConnection.getMetadata().isViewType(type))
+    {
+      baseTable = "sys.view_columns";
+      nameColumn = "view_name";
+    }
 
     String sql =
       "select null as table_cat,  \n" +
       "       schema_name as table_schem,  \n" +
-      "       table_name,  \n" +
+      "       " + nameColumn + " as table_name,  \n" +
       "       column_name,  \n" +
       "       case data_type_id \n" +
       "         when -10 then 2011 \n" +
@@ -151,8 +160,8 @@ public class HanaTableDefinitionReader
       "         else 'NO' \n" +
       "       end as is_autoincrement, \n" +
       "       generation_type \n" +
-      "from sys.table_columns tc \n" +
-      "where table_name LIKE ? ESCAPE '\\' \n" +
+      "from " + baseTable + " tc \n" +
+      "where " + nameColumn + " LIKE ? ESCAPE '\\' \n" +
       "  and schema_name LIKE ? ESCAPE '\\' \n" +
       "order by position";
 

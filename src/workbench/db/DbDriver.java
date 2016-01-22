@@ -527,7 +527,9 @@ public class DbDriver
 			}
       else if (doSetAppName() && url.startsWith("jdbc:sap"))
       {
-        conn.setClientInfo("APPLICATION", getProgramName() + " (" + id + ")");
+        conn.setClientInfo("APPLICATION", StringUtil.coalesce(getAppName(), ResourceMgr.TXT_PRODUCT_NAME));
+        conn.setClientInfo("APPLICATIONSOURCE", id);
+        conn.setClientInfo("APPLICATIONVERSION", ResourceMgr.getBuildNumber().toString());
         String username = System.getProperty("user.name");
         if (username != null)
         {
@@ -573,9 +575,14 @@ public class DbDriver
 		System.gc();
 	}
 
+	private String getAppName()
+	{
+		return Settings.getInstance().getProperty("workbench.db.connection.info.programname", null);
+	}
+
 	private String getProgramName()
 	{
-		String userPrgName = Settings.getInstance().getProperty("workbench.db.connection.info.programname", null);
+		String userPrgName = getAppName();
 		if (userPrgName != null) return userPrgName;
 
 		return ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildNumber();

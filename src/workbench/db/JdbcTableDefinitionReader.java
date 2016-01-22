@@ -129,7 +129,7 @@ public class JdbcTableDefinitionReader
 			}
 
       long start = System.currentTimeMillis();
-      rs = getColumns(catalog, schema, tablename, "%");
+      rs = getColumns(catalog, schema, tablename, "%", table.getType());
       long duration = System.currentTimeMillis() - start;
 
       ResultSetMetaData rsmeta = rs.getMetaData();
@@ -256,7 +256,7 @@ public class JdbcTableDefinitionReader
     // nothing done here
   }
 
-  protected ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
+  protected ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern, String tableType)
     throws SQLException
   {
     return dbConnection.getSqlConnection().getMetaData().getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
