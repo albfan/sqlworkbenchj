@@ -658,16 +658,12 @@ public class DbDriver
 		}
 		else if (url.startsWith("jdbc:db2:"))
 		{
-			appNameProperty = "clientApplicationInformation";
-			prgName = ResourceMgr.TXT_PRODUCT_NAME + " (" + id + ")";
-			if (!props.containsKey("clientProgramName"))
-			{
-				props.put("clientProgramName", ResourceMgr.TXT_PRODUCT_NAME);
-			}
+      props.put("clientApplicationInformation", id);
+      appNameProperty = "clientProgramName";
 		}
 		else if (url.startsWith("jdbc:firebirdsql:"))
 		{
-			System.setProperty("org.firebirdsql.jdbc.processName", StringUtil.getMaxSubstring(prgName, 253));
+			System.setProperty("org.firebirdsql.jdbc.processName", StringUtil.getMaxSubstring(prgName, 250));
 		}
 		else if (url.startsWith("jdbc:sybase:tds"))
 		{

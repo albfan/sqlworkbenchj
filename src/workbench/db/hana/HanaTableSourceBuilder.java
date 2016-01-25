@@ -37,7 +37,6 @@ import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -80,10 +79,7 @@ public class HanaTableSourceBuilder
 			if (rs.next())
 			{
 				String type = rs.getString(1);
-        if (StringUtil.stringsAreNotEqual("ROW", type))
-        {
-          tbl.getSourceOptions().setTypeModifier(type);
-        }
+        tbl.getSourceOptions().setTypeModifier(type);
 			}
       long duration = System.currentTimeMillis() - start;
       LogMgr.logDebug("HanaTableSourceBuilder.readTableConfigOptions()", "Retrieving table type took: " + duration + "ms");
