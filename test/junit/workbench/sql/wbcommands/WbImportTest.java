@@ -112,6 +112,45 @@ public class WbImportTest
 		connection.disconnect();
 	}
 
+  public void testConstantVariables()
+    throws Exception
+  {
+		WbConnection con = getTestUtil().getHSQLConnection("constants");
+    try
+    {
+      TestUtil.executeScript(con,
+        "create table data1 (id integer primary key, data varchar(100));\n" +
+        "create table data2 (id integer primary key, data varchar(100));\n" +
+        "commit;\n");
+      File data1 = new File(basedir, "data1.txt");
+      FileUtil.writeString(data1,
+        "id\n" +
+        "1\n");
+
+      File data2 = new File(basedir, "data2.txt");
+      FileUtil.writeString(data2,
+        "id\n" +
+        "2\n");
+
+
+      WbImport cmd = new WbImport();
+      cmd.setConnection(con);
+      StatementRunnerResult result = cmd.execute(
+        "WbImport -sourceDir='" + basedir + "' -type=text \n" +
+        "         -delimiter=',' \n" +
+        "         -extension=txt \n" +
+        "         -constantValues=\"source_file=$[_wb_import_file_path]\" \n" +
+        "         -header=true");
+      String msg = result.getMessages().toString();
+      assertTrue(msg, result.isSuccess());
+
+    }
+		finally
+		{
+			con.disconnect();
+		}
+
+  }
 	@Test
 	public void testImportIntoView()
 		throws Exception

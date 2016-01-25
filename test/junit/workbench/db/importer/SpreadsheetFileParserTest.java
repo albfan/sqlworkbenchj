@@ -215,7 +215,7 @@ public class SpreadsheetFileParserTest
 			}
 
 			@Override
-			public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)
+			public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns, File currentFile)
 				throws SQLException
 			{
 			}

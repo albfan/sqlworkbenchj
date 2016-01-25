@@ -699,7 +699,7 @@ public class XmlDataFileParser
 			checkTargetColumns(tbl);
 			if (this.importColumns == null)
 			{
-				this.receiver.setTargetTable(tbl, Arrays.asList(this.columns));
+				this.receiver.setTargetTable(tbl, Arrays.asList(this.columns), inputFile);
 			}
 			else
 			{
@@ -711,7 +711,7 @@ public class XmlDataFileParser
 						cols.add(this.columns[i]);
 					}
 				}
-				this.receiver.setTargetTable(tbl, cols);
+				this.receiver.setTargetTable(tbl, cols, inputFile);
 			}
 			this.currentRow = new Object[this.realColCount];
 		}

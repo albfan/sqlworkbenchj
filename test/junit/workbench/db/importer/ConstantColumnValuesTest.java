@@ -23,17 +23,22 @@
  */
 package workbench.db.importer;
 
-import org.junit.Test;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -53,7 +58,7 @@ public class ConstantColumnValuesTest
 	public void testGetStaticValues()
 		throws Exception
 	{
-		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> columns = new ArrayList<>();
 		columns.add(new ColumnIdentifier("test_run_id", java.sql.Types.INTEGER));
 		columns.add(new ColumnIdentifier("title", java.sql.Types.VARCHAR));
 		columns.add(new ColumnIdentifier("modified", java.sql.Types.TIMESTAMP));

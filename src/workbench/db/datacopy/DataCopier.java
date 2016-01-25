@@ -655,7 +655,7 @@ public class DataCopier
 			List<ColumnIdentifier> realCols = targetConnection.getMetadata().getTableColumns(targetTable);
 			updateTargetColumns(realCols, targetColumnsForQuery);
 		}
-		this.importer.setTargetTable(this.targetTable, this.targetColumnsForQuery);
+		this.importer.setTargetTable(this.targetTable, this.targetColumnsForQuery, null);
 		initQuerySource(query);
 	}
 
@@ -701,7 +701,7 @@ public class DataCopier
 		}
 		initQuerySource(sql.toString());
 
-		this.importer.setTargetTable(this.targetTable, cols);
+		this.importer.setTargetTable(this.targetTable, cols, null);
 	}
 
 	private void initQuerySource(String sql)

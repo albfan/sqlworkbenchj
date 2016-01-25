@@ -23,12 +23,15 @@
  */
 package workbench.db.importer;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import workbench.log.LogMgr;
 
@@ -38,11 +41,15 @@ import workbench.db.WbConnection;
 
 import workbench.storage.ColumnData;
 
+import workbench.sql.VariablePool;
+
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
+import workbench.util.WbFile;
 
 /**
  * A class to parse column constants for the DataImporter
@@ -51,8 +58,17 @@ import workbench.util.ValueConverter;
  */
 public class ConstantColumnValues
 {
+  public static final String VAR_NAME_CURRENT_FILE_PATH = "_wb_import_file_path";
+  public static final String VAR_NAME_CURRENT_FILE_NAME = "_wb_import_file_name";
+  public static final String VAR_NAME_CURRENT_FILE_DIR = "_wb_import_file_dir";
+
+  private List<String> originalDefinition;
+  private ValueConverter originalConverter;
+
 	private List<ColumnData> columnValues;
-	private Map<Integer, ValueStatement> selectStatements;
+	private final Map<Integer, ValueStatement> selectStatements = new HashMap<>();
+  private final Map<String, String> variables = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+  private boolean usesVariables;
 
 	/**
 	 * Parses a parameter value for column value definitions.
@@ -66,9 +82,17 @@ public class ConstantColumnValues
 	public ConstantColumnValues(List<String> entries, WbConnection con, String tablename, ValueConverter converter)
 		throws SQLException, ConverterException
 	{
-		List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(new TableIdentifier(tablename, con), false);
-		if (tableColumns.isEmpty()) throw new SQLException("Table '" + tablename + "' not found!");
-		init(entries, tableColumns, converter);
+    if (StringUtil.isNonEmpty(tablename))
+    {
+      List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(new TableIdentifier(tablename, con), false);
+      if (tableColumns.isEmpty()) throw new SQLException("Table \"" + tablename + "\" not found!");
+      init(entries, tableColumns, converter);
+    }
+    else
+    {
+      originalDefinition = new ArrayList<>(entries);
+      originalConverter = converter;
+    }
 	}
 
 	/**
@@ -77,15 +101,20 @@ public class ConstantColumnValues
 	ConstantColumnValues(List<String> entries, List<ColumnIdentifier> targetColumns)
 		throws SQLException, ConverterException
 	{
-		init(entries, targetColumns, new ValueConverter());
+    originalDefinition = new ArrayList<>(entries);
+    originalConverter = new ValueConverter();
+		init(entries, targetColumns, originalConverter);
 	}
 
 	protected final void init(List<String> entries, List<ColumnIdentifier> tableColumns, ValueConverter converter)
 		throws SQLException, ConverterException
 	{
-
+    usesVariables = false;
 		columnValues = new ArrayList<>(entries.size());
-		selectStatements = new HashMap<>();
+		selectStatements.clear();
+    variables.clear();
+
+    Set<String> varNames = CollectionUtil.caseInsensitiveSet(VAR_NAME_CURRENT_FILE_DIR, VAR_NAME_CURRENT_FILE_NAME, VAR_NAME_CURRENT_FILE_PATH);
 
 		for (String entry : entries)
 		{
@@ -120,15 +149,37 @@ public class ConstantColumnValues
 						data = converter.convertValue(value, col.getDataType());
 					}
 				}
+
+        if (SqlUtil.isCharacterType(col.getDataType()) && StringUtil.isNonBlank(value) && !usesVariables)
+        {
+          usesVariables = VariablePool.getInstance().containsVariable(value, varNames);
+        }
+
 				this.columnValues.add(new ColumnData(data, col));
 			}
 			else
 			{
 				throw new SQLException("Column '" + colname + "' not found in target table!");
 			}
-
 		}
 	}
+
+  public void initFileVariables(TableIdentifier currentTable, WbConnection con, File currentFile)
+    throws SQLException, ConverterException
+  {
+    variables.clear();
+    if (currentFile == null) return;
+
+    List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(currentTable, false);
+    init(originalDefinition, tableColumns, originalConverter);
+
+    WbFile dir = new WbFile(currentFile.getAbsoluteFile().getParent());
+    variables.put(VAR_NAME_CURRENT_FILE_DIR, dir.getFullPath());
+
+    WbFile f = new WbFile(currentFile);
+    variables.put(VAR_NAME_CURRENT_FILE_PATH, f.getFullPath());
+    variables.put(VAR_NAME_CURRENT_FILE_NAME, f.getName());
+  }
 
 	private ColumnIdentifier findColumn(List<ColumnIdentifier> columns, String name)
 	{
@@ -207,7 +258,11 @@ public class ConstantColumnValues
 
 	public int getColumnCount()
 	{
-		if (columnValues == null) return 0;
+		if (columnValues == null)
+    {
+      if (originalDefinition == null) return 0;
+      return originalDefinition.size();
+    }
 		return columnValues.size();
 	}
 
@@ -218,7 +273,7 @@ public class ConstantColumnValues
 
 	public ColumnData getColumnData(int index)
 	{
-		return columnValues.get(index);
+    return replaceVariables(columnValues.get(index));
 	}
 
 	public ColumnData getColumnData(String columnName)
@@ -227,15 +282,28 @@ public class ConstantColumnValues
 		{
 			if (col.getIdentifier().getColumnName().equalsIgnoreCase(columnName))
 			{
-				return col;
+        return replaceVariables(col);
 			}
 		}
 		return null;
 	}
 
 	public Object getValue(int index)
+  {
+    ColumnData data = replaceVariables(columnValues.get(index));
+    return data.getValue();
+  }
+
+	private ColumnData replaceVariables(ColumnData data)
 	{
-		return columnValues.get(index).getValue();
+    if (data == null) return null;
+    if (usesVariables && variables.size() > 0 && SqlUtil.isCharacterType(data.getIdentifier().getDataType()))
+    {
+      String value = (String)data.getValue();
+      String realValue = VariablePool.getInstance().replaceAllParameters(value, variables);
+      return data.createCopy(realValue);
+    }
+    return data;
 	}
 
 	public boolean removeColumn(ColumnIdentifier col)

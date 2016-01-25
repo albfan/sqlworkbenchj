@@ -251,6 +251,20 @@ public class VariablePool
 		return m.find();
 	}
 
+  public boolean containsVariable(String sql, Set<String> names)
+  {
+    if (StringUtil.isBlank(sql)) return false;
+    
+    for (String var : names)
+    {
+      String varPattern = buildVarNamePattern(var, false);
+      Pattern p = Pattern.compile(varPattern);
+      Matcher m = p.matcher(sql);
+      if (m.find()) return true;
+    }
+    return false;
+  }
+
 	private Set<String> getPromptVariables(String sql, boolean includeConditional)
 	{
 		if (sql == null) return Collections.emptySet();
@@ -343,24 +357,30 @@ public class VariablePool
 	}
 
 	public String replaceAllParameters(String sql)
+  {
+    if (data.isEmpty()) return sql;
+    synchronized (data)
+    {
+      return replaceAllParameters(sql, data);
+    }
+  }
+
+  public String replaceAllParameters(String sql, Map<String, String> variables)
 	{
-		if (data.isEmpty()) return sql;
-		synchronized (this.data)
-		{
-			return this.replaceParameters(this.data.keySet(), sql, false);
-		}
+		if (variables.isEmpty()) return sql;
+    return replaceParameters(variables, sql, false);
 	}
 
-	private String replaceParameters(Set<String> varNames, String sql, boolean forPrompt)
+	private String replaceParameters(Map<String, String> variables, String sql, boolean forPrompt)
 	{
 		if (sql == null) return null;
 		if (StringUtil.isBlank(sql)) return StringUtil.EMPTY_STRING;
 		if (sql.indexOf(this.getPrefix()) == -1) return sql;
 		StringBuilder newSql = new StringBuilder(sql);
-		for (String name : varNames)
+		for (String name : variables.keySet())
 		{
 			String var = this.buildVarNamePattern(name, forPrompt);
-			String value = this.data.get(name);
+			String value = variables.get(name);
 			if (value == null) continue;
 			replaceVarValue(newSql, var, value);
 		}

@@ -68,6 +68,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
 
 import workbench.util.CollectionUtil;
+import workbench.util.ConverterException;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
@@ -1544,10 +1545,20 @@ public class DataImporter
 		return rows;
 	}
 
-	private void checkConstantValues()
+	private void checkConstantValues(File currentFile)
 		throws SQLException
 	{
 		if (this.columnConstants == null) return;
+
+    try
+    {
+      columnConstants.initFileVariables(targetTable, dbConn, currentFile);
+    }
+    catch (ConverterException ex)
+    {
+      throw new SQLException("Could not convert constant values", ex);
+    }
+
 		for (ColumnIdentifier col : this.targetColumns)
 		{
 			if (this.columnConstants.removeColumn(col))
@@ -1600,7 +1611,7 @@ public class DataImporter
 	 *	Callback function from the RowDataProducer
 	 */
 	@Override
-	public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columnsToImport)
+	public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columnsToImport, File currentFile)
 		throws SQLException
 	{
 		// be prepared to import more then one table...
@@ -1626,7 +1637,6 @@ public class DataImporter
 
 		this.errorCount = 0;
 		this.errorLimitAdded = false;
-
 
 		try
 		{
@@ -1687,7 +1697,7 @@ public class DataImporter
 				}
 			}
 
-			checkConstantValues();
+			checkConstantValues(currentFile);
 
 			this.currentImportRow = 0;
 			this.totalRows = 0;

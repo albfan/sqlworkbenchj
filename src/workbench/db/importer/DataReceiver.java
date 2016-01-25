@@ -23,6 +23,7 @@
  */
 package workbench.db.importer;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -80,7 +81,7 @@ public interface DataReceiver
 	 * @param columns  the columns of that column to be used for inserting
 	 * @throws SQLException
 	 */
-	void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)
+	void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns, File currentFile)
 		throws SQLException;
 
 	void importFinished();

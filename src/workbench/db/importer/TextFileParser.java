@@ -547,7 +547,7 @@ public class TextFileParser
 		try
 		{
 			// The target table might be null if an import is done into a DataStore
-			this.receiver.setTargetTable((targetTable != null ? targetTable.getTable() : null), columnsToImport);
+			this.receiver.setTargetTable((targetTable != null ? targetTable.getTable() : null), columnsToImport, inputFile);
 		}
 		catch (Exception e)
 		{

@@ -38,7 +38,7 @@ import workbench.db.ColumnIdentifier;
 public class ColumnData
 {
 	final private Object data;
-	final private ColumnIdentifier id;
+	final private ColumnIdentifier column;
 
 	/**
 	 * Creates a new instance of ColumnData
@@ -49,7 +49,7 @@ public class ColumnData
 	public ColumnData(Object value, ColumnIdentifier colid)
 	{
 		data = value;
-		id = colid;
+		column = colid;
 	}
 
 	public Object getValue()
@@ -59,7 +59,7 @@ public class ColumnData
 
 	public ColumnIdentifier getIdentifier()
 	{
-		return id;
+		return column;
 	}
 
 	public boolean isNull()
@@ -74,11 +74,11 @@ public class ColumnData
 		if (obj instanceof ColumnData)
 		{
 			final ColumnData other = (ColumnData) obj;
-			return this.id.equals(other.id);
+			return this.column.equals(other.column);
 		}
 		else if (obj instanceof ColumnIdentifier)
 		{
-			return this.id.equals(obj);
+			return this.column.equals(obj);
 		}
 		return false;
 	}
@@ -86,13 +86,17 @@ public class ColumnData
 	@Override
 	public int hashCode()
 	{
-		return id.hashCode();
+		return column.hashCode();
 	}
 
 	@Override
 	public String toString()
 	{
-		return id.getColumnName() + " = " + (data == null ? "NULL" : data.toString());
+		return column.getColumnName() + " = " + (data == null ? "NULL" : data.toString());
 	}
 
+  public ColumnData createCopy(Object newValue)
+  {
+    return new ColumnData(newValue, column);
+  }
 }
