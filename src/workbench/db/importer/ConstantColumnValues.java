@@ -64,6 +64,7 @@ public class ConstantColumnValues
 
   private List<String> originalDefinition;
   private ValueConverter originalConverter;
+  private TableIdentifier currentTable;
 
 	private List<ColumnData> columnValues;
 	private final Map<Integer, ValueStatement> selectStatements = new HashMap<>();
@@ -84,7 +85,8 @@ public class ConstantColumnValues
 	{
     if (StringUtil.isNonEmpty(tablename))
     {
-      List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(new TableIdentifier(tablename, con), false);
+      currentTable = new TableIdentifier(tablename, con);
+      List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(currentTable, false);
       if (tableColumns.isEmpty()) throw new SQLException("Table \"" + tablename + "\" not found!");
       init(entries, tableColumns, converter);
     }
@@ -164,14 +166,21 @@ public class ConstantColumnValues
 		}
 	}
 
-  public void initFileVariables(TableIdentifier currentTable, WbConnection con, File currentFile)
+  public void initFileVariables(TableIdentifier table, WbConnection con, File currentFile)
     throws SQLException, ConverterException
   {
     variables.clear();
     if (currentFile == null) return;
 
-    List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(currentTable, false);
-    init(originalDefinition, tableColumns, originalConverter);
+    if ( (columnValues == null && originalDefinition != null) || (!TableIdentifier.tablesAreEqual(currentTable, table, con)))
+    {
+      LogMgr.logDebug("ConstantColumnValues.initFileVariables()", "Inititializing new table columns for table: " + table.getTableExpression());
+      List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(table, false);
+      init(originalDefinition, tableColumns, originalConverter);
+      currentTable = table.createCopy();
+    }
+
+    LogMgr.logDebug("ConstantColumnValues.initFileVariables()", "Inititializing variables for file: " + currentFile.getAbsolutePath());
 
     WbFile dir = new WbFile(currentFile.getAbsoluteFile().getParent());
     variables.put(VAR_NAME_CURRENT_FILE_DIR, dir.getFullPath());
