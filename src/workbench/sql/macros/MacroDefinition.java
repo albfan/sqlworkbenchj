@@ -72,7 +72,7 @@ public class MacroDefinition
   public void setTooltip(String tip)
   {
     modified = modified || StringUtil.stringsAreNotEqual(tooltip, tip);
-    this.tooltip = tip;
+    tooltip = StringUtil.trimToNull(tip);
   }
 
 	public void setExpandWhileTyping(boolean flag)

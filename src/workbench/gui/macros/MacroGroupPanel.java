@@ -52,7 +52,7 @@ public class MacroGroupPanel
 	public MacroGroupPanel(PropertyChangeListener l)
 	{
 		initComponents();
-		jTextField1.addPropertyChangeListener(l);
+		tfGroupName.addPropertyChangeListener(l);
 	}
 
 	public void setMacroGroup(MacroGroup group)
@@ -65,14 +65,18 @@ public class MacroGroupPanel
 		popup.setSourceObject(group, "visibleInPopup");
 		popup.setImmediateUpdate(true);
 
-		StringPropertyEditor name = (StringPropertyEditor)jTextField1;
+		StringPropertyEditor name = (StringPropertyEditor)tfGroupName;
 		name.setSourceObject(group, "name");
 		name.setImmediateUpdate(true);
 
+		StringPropertyEditor tooltip = (StringPropertyEditor)tfTooltip;
+		tooltip.setSourceObject(group, "tooltip");
+		tooltip.setImmediateUpdate(true);
+
 		WbTraversalPolicy policy = new WbTraversalPolicy();
-		policy.addComponent(jTextField1);
+		policy.addComponent(tfGroupName);
 		policy.addComponent(includeInMenu);
-		policy.setDefaultComponent(jTextField1);
+		policy.setDefaultComponent(tfGroupName);
 		setFocusTraversalPolicy(policy);
 	}
 
@@ -88,10 +92,12 @@ public class MacroGroupPanel
     GridBagConstraints gridBagConstraints;
 
     jLabel1 = new JLabel();
-    jTextField1 = new StringPropertyEditor();
+    tfGroupName = new StringPropertyEditor();
     jPanel1 = new JPanel();
     includeInMenu = new BooleanPropertyEditor();
     includeInPopup = new BooleanPropertyEditor();
+    jLabel2 = new JLabel();
+    tfTooltip = new StringPropertyEditor();
 
     setMinimumSize(new Dimension(120, 90));
     setLayout(new GridBagLayout());
@@ -106,7 +112,7 @@ public class MacroGroupPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(5, 5, 0, 5);
-    add(jTextField1, gridBagConstraints);
+    add(tfGroupName, gridBagConstraints);
 
     jPanel1.setLayout(new GridBagLayout());
 
@@ -131,18 +137,36 @@ public class MacroGroupPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(11, 5, 0, 0);
     add(jPanel1, gridBagConstraints);
+
+    jLabel2.setText(ResourceMgr.getString("LblMacroToolTip")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 0);
+    add(jLabel2, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 5);
+    add(tfTooltip, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox includeInMenu;
   private JCheckBox includeInPopup;
   private JLabel jLabel1;
+  private JLabel jLabel2;
   private JPanel jPanel1;
-  private JTextField jTextField1;
+  private JTextField tfGroupName;
+  private JTextField tfTooltip;
   // End of variables declaration//GEN-END:variables
 }

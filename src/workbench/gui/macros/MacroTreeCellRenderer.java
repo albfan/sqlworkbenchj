@@ -36,6 +36,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import workbench.resource.IconMgr;
 
 import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroGroup;
 
 import workbench.util.HtmlUtil;
 import workbench.util.StringUtil;
@@ -76,10 +77,11 @@ public class MacroTreeCellRenderer
 		if (value instanceof MacroTreeNode)
 		{
 			MacroTreeNode node = (MacroTreeNode)value;
+      Object dataObject = node.getDataObject();
 
-			if (!node.getAllowsChildren())
+			if (dataObject instanceof MacroDefinition)
 			{
-				MacroDefinition macro = (MacroDefinition) node.getDataObject();
+				MacroDefinition macro = (MacroDefinition)dataObject;
 				if (macro.getExpandWhileTyping())
 				{
 					setIcon(IconMgr.getInstance().getLabelIcon("macro_expand"));
@@ -97,9 +99,9 @@ public class MacroTreeCellRenderer
           setToolTipText(macro.getTooltip());
         }
 			}
-			else
+      else if (dataObject instanceof MacroGroup)
 			{
-				setToolTipText(null);
+				setToolTipText(((MacroGroup)dataObject).getTooltip());
 			}
 		}
 

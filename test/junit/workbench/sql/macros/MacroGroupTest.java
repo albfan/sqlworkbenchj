@@ -39,6 +39,7 @@ public class MacroGroupTest
 	{
 		MacroGroup group = new MacroGroup("Default Group");
 		group.setSortOrder(2);
+    group.setTooltip("Stuff");
 		group.setVisibleInMenu(false);
 		group.setVisibleInPopup(false);
 
@@ -50,5 +51,11 @@ public class MacroGroupTest
 		assertFalse(copy.isVisibleInPopup());
 		assertEquals(2, copy.getSortOrder());
 		assertEquals(1, copy.getSize());
+    assertEquals("Stuff", copy.getTooltip());
+
+		group = new MacroGroup("Another Group");
+    group.resetModified();
+    group.setTooltip("Foo");
+    assertTrue(group.isModified());
 	}
 }

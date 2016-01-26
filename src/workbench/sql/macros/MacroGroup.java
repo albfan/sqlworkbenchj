@@ -46,6 +46,7 @@ public class MacroGroup
 	private String name;
 	private List<MacroDefinition> macros = new ArrayList<>();
 	private int sortOrder;
+  private String tooltip;
 	private boolean modified = false;
 	private boolean showInMenu = true;
 	private boolean showInPopup = true;
@@ -58,6 +59,17 @@ public class MacroGroup
 	{
 		this.name = groupName;
 	}
+
+  public String getTooltip()
+  {
+    return tooltip;
+  }
+
+  public void setTooltip(String tip)
+  {
+    modified = modified || StringUtil.stringsAreNotEqual(tooltip, tip);
+    tooltip = StringUtil.trimToNull(tip);
+  }
 
 	public boolean isVisibleInMenu()
 	{
@@ -244,6 +256,7 @@ public class MacroGroup
 		copy.sortOrder = this.sortOrder;
 		copy.showInMenu = this.showInMenu;
 		copy.showInPopup = this.showInPopup;
+    copy.tooltip = this.tooltip;
 		copy.modified = false;
 		for (MacroDefinition def : macros)
 		{
