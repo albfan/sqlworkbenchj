@@ -36,6 +36,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.db.DbMetadata;
+
 /**
  *
  * @author Thomas Kellerer
@@ -48,6 +50,37 @@ public class WbSqlFormatterTest
 		super("SqlFormatterTest");
 	}
 
+  @Test
+  public void testCreateTableWithType()
+  {
+    String sql = "create unlogged table foobar (id integer)";
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setIndentWhereCondition(true);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "CREATE UNLOGGED TABLE foobar\n" +
+      "(\n" +
+      "  id   INTEGER\n" +
+      ")";
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+    sql = "create temporary view foo as select * from bar;";
+		f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setIndentWhereCondition(true);
+    formatted = f.getFormattedSql();
+    expected =
+      "CREATE TEMPORARY VIEW foo \n" +
+      "AS\n" +
+      "SELECT *\n" +
+      "FROM bar;";
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
 
   @Test
   public void testLongJoin()

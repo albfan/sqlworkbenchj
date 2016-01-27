@@ -123,6 +123,16 @@ public class SqlKeywordHelper
 		return loadKeywordsFromFile("operators.wb");
 	}
 
+  public Set<String> getCreateTableTypes()
+  {
+    return loadKeywordsFromFile("create_table_types.wb");
+  }
+
+  public Set<String> getCreateViewTypes()
+  {
+    return loadKeywordsFromFile("create_view_types.wb");
+  }
+
 	public Set<String> getSqlFunctions()
 	{
 		Set<String> functions = loadKeywordsFromFile("functions.wb");

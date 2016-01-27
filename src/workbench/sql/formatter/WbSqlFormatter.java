@@ -109,6 +109,8 @@ public class WbSqlFormatter
 	private Set<String> dbFunctions = CollectionUtil.caseInsensitiveSet();
 	private Set<String> dataTypes = CollectionUtil.caseInsensitiveSet();
 	private Set<String> keywords = CollectionUtil.caseInsensitiveSet();
+	private Set<String> createTableTypes = CollectionUtil.caseInsensitiveSet();
+	private Set<String> createViewTypes = CollectionUtil.caseInsensitiveSet();
 
 	private static final String NL = "\n";
 	private boolean addColumnCommentForInsert;
@@ -292,10 +294,16 @@ public class WbSqlFormatter
 		keywords.clear();
 		dataTypes.clear();
 		dbFunctions.clear();
+    createTableTypes.clear();
+    createViewTypes.clear();
 		keywords.addAll(helper.getKeywords());
 		keywords.addAll(helper.getReservedWords());
 		dataTypes.addAll(helper.getDataTypes());
 		dbFunctions.addAll(helper.getSqlFunctions());
+    createTableTypes.addAll(helper.getCreateTableTypes());
+    createViewTypes.addAll(helper.getCreateViewTypes());
+    keywords.addAll(createTableTypes);
+    keywords.addAll(createViewTypes);
 	}
 
 	private boolean isDbFunction(SQLToken token)
@@ -2260,6 +2268,14 @@ public class WbSqlFormatter
 	{
 		SQLToken t = skipComments();
 		String verb = t.getContents();
+
+    while (createTableTypes.contains(verb) || createViewTypes.contains(verb))
+    {
+      appendText(' ');
+      appendTokenText(t);
+      t = skipComments();
+      if (t != null) verb = t.getContents();
+    }
 
 		if (verb.equals("TABLE"))
 		{
