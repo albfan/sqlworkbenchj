@@ -647,7 +647,7 @@
 					</row>
 
 					<row>
-						<entry>-constantValues</entry>
+						<entry id="import-column-constant">-constantValues</entry>
 						<entry>
 							<para>
 								With this parameter you can supply constant values for one or more columns
@@ -690,7 +690,19 @@
                 the values in the input file must be convertible by the JDBC driver.
               </para>
               <para>
-                Please refer to the examples for more details on the usage.
+                In addition to the function call or <literal>SELECT</literal> statements, WbImport provides three variables that can be used to access the name
+                of the currently imported file. This can be used to store the source file of the data in the target table.
+              </para>
+              <para>
+                The following three variables are supported
+                <itemizedlist>
+                  <listitem><simpara><literal>_wb_import_file_path</literal> this contains the full path and file name of the current import file</simpara></listitem>
+                  <listitem><simpara><literal>_wb_import_file_name</literal> this contains only the file name (without the path)</simpara></listitem>
+                  <listitem><simpara><literal>_wb_import_file_dir</literal> this contains only the path of the file without the filename (and without the extension)</simpara></listitem>
+                </itemizedlist>
+              </para>
+              <para>
+                Please refer to the <link linkend="text-import-examples">examples</link> for more details on the usage.
               </para>
 						</entry>
 					</row>
@@ -1296,6 +1308,27 @@
     </para>
   </section>
 
+  <section id="wbimport-example-6">
+    <title>Storing the name of the source file</title>
+
+    <para>
+      The following statement will import all <literal>.txt</literal> files from the directory <literal>/data/import</literal>
+      and store them in the appropriate tables. Each table that is being imported has to have a column named <literal>source_file</literal>
+      and the complete path to the import file will be stored in that column (for each imported row).
+    </para>
+
+<programlisting>WbImport -sourceDir=/data/import
+         -header=true
+         -schema=staging
+         -extension=txt
+         -constantValues="source_file=$[_wb_import_file_path]"
+         -type=text;
+</programlisting>
+      <para>
+
+      </para>
+  </section>
+
   <section id="wbimport-lookup-select">
     <title>Populating columns from the database</title>
     <para>
@@ -1321,14 +1354,12 @@
     <para>
       To import this file, the following statement can be used:
     </para>
-    <programlisting>WbImport
-  -file=contacts.txt
-  -type=text
-  -header=true
-  -table=contact
-  -importColumns=contact_id, first_name, last_name
-  -constantValues="type_id=$@{SELECT type_id FROM contact_type WHERE type_name = $4}"
-         </programlisting>
+    <programlisting>WbImport -file=contacts.txt
+         -type=text
+         -header=true
+         -table=contact
+         -importColumns=contact_id, first_name, last_name
+         -constantValues="type_id=$@{SELECT type_id FROM contact_type WHERE type_name = $4}"</programlisting>
     <para>
       For every row from the input file, &wb-productname; will run the specified SELECT statement. The value of the first column
       of the first row that is returned by the SELECT, will then be used to populate the <literal>type_id</literal> column. The SELECT

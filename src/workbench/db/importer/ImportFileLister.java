@@ -128,6 +128,26 @@ public class ImportFileLister
 		cleanupLobFiles();
 	}
 
+  public ImportFileLister(WbConnection con, List<WbFile> files)
+  {
+    toProcess = new ArrayList<>();
+    dbConn = con;
+    sourceDir = new WbFile(files.get(0).getAbsoluteFile().getParentFile());
+
+    for (WbFile f : files)
+    {
+      if (f.length() > 0)
+      {
+        toProcess.add(f);
+      }
+      else
+      {
+        LogMgr.logWarning("ImportFileLister.<init>", "Ignoring empty file: " + f.getAbsolutePath());
+      }
+    }
+    cleanupLobFiles();
+  }
+
 	public int getFileCount()
 	{
 		return this.toProcess.size();
