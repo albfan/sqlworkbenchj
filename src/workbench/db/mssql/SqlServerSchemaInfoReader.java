@@ -91,7 +91,7 @@ public class SqlServerSchemaInfoReader
     ResultSet rs = null;
     try
     {
-      stmt = con.createStatementForQuery();
+      stmt = con.getSqlConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       rs = stmt.executeQuery(sql);
       if (rs.next())
       {

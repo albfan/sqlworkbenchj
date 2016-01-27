@@ -65,11 +65,11 @@ public class OpenEdgeColumnEnhancer
     PreparedStatement stmt = null;
     ResultSet rs = null;
 
-    String sql
-      = "select col, description \n" +
+    String sql =
+      "select col, description \n" +
       "from sysprogress.syscolumns_full \n" +
       "where owner = ? \n" +
-      "and tbl = ? ";
+      "  and tbl = ? ";
 
     String tablename = SqlUtil.removeObjectQuotes(table.getTable().getTableName());
     String schema = SqlUtil.removeObjectQuotes(table.getTable().getSchema());
