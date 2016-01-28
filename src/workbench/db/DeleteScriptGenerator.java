@@ -50,12 +50,12 @@ import workbench.db.importer.TableDependencySorter;
 
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.ObjectScripterUI;
-import workbench.sql.formatter.FormatterUtil;
 
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
 import workbench.storage.SqlLiteralFormatter;
 
+import workbench.sql.formatter.FormatterUtil;
 import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
@@ -88,6 +88,7 @@ public class DeleteScriptGenerator
 	private boolean formatSql = true;
 	private boolean showFkNames;
 	private List<TableIdentifier> excludeTables = new ArrayList<>();
+  private TextOutput output;
 
 	private final Comparator<Integer> descComparator = (Integer i1, Integer i2) ->
   {
@@ -105,8 +106,9 @@ public class DeleteScriptGenerator
 	}
 
   @Override
-  public void setTextOutput(TextOutput output)
+  public void setTextOutput(TextOutput textOut)
   {
+    this.output = textOut;
   }
 
 	@Override
@@ -197,7 +199,7 @@ public class DeleteScriptGenerator
 				if (!includeRoot && i==sorted.size() - 1) break;
 				TableIdentifier tbl = sorted.get(i);
 				String delete = "DELETE FROM " + tbl.getTableExpression(connection);
-				this.statements.add(formatSql(delete));
+				addStatement(formatSql(delete));
 			}
 		}
 		finally
@@ -274,7 +276,7 @@ public class DeleteScriptGenerator
 				{
 					if (this.excludeTables.contains(tbl)) continue;
 					if (isCancelled()) break;
-					statements.add(createDeleteStatement(tbl, tableNodes.get(tbl)));
+					addStatement(createDeleteStatement(tbl, tableNodes.get(tbl)));
 				}
 			}
 		}
@@ -287,10 +289,21 @@ public class DeleteScriptGenerator
 			rootSql.append(root.getTable().getTableExpression(this.connection));
 			rootSql.append("\nWHERE ");
 			this.addRootTableWhere(rootSql);
-			statements.add(formatSql(rootSql));
+			addStatement(formatSql(rootSql));
 		}
 	}
 
+  private void addStatement(String sql)
+  {
+    if (output != null)
+    {
+      output.append(sql.trim() + ";\n\n");
+    }
+    else
+    {
+      statements.add(sql);
+    }
+  }
 	private List<TableIdentifier> sortTables(final Map<TableIdentifier, Set<DependencyNode>>  tables)
 	{
 		final Set<DependencyNode> allNodes = new HashSet<>();
