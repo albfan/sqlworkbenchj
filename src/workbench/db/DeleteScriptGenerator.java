@@ -604,7 +604,10 @@ public class DeleteScriptGenerator
 			{
 				List<ColumnData> pkvalues = ds.getPkValues(rows[i]);
 				this.setValues(pkvalues);
-				if (monitor != null) this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow"), i+1, numRows);
+				if (monitor != null)
+        {
+          this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow"), i+1, numRows);
+        }
 				this.createStatements(true);
 				if (dependency != null && dependency.isCancelled())
 				{
@@ -618,6 +621,10 @@ public class DeleteScriptGenerator
 		}
 		finally
 		{
+      if (monitor != null)
+      {
+        this.monitor.setCurrentObject(null, -1, -1);
+      }
 			connection.setBusy(false);
 		}
 	}

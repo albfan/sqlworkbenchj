@@ -140,7 +140,7 @@ public class ObjectScripterUI
 				}
 				finally
 				{
-          window.setTitle(lastObject == null ? baseTitle : lastObject);
+          window.setTitle(StringUtil.coalesce(lastObject, baseTitle));
 					setRunning(false);
 					EventQueue.invokeLater(() ->
           {
@@ -166,7 +166,8 @@ public class ObjectScripterUI
 		}
 		else
 		{
-			this.statusMessage.setText(currentObject);
+      lastObject = currentObject;
+      statusMessage.setText(StringUtil.coalesce(currentObject,""));
 		}
 		this.statusMessage.repaint();
 	}
