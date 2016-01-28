@@ -7,7 +7,6 @@
   <property name="src" value="../src"/>
   <property name="testsrc" value="../test"/>
   <property name="unittest" value="../test/junit"/>
-  <property name="guitest" value="../test/jemmy"/>
   <property name="dbtest" value="../test/dbtest"/>
   <property name="csrc" value="../launcher"/>
   <property name="junitdir" value="../build/junit"/>
@@ -163,9 +162,6 @@
         <include name="**/*.ods"/>
         <include name="**/*.txt"/>
         <include name="**/*.properties"/>
-      </fileset>
-      <fileset defaultexcludes="true" dir="${testsrc}/jemmy">
-        <include name="**/*.timeouts"/>
       </fileset>
     </copy>
   </target>
@@ -973,7 +969,7 @@
 
   </target>
 
-<path id="junit.path">
+  <path id="junit.path">
     <fileset dir="${junitlibs}">
       <include name="*.jar"/>
     </fileset>
@@ -997,22 +993,6 @@
            destdir="${build.test}"
            optimize="off"
            srcdir="${unittest}"
-           target="${target.version}"
-           source="${target.version}"
-           encoding="ISO-8859-1">
-      <classpath>
-        <pathelement location="${build}"/>
-        <path refid="junit.path"/>
-      </classpath>
-    </javac>
-  </target>
-
-  <target name="compile-gui-tests" depends="prepare-test, compile-tests">
-    <javac debug="on"
-           includeantruntime="false"
-           destdir="${build.test}"
-           optimize="off"
-           srcdir="${guitest}"
            target="${target.version}"
            source="${target.version}"
            encoding="ISO-8859-1">
@@ -1153,23 +1133,6 @@
         </fileset>
       </batchtest>
 
-    </junit>
-  </target>
-
-  <target name="gui-test" depends="compile-gui-tests, clean-junit">
-    <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true">
-      <classpath>
-        <pathelement location="${build}"/>
-        <pathelement location="${build.test}"/>
-        <path refid="junit.path"/>
-      </classpath>
-
-      <batchtest todir="${junitdir}">
-        <formatter type="plain"/>
-        <fileset dir="${guitest}">
-          <include name="**/*Test.java"/>
-        </fileset>
-      </batchtest>
     </junit>
   </target>
 
