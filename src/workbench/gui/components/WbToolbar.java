@@ -51,6 +51,7 @@ public class WbToolbar
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setBorderPainted(true);
 		this.setRollover(true);
+    putClientProperty("Synthetica.opaque", Boolean.FALSE);
 	}
 
 	@Override

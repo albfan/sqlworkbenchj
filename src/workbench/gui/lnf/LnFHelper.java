@@ -159,6 +159,7 @@ public class LnFHelper
 		}
 
     def.put("Button.showMnemonics", Boolean.valueOf(GuiSettings.getShowMnemonics()));
+    UIManager.put("Synthetica.extendedFileChooser.rememberLastDirectory", false);
 	}
 
 	private boolean isWindowsLookAndFeel()

@@ -129,7 +129,6 @@ public class SortHeaderRenderer
 			display = displayLabel;
 		}
 
-    boolean boldEnabled = false;
 		display.setIconTextGap(5);
 		display.setHorizontalTextPosition(SwingConstants.LEFT);
 		display.setHorizontalAlignment(SwingConstants.LEFT);
@@ -139,6 +138,11 @@ public class SortHeaderRenderer
 		String remarks = null;
 
 		int javaType = Types.OTHER;
+
+    if (showBoldHeader)
+    {
+      text = "<b>" + text + "</b>";
+    }
 
 		if (table instanceof WbTable)
 		{
@@ -174,29 +178,16 @@ public class SortHeaderRenderer
               text = "<u>" + text + "</u>";
             }
 
-            if (showBoldHeader)
-            {
-              text = "<b>" + text + "</b>";
-              boldEnabled = true;
-            }
-
             if (showDatatype)
             {
-              display.setText("<html>" + text + "<br>" + type + "</html>");
-            }
-            else
-            {
-              display.setText("<html>" + text + "</html>");
+              text += "<br>" + type;
             }
 					}
 				}
 			}
 		}
 
-    if (showBoldHeader && !boldEnabled)
-		{
-			display.setFont(display.getFont().deriveFont(Font.BOLD));
-		}
+    display.setText("<html>" + text + "</html>");
 
 		if (sorted)
 		{
