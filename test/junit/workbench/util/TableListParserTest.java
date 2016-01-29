@@ -55,6 +55,15 @@ public class TableListParserTest
 	}
 
 	@Test
+	public void testFQNQuoted()
+	{
+		TableListParser parser = new TableListParser( '.', '.', ParserType.Standard);
+		List<Alias> tables = parser.getTables("select * from some_schema.\"Foobar::TABLENAME\";", false);
+		assertEquals(tables.size(), 1);
+		assertEquals("some_schema.\"Foobar::TABLENAME\"", tables.get(0).getName());
+	}
+
+	@Test
 	public void testDb2Parsing()
 	{
 		TableListParser parser = new TableListParser('/', '.', ParserType.Standard);

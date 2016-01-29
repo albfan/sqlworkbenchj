@@ -496,8 +496,9 @@ public class StatementFactory
 			{
 				tname = dbConnection.getMetadata().quoteObjectname(toUse.getTableName());
 			}
+      tname = FormatterUtil.getIdentifier(tname);
 		}
-		return FormatterUtil.getIdentifier(tname);
+		return tname;
 	}
 
 	private void appendKeyword(StringBuilder text, String toAppend)

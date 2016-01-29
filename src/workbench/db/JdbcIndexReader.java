@@ -126,7 +126,7 @@ public class JdbcIndexReader
 				", approximate=true");
 		}
 
-		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, true);
+		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), unique, true);
 	}
 
 	/**
@@ -170,7 +170,7 @@ public class JdbcIndexReader
 
 			try
 			{
-				keysRs = getPrimaryKeyInfo(catalog, schema, tbl.getTableName());
+				keysRs = getPrimaryKeyInfo(catalog, schema, tbl.getRawTableName());
 				while (keysRs.next())
 				{
 					if (pkName == null)
