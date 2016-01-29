@@ -413,9 +413,13 @@ public class ProfileSelectionPanel
 			pos = 200; // make sure the whole toolbar for the tree is visible!
 		}
 		this.jSplitPane.setDividerLocation(pos);
-		String groups = Settings.getInstance().getProperty("workbench.profiles.expandedgroups", null);
-		List<String> l = StringUtil.stringToList(groups, ",", true, true);
-		((ProfileTree)profileTree).expandGroups(l);
+
+    if (GuiSettings.getRestoreExpandedProfiles())
+    {
+      String groups = Settings.getInstance().getProperty("workbench.profiles.expandedgroups", null);
+      List<String> l = StringUtil.stringToList(groups, ",", true, true);
+      ((ProfileTree)profileTree).expandGroups(l);
+    }
 	}
 
 	public boolean profilesChanged()

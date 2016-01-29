@@ -633,6 +633,16 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.dynamiclayout", flag);
 	}
 
+  public static boolean getRestoreExpandedProfiles()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.gui.profiles.restored.expanded", true);
+  }
+
+  public static void setRestoreExpandedProfiles(boolean flag)
+  {
+    Settings.getInstance().setProperty("workbench.gui.profiles.restored.expanded", flag);
+  }
+
 	public static int getProfileDividerLocation()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.profiles.divider", -1);
