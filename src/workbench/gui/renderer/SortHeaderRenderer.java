@@ -70,7 +70,7 @@ public class SortHeaderRenderer
 	private boolean showFullTypeInfo;
 	private boolean showBoldHeader;
 	private boolean showDatatype;
-	private boolean highlightPk;
+	private boolean underlinePK;
 
 	public SortHeaderRenderer()
 	{
@@ -78,9 +78,9 @@ public class SortHeaderRenderer
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROP_TABLE_HEADER_BOLD, GuiSettings.PROP_TABLE_HEADER_FULL_TYPE_INFO);
 	}
 
-	public void setShowPKIcon(boolean flag)
+	public void setUnderlinePK(boolean flag)
 	{
-		this.highlightPk = flag;
+		this.underlinePK = flag;
 	}
 
 	private void readSettings()
@@ -93,7 +93,7 @@ public class SortHeaderRenderer
   {
     showDatatype = flag;
   }
-  
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
@@ -129,10 +129,7 @@ public class SortHeaderRenderer
 			display = displayLabel;
 		}
 
-		if (showBoldHeader)
-		{
-			display.setFont(display.getFont().deriveFont(Font.BOLD));
-		}
+    boolean boldEnabled = false;
 		display.setIconTextGap(5);
 		display.setHorizontalTextPosition(SwingConstants.LEFT);
 		display.setHorizontalAlignment(SwingConstants.LEFT);
@@ -153,9 +150,10 @@ public class SortHeaderRenderer
 				ascending = sortTable.isViewColumnSortAscending(col);
 				primary = sortTable.isPrimarySortColumn(col);
 			}
+
 			DataStoreTableModel model = sortTable.getDataStoreTableModel();
 
-			if (model != null)
+			if (model != null && (underlinePK || showDatatype))
 			{
 				int realCol = table.convertColumnIndexToModel(col) - model.getRealColumnStart();
 				if (realCol >= 0)
@@ -170,18 +168,34 @@ public class SortHeaderRenderer
 						javaType = colId.getDataType();
 						javaTypeName = SqlUtil.getTypeName(javaType);
 						remarks = colId.getComment();
-						if (highlightPk && colId.isPkColumn())
-						{
-							Font f = display.getFont().deriveFont(Font.ITALIC);
-							display.setFont(f);
-						}
+
+            if (underlinePK && colId.isPkColumn())
+            {
+              text = "<u>" + text + "</u>";
+            }
+
+            if (showBoldHeader)
+            {
+              text = "<b>" + text + "</b>";
+              boldEnabled = true;
+            }
+
             if (showDatatype)
             {
               display.setText("<html>" + text + "<br>" + type + "</html>");
             }
+            else
+            {
+              display.setText("<html>" + text + "</html>");
+            }
 					}
 				}
 			}
+		}
+
+    if (showBoldHeader && !boldEnabled)
+		{
+			display.setFont(display.getFont().deriveFont(Font.BOLD));
 		}
 
 		if (sorted)

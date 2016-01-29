@@ -175,7 +175,7 @@ public class LookupValuePicker
 		lookupData.addMouseListener(this);
 		lookupData.setColumnSelectionAllowed(false);
 		lookupData.setRowSelectionAllowed(true);
-		lookupData.getHeaderRenderer().setShowPKIcon(true);
+		lookupData.getHeaderRenderer().setUnderlinePK(true);
 		selectionHandler = new SelectionHandler(lookupData);
 
 		Action nextComponent = new AbstractAction()

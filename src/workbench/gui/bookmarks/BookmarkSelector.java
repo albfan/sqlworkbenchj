@@ -153,7 +153,7 @@ public class BookmarkSelector
 		bookmarks.addMouseListener(this);
 		bookmarks.setColumnSelectionAllowed(false);
 		bookmarks.setRowSelectionAllowed(true);
-		bookmarks.getHeaderRenderer().setShowPKIcon(true);
+		bookmarks.getHeaderRenderer().setUnderlinePK(true);
 		bookmarks.setSortIgnoreCase(true);
 		bookmarks.setShowPopupMenu(false);
 		keyHandler = new SelectionHandler(bookmarks);
