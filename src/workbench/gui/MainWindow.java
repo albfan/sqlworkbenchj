@@ -966,7 +966,15 @@ public class MainWindow
 		}
 	}
 
-	private void buildMacroMenu(JMenu macroMenu)
+  private void buildMacroMenu(final JMenu macroMenu)
+  {
+    WbSwingUtilities.invoke(() ->
+    {
+      _buildMacroMenu(macroMenu);
+    });
+  }
+
+	private void _buildMacroMenu(JMenu macroMenu)
 	{
 		macroMenu.removeAll();
 		createMacro.addToMenu(macroMenu);
@@ -3595,7 +3603,7 @@ public class MainWindow
 		for (int i=0; i < count; i++)
 		{
 			JMenu menu = menuBar.getMenu(i);
-			menu.removeAll();
+      if (menu != null) menu.removeAll();
 		}
 		menuBar.removeAll();
 	}

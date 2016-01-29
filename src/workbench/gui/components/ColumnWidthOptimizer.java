@@ -229,6 +229,16 @@ public class ColumnWidthOptimizer
 		}
 		Insets ins = c.getInsets();
 		int headerWidth = hfm.stringWidth(colName) + getAdditionalHeaderSpace() + ins.left + ins.right;
+    if (table.getShowDataTypeInHeader() && table.getDataStoreTableModel() != null)
+    {
+      String typeName = table.getDataStoreTableModel().getDbmsType(col);
+      int typeWidth = hfm.stringWidth(typeName) + getAdditionalHeaderSpace() + ins.left + ins.right;
+      if (typeWidth > headerWidth)
+      {
+        headerWidth = typeWidth;
+      }
+    }
+
 		if (table.isViewColumnSorted(col))
 		{
 			int iconWidth = (int)(SortHeaderRenderer.getArrowSize(fm, table.isPrimarySortColumn(col)) * 1.15);

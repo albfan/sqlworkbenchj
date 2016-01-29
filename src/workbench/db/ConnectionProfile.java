@@ -1101,13 +1101,14 @@ public class ConnectionProfile
 	{
 		if (CollectionUtil.isEmpty(props))
 		{
-      this.changed = CollectionUtil.isNonEmpty(connectionProperties);
-			this.connectionProperties = null;
+      changed = CollectionUtil.isNonEmpty(connectionProperties);
+			connectionProperties = null;
     }
     else if (!props.equals(connectionProperties))
     {
-      this.changed = true;
-      this.connectionProperties = new Properties(props);
+      changed = true;
+      connectionProperties = new Properties();
+      connectionProperties.putAll(props);
 		}
 	}
 

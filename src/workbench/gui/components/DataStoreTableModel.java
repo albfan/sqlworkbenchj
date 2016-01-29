@@ -267,14 +267,7 @@ public class DataStoreTableModel
 				throw new IllegalArgumentException(msg);
 			}
 		}
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				fireTableDataChanged();
-			}
-		});
+		WbSwingUtilities.invoke(this::fireTableDataChanged);
 	}
 
 	/**
@@ -724,14 +717,10 @@ public class DataStoreTableModel
 			}
 		}
 		final TableModelEvent event = new TableModelEvent(this);
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				fireTableChanged(event);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      fireTableChanged(event);
+    });
 	}
 
 	private boolean sortingInProgress = false;

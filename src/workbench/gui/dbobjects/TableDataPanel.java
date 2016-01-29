@@ -149,15 +149,7 @@ public class TableDataPanel
 	private void initGui()
 	{
 		if (initialized) return;
-
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_initGui();
-			}
-		});
+		WbSwingUtilities.invoke(this::_initGui);
 	}
 
 	private void _initGui()
@@ -187,9 +179,8 @@ public class TableDataPanel
 			}
 		};
 		dataDisplay.showCreateDeleteScript();
-
-		this.dataDisplay.setShowLoadProcess(true);
-		this.dataDisplay.setDefaultStatusMessage("");
+		dataDisplay.setShowLoadProcess(true);
+		dataDisplay.setDefaultStatusMessage("");
 
     createToolbar();
 

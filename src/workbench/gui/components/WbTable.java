@@ -247,6 +247,7 @@ public class WbTable
 	private FocusIndicator focusIndicator;
 	private ListSelectionControl selectionController;
 	private boolean readOnly;
+  private boolean showDatatypeInHeader;
 	protected FontZoomer zoomer;
 
 	private RendererSetup rendererSetup;
@@ -415,6 +416,17 @@ public class WbTable
 		};
 		configureEnterKeyAction(a);
 	}
+
+  public boolean getShowDataTypeInHeader()
+  {
+    return showDatatypeInHeader;
+  }
+
+  public void setShowDataTypeInHeader(boolean flag)
+  {
+    showDatatypeInHeader = flag;
+    sortRenderer.setShowDatatype(showDatatypeInHeader);
+  }
 
 	public SortHeaderRenderer getHeaderRenderer()
 	{
@@ -1272,15 +1284,7 @@ public class WbTable
 			{
 				initRendererHighlight(row);
 			}
-
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					clearSelection();
-				}
-			});
+			EventQueue.invokeLater(this::clearSelection);
 		}
 		return result;
 	}
@@ -2617,14 +2621,7 @@ public class WbTable
 		final Component edit = this.getEditorComponent();
 		if (edit != null)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					edit.requestFocusInWindow();
-				}
-			});
+			EventQueue.invokeLater(edit::requestFocusInWindow);
 		}
 		return newRow;
 	}

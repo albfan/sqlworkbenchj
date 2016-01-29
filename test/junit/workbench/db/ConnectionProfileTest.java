@@ -139,6 +139,8 @@ public class ConnectionProfileTest
 		props.setProperty("remarksReporting", "true");
 		profile.setConnectionProperties(props);
 		assertTrue(profile.isChanged());
+    assertEquals("true", profile.getConnectionProperties().getProperty("remarksReporting"));
+    assertEquals(1, profile.getConnectionProperties().size());
 		profile.setCopyExtendedPropsToSystem(true);
 		assertTrue(profile.isChanged());
 

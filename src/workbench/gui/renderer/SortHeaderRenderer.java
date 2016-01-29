@@ -69,6 +69,7 @@ public class SortHeaderRenderer
 	private final JLabel displayLabel = new JLabel();
 	private boolean showFullTypeInfo;
 	private boolean showBoldHeader;
+	private boolean showDatatype;
 	private boolean highlightPk;
 
 	public SortHeaderRenderer()
@@ -88,6 +89,11 @@ public class SortHeaderRenderer
 		showFullTypeInfo = Settings.getInstance().getBoolProperty(GuiSettings.PROP_TABLE_HEADER_FULL_TYPE_INFO, false);
 	}
 
+  public void setShowDatatype(boolean flag)
+  {
+    showDatatype = flag;
+  }
+  
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
@@ -99,7 +105,7 @@ public class SortHeaderRenderer
 	{
 		TableCellRenderer realRenderer = table.getTableHeader().getDefaultRenderer();
 
-		JComponent c = (JComponent)realRenderer.getTableCellRendererComponent (table,value, isSelected, hasFocus, row, col);
+		JComponent c = (JComponent)realRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 
 		boolean sorted = false;
 		boolean ascending = false;
@@ -169,6 +175,10 @@ public class SortHeaderRenderer
 							Font f = display.getFont().deriveFont(Font.ITALIC);
 							display.setFont(f);
 						}
+            if (showDatatype)
+            {
+              display.setText("<html>" + text + "<br>" + type + "</html>");
+            }
 					}
 				}
 			}

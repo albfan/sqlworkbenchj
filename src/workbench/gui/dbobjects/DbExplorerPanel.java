@@ -196,7 +196,7 @@ public class DbExplorerPanel
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			this.setLayout(new BorderLayout());
 
-			schemaReloader = new Reloadable()
+      schemaReloader = new Reloadable()
 			{
 				@Override
 				public void reload()
@@ -1090,6 +1090,7 @@ public class DbExplorerPanel
 	@Override
 	public boolean isModified()
 	{
+    if (tables == null) return false;
 		return tables.isModified();
 	}
 
@@ -1115,9 +1116,9 @@ public class DbExplorerPanel
 			WbProperties p = w.getSettings();
 			this.schemaFromWorkspace = p.getProperty("dbexplorer" + index + ".currentschema", null);
 			this.catalogFromWorkspace = p.getProperty("dbexplorer" + index + ".currentcatalog", null);
-			tables.readFromWorkspace(w, index);
-			searchPanel.readFromWorkspace(w, index);
-			procs.readFromWorkspace(w, index);
+			if (tables != null) tables.readFromWorkspace(w, index);
+			if (searchPanel != null) searchPanel.readFromWorkspace(w, index);
+			if (procs != null) procs.readFromWorkspace(w, index);
 			if (triggers != null) triggers.readFromWorkspace(w, index);
 			setTabName(p.getProperty("tab" + index + ".title"));
 			this.locked = p.getBoolProperty("dbexplorer" + index + ".locked", false);
@@ -1126,14 +1127,8 @@ public class DbExplorerPanel
 		{
 			LogMgr.logError("DbExplorerPanel.readFromWorkspace()", "Error loading workspace", e);
 		}
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				updateTabTitle();
-			}
-		});
+
+		EventQueue.invokeLater(this::updateTabTitle);
 	}
 
 	@Override

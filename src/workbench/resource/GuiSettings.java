@@ -89,6 +89,7 @@ public class GuiSettings
 		PROP_TITLE_SHOW_EDITOR_FILE, PROP_TITLE_GROUP_SEP, PROP_TITLE_GROUP_BRACKET);
 
 	public static final String PROP_TABLE_HEADER_BOLD = "workbench.gui.table.header.bold";
+	public static final String PROP_TABLE_HEADER_DATATYPE = "workbench.gui.table.header.include.type";
 	public static final String PROP_TABLE_HEADER_FULL_TYPE_INFO = "workbench.gui.table.header.typeinfo.full";
 	public static final String PROP_WRAP_MULTILINE_RENDERER = "workbench.gui.display.multiline.renderer.wrap";
 	public static final String PROP_WRAP_MULTILINE_EDITOR = "workbench.gui.display.multiline.editor.wrap";
@@ -1057,6 +1058,16 @@ public class GuiSettings
 	public static void setShowTableHeaderInBold(boolean flag)
 	{
 		Settings.getInstance().setProperty(PROP_TABLE_HEADER_BOLD, flag);
+	}
+
+	public static boolean showDatatypeInTableHeader()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_TABLE_HEADER_DATATYPE, false);
+	}
+
+	public static void setShowDatatypeInTableHeader(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_TABLE_HEADER_DATATYPE, flag);
 	}
 
 	public static void setReloadType(FileReloadType type)

@@ -25,6 +25,7 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,7 +61,6 @@ public class ConnectionInfo
 	private WbAction showInfoAction;
 	private WbLabelField infoText;
 	private JLabel iconLabel;
-	private final Runnable updater;
 	private boolean useCachedSchema;
 
 	public ConnectionInfo(Color aBackground)
@@ -86,14 +86,6 @@ public class ConnectionInfo
 		infoText.addPopupAction(showInfoAction);
 		infoText.setText(ResourceMgr.getString("TxtNotConnected"));
 		add(infoText, BorderLayout.CENTER);
-		updater = new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_updateDisplay();
-			}
-		};
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -116,16 +108,22 @@ public class ConnectionInfo
 				bkg = p.getInfoDisplayColor();
 			}
 		}
-		showInfoAction.setEnabled(this.sourceConnection != null);
 
-		if (bkg == null)
-		{
-			setBackground(defaultBackground);
-		}
-		else
-		{
-			setBackground(bkg);
-		}
+    final Color background = bkg;
+
+    EventQueue.invokeLater(() ->
+    {
+      showInfoAction.setEnabled(sourceConnection != null);
+
+      if (background == null)
+      {
+        setBackground(defaultBackground);
+      }
+      else
+      {
+        setBackground(background);
+      }
+    });
 
 		useCachedSchema = true;
 		try
@@ -140,7 +138,7 @@ public class ConnectionInfo
 
 	private void updateDisplay()
 	{
-		WbSwingUtilities.invoke(updater);
+		WbSwingUtilities.invoke(this::_updateDisplay);
 	}
 
 	private void _updateDisplay()

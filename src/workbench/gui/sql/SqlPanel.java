@@ -2147,7 +2147,7 @@ public class SqlPanel
 		fireDbExecStart();
 
     doAutoSaveFile();
-    
+
 		setCancelState(true);
 
 		try
