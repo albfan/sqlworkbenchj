@@ -1081,14 +1081,14 @@ public class ConnectionProfile
 		this.changed = true;
 	}
 
-	public void addConnectionProperty(String aKey, String aValue)
+	public void addConnectionProperty(String key, String value)
 	{
-		if (aKey == null) return;
+		if (key == null) return;
 		if (this.connectionProperties == null)
 		{
 			this.connectionProperties = new Properties();
 		}
-		this.connectionProperties.put(aKey, aValue);
+		this.connectionProperties.put(key, value);
 		this.changed = true;
 	}
 
@@ -1099,24 +1099,15 @@ public class ConnectionProfile
 
 	public void setConnectionProperties(Properties props)
 	{
-		boolean wasDefined = (this.connectionProperties != null && this.connectionProperties.size() > 0);
-		if (props != null)
+		if (CollectionUtil.isEmpty(props))
 		{
-			if (props.isEmpty())
-			{
-				this.connectionProperties = null;
-				if (wasDefined) this.changed = true;
-			}
-			else
-			{
-				this.connectionProperties = props;
-				this.changed = true;
-			}
-		}
-		else
-		{
+      this.changed = CollectionUtil.isNonEmpty(connectionProperties);
 			this.connectionProperties = null;
-			if (wasDefined) this.changed = true;
+    }
+    else if (!props.equals(connectionProperties))
+    {
+      this.changed = true;
+      this.connectionProperties = new Properties(props);
 		}
 	}
 

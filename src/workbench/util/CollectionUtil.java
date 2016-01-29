@@ -44,6 +44,11 @@ public class CollectionUtil
 		return (c != null && c.size() > 0);
 	}
 
+	public static boolean isNonEmpty(Map map)
+	{
+		return (map != null && map.size() > 0);
+	}
+
 	public static boolean isEmpty(Collection c)
 	{
 		return (c == null || c.isEmpty());
