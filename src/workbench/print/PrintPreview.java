@@ -373,18 +373,14 @@ public class PrintPreview
 		if (!PrintUtil.pageFormatEquals(newFormat, oldFormat))
 		{
 			Settings.getInstance().setPageFormat(newFormat);
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					printTarget.setPageFormat(newFormat);
-					showCurrentPage();
-					invalidate();
-					preview.validate();
-					preview.doLayout();
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        printTarget.setPageFormat(newFormat);
+        showCurrentPage();
+        invalidate();
+        preview.validate();
+        preview.doLayout();
+      });
 
 		}
 	}
@@ -408,14 +404,7 @@ public class PrintPreview
 		}
 		else
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					showCrossPlatformPageSetup();
-				}
-			});
+			EventQueue.invokeLater(this::showCrossPlatformPageSetup);
 		}
 	}
 
