@@ -213,14 +213,7 @@ public class TableSelectorPanel
 
 	public void retrieveSchemas()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_retrieveSchemas();
-			}
-		});
+		WbSwingUtilities.invoke(this::_retrieveSchemas);
 	}
 
 	private void _retrieveSchemas()
@@ -399,14 +392,10 @@ public class TableSelectorPanel
 			{
 				editNewTableNameButton.setEnabled(false);
 			}
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					firePropertyChange(old, currentTable);
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        firePropertyChange(old, currentTable);
+      });
 		}
 	}
 

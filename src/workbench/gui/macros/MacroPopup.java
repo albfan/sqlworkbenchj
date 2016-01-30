@@ -278,14 +278,7 @@ public class MacroPopup
 		removeWindowListener(this);
 		tree.removeTreeSelectionListener(this);
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				closeWindow();
-			}
-		});
+		EventQueue.invokeLater(this::closeWindow);
 	}
 
 	@Override

@@ -330,15 +330,8 @@ public class InputHandler
 		if (keyCode == KeyEvent.VK_CONTEXT_MENU)
 		{
       evt.consume();
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					JEditTextArea area = getTextArea(evt);
-					area.showContextMenu();
-				}
-			});
+      final JEditTextArea area = getTextArea(evt);
+			EventQueue.invokeLater(area::showContextMenu);
 			return;
 		}
 

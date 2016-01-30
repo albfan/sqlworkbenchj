@@ -106,7 +106,7 @@ import workbench.util.WbWorkspace;
  */
 public class DbExplorerPanel
 	extends JPanel
-	implements ActionListener, MainPanel, DbExecutionListener, PropertyChangeListener
+	implements ActionListener, MainPanel, DbExecutionListener, PropertyChangeListener, Reloadable
 {
   private JTabbedPane tabPane;
   protected TableListPanel tables;
@@ -196,24 +196,7 @@ public class DbExplorerPanel
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			this.setLayout(new BorderLayout());
 
-      schemaReloader = new Reloadable()
-			{
-				@Override
-				public void reload()
-				{
-					if (!WbSwingUtilities.isConnectionIdle(DbExplorerPanel.this, dbConnection)) return;
-
-					if (schemaSelector.isVisible())
-					{
-						readSchemas(false);
-					}
-					else if (catalogSelector.isVisible())
-					{
-						readCatalogs();
-					}
-				}
-			};
-			reloadSchemasAction = new ReloadAction(schemaReloader);
+			reloadSchemasAction = new ReloadAction(this);
 			reloadSchemasAction.setEnabled(false);
 			reloadSchemasAction.setTooltip(ResourceMgr.getString("TxtReload"));
       reloadSchemasAction.setUseLabelIconSize(true);
@@ -272,6 +255,21 @@ public class DbExplorerPanel
 			LogMgr.logError(this, "Could not initialize DbExplorerPanel", e);
 		}
 	}
+
+  @Override
+  public void reload()
+  {
+    if (!WbSwingUtilities.isConnectionIdle(DbExplorerPanel.this, dbConnection)) return;
+
+    if (schemaSelector.isVisible())
+    {
+      readSchemas(false);
+    }
+    else if (catalogSelector.isVisible())
+    {
+      readCatalogs();
+    }
+  }
 
   @Override
   public void registerObjectFinder(ObjectFinder finder)

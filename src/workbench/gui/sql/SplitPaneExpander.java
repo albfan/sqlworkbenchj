@@ -99,13 +99,6 @@ public class SplitPaneExpander
 
 	private void repaintClient()
 	{
-		WbSwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				contentPanel.validate();
-			}
-		});
+		WbSwingUtilities.invokeLater(contentPanel::validate);
 	}
 }

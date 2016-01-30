@@ -28,9 +28,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+
 import workbench.resource.ResourceMgr;
 
 /**
@@ -40,6 +42,7 @@ import workbench.resource.ResourceMgr;
  */
 public class DisconnectInfo
 	extends JDialog
+  implements ActionListener
 {
 	private ActionListener cancelAction;
 	private JButton cancelButton;
@@ -64,14 +67,7 @@ public class DisconnectInfo
 		{
 			cancelButton = new JButton(ResourceMgr.getString(msgKey));
 			cancelButton.setToolTipText(ResourceMgr.getDescription(msgKey));
-			cancelButton.addActionListener(new ActionListener()
-			{
-				@Override
-				public void actionPerformed(ActionEvent evt)
-				{
-					cancelAction.actionPerformed(evt);
-				}
-			});
+			cancelButton.addActionListener(this);
 			JPanel p2 = new JPanel();
 			p2.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 			p2.setBorder(new EmptyBorder(15,10,5,10));
@@ -84,6 +80,12 @@ public class DisconnectInfo
 		pack();
 		WbSwingUtilities.center(this, parent);
 	}
+
+  @Override
+  public void actionPerformed(ActionEvent evt)
+  {
+    cancelAction.actionPerformed(evt);
+  }
 
 	@Override
 	public void dispose()

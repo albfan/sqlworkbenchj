@@ -245,81 +245,66 @@ public class TableSearchPanel
 		tableCount ++;
 
 		// Make sure everything happens on the EDT thread
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					WbTable display = new WbTable(true, true, false);
-
-					DataStoreTableModel model = new DataStoreTableModel(result);
-					display.setModel(model, true);
-					display.applyHighlightExpression(searcher.getSearchExpression());
-
-					display.checkCopyActions();
-
-					JScrollPane pane = new ParentWidthScrollPane(display);
-
-					int rows = display.getRowCount();
-
-					String label = table.getTableExpression() + " " + ResourceMgr.getFormattedString("MsgRows", rows);
-					TitledBorder b = new TitledBorder(" " + label);
-					pane.setBorder(b);
-					Font f = b.getTitleFont();
-					if (f == null)
-					{
-						// With JDK 7, getTitleFont() seems to return null...
-						UIDefaults def = UIManager.getDefaults();
-						f = def.getFont("Label.font");
-					}
-
-					// Check for != null again - just to make sure.
-					// Because if a NPE is thrown here, nothing will be shown to the user
-					if (f != null)
-					{
-						f = f.deriveFont(Font.BOLD);
-						b.setTitleFont(f);
-					}
-
-					// only the last component should have weighty = 1.0
-					// so reset the weighty attribute for the component that is currently the last one
-					int count = resultPanel.getComponentCount();
-					if (count > 0)
-					{
-						Component comp = resultPanel.getComponent(count - 1);
-						GridBagLayout layout = (GridBagLayout)resultPanel.getLayout();
-						GridBagConstraints prev = layout.getConstraints(comp);
-						prev.weighty = 0;
-						layout.setConstraints(comp, prev);
-					}
-
-					GridBagConstraints constraints = new GridBagConstraints();
-					constraints.gridx = 0;
-					constraints.fill = GridBagConstraints.HORIZONTAL;
-					constraints.weightx = 1.0;
-					constraints.weighty = 1.0;
-					constraints.anchor = GridBagConstraints.NORTHWEST;
-					resultPanel.add(pane, constraints);
-
-					int height = display.getRowHeight();
-					int width = pane.getWidth();
-
-					Dimension size = pane.getPreferredSize();
-					if (rows > 25)
-					{
-						rows = 25;
-					}
-					size.setSize(width - 20, (rows + 4) * height);
-					pane.setPreferredSize(size);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("TableSearchPanel.tableSearched()", "Error adding result.", e);
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      try
+      {
+        WbTable display = new WbTable(true, true, false);
+        DataStoreTableModel model = new DataStoreTableModel(result);
+        display.setModel(model, true);
+        display.applyHighlightExpression(searcher.getSearchExpression());
+        display.checkCopyActions();
+        JScrollPane pane = new ParentWidthScrollPane(display);
+        int rows = display.getRowCount();
+        String label = table.getTableExpression() + " " + ResourceMgr.getFormattedString("MsgRows", rows);
+        TitledBorder b = new TitledBorder(" " + label);
+        pane.setBorder(b);
+        Font f = b.getTitleFont();
+        if (f == null)
+        {
+          // With JDK 7, getTitleFont() seems to return null...
+          UIDefaults def = UIManager.getDefaults();
+          f = def.getFont("Label.font");
+        }
+        // Check for != null again - just to make sure.
+        // Because if a NPE is thrown here, nothing will be shown to the user
+        if (f != null)
+        {
+          f = f.deriveFont(Font.BOLD);
+          b.setTitleFont(f);
+        }
+        // only the last component should have weighty = 1.0
+        // so reset the weighty attribute for the component that is currently the last one
+        int count = resultPanel.getComponentCount();
+        if (count > 0)
+        {
+          Component comp = resultPanel.getComponent(count - 1);
+          GridBagLayout layout = (GridBagLayout)resultPanel.getLayout();
+          GridBagConstraints prev = layout.getConstraints(comp);
+          prev.weighty = 0;
+          layout.setConstraints(comp, prev);
+        }
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.anchor = GridBagConstraints.NORTHWEST;
+        resultPanel.add(pane, constraints);
+        int height1 = display.getRowHeight();
+        int width1 = pane.getWidth();
+        Dimension size = pane.getPreferredSize();
+        if (rows > 25)
+        {
+          rows = 25;
+        }
+        size.setSize(width1 - 20, (rows + 4) * height1);
+        pane.setPreferredSize(size);
+      }catch (Exception e)
+      {
+        LogMgr.logError("TableSearchPanel.tableSearched()", "Error adding result.", e);
+      }
+    });
 	}
 
 	@Override

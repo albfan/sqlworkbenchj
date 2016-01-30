@@ -180,16 +180,12 @@ public class WbSwingUtilities
 
 	public static void setLabel(final JLabel label, final String text, final String tooltip)
 	{
-		invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				label.setText(text);
-				label.setToolTipText(tooltip);
-				callRepaint(label);
-			}
-		});
+		invoke(() ->
+    {
+      label.setText(text);
+      label.setToolTipText(tooltip);
+      callRepaint(label);
+    });
 	}
 
 	/**
@@ -453,22 +449,18 @@ public class WbSwingUtilities
 	{
 		if (caller == null) return;
 
-		Runnable r = new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				caller.setCursor(cursor);
-				if (includeParent)
-				{
-					final Window w = getWindowAncestor(caller);
-					if (w != null)
-					{
-						w.setCursor(cursor);
-					}
-				}
-			}
-		};
+		Runnable r = () ->
+    {
+      caller.setCursor(cursor);
+      if (includeParent)
+      {
+        final Window w = getWindowAncestor(caller);
+        if (w != null)
+        {
+          w.setCursor(cursor);
+        }
+      }
+    };
 
 		if (EventQueue.isDispatchThread())
 		{
@@ -550,14 +542,10 @@ public class WbSwingUtilities
 			caller = getWindowAncestor(component);
 		}
 
-		invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				JOptionPane.showMessageDialog(caller, message, title, JOptionPane.ERROR_MESSAGE);
-			}
-		});
+		invoke(() ->
+    {
+      JOptionPane.showMessageDialog(caller, message, title, JOptionPane.ERROR_MESSAGE);
+    });
 	}
 
 	public static void showMultiLineError(final Component caller, final String title, final String message)
@@ -579,20 +567,16 @@ public class WbSwingUtilities
 			realCaller = getWindowAncestor(caller);
 		}
 
-		invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-        JComponent pane = createErrorMessagePanel(message, GuiSettings.PROP_PLAIN_EDITOR_WRAP, true);
-        JOptionPane errorPane = new WbOptionPane(pane, JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION);
-    		JDialog dialog = errorPane.createDialog(getWindowAncestor(realCaller), title);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.setResizable(true);
-        dialog.pack();
-        dialog.setVisible(true);
-			}
-		});
+		invoke(() ->
+    {
+      JComponent pane = createErrorMessagePanel(message, GuiSettings.PROP_PLAIN_EDITOR_WRAP, true);
+      JOptionPane errorPane = new WbOptionPane(pane, JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION);
+      JDialog dialog = errorPane.createDialog(getWindowAncestor(realCaller), title);
+      dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      dialog.setResizable(true);
+      dialog.pack();
+      dialog.setVisible(true);
+    });
 	}
 
   public static PlainEditor createErrorMessagePanel(String message, String settingsKey, boolean allowWordWrap)
@@ -664,38 +648,26 @@ public class WbSwingUtilities
 
 	public static void showMessage(final Component aCaller, final Object aMessage)
 	{
-		invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
-			}
-		});
+		invoke(() ->
+    {
+      JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+    });
 	}
 
 	public static void showMessage(final Component aCaller, final String title, final Object aMessage)
 	{
-		invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.PLAIN_MESSAGE);
-			}
-		});
+		invoke(() ->
+    {
+      JOptionPane.showMessageDialog(aCaller, aMessage, title, JOptionPane.PLAIN_MESSAGE);
+    });
 	}
 
 	public static void showMessageKey(final Component aCaller, final String aKey)
 	{
-		invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
-			}
-		});
+		invoke(() ->
+    {
+      JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+    });
 	}
 
 	public static boolean getYesNo(Component aCaller, String aMessage)
@@ -736,16 +708,12 @@ public class WbSwingUtilities
 
 		try
 		{
-			invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					dialog.setResizable(false);
-					dialog.pack();
-					dialog.setVisible(true);
-				}
-			});
+			invoke(() ->
+      {
+        dialog.setResizable(false);
+        dialog.pack();
+        dialog.setVisible(true);
+      });
 		}
 		finally
 		{
@@ -1235,26 +1203,18 @@ public class WbSwingUtilities
 
 	public static void repaintNow(final Component c)
 	{
-		invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				callRepaint(c);
-			}
-		});
+		invoke(() ->
+    {
+      callRepaint(c);
+    });
 	}
 
 	public static void repaintLater(final Component c)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				callRepaint(c);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      callRepaint(c);
+    });
 	}
 
 	/**
@@ -1272,14 +1232,7 @@ public class WbSwingUtilities
 			@Override
 			public void windowActivated(WindowEvent evt)
 			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						comp.requestFocus();
-					}
-				});
+				EventQueue.invokeLater(comp::requestFocus);
 				win.removeWindowListener(this);
 			}
 		});
@@ -1296,14 +1249,7 @@ public class WbSwingUtilities
 	{
 		if (comp == null) return;
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				comp.requestFocus();
-			}
-		});
+		EventQueue.invokeLater(comp::requestFocus);
 	}
 
 	public static void initPropertyEditors(Object bean, JComponent root)

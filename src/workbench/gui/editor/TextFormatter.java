@@ -75,30 +75,26 @@ public class TextFormatter
 
   private void updateEditor(final SqlTextContainer editor, final String text)
   {
-    WbSwingUtilities.invoke(new Runnable()
+    WbSwingUtilities.invoke(() ->
     {
-      @Override
-      public void run()
+      if (editor.isTextSelected())
       {
-        if (editor.isTextSelected())
+        boolean editable = editor.isEditable();
+        try
         {
-          boolean editable = editor.isEditable();
-          try
-          {
-            // the editor will refuse to execute setSelectedText() if it's not editable
-            editor.setEditable(true);
-            editor.setSelectedText(text);
-          }
-          finally
-          {
-            editor.setEditable(editable);
-          }
+          // the editor will refuse to execute setSelectedText() if it's not editable
+          editor.setEditable(true);
+          editor.setSelectedText(text);
         }
-        else
+        finally
         {
-          // setText() is always allowed, even if the editor is not editable
-          editor.setText(text);
+          editor.setEditable(editable);
         }
+      }
+      else
+      {
+        // setText() is always allowed, even if the editor is not editable
+        editor.setText(text);
       }
     });
   }

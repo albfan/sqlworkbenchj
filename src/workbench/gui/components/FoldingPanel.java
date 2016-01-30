@@ -102,21 +102,17 @@ public class FoldingPanel
 	private void updateDisplay(final int delta)
 	{
 		this.invalidate();
-		WbSwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				Window w = SwingUtilities.getWindowAncestor(FoldingPanel.this);
-				if (w != null)
-				{
-					w.validate();
-					Dimension d = w.getSize();
-					d.height += delta;
-					w.setSize(d);
-				}
-			}
-		});
+		WbSwingUtilities.invokeLater(() ->
+    {
+      Window w = SwingUtilities.getWindowAncestor(FoldingPanel.this);
+      if (w != null)
+      {
+        w.validate();
+        Dimension d = w.getSize();
+        d.height += delta;
+        w.setSize(d);
+      }
+    });
 	}
 
 	@Override

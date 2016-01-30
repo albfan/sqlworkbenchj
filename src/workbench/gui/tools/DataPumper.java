@@ -1227,14 +1227,7 @@ public class DataPumper
 		}
 
 		this.window .setVisible(true);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				checkConnections();
-			}
-		});
+		EventQueue.invokeLater(this::checkConnections);
 	}
 
 	private void disconnectTarget()
@@ -1619,14 +1612,7 @@ public class DataPumper
 
 		if (this.hasSource() && theTarget != null)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					initColumnMapper();
-				}
-			});
+			EventQueue.invokeLater(this::initColumnMapper);
 		}
 		else
 		{
@@ -2000,19 +1986,15 @@ public class DataPumper
 	protected void doCancel()
 	{
 		if (copier != null) copier.cancel();
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				cancelButton.setEnabled(false);
-				startButton.setEnabled(true);
-				copyRunning = false;
-				updateWindowTitle();
-				statusLabel.setText(ResourceMgr.getString("MsgCopyCancelled"));
-				statusLabel.repaint();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      cancelButton.setEnabled(false);
+      startButton.setEnabled(true);
+      copyRunning = false;
+      updateWindowTitle();
+      statusLabel.setText(ResourceMgr.getString("MsgCopyCancelled"));
+      statusLabel.repaint();
+    });
 	}
 
 	private void initImporter()
@@ -2174,16 +2156,12 @@ public class DataPumper
 
 	private void updateMonitor(final long currentRow)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (currentRow == 1) updateWindowTitle();
-				statusLabel.setText(copyMsg + " " + currentRow);
-				statusLabel.repaint();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (currentRow == 1) updateWindowTitle();
+      statusLabel.setText(copyMsg + " " + currentRow);
+      statusLabel.repaint();
+    });
 	}
 
 	@Override
@@ -2268,14 +2246,7 @@ public class DataPumper
 
 		if (!this.copier.isSuccess())
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					showLog();
-				}
-			});
+			EventQueue.invokeLater(this::showLog);
 		}
 	}
 

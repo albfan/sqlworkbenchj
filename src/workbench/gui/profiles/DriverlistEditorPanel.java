@@ -53,7 +53,7 @@ import workbench.gui.components.WbTraversalPolicy;
  */
 public class DriverlistEditorPanel
 	extends JPanel
-	implements FileActions, Validator, ListSelectionControl
+	implements FileActions, Validator, ListSelectionControl, ListSelectionListener
 {
 	private DriverListModel model;
 	private JToolBar toolbar;
@@ -92,14 +92,7 @@ public class DriverlistEditorPanel
 
 		setLayout(new BorderLayout());
 
-		driverList.addListSelectionListener(new ListSelectionListener()
-		{
-			@Override
-			public void valueChanged(ListSelectionEvent evt)
-			{
-				driverListValueChanged(evt);
-			}
-		});
+		driverList.addListSelectionListener(this);
 
 		JScrollPane scroll = new JScrollPane(driverList);
 
@@ -114,8 +107,9 @@ public class DriverlistEditorPanel
 		this.setMinimumSize(new Dimension(200, 400));
 	}
 
-	private void driverListValueChanged(ListSelectionEvent evt)
-	{
+  @Override
+  public void valueChanged(ListSelectionEvent evt)
+  {
 		if (evt.getSource() == this.driverList)
 		{
 			if (lastIndex > -1)

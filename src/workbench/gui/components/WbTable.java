@@ -888,13 +888,9 @@ public class WbTable
 
 	public void addMacroMenu(final WbMenu submenu)
   {
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-        _addMacroMenu(submenu);
-      }
+		WbSwingUtilities.invoke(() ->
+    {
+      _addMacroMenu(submenu);
     });
   }
 
@@ -944,19 +940,15 @@ public class WbTable
 
 	private void addPopupSubMenu(final WbMenu submenu, final boolean withSep)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (popup == null) popup = new WbPopupMenu();
-				if (withSep)
-				{
-					popup.addSeparator();
-				}
-				popup.add(submenu);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      if (popup == null) popup = new WbPopupMenu();
+      if (withSep)
+      {
+        popup.addSeparator();
+      }
+      popup.add(submenu);
+    });
 	}
 
 	private int findPopupItem(WbAction reference)
@@ -983,14 +975,10 @@ public class WbTable
 		final int index = findPopupItem(reference);
 		if (index == -1) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				popup.add(action.getMenuItem(), index + 1);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      popup.add(action.getMenuItem(), index + 1);
+    });
 	}
 
 	public void removeSubmenu(JMenuItem item)
@@ -1030,27 +1018,23 @@ public class WbTable
 
 	public void addPopupMenu(final JMenuItem item, final boolean withSep)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (popup == null) popup = new WbPopupMenu();
-				if (printDataAction != null)
-				{
-					if (withSep)
-					{
-						popup.add(new Separator(), popup.getComponentCount() - 3);
-					}
-					popup.add(item, popup.getComponentCount() - 3);
-				}
-				else
-				{
-					if (withSep) popup.addSeparator();
-					popup.add(item);
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      if (popup == null) popup = new WbPopupMenu();
+      if (printDataAction != null)
+      {
+        if (withSep)
+        {
+          popup.add(new Separator(), popup.getComponentCount() - 3);
+        }
+        popup.add(item, popup.getComponentCount() - 3);
+      }
+      else
+      {
+        if (withSep) popup.addSeparator();
+        popup.add(item);
+      }
+    });
 	}
 
 	@Override
@@ -1580,18 +1564,14 @@ public class WbTable
 	{
 		if (this.dwModel == null) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				boolean restored = dwModel.getDataStore().restoreOriginalValues();
-				if (restored)
-				{
-					dwModel.fireTableDataChanged();
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      boolean restored = dwModel.getDataStore().restoreOriginalValues();
+      if (restored)
+      {
+        dwModel.fireTableDataChanged();
+      }
+    });
 	}
 
 	public PrintPreviewAction getPrintPreviewAction()
@@ -1652,14 +1632,10 @@ public class WbTable
 	{
 		if (flag == this.dwModel.isStatusColumnVisible()) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_setShowStatusColumn(flag);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      _setShowStatusColumn(flag);
+    });
 	}
 
 	private void _setShowStatusColumn(boolean show)
@@ -1702,15 +1678,11 @@ public class WbTable
 
 			if (newColumn >= 0)
 			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						changeSelection(row, -1, false, false);
-						changeSelection(row, newColumn, false, true);
-					}
-				});
+				EventQueue.invokeLater(() ->
+        {
+          changeSelection(row, -1, false, false);
+          changeSelection(row, newColumn, false, true);
+        });
 			}
 		}
 	}
@@ -1740,15 +1712,11 @@ public class WbTable
 	{
 		final Container c = (this.scrollPane == null ? this : scrollPane);
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				updateSortRenderer();
-				WbSwingUtilities.showWaitCursor(c.getParent());
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      updateSortRenderer();
+      WbSwingUtilities.showWaitCursor(c.getParent());
+    });
 	}
 
 	protected void updateSortRenderer()
@@ -1773,28 +1741,24 @@ public class WbTable
 	public void sortingFinished()
 	{
 		final Container c = (this.scrollPane == null ? this : scrollPane);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				adjustRowHeight();
+		EventQueue.invokeLater(() ->
+    {
+      adjustRowHeight();
 
-				if (GuiSettings.getAutomaticOptimalWidth() && GuiSettings.getIncludeHeaderInOptimalWidth())
-				{
-					ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(WbTable.this);
-					optimizer.optimizeHeader();
-				}
+      if (GuiSettings.getAutomaticOptimalWidth() && GuiSettings.getIncludeHeaderInOptimalWidth())
+      {
+        ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(WbTable.this);
+        optimizer.optimizeHeader();
+      }
 
-				WbSwingUtilities.showDefaultCursor(c.getParent());
-				WbSwingUtilities.showDefaultCursor(getTableHeader());
+      WbSwingUtilities.showDefaultCursor(c.getParent());
+      WbSwingUtilities.showDefaultCursor(getTableHeader());
 
-				// For some reason, the sorting indicator is not properly displayed
-				// if repaint() is not called. It needs two clicks int order to
-				// display the new sort icon if
-				getTableHeader().repaint();
-			}
-		});
+      // For some reason, the sorting indicator is not properly displayed
+      // if repaint() is not called. It needs two clicks int order to
+      // display the new sort icon if
+      getTableHeader().repaint();
+    });
 	}
 
 	public boolean canSearchAgain()
@@ -2254,15 +2218,11 @@ public class WbTable
 			if (e.getSource() instanceof JTableHeader)
 			{
 				this.headerPopupX = e.getX();
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						JPopupMenu headerPopup = getHeaderPopup();
-						headerPopup.show(getTableHeader(), e.getX(), e.getY());
-					}
-				});
+				EventQueue.invokeLater(() ->
+        {
+          JPopupMenu headerPopup = getHeaderPopup();
+          headerPopup.show(getTableHeader(), e.getX(), e.getY());
+        });
 			}
 			else if (this.showPopup && this.popup != null)
 			{
@@ -2274,27 +2234,19 @@ public class WbTable
 					if (row != selectedRow)
 					{
 						final ListSelectionModel model = this.getSelectionModel();
-						EventQueue.invokeLater(new Runnable()
-						{
-							@Override
-							public void run()
-							{
-								model.setSelectionInterval(row, row);
-							}
-						});
+						EventQueue.invokeLater(() ->
+            {
+              model.setSelectionInterval(row, row);
+            });
 					}
 				}
 				final int x = e.getX();
 				final int y = e.getY();
 
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						popup.show(WbTable.this, x,y);
-					}
-				});
+				EventQueue.invokeLater(() ->
+        {
+          popup.show(WbTable.this, x,y);
+        });
 			}
 		}
 		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1

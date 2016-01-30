@@ -26,11 +26,14 @@ package workbench.gui.filter;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.storage.filter.FilterExpression;
+
 import workbench.util.FixedSizeList;
 import workbench.util.WbFile;
 import workbench.util.WbPersistence;
@@ -60,7 +63,7 @@ public class FilterDefinitionManager
 	private FilterDefinitionManager()
 	{
 		int size = Settings.getInstance().getIntProperty("workbench.gui.filter.mru.maxsize", DEFAULT_MAX_SIZE);
-		this.filterFiles = new FixedSizeList<WbFile>(size);
+		this.filterFiles = new FixedSizeList<>(size);
 		loadMRUList();
 	}
 
@@ -112,7 +115,7 @@ public class FilterDefinitionManager
 
 	public synchronized void addPropertyChangeListener(PropertyChangeListener l)
 	{
-		if (this.listeners == null) this.listeners = new LinkedList<PropertyChangeListener>();
+		if (this.listeners == null) this.listeners = new ArrayList<>(2);
 		this.listeners.add(l);
 	}
 

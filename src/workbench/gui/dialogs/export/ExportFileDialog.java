@@ -287,14 +287,7 @@ public class ExportFileDialog
 
 		if (exportOptions.getExportType().isSqlType())
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					checkSqlOptions();
-				}
-			});
+			EventQueue.invokeLater(this::checkSqlOptions);
 		}
 		int answer = chooser.showSaveDialog(parentWindow);
 
@@ -446,20 +439,11 @@ public class ExportFileDialog
 		if (checkWindow != null) return;
 		if (chooser == null) return;
 
-		Runnable task = new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_checkSqlOptions();
-			}
-		};
-
 		checkWindow = new FeedbackWindow(chooser.getCurrentDialog(), ResourceMgr.getString("MsgRetrievingKeyColumns"));
 		WbSwingUtilities.center(checkWindow, chooser.getCurrentDialog());
 		WbSwingUtilities.showWaitCursor(chooser.getCurrentDialog());
 		WbSwingUtilities.showWaitCursor(exportOptions);
-		checkWindow.showAndStart(task);
+		checkWindow.showAndStart(this::_checkSqlOptions);
 	}
 
 	private void updateSqlFlags()
@@ -469,22 +453,18 @@ public class ExportFileDialog
 		includeSqlUpdate = (source != null && source.hasPkColumns());
 		includeSqlDeleteInsert = (includeSqlInsert && includeSqlUpdate);
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (!includeSqlUpdate)
-				{
-					chooser.removeChoosableFileFilter(ExtensionFileFilter.getSqlUpdateFileFilter());
-				}
+		EventQueue.invokeLater(() ->
+    {
+      if (!includeSqlUpdate)
+      {
+        chooser.removeChoosableFileFilter(ExtensionFileFilter.getSqlUpdateFileFilter());
+      }
 
-				if (!includeSqlDeleteInsert)
-				{
-					chooser.removeChoosableFileFilter(ExtensionFileFilter.getSqlInsertDeleteFilter());
-				}
-			}
-		});
+      if (!includeSqlDeleteInsert)
+      {
+        chooser.removeChoosableFileFilter(ExtensionFileFilter.getSqlInsertDeleteFilter());
+      }
+    });
 	}
 
 	protected void _checkSqlOptions()

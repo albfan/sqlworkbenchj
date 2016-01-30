@@ -123,20 +123,16 @@ public class EncodingPanel
 	@Override
 	public void setEncoding(final String enc)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				DefaultComboBoxModel model = (DefaultComboBoxModel)encodings.getModel();
-				int index = model.getIndexOf(enc);
-				if (index < 0)
-				{
-					encodings.addItem(enc);
-				}
-				encodings.setSelectedItem(enc);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      DefaultComboBoxModel model = (DefaultComboBoxModel)encodings.getModel();
+      int index = model.getIndexOf(enc);
+      if (index < 0)
+      {
+        encodings.addItem(enc);
+      }
+      encodings.setSelectedItem(enc);
+    });
 	}
 
 	@Override

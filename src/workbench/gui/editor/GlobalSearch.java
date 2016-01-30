@@ -529,13 +529,9 @@ public class GlobalSearch
   private void jumpTo(SearchResult searchLocation)
   {
     final NamedScriptLocation target = new NamedScriptLocation("", searchLocation.getOffset(), searchLocation.getTabId());
-    EventQueue.invokeLater(new Runnable()
+    EventQueue.invokeLater(() ->
     {
-      @Override
-      public void run()
-      {
-        window.jumpToBookmark(target);
-      }
+      window.jumpToBookmark(target);
     });
   }
 

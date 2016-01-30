@@ -39,12 +39,15 @@ import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
+
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+
 import workbench.util.FileUtil;
 
 
@@ -115,6 +118,7 @@ public class ImagePanel
 		}
 	}
 
+  @Override
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);

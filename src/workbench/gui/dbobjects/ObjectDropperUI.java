@@ -130,23 +130,19 @@ public class ObjectDropperUI
 			setConnectionBusy(false);
 		}
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (cancelled)
-				{
-					dropButton.setEnabled(true);
-				}
-				else
-				{
-					dialog.setVisible(false);
-					dialog.dispose();
-					dialog = null;
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (cancelled)
+      {
+        dropButton.setEnabled(true);
+      }
+      else
+      {
+        dialog.setVisible(false);
+        dialog.dispose();
+        dialog = null;
+      }
+    });
 	}
 
   public boolean success()
@@ -496,21 +492,16 @@ private void showScriptButtonActionPerformed(java.awt.event.ActionEvent evt) {//
 	private void fkCheckFinished(final List<TableIdentifier> tables)
 	{
 		this.checkThread = null;
-		EventQueue.invokeLater(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				statusLabel.setText("");
-				dropper.setObjects(tables);
-				initDisplay();
-				dropButton.setEnabled(true);
-				showScriptButton.setEnabled(true);
-				cancelButton.setEnabled(true);
-				WbSwingUtilities.showDefaultCursor(dialog);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      statusLabel.setText("");
+      dropper.setObjects(tables);
+      initDisplay();
+      dropButton.setEnabled(true);
+      showScriptButton.setEnabled(true);
+      cancelButton.setEnabled(true);
+      WbSwingUtilities.showDefaultCursor(dialog);
+    });
 	}
 
 private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkFKButtonActionPerformed

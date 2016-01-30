@@ -99,15 +99,11 @@ public class ProgressDialog
 			@Override
 			public void run()
 			{
-				WbSwingUtilities.invoke(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						WbSwingUtilities.center(ProgressDialog.this, parentWindow);
-						setVisible(true);
-					}
-				});
+				WbSwingUtilities.invoke(() ->
+        {
+          WbSwingUtilities.center(ProgressDialog.this, parentWindow);
+          setVisible(true);
+        });
 			}
 		};
 		t.start();

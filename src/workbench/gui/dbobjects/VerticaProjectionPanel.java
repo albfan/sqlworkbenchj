@@ -252,15 +252,11 @@ public class VerticaProjectionPanel
 			String basename = projectionList.getValueAsString(selected, 0);
 
 			final DataStoreTableModel model = new DataStoreTableModel(getProjectionCopiesDataStore(basename));
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					projectionBuddies.setModel(model, true);
-					projectionBuddies.adjustRowsAndColumns();
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        projectionBuddies.setModel(model, true);
+        projectionBuddies.adjustRowsAndColumns();
+      });
 		}
 		catch (SQLException se)
 		{
@@ -276,15 +272,11 @@ public class VerticaProjectionPanel
 			String basename = projectionList.getValueAsString(selected, 0);
 
 			final DataStoreTableModel model = new DataStoreTableModel(getProjectionColumnsDataStore(basename));
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					projectionColumns.setModel(model, true);
-					projectionColumns.adjustRowsAndColumns();
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        projectionColumns.setModel(model, true);
+        projectionColumns.adjustRowsAndColumns();
+      });
 		}
 		catch (SQLException se)
 		{

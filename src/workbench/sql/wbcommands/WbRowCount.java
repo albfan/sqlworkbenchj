@@ -206,7 +206,8 @@ public class WbRowCount
 				{
 					rowMonitor.setCurrentObject(msg, row + 1, tableCount);
 				}
-				rs = JdbcUtils.runStatement(currentConnection, currentStatement, countQuery, false, useSavepoint);
+        
+				rs = JdbcUtils.runStatement(currentConnection, currentStatement, countQuery, useSavepoint);
 
 				if (isCancelled) break;
 

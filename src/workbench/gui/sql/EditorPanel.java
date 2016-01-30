@@ -689,7 +689,7 @@ public class EditorPanel
   {
     return checkAndSaveFile(true);
   }
-  
+
   public int checkAndSaveFile(boolean allowCancel)
   {
     if (!this.hasFileLoaded()) return JOptionPane.YES_OPTION;
@@ -1143,15 +1143,11 @@ public class EditorPanel
         {
           evt.getDropTargetContext().dropComplete(false);
           final Window w = SwingUtilities.getWindowAncestor(this);
-          EventQueue.invokeLater(new Runnable()
+          EventQueue.invokeLater(() ->
           {
-            @Override
-            public void run()
-            {
-              w.toFront();
-              w.requestFocus();
-              WbSwingUtilities.showErrorMessageKey(w, "ErrNoMultipleDrop");
-            }
+            w.toFront();
+            w.requestFocus();
+            WbSwingUtilities.showErrorMessageKey(w, "ErrNoMultipleDrop");
           });
         }
       }

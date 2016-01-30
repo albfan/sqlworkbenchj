@@ -163,22 +163,18 @@ public class MacroDefinitionPanel
 		updateShortcutDisplay();
 		appendResults.setEnabled(!doExpansion.isSelected());
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (currentMacro != null)
-				{
-					macroEditor.setText(currentMacro.getText());
-					macroEditor.setCaretPosition(0);
-				}
-				else
-				{
-					macroEditor.setText("");
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (currentMacro != null)
+      {
+        macroEditor.setText(currentMacro.getText());
+        macroEditor.setCaretPosition(0);
+      }
+      else
+      {
+        macroEditor.setText("");
+      }
+    });
 	}
 
 	public void setCurrentConnection(WbConnection conn)
@@ -254,14 +250,7 @@ public class MacroDefinitionPanel
 	 */
 	public void selectMacroName()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				tfName.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(tfName::requestFocusInWindow);
 	}
 
 	/** This method is called from within the constructor to

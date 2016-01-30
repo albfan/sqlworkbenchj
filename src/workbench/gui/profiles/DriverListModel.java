@@ -44,18 +44,14 @@ class DriverListModel
 
 	DriverListModel(List<DbDriver> aDriverList)
 	{
-		this.drivers = new ArrayList<DbDriver>(aDriverList);
-		Comparator<DbDriver> comp = new Comparator<DbDriver>()
-		{
-			@Override
-			public int compare(DbDriver o1, DbDriver o2)
-			{
-				if (o1 == null && o2 == null) return 0;
-				if (o1 == null) return -1;
-				if (o2 == null) return 1;
-				return o1.getName().compareTo(o2.getName());
-			}
-		};
+		this.drivers = new ArrayList<>(aDriverList);
+		Comparator<DbDriver> comp = (DbDriver o1, DbDriver o2) ->
+    {
+      if (o1 == null && o2 == null) return 0;
+      if (o1 == null) return -1;
+      if (o2 == null) return 1;
+      return o1.getName().compareTo(o2.getName());
+    };
 		Collections.sort(this.drivers, comp);
 	}
 

@@ -85,15 +85,11 @@ public class DriverEditorDialog
 		// when invoked from the connection dialog, it seems that under
 		// Linux the dialog is not visible (because it's behind the connection
 		// dialog), so we're trying to make this window visible
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				toFront();
-				requestFocus();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      toFront();
+      requestFocus();
+    });
 	}
 
 	private void initComponents()

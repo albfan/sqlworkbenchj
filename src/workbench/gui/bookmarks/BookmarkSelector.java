@@ -439,55 +439,51 @@ public class BookmarkSelector
 		}
 
 		WbSwingUtilities.showWaitCursorOnWindow(this);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				initialColumnWidths = null;
+		EventQueue.invokeLater(() ->
+    {
+      initialColumnWidths = null;
 
-				SortDefinition oldSort;
-				if (savedSort != null)
-				{
-					oldSort = savedSort;
-					savedSort = null;
-				}
-				else
-				{
-					oldSort	= bookmarks.getCurrentSortColumns();
-				}
-				DataStoreTableModel model = new DataStoreTableModel(data);
-				model.setAllowEditing(false);
-				bookmarks.setModel(model, true);
-				bookmarks.getTableHeader().setReorderingAllowed(false);
+      SortDefinition oldSort;
+      if (savedSort != null)
+      {
+        oldSort = savedSort;
+        savedSort = null;
+      }
+      else
+      {
+        oldSort	= bookmarks.getCurrentSortColumns();
+      }
+      DataStoreTableModel model = new DataStoreTableModel(data);
+      model.setAllowEditing(false);
+      bookmarks.setModel(model, true);
+      bookmarks.getTableHeader().setReorderingAllowed(false);
 
-				if (data.getRowCount() > 0)
-				{
-					if (oldSort != null)
-					{
-						model.setSortDefinition(oldSort);
-					}
-					else
-					{
-						model.sortByColumn(0, true, false);
-					}
-					handleColumnWidths();
-				}
+      if (data.getRowCount() > 0)
+      {
+        if (oldSort != null)
+        {
+          model.setSortDefinition(oldSort);
+        }
+        else
+        {
+          model.sortByColumn(0, true, false);
+        }
+        handleColumnWidths();
+      }
 
-				initialColumnWidths = getColumnWidths();
+      initialColumnWidths = getColumnWidths();
 
-				// always select at least one row.
-				// as the focus is set to the table containing the lookup data,
-				// the user can immediately use the cursor keys to select one entry.
-				keyHandler.selectRow(0);
+      // always select at least one row.
+      // as the focus is set to the table containing the lookup data,
+      // the user can immediately use the cursor keys to select one entry.
+      keyHandler.selectRow(0);
 
-				long duration = System.currentTimeMillis() - start;
-				LogMgr.logDebug("BookmarkSelector.loadBookmarks()", "Loading bookmarks took: " + duration + "ms");
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("BookmarkSelector.loadBookmarks()", "Loading bookmarks took: " + duration + "ms");
 
-				filterValue.requestFocusInWindow();
-				WbSwingUtilities.showDefaultCursorOnWindow(BookmarkSelector.this);
-			}
-		});
+      filterValue.requestFocusInWindow();
+      WbSwingUtilities.showDefaultCursorOnWindow(BookmarkSelector.this);
+    });
 	}
 
 	private void handleColumnWidths()
@@ -509,45 +505,37 @@ public class BookmarkSelector
 
 	protected void resetFilter()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				filterValue.setText("");
-				bookmarks.resetFilter();
-				keyHandler.selectRow(0);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      filterValue.setText("");
+      bookmarks.resetFilter();
+      keyHandler.selectRow(0);
+    });
 	}
 
 	protected void applyFilter()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (GuiSettings.getSaveBookmarkColWidths())
-				{
-					saveColumnWidths();
-				}
-				ContainsComparator comp = new ContainsComparator();
-				FilterExpression filter;
-				if (searchNameCbx.isSelected())
-				{
-					filter = new ColumnExpression(bookmarks.getDataStore().getColumnName(0), comp, filterValue.getText());
-				}
-				else
-				{
-					filter = new DataRowExpression(comp, filterValue.getText());
-				}
-				((ExpressionValue)filter).setIgnoreCase(true);
-				bookmarks.applyFilter(filter, false);
-				handleColumnWidths();
-				keyHandler.selectRow(0);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (GuiSettings.getSaveBookmarkColWidths())
+      {
+        saveColumnWidths();
+      }
+      ContainsComparator comp = new ContainsComparator();
+      FilterExpression filter;
+      if (searchNameCbx.isSelected())
+      {
+        filter = new ColumnExpression(bookmarks.getDataStore().getColumnName(0), comp, filterValue.getText());
+      }
+      else
+      {
+        filter = new DataRowExpression(comp, filterValue.getText());
+      }
+      ((ExpressionValue)filter).setIgnoreCase(true);
+      bookmarks.applyFilter(filter, false);
+      handleColumnWidths();
+      keyHandler.selectRow(0);
+    });
 	}
 
 	private void selectCurrentTab()
@@ -774,14 +762,10 @@ public class BookmarkSelector
 
 		if (!dialog.isCancelled() && picker.selectedBookmark != null)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					window.jumpToBookmark(picker.selectedBookmark);
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        window.jumpToBookmark(picker.selectedBookmark);
+      });
 		}
 	}
 }

@@ -410,13 +410,6 @@ public class EditConnectionFiltersPanel
 	@Override
 	public void componentDisplayed()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				schemaFilterEditor.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(schemaFilterEditor::requestFocusInWindow);
 	}
 }

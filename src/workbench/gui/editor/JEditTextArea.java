@@ -22,7 +22,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentAdapter;
@@ -498,15 +497,10 @@ public class JEditTextArea
 		if (caretTimer != null) return;
 
 		final int blinkInterval = 750;
-		caretTimer = new Timer(blinkInterval,
-		 new ActionListener()
-			{
-				@Override
-				public void actionPerformed(ActionEvent evt)
-				{
-					blinkCaret();
-				}
-			});
+		caretTimer = new Timer(blinkInterval, (ActionEvent evt) ->
+    {
+      blinkCaret();
+    });
 		caretTimer.setInitialDelay(blinkInterval);
 		caretTimer.start();
 	}
@@ -1272,26 +1266,15 @@ public class JEditTextArea
 
 			this.document.addDocumentListener(documentHandler);
 
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					updateScrollBars();
-					validate();
-					painter.repaint();
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        updateScrollBars();
+        validate();
+        painter.repaint();
+      });
 
 		}
 	}
-
-//	@Override
-//	public void validate()
-//	{
-//		painter.invalidateLineRange(0, getLineCount());
-//		super.validate();
-//	}
 
 	@Override
 	public void setFont(Font aNewFont)
@@ -1533,15 +1516,11 @@ public class JEditTextArea
 
 		if (isVisible())
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					updateScrollBars();
-					validate();
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        updateScrollBars();
+        validate();
+      });
 		}
 	}
 

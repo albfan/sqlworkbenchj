@@ -231,22 +231,18 @@ public class DbExplorerWindow
 
 	public static void showWindow()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				DbExplorerPanel dbPanel = new DbExplorerPanel();
-				DbExplorerWindow window = new DbExplorerWindow(dbPanel);
-				window.setStandalone(true);
+		EventQueue.invokeLater(() ->
+    {
+      DbExplorerPanel dbPanel = new DbExplorerPanel();
+      DbExplorerWindow window = new DbExplorerWindow(dbPanel);
+      window.setStandalone(true);
 
-				window.restorePosition();
-				dbPanel.restoreSettings();
+      window.restorePosition();
+      dbPanel.restoreSettings();
 
-				window.setVisible(true);
-				window.selectConnection();
-			}
-		});
+      window.setVisible(true);
+      window.selectConnection();
+    });
 	}
 
 	@Override

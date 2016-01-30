@@ -33,6 +33,7 @@ import javax.swing.event.ListSelectionListener;
 
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.Settings;
 
 import workbench.db.TableIdentifier;
@@ -47,7 +48,6 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.sql.EditorPanel;
-import workbench.resource.IconMgr;
 
 import workbench.storage.DataStore;
 
@@ -123,25 +123,21 @@ public class TriggerDisplayPanel
 			triggerTable = table;
 			DataStore trg = reader.getTableTriggers(table);
 			final DataStoreTableModel rs = new DataStoreTableModel(trg);
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					triggers.setModel(rs, true);
-					triggers.adjustRowsAndColumns();
-					triggerCatalog = table.getCatalog();
-					triggerSchema = table.getSchema();
-					if (triggers.getRowCount() > 0)
-					{
-						triggers.getSelectionModel().setSelectionInterval(0, 0);
-					}
-					else
-					{
-						source.setText("");
-					}
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        triggers.setModel(rs, true);
+        triggers.adjustRowsAndColumns();
+        triggerCatalog = table.getCatalog();
+        triggerSchema = table.getSchema();
+        if (triggers.getRowCount() > 0)
+        {
+          triggers.getSelectionModel().setSelectionInterval(0, 0);
+        }
+        else
+        {
+          source.setText("");
+        }
+      });
 		}
 		catch (Exception e)
 		{

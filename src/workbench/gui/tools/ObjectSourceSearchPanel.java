@@ -184,17 +184,13 @@ public class ObjectSourceSearchPanel
 	protected void searchEnded()
 	{
 		searchThread = null;
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				window.setTitle(ResourceMgr.getString("TxtWindowTitleObjectSearcher"));
-				String msg = ResourceMgr.getFormattedString("MsgGrepSourceFinished", searcher.getNumberOfObjectsSearched(), results.getRowCount());
-				statusbar.setText(msg);
-				checkButtons();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      window.setTitle(ResourceMgr.getString("TxtWindowTitleObjectSearcher"));
+      String msg = ResourceMgr.getFormattedString("MsgGrepSourceFinished", searcher.getNumberOfObjectsSearched(), results.getRowCount());
+      statusbar.setText(msg);
+      checkButtons();
+    });
 	}
 
 	protected void checkButtons()
@@ -238,17 +234,13 @@ public class ObjectSourceSearchPanel
 
 	protected void setModel(final DataStore data)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				DataStoreTableModel model = new DataStoreTableModel(data);
-				results.setModel(model, true);
-				results.adjustRowsAndColumns();
-				removeSourceColumn();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      DataStoreTableModel model = new DataStoreTableModel(data);
+      results.setModel(model, true);
+      results.adjustRowsAndColumns();
+      removeSourceColumn();
+    });
 	}
 
 	protected void cancelSearch()
@@ -336,16 +328,12 @@ public class ObjectSourceSearchPanel
 	{
 		WbSwingUtilities.showDefaultCursor(window);
 		objectSource.setDatabaseConnection(connection);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				statusbar.setText("");
-				checkButtons();
-				updateWindowTitle();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      statusbar.setText("");
+      checkButtons();
+      updateWindowTitle();
+    });
 	}
 
 	protected void updateWindowTitle()
@@ -479,14 +467,10 @@ public class ObjectSourceSearchPanel
 
 	public void showWindow(final MainWindow parent)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_showWindow(parent);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      _showWindow(parent);
+    });
 	}
 
 	public void _showWindow(MainWindow parent)
@@ -530,13 +514,9 @@ public class ObjectSourceSearchPanel
 
 		if (Settings.getInstance().getAutoConnectObjectSearcher() && profile != null)
 		{
-      EventQueue.invokeLater(new Runnable()
+      EventQueue.invokeLater(() ->
       {
-        @Override
-        public void run()
-        {
-          connect(profile);
-        }
+        connect(profile);
       });
 		}
 	}
@@ -602,14 +582,10 @@ public class ObjectSourceSearchPanel
 			}
 
       final int toSelect = firstSelected;
-      EventQueue.invokeLater(new Runnable()
+      EventQueue.invokeLater(() ->
       {
-        @Override
-        public void run()
-        {
-          elementList.setSelectedIndices(indexes);
-          elementList.ensureIndexIsVisible(toSelect);
-        }
+        elementList.setSelectedIndices(indexes);
+        elementList.ensureIndexIsVisible(toSelect);
       });
 		}
 
@@ -647,25 +623,22 @@ public class ObjectSourceSearchPanel
 		final CharSequence source = (CharSequence)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_SOURCE);
 		final String name = (String)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_OBJECT_NAME);
     final String type = (String)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_OBJECT_TYPE);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				objectSource.setText(source == null ? "" : source.toString(), name, type);
-				objectSource.setCaretPosition(0, false);
-				List<String> values = StringUtil.stringToList(searchValues.getText(), ",", true, true, false);
-				if (values.size() == 1)
-				{
-					String text = values.get(0);
-					int pos = objectSource.getEditor().findFirst(text, ignoreCase.isSelected(), false, regex.isSelected());
-					if (pos > -1)
-					{
-						objectSource.requestFocus();
-					}
-				}
-			}
-		});
+    
+		EventQueue.invokeLater(() ->
+    {
+      objectSource.setText(source == null ? "" : source.toString(), name, type);
+      objectSource.setCaretPosition(0, false);
+      List<String> values = StringUtil.stringToList(searchValues.getText(), ",", true, true, false);
+      if (values.size() == 1)
+      {
+        String text = values.get(0);
+        int pos = objectSource.getEditor().findFirst(text, ignoreCase.isSelected(), false, regex.isSelected());
+        if (pos > -1)
+        {
+          objectSource.requestFocus();
+        }
+      }
+    });
 	}
 
 	public void showWbCommand()

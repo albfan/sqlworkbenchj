@@ -42,7 +42,9 @@ import javax.swing.event.MenuListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import workbench.interfaces.ResultReceiver;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
@@ -57,8 +59,6 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.EditorTabSelectMenu;
-import workbench.interfaces.ResultReceiver;
-import workbench.resource.GuiSettings;
 
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
@@ -390,31 +390,27 @@ public class ReferenceTableNavigator
 
 	private void addMenuItems(final WbMenu menu, final List<JMenuItem> items)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				synchronized (menu)
-				{
-					menu.removeAll();
-					for (JMenuItem item : items)
-					{
-						menu.add(item);
-					}
-					JPopupMenu pop = menu.getPopupMenu();
-					if (pop.isVisible())
-					{
-						pop.invalidate();
-						// The popup menu is not repainted correctly
-						// if not made invisible. Neither doLayout() or updateUI()
-						// adjust the height and width of the popup menu correctly
-						pop.setVisible(false);
-						pop.setVisible(true);
-					}
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      synchronized (menu)
+      {
+        menu.removeAll();
+        for (JMenuItem item : items)
+        {
+          menu.add(item);
+        }
+        JPopupMenu pop = menu.getPopupMenu();
+        if (pop.isVisible())
+        {
+          pop.invalidate();
+          // The popup menu is not repainted correctly
+          // if not made invisible. Neither doLayout() or updateUI()
+          // adjust the height and width of the popup menu correctly
+          pop.setVisible(false);
+          pop.setVisible(true);
+        }
+      }
+    });
 	}
 
 	private List<List<ColumnData>> getColumnData(DependencyNode node)

@@ -239,21 +239,17 @@ public class ListValuePicker
 	@Override
 	public void keyTyped(final KeyEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
-				{
-					resetFilter();
-				}
-				else
-				{
-					applyFilter();
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
+      {
+        resetFilter();
+      }
+      else
+      {
+        applyFilter();
+      }
+    });
 	}
 
 	@Override

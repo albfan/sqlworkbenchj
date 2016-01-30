@@ -134,16 +134,12 @@ public class TriggerListPanel
 	{
 		if (initialized) return;
 
-		Reloadable sourceReload = new Reloadable()
-		{
-			@Override
-			public void reload()
-			{
-				if (dbConnection == null) return;
-				if (dbConnection.isBusy()) return;
-        retrieveCurrentTrigger();
-			}
-		};
+		Reloadable sourceReload = () ->
+    {
+      if (dbConnection == null) return;
+      if (dbConnection.isBusy()) return;
+      retrieveCurrentTrigger();
+    };
 
 		this.source = new DbObjectSourcePanel(parentWindow, sourceReload);
     if (DbExplorerSettings.allowSourceEditing())
@@ -254,15 +250,11 @@ public class TriggerListPanel
 	{
 		if (!initialized) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				triggerList.reset();
-				source.reset();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      triggerList.reset();
+      source.reset();
+    });
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -318,15 +310,11 @@ public class TriggerListPanel
 			DataStore ds = reader.getTriggers(currentCatalog, currentSchema);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					infoLabel.showObjectListInfo(model);
-					triggerList.setModel(model, true);
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        infoLabel.showObjectListInfo(model);
+        triggerList.setModel(model, true);
+      });
 			shouldRetrieve = false;
 		}
 		catch (OutOfMemoryError mem)
@@ -510,14 +498,10 @@ public class TriggerListPanel
           }
         }
 
-        final String sourceSql = sql;
-        WbSwingUtilities.invoke(new Runnable()
+        final String sourceSql = sql == null ? "" : sql;
+        WbSwingUtilities.invoke(() ->
         {
-          @Override
-          public void run()
-          {
-            source.setText(sourceSql == null ? "" : sourceSql, triggerName, TRG_TYPE_NAME);
-          }
+          source.setText(sourceSql, triggerName, TRG_TYPE_NAME);
         });
 
 			}
@@ -536,18 +520,14 @@ public class TriggerListPanel
 
 		if (this.triggerList.getSelectedRowCount() == 1)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					source.setCaretPosition(0, false);
-					if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
-					{
-						source.requestFocusInWindow();
-					}
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        source.setCaretPosition(0, false);
+        if (DbExplorerSettings.getSelectSourcePanelAfterRetrieve())
+        {
+          source.requestFocusInWindow();
+        }
+      });
 		}
 	}
 

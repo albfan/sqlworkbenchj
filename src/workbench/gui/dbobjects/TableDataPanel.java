@@ -423,17 +423,13 @@ public class TableDataPanel
 
     refreshMgr.clear();
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				dataDisplay.clearContent();
-				if (rowCountLabel != null) rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
-				clearLoadingImage();
-				reloadAction.setEnabled(true);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      dataDisplay.clearContent();
+      if (rowCountLabel != null) rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
+      clearLoadingImage();
+      reloadAction.setEnabled(true);
+    });
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -505,17 +501,13 @@ public class TableDataPanel
 		if (this.isRetrieving()) return -1;
 		initGui();
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				rowCountLabel.setText("");
-				rowCountLabel.setIcon(getLoadingIndicator());
-				reloadAction.setEnabled(false);
-				dataDisplay.setStatusMessage(ResourceMgr.getFormattedString("MsgCalculatingTableRows", table.getTableName()));
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      rowCountLabel.setText("");
+      rowCountLabel.setIcon(getLoadingIndicator());
+      reloadAction.setEnabled(false);
+      dataDisplay.setStatusMessage(ResourceMgr.getFormattedString("MsgCalculatingTableRows", table.getTableName()));
+    });
 
 		String sql = this.buildSqlForRowCount();
 		if (sql == null) return -1;
@@ -563,17 +555,13 @@ public class TableDataPanel
 			SqlUtil.closeAll(rs, rowCountRetrieveStmt);
 			this.rowCountCancel = false;
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					dataDisplay.setStatusMessage("");
-					clearLoadingImage();
-					reloadAction.setEnabled(true);
-					rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        dataDisplay.setStatusMessage("");
+        clearLoadingImage();
+        reloadAction.setEnabled(true);
+        rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
+      });
 
 			if (error)
 			{
@@ -637,23 +625,19 @@ public class TableDataPanel
 		this.tableDefinition = null;
 		this.lastSort = null;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				dataDisplay.getTable().clearLastFilter(true);
-				dataDisplay.getTable().resetFilter();
-				if (DbExplorerSettings.getDbExplorerTableDetailFullyQualified())
-				{
-					tableNameLabel.setText(table.getFullyQualifiedName(dbConnection));
-				}
-				else
-				{
-					tableNameLabel.setText(table.getTableExpression(dbConnection));
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      dataDisplay.getTable().clearLastFilter(true);
+      dataDisplay.getTable().resetFilter();
+      if (DbExplorerSettings.getDbExplorerTableDetailFullyQualified())
+      {
+        tableNameLabel.setText(table.getFullyQualifiedName(dbConnection));
+      }
+      else
+      {
+        tableNameLabel.setText(table.getTableExpression(dbConnection));
+      }
+    });
 	}
 
 	private String buildSqlForRowCount()
@@ -854,14 +838,10 @@ public class TableDataPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
+      });
 
 			setSavepoint();
 
@@ -882,27 +862,23 @@ public class TableDataPanel
 				// By directly setting the update table, we avoid
 				// another round-trip to the database to check the table from the
 				// passed SQL statement.
-				WbSwingUtilities.invoke(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						dataDisplay.defineUpdateTable(tableDefinition);
-						dataDisplay.getSelectKeysAction().setEnabled(true);
-						String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
-						dataDisplay.setPrintHeader(header);
-						dataDisplay.showLastExecutionDuration();
+				WbSwingUtilities.invoke(() ->
+        {
+          dataDisplay.defineUpdateTable(tableDefinition);
+          dataDisplay.getSelectKeysAction().setEnabled(true);
+          String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
+          dataDisplay.setPrintHeader(header);
+          dataDisplay.showLastExecutionDuration();
 
-						if (lastSort != null)
-						{
-							dataDisplay.setSortDefinition(lastSort);
-						}
+          if (lastSort != null)
+          {
+            dataDisplay.setSortDefinition(lastSort);
+          }
 
-						ColumnOrderMgr.getInstance().restoreColumnOrder(dataDisplay.getTable());
-						dataDisplay.checkLimitReachedDisplay();
-						dataDisplay.showGeneratingSQLAsTooltip();
-					}
-				});
+          ColumnOrderMgr.getInstance().restoreColumnOrder(dataDisplay.getTable());
+          dataDisplay.checkLimitReachedDisplay();
+          dataDisplay.showGeneratingSQLAsTooltip();
+        });
 			}
 		}
 		catch (LowMemoryException mem)
@@ -932,16 +908,13 @@ public class TableDataPanel
 		{
 			WbSwingUtilities.showDefaultCursor(this);
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					dataDisplay.clearStatusMessage();
-					cancelRetrieve.setEnabled(false);
-					reloadAction.setEnabled(true);
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        dataDisplay.clearStatusMessage();
+        cancelRetrieve.setEnabled(false);
+        reloadAction.setEnabled(true);
+      });
+      
 			this.retrieveEnd();
 			if (error)
 			{

@@ -199,15 +199,11 @@ public class ConnectionEditorPanel
 
 	public void setFocusToTitle()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				tfProfileName.requestFocusInWindow();
-				tfProfileName.selectAll();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      tfProfileName.requestFocusInWindow();
+      tfProfileName.selectAll();
+    });
 	}
 
 	private void initEditorList()
@@ -1128,17 +1124,13 @@ public class ConnectionEditorPanel
 				final Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this).getParent());
 				final DbDriver toSelect = newDriver;
 
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						if (WbSwingUtilities.getYesNo(ConnectionEditorPanel.this, ResourceMgr.getString("MsgDriverLibraryNotReadable")))
-						{
-							DriverEditorDialog.showDriverDialog(parent, toSelect);
-						}
-					}
-				});
+				EventQueue.invokeLater(() ->
+        {
+          if (WbSwingUtilities.getYesNo(ConnectionEditorPanel.this, ResourceMgr.getString("MsgDriverLibraryNotReadable")))
+          {
+            DriverEditorDialog.showDriverDialog(parent, toSelect);
+          }
+        });
 			}
 		}
 	}//GEN-LAST:event_cbDriversItemStateChanged
@@ -1236,15 +1228,7 @@ public class ConnectionEditorPanel
 			Object currentDriver = this.cbDrivers.getSelectedItem();
 			try
 			{
-        // The default DbDriver.compareTo()
-				Comparator<DbDriver> comparator = new Comparator<DbDriver>()
-				{
-					@Override
-					public int compare(DbDriver o1, DbDriver o2)
-					{
-						return StringUtil.compareStrings(o1.getName(), o2.getName(), true);
-					}
-				};
+				Comparator<DbDriver> comparator = (DbDriver o1, DbDriver o2) -> StringUtil.compareStrings(o1.getName(), o2.getName(), true);
 
 				Collections.sort(aDriverList, comparator);
 				this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
@@ -1266,15 +1250,11 @@ public class ConnectionEditorPanel
 
 	public void editExtendedProperties()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				ConnectionPropertiesEditor.editProperties(SwingUtilities.getWindowAncestor(ConnectionEditorPanel.this), currentProfile);
-				checkExtendedProps();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      ConnectionPropertiesEditor.editProperties(SwingUtilities.getWindowAncestor(ConnectionEditorPanel.this), currentProfile);
+      checkExtendedProps();
+    });
 	}
 
 	public void selectMacroFile()

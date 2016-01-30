@@ -42,19 +42,22 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import workbench.interfaces.ValueProvider;
-import workbench.db.ColumnIdentifier;
-import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbTraversalPolicy;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.ColumnIdentifier;
+
 import workbench.gui.components.FlatButton;
+import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbTraversalPolicy;
+
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ComparatorFactory;
 import workbench.storage.filter.DataRowExpression;
 import workbench.storage.filter.ExpressionValue;
+
 import workbench.util.ValueConverter;
 
 /**
@@ -86,7 +89,7 @@ public class ColumnExpressionPanel
 		activeItems = new ListComboBoxModel();
 
 		List<ColumnComparator> comps = factory.getAvailableComparators();
-		comparatorItems = new ArrayList<ComparatorListItem>(comps.size());
+		comparatorItems = new ArrayList<>(comps.size());
 		for (ColumnComparator comp : comps)
 		{
 			comparatorItems.add(new ComparatorListItem(comp));
@@ -101,7 +104,7 @@ public class ColumnExpressionPanel
 
 		columnSelector = new JComboBox();
 		int count = info.getColumnCount();
-		ArrayList<String> l = new ArrayList<String>(count);
+		ArrayList<String> l = new ArrayList<>(count);
 		l.add("*");
 		for (int i=0; i < count; i++)
 		{
@@ -174,14 +177,10 @@ public class ColumnExpressionPanel
 		final int index = findColumnInDropDown(col);
 		if (index > -1)
 		{
-			SwingUtilities.invokeLater(new Runnable() {
-
-				@Override
-				public void run()
-				{
-					columnSelector.setSelectedIndex(index);
-				}
-			});
+			SwingUtilities.invokeLater(() ->
+      {
+        columnSelector.setSelectedIndex(index);
+      });
 		}
 	}
 
@@ -405,7 +404,7 @@ public class ColumnExpressionPanel
 		{
 			int count = comparatorItems.size();
 			int added = 0;
-			final ArrayList<ComparatorListItem> l = new ArrayList<ComparatorListItem>(count);
+			final ArrayList<ComparatorListItem> l = new ArrayList<>(count);
 			for (int i=0; i < count; i++)
 			{
 				ComparatorListItem item = comparatorItems.get(i);

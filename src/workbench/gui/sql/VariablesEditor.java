@@ -126,14 +126,10 @@ public class VariablesEditor
 		}
 		else if (editedRow >= 0)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					startEditRow(editedRow + 1);
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        startEditRow(editedRow + 1);
+      });
 		}
 	}
 

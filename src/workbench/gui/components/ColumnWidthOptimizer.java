@@ -228,14 +228,21 @@ public class ColumnWidthOptimizer
 			hfm = c.getFontMetrics(headerFont);
 		}
 		Insets ins = c.getInsets();
-		int headerWidth = hfm.stringWidth(colName) + getAdditionalHeaderSpace() + ins.left + ins.right;
+
+    int addHeaderSpace = getAdditionalHeaderSpace() + ins.left + ins.right;
+
+		int headerWidth = hfm.stringWidth(colName) + addHeaderSpace;
+
     if (table.getShowDataTypeInHeader() && table.getDataStoreTableModel() != null)
     {
       String typeName = table.getDataStoreTableModel().getDbmsType(col);
-      int typeWidth = hfm.stringWidth(typeName) + getAdditionalHeaderSpace() + ins.left + ins.right;
-      if (typeWidth > headerWidth)
+      if (typeName != null)
       {
-        headerWidth = typeWidth;
+        int typeWidth = hfm.stringWidth(typeName) + addHeaderSpace;
+        if (typeWidth > headerWidth)
+        {
+          headerWidth = typeWidth;
+        }
       }
     }
 

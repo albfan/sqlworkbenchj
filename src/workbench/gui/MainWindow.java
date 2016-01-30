@@ -321,17 +321,13 @@ public class MainWindow
 	protected final void updateTabPolicy()
 	{
 		final JComponent content = (JComponent)this.getContentPane();
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				int tabPolicy = Settings.getInstance().getIntProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.WRAP_TAB_LAYOUT);
-				sqlTab.setTabLayoutPolicy(tabPolicy);
-				sqlTab.invalidate();
-				content.revalidate();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      int tabPolicy = Settings.getInstance().getIntProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.WRAP_TAB_LAYOUT);
+      sqlTab.setTabLayoutPolicy(tabPolicy);
+      sqlTab.invalidate();
+      content.revalidate();
+    });
 		WbSwingUtilities.repaintLater(this);
 	}
 
@@ -1830,80 +1826,76 @@ public class MainWindow
 		this.currentWorkspaceFile = null;
 		this.resultForWorkspaceClose = false;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				WbWorkspace w = null;
-				try
-				{
-					removeAllPanels(false);
+		WbSwingUtilities.invoke(() ->
+    {
+      WbWorkspace w = null;
+      try
+      {
+        removeAllPanels(false);
 
-					// Ignore all stateChanged() events from the SQL Tab during loading
-					setIgnoreTabChange(true);
+        // Ignore all stateChanged() events from the SQL Tab during loading
+        setIgnoreTabChange(true);
 
-					w = new WbWorkspace(realFilename, false);
-					final int entryCount = w.getEntryCount();
+        w = new WbWorkspace(realFilename, false);
+        final int entryCount = w.getEntryCount();
 
-					for (int i = 0; i < entryCount; i++)
-					{
-						if (w.getPanelType(i) == PanelType.dbExplorer)
-						{
-							newDbExplorerPanel(false);
-						}
-						else
-						{
-							addTabAtIndex(false, false, false, -1);
-						}
-						MainPanel p = getSqlPanel(i);
-            ((JComponent)p).validate();
-						p.readFromWorkspace(w, i);
-					}
+        for (int i = 0; i < entryCount; i++)
+        {
+          if (w.getPanelType(i) == PanelType.dbExplorer)
+          {
+            newDbExplorerPanel(false);
+          }
+          else
+          {
+            addTabAtIndex(false, false, false, -1);
+          }
+          MainPanel p = getSqlPanel(i);
+          ((JComponent)p).validate();
+          p.readFromWorkspace(w, i);
+        }
 
-					if (entryCount == 0)
-					{
-						LogMgr.logWarning("MainWindow.loadWorkspace()", "No panels stored in the workspace: " + realFilename);
-						addTabAtIndex(false, false, false, -1);
-					}
+        if (entryCount == 0)
+        {
+          LogMgr.logWarning("MainWindow.loadWorkspace()", "No panels stored in the workspace: " + realFilename);
+          addTabAtIndex(false, false, false, -1);
+        }
 
-					currentWorkspaceFile = realFilename;
-					resultForWorkspaceClose = true;
+        currentWorkspaceFile = realFilename;
+        resultForWorkspaceClose = true;
 
-					renumberTabs();
-					updateWindowTitle();
-					checkWorkspaceActions();
-					updateAddMacroAction();
-					toolProperties.clear();
-					toolProperties.putAll(w.getToolProperties());
+        renumberTabs();
+        updateWindowTitle();
+        checkWorkspaceActions();
+        updateAddMacroAction();
+        toolProperties.clear();
+        toolProperties.putAll(w.getToolProperties());
 
-					setIgnoreTabChange(false);
+        setIgnoreTabChange(false);
 
-					int newIndex = entryCount > 0 ? w.getSelectedTab() : 0;
-					if (newIndex < sqlTab.getTabCount())
-					{
-						sqlTab.setSelectedIndex(newIndex);
-					}
+        int newIndex = entryCount > 0 ? w.getSelectedTab() : 0;
+        if (newIndex < sqlTab.getTabCount())
+        {
+          sqlTab.setSelectedIndex(newIndex);
+        }
 
-					MainPanel p = getCurrentPanel();
-					checkConnectionForPanel(p);
-					setMacroMenuEnabled(true);
-				}
-				catch (Throwable e)
-				{
-					LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + realFilename, e);
-					handleWorkspaceLoadError(e, realFilename);
-					resultForWorkspaceClose = false;
-				}
-				finally
-				{
-					checkReloadWkspAction();
-					setIgnoreTabChange(false);
-					FileUtil.closeQuietely(w);
-					updateGuiForTab(sqlTab.getSelectedIndex());
-				}
-			}
-		});
+        MainPanel p = getCurrentPanel();
+        checkConnectionForPanel(p);
+        setMacroMenuEnabled(true);
+      }
+      catch (Throwable e)
+      {
+        LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + realFilename, e);
+        handleWorkspaceLoadError(e, realFilename);
+        resultForWorkspaceClose = false;
+      }
+      finally
+      {
+        checkReloadWkspAction();
+        setIgnoreTabChange(false);
+        FileUtil.closeQuietely(w);
+        updateGuiForTab(sqlTab.getSelectedIndex());
+      }
+    });
 
 		if (updateRecent)
 		{
@@ -1915,14 +1907,10 @@ public class MainWindow
 
     if (shouldShowTree && getCurrentSqlPanel() != null)
     {
-      EventQueue.invokeLater(new Runnable()
+      EventQueue.invokeLater(() ->
       {
-        @Override
-        public void run()
-        {
-          showDbTree(false);
-          shouldShowTree = false;
-        }
+        showDbTree(false);
+        shouldShowTree = false;
       });
     }
 
@@ -2113,23 +2101,19 @@ public class MainWindow
 		if (saveWorkspace) saveWorkspace(false);
 		if (background) showDisconnectInfo();
 
-		Runnable run = new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					doDisconnect();
-					if (closeWorkspace) closeWorkspace(background);
-				}
-				finally
-				{
-					clearConnectIsInProgress();
-					if (background) closeConnectingInfo();
-				}
-			}
-		};
+		Runnable run = () ->
+    {
+      try
+      {
+        doDisconnect();
+        if (closeWorkspace) closeWorkspace(background);
+      }
+      finally
+      {
+        clearConnectIsInProgress();
+        if (background) closeConnectingInfo();
+      }
+    };
 
 		if (background)
 		{

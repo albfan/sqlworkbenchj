@@ -42,6 +42,7 @@ import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DependencyNode;
@@ -59,7 +60,6 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.renderer.RendererSetup;
-import workbench.resource.IconMgr;
 
 import workbench.storage.DataStore;
 
@@ -253,16 +253,12 @@ public class FkDisplayPanel
 
 			final DataStoreTableModel model = new DataStoreTableModel(getFKDataStore(table));
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					keys.setModel(model, true);
-					keys.adjustRowsAndColumns();
-					dependencyTree.reset();
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        keys.setModel(model, true);
+        keys.adjustRowsAndColumns();
+        dependencyTree.reset();
+      });
 
 			if (DbExplorerSettings.getAutoRetrieveFKTree())
 			{

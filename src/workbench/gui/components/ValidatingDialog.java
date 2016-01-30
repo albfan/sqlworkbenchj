@@ -321,21 +321,17 @@ public class ValidatingDialog
 	@Override
 	public void windowOpened(WindowEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (validator != null)
-				{
-					validator.componentDisplayed();
-				}
-				else
-				{
-					editorComponent.requestFocus();
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (validator != null)
+      {
+        validator.componentDisplayed();
+      }
+      else
+      {
+        editorComponent.requestFocus();
+      }
+    });
 	}
 
 	public void approveAndClose()

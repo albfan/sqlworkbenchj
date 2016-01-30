@@ -293,15 +293,10 @@ public class DwStatusBar
 
 	private void setExecTimeText(final String text)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-				@Override
-				public void run()
-				{
-					execTime.setText(text);
-				}
-			}
-		);
+		EventQueue.invokeLater(() ->
+    {
+      execTime.setText(text);
+    });
 	}
 
 	public void setRowcount(int start, int end, int count)
@@ -323,16 +318,11 @@ public class DwStatusBar
 
 	private void setRowcountText(final String text)
 	{
-		EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					tfRowCount.setText(text);
-					validate();
-				}
-			}
-		);
+		EventQueue.invokeLater(() ->
+    {
+      tfRowCount.setText(text);
+      validate();
+    });
 	}
 
 	public void clearRowcount()

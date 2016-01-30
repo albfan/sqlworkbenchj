@@ -184,31 +184,27 @@ public class TagSearchPopup
       Rectangle r = inputField.modelToView(inputField.getCaretPosition());
       p.x += r.x;
 
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if (window != null)
-					{
-						window.setLocation(p);
-						window.pack();
-            Dimension size = window.getSize();
-            int width = elementList.getWidth() * 3;
-            if (width > size.width)
-            {
-              size.width = width;
-              window.setSize(size);
-            }
-						window.setVisible(true);
-            searchField.requestFocusInWindow();
-            if (index > -1)
-            {
-              elementList.setSelectedIndex(index);
-            }
-					}
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        if (window != null)
+        {
+          window.setLocation(p);
+          window.pack();
+          Dimension size = window.getSize();
+          int width = elementList.getWidth() * 3;
+          if (width > size.width)
+          {
+            size.width = width;
+            window.setSize(size);
+          }
+          window.setVisible(true);
+          searchField.requestFocusInWindow();
+          if (index > -1)
+          {
+            elementList.setSelectedIndex(index);
+          }
+        }
+      });
 		}
 		catch (Exception e)
 		{

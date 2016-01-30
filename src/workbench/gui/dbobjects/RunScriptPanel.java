@@ -210,13 +210,9 @@ public class RunScriptPanel
 	public void openWindow(final Frame owner, final String title, final String highlight)
   {
     textToHighlight = highlight;
-    WbSwingUtilities.invoke(new Runnable()
+    WbSwingUtilities.invoke(() ->
     {
-      @Override
-      public void run()
-      {
-        showDialog(owner, title);
-      }
+      showDialog(owner, title);
     });
   }
 

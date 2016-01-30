@@ -58,7 +58,6 @@ import workbench.gui.components.WbCheckBox;
 import workbench.gui.components.WbLabelField;
 import workbench.gui.editor.MacroExpander;
 import workbench.gui.sql.SqlPanel;
-import workbench.log.LogMgr;
 
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
@@ -351,15 +350,7 @@ public class MacroManagerDialog
 		// It seems that the macro editor is not repainted
 		// correctly if we load the macro text while
 		// it's not visible
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				macroPanel.restoreSettings();
-			}
-		});
-    LogMgr.logDebug("MacroManagerDialog.windowOpened()", "MacroManagerDialog displayed.");
+		EventQueue.invokeLater(macroPanel::restoreSettings);
 	}
 
 	@Override

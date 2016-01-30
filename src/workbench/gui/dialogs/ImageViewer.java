@@ -33,15 +33,18 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.sql.Blob;
+
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.EscAction;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.EscAction;
 
 /**
  * A dialog to display a {@link ImagePanel}
@@ -114,37 +117,45 @@ public class ImageViewer
 		}
 	}
 
+  @Override
 	public void actionPerformed(ActionEvent e)
 	{
 		this.setVisible(false);
 		this.dispose();
 	}
 
+  @Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
+  @Override
 	public void windowClosing(WindowEvent e)
 	{
 	}
 
+  @Override
 	public void windowClosed(WindowEvent e)
 	{
 		Settings.getInstance().storeWindowSize(this, settingsId);
 	}
 
+  @Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+  @Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+  @Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+  @Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}

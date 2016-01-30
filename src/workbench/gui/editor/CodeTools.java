@@ -24,7 +24,9 @@
 package workbench.gui.editor;
 
 import java.awt.EventQueue;
+
 import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -132,14 +134,10 @@ public class CodeTools
 		}
 		newText.append(')');
 		newText.append(nl);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				editor.setSelectedText(newText.toString());
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      editor.setSelectedText(newText.toString());
+    });
 	}
 
 }

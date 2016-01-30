@@ -25,8 +25,10 @@ package workbench.gui.dbobjects;
 
 import java.util.HashSet;
 import java.util.Set;
-import workbench.gui.components.WbSplitPane;
+
 import workbench.interfaces.Resettable;
+
+import workbench.gui.components.WbSplitPane;
 
 /**
  * @author Thomas Kellerer
@@ -47,6 +49,7 @@ public class ResettableSplitPane
 		clients.add(r);
 	}
 
+  @Override
 	public void reset()
 	{
 		for (Resettable r : clients)
@@ -54,6 +57,5 @@ public class ResettableSplitPane
 			r.reset();
 		}
 	}
-
 
 }

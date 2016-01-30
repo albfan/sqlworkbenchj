@@ -35,13 +35,13 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
+import workbench.log.LogMgr;
 import workbench.resource.ErrorPromptType;
 import workbench.resource.GuiSettings;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.components.WbOptionPane;
-import workbench.log.LogMgr;
-import workbench.resource.IconMgr;
 
 import workbench.sql.ErrorDescriptor;
 
@@ -64,13 +64,9 @@ public class ErrorContinueDialog
 
   public int askContinue(final Component caller)
   {
-    WbSwingUtilities.invoke(new Runnable()
+    WbSwingUtilities.invoke(() ->
     {
-      @Override
-      public void run()
-      {
-        dialogChoice = showDialog(caller);
-      }
+      dialogChoice = showDialog(caller);
     });
 
     return dialogChoice;

@@ -178,7 +178,7 @@ public class SortHeaderRenderer
               text = "<u>" + text + "</u>";
             }
 
-            if (showDatatype)
+            if (showDatatype && type != null)
             {
               text += "<br>" + type;
             }

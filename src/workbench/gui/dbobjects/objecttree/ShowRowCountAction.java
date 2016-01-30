@@ -127,7 +127,7 @@ public class ShowRowCountAction
 
         String sql = builder.getSelectForCount(table);
 
-        rs = JdbcUtils.runStatement(conn, currentStatement, sql, true, useSavepoint);
+        rs = JdbcUtils.runStatement(conn, currentStatement, sql, useSavepoint);
 
         if (rs != null && rs.next())
         {
@@ -146,6 +146,10 @@ public class ShowRowCountAction
     finally
     {
       SqlUtil.closeAll(rs, currentStatement);
+      if (conn.selectStartsTransaction())
+      {
+        conn.rollbackSilently();
+      }
       currentStatement = null;
       conn.setBusy(false);
       if (statusBar != null)
@@ -154,7 +158,6 @@ public class ShowRowCountAction
       }
       WbSwingUtilities.showDefaultCursor(source.getComponent());
     }
-
   }
 
   @Override

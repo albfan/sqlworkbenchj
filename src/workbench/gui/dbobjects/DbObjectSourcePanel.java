@@ -353,33 +353,25 @@ public class DbObjectSourcePanel
 			sourceEditor.disableSqlHighlight();
 		}
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-        hideErrorLog();
-				sourceEditor.setText(text == null ? "" : text);
-        sourceEditor.clearUndoBuffer();
-				sourceEditor.invalidate();
-				sourceEditor.doLayout();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      hideErrorLog();
+      sourceEditor.setText(text == null ? "" : text);
+      sourceEditor.clearUndoBuffer();
+      sourceEditor.invalidate();
+      sourceEditor.doLayout();
+    });
 
 	}
 
   public void appendText(final String text)
   {
     if (StringUtil.isEmptyString(text)) return;
-    WbSwingUtilities.invoke(new Runnable()
+    WbSwingUtilities.invoke(() ->
     {
-      @Override
-      public void run()
-      {
-        sourceEditor.appendLine(text);
-        sourceEditor.invalidate();
-        sourceEditor.doLayout();
-      }
+      sourceEditor.appendLine(text);
+      sourceEditor.invalidate();
+      sourceEditor.doLayout();
     });
   }
 
@@ -557,13 +549,9 @@ public class DbObjectSourcePanel
     {
       if (StringUtil.isBlank(errorLog.getText()) && StringUtil.isBlank(msg)) return;
 
-      WbSwingUtilities.invoke(new Runnable()
+      WbSwingUtilities.invoke(() ->
       {
-        @Override
-        public void run()
-        {
-          errorLog.append(msg);
-        }
+        errorLog.append(msg);
       });
     }
   }
@@ -573,13 +561,9 @@ public class DbObjectSourcePanel
   {
     if (errorLog != null)
     {
-      WbSwingUtilities.invoke(new Runnable()
+      WbSwingUtilities.invoke(() ->
       {
-        @Override
-        public void run()
-        {
-          errorLog.setText(msg);
-        }
+        errorLog.setText(msg);
       });
     }
   }

@@ -25,6 +25,7 @@ package workbench.gui.filter;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 
@@ -37,12 +38,12 @@ public class ListComboBoxModel
 	extends AbstractListModel
 	implements ComboBoxModel
 {
-	private List<? extends Object> data = new ArrayList<Object>();
+	private List<? extends Object> data = new ArrayList<>();
 	private Object selectedItem;
 
 	public ListComboBoxModel()
 	{
-		this(new ArrayList<Object>());
+		this(new ArrayList<>());
 	}
 
 	public ListComboBoxModel(List<? extends Object> l)

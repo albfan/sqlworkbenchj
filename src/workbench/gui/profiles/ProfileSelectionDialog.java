@@ -193,22 +193,18 @@ public class ProfileSelectionDialog
 				}
 			});
 
-		WbSwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				versionInfo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				versionInfo.setIcon(IconMgr.getInstance().getLabelIcon(event.getIconKey()));
-				versionInfo.setText("<html><b>" + event.getMessage() + "</b></html>");
-				String tip = event.getTooltip();
-				if (StringUtil.isNonEmpty(tip))
-				{
-					versionInfo.setToolTipText(tip);
-				}
-				versionInfo.getParent().doLayout();
-			}
-		});
+		WbSwingUtilities.invokeLater(() ->
+    {
+      versionInfo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      versionInfo.setIcon(IconMgr.getInstance().getLabelIcon(event.getIconKey()));
+      versionInfo.setText("<html><b>" + event.getMessage() + "</b></html>");
+      String tip = event.getTooltip();
+      if (StringUtil.isNonEmpty(tip))
+      {
+        versionInfo.setToolTipText(tip);
+      }
+      versionInfo.getParent().doLayout();
+    });
 	}
 
 	@Override
@@ -216,17 +212,13 @@ public class ProfileSelectionDialog
 	{
 		if (versionInfo == null) return;
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				versionInfo.setCursor(null);
-				versionInfo.setIcon(null);
-				versionInfo.setText("");
-				versionInfo.getParent().doLayout();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      versionInfo.setCursor(null);
+      versionInfo.setIcon(null);
+      versionInfo.setText("");
+      versionInfo.getParent().doLayout();
+    });
 	}
 
 	private void closeDialog()

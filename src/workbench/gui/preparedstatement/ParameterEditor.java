@@ -153,45 +153,33 @@ public class ParameterEditor
 
 	private static boolean dialogResult = false;
 
-	public static final StatementParameterPrompter GUI_PROMPTER = new StatementParameterPrompter()
-			{
-				@Override
-				public boolean showParameterDialog(StatementParameters parms, boolean showNames)
-				{
-					return ParameterEditor.showParameterDialog(parms, showNames);
-				}
-			};
+	public static final StatementParameterPrompter GUI_PROMPTER = ParameterEditor::showParameterDialog;
 
 	public static synchronized boolean showParameterDialog(final StatementParameters parms, final boolean showNames)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				ParameterEditor editor = new ParameterEditor(parms, showNames);
-				Dimension d = new Dimension(300,250);
-				editor.setMinimumSize(d);
-				editor.setPreferredSize(d);
-
-				dialogResult = false;
-				Frame parent = WbManager.getInstance().getCurrentWindow();
-				boolean ok = ValidatingDialog.showConfirmDialog(parent, editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
-				if (ok)
-				{
-					try
-					{
-						editor.applyValues();
-						dialogResult = true;
-					}
-					catch (Exception e)
-					{
-						LogMgr.logError("VariablesEditor.showVariablesDialog()", "Error when saving values", e);
-						dialogResult = false;
-					}
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      ParameterEditor editor = new ParameterEditor(parms, showNames);
+      Dimension d = new Dimension(300,250);
+      editor.setMinimumSize(d);
+      editor.setPreferredSize(d);
+      dialogResult = false;
+      Frame parent1 = WbManager.getInstance().getCurrentWindow();
+      boolean ok = ValidatingDialog.showConfirmDialog(parent1, editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
+      if (ok)
+      {
+        try
+        {
+          editor.applyValues();
+          dialogResult = true;
+        }
+        catch (Exception e)
+        {
+          LogMgr.logError("VariablesEditor.showVariablesDialog()", "Error when saving values", e);
+          dialogResult = false;
+        }
+      }
+    });
 		return dialogResult;
 	}
 

@@ -39,6 +39,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
 import workbench.interfaces.Reloadable;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DbMetadata;
@@ -48,14 +49,13 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 import workbench.db.dependency.DependencyReaderFactory;
-import workbench.gui.WbSwingUtilities;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
-import workbench.resource.IconMgr;
 
 import workbench.storage.DataStore;
 
@@ -191,14 +191,7 @@ public class ObjectDependencyPanel
 
     if (!WbSwingUtilities.isConnectionIdle(this, dbConnection)) return;
 
-    WbThread loader = new WbThread(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        doLoad();
-      }
-    }, "DependencyLoader Thread");
+    WbThread loader = new WbThread(this::doLoad, "DependencyLoader Thread");
     loader.start();
   }
 
@@ -214,25 +207,17 @@ public class ObjectDependencyPanel
       WbSwingUtilities.showWaitCursor(this);
       final List<DbObject> using = reader.getUsedObjects(dbConnection, currentObject);
 
-      EventQueue.invokeLater(new Runnable()
+      EventQueue.invokeLater(() ->
       {
-        @Override
-        public void run()
-        {
-          showResult(using, objectsUsed);
-        }
+        showResult(using, objectsUsed);
       });
 
       final List<DbObject> used = reader.getUsedBy(dbConnection, currentObject);
 
-      EventQueue.invokeLater(new Runnable()
+      EventQueue.invokeLater(() ->
       {
-        @Override
-        public void run()
-        {
-          showResult(used, usedByObjects);
-          invalidate();
-        }
+        showResult(used, usedByObjects);
+        invalidate();
       });
 
       EventQueue.invokeLater(this::calculateSplit);

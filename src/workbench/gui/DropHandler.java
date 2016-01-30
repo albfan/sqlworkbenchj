@@ -127,22 +127,18 @@ class DropHandler
 
 	private void openFiles(final List fileList)
 	{
-		WbSwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				int count = fileList.size();
+		WbSwingUtilities.invokeLater(() ->
+    {
+      int count = fileList.size();
 
-				for (int i=0; i < count; i++)
-				{
-					File file = (File)fileList.get(i);
-					boolean doSelect = (i == count - 1);
-					SqlPanel newTab = (SqlPanel)client.addTab(doSelect, doSelect, true, true);
-					newTab.readFile(file.getAbsolutePath(), null);
-				}
-			}
-		});
+      for (int i=0; i < count; i++)
+      {
+        File file = (File)fileList.get(i);
+        boolean doSelect = (i == count - 1);
+        SqlPanel newTab = (SqlPanel)client.addTab(doSelect, doSelect, true, true);
+        newTab.readFile(file.getAbsolutePath(), null);
+      }
+    });
 	}
 
 }

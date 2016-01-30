@@ -127,14 +127,7 @@ public class RecordFormPanel
 
 	protected void buildEntryForm()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_buildEntryForm();
-			}
-		});
+		WbSwingUtilities.invoke(this::_buildEntryForm);
 	}
 
 	public boolean isEditingAllow()
@@ -347,14 +340,7 @@ public class RecordFormPanel
 	public void showRecord(int rowNumber)
 	{
 		currentRow = rowNumber;
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_showRecord();
-			}
-		});
+		WbSwingUtilities.invoke(this::_showRecord);
 	}
 
 	protected void _showRecord()
@@ -560,15 +546,7 @@ public class RecordFormPanel
 	public void componentDisplayed()
 	{
 		if (inputControls == null) return;
-
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				inputControls[toFocus].requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(inputControls[toFocus]::requestFocusInWindow);
 	}
 
 	private int getColumnIndexFor(Component component)

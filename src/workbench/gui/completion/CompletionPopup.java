@@ -157,14 +157,10 @@ public class CompletionPopup
 			if (selectCurrentWordInEditor)
 			{
 				// Make sure this is executed on the EDT
-				WbSwingUtilities.invoke(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						editor.selectWordAtCursor(context.getAnalyzer().getWordDelimiters());
-					}
-				});
+				WbSwingUtilities.invoke(() ->
+        {
+          editor.selectWordAtCursor(context.getAnalyzer().getWordDelimiters());
+        });
 			}
 			int count = data.getSize();
 			elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
@@ -212,26 +208,22 @@ public class CompletionPopup
 
 			final int toSelect = index;
 
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if (window != null)
-					{
-						window.setLocation(p);
-						window.pack();
-						if (window.getWidth() < d.width + 5)
-						{
-							window.setSize(d.width + 5, window.getHeight());
-						}
-						window.setVisible(true);
-						elementList.requestFocus();
-						elementList.setSelectedIndex(toSelect);
-						elementList.ensureIndexIsVisible(toSelect);
-					}
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        if (window != null)
+        {
+          window.setLocation(p);
+          window.pack();
+          if (window.getWidth() < d.width + 5)
+          {
+            window.setSize(d.width + 5, window.getHeight());
+          }
+          window.setVisible(true);
+          elementList.requestFocus();
+          elementList.setSelectedIndex(toSelect);
+          elementList.ensureIndexIsVisible(toSelect);
+        }
+      });
 
 			if (showQuickSearch)
 			{
@@ -276,14 +268,7 @@ public class CompletionPopup
 		}
 		else
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					elementList.requestFocusInWindow();
-				}
-			});
+			EventQueue.invokeLater(elementList::requestFocusInWindow);
 		}
 	}
 
@@ -360,15 +345,11 @@ public class CompletionPopup
 
 	private void selectEditor()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				editor.requestFocus();
-				editor.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      editor.requestFocus();
+      editor.requestFocusInWindow();
+    });
 	}
 
 	private List<ColumnIdentifier> getColumnsFromData()
@@ -881,16 +862,12 @@ public class CompletionPopup
 	protected void showQuickSearchValue(final String text)
 	{
 		if (StringUtil.isBlank(text)) return;
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				openQuickSearch(text);
-				searchField.setText(text.trim());
-				searchField.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      openQuickSearch(text);
+      searchField.setText(text.trim());
+      searchField.requestFocusInWindow();
+    });
 		setSearchFieldCursor();
 	}
 
@@ -906,19 +883,15 @@ public class CompletionPopup
 
 	protected void setSearchFieldCursor()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (searchField != null)
-				{
-					int len = searchField.getText().length();
-					searchField.setCaretPosition(len);
-					searchField.select(len, len);
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (searchField != null)
+      {
+        int len = searchField.getText().length();
+        searchField.setCaretPosition(len);
+        searchField.select(len, len);
+      }
+    });
 	}
 
 	@Override
@@ -929,18 +902,11 @@ public class CompletionPopup
 			String text = String.valueOf(evt.getKeyChar());
 			openQuickSearch(text);
 		}
-
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (searchField != null)
-				{
-					searchField.requestFocusInWindow();
-				}
-			}
-		});
+    else
+    {
+      WbSwingUtilities.invoke(searchField::requestFocusInWindow);
+    }
+    
 		// The JGoodies look and feel automatically selects
 		// the content of the text field when a focusGained event
 		// occurs. The moving of the caret has to come later

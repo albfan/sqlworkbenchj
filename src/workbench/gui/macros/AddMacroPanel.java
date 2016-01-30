@@ -186,14 +186,7 @@ public class AddMacroPanel
 	@Override
 	public void windowOpened(WindowEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				macroName.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(macroName::requestFocusInWindow);
 	}
 
 	@Override

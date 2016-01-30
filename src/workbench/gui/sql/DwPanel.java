@@ -852,15 +852,11 @@ public class DwPanel
 
 		try
 		{
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					clearContent();
-					initColors();
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        clearContent();
+        initColors();
+      });
 
 			this.sql = aSql;
 			int max = (respectMaxRows ? this.statusBar.getMaxRows() : 0);
@@ -964,27 +960,23 @@ public class DwPanel
 			clearStatusMessage();
 
 			// Make sure this is executed on the EDT
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					dataTable.reset();
-					dataTable.setAutoCreateColumnsFromModel(true);
-					dataTable.setModel(new DataStoreTableModel(newData), true);
-					setPrintHeader(sql);
-					checkResultSetActions();
-					dataTable.applyHighlightExpression(newData.getGeneratingFilter());
-					if (GuiSettings.getShowTableRowNumbers())
-					{
-						TableRowHeader.showRowHeader(dataTable);
-					}
-					if (enableSqlInfo && GuiSettings.getShowResultSQL())
-					{
-						showSQLInfo();
-					}
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        dataTable.reset();
+        dataTable.setAutoCreateColumnsFromModel(true);
+        dataTable.setModel(new DataStoreTableModel(newData), true);
+        setPrintHeader(sql);
+        checkResultSetActions();
+        dataTable.applyHighlightExpression(newData.getGeneratingFilter());
+        if (GuiSettings.getShowTableRowNumbers())
+        {
+          TableRowHeader.showRowHeader(dataTable);
+        }
+        if (enableSqlInfo && GuiSettings.getShowResultSQL())
+        {
+          showSQLInfo();
+        }
+      });
 		}
 		finally
 		{
@@ -1215,23 +1207,19 @@ public class DwPanel
 		{
 			// Make the new row the current row
 			// and start editing in the first column
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					dataTable.getSelectionModel().setSelectionInterval(newRow, newRow);
-					dataTable.setEditingRow(newRow);
-					dataTable.setEditingColumn(1);
-					dataTable.editCellAt(newRow,1);
-					CellEditor edit = dataTable.getCellEditor(newRow, 1);
-					if (edit instanceof WbTextCellEditor)
-					{
-						((WbTextCellEditor)edit).requestFocus();
-					}
-					rowCountChanged();
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        dataTable.getSelectionModel().setSelectionInterval(newRow, newRow);
+        dataTable.setEditingRow(newRow);
+        dataTable.setEditingColumn(1);
+        dataTable.editCellAt(newRow,1);
+        CellEditor edit = dataTable.getCellEditor(newRow, 1);
+        if (edit instanceof WbTextCellEditor)
+        {
+          ((WbTextCellEditor)edit).requestFocus();
+        }
+        rowCountChanged();
+      });
 		}
 
 		return newRow;
@@ -1312,14 +1300,7 @@ public class DwPanel
 				// something must try to restore the selection
 				// but as that row does not longer exist, it results in
 				// selecting all rows...
-				EventQueue.invokeLater(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						dataTable.clearSelection();
-					}
-				});
+				EventQueue.invokeLater(dataTable::clearSelection);
 			}
 		}
 		catch (SQLException e)
@@ -1505,18 +1486,14 @@ public class DwPanel
 	protected void setMessageDisplayModel(final TableModel aModel)
 	{
 		if (this.dataTable.getModel() == aModel) return;
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				dataTable.setModel(aModel);
-				TableColumnModel colMod = dataTable.getColumnModel();
-				TableColumn col = colMod.getColumn(0);
-				col.setPreferredWidth(getWidth() - 10);
-				statusBar.setRowcount(0,0,0);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      dataTable.setModel(aModel);
+      TableColumnModel colMod = dataTable.getColumnModel();
+      TableColumn col = colMod.getColumn(0);
+      col.setPreferredWidth(getWidth() - 10);
+      statusBar.setRowcount(0,0,0);
+    });
 	}
 
 	/**
@@ -1734,14 +1711,7 @@ public class DwPanel
 				dataTable.requestFocusInWindow();
 			}
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					checkResultSetActions();
-				}
-			});
+			WbSwingUtilities.invoke(this::checkResultSetActions);
 		}
 		else
 		{
@@ -1820,15 +1790,11 @@ public class DwPanel
 
 		if (modified && !structureChange)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if (!editing) startEdit();
-					checkResultSetActions();
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        if (!editing) startEdit();
+        checkResultSetActions();
+      });
 		}
 	}
 

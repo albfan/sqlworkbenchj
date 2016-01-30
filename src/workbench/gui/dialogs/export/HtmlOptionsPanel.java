@@ -26,10 +26,12 @@ package workbench.gui.dialogs.export;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -63,31 +65,37 @@ public class HtmlOptionsPanel
 		this.setPageTitle(s.getProperty("workbench.export.html.pagetitle", ""));
 	}
 
+  @Override
 	public boolean getCreateFullPage()
 	{
 		return this.fullPage.isSelected();
 	}
 
+  @Override
 	public boolean getEscapeHtml()
 	{
 		return escapeHtml.isSelected();
 	}
 
+  @Override
 	public String getPageTitle()
 	{
 		return pageTitle.getText();
 	}
 
+  @Override
 	public void setCreateFullPage(boolean flag)
 	{
 		fullPage.setSelected(flag);
 	}
 
+  @Override
 	public void setEscapeHtml(boolean flag)
 	{
 		escapeHtml.setSelected(flag);
 	}
 
+  @Override
 	public void setPageTitle(String title)
 	{
 		pageTitle.setText(title);

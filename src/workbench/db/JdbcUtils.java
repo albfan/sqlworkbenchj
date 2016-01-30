@@ -34,11 +34,11 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 
-import workbench.db.mssql.SqlServerUtil;
 import workbench.log.LogMgr;
 
+import workbench.db.mssql.SqlServerUtil;
+
 import workbench.util.FileUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
 
@@ -234,38 +234,23 @@ public class JdbcUtils
 		}
 	}
 
-	public static ResultSet runStatement(WbConnection dbConnection, Statement statement, String sql, boolean useSeparateConnection, boolean useSavepoint)
+	public static ResultSet runStatement(WbConnection dbConnection, Statement statement, String sql, boolean useSavepoint)
 	{
 		ResultSet rs = null;
 		Savepoint sp = null;
-
 		try
 		{
 			if (useSavepoint && !dbConnection.getAutoCommit())
 			{
 				sp = dbConnection.setSavepoint();
 			}
-
 			rs = statement.executeQuery(sql);
-
-			if (useSeparateConnection)
-			{
-				if (dbConnection.selectStartsTransaction() && !dbConnection.getAutoCommit())
-				{
-					dbConnection.rollback();
-				}
-			}
-      else
-			{
-				dbConnection.rollback(sp);
-			}
+			dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException ex)
 		{
 			dbConnection.rollback(sp);
 			LogMgr.logError("JdbcUtils.runStatement()", "Error running statement", ex);
-      SqlUtil.closeResult(rs);
-			rs = null;
 		}
 		return rs;
 	}

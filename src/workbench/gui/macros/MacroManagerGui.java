@@ -169,14 +169,7 @@ public class MacroManagerGui
 
 	private void selectListLater()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				macroTree.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(macroTree::requestFocusInWindow);
 	}
 
 	@Override

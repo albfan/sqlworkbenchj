@@ -47,15 +47,11 @@ public class Highlighter
 		final int endPos = scriptParser.getEndPosForCommand(command) + startOffset;
 		final int line = this.editor.getLineOfOffset(startPos);
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				editor.scrollTo(line, 0);
-				editor.selectStatementTemporary(startPos, endPos);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      editor.scrollTo(line, 0);
+      editor.selectStatementTemporary(startPos, endPos);
+    });
 	}
 
 	public void markError(final boolean doHighlight, ScriptParser scriptParser, int commandWithError, int startOffset, ErrorDescriptor error)
@@ -96,23 +92,19 @@ public class Highlighter
       newCaret = editor.getLineStartOffset(line);
 		}
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-        editor.scrollTo(line, 0);
+		WbSwingUtilities.invoke(() ->
+    {
+      editor.scrollTo(line, 0);
 
-				if (doHighlight)
-				{
-					editor.selectError(startPos, endPos);
-				}
-        else
-        {
-          editor.setCaretPosition(newCaret);
-        }
-			}
-		});
+      if (doHighlight)
+      {
+        editor.selectError(startPos, endPos);
+      }
+      else
+      {
+        editor.setCaretPosition(newCaret);
+      }
+    });
 	}
 
 }

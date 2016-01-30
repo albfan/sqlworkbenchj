@@ -188,13 +188,6 @@ public class EditConnectScriptsPanel
 	@Override
 	public void componentDisplayed()
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				postConnectEditor.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(postConnectEditor::requestFocusInWindow);
 	}
 }

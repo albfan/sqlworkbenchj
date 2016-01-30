@@ -375,15 +375,11 @@ public class LookupValuePicker
 		if (found > -1)
 		{
 			final int hrow = found;
-			RowHighlighter highlighter = new RowHighlighter()
-			{
-				@Override
-				public boolean hightlightColumn(int row, String column, Object columnValue)
-				{
-					String pkColumn = fkMap.get(column);
-					return row == hrow && currentValues.containsKey(pkColumn);
-				}
-			};
+			RowHighlighter highlighter = (int row, String column, Object columnValue) ->
+      {
+        String pkColumn = fkMap.get(column);
+        return row == hrow && currentValues.containsKey(pkColumn);
+      };
 			lookupData.applyHighlightExpression(highlighter);
 		}
 		return found;
@@ -416,14 +412,10 @@ public class LookupValuePicker
 
 	private void setStatusText(final String text)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				statusBar.setText(text);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      statusBar.setText(text);
+    });
 	}
 
 	protected void fixStatusBarHeight()
@@ -483,54 +475,48 @@ public class LookupValuePicker
 				}
 			}
 
-			EventQueue.invokeLater(new Runnable()
-			{
-				// <editor-fold defaultstate="collapsed" desc="Implementation">
-				@Override
-				public void run()
-				{
-					DataStoreTableModel model = new DataStoreTableModel(data);
-					model.setAllowEditing(false);
-					model.setSortDefinition(sort);
-					lookupData.setModel(model, true);
-					if (GuiSettings.getShowTableRowNumbers())
-					{
-						TableRowHeader.showRowHeader(lookupData);
-					}
+			EventQueue.invokeLater(() ->
+      {
+        DataStoreTableModel model = new DataStoreTableModel(data);
+        model.setAllowEditing(false);
+        model.setSortDefinition(sort);
+        lookupData.setModel(model, true);
+        if (GuiSettings.getShowTableRowNumbers())
+        {
+          TableRowHeader.showRowHeader(lookupData);
+        }
 
-					int row = highlightCurrentValues();
+        int row = highlightCurrentValues();
 
-					// always select at least one row.
-					// as the focus is set to the table containing the lookup data,
-					// the user can immediately use the cursor keys to select one entry.
-					if (!selectCurrent || row < 0) row = 0;
-					selectionHandler.selectRow(row);
+        // always select at least one row.
+        // as the focus is set to the table containing the lookup data,
+        // the user can immediately use the cursor keys to select one entry.
+        if (!selectCurrent || row < 0) row = 0;
+        selectionHandler.selectRow(row);
 
-					int rows = data.getRowCount();
-					int maxRowNum = maxRows.getValue();
-					rowCount.setText(ResourceMgr.getFormattedString("MsgRows", rows).replaceAll("[\\(\\)]", ""));
+        int rows = data.getRowCount();
+        int maxRowNum = maxRows.getValue();
+        rowCount.setText(ResourceMgr.getFormattedString("MsgRows", rows).replaceAll("[\\(\\)]", ""));
 
-					if (rows >= maxRowNum) // some drivers return one row more than requested
-					{
-						rowCount.setIcon(IconMgr.getInstance().getLabelIcon("alert"));
-					}
-					else
-					{
-						rowCount.setIcon(null);
-					}
-					statusPanel.doLayout();
+        if (rows >= maxRowNum) // some drivers return one row more than requested
+        {
+          rowCount.setIcon(IconMgr.getInstance().getLabelIcon("alert"));
+        }
+        else
+        {
+          rowCount.setIcon(null);
+        }
+        statusPanel.doLayout();
 
-					if (doFilter.isSelected())
-					{
-						filterValue.requestFocusInWindow();
-					}
-					else
-					{
-						lookupData.requestFocusInWindow();
-					}
-				}
-				// </editor-fold>
-			});
+        if (doFilter.isSelected())
+        {
+          filterValue.requestFocusInWindow();
+        }
+        else
+        {
+          lookupData.requestFocusInWindow();
+        }
+      });
 		}
 		catch (SQLException ex)
 		{
@@ -580,25 +566,21 @@ public class LookupValuePicker
 	{
 		if (!doFilter.isSelected()) return;
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (e.getKeyChar() == KeyEvent.VK_ENTER)
-				{
-					selectValue();
-				}
-				else if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
-				{
-					resetFilter();
-				}
-				else
-				{
-					applyFilter();
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (e.getKeyChar() == KeyEvent.VK_ENTER)
+      {
+        selectValue();
+      }
+      else if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
+      {
+        resetFilter();
+      }
+      else
+      {
+        applyFilter();
+      }
+    });
 	}
 
 	@Override
@@ -719,14 +701,10 @@ public class LookupValuePicker
 				if (lookupTable != null)
 				{
 					// a referenced table was found --> Open the picker dialog butm make sure that is opened on the EDT
-					EventQueue.invokeLater(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							showDialog(parent, result, conn, baseTable, loader, allowMultiSelect);
-						}
-					});
+					EventQueue.invokeLater(() ->
+          {
+            showDialog(parent, result, conn, baseTable, loader, allowMultiSelect);
+          });
 				}
 				else
 				{
@@ -869,14 +847,10 @@ public class LookupValuePicker
 
 	private static void showStatusMessage(final JComponent component, final String msgKey, final int timeout)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_showStatusMessage(component, msgKey, timeout);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      _showStatusMessage(component, msgKey, timeout);
+    });
 	}
 
 	private static void _showStatusMessage(JComponent component, String msgKey, int timeout)

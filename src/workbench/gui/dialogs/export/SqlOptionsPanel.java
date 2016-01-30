@@ -410,7 +410,7 @@ public class SqlOptionsPanel
 
 			List selected = this.columnSelectorPanel.getSelectedColumns();
 			int size = selected.size();
-			this.keyColumns = new ArrayList<String>(size);
+			this.keyColumns = new ArrayList<>(size);
 			for (int i=0; i < size; i++)
 			{
 				ColumnIdentifier col = (ColumnIdentifier)selected.get(i);

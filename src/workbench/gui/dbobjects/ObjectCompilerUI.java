@@ -33,14 +33,17 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbObject;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleObjectCompiler;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -120,29 +123,21 @@ public class ObjectCompilerUI
 			this.dbConnection.setBusy(false);
 		}
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				log.setCaretPosition(0);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      log.setCaretPosition(0);
+    });
 
 	}
 
 	private void appendLog(final String msg)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				log.appendLine(msg);
-				log.validate();
-				log.updateScrollBars();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      log.appendLine(msg);
+      log.validate();
+      log.updateScrollBars();
+    });
 	}
 
 	public void show(Window aParent)

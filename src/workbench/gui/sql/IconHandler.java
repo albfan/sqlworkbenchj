@@ -163,45 +163,33 @@ public class IconHandler
 			if (icon == null && oldIcon == null) return;
 			if (icon != oldIcon)
 			{
-				WbSwingUtilities.invoke(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						tab.setIconAt(index, icon);
-					}
-				});
+				WbSwingUtilities.invoke(() ->
+        {
+          tab.setIconAt(index, icon);
+        });
 			}
 		}
 	}
 
-	private Runnable hideBusyRunnable = new Runnable()
+	private void hideBusy()
 	{
-		@Override
-		public void run()
-		{
-			_showBusyIcon(false);
-		}
+    _showBusyIcon(false);
 	};
 
-	private Runnable showBusyRunnable = new Runnable()
+	private void showBusy()
 	{
-		@Override
-		public void run()
-		{
-			_showBusyIcon(true);
-		}
+    _showBusyIcon(true);
 	};
 
 	public void showBusyIcon(boolean show)
 	{
 		if (show)
 		{
-			WbSwingUtilities.invoke(showBusyRunnable);
+			WbSwingUtilities.invoke(this::showBusy);
 		}
 		else
 		{
-			WbSwingUtilities.invoke(hideBusyRunnable);
+			WbSwingUtilities.invoke(this::hideBusy);
 		}
 	}
 

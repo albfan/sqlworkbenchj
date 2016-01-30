@@ -263,7 +263,7 @@ public class TableRowCountPanel
 				showTable(table, tableNum+1, tblCount);
 				String sql = builder.getSelectForCount(table);
 
-				rs = JdbcUtils.runStatement(dbConnection, currentStatement, sql, useSeparateConnection, useSavepoint);
+				rs = JdbcUtils.runStatement(dbConnection, currentStatement, sql, useSavepoint);
 
 				if (rs != null && rs.next())
 				{
@@ -283,6 +283,10 @@ public class TableRowCountPanel
 			SqlUtil.closeAll(rs, currentStatement);
 			currentStatement = null;
 			dbConnection.setBusy(false);
+      if (useSeparateConnection)
+      {
+        dbConnection.rollbackSilently();
+      }
 			showStatusMessage("");
 			WbSwingUtilities.showDefaultCursor(scrollPane);
 			window.setTitle(ResourceMgr.getString("TxtWindowTitleRowCount"));
@@ -290,16 +294,12 @@ public class TableRowCountPanel
 			cancelAction.setEnabled(false);
 		}
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				SortDefinition sortDef = WbRowCount.getDefaultRowCountSort(data.getDataStore(), dbConnection);
-				data.getDataStoreTableModel().setSortDefinition(sortDef);
-				data.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      SortDefinition sortDef = WbRowCount.getDefaultRowCountSort(data.getDataStore(), dbConnection);
+      data.getDataStoreTableModel().setSortDefinition(sortDef);
+      data.requestFocusInWindow();
+    });
 	}
 
 	private void showTable(final TableIdentifier table, int current, int total)
@@ -319,44 +319,33 @@ public class TableRowCountPanel
 		{
 			msg = message;
 		}
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				statusBar.setText(" " + msg);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      statusBar.setText(" " + msg);
+    });
 	}
 
 	private void addRowCount(final TableIdentifier table, final long count)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				DataStoreTableModel model = data.getDataStoreTableModel();
-				int row = model.addRow();
-				model.setValueAt(Long.valueOf(count), row, 0);
-				model.setValueAt(table.getTableName(), row, 1);
-				model.setValueAt(table.getObjectType(), row, 2);
-				model.setValueAt(table.getCatalog(), row, 3);
-				model.setValueAt(table.getSchema(), row, 4);
-				data.adjustRowsAndColumns();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      DataStoreTableModel model = data.getDataStoreTableModel();
+      int row = model.addRow();
+      model.setValueAt(Long.valueOf(count), row, 0);
+      model.setValueAt(table.getTableName(), row, 1);
+      model.setValueAt(table.getObjectType(), row, 2);
+      model.setValueAt(table.getCatalog(), row, 3);
+      model.setValueAt(table.getSchema(), row, 4);
+      data.adjustRowsAndColumns();
+    });
 	}
+  
 	private void setModel(final DataStoreTableModel model)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				data.setModel(model, true);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      data.setModel(model, true);
+    });
 	}
 
 	public void showWindow(Window aParent)

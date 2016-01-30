@@ -737,6 +737,8 @@ public class WbConnection
 
 	public void rollbackSilently()
 	{
+    if (getAutoCommit()) return;
+    
 		try
 		{
 			rollback();
