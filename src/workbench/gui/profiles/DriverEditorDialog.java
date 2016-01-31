@@ -221,17 +221,13 @@ public class DriverEditorDialog
 	 */
 	public static void showDriverDialog(final Frame parentFrame, final DbDriver current)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				DriverEditorDialog d = new DriverEditorDialog(parentFrame);
-				d.setDriverName(current != null ? current.getName() : null);
-				WbSwingUtilities.center(d, parentFrame);
-				d.setVisible(true);
-				d.dispose();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      DriverEditorDialog d = new DriverEditorDialog(parentFrame);
+      d.setDriverName(current != null ? current.getName() : null);
+      WbSwingUtilities.center(d, parentFrame);
+      d.setVisible(true);
+      d.dispose();
+    });
 	}
 }

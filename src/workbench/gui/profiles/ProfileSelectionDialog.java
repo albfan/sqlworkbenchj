@@ -239,6 +239,8 @@ public class ProfileSelectionDialog
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
 			this.pack();
+      // for some reason pack() doesn't calculate the width correctly
+      this.setSize((int)(getWidth() * 1.08), getHeight());
       this.profiles.initDivider();
 		}
 	}

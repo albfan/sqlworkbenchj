@@ -79,14 +79,7 @@ public class ConnectionSelector
 
 	public void selectConnection()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				_selectConnection();
-			}
-		});
+		WbSwingUtilities.invoke(this::_selectConnection);
 	}
 
 	protected void _selectConnection()
@@ -144,20 +137,16 @@ public class ConnectionSelector
 
 	public void closeConnectingInfo()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (connectingInfo != null)
-				{
-					connectingInfo.setVisible(false);
-					connectingInfo.dispose();
-					connectingInfo = null;
-					WbSwingUtilities.repaintLater(parent);
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      if (connectingInfo != null)
+      {
+        connectingInfo.setVisible(false);
+        connectingInfo.dispose();
+        connectingInfo = null;
+        WbSwingUtilities.repaintLater(parent);
+      }
+    });
 	}
 
 	public void showDisconnectInfo()
@@ -172,26 +161,22 @@ public class ConnectionSelector
 
 	protected void showPopupMessagePanel(final String msg)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (connectingInfo != null)
-				{
-					connectingInfo.setMessage(msg);
-					connectingInfo.pack();
-					WbSwingUtilities.center(connectingInfo, parent);
-				}
-				else
-				{
-					connectingInfo = new FeedbackWindow(parent, msg);
-					WbSwingUtilities.center(connectingInfo, parent);
-					connectingInfo.setVisible(true);
-				}
-				connectingInfo.forceRepaint();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      if (connectingInfo != null)
+      {
+        connectingInfo.setMessage(msg);
+        connectingInfo.pack();
+        WbSwingUtilities.center(connectingInfo, parent);
+      }
+      else
+      {
+        connectingInfo = new FeedbackWindow(parent, msg);
+        WbSwingUtilities.center(connectingInfo, parent);
+        connectingInfo.setVisible(true);
+      }
+      connectingInfo.forceRepaint();
+    });
 	}
 
 
@@ -296,21 +281,17 @@ public class ConnectionSelector
 			final WbConnection theConnection = conn;
 			final String theError = error;
 
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if (theConnection != null)
-					{
-						client.connected(theConnection);
-					}
-					else
-					{
-						client.connectFailed(theError);
-					}
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        if (theConnection != null)
+        {
+          client.connected(theConnection);
+        }
+        else
+        {
+          client.connectFailed(theError);
+        }
+      });
 
 			if (conn == null && showSelectDialogOnError)
 			{
@@ -348,14 +329,10 @@ public class ConnectionSelector
 	@Override
 	public void setStatusMessage(final String message)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				showPopupMessagePanel(message);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      showPopupMessagePanel(message);
+    });
 	}
 
 	@Override
