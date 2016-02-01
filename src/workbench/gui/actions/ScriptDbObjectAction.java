@@ -95,6 +95,10 @@ public class ScriptDbObjectAction
     s.setShowPackageProcedureOnly(showSinglePackageProcedure);
     s.setIncludeGrants(DbExplorerSettings.getGenerateTableGrants());
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
+    if (objects.size() == 1)
+    {
+      scripterUI.setScriptObjectName(objects.get(0).getObjectExpression(source.getConnection()));
+    }
 		scripterUI.setDbConnection(source.getConnection());
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}

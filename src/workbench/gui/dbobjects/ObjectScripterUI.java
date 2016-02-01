@@ -64,7 +64,7 @@ public class ObjectScripterUI
 	protected JFrame window;
 	private boolean isRunning;
 	private final Object runMonitor = new Object();
-  private String lastObject;
+  private String mainObject;
 
 	public ObjectScripterUI(Scripter script)
 	{
@@ -116,6 +116,11 @@ public class ObjectScripterUI
     });
   }
 
+  public void setScriptObjectName(String name)
+  {
+    mainObject = name;
+  }
+
 	private void startScripting()
 	{
 		if (this.isRunning()) return;
@@ -134,13 +139,12 @@ public class ObjectScripterUI
 				try
 				{
 					setRunning(true);
-          lastObject = null;
 					window.setTitle(RunningJobIndicator.TITLE_PREFIX + baseTitle);
 					scripter.generateScript();
 				}
 				finally
 				{
-          window.setTitle(StringUtil.coalesce(lastObject, baseTitle));
+          window.setTitle(StringUtil.coalesce(mainObject, baseTitle));
 					setRunning(false);
 					EventQueue.invokeLater(() ->
           {
@@ -156,20 +160,17 @@ public class ObjectScripterUI
 	@Override
 	public void setCurrentObject(String currentObject, int current, int total)
 	{
-		if (current > 0 && total > 0)
-		{
-			this.statusMessage.setText(currentObject + " (" + current + "/" + total + ")");
-      if (current == total && total == 1)
+    WbSwingUtilities.invoke(() ->
+    {
+      if (current > 0 && total > 0)
       {
-        lastObject = currentObject;
+        statusMessage.setText(currentObject + " (" + current + "/" + total + ")");
       }
-		}
-		else
-		{
-      lastObject = currentObject;
-      statusMessage.setText(StringUtil.coalesce(currentObject,""));
-		}
-		this.statusMessage.repaint();
+      else
+      {
+        statusMessage.setText(StringUtil.coalesce(currentObject,""));
+      }
+    });
 	}
 
 	public void show(Window aParent)

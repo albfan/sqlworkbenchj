@@ -157,7 +157,14 @@ public class DeleteScriptGenerator
 
 	public void setValues(List<ColumnData> colValues)
 	{
-		this.columnValues = colValues;
+    if (colValues == null)
+    {
+      columnValues = null;
+    }
+		else
+    {
+      this.columnValues = new ArrayList<>(colValues);
+    }
 	}
 
 	@Override
