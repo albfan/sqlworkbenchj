@@ -601,7 +601,17 @@ public class ConnectionProfile
 			return;
 		}
 
-		pwd = pwd.trim();
+    PasswordTrimType trimType = Settings.getInstance().getPassworTrimType();
+
+    if (trimType == PasswordTrimType.always)
+    {
+      pwd = pwd.trim();
+    }
+    else if (trimType == PasswordTrimType.blankOnly && StringUtil.isBlank(pwd))
+    {
+      pwd = "";
+    }
+    // else --> either PasswordTrimType.never or the password was not blank
 
 		// check encryption settings when reading the profiles...
 		if (Settings.getInstance().getUseEncryption())

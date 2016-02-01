@@ -60,6 +60,7 @@ import workbench.log.LogMgr;
 
 import workbench.db.ConnectionProfile;
 import workbench.db.IniProfileStorage;
+import workbench.db.PasswordTrimType;
 import workbench.db.WbConnection;
 import workbench.db.XmlProfileStorage;
 
@@ -103,6 +104,7 @@ public class Settings
 {
 	// <editor-fold defaultstate="collapsed" desc="Property Keys">
 	public static final String PROPERTY_ENCRYPT_PWD = "workbench.profiles.encryptpassword";
+	public static final String PROPERTY_TRIM_PWD = "workbench.profiles.trimpassword";
 	public static final String PROPERTY_DATE_FORMAT = "workbench.gui.display.dateformat";
 	public static final String PROPERTY_DATETIME_FORMAT = "workbench.gui.display.datetimeformat";
 	public static final String PROPERTY_TIME_FORMAT = "workbench.gui.display.timeformat";
@@ -3229,14 +3231,10 @@ public class Settings
 		if (w > 0 && h > 0 && w <= screen.getWidth() && h <= screen.getHeight())
 		{
 			result = true;
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					target.setSize(new Dimension(w, h));
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        target.setSize(new Dimension(w, h));
+      });
 		}
 		return result;
 	}
@@ -3267,14 +3265,10 @@ public class Settings
 		LogMgr.logDebug("Settings.restoreWindowPosition()", "Restoring window position for '" + id + "', " +
 			"current screen size: " + WbSwingUtilities.displayString(screen)  + ", requested position: " + WbSwingUtilities.displayString(toDisplay));
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				target.setLocation(new Point(x, y));
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      target.setLocation(new Point(x, y));
+    });
 
 		return true;
 	}
@@ -3722,4 +3716,16 @@ public class Settings
 		return "[Settings]";
 	}
 
+  public PasswordTrimType getPassworTrimType()
+  {
+    String type = getProperty(PROPERTY_TRIM_PWD, PasswordTrimType.always.name());
+    try
+    {
+      return PasswordTrimType.valueOf(type);
+    }
+    catch (Throwable th)
+    {
+      return PasswordTrimType.always;
+    }
+  }
 }
