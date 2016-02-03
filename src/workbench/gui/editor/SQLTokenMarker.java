@@ -30,16 +30,26 @@ public class SQLTokenMarker
 		return literalChar;
 	}
 
-	private static byte getLiteralId(char literal)
+	private byte getLiteralId(char literal)
 	{
 		switch (literal)
 		{
 			case '\'':
 				return Token.LITERAL1;
 			case '"':
+				return Token.LITERAL2;
 			case '[':
 			case ']':
-				return Token.LITERAL2;
+        if (isMicrosoft)
+        {
+          return Token.LITERAL2;
+        }
+        return 0;
+      case '`':
+        if (isMySql)
+        {
+          return Token.LITERAL2;
+        }
 		}
 		return 0;
 	}

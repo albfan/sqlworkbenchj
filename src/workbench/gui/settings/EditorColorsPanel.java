@@ -90,7 +90,7 @@ public class EditorColorsPanel
 		Color l1 = sett.getColor("workbench.editor.color.literal1", defaultStyles[Token.LITERAL1].getColor());
 		literals.setSelectedColor(l1);
 
-		Color l2 = sett.getColor("workbench.editor.color.literal2", defaultStyles[Token.LITERAL1].getColor());
+		Color l2 = sett.getColor("workbench.editor.color.literal2", defaultStyles[Token.LITERAL2].getColor());
 		quotedIds.setSelectedColor(l2);
 
 		Color op = sett.getColor("workbench.editor.color.operator", defaultStyles[Token.OPERATOR].getColor());
@@ -115,6 +115,7 @@ public class EditorColorsPanel
 		sett.setColor("workbench.editor.color.keyword2", keyword2.getSelectedColor());
 		sett.setColor("workbench.editor.color.keyword3", keyword3.getSelectedColor());
 		sett.setColor("workbench.editor.color.literal1", literals.getSelectedColor());
+		sett.setColor("workbench.editor.color.literal2", quotedIds.getSelectedColor());
 		sett.setColor("workbench.editor.color.operator", operators.getSelectedColor());
 
 		sett.setEditorErrorColor(errorColor.getSelectedColor());
