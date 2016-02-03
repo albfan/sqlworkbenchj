@@ -901,12 +901,11 @@ public class CompletionPopup
 		{
 			String text = String.valueOf(evt.getKeyChar());
 			openQuickSearch(text);
+      evt.consume();
 		}
-    else
-    {
-      WbSwingUtilities.invoke(searchField::requestFocusInWindow);
-    }
     
+    searchField.requestFocusInWindow();
+
 		// The JGoodies look and feel automatically selects
 		// the content of the text field when a focusGained event
 		// occurs. The moving of the caret has to come later
