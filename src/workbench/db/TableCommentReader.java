@@ -77,11 +77,11 @@ public class TableCommentReader
 		{
 			if (commentStatement.contains(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER))
 			{
-				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
+				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConnection));
 			}
 			else
 			{
-				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getTableName()));
+        result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConnection));
 				result = replaceObjectNamePlaceholder(result, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getTableName()));
         result = replaceObjectNamePlaceholder(result, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConnection));
 				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.SCHEMA_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getSchema()));
